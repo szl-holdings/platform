@@ -9,7 +9,7 @@ import {
   firestormCasesTable,
   firestormMitreDetectionsTable,
   firestormAssessmentsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { sql } from "drizzle-orm";
 
 const ANALYSTS = ["J. Chen", "M. Rodriguez", "S. Park", "K. Wilson", "A. Thompson", "R. Davis", "L. Nguyen"];

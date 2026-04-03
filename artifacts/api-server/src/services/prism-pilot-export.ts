@@ -1,4 +1,4 @@
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import { logger } from "../lib/logger";
 import { eq, and, desc } from "drizzle-orm";
 import {
@@ -7,7 +7,7 @@ import {
   pcAuditEventsTable,
   pcChangeEventsTable,
   pcMattersTable,
-} from "@workspace/db/schema";
+} from "@szl-holdings/db/schema";
 
 export class PilotExportService {
   async generateExport(orgId: number, data: {

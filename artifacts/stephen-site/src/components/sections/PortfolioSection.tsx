@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ExternalLink, Github } from "lucide-react";
-import { useListProjects } from "@workspace/api-client-react";
+import { useListProjects } from "@szl-holdings/api-client-react";
 
 export function PortfolioSection() {
   const { data: projects, isLoading } = useListProjects();

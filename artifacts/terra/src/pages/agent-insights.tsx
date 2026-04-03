@@ -1,4 +1,4 @@
-import { AgentInsightsWidget } from "@workspace/shared-ui/agent-insights-widget";
+import { AgentInsightsWidget } from "@szl-holdings/shared-ui/agent-insights-widget";
 import { useQuery } from "@tanstack/react-query";
 import { Brain, Zap, Radio, Building2 } from "lucide-react";
 

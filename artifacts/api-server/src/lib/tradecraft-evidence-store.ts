@@ -1,5 +1,5 @@
-import { EvidencePipeline } from "@workspace/ai-engine";
-import type { EvidenceQueryResult } from "@workspace/ai-engine";
+import { EvidencePipeline } from "@szl-holdings/ai-engine";
+import type { EvidenceQueryResult } from "@szl-holdings/ai-engine";
 import {
   db,
   firestormAlertsTable,
@@ -11,7 +11,7 @@ import {
   firestormComplianceControlsTable,
   firestormAnalystNotebookTable,
   workflowsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc } from "drizzle-orm";
 import { logger } from "./logger";
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearch } from "wouter";
 import { CheckCircle, ArrowLeft, Loader2 } from "lucide-react";
-import { Button } from "@workspace/shared-ui/ui/button";
+import { Button } from "@szl-holdings/shared-ui/ui/button";
 
 export default function CheckoutSuccess() {
   const search = useSearch();

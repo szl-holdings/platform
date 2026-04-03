@@ -1,23 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Button } from "@workspace/shared-ui/ui/button";
-import { Input } from "@workspace/shared-ui/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/shared-ui/ui/select";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { Button } from "@szl-holdings/shared-ui/ui/button";
+import { Input } from "@szl-holdings/shared-ui/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
 import {
   Briefcase, Clock, AlertTriangle, CheckCircle, XCircle,
   Search, Filter, ChevronDown, ChevronUp, User, Calendar,
   FileText, Shield, Activity, Plus, Flame
 } from "lucide-react";
 import { useState, useMemo } from "react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { toast } from "sonner";
 import {
   OperationalAuditTimeline,
   OperationalOwnerChip,
   OperationalStatusBadge,
   type AuditHistoryEntry,
-} from "@workspace/shared-ui/operational-primitives";
+} from "@szl-holdings/shared-ui/operational-primitives";
 import { TradecraftPanel } from "@/components/tradecraft-panel";
 
 interface CaseNote { content: string; author: string; at: string }

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Plus, Brain, Globe, Shield, Cpu, Zap, TrendingUp, Activity, Radio, ChevronRight, CheckCircle2, AlertCircle, Sparkles, Settings } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const DOMAIN_TEMPLATES = [
   {

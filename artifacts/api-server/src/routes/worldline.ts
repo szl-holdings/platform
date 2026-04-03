@@ -41,7 +41,7 @@ router.post("/worldline/sources", authMiddleware(), requireRole("super_admin", "
       return;
     }
 
-    const { registerSource } = await import("@workspace/worldline");
+    const { registerSource } = await import("@szl-holdings/worldline");
     const user = req.user;
     const orgId = user?.orgs?.[0]?.orgId ?? null;
 
@@ -50,9 +50,9 @@ router.post("/worldline/sources", authMiddleware(), requireRole("super_admin", "
       slug,
       name,
       description,
-      sourceType: sourceType as import("@workspace/worldline").WorldlineSourceType,
+      sourceType: sourceType as import("@szl-holdings/worldline").WorldlineSourceType,
       domain,
-      freshnessCadence: freshnessCadence as import("@workspace/worldline").WorldlineFreshnessCadence | undefined,
+      freshnessCadence: freshnessCadence as import("@szl-holdings/worldline").WorldlineFreshnessCadence | undefined,
       confidenceBaseline,
       connectionConfig,
       normalizationConfig,
@@ -75,11 +75,11 @@ router.get("/worldline/sources", authMiddleware(), async (req: Request, res: Res
     const status = req.query["status"] as string | undefined;
     const limit = Math.min(parseInt(req.query["limit"] as string ?? "100", 10), 500);
 
-    const { listSources } = await import("@workspace/worldline");
+    const { listSources } = await import("@szl-holdings/worldline");
     const results = await listSources({
       orgId,
       domain,
-      status: status as import("@workspace/worldline").WorldlineSourceStatus | undefined,
+      status: status as import("@szl-holdings/worldline").WorldlineSourceStatus | undefined,
       limit,
     });
 
@@ -95,7 +95,7 @@ router.get("/worldline/sources/:slug", authMiddleware(), async (req: Request, re
     const user = req.user;
     const orgId = user?.orgs?.[0]?.orgId ?? null;
 
-    const { getSourceBySlug } = await import("@workspace/worldline");
+    const { getSourceBySlug } = await import("@szl-holdings/worldline");
     const source = await getSourceBySlug(slug, orgId);
     if (!source) { sendNotFound(res, "Worldline source"); return; }
 
@@ -112,7 +112,7 @@ router.get("/worldline/sources/:slug/history", authMiddleware(), async (req: Req
     const orgId = user?.orgs?.[0]?.orgId ?? null;
     const limit = Math.min(parseInt(req.query["limit"] as string ?? "50", 10), 200);
 
-    const { getSourceBySlug, getFetchHistory } = await import("@workspace/worldline");
+    const { getSourceBySlug, getFetchHistory } = await import("@szl-holdings/worldline");
     const source = await getSourceBySlug(slug, orgId);
     if (!source) { sendNotFound(res, "Worldline source"); return; }
 
@@ -129,7 +129,7 @@ router.post("/worldline/sources/:slug/fetch", authMiddleware(), requireRole("sup
     const user = req.user;
     const orgId = user?.orgs?.[0]?.orgId ?? null;
 
-    const { getSourceBySlug, recordFetch } = await import("@workspace/worldline");
+    const { getSourceBySlug, recordFetch } = await import("@szl-holdings/worldline");
     const source = await getSourceBySlug(slug, orgId);
     if (!source) { sendNotFound(res, "Worldline source"); return; }
 

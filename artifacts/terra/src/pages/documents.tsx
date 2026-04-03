@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { FileText, AlertTriangle, CheckCircle, Clock, Upload, Search } from "lucide-react";
 import { documents, type Document } from "@/data/brokerage";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const statusConfig: Record<Document["status"], { label: string; color: string; bg: string; icon: typeof CheckCircle }> = {
   complete: { label: "Complete", color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20", icon: CheckCircle },

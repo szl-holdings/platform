@@ -1,5 +1,5 @@
-import { DRIFT_EVENTS, formatCurrency, getSeverityColor, type Severity } from "@workspace/shared-ui/core-observability-data";
-import { cn } from "@workspace/shared-ui/utils";
+import { DRIFT_EVENTS, formatCurrency, getSeverityColor, type Severity } from "@szl-holdings/shared-ui/core-observability-data";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { Radar, AlertTriangle, Clock, ArrowRight } from "lucide-react";
 
 function SeverityBadge({ severity }: { severity: Severity }) {

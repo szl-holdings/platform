@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   recommendationsTable,
   auditLogsTable,
@@ -9,11 +9,11 @@ import {
   firestormFindingsTable,
   alloyWorkflows,
   platformJobRunsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import {
   RECOMMENDATION_ENTITY_TYPES,
   type RecommendationEntityType,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { sql, desc, gte, eq, count } from "drizzle-orm";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";

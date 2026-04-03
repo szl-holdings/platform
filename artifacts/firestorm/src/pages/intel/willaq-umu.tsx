@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Eye, Star, Sparkles, Brain, ChevronDown, ChevronUp, BarChart3, Zap, Activity, CheckCircle2, HelpCircle } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const ORACLES = [
   {

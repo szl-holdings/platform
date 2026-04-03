@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { Plus, MoreHorizontal, Clock, Target, Sparkles, Film, Palette, Megaphone, Layers, TrendingUp, DollarSign, Users, Calendar, Image, FolderOpen, Eye, Loader2 } from "lucide-react";
-import { ActivityFeed } from "@workspace/shared-ui/collaboration";
+import { ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 import { useCampaigns, useCreateCampaign } from "@/alloy/hooks/use-campaigns";
 
 const container = {

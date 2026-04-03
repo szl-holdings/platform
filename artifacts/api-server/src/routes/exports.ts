@@ -6,7 +6,7 @@ import {
   vesselsFleetsTable, vesselsTable,
   terraDealsTable,
   mspTicketsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { desc, gte, lte, and, ilike, or, sql } from "drizzle-orm";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { isFlagEnabled } from "../lib/platform-flags";

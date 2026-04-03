@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Brain, Activity, AlertTriangle, Radio, Loader2, Zap, TrendingUp, FileText } from "lucide-react";
-import { AnomalySparkline, SeverityMeter, TypewriterText, AnimatedGauge } from "@workspace/shared-ui/ai-components";
+import { AnomalySparkline, SeverityMeter, TypewriterText, AnimatedGauge } from "@szl-holdings/shared-ui/ai-components";
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {

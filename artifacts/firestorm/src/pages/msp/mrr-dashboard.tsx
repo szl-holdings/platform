@@ -1,9 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
-import { Badge } from "@workspace/shared-ui/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { DollarSign, TrendingUp, TrendingDown, Users, Clock, BarChart3, RefreshCw } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar } from "recharts";
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "@workspace/shared-ui/ui/skeleton";
+import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string): Promise<T> {

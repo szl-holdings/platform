@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { withExternalSpan } from "../middlewares/telemetry";
-import { db, intelligenceCacheTable } from "@workspace/db";
+import { db, intelligenceCacheTable } from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
 
 const router: IRouter = Router();

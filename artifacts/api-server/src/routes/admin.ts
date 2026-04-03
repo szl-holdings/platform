@@ -1,16 +1,16 @@
 import { Router, type IRouter } from "express";
-import { services } from "@workspace/services";
-import { APP_INTEGRATIONS, PLATFORM_APPS } from "@workspace/config";
+import { services } from "@szl-holdings/services";
+import { APP_INTEGRATIONS, PLATFORM_APPS } from "@szl-holdings/config";
 import {
   db, pool,
   billingPlansTable, subscriptionsTable, invoicesTable, entitlementsTable, usageEventsTable,
   usersTable, rolesTable, userRolesTable, auditEventsTable, featureFlagsTable, webhookEventsTable,
   platformJobRunsTable, artifactApprovalsTable, exportJobsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { seedLyteObservability } from "../lib/lyte-observability-seed";
 import { desc, sql, ilike, or, eq, and, inArray, gte, lte } from "drizzle-orm";
 import { authMiddleware, requireRole } from "../middlewares/auth";
-import { serverTelemetry } from "@workspace/observability";
+import { serverTelemetry } from "@szl-holdings/observability";
 import { jobQueue } from "../lib/job-queue";
 import { logActivity } from "../lib/activity-logger";
 import { isFlagEnabled } from "../lib/platform-flags";
@@ -1264,7 +1264,7 @@ adminRouter.get("/admin/health-dashboard", async (_req, res) => {
 
 adminRouter.get("/admin/push-tokens/stats", async (_req, res) => {
   try {
-    const { pushTokensTable } = await import("@workspace/db");
+    const { pushTokensTable } = await import("@szl-holdings/db");
     const { sql: drizzleSql, eq } = await import("drizzle-orm");
     const totalResult = await db.select({ count: drizzleSql<number>`count(*)::int` }).from(pushTokensTable);
     const activeResult = await db.select({ count: drizzleSql<number>`count(*)::int` }).from(pushTokensTable).where(eq(pushTokensTable.isActive, true));

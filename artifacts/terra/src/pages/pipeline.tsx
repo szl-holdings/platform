@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Handshake, ArrowRight, Building2, MapPin, User, Calendar, DollarSign } from "lucide-react";
 import { deals } from "@/data/portfolio";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const stages = [
   { key: "sourcing", label: "Sourcing", color: "border-terra-text-muted", bg: "bg-terra-text-muted/10" },

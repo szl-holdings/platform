@@ -1,5 +1,5 @@
 import { XCircle, ArrowLeft } from "lucide-react";
-import { Button } from "@workspace/shared-ui/ui/button";
+import { Button } from "@szl-holdings/shared-ui/ui/button";
 
 export default function CheckoutCancel() {
   return (

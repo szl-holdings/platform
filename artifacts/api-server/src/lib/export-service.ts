@@ -8,7 +8,7 @@
 import { randomUUID } from "crypto";
 import { renderToBuffer, Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import React from "react";
-import { db, exportJobsTable, usersTable } from "@workspace/db";
+import { db, exportJobsTable, usersTable } from "@szl-holdings/db";
 import { eq, desc, and, gte, lte, ilike, or, sql } from "drizzle-orm";
 import { logger } from "./logger";
 

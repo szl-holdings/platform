@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, type LyteSignal, type LyteIncident, type LyteAction } from "@/lib/api";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import {
   Radio, AlertTriangle, CheckSquare, Filter, RefreshCw,
   User, Clock, ArrowUp, ArrowDown, ChevronRight,
   Zap, X, MoreVertical, Eye,
 } from "lucide-react";
-import { Button } from "@workspace/shared-ui/ui/button";
-import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/shared-ui/ui/select";
+import { Button } from "@szl-holdings/shared-ui/ui/button";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
 import { toast } from "sonner";
 
 // ── Types ─────────────────────────────────────────────────────────────────────

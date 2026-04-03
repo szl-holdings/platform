@@ -1,5 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import crypto from "crypto";
 import { z } from "zod";
 import { authMiddleware } from "../middlewares/auth";

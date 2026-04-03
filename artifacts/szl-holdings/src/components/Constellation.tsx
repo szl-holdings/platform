@@ -5,7 +5,7 @@ import portfolioData from "@/data/portfolio.json";
 import siteData from "@/data/site.json";
 import { ventures } from "@/data/ventures";
 import { analytics } from "@/lib/analytics";
-import { SectionErrorBoundary } from "@workspace/shared-ui/error-boundary";
+import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
 
 interface Node {
   id: string;

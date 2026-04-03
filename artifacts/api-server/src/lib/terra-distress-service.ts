@@ -1,4 +1,4 @@
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   terraDistressPropertiesTable,
   terraDistressAlertsTable,
@@ -6,7 +6,7 @@ import {
   type InsertTerraDistressProperty,
   type InsertTerraDistressAlert,
   type TerraDistressProperty,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, and, gte, lte, ilike, or, desc, asc, sql, isNull, isNotNull } from "drizzle-orm";
 import { logger } from "./logger";
 

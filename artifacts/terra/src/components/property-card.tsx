@@ -1,4 +1,4 @@
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { motion } from "framer-motion";
 import { Building2, MapPin, Users, DollarSign, TrendingUp, AlertTriangle } from "lucide-react";
 import type { Property } from "@/data/portfolio";

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { CheckCircle, ArrowRight, Zap, Shield, Building2, X } from "lucide-react";
 import { Link } from "wouter";
-import { ContactModal, useContactModal } from "@workspace/shared-ui";
+import { ContactModal, useContactModal } from "@szl-holdings/shared-ui";
 
 const ACCENT = "#d4a054";
 const BG = "#0a0b0e";

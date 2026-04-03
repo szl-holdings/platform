@@ -1,4 +1,4 @@
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   firestormAssetsTable,
   firestormWorkflowActionsTable,
@@ -7,7 +7,7 @@ import {
   lyteReadinessItemsTable,
   vesselsEventsTable,
   vesselsCommandWorkflowsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 
 async function seedFirestorm() {
   console.log("[seed] Seeding firestorm assets...");

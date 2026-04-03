@@ -11,11 +11,11 @@ import {
   clientDocumentsTable,
   clientUpdatesTable,
   clientMessagesTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, sql, and } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError, sendBadRequest, parsePagination } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
-import { services } from "@workspace/services";
+import { services } from "@szl-holdings/services";
 import { logger } from "../lib/logger";
 import { broadcastWs, pubsub, CARLOTA_EVENTS } from "../lib/pubsub-bridge.js";
 import {

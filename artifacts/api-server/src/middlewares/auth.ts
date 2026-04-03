@@ -1,9 +1,9 @@
 import type { Request, Response, NextFunction } from "express";
-import { db, usersTable, sessionsTable, userRolesTable, rolesTable, orgMembersTable, organizationsTable } from "@workspace/db";
+import { db, usersTable, sessionsTable, userRolesTable, rolesTable, orgMembersTable, organizationsTable } from "@szl-holdings/db";
 import { eq, and, gt } from "drizzle-orm";
-import type { RoleName } from "@workspace/db";
-import { ROLE_HIERARCHY, isReadOnlyRole, toCanonicalRole } from "@workspace/db";
-import { serverTelemetry } from "@workspace/observability";
+import type { RoleName } from "@szl-holdings/db";
+import { ROLE_HIERARCHY, isReadOnlyRole, toCanonicalRole } from "@szl-holdings/db";
+import { serverTelemetry } from "@szl-holdings/observability";
 import { logger } from "../lib/logger";
 
 export interface OrgMembership {

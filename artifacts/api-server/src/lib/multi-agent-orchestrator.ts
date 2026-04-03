@@ -1,6 +1,6 @@
 import { logger } from "./logger";
 import { gatewayInfer, type GatewayResponse } from "./ai-gateway";
-import type { ChatMessage } from "@workspace/services";
+import type { ChatMessage } from "@szl-holdings/services";
 
 export type OrchestrationDepth = "shallow" | "standard" | "deep";
 

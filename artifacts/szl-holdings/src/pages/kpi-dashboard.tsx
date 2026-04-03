@@ -3,7 +3,7 @@ import { m } from "framer-motion";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { DataStateBadge } from "@/components/DataStateBadge";
-import { useAuth } from "@workspace/replit-auth-web";
+import { useAuth } from "@szl-holdings/replit-auth-web";
 import { Lock, TrendingUp, Ship, Layers, Eye, Shield, Sparkles, BarChart3, ArrowUpRight, RefreshCw } from "lucide-react";
 
 interface KpiData {

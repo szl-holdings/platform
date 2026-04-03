@@ -2,8 +2,8 @@ import { insurerPressureEngine } from "./prism-insurer-pressure";
 import { settlementFrictionEngine } from "./prism-settlement-friction";
 import { forecastExpanded } from "./prism-forecast-expanded";
 import { portfolioLearning } from "./prism-portfolio-learning";
-import { db } from "@workspace/db";
-import { pcMattersTable, pcCommunicationsTable, pcDeadlinesTable } from "@workspace/db/schema";
+import { db } from "@szl-holdings/db";
+import { pcMattersTable, pcCommunicationsTable, pcDeadlinesTable } from "@szl-holdings/db/schema";
 import { eq, and, desc, gte } from "drizzle-orm";
 
 interface ActionCardResult {

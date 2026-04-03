@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import {
   Shield, AlertTriangle, Bell, Clock, CheckCircle2, XCircle, Activity,
   TrendingUp, TrendingDown, Minus, Users, Lock, Eye, Zap,

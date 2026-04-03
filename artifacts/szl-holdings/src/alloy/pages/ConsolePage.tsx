@@ -6,7 +6,7 @@ import {
   ChevronDown, ChevronRight, Eye, CheckCheck, X as XIcon, ToggleRight, FileText, Users, Flag,
 } from "lucide-react";
 import { cn } from "../lib/utils";
-import { isAuthError } from "@workspace/shared-ui";
+import { isAuthError } from "@szl-holdings/shared-ui";
 
 function noRetryOn401(failureCount: number, error: unknown): boolean {
   if (isAuthError(error)) return false;

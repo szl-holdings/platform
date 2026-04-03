@@ -1,4 +1,4 @@
-import { db, pcBackgroundJobsTable, pcDeadLetterEventsTable } from "@workspace/db";
+import { db, pcBackgroundJobsTable, pcDeadLetterEventsTable } from "@szl-holdings/db";
 import { eq, and, lte, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
 

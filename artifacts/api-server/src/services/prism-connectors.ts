@@ -8,7 +8,7 @@ import {
   pcWebhookSubscriptionsTable,
   pcGraphSubscriptionStateTable,
   pcAuditEventsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, and, desc, sql, lte } from "drizzle-orm";
 import { logger } from "../lib/logger";
 import { enqueuePrismJob, PRISM_JOB_TYPES } from "./prism-queue";

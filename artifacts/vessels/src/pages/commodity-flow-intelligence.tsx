@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch } from "@workspace/shared-ui";
-import { cn } from "@workspace/shared-ui/utils";
+import { apiFetch } from "@szl-holdings/shared-ui";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import {
   BarChart3, TrendingUp, TrendingDown, Ship, Anchor, AlertTriangle,
   Clock, Globe, ArrowRight, Activity, Filter, ChevronDown, Download,

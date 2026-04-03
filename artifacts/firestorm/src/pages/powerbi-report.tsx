@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { BarChart3, Shield, AlertTriangle, CheckCircle2, Activity, Loader2, Info } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
-import { PowerBiEmbed, type PowerBiEmbedConfig, apiFetch } from "@workspace/shared-ui";
+import { cn } from "@szl-holdings/shared-ui/utils";
+import { PowerBiEmbed, type PowerBiEmbedConfig, apiFetch } from "@szl-holdings/shared-ui";
 
 const SAMPLE_METRICS = [
   { label: "Overall Risk Score", value: "34", unit: "/ 100", delta: "-8 pts", up: false, color: "text-emerald-400" },

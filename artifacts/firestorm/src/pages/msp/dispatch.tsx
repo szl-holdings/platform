@@ -1,6 +1,6 @@
 import { User, MapPin, Clock, CheckCircle, AlertTriangle, Wrench, Calendar, Navigation, RefreshCw } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "@workspace/shared-ui/ui/skeleton";
+import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string): Promise<T> {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Radio, Shield, Zap, Lock, Globe, Activity, ArrowRight, Clock, ChevronDown, ChevronUp } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const MODELS = [
   { id: "willaq-umu-70b", name: "Willaq Umu 70B", type: "General Oracle", latency: "420ms", cost: "$0.0018/req", requests: 4821, accuracy: 96.2, status: "optimal" },

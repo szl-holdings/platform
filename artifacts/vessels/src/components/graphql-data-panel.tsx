@@ -1,4 +1,4 @@
-import { useVessels, useVesselEvents } from "@workspace/graphql-client/hooks";
+import { useVessels, useVesselEvents } from "@szl-holdings/graphql-client/hooks";
 
 export function VesselsGraphQLPanel() {
   const { data: vesselsData, loading: vesselsLoading } = useVessels({ limit: 3 });

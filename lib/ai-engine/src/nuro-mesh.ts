@@ -1,9 +1,9 @@
-import { db } from "@workspace/db";
-import { agentMemoryFacts, agentUsageStats } from "@workspace/db";
+import { db } from "@szl-holdings/db";
+import { agentMemoryFacts, agentUsageStats } from "@szl-holdings/db";
 import { eq, desc, and, gt } from "drizzle-orm";
-import { openai } from "@workspace/integrations-openai-ai-server";
-import { anthropic } from "@workspace/integrations-anthropic-ai";
-import { ai as geminiAi } from "@workspace/integrations-gemini-ai";
+import { openai } from "@szl-holdings/integrations-openai-ai-server";
+import { anthropic } from "@szl-holdings/integrations-anthropic-ai";
+import { ai as geminiAi } from "@szl-holdings/integrations-gemini-ai";
 import type { AgentDefinition, DomainRoutingRule, ValidationResult, AgentCallResult } from "./types.js";
 
 export const AGENT_REGISTRY: AgentDefinition[] = [

@@ -2,15 +2,15 @@ import { Router, type IRouter, type Request, type Response, type RequestHandler 
 import rateLimit from "express-rate-limit";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole } from "../middlewares/auth";
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   azureTenantsTable,
   dataverseConnectionsTable,
   terraLeadsTable,
   alloySignalsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, and } from "drizzle-orm";
-import { services } from "@workspace/services";
+import { services } from "@szl-holdings/services";
 import { getAzureTenantForUser } from "../lib/auth";
 import { decryptSecret } from "../lib/crypto";
 

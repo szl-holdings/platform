@@ -1,8 +1,8 @@
 import { logger } from "./logger";
 import { inferenceTelemetry, estimateCost, type InferenceProvider } from "./inference-telemetry";
 import { providerHealth } from "./provider-health";
-import { services } from "@workspace/services";
-import type { ChatMessage, ChatCompletionResult } from "@workspace/services";
+import { services } from "@szl-holdings/services";
+import type { ChatMessage, ChatCompletionResult } from "@szl-holdings/services";
 
 export type RoutingStrategy = "fastest" | "cheapest" | "preferred" | "fallback";
 

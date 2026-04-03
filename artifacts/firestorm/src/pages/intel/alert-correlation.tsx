@@ -1,5 +1,5 @@
 import { GitBranch, Activity, AlertTriangle, Brain, Zap, Link2, Clock, CheckCircle2 } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const correlationGroups = [
   {

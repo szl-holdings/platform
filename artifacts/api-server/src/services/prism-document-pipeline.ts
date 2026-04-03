@@ -3,7 +3,7 @@ import {
   pcDocumentsTable,
   pcExtractionJobsTable,
   pcAuditEventsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
 import { enqueuePrismJob, PRISM_JOB_TYPES } from "./prism-queue";

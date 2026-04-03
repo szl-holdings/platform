@@ -1,4 +1,4 @@
-import type { InsertAlloySignal } from "@workspace/db";
+import type { InsertAlloySignal } from "@szl-holdings/db";
 
 export type RawSignalInput = {
   source: string;

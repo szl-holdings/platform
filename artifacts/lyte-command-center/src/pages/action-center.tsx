@@ -2,9 +2,9 @@
 import { useState, useEffect } from "react";
 import { Zap, Clock, ChevronDown, ChevronRight, CheckCircle2, AlertTriangle, Users, DollarSign, ArrowRight, RefreshCw } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRealtimeChannel } from "@workspace/shared-ui";
-import { doctrineEventBus } from "@workspace/observability";
-import { DoctrineLayerBadge } from "@workspace/shared-ui/doctrine-layer-badge";
+import { useRealtimeChannel } from "@szl-holdings/shared-ui";
+import { doctrineEventBus } from "@szl-holdings/observability";
+import { DoctrineLayerBadge } from "@szl-holdings/shared-ui/doctrine-layer-badge";
 import { cn } from "@/lib/utils";
 import { api, type LyteAction } from "@/lib/api";
 import { LyteGraphQLPanel } from "@/components/graphql-data-panel";

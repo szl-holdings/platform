@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch } from "@workspace/shared-ui";
-import { cn } from "@workspace/shared-ui/utils";
+import { apiFetch } from "@szl-holdings/shared-ui";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import {
   Shield, AlertTriangle, ChevronRight, Clock, User, Server, Network, Globe,
   Eye, Crosshair, Database, Lock, ArrowRight, Activity, Zap, Radio, Bug,

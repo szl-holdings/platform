@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Users, TrendingUp, AlertTriangle, Award, Target } from "lucide-react";
 import { agents, teams, type Agent } from "@/data/brokerage";
 import { formatCurrency, AgentAvatar } from "@/components/brokerage-ui";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts";
 
 function StatBar({ value, max, color = "bg-terra-primary" }: { value: number; max: number; color?: string }) {

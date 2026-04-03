@@ -1,11 +1,11 @@
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import { logger } from "../lib/logger";
 import { eq, and, desc } from "drizzle-orm";
 import {
   pcChangeEventsTable,
   pcIngestionJobsTable,
   pcMatterDeskSnapshotsTable,
-} from "@workspace/db/schema";
+} from "@szl-holdings/db/schema";
 
 export class PilotIngestionService {
   async ingestEmail(orgId: number, payload: {

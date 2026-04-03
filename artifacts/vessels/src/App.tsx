@@ -1,28 +1,28 @@
 import { lazy, Suspense, useState } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
-import { Toaster } from "@workspace/shared-ui/ui/sonner";
-import { McpOverlay } from "@workspace/mcp-client";
-import { UserButton } from "@workspace/shared-ui/UserButton";
+import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
+import { McpOverlay } from "@szl-holdings/mcp-client";
+import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 import {
   Ship, AlertTriangle, Activity, LayoutDashboard, WifiOff,
   BarChart3, ChevronDown, User, ChevronRight, DollarSign, Wrench,
   MapPin, Radio, List, Globe, Navigation, EyeOff, ShieldAlert, Shield, Anchor, Brain, Menu, FileText
 } from "lucide-react";
-import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
-import { AgentCopilot } from "@workspace/shared-ui/copilot";
-import { helmsmanConfig } from "@workspace/shared-ui/copilot-configs";
-import { cn } from "@workspace/shared-ui/utils";
-import { toAlpha } from "@workspace/shared-ui/utils";
+import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
+import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
+import { helmsmanConfig } from "@szl-holdings/shared-ui/copilot-configs";
+import { cn } from "@szl-holdings/shared-ui/utils";
+import { toAlpha } from "@szl-holdings/shared-ui/utils";
 import { AuthProvider, useAuth, roleLabels, type UserRole } from "@/contexts/auth-context";
-import { PrivateAppGuard, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig } from "@workspace/shared-ui";
-import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
-import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
-import { DemoModeProvider, SandboxModeProvider, SandboxModeBanner } from "@workspace/shared-ui";
+import { PrivateAppGuard, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui";
+import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
+import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
+import { DemoModeProvider, SandboxModeProvider, SandboxModeBanner } from "@szl-holdings/shared-ui";
 import { PackBanner } from "@/components/pack-banner";
-import { LANE_ACCENT_HEX } from "@workspace/shared-ui/lane-colors";
-import { SidebarNav, type SidebarNavSection } from "@workspace/shared-ui/design-system";
-import { DashboardShell as SharedDashboardShell } from "@workspace/shared-ui/design-system";
+import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
+import { SidebarNav, type SidebarNavSection } from "@szl-holdings/shared-ui/design-system";
+import { DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
 
 const VESSELS_ACCENT = LANE_ACCENT_HEX.vessels.primaryLight;
 

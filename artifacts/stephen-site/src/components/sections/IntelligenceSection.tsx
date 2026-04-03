@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Activity, Cpu, Globe, MessageSquare, Send, Loader2, TrendingUp, Zap, Shield, Ship, Brain, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChatBubble } from "@workspace/shared-ui/ai-components";
+import { ChatBubble } from "@szl-holdings/shared-ui/ai-components";
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {

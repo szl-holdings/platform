@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { bookingMockProvider, createProvider, type DataProvider, type BookingAppointment } from "@workspace/services";
+import { bookingMockProvider, createProvider, type DataProvider, type BookingAppointment } from "@szl-holdings/services";
 
 const router: IRouter = Router();
 

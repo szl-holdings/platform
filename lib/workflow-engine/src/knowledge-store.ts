@@ -1,5 +1,5 @@
 import { logger } from "./logger.js";
-import { db, agentKnowledgeTable, agentRunsTable } from "@workspace/db";
+import { db, agentKnowledgeTable, agentRunsTable } from "@szl-holdings/db";
 import { desc, sql } from "drizzle-orm";
 
 export type KnowledgeEntryType =

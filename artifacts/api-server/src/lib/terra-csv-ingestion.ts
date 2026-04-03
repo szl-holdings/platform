@@ -9,7 +9,7 @@ import {
   mapCountyFromBorough,
   classifyDistressType,
 } from "./terra-distress-service";
-import type { InsertTerraDistressProperty } from "@workspace/db";
+import type { InsertTerraDistressProperty } from "@szl-holdings/db";
 
 interface CsvRow {
   [key: string]: string;

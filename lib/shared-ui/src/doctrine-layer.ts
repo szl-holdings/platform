@@ -1,5 +1,5 @@
-import type { DoctrineLayer } from "@workspace/observability";
-export type { DoctrineLayer, DoctrineContextModel, ExplainabilityModel, NormalizedEvent } from "@workspace/observability";
+import type { DoctrineLayer } from "@szl-holdings/observability";
+export type { DoctrineLayer, DoctrineContextModel, ExplainabilityModel, NormalizedEvent } from "@szl-holdings/observability";
 
 export interface DoctrineLayerConfig {
   appId: string;

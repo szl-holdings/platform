@@ -1,7 +1,7 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { Shield, AlertTriangle, Brain, Radio, Ship, Loader2, Navigation } from "lucide-react";
-import { NERHighlight, AnimatedGauge, SeverityMeter } from "@workspace/shared-ui/ai-components";
+import { NERHighlight, AnimatedGauge, SeverityMeter } from "@szl-holdings/shared-ui/ai-components";
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {

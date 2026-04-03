@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Webhook, Plus, Trash2, ChevronDown, AlertCircle, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { apiFetch, isAuthenticated } from "../../lib/admin-api";
-import AuthGate from "@workspace/shared-ui/AuthGate";
+import AuthGate from "@szl-holdings/shared-ui/AuthGate";
 
 interface WebhookData {
   id: number;

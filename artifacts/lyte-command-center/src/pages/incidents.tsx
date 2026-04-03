@@ -2,11 +2,11 @@
 import { useIncidents, useCreateIncident, useUpdateIncident } from "@/hooks/use-lyte";
 import { formatDistanceToNow } from "date-fns";
 import { Plus, Search, AlertTriangle, ShieldCheck, ChevronRight, Clock, User } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExportButton } from "@workspace/shared-ui/data-export";
-import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
+import { ExportButton } from "@szl-holdings/shared-ui/data-export";
+import { CommentThread, ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 
 const severityColors = {
   critical: "bg-[#c45a4a]/20 text-[#c45a4a] border-[#c45a4a]/30",

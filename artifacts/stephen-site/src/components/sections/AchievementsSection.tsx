@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Award, Briefcase, GraduationCap, Star, Rocket, Shield, Globe } from "lucide-react";
-import { useListStephenContentBlocks } from "@workspace/api-client-react";
+import { useListStephenContentBlocks } from "@szl-holdings/api-client-react";
 import { format } from "date-fns";
 
 const iconMap: Record<string, React.ElementType> = {

@@ -1,8 +1,8 @@
 import { Router, type IRouter } from "express";
-import { services } from "@workspace/services";
-import { db } from "@workspace/db";
+import { services } from "@szl-holdings/services";
+import { db } from "@szl-holdings/db";
 import { sql } from "drizzle-orm";
-import { getOtelConfig } from "@workspace/observability";
+import { getOtelConfig } from "@szl-holdings/observability";
 import { getEmailProviderStatus } from "../lib/email";
 import { isAzureAdConfigured } from "../lib/auth";
 import { logger } from "../lib/logger";
@@ -224,7 +224,7 @@ async function checkDynamics365(): Promise<IntegrationHealth> {
   }
 
   const { result, latencyMs, error } = await checkWithTimeout(async () => {
-    const { services } = await import("@workspace/services");
+    const { services } = await import("@szl-holdings/services");
     return await services.dataverse.testConnection();
   });
 
@@ -502,7 +502,7 @@ router.get("/health/external-feeds/refresh", async (_req, res) => {
 
 router.get("/health/ai", async (_req, res) => {
   try {
-    const { getRouteConfig, alloyRetrieval } = await import("@workspace/ai-engine");
+    const { getRouteConfig, alloyRetrieval } = await import("@szl-holdings/ai-engine");
     const config = getRouteConfig();
     const stats = alloyRetrieval.getStats();
 
@@ -613,7 +613,7 @@ router.get("/health/billing", async (_req, res) => {
       return;
     }
 
-    const { services } = await import("@workspace/services");
+    const { services } = await import("@szl-holdings/services");
     const { result, latencyMs, error } = await checkWithTimeout(() => services.stripe.testConnection());
 
     res.json({

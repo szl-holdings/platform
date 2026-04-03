@@ -1,4 +1,4 @@
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   pcMattersTable,
   pcMatterClocksTable,
@@ -19,7 +19,7 @@ import {
   pcInsurerProfilesTable,
   pcVenueProfilesTable,
   pcAdjusterProfilesTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, and, sql, inArray } from "drizzle-orm";
 
 export type ForecastType =

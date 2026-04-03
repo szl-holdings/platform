@@ -1,9 +1,9 @@
 import { Link, useLocation } from "wouter";
-import { cn } from "@workspace/shared-ui/utils";
-import { SectionErrorBoundary } from "@workspace/shared-ui/error-boundary";
+import { cn } from "@szl-holdings/shared-ui/utils";
+import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
 import { ReactNode, useState } from "react";
 import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard, ArrowLeft, FileText, Brain, Layers, Home, BookOpen, Globe, Lock, Play, Star, DollarSign, Store, Code2 } from "lucide-react";
-import { useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
+import { useRealtimeChannel, RealtimeStatusIndicator } from "@szl-holdings/shared-ui";
 import { CommandBar, CommandBarTrigger, useCommandBar } from "./command-bar";
 
 const COMMAND_LOOP = [

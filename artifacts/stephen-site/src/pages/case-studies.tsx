@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
-import { Badge } from "@workspace/shared-ui/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { BookOpen, TrendingUp, ArrowRight, Target, DollarSign } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 

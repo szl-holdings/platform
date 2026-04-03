@@ -1,4 +1,4 @@
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   pcInsurerPressureSnapshotsTable, pcInsurerPressureDriversTable,
   pcSettlementFrictionSnapshotsTable, pcSettlementFrictionDriversTable,
@@ -9,7 +9,7 @@ import {
   pcQuietRiskSnapshotsTable, pcWorldlineSignalOverlaysTable,
   pcWorldlineWeatherEventsTable, pcWorldlineRegulatoryEventsTable,
   pcWorldlineRecoveryMarkersTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, and, desc, gte } from "drizzle-orm";
 import { insurerPressureEngine } from "../../services/prism-insurer-pressure";
 import { settlementFrictionEngine } from "../../services/prism-settlement-friction";

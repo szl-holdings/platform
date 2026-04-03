@@ -1,4 +1,4 @@
-import { EVENTS, PREDICTIONS, EXECUTION_RUNS, GOLDEN_FLOW_CORRELATION_ID, formatCurrency, getSeverityColor } from "@workspace/shared-ui/core-observability-data";
+import { EVENTS, PREDICTIONS, EXECUTION_RUNS, GOLDEN_FLOW_CORRELATION_ID, formatCurrency, getSeverityColor } from "@szl-holdings/shared-ui/core-observability-data";
 import { GitBranch, ArrowRight, ExternalLink, Activity, Zap, Brain } from "lucide-react";
 
 export default function CausalDrilldown() {

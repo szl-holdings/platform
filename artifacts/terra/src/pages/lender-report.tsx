@@ -11,7 +11,7 @@ import {
   BarChart, Bar, PieChart, Pie, Cell, Legend
 } from "recharts";
 import { properties, revenueHistory, portfolioSummary } from "@/data/portfolio";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 function formatCurrency(n: number) {
   if (n >= 1e9) return `$${(n / 1e9).toFixed(1)}B`;

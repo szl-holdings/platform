@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Shield, CheckCircle2, XCircle, AlertTriangle, Lock, Eye, Activity, Filter, ChevronDown, ChevronUp } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 interface PolicyDecision {
   id: string;

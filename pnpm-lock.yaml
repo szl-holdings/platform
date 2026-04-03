@@ -196,6 +196,9 @@ importers:
       '@stardazed/streams-text-encoding':
         specifier: ^1.0.2
         version: 1.0.2
+      '@szl-holdings/api-client-react':
+        specifier: workspace:*
+        version: link:../../lib/api-client-react
       '@tanstack/react-query':
         specifier: 'catalog:'
         version: 5.90.21(react@19.1.0)
@@ -208,9 +211,6 @@ importers:
       '@ungap/structured-clone':
         specifier: ^1.3.0
         version: 1.3.0
-      '@workspace/api-client-react':
-        specifier: workspace:*
-        version: link:../../lib/api-client-react
       babel-plugin-react-compiler:
         specifier: ^19.0.0-beta-e993439-20250117
         version: 19.0.0-beta-ebf51a3-20250411
@@ -334,6 +334,54 @@ importers:
       '@swc/helpers':
         specifier: ^0.5.20
         version: 0.5.20
+      '@szl-holdings/ai-engine':
+        specifier: workspace:*
+        version: link:../../lib/ai-engine
+      '@szl-holdings/api-zod':
+        specifier: workspace:*
+        version: link:../../lib/api-zod
+      '@szl-holdings/approvals':
+        specifier: workspace:*
+        version: link:../../lib/approvals
+      '@szl-holdings/audit':
+        specifier: workspace:*
+        version: link:../../lib/audit
+      '@szl-holdings/auth':
+        specifier: workspace:*
+        version: link:../../lib/auth
+      '@szl-holdings/config':
+        specifier: workspace:*
+        version: link:../../lib/config
+      '@szl-holdings/data-connectors':
+        specifier: workspace:*
+        version: link:../../lib/data-connectors
+      '@szl-holdings/db':
+        specifier: workspace:*
+        version: link:../../lib/db
+      '@szl-holdings/integrations-anthropic-ai':
+        specifier: workspace:*
+        version: link:../../lib/integrations-anthropic-ai
+      '@szl-holdings/integrations-gemini-ai':
+        specifier: workspace:*
+        version: link:../../lib/integrations-gemini-ai
+      '@szl-holdings/integrations-openai-ai-server':
+        specifier: workspace:*
+        version: link:../../lib/integrations-openai-ai-server
+      '@szl-holdings/observability':
+        specifier: workspace:*
+        version: link:../../lib/observability
+      '@szl-holdings/proof-chain':
+        specifier: workspace:*
+        version: link:../../lib/proof-chain
+      '@szl-holdings/services':
+        specifier: workspace:*
+        version: link:../../lib/services
+      '@szl-holdings/workflow-engine':
+        specifier: workspace:*
+        version: link:../../lib/workflow-engine
+      '@szl-holdings/worldline':
+        specifier: workspace:*
+        version: link:../../lib/worldline
       '@types/archiver':
         specifier: ^7.0.0
         version: 7.0.0
@@ -349,54 +397,6 @@ importers:
       '@types/pdfkit':
         specifier: ^0.17.5
         version: 0.17.5
-      '@workspace/ai-engine':
-        specifier: workspace:*
-        version: link:../../lib/ai-engine
-      '@workspace/api-zod':
-        specifier: workspace:*
-        version: link:../../lib/api-zod
-      '@workspace/approvals':
-        specifier: workspace:*
-        version: link:../../lib/approvals
-      '@workspace/audit':
-        specifier: workspace:*
-        version: link:../../lib/audit
-      '@workspace/auth':
-        specifier: workspace:*
-        version: link:../../lib/auth
-      '@workspace/config':
-        specifier: workspace:*
-        version: link:../../lib/config
-      '@workspace/data-connectors':
-        specifier: workspace:*
-        version: link:../../lib/data-connectors
-      '@workspace/db':
-        specifier: workspace:*
-        version: link:../../lib/db
-      '@workspace/integrations-anthropic-ai':
-        specifier: workspace:*
-        version: link:../../lib/integrations-anthropic-ai
-      '@workspace/integrations-gemini-ai':
-        specifier: workspace:*
-        version: link:../../lib/integrations-gemini-ai
-      '@workspace/integrations-openai-ai-server':
-        specifier: workspace:*
-        version: link:../../lib/integrations-openai-ai-server
-      '@workspace/observability':
-        specifier: workspace:*
-        version: link:../../lib/observability
-      '@workspace/proof-chain':
-        specifier: workspace:*
-        version: link:../../lib/proof-chain
-      '@workspace/services':
-        specifier: workspace:*
-        version: link:../../lib/services
-      '@workspace/workflow-engine':
-        specifier: workspace:*
-        version: link:../../lib/workflow-engine
-      '@workspace/worldline':
-        specifier: workspace:*
-        version: link:../../lib/worldline
       archiver:
         specifier: ^7.0.1
         version: 7.0.1
@@ -506,19 +506,19 @@ importers:
 
   artifacts/carlota-jo:
     dependencies:
-      '@workspace/analytics':
+      '@szl-holdings/analytics':
         specifier: workspace:*
         version: link:../../lib/analytics
-      '@workspace/graphql-client':
+      '@szl-holdings/graphql-client':
         specifier: workspace:*
         version: link:../../lib/graphql-client
-      '@workspace/observability':
+      '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
-      '@workspace/replit-auth-web':
+      '@szl-holdings/replit-auth-web':
         specifier: workspace:*
         version: link:../../lib/replit-auth-web
-      '@workspace/shared-ui':
+      '@szl-holdings/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui
       i18next:
@@ -543,6 +543,9 @@ importers:
       '@replit/vite-plugin-runtime-error-modal':
         specifier: 'catalog:'
         version: 0.0.6
+      '@szl-holdings/mcp-client':
+        specifier: workspace:*
+        version: link:../../lib/mcp-client
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.2.1(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
@@ -558,9 +561,6 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
-      '@workspace/mcp-client':
-        specifier: workspace:*
-        version: link:../../lib/mcp-client
       clsx:
         specifier: 'catalog:'
         version: 2.1.1
@@ -625,6 +625,9 @@ importers:
       '@stardazed/streams-text-encoding':
         specifier: ^1.0.2
         version: 1.0.2
+      '@szl-holdings/api-client-react':
+        specifier: workspace:*
+        version: link:../../lib/api-client-react
       '@tanstack/react-query':
         specifier: 'catalog:'
         version: 5.90.21(react@19.1.0)
@@ -637,9 +640,6 @@ importers:
       '@ungap/structured-clone':
         specifier: ^1.3.0
         version: 1.3.0
-      '@workspace/api-client-react':
-        specifier: workspace:*
-        version: link:../../lib/api-client-react
       babel-plugin-react-compiler:
         specifier: ^19.0.0-beta-e993439-20250117
         version: 19.0.0-beta-ebf51a3-20250411
@@ -751,13 +751,13 @@ importers:
 
   artifacts/firestorm:
     dependencies:
-      '@workspace/graphql-client':
+      '@szl-holdings/graphql-client':
         specifier: workspace:*
         version: link:../../lib/graphql-client
-      '@workspace/observability':
+      '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
-      '@workspace/services':
+      '@szl-holdings/services':
         specifier: workspace:*
         version: link:../../lib/services
     devDependencies:
@@ -854,6 +854,18 @@ importers:
       '@replit/vite-plugin-runtime-error-modal':
         specifier: 'catalog:'
         version: 0.0.6
+      '@szl-holdings/analytics':
+        specifier: workspace:*
+        version: link:../../lib/analytics
+      '@szl-holdings/api-client-react':
+        specifier: workspace:*
+        version: link:../../lib/api-client-react
+      '@szl-holdings/mcp-client':
+        specifier: workspace:*
+        version: link:../../lib/mcp-client
+      '@szl-holdings/shared-ui':
+        specifier: workspace:*
+        version: link:../../lib/shared-ui
       '@tailwindcss/typography':
         specifier: ^0.5.15
         version: 0.5.19(tailwindcss@4.2.1)
@@ -875,18 +887,6 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
-      '@workspace/analytics':
-        specifier: workspace:*
-        version: link:../../lib/analytics
-      '@workspace/api-client-react':
-        specifier: workspace:*
-        version: link:../../lib/api-client-react
-      '@workspace/mcp-client':
-        specifier: workspace:*
-        version: link:../../lib/mcp-client
-      '@workspace/shared-ui':
-        specifier: workspace:*
-        version: link:../../lib/shared-ui
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -971,13 +971,13 @@ importers:
       '@dnd-kit/utilities':
         specifier: ^3.2.2
         version: 3.2.2(react@19.1.0)
-      '@workspace/graphql-client':
+      '@szl-holdings/graphql-client':
         specifier: workspace:*
         version: link:../../lib/graphql-client
-      '@workspace/observability':
+      '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
-      '@workspace/services':
+      '@szl-holdings/services':
         specifier: workspace:*
         version: link:../../lib/services
     devDependencies:
@@ -1074,6 +1074,21 @@ importers:
       '@replit/vite-plugin-runtime-error-modal':
         specifier: 'catalog:'
         version: 0.0.6
+      '@szl-holdings/analytics':
+        specifier: workspace:*
+        version: link:../../lib/analytics
+      '@szl-holdings/api-client-react':
+        specifier: workspace:*
+        version: link:../../lib/api-client-react
+      '@szl-holdings/mcp-client':
+        specifier: workspace:*
+        version: link:../../lib/mcp-client
+      '@szl-holdings/replit-auth-web':
+        specifier: workspace:*
+        version: link:../../lib/replit-auth-web
+      '@szl-holdings/shared-ui':
+        specifier: workspace:*
+        version: link:../../lib/shared-ui
       '@tailwindcss/typography':
         specifier: ^0.5.15
         version: 0.5.19(tailwindcss@4.2.1)
@@ -1095,21 +1110,6 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
-      '@workspace/analytics':
-        specifier: workspace:*
-        version: link:../../lib/analytics
-      '@workspace/api-client-react':
-        specifier: workspace:*
-        version: link:../../lib/api-client-react
-      '@workspace/mcp-client':
-        specifier: workspace:*
-        version: link:../../lib/mcp-client
-      '@workspace/replit-auth-web':
-        specifier: workspace:*
-        version: link:../../lib/replit-auth-web
-      '@workspace/shared-ui':
-        specifier: workspace:*
-        version: link:../../lib/shared-ui
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -1206,6 +1206,9 @@ importers:
       '@stardazed/streams-text-encoding':
         specifier: ^1.0.2
         version: 1.0.2
+      '@szl-holdings/api-client-react':
+        specifier: workspace:*
+        version: link:../../lib/api-client-react
       '@tanstack/react-query':
         specifier: 'catalog:'
         version: 5.90.21(react@19.1.0)
@@ -1218,9 +1221,6 @@ importers:
       '@ungap/structured-clone':
         specifier: ^1.3.0
         version: 1.3.0
-      '@workspace/api-client-react':
-        specifier: workspace:*
-        version: link:../../lib/api-client-react
       babel-plugin-react-compiler:
         specifier: ^19.0.0-beta-e993439-20250117
         version: 19.0.0-beta-ebf51a3-20250411
@@ -1404,6 +1404,9 @@ importers:
       '@replit/vite-plugin-runtime-error-modal':
         specifier: 'catalog:'
         version: 0.0.6
+      '@szl-holdings/shared-ui':
+        specifier: workspace:*
+        version: link:../../lib/shared-ui
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.2.1(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
@@ -1419,9 +1422,6 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
-      '@workspace/shared-ui':
-        specifier: workspace:*
-        version: link:../../lib/shared-ui
       chokidar:
         specifier: ^4.0.3
         version: 4.0.3
@@ -1521,6 +1521,9 @@ importers:
       '@stardazed/streams-text-encoding':
         specifier: ^1.0.2
         version: 1.0.2
+      '@szl-holdings/api-client-react':
+        specifier: workspace:*
+        version: link:../../lib/api-client-react
       '@tanstack/react-query':
         specifier: 'catalog:'
         version: 5.90.21(react@19.1.0)
@@ -1533,9 +1536,6 @@ importers:
       '@ungap/structured-clone':
         specifier: ^1.3.0
         version: 1.3.0
-      '@workspace/api-client-react':
-        specifier: workspace:*
-        version: link:../../lib/api-client-react
       babel-plugin-react-compiler:
         specifier: ^19.0.0-beta-e993439-20250117
         version: 19.0.0-beta-ebf51a3-20250411
@@ -1632,10 +1632,10 @@ importers:
 
   artifacts/stephen-site:
     dependencies:
-      '@workspace/graphql-client':
+      '@szl-holdings/graphql-client':
         specifier: workspace:*
         version: link:../../lib/graphql-client
-      '@workspace/observability':
+      '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
       i18next:
@@ -1741,6 +1741,18 @@ importers:
       '@replit/vite-plugin-runtime-error-modal':
         specifier: 'catalog:'
         version: 0.0.6
+      '@szl-holdings/analytics':
+        specifier: workspace:*
+        version: link:../../lib/analytics
+      '@szl-holdings/api-client-react':
+        specifier: workspace:*
+        version: link:../../lib/api-client-react
+      '@szl-holdings/mcp-client':
+        specifier: workspace:*
+        version: link:../../lib/mcp-client
+      '@szl-holdings/shared-ui':
+        specifier: workspace:*
+        version: link:../../lib/shared-ui
       '@tailwindcss/typography':
         specifier: ^0.5.15
         version: 0.5.19(tailwindcss@4.2.1)
@@ -1762,18 +1774,6 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
-      '@workspace/analytics':
-        specifier: workspace:*
-        version: link:../../lib/analytics
-      '@workspace/api-client-react':
-        specifier: workspace:*
-        version: link:../../lib/api-client-react
-      '@workspace/mcp-client':
-        specifier: workspace:*
-        version: link:../../lib/mcp-client
-      '@workspace/shared-ui':
-        specifier: workspace:*
-        version: link:../../lib/shared-ui
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -1849,19 +1849,19 @@ importers:
 
   artifacts/szl-holdings:
     dependencies:
-      '@workspace/analytics':
+      '@szl-holdings/analytics':
         specifier: workspace:*
         version: link:../../lib/analytics
-      '@workspace/graphql-client':
+      '@szl-holdings/graphql-client':
         specifier: workspace:*
         version: link:../../lib/graphql-client
-      '@workspace/observability':
+      '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
-      '@workspace/replit-auth-web':
+      '@szl-holdings/replit-auth-web':
         specifier: workspace:*
         version: link:../../lib/replit-auth-web
-      '@workspace/shared-ui':
+      '@szl-holdings/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui
       clsx:
@@ -1892,6 +1892,12 @@ importers:
       '@replit/vite-plugin-runtime-error-modal':
         specifier: 'catalog:'
         version: 0.0.6
+      '@szl-holdings/api-client-react':
+        specifier: workspace:*
+        version: link:../../lib/api-client-react
+      '@szl-holdings/mcp-client':
+        specifier: workspace:*
+        version: link:../../lib/mcp-client
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.2.1(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
@@ -1910,12 +1916,6 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
-      '@workspace/api-client-react':
-        specifier: workspace:*
-        version: link:../../lib/api-client-react
-      '@workspace/mcp-client':
-        specifier: workspace:*
-        version: link:../../lib/mcp-client
       framer-motion:
         specifier: 'catalog:'
         version: 12.35.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -1968,6 +1968,9 @@ importers:
       '@react-native-async-storage/async-storage':
         specifier: 2.2.0
         version: 2.2.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))
+      '@szl-holdings/api-client-react':
+        specifier: workspace:*
+        version: link:../../lib/api-client-react
       '@tanstack/react-query':
         specifier: 'catalog:'
         version: 5.90.21(react@19.1.0)
@@ -1977,9 +1980,6 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.0
         version: 19.2.3(@types/react@19.2.14)
-      '@workspace/api-client-react':
-        specifier: workspace:*
-        version: link:../../lib/api-client-react
       babel-plugin-react-compiler:
         specifier: ^19.0.0-beta-e993439-20250117
         version: 19.0.0-beta-ebf51a3-20250411
@@ -2073,12 +2073,12 @@ importers:
 
   artifacts/terra:
     dependencies:
+      '@szl-holdings/graphql-client':
+        specifier: workspace:*
+        version: link:../../lib/graphql-client
       '@types/mapbox-gl':
         specifier: ^3.5.0
         version: 3.5.0
-      '@workspace/graphql-client':
-        specifier: workspace:*
-        version: link:../../lib/graphql-client
       mapbox-gl:
         specifier: ^3.20.0
         version: 3.20.0
@@ -2092,6 +2092,21 @@ importers:
       '@replit/vite-plugin-runtime-error-modal':
         specifier: 'catalog:'
         version: 0.0.6
+      '@szl-holdings/analytics':
+        specifier: workspace:*
+        version: link:../../lib/analytics
+      '@szl-holdings/mcp-client':
+        specifier: workspace:*
+        version: link:../../lib/mcp-client
+      '@szl-holdings/observability':
+        specifier: workspace:*
+        version: link:../../lib/observability
+      '@szl-holdings/replit-auth-web':
+        specifier: workspace:*
+        version: link:../../lib/replit-auth-web
+      '@szl-holdings/shared-ui':
+        specifier: workspace:*
+        version: link:../../lib/shared-ui
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.2.1(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
@@ -2110,21 +2125,6 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
-      '@workspace/analytics':
-        specifier: workspace:*
-        version: link:../../lib/analytics
-      '@workspace/mcp-client':
-        specifier: workspace:*
-        version: link:../../lib/mcp-client
-      '@workspace/observability':
-        specifier: workspace:*
-        version: link:../../lib/observability
-      '@workspace/replit-auth-web':
-        specifier: workspace:*
-        version: link:../../lib/replit-auth-web
-      '@workspace/shared-ui':
-        specifier: workspace:*
-        version: link:../../lib/shared-ui
       clsx:
         specifier: 'catalog:'
         version: 2.1.1
@@ -2192,6 +2192,9 @@ importers:
       '@stardazed/streams-text-encoding':
         specifier: ^1.0.2
         version: 1.0.2
+      '@szl-holdings/api-client-react':
+        specifier: workspace:*
+        version: link:../../lib/api-client-react
       '@tanstack/react-query':
         specifier: 'catalog:'
         version: 5.90.21(react@19.1.0)
@@ -2204,9 +2207,6 @@ importers:
       '@ungap/structured-clone':
         specifier: ^1.3.0
         version: 1.3.0
-      '@workspace/api-client-react':
-        specifier: workspace:*
-        version: link:../../lib/api-client-react
       babel-plugin-react-compiler:
         specifier: ^19.0.0-beta-e993439-20250117
         version: 19.0.0-beta-ebf51a3-20250411
@@ -2321,18 +2321,18 @@ importers:
 
   artifacts/vessels:
     dependencies:
+      '@szl-holdings/graphql-client':
+        specifier: workspace:*
+        version: link:../../lib/graphql-client
+      '@szl-holdings/observability':
+        specifier: workspace:*
+        version: link:../../lib/observability
+      '@szl-holdings/services':
+        specifier: workspace:*
+        version: link:../../lib/services
       '@types/mapbox-gl':
         specifier: ^3.5.0
         version: 3.5.0
-      '@workspace/graphql-client':
-        specifier: workspace:*
-        version: link:../../lib/graphql-client
-      '@workspace/observability':
-        specifier: workspace:*
-        version: link:../../lib/observability
-      '@workspace/services':
-        specifier: workspace:*
-        version: link:../../lib/services
       mapbox-gl:
         specifier: ^3.20.0
         version: 3.20.0
@@ -2430,6 +2430,18 @@ importers:
       '@replit/vite-plugin-runtime-error-modal':
         specifier: 'catalog:'
         version: 0.0.6
+      '@szl-holdings/analytics':
+        specifier: workspace:*
+        version: link:../../lib/analytics
+      '@szl-holdings/api-client-react':
+        specifier: workspace:*
+        version: link:../../lib/api-client-react
+      '@szl-holdings/mcp-client':
+        specifier: workspace:*
+        version: link:../../lib/mcp-client
+      '@szl-holdings/shared-ui':
+        specifier: workspace:*
+        version: link:../../lib/shared-ui
       '@tailwindcss/typography':
         specifier: ^0.5.15
         version: 0.5.19(tailwindcss@4.2.1)
@@ -2451,18 +2463,6 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
-      '@workspace/analytics':
-        specifier: workspace:*
-        version: link:../../lib/analytics
-      '@workspace/api-client-react':
-        specifier: workspace:*
-        version: link:../../lib/api-client-react
-      '@workspace/mcp-client':
-        specifier: workspace:*
-        version: link:../../lib/mcp-client
-      '@workspace/shared-ui':
-        specifier: workspace:*
-        version: link:../../lib/shared-ui
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -2559,6 +2559,9 @@ importers:
       '@stardazed/streams-text-encoding':
         specifier: ^1.0.2
         version: 1.0.2
+      '@szl-holdings/api-client-react':
+        specifier: workspace:*
+        version: link:../../lib/api-client-react
       '@tanstack/react-query':
         specifier: 'catalog:'
         version: 5.90.21(react@19.1.0)
@@ -2571,9 +2574,6 @@ importers:
       '@ungap/structured-clone':
         specifier: ^1.3.0
         version: 1.3.0
-      '@workspace/api-client-react':
-        specifier: workspace:*
-        version: link:../../lib/api-client-react
       babel-plugin-react-compiler:
         specifier: ^19.0.0-beta-e993439-20250117
         version: 19.0.0-beta-ebf51a3-20250411
@@ -2679,19 +2679,19 @@ importers:
 
   lib/ai-engine:
     dependencies:
-      '@workspace/db':
+      '@szl-holdings/db':
         specifier: workspace:*
         version: link:../db
-      '@workspace/integrations-anthropic-ai':
+      '@szl-holdings/integrations-anthropic-ai':
         specifier: workspace:*
         version: link:../integrations-anthropic-ai
-      '@workspace/integrations-gemini-ai':
+      '@szl-holdings/integrations-gemini-ai':
         specifier: workspace:*
         version: link:../integrations-gemini-ai
-      '@workspace/integrations-openai-ai-server':
+      '@szl-holdings/integrations-openai-ai-server':
         specifier: workspace:*
         version: link:../integrations-openai-ai-server
-      '@workspace/services':
+      '@szl-holdings/services':
         specifier: workspace:*
         version: link:../services
       drizzle-orm:
@@ -2731,7 +2731,7 @@ importers:
 
   lib/approvals:
     dependencies:
-      '@workspace/db':
+      '@szl-holdings/db':
         specifier: workspace:*
         version: link:../db
       drizzle-orm:
@@ -2747,7 +2747,7 @@ importers:
 
   lib/audit:
     dependencies:
-      '@workspace/db':
+      '@szl-holdings/db':
         specifier: workspace:*
         version: link:../db
       drizzle-orm:
@@ -2778,7 +2778,7 @@ importers:
 
   lib/data-connectors:
     dependencies:
-      '@workspace/services':
+      '@szl-holdings/services':
         specifier: workspace:*
         version: link:../services
     devDependencies:
@@ -2918,7 +2918,7 @@ importers:
 
   lib/proof-chain:
     dependencies:
-      '@workspace/db':
+      '@szl-holdings/db':
         specifier: workspace:*
         version: link:../db
       drizzle-orm:
@@ -2934,7 +2934,7 @@ importers:
 
   lib/replit-auth-web:
     dependencies:
-      '@workspace/api-client-react':
+      '@szl-holdings/api-client-react':
         specifier: workspace:*
         version: link:../api-client-react
     devDependencies:
@@ -3031,6 +3031,12 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.2.0
         version: 1.2.8(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@szl-holdings/observability':
+        specifier: workspace:*
+        version: link:../observability
+      '@szl-holdings/replit-auth-web':
+        specifier: workspace:*
+        version: link:../replit-auth-web
       '@tanstack/react-query':
         specifier: 'catalog:'
         version: 5.90.21(react@19.1.0)
@@ -3040,12 +3046,6 @@ importers:
       '@udecode/plate-core':
         specifier: ^49.0.0
         version: 49.0.0(@types/react@19.2.14)(immer@10.2.0)(react-dom@19.1.0(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.114.0(slate@0.124.0))(slate@0.124.0)(use-sync-external-store@1.6.0(react@19.1.0))
-      '@workspace/observability':
-        specifier: workspace:*
-        version: link:../observability
-      '@workspace/replit-auth-web':
-        specifier: workspace:*
-        version: link:../replit-auth-web
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -3116,13 +3116,13 @@ importers:
 
   lib/workflow-engine:
     dependencies:
-      '@workspace/db':
+      '@szl-holdings/db':
         specifier: workspace:*
         version: link:../db
-      '@workspace/observability':
+      '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../observability
-      '@workspace/services':
+      '@szl-holdings/services':
         specifier: workspace:*
         version: link:../services
       drizzle-orm:
@@ -3138,7 +3138,7 @@ importers:
 
   lib/worldline:
     dependencies:
-      '@workspace/db':
+      '@szl-holdings/db':
         specifier: workspace:*
         version: link:../db
       drizzle-orm:
@@ -3176,7 +3176,7 @@ importers:
 
   scripts:
     dependencies:
-      '@workspace/db':
+      '@szl-holdings/db':
         specifier: workspace:*
         version: link:../lib/db
     devDependencies:

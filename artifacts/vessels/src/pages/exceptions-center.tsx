@@ -1,19 +1,19 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "@workspace/shared-ui";
-import { Badge } from "@workspace/shared-ui/ui/badge";
+import { apiFetch } from "@szl-holdings/shared-ui";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import {
   AlertTriangle, Clock, User, ChevronDown, ChevronRight,
   CheckCircle2, Ship, CloudLightning, Anchor, Wrench, Fuel, Navigation, Radio,
   RefreshCw, CheckCheck, ArrowUpCircle,
 } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import {
   OperationalOwnerChip,
   OperationalStatusBadge,
   OperationalRiskBadge,
   severityToRiskLevel,
-} from "@workspace/shared-ui/operational-primitives";
+} from "@szl-holdings/shared-ui/operational-primitives";
 
 export type ExceptionSeverity = "critical" | "high" | "watch" | "normal" | "medium" | "low";
 export type ExceptionType = "route_deviation" | "delay_risk" | "port_congestion" | "weather_disruption" | "maintenance_risk" | "fuel_anomaly" | "schedule_variance" | "security_alert";

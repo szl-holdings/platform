@@ -29,7 +29,7 @@ import {
   pcForecastExplanationsTable,
   pcAiReviewPacketsTable,
   pcDefensibilityScoresTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, sql, and } from "drizzle-orm";
 import {
   sendSuccess,

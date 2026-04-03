@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Sun, Moon, Zap, Brain, Activity, Clock, CheckCircle2, AlertCircle, ArrowRight } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 interface IntiAction {
   id: string;

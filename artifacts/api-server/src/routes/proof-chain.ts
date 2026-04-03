@@ -45,7 +45,7 @@ router.post("/proof-chain/tag", authMiddleware(), async (req: Request, res: Resp
       return;
     }
 
-    const { tagAIContent } = await import("@workspace/proof-chain");
+    const { tagAIContent } = await import("@szl-holdings/proof-chain");
     const user = req.user;
     const orgId = user?.orgs?.[0]?.orgId ?? null;
 
@@ -53,7 +53,7 @@ router.post("/proof-chain/tag", authMiddleware(), async (req: Request, res: Resp
       orgId,
       contentId,
       contentType,
-      sourceClass: sourceClass as import("@workspace/proof-chain").ProvenanceSourceClass,
+      sourceClass: sourceClass as import("@szl-holdings/proof-chain").ProvenanceSourceClass,
       confidenceScore,
       modelLane,
       modelId,
@@ -79,7 +79,7 @@ router.get("/proof-chain/:id", authMiddleware(), async (req: Request, res: Respo
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid proof ID"); return; }
 
-    const { db, proofChainTable } = await import("@workspace/db");
+    const { db, proofChainTable } = await import("@szl-holdings/db");
     const { eq } = await import("drizzle-orm");
     const [row] = await db.select().from(proofChainTable).where(eq(proofChainTable.id, id));
     if (!row) { sendNotFound(res, "Proof"); return; }
@@ -94,7 +94,7 @@ router.get("/proof-chain/by-content/:contentType/:contentId", authMiddleware(), 
   try {
     const { contentType, contentId } = req.params as { contentType: string; contentId: string };
 
-    const { getProofByContent } = await import("@workspace/proof-chain");
+    const { getProofByContent } = await import("@szl-holdings/proof-chain");
     const proof = await getProofByContent(contentId, contentType);
     if (!proof) { sendNotFound(res, "Proof"); return; }
 
@@ -125,13 +125,13 @@ router.post("/proof-chain/:id/review", authMiddleware(), requireRole("super_admi
       return;
     }
 
-    const { reviewProof } = await import("@workspace/proof-chain");
+    const { reviewProof } = await import("@szl-holdings/proof-chain");
     const updated = await reviewProof({
       proofId: id,
       reviewedBy: req.user.id,
-      reviewState: reviewState as import("@workspace/proof-chain").ProofReviewState,
+      reviewState: reviewState as import("@szl-holdings/proof-chain").ProofReviewState,
       reviewNote,
-      exportSafetyState: exportSafetyState as import("@workspace/proof-chain").ProofExportSafetyState | undefined,
+      exportSafetyState: exportSafetyState as import("@szl-holdings/proof-chain").ProofExportSafetyState | undefined,
     });
 
     sendSuccess(res, updated);
@@ -150,11 +150,11 @@ router.get("/proof-chain", authMiddleware(), requireRole("super_admin", "admin",
     const contentType = req.query["contentType"] as string | undefined;
     const limit = Math.min(parseInt(req.query["limit"] as string ?? "100", 10), 500);
 
-    const { listProofChain } = await import("@workspace/proof-chain");
+    const { listProofChain } = await import("@szl-holdings/proof-chain");
     const results = await listProofChain({
       orgId,
-      reviewState: reviewState as import("@workspace/proof-chain").ProofReviewState | undefined,
-      sourceClass: sourceClass as import("@workspace/proof-chain").ProvenanceSourceClass | undefined,
+      reviewState: reviewState as import("@szl-holdings/proof-chain").ProofReviewState | undefined,
+      sourceClass: sourceClass as import("@szl-holdings/proof-chain").ProvenanceSourceClass | undefined,
       contentType,
       limit,
     });

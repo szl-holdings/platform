@@ -96,8 +96,8 @@ export const holdingsResolvers = {
     }),
     holdingsVentures: async (_: unknown, args: { status?: string; limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { holdingsVenturesTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { holdingsVenturesTable } = await import("@szl-holdings/db/schema");
         const { desc, eq } = await import("drizzle-orm");
         const query = db.select().from(holdingsVenturesTable).orderBy(desc(holdingsVenturesTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (args.status) {
@@ -110,8 +110,8 @@ export const holdingsResolvers = {
     },
     holdingsVenture: async (_: unknown, args: { id: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { holdingsVenturesTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { holdingsVenturesTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const rows = await db.select().from(holdingsVenturesTable).where(eq(holdingsVenturesTable.id, parseIntId(args.id))).limit(1);
         return rows[0] ?? null;
@@ -121,8 +121,8 @@ export const holdingsResolvers = {
     },
     holdingsVentureBySlug: async (_: unknown, args: { slug: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { holdingsVenturesTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { holdingsVenturesTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const rows = await db.select().from(holdingsVenturesTable).where(eq(holdingsVenturesTable.slug, args.slug as any)).limit(1);
         return rows[0] ?? null;
@@ -132,8 +132,8 @@ export const holdingsResolvers = {
     },
     holdingsMetrics: async (_: unknown, args: { ventureId: string; limit?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { holdingsMetricsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { holdingsMetricsTable } = await import("@szl-holdings/db/schema");
         const { desc, eq } = await import("drizzle-orm");
         return await db.select().from(holdingsMetricsTable).where(eq(holdingsMetricsTable.ventureId, parseIntId(args.ventureId, "ventureId"))).orderBy(desc(holdingsMetricsTable.createdAt)).limit(args.limit ?? 20);
       } catch {
@@ -142,8 +142,8 @@ export const holdingsResolvers = {
     },
     holdingsMilestones: async (_: unknown, args: { ventureId: string; limit?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { holdingsMilestonesTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { holdingsMilestonesTable } = await import("@szl-holdings/db/schema");
         const { desc, eq } = await import("drizzle-orm");
         return await db.select().from(holdingsMilestonesTable).where(eq(holdingsMilestonesTable.ventureId, parseIntId(args.ventureId, "ventureId"))).orderBy(desc(holdingsMilestonesTable.createdAt)).limit(args.limit ?? 20);
       } catch {
@@ -152,8 +152,8 @@ export const holdingsResolvers = {
     },
     holdingsInquiries: async (_: unknown, args: { status?: string; limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { holdingsInquiriesTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { holdingsInquiriesTable } = await import("@szl-holdings/db/schema");
         const { desc, eq } = await import("drizzle-orm");
         const query = db.select().from(holdingsInquiriesTable).orderBy(desc(holdingsInquiriesTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (args.status) {
@@ -168,8 +168,8 @@ export const holdingsResolvers = {
   Mutation: {
     createHoldingsInquiry: async (_: unknown, args: { name: string; email: string; subject: string; message: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { holdingsInquiriesTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { holdingsInquiriesTable } = await import("@szl-holdings/db/schema");
         const rows = await db
           .insert(holdingsInquiriesTable)
           .values({ name: args.name, email: args.email, subject: args.subject, message: args.message, status: "new" })

@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
 import { AlertTriangle, CheckCircle2, Activity, Clock, Bell, XCircle, Eye, RefreshCw, Wifi, Server, Database, Mail, Cloud, Shield } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { useEffect, useState, useCallback } from "react";
-import { doctrineEventBus } from "@workspace/observability";
-import { DoctrineLayerBadge } from "@workspace/shared-ui/doctrine-layer-badge";
-import { Skeleton } from "@workspace/shared-ui/ui/skeleton";
+import { doctrineEventBus } from "@szl-holdings/observability";
+import { DoctrineLayerBadge } from "@szl-holdings/shared-ui/doctrine-layer-badge";
+import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string): Promise<T> {

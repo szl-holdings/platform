@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
-import { Badge } from "@workspace/shared-ui/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { TrendingUp, DollarSign, BarChart3, Target, Building2, Percent, Map } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar } from "recharts";
 import { Link } from "wouter";

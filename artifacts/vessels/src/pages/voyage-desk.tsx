@@ -4,8 +4,8 @@ import {
   Shield, BarChart3, Plug, ArrowUpRight, RefreshCw,
   FileText, User, Activity, Wind
 } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
-import { EmptyState } from "@workspace/shared-ui";
+import { cn } from "@szl-holdings/shared-ui/utils";
+import { EmptyState } from "@szl-holdings/shared-ui";
 import {
   vesselTwins, voyageTwins,
   type VesselTwin, type VoyageTwin

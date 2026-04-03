@@ -48,9 +48,9 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
-    "@workspace/analytics": "workspace:*",
-    "@workspace/api-client-react": "workspace:*",
-    "@workspace/shared-ui": "workspace:*",
+    "@szl-holdings/analytics": "workspace:*",
+    "@szl-holdings/api-client-react": "workspace:*",
+    "@szl-holdings/shared-ui": "workspace:*",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "cmdk": "^1.1.1",
@@ -75,11 +75,11 @@
     "vite": "catalog:",
     "wouter": "^3.3.5",
     "zod": "catalog:",
-    "@workspace/mcp-client": "workspace:*"
+    "@szl-holdings/mcp-client": "workspace:*"
   },
   "dependencies": {
-    "@workspace/graphql-client": "workspace:*",
-    "@workspace/observability": "workspace:*",
+    "@szl-holdings/graphql-client": "workspace:*",
+    "@szl-holdings/observability": "workspace:*",
     "i18next": "^26.0.3",
     "i18next-browser-languagedetector": "^8.2.1",
     "react-i18next": "^17.0.2"

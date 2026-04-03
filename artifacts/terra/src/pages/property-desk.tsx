@@ -5,8 +5,8 @@ import {
   ChevronRight, ChevronDown, Shield, TrendingUp, ExternalLink,
   BarChart3, Plug, Info, ArrowRight, Plus, Eye, RefreshCw
 } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
-import { EmptyState } from "@workspace/shared-ui";
+import { cn } from "@szl-holdings/shared-ui/utils";
+import { EmptyState } from "@szl-holdings/shared-ui";
 import { propertyTwins, whatChangedFeed, type PropertyTwin, type DiligenceTask } from "@/data/property-twin";
 
 const ACCENT = "#40856a";

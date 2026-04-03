@@ -7,7 +7,7 @@ export {
   type KnowledgeDomain,
   type KnowledgeEntry,
   type KnowledgeQuery,
-} from "@workspace/workflow-engine";
+} from "@szl-holdings/workflow-engine";
 
 import { logger } from "./logger";
 logger.info("Knowledge store initialized");

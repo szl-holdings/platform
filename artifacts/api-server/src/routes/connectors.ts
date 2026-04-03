@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, connectorsTable, connectorLogsTable } from "@workspace/db";
+import { db, connectorsTable, connectorLogsTable } from "@szl-holdings/db";
 import { eq, desc } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendError, handleRouteError } from "../lib/api-response";
 import { logActivity } from "../lib/activity-logger";

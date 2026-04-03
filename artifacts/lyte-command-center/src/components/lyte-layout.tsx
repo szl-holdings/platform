@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
-import { cn } from "@workspace/shared-ui/utils";
-import { SectionErrorBoundary } from "@workspace/shared-ui/error-boundary";
+import { cn } from "@szl-holdings/shared-ui/utils";
+import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
 import { ReactNode, useState } from "react";
 import {
   Zap, Menu, X, ChevronDown, Bell, Settings, Users, Flag, FileText,
@@ -8,7 +8,7 @@ import {
   AlertTriangle, Brain, Radio, Workflow, Inbox, Search, UserCheck,
   ChevronRight, Gauge, BarChart3, LayoutDashboard, Download
 } from "lucide-react";
-import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, useSandboxMode, EnvironmentLabel, type OnboardingConfig } from "@workspace/shared-ui";
+import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, useSandboxMode, EnvironmentLabel, type OnboardingConfig } from "@szl-holdings/shared-ui";
 
 const LYTE_ONBOARDING_CONFIG: OnboardingConfig = {
   appId: "lyte",

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Activity, CheckCircle2, AlertTriangle, XCircle, Globe, Server, Cpu, Clock } from "lucide-react";
-import { useGetStephenEcosystemStatus } from "@workspace/api-client-react";
+import { useGetStephenEcosystemStatus } from "@szl-holdings/api-client-react";
 import { format } from "date-fns";
 
 type EcoApp = { name: string; slug: string; description: string; status: string; lastChecked?: string };

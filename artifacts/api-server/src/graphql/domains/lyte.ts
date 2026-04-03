@@ -368,8 +368,8 @@ export const lyteResolvers = {
   Query: {
     lyteWorkspaces: async (_: unknown, args: { limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { lyteWorkspacesTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { lyteWorkspacesTable } = await import("@szl-holdings/db/schema");
         const { desc } = await import("drizzle-orm");
         return await db.select().from(lyteWorkspacesTable)
           .orderBy(desc(lyteWorkspacesTable.createdAt))
@@ -379,8 +379,8 @@ export const lyteResolvers = {
 
     lyteSignals: async (_: unknown, args: { severity?: string; status?: string; domain?: string; limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { lyteSignalsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { lyteSignalsTable } = await import("@szl-holdings/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions: ReturnType<typeof eq>[] = [];
         if (args.severity && VALID_SIGNAL_SEVERITIES.has(args.severity as SignalSeverity)) {
@@ -401,8 +401,8 @@ export const lyteResolvers = {
 
     lyteSignal: async (_: unknown, args: { id: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { lyteSignalsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { lyteSignalsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const rows = await db.select().from(lyteSignalsTable).where(eq(lyteSignalsTable.id, parseIntId(args.id))).limit(1);
         const signal = rows[0];
@@ -413,8 +413,8 @@ export const lyteResolvers = {
 
     lyteActions: async (_: unknown, args: { state?: string; priority?: string; assignee?: string; limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { lyteActionsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { lyteActionsTable } = await import("@szl-holdings/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const VALID_ACTION_PRIORITIES = new Set<ActionPriority>(["urgent", "high", "medium", "low"]);
         const conditions: ReturnType<typeof eq>[] = [];
@@ -435,8 +435,8 @@ export const lyteResolvers = {
 
     lyteAction: async (_: unknown, args: { id: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { lyteActionsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { lyteActionsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const rows = await db.select().from(lyteActionsTable).where(eq(lyteActionsTable.id, parseIntId(args.id))).limit(1);
         if (!rows[0]) return null;
@@ -446,8 +446,8 @@ export const lyteResolvers = {
 
     lyteIncidents: async (_: unknown, args: { status?: string; severity?: string; assignee?: string; limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { lyteIncidentsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { lyteIncidentsTable } = await import("@szl-holdings/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions: ReturnType<typeof eq>[] = [];
         if (args.status && VALID_INCIDENT_STATUSES.has(args.status as IncidentStatus)) {
@@ -467,8 +467,8 @@ export const lyteResolvers = {
 
     lyteIncident: async (_: unknown, args: { id: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { lyteIncidentsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { lyteIncidentsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const rows = await db.select().from(lyteIncidentsTable).where(eq(lyteIncidentsTable.id, parseIntId(args.id))).limit(1);
         if (!rows[0]) return null;
@@ -484,8 +484,8 @@ export const lyteResolvers = {
       offset?: number;
     }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { lyteSignalsTable, lyteActionsTable, lyteIncidentsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { lyteSignalsTable, lyteActionsTable, lyteIncidentsTable } = await import("@szl-holdings/db/schema");
         const { desc, asc, eq, and } = await import("drizzle-orm");
         const filter = args.filter ?? {};
         const limit = args.limit ?? 50;
@@ -566,8 +566,8 @@ export const lyteResolvers = {
 
     lyteExecutiveSummary: async () => {
       try {
-        const { db } = await import("@workspace/db");
-        const { lyteSignalsTable, lyteActionsTable, lyteIncidentsTable, alloyApprovals } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { lyteSignalsTable, lyteActionsTable, lyteIncidentsTable, alloyApprovals } = await import("@szl-holdings/db/schema");
         const { desc, eq } = await import("drizzle-orm");
 
         const [signals, incidents, actions, pendingApprovals] = await Promise.all([
@@ -623,8 +623,8 @@ export const lyteResolvers = {
   Mutation: {
     triageLyteSignal: async (_: unknown, args: { id: string; status: string; rationale?: string; nextAction?: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { lyteSignalsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { lyteSignalsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         if (!VALID_SIGNAL_STATUSES.has(args.status as SignalStatus)) {
           throw new Error(`Invalid signal status '${args.status}' — must be one of: ${[...VALID_SIGNAL_STATUSES].join(", ")}`);
@@ -653,8 +653,8 @@ export const lyteResolvers = {
 
     assignLyteSignalOwner: async (_: unknown, args: { id: string; assignee: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { lyteSignalsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { lyteSignalsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         // lyteSignalsTable has no assignee column — store in metadata jsonb
         const id = parseIntId(args.id);
@@ -674,8 +674,8 @@ export const lyteResolvers = {
 
     escalateLyteSignal: async (_: unknown, args: { id: string; reason?: string; targetRole: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { lyteSignalsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { lyteSignalsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const id = parseIntId(args.id);
         const [existing] = await db.select().from(lyteSignalsTable).where(eq(lyteSignalsTable.id, id)).limit(1);
@@ -696,8 +696,8 @@ export const lyteResolvers = {
 
     updateLyteIncident: async (_: unknown, args: { id: string; status: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { lyteIncidentsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { lyteIncidentsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         if (!VALID_INCIDENT_STATUSES.has(args.status as IncidentStatus)) {
           throw new Error(`Invalid incident status '${args.status}' — must be one of: ${[...VALID_INCIDENT_STATUSES].join(", ")}`);
@@ -717,8 +717,8 @@ export const lyteResolvers = {
 
     assignLyteIncidentOwner: async (_: unknown, args: { id: string; assignee: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { lyteIncidentsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { lyteIncidentsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const id = parseIntId(args.id);
         const rows = await db.update(lyteIncidentsTable)
@@ -735,8 +735,8 @@ export const lyteResolvers = {
 
     escalateLyteIncident: async (_: unknown, args: { id: string; reason?: string; targetRole: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { lyteIncidentsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { lyteIncidentsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const id = parseIntId(args.id);
         // Fetch existing row to merge metadata and transition status
@@ -765,8 +765,8 @@ export const lyteResolvers = {
 
     resolveLyteIncident: async (_: unknown, args: { id: string; resolution: string; rootCause?: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { lyteIncidentsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { lyteIncidentsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const id = parseIntId(args.id);
         const rows = await db.update(lyteIncidentsTable)
@@ -783,8 +783,8 @@ export const lyteResolvers = {
 
     updateLyteActionState: async (_: unknown, args: { id: string; state: string; rationale?: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { lyteActionsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { lyteActionsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         if (!VALID_ACTION_STATES.has(args.state as ActionState)) {
           throw new Error(`Invalid action state '${args.state}' — must be one of: ${[...VALID_ACTION_STATES].join(", ")}`);
@@ -806,8 +806,8 @@ export const lyteResolvers = {
 
     assignLyteActionOwner: async (_: unknown, args: { id: string; assignedTo: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { lyteActionsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { lyteActionsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const id = parseIntId(args.id);
         const rows = await db.update(lyteActionsTable)
@@ -823,8 +823,8 @@ export const lyteResolvers = {
 
     escalateLyteAction: async (_: unknown, args: { id: string; reason?: string; targetRole: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { lyteActionsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { lyteActionsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const id = parseIntId(args.id);
         const [existing] = await db.select({ stateHistory: lyteActionsTable.stateHistory }).from(lyteActionsTable).where(eq(lyteActionsTable.id, id)).limit(1);

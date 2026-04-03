@@ -1,4 +1,4 @@
-import { useAlloyWorkflows, useAlloySignals } from "@workspace/graphql-client/hooks";
+import { useAlloyWorkflows, useAlloySignals } from "@szl-holdings/graphql-client/hooks";
 
 export function AlloyGraphQLPanel() {
   const { data: workflowsData, loading: wLoading } = useAlloyWorkflows({ limit: 3 });

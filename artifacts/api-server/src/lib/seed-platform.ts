@@ -16,8 +16,8 @@ import {
   maritimeExceptionsTable,
   featureFlagsTable,
   szlProductsTable,
-} from "@workspace/db";
-import { productsTable } from "@workspace/db/schema/canonical";
+} from "@szl-holdings/db";
+import { productsTable } from "@szl-holdings/db/schema/canonical";
 import { eq, sql } from "drizzle-orm";
 
 async function tableHasData(table: any): Promise<boolean> {

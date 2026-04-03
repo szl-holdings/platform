@@ -3,9 +3,9 @@ export {
   agentScheduler,
   type AgentSchedule,
   type AgentRunRecord,
-} from "@workspace/workflow-engine";
+} from "@szl-holdings/workflow-engine";
 
-import { agentScheduler } from "@workspace/workflow-engine";
+import { agentScheduler } from "@szl-holdings/workflow-engine";
 import { logger } from "./logger";
 
 const BASE_URL = `http://localhost:${process.env["PORT"] || 3000}`;

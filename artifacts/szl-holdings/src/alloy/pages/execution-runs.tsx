@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch, isAuthError, DataStateBadge, useRealtimeChannel } from "@workspace/shared-ui";
+import { apiFetch, isAuthError, DataStateBadge, useRealtimeChannel } from "@szl-holdings/shared-ui";
 import { Activity, Clock, CheckCircle, XCircle, RotateCcw, RefreshCw, AlertTriangle, Zap, Terminal, ChevronRight, Play, Filter } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 

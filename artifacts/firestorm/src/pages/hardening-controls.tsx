@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { Card, CardContent } from "@workspace/shared-ui/ui/card";
-import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Button } from "@workspace/shared-ui/ui/button";
-import { Progress } from "@workspace/shared-ui/ui/progress";
+import { Card, CardContent } from "@szl-holdings/shared-ui/ui/card";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { Button } from "@szl-holdings/shared-ui/ui/button";
+import { Progress } from "@szl-holdings/shared-ui/ui/progress";
 import {
   Shield, Key, Globe, Settings, Package, Search,
   CheckCircle, AlertTriangle, XCircle, RefreshCw,

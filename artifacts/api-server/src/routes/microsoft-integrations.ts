@@ -4,7 +4,7 @@ import crypto from "crypto";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { platformAuth } from "../middlewares/platform-auth";
 import { isFlagEnabled } from "../lib/platform-flags";
-import { services } from "@workspace/services";
+import { services } from "@szl-holdings/services";
 import {
   sendSuccess,
   sendCreated,

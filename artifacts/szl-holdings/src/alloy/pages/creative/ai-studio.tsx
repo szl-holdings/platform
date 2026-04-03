@@ -2,7 +2,7 @@ import * as React from "react";
 import { useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, TrendingUp, ImageIcon, Type, Calendar, Loader2, Lightbulb, Globe, Zap, Video, Music, Palette, Layers, Wand2 } from "lucide-react";
-import { ShimmerReveal, TypewriterText } from "@workspace/shared-ui/ai-components";
+import { ShimmerReveal, TypewriterText } from "@szl-holdings/shared-ui/ai-components";
 
 const demoContentIdeas = {
   ideas: [

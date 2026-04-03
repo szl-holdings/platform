@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { type AppObservabilityState, type LensId, LENSES } from "@workspace/observability";
-import { ALL_CONFIGS } from "@workspace/observability/configs";
+import { type AppObservabilityState, type LensId, LENSES } from "@szl-holdings/observability";
+import { ALL_CONFIGS } from "@szl-holdings/observability/configs";
 
 const LENS_ICONS: Record<string, string> = {
   signal: "◎",

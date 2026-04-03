@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Badge } from "@workspace/shared-ui/ui/badge";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { ShieldAlert, AlertTriangle, CheckCircle, Search, Clock, Ship, Loader2, Eye } from "lucide-react";
 import { useSanctions, useSanctionsSummary } from "@/hooks/use-vessels-data";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 type OfacDistEntry = { status: string; count: number };
 type PscDistEntry = { result: string; count: number; avgDeficiencies: number };

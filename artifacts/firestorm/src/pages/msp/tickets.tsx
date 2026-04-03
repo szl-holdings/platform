@@ -1,9 +1,9 @@
 import { Ticket, Clock, AlertTriangle, CheckCircle, User, Plus, Sparkles, Loader2, X, ChevronRight, MessageCircle, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ExportButton } from "@workspace/shared-ui/data-export";
-import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
-import { Skeleton } from "@workspace/shared-ui/ui/skeleton";
+import { ExportButton } from "@szl-holdings/shared-ui/data-export";
+import { CommentThread, ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
+import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { toast } from "sonner";
 
 const API_BASE = "/api";

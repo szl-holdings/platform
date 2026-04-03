@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AlertTriangle, CheckCircle, Clock, User, Shield, ArrowUpRight, Target } from "lucide-react";
-import { EmptyState } from "@workspace/shared-ui";
+import { EmptyState } from "@szl-holdings/shared-ui";
 import { actionQueue, type ActionQueueItem } from "@/data/threat-twin";
 
 const ACCENT = "hsl(220 72% 56%)";

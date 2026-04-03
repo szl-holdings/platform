@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, commentsTable } from "@workspace/db";
+import { db, commentsTable } from "@szl-holdings/db";
 import { eq, and, desc } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, handleRouteError } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";

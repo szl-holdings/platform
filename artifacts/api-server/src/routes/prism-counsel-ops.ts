@@ -29,7 +29,7 @@ import {
   pcDepositionsTable,
   pcReadinessScoresTable,
   pcDocumentChunksTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, sql, and, count, sum } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendForbidden, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";

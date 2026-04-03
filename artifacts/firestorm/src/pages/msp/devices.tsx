@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, Server, Monitor, Wifi, Printer, Smartphone, Shield, AlertTriangle, CheckCircle2, XCircle, Activity, RefreshCw } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "@workspace/shared-ui/ui/skeleton";
+import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string): Promise<T> {

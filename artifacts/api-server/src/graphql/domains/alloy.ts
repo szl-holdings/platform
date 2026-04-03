@@ -349,8 +349,8 @@ export const alloyResolvers = {
   Query: {
     alloySignals: async (_: unknown, args: { limit?: number; offset?: number; severity?: string; status?: string; domain?: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { alloySignals } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloySignals } = await import("@szl-holdings/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions: ReturnType<typeof eq>[] = [];
         if (args.severity) conditions.push(eq(alloySignals.severity, args.severity as typeof alloySignals.severity._.data));
@@ -364,8 +364,8 @@ export const alloyResolvers = {
 
     alloySignal: async (_: unknown, args: { id: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { alloySignals } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloySignals } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const rows = await db.select().from(alloySignals).where(eq(alloySignals.id, parseInt(args.id, 10))).limit(1);
         return rows[0] ?? null;
@@ -374,8 +374,8 @@ export const alloyResolvers = {
 
     alloyWorkflows: async (_: unknown, args: { limit?: number; offset?: number; status?: string; priority?: string; domain?: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { alloyWorkflows } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloyWorkflows } = await import("@szl-holdings/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions: ReturnType<typeof eq>[] = [];
         if (args.status && VALID_WORKFLOW_STATUSES.has(args.status as WorkflowStatus)) {
@@ -394,8 +394,8 @@ export const alloyResolvers = {
 
     alloyWorkflow: async (_: unknown, args: { id: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { alloyWorkflows } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloyWorkflows } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const rows = await db.select().from(alloyWorkflows).where(eq(alloyWorkflows.id, parseInt(args.id, 10))).limit(1);
         return rows[0] ? enrichWorkflow(rows[0] as unknown as Record<string, unknown>) : null;
@@ -404,8 +404,8 @@ export const alloyResolvers = {
 
     alloyWorkflowStateTransitions: async (_: unknown, args: { workflowId: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { alloyWorkflows } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloyWorkflows } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const rows = await db.select({ status: alloyWorkflows.status }).from(alloyWorkflows)
           .where(eq(alloyWorkflows.id, parseInt(args.workflowId, 10))).limit(1);
@@ -415,8 +415,8 @@ export const alloyResolvers = {
 
     alloyWorkflowRuns: async (_: unknown, args: { workflowId?: string; limit?: number; offset?: number; status?: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { alloyWorkflowRuns } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloyWorkflowRuns } = await import("@szl-holdings/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions: ReturnType<typeof eq>[] = [];
         if (args.workflowId) conditions.push(eq(alloyWorkflowRuns.workflowId, parseInt(args.workflowId, 10)));
@@ -431,8 +431,8 @@ export const alloyResolvers = {
 
     alloyWorkflowRun: async (_: unknown, args: { id: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { alloyWorkflowRuns } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloyWorkflowRuns } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const rows = await db.select().from(alloyWorkflowRuns).where(eq(alloyWorkflowRuns.id, parseIntId(args.id))).limit(1);
         return rows[0] ?? null;
@@ -441,8 +441,8 @@ export const alloyResolvers = {
 
     alloyApprovals: async (_: unknown, args: { workflowId?: string; status?: string; limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { alloyApprovals } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloyApprovals } = await import("@szl-holdings/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         type ApprovalStatus = "pending" | "approved" | "rejected" | "expired";
         const VALID_APPROVAL_STATUSES = new Set<ApprovalStatus>(["pending", "approved", "rejected", "expired"]);
@@ -459,8 +459,8 @@ export const alloyResolvers = {
 
     alloyApproval: async (_: unknown, args: { id: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { alloyApprovals } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloyApprovals } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const rows = await db.select().from(alloyApprovals).where(eq(alloyApprovals.id, parseIntId(args.id))).limit(1);
         return rows[0] ?? null;
@@ -469,8 +469,8 @@ export const alloyResolvers = {
 
     alloyActions: async (_: unknown, args: { workflowId?: string; limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { alloyActions } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloyActions } = await import("@szl-holdings/db/schema");
         const { desc, eq } = await import("drizzle-orm");
         const q = db.select().from(alloyActions).orderBy(desc(alloyActions.createdAt))
           .limit(args.limit ?? 50).offset(args.offset ?? 0);
@@ -481,8 +481,8 @@ export const alloyResolvers = {
 
     alloyArtifacts: async (_: unknown, args: { workflowId?: string; domain?: string; limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { alloyArtifacts } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloyArtifacts } = await import("@szl-holdings/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions: ReturnType<typeof eq>[] = [];
         if (args.workflowId) conditions.push(eq(alloyArtifacts.workflowId, parseInt(args.workflowId, 10)));
@@ -495,8 +495,8 @@ export const alloyResolvers = {
 
     alloyAuditLog: async (_: unknown, args: { entityType?: string; entityId?: string; limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { alloyAuditLog } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloyAuditLog } = await import("@szl-holdings/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         type AuditEntityType = "signal" | "workflow" | "action" | "artifact" | "approval" | "owner";
         const VALID_ENTITY_TYPES = new Set<AuditEntityType>(["signal", "workflow", "action", "artifact", "approval", "owner"]);
@@ -514,8 +514,8 @@ export const alloyResolvers = {
 
     alloyDashboard: async () => {
       try {
-        const { db } = await import("@workspace/db");
-        const { alloyWorkflows, alloyWorkflowRuns, alloyApprovals, alloyAuditLog } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloyWorkflows, alloyWorkflowRuns, alloyApprovals, alloyAuditLog } = await import("@szl-holdings/db/schema");
         const { desc, eq } = await import("drizzle-orm");
 
         const [workflows, runs, pendingApprovals, recentAudit] = await Promise.all([
@@ -557,8 +557,8 @@ export const alloyResolvers = {
   Mutation: {
     createAlloyWorkflow: async (_: unknown, args: { name: string; type?: string; priority?: string; description?: string; domain?: string; requiresApproval?: boolean }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { alloyWorkflows } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloyWorkflows } = await import("@szl-holdings/db/schema");
         const rows = await db.insert(alloyWorkflows).values({
           name: args.name,
           type: coerceWorkflowType(args.type),
@@ -576,8 +576,8 @@ export const alloyResolvers = {
 
     submitAlloyWorkflow: async (_: unknown, args: { id: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { alloyWorkflows } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloyWorkflows } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const id = parseIntId(args.id);
         const [existing] = await db.select({ status: alloyWorkflows.status }).from(alloyWorkflows).where(eq(alloyWorkflows.id, id)).limit(1);
@@ -600,8 +600,8 @@ export const alloyResolvers = {
 
     cancelAlloyWorkflow: async (_: unknown, args: { id: string; reason?: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { alloyWorkflows } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloyWorkflows } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const id = parseIntId(args.id);
         const [existing] = await db.select({ status: alloyWorkflows.status }).from(alloyWorkflows).where(eq(alloyWorkflows.id, id)).limit(1);
@@ -621,8 +621,8 @@ export const alloyResolvers = {
 
     retryAlloyWorkflow: async (_: unknown, args: { id: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { alloyWorkflows } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloyWorkflows } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const id = parseIntId(args.id);
         const [existing] = await db.select({ status: alloyWorkflows.status }).from(alloyWorkflows).where(eq(alloyWorkflows.id, id)).limit(1);
@@ -644,8 +644,8 @@ export const alloyResolvers = {
 
     requestAlloyApproval: async (_: unknown, args: { workflowId: string; reason?: string; reviewerUserId?: string; expiresInHours?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { alloyWorkflows, alloyApprovals } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloyWorkflows, alloyApprovals } = await import("@szl-holdings/db/schema");
         const { and, desc, eq } = await import("drizzle-orm");
         const workflowId = parseIntId(args.workflowId);
         const [existing] = await db.select({ status: alloyWorkflows.status }).from(alloyWorkflows).where(eq(alloyWorkflows.id, workflowId)).limit(1);
@@ -685,8 +685,8 @@ export const alloyResolvers = {
         const reviewerUserId = parseInt(args.reviewerUserId, 10);
         if (!reviewerUserId || isNaN(reviewerUserId)) throw new Error("reviewerUserId is required and must be a valid integer");
         // Validate the linked workflow is in waiting_approval state before reviewing
-        const { db } = await import("@workspace/db");
-        const { alloyApprovals, alloyWorkflows } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloyApprovals, alloyWorkflows } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const approvalId = parseIntId(args.approvalId);
         const [approval] = await db.select({ workflowId: alloyApprovals.workflowId, status: alloyApprovals.status }).from(alloyApprovals).where(eq(alloyApprovals.id, approvalId)).limit(1);
@@ -707,8 +707,8 @@ export const alloyResolvers = {
 
     runAlloyWorkflow: async (_: unknown, args: { workflowId: string; overrideApproval?: boolean }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { alloyWorkflows } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloyWorkflows } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const id = parseIntId(args.workflowId);
         const [existing] = await db.select({ status: alloyWorkflows.status }).from(alloyWorkflows).where(eq(alloyWorkflows.id, id)).limit(1);
@@ -730,8 +730,8 @@ export const alloyResolvers = {
         }
         const { advanceWorkflowStep } = await import("../../lib/alloy-orchestration.js");
         await advanceWorkflowStep(parseIntId(args.runId), args.stepNumber, args.result as "completed" | "failed", { error: args.error });
-        const { db } = await import("@workspace/db");
-        const { alloyWorkflowRuns } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloyWorkflowRuns } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const rows = await db.select().from(alloyWorkflowRuns).where(eq(alloyWorkflowRuns.id, parseIntId(args.runId))).limit(1);
         const run = rows[0];
@@ -752,8 +752,8 @@ export const alloyResolvers = {
 
     recordAlloyAction: async (_: unknown, args: { workflowId: string; type: string; description?: string; outcome?: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { alloyActions } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { alloyActions } = await import("@szl-holdings/db/schema");
         const actionType = coerceActionType(args.type);
         const rows = await db.insert(alloyActions).values({
           workflowId: parseIntId(args.workflowId),

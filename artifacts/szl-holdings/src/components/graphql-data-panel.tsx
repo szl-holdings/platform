@@ -1,4 +1,4 @@
-import { useHoldingsVentures } from "@workspace/graphql-client/hooks";
+import { useHoldingsVentures } from "@szl-holdings/graphql-client/hooks";
 
 export function HoldingsGraphQLPanel() {
   const { data, loading } = useHoldingsVentures({ limit: 5 });

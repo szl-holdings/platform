@@ -6,7 +6,7 @@ import {
   costBudgetsTable,
   costEventsTable,
   governanceIncidentsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { authMiddleware, requireRole, type AuthenticatedUser } from "../middlewares/auth";
 import {

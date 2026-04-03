@@ -14,7 +14,7 @@ import {
   naicsCodeMappingTable,
   auditLogsTable,
   featureFlagsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, sql, and, asc } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";

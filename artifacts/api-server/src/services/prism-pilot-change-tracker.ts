@@ -1,4 +1,4 @@
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import { logger } from "../lib/logger";
 import { eq, and, desc, gte, sql } from "drizzle-orm";
 import {
@@ -11,7 +11,7 @@ import {
   pcCommunicationsTable,
   pcReviewItemsTable,
   pcSignoffQueueTable,
-} from "@workspace/db/schema";
+} from "@szl-holdings/db/schema";
 
 export class PilotChangeTracker {
   async getChanges(orgId: number, matterId?: number, opts?: { since?: Date; limit?: number }) {

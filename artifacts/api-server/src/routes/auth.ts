@@ -1,11 +1,11 @@
 import { Router, type IRouter } from "express";
-import { db, usersTable, sessionsTable, rolesTable, userRolesTable, toCanonicalRole, type RoleName } from "@workspace/db";
+import { db, usersTable, sessionsTable, rolesTable, userRolesTable, toCanonicalRole, type RoleName } from "@szl-holdings/db";
 import { eq, desc, and } from "drizzle-orm";
 import { randomBytes } from "crypto";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendForbidden, sendError, handleRouteError } from "../lib/api-response";
 import { logActivity } from "../lib/activity-logger";
-import { createAuthService } from "@workspace/auth";
+import { createAuthService } from "@szl-holdings/auth";
 import { issueWsTicket } from "../lib/websocket.js";
 import { getSessionToken, getSessionUser } from "../lib/auth";
 

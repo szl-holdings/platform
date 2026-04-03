@@ -1,9 +1,9 @@
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   pcMattersTable, pcDeadlinesTable, pcForecastsTable, pcApprovalRequestsTable,
   pcAuditEventsTable, pcCommunicationsTable, pcReadinessScoresTable,
   pcConnectorAccountsTable, pcAiRecommendationsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import type { GraphQLContext } from "../index.js";
 
@@ -349,21 +349,21 @@ export const prismCounselResolvers = {
 
     pcForecastDiffs: async (_: unknown, { matterId }: { matterId: number }) => {
       try {
-        const { pcForecastDiffsTable } = await import("@workspace/db");
+        const { pcForecastDiffsTable } = await import("@szl-holdings/db");
         return await db.select().from(pcForecastDiffsTable).where(eq(pcForecastDiffsTable.matterId, matterId)).orderBy(desc(pcForecastDiffsTable.createdAt)).limit(20);
       } catch { return []; }
     },
 
     pcPressureDimensions: async (_: unknown, { matterId }: { matterId: number }) => {
       try {
-        const { pcPressureGraphDimensionsTable } = await import("@workspace/db");
+        const { pcPressureGraphDimensionsTable } = await import("@szl-holdings/db");
         return await db.select().from(pcPressureGraphDimensionsTable).where(eq(pcPressureGraphDimensionsTable.matterId, matterId)).orderBy(desc(pcPressureGraphDimensionsTable.computedAt)).limit(12);
       } catch { return []; }
     },
 
     pcProofChainEntries: async (_: unknown, { matterId }: { matterId: number }) => {
       try {
-        const { pcProofChainEntriesTable } = await import("@workspace/db");
+        const { pcProofChainEntriesTable } = await import("@szl-holdings/db");
         return await db.select().from(pcProofChainEntriesTable).where(eq(pcProofChainEntriesTable.matterId, matterId)).orderBy(desc(pcProofChainEntriesTable.generatedAt)).limit(50);
       } catch { return []; }
     },
@@ -397,7 +397,7 @@ export const prismCounselResolvers = {
 
     pcDataProductScores: async (_: unknown, { orgId, matterId }: { orgId: number; matterId?: number }) => {
       try {
-        const { pcDataProductScoresTable } = await import("@workspace/db");
+        const { pcDataProductScoresTable } = await import("@szl-holdings/db");
         const cond = matterId
           ? and(eq(pcDataProductScoresTable.orgId, orgId), eq(pcDataProductScoresTable.matterId, matterId))
           : eq(pcDataProductScoresTable.orgId, orgId);
@@ -407,7 +407,7 @@ export const prismCounselResolvers = {
 
     pcServiceMetrics: async (_: unknown, { orgId, service }: { orgId: number; service?: string }) => {
       try {
-        const { pcServiceMetricsTable } = await import("@workspace/db");
+        const { pcServiceMetricsTable } = await import("@szl-holdings/db");
         const cond = service
           ? and(eq(pcServiceMetricsTable.orgId, orgId), eq(pcServiceMetricsTable.service, service as any))
           : eq(pcServiceMetricsTable.orgId, orgId);

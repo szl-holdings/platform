@@ -9,7 +9,7 @@
  * - Actor attribution and resource context
  */
 
-import { db, alloyAuditLogTable } from "@workspace/db";
+import { db, alloyAuditLogTable } from "@szl-holdings/db";
 import type { Request } from "express";
 
 export type AdminActionClass =

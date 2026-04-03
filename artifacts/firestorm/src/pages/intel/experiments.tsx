@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { experiments, projects, type Experiment } from "@/data/seed-data";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { ExportButton } from "@workspace/shared-ui/data-export";
-import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
+import { ExportButton } from "@szl-holdings/shared-ui/data-export";
+import { CommentThread, ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 
 const statusColors: Record<string, string> = {
   running: "text-amber-400 bg-amber-400/10",

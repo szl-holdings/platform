@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
-import { db } from "@workspace/db";
-import { aiSafetyEvents, agentModelAssignments, agentUsageStats } from "@workspace/db";
+import { db } from "@szl-holdings/db";
+import { aiSafetyEvents, agentModelAssignments, agentUsageStats } from "@szl-holdings/db";
 import { eq, desc, and, gte, sql } from "drizzle-orm";
 import rateLimit from "express-rate-limit";
 import { AGENT_REGISTRY } from "./nuro-mesh.js";

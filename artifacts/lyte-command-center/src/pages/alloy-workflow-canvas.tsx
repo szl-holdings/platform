@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "@workspace/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui";
 import {
   Brain, Activity, Play, CheckCircle, AlertTriangle, Clock,
   RefreshCw, Zap, GitBranch, ArrowRight, Search,

@@ -1,4 +1,4 @@
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import { logger as _logger } from "./logger";
 import {
   alloySignals,
@@ -11,7 +11,7 @@ import {
   type InsertAlloyWorkflow,
   type InsertAlloyArtifact,
   type AlloySignal,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, and, gte, lte } from "drizzle-orm";
 
 // ─── Signal Normalization ─────────────────────────────────────────────────────

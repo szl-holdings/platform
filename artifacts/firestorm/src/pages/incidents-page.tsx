@@ -1,19 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { Card, CardContent } from "@workspace/shared-ui/ui/card";
-import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Button } from "@workspace/shared-ui/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@workspace/shared-ui/ui/dialog";
-import { Input } from "@workspace/shared-ui/ui/input";
-import { Label } from "@workspace/shared-ui/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/shared-ui/ui/select";
-import { Textarea } from "@workspace/shared-ui/ui/textarea";
+import { Card, CardContent } from "@szl-holdings/shared-ui/ui/card";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { Button } from "@szl-holdings/shared-ui/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@szl-holdings/shared-ui/ui/dialog";
+import { Input } from "@szl-holdings/shared-ui/ui/input";
+import { Label } from "@szl-holdings/shared-ui/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
+import { Textarea } from "@szl-holdings/shared-ui/ui/textarea";
 import { Plus, AlertTriangle, Shield, Clock, Users, Trash2, ArrowRight, FileText, Loader2, X, ChevronUp, ChevronDown } from "lucide-react";
-import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
+import { CommentThread, ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { useRealtimeChannel } from "@workspace/shared-ui";
-import { ExportButton } from "@workspace/shared-ui/data-export";
+import { useRealtimeChannel } from "@szl-holdings/shared-ui";
+import { ExportButton } from "@szl-holdings/shared-ui/data-export";
 import {
   OperationalDetailPane,
   OperationalStatusBadge,
@@ -28,7 +28,7 @@ import {
   type AuditHistoryEntry,
   type EvidenceItem,
   type EscalationPath,
-} from "@workspace/shared-ui/operational-primitives";
+} from "@szl-holdings/shared-ui/operational-primitives";
 
 async function downloadIncidentPDF(incident: Record<string, unknown>): Promise<void> {
   const res = await fetch("/api/documents/generate", {

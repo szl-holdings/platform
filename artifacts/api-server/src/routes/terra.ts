@@ -11,7 +11,7 @@ import {
   runCommercialDataRefresh,
   getEnterpriseFeatureFlags,
 } from "../lib/terra-enterprise-ingestion";
-import { services } from "@workspace/services";
+import { services } from "@szl-holdings/services";
 
 const router: IRouter = Router();
 

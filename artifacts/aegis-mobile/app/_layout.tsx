@@ -10,7 +10,7 @@ import {
   SpaceGrotesk_700Bold,
   useFonts as useSpaceFonts,
 } from "@expo-google-fonts/space-grotesk";
-import { setBaseUrl, setAuthTokenGetter } from "@workspace/api-client-react";
+import { setBaseUrl, setAuthTokenGetter } from "@szl-holdings/api-client-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";

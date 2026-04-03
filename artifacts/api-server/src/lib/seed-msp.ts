@@ -1,11 +1,11 @@
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   mspClientsTable,
   mspTechniciansTable,
   mspTicketsTable,
   mspDevicesTable,
   mspContractsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { sql } from "drizzle-orm";
 import { logger } from "./logger";
 

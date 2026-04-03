@@ -1,4 +1,4 @@
-import { WORKFLOWS, APPROVALS, EXECUTION_RUNS, formatCurrency, getStateColor } from "@workspace/shared-ui/core-observability-data";
+import { WORKFLOWS, APPROVALS, EXECUTION_RUNS, formatCurrency, getStateColor } from "@szl-holdings/shared-ui/core-observability-data";
 import { Wrench, MessageSquare, RotateCcw, ArrowUpRight, CheckCircle, XCircle, Clock, ExternalLink } from "lucide-react";
 import { useState } from "react";
 

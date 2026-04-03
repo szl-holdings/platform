@@ -1,7 +1,7 @@
 import { logger } from "./logger";
 import { jobQueue } from "./job-queue";
-import { db } from "@workspace/db";
-import { auditLogsTable } from "@workspace/db";
+import { db } from "@szl-holdings/db";
+import { auditLogsTable } from "@szl-holdings/db";
 import {
   startIngestionRun,
   completeIngestionRun,
@@ -12,7 +12,7 @@ import {
   mapCountyFromBorough,
   classifyDistressType,
 } from "./terra-distress-service";
-import type { InsertTerraDistressProperty } from "@workspace/db";
+import type { InsertTerraDistressProperty } from "@szl-holdings/db";
 
 async function writeAuditLog(
   actionType: string,

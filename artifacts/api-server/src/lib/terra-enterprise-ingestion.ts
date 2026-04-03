@@ -1,5 +1,5 @@
 import { logger } from "./logger";
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   terraMlsListingsTable,
   terraCommercialPropertiesTable,
@@ -8,8 +8,8 @@ import {
   type InsertTerraMlsListing,
   type InsertTerraCommercialProperty,
   type InsertTerraCommercialComp,
-} from "@workspace/db";
-import { services } from "@workspace/services";
+} from "@szl-holdings/db";
+import { services } from "@szl-holdings/services";
 import { eq, and, ilike, desc, gte } from "drizzle-orm";
 import { startIngestionRun, completeIngestionRun } from "./terra-distress-service";
 

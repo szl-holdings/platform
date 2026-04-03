@@ -39,7 +39,7 @@ import {
   type ExtractedEntities,
   type AlloyDecision,
   type RiskLevel,
-} from "@workspace/ai-engine";
+} from "@szl-holdings/ai-engine";
 
 function getOrgId(user?: AuthenticatedUser): number | null {
   return user?.orgs?.[0]?.orgId ?? null;

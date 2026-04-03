@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useStepUp } from "@/lib/use-step-up";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import {
   Play, Pause, CheckCircle2, XCircle, Clock, AlertTriangle, Shield,
   ChevronRight, ChevronDown, RotateCcw, ShieldOff, Zap, Lock, Eye,

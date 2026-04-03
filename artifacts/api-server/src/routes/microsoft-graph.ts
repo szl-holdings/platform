@@ -2,7 +2,7 @@ import { Router, type IRouter, type Request, type Response, type RequestHandler 
 import rateLimit from "express-rate-limit";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
-import { services } from "@workspace/services";
+import { services } from "@szl-holdings/services";
 
 const router: IRouter = Router();
 

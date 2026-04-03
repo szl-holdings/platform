@@ -14,11 +14,11 @@
 
 import type { Request, Response, NextFunction } from "express";
 import crypto from "crypto";
-import { db, sessionsTable, usersTable, auditEventsTable, userRolesTable, rolesTable } from "@workspace/db";
+import { db, sessionsTable, usersTable, auditEventsTable, userRolesTable, rolesTable } from "@szl-holdings/db";
 import { eq, and, gt, desc } from "drizzle-orm";
 import { SESSION_COOKIE, SESSION_TTL, setSessionCookie } from "../lib/auth";
 import { logger } from "../lib/logger";
-import type { RoleName } from "@workspace/db";
+import type { RoleName } from "@szl-holdings/db";
 import type { AuthenticatedUser } from "./auth";
 
 export const SESSION_REFRESH_WINDOW = 24 * 60 * 60 * 1000;

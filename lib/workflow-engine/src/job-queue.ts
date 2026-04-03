@@ -1,5 +1,5 @@
 import { logger } from "./logger.js";
-import { serverTelemetry } from "@workspace/observability";
+import { serverTelemetry } from "@szl-holdings/observability";
 
 export type JobStatus = "pending" | "running" | "completed" | "failed";
 

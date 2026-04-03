@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { db, featureFlagsTable } from "@workspace/db";
+import { db, featureFlagsTable } from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
 
 const flagCache = new Map<string, { value: boolean; expiresAt: number }>();

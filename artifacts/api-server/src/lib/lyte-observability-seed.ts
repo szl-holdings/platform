@@ -6,7 +6,7 @@ import {
   lyteAlertEventsTable,
   lyteEscalationsTable,
   lyteSignalsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { sql } from "drizzle-orm";
 
 const SERVICES = [

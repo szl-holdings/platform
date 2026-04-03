@@ -3,7 +3,7 @@ import {
   Shield, CheckCircle, X, AlertTriangle, MessageSquare,
   ChevronRight, ArrowUpRight, Download, Anchor
 } from "lucide-react";
-import { EmptyState } from "@workspace/shared-ui";
+import { EmptyState } from "@szl-holdings/shared-ui";
 import { voyageTwins, type VoyageApproval } from "@/data/fleet-twin";
 
 const ACCENT = "hsl(205 70% 50%)";

@@ -3,61 +3,61 @@ export {
   type ServiceStatus,
   type ServiceHealthReport,
   type ConnectionTestResult,
-} from "@workspace/services";
+} from "@szl-holdings/services";
 
 export {
   ServiceRegistry,
   services as ConnectorRegistry,
   type IntegrationHealthMatrix,
-} from "@workspace/services";
+} from "@szl-holdings/services";
 
 export {
   resolveProviderMode,
   createProvider,
   type ProviderMode,
   type DataProvider,
-} from "@workspace/services";
+} from "@szl-holdings/services";
 
 export {
   AIAdapter,
   type ChatMessage,
   type ChatCompletionResult,
-} from "@workspace/services";
-export { WeatherAdapter, type WeatherConditions, type WeatherForecastDay } from "@workspace/services";
-export { ShippingAdapter, type VesselPosition, type PortInfo } from "@workspace/services";
-export { StripeAdapter, type StripeConnectionStatus, type StripeProduct } from "@workspace/services";
-export { SlackAdapter, type SlackMessageResult } from "@workspace/services";
-export { TwilioAdapter, type SMSResult } from "@workspace/services";
-export { GoogleAdapter, type GoogleAuthStatus } from "@workspace/services";
-export { NotionAdapter, type NotionPage, type NotionDatabase } from "@workspace/services";
-export { StorageAdapter, type UploadResult, type StoredFile } from "@workspace/services";
-export { MonitoringAdapter, type ErrorReport, type AnalyticsEvent } from "@workspace/services";
-export { GitHubAdapter, type GitHubRepo, type GitHubWebhookEvent } from "@workspace/services";
-export { GoogleCalendarAdapter, type CalendarEvent } from "@workspace/services";
-export { GoogleDocsAdapter, type GoogleDoc } from "@workspace/services";
-export { GoogleDriveAdapter, type DriveFile } from "@workspace/services";
-export { DropboxAdapter, type DropboxFile } from "@workspace/services";
-export { OneDriveAdapter, type OneDriveFile } from "@workspace/services";
-export { StormGlassAdapter, type MarineWeather } from "@workspace/services";
-export { PostHogAdapter, type PostHogEvent, type PostHogInsight } from "@workspace/services";
-export { GmailAdapter, type GmailMessage } from "@workspace/services";
-export { ConfluenceAdapter, type ConfluencePage } from "@workspace/services";
-export { HubSpotAdapter, type HubSpotContact, type HubSpotDeal } from "@workspace/services";
-export { ElevenLabsAdapter, type ElevenLabsVoice, type TTSResult } from "@workspace/services";
-export { FigmaAdapter, type FigmaFile, type FigmaProject } from "@workspace/services";
-export { CisaAdapter, type CisaKevEntry, type MitreAttackTechnique } from "@workspace/services";
-export { ArxivAdapter, type ArxivPaper } from "@workspace/services";
-export { AbuseIPDBAdapter, type IpReputationResult } from "@workspace/services";
-export { NOAAAdapter } from "@workspace/services";
-export { NVDAdapter } from "@workspace/services";
-export { BLSAdapter } from "@workspace/services";
-export { WorldBankAdapter } from "@workspace/services";
-export { OpenMeteoAdapter } from "@workspace/services";
-export { MITREAdapter } from "@workspace/services";
-export { GDELTAdapter } from "@workspace/services";
-export { ResoMlsAdapter, type MlsListing, type ODataQueryParams, type MlsIncrementalSyncResult } from "@workspace/services";
-export { CoStarAdapter, type CoStarProperty, type CoStarMarketStats, type CoStarSaleComp } from "@workspace/services";
-export { CompStakAdapter, type CompStakLeaseComp, type CompStakSaleComp, type CompStakPropertyDetail } from "@workspace/services";
+} from "@szl-holdings/services";
+export { WeatherAdapter, type WeatherConditions, type WeatherForecastDay } from "@szl-holdings/services";
+export { ShippingAdapter, type VesselPosition, type PortInfo } from "@szl-holdings/services";
+export { StripeAdapter, type StripeConnectionStatus, type StripeProduct } from "@szl-holdings/services";
+export { SlackAdapter, type SlackMessageResult } from "@szl-holdings/services";
+export { TwilioAdapter, type SMSResult } from "@szl-holdings/services";
+export { GoogleAdapter, type GoogleAuthStatus } from "@szl-holdings/services";
+export { NotionAdapter, type NotionPage, type NotionDatabase } from "@szl-holdings/services";
+export { StorageAdapter, type UploadResult, type StoredFile } from "@szl-holdings/services";
+export { MonitoringAdapter, type ErrorReport, type AnalyticsEvent } from "@szl-holdings/services";
+export { GitHubAdapter, type GitHubRepo, type GitHubWebhookEvent } from "@szl-holdings/services";
+export { GoogleCalendarAdapter, type CalendarEvent } from "@szl-holdings/services";
+export { GoogleDocsAdapter, type GoogleDoc } from "@szl-holdings/services";
+export { GoogleDriveAdapter, type DriveFile } from "@szl-holdings/services";
+export { DropboxAdapter, type DropboxFile } from "@szl-holdings/services";
+export { OneDriveAdapter, type OneDriveFile } from "@szl-holdings/services";
+export { StormGlassAdapter, type MarineWeather } from "@szl-holdings/services";
+export { PostHogAdapter, type PostHogEvent, type PostHogInsight } from "@szl-holdings/services";
+export { GmailAdapter, type GmailMessage } from "@szl-holdings/services";
+export { ConfluenceAdapter, type ConfluencePage } from "@szl-holdings/services";
+export { HubSpotAdapter, type HubSpotContact, type HubSpotDeal } from "@szl-holdings/services";
+export { ElevenLabsAdapter, type ElevenLabsVoice, type TTSResult } from "@szl-holdings/services";
+export { FigmaAdapter, type FigmaFile, type FigmaProject } from "@szl-holdings/services";
+export { CisaAdapter, type CisaKevEntry, type MitreAttackTechnique } from "@szl-holdings/services";
+export { ArxivAdapter, type ArxivPaper } from "@szl-holdings/services";
+export { AbuseIPDBAdapter, type IpReputationResult } from "@szl-holdings/services";
+export { NOAAAdapter } from "@szl-holdings/services";
+export { NVDAdapter } from "@szl-holdings/services";
+export { BLSAdapter } from "@szl-holdings/services";
+export { WorldBankAdapter } from "@szl-holdings/services";
+export { OpenMeteoAdapter } from "@szl-holdings/services";
+export { MITREAdapter } from "@szl-holdings/services";
+export { GDELTAdapter } from "@szl-holdings/services";
+export { ResoMlsAdapter, type MlsListing, type ODataQueryParams, type MlsIncrementalSyncResult } from "@szl-holdings/services";
+export { CoStarAdapter, type CoStarProperty, type CoStarMarketStats, type CoStarSaleComp } from "@szl-holdings/services";
+export { CompStakAdapter, type CompStakLeaseComp, type CompStakSaleComp, type CompStakPropertyDetail } from "@szl-holdings/services";
 export {
   SalesforceAdapter,
   type SalesforceAccount,
@@ -70,7 +70,7 @@ export {
   type SalesforceQueryResult,
   type SalesforceConnectionStatus,
   type SalesforcePipelineHealth,
-} from "@workspace/services";
+} from "@szl-holdings/services";
 export {
   JiraAdapter,
   type JiraProject,
@@ -80,7 +80,7 @@ export {
   type JiraSignal,
   type JiraWebhookEvent,
   type JiraConnectionStatus,
-} from "@workspace/services";
+} from "@szl-holdings/services";
 export {
   HuggingFaceAdapter,
   type HFTextGenerationResult,
@@ -100,7 +100,7 @@ export {
   type HFTranscriptionResult,
   type HFReasoningResult,
   type ModelTier,
-} from "@workspace/services";
+} from "@szl-holdings/services";
 
 export {
   azureKeyVault,
@@ -110,7 +110,7 @@ export {
   azureAppInsights,
   getAzureStatus,
   type AzureServiceConfig,
-} from "@workspace/services";
+} from "@szl-holdings/services";
 
 export {
   Dynamics365Adapter,
@@ -121,7 +121,7 @@ export {
   type DynamicsCase,
   type DynamicsActivity,
   type DynamicsSyncSignal,
-} from "@workspace/services";
+} from "@szl-holdings/services";
 
 export {
   SharePointSPFxAdapter,
@@ -130,7 +130,7 @@ export {
   type SPFxSiteInfo,
   type SPFxDeploymentStatus,
   type SPFxDeployedPackage,
-} from "@workspace/services";
+} from "@szl-holdings/services";
 
 export {
   vesselsMockProvider,
@@ -152,4 +152,4 @@ export {
   type AIBriefing,
   type PredictiveMaintenance,
   type ForecastModule,
-} from "@workspace/services";
+} from "@szl-holdings/services";

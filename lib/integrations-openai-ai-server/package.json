@@ -1,7 +1,16 @@
 {
-  "name": "@workspace/integrations-openai-ai-server",
+  "name": "@szl-holdings/integrations-openai-ai-server",
   "version": "0.0.0",
-  "private": true,
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szl-holdings/szl-holdings-platform.git",
+    "directory": "lib/integrations-openai-ai-server"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
   "type": "module",
   "exports": {
     ".": "./src/index.ts",

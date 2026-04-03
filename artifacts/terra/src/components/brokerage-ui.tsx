@@ -1,4 +1,4 @@
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { AlertTriangle, CheckCircle, Clock, TrendingUp, Shield, Zap, XCircle } from "lucide-react";
 
 export function RiskBadge({ level, className }: { level: "low" | "medium" | "high" | "critical" | string; className?: string }) {

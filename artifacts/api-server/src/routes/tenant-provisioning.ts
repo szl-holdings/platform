@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit";
 import crypto from "crypto";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole } from "../middlewares/auth";
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   azureTenantsTable,
   auditLogsTable,
@@ -17,9 +17,9 @@ import {
   type InsertAzureTenant,
   type InsertDataverseConnection,
   type InsertTenantBranding,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, and, count, sql, inArray } from "drizzle-orm";
-import { services } from "@workspace/services";
+import { services } from "@szl-holdings/services";
 import { encryptSecret, decryptSecret } from "../lib/crypto";
 
 const router: IRouter = Router();

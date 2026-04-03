@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import { sql } from "drizzle-orm";
 import os from "os";
 

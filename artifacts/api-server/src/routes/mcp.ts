@@ -1,10 +1,10 @@
 import { Router, type Request, type Response } from "express";
-import { db, alloyWorkflowsTable, alloyWorkflowRunsTable, alloyArtifactsTable, alloyDecisions, alloySkills, alloySkillRuns, alloyAuditLogTable } from "@workspace/db";
+import { db, alloyWorkflowsTable, alloyWorkflowRunsTable, alloyArtifactsTable, alloyDecisions, alloySkills, alloySkillRuns, alloyAuditLogTable } from "@szl-holdings/db";
 import { eq, desc, and, inArray } from "drizzle-orm";
 import { authMiddleware, requireRole, type AuthenticatedUser } from "../middlewares/auth";
 import { logger } from "../lib/logger";
 import { AGENT_CONFIGS } from "./domain-agents/configs";
-import { logActivity } from "@workspace/audit";
+import { logActivity } from "@szl-holdings/audit";
 
 const router = Router();
 

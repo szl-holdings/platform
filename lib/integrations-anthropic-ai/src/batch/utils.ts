@@ -9,8 +9,8 @@ import pRetry, { AbortError as PRetryAbortError } from "p-retry";
  *
  * USAGE:
  * ```typescript
- * import { batchProcess } from "@workspace/integrations-anthropic-ai/batch";
- * import { anthropic } from "@workspace/integrations-anthropic-ai";
+ * import { batchProcess } from "@szl-holdings/integrations-anthropic-ai/batch";
+ * import { anthropic } from "@szl-holdings/integrations-anthropic-ai";
  *
  * const results = await batchProcess(
  *   artworks,

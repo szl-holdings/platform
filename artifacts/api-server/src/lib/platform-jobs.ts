@@ -1,7 +1,7 @@
 import { logger } from "./logger";
 import { jobQueue, JOB_TYPES } from "./job-queue";
-import { serverTelemetry } from "@workspace/observability";
-import { db, pool, platformJobRunsTable } from "@workspace/db";
+import { serverTelemetry } from "@szl-holdings/observability";
+import { db, pool, platformJobRunsTable } from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -573,7 +573,7 @@ jobQueue.register(PLATFORM_JOB_TYPES.SALESFORCE_OPPORTUNITY_SYNC, async (job) =>
       return;
     }
 
-    const { services } = await import("@workspace/services");
+    const { services } = await import("@szl-holdings/services");
     const adapter = services.salesforce;
 
     const opportunities = await adapter.queryOpportunities(100);
@@ -582,7 +582,7 @@ jobQueue.register(PLATFORM_JOB_TYPES.SALESFORCE_OPPORTUNITY_SYNC, async (job) =>
     const signals = await adapter.ingestSignals();
     signalsGenerated = signals.length;
 
-    const { db, alloySignalsTable, insertAlloySignalSchema } = await import("@workspace/db");
+    const { db, alloySignalsTable, insertAlloySignalSchema } = await import("@szl-holdings/db");
     for (const signal of signals) {
       try {
         const data = insertAlloySignalSchema.parse({
@@ -647,7 +647,7 @@ jobQueue.register(PLATFORM_JOB_TYPES.JIRA_SPRINT_HEALTH_SCAN, async (job) => {
       return;
     }
 
-    const { services } = await import("@workspace/services");
+    const { services } = await import("@szl-holdings/services");
     const adapter = services.jira;
 
     const sprints = await adapter.getActiveSprints();
@@ -658,7 +658,7 @@ jobQueue.register(PLATFORM_JOB_TYPES.JIRA_SPRINT_HEALTH_SCAN, async (job) => {
     const signals = await adapter.ingestSignals();
     signalsGenerated = signals.length;
 
-    const { db, alloySignalsTable, insertAlloySignalSchema } = await import("@workspace/db");
+    const { db, alloySignalsTable, insertAlloySignalSchema } = await import("@szl-holdings/db");
     for (const signal of signals) {
       try {
         const data = insertAlloySignalSchema.parse({

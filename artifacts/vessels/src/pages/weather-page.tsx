@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
-import { Badge } from "@workspace/shared-ui/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { CloudRain, Wind, Eye, Thermometer, Waves, AlertTriangle, Cloud, Sun, Snowflake, CloudLightning, MapPin } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { LiveDataBadge } from "@/lib/live-badge";

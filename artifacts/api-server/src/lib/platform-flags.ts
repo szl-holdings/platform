@@ -1,4 +1,4 @@
-import { db, featureFlagsTable, featureFlagOverridesTable } from "@workspace/db";
+import { db, featureFlagsTable, featureFlagOverridesTable } from "@szl-holdings/db";
 import { eq, and } from "drizzle-orm";
 import { logger } from "./logger";
 

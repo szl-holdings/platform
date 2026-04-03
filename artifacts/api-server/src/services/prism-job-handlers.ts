@@ -1,4 +1,4 @@
-import { db, pcDeadlinesTable, pcNotificationsTable, pcExportsTable, pcMattersTable, pcAuditEventsTable } from "@workspace/db";
+import { db, pcDeadlinesTable, pcNotificationsTable, pcExportsTable, pcMattersTable, pcAuditEventsTable } from "@szl-holdings/db";
 import { eq, and, lte, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
 import { registerPrismJobHandler, PRISM_JOB_TYPES } from "./prism-queue";

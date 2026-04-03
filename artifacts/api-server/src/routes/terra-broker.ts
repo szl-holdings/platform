@@ -2,7 +2,7 @@ import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   terraListingsTable,
   terraAgentsTable,
@@ -10,7 +10,7 @@ import {
   terraInquiriesTable,
   terraTransactionsTable,
   terraPropertiesTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, and, or, ilike, sql, asc, gte, lte } from "drizzle-orm";
 import { z } from "zod";
 

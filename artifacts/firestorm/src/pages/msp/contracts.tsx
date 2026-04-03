@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { FileText, Calendar, AlertTriangle, CheckCircle2, Clock, DollarSign, Shield, Search, Filter, RefreshCw } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "@workspace/shared-ui/ui/skeleton";
+import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string): Promise<T> {

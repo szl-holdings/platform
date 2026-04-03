@@ -1,4 +1,4 @@
-import { db, activityLogTable, auditEventsTable, auditLogsTable } from "@workspace/db";
+import { db, activityLogTable, auditEventsTable, auditLogsTable } from "@szl-holdings/db";
 import { desc, eq, and, like } from "drizzle-orm";
 import type { Request, Response, NextFunction } from "express";
 

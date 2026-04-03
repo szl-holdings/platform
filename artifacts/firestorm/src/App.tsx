@@ -1,11 +1,11 @@
 import { lazy, Suspense, useState, useEffect, useCallback } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
-import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
-import { DemoModeProvider, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig, SandboxModeProvider, SandboxModeBanner } from "@workspace/shared-ui";
-import { McpOverlay } from "@workspace/mcp-client";
+import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
+import { DemoModeProvider, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig, SandboxModeProvider, SandboxModeBanner } from "@szl-holdings/shared-ui";
+import { McpOverlay } from "@szl-holdings/mcp-client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@workspace/shared-ui/ui/sonner";
-import { UserButton } from "@workspace/shared-ui/UserButton";
+import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
+import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 import {
   Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Bell, Grid3X3,
   ClipboardCheck, Search, Rss, Layers, Users, ShieldCheck,
@@ -15,15 +15,15 @@ import {
   Database, Trophy, Boxes, GitBranch, Link2, Flame, Menu, X, ChevronDown,
   Hexagon, Zap, Briefcase, Globe
 } from "lucide-react";
-import { AgentCopilot } from "@workspace/shared-ui/copilot";
-import { sentinelConfig } from "@workspace/shared-ui/copilot-configs";
-import { cn } from "@workspace/shared-ui/utils";
-import { toAlpha } from "@workspace/shared-ui/utils";
-import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
-import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
+import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
+import { sentinelConfig } from "@szl-holdings/shared-ui/copilot-configs";
+import { cn } from "@szl-holdings/shared-ui/utils";
+import { toAlpha } from "@szl-holdings/shared-ui/utils";
+import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
+import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
 import { PackBanner } from "@/components/pack-banner";
-import { LANE_ACCENT_HEX } from "@workspace/shared-ui/lane-colors";
-import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardShell } from "@workspace/shared-ui/design-system";
+import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
+import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
 
 const AEGIS_ACCENT = LANE_ACCENT_HEX.aegis.primary;
 

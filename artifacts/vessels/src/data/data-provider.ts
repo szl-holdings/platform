@@ -1,4 +1,4 @@
-import { apiFetch } from "@workspace/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui";
 import type {
   VesselProfile,
   MaintenanceLog,

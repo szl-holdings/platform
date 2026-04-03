@@ -1,6 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import { logger } from "../lib/logger";
-import { serverTelemetry } from "@workspace/observability";
+import { serverTelemetry } from "@szl-holdings/observability";
 
 const analyticsRouter = Router();
 

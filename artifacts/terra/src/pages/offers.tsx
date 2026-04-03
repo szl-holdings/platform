@@ -3,7 +3,7 @@ import { useState } from "react";
 import { DollarSign, Clock, CheckCircle, AlertTriangle, ArrowLeftRight } from "lucide-react";
 import { offers, type Offer } from "@/data/brokerage";
 import { RiskBadge, ApprovalChip, formatCurrency, ConfidenceBadge } from "@/components/brokerage-ui";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 function timeUntil(dateStr: string) {
   const diff = new Date(dateStr).getTime() - Date.now();

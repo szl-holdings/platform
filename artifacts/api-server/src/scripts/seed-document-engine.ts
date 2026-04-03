@@ -16,7 +16,7 @@ import {
   contentLibraryBlocksTable,
   documentsTable,
   signaturesTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 

@@ -1,5 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { db, pool } from "@workspace/db";
+import { db, pool } from "@szl-holdings/db";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
 import { authMiddleware } from "../middlewares/authMiddleware";

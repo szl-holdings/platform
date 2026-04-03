@@ -1,5 +1,5 @@
 import { type Request, type Response, type NextFunction } from "express";
-import { logger } from "@workspace/workflow-engine";
+import { logger } from "@szl-holdings/workflow-engine";
 
 export const PRISM_ROLES = {
   FOUNDER_ADMIN: "founder_admin",

@@ -1,7 +1,16 @@
 {
-  "name": "@workspace/worldline",
+  "name": "@szl-holdings/worldline",
   "version": "0.0.0",
-  "private": true,
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szl-holdings/szl-holdings-platform.git",
+    "directory": "lib/worldline"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
   "type": "module",
   "exports": {
     ".": {
@@ -10,7 +19,7 @@
     }
   },
   "dependencies": {
-    "@workspace/db": "workspace:*",
+    "@szl-holdings/db": "workspace:*",
     "drizzle-orm": "catalog:",
     "zod": "catalog:"
   },

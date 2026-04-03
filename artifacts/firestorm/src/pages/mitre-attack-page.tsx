@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { Badge } from "@workspace/shared-ui/ui/badge";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Grid3X3, Shield, AlertTriangle, Eye, Target, Activity, ChevronRight, X } from "lucide-react";
 import { useState } from "react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const tactics = [
   { id: "TA0001", name: "Initial Access", shortName: "Initial Access", techniques: ["T1566.001", "T1190", "T1133", "T1078", "T1195.002", "T1189"] },

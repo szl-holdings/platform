@@ -1,4 +1,4 @@
-import { pool } from "@workspace/db";
+import { pool } from "@szl-holdings/db";
 import { logger } from "./logger";
 
 const GOVERNANCE_STATEMENTS = [

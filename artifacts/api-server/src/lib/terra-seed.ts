@@ -1,4 +1,4 @@
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   terraBrokeragesTable,
   terraAgentsTable,
@@ -7,7 +7,7 @@ import {
   terraInquiriesTable,
   terraTransactionsTable,
   featureFlagsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { sql, eq } from "drizzle-orm";
 
 export async function seedTerraDemo() {

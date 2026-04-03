@@ -18,7 +18,7 @@ import {
   firestormFindingsTable,
   carlotaInquiriesTable,
   carlotaReservationsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, ilike, or, sql, count } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError, sendBadRequest, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";

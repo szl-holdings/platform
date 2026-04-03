@@ -3,7 +3,7 @@ import { pilotIngestion } from "../services/prism-pilot-ingestion";
 import { pilotChangeTracker } from "../services/prism-pilot-change-tracker";
 import { pilotReview, pilotSignoff } from "../services/prism-pilot-review";
 import { pilotExport } from "../services/prism-pilot-export";
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import { eq, and, desc, gte, sql } from "drizzle-orm";
 import {
   pcMattersTable,
@@ -18,7 +18,7 @@ import {
   pcMatterDeskSnapshotsTable,
   pcForecastsTable,
   pcConnectorAccountsTable,
-} from "@workspace/db/schema";
+} from "@szl-holdings/db/schema";
 import { logger } from "../lib/logger";
 
 const router = Router();

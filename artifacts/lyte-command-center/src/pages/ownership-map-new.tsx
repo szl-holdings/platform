@@ -1,4 +1,4 @@
-import { WORKFLOWS, APPROVALS, formatCurrency, getStateColor } from "@workspace/shared-ui/core-observability-data";
+import { WORKFLOWS, APPROVALS, formatCurrency, getStateColor } from "@szl-holdings/shared-ui/core-observability-data";
 import { Users, AlertTriangle, User, ArrowRight } from "lucide-react";
 
 interface OwnerRecord {

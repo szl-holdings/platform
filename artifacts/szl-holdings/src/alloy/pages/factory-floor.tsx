@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch, DataStateBadge, isAuthError, DataProvenance, ActionLoop, RoleSelector } from "@workspace/shared-ui";
-import type { DataProvenanceInfo } from "@workspace/shared-ui";
+import { apiFetch, DataStateBadge, isAuthError, DataProvenance, ActionLoop, RoleSelector } from "@szl-holdings/shared-ui";
+import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
 import { Activity, CheckCircle, XCircle, Clock, AlertTriangle, ChevronRight, Zap, TrendingUp, Timer } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";

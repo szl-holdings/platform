@@ -1,5 +1,5 @@
-import { db } from "@workspace/db";
-import { pcCopilotSessionsTable, pcCopilotMessagesTable, pcProofChainEntriesTable } from "@workspace/db/schema";
+import { db } from "@szl-holdings/db";
+import { pcCopilotSessionsTable, pcCopilotMessagesTable, pcProofChainEntriesTable } from "@szl-holdings/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { logger } from "../lib/logger";
 import { modelRouter } from "./prism-model-router";

@@ -1,6 +1,6 @@
-import { pool } from "@workspace/db";
+import { pool } from "@szl-holdings/db";
 import { logger } from "./logger";
-import type { AlloyDecision } from "@workspace/ai-engine";
+import type { AlloyDecision } from "@szl-holdings/ai-engine";
 
 const BOOTSTRAP_SQL = `
 CREATE TABLE IF NOT EXISTS alloy_ai_decisions (

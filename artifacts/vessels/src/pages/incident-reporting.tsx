@@ -1,6 +1,6 @@
 import { useState, type ElementType } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
-import { Badge } from "@workspace/shared-ui/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { AlertTriangle, MapPin, Clock, Shield, Anchor, Skull, Bomb, Flag, ChevronRight } from "lucide-react";
 
 const regions = [

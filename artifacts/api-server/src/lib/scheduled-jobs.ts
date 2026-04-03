@@ -1,6 +1,6 @@
 import { logger } from "./logger";
 import { jobQueue, JOB_TYPES } from "./job-queue";
-import { serverTelemetry } from "@workspace/observability";
+import { serverTelemetry } from "@szl-holdings/observability";
 
 export const NAMED_JOB_TYPES = {
   DAILY_LYTE_DIGEST: "daily_lyte_digest",
@@ -129,7 +129,7 @@ jobQueue.register(NAMED_JOB_TYPES.DAILY_FEATURE_FLAG_SYNC, async (job) => {
 // Scans for documents with status "approved" that have no completed PDF export,
 // creates a scheduled batch, and enqueues them for rendering.
 jobQueue.register(NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, async (job) => {
-  const { db, documentsTable, pdfBatchesTable, pdfJobsTable } = await import("@workspace/db");
+  const { db, documentsTable, pdfBatchesTable, pdfJobsTable } = await import("@szl-holdings/db");
   const { eq } = await import("drizzle-orm");
   const { randomUUID } = await import("crypto");
 

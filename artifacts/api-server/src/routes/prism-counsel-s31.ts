@@ -6,8 +6,8 @@ import { pressureGraph } from "../services/prism-pressure-graph";
 import { proofChain } from "../services/prism-proof-chain";
 import { matterTwin } from "../services/prism-matter-twin";
 import { copilotWorkbench } from "../services/prism-copilot-workbench";
-import { db } from "@workspace/db";
-import { pcModelLanesTable, pcCostTrackingTable, pcForecastDiffsTable, pcM365SubscriptionsTable, pcM365DeltaCursorsTable } from "@workspace/db/schema";
+import { db } from "@szl-holdings/db";
+import { pcModelLanesTable, pcCostTrackingTable, pcForecastDiffsTable, pcM365SubscriptionsTable, pcM365DeltaCursorsTable } from "@szl-holdings/db/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
 

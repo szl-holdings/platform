@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { useAuth } from "@workspace/replit-auth-web";
+import { useAuth } from "@szl-holdings/replit-auth-web";
 
 export interface AuthGateProps {
   children?: ReactNode;

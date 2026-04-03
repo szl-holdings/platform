@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { Card, CardContent } from "@workspace/shared-ui/ui/card";
-import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Progress } from "@workspace/shared-ui/ui/progress";
+import { Card, CardContent } from "@szl-holdings/shared-ui/ui/card";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { Progress } from "@szl-holdings/shared-ui/ui/progress";
 import { BarChart3, Shield, TrendingUp, TrendingDown, AlertTriangle, Minus, Gauge } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 

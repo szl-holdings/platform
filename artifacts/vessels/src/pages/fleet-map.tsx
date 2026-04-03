@@ -6,15 +6,15 @@ import { type VesselProfile } from "@/data/mock-data";
 import { useVessels, useFleetExceptions } from "@/hooks/use-vessels-data";
 import { useMapboxToken } from "@/hooks/use-mapbox-token";
 import { useQuery } from "@tanstack/react-query";
-import { Badge } from "@workspace/shared-ui/ui/badge";
-import { SectionErrorBoundary } from "@workspace/shared-ui/error-boundary";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
 import { toast } from "sonner";
 import {
   X, Ship, MapPin, Radio, Navigation, Clock, Filter, ChevronRight,
   AlertTriangle, Anchor, Wrench, Activity, TrendingUp, TrendingDown, Layers, Play, Pause
 } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
-import { useRealtimeChannel } from "@workspace/shared-ui";
+import { cn } from "@szl-holdings/shared-ui/utils";
+import { useRealtimeChannel } from "@szl-holdings/shared-ui";
 import { useQueryClient } from "@tanstack/react-query";
 
 const statusColors: Record<string, string> = {

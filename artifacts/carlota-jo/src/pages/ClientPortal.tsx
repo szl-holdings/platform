@@ -5,8 +5,8 @@ import {
   CheckCircle2, Clock, ArrowRight, Download, Eye, Upload, CreditCard, Lock
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useAuth } from "@workspace/replit-auth-web";
-import { useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
+import { useAuth } from "@szl-holdings/replit-auth-web";
+import { useRealtimeChannel, RealtimeStatusIndicator } from "@szl-holdings/shared-ui";
 
 const portalNav = [
   { label: "Overview", href: "/client-portal", icon: LayoutDashboard },

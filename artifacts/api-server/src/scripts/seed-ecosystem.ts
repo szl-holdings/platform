@@ -1,4 +1,4 @@
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   terraDistressPropertiesTable,
   firestormAssessmentsTable,
@@ -7,7 +7,7 @@ import {
   platformJobRunsTable,
   recommendationsTable,
   type InsertTerraDistressProperty,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 

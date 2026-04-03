@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "@workspace/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui";
 import { useLocation } from "wouter";
 import {
   Zap, Activity, GitBranch, Shield, Radio, Bell, RefreshCw,

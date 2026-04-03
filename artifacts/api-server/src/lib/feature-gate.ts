@@ -1,4 +1,4 @@
-import { db, entitlementsTable, usageEventsTable, subscriptionsTable } from "@workspace/db";
+import { db, entitlementsTable, usageEventsTable, subscriptionsTable } from "@szl-holdings/db";
 import { eq, and, sql } from "drizzle-orm";
 
 export interface FeatureGateResult {

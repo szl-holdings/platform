@@ -1,5 +1,5 @@
-import { WORKFLOWS, APPROVALS, EVENTS, KPI_FRAMEWORK, DRIFT_EVENTS, formatCurrency, getSeverityColor, getStateColor, type Severity } from "@workspace/shared-ui/core-observability-data";
-import { cn } from "@workspace/shared-ui/utils";
+import { WORKFLOWS, APPROVALS, EVENTS, KPI_FRAMEWORK, DRIFT_EVENTS, formatCurrency, getSeverityColor, getStateColor, type Severity } from "@szl-holdings/shared-ui/core-observability-data";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { AlertTriangle, Clock, DollarSign, TrendingUp, TrendingDown, ArrowRight, Zap, Eye, Activity } from "lucide-react";
 
 function KpiCard({ label, value, trend, unit, description }: { label: string; value: string; trend: number; unit?: string; description?: string }) {

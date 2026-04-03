@@ -1,19 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
-import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Button } from "@workspace/shared-ui/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@workspace/shared-ui/ui/dialog";
-import { Input } from "@workspace/shared-ui/ui/input";
-import { Label } from "@workspace/shared-ui/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/shared-ui/ui/select";
-import { Progress } from "@workspace/shared-ui/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { Button } from "@szl-holdings/shared-ui/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@szl-holdings/shared-ui/ui/dialog";
+import { Input } from "@szl-holdings/shared-ui/ui/input";
+import { Label } from "@szl-holdings/shared-ui/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
+import { Progress } from "@szl-holdings/shared-ui/ui/progress";
 import { Play, Clock, CheckCircle, XCircle, Activity, Target, Shield, Loader2, Zap } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { doctrineEventBus } from "@workspace/observability";
-import { DoctrineLayerBadge } from "@workspace/shared-ui/doctrine-layer-badge";
-import { useRole } from "@workspace/shared-ui";
+import { doctrineEventBus } from "@szl-holdings/observability";
+import { DoctrineLayerBadge } from "@szl-holdings/shared-ui/doctrine-layer-badge";
+import { useRole } from "@szl-holdings/shared-ui";
 import { Lock } from "lucide-react";
 
 const statusColors: Record<string, string> = {

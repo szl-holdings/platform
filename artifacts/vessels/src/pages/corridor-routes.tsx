@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { Badge } from "@workspace/shared-ui/ui/badge";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Navigation, TrendingUp, TrendingDown, Minus, AlertTriangle, Ship, Clock, Activity, RefreshCw } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { api, type Corridor } from "@/lib/api";
 
 const weatherRiskColors: Record<string, string> = {

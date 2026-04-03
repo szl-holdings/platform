@@ -1,19 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { Card, CardContent } from "@workspace/shared-ui/ui/card";
-import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Button } from "@workspace/shared-ui/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@workspace/shared-ui/ui/dialog";
-import { Input } from "@workspace/shared-ui/ui/input";
-import { Label } from "@workspace/shared-ui/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/shared-ui/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/shared-ui/ui/tabs";
+import { Card, CardContent } from "@szl-holdings/shared-ui/ui/card";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { Button } from "@szl-holdings/shared-ui/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@szl-holdings/shared-ui/ui/dialog";
+import { Input } from "@szl-holdings/shared-ui/ui/input";
+import { Label } from "@szl-holdings/shared-ui/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@szl-holdings/shared-ui/ui/tabs";
 import { AlertTriangle, Bell, Shield, Plus, Clock, Trash2, BellOff } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { doctrineEventBus } from "@workspace/observability";
-import { DoctrineLayerBadge } from "@workspace/shared-ui/doctrine-layer-badge";
-import { DataStateBadge } from "@workspace/shared-ui";
+import { doctrineEventBus } from "@szl-holdings/observability";
+import { DoctrineLayerBadge } from "@szl-holdings/shared-ui/doctrine-layer-badge";
+import { DataStateBadge } from "@szl-holdings/shared-ui";
 
 interface FleetAlert {
   id: number;

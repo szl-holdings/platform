@@ -4,7 +4,7 @@ import {
   BarChart3, Users, Search, FileText, Shield, Layers,
   CheckCircle, Menu, X, Eye, Activity,
 } from "lucide-react";
-import { ContactModal } from "@workspace/shared-ui";
+import { ContactModal } from "@szl-holdings/shared-ui";
 
 const ACCENT = "#2d6a4f";
 const ACCENT_LIGHT = "#40856a";

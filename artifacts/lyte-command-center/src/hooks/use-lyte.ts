@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSandboxMode } from "@workspace/shared-ui";
+import { useSandboxMode } from "@szl-holdings/shared-ui";
 import { api, type LyteIncident, type LyteAction, type LyteSavedView } from "../lib/api";
-import { lyteSignals as mockSignals, lyteIncidents as mockIncidents, lyteRecommendations as mockRecommendations, lytePlaybooks as mockPlaybooks } from "@workspace/services";
+import { lyteSignals as mockSignals, lyteIncidents as mockIncidents, lyteRecommendations as mockRecommendations, lytePlaybooks as mockPlaybooks } from "@szl-holdings/services";
 
 export function useSignals() {
   const { sandboxActive, resetKey } = useSandboxMode();

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { DollarSign, TrendingUp, Target, Zap, ArrowRight, Calculator } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";

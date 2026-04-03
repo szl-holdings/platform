@@ -4,8 +4,8 @@ import {
   ChevronRight, User, Building2, FileText, MessageSquare,
   ArrowUpRight, Download
 } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
-import { EmptyState } from "@workspace/shared-ui";
+import { cn } from "@szl-holdings/shared-ui/utils";
+import { EmptyState } from "@szl-holdings/shared-ui";
 import { propertyTwins, type PropertyApproval } from "@/data/property-twin";
 
 const ACCENT = "#40856a";

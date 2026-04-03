@@ -1,10 +1,10 @@
 import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
-import { db } from "@workspace/db";
-import { agentMemoryFacts, agentUsageStats, agentToolCalls, advisoryFindings } from "@workspace/db";
+import { db } from "@szl-holdings/db";
+import { agentMemoryFacts, agentUsageStats, agentToolCalls, advisoryFindings } from "@szl-holdings/db";
 import { eq, desc, and, gt } from "drizzle-orm";
-import { openai } from "@workspace/integrations-openai-ai-server";
-import { anthropic } from "@workspace/integrations-anthropic-ai";
-import { ai as geminiAi } from "@workspace/integrations-gemini-ai";
+import { openai } from "@szl-holdings/integrations-openai-ai-server";
+import { anthropic } from "@szl-holdings/integrations-anthropic-ai";
+import { ai as geminiAi } from "@szl-holdings/integrations-gemini-ai";
 import rateLimit from "express-rate-limit";
 
 const nueroMeshRouter: IRouter = Router();

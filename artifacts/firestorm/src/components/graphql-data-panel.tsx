@@ -1,4 +1,4 @@
-import { useFirestormAssessments, useFirestormIncidents } from "@workspace/graphql-client/hooks";
+import { useFirestormAssessments, useFirestormIncidents } from "@szl-holdings/graphql-client/hooks";
 
 export function FirestormGraphQLPanel() {
   const { data: assessmentsData, loading: aLoading } = useFirestormAssessments({ limit: 3 });

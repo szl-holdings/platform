@@ -1,5 +1,5 @@
-import { cn } from "@workspace/shared-ui/utils";
-import { DataStateBadge } from "@workspace/shared-ui";
+import { cn } from "@szl-holdings/shared-ui/utils";
+import { DataStateBadge } from "@szl-holdings/shared-ui";
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import {

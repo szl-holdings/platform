@@ -7,7 +7,7 @@ import {
   stephenContentBlocksTable,
   stephenCaseStudiesTable,
   stephenBookingRequestsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { z } from "zod";
 import { eq, desc, asc } from "drizzle-orm";
 

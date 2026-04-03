@@ -1,17 +1,17 @@
 import { lazy, Suspense, useEffect, useRef } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
-import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
-import { SandboxModeProvider, SandboxModeBanner } from "@workspace/shared-ui";
-import { McpOverlay } from "@workspace/mcp-client";
+import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
+import { SandboxModeProvider, SandboxModeBanner } from "@szl-holdings/shared-ui";
+import { McpOverlay } from "@szl-holdings/mcp-client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AgentCopilot } from "@workspace/shared-ui/copilot";
-import { beaconConfig } from "@workspace/shared-ui/copilot-configs";
-import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
-import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
+import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
+import { beaconConfig } from "@szl-holdings/shared-ui/copilot-configs";
+import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
+import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
 import { TerraLayout } from "@/components/terra-layout";
-import { useAuth } from "@workspace/replit-auth-web";
-import { LANE_ACCENT_HEX } from "@workspace/shared-ui/lane-colors";
-import { Toaster } from "@workspace/shared-ui/ui/sonner";
+import { useAuth } from "@szl-holdings/replit-auth-web";
+import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
+import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 
 const TERRA_ACCENT = LANE_ACCENT_HEX.terra.primary;
 

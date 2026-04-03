@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { useRoster } from "@/hooks/use-vessels-data";
 import { type RosterVessel } from "@/lib/api";
-import { Badge } from "@workspace/shared-ui/ui/badge";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Ship, ChevronRight, AlertTriangle, Search, RefreshCw, MapPin, Clock, TrendingUp } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const statusConfig: Record<string, { label: string; color: string; dotColor: string }> = {
   at_sea: { label: "At Sea", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", dotColor: "bg-emerald-400" },

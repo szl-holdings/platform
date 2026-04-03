@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import {
   Search, FileText, Tag, ChevronRight, ChevronDown, Plus, Circle,
   Clock, User, Link2, AlertTriangle, Network, Layers, Lightbulb,

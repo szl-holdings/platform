@@ -1,4 +1,4 @@
-import { EVENTS, WORKFLOWS, EXECUTION_RUNS, formatCurrency, getStateColor } from "@workspace/shared-ui/core-observability-data";
+import { EVENTS, WORKFLOWS, EXECUTION_RUNS, formatCurrency, getStateColor } from "@szl-holdings/shared-ui/core-observability-data";
 import { TrendingDown, TrendingUp, CheckCircle, ArrowRight } from "lucide-react";
 
 export default function ValueRecovery() {

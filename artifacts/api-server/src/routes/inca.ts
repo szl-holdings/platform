@@ -8,7 +8,7 @@ import {
   incaModelsTable,
   incaInsightsTable,
   incaDatasetsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, ilike, or, sql } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";

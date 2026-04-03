@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { UserButton } from "@workspace/shared-ui/UserButton";
+import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 import {
   Activity,
   AlertTriangle,
@@ -19,10 +19,10 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { ReactNode } from "react";
 import { LyteLogo } from "./LyteLogo";
-import { LANE_ACCENT_HEX } from "@workspace/shared-ui/lane-colors";
-import { DashboardShell, SidebarNav, type SidebarNavSection } from "@workspace/shared-ui/design-system";
-import { colors, spacing } from "@workspace/shared-ui/tokens";
-import { toAlpha } from "@workspace/shared-ui/utils";
+import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
+import { DashboardShell, SidebarNav, type SidebarNavSection } from "@szl-holdings/shared-ui/design-system";
+import { colors, spacing } from "@szl-holdings/shared-ui/tokens";
+import { toAlpha } from "@szl-holdings/shared-ui/utils";
 
 const LYTE_ACCENT = LANE_ACCENT_HEX.lyte.primary;
 const SIDEBAR_BG = "#08090d";

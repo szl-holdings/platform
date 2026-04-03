@@ -6,7 +6,7 @@ import {
   type ProvenanceSourceClass,
   type ProofReviewState,
   type ProofExportSafetyState,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, and, desc, inArray } from "drizzle-orm";
 import { createHash } from "crypto";
 

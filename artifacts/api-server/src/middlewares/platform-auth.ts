@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
-import { db, usersTable, sessionsTable, userRolesTable, rolesTable, orgMembersTable, organizationsTable } from "@workspace/db";
+import { db, usersTable, sessionsTable, userRolesTable, rolesTable, orgMembersTable, organizationsTable } from "@szl-holdings/db";
 import { eq, and, gt } from "drizzle-orm";
-import type { PlatformRole } from "@workspace/db";
-import { PLATFORM_ROLE_HIERARCHY, hasPlatformRole, isPlatformAdmin, canWritePlatform } from "@workspace/db";
+import type { PlatformRole } from "@szl-holdings/db";
+import { PLATFORM_ROLE_HIERARCHY, hasPlatformRole, isPlatformAdmin, canWritePlatform } from "@szl-holdings/db";
 
 export interface PlatformUser {
   id: number;
@@ -213,7 +213,7 @@ export function logPlatformEvent(eventType: string, entityType: string) {
   return async (req: Request, _res: Response, next: NextFunction) => {
     next();
     try {
-      const { db: database, eventLogTable } = await import("@workspace/db");
+      const { db: database, eventLogTable } = await import("@szl-holdings/db");
       if (req.platformUser) {
         await database.insert(eventLogTable).values({
           orgId: req.platformUser.orgId ?? undefined,

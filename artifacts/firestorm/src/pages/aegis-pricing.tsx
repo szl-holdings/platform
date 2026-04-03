@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { CheckCircle, ArrowRight, Shield, Layers, Building2, X } from "lucide-react";
-import { ContactModal, useContactModal } from "@workspace/shared-ui";
+import { ContactModal, useContactModal } from "@szl-holdings/shared-ui";
 
 const ACCENT = "#ef4444";
 const BG = "#080a10";

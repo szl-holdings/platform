@@ -13,7 +13,7 @@ import {
   alloyDecisions,
   alloySkills,
   alloySkillRuns,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, and, sql, inArray, gte, lte } from "drizzle-orm";
 import { authMiddleware, requireRole, parseIdParam, type AuthenticatedUser } from "../middlewares/auth";
 import { withDbSpan } from "../middlewares/telemetry";

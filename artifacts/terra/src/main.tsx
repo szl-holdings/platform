@@ -1,9 +1,9 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { ErrorBoundary } from "@workspace/shared-ui/error-boundary";
-import { configurePlausible } from "@workspace/analytics";
-import { initSentry, initWebVitals } from "@workspace/observability/react";
-import { GraphQLProvider } from "@workspace/graphql-client/provider";
+import { ErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
+import { configurePlausible } from "@szl-holdings/analytics";
+import { initSentry, initWebVitals } from "@szl-holdings/observability/react";
+import { GraphQLProvider } from "@szl-holdings/graphql-client/provider";
 import App from "./App";
 import "./index.css";
 

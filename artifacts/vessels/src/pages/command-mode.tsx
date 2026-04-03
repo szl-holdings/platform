@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import type { VesselProfile } from "@/data/mock-data";
 import { useVessels, useFleetExceptions, useMaintenance } from "@/hooks/use-vessels-data";
-import { Badge } from "@workspace/shared-ui/ui/badge";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import {
   Ship, AlertTriangle, Clock, MapPin, Navigation, Radio, ChevronRight,
   Activity, Wrench, X, Maximize2, Fuel, TrendingUp, TrendingDown
 } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const statusColors: Record<string, string> = {
   at_sea: "#22c55e",

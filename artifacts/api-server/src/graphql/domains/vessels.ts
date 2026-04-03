@@ -55,8 +55,8 @@ export const vesselsResolvers = {
   Query: {
     vessels: async (_: unknown, args: { status?: string; limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { vesselsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { vesselsTable } = await import("@szl-holdings/db/schema");
         const { desc, eq } = await import("drizzle-orm");
         const query = db.select().from(vesselsTable).orderBy(desc(vesselsTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (args.status) {
@@ -69,8 +69,8 @@ export const vesselsResolvers = {
     },
     vessel: async (_: unknown, args: { id: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { vesselsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { vesselsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const rows = await db.select().from(vesselsTable).where(eq(vesselsTable.id, parseInt(args.id, 10))).limit(1);
         return rows[0] ?? null;
@@ -80,8 +80,8 @@ export const vesselsResolvers = {
     },
     vesselPositions: async (_: unknown, args: { vesselId?: string; limit?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { vesselsPositionsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { vesselsPositionsTable } = await import("@szl-holdings/db/schema");
         const { desc, eq } = await import("drizzle-orm");
         const query = db.select().from(vesselsPositionsTable).orderBy(desc(vesselsPositionsTable.recordedAt)).limit(args.limit ?? 100);
         if (args.vesselId) {
@@ -94,8 +94,8 @@ export const vesselsResolvers = {
     },
     vesselRoutes: async (_: unknown, args: { vesselId?: string; status?: string; limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { vesselsRoutesTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { vesselsRoutesTable } = await import("@szl-holdings/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions = [];
         if (args.vesselId) conditions.push(eq(vesselsRoutesTable.vesselId, parseInt(args.vesselId, 10)));
@@ -111,8 +111,8 @@ export const vesselsResolvers = {
     },
     vesselEvents: async (_: unknown, args: { vesselId?: string; severity?: string; limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { vesselsEventsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { vesselsEventsTable } = await import("@szl-holdings/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions = [];
         if (args.vesselId) conditions.push(eq(vesselsEventsTable.vesselId, parseInt(args.vesselId, 10)));

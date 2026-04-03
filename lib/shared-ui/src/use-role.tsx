@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@workspace/replit-auth-web";
+import { useAuth } from "@szl-holdings/replit-auth-web";
 
 export type AppRole = "admin" | "investor" | "security" | "operator" | "viewer";
 

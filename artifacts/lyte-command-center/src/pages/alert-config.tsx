@@ -1,9 +1,9 @@
 // @ts-nocheck
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "@workspace/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui";
 import { Bell, Plus, AlertTriangle, CheckCircle, Clock, Zap, RefreshCw, X, Trash2 } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 interface LyteAlert {
   id: number;

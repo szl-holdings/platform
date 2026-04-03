@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
-import { LanguageSwitcher, type SupportedLocale } from "@workspace/shared-ui";
+import { LanguageSwitcher, type SupportedLocale } from "@szl-holdings/shared-ui";
 import i18n from "../i18n";
 
 export default function Header() {

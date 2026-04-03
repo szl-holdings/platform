@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Zap, CheckCircle, XCircle, RotateCcw, Clock, Shield, AlertTriangle, Play, Pause, RefreshCw } from "lucide-react";
 import { automations, automationRuns, type Automation, type AutomationRun } from "@/data/brokerage";
 import { StatusIndicator } from "@/components/brokerage-ui";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const categoryColors: Record<Automation["category"], string> = {
   "stage-change": "bg-blue-500/10 text-blue-400 border-blue-500/20",

@@ -1,5 +1,5 @@
-import { db } from "@workspace/db";
-import { pcProofChainEntriesTable } from "@workspace/db/schema";
+import { db } from "@szl-holdings/db";
+import { pcProofChainEntriesTable } from "@szl-holdings/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { createHash } from "crypto";
 import { logger } from "../lib/logger";

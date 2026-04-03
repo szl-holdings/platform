@@ -1,13 +1,13 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   agentTrainingPairs,
   agentBehaviorPrefs,
   agentFeedback,
   advisoryAudit,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, asc, and, avg, count } from "drizzle-orm";
-import { openai } from "@workspace/integrations-openai-ai-server";
+import { openai } from "@szl-holdings/integrations-openai-ai-server";
 import multer from "multer";
 
 const trainingRouter: IRouter = Router();
@@ -249,7 +249,7 @@ trainingRouter.post("/agent-training/transcribe", upload.single("audio"), async 
       : mimeType.includes("wav") ? "wav"
       : "webm";
 
-    const { toFile } = await import("@workspace/integrations-openai-ai-server");
+    const { toFile } = await import("@szl-holdings/integrations-openai-ai-server");
     const audioFile = await toFile(audioBuffer, `audio.${ext}`, { type: mimeType });
 
     const transcription = await openai.audio.transcriptions.create({

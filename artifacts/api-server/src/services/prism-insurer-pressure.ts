@@ -1,11 +1,11 @@
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   pcInsurerPressureSnapshotsTable, pcInsurerPressureDriversTable,
   pcCarrierBehaviorPatternsTable, pcCarrierResponseEventsTable,
   pcCarrierSilenceWindowsTable, pcCarrierOfferBehaviorTable,
   pcCarrierReserveBehaviorTable,
-} from "@workspace/db";
-import { pcMattersTable, pcCommunicationsTable, pcClaimsTable } from "@workspace/db";
+} from "@szl-holdings/db";
+import { pcMattersTable, pcCommunicationsTable, pcClaimsTable } from "@szl-holdings/db";
 import { eq, and, desc, gte, lt } from "drizzle-orm";
 import { logger } from "../lib/logger";
 

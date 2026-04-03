@@ -27,7 +27,7 @@
  */
 
 import type { Request, Response, NextFunction } from "express";
-import { db, orgMembersTable, organizationsTable } from "@workspace/db";
+import { db, orgMembersTable, organizationsTable } from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
 import type { AuthenticatedUser } from "./auth";
 

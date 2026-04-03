@@ -1,4 +1,4 @@
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import { logger } from "../lib/logger";
 import { eq, and, desc } from "drizzle-orm";
 import {
@@ -6,7 +6,7 @@ import {
   pcSignoffQueueTable,
   pcChangeEventsTable,
   pcAuditEventsTable,
-} from "@workspace/db/schema";
+} from "@szl-holdings/db/schema";
 
 export class PilotReviewService {
   async createReview(orgId: number, data: {

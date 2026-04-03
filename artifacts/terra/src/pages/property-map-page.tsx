@@ -5,7 +5,7 @@ import { useMapboxToken } from "@/hooks/use-mapbox-token";
 import PropertyMap from "@/components/property-map";
 import { useState } from "react";
 import { Link } from "wouter";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const STATUS_COLORS: Record<string, string> = {
   performing: "#10b981",

@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Button } from "@workspace/shared-ui/ui/button";
-import { Input } from "@workspace/shared-ui/ui/input";
-import { Textarea } from "@workspace/shared-ui/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/shared-ui/ui/select";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { Button } from "@szl-holdings/shared-ui/ui/button";
+import { Input } from "@szl-holdings/shared-ui/ui/input";
+import { Textarea } from "@szl-holdings/shared-ui/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
 import type { LucideIcon } from "lucide-react";
 import {
   Brain, Shield, AlertTriangle, FileText, Search, Eye, ChevronDown, ChevronUp,
@@ -13,7 +13,7 @@ import {
   BarChart3, Flame, Lock, Users, Database, Globe, Server, Cpu
 } from "lucide-react";
 import { useState, useMemo } from "react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { toast } from "sonner";
 import { EvidenceIndexPanel } from "@/components/tradecraft-panel";
 

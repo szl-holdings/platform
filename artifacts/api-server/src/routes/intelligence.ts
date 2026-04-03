@@ -1,15 +1,15 @@
 import crypto from "crypto";
 import express, { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
-import { services } from "@workspace/services";
+import { services } from "@szl-holdings/services";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { logger } from "../lib/logger";
 import { getAiModels, getAiModelById, getModelObservabilitySummary } from "../lib/ai-model-observability";
 import { getRegistrySummary } from "../lib/model-registry";
-import { openai } from "@workspace/integrations-openai-ai-server";
-import { anthropic } from "@workspace/integrations-anthropic-ai";
-import { db, intelligenceCacheTable } from "@workspace/db";
+import { openai } from "@szl-holdings/integrations-openai-ai-server";
+import { anthropic } from "@szl-holdings/integrations-anthropic-ai";
+import { db, intelligenceCacheTable } from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
 type AnthropicMessageParam = { role: "user" | "assistant"; content: string | { type: string; text: string }[] };
 

@@ -3,8 +3,8 @@ import {
   CheckCircle, Clock, AlertTriangle, FileText, User, Plug,
   ChevronRight, Building2, ArrowRight, BarChart3, Shield
 } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
-import { EmptyState } from "@workspace/shared-ui";
+import { cn } from "@szl-holdings/shared-ui/utils";
+import { EmptyState } from "@szl-holdings/shared-ui";
 import { propertyTwins, type PropertyTwin, type DiligenceTask } from "@/data/property-twin";
 
 const ACCENT = "#40856a";

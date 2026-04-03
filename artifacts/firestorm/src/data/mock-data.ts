@@ -14,4 +14,4 @@ export {
   type MspContract as Contract,
   type MspAlert as Alert,
   type MspTechnician as Technician,
-} from "@workspace/services";
+} from "@szl-holdings/services";

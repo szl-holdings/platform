@@ -1,7 +1,16 @@
 {
-  "name": "@workspace/analytics",
+  "name": "@szl-holdings/analytics",
   "version": "0.0.0",
-  "private": true,
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szl-holdings/szl-holdings-platform.git",
+    "directory": "lib/analytics"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
   "type": "module",
   "exports": {
     ".": "./src/index.ts",

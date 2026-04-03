@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   ownershipScenariosTable,
   ownershipAllocationsTable,
@@ -14,7 +14,7 @@ import {
   governanceDocumentsTable,
   ownershipDecisionLogsTable,
   szlFeatureFlagsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, asc, and, sql } from "drizzle-orm";
 import { handleRouteError, sendSuccess, sendNotFound, parsePagination } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";

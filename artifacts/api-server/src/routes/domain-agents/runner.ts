@@ -1,4 +1,4 @@
-import { services, type ChatMessage } from "@workspace/services";
+import { services, type ChatMessage } from "@szl-holdings/services";
 import type { Response } from "express";
 import { AGENT_CONFIGS, type AgentType } from "./configs";
 import { getModelConfig } from "../../lib/model-registry";

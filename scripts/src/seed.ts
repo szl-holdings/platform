@@ -95,7 +95,7 @@ import {
   holdingsMetricsTable,
   holdingsLeadershipTable,
   holdingsInquiriesTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { randomBytes } from "crypto";
 
 async function seed() {

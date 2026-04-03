@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch } from "@workspace/shared-ui";
-import { cn } from "@workspace/shared-ui/utils";
+import { apiFetch } from "@szl-holdings/shared-ui";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import {
   Shield, Ship, Zap, TrendingDown, AlertTriangle, CheckCircle, Clock,
   ArrowRight, ExternalLink, Activity, BarChart3, Eye, User,

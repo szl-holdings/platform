@@ -95,8 +95,8 @@ export const terraResolvers = {
   Query: {
     terraProperties: async (_: unknown, args: { limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { terraPropertiesTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { terraPropertiesTable } = await import("@szl-holdings/db/schema");
         const { desc } = await import("drizzle-orm");
         return await db.select().from(terraPropertiesTable).orderBy(desc(terraPropertiesTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
       } catch {
@@ -105,8 +105,8 @@ export const terraResolvers = {
     },
     terraListings: async (_: unknown, args: { status?: string; limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { terraListingsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { terraListingsTable } = await import("@szl-holdings/db/schema");
         const { desc, eq } = await import("drizzle-orm");
         const query = db.select().from(terraListingsTable).orderBy(desc(terraListingsTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (args.status) {
@@ -119,8 +119,8 @@ export const terraResolvers = {
     },
     terraDistressProperties: async (_: unknown, args: { borough?: string; distressType?: string; limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { terraDistressPropertiesTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { terraDistressPropertiesTable } = await import("@szl-holdings/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions = [];
         if (args.borough) conditions.push(eq(terraDistressPropertiesTable.borough, args.borough as any));
@@ -136,8 +136,8 @@ export const terraResolvers = {
     },
     terraDeals: async (_: unknown, args: { stage?: string; limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { terraDealsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { terraDealsTable } = await import("@szl-holdings/db/schema");
         const { desc, eq } = await import("drizzle-orm");
         const query = db.select().from(terraDealsTable).orderBy(desc(terraDealsTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (args.stage) {
@@ -150,8 +150,8 @@ export const terraResolvers = {
     },
     terraDeal: async (_: unknown, args: { id: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { terraDealsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { terraDealsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const rows = await db.select().from(terraDealsTable).where(eq(terraDealsTable.id, parseIntId(args.id))).limit(1);
         return rows[0] ?? null;
@@ -161,8 +161,8 @@ export const terraResolvers = {
     },
     terraLeads: async (_: unknown, args: { stage?: string; limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { terraLeadsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { terraLeadsTable } = await import("@szl-holdings/db/schema");
         const { desc, eq } = await import("drizzle-orm");
         const query = db.select().from(terraLeadsTable).orderBy(desc(terraLeadsTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (args.stage) {
@@ -175,8 +175,8 @@ export const terraResolvers = {
     },
     terraActionItems: async (_: unknown, args: { propertyId?: string; status?: string; limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { terraActionItemsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { terraActionItemsTable } = await import("@szl-holdings/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions: ReturnType<typeof eq>[] = [];
         if (args.propertyId) conditions.push(eq(terraActionItemsTable.propertyId, args.propertyId));
@@ -195,8 +195,8 @@ export const terraResolvers = {
   Mutation: {
     updateTerraDeal: async (_: unknown, args: { id: string; stage?: string; probability?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { terraDealsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { terraDealsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const updateData: Record<string, unknown> = {};
         if (args.stage) updateData.stage = args.stage;
@@ -220,8 +220,8 @@ export const terraResolvers = {
     },
     createTerraLead: async (_: unknown, args: { firstName: string; lastName: string; type?: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { terraLeadsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { terraLeadsTable } = await import("@szl-holdings/db/schema");
         const rows = await db
           .insert(terraLeadsTable)
           .values({ firstName: args.firstName, lastName: args.lastName, type: args.type ?? "buyer", stage: "new" } as any)
@@ -233,8 +233,8 @@ export const terraResolvers = {
     },
     updateTerraActionItem: async (_: unknown, args: { id: string; status?: string; recommendedAction?: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { terraActionItemsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { terraActionItemsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const numericId = parseIntId(args.id);
         const existing = await db.select({ status: terraActionItemsTable.status })
@@ -257,7 +257,7 @@ export const terraResolvers = {
         const item = rows[0];
         if (!item) throw new Error(`Action item update returned no rows for id: ${args.id}`);
         try {
-          const { alloyAuditLog } = await import("@workspace/db/schema");
+          const { alloyAuditLog } = await import("@szl-holdings/db/schema");
           await db.insert(alloyAuditLog).values({
             entityType: "action",
             entityId: item.id,
@@ -283,8 +283,8 @@ export const terraResolvers = {
     },
     seedTerraActionItems: async (_: unknown, args: { propertyId: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { terraActionItemsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { terraActionItemsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const SEED_DATA: Record<string, Array<{
           externalId: string;

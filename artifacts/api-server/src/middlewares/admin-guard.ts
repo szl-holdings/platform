@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { getSessionToken, getSessionUser } from "../lib/auth";
-import type { RoleName } from "@workspace/db";
+import type { RoleName } from "@szl-holdings/db";
 import { logger } from "../lib/logger";
 
 const ADMIN_ROLES: RoleName[] = ["super_admin", "ops", "exec"];

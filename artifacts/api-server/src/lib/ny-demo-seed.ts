@@ -1,4 +1,4 @@
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   pcMattersTable,
   pcMatterClocksTable,
@@ -28,7 +28,7 @@ import {
   pcDefensibilityScoresTable,
   pcClockRulesTable,
   pcNyRuleProfilesTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, sql } from "drizzle-orm";
 
 const logger = { info: (msg: string, meta?: unknown) => console.log(`[ny-demo-seed] ${msg}`, meta ?? ""), error: (msg: string, e?: unknown) => console.error(`[ny-demo-seed] ERROR: ${msg}`, e ?? "") };

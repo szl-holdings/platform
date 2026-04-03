@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { ReactNode, useState } from "react";
 import {
   LayoutDashboard, Activity, TrendingDown, Radar, GitBranch,

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch } from "@workspace/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui";
 import { Network, Activity, AlertTriangle, CheckCircle, RefreshCw, Zap, Server, Database, Globe, Shield, Layers } from "lucide-react";
 
 interface TopologyNode {

@@ -1,9 +1,9 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { db, billingPlansTable, subscriptionsTable, invoicesTable, organizationsTable, revenueEventsTable } from "@workspace/db";
+import { db, billingPlansTable, subscriptionsTable, invoicesTable, organizationsTable, revenueEventsTable } from "@szl-holdings/db";
 import { eq, desc, or } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
-import { services } from "@workspace/services";
+import { services } from "@szl-holdings/services";
 import { logger } from "../lib/logger";
 import { isFlagEnabled } from "../lib/platform-flags";
 

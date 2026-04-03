@@ -11,7 +11,7 @@ import {
   lyteActionsTable,
   lyteSavedViewsTable,
   lyteReadinessItemsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, sql } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam, denyIfReadOnly, requireRole } from "../middlewares/auth";

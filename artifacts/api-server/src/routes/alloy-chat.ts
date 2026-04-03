@@ -1,14 +1,14 @@
 import crypto from "crypto";
 import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
-import { db, pool } from "@workspace/db";
-import { conversations, messages } from "@workspace/db";
+import { db, pool } from "@szl-holdings/db";
+import { conversations, messages } from "@szl-holdings/db";
 import { eq, asc, desc } from "drizzle-orm";
-import { services } from "@workspace/services";
+import { services } from "@szl-holdings/services";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
-import { openai } from "@workspace/integrations-openai-ai-server";
-import { anthropic } from "@workspace/integrations-anthropic-ai";
+import { openai } from "@szl-holdings/integrations-openai-ai-server";
+import { anthropic } from "@szl-holdings/integrations-anthropic-ai";
 
 const alloyChatRouter: IRouter = Router();
 

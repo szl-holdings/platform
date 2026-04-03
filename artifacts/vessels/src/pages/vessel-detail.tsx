@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRoute, Link } from "wouter";
 import { api } from "@/lib/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
-import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Button } from "@workspace/shared-ui/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/shared-ui/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { Button } from "@szl-holdings/shared-ui/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@szl-holdings/shared-ui/ui/tabs";
 import { ArrowLeft, Ship, MapPin, Package, Navigation, Clock } from "lucide-react";
-import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
+import { CommentThread, ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 
 interface RouteRecord { id: number; originPort?: string; destinationPort?: string; departureAt?: string; arrivalAt?: string; distanceNm?: number; status?: string; waypoints?: { name?: string }[]; }
 interface CargoRecord { id: number; cargoType?: string; quantity?: number; unit?: string; origin?: string; destination?: string; status?: string; }

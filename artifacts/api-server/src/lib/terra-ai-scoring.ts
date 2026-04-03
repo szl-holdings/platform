@@ -1,4 +1,4 @@
-import type { TerraDistressProperty } from "@workspace/db";
+import type { TerraDistressProperty } from "@szl-holdings/db";
 
 export interface ScoringResult {
   score: number;

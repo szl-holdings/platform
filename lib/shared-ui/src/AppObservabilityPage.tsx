@@ -1,5 +1,5 @@
-import { ObservabilityProvider, ObservabilityPanel } from "@workspace/observability/react";
-import type { DomainConfig } from "@workspace/observability";
+import { ObservabilityProvider, ObservabilityPanel } from "@szl-holdings/observability/react";
+import type { DomainConfig } from "@szl-holdings/observability";
 
 interface AppObservabilityPageProps {
   config: DomainConfig;

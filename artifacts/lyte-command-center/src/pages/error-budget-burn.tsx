@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch } from "@workspace/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui";
 import { cn } from "@/lib/utils";
 import {
   Activity, AlertTriangle, CheckCircle, Clock, TrendingDown, TrendingUp,

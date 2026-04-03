@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react";
 import React from "react";
 import { analytics } from "@/lib/analytics";
-import { DataProvenance, ActionLoop, RoleSelector } from "@workspace/shared-ui";
-import type { DataProvenanceInfo } from "@workspace/shared-ui";
+import { DataProvenance, ActionLoop, RoleSelector } from "@szl-holdings/shared-ui";
+import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
 import { Link } from "wouter";
 import {
   ChevronRight, Zap, Target, Activity,

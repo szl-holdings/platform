@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { broadcastWs, pubsub, TERRA_EVENTS } from "../lib/pubsub-bridge.js";
-import { db, pool } from "@workspace/db";
+import { db, pool } from "@szl-holdings/db";
 import {
   terraLeadsTable,
   terraDealsTable,
@@ -11,7 +11,7 @@ import {
   auditLogsTable,
   type InsertTerraLead,
   type InsertTerraDeal,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, and, desc, ilike, or, sql, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { scoreDistressProperty } from "../lib/terra-ai-scoring";

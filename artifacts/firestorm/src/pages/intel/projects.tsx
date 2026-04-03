@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Link } from "wouter";
 import { Search, LayoutGrid, List, Filter, ArrowRight } from "lucide-react";
 import { projects, type Project, type ProjectStatus } from "@/data/seed-data";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const statusLabels: Record<ProjectStatus, string> = {
   research: "Research",

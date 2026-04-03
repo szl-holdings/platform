@@ -4,7 +4,7 @@ import { settlementFrictionEngine } from "../services/prism-settlement-friction"
 import { portfolioLearning } from "../services/prism-portfolio-learning";
 import { forecastExpanded } from "../services/prism-forecast-expanded";
 import { copilotPilotOne } from "../services/prism-copilot-pilot-one";
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import { eq, and, desc } from "drizzle-orm";
 import {
   pcInsurerPressureSnapshotsTable, pcSettlementFrictionSnapshotsTable,
@@ -15,7 +15,7 @@ import {
   pcWorldlineWeatherEventsTable, pcWorldlineCountyProfilesTable,
   pcWorldlineRegulatoryEventsTable, pcWorldlineRecoveryMarkersTable,
   pcQuietRiskSnapshotsTable,
-} from "@workspace/db/schema";
+} from "@szl-holdings/db/schema";
 import { logger } from "../lib/logger";
 
 const router = Router();

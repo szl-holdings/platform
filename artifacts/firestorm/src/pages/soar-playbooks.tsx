@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Play, Pause, CheckCircle, XCircle, Clock, Zap, Shield, AlertTriangle, Users, Globe, Lock, Mail, Server, ChevronRight, ChevronDown, Activity, BarChart3, Plus, Edit, Copy } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 

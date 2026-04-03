@@ -2,15 +2,15 @@ import { lazy, Suspense, type ReactNode } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
-import { DemoModeProvider, SandboxModeProvider, CookieBanner, StatusBanner, type StatusBannerConfig } from "@workspace/shared-ui";
-import { McpOverlay } from "@workspace/mcp-client";
-import { useAuth } from "@workspace/replit-auth-web";
+import { DemoModeProvider, SandboxModeProvider, CookieBanner, StatusBanner, type StatusBannerConfig } from "@szl-holdings/shared-ui";
+import { McpOverlay } from "@szl-holdings/mcp-client";
+import { useAuth } from "@szl-holdings/replit-auth-web";
 import { AlloyLayout } from "@/alloy/components/alloy-layout";
 import { CounselLayout } from "@/prism-counsel/components/counsel-layout";
 import { LawyerLifeOSShell } from "@/prism-counsel/components/lawyer-life-os-shell";
 import { NyLayout } from "@/prism-counsel/pages/ny/ny-layout";
-import { Toaster } from "@workspace/shared-ui/ui/sonner";
-import { LANE_ACCENT_HEX } from "@workspace/shared-ui/lane-colors";
+import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
+import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 
 const SZL_ACCENT = LANE_ACCENT_HEX.szl.primary;
 

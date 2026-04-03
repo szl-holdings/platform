@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { execSync } from "child_process";
-import { pool } from "@workspace/db";
+import { pool } from "@szl-holdings/db";
 
 const WORKSPACE_ROOT = path.resolve(process.cwd(), "../../");
 const BACKUP_DIR = process.env.BACKUP_DIR ?? path.resolve(WORKSPACE_ROOT, "backups");

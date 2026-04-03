@@ -4,7 +4,7 @@ import {
   TrendingUp, Users, Flame, BookmarkIcon, Handshake, BarChart3,
   CheckCircle, Target, MapPin, Award, Activity
 } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API = "/api";

@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { dataProvider } from "@/data/data-provider";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
-import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Input } from "@workspace/shared-ui/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { Input } from "@szl-holdings/shared-ui/ui/input";
 import { ScrollText, Search, ChevronDown, ChevronRight, AlertTriangle, AlertCircle, Info, Bug, Filter } from "lucide-react";
 import { useState } from "react";
 

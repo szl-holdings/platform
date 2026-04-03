@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
-import { Badge } from "@workspace/shared-ui/ui/badge";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { useAuth } from "@/contexts/auth-context";
 import {
   Ship, AlertTriangle, Clock, Wrench, TrendingUp, TrendingDown,
   ChevronRight, Activity, DollarSign, Fuel, CloudLightning, BarChart3,
   CheckCircle2, XCircle, Minus, RefreshCw, EyeOff, ShieldAlert, Navigation
 } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
-import { CommandModeSurface, type CommandModeSignal, useRealtimeChannel } from "@workspace/shared-ui";
+import { cn } from "@szl-holdings/shared-ui/utils";
+import { CommandModeSurface, type CommandModeSignal, useRealtimeChannel } from "@szl-holdings/shared-ui";
 import { useVessels, useFleetExceptions, useVoyages, useMaintenance } from "@/hooks/use-vessels-data";
 import { useQueryClient } from "@tanstack/react-query";
 import { PackBanner } from "@/components/pack-banner";

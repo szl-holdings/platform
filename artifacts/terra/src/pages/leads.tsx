@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Users, Search, Phone, Mail, TrendingUp, CheckSquare, Plus, RefreshCw, X } from "lucide-react";
 import { StageBadge, AgentAvatar, formatCurrency, ProbabilityBar } from "@/components/brokerage-ui";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API = "/api";

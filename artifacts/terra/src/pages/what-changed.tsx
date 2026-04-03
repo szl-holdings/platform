@@ -3,7 +3,7 @@ import {
   Activity, AlertTriangle, CheckCircle, Clock, FileText, User,
   Filter, RefreshCw, Building2, Shield, ArrowUpRight
 } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { whatChangedFeed, type WhatChangedEvent } from "@/data/property-twin";
 
 const ACCENT = "#40856a";

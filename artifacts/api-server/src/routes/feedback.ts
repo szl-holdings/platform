@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, pool, feedbackTable, feedbackSurveyPrefsTable } from "@workspace/db";
+import { db, pool, feedbackTable, feedbackSurveyPrefsTable } from "@szl-holdings/db";
 import { desc, eq, sql, and, gte, lt } from "drizzle-orm";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import type { Request, Response } from "express";

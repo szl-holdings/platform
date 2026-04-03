@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Link } from "wouter";
 import { Building2, X, MapPin, TrendingUp, DollarSign, Users, ChevronRight } from "lucide-react";
 import { type Property } from "@/data/portfolio";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const STATUS_COLORS: Record<string, string> = {
   performing: "#10b981",

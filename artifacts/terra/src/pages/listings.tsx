@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Home, Search, Filter, MapPin, Clock, TrendingDown, Eye, ChevronDown, X, Building2, ArrowRight, Radio } from "lucide-react";
 import { listings, type Listing } from "@/data/brokerage";
 import { RiskBadge, StageBadge, formatCurrency, AgentAvatar, PropertyDrawer } from "@/components/brokerage-ui";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 

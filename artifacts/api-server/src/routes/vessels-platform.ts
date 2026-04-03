@@ -12,7 +12,7 @@ import {
   workflowsTable,
   workflowRunsTable,
   auditLogsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, and, desc, sql, or } from "drizzle-orm";
 import { z } from "zod";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";

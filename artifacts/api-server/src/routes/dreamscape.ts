@@ -9,7 +9,7 @@ import {
   dreamscapeVoiceAssetsTable,
   dreamscapeCampaignAssetsTable,
   dreamscapeReviewsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, sql } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";

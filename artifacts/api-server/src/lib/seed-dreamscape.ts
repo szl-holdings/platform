@@ -1,4 +1,4 @@
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   dreamscapeCampaignsTable,
   dreamscapeScriptsTable,
@@ -6,7 +6,7 @@ import {
   dreamscapeVoiceAssetsTable,
   dreamscapeCampaignAssetsTable,
   dreamscapeReviewsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { sql } from "drizzle-orm";
 
 export async function seedDreamscapeData(): Promise<void> {

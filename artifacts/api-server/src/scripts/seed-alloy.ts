@@ -1,4 +1,4 @@
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   alloyWorkflowsTable,
   alloySignalsTable,
@@ -6,7 +6,7 @@ import {
   alloyApprovalsTable,
   alloyArtifactsTable,
   alloyAuditLogTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { sql, eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 

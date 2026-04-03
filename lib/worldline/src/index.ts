@@ -9,7 +9,7 @@ import {
   type WorldlineSourceType,
   type WorldlineFreshnessCadence,
   type WorldlineSourceStatus,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, and, desc, sql } from "drizzle-orm";
 
 export type { WorldlineSource, WorldlineFetchLog, WorldlineSourceType, WorldlineFreshnessCadence, WorldlineSourceStatus };

@@ -1,8 +1,8 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 import { eq, and } from "drizzle-orm";
-import { services } from "@workspace/services";
-import { db, alloySignals, connectorsTable } from "@workspace/db";
+import { services } from "@szl-holdings/services";
+import { db, alloySignals, connectorsTable } from "@szl-holdings/db";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import {
   sendSuccess,

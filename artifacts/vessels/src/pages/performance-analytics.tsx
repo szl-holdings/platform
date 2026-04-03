@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { usePerformanceMetrics } from "@/hooks/use-vessels-data";
 import { BarChart3, TrendingUp, TrendingDown, Clock, Ship, Activity, Minus, RefreshCw } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 function SparkBar({ values, color }: { values: number[]; color: string }) {
   const max = Math.max(...values, 1);

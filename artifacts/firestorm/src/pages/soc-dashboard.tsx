@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { cn } from "@workspace/shared-ui/utils";
-import { DataProvenance, ActionLoop, RoleSelector } from "@workspace/shared-ui";
-import type { DataProvenanceInfo } from "@workspace/shared-ui";
+import { cn } from "@szl-holdings/shared-ui/utils";
+import { DataProvenance, ActionLoop, RoleSelector } from "@szl-holdings/shared-ui";
+import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
 import { Link } from "wouter";
 import {
   Shield, Server, Brain, AlertTriangle, Activity, Clock,

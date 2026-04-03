@@ -1,10 +1,10 @@
 import { Router, type IRouter } from "express";
-import { services } from "@workspace/services";
-import { MetricCollector, serverTelemetry, clientTelemetry } from "@workspace/observability";
-import type { WebVitalsReport } from "@workspace/observability";
-import { ALL_CONFIGS, getConfigBySlug } from "@workspace/observability/configs";
+import { services } from "@szl-holdings/services";
+import { MetricCollector, serverTelemetry, clientTelemetry } from "@szl-holdings/observability";
+import type { WebVitalsReport } from "@szl-holdings/observability";
+import { ALL_CONFIGS, getConfigBySlug } from "@szl-holdings/observability/configs";
 import { authMiddleware, requireRole } from "../middlewares/auth";
-import { db, platformJobRunsTable, artifactApprovalsTable } from "@workspace/db";
+import { db, platformJobRunsTable, artifactApprovalsTable } from "@szl-holdings/db";
 import { sql, eq, and, gt } from "drizzle-orm";
 
 const router: IRouter = Router();

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { ContactModal } from "@workspace/shared-ui";
+import { ContactModal } from "@szl-holdings/shared-ui";
 import { Link } from "wouter";
 import {
   Shield, ArrowRight, Layers, Server, Brain, Eye, Target,

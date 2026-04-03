@@ -2,7 +2,7 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { DataStateBadge, useRealtimeChannel, ActionLoop } from "@workspace/shared-ui";
+import { DataStateBadge, useRealtimeChannel, ActionLoop } from "@szl-holdings/shared-ui";
 import {
   Building2, MapPin, TrendingUp, Users, Activity,
   ArrowRight, AlertTriangle, Eye, Globe, Map, Shield, BarChart3,

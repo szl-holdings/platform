@@ -1,4 +1,4 @@
-import { useLyteSignals, useLyteActions } from "@workspace/graphql-client/hooks";
+import { useLyteSignals, useLyteActions } from "@szl-holdings/graphql-client/hooks";
 
 export function LyteGraphQLPanel() {
   const { data: signalsData, loading: sLoading } = useLyteSignals({ limit: 3 });

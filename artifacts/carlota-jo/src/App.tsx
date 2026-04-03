@@ -1,11 +1,11 @@
 import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
-import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
-import { McpOverlay } from "@workspace/mcp-client";
-import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
-import { OnboardingWizard, type OnboardingConfig, SandboxModeProvider } from "@workspace/shared-ui";
+import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
+import { McpOverlay } from "@szl-holdings/mcp-client";
+import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
+import { OnboardingWizard, type OnboardingConfig, SandboxModeProvider } from "@szl-holdings/shared-ui";
 import { BookOpen, Users, Calendar, MessageSquare, FileText, Sparkles } from "lucide-react";
-import { LANE_ACCENT_HEX } from "@workspace/shared-ui/lane-colors";
+import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 
 const CARLOTA_ACCENT = LANE_ACCENT_HEX.carlotaJo.primary;
 

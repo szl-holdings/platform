@@ -2,7 +2,7 @@ import type { IncomingMessage, Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { createHmac, timingSafeEqual, randomBytes } from "crypto";
 import { logger } from "./logger";
-import { db, sessionsTable, usersTable } from "@workspace/db";
+import { db, sessionsTable, usersTable } from "@szl-holdings/db";
 import { eq, gt, and } from "drizzle-orm";
 
 export interface ChannelMessage {

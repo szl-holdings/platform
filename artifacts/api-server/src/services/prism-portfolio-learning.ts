@@ -1,14 +1,14 @@
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   pcPortfolioBenchmarkSnapshotsTable, pcPortfolioActionEffectivenessTable,
   pcPortfolioTeamLagMetricsTable, pcPortfolioMatterCohortsTable,
   pcQuietRiskSnapshotsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import {
   pcMattersTable, pcDeadlinesTable, pcApprovalRequestsTable,
   pcCommunicationsTable, pcNextActionsTable,
-} from "@workspace/db";
-import { pcInsurerPressureSnapshotsTable, pcSettlementFrictionSnapshotsTable } from "@workspace/db";
+} from "@szl-holdings/db";
+import { pcInsurerPressureSnapshotsTable, pcSettlementFrictionSnapshotsTable } from "@szl-holdings/db";
 import { eq, and, desc, gte, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
 

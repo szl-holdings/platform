@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { HealthCheckResponse } from "@workspace/api-zod";
+import { HealthCheckResponse } from "@szl-holdings/api-zod";
 import { getBackupHealthStatus } from "../lib/backup-service";
 
 const router: IRouter = Router();

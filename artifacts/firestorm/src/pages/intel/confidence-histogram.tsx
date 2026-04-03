@@ -1,5 +1,5 @@
 import { BarChart3, Brain, Target, TrendingUp, AlertTriangle } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const histogramData = [
   { range: "0-10%", count: 2, color: "bg-red-500" },

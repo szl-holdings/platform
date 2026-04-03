@@ -25,7 +25,7 @@ import {
   firestormRiskScoresTable,
   firestormFindingsTable,
   firestormToolAuditLogTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { desc, eq, inArray, sql } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
 import {

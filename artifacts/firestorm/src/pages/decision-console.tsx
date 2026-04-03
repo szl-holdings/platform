@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useStepUp } from "@/lib/use-step-up";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import {
   CheckCircle2, XCircle, Clock, AlertTriangle, FileText, Lock,
   ChevronDown, ChevronRight, Eye, Shield, UserCheck, Activity,

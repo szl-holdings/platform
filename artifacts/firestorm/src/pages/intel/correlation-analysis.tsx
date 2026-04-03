@@ -1,5 +1,5 @@
 import { GitBranch, TrendingUp, TrendingDown, Brain, Target, BarChart3, AlertTriangle } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const correlationMatrix = [
   { feature1: "Revenue", feature2: "Marketing Spend", correlation: 0.87, trend: "stable" as const },

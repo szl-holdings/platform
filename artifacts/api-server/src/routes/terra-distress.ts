@@ -2,8 +2,8 @@ import { Router, type IRouter } from "express";
 import multer from "multer";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole } from "../middlewares/auth";
-import { db } from "@workspace/db";
-import { auditLogsTable } from "@workspace/db";
+import { db } from "@szl-holdings/db";
+import { auditLogsTable } from "@szl-holdings/db";
 import {
   searchDistressedProperties,
   getDistressPropertyById,

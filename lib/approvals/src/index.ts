@@ -6,7 +6,7 @@ import {
   type InsertApprovalRequest,
   type ApprovalRequest,
   type ApprovalStatus,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, and, desc, inArray } from "drizzle-orm";
 
 export type { ApprovalRequest, ApprovalStatus };

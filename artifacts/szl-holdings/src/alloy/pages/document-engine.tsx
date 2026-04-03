@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { FileText, Layers, Pen, BookOpen } from "lucide-react";
-import { DocumentEnginePanel, BatchPdfPanel, SigningDashboard } from "@workspace/shared-ui";
-import { cn } from "@workspace/shared-ui/utils";
+import { DocumentEnginePanel, BatchPdfPanel, SigningDashboard } from "@szl-holdings/shared-ui";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const TABS = [
   { id: "documents", label: "Documents", icon: FileText },

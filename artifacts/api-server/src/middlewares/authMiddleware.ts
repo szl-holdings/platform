@@ -16,7 +16,7 @@
  */
 import { type Request, type Response, type NextFunction } from "express";
 import { getSessionToken, getSessionUser } from "../lib/auth";
-import type { RoleName } from "@workspace/db";
+import type { RoleName } from "@szl-holdings/db";
 
 export interface OidcUser {
   id: number;

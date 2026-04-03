@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DataStateBadge } from "@workspace/shared-ui";
+import { DataStateBadge } from "@szl-holdings/shared-ui";
 import {
   CheckCircle, ChevronRight, Building2, Shield, Zap, Play, User,
   Settings2, Database, ArrowRight, Loader2, Star, AlertTriangle

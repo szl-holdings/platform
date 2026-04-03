@@ -1,5 +1,5 @@
 import { Briefcase, Code, Award, Star, ExternalLink, Github, Linkedin, MapPin, GraduationCap, CheckCircle2, Zap } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 const skills = [

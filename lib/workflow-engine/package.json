@@ -1,7 +1,16 @@
 {
-  "name": "@workspace/workflow-engine",
+  "name": "@szl-holdings/workflow-engine",
   "version": "0.0.0",
-  "private": true,
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szl-holdings/szl-holdings-platform.git",
+    "directory": "lib/workflow-engine"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
   "type": "module",
   "exports": {
     ".": {
@@ -10,9 +19,9 @@
     }
   },
   "dependencies": {
-    "@workspace/db": "workspace:*",
-    "@workspace/observability": "workspace:*",
-    "@workspace/services": "workspace:*",
+    "@szl-holdings/db": "workspace:*",
+    "@szl-holdings/observability": "workspace:*",
+    "@szl-holdings/services": "workspace:*",
     "drizzle-orm": "catalog:",
     "pino": "^9"
   },

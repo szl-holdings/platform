@@ -10,7 +10,7 @@ import {
   pcAiRecommendationsTable,
   pcCommunicationsTable,
   pcReadinessScoresTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, sql, and } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendForbidden, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
@@ -209,7 +209,7 @@ router.get("/prism-counsel/matters/:id/pressure", authMiddleware(), async (req, 
 
     let dimensions: any[] = [];
     try {
-      const { pcPressureGraphDimensionsTable } = await import("@workspace/db");
+      const { pcPressureGraphDimensionsTable } = await import("@szl-holdings/db");
       dimensions = await db.select().from(pcPressureGraphDimensionsTable)
         .where(eq(pcPressureGraphDimensionsTable.matterId, matterId))
         .orderBy(desc(pcPressureGraphDimensionsTable.computedAt)).limit(12);
@@ -231,7 +231,7 @@ router.get("/prism-counsel/matters/:id/proof-chain", authMiddleware(), async (re
 
     let entries: any[] = [];
     try {
-      const { pcProofChainEntriesTable } = await import("@workspace/db");
+      const { pcProofChainEntriesTable } = await import("@szl-holdings/db");
       entries = await db.select().from(pcProofChainEntriesTable)
         .where(eq(pcProofChainEntriesTable.matterId, matterId))
         .orderBy(desc(pcProofChainEntriesTable.generatedAt)).limit(50);
@@ -253,7 +253,7 @@ router.get("/prism-counsel/matters/:id/forecast-diffs", authMiddleware(), async 
 
     let diffs: any[] = [];
     try {
-      const { pcForecastDiffsTable } = await import("@workspace/db");
+      const { pcForecastDiffsTable } = await import("@szl-holdings/db");
       diffs = await db.select().from(pcForecastDiffsTable)
         .where(eq(pcForecastDiffsTable.matterId, matterId))
         .orderBy(desc(pcForecastDiffsTable.createdAt)).limit(20);
@@ -273,7 +273,7 @@ router.get("/prism-counsel/data-products", authMiddleware(), async (req, res) =>
 
     let scores: any[] = [];
     try {
-      const { pcDataProductScoresTable } = await import("@workspace/db");
+      const { pcDataProductScoresTable } = await import("@szl-holdings/db");
       scores = await db.select().from(pcDataProductScoresTable)
         .where(eq(pcDataProductScoresTable.orgId, orgId))
         .orderBy(desc(pcDataProductScoresTable.computedAt)).limit(100);
@@ -293,7 +293,7 @@ router.get("/prism-counsel/worldline/signals", authMiddleware(), async (req, res
 
     let signals: any[] = [];
     try {
-      const { pcWorldlineSignalsTable } = await import("@workspace/db");
+      const { pcWorldlineSignalsTable } = await import("@szl-holdings/db");
       signals = await db.select().from(pcWorldlineSignalsTable)
         .where(eq(pcWorldlineSignalsTable.orgId, orgId))
         .orderBy(desc(pcWorldlineSignalsTable.createdAt)).limit(50);
@@ -315,7 +315,7 @@ router.get("/prism-counsel/matters/:id/copilot-drafts", authMiddleware(), async 
 
     let drafts: any[] = [];
     try {
-      const { pcCopilotDraftsTable } = await import("@workspace/db");
+      const { pcCopilotDraftsTable } = await import("@szl-holdings/db");
       drafts = await db.select().from(pcCopilotDraftsTable)
         .where(eq(pcCopilotDraftsTable.matterId, matterId))
         .orderBy(desc(pcCopilotDraftsTable.createdAt)).limit(20);
@@ -411,7 +411,7 @@ router.get("/prism-counsel/admin/service-metrics", authMiddleware(), async (req,
 
     let metrics: any[] = [];
     try {
-      const { pcServiceMetricsTable } = await import("@workspace/db");
+      const { pcServiceMetricsTable } = await import("@szl-holdings/db");
       metrics = await db.select().from(pcServiceMetricsTable)
         .where(eq(pcServiceMetricsTable.orgId, orgId))
         .orderBy(desc(pcServiceMetricsTable.measuredAt)).limit(50);
@@ -432,7 +432,7 @@ router.get("/prism-counsel/admin/dashboards/:type", authMiddleware(), async (req
 
     let snapshot: any = null;
     try {
-      const { pcDashboardSnapshotsTable } = await import("@workspace/db");
+      const { pcDashboardSnapshotsTable } = await import("@szl-holdings/db");
       const [latest] = await db.select().from(pcDashboardSnapshotsTable)
         .where(and(eq(pcDashboardSnapshotsTable.orgId, orgId), eq(pcDashboardSnapshotsTable.dashboardType, dashType as any)))
         .orderBy(desc(pcDashboardSnapshotsTable.computedAt)).limit(1);
@@ -453,7 +453,7 @@ router.get("/prism-counsel/admin/tenant-config", authMiddleware(), async (req, r
 
     let config: any = null;
     try {
-      const { pcTenantConfigTable } = await import("@workspace/db");
+      const { pcTenantConfigTable } = await import("@szl-holdings/db");
       const [cfg] = await db.select().from(pcTenantConfigTable).where(eq(pcTenantConfigTable.orgId, orgId));
       config = cfg ?? null;
     } catch { config = null; }
@@ -472,7 +472,7 @@ router.get("/prism-counsel/admin/incidents", authMiddleware(), async (req, res) 
 
     let incidents: any[] = [];
     try {
-      const { pcIncidentsTable } = await import("@workspace/db");
+      const { pcIncidentsTable } = await import("@szl-holdings/db");
       incidents = await db.select().from(pcIncidentsTable)
         .where(eq(pcIncidentsTable.orgId, orgId))
         .orderBy(desc(pcIncidentsTable.detectedAt)).limit(50);
@@ -492,7 +492,7 @@ router.get("/prism-counsel/admin/onboarding", authMiddleware(), async (req, res)
 
     let checklist: any[] = [];
     try {
-      const { pcOnboardingChecklistTable } = await import("@workspace/db");
+      const { pcOnboardingChecklistTable } = await import("@szl-holdings/db");
       checklist = await db.select().from(pcOnboardingChecklistTable)
         .where(eq(pcOnboardingChecklistTable.orgId, orgId));
     } catch { checklist = []; }
@@ -513,7 +513,7 @@ router.get("/prism-counsel/matters/:id/contradictions", authMiddleware(), async 
 
     let contradictions: any[] = [];
     try {
-      const { pcContradictionPanelTable } = await import("@workspace/db");
+      const { pcContradictionPanelTable } = await import("@szl-holdings/db");
       contradictions = await db.select().from(pcContradictionPanelTable)
         .where(eq(pcContradictionPanelTable.matterId, matterId))
         .orderBy(desc(pcContradictionPanelTable.createdAt)).limit(50);
@@ -533,7 +533,7 @@ router.get("/prism-counsel/operational-flows", authMiddleware(), async (req, res
 
     let flows: any[] = [];
     try {
-      const { pcOperationalFlowRunsTable } = await import("@workspace/db");
+      const { pcOperationalFlowRunsTable } = await import("@szl-holdings/db");
       flows = await db.select().from(pcOperationalFlowRunsTable)
         .where(eq(pcOperationalFlowRunsTable.orgId, orgId))
         .orderBy(desc(pcOperationalFlowRunsTable.startedAt)).limit(50);
@@ -553,7 +553,7 @@ router.get("/prism-counsel/signal-forge/runs", authMiddleware(), async (req, res
 
     let runs: any[] = [];
     try {
-      const { pcSignalForgeRunsTable } = await import("@workspace/db");
+      const { pcSignalForgeRunsTable } = await import("@szl-holdings/db");
       runs = await db.select().from(pcSignalForgeRunsTable)
         .where(eq(pcSignalForgeRunsTable.orgId, orgId))
         .orderBy(desc(pcSignalForgeRunsTable.startedAt)).limit(30);
@@ -575,7 +575,7 @@ router.get("/prism-counsel/matters/:id/audit-packets", authMiddleware(), async (
 
     let packets: any[] = [];
     try {
-      const { pcAuditPacketsTable } = await import("@workspace/db");
+      const { pcAuditPacketsTable } = await import("@szl-holdings/db");
       packets = await db.select().from(pcAuditPacketsTable)
         .where(eq(pcAuditPacketsTable.matterId, matterId))
         .orderBy(desc(pcAuditPacketsTable.generatedAt)).limit(20);

@@ -1,9 +1,9 @@
 import * as client from "openid-client";
 import crypto from "crypto";
 import { type Request, type Response } from "express";
-import { db, usersTable, sessionsTable, rolesTable, userRolesTable, azureTenantsTable, orgMembersTable, organizationsTable } from "@workspace/db";
+import { db, usersTable, sessionsTable, rolesTable, userRolesTable, azureTenantsTable, orgMembersTable, organizationsTable } from "@szl-holdings/db";
 import { eq, and, gt } from "drizzle-orm";
-import type { RoleName } from "@workspace/db";
+import type { RoleName } from "@szl-holdings/db";
 
 export const ISSUER_URL = process.env.ISSUER_URL ?? "https://replit.com/oidc";
 export const SESSION_COOKIE = "sid";

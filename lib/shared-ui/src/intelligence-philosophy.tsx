@@ -1,4 +1,4 @@
-import { SIX_LENSES_PHILOSOPHY, LENSES, INTELLIGENCE_PHILOSOPHY, PILLARS } from "@workspace/observability";
+import { SIX_LENSES_PHILOSOPHY, LENSES, INTELLIGENCE_PHILOSOPHY, PILLARS } from "@szl-holdings/observability";
 
 const LENS_ICONS: Record<string, string> = {
   signal: "◎",

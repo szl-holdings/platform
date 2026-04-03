@@ -61,8 +61,8 @@ export const firestormResolvers = {
   Query: {
     firestormAssessments: async (_: unknown, args: { limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { firestormAssessmentsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { firestormAssessmentsTable } = await import("@szl-holdings/db/schema");
         const { desc } = await import("drizzle-orm");
         return await db
           .select()
@@ -76,8 +76,8 @@ export const firestormResolvers = {
     },
     firestormAssessment: async (_: unknown, args: { id: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { firestormAssessmentsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { firestormAssessmentsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const rows = await db.select().from(firestormAssessmentsTable).where(eq(firestormAssessmentsTable.id, parseInt(args.id, 10))).limit(1);
         return rows[0] ?? null;
@@ -87,8 +87,8 @@ export const firestormResolvers = {
     },
     firestormFindings: async (_: unknown, args: { assessmentId?: string; severity?: string; limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { firestormFindingsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { firestormFindingsTable } = await import("@szl-holdings/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions = [];
         if (args.assessmentId) conditions.push(eq(firestormFindingsTable.assessmentId, parseInt(args.assessmentId, 10)));
@@ -104,8 +104,8 @@ export const firestormResolvers = {
     },
     firestormIncidents: async (_: unknown, args: { status?: string; severity?: string; limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { firestormIncidentsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { firestormIncidentsTable } = await import("@szl-holdings/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions = [];
         if (args.status) conditions.push(eq(firestormIncidentsTable.status, args.status as any));
@@ -121,8 +121,8 @@ export const firestormResolvers = {
     },
     firestormIncident: async (_: unknown, args: { id: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { firestormIncidentsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { firestormIncidentsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const rows = await db.select().from(firestormIncidentsTable).where(eq(firestormIncidentsTable.id, parseInt(args.id, 10))).limit(1);
         return rows[0] ?? null;
@@ -132,8 +132,8 @@ export const firestormResolvers = {
     },
     firestormAssets: async (_: unknown, args: { limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { firestormAssetsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { firestormAssetsTable } = await import("@szl-holdings/db/schema");
         const { desc } = await import("drizzle-orm");
         return await db
           .select()
@@ -149,8 +149,8 @@ export const firestormResolvers = {
   Mutation: {
     updateFirestormIncident: async (_: unknown, args: { id: string; status: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { firestormIncidentsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { firestormIncidentsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const rows = await db
           .update(firestormIncidentsTable)

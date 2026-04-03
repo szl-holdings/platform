@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { LiveDataBadge } from "@/lib/live-badge";
 import { toast } from "sonner";
-import { Skeleton } from "@workspace/shared-ui/ui/skeleton";
+import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { useMapboxToken } from "@/hooks/use-mapbox-token";
 import { Link } from "wouter";
 

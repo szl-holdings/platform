@@ -1,13 +1,22 @@
 {
-  "name": "@workspace/replit-auth-web",
+  "name": "@szl-holdings/replit-auth-web",
   "version": "0.0.0",
-  "private": true,
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szl-holdings/szl-holdings-platform.git",
+    "directory": "lib/replit-auth-web"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
   "type": "module",
   "exports": {
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@workspace/api-client-react": "workspace:*"
+    "@szl-holdings/api-client-react": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18"

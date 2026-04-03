@@ -1,14 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "@workspace/shared-ui";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
-import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Button } from "@workspace/shared-ui/ui/button";
-import { Progress } from "@workspace/shared-ui/ui/progress";
+import { apiFetch } from "@szl-holdings/shared-ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { Button } from "@szl-holdings/shared-ui/ui/button";
+import { Progress } from "@szl-holdings/shared-ui/ui/progress";
 import {
   CheckCircle, XCircle, Clock, AlertTriangle, Shield, Zap, User, ArrowRight, Package
 } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const ITEM_TYPE_CONFIG: Record<string, { label: string; icon: any; color: string }> = {
   launch_gate: { label: "Launch Gate", icon: Shield, color: "text-[#d4a054]" },

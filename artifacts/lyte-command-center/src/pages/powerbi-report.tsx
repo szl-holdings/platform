@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { BarChart3, Activity, CheckCircle2, AlertOctagon, Clock, TrendingUp, AlertTriangle, Loader2, Info } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
-import { PowerBiEmbed, type PowerBiEmbedConfig, apiFetch } from "@workspace/shared-ui";
+import { cn } from "@szl-holdings/shared-ui/utils";
+import { PowerBiEmbed, type PowerBiEmbedConfig, apiFetch } from "@szl-holdings/shared-ui";
 
 const OPS_METRICS = [
   { label: "SLA Compliance", value: "97.8%", delta: "+0.3%", up: true, color: "text-[#d4a054]", icon: CheckCircle2 },

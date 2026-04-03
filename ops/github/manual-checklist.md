@@ -146,7 +146,26 @@ See `scripts/github/update-social-preview-guide.md`.
 
 ---
 
-## 9. Verify Completed State
+## 9. GitHub Packages Setup
+
+GitHub Packages is configured for all five registries (npm, containers, Maven, NuGet, RubyGems).
+
+See the complete packages setup and manual UI steps at:
+**`ops/github/packages-manual-checklist.md`**
+
+Quick reference:
+- Enable Packages feature in repo Settings → Features
+- Connect published packages to the repository after first CI publish
+- Set workflow permissions to Read and write (Settings → Actions → Workflow permissions)
+
+Related docs:
+- `docs/github/packages-strategy.md` — all registries, naming, versioning, access control
+- `docs/github/packages-security.md` — token management, secret hygiene
+- `scripts/github/audit-packages.ts` — audit published packages across all registries
+
+---
+
+## 10. Verify Completed State
 
 After all steps above:
 
@@ -161,3 +180,5 @@ After all steps above:
 - [ ] Wiki is enabled and published (12 pages + sidebar + footer)
 - [ ] Social preview image is uploaded
 - [ ] README links to wiki pages are valid
+- [ ] GitHub Packages enabled (see `ops/github/packages-manual-checklist.md`)
+- [ ] Workflow permissions set to Read and write

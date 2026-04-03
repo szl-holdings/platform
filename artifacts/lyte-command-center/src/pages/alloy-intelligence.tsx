@@ -18,7 +18,7 @@ import {
   PriorityBadge,
   ActionTypeBadge,
   EnvironmentLabel,
-} from "@workspace/shared-ui";
+} from "@szl-holdings/shared-ui";
 
 const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e" };
 const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.07)" };

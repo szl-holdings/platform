@@ -14,7 +14,7 @@ import {
   type InsertVesselPortCall,
   type InsertVesselVoyageEconomics,
   type InsertVesselPosition,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { sql } from "drizzle-orm";
 
 const now = new Date();

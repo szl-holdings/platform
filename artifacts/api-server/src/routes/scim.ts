@@ -22,7 +22,7 @@
 
 import { Router, type Request, type Response, type NextFunction } from "express";
 import crypto from "crypto";
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   usersTable,
   orgMembersTable,
@@ -34,7 +34,7 @@ import {
   scimGroupMembersTable,
   scimProvisionedUsersTable,
   scimSyncLogsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, and, or, ilike, desc, sql, inArray, count } from "drizzle-orm";
 
 const router = Router();

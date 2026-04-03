@@ -9,8 +9,8 @@ import pRetry, { AbortError as PRetryAbortError } from "p-retry";
  *
  * USAGE:
  * ```typescript
- * import { batchProcess } from "@workspace/integrations-openai-ai-server/batch";
- * import { openai } from "@workspace/integrations-openai-ai-server";
+ * import { batchProcess } from "@szl-holdings/integrations-openai-ai-server/batch";
+ * import { openai } from "@szl-holdings/integrations-openai-ai-server";
  *
  * const results = await batchProcess(
  *   artworks,

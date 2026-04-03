@@ -1,5 +1,5 @@
-import { LENSES } from "@workspace/observability";
-import type { LensScore, LensBarData } from "@workspace/observability";
+import { LENSES } from "@szl-holdings/observability";
+import type { LensScore, LensBarData } from "@szl-holdings/observability";
 
 const LENS_ICONS: Record<string, string> = {
   signal: "◎",

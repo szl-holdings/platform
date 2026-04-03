@@ -32,13 +32,13 @@ import {
   insertFirestormTradecraftDecisionSchema,
   insertFirestormAnalystNotebookSchema,
   type InsertFirestormCaseMemory,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { REFERENCE_COMPLIANCE_CONTROLS } from "./readiness.js";
 import { eq, desc, sql, inArray, and } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendNoContent, handleRouteError } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { queryEvidenceIndex, ingestDecisionToEvidenceIndex } from "../lib/tradecraft-evidence-store";
-import { validateAndBuildDecision, type DecisionObjectType } from "@workspace/ai-engine";
+import { validateAndBuildDecision, type DecisionObjectType } from "@szl-holdings/ai-engine";
 import { broadcastWs, pubsub, FIRESTORM_EVENTS } from "../lib/pubsub-bridge.js";
 
 const router: IRouter = Router();

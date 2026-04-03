@@ -1,10 +1,10 @@
 import { logger } from "./logger.js";
 import { knowledgeStore, createKnowledgeEntry, persistAgentRun, type KnowledgeDomain } from "./knowledge-store.js";
 import { agentEventBus, type AgentEventType } from "./event-bus.js";
-import { services } from "@workspace/services";
-import type { ChatMessage } from "@workspace/services";
-import { serverTelemetry } from "@workspace/observability";
-import { db, agentKnowledgeTable, agentRunsTable } from "@workspace/db";
+import { services } from "@szl-holdings/services";
+import type { ChatMessage } from "@szl-holdings/services";
+import { serverTelemetry } from "@szl-holdings/observability";
+import { db, agentKnowledgeTable, agentRunsTable } from "@szl-holdings/db";
 import { lt } from "drizzle-orm";
 
 export interface AgentSchedule {

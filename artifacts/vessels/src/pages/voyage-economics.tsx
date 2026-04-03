@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useVoyages, useVoyageEconomicsAnalytics, type VoyageRow } from "@/hooks/use-vessels-data";
-import { Badge } from "@workspace/shared-ui/ui/badge";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { TrendingUp, TrendingDown, DollarSign, Fuel, Clock, Ship, BarChart3, Loader2, Anchor } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const charterColors: Record<string, string> = {
   time_charter: "text-sky-400 bg-sky-500/10 border-sky-500/20",

@@ -1,20 +1,20 @@
 import { useState } from "react";
 import { useRoute, Link } from "wouter";
 import { useVesselDetail, useFleetExceptions } from "@/hooks/use-vessels-data";
-import { Badge } from "@workspace/shared-ui/ui/badge";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import {
   ArrowLeft, Ship, MapPin, Navigation, Clock, Wrench, AlertTriangle,
   DollarSign, Activity, TrendingUp, TrendingDown, ChevronRight,
   Fuel, Shield, Radio, RefreshCw, Package, Globe, History
 } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import {
   OperationalAuditTimeline,
   OperationalOwnerChip,
   OperationalStatusBadge,
   OperationalRiskBadge,
   type AuditHistoryEntry,
-} from "@workspace/shared-ui/operational-primitives";
+} from "@szl-holdings/shared-ui/operational-primitives";
 
 const statusConfig: Record<string, { label: string; color: string; dotColor: string }> = {
   at_sea: { label: "At Sea", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", dotColor: "#22c55e" },

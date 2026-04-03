@@ -1,9 +1,9 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api, type VesselMaintenance } from "@/lib/api";
-import { Badge } from "@workspace/shared-ui/ui/badge";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Wrench, AlertTriangle, Clock, CheckCircle2, TrendingDown, Ship, Calendar, RefreshCw } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const statusConfig: Record<string, { label: string; color: string; dot: string }> = {
   overdue: { label: "Overdue", color: "text-red-400 bg-red-500/10 border-red-500/20", dot: "bg-red-400" },

@@ -1,7 +1,7 @@
-import { useListProjects, Project } from "@workspace/api-client-react";
+import { useListProjects, Project } from "@szl-holdings/api-client-react";
 import { useState } from "react";
 import { BarChart3, Filter, Grid3X3, TrendingUp, Eye, ArrowUp, ArrowDown, Search, Layers, Zap, RefreshCw, AlertCircle, Clock } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 const healthDimensions = ["Performance", "Security", "Reliability", "Scalability", "Maintainability"];

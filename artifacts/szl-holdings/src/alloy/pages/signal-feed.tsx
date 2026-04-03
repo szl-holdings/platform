@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch, DataStateBadge, isAuthError } from "@workspace/shared-ui";
+import { apiFetch, DataStateBadge, isAuthError } from "@szl-holdings/shared-ui";
 import { Radio, AlertTriangle, Info, ChevronRight, Filter, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";

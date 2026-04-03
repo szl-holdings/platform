@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Rss, Globe, Shield, AlertTriangle, Clock, Radio, Eye, ExternalLink, RefreshCw, Sparkles, Loader2, ChevronDown, ChevronUp } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { LiveDataBadge } from "@/lib/live-badge";
 import { api } from "@/lib/api";
 

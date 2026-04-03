@@ -1,12 +1,12 @@
 import { Router, Request, Response } from "express";
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import { eq, and, desc, or, sql, isNull, not, gte } from "drizzle-orm";
 import {
   pcManagedReviewItemsTable,
   pcManagedReviewAssignmentsTable,
   pcManagedReviewNotesTable,
   pcReviewAuditEventsTable,
-} from "@workspace/db/schema";
+} from "@szl-holdings/db/schema";
 import { logger } from "../lib/logger";
 
 const router = Router();

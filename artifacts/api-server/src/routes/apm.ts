@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { serverTelemetry } from "@workspace/observability";
+import { serverTelemetry } from "@szl-holdings/observability";
 import { authMiddleware } from "../middlewares/auth";
 import { sendSuccess, handleRouteError, sendBadRequest } from "../lib/api-response";
 

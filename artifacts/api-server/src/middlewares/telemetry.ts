@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { serverTelemetry, getTracer } from "@workspace/observability";
+import { serverTelemetry, getTracer } from "@szl-holdings/observability";
 
 const INSTRUMENTED_PREFIXES = [
   "/alloy/",

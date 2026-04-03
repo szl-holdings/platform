@@ -1,19 +1,19 @@
 import { Link, useLocation } from "wouter";
-import { cn } from "@workspace/shared-ui/utils";
-import { toAlpha } from "@workspace/shared-ui/utils";
-import { SectionErrorBoundary } from "@workspace/shared-ui/error-boundary";
+import { cn } from "@szl-holdings/shared-ui/utils";
+import { toAlpha } from "@szl-holdings/shared-ui/utils";
+import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
 import { ReactNode, useState } from "react";
-import { LANE_ACCENT_HEX } from "@workspace/shared-ui/lane-colors";
+import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 import {
   Building2, LayoutDashboard, Eye, Activity,
   BarChart3, Users, FileText, CheckSquare,
   Bell, Menu, X, Briefcase, Map, Globe, TrendingUp, BookOpen,
   Shield, Layers, Radio, Search
 } from "lucide-react";
-import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@workspace/shared-ui";
-import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardShell } from "@workspace/shared-ui/design-system";
+import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui";
+import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
 import { useQuery } from "@tanstack/react-query";
-import { colors, spacing } from "@workspace/shared-ui/tokens";
+import { colors, spacing } from "@szl-holdings/shared-ui/tokens";
 
 const TERRA_ACCENT = LANE_ACCENT_HEX.terra.primary;
 const SIDEBAR_BG = "#080b0d";

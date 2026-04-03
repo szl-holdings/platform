@@ -10,7 +10,7 @@
 
 import { Router } from "express";
 import crypto from "crypto";
-import { db, orgInvitationsTable, organizationsTable, orgMembersTable, auditEventsTable } from "@workspace/db";
+import { db, orgInvitationsTable, organizationsTable, orgMembersTable, auditEventsTable } from "@szl-holdings/db";
 import { eq, and, gt } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
 import { writeLimiter } from "../middlewares/rate-limiters";

@@ -5,12 +5,12 @@ export {
   type Job,
   type JobStatus,
   type WsPublishFn,
-} from "@workspace/workflow-engine";
+} from "@szl-holdings/workflow-engine";
 
-import { jobQueue, JOB_TYPES } from "@workspace/workflow-engine";
+import { jobQueue, JOB_TYPES } from "@szl-holdings/workflow-engine";
 import { logger } from "./logger";
 import { publish, WS_CHANNELS } from "./websocket";
-import { serverTelemetry } from "@workspace/observability";
+import { serverTelemetry } from "@szl-holdings/observability";
 
 jobQueue.setPublishFn(publish);
 

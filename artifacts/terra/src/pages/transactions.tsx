@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ClipboardList, CheckCircle, Clock, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { transactions, type Transaction, type TransactionStep } from "@/data/brokerage";
 import { formatCurrency, WorkflowTraceView, AuditPanel } from "@/components/brokerage-ui";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const stepStatusConfig = {
   complete: { color: "bg-emerald-500", ring: "border-emerald-500/30", label: "Complete", textColor: "text-emerald-400" },

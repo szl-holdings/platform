@@ -25,7 +25,7 @@ import { scheduleNycIngestionJob } from "./lib/terra-nyc-ingestion";
 import "./lib/terra-nyc-extended-ingestion";
 import { scheduleNycExtendedIngestionJob } from "./lib/terra-nyc-extended-ingestion";
 import { seedPlatformData } from "./lib/seed-platform";
-import { initializeOpenTelemetry } from "@workspace/observability";
+import { initializeOpenTelemetry } from "@szl-holdings/observability";
 import { seedTerraDemo } from "./lib/terra-seed";
 import { seedMspData } from "./lib/seed-msp";
 import { seedDreamscapeData } from "./lib/seed-dreamscape";
@@ -191,7 +191,7 @@ async function shutdown(signal: string) {
   }
 
   try {
-    const { pool } = await import("@workspace/db");
+    const { pool } = await import("@szl-holdings/db");
     await pool.end();
     logger.info("Database pool closed");
   } catch (err) {

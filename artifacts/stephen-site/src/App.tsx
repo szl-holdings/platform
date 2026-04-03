@@ -1,9 +1,9 @@
 import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@workspace/shared-ui/ui/toaster";
-import { McpOverlay } from "@workspace/mcp-client";
-import { TooltipProvider } from "@workspace/shared-ui/ui/tooltip";
+import { Toaster } from "@szl-holdings/shared-ui/ui/toaster";
+import { McpOverlay } from "@szl-holdings/mcp-client";
+import { TooltipProvider } from "@szl-holdings/shared-ui/ui/tooltip";
 
 const Home = lazy(() => import("@/pages/Home").then(m => ({ default: m.Home })));
 const Work = lazy(() => import("@/pages/Work").then(m => ({ default: m.Work })));

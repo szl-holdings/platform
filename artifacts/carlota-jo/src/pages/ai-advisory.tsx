@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
-import { Badge } from "@workspace/shared-ui/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Brain, Send, BookOpen, TrendingUp, Lightbulb, Search, Sparkles, Loader2, Download, FileText } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { CarlotaGraphQLPanel } from "@/components/graphql-data-panel";
-import { useRealtimeChannel } from "@workspace/shared-ui";
+import { useRealtimeChannel } from "@szl-holdings/shared-ui";
 
 async function downloadEngagementSummary(
   insights: Array<{ title: string; type: string; summary: string; confidence: number; tags: string[] }>,

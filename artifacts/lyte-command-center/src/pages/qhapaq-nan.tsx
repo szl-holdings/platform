@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Activity, Globe, Shield, Brain, Cpu, TrendingUp, Zap, Radio, ArrowRight, Eye } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const NODES = [
   { id: "aegis", name: "Aegis Command", role: "Defense & Intelligence", agent: "Sentinel Engine", color: "text-indigo-400", bg: "bg-indigo-400/10", border: "border-indigo-400/25", x: 50, y: 15, type: "cortex" },

@@ -1,4 +1,4 @@
-import { CONNECTORS_UI } from "@workspace/shared-ui/core-observability-data";
+import { CONNECTORS_UI } from "@szl-holdings/shared-ui/core-observability-data";
 import { Network, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 
 const HEALTH_ICONS: Record<string, React.ReactNode> = {

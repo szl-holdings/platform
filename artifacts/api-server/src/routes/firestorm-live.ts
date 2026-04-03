@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, firestormIncidentsTable, firestormAlertsTable, firestormAssetsTable, firestormComplianceControlsTable, firestormFindingsTable } from "@workspace/db";
+import { db, firestormIncidentsTable, firestormAlertsTable, firestormAssetsTable, firestormComplianceControlsTable, firestormFindingsTable } from "@szl-holdings/db";
 import { desc, eq, and, gte, count, sql } from "drizzle-orm";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole } from "../middlewares/auth";

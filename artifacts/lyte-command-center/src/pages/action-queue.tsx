@@ -1,16 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "@workspace/shared-ui";
-import { Card, CardContent } from "@workspace/shared-ui/ui/card";
-import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Button } from "@workspace/shared-ui/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/shared-ui/ui/select";
+import { apiFetch } from "@szl-holdings/shared-ui";
+import { Card, CardContent } from "@szl-holdings/shared-ui/ui/card";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { Button } from "@szl-holdings/shared-ui/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
 import {
   CheckSquare, User, AlertOctagon, TrendingDown, GitBranch, Clock, AlertTriangle,
   ArrowRight, Filter, Zap, Users, BarChart3, Package
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 type Role = "executive" | "operations" | "delivery";
 type ActionState = "new" | "acknowledged" | "assigned" | "escalated" | "resolved" | "dismissed";

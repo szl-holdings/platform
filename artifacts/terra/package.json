@@ -19,10 +19,10 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
-    "@workspace/analytics": "workspace:*",
-    "@workspace/observability": "workspace:*",
-    "@workspace/replit-auth-web": "workspace:*",
-    "@workspace/shared-ui": "workspace:*",
+    "@szl-holdings/analytics": "workspace:*",
+    "@szl-holdings/observability": "workspace:*",
+    "@szl-holdings/replit-auth-web": "workspace:*",
+    "@szl-holdings/shared-ui": "workspace:*",
     "clsx": "catalog:",
     "framer-motion": "catalog:",
     "lucide-react": "catalog:",
@@ -34,11 +34,11 @@
     "tailwindcss": "catalog:",
     "vite": "catalog:",
     "wouter": "^3.3.5",
-    "@workspace/mcp-client": "workspace:*"
+    "@szl-holdings/mcp-client": "workspace:*"
   },
   "dependencies": {
     "@types/mapbox-gl": "^3.5.0",
-    "@workspace/graphql-client": "workspace:*",
+    "@szl-holdings/graphql-client": "workspace:*",
     "mapbox-gl": "^3.20.0"
   }
 }

@@ -1,7 +1,16 @@
 {
-  "name": "@workspace/shared-ui",
+  "name": "@szl-holdings/shared-ui",
   "version": "0.0.0",
-  "private": true,
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szl-holdings/szl-holdings-platform.git",
+    "directory": "lib/shared-ui"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
@@ -127,8 +136,8 @@
     "@tanstack/react-query": "catalog:",
     "@udecode/plate-common": "^42.0.0",
     "@udecode/plate-core": "^49.0.0",
-    "@workspace/observability": "workspace:*",
-    "@workspace/replit-auth-web": "workspace:*",
+    "@szl-holdings/observability": "workspace:*",
+    "@szl-holdings/replit-auth-web": "workspace:*",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "cmdk": "^1.1.1",

@@ -4,15 +4,15 @@ import { useRoster, useFleetExceptions, useSanctions } from "@/hooks/use-vessels
 import type { RosterVessel } from "@/lib/api";
 import { dataProvider } from "@/data/data-provider";
 import { VesselsGraphQLPanel } from "@/components/graphql-data-panel";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
-import { Badge } from "@workspace/shared-ui/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Link } from "wouter";
 import { Ship, Globe, MapPin, X, ChevronRight, Radio, Shield, Clock, AlertTriangle, Eye, EyeOff, Anchor, TrendingUp, Package, BarChart3 } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
-import { ExportButton } from "@workspace/shared-ui/data-export";
-import { ActivityFeed } from "@workspace/shared-ui/collaboration";
-import { DataProvenance, ActionLoop, RoleSelector } from "@workspace/shared-ui";
-import type { DataProvenanceInfo } from "@workspace/shared-ui";
+import { ExportButton } from "@szl-holdings/shared-ui/data-export";
+import { ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
+import { DataProvenance, ActionLoop, RoleSelector } from "@szl-holdings/shared-ui";
+import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
 
 const statusColors: Record<string, string> = {
   at_sea: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",

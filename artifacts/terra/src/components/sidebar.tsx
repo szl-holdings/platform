@@ -1,8 +1,8 @@
 import { Link, useLocation } from "wouter";
 import { Building2, LayoutDashboard, AlertTriangle, Home, ChevronLeft, ChevronRight, Users, Brain, Zap, FileText, ClipboardList, DollarSign, Activity, List, UserCheck, ArrowLeftRight, Flame, Handshake } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { useState, useEffect } from "react";
-import { UserButton } from "@workspace/shared-ui/UserButton";
+import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 import { PackBanner } from "@/components/pack-banner";
 
 interface NavItem {

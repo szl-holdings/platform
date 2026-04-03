@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Bell, BellRing, AlertTriangle, CheckCircle2, Clock, Filter, XCircle, Shield, Zap, Volume2, VolumeX } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
-import { doctrineEventBus } from "@workspace/observability";
-import { DoctrineLayerBadge } from "@workspace/shared-ui/doctrine-layer-badge";
+import { cn } from "@szl-holdings/shared-ui/utils";
+import { doctrineEventBus } from "@szl-holdings/observability";
+import { DoctrineLayerBadge } from "@szl-holdings/shared-ui/doctrine-layer-badge";
 
 const alerts = [
   { id: "ALT-001", title: "Model Drift Detected - DeepForecaster v3.2", severity: "high", source: "PredictionDrift Monitor", timestamp: "2 min ago", status: "open", category: "drift", description: "Prediction drift exceeded 5% threshold for Revenue Q3 forecast" },

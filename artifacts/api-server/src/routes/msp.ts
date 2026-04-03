@@ -1,13 +1,13 @@
 // Aegis Operations routes (file: msp.ts — legacy filename, module now known as Aegis Operations)
 import { Router, type IRouter } from "express";
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   mspClientsTable,
   mspTicketsTable,
   mspDevicesTable,
   mspContractsTable,
   mspTechniciansTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, sql, desc, and, or, ilike } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";

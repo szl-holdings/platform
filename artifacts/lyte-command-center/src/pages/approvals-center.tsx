@@ -1,6 +1,6 @@
-import { APPROVALS, formatCurrency } from "@workspace/shared-ui/core-observability-data";
+import { APPROVALS, formatCurrency } from "@szl-holdings/shared-ui/core-observability-data";
 import { CheckSquare, Clock, AlertTriangle, User, ArrowRight, ExternalLink } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 export default function ApprovalsCenter() {
   const escalated = APPROVALS.filter(a => a.status === "escalated");

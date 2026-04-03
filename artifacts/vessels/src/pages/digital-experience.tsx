@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { dataProvider } from "@/data/data-provider";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
-import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Progress } from "@workspace/shared-ui/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { Progress } from "@szl-holdings/shared-ui/ui/progress";
 import { Package, Truck, Star, Clock, AlertTriangle, CheckCircle, TrendingUp, MapPin } from "lucide-react";
 
 const demurrageColors: Record<string, string> = {

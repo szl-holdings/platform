@@ -1,5 +1,5 @@
-import { db } from "@workspace/db";
-import { pcModelLanesTable, pcModelRequestsTable, pcCostTrackingTable } from "@workspace/db/schema";
+import { db } from "@szl-holdings/db";
+import { pcModelLanesTable, pcModelRequestsTable, pcCostTrackingTable } from "@szl-holdings/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { logger } from "../lib/logger";
 

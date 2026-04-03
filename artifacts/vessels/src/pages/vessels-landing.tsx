@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { Ship, Navigation, AlertTriangle, Wrench, DollarSign, Activity, ChevronRight, MapPin, BarChart3, TrendingUp, Anchor } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
-import { ContactModal } from "@workspace/shared-ui";
+import { cn } from "@szl-holdings/shared-ui/utils";
+import { ContactModal } from "@szl-holdings/shared-ui";
 
 const CORE_VIEWS = [
   {

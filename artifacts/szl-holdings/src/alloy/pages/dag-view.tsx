@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch, isAuthError } from "@workspace/shared-ui";
+import { apiFetch, isAuthError } from "@szl-holdings/shared-ui";
 import { useState } from "react";
 import { CheckCircle, XCircle, Clock, Activity, AlertTriangle, ChevronLeft } from "lucide-react";
 import { useLocation } from "wouter";

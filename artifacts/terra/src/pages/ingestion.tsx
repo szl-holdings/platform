@@ -5,7 +5,7 @@ import {
   Upload, RefreshCw, CheckCircle, XCircle, Clock, AlertTriangle,
   FileText, Database, Play, ChevronDown, ChevronUp, Zap, BarChart3
 } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API = "/api";

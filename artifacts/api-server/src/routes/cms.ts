@@ -7,11 +7,11 @@ import {
   downloadsTable, navigationItemsTable, siteSettingsTable, mediaAssetsTable,
   formsTable, contactSubmissionsTable, leadStatusTable, redirectsTable,
   cmsPostsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, asc, sql, and, inArray } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
-import { services } from "@workspace/services";
+import { services } from "@szl-holdings/services";
 
 const imageUpload = multer({
   storage: multer.memoryStorage(),

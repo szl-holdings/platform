@@ -6,7 +6,7 @@ import {
   Building2, AlertTriangle, Clock, Gavel, FileText, CheckCircle, X,
   BarChart3, Zap, Users, Bookmark
 } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API = "/api";

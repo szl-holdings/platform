@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch, DataStateBadge } from "@workspace/shared-ui";
+import { apiFetch, DataStateBadge } from "@szl-holdings/shared-ui";
 import {
   Activity, Zap, FileText, Globe, DollarSign, TrendingUp,
   AlertTriangle, CheckCircle, Radio, BarChart2

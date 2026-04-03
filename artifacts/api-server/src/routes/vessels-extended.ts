@@ -19,7 +19,7 @@ import {
   type VesselSanctionsScreening,
   type VesselPortCall,
   type VesselVoyageEconomics,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, and, sql, type SQL } from "drizzle-orm";
 import {
   sendSuccess,

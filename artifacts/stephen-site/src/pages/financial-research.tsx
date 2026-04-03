@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { TrendingUp, TrendingDown, BarChart3, DollarSign, Activity, Globe, PieChart, ArrowUpRight, ArrowDownRight, Calendar, Brain } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 const marketData = [

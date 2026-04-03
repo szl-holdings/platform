@@ -7,10 +7,10 @@ import {
   Wrench, User, AlertTriangle, Download, Loader2, CheckCircle, Clock,
   FileText, Shield, Activity, Target, Tag, LayoutDashboard
 } from "lucide-react";
-import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
-import { OperationalQueueRow, type OperationalEntity } from "@workspace/shared-ui";
+import { CommentThread, ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
+import { OperationalQueueRow, type OperationalEntity } from "@szl-holdings/shared-ui";
 import { properties, tenants, alerts } from "@/data/portfolio";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { gqlFetch, type GqlTerraActionItem } from "@/lib/api";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 

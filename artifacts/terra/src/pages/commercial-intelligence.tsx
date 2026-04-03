@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Building2, MapPin, Search, TrendingUp, DollarSign, Users, Filter, BarChart3, RefreshCw, ChevronRight, Layers, ArrowRight, Badge } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
-import { DataStateBadge } from "@workspace/shared-ui";
+import { cn } from "@szl-holdings/shared-ui/utils";
+import { DataStateBadge } from "@szl-holdings/shared-ui";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API_BASE = "/api";

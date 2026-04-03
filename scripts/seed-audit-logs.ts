@@ -1,4 +1,4 @@
-import { db, activityLogTable, auditEventsTable } from "@workspace/db";
+import { db, activityLogTable, auditEventsTable } from "@szl-holdings/db";
 import { sql } from "drizzle-orm";
 
 const ACTORS = [

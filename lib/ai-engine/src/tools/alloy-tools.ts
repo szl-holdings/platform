@@ -16,7 +16,7 @@
  * human approval before execution in approval_required mode.
  */
 import type { HFToolDef } from "../providers/hf-client.js";
-import type { InsertFirestormToolAuditLog } from "@workspace/db";
+import type { InsertFirestormToolAuditLog } from "@szl-holdings/db";
 
 export interface ToolExecutionResult {
   toolName: string;
@@ -488,7 +488,7 @@ async function writeAuditLog(
   throwOnFailure = false,
 ): Promise<void> {
   try {
-    const { db, firestormToolAuditLogTable } = await import("@workspace/db");
+    const { db, firestormToolAuditLogTable } = await import("@szl-holdings/db");
     const logId = `tal-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const row: InsertFirestormToolAuditLog = {
       logId,

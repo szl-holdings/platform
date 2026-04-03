@@ -10,7 +10,7 @@ import {
   investorPacketDeliverables,
   diligenceChecklistsTable,
   diligenceChecklistItemsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
 
 async function upsertFlag(key: string, name: string, description: string) {

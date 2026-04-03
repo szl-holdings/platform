@@ -7,7 +7,7 @@ import {
   Calendar, User, Tag, ArrowRight, Bell, BarChart3, Eye, Zap, Target,
   CheckCircle, ArrowUpRight, LinkIcon, Layers, Loader2, RefreshCw, Download
 } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API_BASE = "/api";

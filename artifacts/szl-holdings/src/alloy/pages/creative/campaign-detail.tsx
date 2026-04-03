@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, FileText, LayoutTemplate, Mic2, FolderArchive, Eye, ArrowLeft, Calendar, CreditCard, TrendingUp, DollarSign, Users, MessageCircle } from "lucide-react";
 import { useCampaign } from "@/alloy/hooks/use-campaigns";
 import { format } from "date-fns";
-import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
+import { CommentThread, ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 
 import { ScriptEditor } from "@/alloy/components/creative/scripts/script-editor";
 import { StoryboardBoard } from "@/alloy/components/creative/storyboards/storyboard-board";

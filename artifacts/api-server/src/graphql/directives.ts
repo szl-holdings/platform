@@ -92,7 +92,7 @@ export function auditField<TSource, TArgs, TContext extends GraphQLContext>(
     });
 
     try {
-      const { writeEnrichedAudit } = await import("@workspace/audit");
+      const { writeEnrichedAudit } = await import("@szl-holdings/audit");
       await writeEnrichedAudit({
         orgId: user?.orgs?.[0]?.orgId ?? null,
         userId: user?.id ?? null,
@@ -149,7 +149,7 @@ export async function auditMutationContext(
 ): Promise<void> {
   try {
     const user = context?.req?.user;
-    const { writeEnrichedAudit } = await import("@workspace/audit");
+    const { writeEnrichedAudit } = await import("@szl-holdings/audit");
     await writeEnrichedAudit({
       orgId: user?.orgs?.[0]?.orgId ?? null,
       userId: user?.id ?? null,

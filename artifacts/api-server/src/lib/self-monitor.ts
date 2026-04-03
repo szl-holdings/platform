@@ -1,4 +1,4 @@
-import { db, lyteSignalsTable } from "@workspace/db";
+import { db, lyteSignalsTable } from "@szl-holdings/db";
 import { lt, sql } from "drizzle-orm";
 import { publish, WS_CHANNELS } from "./websocket";
 import { logger } from "./logger";

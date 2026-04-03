@@ -1,5 +1,5 @@
-import { WORKFLOWS, formatCurrency, formatDuration, getStateColor, type EntityState } from "@workspace/shared-ui/core-observability-data";
-import { cn } from "@workspace/shared-ui/utils";
+import { WORKFLOWS, formatCurrency, formatDuration, getStateColor, type EntityState } from "@szl-holdings/shared-ui/core-observability-data";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { Activity, AlertTriangle, Clock, User, ExternalLink } from "lucide-react";
 
 function StateBadge({ state }: { state: EntityState }) {

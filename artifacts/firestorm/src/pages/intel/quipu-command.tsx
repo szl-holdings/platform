@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Activity, Brain, Cpu, Globe, Shield, Zap, ChevronRight, Circle, Radio, TrendingUp, AlertCircle, CheckCircle2, Clock } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { Link } from "wouter";
 
 const ECOSYSTEM_APPS = [

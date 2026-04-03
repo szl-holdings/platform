@@ -1,4 +1,4 @@
-import { useCarlotaServices, useCarlotaInquiries } from "@workspace/graphql-client/hooks";
+import { useCarlotaServices, useCarlotaInquiries } from "@szl-holdings/graphql-client/hooks";
 
 export function CarlotaGraphQLPanel() {
   const { data: servicesData, loading: sLoading } = useCarlotaServices({ isActive: true, limit: 3 });

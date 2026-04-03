@@ -1,5 +1,5 @@
 import { Expo, type ExpoPushMessage, type ExpoPushTicket } from "expo-server-sdk";
-import { db, pushTokensTable } from "@workspace/db";
+import { db, pushTokensTable } from "@szl-holdings/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { logger } from "./logger";
 

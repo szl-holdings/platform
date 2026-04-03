@@ -178,7 +178,7 @@ app.get("/api/health", async (_req: Request, res: Response) => {
   if (dbUrl) {
     const dbStart = Date.now();
     try {
-      const { db } = await import("@workspace/db");
+      const { db } = await import("@szl-holdings/db");
       const { sql } = await import("drizzle-orm");
       await Promise.race([
         db.execute(sql`SELECT 1`),
@@ -238,7 +238,7 @@ app.get("/api/health/ready", async (_req: Request, res: Response) => {
 
   if (dbUrl) {
     try {
-      const { db } = await import("@workspace/db");
+      const { db } = await import("@szl-holdings/db");
       const { sql } = await import("drizzle-orm");
       await Promise.race([
         db.execute(sql`SELECT 1`),
@@ -279,7 +279,7 @@ app.get("/api/health/detailed", async (req: Request, res: Response) => {
   if (dbUrl) {
     const start = Date.now();
     try {
-      const { db, pool } = await import("@workspace/db");
+      const { db, pool } = await import("@szl-holdings/db");
       const { sql } = await import("drizzle-orm");
       await Promise.race([
         db.execute(sql`SELECT 1`),
@@ -309,7 +309,7 @@ app.get("/api/health/detailed", async (req: Request, res: Response) => {
   }
 
   try {
-    const { serverTelemetry } = await import("@workspace/observability");
+    const { serverTelemetry } = await import("@szl-holdings/observability");
     const snapshot = serverTelemetry.getSnapshot();
     checks["telemetry"] = {
       status: snapshot.errorRate > 10 ? "elevated_errors" : "ok",

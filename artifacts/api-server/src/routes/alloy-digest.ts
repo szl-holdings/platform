@@ -1,8 +1,8 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { pool, db } from "@workspace/db";
-import { alloyWorkflows, alloyApprovals, alloySignals, alloyActions } from "@workspace/db";
+import { pool, db } from "@szl-holdings/db";
+import { alloyWorkflows, alloyApprovals, alloySignals, alloyActions } from "@szl-holdings/db";
 import { eq, desc, gte, count, and } from "drizzle-orm";
-import { services } from "@workspace/services";
+import { services } from "@szl-holdings/services";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendSuccess, sendCreated, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";

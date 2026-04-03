@@ -15,7 +15,7 @@ import {
   szlSignalsTable,
   szlActionsTable,
   szlWorkflowsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
 
 const PILOT_ORG_SLUG = "pilot-customer-1";

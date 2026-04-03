@@ -1,4 +1,4 @@
-import { APPROVALS, PREDICTIONS, formatCurrency } from "@workspace/shared-ui/core-observability-data";
+import { APPROVALS, PREDICTIONS, formatCurrency } from "@szl-holdings/shared-ui/core-observability-data";
 import { AlertOctagon, Brain, ExternalLink, ArrowRight, Clock } from "lucide-react";
 
 const ESCALATIONS = [

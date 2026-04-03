@@ -1,4 +1,4 @@
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   alloySignals,
   alloyWorkflows,
@@ -13,7 +13,7 @@ import {
   type AlloyWorkflow,
   type AlloySignal,
   type AlloyWorkflowRun,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc } from "drizzle-orm";
 import { logger } from "./logger";
 import { jobQueue } from "./job-queue";

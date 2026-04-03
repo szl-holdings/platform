@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { services } from "@workspace/services";
-import { APP_INTEGRATIONS } from "@workspace/config";
+import { services } from "@szl-holdings/services";
+import { APP_INTEGRATIONS } from "@szl-holdings/config";
 import { integrationActivityLog, type IntegrationActivity } from "./admin.js";
 
 function logActivity(entry: Omit<IntegrationActivity, "id" | "timestamp">) {

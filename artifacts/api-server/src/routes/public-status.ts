@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { pool } from "@workspace/db";
+import { pool } from "@szl-holdings/db";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();

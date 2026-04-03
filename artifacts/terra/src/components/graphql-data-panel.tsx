@@ -1,4 +1,4 @@
-import { useTerraDeals, useTerraLeads } from "@workspace/graphql-client/hooks";
+import { useTerraDeals, useTerraLeads } from "@szl-holdings/graphql-client/hooks";
 
 export function TerraGraphQLPanel() {
   const { data: dealsData, loading: dealsLoading } = useTerraDeals({ limit: 3 });

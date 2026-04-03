@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Boxes, Play, GitBranch, TrendingUp, TrendingDown, BarChart3, Brain, Settings, Plus, Trash2 } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 
 interface Scenario {
   id: string;

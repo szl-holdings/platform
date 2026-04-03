@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, featureFlagsTable, featureFlagOverridesTable, orgMembersTable } from "@workspace/db";
+import { db, featureFlagsTable, featureFlagOverridesTable, orgMembersTable } from "@szl-holdings/db";
 import { eq, desc } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendError, handleRouteError } from "../lib/api-response";
 import { logActivity } from "../lib/activity-logger";

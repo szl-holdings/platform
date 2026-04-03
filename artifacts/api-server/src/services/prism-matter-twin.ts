@@ -1,6 +1,6 @@
-import { db } from "@workspace/db";
-import { pcMatterTwinSnapshotsTable, pcPressureScoresTable, pcForecastDiffsTable, pcProofChainEntriesTable, pcDataProductScoresTable, pcWorldlineFeaturesTable } from "@workspace/db/schema";
-import { pcMattersTable, pcPartiesTable, pcClaimsTable, pcDeadlinesTable, pcCommunicationsTable } from "@workspace/db/schema";
+import { db } from "@szl-holdings/db";
+import { pcMatterTwinSnapshotsTable, pcPressureScoresTable, pcForecastDiffsTable, pcProofChainEntriesTable, pcDataProductScoresTable, pcWorldlineFeaturesTable } from "@szl-holdings/db/schema";
+import { pcMattersTable, pcPartiesTable, pcClaimsTable, pcDeadlinesTable, pcCommunicationsTable } from "@szl-holdings/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { logger } from "../lib/logger";
 

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { BarChart3, Building2, TrendingUp, DollarSign, Home, AlertTriangle, Activity, Info, Loader2 } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
-import { PowerBiEmbed, type PowerBiEmbedConfig, apiFetch } from "@workspace/shared-ui";
+import { cn } from "@szl-holdings/shared-ui/utils";
+import { PowerBiEmbed, type PowerBiEmbedConfig, apiFetch } from "@szl-holdings/shared-ui";
 
 const PORTFOLIO_METRICS = [
   { label: "Portfolio Value", value: "$48.3M", delta: "+4.1%", up: true, icon: DollarSign, color: "#10b981" },

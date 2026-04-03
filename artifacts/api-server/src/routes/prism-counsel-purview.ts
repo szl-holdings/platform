@@ -1,7 +1,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { sendSuccess, sendNotFound, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   pcPurviewCaseLinksTable,
   pcPurviewHoldAwarenessTable,
@@ -9,7 +9,7 @@ import {
   pcPurviewScopeLinksTable,
   pcPurviewDiagnosticsTable,
   pcAuditEventsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
 

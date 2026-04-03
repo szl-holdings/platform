@@ -1,10 +1,10 @@
 import { BarChart3, Users, Ticket, Server, AlertTriangle, CheckCircle, Clock, DollarSign, ArrowUp, ArrowDown, Activity, Wifi, Shield, TrendingUp, ChevronRight, RefreshCw, Bell, MapPin, Star, AlertCircle } from "lucide-react";
-import { ActivityFeed } from "@workspace/shared-ui/collaboration";
+import { ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "@workspace/shared-ui/ui/skeleton";
+import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { toast } from "sonner";
-import { DataStateBadge } from "@workspace/shared-ui";
+import { DataStateBadge } from "@szl-holdings/shared-ui";
 import { FirestormGraphQLPanel } from "@/components/graphql-data-panel";
 
 const API_BASE = "/api";

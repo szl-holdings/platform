@@ -20,7 +20,7 @@ import {
   insertVesselSimulationSchema,
   insertVesselsExceptionEventSchema,
   insertVesselCommandWorkflowSchema,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendNoContent, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";

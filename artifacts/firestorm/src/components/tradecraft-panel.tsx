@@ -1,8 +1,8 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Button } from "@workspace/shared-ui/ui/button";
-import { Input } from "@workspace/shared-ui/ui/input";
+import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { Button } from "@szl-holdings/shared-ui/ui/button";
+import { Input } from "@szl-holdings/shared-ui/ui/input";
 import type { LucideIcon } from "lucide-react";
 import {
   Brain, Shield, BookOpen, ChevronRight, AlertTriangle,
@@ -10,7 +10,7 @@ import {
   Star, Activity, Lock, Zap, Search, AlertCircle, Loader2, Info
 } from "lucide-react";
 import { useState } from "react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { Link } from "wouter";
 
 interface TradecraftDecision {

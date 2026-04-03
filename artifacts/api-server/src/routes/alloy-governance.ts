@@ -9,7 +9,7 @@ import {
   insertAlloyPolicySchema,
   insertAlloyGovernanceIncidentSchema,
   insertAlloyUsageEventSchema,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, and, isNull, count, sum, gte, sql } from "drizzle-orm";
 import {
   authMiddleware,

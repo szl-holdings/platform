@@ -1,11 +1,11 @@
-import { db } from "@workspace/db";
+import { db } from "@szl-holdings/db";
 import {
   terraDistressPropertiesTable,
   terraDistressAlertsTable,
   terraIngestionRunsTable,
   type InsertTerraDistressProperty,
   type InsertTerraDistressAlert,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
 import { generateAlertsForProperty, upsertDistressProperty, startIngestionRun, completeIngestionRun } from "../lib/terra-distress-service";
 

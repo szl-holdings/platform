@@ -1,17 +1,17 @@
 import React, { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
-import { SandboxModeProvider, SandboxModeBanner, CookieBanner, StatusBanner } from "@workspace/shared-ui";
-import { McpOverlay } from "@workspace/mcp-client";
+import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
+import { SandboxModeProvider, SandboxModeBanner, CookieBanner, StatusBanner } from "@szl-holdings/shared-ui";
+import { McpOverlay } from "@szl-holdings/mcp-client";
 import { LyteLayout } from "@/components/lyte-layout";
-import { AgentCopilot } from "@workspace/shared-ui/copilot";
-import { beaconConfig } from "@workspace/shared-ui/copilot-configs";
-import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
-import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
-import { useAuth } from "@workspace/replit-auth-web";
+import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
+import { beaconConfig } from "@szl-holdings/shared-ui/copilot-configs";
+import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
+import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
+import { useAuth } from "@szl-holdings/replit-auth-web";
 import { Shield } from "lucide-react";
-import { LANE_ACCENT_HEX } from "@workspace/shared-ui/lane-colors";
+import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 
 const LYTE_ACCENT = LANE_ACCENT_HEX.lyte.primary;
 

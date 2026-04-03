@@ -8,7 +8,7 @@ import {
   lyteAlertEventsTable,
   lyteEscalationsTable,
   lyteDashboardsTable,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, gte, lte, and, sql, inArray, asc } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, sendBadRequest, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam, denyIfReadOnly } from "../middlewares/auth";

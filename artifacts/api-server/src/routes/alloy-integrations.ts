@@ -1,8 +1,8 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { createHmac, randomBytes } from "crypto";
-import { pool, db, connectorsTable } from "@workspace/db";
+import { pool, db, connectorsTable } from "@szl-holdings/db";
 import { eq, and } from "drizzle-orm";
-import { services } from "@workspace/services";
+import { services } from "@szl-holdings/services";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendBadRequest, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";

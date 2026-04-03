@@ -16,7 +16,7 @@ import {
   organizationsTable,
   type SzlSignal,
   type SzlPort,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 
 async function seedCanonical() {
   console.log("Seeding SZL canonical data...");

@@ -3,7 +3,7 @@ import {
   Shield, CheckCircle, X, AlertTriangle, FileText,
   MessageSquare, ChevronRight, ArrowUpRight, Download, Clock
 } from "lucide-react";
-import { EmptyState } from "@workspace/shared-ui";
+import { EmptyState } from "@szl-holdings/shared-ui";
 import { threatTwins, exposureTwins, incidentReadiness, type ThreatApproval } from "@/data/threat-twin";
 
 const ACCENT = "hsl(220 72% 56%)";

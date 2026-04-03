@@ -1,7 +1,16 @@
 {
-  "name": "@workspace/data-connectors",
+  "name": "@szl-holdings/data-connectors",
   "version": "0.0.0",
-  "private": true,
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szl-holdings/szl-holdings-platform.git",
+    "directory": "lib/data-connectors"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
   "type": "module",
   "exports": {
     ".": {
@@ -10,7 +19,7 @@
     }
   },
   "dependencies": {
-    "@workspace/services": "workspace:*"
+    "@szl-holdings/services": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:"

@@ -1,4 +1,4 @@
-import { EXECUTION_RUNS, WORKFLOWS_UI, CONNECTORS_UI, formatCurrency } from "@workspace/shared-ui/core-observability-data";
+import { EXECUTION_RUNS, WORKFLOWS_UI, CONNECTORS_UI, formatCurrency } from "@szl-holdings/shared-ui/core-observability-data";
 import { BarChart2, TrendingUp } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 

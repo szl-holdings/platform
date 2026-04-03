@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { pool } from "@workspace/db";
+import { pool } from "@szl-holdings/db";
 import { logger } from "./logger";
 
 function getMigrationFilePath(): string {

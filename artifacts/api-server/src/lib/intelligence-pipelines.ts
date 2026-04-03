@@ -1,7 +1,7 @@
 import { logger } from "./logger";
 import { gatewayInfer } from "./ai-gateway";
 import { writeAuditLog } from "./alloy-orchestration";
-import type { ChatMessage } from "@workspace/services";
+import type { ChatMessage } from "@szl-holdings/services";
 
 export type PipelineStageType = "ingest" | "classify" | "score" | "enrich" | "recommend" | "audit";
 

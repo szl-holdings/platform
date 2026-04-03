@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Activity, AlertTriangle, CheckCircle, Clock, Database, Server, Wifi, Zap, RefreshCw, ShieldCheck, BarChart3 } from "lucide-react";
-import { apiFetch } from "@workspace/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 interface HealthCheck {
   status: string;

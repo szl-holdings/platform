@@ -15,7 +15,7 @@ import {
   insertLyteSavedViewSchema,
   insertLyteSignalCommentSchema,
   insertLyteReadinessItemSchema,
-} from "@workspace/db";
+} from "@szl-holdings/db";
 import { eq, desc, and, sql, ne } from "drizzle-orm";
 import {
   sendSuccess,

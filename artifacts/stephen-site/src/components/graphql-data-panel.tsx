@@ -1,4 +1,4 @@
-import { useStephenCaseStudies, useStephenContentBlocks } from "@workspace/graphql-client/hooks";
+import { useStephenCaseStudies, useStephenContentBlocks } from "@szl-holdings/graphql-client/hooks";
 
 export function StephenGraphQLPanel() {
   const { data: caseStudiesData, loading: csLoading } = useStephenCaseStudies({ limit: 3 });

@@ -1,5 +1,5 @@
-import { AppObservabilityPage } from "@workspace/shared-ui";
-  import { lyteCommandCenterConfig } from "@workspace/observability/configs";
+import { AppObservabilityPage } from "@szl-holdings/shared-ui";
+  import { lyteCommandCenterConfig } from "@szl-holdings/observability/configs";
 
   export default function ObservabilityPage() {
     return <AppObservabilityPage config={lyteCommandCenterConfig} />;

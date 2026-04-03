@@ -60,8 +60,8 @@ export const carlotaJoResolvers = {
   Query: {
     carlotaServices: async (_: unknown, args: { category?: string; isActive?: boolean; limit?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { carlotaServicesTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { carlotaServicesTable } = await import("@szl-holdings/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions = [];
         if (args.category) conditions.push(eq(carlotaServicesTable.category, args.category as any));
@@ -77,8 +77,8 @@ export const carlotaJoResolvers = {
     },
     carlotaReservations: async (_: unknown, args: { status?: string; limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { carlotaReservationsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { carlotaReservationsTable } = await import("@szl-holdings/db/schema");
         const { desc, eq } = await import("drizzle-orm");
         const query = db.select().from(carlotaReservationsTable).orderBy(desc(carlotaReservationsTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (args.status) {
@@ -91,8 +91,8 @@ export const carlotaJoResolvers = {
     },
     carlotaReservation: async (_: unknown, args: { confirmationId: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { carlotaReservationsTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { carlotaReservationsTable } = await import("@szl-holdings/db/schema");
         const { eq } = await import("drizzle-orm");
         const rows = await db.select().from(carlotaReservationsTable).where(eq(carlotaReservationsTable.confirmationId, args.confirmationId)).limit(1);
         return rows[0] ?? null;
@@ -102,8 +102,8 @@ export const carlotaJoResolvers = {
     },
     carlotaInquiries: async (_: unknown, args: { status?: string; limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { carlotaInquiriesTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { carlotaInquiriesTable } = await import("@szl-holdings/db/schema");
         const { desc, eq } = await import("drizzle-orm");
         const query = db.select().from(carlotaInquiriesTable).orderBy(desc(carlotaInquiriesTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (args.status) {
@@ -116,8 +116,8 @@ export const carlotaJoResolvers = {
     },
     carlotaClientProfiles: async (_: unknown, args: { limit?: number; offset?: number }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { carlotaClientProfilesTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { carlotaClientProfilesTable } = await import("@szl-holdings/db/schema");
         const { desc } = await import("drizzle-orm");
         return await db.select().from(carlotaClientProfilesTable).orderBy(desc(carlotaClientProfilesTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
       } catch {
@@ -128,8 +128,8 @@ export const carlotaJoResolvers = {
   Mutation: {
     createCarlotaInquiry: async (_: unknown, args: { name: string; email: string; service: string; message: string }) => {
       try {
-        const { db } = await import("@workspace/db");
-        const { carlotaInquiriesTable } = await import("@workspace/db/schema");
+        const { db } = await import("@szl-holdings/db");
+        const { carlotaInquiriesTable } = await import("@szl-holdings/db/schema");
         const rows = await db
           .insert(carlotaInquiriesTable)
           .values({ name: args.name, email: args.email, service: args.service, message: args.message, status: "new" } as any)
