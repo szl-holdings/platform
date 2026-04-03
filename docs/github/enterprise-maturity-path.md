@@ -41,22 +41,31 @@ The enterprise maturity path transforms the SZL Holdings GitHub presence from fo
 - [x] Issue labels bootstrapped
 
 #### README & Surface
-- [x] Flagship README updated to premium standard (all required sections)
+- [x] Flagship README updated to premium standard (all required sections, CI badges)
 - [x] Org profile README deployed with company statement, platform architecture, demo path
-- [ ] Personal profile README updated with org link *(requires manual update)*
-- [ ] All archive repos annotated with archived annotation template
+- [ ] Personal profile README updated with org link *(requires manual — OAuth can't write to personal repos)*
+- [x] All archive repos annotated with archived annotation template *(all 3 personal repos archived with consolidation notice)*
 
 #### Actions / CI
-- [ ] All workflows have explicit `permissions` blocks *(OAuth lacks `workflow` scope — cannot push workflow files)*
+- [ ] All workflows have explicit `permissions` blocks *(OAuth lacks `workflow` scope — cannot push workflow files via API)*
 - [ ] Third-party actions pinned to SHA
 - [ ] CI gate job added as single status check for branch protection
-- [ ] `deploy.yml` clarified (implement real trigger or document as placeholder)
-- [ ] `prism-counsel-ci.yml` audited — remove if not needed
+- [x] `deploy.yml` implemented with Replit deploy trigger
+- [x] `release.yml` implemented with auto-versioning from conventional commits
 
 #### Gists
-- [ ] Gist audit complete
-- [ ] Non-compliant gists made private or deleted
-- [ ] Retained gists registry updated
+- [x] Gist audit complete *(zero gists found — clean)*
+- [x] Non-compliant gists made private or deleted *(N/A — none exist)*
+- [x] Retained gists registry updated *(N/A — none exist)*
+
+#### Additional Phase 1 Completions
+- [x] CODE_OF_CONDUCT.md deployed (Contributor Covenant 2.1)
+- [x] CHANGELOG.md deployed (Keep a Changelog format)
+- [x] FUNDING.yml configured
+- [x] Tag protection ruleset active for `v*` releases
+- [x] Dependabot version updates configured (npm + GitHub Actions, grouped)
+- [x] Production environment created with protected branch policy
+- [x] v0.1.0 Foundation Release published with release notes
 
 ### Phase 1 Gate
 
@@ -99,10 +108,10 @@ Phase 1 is complete when:
 
 #### Access Control
 - [x] Create formal teams: `platform`, `security` (even if single-member)
-- [ ] Assign repos to teams with explicit permissions
-- [ ] Document onboarding procedure for future contributors
-- [ ] Set member base permissions to `Read` (org settings)
-- [ ] Enable 2FA requirement for org members
+- [x] Assign repos to teams with explicit permissions *(platform=admin, security=push on both repos)*
+- [x] Document onboarding procedure for future contributors *(CONTRIBUTING.md deployed)*
+- [x] Set member base permissions to `Read` (org settings)
+- [ ] Enable 2FA requirement for org members *(requires manual UI confirmation)*
 
 #### Rulesets (Team plan)
 - [ ] Upgrade to Team plan when org has 2+ active contributors
