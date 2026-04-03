@@ -93,19 +93,47 @@ export async function enqueuePrismJob(
   return job.id;
 }
 
+const MAX_DB_RETRIES = 3;
+const DB_RETRY_DELAY_MS = 2000;
+
+async function withDbRetry<T>(fn: () => Promise<T>, context: string): Promise<T> {
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < MAX_DB_RETRIES; attempt++) {
+    try {
+      return await fn();
+    } catch (err: unknown) {
+      lastErr = err;
+      const msg = err instanceof Error ? err.message : String(err);
+      const isConnectionErr = msg.includes("Connection terminated") ||
+        msg.includes("connection timeout") ||
+        msg.includes("ECONNRESET") ||
+        msg.includes("ENOTFOUND") ||
+        msg.includes("connect ETIMEDOUT") ||
+        msg.includes("Client was closed");
+      if (!isConnectionErr || attempt === MAX_DB_RETRIES - 1) throw err;
+      logger.warn({ attempt, context, err: msg }, "[prism-queue] DB connection error — retrying");
+      await new Promise((r) => setTimeout(r, DB_RETRY_DELAY_MS * (attempt + 1)));
+    }
+  }
+  throw lastErr;
+}
+
 async function processPendingJobs(): Promise<void> {
   if (isProcessing || activeCount >= MAX_CONCURRENT) return;
   isProcessing = true;
 
   try {
-    const pendingJobs = await db.select()
-      .from(pcBackgroundJobsTable)
-      .where(and(
-        eq(pcBackgroundJobsTable.status, "pending"),
-        sql`(${pcBackgroundJobsTable.nextRetryAt} IS NULL OR ${pcBackgroundJobsTable.nextRetryAt} <= NOW())`
-      ))
-      .orderBy(pcBackgroundJobsTable.createdAt)
-      .limit(MAX_CONCURRENT - activeCount);
+    const pendingJobs = await withDbRetry(() =>
+      db.select()
+        .from(pcBackgroundJobsTable)
+        .where(and(
+          eq(pcBackgroundJobsTable.status, "pending"),
+          sql`(${pcBackgroundJobsTable.nextRetryAt} IS NULL OR ${pcBackgroundJobsTable.nextRetryAt} <= NOW())`
+        ))
+        .orderBy(pcBackgroundJobsTable.createdAt)
+        .limit(MAX_CONCURRENT - activeCount),
+      "processPendingJobs"
+    );
 
     for (const job of pendingJobs) {
       activeCount++;

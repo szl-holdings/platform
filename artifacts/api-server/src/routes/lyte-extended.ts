@@ -350,20 +350,47 @@ router.get("/dashboard", authMiddleware(), async (_req, res) => {
 
 router.get("/insights/narratives", authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const signals = await db.select().from(lyteSignalsTable).where(ne(lyteSignalsTable.status, "resolved")).orderBy(desc(lyteSignalsTable.receivedAt)).limit(20);
-    const incidents = await db.select().from(lyteIncidentsTable).where(ne(lyteIncidentsTable.status, "closed")).orderBy(desc(lyteIncidentsTable.createdAt)).limit(10);
-    const bySeverity = signals.reduce<Record<string, number>>((a, s) => { a[s.severity] = (a[s.severity] ?? 0) + 1; return a; }, {});
-    const bySource = signals.reduce<Record<string, number>>((a, s) => { a[s.source] = (a[s.source] ?? 0) + 1; return a; }, {});
-    const narratives = [];
-    if ((bySeverity.critical ?? 0) > 0) {
-      narratives.push({ type: "alert", priority: "critical", headline: `${bySeverity.critical} critical signal${bySeverity.critical > 1 ? "s" : ""} require immediate attention`, detail: "Critical signals are unacknowledged and may have downstream impact." });
+    let signals: { severity: string; source: string; status: string }[] = [];
+    let incidents: { title?: string | null; status: string }[] = [];
+
+    try {
+      signals = await db.select().from(lyteSignalsTable).where(ne(lyteSignalsTable.status, "resolved")).orderBy(desc(lyteSignalsTable.receivedAt)).limit(20);
+    } catch {
+      signals = [];
+    }
+
+    try {
+      incidents = await db.select().from(lyteIncidentsTable).where(ne(lyteIncidentsTable.status, "closed")).orderBy(desc(lyteIncidentsTable.createdAt)).limit(10);
+    } catch {
+      incidents = [];
+    }
+
+    const bySeverity = signals.reduce<Record<string, number>>((a, s) => {
+      const sev = s.severity ?? "unknown";
+      a[sev] = (a[sev] ?? 0) + 1;
+      return a;
+    }, {});
+    const bySource = signals.reduce<Record<string, number>>((a, s) => {
+      const src = s.source ?? "unknown";
+      a[src] = (a[src] ?? 0) + 1;
+      return a;
+    }, {});
+    const narratives: { type: string; priority: string; headline: string; detail: string }[] = [];
+    const criticalCount = bySeverity.critical ?? 0;
+    if (criticalCount > 0) {
+      narratives.push({ type: "alert", priority: "critical", headline: `${criticalCount} critical signal${criticalCount > 1 ? "s" : ""} require immediate attention`, detail: "Critical signals are unacknowledged and may have downstream impact." });
     }
     if (incidents.length > 0) {
-      narratives.push({ type: "incident", priority: "high", headline: `${incidents.length} active incident${incidents.length > 1 ? "s" : ""} in progress`, detail: `Most recent: ${incidents[0]?.title}` });
+      const firstTitle = incidents[0]?.title ?? "Untitled";
+      narratives.push({ type: "incident", priority: "high", headline: `${incidents.length} active incident${incidents.length > 1 ? "s" : ""} in progress`, detail: `Most recent: ${firstTitle}` });
     }
-    const topSource = Object.entries(bySource).sort((a, b) => b[1] - a[1])[0];
+    const sourceEntries = Object.entries(bySource).filter(([k]) => k !== "unknown");
+    const topSource = sourceEntries.sort((a, b) => b[1] - a[1])[0];
     if (topSource) {
       narratives.push({ type: "pattern", priority: "medium", headline: `${topSource[0]} is the leading signal source (${topSource[1]} signal${topSource[1] > 1 ? "s" : ""})`, detail: "Consider reviewing integration health or thresholds for this source." });
+    }
+    if (narratives.length === 0) {
+      narratives.push({ type: "info", priority: "low", headline: "All systems nominal", detail: "No active signals or open incidents detected." });
     }
     sendSuccess(res, { narratives, signalSummary: bySeverity, sourceSummary: bySource });
   } catch (err) {

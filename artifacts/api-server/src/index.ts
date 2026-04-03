@@ -122,6 +122,28 @@ seedDreamscapeData().catch(err => {
 registerAllPrismJobHandlers();
 const prismPoller = startPrismJobPoller(5000);
 
+const HEAP_WARN_THRESHOLD = 0.85;
+const HEAP_CRITICAL_THRESHOLD = 0.95;
+const memoryMonitor = setInterval(() => {
+  const { heapUsed, heapTotal } = process.memoryUsage();
+  const ratio = heapUsed / heapTotal;
+  if (ratio >= HEAP_CRITICAL_THRESHOLD) {
+    logger.error({
+      heapUsedMb: Math.round(heapUsed / 1024 / 1024),
+      heapTotalMb: Math.round(heapTotal / 1024 / 1024),
+      ratio: ratio.toFixed(3),
+    }, "[memory] Heap usage critical — consider increasing --max-old-space-size");
+    if (global.gc) global.gc();
+  } else if (ratio >= HEAP_WARN_THRESHOLD) {
+    logger.warn({
+      heapUsedMb: Math.round(heapUsed / 1024 / 1024),
+      heapTotalMb: Math.round(heapTotal / 1024 / 1024),
+      ratio: ratio.toFixed(3),
+    }, "[memory] Heap usage elevated");
+  }
+}, 30_000);
+memoryMonitor.unref();
+
 server.listen(port, "0.0.0.0", () => {
   logger.info({ port, host: "0.0.0.0" }, "Server listening");
   scheduleNycIngestionJob();
