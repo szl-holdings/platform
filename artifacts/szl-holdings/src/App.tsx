@@ -84,9 +84,13 @@ const HowItWorksPage = lazy(() => import("@/pages/how-it-works"));
 const CompanyPage = lazy(() => import("@/pages/company"));
 const FounderPage = lazy(() => import("@/pages/founder"));
 const NotFoundPage = lazy(() => import("@/pages/not-found"));
+const EcosystemPage = lazy(() => import("@/pages/ecosystem"));
 const CaseStudiesPage = lazy(() => import("@/pages/case-studies"));
 const InsightsPage = lazy(() => import("@/pages/insights"));
 const InsightsArticlePage = lazy(() => import("@/pages/insights-article"));
+const CoreCommandPage = lazy(() => import("@/pages/core-command"));
+const ControlPlanePage = lazy(() => import("@/pages/control-plane"));
+const PortfolioOpsPage = lazy(() => import("@/pages/portfolio-ops"));
 
 // Public infrastructure pages (trust center, legal baseline, API, investor, press, brand, faq, roadmap)
 const SecurityPage = lazy(() => import("@/pages/security"));
@@ -705,7 +709,7 @@ function App() {
               <Redirect to="/investors/overview" />
             </Route>
             <Route path="/ecosystem">
-              <Redirect to="/" />
+              <Suspense fallback={<PageLoader />}><EcosystemPage /></Suspense>
             </Route>
             <Route path="/founder-legacy">
               <Redirect to="/investors/founder" />
@@ -738,13 +742,13 @@ function App() {
               <Redirect to="/docs" />
             </Route>
             <Route path="/core">
-              <Redirect to="/" />
+              <Suspense fallback={<PageLoader />}><CoreCommandPage /></Suspense>
             </Route>
             <Route path="/control-plane">
-              <Redirect to="/" />
+              <Suspense fallback={<PageLoader />}><ControlPlanePage /></Suspense>
             </Route>
             <Route path="/portfolio-ops">
-              <Redirect to="/" />
+              <Suspense fallback={<PageLoader />}><PortfolioOpsPage /></Suspense>
             </Route>
             <Route path="/terra/platform">
               <Redirect to="/platform" />

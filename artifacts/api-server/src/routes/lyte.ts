@@ -65,7 +65,7 @@ router.get("/lyte/signals", authMiddleware(), async (req, res) => {
 router.post("/lyte/signals", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const [row] = await db.insert(lyteSignalsTable).values(req.body).returning();
-    broadcastWs("lyte-metrics", "signal-created", { id: row.id, type: (row as any).type, severity: row.severity });
+    broadcastWs("lyte-metrics", "signal-created", { id: row.id, type: row.sourceType, severity: row.severity });
     sendSuccess(res, row, 201);
   } catch (err) {
     handleRouteError(res, err, "Failed to create signal");
@@ -77,7 +77,7 @@ router.patch("/lyte/signals/:id", authMiddleware(), denyIfReadOnly(), async (req
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(lyteSignalsTable).set(req.body).where(eq(lyteSignalsTable.id, id)).returning();
     if (!row) { sendNotFound(res, "Signal"); return; }
-    broadcastWs("lyte-metrics", "signal-updated", { id: row.id, type: (row as any).type, severity: row.severity });
+    broadcastWs("lyte-metrics", "signal-updated", { id: row.id, type: row.sourceType, severity: row.severity });
     sendSuccess(res, row);
   } catch (err) {
     handleRouteError(res, err, "Failed to update signal");
@@ -313,7 +313,7 @@ router.get("/lyte/actions", authMiddleware(), async (req, res) => {
     const filtered = rows.filter(r => {
       if (state && r.state !== state) return false;
       if (role) {
-        const rv = r.roleVisibility as any;
+        const rv = r.roleVisibility as Record<string, boolean> | null;
         if (rv && !rv[role]) return false;
       }
       return true;
@@ -336,7 +336,7 @@ router.patch("/lyte/actions/:id", authMiddleware(), denyIfReadOnly(), async (req
     if (!current[0]) { sendNotFound(res, "Action"); return; }
 
     const { state, assignedTo, notes, ...rest } = req.body;
-    const stateHistory = (current[0].stateHistory as any[]) ?? [];
+    const stateHistory = (current[0].stateHistory as Array<{ from: string; to: string; at: string }>) ?? [];
     if (state && state !== current[0].state) {
       stateHistory.push({ from: current[0].state, to: state, at: new Date().toISOString() });
     }
@@ -470,8 +470,17 @@ async function fetchJson(url: string, timeoutMs = 10000): Promise<unknown> {
   }
 }
 
-function parseRssToNews(xml: string, source: string, maxItems = 8): any[] {
-  const items: any[] = [];
+interface RssNewsItem {
+  id: string;
+  title: string;
+  url: string;
+  publishedAt: string;
+  summary: string;
+  source: string;
+}
+
+function parseRssToNews(xml: string, source: string, maxItems = 8): RssNewsItem[] {
+  const items: RssNewsItem[] = [];
   for (const match of xml.matchAll(/<item>([\s\S]*?)<\/item>/g)) {
     const item = match[1] ?? "";
     const title = item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/)?.[1] ?? item.match(/<title>(.*?)<\/title>/)?.[1] ?? "No title";
@@ -520,10 +529,12 @@ router.get("/lyte/live/bls-employment", lyteLiveLimit, authMiddleware(), async (
   try {
     const data = await getCached("lyte-bls", 86400000, async () => {
       try {
+        interface BlsDataPoint { value: string; periodName: string; year: string; }
+        interface BlsResponse { status: string; Results?: { series?: Array<{ data?: BlsDataPoint[] }> } }
         const raw = await fetchJson(
           "https://api.bls.gov/publicAPI/v2/timeseries/data/LNS14000000",
           8000,
-        ) as any;
+        ) as BlsResponse;
         if (raw?.status !== "REQUEST_SUCCEEDED") throw new Error("BLS API error");
         const series = raw?.Results?.series?.[0]?.data;
         if (!Array.isArray(series) || series.length === 0) throw new Error("No BLS data");
@@ -535,7 +546,7 @@ router.get("/lyte/live/bls-employment", lyteLiveLimit, authMiddleware(), async (
           previousPeriod: `${prev?.periodName} ${prev?.year}`,
           previousRate: parseFloat(prev?.value ?? latest.value),
           trend: parseFloat(latest.value) < parseFloat(prev?.value ?? "9999") ? "improving" : "worsening",
-          historicalData: series.slice(0, 12).map((d: any) => ({
+          historicalData: series.slice(0, 12).map((d: BlsDataPoint) => ({
             period: `${d.periodName} ${d.year}`,
             rate: parseFloat(d.value),
           })),
@@ -560,12 +571,14 @@ router.get("/lyte/live/github-trending", lyteLiveLimit, authMiddleware(), async 
     const language = (req.query.language as string) || "TypeScript";
     const data = await getCached(`lyte-github-${language}`, 3600000, async () => {
       try {
+        interface GhRepo { full_name: string; description?: string | null; stargazers_count: number; forks_count: number; language?: string | null; topics?: string[]; html_url: string; created_at: string; pushed_at: string; }
+        interface GhSearchResponse { items?: GhRepo[] }
         const raw = await fetchJson(
           `https://api.github.com/search/repositories?q=language:${encodeURIComponent(language)}+created:>2026-01-01&sort=stars&order=desc&per_page=8`,
           8000,
-        ) as any;
+        ) as GhSearchResponse;
         if (!Array.isArray(raw?.items)) throw new Error("No GitHub data");
-        return raw.items.map((r: any) => ({
+        return raw.items.map((r: GhRepo) => ({
           name: r.full_name,
           description: r.description?.slice(0, 150) ?? "",
           stars: r.stargazers_count,

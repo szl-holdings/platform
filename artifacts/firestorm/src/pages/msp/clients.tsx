@@ -1,9 +1,33 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, ArrowUpDown, Building2, Monitor, Ticket, AlertTriangle, TrendingUp, TrendingDown, ChevronRight, Plus, CheckCircle, Activity } from "lucide-react";
-import { cn } from "@szl-holdings/shared-ui/utils";
-import { clients as mockClients, type Client } from "@/data/mock-data";
-import { ExportButton } from "@szl-holdings/shared-ui/data-export";
+import { cn } from "@workspace/shared-ui/utils";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@workspace/shared-ui/ui/skeleton";
+import { clients as fallbackClients, type Client } from "@/data/mock-data";
+import { ExportButton } from "@workspace/shared-ui/data-export";
+
+const API_BASE = "/api";
+async function apiFetch<T>(path: string): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, { credentials: "include" });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+interface ApiClient {
+  id: number;
+  name: string;
+  industry?: string | null;
+  status: "active" | "inactive" | "at-risk" | "churned";
+  healthScore?: number | null;
+  mrr?: number | null;
+  deviceCount?: number | null;
+  openTickets?: number | null;
+  criticalAlerts?: number | null;
+  contractStatus?: "active" | "expiring" | "expired" | "pending" | null;
+  slaCompliance?: number | null;
+  sites?: number | null;
+}
 
 function HealthBadge({ score }: { score: number }) {
   const color = score >= 90 ? "text-emerald-400 bg-emerald-500/10" : score >= 75 ? "text-amber-400 bg-amber-500/10" : "text-red-400 bg-red-500/10";
@@ -15,17 +39,77 @@ function HealthBadge({ score }: { score: number }) {
   );
 }
 
-function ContractBadge({ status }: { status: Client["contractStatus"] }) {
-  const styles = {
+type ContractStatus = "active" | "expiring" | "expired" | "pending";
+
+function ContractBadge({ status }: { status: ContractStatus | null | undefined }) {
+  const styles: Record<ContractStatus, string> = {
     active: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
     expiring: "text-amber-400 bg-amber-500/10 border-amber-500/20",
     expired: "text-red-400 bg-red-500/10 border-red-500/20",
     pending: "text-blue-400 bg-blue-500/10 border-blue-500/20",
   };
-  return <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium border", styles[status])}>{status}</span>;
+  const s = status ?? "pending";
+  return <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium border", styles[s as ContractStatus] ?? styles.pending)}>{s}</span>;
 }
 
-function ClientRow({ client, index }: { client: Client; index: number }) {
+function ApiClientRow({ client, index }: { client: ApiClient; index: number }) {
+  const health = client.healthScore ?? 0;
+  const sla = client.slaCompliance ?? 100;
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.05 }}
+      className="group grid grid-cols-12 gap-4 items-center px-5 py-4 border-b border-border/40 hover:bg-muted/30 transition-colors cursor-pointer"
+    >
+      <div className="col-span-3 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+          <Building2 className="w-5 h-5 text-primary" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">{client.name}</p>
+          <p className="text-xs text-muted-foreground">{client.industry ?? "—"}</p>
+        </div>
+      </div>
+      <div className="col-span-1 text-center"><HealthBadge score={health} /></div>
+      <div className="col-span-1 text-center">
+        <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
+          <Monitor className="w-3.5 h-3.5" /> {client.deviceCount ?? 0}
+        </div>
+      </div>
+      <div className="col-span-1 text-center">
+        <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
+          <Ticket className="w-3.5 h-3.5" /> {client.openTickets ?? 0}
+        </div>
+      </div>
+      <div className="col-span-1 text-center">
+        {(client.criticalAlerts ?? 0) > 0 ? (
+          <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-400">
+            <AlertTriangle className="w-3.5 h-3.5" /> {client.criticalAlerts}
+          </span>
+        ) : (
+          <span className="text-xs text-muted-foreground/50">—</span>
+        )}
+      </div>
+      <div className="col-span-1 text-center"><ContractBadge status={client.contractStatus} /></div>
+      <div className="col-span-1 text-center text-sm font-semibold text-foreground">${(client.mrr ?? 0).toLocaleString()}</div>
+      <div className="col-span-1 text-center">
+        <div className="flex items-center justify-center gap-1">
+          <div className="w-16 h-1.5 rounded-full bg-muted overflow-hidden">
+            <div className={cn("h-full rounded-full", sla >= 99 ? "bg-emerald-400" : sla >= 95 ? "bg-amber-400" : "bg-red-400")} style={{ width: `${sla}%` }} />
+          </div>
+          <span className="text-xs text-muted-foreground">{sla}%</span>
+        </div>
+      </div>
+      <div className="col-span-1 text-center text-xs text-muted-foreground">{client.sites ?? 1}</div>
+      <div className="col-span-1 text-right">
+        <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary transition-colors ml-auto" />
+      </div>
+    </motion.div>
+  );
+}
+
+function FallbackClientRow({ client, index }: { client: Client; index: number }) {
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -85,8 +169,28 @@ export default function ClientsPage() {
   const [sortBy, setSortBy] = useState<"name" | "health" | "mrr">("health");
   const [filterStatus, setFilterStatus] = useState<string>("all");
 
-  const filtered = mockClients
-    .filter(c => c.name.toLowerCase().includes(search.toLowerCase()) || c.industry.toLowerCase().includes(search.toLowerCase()))
+  const { data, isLoading } = useQuery<{ clients: ApiClient[] }>({
+    queryKey: ["msp-clients"],
+    queryFn: () => apiFetch<{ clients: ApiClient[] }>("/msp/clients?limit=100"),
+    staleTime: 60000,
+    retry: 1,
+  });
+
+  const useApi = !!(data?.clients && data.clients.length > 0);
+  const apiClients = data?.clients ?? [];
+  const displayClients = useApi ? apiClients : fallbackClients;
+
+  const filteredApi = apiClients
+    .filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()) || (c.industry ?? "").toLowerCase().includes(search.toLowerCase()))
+    .filter(c => filterStatus === "all" || c.contractStatus === filterStatus)
+    .sort((a, b) => {
+      if (sortBy === "health") return (b.healthScore ?? 0) - (a.healthScore ?? 0);
+      if (sortBy === "mrr") return (b.mrr ?? 0) - (a.mrr ?? 0);
+      return a.name.localeCompare(b.name);
+    });
+
+  const filteredFallback = fallbackClients
+    .filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()) || c.industry.toLowerCase().includes(search.toLowerCase()))
     .filter(c => filterStatus === "all" || c.contractStatus === filterStatus)
     .sort((a, b) => {
       if (sortBy === "health") return b.healthScore - a.healthScore;
@@ -94,10 +198,15 @@ export default function ClientsPage() {
       return a.name.localeCompare(b.name);
     });
 
-  const totalDevices = mockClients.reduce((s, c) => s + c.deviceCount, 0);
-  const totalTickets = mockClients.reduce((s, c) => s + c.openTickets, 0);
-  const totalMRR = mockClients.reduce((s, c) => s + c.mrr, 0);
-  const avgHealth = Math.round(mockClients.reduce((s, c) => s + c.healthScore, 0) / mockClients.length);
+  const totalDevices = displayClients.reduce((s, c) => s + (c.deviceCount ?? 0), 0);
+  const totalTickets = displayClients.reduce((s, c) => s + (c.openTickets ?? 0), 0);
+  const totalMRR = displayClients.reduce((s, c) => s + (c.mrr ?? 0), 0);
+  const avgHealth = displayClients.length > 0
+    ? Math.round(displayClients.reduce((s, c) => s + (c.healthScore ?? 0), 0) / displayClients.length)
+    : 0;
+  const activeCount = useApi
+    ? apiClients.filter(c => c.status === "active").length
+    : fallbackClients.filter(c => c.contractStatus === "active").length;
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
@@ -108,14 +217,14 @@ export default function ClientsPage() {
         </div>
         <div className="flex items-center gap-2">
           <ExportButton
-            data={mockClients.map(c => ({
+            data={(useApi ? apiClients : fallbackClients).map(c => ({
               Name: c.name,
-              Industry: c.industry,
-              "Contract Status": c.contractStatus,
-              "Health Score": c.healthScore,
-              Devices: c.deviceCount,
-              "Open Tickets": c.openTickets,
-              "MRR ($)": c.mrr,
+              Industry: c.industry ?? "",
+              "Contract Status": c.contractStatus ?? "",
+              "Health Score": c.healthScore ?? 0,
+              Devices: c.deviceCount ?? 0,
+              "Open Tickets": c.openTickets ?? 0,
+              "MRR ($)": c.mrr ?? 0,
             }))}
             options={{ filename: "msp-clients", title: "Client Management Report", accentColor: "#3b82f6" }}
           />
@@ -127,9 +236,9 @@ export default function ClientsPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Clients", value: mockClients.length.toString(), sub: `${mockClients.filter(c => c.contractStatus === "active").length} active`, color: "text-primary", icon: CheckCircle },
+          { label: "Total Clients", value: displayClients.length.toString(), sub: `${activeCount} active`, color: "text-primary", icon: CheckCircle },
           { label: "Avg Health Score", value: avgHealth.toString(), sub: avgHealth >= 85 ? "Good" : "Needs Attention", color: avgHealth >= 85 ? "text-emerald-400" : "text-amber-400", icon: Activity },
-          { label: "Total Devices", value: totalDevices.toLocaleString(), sub: `${mockClients.length} organizations`, color: "text-cyan-400", icon: Monitor },
+          { label: "Total Devices", value: totalDevices.toLocaleString(), sub: `${displayClients.length} organizations`, color: "text-cyan-400", icon: Monitor },
           { label: "Monthly Revenue", value: `$${(totalMRR / 1000).toFixed(1)}K`, sub: `${totalTickets} open tickets`, color: "text-violet-400", icon: Building2 },
         ].map((stat, i) => (
           <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="glass-card rounded-xl p-5">
@@ -180,14 +289,21 @@ export default function ClientsPage() {
           <div className="col-span-1"></div>
         </div>
 
-        <div>
-          {filtered.map((client, i) => (
-            <ClientRow key={client.id} client={client} index={i} />
-          ))}
-          {filtered.length === 0 && (
-            <div className="px-5 py-12 text-center text-muted-foreground">No clients match your search criteria</div>
-          )}
-        </div>
+        {isLoading ? (
+          <div className="p-4 space-y-2">
+            {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-16 rounded-lg" />)}
+          </div>
+        ) : (
+          <div>
+            {useApi
+              ? filteredApi.map((client, i) => <ApiClientRow key={client.id} client={client} index={i} />)
+              : filteredFallback.map((client, i) => <FallbackClientRow key={client.id} client={client} index={i} />)
+            }
+            {((useApi && filteredApi.length === 0) || (!useApi && filteredFallback.length === 0)) && (
+              <div className="px-5 py-12 text-center text-muted-foreground">No clients match your search criteria</div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,12 +1,41 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, AlertTriangle, Clock, User, ArrowUp, ArrowDown, Minus, CheckCircle2, Circle, Pause, Timer, Plus } from "lucide-react";
-import { cn } from "@szl-holdings/shared-ui/utils";
-import { tickets, type Ticket } from "@/data/mock-data";
+import { cn } from "@workspace/shared-ui/utils";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@workspace/shared-ui/ui/skeleton";
+import { tickets as fallbackTickets, type Ticket } from "@/data/mock-data";
 
-function formatTimeRemaining(deadline: string, breached: boolean): { text: string; urgency: "breached" | "critical" | "warning" | "ok" } {
+const API_BASE = "/api";
+async function apiFetch<T>(path: string): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, { credentials: "include" });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+interface ApiTicket {
+  id: number;
+  ticketNumber: string;
+  subject: string;
+  description?: string | null;
+  clientId?: number | null;
+  clientName?: string | null;
+  priority: "critical" | "high" | "medium" | "low";
+  status: "open" | "in-progress" | "waiting" | "resolved" | "closed";
+  category?: string | null;
+  assigneeId?: number | null;
+  assigneeName?: string | null;
+  slaDeadline?: string | null;
+  slaStatus?: string | null;
+  createdAt: string;
+  updatedAt?: string | null;
+}
+
+function formatTimeRemaining(deadline: string | null | undefined, slaStatus: string | null | undefined): { text: string; urgency: "breached" | "critical" | "warning" | "ok" } {
+  if (!deadline) return { text: "No SLA", urgency: "ok" };
+  const breached = slaStatus === "breached";
   if (breached) return { text: "BREACHED", urgency: "breached" };
-  const now = new Date("2026-03-29T09:00:00Z");
+  const now = new Date();
   const end = new Date(deadline);
   const diffMs = end.getTime() - now.getTime();
   if (diffMs <= 0) return { text: "BREACHED", urgency: "breached" };
@@ -39,13 +68,71 @@ const statusConfig = {
   closed: { icon: CheckCircle2, color: "text-muted-foreground", label: "Closed" },
 };
 
-function TicketCard({ ticket, index }: { ticket: Ticket; index: number }) {
-  const priority = priorityConfig[ticket.priority];
-  const status = statusConfig[ticket.status];
+function ApiTicketCard({ ticket, index }: { ticket: ApiTicket; index: number }) {
+  const priority = priorityConfig[ticket.priority] ?? priorityConfig.medium;
+  const status = statusConfig[ticket.status] ?? statusConfig.open;
   const PriorityIcon = priority.icon;
   const StatusIcon = status.icon;
   const isTerminal = ticket.status === "resolved" || ticket.status === "closed";
-  const sla = isTerminal ? null : formatTimeRemaining(ticket.slaDeadline, ticket.slaBreached);
+  const sla = isTerminal ? null : formatTimeRemaining(ticket.slaDeadline, ticket.slaStatus);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.04 }}
+      className="group glass-card rounded-xl p-5 hover:border-primary/30 transition-all cursor-pointer"
+    >
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-mono text-muted-foreground">{ticket.ticketNumber}</span>
+          {sla && (
+            <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border", urgencyStyles[sla.urgency])}>
+              <Timer className="w-3 h-3" /> {sla.text}
+            </span>
+          )}
+          {isTerminal && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-muted-foreground bg-muted/30 border border-border/30">
+              SLA Met
+            </span>
+          )}
+        </div>
+        <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border", priority.color)}>
+          <PriorityIcon className="w-3 h-3" /> {priority.label}
+        </span>
+      </div>
+
+      <h3 className="text-sm font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">{ticket.subject}</h3>
+      {ticket.description && <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{ticket.description}</p>}
+
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className={cn("inline-flex items-center gap-1 text-xs font-medium", status.color)}>
+            <StatusIcon className="w-3.5 h-3.5" /> {status.label}
+          </span>
+          {ticket.clientName && <span className="text-xs text-muted-foreground">{ticket.clientName}</span>}
+        </div>
+        <div className="flex items-center gap-3">
+          {ticket.assigneeName && (
+            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+              <User className="w-3 h-3" /> {ticket.assigneeName}
+            </span>
+          )}
+          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+            <Clock className="w-3 h-3" /> {new Date(ticket.updatedAt ?? ticket.createdAt).toLocaleDateString()}
+          </span>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function FallbackTicketCard({ ticket, index }: { ticket: Ticket; index: number }) {
+  const priority = priorityConfig[ticket.priority] ?? priorityConfig.medium;
+  const status = statusConfig[ticket.status] ?? statusConfig.open;
+  const PriorityIcon = priority.icon;
+  const StatusIcon = status.icon;
+  const isTerminal = ticket.status === "resolved" || ticket.status === "closed";
 
   return (
     <motion.div
@@ -57,11 +144,6 @@ function TicketCard({ ticket, index }: { ticket: Ticket; index: number }) {
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
           <span className="text-xs font-mono text-muted-foreground">{ticket.id}</span>
-          {sla && (
-            <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border", urgencyStyles[sla.urgency])}>
-              <Timer className="w-3 h-3" /> {sla.text}
-            </span>
-          )}
           {isTerminal && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-muted-foreground bg-muted/30 border border-border/30">
               SLA Met
@@ -87,9 +169,6 @@ function TicketCard({ ticket, index }: { ticket: Ticket; index: number }) {
           <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
             <User className="w-3 h-3" /> {ticket.assignee}
           </span>
-          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-            <Clock className="w-3 h-3" /> {ticket.lastUpdate}
-          </span>
         </div>
       </div>
     </motion.div>
@@ -101,15 +180,39 @@ export default function ServiceDeskPage() {
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const filtered = tickets
-    .filter(t => t.title.toLowerCase().includes(search.toLowerCase()) || t.client.toLowerCase().includes(search.toLowerCase()) || t.id.toLowerCase().includes(search.toLowerCase()))
+  const { data, isLoading } = useQuery<{ tickets: ApiTicket[] }>({
+    queryKey: ["msp-tickets"],
+    queryFn: () => apiFetch<{ tickets: ApiTicket[] }>("/msp/tickets?limit=100"),
+    staleTime: 30000,
+    retry: 1,
+  });
+
+  const useApi = !!(data?.tickets && data.tickets.length > 0);
+  const apiTickets: ApiTicket[] = data?.tickets ?? [];
+  const fallback: Ticket[] = fallbackTickets;
+
+  const filteredApi = apiTickets
+    .filter(t => !search || t.subject.toLowerCase().includes(search.toLowerCase()) || (t.clientName ?? "").toLowerCase().includes(search.toLowerCase()) || t.ticketNumber.toLowerCase().includes(search.toLowerCase()))
     .filter(t => priorityFilter === "all" || t.priority === priorityFilter)
     .filter(t => statusFilter === "all" || t.status === statusFilter);
 
-  const criticalCount = tickets.filter(t => t.priority === "critical" && t.status !== "resolved" && t.status !== "closed").length;
-  const breachedCount = tickets.filter(t => t.slaBreached).length;
-  const openCount = tickets.filter(t => t.status === "open").length;
-  const inProgressCount = tickets.filter(t => t.status === "in-progress").length;
+  const filteredFallback = fallback
+    .filter(t => !search || t.title.toLowerCase().includes(search.toLowerCase()) || t.client.toLowerCase().includes(search.toLowerCase()) || t.id.toLowerCase().includes(search.toLowerCase()))
+    .filter(t => priorityFilter === "all" || t.priority === priorityFilter)
+    .filter(t => statusFilter === "all" || t.status === statusFilter);
+
+  const criticalCount = useApi
+    ? apiTickets.filter(t => t.priority === "critical" && t.status !== "resolved" && t.status !== "closed").length
+    : fallback.filter(t => t.priority === "critical" && t.status !== "resolved" && t.status !== "closed").length;
+  const breachedCount = useApi
+    ? apiTickets.filter(t => t.slaStatus === "breached").length
+    : fallback.filter(t => t.slaBreached).length;
+  const openCount = useApi
+    ? apiTickets.filter(t => t.status === "open").length
+    : fallback.filter(t => t.status === "open").length;
+  const inProgressCount = useApi
+    ? apiTickets.filter(t => t.status === "in-progress").length
+    : fallback.filter(t => t.status === "in-progress").length;
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
@@ -162,14 +265,21 @@ export default function ServiceDeskPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3">
-        {filtered.map((ticket, i) => (
-          <TicketCard key={ticket.id} ticket={ticket} index={i} />
-        ))}
-        {filtered.length === 0 && (
-          <div className="glass-card rounded-xl p-12 text-center text-muted-foreground">No tickets match your filters</div>
-        )}
-      </div>
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-3">
+          {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-32 rounded-xl" />)}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-3">
+          {useApi
+            ? filteredApi.map((ticket, i) => <ApiTicketCard key={ticket.id} ticket={ticket} index={i} />)
+            : filteredFallback.map((ticket, i) => <FallbackTicketCard key={ticket.id} ticket={ticket} index={i} />)
+          }
+          {((useApi && filteredApi.length === 0) || (!useApi && filteredFallback.length === 0)) && (
+            <div className="glass-card rounded-xl p-12 text-center text-muted-foreground">No tickets match your filters</div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

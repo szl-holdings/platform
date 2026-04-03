@@ -18,7 +18,7 @@ import { authMiddleware, parseIdParam } from "../middlewares/auth";
 const router: IRouter = Router();
 
 function getOrgId(req: Request): number | null {
-  const user = (req as any).user;
+  const user = req.user;
   if (!user) return null;
   if (user.roles?.includes("super_admin") || user.roles?.includes("admin")) {
     return user.orgs?.[0]?.orgId ?? 1;
@@ -133,16 +133,18 @@ router.post("/prism-counsel/matters", authMiddleware(), async (req, res) => {
     if (!orgId) return;
     const body = req.body as Record<string, unknown>;
     if (!body.title || !body.matterType) return sendBadRequest(res, "title and matterType are required");
+    type MatterType = "litigation" | "transactional" | "advisory" | "regulatory" | "ip" | "employment" | "other";
+    type MatterStatus = "intake" | "active" | "on-hold" | "closed" | "archived";
     const [matter] = await db.insert(pcMattersTable).values({
       orgId,
       title: String(body.title),
-      matterType: String(body.matterType) as any,
-      status: (body.status as any) ?? "intake",
+      matterType: String(body.matterType) as MatterType,
+      status: (String(body.status ?? "intake")) as MatterStatus,
       caseNumber: body.caseNumber ? String(body.caseNumber) : undefined,
       jurisdiction: body.jurisdiction ? String(body.jurisdiction) : undefined,
       courtName: body.courtName ? String(body.courtName) : undefined,
       notes: body.notes ? String(body.notes) : undefined,
-      createdBy: (req as any).user?.id,
+      createdBy: req.user?.id,
     }).returning();
     sendSuccess(res, matter, 201);
   } catch (err) {
@@ -157,8 +159,9 @@ router.patch("/prism-counsel/matters/:id", authMiddleware(), async (req, res) =>
     const matterId = parseIdParam(req.params.id);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
     const body = req.body as Record<string, unknown>;
+    const patch = body as typeof pcMattersTable.$inferInsert;
     const [updated] = await db.update(pcMattersTable)
-      .set({ ...body as any, updatedBy: (req as any).user?.id, updatedAt: new Date() })
+      .set({ ...patch, updatedBy: req.user?.id, updatedAt: new Date() })
       .where(eq(pcMattersTable.id, matterId)).returning();
     sendSuccess(res, updated);
   } catch (err) {
@@ -207,7 +210,7 @@ router.get("/prism-counsel/matters/:id/pressure", authMiddleware(), async (req, 
     const matterId = parseIdParam(req.params.id);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
 
-    let dimensions: any[] = [];
+    let dimensions: unknown[] = [];
     try {
       const { pcPressureGraphDimensionsTable } = await import("@szl-holdings/db");
       dimensions = await db.select().from(pcPressureGraphDimensionsTable)
@@ -229,7 +232,7 @@ router.get("/prism-counsel/matters/:id/proof-chain", authMiddleware(), async (re
     const matterId = parseIdParam(req.params.id);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
 
-    let entries: any[] = [];
+    let entries: unknown[] = [];
     try {
       const { pcProofChainEntriesTable } = await import("@szl-holdings/db");
       entries = await db.select().from(pcProofChainEntriesTable)
@@ -251,7 +254,7 @@ router.get("/prism-counsel/matters/:id/forecast-diffs", authMiddleware(), async 
     const matterId = parseIdParam(req.params.id);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
 
-    let diffs: any[] = [];
+    let diffs: unknown[] = [];
     try {
       const { pcForecastDiffsTable } = await import("@szl-holdings/db");
       diffs = await db.select().from(pcForecastDiffsTable)
@@ -271,7 +274,7 @@ router.get("/prism-counsel/data-products", authMiddleware(), async (req, res) =>
     const orgId = requireAuth(req, res);
     if (!orgId) return;
 
-    let scores: any[] = [];
+    let scores: unknown[] = [];
     try {
       const { pcDataProductScoresTable } = await import("@szl-holdings/db");
       scores = await db.select().from(pcDataProductScoresTable)
@@ -291,7 +294,7 @@ router.get("/prism-counsel/worldline/signals", authMiddleware(), async (req, res
     const orgId = requireAuth(req, res);
     if (!orgId) return;
 
-    let signals: any[] = [];
+    let signals: unknown[] = [];
     try {
       const { pcWorldlineSignalsTable } = await import("@szl-holdings/db");
       signals = await db.select().from(pcWorldlineSignalsTable)
@@ -313,7 +316,7 @@ router.get("/prism-counsel/matters/:id/copilot-drafts", authMiddleware(), async 
     const matterId = parseIdParam(req.params.id);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
 
-    let drafts: any[] = [];
+    let drafts: unknown[] = [];
     try {
       const { pcCopilotDraftsTable } = await import("@szl-holdings/db");
       drafts = await db.select().from(pcCopilotDraftsTable)
@@ -333,7 +336,7 @@ router.get("/prism-counsel/approvals", authMiddleware(), async (req, res) => {
     const orgId = requireAuth(req, res);
     if (!orgId) return;
     const status = req.query.status as string | undefined;
-    let items: any[];
+    let items: unknown[];
     if (status) {
       items = await db.select().from(pcApprovalRequestsTable)
         .where(sql`matter_id IN (SELECT id FROM pc_matters WHERE org_id = ${orgId}) AND status = ${status}`)
@@ -354,7 +357,7 @@ router.post("/prism-counsel/approvals/:id/approve", authMiddleware(), async (req
     const orgId = requireAuth(req, res);
     if (!orgId) return;
     const requestId = parseIdParam(req.params.id);
-    const user = (req as any).user;
+    const user = req.user;
     const [updated] = await db.update(pcApprovalRequestsTable)
       .set({ status: "approved", approvedBy: user?.id, resolvedAt: new Date() })
       .where(eq(pcApprovalRequestsTable.id, requestId)).returning();
@@ -381,7 +384,7 @@ router.post("/prism-counsel/approvals/:id/reject", authMiddleware(), async (req,
     const orgId = requireAuth(req, res);
     if (!orgId) return;
     const requestId = parseIdParam(req.params.id);
-    const user = (req as any).user;
+    const user = req.user;
     const [updated] = await db.update(pcApprovalRequestsTable)
       .set({ status: "rejected", approvedBy: user?.id, resolvedAt: new Date() })
       .where(eq(pcApprovalRequestsTable.id, requestId)).returning();
@@ -409,7 +412,7 @@ router.get("/prism-counsel/admin/service-metrics", authMiddleware(), async (req,
     const orgId = requireAuth(req, res);
     if (!orgId) return;
 
-    let metrics: any[] = [];
+    let metrics: unknown[] = [];
     try {
       const { pcServiceMetricsTable } = await import("@szl-holdings/db");
       metrics = await db.select().from(pcServiceMetricsTable)
@@ -430,11 +433,11 @@ router.get("/prism-counsel/admin/dashboards/:type", authMiddleware(), async (req
     if (!orgId) return;
     const dashType = req.params.type;
 
-    let snapshot: any = null;
+    let snapshot: unknown = null;
     try {
       const { pcDashboardSnapshotsTable } = await import("@szl-holdings/db");
       const [latest] = await db.select().from(pcDashboardSnapshotsTable)
-        .where(and(eq(pcDashboardSnapshotsTable.orgId, orgId), eq(pcDashboardSnapshotsTable.dashboardType, dashType as any)))
+        .where(and(eq(pcDashboardSnapshotsTable.orgId, orgId), eq(pcDashboardSnapshotsTable.dashboardType, dashType as never)))
         .orderBy(desc(pcDashboardSnapshotsTable.computedAt)).limit(1);
       snapshot = latest ?? null;
     } catch { snapshot = null; }
@@ -451,7 +454,7 @@ router.get("/prism-counsel/admin/tenant-config", authMiddleware(), async (req, r
     const orgId = requireAuth(req, res);
     if (!orgId) return;
 
-    let config: any = null;
+    let config: unknown = null;
     try {
       const { pcTenantConfigTable } = await import("@szl-holdings/db");
       const [cfg] = await db.select().from(pcTenantConfigTable).where(eq(pcTenantConfigTable.orgId, orgId));
@@ -470,7 +473,7 @@ router.get("/prism-counsel/admin/incidents", authMiddleware(), async (req, res) 
     const orgId = requireAuth(req, res);
     if (!orgId) return;
 
-    let incidents: any[] = [];
+    let incidents: unknown[] = [];
     try {
       const { pcIncidentsTable } = await import("@szl-holdings/db");
       incidents = await db.select().from(pcIncidentsTable)
@@ -490,7 +493,7 @@ router.get("/prism-counsel/admin/onboarding", authMiddleware(), async (req, res)
     const orgId = requireAuth(req, res);
     if (!orgId) return;
 
-    let checklist: any[] = [];
+    let checklist: unknown[] = [];
     try {
       const { pcOnboardingChecklistTable } = await import("@szl-holdings/db");
       checklist = await db.select().from(pcOnboardingChecklistTable)
@@ -511,7 +514,7 @@ router.get("/prism-counsel/matters/:id/contradictions", authMiddleware(), async 
     const matterId = parseIdParam(req.params.id);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
 
-    let contradictions: any[] = [];
+    let contradictions: unknown[] = [];
     try {
       const { pcContradictionPanelTable } = await import("@szl-holdings/db");
       contradictions = await db.select().from(pcContradictionPanelTable)
@@ -531,7 +534,7 @@ router.get("/prism-counsel/operational-flows", authMiddleware(), async (req, res
     const orgId = requireAuth(req, res);
     if (!orgId) return;
 
-    let flows: any[] = [];
+    let flows: unknown[] = [];
     try {
       const { pcOperationalFlowRunsTable } = await import("@szl-holdings/db");
       flows = await db.select().from(pcOperationalFlowRunsTable)
@@ -551,7 +554,7 @@ router.get("/prism-counsel/signal-forge/runs", authMiddleware(), async (req, res
     const orgId = requireAuth(req, res);
     if (!orgId) return;
 
-    let runs: any[] = [];
+    let runs: unknown[] = [];
     try {
       const { pcSignalForgeRunsTable } = await import("@szl-holdings/db");
       runs = await db.select().from(pcSignalForgeRunsTable)
@@ -573,7 +576,7 @@ router.get("/prism-counsel/matters/:id/audit-packets", authMiddleware(), async (
     const matterId = parseIdParam(req.params.id);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
 
-    let packets: any[] = [];
+    let packets: unknown[] = [];
     try {
       const { pcAuditPacketsTable } = await import("@szl-holdings/db");
       packets = await db.select().from(pcAuditPacketsTable)
