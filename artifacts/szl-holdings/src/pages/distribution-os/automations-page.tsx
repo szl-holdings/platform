@@ -1,71 +1,474 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { m } from "framer-motion";
-import { Zap, CheckCircle, Clock, AlertCircle, Play } from "lucide-react";
+import { m, AnimatePresence } from "framer-motion";
+import {
+  Zap, CheckCircle, Clock, AlertCircle, Play, RefreshCw,
+  Lightbulb, BookOpen, FileText, BarChart3, ChevronDown, Download,
+} from "lucide-react";
 import { DistributionOsLayout } from "./admin-dashboard";
 
 const API = import.meta.env.VITE_API_URL || "";
 
-interface AutomationRun { id: number; jobName: string; jobType: string; status: string; startedAt: string; completedAt: string | null; summary: string | null; itemsCreated: number; itemsFailed: number; }
 
-const STATUS_MAP: Record<string, { icon: typeof Clock; color: string }> = {
-  running: { icon: Clock, color: "#d4a054" },
-  completed: { icon: CheckCircle, color: "#5a9c5a" },
-  failed: { icon: AlertCircle, color: "#c45a4a" },
+interface AutomationRun {
+  id: number;
+  jobName: string;
+  jobType: string;
+  status: string;
+  startedAt: string;
+  completedAt: string | null;
+  summary: string | null;
+  itemsCreated: number;
+  itemsFailed: number;
+  errorLog: string | null;
+}
+
+interface WeeklyReportOutput {
+  totalVisits: number;
+  totalLeads: number;
+  bestCampaign: string;
+  topLeadSource: string;
+  publishedArticles: number;
+  carouselsGenerated: number;
+  xPostsSent: number;
+  newslettersSent: number;
+  automationsRun: number;
+  followUpQueue: number;
+  weekStart: string;
+  weekEnd: string;
+  recommendations: string[];
+}
+
+interface DailySummaryOutput {
+  visits: number;
+  leads: number;
+  openTasks: number;
+  scheduledItems: number;
+  xQueued: number;
+}
+
+interface TriggerResult {
+  run: AutomationRun;
+  output: Record<string, unknown>;
+}
+
+
+const JOB_DEFINITIONS = [
+  {
+    id: "carousel-ideas",
+    name: "Carousel Idea Generator",
+    icon: Lightbulb,
+    scheduleDesc: "Mon–Fri, 8:00 AM",
+    description: "Pulls active content pillars and generates 3 carousel ideas (1 per top pillar), adding them to the content calendar as 'Idea' items.",
+    output: "3 carousel calendar items",
+    color: "#d4a054",
+  },
+  {
+    id: "thought-leadership",
+    name: "Weekly Thought-Leadership Pack",
+    icon: BookOpen,
+    scheduleDesc: "Monday, 8:30 AM",
+    description: "Creates a bundled pack: 1 hero carousel, 1 supporting text post, 1 CTA email draft, and 1 offer page recommendation — all added to the content calendar.",
+    output: "4 content calendar items",
+    color: "#4a90b8",
+  },
+  {
+    id: "daily-summary",
+    name: "Daily Marketing Summary",
+    icon: BarChart3,
+    scheduleDesc: "Daily, 6:00 PM",
+    description: "Queries today's page views, new leads, open calendar tasks, scheduled items, and X post queue to produce an end-of-day summary.",
+    output: "Real-time metrics summary",
+    color: "#5a9c5a",
+  },
+  {
+    id: "weekly-report",
+    name: "Weekly Executive Report",
+    icon: FileText,
+    scheduleDesc: "Friday, 4:00 PM",
+    description: "Aggregates the past 7 days of visits, leads, content, campaigns, and automation activity from the database to produce a polished executive report.",
+    output: "Exportable executive report",
+    color: "#9c5adc",
+  },
+] as const;
+
+type JobId = typeof JOB_DEFINITIONS[number]["id"];
+
+
+const STATUS_MAP: Record<string, { icon: typeof Clock; color: string; bg: string }> = {
+  running: { icon: Clock, color: "#d4a054", bg: "hsla(38,65%,58%,0.1)" },
+  completed: { icon: CheckCircle, color: "#5a9c5a", bg: "hsla(120,35%,48%,0.1)" },
+  failed: { icon: AlertCircle, color: "#c45a4a", bg: "hsla(10,50%,55%,0.1)" },
+  cancelled: { icon: AlertCircle, color: "#6b6560", bg: "hsla(30,5%,40%,0.1)" },
 };
+
+function timeAgo(date: string) {
+  const diff = Date.now() - new Date(date).getTime();
+  const mins = Math.floor(diff / 60000);
+  const hrs = Math.floor(mins / 60);
+  const days = Math.floor(hrs / 24);
+  if (days > 0) return `${days}d ago`;
+  if (hrs > 0) return `${hrs}h ago`;
+  if (mins > 0) return `${mins}m ago`;
+  return "Just now";
+}
+
+function duration(start: string, end: string | null) {
+  if (!end) return "Running…";
+  const ms = new Date(end).getTime() - new Date(start).getTime();
+  const secs = Math.round(ms / 1000);
+  if (secs < 60) return `${secs}s`;
+  return `${Math.floor(secs / 60)}m ${secs % 60}s`;
+}
+
+
+function WeeklyReportPanel({ report }: { report: WeeklyReportOutput }) {
+  function exportReport() {
+    const text = [
+      "WEEKLY EXECUTIVE REPORT",
+      `${report.weekStart} – ${report.weekEnd}`,
+      "",
+      "KEY METRICS",
+      `Total Visits (7 days):      ${report.totalVisits}`,
+      `Total New Leads:            ${report.totalLeads}`,
+      `Top Lead Source:            ${report.topLeadSource}`,
+      `Best Active Campaign:       ${report.bestCampaign}`,
+      "",
+      "CONTENT OUTPUT",
+      `Articles Published:         ${report.publishedArticles}`,
+      `Carousels Generated:        ${report.carouselsGenerated}`,
+      `X / Thread Posts Sent:      ${report.xPostsSent}`,
+      `Newsletters Sent:           ${report.newslettersSent}`,
+      `Automations Completed:      ${report.automationsRun}`,
+      "",
+      "ACTION ITEMS",
+      `Follow-Up Queue:            ${report.followUpQueue} lead(s) need follow-up`,
+      "",
+      "RECOMMENDATIONS",
+      ...report.recommendations.map((r, i) => `${i + 1}. ${r}`),
+      "",
+      "— Generated by SZL Marketing OS",
+    ].join("\n");
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `szl-weekly-report-${report.weekStart}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <div style={{ padding: "1.5rem", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.08)", borderRadius: "12px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
+        <div>
+          <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "#e8e4de" }}>Weekly Executive Report</h3>
+          <p style={{ fontSize: "0.75rem", color: "#6b6560", marginTop: "0.125rem" }}>
+            {report.weekStart} – {report.weekEnd} · Data sourced from live database
+          </p>
+        </div>
+        <button onClick={exportReport} style={{ display: "flex", alignItems: "center", gap: "0.375rem", padding: "0.5rem 0.875rem", background: "hsla(0,0%,100%,0.06)", color: "#8b8579", border: "1px solid hsla(0,0%,100%,0.08)", borderRadius: "6px", fontSize: "0.75rem", cursor: "pointer" }}>
+          <Download size={12} /> Export .txt
+        </button>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: "0.75rem", marginBottom: "1.5rem" }}>
+        {[
+          { label: "Total Visits", value: report.totalVisits, color: "#4a90b8" },
+          { label: "New Leads", value: report.totalLeads, color: "#5a9c5a" },
+          { label: "Articles", value: report.publishedArticles, color: "#d4a054" },
+          { label: "Carousels", value: report.carouselsGenerated, color: "#9c5adc" },
+          { label: "X Posts Sent", value: report.xPostsSent, color: "#4a90b8" },
+          { label: "Follow-Up Queue", value: report.followUpQueue, color: "#c45a4a" },
+        ].map(m => (
+          <div key={m.label} style={{ padding: "0.875rem", background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.05)", borderRadius: "8px", textAlign: "center" }}>
+            <div style={{ fontSize: "1.5rem", fontWeight: 700, color: m.color }}>{m.value}</div>
+            <div style={{ fontSize: "0.625rem", color: "#6b6560", marginTop: "0.25rem", textTransform: "uppercase", fontWeight: 600 }}>{m.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.5rem" }}>
+        <div style={{ padding: "1rem", background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.05)", borderRadius: "8px" }}>
+          <div style={{ fontSize: "0.625rem", fontWeight: 700, color: "#6b6560", textTransform: "uppercase", marginBottom: "0.5rem" }}>Best Active Campaign</div>
+          <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "#e8e4de" }}>{report.bestCampaign}</div>
+        </div>
+        <div style={{ padding: "1rem", background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.05)", borderRadius: "8px" }}>
+          <div style={{ fontSize: "0.625rem", fontWeight: 700, color: "#6b6560", textTransform: "uppercase", marginBottom: "0.5rem" }}>Top Lead Source</div>
+          <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "#e8e4de" }}>{report.topLeadSource}</div>
+        </div>
+      </div>
+
+      <div style={{ padding: "1rem", background: "hsla(38,65%,58%,0.06)", border: "1px solid hsla(38,65%,58%,0.15)", borderRadius: "8px" }}>
+        <div style={{ fontSize: "0.625rem", fontWeight: 700, color: "#d4a054", textTransform: "uppercase", marginBottom: "0.75rem" }}>Strategic Recommendations</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          {report.recommendations.map((rec, i) => (
+            <div key={i} style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start" }}>
+              <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#d4a054", flexShrink: 0 }}>{i + 1}.</span>
+              <span style={{ fontSize: "0.8125rem", color: "#c8c2ba", lineHeight: 1.5 }}>{rec}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+function DailySummaryPanel({ summary }: { summary: DailySummaryOutput }) {
+  return (
+    <div style={{ padding: "1.25rem", background: "hsla(120,35%,48%,0.06)", border: "1px solid hsla(120,35%,48%,0.15)", borderRadius: "10px" }}>
+      <div style={{ fontSize: "0.6875rem", fontWeight: 700, color: "#5a9c5a", textTransform: "uppercase", marginBottom: "1rem" }}>End-of-Day Marketing Summary</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "0.625rem" }}>
+        {[
+          { label: "Page Views", value: summary.visits },
+          { label: "New Leads", value: summary.leads },
+          { label: "Open Tasks", value: summary.openTasks },
+          { label: "Scheduled", value: summary.scheduledItems },
+          { label: "X Queued", value: summary.xQueued },
+        ].map(m => (
+          <div key={m.label} style={{ textAlign: "center" }}>
+            <div style={{ fontSize: "1.25rem", fontWeight: 700, color: "#e8e4de" }}>{m.value}</div>
+            <div style={{ fontSize: "0.5625rem", color: "#6b6560", textTransform: "uppercase", fontWeight: 600 }}>{m.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+function CarouselIdeasPanel({ ideas }: { ideas: string[] }) {
+  return (
+    <div style={{ padding: "1.25rem", background: "hsla(38,65%,58%,0.06)", border: "1px solid hsla(38,65%,58%,0.15)", borderRadius: "10px" }}>
+      <div style={{ fontSize: "0.6875rem", fontWeight: 700, color: "#d4a054", textTransform: "uppercase", marginBottom: "0.75rem" }}>Generated Carousel Ideas → Added to Content Calendar</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+        {ideas.map((idea, i) => (
+          <div key={i} style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            <span style={{ fontSize: "0.6875rem", color: "#d4a054", fontWeight: 700, flexShrink: 0 }}>#{i + 1}</span>
+            <span style={{ fontSize: "0.8125rem", color: "#c8c2ba" }}>{idea}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+function JobCard({ job, onRun, running }: {
+  job: typeof JOB_DEFINITIONS[number];
+  onRun: (jobId: JobId) => void;
+  running: boolean;
+}) {
+  const Icon = job.icon;
+  return (
+    <div style={{ padding: "1.25rem", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "10px" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: "0.875rem" }}>
+        <div style={{ width: 36, height: 36, borderRadius: "8px", background: `${job.color}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Icon size={18} style={{ color: job.color }} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: "0.9375rem", fontWeight: 600, color: "#e8e4de", marginBottom: "0.25rem" }}>{job.name}</div>
+          <div style={{ fontSize: "0.75rem", color: job.color, marginBottom: "0.375rem" }}>{job.scheduleDesc}</div>
+          <div style={{ fontSize: "0.8125rem", color: "#6b6560", lineHeight: 1.5, marginBottom: "0.625rem" }}>{job.description}</div>
+          <div style={{ fontSize: "0.6875rem", color: "#4a4540" }}>Output: {job.output}</div>
+        </div>
+      </div>
+      <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid hsla(0,0%,100%,0.05)", display: "flex", alignItems: "center", gap: "0.75rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
+          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#5a9c5a" }} />
+          <span style={{ fontSize: "0.6875rem", color: "#5a9c5a", fontWeight: 600 }}>Healthy</span>
+        </div>
+        <button
+          onClick={() => onRun(job.id)}
+          disabled={running}
+          style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "0.375rem", padding: "0.375rem 0.75rem", background: running ? "hsla(0,0%,100%,0.04)" : "hsla(0,0%,100%,0.06)", color: running ? "#4a4540" : "#8b8579", border: "1px solid hsla(0,0%,100%,0.08)", borderRadius: "6px", fontSize: "0.6875rem", cursor: running ? "not-allowed" : "pointer", fontWeight: 500 }}
+        >
+          {running ? <RefreshCw size={11} style={{ animation: "spin 1s linear infinite" }} /> : <Play size={11} />}
+          {running ? "Running…" : "Run Now"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 
 export default function AutomationsPage() {
   const [location] = useLocation();
   const [runs, setRuns] = useState<AutomationRun[]>([]);
+  const [runningJobs, setRunningJobs] = useState<Set<string>>(new Set());
+  const [latestReport, setLatestReport] = useState<WeeklyReportOutput | null>(null);
+  const [latestDailySummary, setLatestDailySummary] = useState<DailySummaryOutput | null>(null);
+  const [latestCarouselIdeas, setLatestCarouselIdeas] = useState<string[] | null>(null);
+  const [showReport, setShowReport] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [expandedRun, setExpandedRun] = useState<number | null>(null);
 
-  useEffect(() => { fetch(`${API}/api/distribution-os/automation-runs`).then(r => r.json()).then(setRuns).catch(() => {}); }, []);
+  useEffect(() => {
+    fetch(`${API}/api/distribution-os/automation-runs`)
+      .then(r => r.json())
+      .then(data => { setRuns(Array.isArray(data) ? data : []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  async function triggerJob(jobId: JobId) {
+    setRunningJobs(prev => new Set([...prev, jobId]));
+    try {
+      const res = await fetch(`${API}/api/distribution-os/automation-runs/trigger/${jobId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Unknown error" }));
+        console.error("Job failed:", err);
+        return;
+      }
+      const result: TriggerResult = await res.json();
+      setRuns(prev => [result.run, ...prev]);
+
+      if (jobId === "weekly-report" && result.output) {
+        setLatestReport(result.output as unknown as WeeklyReportOutput);
+        setShowReport(true);
+      } else if (jobId === "daily-summary" && result.output) {
+        setLatestDailySummary(result.output as unknown as DailySummaryOutput);
+      } else if (jobId === "carousel-ideas" && result.output?.carouselIdeas) {
+        setLatestCarouselIdeas(result.output.carouselIdeas as string[]);
+      }
+    } catch (e) {
+      console.error("Job trigger error:", e);
+    } finally {
+      setRunningJobs(prev => { const n = new Set(prev); n.delete(jobId); return n; });
+    }
+  }
 
   return (
     <DistributionOsLayout currentPath={location}>
+      <style>{`@keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }`}</style>
       <m.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
         <div style={{ marginBottom: "2rem" }}>
           <h1 style={{ fontSize: "1.5rem", fontWeight: 700, color: "#e8e4de" }}>Automations</h1>
-          <p style={{ fontSize: "0.8125rem", color: "#6b6560", marginTop: "0.25rem" }}>Content generation and distribution automation runs</p>
+          <p style={{ fontSize: "0.8125rem", color: "#6b6560", marginTop: "0.25rem" }}>
+            Scheduled jobs that generate content, compile summaries, and produce weekly executive reports — all backed by live database data.
+          </p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
-          {[
-            { name: "X Post Queue Processor", type: "x-queue", desc: "Sends queued X posts at scheduled times" },
-            { name: "Newsletter Generator", type: "newsletter-gen", desc: "Generates weekly newsletter from recent articles" },
-            { name: "Analytics Aggregator", type: "analytics-agg", desc: "Compiles daily analytics summaries" },
-            { name: "Lead Scorer", type: "lead-score", desc: "Re-scores leads based on engagement" },
-          ].map(job => (
-            <div key={job.type} style={{ padding: "1.25rem", background: "hsla(0,0%,100%,0.03)", border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "10px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
-                <Zap size={16} style={{ color: "#d4a054" }} />
-                <h3 style={{ fontSize: "0.875rem", fontWeight: 600, color: "#e8e4de" }}>{job.name}</h3>
-              </div>
-              <p style={{ fontSize: "0.75rem", color: "#6b6560", lineHeight: 1.5, marginBottom: "0.75rem" }}>{job.desc}</p>
-              <button style={{ display: "flex", alignItems: "center", gap: "0.375rem", padding: "0.375rem 0.75rem", background: "hsla(0,0%,100%,0.06)", color: "#8b8579", border: "1px solid hsla(0,0%,100%,0.08)", borderRadius: "6px", fontSize: "0.6875rem", cursor: "pointer" }}>
-                <Play size={10} /> Run Now
-              </button>
-            </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "1rem", marginBottom: "2.5rem" }}>
+          {JOB_DEFINITIONS.map(job => (
+            <JobCard key={job.id} job={job} onRun={triggerJob} running={runningJobs.has(job.id)} />
           ))}
         </div>
 
-        <h2 style={{ fontSize: "0.75rem", fontWeight: 600, color: "#6b6560", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem" }}>Recent Runs</h2>
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-          {runs.map(run => {
-            const sm = STATUS_MAP[run.status] || STATUS_MAP.running;
-            return (
-              <div key={run.id} style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.875rem 1rem", background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.05)", borderRadius: "6px" }}>
-                <sm.icon size={16} style={{ color: sm.color }} />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "#e8e4de" }}>{run.jobName}</div>
-                  <div style={{ fontSize: "0.6875rem", color: "#4a4540" }}>{run.jobType} · {new Date(run.startedAt).toLocaleString()}</div>
-                </div>
-                {run.summary && <span style={{ fontSize: "0.6875rem", color: "#8b8579" }}>{run.summary}</span>}
-                <span style={{ fontSize: "0.6875rem", color: "#5a9c5a" }}>{run.itemsCreated} created</span>
-                {run.itemsFailed > 0 && <span style={{ fontSize: "0.6875rem", color: "#c45a4a" }}>{run.itemsFailed} failed</span>}
+        <AnimatePresence>
+          {latestCarouselIdeas && (
+            <m.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} style={{ marginBottom: "1.5rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
+                <h2 style={{ fontSize: "0.75rem", fontWeight: 700, color: "#6b6560", letterSpacing: "0.1em", textTransform: "uppercase" }}>Latest: Carousel Ideas</h2>
+                <button onClick={() => setLatestCarouselIdeas(null)} style={{ background: "none", border: "none", color: "#4a4540", cursor: "pointer", fontSize: "0.75rem" }}>Dismiss</button>
               </div>
-            );
-          })}
-          {runs.length === 0 && <div style={{ textAlign: "center", padding: "3rem", color: "#4a4540" }}><Zap size={32} style={{ margin: "0 auto 1rem", opacity: 0.5 }} /><p>No automation runs yet.</p></div>}
+              <CarouselIdeasPanel ideas={latestCarouselIdeas} />
+            </m.div>
+          )}
+          {latestDailySummary && (
+            <m.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} style={{ marginBottom: "1.5rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
+                <h2 style={{ fontSize: "0.75rem", fontWeight: 700, color: "#6b6560", letterSpacing: "0.1em", textTransform: "uppercase" }}>Latest: Daily Summary</h2>
+                <button onClick={() => setLatestDailySummary(null)} style={{ background: "none", border: "none", color: "#4a4540", cursor: "pointer", fontSize: "0.75rem" }}>Dismiss</button>
+              </div>
+              <DailySummaryPanel summary={latestDailySummary} />
+            </m.div>
+          )}
+          {showReport && latestReport && (
+            <m.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} style={{ marginBottom: "2.5rem" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+                <h2 style={{ fontSize: "0.75rem", fontWeight: 700, color: "#6b6560", letterSpacing: "0.1em", textTransform: "uppercase" }}>Latest: Weekly Executive Report</h2>
+                <button onClick={() => setShowReport(false)} style={{ background: "none", border: "none", color: "#4a4540", cursor: "pointer", fontSize: "0.75rem" }}>Hide</button>
+              </div>
+              <WeeklyReportPanel report={latestReport} />
+            </m.div>
+          )}
+        </AnimatePresence>
+
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+          <h2 style={{ fontSize: "0.75rem", fontWeight: 700, color: "#6b6560", letterSpacing: "0.1em", textTransform: "uppercase" }}>Run History</h2>
+          <span style={{ fontSize: "0.6875rem", color: "#4a4540" }}>{runs.length} runs recorded</span>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          {loading ? (
+            <div style={{ textAlign: "center", padding: "3rem", color: "#4a4540" }}>Loading run history…</div>
+          ) : runs.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "4rem", color: "#4a4540" }}>
+              <Zap size={40} style={{ margin: "0 auto 1rem", opacity: 0.4 }} />
+              <p style={{ color: "#6b6560" }}>No automation runs yet. Click &ldquo;Run Now&rdquo; on any job to start.</p>
+            </div>
+          ) : (
+            runs.map(run => {
+              const sm = STATUS_MAP[run.status] || STATUS_MAP.running;
+              const expanded = expandedRun === run.id;
+              return (
+                <div key={run.id} style={{ background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.05)", borderRadius: "8px", overflow: "hidden" }}>
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: "0.875rem", padding: "0.875rem 1rem", cursor: "pointer" }}
+                    onClick={() => setExpandedRun(expanded ? null : run.id)}
+                  >
+                    <div style={{ width: 28, height: 28, borderRadius: "6px", background: sm.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <sm.icon size={14} style={{ color: sm.color }} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "#e8e4de" }}>{run.jobName}</div>
+                      <div style={{ fontSize: "0.6875rem", color: "#4a4540", marginTop: "0.0625rem" }}>
+                        {run.jobType} · {timeAgo(run.startedAt)} · {duration(run.startedAt, run.completedAt)}
+                      </div>
+                    </div>
+                    {run.summary && (
+                      <span style={{ fontSize: "0.6875rem", color: "#8b8579", maxWidth: 260, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {run.summary}
+                      </span>
+                    )}
+                    <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexShrink: 0 }}>
+                      {run.itemsCreated > 0 && <span style={{ fontSize: "0.6875rem", color: "#5a9c5a", fontWeight: 600 }}>{run.itemsCreated} created</span>}
+                      {run.itemsFailed > 0 && <span style={{ fontSize: "0.6875rem", color: "#c45a4a", fontWeight: 600 }}>{run.itemsFailed} failed</span>}
+                      <span style={{ fontSize: "0.6875rem", fontWeight: 700, color: sm.color, padding: "0.125rem 0.5rem", background: sm.bg, borderRadius: "3px" }}>{run.status}</span>
+                      <ChevronDown size={14} style={{ color: "#4a4540", transform: expanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+                    </div>
+                  </div>
+                  <AnimatePresence>
+                    {expanded && (
+                      <m.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: "hidden" }}>
+                        <div style={{ padding: "0 1rem 1rem 3.75rem", borderTop: "1px solid hsla(0,0%,100%,0.04)" }}>
+                          <div style={{ paddingTop: "0.875rem", display: "flex", gap: "2rem", flexWrap: "wrap" }}>
+                            <div>
+                              <div style={{ fontSize: "0.625rem", fontWeight: 600, color: "#6b6560", textTransform: "uppercase", marginBottom: "0.25rem" }}>Started</div>
+                              <div style={{ fontSize: "0.8125rem", color: "#c8c2ba" }}>{new Date(run.startedAt).toLocaleString()}</div>
+                            </div>
+                            {run.completedAt && (
+                              <div>
+                                <div style={{ fontSize: "0.625rem", fontWeight: 600, color: "#6b6560", textTransform: "uppercase", marginBottom: "0.25rem" }}>Completed</div>
+                                <div style={{ fontSize: "0.8125rem", color: "#c8c2ba" }}>{new Date(run.completedAt).toLocaleString()}</div>
+                              </div>
+                            )}
+                            {run.summary && (
+                              <div style={{ flex: 1, minWidth: 200 }}>
+                                <div style={{ fontSize: "0.625rem", fontWeight: 600, color: "#6b6560", textTransform: "uppercase", marginBottom: "0.25rem" }}>Output Summary</div>
+                                <div style={{ fontSize: "0.8125rem", color: "#8b8579" }}>{run.summary}</div>
+                              </div>
+                            )}
+                            {run.errorLog && (
+                              <div style={{ flex: 1, minWidth: 200 }}>
+                                <div style={{ fontSize: "0.625rem", fontWeight: 600, color: "#c45a4a", textTransform: "uppercase", marginBottom: "0.25rem" }}>Error</div>
+                                <div style={{ fontSize: "0.8125rem", color: "#c45a4a", fontFamily: "monospace" }}>{run.errorLog}</div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </m.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })
+          )}
         </div>
       </m.div>
     </DistributionOsLayout>
