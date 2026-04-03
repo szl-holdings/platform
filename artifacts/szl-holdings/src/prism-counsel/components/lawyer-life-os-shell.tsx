@@ -6,7 +6,7 @@ import {
   MessageSquare, FileText, TrendingUp, Shield, Bell,
   Download, Briefcase, Brain, Layers, BarChart3, Zap,
   Activity, DollarSign, MapPin, Building2, Users, Globe,
-  Server, Plug, Star, HelpCircle
+  Server, Plug, Star, HelpCircle, ShieldAlert, XCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -58,6 +58,13 @@ const LEFT_SECTIONS = [
       { label: "Matter Twin", href: "/prism-counsel/matter-twin", icon: Layers },
       { label: "Proof Chain", href: "/prism-counsel/proof-chain", icon: Shield },
       { label: "Forecast Diff", href: "/prism-counsel/forecast-diff", icon: BarChart3 },
+    ],
+  },
+  {
+    label: "Recovery & Liens",
+    items: [
+      { label: "Recovery View", href: "/prism-counsel/recovery-view", icon: ShieldAlert },
+      { label: "Settlement Blockers", href: "/prism-counsel/settlement-blockers-view", icon: XCircle },
     ],
   },
   {

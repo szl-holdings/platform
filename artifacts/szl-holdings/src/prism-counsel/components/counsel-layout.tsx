@@ -5,7 +5,8 @@ import {
   MessageSquare, Shield, Settings, ChevronLeft, ChevronRight,
   Gavel, Clock, FileText, Users, Eye, Building2, MapPin, AlertTriangle, Plug,
   Brain, Globe, Activity, Layers, Link2, DollarSign, BarChart3, Zap,
-  Sun, Inbox, Download, CheckSquare, Radio, Server, Gauge, Waves, Car, Move, ClipboardList, ClipboardCheck
+  Sun, Inbox, Download, CheckSquare, Radio, Server, Gauge, Waves, Car, Move, ClipboardList, ClipboardCheck,
+  ShieldAlert, XCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -77,6 +78,14 @@ const NAV_SECTIONS = [
       { label: "Carrier Watch", href: "/prism-counsel/carrier-watch", icon: Building2 },
       { label: "Movement Board", href: "/prism-counsel/movement-board", icon: Move },
       { label: "Pilot One Ops", href: "/prism-counsel/pilot-one-admin", icon: Server },
+    ],
+  },
+  {
+    label: "Pilot Two",
+    items: [
+      { label: "Recovery Ops", href: "/prism-counsel/recovery-ops", icon: ShieldAlert },
+      { label: "Settlement Blockers", href: "/prism-counsel/settlement-blockers", icon: XCircle },
+      { label: "Recovery Admin", href: "/prism-counsel/admin/recovery", icon: Server },
     ],
   },
   {

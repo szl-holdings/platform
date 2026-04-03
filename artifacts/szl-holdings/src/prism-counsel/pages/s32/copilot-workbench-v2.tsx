@@ -77,6 +77,22 @@ const ACTION_CARDS = [
     defaultPrompt: "What is blocking settlement on this matter? List all friction sources and blockers",
   },
   {
+    id: "recovery-lien-deps",
+    label: "Recovery / Lien Deps",
+    icon: Shield,
+    color: "#c45a4a",
+    description: "Active liens, lifecycle state, stale amounts, dependency timeline",
+    defaultPrompt: "Show recovery and lien dependencies for this matter — active liens, lifecycle state, stale amounts, and what blocks settlement",
+  },
+  {
+    id: "recovery-memo",
+    label: "Draft Recovery Memo",
+    icon: FileText,
+    color: "#8b7ac8",
+    description: "Generate a recovery dependency memo for this matter",
+    defaultPrompt: "Draft a recovery dependency memo documenting lien positions, lifecycle state, and settlement impact for this matter",
+  },
+  {
     id: "missing-support",
     label: "Show Missing Support",
     icon: Shield,

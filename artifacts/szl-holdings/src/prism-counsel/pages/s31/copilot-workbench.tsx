@@ -16,6 +16,27 @@ const DEMO_MESSAGES = [
   { role: "assistant", content: `## Matter Changes — Last 7 Days\n\n**Rodriguez v. National General** (Case #2024-CV-1847)\n\n### Pressure Shifts\n- **Insurer pressure** rose from 0.52 → 0.58 (+6%) — carrier response lag now exceeds 21 days\n- **Settlement pressure** stable at 0.62 — mediation approaching April 22\n- **Evidence pressure** fell from 0.60 → 0.52 — 2 documents processed from extraction queue\n\n### Key Events\n1. **Mar 28** — Reserve increase notification detected in carrier correspondence\n2. **Mar 30** — IME report received from Dr. Whitmore (orthopedic)\n3. **Apr 1** — Discovery deadline extension granted (new cutoff: May 15)\n\n### Missing Artifacts\n- Outstanding medical records from 2 providers\n- Lost wage verification incomplete\n- No mediation memo drafted\n\n### Recommended Actions\n1. Follow up on outstanding medical records (2 providers)\n2. Complete lost wage verification before demand finalization\n3. Draft mediation memo — mediation in 19 days\n\n*Sources: Matter Twin snapshot, Pressure Graph, Communication logs*\n*Confidence: 0.82 | Proof Chain: #PC-2847*` },
 ];
 
+const RECOVERY_ACTION_CARDS = [
+  {
+    query: "What is blocking settlement?",
+    label: "What's Blocking Settlement?",
+    description: "Show all open settlement blockers by severity, owner, and clearing action",
+    icon: "⛔",
+  },
+  {
+    query: "Show recovery and lien dependencies for this matter",
+    label: "Recovery / Lien Dependencies",
+    description: "Active liens, lifecycle state, stale amounts, and dependency timeline",
+    icon: "🔗",
+  },
+  {
+    query: "Draft a recovery dependency memo for Rodriguez v. National General",
+    label: "Draft Recovery Dependency Memo",
+    description: "Generate a structured memo documenting lien positions and settlement impact",
+    icon: "📋",
+  },
+];
+
 export default function CopilotWorkbenchPage() {
   const [activeMode, setActiveMode] = useState<string>("matter");
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
@@ -88,6 +109,21 @@ export default function CopilotWorkbenchPage() {
             <>
               {["What changed in the last 7 days?", "What is missing before mediation?", "Show actions requiring approval"].map(q => (
                 <button key={q} onClick={() => setInput(q)} className="w-full text-left px-2 py-1.5 text-[10px] text-slate-500 hover:text-slate-300 hover:bg-white/[0.03] rounded transition-colors">{q}</button>
+              ))}
+            </>
+          )}
+          {activeMode === "matter" && (
+            <>
+              <div className="text-[9px] uppercase tracking-wider text-slate-600 px-2 pt-3 pb-1">Recovery & Lien Ops</div>
+              {RECOVERY_ACTION_CARDS.map(card => (
+                <button
+                  key={card.query}
+                  onClick={() => setInput(card.query)}
+                  className="w-full text-left px-2 py-1.5 rounded text-[10px] text-slate-400 hover:text-slate-200 hover:bg-white/[0.04] transition-colors mb-0.5"
+                >
+                  <span className="mr-1">{card.icon}</span>
+                  {card.label}
+                </button>
               ))}
             </>
           )}

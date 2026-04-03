@@ -128,6 +128,12 @@ const PilotOneCarrierWatch = lazy(() => import("@/prism-counsel/pages/pilot/carr
 const PilotOneMovementBoard = lazy(() => import("@/prism-counsel/pages/pilot/movement-board-page"));
 const PilotOneAdmin = lazy(() => import("@/prism-counsel/pages/pilot/pilot-one-admin-page"));
 
+const RecoveryOpsPage = lazy(() => import("@/prism-counsel/pages/recovery-ops-page"));
+const SettlementBlockersPage = lazy(() => import("@/prism-counsel/pages/settlement-blockers-page"));
+const AdminRecoveryPage = lazy(() => import("@/prism-counsel/pages/admin-recovery-page"));
+const S32SettlementBlockersView = lazy(() => import("@/prism-counsel/pages/s32/settlement-blockers-view"));
+const S32RecoveryView = lazy(() => import("@/prism-counsel/pages/s32/recovery-view"));
+
 const S31CopilotWorkbench = lazy(() => import("@/prism-counsel/pages/s31/copilot-workbench"));
 const S31WorldlineDashboard = lazy(() => import("@/prism-counsel/pages/s31/worldline-dashboard"));
 const S31PressureGraph = lazy(() => import("@/prism-counsel/pages/s31/pressure-graph-page"));
@@ -523,6 +529,17 @@ function App() {
               <Suspense fallback={<PageLoader />}><CounselAppPage><PilotOneAdmin /></CounselAppPage></Suspense>
             </Route>
 
+            {/* ── PRISM Counsel Pilot Two — Recovery & Lien Ops ── */}
+            <Route path="/prism-counsel/recovery-ops">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><RecoveryOpsPage /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/settlement-blockers">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><SettlementBlockersPage /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/admin/recovery">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><AdminRecoveryPage /></CounselAppPage></Suspense>
+            </Route>
+
             {/* ── PRISM Counsel Section 31 routes (flat paths) ── */}
             <Route path="/prism-counsel/pressure-graph">
               <Suspense fallback={<PageLoader />}><CounselAppPage><S31PressureGraph /></CounselAppPage></Suspense>
@@ -599,6 +616,14 @@ function App() {
             </Route>
             <Route path="/prism-counsel/matter-desk-v2/:id">
               {(params) => <Suspense fallback={<PageLoader />}><LawyerOSAppPage><S32MatterDeskV2RouteWrapper params={params} /></LawyerOSAppPage></Suspense>}
+            </Route>
+
+            {/* ── Pilot Two — Lawyer Life OS (S32) views ── */}
+            <Route path="/prism-counsel/recovery-view">
+              <Suspense fallback={<PageLoader />}><LawyerOSAppPage><S32RecoveryView /></LawyerOSAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/settlement-blockers-view">
+              <Suspense fallback={<PageLoader />}><LawyerOSAppPage><S32SettlementBlockersView /></LawyerOSAppPage></Suspense>
             </Route>
 
             <Route path="/prism-counsel/ny">

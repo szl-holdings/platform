@@ -3,7 +3,8 @@ import { Link } from "wouter";
 import {
   ArrowLeft, Clock, DollarSign, FileText, Users, Activity,
   MessageSquare, ShieldCheck, TrendingUp, AlertTriangle, Stethoscope,
-  Scale, ChevronRight, ExternalLink, Wifi, WifiOff, Loader2
+  Scale, ChevronRight, ExternalLink, Wifi, WifiOff, Loader2,
+  ShieldAlert, Layers, XCircle, RefreshCw, CheckCircle
 } from "lucide-react";
 import { DEMO_MATTERS, PILLAR_LABELS, PILLAR_DESCRIPTIONS } from "../data/demo-matters";
 import { usePrismMatterDetail, usePrismMatterDeadlines, usePrismMatterParties, usePrismMatterComms } from "../hooks/use-prism-api";
@@ -16,6 +17,8 @@ const TABS = [
   { key: "forecast", label: "Forecast", icon: TrendingUp },
   { key: "communications", label: "Comms", icon: MessageSquare },
   { key: "approvals", label: "Approvals", icon: ShieldCheck },
+  { key: "recovery", label: "Recovery & Liens", icon: ShieldAlert },
+  { key: "blockers", label: "Settlement Blockers", icon: Layers },
 ];
 
 function PillarCard({ pillar, score, description }: { pillar: string; score: number; description: string }) {
@@ -166,6 +169,8 @@ export default function MatterDetailPage({ id }: { id: number }) {
           {activeTab === "forecast" && <ForecastTab matter={matter} />}
           {activeTab === "communications" && <CommsTab matter={matter} comms={commsQ.data} isLive={!!commsQ.data?.length} />}
           {activeTab === "approvals" && <ApprovalsTab matter={matter} />}
+          {activeTab === "recovery" && <RecoveryTab matter={matter} />}
+          {activeTab === "blockers" && <SettlementBlockersTab matter={matter} />}
         </div>
 
         <div className="space-y-3">
@@ -540,6 +545,287 @@ function ApprovalsTab({ matter }: { matter: MatterLike }) {
         ))}
       </div>
       <p className="text-[9px] text-slate-600 mt-3">All externally consequential actions require explicit attorney or partner approval before execution.</p>
+    </div>
+  );
+}
+
+const MATTER_RECOVERY_DEMO: Record<number, any[]> = {
+  1: [
+    {
+      id: 1, lienHolder: "Florida Medicaid AHCA", category: "Medicaid",
+      lifecycleState: "awaiting_response", assertedAmount: 22300, amountStatus: "pending",
+      blocksSettlement: true, isStale: true, daysSinceActivity: 47, confidence: 0.82,
+      notes: "Conditional payment letter received Jan 2026. No updated amount despite follow-up.",
+    },
+    {
+      id: 2, lienHolder: "PhysioFirst PT", category: "Provider Lien",
+      lifecycleState: "amount_known", assertedAmount: 14400, amountStatus: "confirmed",
+      blocksSettlement: false, isStale: false, daysSinceActivity: 5, confidence: 0.95,
+      notes: "Provider confirmed final amount. Negotiation in progress.",
+    },
+    {
+      id: 3, lienHolder: "Jackson Memorial Hospital", category: "Hospital Lien",
+      lifecycleState: "dispute_flagged", assertedAmount: 5600, amountStatus: "inferred",
+      blocksSettlement: true, isStale: false, daysSinceActivity: 12, confidence: 0.65,
+      notes: "Dispute letter sent. Hospital non-responsive. Export blocked.",
+    },
+  ],
+  2: [
+    {
+      id: 4, lienHolder: "Blue Cross Blue Shield NJ", category: "Private Health / ERISA",
+      lifecycleState: "documentation_requested", assertedAmount: 18900, amountStatus: "pending",
+      blocksSettlement: true, isStale: false, daysSinceActivity: 8, confidence: 0.78,
+      notes: "ERISA plan. Documentation requested March 2026.",
+    },
+  ],
+  3: [],
+};
+
+const LIFECYCLE_COLORS_MATTER: Record<string, string> = {
+  awaiting_response: "#d4a054",
+  documentation_requested: "#c8953c",
+  dispute_flagged: "#c45a4a",
+  amount_pending: "#c8953c",
+  amount_known: "#4a90b8",
+  ready_for_settlement_handling: "#22c55e",
+};
+
+const LIFECYCLE_LABELS_MATTER: Record<string, string> = {
+  not_identified: "Not Identified", suspected: "Suspected", identified: "Identified",
+  documentation_requested: "Docs Requested", awaiting_response: "Awaiting Response",
+  amount_pending: "Amount Pending", amount_known: "Amount Known", dispute_flagged: "Dispute Flagged",
+  reviewed: "Reviewed", ready_for_settlement_handling: "Ready", resolved: "Resolved", archived: "Archived",
+};
+
+function RecoveryTab({ matter }: { matter: MatterLike & { id?: number } }) {
+  const matterId = (matter as any).id ?? 1;
+  const items = MATTER_RECOVERY_DEMO[matterId] ?? [];
+  const blockingCount = items.filter((i: any) => i.blocksSettlement).length;
+  const totalAsserted = items.reduce((s: number, i: any) => s + (i.assertedAmount ?? 0), 0);
+
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-3 gap-2">
+        <div className="rounded border border-white/[0.06] p-3" style={{ background: "#080c14" }}>
+          <div className="text-[9px] text-slate-600 uppercase mb-1">Recovery Items</div>
+          <div className="text-lg font-bold text-slate-200">{items.length}</div>
+        </div>
+        <div className="rounded border border-white/[0.06] p-3" style={{ background: "#080c14" }}>
+          <div className="text-[9px] text-slate-600 uppercase mb-1">Blocking Settlement</div>
+          <div className="text-lg font-bold text-[#c45a4a]">{blockingCount}</div>
+        </div>
+        <div className="rounded border border-white/[0.06] p-3" style={{ background: "#080c14" }}>
+          <div className="text-[9px] text-slate-600 uppercase mb-1">Total Asserted</div>
+          <div className="text-lg font-bold text-slate-200">${(totalAsserted / 1000).toFixed(1)}K</div>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-1.5">
+            <ShieldAlert className="w-4 h-4 text-[#c45a4a]" />
+            Recovery & Lien Panel
+          </h3>
+          <Link href="/prism-counsel/recovery-ops">
+            <span className="text-[10px] text-slate-500 hover:text-[#d4a054] cursor-pointer flex items-center gap-1">
+              Firm view <ChevronRight className="w-3 h-3" />
+            </span>
+          </Link>
+        </div>
+        {items.length === 0 ? (
+          <p className="text-xs text-slate-500">No recovery items for this matter</p>
+        ) : (
+          <div className="space-y-3">
+            {items.map((item: any) => {
+              const stateColor = LIFECYCLE_COLORS_MATTER[item.lifecycleState] ?? "#6b7280";
+              return (
+                <div key={item.id} className="rounded border border-white/[0.04] p-3" style={{ background: "#080c14" }}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-[11px] font-medium text-slate-100">{item.lienHolder}</span>
+                        {item.blocksSettlement && (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] bg-[#c45a4a]/10 text-[#c45a4a]">BLOCKS</span>
+                        )}
+                        {item.isStale && (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] bg-[#c8953c]/10 text-[#c8953c]">STALE</span>
+                        )}
+                      </div>
+                      <div className="text-[9px] text-[#4a90b8] mb-1">{item.category}</div>
+                      <p className="text-[9px] text-slate-500 leading-relaxed">{item.notes}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <div className="text-xs font-mono text-slate-200">${(item.assertedAmount / 1000).toFixed(1)}K</div>
+                      <div className="text-[9px] mt-0.5" style={{ color: item.amountStatus === "confirmed" ? "#22c55e" : "#d4a054" }}>{item.amountStatus}</div>
+                      <div className="mt-1">
+                        <span className="px-1.5 py-0.5 rounded text-[9px]" style={{ background: `${stateColor}18`, color: stateColor }}>
+                          {LIFECYCLE_LABELS_MATTER[item.lifecycleState]}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-[9px] text-slate-600">{item.daysSinceActivity}d since activity</span>
+                    <span className="text-[9px] text-slate-600">conf: {Math.round(item.confidence * 100)}%</span>
+                    <div className="flex-1" />
+                    <button className="px-2 py-0.5 rounded text-[9px] text-slate-400 border border-white/[0.06] hover:border-white/[0.12] hover:text-slate-200 transition-colors">
+                      Request Update
+                    </button>
+                    <button className="px-2 py-0.5 rounded text-[9px] text-slate-400 border border-white/[0.06] hover:border-white/[0.12] hover:text-slate-200 transition-colors">
+                      Add Note
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {items.length > 0 && (
+        <div className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
+          <h3 className="text-xs font-semibold text-slate-200 mb-2">Recovery Signals</h3>
+          <div className="space-y-1.5">
+            {items.filter((i: any) => i.blocksSettlement).map((item: any) => (
+              <div key={item.id} className="flex items-start gap-1.5">
+                <div className="w-1 h-1 rounded-full bg-[#c45a4a] mt-1.5 flex-shrink-0" />
+                <span className="text-[9px] text-slate-500">{item.lienHolder}: blocks settlement distribution</span>
+              </div>
+            ))}
+            {items.filter((i: any) => i.isStale).map((item: any) => (
+              <div key={`stale-${item.id}`} className="flex items-start gap-1.5">
+                <div className="w-1 h-1 rounded-full bg-[#c8953c] mt-1.5 flex-shrink-0" />
+                <span className="text-[9px] text-slate-500">{item.lienHolder}: amount stale {item.daysSinceActivity}d, matter has advanced</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const MATTER_BLOCKERS_DEMO: Record<number, any[]> = {
+  1: [
+    {
+      id: 1, blockerType: "recovery_lien", title: "Medicaid AHCA — amount not confirmed",
+      severity: "critical", isExternal: true, daysOpen: 47,
+      nextBestAction: "Send certified escalation letter to AHCA with settlement timeline",
+      blocksWhat: "Settlement distribution, export",
+      consequencesIfIgnored: "Cannot distribute funds. MSP compliance exposure.",
+    },
+    {
+      id: 2, blockerType: "missing_evidence", title: "Wage verification outstanding",
+      severity: "high", isExternal: false, daysOpen: 22,
+      nextBestAction: "Final demand to employer with 10-day deadline",
+      blocksWhat: "Demand packet send",
+      consequencesIfIgnored: "Lost wages component weakened; demand incomplete.",
+    },
+    {
+      id: 3, blockerType: "recovery_lien", title: "Jackson Memorial lien — dispute active",
+      severity: "high", isExternal: true, daysOpen: 12,
+      nextBestAction: "Follow up dispute letter; set 14-day response deadline",
+      blocksWhat: "Export, settlement distribution",
+      consequencesIfIgnored: "Export blocked. Settlement delay.",
+    },
+  ],
+  2: [
+    {
+      id: 4, blockerType: "missing_evidence", title: "Surveillance footage not produced",
+      severity: "critical", isExternal: true, daysOpen: 31,
+      nextBestAction: "File motion for sanctions; depose facilities manager",
+      blocksWhat: "Trial readiness, mediation",
+      consequencesIfIgnored: "Liability contested without evidence. Weak mediation position.",
+    },
+  ],
+  3: [
+    {
+      id: 5, blockerType: "insurer_silence", title: "Atlantic Casualty non-responsive 62 days",
+      severity: "high", isExternal: true, daysOpen: 62,
+      nextBestAction: "Formal demand citing silence as bad faith; 10-day ultimatum",
+      blocksWhat: "Settlement negotiations",
+      consequencesIfIgnored: "Momentum stalled. MSJ on bad faith may be needed.",
+    },
+  ],
+};
+
+const BLOCKER_COLORS: Record<string, string> = {
+  recovery_lien: "#c45a4a", missing_evidence: "#c45a4a", insurer_silence: "#d4a054",
+  insurer_hardening: "#c45a4a", contradiction: "#c45a4a", approval: "#8b7ac8",
+  document_confidence: "#c8953c", export_safety: "#c45a4a", review_backlog: "#d4a054",
+};
+const BLOCKER_LABELS: Record<string, string> = {
+  recovery_lien: "Recovery / Lien", missing_evidence: "Missing Evidence",
+  insurer_silence: "Insurer Silence", insurer_hardening: "Insurer Hardening",
+  missing_records: "Missing Records", contradiction: "Contradiction",
+  approval: "Approval", document_confidence: "Doc Confidence",
+  export_safety: "Export Safety", review_backlog: "Review Backlog",
+};
+
+function SettlementBlockersTab({ matter }: { matter: MatterLike & { id?: number } }) {
+  const matterId = (matter as any).id ?? 1;
+  const blockers = MATTER_BLOCKERS_DEMO[matterId] ?? [];
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-1.5">
+            <Layers className="w-4 h-4 text-[#d4a054]" />
+            Settlement Blockers
+          </h3>
+          <Link href="/prism-counsel/settlement-blockers">
+            <span className="text-[10px] text-slate-500 hover:text-[#d4a054] cursor-pointer flex items-center gap-1">
+              All blockers <ChevronRight className="w-3 h-3" />
+            </span>
+          </Link>
+        </div>
+        {blockers.length === 0 ? (
+          <div className="text-center py-4">
+            <CheckCircle className="w-6 h-6 text-[#22c55e] mx-auto mb-2" />
+            <p className="text-xs text-slate-400">No active settlement blockers</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {blockers.map((blocker: any) => {
+              const color = BLOCKER_COLORS[blocker.blockerType] ?? "#6b7280";
+              const sevColor = blocker.severity === "critical" ? "#c45a4a" : blocker.severity === "high" ? "#d4a054" : "#c8953c";
+              return (
+                <div key={blocker.id} className="rounded border p-3 transition-colors" style={{ background: "#080c14", borderColor: blocker.severity === "critical" ? "#c45a4a25" : "rgba(255,255,255,0.04)" }}>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-[11px] font-medium text-slate-100">{blocker.title}</span>
+                    <span className="px-1.5 py-0.5 rounded text-[9px]" style={{ background: `${sevColor}18`, color: sevColor }}>
+                      {blocker.severity.toUpperCase()}
+                    </span>
+                    <span className={`px-1.5 py-0.5 rounded text-[9px] ${blocker.isExternal ? "bg-[#8b7ac8]/10 text-[#8b7ac8]" : "bg-white/[0.04] text-slate-500"}`}>
+                      {blocker.isExternal ? "EXTERNAL" : "INTERNAL"}
+                    </span>
+                  </div>
+                  <div className="text-[9px] text-[#4a90b8] mb-2">{BLOCKER_LABELS[blocker.blockerType]}</div>
+                  <div className="grid grid-cols-2 gap-2 text-[9px]">
+                    <div>
+                      <div className="text-slate-600 uppercase mb-0.5">Next Action</div>
+                      <p className="text-[#4a90b8] leading-relaxed">{blocker.nextBestAction}</p>
+                    </div>
+                    <div>
+                      <div className="text-slate-600 uppercase mb-0.5">If Ignored</div>
+                      <p className="text-[#c45a4a] leading-relaxed">{blocker.consequencesIfIgnored}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2 pt-1.5 border-t border-white/[0.04]">
+                    <span className="text-[9px] text-slate-600">{blocker.daysOpen}d open</span>
+                    <span className="text-[9px] text-slate-600">Blocks: {blocker.blocksWhat}</span>
+                    <div className="flex-1" />
+                    <button className="px-2 py-0.5 rounded text-[9px] text-slate-400 border border-white/[0.06] hover:border-white/[0.12] hover:text-slate-200 transition-colors">
+                      Take Action
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
