@@ -4,6 +4,9 @@ import { ArrowRight, ShieldCheck, Ship, Building2, BriefcaseBusiness } from "luc
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { InlineSegmentedCTA, SegmentedCTA } from "@/components/SegmentedCTA";
+import { useNarrativeRouter } from "@/hooks/useNarrativeRouter";
+import { DynamicProofPack } from "@/components/DynamicProofPack";
 
 const SOLUTIONS = [
   {
@@ -57,6 +60,8 @@ const SOLUTIONS = [
 ];
 
 export default function SolutionsPage() {
+  const { visitorType, setIntent } = useNarrativeRouter();
+
   usePageMeta({
     title: "Solutions — SZL Holdings",
     description: "Vertical domain packs that extend the Lyte + Alloy operating platform into defense & intelligence, maritime, real estate, and executive advisory.",
@@ -192,6 +197,25 @@ export default function SolutionsPage() {
                 Start a conversation <ArrowRight size={14} />
               </Link>
             </m.div>
+          </div>
+        </section>
+
+        {/* Proof pack by intent */}
+        <section style={{ borderTop: "1px solid var(--color-szl-border)", padding: "clamp(3rem,5vw,4rem) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <div style={{ marginBottom: "1.75rem" }}>
+              <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(214,7%,38%)", fontFamily: "var(--font-mono)", marginBottom: "0.5rem" }}>
+                Proof by intent
+              </p>
+              <p style={{ fontSize: "0.875rem", color: "hsl(214,7%,55%)" }}>
+                {visitorType !== "unknown" ? "We've selected the right evidence for your context." : "Tell us who you are and we'll show you the right materials."}
+              </p>
+            </div>
+            {visitorType !== "unknown" ? (
+              <DynamicProofPack visitorType={visitorType} onChangeIntent={() => setIntent("unknown")} />
+            ) : (
+              <SegmentedCTA visitorType={visitorType} onSelectIntent={setIntent} />
+            )}
           </div>
         </section>
 

@@ -63,6 +63,7 @@ const HelmConsolePage = lazy(() => import("@/pages/helm-console"));
 const CommercialPackagingPage = lazy(() => import("@/pages/commercial-packaging"));
 const RoiCalculatorPage = lazy(() => import("@/pages/roi-calculator"));
 const ReliefMessagingPage = lazy(() => import("@/pages/relief-messaging"));
+const TrustRoutePage = lazy(() => import("@/pages/trust-route"));
 
 // New platform-repositioning pages
 const LytePage = lazy(() => import("@/pages/lyte-page"));
@@ -390,6 +391,9 @@ function App() {
             </Route>
 
             {/* ── Trust Center ── */}
+            <Route path="/trust-route">
+              <Suspense fallback={<PageLoader />}><TrustRoutePage /></Suspense>
+            </Route>
             <Route path="/trust/security">
               <Suspense fallback={<PageLoader />}><TrustSecurityPage /></Suspense>
             </Route>

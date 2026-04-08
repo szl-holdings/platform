@@ -18,6 +18,9 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { useNarrativeRouter } from "@/hooks/useNarrativeRouter";
+import { SegmentedCTA } from "@/components/SegmentedCTA";
+import { DynamicProofPack } from "@/components/DynamicProofPack";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -246,6 +249,8 @@ function NewsletterSection() {
 }
 
 export default function HomePage() {
+  const { visitorType, setIntent } = useNarrativeRouter();
+
   usePageMeta({
     title: "SZL Holdings — Business observability with explainable execution.",
     description:
@@ -698,6 +703,27 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ── 6b. Segmented Intent / Proof Pack ───────────────────────── */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.015)" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+              <div style={{ marginBottom: "2rem", maxWidth: "42rem" }}>
+                <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
+                  Proof by intent
+                </p>
+                <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)" }}>
+                  The right evidence for who you are.
+                </h2>
+              </div>
+              {visitorType !== "unknown" ? (
+                <DynamicProofPack visitorType={visitorType} onChangeIntent={() => setIntent("unknown")} />
+              ) : (
+                <SegmentedCTA visitorType={visitorType} onSelectIntent={setIntent} />
+              )}
+            </m.div>
+          </div>
+        </section>
+
         {/* ── 7. Integration / Architecture ───────────────────────────── */}
         <section style={{ borderBottom: "1px solid var(--color-szl-border)" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
@@ -993,7 +1019,7 @@ export default function HomePage() {
         {/* ── 11. Newsletter Signup ────────────────────────────────────── */}
         <NewsletterSection />
 
-        {/* ── 12. Demo CTA ────────────────────────────────────────────── */}
+        {/* ── 12. Final CTA — Dynamic by visitor type ──────────────────── */}
         <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(192,72%,48%,0.02)" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
             <m.div
@@ -1003,59 +1029,106 @@ export default function HomePage() {
               transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
               style={{
                 borderRadius: "1rem",
-                border: "1px solid hsla(192,72%,48%,0.18)",
+                border: visitorType === "investor" ? "1px solid hsla(38,72%,58%,0.18)" : visitorType === "lender" ? "1px solid hsla(192,72%,48%,0.18)" : visitorType === "design-partner" ? "1px solid hsla(222,60%,60%,0.18)" : "1px solid hsla(192,72%,48%,0.18)",
                 padding: "clamp(2rem,5vw,3.5rem)",
                 background: "hsla(0,0%,100%,0.025)",
               }}
             >
               <div style={{ maxWidth: "32rem" }}>
-                <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(192,72%,48%)", fontFamily: "var(--font-mono)", marginBottom: "1rem" }}>
-                  Request a demo
-                </p>
-                <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.12, color: "hsl(38,8%,94%)", marginBottom: "1rem" }}>
-                  See how Lyte works on a real workflow.
-                </h2>
-                <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "2rem" }}>
-                  The demo covers the full signal-to-action arc using staged data. You can also request a design-partner conversation if you want to explore a live instrumentation of one of your own workflows.
-                </p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-                  <Link
-                    href="/demo"
-                    style={{
-                      display: "inline-flex", alignItems: "center", gap: "0.5rem",
-                      padding: "0.75rem 1.5rem",
-                      background: "hsl(192,72%,48%)",
-                      color: "hsl(214,18%,4%)",
-                      borderRadius: "0.375rem",
-                      fontSize: "0.875rem", fontWeight: 600,
-                      textDecoration: "none",
-                      transition: "background 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,54%)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,48%)"; }}
-                  >
-                    Request a demo
-                    <ArrowRight size={15} />
-                  </Link>
-                  <Link
-                    href="/design-partner"
-                    style={{
-                      display: "inline-flex", alignItems: "center", gap: "0.5rem",
-                      padding: "0.75rem 1.5rem",
-                      background: "transparent",
-                      color: "var(--color-szl-text-secondary)",
-                      border: "1px solid var(--color-szl-border-hover)",
-                      borderRadius: "0.375rem",
-                      fontSize: "0.875rem", fontWeight: 500,
-                      textDecoration: "none",
-                      transition: "border-color 0.2s ease, color 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.25)"; (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--color-szl-border-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-                  >
-                    Become a design partner
-                  </Link>
-                </div>
+                {visitorType === "investor" && (
+                  <>
+                    <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(38,72%,58%)", fontFamily: "var(--font-mono)", marginBottom: "1rem" }}>
+                      For investors
+                    </p>
+                    <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.12, color: "hsl(38,8%,94%)", marginBottom: "1rem" }}>
+                      The thesis, architecture, and moat — all in one place.
+                    </h2>
+                    <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "2rem" }}>
+                      Walk through the investor materials at your own pace, or request data room access to start a qualified conversation.
+                    </p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+                      <Link href="/investors/overview" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 1.5rem", background: "hsl(38,72%,58%)", color: "hsl(214,18%,4%)", borderRadius: "0.375rem", fontSize: "0.875rem", fontWeight: 600, textDecoration: "none" }}>
+                        View investor materials <ArrowRight size={15} />
+                      </Link>
+                      <Link href="/investors/data-room" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 1.5rem", background: "transparent", color: "var(--color-szl-text-secondary)", border: "1px solid var(--color-szl-border-hover)", borderRadius: "0.375rem", fontSize: "0.875rem", fontWeight: 500, textDecoration: "none" }}>
+                        Data room access
+                      </Link>
+                    </div>
+                  </>
+                )}
+                {visitorType === "lender" && (
+                  <>
+                    <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(192,72%,48%)", fontFamily: "var(--font-mono)", marginBottom: "1rem" }}>
+                      For lenders &amp; banks
+                    </p>
+                    <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.12, color: "hsl(38,8%,94%)", marginBottom: "1rem" }}>
+                      Capital materials built for lender conversations.
+                    </h2>
+                    <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "2rem" }}>
+                      Bank brief, operating plan, and financial narrative — structured for bank and SBA conversations. Request the full package and we'll respond within 24 hours.
+                    </p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+                      <Link href="/investor-relations" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 1.5rem", background: "hsl(192,72%,48%)", color: "hsl(214,18%,4%)", borderRadius: "0.375rem", fontSize: "0.875rem", fontWeight: 600, textDecoration: "none" }}>
+                        Request lender brief <ArrowRight size={15} />
+                      </Link>
+                      <Link href="/contact" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 1.5rem", background: "transparent", color: "var(--color-szl-text-secondary)", border: "1px solid var(--color-szl-border-hover)", borderRadius: "0.375rem", fontSize: "0.875rem", fontWeight: 500, textDecoration: "none" }}>
+                        Start a conversation
+                      </Link>
+                    </div>
+                  </>
+                )}
+                {visitorType === "design-partner" && (
+                  <>
+                    <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(222,60%,60%)", fontFamily: "var(--font-mono)", marginBottom: "1rem" }}>
+                      Design partner
+                    </p>
+                    <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.12, color: "hsl(38,8%,94%)", marginBottom: "1rem" }}>
+                      Instrument one real workflow. Build proof in 90 days.
+                    </h2>
+                    <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "2rem" }}>
+                      Design partner slots are limited and selected carefully. The conversation starts here — founder-led, structured, and commitment-free until we both agree it's the right fit.
+                    </p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+                      <Link href="/contact" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 1.5rem", background: "hsl(222,60%,60%)", color: "hsl(214,18%,4%)", borderRadius: "0.375rem", fontSize: "0.875rem", fontWeight: 600, textDecoration: "none" }}>
+                        Apply as a design partner <ArrowRight size={15} />
+                      </Link>
+                      <Link href="/design-partners" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 1.5rem", background: "transparent", color: "var(--color-szl-text-secondary)", border: "1px solid var(--color-szl-border-hover)", borderRadius: "0.375rem", fontSize: "0.875rem", fontWeight: 500, textDecoration: "none" }}>
+                        See the program
+                      </Link>
+                    </div>
+                  </>
+                )}
+                {(visitorType === "buyer" || visitorType === "unknown") && (
+                  <>
+                    <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(192,72%,48%)", fontFamily: "var(--font-mono)", marginBottom: "1rem" }}>
+                      Request a demo
+                    </p>
+                    <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.12, color: "hsl(38,8%,94%)", marginBottom: "1rem" }}>
+                      See how Lyte works on a real workflow.
+                    </h2>
+                    <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "2rem" }}>
+                      The demo covers the full signal-to-action arc using staged data. You can also request a design-partner conversation if you want to explore a live instrumentation of one of your own workflows.
+                    </p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+                      <Link
+                        href="/demo"
+                        style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 1.5rem", background: "hsl(192,72%,48%)", color: "hsl(214,18%,4%)", borderRadius: "0.375rem", fontSize: "0.875rem", fontWeight: 600, textDecoration: "none", transition: "background 0.2s ease" }}
+                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,54%)"; }}
+                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,48%)"; }}
+                      >
+                        Request a demo <ArrowRight size={15} />
+                      </Link>
+                      <Link
+                        href="/design-partner"
+                        style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 1.5rem", background: "transparent", color: "var(--color-szl-text-secondary)", border: "1px solid var(--color-szl-border-hover)", borderRadius: "0.375rem", fontSize: "0.875rem", fontWeight: 500, textDecoration: "none", transition: "border-color 0.2s ease, color 0.2s ease" }}
+                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.25)"; (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; }}
+                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--color-szl-border-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+                      >
+                        Become a design partner
+                      </Link>
+                    </div>
+                  </>
+                )}
               </div>
             </m.div>
           </div>

@@ -4,6 +4,8 @@ import { ShieldCheck, Lock, Brain, Download, Settings, CheckSquare, ArrowRight, 
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { InlineSegmentedCTA } from "@/components/SegmentedCTA";
+import { useNarrativeRouter } from "@/hooks/useNarrativeRouter";
 
 const TRUST_PAGES = [
   {
@@ -86,6 +88,8 @@ const TRUST_SIGNALS = [
 ];
 
 export default function TrustPage() {
+  const { visitorType } = useNarrativeRouter();
+
   usePageMeta({
     title: "Trust Center — SZL Holdings",
     description: "Security, governance, AI policy, approvals, exports, operations and architecture — documented for buyer and investor diligence.",
@@ -232,14 +236,25 @@ export default function TrustPage() {
         {/* Bottom CTA */}
         <section style={{ padding: "var(--space-section-sm) 0" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-              <Link href="/contact" className="szl-btn-primary">
-                Request a diligence package <ArrowRight size={14} />
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginBottom: "2rem" }}>
+              <Link href="/trust-route" className="szl-btn-primary">
+                Walk the trust route <ArrowRight size={14} />
+              </Link>
+              <Link href="/contact" className="szl-btn-ghost">
+                Request a diligence package
               </Link>
               <Link href="/investor-relations" className="szl-btn-ghost">
                 Investor relations
               </Link>
             </div>
+            {visitorType !== "unknown" && (
+              <div style={{ borderTop: "1px solid var(--color-szl-border)", paddingTop: "1.5rem" }}>
+                <p style={{ fontSize: "0.75rem", color: "hsl(214,7%,45%)", marginBottom: "0.75rem" }}>
+                  Based on your visit context, we've identified the right next step:
+                </p>
+                <InlineSegmentedCTA visitorType={visitorType} />
+              </div>
+            )}
           </div>
         </section>
 

@@ -13,6 +13,7 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { InlineSegmentedCTA } from "@/components/SegmentedCTA";
 
 const hubPages = [
   {
@@ -255,6 +256,35 @@ export default function InvestorsHubPage() {
             </div>
           </div>
         </section>
+        {/* Trust Route cross-link */}
+        <section style={{ borderTop: "1px solid hsla(0,0%,100%,0.07)", padding: "clamp(2.5rem,5vw,3.5rem) 0" }}>
+          <div className="mx-auto max-w-6xl px-6 lg:px-8">
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "1rem" }}>
+              <div>
+                <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsla(0,0%,100%,0.3)", fontFamily: "var(--font-mono)", marginBottom: "0.375rem" }}>
+                  Governance evidence
+                </p>
+                <p style={{ fontSize: "0.875rem", color: "hsla(0,0%,100%,0.5)", lineHeight: 1.55 }}>
+                  Walk the full Trust Route — governance proof with receipts at every stage.
+                </p>
+              </div>
+              <Link href="/trust-route" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.25rem", background: "hsla(38,72%,58%,0.10)", border: "1px solid hsla(38,72%,58%,0.22)", borderRadius: "0.375rem", fontSize: "0.875rem", fontWeight: 600, color: "hsl(38,72%,58%)", textDecoration: "none" }}>
+                Walk the Trust Route <ArrowRight size={13} />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Non-investor cross-navigation */}
+        <section style={{ borderTop: "1px solid hsla(0,0%,100%,0.05)", padding: "clamp(2rem,4vw,3rem) 0" }}>
+          <div className="mx-auto max-w-6xl px-6 lg:px-8">
+            <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsla(0,0%,100%,0.22)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
+              Not an investor?
+            </p>
+            <InlineSegmentedCTA visitorType="unknown" />
+          </div>
+        </section>
+
       </main>
       <SiteFooter />
     </div>
