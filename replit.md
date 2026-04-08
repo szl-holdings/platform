@@ -53,16 +53,87 @@ The platform consists of 13 interconnected applications sharing authentication a
 - **Observability:** Structured logging via pino and an 8-pillar domain-native observability framework.
 - **Feature Gating:** Entitlement-based access control using `checkFeatureAccess`.
 - **Admin Panel CMS:** Centralized administration for 16 CMS tables, media assets, and site settings.
-- **Collaboration & Notifications:** In-app collaboration layer via `comments` table and a universal notification/real-time alerting system with multi-channel dispatch (Slack, MS Teams) and Expo Push Notifications for mobile.
-- **Email Delivery:** Triple-failover email chain (SendGrid → Resend → SMTP nodemailer).
-- **Alloy Platform Core:** Orchestration engine with canonical shared data model, ingestion, normalization, and workflow orchestration.
-- **Alloy Unified Command Surface:** Features a Global Command Bar, Workspace Home, Decision Objects, Skill Registry, and Operator Control Center.
-- **Alloy Enterprise Governance:** A comprehensive governance system with policies, model routing, cost controls, and incident management.
-- **Outcome Graph & Atlas Artifacts:** Decision memory and learning loop engine, and branded document/report generation with provenance and versioning.
-- **HELM Console:** Operator control plane providing platform health, agent stats, outcome metrics, and trust receipt anomalies.
-- **Platform Marketing Readiness:** Includes feature flags, analytics integration, elite layer pages (`/academy`, `/help`, `/demos`), robust demo data, and full Open Graph/Twitter Card meta tags.
-- **Cross-App Compounding:** Implements cross-app handoff contracts, notification relay, and a family dashboard in HELM for visualizing cross-platform KPIs and health.
-- **Commercialization:** Includes dedicated pages for commercial packaging (`/packages`), ROI calculation (`/roi`), and relief-based messaging (`/relief`).
+- **In-App Collaboration Layer:** Platform-wide system for team discussions via a `comments` table.
+- **Universal Notification & Real-Time Alerting System:** `useNotificationCenter` hook and WebSocket integration for real-time pushes, with multi-channel dispatch to Slack and Microsoft Teams.
+- **Expo Push Notifications (Mobile):** End-to-end push notification system for Carlota Jo, with 15 domain-specific templates.
+- **Email Delivery System:** Triple-failover email chain (SendGrid → Resend → SMTP nodemailer) with brand templates.
+- **Alloy Platform Core — Orchestration Engine:** Canonical shared data model, ingestion layer, normalization pipeline, and workflow orchestration.
+- **Alloy Unified Command Surface:** Transformed into a unified command platform with features like a Global Command Bar, Workspace Home, Decision Objects, Skill Registry, and Operator Control Center.
+- **Alloy Enterprise Governance (Task #271):** Full governance system with 5 DB tables (`alloy_policies`, `model_routing_policies`, `cost_budgets`, `cost_events`, `governance_incidents`), CRUD API at `/api/governance/*` (uses `authMiddleware()` + `requireRole` for write ops, org-scoped), and premium tabbed UI at `/alloy/enterprise-governance` (Overview, Policies, Model Routing, Cost Controls, Incidents). Seeded with compliance templates (SOC 2, HIPAA, etc.) and model routing policies. Trust UX components: `DataSourceIndicator`, `DemoModeBanner`, `CapabilityBadge` in `src/components/DataSourceIndicator.tsx`.
+- **Aegis — Consolidated Defense & Intelligence Platform:** Unifies Security Operations, Managed Operations, and Intelligence Engine with modules for SOAR Playbook Engine, STIX/TAXII Protocol Layer, Unified XDR Console, Threat Intel Feed, Sentinel Watch, and Framework Scorecards.
+- **NPS & Contextual Feedback System:** Full in-app feedback collection system with DB schema, API routes, shared UI components, and admin dashboard.
+- **MCP Server (Task #297):** Model Context Protocol server at `/api/mcp` exposing 20 tools, 4 resources, and 5 prompt templates. Implements MCP spec 2024-11-05 via HTTP+SSE transport. Domain tools: `vessels_fleet_status`, `vessels_weather_risk`, `firestorm_threat_scan`, `firestorm_compliance_check`, `terra_property_search`, `terra_market_signals`, `lyte_health_check`, `lyte_executive_summary`, `inca_experiment_status`. Platform tools: `alloy_launch_workflow`, `alloy_workflow_status`, `alloy_create_artifact`, `alloy_research`, `alloy_decision_status`, `alloy_approve_decision`, `alloy_skill_list`, `alloy_skill_invoke`. Data tools: `query_holdings_ecosystem`, `query_audit_log`, `query_notifications`. Resources: platform schema, agent system prompts, skill catalog, workflow templates. Prompt templates: `research_brief`, `threat_assessment`, `property_analysis`, `fleet_report`, `executive_digest`. All invocations are audit-logged, approval-class-enforced, and respect tenant isolation. SSE transport at `/api/mcp/sse`. Health check at `/api/mcp/health`.
+
+### Omega Phase 3 — Executive Polish & Premium Views (Task #302)
+- **Lyte Command Center — Executive Layer:** 7 new pages added to `/lyte-command-center/src/pages/`:
+  - `executive-command.tsx` — Portfolio health pack cards (Revenue Velocity, Approval Overwatch, Ownership Pressure, Trust Integrity), Pressure Board, Movement Board, live Approval Overwatch table, cross-pack aggregate KPIs.
+  - `blocker-board.tsx` — Cross-portfolio blocker tracking with status, severity, owner, and linked pack columns; unblock action UI.
+  - `digest-center.tsx` — Digest inbox with filter controls, daily/weekly digest cards, and inline expansion.
+  - `alloy-action-console.tsx` — Action queue table with retry/cancel/approve inline actions, status filters, and action detail drawers.
+  - `alloy-workflow-templates.tsx` — Template library with category filter, preview cards, and launch confirmation.
+  - `alloy-write-back.tsx` — Write-back gate controls, export gate toggles, and gate configuration panel.
+  - (Trust & Audit — pre-existing page wired to sidebar)
+  - Sidebar `lyte-layout.tsx` updated with **Executive** section (Blocker Board, Digest Center, Approvals, Trust & Audit) and expanded **Alloy Engine** section (Action Console, Templates, Write-Back Gates).
+  - Command palette updated to include all new Executive and Alloy routes with grouped navigation.
+- **Carlota Jo — Luxury Rebuild:**
+  - `PremiumHome.tsx` — Full luxury homepage rebuild with animated gold-dust canvas particles, Cormorant Garamond serif display, split hero with live services panel (stats: 98% retention, 24h SLA), 6-service grid, 5-pillar DiscreetApproach section, Rosa Carlota Jo principal intro, dark ClientExperienceStrip with portal feature cards, SZL platform attribution note, and closing CTA. All sections use Framer Motion `whileInView` animations with proper reduced-motion fallback.
+  - App.tsx updated to serve `PremiumHome` as the root `/` route.
+
+### Outcome Graph, Atlas Artifacts & HELM Console (Task #337)
+- **Outcome Graph (`lib/outcome-graph`):** Decision memory and learning loop engine. DB tables: `outcome_graph` (recommendations, decisions, outcomes with confidence calibration), `outcome_graph_learning_jobs` (periodic calibration runs). API routes at `/api/outcome-graph/*` for recording recommendations, capturing decisions, tracking outcomes, and triggering learning calibration.
+- **Atlas Artifacts (`lib/atlas-artifacts`):** Branded document/report generation with provenance, versioning, compare-diff, share-link, and export pipeline. DB tables: `atlas_artifacts` (versioned artifacts with domain/template/sections), `atlas_export_jobs` (PDF/HTML/JSON export queue). API routes at `/api/atlas/*` for artifact CRUD, regeneration, version comparison, sharing, and export jobs. Proof-chain integration via `tagAIContent` for provenance tagging.
+- **HELM Console:** Operator control plane at `/helm` in SZL Holdings. 6 tabs: Overview (platform health, agent stats, outcome metrics), Agents (agent run history), Outcomes (outcome graph dashboard), Artifacts (atlas artifact stats), Worldline (data source health), Proof Chain (trust receipt anomalies). Admin-only access via `requireRole(["admin", "super_admin"])`.
+- **Domain Atlas Pages:** Each domain app has an `/atlas-artifacts` route — Aegis (incident packets, threat assessments), Vessels (voyage reports, fleet briefs), Terra (property briefs, market analyses), Lyte (ops runbooks, post-mortems).
+- **Shared UI Components:** `OutcomeFeedbackBar`, `OutcomeFeedbackCard`, `OutcomeDashboard` (outcome-feedback.tsx), `AtlasArtifactCard`, `AtlasArtifactViewer`, `AtlasArtifactPanel` (atlas-artifact-panel.tsx) in `lib/shared-ui`.
+- **Migration:** `0016_outcome_graph_atlas_artifacts.sql` — 4 tables with indexes and foreign keys.
+
+### Platform Marketing Readiness — P0 Gap Closure
+- **Feature Flags:** `useFeatureFlag(flagKey)` hook in `lib/shared-ui/src/hooks.tsx`, `FeatureFlagGate` component in `lib/shared-ui/src/feature-flag-gate.tsx`. API at `/api/feature-flags/check/:key`. 26 flags in DB.
+- **Analytics Provider:** `AnalyticsProvider` and `useAnalytics` in `lib/shared-ui/src/analytics-provider.tsx`. Wired into all 8 web apps. Batched event flush to `/api/telemetry/events`.
+- **Elite Layer Pages:** `/academy` (6 learning paths), `/help` (support center with FAQs), `/demos` (live product showcase with links to all domain apps). All routed in SZL Holdings App.tsx.
+- **Demo Data:** 10 firestorm incidents, 7 lyte incidents, 18 DOS articles (6 flagship essays + 6 case studies), 10 leads, 6 newsletters, 17 MSP clients, 6 terra listings, 5 scenarios, 6 campaigns. All seeded via psql.
+- **OG Meta Tags:** All 8 web apps have full Open Graph and Twitter Card meta tags in index.html.
+- **DB Stats:** 446 tables, 1,618+ API endpoints, 26 feature flags.
+
+### SZL Distribution OS — Content Publishing & Distribution Platform
+22 database tables (`dos_*` prefix), full CRUD API at `/api/distribution-os/*`, public pages, and admin panel. Auth-protected write routes.
+- **DB Schema:** `lib/db/src/schema/distribution-os.ts` — articles, article_versions, newsletters, carousel_projects, carousel_slides, x_posts, campaigns, campaign_links, leads, lead_notes, editorial_pillars, cta_blocks, content_calendar_items, distribution_targets, distribution_runs, publication_urls, author_profiles, site_settings, integration_status, automation_runs, linktree_config, page_views, analytics_events.
+- **API Routes:** `artifacts/api-server/src/routes/distribution-os.ts` — full CRUD with auth middleware on all write operations. Public endpoints: `POST /leads` (lead capture), `POST /analytics/*` (tracking). Read endpoints open for public content.
+- **Public Pages:** `/link-in-bio` (mobile Linktree), `/newsletter` (subscription landing). Existing `/insights` and `/insights/:slug` pages retained.
+- **Admin Panel:** `/admin/distribution/*` with 11 sub-pages (dashboard, articles CMS, newsletters, carousel lab, X studio, leads, campaigns/UTM builder, content calendar, analytics, automations, settings/integrations). All gated with RequireAuth.
+- **Seed Data:** 6 editorial pillars, 1 author profile (Stephen Lutar), 3 campaigns, 12 article drafts, 4 newsletters, 12 calendar items, 10 linktree items, 5 integrations (X, Medium, Substack, LinkedIn, AI Carousels), 12 site settings.
+- **Connected Profiles:** X (`@szlholdings`), Medium (`@stephen_38454`), AI Carousels (connected).
+- **Import:** Always `import { db } from "@szl-holdings/db"` — NOT `@workspace/db`.
+
+### Task #341 — Aegis Gap Closure & Tradecraft Differentiators
+Five intelligence tradecraft feature pages added to Aegis and Aegis Mobile. All features use seeded/demo data consistent with the broader Aegis demo posture — no backend persistence is added. They are designed to illustrate tradecraft workflows for demo and prototype evaluation.
+
+**New Web Pages (artifacts/firestorm):**
+- **Alternative Hypothesis Engine** (`/tradecraft/hypothesis-engine`): Full ACH matrix with side-by-side hypothesis cards, evidence consistency ratings (consistent/neutral/inconsistent), net score ranking, assumptions checklist, and mirror test (devil's advocacy). Two seeded scenarios: Ransomware Patient Zero and Insider Threat Intent.
+- **Confidence Challenge Mode** (`/tradecraft/confidence-challenge`): Three seeded analyst assessments with evidence quality breakdowns. A `calibrateConfidence()` function algorithmically computes a calibrated confidence score from evidence quality weights, source diversity/count, gap and assumption penalties, and an alternatives-considered bonus. After submitting their own slider estimate, the analyst sees the computed calibration alongside a Confidence Basis Breakdown (showing each penalty/bonus component) and the expert rationale. Overconfidence patterns tracked across sessions.
+- **Executive Board Brief Generator** (`/tradecraft/board-brief`): One-click structured brief from incident data. Sections: Situation Summary, Key Assumptions (Explicit), Gaps & Unknowns, Alternative Scenarios, Recommended Board Actions, Posture Impact. Uses live incident API with MOCK_INCIDENTS fallback. Copy-to-clipboard as formatted text.
+- **Resilience Drill Simulator** (`/tradecraft/resilience-drill`): Five timed, scored scenarios — Ransomware Crisis, Insider Threat, Supply Chain Compromise, APT Intrusion, Data Breach. Each scenario has 2-3 decision points with 4 options, time limit (90s), scoring rubric, rationale reveal, and structured After-Action Review with tradecraft recommendations.
+- **Analyst Tradecraft Scorecard** (`/tradecraft/analyst-scorecard`): Team performance dashboard tracking Hypothesis Accuracy (25%), Evidence Usage Quality (20%), False Positive Rate (20%), Escalation Decision Accuracy (20%), Drill Score (15%). Weighted composite score with trend indicator, expandable recent activity per analyst.
+
+**Navigation:**
+- New sidebar section "Intelligence Tradecraft" in the Security module nav
+- Five command palette entries in the "Intelligence Tradecraft" group
+- All 5 routes registered in AppRouter
+
+**Aegis Mobile (artifacts/aegis-mobile):**
+- **Board Brief tab** (`app/(tabs)/board-brief.tsx`): Incident selector with severity/status indicators, one-tap brief generation (situation, assumptions, unknowns, recommended actions), regeneration flow.
+- **Drill Summary tab** (`app/(tabs)/drill-summary.tsx`): Team stats (avg score, drills completed, avg duration), per-drill cards with score/grade/progress bar, expandable step-by-step decision breakdown, tradecraft recommendations. Seeded with 3 completed drill results.
+- `_layout.tsx` updated: Both tabs registered in NativeTabLayout (iOS native) and ClassicTabLayout (Android/web). mcp-tools moved to hidden. Tab order: Dashboard, Incidents, Approvals, Brief, Drills, Digest, Profile.
+
+### Task #338 — SZL Platform Moats: Cross-App Compounding & Commercialization
+- **Cross-App Handoff Contracts (PRISM BUS typed contracts):** 5 formal typed handoff contracts defined as `HandoffContractType`: Lyte→FORGE RUNTIME (priority signals), Aegis→COVENANT (threat enforcement), Vessels→FORGE (voyage anomalies), Terra→Carlota Jo (deal blockers), Holdings→ATLAS (investor events). API route at `artifacts/api-server/src/routes/cross-app-handoffs.ts`, endpoints: `GET /api/cross-app/handoffs/contracts`, `GET /api/cross-app/handoffs/history`, `GET /api/cross-app/handoffs/stats`, `POST /api/cross-app/handoffs/trigger`, `GET /api/cross-app/family/health`. Each handoff publishes a `cross_domain_correlation` event to PRISM BUS.
+- **Cross-App Notification Relay:** `artifacts/api-server/src/lib/cross-app-notification-relay.ts` — in-process service that listens on the agent event bus for domain signals and dispatches them to all relevant target apps via WebSocket. Subscribed to `anomaly_detected`, `threat_identified`, `alert_raised`, `metric_spike`, `cross_domain_signal` event types. Auto-initialized on server startup.
+- **HELM CONSOLE — Family Dashboard:** `/helm` route in SZL Holdings. Shows cross-app KPI stats (handoffs, success rate, active contracts, PRISM events), tabbed view with App Overview (6 apps with handoff targets and status), Handoff Contracts (5 contracts with source/target/trigger/action), Signal Feed (live cross-app signals with severity), and Platform Systems (all 8 named systems). API-backed via React Query with fallback values.
+- **Commercial Packaging Page:** `/packages` in SZL Holdings — 5 relief-based tiers: Clarity (stop flying blind), Triage (right thing first), Readiness (know what's coming), Governed Execution (action accountably), White-Glove Orchestration (embedded partnership). Add-ons: Enterprise Governance, Artifact & Export, Integration & API, Pilot Bundle. Interactive tier selector updates detail panel dynamically.
+- **ROI Proof Calculator:** `/roi` in SZL Holdings — interactive slider-based calculator with 7 inputs (team size, salary, approval hours, cycle time, missed signals, incident response, decisions challenged). Calculates 5 recovery streams using PULSE EVALS benchmark constants. Shows annual recovery ($1.3M default), hours recovered/week, payback estimate, recovery breakdown with bar chart, and platform benchmarks.
+- **Relief-Based Messaging Pack:** `/relief` in SZL Holdings — 6 relief sections mapping symptoms to relief (Stop finding out last, Stop triaging threats by Slack, Stop burning hours on approval theater, Stop dreading the audit, Stop operating in silos, Stop guessing at what's working). Platform proof stats: 8.4min signal-to-action, 62% approval reduction, 98% handoff success, <2min audit reconstruction.
+- **SiteNav Updated:** Platform dropdown now includes "HELM CONSOLE — Family Command" link; Resources dropdown now includes "What SZL Relieves", "ROI Calculator", "Platform Packages".
+- **Routes added to SZL Holdings App.tsx:** `/helm`, `/packages`, `/roi`, `/relief`.
 
 ## External Dependencies
 - **Database:** PostgreSQL

@@ -25,13 +25,17 @@ function NativeTabLayout() {
         <Icon sf={{ default: "checkmark.seal", selected: "checkmark.seal.fill" }} />
         <Label>Approvals</Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="board-brief">
+        <Icon sf={{ default: "doc.badge.gearshape", selected: "doc.badge.gearshape.fill" }} />
+        <Label>Brief</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="drill-summary">
+        <Icon sf={{ default: "flame", selected: "flame.fill" }} />
+        <Label>Drills</Label>
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="digest">
         <Icon sf={{ default: "doc.text", selected: "doc.text.fill" }} />
         <Label>Digest</Label>
-      </NativeTabs.Trigger>
-            <NativeTabs.Trigger name="mcp-tools">
-        <Icon sf={{ default: "cpu", selected: "cpu.fill" }} />
-        <Label>Tools</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
         <Icon sf={{ default: "person", selected: "person.fill" }} />
@@ -110,6 +114,30 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen
+        name="board-brief"
+        options={{
+          title: "Brief",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="doc.badge.gearshape.fill" tintColor={color} size={22} />
+            ) : (
+              <Ionicons name="document-text-outline" size={20} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="drill-summary"
+        options={{
+          title: "Drills",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="flame.fill" tintColor={color} size={22} />
+            ) : (
+              <Ionicons name="flame-outline" size={20} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
         name="digest"
         options={{
           title: "Digest",
@@ -129,6 +157,12 @@ function ClassicTabLayout() {
       />
       <Tabs.Screen
         name="mitre"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="mcp-tools"
         options={{
           href: null,
         }}

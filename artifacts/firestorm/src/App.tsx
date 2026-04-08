@@ -75,6 +75,11 @@ const ReadinessAIInsights = lazy(() => import("@/pages/compliance/readiness-ai-i
 const SoarPlaybooks = lazy(() => import("@/pages/soar-playbooks"));
 const StixTaxii = lazy(() => import("@/pages/stix-taxii"));
 const TradecraftEnginePage = lazy(() => import("@/pages/tradecraft-engine"));
+const HypothesisEngine = lazy(() => import("@/pages/hypothesis-engine"));
+const ConfidenceChallenge = lazy(() => import("@/pages/confidence-challenge"));
+const BoardBriefGenerator = lazy(() => import("@/pages/board-brief-generator"));
+const ResilienceDrill = lazy(() => import("@/pages/resilience-drill"));
+const AnalystScorecard = lazy(() => import("@/pages/analyst-scorecard"));
 
 // ─── Command Surfaces (Phase 1) ───────────────────────────────────────────────
 const CommandHome = lazy(() => import("@/pages/command-home"));
@@ -359,6 +364,17 @@ function AegisSidebarContent({ location, onNavigate }: { location: string; onNav
       ],
     },
     {
+      id: "tradecraft-tools",
+      label: "Intelligence Tradecraft",
+      items: [
+        { id: "hypothesis-engine", label: "Hypothesis Engine", href: "/tradecraft/hypothesis-engine", icon: <BrainIcon className="w-3 h-3" /> },
+        { id: "confidence-challenge", label: "Confidence Challenge", href: "/tradecraft/confidence-challenge", icon: <BarChart3 className="w-3 h-3" /> },
+        { id: "board-brief", label: "Board Brief Generator", href: "/tradecraft/board-brief", icon: <FileText className="w-3 h-3" /> },
+        { id: "resilience-drill", label: "Resilience Drill", href: "/tradecraft/resilience-drill", icon: <Shield className="w-3 h-3" /> },
+        { id: "analyst-scorecard", label: "Analyst Scorecard", href: "/tradecraft/analyst-scorecard", icon: <TrendingUp className="w-3 h-3" /> },
+      ],
+    },
+    {
       id: "governance",
       label: "Governance & Reporting",
       items: governanceNavItems.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3 h-3" /> })),
@@ -636,6 +652,13 @@ function AppRouter() {
         <Route path="/soc/readiness" component={IncidentReadinessView} />
         <Route path="/soc/governance" component={GovernanceReview} />
 
+        {/* Intelligence Tradecraft Tools */}
+        <Route path="/tradecraft/hypothesis-engine" component={HypothesisEngine} />
+        <Route path="/tradecraft/confidence-challenge" component={ConfidenceChallenge} />
+        <Route path="/tradecraft/board-brief" component={BoardBriefGenerator} />
+        <Route path="/tradecraft/resilience-drill" component={ResilienceDrill} />
+        <Route path="/tradecraft/analyst-scorecard" component={AnalystScorecard} />
+
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground">Page not found</p>
@@ -678,6 +701,11 @@ const aegisCommands: CommandItem[] = [
   { id: "nav-models", label: "Models", icon: "⚙️", group: "Intelligence Engine", action: nav("/intel/models") },
   { id: "nav-predictions", label: "Predictions", icon: "📈", group: "Intelligence Engine", action: nav("/intel/predictions") },
   { id: "nav-intel-insights", label: "Intel Insights", icon: "💡", group: "Intelligence Engine", action: nav("/intel/insights") },
+  { id: "nav-hypothesis-engine", label: "Hypothesis Engine", icon: "🧩", group: "Intelligence Tradecraft", keywords: ["hypothesis", "ach", "competing", "alternative", "analysis"], action: nav("/tradecraft/hypothesis-engine") },
+  { id: "nav-confidence-challenge", label: "Confidence Challenge Mode", icon: "📊", group: "Intelligence Tradecraft", keywords: ["confidence", "calibration", "challenge", "audit"], action: nav("/tradecraft/confidence-challenge") },
+  { id: "nav-board-brief", label: "Board Brief Generator", icon: "📄", group: "Intelligence Tradecraft", keywords: ["board", "brief", "executive", "report", "restricted"], action: nav("/tradecraft/board-brief") },
+  { id: "nav-resilience-drill", label: "Resilience Drill Simulator", icon: "🏋️", group: "Intelligence Tradecraft", keywords: ["drill", "simulation", "exercise", "tabletop", "resilience"], action: nav("/tradecraft/resilience-drill") },
+  { id: "nav-analyst-scorecard", label: "Analyst Tradecraft Scorecard", icon: "🏆", group: "Intelligence Tradecraft", keywords: ["analyst", "scorecard", "performance", "tradecraft", "metrics"], action: nav("/tradecraft/analyst-scorecard") },
   { id: "app-alloy", label: "Switch to Alloy", icon: "⬡", group: "Switch App", description: "Execution Fabric", action: () => { window.location.href = "/alloy/"; } },
   { id: "app-lyte", label: "Switch to Lyte", icon: "⚡", group: "Switch App", description: "Command Center", action: () => { window.location.href = "/lyte-command-center/"; } },
   { id: "app-vessels", label: "Switch to Vessels", icon: "⚓", group: "Switch App", description: "Maritime Intelligence", action: () => { window.location.href = "/vessels/"; } },
