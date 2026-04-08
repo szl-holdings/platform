@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@szl-holdings/shared-ui/ui/toaster";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
+import { AnalyticsProvider } from "@szl-holdings/shared-ui";
 import { TooltipProvider } from "@szl-holdings/shared-ui/ui/tooltip";
 
 const Home = lazy(() => import("@/pages/Home").then(m => ({ default: m.Home })));
@@ -101,6 +102,7 @@ function App() {
   }
 
   return (
+    <AnalyticsProvider appName="stephen">
     <PrismBusProvider domain="stephen">
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -116,6 +118,7 @@ function App() {
       </TooltipProvider>
     </QueryClientProvider>
     </PrismBusProvider>
+    </AnalyticsProvider>
   );
 }
 

@@ -116,6 +116,7 @@ import genAITelemetryRouter from "./genai-telemetry";
 import outcomeGraphRouter from "./outcome-graph";
 import atlasRouter from "./atlas-artifacts";
 import helmRouter from "./helm-console";
+import telemetryRouter from "./telemetry";
 
 const router: IRouter = Router();
 
@@ -435,5 +436,8 @@ router.use(atlasRouter);
 
 router.use("/helm", _readLimiter);
 router.use(helmRouter);
+
+router.use("/telemetry", _writeLimiter);
+router.use(telemetryRouter);
 
 export default router;

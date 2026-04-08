@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-quer
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
+import { AnalyticsProvider } from "@szl-holdings/shared-ui";
 import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 import {
   Ship, AlertTriangle, Activity, LayoutDashboard, WifiOff,
@@ -595,6 +596,7 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(vesselsCommands);
 
   return (
+    <AnalyticsProvider appName="vessels">
     <PrismBusProvider domain="vessels">
     <SandboxModeProvider>
       <DemoModeProvider>
@@ -610,6 +612,7 @@ function App() {
       </DemoModeProvider>
     </SandboxModeProvider>
     </PrismBusProvider>
+    </AnalyticsProvider>
   );
 }
 

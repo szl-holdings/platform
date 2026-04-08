@@ -30,6 +30,7 @@ const EXEMPT_PATHS = new Set([
   "/api/observability/vitals",
   "/api/observability/client-errors",
   "/api/observability/error-feedback",
+  "/api/telemetry/events",
 ]);
 
 const GRAPHQL_PATHS = ["/api/graphql", "/graphql"];

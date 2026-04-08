@@ -110,6 +110,14 @@ The platform comprises 13 applications sharing authentication and design.
 - **Shared UI Components:** `OutcomeFeedbackBar`, `OutcomeFeedbackCard`, `OutcomeDashboard` (outcome-feedback.tsx), `AtlasArtifactCard`, `AtlasArtifactViewer`, `AtlasArtifactPanel` (atlas-artifact-panel.tsx) in `lib/shared-ui`.
 - **Migration:** `0016_outcome_graph_atlas_artifacts.sql` — 4 tables with indexes and foreign keys.
 
+### Platform Marketing Readiness — P0 Gap Closure
+- **Feature Flags:** `useFeatureFlag(flagKey)` hook in `lib/shared-ui/src/hooks.tsx`, `FeatureFlagGate` component in `lib/shared-ui/src/feature-flag-gate.tsx`. API at `/api/feature-flags/check/:key`. 26 flags in DB.
+- **Analytics Provider:** `AnalyticsProvider` and `useAnalytics` in `lib/shared-ui/src/analytics-provider.tsx`. Wired into all 8 web apps. Batched event flush to `/api/telemetry/events`.
+- **Elite Layer Pages:** `/academy` (6 learning paths), `/help` (support center with FAQs), `/demos` (live product showcase with links to all domain apps). All routed in SZL Holdings App.tsx.
+- **Demo Data:** 10 firestorm incidents, 7 lyte incidents, 18 DOS articles (6 flagship essays + 6 case studies), 10 leads, 6 newsletters, 17 MSP clients, 6 terra listings, 5 scenarios, 6 campaigns. All seeded via psql.
+- **OG Meta Tags:** All 8 web apps have full Open Graph and Twitter Card meta tags in index.html.
+- **DB Stats:** 446 tables, 1,618+ API endpoints, 26 feature flags.
+
 ### SZL Distribution OS — Content Publishing & Distribution Platform
 22 database tables (`dos_*` prefix), full CRUD API at `/api/distribution-os/*`, public pages, and admin panel. Auth-protected write routes.
 - **DB Schema:** `lib/db/src/schema/distribution-os.ts` — articles, article_versions, newsletters, carousel_projects, carousel_slides, x_posts, campaigns, campaign_links, leads, lead_notes, editorial_pillars, cta_blocks, content_calendar_items, distribution_targets, distribution_runs, publication_urls, author_profiles, site_settings, integration_status, automation_runs, linktree_config, page_views, analytics_events.

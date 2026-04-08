@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState, useEffect, useCallback } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
-import { DemoModeProvider, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig, SandboxModeProvider, SandboxModeBanner } from "@szl-holdings/shared-ui";
+import { DemoModeProvider, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig, SandboxModeProvider, SandboxModeBanner, AnalyticsProvider } from "@szl-holdings/shared-ui";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -792,6 +792,7 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(aegisCommands);
 
   return (
+    <AnalyticsProvider appName="aegis">
     <PrismBusProvider domain="aegis">
     <SandboxModeProvider>
       <DemoModeProvider>
@@ -805,6 +806,7 @@ function App() {
       </DemoModeProvider>
     </SandboxModeProvider>
     </PrismBusProvider>
+    </AnalyticsProvider>
   );
 }
 

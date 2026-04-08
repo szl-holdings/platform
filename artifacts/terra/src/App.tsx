@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useRef } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
-import { SandboxModeProvider, SandboxModeBanner } from "@szl-holdings/shared-ui";
+import { SandboxModeProvider, SandboxModeBanner, AnalyticsProvider } from "@szl-holdings/shared-ui";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -210,6 +210,7 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(terraCommands);
 
   return (
+    <AnalyticsProvider appName="terra">
     <PrismBusProvider domain="terra">
     <SandboxModeProvider>
       <QueryClientProvider client={queryClient}>
@@ -222,6 +223,7 @@ function App() {
       </QueryClientProvider>
     </SandboxModeProvider>
     </PrismBusProvider>
+    </AnalyticsProvider>
   );
 }
 

@@ -111,6 +111,10 @@ export {
   type AtlasExportFormat,
 } from "./atlas-artifact-panel";
 
+export { FeatureFlagGate, type FeatureFlagGateProps } from "./feature-flag-gate";
+export { AnalyticsProvider, useAnalytics } from "./analytics-provider";
+export { useFeatureFlag, type FeatureFlag } from "./hooks";
+
 export {
   OperationalStatusBadge,
   OperationalRiskBadge,

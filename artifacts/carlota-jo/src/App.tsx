@@ -4,7 +4,7 @@ import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdin
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
-import { OnboardingWizard, type OnboardingConfig, SandboxModeProvider } from "@szl-holdings/shared-ui";
+import { OnboardingWizard, type OnboardingConfig, SandboxModeProvider, AnalyticsProvider } from "@szl-holdings/shared-ui";
 import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { BookOpen, Users, Calendar, MessageSquare, FileText, Sparkles } from "lucide-react";
@@ -195,6 +195,7 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(carlotaCommands);
 
   return (
+    <AnalyticsProvider appName="carlota-jo">
     <PrismBusProvider domain="carlota-jo">
     <SandboxModeProvider>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
@@ -218,6 +219,7 @@ function App() {
       </WouterRouter>
     </SandboxModeProvider>
     </PrismBusProvider>
+    </AnalyticsProvider>
   );
 }
 

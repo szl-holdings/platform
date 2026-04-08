@@ -4,6 +4,7 @@ import { configurePlausible } from "@szl-holdings/analytics";
 import { initSentry } from "@szl-holdings/observability/react";
 import { initWebVitals } from "@szl-holdings/observability/react";
 import { GraphQLProvider } from "@szl-holdings/graphql-client/provider";
+import { AnalyticsProvider } from "@szl-holdings/shared-ui";
 import { PrismCounselApp } from "./prism-counsel/prism-counsel-app";
 import App from "./App";
 import "./i18n";
@@ -25,7 +26,9 @@ const isPrismCounsel =
 if (isPrismCounsel) {
   createRoot(document.getElementById("root")!).render(
     <ErrorBoundary appName="Prism Counsel" accentColor="#c8a96e">
-      <PrismCounselApp />
+      <AnalyticsProvider appName="prism-counsel">
+        <PrismCounselApp />
+      </AnalyticsProvider>
     </ErrorBoundary>,
   );
 } else {

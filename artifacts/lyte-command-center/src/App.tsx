@@ -2,7 +2,7 @@ import React, { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
-import { SandboxModeProvider, SandboxModeBanner, CookieBanner, StatusBanner } from "@szl-holdings/shared-ui";
+import { SandboxModeProvider, SandboxModeBanner, CookieBanner, StatusBanner, AnalyticsProvider } from "@szl-holdings/shared-ui";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { LyteLayout } from "@/components/lyte-layout";
@@ -300,6 +300,7 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(lyteCommands);
 
   return (
+    <AnalyticsProvider appName="lyte">
     <PrismBusProvider domain="lyte">
     <SandboxModeProvider>
       <QueryClientProvider client={queryClient}>
@@ -315,6 +316,7 @@ function App() {
       </QueryClientProvider>
     </SandboxModeProvider>
     </PrismBusProvider>
+    </AnalyticsProvider>
   );
 }
 

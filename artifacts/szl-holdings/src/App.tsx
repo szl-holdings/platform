@@ -2,7 +2,7 @@ import { lazy, Suspense, type ReactNode } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
-import { DemoModeProvider, SandboxModeProvider, CookieBanner, StatusBanner, type StatusBannerConfig } from "@szl-holdings/shared-ui";
+import { DemoModeProvider, SandboxModeProvider, CookieBanner, StatusBanner, AnalyticsProvider, type StatusBannerConfig } from "@szl-holdings/shared-ui";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { useAuth } from "@szl-holdings/replit-auth-web";
@@ -162,6 +162,9 @@ const AlloyPilotOnboarding = lazy(() => import("@/alloy/pages/pilot-onboarding")
 const AlloyMcpStore = lazy(() => import("@/alloy/pages/mcp-store"));
 const AlloyMcpToolCreator = lazy(() => import("@/alloy/pages/mcp-tool-creator"));
 const HelmConsolePage = lazy(() => import("@/pages/helm-console"));
+const AcademyPage = lazy(() => import("@/pages/academy"));
+const HelpPage = lazy(() => import("@/pages/help"));
+const DemosPage = lazy(() => import("@/pages/demos"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -254,6 +257,7 @@ function PageLoader() {
 
 function App() {
   return (
+    <AnalyticsProvider appName="szl-holdings">
     <PrismBusProvider domain="szl-holdings">
     <SandboxModeProvider>
     <DemoModeProvider>
@@ -408,6 +412,17 @@ function App() {
             </Route>
             <Route path="/trust">
               <Suspense fallback={<PageLoader />}><TrustPage /></Suspense>
+            </Route>
+
+            {/* ── Academy, Help, Demos ── */}
+            <Route path="/academy">
+              <Suspense fallback={<PageLoader />}><AcademyPage /></Suspense>
+            </Route>
+            <Route path="/help">
+              <Suspense fallback={<PageLoader />}><HelpPage /></Suspense>
+            </Route>
+            <Route path="/demos">
+              <Suspense fallback={<PageLoader />}><DemosPage /></Suspense>
             </Route>
 
             {/* ── Docs hub ── */}
@@ -845,6 +860,7 @@ function App() {
     </DemoModeProvider>
     </SandboxModeProvider>
     </PrismBusProvider>
+    </AnalyticsProvider>
   );
 }
 
