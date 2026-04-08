@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 440" fill="none">
+  <defs>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e8c675"/>
+      <stop offset="50%" stop-color="#d4a054"/>
+      <stop offset="100%" stop-color="#b8862c"/>
+    </linearGradient>
+    <linearGradient id="lineGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d4a054" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#d4a054" stop-opacity="0.05"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="900" height="440" fill="#080c14"/>
+  <rect x="0" y="0" width="900" height="1" fill="#d4a054" opacity="0.3"/>
+  <rect x="0" y="439" width="900" height="1" fill="#d4a054" opacity="0.3"/>
+  <rect x="0" y="0" width="1" height="440" fill="#d4a054" opacity="0.15"/>
+  <rect x="899" y="0" width="1" height="440" fill="#d4a054" opacity="0.15"/>
+
+  <rect x="325" y="30" width="250" height="90" rx="8" fill="#0c1018" stroke="#d4a054" stroke-width="1.5"/>
+  <rect x="345" y="45" width="42" height="42" rx="8" fill="url(#goldGrad)"/>
+  <text x="366" y="73" fill="#080c14" font-family="Georgia, serif" font-size="16" font-weight="800" text-anchor="middle">SZL</text>
+  <text x="450" y="65" fill="#e2e8f0" font-family="system-ui, sans-serif" font-size="20" font-weight="700" text-anchor="middle">SZL Holdings</text>
+  <text x="450" y="85" fill="#d4a054" font-family="system-ui, sans-serif" font-size="10" font-weight="500" text-anchor="middle" letter-spacing="2">INVESTMENT &amp; OPERATIONS HOLDING COMPANY</text>
+
+  <line x1="450" y1="120" x2="450" y2="148" stroke="#d4a054" stroke-width="1" opacity="0.4"/>
+  <line x1="450" y1="148" x2="160" y2="190" stroke="#d4a054" stroke-width="0.8" opacity="0.25"/>
+  <line x1="450" y1="148" x2="450" y2="190" stroke="#d4a054" stroke-width="0.8" opacity="0.25"/>
+  <line x1="450" y1="148" x2="740" y2="190" stroke="#d4a054" stroke-width="0.8" opacity="0.25"/>
+
+  <rect x="60" y="190" width="200" height="70" rx="6" fill="#0c1018" stroke="#d4a054" stroke-width="1" stroke-opacity="0.5"/>
+  <text x="160" y="218" fill="#d4a054" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Lyte</text>
+  <text x="160" y="238" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">Business Observability</text>
+
+  <rect x="350" y="190" width="200" height="70" rx="6" fill="#0c1018" stroke="#8b7ac8" stroke-width="1" stroke-opacity="0.5"/>
+  <text x="450" y="218" fill="#8b7ac8" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Alloy</text>
+  <text x="450" y="238" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">Execution Engine</text>
+
+  <rect x="640" y="190" width="200" height="70" rx="6" fill="#0c1018" stroke="#c45a4a" stroke-width="1" stroke-opacity="0.5"/>
+  <text x="740" y="218" fill="#c45a4a" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Aegis</text>
+  <text x="740" y="238" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">Defense &amp; Intelligence</text>
+
+  <line x1="160" y1="260" x2="160" y2="290" stroke="#d4a054" stroke-width="0.6" opacity="0.2"/>
+  <line x1="450" y1="260" x2="450" y2="290" stroke="#8b7ac8" stroke-width="0.6" opacity="0.2"/>
+  <line x1="740" y1="260" x2="740" y2="290" stroke="#c45a4a" stroke-width="0.6" opacity="0.2"/>
+
+  <rect x="60" y="290" width="200" height="70" rx="6" fill="#0c1018" stroke="#4a90b8" stroke-width="1" stroke-opacity="0.5"/>
+  <text x="160" y="318" fill="#4a90b8" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Vessels</text>
+  <text x="160" y="338" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">Maritime Intelligence</text>
+
+  <rect x="350" y="290" width="200" height="70" rx="6" fill="#0c1018" stroke="#c8953c" stroke-width="1" stroke-opacity="0.5"/>
+  <text x="450" y="318" fill="#c8953c" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Terra</text>
+  <text x="450" y="338" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">Real Estate Intelligence</text>
+
+  <rect x="640" y="290" width="200" height="70" rx="6" fill="#0c1018" stroke="#94a3b8" stroke-width="1" stroke-opacity="0.4"/>
+  <text x="740" y="318" fill="#e2e8f0" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle">PRISM Counsel</text>
+  <text x="740" y="338" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11" text-anchor="middle">Legal Matter Command</text>
+
+  <rect x="140" y="390" width="620" height="30" rx="4" fill="#0c1018" stroke="#1e293b" stroke-width="1"/>
+  <text x="450" y="410" fill="#64748b" font-family="system-ui, sans-serif" font-size="10" text-anchor="middle" letter-spacing="1">TypeScript  ·  React  ·  Express  ·  PostgreSQL  ·  Drizzle ORM  ·  Expo  ·  pnpm Monorepo</text>
+</svg>
