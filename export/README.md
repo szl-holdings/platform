@@ -1,74 +1,157 @@
 # SZL Holdings — Content Export Kit
 
-All content is ready for manual publishing across distribution channels.
+Everything you need to publish across all channels.
+Just open the file, copy, and paste into the platform.
+
 Author: Stephen Lutar | @szlholdings
 
 ---
 
-## X / Twitter (`x-twitter/`)
-14 individual posts + 1 thread, all status: `ready`
+## QUICK START — What to publish first
 
-| File | Type | Description |
-|------|------|-------------|
-| `post-01.txt` | Single | Portfolio announcement (16 apps, solo founder) |
-| `post-02.txt` | Thread opener | "Why I built SZL Holdings as one person" |
-| `post-02-thread.txt` | Thread (JSON) | Full thread with all tweets |
-| `post-03.txt` | Single | Solo founder — "why do most companies need 16 teams?" |
-| `post-04.txt` | Single | Aegis — security tool sprawl problem |
-| `post-05.txt` | Single | Vessels — fleet operator intelligence |
-| `post-06.txt` | Single | Terra — NYC real estate information asymmetry |
-| `post-07.txt` | Single | Lyte — executive operational health |
-| `post-08.txt` | Single | Hot take: AI-powered enterprise software |
-| `post-09.txt` | Single | GitHub contribution graph, build stats |
-| `post-10.txt` | Single | Signal Over Noise newsletter launch |
-| `post-11.txt` | Single | Carlota Jo — household operations |
-| `post-12.txt` | Single | Unpopular opinion: best enterprise software is invisible |
-| `post-13.txt` | Single | Legal industry operational intelligence |
-| `post-14.txt` | Single | Year one platform metrics |
-| `all-tweets.md` | Compiled | All tweets in one document |
-| `pinned-thread-expanded.md` | Compiled | Pinned thread with expanded context |
+1. Go to `linkedin/linkedin-portfolio-announcement.md` — copy into LinkedIn
+2. Go to `x-twitter/post-02-thread.txt` — copy into X as a thread, pin it
+3. Go to `x-twitter/post-01.txt` — post on X (your first single tweet)
+4. Go to `medium/01-why-every-enterprise-needs-an-ai-observability-layer.md` — paste into Medium
+5. Go to `substack/01-the-szl-briefing-1-ai-observability-and-the-enterprise-stack.md` — paste into Substack
 
-## LinkedIn (`linkedin/`)
-5 posts — copy/paste ready
-
-| File | Description |
-|------|-------------|
-| `linkedin-launch-posts.md` | Initial launch announcements |
-| `linkedin-profile-copy.md` | Profile headline, about, experience copy |
-| `linkedin-portfolio-announcement.md` | Full portfolio showcase post |
-| `linkedin-architecture-deep-dive.md` | Monorepo architecture thought piece |
-| `linkedin-signal-over-noise.md` | Newsletter launch announcement |
-
-## Medium (`medium/`)
-20 articles — full markdown with frontmatter
-
-## Substack (`substack/`)
-66 newsletter editions — full markdown ready for import
-
-## Carousels (`carousels/`)
-3 PDF slide carousels for LinkedIn/Instagram
-
-## Images
-- `szl-brand-mark.png` — SZL brand mark (gold gradient)
-- `szl-og-default.png` — Default OG image (1200x630)
-- `stephen-profile-card.png` — Profile card image
+Then keep going through the numbered files in order.
 
 ---
 
-## Distribution Channels
-| Platform | Handle / URL |
-|----------|-------------|
-| X (Twitter) | [@szlholdings](https://x.com/szlholdings) |
-| LinkedIn | [Stephen Lutar](https://linkedin.com/in/stephenlutar) |
-| Medium | [@stephen_38454](https://medium.com/@stephen_38454) |
-| Substack | [szlholdings.substack.com](https://szlholdings.substack.com) |
-| GitHub | [szl-holdings](https://github.com/szl-holdings) |
-| Website | [szlholdings.com](https://szlholdings.com) |
-| Linktree | [linktr.ee/szlholdings](https://linktr.ee/szlholdings) |
+## FOLDER MAP
 
-## Publishing Order (Recommended)
-1. **LinkedIn** — Portfolio announcement first (biggest professional reach)
-2. **X/Twitter** — Pin the thread, then drip single posts 1-2/day
-3. **Medium** — Publish 2-3 articles/week for SEO backlinks
-4. **Substack** — Weekly newsletter cadence
-5. **Linktree** — Update with latest links after each batch
+```
+export/
+├── x-twitter/          ← 14 tweets + 1 thread (copy/paste into X)
+├── linkedin/           ← 5 LinkedIn posts (copy/paste into LinkedIn)
+├── medium/             ← 20 articles (copy/paste into Medium)
+├── substack/           ← 8 newsletter editions (copy/paste into Substack)
+├── carousels/          ← 3 PDF slide decks (upload to LinkedIn/Instagram)
+├── images/             ← Profile images and banners
+│   ├── szl-linktree-header.png    ← Linktree header banner
+│   ├── szl-profile-square.png     ← Profile photo (all platforms)
+│   └── szl-x-banner.png          ← X/Twitter banner image
+└── README.md           ← This file
+```
+
+---
+
+## X / TWITTER — `x-twitter/`
+
+Post 1-2 tweets per day. Pin the thread first.
+
+| # | File | What it is |
+|---|------|-----------|
+| PIN | `post-02-thread.txt` | Thread: "Why I built SZL Holdings as one person" — **pin this** |
+| 1 | `post-01.txt` | Portfolio announcement — 16 apps, solo founder |
+| 3 | `post-03.txt` | Solo founder — "why do most companies need 16 teams?" |
+| 4 | `post-04.txt` | Aegis — security tool sprawl problem |
+| 5 | `post-05.txt` | Vessels — fleet operator intelligence |
+| 6 | `post-06.txt` | Terra — NYC real estate information asymmetry |
+| 7 | `post-07.txt` | Lyte — executive operational health |
+| 8 | `post-08.txt` | Hot take: AI-powered enterprise software |
+| 9 | `post-09.txt` | GitHub contribution graph + build stats |
+| 10 | `post-10.txt` | Signal Over Noise newsletter launch |
+| 11 | `post-11.txt` | Carlota Jo — household operations |
+| 12 | `post-12.txt` | Unpopular opinion: best enterprise software is invisible |
+| 13 | `post-13.txt` | Legal industry operational intelligence |
+| 14 | `post-14.txt` | Year one platform metrics |
+
+Also included: `all-tweets.md` (all in one doc) and `pinned-thread-expanded.md`
+
+---
+
+## LINKEDIN — `linkedin/`
+
+Post 1-2 per week. Start with the portfolio announcement.
+
+| # | File | What it is |
+|---|------|-----------|
+| 1 | `linkedin-portfolio-announcement.md` | Full portfolio showcase — post this first |
+| 2 | `linkedin-architecture-deep-dive.md` | Monorepo architecture thought piece |
+| 3 | `linkedin-signal-over-noise.md` | Newsletter launch announcement |
+| 4 | `linkedin-launch-posts.md` | Additional launch announcements |
+| 5 | `linkedin-profile-copy.md` | Profile headline, about section, and experience copy |
+
+---
+
+## MEDIUM — `medium/`
+
+Publish 2-3 articles per week. They are numbered in recommended order.
+
+| # | File |
+|---|------|
+| 1 | `01-why-every-enterprise-needs-an-ai-observability-layer.md` |
+| 2 | `02-zero-trust-architecture-for-maritime-operations.md` |
+| 3 | `03-the-founder-s-playbook-from-0-to-enterprise-in-18-months.md` |
+| 4 | `04-legal-observability-the-next-frontier-in-legaltech.md` |
+| 5 | `05-distress-signal-intelligence-in-nyc-real-estate.md` |
+| 6 | `06-soc-operations-at-scale-building-aegis.md` |
+| 7 | `07-the-case-for-vertical-ai-platforms.md` |
+| 8 | `08-building-a-multi-product-startup-lessons-from-szl-holdings.md` |
+| 9 | `09-fleet-intelligence-from-ais-data-to-business-decisions.md` |
+| 10 | `10-enterprise-security-compliance-automation.md` |
+| 11 | `11-ai-powered-contract-analysis-how-prism-counsel-works.md` |
+| 12 | `12-the-technical-architecture-of-szl-holdings.md` |
+| 13 | `13-why-business-observability-is-the-next-enterprise-moat.md` |
+| 14 | `14-domain-specificity-is-a-durable-moat-against-model-commoditi.md` |
+| 15 | `15-the-signal-to-action-gap-why-most-enterprise-software-fails-.md` |
+| 16 | `16-how-we-built-vessels-lessons-from-maritime-domain-intelligen.md` |
+| 17 | `17-proof-chain-why-every-enterprise-decision-needs-an-audit-tra.md` |
+| 18 | `18-terra-case-study-from-fragmented-property-data-to-unified-in.md` |
+| 19 | `19-why-visibility-without-control-is-not-a-product.md` |
+| 20 | `20-the-operator-s-case-for-domain-specific-software.md` |
+
+---
+
+## SUBSTACK — `substack/`
+
+Send 1 per week to your subscriber list.
+
+| # | File |
+|---|------|
+| 1 | `01-the-szl-briefing-1-ai-observability-and-the-enterprise-stack.md` |
+| 2 | `02-the-szl-briefing-2-maritime-intelligence-and-zero-trust.md` |
+| 3 | `03-the-szl-briefing-3-legal-tech-frontier.md` |
+| 4 | `04-the-szl-briefing-4-founder-playbooks.md` |
+| 5 | `05-the-weekly-brief-issue-3-platform-thesis.md` |
+| 6 | `06-the-weekly-brief-issue-4-signal-vs-noise.md` |
+| 7 | `07-the-szl-briefing-2-why-we-build-command-systems-not-dashboar.md` |
+| 8 | `08-the-szl-briefing-3-the-compounding-architecture.md` |
+
+---
+
+## CAROUSELS — `carousels/`
+
+Upload as PDFs to LinkedIn or convert to images for Instagram.
+
+| File | Topic |
+|------|-------|
+| `carousel-1-szl-ecosystem.pdf` | SZL platform ecosystem overview |
+| `carousel-2-six-lenses.pdf` | The Six Lenses observability framework |
+| `carousel-3-noise-to-signal.pdf` | From noise to signal — the thesis |
+
+---
+
+## IMAGES — `images/`
+
+| File | Use it for |
+|------|-----------|
+| `szl-profile-square.png` | Profile photo on all platforms |
+| `szl-x-banner.png` | X/Twitter header banner |
+| `szl-linktree-header.png` | Linktree header image |
+
+---
+
+## YOUR CHANNELS
+
+| Platform | Link |
+|----------|------|
+| X | x.com/szlholdings |
+| LinkedIn | linkedin.com/in/stephenlutar |
+| Medium | medium.com/@stephen_38454 |
+| Substack | szlholdings.substack.com |
+| GitHub | github.com/szl-holdings |
+| Website | szlholdings.com |
+| Linktree | linktr.ee/szlholdings |
