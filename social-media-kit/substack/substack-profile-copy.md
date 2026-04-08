@@ -6,62 +6,97 @@
 Signal Over Noise
 
 ## Subtitle
-Strategic intelligence from SZL Holdings — for operators and builders who want clarity over noise.
+Operating doctrine and intelligence frameworks from a founder building 16 applications across 5 industries. No fluff. No vaporware. Signal.
 
 ## Publication URL
-szlholdings.substack.com (or signalOvernoise.substack.com — whichever is available)
+szlholdings.substack.com
 
 ## Author Name
-SZL Holdings
+Stephen Lutar
+
+## Author Bio
+Founder & CEO of SZL Holdings. Building governed operational intelligence software — Lyte, Vessels, Aegis, Terra, PRISM Counsel, Carlota Jo — all on one TypeScript architecture. 16 live apps. 446 database tables. One founder.
 
 ## Publication Logo
 Upload: `szl-profile-square.png`
 
 ## About Page (Long Form)
 
-**Signal Over Noise** is the official intelligence brief of SZL Holdings.
+### What is Signal Over Noise?
 
-We are a holding company. We build structured ventures — platforms, advisory services, and operating systems — across business observability, maritime logistics, cybersecurity, real estate intelligence, and premium advisory.
+Signal Over Noise is the operating intelligence brief from SZL Holdings — written by Stephen Lutar, the founder and sole engineer behind a portfolio of six operational intelligence platforms.
 
-We publish Signal Over Noise because we believe the most valuable thing we can offer, beyond the platforms themselves, is the thinking behind them.
+This is not a company blog. It is not a marketing newsletter. It is a structured thinking publication from someone who is actively building real, governed software across five industries — and writing about what that actually looks like.
 
-Every issue covers at least one of three things:
-1. Structural thinking about business observability and the 6 Lenses framework
-2. Domain intelligence from our operating platforms (Lyte, Vessels, Aegis, Terra, Carlota Jo, PRISM)
-3. Operating philosophy from the SZL doctrine — strong opinions, rigorously argued
+### What you get in every issue
 
-**Who this is for:**
-Operators, executives, builders, and investors who are tired of surface-level takes and want the kind of structured analysis that actually changes how you look at your organization.
+Each issue covers at least one of three things:
 
-**Who this is NOT for:**
-People looking for a company newsletter. People who want feel-good content. People who think "move fast and break things" is still a useful operating philosophy.
+**1. Business Observability**
+The 6 Lenses framework — Revenue Health, Operational Integrity, Risk & Exposure, Talent & Ownership, Strategic Alignment, Financial Discipline — and how we instrument organizational reality rather than just visualize it.
 
-**Publish cadence:** Biweekly (twice per month)
+**2. Domain Intelligence**
+Operating patterns from our six platforms: maritime fleet command (Vessels), unified defense operations (Aegis), real estate deal intelligence (Terra), legal matter governance (PRISM Counsel), UHNW advisory operations (Carlota Jo), and the Lyte observability platform that ties everything together.
 
-**Contact:** inquiries@szlholdings.com
-**Website:** szlholdings.com
+**3. Founder Operations**
+The unfiltered reality of building 16 applications as a solo technical founder. Architecture decisions. Product philosophy. What works, what breaks, and why I build this way.
+
+### Who this is for
+
+- **Operators** who manage complex organizations and want structured frameworks, not buzzwords
+- **Technical founders** building real products who want honest operating notes from someone doing the same
+- **Investors and advisors** evaluating AI-enabled enterprise software and wanting to understand the builder's perspective
+- **Domain practitioners** in maritime, defense, real estate, legal, or advisory who want to see how software should serve their world
+
+### Who this is NOT for
+
+People looking for a company newsletter. People who want feel-good startup content. People who think "move fast and break things" is still a useful operating philosophy.
+
+### The proof
+
+This publication comes from a founder who has personally built:
+- 16 deployable applications (8 web, 8 mobile)
+- 446 database tables in one shared schema
+- 1,618+ REST API endpoints
+- A complete TypeScript monorepo with shared UI library, execution engine, and AI governance layer
+
+Every framework discussed here is derived from actual building, not consulting.
+
+### Publish cadence
+Biweekly (twice per month)
+
+### Connect
+Website: [szlholdings.com](https://szlholdings.com)
+X: [@szlholdings](https://x.com/szlholdings)
+Medium: [SZL Holdings on Medium](https://medium.com/@stephen_38454)
+LinkedIn: [Stephen Lutar](https://linkedin.com/in/stephenlutar)
 
 ---
 
 ## Welcome Email (sent to new subscribers automatically)
 
-Subject: Welcome to Signal Over Noise
+Subject: You're in. Here's what to expect.
 
-You're in. Welcome to Signal Over Noise — the intelligence brief from SZL Holdings.
+You just subscribed to Signal Over Noise — the operating intelligence brief from SZL Holdings.
 
-Here's what to expect:
+Here's what you signed up for:
 
-Every issue is structured around one of our core operating themes: business observability, domain intelligence from our platforms, or operating philosophy from the SZL doctrine. No fluff. No padding. Signal.
+Every issue is built around one of three pillars: business observability (the 6 Lenses framework), domain intelligence from our six operating platforms, or founder operating notes from the reality of building 16 applications as one person.
 
-Start with Issue 001 if you haven't already — it introduces who we are, what we build, and the 6 Lenses framework that sits behind everything we publish.
+This is not a newsletter about startups. It is an operating document from someone actively building governed intelligence software across maritime, defense, real estate, legal, and advisory.
 
-We publish twice a month. Respond to any issue if something lands or something deserves an argument.
+Start with Issue 001 — it introduces the operating thesis and the architecture behind everything we publish.
 
-Structured ventures. Clear direction.
-— SZL Holdings
+We publish twice a month. Every issue is designed to change how you think about at least one thing. Reply to any issue if something lands or something deserves an argument.
+
+— Stephen Lutar
+Founder & CEO, SZL Holdings
 
 ## Category
-Business & Finance → Entrepreneurship
+Business & Finance > Entrepreneurship
 
 ## Recommendations to Make
-(Add other strategic/operational Substacks you admire once the publication is set up)
+- Lenny's Newsletter (product management, growth)
+- Thesis Driven (real estate + tech intersection)
+- ByteByteGo (system design)
+- Stratechery (business strategy)

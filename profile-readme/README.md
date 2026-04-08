@@ -2,51 +2,66 @@
 
 **Founder & CEO — SZL Holdings**
 
-Building governed operational intelligence software. Systems where AI-assisted decisions require human accountability, and where observability connects to action — not just visualization.
+One holding company. Six platforms. 16 live applications. One founder.
+
+Building governed operational intelligence software for industries where silent failures, invisible risk, and unaccountable AI are not acceptable.
 
 ---
 
-## About
+## The Numbers
 
-I build governed, production-ready command software for organizations that cannot afford silent failures, invisible risk, or unaccountable AI. Every system I build has explicit audit trails, human-in-the-loop controls, and traceable decision paths.
-
-AI outputs without traceability create noise, not trust. Signal → routing → approval gate → audit trail. That's the model.
-
----
-
-## Current Build
-
-**SZL Holdings Platform** — 16-artifact pnpm monorepo. TypeScript throughout.
-
-**[Lyte](https://szlholdings.com)** — Business observability platform. Surfaces execution risk, ownership drift, and workflow friction before they compound. PRISM framework: People, Revenue, Infrastructure, Security, Market.
-
-**Alloy** — Execution fabric. Signal normalization, workflow orchestration, approval controls, human-in-the-loop gates, and immutable audit trail. The layer that makes AI-assisted operations durable and accountable.
+```
+16  applications live          8 web + 8 mobile
+446 database tables            one shared schema
+1,618+ API endpoints           full TypeScript
+6   operating platforms        one compounding architecture
+1   founder                    builder-operator
+```
 
 ---
 
-## Platforms
+## What I Build
 
-| Platform | Domain |
-|----------|--------|
-| **Aegis** | Security & defense intelligence |
-| **Vessels** | Maritime fleet command |
-| **Terra** | Real estate intelligence |
-| **Carlota Jo** | Premium advisory operations |
+**SZL Holdings** is a strategic holding company operating six purpose-built intelligence platforms — all running on one shared TypeScript monorepo, one execution engine, and one architectural thesis.
+
+### The Platforms
+
+| Platform | Domain | What It Does |
+|----------|--------|-------------|
+| **Lyte** | Business Observability | Surfaces execution risk, ownership drift, and workflow friction before they compound. PRISM framework: People, Revenue, Infrastructure, Security, Market. |
+| **Alloy** | Execution Engine | Signal normalization, workflow orchestration, approval gates, human-in-the-loop controls, and immutable audit trails. The fabric everything runs on. |
+| **Vessels** | Maritime Intelligence | Fleet command, AIS analytics, voyage management, and compliance monitoring for global maritime operators. |
+| **Aegis** | Defense & Intelligence | Unified SOC command — threat correlation, incident governance, analyst tradecraft tools, and security posture management. |
+| **Terra** | Real Estate Intelligence | Market intelligence, distress engine, deal pipeline, and portfolio analytics for institutional real estate. |
+| **PRISM Counsel** | Legal Matter Command | Deadline tracking, pressure scoring, proof chain export, and privilege-safe document handling. |
+| **Carlota Jo** | Private Advisory | Operational management and strategic coordination for UHNW household environments. |
 
 ---
 
 ## Architecture
 
 ```
-Lyte + Alloy                │  Full-Stack TypeScript     │  AI Governance
-Business observability      │  React + Node + PostgreSQL  │  Evidence-backed decisions
-Signal → action pipelines   │  Monorepo discipline        │  Human-in-the-loop gates
-Execution accountability    │  Shared infrastructure      │  Audit-first design
+                    ┌─────────────────────────────────┐
+                    │         SZL Holdings             │
+                    │    One Monorepo · TypeScript      │
+                    └───────────────┬──────────────────┘
+                                    │
+                    ┌───────────────┴──────────────────┐
+                    │           Lyte + Alloy            │
+                    │   Observability + Execution        │
+                    │   Signal → Action → Audit Trail    │
+                    └───────────────┬──────────────────┘
+                                    │
+          ┌─────────┬───────────┬───┴────┬──────────┬──────────┐
+          │         │           │        │          │          │
+       Vessels    Aegis      Terra    PRISM     Carlota    Custom
+       Maritime   Defense    Real     Legal      Jo        Domain
+       Command    & Intel    Estate   Matter    Advisory    Packs
 ```
 
 ---
 
-## Architecture Principles
+## Principles
 
 **AI governance by design.** Advisory agents cannot execute consequential actions without explicit human confirmation. Enforced at the workflow layer — not just the UI.
 
@@ -54,7 +69,9 @@ Execution accountability    │  Shared infrastructure      │  Audit-first des
 
 **Explicit over implicit.** Platform state is always visible. No silent fallbacks. Failures surface, not hide.
 
-**Shared fabric, domain specialization.** Lyte and Alloy are not product-specific — they are platform infrastructure. Domain packs are structured applications built on the same foundation.
+**Shared fabric, domain specialization.** Lyte and Alloy are platform infrastructure. Domain packs are structured applications built on the same foundation. Every improvement compounds across every platform.
+
+**No fake traction.** The products are built. The architecture is real. 16 applications, 446 tables, 1,618+ endpoints — all running in production.
 
 ---
 
@@ -62,26 +79,23 @@ Execution accountability    │  Shared infrastructure      │  Audit-first des
 
 ```
 TypeScript · React · Express · PostgreSQL · Drizzle ORM
-pnpm monorepo · Expo / React Native · Azure · OIDC/PKCE
-HuggingFace Inference · Apollo GraphQL · Vite
+pnpm monorepo · Expo / React Native · Vite · Framer Motion
+HuggingFace Inference · Apollo GraphQL · OIDC/PKCE Auth
 ```
-
-16 deployable artifacts · 120+ database tables · 7 web apps · 7 mobile apps
 
 ---
 
-## Featured Repository
+## Writing
 
-**[szl-holdings-platform](https://github.com/szl-holdings/szl-holdings-platform)** — Full platform ecosystem. 16 deployable artifacts, 120+ database tables, TypeScript everywhere.
-
-→ **[Live Demo](https://szlholdings.com)** | **[Security Policy](https://github.com/szl-holdings/szl-holdings-platform/blob/master/SECURITY.md)** | **[Architecture](https://github.com/szl-holdings/szl-holdings-platform/tree/master/docs/architecture)**
+- **Substack:** [Signal Over Noise](https://szlholdings.substack.com) — biweekly intelligence brief on business observability, AI governance, and founder operations
+- **Medium:** [Stephen Lutar](https://medium.com/@stephen_38454) — long-form thinking on architecture, domain intelligence, and operating philosophy
 
 ---
 
 ## Connect
 
-**LinkedIn:** [linkedin.com/in/stephen-l-279315240](https://linkedin.com/in/stephen-l-279315240)  
-**Website:** [szlholdings.com](https://szlholdings.com)  
-**Email:** inquiries@szlholdings.com
+**LinkedIn:** [linkedin.com/in/stephenlutar](https://linkedin.com/in/stephenlutar)
+**X:** [@szlholdings](https://x.com/szlholdings)
+**Website:** [szlholdings.com](https://szlholdings.com)
 
 *Open to design partner conversations, enterprise evaluation, and investment introductions.*

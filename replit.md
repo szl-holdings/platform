@@ -135,6 +135,15 @@ Five intelligence tradecraft feature pages added to Aegis and Aegis Mobile. All 
 - **SiteNav Updated:** Platform dropdown now includes "HELM CONSOLE — Family Command" link; Resources dropdown now includes "What SZL Relieves", "ROI Calculator", "Platform Packages".
 - **Routes added to SZL Holdings App.tsx:** `/helm`, `/packages`, `/roi`, `/relief`.
 
+### Distribution OS & Social Presence
+- **DB Author Profile:** `dos_author_profiles` id=1 — upgraded bio, websiteUrl=`szlholdings.com`, xUrl, linkedinUrl.
+- **X Posts (DB):** 11 rows in `dos_x_posts` — 1 pinned thread (5-tweet), 6 platform spotlights, 4 founder authority tweets. All draft status, ready for scheduling.
+- **Medium Articles (DB):** 20 rows in `dos_articles` — flagship article + domain spotlights.
+- **Substack Newsletters (DB):** 8 rows in `dos_newsletters` — "Signal Over Noise" series.
+- **Social Media Kit:** `social-media-kit/` directory with platform-specific copy files (X, Medium, Substack, Linktree).
+- **GitHub Profile:** `profile-readme/README.md` with metrics table, ASCII architecture, founder-card SVG.
+- **Brand Mark:** Gold-gradient SZL monogram (`#d4a054→#b8862c`) used across all founder/about pages; no face photo.
+
 ## External Dependencies
 - **Database:** PostgreSQL
 - **Authentication:** Replit Auth

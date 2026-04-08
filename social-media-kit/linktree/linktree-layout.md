@@ -6,17 +6,19 @@
 
 ## Profile Configuration
 
-**Profile Name:** SZL Holdings
+**Profile Name:** Stephen Lutar
 **Username:** @szlholdings
 
 **Header Intro Text (shown below name):**
-Structured ventures. Clear direction.
-One holding company. One architecture. Six platforms.
-Washington, D.C. · London · Singapore
+Founder & CEO, SZL Holdings
+6 platforms. One architecture. 16 live applications.
+Building governed intelligence software.
 
 **Background Style:** Dark (charcoal/near-black — #0a0f14 or closest dark option)
-**Button Style:** Outlined with gold/amber accent (#C4973A or closest match)
+**Button Style:** Outlined with gold/amber accent (#d4a054 or closest match)
 **Font:** Clean sans-serif (Inter or closest available)
+
+**Profile Image:** Upload `szl-profile-square.png` (gold SZL monogram)
 
 ---
 
@@ -25,100 +27,101 @@ Washington, D.C. · London · Singapore
 ### 1 — FLAGSHIP
 **Title:** SZL Holdings — The Ecosystem
 **URL:** https://szlholdings.com
-**Description:** Portfolio overview, thesis, and all ventures
-**Icon:** 🏛️ (or briefcase icon)
+**Description:** One holding company, six platforms, one compounding architecture
+**Thumbnail:** SZL logo
 
 ---
 
-### 2 — LYTE
-**Title:** Lyte — Business Observability
-**URL:** https://szlholdings.com/lyte-command-center
-**Description:** Revenue health, workflow friction, and operational drift — surfaced before it costs you
-**Icon:** ⚡ (or bar chart icon)
+### 2 — NEWSLETTER
+**Title:** Signal Over Noise — Subscribe Free
+**URL:** https://szlholdings.substack.com
+**Description:** Biweekly intelligence brief on business observability, AI governance, and founder operations
+**Priority:** HIGH — this should be visually prominent (star or highlight if Linktree supports it)
 
 ---
 
-### 3 — AEGIS
+### 3 — LYTE
+**Title:** Lyte — Business Observability Platform
+**URL:** https://szlholdings.com/lyte
+**Description:** Surfaces what's stuck, at risk, and about to break — with explainable context behind every flag
+
+---
+
+### 4 — AEGIS
 **Title:** Aegis — Unified Defense & Intelligence
 **URL:** https://szlholdings.com/firestorm
-**Description:** SOC command, XDR, managed operations, and AI intelligence in one surface
-**Icon:** 🛡️ (or shield icon)
+**Description:** SOC command, threat correlation, analyst tradecraft, and incident governance
 
 ---
 
-### 4 — VESSELS
-**Title:** Vessels — Maritime Command
+### 5 — VESSELS
+**Title:** Vessels — Maritime Fleet Command
 **URL:** https://szlholdings.com/vessels
-**Description:** Fleet tracking, voyage analytics, and commercial operations for maritime operators
-**Icon:** ⚓ (or ship icon)
+**Description:** Fleet tracking, AIS analytics, voyage management, and compliance monitoring
 
 ---
 
-### 5 — TERRA
+### 6 — TERRA
 **Title:** Terra — Real Estate Intelligence
 **URL:** https://szlholdings.com/terra
-**Description:** Distress engine, deal pipeline, and market intelligence across NYC's five boroughs
-**Icon:** 🏙️ (or building icon)
-
----
-
-### 6 — CARLOTA JO
-**Title:** Carlota Jo — Estate Management
-**URL:** https://szlholdings.com/carlota-jo
-**Description:** White-glove residential operations for high-net-worth families
-**Icon:** 🏡 (or home icon)
+**Description:** Market intelligence, distress engine, deal pipeline, and portfolio analytics
 
 ---
 
 ### 7 — PRISM COUNSEL
 **Title:** PRISM Counsel — Legal Matter Command
 **URL:** https://szlholdings.com/prism-counsel
-**Description:** Structured intelligence for legal teams managing complex engagements
-**Icon:** ⚖️ (or scales icon)
+**Description:** Deadline tracking, pressure scoring, proof chains, and privilege-safe document handling
 
 ---
 
-### 8 — STEPHEN LUTAR
-**Title:** Stephen Lutar — Founder & Operator
-**URL:** https://szlholdings.com/stephen
-**Description:** Builder, operator, and systems thinker behind the SZL ecosystem
-**Icon:** 👤 (or person icon)
+### 8 — CARLOTA JO
+**Title:** Carlota Jo — Private Advisory
+**URL:** https://szlholdings.com/carlota-jo
+**Description:** Operational management for UHNW household environments. By introduction only.
 
 ---
 
-### 9 — SUBSTACK
-**Title:** Signal Over Noise — Newsletter
-**URL:** https://szlholdings.substack.com
-**Description:** Strategic thinking for operators who want clarity over noise
-**Icon:** 📬 (or mail icon)
+### 9 — FOUNDER
+**Title:** About Stephen Lutar
+**URL:** https://szlholdings.com/founder
+**Description:** Builder, operator, systems thinker. The person behind the entire SZL ecosystem.
 
 ---
 
 ### 10 — MEDIUM
-**Title:** SZL Holdings on Medium
-**URL:** https://medium.com/@szlholdings
-**Description:** Long-form thinking: whitepapers, doctrine, and strategic analysis
-**Icon:** ✍️ (or pen icon)
+**Title:** Long-Form Writing on Medium
+**URL:** https://medium.com/@stephen_38454
+**Description:** Deep dives on business observability, AI governance, and the architecture behind SZL
 
 ---
 
-### 11 — CONTACT
-**Title:** Start a Strategic Conversation
-**URL:** https://szlholdings.com/#contact
-**Description:** Portfolio inquiries, partnerships, and strategic conversations
-**Icon:** 💬 (or message icon)
+### 11 — LINKEDIN
+**Title:** Connect on LinkedIn
+**URL:** https://linkedin.com/in/stephenlutar
+**Description:** Professional network, investor conversations, and partnership discussions
 
 ---
 
-## Optional: Social Icons to Enable
-- X (Twitter): @SZLHoldings
-- Medium: @szlholdings
-- LinkedIn: SZL Holdings
+### 12 — CONTACT
+**Title:** Start a Conversation
+**URL:** https://szlholdings.com/contact
+**Description:** Design partner inquiries, investor introductions, and strategic conversations. No sales queue.
+
+---
+
+## Social Icons to Enable
+- X (Twitter): @szlholdings
+- Medium: @stephen_38454
+- LinkedIn: Stephen Lutar
+- Substack: szlholdings.substack.com
 
 ---
 
 ## Notes for Upload
-- Upload the square SZL profile image (`szl-profile-square.png`) as the profile photo
-- Upload the Linktree header image (`szl-linktree-header.png`) if Linktree Pro allows a custom header
-- Use the "dark" background theme to match SZL brand
-- Arrange links in the order listed above — most important platforms first
+- Upload `szl-profile-square.png` as the profile photo (gold SZL monogram on dark background)
+- Upload `szl-linktree-header.png` as custom header if Linktree Pro allows it
+- Use the darkest background theme available to match SZL brand
+- Gold/amber (#d4a054) button accents
+- Arrange links in the exact order listed above — newsletter near the top for growth
+- Enable "Subscribe" or "Email Collection" if Linktree supports it — funnel to Substack
