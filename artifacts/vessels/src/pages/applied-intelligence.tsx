@@ -61,7 +61,7 @@ export default function AppliedIntelligencePage() {
                 <div>
                   <p className="text-xs font-semibold text-muted-foreground mb-1.5">Action Items</p>
                   <ul className="space-y-1">
-                    {b.actionItems.map((item, i) => (
+                    {(b.actionItems ?? []).map((item, i) => (
                       <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
                         <CheckCircle className="w-3 h-3 mt-0.5 text-primary shrink-0" />
                         {item}
@@ -70,7 +70,7 @@ export default function AppliedIntelligencePage() {
                   </ul>
                 </div>
                 <div className="flex flex-wrap gap-1 pt-2 border-t border-border">
-                  {b.affectedVessels.map(v => (
+                  {(b.affectedVessels ?? []).map(v => (
                     <Badge key={v} variant="outline" className="text-[10px] bg-muted text-muted-foreground">{v}</Badge>
                   ))}
                 </div>
@@ -91,7 +91,7 @@ export default function AppliedIntelligencePage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {predictive.sort((a, b) => b.failureProbability - a.failureProbability).map(p => (
+            {predictive.sort((a, b) => (b.failureProbability ?? 0) - (a.failureProbability ?? 0)).map(p => (
               <div key={p.id} className={`p-4 rounded-lg border transition-all ${p.riskLevel === "High" ? "border-red-500/20 bg-red-500/5" : "border-border bg-background/50"} hover:border-primary/20`}>
                 <div className="flex items-start justify-between">
                   <div>
@@ -102,7 +102,7 @@ export default function AppliedIntelligencePage() {
                     <p className="text-xs text-muted-foreground">{p.vesselName}</p>
                   </div>
                   <div className="text-right">
-                    <p className={`text-lg font-bold ${p.failureProbability >= 60 ? "text-red-400" : p.failureProbability >= 40 ? "text-amber-400" : "text-emerald-400"}`}>{p.failureProbability}%</p>
+                    <p className={`text-lg font-bold ${(p.failureProbability ?? 0) >= 60 ? "text-red-400" : (p.failureProbability ?? 0) >= 40 ? "text-amber-400" : "text-emerald-400"}`}>{(p.failureProbability ?? 0)}%</p>
                     <p className="text-[10px] text-muted-foreground">failure prob.</p>
                   </div>
                 </div>
@@ -149,7 +149,7 @@ export default function AppliedIntelligencePage() {
                     <p className="text-lg font-bold">{typeof f.currentValue === "number" && f.currentValue > 1000 ? f.currentValue.toLocaleString() : f.currentValue} <span className="text-xs text-muted-foreground">{f.metric}</span></p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-muted-foreground">Forecast ({f.forecastDate.slice(5)})</p>
+                    <p className="text-xs text-muted-foreground">Forecast ({(f.forecastDate ?? '').slice(5)})</p>
                     <p className={`text-lg font-bold ${f.trend === "up" ? "text-emerald-400" : "text-blue-400"}`}>{typeof f.forecastValue === "number" && f.forecastValue > 1000 ? f.forecastValue.toLocaleString() : f.forecastValue} <span className="text-xs text-muted-foreground">{f.metric}</span></p>
                   </div>
                 </div>

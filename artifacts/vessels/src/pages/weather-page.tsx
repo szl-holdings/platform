@@ -101,6 +101,8 @@ function WeatherSkeleton() {
 interface WeatherSnapshot {
   id: string | number;
   location: string;
+  latitude?: number;
+  longitude?: number;
   riskLevel: string;
   description?: string;
   temperature?: string | number;

@@ -13,6 +13,7 @@ export interface VesselProfile {
   flag: string;
   type: string;
   vesselClass: VesselClass;
+  vesselType?: string;
   status: VesselStatus;
   lat: number;
   lon: number;
@@ -20,6 +21,7 @@ export interface VesselProfile {
   heading: number;
   nextPort: string;
   lastPort: string;
+  destination?: string;
   eta: string;
   etaDelta: number;
   routeProgress: number;
@@ -32,6 +34,7 @@ export interface VesselProfile {
   fleet: string;
   cargoType: string;
   dwt: number;
+  grossTonnage?: number;
   yearBuilt: number;
   owner: string;
   manager: string;
@@ -42,9 +45,14 @@ export interface VesselProfile {
   voyageMargin: number;
   alertCount: number;
   maintenanceStatus: MaintenanceStatus;
+  maintenanceScore?: number;
+  engineHealth?: number;
+  hullCondition?: number;
+  eexi?: number;
   readinessState: ReadinessState;
   currentVoyageId: string;
   region: string;
+  [key: string]: unknown;
 }
 
 export interface VoyageEconomics {
@@ -147,11 +155,15 @@ export interface MaintenanceLog {
   vesselId: number;
   vesselName: string;
   type: string;
+  component?: string;
   description: string;
   date: string;
   status: "Completed" | "In Progress" | "Scheduled" | "Overdue";
   priority: "Low" | "Medium" | "High" | "Critical";
+  severity?: string;
   estimatedCost: number;
+  estimatedHours?: number;
+  cost?: number;
   technician: string;
 }
 
@@ -161,9 +173,11 @@ export interface ComplianceCertificate {
   vesselName: string;
   certificateType: string;
   issuingAuthority: string;
+  issuer?: string;
+  regulation?: string;
   issueDate: string;
   expiryDate: string;
-  status: "Valid" | "Expiring" | "Expired";
+  status: "Valid" | "Expiring" | "Expired" | "Expiring Soon";
   daysUntilExpiry: number;
 }
 
@@ -175,23 +189,33 @@ export interface PortStateDeficiency {
   deficiencyCode: string;
   description: string;
   date: string;
+  inspectionDate?: string;
+  mouRegime?: string;
   status: "Open" | "Rectified" | "Closed";
   severity: "Minor" | "Major" | "Detainable";
 }
 
 export interface ShipmentRecord {
   id: number;
+  shipmentId?: string;
   vesselId: number;
   vesselName: string;
   cargo: string;
+  cargoType?: string;
   quantity: number;
+  weight?: number;
   unit: string;
   origin: string;
   destination: string;
   loadDate: string;
+  departureDate?: string;
   deliveryDate: string;
-  status: "planned" | "loading" | "in_transit" | "delivered" | "completed";
+  eta?: string;
+  status: "planned" | "loading" | "in_transit" | "In Transit" | "delivered" | "completed";
   value: number;
+  onTimeScore?: number;
+  customerSatisfaction?: number;
+  demurrageRisk?: number;
 }
 
 export interface EventLog {
@@ -200,6 +224,7 @@ export interface EventLog {
   vesselName: string;
   category: string;
   severity: "Info" | "Warning" | "Critical";
+  source?: string;
   message: string;
   details: string;
   timestamp: string;
@@ -209,10 +234,14 @@ export interface EmissionRecord {
   id: number;
   vesselId: number;
   date: string;
+  month?: string;
   co2: number;
+  co2Emissions?: number;
   sox: number;
   nox: number;
   ciiScore: string;
+  fuelConsumed?: number;
+  distanceTraveled?: number;
 }
 
 export interface AIBriefing {
@@ -221,6 +250,11 @@ export interface AIBriefing {
   summary: string;
   confidence: number;
   category: string;
+  severity?: string;
+  details?: string;
+  actionItems?: string[];
+  affectedVessels?: string[];
+  generatedAt?: string;
   timestamp: string;
   priority: "Low" | "Medium" | "High";
 }
@@ -231,6 +265,8 @@ export interface PredictiveMaintenance {
   vesselName: string;
   component: string;
   predictedFailureDate: string;
+  failureProbability?: number;
+  riskLevel?: string;
   confidence: number;
   recommendedAction: string;
   estimatedCost: number;
@@ -239,20 +275,29 @@ export interface PredictiveMaintenance {
 
 export interface ForecastModule {
   id: number;
+  title?: string;
   metric: string;
   currentValue: number;
   forecastValue: number;
+  forecastDate?: string;
+  dataPoints?: number[];
   unit: string;
   trend: "up" | "down" | "stable";
   confidence: number;
 }
 
 export interface SanctionsRiskIndicator {
+  id?: number;
+  imo?: string;
+  vesselName?: string;
   entity: string;
   flag: string;
   riskLevel: string;
+  reason?: string;
+  region?: string;
   vessels: string[];
   lastUpdated: string;
+  lastSeen?: string;
 }
 
 export interface ComplianceAlert {
@@ -260,6 +305,8 @@ export interface ComplianceAlert {
   type: string;
   message: string;
   severity: string;
+  date?: string;
+  vessel?: string;
   vesselId: number;
   vesselName: string;
 }

@@ -23,8 +23,8 @@ export default function FleetAPMPage() {
 
   const tceByType: Record<string, { count: number; total: number }> = {};
   vessels.forEach(v => {
-    if (!tceByType[v.vesselType]) tceByType[v.vesselType] = { count: 0, total: 0 };
-    if (v.tce > 0) { tceByType[v.vesselType].count++; tceByType[v.vesselType].total += v.tce; }
+    if (!tceByType[(v.vesselType ?? 'unknown')]) tceByType[(v.vesselType ?? 'unknown')] = { count: 0, total: 0 };
+    if (v.tce > 0) { tceByType[(v.vesselType ?? 'unknown')].count++; tceByType[(v.vesselType ?? 'unknown')].total += v.tce; }
   });
   const marketTrendData = Object.entries(tceByType).filter(([, d]) => d.count > 0).map(([type, d]) => ({
     type: type.charAt(0).toUpperCase() + type.slice(1),
@@ -192,7 +192,7 @@ export default function FleetAPMPage() {
                     <span className="w-6 h-6 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold flex items-center justify-center">{i + 1}</span>
                     <div>
                       <p className="text-sm font-semibold">{v.name}</p>
-                      <p className="text-xs text-muted-foreground capitalize">{v.vesselType} · {v.flag}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{(v.vesselType ?? 'unknown')} · {v.flag}</p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -219,7 +219,7 @@ export default function FleetAPMPage() {
                     <span className="w-6 h-6 rounded-full bg-amber-500/10 text-amber-400 text-xs font-bold flex items-center justify-center">{i + 1}</span>
                     <div>
                       <p className="text-sm font-semibold">{v.name}</p>
-                      <p className="text-xs text-muted-foreground capitalize">{v.vesselType} · {v.flag}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{(v.vesselType ?? 'unknown')} · {v.flag}</p>
                     </div>
                   </div>
                   <div className="text-right">

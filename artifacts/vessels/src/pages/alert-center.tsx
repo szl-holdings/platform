@@ -120,7 +120,7 @@ export default function AlertCenterPage() {
   const [ruleForm, setRuleForm] = useState({ name: "", ruleType: "speed", severity: "medium" });
 
   const createRuleMut = useMutation({
-    mutationFn: (data: Record<string, unknown>) => api.alertRules.create(data),
+    mutationFn: (data: any) => api.alertRules.create(data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["alertRules"] }); setRuleOpen(false); toast.success("Alert rule created"); },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -170,7 +170,7 @@ export default function AlertCenterPage() {
         </div>
         <p className="text-sm text-muted-foreground mt-1">Active alert stream, rule configuration, and escalation thresholds across fleet operations</p>
         <div className="flex items-center gap-2 mt-2">
-          <DataStateBadge state={isLive ? "live" : "loading"} pulse={isLive} />
+          <DataStateBadge state={isLive ? "live" : "demo"} pulse={isLive} />
         </div>
       </div>
 

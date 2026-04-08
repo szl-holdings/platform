@@ -228,7 +228,7 @@ export default function OpsConsole() {
             >
               <tab.icon style={{ width: 12, height: 12 }} />
               {tab.label}
-              {tab.badge !== undefined && tab.badge > 0 && (
+              {tab.badge !== undefined && Number(tab.badge) > 0 && (
                 <span style={{ fontSize: "9px", fontWeight: 700, padding: "1px 5px", borderRadius: "9px", background: "#c45a4a", color: "#fff", minWidth: "16px", textAlign: "center" }}>
                   {tab.badge}
                 </span>

@@ -1,5 +1,5 @@
 import "mapbox-gl/dist/mapbox-gl.css";
-import type MapboxGL from "mapbox-gl";
+import type * as mapboxgl from "mapbox-gl";
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Link } from "wouter";
 import { type VesselProfile } from "@/data/mock-data";
@@ -219,10 +219,10 @@ function MapboxFleetMap({
   showAis: boolean;
 }) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<MapboxGL.Map | null>(null);
-  const markersRef = useRef<Map<number, MapboxGL.Marker>>(new Map());
-  const aisMarkersRef = useRef<Map<string, MapboxGL.Marker>>(new Map());
-  const popupRef = useRef<MapboxGL.Popup | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const markersRef = useRef<Map<number, mapboxgl.Marker>>(new Map());
+  const aisMarkersRef = useRef<Map<string, mapboxgl.Marker>>(new Map());
+  const popupRef = useRef<mapboxgl.Popup | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
 
@@ -240,18 +240,18 @@ function MapboxFleetMap({
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
-    let mapboxgl: typeof MapboxGL;
+    let mbgl: any;
     let destroyed = false;
 
     import("mapbox-gl").then((module) => {
       if (destroyed) return;
-      mapboxgl = module.default;
+      mbgl = module.default;
 
       if (token) {
-        mapboxgl.accessToken = token;
+        mbgl.accessToken = token;
       }
 
-      const map = new mapboxgl.Map({
+      const map = new mbgl.Map({
         container: mapContainerRef.current!,
         style: token
           ? "mapbox://styles/mapbox/dark-v11"
@@ -268,7 +268,7 @@ function MapboxFleetMap({
             },
         center: [20, 20],
         zoom: 1.8,
-        projection: { name: "mercator" } as MapboxGL.ProjectionSpecification,
+        projection: { name: "mercator" } as mapboxgl.ProjectionSpecification,
         antialias: true,
       });
 
@@ -380,7 +380,7 @@ function MapboxFleetMap({
     const map = mapRef.current;
 
     import("mapbox-gl").then((module) => {
-      const mapboxgl = module.default;
+      const mbgl = module.default;
 
       markersRef.current.forEach((m) => m.remove());
       markersRef.current.clear();
@@ -437,7 +437,7 @@ function MapboxFleetMap({
           el.appendChild(pulse);
         }
 
-        const popup = new mapboxgl.Popup({
+        const popup = new mbgl.Popup({
           closeButton: false,
           closeOnClick: false,
           offset: 15,
@@ -476,7 +476,7 @@ function MapboxFleetMap({
           onVesselSelect(selectedVessel?.id === vessel.id ? null : vessel);
         });
 
-        const marker = new mapboxgl.Marker({ element: el })
+        const marker = new mbgl.Marker({ element: el })
           .setLngLat([vessel.lon, vessel.lat])
           .addTo(map);
 
@@ -510,7 +510,7 @@ function MapboxFleetMap({
       }));
 
     try {
-      (map.getSource("routes") as MapboxGL.GeoJSONSource | undefined)?.setData({
+      (map.getSource("routes") as mapboxgl.GeoJSONSource | undefined)?.setData({
         type: "FeatureCollection",
         features: routeFeatures,
       });
@@ -542,7 +542,7 @@ function MapboxFleetMap({
     }));
 
     try {
-      (map.getSource("selected-route") as MapboxGL.GeoJSONSource | undefined)?.setData({
+      (map.getSource("selected-route") as mapboxgl.GeoJSONSource | undefined)?.setData({
         type: "FeatureCollection",
         features: [...lineFeature, ...waypointFeatures],
       });
@@ -553,7 +553,7 @@ function MapboxFleetMap({
     if (!mapLoaded || !mapRef.current) return;
 
     import("mapbox-gl").then((module) => {
-      const mapboxgl = module.default;
+      const mbgl = module.default;
       const map = mapRef.current;
       if (!map) return;
 
@@ -578,7 +578,7 @@ function MapboxFleetMap({
           box-shadow: 0 0 4px ${color}60;
         `;
 
-        const popup = new mapboxgl.Popup({
+        const popup = new mbgl.Popup({
           closeButton: false,
           closeOnClick: false,
           offset: 10,
@@ -605,7 +605,7 @@ function MapboxFleetMap({
         el.addEventListener("mouseenter", () => popup.setLngLat([v.lon, v.lat]).addTo(map));
         el.addEventListener("mouseleave", () => popup.remove());
 
-        const marker = new mapboxgl.Marker({ element: el })
+        const marker = new mbgl.Marker({ element: el })
           .setLngLat([v.lon, v.lat])
           .addTo(map);
 

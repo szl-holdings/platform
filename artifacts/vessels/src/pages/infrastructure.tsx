@@ -40,11 +40,11 @@ export default function InfrastructurePage() {
   const inProgressCount = maintenanceLogs.filter(m => m.status === "In Progress").length;
   const overdueCount = maintenanceLogs.filter(m => m.status === "Overdue").length;
   const scheduledCount = maintenanceLogs.filter(m => m.status === "Scheduled").length;
-  const totalCost = maintenanceLogs.reduce((s, m) => s + m.cost, 0);
+  const totalCost = maintenanceLogs.reduce((s, m) => s + m.cost ?? 0, 0);
 
-  const avgEngine = vessels.length > 0 ? Math.round(vessels.reduce((s, v) => s + v.engineHealth, 0) / vessels.length) : 0;
-  const avgHull = vessels.length > 0 ? Math.round(vessels.reduce((s, v) => s + v.hullCondition, 0) / vessels.length) : 0;
-  const avgMaint = vessels.length > 0 ? Math.round(vessels.reduce((s, v) => s + v.maintenanceScore, 0) / vessels.length) : 0;
+  const avgEngine = vessels.length > 0 ? Math.round(vessels.reduce((s, v) => s + (v.engineHealth ?? 0), 0) / vessels.length) : 0;
+  const avgHull = vessels.length > 0 ? Math.round(vessels.reduce((s, v) => s + (v.hullCondition ?? 0), 0) / vessels.length) : 0;
+  const avgMaint = vessels.length > 0 ? Math.round(vessels.reduce((s, v) => s + (v.maintenanceScore ?? 0), 0) / vessels.length) : 0;
 
   return (
     <div className="p-6 space-y-6">
@@ -104,8 +104,8 @@ export default function InfrastructurePage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in-up stagger-2">
-        {vessels.filter(v => v.engineHealth < 85 || v.hullCondition < 80 || v.maintenanceScore < 75).map(v => (
-          <Card key={v.id} className={`bg-card border-border hover:border-primary/20 transition-all ${v.engineHealth < 70 || v.hullCondition < 70 ? "ring-1 ring-red-500/20" : ""}`}>
+        {vessels.filter(v => (v.engineHealth ?? 0) < 85 || (v.hullCondition ?? 0) < 80 || (v.maintenanceScore ?? 0) < 75).map(v => (
+          <Card key={v.id} className={`bg-card border-border hover:border-primary/20 transition-all ${(v.engineHealth ?? 0) < 70 || (v.hullCondition ?? 0) < 70 ? "ring-1 ring-red-500/20" : ""}`}>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="font-display text-sm flex items-center gap-2">
@@ -117,13 +117,13 @@ export default function InfrastructurePage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
-              <HealthGauge value={v.engineHealth} label="Engine Health" color="primary" />
-              <HealthGauge value={v.hullCondition} label="Hull Condition" color="chart-2" />
-              <HealthGauge value={v.maintenanceScore} label="Maintenance Score" color="chart-3" />
+              <HealthGauge value={(v.engineHealth ?? 0)} label="Engine Health" color="primary" />
+              <HealthGauge value={(v.hullCondition ?? 0)} label="Hull Condition" color="chart-2" />
+              <HealthGauge value={(v.maintenanceScore ?? 0)} label="Maintenance Score" color="chart-3" />
               <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground pt-2 border-t border-border">
                 <div>Type: <span className="text-foreground capitalize">{v.vesselType}</span></div>
                 <div>Built: <span className="text-foreground">{v.yearBuilt}</span></div>
-                <div>GT: <span className="text-foreground">{v.grossTonnage.toLocaleString()}</span></div>
+                <div>GT: <span className="text-foreground">{(v.grossTonnage ?? 0).toLocaleString()}</span></div>
                 <div>EEXI: <span className="text-foreground">{v.eexi}</span></div>
               </div>
             </CardContent>
@@ -161,9 +161,9 @@ export default function InfrastructurePage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground ml-7">
-                    <span>Scheduled: {new Date(log.scheduledDate).toLocaleDateString()}</span>
+                    <span>Scheduled: {new Date(log.date).toLocaleDateString()}</span>
                     <span>Est: {log.estimatedHours}h</span>
-                    <span>Cost: ${log.cost.toLocaleString()}</span>
+                    <span>Cost: ${(log.cost ?? 0).toLocaleString()}</span>
                   </div>
                 </div>
               );

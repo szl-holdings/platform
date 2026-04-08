@@ -31,10 +31,10 @@ export default function CO2EmissionsPage() {
 
   const monthlyTotals: Record<string, { co2: number; fuel: number; distance: number }> = {};
   filteredEmissions.forEach(e => {
-    if (!monthlyTotals[e.month]) monthlyTotals[e.month] = { co2: 0, fuel: 0, distance: 0 };
-    monthlyTotals[e.month].co2 += e.co2Emissions;
-    monthlyTotals[e.month].fuel += e.fuelConsumed;
-    monthlyTotals[e.month].distance += e.distanceTraveled;
+    if (!monthlyTotals[(e.month ?? '')]) monthlyTotals[(e.month ?? '')] = { co2: 0, fuel: 0, distance: 0 };
+    monthlyTotals[(e.month ?? '')].co2 += (e.co2Emissions ?? 0);
+    monthlyTotals[(e.month ?? '')].fuel += (e.fuelConsumed ?? 0);
+    monthlyTotals[(e.month ?? '')].distance += (e.distanceTraveled ?? 0);
   });
   const monthlyData = Object.entries(monthlyTotals).sort(([a], [b]) => a.localeCompare(b)).map(([month, d]) => ({
     month: month.slice(5),
@@ -42,8 +42,8 @@ export default function CO2EmissionsPage() {
     fuel: Math.round(d.fuel / 1000),
   }));
 
-  const totalCO2 = filteredEmissions.reduce((s, e) => s + e.co2Emissions, 0);
-  const totalFuel = filteredEmissions.reduce((s, e) => s + e.fuelConsumed, 0);
+  const totalCO2 = filteredEmissions.reduce((s, e) => s + (e.co2Emissions ?? 0), 0);
+  const totalFuel = filteredEmissions.reduce((s, e) => s + (e.fuelConsumed ?? 0), 0);
 
   const ciiDistribution: Record<string, number> = {};
   vessels.forEach(v => { ciiDistribution[v.ciiRating] = (ciiDistribution[v.ciiRating] || 0) + 1; });

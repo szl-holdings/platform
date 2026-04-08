@@ -153,7 +153,7 @@ export default function ApprovalReview() {
 
   const displayed = allApprovals.map(a => ({
     ...a,
-    status: approvalStates[a.id] ?? a.status,
+    status: (approvalStates[a.id] ?? a.status) as PropertyApproval["status"],
   })).filter(a => statusFilter === "all" || a.status === statusFilter);
 
   const pending = allApprovals.filter(a => (approvalStates[a.id] ?? a.status) === "pending").length;

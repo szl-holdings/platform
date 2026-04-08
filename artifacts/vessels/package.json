@@ -83,6 +83,7 @@
     "@szl-holdings/observability": "workspace:*",
     "@szl-holdings/services": "workspace:*",
     "mapbox-gl": "^3.20.0",
-    "@szl-holdings/prism-bus": "workspace:*"
+    "@szl-holdings/prism-bus": "workspace:*",
+    "@szl-holdings/replit-auth-web": "workspace:*"
   }
 }

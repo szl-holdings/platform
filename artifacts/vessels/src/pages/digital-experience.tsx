@@ -14,8 +14,8 @@ const demurrageColors: Record<string, string> = {
 export default function DigitalExperiencePage() {
   const { data: shipments = [] } = useQuery({ queryKey: ["shipments"], queryFn: () => dataProvider.getShipmentRecords() });
 
-  const avgOnTime = shipments.length > 0 ? Math.round(shipments.reduce((s, r) => s + r.onTimeScore, 0) / shipments.length * 10) / 10 : 0;
-  const avgSatisfaction = shipments.length > 0 ? (shipments.reduce((s, r) => s + r.customerSatisfaction, 0) / shipments.length).toFixed(1) : "0";
+  const avgOnTime = shipments.length > 0 ? Math.round(shipments.reduce((s, r) => s + (r.onTimeScore ?? 0), 0) / shipments.length * 10) / 10 : 0;
+  const avgSatisfaction = shipments.length > 0 ? (shipments.reduce((s, r) => s + (r.customerSatisfaction ?? 0), 0) / shipments.length).toFixed(1) : "0";
   const highRisk = shipments.filter(s => s.demurrageRisk === "High").length;
   const inTransit = shipments.filter(s => s.status === "In Transit").length;
 
@@ -122,13 +122,13 @@ export default function DigitalExperiencePage() {
                   </div>
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <div className="flex items-center gap-4">
-                      <span>{s.weight.toLocaleString()} MT</span>
+                      <span>{(s.weight ?? 0).toLocaleString()} MT</span>
                       <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> ETA: {new Date(s.eta).toLocaleDateString()}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="flex items-center gap-1">
-                        <CheckCircle className={`w-3 h-3 ${s.onTimeScore >= 95 ? "text-emerald-400" : s.onTimeScore >= 90 ? "text-amber-400" : "text-red-400"}`} />
-                        {s.onTimeScore}% on-time
+                        <CheckCircle className={`w-3 h-3 ${(s.onTimeScore ?? 0) >= 95 ? "text-emerald-400" : (s.onTimeScore ?? 0) >= 90 ? "text-amber-400" : "text-red-400"}`} />
+                        {(s.onTimeScore ?? 0)}% on-time
                       </span>
                       <span className="flex items-center gap-0.5">
                         {[1,2,3,4,5].map(i => <Star key={i} className={`w-2.5 h-2.5 ${i <= Math.round(s.customerSatisfaction) ? "text-amber-400 fill-amber-400" : "text-muted-foreground/30"}`} />)}

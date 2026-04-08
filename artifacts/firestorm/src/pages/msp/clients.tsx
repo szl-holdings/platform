@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, ArrowUpDown, Building2, Monitor, Ticket, AlertTriangle, TrendingUp, TrendingDown, ChevronRight, Plus, CheckCircle, Activity } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "@workspace/shared-ui/ui/skeleton";
+import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { clients as fallbackClients, type Client } from "@/data/mock-data";
-import { ExportButton } from "@workspace/shared-ui/data-export";
+import { ExportButton } from "@szl-holdings/shared-ui/data-export";
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string): Promise<T> {

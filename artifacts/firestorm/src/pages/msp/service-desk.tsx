@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, AlertTriangle, Clock, User, ArrowUp, ArrowDown, Minus, CheckCircle2, Circle, Pause, Timer, Plus } from "lucide-react";
-import { cn } from "@workspace/shared-ui/utils";
+import { cn } from "@szl-holdings/shared-ui/utils";
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "@workspace/shared-ui/ui/skeleton";
+import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { tickets as fallbackTickets, type Ticket } from "@/data/mock-data";
 
 const API_BASE = "/api";

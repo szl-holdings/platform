@@ -205,7 +205,7 @@ export default function PerformanceAnalyticsPage() {
                     <p className="text-[10px] text-sky-400/50 mt-0.5">{corridor.origin} → {corridor.destination} · {corridor.commodity}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className={cn("text-sm font-bold font-mono", corridor.profitabilityIndex >= 70 ? "text-emerald-400" : corridor.profitabilityIndex >= 50 ? "text-amber-400" : "text-red-400")}>
+                    <p className={cn("text-sm font-bold font-mono", Number(corridor.profitabilityIndex) >= 70 ? "text-emerald-400" : Number(corridor.profitabilityIndex) >= 50 ? "text-amber-400" : "text-red-400")}>
                       {corridor.profitabilityIndex}
                     </p>
                     <p className="text-[9px] text-sky-400/40">profit index</p>
@@ -219,7 +219,7 @@ export default function PerformanceAnalyticsPage() {
                   </div>
                   <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
                     <p className="text-[9px] text-sky-400/40">Delay Rate</p>
-                    <p className={cn("text-[10px] font-mono", corridor.delayRate >= 30 ? "text-red-400" : corridor.delayRate >= 15 ? "text-amber-400" : "text-emerald-400")}>{corridor.delayRate}%</p>
+                    <p className={cn("text-[10px] font-mono", Number(corridor.delayRate) >= 30 ? "text-red-400" : Number(corridor.delayRate) >= 15 ? "text-amber-400" : "text-emerald-400")}>{corridor.delayRate}%</p>
                   </div>
                   <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
                     <p className="text-[9px] text-sky-400/40">Weather</p>

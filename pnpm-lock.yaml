@@ -2396,6 +2396,9 @@ importers:
       '@szl-holdings/prism-bus':
         specifier: workspace:*
         version: link:../../lib/prism-bus
+      '@szl-holdings/replit-auth-web':
+        specifier: workspace:*
+        version: link:../../lib/replit-auth-web
       '@szl-holdings/services':
         specifier: workspace:*
         version: link:../../lib/services

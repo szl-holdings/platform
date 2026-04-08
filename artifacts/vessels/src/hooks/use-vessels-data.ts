@@ -9,7 +9,7 @@ type MaintenanceType = "scheduled" | "emergency" | "predictive" | "regulatory";
 type MaintenanceStatus = "overdue" | "due_soon" | "scheduled" | "in_progress" | "completed";
 type MaintenancePriority = "critical" | "high" | "medium" | "low";
 type CharterType = "time_charter" | "voyage_charter" | "spot" | "bareboat";
-type VoyageStatus = "planned" | "loading" | "at_sea" | "completed" | "cancelled";
+type VoyageStatus = "planned" | "loading" | "at_sea" | "completed" | "cancelled" | "active";
 
 function toExceptionType(val: string | null | undefined): ExceptionType {
   const valid: ExceptionType[] = ["route_deviation", "delay_risk", "port_congestion", "weather_disruption", "maintenance_risk", "fuel_anomaly", "schedule_variance", "security_alert", "ais_dark", "sanctions_match", "overdue_arrival", "inspection_failure"];
@@ -138,7 +138,7 @@ export function useFleetExceptions(params?: { status?: string; severity?: string
 
   const isLive = apiExceptions.length > 0;
 
-  const fleetExceptions = apiExceptions.map((e: Record<string, unknown>) => ({
+  const fleetExceptions = apiExceptions.map((e: any) => ({
     id: String(e["id"]),
     type: toExceptionType(e["exceptionType"] as string | null | undefined),
     severity: toExceptionSeverity(e["severity"] as string | null | undefined),
@@ -183,6 +183,7 @@ export type VoyageRow = {
   status: VoyageStatus;
   distanceNm: number;
   durationDays: number;
+  performanceVsBudget?: number;
   voyageRef: string | null;
 };
 
@@ -249,7 +250,7 @@ export function useMaintenance(params?: { status?: string; vesselId?: number }) 
 
   const isLive = apiMaintenance.length > 0;
 
-  const maintenanceItems = apiMaintenance.map((m: Record<string, unknown>) => ({
+  const maintenanceItems = apiMaintenance.map((m: any) => ({
     id: m["id"] as number,
     vesselId: m["vesselId"] as number,
     vesselName: (m["vesselName"] as string) ?? `Vessel #${m["vesselId"] as number}`,
@@ -317,7 +318,7 @@ export function usePerformanceMetrics() {
     return {
       vesselId: v.id,
       vesselName: v.name,
-      utilization: (v as Record<string, unknown>)["utilization"] as number ?? 0,
+      utilization: (v as any)["utilization"] as number ?? 0,
       tce,
       fuelEfficiency: 0,
       onTimeArrivalRate: 0,
