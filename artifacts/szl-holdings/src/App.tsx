@@ -381,17 +381,12 @@ function App() {
               <Suspense fallback={<PageLoader />}><CarlotaJoPublicPage /></Suspense>
             </Route>
 
-            {/* ── PRISM Counsel — standalone app, bootstrapped in main.tsx at entry level ── */}
-            {/* These catch-all routes force a hard navigation to ensure main.tsx re-evaluates the path
-                and mounts PrismCounselApp instead of this SZL App tree (SPA links bypass main.tsx). */}
+            {/* ── PRISM Counsel — now a standalone artifact at /prism-counsel/ ── */}
             <Route path="/prism-counsel/:rest*">
-              {() => {
-                window.location.href = window.location.pathname + window.location.search + window.location.hash;
-                return null;
-              }}
+              {() => { window.location.href = "/prism-counsel/"; return null; }}
             </Route>
             <Route path="/prism-counsel">
-              {() => { window.location.href = "/prism-counsel"; return null; }}
+              {() => { window.location.href = "/prism-counsel/"; return null; }}
             </Route>
 
             {/* ── Trust Center ── */}

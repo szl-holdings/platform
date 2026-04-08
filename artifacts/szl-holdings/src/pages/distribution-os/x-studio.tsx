@@ -42,7 +42,7 @@ export default function XStudioPage() {
   const [publishing, setPublishing] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch(`${API}/api/distribution-os/x-posts`).then(r => r.json()).then(setPosts).catch(() => {});
+    fetch(`${API}/api/distribution-os/x-posts`, { credentials: "include" }).then(r => r.json()).then(setPosts).catch(() => {});
   }, []);
 
   async function createPost() {
@@ -83,12 +83,12 @@ export default function XStudioPage() {
       if (data.post) {
         setPosts(prev => prev.map(p => p.id === id ? data.post : p));
       } else if (data.error) {
-        const refreshRes = await fetch(`${API}/api/distribution-os/x-posts/${id}`);
+        const refreshRes = await fetch(`${API}/api/distribution-os/x-posts/${id}`, { credentials: "include" });
         const refreshed = await refreshRes.json();
         setPosts(prev => prev.map(p => p.id === id ? refreshed : p));
       }
     } catch {
-      const refreshRes = await fetch(`${API}/api/distribution-os/x-posts/${id}`);
+      const refreshRes = await fetch(`${API}/api/distribution-os/x-posts/${id}`, { credentials: "include" });
       const refreshed = await refreshRes.json();
       setPosts(prev => prev.map(p => p.id === id ? refreshed : p));
     }

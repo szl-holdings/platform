@@ -4,8 +4,6 @@ import { configurePlausible } from "@szl-holdings/analytics";
 import { initSentry } from "@szl-holdings/observability/react";
 import { initWebVitals } from "@szl-holdings/observability/react";
 import { GraphQLProvider } from "@szl-holdings/graphql-client/provider";
-import { AnalyticsProvider } from "@szl-holdings/shared-ui";
-import { PrismCounselApp } from "./prism-counsel/prism-counsel-app";
 import App from "./App";
 import "./i18n";
 import "./index.css";
@@ -19,24 +17,10 @@ configurePlausible({
 initSentry({ appSlug: "szl-holdings", tracesSampleRate: 0.2 });
 initWebVitals("szl-holdings", "/api/");
 
-const isPrismCounsel =
-  window.location.pathname === "/prism-counsel" ||
-  window.location.pathname.startsWith("/prism-counsel/");
-
-if (isPrismCounsel) {
-  createRoot(document.getElementById("root")!).render(
-    <ErrorBoundary appName="Prism Counsel" accentColor="#c8a96e">
-      <AnalyticsProvider appName="prism-counsel">
-        <PrismCounselApp />
-      </AnalyticsProvider>
-    </ErrorBoundary>,
-  );
-} else {
-  createRoot(document.getElementById("root")!).render(
-    <ErrorBoundary appName="SZL Holdings" accentColor="#8b7ac8">
-      <GraphQLProvider>
-        <App />
-      </GraphQLProvider>
-    </ErrorBoundary>,
-  );
-}
+createRoot(document.getElementById("root")!).render(
+  <ErrorBoundary appName="SZL Holdings" accentColor="#8b7ac8">
+    <GraphQLProvider>
+      <App />
+    </GraphQLProvider>
+  </ErrorBoundary>,
+);
