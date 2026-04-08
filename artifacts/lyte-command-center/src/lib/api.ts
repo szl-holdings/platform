@@ -304,7 +304,99 @@ export const api = {
       apiFetch<{ decision: AlloyDecision; message: string }>(`/ai/decision/${id}/reject`, { method: "POST", body: JSON.stringify({ reason, rejectorName }) }),
     approvalMatrix: () => apiFetch<{ matrix: Record<string, AlloyApprovalPolicy>; description: string; executionMode: string }>("/ai/approval-matrix"),
   },
+  covenant: {
+    status: () => apiFetch<{ engine: string; status: string; stats: Record<string, unknown>; highRiskActions: string[] }>("/covenant/status"),
+    policies: () => apiFetch<{ policies: Array<Record<string, unknown>>; count: number }>("/covenant/policies"),
+    simulate: (subject: { roles: string[] }, resource: { type: string; domain?: string }, action: string, context?: Record<string, unknown>) =>
+      apiFetch<{ decision: Record<string, unknown>; explanation: string; ui: Record<string, unknown> }>("/covenant/simulate", {
+        method: "POST",
+        body: JSON.stringify({ subject, resource, action, context }),
+      }),
+    evaluate: (subject: { roles: string[] }, resource: { type: string; domain?: string }, action: string, context?: Record<string, unknown>) =>
+      apiFetch<{ decision: Record<string, unknown>; ui: Record<string, unknown> }>("/covenant/evaluate", {
+        method: "POST",
+        body: JSON.stringify({ subject, resource, action, context }),
+      }),
+    recent: (limit?: number) => apiFetch<{ decisions: Array<Record<string, unknown>>; count: number }>(`/covenant/decisions/recent?limit=${limit || 20}`),
+    denied: (limit?: number) => apiFetch<{ decisions: Array<Record<string, unknown>>; count: number }>(`/covenant/decisions/denied?limit=${limit || 20}`),
+  },
+  alloyRuns: {
+    list: (params?: { state?: string; limit?: number }) => {
+      const q = new URLSearchParams();
+      if (params?.state) q.set("state", params.state);
+      if (params?.limit) q.set("limit", String(params.limit));
+      return apiFetch<{ data: AlloyWorkflowRun[]; meta: { total: number } }>(`/alloy/runs?${q.toString()}`);
+    },
+    get: (id: number) => apiFetch<AlloyWorkflowRun>(`/alloy/runs/${id}`),
+  },
+  alloyWorkflows: {
+    list: (params?: { limit?: number }) => {
+      const q = new URLSearchParams();
+      if (params?.limit) q.set("limit", String(params.limit));
+      return apiFetch<{ data: AlloyWorkflow[]; meta: { total: number } }>(`/alloy/workflows?${q.toString()}`);
+    },
+    run: (id: number, input?: Record<string, unknown>) =>
+      apiFetch<AlloyWorkflowRun>(`/alloy/workflows/${id}/run`, { method: "POST", body: JSON.stringify({ input }) }),
+  },
+  receipts: {
+    list: (params?: { limit?: number; contentType?: string }) => {
+      const q = new URLSearchParams();
+      if (params?.limit) q.set("limit", String(params.limit));
+      if (params?.contentType) q.set("contentType", params.contentType);
+      return apiFetch<{ receipts: Array<Record<string, unknown>>; count: number }>(`/receipt-graph/receipts?${q.toString()}`);
+    },
+    get: (id: string) => apiFetch<Record<string, unknown>>(`/receipt-graph/receipts/${id}`),
+    executiveSummary: () => apiFetch<Record<string, unknown>>("/receipt-graph/trust-summary"),
+  },
+  handoffs: {
+    contracts: () => apiFetch<{ contracts: Array<Record<string, unknown>>; count: number }>("/cross-app/handoffs/contracts"),
+    history: (params?: { sourceDomain?: string; limit?: number }) => {
+      const q = new URLSearchParams();
+      if (params?.sourceDomain) q.set("sourceDomain", params.sourceDomain);
+      if (params?.limit) q.set("limit", String(params.limit));
+      return apiFetch<{ handoffs: Array<Record<string, unknown>>; count: number }>(`/cross-app/handoffs/history?${q.toString()}`);
+    },
+    stats: () => apiFetch<Record<string, unknown>>("/cross-app/handoffs/stats"),
+    trigger: (type: string, payload?: Record<string, unknown>) =>
+      apiFetch<{ handoff: Record<string, unknown>; message: string }>("/cross-app/handoffs/trigger", {
+        method: "POST",
+        body: JSON.stringify({ type, payload }),
+      }),
+  },
 };
+
+export interface AlloyWorkflowRun {
+  id: number;
+  workflowId: number;
+  state: "queued" | "running" | "completed" | "failed" | "waiting_approval" | "cancelled";
+  input: Record<string, unknown>;
+  output?: Record<string, unknown>;
+  errorMessage?: string;
+  stateHistory: Array<{ state: string; at: string; by: string; reason?: string }>;
+  durationMs?: number;
+  startedAt?: string;
+  completedAt?: string;
+  queuedAt: string;
+  createdAt: string;
+}
+
+export interface AlloyWorkflow {
+  id: number;
+  name: string;
+  description?: string;
+  trigger: string;
+  triggerConfig?: Record<string, unknown>;
+  steps?: unknown[];
+  outputType: string;
+  requiresApproval: boolean;
+  approverRole?: string;
+  isActive: boolean;
+  runCount: number;
+  lastRunAt?: string;
+  orgId?: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface AlloyAIHealth {
   status: string;

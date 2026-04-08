@@ -6,7 +6,8 @@ import {
   Zap, Menu, X, ChevronDown, Bell, Settings, Users, Flag, FileText,
   Database, Play, Activity, CheckSquare, Shield, Network, Heart,
   AlertTriangle, Brain, Radio, Workflow, Inbox, Search, UserCheck,
-  ChevronRight, Gauge, BarChart3, LayoutDashboard, Download, Clapperboard, Power
+  ChevronRight, Gauge, BarChart3, LayoutDashboard, Download, Clapperboard, Power,
+  GitBranch, Send
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, useSandboxMode, EnvironmentLabel, type OnboardingConfig } from "@szl-holdings/shared-ui";
 import { useDemoMode } from "@/lib/demo-mode";
@@ -141,6 +142,11 @@ const NAV_GROUPS = [
       { href: "/alloy/traces", label: "Execution Traces", icon: Activity },
       { href: "/alloy/governance", label: "Governance", icon: Shield },
       { href: "/alloy/integrations", label: "Integration Health", icon: Network },
+      { href: "/alloy/compiler", label: "Graph Compiler", icon: GitBranch },
+      { href: "/alloy/replay", label: "Replay Timeline", icon: Play },
+      { href: "/alloy/simulate", label: "Policy Simulator", icon: Shield },
+      { href: "/alloy/handoffs", label: "Agent Handoffs", icon: Send },
+      { href: "/alloy/receipts", label: "Trust Receipts", icon: FileText },
     ],
   },
 ];

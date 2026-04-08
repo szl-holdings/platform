@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import {
   ArrowRight, GitBranch, Layers, CheckSquare, FileText, AlertOctagon,
   Workflow, Shield, Zap, Lock, Download, RefreshCw, Database, Filter,
-  BarChart3, Network, BookOpen, Puzzle
+  BarChart3, Network, BookOpen, Puzzle, Activity, Eye, Send
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -51,7 +51,7 @@ const OPERATING_LOOP = [
     phase: "Audit Preservation",
     step: "07",
     icon: FileText,
-    description: "Every stage — ingestion, evaluation, routing, approval, execution — is logged in an immutable audit record. The record is structured, attributed to real actors, and exportable for compliance, capital review, or customer diligence.",
+    description: "Every stage — ingestion, evaluation, routing, approval, execution — is logged in a structured audit record. The record is attributed to real actors and exportable for compliance, capital review, or customer diligence.",
   },
   {
     phase: "Explainability",
@@ -86,7 +86,7 @@ const CAPABILITIES = [
   {
     icon: FileText,
     title: "Immutable Audit Trail",
-    body: "Every action, decision, approval, and outcome is logged with full attribution — who acted, when, with what authority, and what changed. Structured, immutable, and exportable for compliance and capital review.",
+    body: "Every action, decision, approval, and outcome is logged with full attribution — who acted, when, with what authority, and what changed. Structured, auditable, and exportable for compliance and capital review.",
   },
   {
     icon: Download,
@@ -200,7 +200,7 @@ export default function AlloyPage() {
                     marginBottom: "0.875rem",
                   }}
                 >
-                  Alloy is the execution fabric beneath every SZL Holdings product. Every signal — from Lyte, from any pack, or from any integration — enters Alloy's operating loop: ingestion, normalization, evaluation, ranking, routing, governed execution, and immutable audit preservation.
+                  Alloy is the execution fabric beneath every SZL Holdings product. Every signal — from Lyte, from any pack, or from any integration — enters Alloy's operating loop: ingestion, normalization, evaluation, ranking, routing, governed execution, and structured audit preservation.
                 </p>
                 <p
                   style={{
@@ -456,6 +456,96 @@ export default function AlloyPage() {
                     </div>
                     <h3 style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.625rem" }}>{item.title}</h3>
                     <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{item.body}</p>
+                  </m.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* Product-level features — new capabilities */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>
+                Governed Execution Layer
+              </p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "32ch", marginBottom: "1.25rem" }}>
+                From intent to verified execution — with accountability at every step.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "3rem" }}>
+                Alloy's product layer turns goals into governed DAGs, replays every decision, simulates policy outcomes before going live, and delegates to specialized agents with structured receipts.
+              </p>
+            </m.div>
+            <div style={{ display: "grid", gap: "1rem" }} className="lg:grid-cols-2 xl:grid-cols-3">
+              {[
+                {
+                  icon: GitBranch,
+                  tag: "Action Graph Compiler",
+                  title: "Goal → Executable DAG",
+                  body: "Define an objective. Alloy compiles it into an executable plan with branch logic, fallback paths, and approval gates — rendered as an interactive DAG before any execution begins.",
+                  badge: "Simulation-first",
+                },
+                {
+                  icon: Activity,
+                  tag: "Execution Replay",
+                  title: "Step-by-step Replay Timeline",
+                  body: "Every completed run shows a full replay: what tools were called, what was seen, what was approved or blocked, evidence collected, and timestamps — down to the millisecond.",
+                  badge: "Structured audit trail",
+                },
+                {
+                  icon: Shield,
+                  tag: "COVENANT Policy Engine",
+                  title: "Policy Simulation Console",
+                  body: "Test 'what would happen if' scenarios against COVENANT policies before running live. See projected approve, block, escalate, and defer outcomes for any proposed action.",
+                  badge: "No live execution",
+                },
+                {
+                  icon: Send,
+                  tag: "A2A Protocol",
+                  title: "Agent Handoff & Delegation",
+                  body: "Alloy delegates subtasks to specialized agents — internal or remote — using the A2A protocol. Every delegation is tracked with a structured receipt including status and completion verification.",
+                  badge: "Tracked receipts",
+                },
+                {
+                  icon: FileText,
+                  tag: "Trust Layer",
+                  title: "Run-grade Trust Receipts",
+                  body: "Every completed run produces a structured receipt: inputs, outputs, policy decisions, evidence chain, confidence levels, approval records, and duration — designed for compliance export.",
+                  badge: "Audit-grade receipts",
+                },
+                {
+                  icon: Eye,
+                  tag: "Governance",
+                  title: "Clearly Marked Boundaries",
+                  body: "Alloy is explicit about what is simulation versus live execution. Policy gates are structural, not configurable away. Human approval is enforced — not optional — for consequential actions.",
+                  badge: "No autonomous execution",
+                },
+              ].map((cap, i) => {
+                const Icon = cap.icon;
+                return (
+                  <m.div
+                    key={cap.title}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.38, delay: i * 0.06 }}
+                    className="szl-card"
+                    style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.875rem" }}>
+                      <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "6px", flexShrink: 0 }}>
+                        <Icon size={14} color="var(--color-alloy-light)" />
+                      </div>
+                      <div>
+                        <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 600, color: "var(--color-alloy-light)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{cap.tag}</div>
+                        <h3 style={{ fontSize: "0.9375rem", fontWeight: 700, letterSpacing: "-0.012em", color: "hsl(38,8%,88%)", marginTop: "1px" }}>{cap.title}</h3>
+                      </div>
+                    </div>
+                    <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)", marginBottom: "0.875rem" }}>{cap.body}</p>
+                    <span style={{ display: "inline-block", fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-alloy-light)", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "4px", padding: "2px 8px" }}>
+                      {cap.badge}
+                    </span>
                   </m.div>
                 );
               })}

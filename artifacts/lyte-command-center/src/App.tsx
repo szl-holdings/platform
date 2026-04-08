@@ -81,6 +81,11 @@ const AlloyAgentMonitor = lazy(() => import("@/pages/alloy-agent-monitor"));
 const AlloyExecutionTraces = lazy(() => import("@/pages/alloy-execution-traces"));
 const AlloyGovernance = lazy(() => import("@/pages/alloy-governance"));
 const AlloyIntegrationHealth = lazy(() => import("@/pages/alloy-integration-health"));
+const AlloyGraphCompiler = lazy(() => import("@/pages/alloy-graph-compiler"));
+const AlloyReplayTimeline = lazy(() => import("@/pages/alloy-replay-timeline"));
+const AlloyPolicySim = lazy(() => import("@/pages/alloy-policy-sim"));
+const AlloyAgentHandoffs = lazy(() => import("@/pages/alloy-agent-handoffs"));
+const AlloyTrustReceipts = lazy(() => import("@/pages/alloy-trust-receipts"));
 const EscalationWorkflow = lazy(() => import("@/pages/escalation-workflow"));
 const CommandInboxLegacy = lazy(() => import("@/pages/action-queue"));
 const PowerBiReport = lazy(() => import("@/pages/powerbi-report"));
@@ -181,6 +186,11 @@ function PrivateRouter() {
         <Route path="/alloy/traces" component={AlloyExecutionTraces} />
         <Route path="/alloy/governance" component={AlloyGovernance} />
         <Route path="/alloy/integrations" component={AlloyIntegrationHealth} />
+        <Route path="/alloy/compiler" component={AlloyGraphCompiler} />
+        <Route path="/alloy/replay" component={AlloyReplayTimeline} />
+        <Route path="/alloy/simulate" component={AlloyPolicySim} />
+        <Route path="/alloy/handoffs" component={AlloyAgentHandoffs} />
+        <Route path="/alloy/receipts" component={AlloyTrustReceipts} />
         <Route path="/powerbi" component={PowerBiReport} />
         <Route path="/dashboards" component={DashboardBuilder} />
         <Route path="/apm" component={ApmInstrumentation} />
@@ -225,6 +235,11 @@ const lyteCommands: CommandItem[] = [
   { id: "nav-alloy-actions", label: "Alloy Action Queue", icon: "⚙️", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/actions"); } },
   { id: "nav-alloy-templates", label: "Alloy Workflow Templates", icon: "🔄", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/templates"); } },
   { id: "nav-alloy-gates", label: "Write-Back Gates", icon: "🔒", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/gates"); } },
+  { id: "nav-alloy-compiler", label: "Action Graph Compiler", icon: "🗂️", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/compiler"); } },
+  { id: "nav-alloy-replay", label: "Execution Replay Timeline", icon: "▶️", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/replay"); } },
+  { id: "nav-alloy-simulate", label: "Policy Simulation Console", icon: "🧪", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/simulate"); } },
+  { id: "nav-alloy-handoffs", label: "Agent Handoffs (A2A)", icon: "🔗", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/handoffs"); } },
+  { id: "nav-alloy-receipts", label: "Trust Receipts", icon: "🛡️", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/receipts"); } },
 ];
 
 const lyteShortcuts: KeyboardShortcut[] = [
