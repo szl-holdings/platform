@@ -1,10 +1,15 @@
 # Stephen Lutar
 
-**Founder & CEO — SZL Holdings**
+**Founder & CEO — [SZL Holdings](https://szlholdings.com)**
 
 One holding company. Six platforms. 16 live applications. One founder.
 
 Building governed operational intelligence software for industries where silent failures, invisible risk, and unaccountable AI are not acceptable.
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-stephenlutar-0A66C2?style=flat&logo=linkedin)](https://linkedin.com/in/stephenlutar)
+[![X](https://img.shields.io/badge/X-@szlholdings-000000?style=flat&logo=x)](https://x.com/szlholdings)
+[![Substack](https://img.shields.io/badge/Substack-Signal_Over_Noise-FF6719?style=flat&logo=substack)](https://szlholdings.substack.com)
+[![Medium](https://img.shields.io/badge/Medium-@stephen__38454-000000?style=flat&logo=medium)](https://medium.com/@stephen_38454)
 
 ---
 
@@ -34,7 +39,7 @@ Building governed operational intelligence software for industries where silent 
 | **Aegis** | Defense & Intelligence | Unified SOC command — threat correlation, incident governance, analyst tradecraft tools, and security posture management. |
 | **Terra** | Real Estate Intelligence | Market intelligence, distress engine, deal pipeline, and portfolio analytics for institutional real estate. |
 | **PRISM Counsel** | Legal Matter Command | Deadline tracking, pressure scoring, proof chain export, and privilege-safe document handling. |
-| **Carlota Jo** | Private Advisory | Operational management and strategic coordination for UHNW household environments. |
+| **Carlota Jo** | Private Advisory | Bespoke coordination and operational management for luxury residential and UHNW household environments. |
 
 ---
 
@@ -63,15 +68,10 @@ Building governed operational intelligence software for industries where silent 
 
 ## Principles
 
-**AI governance by design.** Advisory agents cannot execute consequential actions without explicit human confirmation. Enforced at the workflow layer — not just the UI.
-
-**Evidence-backed decisions.** Every AI recommendation includes source citations, confidence scores, and retrieval provenance. No opaque outputs.
-
-**Explicit over implicit.** Platform state is always visible. No silent fallbacks. Failures surface, not hide.
-
-**Shared fabric, domain specialization.** Lyte and Alloy are platform infrastructure. Domain packs are structured applications built on the same foundation. Every improvement compounds across every platform.
-
-**No fake traction.** The products are built. The architecture is real. 16 applications, 446 tables, 1,618+ endpoints — all running in production.
+- **AI governance by design.** Advisory agents cannot execute consequential actions without explicit human confirmation. Enforced at the workflow layer — not just the UI.
+- **Evidence-backed decisions.** Every AI recommendation includes source citations, confidence scores, and retrieval provenance. No opaque outputs.
+- **Explicit over implicit.** Platform state is always visible. No silent fallbacks. Failures surface, not hide.
+- **Shared fabric, domain specialization.** Lyte and Alloy are platform infrastructure. Domain packs are structured applications built on the same foundation. Every improvement compounds across every platform.
 
 ---
 
@@ -96,6 +96,7 @@ HuggingFace Inference · Apollo GraphQL · OIDC/PKCE Auth
 
 **LinkedIn:** [linkedin.com/in/stephenlutar](https://linkedin.com/in/stephenlutar)
 **X:** [@szlholdings](https://x.com/szlholdings)
+**GitHub:** [github.com/szl-holdings](https://github.com/szl-holdings)
 **Website:** [szlholdings.com](https://szlholdings.com)
 
 *Open to design partner conversations, enterprise evaluation, and investment introductions.*
