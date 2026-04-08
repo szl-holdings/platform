@@ -58,6 +58,9 @@ const WhatChanged = lazy(() => import("@/pages/what-changed"));
 const DiligencePrep = lazy(() => import("@/pages/diligence-prep"));
 const ReadinessBoard = lazy(() => import("@/pages/readiness-board"));
 const ApprovalReview = lazy(() => import("@/pages/approval-review"));
+const ReadinessGraph = lazy(() => import("@/pages/readiness-graph"));
+const VendorReliability = lazy(() => import("@/pages/vendor-reliability"));
+const CountdownEngine = lazy(() => import("@/pages/countdown-engine"));
 
 function PageLoader() {
   return (
@@ -119,6 +122,9 @@ function PrivateRouter() {
         <Route path="/diligence-prep" component={DiligencePrep} />
         <Route path="/readiness-board" component={ReadinessBoard} />
         <Route path="/approval-review" component={ApprovalReview} />
+        <Route path="/readiness-graph" component={ReadinessGraph} />
+        <Route path="/vendor-reliability" component={VendorReliability} />
+        <Route path="/countdown-engine" component={CountdownEngine} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

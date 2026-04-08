@@ -8,7 +8,7 @@ import {
   Building2, LayoutDashboard, Eye, Activity,
   BarChart3, Users, FileText, CheckSquare,
   Bell, Menu, X, Briefcase, Map, Globe, TrendingUp, BookOpen,
-  Shield, Layers, Radio, Search, PieChart
+  Shield, Layers, Radio, Search, PieChart, GitBranch, Timer, Wrench
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui";
 import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
@@ -74,6 +74,9 @@ const NAV_SECTIONS: SidebarNavSection[] = [
       { id: "what-changed", href: "/what-changed", label: "What Changed", icon: <Radio className="w-full h-full" /> },
       { id: "diligence-prep", href: "/diligence-prep", label: "Diligence Prep", icon: <Search className="w-full h-full" /> },
       { id: "readiness-board", href: "/readiness-board", label: "Readiness Board", icon: <BarChart3 className="w-full h-full" /> },
+      { id: "readiness-graph", href: "/readiness-graph", label: "Readiness Graph", icon: <GitBranch className="w-full h-full" /> },
+      { id: "countdown-engine", href: "/countdown-engine", label: "Countdown Engine", icon: <Timer className="w-full h-full" /> },
+      { id: "vendor-reliability", href: "/vendor-reliability", label: "Vendor Reliability", icon: <Wrench className="w-full h-full" /> },
       { id: "approval-review", href: "/approval-review", label: "Review & Approval", icon: <Shield className="w-full h-full" /> },
     ],
   },
