@@ -18,9 +18,12 @@ social-media-kit/
 │   ├── carousel-1-szl-ecosystem.pdf   ← "The SZL Ecosystem" (9 slides)
 │   ├── carousel-2-six-lenses.pdf      ← "6 Lenses of Business Observability" (8 slides)
 │   └── carousel-3-noise-to-signal.pdf ← "From Noise to Signal" (7 slides)
+├── linkedin/
+│   ├── linkedin-profile-copy.md       ← Headline, About, Experience, Featured
+│   └── linkedin-launch-posts.md       ← 5 ready-to-post LinkedIn posts
 ├── x-twitter/
 │   ├── x-profile-copy.md              ← Bio, handle, header config
-│   └── launch-tweets.md               ← 10 ready-to-post tweets + 5-tweet thread
+│   └── launch-tweets.md               ← 17 ready-to-post tweets + 5-tweet thread
 ├── medium/
 │   ├── medium-profile-copy.md         ← Publication config, bio, about page
 │   └── medium-article.md              ← Flagship article (~1,500 words)
@@ -35,7 +38,24 @@ social-media-kit/
 
 ## Step-by-Step Upload Instructions
 
-### PLATFORM 1: X (Twitter)
+### PLATFORM 1: LinkedIn
+
+**Time needed:** ~30 minutes
+
+1. **Update your LinkedIn profile** at linkedin.com/in/stephenlutar
+2. **Upload profile photo:** `images/szl-profile-square.png`
+3. **Upload banner:** `images/szl-x-banner.png` (works well as LinkedIn background too)
+4. **Set the headline:** Copy from `linkedin/linkedin-profile-copy.md` → "Headline" field
+5. **Set the About section:** Copy from `linkedin/linkedin-profile-copy.md` → "About Section"
+6. **Update Experience:** Copy from `linkedin/linkedin-profile-copy.md` → "Experience" section
+7. **Add Featured section:** Add links to szlholdings.com, Medium flagship article, and Substack
+8. **Post the announcement:** Open `linkedin/linkedin-launch-posts.md` → Post #1 (pin it)
+9. **Schedule remaining posts:** Posts 2-5, one every 2-3 days over the next 2 weeks
+10. **Upload carousels:** LinkedIn supports native PDF carousel uploads — upload `carousels/*.pdf` as document posts with captions from the carousel projects
+
+---
+
+### PLATFORM 2: X (Twitter)
 
 **Time needed:** ~20 minutes
 
@@ -51,11 +71,11 @@ social-media-kit/
 6. **Set website:** https://szlholdings.com
 7. **Post the launch thread:** Open `x-twitter/launch-tweets.md` → post Tweets 1–5 as a thread (reply to the previous tweet each time)
 8. **Pin the thread:** Go to Tweet 1/5 → click "..." → "Pin to your profile"
-9. **Schedule or post the remaining 5 spotlight tweets** (Tweets 6–10) — suggest spreading over 5 days, one per day
+9. **Schedule the spotlight tweets** (Tweets 6–11) and **authority tweets** (Tweets 12–17) — spread over 2 weeks, one per day
 
 ---
 
-### PLATFORM 2: Medium
+### PLATFORM 3: Medium
 
 **Time needed:** ~30 minutes
 
@@ -73,7 +93,7 @@ social-media-kit/
 
 ---
 
-### PLATFORM 3: Substack
+### PLATFORM 4: Substack
 
 **Time needed:** ~25 minutes
 
@@ -94,7 +114,7 @@ social-media-kit/
 
 ---
 
-### PLATFORM 4: Linktree
+### PLATFORM 5: Linktree
 
 **Time needed:** ~20 minutes
 
@@ -105,7 +125,7 @@ social-media-kit/
 4. **Set the profile name:** SZL Holdings
 5. **Set the intro text:** Copy from `linktree/linktree-layout.md` → "Header Intro Text"
 6. **Add each link in order:** Follow the link list in `linktree/linktree-layout.md` exactly
-   - 11 links total, from "SZL Holdings — The Ecosystem" through "Start a Strategic Conversation"
+   - 12 links total, from "Signal Over Noise" (newsletter) through "Start a Conversation"
    - Use the exact titles and descriptions provided
 7. **Set the theme:** Dark background (closest to `#0a0f14`)
 8. **Set button style:** Outlined with gold/amber accent

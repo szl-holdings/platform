@@ -69,7 +69,7 @@ szlholdings.substack.com
 
 ---
 
-## INDIVIDUAL SPOTLIGHT TWEETS (5 tweets)
+## INDIVIDUAL SPOTLIGHT TWEETS (6 tweets)
 
 ---
 
@@ -134,11 +134,24 @@ szlholdings.com/carlota-jo
 
 ---
 
-## BONUS: Founder Authority Tweets (post after launch week)
+**Tweet 11 — Lyte Intelligence**
+Unpopular opinion: The best enterprise software is invisible.
+
+You should not notice it. You should not think about it. You should not attend training sessions to learn it.
+
+It should surface the right information to the right person at the right time and get out of the way.
+
+That is what Lyte does.
 
 ---
 
-**Tweet 11 — Architecture**
+---
+
+## AUTHORITY & THOUGHT LEADERSHIP TWEETS (6 tweets)
+
+---
+
+**Tweet 12 — Architecture**
 People ask why I built 16 applications as one person.
 
 The real question is: why do most companies need 16 teams to build one?
@@ -149,7 +162,7 @@ One monorepo. One schema. One mind.
 
 ---
 
-**Tweet 12 — AI Governance**
+**Tweet 13 — AI Governance**
 Hot take: Most "AI-powered" enterprise software is just GPT-3.5 in a trench coat.
 
 No source attribution. No confidence scoring. No audit trail. No human-in-the-loop gates.
@@ -160,7 +173,7 @@ Every recommendation is traceable. Every action is auditable. Every gate has a h
 
 ---
 
-**Tweet 13 — Building in Public Proof**
+**Tweet 14 — Building in Public Proof**
 My GitHub contribution graph doesn't have gaps.
 
 446 database tables.
@@ -170,9 +183,11 @@ One TypeScript monorepo.
 
 When someone asks "can one person build an enterprise software company?" — I'm the proof of concept.
 
+github.com/szl-holdings
+
 ---
 
-**Tweet 14 — Substack Promo**
+**Tweet 15 — Substack Promo**
 Started writing "Signal Over Noise" — a biweekly intelligence brief on:
 
 1. Business observability (the 6 Lenses framework)
@@ -182,3 +197,31 @@ Started writing "Signal Over Noise" — a biweekly intelligence brief on:
 No fluff. No vaporware. Signal.
 
 Subscribe free: szlholdings.substack.com
+
+---
+
+**Tweet 16 — PRISM Legal**
+The legal industry spends more on document management than on operational intelligence.
+
+Think about that.
+
+They have invested billions in organizing the artifacts of legal work and almost nothing in understanding the work itself.
+
+PRISM Counsel exists because we think that is backwards.
+
+Deadline intelligence. Evidence proof chains. Matter health scoring.
+
+---
+
+**Tweet 17 — Metrics Proof**
+Metrics from our first year of platform operations:
+
+8.4 min — average signal-to-action time
+62% — approval chain reduction
+98% — handoff success rate
+<2 min — audit reconstruction time
+73% — AI recommendation accuracy at high confidence
+
+These are not projections. They are measurements.
+
+szlholdings.com
