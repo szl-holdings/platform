@@ -117,6 +117,7 @@ import outcomeGraphRouter from "./outcome-graph";
 import atlasRouter from "./atlas-artifacts";
 import helmRouter from "./helm-console";
 import telemetryRouter from "./telemetry";
+import crossAppHandoffsRouter from "./cross-app-handoffs";
 
 const router: IRouter = Router();
 
@@ -439,5 +440,9 @@ router.use(helmRouter);
 
 router.use("/telemetry", _writeLimiter);
 router.use(telemetryRouter);
+
+router.use("/cross-app", _readLimiter);
+router.use("/cross-app", _writeLimiter);
+router.use(crossAppHandoffsRouter);
 
 export default router;

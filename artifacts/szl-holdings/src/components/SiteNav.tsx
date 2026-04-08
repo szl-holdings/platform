@@ -16,6 +16,7 @@ const NAV_ITEMS = [
       { label: "Lyte — Business Observability", href: "/lyte" },
       { label: "Alloy — Execution Fabric", href: "/alloy-fabric" },
       { label: "Architecture", href: "/architecture" },
+      { label: "HELM CONSOLE — Family Command", href: "/helm" },
     ],
   },
   {
@@ -56,6 +57,9 @@ const NAV_ITEMS = [
       { label: "Case Studies", href: "/case-studies" },
       { label: "FAQ", href: "/faq" },
       { label: "Public Roadmap", href: "/roadmap" },
+      { label: "What SZL Relieves", href: "/relief" },
+      { label: "ROI Calculator", href: "/roi" },
+      { label: "Platform Packages", href: "/packages" },
     ],
   },
   {

@@ -59,6 +59,10 @@ const LegalTermsPage = lazy(() => import("@/pages/legal-terms"));
 const AccessibilityPage = lazy(() => import("@/pages/accessibility"));
 const DemoPage = lazy(() => import("@/pages/demo"));
 const PricingPage = lazy(() => import("@/pages/pricing"));
+const HelmConsolePage = lazy(() => import("@/pages/helm-console"));
+const CommercialPackagingPage = lazy(() => import("@/pages/commercial-packaging"));
+const RoiCalculatorPage = lazy(() => import("@/pages/roi-calculator"));
+const ReliefMessagingPage = lazy(() => import("@/pages/relief-messaging"));
 
 // New platform-repositioning pages
 const LytePage = lazy(() => import("@/pages/lyte-page"));
@@ -722,6 +726,20 @@ function App() {
             </Route>
             <Route path="/accessibility">
               <Suspense fallback={<PageLoader />}><AccessibilityPage /></Suspense>
+            </Route>
+
+            {/* ── Cross-app / platform command pages ── */}
+            <Route path="/helm">
+              <Suspense fallback={<PageLoader />}><HelmConsolePage /></Suspense>
+            </Route>
+            <Route path="/packages">
+              <Suspense fallback={<PageLoader />}><CommercialPackagingPage /></Suspense>
+            </Route>
+            <Route path="/roi">
+              <Suspense fallback={<PageLoader />}><RoiCalculatorPage /></Suspense>
+            </Route>
+            <Route path="/relief">
+              <Suspense fallback={<PageLoader />}><ReliefMessagingPage /></Suspense>
             </Route>
 
             {/* ── Public infrastructure pages ── */}
