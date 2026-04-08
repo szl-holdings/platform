@@ -122,7 +122,7 @@ export default function PrismCounselDashboard() {
           <div className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-slate-200">Matter Health</h2>
-              <Link href="/prism-counsel/matters">
+              <Link href="/matters">
                 <span className="text-[10px] text-slate-500 hover:text-[#d4a054] cursor-pointer flex items-center gap-1">
                   View all <ChevronRight className="w-3 h-3" />
                 </span>

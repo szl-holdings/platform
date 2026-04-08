@@ -33,109 +33,109 @@ const NAV: NavSection[] = [
   {
     label: "Daily",
     items: [
-      { label: "Today", href: "/prism-counsel/today", icon: Sun },
-      { label: "What Changed", href: "/prism-counsel/what-changed", icon: Activity },
-      { label: "Morning Brief", href: "/prism-counsel/morning-brief", icon: Bell },
-      { label: "Review", href: "/prism-counsel/review-before-send", icon: Eye },
-      { label: "Sign-Off", href: "/prism-counsel/signoff-queue", icon: CheckSquare },
+      { label: "Today", href: "/today", icon: Sun },
+      { label: "What Changed", href: "/what-changed", icon: Activity },
+      { label: "Morning Brief", href: "/morning-brief", icon: Bell },
+      { label: "Review", href: "/review-before-send", icon: Eye },
+      { label: "Sign-Off", href: "/signoff-queue", icon: CheckSquare },
     ],
   },
   {
     label: "Matters",
     items: [
-      { label: "Dashboard", href: "/prism-counsel", icon: LayoutDashboard },
-      { label: "Matter Desk", href: "/prism-counsel/matters", icon: FolderOpen },
-      { label: "Watchlist", href: "/prism-counsel/watchlist", icon: Eye },
-      { label: "Deadlines", href: "/prism-counsel/deadlines", icon: Clock },
-      { label: "Forecast", href: "/prism-counsel/forecast", icon: TrendingUp },
+      { label: "Dashboard", href: "/", icon: LayoutDashboard },
+      { label: "Matter Desk", href: "/matters", icon: FolderOpen },
+      { label: "Watchlist", href: "/watchlist", icon: Eye },
+      { label: "Deadlines", href: "/deadlines", icon: Clock },
+      { label: "Forecast", href: "/forecast", icon: TrendingUp },
     ],
   },
   {
     label: "Operations",
     items: [
-      { label: "Approvals", href: "/prism-counsel/approvals", icon: Gavel },
-      { label: "Discovery", href: "/prism-counsel/discovery", icon: FileText },
-      { label: "Playbooks", href: "/prism-counsel/playbooks", icon: BookOpen },
-      { label: "Parties", href: "/prism-counsel/parties", icon: Users },
-      { label: "Word Export", href: "/prism-counsel/word-export", icon: Download },
+      { label: "Approvals", href: "/approvals", icon: Gavel },
+      { label: "Discovery", href: "/discovery", icon: FileText },
+      { label: "Playbooks", href: "/playbooks", icon: BookOpen },
+      { label: "Parties", href: "/parties", icon: Users },
+      { label: "Word Export", href: "/word-export", icon: Download },
     ],
   },
   {
     label: "Review Desk",
     items: [
-      { label: "My Review", href: "/prism-counsel/review-desk/my-review", icon: ClipboardCheck },
-      { label: "Review Queue", href: "/prism-counsel/review-desk", icon: ClipboardList },
-      { label: "Metrics", href: "/prism-counsel/review-desk/metrics", icon: BarChart3 },
-      { label: "Admin", href: "/prism-counsel/review-desk/admin", icon: Settings },
+      { label: "My Review", href: "/review-desk/my-review", icon: ClipboardCheck },
+      { label: "Review Queue", href: "/review-desk", icon: ClipboardList },
+      { label: "Metrics", href: "/review-desk/metrics", icon: BarChart3 },
+      { label: "Admin", href: "/review-desk/admin", icon: Settings },
     ],
   },
   {
     label: "Intelligence",
     items: [
-      { label: "Copilot", href: "/prism-counsel/copilot", icon: MessageSquare },
-      { label: "Workbench", href: "/prism-counsel/copilot-workbench", icon: Brain },
-      { label: "Insurer Intel", href: "/prism-counsel/insurer-intel", icon: Building2 },
-      { label: "Venue Intel", href: "/prism-counsel/venue-intel", icon: MapPin },
+      { label: "Copilot", href: "/copilot", icon: MessageSquare },
+      { label: "Workbench", href: "/copilot-workbench", icon: Brain },
+      { label: "Insurer Intel", href: "/insurer-intel", icon: Building2 },
+      { label: "Venue Intel", href: "/venue-intel", icon: MapPin },
     ],
   },
   {
     label: "Section 31",
     items: [
-      { label: "Worldline", href: "/prism-counsel/worldline", icon: Globe },
-      { label: "Pressure Graph", href: "/prism-counsel/pressure-graph", icon: Activity },
-      { label: "Matter Twin", href: "/prism-counsel/matter-twin", icon: Layers },
-      { label: "Proof Chain", href: "/prism-counsel/proof-chain", icon: Shield },
-      { label: "Signal Forge", href: "/prism-counsel/signal-forge", icon: Radio },
-      { label: "Forecast Diff", href: "/prism-counsel/forecast-diff", icon: TrendingUp },
-      { label: "Data Products", href: "/prism-counsel/data-products", icon: BarChart3 },
+      { label: "Worldline", href: "/worldline", icon: Globe },
+      { label: "Pressure Graph", href: "/pressure-graph", icon: Activity },
+      { label: "Matter Twin", href: "/matter-twin", icon: Layers },
+      { label: "Proof Chain", href: "/proof-chain", icon: Shield },
+      { label: "Signal Forge", href: "/signal-forge", icon: Radio },
+      { label: "Forecast Diff", href: "/forecast-diff", icon: TrendingUp },
+      { label: "Data Products", href: "/data-products", icon: BarChart3 },
     ],
   },
   {
     label: "New York",
     defaultCollapsed: true,
     items: [
-      { label: "NY Command", href: "/prism-counsel/ny", icon: Scale },
-      { label: "No-Fault", href: "/prism-counsel/ny/no-fault", icon: AlertTriangle },
-      { label: "Watchlist", href: "/prism-counsel/ny/watchlist", icon: Eye },
-      { label: "Deadlines", href: "/prism-counsel/ny/deadlines", icon: Clock },
-      { label: "Coverage", href: "/prism-counsel/ny/coverage", icon: Shield },
-      { label: "Mediation", href: "/prism-counsel/ny/mediation", icon: Activity },
-      { label: "Insurer Intel", href: "/prism-counsel/ny/insurer-intel", icon: Building2 },
-      { label: "Venue Intel", href: "/prism-counsel/ny/venue-intel", icon: MapPin },
-      { label: "NY Forecast", href: "/prism-counsel/ny/forecast", icon: TrendingUp },
+      { label: "NY Command", href: "/ny", icon: Scale },
+      { label: "No-Fault", href: "/ny/no-fault", icon: AlertTriangle },
+      { label: "Watchlist", href: "/ny/watchlist", icon: Eye },
+      { label: "Deadlines", href: "/ny/deadlines", icon: Clock },
+      { label: "Coverage", href: "/ny/coverage", icon: Shield },
+      { label: "Mediation", href: "/ny/mediation", icon: Activity },
+      { label: "Insurer Intel", href: "/ny/insurer-intel", icon: Building2 },
+      { label: "Venue Intel", href: "/ny/venue-intel", icon: MapPin },
+      { label: "NY Forecast", href: "/ny/forecast", icon: TrendingUp },
     ],
   },
   {
     label: "Portfolio",
     defaultCollapsed: true,
     items: [
-      { label: "Partner View", href: "/prism-counsel/portfolio", icon: BarChart3 },
-      { label: "Pressure Board", href: "/prism-counsel/portfolio/pressure-board", icon: Gauge },
-      { label: "Friction Board", href: "/prism-counsel/portfolio/friction-board", icon: Waves },
-      { label: "Review Backlog", href: "/prism-counsel/portfolio/review-backlog", icon: ClipboardList },
-      { label: "Approval Bottleneck", href: "/prism-counsel/portfolio/approval-bottleneck", icon: CheckSquare },
-      { label: "Recovery/Lien", href: "/prism-counsel/portfolio/recovery-lien", icon: DollarSign },
-      { label: "Insurer Pressure", href: "/prism-counsel/portfolio/insurer-pressure", icon: Building2 },
-      { label: "Team Throughput", href: "/prism-counsel/portfolio/throughput", icon: Users },
-      { label: "Portfolio Forecast", href: "/prism-counsel/portfolio/forecast", icon: TrendingUp },
-      { label: "Partner Life OS", href: "/prism-counsel/portfolio/partner-view", icon: Scale },
+      { label: "Partner View", href: "/portfolio", icon: BarChart3 },
+      { label: "Pressure Board", href: "/portfolio/pressure-board", icon: Gauge },
+      { label: "Friction Board", href: "/portfolio/friction-board", icon: Waves },
+      { label: "Review Backlog", href: "/portfolio/review-backlog", icon: ClipboardList },
+      { label: "Approval Bottleneck", href: "/portfolio/approval-bottleneck", icon: CheckSquare },
+      { label: "Recovery/Lien", href: "/portfolio/recovery-lien", icon: DollarSign },
+      { label: "Insurer Pressure", href: "/portfolio/insurer-pressure", icon: Building2 },
+      { label: "Team Throughput", href: "/portfolio/throughput", icon: Users },
+      { label: "Portfolio Forecast", href: "/portfolio/forecast", icon: TrendingUp },
+      { label: "Partner Life OS", href: "/portfolio/partner-view", icon: Scale },
     ],
   },
   {
     label: "System",
     defaultCollapsed: true,
     items: [
-      { label: "Recovery Ops", href: "/prism-counsel/recovery-ops", icon: ShieldAlert },
-      { label: "Settlement Blockers", href: "/prism-counsel/settlement-blockers", icon: XCircle },
-      { label: "Connectors", href: "/prism-counsel/connectors", icon: Plug },
-      { label: "System Health", href: "/prism-counsel/admin/health", icon: Server },
-      { label: "M365 Integration", href: "/prism-counsel/admin/m365", icon: Link2 },
-      { label: "Purview Bridge", href: "/prism-counsel/admin/purview", icon: Shield },
-      { label: "Quality Gates", href: "/prism-counsel/admin/quality", icon: BarChart3 },
-      { label: "Model Costs", href: "/prism-counsel/admin/model-costs", icon: DollarSign },
-      { label: "Ops Diagnostics", href: "/prism-counsel/admin/ops-diagnostics", icon: Activity },
-      { label: "Replays", href: "/prism-counsel/admin/replays", icon: RefreshCw },
-      { label: "Admin", href: "/prism-counsel/admin", icon: Settings },
+      { label: "Recovery Ops", href: "/recovery-ops", icon: ShieldAlert },
+      { label: "Settlement Blockers", href: "/settlement-blockers", icon: XCircle },
+      { label: "Connectors", href: "/connectors", icon: Plug },
+      { label: "System Health", href: "/admin/health", icon: Server },
+      { label: "M365 Integration", href: "/admin/m365", icon: Link2 },
+      { label: "Purview Bridge", href: "/admin/purview", icon: Shield },
+      { label: "Quality Gates", href: "/admin/quality", icon: BarChart3 },
+      { label: "Model Costs", href: "/admin/model-costs", icon: DollarSign },
+      { label: "Ops Diagnostics", href: "/admin/ops-diagnostics", icon: Activity },
+      { label: "Replays", href: "/admin/replays", icon: RefreshCw },
+      { label: "Admin", href: "/admin", icon: Settings },
     ],
   },
 ];
@@ -144,7 +144,7 @@ function NavSectionGroup({ section, collapsed, location }: { section: NavSection
   const [open, setOpen] = useState(!section.defaultCollapsed);
 
   const anyActive = section.items.some(item =>
-    location === item.href || (item.href !== "/prism-counsel" && location.startsWith(item.href + "/"))
+    location === item.href || (item.href !== "/" && location.startsWith(item.href + "/"))
   );
 
   useEffect(() => {
@@ -164,8 +164,8 @@ function NavSectionGroup({ section, collapsed, location }: { section: NavSection
       )}
       {(open || collapsed) && section.items.map((item) => {
         const isActive = location === item.href ||
-          (item.href !== "/prism-counsel" && location.startsWith(item.href + "/")) ||
-          (item.href === "/prism-counsel" && (location === "/prism-counsel" || location === "/prism-counsel/"));
+          (item.href !== "/" && location.startsWith(item.href + "/")) ||
+          (item.href === "/" && (location === "/" || location === "/"));
         const Icon = item.icon;
         return (
           <Link key={item.href} href={item.href}>
@@ -387,8 +387,8 @@ export function PrismCounselShell({ children }: { children: React.ReactNode }) {
 }
 
 function getBreadcrumb(location: string): string {
-  if (location === "/prism-counsel" || location === "/prism-counsel/") return "Dashboard";
-  const path = location.replace("/prism-counsel/", "");
+  if (location === "/" || location === "/") return "Dashboard";
+  const path = location.replace("/", "");
   const breadcrumbs: Record<string, string> = {
     today: "Today",
     matters: "Matters",

@@ -4,17 +4,17 @@ import { useNyMatters, useNyHealth } from "../../hooks/use-ny-api";
 import { NY_SIGNAL_FAMILIES } from "../../data/ny-demo-matters";
 
 const MODULES = [
-  { label: "NY Command Dashboard", href: "/prism-counsel/ny/dashboard", icon: TrendingUp, desc: "10+ widgets: deadline watchlist, demand readiness, mediation windows, reserve tracker" },
-  { label: "Deadline Watchlist", href: "/prism-counsel/ny/watchlist", icon: AlertTriangle, desc: "Deadline breach risk queue with no-fault clock intelligence" },
-  { label: "Clock & Deadline Monitor", href: "/prism-counsel/ny/deadlines", icon: Clock, desc: "All NY-specific statutory clocks with breach detection" },
-  { label: "No-Fault Intelligence", href: "/prism-counsel/ny/no-fault", icon: FileText, desc: "No-fault claims, bill cycles, EUO/IMC verification requests, arbitration status" },
-  { label: "Coverage & Disclaimer", href: "/prism-counsel/ny/coverage", icon: ShieldOff, desc: "Disclaimer timeliness, coverage positions, denial patterns, appeal tracking" },
-  { label: "Mediation Command", href: "/prism-counsel/ny/mediation", icon: Activity, desc: "Mediation readiness, conversion probability, insurer behavior, session management" },
-  { label: "Forecast Engine", href: "/prism-counsel/ny/forecast", icon: TrendingUp, desc: "8 NY forecast types with drivers, confidence, weekly delta, and next-best-action" },
-  { label: "Insurer Intel", href: "/prism-counsel/ny/insurer-intel", icon: Building2, desc: "Insurer profiles, adjuster behavior, reserve patterns, communication cadence" },
-  { label: "Venue / Part Intel", href: "/prism-counsel/ny/venue-intel", icon: MapPin, desc: "County courts, parts, judge rules, ADR patterns, venue velocity scoring" },
-  { label: "Copilot NY", href: "/prism-counsel/ny/copilot", icon: Shield, desc: "Outlook/Teams/SharePoint-native workflow surfaces and connector definitions" },
-  { label: "Trust & Governance", href: "/prism-counsel/ny/trust", icon: Shield, desc: "AI review policy, approval requirements, privilege controls, audit model" },
+  { label: "NY Command Dashboard", href: "/ny/dashboard", icon: TrendingUp, desc: "10+ widgets: deadline watchlist, demand readiness, mediation windows, reserve tracker" },
+  { label: "Deadline Watchlist", href: "/ny/watchlist", icon: AlertTriangle, desc: "Deadline breach risk queue with no-fault clock intelligence" },
+  { label: "Clock & Deadline Monitor", href: "/ny/deadlines", icon: Clock, desc: "All NY-specific statutory clocks with breach detection" },
+  { label: "No-Fault Intelligence", href: "/ny/no-fault", icon: FileText, desc: "No-fault claims, bill cycles, EUO/IMC verification requests, arbitration status" },
+  { label: "Coverage & Disclaimer", href: "/ny/coverage", icon: ShieldOff, desc: "Disclaimer timeliness, coverage positions, denial patterns, appeal tracking" },
+  { label: "Mediation Command", href: "/ny/mediation", icon: Activity, desc: "Mediation readiness, conversion probability, insurer behavior, session management" },
+  { label: "Forecast Engine", href: "/ny/forecast", icon: TrendingUp, desc: "8 NY forecast types with drivers, confidence, weekly delta, and next-best-action" },
+  { label: "Insurer Intel", href: "/ny/insurer-intel", icon: Building2, desc: "Insurer profiles, adjuster behavior, reserve patterns, communication cadence" },
+  { label: "Venue / Part Intel", href: "/ny/venue-intel", icon: MapPin, desc: "County courts, parts, judge rules, ADR patterns, venue velocity scoring" },
+  { label: "Copilot NY", href: "/ny/copilot", icon: Shield, desc: "Outlook/Teams/SharePoint-native workflow surfaces and connector definitions" },
+  { label: "Trust & Governance", href: "/ny/trust", icon: Shield, desc: "AI review policy, approval requirements, privilege controls, audit model" },
 ];
 
 const MATTER_TYPE_LABEL: Record<string, string> = {
@@ -46,7 +46,7 @@ export default function NyOverviewPage() {
           </div>
           <p className="text-xs text-slate-500">NY-specific signal model, clock intelligence, insurer/venue intel, and 8-type forecast engine</p>
         </div>
-        <Link href="/prism-counsel/ny/dashboard">
+        <Link href="/ny/dashboard">
           <button className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs bg-[#d4a054]/10 border border-[#d4a054]/30 text-[#d4a054] hover:bg-[#d4a054]/20 transition-colors">
             Open Command Dashboard <ArrowRight className="w-3.5 h-3.5" />
           </button>

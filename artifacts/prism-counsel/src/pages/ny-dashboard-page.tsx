@@ -49,7 +49,7 @@ export default function NYDashboardPage() {
           <div className="rounded-lg border border-white/[0.06] p-5" style={{ background: "#0c1220" }}>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-slate-200">Priority Watchlist</h2>
-              <Link href="/prism-counsel/watchlist">
+              <Link href="/watchlist">
                 <span className="text-[10px] text-[#4a90b8] hover:text-[#5aa0c8] cursor-pointer flex items-center gap-1">
                   View all <ArrowRight className="w-2.5 h-2.5" />
                 </span>
@@ -148,7 +148,7 @@ export default function NYDashboardPage() {
           <div className="rounded-lg border border-white/[0.06] p-5" style={{ background: "#0c1220" }}>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-slate-200">No-Fault Claims</h2>
-              <Link href="/prism-counsel/no-fault">
+              <Link href="/no-fault">
                 <span className="text-[10px] text-[#4a90b8] hover:text-[#5aa0c8] cursor-pointer flex items-center gap-1">
                   Details <ArrowRight className="w-2.5 h-2.5" />
                 </span>
@@ -178,7 +178,7 @@ export default function NYDashboardPage() {
           <div className="rounded-lg border border-white/[0.06] p-5" style={{ background: "#0c1220" }}>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-slate-200">Carrier Intelligence</h2>
-              <Link href="/prism-counsel/insurer-intel">
+              <Link href="/insurer-intel">
                 <span className="text-[10px] text-[#4a90b8] hover:text-[#5aa0c8] cursor-pointer flex items-center gap-1">
                   Full profiles <ArrowRight className="w-2.5 h-2.5" />
                 </span>
@@ -217,7 +217,7 @@ export default function NYDashboardPage() {
           <div className="rounded-lg border border-white/[0.06] p-5" style={{ background: "#0c1220" }}>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-slate-200">NY Venue Snapshot</h2>
-              <Link href="/prism-counsel/venue-intel">
+              <Link href="/venue-intel">
                 <span className="text-[10px] text-[#4a90b8] hover:text-[#5aa0c8] cursor-pointer flex items-center gap-1">
                   All venues <ArrowRight className="w-2.5 h-2.5" />
                 </span>

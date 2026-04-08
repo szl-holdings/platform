@@ -193,7 +193,7 @@ export default function RecoveryOpsPage() {
           </div>
           <p className="text-xs text-slate-500 mt-0.5">Firm-wide lien tracking, recovery lifecycle, and settlement blocker intelligence</p>
         </div>
-        <Link href="/prism-counsel/settlement-blockers">
+        <Link href="/settlement-blockers">
           <button className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-[#d4a054]/10 text-[#d4a054] border border-[#d4a054]/20 hover:bg-[#d4a054]/20 transition-colors">
             <Layers className="w-3.5 h-3.5" />
             Settlement Blockers

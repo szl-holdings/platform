@@ -84,7 +84,7 @@ function DimensionCard({ dim, liveData }: { dim: typeof DIMENSIONS[number]; live
 }
 
 export default function PressureGraphPage() {
-  const [, params] = useRoute("/prism-counsel/matters/:id/pressure");
+  const [, params] = useRoute("/matters/:id/pressure");
   const matterId = parseInt(params?.id ?? "0");
 
   const { data: pressureData, isLoading } = useQuery({

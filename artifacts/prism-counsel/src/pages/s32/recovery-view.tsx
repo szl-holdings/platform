@@ -108,7 +108,7 @@ export default function RecoveryView() {
           </div>
           <p className="text-[11px] text-slate-500 mt-0.5">Your recovery items — unresolved, stale, awaiting response, settlement blockers</p>
         </div>
-        <Link href="/prism-counsel/recovery-ops">
+        <Link href="/recovery-ops">
           <button className="flex items-center gap-1 px-2 py-1 rounded text-[10px] text-slate-500 border border-white/[0.06] hover:text-slate-300 hover:border-white/[0.12] transition-colors">
             Firm View <ChevronRight className="w-3 h-3" />
           </button>

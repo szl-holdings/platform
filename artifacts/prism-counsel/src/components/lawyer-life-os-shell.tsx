@@ -11,78 +11,78 @@ import {
 import { cn } from "@/lib/utils";
 
 const TOP_MODES = [
-  { key: "today", label: "Today", href: "/prism-counsel/today", icon: Sun, accent: "#d4a054" },
-  { key: "matter-desk", label: "Matter Desk", href: "/prism-counsel/matters", icon: FolderOpen, accent: "#4a90b8" },
-  { key: "prep", label: "Prep", href: "/prism-counsel/prep", icon: BookOpen, accent: "#8b7ac8" },
-  { key: "review", label: "Review", href: "/prism-counsel/review-before-send", icon: Eye, accent: "#c45a4a" },
-  { key: "signoff", label: "Sign-Off", href: "/prism-counsel/signoff-queue", icon: CheckSquare, accent: "#4a90b8" },
-  { key: "ops", label: "Ops", href: "/prism-counsel/ops-lite", icon: Settings2, accent: "#6b7280" },
+  { key: "today", label: "Today", href: "/today", icon: Sun, accent: "#d4a054" },
+  { key: "matter-desk", label: "Matter Desk", href: "/matters", icon: FolderOpen, accent: "#4a90b8" },
+  { key: "prep", label: "Prep", href: "/prep", icon: BookOpen, accent: "#8b7ac8" },
+  { key: "review", label: "Review", href: "/review-before-send", icon: Eye, accent: "#c45a4a" },
+  { key: "signoff", label: "Sign-Off", href: "/signoff-queue", icon: CheckSquare, accent: "#4a90b8" },
+  { key: "ops", label: "Ops", href: "/ops-lite", icon: Settings2, accent: "#6b7280" },
 ];
 
 const LEFT_SECTIONS = [
   {
     label: "My Matters",
     items: [
-      { label: "All Matters", href: "/prism-counsel/matters", icon: FolderOpen },
-      { label: "High Pressure", href: "/prism-counsel/matters?filter=high-pressure", icon: AlertTriangle },
-      { label: "Quiet Risk", href: "/prism-counsel/quiet-risk", icon: Eye },
-      { label: "Ready to Move", href: "/prism-counsel/matters?filter=ready", icon: Zap },
-      { label: "Needs Evidence", href: "/prism-counsel/matters?filter=missing-evidence", icon: FileText },
+      { label: "All Matters", href: "/matters", icon: FolderOpen },
+      { label: "High Pressure", href: "/matters?filter=high-pressure", icon: AlertTriangle },
+      { label: "Quiet Risk", href: "/quiet-risk", icon: Eye },
+      { label: "Ready to Move", href: "/matters?filter=ready", icon: Zap },
+      { label: "Needs Evidence", href: "/matters?filter=missing-evidence", icon: FileText },
     ],
   },
   {
     label: "Named Workflows",
     items: [
-      { label: "Open My Day", href: "/prism-counsel/workflows/open-my-day", icon: Sun },
-      { label: "Prep a Demand", href: "/prism-counsel/workflows/prep-demand", icon: BookOpen },
-      { label: "Prep for Mediation", href: "/prism-counsel/workflows/prep-mediation", icon: MessageSquare },
-      { label: "Review Carrier Comms", href: "/prism-counsel/workflows/review-carrier-comms", icon: Building2 },
-      { label: "What's Blocking?", href: "/prism-counsel/workflows/blocking", icon: AlertTriangle },
-      { label: "Clear Review Queue", href: "/prism-counsel/workflows/clear-review", icon: CheckSquare },
+      { label: "Open My Day", href: "/workflows/open-my-day", icon: Sun },
+      { label: "Prep a Demand", href: "/workflows/prep-demand", icon: BookOpen },
+      { label: "Prep for Mediation", href: "/workflows/prep-mediation", icon: MessageSquare },
+      { label: "Review Carrier Comms", href: "/workflows/review-carrier-comms", icon: Building2 },
+      { label: "What's Blocking?", href: "/workflows/blocking", icon: AlertTriangle },
+      { label: "Clear Review Queue", href: "/workflows/clear-review", icon: CheckSquare },
     ],
   },
   {
     label: "Intelligence",
     items: [
-      { label: "Workbench", href: "/prism-counsel/copilot-workbench", icon: Brain },
-      { label: "Insurer Intel", href: "/prism-counsel/insurer-intel", icon: Building2 },
-      { label: "Forecast", href: "/prism-counsel/forecast", icon: TrendingUp },
-      { label: "Deadlines", href: "/prism-counsel/deadlines", icon: Clock },
+      { label: "Workbench", href: "/copilot-workbench", icon: Brain },
+      { label: "Insurer Intel", href: "/insurer-intel", icon: Building2 },
+      { label: "Forecast", href: "/forecast", icon: TrendingUp },
+      { label: "Deadlines", href: "/deadlines", icon: Clock },
     ],
   },
   {
     label: "Section 31",
     items: [
-      { label: "Worldline", href: "/prism-counsel/worldline", icon: Globe },
-      { label: "Pressure Graph", href: "/prism-counsel/pressure-graph", icon: Activity },
-      { label: "Matter Twin", href: "/prism-counsel/matter-twin", icon: Layers },
-      { label: "Proof Chain", href: "/prism-counsel/proof-chain", icon: Shield },
-      { label: "Forecast Diff", href: "/prism-counsel/forecast-diff", icon: BarChart3 },
+      { label: "Worldline", href: "/worldline", icon: Globe },
+      { label: "Pressure Graph", href: "/pressure-graph", icon: Activity },
+      { label: "Matter Twin", href: "/matter-twin", icon: Layers },
+      { label: "Proof Chain", href: "/proof-chain", icon: Shield },
+      { label: "Forecast Diff", href: "/forecast-diff", icon: BarChart3 },
     ],
   },
   {
     label: "Recovery & Liens",
     items: [
-      { label: "Recovery View", href: "/prism-counsel/recovery-view", icon: ShieldAlert },
-      { label: "Settlement Blockers", href: "/prism-counsel/settlement-blockers-view", icon: XCircle },
+      { label: "Recovery View", href: "/recovery-view", icon: ShieldAlert },
+      { label: "Settlement Blockers", href: "/settlement-blockers-view", icon: XCircle },
     ],
   },
   {
     label: "NY Practice",
     items: [
-      { label: "NY Command", href: "/prism-counsel/ny", icon: Scale },
-      { label: "No-Fault", href: "/prism-counsel/no-fault", icon: AlertTriangle },
+      { label: "NY Command", href: "/ny", icon: Scale },
+      { label: "No-Fault", href: "/no-fault", icon: AlertTriangle },
     ],
   },
   {
     label: "Admin Only",
     adminOnly: true,
     items: [
-      { label: "Connectors", href: "/prism-counsel/connectors", icon: Plug },
-      { label: "System Health", href: "/prism-counsel/ops-lite", icon: Server },
-      { label: "Purview Bridge", href: "/prism-counsel/purview-bridge", icon: Shield },
-      { label: "Model Mesh", href: "/prism-counsel/model-mesh", icon: Zap },
-      { label: "Admin", href: "/prism-counsel/admin", icon: Settings2 },
+      { label: "Connectors", href: "/connectors", icon: Plug },
+      { label: "System Health", href: "/ops-lite", icon: Server },
+      { label: "Purview Bridge", href: "/purview-bridge", icon: Shield },
+      { label: "Model Mesh", href: "/model-mesh", icon: Zap },
+      { label: "Admin", href: "/admin", icon: Settings2 },
     ],
   },
 ];
@@ -94,12 +94,12 @@ export function LawyerLifeOSShell({ children }: { children: React.ReactNode }) {
 
   const activeMode = TOP_MODES.find(m =>
     location === m.href || location.startsWith(m.href.split("?")[0] + "/") ||
-    (m.key === "matter-desk" && location.startsWith("/prism-counsel/matter-desk")) ||
-    (m.key === "today" && location === "/prism-counsel/today") ||
-    (m.key === "prep" && location.startsWith("/prism-counsel/prep")) ||
-    (m.key === "signoff" && location.startsWith("/prism-counsel/signoff")) ||
-    (m.key === "review" && location.startsWith("/prism-counsel/review")) ||
-    (m.key === "ops" && (location.startsWith("/prism-counsel/ops") || location.startsWith("/prism-counsel/connectors")))
+    (m.key === "matter-desk" && location.startsWith("/matter-desk")) ||
+    (m.key === "today" && location === "/today") ||
+    (m.key === "prep" && location.startsWith("/prep")) ||
+    (m.key === "signoff" && location.startsWith("/signoff")) ||
+    (m.key === "review" && location.startsWith("/review")) ||
+    (m.key === "ops" && (location.startsWith("/ops") || location.startsWith("/connectors")))
   );
 
   return (
@@ -137,13 +137,13 @@ export function LawyerLifeOSShell({ children }: { children: React.ReactNode }) {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link href="/prism-counsel/morning-brief">
+          <Link href="/morning-brief">
             <div className="flex items-center gap-1 px-2 py-1 rounded text-[10px] text-slate-400 hover:text-slate-200 hover:bg-white/[0.04] cursor-pointer transition-colors">
               <Bell className="w-3 h-3" />
               <span>Morning Brief</span>
             </div>
           </Link>
-          <Link href="/prism-counsel/word-export">
+          <Link href="/word-export">
             <div className="flex items-center gap-1 px-2 py-1 rounded text-[10px] text-slate-400 hover:text-slate-200 hover:bg-white/[0.04] cursor-pointer transition-colors">
               <Download className="w-3 h-3" />
               <span>Exports</span>
@@ -182,7 +182,7 @@ export function LawyerLifeOSShell({ children }: { children: React.ReactNode }) {
                   </div>
                 )}
                 {section.items.map(item => {
-                  const isActive = location === item.href || (item.href.split("?")[0] !== "/prism-counsel/matters" && location.startsWith(item.href.split("?")[0]));
+                  const isActive = location === item.href || (item.href.split("?")[0] !== "/matters" && location.startsWith(item.href.split("?")[0]));
                   const Icon = item.icon;
                   return (
                     <Link key={item.href} href={item.href}>
@@ -231,7 +231,7 @@ export function LawyerLifeOSShell({ children }: { children: React.ReactNode }) {
         </main>
 
         <aside className="flex-shrink-0 w-[200px] border-l border-white/[0.06] overflow-y-auto p-3 space-y-4" style={{ background: "#0a0f18" }}>
-          <RightRailSection title="What Changed" icon={<Activity className="w-3 h-3 text-[#4a90b8]" />} href="/prism-counsel/what-changed">
+          <RightRailSection title="What Changed" icon={<Activity className="w-3 h-3 text-[#4a90b8]" />} href="/what-changed">
             <div className="space-y-1.5">
               {[
                 { matter: "Rodriguez v. Natl General", change: "Reserve increase received", time: "2h ago" },
@@ -247,7 +247,7 @@ export function LawyerLifeOSShell({ children }: { children: React.ReactNode }) {
             </div>
           </RightRailSection>
 
-          <RightRailSection title="Deadlines at Risk" icon={<Clock className="w-3 h-3 text-[#c45a4a]" />} href="/prism-counsel/deadlines">
+          <RightRailSection title="Deadlines at Risk" icon={<Clock className="w-3 h-3 text-[#c45a4a]" />} href="/deadlines">
             <div className="space-y-1.5">
               {[
                 { title: "Interrogatories — Rodriguez", days: 2, level: "critical" },
@@ -264,7 +264,7 @@ export function LawyerLifeOSShell({ children }: { children: React.ReactNode }) {
             </div>
           </RightRailSection>
 
-          <RightRailSection title="Waiting on Others" icon={<Users className="w-3 h-3 text-[#8b7ac8]" />} href="/prism-counsel/today">
+          <RightRailSection title="Waiting on Others" icon={<Users className="w-3 h-3 text-[#8b7ac8]" />} href="/today">
             <div className="space-y-1.5">
               {[
                 { who: "National General", what: "Demand response", days: 18 },
@@ -278,7 +278,7 @@ export function LawyerLifeOSShell({ children }: { children: React.ReactNode }) {
             </div>
           </RightRailSection>
 
-          <RightRailSection title="Pending Approvals" icon={<CheckSquare className="w-3 h-3 text-[#d4a054]" />} href="/prism-counsel/signoff-queue">
+          <RightRailSection title="Pending Approvals" icon={<CheckSquare className="w-3 h-3 text-[#d4a054]" />} href="/signoff-queue">
             <div className="space-y-1.5">
               {[
                 { title: "Chronology export — Rodriguez", type: "Sign-Off" },

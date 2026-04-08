@@ -27,10 +27,10 @@ const CLOSE_TO_MOVEMENT = [
 ];
 
 const BACKLOG_HOTSPOTS = [
-  { label: "Pending Partner Approvals", count: 4, urgency: "critical", color: "#c45a4a", href: "/prism-counsel/portfolio/approval-bottleneck" },
-  { label: "Review Items Blocking Export", count: 5, urgency: "high", color: "#c8953c", href: "/prism-counsel/portfolio/review-backlog" },
-  { label: "Critical Lien Issues", count: 3, urgency: "high", color: "#c45a4a", href: "/prism-counsel/portfolio/recovery-lien" },
-  { label: "Approval Lag Decisions", count: 2, urgency: "critical", color: "#c45a4a", href: "/prism-counsel/portfolio/approval-bottleneck" },
+  { label: "Pending Partner Approvals", count: 4, urgency: "critical", color: "#c45a4a", href: "/portfolio/approval-bottleneck" },
+  { label: "Review Items Blocking Export", count: 5, urgency: "high", color: "#c8953c", href: "/portfolio/review-backlog" },
+  { label: "Critical Lien Issues", count: 3, urgency: "high", color: "#c45a4a", href: "/portfolio/recovery-lien" },
+  { label: "Approval Lag Decisions", count: 2, urgency: "critical", color: "#c45a4a", href: "/portfolio/approval-bottleneck" },
 ];
 
 const INTERVENTION_LEVERAGE = [
@@ -66,10 +66,10 @@ export default function PartnerLifeOsPage() {
 
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: "Active Matters", value: PARTNER_CONTEXT.totalMatters, color: "#d4a054", href: "/prism-counsel/portfolio" },
-          { label: "Pending Approvals", value: PARTNER_CONTEXT.pendingApprovals, color: "#c45a4a", href: "/prism-counsel/portfolio/approval-bottleneck" },
-          { label: "Close to Movement", value: CLOSE_TO_MOVEMENT.length, color: "#4a90b8", href: "/prism-counsel/portfolio/movement-opportunity" },
-          { label: "Slipping Quietly", value: SLIPPING_MATTERS.length, color: "#8b7ac8", href: "/prism-counsel/portfolio/quiet-risk" },
+          { label: "Active Matters", value: PARTNER_CONTEXT.totalMatters, color: "#d4a054", href: "/portfolio" },
+          { label: "Pending Approvals", value: PARTNER_CONTEXT.pendingApprovals, color: "#c45a4a", href: "/portfolio/approval-bottleneck" },
+          { label: "Close to Movement", value: CLOSE_TO_MOVEMENT.length, color: "#4a90b8", href: "/portfolio/movement-opportunity" },
+          { label: "Slipping Quietly", value: SLIPPING_MATTERS.length, color: "#8b7ac8", href: "/portfolio/quiet-risk" },
         ].map(s => (
           <Link key={s.label} href={s.href}>
             <div className="rounded-lg border border-white/[0.06] p-3 hover:border-white/[0.10] cursor-pointer transition-colors" style={{ background: "#0c1220" }}>
@@ -87,7 +87,7 @@ export default function PartnerLifeOsPage() {
               <AlertTriangle className="w-4 h-4 text-[#c45a4a]" />
               <h3 className="text-sm font-semibold text-slate-200">Top Pressure Matters</h3>
             </div>
-            <Link href="/prism-counsel/portfolio/pressure-board">
+            <Link href="/portfolio/pressure-board">
               <span className="text-[10px] text-slate-500 hover:text-[#d4a054] cursor-pointer flex items-center gap-1">All <ChevronRight className="w-3 h-3" /></span>
             </Link>
           </div>
@@ -112,7 +112,7 @@ export default function PartnerLifeOsPage() {
               <Zap className="w-4 h-4 text-[#4a90b8]" />
               <h3 className="text-sm font-semibold text-slate-200">Close to Movement</h3>
             </div>
-            <Link href="/prism-counsel/portfolio/movement-opportunity">
+            <Link href="/portfolio/movement-opportunity">
               <span className="text-[10px] text-slate-500 hover:text-[#d4a054] cursor-pointer flex items-center gap-1">All <ChevronRight className="w-3 h-3" /></span>
             </Link>
           </div>
@@ -138,7 +138,7 @@ export default function PartnerLifeOsPage() {
                 <TrendingDown className="w-4 h-4 text-[#8b7ac8]" />
                 <h3 className="text-sm font-semibold text-slate-200">Slipping Matters</h3>
               </div>
-              <Link href="/prism-counsel/portfolio/quiet-risk">
+              <Link href="/portfolio/quiet-risk">
                 <span className="text-[10px] text-slate-500 hover:text-[#d4a054] cursor-pointer flex items-center gap-1">All <ChevronRight className="w-3 h-3" /></span>
               </Link>
             </div>

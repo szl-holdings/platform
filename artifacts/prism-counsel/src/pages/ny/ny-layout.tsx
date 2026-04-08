@@ -6,18 +6,18 @@ import {
 import { cn } from "@/lib/utils";
 
 const NY_NAV = [
-  { label: "Overview", href: "/prism-counsel/ny", icon: Scale },
-  { label: "Dashboard", href: "/prism-counsel/ny/dashboard", icon: LayoutDashboard },
-  { label: "Watchlist", href: "/prism-counsel/ny/watchlist", icon: AlertTriangle },
-  { label: "Deadlines", href: "/prism-counsel/ny/deadlines", icon: Clock },
-  { label: "No-Fault", href: "/prism-counsel/ny/no-fault", icon: FileText },
-  { label: "Coverage", href: "/prism-counsel/ny/coverage", icon: ShieldOff },
-  { label: "Mediation", href: "/prism-counsel/ny/mediation", icon: Activity },
-  { label: "Forecast", href: "/prism-counsel/ny/forecast", icon: TrendingUp },
-  { label: "Insurer Intel", href: "/prism-counsel/ny/insurer-intel", icon: Building2 },
-  { label: "Venue Intel", href: "/prism-counsel/ny/venue-intel", icon: MapPin },
-  { label: "Copilot", href: "/prism-counsel/ny/copilot", icon: MessageSquare },
-  { label: "Trust", href: "/prism-counsel/ny/trust", icon: Shield },
+  { label: "Overview", href: "/ny", icon: Scale },
+  { label: "Dashboard", href: "/ny/dashboard", icon: LayoutDashboard },
+  { label: "Watchlist", href: "/ny/watchlist", icon: AlertTriangle },
+  { label: "Deadlines", href: "/ny/deadlines", icon: Clock },
+  { label: "No-Fault", href: "/ny/no-fault", icon: FileText },
+  { label: "Coverage", href: "/ny/coverage", icon: ShieldOff },
+  { label: "Mediation", href: "/ny/mediation", icon: Activity },
+  { label: "Forecast", href: "/ny/forecast", icon: TrendingUp },
+  { label: "Insurer Intel", href: "/ny/insurer-intel", icon: Building2 },
+  { label: "Venue Intel", href: "/ny/venue-intel", icon: MapPin },
+  { label: "Copilot", href: "/ny/copilot", icon: MessageSquare },
+  { label: "Trust", href: "/ny/trust", icon: Shield },
 ];
 
 export function NyLayout({ children }: { children: React.ReactNode }) {
@@ -27,7 +27,7 @@ export function NyLayout({ children }: { children: React.ReactNode }) {
     <div className="flex h-screen" style={{ background: "#080c14" }}>
       <aside className="w-[200px] flex flex-col border-r border-white/[0.06]" style={{ background: "#0a0f18" }}>
         <div className="px-3 py-3 border-b border-white/[0.06]">
-          <Link href="/prism-counsel">
+          <Link href="/">
             <div className="flex items-center gap-1.5 text-[10px] text-slate-500 hover:text-slate-400 cursor-pointer mb-2">
               <ChevronLeft className="w-3 h-3" /> PRISM Counsel
             </div>
@@ -44,7 +44,7 @@ export function NyLayout({ children }: { children: React.ReactNode }) {
         </div>
         <nav className="flex-1 overflow-y-auto py-2">
           {NY_NAV.map((item) => {
-            const isActive = location === item.href || (item.href !== "/prism-counsel/ny" && location.startsWith(item.href));
+            const isActive = location === item.href || (item.href !== "/ny" && location.startsWith(item.href));
             const Icon = item.icon;
             return (
               <Link key={item.href} href={item.href}>

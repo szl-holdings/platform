@@ -107,7 +107,7 @@ export default function NyDashboard() {
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <Widget title="Deadline Breach Watchlist" href="/prism-counsel/ny/watchlist">
+        <Widget title="Deadline Breach Watchlist" href="/ny/watchlist">
           <div className="space-y-2">
             {deadlineBreachForecasts.map((f, i) => (
               <div key={i} className="flex items-center gap-3 py-1.5 border-b border-white/[0.04] last:border-0">
@@ -126,7 +126,7 @@ export default function NyDashboard() {
           </div>
         </Widget>
 
-        <Widget title="Demand Readiness Leaderboard" href="/prism-counsel/ny/no-fault">
+        <Widget title="Demand Readiness Leaderboard" href="/ny/no-fault">
           <div className="space-y-2">
             {allDemandPackets.sort((a, b) => b.readinessScore - a.readinessScore).map((dp, i) => (
               <div key={i} className="py-1.5 border-b border-white/[0.04] last:border-0">
@@ -153,7 +153,7 @@ export default function NyDashboard() {
           </div>
         </Widget>
 
-        <Widget title="Mediation Windows" href="/prism-counsel/ny/mediation">
+        <Widget title="Mediation Windows" href="/ny/mediation">
           <div className="space-y-2">
             {allMediations.map((e, i) => (
               <div key={i} className="py-1.5 border-b border-white/[0.04] last:border-0">
@@ -182,7 +182,7 @@ export default function NyDashboard() {
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <Widget title="Reserve / Offer Tracker" href="/prism-counsel/ny/forecast">
+        <Widget title="Reserve / Offer Tracker" href="/ny/forecast">
           <div className="space-y-2">
             {allOfferMovements.slice(0, 5).map((o, i) => (
               <div key={i} className="flex items-center gap-2 py-1.5 border-b border-white/[0.04] last:border-0">
@@ -204,7 +204,7 @@ export default function NyDashboard() {
           </div>
         </Widget>
 
-        <Widget title="Communication Silence Tracker" href="/prism-counsel/ny/insurer-intel">
+        <Widget title="Communication Silence Tracker" href="/ny/insurer-intel">
           <div className="space-y-2">
             {allComms.slice(0, 4).map((c, i) => (
               <div key={i} className="py-1.5 border-b border-white/[0.04] last:border-0">
@@ -222,7 +222,7 @@ export default function NyDashboard() {
           </div>
         </Widget>
 
-        <Widget title="Chronology Integrity / AI Defensibility" href="/prism-counsel/ny/trust">
+        <Widget title="Chronology Integrity / AI Defensibility" href="/ny/trust">
           <div className="space-y-2">
             {NY_DEMO_MATTERS.map((m, i) => {
               const defensibility = m.forecasts.find(f => f.type === "ai_defensibility_score");
@@ -251,7 +251,7 @@ export default function NyDashboard() {
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <Widget title="Disclaimer Vulnerability Queue" href="/prism-counsel/ny/coverage">
+        <Widget title="Disclaimer Vulnerability Queue" href="/ny/coverage">
           {disclaimerMatters.length === 0 ? (
             <div className="text-[10px] text-slate-600 py-3 text-center">No active disclaimer challenges</div>
           ) : (
@@ -274,7 +274,7 @@ export default function NyDashboard() {
           )}
         </Widget>
 
-        <Widget title="Damages / Lien Gaps" href="/prism-counsel/ny/no-fault">
+        <Widget title="Damages / Lien Gaps" href="/ny/no-fault">
           <div className="space-y-2">
             {NY_DEMO_MATTERS.filter(m => m.demandPacket && m.demandPacket.missingItems.length > 0).map((m, i) => (
               <div key={i} className="py-1.5 border-b border-white/[0.04] last:border-0">
