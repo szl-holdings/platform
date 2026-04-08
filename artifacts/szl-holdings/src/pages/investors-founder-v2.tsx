@@ -1,6 +1,5 @@
 import { Link } from "wouter";
 import {
-  User,
   ArrowRight,
   Building2,
   Code2,
@@ -128,14 +127,27 @@ export default function InvestorsFounderPage() {
         {/* Hero */}
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#d4a054]/20 bg-[#d4a054]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#d4a054]">
-              <User className="h-3.5 w-3.5" />
-              Founder
+            <div className="flex items-start gap-5 mb-4">
+              <div
+                className="shrink-0"
+                style={{
+                  width: 64, height: 64, borderRadius: "0.875rem",
+                  background: "linear-gradient(135deg, #d4a054 0%, #c8953c 50%, #b8862c 100%)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  boxShadow: "0 0 0 1px rgba(212,160,84,0.2), 0 8px 32px rgba(0,0,0,0.4)",
+                }}
+              >
+                <span style={{ color: "#070a10", fontWeight: 800, fontSize: "0.9375rem", letterSpacing: "-0.02em" }}>SZL</span>
+              </div>
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-[#d4a054]/20 bg-[#d4a054]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#d4a054] mb-2">
+                  Founder & CEO
+                </div>
+                <h1 className="max-w-2xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
+                  Stephen Lutar
+                </h1>
+              </div>
             </div>
-            <h1 className="mt-6 max-w-2xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
-              Stephen Lutar
-            </h1>
-            <p className="mt-2 text-lg text-[#d4a054]">Founder & CEO — SZL Holdings</p>
             <p className="mt-6 max-w-3xl text-lg leading-8 text-white/70">
               Builder, operator, systems thinker. Designing the infrastructure layer for how
               governed organizations make and audit operational decisions — starting with business

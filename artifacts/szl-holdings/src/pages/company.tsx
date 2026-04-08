@@ -64,9 +64,22 @@ export default function CompanyPage() {
         <section style={{ borderBottom: "1px solid var(--color-szl-border)", paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <p style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", marginBottom: "1.25rem" }}>
-                About SZL Holdings
-              </p>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "1.5rem", marginBottom: "2rem", flexWrap: "wrap" }}>
+                <div style={{
+                  width: 64, height: 64, borderRadius: "0.875rem", flexShrink: 0,
+                  background: "linear-gradient(135deg, #d4a054 0%, #c8953c 50%, #b8862c 100%)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  boxShadow: "0 0 0 1px hsla(38,50%,52%,0.2), 0 8px 32px hsla(0,0%,0%,0.4)",
+                }}>
+                  <span style={{ color: "#070a10", fontWeight: 800, fontSize: "0.9375rem", letterSpacing: "-0.02em" }}>SZL</span>
+                </div>
+                <div style={{ flex: 1, minWidth: "200px" }}>
+                  <p style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", marginBottom: "0.5rem" }}>
+                    About SZL Holdings
+                  </p>
+                  <p style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)" }}>Est. 2023 · London · Owner-Operated</p>
+                </div>
+              </div>
               <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 600, letterSpacing: "-0.026em", lineHeight: 1.1, maxWidth: "22ch", marginBottom: "1.5rem", color: "hsl(38,8%,96%)" }}>
                 One architecture. One founder. Disciplined company-building.
               </h1>

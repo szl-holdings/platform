@@ -40,9 +40,22 @@ export default function FounderPage() {
               className="grid grid-cols-1 lg:grid-cols-12 gap-14 lg:gap-20"
             >
               <div className="lg:col-span-7">
-                <p className="text-[11px] font-medium tracking-[0.35em] uppercase mb-6" style={{ color: "var(--color-gold)" }}>
-                  Carlota Jo
-                </p>
+                <div className="flex items-start gap-5 mb-8">
+                  <div style={{
+                    width: 64, height: 64, flexShrink: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    background: "var(--color-gold)", borderRadius: "0.75rem",
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+                  }}>
+                    <span style={{ color: "var(--color-cream-warm)", fontWeight: 700, fontSize: "1.125rem", letterSpacing: "0.04em", fontFamily: "var(--font-serif, Georgia, serif)" }}>CJ</span>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-medium tracking-[0.35em] uppercase mb-1" style={{ color: "var(--color-gold)" }}>
+                      Carlota Jo
+                    </p>
+                    <p className="text-[13px] font-light" style={{ color: "var(--color-ink-500)" }}>Private Practice · By Introduction Only</p>
+                  </div>
+                </div>
                 <h1 className="font-serif font-light leading-[1.1] mb-8" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", color: "var(--color-ink-900)" }}>
                   The trusted operator
                   <br />

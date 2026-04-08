@@ -77,14 +77,14 @@ export default function LinkInBioPage() {
 
         <m.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} style={{ textAlign: "center", marginBottom: "2rem" }}>
           <div style={{
-            width: 88, height: 88, borderRadius: "50%",
+            width: 88, height: 88, borderRadius: "1.125rem",
             background: "linear-gradient(135deg, #d4a054 0%, #c8953c 50%, #b8862c 100%)",
             margin: "0 auto 1.25rem",
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: "1.625rem", fontWeight: 700, color: "#070a10",
-            boxShadow: "0 0 0 3px hsla(38,50%,52%,0.2), 0 8px 32px hsla(0,0%,0%,0.4)",
+            fontSize: "1.25rem", fontWeight: 800, color: "#070a10", letterSpacing: "-0.02em",
+            boxShadow: "0 0 0 1px hsla(38,50%,52%,0.2), 0 12px 40px hsla(0,0%,0%,0.5), 0 0 80px hsla(38,50%,52%,0.08)",
           }}>
-            SL
+            SZL
           </div>
           <h1 style={{ fontSize: "1.375rem", fontWeight: 700, color: "#e8e4de", letterSpacing: "-0.02em", marginBottom: "0.25rem" }}>Stephen Lutar</h1>
           <p style={{ fontSize: "0.8125rem", color: "#8b8579", lineHeight: 1.5 }}>Founder & CEO, SZL Holdings</p>
@@ -104,6 +104,7 @@ export default function LinkInBioPage() {
               target="_blank"
               rel="noopener noreferrer"
               title={s.label}
+              aria-label={s.label}
               style={{
                 width: 40, height: 40, borderRadius: "50%",
                 background: "hsla(0,0%,100%,0.05)",
