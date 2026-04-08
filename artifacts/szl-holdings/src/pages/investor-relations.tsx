@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { m } from "framer-motion";
 import { Link } from "wouter";
 import {
   ArrowRight,
@@ -46,10 +47,10 @@ const materials = [
 ];
 
 const milestones = [
-  "3\u20135 serious lender conversations",
+  "3–5 serious lender conversations",
   "20+ target investor conversations",
-  "3\u20135 design-partner prospects in pipeline",
-  "1\u20132 paid pilots or structured discovery engagements",
+  "3–5 design-partner prospects in pipeline",
+  "1–2 paid pilots or structured discovery engagements",
 ];
 
 export default function InvestorRelationsPage() {
@@ -61,7 +62,7 @@ export default function InvestorRelationsPage() {
   const [error, setError] = useState("");
 
   usePageMeta({
-    title: "Investor Relations \u2014 SZL Holdings",
+    title: "Investor Relations — SZL Holdings",
     description:
       "Capital and partner materials for SZL Holdings, centered on the Lyte + Alloy raise story.",
     canonical: "https://szlholdings.com/investor-relations",
@@ -106,204 +107,189 @@ export default function InvestorRelationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#070a10] text-white">
+    <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
       <SiteNav />
-      <main>
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#d4a054]/25 bg-[#d4a054]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#d4a054]">
-              <FileText className="h-3.5 w-3.5" />
-              Investor relations
-            </div>
-            <h1 className="mt-6 max-w-4xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
-              Capital materials for a disciplined company narrative.
-            </h1>
-            <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
-              SZL Holdings is running a focused capital story around Lyte + Alloy. The objective is
-              to align lenders, investors, and design partners around one commercial wedge, one
-              product narrative, and one execution plan.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/contact"
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
-              >
-                Start a conversation
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <a
-                href="mailto:hello@szlholdings.com"
-                className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-5 py-3 text-sm font-semibold text-white/85 transition hover:border-white/30 hover:bg-white/5"
-              >
-                <Mail className="h-4 w-4" />
-                hello@szlholdings.com
-              </a>
-            </div>
+      <main id="main-content" role="main">
+
+        <section className="szl-grid-texture" style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)", borderBottom: "1px solid var(--color-szl-border)" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.3rem 0.875rem", borderRadius: "99px", border: "1px solid hsla(38,72%,58%,0.25)", background: "hsla(38,72%,58%,0.08)", marginBottom: "1.75rem" }}>
+                <FileText size={13} color="hsl(38,72%,58%)" />
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(38,72%,58%)" }}>Investor Relations</span>
+              </div>
+              <h1 style={{ fontSize: "clamp(2.25rem,5vw,3.75rem)", fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1.06, maxWidth: "22ch", marginBottom: "1.5rem" }}>
+                Capital materials for a disciplined company narrative.
+              </h1>
+              <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "54ch", marginBottom: "2.25rem" }}>
+                SZL Holdings is running a focused capital story around Lyte + Alloy. The objective is
+                to align lenders, investors, and design partners around one commercial wedge, one
+                product narrative, and one execution plan.
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+                <Link href="/contact" className="szl-btn-primary">Start a conversation <ArrowRight size={15} /></Link>
+                <a href="mailto:hello@szlholdings.com" className="szl-btn-secondary" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+                  <Mail size={14} /> hello@szlholdings.com
+                </a>
+              </div>
+            </m.div>
           </div>
         </section>
 
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <div className="max-w-2xl">
-              <p className="text-xs uppercase tracking-[0.24em] text-white/45">Capital paths</p>
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(38,72%,58%)", marginBottom: "1rem" }}>Capital Paths</p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "3rem" }}>
                 Three sources of momentum
               </h2>
-            </div>
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
-              {capitalPaths.map((path) => {
+            </m.div>
+            <div className="szl-grid-3">
+              {capitalPaths.map((path, i) => {
                 const Icon = path.icon;
                 return (
-                  <div key={path.title} className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-                    <div className="mb-4 inline-flex rounded-xl border border-white/10 bg-black/20 p-3">
-                      <Icon className="h-5 w-5 text-white/80" />
+                  <m.div key={path.title} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.38, delay: i * 0.06 }} className="szl-card" style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}>
+                    <div style={{ width: "40px", height: "40px", display: "flex", alignItems: "center", justifyContent: "center", background: "hsla(0,0%,100%,0.04)", border: "1px solid var(--color-szl-border)", borderRadius: "0.5rem", marginBottom: "1.25rem" }}>
+                      <Icon size={18} color="hsl(38,8%,78%)" />
                     </div>
-                    <h3 className="text-lg font-semibold text-white">{path.title}</h3>
-                    <p className="mt-3 text-sm leading-7 text-white/72">{path.body}</p>
-                    <ul className="mt-4 space-y-2">
+                    <h3 style={{ fontSize: "1.0625rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.75rem" }}>{path.title}</h3>
+                    <p style={{ fontSize: "0.875rem", lineHeight: 1.72, color: "hsl(214,7%,60%)", marginBottom: "1.25rem" }}>{path.body}</p>
+                    <ul style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                       {path.bullets.map((bullet) => (
-                        <li key={bullet} className="flex items-start gap-3 text-sm leading-6 text-white/78">
-                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#d4a054]" />
+                        <li key={bullet} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", fontSize: "0.8625rem", lineHeight: 1.55, color: "hsl(38,8%,75%)" }}>
+                          <CheckCircle2 size={14} color="hsl(38,72%,58%)" style={{ flexShrink: 0, marginTop: "2px" }} />
                           <span>{bullet}</span>
                         </li>
                       ))}
                     </ul>
-                  </div>
+                  </m.div>
                 );
               })}
             </div>
           </div>
         </section>
 
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr]">
-              <div>
-                <p className="text-xs uppercase tracking-[0.24em] text-white/45">Available now</p>
-                <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <div style={{ display: "grid", gap: "3rem", gridTemplateColumns: "1fr" }}>
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(192,72%,48%)", marginBottom: "1rem" }}>Available Now</p>
+                <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "0.75rem" }}>
                   Materials ready for serious conversations
                 </h2>
-                <p className="mt-4 text-sm leading-7 text-white/72">
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "hsl(214,7%,60%)", maxWidth: "52ch", marginBottom: "2.5rem" }}>
                   The package is built to support lender calls, investor meetings, and design-partner
                   outreach without changing the company story every time the audience changes.
                 </p>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2">
-                {materials.map((item) => (
-                  <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm text-white/80">
-                    {item}
-                  </div>
+              </m.div>
+              <div className="szl-grid-3">
+                {materials.map((item, i) => (
+                  <m.div key={item} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: i * 0.04 }} className="szl-card" style={{ borderRadius: "0.75rem", padding: "1.25rem 1.5rem" }}>
+                    <p style={{ fontSize: "0.9375rem", fontWeight: 500 }}>{item}</p>
+                  </m.div>
                 ))}
               </div>
             </div>
           </div>
         </section>
 
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
-              <div>
-                <p className="text-xs uppercase tracking-[0.24em] text-white/45">Near-term targets</p>
-                <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
-                  What progress should look like in the next 90 days
-                </h2>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2">
-                {milestones.map((item) => (
-                  <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm leading-7 text-white/80">
-                    {item}
-                  </div>
-                ))}
-              </div>
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(145,62%,46%)", marginBottom: "1rem" }}>Near-Term Targets</p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "2.5rem" }}>
+                What progress should look like in the next 90 days
+              </h2>
+            </m.div>
+            <div className="szl-grid-2">
+              {milestones.map((item, i) => (
+                <m.div key={item} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: i * 0.05 }} className="szl-card" style={{ borderRadius: "0.75rem", padding: "1.25rem 1.5rem" }}>
+                  <p style={{ fontSize: "0.9375rem", lineHeight: 1.65, fontWeight: 500 }}>{item}</p>
+                </m.div>
+              ))}
             </div>
           </div>
         </section>
 
-        <section>
-          <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8">
-            <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-[#4a90b8]/25 bg-[#4a90b8]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#4a90b8]">
-                  <Workflow className="h-3.5 w-3.5" />
-                  Request materials
+        <section style={{ padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <div style={{ display: "grid", gap: "3rem" }}>
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.3rem 0.875rem", borderRadius: "99px", border: "1px solid hsla(206,72%,52%,0.25)", background: "hsla(206,72%,52%,0.08)", marginBottom: "1.5rem" }}>
+                  <Workflow size={13} color="hsl(206,72%,52%)" />
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(206,72%,52%)" }}>Request Materials</span>
                 </div>
-                <h2 className="mt-6 text-3xl font-semibold tracking-tight text-white">
+                <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "0.75rem" }}>
                   Send a note and we will route the right package.
                 </h2>
-                <p className="mt-4 text-sm leading-7 text-white/72">
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "hsl(214,7%,60%)", maxWidth: "52ch", marginBottom: "1.5rem" }}>
                   Lenders, investors, and design partners need different slices of the same company
                   story. This form routes the request into the same operating pipeline as the rest of
                   the commercial workflow.
                 </p>
-                <div className="mt-6 rounded-2xl border border-[#d4a054]/20 bg-[#d4a054]/10 p-5">
-                  <div className="flex items-start gap-3">
-                    <Radar className="mt-1 h-5 w-5 shrink-0 text-[#d4a054]" />
-                    <p className="text-sm leading-7 text-white/80">
+                <div className="szl-card" style={{ borderRadius: "0.75rem", padding: "1.25rem 1.5rem", borderLeft: "3px solid hsl(38,72%,58%)", maxWidth: "520px" }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
+                    <Radar size={18} color="hsl(38,72%,58%)" style={{ flexShrink: 0, marginTop: "2px" }} />
+                    <p style={{ fontSize: "0.875rem", lineHeight: 1.72, color: "hsl(38,8%,78%)" }}>
                       Keep the ask simple: Lyte + Alloy now, expansion lanes later, proof and customer
                       truth as the filter for everything else.
                     </p>
                   </div>
                 </div>
-              </div>
+              </m.div>
 
-              <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-6 lg:p-8">
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45, delay: 0.1 }} className="szl-card" style={{ borderRadius: "1rem", padding: "clamp(1.5rem,3vw,2.5rem)", maxWidth: "600px" }}>
                 {sent ? (
-                  <div className="rounded-2xl border border-[#d4a054]/20 bg-[#d4a054]/10 p-6">
-                    <p className="text-lg font-semibold text-white">Request received.</p>
-                    <p className="mt-2 text-sm leading-7 text-white/80">
+                  <div style={{ borderRadius: "0.75rem", border: "1px solid hsla(38,72%,58%,0.25)", background: "hsla(38,72%,58%,0.08)", padding: "1.5rem" }}>
+                    <p style={{ fontSize: "1.0625rem", fontWeight: 600, marginBottom: "0.5rem" }}>Request received.</p>
+                    <p style={{ fontSize: "0.9rem", lineHeight: 1.65, color: "hsl(214,7%,60%)" }}>
                       We will follow up with the relevant materials and next step.
                     </p>
                   </div>
                 ) : (
-                  <form className="space-y-4" onSubmit={onSubmit}>
+                  <form style={{ display: "flex", flexDirection: "column", gap: "1rem" }} onSubmit={onSubmit}>
                     <div>
-                      <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-white/50">
-                        Email
-                      </label>
+                      <label style={{ display: "block", marginBottom: "0.5rem", fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(214,7%,48%)" }}>Email</label>
                       <input
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         type="email"
                         required
-                        className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-white/25"
+                        style={{ width: "100%", borderRadius: "0.625rem", border: "1px solid var(--color-szl-border)", background: "hsla(0,0%,0%,0.3)", padding: "0.75rem 1rem", fontSize: "0.9375rem", color: "hsl(38,8%,90%)", outline: "none" }}
                         placeholder="you@firm.com"
                       />
                     </div>
                     <div>
-                      <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-white/50">
-                        Firm or company
-                      </label>
+                      <label style={{ display: "block", marginBottom: "0.5rem", fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(214,7%,48%)" }}>Firm or company</label>
                       <input
                         value={company}
                         onChange={(e) => setCompany(e.target.value)}
-                        className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-white/25"
+                        style={{ width: "100%", borderRadius: "0.625rem", border: "1px solid var(--color-szl-border)", background: "hsla(0,0%,0%,0.3)", padding: "0.75rem 1rem", fontSize: "0.9375rem", color: "hsl(38,8%,90%)", outline: "none" }}
                         placeholder="Optional"
                       />
                     </div>
                     <div>
-                      <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-white/50">
-                        What are you looking for?
-                      </label>
+                      <label style={{ display: "block", marginBottom: "0.5rem", fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(214,7%,48%)" }}>What are you looking for?</label>
                       <textarea
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         rows={5}
-                        className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-white/25"
+                        style={{ width: "100%", borderRadius: "0.625rem", border: "1px solid var(--color-szl-border)", background: "hsla(0,0%,0%,0.3)", padding: "0.75rem 1rem", fontSize: "0.9375rem", color: "hsl(38,8%,90%)", outline: "none", resize: "vertical" }}
                         placeholder="Bank / SBA conversation, angel materials, design-partner proposal, etc."
                       />
                     </div>
-                    {error ? <p className="text-sm text-[#c45a4a]">{error}</p> : null}
+                    {error ? <p style={{ fontSize: "0.875rem", color: "hsl(0,60%,55%)" }}>{error}</p> : null}
                     <button
                       type="submit"
                       disabled={!canSubmit || submitting}
-                      className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="szl-btn-primary"
+                      style={{ alignSelf: "flex-start", opacity: !canSubmit || submitting ? 0.6 : 1, cursor: !canSubmit || submitting ? "not-allowed" : "pointer" }}
                     >
-                      {submitting ? "Sending..." : "Request materials"}
-                      <ArrowRight className="h-4 w-4" />
+                      {submitting ? "Sending..." : "Request materials"} <ArrowRight size={14} />
                     </button>
                   </form>
                 )}
-              </div>
+              </m.div>
             </div>
           </div>
         </section>
