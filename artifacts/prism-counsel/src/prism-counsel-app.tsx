@@ -1,9 +1,10 @@
 import { lazy, Suspense } from "react";
-import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
+import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
 import { DemoModeProvider } from "@szl-holdings/shared-ui";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
+import { useAuth } from "@szl-holdings/replit-auth-web";
 import { PrismCounselShell } from "./components/prism-shell";
 
 const queryClient = new QueryClient({
@@ -137,7 +138,34 @@ function MatterDeskV2Wrapper() {
   return <S32MatterDeskV2 />;
 }
 
+const PRISM_MARKETING_ROUTES = ["/prism-counsel/marketing", "/prism-counsel/home"];
+
 function PrismCounselRoutes() {
+  const [location] = useLocation();
+  const { isLoading, isAuthenticated, login } = useAuth();
+  const normalizedPath = location.replace(/\/+$/, "") || "/prism-counsel";
+  const isMarketingRoute = PRISM_MARKETING_ROUTES.includes(normalizedPath);
+
+  if (isMarketingRoute || (!isLoading && !isAuthenticated && normalizedPath === "/prism-counsel")) {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <PrismMarketingLanding />
+      </Suspense>
+    );
+  }
+
+  if (!isLoading && !isAuthenticated) {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <PrismMarketingLanding />
+      </Suspense>
+    );
+  }
+
+  if (isLoading) {
+    return <PageLoader />;
+  }
+
   return (
     <Switch>
       {/* ── Marketing landing page ── */}
