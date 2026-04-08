@@ -101,8 +101,9 @@ The platform consists of 13 interconnected applications sharing authentication a
 - **API Routes:** `artifacts/api-server/src/routes/distribution-os.ts` — full CRUD with auth middleware on all write operations. Public endpoints: `POST /leads` (lead capture), `POST /analytics/*` (tracking). Read endpoints open for public content.
 - **Public Pages:** `/link-in-bio` (mobile Linktree), `/newsletter` (subscription landing). Existing `/insights` and `/insights/:slug` pages retained.
 - **Admin Panel:** `/admin/distribution/*` with 11 sub-pages (dashboard, articles CMS, newsletters, carousel lab, X studio, leads, campaigns/UTM builder, content calendar, analytics, automations, settings/integrations). All gated with RequireAuth.
-- **Seed Data:** 6 editorial pillars, 1 author profile (Stephen Lutar), 3 campaigns, 12 article drafts, 4 newsletters, 12 calendar items, 10 linktree items, 5 integrations (X, Medium, Substack, LinkedIn, AI Carousels), 12 site settings.
-- **Connected Profiles:** X (`@szlholdings`), Medium (`@stephen_38454`), AI Carousels (connected).
+- **Seed Data:** 6 editorial pillars, 1 author profile (Stephen Lutar), 3 campaigns, 20 articles (all status=ready), 8 newsletters (all approved), 14 X posts (all ready), 2 carousel projects (ready), 12 linktree items (absolute HTTPS URLs), 12 calendar items, 5 integrations (X, Medium, Substack, LinkedIn, AI Carousels), 12 site settings.
+- **Connected Profiles:** X (`@szlholdings`), Medium (`@stephen_38454`), Substack (`szlholdings.substack.com`), LinkedIn (`linkedin.com/in/stephenlutar`).
+- **Export Folder:** `export/` directory with 20 Medium articles, 8 Substack newsletters, 14 X tweets, 5 LinkedIn posts, 3 carousel PDFs, 3 brand images — all ready to copy-paste-publish.
 - **Import:** Always `import { db } from "@szl-holdings/db"` — NOT `@workspace/db`.
 
 ### Task #341 — Aegis Gap Closure & Tradecraft Differentiators
