@@ -173,3 +173,9 @@ id = "EKaAPqjUt9LHTMpRNhdAO"
 uri = "file://social-content/banners/header-linkedin-1584x396.png"
 type = "image"
 title = "LinkedIn Header (1584×396)"
+
+[[outputs]]
+id = "dbovTBGz_ZiuAT3OPiJei"
+uri = "file://export/SZL-Social-Media-Playbook.pdf"
+type = "pdf"
+title = "SZL Social Media Playbook — Copy & Paste Ready"

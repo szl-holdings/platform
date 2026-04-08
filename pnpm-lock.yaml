@@ -90,6 +90,9 @@ importers:
       nodemailer:
         specifier: ^8.0.4
         version: 8.0.4
+      pdfkit:
+        specifier: ^0.18.0
+        version: 0.18.0
       react:
         specifier: 'catalog:'
         version: 19.1.0
