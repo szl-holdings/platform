@@ -128,6 +128,11 @@ const FleetWhatChangedPage = lazy(() => import("@/pages/fleet-what-changed"));
 const ExceptionQueuePage = lazy(() => import("@/pages/exception-queue"));
 const RouteRiskPage = lazy(() => import("@/pages/route-risk"));
 const VesselsApprovalReviewPage = lazy(() => import("@/pages/vessels-approval-review"));
+const VoyageInterventionSimulatorPage = lazy(() => import("@/pages/voyage-intervention-simulator"));
+const ReadinessDragIndexPage = lazy(() => import("@/pages/readiness-drag-index"));
+const PortFrictionMemoryPage = lazy(() => import("@/pages/port-friction-memory"));
+const FleetMorningBriefPage = lazy(() => import("@/pages/fleet-morning-brief"));
+const CommandModeTogglePage = lazy(() => import("@/pages/command-mode-toggle"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -274,11 +279,16 @@ function VesselsSidebarContent({ expanded, onMobileClose }: { expanded: boolean;
       id: "operations",
       label: "Operations",
       items: [
+        { id: "fleet-morning-brief", label: "Morning Brief", href: "/fleet-morning-brief", icon: <Activity className="w-3.5 h-3.5" /> },
         { id: "voyage-desk", label: "Voyage Desk", href: "/voyage-desk", icon: <Anchor className="w-3.5 h-3.5" /> },
         { id: "what-changed", label: "What Changed", href: "/what-changed", icon: <Radio className="w-3.5 h-3.5" /> },
         { id: "exception-queue", label: "Exceptions", href: "/exception-queue", icon: <AlertTriangle className="w-3.5 h-3.5" /> },
         { id: "route-risk", label: "Route Risk", href: "/route-risk", icon: <Navigation className="w-3.5 h-3.5" /> },
         { id: "approval-review", label: "Review & Approval", href: "/approval-review", icon: <Shield className="w-3.5 h-3.5" /> },
+        { id: "voyage-intervention-simulator", label: "Intervention Simulator", href: "/voyage-intervention-simulator", icon: <BarChart3 className="w-3.5 h-3.5" /> },
+        { id: "readiness-drag-index", label: "Drag Index", href: "/readiness-drag-index", icon: <AlertTriangle className="w-3.5 h-3.5" /> },
+        { id: "port-friction-memory", label: "Port Friction", href: "/port-friction-memory", icon: <MapPin className="w-3.5 h-3.5" /> },
+        { id: "command-mode-toggle", label: "Captain / Exec Mode", href: "/command-mode-toggle", icon: <User className="w-3.5 h-3.5" /> },
       ]
     },
     {
@@ -468,6 +478,11 @@ function DashboardRouter() {
         <Route path="/exception-queue" component={ExceptionQueuePage} />
         <Route path="/route-risk" component={RouteRiskPage} />
         <Route path="/approval-review" component={VesselsApprovalReviewPage} />
+        <Route path="/voyage-intervention-simulator" component={VoyageInterventionSimulatorPage} />
+        <Route path="/readiness-drag-index" component={ReadinessDragIndexPage} />
+        <Route path="/port-friction-memory" component={PortFrictionMemoryPage} />
+        <Route path="/fleet-morning-brief" component={FleetMorningBriefPage} />
+        <Route path="/command-mode-toggle" component={CommandModeTogglePage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-sky-400/40">Page not found</p>
@@ -563,7 +578,10 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     location.startsWith("/document-engine") ||
     location.startsWith("/voyage-desk") || location.startsWith("/what-changed") ||
     location.startsWith("/exception-queue") || location.startsWith("/route-risk") ||
-    location.startsWith("/approval-review");
+    location.startsWith("/approval-review") ||
+    location.startsWith("/voyage-intervention-simulator") || location.startsWith("/readiness-drag-index") ||
+    location.startsWith("/port-friction-memory") || location.startsWith("/fleet-morning-brief") ||
+    location.startsWith("/command-mode-toggle");
 
   if (isDashboard) {
     return (
