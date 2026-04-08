@@ -84,6 +84,24 @@ uri = "file://artifacts/vessels-mobile/assets/images/splash-icon.png"
 type = "image"
 title = "vessels splash screen"
 
+[[generated]]
+id = "2zui-dg-Nq5UiuAvEth8x"
+uri = "file://social-media-kit/images/szl-profile-square.png"
+type = "image"
+title = "SZL Holdings square profile"
+
+[[generated]]
+id = "1Sg3Zku0El5zJtk6g5yIp"
+uri = "file://social-media-kit/images/szl-x-banner.png"
+type = "image"
+title = "SZL Holdings X banner header"
+
+[[generated]]
+id = "Wc-vCx1iJbhPF79LKEgYf"
+uri = "file://social-media-kit/images/szl-linktree-header.png"
+type = "image"
+title = "SZL Holdings Linktree header"
+
 [[outputs]]
 id = "I_ORUhKS2b7MEVDwDdGWJ"
 uri = "file://social-content/banners/linkedin-7-lenses-banner.png"
