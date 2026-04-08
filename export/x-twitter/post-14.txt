@@ -1,0 +1,11 @@
+Metrics from our first year of platform operations:
+
+8.4 min — average signal-to-action time
+62% — approval chain reduction
+98% — handoff success rate
+<2 min — audit reconstruction time
+73% — AI recommendation accuracy at high confidence
+
+These are not projections. They are measurements.
+
+szlholdings.com

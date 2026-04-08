@@ -1,0 +1,7 @@
+Unpopular opinion: The best enterprise software is invisible.
+
+You should not notice it. You should not think about it. You should not attend training sessions to learn it.
+
+It should surface the right information to the right person at the right time and get out of the way.
+
+That is what Lyte does. Not another dashboard you have to check. An intelligence layer that tells you what matters before you have to ask.

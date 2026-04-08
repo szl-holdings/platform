@@ -1,0 +1,7 @@
+Hot take: Most "AI-powered" enterprise software is just GPT-3.5 in a trench coat.
+
+No source attribution. No confidence scoring. No audit trail. No human-in-the-loop gates.
+
+We build AI governance into the architecture. Not the marketing.
+
+Every recommendation is traceable. Every action is auditable. Every gate has a human.

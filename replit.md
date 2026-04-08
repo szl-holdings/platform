@@ -16,7 +16,7 @@ Do not make changes to the file `Y`.
 The platform is built as a pnpm monorepo utilizing Node.js 24 and TypeScript 5.9.
 - **Frontend:** React, Vite, TanStack React Query, Wouter, Tailwind CSS, Framer Motion, Lucide React, Recharts. Internationalization is handled by `react-i18next` with RTL support.
 - **Backend:** Express 5, Drizzle ORM, Zod validation, pino logging.
-- **Database:** PostgreSQL with Drizzle ORM (over 120 tables) managing multiple schemas including CMS, product, client portal, and organization membership.
+- **Database:** PostgreSQL with Drizzle ORM (446 tables) managing multiple schemas including CMS, product, client portal, and organization membership.
 - **Authentication:** Replit Auth (OIDC/PKCE), session-based with cookie+Bearer token, 7-role RBAC.
 - **API Codegen:** Orval from OpenAPI specification.
 - **Bundling:** esbuild (CJS) and Vite.
