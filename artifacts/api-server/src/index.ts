@@ -133,6 +133,7 @@ seedDosData().catch(err => {
 registerAllPrismJobHandlers();
 const prismPoller = startPrismJobPoller(5000);
 
+const HEAP_GC_THRESHOLD = 0.80;
 const HEAP_WARN_THRESHOLD = 0.88;
 const HEAP_CRITICAL_THRESHOLD = 0.97;
 const memoryMonitor = setInterval(() => {
@@ -144,13 +145,16 @@ const memoryMonitor = setInterval(() => {
       heapTotalMb: Math.round(heapTotal / 1024 / 1024),
       ratio: ratio.toFixed(3),
     }, "[memory] Heap usage critical — consider increasing --max-old-space-size");
-    if (global.gc) global.gc();
+    if (global.gc) { global.gc(); global.gc(); }
   } else if (ratio >= HEAP_WARN_THRESHOLD) {
     logger.warn({
       heapUsedMb: Math.round(heapUsed / 1024 / 1024),
       heapTotalMb: Math.round(heapTotal / 1024 / 1024),
       ratio: ratio.toFixed(3),
     }, "[memory] Heap usage elevated");
+    if (global.gc) global.gc();
+  } else if (ratio >= HEAP_GC_THRESHOLD) {
+    if (global.gc) global.gc();
   }
 }, 30_000);
 memoryMonitor.unref();
