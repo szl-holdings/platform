@@ -102,6 +102,18 @@ uri = "file://social-media-kit/images/szl-linktree-header.png"
 type = "image"
 title = "SZL Holdings Linktree header"
 
+[[generated]]
+id = "6Ejd32eXZkVLQthc6UMGz"
+uri = "file://artifacts/szl-holdings/public/brand-kit/szl-avatar-square.png"
+type = "image"
+title = "SZL monogram avatar"
+
+[[generated]]
+id = "6Jutxrwa_tCbDkR-SxS14"
+uri = "file://artifacts/szl-holdings/public/brand-kit/szl-x-banner.png"
+type = "image"
+title = "SZL X banner header wide"
+
 [[outputs]]
 id = "I_ORUhKS2b7MEVDwDdGWJ"
 uri = "file://social-content/banners/linkedin-7-lenses-banner.png"

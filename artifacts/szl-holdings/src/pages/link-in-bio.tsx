@@ -42,14 +42,16 @@ const SOCIAL_LINKS = [
 ];
 
 const FALLBACK_LINKS: LinkItem[] = [
-  { id: 1, label: "SZL Holdings — Enterprise Platform", destination: "/", campaignTag: null, contentTag: "website", sortOrder: 0 },
-  { id: 2, label: "Latest Insights & Analysis", destination: "/insights", campaignTag: null, contentTag: "insights", sortOrder: 1 },
-  { id: 3, label: "PRISM Counsel — Legal Intelligence", destination: "/solutions/prism-counsel", campaignTag: null, contentTag: "ai", sortOrder: 2 },
-  { id: 4, label: "Vessels — Maritime Intelligence", destination: "/solutions/vessels", campaignTag: null, contentTag: "maritime", sortOrder: 3 },
-  { id: 5, label: "Terra — Real Estate Intelligence", destination: "/solutions/terra", campaignTag: null, contentTag: "real-estate", sortOrder: 4 },
-  { id: 6, label: "Aegis — Unified Defense & SOC", destination: "/solutions/aegis", campaignTag: null, contentTag: "security", sortOrder: 5 },
-  { id: 7, label: "Subscribe to Newsletter", destination: "/newsletter", campaignTag: null, contentTag: "newsletter", sortOrder: 6 },
-  { id: 8, label: "Book a Consultation", destination: "/contact", campaignTag: null, contentTag: "portfolio", sortOrder: 7 },
+  { id: 1, label: "Newsletter — Get the Weekly Brief", destination: "https://szlholdings.substack.com", campaignTag: "newsletter", contentTag: "newsletter", sortOrder: 0 },
+  { id: 2, label: "SZL Holdings — Enterprise Platform", destination: "https://szlholdings.com", campaignTag: "homepage", contentTag: "website", sortOrder: 1 },
+  { id: 3, label: "Latest Insights & Analysis", destination: "https://szlholdings.com/insights", campaignTag: "insights", contentTag: "insights", sortOrder: 2 },
+  { id: 4, label: "Aegis — Unified Defense & SOC", destination: "https://szlholdings.com/solutions/aegis", campaignTag: "aegis", contentTag: "security", sortOrder: 3 },
+  { id: 5, label: "Vessels — Maritime Intelligence", destination: "https://szlholdings.com/solutions/vessels", campaignTag: "vessels", contentTag: "maritime", sortOrder: 4 },
+  { id: 6, label: "Terra — Real Estate Intelligence", destination: "https://szlholdings.com/solutions/terra", campaignTag: "terra", contentTag: "real-estate", sortOrder: 5 },
+  { id: 7, label: "Lyte — AIOps Command Center", destination: "https://szlholdings.com/solutions/lyte", campaignTag: "lyte", contentTag: "automation", sortOrder: 6 },
+  { id: 8, label: "PRISM Counsel — AI-Native Legal", destination: "https://szlholdings.com/solutions/prism-counsel", campaignTag: "prism-counsel", contentTag: "ai", sortOrder: 7 },
+  { id: 9, label: "Carlota Jo — Creative Consulting", destination: "https://szlholdings.com/solutions/carlota-jo", campaignTag: "carlota-jo", contentTag: "consulting", sortOrder: 8 },
+  { id: 10, label: "Book a Consultation", destination: "https://szlholdings.com/contact", campaignTag: "contact", contentTag: "portfolio", sortOrder: 9 },
 ];
 
 function trackClick(linkId: number) {
