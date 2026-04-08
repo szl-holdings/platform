@@ -9,6 +9,14 @@ import { DistributionOsLayout } from "./admin-dashboard";
 
 const API = import.meta.env.VITE_API_URL || "";
 
+function getCsrfToken(): string {
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
+function writeHeaders(): Record<string, string> {
+  return { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() };
+}
 
 interface Pillar { id: number; name: string; slug: string; color: string | null; isFavorite: boolean; }
 
@@ -421,7 +429,8 @@ function GeneratorPanel({ pillars, onSave }: { pillars: Pillar[]; onSave: (c: Ca
       };
       const res = await fetch(`${API}/api/distribution-os/carousels`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        headers: writeHeaders(),
         body: JSON.stringify(payload),
       });
       const saved = await res.json();
@@ -658,6 +667,9 @@ function GeneratorPanel({ pillars, onSave }: { pillars: Pillar[]; onSave: (c: Ca
 
 function CarouselCard({ carousel, pillars }: { carousel: CarouselProject; pillars: Pillar[] }) {
   const [expanded, setExpanded] = useState(false);
+  const [publishingLinkedIn, setPublishingLinkedIn] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const [statusLabel, setStatusLabel] = useState(carousel.status);
 
   const pillar = pillars.find(p => p.id === carousel.pillarId);
   const templateMatch = CAROUSEL_TEMPLATES.find(t => carousel.slug?.startsWith(t.id) || carousel.title?.toLowerCase().includes(t.name.toLowerCase()));
@@ -679,12 +691,44 @@ function CarouselCard({ carousel, pillars }: { carousel: CarouselProject; pillar
     URL.revokeObjectURL(url);
   }
 
+  async function publishToLinkedIn() {
+    setPublishingLinkedIn(true);
+    try {
+      const res = await fetch(`${API}/api/distribution-os/carousels/${carousel.id}/publish-linkedin`, {
+        method: "POST",
+        credentials: "include",
+        headers: writeHeaders(),
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (data.carousel) setStatusLabel(data.carousel.status);
+    } catch {}
+    setPublishingLinkedIn(false);
+  }
+
+  async function downloadPdf() {
+    setDownloadingPdf(true);
+    try {
+      const res = await fetch(`${API}/api/distribution-os/carousels/${carousel.id}/export-pdf`);
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${carousel.slug || "carousel"}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch {}
+    setDownloadingPdf(false);
+  }
+
   return (
     <div style={{ padding: "1.25rem", background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.05)", borderRadius: "10px" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.75rem" }}>
         <div style={{ flex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.375rem", flexWrap: "wrap" }}>
-            <span style={{ fontSize: "0.625rem", fontWeight: 700, color: STATUS_COLORS[carousel.status] || "#8b8579", textTransform: "uppercase", letterSpacing: "0.08em", padding: "0.125rem 0.5rem", background: `${STATUS_COLORS[carousel.status] || "#8b8579"}18`, borderRadius: "3px" }}>{carousel.status}</span>
+            <span style={{ fontSize: "0.625rem", fontWeight: 700, color: STATUS_COLORS[statusLabel] || "#8b8579", textTransform: "uppercase", letterSpacing: "0.08em", padding: "0.125rem 0.5rem", background: `${STATUS_COLORS[statusLabel] || "#8b8579"}18`, borderRadius: "3px" }}>{statusLabel}</span>
             <span style={{ fontSize: "0.625rem", color: "#6b6560", padding: "0.125rem 0.5rem", background: "hsla(0,0%,100%,0.04)", borderRadius: "3px", border: "1px solid hsla(0,0%,100%,0.06)" }}>{templateName}</span>
             {pillar && <span style={{ fontSize: "0.625rem", color: pillar.color || "#d4a054", padding: "0.125rem 0.5rem", background: "hsla(38,65%,58%,0.08)", borderRadius: "3px" }}>{pillar.name}</span>}
             {platforms.length > 0 && <span style={{ fontSize: "0.625rem", color: "#4a90b8" }}>{platforms.join(" · ")}</span>}
@@ -697,7 +741,15 @@ function CarouselCard({ carousel, pillars }: { carousel: CarouselProject; pillar
             {carousel.ctaUrl && <span style={{ fontSize: "0.6875rem", color: "#4a4540" }}>→ {carousel.ctaUrl}</span>}
           </div>
         </div>
-        <div style={{ display: "flex", gap: "0.375rem", flexShrink: 0 }}>
+        <div style={{ display: "flex", gap: "0.375rem", flexShrink: 0, flexWrap: "wrap", justifyContent: "flex-end" }}>
+          <button onClick={downloadPdf} disabled={downloadingPdf} style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "0.375rem 0.625rem", background: "hsla(0,0%,100%,0.06)", color: "#d4a054", border: "1px solid hsla(38,50%,52%,0.2)", borderRadius: "6px", fontSize: "0.6875rem", cursor: downloadingPdf ? "default" : "pointer", fontWeight: 600 }}>
+            <Download size={12} /> {downloadingPdf ? "..." : "PDF"}
+          </button>
+          {carousel.linkedinShortCaption && (
+            <button onClick={publishToLinkedIn} disabled={publishingLinkedIn} style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "0.375rem 0.625rem", background: publishingLinkedIn ? "hsla(0,0%,100%,0.04)" : "hsla(210,50%,50%,0.12)", color: "#4a90b8", border: "1px solid hsla(210,50%,50%,0.2)", borderRadius: "6px", fontSize: "0.6875rem", cursor: publishingLinkedIn ? "default" : "pointer", fontWeight: 600 }}>
+              LinkedIn
+            </button>
+          )}
           {carousel.aiCarouselsImportBlock && <CopyButton text={carousel.aiCarouselsImportBlock} label="Copy Import" />}
           {carousel.aiCarouselsImportBlock && (
             <button onClick={exportImportBlock} style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "0.375rem 0.625rem", background: "hsla(0,0%,100%,0.04)", color: "#8b8579", border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "6px", fontSize: "0.6875rem", cursor: "pointer" }}>

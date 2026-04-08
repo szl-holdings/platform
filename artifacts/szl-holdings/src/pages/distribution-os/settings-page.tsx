@@ -11,6 +11,15 @@ import { DistributionOsLayout } from "./admin-dashboard";
 
 const API = import.meta.env.VITE_API_URL || "";
 
+function getCsrfToken(): string {
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
+function writeHeaders(): Record<string, string> {
+  return { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() };
+}
+
 interface Integration {
   id: number;
   provider: string;
@@ -130,7 +139,8 @@ export default function SettingsPage() {
     if (existing) {
       const res = await fetch(`${API}/api/distribution-os/settings/${key}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        headers: writeHeaders(),
         body: JSON.stringify({ value }),
       });
       const updated = await res.json();
@@ -138,7 +148,8 @@ export default function SettingsPage() {
     } else {
       const res = await fetch(`${API}/api/distribution-os/settings`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        headers: writeHeaders(),
         body: JSON.stringify({ key, value, category: SETTING_GROUPS.find(g => g.fields.find(f => f.key === key))?.category || "company", label: SETTING_GROUPS.flatMap(g => g.fields).find(f => f.key === key)?.label || key }),
       });
       const created = await res.json();
@@ -149,7 +160,7 @@ export default function SettingsPage() {
   }
 
   async function retryIntegration(provider: string) {
-    const res = await fetch(`${API}/api/distribution-os/integrations/retry/${provider}`, { method: "POST", headers: { "Content-Type": "application/json" } });
+    const res = await fetch(`${API}/api/distribution-os/integrations/retry/${provider}`, { method: "POST", credentials: "include", headers: writeHeaders() });
     const updated = await res.json();
     setIntegrations(prev => prev.map(i => i.provider === provider ? updated : i));
   }
@@ -158,7 +169,8 @@ export default function SettingsPage() {
     const newStatus = integration.status === "mock" ? "disconnected" : "mock";
     const res = await fetch(`${API}/api/distribution-os/integrations/${integration.id}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      headers: writeHeaders(),
       body: JSON.stringify({ status: newStatus }),
     });
     if (res.ok) {
@@ -177,7 +189,8 @@ export default function SettingsPage() {
     if (!newLinkForm.label || !newLinkForm.destination) return;
     const res = await fetch(`${API}/api/distribution-os/linktree`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      headers: writeHeaders(),
       body: JSON.stringify({ ...newLinkForm, sortOrder: linktreeItems.length, isActive: true }),
     });
     const item = await res.json();
@@ -189,7 +202,8 @@ export default function SettingsPage() {
   async function updateLink(id: number, patch: Partial<LinktreeItem>) {
     const res = await fetch(`${API}/api/distribution-os/linktree/${id}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      headers: writeHeaders(),
       body: JSON.stringify(patch),
     });
     const updated = await res.json();
@@ -198,7 +212,7 @@ export default function SettingsPage() {
 
   async function deleteLink(id: number) {
     if (!confirm("Delete this link?")) return;
-    await fetch(`${API}/api/distribution-os/linktree/${id}`, { method: "DELETE" });
+    await fetch(`${API}/api/distribution-os/linktree/${id}`, { method: "DELETE", credentials: "include", headers: { "x-csrf-token": getCsrfToken() } });
     setLinktreeItems(prev => prev.filter(i => i.id !== id));
   }
 
@@ -211,8 +225,8 @@ export default function SettingsPage() {
     arr[target] = { ...a, sortOrder: b.sortOrder };
     setLinktreeItems(arr);
     await Promise.all([
-      fetch(`${API}/api/distribution-os/linktree/${a.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sortOrder: b.sortOrder }) }),
-      fetch(`${API}/api/distribution-os/linktree/${b.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sortOrder: a.sortOrder }) }),
+      fetch(`${API}/api/distribution-os/linktree/${a.id}`, { method: "PATCH", credentials: "include", headers: writeHeaders(), body: JSON.stringify({ sortOrder: b.sortOrder }) }),
+      fetch(`${API}/api/distribution-os/linktree/${b.id}`, { method: "PATCH", credentials: "include", headers: writeHeaders(), body: JSON.stringify({ sortOrder: a.sortOrder }) }),
     ]);
   }
 
@@ -227,7 +241,8 @@ export default function SettingsPage() {
       const r = RECOMMENDED_LINKTREE[i];
       const res = await fetch(`${API}/api/distribution-os/linktree`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        headers: writeHeaders(),
         body: JSON.stringify({ label: r.label, destination: r.destination, campaignTag: r.tag, sortOrder: i, isActive: true }),
       });
       const item = await res.json();

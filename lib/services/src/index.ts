@@ -151,6 +151,11 @@ export {
   type SPFxDeployedPackage,
 } from "./adapters/sharepoint-spfx.js";
 
+export { XTwitterAdapter, type XPostResult } from "./adapters/x-twitter.js";
+export { MediumAdapter, type MediumPublishResult } from "./adapters/medium.js";
+export { SubstackAdapter, type SubstackPublishResult } from "./adapters/substack.js";
+export { LinkedInAdapter, type LinkedInPostResult } from "./adapters/linkedin.js";
+
 export {
   HuggingFaceAdapter,
   type HFTextGenerationResult,

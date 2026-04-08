@@ -42,6 +42,10 @@ import { Dynamics365Adapter } from "./adapters/dynamics365.js";
 import { SharePointSPFxAdapter } from "./adapters/sharepoint-spfx.js";
 import { SalesforceAdapter } from "./adapters/salesforce.js";
 import { JiraAdapter } from "./adapters/jira.js";
+import { XTwitterAdapter } from "./adapters/x-twitter.js";
+import { MediumAdapter } from "./adapters/medium.js";
+import { SubstackAdapter } from "./adapters/substack.js";
+import { LinkedInAdapter } from "./adapters/linkedin.js";
 
 export interface IntegrationHealthMatrix {
   timestamp: string;
@@ -98,6 +102,10 @@ export class ServiceRegistry {
   readonly sharepointSpfx: SharePointSPFxAdapter;
   readonly salesforce: SalesforceAdapter;
   readonly jira: JiraAdapter;
+  readonly xTwitter: XTwitterAdapter;
+  readonly medium: MediumAdapter;
+  readonly substack: SubstackAdapter;
+  readonly linkedin: LinkedInAdapter;
 
   private readonly adapters: ServiceAdapter[];
 
@@ -145,6 +153,10 @@ export class ServiceRegistry {
     this.sharepointSpfx = new SharePointSPFxAdapter();
     this.salesforce = new SalesforceAdapter();
     this.jira = new JiraAdapter();
+    this.xTwitter = new XTwitterAdapter();
+    this.medium = new MediumAdapter();
+    this.substack = new SubstackAdapter();
+    this.linkedin = new LinkedInAdapter();
 
     this.adapters = [
       this.ai,
@@ -190,6 +202,10 @@ export class ServiceRegistry {
       this.sharepointSpfx,
       this.salesforce,
       this.jira,
+      this.xTwitter,
+      this.medium,
+      this.substack,
+      this.linkedin,
     ];
   }
 

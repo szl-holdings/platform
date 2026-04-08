@@ -165,7 +165,6 @@ const AlloyCanonicalDemos = lazy(() => import("@/alloy/pages/canonical-demos"));
 const AlloyPilotOnboarding = lazy(() => import("@/alloy/pages/pilot-onboarding"));
 const AlloyMcpStore = lazy(() => import("@/alloy/pages/mcp-store"));
 const AlloyMcpToolCreator = lazy(() => import("@/alloy/pages/mcp-tool-creator"));
-const HelmConsolePage = lazy(() => import("@/pages/helm-console"));
 const AcademyPage = lazy(() => import("@/pages/academy"));
 const HelpPage = lazy(() => import("@/pages/help"));
 const DemosPage = lazy(() => import("@/pages/demos"));

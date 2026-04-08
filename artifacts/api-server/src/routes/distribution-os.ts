@@ -583,6 +583,233 @@ router.post("/automation-runs/trigger/:jobType", requireAuth, async (req: Reques
   }
 });
 
+// ─── Publishing Endpoints ─────────────────────────────────────────────────────
+
+router.post("/x-posts/:id/publish", requireAuth, async (req: Request, res: Response) => {
+  const [post] = await db.select().from(dosXPostsTable).where(eq(dosXPostsTable.id, Number(req.params.id)));
+  if (!post) return res.status(404).json({ error: "X post not found" });
+  if (post.status === "sent") return res.status(400).json({ error: "Already published" });
+
+  try {
+    const { XTwitterAdapter } = await import("@szl-holdings/services");
+    const adapter = new XTwitterAdapter();
+
+    if (post.postType === "thread" && post.threadJson) {
+      const tweets = (post.threadJson as string[]);
+      const results = await adapter.postThread(tweets);
+      const firstResult = results[0];
+      if (!firstResult?.posted) {
+        await db.update(dosXPostsTable).set({ status: "failed", errorMessage: firstResult?.error || "Unknown error", retryCount: (post.retryCount || 0) + 1, updatedAt: new Date() }).where(eq(dosXPostsTable.id, post.id));
+        return res.status(502).json({ error: firstResult?.error, results });
+      }
+      const [updated] = await db.update(dosXPostsTable).set({
+        status: "sent", sentAt: new Date(), externalPostId: firstResult.externalPostId || null,
+        externalPostUrl: firstResult.externalPostUrl || null, errorMessage: null, updatedAt: new Date(),
+      }).where(eq(dosXPostsTable.id, post.id)).returning();
+      return res.json({ post: updated, results, mock: firstResult.mock });
+    }
+
+    const result = await adapter.postTweet(post.body);
+    if (!result.posted) {
+      await db.update(dosXPostsTable).set({ status: "failed", errorMessage: result.error || "Unknown error", retryCount: (post.retryCount || 0) + 1, updatedAt: new Date() }).where(eq(dosXPostsTable.id, post.id));
+      return res.status(502).json({ error: result.error });
+    }
+    const [updated] = await db.update(dosXPostsTable).set({
+      status: "sent", sentAt: new Date(), externalPostId: result.externalPostId || null,
+      externalPostUrl: result.externalPostUrl || null, errorMessage: null, updatedAt: new Date(),
+    }).where(eq(dosXPostsTable.id, post.id)).returning();
+    res.json({ post: updated, mock: result.mock });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    await db.update(dosXPostsTable).set({ status: "failed", errorMessage: msg, retryCount: (post.retryCount || 0) + 1, updatedAt: new Date() }).where(eq(dosXPostsTable.id, post.id));
+    res.status(500).json({ error: msg });
+  }
+});
+
+router.post("/articles/:id/publish-medium", requireAuth, async (req: Request, res: Response) => {
+  const [article] = await db.select().from(dosArticlesTable).where(eq(dosArticlesTable.id, Number(req.params.id)));
+  if (!article) return res.status(404).json({ error: "Article not found" });
+
+  try {
+    const { MediumAdapter } = await import("@szl-holdings/services");
+    const adapter = new MediumAdapter();
+    const content = article.bodyMarkdown || article.bodyHtml || "";
+    if (!content) return res.status(400).json({ error: "Article has no body content" });
+
+    const result = await adapter.publishArticle({
+      title: article.title,
+      content,
+      contentFormat: article.bodyMarkdown ? "markdown" : "html",
+      tags: article.tags as string[] || [],
+      publishStatus: (req.body.publishStatus as "public" | "draft" | "unlisted") || "draft",
+    });
+
+    if (!result.published) return res.status(502).json({ error: result.error });
+
+    const [updated] = await db.update(dosArticlesTable).set({
+      status: "published", mediumStatus: "published", externalUrlMedium: result.externalUrl || null, publishedMediumAt: new Date(), updatedAt: new Date(),
+    }).where(eq(dosArticlesTable.id, article.id)).returning();
+    res.json({ article: updated, mock: result.mock, externalUrl: result.externalUrl });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+router.post("/newsletters/:id/publish-substack", requireAuth, async (req: Request, res: Response) => {
+  const [nl] = await db.select().from(dosNewslettersTable).where(eq(dosNewslettersTable.id, Number(req.params.id)));
+  if (!nl) return res.status(404).json({ error: "Newsletter not found" });
+
+  try {
+    const { SubstackAdapter } = await import("@szl-holdings/services");
+    const adapter = new SubstackAdapter();
+    const body = nl.mainStoryMarkdown || nl.mainStoryHtml || "";
+    if (!body) return res.status(400).json({ error: "Newsletter has no body content" });
+
+    const result = await adapter.publishNewsletter({
+      title: nl.title,
+      subtitle: nl.subtitle || undefined,
+      body,
+      bodyFormat: nl.mainStoryMarkdown ? "markdown" : "html",
+    });
+
+    if (!result.published) return res.status(502).json({ error: result.error });
+
+    const [updated] = await db.update(dosNewslettersTable).set({
+      status: "published", substackUrl: result.externalUrl || null, updatedAt: new Date(),
+    }).where(eq(dosNewslettersTable.id, nl.id)).returning();
+    res.json({ newsletter: updated, mock: result.mock, externalUrl: result.externalUrl });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+router.post("/carousels/:id/publish-linkedin", requireAuth, async (req: Request, res: Response) => {
+  const [carousel] = await db.select().from(dosCarouselProjectsTable).where(eq(dosCarouselProjectsTable.id, Number(req.params.id)));
+  if (!carousel) return res.status(404).json({ error: "Carousel not found" });
+
+  try {
+    const { LinkedInAdapter } = await import("@szl-holdings/services");
+    const adapter = new LinkedInAdapter();
+    const caption = carousel.linkedinShortCaption || carousel.linkedinLongCaption || `${carousel.title} — by SZL Holdings`;
+
+    const result = await adapter.sharePost({
+      text: caption,
+      articleUrl: carousel.ctaUrl || undefined,
+      articleTitle: carousel.title,
+    });
+
+    if (!result.posted) return res.status(502).json({ error: result.error });
+
+    const [updated] = await db.update(dosCarouselProjectsTable).set({
+      status: "published", updatedAt: new Date(),
+    }).where(eq(dosCarouselProjectsTable.id, carousel.id)).returning();
+    res.json({ carousel: updated, mock: result.mock, externalUrl: result.externalUrl });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// ─── PDF Carousel Export ──────────────────────────────────────────────────────
+
+router.get("/carousels/:id/export-pdf", async (req: Request, res: Response) => {
+  const [carousel] = await db.select().from(dosCarouselProjectsTable).where(eq(dosCarouselProjectsTable.id, Number(req.params.id)));
+  if (!carousel) return res.status(404).json({ error: "Carousel not found" });
+
+  const slides = await db.select().from(dosCarouselSlidesTable).where(eq(dosCarouselSlidesTable.projectId, carousel.id)).orderBy(asc(dosCarouselSlidesTable.slideNumber));
+
+  try {
+    const PDFDocument = (await import("pdfkit")).default;
+    const doc = new PDFDocument({ size: [1080, 1080], margin: 0 });
+    const chunks: Buffer[] = [];
+    doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+
+    const bgColor = "#080c14";
+    const accentColor = "#d4a054";
+    const textColor = "#e8e4de";
+    const subtextColor = "#8b8579";
+
+    for (let i = 0; i < slides.length; i++) {
+      if (i > 0) doc.addPage();
+      const slide = slides[i];
+
+      doc.rect(0, 0, 1080, 1080).fill(bgColor);
+      doc.rect(0, 0, 1080, 6).fill(accentColor);
+      doc.rect(0, 1074, 1080, 6).fill(accentColor);
+
+      if (slide.slideType === "intro") {
+        if (slide.tagline) {
+          doc.font("Helvetica").fontSize(16).fillColor(accentColor);
+          doc.text(slide.tagline.toUpperCase(), 80, 300, { width: 920, align: "center", characterSpacing: 4 });
+        }
+        doc.font("Helvetica-Bold").fontSize(48).fillColor(textColor);
+        doc.text(slide.title || carousel.title, 80, 380, { width: 920, align: "center", lineGap: 8 });
+        if (slide.paragraph) {
+          doc.font("Helvetica").fontSize(20).fillColor(subtextColor);
+          doc.text(slide.paragraph, 120, 560, { width: 840, align: "center", lineGap: 6 });
+        }
+        doc.font("Helvetica").fontSize(14).fillColor(accentColor);
+        doc.text("SZL HOLDINGS", 80, 960, { width: 920, align: "center", characterSpacing: 3 });
+      } else if (slide.slideType === "outro") {
+        doc.font("Helvetica").fontSize(14).fillColor(accentColor);
+        doc.text((slide.tagline || "SZL HOLDINGS").toUpperCase(), 80, 280, { width: 920, align: "center", characterSpacing: 4 });
+        doc.font("Helvetica-Bold").fontSize(40).fillColor(textColor);
+        doc.text(slide.title || "Thank You", 80, 360, { width: 920, align: "center", lineGap: 8 });
+        if (slide.paragraph) {
+          doc.font("Helvetica").fontSize(20).fillColor(subtextColor);
+          doc.text(slide.paragraph, 120, 520, { width: 840, align: "center", lineGap: 6 });
+        }
+        if (slide.callToAction) {
+          doc.roundedRect(340, 700, 400, 56, 8).fill(accentColor);
+          doc.font("Helvetica-Bold").fontSize(18).fillColor(bgColor);
+          doc.text(slide.callToAction, 340, 716, { width: 400, align: "center" });
+        }
+        doc.font("Helvetica").fontSize(12).fillColor(subtextColor);
+        doc.text("szlholdings.com", 80, 960, { width: 920, align: "center" });
+      } else {
+        const slideNum = `${String(slide.slideNumber).padStart(2, "0")}`;
+        doc.font("Helvetica").fontSize(64).fillColor(accentColor).opacity(0.15);
+        doc.text(slideNum, 80, 80, { width: 920 });
+        doc.opacity(1);
+        doc.font("Helvetica-Bold").fontSize(36).fillColor(textColor);
+        doc.text(slide.title || "", 80, 260, { width: 920, lineGap: 6 });
+        doc.moveTo(80, 360).lineTo(200, 360).lineWidth(3).strokeColor(accentColor).stroke();
+        if (slide.paragraph) {
+          doc.font("Helvetica").fontSize(22).fillColor(subtextColor);
+          doc.text(slide.paragraph, 80, 400, { width: 920, lineGap: 8 });
+        }
+        doc.font("Helvetica").fontSize(12).fillColor(accentColor);
+        doc.text(`${slideNum} / ${String(slides.length).padStart(2, "0")}`, 80, 980, { width: 920, align: "right" });
+        doc.font("Helvetica").fontSize(11).fillColor(subtextColor);
+        doc.text("SZL HOLDINGS", 80, 980);
+      }
+    }
+
+    await new Promise<void>((resolve) => { doc.on("end", resolve); doc.end(); });
+    const pdfBuffer = Buffer.concat(chunks);
+    const filename = `${carousel.slug || "carousel"}.pdf`;
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.setHeader("Content-Length", pdfBuffer.length);
+    res.end(pdfBuffer);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// ─── Linktree Click Tracking ──────────────────────────────────────────────────
+
+router.post("/linktree/:id/click", async (req: Request, res: Response) => {
+  const [item] = await db.select().from(dosLinktreeConfigTable).where(eq(dosLinktreeConfigTable.id, Number(req.params.id)));
+  if (!item) return res.status(404).json({ error: "Link not found" });
+  await db.insert(dosAnalyticsEventsTable).values({
+    eventType: "linktree_click",
+    eventName: "link_click",
+    pagePath: "/link-in-bio",
+    metadata: { linkId: item.id, label: item.label, destination: item.destination, campaignTag: item.campaignTag },
+  });
+  res.json({ ok: true });
+});
+
 router.post("/analytics/event", async (req: Request, res: Response) => {
   const [event] = await db.insert(dosAnalyticsEventsTable).values(req.body).returning();
   res.status(201).json(event);
