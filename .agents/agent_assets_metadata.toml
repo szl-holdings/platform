@@ -162,6 +162,96 @@ uri = "file://screenshots/szl-holdings.png"
 type = "image"
 title = "generated_image"
 
+[[generated]]
+id = "daioziWVYVChLP9wkcZJ0"
+uri = "file://export/images/x-twitter-banner.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "d_jwkMPqz229shq-3-xKX"
+uri = "file://export/images/x-twitter-profile.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "7ZdBcNbWOulualE8GLKGB"
+uri = "file://export/images/medium-header.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "j7_pV5cqAjK2NLsD2sxU3"
+uri = "file://export/images/substack-banner.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "ZJeIYYE_cD6HNYrADgxUP"
+uri = "file://export/images/linktree-header.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "yjLgo5WXzIb_RoZhA5dtL"
+uri = "file://export/images/post-hero-16apps.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "_g31wupcXITIt-6ONpkb0"
+uri = "file://export/images/post-aegis.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "oID-psslyAyWm___PzzIo"
+uri = "file://export/images/post-vessels.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "4_HWd0wukdTliPA0Ny4G_"
+uri = "file://export/images/post-terra.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "2WPs4CmbkyQU3xxprNFyT"
+uri = "file://export/images/post-lyte.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "GyZhofbCaelvlRiVSDivm"
+uri = "file://export/images/post-prism.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "cEG4YEu2xLpO-Wc3P1Z6t"
+uri = "file://export/images/post-carlota-jo.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "1mYQgdhm7MoULhZCj1fAS"
+uri = "file://export/images/medium-ai-governance.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "0Cd-YrJDcgSB1e0aZ9nt6"
+uri = "file://export/images/medium-architecture.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "wiQE1iYRLNO9GDebJGfPp"
+uri = "file://export/images/post-metrics.png"
+type = "image"
+title = "generated_image"
+
 [[outputs]]
 id = "I_ORUhKS2b7MEVDwDdGWJ"
 uri = "file://social-content/banners/linkedin-7-lenses-banner.png"
@@ -178,4 +268,94 @@ title = "LinkedIn Header (1584×396)"
 id = "dbovTBGz_ZiuAT3OPiJei"
 uri = "file://export/SZL-Social-Media-Playbook.pdf"
 type = "pdf"
-title = "SZL Social Media Playbook — Complete (75 pages)"
+title = "SZL Social Media Playbook — 77 Pages + 18 Images"
+
+[[outputs]]
+id = "xzfKhgylpXzC8xEag0Zl0"
+uri = "file://export/images/x-twitter-banner.png"
+type = "image"
+title = "X/Twitter Banner"
+
+[[outputs]]
+id = "iO5Gheervc_ByXiZozRy3"
+uri = "file://export/images/x-twitter-profile.png"
+type = "image"
+title = "Profile Photo (Use Everywhere)"
+
+[[outputs]]
+id = "06iW5uI0rgm4BfrsnIimB"
+uri = "file://export/images/medium-header.png"
+type = "image"
+title = "Medium — Signal Over Noise Header"
+
+[[outputs]]
+id = "Y94-8OjpBdpJsfoa-4Wx-"
+uri = "file://export/images/substack-banner.png"
+type = "image"
+title = "Substack — Signal Over Noise Banner"
+
+[[outputs]]
+id = "oo4I8QswRhmRezbO7eYvl"
+uri = "file://export/images/linktree-header.png"
+type = "image"
+title = "Linktree Header"
+
+[[outputs]]
+id = "_ZIH1e7kW7OZzxuTMbHR5"
+uri = "file://export/images/post-hero-16apps.png"
+type = "image"
+title = "Post Image — 16 Apps. 1 Founder."
+
+[[outputs]]
+id = "uPR96sK3hNcNI25mZWcFW"
+uri = "file://export/images/post-aegis.png"
+type = "image"
+title = "Post Image — Aegis"
+
+[[outputs]]
+id = "bofW4QRwXpZLPeRhW61SA"
+uri = "file://export/images/post-vessels.png"
+type = "image"
+title = "Post Image — Vessels"
+
+[[outputs]]
+id = "9T1OTNpw_n0t8shA7LlVS"
+uri = "file://export/images/post-terra.png"
+type = "image"
+title = "Post Image — Terra"
+
+[[outputs]]
+id = "UWNu4NlRPeT_M79h0RnaA"
+uri = "file://export/images/post-lyte.png"
+type = "image"
+title = "Post Image — Lyte"
+
+[[outputs]]
+id = "8Ja4tR7MHl1NdR-VXFS18"
+uri = "file://export/images/post-prism.png"
+type = "image"
+title = "Post Image — PRISM Counsel"
+
+[[outputs]]
+id = "MUGRZFpQ6zqkfkYAiNQln"
+uri = "file://export/images/post-carlota-jo.png"
+type = "image"
+title = "Post Image — Carlota Jo"
+
+[[outputs]]
+id = "q4z3wPYTxNFJIPhsD92fv"
+uri = "file://export/images/post-metrics.png"
+type = "image"
+title = "Post Image — Year One Metrics"
+
+[[outputs]]
+id = "8iYJQZKKWKs1wZWHrFzCX"
+uri = "file://export/images/medium-ai-governance.png"
+type = "image"
+title = "Medium Article — AI Governance"
+
+[[outputs]]
+id = "2CyhT9rhGif265J0sEgzI"
+uri = "file://export/images/medium-architecture.png"
+type = "image"
+title = "Medium Article — The Compounding Architecture"
