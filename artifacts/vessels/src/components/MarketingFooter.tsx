@@ -69,6 +69,9 @@ export function MarketingFooter() {
             &copy; {new Date().getFullYear()} Vessels · SZL Holdings. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
+            <a href="https://x.com/szlholdings" target="_blank" rel="noopener noreferrer" className="text-sky-400/20 text-[12px] hover:text-sky-300/50 transition-colors">X</a>
+            <a href="https://linkedin.com/company/szlholdings" target="_blank" rel="noopener noreferrer" className="text-sky-400/20 text-[12px] hover:text-sky-300/50 transition-colors">LinkedIn</a>
+            <a href="https://medium.com/@stephen_38454" target="_blank" rel="noopener noreferrer" className="text-sky-400/20 text-[12px] hover:text-sky-300/50 transition-colors">Medium</a>
             {legalLinks.map((l) => (
               <Link key={l.label} href={l.href} className="text-sky-400/20 text-[12px] hover:text-sky-300/50 transition-colors">
                 {l.label}

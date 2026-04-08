@@ -72,7 +72,12 @@ export function Footer() {
           <div className="md:col-span-3">
             <h4 className="text-[10px] font-medium tracking-[0.22em] uppercase text-white/25 mb-4">Contact</h4>
             <p className="text-[13px] text-white/22 font-light mb-2">contact@stephenl.dev</p>
-            <a href="https://linkedin.com/in/stephen-l-279315240" target="_blank" rel="noopener noreferrer" className="text-[13px] text-white/22 hover:text-white/55 transition-colors font-light block">LinkedIn</a>
+            <div className="space-y-2">
+              <a href="https://linkedin.com/in/stephenlutar" target="_blank" rel="noopener noreferrer" className="text-[13px] text-white/22 hover:text-white/55 transition-colors font-light block">LinkedIn</a>
+              <a href="https://x.com/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[13px] text-white/22 hover:text-white/55 transition-colors font-light block">X / Twitter</a>
+              <a href="https://medium.com/@stephen_38454" target="_blank" rel="noopener noreferrer" className="text-[13px] text-white/22 hover:text-white/55 transition-colors font-light block">Medium</a>
+              <a href="https://szlholdings.substack.com" target="_blank" rel="noopener noreferrer" className="text-[13px] text-white/22 hover:text-white/55 transition-colors font-light block">Substack</a>
+            </div>
           </div>
         </div>
 

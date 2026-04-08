@@ -144,6 +144,14 @@ export default function Footer() {
             {t("footer.copyright", { year: new Date().getFullYear() })}
           </p>
           <div className="flex items-center gap-6">
+            <a href="https://x.com/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[11px] tracking-wider transition-colors" style={{ color: "var(--color-stone-400)", textDecoration: "none" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-ink-600)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-stone-400)"; }}
+            >X</a>
+            <a href="https://linkedin.com/company/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[11px] tracking-wider transition-colors" style={{ color: "var(--color-stone-400)", textDecoration: "none" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-ink-600)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-stone-400)"; }}
+            >LinkedIn</a>
             {legalLinks.map((link) => (
               <Link key={link.label} href={link.href} className="text-[11px] tracking-wider transition-colors" style={{ color: "var(--color-stone-400)", textDecoration: "none" }}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-ink-600)"; }}

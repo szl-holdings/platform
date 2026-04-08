@@ -4,56 +4,14 @@ import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdin
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
-import { OnboardingWizard, type OnboardingConfig, SandboxModeProvider, AnalyticsProvider } from "@szl-holdings/shared-ui";
+import { SandboxModeProvider, AnalyticsProvider } from "@szl-holdings/shared-ui";
 import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 import { useAuth } from "@szl-holdings/replit-auth-web";
-import { BookOpen, Users, Calendar, MessageSquare, FileText, Sparkles } from "lucide-react";
+import { Users, MessageSquare } from "lucide-react";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 
 const CARLOTA_ACCENT = LANE_ACCENT_HEX.carlotaJo.primary;
 
-const CARLOTA_ONBOARDING_CONFIG: OnboardingConfig = {
-  appId: "carlota-jo",
-  appName: "Carlota Jo Consulting",
-  accentColor: CARLOTA_ACCENT,
-  steps: [
-    {
-      id: "welcome",
-      title: "Welcome to Carlota Jo",
-      description: "Carlota Jo is a boutique consulting firm helping founders, operators, and organizations build with clarity, confidence, and strategic precision.",
-      placement: "center",
-      icon: Sparkles,
-    },
-    {
-      id: "services",
-      title: "Our Services",
-      description: "Explore the full range of advisory services — strategic consulting, brand positioning, operational design, and executive coaching tailored to your growth stage.",
-      placement: "center",
-      icon: BookOpen,
-    },
-    {
-      id: "client-portal",
-      title: "Client Portal",
-      description: "Your client portal gives you secure access to engagement documents, project updates, messages, and shared deliverables — all in one private workspace.",
-      placement: "center",
-      icon: FileText,
-    },
-    {
-      id: "book",
-      title: "Book a Consultation",
-      description: "Ready to start? Book a discovery call or kick off a new engagement directly through the platform — no back-and-forth emails required.",
-      placement: "center",
-      icon: Calendar,
-    },
-  ],
-  checklist: [
-    { id: "explore-services", label: "Explore the services", description: "See what engagements are available" },
-    { id: "book-consultation", label: "Book a consultation", description: "Schedule a discovery call" },
-    { id: "access-portal", label: "Access the client portal", description: "View your engagement documents" },
-    { id: "contact-team", label: "Send an inquiry", description: "Get in touch with Carlota Jo" },
-    { id: "view-approach", label: "Read about our approach", description: "Understand the consulting philosophy" },
-  ],
-};
 
 const Home = lazy(() => import("@/pages/PremiumHome"));
 const ServicesPage = lazy(() => import("@/pages/Services"));
@@ -213,7 +171,6 @@ function App() {
             appName="Carlota Jo"
             accentColor={CARLOTA_ACCENT}
           />
-          <OnboardingWizard config={CARLOTA_ONBOARDING_CONFIG} />
           <McpOverlay domain="carlota-jo" />
         </PowerUserProvider>
       </WouterRouter>

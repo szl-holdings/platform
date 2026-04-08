@@ -618,7 +618,14 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
               ))}
             </div>
           </div>
-          <p className="text-[10px] text-center sm:text-left" style={{ color: "rgba(255,255,255,0.08)" }}>&copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-[10px] text-center sm:text-left" style={{ color: "rgba(255,255,255,0.08)" }}>&copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
+            <div className="flex items-center gap-4">
+              <a href="https://x.com/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.1)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.1)")}>X</a>
+              <a href="https://linkedin.com/company/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.1)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.1)")}>LinkedIn</a>
+              <a href="https://medium.com/@stephen_38454" target="_blank" rel="noopener noreferrer" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.1)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.1)")}>Medium</a>
+            </div>
+          </div>
         </div>
       </footer>
     </div>

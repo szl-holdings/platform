@@ -319,9 +319,9 @@ export default function FirestormMarketingHome() {
                 <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center">
                   <Flame className="w-3.5 h-3.5 text-white" />
                 </div>
-                <span className="font-bold text-[14px]">Firestorm</span>
+                <span className="font-bold text-[14px]">Aegis</span>
               </div>
-              <p className="text-[12px] text-gray-500 leading-relaxed">Cyber defense command platform by SZL Holdings.</p>
+              <p className="text-[12px] text-gray-500 leading-relaxed">Unified defense and intelligence command by SZL Holdings.</p>
             </div>
             <div>
               <p className="text-[11px] font-semibold text-gray-400 tracking-[0.1em] uppercase mb-4">Platform</p>
@@ -357,6 +357,8 @@ export default function FirestormMarketingHome() {
           <div className="border-t border-white/5 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-[11px] text-gray-600">&copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
             <div className="flex gap-6">
+              <a href="https://x.com/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[11px] text-gray-600 hover:text-gray-400 transition-colors">X</a>
+              <a href="https://linkedin.com/company/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[11px] text-gray-600 hover:text-gray-400 transition-colors">LinkedIn</a>
               {["Privacy", "Terms", "Security"].map(l => (
                 <span key={l} className="text-[11px] text-gray-600 hover:text-gray-400 transition-colors cursor-pointer">{l}</span>
               ))}
