@@ -347,6 +347,9 @@ importers:
       '@szl-holdings/approvals':
         specifier: workspace:*
         version: link:../../lib/approvals
+      '@szl-holdings/atlas-artifacts':
+        specifier: workspace:*
+        version: link:../../lib/atlas-artifacts
       '@szl-holdings/audit':
         specifier: workspace:*
         version: link:../../lib/audit
@@ -380,6 +383,9 @@ importers:
       '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@szl-holdings/outcome-graph':
+        specifier: workspace:*
+        version: link:../../lib/outcome-graph
       '@szl-holdings/prism-bus':
         specifier: workspace:*
         version: link:../../lib/prism-bus
@@ -2821,6 +2827,25 @@ importers:
         specifier: 'catalog:'
         version: 25.3.5
 
+  lib/atlas-artifacts:
+    dependencies:
+      '@szl-holdings/db':
+        specifier: workspace:*
+        version: link:../db
+      '@szl-holdings/proof-chain':
+        specifier: workspace:*
+        version: link:../proof-chain
+      drizzle-orm:
+        specifier: 'catalog:'
+        version: 0.45.1(@types/pg@8.18.0)(pg@8.20.0)
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+
   lib/audit:
     dependencies:
       '@szl-holdings/db':
@@ -3020,6 +3045,22 @@ importers:
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14
+
+  lib/outcome-graph:
+    dependencies:
+      '@szl-holdings/db':
+        specifier: workspace:*
+        version: link:../db
+      drizzle-orm:
+        specifier: 'catalog:'
+        version: 0.45.1(@types/pg@8.18.0)(pg@8.20.0)
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
 
   lib/prism-bus:
     dependencies:

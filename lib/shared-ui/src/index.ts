@@ -88,6 +88,30 @@ export {
   type DecisionCardProps,
 } from "./alloy-decision-card";
 export {
+  OutcomeFeedbackBar,
+  OutcomeFeedbackCard,
+  OutcomeDashboard,
+  type OutcomeDecision,
+  type OutcomeFeedbackProps,
+  type OutcomeFeedbackBarProps,
+  type OutcomeDashboardProps,
+} from "./outcome-feedback";
+
+export {
+  AtlasArtifactCard,
+  AtlasArtifactViewer,
+  AtlasArtifactPanel,
+  type AtlasArtifactMeta,
+  type AtlasArtifactFull,
+  type AtlasArtifactSection,
+  type AtlasArtifactCardProps,
+  type AtlasArtifactViewerProps,
+  type AtlasArtifactPanelProps,
+  type AtlasTemplateType,
+  type AtlasExportFormat,
+} from "./atlas-artifact-panel";
+
+export {
   OperationalStatusBadge,
   OperationalRiskBadge,
   OperationalApprovalBadge,

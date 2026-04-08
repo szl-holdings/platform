@@ -113,6 +113,9 @@ import covenantPolicyApiRouter from "./covenant-policy-api";
 import receiptGraphRouter from "./receipt-graph";
 import pulseEvalsRouter from "./pulse-evals";
 import genAITelemetryRouter from "./genai-telemetry";
+import outcomeGraphRouter from "./outcome-graph";
+import atlasRouter from "./atlas-artifacts";
+import helmRouter from "./helm-console";
 
 const router: IRouter = Router();
 
@@ -423,5 +426,14 @@ router.use(pulseEvalsRouter);
 router.use("/genai-telemetry", _readLimiter);
 router.use("/genai-telemetry", _writeLimiter);
 router.use(genAITelemetryRouter);
+
+router.use("/outcome-graph", _writeLimiter);
+router.use(outcomeGraphRouter);
+
+router.use("/atlas", _writeLimiter);
+router.use(atlasRouter);
+
+router.use("/helm", _readLimiter);
+router.use(helmRouter);
 
 export default router;

@@ -82,6 +82,7 @@ const VESSELS_ONBOARDING_CONFIG: OnboardingConfig = {
 };
 
 // Marketing pages
+const VesselsAtlasArtifactsPage = lazy(() => import("@/pages/atlas-artifacts"));
 const MarketingHomePage = lazy(() => import("@/pages/marketing-home"));
 const MarketingPlatformPage = lazy(() => import("@/pages/marketing-platform"));
 const MarketingCapabilitiesPage = lazy(() => import("@/pages/marketing-capabilities"));
@@ -460,6 +461,7 @@ function DashboardRouter() {
         <Route path="/command-workflows" component={CommandWorkflowsPage} />
         <Route path="/document-engine" component={DocumentEngine} />
         <Route path="/document-engine/:sub" component={DocumentEngine} />
+        <Route path="/atlas-artifacts" component={VesselsAtlasArtifactsPage} />
         <Route path="/voyage-desk" component={VoyageDeskPage} />
         <Route path="/what-changed" component={FleetWhatChangedPage} />
         <Route path="/exception-queue" component={ExceptionQueuePage} />

@@ -35,6 +35,7 @@ function PageLoader() {
   );
 }
 
+const LyteAtlasArtifactsPage = lazy(() => import("@/pages/atlas-artifacts"));
 const ExecutiveCommand = lazy(() => import("@/pages/executive-command"));
 const BlockerBoard = lazy(() => import("@/pages/blocker-board"));
 const DigestCenter = lazy(() => import("@/pages/digest-center"));
@@ -203,6 +204,7 @@ function PrivateRouter() {
         <Route path="/outcome-loop" component={OutcomeLoop} />
         <Route path="/defer-lane" component={DeferLane} />
         <Route path="/shadow-mode" component={ShadowMode} />
+        <Route path="/atlas-artifacts" component={LyteAtlasArtifactsPage} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>

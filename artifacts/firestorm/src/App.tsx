@@ -31,6 +31,7 @@ import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardSh
 const AEGIS_ACCENT = LANE_ACCENT_HEX.aegis.primary;
 
 // ─── Security Operations pages (from Firestorm) ──────────────────────────────
+const AegisAtlasArtifactsPage = lazy(() => import("@/pages/atlas-artifacts"));
 const AegisMarketingHome = lazy(() => import("@/pages/aegis-home"));
 const AegisPricingPage = lazy(() => import("@/pages/aegis-pricing"));
 const EnterpriseDemo = lazy(() => import("@/pages/enterprise-demo"));
@@ -592,6 +593,7 @@ function AppRouter() {
         <Route path="/powerbi" component={PowerBiReport} />
         <Route path="/document-engine" component={DocumentEngine} />
         <Route path="/document-engine/:sub" component={DocumentEngine} />
+        <Route path="/atlas-artifacts" component={AegisAtlasArtifactsPage} />
 
         {/* Governance & Reporting (Phase 3) */}
         <Route path="/gov/operator-analytics" component={OperatorAnalytics} />

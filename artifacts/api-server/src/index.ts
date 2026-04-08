@@ -20,6 +20,7 @@ import { ensureExportJobsTable } from "./lib/export-migrations";
 import { ensureFeedbackTables } from "./lib/feedback-migrations";
 import { ensureTerraActionItemsTable } from "./lib/terra-action-items-migration";
 import { ensureTradecraftTables } from "./lib/tradecraft-migrations";
+import { ensureOutcomeGraphTables } from "./lib/outcome-graph-migrations";
 import "./lib/terra-nyc-ingestion";
 import { scheduleNycIngestionJob } from "./lib/terra-nyc-ingestion";
 import "./lib/terra-nyc-extended-ingestion";
@@ -92,6 +93,7 @@ ensureAlloyTables()
   .then(() => ensureFeedbackTables())
   .then(() => ensureTerraActionItemsTable())
   .then(() => ensureTradecraftTables())
+  .then(() => ensureOutcomeGraphTables())
   .then(() => knowledgeStore.loadFromDb())
   .then(() => {
     registerDefaultSchedules();

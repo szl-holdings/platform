@@ -161,6 +161,7 @@ const AlloyCanonicalDemos = lazy(() => import("@/alloy/pages/canonical-demos"));
 const AlloyPilotOnboarding = lazy(() => import("@/alloy/pages/pilot-onboarding"));
 const AlloyMcpStore = lazy(() => import("@/alloy/pages/mcp-store"));
 const AlloyMcpToolCreator = lazy(() => import("@/alloy/pages/mcp-tool-creator"));
+const HelmConsolePage = lazy(() => import("@/pages/helm-console"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -670,6 +671,12 @@ function App() {
             </Route>
             <Route path="/admin/:section">
               <RequireAuth><Suspense fallback={<PageLoader />}><AdminPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/helm">
+              <RequireAuth><Suspense fallback={<PageLoader />}><HelmConsolePage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/helm/:tab">
+              <RequireAuth><Suspense fallback={<PageLoader />}><HelmConsolePage /></Suspense></RequireAuth>
             </Route>
             <Route path="/ownership">
               <RequireAuth><Suspense fallback={<PageLoader />}><OwnershipOsPage /></Suspense></RequireAuth>

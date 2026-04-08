@@ -20,6 +20,7 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60_000, retry: 1 } },
 });
 
+const TerraAtlasArtifactsPage = lazy(() => import("@/pages/atlas-artifacts"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const DistressEngine = lazy(() => import("@/pages/distress-engine"));
 const Deals = lazy(() => import("@/pages/deals"));
@@ -110,6 +111,7 @@ function PrivateRouter() {
         <Route path="/powerbi" component={PowerBiReport} />
         <Route path="/document-engine" component={DocumentEngine} />
         <Route path="/document-engine/:sub" component={DocumentEngine} />
+        <Route path="/atlas-artifacts" component={TerraAtlasArtifactsPage} />
         <Route path="/pricing" component={TerraPerricingPage} />
         <Route path="/lender-report" component={LenderReport} />
         <Route path="/property-desk" component={PropertyDesk} />
