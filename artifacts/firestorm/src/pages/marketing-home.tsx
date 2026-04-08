@@ -92,9 +92,11 @@ export default function FirestormMarketingHome() {
             <span className="font-bold text-[15px] tracking-tight">Firestorm</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
-            {["Platform", "Capabilities", "Use Cases", "Security", "Pricing"].map(item => (
-              <a key={item} href={`#${item.toLowerCase().replace(/ /g, "-")}`} className="text-[13px] text-gray-400 hover:text-white transition-colors">{item}</a>
-            ))}
+            <a href="#platform" className="text-[13px] text-gray-400 hover:text-white transition-colors">Platform</a>
+            <a href="#capabilities" className="text-[13px] text-gray-400 hover:text-white transition-colors">Capabilities</a>
+            <Link href="/use-cases" className="text-[13px] text-gray-400 hover:text-white transition-colors">Use Cases</Link>
+            <Link href="/security" className="text-[13px] text-gray-400 hover:text-white transition-colors">Security</Link>
+            <Link href="/pricing" className="text-[13px] text-gray-400 hover:text-white transition-colors">Pricing</Link>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/" className="text-[13px] text-gray-400 hover:text-white transition-colors hidden sm:block">Sign In</Link>

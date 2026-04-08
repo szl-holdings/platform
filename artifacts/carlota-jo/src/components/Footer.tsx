@@ -2,12 +2,14 @@ import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
 
 const ecosystemLinks = [
-  { label: "SZL Holdings", href: "/" },
+  { label: "SZL Holdings", href: "/szl-holdings/" },
+  { label: "Trust Center", href: "/szl-holdings/trust" },
+  { label: "Architecture", href: "/szl-holdings/architecture" },
   { label: "Lyte", href: "/lyte-command-center/" },
   { label: "Vessels", href: "/vessels/" },
   { label: "Aegis", href: "/firestorm/" },
   { label: "Terra", href: "/terra/" },
-  { label: "Stephen Lutar", href: "/stephen/" },
+  { label: "PRISM Counsel", href: "/prism-counsel/marketing" },
 ];
 
 export default function Footer() {

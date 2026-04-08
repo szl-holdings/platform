@@ -120,8 +120,8 @@ export default function AegisHomePage() {
             <span className="hidden sm:inline text-[9px] tracking-[0.15em] uppercase text-white/15 font-mono ml-1">Defense & Intelligence</span>
           </div>
           <div className="hidden md:flex items-center gap-7">
-            {[{ label: "Architecture", href: "#architecture" }, { label: "Convergence", href: "#convergence" }, { label: "Operating Model", href: "#model" }].map(l => (
-              <a key={l.label} href={l.href} className="text-[11px] text-white/30 hover:text-white/60 transition-colors tracking-[0.08em] uppercase font-medium">{l.label}</a>
+            {[{ label: "Use Cases", href: "/use-cases" }, { label: "Security", href: "/security" }, { label: "Pricing", href: "/pricing" }].map(l => (
+              <Link key={l.label} href={l.href}><span className="text-[11px] text-white/30 hover:text-white/60 transition-colors tracking-[0.08em] uppercase font-medium cursor-pointer">{l.label}</span></Link>
             ))}
             <Link href="/soc">
               <span className="text-[12px] font-semibold text-white bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] rounded-lg px-5 py-1.5 transition-all cursor-pointer">Enter Platform</span>
@@ -135,8 +135,8 @@ export default function AegisHomePage() {
 
       {mobileNav && (
         <div className="fixed inset-0 z-40 bg-[#080a10]/98 backdrop-blur-xl flex flex-col items-center justify-center gap-8 md:hidden">
-          {[{ label: "Architecture", href: "#architecture" }, { label: "Convergence", href: "#convergence" }, { label: "Operating Model", href: "#model" }].map(l => (
-            <a key={l.label} href={l.href} onClick={() => setMobileNav(false)} className="text-lg text-white/50 hover:text-white tracking-wide transition-colors">{l.label}</a>
+          {[{ label: "Use Cases", href: "/use-cases" }, { label: "Security", href: "/security" }, { label: "Pricing", href: "/pricing" }].map(l => (
+            <Link key={l.label} href={l.href}><span onClick={() => setMobileNav(false)} className="text-lg text-white/50 hover:text-white tracking-wide transition-colors cursor-pointer">{l.label}</span></Link>
           ))}
           <Link href="/soc">
             <span className="mt-4 text-sm font-semibold text-white bg-white/[0.08] rounded-lg px-8 py-3 cursor-pointer" onClick={() => setMobileNav(false)}>Enter Platform</span>

@@ -144,6 +144,37 @@ Five intelligence tradecraft feature pages added to Aegis and Aegis Mobile. All 
 - **GitHub Profile:** `profile-readme/README.md` with metrics table, ASCII architecture, founder-card SVG.
 - **Brand Mark:** Gold-gradient SZL monogram (`#d4a054→#b8862c`) used across all founder/about pages; no face photo.
 
+### Task #351 — Competitor-Grade Marketing Pages Across All 6 Product Apps
+All 6 product marketing pages elevated to competitor-grade quality with consistent structure.
+
+**PRISM Counsel (`artifacts/prism-counsel`):**
+- New full marketing landing at `/prism-counsel/marketing` (`pages/marketing-landing.tsx`)
+- Sections: hero, PRISM 6-lens framework (P/R/I/S/M/G), 8 capabilities, 4 practice modules (No-Fault/PI/Commercial/Mass Tort), 3 use cases, proof metrics, trust/governance, 3 pricing tiers, SZL cross-links
+- Route registered in `prism-counsel-app.tsx`
+
+**Aegis / Firestorm (`artifacts/firestorm`):**
+- New `pages/aegis-use-cases.tsx` at `/use-cases`: 4 customer segments (Enterprise/MSSP/Government/Cloud-Native) with tabbed layout, outcome metrics per segment, and testimonials
+- New `pages/aegis-trust.tsx` at `/security`: SOC 2, ISO 27001, CMMC compliance frameworks, 6 security control categories, pen testing process, shared responsibility model
+- Both routes added to `MARKETING_ROUTES` array and the public Switch block in App.tsx (no auth gate required)
+
+**Carlota Jo (`artifacts/carlota-jo`):**
+- Rewrote `components/Proof.tsx`: 4 outcome pillars (< 6 weeks clarity, 4 continents, 100% principal-led, 0 disclosed), 4 documented anonymized engagement outcomes with quantified results, 6 testimonials
+- Footer updated with SZL Trust Center and PRISM Counsel cross-links
+
+**Terra (`artifacts/terra`):**
+- Added social proof section to `pages/marketing-landing.tsx` before footer: 4 outcome metrics (3×, 18%, $2.4M, <30 min), 3 client testimonials, SZL cross-links (Trust Center, Architecture)
+
+**Lyte Command Center (`artifacts/lyte-command-center`):**
+- Added social proof section to `pages/marketing-landing.tsx`: 4 outcome metrics, 3 testimonials, SZL cross-links (Holdings, Trust Center, Architecture, cross-product links)
+
+**Vessels (`artifacts/vessels`):**
+- Added social proof section to marketing page: 4 outcome metrics, 3 testimonials, SZL social proof callout panel, SZL cross-links
+
+**Cross-link standard (all products link to):**
+- `/szl-holdings/` — SZL Holdings home
+- `/szl-holdings/trust` — Trust Center  
+- `/szl-holdings/architecture` — Architecture page
+
 ## External Dependencies
 - **Database:** PostgreSQL
 - **Authentication:** Replit Auth

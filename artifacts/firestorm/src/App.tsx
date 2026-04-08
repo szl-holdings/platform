@@ -34,6 +34,8 @@ const AEGIS_ACCENT = LANE_ACCENT_HEX.aegis.primary;
 const AegisAtlasArtifactsPage = lazy(() => import("@/pages/atlas-artifacts"));
 const AegisMarketingHome = lazy(() => import("@/pages/aegis-home"));
 const AegisPricingPage = lazy(() => import("@/pages/aegis-pricing"));
+const AegisUseCasesPage = lazy(() => import("@/pages/aegis-use-cases"));
+const AegisTrustPage = lazy(() => import("@/pages/aegis-trust"));
 const EnterpriseDemo = lazy(() => import("@/pages/enterprise-demo"));
 const SOCDashboard = lazy(() => import("@/pages/soc-dashboard"));
 const ThreatIntelligence = lazy(() => import("@/pages/threat-intelligence"));
@@ -558,6 +560,8 @@ function AppRouter() {
       <Switch>
         {/* Aegis Home & Enterprise */}
         <Route path="/home" component={AegisMarketingHome} />
+        <Route path="/use-cases" component={AegisUseCasesPage} />
+        <Route path="/security" component={AegisTrustPage} />
         <Route path="/demo" component={EnterpriseDemo} />
         {/* Command Surfaces (Phase 1) */}
         <Route path="/command-home" component={CommandHome} />
@@ -719,7 +723,7 @@ const aegisShortcuts: KeyboardShortcut[] = [
   { key: "E", description: "Go to Intelligence Dashboard", category: "Intelligence" },
 ];
 
-const MARKETING_ROUTES = ["/", "/home", "/demo"];
+const MARKETING_ROUTES = ["/", "/home", "/demo", "/use-cases", "/security", "/pricing"];
 
 function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -739,7 +743,10 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
       <Suspense fallback={<PageLoader />}>
         <Switch>
           <Route path="/home" component={AegisMarketingHome} />
+          <Route path="/use-cases" component={AegisUseCasesPage} />
+          <Route path="/security" component={AegisTrustPage} />
           <Route path="/demo" component={EnterpriseDemo} />
+          <Route path="/pricing" component={AegisPricingPage} />
           <Route path="/" component={AegisMarketingHome} />
         </Switch>
         <Toaster />

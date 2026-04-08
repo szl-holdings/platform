@@ -520,6 +520,74 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
         </div>
       </section>
 
+      {/* SOCIAL PROOF */}
+      <section className="py-24 sm:py-32 px-6" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+        <div className="max-w-[1100px] mx-auto">
+          <Reveal>
+            <div className="max-w-[560px] mb-14">
+              <p className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-4 font-mono" style={{ color: "rgba(255,255,255,0.18)" }}>Documented Results</p>
+              <h2 className="text-[clamp(1.5rem,3.5vw,2.4rem)] font-bold leading-[1.15] tracking-tight text-white mb-4">
+                Real operators. Real outcomes.
+              </h2>
+              <p className="text-[15px] leading-[1.85]" style={{ color: "rgba(255,255,255,0.28)" }}>
+                From individual investors to acquisition teams at private equity firms — these are the results Terra delivers in production environments.
+              </p>
+            </div>
+          </Reveal>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
+            {[
+              { metric: "3×", label: "Faster deal sourcing", detail: "Operators move from market research to qualified pipeline in 3× less time vs. manual processes." },
+              { metric: "18%", label: "Higher off-market ratio", detail: "Average improvement in off-market acquisitions vs. MLS-first sourcing strategies." },
+              { metric: "$2.4M", label: "Average pipeline value at setup", detail: "Typical pipeline value tracked within 60 days of first deployment, across all tiers." },
+              { metric: "< 30 min", label: "Time to first distress lead", detail: "From platform connection to first ranked distress opportunity — typically under 30 minutes." },
+            ].map((p, i) => (
+              <Reveal key={p.label} delay={i * 60}>
+                <div className="p-7 rounded-xl h-full" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                  <span className="text-[2.5rem] font-extrabold font-mono block mb-2" style={{ color: ACCENT_LIGHT }}>{p.metric}</span>
+                  <p className="text-[12px] font-bold text-white mb-2">{p.label}</p>
+                  <p className="text-[11px] leading-[1.75]" style={{ color: "rgba(255,255,255,0.3)" }}>{p.detail}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
+            {[
+              { quote: "I was spending 2 hours every morning pulling from ACRIS, PropStream, and two other tools. Terra replaced all of it. I get to actual deals before the competition does.", attribution: "Acquisition Lead, NYC Investor Group", context: "50-unit portfolio, Brooklyn / Queens focus" },
+              { quote: "The LLC unmasking alone is worth the subscription. We identified three beneficial owners that weren't visible in any other database we had access to. All three deals closed.", attribution: "Principal, Real Estate Private Equity", context: "Series of distressed multi-family acquisitions" },
+              { quote: "Our team went from 6 properties in active pipeline to 34 in the first month. The distress scoring is genuinely predictive — not just a filtered public records list.", attribution: "Director of Acquisitions, Opportunity Zone Fund", context: "Bronx and Upper Manhattan market coverage" },
+            ].map((t, i) => (
+              <Reveal key={i} delay={i * 60}>
+                <div className="p-7 rounded-xl h-full" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                  <p className="text-[14px] leading-[1.85] mb-5 italic" style={{ color: "rgba(255,255,255,0.55)" }}>"{t.quote}"</p>
+                  <p className="text-[12px] font-semibold text-white mb-0.5">{t.attribution}</p>
+                  <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.25)" }}>{t.context}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+
+          <Reveal>
+            <div className="p-6 rounded-xl" style={{ background: "rgba(45,106,79,0.03)", border: "1px solid rgba(45,106,79,0.08)" }}>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <p className="text-[13px] font-semibold text-white mb-1">Part of the SZL Holdings platform family</p>
+                  <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.3)" }}>
+                    Terra runs on the SZL shared security and data infrastructure — SOC 2 compliant, enterprise-grade.{" "}
+                    <a href="/szl-holdings/trust" className="underline" style={{ color: "rgba(64,133,106,0.7)" }}>View Trust Center →</a>
+                  </p>
+                </div>
+                <div className="flex gap-3 shrink-0">
+                  <a href="/szl-holdings/" className="text-[11px] px-3 py-1.5 rounded-lg" style={{ color: "rgba(255,255,255,0.35)", border: "1px solid rgba(255,255,255,0.08)" }}>SZL Holdings →</a>
+                  <a href="/szl-holdings/architecture" className="text-[11px] px-3 py-1.5 rounded-lg" style={{ color: "rgba(255,255,255,0.35)", border: "1px solid rgba(255,255,255,0.08)" }}>Architecture →</a>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
       {/* FOOTER */}
       <footer className="border-t px-6 py-10" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
         <div className="max-w-[1100px] mx-auto flex flex-col gap-6">

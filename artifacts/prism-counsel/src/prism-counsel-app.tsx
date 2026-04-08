@@ -36,6 +36,7 @@ const PrismApprovals = lazy(() => import("./pages/approvals-page"));
 const PrismCopilot = lazy(() => import("./pages/copilot-page"));
 const PrismParties = lazy(() => import("./pages/parties-page"));
 const PrismTrust = lazy(() => import("./pages/trust-page"));
+const PrismMarketingLanding = lazy(() => import("./pages/marketing-landing"));
 const PrismAdmin = lazy(() => import("./pages/admin-page"));
 const PrismWatchlist = lazy(() => import("./pages/watchlist-page"));
 const PrismInsurerIntel = lazy(() => import("./pages/insurer-intel-page"));
@@ -139,6 +140,11 @@ function MatterDeskV2Wrapper() {
 function PrismCounselRoutes() {
   return (
     <Switch>
+      {/* ── Marketing landing page ── */}
+      <Route path="/prism-counsel/marketing">
+        <Suspense fallback={<PageLoader />}><PrismMarketingLanding /></Suspense>
+      </Route>
+
       {/* ── Canonical enterprise IA routes (new top-level contract) ── */}
       {/* /overview → dashboard */}
       <Route path="/prism-counsel/overview">
