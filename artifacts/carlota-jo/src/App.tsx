@@ -9,6 +9,7 @@ import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { Users, MessageSquare } from "lucide-react";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
+import { GenomeProvider } from "@/context/GenomeContext";
 
 const CARLOTA_ACCENT = LANE_ACCENT_HEX.carlotaJo.primary;
 
@@ -47,6 +48,11 @@ const BrandAudit = lazy(() => import("@/pages/brand-audit"));
 const ContentStrategy = lazy(() => import("@/pages/content-strategy"));
 const DocumentEngine = lazy(() => import("@/pages/document-engine"));
 const MethodologyPage = lazy(() => import("@/pages/methodology"));
+const PreferenceGenome = lazy(() => import("@/pages/preference-genome"));
+const AnticipationEngine = lazy(() => import("@/pages/anticipation-engine"));
+const RhythmCalendar = lazy(() => import("@/pages/rhythm-calendar"));
+const SummaryComposer = lazy(() => import("@/pages/summary-composer"));
+const DiscretionScore = lazy(() => import("@/pages/discretion-score"));
 
 function PageLoader() {
   return (
@@ -128,6 +134,11 @@ function Router() {
         <Route path="/content-strategy" component={ContentStrategy} />
         <Route path="/document-engine" component={DocumentEngine} />
         <Route path="/document-engine/:sub" component={DocumentEngine} />
+        <Route path="/preference-genome" component={PreferenceGenome} />
+        <Route path="/anticipation" component={AnticipationEngine} />
+        <Route path="/rhythm-calendar" component={RhythmCalendar} />
+        <Route path="/summary-composer" component={SummaryComposer} />
+        <Route path="/discretion" component={DiscretionScore} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
@@ -162,7 +173,9 @@ function App() {
             <div style={{ position: "fixed", top: 12, right: 16, zIndex: 9999 }}>
               <UserButton />
             </div>
-            <Router />
+            <GenomeProvider>
+              <Router />
+            </GenomeProvider>
           </div>
           <CommandPalette
             open={cmdOpen}
