@@ -38,13 +38,13 @@ router.get("/today", async (_req: Request, res: Response) => {
       db.select().from(pcMattersTable)
         .where(and(eq(pcMattersTable.orgId, ORG_ID), eq(pcMattersTable.status, "active" as any))),
       db.select().from(pcDeadlinesTable)
-        .where(and(eq(pcDeadlinesTable.orgId as any, ORG_ID), sql`${pcDeadlinesTable.dueDate} <= ${threeDays}`, sql`${pcDeadlinesTable.dueDate} >= NOW()`, eq(pcDeadlinesTable.status, "active" as any)))
+        .where(and(sql`${pcDeadlinesTable.dueDate} <= ${threeDays}`, sql`${pcDeadlinesTable.dueDate} >= NOW()`, eq(pcDeadlinesTable.status, "active" as any)))
         .orderBy(pcDeadlinesTable.dueDate),
       db.select().from(pcDeadlinesTable)
-        .where(and(eq(pcDeadlinesTable.orgId as any, ORG_ID), sql`${pcDeadlinesTable.dueDate} <= ${fiveDays}`, sql`${pcDeadlinesTable.dueDate} >= NOW()`, eq(pcDeadlinesTable.status, "active" as any)))
+        .where(and(sql`${pcDeadlinesTable.dueDate} <= ${fiveDays}`, sql`${pcDeadlinesTable.dueDate} >= NOW()`, eq(pcDeadlinesTable.status, "active" as any)))
         .orderBy(pcDeadlinesTable.dueDate),
       db.select().from(pcDeadlinesTable)
-        .where(and(eq(pcDeadlinesTable.orgId as any, ORG_ID), sql`${pcDeadlinesTable.dueDate} <= ${tenDays}`, sql`${pcDeadlinesTable.dueDate} >= NOW()`, eq(pcDeadlinesTable.status, "active" as any)))
+        .where(and(sql`${pcDeadlinesTable.dueDate} <= ${tenDays}`, sql`${pcDeadlinesTable.dueDate} >= NOW()`, eq(pcDeadlinesTable.status, "active" as any)))
         .orderBy(pcDeadlinesTable.dueDate),
       db.select().from(pcSignoffQueueTable)
         .where(and(eq(pcSignoffQueueTable.orgId, ORG_ID), eq(pcSignoffQueueTable.status, "pending"))),
