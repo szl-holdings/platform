@@ -2,18 +2,21 @@ import { Link } from "wouter";
 
 const nav = [
   { label: "Ecosystem", href: "/ecosystem", external: false },
-  { label: "Alloy", href: "/alloy/", external: true },
   { label: "Lyte", href: "/lyte-command-center/", external: true },
   { label: "Vessels", href: "/vessels/", external: true },
-  { label: "Trust", href: "/trust", external: false },
-  { label: "Status", href: "/status", external: false },
+  { label: "Aegis", href: "/firestorm/", external: true },
+  { label: "Terra", href: "/terra/", external: true },
+  { label: "PRISM Counsel", href: "/prism-counsel/", external: true },
+  { label: "Alloy", href: "/alloy/", external: true },
+  { label: "Insights", href: "/insights", external: false },
   { label: "Founder", href: "/founder", external: false },
   { label: "Contact", href: "/contact", external: false },
 ];
 
 const legal = [
-  { label: "Privacy", href: "/contact" },
-  { label: "Terms", href: "/contact" },
+  { label: "Privacy", href: "/legal/privacy" },
+  { label: "Terms", href: "/legal/terms" },
+  { label: "Security", href: "/security" },
 ];
 
 export function Footer() {
@@ -83,7 +86,7 @@ export function Footer() {
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <p style={{ fontSize: "11.5px", color: "hsl(210,5%,38%)" }}>
-            © {new Date().getFullYear()} SZL Holdings. All rights reserved.
+            © 2026 SZL Holdings. All rights reserved.
           </p>
           <div style={{ display: "flex", gap: "1.25rem" }}>
             {legal.map((item) => (

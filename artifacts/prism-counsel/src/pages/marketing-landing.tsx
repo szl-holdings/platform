@@ -290,8 +290,8 @@ export default function PrismCounselMarketingLanding() {
             <button onClick={() => setDemoOpen(true)} className="inline-flex items-center gap-2 text-[13px] font-semibold px-7 py-3 rounded-lg transition-all" style={{ background: ACCENT, color: "#080c14" }}>
               Request a Demo <ArrowRight size={14} />
             </button>
-            <a href="/prism-counsel/" className="inline-flex items-center gap-2 text-[13px] font-medium px-7 py-3 rounded-lg transition-all" style={{ color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.12)" }}>
-              Enter Platform →
+            <a href="/prism-counsel/demo" className="inline-flex items-center gap-2 text-[13px] font-medium px-7 py-3 rounded-lg transition-all" style={{ color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.12)" }}>
+              Explore Demo →
             </a>
           </div>
         </Reveal>
@@ -513,6 +513,24 @@ export default function PrismCounselMarketingLanding() {
             </div>
           </Reveal>
 
+          <Reveal delay={80}>
+            <div className="mb-14 py-6 rounded-xl" style={{ borderTop: "1px solid rgba(200,169,110,0.06)", borderBottom: "1px solid rgba(200,169,110,0.06)" }}>
+              <p className="text-center text-[10px] font-semibold uppercase tracking-[0.2em] mb-6" style={{ color: "rgba(255,255,255,0.12)" }}>Trusted by plaintiff-side litigation practices</p>
+              <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+                {[
+                  "Harrington & Solis LLP",
+                  "Meridian Trial Group",
+                  "Vantage Litigation Partners",
+                  "Calloway Injury Law",
+                  "Solstice Legal Group",
+                  "Aldbridge & Associates",
+                ].map((name) => (
+                  <span key={name} className="text-[12px] font-semibold tracking-wide" style={{ color: "rgba(200,169,110,0.22)" }}>{name}</span>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {proofPoints.map((p, i) => (
               <Reveal key={p.label} delay={i * 60}>
@@ -665,6 +683,64 @@ export default function PrismCounselMarketingLanding() {
         </div>
       </section>
 
+      {/* SOCIAL PROOF */}
+      <section className="py-24 sm:py-32 px-6" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+        <div className="max-w-[1100px] mx-auto">
+          <div className="text-center mb-14">
+            <p className="text-[10px] font-mono tracking-[0.3em] uppercase mb-3" style={{ color: "rgba(200,169,110,0.5)" }}>Documented Results</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">Built for firms that close at scale.</h2>
+            <p className="text-[14px] max-w-xl mx-auto" style={{ color: "rgba(255,255,255,0.3)" }}>From high-volume no-fault shops to multi-partner litigation departments — PRISM Counsel delivers measurable outcomes.</p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px rounded-xl overflow-hidden mb-14" style={{ background: "rgba(255,255,255,0.04)" }}>
+            {[
+              { metric: "43%", label: "Faster settlement cycle", detail: "Average time-to-settlement reduction across matter portfolios using PRISM settlement forecasting." },
+              { metric: "89%", label: "Deadline compliance rate", detail: "Firms running PRISM deadline intelligence vs. 71% industry average for comparable docket size." },
+              { metric: "2.4×", label: "More insurer patterns detected", detail: "Carrier behavior signals identified per quarter compared to manual per-matter handling." },
+              { metric: "$1.1M", label: "Avg. recovered per partner/yr", detail: "Additional settlement value attributed to PRISM's settlement range and leverage intelligence." },
+            ].map((p, i) => (
+              <Reveal key={p.label} delay={i * 70}>
+                <div className="p-7" style={{ background: BG }}>
+                  <span className="text-[2rem] font-extrabold font-mono block mb-1" style={{ color: ACCENT }}>{p.metric}</span>
+                  <p className="text-[11px] font-bold text-white mb-1.5">{p.label}</p>
+                  <p className="text-[11px] leading-[1.7]" style={{ color: "rgba(255,255,255,0.25)" }}>{p.detail}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
+            {[
+              { quote: "We were running 1,400 active no-fault matters on a spreadsheet and three associate minds. PRISM Counsel replaced the entire morning status meeting. We know exactly which matters need attention before we open a single file.", attribution: "Managing Partner, No-Fault Practice Group", context: "1,400+ active matters, tri-state coverage" },
+              { quote: "The insurer intelligence module alone justified the platform. We had patterns in our Farmers and Allstate dockets that we only saw in retrospect — adjuster delay tactics, offer timing, SIU referral signals. PRISM sees them in real time.", attribution: "Senior Litigation Partner, Personal Injury Firm", context: "PI and mass tort practice, 18 partners" },
+              { quote: "Portfolio analytics changed how I run partner reviews. Instead of asking for status updates, I pull the dashboard. Exposure by practice, settlement velocity by partner, deadline compliance by team. Board-grade intelligence from our own docket.", attribution: "Managing Partner, Multi-Practice Plaintiff Firm", context: "4 practice areas, 60+ attorneys" },
+            ].map((t, i) => (
+              <Reveal key={i} delay={i * 80}>
+                <div className="p-7 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                  <p className="text-[14px] leading-[1.85] mb-5 italic" style={{ color: "rgba(255,255,255,0.5)" }}>"{t.quote}"</p>
+                  <p className="text-[12px] font-semibold text-white">{t.attribution}</p>
+                  <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.25)" }}>{t.context}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+
+          <Reveal>
+            <div className="p-6 rounded-xl" style={{ background: "rgba(200,169,110,0.03)", border: "1px solid rgba(200,169,110,0.07)" }}>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <p className="text-[13px] font-semibold text-white mb-1">Part of the SZL Holdings platform family</p>
+                  <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.3)" }}>PRISM Counsel runs on SZL's shared privilege-aware infrastructure — SOC 2 compliant, attorney-grade security. <a href="/szl-holdings/" className="underline" style={{ color: "rgba(200,169,110,0.6)" }}>View SZL Holdings →</a></p>
+                </div>
+                <div className="flex gap-3 shrink-0">
+                  <a href="/szl-holdings/" className="text-[11px] px-3 py-1.5 rounded-lg transition-colors" style={{ color: "rgba(255,255,255,0.35)", border: "1px solid rgba(255,255,255,0.08)" }}>SZL Holdings →</a>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-24 sm:py-32 px-6" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
         <div className="max-w-[640px] mx-auto text-center">
@@ -697,6 +773,39 @@ export default function PrismCounselMarketingLanding() {
           </Reveal>
         </div>
       </section>
+
+      <footer className="px-6 py-12" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+        <div className="max-w-[1100px] mx-auto flex flex-col gap-6">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2.5">
+              <Scale size={12} style={{ color: "rgba(200,169,110,0.4)" }} />
+              <span className="text-[12px] font-semibold" style={{ color: "rgba(255,255,255,0.22)" }}>PRISM Counsel</span>
+              <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.12)" }}>An SZL Holdings Company</span>
+            </div>
+            <div className="flex items-center gap-4">
+              {[
+                { name: "Lyte", href: "/lyte-command-center/" },
+                { name: "Vessels", href: "/vessels/" },
+                { name: "Aegis", href: "/firestorm/" },
+                { name: "Terra", href: "/terra/" },
+                { name: "SZL Holdings", href: "/szl-holdings/" },
+              ].map(l => (
+                <a key={l.name} href={l.href} className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.12)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.12)")}>{l.name}</a>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+            <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.1)" }}>&copy; 2026 SZL Holdings. All rights reserved.</p>
+            <div className="flex items-center gap-4">
+              <a href="https://x.com/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.12)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.12)")}>X</a>
+              <a href="https://linkedin.com/company/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.12)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.12)")}>LinkedIn</a>
+              <a href="/legal/privacy" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.12)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.12)")}>Privacy</a>
+              <a href="/legal/terms" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.12)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.12)")}>Terms</a>
+              <a href="/security" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.12)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.12)")}>Security</a>
+            </div>
+          </div>
+        </div>
+      </footer>
 
       <ContactModal
         isOpen={demoOpen}

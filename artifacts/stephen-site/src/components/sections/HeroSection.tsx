@@ -24,6 +24,7 @@ const fallbackApps = [
   { name: "Vessels", slug: "vessels", status: "operational", description: "Maritime Intelligence" },
   { name: "Aegis", slug: "aegis", status: "operational", description: "Defense & Intelligence" },
   { name: "Terra", slug: "terra", status: "operational", description: "Real Estate Intelligence" },
+  { name: "PRISM Counsel", slug: "prism-counsel", status: "operational", description: "Legal Intelligence" },
   { name: "Carlota Jo", slug: "carlota-jo", status: "operational", description: "Private Advisory" },
 ];
 
@@ -34,6 +35,7 @@ const brandColors: Record<string, string> = {
   "aegis": "hsl(232,68%,60%)",
   "firestorm": "hsl(232,68%,60%)",
   "terra": "hsl(140,56%,40%)",
+  "prism-counsel": "hsl(38,62%,56%)",
   "carlota-jo": "hsl(38,55%,58%)",
 };
 

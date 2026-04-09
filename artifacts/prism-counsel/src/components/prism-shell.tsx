@@ -7,13 +7,77 @@ import {
   DollarSign, BarChart3, Zap, AlertTriangle, Building2, MapPin, Plug,
   Server, Radio, Gauge, Waves, Car, Move, ClipboardList, ClipboardCheck,
   ShieldAlert, XCircle, Archive, RefreshCw, Gavel, BookOpen, Star, Command,
-  X, ArrowRight, ChevronDown, ChevronUp, Menu
+  X, ArrowRight, ChevronDown, ChevronUp, Menu, LayoutGrid
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const PRISM_GOLD = "#c8a96e";
 const PRISM_BLUE = "#4a8ab0";
 const PRISM_RED = "#b85a4a";
+
+const ECOSYSTEM_PLATFORMS = [
+  { name: "SZL Holdings", href: "/szl-holdings/", accent: "#94a3b8", short: "SZL" },
+  { name: "Lyte", href: "/lyte-command-center/", accent: "#e8b84b", short: "LY" },
+  { name: "Vessels", href: "/vessels/", accent: "#38bdf8", short: "VS" },
+  { name: "Aegis", href: "/firestorm/", accent: "#ef4444", short: "AE" },
+  { name: "Terra", href: "/terra/", accent: "#4ade80", short: "TR" },
+  { name: "Carlota Jo", href: "/carlota-jo/", accent: "#d4a27f", short: "CJ" },
+];
+
+function EcosystemSwitcher() {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handle(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    if (open) document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="flex items-center gap-1.5 px-2 py-1 rounded text-[10px] text-slate-500 hover:text-slate-300 hover:bg-white/[0.04] transition-colors border border-transparent hover:border-white/[0.06]"
+        title="Switch platform"
+      >
+        <LayoutGrid className="w-3 h-3" />
+        <span className="hidden sm:inline text-[9px]">Ecosystem</span>
+      </button>
+      {open && (
+        <div
+          className="absolute right-0 top-full mt-1 w-48 rounded-lg py-1 z-50 shadow-xl"
+          style={{ background: "#0d1524", border: "1px solid rgba(255,255,255,0.08)" }}
+        >
+          <div className="px-3 py-1.5 text-[9px] font-semibold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.2)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+            SZL Holdings Ecosystem
+          </div>
+          {ECOSYSTEM_PLATFORMS.map(p => (
+            <a
+              key={p.name}
+              href={p.href}
+              className="flex items-center gap-2.5 px-3 py-2 text-[11px] hover:bg-white/[0.04] transition-colors"
+              style={{ color: "rgba(255,255,255,0.5)" }}
+              onClick={() => setOpen(false)}
+            >
+              <span className="w-4 h-4 rounded text-[8px] font-bold flex items-center justify-center flex-shrink-0" style={{ background: `${p.accent}18`, color: p.accent }}>{p.short}</span>
+              <span>{p.name}</span>
+            </a>
+          ))}
+          <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }} className="mt-1 pt-1">
+            <div className="flex items-center gap-2.5 px-3 py-1.5">
+              <span className="w-4 h-4 rounded text-[8px] font-bold flex items-center justify-center flex-shrink-0" style={{ background: `${PRISM_GOLD}18`, color: PRISM_GOLD }}>PC</span>
+              <span className="text-[11px]" style={{ color: PRISM_GOLD }}>PRISM Counsel</span>
+              <span className="ml-auto text-[9px]" style={{ color: "rgba(255,255,255,0.2)" }}>current</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface NavItem {
   label: string;
@@ -297,7 +361,7 @@ export function PrismCounselShell({ children }: { children: React.ReactNode }) {
           {!collapsed && (
             <div className="min-w-0 flex-1">
               <div className="text-[11px] font-bold text-slate-100 tracking-tight leading-none">PRISM COUNSEL</div>
-              <div className="text-[9px] text-[#c8a96e] leading-none mt-0.5 font-medium tracking-wide">MATTER COMMAND</div>
+              <a href="/szl-holdings/" className="text-[9px] text-[#c8a96e]/60 leading-none mt-0.5 font-medium tracking-wide hover:text-[#c8a96e] transition-colors block">SZL HOLDINGS ↗</a>
             </div>
           )}
         </div>
@@ -357,6 +421,10 @@ export function PrismCounselShell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="ml-auto flex items-center gap-2">
+            <EcosystemSwitcher />
+
+            <div className="w-px h-4 bg-white/[0.06]" />
+
             <button
               onClick={() => setCommandOpen(true)}
               className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] text-slate-500 hover:text-slate-300 hover:bg-white/[0.04] transition-colors border border-transparent hover:border-white/[0.06]"

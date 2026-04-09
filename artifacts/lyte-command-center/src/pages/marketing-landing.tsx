@@ -651,13 +651,14 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
             <div className="flex items-center gap-2.5">
               <Zap size={12} style={{ color: "rgba(212,160,84,0.4)" }} />
               <span className="text-[12px] font-semibold" style={{ color: "rgba(255,255,255,0.2)" }}>Lyte</span>
-              <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.1)" }}>by SZL Holdings</span>
+              <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.1)" }}>An SZL Holdings Company</span>
             </div>
             <div className="flex items-center gap-4">
               {[
                 { name: "Terra", href: "/terra/" },
                 { name: "Vessels", href: "/vessels/" },
                 { name: "Aegis", href: "/firestorm/" },
+                { name: "PRISM Counsel", href: "/prism-counsel/" },
                 { name: "Carlota Jo", href: "/carlota-jo/" },
                 { name: "SZL", href: "/szl-holdings/" },
               ].map(l => (
@@ -666,11 +667,14 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
             </div>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-[10px] text-center sm:text-left" style={{ color: "rgba(255,255,255,0.08)" }}>&copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
+            <p className="text-[10px] text-center sm:text-left" style={{ color: "rgba(255,255,255,0.08)" }}>&copy; 2026 SZL Holdings. All rights reserved.</p>
             <div className="flex items-center gap-4">
               <a href="https://x.com/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.1)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.1)")}>X</a>
               <a href="https://linkedin.com/company/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.1)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.1)")}>LinkedIn</a>
               <a href="https://medium.com/@stephen_38454" target="_blank" rel="noopener noreferrer" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.1)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.1)")}>Medium</a>
+              <a href="/legal/privacy" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.1)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.1)")}>Privacy</a>
+              <a href="/legal/terms" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.1)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.1)")}>Terms</a>
+              <a href="/security" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.1)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.1)")}>Security</a>
             </div>
           </div>
         </div>

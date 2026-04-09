@@ -38,6 +38,7 @@ const PrismCopilot = lazy(() => import("./pages/copilot-page"));
 const PrismParties = lazy(() => import("./pages/parties-page"));
 const PrismTrust = lazy(() => import("./pages/trust-page"));
 const PrismMarketingLanding = lazy(() => import("./pages/marketing-landing"));
+const PrismDemoPage = lazy(() => import("./pages/prism-demo-page"));
 const PrismAdmin = lazy(() => import("./pages/admin-page"));
 const PrismWatchlist = lazy(() => import("./pages/watchlist-page"));
 const PrismInsurerIntel = lazy(() => import("./pages/insurer-intel-page"));
@@ -147,9 +148,14 @@ function PrismCounselRoutes() {
 
   if (!isAuthenticated) {
     return (
-      <Suspense fallback={<PageLoader />}>
-        <PrismMarketingLanding />
-      </Suspense>
+      <Switch>
+        <Route path="/demo">
+          <Suspense fallback={<PageLoader />}><PrismDemoPage /></Suspense>
+        </Route>
+        <Route>
+          <Suspense fallback={<PageLoader />}><PrismMarketingLanding /></Suspense>
+        </Route>
+      </Switch>
     );
   }
 
@@ -157,6 +163,10 @@ function PrismCounselRoutes() {
     <Switch>
       <Route path="/marketing">
         <Suspense fallback={<PageLoader />}><PrismMarketingLanding /></Suspense>
+      </Route>
+
+      <Route path="/demo">
+        <Suspense fallback={<PageLoader />}><PrismDemoPage /></Suspense>
       </Route>
 
       <Route path="/overview">

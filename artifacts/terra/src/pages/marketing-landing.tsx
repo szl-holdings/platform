@@ -597,13 +597,14 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 <Building2 size={12} style={{ color: ACCENT_LIGHT }} />
               </div>
               <span className="text-sm font-bold text-white">Terra</span>
-              <span className="text-[9px] font-mono ml-1" style={{ color: "rgba(255,255,255,0.2)" }}>Property Intelligence</span>
+              <span className="text-[9px] font-mono ml-1" style={{ color: "rgba(255,255,255,0.2)" }}>An SZL Holdings Company</span>
             </div>
             <div className="flex items-center gap-4">
               {[
                 { name: "Lyte", href: "/lyte-command-center/" },
                 { name: "Vessels", href: "/vessels/" },
                 { name: "Aegis", href: "/firestorm/" },
+                { name: "PRISM Counsel", href: "/prism-counsel/" },
                 { name: "Carlota Jo", href: "/carlota-jo/" },
                 { name: "SZL", href: "/szl-holdings/" },
               ].map(l => (
@@ -613,12 +614,15 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-[11px] text-center sm:text-left" style={{ color: "rgba(255,255,255,0.12)" }}>
-              &copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.
+              &copy; 2026 SZL Holdings. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
               <a href="https://x.com/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.15)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.15)")}>X</a>
               <a href="https://linkedin.com/company/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.15)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.15)")}>LinkedIn</a>
               <a href="https://medium.com/@stephen_38454" target="_blank" rel="noopener noreferrer" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.15)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.15)")}>Medium</a>
+              <a href="/legal/privacy" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.15)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.15)")}>Privacy</a>
+              <a href="/legal/terms" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.15)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.15)")}>Terms</a>
+              <a href="/security" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.15)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.15)")}>Security</a>
             </div>
           </div>
         </div>

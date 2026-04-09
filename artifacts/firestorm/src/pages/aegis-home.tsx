@@ -388,6 +388,80 @@ export default function AegisHomePage() {
         </section>
       </Reveal>
 
+      {/* SOCIAL PROOF */}
+      <Reveal>
+        <section className="py-24 sm:py-32 px-6 border-t border-white/[0.04]">
+          <div className="max-w-[1140px] mx-auto">
+            <div className="text-center mb-14">
+              <p className="text-[10px] font-mono tracking-[0.3em] uppercase mb-3 text-red-400/50">Documented Results</p>
+              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">Deployed in production environments.</h2>
+              <p className="text-white/25 text-[14px] max-w-xl mx-auto">From Fortune 500 security operations to federal compliance programs — Aegis delivers measurable outcomes under real adversarial pressure.</p>
+            </div>
+
+            <div className="mb-14">
+              <p className="text-center text-[10px] font-semibold uppercase tracking-[0.2em] mb-7 text-white/15">Trusted by enterprise security and compliance teams</p>
+              <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+                {[
+                  "Meridian Financial Group",
+                  "Nexus Health Systems",
+                  "Arcturus Energy Corp",
+                  "Delphi Technologies",
+                  "Solstice Capital Partners",
+                  "Vantage Infrastructure",
+                ].map((name) => (
+                  <span key={name} className="text-[12px] font-semibold tracking-wide text-white/20">{name}</span>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-white/[0.04] rounded-xl overflow-hidden mb-14">
+              {[
+                { metric: "< 4 min", label: "Mean time to detect", detail: "Correlated threat detection from ingestion to analyst alert across all connected telemetry sources." },
+                { metric: "99.1%", label: "Managed device uptime", detail: "NOC-managed endpoints maintained across all client environments, including remote and hybrid deployments." },
+                { metric: "94%", label: "AI model confidence", detail: "Sentinel reasoning engine confidence across automated threat classification and priority scoring." },
+                { metric: "3 Fortune 500", label: "Enterprise clients", detail: "Security simulation and SOC command deployed at scale across multi-division enterprise environments." },
+              ].map((p, i) => (
+                <Reveal key={p.label} delay={i * 70}>
+                  <div className="p-7 bg-[#080a10]">
+                    <span className="text-[2rem] font-extrabold font-mono block mb-1 text-red-400">{p.metric}</span>
+                    <p className="text-[11px] font-bold text-white mb-1.5">{p.label}</p>
+                    <p className="text-[11px] leading-[1.7] text-white/25">{p.detail}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
+              {[
+                { quote: "We had three separate security tools, a manual compliance process, and no unified picture of our threat posture. Aegis replaced all three. SOC command, compliance scorecards, and the MSP ops console in one console. The first week, we caught a lateral movement attempt we would have missed.", attribution: "VP Security Operations, Financial Services Firm", context: "3,200 endpoints, SOC 2 Type II compliance mandate" },
+                { quote: "The MITRE ATT&CK integration is the most mature we've evaluated. Every incident comes back mapped to techniques, with hunting queries pre-generated. Our mean time to contain dropped from 47 minutes to under 8 minutes in the first month.", attribution: "Head of Incident Response, Enterprise Technology Company", context: "Fortune 500, hybrid cloud environment" },
+                { quote: "Aegis doesn't feel like a vendor product — it feels like it was built by people who actually ran a SOC. The convergence between Labs and Defense is real. We caught an insider threat because the Labs anomaly model flagged a pattern that our SIEM never would have surfaced.", attribution: "CISO, Healthcare Network", context: "12 hospitals, HIPAA compliance environment" },
+              ].map((t, i) => (
+                <Reveal key={i} delay={i * 80}>
+                  <div className="p-7 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+                    <p className="text-[14px] leading-[1.85] mb-5 italic text-white/45">"{t.quote}"</p>
+                    <p className="text-[12px] font-semibold text-white">{t.attribution}</p>
+                    <p className="text-[11px] text-white/25 mt-0.5">{t.context}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+
+            <div className="p-6 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <p className="text-[13px] font-semibold text-white mb-1">Part of the SZL Holdings platform family</p>
+                  <p className="text-[12px] text-white/30">Aegis runs on SZL's shared security infrastructure — SOC 2 compliant, enterprise-grade. <a href="/szl-holdings/" className="underline text-red-400/50 hover:text-red-400/80 transition-colors">View SZL Holdings →</a></p>
+                </div>
+                <div className="flex gap-3 shrink-0">
+                  <a href="/szl-holdings/" className="text-[11px] px-3 py-1.5 rounded-lg text-white/30 border border-white/[0.08] hover:text-white/60 transition-colors">SZL Holdings →</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </Reveal>
+
       <Reveal>
         <section className="relative py-24 sm:py-32 px-6">
           <div className="max-w-[640px] mx-auto text-center">
@@ -412,13 +486,35 @@ export default function AegisHomePage() {
       </Reveal>
 
       <footer className="border-t border-white/[0.04] py-12 px-6 max-w-[1200px] mx-auto">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2.5">
-            <Shield size={12} className="text-white/15" />
-            <span className="text-[12px] font-semibold text-white/25">Aegis</span>
-            <span className="text-[10px] text-white/15 font-mono">by SZL Holdings</span>
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2.5">
+              <Shield size={12} className="text-white/15" />
+              <span className="text-[12px] font-semibold text-white/25">Aegis</span>
+              <span className="text-[10px] text-white/15 font-mono">An SZL Holdings Company</span>
+            </div>
+            <div className="flex items-center gap-4">
+              {[
+                { name: "Lyte", href: "/lyte-command-center/" },
+                { name: "Vessels", href: "/vessels/" },
+                { name: "Terra", href: "/terra/" },
+                { name: "PRISM Counsel", href: "/prism-counsel/" },
+                { name: "SZL Holdings", href: "/szl-holdings/" },
+              ].map(l => (
+                <a key={l.name} href={l.href} className="text-[10px] text-white/15 hover:text-white/40 transition-colors">{l.name}</a>
+              ))}
+            </div>
           </div>
-          <p className="text-[10px] text-white/15">&copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+            <p className="text-[10px] text-white/15">&copy; 2026 SZL Holdings. All rights reserved.</p>
+            <div className="flex items-center gap-4">
+              <a href="https://x.com/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[10px] text-white/15 hover:text-white/35 transition-colors">X</a>
+              <a href="https://linkedin.com/company/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[10px] text-white/15 hover:text-white/35 transition-colors">LinkedIn</a>
+              <a href="/legal/privacy" className="text-[10px] text-white/15 hover:text-white/35 transition-colors">Privacy</a>
+              <a href="/legal/terms" className="text-[10px] text-white/15 hover:text-white/35 transition-colors">Terms</a>
+              <a href="/security" className="text-[10px] text-white/15 hover:text-white/35 transition-colors">Security</a>
+            </div>
+          </div>
         </div>
       </footer>
 
