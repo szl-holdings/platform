@@ -5,6 +5,7 @@ import { Toaster } from "@szl-holdings/shared-ui/ui/toaster";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { AnalyticsProvider } from "@szl-holdings/shared-ui";
+import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { TooltipProvider } from "@szl-holdings/shared-ui/ui/tooltip";
 
 const Home = lazy(() => import("@/pages/Home").then(m => ({ default: m.Home })));
@@ -108,6 +109,11 @@ function App() {
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+            <EcosystemNav
+              currentAppId="stephen-site"
+              currentAppName="Stephen Lutar"
+              accentColor="#94a3b8"
+            />
             <div style={{ flex: 1 }}>
               <Router />
             </div>

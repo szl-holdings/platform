@@ -107,6 +107,15 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     icon: "○",
     description: "Systems, Visibility, and Execution",
   },
+  {
+    id: "prism-counsel",
+    name: "PRISM Counsel",
+    subtitle: "Platform · Legal Matter Command",
+    path: "/prism-counsel/",
+    accent: "#c8a96e",
+    icon: "⚖",
+    description: "Legal Matter Intelligence Platform",
+  },
 ];
 
 const LEVEL_COLORS: Record<EcosystemNotification["level"], string> = {

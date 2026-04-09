@@ -111,6 +111,13 @@ export const DOCTRINE_APP_MAP: DoctrineLayerConfig[] = [
     description: "Unified security, managed operations, and AI intelligence. SOC command, XDR, MSP operations, model registry, and agentic cortex in one platform.",
     primaryRole: "Unified Defense & Intelligence Command",
   },
+  {
+    appId: "prism-counsel",
+    appName: "PRISM Counsel",
+    layers: ["OBSERVE", "UNDERSTAND", "DECIDE"],
+    description: "Legal matter command — matter intelligence, forecast, deadlines, discovery, and advisory AI for litigation and legal operations.",
+    primaryRole: "Legal Matter Intelligence",
+  },
 ];
 
 export function getDoctrineConfig(appId: string): DoctrineLayerConfig | undefined {

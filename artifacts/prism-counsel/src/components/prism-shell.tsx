@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
+import { DOCTRINE_LAYER_COLORS } from "@szl-holdings/shared-ui";
 import {
   Scale, LayoutDashboard, FolderOpen, TrendingUp, Clock, FileText, Users,
   MessageSquare, Shield, Settings, ChevronLeft, ChevronRight, Search, Bell,
@@ -16,12 +17,13 @@ const PRISM_BLUE = "#4a8ab0";
 const PRISM_RED = "#b85a4a";
 
 const ECOSYSTEM_PLATFORMS = [
-  { name: "SZL Holdings", href: "/szl-holdings/", accent: "#94a3b8", short: "SZL" },
+  { name: "SZL Holdings", href: "/", accent: "#94a3b8", short: "SZL" },
   { name: "Lyte", href: "/lyte-command-center/", accent: "#e8b84b", short: "LY" },
   { name: "Vessels", href: "/vessels/", accent: "#38bdf8", short: "VS" },
   { name: "Aegis", href: "/firestorm/", accent: "#ef4444", short: "AE" },
   { name: "Terra", href: "/terra/", accent: "#4ade80", short: "TR" },
   { name: "Carlota Jo", href: "/carlota-jo/", accent: "#d4a27f", short: "CJ" },
+  { name: "Stephen Lutar", href: "/stephen/", accent: "#94a3b8", short: "SL" },
 ];
 
 function EcosystemSwitcher() {
@@ -416,6 +418,25 @@ export function PrismCounselShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2 text-[10px] text-slate-600">
             <Scale className="w-3 h-3 text-[#c8a96e]/50" />
             <span>Prism Counsel</span>
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "2px",
+                padding: "1px 5px",
+                borderRadius: "3px",
+                background: "hsla(0 0% 100% / 0.04)",
+                border: "1px solid hsla(0 0% 100% / 0.07)",
+                marginLeft: "4px",
+              }}
+            >
+              {(["OBSERVE", "UNDERSTAND", "DECIDE"] as const).map((layer, i) => (
+                <span key={layer} style={{ display: "inline-flex", alignItems: "center", gap: "1px" }}>
+                  {i > 0 && <span style={{ fontSize: "7px", color: "rgba(255,255,255,0.2)", margin: "0 1px" }}>+</span>}
+                  <span style={{ fontSize: "8px", fontWeight: 700, letterSpacing: "0.06em", color: DOCTRINE_LAYER_COLORS[layer].color, fontFamily: "monospace", textTransform: "uppercase" }}>{layer}</span>
+                </span>
+              ))}
+            </span>
             <span className="text-slate-700">/</span>
             <span className="text-slate-400">{getBreadcrumb(location)}</span>
           </div>

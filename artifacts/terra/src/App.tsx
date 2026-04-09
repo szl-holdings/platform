@@ -7,7 +7,7 @@ import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
-import { beaconConfig } from "@szl-holdings/shared-ui/copilot-configs";
+import { terraConfig } from "@szl-holdings/shared-ui/copilot-configs";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
 import { TerraLayout } from "@/components/terra-layout";
@@ -257,7 +257,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
-          <AgentCopilot config={beaconConfig} />
+          <AgentCopilot config={terraConfig} />
           <Toaster />
           <McpOverlay domain="terra" />
         </WouterRouter>

@@ -5,9 +5,8 @@ import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
 import { SandboxModeProvider, AnalyticsProvider } from "@szl-holdings/shared-ui";
-import { UserButton } from "@szl-holdings/shared-ui/UserButton";
+import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { useAuth } from "@szl-holdings/replit-auth-web";
-import { Users, MessageSquare } from "lucide-react";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 import { GenomeProvider } from "@/context/GenomeContext";
 
@@ -170,9 +169,11 @@ function App() {
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <PowerUserProvider shortcuts={carlotaShortcuts} appName="Carlota Jo" accentColor={CARLOTA_ACCENT}>
           <div style={{ minHeight: "100vh" }}>
-            <div style={{ position: "fixed", top: 12, right: 16, zIndex: 9999 }}>
-              <UserButton />
-            </div>
+            <EcosystemNav
+              currentAppId="carlota-jo"
+              currentAppName="Carlota Jo"
+              accentColor={CARLOTA_ACCENT}
+            />
             <GenomeProvider>
               <Router />
             </GenomeProvider>
