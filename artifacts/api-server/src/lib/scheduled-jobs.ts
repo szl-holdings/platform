@@ -280,6 +280,7 @@ jobQueue.register(NAMED_JOB_TYPES.READINESS_SCORE_RECOMPUTE_JOB, async (job) => 
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
+const REDUCED_HOURLY_INTERVAL_MS = 4 * HOUR_MS;
 
 let namedJobsStarted = false;
 
@@ -338,7 +339,7 @@ export function startNamedScheduledJobs() {
         try { await enqueueNamedJob(type); } catch (err) { logger.warn({ err, type }, "Failed to enqueue hourly job"); }
         await new Promise(r => setTimeout(r, 300));
       }
-    }, HOUR_MS);
+    }, REDUCED_HOURLY_INTERVAL_MS);
   }, msUntilHourly);
 
   const allEntries = Array.from(jobRegistry.values());

@@ -55,12 +55,14 @@ function safeSerialize(data: unknown, maxLen: number): string {
 }
 
 export function registerDefaultSchedules() {
+  const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
+
   const schedules = [
     {
       agentId: "vessels-autonomous",
       name: "Vessels Fleet Monitor",
       domain: "vessels" as const,
-      intervalMs: 60 * 60 * 1000,
+      intervalMs: SIX_HOURS_MS,
       enabled: true,
       taskDescription: "Scan AIS data for anomalies, check sanctions matches, monitor chokepoint congestion",
       systemPrompt: `You are an autonomous maritime intelligence agent. Analyze the provided fleet data and generate concise intelligence findings. Focus on: vessel anomalies, sanctions risks, chokepoint congestion, and route deviations. Be specific and actionable. Respond in 2-3 sentences max per finding.`,
@@ -77,7 +79,7 @@ export function registerDefaultSchedules() {
       agentId: "firestorm-autonomous",
       name: "Firestorm Threat Scanner",
       domain: "firestorm" as const,
-      intervalMs: 60 * 60 * 1000,
+      intervalMs: SIX_HOURS_MS,
       enabled: true,
       taskDescription: "Monitor threat feeds, scan for new CVEs, assess risk posture changes",
       systemPrompt: `You are an autonomous cybersecurity intelligence agent. Analyze the provided threat data and generate concise security findings. Focus on: critical threats, new CVEs, active incidents, and emerging attack patterns. Be specific and actionable. Respond in 2-3 sentences max per finding.`,
@@ -93,7 +95,7 @@ export function registerDefaultSchedules() {
       agentId: "lyte-autonomous",
       name: "Lyte System Health Monitor",
       domain: "lyte" as const,
-      intervalMs: 60 * 60 * 1000,
+      intervalMs: SIX_HOURS_MS,
       enabled: true,
       taskDescription: "Check system health metrics, evaluate SLO compliance, detect performance degradation",
       systemPrompt: `You are an autonomous SRE observability agent. Analyze the provided system metrics and generate concise health findings. Focus on: service degradation, SLO breaches, anomalous patterns, and reliability risks. Be specific and actionable.`,
@@ -121,7 +123,7 @@ export function registerDefaultSchedules() {
       agentId: "terra-autonomous",
       name: "Terra Market Monitor",
       domain: "terra" as const,
-      intervalMs: 30 * 60 * 1000,
+      intervalMs: SIX_HOURS_MS,
       enabled: true,
       taskDescription: "Track geopolitical events, assess market impact on real estate, identify risk factors",
       systemPrompt: `You are an autonomous real estate market intelligence agent. Analyze geopolitical and market data to generate concise real estate investment findings. Focus on: market risks, geopolitical impacts, and emerging opportunities.`,

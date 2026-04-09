@@ -4,6 +4,7 @@ import { authMiddleware } from "../middlewares/auth";
 import { db } from "@szl-holdings/db";
 import { sql } from "drizzle-orm";
 import os from "os";
+import { HEAP_LIMIT_MB, HEAP_WARN_THRESHOLD_MB, HEAP_CRITICAL_THRESHOLD_MB } from "../lib/heap-limits";
 
 const router: IRouter = Router();
 
@@ -162,7 +163,7 @@ router.get("/lyte/live/signals", authMiddleware({ required: false }), async (_re
         value: `${(memUsage.heapUsed / 1024 / 1024).toFixed(1)} MB`,
         rawValue: memUsage.heapUsed,
         unit: "bytes",
-        status: memUsage.heapUsed / memUsage.heapTotal > 0.9 ? "critical" : memUsage.heapUsed / memUsage.heapTotal > 0.75 ? "elevated" : "healthy",
+        status: (memUsage.heapUsed / 1024 / 1024) > HEAP_CRITICAL_THRESHOLD_MB ? "critical" : (memUsage.heapUsed / 1024 / 1024) > HEAP_WARN_THRESHOLD_MB ? "elevated" : "healthy",
         category: "infrastructure",
         source: "process",
         detail: {

@@ -1,4 +1,5 @@
 import http from "http";
+import { HEAP_LIMIT_MB, HEAP_GC_THRESHOLD_MB, HEAP_WARN_THRESHOLD_MB, HEAP_CRITICAL_THRESHOLD_MB } from "./lib/heap-limits";
 import app from "./app";
 import { logger } from "./lib/logger";
 import { failFastOnInvalidConfig } from "./lib/startup-validation";
@@ -137,30 +138,28 @@ seedDosData().catch(err => {
 registerAllPrismJobHandlers();
 const prismPoller = startPrismJobPoller(5000);
 
-const HEAP_GC_THRESHOLD = 0.80;
-const HEAP_WARN_THRESHOLD = 0.88;
-const HEAP_CRITICAL_THRESHOLD = 0.97;
 const memoryMonitor = setInterval(() => {
   const { heapUsed, heapTotal } = process.memoryUsage();
-  const ratio = heapUsed / heapTotal;
-  if (ratio >= HEAP_CRITICAL_THRESHOLD) {
+  const heapUsedMb = Math.round(heapUsed / 1024 / 1024);
+  const heapTotalMb = Math.round(heapTotal / 1024 / 1024);
+  if (heapUsedMb >= HEAP_CRITICAL_THRESHOLD_MB) {
     logger.error({
-      heapUsedMb: Math.round(heapUsed / 1024 / 1024),
-      heapTotalMb: Math.round(heapTotal / 1024 / 1024),
-      ratio: ratio.toFixed(3),
-    }, "[memory] Heap usage critical — consider increasing --max-old-space-size");
+      heapUsedMb,
+      heapTotalMb,
+      limitMb: HEAP_LIMIT_MB,
+    }, "[memory] Heap usage critical — forcing GC");
     if (global.gc) { global.gc(); global.gc(); }
-  } else if (ratio >= HEAP_WARN_THRESHOLD) {
+  } else if (heapUsedMb >= HEAP_WARN_THRESHOLD_MB) {
     logger.warn({
-      heapUsedMb: Math.round(heapUsed / 1024 / 1024),
-      heapTotalMb: Math.round(heapTotal / 1024 / 1024),
-      ratio: ratio.toFixed(3),
-    }, "[memory] Heap usage elevated");
+      heapUsedMb,
+      heapTotalMb,
+      limitMb: HEAP_LIMIT_MB,
+    }, "[memory] Heap usage elevated — running GC");
     if (global.gc) global.gc();
-  } else if (ratio >= HEAP_GC_THRESHOLD) {
+  } else if (heapUsedMb >= HEAP_GC_THRESHOLD_MB) {
     if (global.gc) global.gc();
   }
-}, 30_000);
+}, 20_000);
 memoryMonitor.unref();
 
 server.listen(port, "0.0.0.0", () => {
