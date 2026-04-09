@@ -24,9 +24,8 @@ The principles are simple:
 — Failures surface. They don't hide.
 — Shared infrastructure, domain specialization
 
-If you're evaluating enterprise software companies, doing due diligence on AI governance, or looking for design partner conversations — the code is public and the platforms are live.
+If you're evaluating enterprise software companies, exploring AI governance frameworks, or looking for design partner conversations — the platforms are live and the architecture is documented.
 
-github.com/szl-holdings
 szlholdings.com
 
-#SZLHoldings #AI #AIGovernance #TypeScript #StartupFounder #EnterpriseAI #BusinessObservability #MaritimeTech #PropTech #LegalTech #Cybersecurity #BuildInPublic
+#SZLHoldings #AI #AIGovernance #TypeScript #StartupFounder #EnterpriseAI #BusinessObservability #MaritimeTech #PropTech #LegalTech #Cybersecurity
