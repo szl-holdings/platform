@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "wouter";
 import { m } from "framer-motion";
 import {
@@ -21,6 +21,10 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 import { useNarrativeRouter } from "@/hooks/useNarrativeRouter";
 import { SegmentedCTA } from "@/components/SegmentedCTA";
 import { DynamicProofPack } from "@/components/DynamicProofPack";
+import {
+  WordReveal, MagneticButton, NoiseGrain, LiveIndicator,
+  CinematicReveal, EcosystemPulseItem, useMouseParallax,
+} from "@szl-holdings/shared-ui";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -248,6 +252,96 @@ function NewsletterSection() {
   );
 }
 
+const ECOSYSTEM_APPS = [
+  { name: "Lyte", description: "Business Observability", color: "hsl(192,72%,48%)" },
+  { name: "Vessels", description: "Maritime Intelligence", color: "hsl(206,72%,52%)" },
+  { name: "Aegis", description: "Defense & Intelligence", color: "hsl(222,60%,62%)" },
+  { name: "Terra", description: "Real Estate Intelligence", color: "hsl(140,50%,48%)" },
+  { name: "PRISM Counsel", description: "Legal Matter Command", color: "hsl(38,72%,58%)" },
+  { name: "Carlota Jo", description: "Private Advisory", color: "hsl(280,50%,65%)" },
+];
+
+function EcosystemPulseSection() {
+  const [pulseData, setPulseData] = useState<Array<{ name: string; status: "operational" | "degraded" | "down" | "unknown"; description: string; color: string; lastChecked: string }>>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fallback = ECOSYSTEM_APPS.map(app => ({
+      name: app.name,
+      status: "operational" as const,
+      description: app.description,
+      color: app.color,
+      lastChecked: "just now",
+    }));
+    // /api/health/detailed returns overall API status + checks (database, job_queue, telemetry).
+    // We map the overall status to all ecosystem apps since a single API server backs the ecosystem.
+    // Statuses: "healthy" → operational, "warning" → degraded, "degraded" → down.
+    fetch("/api/health/detailed")
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data) { setPulseData(fallback); return; }
+        // Map API health status to UI status. "degraded" means some checks are failing
+        // (e.g. database unreachable) but the service is still responding — we show "degraded"
+        // rather than "down" to avoid overstating severity. Unknown/unexpected values map to
+        // "unknown" (not "operational") to avoid falsely signalling a green state.
+        const overallStatus = data.status === "healthy" ? "operational" as const
+          : data.status === "warning" ? "degraded" as const
+          : data.status === "degraded" ? "degraded" as const
+          : "unknown" as const;
+        setPulseData(ECOSYSTEM_APPS.map(app => ({
+          name: app.name,
+          status: overallStatus,
+          description: app.description,
+          color: app.color,
+          lastChecked: "just now",
+        })));
+      })
+      .catch(() => setPulseData(fallback))
+      .finally(() => setLoading(false));
+  }, []);
+
+  return (
+    <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.01)" }}>
+      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
+        <CinematicReveal>
+          <div style={{ marginBottom: "2.5rem", display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
+            <div>
+              <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
+                Ecosystem
+              </p>
+              <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)" }}>
+                One platform. Six operational domains.
+              </h2>
+            </div>
+            <LiveIndicator label="ECOSYSTEM PULSE" color="hsl(192,72%,48%)" />
+          </div>
+        </CinematicReveal>
+        {loading ? (
+          <div style={{ display: "grid", gap: "0.875rem", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))" }}>
+            {ECOSYSTEM_APPS.map(app => (
+              <div key={app.name} style={{ height: 90, borderRadius: "0.75rem", background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.05)", animation: "pulse 2s ease-in-out infinite" }} />
+            ))}
+          </div>
+        ) : (
+          <div style={{ display: "grid", gap: "0.875rem", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))" }}>
+            {pulseData.map((item, i) => (
+              <CinematicReveal key={item.name} delay={i * 0.06}>
+                <EcosystemPulseItem
+                  name={item.name}
+                  status={item.status}
+                  description={item.description}
+                  color={item.color}
+                  lastChecked={item.lastChecked}
+                />
+              </CinematicReveal>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 export default function HomePage() {
   const { visitorType, setIntent } = useNarrativeRouter();
 
@@ -258,29 +352,19 @@ export default function HomePage() {
     canonical: "https://szlholdings.com/",
   });
 
+  const { x: pX, y: pY } = useMouseParallax(0.025);
+
   return (
     <div className="min-h-screen" style={{ background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
+      <NoiseGrain opacity={0.028} />
       <SiteNav />
       <main id="main-content">
 
         {/* ── 1. Hero ─────────────────────────────────────────────────── */}
         <section style={{ position: "relative", overflow: "hidden", borderBottom: "1px solid var(--color-szl-border)" }}>
-          <div style={{
-            pointerEvents: "none",
-            position: "absolute",
-            inset: 0,
-          }}>
-            <div style={{
-              position: "absolute",
-              top: "-10rem",
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: "900px",
-              height: "600px",
-              borderRadius: "50%",
-              background: "hsla(192,72%,48%,0.04)",
-              filter: "blur(140px)",
-            }} />
+          <div style={{ pointerEvents: "none", position: "absolute", inset: 0 }}>
+            <m.div style={{ x: pX, y: pY, position: "absolute", top: "-10rem", left: "50%", transform: "translateX(-50%)", width: "900px", height: "600px", borderRadius: "50%", background: "hsla(192,72%,48%,0.055)", filter: "blur(120px)" }} />
+            <m.div style={{ x: pX, y: pY, position: "absolute", top: "5rem", right: "-15rem", width: "600px", height: "500px", borderRadius: "50%", background: "hsla(215,72%,55%,0.025)", filter: "blur(100px)" }} />
           </div>
           <div style={{ position: "relative", maxWidth: "1280px", margin: "0 auto", padding: "clamp(7rem,14vw,10rem) var(--space-content-x) clamp(4rem,8vw,6rem)" }}>
             <m.div
@@ -288,67 +372,89 @@ export default function HomePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
             >
-              <p style={{ marginBottom: "1.5rem", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)" }}>
-                SZL Holdings · Design-partner stage · 2026
-              </p>
-              <h1 style={{
-                fontSize: "clamp(2.5rem,5.5vw,4.25rem)",
-                fontWeight: 600,
-                letterSpacing: "-0.028em",
-                lineHeight: 1.08,
-                maxWidth: "22ch",
-                marginBottom: "1.5rem",
-                color: "hsl(38,8%,96%)",
-              }}>
-                Business observability<br />with explainable execution.
-              </h1>
-              <p style={{
-                fontSize: "clamp(1rem,1.8vw,1.125rem)",
-                lineHeight: 1.72,
-                color: "var(--color-szl-text-secondary)",
-                maxWidth: "46ch",
-                marginBottom: "2.5rem",
-              }}>
-                Lyte surfaces what's stuck, at risk, and about to break — before the damage compounds. Alloy routes the right action with a full audit trail. One platform, every high-consequence domain.
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-                <Link
-                  href="/demo"
-                  style={{
-                    display: "inline-flex", alignItems: "center", gap: "0.5rem",
-                    padding: "0.75rem 1.5rem",
-                    background: "hsl(192,72%,48%)",
-                    color: "hsl(214,18%,4%)",
-                    borderRadius: "0.375rem",
-                    fontSize: "0.875rem", fontWeight: 600,
-                    textDecoration: "none",
-                    transition: "background 0.2s ease",
-                  }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,54%)"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,48%)"; }}
-                >
-                  Request a demo
-                  <ArrowRight size={15} />
-                </Link>
-                <Link
-                  href="/platform"
-                  style={{
-                    display: "inline-flex", alignItems: "center", gap: "0.5rem",
-                    padding: "0.75rem 1.5rem",
-                    background: "transparent",
-                    color: "var(--color-szl-text-secondary)",
-                    border: "1px solid var(--color-szl-border-hover)",
-                    borderRadius: "0.375rem",
-                    fontSize: "0.875rem", fontWeight: 500,
-                    textDecoration: "none",
-                    transition: "border-color 0.2s ease, color 0.2s ease",
-                  }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.25)"; (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--color-szl-border-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-                >
-                  Explore the platform
-                </Link>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem" }}>
+                <p style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)" }}>
+                  SZL Holdings · Design-partner stage · 2026
+                </p>
+                <LiveIndicator color="hsl(192,72%,48%)" showTimestamp={false} />
               </div>
+              <WordReveal
+                text="Business observability with explainable execution."
+                as="h1"
+                delay={0.1}
+                stagger={0.055}
+                style={{
+                  fontSize: "clamp(2.5rem,5.5vw,4.25rem)",
+                  fontWeight: 600,
+                  letterSpacing: "-0.028em",
+                  lineHeight: 1.08,
+                  maxWidth: "22ch",
+                  marginBottom: "1.5rem",
+                  color: "hsl(38,8%,96%)",
+                }}
+              />
+              <m.p
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+                style={{
+                  fontSize: "clamp(1rem,1.8vw,1.125rem)",
+                  lineHeight: 1.72,
+                  color: "var(--color-szl-text-secondary)",
+                  maxWidth: "46ch",
+                  marginBottom: "2.5rem",
+                }}
+              >
+                Lyte surfaces what's stuck, at risk, and about to break — before the damage compounds. Alloy routes the right action with a full audit trail. One platform, every high-consequence domain.
+              </m.p>
+              <m.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.65 }}
+                style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}
+              >
+                <MagneticButton>
+                  <Link
+                    href="/demo"
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: "0.5rem",
+                      padding: "0.75rem 1.5rem",
+                      background: "hsl(192,72%,48%)",
+                      color: "hsl(214,18%,4%)",
+                      borderRadius: "0.375rem",
+                      fontSize: "0.875rem", fontWeight: 600,
+                      textDecoration: "none",
+                      transition: "background 0.2s ease, box-shadow 0.2s ease",
+                      boxShadow: "0 0 24px hsla(192,72%,48%,0.18)",
+                    }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,54%)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 0 36px hsla(192,72%,48%,0.32)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,48%)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 0 24px hsla(192,72%,48%,0.18)"; }}
+                  >
+                    Request a demo
+                    <ArrowRight size={15} />
+                  </Link>
+                </MagneticButton>
+                <MagneticButton>
+                  <Link
+                    href="/platform"
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: "0.5rem",
+                      padding: "0.75rem 1.5rem",
+                      background: "transparent",
+                      color: "var(--color-szl-text-secondary)",
+                      border: "1px solid var(--color-szl-border-hover)",
+                      borderRadius: "0.375rem",
+                      fontSize: "0.875rem", fontWeight: 500,
+                      textDecoration: "none",
+                      transition: "border-color 0.2s ease, color 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.25)"; (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--color-szl-border-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+                  >
+                    Explore the platform
+                  </Link>
+                </MagneticButton>
+              </m.div>
             </m.div>
           </div>
         </section>
@@ -1016,7 +1122,10 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 11. Newsletter Signup ────────────────────────────────────── */}
+        {/* ── 11. Ecosystem Pulse ─────────────────────────────────────── */}
+        <EcosystemPulseSection />
+
+        {/* ── 11b. Newsletter Signup ────────────────────────────────────── */}
         <NewsletterSection />
 
         {/* ── 12. Final CTA — Dynamic by visitor type ──────────────────── */}

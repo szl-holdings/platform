@@ -116,6 +116,26 @@ export { AnalyticsProvider, useAnalytics } from "./analytics-provider";
 export { useFeatureFlag, type FeatureFlag } from "./hooks";
 
 export {
+  useMouseParallax,
+  useScrollY,
+  useInViewOnce,
+  WordReveal,
+  LetterReveal,
+  MagneticButton,
+  NoiseGrain,
+  WarmGrain,
+  CustomCursor,
+  ScrollCounter,
+  LiveIndicator,
+  ThreatTicker,
+  SignalTicker,
+  CinematicReveal,
+  EcosystemPulseItem,
+  PageTransition,
+  ParallaxLayer,
+} from "./cinematic-utils";
+
+export {
   OperationalStatusBadge,
   OperationalRiskBadge,
   OperationalApprovalBadge,

@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState, useEffect, useCallback } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
+import { AnimatePresence, motion as m, useReducedMotion } from "framer-motion";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { DemoModeProvider, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig, SandboxModeProvider, SandboxModeBanner, AnalyticsProvider } from "@szl-holdings/shared-ui";
 import { McpOverlay } from "@szl-holdings/mcp-client";
@@ -555,8 +556,12 @@ function SidebarContent({ onNavigate, onReplayTour }: { onNavigate: (path: strin
 }
 
 function AppRouter() {
+  const [location] = useLocation();
+  const prefersReducedMotion = useReducedMotion();
   return (
-    <Suspense fallback={<PageLoader />}>
+    <AnimatePresence mode="wait" initial={false}>
+      <m.div key={location} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: prefersReducedMotion ? 0 : 0.25, ease: "easeInOut" }} style={{ position: "relative", minHeight: "100vh" }}>
+      <Suspense fallback={<PageLoader />}>
       <Switch>
         {/* Aegis Home & Enterprise */}
         <Route path="/home" component={AegisMarketingHome} />
@@ -670,6 +675,8 @@ function AppRouter() {
         </Route>
       </Switch>
     </Suspense>
+      </m.div>
+    </AnimatePresence>
   );
 }
 

@@ -1,11 +1,23 @@
 import { useState, useEffect, useRef } from "react";
-import { ContactModal } from "@szl-holdings/shared-ui";
+import { motion } from "framer-motion";
+import { ContactModal, NoiseGrain, CustomCursor, MagneticButton, ThreatTicker, WordReveal } from "@szl-holdings/shared-ui";
 import { Link } from "wouter";
 import {
   Shield, ArrowRight, Layers, Server, Brain, Eye, Target,
   Lock, Users, Network, Menu, X,
   ChevronRight, Activity, FileSearch, AlertTriangle, Cpu, Radio,
 } from "lucide-react";
+
+const THREAT_FEED_FALLBACK = [
+  "APT29 lateral movement detected — enterprise client network — contained in < 4 min",
+  "Ransomware pre-cursor pattern identified on DC-PROD-03 — hunting query deployed automatically",
+  "OFAC screening flag: vessel MT Pacific Star — dark AIS activity window detected — escalated",
+  "Identity threat: brute-force on Azure AD tenant — conditional access policy triggered",
+  "Vendor contract expiry: 3 active projects at risk — $2.1M delivery exposure — remediation routed",
+  "MITRE ATT&CK mapping: TA0006 Credential Access — 94% model confidence — SOC notified",
+  "SLA breach predicted: managed client Northgate — auto-notification triggered — 18 min ahead",
+  "Supply chain anomaly: firmware update from unverified publisher — quarantine initiated",
+];
 
 const BG = "#080a10";
 
@@ -100,6 +112,7 @@ export default function AegisHomePage() {
   const [scrolled, setScrolled] = useState(false);
   const [activeWs, setActiveWs] = useState(0);
   const [demoOpen, setDemoOpen] = useState(false);
+  const [threatFeed, setThreatFeed] = useState<string[]>(THREAT_FEED_FALLBACK);
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 40);
@@ -107,8 +120,32 @@ export default function AegisHomePage() {
     return () => window.removeEventListener("scroll", h);
   }, []);
 
+  useEffect(() => {
+    fetch("/api/intelligence/threats")
+      .then((r) => r.json())
+      .then((d) => {
+        const items: Array<{ name: string; severity: string; country: string; targetSector: string }> =
+          Array.isArray(d?.data) ? d.data : [];
+        if (items.length > 0) {
+          setThreatFeed(
+            items.map((t) => `${t.severity.toUpperCase()}: ${t.name} [${t.country}] — ${t.targetSector}`)
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   return (
-    <div className="min-h-screen text-slate-300 overflow-x-hidden" style={{ background: BG, fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, transition: { duration: 0.2, ease: "easeIn" } }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="min-h-screen text-slate-300 overflow-x-hidden"
+      style={{ background: BG, fontFamily: "'Inter', system-ui, sans-serif" }}
+    >
+      <NoiseGrain opacity={0.03} />
+      <CustomCursor variant="crosshair" color="rgba(239,68,68,0.55)" />
 
       <nav className={`fixed top-0 left-0 right-0 z-50 h-14 flex items-center transition-all duration-500 ${scrolled ? "bg-[#080a10]/90 backdrop-blur-2xl border-b border-red-500/[0.06]" : "bg-transparent"}`}>
         <div className="max-w-[1200px] mx-auto px-6 w-full flex items-center justify-between">
@@ -149,20 +186,33 @@ export default function AegisHomePage() {
         <div className="absolute top-[200px] right-[15%] w-[500px] h-[400px] rounded-full" style={{ background: "radial-gradient(ellipse, rgba(139,92,246,0.02) 0%, transparent 70%)" }} />
       </div>
 
-      <section className="relative pt-32 sm:pt-40 pb-20 sm:pb-28 max-w-[1200px] mx-auto px-6">
+      <div className="pt-14">
+        <ThreatTicker items={threatFeed} label="THREAT INTEL" bgColor="rgba(8,10,16,0.95)" color="rgba(239,68,68,0.55)" />
+      </div>
+
+      <section className="relative pt-20 sm:pt-28 pb-20 sm:pb-28 max-w-[1200px] mx-auto px-6">
         <Reveal>
           <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/15 mb-8 font-mono">SZL Holdings &middot; Unified Defense & Intelligence</p>
         </Reveal>
 
         <Reveal delay={100}>
-          <h1 className="text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold leading-[1.04] tracking-[-0.03em] text-white max-w-[900px]">
-            Three workspaces.
-          </h1>
+          <WordReveal
+            text="Three workspaces."
+            as="h1"
+            delay={0.1}
+            stagger={0.07}
+            className="text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold leading-[1.04] tracking-[-0.03em] text-white max-w-[900px]"
+          />
         </Reveal>
         <Reveal delay={200}>
-          <h1 className="text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold leading-[1.04] tracking-[-0.03em] max-w-[900px] mb-8">
-            <span className="text-white/20">One shared intelligence layer.</span>
-          </h1>
+          <WordReveal
+            text="One shared intelligence layer."
+            as="h1"
+            delay={0.35}
+            stagger={0.05}
+            className="text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold leading-[1.04] tracking-[-0.03em] max-w-[900px] mb-8"
+            style={{ color: "rgba(255,255,255,0.2)" }}
+          />
         </Reveal>
 
         <Reveal delay={300}>
@@ -175,17 +225,21 @@ export default function AegisHomePage() {
 
         <Reveal delay={400}>
           <div className="flex flex-wrap gap-3 mb-20">
-            <Link href="/soc">
-              <span className="text-[13px] font-semibold bg-white/[0.07] hover:bg-white/[0.12] text-white border border-white/[0.08] rounded-lg px-7 py-3 flex items-center gap-2 transition-all cursor-pointer">
-                Enter SOC Command <ArrowRight size={14} />
-              </span>
-            </Link>
-            <button
-              onClick={() => setDemoOpen(true)}
-              className="text-[13px] font-medium text-white/60 hover:text-white border border-white/[0.06] hover:border-white/[0.20] rounded-lg px-7 py-3 transition-all"
-            >
-              Request a Demo
-            </button>
+            <MagneticButton>
+              <Link href="/soc">
+                <span className="text-[13px] font-semibold bg-white/[0.07] hover:bg-white/[0.12] text-white border border-white/[0.08] rounded-lg px-7 py-3 flex items-center gap-2 transition-all cursor-pointer" style={{ boxShadow: "0 0 28px rgba(239,68,68,0.08)" }}>
+                  Enter SOC Command <ArrowRight size={14} />
+                </span>
+              </Link>
+            </MagneticButton>
+            <MagneticButton>
+              <button
+                onClick={() => setDemoOpen(true)}
+                className="text-[13px] font-medium text-white/60 hover:text-white border border-white/[0.06] hover:border-white/[0.20] rounded-lg px-7 py-3 transition-all"
+              >
+                Request a Demo
+              </button>
+            </MagneticButton>
           </div>
         </Reveal>
 
@@ -525,6 +579,6 @@ export default function AegisHomePage() {
         app="aegis"
         subtitle="Aegis — Unified Defense & Intelligence Command"
       />
-    </div>
+    </motion.div>
   );
 }

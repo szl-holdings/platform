@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { ContactModal } from "@szl-holdings/shared-ui";
+import { motion as m } from "framer-motion";
+import { ContactModal, NoiseGrain, MagneticButton, WordReveal, SignalTicker, LiveIndicator, CinematicReveal } from "@szl-holdings/shared-ui";
 import {
   ArrowRight, Activity, Eye, TrendingUp, Radio, Gauge,
   Target, Users, Shield, Zap, CheckCircle,
@@ -7,6 +8,17 @@ import {
   Briefcase, HeartPulse, Factory, CreditCard, CheckSquare,
   Menu, X, Monitor, GitBranch, Network, Lock, Scale, Cpu,
 } from "lucide-react";
+
+const LYTE_SIGNALS_FALLBACK = [
+  { label: "APPROVAL QUEUE", value: "14 aging", delta: "+3", color: "rgba(212,160,84,0.9)" },
+  { label: "OWNERSHIP GAPS", value: "7 active", delta: "+1", color: "rgba(196,98,80,0.9)" },
+  { label: "DECISION LATENCY", value: "3.4 days avg", delta: "+0.2d", color: "rgba(196,98,80,0.9)" },
+  { label: "SIGNALS LIVE", value: "1,284 tracked", delta: "+22", color: "rgba(70,200,150,0.9)" },
+  { label: "STUCK WORKFLOWS", value: "9 flagged", delta: "+2", color: "rgba(196,98,80,0.9)" },
+  { label: "AUDIT COVERAGE", value: "100%", color: "rgba(70,200,150,0.9)" },
+  { label: "CONNECTORS LIVE", value: "16 active", color: "rgba(212,160,84,0.9)" },
+  { label: "RISK EXPOSURE", value: "$2.1M tracked", color: "rgba(212,160,84,0.9)" },
+];
 
 const prism = [
   { key: "P", name: "Pulse", color: "#d4a054", icon: Activity, meaning: "Business health, operating heartbeat, trend status", detail: "Pulse monitors the continuous rhythm of your operations — revenue velocity, delivery cadence, customer health, operational tempo. Not infrastructure uptime. Business uptime." },
@@ -80,6 +92,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
   const [mobileNav, setMobileNav] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [demoOpen, setDemoOpen] = useState(false);
+  const [liveSignals, setLiveSignals] = useState(LYTE_SIGNALS_FALLBACK);
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 40);
@@ -87,8 +100,41 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
     return () => window.removeEventListener("scroll", h);
   }, []);
 
+  useEffect(() => {
+    // Uses /api/lyte/live/signals (auth-optional) rather than /api/lyte/signals (requires auth).
+    // The live endpoint is the correct choice for the public marketing ticker — it returns
+    // sanitised operational metrics without requiring a session.
+    fetch("/api/lyte/live/signals")
+      .then((r) => r.json())
+      .then((d) => {
+        const signals: Array<{ name: string; value: string; status: string }> =
+          Array.isArray(d?.data?.signals) ? d.data.signals : [];
+        if (signals.length > 0) {
+          setLiveSignals(
+            signals.map((s) => ({
+              label: s.name.toUpperCase(),
+              value: s.value,
+              color:
+                s.status === "healthy" ? "rgba(70,200,150,0.9)" :
+                s.status === "critical" || s.status === "degraded" ? "rgba(196,98,80,0.9)" :
+                "rgba(212,160,84,0.9)",
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   return (
-    <div className="min-h-screen bg-[#0a0d14] text-slate-300 overflow-x-hidden" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <m.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, transition: { duration: 0.2, ease: "easeIn" } }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="min-h-screen bg-[#0a0d14] text-slate-300 overflow-x-hidden"
+      style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+    >
+      <NoiseGrain opacity={0.028} />
 
       <nav className={`fixed top-0 left-0 right-0 z-50 h-14 flex items-center transition-all duration-500 ${scrolled ? "bg-[#0a0d14]/92 backdrop-blur-2xl border-b" : "bg-transparent border-b border-transparent"}`} style={{ borderColor: scrolled ? "rgba(212,160,84,0.06)" : "transparent" }}>
         <div className="max-w-[1140px] mx-auto px-6 w-full flex items-center justify-between">
@@ -136,21 +182,38 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
         <div className="absolute top-[180px] left-1/2 -translate-x-1/2 w-[1000px] h-[600px] rounded-full" style={{ background: "radial-gradient(ellipse, rgba(212,160,84,0.025) 0%, transparent 65%)" }} />
       </div>
 
+      {/* SIGNAL TICKER */}
+      <div className="pt-14">
+        <SignalTicker items={liveSignals} bgColor="rgba(10,13,20,0.8)" />
+      </div>
+
       {/* HERO */}
-      <section className="relative pt-36 sm:pt-44 pb-28 sm:pb-36 max-w-[1140px] mx-auto px-6">
+      <section className="relative pt-20 sm:pt-28 pb-28 sm:pb-36 max-w-[1140px] mx-auto px-6">
         <Reveal>
-          <p className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-6 font-mono" style={{ color: "rgba(212,160,84,0.45)" }}>Business Observability</p>
+          <div className="flex items-center gap-2 mb-6">
+            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase font-mono" style={{ color: "rgba(212,160,84,0.45)" }}>Business Observability</p>
+            <LiveIndicator color="#d4a054" showTimestamp={false} label="LIVE" />
+          </div>
         </Reveal>
 
         <Reveal delay={100}>
-          <h1 className="text-[clamp(2.2rem,5.5vw,4rem)] font-extrabold leading-[1.06] tracking-[-0.03em] text-white max-w-[820px] mb-3">
-            In the dark,
-          </h1>
+          <WordReveal
+            text="In the dark,"
+            as="h1"
+            delay={0.1}
+            stagger={0.07}
+            className="text-[clamp(2.2rem,5.5vw,4rem)] font-extrabold leading-[1.06] tracking-[-0.03em] text-white max-w-[820px] mb-3"
+          />
         </Reveal>
         <Reveal delay={200}>
-          <h1 className="text-[clamp(2.2rem,5.5vw,4rem)] font-extrabold leading-[1.06] tracking-[-0.03em] max-w-[820px] mb-10">
-            <span style={{ color: "#d4a054" }}>let Lyte guide you.</span>
-          </h1>
+          <WordReveal
+            text="let Lyte guide you."
+            as="h1"
+            delay={0.3}
+            stagger={0.06}
+            className="text-[clamp(2.2rem,5.5vw,4rem)] font-extrabold leading-[1.06] tracking-[-0.03em] max-w-[820px] mb-10"
+            style={{ color: "#d4a054" }}
+          />
         </Reveal>
 
         <Reveal delay={300}>
@@ -163,12 +226,16 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
 
         <Reveal delay={400}>
           <div className="flex flex-wrap gap-3 mb-24">
-            <button onClick={onSignIn} className="text-[13px] font-semibold rounded-lg px-7 py-3 flex items-center gap-2 transition-all hover:shadow-lg" style={{ background: "#d4a054", color: "#0a0d14", boxShadow: "0 0 24px rgba(212,160,84,0.08)" }}>
-              Sign In <ArrowRight size={14} />
-            </button>
-            <button onClick={() => { window.location.href = "/lyte-command-center/?view=app"; }} className="text-[13px] font-medium border rounded-lg px-7 py-3 transition-all hover:border-[rgba(212,160,84,0.3)] hover:text-[rgba(212,160,84,0.8)]" style={{ color: "rgba(255,255,255,0.5)", borderColor: "rgba(255,255,255,0.12)" }}>
-              Try Live Demo →
-            </button>
+            <MagneticButton>
+              <button onClick={onSignIn} className="text-[13px] font-semibold rounded-lg px-7 py-3 flex items-center gap-2 transition-all" style={{ background: "#d4a054", color: "#0a0d14", boxShadow: "0 0 28px rgba(212,160,84,0.18)" }}>
+                Sign In <ArrowRight size={14} />
+              </button>
+            </MagneticButton>
+            <MagneticButton>
+              <button onClick={() => { window.location.href = "/lyte-command-center/?view=app"; }} className="text-[13px] font-medium border rounded-lg px-7 py-3 transition-all" style={{ color: "rgba(255,255,255,0.5)", borderColor: "rgba(255,255,255,0.12)" }}>
+                Try Live Demo →
+              </button>
+            </MagneticButton>
           </div>
         </Reveal>
 
@@ -679,6 +746,6 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
           </div>
         </div>
       </footer>
-    </div>
+    </m.div>
   );
 }

@@ -1,11 +1,25 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "wouter";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { WarmGrain, MagneticButton, LetterReveal } from "@szl-holdings/shared-ui";
 
 function GoldDust() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mouseRef = useRef({ x: -1, y: -1 });
+
+  useEffect(() => {
+    const handleMouse = (e: MouseEvent) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      mouseRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    };
+    window.addEventListener("mousemove", handleMouse, { passive: true });
+    return () => window.removeEventListener("mousemove", handleMouse);
+  }, []);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -22,15 +36,16 @@ function GoldDust() {
     };
     resize();
     window.addEventListener("resize", resize);
-    const particles: { x: number; y: number; vx: number; vy: number; size: number; opacity: number }[] = [];
-    for (let i = 0; i < 40; i++) {
+    const particles: { x: number; y: number; vx: number; vy: number; size: number; opacity: number; ox: number; oy: number }[] = [];
+    for (let i = 0; i < 55; i++) {
+      const x = Math.random() * canvas.offsetWidth;
+      const y = Math.random() * canvas.offsetHeight;
       particles.push({
-        x: Math.random() * canvas.offsetWidth,
-        y: Math.random() * canvas.offsetHeight,
+        x, y, ox: x, oy: y,
         vx: (Math.random() - 0.5) * 0.15,
-        vy: -Math.random() * 0.1 - 0.02,
-        size: Math.random() * 1.2 + 0.3,
-        opacity: Math.random() * 0.15 + 0.03,
+        vy: -Math.random() * 0.08 - 0.015,
+        size: Math.random() * 1.4 + 0.25,
+        opacity: Math.random() * 0.18 + 0.03,
       });
     }
     const draw = () => {
@@ -38,10 +53,16 @@ function GoldDust() {
       time += 0.001;
       const w = canvas.offsetWidth;
       const h = canvas.offsetHeight;
+      const mx = mouseRef.current.x;
+      const my = mouseRef.current.y;
       ctx.clearRect(0, 0, w, h);
       particles.forEach(p => {
-        p.x += p.vx + Math.sin(time * 2 + p.y * 0.01) * 0.05;
-        p.y += p.vy;
+        const dx = p.x - mx;
+        const dy = p.y - my;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const repulse = dist > 0 && dist < 80 ? ((80 - dist) / 80) * 0.5 : 0;
+        p.x += p.vx + Math.sin(time * 2 + p.y * 0.01) * 0.05 + (dist > 0 ? (dx / dist) * repulse : 0);
+        p.y += p.vy + (dist > 0 ? (dy / dist) * repulse * 0.5 : 0);
         if (p.y < -5) { p.y = h + 5; p.x = Math.random() * w; }
         if (p.x < -5) p.x = w + 5;
         if (p.x > w + 5) p.x = -5;
@@ -78,10 +99,11 @@ export default function Hero() {
 
   return (
     <section className="relative overflow-hidden" style={{ background: "#1a1714", minHeight: "min(92vh, 820px)" }}>
+      <WarmGrain opacity={0.022} />
       <GoldDust />
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 inset-inline-0 h-px" style={{ background: "linear-gradient(to right, transparent, rgba(196,170,126,0.15), transparent)" }} />
-        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 70% 60% at 75% 30%, rgba(196,170,126,0.04) 0%, transparent 70%)" }} />
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 70% 60% at 75% 30%, rgba(196,170,126,0.05) 0%, transparent 70%)" }} />
         <div className="absolute bottom-0 inset-inline-0 h-32" style={{ background: "linear-gradient(to top, #1a1714, transparent)" }} />
       </div>
 
@@ -100,22 +122,27 @@ export default function Hero() {
               </span>
             </motion.div>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, delay: 0.15 }}
-              className="font-serif leading-[1.06] mb-7"
+            <LetterReveal
+              text={t("hero.headline")}
+              as="h1"
+              delay={0.2}
+              stagger={0.022}
+              className="font-serif leading-[1.06] mb-3"
               style={{ fontSize: "clamp(2.6rem, 5.5vw, 4.5rem)", fontWeight: 300, color: "#f5f0e8" }}
-            >
-              {t("hero.headline")}
-              <br />
-              <span style={{ fontStyle: "italic", color: "rgba(196,170,126,0.85)" }}>{t("hero.headlineEmphasis")}</span>
-            </motion.h1>
+            />
+            <LetterReveal
+              text={t("hero.headlineEmphasis")}
+              as="h1"
+              delay={0.55}
+              stagger={0.02}
+              className="font-serif leading-[1.06] mb-7"
+              style={{ fontSize: "clamp(2.6rem, 5.5vw, 4.5rem)", fontWeight: 300, fontStyle: "italic", color: "rgba(196,170,126,0.85)" }}
+            />
 
             <motion.p
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
               className="text-[15px] font-light leading-relaxed mb-10 max-w-md"
               style={{ color: "rgba(245,240,232,0.65)" }}
             >
@@ -125,34 +152,38 @@ export default function Hero() {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.45 }}
+              transition={{ duration: 0.7, delay: 0.65 }}
               className="flex flex-col sm:flex-row items-start gap-3"
             >
-              <Link
-                href="/contact"
-                className="group flex items-center gap-2.5 px-7 py-3.5 text-[12px] font-medium tracking-[0.08em] uppercase transition-all duration-300"
-                style={{ color: "#1a1714", background: "rgba(196,170,126,0.9)" }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(196,170,126,1)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(196,170,126,0.9)"; }}
-              >
-                {t("common.beginConversation")}
-                <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
-              </Link>
-              <Link
-                href="/services"
-                className="px-6 py-3.5 text-[11px] font-medium tracking-[0.15em] uppercase transition-all duration-300"
-                style={{ color: "rgba(196,170,126,0.5)", border: "1px solid rgba(196,170,126,0.15)" }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,170,126,0.35)";
-                  (e.currentTarget as HTMLElement).style.color = "rgba(196,170,126,0.8)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,170,126,0.15)";
-                  (e.currentTarget as HTMLElement).style.color = "rgba(196,170,126,0.5)";
-                }}
-              >
-                {t("nav.services")}
-              </Link>
+              <MagneticButton>
+                <Link
+                  href="/contact"
+                  className="group flex items-center gap-2.5 px-7 py-3.5 text-[12px] font-medium tracking-[0.08em] uppercase transition-all duration-300"
+                  style={{ color: "#1a1714", background: "rgba(196,170,126,0.9)", boxShadow: "0 0 28px rgba(196,170,126,0.14)" }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(196,170,126,1)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 0 40px rgba(196,170,126,0.24)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(196,170,126,0.9)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 0 28px rgba(196,170,126,0.14)"; }}
+                >
+                  {t("common.beginConversation")}
+                  <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+              </MagneticButton>
+              <MagneticButton>
+                <Link
+                  href="/services"
+                  className="px-6 py-3.5 text-[11px] font-medium tracking-[0.15em] uppercase transition-all duration-300"
+                  style={{ color: "rgba(196,170,126,0.5)", border: "1px solid rgba(196,170,126,0.15)" }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,170,126,0.35)";
+                    (e.currentTarget as HTMLElement).style.color = "rgba(196,170,126,0.8)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,170,126,0.15)";
+                    (e.currentTarget as HTMLElement).style.color = "rgba(196,170,126,0.5)";
+                  }}
+                >
+                  {t("nav.services")}
+                </Link>
+              </MagneticButton>
             </motion.div>
           </div>
 

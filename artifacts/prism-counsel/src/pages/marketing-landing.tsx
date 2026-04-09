@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { ContactModal } from "@szl-holdings/shared-ui";
+import { motion } from "framer-motion";
+import { ContactModal, NoiseGrain, MagneticButton, WordReveal, CinematicReveal, LiveIndicator } from "@szl-holdings/shared-ui";
 import {
   Scale, ArrowRight, Shield, FileText, Brain, Clock,
   CheckCircle, Users, BarChart3, Target, Lock, Eye,
@@ -215,7 +216,15 @@ export default function PrismCounselMarketingLanding() {
   }, []);
 
   return (
-    <div className="min-h-screen overflow-x-hidden" style={{ background: BG, color: "rgba(255,255,255,0.75)", fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, transition: { duration: 0.2, ease: "easeIn" } }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="min-h-screen overflow-x-hidden"
+      style={{ background: BG, color: "rgba(255,255,255,0.75)", fontFamily: "'Inter', system-ui, sans-serif" }}
+    >
+      <NoiseGrain opacity={0.03} />
 
       <nav className={`fixed top-0 left-0 right-0 z-50 h-14 flex items-center transition-all duration-400 ${scrolled ? "border-b" : ""}`}
         style={{ background: scrolled ? "rgba(8,12,20,0.96)" : "transparent", backdropFilter: scrolled ? "blur(20px)" : "none", borderColor: "rgba(200,169,110,0.08)" }}>
@@ -267,16 +276,31 @@ export default function PrismCounselMarketingLanding() {
       {/* HERO */}
       <section className="relative pt-32 sm:pt-44 pb-24 sm:pb-32 max-w-[1100px] mx-auto px-6">
         <Reveal>
-          <p className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-8 font-mono" style={{ color: "rgba(200,169,110,0.45)" }}>
-            SZL Holdings &middot; Plaintiff-Side Litigation Intelligence
-          </p>
+          <div className="flex items-center gap-2 mb-8">
+            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase font-mono" style={{ color: "rgba(200,169,110,0.45)" }}>
+              SZL Holdings &middot; Plaintiff-Side Litigation Intelligence
+            </p>
+            <LiveIndicator color={ACCENT} showTimestamp={false} label="LIVE" />
+          </div>
         </Reveal>
 
         <Reveal delay={80}>
-          <h1 className="text-[clamp(2.4rem,6vw,4.5rem)] font-extrabold leading-[1.04] tracking-[-0.03em] text-white max-w-[800px]">
-            Litigation intelligence<br />
-            <span style={{ color: ACCENT }}>built for plaintiff counsel.</span>
-          </h1>
+          <WordReveal
+            text="Litigation intelligence"
+            as="h1"
+            delay={0.1}
+            stagger={0.06}
+            className="text-[clamp(2.4rem,6vw,4.5rem)] font-extrabold leading-[1.04] tracking-[-0.03em] text-white max-w-[800px]"
+          />
+          <WordReveal
+            text="built for plaintiff counsel."
+            as="h1"
+            delay={0.4}
+            stagger={0.055}
+            className="text-[clamp(2.4rem,6vw,4.5rem)] font-extrabold leading-[1.04] tracking-[-0.03em] max-w-[800px]"
+            style={{ color: ACCENT }}
+          />
+          <div className="h-1" />
         </Reveal>
 
         <Reveal delay={180}>
@@ -287,12 +311,16 @@ export default function PrismCounselMarketingLanding() {
 
         <Reveal delay={280}>
           <div className="flex flex-wrap gap-3 mb-20">
-            <button onClick={() => setDemoOpen(true)} className="inline-flex items-center gap-2 text-[13px] font-semibold px-7 py-3 rounded-lg transition-all" style={{ background: ACCENT, color: "#080c14" }}>
-              Request a Demo <ArrowRight size={14} />
-            </button>
-            <a href="/prism-counsel/demo" className="inline-flex items-center gap-2 text-[13px] font-medium px-7 py-3 rounded-lg transition-all" style={{ color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.12)" }}>
-              Explore Demo →
-            </a>
+            <MagneticButton>
+              <button onClick={() => setDemoOpen(true)} className="inline-flex items-center gap-2 text-[13px] font-semibold px-7 py-3 rounded-lg transition-all" style={{ background: ACCENT, color: "#080c14", boxShadow: "0 0 28px rgba(200,169,110,0.18)" }}>
+                Request a Demo <ArrowRight size={14} />
+              </button>
+            </MagneticButton>
+            <MagneticButton>
+              <a href="/prism-counsel/" className="inline-flex items-center gap-2 text-[13px] font-medium px-7 py-3 rounded-lg transition-all" style={{ color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                Enter Platform →
+              </a>
+            </MagneticButton>
           </div>
         </Reveal>
 
@@ -814,6 +842,6 @@ export default function PrismCounselMarketingLanding() {
         app="prism-counsel"
         subtitle="PRISM Counsel — Matter Intelligence Platform"
       />
-    </div>
+    </motion.div>
   );
 }

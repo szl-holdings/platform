@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useRef } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
+import { AnimatePresence, motion as m, useReducedMotion } from "framer-motion";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { SandboxModeProvider, SandboxModeBanner, AnalyticsProvider } from "@szl-holdings/shared-ui";
 import { McpOverlay } from "@szl-holdings/mcp-client";
@@ -79,55 +80,68 @@ function NotFound() {
 }
 
 function PrivateRouter() {
+  const [location] = useLocation();
+  const prefersReducedMotion = useReducedMotion();
   return (
-    <Suspense fallback={<PageLoader />}>
-      <Switch>
-        <Route path="/" component={() => <Redirect to="/dashboard" />} />
-        <Route path="/dashboard" component={Dashboard} />
-        <Route path="/home" component={() => <Redirect to="/dashboard" />} />
-        <Route path="/distress-engine" component={DistressEngine} />
-        <Route path="/deals" component={Deals} />
-        <Route path="/listings" component={Listings} />
-        <Route path="/leads" component={Leads} />
-        <Route path="/team" component={Team} />
-        <Route path="/inquiries" component={InquiriesPage} />
-        <Route path="/agents" component={AgentsPage} />
-        <Route path="/case-study" component={CaseStudyPage} />
-        <Route path="/market" component={Market} />
-        <Route path="/transactions" component={Transactions} />
-        <Route path="/documents" component={Documents} />
-        <Route path="/offers" component={Offers} />
-        <Route path="/predictions" component={Predictions} />
-        <Route path="/automations" component={Automations} />
-        <Route path="/broker-overview" component={BrokerOverview} />
-        <Route path="/ingestion" component={Ingestion} />
-        <Route path="/commercial" component={CommercialIntelligence} />
-        <Route path="/market-intelligence" component={MarketIntelligence} />
-        <Route path="/market-analytics" component={MarketAnalytics} />
-        <Route path="/comparable-sales" component={ComparableSales} />
-        <Route path="/distress-pipeline" component={DistressPipeline} />
-        <Route path="/portfolio-dashboard" component={PortfolioDashboard} />
-        <Route path="/investor-mode" component={InvestorMode} />
-        <Route path="/pipeline" component={Pipeline} />
-        <Route path="/property-map" component={PropertyMapPage} />
-        <Route path="/property/:id" component={PropertyDetail} />
-        <Route path="/powerbi" component={PowerBiReport} />
-        <Route path="/document-engine" component={DocumentEngine} />
-        <Route path="/document-engine/:sub" component={DocumentEngine} />
-        <Route path="/atlas-artifacts" component={TerraAtlasArtifactsPage} />
-        <Route path="/pricing" component={TerraPerricingPage} />
-        <Route path="/lender-report" component={LenderReport} />
-        <Route path="/property-desk" component={PropertyDesk} />
-        <Route path="/what-changed" component={WhatChanged} />
-        <Route path="/diligence-prep" component={DiligencePrep} />
-        <Route path="/readiness-board" component={ReadinessBoard} />
-        <Route path="/approval-review" component={ApprovalReview} />
-        <Route path="/readiness-graph" component={ReadinessGraph} />
-        <Route path="/vendor-reliability" component={VendorReliability} />
-        <Route path="/countdown-engine" component={CountdownEngine} />
-        <Route component={NotFound} />
-      </Switch>
-    </Suspense>
+    <AnimatePresence mode="wait" initial={false}>
+      <m.div
+        key={location}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: "easeInOut" }}
+        style={{ position: "relative", minHeight: "100%" }}
+      >
+        <Suspense fallback={<PageLoader />}>
+          <Switch>
+            <Route path="/" component={() => <Redirect to="/dashboard" />} />
+            <Route path="/dashboard" component={Dashboard} />
+            <Route path="/home" component={() => <Redirect to="/dashboard" />} />
+            <Route path="/distress-engine" component={DistressEngine} />
+            <Route path="/deals" component={Deals} />
+            <Route path="/listings" component={Listings} />
+            <Route path="/leads" component={Leads} />
+            <Route path="/team" component={Team} />
+            <Route path="/inquiries" component={InquiriesPage} />
+            <Route path="/agents" component={AgentsPage} />
+            <Route path="/case-study" component={CaseStudyPage} />
+            <Route path="/market" component={Market} />
+            <Route path="/transactions" component={Transactions} />
+            <Route path="/documents" component={Documents} />
+            <Route path="/offers" component={Offers} />
+            <Route path="/predictions" component={Predictions} />
+            <Route path="/automations" component={Automations} />
+            <Route path="/broker-overview" component={BrokerOverview} />
+            <Route path="/ingestion" component={Ingestion} />
+            <Route path="/commercial" component={CommercialIntelligence} />
+            <Route path="/market-intelligence" component={MarketIntelligence} />
+            <Route path="/market-analytics" component={MarketAnalytics} />
+            <Route path="/comparable-sales" component={ComparableSales} />
+            <Route path="/distress-pipeline" component={DistressPipeline} />
+            <Route path="/portfolio-dashboard" component={PortfolioDashboard} />
+            <Route path="/investor-mode" component={InvestorMode} />
+            <Route path="/pipeline" component={Pipeline} />
+            <Route path="/property-map" component={PropertyMapPage} />
+            <Route path="/property/:id" component={PropertyDetail} />
+            <Route path="/powerbi" component={PowerBiReport} />
+            <Route path="/document-engine" component={DocumentEngine} />
+            <Route path="/document-engine/:sub" component={DocumentEngine} />
+            <Route path="/atlas-artifacts" component={TerraAtlasArtifactsPage} />
+            <Route path="/pricing" component={TerraPerricingPage} />
+            <Route path="/lender-report" component={LenderReport} />
+            <Route path="/property-desk" component={PropertyDesk} />
+            <Route path="/what-changed" component={WhatChanged} />
+            <Route path="/diligence-prep" component={DiligencePrep} />
+            <Route path="/readiness-board" component={ReadinessBoard} />
+            <Route path="/approval-review" component={ApprovalReview} />
+            <Route path="/readiness-graph" component={ReadinessGraph} />
+            <Route path="/vendor-reliability" component={VendorReliability} />
+            <Route path="/countdown-engine" component={CountdownEngine} />
+            <Route component={NotFound} />
+          </Switch>
+        </Suspense>
+      </m.div>
+    </AnimatePresence>
   );
 }
 
@@ -177,6 +191,7 @@ function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
 function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   const { isLoading, isAuthenticated, login } = useAuth();
   const [, navigate] = useLocation();
+  const prefersReducedMotion = useReducedMotion();
   const prevAuth = useRef(isAuthenticated);
 
   const params = new URLSearchParams(window.location.search);
@@ -201,15 +216,35 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     );
   }
 
-  if (!isAuthenticated) {
-    return (
-      <Suspense fallback={<div style={{ height: "100vh", background: "#0a0c10" }} />}>
-        <TerraMarketingLanding onSignIn={login} />
-      </Suspense>
-    );
-  }
-
-  return <PrivateApp cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />;
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      {!isAuthenticated ? (
+        <m.div
+          key="marketing"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.3, ease: "easeInOut" }}
+          style={{ position: "relative" }}
+        >
+          <Suspense fallback={<div style={{ height: "100vh", background: "#0a0c10" }} />}>
+            <TerraMarketingLanding onSignIn={login} />
+          </Suspense>
+        </m.div>
+      ) : (
+        <m.div
+          key="private"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.3, ease: "easeInOut" }}
+          style={{ position: "relative" }}
+        >
+          <PrivateApp cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
+        </m.div>
+      )}
+    </AnimatePresence>
+  );
 }
 
 function App() {

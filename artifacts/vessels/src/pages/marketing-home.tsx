@@ -2,9 +2,20 @@ import { Link } from "wouter";
 import { Ship, ChevronRight, Shield, BarChart3, AlertTriangle, Activity, Globe, Anchor, Navigation, DollarSign, ArrowRight, Eye, TrendingUp, Zap, Clock, Waves, MapPin, Lock } from "lucide-react";
 import { MarketingNav } from "@/components/MarketingNav";
 import { MarketingFooter } from "@/components/MarketingFooter";
-import { ContactModal } from "@szl-holdings/shared-ui";
+import { ContactModal, NoiseGrain, CustomCursor, MagneticButton, SignalTicker, CinematicReveal } from "@szl-holdings/shared-ui";
 import { motion as m, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+
+const FLEET_TICKER_FALLBACK = [
+  { label: "VESSELS LIVE", value: "214", color: "rgba(56,189,248,0.8)" },
+  { label: "ON-TIME ARRIVAL", value: "84%", color: "rgba(70,200,150,0.8)" },
+  { label: "HIGH RISK", value: "3 flagged", delta: "+1", color: "rgba(239,68,68,0.8)" },
+  { label: "SANCTIONS QUEUE", value: "0 alerts", color: "rgba(70,200,150,0.8)" },
+  { label: "CANAL DELAYS", value: "2 vessels", color: "rgba(251,191,36,0.8)" },
+  { label: "AIS COVERAGE", value: "99.97%", color: "rgba(56,189,248,0.8)" },
+  { label: "VOYAGE ECONOMICS", value: "$18.4M TCE", color: "rgba(56,189,248,0.8)" },
+  { label: "PORT CALLS TODAY", value: "12 active", color: "rgba(70,200,150,0.8)" },
+];
 
 function AnimatedCounter({ value, suffix = "", prefix = "" }: { value: number; suffix?: string; prefix?: string }) {
   const [display, setDisplay] = useState(0);
@@ -230,11 +241,44 @@ const useCases = [
 
 export default function MarketingHomePage() {
   const [demoOpen, setDemoOpen] = useState(false);
+  const [fleetTicker, setFleetTicker] = useState(FLEET_TICKER_FALLBACK);
+
+  useEffect(() => {
+    fetch("/api/vessels/live/fleet-summary")
+      .then((r) => r.json())
+      .then((d) => {
+        const f = d?.data;
+        if (!f || typeof f.totalVesselsTracked !== "number") return;
+        setFleetTicker([
+          { label: "VESSELS TRACKED", value: String(f.totalVesselsTracked), color: "rgba(56,189,248,0.8)" },
+          { label: "UNDERWAY", value: String(f.underwayCount), color: "rgba(70,200,150,0.8)" },
+          { label: "ANCHORED", value: String(f.anchoredCount), color: "rgba(251,191,36,0.8)" },
+          { label: "MOORED", value: String(f.mooredCount), color: "rgba(56,189,248,0.8)" },
+          { label: "AVG SPEED", value: `${f.avgSpeedKnots} kts`, color: "rgba(56,189,248,0.8)" },
+          { label: "DATA SOURCE", value: f.liveData ? "LIVE AIS" : "Demo", color: f.liveData ? "rgba(70,200,150,0.8)" : "rgba(212,160,84,0.8)" },
+        ]);
+      })
+      .catch(() => {});
+  }, []);
+
   return (
-    <div className="min-h-screen bg-[#050c17] text-sky-50 overflow-x-hidden">
+    <m.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, transition: { duration: 0.2, ease: "easeIn" } }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="min-h-screen bg-[#050c17] text-sky-50 overflow-x-hidden"
+    >
+      <NoiseGrain opacity={0.026} />
+      <CustomCursor variant="crosshair" color="rgba(56,189,248,0.6)" />
       <MarketingNav />
 
-      <section className="relative pt-28 pb-6 sm:pt-32 sm:pb-8 lg:pt-36 lg:pb-10 overflow-hidden">
+      {/* FLEET SIGNAL TICKER */}
+      <div className="pt-14">
+        <SignalTicker items={fleetTicker} bgColor="rgba(5,12,23,0.9)" speed={32} />
+      </div>
+
+      <section className="relative pt-16 pb-6 sm:pt-20 sm:pb-8 lg:pt-24 lg:pb-10 overflow-hidden">
         <OceanCanvas />
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-sky-500/10 to-transparent" />
@@ -243,7 +287,7 @@ export default function MarketingHomePage() {
 
         <div className="relative z-10 max-w-6xl mx-auto px-5 sm:px-6">
           <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="flex items-center gap-2 mb-6">
-            <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+            <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
             <span className="text-[11px] font-semibold text-cyan-400/70 tracking-[0.12em] uppercase">Maritime Intelligence Platform</span>
           </m.div>
 
@@ -275,16 +319,20 @@ export default function MarketingHomePage() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="flex flex-col sm:flex-row items-start gap-3"
             >
-              <a href="./dashboard?demo=true">
-                <button className="flex items-center gap-2 px-7 py-3.5 bg-cyan-400 hover:bg-cyan-300 text-[#050c17] font-semibold text-[13px] tracking-wide transition-all duration-200">
-                  Enter Fleet Command <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              </a>
-              <Link href="/demo">
-                <button className="flex items-center gap-2 px-7 py-3.5 border border-sky-500/15 hover:border-sky-400/30 text-sky-300/70 hover:text-sky-200 font-medium text-[13px] transition-all duration-200">
-                  Request a demo <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </Link>
+              <MagneticButton>
+                <a href="./dashboard?demo=true">
+                  <button className="flex items-center gap-2 px-7 py-3.5 bg-cyan-400 hover:bg-cyan-300 text-[#050c17] font-semibold text-[13px] tracking-wide transition-all duration-200" style={{ boxShadow: "0 0 32px rgba(34,211,238,0.22)" }}>
+                    Enter Fleet Command <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </a>
+              </MagneticButton>
+              <MagneticButton>
+                <Link href="/demo">
+                  <button className="flex items-center gap-2 px-7 py-3.5 border border-sky-500/15 hover:border-sky-400/30 text-sky-300/70 hover:text-sky-200 font-medium text-[13px] transition-all duration-200">
+                    Request a demo <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </Link>
+              </MagneticButton>
             </m.div>
           </div>
 
@@ -616,6 +664,6 @@ export default function MarketingHomePage() {
         app="vessels"
         subtitle="Vessels — Maritime Fleet Intelligence"
       />
-    </div>
+    </m.div>
   );
 }

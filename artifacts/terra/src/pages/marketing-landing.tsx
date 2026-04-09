@@ -1,10 +1,15 @@
 import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight, Building2, MapPin, TrendingUp, DollarSign, Flame,
   BarChart3, Users, Search, FileText, Shield, Layers,
   CheckCircle, Menu, X, Eye, Activity,
 } from "lucide-react";
-import { ContactModal } from "@szl-holdings/shared-ui";
+import { ContactModal, NoiseGrain, MagneticButton, WordReveal, ScrollCounter, CinematicReveal, LiveIndicator } from "@szl-holdings/shared-ui";
+
+type HeroCounterStat = { value: number; prefix?: string; suffix?: string; label: string };
+type HeroStaticStat = { display: string; label: string };
+type HeroStat = HeroCounterStat | HeroStaticStat;
 
 const ACCENT = "#2d6a4f";
 const ACCENT_LIGHT = "#40856a";
@@ -125,7 +130,15 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
   }, []);
 
   return (
-    <div className="min-h-screen overflow-x-hidden" style={{ background: BG, color: "#c8ccd6", fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, transition: { duration: 0.2, ease: "easeIn" } }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="min-h-screen overflow-x-hidden"
+      style={{ background: BG, color: "#c8ccd6", fontFamily: "'Inter', system-ui, sans-serif" }}
+    >
+      <NoiseGrain opacity={0.026} />
 
       {/* NAV */}
       <nav className={`fixed top-0 left-0 right-0 z-50 h-14 flex items-center transition-all duration-400 ${scrolled ? "border-b" : ""}`}
@@ -168,20 +181,34 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
       {/* HERO */}
       <section className="relative pt-32 sm:pt-44 pb-24 sm:pb-32 max-w-[1100px] mx-auto px-6">
         <div className="absolute top-0 left-0 right-0 h-[600px] pointer-events-none overflow-hidden">
-          <div className="absolute top-[200px] left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full" style={{ background: "radial-gradient(ellipse, rgba(45,106,79,0.035) 0%, transparent 70%)" }} />
+          <div className="absolute top-[200px] left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full" style={{ background: "radial-gradient(ellipse, rgba(45,106,79,0.04) 0%, transparent 70%)" }} />
         </div>
 
         <Reveal>
-          <p className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-8 font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>
-            SZL Holdings &middot; Property / Portfolio / Broker Intelligence
-          </p>
+          <div className="flex items-center gap-2 mb-8">
+            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>
+              SZL Holdings &middot; Property / Portfolio / Broker Intelligence
+            </p>
+            <LiveIndicator color={ACCENT_LIGHT} showTimestamp={false} label="LIVE" />
+          </div>
         </Reveal>
 
         <Reveal delay={80}>
-          <h1 className="text-[clamp(2.6rem,6.5vw,4.8rem)] font-extrabold leading-[1.03] tracking-[-0.03em] text-white max-w-[860px]">
-            The operating surface for<br />
-            <span style={{ color: ACCENT_LIGHT }}>serious real estate.</span>
-          </h1>
+          <WordReveal
+            text="The operating surface for"
+            as="h1"
+            delay={0.1}
+            stagger={0.06}
+            className="text-[clamp(2.6rem,6.5vw,4.8rem)] font-extrabold leading-[1.03] tracking-[-0.03em] text-white max-w-[860px]"
+          />
+          <WordReveal
+            text="serious real estate."
+            as="h1"
+            delay={0.45}
+            stagger={0.06}
+            className="text-[clamp(2.6rem,6.5vw,4.8rem)] font-extrabold leading-[1.03] tracking-[-0.03em] max-w-[860px]"
+            style={{ color: ACCENT_LIGHT }}
+          />
         </Reveal>
 
         <Reveal delay={180}>
@@ -192,25 +219,35 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
 
         <Reveal delay={280}>
           <div className="flex flex-wrap gap-3 mb-20">
-            <button onClick={onSignIn} className="inline-flex items-center gap-2 text-[13px] font-semibold px-7 py-3 rounded-lg transition-all" style={{ background: ACCENT_LIGHT, color: "#fff" }}>
-              Sign In <ArrowRight size={14} />
-            </button>
-            <a href="./dashboard?demo=true" className="inline-flex items-center gap-2 text-[13px] font-medium px-7 py-3 rounded-lg transition-all" style={{ color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.12)" }}>
-              Try Platform Demo →
-            </a>
+            <MagneticButton>
+              <button onClick={onSignIn} className="inline-flex items-center gap-2 text-[13px] font-semibold px-7 py-3 rounded-lg transition-all" style={{ background: ACCENT_LIGHT, color: "#fff", boxShadow: "0 0 28px rgba(64,133,106,0.22)" }}>
+                Sign In <ArrowRight size={14} />
+              </button>
+            </MagneticButton>
+            <MagneticButton>
+              <a href="./dashboard?demo=true" className="inline-flex items-center gap-2 text-[13px] font-medium px-7 py-3 rounded-lg transition-all" style={{ color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                Try Platform Demo →
+              </a>
+            </MagneticButton>
           </div>
         </Reveal>
 
         <Reveal delay={360}>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-px rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
-            {[
-              { value: "1,025+", label: "Distress properties" },
-              { value: "$4.8B", label: "Pipeline tracked" },
-              { value: "5 boroughs", label: "NYC coverage" },
-              { value: "6 modules", label: "Intelligence domains" },
-            ].map(s => (
+            {([
+              { value: 1025, suffix: "+", label: "Distress properties" },
+              { value: 4.8, prefix: "$", suffix: "B", label: "Pipeline tracked" },
+              { display: "5 boroughs", label: "NYC coverage" },
+              { display: "6 modules", label: "Intelligence domains" },
+            ] as HeroStat[]).map((s) => (
               <div key={s.label} className="py-5 px-5" style={{ background: BG }}>
-                <span className="text-[22px] font-extrabold font-mono text-white block">{s.value}</span>
+                <span className="text-[22px] font-extrabold font-mono text-white block">
+                  {"value" in s ? (
+                    <ScrollCounter target={(s as HeroCounterStat).value} prefix={(s as HeroCounterStat).prefix} suffix={(s as HeroCounterStat).suffix} />
+                  ) : (
+                    (s as HeroStaticStat).display
+                  )}
+                </span>
                 <span className="text-[10px] tracking-[0.06em] uppercase mt-1 block" style={{ color: "rgba(255,255,255,0.22)" }}>{s.label}</span>
               </div>
             ))}
@@ -635,6 +672,6 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
         app="terra"
         subtitle="Terra — Real Estate Intelligence"
       />
-    </div>
+    </motion.div>
   );
 }
