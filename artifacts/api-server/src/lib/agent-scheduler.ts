@@ -121,7 +121,7 @@ export function registerDefaultSchedules() {
       agentId: "terra-autonomous",
       name: "Terra Market Monitor",
       domain: "terra" as const,
-      intervalMs: 60 * 60 * 1000,
+      intervalMs: 30 * 60 * 1000,
       enabled: true,
       taskDescription: "Track geopolitical events, assess market impact on real estate, identify risk factors",
       systemPrompt: `You are an autonomous real estate market intelligence agent. Analyze geopolitical and market data to generate concise real estate investment findings. Focus on: market risks, geopolitical impacts, and emerging opportunities.`,
@@ -146,7 +146,16 @@ export function registerDefaultSchedules() {
     },
   ];
 
-  for (const schedule of schedules) {
+  const schedulesWithGc = schedules.map((schedule) => ({
+    ...schedule,
+    analysisPrompt: async () => {
+      const prompt = await schedule.analysisPrompt();
+      if (typeof global.gc === "function") global.gc();
+      return prompt;
+    },
+  }));
+
+  for (const schedule of schedulesWithGc) {
     agentScheduler.register(schedule);
   }
 
