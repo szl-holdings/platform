@@ -1,3 +1,4 @@
+// Canonical schema — single source of truth for all cross-product platform tables.
 import { pgTable, text, serial, timestamp, integer, numeric, boolean, jsonb, index, uniqueIndex } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";

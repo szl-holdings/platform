@@ -1,3 +1,5 @@
+// Legacy: Dreamscape creative platform — now surfaces as creative-workflows in Alloy.
+// Retained for active DB tables; new creative schema belongs in alloy_platform.
 import { pgTable, text, serial, timestamp, integer, boolean, jsonb, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";

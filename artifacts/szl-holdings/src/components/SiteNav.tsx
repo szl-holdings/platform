@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { analytics } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
@@ -8,16 +8,16 @@ import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 
 const NAV_ITEMS = [
   {
-    label: "Platform",
-    href: "/platform",
+    label: "Ecosystem",
+    href: "/ecosystem",
     highlight: false,
-    children: [
-      { label: "Platform Overview", href: "/platform" },
-      { label: "Lyte — Business Observability", href: "/lyte" },
-      { label: "Alloy — Execution Fabric", href: "/alloy-fabric" },
-      { label: "Architecture", href: "/architecture" },
-      { label: "HELM CONSOLE — Family Command", href: "/helm" },
-    ],
+    children: null,
+  },
+  {
+    label: "Alloy",
+    href: "/alloy-fabric",
+    highlight: false,
+    children: null,
   },
   {
     label: "Lyte",
@@ -26,83 +26,46 @@ const NAV_ITEMS = [
     children: null,
   },
   {
-    label: "Trust",
-    href: "/trust",
+    label: "Vessels",
+    href: "/products/vessels",
     highlight: false,
-    children: [
-      { label: "Trust Center", href: "/trust" },
-      { label: "Security", href: "/trust/security" },
-      { label: "Architecture", href: "/architecture" },
-      { label: "AI Governance", href: "/trust/ai" },
-      { label: "Governance", href: "/trust/governance" },
-    ],
+    children: null,
   },
   {
-    label: "Docs",
-    href: "/docs",
+    label: "Carlota Jo",
+    href: "/services/carlota-jo",
     highlight: false,
-    children: [
-      { label: "Documentation", href: "/docs" },
-      { label: "Architecture", href: "/docs/architecture" },
-      { label: "Control Plane", href: "/docs/control-plane" },
-      { label: "Proof Chain", href: "/docs/proof-chain" },
-    ],
+    children: null,
   },
   {
-    label: "Resources",
-    href: "/insights",
+    label: "Founder",
+    href: "/founder",
     highlight: false,
-    children: [
-      { label: "Insights & Articles", href: "/insights" },
-      { label: "Case Studies", href: "/case-studies" },
-      { label: "FAQ", href: "/faq" },
-      { label: "Public Roadmap", href: "/roadmap" },
-      { label: "What SZL Relieves", href: "/relief" },
-      { label: "ROI Calculator", href: "/roi" },
-      { label: "Platform Packages", href: "/packages" },
-    ],
+    children: null,
   },
   {
-    label: "Company",
-    href: "/company",
-    highlight: false,
-    children: [
-      { label: "About SZL Holdings", href: "/company" },
-      { label: "Operating Doctrine", href: "/operating-doctrine" },
-      { label: "Founder", href: "/founder" },
-      { label: "Design Partners", href: "/design-partner" },
-      { label: "Contact", href: "/contact" },
-    ],
-  },
-  {
-    label: "Demo",
-    href: "/demo",
+    label: "Contact",
+    href: "/contact",
     children: null,
     highlight: true,
   },
 ];
 
 const NAV_LINKS_MOBILE = [
-  { label: "Demo", href: "/demo", primary: true },
-  { label: "Platform Overview", href: "/platform", primary: false },
-  { label: "Lyte", href: "/lyte", primary: false },
+  { label: "Contact", href: "/contact", primary: true },
+  { label: "Ecosystem", href: "/ecosystem", primary: false },
   { label: "Alloy", href: "/alloy-fabric", primary: false },
-  { label: "Architecture", href: "/architecture", primary: false },
-  { label: "Trust Center", href: "/trust", primary: false },
-  { label: "Security", href: "/trust/security", primary: false },
-  { label: "Docs", href: "/docs", primary: false },
-  { label: "Insights", href: "/insights", primary: false },
-  { label: "Case Studies", href: "/case-studies", primary: false },
-  { label: "Company", href: "/company", primary: false },
+  { label: "Lyte", href: "/lyte", primary: false },
+  { label: "Vessels", href: "/products/vessels", primary: false },
+  { label: "Carlota Jo", href: "/services/carlota-jo", primary: false },
   { label: "Founder", href: "/founder", primary: false },
-  { label: "Design Partners", href: "/design-partner", primary: false },
-  { label: "Contact", href: "/contact", primary: false },
+  { label: "Investors", href: "/investor-relations", primary: false },
+  { label: "Trust Center", href: "/trust", primary: false },
 ];
 
 export function SiteNav() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [location] = useLocation();
 
   useEffect(() => {
@@ -113,7 +76,6 @@ export function SiteNav() {
 
   useEffect(() => {
     setMobileOpen(false);
-    setOpenDropdown(null);
   }, [location]);
 
   const handleNavClick = (label: string, href: string) => {
@@ -133,7 +95,6 @@ export function SiteNav() {
         )}
         role="navigation"
         aria-label="Main navigation"
-        onMouseLeave={() => setOpenDropdown(null)}
       >
         <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
           <div style={{ height: "64px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -164,8 +125,6 @@ export function SiteNav() {
             <div style={{ display: "flex", alignItems: "center", gap: "0.125rem" }} className="hidden lg:flex">
               {NAV_ITEMS.map((item) => {
                 const isActive = location === item.href || location.startsWith(item.href + "/");
-                const hasChildren = !!item.children;
-                const isOpen = openDropdown === item.label;
 
                 if (item.highlight) {
                   return (
@@ -178,85 +137,6 @@ export function SiteNav() {
                     >
                       {item.label}
                     </Link>
-                  );
-                }
-
-                if (hasChildren) {
-                  return (
-                    <div
-                      key={item.label}
-                      style={{ position: "relative" }}
-                      onMouseEnter={() => setOpenDropdown(item.label)}
-                    >
-                      <Link
-                        href={item.href}
-                        onClick={() => handleNavClick(item.label, item.href)}
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "0.25rem",
-                          fontSize: "0.8125rem",
-                          fontWeight: 500,
-                          color: isActive ? "var(--color-szl-text)" : "var(--color-szl-text-secondary)",
-                          textDecoration: "none",
-                          padding: "0.375rem 0.625rem",
-                          borderRadius: "0.375rem",
-                          transition: "color 0.18s ease, background 0.18s ease",
-                          cursor: "pointer",
-                        }}
-                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.04)"; }}
-                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = isActive ? "var(--color-szl-text)" : "var(--color-szl-text-secondary)"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}
-                      >
-                        {item.label}
-                        <ChevronDown size={12} style={{ opacity: 0.6, transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }} />
-                      </Link>
-
-                      <AnimatePresence>
-                        {isOpen && (
-                          <m.div
-                            initial={{ opacity: 0, y: 6, scale: 0.97 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 4, scale: 0.97 }}
-                            transition={{ duration: 0.15 }}
-                            style={{
-                              position: "absolute",
-                              top: "calc(100% + 4px)",
-                              left: "50%",
-                              transform: "translateX(-50%)",
-                              minWidth: "200px",
-                              background: "hsl(214,16%,6%)",
-                              border: "1px solid var(--color-szl-border-hover)",
-                              borderRadius: "0.625rem",
-                              padding: "0.375rem",
-                              boxShadow: "0 12px 40px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.30)",
-                              backdropFilter: "blur(20px)",
-                            }}
-                          >
-                            {item.children!.map((child) => (
-                              <Link
-                                key={child.href}
-                                href={child.href}
-                                onClick={() => { handleNavClick(child.label, child.href); setOpenDropdown(null); }}
-                                style={{
-                                  display: "block",
-                                  padding: "0.5rem 0.75rem",
-                                  borderRadius: "0.375rem",
-                                  fontSize: "0.8125rem",
-                                  fontWeight: 500,
-                                  color: "var(--color-szl-text-secondary)",
-                                  textDecoration: "none",
-                                  transition: "color 0.15s ease, background 0.15s ease",
-                                }}
-                                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.05)"; }}
-                                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}
-                              >
-                                {child.label}
-                              </Link>
-                            ))}
-                          </m.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
                   );
                 }
 

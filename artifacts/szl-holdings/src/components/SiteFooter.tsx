@@ -2,19 +2,20 @@ import { Link } from "wouter";
 
 const FOOTER_COLS = [
   {
-    heading: "Platform",
+    heading: "Products",
     links: [
-      { label: "Platform Overview", href: "/platform" },
-      { label: "Lyte", href: "/lyte" },
+      { label: "Ecosystem", href: "/ecosystem" },
       { label: "Alloy", href: "/alloy-fabric" },
-      { label: "Architecture", href: "/architecture" },
+      { label: "Lyte", href: "/lyte" },
+      { label: "Vessels", href: "/products/vessels" },
+      { label: "Carlota Jo", href: "/services/carlota-jo" },
     ],
   },
   {
-    heading: "Lyte",
+    heading: "Platform",
     links: [
-      { label: "Business Observability", href: "/lyte" },
-      { label: "Execution Fabric", href: "/alloy-fabric" },
+      { label: "Platform Overview", href: "/platform" },
+      { label: "Architecture", href: "/architecture" },
       { label: "How It Works", href: "/how-it-works" },
       { label: "Request Demo", href: "/demo" },
     ],
@@ -24,17 +25,17 @@ const FOOTER_COLS = [
     links: [
       { label: "Trust Center", href: "/trust" },
       { label: "Security", href: "/trust/security" },
-      { label: "Architecture", href: "/architecture" },
       { label: "AI Governance", href: "/trust/ai" },
+      { label: "Governance", href: "/trust/governance" },
     ],
   },
   {
-    heading: "Docs",
+    heading: "Investors",
     links: [
-      { label: "Documentation", href: "/docs" },
-      { label: "Control Plane", href: "/docs/control-plane" },
-      { label: "Proof Chain", href: "/docs/proof-chain" },
-      { label: "Model Mesh", href: "/docs/model-mesh" },
+      { label: "Investor Relations", href: "/investor-relations" },
+      { label: "Investor Story", href: "/investor-story" },
+      { label: "Operating Doctrine", href: "/operating-doctrine" },
+      { label: "Capital Arsenal", href: "/capital-arsenal" },
     ],
   },
   {

@@ -1,3 +1,5 @@
+// Legacy: Nuro Mesh AI infrastructure — absorbed into agent_os/agent_training/alloy_platform.
+// Retained for active DB tables; do not add new tables here.
 import { pgTable, serial, text, integer, boolean, timestamp, real, jsonb } from "drizzle-orm/pg-core";
 
 export const agentMemoryFacts = pgTable("agent_memory_facts", {

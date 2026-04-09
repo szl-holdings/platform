@@ -15,9 +15,8 @@ import {
   voyagesTable,
   maritimeExceptionsTable,
   featureFlagsTable,
-  szlProductsTable,
+  productsTable,
 } from "@szl-holdings/db";
-import { productsTable } from "@szl-holdings/db/schema/canonical";
 import { eq, sql } from "drizzle-orm";
 
 async function tableHasData(table: any): Promise<boolean> {
@@ -77,12 +76,12 @@ export async function seedPlatformData(): Promise<void> {
   const seedLyteOrgId = lyteOrgId ?? 2;
   const seedVesselsOrgId = vesselsOrgId ?? 3;
 
-  await db.insert(szlProductsTable).values([
-    { slug: "alloy", name: "Alloy", description: "Execution Fabric — signal ingest, workflow orchestration, artifact management", productType: "platform" as const, isActive: true },
-    { slug: "lyte", name: "Lyte Command Center", description: "Business telemetry and ops signal management for MSPs", productType: "module" as const, isActive: true },
-    { slug: "vessels", name: "Vessels Maritime Intelligence", description: "Maritime fleet monitoring, voyage management, and exception handling", productType: "vertical" as const, isActive: true },
-    { slug: "terra", name: "Terra", description: "Predictive intelligence and business analytics", productType: "module" as const, isActive: true },
-    { slug: "inca", name: "INCA AI Research Command", description: "AI research orchestration and knowledge management", productType: "service" as const, isActive: true },
+  await db.insert(productsTable).values([
+    { key: "alloy", name: "Alloy", description: "Execution Fabric — signal ingest, workflow orchestration, artifact management", category: "platform" as const, isActive: true },
+    { key: "lyte", name: "Lyte Command Center", description: "Business telemetry and ops signal management for MSPs", category: "platform" as const, isActive: true },
+    { key: "vessels", name: "Vessels Maritime Intelligence", description: "Maritime fleet monitoring, voyage management, and exception handling", category: "maritime" as const, isActive: true },
+    { key: "terra", name: "Terra", description: "Predictive intelligence and business analytics", category: "analytics" as const, isActive: true },
+    { key: "inca", name: "INCA AI Research Command", description: "AI research orchestration and knowledge management", category: "intelligence" as const, isActive: true },
   ]).onConflictDoNothing();
 
   await db.insert(featureFlagsTable).values([
