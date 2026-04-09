@@ -1408,4 +1408,53 @@ adminRouter.delete("/admin/sessions/:userId", requireRole("admin"), async (req, 
   }
 });
 
+// ─── Dead Letter Queue Admin Endpoints ───────────────────────────────────────
+
+adminRouter.get("/admin/dead-letter-jobs", async (_req, res) => {
+  try {
+    const { listDeadLetterJobs } = await import("../lib/persistence-bootstrap");
+    const jobs = await listDeadLetterJobs(100);
+    res.json({ success: true, data: jobs, count: jobs.length });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed to list dead letter jobs";
+    res.status(500).json({ error: message });
+  }
+});
+
+adminRouter.post("/admin/dead-letter-jobs/:id/replay", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id ?? "", 10);
+    if (isNaN(id)) {
+      res.status(400).json({ error: "Invalid dead letter job id" });
+      return;
+    }
+    const { replayDeadLetterJob } = await import("../lib/persistence-bootstrap");
+    const result = await replayDeadLetterJob(id);
+    if (result.success) {
+      res.json({ success: true, newJobId: result.newJobId });
+    } else {
+      res.status(400).json({ success: false, error: result.error });
+    }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed to replay dead letter job";
+    res.status(500).json({ error: message });
+  }
+});
+
+// ─── Agent Event History Admin Endpoint ───────────────────────────────────────
+
+adminRouter.get("/admin/agent-events", async (req, res) => {
+  try {
+    const { getEventBusHistory } = await import("../lib/persistence-bootstrap");
+    const limit = Math.min(parseInt((req.query.limit as string) ?? "50", 10), 200);
+    const type = req.query.type as string | undefined;
+    const sourceDomain = req.query.sourceDomain as string | undefined;
+    const events = await getEventBusHistory({ limit, type, sourceDomain });
+    res.json({ success: true, data: events, count: events.length });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed to list agent events";
+    res.status(500).json({ error: message });
+  }
+});
+
 export default adminRouter;

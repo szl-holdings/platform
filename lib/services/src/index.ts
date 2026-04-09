@@ -1,5 +1,6 @@
 export { ServiceAdapter, type ServiceStatus, type ServiceHealthReport, type ConnectionTestResult } from "./base.js";
 export { ServiceRegistry, type IntegrationHealthMatrix, services } from "./registry.js";
+export { getRedisClient, isRedisReal, cacheGet, cacheSet, cacheDel, rateLimitIncr, getRedisStatus } from "./adapters/redis.js";
 
 export {
   type ProviderMode,

@@ -60,6 +60,12 @@ jobQueue.register(JOB_TYPES.DAILY_DIGEST, async (job) => {
     },
   });
   logger.info({ jobId: job.id, snapshot: { requestCount: snapshot.requestCount, errorRate: snapshot.errorRate } }, "Daily digest complete");
+  import("./persistence-bootstrap").then(({ updateScheduledJobRun }) => {
+    const nextRun = new Date();
+    nextRun.setUTCDate(nextRun.getUTCDate() + 1);
+    nextRun.setUTCHours(8, 0, 0, 0);
+    updateScheduledJobRun("daily_digest", "completed", nextRun).catch(() => {});
+  }).catch(() => {});
 });
 
 jobQueue.register(JOB_TYPES.HEALTH_SCAN, async (job) => {
@@ -104,6 +110,9 @@ jobQueue.register(JOB_TYPES.HEALTH_SCAN, async (job) => {
     metadata: { services: serviceList, alertsRaised: errorRateHigh || p95High ? 1 : 0 },
   });
   logger.info({ jobId: job.id }, "Health scan completed");
+  import("./persistence-bootstrap").then(({ updateScheduledJobRun }) => {
+    updateScheduledJobRun("health_scan", "completed", new Date(Date.now() + 5 * 60 * 1000)).catch(() => {});
+  }).catch(() => {});
 });
 
 jobQueue.register(JOB_TYPES.ALERT_CHECK, async (job) => {
@@ -232,25 +241,43 @@ export function startScheduledJobs() {
   }, 15 * 60 * 1000);
 
   const now = new Date();
-  const nextDigest = new Date(now);
-  nextDigest.setUTCHours(8, 0, 0, 0);
-  if (nextDigest <= now) nextDigest.setUTCDate(nextDigest.getUTCDate() + 1);
-  const msUntilDigest = nextDigest.getTime() - now.getTime();
+  const defaultNextDigest = new Date(now);
+  defaultNextDigest.setUTCHours(8, 0, 0, 0);
+  if (defaultNextDigest <= now) defaultNextDigest.setUTCDate(defaultNextDigest.getUTCDate() + 1);
 
-  setTimeout(async () => {
-    try {
-      await jobQueue.enqueue(JOB_TYPES.DAILY_DIGEST, { domains: ["vessels", "firestorm", "lyte", "terra"] }, { maxRetries: 2 });
-    } catch (err) {
-      logger.warn({ err }, "Failed to enqueue daily digest");
-    }
-    setInterval(async () => {
+  import("../lib/persistence-bootstrap").then(async ({ getScheduledJobNextRunMs }) => {
+    const msUntilDigest = await getScheduledJobNextRunMs("daily_digest", DAY_MS, defaultNextDigest);
+    setTimeout(async () => {
       try {
-        await jobQueue.enqueue(JOB_TYPES.DAILY_DIGEST, { domains: ["vessels", "firestorm", "lyte", "terra"] }, { maxRetries: 2 });
+        await jobQueue.enqueue(JOB_TYPES.DAILY_DIGEST, { domains: ["vessels", "firestorm", "lyte", "inca", "terra", "msp"] }, { maxRetries: 2 });
       } catch (err) {
         logger.warn({ err }, "Failed to enqueue daily digest");
       }
-    }, DAY_MS);
-  }, msUntilDigest);
+      setInterval(async () => {
+        try {
+          await jobQueue.enqueue(JOB_TYPES.DAILY_DIGEST, { domains: ["vessels", "firestorm", "lyte", "inca", "terra", "msp"] }, { maxRetries: 2 });
+        } catch (err) {
+          logger.warn({ err }, "Failed to enqueue daily digest");
+        }
+      }, DAY_MS);
+    }, msUntilDigest);
+  }).catch(() => {
+    const msUntilDigest = defaultNextDigest.getTime() - now.getTime();
+    setTimeout(async () => {
+      try {
+        await jobQueue.enqueue(JOB_TYPES.DAILY_DIGEST, { domains: ["vessels", "firestorm", "lyte", "inca", "terra", "msp"] }, { maxRetries: 2 });
+      } catch (err) {
+        logger.warn({ err }, "Failed to enqueue daily digest");
+      }
+      setInterval(async () => {
+        try {
+          await jobQueue.enqueue(JOB_TYPES.DAILY_DIGEST, { domains: ["vessels", "firestorm", "lyte", "inca", "terra", "msp"] }, { maxRetries: 2 });
+        } catch (err) {
+          logger.warn({ err }, "Failed to enqueue daily digest");
+        }
+      }, DAY_MS);
+    }, msUntilDigest);
+  });
 
   const now2 = new Date();
   const nextCertDigest = new Date(now2);

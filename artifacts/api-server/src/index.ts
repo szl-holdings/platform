@@ -38,8 +38,12 @@ import { registerAllPrismJobHandlers } from "./services/prism-job-handlers";
 import { startPrismJobPoller } from "./services/prism-queue";
 import { registerGenAITelemetryBridge } from "./lib/genai-telemetry-bridge.js";
 import "./lib/cross-app-notification-relay.js";
+import { bootstrapPersistence, restoreJobsFromDb } from "./lib/persistence-bootstrap";
 
 failFastOnInvalidConfig();
+
+bootstrapPersistence();
+restoreJobsFromDb().catch(() => {});
 
 registerGenAITelemetryBridge();
 

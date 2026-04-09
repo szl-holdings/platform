@@ -12,6 +12,15 @@ import {
   getEnterpriseFeatureFlags,
 } from "../lib/terra-enterprise-ingestion";
 import { services } from "@szl-holdings/services";
+import { db } from "@szl-holdings/db";
+import {
+  terraPropertiesTable,
+  terraListingsTable,
+  terraDistressPropertiesTable,
+  terraTransactionsTable,
+  terraIngestionRunsTable,
+} from "@szl-holdings/db";
+import { sql, desc, eq, and, count, avg, sum } from "drizzle-orm";
 
 const router: IRouter = Router();
 
@@ -55,11 +64,75 @@ async function fetchJson(url: string, timeoutMs = 10000): Promise<unknown> {
 
 router.get("/terra/market-intelligence", terraRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
+    const [propertyStats, listingStats, distressStats, transactionStats] = await Promise.all([
+      db.select({
+        total: count(),
+        byType: sql<string>`jsonb_object_agg(property_type, cnt) FILTER (WHERE property_type IS NOT NULL)`,
+      }).from(
+        db.select({ property_type: terraPropertiesTable.propertyType, cnt: count().as("cnt") })
+          .from(terraPropertiesTable)
+          .where(eq(terraPropertiesTable.isActive, true))
+          .groupBy(terraPropertiesTable.propertyType)
+          .as("pt")
+      ).catch(() => [{ total: 0, byType: "{}" }]),
+
+      db.select({
+        activeCount: count(),
+        avgListPrice: avg(sql<number>`CAST(list_price AS numeric)`),
+        avgDom: avg(terraListingsTable.daysOnMarket),
+      }).from(terraListingsTable).where(eq(terraListingsTable.status, "active")).catch(() => []),
+
+      db.select({
+        distressCount: count(),
+        avgOpportunityScore: avg(terraDistressPropertiesTable.opportunityScore),
+        totalEstimatedValue: sum(sql<number>`CAST(estimated_value AS numeric)`),
+      }).from(terraDistressPropertiesTable).where(eq(terraDistressPropertiesTable.isActive, true)).catch(() => []),
+
+      db.select({
+        transactionCount: count(),
+        avgSalePrice: avg(sql<number>`CAST(sale_price AS numeric)`),
+      }).from(terraTransactionsTable).where(eq(terraTransactionsTable.status, "completed")).catch(() => []),
+    ]);
+
+    const pStats = propertyStats[0] ?? { total: 0, byType: "{}" };
+    const lStats = listingStats[0] ?? { activeCount: 0, avgListPrice: null, avgDom: null };
+    const dStats = distressStats[0] ?? { distressCount: 0, avgOpportunityScore: null, totalEstimatedValue: null };
+    const tStats = transactionStats[0] ?? { transactionCount: 0, avgSalePrice: null };
+
+    const lastRun = await db.select().from(terraIngestionRunsTable)
+      .where(eq(terraIngestionRunsTable.status, "completed"))
+      .orderBy(desc(terraIngestionRunsTable.completedAt))
+      .limit(1)
+      .catch(() => []);
+
     sendSuccess(res, {
-      status: "NOT_CONFIGURED",
-      note: "Connect a real estate data provider (e.g. ATTOM, Zillow API, CoStar, RealPage) for live market intelligence.",
-      count: 0,
-      markets: [],
+      status: "computed",
+      source: "Terra Database — NYC Pipeline + Demo Data",
+      dataAsOf: lastRun[0]?.completedAt?.toISOString() ?? new Date().toISOString(),
+      markets: [
+        {
+          market: "New York City",
+          properties: {
+            total: Number(pStats.total),
+            byType: typeof pStats.byType === "string" ? JSON.parse(pStats.byType) : (pStats.byType ?? {}),
+          },
+          listings: {
+            active: Number((lStats as { activeCount?: number | string }).activeCount ?? 0),
+            avgListPriceUsd: Math.round(parseFloat(String((lStats as { avgListPrice?: string | null }).avgListPrice ?? "0")) || 0),
+            avgDaysOnMarket: Math.round(parseFloat(String((lStats as { avgDom?: string | null }).avgDom ?? "0")) || 0),
+          },
+          distress: {
+            total: Number((dStats as { distressCount?: number | string }).distressCount ?? 0),
+            avgOpportunityScore: Math.round(parseFloat(String((dStats as { avgOpportunityScore?: string | null }).avgOpportunityScore ?? "0")) || 0),
+            totalEstimatedValueUsd: Math.round(parseFloat(String((dStats as { totalEstimatedValue?: string | null }).totalEstimatedValue ?? "0")) || 0),
+          },
+          transactions: {
+            total: Number((tStats as { transactionCount?: number | string }).transactionCount ?? 0),
+            avgSalePriceUsd: Math.round(parseFloat(String((tStats as { avgSalePrice?: string | null }).avgSalePrice ?? "0")) || 0),
+          },
+        },
+      ],
+      count: 1,
       fetchedAt: new Date().toISOString(),
     });
   } catch (err) { handleRouteError(res, err, "Failed to fetch market intelligence"); }
@@ -68,7 +141,7 @@ router.get("/terra/market-intelligence", terraRateLimit, authMiddleware({ requir
 router.get("/terra/reit-filings", terraRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
     sendSuccess(res, {
-      status: "NOT_CONFIGURED",
+      status: "external_source_required",
       note: "Connect to SEC EDGAR Full-Text Search API (https://efts.sec.gov/LATEST/search-index) for live REIT 10-K/10-Q filings.",
       count: 0,
       filings: [],
@@ -79,11 +152,29 @@ router.get("/terra/reit-filings", terraRateLimit, authMiddleware({ required: fal
 
 router.get("/terra/demographics", terraRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
+    const distressByBorough = await db
+      .select({
+        borough: terraDistressPropertiesTable.borough,
+        propertyCount: count(),
+        avgOpportunityScore: avg(terraDistressPropertiesTable.opportunityScore),
+      })
+      .from(terraDistressPropertiesTable)
+      .where(eq(terraDistressPropertiesTable.isActive, true))
+      .groupBy(terraDistressPropertiesTable.borough)
+      .orderBy(desc(count()))
+      .catch(() => []);
+
     sendSuccess(res, {
-      status: "NOT_CONFIGURED",
-      note: "Connect a Census Bureau API key (https://api.census.gov/data/key_signup.html) for live ACS demographic data.",
-      count: 0,
-      demographics: [],
+      status: "computed",
+      source: "Terra Database — NYC Open Data Pipeline",
+      note: "For full ACS demographic data, connect a Census Bureau API key (https://api.census.gov/data/key_signup.html).",
+      count: distressByBorough.length,
+      demographics: distressByBorough.map((row) => ({
+        area: row.borough,
+        areaType: "borough",
+        propertyCount: Number(row.propertyCount),
+        avgDistressOpportunityScore: Math.round(parseFloat(String(row.avgOpportunityScore ?? "0")) || 0),
+      })),
       fetchedAt: new Date().toISOString(),
     });
   } catch (err) { handleRouteError(res, err, "Failed to fetch demographic data"); }
@@ -91,11 +182,42 @@ router.get("/terra/demographics", terraRateLimit, authMiddleware({ required: fal
 
 router.get("/terra/property-risk", terraRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
+    const highRiskDistress = await db
+      .select({
+        id: terraDistressPropertiesTable.id,
+        address: terraDistressPropertiesTable.address,
+        borough: terraDistressPropertiesTable.borough,
+        zipCode: terraDistressPropertiesTable.zipCode,
+        propertyType: terraDistressPropertiesTable.propertyType,
+        distressType: terraDistressPropertiesTable.distressType,
+        estimatedValue: terraDistressPropertiesTable.estimatedValue,
+        opportunityScore: terraDistressPropertiesTable.opportunityScore,
+        daysInDistress: terraDistressPropertiesTable.daysInDistress,
+        confidenceLevel: terraDistressPropertiesTable.confidenceLevel,
+      })
+      .from(terraDistressPropertiesTable)
+      .where(eq(terraDistressPropertiesTable.isActive, true))
+      .orderBy(desc(terraDistressPropertiesTable.opportunityScore))
+      .limit(50)
+      .catch(() => []);
+
     sendSuccess(res, {
-      status: "NOT_CONFIGURED",
-      note: "Connect FEMA NRI API (https://hazards.fema.gov/nri/api) and NOAA Climate data feeds for live property risk scoring.",
-      count: 0,
-      properties: [],
+      status: "computed",
+      source: "Terra Database — NYC Distress Intelligence",
+      note: "For FEMA climate risk scores, connect FEMA NRI API (https://hazards.fema.gov/nri/api).",
+      count: highRiskDistress.length,
+      properties: highRiskDistress.map((p) => ({
+        id: p.id,
+        address: p.address,
+        borough: p.borough,
+        zipCode: p.zipCode,
+        propertyType: p.propertyType,
+        distressType: p.distressType,
+        estimatedValueUsd: parseFloat(String(p.estimatedValue ?? "0")),
+        distressRiskScore: p.opportunityScore,
+        daysInDistress: p.daysInDistress,
+        confidenceLevel: p.confidenceLevel,
+      })),
       fetchedAt: new Date().toISOString(),
     });
   } catch (err) { handleRouteError(res, err, "Failed to fetch property risk scores"); }

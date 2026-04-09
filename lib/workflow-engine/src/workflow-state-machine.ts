@@ -23,6 +23,8 @@ export interface WorkflowContext {
   error?: string;
 }
 
+export type WorkflowDbPersistFn = (ctx: WorkflowContext) => void;
+
 const TRANSITIONS: WorkflowTransition[] = [
   { from: "pending", to: "running", effect: ctx => { ctx.startedAt = new Date(); } },
   { from: "running", to: "paused" },
@@ -35,10 +37,15 @@ const TRANSITIONS: WorkflowTransition[] = [
 export class WorkflowStateMachine {
   private context: WorkflowContext;
   private transitions: WorkflowTransition[];
+  private dbPersistFn?: WorkflowDbPersistFn;
 
   constructor(id: string, metadata: Record<string, unknown> = {}, transitions: WorkflowTransition[] = TRANSITIONS) {
     this.context = { id, status: "pending", metadata };
     this.transitions = transitions;
+  }
+
+  setDbPersistFn(fn: WorkflowDbPersistFn): void {
+    this.dbPersistFn = fn;
   }
 
   get state(): WorkflowStatus {
@@ -83,6 +90,12 @@ export class WorkflowStateMachine {
 
     if (transition.effect) {
       await transition.effect(this.context);
+    }
+
+    if (this.dbPersistFn) {
+      try {
+        this.dbPersistFn({ ...this.context });
+      } catch { /* non-fatal */ }
     }
   }
 

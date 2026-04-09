@@ -73,3 +73,4 @@ export * from "./prism_counsel_purview";
 export * from "./distribution-os";
 export * from "./outcome_graph";
 export * from "./atlas_artifacts";
+export * from "./infrastructure";

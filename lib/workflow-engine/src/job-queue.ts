@@ -20,6 +20,12 @@ type JobHandler<T = unknown> = (job: Job<T>) => Promise<void>;
 
 export type WsPublishFn = (channel: string, event: string, data: unknown) => void;
 
+export type DbPersistJobFn = (
+  job: Job,
+  action: "enqueue" | "start" | "complete" | "fail" | "dead_letter",
+  extra?: { error?: string; errorHistory?: string[] }
+) => void;
+
 export class InProcessJobQueue {
   private handlers = new Map<string, JobHandler>();
   private queue: Job[] = [];
@@ -29,6 +35,8 @@ export class InProcessJobQueue {
   private maxCompleted = 20;
   private maxConcurrent: number;
   private publishFn?: WsPublishFn;
+  private dbPersistFn?: DbPersistJobFn;
+  private jobErrorHistory = new Map<string, string[]>();
 
   constructor(maxConcurrent = 5) {
     this.maxConcurrent = maxConcurrent;
@@ -36,6 +44,10 @@ export class InProcessJobQueue {
 
   setPublishFn(fn: WsPublishFn): void {
     this.publishFn = fn;
+  }
+
+  setDbPersistFn(fn: DbPersistJobFn): void {
+    this.dbPersistFn = fn;
   }
 
   register<T>(type: string, handler: JobHandler<T>): void {
@@ -65,6 +77,12 @@ export class InProcessJobQueue {
     this.queue.push(job as Job);
     logger.debug({ jobId: job.id, type }, "Job enqueued");
 
+    if (this.dbPersistFn) {
+      try {
+        this.dbPersistFn(job as Job, "enqueue");
+      } catch { /* non-fatal */ }
+    }
+
     this.publishFn?.("job-queue", "enqueued", {
       id: job.id,
       type: job.type,
@@ -88,12 +106,19 @@ export class InProcessJobQueue {
       job.status = "failed";
       job.error = `No handler for type: ${job.type}`;
       this.archiveJob(job);
+      if (this.dbPersistFn) {
+        try { this.dbPersistFn(job, "fail"); } catch { /* non-fatal */ }
+      }
       return;
     }
 
     this.running.add(job.id);
     job.status = "running";
     job.startedAt = Date.now();
+
+    if (this.dbPersistFn) {
+      try { this.dbPersistFn(job, "start"); } catch { /* non-fatal */ }
+    }
 
     try {
       await handler(job);
@@ -108,9 +133,17 @@ export class InProcessJobQueue {
         success: true,
         metadata: { jobId: job.id },
       });
+
+      if (this.dbPersistFn) {
+        try { this.dbPersistFn(job, "complete"); } catch { /* non-fatal */ }
+      }
     } catch (err) {
       job.retries++;
       const errorMsg = err instanceof Error ? err.message : String(err);
+
+      const history = this.jobErrorHistory.get(job.id) ?? [];
+      history.push(`[attempt ${job.retries}] ${errorMsg}`);
+      this.jobErrorHistory.set(job.id, history);
 
       if (job.retries <= job.maxRetries) {
         logger.warn({ jobId: job.id, type: job.type, attempt: job.retries, err }, "Job failed — retrying");
@@ -140,6 +173,15 @@ export class InProcessJobQueue {
         success: false,
         metadata: { jobId: job.id, error: errorMsg, retries: job.retries },
       });
+
+      if (this.dbPersistFn) {
+        try {
+          this.dbPersistFn(job, "dead_letter", {
+            error: errorMsg,
+            errorHistory: history,
+          });
+        } catch { /* non-fatal */ }
+      }
     }
 
     this.running.delete(job.id);
@@ -160,6 +202,7 @@ export class InProcessJobQueue {
     if (this.completed.length > this.maxCompleted) {
       this.completed.length = this.maxCompleted;
     }
+    this.jobErrorHistory.delete(job.id);
   }
 
   getStats() {

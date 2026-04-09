@@ -248,12 +248,25 @@ async function checkRedis(): Promise<IntegrationHealth> {
     return { name: "redis", status: "unconfigured", lastChecked: new Date().toISOString() };
   }
 
-  return {
-    name: "redis",
-    status: "healthy",
-    lastChecked: new Date().toISOString(),
-    details: { configured: true, note: "Health check via connection string presence" },
-  };
+  try {
+    const { getRedisClient } = await import("@szl-holdings/services");
+    const client = await getRedisClient();
+    const pong = await client.ping();
+    return {
+      name: "redis",
+      status: pong === "PONG" ? "healthy" : "degraded",
+      lastChecked: new Date().toISOString(),
+      details: { configured: true, response: pong, mode: "real" },
+    };
+  } catch (err) {
+    return {
+      name: "redis",
+      status: "unhealthy",
+      lastChecked: new Date().toISOString(),
+      error: err instanceof Error ? err.message : "Redis ping failed",
+      details: { configured: true, mode: "real" },
+    };
+  }
 }
 
 let cachedHealth: { data: IntegrationHealth[]; checkedAt: number } | null = null;

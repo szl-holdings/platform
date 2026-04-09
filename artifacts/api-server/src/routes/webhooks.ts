@@ -1,5 +1,10 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { db } from "@szl-holdings/db";
+import {
+  webhookEndpointsTable,
+  webhookDeliveriesTable,
+} from "@szl-holdings/db";
+import { eq, desc, and } from "drizzle-orm";
 import crypto from "crypto";
 import { z } from "zod";
 import { authMiddleware } from "../middlewares/auth";
@@ -20,34 +25,6 @@ const webhookEndpointUpdateSchema = z.object({
 });
 
 const router: IRouter = Router();
-
-interface WebhookEndpoint {
-  id: string;
-  url: string;
-  secret: string;
-  eventTypes: string[] | "*";
-  active: boolean;
-  description?: string;
-  createdAt: number;
-  lastDeliveredAt?: number;
-  failureCount: number;
-}
-
-interface WebhookDelivery {
-  id: string;
-  endpointId: string;
-  eventType: string;
-  payload: Record<string, unknown>;
-  status: "pending" | "delivered" | "failed";
-  statusCode?: number;
-  attempt: number;
-  deliveredAt?: number;
-  error?: string;
-}
-
-const webhookEndpoints = new Map<string, WebhookEndpoint>();
-const webhookDeliveries: WebhookDelivery[] = [];
-const MAX_DELIVERIES = 500;
 
 export const SZL_EVENT_TYPES = [
   "payment.succeeded",
@@ -99,42 +76,52 @@ export async function deliverWebhookEvent(
     ...(options.correlationId ? { correlation_id: options.correlationId } : {}),
   };
 
-  for (const endpoint of webhookEndpoints.values()) {
-    if (!endpoint.active) continue;
+  let endpoints: Array<typeof webhookEndpointsTable.$inferSelect>;
+  try {
+    endpoints = await db.select().from(webhookEndpointsTable).where(eq(webhookEndpointsTable.isActive, true));
+  } catch (err) {
+    logger.error({ err }, "Failed to load webhook endpoints from DB");
+    return;
+  }
 
+  for (const endpoint of endpoints) {
+    const eventTypes = endpoint.eventTypes as string[] | "*";
     const eventMatches =
-      endpoint.eventTypes === "*" ||
-      (Array.isArray(endpoint.eventTypes) && endpoint.eventTypes.includes(eventType));
+      eventTypes === "*" ||
+      (Array.isArray(eventTypes) && eventTypes.includes(eventType));
 
     if (!eventMatches) continue;
 
-    const delivery: WebhookDelivery = {
-      id: `del_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`,
-      endpointId: endpoint.id,
-      eventType,
-      payload: wrappedPayload,
-      status: "pending",
-      attempt: 1,
-    };
+    const deliveryId = `del_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
 
-    webhookDeliveries.unshift(delivery);
-    if (webhookDeliveries.length > MAX_DELIVERIES) {
-      webhookDeliveries.length = MAX_DELIVERIES;
+    try {
+      await db.insert(webhookDeliveriesTable).values({
+        deliveryId,
+        endpointId: endpoint.endpointId,
+        eventType,
+        payload: wrappedPayload as Record<string, unknown>,
+        status: "pending",
+        attempt: 1,
+      });
+    } catch (err) {
+      logger.error({ err, endpointId: endpoint.endpointId }, "Failed to insert webhook delivery record");
     }
 
     setImmediate(async () => {
-      await attemptWebhookDelivery(delivery, endpoint);
+      await attemptWebhookDeliveryDb(deliveryId, endpoint, wrappedPayload, 1);
     });
   }
 }
 
-async function attemptWebhookDelivery(
-  delivery: WebhookDelivery,
-  endpoint: WebhookEndpoint,
-  retryAttempt = 1,
+async function attemptWebhookDeliveryDb(
+  deliveryId: string,
+  endpoint: typeof webhookEndpointsTable.$inferSelect,
+  wrappedPayload: Record<string, unknown>,
+  attempt: number,
 ): Promise<void> {
-  const bodyStr = JSON.stringify(delivery.payload);
+  const bodyStr = JSON.stringify(wrappedPayload);
   const signature = signPayload(bodyStr, endpoint.secret);
+  const eventType = (wrappedPayload.type as string) ?? "unknown";
 
   const maxRetries = 3;
   const retryDelays = [0, 30_000, 300_000];
@@ -147,9 +134,9 @@ async function attemptWebhookDelivery(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-SZL-Event": delivery.eventType,
+        "X-SZL-Event": eventType,
         "X-SZL-Signature": signature,
-        "X-SZL-Delivery": delivery.id,
+        "X-SZL-Delivery": deliveryId,
         "User-Agent": "SZL-Webhooks/1.0",
       },
       body: bodyStr,
@@ -158,52 +145,71 @@ async function attemptWebhookDelivery(
 
     clearTimeout(timeout);
 
-    delivery.status = res.ok ? "delivered" : "failed";
-    delivery.statusCode = res.status;
-    delivery.deliveredAt = Date.now();
-    delivery.attempt = retryAttempt;
-
     if (res.ok) {
-      endpoint.lastDeliveredAt = Date.now();
-      endpoint.failureCount = 0;
-      logger.info({ endpointId: endpoint.id, eventType: delivery.eventType, deliveryId: delivery.id }, "Webhook delivered");
-    } else {
-      endpoint.failureCount++;
-      logger.warn({ endpointId: endpoint.id, status: res.status, attempt: retryAttempt }, "Webhook delivery failed");
+      await db.update(webhookDeliveriesTable)
+        .set({ status: "delivered", statusCode: res.status, attempt, deliveredAt: new Date() })
+        .where(eq(webhookDeliveriesTable.deliveryId, deliveryId))
+        .catch(() => {});
 
-      if (retryAttempt < maxRetries) {
-        const delay = retryDelays[retryAttempt] ?? 300_000;
-        setTimeout(() => attemptWebhookDelivery(delivery, endpoint, retryAttempt + 1), delay);
+      await db.update(webhookEndpointsTable)
+        .set({ lastDeliveredAt: new Date(), failureCount: 0, updatedAt: new Date() })
+        .where(eq(webhookEndpointsTable.endpointId, endpoint.endpointId))
+        .catch(() => {});
+
+      logger.info({ endpointId: endpoint.endpointId, eventType, deliveryId }, "Webhook delivered");
+    } else {
+      await db.update(webhookEndpointsTable)
+        .set({ failureCount: (endpoint.failureCount ?? 0) + 1, updatedAt: new Date() })
+        .where(eq(webhookEndpointsTable.endpointId, endpoint.endpointId))
+        .catch(() => {});
+
+      logger.warn({ endpointId: endpoint.endpointId, status: res.status, attempt }, "Webhook delivery failed");
+
+      if (attempt < maxRetries) {
+        const delay = retryDelays[attempt] ?? 300_000;
+        setTimeout(() => attemptWebhookDeliveryDb(deliveryId, endpoint, wrappedPayload, attempt + 1), delay);
+      } else {
+        await db.update(webhookDeliveriesTable)
+          .set({ status: "failed", statusCode: res.status, attempt })
+          .where(eq(webhookDeliveriesTable.deliveryId, deliveryId))
+          .catch(() => {});
       }
     }
   } catch (err) {
-    delivery.status = "failed";
-    delivery.error = (err as Error).message;
-    delivery.attempt = retryAttempt;
-    endpoint.failureCount++;
+    const errorMsg = (err as Error).message;
+    await db.update(webhookEndpointsTable)
+      .set({ failureCount: (endpoint.failureCount ?? 0) + 1, updatedAt: new Date() })
+      .where(eq(webhookEndpointsTable.endpointId, endpoint.endpointId))
+      .catch(() => {});
 
-    logger.error({ err, endpointId: endpoint.id, attempt: retryAttempt }, "Webhook delivery error");
+    logger.error({ err, endpointId: endpoint.endpointId, attempt }, "Webhook delivery error");
 
-    if (retryAttempt < maxRetries) {
-      const delay = retryDelays[retryAttempt] ?? 300_000;
-      setTimeout(() => attemptWebhookDelivery(delivery, endpoint, retryAttempt + 1), delay);
+    if (attempt < maxRetries) {
+      const delay = retryDelays[attempt] ?? 300_000;
+      setTimeout(() => attemptWebhookDeliveryDb(deliveryId, endpoint, wrappedPayload, attempt + 1), delay);
+    } else {
+      await db.update(webhookDeliveriesTable)
+        .set({ status: "failed", error: errorMsg, attempt })
+        .where(eq(webhookDeliveriesTable.deliveryId, deliveryId))
+        .catch(() => {});
     }
   }
 }
 
 router.get("/webhooks/endpoints", authMiddleware(), async (_req, res) => {
   try {
-    const endpoints = Array.from(webhookEndpoints.values()).map((e) => ({
-      id: e.id,
+    const endpoints = await db.select().from(webhookEndpointsTable)
+      .orderBy(desc(webhookEndpointsTable.createdAt));
+    sendSuccess(res, endpoints.map((e) => ({
+      id: e.endpointId,
       url: e.url,
       eventTypes: e.eventTypes,
-      active: e.active,
+      active: e.isActive,
       description: e.description,
-      createdAt: e.createdAt,
-      lastDeliveredAt: e.lastDeliveredAt,
+      createdAt: e.createdAt.getTime(),
+      lastDeliveredAt: e.lastDeliveredAt?.getTime(),
       failureCount: e.failureCount,
-    }));
-    sendSuccess(res, endpoints);
+    })));
   } catch (err) {
     handleRouteError(res, err, "Failed to list webhook endpoints");
   }
@@ -218,33 +224,31 @@ router.post("/webhooks/endpoints", authMiddleware(), async (req: Request, res: R
   try {
     const { url, eventTypes, description } = parsed.data;
 
-    const id = `whe_${Date.now()}_${crypto.randomBytes(6).toString("hex")}`;
+    const endpointId = `whe_${Date.now()}_${crypto.randomBytes(6).toString("hex")}`;
     const secret = generateWebhookSecret();
 
-    const endpoint: WebhookEndpoint = {
-      id,
+    await db.insert(webhookEndpointsTable).values({
+      endpointId,
       url,
       secret,
-      eventTypes: eventTypes ?? "*",
-      active: true,
+      eventTypes: (eventTypes ?? "*") as unknown as Record<string, unknown>,
       description,
-      createdAt: Date.now(),
+      isActive: true,
       failureCount: 0,
-    };
+    });
 
-    webhookEndpoints.set(id, endpoint);
-    logger.info({ endpointId: id, url }, "Webhook endpoint registered");
+    logger.info({ endpointId, url }, "Webhook endpoint registered");
 
     res.status(201).json({
       success: true,
       data: {
-        id,
+        id: endpointId,
         url,
         secret,
-        eventTypes: endpoint.eventTypes,
-        active: endpoint.active,
+        eventTypes: eventTypes ?? "*",
+        active: true,
         description,
-        createdAt: endpoint.createdAt,
+        createdAt: Date.now(),
       },
     });
   } catch (err) {
@@ -259,25 +263,32 @@ router.patch("/webhooks/endpoints/:id", authMiddleware(), async (req: Request, r
     return;
   }
   try {
-    const endpoint = webhookEndpoints.get(String(req.params.id));
+    const [endpoint] = await db.select().from(webhookEndpointsTable)
+      .where(eq(webhookEndpointsTable.endpointId, String(req.params.id))).limit(1);
+
     if (!endpoint) {
       sendNotFound(res, "Webhook endpoint");
       return;
     }
 
     const { url, eventTypes, active, description } = parsed.data;
+    const updates: Partial<typeof webhookEndpointsTable.$inferInsert> = { updatedAt: new Date() };
 
-    if (url !== undefined) endpoint.url = url;
-    if (eventTypes !== undefined) endpoint.eventTypes = eventTypes;
-    if (active !== undefined) endpoint.active = active;
-    if (description !== undefined) endpoint.description = description;
+    if (url !== undefined) updates.url = url;
+    if (eventTypes !== undefined) updates.eventTypes = eventTypes as unknown as Record<string, unknown>;
+    if (active !== undefined) updates.isActive = active;
+    if (description !== undefined) updates.description = description;
+
+    await db.update(webhookEndpointsTable)
+      .set(updates)
+      .where(eq(webhookEndpointsTable.endpointId, String(req.params.id)));
 
     sendSuccess(res, {
-      id: endpoint.id,
-      url: endpoint.url,
-      eventTypes: endpoint.eventTypes,
-      active: endpoint.active,
-      description: endpoint.description,
+      id: endpoint.endpointId,
+      url: url ?? endpoint.url,
+      eventTypes: eventTypes ?? endpoint.eventTypes,
+      active: active ?? endpoint.isActive,
+      description: description ?? endpoint.description,
     });
   } catch (err) {
     handleRouteError(res, err, "Failed to update webhook endpoint");
@@ -286,11 +297,13 @@ router.patch("/webhooks/endpoints/:id", authMiddleware(), async (req: Request, r
 
 router.delete("/webhooks/endpoints/:id", authMiddleware(), async (req: Request, res: Response) => {
   try {
-    if (!webhookEndpoints.has(String(req.params.id))) {
+    const result = await db.delete(webhookEndpointsTable)
+      .where(eq(webhookEndpointsTable.endpointId, String(req.params.id)));
+
+    if (!result) {
       sendNotFound(res, "Webhook endpoint");
       return;
     }
-    webhookEndpoints.delete(String(req.params.id));
     res.status(204).send();
   } catch (err) {
     handleRouteError(res, err, "Failed to delete webhook endpoint");
@@ -299,32 +312,40 @@ router.delete("/webhooks/endpoints/:id", authMiddleware(), async (req: Request, 
 
 router.post("/webhooks/endpoints/:id/ping", authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const endpoint = webhookEndpoints.get(String(req.params.id));
+    const [endpoint] = await db.select().from(webhookEndpointsTable)
+      .where(eq(webhookEndpointsTable.endpointId, String(req.params.id))).limit(1);
+
     if (!endpoint) {
       sendNotFound(res, "Webhook endpoint");
       return;
     }
 
-    const pingDelivery: WebhookDelivery = {
-      id: `ping_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`,
-      endpointId: endpoint.id,
+    const pingPayload = {
+      id: `ping_${Date.now()}`,
+      type: "ping",
+      created: Math.floor(Date.now() / 1000),
+      data: { message: "SZL webhook ping test" },
+    };
+    const pingDeliveryId = `ping_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
+
+    await db.insert(webhookDeliveriesTable).values({
+      deliveryId: pingDeliveryId,
+      endpointId: endpoint.endpointId,
       eventType: "ping",
-      payload: {
-        id: `ping_${Date.now()}`,
-        type: "ping",
-        created: Math.floor(Date.now() / 1000),
-        data: { message: "SZL webhook ping test" },
-      },
+      payload: pingPayload as unknown as Record<string, unknown>,
       status: "pending",
       attempt: 1,
-    };
+    }).catch(() => {});
 
-    await attemptWebhookDelivery(pingDelivery, endpoint);
+    await attemptWebhookDeliveryDb(pingDeliveryId, endpoint, pingPayload, 1);
+
+    const [updatedDelivery] = await db.select().from(webhookDeliveriesTable)
+      .where(eq(webhookDeliveriesTable.deliveryId, pingDeliveryId)).limit(1);
 
     sendSuccess(res, {
-      delivered: pingDelivery.status === "delivered",
-      statusCode: pingDelivery.statusCode,
-      error: pingDelivery.error,
+      delivered: updatedDelivery?.status === "delivered",
+      statusCode: updatedDelivery?.statusCode,
+      error: updatedDelivery?.error,
     });
   } catch (err) {
     handleRouteError(res, err, "Failed to ping webhook endpoint");
@@ -336,19 +357,22 @@ router.get("/webhooks/deliveries", authMiddleware(), async (req: Request, res: R
     const endpointId = req.query.endpointId as string | undefined;
     const limit = Math.min(parseInt((req.query.limit as string) ?? "50", 10), 200);
 
-    let deliveries = webhookDeliveries;
-    if (endpointId) {
-      deliveries = deliveries.filter((d) => d.endpointId === endpointId);
-    }
+    const conditions = [];
+    if (endpointId) conditions.push(eq(webhookDeliveriesTable.endpointId, endpointId));
 
-    sendSuccess(res, deliveries.slice(0, limit).map((d) => ({
-      id: d.id,
+    const deliveries = await db.select().from(webhookDeliveriesTable)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(webhookDeliveriesTable.createdAt))
+      .limit(limit);
+
+    sendSuccess(res, deliveries.map((d) => ({
+      id: d.deliveryId,
       endpointId: d.endpointId,
       eventType: d.eventType,
       status: d.status,
       statusCode: d.statusCode,
       attempt: d.attempt,
-      deliveredAt: d.deliveredAt,
+      deliveredAt: d.deliveredAt?.getTime(),
       error: d.error,
     })));
   } catch (err) {
