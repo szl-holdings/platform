@@ -2,9 +2,14 @@
 
 **Status:** On standby as of April 9, 2026.
 **Tag:** `v1.0-standby`
-**Last commit:** `3854aad` — fix: doctrine compliance & production quality sweep — web apps
+**Last commit:** `06764cc` — chore: add STANDBY.md — standby guide for 1-2 month pause
 
 This document is your "welcome back" guide for resuming work after 1-2 months away.
+
+> **Note on production publish:** The final production publish to Replit Deployments
+> must be triggered manually by clicking "Publish" in the Replit UI from the main project.
+> This cannot be automated from an agent task context. When returning from standby,
+> merge any pending tasks and then click Publish to push the latest code to production.
 
 ---
 
