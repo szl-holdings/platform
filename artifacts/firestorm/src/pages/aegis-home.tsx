@@ -98,10 +98,11 @@ function useInView(threshold = 0.12) {
   return { ref, visible };
 }
 
-function Reveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+function Reveal({ children, className = "", delay = 0, immediate = false }: { children: React.ReactNode; className?: string; delay?: number; immediate?: boolean }) {
   const { ref, visible } = useInView();
+  const show = immediate || visible;
   return (
-    <div ref={ref} className={`transition-all duration-1000 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"} ${className}`} style={{ transitionDelay: `${delay}ms` }}>
+    <div ref={ref} className={`transition-all duration-1000 ease-out ${show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"} ${className}`} style={{ transitionDelay: immediate ? "0ms" : `${delay}ms` }}>
       {children}
     </div>
   );
@@ -191,11 +192,11 @@ export default function AegisHomePage() {
       </div>
 
       <section className="relative pt-20 sm:pt-28 pb-20 sm:pb-28 max-w-[1200px] mx-auto px-6">
-        <Reveal>
-          <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/15 mb-8 font-mono">SZL Holdings &middot; Unified Defense & Intelligence</p>
+        <Reveal immediate>
+          <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/30 mb-8 font-mono">SZL Holdings &middot; Unified Defense & Intelligence</p>
         </Reveal>
 
-        <Reveal delay={100}>
+        <Reveal immediate>
           <WordReveal
             text="Three workspaces."
             as="h1"
@@ -204,26 +205,26 @@ export default function AegisHomePage() {
             className="text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold leading-[1.04] tracking-[-0.03em] text-white max-w-[900px]"
           />
         </Reveal>
-        <Reveal delay={200}>
+        <Reveal immediate>
           <WordReveal
             text="One shared intelligence layer."
             as="h1"
             delay={0.35}
             stagger={0.05}
             className="text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold leading-[1.04] tracking-[-0.03em] max-w-[900px] mb-8"
-            style={{ color: "rgba(255,255,255,0.2)" }}
+            style={{ color: "rgba(255,255,255,0.5)" }}
           />
         </Reveal>
 
-        <Reveal delay={300}>
-          <p className="text-[17px] sm:text-[19px] leading-[1.75] text-white/30 max-w-[640px] mb-12">
+        <Reveal immediate>
+          <p className="text-[17px] sm:text-[19px] leading-[1.75] text-white/45 max-w-[640px] mb-12">
             Aegis unifies security operations, managed services, and AI-driven intelligence
             into a single console. Defense detects. Command operates. Labs reasons.
             All three share one data context, one correlation engine, one operating model.
           </p>
         </Reveal>
 
-        <Reveal delay={400}>
+        <Reveal immediate>
           <div className="flex flex-wrap gap-3 mb-20">
             <MagneticButton>
               <Link href="/soc">
@@ -243,7 +244,7 @@ export default function AegisHomePage() {
           </div>
         </Reveal>
 
-        <Reveal delay={500}>
+        <Reveal immediate>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-px rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
             {[
               { value: "< 4 min", label: "Mean time to detect" },
@@ -253,7 +254,7 @@ export default function AegisHomePage() {
             ].map(s => (
               <div key={s.label} className="bg-[#080a10] py-5 px-5">
                 <span className="text-[22px] font-extrabold font-mono text-white block">{s.value}</span>
-                <span className="text-[10px] tracking-[0.08em] uppercase text-white/20 mt-1 block">{s.label}</span>
+                <span className="text-[10px] tracking-[0.08em] uppercase text-white/35 mt-1 block">{s.label}</span>
               </div>
             ))}
           </div>

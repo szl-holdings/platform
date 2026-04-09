@@ -78,10 +78,11 @@ function useInView(threshold = 0.12) {
   return { ref, visible };
 }
 
-function Reveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+function Reveal({ children, className = "", delay = 0, immediate = false }: { children: React.ReactNode; className?: string; delay?: number; immediate?: boolean }) {
   const { ref, visible } = useInView();
+  const show = immediate || visible;
   return (
-    <div ref={ref} className={`transition-all duration-1000 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"} ${className}`} style={{ transitionDelay: `${delay}ms` }}>
+    <div ref={ref} className={`transition-all duration-1000 ease-out ${show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"} ${className}`} style={{ transitionDelay: immediate ? "0ms" : `${delay}ms` }}>
       {children}
     </div>
   );
@@ -189,14 +190,14 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
 
       {/* HERO */}
       <section className="relative pt-20 sm:pt-28 pb-28 sm:pb-36 max-w-[1140px] mx-auto px-6">
-        <Reveal>
+        <Reveal immediate>
           <div className="flex items-center gap-2 mb-6">
-            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase font-mono" style={{ color: "rgba(212,160,84,0.45)" }}>Business Observability</p>
+            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase font-mono" style={{ color: "rgba(212,160,84,0.65)" }}>Business Observability</p>
             <LiveIndicator color="#d4a054" showTimestamp={false} label="LIVE" />
           </div>
         </Reveal>
 
-        <Reveal delay={100}>
+        <Reveal immediate>
           <WordReveal
             text="In the dark,"
             as="h1"
@@ -205,7 +206,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
             className="text-[clamp(2.2rem,5.5vw,4rem)] font-extrabold leading-[1.06] tracking-[-0.03em] text-white max-w-[820px] mb-3"
           />
         </Reveal>
-        <Reveal delay={200}>
+        <Reveal immediate>
           <WordReveal
             text="let Lyte guide you."
             as="h1"
@@ -216,15 +217,15 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
           />
         </Reveal>
 
-        <Reveal delay={300}>
-          <p className="text-[17px] sm:text-[18px] leading-[1.85] max-w-[600px] mb-14" style={{ color: "rgba(255,255,255,0.3)" }}>
+        <Reveal immediate>
+          <p className="text-[17px] sm:text-[18px] leading-[1.85] max-w-[600px] mb-14" style={{ color: "rgba(255,255,255,0.48)" }}>
             Revenue stalling. Approvals aging. Ownership gaps widening. By the time
             these surface as problems, the damage has already compounded. Lyte makes
             the invisible visible — before it costs you.
           </p>
         </Reveal>
 
-        <Reveal delay={400}>
+        <Reveal immediate>
           <div className="flex flex-wrap gap-3 mb-24">
             <MagneticButton>
               <button onClick={onSignIn} className="text-[13px] font-semibold rounded-lg px-7 py-3 flex items-center gap-2 transition-all" style={{ background: "#d4a054", color: "#0a0d14", boxShadow: "0 0 28px rgba(212,160,84,0.18)" }}>
@@ -239,12 +240,12 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
           </div>
         </Reveal>
 
-        <Reveal delay={500}>
+        <Reveal immediate>
           <div className="grid grid-cols-5 gap-px rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)" }}>
             {prism.map((p) => (
               <div key={p.key} className="bg-[#0a0d14] py-6 px-4 text-center">
                 <span className="text-[28px] font-extrabold font-mono block leading-none" style={{ color: p.color }}>{p.key}</span>
-                <span className="text-[9px] tracking-[0.12em] uppercase mt-2 block" style={{ color: "rgba(255,255,255,0.18)" }}>{p.name}</span>
+                <span className="text-[9px] tracking-[0.12em] uppercase mt-2 block" style={{ color: "rgba(255,255,255,0.35)" }}>{p.name}</span>
               </div>
             ))}
           </div>
