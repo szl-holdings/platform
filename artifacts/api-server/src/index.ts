@@ -167,10 +167,12 @@ server.listen(port, "0.0.0.0", () => {
   logger.info({ port, host: "0.0.0.0" }, "Server listening");
   scheduleNycIngestionJob();
   scheduleNycExtendedIngestionJob();
-  prewarmIntelligenceCache().catch(err => {
-    logger.warn({ err }, "[intelligence-cache] Prewarm failed (non-fatal)");
-  });
-  scheduleIntelligenceRefresh();
+  setTimeout(() => {
+    prewarmIntelligenceCache().catch(err => {
+      logger.warn({ err }, "[intelligence-cache] Prewarm failed (non-fatal)");
+    });
+    scheduleIntelligenceRefresh();
+  }, 5 * 60 * 1000);
 });
 
 const SHUTDOWN_TIMEOUT_MS = 10_000;

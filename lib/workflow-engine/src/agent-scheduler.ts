@@ -130,7 +130,7 @@ export class AgentScheduler {
 
     for (const [agentId, schedule] of this.schedules) {
       if (!schedule.enabled) continue;
-      const initialDelay = Math.random() * Math.min(schedule.intervalMs, 60000);
+      const initialDelay = Math.random() * Math.min(schedule.intervalMs, 300000);
       setTimeout(() => {
         this.runAgent(agentId).catch(err => {
           logger.error({ err, agentId }, "Initial agent run failed");
