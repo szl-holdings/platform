@@ -11,7 +11,7 @@
 <p align="center">
   <a href="https://x.com/szlholdings"><img src="https://img.shields.io/badge/X-@szlholdings-000000?style=for-the-badge&logo=x&logoColor=white" /></a>
   <a href="https://medium.com/@stephen_38454"><img src="https://img.shields.io/badge/MEDIUM-@stephen__38454-000000?style=for-the-badge&logo=medium&logoColor=white" /></a>
-  <a href="mailto:inquiries@szlholdings.com"><img src="https://img.shields.io/badge/CONTACT-inquiries@szlholdings.com-1e293b?style=for-the-badge&logo=mail.ru&logoColor=white" /></a>
+  <a href="mailto:stephenlutar2@gmail.com"><img src="https://img.shields.io/badge/CONTACT-stephenlutar2@gmail.com-1e293b?style=for-the-badge&logo=gmail&logoColor=white" /></a>
 </p>
 
 ---
@@ -98,5 +98,5 @@ AI Advisors (governed) · RBAC · Audit Trail · Signal Pipeline · WebSocket ·
 </p>
 
 <p align="center">
-  <a href="mailto:inquiries@szlholdings.com"><strong>inquiries@szlholdings.com</strong></a>
+  <a href="mailto:stephenlutar2@gmail.com"><strong>stephenlutar2@gmail.com</strong></a>
 </p>
