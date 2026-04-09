@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/hero.svg" width="100%" alt="Stephen Lutar — Founder &amp; CEO, SZL Holdings" />
+  <img src="assets/hero.svg" width="100%" alt="Stephen Lutar — Founder and CEO, SZL Holdings" />
 </p>
 
 <p align="center">
@@ -18,9 +18,9 @@
 
 ### Builder-operator behind SZL Holdings.
 
-One holding company. Six platforms. 16 live applications.
+One holding company. Six platforms. 16 live applications. One architect.
 
-I build governed operational intelligence software for industries where silent failures, invisible risk, and unaccountable AI are not acceptable. Everything ships from a single TypeScript monorepo. Everything compounds.
+I build governed operational intelligence software for industries where silent failures, invisible risk, and unaccountable AI are not acceptable. Everything ships from a single TypeScript monorepo. Every improvement compounds across every platform.
 
 ---
 
@@ -30,17 +30,58 @@ I build governed operational intelligence software for industries where silent f
 
 ---
 
-### The Platforms
+### The Platforms — Live and Deployed
 
-| Platform | Domain | What It Does |
-|:---------|:-------|:-------------|
-| **Lyte** | Business Observability | Surfaces execution risk, ownership drift, and workflow friction before they compound |
-| **Alloy** | Execution Engine | Signal normalization, workflow orchestration, approval gates, and immutable audit trails |
-| **Vessels** | Maritime Intelligence | Fleet command, AIS analytics, voyage management, and compliance monitoring |
-| **Aegis** | Defense &amp; Intelligence | Unified SOC command — threat correlation, incident governance, and security posture |
-| **Terra** | Real Estate Intelligence | Market intelligence, distress engine, deal pipeline, and portfolio analytics |
-| **PRISM Counsel** | Legal Matter Command | Deadline tracking, pressure scoring, proof chain export, and document handling |
-| **Carlota Jo** | Private Advisory | Bespoke coordination and management for luxury residential environments |
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <strong>Vessels — Maritime Intelligence</strong><br/>
+      Fleet command, AIS analytics, voyage management, compliance monitoring<br/><br/>
+      <img src="screenshots/vessels.jpg" width="100%" alt="Vessels Maritime Intelligence" />
+    </td>
+    <td width="50%" align="center">
+      <strong>Aegis — Defense and Intelligence</strong><br/>
+      Unified SOC command, threat correlation, incident governance<br/><br/>
+      <img src="screenshots/firestorm-aegis.jpg" width="100%" alt="Aegis Defense and Intelligence" />
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <strong>Terra — Real Estate Intelligence</strong><br/>
+      Market intelligence, distress engine, deal pipeline, portfolio analytics<br/><br/>
+      <img src="screenshots/terra.jpg" width="100%" alt="Terra Real Estate Intelligence" />
+    </td>
+    <td width="50%" align="center">
+      <strong>Lyte — Business Observability</strong><br/>
+      Execution risk, ownership drift, workflow friction analysis<br/><br/>
+      <img src="screenshots/lyte-command-center.jpg" width="100%" alt="Lyte Command Center" />
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <strong>PRISM Counsel — Legal Matter Command</strong><br/>
+      Deadline tracking, pressure scoring, proof chain export<br/><br/>
+      <img src="screenshots/prism-counsel.jpg" width="100%" alt="PRISM Counsel" />
+    </td>
+    <td width="50%" align="center">
+      <strong>Carlota Jo — Private Advisory</strong><br/>
+      Bespoke coordination for luxury residential environments<br/><br/>
+      <img src="screenshots/carlota-jo.jpg" width="100%" alt="Carlota Jo Consulting" />
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <strong>SZL Holdings — Command Surface</strong><br/>
+      Holding company dashboard, cross-platform intelligence<br/><br/>
+      <img src="screenshots/szl-holdings.jpg" width="100%" alt="SZL Holdings" />
+    </td>
+    <td width="50%" align="center">
+      <strong>Stephen Lutar — Founder Portfolio</strong><br/>
+      Personal site, ecosystem overview, case studies<br/><br/>
+      <img src="screenshots/stephen-site-fresh.jpg" width="100%" alt="Stephen Lutar" />
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -84,7 +125,7 @@ AI Advisors (governed) · RBAC · Audit Trail · Signal Pipeline · WebSocket ·
 
 ### Writing
 
-- **Substack:** [Signal Over Noise](https://szlholdings.substack.com) — biweekly intelligence brief on business observability, AI governance, and founder operations
+- **Substack:** [Signal Over Noise](https://szlholdings.substack.com) — intelligence brief on business observability, AI governance, and founder operations
 - **Medium:** [Stephen Lutar](https://medium.com/@stephen_38454) — long-form thinking on architecture, domain intelligence, and operating philosophy
 
 ---
