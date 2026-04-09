@@ -26,7 +26,7 @@ export class InProcessJobQueue {
   private running = new Set<string>();
   private completed: Job[] = [];
   private isShuttingDown = false;
-  private maxCompleted = 100;
+  private maxCompleted = 20;
   private maxConcurrent: number;
   private publishFn?: WsPublishFn;
 

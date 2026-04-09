@@ -239,13 +239,13 @@ export function startScheduledJobs() {
 
   setTimeout(async () => {
     try {
-      await jobQueue.enqueue(JOB_TYPES.DAILY_DIGEST, { domains: ["vessels", "firestorm", "lyte", "inca", "terra", "msp"] }, { maxRetries: 2 });
+      await jobQueue.enqueue(JOB_TYPES.DAILY_DIGEST, { domains: ["vessels", "firestorm", "lyte", "terra"] }, { maxRetries: 2 });
     } catch (err) {
       logger.warn({ err }, "Failed to enqueue daily digest");
     }
     setInterval(async () => {
       try {
-        await jobQueue.enqueue(JOB_TYPES.DAILY_DIGEST, { domains: ["vessels", "firestorm", "lyte", "inca", "terra", "msp"] }, { maxRetries: 2 });
+        await jobQueue.enqueue(JOB_TYPES.DAILY_DIGEST, { domains: ["vessels", "firestorm", "lyte", "terra"] }, { maxRetries: 2 });
       } catch (err) {
         logger.warn({ err }, "Failed to enqueue daily digest");
       }

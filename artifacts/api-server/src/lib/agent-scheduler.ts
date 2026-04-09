@@ -110,16 +110,11 @@ export function registerDefaultSchedules() {
       name: "INCA Research Scanner",
       domain: "inca" as const,
       intervalMs: 15 * 60 * 1000,
-      enabled: true,
+      enabled: false,
       taskDescription: "Monitor experiment results, evaluate model performance trends, identify research opportunities",
       systemPrompt: `You are an autonomous AI research intelligence agent. Analyze the provided experiment data and generate concise research findings. Focus on: model performance trends, experiment anomalies, and actionable research insights.`,
       analysisPrompt: async () => {
-        const [experiments, models, insights] = await Promise.all([
-          fetchData("/api/inca/experiments"),
-          fetchData("/api/inca/models"),
-          fetchData("/api/inca/insights"),
-        ]);
-        return `Analyze this research data and identify the top 1-2 most significant findings:\n\nExperiments: ${safeSerialize(experiments, 1500)}\nModels: ${safeSerialize(models, 800)}\nInsights: ${safeSerialize(insights, 500)}\n\nRespond with findings in this format:\nFINDING: [title]\nSEVERITY: [low|medium|high|critical]\nSUMMARY: [2-3 sentence summary]\nTAGS: [comma-separated tags]`;
+        return "INCA app removed — agent disabled";
       },
     },
     {
@@ -142,14 +137,11 @@ export function registerDefaultSchedules() {
       name: "MSP Client Monitor",
       domain: "msp" as const,
       intervalMs: 30 * 60 * 1000,
-      enabled: true,
+      enabled: false,
       taskDescription: "Check client SLA compliance, monitor ticket queue, identify service delivery risks",
-      systemPrompt: `You are an autonomous managed services monitoring agent. Analyze client infrastructure and SLA data to generate concise service delivery findings. Focus on: SLA breaches, ticket patterns, and client health risks.`,
+      systemPrompt: `You are an autonomous managed services monitoring agent.`,
       analysisPrompt: async () => {
-        const [health] = await Promise.all([
-          fetchData("/api/services/health"),
-        ]);
-        return `Analyze this services data and identify the top 1-2 most significant findings for managed service delivery:\n\nServices Health: ${safeSerialize(health, 2000)}\n\nRespond with findings in this format:\nFINDING: [title]\nSEVERITY: [low|medium|high|critical]\nSUMMARY: [2-3 sentence summary]\nTAGS: [comma-separated tags]`;
+        return "MSP app removed — agent disabled";
       },
     },
   ];

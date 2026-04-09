@@ -28,7 +28,8 @@ import creativeWorkflowsRouter from "./dreamscape"; // creative-workflows module
 import readinessRouter from "./readiness";
 import adminRouter from "./admin";
 import intelligenceRouter from "./intelligence";
-import aegisIntelRouter from "./inca";
+// INCA app removed — routes disabled (no surviving artifact uses /api/inca/* endpoints)
+// import aegisIntelRouter from "./inca";
 import bookingRouter from "./booking";
 import holdingsRouter from "./holdings";
 import carlotaJoRouter from "./carlota-jo";
@@ -130,10 +131,6 @@ router.use((req, _res, next) => {
     req.url = req.url.replace("/aegis/ops/", "/msp/");
   } else if (req.path.startsWith("/aegis/ops")) {
     req.url = req.url.replace("/aegis/ops", "/msp");
-  } else if (req.path.startsWith("/aegis/intel/")) {
-    req.url = req.url.replace("/aegis/intel/", "/inca/");
-  } else if (req.path.startsWith("/aegis/intel")) {
-    req.url = req.url.replace("/aegis/intel", "/inca");
   }
   next();
 });
@@ -155,7 +152,8 @@ router.use("/files", _writeLimiter);
 router.use("/vessels", _readLimiter);
 router.use("/intelligence", _readLimiter);
 router.use("/firestorm", _readLimiter);
-router.use("/inca", _readLimiter);
+// INCA routes disabled — no surviving artifact uses /api/inca/* endpoints
+// router.use("/inca", _readLimiter);
 router.use("/msp", _readLimiter);
 router.use("/aegis", _readLimiter);
 router.use("/booking", _readLimiter);
@@ -205,7 +203,7 @@ router.use(readinessRouter);
 router.use("/admin", adminGuard);
 router.use(adminRouter);
 router.use(intelligenceRouter);
-router.use(aegisIntelRouter);
+// aegisIntelRouter (inca.ts) disabled — INCA app removed, no surviving artifact calls /api/inca/*
 router.use(bookingRouter);
 router.use(holdingsRouter);
 router.use("/demo-requests", _writeLimiter);

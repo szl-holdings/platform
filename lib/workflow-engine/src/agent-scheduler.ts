@@ -101,7 +101,7 @@ function parseFindingsFromText(text: string): Array<{ title: string; severity: s
   return findings;
 }
 
-const MAX_RUN_HISTORY = 50;
+const MAX_RUN_HISTORY = 10;
 const DB_CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
 const DB_CLEANUP_MAX_AGE_DAYS = 7;
 
@@ -379,6 +379,9 @@ export class AgentScheduler {
       persistAgentRun(record).catch(() => {});
     } finally {
       this.activeAgents.delete(agentId);
+      if (typeof global.gc === "function") {
+        setImmediate(() => (global.gc as () => void)());
+      }
     }
 
     return record;

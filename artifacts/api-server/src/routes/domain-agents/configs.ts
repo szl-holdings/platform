@@ -1,7 +1,7 @@
 export type AgentType =
-  | "inca" | "vessels" | "szl-holdings" | "carlota-jo"
-  | "firestorm" | "lyte" | "dreamscape"
-  | "readiness-report" | "msp" | "terra" | "admin" | "stephen";
+  | "vessels" | "szl-holdings" | "carlota-jo"
+  | "firestorm" | "lyte"
+  | "readiness-report" | "terra" | "admin" | "stephen";
 
 export interface ToolDefinition {
   name: string;
@@ -15,24 +15,6 @@ export interface AgentConfig {
   tools: ToolDefinition[];
   executeTool: (name: string, args: Record<string, unknown>) => Promise<string>;
 }
-
-const INCA_SYSTEM_PROMPT = `You are the INCA Research Intelligence Agent, the senior AI research scientist embedded in the INCA Intelligence Platform at SZL Holdings.
-
-## Identity
-You are a highly analytical AI research scientist with deep expertise in experiment design, model evaluation, ML pipeline optimization, and research methodology. You help teams plan experiments, interpret results, evaluate model performance, and generate actionable research insights.
-
-## Capabilities
-- Analyze experiment results and model metrics
-- Design experiment configurations and suggest hyperparameter ranges
-- Interpret accuracy, loss, and performance curves
-- Compare model architectures and recommend improvements
-- Generate research briefs and insight summaries
-
-## Guidelines
-- Always ground your analysis in data and metrics
-- When suggesting experiments, provide specific parameter recommendations
-- Use clear scientific terminology but remain accessible
-- Acknowledge uncertainty and suggest validation approaches`;
 
 const VESSELS_SYSTEM_PROMPT = `You are the Vessels Maritime Operations Agent, the senior fleet intelligence officer for the Vessels Maritime Intelligence Platform at SZL Holdings.
 
@@ -120,24 +102,6 @@ You are a senior site reliability engineer (SRE) and observability specialist wi
 - Consider blast radius and customer impact
 - Suggest monitoring improvements alongside fixes`;
 
-const DREAMSCAPE_SYSTEM_PROMPT = `You are Dreamscape, the World-Building Companion for the Dreamscape Creative Platform at SZL Holdings.
-
-## Identity
-You are a master world-builder and narrative architect with deep expertise in fictional universe creation, story structure, character archetype theory, and visual storytelling.
-
-## Capabilities
-- Design creative campaigns and content strategies
-- Generate copy, taglines, and brand narratives
-- Create content calendars and social media plans
-- Develop visual concepts and art direction
-- Build fictional worlds and narrative frameworks
-
-## Guidelines
-- Balance creativity with strategic objectives
-- Maintain brand consistency across content
-- Consider audience engagement and emotional resonance
-- Provide multiple creative options for decision-making`;
-
 const READINESS_SYSTEM_PROMPT = `You are the Lyte Readiness Agent, the project assessment advisor for the Lyte Readiness module at SZL Holdings.
 
 ## Identity
@@ -154,22 +118,6 @@ You are a project management expert specializing in readiness assessments, risk 
 - Highlight both strengths and gaps
 - Provide specific, actionable recommendations
 - Consider stakeholder perspectives`;
-
-const MSP_SYSTEM_PROMPT = `You are the MSP Command Agent for the MSP Command Center at SZL Holdings.
-
-## Identity
-You are a managed services expert specializing in client infrastructure management, SLA monitoring, ticket triage, and service delivery optimization.
-
-## Capabilities
-- Monitor client infrastructure health and SLA compliance
-- Triage support tickets and recommend priorities
-- Analyze service delivery metrics and trends
-- Generate compliance and performance reports
-
-## Guidelines
-- Prioritize SLA compliance and client satisfaction
-- Reference ITIL frameworks and best practices
-- Provide specific metric thresholds and targets`;
 
 const TERRA_SYSTEM_PROMPT = `You are the Terra Intelligence Agent for the Terra Real Estate Intelligence Platform at SZL Holdings.
 
@@ -221,17 +169,6 @@ You are a professional portfolio assistant who helps visitors learn about Stephe
 - Direct visitors to relevant platforms and projects`;
 
 export const AGENT_CONFIGS: Record<AgentType, AgentConfig> = {
-  inca: {
-    name: "INCA Research Intelligence Agent",
-    systemPrompt: INCA_SYSTEM_PROMPT,
-    tools: [
-      { name: "get_experiments", description: "List recent AI experiments", parameters: { type: "object", properties: { status: { type: "string", description: "Filter by status" } } } },
-      { name: "get_models", description: "List deployed models and their metrics", parameters: { type: "object", properties: {} } },
-      { name: "get_insights", description: "Get recent AI research insights", parameters: { type: "object", properties: { limit: { type: "number", description: "Max results" } } } },
-      { name: "analyze_experiment", description: "Analyze an experiment's results", parameters: { type: "object", properties: { experimentId: { type: "string" } }, required: ["experimentId"] } },
-    ],
-    executeTool: createDomainToolExecutor("inca"),
-  },
   vessels: {
     name: "Vessels Maritime Operations Agent",
     systemPrompt: VESSELS_SYSTEM_PROMPT,
@@ -285,16 +222,6 @@ export const AGENT_CONFIGS: Record<AgentType, AgentConfig> = {
     ],
     executeTool: createDomainToolExecutor("lyte"),
   },
-  dreamscape: {
-    name: "Dreamscape World-Building Companion",
-    systemPrompt: DREAMSCAPE_SYSTEM_PROMPT,
-    tools: [
-      { name: "get_campaigns", description: "List creative campaigns", parameters: { type: "object", properties: {} } },
-      { name: "get_content_calendar", description: "Get upcoming content schedule", parameters: { type: "object", properties: {} } },
-      { name: "generate_concepts", description: "Generate creative concepts for a brief", parameters: { type: "object", properties: { brief: { type: "string" } }, required: ["brief"] } },
-    ],
-    executeTool: createDomainToolExecutor("dreamscape"),
-  },
   "readiness-report": {
     name: "Lyte Readiness Agent",
     systemPrompt: READINESS_SYSTEM_PROMPT,
@@ -302,16 +229,6 @@ export const AGENT_CONFIGS: Record<AgentType, AgentConfig> = {
       { name: "get_platform_info", description: "Get information about this platform", parameters: { type: "object", properties: {} } },
     ],
     executeTool: createStaticToolExecutor("readiness-report"),
-  },
-  msp: {
-    name: "MSP Command Agent",
-    systemPrompt: MSP_SYSTEM_PROMPT,
-    tools: [
-      { name: "get_client_health", description: "Get client infrastructure health summary", parameters: { type: "object", properties: {} } },
-      { name: "get_sla_status", description: "Get SLA compliance status", parameters: { type: "object", properties: {} } },
-      { name: "get_ticket_queue", description: "Get current support ticket queue", parameters: { type: "object", properties: {} } },
-    ],
-    executeTool: createDomainToolExecutor("msp"),
   },
   terra: {
     name: "Terra Real Estate Intelligence Agent",
@@ -369,12 +286,6 @@ function createDomainToolExecutor(domain: string) {
       const devDomain = process.env.REPLIT_DEV_DOMAIN;
       const baseUrl = devDomain ? `https://${devDomain}` : `http://localhost:${process.env["PORT"] || 3000}`;
       const toolRoutes: Record<string, Record<string, string>> = {
-        inca: {
-          get_experiments: "/api/inca/experiments",
-          get_models: "/api/inca/models",
-          get_insights: "/api/inca/insights",
-          analyze_experiment: "/api/inca/experiments",
-        },
         vessels: {
           get_fleet_status: "/api/intelligence/maritime/vessels",
           get_weather_alerts: "/api/intelligence/maritime/weather",
@@ -394,16 +305,6 @@ function createDomainToolExecutor(domain: string) {
           get_active_alerts: "/api/lyte/signals",
           get_service_topology: "/api/lyte/workspaces",
           analyze_logs: "/api/lyte/signals",
-        },
-        dreamscape: {
-          get_campaigns: "/api/dreamscape/campaigns",
-          get_content_calendar: "/api/dreamscape/campaigns",
-          generate_concepts: "/api/dreamscape/campaigns",
-        },
-        msp: {
-          get_client_health: "/api/services/health",
-          get_sla_status: "/api/services/health",
-          get_ticket_queue: "/api/services/health",
         },
         terra: {
           get_market_overview: "/api/intelligence/geopolitical",

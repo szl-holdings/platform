@@ -54,15 +54,6 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     description: "Premium Command Systems Ecosystem",
   },
   {
-    id: "alloy",
-    name: "Alloy",
-    subtitle: "Engine · SZL Holdings Module",
-    path: "/alloy",
-    accent: "#60a5fa",
-    icon: "⬡",
-    description: "Execution Fabric & Orchestration Engine",
-  },
-  {
     id: "lyte",
     name: "Lyte",
     subtitle: "Platform · Business Observability",
@@ -959,7 +950,6 @@ function getDomainSearchResults(q: string): SearchResult[] {
   const searchableContent = [
     { keywords: ["fleet", "vessel", "ship", "port", "maritime", "route", "anchor"], app: "Vessels", icon: "🚢", accent: "#4a90b8", href: "/vessels/", items: ["Fleet Dashboard", "Port Analytics", "Route Planning", "Risk Scoring", "Dark Vessel Detection"] },
     { keywords: ["signal", "workflow", "observability", "playbook", "ops", "anomaly", "business", "escalation"], app: "Lyte", icon: "⚡", accent: "#d4a054", href: "/lyte-command-center/", items: ["Command Inbox", "Approvals Center", "Ownership Map", "Escalation Center", "Intervention Workspace"] },
-    { keywords: ["alloy", "automation", "connector", "workflow", "orchestration", "execution", "run"], app: "Alloy", icon: "⬡", accent: "#60a5fa", href: "/alloy/", items: ["Execution Runs", "Workflow Orchestration", "Connector Mesh", "Governance", "Automation Analytics"] },
     { keywords: ["brand", "consulting", "advisory", "discreet", "residence", "estate", "private"], app: "Carlota Jo", icon: "◈", accent: "#d4b896", href: "/carlota-jo/", items: ["Services", "Approach", "Private Inquiry"] },
     { keywords: ["founder", "stephen", "lutar", "systems", "visibility", "writing", "frameworks"], app: "Stephen Lutar", icon: "○", accent: "#94a3b8", href: "/stephen/", items: ["Work", "Frameworks", "Writing", "Contact"] },
   ];
