@@ -15,6 +15,7 @@ kind = "mobile"
 
     [services.development]
     run = "pnpm --filter @workspace/aegis-mobile run dev"
+    autoStart = false
 
     [services.production]
     build = ["pnpm", "--filter", "@workspace/aegis-mobile", "run", "build"]
@@ -23,4 +24,3 @@ kind = "mobile"
     [services.env]
     PORT = "8083"
     BASE_PATH = "/aegis-mobile/"
-  

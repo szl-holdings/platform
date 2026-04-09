@@ -15,6 +15,7 @@ kind = "mobile"
 
     [services.development]
     run = "pnpm --filter @workspace/szl-holdings-mobile run dev"
+    autoStart = false
 
     [services.production]
     build = ["pnpm", "--filter", "@workspace/szl-holdings-mobile", "run", "build"]
@@ -23,4 +24,3 @@ kind = "mobile"
     [services.env]
     PORT = "8085"
     BASE_PATH = "/szl-holdings-mobile/"
-  

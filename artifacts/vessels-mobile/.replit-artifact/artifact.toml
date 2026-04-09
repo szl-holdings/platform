@@ -15,6 +15,7 @@ kind = "mobile"
 
   [services.development]
   run = "pnpm --filter @workspace/vessels-mobile run dev"
+  autoStart = false
 
   [services.production]
   build = ["pnpm", "--filter", "@workspace/vessels-mobile", "run", "build"]

@@ -9,12 +9,12 @@ import {
 } from "@szl-holdings/db";
 import { sql } from "drizzle-orm";
 
-export async function seedDreamscapeData(): Promise<void> {
-  console.log("[seed-dreamscape] Starting Creative Workflows seed data...");
+export async function seedAlloyCreativeData(): Promise<void> {
+  console.log("[seed-alloy-creative] Starting Alloy Creative seed data...");
 
   const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(dreamscapeCampaignsTable);
   if (count > 0) {
-    console.log("[seed-dreamscape] Campaigns already seeded, skipping.");
+    console.log("[seed-alloy-creative] Campaigns already seeded, skipping.");
     return;
   }
 
@@ -120,7 +120,7 @@ export async function seedDreamscapeData(): Promise<void> {
     },
   ]).returning();
 
-  console.log(`[seed-dreamscape] Inserted ${campaigns.length} campaigns.`);
+  console.log(`[seed-alloy-creative] Inserted ${campaigns.length} campaigns.`);
 
   if (campaigns.length === 0) return;
 
@@ -189,7 +189,7 @@ END CARD: alloy.szlholdings.com — Request Access`,
     },
   ]).returning();
 
-  console.log(`[seed-dreamscape] Inserted ${scripts.length} scripts.`);
+  console.log(`[seed-alloy-creative] Inserted ${scripts.length} scripts.`);
 
   const storyboards = await db.insert(dreamscapeStoryboardsTable).values([
     {
@@ -253,7 +253,7 @@ END CARD: alloy.szlholdings.com — Request Access`,
     },
   ]).returning();
 
-  console.log(`[seed-dreamscape] Inserted ${storyboards.length} storyboards.`);
+  console.log(`[seed-alloy-creative] Inserted ${storyboards.length} storyboards.`);
 
   await db.insert(dreamscapeVoiceAssetsTable).values([
     {
@@ -365,5 +365,5 @@ END CARD: alloy.szlholdings.com — Request Access`,
     },
   ]);
 
-  console.log("[seed-dreamscape] Creative Workflows seed data complete.");
+  console.log("[seed-alloy-creative] Alloy Creative seed data complete.");
 }

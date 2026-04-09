@@ -15,6 +15,7 @@ kind = "mobile"
 
   [services.development]
   run = "pnpm --filter @workspace/carlota-jo-mobile run dev"
+  autoStart = false
 
   [services.production]
   build = ["pnpm", "--filter", "@workspace/carlota-jo-mobile", "run", "build"]
@@ -23,4 +24,3 @@ kind = "mobile"
   [services.env]
   PORT = "8082"
   BASE_PATH = "/carlota-jo-mobile/"
-  

@@ -29,7 +29,7 @@ import { seedPlatformData } from "./lib/seed-platform";
 import { initializeOpenTelemetry } from "@szl-holdings/observability";
 import { seedTerraDemo } from "./lib/terra-seed";
 import { seedMspData } from "./lib/seed-msp";
-import { seedDreamscapeData } from "./lib/seed-dreamscape";
+import { seedAlloyCreativeData } from "./lib/seed-dreamscape";
 import { seedDosData } from "./lib/seed-dos";
 import { buildGraphQLMiddleware } from "./graphql/index.js";
 import { registerGraphQLHandler } from "./app.js";
@@ -122,8 +122,8 @@ seedMspData().catch(err => {
   logger.warn({ err }, "[msp-seed] MSP demo seed failed (non-fatal)");
 });
 
-seedDreamscapeData().catch(err => {
-  logger.warn({ err }, "[seed-dreamscape] Creative Workflows seed failed (non-fatal)");
+seedAlloyCreativeData().catch(err => {
+  logger.warn({ err }, "[seed-alloy-creative] Alloy Creative seed failed (non-fatal)");
 });
 
 seedDosData().catch(err => {
