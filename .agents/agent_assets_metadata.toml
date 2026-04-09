@@ -359,3 +359,9 @@ id = "2CyhT9rhGif265J0sEgzI"
 uri = "file://export/images/medium-architecture.png"
 type = "image"
 title = "Medium Article — The Compounding Architecture"
+
+[[outputs]]
+id = "EJ7YZnb5--WuElFR7Zgmb"
+uri = "file://export/linkedin-github-upgrade-post.txt"
+type = "text"
+title = "LinkedIn Post — GitHub Upgrade Announcement"

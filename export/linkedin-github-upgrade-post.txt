@@ -1,0 +1,32 @@
+LINKEDIN POST — GitHub Presence Upgrade
+Copy everything below the line and paste into LinkedIn.
+————————————————————————————————————————
+
+Upgraded the SZL Holdings GitHub presence today.
+
+One holding company. Six platforms. 16 live applications. 446 database tables. 1,618+ API endpoints. One TypeScript monorepo. One founder.
+
+What we build:
+
+Lyte — Business observability that surfaces execution risk before it compounds
+Alloy — Execution engine with approval gates, audit trails, and human-in-the-loop AI governance
+Vessels — Maritime fleet command and intelligence
+Aegis — Unified defense and security operations
+Terra — Real estate market intelligence and deal pipeline
+PRISM Counsel — Legal matter command with deadline tracking and proof chains
+Carlota Jo — Private advisory and luxury household operations
+
+Every platform runs on the same shared architecture. Every improvement compounds across every product.
+
+The principles are simple:
+— AI cannot execute without human confirmation
+— Every recommendation includes citations and confidence scores
+— Failures surface. They don't hide.
+— Shared infrastructure, domain specialization
+
+If you're evaluating enterprise software companies, doing due diligence on AI governance, or looking for design partner conversations — the code is public and the platforms are live.
+
+github.com/szl-holdings
+szlholdings.com
+
+#SZLHoldings #AI #AIGovernance #TypeScript #StartupFounder #EnterpriseAI #BusinessObservability #MaritimeTech #PropTech #LegalTech #Cybersecurity #BuildInPublic
