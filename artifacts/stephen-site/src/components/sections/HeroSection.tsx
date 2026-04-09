@@ -256,11 +256,11 @@ export function HeroSection() {
               transition={{ duration: 0.6, delay: 0.52 }}
               className="flex items-center gap-5 mb-8"
             >
-              <a href="https://linkedin.com/in/stephen-l-279315240" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[11px] text-foreground/30 hover:text-foreground/60 transition-colors">
+              <a href="https://linkedin.com/in/stephenlutar" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[11px] text-foreground/30 hover:text-foreground/60 transition-colors">
                 <Linkedin size={13} /> LinkedIn
               </a>
-              <a href="mailto:contact@stephenl.dev" className="inline-flex items-center gap-1.5 text-[11px] text-foreground/30 hover:text-foreground/60 transition-colors">
-                <Mail size={13} /> contact@stephenl.dev
+              <a href="mailto:inquiries@szlholdings.com" className="inline-flex items-center gap-1.5 text-[11px] text-foreground/30 hover:text-foreground/60 transition-colors">
+                <Mail size={13} /> inquiries@szlholdings.com
               </a>
             </motion.div>
 
@@ -272,10 +272,10 @@ export function HeroSection() {
               style={{ borderTop: "1px solid hsla(0,0%,100%,0.05)" }}
             >
               {[
-                { value: "6", label: "Products live" },
-                { value: "5+", label: "Years operating" },
-                { value: "Solo", label: "Full-stack build" },
-                { value: "1", label: "Architecture" },
+                { value: "16", label: "Applications live" },
+                { value: "446", label: "Database tables" },
+                { value: "1,618+", label: "API endpoints" },
+                { value: "1", label: "Architect" },
               ].map((stat) => (
                 <div key={stat.label} className="flex flex-col">
                   <span className="text-2xl sm:text-3xl font-serif text-primary leading-none mb-1">{stat.value}</span>

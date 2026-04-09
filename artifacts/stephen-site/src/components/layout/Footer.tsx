@@ -39,7 +39,7 @@ export function Footer() {
               Founder & CEO, SZL Holdings
             </p>
             <p className="text-[13px] text-white/25 font-light leading-relaxed max-w-xs">
-              Builder of enterprise infrastructure, AI platforms, and founder-led teams. Five platforms. One compounding architecture.
+              Builder-operator behind 16 live applications, 446 database tables, and 1,618+ API endpoints. One compounding architecture.
             </p>
           </div>
 
@@ -71,7 +71,7 @@ export function Footer() {
 
           <div className="md:col-span-3">
             <h4 className="text-[10px] font-medium tracking-[0.22em] uppercase text-white/25 mb-4">Contact</h4>
-            <p className="text-[13px] text-white/22 font-light mb-2">contact@stephenl.dev</p>
+            <p className="text-[13px] text-white/22 font-light mb-2">inquiries@szlholdings.com</p>
             <div className="space-y-2">
               <a href="https://linkedin.com/in/stephenlutar" target="_blank" rel="noopener noreferrer" className="text-[13px] text-white/22 hover:text-white/55 transition-colors font-light block">LinkedIn</a>
               <a href="https://x.com/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[13px] text-white/22 hover:text-white/55 transition-colors font-light block">X / Twitter</a>
