@@ -225,17 +225,6 @@ const DOMAIN_TOOLS: McpTool[] = [
       },
     },
   },
-  {
-    name: "inca_experiment_status",
-    description: "Query ML experiment results, model metrics, and AI research insights from the INCA platform",
-    inputSchema: {
-      type: "object",
-      properties: {
-        status: { type: "string", description: "Filter by experiment status (e.g. 'running', 'completed', 'failed')" },
-        limit: { type: "number", description: "Maximum number of results to return" },
-      },
-    },
-  },
 ];
 
 const PLATFORM_TOOLS: McpTool[] = [
@@ -572,17 +561,6 @@ async function executeTool(
       const path = timeRange ? `/api/lyte/executive-summary?timeRange=${encodeURIComponent(timeRange)}` : "/api/lyte/executive-summary";
       const data = await internalGet(path, token);
       return { tool: toolName, domain: "lyte", result: data };
-    }
-    case "inca_experiment_status": {
-      const status = toolArgs["status"] as string | undefined;
-      const limit = toolArgs["limit"] as number | undefined;
-      let path = "/api/inca/experiments";
-      const params = new URLSearchParams();
-      if (status) params.set("status", status);
-      if (limit) params.set("limit", String(limit));
-      if (params.toString()) path += `?${params.toString()}`;
-      const data = await internalGet(path, token);
-      return { tool: toolName, domain: "inca", result: data };
     }
     case "alloy_launch_workflow": {
       const workflowId = toolArgs["workflowId"] as number;

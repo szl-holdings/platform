@@ -235,15 +235,16 @@ module frontDoor 'modules/frontdoor.bicep' = {
 }
 
 var frontendApps = [
+  'aegis-ops'
   'aegis'
+  'terra'
   'firestorm'
   'vessels'
   'lyte'
   'carlota-jo'
   'szl-holdings'
-  'alloyscape'
+  'alloy'
   'prism-counsel'
-  'terra'
   'stephen'
 ]
 

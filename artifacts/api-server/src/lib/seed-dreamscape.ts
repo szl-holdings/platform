@@ -44,7 +44,7 @@ export async function seedAlloyCreativeData(): Promise<void> {
     },
     {
       name: "Alloy Platform Launch",
-      description: "Multi-channel product launch campaign for AlloyScape Execution Fabric — digital video, social cutdowns, and executive demo reels.",
+      description: "Multi-channel product launch campaign for Alloy Execution Fabric — digital video, social cutdowns, and executive demo reels.",
       clientName: "Alloy Product",
       status: "production",
       category: "product_launch",

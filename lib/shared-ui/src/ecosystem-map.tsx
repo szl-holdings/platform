@@ -14,7 +14,7 @@ export interface EcosystemNode {
 
 const ECOSYSTEM_NODES: EcosystemNode[] = [
   {
-    id: "beacon",
+    id: "terra",
     name: "Terra",
     icon: "📡",
     layer: 0,
@@ -104,7 +104,7 @@ const CONNECTION_PAIRS: Array<[string, string, string]> = [
   ["aegis", "alloy", "Containment → playbook"],
   ["alloy", "lyte", "Prediction → workflow"],
   ["lyte", "alloy", "Action → execution"],
-  ["alloy", "beacon", "Result → telemetry"],
+  ["alloy", "terra", "Result → telemetry"],
   ["carlota-jo", "aegis", "Advisory → intelligence"],
 ];
 

@@ -8,8 +8,8 @@ export const PLATFORM_APPS = [
   { slug: "vessels", name: "Vessels Maritime Intelligence", icon: "Ship", color: "#06b6d4" },
   { slug: "firestorm", name: "Firestorm Security Simulation", icon: "Flame", color: "#f97316" },
   { slug: "inca", name: "INCA AI Research", icon: "Brain", color: "#14b8a6" },
-  { slug: "beacon", name: "Terra", icon: "BarChart3", color: "#0ea5e9" },
-  { slug: "rosie", name: "Aegis Operations", icon: "AlertTriangle", color: "#ef4444" },
+  { slug: "terra", name: "Terra", icon: "BarChart3", color: "#0ea5e9" },
+  { slug: "aegis-ops", name: "Aegis Operations", icon: "AlertTriangle", color: "#ef4444" },
   { slug: "carlota-jo", name: "Carlota Jo Advisory", icon: "Crown", color: "#f43f5e" },
   { slug: "aegis", name: "Aegis Control Plane", icon: "Shield", color: "#10b981" },
   { slug: "career", name: "Career — Founder Identity", icon: "Globe", color: "#6366f1" },
@@ -97,15 +97,15 @@ export const APP_INTEGRATIONS: Record<string, { connectors: string[]; descriptio
     liveFeeds: ["NIST CSF 2.0 Framework", "FedRAMP Marketplace", "CMMC Maturity Model", "CISA KEV (Patch Compliance)", "Microsoft SharePoint Compliance Evidence Library"],
     doctrineRole: "DECIDE",
   },
-  rosie: {
+  "aegis-ops": {
     connectors: ["ai", "monitoring", "posthog", "slack", "gmail"],
-    description: "Aegis Operations (slug: rosie/msp) — threat and anomaly visibility, evidence-backed incident command, government contract intelligence, FedRAMP products, CMMC compliance tracking.",
+    description: "Aegis Operations (msp module) — threat and anomaly visibility, evidence-backed incident command, government contract intelligence, FedRAMP products, CMMC compliance tracking.",
     liveFeeds: ["USAspending.gov Federal Contracts", "FedRAMP Authorized Products", "SAM.gov Contract Pipeline"],
     doctrineRole: "OBSERVE",
   },
-  beacon: {
+  terra: {
     connectors: ["ai", "monitoring", "storage"],
-    description: "Terra (slug: beacon) — business telemetry, KPI movement, value leakage detection, Census demographics, BLS employment, FEMA risk, SEC EDGAR REIT filings.",
+    description: "Terra — business telemetry, KPI movement, value leakage detection, Census demographics, BLS employment, FEMA risk, SEC EDGAR REIT filings.",
     liveFeeds: ["Census Bureau ACS Demographics", "BLS Employment Data", "FEMA National Risk Index", "SEC EDGAR REIT Filings", "Open-Meteo Climate Projections"],
     doctrineRole: "OBSERVE",
   },
@@ -136,11 +136,6 @@ export const APP_INTEGRATIONS: Record<string, { connectors: string[]; descriptio
     connectors: ["ai", "github", "google", "storage"],
     description: "Legacy slug for Career — Founder Identity site",
     doctrineRole: "EXECUTE",
-  },
-  terra: {
-    connectors: ["ai", "monitoring", "storage"],
-    description: "Legacy slug for Terra (beacon) — Business Telemetry",
-    doctrineRole: "OBSERVE",
   },
   readiness: {
     connectors: ["ai", "notion", "confluence", "google-docs", "slack", "monitoring"],

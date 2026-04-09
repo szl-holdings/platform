@@ -656,7 +656,7 @@ async function seedRecommendations() {
     {
       entityType: "incident" as const,
       entityId: "inc-7821",
-      domain: "rosie",
+      domain: "aegis-ops",
       score: "95",
       confidence: "0.96",
       severity: "critical" as const,

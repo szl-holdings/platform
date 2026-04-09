@@ -2,7 +2,7 @@ export type Severity = "critical" | "high" | "medium" | "low" | "info";
 export type EntityType = "workflow" | "approval" | "task" | "opportunity" | "recommendation" | "execution_run" | "exception" | "owner" | "signal";
 export type EntityState = "healthy" | "degraded" | "blocked" | "pending_approval" | "escalated" | "executing" | "retried" | "completed" | "failed" | "recovered";
 export type CommandPhase = "DETECT" | "INTERPRET" | "DECIDE" | "EXECUTE" | "VERIFY";
-export type ProductId = "beacon" | "lyte" | "alloy" | "alloyscape";
+export type ProductId = "terra" | "lyte" | "alloy" | "alloy-predict";
 
 export interface ObsEvent {
   event_id: string;
@@ -415,7 +415,7 @@ export const EVENTS: ObsEvent[] = [
   {
     event_id: "evt-001",
     event_type: "approval_sla_breach",
-    source_product: "beacon",
+    source_product: "terra",
     entity_type: "approval",
     entity_id: "apr-001",
     entity_name: "Contract Execution — Northgate Systems",
@@ -433,7 +433,7 @@ export const EVENTS: ObsEvent[] = [
   {
     event_id: "evt-002",
     event_type: "workflow_blocked",
-    source_product: "beacon",
+    source_product: "terra",
     entity_type: "workflow",
     entity_id: "wf-001",
     entity_name: "Enterprise Contract Approval — Northgate Systems",
@@ -451,7 +451,7 @@ export const EVENTS: ObsEvent[] = [
   {
     event_id: "evt-003",
     event_type: "ownership_gap",
-    source_product: "beacon",
+    source_product: "terra",
     entity_type: "workflow",
     entity_id: "wf-003",
     entity_name: "New Vendor Onboarding — Apex Logistics",
@@ -469,7 +469,7 @@ export const EVENTS: ObsEvent[] = [
   {
     event_id: "evt-004",
     event_type: "drift_detected",
-    source_product: "beacon",
+    source_product: "terra",
     entity_type: "signal",
     entity_id: "sig-001",
     entity_name: "TechCorp NPS Anomaly",
@@ -487,7 +487,7 @@ export const EVENTS: ObsEvent[] = [
   {
     event_id: "evt-005",
     event_type: "intervention_executed",
-    source_product: "alloyscape",
+    source_product: "alloy-predict",
     entity_type: "execution_run",
     entity_id: "run-002",
     entity_name: "Contract Workflow Reroute",
@@ -505,7 +505,7 @@ export const EVENTS: ObsEvent[] = [
   {
     event_id: "evt-006",
     event_type: "value_recovered",
-    source_product: "beacon",
+    source_product: "terra",
     entity_type: "workflow",
     entity_id: "wf-001",
     entity_name: "Enterprise Contract Approval — Northgate Systems",
@@ -661,7 +661,7 @@ export const KPI_FRAMEWORK = {
     workflow_health_score: { label: "Workflow Health", value: "61%", trend: -14, unit: "%", description: "% of workflows in healthy state" },
     approval_sla_compliance: { label: "Approval SLA", value: "44%", trend: -31, unit: "%", description: "% of approvals meeting SLA targets" },
   },
-  beacon: {
+  terra: {
     drift_events_24h: { label: "Drift Events", value: "23", trend: 15 },
     causal_chains_resolved: { label: "Causal Chains Resolved", value: "7", trend: 40 },
     value_leakage_detected: { label: "Value Leakage Detected", value: "$1.8M", trend: -5 },
@@ -676,7 +676,7 @@ export const KPI_FRAMEWORK = {
     avg_confidence: { label: "Avg Confidence", value: "81%", trend: 4 },
     high_probability_risks: { label: "High-Prob Risks", value: "4", trend: -25 },
   },
-  alloyscape: {
+  "alloy-predict": {
     runs_24h: { label: "Runs (24h)", value: "1,247", trend: 8 },
     success_rate: { label: "Success Rate", value: "94.2%", trend: 2 },
     exceptions_open: { label: "Open Exceptions", value: "6", trend: -33 },
@@ -684,11 +684,11 @@ export const KPI_FRAMEWORK = {
 };
 
 export const COMMAND_LOOP_PHASES: { phase: CommandPhase; label: string; description: string; product: ProductId; color: string }[] = [
-  { phase: "DETECT", label: "Detect", description: "Surface signals, drift, and degradation", product: "beacon", color: "#4a90b8" },
+  { phase: "DETECT", label: "Detect", description: "Surface signals, drift, and degradation", product: "terra", color: "#4a90b8" },
   { phase: "INTERPRET", label: "Interpret", description: "Route accountability and orchestrate response", product: "lyte", color: "#d4a054" },
   { phase: "DECIDE", label: "Decide", description: "Model scenarios and recommend actions", product: "alloy", color: "#8b7ac8" },
-  { phase: "EXECUTE", label: "Execute", description: "Run automations and manage interventions", product: "alloyscape", color: "#4B8BDB" },
-  { phase: "VERIFY", label: "Verify", description: "Confirm recovery and measure value restored", product: "beacon", color: "#6b8f71" },
+  { phase: "EXECUTE", label: "Execute", description: "Run automations and manage interventions", product: "alloy-predict", color: "#4B8BDB" },
+  { phase: "VERIFY", label: "Verify", description: "Confirm recovery and measure value restored", product: "terra", color: "#6b8f71" },
 ];
 
 export const DRIFT_EVENTS = [
