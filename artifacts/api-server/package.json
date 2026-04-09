@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "NODE_ENV=development node --max-old-space-size=512 --expose-gc --optimize-for-size --enable-source-maps ./dist/index.mjs",
+    "dev": "NODE_ENV=development node --max-old-space-size=1536 --expose-gc --optimize-for-size --enable-source-maps ./dist/index.mjs",
     "build": "node ./build.mjs",
-    "start": "node --max-old-space-size=512 --expose-gc --optimize-for-size --enable-source-maps ./dist/index.mjs",
+    "start": "node --max-old-space-size=1024 --expose-gc --optimize-for-size --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "seed:terra": "tsx src/scripts/seed-terra-distress.ts",
     "seed:ecosystem": "tsx src/scripts/seed-ecosystem.ts"
