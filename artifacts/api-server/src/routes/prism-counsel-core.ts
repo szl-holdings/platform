@@ -133,13 +133,21 @@ router.post("/prism-counsel/matters", authMiddleware(), async (req, res) => {
     if (!orgId) return;
     const body = req.body as Record<string, unknown>;
     if (!body.title || !body.matterType) return sendBadRequest(res, "title and matterType are required");
-    type MatterType = "litigation" | "transactional" | "advisory" | "regulatory" | "ip" | "employment" | "other";
-    type MatterStatus = "intake" | "active" | "on-hold" | "closed" | "archived";
+    const validMatterTypes = ["auto_injury", "premises_liability", "insurance_coverage", "medical_malpractice", "product_liability", "wrongful_death", "workers_comp", "no_fault", "other"] as const;
+    const validMatterStatuses = ["intake", "investigation", "discovery", "pre_trial", "trial", "settlement", "closed", "archived"] as const;
+    type MatterType = typeof validMatterTypes[number];
+    type MatterStatus = typeof validMatterStatuses[number];
+    const matterType = validMatterTypes.includes(String(body.matterType) as MatterType)
+      ? (String(body.matterType) as MatterType)
+      : "other";
+    const matterStatus = validMatterStatuses.includes(String(body.status ?? "") as MatterStatus)
+      ? (String(body.status) as MatterStatus)
+      : "intake";
     const [matter] = await db.insert(pcMattersTable).values({
       orgId,
       title: String(body.title),
-      matterType: String(body.matterType) as MatterType,
-      status: (String(body.status ?? "intake")) as MatterStatus,
+      matterType,
+      status: matterStatus,
       caseNumber: body.caseNumber ? String(body.caseNumber) : undefined,
       jurisdiction: body.jurisdiction ? String(body.jurisdiction) : undefined,
       courtName: body.courtName ? String(body.courtName) : undefined,
@@ -237,7 +245,7 @@ router.get("/prism-counsel/matters/:id/proof-chain", authMiddleware(), async (re
       const { pcProofChainEntriesTable } = await import("@szl-holdings/db");
       entries = await db.select().from(pcProofChainEntriesTable)
         .where(eq(pcProofChainEntriesTable.matterId, matterId))
-        .orderBy(desc(pcProofChainEntriesTable.generatedAt)).limit(50);
+        .orderBy(desc(pcProofChainEntriesTable.generationTimestamp)).limit(50);
     } catch { entries = []; }
 
     sendSuccess(res, { matterId, entries });

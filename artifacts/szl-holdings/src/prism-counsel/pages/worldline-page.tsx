@@ -3,6 +3,41 @@ import { Globe, Radio, Activity, AlertTriangle, CheckCircle2, RefreshCw } from "
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 
+interface WorldlineSource {
+  id: number;
+  orgId: number;
+  sourceClass: string;
+  name: string;
+  description: string | null;
+  fetchMethod: string;
+  schedule: string | null;
+  status: string;
+  lastFetchAt: string | null;
+  lastFetchStatus: string | null;
+  totalSignals: number | null;
+  createdAt: string;
+}
+
+interface WorldlineSignal {
+  id: number;
+  orgId: number;
+  sourceId: number | null;
+  sourceClass: string;
+  eventType: string;
+  title: string;
+  summary: string | null;
+  jurisdiction: string | null;
+  county: string | null;
+  freshnessScore: number | null;
+  provenanceScore: number | null;
+  legalUsefulnessScore: number | null;
+  fetchedAt: string;
+  createdAt: string;
+}
+
+interface WorldlineSourcesResponse { sources: WorldlineSource[] }
+interface WorldlineSignalsResponse { signals: WorldlineSignal[] }
+
 const SOURCE_CLASSES = [
   { id: "regulatory_insurance", label: "Regulatory / Insurance", color: "#4a90b8", icon: "📋" },
   { id: "crash_incident", label: "Crash / Incident", color: "#c45a4a", icon: "🚨" },
@@ -44,29 +79,23 @@ function SourceClassCard({ cls, signalCount }: { cls: typeof SOURCE_CLASSES[numb
 export default function WorldlinePage() {
   const [view, setView] = useState<"sources" | "signals" | "pipeline">("sources");
 
-  const { data: sourcesData, isLoading } = useQuery({
+  const { data: sourcesData, isLoading } = useQuery<WorldlineSourcesResponse>({
     queryKey: ["worldline-sources"],
-    queryFn: async () => {
-      const res = await apiRequest("GET", "/api/prism-counsel/s31/worldline/sources");
-      return res.json();
-    },
+    queryFn: () => apiRequest<WorldlineSourcesResponse>("GET", "/api/prism-counsel/s31/worldline/sources"),
   });
 
-  const { data: signalsData } = useQuery({
+  const { data: signalsData } = useQuery<WorldlineSignalsResponse>({
     queryKey: ["worldline-signals"],
-    queryFn: async () => {
-      const res = await apiRequest("GET", "/api/prism-counsel/worldline/signals");
-      return res.json();
-    },
+    queryFn: () => apiRequest<WorldlineSignalsResponse>("GET", "/api/prism-counsel/worldline/signals"),
     enabled: view === "signals",
   });
 
-  const sources = sourcesData?.sources ?? [];
-  const signals = signalsData?.data?.signals ?? [];
+  const sources: WorldlineSource[] = sourcesData?.sources ?? [];
+  const signals: WorldlineSignal[] = signalsData?.signals ?? [];
 
-  const activeSources = sources.filter((s: any) => s.status === "active").length;
-  const errorSources = sources.filter((s: any) => s.status === "error").length;
-  const totalSignals = sources.reduce((sum: number, s: any) => sum + (s.totalSignals ?? 0), 0);
+  const activeSources = sources.filter((s) => s.status === "active").length;
+  const errorSources = sources.filter((s) => s.status === "error").length;
+  const totalSignals = sources.reduce((sum, s) => sum + (s.totalSignals ?? 0), 0);
 
   return (
     <div className="p-5 max-w-[1200px] mx-auto space-y-5">
@@ -119,7 +148,7 @@ export default function WorldlinePage() {
         <div>
           <div className="grid grid-cols-3 gap-3 mb-4">
             {SOURCE_CLASSES.map(cls => {
-              const liveSource = sources.find((s: any) => s.sourceClass === cls.id);
+              const liveSource = sources.find((s) => s.sourceClass === cls.id);
               return <SourceClassCard key={cls.id} cls={cls} signalCount={liveSource?.totalSignals ?? 0} />;
             })}
           </div>
@@ -128,7 +157,7 @@ export default function WorldlinePage() {
             <div className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
               <h3 className="text-xs font-semibold text-slate-200 mb-3">Registered Sources</h3>
               <div className="space-y-2">
-                {sources.map((s: any) => (
+                {sources.map((s) => (
                   <div key={s.id} className="flex items-center justify-between py-2 border-b border-white/[0.04] last:border-0">
                     <div>
                       <div className="text-xs text-slate-200">{s.name}</div>
@@ -162,15 +191,15 @@ export default function WorldlinePage() {
       {view === "signals" && (
         <div className="space-y-2">
           {signals.length === 0 && <div className="text-xs text-slate-500">No signals ingested yet</div>}
-          {signals.map((s: any, i: number) => (
+          {signals.map((s, i) => (
             <div key={i} className="rounded-lg border border-white/[0.06] p-3 flex items-center justify-between" style={{ background: "#0c1220" }}>
               <div>
-                <div className="text-xs text-slate-200">{s.signalType ?? s.title ?? "Signal"}</div>
+                <div className="text-xs text-slate-200">{s.title ?? s.eventType ?? "Signal"}</div>
                 <div className="text-[10px] text-slate-500">{s.sourceClass} · {s.jurisdiction ?? "—"}</div>
               </div>
               <div className="text-right">
                 {s.freshnessScore && <div className="text-[10px] text-slate-400">Fresh: {(s.freshnessScore * 100).toFixed(0)}%</div>}
-                {s.confidenceScore && <div className="text-[10px] text-slate-400">Conf: {(s.confidenceScore * 100).toFixed(0)}%</div>}
+                {s.provenanceScore && <div className="text-[10px] text-slate-400">Prov: {(s.provenanceScore * 100).toFixed(0)}%</div>}
               </div>
             </div>
           ))}

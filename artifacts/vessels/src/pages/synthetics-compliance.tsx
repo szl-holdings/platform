@@ -130,7 +130,7 @@ export default function SyntheticsCompliancePage() {
                     </div>
                     <p className="text-xs text-muted-foreground">{def.vesselName} · {def.port} · Code: {def.deficiencyCode}{def.mouRegime ? ` · ${def.mouRegime}` : ""}</p>
                     <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
-                      <span>Inspected: {new Date(def.inspectionDate).toLocaleDateString()}</span>
+                      <span>Inspected: {def.inspectionDate ? new Date(def.inspectionDate).toLocaleDateString() : "—"}</span>
                       <Badge variant="outline" className={`text-[10px] ${def.status === "Open" ? "bg-red-500/10 text-red-400 border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"}`}>{def.status}</Badge>
                     </div>
                   </div>
@@ -158,7 +158,7 @@ export default function SyntheticsCompliancePage() {
                       <span>IMO: {s.imo}</span>
                       <span>Flag: {s.flag}</span>
                       <span className="flex items-center gap-1"><Globe className="w-3 h-3" /> {s.region}</span>
-                      <span>Last seen: {new Date(s.lastSeen).toLocaleDateString()}</span>
+                      <span>Last seen: {s.lastSeen ? new Date(s.lastSeen).toLocaleDateString() : "—"}</span>
                     </div>
                   </div>
                 ))}
@@ -185,7 +185,7 @@ export default function SyntheticsCompliancePage() {
                       <p className="text-sm font-semibold">{a.type}</p>
                       <Badge variant="outline" className={`text-[10px] ${a.severity === "Critical" ? "bg-red-500/10 text-red-400 border-red-500/20" : a.severity === "High" ? "bg-orange-500/10 text-orange-400 border-orange-500/20" : a.severity === "Warning" ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-blue-500/10 text-blue-400 border-blue-500/20"}`}>{a.severity}</Badge>
                     </div>
-                    <span className="text-xs text-muted-foreground">{new Date(a.date).toLocaleDateString()}</span>
+                    <span className="text-xs text-muted-foreground">{a.date ? new Date(a.date).toLocaleDateString() : "—"}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">{a.vessel} — {a.message}</p>
                 </div>

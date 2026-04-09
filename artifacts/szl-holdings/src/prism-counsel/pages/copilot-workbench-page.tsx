@@ -4,6 +4,20 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
+interface PcCopilotDraft {
+  id: number;
+  matterId?: number | null;
+  draftType: string;
+  title: string;
+  groundingScore?: number | null;
+  unsupportedClaimsCount?: number | null;
+  reviewState: string;
+  exportSafe?: boolean | null;
+  privilegeFlag?: boolean | null;
+}
+
+interface CopilotDraftsResponse { matterId: number; drafts: PcCopilotDraft[] }
+
 const WORKBENCH_MODULES = [
   { id: "outlook", label: "Outlook", icon: Mail, description: "Email ingestion, entity extraction, silence-window detection, follow-up recommendations" },
   { id: "word", label: "Word", icon: FileText, description: "Source-grounded drafting: chronologies, demands, memos, checklists" },
@@ -189,22 +203,19 @@ function CalendarModule() {
 }
 
 function DraftsModule({ matterId }: { matterId?: number }) {
-  const { data: draftsData } = useQuery({
+  const { data: draftsData } = useQuery<CopilotDraftsResponse>({
     queryKey: ["copilot-drafts", matterId],
-    queryFn: async () => {
-      const res = await apiRequest("GET", `/api/prism-counsel/matters/${matterId}/copilot-drafts`);
-      return res.json();
-    },
+    queryFn: () => apiRequest<CopilotDraftsResponse>("GET", `/api/prism-counsel/matters/${matterId}/copilot-drafts`),
     enabled: !!matterId,
   });
 
-  const drafts = draftsData?.data?.drafts ?? [];
+  const drafts = draftsData?.drafts ?? [];
 
   return (
     <div className="space-y-3">
       {!matterId && <div className="text-xs text-slate-500">Select a matter to view drafts</div>}
       {matterId && drafts.length === 0 && <div className="text-xs text-slate-500">No drafts generated yet for this matter</div>}
-      {drafts.map((d: any, i: number) => (
+      {drafts.map((d, i) => (
         <div key={i} className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
           <div className="flex items-center justify-between mb-2">
             <div className="text-xs font-semibold text-slate-200">{d.title}</div>
@@ -217,7 +228,7 @@ function DraftsModule({ matterId }: { matterId?: number }) {
             </div>
           </div>
           <div className="text-[10px] text-slate-500">{d.draftType} · Grounding: {d.groundingScore ? `${(d.groundingScore * 100).toFixed(0)}%` : "—"}</div>
-          {d.unsupportedClaimsCount > 0 && (
+          {(d.unsupportedClaimsCount ?? 0) > 0 && (
             <div className="flex items-center gap-1 mt-2 text-[10px] text-[#c45a4a]">
               <AlertCircle className="w-3 h-3" /> {d.unsupportedClaimsCount} unsupported claim(s) detected
             </div>

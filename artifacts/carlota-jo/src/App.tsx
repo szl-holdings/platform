@@ -2,7 +2,7 @@ import { lazy, Suspense, type ReactNode } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { McpOverlay } from "@szl-holdings/mcp-client";
-import { PrismBusProvider } from "@szl-holdings/prism-bus";
+import { PrismBusProvider } from "@szl-holdings/prism-bus/provider";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
 import { SandboxModeProvider, AnalyticsProvider } from "@szl-holdings/shared-ui";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";

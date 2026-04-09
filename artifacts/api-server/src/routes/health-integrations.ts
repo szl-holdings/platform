@@ -261,7 +261,7 @@ async function checkRedis(): Promise<IntegrationHealth> {
   } catch (err) {
     return {
       name: "redis",
-      status: "unhealthy",
+      status: "unavailable",
       lastChecked: new Date().toISOString(),
       error: err instanceof Error ? err.message : "Redis ping failed",
       details: { configured: true, mode: "real" },

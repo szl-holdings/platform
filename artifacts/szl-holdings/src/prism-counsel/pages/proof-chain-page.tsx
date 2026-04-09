@@ -5,6 +5,60 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
+interface ProofEntry {
+  id: number;
+  matterId: number | null;
+  outputType: string;
+  outputContent: string | null;
+  outputHash: string | null;
+  sourceReferences: unknown;
+  sourceClass: string | null;
+  extractionConfidence: number | null;
+  modelLane: string | null;
+  modelProvider: string | null;
+  modelVersion: string | null;
+  generationTimestamp: string;
+  reviewState: string;
+  privilegeState: string;
+  exportSafe: boolean | null;
+  createdAt: string;
+}
+
+interface ContradictionItem {
+  id: number;
+  matterId: number;
+  contradictionType: string;
+  description: string;
+  sourceARef: string | null;
+  sourceAType: string | null;
+  sourceBRef: string | null;
+  sourceBType: string | null;
+  severity: string;
+  status: string;
+  resolutionNotes: string | null;
+  detectedByLane: string | null;
+  confidence: number | null;
+  resolvedAt: string | null;
+  createdAt: string;
+}
+
+interface AuditPacket {
+  id: number;
+  matterId: number | null;
+  packetType: string;
+  title: string;
+  exportSafe: boolean | null;
+  privilegeChecked: boolean | null;
+  reviewedAt: string | null;
+  generatedAt: string;
+  filePath: string | null;
+  createdAt: string;
+}
+
+interface ProofChainResponse { matterId: number; entries: ProofEntry[] }
+interface ContradictionsResponse { matterId: number; contradictions: ContradictionItem[] }
+interface AuditPacketsResponse { matterId: number; packets: AuditPacket[] }
+
 const PROOF_VIEWS = [
   { id: "entries", label: "Proof Entries" },
   { id: "audit_packets", label: "Audit Packets" },
@@ -31,7 +85,7 @@ function ReviewStateBadge({ state }: { state: string }) {
   );
 }
 
-function ProofEntryCard({ entry }: { entry: any }) {
+function ProofEntryCard({ entry }: { entry: ProofEntry }) {
   const [expanded, setExpanded] = useState(false);
   return (
     <div className="rounded-lg border border-white/[0.06] p-4 space-y-2" style={{ background: "#0c1220" }}>
@@ -42,12 +96,12 @@ function ProofEntryCard({ entry }: { entry: any }) {
         </div>
         <div className="flex items-center gap-2">
           <ReviewStateBadge state={entry.reviewState ?? "unreviewed"} />
-          {entry.privilegeFlag && <Lock className="w-3 h-3 text-[#d4a054]" />}
+          {entry.privilegeState !== "none" && <Lock className="w-3 h-3 text-[#d4a054]" />}
           {entry.exportSafe && <CheckCircle2 className="w-3 h-3 text-[#5aa87a]" />}
         </div>
       </div>
 
-      <div className="text-[10px] text-slate-500 font-mono">{entry.outputRef}</div>
+      <div className="text-[10px] text-slate-500 font-mono">{entry.outputHash}</div>
 
       <div className="grid grid-cols-3 gap-2 text-[10px]">
         <div>
@@ -66,7 +120,7 @@ function ProofEntryCard({ entry }: { entry: any }) {
         </div>
       </div>
 
-      {entry.sourceReferences && (
+      {entry.sourceReferences !== null && entry.sourceReferences !== undefined && (
         <button
           onClick={() => setExpanded(!expanded)}
           className="text-[10px] text-[#4a90b8] hover:text-[#5aa8d8] flex items-center gap-1"
@@ -75,18 +129,18 @@ function ProofEntryCard({ entry }: { entry: any }) {
         </button>
       )}
 
-      {expanded && entry.sourceReferences && (
+      {expanded && entry.sourceReferences !== null && entry.sourceReferences !== undefined && (
         <div className="bg-black/20 rounded p-2 text-[10px] text-slate-400 font-mono">
           <pre className="whitespace-pre-wrap">{JSON.stringify(entry.sourceReferences, null, 2)}</pre>
         </div>
       )}
 
-      <div className="text-[10px] text-slate-600">{new Date(entry.generatedAt).toLocaleString()}</div>
+      <div className="text-[10px] text-slate-600">{new Date(entry.generationTimestamp).toLocaleString()}</div>
     </div>
   );
 }
 
-function ContradictionCard({ c }: { c: any }) {
+function ContradictionCard({ c }: { c: ContradictionItem }) {
   return (
     <div className={cn(
       "rounded-lg border p-4 space-y-2",
@@ -123,41 +177,32 @@ export default function ProofChainPage() {
   const [view, setView] = useState<ProofView>("entries");
   const matterId = parseInt(params?.id ?? "0");
 
-  const { data: proofData, isLoading: pcLoading } = useQuery({
+  const { data: proofData, isLoading: pcLoading } = useQuery<ProofChainResponse>({
     queryKey: ["proof-chain", matterId],
-    queryFn: async () => {
-      const res = await apiRequest("GET", `/api/prism-counsel/matters/${matterId}/proof-chain`);
-      return res.json();
-    },
+    queryFn: () => apiRequest<ProofChainResponse>("GET", `/api/prism-counsel/matters/${matterId}/proof-chain`),
     enabled: matterId > 0 && view === "entries",
   });
 
-  const { data: contradictionData, isLoading: cdLoading } = useQuery({
+  const { data: contradictionData, isLoading: cdLoading } = useQuery<ContradictionsResponse>({
     queryKey: ["contradictions", matterId],
-    queryFn: async () => {
-      const res = await apiRequest("GET", `/api/prism-counsel/matters/${matterId}/contradictions`);
-      return res.json();
-    },
+    queryFn: () => apiRequest<ContradictionsResponse>("GET", `/api/prism-counsel/matters/${matterId}/contradictions`),
     enabled: matterId > 0 && view === "contradictions",
   });
 
-  const { data: auditData } = useQuery({
+  const { data: auditData } = useQuery<AuditPacketsResponse>({
     queryKey: ["audit-packets", matterId],
-    queryFn: async () => {
-      const res = await apiRequest("GET", `/api/prism-counsel/matters/${matterId}/audit-packets`);
-      return res.json();
-    },
+    queryFn: () => apiRequest<AuditPacketsResponse>("GET", `/api/prism-counsel/matters/${matterId}/audit-packets`),
     enabled: matterId > 0 && view === "audit_packets",
   });
 
-  const entries = proofData?.data?.entries ?? [];
-  const contradictions = contradictionData?.data?.contradictions ?? [];
-  const packets = auditData?.data?.packets ?? [];
+  const entries = proofData?.entries ?? [];
+  const contradictions = contradictionData?.contradictions ?? [];
+  const packets = auditData?.packets ?? [];
 
-  const approved = entries.filter((e: any) => e.reviewState === "approved").length;
-  const exportSafe = entries.filter((e: any) => e.exportSafe).length;
-  const privileged = entries.filter((e: any) => e.privilegeFlag).length;
-  const criticalContradictions = contradictions.filter((c: any) => c.severity === "critical").length;
+  const approved = entries.filter((e) => e.reviewState === "approved").length;
+  const exportSafe = entries.filter((e) => e.exportSafe).length;
+  const privileged = entries.filter((e) => e.privilegeState !== "none").length;
+  const criticalContradictions = contradictions.filter((c) => c.severity === "critical").length;
 
   return (
     <div className="p-5 max-w-[1000px] mx-auto space-y-5">
@@ -210,7 +255,7 @@ export default function ProofChainPage() {
         <div className="space-y-3">
           {pcLoading && <div className="text-xs text-slate-500">Loading proof chain…</div>}
           {!pcLoading && entries.length === 0 && <div className="text-xs text-slate-500">No proof chain entries yet</div>}
-          {entries.map((entry: any) => <ProofEntryCard key={entry.id} entry={entry} />)}
+          {entries.map((entry) => <ProofEntryCard key={entry.id} entry={entry} />)}
         </div>
       )}
 
@@ -218,14 +263,14 @@ export default function ProofChainPage() {
         <div className="space-y-3">
           {cdLoading && <div className="text-xs text-slate-500">Loading…</div>}
           {!cdLoading && contradictions.length === 0 && <div className="text-xs text-slate-500">No contradictions detected</div>}
-          {contradictions.map((c: any) => <ContradictionCard key={c.id} c={c} />)}
+          {contradictions.map((c) => <ContradictionCard key={c.id} c={c} />)}
         </div>
       )}
 
       {view === "audit_packets" && (
         <div className="space-y-3">
           {packets.length === 0 && <div className="text-xs text-slate-500">No audit packets generated yet</div>}
-          {packets.map((p: any) => (
+          {packets.map((p) => (
             <div key={p.id} className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
               <div className="flex items-center justify-between mb-2">
                 <div className="text-xs font-medium text-slate-200">{p.title}</div>

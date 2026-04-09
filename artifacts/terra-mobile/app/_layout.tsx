@@ -20,7 +20,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
-import { PrismBusProvider } from "@szl-holdings/prism-bus";
+import { PrismBusProvider } from "@szl-holdings/prism-bus/provider";
 
 if (process.env.EXPO_PUBLIC_DOMAIN) {
   setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);

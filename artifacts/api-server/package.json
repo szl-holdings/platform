@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node ./build.mjs && node --max-old-space-size=1536 --expose-gc --optimize-for-size --enable-source-maps ./dist/index.mjs",
+    "dev:nobuild": "node --max-old-space-size=1536 --expose-gc --optimize-for-size --enable-source-maps ./dist/index.mjs",
     "dev:fast": "node --input-type=commonjs -e \"const{existsSync}=require('fs');if(!existsSync('./dist/index.mjs')){require('child_process').execSync('node ./build.mjs',{stdio:'inherit'})}\" && node --max-old-space-size=1536 --expose-gc --optimize-for-size --enable-source-maps ./dist/index.mjs",
     "build": "node ./build.mjs",
     "start": "node --max-old-space-size=1024 --expose-gc --optimize-for-size --enable-source-maps ./dist/index.mjs",

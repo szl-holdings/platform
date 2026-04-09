@@ -18,7 +18,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/context/AuthContext";
 import { LyteProvider } from "@/context/LyteContext";
 import { NotificationProvider } from "@/context/NotificationContext";
-import { PrismBusProvider } from "@szl-holdings/prism-bus";
+import { PrismBusProvider } from "@szl-holdings/prism-bus/provider";
 
 SystemUI.setBackgroundColorAsync("#070c14");
 SplashScreen.preventAutoHideAsync();

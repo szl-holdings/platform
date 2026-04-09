@@ -29,6 +29,8 @@ const colors = {
     emeraldDim: "rgba(16,185,129,0.10)",
     blue: "#3B82F6",
     blueDim: "rgba(59,130,246,0.10)",
+    cyan: "#06B6D4",
+    cyanDim: "rgba(6,182,212,0.10)",
     surface: "#0D1018",
     surfaceElevated: "#141820",
   },

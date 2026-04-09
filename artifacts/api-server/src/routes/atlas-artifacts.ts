@@ -124,7 +124,7 @@ atlasRouter.get("/atlas/artifacts", async (req: Request, res: Response) => {
 
 atlasRouter.get("/atlas/artifacts/:id", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id ?? "0", 10);
+    const id = parseInt(String(req.params.id ?? "0"), 10);
     if (!id) return res.status(400).json({ error: "Invalid id" });
 
     const [artifact] = await db.select().from(atlasArtifactsTable).where(eq(atlasArtifactsTable.id, id));
@@ -139,7 +139,7 @@ atlasRouter.get("/atlas/artifacts/:id", async (req: Request, res: Response) => {
 
 atlasRouter.patch("/atlas/artifacts/:id", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id ?? "0", 10);
+    const id = parseInt(String(req.params.id ?? "0"), 10);
     if (!id) return res.status(400).json({ error: "Invalid id" });
 
     const parsed = updateArtifactSchema.safeParse(req.body);
@@ -168,7 +168,7 @@ atlasRouter.patch("/atlas/artifacts/:id", async (req: Request, res: Response) =>
 
 atlasRouter.post("/atlas/artifacts/:id/regenerate", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id ?? "0", 10);
+    const id = parseInt(String(req.params.id ?? "0"), 10);
     if (!id) return res.status(400).json({ error: "Invalid id" });
 
     const [existing] = await db.select().from(atlasArtifactsTable).where(eq(atlasArtifactsTable.id, id));
@@ -209,7 +209,7 @@ atlasRouter.post("/atlas/artifacts/:id/regenerate", async (req: Request, res: Re
 
 atlasRouter.get("/atlas/artifacts/:slug/versions", async (req: Request, res: Response) => {
   try {
-    const slug = req.params.slug;
+    const slug = String(req.params.slug ?? "");
     if (!slug) return res.status(400).json({ error: "Invalid slug" });
 
     const rows = await db
@@ -234,7 +234,7 @@ atlasRouter.get("/atlas/artifacts/:slug/versions", async (req: Request, res: Res
 
 atlasRouter.post("/atlas/artifacts/:id/share", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id ?? "0", 10);
+    const id = parseInt(String(req.params.id ?? "0"), 10);
     if (!id) return res.status(400).json({ error: "Invalid id" });
 
     const { expiresInHours = 72 } = req.body as { expiresInHours?: number };
@@ -254,7 +254,7 @@ atlasRouter.post("/atlas/artifacts/:id/share", async (req: Request, res: Respons
 
 atlasRouter.get("/atlas/shared/:token", async (req: Request, res: Response) => {
   try {
-    const token = req.params.token;
+    const token = String(req.params.token ?? "");
     if (!token) return res.status(400).json({ error: "Invalid token" });
 
     const [artifact] = await db.select().from(atlasArtifactsTable)
@@ -274,7 +274,7 @@ atlasRouter.get("/atlas/shared/:token", async (req: Request, res: Response) => {
 
 atlasRouter.post("/atlas/artifacts/:id/export", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id ?? "0", 10);
+    const id = parseInt(String(req.params.id ?? "0"), 10);
     if (!id) return res.status(400).json({ error: "Invalid id" });
 
     const schema = z.object({
@@ -308,7 +308,7 @@ atlasRouter.post("/atlas/artifacts/:id/export", async (req: Request, res: Respon
 
 atlasRouter.get("/atlas/export-jobs/:id", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id ?? "0", 10);
+    const id = parseInt(String(req.params.id ?? "0"), 10);
     if (!id) return res.status(400).json({ error: "Invalid id" });
 
     const [job] = await db.select().from(atlasExportJobsTable).where(eq(atlasExportJobsTable.id, id));

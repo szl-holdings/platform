@@ -105,10 +105,10 @@ router.get("/review-desk/my-queue", async (req: Request, res: Response) => {
       ))
       .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
       .limit(50);
-    res.json({ items, count: items.length });
+    return res.json({ items, count: items.length });
   } catch (err: any) {
     logger.error({ err }, "Failed to get my review queue");
-    res.status(500).json({ error: "Failed to get review queue" });
+    return res.status(500).json({ error: "Failed to get review queue" });
   }
 });
 
@@ -122,10 +122,10 @@ router.get("/review-desk/team-queue", async (_req: Request, res: Response) => {
       ))
       .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
       .limit(100);
-    res.json({ items, count: items.length });
+    return res.json({ items, count: items.length });
   } catch (err: any) {
     logger.error({ err }, "Failed to get team review queue");
-    res.status(500).json({ error: "Failed to get team review queue" });
+    return res.status(500).json({ error: "Failed to get team review queue" });
   }
 });
 
@@ -139,9 +139,9 @@ router.get("/review-desk/high-risk", async (_req: Request, res: Response) => {
       ))
       .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
       .limit(50);
-    res.json({ items, count: items.length });
+    return res.json({ items, count: items.length });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to get high-risk queue" });
+    return res.status(500).json({ error: "Failed to get high-risk queue" });
   }
 });
 
@@ -155,9 +155,9 @@ router.get("/review-desk/low-confidence", async (_req: Request, res: Response) =
       ))
       .orderBy(desc(pcManagedReviewItemsTable.lowConfidenceScore))
       .limit(50);
-    res.json({ items, count: items.length });
+    return res.json({ items, count: items.length });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to get low-confidence queue" });
+    return res.status(500).json({ error: "Failed to get low-confidence queue" });
   }
 });
 
@@ -171,9 +171,9 @@ router.get("/review-desk/contradiction", async (_req: Request, res: Response) =>
       ))
       .orderBy(desc(pcManagedReviewItemsTable.contradictionSeverityScore))
       .limit(50);
-    res.json({ items, count: items.length });
+    return res.json({ items, count: items.length });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to get contradiction queue" });
+    return res.status(500).json({ error: "Failed to get contradiction queue" });
   }
 });
 
@@ -186,9 +186,9 @@ router.get("/review-desk/needs-attorney", async (_req: Request, res: Response) =
       ))
       .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
       .limit(50);
-    res.json({ items, count: items.length });
+    return res.json({ items, count: items.length });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to get attorney review queue" });
+    return res.status(500).json({ error: "Failed to get attorney review queue" });
   }
 });
 
@@ -201,9 +201,9 @@ router.get("/review-desk/needs-partner", async (_req: Request, res: Response) =>
       ))
       .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
       .limit(50);
-    res.json({ items, count: items.length });
+    return res.json({ items, count: items.length });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to get partner review queue" });
+    return res.status(500).json({ error: "Failed to get partner review queue" });
   }
 });
 
@@ -217,9 +217,9 @@ router.get("/review-desk/ready-to-export", async (_req: Request, res: Response) 
       ))
       .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
       .limit(50);
-    res.json({ items, count: items.length });
+    return res.json({ items, count: items.length });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to get ready-to-export queue" });
+    return res.status(500).json({ error: "Failed to get ready-to-export queue" });
   }
 });
 
@@ -235,9 +235,9 @@ router.get("/review-desk/blocked", async (_req: Request, res: Response) => {
       ))
       .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
       .limit(50);
-    res.json({ items, count: items.length });
+    return res.json({ items, count: items.length });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to get blocked queue" });
+    return res.status(500).json({ error: "Failed to get blocked queue" });
   }
 });
 
@@ -279,7 +279,7 @@ router.get("/review-desk/overview", async (_req: Request, res: Response) => {
       ? all.reduce((sum, i) => sum + (Date.now() - new Date(i.createdAt).getTime()), 0) / all.length / 3600000
       : 0;
 
-    res.json({
+    return res.json({
       totalActive: all.length,
       highPriority,
       slaBreaches: slaBreaches.length,
@@ -292,13 +292,13 @@ router.get("/review-desk/overview", async (_req: Request, res: Response) => {
     });
   } catch (err: any) {
     logger.error({ err }, "Failed to get review desk overview");
-    res.status(500).json({ error: "Failed to get overview" });
+    return res.status(500).json({ error: "Failed to get overview" });
   }
 });
 
 router.get("/review-desk/items/:id", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id ?? "0"), 10);
     const [item, notes, assignments] = await Promise.all([
       db.select().from(pcManagedReviewItemsTable)
         .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
@@ -310,9 +310,9 @@ router.get("/review-desk/items/:id", async (req: Request, res: Response) => {
         .where(eq(pcManagedReviewAssignmentsTable.reviewItemId, id)),
     ]);
     if (!item.length) return res.status(404).json({ error: "Review item not found" });
-    res.json({ item: item[0], notes, assignments });
+    return res.json({ item: item[0], notes, assignments });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to get review item" });
+    return res.status(500).json({ error: "Failed to get review item" });
   }
 });
 
@@ -380,16 +380,16 @@ router.post("/review-desk/items", async (req: Request, res: Response) => {
       details: { reviewWorkType, title },
     });
 
-    res.status(201).json({ item });
+    return res.status(201).json({ item });
   } catch (err: any) {
     logger.error({ err }, "Failed to create review item");
-    res.status(500).json({ error: "Failed to create review item" });
+    return res.status(500).json({ error: "Failed to create review item" });
   }
 });
 
 router.post("/review-desk/items/:id/transition", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id ?? "0"), 10);
     const { toState, actorId, reason } = req.body;
     const validTransitions = buildValidTransitions();
 
@@ -442,22 +442,56 @@ router.post("/review-desk/items/:id/transition", async (req: Request, res: Respo
       details: { reason },
     });
 
-    res.json({ item: updated });
+    return res.json({ item: updated });
   } catch (err: any) {
     logger.error({ err }, "Failed to transition review item");
-    res.status(500).json({ error: "Failed to transition review item" });
+    return res.status(500).json({ error: "Failed to transition review item" });
   }
 });
 
 router.post("/review-desk/items/:id/approve", async (req: Request, res: Response) => {
-  req.body.toState = "approved";
-  req.params.id = req.params.id;
-  return router.handle?.(req, res, () => {}) ?? res.status(500).json({ error: "Route error" });
+  try {
+    const id = parseInt(String(req.params.id ?? "0"), 10);
+    const { actorId, reason } = req.body as { actorId?: number; reason?: string };
+    const validTransitions = buildValidTransitions();
+
+    const [item] = await db.select().from(pcManagedReviewItemsTable)
+      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
+      .limit(1);
+    if (!item) return res.status(404).json({ error: "Review item not found" });
+
+    const allowed = validTransitions[item.lifecycleState] ?? [];
+    if (!allowed.includes("approved")) {
+      return res.status(400).json({ error: `Invalid transition from ${item.lifecycleState} to approved`, allowed });
+    }
+
+    const now = new Date();
+    const [updated] = await db.update(pcManagedReviewItemsTable)
+      .set({ lifecycleState: "approved", approvedBy: actorId, approvedAt: now, updatedAt: now })
+      .where(eq(pcManagedReviewItemsTable.id, id))
+      .returning();
+
+    await emitReviewAudit({
+      orgId: ORG_ID,
+      matterId: item.matterId,
+      reviewItemId: id,
+      actorId,
+      action: "review_approved",
+      fromState: item.lifecycleState,
+      toState: "approved",
+      details: { reason },
+    });
+
+    return res.json({ item: updated });
+  } catch (err) {
+    logger.error({ err }, "Failed to approve review item");
+    return res.status(500).json({ error: "Failed to approve review item" });
+  }
 });
 
 router.post("/review-desk/items/:id/actions/approve", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id ?? "0"), 10);
     const { actorId, notes } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -483,15 +517,15 @@ router.post("/review-desk/items/:id/actions/approve", async (req: Request, res: 
     }
 
     await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_approved", fromState: item.lifecycleState, toState: "approved" });
-    res.json({ item: updated });
+    return res.json({ item: updated });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to approve" });
+    return res.status(500).json({ error: "Failed to approve" });
   }
 });
 
 router.post("/review-desk/items/:id/actions/reject", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id ?? "0"), 10);
     const { actorId, reason } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -512,15 +546,15 @@ router.post("/review-desk/items/:id/actions/reject", async (req: Request, res: R
     }
 
     await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_rejected", fromState: item.lifecycleState, toState: "rejected", details: { reason } });
-    res.json({ item: updated });
+    return res.json({ item: updated });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to reject" });
+    return res.status(500).json({ error: "Failed to reject" });
   }
 });
 
 router.post("/review-desk/items/:id/actions/revise", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id ?? "0"), 10);
     const { actorId, notes } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -541,15 +575,15 @@ router.post("/review-desk/items/:id/actions/revise", async (req: Request, res: R
     }
 
     await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_revised", fromState: item.lifecycleState, toState: "revised" });
-    res.json({ item: updated });
+    return res.json({ item: updated });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to revise" });
+    return res.status(500).json({ error: "Failed to revise" });
   }
 });
 
 router.post("/review-desk/items/:id/actions/escalate", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id ?? "0"), 10);
     const { actorId, escalateTo, reason } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -572,15 +606,15 @@ router.post("/review-desk/items/:id/actions/escalate", async (req: Request, res:
     });
 
     await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_escalated", fromState: item.lifecycleState, toState: newState, details: { escalateTo, reason } });
-    res.json({ item: updated });
+    return res.json({ item: updated });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to escalate" });
+    return res.status(500).json({ error: "Failed to escalate" });
   }
 });
 
 router.post("/review-desk/items/:id/actions/assign", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id ?? "0"), 10);
     const { actorId, assignTo, role } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -606,15 +640,15 @@ router.post("/review-desk/items/:id/actions/assign", async (req: Request, res: R
       .returning();
 
     await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_assigned", fromState: item.lifecycleState, toState: "assigned", details: { assignTo, role } });
-    res.json({ item: updated });
+    return res.json({ item: updated });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to assign" });
+    return res.status(500).json({ error: "Failed to assign" });
   }
 });
 
 router.post("/review-desk/items/:id/actions/block", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id ?? "0"), 10);
     const { actorId, reason } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -628,15 +662,15 @@ router.post("/review-desk/items/:id/actions/block", async (req: Request, res: Re
       .returning();
 
     await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_blocked", fromState: item.lifecycleState, toState: "blocked", details: { reason } });
-    res.json({ item: updated });
+    return res.json({ item: updated });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to block" });
+    return res.status(500).json({ error: "Failed to block" });
   }
 });
 
 router.post("/review-desk/items/:id/actions/request-support", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id ?? "0"), 10);
     const { actorId, request } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -655,15 +689,15 @@ router.post("/review-desk/items/:id/actions/request-support", async (req: Reques
     });
 
     await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_support_requested", fromState: item.lifecycleState, toState: "needs_evidence" });
-    res.json({ item: updated });
+    return res.json({ item: updated });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to request support" });
+    return res.status(500).json({ error: "Failed to request support" });
   }
 });
 
 router.post("/review-desk/items/:id/actions/generate-review-packet", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id ?? "0"), 10);
     const { actorId } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -677,15 +711,15 @@ router.post("/review-desk/items/:id/actions/generate-review-packet", async (req:
       .where(eq(pcManagedReviewItemsTable.id, id));
 
     await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_packet_generated", details: { packetRef } });
-    res.json({ packetRef, message: "Review packet generation queued" });
+    return res.json({ packetRef, message: "Review packet generation queued" });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to generate review packet" });
+    return res.status(500).json({ error: "Failed to generate review packet" });
   }
 });
 
 router.post("/review-desk/items/:id/actions/export-packet", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id ?? "0"), 10);
     const { actorId } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -707,15 +741,15 @@ router.post("/review-desk/items/:id/actions/export-packet", async (req: Request,
       .returning();
 
     await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_exported", fromState: "approved", toState: "exported", details: { exportRef } });
-    res.json({ item: updated, exportRef });
+    return res.json({ item: updated, exportRef });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to create export packet" });
+    return res.status(500).json({ error: "Failed to create export packet" });
   }
 });
 
 router.post("/review-desk/items/:id/notes", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id ?? "0"), 10);
     const { authorId, noteType, content, isPrivileged } = req.body;
 
     const [note] = await db.insert(pcManagedReviewNotesTable).values({
@@ -723,9 +757,9 @@ router.post("/review-desk/items/:id/notes", async (req: Request, res: Response) 
       content, authorId, isPrivileged: isPrivileged ?? false,
     }).returning();
 
-    res.status(201).json({ note });
+    return res.status(201).json({ note });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to add note" });
+    return res.status(500).json({ error: "Failed to add note" });
   }
 });
 
@@ -786,7 +820,7 @@ router.get("/review-desk/metrics", async (req: Request, res: Response) => {
     const backlogByType: Record<string, number> = {};
     all.forEach(i => { backlogByType[i.reviewWorkType] = (backlogByType[i.reviewWorkType] ?? 0) + 1; });
 
-    res.json({
+    return res.json({
       period: { days: periodDays, since: since.toISOString() },
       avgReviewAgeHours: Math.round(avgAge * 10) / 10,
       throughputPerDay: Math.round(throughput * 100) / 100,
@@ -803,7 +837,7 @@ router.get("/review-desk/metrics", async (req: Request, res: Response) => {
     });
   } catch (err: any) {
     logger.error({ err }, "Failed to get review metrics");
-    res.status(500).json({ error: "Failed to get review metrics" });
+    return res.status(500).json({ error: "Failed to get review metrics" });
   }
 });
 
@@ -831,7 +865,7 @@ router.get("/review-desk/admin", async (_req: Request, res: Response) => {
     const lowConfBacklog = all.filter(i => i.reviewWorkType === "low_confidence_extraction_review" && i.lifecycleState !== "closed").length;
     const failedPackets = all.filter(i => i.auditPacketRef !== null && i.lifecycleState === "blocked").length;
 
-    res.json({
+    return res.json({
       backlogByType,
       backlogByState,
       slaBreaches: breaches.map(i => ({
@@ -848,7 +882,7 @@ router.get("/review-desk/admin", async (_req: Request, res: Response) => {
       totalActive: all.filter(i => !["closed", "exported"].includes(i.lifecycleState)).length,
     });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to get admin view" });
+    return res.status(500).json({ error: "Failed to get admin view" });
   }
 });
 
@@ -873,7 +907,7 @@ router.get("/review-desk/my-review", async (req: Request, res: Response) => {
       .sort((a, b) => b.workUnblockedScore - a.workUnblockedScore)
       .slice(0, 5);
 
-    res.json({
+    return res.json({
       needsAction: needsAction.length,
       risky: risky.length,
       missing: missing.length,
@@ -884,7 +918,7 @@ router.get("/review-desk/my-review", async (req: Request, res: Response) => {
       topUnblockers: unblocks,
     });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to get my review summary" });
+    return res.status(500).json({ error: "Failed to get my review summary" });
   }
 });
 
@@ -901,7 +935,7 @@ router.get("/review-desk/copilot/max-unblock", async (_req: Request, res: Respon
       .limit(10);
 
     const top = items[0];
-    res.json({
+    return res.json({
       topUnblocker: top ? {
         id: top.id,
         title: top.title,
@@ -921,7 +955,7 @@ router.get("/review-desk/copilot/max-unblock", async (_req: Request, res: Respon
       })),
     });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to get max-unblock item" });
+    return res.status(500).json({ error: "Failed to get max-unblock item" });
   }
 });
 

@@ -11,7 +11,7 @@ import {
   dosSiteSettingsTable, dosIntegrationStatusTable, dosAutomationRunsTable,
   dosLinktreeConfigTable, dosPageViewsTable, dosAnalyticsEventsTable,
 } from "@szl-holdings/db";
-import { eq, desc, asc, and, gte, count } from "drizzle-orm";
+import { eq, desc, asc, and, gte, count, sql } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
 
 const router = Router();
@@ -19,79 +19,79 @@ const requireAuth = authMiddleware({ required: true });
 
 router.get("/articles", async (_req: Request, res: Response) => {
   const articles = await db.select().from(dosArticlesTable).orderBy(desc(dosArticlesTable.createdAt)).limit(100);
-  res.json(articles);
+  return res.json(articles);
 });
 
 router.get("/articles/:id", async (req: Request, res: Response) => {
   const [article] = await db.select().from(dosArticlesTable).where(eq(dosArticlesTable.id, Number(req.params.id)));
   if (!article) return res.status(404).json({ error: "Article not found" });
-  res.json(article);
+  return res.json(article);
 });
 
 router.get("/articles/slug/:slug", async (req: Request, res: Response) => {
-  const [article] = await db.select().from(dosArticlesTable).where(eq(dosArticlesTable.slug, req.params.slug));
+  const [article] = await db.select().from(dosArticlesTable).where(eq(dosArticlesTable.slug, String(req.params.slug ?? "")));
   if (!article) return res.status(404).json({ error: "Article not found" });
-  res.json(article);
+  return res.json(article);
 });
 
 router.post("/articles", requireAuth, async (req: Request, res: Response) => {
   const [article] = await db.insert(dosArticlesTable).values(req.body).returning();
-  res.status(201).json(article);
+  return res.status(201).json(article);
 });
 
 router.patch("/articles/:id", requireAuth, async (req: Request, res: Response) => {
   const [article] = await db.update(dosArticlesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dosArticlesTable.id, Number(req.params.id))).returning();
   if (!article) return res.status(404).json({ error: "Article not found" });
-  res.json(article);
+  return res.json(article);
 });
 
 router.delete("/articles/:id", requireAuth, async (req: Request, res: Response) => {
   await db.delete(dosArticlesTable).where(eq(dosArticlesTable.id, Number(req.params.id)));
-  res.json({ success: true });
+  return res.json({ success: true });
 });
 
 router.get("/articles/:id/versions", async (req: Request, res: Response) => {
   const versions = await db.select().from(dosArticleVersionsTable).where(eq(dosArticleVersionsTable.articleId, Number(req.params.id))).orderBy(desc(dosArticleVersionsTable.createdAt));
-  res.json(versions);
+  return res.json(versions);
 });
 
 router.get("/newsletters", async (_req: Request, res: Response) => {
   const newsletters = await db.select().from(dosNewslettersTable).orderBy(desc(dosNewslettersTable.createdAt)).limit(100);
-  res.json(newsletters);
+  return res.json(newsletters);
 });
 
 router.get("/newsletters/:id", async (req: Request, res: Response) => {
   const [nl] = await db.select().from(dosNewslettersTable).where(eq(dosNewslettersTable.id, Number(req.params.id)));
   if (!nl) return res.status(404).json({ error: "Newsletter not found" });
-  res.json(nl);
+  return res.json(nl);
 });
 
 router.post("/newsletters", requireAuth, async (req: Request, res: Response) => {
   const [nl] = await db.insert(dosNewslettersTable).values(req.body).returning();
-  res.status(201).json(nl);
+  return res.status(201).json(nl);
 });
 
 router.patch("/newsletters/:id", requireAuth, async (req: Request, res: Response) => {
   const [nl] = await db.update(dosNewslettersTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dosNewslettersTable.id, Number(req.params.id))).returning();
   if (!nl) return res.status(404).json({ error: "Newsletter not found" });
-  res.json(nl);
+  return res.json(nl);
 });
 
 router.delete("/newsletters/:id", requireAuth, async (req: Request, res: Response) => {
   await db.delete(dosNewslettersTable).where(eq(dosNewslettersTable.id, Number(req.params.id)));
-  res.json({ success: true });
+  return res.json({ success: true });
 });
 
 router.get("/carousels", async (_req: Request, res: Response) => {
   const carousels = await db.select().from(dosCarouselProjectsTable).orderBy(desc(dosCarouselProjectsTable.createdAt)).limit(100);
-  res.json(carousels);
+  return res.json(carousels);
 });
 
 router.get("/carousels/:id", async (req: Request, res: Response) => {
   const [c] = await db.select().from(dosCarouselProjectsTable).where(eq(dosCarouselProjectsTable.id, Number(req.params.id)));
   if (!c) return res.status(404).json({ error: "Carousel not found" });
   const slides = await db.select().from(dosCarouselSlidesTable).where(eq(dosCarouselSlidesTable.projectId, c.id)).orderBy(asc(dosCarouselSlidesTable.slideNumber));
-  res.json({ ...c, slides });
+  return res.json({ ...c, slides });
 });
 
 router.post("/carousels", requireAuth, async (req: Request, res: Response) => {
@@ -100,67 +100,67 @@ router.post("/carousels", requireAuth, async (req: Request, res: Response) => {
   if (slides?.length) {
     await db.insert(dosCarouselSlidesTable).values(slides.map((s: Record<string, unknown>, i: number) => ({ ...s, projectId: c.id, slideNumber: i + 1 })));
   }
-  res.status(201).json(c);
+  return res.status(201).json(c);
 });
 
 router.patch("/carousels/:id", requireAuth, async (req: Request, res: Response) => {
   const [c] = await db.update(dosCarouselProjectsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dosCarouselProjectsTable.id, Number(req.params.id))).returning();
   if (!c) return res.status(404).json({ error: "Carousel not found" });
-  res.json(c);
+  return res.json(c);
 });
 
 router.get("/x-posts", async (_req: Request, res: Response) => {
   const posts = await db.select().from(dosXPostsTable).orderBy(desc(dosXPostsTable.createdAt)).limit(100);
-  res.json(posts);
+  return res.json(posts);
 });
 
 router.get("/x-posts/:id", async (req: Request, res: Response) => {
   const [post] = await db.select().from(dosXPostsTable).where(eq(dosXPostsTable.id, Number(req.params.id)));
   if (!post) return res.status(404).json({ error: "X post not found" });
-  res.json(post);
+  return res.json(post);
 });
 
 router.post("/x-posts", requireAuth, async (req: Request, res: Response) => {
   const [post] = await db.insert(dosXPostsTable).values(req.body).returning();
-  res.status(201).json(post);
+  return res.status(201).json(post);
 });
 
 router.patch("/x-posts/:id", requireAuth, async (req: Request, res: Response) => {
   const [post] = await db.update(dosXPostsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dosXPostsTable.id, Number(req.params.id))).returning();
   if (!post) return res.status(404).json({ error: "X post not found" });
-  res.json(post);
+  return res.json(post);
 });
 
 router.delete("/x-posts/:id", requireAuth, async (req: Request, res: Response) => {
   await db.delete(dosXPostsTable).where(eq(dosXPostsTable.id, Number(req.params.id)));
-  res.json({ success: true });
+  return res.json({ success: true });
 });
 
 router.post("/x-posts/:id/queue", requireAuth, async (req: Request, res: Response) => {
   const [post] = await db.update(dosXPostsTable).set({ status: "queued", scheduledFor: req.body.scheduledFor || new Date(), updatedAt: new Date() }).where(eq(dosXPostsTable.id, Number(req.params.id))).returning();
   if (!post) return res.status(404).json({ error: "X post not found" });
-  res.json(post);
+  return res.json(post);
 });
 
 router.get("/campaigns", requireAuth, async (_req: Request, res: Response) => {
   const campaigns = await db.select().from(dosCampaignsTable).orderBy(desc(dosCampaignsTable.createdAt)).limit(100);
-  res.json(campaigns);
+  return res.json(campaigns);
 });
 
 router.post("/campaigns", requireAuth, async (req: Request, res: Response) => {
   const [c] = await db.insert(dosCampaignsTable).values(req.body).returning();
-  res.status(201).json(c);
+  return res.status(201).json(c);
 });
 
 router.patch("/campaigns/:id", requireAuth, async (req: Request, res: Response) => {
   const [c] = await db.update(dosCampaignsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dosCampaignsTable.id, Number(req.params.id))).returning();
   if (!c) return res.status(404).json({ error: "Campaign not found" });
-  res.json(c);
+  return res.json(c);
 });
 
 router.get("/campaigns/:id/links", requireAuth, async (req: Request, res: Response) => {
   const links = await db.select().from(dosCampaignLinksTable).where(eq(dosCampaignLinksTable.campaignId, Number(req.params.id)));
-  res.json(links);
+  return res.json(links);
 });
 
 router.post("/campaigns/:id/links", requireAuth, async (req: Request, res: Response) => {
@@ -173,7 +173,7 @@ router.post("/campaigns/:id/links", requireAuth, async (req: Request, res: Respo
   if (term) params.set("utm_term", term);
   const fullUrl = `${destination}${destination.includes("?") ? "&" : "?"}${params.toString()}`;
   const [link] = await db.insert(dosCampaignLinksTable).values({ ...req.body, campaignId: Number(req.params.id), fullUrl }).returning();
-  res.status(201).json(link);
+  return res.status(201).json(link);
 });
 
 // ─── Zod schemas for admin write paths ───────────────────────────────────────
@@ -217,16 +217,16 @@ router.get("/leads", requireAuth, async (req: Request, res: Response) => {
   const campaign = req.query.campaign as string | undefined;
   const period = req.query.period as string | undefined;
 
-  const conditions = [];
-  if (stage) conditions.push(eq(dosLeadsTable.stage, stage));
-  if (campaign) conditions.push(eq(dosLeadsTable.campaign, campaign));
+  const conditions: ReturnType<typeof sql>[] = [];
+  if (stage) conditions.push(sql`${dosLeadsTable.stage} = ${stage}`);
+  if (campaign) conditions.push(sql`${dosLeadsTable.campaign} = ${campaign}`);
   if (period === "weekly") conditions.push(gte(dosLeadsTable.createdAt, new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)));
   else if (period === "monthly") conditions.push(gte(dosLeadsTable.createdAt, new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)));
 
   const leads = conditions.length > 0
     ? await db.select().from(dosLeadsTable).where(and(...conditions)).orderBy(desc(dosLeadsTable.createdAt)).limit(200)
     : await db.select().from(dosLeadsTable).orderBy(desc(dosLeadsTable.createdAt)).limit(200);
-  res.json(leads);
+  return res.json(leads);
 });
 
 router.post("/leads", async (req: Request, res: Response) => {
@@ -234,8 +234,24 @@ router.post("/leads", async (req: Request, res: Response) => {
   if (!parsed.success) return res.status(400).json({ error: "Validation failed", details: parsed.error.flatten() });
   const data = parsed.data;
   const score = computeLeadScore(data);
-  const [lead] = await db.insert(dosLeadsTable).values({ ...data, score }).returning();
-  res.status(201).json(lead);
+  const leadStageEnum = ["new", "qualified", "warm", "needs-followup", "proposal-candidate", "closed-won", "closed-lost"] as const;
+  type LeadStage = typeof leadStageEnum[number];
+  const stage: LeadStage = leadStageEnum.includes(data.stage as LeadStage) ? (data.stage as LeadStage) : "new";
+  const [lead] = await db.insert(dosLeadsTable).values({
+    name: data.name,
+    email: data.email,
+    company: data.company,
+    interestArea: data.interestArea,
+    budget: data.budget,
+    message: data.message,
+    source: data.source,
+    medium: data.medium,
+    campaign: data.campaign,
+    landingPage: data.landingPage,
+    stage,
+    score,
+  }).returning();
+  return res.status(201).json(lead);
 });
 
 router.patch("/leads/:id", requireAuth, async (req: Request, res: Response) => {
@@ -255,167 +271,177 @@ router.patch("/leads/:id", requireAuth, async (req: Request, res: Response) => {
     interestArea: merged.interestArea,
   });
   const [lead] = await db.update(dosLeadsTable).set({ ...req.body, score, updatedAt: new Date() }).where(eq(dosLeadsTable.id, Number(req.params.id))).returning();
-  res.json(lead);
+  return res.json(lead);
 });
 
 router.delete("/leads/:id", requireAuth, async (req: Request, res: Response) => {
   const id = Number(req.params.id);
   await db.delete(dosLeadNotesTable).where(eq(dosLeadNotesTable.leadId, id));
   await db.delete(dosLeadsTable).where(eq(dosLeadsTable.id, id));
-  res.json({ success: true });
+  return res.json({ success: true });
 });
 
 router.get("/leads/:id/notes", requireAuth, async (req: Request, res: Response) => {
   const notes = await db.select().from(dosLeadNotesTable).where(eq(dosLeadNotesTable.leadId, Number(req.params.id))).orderBy(desc(dosLeadNotesTable.createdAt));
-  res.json(notes);
+  return res.json(notes);
 });
 
 router.post("/leads/:id/notes", requireAuth, async (req: Request, res: Response) => {
   const [note] = await db.insert(dosLeadNotesTable).values({ ...req.body, leadId: Number(req.params.id) }).returning();
-  res.status(201).json(note);
+  return res.status(201).json(note);
 });
 
 router.get("/pillars", async (_req: Request, res: Response) => {
   const pillars = await db.select().from(dosEditorialPillarsTable).orderBy(asc(dosEditorialPillarsTable.sortOrder));
-  res.json(pillars);
+  return res.json(pillars);
 });
 
 router.post("/pillars", requireAuth, async (req: Request, res: Response) => {
   const [p] = await db.insert(dosEditorialPillarsTable).values(req.body).returning();
-  res.status(201).json(p);
+  return res.status(201).json(p);
 });
 
 router.get("/cta-blocks", async (_req: Request, res: Response) => {
   const blocks = await db.select().from(dosCtaBlocksTable).orderBy(desc(dosCtaBlocksTable.createdAt));
-  res.json(blocks);
+  return res.json(blocks);
 });
 
 router.post("/cta-blocks", requireAuth, async (req: Request, res: Response) => {
   const [b] = await db.insert(dosCtaBlocksTable).values(req.body).returning();
-  res.status(201).json(b);
+  return res.status(201).json(b);
 });
 
 router.get("/calendar", async (req: Request, res: Response) => {
   const items = await db.select().from(dosContentCalendarItemsTable).orderBy(asc(dosContentCalendarItemsTable.scheduledDate)).limit(200);
-  res.json(items);
+  return res.json(items);
 });
 
 router.post("/calendar", requireAuth, async (req: Request, res: Response) => {
   const [item] = await db.insert(dosContentCalendarItemsTable).values(req.body).returning();
-  res.status(201).json(item);
+  return res.status(201).json(item);
 });
 
 router.patch("/calendar/:id", requireAuth, async (req: Request, res: Response) => {
   const [item] = await db.update(dosContentCalendarItemsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dosContentCalendarItemsTable.id, Number(req.params.id))).returning();
   if (!item) return res.status(404).json({ error: "Calendar item not found" });
-  res.json(item);
+  return res.json(item);
 });
 
 router.get("/distribution", async (_req: Request, res: Response) => {
   const targets = await db.select().from(dosDistributionTargetsTable).orderBy(desc(dosDistributionTargetsTable.createdAt)).limit(200);
-  res.json(targets);
+  return res.json(targets);
 });
 
 router.post("/distribution", requireAuth, async (req: Request, res: Response) => {
   const [t] = await db.insert(dosDistributionTargetsTable).values(req.body).returning();
-  res.status(201).json(t);
+  return res.status(201).json(t);
 });
 
 router.patch("/distribution/:id", requireAuth, async (req: Request, res: Response) => {
   const [t] = await db.update(dosDistributionTargetsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dosDistributionTargetsTable.id, Number(req.params.id))).returning();
   if (!t) return res.status(404).json({ error: "Distribution target not found" });
-  res.json(t);
+  return res.json(t);
 });
 
 router.get("/settings", requireAuth, async (_req: Request, res: Response) => {
   const settings = await db.select().from(dosSiteSettingsTable).orderBy(asc(dosSiteSettingsTable.category));
-  res.json(settings);
+  return res.json(settings);
 });
 
 router.post("/settings", requireAuth, async (req: Request, res: Response) => {
   const parsed = SettingWriteSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: "Validation failed", details: parsed.error.flatten() });
-  const [s] = await db.insert(dosSiteSettingsTable).values(parsed.data).returning();
-  res.status(201).json(s);
+  const categoryEnum = ["company", "social", "integration", "publishing", "author", "cta"] as const;
+  type SettingCategory = typeof categoryEnum[number];
+  const category: SettingCategory = categoryEnum.includes(parsed.data.category as SettingCategory)
+    ? (parsed.data.category as SettingCategory)
+    : "company";
+  const [s] = await db.insert(dosSiteSettingsTable).values({
+    key: parsed.data.key,
+    value: parsed.data.value,
+    label: parsed.data.label,
+    category,
+  }).returning();
+  return res.status(201).json(s);
 });
 
 router.patch("/settings/:key", requireAuth, async (req: Request, res: Response) => {
-  const [s] = await db.update(dosSiteSettingsTable).set({ value: req.body.value, updatedAt: new Date() }).where(eq(dosSiteSettingsTable.key, req.params.key)).returning();
+  const [s] = await db.update(dosSiteSettingsTable).set({ value: req.body.value, updatedAt: new Date() }).where(eq(dosSiteSettingsTable.key, String(req.params.key ?? ""))).returning();
   if (!s) return res.status(404).json({ error: "Setting not found" });
-  res.json(s);
+  return res.json(s);
 });
 
 router.get("/integrations", requireAuth, async (_req: Request, res: Response) => {
   const integrations = await db.select().from(dosIntegrationStatusTable).orderBy(asc(dosIntegrationStatusTable.provider));
-  res.json(integrations);
+  return res.json(integrations);
 });
 
 router.post("/integrations/retry/:provider", requireAuth, async (req: Request, res: Response) => {
-  const [i] = await db.update(dosIntegrationStatusTable).set({ status: "disconnected", lastError: null, updatedAt: new Date() }).where(eq(dosIntegrationStatusTable.provider, req.params.provider)).returning();
+  const [i] = await db.update(dosIntegrationStatusTable).set({ status: "disconnected", lastError: null, updatedAt: new Date() }).where(eq(dosIntegrationStatusTable.provider, String(req.params.provider ?? ""))).returning();
   if (!i) return res.status(404).json({ error: "Integration not found" });
-  res.json(i);
+  return res.json(i);
 });
 
 router.patch("/integrations/:id", requireAuth, async (req: Request, res: Response) => {
   const [i] = await db.update(dosIntegrationStatusTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dosIntegrationStatusTable.id, Number(req.params.id))).returning();
   if (!i) return res.status(404).json({ error: "Integration not found" });
-  res.json(i);
+  return res.json(i);
 });
 
 router.get("/authors", async (_req: Request, res: Response) => {
   const authors = await db.select().from(dosAuthorProfilesTable);
-  res.json(authors);
+  return res.json(authors);
 });
 
 router.post("/authors", requireAuth, async (req: Request, res: Response) => {
   const [a] = await db.insert(dosAuthorProfilesTable).values(req.body).returning();
-  res.status(201).json(a);
+  return res.status(201).json(a);
 });
 
 router.get("/linktree", async (_req: Request, res: Response) => {
   // Public endpoint — active items only
   const items = await db.select().from(dosLinktreeConfigTable).where(eq(dosLinktreeConfigTable.isActive, true)).orderBy(asc(dosLinktreeConfigTable.sortOrder));
-  res.json(items);
+  return res.json(items);
 });
 
 router.get("/linktree/admin", requireAuth, async (_req: Request, res: Response) => {
   // Admin endpoint — all items including inactive
   const items = await db.select().from(dosLinktreeConfigTable).orderBy(asc(dosLinktreeConfigTable.sortOrder));
-  res.json(items);
+  return res.json(items);
 });
 
 router.post("/linktree", requireAuth, async (req: Request, res: Response) => {
   const parsed = LinktreeItemSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: "Validation failed", details: parsed.error.flatten() });
   const [item] = await db.insert(dosLinktreeConfigTable).values(parsed.data).returning();
-  res.status(201).json(item);
+  return res.status(201).json(item);
 });
 
 router.patch("/linktree/:id", requireAuth, async (req: Request, res: Response) => {
   const [item] = await db.update(dosLinktreeConfigTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dosLinktreeConfigTable.id, Number(req.params.id))).returning();
   if (!item) return res.status(404).json({ error: "Linktree item not found" });
-  res.json(item);
+  return res.json(item);
 });
 
 router.delete("/linktree/:id", requireAuth, async (req: Request, res: Response) => {
   await db.delete(dosLinktreeConfigTable).where(eq(dosLinktreeConfigTable.id, Number(req.params.id)));
-  res.json({ success: true });
+  return res.json({ success: true });
 });
 
 router.get("/automation-runs", async (_req: Request, res: Response) => {
   const runs = await db.select().from(dosAutomationRunsTable).orderBy(desc(dosAutomationRunsTable.createdAt)).limit(50);
-  res.json(runs);
+  return res.json(runs);
 });
 
 router.post("/automation-runs", requireAuth, async (req: Request, res: Response) => {
   const [run] = await db.insert(dosAutomationRunsTable).values(req.body).returning();
-  res.status(201).json(run);
+  return res.status(201).json(run);
 });
 
 router.patch("/automation-runs/:id", requireAuth, async (req: Request, res: Response) => {
   const [run] = await db.update(dosAutomationRunsTable).set(req.body).where(eq(dosAutomationRunsTable.id, Number(req.params.id))).returning();
   if (!run) return res.status(404).json({ error: "Run not found" });
-  res.json(run);
+  return res.json(run);
 });
 
 // ─── Automation Job Executors ─────────────────────────────────────────────────
@@ -564,7 +590,7 @@ router.post("/automation-runs/trigger/:jobType", requireAuth, async (req: Reques
       itemsFailed,
     }).returning();
 
-    res.json({ run, output });
+    return res.json({ run, output });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
     const [run] = await db.insert(dosAutomationRunsTable).values({
@@ -579,7 +605,7 @@ router.post("/automation-runs/trigger/:jobType", requireAuth, async (req: Reques
       itemsFailed: 1,
       errorLog: errorMessage,
     }).returning();
-    res.status(500).json({ error: errorMessage, run });
+    return res.status(500).json({ error: errorMessage, run });
   }
 });
 
@@ -595,7 +621,10 @@ router.post("/x-posts/:id/publish", requireAuth, async (req: Request, res: Respo
     const adapter = new XTwitterAdapter();
 
     if (post.postType === "thread" && post.threadJson) {
-      const tweets = (post.threadJson as string[]);
+      const rawThread = post.threadJson as { body: string }[] | string[];
+      const tweets = Array.isArray(rawThread) && rawThread.length > 0 && typeof rawThread[0] === 'object'
+        ? (rawThread as { body: string }[]).map(t => t.body)
+        : rawThread as string[];
       const results = await adapter.postThread(tweets);
       const firstResult = results[0];
       if (!firstResult?.posted) {
@@ -618,11 +647,11 @@ router.post("/x-posts/:id/publish", requireAuth, async (req: Request, res: Respo
       status: "sent", sentAt: new Date(), externalPostId: result.externalPostId || null,
       externalPostUrl: result.externalPostUrl || null, errorMessage: null, updatedAt: new Date(),
     }).where(eq(dosXPostsTable.id, post.id)).returning();
-    res.json({ post: updated, mock: result.mock });
+    return res.json({ post: updated, mock: result.mock });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     await db.update(dosXPostsTable).set({ status: "failed", errorMessage: msg, retryCount: (post.retryCount || 0) + 1, updatedAt: new Date() }).where(eq(dosXPostsTable.id, post.id));
-    res.status(500).json({ error: msg });
+    return res.status(500).json({ error: msg });
   }
 });
 
@@ -649,9 +678,9 @@ router.post("/articles/:id/publish-medium", requireAuth, async (req: Request, re
     const [updated] = await db.update(dosArticlesTable).set({
       status: "published", mediumStatus: "published", externalUrlMedium: result.externalUrl || null, publishedMediumAt: new Date(), updatedAt: new Date(),
     }).where(eq(dosArticlesTable.id, article.id)).returning();
-    res.json({ article: updated, mock: result.mock, externalUrl: result.externalUrl });
+    return res.json({ article: updated, mock: result.mock, externalUrl: result.externalUrl });
   } catch (err) {
-    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    return res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
 
@@ -677,9 +706,9 @@ router.post("/newsletters/:id/publish-substack", requireAuth, async (req: Reques
     const [updated] = await db.update(dosNewslettersTable).set({
       status: "published", substackUrl: result.externalUrl || null, updatedAt: new Date(),
     }).where(eq(dosNewslettersTable.id, nl.id)).returning();
-    res.json({ newsletter: updated, mock: result.mock, externalUrl: result.externalUrl });
+    return res.json({ newsletter: updated, mock: result.mock, externalUrl: result.externalUrl });
   } catch (err) {
-    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    return res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
 
@@ -703,9 +732,9 @@ router.post("/carousels/:id/publish-linkedin", requireAuth, async (req: Request,
     const [updated] = await db.update(dosCarouselProjectsTable).set({
       status: "published", updatedAt: new Date(),
     }).where(eq(dosCarouselProjectsTable.id, carousel.id)).returning();
-    res.json({ carousel: updated, mock: result.mock, externalUrl: result.externalUrl });
+    return res.json({ carousel: updated, mock: result.mock, externalUrl: result.externalUrl });
   } catch (err) {
-    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    return res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
 
@@ -790,9 +819,9 @@ router.get("/carousels/:id/export-pdf", async (req: Request, res: Response) => {
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
     res.setHeader("Content-Length", pdfBuffer.length);
-    res.end(pdfBuffer);
+    return res.end(pdfBuffer);
   } catch (err) {
-    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    return res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
 
@@ -802,22 +831,23 @@ router.post("/linktree/:id/click", async (req: Request, res: Response) => {
   const [item] = await db.select().from(dosLinktreeConfigTable).where(eq(dosLinktreeConfigTable.id, Number(req.params.id)));
   if (!item) return res.status(404).json({ error: "Link not found" });
   await db.insert(dosAnalyticsEventsTable).values({
-    eventType: "linktree_click",
-    eventName: "link_click",
-    pagePath: "/link-in-bio",
+    eventType: "cta_click",
+    path: "/link-in-bio",
+    target: item.destination,
+    value: item.label,
     metadata: { linkId: item.id, label: item.label, destination: item.destination, campaignTag: item.campaignTag },
   });
-  res.json({ ok: true });
+  return res.json({ ok: true });
 });
 
 router.post("/analytics/event", async (req: Request, res: Response) => {
   const [event] = await db.insert(dosAnalyticsEventsTable).values(req.body).returning();
-  res.status(201).json(event);
+  return res.status(201).json(event);
 });
 
 router.post("/analytics/pageview", async (req: Request, res: Response) => {
   const [pv] = await db.insert(dosPageViewsTable).values(req.body).returning();
-  res.status(201).json(pv);
+  return res.status(201).json(pv);
 });
 
 router.get("/analytics/dashboard", requireAuth, async (req: Request, res: Response) => {
@@ -852,7 +882,7 @@ router.get("/analytics/dashboard", requireAuth, async (req: Request, res: Respon
   const failedAutos = await db.select({ count: count() }).from(dosAutomationRunsTable).where(and(gte(dosAutomationRunsTable.createdAt, windowStart), eq(dosAutomationRunsTable.status, "failed")));
   const automationsHealth = (failedAutos[0]?.count ?? 0) > 0 ? "Degraded" : "Healthy";
 
-  res.json({
+  return res.json({
     period,
     visitsThisWeek: pvCount?.count ?? 0,
     leadsThisWeek: leadCount?.count ?? 0,
@@ -872,7 +902,7 @@ router.get("/analytics/dashboard", requireAuth, async (req: Request, res: Respon
 
 router.delete("/campaigns/:id", requireAuth, async (req: Request, res: Response) => {
   await db.delete(dosCampaignsTable).where(eq(dosCampaignsTable.id, Number(req.params.id)));
-  res.json({ success: true });
+  return res.json({ success: true });
 });
 
 // ─── Seed data ────────────────────────────────────────────────────────────────
@@ -998,7 +1028,7 @@ router.post("/seed", requireAuth, async (_req: Request, res: Response) => {
   }
   results.integrations = intCreated;
 
-  res.json({ success: true, seeded: results });
+  return res.json({ success: true, seeded: results });
 });
 
 router.get("/articles/published/list", async (_req: Request, res: Response) => {
@@ -1013,7 +1043,7 @@ router.get("/articles/published/list", async (_req: Request, res: Response) => {
     publishedSiteAt: dosArticlesTable.publishedSiteAt,
     articleType: dosArticlesTable.articleType,
   }).from(dosArticlesTable).where(eq(dosArticlesTable.siteStatus, "published")).orderBy(desc(dosArticlesTable.publishedSiteAt)).limit(50);
-  res.json(articles);
+  return res.json(articles);
 });
 
 export default router;

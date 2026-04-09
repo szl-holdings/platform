@@ -46,7 +46,7 @@ export default function AppliedIntelligencePage() {
                     <CardTitle className="font-display text-sm">{b.title}</CardTitle>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className={`text-xs ${severityColors[b.severity]}`}>{b.severity}</Badge>
+                    <Badge variant="outline" className={`text-xs ${severityColors[b.severity ?? ""]}`}>{b.severity}</Badge>
                     <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
                       <Target className="w-3 h-3 mr-1" />{b.confidence}%
                     </Badge>
@@ -75,7 +75,7 @@ export default function AppliedIntelligencePage() {
                   ))}
                 </div>
                 <div className="text-[10px] text-muted-foreground/50">
-                  Generated: {new Date(b.generatedAt).toLocaleString()} · Category: {b.category}
+                  Generated: {b.generatedAt ? new Date(b.generatedAt).toLocaleString() : "—"} · Category: {b.category}
                 </div>
               </CardContent>
             </Card>
@@ -97,7 +97,7 @@ export default function AppliedIntelligencePage() {
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <p className="text-sm font-semibold">{p.component}</p>
-                      <Badge variant="outline" className={`text-xs ${riskColors[p.riskLevel]}`}>{p.riskLevel} Risk</Badge>
+                      <Badge variant="outline" className={`text-xs ${riskColors[p.riskLevel ?? ""]}`}>{p.riskLevel} Risk</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground">{p.vesselName}</p>
                   </div>

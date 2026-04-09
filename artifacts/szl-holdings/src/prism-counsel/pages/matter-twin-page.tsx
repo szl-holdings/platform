@@ -5,6 +5,73 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
+interface TwinMatter {
+  id: number;
+  title?: string;
+  status?: string;
+  matterType?: string;
+  jurisdiction?: string;
+  healthScore?: number;
+  updatedAt?: string;
+  caseNumber?: string | null;
+}
+
+interface TwinDeadline {
+  id: number;
+  title: string;
+  dueDate: string;
+  deadlineType?: string;
+  priority?: string;
+}
+
+interface TwinForecast {
+  id: number;
+  forecastType?: string;
+  confidence?: number;
+  explanation?: string;
+  valueLow?: number;
+  valueHigh?: number;
+}
+
+interface TwinComm {
+  id: number;
+  channel?: string;
+  direction?: string;
+  subject?: string;
+  summary?: string;
+  fromParty?: string;
+  toParty?: string;
+  isPrivileged?: boolean;
+}
+
+interface TwinApproval {
+  id: number;
+  title: string;
+  requestType?: string;
+  requestedAt: string;
+  description?: string;
+}
+
+interface TwinRecommendation {
+  id: number;
+  title: string;
+  description?: string;
+  priority?: string;
+}
+
+interface TwinResponse {
+  matter: TwinMatter;
+  subpages: {
+    summary: { matter: TwinMatter; readinessScores: unknown[] };
+    deadlines: { items: TwinDeadline[] };
+    forecast: { items: TwinForecast[] };
+    communications: { items: TwinComm[] };
+    approvals: { pending: TwinApproval[] };
+    recommendations: { items: TwinRecommendation[] };
+  };
+  lastComputedAt: string;
+}
+
 const SUBPAGES = [
   { id: "summary", label: "Summary", icon: Brain },
   { id: "twin", label: "Twin", icon: Layers },
@@ -27,7 +94,7 @@ const SUBPAGES = [
 
 type SubpageId = typeof SUBPAGES[number]["id"];
 
-function SummarySubpage({ twinData }: { twinData: any }) {
+function SummarySubpage({ twinData }: { twinData: TwinResponse | undefined }) {
   const matter = twinData?.matter;
   const recs = twinData?.subpages?.recommendations?.items ?? [];
   const approvals = twinData?.subpages?.approvals?.pending ?? [];
@@ -50,7 +117,7 @@ function SummarySubpage({ twinData }: { twinData: any }) {
         <h3 className="text-sm font-semibold text-slate-200 mb-3">AI Recommendations</h3>
         {recs.length === 0 && <div className="text-xs text-slate-500">No pending recommendations</div>}
         <div className="space-y-2">
-          {recs.slice(0, 5).map((r: any, i: number) => (
+          {recs.slice(0, 5).map((r, i) => (
             <div key={i} className="flex items-start gap-3 py-2 border-b border-white/[0.04] last:border-0">
               <div className={`mt-0.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${r.priority === "critical" ? "bg-[#c45a4a]" : "bg-[#d4a054]"}`} />
               <div>
@@ -66,7 +133,7 @@ function SummarySubpage({ twinData }: { twinData: any }) {
         <div className="rounded-lg border border-[#d4a054]/20 p-4" style={{ background: "#0c1220" }}>
           <h3 className="text-sm font-semibold text-[#d4a054] mb-3">Pending Approvals</h3>
           <div className="space-y-2">
-            {approvals.map((a: any, i: number) => (
+            {approvals.map((a, i) => (
               <div key={i} className="flex items-center justify-between py-2 border-b border-white/[0.04] last:border-0">
                 <div>
                   <div className="text-xs text-slate-200">{a.title}</div>
@@ -82,16 +149,16 @@ function SummarySubpage({ twinData }: { twinData: any }) {
   );
 }
 
-function TwinSubpage({ twinData }: { twinData: any }) {
+function TwinSubpage({ twinData }: { twinData: TwinResponse | undefined }) {
   const matter = twinData?.matter;
   const EIGHT_QUESTIONS = [
     { q: "What's happening?", a: matter ? `${matter.matterType?.replace("_", " ")} case in ${matter.status} stage` : "Loading..." },
     { q: "What changed?", a: "Last updated: " + (matter?.updatedAt ? new Date(matter.updatedAt).toLocaleDateString() : "—") },
     { q: "What's missing?", a: "Review AI recommendations for missing evidence gaps" },
-    { q: "What's risky?", a: matter?.healthScore < 50 ? "Matter health below threshold — review deadlines and coverage" : "No critical risks detected" },
+    { q: "What's risky?", a: (matter?.healthScore ?? 100) < 50 ? "Matter health below threshold — review deadlines and coverage" : "No critical risks detected" },
     { q: "What outside context matters?", a: "Worldline signals: venue velocity, insurer pressure, weather events" },
     { q: "What should happen next?", a: "See AI recommendations above for next best actions" },
-    { q: "Who must approve?", a: twinData?.subpages?.approvals?.pending?.length > 0 ? `${twinData.subpages.approvals.pending.length} approval(s) pending` : "No pending approvals" },
+    { q: "Who must approve?", a: (twinData?.subpages?.approvals?.pending?.length ?? 0) > 0 ? `${twinData?.subpages?.approvals?.pending?.length} approval(s) pending` : "No pending approvals" },
     { q: "What sources support that answer?", a: "See Proof Chain for full source lineage and confidence scores" },
   ];
 
@@ -109,12 +176,12 @@ function TwinSubpage({ twinData }: { twinData: any }) {
   );
 }
 
-function DeadlinesSubpage({ twinData }: { twinData: any }) {
+function DeadlinesSubpage({ twinData }: { twinData: TwinResponse | undefined }) {
   const items = twinData?.subpages?.deadlines?.items ?? [];
   return (
     <div className="space-y-2">
       {items.length === 0 && <div className="text-xs text-slate-500">No deadlines found</div>}
-      {items.map((d: any, i: number) => {
+      {items.map((d, i) => {
         const days = Math.ceil((new Date(d.dueDate).getTime() - Date.now()) / 86400000);
         const color = days <= 7 ? "#c45a4a" : days <= 30 ? "#d4a054" : "#4a90b8";
         return (
@@ -134,12 +201,12 @@ function DeadlinesSubpage({ twinData }: { twinData: any }) {
   );
 }
 
-function ForecastSubpage({ twinData }: { twinData: any }) {
+function ForecastSubpage({ twinData }: { twinData: TwinResponse | undefined }) {
   const items = twinData?.subpages?.forecast?.items ?? [];
   return (
     <div className="space-y-3">
       {items.length === 0 && <div className="text-xs text-slate-500">No forecasts available</div>}
-      {items.map((f: any, i: number) => (
+      {items.map((f, i) => (
         <div key={i} className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
           <div className="flex items-center justify-between mb-2">
             <div className="text-xs font-medium text-slate-200">{f.forecastType?.replace("_", " ")}</div>
@@ -157,12 +224,12 @@ function ForecastSubpage({ twinData }: { twinData: any }) {
   );
 }
 
-function CommsSubpage({ twinData }: { twinData: any }) {
+function CommsSubpage({ twinData }: { twinData: TwinResponse | undefined }) {
   const items = twinData?.subpages?.communications?.items ?? [];
   return (
     <div className="space-y-2">
       {items.length === 0 && <div className="text-xs text-slate-500">No communications logged</div>}
-      {items.map((c: any, i: number) => (
+      {items.map((c, i) => (
         <div key={i} className="rounded-lg border border-white/[0.06] p-3" style={{ background: "#0c1220" }}>
           <div className="flex items-center gap-2 mb-1">
             <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${c.direction === "inbound" ? "bg-[#4a90b8]/10 text-[#4a90b8]" : "bg-[#d4a054]/10 text-[#d4a054]"}`}>
@@ -179,7 +246,7 @@ function CommsSubpage({ twinData }: { twinData: any }) {
   );
 }
 
-function ApprovalsSubpage({ twinData }: { twinData: any }) {
+function ApprovalsSubpage({ twinData }: { twinData: TwinResponse | undefined }) {
   const items = twinData?.subpages?.approvals?.pending ?? [];
   return (
     <div className="space-y-2">
@@ -188,7 +255,7 @@ function ApprovalsSubpage({ twinData }: { twinData: any }) {
           <CheckCircle2 className="w-4 h-4 text-green-500" /> No pending approvals
         </div>
       )}
-      {items.map((a: any, i: number) => (
+      {items.map((a, i) => (
         <div key={i} className="rounded-lg border border-[#d4a054]/20 p-4" style={{ background: "#0c1220" }}>
           <div className="flex items-center justify-between mb-2">
             <div className="text-xs font-semibold text-slate-200">{a.title}</div>
@@ -216,16 +283,13 @@ export default function MatterTwinPage() {
   const [activeSubpage, setActiveSubpage] = useState<SubpageId>("summary");
   const matterId = parseInt(params?.id ?? "0");
 
-  const { data: twinData, isLoading } = useQuery({
+  const { data: twinData, isLoading } = useQuery<TwinResponse>({
     queryKey: ["matter-twin", matterId],
-    queryFn: async () => {
-      const res = await apiRequest("GET", `/api/prism-counsel/matters/${matterId}/twin`);
-      return res.json();
-    },
+    queryFn: () => apiRequest<TwinResponse>("GET", `/api/prism-counsel/matters/${matterId}/twin`),
     enabled: matterId > 0,
   });
 
-  const twin = twinData?.data;
+  const twin = twinData;
 
   function renderSubpage() {
     if (!twin && !isLoading) return <div className="text-xs text-slate-500">Matter not found</div>;

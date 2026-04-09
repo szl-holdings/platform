@@ -97,7 +97,7 @@ router.post("/forge/submit", authMiddleware(), async (req: Request, res: Respons
 router.get("/forge/executions/:executionId", authMiddleware(), async (req: Request, res: Response) => {
   try {
     const { executionId } = req.params;
-    const execution = forgeRuntime.getExecution(executionId!);
+    const execution = forgeRuntime.getExecution(String(executionId ?? ""));
     if (!execution) {
       sendNotFound(res, `Execution ${executionId} not found`);
       return;
@@ -143,7 +143,7 @@ router.post("/forge/executions/:executionId/approve", authMiddleware(), requireR
     const callerTenantId = req.user?.orgs?.[0]?.orgId?.toString() ?? null;
     const isSuperAdmin = req.user?.roles?.includes("super_admin") || req.user?.roles?.includes("admin");
 
-    const pending = forgeRuntime.getExecution(executionId!);
+    const pending = forgeRuntime.getExecution(String(executionId ?? ""));
     if (!pending) {
       sendNotFound(res, `Execution ${executionId} not found`);
       return;
@@ -153,7 +153,7 @@ router.post("/forge/executions/:executionId/approve", authMiddleware(), requireR
       return;
     }
 
-    const execution = await forgeRuntime.approveAndRun(executionId!, approvalId);
+    const execution = await forgeRuntime.approveAndRun(String(executionId ?? ""), approvalId);
     sendSuccess(res, {
       executionId: execution.executionId,
       status: execution.status,

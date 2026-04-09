@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { api, type VoyageEconomics, type SanctionsScreening, type PortCall, type RosterVessel, type VesselDetail } from "@/lib/api";
+import { api, type VoyageEconomics, type SanctionsScreening, type PortCall, type RosterVessel, type VesselDetail, type FleetException as ApiFleetException, type VesselMaintenance, type VesselSummary } from "@/lib/api";
 import type { VesselProfile } from "@/data/mock-data";
 
 type ExceptionType = "route_deviation" | "delay_risk" | "port_congestion" | "weather_disruption" | "maintenance_risk" | "fuel_anomaly" | "schedule_variance" | "security_alert" | "ais_dark" | "sanctions_match" | "overdue_arrival" | "inspection_failure";
@@ -63,16 +63,16 @@ function mapStatusToProfile(apiStatus: string): VesselProfile["status"] {
   return map[apiStatus] ?? "at_sea";
 }
 
-function mapApiVesselToProfile(apiVessel: Record<string, unknown>): VesselProfile {
+function mapApiVesselToProfile(apiVessel: VesselSummary): VesselProfile {
   return {
-    id: apiVessel["id"] as number,
-    name: (apiVessel["name"] as string) ?? "Unknown Vessel",
-    imo: (apiVessel["imo"] as string | null) ?? "—",
-    mmsi: (apiVessel["mmsi"] as string | null) ?? "—",
-    flag: (apiVessel["flag"] as string | null) ?? "—",
-    type: (apiVessel["vesselType"] as string | null) ?? "Cargo",
-    status: mapStatusToProfile(apiVessel["status"] as string),
-    yearBuilt: (apiVessel["yearBuilt"] as number | null) ?? 2000,
+    id: apiVessel.id,
+    name: apiVessel.name ?? "Unknown Vessel",
+    imo: apiVessel.imo ?? "—",
+    mmsi: apiVessel.mmsi ?? "—",
+    flag: apiVessel.flag ?? "—",
+    type: apiVessel.vesselType ?? "Cargo",
+    status: mapStatusToProfile(apiVessel.status),
+    yearBuilt: 2000,
     utilization: 0,
     dwt: 0,
     gt: 0,
@@ -116,7 +116,7 @@ export function useVessels() {
   });
 
   const isLive = apiVessels.length > 0;
-  const vessels: VesselProfile[] = (apiVessels as Record<string, unknown>[]).map(mapApiVesselToProfile);
+  const vessels: VesselProfile[] = apiVessels.map(mapApiVesselToProfile);
 
   return { vessels, isLoading, error, isLive, refetch };
 }
@@ -138,25 +138,25 @@ export function useFleetExceptions(params?: { status?: string; severity?: string
 
   const isLive = apiExceptions.length > 0;
 
-  const fleetExceptions = apiExceptions.map((e: any) => ({
-    id: String(e["id"]),
-    type: toExceptionType(e["exceptionType"] as string | null | undefined),
-    severity: toExceptionSeverity(e["severity"] as string | null | undefined),
-    vesselId: (e["vesselId"] as number) ?? 0,
-    vesselName: (e["vesselName"] as string) ?? `Vessel #${(e["vesselId"] as number) ?? 0}`,
+  const fleetExceptions = apiExceptions.map((e: ApiFleetException) => ({
+    id: String(e.id),
+    type: toExceptionType(e.exceptionType),
+    severity: toExceptionSeverity(e.severity),
+    vesselId: e.vesselId ?? 0,
+    vesselName: e.vesselName ?? `Vessel #${e.vesselId ?? 0}`,
     route: "—",
-    title: (e["title"] as string) ?? "",
-    description: (e["description"] as string) ?? "",
-    whyItMatters: (e["whyItMatters"] as string) ?? "",
-    recommendedResponse: (e["recommendedResponse"] as string) ?? "",
-    businessConsequence: (e["businessConsequence"] as string) ?? "",
-    owner: (e["owner"] as string) ?? "—",
-    ownerFunction: (e["ownerFunction"] as string) ?? "—",
-    detectedAt: (e["detectedAt"] as string) ?? "",
-    acknowledgedAt: (e["acknowledgedAt"] as string | null) ?? null,
-    resolvedAt: (e["resolvedAt"] as string | null) ?? null,
-    status: toExceptionStatus(e["status"] as string | null | undefined),
-    estimatedImpactUSD: parseFloat((e["estimatedImpactUsd"] as string) ?? "0"),
+    title: e.title ?? "",
+    description: e.description ?? "",
+    whyItMatters: e.whyItMatters ?? "",
+    recommendedResponse: e.recommendedResponse ?? "",
+    businessConsequence: e.businessConsequence ?? "",
+    owner: e.owner ?? "—",
+    ownerFunction: e.ownerFunction ?? "—",
+    detectedAt: e.detectedAt ?? "",
+    acknowledgedAt: e.acknowledgedAt ?? null,
+    resolvedAt: e.resolvedAt ?? null,
+    status: toExceptionStatus(e.status),
+    estimatedImpactUSD: parseFloat(e.estimatedImpactUsd ?? "0"),
   }));
 
   return { fleetExceptions, isLoading, error, isLive, refetch };
@@ -250,25 +250,25 @@ export function useMaintenance(params?: { status?: string; vesselId?: number }) 
 
   const isLive = apiMaintenance.length > 0;
 
-  const maintenanceItems = apiMaintenance.map((m: any) => ({
-    id: m["id"] as number,
-    vesselId: m["vesselId"] as number,
-    vesselName: (m["vesselName"] as string) ?? `Vessel #${m["vesselId"] as number}`,
-    vesselType: m["vesselType"] as string | null,
-    vesselFlag: m["vesselFlag"] as string | null,
-    component: m["component"] as string,
-    type: toMaintenanceType(m["maintenanceType"] as string | null | undefined),
-    description: (m["description"] as string) ?? "",
-    dueDate: (m["dueDate"] as string) ?? "",
-    status: toMaintenanceStatus(m["status"] as string | null | undefined),
-    priority: toMaintenancePriority(m["priority"] as string | null | undefined),
-    estimatedCost: parseFloat((m["estimatedCost"] as string) ?? "0"),
-    daysToDue: m["dueDate"] ? Math.round((new Date(m["dueDate"] as string).getTime() - Date.now()) / 86400000) : 999,
-    riskOfServiceIssue: parseFloat((m["riskOfServiceIssue"] as string) ?? "0"),
-    impactsVoyageAvailability: (m["impactsVoyageAvailability"] as boolean) ?? false,
-    technician: (m["technician"] as string) ?? "—",
-    assetHealth: parseFloat((m["assetHealth"] as string) ?? "75"),
-    notes: m["notes"] as string | null,
+  const maintenanceItems = apiMaintenance.map((m: VesselMaintenance) => ({
+    id: m.id,
+    vesselId: m.vesselId,
+    vesselName: m.vesselName ?? `Vessel #${m.vesselId}`,
+    vesselType: m.vesselType ?? null,
+    vesselFlag: m.vesselFlag ?? null,
+    component: m.component,
+    type: toMaintenanceType(m.maintenanceType),
+    description: m.description ?? "",
+    dueDate: m.dueDate ?? "",
+    status: toMaintenanceStatus(m.status),
+    priority: toMaintenancePriority(m.priority),
+    estimatedCost: parseFloat(m.estimatedCost ?? "0"),
+    daysToDue: m.dueDate ? Math.round((new Date(m.dueDate).getTime() - Date.now()) / 86400000) : 999,
+    riskOfServiceIssue: parseFloat(m.riskOfServiceIssue ?? "0"),
+    impactsVoyageAvailability: m.impactsVoyageAvailability ?? false,
+    technician: m.technician ?? "—",
+    assetHealth: parseFloat(m.assetHealth ?? "75"),
+    notes: null as string | null,
   }));
 
   return { maintenanceItems, isLoading, error, isLive, refetch };
@@ -318,13 +318,14 @@ export function usePerformanceMetrics() {
     return {
       vesselId: v.id,
       vesselName: v.name,
-      utilization: (v as any)["utilization"] as number ?? 0,
+      utilization: 0,
       tce,
       fuelEfficiency: 0,
       onTimeArrivalRate: 0,
       avgDelayHours: 0,
       cargoTonnes: 0,
       revenuePerDay: 0,
+      routeProfitability: 0,
     };
   });
 

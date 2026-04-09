@@ -28,7 +28,7 @@ function AnimatedCounter({ value }: { value: number }) {
   return <>{display}</>;
 }
 
-interface MapVessel { lat?: number; lon?: number; latitude?: number; longitude?: number; name?: string; mmsi?: string; }
+interface MapVessel { lat?: number; lon?: number; latitude?: number; longitude?: number; name?: string; mmsi?: string; course?: number; }
 interface MapChokepoint { lat?: number; lon?: number; name?: string; riskLevel?: string; status?: string; vesselCount?: number; dailyTransits?: number; oilFlowMbpd?: number; }
 interface WeatherRow { region: string; warning?: string; windSpeed?: number; windDirection?: string; waveHeight?: number; seaTemp?: number; visibility?: string; }
 interface SanctionEntity { entity: string; word: string; }
@@ -60,8 +60,8 @@ function VesselMapCanvas({ vessels, chokepoints }: { vessels: MapVessel[]; choke
     const toY = (lat: number) => ((90 - lat) / 180) * h;
 
     chokepoints.forEach((cp) => {
-      const x = toX(cp.lon);
-      const y = toY(cp.lat);
+      const x = toX(cp.lon ?? 0);
+      const y = toY(cp.lat ?? 0);
       const color = cp.riskLevel === "critical" ? "rgba(239, 68, 68, 0.6)" : cp.riskLevel === "warning" ? "rgba(234, 179, 8, 0.6)" : cp.riskLevel === "elevated" ? "rgba(249, 115, 22, 0.5)" : "rgba(6, 182, 212, 0.4)";
 
       ctx.beginPath();
@@ -80,14 +80,14 @@ function VesselMapCanvas({ vessels, chokepoints }: { vessels: MapVessel[]; choke
     });
 
     vessels.forEach((v) => {
-      const x = toX(v.lon);
-      const y = toY(v.lat);
+      const x = toX(v.lon ?? 0);
+      const y = toY(v.lat ?? 0);
       ctx.fillStyle = "rgba(6, 182, 212, 0.9)";
       ctx.beginPath();
       ctx.arc(x, y, 4, 0, Math.PI * 2);
       ctx.fill();
 
-      const rad = (v.course * Math.PI) / 180;
+      const rad = ((v.course ?? 0) * Math.PI) / 180;
       ctx.strokeStyle = "rgba(6, 182, 212, 0.5)";
       ctx.lineWidth = 1;
       ctx.beginPath();
@@ -284,7 +284,7 @@ export default function MaritimeIntelligence() {
                       <span>Flag: {v.flag}</span>
                       <span>Source: {v.source}</span>
                       <button
-                        onClick={() => translateMutation.mutate({ text: v.reason, imo: v.imo, targetLang: "fr" })}
+                        onClick={() => translateMutation.mutate({ text: v.reason ?? "", imo: v.imo, targetLang: "fr" })}
                         disabled={translateMutation.isPending || !!translations[v.imo]}
                         className="flex items-center gap-1 text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
                         title="Translate to French"

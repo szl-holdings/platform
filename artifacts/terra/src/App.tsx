@@ -4,7 +4,7 @@ import { AnimatePresence, motion as m, useReducedMotion } from "framer-motion";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { SandboxModeProvider, SandboxModeBanner, AnalyticsProvider } from "@szl-holdings/shared-ui";
 import { McpOverlay } from "@szl-holdings/mcp-client";
-import { PrismBusProvider } from "@szl-holdings/prism-bus";
+import { PrismBusProvider } from "@szl-holdings/prism-bus/provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { terraConfig } from "@szl-holdings/shared-ui/copilot-configs";

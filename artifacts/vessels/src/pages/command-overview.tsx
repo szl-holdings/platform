@@ -152,7 +152,7 @@ function OperationsView({ vessels, fleetExceptions, maintenanceItems }: ViewProp
         <div className="space-y-2">
           {activeExceptions.map((exc) => {
             const sc = severityConfig[exc.severity] ?? severityConfig.normal;
-            const impact = (exc as { estimatedImpactUSD?: number; estimatedImpact?: number; valueAtRiskUsd?: string }).estimatedImpactUSD ?? ((exc as { valueAtRiskUsd?: string }).valueAtRiskUsd ? parseFloat((exc as { valueAtRiskUsd: string }).valueAtRiskUsd) : ((exc as { estimatedImpact?: number }).estimatedImpact ?? 0));
+            const impact = exc.estimatedImpactUSD ?? 0;
             return (
               <Link key={exc.id} href="/exceptions">
                 <div className="px-4 py-3 bg-[#0a1628]/60 border border-sky-500/10 rounded-lg hover:border-sky-500/20 transition-all cursor-pointer">
@@ -208,8 +208,8 @@ function OperationsView({ vessels, fleetExceptions, maintenanceItems }: ViewProp
 
 function CommercialView({ voyageEconomics }: ViewProps) {
   const activeVoyages = voyageEconomics.filter(v => v.status === "active");
-  const underperforming = activeVoyages.filter(v => v.performanceVsBudget < -5);
-  const overperforming = activeVoyages.filter(v => v.performanceVsBudget > 5);
+  const underperforming = activeVoyages.filter(v => (v.performanceVsBudget ?? 0) < -5);
+  const overperforming = activeVoyages.filter(v => (v.performanceVsBudget ?? 0) > 5);
 
   return (
     <div className="space-y-6">
@@ -224,7 +224,7 @@ function CommercialView({ voyageEconomics }: ViewProps) {
         <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider mb-3">Voyage P&amp;L by Charter</h3>
         <div className="space-y-2">
           {activeVoyages.map(v => {
-            const perf = v.performanceVsBudget;
+            const perf = v.performanceVsBudget ?? 0;
             const isUp = perf > 0;
             return (
               <div key={v.voyageId} className="px-4 py-3 bg-[#0a1628]/60 border border-sky-500/10 rounded-lg">

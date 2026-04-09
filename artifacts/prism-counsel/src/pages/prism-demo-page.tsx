@@ -164,7 +164,7 @@ export default function PrismDemoPage() {
               <tbody>
                 {SAMPLE_MATTERS.map((m: NyMatter, i: number) => {
                   const clock = m.clocks[0];
-                  const daysLeft = clock ? Math.ceil((new Date(clock.deadline).getTime() - Date.now()) / 86400000) : null;
+                  const daysLeft = clock ? Math.ceil((new Date(clock.deadlineAt).getTime() - Date.now()) / 86400000) : null;
                   return (
                     <tr key={m.id} className="transition-colors" style={{ borderBottom: i < SAMPLE_MATTERS.length - 1 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
                       <td className="px-5 py-3.5">

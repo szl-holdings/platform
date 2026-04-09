@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Navigation, Plus, MapPin, Clock, Trash2, Route, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { type VesselsRoute, type VesselSummary } from "@/lib/api";
 
 const statusColors: Record<string, string> = {
   planned: "bg-amber-500/10 text-amber-400 border-amber-500/20",
@@ -61,15 +62,15 @@ function RouteSkeleton() {
 
 export default function RoutePlanningPage() {
   const qc = useQueryClient();
-  const { data: routes = [], isLoading } = useQuery({ queryKey: ["routes"], queryFn: api.routes.list });
-  const { data: vessels = [] } = useQuery({ queryKey: ["vessels"], queryFn: api.vessels.list });
+  const { data: routes = [], isLoading } = useQuery<VesselsRoute[]>({ queryKey: ["routes"], queryFn: api.routes.list });
+  const { data: vessels = [] } = useQuery<VesselSummary[]>({ queryKey: ["vessels"], queryFn: api.vessels.list });
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ vesselId: "", originPort: "", destinationPort: "", distanceNm: "" });
 
   const createMut = useMutation({
-    mutationFn: (data: any) => api.routes.create(data),
+    mutationFn: (data: Parameters<typeof api.routes.create>[0]) => api.routes.create(data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["routes"] }); setOpen(false); toast.success("Route created"); },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const deleteMut = useMutation({
@@ -106,7 +107,7 @@ export default function RoutePlanningPage() {
                 <Label>Vessel</Label>
                 <Select value={form.vesselId} onValueChange={v => setForm(p => ({ ...p, vesselId: v }))}>
                   <SelectTrigger><SelectValue placeholder="Select vessel" /></SelectTrigger>
-                  <SelectContent>{vessels.map((v: any) => <SelectItem key={v.id} value={String(v.id)}>{v.name}</SelectItem>)}</SelectContent>
+                  <SelectContent>{vessels.map((v) => <SelectItem key={v.id} value={String(v.id)}>{v.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -136,8 +137,8 @@ export default function RoutePlanningPage() {
         </Card>
       ) : (
         <div className="space-y-3">
-          {routes.map((route: any, i: number) => {
-            const vessel = vessels.find((v: any) => v.id === route.vesselId);
+          {routes.map((route, i) => {
+            const vessel = vessels.find((v) => v.id === route.vesselId);
             const isActive = route.status === "active";
             return (
               <Card key={route.id} className={`bg-card border-border hover:border-primary/20 transition-all duration-300 animate-fade-in-up stagger-${Math.min(i + 1, 8)} ${isActive ? "ring-1 ring-emerald-500/10" : ""}`}>
@@ -168,7 +169,7 @@ export default function RoutePlanningPage() {
                         </div>
                         {route.waypoints && Array.isArray(route.waypoints) && route.waypoints.length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-1">
-                            {route.waypoints.map((wp: any, idx: number) => (
+                            {route.waypoints.map((wp, idx) => (
                               <span key={idx} className="text-xs bg-muted px-2 py-0.5 rounded flex items-center gap-1">
                                 <MapPin className="w-2.5 h-2.5 text-primary/60" />
                                 {wp.name || `Waypoint ${idx + 1}`}

@@ -16,7 +16,7 @@ import { sql, count, avg, desc, gte, eq, and } from "drizzle-orm";
 const helmRouter: IRouter = Router();
 
 helmRouter.use("/helm", authMiddleware({ required: true }));
-helmRouter.use("/helm", requireRole(["admin", "super_admin"]));
+helmRouter.use("/helm", requireRole("admin", "super_admin"));
 
 helmRouter.get("/helm/overview", async (_req: Request, res: Response) => {
   try {
@@ -33,7 +33,7 @@ helmRouter.get("/helm/overview", async (_req: Request, res: Response) => {
     ] = await Promise.allSettled([
       db.select({ total: count(), avgLatency: avg(agentUsageStats.latencyMs), avgTokens: avg(agentUsageStats.tokensUsed) })
         .from(agentUsageStats)
-        .where(gte(agentUsageStats.createdAt, since24h)),
+        .where(gte(agentUsageStats.recordedAt, since24h)),
 
       db.select({ status: atlasArtifactsTable.status, total: count() })
         .from(atlasArtifactsTable)
@@ -94,7 +94,7 @@ helmRouter.get("/helm/agent-runs", async (req: Request, res: Response) => {
       avgTokens: avg(agentUsageStats.tokensUsed),
     })
       .from(agentUsageStats)
-      .where(gte(agentUsageStats.createdAt, since))
+      .where(gte(agentUsageStats.recordedAt, since))
       .groupBy(agentUsageStats.agentId, agentUsageStats.agentName, agentUsageStats.domain)
       .orderBy(desc(count()));
 

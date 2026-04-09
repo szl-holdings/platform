@@ -79,7 +79,7 @@ outcomeGraphRouter.post("/outcome-graph/recommendations", async (req: Request, r
 
 outcomeGraphRouter.post("/outcome-graph/recommendations/:id/decision", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id ?? "0", 10);
+    const id = parseInt(String(req.params.id ?? "0"), 10);
     if (!id) return res.status(400).json({ error: "Invalid id" });
 
     const parsed = recordDecisionSchema.safeParse(req.body);
@@ -122,7 +122,7 @@ outcomeGraphRouter.post("/outcome-graph/recommendations/:id/decision", async (re
 
 outcomeGraphRouter.post("/outcome-graph/recommendations/:id/outcome", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id ?? "0", 10);
+    const id = parseInt(String(req.params.id ?? "0"), 10);
     if (!id) return res.status(400).json({ error: "Invalid id" });
 
     const parsed = recordOutcomeSchema.safeParse(req.body);
@@ -219,7 +219,7 @@ outcomeGraphRouter.get("/outcome-graph/stats", async (req: Request, res: Respons
   }
 });
 
-outcomeGraphRouter.post("/outcome-graph/learning-jobs", requireRole(["admin", "super_admin"]), async (req: Request, res: Response) => {
+outcomeGraphRouter.post("/outcome-graph/learning-jobs", requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
   try {
     const schema = z.object({
       domain: z.enum(["maritime", "security", "real_estate", "aiops", "research", "creative", "analytics", "infrastructure", "readiness", "general"]),
@@ -247,7 +247,7 @@ outcomeGraphRouter.post("/outcome-graph/learning-jobs", requireRole(["admin", "s
   }
 });
 
-outcomeGraphRouter.get("/outcome-graph/learning-jobs", requireRole(["admin", "super_admin"]), async (req: Request, res: Response) => {
+outcomeGraphRouter.get("/outcome-graph/learning-jobs", requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
     const orgId: number | null = user?.orgId ?? null;

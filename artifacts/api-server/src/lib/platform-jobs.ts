@@ -585,10 +585,18 @@ jobQueue.register(PLATFORM_JOB_TYPES.SALESFORCE_OPPORTUNITY_SYNC, async (job) =>
     const { db, alloySignalsTable, insertAlloySignalSchema } = await import("@szl-holdings/db");
     for (const signal of signals) {
       try {
+        const sfSeverityMap: Record<string, "critical" | "high" | "medium" | "low" | "info"> = {
+          critical: "critical",
+          warning: "medium",
+          high: "high",
+          medium: "medium",
+          low: "low",
+          info: "info",
+        };
         const data = insertAlloySignalSchema.parse({
           source: "salesforce",
-          sourceType: signal.type,
-          severity: signal.severity,
+          sourceType: "connector",
+          severity: sfSeverityMap[signal.severity ?? "info"] ?? "info",
           title: signal.title,
           body: signal.description,
           status: "new",
@@ -596,7 +604,7 @@ jobQueue.register(PLATFORM_JOB_TYPES.SALESFORCE_OPPORTUNITY_SYNC, async (job) =>
           workflowId: null,
           normalizedScore: null,
           valueAtRisk: signal.valueAtRisk,
-          metadata: signal.metadata,
+          metadata: { ...signal.metadata, signalType: signal.type },
         });
         await db.insert(alloySignalsTable).values(data);
         signalsIngested++;
@@ -661,10 +669,18 @@ jobQueue.register(PLATFORM_JOB_TYPES.JIRA_SPRINT_HEALTH_SCAN, async (job) => {
     const { db, alloySignalsTable, insertAlloySignalSchema } = await import("@szl-holdings/db");
     for (const signal of signals) {
       try {
+        const severityMap: Record<string, "critical" | "high" | "medium" | "low" | "info"> = {
+          critical: "critical",
+          warning: "medium",
+          high: "high",
+          medium: "medium",
+          low: "low",
+          info: "info",
+        };
         const data = insertAlloySignalSchema.parse({
           source: "jira",
-          sourceType: signal.type,
-          severity: signal.severity,
+          sourceType: "connector",
+          severity: severityMap[signal.severity] ?? "info",
           title: signal.title,
           body: signal.description,
           status: "new",
@@ -672,7 +688,7 @@ jobQueue.register(PLATFORM_JOB_TYPES.JIRA_SPRINT_HEALTH_SCAN, async (job) => {
           workflowId: null,
           normalizedScore: null,
           valueAtRisk: null,
-          metadata: { ...signal.metadata, projectKey: signal.projectKey, sprintName: signal.sprintName },
+          metadata: { ...signal.metadata, signalType: signal.type, projectKey: signal.projectKey, sprintName: signal.sprintName },
         });
         await db.insert(alloySignalsTable).values(data);
         signalsIngested++;

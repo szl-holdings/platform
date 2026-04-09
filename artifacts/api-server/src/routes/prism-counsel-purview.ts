@@ -9,6 +9,11 @@ import {
   pcPurviewScopeLinksTable,
   pcPurviewDiagnosticsTable,
   pcAuditEventsTable,
+  type PcPurviewCaseLink,
+  type PcPurviewHoldAwareness,
+  type PcPurviewExportHandoff,
+  type PcPurviewScopeLink,
+  type PcPurviewDiagnostic,
 } from "@szl-holdings/db";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
@@ -106,7 +111,7 @@ router.get("/purview/status", authMiddleware({ required: false }), async (_req: 
 router.get("/purview/case-links", authMiddleware({ required: false }), async (req: Request, res: Response) => {
   try {
     const orgId = Number(req.query.orgId ?? 1);
-    let links;
+    let links: PcPurviewCaseLink[] = [];
     try {
       links = await db.select().from(pcPurviewCaseLinksTable).where(eq(pcPurviewCaseLinksTable.orgId, orgId)).orderBy(desc(pcPurviewCaseLinksTable.createdAt));
     } catch { links = []; }
@@ -118,7 +123,7 @@ router.get("/purview/case-links", authMiddleware({ required: false }), async (re
 router.get("/purview/hold-awareness", authMiddleware({ required: false }), async (req: Request, res: Response) => {
   try {
     const orgId = Number(req.query.orgId ?? 1);
-    let holds;
+    let holds: PcPurviewHoldAwareness[] = [];
     try {
       holds = await db.select().from(pcPurviewHoldAwarenessTable).where(eq(pcPurviewHoldAwarenessTable.orgId, orgId)).orderBy(desc(pcPurviewHoldAwarenessTable.createdAt));
     } catch { holds = []; }
@@ -130,7 +135,7 @@ router.get("/purview/hold-awareness", authMiddleware({ required: false }), async
 router.get("/purview/export-handoffs", authMiddleware({ required: false }), async (req: Request, res: Response) => {
   try {
     const orgId = Number(req.query.orgId ?? 1);
-    let handoffs;
+    let handoffs: PcPurviewExportHandoff[] = [];
     try {
       handoffs = await db.select().from(pcPurviewExportHandoffsTable).where(eq(pcPurviewExportHandoffsTable.orgId, orgId)).orderBy(desc(pcPurviewExportHandoffsTable.createdAt));
     } catch { handoffs = []; }
@@ -143,7 +148,7 @@ router.get("/purview/scope-links", authMiddleware({ required: false }), async (r
   try {
     const orgId = Number(req.query.orgId ?? 1);
     const matterId = req.query.matterId ? Number(req.query.matterId) : undefined;
-    let scopeLinks;
+    let scopeLinks: PcPurviewScopeLink[] = [];
     try {
       const q = matterId
         ? db.select().from(pcPurviewScopeLinksTable).where(and(eq(pcPurviewScopeLinksTable.orgId, orgId), eq(pcPurviewScopeLinksTable.matterId, matterId)))
@@ -158,7 +163,7 @@ router.get("/purview/scope-links", authMiddleware({ required: false }), async (r
 router.get("/purview/diagnostics", authMiddleware({ required: false }), async (req: Request, res: Response) => {
   try {
     const orgId = Number(req.query.orgId ?? 1);
-    let diagnostics;
+    let diagnostics: PcPurviewDiagnostic[] = [];
     try {
       diagnostics = await db.select().from(pcPurviewDiagnosticsTable).where(eq(pcPurviewDiagnosticsTable.orgId, orgId)).orderBy(desc(pcPurviewDiagnosticsTable.checkedAt));
     } catch { diagnostics = []; }

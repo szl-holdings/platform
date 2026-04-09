@@ -3,6 +3,36 @@ import { Radio, Zap, CheckCircle2, AlertTriangle, Activity, TrendingUp } from "l
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 
+interface SignalForgeRun {
+  id: number;
+  orgId: number;
+  sourceId: number | null;
+  stage: string;
+  inputCount: number | null;
+  outputCount: number | null;
+  rejectedCount: number | null;
+  contradictionsFound: number | null;
+  qualityScoreAvg: number | null;
+  durationMs: number | null;
+  startedAt: string;
+  completedAt: string | null;
+  createdAt: string;
+}
+
+interface DataProductScore {
+  id: number;
+  matterId: number | null;
+  product: string;
+  score: number;
+  priorScore: number | null;
+  movement: string;
+  confidence: number | null;
+  computedAt: string;
+}
+
+interface SignalForgeRunsResponse { runs: SignalForgeRun[] }
+interface DataProductsResponse { scores: DataProductScore[] }
+
 const DATA_PRODUCTS = [
   { id: "insurer_pressure_index", label: "Insurer Pressure Index", description: "Blends insurer response patterns, reservation history, and adjuster behavior signals", color: "#c45a4a" },
   { id: "venue_velocity_index", label: "Venue Velocity Index", description: "Court/venue settlement and verdict velocity based on county and judge-level outcomes", color: "#4a90b8" },
@@ -15,26 +45,20 @@ const DATA_PRODUCTS = [
 export default function SignalForgePage() {
   const [view, setView] = useState<"forge" | "data_products">("forge");
 
-  const { data: runsData, isLoading } = useQuery({
+  const { data: runsData, isLoading } = useQuery<SignalForgeRunsResponse>({
     queryKey: ["signal-forge-runs"],
-    queryFn: async () => {
-      const res = await apiRequest("GET", "/api/prism-counsel/signal-forge/runs");
-      return res.json();
-    },
+    queryFn: () => apiRequest<SignalForgeRunsResponse>("GET", "/api/prism-counsel/signal-forge/runs"),
   });
 
-  const { data: dataProductsData } = useQuery({
+  const { data: dataProductsData } = useQuery<DataProductsResponse>({
     queryKey: ["data-products"],
-    queryFn: async () => {
-      const res = await apiRequest("GET", "/api/prism-counsel/data-products");
-      return res.json();
-    },
+    queryFn: () => apiRequest<DataProductsResponse>("GET", "/api/prism-counsel/data-products"),
     enabled: view === "data_products",
   });
 
-  const runs = runsData?.data?.runs ?? [];
-  const scores = dataProductsData?.data?.scores ?? [];
-  const scoresByProduct: Record<string, any[]> = {};
+  const runs: SignalForgeRun[] = runsData?.runs ?? [];
+  const scores: DataProductScore[] = dataProductsData?.scores ?? [];
+  const scoresByProduct: Record<string, DataProductScore[]> = {};
   for (const s of scores) scoresByProduct[s.product] = [...(scoresByProduct[s.product] ?? []), s];
 
   const PIPELINE_STAGES = [
@@ -105,7 +129,7 @@ export default function SignalForgePage() {
               <div className="text-xs text-slate-500">No signal forge runs yet. Initialize worldline sources first.</div>
             )}
             <div className="space-y-2">
-              {runs.slice(0, 10).map((run: any, i: number) => (
+              {runs.slice(0, 10).map((run, i) => (
                 <div key={i} className="flex items-center justify-between py-2 border-b border-white/[0.04] last:border-0">
                   <div>
                     <div className="text-xs text-slate-200 capitalize">{run.stage}</div>

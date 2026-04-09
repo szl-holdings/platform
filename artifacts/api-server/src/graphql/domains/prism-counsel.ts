@@ -364,7 +364,7 @@ export const prismCounselResolvers = {
     pcProofChainEntries: async (_: unknown, { matterId }: { matterId: number }) => {
       try {
         const { pcProofChainEntriesTable } = await import("@szl-holdings/db");
-        return await db.select().from(pcProofChainEntriesTable).where(eq(pcProofChainEntriesTable.matterId, matterId)).orderBy(desc(pcProofChainEntriesTable.generatedAt)).limit(50);
+        return await db.select().from(pcProofChainEntriesTable).where(eq(pcProofChainEntriesTable.matterId, matterId)).orderBy(desc(pcProofChainEntriesTable.generationTimestamp)).limit(50);
       } catch { return []; }
     },
 

@@ -71,7 +71,7 @@ router.get("/today", async (_req: Request, res: Response) => {
       };
     });
 
-    res.json({
+    return res.json({
       asOf: new Date().toISOString(),
       changedSinceYesterday: recentChanges.length,
       mattersNeedingAttention,
@@ -106,43 +106,43 @@ router.get("/today", async (_req: Request, res: Response) => {
     });
   } catch (err: any) {
     logger.error({ err }, "Error building Today view");
-    res.status(500).json({ error: "Failed to build Today view" });
+    return res.status(500).json({ error: "Failed to build Today view" });
   }
 });
 
 router.get("/today/brief", async (_req: Request, res: Response) => {
   try {
     const brief = await pilotChangeTracker.getLatestBrief(ORG_ID, 1);
-    res.json({ brief });
+    return res.json({ brief });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to fetch brief" });
+    return res.status(500).json({ error: "Failed to fetch brief" });
   }
 });
 
 router.post("/today/brief/generate", async (_req: Request, res: Response) => {
   try {
     const brief = await pilotChangeTracker.generateMorningBrief(ORG_ID, 1);
-    res.json({ brief });
+    return res.json({ brief });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to generate brief" });
+    return res.status(500).json({ error: "Failed to generate brief" });
   }
 });
 
 router.get("/today/quiet-risks", async (_req: Request, res: Response) => {
   try {
     const risks = await pilotChangeTracker.getQuietRisks(ORG_ID);
-    res.json({ risks });
+    return res.json({ risks });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to fetch quiet risks" });
+    return res.status(500).json({ error: "Failed to fetch quiet risks" });
   }
 });
 
 router.post("/today/detect-risks", async (_req: Request, res: Response) => {
   try {
     const newRisks = await pilotChangeTracker.detectQuietRisks(ORG_ID);
-    res.json({ detected: newRisks.length, risks: newRisks });
+    return res.json({ detected: newRisks.length, risks: newRisks });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to detect risks" });
+    return res.status(500).json({ error: "Failed to detect risks" });
   }
 });
 
@@ -150,24 +150,24 @@ router.get("/today/next-actions", async (req: Request, res: Response) => {
   try {
     const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;
     const actions = await pilotChangeTracker.getNextActions(ORG_ID, matterId);
-    res.json({ actions });
+    return res.json({ actions });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to fetch next actions" });
+    return res.status(500).json({ error: "Failed to fetch next actions" });
   }
 });
 
 router.post("/today/next-actions/:id/complete", async (req: Request, res: Response) => {
   try {
-    const result = await pilotChangeTracker.completeAction(ORG_ID, parseInt(req.params.id));
-    res.json({ action: result[0] });
+    const result = await pilotChangeTracker.completeAction(ORG_ID, parseInt(String(req.params.id ?? "0"), 10));
+    return res.json({ action: result[0] });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to complete action" });
+    return res.status(500).json({ error: "Failed to complete action" });
   }
 });
 
 router.get("/matter-desk/:id", async (req: Request, res: Response) => {
   try {
-    const matterId = parseInt(req.params.id);
+    const matterId = parseInt(String(req.params.id ?? "0"), 10);
     const yesterday = new Date(Date.now() - 48 * 60 * 60 * 1000);
 
     const [matter, changes, deadlines, reviews, signoffs, forecasts, quietRisks, nextActions] = await Promise.all([
@@ -187,7 +187,7 @@ router.get("/matter-desk/:id", async (req: Request, res: Response) => {
     const newComms = changes.filter(c => c.changeType === "new_communication");
     const newFiles = changes.filter(c => c.changeType === "new_file");
 
-    res.json({
+    return res.json({
       matter: { id: m.id, title: m.title, caseNumber: m.caseNumber, status: m.status, jurisdiction: m.jurisdiction, healthScore: m.healthScore },
       lastChanges: changes.slice(0, 10).map(c => ({ type: c.changeType, title: c.title, summary: c.summary, severity: c.severity, createdAt: c.createdAt })),
       commsSummary: { recent: newComms.length, latest: newComms[0]?.summary },
@@ -202,7 +202,7 @@ router.get("/matter-desk/:id", async (req: Request, res: Response) => {
     });
   } catch (err: any) {
     logger.error({ err }, "Error building matter desk");
-    res.status(500).json({ error: "Failed to build matter desk" });
+    return res.status(500).json({ error: "Failed to build matter desk" });
   }
 });
 
@@ -229,7 +229,7 @@ router.get("/what-changed", async (req: Request, res: Response) => {
       });
     }
 
-    res.json({
+    return res.json({
       since: since.toISOString(),
       totalChanges: changes.length,
       byType: grouped,
@@ -247,7 +247,7 @@ router.get("/what-changed", async (req: Request, res: Response) => {
       ],
     });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to fetch changes" });
+    return res.status(500).json({ error: "Failed to fetch changes" });
   }
 });
 
@@ -256,9 +256,9 @@ router.post("/what-changed/mark-read", async (req: Request, res: Response) => {
     const { ids } = req.body;
     if (!ids?.length) return res.status(400).json({ error: "ids required" });
     await pilotChangeTracker.markRead(ORG_ID, ids);
-    res.json({ marked: ids.length });
+    return res.json({ marked: ids.length });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to mark read" });
+    return res.status(500).json({ error: "Failed to mark read" });
   }
 });
 
@@ -267,47 +267,47 @@ router.get("/reviews", async (req: Request, res: Response) => {
     const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;
     const state = req.query.state as string | undefined;
     const reviews = await pilotReview.getReviews(ORG_ID, { matterId, state });
-    res.json({ reviews });
+    return res.json({ reviews });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to fetch reviews" });
+    return res.status(500).json({ error: "Failed to fetch reviews" });
   }
 });
 
 router.get("/reviews/:id", async (req: Request, res: Response) => {
   try {
-    const review = await pilotReview.getReview(ORG_ID, parseInt(req.params.id));
+    const review = await pilotReview.getReview(ORG_ID, parseInt(String(req.params.id ?? "0"), 10));
     if (!review) return res.status(404).json({ error: "Review not found" });
-    res.json({ review });
+    return res.json({ review });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to fetch review" });
+    return res.status(500).json({ error: "Failed to fetch review" });
   }
 });
 
 router.post("/reviews", async (req: Request, res: Response) => {
   try {
     const review = await pilotReview.createReview(ORG_ID, req.body);
-    res.json({ review });
+    return res.json({ review });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to create review" });
+    return res.status(500).json({ error: "Failed to create review" });
   }
 });
 
 router.patch("/reviews/:id/state", async (req: Request, res: Response) => {
   try {
     const { state } = req.body;
-    const review = await pilotReview.updateReviewState(ORG_ID, parseInt(req.params.id), state, 1);
-    res.json({ review });
+    const review = await pilotReview.updateReviewState(ORG_ID, parseInt(String(req.params.id ?? "0"), 10), state, 1);
+    return res.json({ review });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to update review state" });
+    return res.status(500).json({ error: "Failed to update review state" });
   }
 });
 
 router.post("/reviews/:id/submit-signoff", async (req: Request, res: Response) => {
   try {
-    const signoff = await pilotReview.submitForSignoff(ORG_ID, parseInt(req.params.id), 1);
-    res.json({ signoff });
+    const signoff = await pilotReview.submitForSignoff(ORG_ID, parseInt(String(req.params.id ?? "0"), 10), 1);
+    return res.json({ signoff });
   } catch (err: any) {
-    res.status(500).json({ error: err.message || "Failed to submit for signoff" });
+    return res.status(500).json({ error: err.message || "Failed to submit for signoff" });
   }
 });
 
@@ -315,18 +315,18 @@ router.get("/signoffs", async (req: Request, res: Response) => {
   try {
     const status = req.query.status as string | undefined;
     const signoffs = await pilotSignoff.getAll(ORG_ID, { status });
-    res.json({ signoffs });
+    return res.json({ signoffs });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to fetch signoffs" });
+    return res.status(500).json({ error: "Failed to fetch signoffs" });
   }
 });
 
 router.get("/signoffs/pending", async (_req: Request, res: Response) => {
   try {
     const signoffs = await pilotSignoff.getPending(ORG_ID);
-    res.json({ signoffs });
+    return res.json({ signoffs });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to fetch pending signoffs" });
+    return res.status(500).json({ error: "Failed to fetch pending signoffs" });
   }
 });
 
@@ -334,10 +334,10 @@ router.post("/signoffs/:id/resolve", async (req: Request, res: Response) => {
   try {
     const { decision } = req.body;
     if (!["approved", "rejected"].includes(decision)) return res.status(400).json({ error: "decision must be approved or rejected" });
-    const result = await pilotSignoff.resolve(ORG_ID, parseInt(req.params.id), decision, 1);
-    res.json({ signoff: result });
+    const result = await pilotSignoff.resolve(ORG_ID, parseInt(String(req.params.id ?? "0"), 10), decision, 1);
+    return res.json({ signoff: result });
   } catch (err: any) {
-    res.status(500).json({ error: err.message || "Failed to resolve signoff" });
+    return res.status(500).json({ error: err.message || "Failed to resolve signoff" });
   }
 });
 
@@ -345,56 +345,56 @@ router.get("/exports", async (req: Request, res: Response) => {
   try {
     const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;
     const exports = await pilotExport.getExports(ORG_ID, { matterId });
-    res.json({ exports });
+    return res.json({ exports });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to fetch exports" });
+    return res.status(500).json({ error: "Failed to fetch exports" });
   }
 });
 
 router.post("/exports", async (req: Request, res: Response) => {
   try {
     const exp = await pilotExport.generateExport(ORG_ID, { ...req.body, generatedBy: 1 });
-    res.json({ export: exp });
+    return res.json({ export: exp });
   } catch (err: any) {
-    res.status(500).json({ error: err.message || "Failed to generate export" });
+    return res.status(500).json({ error: err.message || "Failed to generate export" });
   }
 });
 
 router.get("/exports/:id", async (req: Request, res: Response) => {
   try {
-    const exp = await pilotExport.getExport(ORG_ID, parseInt(req.params.id));
+    const exp = await pilotExport.getExport(ORG_ID, parseInt(String(req.params.id ?? "0"), 10));
     if (!exp) return res.status(404).json({ error: "Export not found" });
     await pilotExport.logAccess(ORG_ID, exp.id, 1);
-    res.json({ export: exp });
+    return res.json({ export: exp });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to fetch export" });
+    return res.status(500).json({ error: "Failed to fetch export" });
   }
 });
 
 router.get("/exports/:id/content", async (req: Request, res: Response) => {
   try {
-    const content = await pilotExport.buildDocxContent(ORG_ID, parseInt(req.params.id));
-    res.json(content);
+    const content = await pilotExport.buildDocxContent(ORG_ID, parseInt(String(req.params.id ?? "0"), 10));
+    return res.json(content);
   } catch (err: any) {
-    res.status(500).json({ error: err.message || "Failed to build export content" });
+    return res.status(500).json({ error: err.message || "Failed to build export content" });
   }
 });
 
 router.post("/ingest/email", async (req: Request, res: Response) => {
   try {
     const job = await pilotIngestion.ingestEmail(ORG_ID, req.body);
-    res.json({ job });
+    return res.json({ job });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to ingest email" });
+    return res.status(500).json({ error: "Failed to ingest email" });
   }
 });
 
 router.post("/ingest/file", async (req: Request, res: Response) => {
   try {
     const job = await pilotIngestion.ingestFile(ORG_ID, req.body);
-    res.json({ job });
+    return res.json({ job });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to ingest file" });
+    return res.status(500).json({ error: "Failed to ingest file" });
   }
 });
 
@@ -403,9 +403,9 @@ router.get("/admin/jobs", async (req: Request, res: Response) => {
     const status = req.query.status as string | undefined;
     const jobs = await pilotIngestion.getJobs(ORG_ID, { status });
     const stats = await pilotIngestion.getJobStats(ORG_ID);
-    res.json({ jobs, stats });
+    return res.json({ jobs, stats });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to fetch jobs" });
+    return res.status(500).json({ error: "Failed to fetch jobs" });
   }
 });
 
@@ -413,9 +413,9 @@ router.get("/admin/connectors", async (_req: Request, res: Response) => {
   try {
     const connectors = await db.select().from(pcConnectorAccountsTable)
       .where(eq(pcConnectorAccountsTable.orgId, ORG_ID));
-    res.json({ connectors });
+    return res.json({ connectors });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to fetch connectors" });
+    return res.status(500).json({ error: "Failed to fetch connectors" });
   }
 });
 
@@ -429,7 +429,7 @@ router.get("/admin/health", async (_req: Request, res: Response) => {
       db.select().from(pcWordExportsTable).where(eq(pcWordExportsTable.orgId, ORG_ID)).orderBy(desc(pcWordExportsTable.createdAt)).limit(10),
     ]);
 
-    res.json({
+    return res.json({
       connectors: connectors.map(c => ({ type: c.connectorType, status: c.status, lastSync: c.lastSyncAt })),
       jobs: jobStats,
       reviewBacklog: pendingReviews.length,
@@ -437,13 +437,13 @@ router.get("/admin/health", async (_req: Request, res: Response) => {
       recentExports: recentExports.length,
     });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to fetch admin health" });
+    return res.status(500).json({ error: "Failed to fetch admin health" });
   }
 });
 
 router.get("/forecasts/:matterId", async (req: Request, res: Response) => {
   try {
-    const matterId = parseInt(req.params.matterId);
+    const matterId = parseInt(String(req.params.matterId ?? "0"), 10);
     const forecasts = await db.select().from(pcForecastsTable)
       .where(eq(pcForecastsTable.matterId, matterId))
       .orderBy(desc(pcForecastsTable.createdAt));
@@ -451,9 +451,9 @@ router.get("/forecasts/:matterId", async (req: Request, res: Response) => {
     const pilotTypes = ["deadline_breach_risk", "demand_readiness", "communication_silence_risk", "chronology_integrity_risk", "ai_defensibility_score"];
     const filtered = forecasts.filter(f => pilotTypes.includes(f.forecastType));
 
-    res.json({ forecasts: filtered });
+    return res.json({ forecasts: filtered });
   } catch (err: any) {
-    res.status(500).json({ error: "Failed to fetch forecasts" });
+    return res.status(500).json({ error: "Failed to fetch forecasts" });
   }
 });
 

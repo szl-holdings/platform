@@ -189,7 +189,7 @@ export default function CopilotWorkbenchV2() {
         sessionId = session.id;
         setActiveSessionId(session.id);
       }
-      await sendMessage.mutateAsync({ sessionId, content: userMsg });
+      await sendMessage.mutateAsync({ sessionId: sessionId!, content: userMsg });
     } catch {
       const actionId = selectedAction;
       const demoResponse = (actionId && DEMO_RESPONSES[actionId]) ||

@@ -215,7 +215,7 @@ export interface ShipmentRecord {
   value: number;
   onTimeScore?: number;
   customerSatisfaction?: number;
-  demurrageRisk?: number;
+  demurrageRisk?: string;
 }
 
 export interface EventLog {

@@ -65,12 +65,20 @@ export class PilotChangeTracker {
       return { matterId: mid, changeCount: changes.length, types: [...new Set(changes.map(c => c.changeType))] };
     });
 
-    const upcomingDeadlines = await db.select().from(pcDeadlinesTable)
+    const upcomingDeadlines = await db.select({
+      id: pcDeadlinesTable.id,
+      matterId: pcDeadlinesTable.matterId,
+      title: pcDeadlinesTable.title,
+      dueDate: pcDeadlinesTable.dueDate,
+      priority: pcDeadlinesTable.priority,
+      status: pcDeadlinesTable.status,
+    }).from(pcDeadlinesTable)
+      .innerJoin(pcMattersTable, eq(pcDeadlinesTable.matterId, pcMattersTable.id))
       .where(and(
-        eq(pcDeadlinesTable.orgId as any, orgId),
+        eq(pcMattersTable.orgId, orgId),
         sql`${pcDeadlinesTable.dueDate} <= ${tenDays}`,
         sql`${pcDeadlinesTable.dueDate} >= NOW()`,
-        eq(pcDeadlinesTable.status, "active" as any)
+        eq(pcDeadlinesTable.status, "pending")
       ))
       .orderBy(pcDeadlinesTable.dueDate)
       .limit(20);
