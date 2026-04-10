@@ -35,13 +35,15 @@ export function CookieBanner({ privacyUrl = "/legal/privacy", accentColor = "#d4
   const { consent, accept, decline } = useCookieConsent();
   const [visible, setVisible] = useState(false);
 
+  const isDemo = typeof window !== "undefined" && window.location.search.includes("demo=true");
+
   useEffect(() => {
-    if (consent === null) {
+    if (consent === null && !isDemo) {
       const t = setTimeout(() => setVisible(true), 800);
       return () => clearTimeout(t);
     }
     return undefined;
-  }, [consent]);
+  }, [consent, isDemo]);
 
   if (!visible || consent !== null) return null;
 
