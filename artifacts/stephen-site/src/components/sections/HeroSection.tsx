@@ -199,10 +199,11 @@ function SystemStatusBar() {
               style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}
             >
               <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color, boxShadow: `0 0 6px ${color}60` }} />
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="text-[10px] font-semibold truncate" style={{ color: "rgba(255,255,255,0.6)" }}>{app.name}</p>
                 <p className="text-[8px] font-mono truncate" style={{ color: "rgba(255,255,255,0.2)" }}>{app.description}</p>
               </div>
+              <span className="text-[9px] font-mono flex-shrink-0" style={{ color: `${color}99` }}>99.9%</span>
             </motion.div>
           );
         })}
