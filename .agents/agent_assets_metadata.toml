@@ -365,3 +365,15 @@ id = "EJ7YZnb5--WuElFR7Zgmb"
 uri = "file://export/linkedin-github-upgrade-post.txt"
 type = "text"
 title = "LinkedIn Post — Updated (no public code language)"
+
+[[outputs]]
+id = "o9_YhBUN8ifZq1PD1dQn1"
+uri = "file://export/SZL-LinkedIn-GitHub-Showcase.pdf"
+type = "pdf"
+title = "SZL LinkedIn + GitHub Showcase PDF"
+
+[[outputs]]
+id = "kzlpafjbfJ0kNHTqNdlfx"
+uri = "file://export/linkedin-github-showcase-post.txt"
+type = "text"
+title = "LinkedIn Post — Ready to Copy & Paste"

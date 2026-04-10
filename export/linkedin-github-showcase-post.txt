@@ -1,0 +1,52 @@
+LINKEDIN POST — GitHub + Platform Showcase (April 2026)
+Copy everything below the line and paste into LinkedIn.
+————————————————————————————————————————
+
+Just finished a major upgrade to the SZL Holdings GitHub presence — and I wanted to share what we've built.
+
+One founder. Six platforms. 16 live applications. One TypeScript monorepo.
+
+Since the last update, here's what changed:
+
+— Full visual showcase on both GitHub profiles (personal + organization)
+— Real screenshots of every platform, embedded directly in the READMEs
+— Architecture documentation, tech stack, and operating philosophy
+— All source code secured in private repos. No downloads, no releases, no leaks.
+— Buyer memo and investor-ready documentation
+
+The platforms, all live and deployed:
+
+Vessels — Maritime fleet command, AIS analytics, voyage management, sanctions screening
+Aegis — Unified SOC command, threat correlation, CVE tracking, incident governance
+Terra — Real estate market intelligence, distress engine, deal pipeline
+Lyte — Business observability, execution risk detection, ownership drift analysis
+PRISM Counsel — Legal matter command, deadline tracking, pressure scoring, proof chains
+Carlota Jo — Private advisory coordination for luxury residential environments
+
+The numbers:
+446 database tables
+1,618+ API endpoints
+8 web applications + 8 mobile apps
+Full TypeScript — zero JavaScript
+One compounding architecture
+
+Every platform shares the same infrastructure. One improvement benefits all six verticals.
+
+The principles haven't changed:
+— AI cannot execute without human confirmation
+— Every recommendation includes source citations and confidence scores
+— Failures surface immediately. They never hide.
+— Shared fabric, domain specialization
+
+Check it out:
+
+GitHub (personal): github.com/stephenlutar2-hash
+GitHub (organization): github.com/szl-holdings
+Platform: szlholdings.com
+Writing: szlholdings.substack.com
+
+Open to design partner conversations, enterprise evaluation, and investment introductions.
+
+stephenlutar2@gmail.com
+
+#SZLHoldings #GitHub #AI #AIGovernance #TypeScript #StartupFounder #EnterpriseAI #BusinessObservability #MaritimeTech #PropTech #LegalTech #Cybersecurity #BuildInPublic #SoloFounder
