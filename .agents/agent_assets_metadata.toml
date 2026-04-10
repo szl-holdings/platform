@@ -377,3 +377,9 @@ id = "kzlpafjbfJ0kNHTqNdlfx"
 uri = "file://export/linkedin-github-showcase-post.txt"
 type = "text"
 title = "LinkedIn Post — Ready to Copy & Paste"
+
+[[outputs]]
+id = "BBy-oHCVzMkKNuolUtHM7"
+uri = "file://export/SZL-LinkedIn-Investor-Guide.pdf"
+type = "pdf"
+title = "SZL Holdings — LinkedIn Investor Posting Guide"
