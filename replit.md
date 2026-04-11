@@ -16,7 +16,7 @@ Do not make changes to the file `Y`.
 The platform is built as a pnpm monorepo utilizing Node.js 24 and TypeScript 5.9.
 - **Frontend:** React, Vite, TanStack React Query, Wouter, Tailwind CSS, Framer Motion, Lucide React, Recharts. Internationalization is handled by `react-i18next` with RTL support.
 - **Backend:** Express 5, Drizzle ORM, Zod validation, pino logging.
-- **Database:** PostgreSQL with Drizzle ORM (446 tables) managing multiple schemas including CMS, product, client portal, and organization membership.
+- **Database:** PostgreSQL with Drizzle ORM (375 tables), pgvector extension for AI embeddings, managing multiple schemas including CMS, product, client portal, organization membership, and AI agent state.
 - **Authentication:** Replit Auth (OIDC/PKCE), session-based with cookie+Bearer token, 7-role RBAC.
 - **API Codegen:** Orval from OpenAPI specification.
 - **Bundling:** esbuild (CJS) and Vite.
@@ -39,6 +39,17 @@ Each platform has a distinct visual identity:
 - **REST API:** Modular Express routes using Zod and Drizzle, located in `artifacts/api-server`. Includes robust security features.
 - **GraphQL API:** A unified API mounted at `/api/graphql` using Apollo Server v5 and `graphql-ws` for subscriptions, with 9 domain modules.
 - **MCP Server:** Model Context Protocol server at `/api/mcp` for AI tool orchestration, exposing 20 tools, 4 resources, and 5 prompt templates via HTTP+SSE.
+- **AI Orchestrator API:** Multi-agent orchestration endpoints at `/api/ai/orchestrator/` including chat, agent runs, RAG knowledge base, multi-step workflows, and cross-platform intelligence.
+
+### Agentic AI Infrastructure
+The platform includes a full agentic AI stack:
+- **LLM Gateway:** Multi-provider AI gateway with intelligent routing across OpenAI GPT-5.2, Anthropic Claude, Google Gemini, and Mixtral. Supports routing strategies (fastest, cheapest, preferred, fallback), provider health tracking, and inference telemetry.
+- **7 Domain-Specific Agents:** Vessels (maritime intelligence), Aegis (cybersecurity defense), Lyte (AIOps command), Terra (real estate analysis), PRISM (legal counsel), Carlota Jo (advisory), and SZL Orchestrator (cross-platform command).
+- **Agent Orchestrator:** Multi-agent execution engine with tool calling, delegation between agents, conversation memory, and multi-step workflow orchestration.
+- **RAG Pipeline:** Document ingestion, chunking, vector embedding (pgvector), and semantic similarity search for knowledge retrieval.
+- **Cross-Platform Tools:** Agents can delegate tasks, query across platforms, generate executive briefings, and access portfolio-wide intelligence.
+- **Database Tables:** ai_embeddings (vector store), ai_conversations, ai_messages, ai_agent_configs, ai_tool_executions, ai_workflows, agent_knowledge, agent_runs.
+- **AI Integrations:** OpenAI and Anthropic provisioned via Replit AI Integrations proxy (no API keys required).
 
 ### Platform Architecture & Features
 The platform consists of 13 interconnected applications sharing authentication and design.

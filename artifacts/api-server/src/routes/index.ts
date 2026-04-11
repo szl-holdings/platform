@@ -117,6 +117,7 @@ import atlasRouter from "./atlas-artifacts";
 import helmRouter from "./helm-console";
 import telemetryRouter from "./telemetry";
 import crossAppHandoffsRouter from "./cross-app-handoffs";
+import { aiRouter as aiOrchestratorRouter } from "./ai-orchestrator";
 
 const router: IRouter = Router();
 
@@ -360,6 +361,8 @@ router.use(feedbackRouter);
 router.use("/ai", _readLimiter);
 router.use("/ai/tools/execute", idempotencyMiddleware);
 router.use(aiEngineRouter);
+
+router.use("/ai/orchestrator", aiOrchestratorRouter);
 
 router.use("/analytics", _writeLimiter);
 router.use(analyticsRouter);

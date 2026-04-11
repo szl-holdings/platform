@@ -8,6 +8,11 @@ const layers = [
     items: ["Vessels", "Aegis", "Lyte", "Terra", "PRISM Counsel", "Carlota Jo", "SZL Holdings"],
   },
   {
+    label: "Agentic AI Layer",
+    color: "#A855F7",
+    items: ["7 Domain Agents", "Multi-Agent Orchestrator", "RAG Pipeline (pgvector)", "Cross-Platform Tool Use"],
+  },
+  {
     label: "Shared Services",
     color: "#00D4FF",
     items: ["API Server (1,618+ endpoints)", "Auth & RBAC", "Feature Flags", "Event Bus"],
@@ -15,12 +20,12 @@ const layers = [
   {
     label: "Intelligence Layer",
     color: "#22C55E",
-    items: ["Signal Processing", "PRISM Scoring", "ML Pipeline", "Anomaly Detection"],
+    items: ["Signal Processing", "LLM Gateway (GPT-5.2 / Claude / Gemini)", "ML Pipeline", "Anomaly Detection"],
   },
   {
     label: "Data Layer",
     color: "#F59E0B",
-    items: ["PostgreSQL (375 tables)", "Drizzle ORM", "Real-time Subscriptions", "Audit Trail"],
+    items: ["PostgreSQL (375 tables)", "Drizzle ORM", "Vector Embeddings", "Real-time Subscriptions"],
   },
   {
     label: "Infrastructure",
@@ -31,10 +36,11 @@ const layers = [
 
 const techStack = [
   { category: "Language", items: ["TypeScript", "Zero JavaScript"] },
+  { category: "AI / Agents", items: ["GPT-5.2", "Claude", "Gemini", "Multi-Agent Orchestration"] },
   { category: "Frontend", items: ["React", "Vite", "Tailwind CSS", "Framer Motion"] },
   { category: "Mobile", items: ["React Native", "Expo", "8 mobile apps"] },
   { category: "Backend", items: ["Node.js", "Express", "tRPC", "GraphQL"] },
-  { category: "Database", items: ["PostgreSQL", "Drizzle ORM", "375 tables"] },
+  { category: "Database", items: ["PostgreSQL", "pgvector", "Drizzle ORM", "375 tables"] },
   { category: "Infra", items: ["pnpm Monorepo", "Shared packages", "Feature flags"] },
 ];
 
