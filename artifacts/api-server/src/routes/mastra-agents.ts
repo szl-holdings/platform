@@ -6,6 +6,8 @@ import {
   getAgentMetrics, getAllAgentMetrics, getTraces,
   listAgentCards, getAgentCard, createTask, getTask, listTasks,
   createWorkflow, executeWorkflow, getWorkflow, listWorkflows, pauseWorkflow, cancelWorkflow,
+  runEvalSuite, runRedTeam, detectHallucinations, getRedTeamCatalog, getRedTeamCategories,
+  executeCompoundPipeline, buildAnalysisPipeline,
 } from "../lib/mastra/index.js";
 import { pool } from "@szl-holdings/db";
 import { logger } from "../lib/logger.js";
@@ -337,6 +339,108 @@ mastraRouter.post("/workflows/:workflowId/cancel", async (req: Request, res: Res
   }
 });
 
+mastraRouter.get("/eval/red-team/catalog", async (_req: Request, res: Response) => {
+  const catalog = getRedTeamCatalog();
+  const categories = getRedTeamCategories();
+  res.json({
+    catalog: catalog.map(a => ({
+      attackId: a.attackId,
+      category: a.category,
+      name: a.name,
+      severity: a.severity,
+      expectedBehavior: a.expectedBehavior,
+    })),
+    totalAttacks: catalog.length,
+    categories,
+    totalCategories: categories.length,
+    framework: "gray-swan-pattern",
+  });
+});
+
+mastraRouter.post("/eval/red-team/run", async (req: Request, res: Response) => {
+  try {
+    const { agentId, categories } = req.body;
+    if (!agentId) return res.status(400).json({ error: "agentId required" });
+    const agentRunner = async (id: string, message: string) => {
+      const start = Date.now();
+      const result = await runAgent(id, message, {});
+      return { response: result.response, latencyMs: Date.now() - start };
+    };
+    const result = await runRedTeam(agentId, agentRunner, categories);
+    res.json({
+      ...result,
+      framework: "gray-swan-pattern",
+      scoreLabel: result.score >= 0.95 ? "excellent" : result.score >= 0.8 ? "good" : result.score >= 0.6 ? "needs-improvement" : "vulnerable",
+    });
+  } catch (err: any) {
+    logger.error({ err }, "Red team run error");
+    res.status(500).json({ error: err.message });
+  }
+});
+
+mastraRouter.post("/eval/suite/run", async (req: Request, res: Response) => {
+  try {
+    const suite = req.body;
+    if (!suite.suiteId || !suite.agentId || !suite.testCases?.length) {
+      return res.status(400).json({ error: "suiteId, agentId, and testCases required" });
+    }
+    const agentRunner = async (id: string, message: string) => {
+      const start = Date.now();
+      const result = await runAgent(id, message, {});
+      return { response: result.response, latencyMs: Date.now() - start };
+    };
+    const result = await runEvalSuite(suite, agentRunner);
+    res.json({
+      ...result,
+      framework: "promptfoo-pattern",
+    });
+  } catch (err: any) {
+    logger.error({ err }, "Eval suite run error");
+    res.status(500).json({ error: err.message });
+  }
+});
+
+mastraRouter.post("/eval/hallucination", async (req: Request, res: Response) => {
+  try {
+    const { response, context, sources } = req.body;
+    if (!response || !context) return res.status(400).json({ error: "response and context required" });
+    const score = await detectHallucinations(response, context, sources);
+    res.json({
+      ...score,
+      framework: "vectara-hhem-pattern",
+      verdict: score.score >= 0.8 ? "grounded" : score.score >= 0.5 ? "partially-grounded" : "ungrounded",
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+mastraRouter.post("/compound/pipeline", async (req: Request, res: Response) => {
+  try {
+    const { pipeline, input } = req.body;
+    if (!pipeline || !input) return res.status(400).json({ error: "pipeline and input required" });
+    const context = { agentId: "compound-pipeline", sessionId: `pipe_${Date.now()}`, userId: "system", domain: "platform" };
+    const result = await executeCompoundPipeline(pipeline, input, context);
+    res.json({ ...result, framework: "fireworks-compound-pattern" });
+  } catch (err: any) {
+    logger.error({ err }, "Compound pipeline error");
+    res.status(500).json({ error: err.message });
+  }
+});
+
+mastraRouter.post("/compound/analyze", async (req: Request, res: Response) => {
+  try {
+    const { query, domains } = req.body;
+    if (!query) return res.status(400).json({ error: "query required" });
+    const pipeline = buildAnalysisPipeline(query, domains || ["portfolio", "technology", "operations"]);
+    const context = { agentId: "analysis-pipeline", sessionId: `analysis_${Date.now()}`, userId: "system", domain: "platform" };
+    const result = await executeCompoundPipeline(pipeline, { query }, context);
+    res.json({ ...result, framework: "fireworks-compound-pattern" });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 mastraRouter.get("/stats", async (_req: Request, res: Response) => {
   try {
     const [agentsResult, toolsResult, runsResult, threadsResult, tracesResult, a2aResult, workflowsResult, entitiesResult, relationsResult, evalsResult] = await Promise.all([
@@ -382,7 +486,24 @@ mastraRouter.get("/stats", async (_req: Request, res: Response) => {
         "cross-platform-delegation",
         "prompt-injection-defense",
         "pii-redaction",
+        "promptfoo-eval-suites",
+        "red-team-adversarial-testing",
+        "vectara-hallucination-detection",
+        "gray-swan-io-security",
+        "compound-ai-pipelines",
+        "fireworks-optimized-routing",
+        "okareo-synthetic-user-simulation",
+        "twelve-labs-multimodal-readiness",
       ],
+      nvidiaInceptionCapabilities: {
+        promptfoo: { status: "integrated", pattern: "eval-suites", attackTypes: getRedTeamCategories().length },
+        vectara: { status: "integrated", pattern: "hhem-hallucination-scoring" },
+        graySwan: { status: "integrated", pattern: "cygnal-io-filtering", attacks: getRedTeamCatalog().length },
+        fireworks: { status: "integrated", pattern: "compound-ai-pipelines" },
+        okareo: { status: "integrated", pattern: "synthetic-user-drivers" },
+        twelveLabs: { status: "architecture-ready", pattern: "multimodal-video-search" },
+        tavily: { status: "integrated", pattern: "agent-web-search-tool" },
+      },
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message });

@@ -6,3 +6,7 @@ export { createThread, storeMessage, getShortTermMemory, semanticRecall, storeKn
 export { emitTrace, recordEval, autoEvaluate, getAgentMetrics, getAllAgentMetrics, getTraces, initDefaultSlos } from "./agentops";
 export { registerAgentCard, getAgentCard, listAgentCards, createTask, updateTaskStatus, getTask, listTasks, initializeA2ACards } from "./a2a";
 export { createWorkflow, executeWorkflow, getWorkflow, listWorkflows, pauseWorkflow, cancelWorkflow } from "./durable-workflows";
+export { runEvalSuite, runRedTeam, detectHallucinations, getRedTeamCatalog, getRedTeamCategories } from "./eval-engine";
+export type { EvalSuite, EvalTestCase, EvalSuiteResult, EvalResult, RedTeamAttack, HallucinationScore } from "./eval-engine";
+export { executeCompoundPipeline, buildAnalysisPipeline } from "./compound-ai";
+export type { CompoundPipeline, CompoundStep, CompoundResult } from "./compound-ai";

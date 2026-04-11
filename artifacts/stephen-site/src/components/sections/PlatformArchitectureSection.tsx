@@ -10,7 +10,12 @@ const layers = [
   {
     label: "Agentic AI Layer",
     color: "#A855F7",
-    items: ["7 Domain Agents", "Mastra Orchestrator", "A2A Protocol (v0.3)", "Durable Workflows"],
+    items: ["7 Domain Agents", "Mastra Orchestrator", "A2A Protocol (v0.3)", "Durable Workflows", "Compound AI Pipelines"],
+  },
+  {
+    label: "AI Eval & Red Teaming",
+    color: "#F97316",
+    items: ["Promptfoo Eval Suites", "Gray Swan Red Teaming", "Okareo Synthetic Users", "20-Attack Threat Catalog"],
   },
   {
     label: "AI Memory & Knowledge",
@@ -18,9 +23,14 @@ const layers = [
     items: ["Three-Tier Memory", "Semantic Recall (pgvector)", "Knowledge Graph", "RAG Pipeline"],
   },
   {
-    label: "AI Safety & Ops",
+    label: "AI Safety & Grounding",
     color: "#F43F5E",
-    items: ["AgentOps Observability", "Zod Tool Validation", "Guardrails & PII Filter", "SLO Monitoring"],
+    items: ["Vectara HHEM Scoring", "Hallucination Detection", "Guardrails & PII Filter", "I/O Security Filtering"],
+  },
+  {
+    label: "AI Observability",
+    color: "#14B8A6",
+    items: ["AgentOps Traces", "SLO Monitoring", "Cost Tracking", "Quality Evals", "Latency Profiling"],
   },
   {
     label: "Shared Services",
@@ -30,7 +40,7 @@ const layers = [
   {
     label: "Intelligence Layer",
     color: "#22C55E",
-    items: ["Multi-Provider LLM Gateway", "GPT-5.2 / Claude / Gemini", "Cost-Optimized Routing", "Inference Telemetry"],
+    items: ["Multi-Provider LLM Gateway", "GPT-5.2 / Claude / Gemini", "Fireworks Optimized Routing", "Inference Telemetry"],
   },
   {
     label: "Data Layer",
@@ -47,12 +57,14 @@ const layers = [
 const techStack = [
   { category: "Language", items: ["TypeScript", "Zero JavaScript"] },
   { category: "AI Agents", items: ["Mastra Framework", "A2A Protocol", "MCP Server", "7 Domain Agents"] },
-  { category: "AI Infra", items: ["GPT-5.2", "Claude", "Gemini", "RAG + pgvector"] },
-  { category: "AI Safety", items: ["Guardrails", "Zod Validation", "AgentOps", "SLO Monitoring"] },
+  { category: "AI Infra", items: ["GPT-5.2", "Claude", "Gemini", "RAG + pgvector", "Compound AI"] },
+  { category: "AI Safety", items: ["Promptfoo Evals", "Gray Swan Red Team", "Vectara HHEM", "Okareo Drivers"] },
+  { category: "AI Ops", items: ["AgentOps", "SLO Monitoring", "Cost Tracking", "Trace Profiling"] },
   { category: "Frontend", items: ["React", "Vite", "Tailwind CSS", "Framer Motion"] },
   { category: "Mobile", items: ["React Native", "Expo", "8 mobile apps"] },
   { category: "Backend", items: ["Node.js", "Express", "GraphQL", "1,618+ endpoints"] },
   { category: "Database", items: ["PostgreSQL", "pgvector", "Knowledge Graph", "375+ tables"] },
+  { category: "NVIDIA Inception", items: ["Promptfoo", "Vectara", "Gray Swan", "Fireworks", "Tavily", "Twelve Labs"] },
 ];
 
 export function PlatformArchitectureSection() {
@@ -83,7 +95,7 @@ export function PlatformArchitectureSection() {
             </div>
             <div className="flex items-end">
               <p className="text-base font-light leading-relaxed" style={{ color: "rgba(255,255,255,0.38)" }}>
-                Every shared layer — auth, design system, observability, data pipelines — reduces the marginal cost of building the next product. The 7th platform costs a fraction of the 1st.
+                Every shared layer — auth, design system, observability, data pipelines — reduces the marginal cost of building the next product. NVIDIA Inception-grade AI safety, eval, and inference capabilities integrated across every agent.
               </p>
             </div>
           </div>
@@ -97,15 +109,15 @@ export function PlatformArchitectureSection() {
                   key={layer.label}
                   initial={{ opacity: 0, x: -20 }}
                   animate={isInView ? { opacity: 1, x: 0 } : {}}
-                  transition={{ duration: 0.5, delay: 0.2 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                  className="p-5 relative overflow-hidden"
+                  transition={{ duration: 0.5, delay: 0.2 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                  className="p-4 relative overflow-hidden"
                   style={{
                     background: "rgba(12,16,24,0.8)",
                     border: "1px solid rgba(255,255,255,0.05)",
                   }}
                 >
                   <div className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ background: layer.color }} />
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between mb-2.5">
                     <span className="text-[10px] font-bold tracking-[0.2em] uppercase" style={{ color: `${layer.color}99`, fontFamily: "'JetBrains Mono', monospace" }}>
                       {layer.label}
                     </span>
@@ -135,7 +147,7 @@ export function PlatformArchitectureSection() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={isInView ? { opacity: 1 } : {}}
-              transition={{ duration: 0.5, delay: 0.8 }}
+              transition={{ duration: 0.5, delay: 1.0 }}
               className="mt-3 flex items-center gap-2 px-4 py-3"
               style={{ background: "rgba(34,197,94,0.05)", border: "1px solid rgba(34,197,94,0.1)" }}
             >
@@ -160,15 +172,15 @@ export function PlatformArchitectureSection() {
               <span className="text-[10px] font-bold tracking-[0.2em] uppercase block mb-5" style={{ color: "rgba(255,255,255,0.25)" }}>
                 Tech Stack
               </span>
-              <div className="space-y-5">
+              <div className="space-y-4">
                 {techStack.map((group, i) => (
                   <motion.div
                     key={group.category}
                     initial={{ opacity: 0, x: 12 }}
                     animate={isInView ? { opacity: 1, x: 0 } : {}}
-                    transition={{ duration: 0.4, delay: 0.6 + i * 0.08 }}
+                    transition={{ duration: 0.4, delay: 0.6 + i * 0.06 }}
                   >
-                    <span className="text-[9px] font-mono font-bold tracking-[0.2em] uppercase block mb-2" style={{ color: "rgba(0,212,255,0.4)", fontFamily: "'JetBrains Mono', monospace" }}>
+                    <span className="text-[9px] font-mono font-bold tracking-[0.2em] uppercase block mb-1.5" style={{ color: "rgba(0,212,255,0.4)", fontFamily: "'JetBrains Mono', monospace" }}>
                       {group.category}
                     </span>
                     <div className="flex flex-wrap gap-1.5">
