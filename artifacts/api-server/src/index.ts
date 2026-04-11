@@ -172,6 +172,13 @@ server.listen(port, "0.0.0.0", () => {
     });
     scheduleIntelligenceRefresh();
   }, 5 * 60 * 1000);
+  import("./lib/mastra/index.js").then(({ initializeMastra }) => {
+    initializeMastra().catch(err => {
+      logger.warn({ err }, "[mastra] Initialization failed (non-fatal)");
+    });
+  }).catch(err => {
+    logger.warn({ err }, "[mastra] Module load failed (non-fatal)");
+  });
 });
 
 const SHUTDOWN_TIMEOUT_MS = 10_000;

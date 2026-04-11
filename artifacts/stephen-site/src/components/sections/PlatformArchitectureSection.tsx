@@ -10,7 +10,17 @@ const layers = [
   {
     label: "Agentic AI Layer",
     color: "#A855F7",
-    items: ["7 Domain Agents", "Multi-Agent Orchestrator", "RAG Pipeline (pgvector)", "Cross-Platform Tool Use"],
+    items: ["7 Domain Agents", "Mastra Orchestrator", "A2A Protocol (v0.3)", "Durable Workflows"],
+  },
+  {
+    label: "AI Memory & Knowledge",
+    color: "#EC4899",
+    items: ["Three-Tier Memory", "Semantic Recall (pgvector)", "Knowledge Graph", "RAG Pipeline"],
+  },
+  {
+    label: "AI Safety & Ops",
+    color: "#F43F5E",
+    items: ["AgentOps Observability", "Zod Tool Validation", "Guardrails & PII Filter", "SLO Monitoring"],
   },
   {
     label: "Shared Services",
@@ -20,12 +30,12 @@ const layers = [
   {
     label: "Intelligence Layer",
     color: "#22C55E",
-    items: ["Signal Processing", "LLM Gateway (GPT-5.2 / Claude / Gemini)", "ML Pipeline", "Anomaly Detection"],
+    items: ["Multi-Provider LLM Gateway", "GPT-5.2 / Claude / Gemini", "Cost-Optimized Routing", "Inference Telemetry"],
   },
   {
     label: "Data Layer",
     color: "#F59E0B",
-    items: ["PostgreSQL (375 tables)", "Drizzle ORM", "Vector Embeddings", "Real-time Subscriptions"],
+    items: ["PostgreSQL (375+ tables)", "Drizzle ORM", "Vector Embeddings", "Real-time Subscriptions"],
   },
   {
     label: "Infrastructure",
@@ -36,12 +46,13 @@ const layers = [
 
 const techStack = [
   { category: "Language", items: ["TypeScript", "Zero JavaScript"] },
-  { category: "AI / Agents", items: ["GPT-5.2", "Claude", "Gemini", "Multi-Agent Orchestration"] },
+  { category: "AI Agents", items: ["Mastra Framework", "A2A Protocol", "MCP Server", "7 Domain Agents"] },
+  { category: "AI Infra", items: ["GPT-5.2", "Claude", "Gemini", "RAG + pgvector"] },
+  { category: "AI Safety", items: ["Guardrails", "Zod Validation", "AgentOps", "SLO Monitoring"] },
   { category: "Frontend", items: ["React", "Vite", "Tailwind CSS", "Framer Motion"] },
   { category: "Mobile", items: ["React Native", "Expo", "8 mobile apps"] },
-  { category: "Backend", items: ["Node.js", "Express", "tRPC", "GraphQL"] },
-  { category: "Database", items: ["PostgreSQL", "pgvector", "Drizzle ORM", "375 tables"] },
-  { category: "Infra", items: ["pnpm Monorepo", "Shared packages", "Feature flags"] },
+  { category: "Backend", items: ["Node.js", "Express", "GraphQL", "1,618+ endpoints"] },
+  { category: "Database", items: ["PostgreSQL", "pgvector", "Knowledge Graph", "375+ tables"] },
 ];
 
 export function PlatformArchitectureSection() {

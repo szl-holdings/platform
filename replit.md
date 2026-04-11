@@ -45,10 +45,17 @@ Each platform has a distinct visual identity:
 The platform includes a full agentic AI stack:
 - **LLM Gateway:** Multi-provider AI gateway with intelligent routing across OpenAI GPT-5.2, Anthropic Claude, Google Gemini, and Mixtral. Supports routing strategies (fastest, cheapest, preferred, fallback), provider health tracking, and inference telemetry.
 - **7 Domain-Specific Agents:** Vessels (maritime intelligence), Aegis (cybersecurity defense), Lyte (AIOps command), Terra (real estate analysis), PRISM (legal counsel), Carlota Jo (advisory), and SZL Orchestrator (cross-platform command).
-- **Agent Orchestrator:** Multi-agent execution engine with tool calling, delegation between agents, conversation memory, and multi-step workflow orchestration.
+- **Mastra Agent Engine:** Production-grade agent framework with Zod-validated tool calling, input/output guardrails (prompt injection defense, PII redaction), and automatic quality evaluation.
+- **Three-Tier Memory:** In-context (session window), short-term (PostgresStore cross-turn persistence), long-term (pgvector semantic recall with similarity search).
+- **Knowledge Graph:** Entity-relation store for structured agent memory across domains, with graph traversal and semantic search.
+- **A2A Protocol (v0.3):** Agent-to-Agent protocol implementation with Agent Cards, task lifecycle management, and cross-agent discovery/invocation.
+- **AgentOps Observability:** Full trace spans (agent_run, tool_call, llm_inference, delegation, workflow_step, memory_recall, rag_query), auto-evaluation (quality, latency, cost), SLO monitoring.
+- **Durable Workflows:** Checkpoint-based workflow engine with DAG execution, parallel steps, retry logic, pause/cancel, and PostgreSQL-backed durability.
+- **Tool Safety:** All agent tools use Zod schemas for input validation, rate limiting, and permission scoping. Output schemas for contract enforcement.
 - **RAG Pipeline:** Document ingestion, chunking, vector embedding (pgvector), and semantic similarity search for knowledge retrieval.
-- **Cross-Platform Tools:** Agents can delegate tasks, query across platforms, generate executive briefings, and access portfolio-wide intelligence.
-- **Database Tables:** ai_embeddings (vector store), ai_conversations, ai_messages, ai_agent_configs, ai_tool_executions, ai_workflows, agent_knowledge, agent_runs.
+- **Cross-Platform Tools:** 6 Zod-validated tools: portfolio metrics, executive briefing, knowledge graph search, cross-domain analysis, agent delegation, semantic memory search.
+- **Database Tables:** ai_embeddings, ai_conversations, ai_messages, ai_agent_configs, ai_tool_executions, ai_workflows, agent_knowledge, agent_runs, agent_memory_threads, agent_memory_messages, agent_knowledge_entities, agent_knowledge_relations, agentops_traces, agentops_evals, agentops_slos, durable_workflows, durable_workflow_steps, a2a_agent_cards, a2a_tasks.
+- **API Routes:** `/api/ai/mastra/` — agents, chat, tools, memory (threads/recall), knowledge (entities/graph), agentops (metrics/traces), a2a (agents/tasks/.well-known), workflows (create/pause/cancel), stats.
 - **AI Integrations:** OpenAI and Anthropic provisioned via Replit AI Integrations proxy (no API keys required).
 
 ### Platform Architecture & Features

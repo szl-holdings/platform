@@ -118,6 +118,7 @@ import helmRouter from "./helm-console";
 import telemetryRouter from "./telemetry";
 import crossAppHandoffsRouter from "./cross-app-handoffs";
 import { aiRouter as aiOrchestratorRouter } from "./ai-orchestrator";
+import { mastraRouter } from "./mastra-agents";
 
 const router: IRouter = Router();
 
@@ -363,6 +364,7 @@ router.use("/ai/tools/execute", idempotencyMiddleware);
 router.use(aiEngineRouter);
 
 router.use("/ai/orchestrator", aiOrchestratorRouter);
+router.use("/ai/mastra", mastraRouter);
 
 router.use("/analytics", _writeLimiter);
 router.use(analyticsRouter);
