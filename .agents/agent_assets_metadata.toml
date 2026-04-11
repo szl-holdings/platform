@@ -383,3 +383,9 @@ id = "BBy-oHCVzMkKNuolUtHM7"
 uri = "file://export/SZL-LinkedIn-Investor-Guide.pdf"
 type = "pdf"
 title = "SZL Holdings — LinkedIn Investor Posting Guide"
+
+[[outputs]]
+id = "vUNP1QIN7UzeuX1DSO3qa"
+uri = "file://szl-linkedin-post-kit.pdf"
+type = "pdf"
+title = "SZL Holdings — LinkedIn Post Kit"

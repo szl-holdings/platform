@@ -1,4 +1,4 @@
-modules = ["nodejs-24", "postgresql-16"]
+modules = ["nodejs-24", "postgresql-16", "python3"]
 
 [[artifacts]]
 id = "artifacts/api-server"
@@ -49,6 +49,7 @@ timeoutMs = 120000
 
 [nix]
 channel = "stable-25_05"
+packages = ["freetype", "glibcLocales", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "tcl", "tk", "zlib"]
 
 [userenv]
 
