@@ -217,11 +217,10 @@ export async function runAgent(
     try {
       response = await gatewayInfer({
         model: config.model,
-        provider: config.provider,
-        messages: messages.map(m => ({ role: m.role as any, content: m.content })),
-        temperature: config.temperature,
+        preferredProvider: config.provider as any,
+        messages: messages.map(m => ({ role: m.role as "system" | "user" | "assistant", content: m.content })),
         maxTokens: config.maxTokens,
-        routing: config.routing ?? "preferred",
+        strategy: (config.routing as "fastest" | "cheapest" | "preferred" | "fallback") ?? "preferred",
       });
     } catch (err: any) {
       await emitTrace(runId, agentId, {
