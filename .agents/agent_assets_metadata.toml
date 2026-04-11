@@ -388,4 +388,76 @@ title = "SZL Holdings — LinkedIn Investor Posting Guide"
 id = "vUNP1QIN7UzeuX1DSO3qa"
 uri = "file://szl-linkedin-post-kit.pdf"
 type = "pdf"
-title = "SZL Holdings — LinkedIn Post Kit"
+title = "LinkedIn Post Kit (PDF with text + screenshots)"
+
+[[outputs]]
+id = "zZgBoyiM9NWT71wTa_bxs"
+uri = "file://szl-linkedin-screenshots.tar.gz"
+type = "unspecified"
+title = "All Screenshots (compressed archive)"
+
+[[outputs]]
+id = "WctCoy5tO3hxF5FeONb2P"
+uri = "file://screenshots/stephen-hero-clean.jpg"
+type = "image"
+title = "1. Stephen Lutar — Hero"
+
+[[outputs]]
+id = "QpiO5aoI5g1JJXTsgHaIa"
+uri = "file://screenshots/aegis-hero-clean.jpg"
+type = "image"
+title = "2. Aegis — Cybersecurity Hero"
+
+[[outputs]]
+id = "VK82LyMl6IkwrerHpawjE"
+uri = "file://screenshots/aegis-command-clean.jpg"
+type = "image"
+title = "3. Aegis — SOC Dashboard"
+
+[[outputs]]
+id = "SMl0OIoqpG8XNEKGMwtQm"
+uri = "file://screenshots/vessels-hero-clean.jpg"
+type = "image"
+title = "4. Vessels — Maritime Hero"
+
+[[outputs]]
+id = "putJV3Y1vO6AbHDtD-VLd"
+uri = "file://screenshots/vessels-marketing-home.jpg"
+type = "image"
+title = "5. Vessels — Fleet Command"
+
+[[outputs]]
+id = "wSLWbUZnhUsNvuV65kzKu"
+uri = "file://screenshots/lyte-hero-clean.jpg"
+type = "image"
+title = "6. Lyte — AIOps Hero"
+
+[[outputs]]
+id = "XgskwTfDPJN2-ySjWXxfT"
+uri = "file://screenshots/lyte-board-clean.jpg"
+type = "image"
+title = "7. Lyte — Board Mode"
+
+[[outputs]]
+id = "nUpQ3Sc8eGXYPOCGOW9UL"
+uri = "file://screenshots/prism-counsel-demo-clean.jpg"
+type = "image"
+title = "8. PRISM Counsel — Legal Command"
+
+[[outputs]]
+id = "X5XxGEgybuJ5VBOh__kEQ"
+uri = "file://screenshots/terra.jpg"
+type = "image"
+title = "9. Terra — Real Estate Intelligence"
+
+[[outputs]]
+id = "Jqn8zo54og9z8OfzRxZEn"
+uri = "file://screenshots/carlota-jo-hero-clean.jpg"
+type = "image"
+title = "10. Carlota Jo — Consulting"
+
+[[outputs]]
+id = "t73wOuV3x5rdy2SPJ7tMj"
+uri = "file://screenshots/stephen-work-clean.jpg"
+type = "image"
+title = "11. Stephen — Case Studies"
