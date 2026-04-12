@@ -4,11 +4,12 @@ import { EvolutionEngine, createWorkflowFitnessFunction, persistPopulation, type
 import { ExpertRouter, logRoutingDecision, type SignalContext } from "../lib/alloy-expert-router";
 import { ThreatEngine, persistThreatModel } from "../lib/alloy-threat-engine";
 import { sendSuccess, sendCreated, sendBadRequest, handleRouteError } from "../lib/api-response";
+import { authMiddleware } from "../middlewares/auth";
 
 const router = Router();
 
 function getOrgId(req: Request): number {
-  return (req as any).orgId ?? 1;
+  return (req as { orgId?: number }).orgId ?? 1;
 }
 
 router.get("/evolution/populations", async (req: Request, res: Response) => {
@@ -26,7 +27,7 @@ router.get("/evolution/populations", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/evolution/populations", async (req: Request, res: Response) => {
+router.post("/evolution/populations", authMiddleware(), async (req: Request, res: Response) => {
   try {
     const { name, domain, objectiveFunction, config } = req.body;
     if (!name || !domain || !objectiveFunction) {
@@ -98,7 +99,7 @@ router.post("/evolution/populations", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/evolution/populations/:id/evolve", async (req: Request, res: Response) => {
+router.post("/evolution/populations/:id/evolve", authMiddleware(), async (req: Request, res: Response) => {
   try {
     const populationId = parseInt(req.params.id);
     const generations = Math.min(req.body.generations || 1, 10);
@@ -124,13 +125,23 @@ router.post("/evolution/populations/:id/evolve", async (req: Request, res: Respo
       [populationId, pop.population_size]
     );
 
-    let currentPopulation = genomeRows.map((row: any) => ({
+    interface GenomeRow {
+      id: number;
+      genes: Gene[];
+      fitness_score: string;
+      generation: number;
+      parent_genome_id: number | null;
+      mutation_history: import("../lib/alloy-evolution-engine").MutationRecord[];
+      is_elite: boolean;
+    }
+    let currentPopulation = (genomeRows as GenomeRow[]).map((row) => ({
       id: row.id,
-      genes: row.genes as Gene[],
+      genes: row.genes,
       fitnessScore: parseFloat(row.fitness_score) || 0,
       generation: row.generation,
-      parentGenomeId: row.parent_genome_id,
+      parentGenomeId: row.parent_genome_id ?? undefined,
       mutationHistory: row.mutation_history || [],
+      isElite: row.is_elite,
     }));
 
     const fitnessFunction = createWorkflowFitnessFunction({
@@ -222,7 +233,7 @@ router.get("/experts", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/experts/route", async (req: Request, res: Response) => {
+router.post("/experts/route", authMiddleware(), async (req: Request, res: Response) => {
   try {
     const { domain, severity, category, requiredCapabilities, strategy } = req.body;
     if (!domain || !severity) {
@@ -268,7 +279,7 @@ router.post("/experts/route", async (req: Request, res: Response) => {
 
 const threatEngine = new ThreatEngine();
 
-router.post("/threats/analyze", async (req: Request, res: Response) => {
+router.post("/threats/analyze", authMiddleware(), async (req: Request, res: Response) => {
   try {
     const { targetAsset, domain } = req.body;
     if (!targetAsset || !domain) {
@@ -315,7 +326,7 @@ router.post("/threats/analyze", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/threats/analyze/full", async (req: Request, res: Response) => {
+router.post("/threats/analyze/full", authMiddleware(), async (req: Request, res: Response) => {
   try {
     const { targetAsset, domain, persist } = req.body;
     if (!targetAsset || !domain) {

@@ -318,13 +318,13 @@ export default function AnticipationScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>
-          ANTICIPATION ENGINE
+          SILENT ORCHESTRATION
         </Text>
         <Text style={[styles.title, { color: colors.cream }]}>
           What Rosa{"\n"}sees coming
         </Text>
         <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-          Pattern-based predictions of what the client will need before they ask.
+          Predictions are converted into action plans automatically. Rosa approves — the client is never involved.
         </Text>
 
         <ScrollView
@@ -414,6 +414,32 @@ export default function AnticipationScreen() {
 
         <View
           style={[
+            styles.silentQueueBanner,
+            {
+              borderColor: "rgba(16,185,129,0.25)",
+              backgroundColor: "rgba(16,185,129,0.06)",
+            },
+          ]}
+        >
+          <View style={styles.silentQueueTop}>
+            <Feather
+              name="cpu"
+              size={11}
+              color="rgba(16,185,129,0.7)"
+            />
+            <Text style={[styles.silentQueueTitle, { color: "rgba(16,185,129,0.8)" }]}>
+              SILENT QUEUE — 5 PLANS AWAITING APPROVAL
+            </Text>
+          </View>
+          <Text style={[styles.footerText, { color: colors.mutedForeground }]}>
+            Predictions are now auto-converted to action plans — vendor
+            communications drafted, calendar entries staged. Rosa approves in
+            the Silent Queue.
+          </Text>
+        </View>
+
+        <View
+          style={[
             styles.footer,
             {
               borderColor: colors.goldBorder,
@@ -428,9 +454,8 @@ export default function AnticipationScreen() {
             style={{ marginBottom: 4 }}
           />
           <Text style={[styles.footerText, { color: colors.mutedForeground }]}>
-            Suggestions are derived from Preference Genome signals, seasonal
-            patterns, and lifecycle triggers. Rosa reviews before action is
-            taken.
+            Signals are cross-referenced with lifecycle event triggers, seasonal
+            patterns, and observed behavioural cadence.
           </Text>
         </View>
       </ScrollView>
@@ -583,10 +608,27 @@ const styles = StyleSheet.create({
     maxWidth: 240,
     lineHeight: 18,
   },
-  footer: {
+  silentQueueBanner: {
     borderWidth: 1,
     padding: 16,
     marginTop: 24,
+    marginBottom: 12,
+    alignItems: "flex-start",
+  },
+  silentQueueTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 6,
+  },
+  silentQueueTitle: {
+    fontSize: 8,
+    fontFamily: "Inter_500Medium",
+    letterSpacing: 1.5,
+  },
+  footer: {
+    borderWidth: 1,
+    padding: 16,
     alignItems: "flex-start",
   },
   footerText: {

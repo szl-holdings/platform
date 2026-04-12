@@ -14,8 +14,8 @@ export interface Genome {
   generation: number;
   parentGenomeId?: number;
   mutationHistory: MutationRecord[];
-  phenotype?: Record<string, unknown>;
   isElite?: boolean;
+  phenotype?: Record<string, unknown>;
 }
 
 export interface MutationRecord {
@@ -336,7 +336,7 @@ export async function persistPopulation(
           JSON.stringify(genome.phenotype || {}),
           genome.fitnessScore,
           JSON.stringify(genome.mutationHistory),
-          genome.isElite || false,
+          genome.isElite ?? false,
         ]
       );
     }

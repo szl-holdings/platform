@@ -2,8 +2,9 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Zap, ChevronRight, ChevronDown, CheckCircle, Clock, AlertCircle,
-  Thermometer, Plane, Calendar, Home, Package, Sparkles, X
+  Thermometer, Plane, Calendar, Home, Package, Sparkles, X, Cpu, ArrowRight
 } from "lucide-react";
+import { Link } from "wouter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { CLIENT_GENOME, getCadencePref, getCommsPref } from "@/data/genome-data";
 
@@ -348,7 +349,36 @@ export default function AnticipationEngine() {
           )}
         </div>
 
-        <div className="mt-8 p-5" style={{ border: `1px solid ${GOLD_BORDER}`, background: GOLD_DIM }}>
+        <div
+          className="mt-8 p-5 flex items-start gap-4"
+          style={{ border: `1px solid rgba(16,185,129,0.2)`, background: "rgba(16,185,129,0.05)" }}
+        >
+          <div
+            className="w-8 h-8 flex items-center justify-center shrink-0 mt-0.5"
+            style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.2)" }}
+          >
+            <Cpu size={14} style={{ color: "rgba(16,185,129,0.85)" }} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] tracking-[0.2em] uppercase mb-1" style={{ color: "rgba(16,185,129,0.65)" }}>
+              Silent Orchestration — Active
+            </p>
+            <p className="text-[12px] font-light leading-relaxed mb-3" style={{ color: CREAM_DIM }}>
+              Predictions are now converted into fully-formed action plans automatically — vendor communications drafted, calendar entries staged, staff schedules adjusted. Rosa approves with one tap.
+            </p>
+            <Link
+              href="/silent-queue"
+              className="inline-flex items-center gap-2 px-4 py-2 text-[10px] tracking-[0.15em] uppercase transition-opacity hover:opacity-80"
+              style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.25)", color: "rgba(16,185,129,0.9)" }}
+            >
+              <Cpu size={10} />
+              Open Silent Queue
+              <ArrowRight size={10} />
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-4 p-5" style={{ border: `1px solid ${GOLD_BORDER}`, background: GOLD_DIM }}>
           <div className="flex items-center gap-2 mb-3">
             <AlertCircle size={11} style={{ color: "rgba(196,170,126,0.55)" }} />
             <p className="text-[10px] tracking-[0.2em] uppercase" style={{ color: "rgba(196,170,126,0.55)" }}>

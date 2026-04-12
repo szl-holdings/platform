@@ -426,6 +426,256 @@ router.post("/portal/messages", authMiddleware(), async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to send message"); }
 });
 
+type ActionPlanStatus = "pending" | "approved" | "modified" | "dismissed";
+
+type ActionPlanRecord = {
+  id: string;
+  title: string;
+  category: string;
+  confidence: "high" | "medium" | "low";
+  confidenceScore: number;
+  scheduledFor: string;
+  status: ActionPlanStatus;
+  approvedBy?: string;
+  approvedAt?: string;
+  draftComm?: string;
+  actionItems: { label: string; type: string; detail: string }[];
+  genomeSignals: { label: string; value: string; source: string; occurrences: number }[];
+  executionLog: { timestamp: string; event: string }[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+const silentQueueStore = new Map<string, ActionPlanRecord>();
+
+function initSilentQueue(): void {
+  if (silentQueueStore.size > 0) return;
+  const now = new Date().toISOString();
+  const plans: ActionPlanRecord[] = [
+    {
+      id: "ap1", title: "Oxfordshire Estate Opening — Full Activation Plan", category: "Residence Operations",
+      confidence: "high", confidenceScore: 94, scheduledFor: "Week of 14 April 2026",
+      status: "pending", draftComm: "Subject: Oxfordshire Estate — Spring Opening 2026\n\nDear James,\n\nPlease see attached pre-open checklist for the inspection week of 14–18 April.\n\nKind regards,\nRosa",
+      actionItems: [
+        { label: "Draft: Caretaker opening inspection request", type: "vendor-contact", detail: "Email to James Alderton — inspection availability week of 14–18 April." },
+        { label: "Calendar: Oxfordshire opening inspection — 14 April", type: "calendar", detail: "Blocked in Household Rhythm Calendar." },
+        { label: "Checklist: Pre-opening inspection items", type: "checklist", detail: "Heating system, window seals, outdoor furniture, pool chemistry, external lighting." },
+      ],
+      genomeSignals: [
+        { label: "Summer residence", value: "Oxfordshire Estate — May to September", source: "Observed 2 consecutive years", occurrences: 2 },
+        { label: "Vendor access protocol", value: "All vendors must confirm 48h in advance", source: "Explicit instruction", occurrences: 4 },
+      ],
+      executionLog: [], createdAt: now, updatedAt: now,
+    },
+    {
+      id: "ap2", title: "Mayfair Summer Staff Cover — Mrs. Chambers Leave", category: "Household Systems",
+      confidence: "high", confidenceScore: 88, scheduledFor: "Action required by 30 April 2026",
+      status: "pending", draftComm: "Subject: Temporary Housekeeper Cover — Mayfair — July/August 2026\n\nDear Karen,\n\nRequesting cover 13 July – 24 August 2026. Fragrance-free products mandatory. NDA required.\n\nKind regards,\nRosa",
+      actionItems: [
+        { label: "Draft: Knightsbridge Domestic Agency — cover request", type: "vendor-contact", detail: "Temporary housekeeper 13 July – 24 August 2026." },
+        { label: "Staff schedule: Flag July–August cover period", type: "staff", detail: "Mrs. Chambers leave window marked in staff rota." },
+        { label: "Checklist: Onboarding protocol for temporary cover", type: "checklist", detail: "Fragrance-free products, NDA, security codes, escalation to Rosa only." },
+      ],
+      genomeSignals: [
+        { label: "Staff comms protocol", value: "All staff to report to Rosa first.", source: "Service plan", occurrences: 8 },
+        { label: "Tolerance for surprises", value: "Zero. All changes briefed in advance.", source: "Explicit instruction", occurrences: 3 },
+      ],
+      executionLog: [], createdAt: now, updatedAt: now,
+    },
+    {
+      id: "ap3", title: "New York June Travel — Pre-Arrangements", category: "Travel & Lifestyle",
+      confidence: "medium", confidenceScore: 73, scheduledFor: "Initiate by 20 April 2026",
+      status: "pending", draftComm: "Subject: June Travel — Provisional Hold Request\n\nDear Reservations Team,\n\nProvisional hold on preferred suite 8–14 June 2026, to be confirmed or released by 1 May.\n\nKind regards,\nRosa\nCarlota Jo Advisory",
+      actionItems: [
+        { label: "Draft: The Carlyle — June provisional hold", type: "vendor-contact", detail: "Tentative hold 8–14 June 2026, flexible ±3 days." },
+        { label: "Calendar: New York travel window — June 2026 (predicted)", type: "calendar", detail: "Placeholder in Household Rhythm Calendar." },
+      ],
+      genomeSignals: [
+        { label: "Travel frequency", value: "New York, Monaco, Dubai — 4–6 times per year", source: "Session notes", occurrences: 3 },
+      ],
+      executionLog: [], createdAt: now, updatedAt: now,
+    },
+    {
+      id: "ap4", title: "Annual Heating System Service — Both Properties", category: "Maintenance",
+      confidence: "high", confidenceScore: 91, scheduledFor: "Outreach in May 2026, service September 2026",
+      status: "pending", draftComm: "Subject: Annual Heating Service — Pre-Booking Request — 2026\n\nDear Heritage Heating,\n\nMayfair: week of 7–11 September. Oxfordshire: week of 14–18 September.\n\nKind regards,\nRosa",
+      actionItems: [
+        { label: "Draft: Heritage Heating — pre-book September service slots", type: "vendor-contact", detail: "Two service appointments — Mayfair and Oxfordshire." },
+        { label: "Calendar: Mayfair heating service — September 2026", type: "calendar", detail: "Staged entry, dates to be confirmed." },
+        { label: "Calendar: Oxfordshire heating service — September 2026", type: "calendar", detail: "Back-to-back with Mayfair preferred." },
+      ],
+      genomeSignals: [
+        { label: "Winter base", value: "Mayfair — October to April", source: "Observed 2 consecutive years", occurrences: 2 },
+      ],
+      executionLog: [], createdAt: now, updatedAt: now,
+    },
+    {
+      id: "ap5", title: "Q3 Review Session — Schedule and Brief", category: "Engagement Cadence",
+      confidence: "high", confidenceScore: 96, scheduledFor: "Propose by 30 April 2026",
+      status: "pending",
+      actionItems: [
+        { label: "Draft: Q3 review session — scheduling note", type: "vendor-contact", detail: "Proposing 6 or 7 July, 9:00 AM, Mayfair." },
+        { label: "Calendar: Q3 Review Session — 6 July 2026 (proposed)", type: "calendar", detail: "Staged in Household Rhythm Calendar." },
+        { label: "Checklist: Q3 review prep agenda", type: "checklist", detail: "Summer operations, Oxfordshire report, autumn planning, Q4 priorities." },
+      ],
+      genomeSignals: [
+        { label: "Review time preference", value: "Morning, before 10:00 AM", source: "Session scheduling history", occurrences: 4 },
+      ],
+      executionLog: [], createdAt: now, updatedAt: now,
+    },
+  ];
+  for (const plan of plans) silentQueueStore.set(plan.id, plan);
+}
+
+router.get("/orchestration/queue", authMiddleware(), async (req, res) => {
+  try {
+    initSilentQueue();
+    const plans = Array.from(silentQueueStore.values());
+    const statusFilter = typeof req.query.status === "string" ? req.query.status : undefined;
+    const filtered = statusFilter ? plans.filter(p => p.status === statusFilter) : plans;
+    sendSuccess(res, filtered, 200, { total: filtered.length });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list orchestration queue");
+  }
+});
+
+router.get("/orchestration/queue/:id", authMiddleware(), async (req, res) => {
+  try {
+    initSilentQueue();
+    const plan = silentQueueStore.get(req.params.id);
+    if (!plan) { sendNotFound(res, "Action plan"); return; }
+    sendSuccess(res, plan);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to get action plan");
+  }
+});
+
+router.patch("/orchestration/queue/:id/approve", authMiddleware(), async (req, res) => {
+  try {
+    initSilentQueue();
+    const plan = silentQueueStore.get(req.params.id);
+    if (!plan) { sendNotFound(res, "Action plan"); return; }
+    if (plan.status !== "pending" && plan.status !== "modified") {
+      sendBadRequest(res, `Plan is already ${plan.status}`);
+      return;
+    }
+    const now = new Date().toISOString();
+    const approvedBy = req.user?.id ? String(req.user.id) : "rosa";
+    const updated: ActionPlanRecord = {
+      ...plan,
+      status: "approved",
+      approvedBy,
+      approvedAt: now,
+      updatedAt: now,
+      executionLog: [
+        ...plan.executionLog,
+        { timestamp: now, event: `Approved by ${approvedBy}` },
+        { timestamp: now, event: "Vendor communications staged for dispatch" },
+        { timestamp: now, event: "Calendar entries updated in Household Rhythm Calendar" },
+        ...(plan.actionItems.filter(i => i.type === "staff").length > 0
+          ? [{ timestamp: now, event: "Staff schedule adjustments applied" }]
+          : []),
+      ],
+    };
+    silentQueueStore.set(plan.id, updated);
+    broadcastWs("bookings", "orchestration-plan-approved", { id: plan.id, title: plan.title, approvedBy });
+    sendSuccess(res, updated);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to approve action plan");
+  }
+});
+
+router.patch("/orchestration/queue/:id/dismiss", authMiddleware(), async (req, res) => {
+  try {
+    initSilentQueue();
+    const plan = silentQueueStore.get(req.params.id);
+    if (!plan) { sendNotFound(res, "Action plan"); return; }
+    if (plan.status === "approved") {
+      sendBadRequest(res, "Cannot dismiss an already-approved plan");
+      return;
+    }
+    const now = new Date().toISOString();
+    const updated: ActionPlanRecord = {
+      ...plan,
+      status: "dismissed",
+      updatedAt: now,
+      executionLog: [...plan.executionLog, { timestamp: now, event: "Dismissed by Rosa — no action taken" }],
+    };
+    silentQueueStore.set(plan.id, updated);
+    sendSuccess(res, updated);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to dismiss action plan");
+  }
+});
+
+router.patch("/orchestration/queue/:id/modify", authMiddleware(), async (req, res) => {
+  try {
+    initSilentQueue();
+    const plan = silentQueueStore.get(req.params.id);
+    if (!plan) { sendNotFound(res, "Action plan"); return; }
+    if (plan.status === "approved" || plan.status === "dismissed") {
+      sendBadRequest(res, `Plan is already ${plan.status}`);
+      return;
+    }
+    const now = new Date().toISOString();
+    const body = req.body as { note?: string };
+    const updated: ActionPlanRecord = {
+      ...plan,
+      status: "modified",
+      updatedAt: now,
+      executionLog: [
+        ...plan.executionLog,
+        { timestamp: now, event: `Flagged for manual review${body.note ? `: ${body.note}` : ""}` },
+      ],
+    };
+    silentQueueStore.set(plan.id, updated);
+    sendSuccess(res, updated);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to modify action plan");
+  }
+});
+
+router.get("/orchestration/queue/:id/draft-comm", authMiddleware(), async (req, res) => {
+  try {
+    initSilentQueue();
+    const plan = silentQueueStore.get(req.params.id);
+    if (!plan) { sendNotFound(res, "Action plan"); return; }
+    if (!plan.draftComm) { sendNotFound(res, "Draft communication"); return; }
+    sendSuccess(res, { id: plan.id, title: plan.title, draftComm: plan.draftComm, status: plan.status });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to get draft communication");
+  }
+});
+
+router.get("/orchestration/report", authMiddleware(), async (_req, res) => {
+  try {
+    initSilentQueue();
+    const plans = Array.from(silentQueueStore.values());
+    const approved = plans.filter(p => p.status === "approved");
+    const pending = plans.filter(p => p.status === "pending");
+    const dismissed = plans.filter(p => p.status === "dismissed");
+    sendSuccess(res, {
+      period: new Date().toISOString().slice(0, 7),
+      summary: {
+        total: plans.length,
+        approved: approved.length,
+        pending: pending.length,
+        dismissed: dismissed.length,
+      },
+      approvedPlans: approved.map(p => ({
+        id: p.id,
+        title: p.title,
+        category: p.category,
+        approvedAt: p.approvedAt,
+        actionCount: p.actionItems.length,
+      })),
+      generatedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to generate orchestration report");
+  }
+});
+
 const carlotaLiveLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 150,

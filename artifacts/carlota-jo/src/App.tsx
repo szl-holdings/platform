@@ -56,6 +56,9 @@ const LifestyleGraph = lazy(() => import("@/pages/lifestyle-graph"));
 const AIConcierge = lazy(() => import("@/pages/ai-concierge"));
 const EngagementTimeline = lazy(() => import("@/pages/engagement-timeline"));
 const DiscretionMode = lazy(() => import("@/pages/discretion-mode"));
+const SilentQueue = lazy(() => import("@/pages/silent-queue"));
+const RhythmTimeline = lazy(() => import("@/pages/rhythm-timeline"));
+const OrchestrationReport = lazy(() => import("@/pages/orchestration-report"));
 
 function PageLoader() {
   return (
@@ -146,6 +149,9 @@ function Router() {
         <Route path="/ai-concierge" component={AIConcierge} />
         <Route path="/engagement-timeline" component={EngagementTimeline} />
         <Route path="/discretion-mode" component={DiscretionMode} />
+        <Route path="/silent-queue" component={SilentQueue} />
+        <Route path="/rhythm-timeline" component={RhythmTimeline} />
+        <Route path="/orchestration-report" component={OrchestrationReport} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
