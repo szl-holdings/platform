@@ -14,6 +14,7 @@ import {
   Database,
   Globe,
   Layers,
+  Network,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -261,9 +262,16 @@ const ECOSYSTEM_APPS = [
   { name: "Carlota Jo", description: "Private Advisory", color: "hsl(280,50%,65%)" },
 ];
 
+interface MeshStats {
+  totalSignalsGenerated: number;
+  totalCrossVentureRoutes: number;
+  signalsMissedInIsolation: number;
+}
+
 function EcosystemPulseSection() {
   const [pulseData, setPulseData] = useState<Array<{ name: string; status: "operational" | "degraded" | "down" | "unknown"; description: string; color: string; lastChecked: string }>>([]);
   const [loading, setLoading] = useState(true);
+  const [meshStats, setMeshStats] = useState<MeshStats | null>(null);
 
   useEffect(() => {
     const fallback = ECOSYSTEM_APPS.map(app => ({
@@ -276,17 +284,19 @@ function EcosystemPulseSection() {
     // /api/health/detailed returns overall API status + checks (database, job_queue, telemetry).
     // We map the overall status to all ecosystem apps since a single API server backs the ecosystem.
     // Statuses: "healthy" → operational, "warning" → degraded, "degraded" → down.
-    fetch("/api/health/detailed")
-      .then(r => r.ok ? r.json() : null)
-      .then(data => {
-        if (!data) { setPulseData(fallback); return; }
+    Promise.all([
+      fetch("/api/health/detailed").then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch("/api/intelligence-mesh/compound-value").then(r => r.ok ? r.json() : null).catch(() => null),
+    ]).then(([healthData, meshData]) => {
+      if (!healthData) { setPulseData(fallback); }
+      else {
         // Map API health status to UI status. "degraded" means some checks are failing
         // (e.g. database unreachable) but the service is still responding — we show "degraded"
         // rather than "down" to avoid overstating severity. Unknown/unexpected values map to
         // "unknown" (not "operational") to avoid falsely signalling a green state.
-        const overallStatus = data.status === "healthy" ? "operational" as const
-          : data.status === "warning" ? "degraded" as const
-          : data.status === "degraded" ? "degraded" as const
+        const overallStatus = healthData.status === "healthy" ? "operational" as const
+          : healthData.status === "warning" ? "degraded" as const
+          : healthData.status === "degraded" ? "degraded" as const
           : "unknown" as const;
         setPulseData(ECOSYSTEM_APPS.map(app => ({
           name: app.name,
@@ -295,9 +305,15 @@ function EcosystemPulseSection() {
           color: app.color,
           lastChecked: "just now",
         })));
-      })
-      .catch(() => setPulseData(fallback))
-      .finally(() => setLoading(false));
+      }
+      if (meshData) {
+        setMeshStats({
+          totalSignalsGenerated: meshData.totalSignalsGenerated ?? 0,
+          totalCrossVentureRoutes: meshData.totalCrossVentureRoutes ?? 0,
+          signalsMissedInIsolation: meshData.signalsMissedInIsolation ?? 0,
+        });
+      }
+    }).catch(() => setPulseData(fallback)).finally(() => setLoading(false));
   }, []);
 
   return (
@@ -337,6 +353,99 @@ function EcosystemPulseSection() {
             ))}
           </div>
         )}
+
+        {/* Intelligence Mesh teaser */}
+        <CinematicReveal delay={0.3}>
+          <m.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            style={{
+              marginTop: "2rem",
+              padding: "1.25rem 1.5rem",
+              borderRadius: "0.875rem",
+              background: "hsla(192,72%,48%,0.04)",
+              border: "1px solid hsla(192,72%,48%,0.2)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "1.25rem",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+              <div style={{
+                width: 40, height: 40, borderRadius: "0.625rem", flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                background: "hsla(192,72%,48%,0.12)",
+                border: "1px solid hsla(192,72%,48%,0.3)",
+              }}>
+                <Network size={18} color="hsl(192,72%,48%)" />
+              </div>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.125rem" }}>
+                  <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(38,8%,92%)" }}>
+                    Compound Intelligence Mesh
+                  </span>
+                  <span style={{
+                    display: "inline-flex", alignItems: "center",
+                    padding: "0.1rem 0.4rem",
+                    borderRadius: "99px",
+                    fontSize: "0.625rem",
+                    fontWeight: 700,
+                    letterSpacing: "0.08em",
+                    color: "hsl(192,72%,48%)",
+                    background: "hsla(192,72%,48%,0.12)",
+                    border: "1px solid hsla(192,72%,48%,0.3)",
+                  }}>
+                    LIVE
+                  </span>
+                </div>
+                <p style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", margin: 0 }}>
+                  Cross-venture signals auto-enrich every relevant domain. Intelligence compounds across the ecosystem.
+                </p>
+              </div>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap" }}>
+              {meshStats && (
+                <div style={{ display: "flex", gap: "1.25rem" }}>
+                  {[
+                    { label: "Signals", value: meshStats.totalSignalsGenerated },
+                    { label: "Routes", value: meshStats.totalCrossVentureRoutes },
+                    { label: "Compound insights", value: meshStats.signalsMissedInIsolation },
+                  ].map(s => (
+                    <div key={s.label} style={{ textAlign: "center" }}>
+                      <div style={{ fontSize: "1.125rem", fontWeight: 700, color: "hsl(192,72%,48%)" }}>{s.value}</div>
+                      <div style={{ fontSize: "0.625rem", color: "var(--color-szl-text-faint)" }}>{s.label}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <Link
+                href="/intelligence-mesh"
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: "0.375rem",
+                  padding: "0.5rem 1rem",
+                  background: "hsla(192,72%,48%,0.12)",
+                  border: "1px solid hsla(192,72%,48%,0.3)",
+                  borderRadius: "0.375rem",
+                  color: "hsl(192,72%,48%)",
+                  fontSize: "0.8125rem",
+                  fontWeight: 600,
+                  textDecoration: "none",
+                  transition: "background 0.2s ease",
+                  flexShrink: 0,
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsla(192,72%,48%,0.2)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsla(192,72%,48%,0.12)"; }}
+              >
+                View Mesh
+                <ArrowRight size={13} />
+              </Link>
+            </div>
+          </m.div>
+        </CinematicReveal>
       </div>
     </section>
   );

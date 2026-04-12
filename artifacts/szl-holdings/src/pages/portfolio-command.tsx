@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { m } from "framer-motion";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { CrossVentureIntelBadge } from "@/components/CrossVentureIntelBadge";
 import {
   Activity, Users, DollarSign, TrendingUp, AlertTriangle, CheckCircle2,
   Shield, Ship, Map, Layers, Eye, Sparkles, ArrowUpRight, RefreshCw, Clock,
@@ -279,6 +280,32 @@ export default function PortfolioCommand() {
           {COMPANIES.map((company, i) => (
             <CompanyCard key={company.id} company={company} delay={i * 0.08} />
           ))}
+        </div>
+
+        {/* ── Compound Intelligence Mesh — cross-venture signal panel ── */}
+        <div style={{ marginTop: 40 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: ACC, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+              Intelligence Mesh
+            </span>
+          </div>
+          <p style={{ fontSize: 13, color: TEXT_SEC, margin: "0 0 16px", maxWidth: "60ch", lineHeight: 1.6 }}>
+            Active cross-venture signals routed by the Compound Intelligence Mesh — intelligence that compounds across domains rather than staying siloed.
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 14 }}>
+            {COMPANIES.slice(0, 5).map(company => {
+              const ventureId = company.id === "carlota" ? "carlota-jo" : company.id;
+              return (
+                <CrossVentureIntelBadge
+                  key={company.id}
+                  ventureId={ventureId}
+                  ventureName={company.name}
+                  accentColor={company.color}
+                  compact
+                />
+              );
+            })}
+          </div>
         </div>
       </div>
       <SiteFooter />

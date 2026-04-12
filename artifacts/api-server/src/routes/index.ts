@@ -28,6 +28,7 @@ import creativeWorkflowsRouter from "./dreamscape"; // creative-workflows module
 import readinessRouter from "./readiness";
 import adminRouter from "./admin";
 import intelligenceRouter from "./intelligence";
+import intelligenceMeshRouter from "./intelligence-mesh";
 import bookingRouter from "./booking";
 import holdingsRouter from "./holdings";
 import carlotaJoRouter from "./carlota-jo";
@@ -204,6 +205,7 @@ router.use(readinessRouter);
 router.use("/admin", adminGuard);
 router.use(adminRouter);
 router.use(intelligenceRouter);
+router.use("/intelligence-mesh", intelligenceMeshRouter);
 router.use(bookingRouter);
 router.use(holdingsRouter);
 router.use("/demo-requests", _writeLimiter);
@@ -457,4 +459,6 @@ router.use("/alloy", alloyEvolutionRouter);
 router.use("/stephen/telemetry", _readLimiter);
 router.use(stephenTelemetryRouter);
 
+router.use("/intelligence-mesh", _readLimiter);
+router.use(intelligenceMeshRouter);
 export default router;
