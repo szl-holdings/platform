@@ -55,6 +55,11 @@ const NAV_SECTIONS: SidebarNavSection[] = [
     items: [
       { id: "pipeline", href: "/pipeline", label: "Pipeline", icon: <Activity className="w-full h-full" /> },
       { id: "investor-mode", href: "/investor-mode", label: "Ownership", icon: <Globe className="w-full h-full" /> },
+      { id: "property-genome", href: "/property-genome", label: "Property Genome", icon: <Layers className="w-full h-full" /> },
+      { id: "predictive-distress-score", href: "/predictive-distress-score", label: "Distress Score", icon: <TrendingUp className="w-full h-full" /> },
+      { id: "deal-war-room", href: "/deal-war-room", label: "Deal War Room", icon: <Shield className="w-full h-full" /> },
+      { id: "market-pulse", href: "/market-pulse", label: "Market Pulse", icon: <Radio className="w-full h-full" /> },
+      { id: "owner-network-graph", href: "/owner-network-graph", label: "Owner Network", icon: <GitBranch className="w-full h-full" /> },
     ],
   },
   {

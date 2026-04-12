@@ -133,6 +133,11 @@ const ReadinessDragIndexPage = lazy(() => import("@/pages/readiness-drag-index")
 const PortFrictionMemoryPage = lazy(() => import("@/pages/port-friction-memory"));
 const FleetMorningBriefPage = lazy(() => import("@/pages/fleet-morning-brief"));
 const CommandModeTogglePage = lazy(() => import("@/pages/command-mode-toggle"));
+const VoyageDigitalTwinPage = lazy(() => import("@/pages/voyage-digital-twin"));
+const MaritimeKnowledgeGraphPage = lazy(() => import("@/pages/maritime-knowledge-graph"));
+const PredictiveCongestionPage = lazy(() => import("@/pages/predictive-congestion"));
+const FleetMorningBriefAiPage = lazy(() => import("@/pages/fleet-morning-brief-ai"));
+const ComplianceAutopilotPage = lazy(() => import("@/pages/compliance-autopilot"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -290,6 +295,17 @@ function VesselsSidebarContent({ expanded, onMobileClose }: { expanded: boolean;
         { id: "port-friction-memory", label: "Port Friction", href: "/port-friction-memory", icon: <MapPin className="w-3.5 h-3.5" /> },
         { id: "command-mode-toggle", label: "Captain / Exec Mode", href: "/command-mode-toggle", icon: <User className="w-3.5 h-3.5" /> },
       ]
+    },
+    {
+      id: "ai-features",
+      label: "AI Intelligence",
+      items: [
+        { id: "fleet-morning-brief-ai", label: "AI Morning Brief", href: "/fleet-morning-brief-ai", icon: <Brain className="w-3.5 h-3.5" /> },
+        { id: "voyage-digital-twin", label: "Voyage Digital Twin", href: "/voyage-digital-twin", icon: <Navigation className="w-3.5 h-3.5" /> },
+        { id: "maritime-knowledge-graph", label: "Knowledge Graph", href: "/maritime-knowledge-graph", icon: <Globe className="w-3.5 h-3.5" /> },
+        { id: "predictive-congestion", label: "Congestion Forecast", href: "/predictive-congestion", icon: <Anchor className="w-3.5 h-3.5" /> },
+        { id: "compliance-autopilot", label: "Compliance Autopilot", href: "/compliance-autopilot", icon: <Shield className="w-3.5 h-3.5" /> },
+      ],
     },
     {
       id: "admin",
@@ -483,6 +499,11 @@ function DashboardRouter() {
         <Route path="/port-friction-memory" component={PortFrictionMemoryPage} />
         <Route path="/fleet-morning-brief" component={FleetMorningBriefPage} />
         <Route path="/command-mode-toggle" component={CommandModeTogglePage} />
+        <Route path="/voyage-digital-twin" component={VoyageDigitalTwinPage} />
+        <Route path="/maritime-knowledge-graph" component={MaritimeKnowledgeGraphPage} />
+        <Route path="/predictive-congestion" component={PredictiveCongestionPage} />
+        <Route path="/fleet-morning-brief-ai" component={FleetMorningBriefAiPage} />
+        <Route path="/compliance-autopilot" component={ComplianceAutopilotPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-sky-400/40">Page not found</p>
@@ -581,7 +602,10 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     location.startsWith("/approval-review") ||
     location.startsWith("/voyage-intervention-simulator") || location.startsWith("/readiness-drag-index") ||
     location.startsWith("/port-friction-memory") || location.startsWith("/fleet-morning-brief") ||
-    location.startsWith("/command-mode-toggle");
+    location.startsWith("/command-mode-toggle") ||
+    location.startsWith("/voyage-digital-twin") || location.startsWith("/maritime-knowledge-graph") ||
+    location.startsWith("/predictive-congestion") || location.startsWith("/fleet-morning-brief-ai") ||
+    location.startsWith("/compliance-autopilot");
 
   if (isDashboard) {
     return (

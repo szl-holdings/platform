@@ -62,6 +62,11 @@ const ApprovalReview = lazy(() => import("@/pages/approval-review"));
 const ReadinessGraph = lazy(() => import("@/pages/readiness-graph"));
 const VendorReliability = lazy(() => import("@/pages/vendor-reliability"));
 const CountdownEngine = lazy(() => import("@/pages/countdown-engine"));
+const PropertyGenome = lazy(() => import("@/pages/property-genome"));
+const PredictiveDistressScore = lazy(() => import("@/pages/predictive-distress-score"));
+const DealWarRoom = lazy(() => import("@/pages/deal-war-room"));
+const MarketPulse = lazy(() => import("@/pages/market-pulse"));
+const OwnerNetworkGraph = lazy(() => import("@/pages/owner-network-graph"));
 
 function PageLoader() {
   return (
@@ -137,6 +142,11 @@ function PrivateRouter() {
             <Route path="/readiness-graph" component={ReadinessGraph} />
             <Route path="/vendor-reliability" component={VendorReliability} />
             <Route path="/countdown-engine" component={CountdownEngine} />
+            <Route path="/property-genome" component={PropertyGenome} />
+            <Route path="/predictive-distress-score" component={PredictiveDistressScore} />
+            <Route path="/deal-war-room" component={DealWarRoom} />
+            <Route path="/market-pulse" component={MarketPulse} />
+            <Route path="/owner-network-graph" component={OwnerNetworkGraph} />
             <Route component={NotFound} />
           </Switch>
         </Suspense>
