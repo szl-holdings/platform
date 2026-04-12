@@ -9,6 +9,7 @@ import {
   ClipboardCheck, BarChart3, RefreshCw, Hexagon, ShieldCheck, FileText
 } from "lucide-react";
 import { Link } from "wouter";
+import { RevenueAtRiskTicker } from "@/components/business-impact-panel";
 
 interface FirestormIncident {
   id: number;
@@ -509,6 +510,12 @@ export default function CommandHome() {
                 <span className="text-[11px] font-mono text-white/80">{approvalQueue.length}</span>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-12 gap-4">
+          <div className="col-span-12">
+            <RevenueAtRiskTicker />
           </div>
         </div>
       </div>
