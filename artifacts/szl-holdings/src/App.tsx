@@ -98,6 +98,11 @@ const InsightsArticlePage = lazy(() => import("@/pages/insights-article"));
 const CoreCommandPage = lazy(() => import("@/pages/core-command"));
 const ControlPlanePage = lazy(() => import("@/pages/control-plane"));
 const PortfolioOpsPage = lazy(() => import("@/pages/portfolio-ops"));
+const PortfolioCommandPage = lazy(() => import("@/pages/portfolio-command"));
+const InvestorIntelligencePage = lazy(() => import("@/pages/investor-intelligence"));
+const PitchModePage = lazy(() => import("@/pages/pitch-mode"));
+const FlywheelVizPage = lazy(() => import("@/pages/flywheel-viz"));
+const RevenueMetricsPage = lazy(() => import("@/pages/revenue-metrics"));
 
 // Public infrastructure pages (trust center, legal baseline, API, investor, press, brand, faq, roadmap)
 const SecurityPage = lazy(() => import("@/pages/security"));
@@ -510,6 +515,23 @@ function App() {
             </Route>
             <Route path="/portfolio">
               <Suspense fallback={<PageLoader />}><PortfolioPage /></Suspense>
+            </Route>
+
+            {/* ── Investor Readiness & Platform Intelligence ── */}
+            <Route path="/portfolio-command">
+              <Suspense fallback={<PageLoader />}><PortfolioCommandPage /></Suspense>
+            </Route>
+            <Route path="/investor-intelligence">
+              <Suspense fallback={<PageLoader />}><InvestorIntelligencePage /></Suspense>
+            </Route>
+            <Route path="/pitch-mode">
+              <Suspense fallback={<PageLoader />}><PitchModePage /></Suspense>
+            </Route>
+            <Route path="/flywheel">
+              <Suspense fallback={<PageLoader />}><FlywheelVizPage /></Suspense>
+            </Route>
+            <Route path="/revenue-metrics">
+              <Suspense fallback={<PageLoader />}><RevenueMetricsPage /></Suspense>
             </Route>
 
             {/* ── Product pages — accessible but not in primary nav ── */}

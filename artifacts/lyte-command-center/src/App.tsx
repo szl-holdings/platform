@@ -112,6 +112,10 @@ const DecisionReceipts = lazy(() => import("@/pages/decision-receipts"));
 const OutcomeLoop = lazy(() => import("@/pages/outcome-loop"));
 const DeferLane = lazy(() => import("@/pages/defer-lane"));
 const ShadowMode = lazy(() => import("@/pages/shadow-mode"));
+const AutonomousRemediation = lazy(() => import("@/pages/autonomous-remediation"));
+const ChaosPrediction = lazy(() => import("@/pages/chaos-prediction"));
+const CostPerformance = lazy(() => import("@/pages/cost-performance"));
+const OperationalNarrative = lazy(() => import("@/pages/operational-narrative"));
 
 const ADMIN_ROLES = ["admin", "super_admin", "ops"];
 
@@ -215,6 +219,10 @@ function PrivateRouter() {
         <Route path="/defer-lane" component={DeferLane} />
         <Route path="/shadow-mode" component={ShadowMode} />
         <Route path="/atlas-artifacts" component={LyteAtlasArtifactsPage} />
+        <Route path="/autonomous-remediation" component={AutonomousRemediation} />
+        <Route path="/chaos-prediction" component={ChaosPrediction} />
+        <Route path="/cost-performance" component={CostPerformance} />
+        <Route path="/operational-narrative" component={OperationalNarrative} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>

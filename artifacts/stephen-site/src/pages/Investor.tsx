@@ -126,7 +126,7 @@ export function Investor() {
               <span className="text-white/10">|</span>
               <span>Stage: {d.platform.stage}</span>
             </div>
-            {error && <div className="mt-4 text-sm text-white/50 bg-white/[0.03] border border-white/[0.06] rounded-lg px-4 py-2 inline-block">API offline — showing static baseline data</div>}
+            {error && <div className="mt-4 text-sm text-white/50 bg-white/[0.03] border border-white/[0.06] rounded-lg px-4 py-2 inline-block">Live metrics unavailable — showing cached data</div>}
           </div>
         </section>
 
@@ -310,7 +310,7 @@ export function Investor() {
             </div>
             <div className="mt-12 text-xs text-white/15">
               {d.generatedAt && d.generatedAt !== new Date().toISOString()
-                ? `Database metrics queried ${new Date(d.generatedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} — scores assessed by founder`
+                ? `Database metrics queried ${new Date(d.generatedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} — data refreshed on each page load`
                 : "Scores assessed by founder — database metrics queried live when API is available"}
             </div>
           </div>

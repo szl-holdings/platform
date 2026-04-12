@@ -52,6 +52,10 @@ const AnticipationEngine = lazy(() => import("@/pages/anticipation-engine"));
 const RhythmCalendar = lazy(() => import("@/pages/rhythm-calendar"));
 const SummaryComposer = lazy(() => import("@/pages/summary-composer"));
 const DiscretionScore = lazy(() => import("@/pages/discretion-score"));
+const LifestyleGraph = lazy(() => import("@/pages/lifestyle-graph"));
+const AIConcierge = lazy(() => import("@/pages/ai-concierge"));
+const EngagementTimeline = lazy(() => import("@/pages/engagement-timeline"));
+const DiscretionMode = lazy(() => import("@/pages/discretion-mode"));
 
 function PageLoader() {
   return (
@@ -138,6 +142,10 @@ function Router() {
         <Route path="/rhythm-calendar" component={RhythmCalendar} />
         <Route path="/summary-composer" component={SummaryComposer} />
         <Route path="/discretion" component={DiscretionScore} />
+        <Route path="/lifestyle-graph" component={LifestyleGraph} />
+        <Route path="/ai-concierge" component={AIConcierge} />
+        <Route path="/engagement-timeline" component={EngagementTimeline} />
+        <Route path="/discretion-mode" component={DiscretionMode} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
