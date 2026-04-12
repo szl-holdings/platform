@@ -253,6 +253,37 @@ All 6 product marketing pages elevated to competitor-grade quality with consiste
 - `/szl-holdings/trust` — Trust Center  
 - `/szl-holdings/architecture` — Architecture page
 
+### INCA Lab — AI Infrastructure Command Center (Task #401)
+
+A proprietary AI infrastructure command center built at `artifacts/inca-lab/` serving at `/inca-lab/` on port 5000.
+
+**Tech stack:** React + Vite, Tailwind CSS v4, @tanstack/react-query, recharts, lucide-react, wouter, framer-motion. Electric violet theme (`hsl(262 82% 62%)`), dark background `hsl(240 18% 4%)`, Space Grotesk headings, JetBrains Mono code.
+
+**6 feature pages:**
+- **Dashboard** — KPI tiles (active routes, token volume, 24h cost, avg latency, fallback rate), routing event feed, live benchmarks bar chart, agent topology grid
+- **Model Intelligence** — HuggingFace model browser (live `/inca/live/huggingface-models`) + arXiv paper feed (live `/inca/live/arxiv`), task filtering, model card detail drawer
+- **Nuro Mesh Command** — 8-agent topology visualization with expand/collapse, real-time model reassignment UI, high-stakes domain indicators per agent, drag-and-drop style model picker
+- **AI Gateway Console** — Routing event stream with fallback indicators, lane cost analysis, routing flow visualization, telemetry stats (success rate, cost-per-token, p95 latency)
+- **Deployment Runway** — Self-hosted vs API cost calculator, quantization selection, vRAM requirements, readiness scores, break-even analysis with month slider
+- **LLMOps Observatory** — 30-day token usage area chart by provider, cost trend bar chart, governance audit log with flag indicators and status badges
+- **Model Lab** — A/B comparison panel (side-by-side model outputs, star rating, collapsible detail), Prompt Workbench with `{{variable}}` template interpolation and template library
+
+**API routes added to api-server (`/inca-lab/*`):**
+- `GET /inca-lab/agents` — 8-agent registry
+- `GET /inca-lab/agents/usage` — per-agent token/latency stats
+- `POST /inca-lab/agents/assign` — model reassignment
+- `GET /inca-lab/router/config` — routing lane configuration
+- `GET /inca-lab/router/events` — 24h routing event stream
+- `GET /inca-lab/benchmarks` — MMLU/HumanEval/HellaSwag scores per model
+- `GET /inca-lab/deployment/targets` — self-hosted deployment readiness
+- `GET /inca-lab/observatory/tokens` — 30-day token usage by provider
+- `GET /inca-lab/observatory/costs` — 30-day cost trends by provider
+- `POST /inca-lab/lab/compare` — model comparison endpoint
+
+**CSS design system:** `.inca-panel`, `.inca-panel-active`, `.model-card`, `.agent-node`, `.kpi-tile`, `.routing-flow`, `.badge-running/staged/idle/warning/error/cloud/local`
+
+**Workflow note:** Due to a platform workflow registration limit (10/10) and a session-level tool cache inconsistency, the INCA Lab workflow must be manually activated by restarting it. The vite dev server starts successfully on port 5000. Node modules were manually bootstrapped from the pnpm virtual store (symlinked from `artifacts/lyte-command-center/node_modules`).
+
 ## External Dependencies
 - **Database:** PostgreSQL
 - **Authentication:** Replit Auth
