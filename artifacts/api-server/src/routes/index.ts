@@ -120,6 +120,7 @@ import telemetryRouter from "./telemetry";
 import crossAppHandoffsRouter from "./cross-app-handoffs";
 import { aiRouter as aiOrchestratorRouter } from "./ai-orchestrator";
 import { mastraRouter } from "./mastra-agents";
+import actionEngineRouter from "./action-engine";
 
 const router: IRouter = Router();
 
@@ -366,6 +367,8 @@ router.use(aiEngineRouter);
 
 router.use("/ai/orchestrator", aiOrchestratorRouter);
 router.use("/ai/mastra", mastraRouter);
+router.use("/ai/mastra/action-engine", _writeLimiter);
+router.use("/ai/mastra", actionEngineRouter);
 
 router.use("/analytics", _writeLimiter);
 router.use(analyticsRouter);

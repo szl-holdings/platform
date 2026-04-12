@@ -5,9 +5,13 @@ import { executeTool, registerCrossPlatformTools, listTools } from "./tool-regis
 import { createThread, storeMessage, getShortTermMemory, semanticRecall, storeKnowledgeEntity } from "./memory";
 import { emitTrace, autoEvaluate, initDefaultSlos } from "./agentops";
 import { initializeA2ACards, createTask, updateTaskStatus } from "./a2a";
-import type { MastraAgentConfig, AgentExecutionContext, OrchestratorResult, DelegationResult, TraceSpan, GuardrailResult } from "./types";
+import { registerGitHubIntegration } from "./external-integrations";
+import { ensureActionAuditTable } from "./action-audit";
+import { ensureDocumentIntelligenceTables } from "./document-intelligence";
+import { ensureTriggerTables, registerDefaultTriggers } from "./event-triggers";
+import type { MastraAgentConfig, AgentExecutionContext, DelegationResult, TraceSpan, GuardrailResult } from "./types";
 
-export type { MastraAgentConfig, AgentExecutionContext, OrchestratorResult };
+export type { MastraAgentConfig, AgentExecutionContext };
 
 const agentConfigs = new Map<string, MastraAgentConfig>();
 
@@ -396,6 +400,7 @@ export async function initializeMastra(): Promise<void> {
   logger.info("Initializing Mastra agent framework...");
 
   registerCrossPlatformTools();
+  registerGitHubIntegration();
   await loadAgentConfigs();
 
   try { await initializeA2ACards(); } catch (err) {
@@ -406,10 +411,19 @@ export async function initializeMastra(): Promise<void> {
     try { await initDefaultSlos(agentId); } catch {}
   }
 
+  await Promise.allSettled([
+    ensureActionAuditTable(),
+    ensureDocumentIntelligenceTables(),
+    ensureTriggerTables(),
+  ]);
+
+  registerDefaultTriggers();
+
   logger.info({
     agents: agentConfigs.size,
     tools: listTools().length,
-  }, "Mastra agent framework initialized");
+    actionEngine: "initialized",
+  }, "Mastra agent framework initialized with Action Engine");
 }
 
 export interface OrchestratorResult {
