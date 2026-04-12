@@ -116,6 +116,32 @@ Each web platform has a companion mobile app built with Expo/React Native, featu
 
 ---
 
+## Platform Screenshots
+
+<table>
+  <tr>
+    <td align="center"><strong>SZL Holdings</strong><br><img src="docs/media/screenshots/szl-holdings-hero.jpg" width="400" alt="SZL Holdings" /></td>
+    <td align="center"><strong>Aegis — Cybersecurity</strong><br><img src="docs/media/screenshots/aegis-hero.jpg" width="400" alt="Aegis" /></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Vessels — Maritime Intelligence</strong><br><img src="docs/media/screenshots/vessels-hero.jpg" width="400" alt="Vessels" /></td>
+    <td align="center"><strong>Terra — Real Estate Intelligence</strong><br><img src="docs/media/screenshots/terra-hero.jpg" width="400" alt="Terra" /></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Lyte — Business Observability</strong><br><img src="docs/media/screenshots/lyte-hero.jpg" width="400" alt="Lyte" /></td>
+    <td align="center"><strong>PRISM Counsel — Litigation Intel</strong><br><img src="docs/media/screenshots/prism-counsel-hero.jpg" width="400" alt="PRISM Counsel" /></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Carlota Jo — Private Advisory</strong><br><img src="docs/media/screenshots/carlota-jo-hero.jpg" width="400" alt="Carlota Jo" /></td>
+    <td align="center"><strong>Stephen Lutar — Founder Portfolio</strong><br><img src="docs/media/screenshots/stephen-lutar-hero.jpg" width="400" alt="Stephen Lutar" /></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2"><strong>Investor Due Diligence Dashboard</strong><br><img src="docs/media/screenshots/investor-dashboard.jpg" width="600" alt="Investor Dashboard" /></td>
+  </tr>
+</table>
+
+---
+
 ## Architecture
 
 ```
