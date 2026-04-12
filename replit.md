@@ -16,7 +16,7 @@ Do not make changes to the file `Y`.
 The platform is built as a pnpm monorepo utilizing Node.js 24 and TypeScript 5.9.
 - **Frontend:** React, Vite, TanStack React Query, Wouter, Tailwind CSS, Framer Motion, Lucide React, Recharts. Internationalization is handled by `react-i18next` with RTL support.
 - **Backend:** Express 5, Drizzle ORM, Zod validation, pino logging.
-- **Database:** PostgreSQL with Drizzle ORM (375+ tables), pgvector extension for AI embeddings, managing multiple schemas including CMS, product, client portal, organization membership, and AI agent state.
+- **Database:** PostgreSQL with Drizzle ORM (541+ tables), pgvector extension for AI embeddings, managing multiple schemas including CMS, product, client portal, organization membership, and AI agent state.
 - **Investor Dashboard:** `/stephen/investor` route on stephen-site — acquisition-grade due diligence surface with live DB metrics, defensibility scoring, TAM analysis, and CTA for Acquire.com. API endpoint: `GET /api/stephen/acquisition-metrics`.
 - **Authentication:** Replit Auth (OIDC/PKCE), session-based with cookie+Bearer token, 7-role RBAC.
 - **API Codegen:** Orval from OpenAPI specification.
@@ -41,6 +41,14 @@ Each platform has a distinct visual identity:
 - **GraphQL API:** A unified API mounted at `/api/graphql` using Apollo Server v5 and `graphql-ws` for subscriptions, with 9 domain modules.
 - **MCP Server:** Model Context Protocol server at `/api/mcp` for AI tool orchestration, exposing 20 tools, 4 resources, and 5 prompt templates via HTTP+SSE.
 - **AI Orchestrator API:** Multi-agent orchestration endpoints at `/api/ai/orchestrator/` including chat, agent runs, RAG knowledge base, multi-step workflows, and cross-platform intelligence.
+
+### Alloy AI Engines (New)
+Three production-grade AI engines powering Alloy's self-evolving intelligence:
+- **Genetic Evolution Engine** (`api-server/src/lib/alloy-evolution-engine.ts`): Real genetic algorithm with 4 selection strategies (tournament, roulette, rank, elitist), crossover operators (single-point, two-point, uniform), Gaussian mutation, and multi-dimensional fitness evaluation. Persists populations, genomes, and evolution events to `alloy_populations`, `alloy_genomes`, `alloy_evolution_events` tables.
+- **Expert Router (MoE)** (`api-server/src/lib/alloy-expert-router.ts`): Mixture-of-Experts inspired router with 9 domain experts, learned domain affinity matrix, 4 routing strategies (affinity-weighted, cascade, ensemble, least-loaded), confidence scoring, and structured routing logs via `alloy_expert_routing_log` and `alloy_experts` tables.
+- **Threat Engine (STRIDE + Kill Chain)** (`api-server/src/lib/alloy-threat-engine.ts`): STRIDE threat modeling framework combined with Lockheed Martin Cyber Kill Chain analysis. Includes real APT profiles (APT-29 Cozy Bear, APT-28 Fancy Bear, FIN7), vulnerability assessment, counter-intelligence indicators, and risk matrix calculation. Persists to `alloy_threat_models` table.
+- **API Routes** (`api-server/src/routes/alloy-evolution.ts`): Full REST endpoints at `/api/alloy/evolution/*`, `/api/alloy/experts/*`, `/api/alloy/threats/*`, `/api/alloy/capabilities`. Org-scoped queries.
+- **Schema**: 6 tables in `lib/db/src/schema/alloy_evolution.ts` — `alloy_experts`, `alloy_genomes`, `alloy_populations`, `alloy_threat_models`, `alloy_expert_routing_log`, `alloy_evolution_events`.
 
 ### Agentic AI Infrastructure
 The platform includes a full agentic AI stack:

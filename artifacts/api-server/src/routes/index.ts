@@ -95,6 +95,7 @@ import prismCounselCoreRouter from "./prism-counsel-core";
 import { prismCounselPilotOneRouter } from "./prism-counsel-pilot-one";
 import prismCounselReviewRouter from "./prism-counsel-review";
 import prismCounselPurviewRouter from "./prism-counsel-purview";
+import alloyEvolutionRouter from "./alloy-evolution";
 import alloyEmailRouter from "./alloy-email";
 import alloyMeetingsRouter from "./alloy-meetings";
 import alloyDigestRouter from "./alloy-digest";
@@ -442,5 +443,11 @@ router.use(telemetryRouter);
 router.use("/cross-app", _readLimiter);
 router.use("/cross-app", _writeLimiter);
 router.use(crossAppHandoffsRouter);
+
+router.use("/alloy/evolution", _readLimiter);
+router.use("/alloy/experts", _readLimiter);
+router.use("/alloy/threats", _readLimiter);
+router.use("/alloy/capabilities", _readLimiter);
+router.use("/alloy", alloyEvolutionRouter);
 
 export default router;
