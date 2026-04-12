@@ -116,6 +116,7 @@ const AutonomousRemediation = lazy(() => import("@/pages/autonomous-remediation"
 const ChaosPrediction = lazy(() => import("@/pages/chaos-prediction"));
 const CostPerformance = lazy(() => import("@/pages/cost-performance"));
 const OperationalNarrative = lazy(() => import("@/pages/operational-narrative"));
+const DecisionCostXRay = lazy(() => import("@/pages/decision-cost-xray"));
 
 const ADMIN_ROLES = ["admin", "super_admin", "ops"];
 
@@ -223,6 +224,7 @@ function PrivateRouter() {
         <Route path="/chaos-prediction" component={ChaosPrediction} />
         <Route path="/cost-performance" component={CostPerformance} />
         <Route path="/operational-narrative" component={OperationalNarrative} />
+        <Route path="/decision-cost-xray" component={DecisionCostXRay} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>
@@ -237,6 +239,7 @@ const lyteCommands: CommandItem[] = [
   { id: "nav-digest", label: "Digest Center", icon: "📄", group: "Executive", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/digest"); } },
   { id: "nav-approvals", label: "Approvals", icon: "✅", group: "Executive", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/approvals"); } },
   { id: "nav-trust", label: "Trust & Audit", icon: "🛡️", group: "Executive", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/trust-audit"); } },
+  { id: "nav-cost-xray", label: "Decision Cost X-Ray", icon: "💸", group: "Executive", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/decision-cost-xray"); } },
   { id: "nav-inbox", label: "Command Inbox", icon: "📥", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/inbox"); } },
   { id: "nav-signals", label: "Signals Feed", icon: "📡", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/signals"); } },
   { id: "nav-ownership", label: "Ownership Map", icon: "👥", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ownership"); } },

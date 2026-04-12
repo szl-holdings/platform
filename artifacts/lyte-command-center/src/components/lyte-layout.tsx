@@ -7,7 +7,7 @@ import {
   Database, Play, Activity, CheckSquare, Shield, Network, Heart,
   AlertTriangle, Brain, Radio, Workflow, Inbox, Search, UserCheck,
   ChevronRight, Gauge, BarChart3, LayoutDashboard, Download, Clapperboard, Power,
-  GitBranch, Send
+  GitBranch, Send, DollarSign
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, useSandboxMode, EnvironmentLabel, type OnboardingConfig } from "@szl-holdings/shared-ui";
 import { useDemoMode } from "@/lib/demo-mode";
@@ -95,6 +95,7 @@ const NAV_GROUPS = [
       { href: "/decision-receipts", label: "Decision Receipts", icon: FileText },
       { href: "/digest", label: "Digest Center", icon: FileText },
       { href: "/approvals", label: "Approvals", icon: CheckSquare },
+      { href: "/decision-cost-xray", label: "Cost X-Ray", icon: DollarSign },
       { href: "/trust-audit", label: "Trust & Audit", icon: Shield },
     ],
   },
