@@ -121,6 +121,7 @@ import crossAppHandoffsRouter from "./cross-app-handoffs";
 import { aiRouter as aiOrchestratorRouter } from "./ai-orchestrator";
 import { mastraRouter } from "./mastra-agents";
 import actionEngineRouter from "./action-engine";
+import stephenTelemetryRouter from "./stephen-telemetry";
 
 const router: IRouter = Router();
 
@@ -452,5 +453,8 @@ router.use("/alloy/experts", _readLimiter);
 router.use("/alloy/threats", _readLimiter);
 router.use("/alloy/capabilities", _readLimiter);
 router.use("/alloy", alloyEvolutionRouter);
+
+router.use("/stephen/telemetry", _readLimiter);
+router.use(stephenTelemetryRouter);
 
 export default router;

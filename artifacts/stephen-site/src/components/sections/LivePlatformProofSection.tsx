@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
-import { Activity, AlertTriangle, MapPin, TrendingUp, Ship, Home, Shield, RefreshCw } from "lucide-react";
+import { Activity, AlertTriangle, MapPin, TrendingUp, Ship, Home, Shield, RefreshCw, Terminal } from "lucide-react";
+import { LiveProofTerminal } from "./LiveProofTerminal";
 
 type Vessel = {
   name: string;
@@ -300,7 +301,9 @@ const platforms = [
 
 export function LivePlatformProofSection() {
   const ref = useRef<HTMLDivElement>(null);
+  const terminalRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-10%" });
+  const isTerminalInView = useInView(terminalRef, { once: true, margin: "-5%" });
   const [active, setActive] = useState(0);
 
   useEffect(() => {
@@ -319,6 +322,10 @@ export function LivePlatformProofSection() {
         <div
           className="absolute right-0 top-1/2 -translate-y-1/2 w-[600px] h-[600px] blur-[200px] rounded-full"
           style={{ background: `radial-gradient(ellipse, ${platform.color}08 0%, transparent 70%)` }}
+        />
+        <div
+          className="absolute left-1/4 bottom-1/4 w-[400px] h-[400px] blur-[180px] rounded-full"
+          style={{ background: "radial-gradient(ellipse, rgba(99,102,241,0.04) 0%, transparent 70%)" }}
         />
       </div>
 
@@ -459,6 +466,37 @@ export function LivePlatformProofSection() {
               ))}
             </div>
           </div>
+        </div>
+
+        <div ref={terminalRef} className="mt-20 sm:mt-24">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={isTerminalInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7 }}
+            className="mb-8"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <Terminal size={14} style={{ color: "rgba(99,102,241,0.7)" }} />
+              <p className="text-[11px] font-semibold tracking-[0.2em] uppercase" style={{ color: "rgba(255,255,255,0.3)" }}>
+                Live Proof Terminal
+              </p>
+            </div>
+            <h3 className="text-3xl sm:text-4xl font-black tracking-tight mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>
+              The ecosystem heartbeat,{" "}
+              <span style={{ color: "rgba(255,255,255,0.3)" }}>right now.</span>
+            </h3>
+            <p className="text-[14px] leading-[1.8] max-w-2xl" style={{ color: "rgba(255,255,255,0.4)" }}>
+              Sanitized, real-time system events streaming from across the SZL Holdings production stack — API calls processed, AI inferences completed, agent tasks orchestrated, compliance checks run. No client data. No PII. Pure system signal.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={isTerminalInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.15 }}
+          >
+            <LiveProofTerminal />
+          </motion.div>
         </div>
       </div>
 
