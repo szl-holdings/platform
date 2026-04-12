@@ -79,7 +79,7 @@ buildGraphQLMiddleware(server)
   .then(middleware => {
     registerGraphQLHandler(middleware);
     logger.info("GraphQL endpoint mounted at /api/graphql");
-    logger.info("GraphQL subscriptions available at ws://.../api/graphql/ws");
+    logger.info("GraphQL subscriptions available at wss://.../api/graphql/ws");
   })
   .catch(err => {
     logger.warn({ err }, "GraphQL initialization failed — continuing without GraphQL");

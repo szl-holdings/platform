@@ -157,9 +157,21 @@ router.patch("/matters/:matterId", authMiddleware(), async (req, res) => {
     if (!existing) return sendNotFound(res, "Matter not found");
 
     const updates: Record<string, unknown> = { updatedAt: new Date(), updatedBy: req.user?.id };
-    const allowedFields = ["title", "caseNumber", "status", "stage", "jurisdiction", "courtName", "notes", "healthScore"];
-    for (const field of allowedFields) {
-      if (req.body[field] !== undefined) updates[field] = req.body[field];
+    const stringFields = ["title", "caseNumber", "status", "stage", "jurisdiction", "courtName", "notes"];
+    const numericFields = ["healthScore"];
+    for (const field of stringFields) {
+      const val = req.body[field];
+      if (val !== undefined) {
+        if (typeof val !== "string") return res.status(400).json({ error: `Field '${field}' must be a string` });
+        updates[field] = val;
+      }
+    }
+    for (const field of numericFields) {
+      const val = req.body[field];
+      if (val !== undefined) {
+        if (typeof val !== "number" || !Number.isFinite(val)) return res.status(400).json({ error: `Field '${field}' must be a number` });
+        updates[field] = val;
+      }
     }
 
     const [updated] = await db.update(pcMattersTable).set(updates as any).where(eq(pcMattersTable.id, matterId)).returning();
