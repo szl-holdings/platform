@@ -10,6 +10,17 @@ import {
   generateForecast,
   ensureMlTables,
 } from "../lib/alloy-ml-engine";
+import {
+  ensureCompoundIntelligenceTables,
+  upsertOntologyEntity,
+  createOntologyLink,
+  traverseOntologyGraph,
+  buildBehavioralGenome,
+  predictCascadeEffects,
+  generateAnticipatorySignal,
+  detectCrossDomainCorrelations,
+  getCompetitiveMoatAnalysis,
+} from "../lib/alloy-compound-intelligence";
 import { pool } from "@szl-holdings/db";
 
 const router = Router();
@@ -19,6 +30,7 @@ function getOrgId(req: Request): number {
 }
 
 ensureMlTables().catch(() => {});
+ensureCompoundIntelligenceTables().catch(() => {});
 
 router.get("/ml/models", async (req: Request, res: Response) => {
   try {
@@ -367,5 +379,252 @@ function generateDomainTrainingData(domain: string) {
     tags: [domain, "training"],
   }));
 }
+
+router.post("/ontology/entities", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const orgId = getOrgId(req);
+    const { entityId, entityType, domain, name, properties, confidence, sourceSystem } = req.body;
+    if (!entityType || !domain || !name) {
+      return sendBadRequest(res, "entityType, domain, and name are required");
+    }
+    const entity = await upsertOntologyEntity({ orgId, entityId, entityType, domain, name, properties, confidence, sourceSystem });
+    sendCreated(res, { entity });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to upsert entity");
+  }
+});
+
+router.get("/ontology/entities", async (req: Request, res: Response) => {
+  try {
+    const orgId = getOrgId(req);
+    const { domain, entityType, limit } = req.query;
+    let query = `SELECT * FROM alloy_ontology_entities WHERE org_id = $1 AND is_active = TRUE`;
+    const params: unknown[] = [orgId];
+    if (domain) { params.push(domain); query += ` AND domain = $${params.length}`; }
+    if (entityType) { params.push(entityType); query += ` AND entity_type = $${params.length}`; }
+    query += ` ORDER BY last_seen DESC LIMIT $${params.length + 1}`;
+    params.push(parseInt(limit as string) || 100);
+    const { rows } = await pool.query(query, params);
+    sendSuccess(res, { entities: rows, total: rows.length });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch entities");
+  }
+});
+
+router.post("/ontology/links", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const orgId = getOrgId(req);
+    const { sourceEntityId, targetEntityId, linkType, strength, evidence, isInferred } = req.body;
+    if (!sourceEntityId || !targetEntityId || !linkType) {
+      return sendBadRequest(res, "sourceEntityId, targetEntityId, and linkType are required");
+    }
+    const link = await createOntologyLink({ orgId, sourceEntityId, targetEntityId, linkType, strength, evidence, isInferred });
+    sendCreated(res, { link });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to create link");
+  }
+});
+
+router.get("/ontology/graph/:entityId", async (req: Request, res: Response) => {
+  try {
+    const orgId = getOrgId(req);
+    const { depth, linkTypes, domains } = req.query;
+    const graph = await traverseOntologyGraph({
+      orgId,
+      entityId: req.params.entityId,
+      depth: depth ? parseInt(depth as string) : undefined,
+      linkTypes: linkTypes ? (linkTypes as string).split(",") : undefined,
+      domains: domains ? (domains as string).split(",") : undefined,
+    });
+    sendSuccess(res, { graph });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to traverse graph");
+  }
+});
+
+router.post("/behavioral/genome", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const orgId = getOrgId(req);
+    const { entityId, domain, genomeType, behaviors } = req.body;
+    if (!entityId || !domain || !genomeType || !behaviors?.length) {
+      return sendBadRequest(res, "entityId, domain, genomeType, and behaviors[] are required");
+    }
+    const genome = await buildBehavioralGenome({ orgId, entityId, domain, genomeType, behaviors });
+    sendCreated(res, { genome });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to build behavioral genome");
+  }
+});
+
+router.get("/behavioral/genomes", async (req: Request, res: Response) => {
+  try {
+    const orgId = getOrgId(req);
+    const { domain, minAnomaly } = req.query;
+    let query = `SELECT * FROM alloy_behavioral_genomes WHERE org_id = $1`;
+    const params: unknown[] = [orgId];
+    if (domain) { params.push(domain); query += ` AND domain = $${params.length}`; }
+    if (minAnomaly) { params.push(parseFloat(minAnomaly as string)); query += ` AND anomaly_score >= $${params.length}`; }
+    query += " ORDER BY anomaly_score DESC LIMIT 100";
+    const { rows } = await pool.query(query, params);
+    sendSuccess(res, { genomes: rows, total: rows.length });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch behavioral genomes");
+  }
+});
+
+router.get("/behavioral/genome/:entityId", async (req: Request, res: Response) => {
+  try {
+    const orgId = getOrgId(req);
+    const { rows } = await pool.query(
+      `SELECT * FROM alloy_behavioral_genomes WHERE org_id = $1 AND entity_id = $2 ORDER BY updated_at DESC`,
+      [orgId, req.params.entityId]
+    );
+    sendSuccess(res, { genomes: rows });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch entity genome");
+  }
+});
+
+router.post("/cascade/predict", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const orgId = getOrgId(req);
+    const { triggerDomain, triggerSignal, severity } = req.body;
+    if (!triggerDomain || !triggerSignal) {
+      return sendBadRequest(res, "triggerDomain and triggerSignal are required");
+    }
+    const result = await predictCascadeEffects({ orgId, triggerDomain, triggerSignal, severity });
+    sendCreated(res, result);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to predict cascade effects");
+  }
+});
+
+router.get("/cascade/predictions", async (req: Request, res: Response) => {
+  try {
+    const orgId = getOrgId(req);
+    const { domain, status } = req.query;
+    let query = `SELECT * FROM alloy_cascade_predictions WHERE org_id = $1`;
+    const params: unknown[] = [orgId];
+    if (domain) { params.push(domain); query += ` AND trigger_domain = $${params.length}`; }
+    if (status) { params.push(status); query += ` AND status = $${params.length}`; }
+    query += " ORDER BY created_at DESC LIMIT 50";
+    const { rows } = await pool.query(query, params);
+    sendSuccess(res, { cascades: rows, total: rows.length });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch cascade predictions");
+  }
+});
+
+router.post("/cascade/resolve/:id", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const orgId = getOrgId(req);
+    const { actualOutcome, wasAccurate } = req.body;
+    const { rows } = await pool.query(
+      `UPDATE alloy_cascade_predictions SET status = 'resolved', resolved_at = NOW(), actual_outcome = $3, was_accurate = $4
+       WHERE id = $1 AND org_id = $2 RETURNING *`,
+      [req.params.id, orgId, JSON.stringify(actualOutcome || {}), wasAccurate ?? null]
+    );
+    if (!rows.length) return sendBadRequest(res, "Cascade prediction not found");
+    sendSuccess(res, { cascade: rows[0] });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to resolve cascade");
+  }
+});
+
+router.post("/anticipatory/signal", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const orgId = getOrgId(req);
+    const { entityId, domain, signalType, context } = req.body;
+    if (!domain || !signalType || !context) {
+      return sendBadRequest(res, "domain, signalType, and context are required");
+    }
+    const result = await generateAnticipatorySignal({ orgId, entityId, domain, signalType, context });
+    if (!result.signal) return sendSuccess(res, { message: result.message, signal: null });
+    sendCreated(res, result);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to generate anticipatory signal");
+  }
+});
+
+router.get("/anticipatory/signals", async (req: Request, res: Response) => {
+  try {
+    const orgId = getOrgId(req);
+    const { domain, active } = req.query;
+    let query = `SELECT * FROM alloy_anticipatory_signals WHERE org_id = $1`;
+    const params: unknown[] = [orgId];
+    if (domain) { params.push(domain); query += ` AND domain = $${params.length}`; }
+    if (active === "true") query += ` AND (expires_at IS NULL OR expires_at > NOW())`;
+    query += " ORDER BY confidence DESC, created_at DESC LIMIT 100";
+    const { rows } = await pool.query(query, params);
+    sendSuccess(res, { signals: rows, total: rows.length });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch anticipatory signals");
+  }
+});
+
+router.post("/correlations/detect", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const orgId = getOrgId(req);
+    const { domains, timeWindowHours } = req.body;
+    const result = await detectCrossDomainCorrelations({ orgId, domains, timeWindowHours });
+    sendSuccess(res, result);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to detect correlations");
+  }
+});
+
+router.get("/correlations", async (req: Request, res: Response) => {
+  try {
+    const orgId = getOrgId(req);
+    const { priority, domain } = req.query;
+    let query = `SELECT * FROM alloy_cross_domain_correlations WHERE org_id = $1`;
+    const params: unknown[] = [orgId];
+    if (priority) { params.push(priority); query += ` AND priority = $${params.length}`; }
+    if (domain) { params.push(domain); query += ` AND $${params.length} = ANY(domains)`; }
+    query += " ORDER BY strength DESC, created_at DESC LIMIT 50";
+    const { rows } = await pool.query(query, params);
+    sendSuccess(res, { correlations: rows, total: rows.length });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch correlations");
+  }
+});
+
+router.get("/competitive/moat", async (req: Request, res: Response) => {
+  try {
+    const orgId = getOrgId(req);
+    const analysis = await getCompetitiveMoatAnalysis(orgId);
+    sendSuccess(res, analysis);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to get competitive analysis");
+  }
+});
+
+router.get("/compound/dashboard", async (req: Request, res: Response) => {
+  try {
+    const orgId = getOrgId(req);
+    const [entities, links, genomes, cascades, signals, correlations, moat] = await Promise.all([
+      pool.query(`SELECT count(*) as total, count(DISTINCT domain) as domains FROM alloy_ontology_entities WHERE org_id = $1 AND is_active = TRUE`, [orgId]),
+      pool.query(`SELECT count(*) as total, count(*) FILTER (WHERE is_inferred = TRUE) as inferred FROM alloy_ontology_links WHERE org_id = $1`, [orgId]),
+      pool.query(`SELECT count(*) as total, avg(anomaly_score) as avg_anomaly, count(*) FILTER (WHERE anomaly_score > 0.7) as high_risk FROM alloy_behavioral_genomes WHERE org_id = $1`, [orgId]),
+      pool.query(`SELECT count(*) as total, count(*) FILTER (WHERE status = 'active') as active, avg(risk_amplification) as avg_amplification FROM alloy_cascade_predictions WHERE org_id = $1`, [orgId]),
+      pool.query(`SELECT count(*) as total, avg(confidence) as avg_confidence, count(*) FILTER (WHERE was_acted_on = TRUE) as acted_on FROM alloy_anticipatory_signals WHERE org_id = $1`, [orgId]),
+      pool.query(`SELECT count(*) as total, count(*) FILTER (WHERE actionable = TRUE) as actionable, count(*) FILTER (WHERE priority = 'critical') as critical FROM alloy_cross_domain_correlations WHERE org_id = $1`, [orgId]),
+      pool.query(`SELECT count(*) as total, avg(moat_score) as avg_moat, count(*) FILTER (WHERE is_unique = TRUE) as unique_capabilities FROM alloy_competitive_moat WHERE org_id = $1`, [orgId]),
+    ]);
+
+    sendSuccess(res, {
+      compoundIntelligence: {
+        ontology: { entities: entities.rows[0].total, domains: entities.rows[0].domains, links: links.rows[0].total, inferredLinks: links.rows[0].inferred },
+        behavioralGenomes: genomes.rows[0],
+        cascadePredictions: cascades.rows[0],
+        anticipatorySignals: signals.rows[0],
+        crossDomainCorrelations: correlations.rows[0],
+        competitiveMoat: moat.rows[0],
+      },
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch compound dashboard");
+  }
+});
 
 export default router;

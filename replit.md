@@ -16,7 +16,7 @@ Do not make changes to the file `Y`.
 The platform is built as a pnpm monorepo utilizing Node.js 24 and TypeScript 5.9.
 - **Frontend:** React, Vite, TanStack React Query, Wouter, Tailwind CSS, Framer Motion, Lucide React, Recharts. Internationalization is handled by `react-i18next` with RTL support.
 - **Backend:** Express 5, Drizzle ORM, Zod validation, pino logging.
-- **Database:** PostgreSQL with Drizzle ORM (552+ tables), pgvector extension for AI embeddings, managing multiple schemas including CMS, product, client portal, organization membership, and AI agent state.
+- **Database:** PostgreSQL with Drizzle ORM (560+ tables), pgvector extension for AI embeddings, managing multiple schemas including CMS, product, client portal, organization membership, and AI agent state.
 - **Investor Dashboard:** `/stephen/investor` route on stephen-site — acquisition-grade due diligence surface with live DB metrics, defensibility scoring, TAM analysis, and CTA for Acquire.com. API endpoint: `GET /api/stephen/acquisition-metrics`.
 - **Authentication:** Replit Auth (OIDC/PKCE), session-based with cookie+Bearer token, 7-role RBAC.
 - **API Codegen:** Orval from OpenAPI specification.
@@ -58,7 +58,18 @@ Production-grade AI engines powering Alloy's self-evolving Four-Lane intelligenc
 - **Forecasting Engine** (`api-server/src/lib/alloy-ml-engine.ts`): Multi-horizon forecasting (1d to 365d) with confidence intervals, seasonal decomposition, and causal reasoning chains. 5 methodologies: trend extrapolation, seasonal decomposition, causal reasoning, ensemble forecast, anomaly-adjusted. Persists to `alloy_forecasts` table.
 - **Prediction Store** (`api-server/src/lib/alloy-ml-engine.ts`): Full prediction lifecycle — generate, store, resolve against actual outcomes, track accuracy over time. Input hashing for deduplication, reasoning chain preservation, confidence calibration feedback. Persists to `alloy_predictions` table.
 - **ML API Routes** (`api-server/src/routes/alloy-ml.ts`): Full REST endpoints at `/api/alloy/ml/*` including models CRUD, training runs, predictions, backtests, forecasts, and aggregated dashboard. Domain-specific training data generators for maritime, legal, defense, real estate, consulting.
-- **Schema**: 14+ tables — `alloy_experts`, `alloy_genomes`, `alloy_populations`, `alloy_threat_models`, `alloy_expert_routing_log`, `alloy_evolution_events`, `alloy_capability_gaps`, `alloy_innovation_proposals`, `alloy_learning_records`, `alloy_ml_models`, `alloy_ml_training_runs`, `alloy_predictions`, `alloy_backtest_sessions`, `alloy_forecasts`.
+
+### Compound Intelligence (One-of-One Capabilities)
+Production-grade compound intelligence engine (`api-server/src/lib/alloy-compound-intelligence.ts`) — features that go beyond Palantir, Anduril, Windward, Datadog, Litify, and Reonomy combined:
+- **Cross-Domain Ontology Fusion**: Real-time entity linking across 5 industries with 8 entity types per domain, 22 link types, graph traversal up to depth 4, inferred relationships, and behavioral DNA integration. No competitor links entities across maritime, legal, defense, real estate, AND advisory in one graph.
+- **Behavioral Genome Profiling**: Builds behavioral DNA fingerprints for every entity — temporal patterns, action entropy, Shannon information theory, anomaly scoring, domain-specific risk factors (AIS gaps, privilege escalation, missed deadlines, distress signals), and pattern signatures.
+- **Predictive Cascade Engine**: Predicts how events cascade across domains — a vessel sanctions violation automatically generates legal liability prediction, property value impact, client advisory needs, and platform health alerts. Time-to-impact estimation and mitigation actions.
+- **Anticipatory Intelligence**: Domain-specific prediction rules that anticipate events BEFORE they happen — settlement windows, APT campaigns, distress opportunities, weather disruptions, client needs shifts — with evidence chains and recommended actions.
+- **Cross-Domain Correlation Detection**: Scans ontology entities, behavioral genomes, and cascade predictions to detect hidden multi-domain relationships — shared entity properties, multi-domain risk convergence, and cascade convergence patterns.
+- **Competitive Moat Analysis**: Live competitive positioning against Palantir, Anduril, Windward, Datadog, Litify, and Reonomy/Cherre with capability-by-capability comparison, moat scoring, and one-of-one uniqueness assessment.
+- **Compound Intelligence Dashboard**: Aggregated metrics across all 7 subsystems — ontology entities/links, behavioral genomes, cascade predictions, anticipatory signals, cross-domain correlations, and competitive moat.
+- **API Routes**: 15+ endpoints at `/api/alloy/ontology/*`, `/api/alloy/behavioral/*`, `/api/alloy/cascade/*`, `/api/alloy/anticipatory/*`, `/api/alloy/correlations/*`, `/api/alloy/competitive/*`, `/api/alloy/compound/*`.
+- **Schema**: 22+ Alloy tables — original 14 + `alloy_ontology_entities`, `alloy_ontology_links`, `alloy_behavioral_genomes`, `alloy_decision_mesh_nodes`, `alloy_cascade_predictions`, `alloy_anticipatory_signals`, `alloy_cross_domain_correlations`, `alloy_competitive_moat`.
 
 ### Agentic AI Infrastructure
 The platform includes a full agentic AI stack:
