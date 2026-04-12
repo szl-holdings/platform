@@ -105,6 +105,7 @@ const PitchModePage = lazy(() => import("@/pages/pitch-mode"));
 const FlywheelVizPage = lazy(() => import("@/pages/flywheel-viz"));
 const RevenueMetricsPage = lazy(() => import("@/pages/revenue-metrics"));
 const IntelligenceMeshPage = lazy(() => import("@/pages/intelligence-mesh"));
+const NerveCenterPage = lazy(() => import("@/pages/nerve-center"));
 
 // Public infrastructure pages (trust center, legal baseline, API, investor, press, brand, faq, roadmap)
 const SecurityPage = lazy(() => import("@/pages/security"));
@@ -539,6 +540,9 @@ function App() {
             </Route>
             <Route path="/intelligence-mesh">
               <Suspense fallback={<PageLoader />}><IntelligenceMeshPage /></Suspense>
+            </Route>
+            <Route path="/nerve-center">
+              <Suspense fallback={<PageLoader />}><NerveCenterPage /></Suspense>
             </Route>
 
             {/* ── Product pages — accessible but not in primary nav ── */}
