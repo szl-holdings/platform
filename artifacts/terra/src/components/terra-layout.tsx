@@ -8,7 +8,7 @@ import {
   Building2, LayoutDashboard, Eye, Activity,
   BarChart3, Users, FileText, CheckSquare,
   Bell, Menu, X, Briefcase, Map, Globe, TrendingUp, BookOpen,
-  Shield, Layers, Radio, Search, PieChart, GitBranch, Timer, Wrench
+  Shield, Layers, Radio, Search, PieChart, GitBranch, Timer, Wrench, Zap
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui";
 import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
@@ -60,6 +60,7 @@ const NAV_SECTIONS: SidebarNavSection[] = [
       { id: "deal-war-room", href: "/deal-war-room", label: "Deal War Room", icon: <Shield className="w-full h-full" /> },
       { id: "market-pulse", href: "/market-pulse", label: "Market Pulse", icon: <Radio className="w-full h-full" /> },
       { id: "owner-network-graph", href: "/owner-network-graph", label: "Owner Network", icon: <GitBranch className="w-full h-full" /> },
+      { id: "distress-contagion-graph", href: "/distress-contagion-graph", label: "Contagion Graph", icon: <Zap className="w-full h-full" /> },
     ],
   },
   {

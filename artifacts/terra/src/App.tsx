@@ -67,6 +67,7 @@ const PredictiveDistressScore = lazy(() => import("@/pages/predictive-distress-s
 const DealWarRoom = lazy(() => import("@/pages/deal-war-room"));
 const MarketPulse = lazy(() => import("@/pages/market-pulse"));
 const OwnerNetworkGraph = lazy(() => import("@/pages/owner-network-graph"));
+const DistressContagionGraph = lazy(() => import("@/pages/distress-contagion-graph"));
 
 function PageLoader() {
   return (
@@ -147,6 +148,7 @@ function PrivateRouter() {
             <Route path="/deal-war-room" component={DealWarRoom} />
             <Route path="/market-pulse" component={MarketPulse} />
             <Route path="/owner-network-graph" component={OwnerNetworkGraph} />
+            <Route path="/distress-contagion-graph" component={DistressContagionGraph} />
             <Route component={NotFound} />
           </Switch>
         </Suspense>
