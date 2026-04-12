@@ -41,37 +41,5 @@ PUBLIC_APP_URL = "https://szlholdings.replit.app"
 OAUTH_STATE_SECRET = "0d5148c24475c3a022f044e15ad8a6088ccdadb82fd4a9c873eed64fe79c4e48"
 
 [[ports]]
-localPort = 8080
-externalPort = 8080
-
-[[ports]]
-localPort = 18485
-externalPort = 3003
-
-[[ports]]
-localPort = 18490
-externalPort = 3001
-
-[[ports]]
-localPort = 19290
-externalPort = 5173
-
-[[ports]]
 localPort = 21130
 externalPort = 80
-
-[[ports]]
-localPort = 21200
-externalPort = 3002
-
-[[ports]]
-localPort = 22500
-externalPort = 4200
-
-[[ports]]
-localPort = 23932
-externalPort = 6000
-
-[[ports]]
-localPort = 26500
-externalPort = 3000
