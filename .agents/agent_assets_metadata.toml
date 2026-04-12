@@ -485,3 +485,81 @@ id = "CPnuq2QR40Q1Kf5EtUpbS"
 uri = "file://screenshots/szl-portfolio.zip"
 type = "unspecified"
 title = "SZL Portfolio Screenshot Package (ZIP)"
+
+[[outputs]]
+id = "Da2hJphy1CAZV9s4uMykl"
+uri = "file://screenshots/01-szl-holdings-home.jpg"
+type = "image"
+title = "SZL Holdings — Homepage (LIVE)"
+
+[[outputs]]
+id = "TZSk8pBfSxA_v47ZzMcyk"
+uri = "file://screenshots/02-alloy-platform.jpg"
+type = "image"
+title = "Alloy AI Platform — Hero + Architecture"
+
+[[outputs]]
+id = "8WNLDGUsVRRqV82PalL5S"
+uri = "file://screenshots/03-alloy-full-page.jpg"
+type = "image"
+title = "Alloy — Full Page (Genetic Evolution + MoE Router)"
+
+[[outputs]]
+id = "8IGq6HAtAdiGgfQG7xvb4"
+uri = "file://screenshots/04-lyte-command-center.jpg"
+type = "image"
+title = "Lyte Command Center — Business Observability"
+
+[[outputs]]
+id = "I2_P9EZyWeWYYNQ0cr9Ia"
+uri = "file://screenshots/05-vessels-maritime.jpg"
+type = "image"
+title = "Vessels — Maritime Intelligence (214 Vessels)"
+
+[[outputs]]
+id = "MmyGuUbp8XN65Njnfy7Tl"
+uri = "file://screenshots/06-aegis-firestorm.jpg"
+type = "image"
+title = "Aegis/Firestorm — Defense & Intelligence"
+
+[[outputs]]
+id = "SOfKq3KOQyD-Gq0dttK_G"
+uri = "file://screenshots/07-terra-real-estate.jpg"
+type = "image"
+title = "Terra — Real Estate Intelligence"
+
+[[outputs]]
+id = "JFaDbZ_T85_vJhLA-cdHH"
+uri = "file://screenshots/08-prism-counsel.jpg"
+type = "image"
+title = "PRISM Counsel — Legal Matter Intelligence"
+
+[[outputs]]
+id = "FvJqwbKtOCQ35fan2Hqrr"
+uri = "file://screenshots/09-carlota-jo.jpg"
+type = "image"
+title = "Carlota Jo — Private Advisory (UHNW)"
+
+[[outputs]]
+id = "gNN2HfOz4wzgoeW6X_4R1"
+uri = "file://screenshots/10-stephen-lutar.jpg"
+type = "image"
+title = "Stephen Lutar — Founder Identity"
+
+[[outputs]]
+id = "t64559PLPPRHuvv6-yRA7"
+uri = "file://screenshots/11-alloy-evolution-radar.jpg"
+type = "image"
+title = "Alloy Evolution Radar — Innovation Dashboard"
+
+[[outputs]]
+id = "0XoEenBIgH8Qmf3sEiMW9"
+uri = "file://screenshots/12-stephen-investor.jpg"
+type = "image"
+title = "Investor Due Diligence — Acquisition Metrics"
+
+[[outputs]]
+id = "A_I4L5-swbnyvs4cntUMj"
+uri = "file://screenshots/13-szl-founder.jpg"
+type = "image"
+title = "SZL Founder Page — 16 Apps, 552 Tables"
