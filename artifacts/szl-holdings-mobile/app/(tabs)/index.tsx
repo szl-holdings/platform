@@ -28,6 +28,11 @@ import { useColors } from "@/hooks/useColors";
 import { useApiStatus } from "@/hooks/useApiStatus";
 import { SkeletonLoader } from "@/components/SkeletonLoader";
 import { apiFetch } from "@/lib/apiClient";
+import { VoiceCommandOverlay } from "@/components/VoiceCommandOverlay";
+import { CommandPalette, type CommandItem } from "@/components/CommandPalette";
+import { useShakeGesture } from "@/hooks/useShakeGesture";
+import { useOfflineSync } from "@/hooks/useOfflineSync";
+import { useRouter } from "expo-router";
 
 type FeatherIconName = React.ComponentProps<typeof Feather>["name"];
 
@@ -374,6 +379,40 @@ export default function CommandScreen() {
   const { isOffline, isDegraded } = useApiStatus();
   const [refreshing, setRefreshing] = useState(false);
   const qc = useQueryClient();
+  const router = useRouter();
+  const [voiceVisible, setVoiceVisible] = useState(false);
+  const [paletteVisible, setPaletteVisible] = useState(false);
+
+  useShakeGesture({
+    onShake: () => setPaletteVisible(true),
+    enabled: true,
+  });
+
+  const { status: syncStatus, pendingCount } = useOfflineSync({
+    namespace: "szl-command",
+  });
+
+  const handleVoiceCommand = useCallback((text: string) => {
+    const lower = text.toLowerCase();
+    if (lower.includes("pulse") || lower.includes("heartbeat")) {
+      router.push("/(tabs)/pulse" as any);
+    } else if (lower.includes("portfolio")) {
+      router.push("/(tabs)/portfolio" as any);
+    } else if (lower.includes("alloy")) {
+      router.push("/(tabs)/alloy" as any);
+    } else if (lower.includes("alert") || lower.includes("critical")) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    }
+  }, [router]);
+
+  const paletteCommands: CommandItem[] = [
+    { id: "pulse", label: "Portfolio Pulse", subtitle: "Live heartbeat for all platforms", icon: "heart", tags: ["pulse", "health", "status"], action: () => router.push("/(tabs)/pulse" as any) },
+    { id: "portfolio", label: "Portfolio", subtitle: "View all ventures", icon: "briefcase", tags: ["ventures", "portfolio"], action: () => router.push("/(tabs)/portfolio" as any) },
+    { id: "alloy", label: "Alloy AI", subtitle: "AI intelligence assistant", icon: "zap", tags: ["ai", "alloy"], action: () => router.push("/(tabs)/alloy" as any) },
+    { id: "investor", label: "Investor Deck", subtitle: "Fundraising materials", icon: "trending-up", tags: ["investor", "fundraise"], action: () => router.push("/(tabs)/investor" as any) },
+    { id: "voice", label: "Voice Command", subtitle: "Say a command", icon: "mic", tags: ["voice"], action: () => setVoiceVisible(true) },
+    { id: "refresh", label: "Refresh All", subtitle: "Sync latest data", icon: "refresh-cw", tags: ["sync", "refresh"], action: () => onRefresh() },
+  ];
 
   const {
     data: health,
@@ -686,6 +725,50 @@ export default function CommandScreen() {
           </Text>
         </View>
       </ScrollView>
+
+      <View style={styles.floatingActions}>
+        <Pressable
+          style={[styles.fab, { backgroundColor: "#c9a84c" }]}
+          onPress={() => setVoiceVisible(true)}
+        >
+          <Feather name="mic" size={20} color="#090810" />
+        </Pressable>
+        <Pressable
+          style={[styles.fab, { backgroundColor: "rgba(201,168,76,0.15)", borderWidth: 1, borderColor: "rgba(201,168,76,0.3)" }]}
+          onPress={() => setPaletteVisible(true)}
+        >
+          <Feather name="command" size={20} color="#c9a84c" />
+        </Pressable>
+      </View>
+
+      {pendingCount > 0 && (
+        <View style={styles.syncBanner}>
+          <Feather name="cloud-off" size={12} color="#f59e0b" />
+          <Text style={styles.syncBannerText}>{pendingCount} pending sync{pendingCount > 1 ? "s" : ""}</Text>
+        </View>
+      )}
+
+      <VoiceCommandOverlay
+        visible={voiceVisible}
+        onClose={() => setVoiceVisible(false)}
+        onCommand={handleVoiceCommand}
+        appName="Alloy"
+        accentColor="#c9a84c"
+        suggestions={[
+          "Show portfolio pulse",
+          "Show critical alerts",
+          "Open Alloy AI",
+          "Go to portfolio",
+        ]}
+      />
+
+      <CommandPalette
+        visible={paletteVisible}
+        onClose={() => setPaletteVisible(false)}
+        commands={paletteCommands}
+        accentColor="#c9a84c"
+        placeholder="Search SZL command palette…"
+      />
     </View>
   );
 }
@@ -898,5 +981,41 @@ const styles = StyleSheet.create({
   lastCheckedText: {
     fontSize: 10,
     fontFamily: "Inter_300Light",
+  },
+  floatingActions: {
+    position: "absolute",
+    bottom: 100,
+    right: 20,
+    gap: 10,
+    alignItems: "center",
+  },
+  fab: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  syncBanner: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "#78350f",
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+  },
+  syncBannerText: {
+    fontSize: 11,
+    fontFamily: "Inter_500Medium",
+    color: "#fbbf24",
   },
 });

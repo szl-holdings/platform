@@ -3,6 +3,7 @@ import React, { useState, useCallback } from "react";
 import {
   View, Text, StyleSheet, TouchableOpacity, FlatList,
   TextInput, RefreshControl, ActivityIndicator, ScrollView,
+  Pressable, Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -11,6 +12,11 @@ import { useQuery } from "@tanstack/react-query";
 import { VesselIcon, featherIcon } from "@/components/VesselIcon";
 import { useColors } from "@/hooks/useColors";
 import { api, type Vessel, CACHE_KEYS, cacheSet, cacheGetStale } from "@/lib/api";
+import { Feather } from "@expo/vector-icons";
+import { ARPortOverlay } from "@/components/ARPortOverlay";
+import { VoiceCommandOverlay } from "@/components/VoiceCommandOverlay";
+import { CommandPalette, type CommandItem } from "@/components/CommandPalette";
+import { useShakeGesture } from "@/hooks/useShakeGesture";
 
 const STATUS_COLORS: Record<string, string> = {
   at_sea: "#22c55e",
@@ -185,6 +191,11 @@ export default function FleetScreen() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [refreshing, setRefreshing] = useState(false);
+  const [arVisible, setArVisible] = useState(false);
+  const [voiceVisible, setVoiceVisible] = useState(false);
+  const [paletteVisible, setPaletteVisible] = useState(false);
+
+  useShakeGesture({ onShake: () => setPaletteVisible(true) });
 
   const [lastFetchedAt, setLastFetchedAt] = useState<Date | null>(null);
 
@@ -238,6 +249,15 @@ export default function FleetScreen() {
         <View>
           <Text style={[styles.title, { color: colors.text }]}>Fleet</Text>
           <Text style={[styles.sub, { color: colors.textFaint }]}>{filtered.length} of {vessels.length} vessels</Text>
+        </View>
+        <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+          <Pressable style={arBtnStyle} onPress={() => setArVisible(true)}>
+            <Feather name="camera" size={14} color="#0ea5e9" />
+            <Text style={{ fontSize: 11, color: "#0ea5e9", fontFamily: "Inter_600SemiBold" }}>AR Port</Text>
+          </Pressable>
+          <Pressable style={micBtnStyle} onPress={() => setVoiceVisible(true)}>
+            <Feather name="mic" size={14} color="#0ea5e9" />
+          </Pressable>
         </View>
         {vessels.length > 0 && (() => {
           const isLive = lastFetchedAt != null && (Date.now() - lastFetchedAt.getTime()) < 3 * 60_000;
@@ -339,9 +359,67 @@ export default function FleetScreen() {
           }
         />
       )}
+
+      <ARPortOverlay
+        visible={arVisible}
+        onClose={() => setArVisible(false)}
+        portName="Port of New York / New Jersey"
+      />
+
+      <VoiceCommandOverlay
+        visible={voiceVisible}
+        onClose={() => setVoiceVisible(false)}
+        onCommand={(text) => {
+          const lower = text.toLowerCase();
+          if (lower.includes("ar") || lower.includes("port") || lower.includes("camera")) setArVisible(true);
+          else if (lower.includes("at sea")) setStatusFilter("at_sea");
+          else if (lower.includes("in port")) setStatusFilter("in_port");
+          else if (lower.includes("all")) setStatusFilter("all");
+        }}
+        appName="Vessels"
+        accentColor="#0ea5e9"
+        suggestions={["Open AR Port Overlay", "Show vessels at sea", "Show vessels in port", "Show all vessels"]}
+      />
+
+      <CommandPalette
+        visible={paletteVisible}
+        onClose={() => setPaletteVisible(false)}
+        commands={[
+          { id: "ar", label: "AR Port Overlay", subtitle: "Camera-based port intelligence", icon: "camera", tags: ["ar", "port", "camera"], action: () => setArVisible(true) },
+          { id: "voice", label: "Voice Command", subtitle: "Speak to search", icon: "mic", tags: ["voice"], action: () => setVoiceVisible(true) },
+          { id: "at-sea", label: "Filter: At Sea", icon: "anchor", tags: ["filter"], action: () => setStatusFilter("at_sea") },
+          { id: "in-port", label: "Filter: In Port", icon: "anchor", tags: ["filter"], action: () => setStatusFilter("in_port") },
+          { id: "all", label: "Show All Vessels", icon: "list", tags: ["all"], action: () => setStatusFilter("all") },
+        ]}
+        accentColor="#0ea5e9"
+        placeholder="Search Vessels commands…"
+      />
     </SafeAreaView>
   );
 }
+
+const arBtnStyle = {
+  flexDirection: "row" as const,
+  alignItems: "center" as const,
+  gap: 5,
+  backgroundColor: "rgba(14,165,233,0.1)",
+  borderWidth: 1,
+  borderColor: "rgba(14,165,233,0.3)",
+  borderRadius: 16,
+  paddingHorizontal: 10,
+  paddingVertical: 6,
+};
+
+const micBtnStyle = {
+  width: 32,
+  height: 32,
+  borderRadius: 16,
+  backgroundColor: "rgba(14,165,233,0.08)",
+  borderWidth: 1,
+  borderColor: "rgba(14,165,233,0.25)",
+  alignItems: "center" as const,
+  justifyContent: "center" as const,
+};
 
 const styles = StyleSheet.create({
   container: { flex: 1 },

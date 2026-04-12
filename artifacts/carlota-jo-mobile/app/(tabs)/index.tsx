@@ -13,6 +13,10 @@ import {
   Text,
   View,
 } from "react-native";
+import { VaultMode } from "@/components/VaultMode";
+import { VoiceCommandOverlay } from "@/components/VoiceCommandOverlay";
+import { CommandPalette } from "@/components/CommandPalette";
+import { useShakeGesture } from "@/hooks/useShakeGesture";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 
@@ -165,6 +169,11 @@ export default function DashboardScreen() {
   const { user, isLoading: authLoading } = useAuth();
   const { isOffline, isDegraded } = useApiStatus();
   const [refreshing, setRefreshing] = useState(false);
+  const [vaultVisible, setVaultVisible] = useState(false);
+  const [voiceVisible, setVoiceVisible] = useState(false);
+  const [paletteVisible, setPaletteVisible] = useState(false);
+
+  useShakeGesture({ onShake: () => setPaletteVisible(true) });
 
   const greeting = (() => {
     const h = new Date().getHours();
@@ -235,7 +244,22 @@ export default function DashboardScreen() {
             <Text style={[styles.greetingEyebrow, { color: colors.goldSubtle }]}>
               CLIENT PORTAL
             </Text>
-            <NotificationBell size={18} />
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <Pressable
+                style={{ flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: "rgba(232,121,249,0.1)", borderWidth: 1, borderColor: "rgba(232,121,249,0.3)", borderRadius: 16, paddingHorizontal: 10, paddingVertical: 5 }}
+                onPress={() => setVaultVisible(true)}
+              >
+                <Feather name="lock" size={12} color="#e879f9" />
+                <Text style={{ fontSize: 11, color: "#e879f9", fontFamily: "Inter_600SemiBold" }}>Vault</Text>
+              </Pressable>
+              <Pressable
+                style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: "rgba(232,121,249,0.08)", borderWidth: 1, borderColor: "rgba(232,121,249,0.25)", alignItems: "center", justifyContent: "center" }}
+                onPress={() => setVoiceVisible(true)}
+              >
+                <Feather name="mic" size={13} color="#e879f9" />
+              </Pressable>
+              <NotificationBell size={18} />
+            </View>
           </View>
           {authLoading ? (
             <View style={{ gap: 8 }}>
@@ -342,6 +366,34 @@ export default function DashboardScreen() {
           </View>
         )}
       </ScrollView>
+
+      <VaultMode
+        visible={vaultVisible}
+        onExit={() => setVaultVisible(false)}
+      />
+
+      <VoiceCommandOverlay
+        visible={voiceVisible}
+        onClose={() => setVoiceVisible(false)}
+        onCommand={(text) => {
+          const lower = text.toLowerCase();
+          if (lower.includes("vault")) setVaultVisible(true);
+        }}
+        appName="Carlota Jo"
+        accentColor="#e879f9"
+        suggestions={["Open Vault Mode", "Show my engagements"]}
+      />
+
+      <CommandPalette
+        visible={paletteVisible}
+        onClose={() => setPaletteVisible(false)}
+        commands={[
+          { id: "vault", label: "Vault Mode", subtitle: "Secure client notes & NDA documents", icon: "lock", tags: ["vault", "secure"], action: () => setVaultVisible(true) },
+          { id: "voice", label: "Voice Command", subtitle: "Speak to navigate", icon: "mic", tags: ["voice"], action: () => setVoiceVisible(true) },
+        ]}
+        accentColor="#e879f9"
+        placeholder="Search Carlota Jo commands…"
+      />
     </View>
   );
 }

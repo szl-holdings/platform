@@ -16,6 +16,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LYTE_COLORS } from "@/constants/colors";
 import { useAuth } from "@/context/AuthContext";
 import { useLyte, Severity, LyteSignal, LyteAction } from "@/context/LyteContext";
+import { ShakeToRestart } from "@/components/ShakeToRestart";
+import { VoiceCommandOverlay } from "@/components/VoiceCommandOverlay";
+import { CommandPalette } from "@/components/CommandPalette";
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -236,6 +239,9 @@ export default function InboxScreen() {
   const [shakeStatus, setShakeStatus] = useState<string | null>(null);
   const shakeMenuVisible = useRef(false);
   const lastAccel = useRef({ x: 0, y: 0, z: 0 });
+  const [shakeRestartVisible, setShakeRestartVisible] = useState(false);
+  const [voiceVisible, setVoiceVisible] = useState(false);
+  const [paletteVisible, setPaletteVisible] = useState(false);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
@@ -396,6 +402,17 @@ export default function InboxScreen() {
             </Pressable>
             <Pressable
               style={styles.shakeAction}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                dismissShake();
+                setShakeRestartVisible(true);
+              }}
+            >
+              <Feather name="refresh-cw" size={16} color={LYTE_COLORS.high} />
+              <Text style={styles.shakeActionText}>Runbooks</Text>
+            </Pressable>
+            <Pressable
+              style={styles.shakeAction}
               onPress={() => { Haptics.selectionAsync(); dismissShake(); }}
             >
               <Feather name="x" size={16} color={LYTE_COLORS.textSecondary} />
@@ -495,6 +512,34 @@ export default function InboxScreen() {
           </View>
         )}
       </ScrollView>
+
+      <ShakeToRestart
+        visible={shakeRestartVisible}
+        onClose={() => setShakeRestartVisible(false)}
+      />
+
+      <VoiceCommandOverlay
+        visible={voiceVisible}
+        onClose={() => setVoiceVisible(false)}
+        onCommand={(text) => {
+          const lower = text.toLowerCase();
+          if (lower.includes("runbook") || lower.includes("restart")) setShakeRestartVisible(true);
+        }}
+        appName="Lyte"
+        accentColor="#f59e0b"
+        suggestions={["Open Runbooks", "Restart monitoring", "Show critical alerts"]}
+      />
+
+      <CommandPalette
+        visible={paletteVisible}
+        onClose={() => setPaletteVisible(false)}
+        commands={[
+          { id: "runbooks", label: "Runbooks", subtitle: "Run system remediation playbooks", icon: "refresh-cw", tags: ["runbook", "restart"], action: () => setShakeRestartVisible(true) },
+          { id: "voice", label: "Voice Command", subtitle: "Speak to navigate", icon: "mic", tags: ["voice"], action: () => setVoiceVisible(true) },
+        ]}
+        accentColor="#f59e0b"
+        placeholder="Search Lyte commands…"
+      />
     </View>
   );
 }

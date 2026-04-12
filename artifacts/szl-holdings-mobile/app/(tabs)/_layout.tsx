@@ -97,6 +97,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="pulse"
+        options={{
+          title: "Pulse",
+          tabBarIcon: ({ color }) => (
+            <Feather name="heart" size={20} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{ href: null }}
       />

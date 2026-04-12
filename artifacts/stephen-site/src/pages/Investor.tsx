@@ -307,7 +307,7 @@ export function Investor() {
               </a>
             </div>
             <div className="mt-12 text-xs text-white/15">
-              Metrics generated {d.generatedAt ? new Date(d.generatedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "live"} — data refreshed on each page load
+              Metrics queried {d.generatedAt ? new Date(d.generatedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "live"} — founder-assessed scores vs live query
             </div>
           </div>
         </section>

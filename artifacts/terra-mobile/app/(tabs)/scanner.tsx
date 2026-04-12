@@ -14,6 +14,10 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { ARPropertyScanner } from "@/components/ARPropertyScanner";
+import { VoiceCommandOverlay } from "@/components/VoiceCommandOverlay";
+import { CommandPalette } from "@/components/CommandPalette";
+import { useShakeGesture } from "@/hooks/useShakeGesture";
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
   ? "https://" + process.env.EXPO_PUBLIC_DOMAIN + "/api"
@@ -170,8 +174,12 @@ export default function ScannerTab() {
   const [addedCount, setAddedCount] = useState(0);
   const [isLoadingCards, setIsLoadingCards] = useState(false);
   const [apiLoaded, setApiLoaded] = useState(false);
-
   const [dismissedCount, setDismissedCount] = useState(0);
+  const [arVisible, setArVisible] = useState(false);
+  const [voiceVisible, setVoiceVisible] = useState(false);
+  const [paletteVisible, setPaletteVisible] = useState(false);
+
+  useShakeGesture({ onShake: () => setPaletteVisible(true) });
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -270,6 +278,21 @@ export default function ScannerTab() {
           <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>TERRA · DISTRESS SCANNER</Text>
           <Text style={[styles.title, { color: colors.cream }]}>Swipe to Decide</Text>
         </View>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <Pressable
+            style={{ flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: "rgba(77,124,15,0.12)", borderWidth: 1, borderColor: "rgba(77,124,15,0.3)", borderRadius: 16, paddingHorizontal: 10, paddingVertical: 6 }}
+            onPress={() => setArVisible(true)}
+          >
+            <Feather name="camera" size={13} color="#4d7c0f" />
+            <Text style={{ fontSize: 11, color: "#4d7c0f", fontFamily: "Inter_600SemiBold" }}>AR Scan</Text>
+          </Pressable>
+          <Pressable
+            style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "rgba(77,124,15,0.08)", borderWidth: 1, borderColor: "rgba(77,124,15,0.25)", alignItems: "center", justifyContent: "center" }}
+            onPress={() => setVoiceVisible(true)}
+          >
+            <Feather name="mic" size={13} color="#4d7c0f" />
+          </Pressable>
+        </View>
         <View style={styles.counters}>
           <View style={[styles.counter, { backgroundColor: colors.emerald + "15" }]}>
             <Feather name="check" size={10} color={colors.emerald} />
@@ -340,6 +363,34 @@ export default function ScannerTab() {
           {cards.length} properties remaining
         </Text>
       )}
+
+      <ARPropertyScanner
+        visible={arVisible}
+        onClose={() => setArVisible(false)}
+      />
+
+      <VoiceCommandOverlay
+        visible={voiceVisible}
+        onClose={() => setVoiceVisible(false)}
+        onCommand={(text) => {
+          const lower = text.toLowerCase();
+          if (lower.includes("ar") || lower.includes("scan") || lower.includes("camera")) setArVisible(true);
+        }}
+        appName="Terra"
+        accentColor="#4d7c0f"
+        suggestions={["Open AR Property Scanner", "Scan this property"]}
+      />
+
+      <CommandPalette
+        visible={paletteVisible}
+        onClose={() => setPaletteVisible(false)}
+        commands={[
+          { id: "ar", label: "AR Property Scanner", subtitle: "Scan distressed properties with camera", icon: "camera", tags: ["ar", "scan"], action: () => setArVisible(true) },
+          { id: "voice", label: "Voice Command", subtitle: "Speak to navigate", icon: "mic", tags: ["voice"], action: () => setVoiceVisible(true) },
+        ]}
+        accentColor="#4d7c0f"
+        placeholder="Search Terra commands…"
+      />
     </View>
   );
 }
