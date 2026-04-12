@@ -5,6 +5,7 @@ import { Link, useLocation } from "wouter";
 import { analytics } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { UserButton } from "@szl-holdings/shared-ui/UserButton";
+import { useAuth } from "@szl-holdings/replit-auth-web";
 
 const NAV_ITEMS = [
   {
@@ -67,6 +68,15 @@ export function SiteNav() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [location] = useLocation();
+  const { isAuthenticated } = useAuth();
+
+  const navItems = isAuthenticated
+    ? [...NAV_ITEMS.slice(0, -1), { label: "Nerve Center", href: "/nerve-center", highlight: false, children: null }, NAV_ITEMS[NAV_ITEMS.length - 1]]
+    : NAV_ITEMS;
+
+  const mobileLinks = isAuthenticated
+    ? [...NAV_LINKS_MOBILE, { label: "Nerve Center", href: "/nerve-center", primary: false }]
+    : NAV_LINKS_MOBILE;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -123,7 +133,7 @@ export function SiteNav() {
 
             {/* Desktop nav */}
             <div style={{ display: "flex", alignItems: "center", gap: "0.125rem" }} className="hidden lg:flex">
-              {NAV_ITEMS.map((item) => {
+              {navItems.map((item) => {
                 const isActive = location === item.href || location.startsWith(item.href + "/");
 
                 if (item.highlight) {
@@ -202,7 +212,7 @@ export function SiteNav() {
               }}
             >
               <div style={{ padding: "1.25rem var(--space-content-x) 1.5rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-                {NAV_LINKS_MOBILE.map((link) => (
+                {mobileLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}

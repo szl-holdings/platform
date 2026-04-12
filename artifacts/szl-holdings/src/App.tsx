@@ -176,6 +176,7 @@ const AlloyEvolutionPage = lazy(() => import("@/alloy/pages/evolution-radar").th
 const AcademyPage = lazy(() => import("@/pages/academy"));
 const HelpPage = lazy(() => import("@/pages/help"));
 const DemosPage = lazy(() => import("@/pages/demos"));
+const NerveCenterPage = lazy(() => import("@/pages/nerve-center"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -757,6 +758,11 @@ function App() {
             </Route>
             <Route path="/accessibility">
               <Suspense fallback={<PageLoader />}><AccessibilityPage /></Suspense>
+            </Route>
+
+            {/* ── Nerve Center — Unified Command Surface ── */}
+            <Route path="/nerve-center">
+              <RequireAuth><Suspense fallback={<PageLoader />}><NerveCenterPage /></Suspense></RequireAuth>
             </Route>
 
             {/* ── Cross-app / platform command pages ── */}

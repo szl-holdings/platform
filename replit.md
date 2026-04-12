@@ -3,6 +3,19 @@
 ## Overview
 The SZL Holdings Platform is a pnpm monorepo that develops **Lyte**, a business observability platform, powered by **Alloy**, its execution fabric and audit layer. The project encompasses **six product platforms** (Lyte, Vessels, Aegis, Terra, PRISM Counsel, Carlota Jo), a parent company site (SZL Holdings), and a founder identity site (Stephen Lutar). The core vision is to establish Lyte + Alloy as the commercial foundation for an expanding ecosystem, leveraging a shared PostgreSQL database, a unified authentication system, and a command-grade design system. The platform aims to provide advanced observability, governed execution, and intelligent automation capabilities across various business domains, with a strong emphasis on verifiable outcomes and operational readiness.
 
+## Key Pages & Features
+
+### Nerve Center — Unified Command Surface (`/nerve-center`)
+A new executive command surface built within the SZL Holdings app (`artifacts/szl-holdings/src/pages/nerve-center.tsx`). Key capabilities:
+- **Operational Timeline**: Live, scrolling feed of cross-domain events from all 6 domains (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, Alloy), rendered chronologically with domain-colored lane indicators, severity badges, timestamps, and inline expansion showing full context with deep-links to domain apps.
+- **Universal Action Bar**: Cross-domain pending actions with approve/reject/escalate/delegate flows, AI recommendations per action, and two-step confirmation.
+- **AI Synthesis Stream**: Continuously generated cross-domain intelligence connections narrated in natural language using the multi-agent orchestrator pattern, with streaming animation.
+- **Stakeholder Pulse**: Prioritized decision points ranked by urgency × business impact × time sensitivity, with one-click action routing.
+- **Filtering**: Domain filter (all 6 domains), severity filter, and action-required toggle with instant feedback.
+- **Domain Status Sidebar**: Per-domain event/critical/high counters with latest event preview and deep-link to each domain app.
+- **Simulated Live WebSocket**: Events stream in every 12–20 seconds simulating the real WebSocket channels (aegis-incidents, vessel-positions, terra-signals, workflow-runs, bookings).
+- Route: `/nerve-center` in SZL Holdings app.
+
 ## User Preferences
 I prefer detailed explanations.
 I want iterative development.

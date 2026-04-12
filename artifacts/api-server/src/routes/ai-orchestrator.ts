@@ -14,6 +14,7 @@ import {
 } from "../lib/rag-pipeline.js";
 import { pool } from "@szl-holdings/db";
 import { logger } from "../lib/logger.js";
+import { authMiddleware } from "../middlewares/auth";
 
 const aiRouter: IRouter = Router();
 
@@ -108,6 +109,42 @@ aiRouter.post("/chat", async (req: Request, res: Response) => {
     const errorMsg = err instanceof Error ? err.message : "Chat failed";
     logger.error({ err, agentId: targetAgent }, "Agent chat failed");
     res.status(500).json({ error: errorMsg });
+  }
+});
+
+aiRouter.post("/chat/stream", authMiddleware({ required: true }), async (req: Request, res: Response) => {
+  ensureTools();
+  const { message, agentId } = req.body;
+
+  if (!message || typeof message !== "string") {
+    res.status(400).json({ error: "message is required" });
+    return;
+  }
+
+  const targetAgent = agentId || "szl-orchestrator";
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no");
+  res.flushHeaders();
+
+  try {
+    const result = await runAgent(targetAgent, message, {});
+    const text = result.response ?? "";
+    const chunkSize = 12;
+
+    for (let i = 0; i < text.length; i += chunkSize) {
+      const chunk = text.slice(i, i + chunkSize);
+      res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
+    }
+    res.write(`data: [DONE]\n\n`);
+    res.end();
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : "Stream failed";
+    logger.error({ err, agentId: targetAgent }, "Agent chat stream failed");
+    res.write(`data: ${JSON.stringify({ error: errorMsg })}\n\n`);
+    res.end();
   }
 });
 

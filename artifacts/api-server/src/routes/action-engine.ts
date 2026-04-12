@@ -233,7 +233,7 @@ router.post("/action-engine/nla/plan", authMiddleware({ required: false }), asyn
   }
 });
 
-router.post("/action-engine/nla/plans/:planId/approve", authMiddleware({ required: false }), async (req: Request, res: Response): Promise<void> => {
+router.post("/action-engine/nla/plans/:planId/approve", authMiddleware({ required: true }), async (req: Request, res: Response): Promise<void> => {
   try {
     await ensureInitialized();
     const { decision, notes } = req.body as { decision?: "approved" | "rejected"; notes?: string };
@@ -249,7 +249,7 @@ router.post("/action-engine/nla/plans/:planId/approve", authMiddleware({ require
   }
 });
 
-router.post("/action-engine/nla/plans/:planId/execute", authMiddleware({ required: false }), async (req: Request, res: Response): Promise<void> => {
+router.post("/action-engine/nla/plans/:planId/execute", authMiddleware({ required: true }), async (req: Request, res: Response): Promise<void> => {
   try {
     await ensureInitialized();
     const { overrideInputs } = req.body as { overrideInputs?: Record<string, Record<string, unknown>> };
@@ -388,7 +388,7 @@ router.post("/action-engine/events/emit", authMiddleware({ required: false }), a
   }
 });
 
-router.get("/action-engine/approvals", async (_req: Request, res: Response): Promise<void> => {
+router.get("/action-engine/approvals", authMiddleware({ required: true }), async (_req: Request, res: Response): Promise<void> => {
   try {
     await ensureInitialized();
     const approvals = getPendingApprovals();
@@ -403,7 +403,7 @@ router.get("/action-engine/approvals", async (_req: Request, res: Response): Pro
   }
 });
 
-router.post("/action-engine/approvals/triggers/:approvalId", authMiddleware({ required: false }), async (req: Request, res: Response): Promise<void> => {
+router.post("/action-engine/approvals/triggers/:approvalId", authMiddleware({ required: true }), async (req: Request, res: Response): Promise<void> => {
   try {
     await ensureInitialized();
     const { decision, notes } = req.body as { decision?: "approved" | "rejected"; notes?: string };
