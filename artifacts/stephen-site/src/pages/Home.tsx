@@ -6,6 +6,9 @@ import { PlatformArchitectureSection } from "@/components/sections/PlatformArchi
 import { ThesisSection } from "@/components/sections/ThesisSection";
 import { ServicesSection } from "@/components/sections/ServicesSection";
 import { ContactSection } from "@/components/sections/ContactSection";
+import { FounderJourneySection } from "@/components/sections/FounderJourneySection";
+import { LivePlatformProofSection } from "@/components/sections/LivePlatformProofSection";
+import { TechStackShowcaseSection } from "@/components/sections/TechStackShowcaseSection";
 import { NoiseGrain } from "@szl-holdings/shared-ui";
 
 export function Home() {
@@ -15,9 +18,12 @@ export function Home() {
       <Navbar />
       <main>
         <HeroSection />
+        <FounderJourneySection />
+        <LivePlatformProofSection />
         <CaseStudiesSection />
         <PlatformArchitectureSection />
         <ThesisSection />
+        <TechStackShowcaseSection />
         <ServicesSection />
         <ContactSection />
       </main>

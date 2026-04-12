@@ -11,7 +11,7 @@ import { TooltipProvider } from "@szl-holdings/shared-ui/ui/tooltip";
 const Home = lazy(() => import("@/pages/Home").then(m => ({ default: m.Home })));
 const Work = lazy(() => import("@/pages/Work").then(m => ({ default: m.Work })));
 const WorkDetail = lazy(() => import("@/pages/WorkDetail").then(m => ({ default: m.WorkDetail })));
-const Thesis = lazy(() => import("@/pages/Thesis").then(m => ({ default: m.Thesis })));
+const Thesis = lazy(() => import("@/pages/ThesisEngine").then(m => ({ default: m.ThesisEngine })));
 const Writing = lazy(() => import("@/pages/Writing").then(m => ({ default: m.Writing })));
 const WritingDetail = lazy(() => import("@/pages/WritingDetail").then(m => ({ default: m.WritingDetail })));
 const About = lazy(() => import("@/pages/About").then(m => ({ default: m.About })));
@@ -19,6 +19,8 @@ const Contact = lazy(() => import("@/pages/Contact").then(m => ({ default: m.Con
 const Downloads = lazy(() => import("@/pages/Downloads").then(m => ({ default: m.Downloads })));
 const LegalPrivacy = lazy(() => import("@/pages/legal-privacy").then(m => ({ default: m.LegalPrivacy })));
 const LegalTerms = lazy(() => import("@/pages/legal-terms").then(m => ({ default: m.LegalTerms })));
+const InvestorCTA = lazy(() => import("@/pages/InvestorCTA").then(m => ({ default: m.InvestorCTA })));
+const SpeakingUpgrade = lazy(() => import("@/pages/SpeakingUpgrade").then(m => ({ default: m.SpeakingUpgrade })));
 
 // Legacy pages
 const NotFound = lazy(() => import("@/pages/not-found"));
@@ -29,7 +31,6 @@ const OperatingPhilosophy = lazy(() => import("@/pages/operating-philosophy"));
 const FinancialResearch = lazy(() => import("@/pages/financial-research"));
 const HackajobProfile = lazy(() => import("@/pages/hackajob-profile"));
 const CareerCommand = lazy(() => import("@/pages/career-command"));
-const Speaking = lazy(() => import("@/pages/speaking"));
 const Investor = lazy(() => import("@/pages/Investor").then(m => ({ default: m.Investor })));
 
 const queryClient = new QueryClient({
@@ -85,8 +86,9 @@ function Router() {
         <Route path="/thought-leadership">
           <Redirect to="/writing" />
         </Route>
-        <Route path="/speaking" component={Speaking} />
+        <Route path="/speaking" component={SpeakingUpgrade} />
         <Route path="/investor" component={Investor} />
+        <Route path="/interested" component={InvestorCTA} />
         <Route path="/case-studies">
           <Redirect to="/work" />
         </Route>

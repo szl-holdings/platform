@@ -3,8 +3,10 @@ import { Link } from "wouter";
 const navLinks = [
   { label: "Work", href: "/work" },
   { label: "Thesis", href: "/thesis" },
+  { label: "Speaking", href: "/speaking" },
   { label: "Writing", href: "/writing" },
   { label: "About", href: "/about" },
+  { label: "Invest", href: "/interested" },
   { label: "Contact", href: "/contact" },
 ];
 

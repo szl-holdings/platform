@@ -288,30 +288,26 @@ export function Investor() {
         {/* CTA */}
         <section className="py-24 border-t border-white/[0.04]">
           <div className="max-w-3xl mx-auto px-6 text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-white mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>Interested in acquiring SZL Holdings?</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-white mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>Interested in SZL Holdings?</h2>
             <p className="text-sm text-white/40 mb-8 max-w-xl mx-auto">
-              Schedule a confidential conversation about the platform, architecture, and growth trajectory.
+              Find the right conversation in 3 questions. Strategic investor, financial buyer, strategic partner, or platform acquirer — each route is different.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <a
-                href="mailto:stephenlutar2@gmail.com?subject=SZL Holdings Acquisition Inquiry"
+                href="/stephen/interested"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-[#080b12] text-sm font-semibold hover:bg-white/90 transition-colors"
               >
-                Contact Founder
+                Find the right conversation →
               </a>
               <a
-                href="https://x.com/szlholdings"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="mailto:stephenlutar2@gmail.com?subject=SZL Holdings Investor Inquiry"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-white/[0.10] text-white/70 text-sm font-medium hover:border-white/[0.20] hover:text-white transition-all"
               >
-                Follow on X
+                Contact directly
               </a>
             </div>
             <div className="mt-12 text-xs text-white/15">
-              {d.generatedAt && d.generatedAt !== new Date().toISOString()
-                ? `Database metrics queried ${new Date(d.generatedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} — data refreshed on each page load`
-                : "Scores assessed by founder — database metrics queried live when API is available"}
+              Metrics generated {d.generatedAt ? new Date(d.generatedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "live"} — data refreshed on each page load
             </div>
           </div>
         </section>

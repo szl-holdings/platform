@@ -7,8 +7,9 @@ import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 const navLinks = [
   { name: "Work", href: "/work" },
   { name: "Thesis", href: "/thesis" },
+  { name: "Speaking", href: "/speaking" },
   { name: "About", href: "/about" },
-  { name: "Investor", href: "/investor" },
+  { name: "Invest", href: "/interested" },
   { name: "Contact", href: "/contact" },
 ];
 
