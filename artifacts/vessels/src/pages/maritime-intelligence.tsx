@@ -1,8 +1,9 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
-import { Ship, Anchor, Navigation, AlertTriangle, Cloud, ShieldAlert, Globe, Radio, Waves, Thermometer, Wind, Eye, MapPin, Languages, Loader2 } from "lucide-react";
+import { Ship, Anchor, Navigation, AlertTriangle, Cloud, ShieldAlert, Globe, Radio, Waves, Thermometer, Wind, Eye, EyeOff, MapPin, Languages, Loader2, Target, ChevronRight, Zap } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { Link } from "wouter";
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
@@ -145,6 +146,30 @@ export default function MaritimeIntelligence() {
           <span className="text-[10px] text-muted-foreground font-mono hidden md:block">UTC {new Date().toISOString().slice(11, 19)}</span>
         </div>
       </div>
+
+      {/* Dark Pattern Decoder Preview Banner */}
+      <Link href="/dark-pattern-decoder">
+        <div className="rounded-xl border border-red-500/20 bg-red-500/5 px-5 py-4 flex items-center gap-4 cursor-pointer hover:border-red-500/35 hover:bg-red-500/8 transition-all animate-fade-in-up">
+          <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0">
+            <EyeOff className="w-5 h-5 text-red-400" />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className="text-sm font-bold text-red-400">Dark Pattern Decoder</span>
+              <span className="text-[9px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20 font-bold tracking-wider">PREDICTIVE AI</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+            </div>
+            <p className="text-xs text-muted-foreground">3 vessels with elevated sanctions evasion probability detected — behavioral fingerprints show pre-dark signals on 2 critical vessels</p>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="text-right">
+              <div className="text-xl font-bold font-display text-red-400">94<span className="text-sm font-normal text-red-400/60">%</span></div>
+              <div className="text-[9px] text-muted-foreground font-mono">TOP SCORE</div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-red-400/50" />
+          </div>
+        </div>
+      </Link>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-fade-in-up stagger-1">
         <Card className="bg-card border-border hover:border-primary/20 transition-all group">

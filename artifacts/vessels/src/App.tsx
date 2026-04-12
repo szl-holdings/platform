@@ -138,6 +138,7 @@ const MaritimeKnowledgeGraphPage = lazy(() => import("@/pages/maritime-knowledge
 const PredictiveCongestionPage = lazy(() => import("@/pages/predictive-congestion"));
 const FleetMorningBriefAiPage = lazy(() => import("@/pages/fleet-morning-brief-ai"));
 const ComplianceAutopilotPage = lazy(() => import("@/pages/compliance-autopilot"));
+const DarkPatternDecoderPage = lazy(() => import("@/pages/dark-pattern-decoder"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -305,6 +306,7 @@ function VesselsSidebarContent({ expanded, onMobileClose }: { expanded: boolean;
         { id: "maritime-knowledge-graph", label: "Knowledge Graph", href: "/maritime-knowledge-graph", icon: <Globe className="w-3.5 h-3.5" /> },
         { id: "predictive-congestion", label: "Congestion Forecast", href: "/predictive-congestion", icon: <Anchor className="w-3.5 h-3.5" /> },
         { id: "compliance-autopilot", label: "Compliance Autopilot", href: "/compliance-autopilot", icon: <Shield className="w-3.5 h-3.5" /> },
+        { id: "dark-pattern-decoder", label: "Dark Pattern Decoder", href: "/dark-pattern-decoder", icon: <EyeOff className="w-3.5 h-3.5" /> },
       ],
     },
     {
@@ -504,6 +506,7 @@ function DashboardRouter() {
         <Route path="/predictive-congestion" component={PredictiveCongestionPage} />
         <Route path="/fleet-morning-brief-ai" component={FleetMorningBriefAiPage} />
         <Route path="/compliance-autopilot" component={ComplianceAutopilotPage} />
+        <Route path="/dark-pattern-decoder" component={DarkPatternDecoderPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-sky-400/40">Page not found</p>
@@ -605,7 +608,8 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     location.startsWith("/command-mode-toggle") ||
     location.startsWith("/voyage-digital-twin") || location.startsWith("/maritime-knowledge-graph") ||
     location.startsWith("/predictive-congestion") || location.startsWith("/fleet-morning-brief-ai") ||
-    location.startsWith("/compliance-autopilot");
+    location.startsWith("/compliance-autopilot") ||
+    location.startsWith("/dark-pattern-decoder");
 
   if (isDashboard) {
     return (
