@@ -107,6 +107,14 @@ const P2PortfolioForecast = lazy(() => import("./pages/p2/portfolio-forecast-pag
 const P2PartnerLifeOs = lazy(() => import("./pages/p2/partner-life-os-page"));
 const P2AdminPortfolio = lazy(() => import("./pages/p2/admin-portfolio-page"));
 
+// ─── Task-375: AI Intelligence Pages ─────────────────────────────────────────
+const CaseOraclePage = lazy(() => import("./pages/case-oracle-page"));
+const JudgeIntelligencePage = lazy(() => import("./pages/judge-intelligence-page"));
+const LitigationWarMapPage = lazy(() => import("./pages/litigation-war-map-page"));
+const InsurerFrictionV2Page = lazy(() => import("./pages/insurer-friction-v2-page"));
+const SmartDiscoveryAutopilotPage = lazy(() => import("./pages/smart-discovery-autopilot-page"));
+const RecoveryVelocityDashboardPage = lazy(() => import("./pages/recovery-velocity-dashboard-page"));
+
 const S32MorningBrief = lazy(() => import("./pages/s32/morning-brief-page"));
 const S32PrepMode = lazy(() => import("./pages/s32/prep-mode-page"));
 const S32QuietRisk = lazy(() => import("./pages/s32/quiet-risk-page"));
@@ -259,6 +267,26 @@ function PrismCounselRoutes() {
       </Route>
       <Route path="/venue-intel">
         <Suspense fallback={<PageLoader />}><Wrap><PrismVenueIntel /></Wrap></Suspense>
+      </Route>
+
+      {/* AI Intelligence — Task 375 */}
+      <Route path="/case-oracle">
+        <Suspense fallback={<PageLoader />}><Wrap><CaseOraclePage /></Wrap></Suspense>
+      </Route>
+      <Route path="/judge-intelligence">
+        <Suspense fallback={<PageLoader />}><Wrap><JudgeIntelligencePage /></Wrap></Suspense>
+      </Route>
+      <Route path="/litigation-war-map">
+        <Suspense fallback={<PageLoader />}><Wrap><LitigationWarMapPage /></Wrap></Suspense>
+      </Route>
+      <Route path="/insurer-friction-v2">
+        <Suspense fallback={<PageLoader />}><Wrap><InsurerFrictionV2Page /></Wrap></Suspense>
+      </Route>
+      <Route path="/smart-discovery-autopilot">
+        <Suspense fallback={<PageLoader />}><Wrap><SmartDiscoveryAutopilotPage /></Wrap></Suspense>
+      </Route>
+      <Route path="/recovery-velocity">
+        <Suspense fallback={<PageLoader />}><Wrap><RecoveryVelocityDashboardPage /></Wrap></Suspense>
       </Route>
       <Route path="/no-fault">
         <Suspense fallback={<PageLoader />}><Wrap><PrismNoFault /></Wrap></Suspense>

@@ -444,24 +444,24 @@ router.get("/stephen/acquisition-metrics", async (_req, res) => {
     const indexCount = parseInt(String((indexCountResult as any).rows?.[0]?.count ?? "0"), 10);
 
     const webApps = [
-      { name: "SZL Holdings", slug: "szl-holdings", domain: "Corporate Platform & Alloy Execution Fabric", industry: "Enterprise SaaS" },
-      { name: "Aegis", slug: "firestorm", domain: "Unified Defense & Intelligence", industry: "Cybersecurity" },
-      { name: "Vessels", slug: "vessels", domain: "Maritime Intelligence Platform", industry: "Maritime / Logistics" },
-      { name: "Terra", slug: "terra", domain: "Real Estate Intelligence", industry: "Real Estate / PropTech" },
-      { name: "Lyte", slug: "lyte", domain: "Business Observability", industry: "Enterprise SaaS" },
-      { name: "Carlota Jo", slug: "carlota-jo", domain: "Private Advisory Operations", industry: "Wealth Management" },
-      { name: "PRISM Counsel", slug: "prism-counsel", domain: "Litigation Intelligence", industry: "Legal Tech" },
-      { name: "Stephen Lutar", slug: "stephen", domain: "Founder Portfolio & Command", industry: "Executive Platform" },
+      { name: "SZL Holdings", slug: "szl-holdings", domain: "Corporate Platform & Alloy Execution Fabric", industry: "Enterprise SaaS", status: "live" },
+      { name: "Aegis", slug: "firestorm", domain: "Unified Defense & Intelligence", industry: "Cybersecurity", status: "live" },
+      { name: "Vessels", slug: "vessels", domain: "Maritime Intelligence Platform", industry: "Maritime / Logistics", status: "live" },
+      { name: "Terra", slug: "terra", domain: "Real Estate Intelligence", industry: "Real Estate / PropTech", status: "live" },
+      { name: "Lyte", slug: "lyte", domain: "Business Observability", industry: "Enterprise SaaS", status: "live" },
+      { name: "Carlota Jo", slug: "carlota-jo", domain: "Private Advisory Operations", industry: "Wealth Management", status: "live" },
+      { name: "PRISM Counsel", slug: "prism-counsel", domain: "Litigation Intelligence", industry: "Legal Tech", status: "live" },
+      { name: "Stephen Lutar", slug: "stephen", domain: "Founder Portfolio & Command", industry: "Executive Platform", status: "live" },
     ];
 
     const mobileApps = [
-      { name: "Terra Mobile", platform: "iOS / Android" },
-      { name: "Vessels Mobile", platform: "iOS / Android" },
-      { name: "Carlota Jo Mobile", platform: "iOS / Android" },
-      { name: "Stephen Mobile", platform: "iOS / Android" },
-      { name: "Aegis Mobile", platform: "iOS / Android" },
-      { name: "Lyte Mobile", platform: "iOS / Android" },
-      { name: "SZL Holdings Mobile", platform: "iOS / Android" },
+      { name: "Terra Mobile", platform: "iOS / Android", status: "live" },
+      { name: "Vessels Mobile", platform: "iOS / Android", status: "live" },
+      { name: "Carlota Jo Mobile", platform: "iOS / Android", status: "live" },
+      { name: "Stephen Mobile", platform: "iOS / Android", status: "live" },
+      { name: "Aegis Mobile", platform: "iOS / Android", status: "live" },
+      { name: "Lyte Mobile", platform: "iOS / Android", status: "live" },
+      { name: "SZL Holdings Mobile", platform: "iOS / Android", status: "live" },
     ];
 
     const techStack = {

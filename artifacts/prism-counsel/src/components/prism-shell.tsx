@@ -145,6 +145,17 @@ const NAV: NavSection[] = [
     ],
   },
   {
+    label: "AI Intelligence",
+    items: [
+      { label: "Case Oracle", href: "/case-oracle", icon: Brain },
+      { label: "Judge Intelligence", href: "/judge-intelligence", icon: Scale },
+      { label: "Litigation War Map", href: "/litigation-war-map", icon: Activity },
+      { label: "Insurer Friction 2.0", href: "/insurer-friction-v2", icon: Building2 },
+      { label: "Discovery Autopilot", href: "/smart-discovery-autopilot", icon: FileText },
+      { label: "Recovery Velocity", href: "/recovery-velocity", icon: TrendingUp },
+    ],
+  },
+  {
     label: "Section 31",
     items: [
       { label: "Worldline", href: "/worldline", icon: Globe },

@@ -84,6 +84,13 @@ const BoardBriefGenerator = lazy(() => import("@/pages/board-brief-generator"));
 const ResilienceDrill = lazy(() => import("@/pages/resilience-drill"));
 const AnalystScorecard = lazy(() => import("@/pages/analyst-scorecard"));
 
+// ─── Task-375: Deep Evolution Pages ───────────────────────────────────────────
+const AdversaryPersonaEngine = lazy(() => import("@/pages/adversary-persona-engine"));
+const AttackReplayTheater = lazy(() => import("@/pages/attack-replay-theater"));
+const BlastRadiusSimulator = lazy(() => import("@/pages/blast-radius-simulator"));
+const BoardReadyRiskNarrative = lazy(() => import("@/pages/board-ready-risk-narrative"));
+const ThreatHuntWorkbench = lazy(() => import("@/pages/threat-hunt-workbench"));
+
 // ─── Command Surfaces (Phase 1) ───────────────────────────────────────────────
 const CommandHome = lazy(() => import("@/pages/command-home"));
 const InvestigationsBoard = lazy(() => import("@/pages/investigations-board"));
@@ -378,6 +385,17 @@ function AegisSidebarContent({ location, onNavigate }: { location: string; onNav
       ],
     },
     {
+      id: "adversary-intel",
+      label: "Adversary Intelligence",
+      items: [
+        { id: "adversary-persona-engine", label: "Adversary Persona Engine", href: "/adversary-persona-engine", icon: <Users className="w-3 h-3" /> },
+        { id: "attack-replay-theater", label: "Attack Replay Theater", href: "/attack-replay-theater", icon: <Play className="w-3 h-3" /> },
+        { id: "blast-radius-simulator", label: "Blast Radius Simulator", href: "/blast-radius-simulator", icon: <Zap className="w-3 h-3" /> },
+        { id: "board-ready-risk-narrative", label: "Board-Ready Risk Narrative", href: "/board-ready-risk-narrative", icon: <FileText className="w-3 h-3" /> },
+        { id: "threat-hunt-workbench", label: "Threat Hunt Workbench", href: "/threat-hunt-workbench", icon: <Search className="w-3 h-3" /> },
+      ],
+    },
+    {
       id: "governance",
       label: "Governance & Reporting",
       items: governanceNavItems.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3 h-3" /> })),
@@ -667,6 +685,13 @@ function AppRouter() {
         <Route path="/tradecraft/board-brief" component={BoardBriefGenerator} />
         <Route path="/tradecraft/resilience-drill" component={ResilienceDrill} />
         <Route path="/tradecraft/analyst-scorecard" component={AnalystScorecard} />
+
+        {/* Adversary Intelligence — Task 375 */}
+        <Route path="/adversary-persona-engine" component={AdversaryPersonaEngine} />
+        <Route path="/attack-replay-theater" component={AttackReplayTheater} />
+        <Route path="/blast-radius-simulator" component={BlastRadiusSimulator} />
+        <Route path="/board-ready-risk-narrative" component={BoardReadyRiskNarrative} />
+        <Route path="/threat-hunt-workbench" component={ThreatHuntWorkbench} />
 
         <Route>
           <div className="flex items-center justify-center h-full">
