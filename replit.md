@@ -42,13 +42,18 @@ Each platform has a distinct visual identity:
 - **MCP Server:** Model Context Protocol server at `/api/mcp` for AI tool orchestration, exposing 20 tools, 4 resources, and 5 prompt templates via HTTP+SSE.
 - **AI Orchestrator API:** Multi-agent orchestration endpoints at `/api/ai/orchestrator/` including chat, agent runs, RAG knowledge base, multi-step workflows, and cross-platform intelligence.
 
-### Alloy AI Engines (New)
-Three production-grade AI engines powering Alloy's self-evolving intelligence:
+### Alloy AI Engines (Four-Lane Architecture)
+Production-grade AI engines powering Alloy's self-evolving Four-Lane intelligence platform:
 - **Genetic Evolution Engine** (`api-server/src/lib/alloy-evolution-engine.ts`): Real genetic algorithm with 4 selection strategies (tournament, roulette, rank, elitist), crossover operators (single-point, two-point, uniform), Gaussian mutation, and multi-dimensional fitness evaluation. Persists populations, genomes, and evolution events to `alloy_populations`, `alloy_genomes`, `alloy_evolution_events` tables.
 - **Expert Router (MoE)** (`api-server/src/lib/alloy-expert-router.ts`): Mixture-of-Experts inspired router with 9 domain experts, learned domain affinity matrix, 4 routing strategies (affinity-weighted, cascade, ensemble, least-loaded), confidence scoring, and structured routing logs via `alloy_expert_routing_log` and `alloy_experts` tables.
 - **Threat Engine (STRIDE + Kill Chain)** (`api-server/src/lib/alloy-threat-engine.ts`): STRIDE threat modeling framework combined with Lockheed Martin Cyber Kill Chain analysis. Includes real APT profiles (APT-29 Cozy Bear, APT-28 Fancy Bear, FIN7), vulnerability assessment, counter-intelligence indicators, and risk matrix calculation. Persists to `alloy_threat_models` table.
-- **API Routes** (`api-server/src/routes/alloy-evolution.ts`): Full REST endpoints at `/api/alloy/evolution/*`, `/api/alloy/experts/*`, `/api/alloy/threats/*`, `/api/alloy/capabilities`. Org-scoped queries.
-- **Schema**: 6 tables in `lib/db/src/schema/alloy_evolution.ts` — `alloy_experts`, `alloy_genomes`, `alloy_populations`, `alloy_threat_models`, `alloy_expert_routing_log`, `alloy_evolution_events`.
+- **Capability Gap Detector** (`api-server/src/lib/capability-gap-detector.ts`): Analyzes tool failures, agent skill gaps, domain fallbacks, and cross-domain patterns. Detects 5 gap types (tool_missing, agent_skill, domain_coverage, pipeline_gap, cross_domain). Persists to `alloy_capability_gaps` table.
+- **Innovation Proposal Engine** (`api-server/src/lib/innovation-proposal-engine.ts`): Synthesizes gaps into typed proposals (new_tool, new_agent_skill, mesh_connection, new_pipeline, app_feature). Generates additional proposals via AI. Stores in `alloy_innovation_proposals` table with approve/dismiss support. Includes Ecosystem Alert generation.
+- **Adaptive Learning Recorder** (`api-server/src/lib/adaptive-learning-recorder.ts`): Unified learning event store (agent executions, RAG, tool calls, A2A, feedback, proposal actions). Computes behavior updates for evolution engine. Persists to `alloy_learning_records` table.
+- **Four-Lane Coordinator** (`api-server/src/lib/four-lane-coordinator.ts`): Orchestrates all four intelligence lanes in a single coordinated flow: (1) RAG context pull, (2) MCP tool discovery/execution, (3) A2A delegation, (4) LLM inference. Per-lane metrics reported.
+- **API Routes** (`api-server/src/routes/alloy-evolution.ts`): Full REST endpoints at `/api/alloy/evolution/*` including `/gaps`, `/proposals`, `/proposals/:id/approve`, `/proposals/:id/dismiss`, `/learning/aggregates`, `/learning/feedback`, `/ecosystem/alerts`, `/evolution/radar`, `/evolution/audit-trail`, `/four-lane/execute`.
+- **Innovation Radar UI** (`szl-holdings/src/alloy/pages/evolution-radar.tsx`): Six-tab dashboard at `/alloy/evolution` — Innovation Radar (overview), Capability Gaps, Innovation Proposals (with Approve/Dismiss), Audit Trail, Ecosystem Alerts, Four-Lane Coordinator testing.
+- **Schema**: 9+ tables — `alloy_experts`, `alloy_genomes`, `alloy_populations`, `alloy_threat_models`, `alloy_expert_routing_log`, `alloy_evolution_events`, `alloy_capability_gaps`, `alloy_innovation_proposals`, `alloy_learning_records`.
 
 ### Agentic AI Infrastructure
 The platform includes a full agentic AI stack:

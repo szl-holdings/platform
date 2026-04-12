@@ -3,6 +3,7 @@ import type { Response } from "express";
 import { AGENT_CONFIGS, type AgentType } from "./configs";
 import { getModelConfig } from "../../lib/model-registry";
 import { logger } from "../../lib/logger";
+import { recordLearningEvent } from "../../lib/adaptive-learning-recorder";
 
 const MAX_TOOL_ROUNDS = 6;
 
@@ -58,6 +59,8 @@ export async function runDomainAgentChat(
   userMessage: string,
   conversationId: string,
 ): Promise<string> {
+  const runStart = Date.now();
+  const runId = `domain_${agentType}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
   const config = AGENT_CONFIGS[agentType];
   const modelConfig = getModelConfig(agentType);
   const messages = getOrCreateConversation(conversationId, agentType);
@@ -113,6 +116,19 @@ export async function runDomainAgentChat(
 
     if (!toolCall) {
       messages.push({ role: "assistant", content: responseText });
+      const toolsUsed = chatMessages
+        .filter(m => m.role === "user" && String(m.content).startsWith("Tool result for "))
+        .map(m => String(m.content).split("\n")[0]?.replace("Tool result for ", "").replace(":", "") ?? "");
+      recordLearningEvent({
+        eventType: "agent_execution",
+        agentId: agentType,
+        domain: agentType,
+        runId,
+        latencyMs: Date.now() - runStart,
+        toolsUsed,
+        successScore: 1.0,
+        inputs: { query: userMessage.slice(0, 200) },
+      }).catch(() => {});
       return responseText;
     }
 
@@ -126,6 +142,15 @@ export async function runDomainAgentChat(
 
   const fallback = "I've reached the maximum number of analysis steps. Here's what I've gathered so far based on the available data.";
   messages.push({ role: "assistant", content: fallback });
+  recordLearningEvent({
+    eventType: "agent_execution",
+    agentId: agentType,
+    domain: agentType,
+    runId,
+    latencyMs: Date.now() - runStart,
+    successScore: 0.5,
+    inputs: { query: userMessage.slice(0, 200), reason: "max_tool_rounds" },
+  }).catch(() => {});
   return fallback;
 }
 
@@ -135,6 +160,8 @@ export async function streamDomainAgentChat(
   conversationId: string,
   res: Response,
 ): Promise<void> {
+  const runStart = Date.now();
+  const runId = `stream_${agentType}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
   const config = AGENT_CONFIGS[agentType];
   const modelConfig = getModelConfig(agentType);
   const messages = getOrCreateConversation(conversationId, agentType);
@@ -174,9 +201,27 @@ export async function streamDomainAgentChat(
     }
 
     messages.push({ role: "assistant", content: fullResponse });
+    recordLearningEvent({
+      eventType: "agent_execution",
+      agentId: agentType,
+      domain: agentType,
+      runId,
+      latencyMs: Date.now() - runStart,
+      successScore: 1.0,
+      inputs: { query: userMessage.slice(0, 200), mode: "stream" },
+    }).catch(() => {});
     res.write(`data: [DONE]\n\n`);
   } catch (err) {
     logger.error({ err, agentType }, "Stream error");
+    recordLearningEvent({
+      eventType: "agent_execution",
+      agentId: agentType,
+      domain: agentType,
+      runId,
+      latencyMs: Date.now() - runStart,
+      successScore: 0.0,
+      inputs: { query: userMessage.slice(0, 200), mode: "stream", error: String(err) },
+    }).catch(() => {});
     res.write(`data: ${JSON.stringify({ error: "Stream error" })}\n\n`);
   }
 

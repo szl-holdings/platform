@@ -5,6 +5,30 @@ import { ExpertRouter, logRoutingDecision, type SignalContext } from "../lib/all
 import { ThreatEngine, persistThreatModel } from "../lib/alloy-threat-engine";
 import { authMiddleware, AuthenticatedUser } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendBadRequest, handleRouteError } from "../lib/api-response";
+import {
+  detectCapabilityGaps,
+  getStoredCapabilityGaps,
+  updateGapStatus,
+  ensureCapabilityGapsTable,
+} from "../lib/capability-gap-detector";
+import {
+  synthesizeProposalsFromGaps,
+  generateAIProposals,
+  getStoredProposals,
+  persistProposals,
+  updateProposalStatus,
+  generateEcosystemAlerts,
+  ensureProposalsTable,
+} from "../lib/innovation-proposal-engine";
+import {
+  recordLearningEvent,
+  recordUserFeedback,
+  recordProposalAction,
+  getLearningAggregates,
+  computeBehaviorUpdate,
+  ensureLearningTable,
+} from "../lib/adaptive-learning-recorder";
+import { executeWithFourLanes } from "../lib/four-lane-coordinator";
 
 const router = Router();
 
@@ -375,10 +399,461 @@ router.get("/threats/models", authMiddleware(), async (req: Request, res: Respon
   }
 });
 
+// ─── Capability Gap Detector ──────────────────────────────────────────────────
+
+router.get("/gaps", async (req: Request, res: Response) => {
+  try {
+    await ensureCapabilityGapsTable();
+    const { status, severity, domain, limit } = req.query;
+    const gaps = await getStoredCapabilityGaps({
+      status: status as string | undefined,
+      severity: severity as string | undefined,
+      domain: domain as string | undefined,
+      limit: limit ? parseInt(String(limit)) : 30,
+    });
+    sendSuccess(res, { gaps, count: gaps.length });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch capability gaps");
+  }
+});
+
+router.post("/gaps/detect", authMiddleware(), async (_req: Request, res: Response) => {
+  try {
+    const windowHours = parseInt(String(_req.body?.windowHours)) || 48;
+    const result = await detectCapabilityGaps(windowHours);
+    sendSuccess(res, result);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to run gap detection");
+  }
+});
+
+router.patch("/gaps/:id/status", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const gapId = parseInt(req.params.id);
+    const { status } = req.body;
+    if (!["open", "acknowledged", "resolved"].includes(status)) {
+      return sendBadRequest(res, "status must be open, acknowledged, or resolved");
+    }
+    await updateGapStatus(gapId, status);
+    sendSuccess(res, { updated: true, gapId, status });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to update gap status");
+  }
+});
+
+// ─── Innovation Proposal Engine ───────────────────────────────────────────────
+
+router.get("/proposals", async (req: Request, res: Response) => {
+  try {
+    await ensureProposalsTable();
+    const { status, proposalType, venture, limit } = req.query;
+    const proposals = await getStoredProposals({
+      status: status as string | undefined,
+      proposalType: proposalType as string | undefined,
+      venture: venture as string | undefined,
+      limit: limit ? parseInt(String(limit)) : 30,
+    });
+    sendSuccess(res, { proposals, count: proposals.length });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch innovation proposals");
+  }
+});
+
+router.post("/proposals/generate", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const windowHours = parseInt(String(req.body?.windowHours)) || 48;
+    const useAI = req.body?.useAI !== false;
+
+    const gapResult = await detectCapabilityGaps(windowHours);
+    const ruleBasedProposals = synthesizeProposalsFromGaps(gapResult.gaps);
+
+    let aiProposals: ReturnType<typeof synthesizeProposalsFromGaps> = [];
+    if (useAI && gapResult.gaps.length > 0) {
+      try {
+        const latest = await pool.query(
+          `SELECT generation, best_fitness, avg_fitness FROM alloy_populations ORDER BY updated_at DESC LIMIT 1`
+        );
+        const evolutionStats = latest.rows[0] ? {
+          generation: latest.rows[0].generation,
+          bestFitness: parseFloat(latest.rows[0].best_fitness) || 0,
+          avgFitness: parseFloat(latest.rows[0].avg_fitness) || 0,
+        } : undefined;
+
+        aiProposals = await generateAIProposals(gapResult.gaps, evolutionStats);
+      } catch {
+        aiProposals = [];
+      }
+    }
+
+    const allProposals = [...ruleBasedProposals, ...aiProposals];
+    const ids = await persistProposals(allProposals);
+
+    sendSuccess(res, {
+      proposalsGenerated: allProposals.length,
+      ruleBasedCount: ruleBasedProposals.length,
+      aiGeneratedCount: aiProposals.length,
+      gapsAnalyzed: gapResult.gapsDetected,
+      proposals: allProposals.map((p, i) => ({ ...p, id: ids[i] })),
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to generate innovation proposals");
+  }
+});
+
+router.post("/proposals/:id/approve", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const proposalId = parseInt(req.params.id);
+    const userId = req.user?.id;
+
+    await updateProposalStatus(proposalId, "approved", { userId });
+    await recordProposalAction({ proposalId, action: "approved", userId, proposalType: req.body?.proposalType });
+
+    sendSuccess(res, { approved: true, proposalId });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to approve proposal");
+  }
+});
+
+router.post("/proposals/:id/dismiss", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const proposalId = parseInt(req.params.id);
+    const userId = req.user?.id;
+    const { reason } = req.body;
+
+    await updateProposalStatus(proposalId, "dismissed", { userId, dismissedReason: reason });
+    await recordProposalAction({ proposalId, action: "dismissed", userId, proposalType: req.body?.proposalType });
+
+    sendSuccess(res, { dismissed: true, proposalId });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to dismiss proposal");
+  }
+});
+
+// ─── Adaptive Learning Recorder ───────────────────────────────────────────────
+
+router.get("/learning/aggregates", async (req: Request, res: Response) => {
+  try {
+    await ensureLearningTable();
+    const windowHours = parseInt(String(req.query.windowHours)) || 168;
+    const aggregates = await getLearningAggregates(windowHours);
+    sendSuccess(res, aggregates);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch learning aggregates");
+  }
+});
+
+router.get("/learning/behavior-update", async (req: Request, res: Response) => {
+  try {
+    const windowHours = parseInt(String(req.query.windowHours)) || 48;
+
+    const latest = await pool.query(
+      `SELECT generation FROM alloy_populations ORDER BY updated_at DESC LIMIT 1`
+    ).catch(() => ({ rows: [] }));
+    const currentGeneration = latest.rows[0]?.generation ?? 0;
+
+    const update = await computeBehaviorUpdate(currentGeneration, windowHours);
+    sendSuccess(res, update);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to compute behavior update");
+  }
+});
+
+router.post("/learning/feedback", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const { agentId, domain, sessionId, feedback, satisfaction, comment } = req.body;
+    if (!feedback || !["positive", "negative", "neutral"].includes(feedback)) {
+      return sendBadRequest(res, "feedback must be positive, negative, or neutral");
+    }
+    await recordUserFeedback({ agentId, domain, sessionId, feedback, satisfaction, comment });
+    sendSuccess(res, { recorded: true });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to record feedback");
+  }
+});
+
+router.post("/learning/event", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const { eventType, agentId, domain, runId, latencyMs, tokensUsed, successScore, toolsUsed, metadata } = req.body;
+    if (!eventType) return sendBadRequest(res, "eventType is required");
+
+    await recordLearningEvent({
+      eventType,
+      agentId,
+      domain,
+      runId,
+      latencyMs,
+      tokensUsed,
+      successScore,
+      toolsUsed: toolsUsed || [],
+      metadata: metadata || {},
+    });
+    sendSuccess(res, { recorded: true });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to record learning event");
+  }
+});
+
+// ─── Four-Lane Coordinator ────────────────────────────────────────────────────
+
+router.post("/four-lane/execute", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const { query, agentId, domain, context, enableRAG, enableMCP, enableA2A } = req.body;
+    if (!query || !agentId) return sendBadRequest(res, "query and agentId are required");
+
+    const result = await executeWithFourLanes({
+      query,
+      agentId,
+      domain: domain || "general",
+      context,
+      enableRAG: enableRAG !== false,
+      enableMCP: enableMCP !== false,
+      enableA2A: enableA2A !== false,
+    });
+
+    sendSuccess(res, result);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to execute four-lane query");
+  }
+});
+
+// ─── Evolution Audit Trail ────────────────────────────────────────────────────
+
+interface EvolutionEventRow { id: string; population_name: string; domain: string; created_at: string; details?: Record<string, unknown>; generation?: number; }
+interface PopHistoryRow { generation: number; best_fitness: string; avg_fitness: string; worst_fitness: string; fitness_history: unknown; updated_at: string; }
+interface ProposalHistoryRow { id: number; title: string; proposal_type: string; estimated_impact: string; status: string; affected_ventures: string[]; confidence_score: number; generated_at: string; approved_at?: string; dismissed_reason?: string; }
+
+router.get("/evolution/audit-trail", async (req: Request, res: Response) => {
+  try {
+    const orgId = getOrgId(req);
+    const limit = parseInt(String(req.query.limit)) || 50;
+    const windowHours = parseInt(String(req.query.windowHours)) || 720;
+
+    const [evolutionEvents, learningAggregates, populationHistory, proposalHistory] = await Promise.all([
+      pool.query<EvolutionEventRow>(
+        `SELECT e.*, p.name as population_name, p.domain
+         FROM alloy_evolution_events e
+         LEFT JOIN alloy_populations p ON e.population_id = p.id
+         WHERE p.org_id = $1
+           AND e.created_at > NOW() - INTERVAL '1 hour' * $2
+         ORDER BY e.created_at DESC LIMIT $3`,
+        [orgId, windowHours, limit]
+      ).catch(() => ({ rows: [] as EvolutionEventRow[] })),
+      getLearningAggregates(windowHours),
+      pool.query<PopHistoryRow>(
+        `SELECT generation, best_fitness, avg_fitness, worst_fitness,
+                fitness_history, updated_at
+         FROM alloy_populations
+         WHERE org_id = $1
+         ORDER BY updated_at DESC LIMIT 10`,
+        [orgId]
+      ).catch(() => ({ rows: [] as PopHistoryRow[] })),
+      pool.query<ProposalHistoryRow>(
+        `SELECT id, title, proposal_type, estimated_impact, status,
+                affected_ventures, confidence_score, generated_at, approved_at, dismissed_reason
+         FROM alloy_innovation_proposals
+         WHERE status IN ('approved', 'dismissed')
+         ORDER BY COALESCE(approved_at, generated_at) DESC LIMIT 20`
+      ).catch(() => ({ rows: [] as ProposalHistoryRow[] })),
+    ]);
+
+    const timelineEvents: Array<{
+      id: string;
+      type: string;
+      timestamp: string;
+      title: string;
+      description: string;
+      before?: Record<string, unknown>;
+      after?: Record<string, unknown>;
+      metrics?: Record<string, unknown>;
+    }> = [];
+
+    for (const event of evolutionEvents.rows) {
+      const details = event.details || {};
+      timelineEvents.push({
+        id: `evo_${event.id}`,
+        type: "evolution_cycle",
+        timestamp: event.created_at,
+        title: `Generation ${details.generation || event.generation} complete — ${event.population_name || event.domain}`,
+        description: `Evolution cycle completed. Best fitness: ${(details.bestFitness || 0).toFixed(3)}, Avg: ${(details.avgFitness || 0).toFixed(3)}, Mutations: ${details.mutationCount || 0}`,
+        after: {
+          generation: details.generation,
+          bestFitness: details.bestFitness,
+          avgFitness: details.avgFitness,
+          diversity: details.diversity,
+        },
+        metrics: {
+          populationSize: details.populationSize,
+          mutationCount: details.mutationCount,
+          eliteCount: details.eliteCount,
+        },
+      });
+    }
+
+    for (const proposal of proposalHistory.rows) {
+      timelineEvents.push({
+        id: `prop_${proposal.id}`,
+        type: proposal.status === "approved" ? "proposal_approved" : "proposal_dismissed",
+        timestamp: proposal.approved_at || proposal.generated_at,
+        title: `Proposal ${proposal.status}: ${proposal.title}`,
+        description: proposal.status === "approved"
+          ? `Innovation proposal approved. Impact: ${proposal.estimated_impact}. Ventures: ${(proposal.affected_ventures || []).join(", ")}`
+          : `Proposal dismissed: ${proposal.dismissed_reason || "No reason provided"}`,
+        metrics: {
+          impact: proposal.estimated_impact,
+          confidence: proposal.confidence_score,
+          type: proposal.proposal_type,
+        },
+      });
+    }
+
+    timelineEvents.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+    const populationRows = populationHistory.rows;
+    const performanceDeltas = populationRows.length >= 2
+      ? {
+          bestFitnessDelta: parseFloat(populationRows[0]?.best_fitness) - parseFloat(populationRows[populationRows.length - 1]?.best_fitness),
+          avgFitnessDelta: parseFloat(populationRows[0]?.avg_fitness) - parseFloat(populationRows[populationRows.length - 1]?.avg_fitness),
+          generationsElapsed: populationRows.length,
+        }
+      : null;
+
+    sendSuccess(res, {
+      timeline: timelineEvents.slice(0, limit),
+      totalEvents: timelineEvents.length,
+      performanceDeltas,
+      learningAggregates,
+      populationSummary: populationRows.map(p => ({
+        generation: p.generation,
+        bestFitness: parseFloat(p.best_fitness),
+        avgFitness: parseFloat(p.avg_fitness),
+        updatedAt: p.updated_at,
+      })),
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch evolution audit trail");
+  }
+});
+
+// ─── Ecosystem Alerts ─────────────────────────────────────────────────────────
+
+router.get("/ecosystem/alerts", async (req: Request, res: Response) => {
+  try {
+    const windowHours = parseInt(String(req.query.windowHours)) || 72;
+
+    interface AgentPerfRow { agent_id: string; domain: string; success_rate: string; avg_latency: string; }
+    const agentPerf = await pool.query<AgentPerfRow>(
+      `SELECT agent_id, domain,
+              AVG(success_score) as success_rate,
+              AVG(latency_ms) as avg_latency
+       FROM alloy_learning_records
+       WHERE recorded_at > NOW() - INTERVAL '1 hour' * $1
+         AND event_type = 'agent_execution'
+         AND agent_id IS NOT NULL
+       GROUP BY agent_id, domain
+       HAVING COUNT(*) >= 3`,
+      [windowHours]
+    ).catch(() => ({ rows: [] as AgentPerfRow[] }));
+
+    const perfData: Record<string, { successRate: number; avgLatency: number; domain: string }> = {};
+    for (const row of agentPerf.rows) {
+      perfData[row.agent_id] = {
+        successRate: parseFloat(row.success_rate) || 0,
+        avgLatency: parseFloat(row.avg_latency) || 0,
+        domain: row.domain || "unknown",
+      };
+    }
+
+    const alerts = generateEcosystemAlerts(perfData);
+
+    const staticAlerts = [
+      {
+        alertType: "missed_synergy" as const,
+        title: "Terra and Carlota Jo have overlapping property intelligence",
+        message: "Terra (real estate) and Carlota Jo (advisory) are independently analyzing property-related signals with no shared context. A Mesh connection would allow Terra's market data to inform Carlota Jo's client advisory recommendations.",
+        severity: "medium" as const,
+        affectedApps: ["terra", "carlota-jo"],
+        recommendation: "Add a Terra → Carlota Jo Mesh connection sharing property market signals and deal flow data.",
+        generatedAt: new Date().toISOString(),
+        isRead: false,
+      },
+    ];
+
+    sendSuccess(res, { alerts: [...alerts, ...staticAlerts], count: alerts.length + staticAlerts.length });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch ecosystem alerts");
+  }
+});
+
+// ─── Innovation Radar Dashboard ───────────────────────────────────────────────
+
+router.get("/evolution/radar", async (req: Request, res: Response) => {
+  try {
+    const orgId = getOrgId(req);
+
+    const [proposals, gaps, learningAgg, population] = await Promise.all([
+      getStoredProposals({ limit: 20 }),
+      getStoredCapabilityGaps({ status: "open", limit: 20 }),
+      getLearningAggregates(168),
+      pool.query<{ generation: number; best_fitness: string; avg_fitness: string; status: string; name: string; domain: string; updated_at: string }>(
+        `SELECT generation, best_fitness, avg_fitness, status, name, domain, updated_at
+         FROM alloy_populations WHERE org_id = $1 ORDER BY updated_at DESC LIMIT 1`,
+        [orgId]
+      ).catch(() => ({ rows: [] as Array<{ generation: number; best_fitness: string; avg_fitness: string; status: string; name: string; domain: string; updated_at: string }> })),
+    ]);
+
+    const popRow = population.rows[0];
+
+    const gapHeatmap: Record<string, { gapCount: number; severity: string; topGap?: string }> = {};
+    for (const gap of gaps) {
+      for (const domain of gap.affectedDomains) {
+        const venture = domainToVenture(domain);
+        if (!gapHeatmap[venture]) gapHeatmap[venture] = { gapCount: 0, severity: "low" };
+        gapHeatmap[venture].gapCount++;
+        if (!gapHeatmap[venture].topGap) gapHeatmap[venture].topGap = gap.title;
+        if (gap.severity === "critical") gapHeatmap[venture].severity = "critical";
+        else if (gap.severity === "high" && gapHeatmap[venture].severity !== "critical") gapHeatmap[venture].severity = "high";
+        else if (gap.severity === "medium" && gapHeatmap[venture].severity === "low") gapHeatmap[venture].severity = "medium";
+      }
+    }
+
+    sendSuccess(res, {
+      proposals,
+      gapHeatmap,
+      openGapCount: gaps.length,
+      learningAggregates: learningAgg,
+      evolutionStatus: popRow ? {
+        generation: popRow.generation,
+        bestFitness: parseFloat(popRow.best_fitness),
+        avgFitness: parseFloat(popRow.avg_fitness),
+        status: popRow.status,
+        domain: popRow.domain,
+        lastEvolved: popRow.updated_at,
+      } : null,
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch evolution radar");
+  }
+});
+
+function domainToVenture(domain: string): string {
+  const map: Record<string, string> = {
+    maritime: "vessels",
+    defense: "aegis",
+    cyber: "aegis",
+    intelligence: "aegis",
+    real_estate: "terra",
+    legal: "prism",
+    finance: "lyte",
+    consulting: "carlota-jo",
+    general: "szl-holdings",
+  };
+  return map[domain] || domain;
+}
+
 router.get("/capabilities", authMiddleware(), (_req: Request, res: Response) => {
   sendSuccess(res, {
     platform: "Alloy",
-    version: "2.0.0",
+    version: "3.0.0",
     engines: {
       evolution: {
         name: "Genetic Evolution Engine",
