@@ -1,4 +1,4 @@
-modules = ["nodejs-24", "postgresql-16", "python3"]
+modules = ["nodejs-24", "python3", "postgresql-16"]
 
 [[artifacts]]
 id = "artifacts/api-server"
@@ -9,6 +9,9 @@ id = "artifacts/mockup-sandbox"
 [deployment]
 router = "application"
 deploymentTarget = "autoscale"
+
+[deployment.build]
+args = ["node", "scripts/ensure-tables.mjs"]
 
 [deployment.postBuild]
 args = ["pnpm", "store", "prune"]
