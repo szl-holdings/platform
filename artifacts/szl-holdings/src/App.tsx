@@ -105,7 +105,6 @@ const PitchModePage = lazy(() => import("@/pages/pitch-mode"));
 const FlywheelVizPage = lazy(() => import("@/pages/flywheel-viz"));
 const RevenueMetricsPage = lazy(() => import("@/pages/revenue-metrics"));
 const IntelligenceMeshPage = lazy(() => import("@/pages/intelligence-mesh"));
-const NerveCenterPage = lazy(() => import("@/pages/nerve-center"));
 
 // Public infrastructure pages (trust center, legal baseline, API, investor, press, brand, faq, roadmap)
 const SecurityPage = lazy(() => import("@/pages/security"));
@@ -178,7 +177,6 @@ const AlloyEvolutionPage = lazy(() => import("@/alloy/pages/evolution-radar").th
 const AcademyPage = lazy(() => import("@/pages/academy"));
 const HelpPage = lazy(() => import("@/pages/help"));
 const DemosPage = lazy(() => import("@/pages/demos"));
-const NerveCenterPage = lazy(() => import("@/pages/nerve-center"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -765,11 +763,6 @@ function App() {
               <Suspense fallback={<PageLoader />}><AccessibilityPage /></Suspense>
             </Route>
 
-            {/* ── Nerve Center — Unified Command Surface ── */}
-            <Route path="/nerve-center">
-              <RequireAuth><Suspense fallback={<PageLoader />}><NerveCenterPage /></Suspense></RequireAuth>
-            </Route>
-
             {/* ── Cross-app / platform command pages ── */}
             <Route path="/helm">
               <Suspense fallback={<PageLoader />}><HelmConsolePage /></Suspense>
@@ -843,9 +836,6 @@ function App() {
             </Route>
             <Route path="/developers/:section">
               <Redirect to="/docs" />
-            </Route>
-            <Route path="/nerve-center">
-              <RequireAuth><Suspense fallback={<PageLoader />}><NerveCenterPage /></Suspense></RequireAuth>
             </Route>
             <Route path="/core">
               <Suspense fallback={<PageLoader />}><CoreCommandPage /></Suspense>

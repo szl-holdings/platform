@@ -79,7 +79,7 @@
       "@xmldom/xmldom": "0.8.12",
       "brace-expansion": "2.0.3",
       "lodash": "4.18.1",
-      "express>router>path-to-regexp": "8.4.0",
+      "path-to-regexp": "8.4.0",
       "picomatch@>=2.0.0 <3": "2.3.2",
       "picomatch@>=4.0.0 <4.0.4": "4.0.4",
       "vite": "7.3.2",
