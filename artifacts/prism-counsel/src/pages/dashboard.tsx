@@ -1,7 +1,23 @@
-import { Scale, AlertTriangle, Clock, TrendingUp, DollarSign, ShieldCheck, FileText, ArrowRight, ChevronRight, Wifi, WifiOff } from "lucide-react";
+import { Scale, AlertTriangle, Clock, TrendingUp, DollarSign, ShieldCheck, FileText, ArrowRight, ChevronRight, Wifi, WifiOff, Shield, CheckCircle, XCircle } from "lucide-react";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { DEMO_MATTERS, PILLAR_LABELS } from "../data/demo-matters";
 import { usePrismDashboard, usePrismMatters } from "../hooks/use-prism-api";
+
+function useFilingGateStats() {
+  return useQuery({
+    queryKey: ["filing-gate", "stats"],
+    queryFn: async () => {
+      const res = await fetch("/api/prism-counsel/review-desk/filing-gate/stats", {
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    },
+    staleTime: 60000,
+    retry: false,
+  });
+}
 
 function PillarBar({ label, score, max = 100 }: { label: string; score: number; max?: number }) {
   const pct = Math.round((score / max) * 100);
@@ -252,6 +268,8 @@ export default function PrismCounselDashboard() {
               })}
             </div>
           </div>
+
+          <FilingGateHealthWidget />
         </div>
       </div>
     </div>
@@ -260,4 +278,88 @@ export default function PrismCounselDashboard() {
 
 function FolderOpen(props: any) {
   return <FileText {...props} />;
+}
+
+function FilingGateHealthWidget() {
+  const { data, isLoading } = useFilingGateStats();
+  const stats = data ?? {};
+  const documentsVerified: number = stats.documentsVerified ?? 0;
+  const citationsAnalyzed: number = stats.citationsAnalyzed ?? 0;
+  const suspiciousCaught: number = stats.suspiciousCaught ?? 0;
+  const blockedDocuments: number = stats.blockedDocuments ?? 0;
+  const sealedAudits: number = stats.sealedAudits ?? 0;
+  const catchRate: number = stats.catchRate ?? 0;
+  const recentActivity: Array<{ auditId: string; documentTitle: string; overallStatus: string; suspiciousCount: number; createdAt: string; sealed: boolean }> = stats.recentActivity ?? [];
+
+  function timeAgo(iso: string) {
+    const diffMs = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diffMs / 60000);
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
+  }
+
+  return (
+    <div className="rounded-lg border border-[#c8a96e]/15 p-4" style={{ background: "#0c1220" }}>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-1.5">
+          <Shield className="w-3.5 h-3.5 text-[#c8a96e]" />
+          <h2 className="text-sm font-semibold text-slate-200">Filing Gate Health</h2>
+          <span className="text-[8px] px-1 py-0.5 rounded font-mono bg-[#c8a96e]/10 text-[#c8a96e]">{isLoading ? "LOADING" : "LIVE"}</span>
+        </div>
+        <Link href="/review-desk/filing-gate">
+          <span className="text-[10px] text-slate-500 hover:text-[#c8a96e] cursor-pointer flex items-center gap-1 transition-colors">
+            Open Gate <ChevronRight className="w-3 h-3" />
+          </span>
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 mb-3">
+        <div className="rounded border border-white/[0.04] p-2 text-center" style={{ background: "#080c14" }}>
+          <div className="text-lg font-bold text-[#4a90b8]">{documentsVerified}</div>
+          <div className="text-[8px] text-slate-600 uppercase">Verified</div>
+        </div>
+        <div className="rounded border border-white/[0.04] p-2 text-center" style={{ background: "#080c14" }}>
+          <div className="text-lg font-bold text-[#d4a054]">{citationsAnalyzed}</div>
+          <div className="text-[8px] text-slate-600 uppercase">Citations</div>
+        </div>
+        <div className="rounded border border-white/[0.04] p-2 text-center" style={{ background: "#080c14" }}>
+          <div className="text-lg font-bold text-[#c45a4a]">{suspiciousCaught}</div>
+          <div className="text-[8px] text-slate-600 uppercase">Suspicious</div>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-[9px] text-slate-500">Citation Catch Rate (30d)</span>
+        <span className="text-[9px] font-mono text-[#c8a96e]">{catchRate}%</span>
+      </div>
+      <div className="h-1.5 rounded-full overflow-hidden mb-3" style={{ background: "rgba(255,255,255,0.06)" }}>
+        <div className="h-full rounded-full" style={{ width: `${Math.min(catchRate, 100)}%`, background: "#c45a4a" }} />
+      </div>
+
+      <div className="space-y-1.5">
+        <div className="text-[9px] text-slate-600 uppercase tracking-wider mb-1">Recent Activity</div>
+        {recentActivity.length > 0 ? recentActivity.slice(0, 4).map((item, i) => (
+          <div key={i} className="flex items-center gap-2">
+            {item.overallStatus === "clear" || item.sealed
+              ? <CheckCircle className="w-2.5 h-2.5 text-[#4a90b8] flex-shrink-0" />
+              : item.overallStatus === "blocked"
+                ? <XCircle className="w-2.5 h-2.5 text-[#c45a4a] flex-shrink-0" />
+                : <AlertTriangle className="w-2.5 h-2.5 text-[#d4a054] flex-shrink-0" />
+            }
+            <span className="text-[9px] text-slate-400 flex-1 truncate">{item.documentTitle}</span>
+            <span className="text-[8px] text-slate-600 flex-shrink-0">{timeAgo(item.createdAt)}</span>
+          </div>
+        )) : (
+          <div className="text-[9px] text-slate-600">No audits in the last 30 days. Run verification on a document to begin.</div>
+        )}
+      </div>
+
+      <div className="mt-3 pt-2.5 border-t border-white/[0.04] flex items-center justify-between">
+        <span className="text-[8.5px] text-slate-600">{blockedDocuments} docs flagged in 30d</span>
+        <span className="text-[8.5px] text-[#4a90b8]">{sealedAudits} audit{sealedAudits !== 1 ? "s" : ""} sealed</span>
+      </div>
+    </div>
+  );
 }

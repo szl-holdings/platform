@@ -3,8 +3,8 @@ import { pool } from "@szl-holdings/db";
 import { EvolutionEngine, createWorkflowFitnessFunction, persistPopulation, type Gene } from "../lib/alloy-evolution-engine";
 import { ExpertRouter, logRoutingDecision, type SignalContext } from "../lib/alloy-expert-router";
 import { ThreatEngine, persistThreatModel } from "../lib/alloy-threat-engine";
+import { authMiddleware, AuthenticatedUser } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendBadRequest, handleRouteError } from "../lib/api-response";
-import { authMiddleware } from "../middlewares/auth";
 
 const router = Router();
 
@@ -29,7 +29,7 @@ router.get("/evolution/populations", async (req: Request, res: Response) => {
 
 router.post("/evolution/populations", authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const { name, domain, objectiveFunction, config } = req.body;
+    const { name, domain, objectiveFunction, config, orgId: bodyOrgId } = req.body;
     if (!name || !domain || !objectiveFunction) {
       return sendBadRequest(res, "name, domain, and objectiveFunction are required");
     }
@@ -112,6 +112,7 @@ router.post("/evolution/populations/:id/evolve", authMiddleware(), async (req: R
     if (popRows.length === 0) return sendBadRequest(res, "Population not found");
 
     const pop = popRows[0];
+
     const engine = new EvolutionEngine({
       populationSize: pop.population_size,
       mutationRate: parseFloat(pop.mutation_rate),
@@ -161,7 +162,7 @@ router.post("/evolution/populations/:id/evolve", authMiddleware(), async (req: R
         [populationId]
       );
 
-      await persistPopulation(pop.org_id || 1, populationId, nextGeneration, stats);
+      await persistPopulation(orgId, populationId, nextGeneration, stats);
       currentPopulation = nextGeneration;
       allStats.push(stats);
     }
@@ -179,11 +180,18 @@ router.post("/evolution/populations/:id/evolve", authMiddleware(), async (req: R
   }
 });
 
-router.get("/evolution/populations/:id/genomes", async (req: Request, res: Response) => {
+router.get("/evolution/populations/:id/genomes", authMiddleware(), async (req: Request, res: Response) => {
   try {
     const populationId = parseInt(req.params.id);
     const eliteOnly = req.query.elite === "true";
 
+    const orgId = getOrgId(req);
+    const { rows: popRows } = await pool.query(
+      `SELECT org_id FROM alloy_populations WHERE id = $1 AND org_id = $2`,
+      [populationId, orgId]
+    );
+    if (popRows.length === 0) return sendBadRequest(res, "Population not found");
+    
     let query = `SELECT id, generation, fitness_score, genes, mutation_history, is_elite,
        created_at FROM alloy_genomes WHERE population_id = $1 AND is_active = true`;
     if (eliteOnly) query += ` AND is_elite = true`;
@@ -199,7 +207,7 @@ router.get("/evolution/populations/:id/genomes", async (req: Request, res: Respo
 const expertRouter = new ExpertRouter();
 let expertsLoaded = false;
 
-router.get("/experts", async (req: Request, res: Response) => {
+router.get("/experts", authMiddleware(), async (req: Request, res: Response) => {
   try {
     if (!expertsLoaded) {
       await expertRouter.loadExperts();
@@ -352,7 +360,7 @@ router.post("/threats/analyze/full", authMiddleware(), async (req: Request, res:
   }
 });
 
-router.get("/threats/models", async (req: Request, res: Response) => {
+router.get("/threats/models", authMiddleware(), async (req: Request, res: Response) => {
   try {
     const orgId = getOrgId(req);
     const { rows } = await pool.query(
@@ -367,7 +375,7 @@ router.get("/threats/models", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/capabilities", (_req: Request, res: Response) => {
+router.get("/capabilities", authMiddleware(), (_req: Request, res: Response) => {
   sendSuccess(res, {
     platform: "Alloy",
     version: "2.0.0",

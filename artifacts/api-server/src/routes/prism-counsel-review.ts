@@ -1,11 +1,12 @@
 import { Router, Request, Response } from "express";
 import { db } from "@szl-holdings/db";
-import { eq, and, desc, or, sql, isNull, not, gte } from "drizzle-orm";
+import { eq, and, desc, or, sql, isNull, not, gte, count } from "drizzle-orm";
 import {
   pcManagedReviewItemsTable,
   pcManagedReviewAssignmentsTable,
   pcManagedReviewNotesTable,
   pcReviewAuditEventsTable,
+  pcCitationAuditReportsTable,
 } from "@szl-holdings/db/schema";
 import { logger } from "../lib/logger";
 
@@ -956,6 +957,280 @@ router.get("/review-desk/copilot/max-unblock", async (_req: Request, res: Respon
     });
   } catch (err: any) {
     return res.status(500).json({ error: "Failed to get max-unblock item" });
+  }
+});
+
+
+// ─── FILING GATE: Citation Audit Report Endpoints ─────────────────────────────
+
+router.post("/prism-counsel/review-desk/filing-gate/verify", async (req: Request, res: Response) => {
+  try {
+    const {
+      documentId,
+      documentTitle,
+      documentType,
+      documentText,
+      matterId,
+      reviewItemId,
+      citations,
+      overallStatus,
+      verifiedCount,
+      unverifiedCount,
+      suspiciousCount,
+      totalCitations,
+      averageConfidence,
+      blockingCitations,
+      verificationDurationMs,
+    } = req.body as {
+      documentId: string;
+      documentTitle: string;
+      documentType?: string;
+      documentText?: string;
+      matterId?: number;
+      reviewItemId?: number;
+      citations: unknown[];
+      overallStatus: "clear" | "needs_review" | "blocked";
+      verifiedCount: number;
+      unverifiedCount: number;
+      suspiciousCount: number;
+      totalCitations: number;
+      averageConfidence: number;
+      blockingCitations: unknown[];
+      verificationDurationMs: number;
+    };
+
+    if (!documentId || !documentTitle || !overallStatus) {
+      return res.status(400).json({ error: "documentId, documentTitle, and overallStatus are required" });
+    }
+
+    const auditId = `audit_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
+    let ragVerificationNotes: Record<string, unknown> = {};
+
+    if (documentText && citations && Array.isArray(citations) && citations.length > 0) {
+      try {
+        const { searchKnowledge } = await import("../lib/rag-pipeline");
+        const suspiciousCites = (citations as Array<{ raw: string; status: string }>)
+          .filter((c) => c.status === "suspicious")
+          .slice(0, 3);
+
+        for (const cite of suspiciousCites) {
+          try {
+            const results = await searchKnowledge(cite.raw, { limit: 3, minSimilarity: 0.2 });
+            ragVerificationNotes[cite.raw] = {
+              kbHits: results.length,
+              topMatch: results[0]
+                ? { docId: results[0].documentId, similarity: results[0].similarity, snippet: results[0].content.slice(0, 200) }
+                : null,
+              kbVerified: results.length > 0 && results[0].similarity > 0.5,
+            };
+          } catch {
+            ragVerificationNotes[cite.raw] = { kbHits: 0, kbVerified: false, error: "kb_search_failed" };
+          }
+        }
+      } catch {
+        logger.warn("RAG pipeline unavailable for citation KB cross-check");
+      }
+    }
+
+    const [report] = await db.insert(pcCitationAuditReportsTable).values({
+      orgId: ORG_ID,
+      matterId: matterId ?? null,
+      reviewItemId: reviewItemId ?? null,
+      auditId,
+      documentId,
+      documentTitle,
+      documentType: documentType ?? null,
+      totalCitations,
+      verifiedCount,
+      unverifiedCount,
+      suspiciousCount,
+      averageConfidence,
+      overallStatus,
+      citations: citations as unknown[],
+      blockingCitations: blockingCitations as unknown[],
+      ragVerificationNotes,
+      verificationDurationMs: verificationDurationMs ?? null,
+    }).returning();
+
+    await emitReviewAudit({
+      orgId: ORG_ID,
+      matterId: matterId ?? undefined,
+      reviewItemId: reviewItemId ?? undefined,
+      action: "citation_audit_created",
+      details: {
+        auditId,
+        documentId,
+        documentTitle,
+        overallStatus,
+        totalCitations,
+        suspiciousCount,
+      },
+    });
+
+    return res.json({ success: true, report });
+  } catch (err: any) {
+    logger.error({ err }, "Failed to create citation audit report");
+    return res.status(500).json({ error: "Failed to create citation audit report" });
+  }
+});
+
+router.get("/prism-counsel/review-desk/filing-gate/audits", async (req: Request, res: Response) => {
+  try {
+    const { matterId, limit = "50", offset = "0", status } = req.query as {
+      matterId?: string;
+      limit?: string;
+      offset?: string;
+      status?: string;
+    };
+
+    const conditions = [eq(pcCitationAuditReportsTable.orgId, ORG_ID)];
+    if (matterId) conditions.push(eq(pcCitationAuditReportsTable.matterId, parseInt(matterId)));
+    if (status && ["clear", "needs_review", "blocked"].includes(status)) {
+      conditions.push(eq(pcCitationAuditReportsTable.overallStatus, status as "clear" | "needs_review" | "blocked"));
+    }
+
+    const reports = await db
+      .select()
+      .from(pcCitationAuditReportsTable)
+      .where(and(...conditions))
+      .orderBy(desc(pcCitationAuditReportsTable.createdAt))
+      .limit(parseInt(limit))
+      .offset(parseInt(offset));
+
+    return res.json({ reports, total: reports.length });
+  } catch (err: any) {
+    logger.error({ err }, "Failed to list citation audit reports");
+    return res.status(500).json({ error: "Failed to list citation audit reports" });
+  }
+});
+
+router.get("/prism-counsel/review-desk/filing-gate/audits/:auditId", async (req: Request, res: Response) => {
+  try {
+    const { auditId } = req.params;
+    const [report] = await db
+      .select()
+      .from(pcCitationAuditReportsTable)
+      .where(and(eq(pcCitationAuditReportsTable.auditId, auditId), eq(pcCitationAuditReportsTable.orgId, ORG_ID)));
+
+    if (!report) return res.status(404).json({ error: "Audit report not found" });
+    return res.json({ report });
+  } catch (err: any) {
+    return res.status(500).json({ error: "Failed to get citation audit report" });
+  }
+});
+
+router.post("/prism-counsel/review-desk/filing-gate/audits/:auditId/seal", async (req: Request, res: Response) => {
+  try {
+    const { auditId } = req.params;
+    const { note, sealedBy } = req.body as { note?: string; sealedBy?: number };
+
+    const [existing] = await db
+      .select()
+      .from(pcCitationAuditReportsTable)
+      .where(and(eq(pcCitationAuditReportsTable.auditId, auditId), eq(pcCitationAuditReportsTable.orgId, ORG_ID)));
+
+    if (!existing) return res.status(404).json({ error: "Audit report not found" });
+    if (existing.sealedAt) return res.status(409).json({ error: "Audit report already sealed" });
+
+    const [updated] = await db
+      .update(pcCitationAuditReportsTable)
+      .set({
+        sealedAt: new Date(),
+        sealedBy: sealedBy ?? null,
+        sealedNote: note ?? null,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(pcCitationAuditReportsTable.auditId, auditId), eq(pcCitationAuditReportsTable.orgId, ORG_ID)))
+      .returning();
+
+    await emitReviewAudit({
+      orgId: ORG_ID,
+      matterId: existing.matterId ?? undefined,
+      reviewItemId: existing.reviewItemId ?? undefined,
+      action: "citation_audit_sealed",
+      details: { auditId, documentTitle: existing.documentTitle, overallStatus: existing.overallStatus, sealedNote: note },
+    });
+
+    return res.json({ success: true, report: updated });
+  } catch (err: any) {
+    logger.error({ err }, "Failed to seal citation audit report");
+    return res.status(500).json({ error: "Failed to seal citation audit report" });
+  }
+});
+
+router.get("/prism-counsel/review-desk/filing-gate/stats", async (req: Request, res: Response) => {
+  try {
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+    const allReports = await db
+      .select({
+        overallStatus: pcCitationAuditReportsTable.overallStatus,
+        totalCitations: pcCitationAuditReportsTable.totalCitations,
+        suspiciousCount: pcCitationAuditReportsTable.suspiciousCount,
+        verifiedCount: pcCitationAuditReportsTable.verifiedCount,
+        averageConfidence: pcCitationAuditReportsTable.averageConfidence,
+        sealedAt: pcCitationAuditReportsTable.sealedAt,
+        createdAt: pcCitationAuditReportsTable.createdAt,
+        auditId: pcCitationAuditReportsTable.auditId,
+        documentTitle: pcCitationAuditReportsTable.documentTitle,
+      })
+      .from(pcCitationAuditReportsTable)
+      .where(and(eq(pcCitationAuditReportsTable.orgId, ORG_ID), gte(pcCitationAuditReportsTable.createdAt, thirtyDaysAgo)))
+      .orderBy(desc(pcCitationAuditReportsTable.createdAt));
+
+    const totalDocuments = allReports.length;
+    const totalCitations = allReports.reduce((s, r) => s + (r.totalCitations || 0), 0);
+    const totalSuspicious = allReports.reduce((s, r) => s + (r.suspiciousCount || 0), 0);
+    const sealedCount = allReports.filter((r) => r.sealedAt != null).length;
+    const blockedCount = allReports.filter((r) => r.overallStatus === "blocked").length;
+    const avgConfidence = totalDocuments > 0
+      ? allReports.reduce((s, r) => s + (r.averageConfidence || 0), 0) / totalDocuments
+      : 0;
+    const catchRate = totalCitations > 0 ? totalSuspicious / totalCitations : 0;
+
+    return res.json({
+      documentsVerified: totalDocuments,
+      citationsAnalyzed: totalCitations,
+      suspiciousCaught: totalSuspicious,
+      catchRate: parseFloat((catchRate * 100).toFixed(1)),
+      averageConfidence: parseFloat((avgConfidence * 100).toFixed(1)),
+      sealedAudits: sealedCount,
+      blockedDocuments: blockedCount,
+      recentActivity: allReports.slice(0, 10).map((r) => ({
+        auditId: r.auditId,
+        documentTitle: r.documentTitle,
+        overallStatus: r.overallStatus,
+        suspiciousCount: r.suspiciousCount,
+        createdAt: r.createdAt,
+        sealed: r.sealedAt != null,
+      })),
+    });
+  } catch (err: any) {
+    logger.error({ err }, "Failed to get filing gate stats");
+    return res.status(500).json({ error: "Failed to get filing gate stats" });
+  }
+});
+
+router.get("/prism-counsel/review-desk/draft-reviews", async (req: Request, res: Response) => {
+  try {
+    const { matterId } = req.query as { matterId?: string };
+    const conditions = [
+      eq(pcManagedReviewItemsTable.orgId, ORG_ID),
+      eq(pcManagedReviewItemsTable.reviewWorkType, "draft_review"),
+    ];
+    if (matterId) conditions.push(eq(pcManagedReviewItemsTable.matterId, parseInt(matterId)));
+
+    const items = await db
+      .select()
+      .from(pcManagedReviewItemsTable)
+      .where(and(...conditions))
+      .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
+      .limit(50);
+
+    return res.json({ items });
+  } catch (err: any) {
+    return res.status(500).json({ error: "Failed to get draft reviews" });
   }
 });
 

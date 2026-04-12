@@ -59,6 +59,7 @@ const PrismReviewDesk = lazy(() => import("./pages/review-desk/review-desk-page"
 const PrismReviewMetrics = lazy(() => import("./pages/review-desk/review-metrics-page"));
 const PrismReviewAdmin = lazy(() => import("./pages/review-desk/review-admin-page"));
 const PrismMyReview = lazy(() => import("./pages/review-desk/my-review-page"));
+const PrismFilingGate = lazy(() => import("./pages/review-desk/filing-gate-page"));
 
 const PilotToday = lazy(() => import("./pages/pilot/today-page"));
 const PilotMatterDesk = lazy(() => import("./pages/pilot/matter-desk-page"));
@@ -308,6 +309,9 @@ function PrismCounselRoutes() {
       </Route>
       <Route path="/review-desk/my-review">
         <Suspense fallback={<PageLoader />}><Wrap><PrismMyReview /></Wrap></Suspense>
+      </Route>
+      <Route path="/review-desk/filing-gate">
+        <Suspense fallback={<PageLoader />}><Wrap><PrismFilingGate /></Wrap></Suspense>
       </Route>
       <Route path="/review-desk">
         <Suspense fallback={<PageLoader />}><Wrap><PrismReviewDesk /></Wrap></Suspense>

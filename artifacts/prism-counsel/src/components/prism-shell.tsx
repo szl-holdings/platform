@@ -131,6 +131,7 @@ const NAV: NavSection[] = [
     items: [
       { label: "My Review", href: "/review-desk/my-review", icon: ClipboardCheck },
       { label: "Review Queue", href: "/review-desk", icon: ClipboardList },
+      { label: "Filing Gate", href: "/review-desk/filing-gate", icon: Shield },
       { label: "Metrics", href: "/review-desk/metrics", icon: BarChart3 },
       { label: "Admin", href: "/review-desk/admin", icon: Settings },
     ],
@@ -530,6 +531,7 @@ function getBreadcrumb(location: string): string {
   if (path.startsWith("matter-desk/")) return "Matter Desk";
   if (path.startsWith("admin/health")) return "System Health";
   if (path.startsWith("admin/")) return "Admin";
+  if (path.startsWith("review-desk/filing-gate")) return "Filing Gate";
   if (path.startsWith("review-desk/")) return "Review Desk";
   if (path.startsWith("portfolio/")) return "Portfolio";
   if (path.startsWith("ny/")) return "New York";
