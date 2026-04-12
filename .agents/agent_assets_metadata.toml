@@ -461,3 +461,15 @@ id = "t73wOuV3x5rdy2SPJ7tMj"
 uri = "file://screenshots/stephen-work-clean.jpg"
 type = "image"
 title = "11. Stephen — Case Studies"
+
+[[outputs]]
+id = "kiKyO3UmnMUXxfHA62N7n"
+uri = "file://screenshots/szl-portfolio.pdf"
+type = "pdf"
+title = "SZL Holdings — LinkedIn Portfolio PDF"
+
+[[outputs]]
+id = "FmWNBqW6sRcrqMw8XcV_A"
+uri = "file://screenshots/szl-portfolio.tar.gz"
+type = "unspecified"
+title = "SZL Portfolio — Complete Screenshot Archive"
