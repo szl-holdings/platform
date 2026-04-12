@@ -112,6 +112,7 @@ import worldlineRouter from "./worldline";
 import distributionOsRouter from "./distribution-os";
 import prismBusApiRouter from "./prism-bus-api";
 import forgeRuntimeApiRouter from "./forge-runtime-api";
+import forgePortalRouter from "./forge-portal";
 import covenantPolicyApiRouter from "./covenant-policy-api";
 import receiptGraphRouter from "./receipt-graph";
 import pulseEvalsRouter from "./pulse-evals";
@@ -522,5 +523,8 @@ router.use(crossDomainIntelligenceRouter);
 router.use("/pulse", _readLimiter);
 router.use("/pulse", _writeLimiter);
 router.use(pulseRouter);
+
+router.use("/forge-portal", _readLimiter);
+router.use(forgePortalRouter);
 
 export default router;

@@ -30,6 +30,14 @@ CIA-PDB–style automated intelligence product within the SZL Holdings app that 
 - **Schema**: `lib/db/src/schema/pulse.ts`
 - **Frontend**: `artifacts/szl-holdings/src/pages/pulse/` (8 page components + utils)
 
+### Forge — Client & Investor Portal (`/forge/`)
+External-facing portal for SZL Holdings clients, investors, and partners. Premium light-mode institutional design. Built as `artifacts/forge` (Vite + React + TanStack Query, port 5000).
+- **7 Pages**: Dashboard, Portfolio, Matter Tracker, Assets, Documents, Messages, Settings
+- **API Layer**: `artifacts/api-server/src/routes/forge-portal.ts` — client-scoped REST API with in-memory data store (seeded per userId), domain-based RBAC (vessels/terra/legal/security)
+- **Frontend API Client**: `artifacts/forge/src/lib/api.ts` — typed fetch client with all portal endpoints and shared TypeScript interfaces
+- **Security**: Document access audit logging, message read receipts, domain entitlement enforcement on all read/write routes, client-scoped data isolation
+- **Design Tokens**: forge-* CSS custom properties (warm neutral palette, light backgrounds, institutional typography)
+
 ## User Preferences
 I prefer detailed explanations.
 I want iterative development.
@@ -72,6 +80,7 @@ Each platform has a distinct visual identity:
 - **Carlota Jo:** Warm ivory/brushed gold, for UHNW residential advisory.
 - **Aegis:** Navy/amber/red, for unified defense and intelligence.
 - **PRISM Counsel:** A standalone artifact focusing on legal matter observability with specialized data products and an NY insurance observability layer.
+- **Forge:** Premium light-mode institutional portal for external clients/investors, warm neutral palette with forge-* CSS tokens.
 - **SZL Distribution OS:** A content publishing and distribution platform with a dedicated admin panel and public-facing content.
 
 ### API Layers
