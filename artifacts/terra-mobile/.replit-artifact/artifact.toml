@@ -1,26 +1,6 @@
 kind = "mobile"
   previewPath = "/terra-mobile/"
-  title = "Terra Mobile — Field Intelligence"
+  title = "Terra Mobile"
   version = "1.0.0"
-  id = "artifacts/carlota-jo-mobile"
-
-  [[integratedSkills]]
-  name = "expo"
-  version = "1.0.0"
-
-  [[services]]
-  name = "expo"
-  paths = ["/terra-mobile/"]
-  localPort = 8088
-
-  [services.development]
-  run = "pnpm --filter @workspace/terra-mobile run dev"
-  autoStart = false
-
-  [services.production]
-  build = ["pnpm", "--filter", "@workspace/terra-mobile", "run", "build"]
-  run = ["pnpm", "--filter", "@workspace/terra-mobile", "run", "serve"]
-
-  [services.env]
-  PORT = "8088"
-  BASE_PATH = "/terra-mobile/"
+  id = "artifacts/terra-mobile"
+  

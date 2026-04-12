@@ -1,0 +1,6 @@
+kind = "web"
+  previewPath = "/firestorm/"
+  title = "Aegis — Unified Defense & Intelligence Command"
+  version = "1.0.0"
+  id = "artifacts/firestorm"
+  

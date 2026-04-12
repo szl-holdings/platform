@@ -454,6 +454,28 @@ export default function HomePage() {
                     Explore the platform
                   </Link>
                 </MagneticButton>
+                <MagneticButton>
+                  <a
+                    href="/stephen-site/investor"
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: "0.5rem",
+                      padding: "0.75rem 1.5rem",
+                      background: "transparent",
+                      color: "var(--color-szl-text-faint)",
+                      border: "1px solid hsla(0,0%,100%,0.06)",
+                      borderRadius: "0.375rem",
+                      fontSize: "0.8125rem", fontWeight: 500,
+                      textDecoration: "none",
+                      letterSpacing: "0.03em",
+                      transition: "border-color 0.2s ease, color 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(192,72%,48%,0.3)"; (e.currentTarget as HTMLElement).style.color = "hsl(192,72%,48%)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.06)"; (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-faint)"; }}
+                  >
+                    For Investors
+                    <ArrowRight size={13} />
+                  </a>
+                </MagneticButton>
               </m.div>
             </m.div>
           </div>

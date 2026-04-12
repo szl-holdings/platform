@@ -1,31 +1,6 @@
 kind = "web"
-previewPath = "/carlota-jo/"
-title = "Carlota Jo Consulting"
-version = "1.0.0"
-id = "artifacts/carlota-jo"
-router = "path"
-
-[[integratedSkills]]
-name = "react-vite"
-version = "1.0.0"
-
-[[services]]
-name = "web"
-paths = [ "/carlota-jo/" ]
-localPort = 21200
-
-[services.development]
-run = "pnpm --filter @workspace/carlota-jo run dev"
-
-[services.production]
-build = [ "pnpm", "--filter", "@workspace/carlota-jo", "run", "build" ]
-publicDir = "artifacts/carlota-jo/dist/public"
-serve = "static"
-
-[[services.production.rewrites]]
-from = "/*"
-to = "/index.html"
-
-[services.env]
-PORT = "21200"
-BASE_PATH = "/carlota-jo/"
+  previewPath = "/carlota-jo/"
+  title = "Carlota Jo Consulting"
+  version = "1.0.0"
+  id = "artifacts/carlota-jo"
+  

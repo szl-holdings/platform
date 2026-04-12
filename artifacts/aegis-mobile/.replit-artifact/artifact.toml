@@ -1,26 +1,6 @@
 kind = "mobile"
-    previewPath = "/aegis-mobile/"
-    title = "Aegis Mobile — SOC Command Center"
-    version = "1.0.0"
-    id = "artifacts/aegis-mobile"
-
-    [[integratedSkills]]
-    name = "expo"
-    version = "1.0.0"
-
-    [[services]]
-    name = "expo"
-    paths = ["/aegis-mobile/"]
-    localPort = 8083
-
-    [services.development]
-    run = "pnpm --filter @workspace/aegis-mobile run dev"
-    autoStart = false
-
-    [services.production]
-    build = ["pnpm", "--filter", "@workspace/aegis-mobile", "run", "build"]
-    run = ["pnpm", "--filter", "@workspace/aegis-mobile", "run", "serve"]
-
-    [services.env]
-    PORT = "8083"
-    BASE_PATH = "/aegis-mobile/"
+  previewPath = "/aegis-mobile/"
+  title = "Aegis Mobile"
+  version = "1.0.0"
+  id = "artifacts/aegis-mobile"
+  

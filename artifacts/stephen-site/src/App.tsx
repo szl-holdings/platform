@@ -30,6 +30,7 @@ const FinancialResearch = lazy(() => import("@/pages/financial-research"));
 const HackajobProfile = lazy(() => import("@/pages/hackajob-profile"));
 const CareerCommand = lazy(() => import("@/pages/career-command"));
 const Speaking = lazy(() => import("@/pages/speaking"));
+const Investor = lazy(() => import("@/pages/Investor").then(m => ({ default: m.Investor })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -85,6 +86,7 @@ function Router() {
           <Redirect to="/writing" />
         </Route>
         <Route path="/speaking" component={Speaking} />
+        <Route path="/investor" component={Investor} />
         <Route path="/case-studies">
           <Redirect to="/work" />
         </Route>

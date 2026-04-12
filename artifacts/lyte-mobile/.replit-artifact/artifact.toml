@@ -1,26 +1,6 @@
 kind = "mobile"
   previewPath = "/lyte-mobile/"
-  title = "Lyte Mobile — AIOps Command"
+  title = "Lyte Mobile"
   version = "1.0.0"
   id = "artifacts/lyte-mobile"
-
-  [[integratedSkills]]
-  name = "expo"
-  version = "1.0.0"
-
-  [[services]]
-  name = "expo"
-  paths = ["/lyte-mobile/"]
-  localPort = 8084
-
-  [services.development]
-  run = "pnpm --filter @workspace/lyte-mobile run dev"
-  autoStart = false
-
-  [services.production]
-  build = ["pnpm", "--filter", "@workspace/lyte-mobile", "run", "build"]
-  run = ["pnpm", "--filter", "@workspace/lyte-mobile", "run", "serve"]
-
-  [services.env]
-  PORT = "8084"
-  BASE_PATH = "/lyte-mobile/"
+  

@@ -10,7 +10,7 @@ kind = "api"
   paths = ["/api"]
 
   [services.development]
-  run = "pnpm --filter @workspace/api-server run dev"
+  run = "pnpm --filter @workspace/api-server run dev:fast"
 
   [services.production]
 

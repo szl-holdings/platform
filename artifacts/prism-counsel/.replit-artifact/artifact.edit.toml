@@ -1,0 +1,6 @@
+kind = "web"
+  previewPath = "/prism-counsel/"
+  title = "PRISM Counsel — Legal Matter Command"
+  version = "1.0.0"
+  id = "artifacts/prism-counsel"
+  
