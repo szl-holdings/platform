@@ -1,8 +1,32 @@
-# SZL Holdings
+<p align="center">
+  <strong>SZL Holdings</strong>
+</p>
 
-**Enterprise-grade platforms for business observability, AI orchestration, and secure operational intelligence.**
+<p align="center">
+  <em>Governed operational intelligence for enterprises that cannot afford silent failures, invisible risk, or unaccountable AI.</em>
+</p>
 
-SZL Holdings builds governed, production-ready command software for organizations that cannot afford silent failures, invisible risk, or unaccountable AI. Every system is designed with explicit audit trails, human-in-the-loop controls, and traceable decision paths.
+<p align="center">
+  <a href="https://szlholdings.com">Website</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="https://github.com/szl-holdings/szl-holdings-platform">Platform Repository</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/investor/platform-thesis.md">Investor Thesis</a>
+</p>
+
+---
+
+## What We Build
+
+SZL Holdings builds the **governed operational intelligence layer** — the platform that connects what's observable to what's executable, under governance, with full attribution.
+
+**Lyte** is the command surface. **Alloy** is the execution fabric. Domain intelligence packs extend the same system into cybersecurity, maritime, real estate, legal, and private advisory.
+
+---
+
+## Platform at Scale
+
+```
+16 Production Applications     415+ Database Tables     5,300+ Columns
+ 9 Web Platforms                940+ Database Indexes    6 Shared Libraries
+ 7 Mobile Apps (Expo)            5  Industry Verticals   1 Founder
+```
 
 ---
 
@@ -10,60 +34,41 @@ SZL Holdings builds governed, production-ready command software for organization
 
 ```
 SZL Holdings
-├── Lyte         Business observability — surfaces risk, drift, and friction before they compound
-├── Alloy        Execution fabric — signal normalization, workflow orchestration, approval gates
+├── Lyte              Business observability — PRISM framework, autonomous remediation
+├── Alloy             Execution fabric — signal routing, workflow orchestration, approval gates
 │
-├── Aegis        Security & defense intelligence command
-├── Vessels      Maritime fleet command & intelligence
-├── Terra        Real estate portfolio intelligence
-└── Carlota Jo   Premium advisory & client operations
+├── Aegis             Cybersecurity & defense intelligence command
+├── Vessels           Maritime fleet command, voyage digital twin, knowledge graph
+├── Terra             Real estate intelligence, property genome, distress prediction
+├── PRISM Counsel     Litigation intelligence, case outcome prediction, judge analytics
+└── Carlota Jo        Premium advisory, AI concierge, lifestyle intelligence
 ```
 
-**Lyte + Alloy** form the core platform: Lyte provides the observability layer (PRISM framework: People, Revenue, Infrastructure, Security, Market), Alloy provides the execution layer (normalized signals → routed workflows → audit-locked outcomes). The vertical platforms (Aegis, Vessels, Terra, Carlota Jo) run on this shared foundation.
+Every system is designed with explicit audit trails, human-in-the-loop controls, and traceable decision paths. AI agents recommend — humans approve — the platform records everything.
 
 ---
 
-## What This Proves
+## Stack
 
-This repository is **technical proof** — not the first impression. The public-facing sequence is:
-
-**[Live Demo](https://szlholdings.com)** → Trust / Architecture / Docs → GitHub
-
-GitHub is where evaluators verify claims made elsewhere. Everything here is maintained to be verifiable, not impressive. If it's here, it works.
+TypeScript 5.9 · React 19 · Vite 7 · Express 5 · PostgreSQL 16 · Drizzle ORM · Expo SDK 53 · Tailwind CSS 4 · Framer Motion · TanStack Query · Multi-provider AI gateway (Anthropic, OpenAI, Gemini, Groq)
 
 ---
 
-## Flagship Product — szl-holdings-platform
+## Key Resources
 
-The canonical platform monorepo. Full ecosystem in a single repository:
-
-- **16 deployable artifacts** — web apps, mobile apps (Expo/React Native), API server
-- **6 shared libraries** — ai-engine, db, shared-ui, workflow-engine, design-tokens, api-spec
-- **120+ database tables** — governed schema via Drizzle ORM + PostgreSQL
-- **TypeScript everywhere** — strict types, no unsafe any, full compile-time guarantees
-- **Enterprise CI/CD** — CodeQL, dependency review, structured release pipeline
-
-→ **[szl-holdings/szl-holdings-platform](https://github.com/szl-holdings/szl-holdings-platform)**
-
----
-
-## Architecture & Trust Surface
-
-| Document | Location |
-|----------|----------|
-| Platform Architecture | [Architecture Overview](https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/architecture/system-overview.md) |
-| Security Posture | [Security & Trust](https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/trust/security-posture.md) |
-| SECURITY.md | [Vulnerability Disclosure](https://github.com/szl-holdings/szl-holdings-platform/blob/master/SECURITY.md) |
-| Investor Thesis | [Platform Thesis](https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/investor/platform-thesis.md) |
-| Public Mirror Policy | [Mirror Policy](https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/public/public-mirror-policy.md) |
+| Resource | Link |
+|----------|------|
+| Platform Repository | [szl-holdings-platform](https://github.com/szl-holdings/szl-holdings-platform) |
+| Architecture Overview | [system-overview.md](https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/architecture/system-overview.md) |
+| Trust Center | [trust-center.md](https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/trust/trust-center.md) |
+| Security Policy | [SECURITY.md](https://github.com/szl-holdings/szl-holdings-platform/blob/master/SECURITY.md) |
+| Investor Thesis | [platform-thesis.md](https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/investor/platform-thesis.md) |
+| Investor Dashboard | [Live Dashboard](https://szlholdings.com/stephen/investor) |
 
 ---
 
-## Contact & Evaluation
+**Stephen Lutar** — Founder & CEO
 
-**Stephen Lutar** — Founder & CEO  
-**Website:** [szlholdings.com](https://szlholdings.com)  
-**LinkedIn:** [linkedin.com/in/stephen-l-279315240](https://linkedin.com/in/stephen-l-279315240)  
-**Inquiries:** inquiries@szlholdings.com
+[szlholdings.com](https://szlholdings.com) · [LinkedIn](https://linkedin.com/in/stephen-l-279315240) · [X](https://x.com/szlholdings)
 
 Open to design partner conversations, enterprise evaluation, and investment introductions.
