@@ -5,7 +5,8 @@ import {
   Workflow, Shield, Zap, Lock, Download, RefreshCw, Database, Filter,
   BarChart3, Network, BookOpen, Puzzle, Activity, Eye, Send,
   Dna, Brain, Target, Crosshair, Globe, Cpu, TrendingUp, Radio,
-  ShieldAlert, Bug, Fingerprint, ScanLine
+  ShieldAlert, Bug, Fingerprint, ScanLine,
+  FlaskConical, History, LineChart, Gauge, Microscope, GitCompare, Timer, Sparkles
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -128,6 +129,103 @@ const EXPANSION_LANES = [
   { name: "Vessels", desc: "Rerouting decisions, port notifications, and regulatory filings routed with human approval and full audit record." },
   { name: "Aegis", desc: "Security incident response, remediation actions, and compliance evidence governed through analyst-gated workflows." },
   { name: "Carlota Jo", desc: "Intake authorizations, service milestone confirmations, and delivery approvals structured through Alloy." },
+];
+
+const ML_TRAINING_CAPABILITIES = [
+  {
+    icon: FlaskConical,
+    title: "LLM-Based Model Training",
+    body: "No custom model infrastructure. Alloy trains 'models' by evolving prompt strategies, reasoning chains, and confidence calibration through genetic algorithms. Each generation breeds better decision logic — measured against real operational data.",
+    badge: "Zero-infrastructure ML",
+  },
+  {
+    icon: Dna,
+    title: "Evolutionary Prompt Engineering",
+    body: "Prompt strategies are genomes. Temperature, reasoning depth, few-shot selection, confidence thresholds — all genes that mutate, crossover, and compete. The fittest prompt strategies survive. Manual prompt tuning becomes obsolete.",
+    badge: "Self-optimizing",
+  },
+  {
+    icon: Microscope,
+    title: "Five Training Strategies",
+    body: "Evolutionary optimization, few-shot refinement, chain-of-thought tuning, ensemble distillation, and reinforcement from human feedback. Each strategy evolves differently — pick the right one for your domain, or let Alloy auto-select.",
+    badge: "Multi-strategy",
+  },
+  {
+    icon: LineChart,
+    title: "Real-Time Epoch Metrics",
+    body: "Watch training in real time: train/validation accuracy, loss curves, diversity index, elite count, and convergence rate. Early stopping prevents overfitting. Every generation is persisted — roll back to any checkpoint.",
+    badge: "Full observability",
+  },
+];
+
+const BACKTEST_CAPABILITIES = [
+  {
+    icon: History,
+    title: "Historical Backtesting",
+    body: "Replay every past prediction through the current model. Compare what was predicted vs what actually happened. Measure accuracy, precision, recall, F1, and calibration — not on toy benchmarks, but on your real production data.",
+    badge: "Production-grade",
+  },
+  {
+    icon: GitCompare,
+    title: "Drift Detection",
+    body: "Alloy compares early vs late accuracy windows to detect model drift automatically. When the world changes and your model hasn't caught up, drift detection flags it before your decisions degrade.",
+    badge: "Auto-monitoring",
+  },
+  {
+    icon: Gauge,
+    title: "Confidence Calibration",
+    body: "A model that says '90% confident' should be right 90% of the time. Backtesting measures calibration — the gap between stated confidence and actual accuracy — and feeds corrections back into training.",
+    badge: "Trustworthy AI",
+  },
+  {
+    icon: Timer,
+    title: "Time-Series Accuracy",
+    body: "See how model accuracy changes over time — not just one number, but a curve. Identify when your model started degrading, correlate with real-world events, and quantify the impact.",
+    badge: "Temporal analysis",
+  },
+];
+
+const FORECAST_CAPABILITIES = [
+  {
+    icon: TrendingUp,
+    title: "Multi-Horizon Forecasting",
+    body: "Project any operational metric forward: 1 day, 7 days, 30 days, 90 days, up to a full year. Each forecast includes upper and lower confidence bounds, seasonal decomposition, and causal reasoning — not just trend extrapolation.",
+    badge: "Confidence intervals",
+  },
+  {
+    icon: Sparkles,
+    title: "Ensemble Methodology",
+    body: "Five forecasting approaches combined: trend extrapolation, seasonal decomposition, causal reasoning, ensemble averaging, and anomaly-adjusted projection. The methodology is selected automatically based on data characteristics.",
+    badge: "Adaptive",
+  },
+  {
+    icon: Brain,
+    title: "Causal Reasoning",
+    body: "Forecasts aren't just curves — they're explanations. Each projection comes with a reasoning chain: which factors drove it, what assumptions were made, and what would change the forecast. Decision-makers get context, not just numbers.",
+    badge: "Explainable",
+  },
+];
+
+const ML_MODEL_TYPES = [
+  { type: "Classifier", desc: "Categorize signals, entities, or events into discrete classes — risk levels, threat categories, outcome predictions" },
+  { type: "Predictor", desc: "Forecast continuous values — settlement amounts, vessel risk scores, property valuations, cost projections" },
+  { type: "Anomaly Detector", desc: "Identify unusual patterns — AIS gaps, transaction anomalies, behavioral deviations, compliance outliers" },
+  { type: "Forecaster", desc: "Project time-series metrics forward — portfolio performance, case volume, fleet utilization, market trends" },
+  { type: "Ranker", desc: "Prioritize items by multi-criteria scoring — lead quality, threat severity, investment attractiveness, escalation urgency" },
+  { type: "Recommender", desc: "Generate actionable recommendations — next best action, optimal allocation, strategic moves, remediation steps" },
+];
+
+const COMPETITIVE_ML_MATRIX = [
+  { feature: "LLM-Based Training (No Custom Models)", alloy: true, aws: false, gcp: false, azure: false },
+  { feature: "Genetic Prompt Evolution", alloy: true, aws: false, gcp: false, azure: false },
+  { feature: "Historical Backtesting", alloy: true, aws: true, gcp: true, azure: true },
+  { feature: "Automatic Drift Detection", alloy: true, aws: true, gcp: true, azure: true },
+  { feature: "Confidence Calibration Feedback", alloy: true, aws: false, gcp: false, azure: false },
+  { feature: "Multi-Strategy Training", alloy: true, aws: false, gcp: false, azure: false },
+  { feature: "Zero-Infrastructure Deployment", alloy: true, aws: false, gcp: false, azure: false },
+  { feature: "Cross-Domain Transfer Learning", alloy: true, aws: false, gcp: false, azure: false },
+  { feature: "Causal Forecast Reasoning", alloy: true, aws: false, gcp: false, azure: false },
+  { feature: "Full Lineage Audit Trail", alloy: true, aws: true, gcp: true, azure: false },
 ];
 
 const sectionPad = "var(--space-section-md)";
@@ -751,6 +849,254 @@ export default function AlloyPage() {
               );
             })}
           </div>
+        </SectionShell>
+
+        {/* ===== LLM-BASED ML TRAINING ===== */}
+        <SectionShell>
+          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+            <p style={monoLabel}>LLM-Based ML Training</p>
+            <h2 style={sectionH2}>
+              Custom models without custom infrastructure.
+            </h2>
+            <p style={sectionP}>
+              Traditional ML requires data pipelines, GPU clusters, and months of iteration. Alloy trains decision models by evolving LLM prompt strategies through genetic algorithms — achieving custom model performance using reasoning-based intelligence instead of statistical weight tuning.
+            </p>
+          </m.div>
+          <div style={{ display: "grid", gap: "1.25rem" }} className="lg:grid-cols-2">
+            {ML_TRAINING_CAPABILITIES.map((cap, i) => {
+              const Icon = cap.icon;
+              return (
+                <m.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.38, delay: i * 0.07 }}
+                  className="szl-card"
+                  style={{ borderRadius: "0.75rem", padding: cardPad }}
+                >
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem", marginBottom: "1rem" }}>
+                    <div style={iconBox}><Icon size={16} color="var(--color-alloy-light)" /></div>
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.5rem" }}>{cap.title}</h3>
+                      <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{cap.body}</p>
+                    </div>
+                  </div>
+                  <span style={badgeStyle}>{cap.badge}</span>
+                </m.div>
+              );
+            })}
+          </div>
+
+          <m.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+            style={{ marginTop: "2.5rem" }}
+          >
+            <p style={{ ...monoLabel, marginBottom: "1.25rem" }}>Model Types</p>
+            <div style={{ display: "grid", gap: "0.75rem" }} className="lg:grid-cols-3">
+              {ML_MODEL_TYPES.map((mt, i) => (
+                <div key={i} className="szl-card" style={{ borderRadius: "0.625rem", padding: "1rem 1.25rem" }}>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "0.375rem" }}>{mt.type}</p>
+                  <p style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "hsl(214,7%,58%)" }}>{mt.desc}</p>
+                </div>
+              ))}
+            </div>
+          </m.div>
+
+          <m.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.35 }}
+            style={{ marginTop: "2.5rem" }}
+          >
+            <p style={{ ...monoLabel, marginBottom: "1.25rem" }}>Training Strategies</p>
+            <div style={{ display: "grid", gap: "0.5rem" }}>
+              {[
+                { name: "Evolutionary Optimization", desc: "Genetic algorithm evolves prompt strategies across generations. Tournament selection, crossover, and mutation breed increasingly effective reasoning patterns." },
+                { name: "Few-Shot Optimization", desc: "Evolves the selection and ordering of few-shot examples to maximize in-context learning. The best examples survive; irrelevant ones are eliminated." },
+                { name: "Chain-of-Thought Tuning", desc: "Refines multi-step reasoning chains by measuring each step's contribution to final accuracy. Steps that don't improve outcomes are pruned." },
+                { name: "Ensemble Distillation", desc: "Runs multiple model configurations in parallel, then distills the best-performing elements into a single optimized strategy." },
+                { name: "Reinforcement from Feedback", desc: "Human feedback signals (approve/reject/correct) feed directly into the fitness function. Models evolve toward what operators actually want." },
+              ].map((s, i) => (
+                <div key={i} className="szl-card" style={{ borderRadius: "0.5rem", padding: "0.875rem 1.25rem", display: "flex", gap: "1rem", alignItems: "baseline" }}>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.625rem", fontWeight: 700, color: "var(--color-alloy-light)", flexShrink: 0, width: "1.5rem" }}>{String(i + 1).padStart(2, "0")}</span>
+                  <div>
+                    <span style={{ fontSize: "0.875rem", fontWeight: 600, marginRight: "0.5rem" }}>{s.name}</span>
+                    <span style={{ fontSize: "0.8125rem", color: "hsl(214,7%,58%)" }}>{s.desc}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </m.div>
+        </SectionShell>
+
+        {/* ===== HISTORICAL BACKTESTING ===== */}
+        <SectionShell>
+          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+            <p style={monoLabel}>Historical Backtesting</p>
+            <h2 style={sectionH2}>
+              Every prediction, verified against reality.
+            </h2>
+            <p style={sectionP}>
+              Before you trust an AI model with consequential decisions, you need proof that it works — not on curated benchmarks, but on your actual historical data. Alloy's backtesting engine replays every past prediction and measures what was right, what was wrong, and what's drifting.
+            </p>
+          </m.div>
+          <div style={{ display: "grid", gap: "1.25rem" }} className="lg:grid-cols-2">
+            {BACKTEST_CAPABILITIES.map((cap, i) => {
+              const Icon = cap.icon;
+              return (
+                <m.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.38, delay: i * 0.07 }}
+                  className="szl-card"
+                  style={{ borderRadius: "0.75rem", padding: cardPad }}
+                >
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem", marginBottom: "1rem" }}>
+                    <div style={iconBox}><Icon size={16} color="var(--color-alloy-light)" /></div>
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.5rem" }}>{cap.title}</h3>
+                      <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{cap.body}</p>
+                    </div>
+                  </div>
+                  <span style={badgeStyle}>{cap.badge}</span>
+                </m.div>
+              );
+            })}
+          </div>
+
+          <m.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+            className="szl-card"
+            style={{ borderRadius: "0.75rem", padding: cardPad, marginTop: "2.5rem" }}
+          >
+            <p style={{ ...monoLabel, marginBottom: "1.25rem" }}>Backtest Metrics</p>
+            <div style={{ display: "grid", gap: "1.5rem" }} className="lg:grid-cols-4">
+              {[
+                { metric: "Accuracy", desc: "Overall correctness rate across all predictions in the backtest window" },
+                { metric: "Precision", desc: "When the model says 'yes', how often it's actually right — minimizes false positives" },
+                { metric: "Recall", desc: "Of all the true positives, how many the model caught — minimizes missed signals" },
+                { metric: "F1 Score", desc: "Harmonic mean of precision and recall — the single best measure of model quality" },
+                { metric: "Calibration", desc: "Gap between stated confidence and actual accuracy — measures trustworthiness" },
+                { metric: "Time-Series Accuracy", desc: "How accuracy changes over time — identifies degradation windows" },
+                { metric: "Confusion Matrix", desc: "Full breakdown of true/false positives/negatives across all predictions" },
+                { metric: "Drift Score", desc: "Statistical measure of model performance degradation over time" },
+              ].map((m, i) => (
+                <div key={i} style={{ borderLeft: "2px solid var(--color-alloy-border)", paddingLeft: "1rem" }}>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.625rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "0.25rem" }}>{m.metric}</p>
+                  <p style={{ fontSize: "0.8125rem", lineHeight: 1.55, color: "hsl(214,7%,56%)" }}>{m.desc}</p>
+                </div>
+              ))}
+            </div>
+          </m.div>
+        </SectionShell>
+
+        {/* ===== FORECASTING ENGINE ===== */}
+        <SectionShell>
+          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+            <p style={monoLabel}>Forecasting Engine</p>
+            <h2 style={sectionH2}>
+              From answering questions to predicting outcomes.
+            </h2>
+            <p style={sectionP}>
+              Most AI platforms react. Alloy forecasts. Multi-horizon projections with confidence intervals, causal reasoning, and seasonal decomposition — across every domain in the ecosystem.
+            </p>
+          </m.div>
+          <div style={{ display: "grid", gap: "1.25rem" }} className="lg:grid-cols-3">
+            {FORECAST_CAPABILITIES.map((cap, i) => {
+              const Icon = cap.icon;
+              return (
+                <m.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.38, delay: i * 0.07 }}
+                  className="szl-card"
+                  style={{ borderRadius: "0.75rem", padding: cardPad }}
+                >
+                  <div style={iconBox}><Icon size={16} color="var(--color-alloy-light)" /></div>
+                  <h3 style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.625rem" }}>{cap.title}</h3>
+                  <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)", marginBottom: "0.75rem" }}>{cap.body}</p>
+                  <span style={badgeStyle}>{cap.badge}</span>
+                </m.div>
+              );
+            })}
+          </div>
+
+          <m.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.25 }}
+            style={{ marginTop: "2rem" }}
+          >
+            <div style={{ display: "grid", gap: "0.5rem" }} className="lg:grid-cols-5">
+              {["1 Day", "7 Days", "30 Days", "90 Days", "1 Year"].map((h, i) => (
+                <div key={i} className="szl-card" style={{ borderRadius: "0.5rem", padding: "0.875rem 1rem", textAlign: "center" }}>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-alloy-light)" }}>{h}</p>
+                  <p style={{ fontSize: "0.6875rem", color: "hsl(214,7%,50%)", marginTop: "0.25rem" }}>
+                    {i === 0 ? "95% confidence" : i === 1 ? "92% confidence" : i === 2 ? "85% confidence" : i === 3 ? "72% confidence" : "58% confidence"}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </m.div>
+        </SectionShell>
+
+        {/* ===== ML COMPETITIVE MATRIX ===== */}
+        <SectionShell>
+          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+            <p style={monoLabel}>ML Competitive Advantage</p>
+            <h2 style={sectionH2}>
+              What Alloy ML does that nobody else can.
+            </h2>
+            <p style={sectionP}>
+              AWS SageMaker, GCP Vertex AI, and Azure ML require data engineers, GPU clusters, and months of iteration. Alloy achieves custom model performance through LLM reasoning evolution — zero infrastructure, zero data pipelines, zero MLOps overhead.
+            </p>
+          </m.div>
+          <m.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="szl-card"
+            style={{ borderRadius: "0.75rem", overflow: "hidden" }}
+          >
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
+                <thead>
+                  <tr style={{ borderBottom: "1px solid var(--color-alloy-border)" }}>
+                    <th style={{ padding: "1rem 1.25rem", textAlign: "left", fontWeight: 600, fontSize: "0.75rem", letterSpacing: "0.04em", textTransform: "uppercase", color: "hsl(214,7%,62%)" }}>Capability</th>
+                    <th style={{ padding: "1rem 0.75rem", textAlign: "center", fontWeight: 700, color: "var(--color-alloy-light)", fontSize: "0.75rem", letterSpacing: "0.04em" }}>ALLOY</th>
+                    <th style={{ padding: "1rem 0.75rem", textAlign: "center", fontWeight: 500, color: "hsl(214,7%,50%)", fontSize: "0.75rem" }}>AWS</th>
+                    <th style={{ padding: "1rem 0.75rem", textAlign: "center", fontWeight: 500, color: "hsl(214,7%,50%)", fontSize: "0.75rem" }}>GCP</th>
+                    <th style={{ padding: "1rem 0.75rem", textAlign: "center", fontWeight: 500, color: "hsl(214,7%,50%)", fontSize: "0.75rem" }}>Azure</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {COMPETITIVE_ML_MATRIX.map((row, i) => (
+                    <tr key={i} style={{ borderBottom: i < COMPETITIVE_ML_MATRIX.length - 1 ? "1px solid hsl(214,10%,12%)" : undefined }}>
+                      <td style={{ padding: "0.75rem 1.25rem", color: "hsl(38,8%,82%)" }}>{row.feature}</td>
+                      <td style={{ padding: "0.75rem", textAlign: "center", color: row.alloy ? "hsl(142,60%,55%)" : "hsl(0,60%,55%)" }}>{row.alloy ? "\u2713" : "\u2717"}</td>
+                      <td style={{ padding: "0.75rem", textAlign: "center", color: row.aws ? "hsl(142,60%,55%)" : "hsl(0,60%,55%)" }}>{row.aws ? "\u2713" : "\u2717"}</td>
+                      <td style={{ padding: "0.75rem", textAlign: "center", color: row.gcp ? "hsl(142,60%,55%)" : "hsl(0,60%,55%)" }}>{row.gcp ? "\u2713" : "\u2717"}</td>
+                      <td style={{ padding: "0.75rem", textAlign: "center", color: row.azure ? "hsl(142,60%,55%)" : "hsl(0,60%,55%)" }}>{row.azure ? "\u2713" : "\u2717"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </m.div>
         </SectionShell>
 
         {/* ===== CTA ===== */}
