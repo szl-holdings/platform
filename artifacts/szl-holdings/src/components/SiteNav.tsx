@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Network } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { analytics } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
@@ -53,7 +53,8 @@ const NAV_ITEMS = [
 ];
 
 const NAV_LINKS_MOBILE = [
-  { label: "Contact", href: "/contact", primary: true },
+  { label: "Nerve Center", href: "/nerve-center", primary: true },
+  { label: "Contact", href: "/contact", primary: false },
   { label: "Ecosystem", href: "/ecosystem", primary: false },
   { label: "Alloy", href: "/alloy-fabric", primary: false },
   { label: "Lyte", href: "/lyte", primary: false },
@@ -173,6 +174,33 @@ export function SiteNav() {
                   </Link>
                 );
               })}
+
+              {/* Nerve Center CTA */}
+              <Link
+                href="/nerve-center"
+                onClick={() => handleNavClick("Nerve Center", "/nerve-center")}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.375rem",
+                  fontSize: "0.8125rem",
+                  fontWeight: 600,
+                  color: location === "/nerve-center" ? "#2dd4bf" : "rgba(45,212,191,0.75)",
+                  textDecoration: "none",
+                  padding: "0.375rem 0.75rem",
+                  borderRadius: "0.375rem",
+                  border: "1px solid rgba(45,212,191,0.25)",
+                  background: location === "/nerve-center" ? "rgba(45,212,191,0.10)" : "rgba(45,212,191,0.05)",
+                  transition: "all 0.18s ease",
+                  marginLeft: "0.25rem",
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#2dd4bf"; (e.currentTarget as HTMLElement).style.background = "rgba(45,212,191,0.12)"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(45,212,191,0.4)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = location === "/nerve-center" ? "#2dd4bf" : "rgba(45,212,191,0.75)"; (e.currentTarget as HTMLElement).style.background = location === "/nerve-center" ? "rgba(45,212,191,0.10)" : "rgba(45,212,191,0.05)"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(45,212,191,0.25)"; }}
+              >
+                <Network size={13} />
+                Nerve Center
+              </Link>
+
               <UserButton />
             </div>
 

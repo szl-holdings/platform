@@ -96,6 +96,7 @@ const CaseStudiesPage = lazy(() => import("@/pages/case-studies"));
 const InsightsPage = lazy(() => import("@/pages/insights"));
 const InsightsArticlePage = lazy(() => import("@/pages/insights-article"));
 const CoreCommandPage = lazy(() => import("@/pages/core-command"));
+const NerveCenterPage = lazy(() => import("@/pages/nerve-center"));
 const ControlPlanePage = lazy(() => import("@/pages/control-plane"));
 const PortfolioOpsPage = lazy(() => import("@/pages/portfolio-ops"));
 const PortfolioCommandPage = lazy(() => import("@/pages/portfolio-command"));
@@ -838,6 +839,9 @@ function App() {
             </Route>
             <Route path="/developers/:section">
               <Redirect to="/docs" />
+            </Route>
+            <Route path="/nerve-center">
+              <RequireAuth><Suspense fallback={<PageLoader />}><NerveCenterPage /></Suspense></RequireAuth>
             </Route>
             <Route path="/core">
               <Suspense fallback={<PageLoader />}><CoreCommandPage /></Suspense>
