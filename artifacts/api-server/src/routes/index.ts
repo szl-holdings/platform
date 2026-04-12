@@ -124,6 +124,11 @@ import { aiRouter as aiOrchestratorRouter } from "./ai-orchestrator";
 import { mastraRouter } from "./mastra-agents";
 import actionEngineRouter from "./action-engine";
 import stephenTelemetryRouter from "./stephen-telemetry";
+import aistreamLiveRouter from "./aisstream-live";
+import courtlistenerLiveRouter from "./courtlistener-live";
+import threatFeedsLiveRouter from "./threat-feeds-live";
+import samgovLiveRouter from "./samgov-live";
+import noaaAlertsLiveRouter from "./noaa-alerts-live";
 
 const router: IRouter = Router();
 
@@ -198,6 +203,10 @@ router.use(vesselsPlatformRouter);
 router.use(vesselsRouter);
 router.use(aegisSocRouter);
 router.use(aegisSocLiveRouter);
+router.use("/vessels", _readLimiter);
+router.use(aistreamLiveRouter);
+router.use("/aegis", _readLimiter);
+router.use(threatFeedsLiveRouter);
 router.use("/firestorm/command", _readLimiter);
 router.use(firestormCommandRouter);
 router.use(lyteRouter);
@@ -247,6 +256,15 @@ router.use("/terra", _readLimiter);
 router.use(terraLiveRouter);
 router.use("/beacon", _readLimiter);
 router.use(terraLiveRouter);
+
+router.use("/prism", _readLimiter);
+router.use(courtlistenerLiveRouter);
+
+router.use("/lyte", _readLimiter);
+router.use(samgovLiveRouter);
+
+router.use("/noaa", _readLimiter);
+router.use(noaaAlertsLiveRouter);
 
 router.use("/readiness", _readLimiter);
 router.use(readinessRouter);

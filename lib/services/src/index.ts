@@ -165,6 +165,17 @@ export { XTwitterAdapter, type XPostResult } from "./adapters/x-twitter.js";
 export { MediumAdapter, type MediumPublishResult } from "./adapters/medium.js";
 export { SubstackAdapter, type SubstackPublishResult } from "./adapters/substack.js";
 export { LinkedInAdapter, type LinkedInPostResult } from "./adapters/linkedin.js";
+export { AisStreamAdapter, type AisStreamVessel } from "./adapters/aisstream.js";
+export { CourtListenerAdapter, type CourtListenerDocket, type CourtListenerOpinion } from "./adapters/courtlistener.js";
+export { PhishTankAdapter, ThreatFoxAdapter, type PhishTankEntry, type ThreatFoxIoc } from "./adapters/phishtank.js";
+export { OpenSkyAdapter, type OpenSkyAircraft } from "./adapters/opensky.js";
+export { SamGovAdapter, type SamGovOpportunity, type SamGovEntity } from "./adapters/samgov.js";
+export { NoaaAlertsAdapter, type NoaaAlert, type NoaaAlertDomain } from "./adapters/noaa-alerts.js";
+export {
+  NycDobAdapter, NycHpdAdapter, NycDofAdapter, NycDobComplaintsAdapter,
+  type NycDobPermit, type NycHpdViolation, type NycDofSale,
+  type NycDobComplaint,
+} from "./adapters/nyc-open-data.js";
 
 export {
   HuggingFaceAdapter,

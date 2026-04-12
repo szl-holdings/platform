@@ -46,6 +46,13 @@ import { XTwitterAdapter } from "./adapters/x-twitter.js";
 import { MediumAdapter } from "./adapters/medium.js";
 import { SubstackAdapter } from "./adapters/substack.js";
 import { LinkedInAdapter } from "./adapters/linkedin.js";
+import { AisStreamAdapter } from "./adapters/aisstream.js";
+import { CourtListenerAdapter } from "./adapters/courtlistener.js";
+import { PhishTankAdapter, ThreatFoxAdapter } from "./adapters/phishtank.js";
+import { OpenSkyAdapter } from "./adapters/opensky.js";
+import { SamGovAdapter } from "./adapters/samgov.js";
+import { NoaaAlertsAdapter } from "./adapters/noaa-alerts.js";
+import { NycDobAdapter, NycHpdAdapter, NycDofAdapter, NycDobComplaintsAdapter } from "./adapters/nyc-open-data.js";
 
 export interface IntegrationHealthMatrix {
   timestamp: string;
@@ -106,6 +113,17 @@ export class ServiceRegistry {
   readonly medium: MediumAdapter;
   readonly substack: SubstackAdapter;
   readonly linkedin: LinkedInAdapter;
+  readonly aisstream: AisStreamAdapter;
+  readonly courtlistener: CourtListenerAdapter;
+  readonly phishtank: PhishTankAdapter;
+  readonly threatfox: ThreatFoxAdapter;
+  readonly opensky: OpenSkyAdapter;
+  readonly samgov: SamGovAdapter;
+  readonly noaaAlerts: NoaaAlertsAdapter;
+  readonly nycDob: NycDobAdapter;
+  readonly nycHpd: NycHpdAdapter;
+  readonly nycDof: NycDofAdapter;
+  readonly nycDobComplaints: NycDobComplaintsAdapter;
 
   private readonly adapters: ServiceAdapter[];
 
@@ -157,6 +175,17 @@ export class ServiceRegistry {
     this.medium = new MediumAdapter();
     this.substack = new SubstackAdapter();
     this.linkedin = new LinkedInAdapter();
+    this.aisstream = new AisStreamAdapter();
+    this.courtlistener = new CourtListenerAdapter();
+    this.phishtank = new PhishTankAdapter();
+    this.threatfox = new ThreatFoxAdapter();
+    this.opensky = new OpenSkyAdapter();
+    this.samgov = new SamGovAdapter();
+    this.noaaAlerts = new NoaaAlertsAdapter();
+    this.nycDob = new NycDobAdapter();
+    this.nycHpd = new NycHpdAdapter();
+    this.nycDof = new NycDofAdapter();
+    this.nycDobComplaints = new NycDobComplaintsAdapter();
 
     this.adapters = [
       this.ai,
@@ -206,6 +235,17 @@ export class ServiceRegistry {
       this.medium,
       this.substack,
       this.linkedin,
+      this.aisstream,
+      this.courtlistener,
+      this.phishtank,
+      this.threatfox,
+      this.opensky,
+      this.samgov,
+      this.noaaAlerts,
+      this.nycDob,
+      this.nycHpd,
+      this.nycDof,
+      this.nycDobComplaints,
     ];
   }
 

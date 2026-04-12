@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { getIngestionStats } from "../lib/terra-distress-service";
+import { services } from "@szl-holdings/services";
 
 const router: IRouter = Router();
 
@@ -317,13 +318,33 @@ router.get("/terra/live/fema-nri", terraLiveLimit, authMiddleware({ required: fa
 
 router.get("/terra/live/nyc-dashboard", terraLiveLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const stats = await getIngestionStats();
+    const [stats, dobSummary, hpdSummary, dofSummary, dobComplaintsSummary] = await Promise.allSettled([
+      getIngestionStats(),
+      getCached("terra-nyc-dob-summary", 3600000, async () => {
+        const data = await services.nycDob.getPermitSummary("MANHATTAN");
+        return { data, source: "live-nyc-dob" };
+      }),
+      getCached("terra-nyc-hpd-summary", 3600000, async () => {
+        const data = await services.nycHpd.getViolationSummary("1");
+        return { data, source: "live-nyc-hpd" };
+      }),
+      getCached("terra-nyc-dof-summary", 3600000, async () => {
+        const data = await services.nycDof.getSalesSummary("1");
+        return { data, source: "live-nyc-dof" };
+      }),
+      getCached("terra-nyc-dob-complaints", 3600000, async () => {
+        const data = await services.nycDobComplaints.getComplaintSummary("MANHATTAN");
+        return { data, source: "live-nyc-dob-complaints" };
+      }),
+    ]);
 
-    const boroughMap = stats.byBorough as Record<string, number>;
-    const typeMap = stats.byDistressType as Record<string, number>;
-
-    const totalProperties = stats.totalProperties as number;
-    const lastRun = Array.isArray(stats.recentRuns) && stats.recentRuns.length > 0 ? stats.recentRuns[0] : null;
+    type IngestionStats = Awaited<ReturnType<typeof getIngestionStats>>;
+    const ingestionStats: IngestionStats | null = stats.status === "fulfilled" ? stats.value : null;
+    const boroughMap: Record<string, number> = ingestionStats?.byBorough ?? {};
+    const typeMap: Record<string, number> = ingestionStats?.byDistressType ?? {};
+    const totalProperties: number = ingestionStats?.totalProperties ?? 0;
+    const recentRuns = ingestionStats?.recentRuns ?? [];
+    const lastRun = recentRuns.length > 0 ? recentRuns[0] : null;
 
     const boroughBreakdown = [
       { borough: "Manhattan", count: boroughMap["Manhattan"] ?? 0, icon: "🏙️" },
@@ -337,37 +358,37 @@ router.get("/terra/live/nyc-dashboard", terraLiveLimit, authMiddleware({ require
       .sort((a, b) => b.count - a.count);
 
     const recentRunSummary = lastRun ? {
-      runId: (lastRun as any).id,
-      source: (lastRun as any).source,
-      status: (lastRun as any).status,
-      recordsInserted: (lastRun as any).recordsInserted,
-      alertsGenerated: (lastRun as any).alertsGenerated,
-      startedAt: (lastRun as any).startedAt,
-      completedAt: (lastRun as any).completedAt,
+      runId: lastRun.id,
+      source: lastRun.source,
+      status: lastRun.status,
+      recordsInserted: lastRun.recordsInserted,
+      alertsGenerated: lastRun.alertsGenerated,
+      startedAt: lastRun.startedAt,
+      completedAt: lastRun.completedAt,
     } : null;
 
-    const newFilings7d = Array.isArray(stats.recentRuns)
-      ? (stats.recentRuns as any[])
-          .filter((r: any) => {
-            if (!r.startedAt) return false;
-            const runDate = new Date(r.startedAt);
-            return Date.now() - runDate.getTime() < 7 * 86400000;
-          })
-          .reduce((sum: number, r: any) => sum + (r.recordsInserted ?? 0), 0)
-      : 0;
+    const newFilings7d = recentRuns
+      .filter(r => r.startedAt != null && Date.now() - new Date(r.startedAt).getTime() < 7 * 86400000)
+      .reduce((sum, r) => sum + (r.recordsInserted ?? 0), 0);
+
+    const dobData = dobSummary.status === "fulfilled" ? dobSummary.value.data : null;
+    const hpdData = hpdSummary.status === "fulfilled" ? hpdSummary.value.data : null;
+    const dofData = dofSummary.status === "fulfilled" ? dofSummary.value.data : null;
+    const dobComplaintsData = dobComplaintsSummary.status === "fulfilled" ? dobComplaintsSummary.value.data : null;
 
     sendSuccess(res, {
-      source: "Terra NYC Intelligence Dashboard — Live Ingestion Stats",
+      source: "Terra NYC Intelligence Dashboard — Live Ingestion + Open Data Signals",
       connectors: [
         "NYC ACRIS Real Property Master (bnx9-e6tj)",
         "NYC ACRIS Legals (8h5j-fqxa)",
         "NYC ACRIS Parties (636b-3b5g)",
-        "NYC Rolling Property Sales (usep-8jbt)",
+        "NYC DOF Rolling Sales (usep-8jbt) — NycDofAdapter",
         "NYC Tax Lien Sale List (9rz4-mjek)",
         "NYC Property Valuation & Assessment (8y4t-faws)",
-        "NYC HPD Violations (wvxf-dwi5)",
+        "NYC HPD Violations (wvxf-dwi5) — NycHpdAdapter",
         "NYC HPD Complaints (uwyv-629c)",
-        "NYC DOB Violations (3h2n-5cm9)",
+        "NYC DOB Now Permits (ipu4-2q9a) — NycDobAdapter",
+        "NYC DOB Complaints (5zuj-tzdj) — NycDobComplaintsAdapter",
         "NYC 311 Property Complaints (erm2-nwe9)",
       ],
       dashboard: {
@@ -383,7 +404,42 @@ router.get("/terra/live/nyc-dashboard", terraLiveLimit, authMiddleware({ require
           { signal: "Auction Scheduled", count: typeMap["auction"] ?? 0, urgency: "critical" },
         ].filter(s => s.count > 0),
         recentIngestionRun: recentRunSummary,
-        dataFreshness: lastRun ? (lastRun as any).completedAt ?? (lastRun as any).startedAt : null,
+        dataFreshness: lastRun ? (lastRun.completedAt ?? lastRun.startedAt) : null,
+      },
+      liveSignals: {
+        permits: dobData ? {
+          source: dobSummary.status === "fulfilled" ? dobSummary.value.source : "unavailable",
+          count: dobData.count,
+          totalEstimatedCost: dobData.totalEstimatedCost,
+          byWorkType: dobData.byWorkType.slice(0, 5),
+        } : null,
+        violations: hpdData ? {
+          source: hpdSummary.status === "fulfilled" ? hpdSummary.value.source : "unavailable",
+          count: hpdData.count,
+          openViolations: hpdData.openViolations,
+          classCRiskLevel: hpdData.classCRiskLevel,
+          byClass: hpdData.byClass,
+        } : null,
+        sales: dofData ? {
+          source: dofSummary.status === "fulfilled" ? dofSummary.value.source : "unavailable",
+          count: dofData.count,
+          avgSalePrice: dofData.avgSalePrice,
+          medianSalePrice: dofData.medianSalePrice,
+        } : null,
+        dobComplaints: dobComplaintsData ? {
+          source: dobComplaintsSummary.status === "fulfilled" ? (dobComplaintsSummary as PromiseFulfilledResult<{ data: typeof dobComplaintsData; source: string }>).value.source : "unavailable",
+          count: dobComplaintsData.count,
+          openCount: dobComplaintsData.openCount,
+          topCategories: dobComplaintsData.byCategory.slice(0, 5),
+          mostRecent: dobComplaintsData.mostRecent,
+        } : null,
+      },
+      dataMode: {
+        ingestion: "live-db",
+        permits: dobSummary.status === "fulfilled" ? dobSummary.value.source : "unavailable",
+        violations: hpdSummary.status === "fulfilled" ? hpdSummary.value.source : "unavailable",
+        sales: dofSummary.status === "fulfilled" ? dofSummary.value.source : "unavailable",
+        dobComplaints: dobComplaintsSummary.status === "fulfilled" ? (dobComplaintsSummary as PromiseFulfilledResult<{ data: typeof dobComplaintsData; source: string }>).value.source : "unavailable",
       },
       liveData: true,
       fetchedAt: new Date().toISOString(),
@@ -647,6 +703,124 @@ router.get("/terra/live/census-acs-demographics", terraLiveLimit, authMiddleware
       fetchedAt: new Date().toISOString(),
     });
   } catch (err) { handleRouteError(res, err, "Failed to fetch Census ACS demographics"); }
+});
+
+const BOROUGH_CODE_MAP: Record<string, string> = {
+  MANHATTAN: "1", BRONX: "2", BROOKLYN: "3", QUEENS: "4", "STATEN ISLAND": "5",
+};
+
+router.get("/terra/live/nyc-dob-permits", terraLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const borough = ((req.query.borough as string) ?? "MANHATTAN").toUpperCase();
+    const workType = (req.query.work_type as string) ?? "";
+    const limit = Math.min(parseInt(req.query.limit as string) || 25, 100);
+    const result = await getCached(`terra-nyc-dob-permits-${borough}-${workType}-${limit}`, 3600000, async () => {
+      const permits = await services.nycDob.getPermits({ borough, workType: workType || undefined, limit });
+      const byWorkType = permits.reduce((acc: Record<string, number>, p) => {
+        acc[p.workType] = (acc[p.workType] ?? 0) + 1;
+        return acc;
+      }, {});
+      const totalEstimatedCost = permits.reduce((sum, p) => sum + (p.estimatedCost ?? 0), 0);
+      return {
+        data: {
+          borough,
+          period: "Last 30 days",
+          count: permits.length,
+          totalEstimatedCost,
+          byWorkType: Object.entries(byWorkType).sort((a, b) => b[1] - a[1]),
+          permits: permits.slice(0, 10),
+        },
+        source: "live-nyc-dob-permits",
+      };
+    });
+    sendSuccess(res, {
+      source: "NYC Department of Buildings — DOB Now: Build Permits (NYC Open Data)",
+      url: "https://data.cityofnewyork.us/Housing-Development/DOB-NOW-Build-Approved-Permits/rbx6-tga4",
+      ...result.data,
+      dataSource: result.source,
+      liveData: result.source.includes("live"),
+      fetchedAt: new Date().toISOString(),
+    });
+  } catch (err) { handleRouteError(res, err, "Failed to fetch NYC DOB permits"); }
+});
+
+router.get("/terra/live/nyc-hpd-violations", terraLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const borough = ((req.query.borough as string) ?? "MANHATTAN").toUpperCase();
+    const classFilter = (req.query.class as string) ?? "";
+    const limit = Math.min(parseInt(req.query.limit as string) || 25, 100);
+    const boroughCode = BOROUGH_CODE_MAP[borough] ?? "1";
+    const result = await getCached(`terra-nyc-hpd-violations-${boroughCode}-${classFilter}-${limit}`, 3600000, async () => {
+      const violations = await services.nycHpd.getViolations({
+        boroughCode,
+        violationClass: classFilter || undefined,
+        limit,
+      });
+      const byClass = violations.reduce((acc: Record<string, number>, v) => {
+        acc[v.class] = (acc[v.class] ?? 0) + 1;
+        return acc;
+      }, {});
+      const byStatus = violations.reduce((acc: Record<string, number>, v) => {
+        acc[v.currentStatus] = (acc[v.currentStatus] ?? 0) + 1;
+        return acc;
+      }, {});
+      const openViolations = violations.filter(v =>
+        v.status === "Open" || v.currentStatus?.toLowerCase().includes("open"),
+      ).length;
+      return {
+        data: {
+          borough,
+          boroughCode,
+          period: "Last 90 days",
+          count: violations.length,
+          openViolations,
+          byClass: Object.entries(byClass).sort((a, b) => b[1] - a[1]),
+          byStatus: Object.entries(byStatus).sort((a, b) => b[1] - a[1]),
+          violations: violations.slice(0, 10),
+        },
+        source: "live-nyc-hpd-violations",
+      };
+    });
+    sendSuccess(res, {
+      source: "NYC Housing Preservation and Development — HPD Violations (NYC Open Data)",
+      url: "https://data.cityofnewyork.us/Housing-Development/Housing-Maintenance-Code-Violations/wvxf-dwi5",
+      ...result.data,
+      dataSource: result.source,
+      liveData: result.source.includes("live"),
+      interpretation: "Class C = immediately hazardous, Class B = hazardous, Class A = non-hazardous. High HPD violations = property risk signal for Terra.",
+      fetchedAt: new Date().toISOString(),
+    });
+  } catch (err) { handleRouteError(res, err, "Failed to fetch NYC HPD violations"); }
+});
+
+router.get("/terra/live/nyc-dof-sales", terraLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const boroughCode = (req.query.borough as string) ?? "1";
+    const limit = Math.min(parseInt(req.query.limit as string) || 25, 100);
+    const result = await getCached(`terra-nyc-dof-sales-${boroughCode}-${limit}`, 3600000, async () => {
+      const summary = await services.nycDof.getSalesSummary(boroughCode);
+      const sales = await services.nycDof.getSales({ boroughCode, limit });
+      return {
+        data: {
+          boroughCode,
+          period: "Last 90 days",
+          ...summary,
+          sales: sales.slice(0, 10),
+        },
+        source: "live-nyc-dof-sales",
+      };
+    });
+    sendSuccess(res, {
+      source: "NYC Department of Finance — Rolling Property Sales (NYC Open Data)",
+      url: "https://data.cityofnewyork.us/City-Government/NYC-Citywide-Rolling-Calendar-Sales/usep-8jbt",
+      boroughMap: { "1": "Manhattan", "2": "Bronx", "3": "Brooklyn", "4": "Queens", "5": "Staten Island" },
+      ...result.data,
+      dataSource: result.source,
+      liveData: result.source.includes("live"),
+      interpretation: "Rolling sales from NYC DOF. Used as comparable sales signal in Terra property valuation.",
+      fetchedAt: new Date().toISOString(),
+    });
+  } catch (err) { handleRouteError(res, err, "Failed to fetch NYC DOF property sales"); }
 });
 
 export default router;

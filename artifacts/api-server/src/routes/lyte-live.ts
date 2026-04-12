@@ -5,7 +5,7 @@ import { db } from "@szl-holdings/db";
 import { sql } from "drizzle-orm";
 import os from "os";
 import { HEAP_LIMIT_MB, HEAP_WARN_THRESHOLD_MB, HEAP_CRITICAL_THRESHOLD_MB } from "../lib/heap-limits";
-import { GitHubAdapter, type GitHubCommit, type GitHubPullRequest, type GitHubIssue } from "@szl-holdings/services";
+import { GitHubAdapter, type GitHubCommit, type GitHubPullRequest, type GitHubIssue, services } from "@szl-holdings/services";
 
 const router: IRouter = Router();
 
@@ -196,8 +196,40 @@ router.get("/lyte/live/signals", authMiddleware({ required: false }), async (_re
       },
     ];
 
+    let samContractSignal: Record<string, unknown> | null = null;
+    try {
+      if (services.samgov.isLive) {
+        const opps = await services.samgov.searchOpportunities({
+          keywords: "information technology",
+          naicsCode: "541511",
+          limit: 5,
+        });
+        samContractSignal = {
+          id: "sam-gov-contracts",
+          name: "SAM.gov IT Contract Opportunities",
+          value: `${opps.length} active`,
+          rawValue: opps.length,
+          unit: "opportunities",
+          status: opps.length > 0 ? "live" : "healthy",
+          category: "intelligence",
+          source: "live-samgov",
+          detail: {
+            opportunities: opps.slice(0, 3).map(o => ({
+              title: o.title,
+              type: o.type,
+              agency: o.organizationName,
+              naics: o.naicsCode,
+              active: o.active,
+            })),
+          },
+        };
+      }
+    } catch (_e) { /* SAM.gov unavailable; skip signal */ }
+
+    if (samContractSignal) signals.push(samContractSignal as typeof signals[0]);
+
     sendSuccess(res, {
-      source: "API Server Self-Observability (process + os module)",
+      source: "API Server Self-Observability (process + os module) + Live External Feeds",
       signals,
       count: signals.length,
       liveData: true,

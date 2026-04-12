@@ -2,6 +2,7 @@ import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
+import { services } from "@szl-holdings/services";
 
 const router: IRouter = Router();
 
@@ -80,7 +81,7 @@ const FALLBACK_AIS_VESSELS = [
   { mmsi: "244123456", imo: "9123456", name: "NORTH SEA PIONEER", type: "Tanker", shipTypeCode: 80, lat: 57.7, lon: 1.8, speed: 6.5, course: 180, heading: 178, destination: "ABERDEEN", status: "Under way using engine", navStatus: 0, flag: "NL", length: 274, beam: 46, draft: 12.8, timestamp: new Date(Date.now() - 200000).toISOString(), callsign: "PBHE3" },
 ];
 
-async function fetchDigitrafficAis(): Promise<{ vessels: typeof FALLBACK_AIS_VESSELS; source: string }> {
+export async function fetchDigitrafficAis(): Promise<{ vessels: typeof FALLBACK_AIS_VESSELS; source: string }> {
   try {
     const data = await fetchJson("https://meri.digitraffic.fi/api/ais/v1/locations/latest?from=0&to=100", 10000) as any;
     const features = data?.features;
@@ -124,7 +125,7 @@ async function fetchDigitrafficAis(): Promise<{ vessels: typeof FALLBACK_AIS_VES
   }
 }
 
-async function fetchBarentsWatchAis(): Promise<{ vessels: any[]; source: string }> {
+export async function fetchBarentsWatchAis(): Promise<{ vessels: any[]; source: string }> {
   try {
     const data = await fetchJson(
       "https://www.barentswatch.no/bwapi/v2/latest/combined?Xabcd=positions&area=NOR",
@@ -187,6 +188,8 @@ router.get("/vessels/live/ais", vesLiveLimit, authMiddleware({ required: false }
 router.get("/vessels/live/ais/combined", vesLiveLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
     const result = await getCached<any>("ais-combined", 5 * 60 * 1000, async () => {
+      const aisStreamAdapter = services.aisstream;
+
       const [digitraffic, barentswatch] = await Promise.allSettled([
         fetchDigitrafficAis(),
         fetchBarentsWatchAis(),
@@ -198,19 +201,62 @@ router.get("/vessels/live/ais/combined", vesLiveLimit, authMiddleware({ required
       const bwSource = barentswatch.status === "fulfilled" ? barentswatch.value.source : "demo";
 
       const mmsiSeen = new Set(dtVessels.map((v: any) => v.mmsi));
-      const combined = [...dtVessels, ...bwVessels.filter((v: any) => !mmsiSeen.has(v.mmsi))];
+      const uniqueBwVessels = bwVessels.filter((v: any) => !mmsiSeen.has(v.mmsi));
+      uniqueBwVessels.forEach((v: any) => mmsiSeen.add(v.mmsi));
+      const combined = [...dtVessels, ...uniqueBwVessels];
+
+      let aisStreamVessels: unknown[] = [];
+      let aisStreamSource = "not-configured";
+      if (aisStreamAdapter.isLive) {
+        aisStreamVessels = aisStreamAdapter.getVessels(500)
+          .filter(v => !mmsiSeen.has(v.mmsi))
+          .map(v => ({
+            mmsi: v.mmsi,
+            lat: v.lat,
+            lon: v.lon,
+            sog: v.speed,
+            cog: v.course,
+            name: v.name || `MMSI ${v.mmsi}`,
+            shipType: v.shipType,
+            shipTypeName: v.shipTypeName,
+            heading: v.heading,
+            navStatus: v.navStatus,
+            navStatusName: v.navStatusName,
+            destination: v.destination,
+            timestamp: v.timestamp,
+            source: "aisstream-ws" as const,
+          }));
+        aisStreamSource = aisStreamVessels.length > 0 ? "live-aisstream-ws" : "aisstream-connected-no-data";
+      }
+
+      const allVessels = [...combined, ...aisStreamVessels];
+      const isLive = dtSource !== "demo" || bwSource !== "demo" || aisStreamVessels.length > 0;
+
+      let noaaMarineAlerts: { count: number; alerts: { event: string; severity: string; areas: string }[]; source: string } = { count: 0, alerts: [], source: "not-fetched" };
+      try {
+        const alerts = await services.noaaAlerts.getActiveAlerts({ domain: "marine", limit: 10 });
+        noaaMarineAlerts = {
+          count: alerts.length,
+          alerts: alerts.slice(0, 5).map(a => ({ event: a.event, severity: a.severity, areas: a.areaDesc.slice(0, 100) })),
+          source: "live-noaa",
+        };
+      } catch (_e) { noaaMarineAlerts = { count: 0, alerts: [], source: "error" }; }
 
       return {
-        data: combined,
-        source: dtSource !== "demo" || bwSource !== "demo" ? "live" : "demo",
+        data: allVessels,
+        source: isLive ? "live" : "demo",
+        sources: { digitraffic: dtSource, barentswatch: bwSource, aisstream: aisStreamSource },
+        noaaMarineAlerts,
       };
     });
 
     sendSuccess(res, {
-      source: "Combined AIS Feed — Digitraffic + BarentsWatch",
+      source: "Combined AIS Feed — Digitraffic + BarentsWatch + AISStream",
       count: (result.data as any[]).length,
       vessels: result.data,
       dataSource: result.source,
+      sources: result.sources,
+      marineWeather: result.noaaMarineAlerts,
       liveData: !result.source.includes("demo"),
       cacheAgeSeconds: result.cacheAge,
       isStale: result.isStale,

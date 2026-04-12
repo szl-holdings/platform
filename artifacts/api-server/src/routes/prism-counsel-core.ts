@@ -14,6 +14,16 @@ import {
 import { eq, desc, sql, and } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendForbidden, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
+import { services } from "@szl-holdings/services";
+
+const courtListenerCache = new Map<string, { data: unknown; expiresAt: number }>();
+async function clCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
+  const cached = courtListenerCache.get(key);
+  if (cached && cached.expiresAt > Date.now()) return cached.data as T;
+  const data = await fetcher();
+  courtListenerCache.set(key, { data, expiresAt: Date.now() + ttlMs });
+  return data;
+}
 
 const router: IRouter = Router();
 
@@ -79,6 +89,52 @@ router.get("/prism-counsel/dashboard", authMiddleware(), async (req, res) => {
       lastSyncAt: pcConnectorAccountsTable.lastSyncAt,
     }).from(pcConnectorAccountsTable).where(eq(pcConnectorAccountsTable.orgId, orgId));
 
+    type CourtIntelligence = {
+      source: string;
+      authenticated: boolean;
+      recentDockets?: { id: string; caseName: string; court: string; dateFiled: string | null; url: string }[];
+      recentOpinions?: { id: string; caseName: string; court: string; dateFiled: string | null; snippet: string; url: string }[];
+      error?: string;
+    };
+
+    let courtIntelligence: CourtIntelligence = { source: "initializing", authenticated: services.courtlistener.authenticatedAccess };
+
+    try {
+      const [dockets, opinions] = await Promise.all([
+        clCached("prism-dashboard-dockets", 3600000, () =>
+          services.courtlistener.searchDockets("", undefined, 5),
+        ),
+        clCached("prism-dashboard-opinions", 3600000, () =>
+          services.courtlistener.searchOpinions("", undefined, 5),
+        ),
+      ]);
+      courtIntelligence = {
+        source: "live-courtlistener",
+        authenticated: services.courtlistener.authenticatedAccess,
+        recentDockets: dockets.slice(0, 5).map(d => ({
+          id: d.id,
+          caseName: d.caseName,
+          court: d.court,
+          dateFiled: d.dateFiled,
+          url: d.url,
+        })),
+        recentOpinions: opinions.slice(0, 5).map(o => ({
+          id: o.id,
+          caseName: o.caseName,
+          court: o.court,
+          dateFiled: o.dateFiled,
+          snippet: o.snippet,
+          url: o.url,
+        })),
+      };
+    } catch (clErr: unknown) {
+      courtIntelligence = {
+        source: "live-courtlistener-error",
+        authenticated: services.courtlistener.authenticatedAccess,
+        error: clErr instanceof Error ? clErr.message : String(clErr),
+      };
+    }
+
     sendSuccess(res, {
       matters: {
         total_matters: Number(mattersAgg?.total ?? 0),
@@ -94,6 +150,11 @@ router.get("/prism-counsel/dashboard", authMiddleware(), async (req, res) => {
         pending_approvals: Number(approvalsAgg?.pending ?? 0),
       },
       connectors,
+      courtIntelligence,
+      dataMode: {
+        matters: "live-db",
+        courtListenerFeed: courtIntelligence.source,
+      },
     });
   } catch (err) {
     handleRouteError(res, err, "GET /prism-counsel/dashboard");
@@ -193,6 +254,19 @@ router.get("/prism-counsel/matters/:id/twin", authMiddleware(), async (req, res)
     const approvals = await db.select().from(pcApprovalRequestsTable).where(and(eq(pcApprovalRequestsTable.matterId, matterId), eq(pcApprovalRequestsTable.status, "pending")));
     const recs = await db.select().from(pcAiRecommendationsTable).where(and(eq(pcAiRecommendationsTable.matterId, matterId), eq(pcAiRecommendationsTable.status, "pending"))).limit(10);
 
+    const courtSearchQuery = matter
+      ? (matter.practiceArea ? `${matter.practiceArea} ${(matter.title ?? "").split(" ").slice(0, 3).join(" ")}` : matter.title ?? "contract dispute")
+      : "contract dispute";
+
+    const liveCourtDockets = await clCached(`twin-dockets-${matterId}`, 3600000, async () => {
+      try {
+        const dockets = await services.courtlistener.searchDockets(courtSearchQuery, undefined, 5);
+        return { dockets, source: "live-courtlistener", query: courtSearchQuery };
+      } catch (err: unknown) {
+        return { dockets: [], source: "error", error: err instanceof Error ? err.message : String(err), query: courtSearchQuery };
+      }
+    });
+
     sendSuccess(res, {
       matter,
       subpages: {
@@ -202,6 +276,7 @@ router.get("/prism-counsel/matters/:id/twin", authMiddleware(), async (req, res)
         communications: { items: comms },
         approvals: { pending: approvals },
         recommendations: { items: recs },
+        liveCourtDockets,
       },
       lastComputedAt: new Date().toISOString(),
     });
