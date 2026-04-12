@@ -9,6 +9,7 @@ import { registerGitHubIntegration } from "./external-integrations";
 import { ensureActionAuditTable } from "./action-audit";
 import { ensureDocumentIntelligenceTables } from "./document-intelligence";
 import { ensureTriggerTables, registerDefaultTriggers } from "./event-triggers";
+import { registerCapabilityMeshTools, ensureCapabilityRegistryTable } from "./capability-mesh";
 import type { MastraAgentConfig, AgentExecutionContext, DelegationResult, TraceSpan, GuardrailResult } from "./types";
 
 export type { MastraAgentConfig, AgentExecutionContext };
@@ -402,6 +403,8 @@ export async function initializeMastra(): Promise<void> {
   registerCrossPlatformTools();
   registerGitHubIntegration();
   registerGitHubTools();
+  registerCapabilityMeshTools();
+  await ensureCapabilityRegistryTable();
   await loadAgentConfigs();
 
   try { await initializeA2ACards(); } catch (err) {

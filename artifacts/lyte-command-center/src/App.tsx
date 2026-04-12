@@ -117,6 +117,7 @@ const ChaosPrediction = lazy(() => import("@/pages/chaos-prediction"));
 const CostPerformance = lazy(() => import("@/pages/cost-performance"));
 const OperationalNarrative = lazy(() => import("@/pages/operational-narrative"));
 const DecisionCostXRay = lazy(() => import("@/pages/decision-cost-xray"));
+const AiCapabilities = lazy(() => import("@/pages/ai-capabilities"));
 
 const ADMIN_ROLES = ["admin", "super_admin", "ops"];
 
@@ -225,6 +226,7 @@ function PrivateRouter() {
         <Route path="/cost-performance" component={CostPerformance} />
         <Route path="/operational-narrative" component={OperationalNarrative} />
         <Route path="/decision-cost-xray" component={DecisionCostXRay} />
+        <Route path="/ai-capabilities" component={AiCapabilities} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>

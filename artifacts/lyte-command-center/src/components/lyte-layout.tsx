@@ -7,7 +7,7 @@ import {
   Database, Play, Activity, CheckSquare, Shield, Network, Heart,
   AlertTriangle, Brain, Radio, Workflow, Inbox, Search, UserCheck,
   ChevronRight, Gauge, BarChart3, LayoutDashboard, Download, Clapperboard, Power,
-  GitBranch, Send, DollarSign
+  GitBranch, Send, DollarSign, Cpu
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, useSandboxMode, EnvironmentLabel, type OnboardingConfig } from "@szl-holdings/shared-ui";
 import { useDemoMode } from "@/lib/demo-mode";
@@ -129,6 +129,12 @@ const NAV_GROUPS = [
       { href: "/ownership", label: "Ownership", icon: Users },
       { href: "/workflows", label: "Workflows", icon: Workflow },
       { href: "/readiness", label: "Readiness", icon: Shield },
+    ],
+  },
+  {
+    label: "AI Capability Mesh",
+    items: [
+      { href: "/ai-capabilities", label: "AI Capabilities", icon: Cpu },
     ],
   },
   {
