@@ -524,11 +524,36 @@ router.get("/feed", (req: Request, res: Response) => {
     const signalType = req.query.signalType as string | undefined;
     const targetVenture = req.query.targetVenture as string | undefined;
     const severity = req.query.severity as string | undefined;
+    const afterRaw = req.query.after as string | undefined;
+    const beforeRaw = req.query.before as string | undefined;
+    const entity = (req.query.entity as string | undefined)?.toLowerCase();
+
+    let after: number | undefined;
+    let before: number | undefined;
+    if (afterRaw) {
+      const ts = new Date(afterRaw).getTime();
+      if (isNaN(ts)) { res.status(400).json({ error: "Invalid 'after' date — expected ISO 8601 string" }); return; }
+      after = ts;
+    }
+    if (beforeRaw) {
+      const ts = new Date(beforeRaw).getTime();
+      if (isNaN(ts)) { res.status(400).json({ error: "Invalid 'before' date — expected ISO 8601 string" }); return; }
+      before = ts;
+    }
 
     let events = [...meshEventStore];
     if (signalType) events = events.filter(e => e.signalType === signalType);
     if (targetVenture) events = events.filter(e => e.targetVenture === targetVenture);
     if (severity) events = events.filter(e => e.severity === severity);
+    if (after !== undefined) events = events.filter(e => new Date(e.enrichedAt).getTime() >= after);
+    if (before !== undefined) events = events.filter(e => new Date(e.enrichedAt).getTime() <= before);
+    if (entity) {
+      events = events.filter(e => {
+        const title = (e.title ?? "").toLowerCase();
+        const ctx = (e.enrichmentContext ?? "").toLowerCase();
+        return title.includes(entity) || ctx.includes(entity);
+      });
+    }
 
     res.json({
       events: events.slice(0, limit),
