@@ -473,3 +473,15 @@ id = "FmWNBqW6sRcrqMw8XcV_A"
 uri = "file://screenshots/szl-portfolio.tar.gz"
 type = "unspecified"
 title = "SZL Portfolio — Complete Screenshot Archive"
+
+[[outputs]]
+id = "Y-OkB1al959dF9m3FeUIf"
+uri = "file://screenshots/szl-portfolio-linkedin.pdf"
+type = "pdf"
+title = "SZL Holdings LinkedIn Portfolio PDF"
+
+[[outputs]]
+id = "CPnuq2QR40Q1Kf5EtUpbS"
+uri = "file://screenshots/szl-portfolio.zip"
+type = "unspecified"
+title = "SZL Portfolio Screenshot Package (ZIP)"
