@@ -118,6 +118,7 @@ const CostPerformance = lazy(() => import("@/pages/cost-performance"));
 const OperationalNarrative = lazy(() => import("@/pages/operational-narrative"));
 const DecisionCostXRay = lazy(() => import("@/pages/decision-cost-xray"));
 const AiCapabilities = lazy(() => import("@/pages/ai-capabilities"));
+const WorkflowAutomation = lazy(() => import("@/pages/workflow-automation"));
 
 const ADMIN_ROLES = ["admin", "super_admin", "ops"];
 
@@ -227,6 +228,7 @@ function PrivateRouter() {
         <Route path="/operational-narrative" component={OperationalNarrative} />
         <Route path="/decision-cost-xray" component={DecisionCostXRay} />
         <Route path="/ai-capabilities" component={AiCapabilities} />
+        <Route path="/workflow-automation" component={WorkflowAutomation} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>
@@ -253,6 +255,7 @@ const lyteCommands: CommandItem[] = [
   { id: "nav-alloy-simulate", label: "Policy Simulation Console", icon: "🧪", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/simulate"); } },
   { id: "nav-alloy-handoffs", label: "Agent Handoffs (A2A)", icon: "🔗", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/handoffs"); } },
   { id: "nav-alloy-receipts", label: "Trust Receipts", icon: "🛡️", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/receipts"); } },
+  { id: "nav-workflow-automation", label: "Workflow Automation", icon: "🤖", group: "AI", description: "Event-driven triggers and human-in-the-loop approvals", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/workflow-automation"); } },
 ];
 
 const lyteShortcuts: KeyboardShortcut[] = [

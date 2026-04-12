@@ -53,6 +53,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
     title: "Platform",
     items: [
       { path: "/automations", label: "Alloy", icon: Zap },
+      { path: "/ai-intelligence", label: "AI Intelligence", icon: Brain },
     ],
   },
 ];

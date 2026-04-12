@@ -147,6 +147,7 @@ const NAV: NavSection[] = [
   {
     label: "AI Intelligence",
     items: [
+      { label: "AI Intelligence", href: "/ai-intelligence", icon: Brain },
       { label: "Case Oracle", href: "/case-oracle", icon: Brain },
       { label: "Judge Intelligence", href: "/judge-intelligence", icon: Scale },
       { label: "Litigation War Map", href: "/litigation-war-map", icon: Activity },

@@ -27,6 +27,7 @@ function Wrap({ children }: { children: React.ReactNode }) {
 }
 
 const PrismDashboard = lazy(() => import("./pages/dashboard"));
+const AIIntelligencePage = lazy(() => import("./pages/ai-intelligence"));
 const PrismMattersList = lazy(() => import("./pages/matters-list"));
 const PrismMatterDetail = lazy(() => import("./pages/matter-detail"));
 const PrismForecast = lazy(() => import("./pages/forecast-page"));
@@ -214,6 +215,10 @@ function PrismCounselRoutes() {
       {/* /intelligence → copilot */}
       <Route path="/intelligence">
         <Redirect to="/copilot" />
+      </Route>
+
+      <Route path="/ai-intelligence">
+        <Suspense fallback={<PageLoader />}><Wrap><AIIntelligencePage /></Wrap></Suspense>
       </Route>
 
       {/* ── Primary app route: dashboard ── */}

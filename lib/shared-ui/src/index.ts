@@ -168,3 +168,18 @@ export {
   type OperationalEntity,
   type StatusConfig,
 } from "./operational-primitives";
+export {
+  DocumentIntelligencePanel,
+  type DocumentIntelligencePanelProps,
+  type DocumentIntelligenceResult,
+  type DocumentEntity,
+  type DocumentClassification,
+} from "./document-intelligence-panel";
+export {
+  AIActionsPanel,
+  DOMAIN_ACTIONS,
+  type AIActionsPanelProps,
+  type AIAction,
+  type ActionHistoryEntry,
+  type WorkflowStatus,
+} from "./ai-actions-panel";

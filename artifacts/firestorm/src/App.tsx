@@ -62,6 +62,7 @@ const ExecutiveRisk = lazy(() => import("@/pages/executive-risk"));
 const SacsayhuamanShield = lazy(() => import("@/pages/sacsayhuaman-shield"));
 const AdversaryEmulation = lazy(() => import("@/pages/simulation-runner"));
 const AgentInsightsPage = lazy(() => import("@/pages/agent-insights"));
+const AIIntelligencePage = lazy(() => import("@/pages/ai-intelligence"));
 const AssetInventoryPage = lazy(() => import("@/pages/asset-inventory"));
 const VulnerabilityDashboard = lazy(() => import("@/pages/vulnerability-dashboard"));
 const HardeningControlsPage = lazy(() => import("@/pages/hardening-controls"));
@@ -250,6 +251,7 @@ const intelCortexNav = [
   { path: "/intel/dual-mind", label: "Dual-Mind Monitor", icon: Sun },
   { path: "/intel/willaq-umu", label: "Willaq Umu Oracle", icon: Eye },
   { path: "/agent-insights", label: "Agent Insights", icon: BrainIcon },
+  { path: "/ai-intelligence", label: "AI Intelligence", icon: BrainIcon },
 ];
 
 type Module = "security" | "operations" | "intelligence";
@@ -629,6 +631,7 @@ function AppRouter() {
         <Route path="/sacsayhuaman-shield" component={SacsayhuamanShield} />
         <Route path="/adversary-emulation" component={AdversaryEmulation} />
         <Route path="/agent-insights" component={AgentInsightsPage} />
+        <Route path="/ai-intelligence" component={AIIntelligencePage} />
         <Route path="/vulnerabilities" component={VulnerabilityDashboard} />
         <Route path="/hardening-controls" component={HardeningControlsPage} />
         <Route path="/cases" component={CasesPage} />
@@ -745,6 +748,7 @@ const aegisCommands: CommandItem[] = [
   { id: "app-alloy", label: "Switch to Alloy", icon: "⬡", group: "Switch App", description: "Execution Fabric", action: () => { window.location.href = "/alloy/"; } },
   { id: "app-lyte", label: "Switch to Lyte", icon: "⚡", group: "Switch App", description: "Command Center", action: () => { window.location.href = "/lyte-command-center/"; } },
   { id: "app-vessels", label: "Switch to Vessels", icon: "⚓", group: "Switch App", description: "Maritime Intelligence", action: () => { window.location.href = "/vessels/"; } },
+  { id: "nav-ai-intelligence", label: "AI Intelligence", icon: "🤖", group: "AI", description: "Document analysis, NER, AI actions & workflows", keywords: ["ai", "document", "intelligence", "ner", "actions"], action: nav("/ai-intelligence") },
 ];
 
 const aegisShortcuts: KeyboardShortcut[] = [

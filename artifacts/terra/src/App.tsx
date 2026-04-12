@@ -22,6 +22,7 @@ const queryClient = new QueryClient({
 });
 
 const TerraAtlasArtifactsPage = lazy(() => import("@/pages/atlas-artifacts"));
+const AIIntelligencePage = lazy(() => import("@/pages/ai-intelligence"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const DistressEngine = lazy(() => import("@/pages/distress-engine"));
 const Deals = lazy(() => import("@/pages/deals"));
@@ -117,6 +118,7 @@ function PrivateRouter() {
             <Route path="/offers" component={Offers} />
             <Route path="/predictions" component={Predictions} />
             <Route path="/automations" component={Automations} />
+            <Route path="/ai-intelligence" component={AIIntelligencePage} />
             <Route path="/broker-overview" component={BrokerOverview} />
             <Route path="/ingestion" component={Ingestion} />
             <Route path="/commercial" component={CommercialIntelligence} />
@@ -168,6 +170,7 @@ const terraCommands: CommandItem[] = [
   { id: "nav-listings", label: "Portfolio", icon: "□", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/listings"); } },
   { id: "nav-approvals", label: "Approvals", icon: "✓", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/transactions"); } },
   { id: "nav-admin", label: "Admin", icon: "⊙", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/broker-overview"); } },
+  { id: "nav-ai-intelligence", label: "AI Intelligence", icon: "🤖", group: "AI", description: "Document analysis, property AI actions & workflows", keywords: ["ai", "document", "intelligence", "actions"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ai-intelligence"); } },
 ];
 
 const terraShortcuts: KeyboardShortcut[] = [

@@ -84,6 +84,7 @@ const VESSELS_ONBOARDING_CONFIG: OnboardingConfig = {
 
 // Marketing pages
 const VesselsAtlasArtifactsPage = lazy(() => import("@/pages/atlas-artifacts"));
+const AIIntelligencePage = lazy(() => import("@/pages/ai-intelligence"));
 const MarketingHomePage = lazy(() => import("@/pages/marketing-home"));
 const MarketingPlatformPage = lazy(() => import("@/pages/marketing-platform"));
 const MarketingCapabilitiesPage = lazy(() => import("@/pages/marketing-capabilities"));
@@ -174,6 +175,7 @@ const legacyNavItems = [
   { path: "/intelligence", label: "Maritime Intel", icon: Globe },
   { path: "/corridors", label: "Corridors", icon: Navigation },
   { path: "/agent-insights", label: "Agent Insights", icon: Brain },
+  { path: "/ai-intelligence", label: "AI Intelligence", icon: Brain },
   { path: "/command-workflows", label: "Command Workflows", icon: ShieldAlert },
   { path: "/document-engine", label: "Document Engine", icon: FileText },
 ];
@@ -472,6 +474,7 @@ function DashboardRouter() {
         <Route path="/command" component={CommandModePage} />
         <Route path="/analytics" component={PerformanceAnalyticsPage} />
         <Route path="/intelligence" component={MaritimeIntelligence} />
+        <Route path="/ai-intelligence" component={AIIntelligencePage} />
         <Route path="/routes" component={CorridorRoutesPage} />
         <Route path="/alerts" component={AlertCenterPage} />
         <Route path="/weather" component={WeatherPage} />
@@ -526,6 +529,7 @@ const vesselsCommands: CommandItem[] = [
   { id: "nav-command", label: "Command Mode", icon: "🎯", group: "Navigation", keywords: ["command", "operational", "focused"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/command"); } },
   { id: "app-lyte", label: "Switch to Lyte", icon: "⚡", group: "Switch App", description: "Business Observability", action: () => { window.location.href = "/lyte-command-center/"; } },
   { id: "app-alloy", label: "Switch to Alloy", icon: "⬡", group: "Switch App", description: "Execution Fabric", action: () => { window.location.href = "/alloy"; } },
+  { id: "nav-ai-intelligence", label: "AI Intelligence", icon: "🤖", group: "AI", description: "Maritime document analysis, sanctions screening AI actions", keywords: ["ai", "document", "intelligence", "sanctions", "manifest"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ai-intelligence"); } },
 ];
 
 const vesselsShortcuts: KeyboardShortcut[] = [

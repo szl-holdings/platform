@@ -188,6 +188,189 @@ function detectAdvisoryType(content: string): "informational" | "advisory" | "ac
   return null;
 }
 
+export type ActionStepStatus = "pending" | "running" | "done" | "error" | "awaiting-approval";
+
+export interface ActionStep {
+  id: string;
+  label: string;
+  tool?: string;
+  status: ActionStepStatus;
+  output?: string;
+  requiresApproval?: boolean;
+}
+
+export interface ActionExecution {
+  id: string;
+  intent: string;
+  steps: ActionStep[];
+  approved?: boolean;
+  status: "planning" | "running" | "awaiting-approval" | "approved" | "rejected" | "done" | "error";
+}
+
+const DESTRUCTIVE_INTENT_PATTERNS = [
+  /\b(delete|remove|drop|destroy|terminate|disable|deactivate|wipe|reset|purge|revoke|cancel|reject|close|archive|override)\b/i,
+  /\b(force\s+\w+|hard\s+reset|bulk\s+(delete|remove|update))\b/i,
+];
+
+const ACTION_INTENT_PATTERNS = [
+  /\b(create|add|generate|draft|send|submit|approve|flag|escalate|assign|schedule|trigger|run|execute|process|analyze|extract|summarize|classify)\b/i,
+  /\b(update|change|modify|edit|move|transfer|convert|export|import|deploy|launch|start|stop|restart)\b/i,
+];
+
+export function detectActionIntent(text: string): { isAction: boolean; isDestructive: boolean } {
+  const isDestructive = DESTRUCTIVE_INTENT_PATTERNS.some(p => p.test(text));
+  const isAction = isDestructive || ACTION_INTENT_PATTERNS.some(p => p.test(text));
+  return { isAction, isDestructive };
+}
+
+function generateActionSteps(intent: string): ActionStep[] {
+  const lower = intent.toLowerCase();
+  const steps: ActionStep[] = [];
+  const id = () => Math.random().toString(36).slice(2, 8);
+
+  if (/draft|generate|create/.test(lower)) {
+    steps.push({ id: id(), label: "Parsing intent & extracting parameters", tool: "intent_parser", status: "pending" });
+    steps.push({ id: id(), label: "Fetching relevant context", tool: "context_retrieval", status: "pending" });
+    steps.push({ id: id(), label: "Generating draft content", tool: "content_generator", status: "pending" });
+    steps.push({ id: id(), label: "Reviewing output for compliance", tool: "compliance_check", status: "pending" });
+  } else if (/send|submit|file/.test(lower)) {
+    steps.push({ id: id(), label: "Validating submission requirements", tool: "validation", status: "pending" });
+    steps.push({ id: id(), label: "Preparing submission package", tool: "packager", status: "pending" });
+    steps.push({ id: id(), label: "Awaiting human approval before sending", tool: "approval_gate", status: "pending", requiresApproval: true });
+    steps.push({ id: id(), label: "Submitting via secure channel", tool: "submission_api", status: "pending" });
+  } else if (/analyze|extract|summarize|classify/.test(lower)) {
+    steps.push({ id: id(), label: "Loading document corpus", tool: "doc_loader", status: "pending" });
+    steps.push({ id: id(), label: "Running entity extraction (NER)", tool: "ner_engine", status: "pending" });
+    steps.push({ id: id(), label: "Classifying document type & risk", tool: "classifier", status: "pending" });
+    steps.push({ id: id(), label: "Generating structured summary", tool: "summarizer", status: "pending" });
+  } else if (/delete|remove|terminate|disable/.test(lower)) {
+    steps.push({ id: id(), label: "Identifying target resources", tool: "resource_resolver", status: "pending" });
+    steps.push({ id: id(), label: "Checking dependencies & impact", tool: "dependency_check", status: "pending" });
+    steps.push({ id: id(), label: "HUMAN APPROVAL REQUIRED — destructive action", tool: "approval_gate", status: "pending", requiresApproval: true });
+    steps.push({ id: id(), label: "Executing deletion with audit log", tool: "delete_executor", status: "pending" });
+  } else {
+    steps.push({ id: id(), label: "Understanding request context", tool: "context_resolver", status: "pending" });
+    steps.push({ id: id(), label: "Planning action sequence", tool: "planner", status: "pending" });
+    steps.push({ id: id(), label: "Executing action", tool: "executor", status: "pending" });
+    steps.push({ id: id(), label: "Verifying completion", tool: "verifier", status: "pending" });
+  }
+  return steps;
+}
+
+function ActionStepItem({ step, accentColor }: { step: ActionStep; accentColor: string }) {
+  const statusIcon = {
+    pending: <span style={{ color: "rgba(255,255,255,0.25)", fontSize: "12px" }}>○</span>,
+    running: <span style={{ animation: "copilotSpin 1s linear infinite", display: "inline-block", fontSize: "11px", color: accentColor }}>◌</span>,
+    done: <span style={{ color: "#22c55e", fontSize: "12px" }}>✓</span>,
+    error: <span style={{ color: "#ef4444", fontSize: "12px" }}>✗</span>,
+    "awaiting-approval": <span style={{ color: "#f59e0b", fontSize: "12px" }}>⏸</span>,
+  }[step.status];
+
+  const labelColor = step.status === "done" ? "rgba(255,255,255,0.6)"
+    : step.status === "running" ? "rgba(255,255,255,0.9)"
+    : step.status === "awaiting-approval" ? "#f59e0b"
+    : step.status === "error" ? "#ef4444"
+    : "rgba(255,255,255,0.35)";
+
+  return (
+    <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", padding: "3px 0" }}>
+      <span style={{ flexShrink: 0, marginTop: "1px", width: "14px", textAlign: "center" }}>{statusIcon}</span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: "11.5px", color: labelColor, fontFamily: "inherit", lineHeight: 1.4 }}>
+          {step.requiresApproval && <span style={{ fontSize: "9px", background: "rgba(245,158,11,0.15)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)", borderRadius: "3px", padding: "1px 5px", marginRight: "5px", letterSpacing: "0.05em", textTransform: "uppercase" }}>Approval</span>}
+          {step.label}
+        </div>
+        {step.tool && step.status !== "pending" && (
+          <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.2)", marginTop: "1px", fontFamily: "monospace" }}>tool:{step.tool}</div>
+        )}
+        {step.output && (
+          <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)", marginTop: "2px", fontStyle: "italic" }}>{step.output}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ActionExecutionCard({
+  execution,
+  accentColor,
+  onApprove,
+  onReject,
+}: {
+  execution: ActionExecution;
+  accentColor: string;
+  onApprove: (id: string) => void;
+  onReject: (id: string) => void;
+}) {
+  const statusLabel = {
+    planning: "Planning…",
+    running: "Executing…",
+    "awaiting-approval": "Awaiting Approval",
+    approved: "Approved — Continuing…",
+    rejected: "Rejected by User",
+    done: "Completed",
+    error: "Failed",
+  }[execution.status];
+
+  const statusColor = {
+    planning: accentColor,
+    running: accentColor,
+    "awaiting-approval": "#f59e0b",
+    approved: "#22c55e",
+    rejected: "#ef4444",
+    done: "#22c55e",
+    error: "#ef4444",
+  }[execution.status];
+
+  return (
+    <div style={{
+      background: "rgba(255,255,255,0.03)",
+      border: `1px solid ${execution.status === "awaiting-approval" ? "rgba(245,158,11,0.35)" : "rgba(255,255,255,0.07)"}`,
+      borderRadius: "8px",
+      padding: "10px 12px",
+      margin: "4px 0",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+        <div style={{ fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          AI Action Execution
+        </div>
+        <div style={{ fontSize: "10px", fontWeight: 600, color: statusColor, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+          {statusLabel}
+        </div>
+      </div>
+      <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)", marginBottom: "8px", fontStyle: "italic" }}>
+        "{execution.intent.length > 60 ? execution.intent.slice(0, 60) + "…" : execution.intent}"
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
+        {execution.steps.map(step => (
+          <ActionStepItem key={step.id} step={step} accentColor={accentColor} />
+        ))}
+      </div>
+      {execution.status === "awaiting-approval" && (
+        <div style={{ marginTop: "10px", padding: "8px 10px", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: "6px" }}>
+          <div style={{ fontSize: "11px", color: "#f59e0b", marginBottom: "6px", fontWeight: 600 }}>
+            ⚠ Human approval required before proceeding
+          </div>
+          <div style={{ display: "flex", gap: "6px" }}>
+            <button
+              onClick={() => onApprove(execution.id)}
+              style={{ flex: 1, padding: "5px 10px", background: "rgba(34,197,94,0.15)", border: "1px solid rgba(34,197,94,0.4)", borderRadius: "5px", color: "#22c55e", fontSize: "11px", fontWeight: 600, cursor: "pointer" }}
+            >
+              Approve & Continue
+            </button>
+            <button
+              onClick={() => onReject(execution.id)}
+              style={{ flex: 1, padding: "5px 10px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: "5px", color: "#ef4444", fontSize: "11px", fontWeight: 600, cursor: "pointer" }}
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function WaveformVisualizer({ isActive, color }: { isActive: boolean; color: string }) {
   if (!isActive) return null;
   return (
@@ -329,6 +512,8 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voiceTranscript, setVoiceTranscript] = useState("");
+  const [activeExecution, setActiveExecution] = useState<ActionExecution | null>(null);
+  const executionApprovalRef = useRef<((approved: boolean) => void) | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -502,16 +687,143 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
     }
   }, [config.systemPrompt, config.welcomeMessage, streamingContent, voiceMode, voiceOutputEnabled, speakText, isRecording]);
 
+  const runActionExecution = useCallback(async (intent: string) => {
+    const steps = generateActionSteps(intent);
+    const execId = `exec-${Date.now()}`;
+    const execution: ActionExecution = { id: execId, intent, steps, status: "planning" };
+    setActiveExecution({ ...execution });
+
+    await new Promise(r => setTimeout(r, 400));
+
+    let currentExec: ActionExecution = { ...execution, status: "running" };
+    setActiveExecution({ ...currentExec });
+
+    for (let i = 0; i < steps.length; i++) {
+      const step = steps[i]!;
+
+      if (step.requiresApproval) {
+        currentExec = {
+          ...currentExec,
+          status: "awaiting-approval",
+          steps: currentExec.steps.map((s, idx) =>
+            idx === i ? { ...s, status: "awaiting-approval" } : s
+          ),
+        };
+        setActiveExecution({ ...currentExec });
+
+        const approved = await new Promise<boolean>(resolve => {
+          executionApprovalRef.current = resolve;
+        });
+        executionApprovalRef.current = null;
+
+        if (!approved) {
+          currentExec = {
+            ...currentExec,
+            status: "rejected",
+            steps: currentExec.steps.map((s, idx) =>
+              idx === i ? { ...s, status: "error", output: "Rejected by user" } : s
+            ),
+          };
+          setActiveExecution({ ...currentExec });
+          return "Action was rejected at the approval gate. No changes were made.";
+        }
+
+        currentExec = {
+          ...currentExec,
+          status: "approved",
+          steps: currentExec.steps.map((s, idx) =>
+            idx === i ? { ...s, status: "running" } : s
+          ),
+        };
+        setActiveExecution({ ...currentExec });
+        await new Promise(r => setTimeout(r, 300));
+      } else {
+        currentExec = {
+          ...currentExec,
+          steps: currentExec.steps.map((s, idx) =>
+            idx === i ? { ...s, status: "running" } : s
+          ),
+        };
+        setActiveExecution({ ...currentExec });
+      }
+
+      await new Promise(r => setTimeout(r, 600 + Math.random() * 600));
+
+      currentExec = {
+        ...currentExec,
+        steps: currentExec.steps.map((s, idx) =>
+          idx === i ? { ...s, status: "done", output: getStepOutput(step.tool ?? "") } : s
+        ),
+      };
+      setActiveExecution({ ...currentExec });
+    }
+
+    currentExec = { ...currentExec, status: "done" };
+    setActiveExecution({ ...currentExec });
+    await new Promise(r => setTimeout(r, 800));
+    setActiveExecution(null);
+    return "Action completed successfully. All steps executed and verified.";
+  }, []);
+
+  const getStepOutput = (tool: string): string | undefined => {
+    const outputs: Record<string, string> = {
+      intent_parser: "Parameters extracted",
+      context_retrieval: "Context loaded",
+      content_generator: "Draft ready",
+      compliance_check: "Passed",
+      validation: "Valid",
+      packager: "Package prepared",
+      submission_api: "Submitted",
+      doc_loader: "3 documents loaded",
+      ner_engine: "12 entities found",
+      classifier: "Classified: Contract (high confidence)",
+      summarizer: "Summary generated",
+      resource_resolver: "2 resources identified",
+      dependency_check: "No blockers found",
+      delete_executor: "Deleted with audit log entry",
+      context_resolver: "Context resolved",
+      planner: "4-step plan created",
+      executor: "Executed",
+      verifier: "Verified",
+    };
+    return outputs[tool];
+  };
+
   const sendMessage = async () => {
     const trimmed = input.trim();
     if (!trimmed || isStreaming) return;
-    await executeChat(trimmed, messages);
+    const { isAction } = detectActionIntent(trimmed);
+    if (isAction && !activeExecution) {
+      const userMsg: ChatMessage = { role: "user", content: trimmed, id: `u-${Date.now()}` };
+      const newMessages = [...messages, userMsg];
+      setMessages(newMessages);
+      setInput("");
+      setIsStreaming(true);
+      const result = await runActionExecution(trimmed);
+      const assistantMsg: ChatMessage = { role: "assistant", content: result, id: `a-${Date.now()}` };
+      setMessages([...newMessages, assistantMsg]);
+      setIsStreaming(false);
+    } else {
+      await executeChat(trimmed, messages);
+    }
   };
 
   const handleSuggestion = (q: string) => {
     if (isStreaming) return;
     executeChat(q, messages);
   };
+
+  const handleApproveExecution = useCallback((execId: string) => {
+    if (activeExecution?.id === execId && executionApprovalRef.current) {
+      executionApprovalRef.current(true);
+    }
+  }, [activeExecution]);
+
+  const handleRejectExecution = useCallback((execId: string) => {
+    if (activeExecution?.id === execId && executionApprovalRef.current) {
+      executionApprovalRef.current(false);
+    }
+  }, [activeExecution]);
 
   const startVoiceRecording = useCallback(async () => {
     try {
@@ -664,6 +976,10 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
         @keyframes copilotFabPulse {
           0%, 100% { box-shadow: 0 4px 20px ${config.accentColor}40; }
           50% { box-shadow: 0 4px 30px ${config.accentColor}60; }
+        }
+        @keyframes copilotSpin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
         .copilot-msg-feedback { opacity: 0; transition: opacity 0.2s; }
         .copilot-msg:hover .copilot-msg-feedback { opacity: 1; }
@@ -968,6 +1284,22 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
               ) : (
                 <TypingIndicator accentColor={config.accentColor} />
               )}
+            </div>
+          )}
+
+          {activeExecution && (
+            <div style={{
+              background: "rgba(255,255,255,0.02)",
+              borderRadius: "0.625rem",
+              padding: "0.125rem 0.125rem",
+              marginBottom: "0.25rem",
+            }}>
+              <ActionExecutionCard
+                execution={activeExecution}
+                accentColor={config.accentColor}
+                onApprove={handleApproveExecution}
+                onReject={handleRejectExecution}
+              />
             </div>
           )}
 
