@@ -129,6 +129,14 @@ import courtlistenerLiveRouter from "./courtlistener-live";
 import threatFeedsLiveRouter from "./threat-feeds-live";
 import samgovLiveRouter from "./samgov-live";
 import noaaAlertsLiveRouter from "./noaa-alerts-live";
+import firestormAgenticSocRouter from "./firestorm-agentic-soc";
+import vesselsDigitalTwinRouter from "./vessels-digital-twin";
+import terraInnovationsRouter from "./terra-innovations";
+import prismCounselInnovationsRouter from "./prism-counsel-innovations";
+import carlotaJoInnovationsRouter from "./carlota-jo-innovations";
+import lyteInnovationsRouter from "./lyte-innovations";
+import aiInnovationsRouter from "./ai-innovations";
+import crossDomainIntelligenceRouter from "./cross-domain-intelligence";
 
 const router: IRouter = Router();
 
@@ -483,4 +491,29 @@ router.use(stephenTelemetryRouter);
 
 router.use("/intelligence-mesh", _readLimiter);
 router.use(intelligenceMeshRouter);
+
+router.use("/firestorm", _readLimiter);
+router.use(firestormAgenticSocRouter);
+
+router.use("/vessels", _readLimiter);
+router.use(vesselsDigitalTwinRouter);
+
+router.use("/terra", _readLimiter);
+router.use(terraInnovationsRouter);
+
+router.use("/prism-counsel", _readLimiter);
+router.use(prismCounselInnovationsRouter);
+
+router.use("/carlota-jo", _readLimiter);
+router.use(carlotaJoInnovationsRouter);
+
+router.use("/lyte", _readLimiter);
+router.use(lyteInnovationsRouter);
+
+router.use("/ai", _readLimiter);
+router.use(aiInnovationsRouter);
+
+router.use("/cross-domain", _readLimiter);
+router.use(crossDomainIntelligenceRouter);
+
 export default router;

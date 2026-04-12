@@ -2,8 +2,9 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Zap, ChevronRight, ChevronDown, CheckCircle, Clock, AlertCircle,
-  Thermometer, Plane, Calendar, Home, Package, Sparkles, X, Cpu, ArrowRight
+  Thermometer, Plane, Calendar, Home, Package, Sparkles, X, Cpu, ArrowRight, TrendingUp, Brain, Users, Globe
 } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { Link } from "wouter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { CLIENT_GENOME, getCadencePref, getCommsPref } from "@/data/genome-data";
@@ -404,6 +405,83 @@ export default function AnticipationEngine() {
             Genome signals are cross-referenced with lifecycle event triggers (property transitions, quarterly review cycles) and observed seasonal patterns. {CLIENT_GENOME.name} has {CLIENT_GENOME.defaultTone === "formal-brief" ? "a preference for brief, direct communication" : "a detailed communication preference"} — suggestions are phrased accordingly.
           </p>
         </div>
+      </div>
+
+      <AnticipationEnginePlusPanel />
+    </div>
+  );
+}
+
+type ProactiveRec = { client_id: string; recommendation_id: string; trigger_type: string; trigger_summary: string; recommendation: string; priority: string; confidence: number };
+type ClientSentiment = { client_id: string; client_name: string; engagement_score: number; sentiment_score: number; sentiment_trend: string; churn_risk_score: number };
+
+function AnticipationEnginePlusPanel() {
+  const [recs, setRecs] = useState<ProactiveRec[] | null>(null);
+  const [sentiment, setSentiment] = useState<ClientSentiment[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const fetchedRef = useRef(false);
+
+  useEffect(() => {
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
+    Promise.all([
+      fetch("/api/carlota-jo/proactive-recommendations").then(r => r.ok ? r.json() as Promise<{ recommendations: ProactiveRec[] }> : null),
+      fetch("/api/carlota-jo/client-sentiment").then(r => r.ok ? r.json() as Promise<{ clients: ClientSentiment[] }> : null),
+    ]).then(([r, s]) => {
+      if (r?.recommendations) setRecs(r.recommendations);
+      if (s?.clients) setSentiment(s.clients);
+    }).finally(() => setLoading(false));
+  }, []);
+
+  const priorityColors: Record<string, string> = {
+    critical: "rgba(239,68,68,0.85)",
+    high: GOLD,
+    medium: "rgba(6,182,212,0.8)",
+    low: "rgba(139,92,246,0.8)",
+  };
+
+  return (
+    <div className="rounded-xl border p-5 space-y-4" style={{ borderColor: GOLD_BORDER, background: GOLD_DIM }}>
+      <div className="flex items-center gap-2">
+        <Brain size={14} style={{ color: GOLD }} />
+        <span className="text-sm font-semibold" style={{ color: CREAM }}>AI Anticipation Engine · 2026</span>
+        <span className="text-[8px] px-1.5 py-0.5 rounded font-mono uppercase" style={{ background: "rgba(196,170,126,0.1)", color: GOLD, border: `1px solid ${GOLD_BORDER}` }}>Live Signals</span>
+      </div>
+
+      {sentiment && sentiment.length > 0 && (
+        <div className="rounded-lg p-3 space-y-1" style={{ background: "rgba(244,237,224,0.04)", border: `1px solid ${GOLD_BORDER}` }}>
+          <div className="text-[9px] uppercase tracking-widest mb-1.5" style={{ color: MUTED }}>Client Sentiment Monitor</div>
+          <div className="flex gap-3 flex-wrap">
+            {sentiment.slice(0, 3).map(c => (
+              <div key={c.client_id} className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: c.churn_risk_score >= 0.5 ? "#ef4444" : c.sentiment_trend === "declining" ? "#f59e0b" : "#10b981" }} />
+                <span className="text-[9px]" style={{ color: CREAM_DIM }}>{c.client_name ?? c.client_id}</span>
+                <span className="text-[8px] font-mono" style={{ color: c.churn_risk_score >= 0.5 ? "#ef4444" : "#10b981" }}>{c.sentiment_trend}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-2">
+        <div className="text-[9px] uppercase tracking-widest" style={{ color: MUTED }}>Proactive Recommendations</div>
+        {recs ? (
+          recs.slice(0, 4).map(r => (
+            <div key={r.recommendation_id} className="flex items-start gap-2 py-1.5" style={{ borderBottom: `1px solid rgba(196,170,126,0.08)` }}>
+              <div className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5" style={{ background: priorityColors[r.priority] ?? GOLD }} />
+              <div className="flex-1 min-w-0">
+                <div className="text-[11px] font-medium" style={{ color: CREAM }}>{r.trigger_summary}</div>
+                <div className="text-[9px] mt-0.5 leading-relaxed" style={{ color: CREAM_DIM }}>{r.recommendation}</div>
+              </div>
+              <span className="text-[8px] px-1.5 py-0.5 rounded shrink-0" style={{ background: `${priorityColors[r.priority] ?? GOLD}12`, color: priorityColors[r.priority] ?? GOLD, border: `1px solid ${(priorityColors[r.priority] ?? GOLD)}25` }}>
+                {Math.round(r.confidence * 100)}%
+              </span>
+            </div>
+          ))
+        ) : (
+          <div className="text-[11px] font-light" style={{ color: CREAM_DIM }}>{loading ? "Scanning signals..." : "No recommendations"}</div>
+        )}
+        {recs && <div className="text-[9px] mt-1" style={{ color: MUTED }}>{recs.filter(r => r.priority === "critical").length} critical · {recs.filter(r => r.priority === "high").length} high priority</div>}
       </div>
     </div>
   );

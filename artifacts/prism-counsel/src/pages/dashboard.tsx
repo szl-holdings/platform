@@ -1,4 +1,5 @@
-import { Scale, AlertTriangle, Clock, TrendingUp, DollarSign, ShieldCheck, FileText, ArrowRight, ChevronRight, Wifi, WifiOff, Shield, CheckCircle, XCircle } from "lucide-react";
+import { Scale, AlertTriangle, Clock, TrendingUp, DollarSign, ShieldCheck, FileText, ArrowRight, ChevronRight, Wifi, WifiOff, Shield, CheckCircle, XCircle, Brain, Gavel, Target } from "lucide-react";
+import { useState } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { DEMO_MATTERS, PILLAR_LABELS } from "../data/demo-matters";
@@ -270,6 +271,7 @@ export default function PrismCounselDashboard() {
           </div>
 
           <FilingGateHealthWidget />
+          <AutonomousLegalPanel />
         </div>
       </div>
     </div>
@@ -359,6 +361,153 @@ function FilingGateHealthWidget() {
       <div className="mt-3 pt-2.5 border-t border-white/[0.04] flex items-center justify-between">
         <span className="text-[8.5px] text-slate-600">{blockedDocuments} docs flagged in 30d</span>
         <span className="text-[8.5px] text-[#4a90b8]">{sealedAudits} audit{sealedAudits !== 1 ? "s" : ""} sealed</span>
+      </div>
+    </div>
+  );
+}
+
+type LitigationPredictionRow = {
+  id: number;
+  matter_id: string;
+  case_type: string;
+  jurisdiction: string;
+  claim_amount: number;
+  predicted_outcome: string;
+  win_probability: number;
+  settlement_recommendation: number;
+  confidence: number;
+  computed_at: string;
+};
+
+type ContractTriageRow = {
+  id: number;
+  triage_id: string;
+  document_name: string;
+  document_type: string;
+  classification: string;
+  risk_level: string;
+  auto_routed: boolean;
+  routing_decision: string;
+  approval_status: string;
+  ai_confidence: number;
+};
+
+type ZeroTouchTriageResult = {
+  triageId: string;
+  classification: string;
+  riskLevel: string;
+  routingDecision: string;
+  autoRouted: boolean;
+  confidence: number;
+  triageCompleted: boolean;
+};
+
+function AutonomousLegalPanel() {
+  const [running, setRunning] = useState(false);
+  const [result, setResult] = useState<ZeroTouchTriageResult | null>(null);
+
+  const predictions = useQuery({
+    queryKey: ["prism-litigation-predictions"],
+    queryFn: async () => {
+      const res = await fetch("/api/prism-counsel/litigation-predictions");
+      if (!res.ok) throw new Error("fetch failed");
+      return res.json() as Promise<LitigationPredictionRow[]>;
+    },
+    staleTime: 60000,
+    retry: false,
+  });
+
+  const contracts = useQuery({
+    queryKey: ["prism-contract-triage"],
+    queryFn: async () => {
+      const res = await fetch("/api/prism-counsel/contract-triage");
+      if (!res.ok) throw new Error("fetch failed");
+      return res.json() as Promise<{ items: ContractTriageRow[]; totalCount: number }>;
+    },
+    staleTime: 60000,
+    retry: false,
+  });
+
+  async function runZeroTouchTriage() {
+    setRunning(true);
+    try {
+      const res = await fetch("/api/prism-counsel/zero-touch-triage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documentName: `Document-${Math.floor(Math.random() * 9000 + 1000)}`, documentType: "contract" }),
+      });
+      if (!res.ok) throw new Error("failed");
+      const body = await res.json() as ZeroTouchTriageResult;
+      setResult(body);
+    } catch {}
+    setRunning(false);
+  }
+
+  const preds = predictions.data;
+  const ctracts = contracts.data;
+
+  return (
+    <div className="rounded-lg border p-4 space-y-3" style={{ borderColor: "rgba(212,160,84,0.2)", background: "rgba(212,160,84,0.03)" }}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Brain className="w-4 h-4 text-[#d4a054]" />
+          <span className="text-sm font-semibold text-slate-100">Autonomous Legal Intelligence · 2026</span>
+          <span className="text-[8px] px-1.5 py-0.5 rounded font-mono uppercase bg-[#d4a054]/10 text-[#d4a054] border border-[#d4a054]/20">AI-Native</span>
+        </div>
+        <button
+          onClick={runZeroTouchTriage}
+          disabled={running}
+          className="text-[10px] px-2.5 py-1 rounded font-medium hover:opacity-80 disabled:opacity-40"
+          style={{ background: "rgba(212,160,84,0.1)", color: "#d4a054", border: "1px solid rgba(212,160,84,0.25)" }}
+        >
+          {running ? "Running..." : "Zero-Touch Triage"}
+        </button>
+      </div>
+
+      {result && (
+        <div className="rounded p-2.5" style={{ background: "rgba(212,160,84,0.06)", border: "1px solid rgba(212,160,84,0.15)" }}>
+          <div className="text-[10px] text-[#d4a054] font-mono">{result.triageId} · {result.classification} · {result.riskLevel} risk</div>
+          <div className="text-[9px] mt-0.5 text-slate-500">{result.routingDecision?.replace(/_/g, " ")} · {result.autoRouted ? "auto-approved" : "manual review required"}</div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <div className="text-[9px] uppercase tracking-widest text-slate-600 mb-2">Litigation Predictions</div>
+          {preds && preds.length > 0 ? (
+            <div className="space-y-1.5">
+              {preds.slice(0, 3).map(p => (
+                <div key={p.id} className="flex items-center gap-2">
+                  <Target className="w-2.5 h-2.5 shrink-0 text-[#d4a054]/50" />
+                  <span className="text-[10px] flex-1 truncate" style={{ color: "rgba(226,232,240,0.7)" }}>{p.matter_id}</span>
+                  <span className="text-[8px] px-1 rounded" style={{ background: Number(p.win_probability) < 0.4 ? "rgba(239,68,68,0.1)" : "rgba(16,185,129,0.1)", color: Number(p.win_probability) < 0.4 ? "#ef4444" : "#10b981" }}>{Math.round(Number(p.win_probability) * 100)}% win</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-[9px] text-slate-600">{predictions.isLoading ? "Loading..." : "No predictions yet"}</div>
+          )}
+        </div>
+
+        <div>
+          <div className="text-[9px] uppercase tracking-widest text-slate-600 mb-2">Contract Risk Triage</div>
+          {ctracts ? (
+            <div className="space-y-1.5">
+              {(ctracts.items ?? []).slice(0, 3).map(c => (
+                <div key={c.triage_id} className="flex items-center gap-2">
+                  <Gavel className="w-2.5 h-2.5 shrink-0 text-[#d4a054]/50" />
+                  <span className="text-[10px] flex-1 truncate" style={{ color: "rgba(226,232,240,0.7)" }}>{c.document_name}</span>
+                  <span className="text-[8px] px-1 rounded" style={{ background: c.risk_level === "high" ? "rgba(239,68,68,0.1)" : "rgba(245,158,11,0.1)", color: c.risk_level === "high" ? "#ef4444" : "#f59e0b" }}>{c.risk_level}</span>
+                </div>
+              ))}
+              {(ctracts.items ?? []).length === 0 && (
+                <div className="text-[9px] text-slate-600">Run triage to generate records</div>
+              )}
+            </div>
+          ) : (
+            <div className="text-[9px] text-slate-600">{contracts.isLoading ? "Loading..." : "No contracts"}</div>
+          )}
+        </div>
       </div>
     </div>
   );

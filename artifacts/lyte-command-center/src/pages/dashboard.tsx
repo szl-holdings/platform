@@ -541,6 +541,8 @@ export default function Dashboard() {
         { id: "5", label: "Escalate vendor renewal gap to COO", severity: "medium", type: "escalate" },
       ]} />
 
+      <CausalAIPanel />
+
       {/* Audit Trace Drawer */}
       {auditSignal && (
         <div className="fixed inset-0 z-50 flex" onClick={() => setAuditSignal(null)}>
@@ -615,6 +617,92 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+type LyteCausalGraph = {
+  incident_id: string;
+  root_cause_id: string;
+  root_cause_service: string;
+  root_cause_type: string;
+  root_cause_description: string;
+  confidence: number;
+  affected_services: string[];
+  computed_at: string;
+};
+
+function CausalAIPanel() {
+  const causalGraphs = useQuery({
+    queryKey: ["lyte-causal-graphs"],
+    queryFn: async () => {
+      const res = await fetch("/api/lyte/causal-graphs");
+      if (!res.ok) throw new Error("fetch failed");
+      return res.json() as Promise<LyteCausalGraph[]>;
+    },
+    staleTime: 60000,
+    retry: false,
+  });
+
+  const predictiveAlerts = useQuery({
+    queryKey: ["lyte-predictive-alerts"],
+    queryFn: async () => {
+      const res = await fetch("/api/lyte/predictive-alerts");
+      if (!res.ok) throw new Error("fetch failed");
+      return res.json() as Promise<{ alerts: Array<{ alert_id: string; service: string; slo_type: string; breach_probability: number; time_to_breach_minutes: number; trend_direction: string; contributing_factors: string[] }>; count: number; source: string }>;
+    },
+    staleTime: 30000,
+    retry: false,
+  });
+
+  const graphs = causalGraphs.data;
+  const alerts = predictiveAlerts.data;
+
+  return (
+    <div className="mx-4 mb-4 rounded-xl border p-4 space-y-4" style={{ borderColor: "rgba(212,160,84,0.2)", background: "rgba(212,160,84,0.03)" }}>
+      <div className="flex items-center gap-2">
+        <GitBranch className="w-4 h-4" style={{ color: "#d4a054" }} />
+        <span className="text-sm font-semibold text-white">Causal AI & Predictive SLO · 2026</span>
+        <span className="text-[8px] px-1.5 py-0.5 rounded font-mono uppercase" style={{ background: "rgba(212,160,84,0.1)", color: "#d4a054", border: "1px solid rgba(212,160,84,0.2)" }}>Autonomous</span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>Causal Root Analysis</div>
+          {graphs && graphs.length > 0 ? (
+            <div className="space-y-2">
+              {graphs.slice(0, 3).map(g => (
+                <div key={g.root_cause_id} className="rounded p-2" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                  <div className="text-[10px] truncate font-medium" style={{ color: "rgba(255,255,255,0.7)" }}>{g.root_cause_service}</div>
+                  <div className="text-[9px] mt-0.5 truncate" style={{ color: "rgba(212,160,84,0.7)" }}>{g.root_cause_type.replace(/_/g, " ")}</div>
+                  <div className="text-[8px] font-mono mt-1" style={{ color: "rgba(255,255,255,0.3)" }}>{Math.round(Number(g.confidence) * 100)}% confidence</div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>{causalGraphs.isLoading ? "Analyzing..." : "No causal graphs — run POST /lyte/causal-analysis to generate"}</div>
+          )}
+        </div>
+
+        <div>
+          <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>SLO Breach Predictions</div>
+          {alerts ? (
+            <div className="space-y-1.5">
+              {alerts.alerts.slice(0, 4).map(a => (
+                <div key={a.alert_id} className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: a.breach_probability >= 0.8 ? "#ef4444" : a.breach_probability >= 0.6 ? "#f97316" : "#f59e0b" }} />
+                  <span className="text-[10px] flex-1 truncate" style={{ color: "rgba(255,255,255,0.6)" }}>{a.service}</span>
+                  <span className="text-[8px] font-mono" style={{ color: a.breach_probability >= 0.8 ? "#ef4444" : "#f59e0b" }}>{Math.round(a.breach_probability * 100)}%</span>
+                  <span className="text-[8px]" style={{ color: "rgba(255,255,255,0.25)" }}>{a.time_to_breach_minutes}m</span>
+                </div>
+              ))}
+              {alerts.count === 0 && <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>No active SLO threats</div>}
+            </div>
+          ) : (
+            <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>{predictiveAlerts.isLoading ? "Loading..." : "No predictions"}</div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
