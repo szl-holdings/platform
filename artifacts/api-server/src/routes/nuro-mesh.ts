@@ -122,7 +122,7 @@ const DOMAIN_ROUTING_RULES: Record<string, string[]> = {
   readiness: ["readiness", "maturity", "assessment", "gap", "score", "compass", "milestone", "capability"],
 };
 
-function routeToAgents(query: string): AgentDefinition[] {
+export function routeToAgents(query: string): AgentDefinition[] {
   const lower = query.toLowerCase();
   const matched = new Set<string>();
 
@@ -171,7 +171,7 @@ async function checkGovernance(
   }
 }
 
-async function callAgent(
+export async function callAgent(
   agent: AgentDefinition,
   query: string,
   context: string,
@@ -330,7 +330,7 @@ ADJUSTED_OUTPUT: [If approved or approved_with_notes, provide the final output (
   }
 }
 
-async function getSharedContext(): Promise<string> {
+export async function getSharedContext(): Promise<string> {
   try {
     const facts = await db
       .select()

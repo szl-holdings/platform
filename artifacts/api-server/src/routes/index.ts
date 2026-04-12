@@ -137,6 +137,7 @@ import carlotaJoInnovationsRouter from "./carlota-jo-innovations";
 import lyteInnovationsRouter from "./lyte-innovations";
 import aiInnovationsRouter from "./ai-innovations";
 import crossDomainIntelligenceRouter from "./cross-domain-intelligence";
+import pulseRouter from "./pulse";
 
 const router: IRouter = Router();
 
@@ -515,5 +516,9 @@ router.use(aiInnovationsRouter);
 
 router.use("/cross-domain", _readLimiter);
 router.use(crossDomainIntelligenceRouter);
+
+router.use("/pulse", _readLimiter);
+router.use("/pulse", _writeLimiter);
+router.use(pulseRouter);
 
 export default router;

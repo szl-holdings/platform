@@ -16,6 +16,20 @@ A new executive command surface built within the SZL Holdings app (`artifacts/sz
 - **Simulated Live WebSocket**: Events stream in every 12–20 seconds simulating the real WebSocket channels (aegis-incidents, vessel-positions, terra-signals, workflow-runs, bookings).
 - Route: `/nerve-center` in SZL Holdings app.
 
+### Pulse — AI Executive Briefing Engine (`/pulse/*`)
+CIA-PDB–style automated intelligence product within the SZL Holdings app that synthesizes signals from Nuro Mesh agents into structured, confidence-scored executive briefings. Lives at `/pulse/*` routes in `artifacts/szl-holdings`.
+- **Daily Brief Generator** (`/pulse`): Today's auto-generated briefing with sections by domain (Maritime, Threat, Real Estate, Legal, Platform), confidence scores, risk levels, recommended actions, and one-click PDF export
+- **Briefing Library** (`/pulse/library`): Searchable/filterable archive of all generated briefs with domain and risk-level facets
+- **Confidence Dashboard** (`/pulse/confidence`): Aggregated confidence metrics with domain/agent breakdowns, trend series, and IC-standard scoring rubric
+- **Custom Brief Builder** (`/pulse/builder`): On-demand intelligence products targeting specific topics, entities, domains, and agents
+- **Dissent Channel** (`/pulse/dissent`): IC-inspired structured dissent process where analysts can challenge briefing claims with formal basis citations
+- **Settings** (`/pulse/settings`): Configuration for classification banners, generation schedule, default domains/agents, notification preferences, archive retention
+- **PDF Export**: Server-side PDF generation via `@react-pdf/renderer` at `GET /api/pulse/briefs/:id/pdf`
+- **Database**: Drizzle ORM tables (`pulse_briefs`, `pulse_dissents`, `pulse_custom_requests`, `pulse_settings`) with auto-migration on first access
+- **Backend**: 12 REST endpoints in `artifacts/api-server/src/routes/pulse.ts`, integrated with Nuro Mesh `callAgent`/`routeToAgents` for live AI brief generation
+- **Schema**: `lib/db/src/schema/pulse.ts`
+- **Frontend**: `artifacts/szl-holdings/src/pages/pulse/` (8 page components + utils)
+
 ## User Preferences
 I prefer detailed explanations.
 I want iterative development.

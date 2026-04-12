@@ -177,6 +177,7 @@ const AlloyEvolutionPage = lazy(() => import("@/alloy/pages/evolution-radar").th
 const AcademyPage = lazy(() => import("@/pages/academy"));
 const HelpPage = lazy(() => import("@/pages/help"));
 const DemosPage = lazy(() => import("@/pages/demos"));
+const PulsePage = lazy(() => import("@/pages/pulse"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -836,6 +837,15 @@ function App() {
             </Route>
             <Route path="/developers/:section">
               <Redirect to="/docs" />
+            </Route>
+            <Route path="/pulse/brief/:id">
+              <RequireAuth><Suspense fallback={<PageLoader />}><PulsePage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/pulse/:tab">
+              <RequireAuth><Suspense fallback={<PageLoader />}><PulsePage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/pulse">
+              <RequireAuth><Suspense fallback={<PageLoader />}><PulsePage /></Suspense></RequireAuth>
             </Route>
             <Route path="/core">
               <Suspense fallback={<PageLoader />}><CoreCommandPage /></Suspense>
