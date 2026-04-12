@@ -18,6 +18,15 @@ export const NAMED_JOB_TYPES = {
   ARTIFACT_GENERATION_JOB: "artifact_generation_job",
   ROUTE_ECONOMICS_RECOMPUTE_JOB: "route_economics_recompute_job",
   READINESS_SCORE_RECOMPUTE_JOB: "readiness_score_recompute_job",
+  DAILY_NVD_CVE_SYNC: "daily_nvd_cve_sync",
+  DAILY_MITRE_ATTACK_SYNC: "daily_mitre_attack_sync",
+  HOURLY_GDELT_MARITIME_SYNC: "hourly_gdelt_maritime_sync",
+  HOURLY_ROUTE_DEVIATION_SCAN: "hourly_route_deviation_scan",
+  HOURLY_TERRA_COVENANT_BREACH: "hourly_terra_covenant_breach",
+  HOURLY_PRISM_DEADLINE_SCAN: "hourly_prism_deadline_scan",
+  HOURLY_LYTE_SIGNAL_NORMALIZATION: "hourly_lyte_signal_normalization",
+  AEGIS_INCIDENT_PLAYBOOK_JOB: "aegis_incident_playbook_job",
+  HOURLY_TERRA_NYC_INGESTION: "hourly_terra_nyc_ingestion",
 } as const;
 
 export type NamedJobType = typeof NAMED_JOB_TYPES[keyof typeof NAMED_JOB_TYPES];
@@ -57,10 +66,24 @@ registerEntry({ type: NAMED_JOB_TYPES.ARTIFACT_GENERATION_JOB, name: "Artifact G
 registerEntry({ type: NAMED_JOB_TYPES.ROUTE_ECONOMICS_RECOMPUTE_JOB, name: "Route Economics Recompute", description: "Recomputes voyage economics for a specified route or vessel, applying current fuel price, port cost, and charter rate data.", schedule: "on_demand", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.READINESS_SCORE_RECOMPUTE_JOB, name: "Readiness Score Recompute", description: "Recomputes readiness dimension scores for a specified program using the latest evidence and dimension weights.", schedule: "on_demand", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, name: "Daily Document Batch Generation", description: "Generates PDF exports for all approved documents pending batch processing across Terra, Aegis, Carlota Jo, Vessels, and Alloy. Archives completed PDFs and notifies document owners.", schedule: "daily", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.DAILY_NVD_CVE_SYNC, name: "Daily NVD CVE Sync", description: "Ingests recent CVEs from the NVD (National Vulnerability Database) API. Stores critical/high severity findings and triggers incident response playbooks for confirmed threats.", schedule: "daily", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.DAILY_MITRE_ATTACK_SYNC, name: "Daily MITRE ATT&CK Sync", description: "Synchronizes MITRE ATT&CK Enterprise technique catalog from the STIX/TAXII feed. Updates threat actor TTP mappings in the Aegis threat engine.", schedule: "daily", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.HOURLY_GDELT_MARITIME_SYNC, name: "Hourly GDELT Maritime Sync", description: "Ingests live maritime geopolitical events from the GDELT Project API. Flags high-negativity events and emits vessel_incident signals to the Aegis and Prism domains.", schedule: "hourly", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.HOURLY_ROUTE_DEVIATION_SCAN, name: "Hourly Route Deviation Scan", description: "Detects vessel route deviations by comparing live AIS positions to expected waypoints. Triggers cross-domain alerts to Aegis (security) and Prism (compliance) when anomalies exceed thresholds.", schedule: "hourly", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.HOURLY_TERRA_COVENANT_BREACH, name: "Hourly Terra Covenant Breach Detection", description: "Scans Terra distress property database for properties crossing configurable distress thresholds. Publishes property_distress events to the trigger system.", schedule: "hourly", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.HOURLY_PRISM_DEADLINE_SCAN, name: "Hourly Prism Deadline Scan", description: "Scans active Prism matters for approaching filing deadlines based on NY court rules. Generates pre-filing checklists and emits compliance_deadline events for urgent clocks.", schedule: "hourly", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.HOURLY_LYTE_SIGNAL_NORMALIZATION, name: "Hourly Lyte Signal Normalization (Live)", description: "Normalizes live signals from Datadog, PagerDuty, and Sentry using real API calls. Deduplicates, enriches, and runs escalation chains when health degrades below thresholds.", schedule: "hourly", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.AEGIS_INCIDENT_PLAYBOOK_JOB, name: "Aegis Incident Response Playbook", description: "Triggered when a critical threat is confirmed. Creates GitHub issue, updates compliance score, and notifies on-call via push notification.", schedule: "on_demand", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.HOURLY_TERRA_NYC_INGESTION, name: "Hourly Terra NYC Live Source Ingestion", description: "Ingests live distress property data from NYC Open Data sources: ACRIS deed transfers, ACRIS master records, foreclosure filings, DOF tax liens, and HPD violations. Upserts to terra_distress_properties and emits property_distress events.", schedule: "hourly", enabled: true });
 
 function updateRegistry(type: NamedJobType, update: Partial<JobScheduleEntry>) {
   const entry = jobRegistry.get(type);
-  if (entry) jobRegistry.set(type, { ...entry, ...update });
+  if (!entry) return;
+  const merged = { ...entry, ...update };
+  if (update.lastStatus === "completed") {
+    merged.failCount = 0;
+  }
+  jobRegistry.set(type, merged);
 }
 
 async function enqueueNamedJob(type: NamedJobType, payload: Record<string, unknown> = {}) {
@@ -75,6 +98,54 @@ async function enqueueNamedJob(type: NamedJobType, payload: Record<string, unkno
     logger.warn({ err, type }, "Failed to enqueue named job");
     updateRegistry(type, { lastStatus: "failed", failCount: (entry.failCount || 0) + 1 });
     return undefined;
+  }
+}
+
+const JOB_FAILURE_ALERT_THRESHOLD = 2;
+
+async function alertCriticalJobFailure(type: NamedJobType, err: unknown): Promise<void> {
+  const entry = jobRegistry.get(type);
+  const failCount = entry?.failCount ?? 0;
+
+  if (failCount < JOB_FAILURE_ALERT_THRESHOLD) return;
+
+  const errorMessage = err instanceof Error ? err.message : String(err);
+
+  try {
+    const { emitDomainEvent } = await import("./mastra/event-triggers");
+    await emitDomainEvent("compliance_deadline", {
+      incidentType: "scheduled_job_failure",
+      jobType: type,
+      jobName: entry?.name ?? type,
+      failCount,
+      errorMessage,
+      urgency: "critical",
+      description: `Scheduled job '${entry?.name ?? type}' has failed ${failCount} consecutive times. Immediate investigation required.`,
+      domain: "lyte",
+      detectedAt: new Date().toISOString(),
+    }, "job-failure-alerting").catch(() => {});
+
+    const { publish, WS_CHANNELS } = await import("./websocket");
+    publish(WS_CHANNELS.NOTIFICATIONS, "job_failure_alert", {
+      jobType: type,
+      jobName: entry?.name ?? type,
+      failCount,
+      errorMessage,
+      severity: "critical",
+      timestamp: new Date().toISOString(),
+    });
+
+    const { sendPushToApp } = await import("./expo-push");
+    await sendPushToApp("aegis", {
+      title: `[ALERT] Scheduled Job Failure`,
+      body: `${entry?.name ?? type} failed ${failCount}x: ${errorMessage.slice(0, 80)}`,
+      data: { type: "job_failure", jobType: type, failCount },
+      sound: "default",
+    }).catch(() => {});
+
+    logger.error({ jobType: type, failCount, errorMessage }, "Critical job failure alert dispatched");
+  } catch (alertErr) {
+    logger.warn({ alertErr, jobType: type }, "Failed to dispatch job failure alert");
   }
 }
 
@@ -278,9 +349,246 @@ jobQueue.register(NAMED_JOB_TYPES.READINESS_SCORE_RECOMPUTE_JOB, async (job) => 
   logger.info({ jobId: job.id, programId }, "readiness_score_recompute_job: complete");
 });
 
+jobQueue.register(NAMED_JOB_TYPES.DAILY_NVD_CVE_SYNC, async (job) => {
+  const start = Date.now();
+  logger.info({ jobId: job.id }, "daily_nvd_cve_sync: fetching CVEs from NVD API");
+  try {
+    const { runNvdCveIngestion } = await import("./nvd-cve-ingestion");
+    const result = await runNvdCveIngestion({ daysBack: 7, maxResults: 200 });
+    serverTelemetry.recordBusinessEvent({
+      type: "nvd_cve_sync_completed",
+      domain: "aegis",
+      durationMs: Date.now() - start,
+      success: true,
+      count: result.fetched,
+      metadata: { ...result },
+    });
+    updateRegistry(NAMED_JOB_TYPES.DAILY_NVD_CVE_SYNC, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+    logger.info({ jobId: job.id, ...result }, "daily_nvd_cve_sync: complete");
+
+    if (result.criticalCount > 0) {
+      await enqueueNamedJob(NAMED_JOB_TYPES.AEGIS_INCIDENT_PLAYBOOK_JOB, { trigger: "nvd_cve_sync", criticalCount: result.criticalCount });
+    }
+  } catch (err) {
+    updateRegistry(NAMED_JOB_TYPES.DAILY_NVD_CVE_SYNC, { lastStatus: "failed", failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_NVD_CVE_SYNC)?.failCount || 0) + 1 });
+    logger.error({ jobId: job.id, err }, "daily_nvd_cve_sync: failed");
+    throw err;
+  }
+});
+
+jobQueue.register(NAMED_JOB_TYPES.DAILY_MITRE_ATTACK_SYNC, async (job) => {
+  const start = Date.now();
+  logger.info({ jobId: job.id }, "daily_mitre_attack_sync: syncing MITRE ATT&CK techniques");
+  try {
+    const { syncMitreAttackTechniques } = await import("./nvd-cve-ingestion");
+    const result = await syncMitreAttackTechniques();
+    serverTelemetry.recordBusinessEvent({
+      type: "mitre_attack_sync_completed",
+      domain: "aegis",
+      durationMs: Date.now() - start,
+      success: true,
+      count: result.upserted,
+      metadata: { fetched: result.fetched, upserted: result.upserted },
+    });
+    updateRegistry(NAMED_JOB_TYPES.DAILY_MITRE_ATTACK_SYNC, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+    logger.info({ jobId: job.id, ...result }, "daily_mitre_attack_sync: complete");
+  } catch (err) {
+    updateRegistry(NAMED_JOB_TYPES.DAILY_MITRE_ATTACK_SYNC, { lastStatus: "failed", failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_MITRE_ATTACK_SYNC)?.failCount || 0) + 1 });
+    logger.error({ jobId: job.id, err }, "daily_mitre_attack_sync: failed");
+    throw err;
+  }
+});
+
+jobQueue.register(NAMED_JOB_TYPES.HOURLY_GDELT_MARITIME_SYNC, async (job) => {
+  const start = Date.now();
+  logger.info({ jobId: job.id }, "hourly_gdelt_maritime_sync: ingesting GDELT maritime events");
+  try {
+    const { runGdeltMaritimeIngestion } = await import("./gdelt-maritime-ingestion");
+    const result = await runGdeltMaritimeIngestion();
+    serverTelemetry.recordBusinessEvent({
+      type: "gdelt_maritime_sync_completed",
+      domain: "vessels",
+      durationMs: Date.now() - start,
+      success: true,
+      count: result.fetched,
+      metadata: { ...result },
+    });
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_GDELT_MARITIME_SYNC, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+    logger.info({ jobId: job.id, ...result }, "hourly_gdelt_maritime_sync: complete");
+  } catch (err) {
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_GDELT_MARITIME_SYNC, { lastStatus: "failed", failCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_GDELT_MARITIME_SYNC)?.failCount || 0) + 1 });
+    logger.warn({ jobId: job.id, err }, "hourly_gdelt_maritime_sync: failed (non-fatal)");
+    await alertCriticalJobFailure(NAMED_JOB_TYPES.HOURLY_GDELT_MARITIME_SYNC, err);
+  }
+});
+
+jobQueue.register(NAMED_JOB_TYPES.HOURLY_ROUTE_DEVIATION_SCAN, async (job) => {
+  const start = Date.now();
+  logger.info({ jobId: job.id }, "hourly_route_deviation_scan: scanning for route deviations");
+  try {
+    const { runRouteDeviationDetection } = await import("./gdelt-maritime-ingestion");
+    const result = await runRouteDeviationDetection();
+    serverTelemetry.recordBusinessEvent({
+      type: "route_deviation_scan_completed",
+      domain: "vessels",
+      durationMs: Date.now() - start,
+      success: true,
+      metadata: { ...result },
+    });
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_ROUTE_DEVIATION_SCAN, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+    logger.info({ jobId: job.id, ...result }, "hourly_route_deviation_scan: complete");
+  } catch (err) {
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_ROUTE_DEVIATION_SCAN, { lastStatus: "failed", failCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_ROUTE_DEVIATION_SCAN)?.failCount || 0) + 1 });
+    logger.warn({ jobId: job.id, err }, "hourly_route_deviation_scan: failed (non-fatal)");
+    await alertCriticalJobFailure(NAMED_JOB_TYPES.HOURLY_ROUTE_DEVIATION_SCAN, err);
+  }
+});
+
+jobQueue.register(NAMED_JOB_TYPES.HOURLY_TERRA_COVENANT_BREACH, async (job) => {
+  const start = Date.now();
+  logger.info({ jobId: job.id }, "hourly_terra_covenant_breach: scanning for covenant breaches");
+  try {
+    const { runCovenantBreachDetection } = await import("./terra-nyc-ingestion");
+    const result = await runCovenantBreachDetection();
+    serverTelemetry.recordBusinessEvent({
+      type: "terra_covenant_breach_scan_completed",
+      domain: "terra",
+      durationMs: Date.now() - start,
+      success: true,
+      metadata: { ...result },
+    });
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_TERRA_COVENANT_BREACH, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+    logger.info({ jobId: job.id, ...result }, "hourly_terra_covenant_breach: complete");
+  } catch (err) {
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_TERRA_COVENANT_BREACH, { lastStatus: "failed", failCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_TERRA_COVENANT_BREACH)?.failCount || 0) + 1 });
+    logger.warn({ jobId: job.id, err }, "hourly_terra_covenant_breach: failed (non-fatal)");
+    await alertCriticalJobFailure(NAMED_JOB_TYPES.HOURLY_TERRA_COVENANT_BREACH, err);
+  }
+});
+
+jobQueue.register(NAMED_JOB_TYPES.HOURLY_PRISM_DEADLINE_SCAN, async (job) => {
+  const start = Date.now();
+  logger.info({ jobId: job.id }, "hourly_prism_deadline_scan: scanning approaching filing deadlines");
+  try {
+    const { runPrismDeadlineScan, computeRuleBasedDeadlines } = await import("./prism-deadline-automation");
+    const [scanResult, ruleResult] = await Promise.all([
+      runPrismDeadlineScan(),
+      computeRuleBasedDeadlines(),
+    ]);
+    const result = { ...scanResult, ...ruleResult };
+    serverTelemetry.recordBusinessEvent({
+      type: "prism_deadline_scan_completed",
+      domain: "prism",
+      durationMs: Date.now() - start,
+      success: true,
+      metadata: { ...result },
+    });
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_PRISM_DEADLINE_SCAN, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+    logger.info({ jobId: job.id, ...result }, "hourly_prism_deadline_scan: complete");
+  } catch (err) {
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_PRISM_DEADLINE_SCAN, { lastStatus: "failed", failCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_PRISM_DEADLINE_SCAN)?.failCount || 0) + 1 });
+    logger.warn({ jobId: job.id, err }, "hourly_prism_deadline_scan: failed (non-fatal)");
+    await alertCriticalJobFailure(NAMED_JOB_TYPES.HOURLY_PRISM_DEADLINE_SCAN, err);
+  }
+});
+
+jobQueue.register(NAMED_JOB_TYPES.HOURLY_LYTE_SIGNAL_NORMALIZATION, async (job) => {
+  const start = Date.now();
+  logger.info({ jobId: job.id }, "hourly_lyte_signal_normalization: normalizing signals from live sources");
+  try {
+    const { runSignalNormalization } = await import("./lyte-signal-normalization");
+    const result = await runSignalNormalization();
+    serverTelemetry.recordBusinessEvent({
+      type: "lyte_signal_normalization_live_completed",
+      domain: "lyte",
+      durationMs: Date.now() - start,
+      success: true,
+      count: result.fetched,
+      metadata: { ...result },
+    });
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_LYTE_SIGNAL_NORMALIZATION, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+    logger.info({ jobId: job.id, ...result }, "hourly_lyte_signal_normalization: complete");
+  } catch (err) {
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_LYTE_SIGNAL_NORMALIZATION, { lastStatus: "failed", failCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_LYTE_SIGNAL_NORMALIZATION)?.failCount || 0) + 1 });
+    logger.warn({ jobId: job.id, err }, "hourly_lyte_signal_normalization: failed (non-fatal)");
+    await alertCriticalJobFailure(NAMED_JOB_TYPES.HOURLY_LYTE_SIGNAL_NORMALIZATION, err);
+  }
+});
+
+jobQueue.register(NAMED_JOB_TYPES.AEGIS_INCIDENT_PLAYBOOK_JOB, async (job) => {
+  const start = Date.now();
+  const payload = job.payload as {
+    cveId?: string;
+    title?: string;
+    description?: string;
+    severity?: "critical" | "high" | "medium";
+    trigger?: string;
+    criticalCount?: number;
+    source?: string;
+    cvssScore?: number;
+    affectedSystems?: string[];
+  };
+  logger.info({ jobId: job.id, payload }, "aegis_incident_playbook_job: running incident response playbook");
+  try {
+    const { runIncidentResponsePlaybook, runCveIncidentCheck } = await import("./aegis-incident-playbook");
+    let result: { playbooksTriggered?: number; cvesChecked?: number; notificationSent?: boolean; incidentId?: string };
+
+    if (payload.title && payload.description && payload.severity) {
+      result = await runIncidentResponsePlaybook({
+        cveId: payload.cveId,
+        title: payload.title,
+        description: payload.description,
+        severity: payload.severity,
+        cvssScore: payload.cvssScore,
+        affectedSystems: payload.affectedSystems,
+        source: payload.source ?? payload.trigger ?? "automated-detection",
+      });
+    } else {
+      result = await runCveIncidentCheck();
+    }
+
+    serverTelemetry.recordBusinessEvent({
+      type: "aegis_incident_playbook_completed",
+      domain: "aegis",
+      durationMs: Date.now() - start,
+      success: true,
+      metadata: { ...result, trigger: payload.trigger },
+    });
+    updateRegistry(NAMED_JOB_TYPES.AEGIS_INCIDENT_PLAYBOOK_JOB, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+    logger.info({ jobId: job.id, ...result }, "aegis_incident_playbook_job: complete");
+  } catch (err) {
+    updateRegistry(NAMED_JOB_TYPES.AEGIS_INCIDENT_PLAYBOOK_JOB, { lastStatus: "failed", failCount: (jobRegistry.get(NAMED_JOB_TYPES.AEGIS_INCIDENT_PLAYBOOK_JOB)?.failCount || 0) + 1 });
+    logger.warn({ jobId: job.id, err }, "aegis_incident_playbook_job: failed (non-fatal)");
+    await alertCriticalJobFailure(NAMED_JOB_TYPES.AEGIS_INCIDENT_PLAYBOOK_JOB, err);
+  }
+});
+
+jobQueue.register(NAMED_JOB_TYPES.HOURLY_TERRA_NYC_INGESTION, async (job) => {
+  const start = Date.now();
+  logger.info({ jobId: job.id }, "hourly_terra_nyc_ingestion: ingesting NYC live distress property sources");
+  try {
+    const { NYC_INGESTION_JOB_TYPE } = await import("./terra-nyc-ingestion");
+    const innerJob = await jobQueue.enqueue(NYC_INGESTION_JOB_TYPE, {
+      sources: ["acris", "acris_master", "foreclosure_filings", "dof_liens", "hpd_violations"],
+    });
+    serverTelemetry.recordBusinessEvent({
+      type: "terra_nyc_ingestion_enqueued",
+      domain: "terra",
+      durationMs: Date.now() - start,
+      success: true,
+      metadata: { innerJobId: innerJob?.id },
+    });
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_TERRA_NYC_INGESTION, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+    logger.info({ jobId: job.id, innerJobId: innerJob?.id }, "hourly_terra_nyc_ingestion: NYC ingestion job enqueued");
+  } catch (err) {
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_TERRA_NYC_INGESTION, { lastStatus: "failed", failCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_TERRA_NYC_INGESTION)?.failCount || 0) + 1 });
+    logger.warn({ jobId: job.id, err }, "hourly_terra_nyc_ingestion: failed to enqueue inner ingestion job (non-fatal)");
+    await alertCriticalJobFailure(NAMED_JOB_TYPES.HOURLY_TERRA_NYC_INGESTION, err);
+  }
+});
+
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
-const REDUCED_HOURLY_INTERVAL_MS = 4 * HOUR_MS;
 
 let namedJobsStarted = false;
 
@@ -295,14 +603,21 @@ export function startNamedScheduledJobs() {
     NAMED_JOB_TYPES.DAILY_ARTIFACT_CLEANUP,
     NAMED_JOB_TYPES.DAILY_FEATURE_FLAG_SYNC,
     NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH,
+    NAMED_JOB_TYPES.DAILY_NVD_CVE_SYNC,
+    NAMED_JOB_TYPES.DAILY_MITRE_ATTACK_SYNC,
   ];
 
   const hourlyJobs: NamedJobType[] = [
-    NAMED_JOB_TYPES.HOURLY_SIGNAL_NORMALIZATION,
     NAMED_JOB_TYPES.HOURLY_STALE_ACTION_SCAN,
     NAMED_JOB_TYPES.HOURLY_VESSEL_ETA_REFRESH,
     NAMED_JOB_TYPES.HOURLY_ROUTE_PRESSURE_SCAN,
     NAMED_JOB_TYPES.HOURLY_TERRA_INQUIRY_DIGEST,
+    NAMED_JOB_TYPES.HOURLY_TERRA_NYC_INGESTION,
+    NAMED_JOB_TYPES.HOURLY_GDELT_MARITIME_SYNC,
+    NAMED_JOB_TYPES.HOURLY_ROUTE_DEVIATION_SCAN,
+    NAMED_JOB_TYPES.HOURLY_TERRA_COVENANT_BREACH,
+    NAMED_JOB_TYPES.HOURLY_PRISM_DEADLINE_SCAN,
+    NAMED_JOB_TYPES.HOURLY_LYTE_SIGNAL_NORMALIZATION,
   ];
 
   const now = new Date();
@@ -339,7 +654,7 @@ export function startNamedScheduledJobs() {
         try { await enqueueNamedJob(type); } catch (err) { logger.warn({ err, type }, "Failed to enqueue hourly job"); }
         await new Promise(r => setTimeout(r, 300));
       }
-    }, REDUCED_HOURLY_INTERVAL_MS);
+    }, HOUR_MS);
   }, msUntilHourly);
 
   const allEntries = Array.from(jobRegistry.values());

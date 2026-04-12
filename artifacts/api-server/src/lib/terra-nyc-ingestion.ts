@@ -1,7 +1,9 @@
 import { logger } from "./logger";
 import { jobQueue } from "./job-queue";
 import { db } from "@szl-holdings/db";
-import { auditLogsTable } from "@szl-holdings/db";
+import { auditLogsTable, terraDistressPropertiesTable } from "@szl-holdings/db";
+import { gte, inArray, and as drizzleAnd } from "drizzle-orm";
+import { emitDomainEvent } from "./mastra/event-triggers";
 import {
   startIngestionRun,
   completeIngestionRun,
@@ -800,4 +802,104 @@ export function scheduleNycIngestionJob(
     runJob();
     setInterval(runJob, intervalMs);
   }, initialDelay);
+}
+
+export interface CovenantBreachResult {
+  propertyId: number;
+  externalId: string;
+  address: string;
+  distressType: string;
+  opportunityScore: number;
+  breachSignals: string[];
+  alertsEmitted: number;
+}
+
+const COVENANT_BREACH_DISTRESS_TYPES = ["foreclosure", "pre-foreclosure", "auction"] as const;
+type CovenantDistressType = typeof COVENANT_BREACH_DISTRESS_TYPES[number];
+
+const COVENANT_BREACH_THRESHOLDS = {
+  minOpportunityScore: 70,
+  minDaysInDistress: 60,
+  distressTypesOfConcern: COVENANT_BREACH_DISTRESS_TYPES as readonly CovenantDistressType[],
+};
+
+export async function runCovenantBreachDetection(): Promise<{
+  propertiesScanned: number;
+  breachesDetected: number;
+  alertsEmitted: number;
+}> {
+  let propertiesScanned = 0;
+  let breachesDetected = 0;
+  let alertsEmitted = 0;
+
+  try {
+    const highRiskProperties = await db.select({
+      id: terraDistressPropertiesTable.id,
+      externalId: terraDistressPropertiesTable.externalId,
+      address: terraDistressPropertiesTable.address,
+      borough: terraDistressPropertiesTable.borough,
+      distressType: terraDistressPropertiesTable.distressType,
+      opportunityScore: terraDistressPropertiesTable.opportunityScore,
+      daysInDistress: terraDistressPropertiesTable.daysInDistress,
+      stage: terraDistressPropertiesTable.stage,
+      confidenceLevel: terraDistressPropertiesTable.confidenceLevel,
+      estimatedValue: terraDistressPropertiesTable.estimatedValue,
+      filingDate: terraDistressPropertiesTable.filingDate,
+    })
+      .from(terraDistressPropertiesTable)
+      .where(
+        drizzleAnd(
+          gte(terraDistressPropertiesTable.opportunityScore, COVENANT_BREACH_THRESHOLDS.minOpportunityScore),
+          gte(terraDistressPropertiesTable.daysInDistress, COVENANT_BREACH_THRESHOLDS.minDaysInDistress),
+          inArray(terraDistressPropertiesTable.distressType, COVENANT_BREACH_THRESHOLDS.distressTypesOfConcern)
+        )
+      )
+      .limit(100);
+
+    for (const property of highRiskProperties) {
+      propertiesScanned++;
+
+      const breachSignals: string[] = [];
+
+      if ((property.opportunityScore ?? 0) >= 85) {
+        breachSignals.push(`High opportunity score: ${property.opportunityScore}`);
+      }
+      if ((property.daysInDistress ?? 0) >= 180) {
+        breachSignals.push(`Extended distress: ${property.daysInDistress} days`);
+      }
+      if (property.distressType === "foreclosure") {
+        breachSignals.push("Active foreclosure proceeding");
+      }
+      if (property.stage === "judgment") {
+        breachSignals.push("Foreclosure judgment recorded");
+      }
+      if (property.stage === "auction") {
+        breachSignals.push("Property scheduled for auction");
+      }
+
+      if (breachSignals.length >= 2) {
+        breachesDetected++;
+        await emitDomainEvent("property_distress", {
+          propertyId: property.id,
+          externalId: property.externalId,
+          address: property.address,
+          borough: property.borough,
+          distressType: property.distressType,
+          opportunityScore: property.opportunityScore,
+          daysInDistress: property.daysInDistress,
+          stage: property.stage,
+          estimatedValue: property.estimatedValue,
+          breachSignals,
+          detectedAt: new Date().toISOString(),
+        }, "covenant-breach-detector").catch(() => {});
+        alertsEmitted++;
+      }
+    }
+
+    logger.info({ propertiesScanned, breachesDetected, alertsEmitted }, "Covenant breach detection complete");
+  } catch (err) {
+    logger.warn({ err }, "Covenant breach detection error");
+  }
+
+  return { propertiesScanned, breachesDetected, alertsEmitted };
 }
