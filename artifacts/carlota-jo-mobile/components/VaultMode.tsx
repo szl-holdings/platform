@@ -13,6 +13,122 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
+import * as SecureStore from "expo-secure-store";
+import * as LocalAuthentication from "expo-local-authentication";
+import * as Crypto from "expo-crypto";
+
+const VAULT_MEMOS_KEY = "cj_vault_memos_encrypted";
+const VAULT_MEMO_KEY_KEY = "cj_vault_memo_key";
+
+type Memo = { id: string; content: string; time: string };
+
+function hexToBytes(hex: string): Uint8Array {
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) bytes[i / 2] = parseInt(hex.slice(i, i + 2), 16);
+  return bytes;
+}
+function bytesToHex(bytes: Uint8Array): string {
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+function uint8ToBase64(bytes: Uint8Array): string {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  let result = "", i = 0;
+  while (i < bytes.length) {
+    const b0 = bytes[i++] ?? 0, b1 = bytes[i++] ?? 0, b2 = bytes[i++] ?? 0;
+    result += chars[b0 >> 2];
+    result += chars[((b0 & 3) << 4) | (b1 >> 4)];
+    result += i - 2 < bytes.length ? chars[((b1 & 15) << 2) | (b2 >> 6)] : "=";
+    result += i - 1 < bytes.length ? chars[b2 & 63] : "=";
+  }
+  return result;
+}
+function base64ToUint8(b64: string): Uint8Array {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  const lookup = new Uint8Array(256);
+  for (let i = 0; i < chars.length; i++) lookup[chars.charCodeAt(i)] = i;
+  const cleaned = b64.replace(/=/g, "");
+  const outLen = Math.floor((cleaned.length * 3) / 4);
+  const out = new Uint8Array(outLen);
+  let idx = 0;
+  for (let i = 0; i < cleaned.length; i += 4) {
+    const c0 = lookup[cleaned.charCodeAt(i)] ?? 0, c1 = lookup[cleaned.charCodeAt(i + 1)] ?? 0;
+    const c2 = lookup[cleaned.charCodeAt(i + 2)] ?? 0, c3 = lookup[cleaned.charCodeAt(i + 3)] ?? 0;
+    out[idx++] = (c0 << 2) | (c1 >> 4);
+    if (i + 2 < cleaned.length) out[idx++] = ((c1 & 15) << 4) | (c2 >> 2);
+    if (i + 3 < cleaned.length) out[idx++] = ((c2 & 3) << 6) | c3;
+  }
+  return out;
+}
+function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+}
+function hasCryptoSubtle(): boolean {
+  return typeof crypto !== "undefined" && typeof crypto.subtle !== "undefined";
+}
+
+async function getOrCreateMemoKey(): Promise<string> {
+  let key = await SecureStore.getItemAsync(VAULT_MEMO_KEY_KEY, {
+    keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+  });
+  if (!key) {
+    const bytes = await Crypto.getRandomBytesAsync(32);
+    key = bytesToHex(bytes);
+    await SecureStore.setItemAsync(VAULT_MEMO_KEY_KEY, key, {
+      keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+    });
+  }
+  return key;
+}
+
+async function importAesKey(keyHex: string): Promise<CryptoKey> {
+  if (!hasCryptoSubtle()) throw new Error("AES-GCM unavailable: crypto.subtle not present");
+  return crypto.subtle.importKey("raw", toArrayBuffer(hexToBytes(keyHex)), { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
+}
+
+async function encryptAndStoreMemos(memos: Memo[], keyHex: string): Promise<void> {
+  if (!hasCryptoSubtle()) throw new Error("Cannot encrypt vault memos: crypto.subtle unavailable");
+  const plain = JSON.stringify(memos);
+  const iv = await Crypto.getRandomBytesAsync(12);
+  const key = await importAesKey(keyHex);
+  const plainBytes = new TextEncoder().encode(plain);
+  const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv: toArrayBuffer(iv) }, key, toArrayBuffer(plainBytes));
+  const encoded = `${uint8ToBase64(iv)}:${uint8ToBase64(new Uint8Array(ct))}`;
+  await SecureStore.setItemAsync(VAULT_MEMOS_KEY, encoded, {
+    keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+  });
+}
+
+async function loadAndDecryptMemos(): Promise<Memo[]> {
+  if (!hasCryptoSubtle()) throw new Error("Cannot decrypt vault memos: crypto.subtle unavailable");
+  const keyHex = await getOrCreateMemoKey();
+  const raw = await SecureStore.getItemAsync(VAULT_MEMOS_KEY, {
+    keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+  });
+  if (!raw) return [];
+  const colonIdx = raw.indexOf(":");
+  if (colonIdx === -1) throw new Error("Invalid vault ciphertext format");
+  const iv = base64ToUint8(raw.slice(0, colonIdx));
+  const ct = base64ToUint8(raw.slice(colonIdx + 1));
+  const key = await importAesKey(keyHex);
+  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: toArrayBuffer(iv) }, key, toArrayBuffer(ct));
+  return JSON.parse(new TextDecoder().decode(pt)) as Memo[];
+}
+
+async function biometricAuth(reason: string): Promise<boolean> {
+  try {
+    const hasHardware = await LocalAuthentication.hasHardwareAsync();
+    if (!hasHardware) return false;
+    const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+    if (!isEnrolled) return false;
+    const result = await LocalAuthentication.authenticateAsync({
+      promptMessage: reason,
+      fallbackLabel: "Use PIN",
+      cancelLabel: "Cancel",
+      disableDeviceFallback: false,
+    });
+    return result.success;
+  } catch { return false; }
+}
 
 interface VaultModeProps {
   visible: boolean;
@@ -27,7 +143,7 @@ const VAULT_PHRASES = [
 ];
 
 export function VaultMode({ visible, onExit, onVoiceMemo }: VaultModeProps) {
-  const [authCode, setAuthCode] = useState("");
+  const [biometricAuthed, setBiometricAuthed] = useState(false);
   const [authError, setAuthError] = useState(false);
   const [voiceMemoMode, setVoiceMemoMode] = useState(false);
   const [recording, setRecording] = useState(false);
@@ -36,18 +152,46 @@ export function VaultMode({ visible, onExit, onVoiceMemo }: VaultModeProps) {
   const shakeAnim = useRef(new RNAnimated.Value(0)).current;
   const phraseIndex = useRef(0);
   const [phrase, setPhrase] = useState(VAULT_PHRASES[0]);
+  const memoKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!visible) {
-      setAuthCode("");
+      setBiometricAuthed(false);
       setAuthError(false);
       setVoiceMemoMode(false);
+      setMemos([]);
+      memoKeyRef.current = null;
       return;
     }
 
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {});
     }
+
+    biometricAuth("Authenticate to access Encrypted Vault").then(async authed => {
+      if (authed) {
+        if (!hasCryptoSubtle()) {
+          setAuthError(true);
+          setTimeout(() => { setAuthError(false); onExit(); }, 3000);
+          return;
+        }
+        setBiometricAuthed(true);
+        const key = await getOrCreateMemoKey();
+        memoKeyRef.current = key;
+        try {
+          const saved = await loadAndDecryptMemos();
+          setMemos(saved);
+        } catch {
+          setMemos([]);
+        }
+      } else {
+        setAuthError(true);
+        setTimeout(() => { setAuthError(false); onExit(); }, 2000);
+      }
+    }).catch(() => {
+      setAuthError(true);
+      setTimeout(() => { setAuthError(false); onExit(); }, 2000);
+    });
 
     const interval = setInterval(() => {
       phraseIndex.current = (phraseIndex.current + 1) % VAULT_PHRASES.length;
@@ -57,15 +201,15 @@ export function VaultMode({ visible, onExit, onVoiceMemo }: VaultModeProps) {
     return () => clearInterval(interval);
   }, [visible]);
 
-  const handleExit = useCallback(() => {
-    if (authCode === "1234" || authCode.length === 0) {
+  const handleExit = useCallback(async () => {
+    const authed = await biometricAuth("Authenticate to exit Vault Mode");
+    if (authed) {
       if (Platform.OS !== "web") {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
       }
-      setAuthCode("");
+      setBiometricAuthed(false);
       onExit();
     } else {
-      setAuthError(true);
       RNAnimated.sequence([
         RNAnimated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
         RNAnimated.timing(shakeAnim, { toValue: -10, duration: 50, useNativeDriver: true }),
@@ -75,40 +219,36 @@ export function VaultMode({ visible, onExit, onVoiceMemo }: VaultModeProps) {
       if (Platform.OS !== "web") {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
       }
-      setTimeout(() => setAuthError(false), 2000);
-      setAuthCode("");
     }
-  }, [authCode, onExit]);
+  }, [onExit]);
 
-  const saveMemo = useCallback(() => {
+  const saveMemo = useCallback(async () => {
     if (!memoText.trim()) return;
     const memo = {
       id: Date.now().toString(),
       content: memoText.trim(),
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
-    setMemos((prev) => [memo, ...prev]);
+    const updated = [memo, ...memos];
+    setMemos(updated);
     onVoiceMemo?.(memoText.trim());
     setMemoText("");
     if (Platform.OS !== "web") {
       Haptics.selectionAsync().catch(() => {});
     }
-  }, [memoText, onVoiceMemo]);
+    if (memoKeyRef.current) {
+      await encryptAndStoreMemos(updated, memoKeyRef.current).catch(() => {});
+    }
+  }, [memoText, memos, onVoiceMemo]);
 
   const toggleRecording = useCallback(() => {
-    setRecording((prev) => {
+    setRecording(prev => {
       if (Platform.OS !== "web") {
         if (!prev) {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
         } else {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {});
         }
-      }
-      if (!prev) {
-        setTimeout(() => {
-          setMemoText("Client prefers conservative growth strategy. Interested in real estate allocation. Follow up on estate planning.");
-          setRecording(false);
-        }, 2500);
       }
       return !prev;
     });
@@ -120,7 +260,7 @@ export function VaultMode({ visible, onExit, onVoiceMemo }: VaultModeProps) {
         <View style={styles.vaultScreen}>
           <View style={styles.neutralPattern}>
             {Array.from({ length: 12 }, (_, i) => (
-              <View key={i} style={[styles.patternLine, { top: `${i * 8.5}%` as any }]} />
+              <View key={i} style={[styles.patternLine, { top: (i * 8.5).toFixed(1) + "%" as `${number}%` }]} />
             ))}
           </View>
 
@@ -146,34 +286,30 @@ export function VaultMode({ visible, onExit, onVoiceMemo }: VaultModeProps) {
 
                 <View style={styles.exitArea}>
                   <RNAnimated.View style={{ transform: [{ translateX: shakeAnim }] }}>
-                    <TextInput
-                      style={[styles.codeInput, authError && { borderColor: "rgba(239,68,68,0.6)" }]}
-                      placeholder="Enter code to exit vault"
-                      placeholderTextColor="rgba(255,255,255,0.15)"
-                      value={authCode}
-                      onChangeText={setAuthCode}
-                      secureTextEntry
-                      keyboardType="numeric"
-                      maxLength={6}
-                      onSubmitEditing={handleExit}
-                      returnKeyType="done"
-                    />
                     {authError && (
-                      <Text style={styles.authError}>Incorrect code</Text>
+                      <Text style={styles.authError}>Authentication failed</Text>
+                    )}
+                    {!biometricAuthed && !authError && (
+                      <Text style={styles.authPending}>Authenticating…</Text>
                     )}
                   </RNAnimated.View>
 
-                  <Pressable style={styles.exitBtn} onPress={handleExit}>
-                    <Text style={styles.exitBtnText}>Exit Vault</Text>
-                  </Pressable>
+                  {biometricAuthed && (
+                    <Pressable style={styles.exitBtn} onPress={handleExit}>
+                      <Feather name="unlock" size={14} color="#fff" />
+                      <Text style={styles.exitBtnText}>Exit Vault</Text>
+                    </Pressable>
+                  )}
 
-                  <Pressable
-                    style={styles.memoBtn}
-                    onPress={() => setVoiceMemoMode(true)}
-                  >
-                    <Feather name="mic" size={14} color="rgba(255,255,255,0.4)" />
-                    <Text style={styles.memoBtnText}>Voice Memo</Text>
-                  </Pressable>
+                  {biometricAuthed && (
+                    <Pressable
+                      style={styles.memoBtn}
+                      onPress={() => setVoiceMemoMode(true)}
+                    >
+                      <Feather name="edit-3" size={14} color="rgba(255,255,255,0.4)" />
+                      <Text style={styles.memoBtnText}>Field Notes</Text>
+                    </Pressable>
+                  )}
                 </View>
               </>
             ) : (
@@ -293,6 +429,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 4,
   },
+  authPending: {
+    fontSize: 11,
+    fontFamily: "Inter_400Regular",
+    color: "rgba(255,255,255,0.3)",
+    textAlign: "center",
+    marginTop: 4,
+  },
   exitBtn: {
     backgroundColor: "rgba(255,255,255,0.06)",
     borderRadius: 12,
@@ -300,6 +443,9 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.1)",
     padding: 14,
     alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
   },
   exitBtnText: { fontSize: 14, fontFamily: "Inter_500Medium", color: "rgba(255,255,255,0.5)" },
   memoBtn: {

@@ -48,11 +48,14 @@
     "react-native-svg": "15.12.1",
     "react-native-web": "^0.21.0",
     "typescript": "~5.9.2",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "expo-sqlite": "~15.1.4"
   },
   "dependencies": {
     "graphql": "^16.13.2",
     "urql": "^5.0.1",
-    "@szl-holdings/prism-bus": "workspace:*"
+    "@szl-holdings/prism-bus": "workspace:*",
+    "@szl-holdings/mobile-ai": "workspace:*",
+    "expo-speech": "~13.0.8"
   }
 }

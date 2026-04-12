@@ -131,7 +131,7 @@ export function CommandPalette({
                     onPress={() => handleSelect(item)}
                   >
                     <View style={[styles.iconBox, { borderColor: `${accentColor}30` }]}>
-                      <Feather name={item.icon as any} size={14} color={accentColor} />
+                      <Feather name={item.icon as React.ComponentProps<typeof Feather>["name"]} size={14} color={accentColor} />
                     </View>
                     <View style={styles.itemText}>
                       <Text style={styles.itemLabel}>{item.label}</Text>

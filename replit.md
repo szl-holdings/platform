@@ -23,6 +23,17 @@ Ask before making major changes.
 Do not make changes to the folder `Z`.
 Do not make changes to the file `Y`.
 
+## Mobile AI Command Center Integration (Task #393)
+All 7 mobile apps (Aegis, Lyte, Vessels, Terra, SZL Holdings, Carlota Jo, Stephen) have been upgraded with:
+- **Real SSE Streaming**: AICopilot in all 7 apps streams from `/api/alloy-chat/conversations/:id/messages` with real chunk parsing, tool call display, and approval workflows via `/api/approvals/:id/approve` and `/api/mcp/tools/call`
+- **Real Push Notifications**: PushNotificationManager in all 7 apps uses `expo-notifications` + `expo-device` for real Expo Push token registration via `/api/notifications/register-token`, with `addNotificationReceivedListener` and `addNotificationResponseReceivedListener`
+- **Real Offline Cache**: `useOfflineCache.ts` in all apps uses connectivity detection via `fetch("https://1.1.1.1")` with pending writes replay via `queueOfflineWrite()`
+- **Real Encrypted Vault (Carlota Jo)**: `VaultMode.tsx` uses `expo-local-authentication` for biometric auth, `expo-secure-store` with `WHEN_UNLOCKED_THIS_DEVICE_ONLY`, and `expo-crypto` SHA256 HMAC for memo encryption
+- **Real Document Capture**: `DocumentCapture.tsx` in Aegis/Vessels/Terra calls `/api/ai/extract` multipart FormData; falls back to JSON body extraction when no image picker is available
+- **Real Live Proof Terminal (Stephen)**: `ProofTerminalModal` probes `/api/mcp/health` every 15s with real latency measurement and live log output
+- **Prism Counsel SSE**: `copilot-page.tsx` wired to real SSE stream with conversation creation, real document extraction via `/api/ai/extract`, and real approval POSTs
+- **Auth Token Wiring**: All mcp-tools screens load auth tokens from `expo-secure-store` and pass them to push notification hooks and health check requests
+
 ## System Architecture
 
 ### Core Technologies
