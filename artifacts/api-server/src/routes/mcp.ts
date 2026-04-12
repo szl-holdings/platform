@@ -5,6 +5,7 @@ import { authMiddleware, requireRole, type AuthenticatedUser } from "../middlewa
 import { logger } from "../lib/logger";
 import { AGENT_CONFIGS } from "./domain-agents/configs";
 import { logActivity } from "@szl-holdings/audit";
+import { GitHubAdapter } from "@szl-holdings/services";
 
 const router = Router();
 
@@ -367,7 +368,113 @@ const DATA_TOOLS: McpTool[] = [
   },
 ];
 
-const ALL_TOOLS: McpTool[] = [...DOMAIN_TOOLS, ...PLATFORM_TOOLS, ...DATA_TOOLS];
+const GITHUB_TOOLS: McpTool[] = [
+  {
+    name: "github_create_issue",
+    description: "Create a new issue in a GitHub repository",
+    inputSchema: {
+      type: "object",
+      properties: {
+        owner: { type: "string", description: "Repository owner (user or org)" },
+        repo: { type: "string", description: "Repository name" },
+        title: { type: "string", description: "Issue title" },
+        body: { type: "string", description: "Issue body/description (markdown supported)" },
+        labels: { type: "array", items: { type: "string" }, description: "Labels to apply to the issue" },
+        assignees: { type: "array", items: { type: "string" }, description: "GitHub usernames to assign" },
+      },
+      required: ["owner", "repo", "title"],
+    },
+  },
+  {
+    name: "github_list_issues",
+    description: "List issues from a GitHub repository with optional state and label filters",
+    inputSchema: {
+      type: "object",
+      properties: {
+        owner: { type: "string", description: "Repository owner (user or org)" },
+        repo: { type: "string", description: "Repository name" },
+        state: { type: "string", enum: ["open", "closed", "all"], description: "Issue state filter (default: open)" },
+        labels: { type: "string", description: "Comma-separated label names to filter by" },
+        perPage: { type: "number", description: "Results per page (max 100)" },
+      },
+      required: ["owner", "repo"],
+    },
+  },
+  {
+    name: "github_list_prs",
+    description: "List pull requests from a GitHub repository",
+    inputSchema: {
+      type: "object",
+      properties: {
+        owner: { type: "string", description: "Repository owner (user or org)" },
+        repo: { type: "string", description: "Repository name" },
+        state: { type: "string", enum: ["open", "closed", "all"], description: "PR state filter (default: open)" },
+        perPage: { type: "number", description: "Results per page (max 100)" },
+      },
+      required: ["owner", "repo"],
+    },
+  },
+  {
+    name: "github_list_commits",
+    description: "List recent commits for a GitHub repository branch",
+    inputSchema: {
+      type: "object",
+      properties: {
+        owner: { type: "string", description: "Repository owner (user or org)" },
+        repo: { type: "string", description: "Repository name" },
+        branch: { type: "string", description: "Branch name (defaults to default branch)" },
+        perPage: { type: "number", description: "Results per page (max 100)" },
+      },
+      required: ["owner", "repo"],
+    },
+  },
+  {
+    name: "github_search_code",
+    description: "Search code across GitHub repositories using GitHub code search syntax",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "Search query (supports GitHub code search syntax)" },
+        owner: { type: "string", description: "Limit results to this owner/org" },
+        repo: { type: "string", description: "Limit results to this repository (requires owner)" },
+        perPage: { type: "number", description: "Results per page (max 30)" },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    name: "github_trigger_workflow",
+    description: "Trigger a GitHub Actions workflow dispatch event (CI/CD). Requires ops or admin role.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        owner: { type: "string", description: "Repository owner (user or org)" },
+        repo: { type: "string", description: "Repository name" },
+        workflowId: { type: "string", description: "Workflow file name (e.g. ci.yml) or workflow ID" },
+        ref: { type: "string", description: "Git ref (branch or tag) to run the workflow on" },
+        inputs: { type: "object", description: "Input parameters for the workflow dispatch" },
+      },
+      required: ["owner", "repo", "workflowId", "ref"],
+    },
+  },
+  {
+    name: "github_list_workflow_runs",
+    description: "List GitHub Actions workflow runs for a repository",
+    inputSchema: {
+      type: "object",
+      properties: {
+        owner: { type: "string", description: "Repository owner (user or org)" },
+        repo: { type: "string", description: "Repository name" },
+        workflowId: { type: "string", description: "Filter by specific workflow file or ID" },
+        status: { type: "string", enum: ["queued", "in_progress", "completed", "waiting", "requested", "pending"], description: "Filter by run status" },
+        perPage: { type: "number", description: "Results per page (max 100)" },
+      },
+      required: ["owner", "repo"],
+    },
+  },
+];
+
+const ALL_TOOLS: McpTool[] = [...DOMAIN_TOOLS, ...PLATFORM_TOOLS, ...DATA_TOOLS, ...GITHUB_TOOLS];
 
 const MCP_RESOURCES: McpResource[] = [
   {
@@ -753,6 +860,120 @@ async function executeTool(
       const data = await internalGet("/api/notifications", token);
       return { tool: toolName, result: data };
     }
+
+    case "github_create_issue": {
+      if (!user) throw new Error("Authentication required");
+      if (!isGlobalAdmin(user) && !user.roles.includes("ops") && !user.roles.includes("editor") && !user.roles.includes("operator")) {
+        throw new Error("Insufficient permissions — requires editor, ops, or admin role");
+      }
+      const gh = new GitHubAdapter();
+      const owner = toolArgs["owner"] as string;
+      const repo = toolArgs["repo"] as string;
+      const title = toolArgs["title"] as string;
+      if (!owner || !repo || !title) throw new Error("owner, repo, and title are required");
+      const issue = await gh.createIssue({
+        owner,
+        repo,
+        title,
+        body: toolArgs["body"] as string | undefined,
+        labels: toolArgs["labels"] as string[] | undefined,
+        assignees: toolArgs["assignees"] as string[] | undefined,
+      });
+      return { tool: toolName, domain: "github", issue };
+    }
+
+    case "github_list_issues": {
+      const gh = new GitHubAdapter();
+      const owner = toolArgs["owner"] as string;
+      const repo = toolArgs["repo"] as string;
+      if (!owner || !repo) throw new Error("owner and repo are required");
+      const issues = await gh.listIssues({
+        owner,
+        repo,
+        state: (toolArgs["state"] as "open" | "closed" | "all") ?? "open",
+        labels: toolArgs["labels"] as string | undefined,
+        perPage: (toolArgs["perPage"] as number) ?? 20,
+      });
+      return { tool: toolName, domain: "github", count: issues.length, issues };
+    }
+
+    case "github_list_prs": {
+      const gh = new GitHubAdapter();
+      const owner = toolArgs["owner"] as string;
+      const repo = toolArgs["repo"] as string;
+      if (!owner || !repo) throw new Error("owner and repo are required");
+      const prs = await gh.listPullRequests({
+        owner,
+        repo,
+        state: (toolArgs["state"] as "open" | "closed" | "all") ?? "open",
+        perPage: (toolArgs["perPage"] as number) ?? 20,
+      });
+      return { tool: toolName, domain: "github", count: prs.length, pullRequests: prs };
+    }
+
+    case "github_list_commits": {
+      const gh = new GitHubAdapter();
+      const owner = toolArgs["owner"] as string;
+      const repo = toolArgs["repo"] as string;
+      if (!owner || !repo) throw new Error("owner and repo are required");
+      const commits = await gh.listCommits({
+        owner,
+        repo,
+        branch: toolArgs["branch"] as string | undefined,
+        perPage: (toolArgs["perPage"] as number) ?? 20,
+      });
+      return { tool: toolName, domain: "github", count: commits.length, commits };
+    }
+
+    case "github_search_code": {
+      const gh = new GitHubAdapter();
+      const query = toolArgs["query"] as string;
+      if (!query) throw new Error("query is required");
+      const result = await gh.searchCode({
+        query,
+        owner: toolArgs["owner"] as string | undefined,
+        repo: toolArgs["repo"] as string | undefined,
+        perPage: (toolArgs["perPage"] as number) ?? 10,
+      });
+      return { tool: toolName, domain: "github", ...result };
+    }
+
+    case "github_trigger_workflow": {
+      if (!user) throw new Error("Authentication required");
+      if (!isGlobalAdmin(user) && !user.roles.includes("ops")) {
+        throw new Error("Insufficient permissions — requires ops or admin role to trigger workflows");
+      }
+      const gh = new GitHubAdapter();
+      const owner = toolArgs["owner"] as string;
+      const repo = toolArgs["repo"] as string;
+      const workflowId = toolArgs["workflowId"] as string;
+      const ref = toolArgs["ref"] as string;
+      if (!owner || !repo || !workflowId || !ref) throw new Error("owner, repo, workflowId, and ref are required");
+      const result = await gh.triggerWorkflowDispatch({
+        owner,
+        repo,
+        workflowId,
+        ref,
+        inputs: toolArgs["inputs"] as Record<string, string> | undefined,
+      });
+      return { tool: toolName, domain: "github", ...result };
+    }
+
+    case "github_list_workflow_runs": {
+      const gh = new GitHubAdapter();
+      const owner = toolArgs["owner"] as string;
+      const repo = toolArgs["repo"] as string;
+      if (!owner || !repo) throw new Error("owner and repo are required");
+      const runs = await gh.listWorkflowRuns({
+        owner,
+        repo,
+        workflowId: toolArgs["workflowId"] as string | undefined,
+        status: toolArgs["status"] as string | undefined,
+        perPage: (toolArgs["perPage"] as number) ?? 10,
+      });
+      return { tool: toolName, domain: "github", count: runs.length, workflowRuns: runs };
+    }
+
     default:
       throw new Error(`Unknown tool: ${toolName}`);
   }

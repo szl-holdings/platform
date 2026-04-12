@@ -1,6 +1,6 @@
 export { initializeMastra, runAgent, listAgents, getAgent } from "./agent-engine";
 export type { MastraAgentConfig, AgentExecutionContext, OrchestratorResult } from "./agent-engine";
-export { registerTool, getTool, listTools, executeTool, registerCrossPlatformTools } from "./tool-registry";
+export { registerTool, getTool, listTools, executeTool, registerCrossPlatformTools, registerGitHubTools } from "./tool-registry";
 export type { MastraTool } from "./types";
 export { createThread, storeMessage, getShortTermMemory, semanticRecall, storeKnowledgeEntity, getKnowledgeGraph, getThreads } from "./memory";
 export { emitTrace, recordEval, autoEvaluate, getAgentMetrics, getAllAgentMetrics, getTraces, initDefaultSlos } from "./agentops";

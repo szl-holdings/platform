@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { MastraTool, AgentExecutionContext } from "./types";
 import { logger } from "../logger";
 import { pool } from "@szl-holdings/db";
+import { GitHubAdapter } from "@szl-holdings/services";
 
 const registry = new Map<string, MastraTool>();
 const toolCallCounts = new Map<string, { count: number; windowStart: number }>();
@@ -281,11 +282,110 @@ export function registerCrossPlatformTools(): void {
           domainData[domain] = { total_runs: 0, successful: 0, failed: 0, avg_duration: 0 };
         }
       }
+
+      const correlations: Array<{
+        domains: string[];
+        correlationType: string;
+        strength: number;
+        description: string;
+        evidence: string[];
+        confidence: number;
+      }> = [];
+
+      try {
+        const signalResult = await pool.query(
+          `SELECT source_domain, event_type, count(*) as event_count,
+                  avg(CASE WHEN severity = 'critical' THEN 4
+                           WHEN severity = 'high' THEN 3
+                           WHEN severity = 'medium' THEN 2
+                           ELSE 1 END) as avg_severity
+           FROM agent_events
+           WHERE source_domain = ANY($1)
+             AND created_at > NOW() - INTERVAL '1 hour' * $2
+           GROUP BY source_domain, event_type
+           ORDER BY event_count DESC
+           LIMIT 50`,
+          [input.domains, input.timeRangeHours]
+        );
+
+        const byDomain: Record<string, { eventCount: number; avgSeverity: number; eventTypes: string[] }> = {};
+        for (const row of signalResult.rows) {
+          if (!byDomain[row.source_domain]) {
+            byDomain[row.source_domain] = { eventCount: 0, avgSeverity: 1, eventTypes: [] };
+          }
+          byDomain[row.source_domain].eventCount += parseInt(row.event_count);
+          byDomain[row.source_domain].avgSeverity = parseFloat(row.avg_severity);
+          byDomain[row.source_domain].eventTypes.push(row.event_type);
+        }
+
+        for (let i = 0; i < input.domains.length; i++) {
+          for (let j = i + 1; j < input.domains.length; j++) {
+            const dA = input.domains[i]!;
+            const dB = input.domains[j]!;
+            const dataA = byDomain[dA];
+            const dataB = byDomain[dB];
+            if (!dataA || !dataB) continue;
+            const sharedTypes = dataA.eventTypes.filter((t) => dataB.eventTypes.includes(t));
+            if (sharedTypes.length > 0) {
+              const strength = Math.min(sharedTypes.length / Math.max(dataA.eventTypes.length, 1), 1);
+              correlations.push({
+                domains: [dA, dB],
+                correlationType: input.analysisType,
+                strength: +strength.toFixed(3),
+                description: `${dA} and ${dB} share ${sharedTypes.length} common event type(s): ${sharedTypes.slice(0, 3).join(", ")}`,
+                evidence: sharedTypes.slice(0, 5),
+                confidence: +Math.min(0.5 + strength * 0.5, 0.95).toFixed(2),
+              });
+            }
+          }
+        }
+      } catch {
+        try {
+          const crossSignals = await pool.query(
+            `SELECT source_app, signal_type, count(*) as cnt, max(severity) as max_severity
+             FROM cross_app_signals
+             WHERE created_at > NOW() - INTERVAL '1 hour' * $1
+             GROUP BY source_app, signal_type
+             ORDER BY cnt DESC
+             LIMIT 30`,
+            [input.timeRangeHours]
+          );
+          const signalsByApp: Record<string, string[]> = {};
+          for (const row of crossSignals.rows) {
+            const appKey = String(row.source_app).toLowerCase().replace(/[^a-z0-9]/g, "-");
+            if (input.domains.some((d: string) => appKey.includes(d) || d.includes(appKey))) {
+              if (!signalsByApp[appKey]) signalsByApp[appKey] = [];
+              signalsByApp[appKey].push(String(row.signal_type));
+            }
+          }
+          const appKeys = Object.keys(signalsByApp);
+          for (let i = 0; i < appKeys.length; i++) {
+            for (let j = i + 1; j < appKeys.length; j++) {
+              const dA = appKeys[i]!;
+              const dB = appKeys[j]!;
+              const shared = signalsByApp[dA]!.filter((t) => signalsByApp[dB]!.includes(t));
+              if (shared.length > 0) {
+                correlations.push({
+                  domains: [dA, dB],
+                  correlationType: input.analysisType,
+                  strength: +Math.min(shared.length / 5, 1).toFixed(3),
+                  description: `Cross-app signal correlation: ${shared.slice(0, 3).join(", ")}`,
+                  evidence: shared.slice(0, 5),
+                  confidence: 0.7,
+                });
+              }
+            }
+          }
+        } catch {
+        }
+      }
+
       return {
         analysisType: input.analysisType,
         timeRangeHours: input.timeRangeHours,
         domains: domainData,
-        correlations: [],
+        correlations,
+        correlationCount: correlations.length,
         generatedAt: new Date().toISOString(),
       };
     },
@@ -319,4 +419,144 @@ export function registerCrossPlatformTools(): void {
   });
 
   logger.info("Registered 6 cross-platform Mastra tools with Zod validation");
+}
+
+const githubAdapter = new GitHubAdapter();
+
+export function registerGitHubTools(): void {
+  registerTool({
+    name: "github_create_issue",
+    description: "Create a new issue in a GitHub repository",
+    inputSchema: z.object({
+      owner: z.string().min(1).describe("Repository owner (user or org)"),
+      repo: z.string().min(1).describe("Repository name"),
+      title: z.string().min(1).describe("Issue title"),
+      body: z.string().optional().describe("Issue body/description (markdown supported)"),
+      labels: z.array(z.string()).optional().describe("Labels to apply to the issue"),
+      assignees: z.array(z.string()).optional().describe("GitHub usernames to assign"),
+    }),
+    rateLimit: { maxCalls: 10, windowMs: 60_000 },
+    handler: async (input) => {
+      const issue = await githubAdapter.createIssue(input);
+      logger.info({ issueNumber: issue.number, repo: `${input.owner}/${input.repo}` }, "GitHub issue created via Mastra tool");
+      return { created: true, issue };
+    },
+  });
+
+  registerTool({
+    name: "github_list_issues",
+    description: "List issues from a GitHub repository with optional state and label filters",
+    inputSchema: z.object({
+      owner: z.string().min(1).describe("Repository owner (user or org)"),
+      repo: z.string().min(1).describe("Repository name"),
+      state: z.enum(["open", "closed", "all"]).default("open").describe("Issue state filter"),
+      labels: z.string().optional().describe("Comma-separated label names to filter by"),
+      perPage: z.number().int().min(1).max(100).default(20).describe("Results per page"),
+    }),
+    rateLimit: { maxCalls: 30, windowMs: 60_000 },
+    handler: async (input) => {
+      const issues = await githubAdapter.listIssues(input);
+      return { count: issues.length, issues };
+    },
+  });
+
+  registerTool({
+    name: "github_get_issue",
+    description: "Get a specific issue from a GitHub repository by issue number",
+    inputSchema: z.object({
+      owner: z.string().min(1).describe("Repository owner (user or org)"),
+      repo: z.string().min(1).describe("Repository name"),
+      issueNumber: z.number().int().positive().describe("Issue number"),
+    }),
+    rateLimit: { maxCalls: 30, windowMs: 60_000 },
+    handler: async (input) => {
+      const issue = await githubAdapter.getIssue(input);
+      return { issue };
+    },
+  });
+
+  registerTool({
+    name: "github_list_prs",
+    description: "List pull requests from a GitHub repository",
+    inputSchema: z.object({
+      owner: z.string().min(1).describe("Repository owner (user or org)"),
+      repo: z.string().min(1).describe("Repository name"),
+      state: z.enum(["open", "closed", "all"]).default("open").describe("PR state filter"),
+      perPage: z.number().int().min(1).max(100).default(20).describe("Results per page"),
+    }),
+    rateLimit: { maxCalls: 30, windowMs: 60_000 },
+    handler: async (input) => {
+      const prs = await githubAdapter.listPullRequests(input);
+      return { count: prs.length, pullRequests: prs };
+    },
+  });
+
+  registerTool({
+    name: "github_list_commits",
+    description: "List recent commits for a GitHub repository branch",
+    inputSchema: z.object({
+      owner: z.string().min(1).describe("Repository owner (user or org)"),
+      repo: z.string().min(1).describe("Repository name"),
+      branch: z.string().optional().describe("Branch name (defaults to default branch)"),
+      perPage: z.number().int().min(1).max(100).default(20).describe("Results per page"),
+    }),
+    rateLimit: { maxCalls: 30, windowMs: 60_000 },
+    handler: async (input) => {
+      const commits = await githubAdapter.listCommits(input);
+      return { count: commits.length, commits };
+    },
+  });
+
+  registerTool({
+    name: "github_search_code",
+    description: "Search code across GitHub repositories using GitHub code search syntax",
+    inputSchema: z.object({
+      query: z.string().min(1).describe("Search query (supports GitHub code search syntax)"),
+      owner: z.string().optional().describe("Limit results to this owner/org"),
+      repo: z.string().optional().describe("Limit results to this repository (requires owner)"),
+      perPage: z.number().int().min(1).max(30).default(10).describe("Results per page"),
+    }),
+    rateLimit: { maxCalls: 10, windowMs: 60_000 },
+    handler: async (input) => {
+      const result = await githubAdapter.searchCode(input);
+      return result;
+    },
+  });
+
+  registerTool({
+    name: "github_trigger_workflow",
+    description: "Trigger a GitHub Actions workflow dispatch event (CI/CD)",
+    inputSchema: z.object({
+      owner: z.string().min(1).describe("Repository owner (user or org)"),
+      repo: z.string().min(1).describe("Repository name"),
+      workflowId: z.string().min(1).describe("Workflow file name (e.g. ci.yml) or workflow ID"),
+      ref: z.string().min(1).describe("Git ref (branch or tag) to run the workflow on"),
+      inputs: z.record(z.string()).optional().describe("Input parameters for the workflow dispatch"),
+    }),
+    rateLimit: { maxCalls: 5, windowMs: 60_000 },
+    handler: async (input) => {
+      const result = await githubAdapter.triggerWorkflowDispatch(input);
+      logger.info({ workflowId: input.workflowId, ref: input.ref, repo: `${input.owner}/${input.repo}` }, "GitHub workflow triggered via Mastra tool");
+      return result;
+    },
+  });
+
+  registerTool({
+    name: "github_list_workflow_runs",
+    description: "List GitHub Actions workflow runs for a repository",
+    inputSchema: z.object({
+      owner: z.string().min(1).describe("Repository owner (user or org)"),
+      repo: z.string().min(1).describe("Repository name"),
+      workflowId: z.string().optional().describe("Filter by specific workflow file or ID"),
+      status: z.enum(["queued", "in_progress", "completed", "waiting", "requested", "pending"]).optional().describe("Filter by run status"),
+      perPage: z.number().int().min(1).max(100).default(10).describe("Results per page"),
+    }),
+    rateLimit: { maxCalls: 20, windowMs: 60_000 },
+    handler: async (input) => {
+      const runs = await githubAdapter.listWorkflowRuns(input);
+      return { count: runs.length, workflowRuns: runs };
+    },
+  });
+
+  logger.info("Registered 8 GitHub Mastra tools with Zod validation and rate limiting");
 }

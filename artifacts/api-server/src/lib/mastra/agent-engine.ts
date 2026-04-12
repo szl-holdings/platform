@@ -1,7 +1,7 @@
 import { pool } from "@szl-holdings/db";
 import { logger } from "../logger";
 import { gatewayInfer } from "../ai-gateway";
-import { executeTool, registerCrossPlatformTools, listTools } from "./tool-registry";
+import { executeTool, registerCrossPlatformTools, registerGitHubTools, listTools } from "./tool-registry";
 import { createThread, storeMessage, getShortTermMemory, semanticRecall, storeKnowledgeEntity } from "./memory";
 import { emitTrace, autoEvaluate, initDefaultSlos } from "./agentops";
 import { initializeA2ACards, createTask, updateTaskStatus } from "./a2a";
@@ -401,6 +401,7 @@ export async function initializeMastra(): Promise<void> {
 
   registerCrossPlatformTools();
   registerGitHubIntegration();
+  registerGitHubTools();
   await loadAgentConfigs();
 
   try { await initializeA2ACards(); } catch (err) {

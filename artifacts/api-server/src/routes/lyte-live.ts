@@ -5,6 +5,7 @@ import { db } from "@szl-holdings/db";
 import { sql } from "drizzle-orm";
 import os from "os";
 import { HEAP_LIMIT_MB, HEAP_WARN_THRESHOLD_MB, HEAP_CRITICAL_THRESHOLD_MB } from "../lib/heap-limits";
+import { GitHubAdapter, type GitHubCommit, type GitHubPullRequest, type GitHubIssue } from "@szl-holdings/services";
 
 const router: IRouter = Router();
 
@@ -40,23 +41,7 @@ export function recordRequest(route: string, latencyMs: number, isError: boolean
   if (requestMetrics.latencies.length > 1000) requestMetrics.latencies.shift();
 }
 
-async function fetchGitHubJson(url: string, token?: string): Promise<unknown> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 10000);
-  try {
-    const headers: Record<string, string> = {
-      "User-Agent": "SZL-Lyte/1.0",
-      Accept: "application/vnd.github.v3+json",
-    };
-    if (token) headers["Authorization"] = `token ${token}`;
-    const res = await fetch(url, { signal: controller.signal, headers });
-    clearTimeout(timer);
-    if (!res.ok) throw new Error(`GitHub API HTTP ${res.status}`);
-    return res.json();
-  } finally {
-    clearTimeout(timer);
-  }
-}
+const lyteGitHub = new GitHubAdapter();
 
 async function getDbTableSizes(): Promise<{ tableName: string; rowCount: number; sizeKb: number }[]> {
   try {
@@ -262,29 +247,21 @@ router.get("/lyte/live/github-activity", authMiddleware({ required: false }), as
   try {
     const owner = (req.query.owner as string) ?? "SZL-Holdings";
     const repo = (req.query.repo as string) ?? "";
-    const token = process.env.GITHUB_TOKEN;
 
     const result = await getLyteCached<any>(`lyte-github-${owner}-${repo}`, 5 * 60 * 1000, async () => {
       try {
         if (!repo) {
-          const repos = await fetchGitHubJson(`https://api.github.com/users/${owner}/repos?sort=updated&per_page=10`, token) as any[];
-          if (!Array.isArray(repos)) throw new Error("No repos");
-
+          const repos = await lyteGitHub.listRepos({ owner, perPage: 10 });
           return {
             data: {
               owner,
               repositories: repos.map(r => ({
                 name: r.name,
-                fullName: r.full_name,
+                fullName: r.fullName,
                 description: r.description,
                 language: r.language,
-                stars: r.stargazers_count,
-                forks: r.forks_count,
-                openIssues: r.open_issues_count,
-                updatedAt: r.updated_at,
-                pushedAt: r.pushed_at,
-                visibility: r.visibility,
-                defaultBranch: r.default_branch,
+                stars: r.stars,
+                updatedAt: r.updatedAt,
               })),
               totalRepos: repos.length,
             },
@@ -292,51 +269,43 @@ router.get("/lyte/live/github-activity", authMiddleware({ required: false }), as
           };
         }
 
-        const [repoData, commits, pulls, issues] = await Promise.allSettled([
-          fetchGitHubJson(`https://api.github.com/repos/${owner}/${repo}`, token) as Promise<any>,
-          fetchGitHubJson(`https://api.github.com/repos/${owner}/${repo}/commits?per_page=10`, token) as Promise<any[]>,
-          fetchGitHubJson(`https://api.github.com/repos/${owner}/${repo}/pulls?state=all&per_page=10`, token) as Promise<any[]>,
-          fetchGitHubJson(`https://api.github.com/repos/${owner}/${repo}/issues?state=all&per_page=10`, token) as Promise<any[]>,
+        const [commits, prs, issues] = await Promise.allSettled([
+          lyteGitHub.listCommits({ owner, repo, perPage: 10 }),
+          lyteGitHub.listPullRequests({ owner, repo, state: "all", perPage: 10 }),
+          lyteGitHub.listIssues({ owner, repo, state: "all", perPage: 10 }),
         ]);
 
-        const rd = repoData.status === "fulfilled" ? repoData.value : {};
         const cm = commits.status === "fulfilled" ? commits.value : [];
-        const pr = pulls.status === "fulfilled" ? pulls.value : [];
+        const pr = prs.status === "fulfilled" ? prs.value : [];
         const is = issues.status === "fulfilled" ? issues.value : [];
 
         return {
           data: {
             owner,
             repo,
-            description: rd.description ?? null,
-            language: rd.language ?? null,
-            stars: rd.stargazers_count ?? 0,
-            forks: rd.forks_count ?? 0,
-            openIssues: rd.open_issues_count ?? 0,
-            defaultBranch: rd.default_branch ?? "main",
-            recentCommits: cm.slice(0, 10).map((c: any) => ({
-              sha: c.sha?.slice(0, 7),
-              message: c.commit?.message?.split("\n")[0]?.slice(0, 120),
-              author: c.commit?.author?.name,
-              date: c.commit?.author?.date,
-              url: c.html_url,
+            recentCommits: cm.slice(0, 10).map((c: GitHubCommit) => ({
+              sha: c.shortSha,
+              message: c.message,
+              author: c.author,
+              date: c.date,
+              url: c.url,
             })),
             pullRequests: {
               total: pr.length,
-              open: pr.filter((p: any) => p.state === "open").length,
-              merged: pr.filter((p: any) => p.merged_at).length,
-              recent: pr.slice(0, 5).map((p: any) => ({
+              open: pr.filter((p: GitHubPullRequest) => p.state === "open").length,
+              merged: pr.filter((p: GitHubPullRequest) => p.merged).length,
+              recent: pr.slice(0, 5).map((p: GitHubPullRequest) => ({
                 number: p.number,
-                title: p.title?.slice(0, 80),
+                title: p.title.slice(0, 80),
                 state: p.state,
-                author: p.user?.login,
-                createdAt: p.created_at,
-                mergedAt: p.merged_at,
+                author: p.author,
+                createdAt: p.createdAt,
+                mergedAt: p.mergedAt,
               })),
             },
             issues: {
-              total: is.filter((i: any) => !i.pull_request).length,
-              open: is.filter((i: any) => i.state === "open" && !i.pull_request).length,
+              total: is.length,
+              open: is.filter((i: GitHubIssue) => i.state === "open").length,
             },
           },
           source: "live-github",
@@ -358,7 +327,7 @@ router.get("/lyte/live/github-activity", authMiddleware({ required: false }), as
     });
 
     sendSuccess(res, {
-      source: "GitHub Public API",
+      source: "GitHub API (via GitHubAdapter)",
       url: repo ? `https://github.com/${owner}/${repo}` : `https://github.com/${owner}`,
       ...result.data,
       dataSource: result.source,

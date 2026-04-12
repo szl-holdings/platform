@@ -80,7 +80,16 @@ export { GoogleAdapter, type GoogleAuthStatus } from "./adapters/google.js";
 export { NotionAdapter, type NotionPage, type NotionDatabase } from "./adapters/notion.js";
 export { StorageAdapter, type UploadResult, type StoredFile } from "./adapters/storage.js";
 export { MonitoringAdapter, type ErrorReport, type AnalyticsEvent } from "./adapters/monitoring.js";
-export { GitHubAdapter, type GitHubRepo, type GitHubWebhookEvent } from "./adapters/github.js";
+export {
+  GitHubAdapter,
+  type GitHubRepo,
+  type GitHubWebhookEvent,
+  type GitHubIssue,
+  type GitHubPullRequest,
+  type GitHubCommit,
+  type GitHubCodeSearchResult,
+  type GitHubWorkflowRun,
+} from "./adapters/github.js";
 export { GoogleCalendarAdapter, type CalendarEvent } from "./adapters/google-calendar.js";
 export { GoogleDocsAdapter, type GoogleDoc } from "./adapters/google-docs.js";
 export { GoogleDriveAdapter, type DriveFile } from "./adapters/google-drive.js";
