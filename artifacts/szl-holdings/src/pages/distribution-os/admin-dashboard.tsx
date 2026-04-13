@@ -5,7 +5,7 @@ import {
   LayoutDashboard, FileText, Mail, Image, Twitter, Users, Megaphone,
   Calendar, BarChart3, Settings, Zap, TrendingUp, Eye, UserPlus, Send,
   AlertCircle, ChevronRight, Globe, Link2, Target, Clock, CheckCircle2,
-  Activity, RefreshCw, LineChart,
+  Activity, RefreshCw, LineChart, GitBranch, Shield,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 
@@ -34,12 +34,15 @@ const NAV_ITEMS = [
   { href: "/admin/distribution/campaigns", icon: Megaphone, label: "Campaigns" },
   { href: "/admin/distribution/articles", icon: FileText, label: "Articles" },
   { href: "/admin/distribution/newsletters", icon: Mail, label: "Newsletters" },
+  { href: "/admin/distribution/email-campaigns", icon: Send, label: "Email Campaigns" },
+  { href: "/admin/distribution/drip-sequences", icon: GitBranch, label: "Drip Sequences" },
   { href: "/admin/distribution/carousel-lab", icon: Image, label: "Carousel Lab" },
   { href: "/admin/distribution/x-studio", icon: Twitter, label: "X Studio" },
   { href: "/admin/distribution/calendar", icon: Calendar, label: "Calendar" },
   { href: "/admin/distribution/analytics", icon: BarChart3, label: "Analytics" },
   { href: "/admin/distribution/reports", icon: LineChart, label: "Reports" },
   { href: "/admin/distribution/automations", icon: Zap, label: "Automations" },
+  { href: "/admin/distribution/privacy", icon: Shield, label: "Privacy" },
   { href: "/admin/distribution/settings", icon: Settings, label: "Settings" },
 ];
 

@@ -140,6 +140,8 @@ import lyteInnovationsRouter from "./lyte-innovations";
 import aiInnovationsRouter from "./ai-innovations";
 import crossDomainIntelligenceRouter from "./cross-domain-intelligence";
 import pulseRouter from "./pulse";
+import emailMarketingRouter from "./email-marketing";
+import sessionAnalyticsRouter from "./session-analytics";
 
 const router: IRouter = Router();
 
@@ -509,5 +511,21 @@ router.use(pulseRouter);
 
 router.use("/forge-portal", _readLimiter);
 router.use(forgePortalRouter);
+
+router.use("/distribution-os/email-campaigns", _writeLimiter);
+router.use("/distribution-os/drip-sequences", _writeLimiter);
+router.use("/distribution-os/segments", _writeLimiter);
+router.use("/distribution-os/campaign-dashboard", _readLimiter);
+router.use("/distribution-os/privacy", _writeLimiter);
+router.use("/distribution-os/preferences", _writeLimiter);
+router.use("/distribution-os/cookie-consent", _writeLimiter);
+router.use("/distribution-os/unsubscribe", _readLimiter);
+router.use("/distribution-os", emailMarketingRouter);
+
+router.use("/distribution-os/sessions", _writeLimiter);
+router.use("/distribution-os/cohorts", _readLimiter);
+router.use("/distribution-os/funnels", _readLimiter);
+router.use("/distribution-os/realtime", _readLimiter);
+router.use("/distribution-os", sessionAnalyticsRouter);
 
 export default router;

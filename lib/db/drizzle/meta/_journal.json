@@ -162,6 +162,13 @@
       "when": 1775140000000,
       "tag": "0022_pc_matters_practice_area",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1776140000000,
+      "tag": "0023_dos_sessions_app_column",
+      "breakpoints": true
     }
   ]
 }

@@ -2,7 +2,8 @@ import { lazy, Suspense, type ReactNode } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
-import { DemoModeProvider, SandboxModeProvider, CookieBanner, StatusBanner, AnalyticsProvider, type StatusBannerConfig } from "@szl-holdings/shared-ui";
+import { DemoModeProvider, SandboxModeProvider, StatusBanner, AnalyticsProvider, type StatusBannerConfig } from "@szl-holdings/shared-ui";
+import { CookieConsentBanner } from "@/components/cookie-consent-banner";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus/provider";
 import { useAuth } from "@szl-holdings/replit-auth-web";
@@ -142,6 +143,9 @@ const DistOsLeads = lazy(() => import("@/pages/distribution-os/leads-page"));
 const DistOsCampaigns = lazy(() => import("@/pages/distribution-os/campaigns-page"));
 const DistOsCalendar = lazy(() => import("@/pages/distribution-os/content-calendar"));
 const DistOsAnalytics = lazy(() => import("@/pages/distribution-os/analytics-dashboard"));
+const DistOsEmailCampaigns = lazy(() => import("@/pages/distribution-os/campaign-builder"));
+const DistOsDripSequences = lazy(() => import("@/pages/distribution-os/drip-sequences-page"));
+const DistOsPrivacy = lazy(() => import("@/pages/distribution-os/privacy-command-center"));
 const DistOsAutomations = lazy(() => import("@/pages/distribution-os/automations-page"));
 const DistOsSettings = lazy(() => import("@/pages/distribution-os/settings-page"));
 const DistOsReports = lazy(() => import("@/pages/distribution-os/reports-page"));
@@ -940,6 +944,15 @@ function App() {
             <Route path="/admin/distribution/analytics">
               <RequireAuth><Suspense fallback={<PageLoader />}><DistOsAnalytics /></Suspense></RequireAuth>
             </Route>
+            <Route path="/admin/distribution/email-campaigns">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsEmailCampaigns /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/drip-sequences">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsDripSequences /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/privacy">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsPrivacy /></Suspense></RequireAuth>
+            </Route>
             <Route path="/admin/distribution/automations">
               <RequireAuth><Suspense fallback={<PageLoader />}><DistOsAutomations /></Suspense></RequireAuth>
             </Route>
@@ -963,7 +976,7 @@ function App() {
       </LazyMotion>
       <Toaster />
       <McpOverlay domain="szl-holdings" />
-      <CookieBanner privacyUrl="/legal/privacy" accentColor={SZL_ACCENT} />
+      <CookieConsentBanner />
     </QueryClientProvider>
     </DemoModeProvider>
     </SandboxModeProvider>
