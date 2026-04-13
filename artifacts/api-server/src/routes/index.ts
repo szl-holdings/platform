@@ -579,4 +579,8 @@ router.use("/package-registry", _readLimiter);
 router.use("/package-registry", _writeLimiter);
 router.use("/package-registry", packageRegistryRouter);
 
+import championRouter from "./champion";
+router.use("/champion", _readLimiter);
+router.use(championRouter);
+
 export default router;

@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
 import { ReactNode, useState } from "react";
-import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard, ArrowLeft, FileText, Brain, Layers, Home, BookOpen, Globe, Lock, Play, Star, DollarSign, Store, Code2, Dna, Cpu } from "lucide-react";
+import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard, ArrowLeft, FileText, Brain, Layers, Home, BookOpen, Globe, Lock, Play, Star, DollarSign, Store, Code2, Dna, Cpu, Crown } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator } from "@szl-holdings/shared-ui";
 import { CommandBar, CommandBarTrigger, useCommandBar } from "./command-bar";
 
@@ -121,7 +121,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-sm tracking-wide text-white leading-none">ALLOY</span>
-                <span className="text-[9px] uppercase tracking-widest leading-none mt-0.5" style={{ color: "#4B8BDB" }}>Execution Fabric</span>
+                <span className="text-[9px] uppercase tracking-widest leading-none mt-0.5" style={{ color: "#f59e0b" }}>Fusion Intelligence</span>
               </div>
             </div>
           </div>
@@ -258,6 +258,11 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             <span style={{ color: "#10b981" }}>8 Done</span>
             <span className="hidden sm:block" style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
             <span className="hidden sm:block" style={{ color: "#ef4444" }}>2 Failed</span>
+            <span className="hidden sm:block" style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
+            <span className="hidden sm:flex items-center gap-1" style={{ color: "#f59e0b" }}>
+              <Crown className="w-3 h-3" />
+              Fusion Active · 5 Champions
+            </span>
           </div>
           <div className="flex items-center gap-3">
             <CommandBarTrigger onClick={openCmd} />

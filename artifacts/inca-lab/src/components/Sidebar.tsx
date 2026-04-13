@@ -32,6 +32,7 @@ import {
   Beaker,
   ShoppingBag,
   Globe,
+  Crown,
 } from "lucide-react";
 
 interface NavItem {
@@ -84,6 +85,7 @@ const NAV_GROUPS: NavGroup[] = [
     defaultExpanded: true,
     items: [
       { id: "agent-marketplace", label: "Agent Marketplace", sublabel: "Browse & deploy agents", icon: Store },
+      { id: "champion-arena", label: "Champion Arena", sublabel: "Fusion intelligence & rankings", icon: Crown },
       { id: "performance-arena", label: "Performance Arena", sublabel: "Benchmarks & leaderboards", icon: Trophy },
       { id: "cognitive-visualizer", label: "Cognitive Visualizer", sublabel: "Real-time agent cognition", icon: Eye },
       { id: "sla-management", label: "SLA Management", sublabel: "Contracts & compliance", icon: Shield },

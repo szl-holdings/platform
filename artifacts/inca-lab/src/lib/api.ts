@@ -246,3 +246,92 @@ export interface SkillEntry {
   avg_latency_ms: number;
   tags: string[];
 }
+
+export interface ChampionCard {
+  id: string;
+  name: string;
+  provider: string;
+  providerLabel: string;
+  model: string;
+  categoryRankings: Record<string, number>;
+  categoryChampion: string[];
+  benchmarks: { name: string; score: number; unit: string; asOf: string }[];
+  costPerRun: number;
+  costPer1kInput: number;
+  costPer1kOutput: number;
+  latencyP50Ms: number;
+  contextWindow: number;
+  strengths: string[];
+  bestFor: string[];
+  livePerformance: { avgLatencyMs: number; errorRate: number; qualityScore: number; requestCount: number };
+  championBadge: boolean;
+  rank: number;
+  tier: "S" | "A" | "B" | "C";
+}
+
+export interface CategoryChampions {
+  category: string;
+  label: string;
+  description: string;
+  champion: ChampionCard;
+  contenders: ChampionCard[];
+}
+
+export interface EvolutionInsight {
+  type: string;
+  severity: "info" | "warning" | "critical";
+  title: string;
+  description: string;
+  affectedModel: string;
+  category: string;
+  metric?: number;
+  timestamp: number;
+}
+
+export interface CostQualityPoint {
+  modelId: string;
+  modelName: string;
+  category: string;
+  qualityScore: number;
+  costPerRun: number;
+  latencyMs: number;
+  tier: "budget" | "balanced" | "premium";
+  recommended: boolean;
+}
+
+export interface ChampionRegistryData {
+  champions: ChampionCard[];
+  summary: {
+    totalChampions: number;
+    categoryChampions: Record<string, string>;
+    sTierCount: number;
+    aTierCount: number;
+    avgCostPerRun: number;
+  };
+}
+
+export interface EvolutionData {
+  insights: EvolutionInsight[];
+  reviewStatus: {
+    lastReview: string;
+    nextReview: string;
+    daysSinceReview: number;
+    reviewDue: boolean;
+    reviewsCompleted: number;
+  };
+  costQualityMap: CostQualityPoint[];
+}
+
+export const championApi = {
+  getRegistry: (): Promise<{ data: ChampionRegistryData }> =>
+    apiFetch("/champion/registry"),
+
+  getCategories: (): Promise<{ data: CategoryChampions[] }> =>
+    apiFetch("/champion/categories"),
+
+  getEvolutionData: (): Promise<{ data: EvolutionData }> =>
+    apiFetch("/champion/evolution/insights"),
+
+  getCostQuality: (): Promise<{ data: CostQualityPoint[] }> =>
+    apiFetch("/champion/evolution/cost-quality"),
+};

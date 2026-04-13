@@ -29,6 +29,7 @@ import { PackageRegistry } from "./pages/PackageRegistry";
 import { AlloyForge } from "./pages/AlloyForge";
 import { TrainingStudio } from "./pages/TrainingStudio";
 import { PublicMarketplace } from "./pages/PublicMarketplace";
+import { ChampionArena } from "./pages/ChampionArena";
 
 export type Page =
   | "dashboard"
@@ -56,7 +57,8 @@ export type Page =
   | "package-registry"
   | "alloy-forge"
   | "training-studio"
-  | "public-marketplace";
+  | "public-marketplace"
+  | "champion-arena";
 
 const PAGE_ROUTES: Record<Page, string> = {
   dashboard: "/inca-lab/",
@@ -85,6 +87,7 @@ const PAGE_ROUTES: Record<Page, string> = {
   "white-label": "/inca-lab/white-label",
   "revenue-roi": "/inca-lab/revenue-roi",
   "skill-playground": "/inca-lab/skill-playground",
+  "champion-arena": "/inca-lab/champion-arena",
 };
 
 function AppShell() {
@@ -110,6 +113,7 @@ function AppShell() {
     if (location.startsWith("/inca-lab/consensus")) return "consensus";
     if (location.startsWith("/inca-lab/agent-console")) return "agent-console";
     if (location.startsWith("/inca-lab/agent-marketplace")) return "agent-marketplace";
+    if (location.startsWith("/inca-lab/champion-arena")) return "champion-arena";
     if (location.startsWith("/inca-lab/performance-arena")) return "performance-arena";
     if (location.startsWith("/inca-lab/cognitive-visualizer")) return "cognitive-visualizer";
     if (location.startsWith("/inca-lab/sla-management")) return "sla-management";
@@ -159,6 +163,7 @@ function AppShell() {
           <Route path="/inca-lab/alloy-forge" component={AlloyForge} />
           <Route path="/inca-lab/training-studio" component={TrainingStudio} />
           <Route path="/inca-lab/public-marketplace" component={PublicMarketplace} />
+          <Route path="/inca-lab/champion-arena" component={ChampionArena} />
           <Route>
             <Dashboard onNavigate={onNavigate} />
           </Route>
