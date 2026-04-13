@@ -2,9 +2,13 @@ import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
-import { services, type ThreatFoxIoc, type PhishTankEntry, type OpenSkyAircraft } from "@szl-holdings/services";
+import { services } from "@szl-holdings/services";
 import { db, intelligenceCacheTable } from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
+
+type ThreatFoxIoc = { ioc_type: string; confidence_level: number; threat_type: string; malware?: string; ioc: string; reference?: string; reporter?: string; first_seen_utc?: string };
+type PhishTankEntry = { phish_id: number; url: string; verified: string; online: string; target?: string; submission_time?: string };
+type OpenSkyAircraft = { icao24: string; callsign?: string; origin_country: string; originCountry: string; latitude?: number; longitude?: number; baro_altitude?: number; velocity?: number; on_ground: boolean; onGround: boolean };
 
 const router: IRouter = Router();
 
@@ -17,9 +21,10 @@ const threatLimit = rateLimit({
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
-const phishtankAdapter = services.phishtank;
-const threatfoxAdapter = services.threatfox;
-const openSkyAdapter = services.opensky;
+const svc = services as any;
+const phishtankAdapter = svc.phishtank;
+const threatfoxAdapter = svc.threatfox;
+const openSkyAdapter = svc.opensky;
 
 const tfMemCache = new Map<string, { data: unknown; expiresAt: number }>();
 
@@ -231,11 +236,11 @@ router.get("/aegis/live/threat-intel-summary", threatLimit, authMiddleware({ req
 
     const [threatfoxResult, urlhausResult] = await Promise.allSettled([
       getCached<ThreatFoxSummary>("threatfox-summary", 3600000, async () => {
-        const iocs = await threatfoxAdapter.getRecentIocs(1, 100);
+        const iocs: ThreatFoxIoc[] = await threatfoxAdapter.getRecentIocs(1, 100);
         return {
           total: iocs.length,
           byType: iocs.reduce<Record<string, number>>((acc, i) => { acc[i.ioc_type] = (acc[i.ioc_type] ?? 0) + 1; return acc; }, {}),
-          highConfidence: iocs.filter((i: ThreatFoxIoc) => i.confidence_level >= 75).length,
+          highConfidence: iocs.filter((i) => i.confidence_level >= 75).length,
           source: "live",
         };
       }),

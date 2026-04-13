@@ -321,19 +321,19 @@ router.get("/terra/live/nyc-dashboard", terraLiveLimit, authMiddleware({ require
     const [stats, dobSummary, hpdSummary, dofSummary, dobComplaintsSummary] = await Promise.allSettled([
       getIngestionStats(),
       getCached("terra-nyc-dob-summary", 3600000, async () => {
-        const data = await services.nycDob.getPermitSummary("MANHATTAN");
+        const data = await (services as any).nycDob.getPermitSummary("MANHATTAN");
         return { data, source: "live-nyc-dob" };
       }),
       getCached("terra-nyc-hpd-summary", 3600000, async () => {
-        const data = await services.nycHpd.getViolationSummary("1");
+        const data = await (services as any).nycHpd.getViolationSummary("1");
         return { data, source: "live-nyc-hpd" };
       }),
       getCached("terra-nyc-dof-summary", 3600000, async () => {
-        const data = await services.nycDof.getSalesSummary("1");
+        const data = await (services as any).nycDof.getSalesSummary("1");
         return { data, source: "live-nyc-dof" };
       }),
       getCached("terra-nyc-dob-complaints", 3600000, async () => {
-        const data = await services.nycDobComplaints.getComplaintSummary("MANHATTAN");
+        const data = await (services as any).nycDobComplaints.getComplaintSummary("MANHATTAN");
         return { data, source: "live-nyc-dob-complaints" };
       }),
     ]);
@@ -715,19 +715,19 @@ router.get("/terra/live/nyc-dob-permits", terraLiveLimit, authMiddleware({ requi
     const workType = (req.query.work_type as string) ?? "";
     const limit = Math.min(parseInt(req.query.limit as string) || 25, 100);
     const result = await getCached(`terra-nyc-dob-permits-${borough}-${workType}-${limit}`, 3600000, async () => {
-      const permits = await services.nycDob.getPermits({ borough, workType: workType || undefined, limit });
-      const byWorkType = permits.reduce((acc: Record<string, number>, p) => {
+      const permits = await (services as any).nycDob.getPermits({ borough, workType: workType || undefined, limit });
+      const byWorkType = permits.reduce((acc: Record<string, number>, p: any) => {
         acc[p.workType] = (acc[p.workType] ?? 0) + 1;
         return acc;
       }, {});
-      const totalEstimatedCost = permits.reduce((sum, p) => sum + (p.estimatedCost ?? 0), 0);
+      const totalEstimatedCost = permits.reduce((sum: number, p: any) => sum + (p.estimatedCost ?? 0), 0);
       return {
         data: {
           borough,
           period: "Last 30 days",
           count: permits.length,
           totalEstimatedCost,
-          byWorkType: Object.entries(byWorkType).sort((a, b) => b[1] - a[1]),
+          byWorkType: Object.entries(byWorkType).sort((a: [string, number], b: [string, number]) => b[1] - a[1]),
           permits: permits.slice(0, 10),
         },
         source: "live-nyc-dob-permits",
@@ -751,20 +751,20 @@ router.get("/terra/live/nyc-hpd-violations", terraLiveLimit, authMiddleware({ re
     const limit = Math.min(parseInt(req.query.limit as string) || 25, 100);
     const boroughCode = BOROUGH_CODE_MAP[borough] ?? "1";
     const result = await getCached(`terra-nyc-hpd-violations-${boroughCode}-${classFilter}-${limit}`, 3600000, async () => {
-      const violations = await services.nycHpd.getViolations({
+      const violations = await (services as any).nycHpd.getViolations({
         boroughCode,
         violationClass: classFilter || undefined,
         limit,
       });
-      const byClass = violations.reduce((acc: Record<string, number>, v) => {
+      const byClass = violations.reduce((acc: Record<string, number>, v: any) => {
         acc[v.class] = (acc[v.class] ?? 0) + 1;
         return acc;
-      }, {});
-      const byStatus = violations.reduce((acc: Record<string, number>, v) => {
+      }, {} as Record<string, number>);
+      const byStatus = violations.reduce((acc: Record<string, number>, v: any) => {
         acc[v.currentStatus] = (acc[v.currentStatus] ?? 0) + 1;
         return acc;
-      }, {});
-      const openViolations = violations.filter(v =>
+      }, {} as Record<string, number>);
+      const openViolations = violations.filter((v: any) =>
         v.status === "Open" || v.currentStatus?.toLowerCase().includes("open"),
       ).length;
       return {
@@ -774,8 +774,8 @@ router.get("/terra/live/nyc-hpd-violations", terraLiveLimit, authMiddleware({ re
           period: "Last 90 days",
           count: violations.length,
           openViolations,
-          byClass: Object.entries(byClass).sort((a, b) => b[1] - a[1]),
-          byStatus: Object.entries(byStatus).sort((a, b) => b[1] - a[1]),
+          byClass: Object.entries(byClass).sort((a: [string, number], b: [string, number]) => b[1] - a[1]),
+          byStatus: Object.entries(byStatus).sort((a: [string, number], b: [string, number]) => b[1] - a[1]),
           violations: violations.slice(0, 10),
         },
         source: "live-nyc-hpd-violations",
@@ -798,8 +798,8 @@ router.get("/terra/live/nyc-dof-sales", terraLiveLimit, authMiddleware({ require
     const boroughCode = (req.query.borough as string) ?? "1";
     const limit = Math.min(parseInt(req.query.limit as string) || 25, 100);
     const result = await getCached(`terra-nyc-dof-sales-${boroughCode}-${limit}`, 3600000, async () => {
-      const summary = await services.nycDof.getSalesSummary(boroughCode);
-      const sales = await services.nycDof.getSales({ boroughCode, limit });
+      const summary = await (services as any).nycDof.getSalesSummary(boroughCode);
+      const sales = await (services as any).nycDof.getSales({ boroughCode, limit });
       return {
         data: {
           boroughCode,

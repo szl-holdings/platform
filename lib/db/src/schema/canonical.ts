@@ -4,6 +4,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { organizationsTable } from "./organizations";
 import { usersTable } from "./auth";
+import { alloySignalsTable } from "./alloy_platform";
 
 export const productsTable = pgTable("products", {
   id: serial("id").primaryKey(),
@@ -17,28 +18,7 @@ export const productsTable = pgTable("products", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const platformSignalsTable = pgTable("platform_signals", {
-  id: serial("id").primaryKey(),
-  orgId: integer("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
-  workflowId: integer("workflow_id").references(() => workflowsTable.id, { onDelete: "set null" }),
-  source: text("source").notNull(),
-  sourceType: text("source_type", { enum: ["connector", "webhook", "api", "manual", "scheduled", "monitoring"] }).notNull(),
-  severity: text("severity", { enum: ["critical", "high", "medium", "low", "info"] }).notNull().default("info"),
-  title: text("title").notNull(),
-  body: text("body"),
-  status: text("status", { enum: ["new", "processing", "processed", "failed", "ignored"] }).notNull().default("new"),
-  normalizedScore: numeric("normalized_score", { precision: 5, scale: 2 }),
-  valueAtRisk: numeric("value_at_risk", { precision: 15, scale: 2 }),
-  metadata: jsonb("metadata"),
-  receivedAt: timestamp("received_at").notNull().defaultNow(),
-  processedAt: timestamp("processed_at"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-}, (t) => [
-  index("signals_org_idx").on(t.orgId),
-  index("signals_status_idx").on(t.status),
-  index("signals_severity_idx").on(t.severity),
-  index("signals_received_idx").on(t.receivedAt),
-]);
+export const platformSignalsTable = alloySignalsTable;
 
 export const actionsTable = pgTable("actions", {
   id: serial("id").primaryKey(),

@@ -2,9 +2,12 @@ import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
-import { services, type SamGovOpportunity, type SamGovEntity } from "@szl-holdings/services";
+import { services } from "@szl-holdings/services";
 import { db, intelligenceCacheTable } from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
+
+type SamGovOpportunity = { title: string; solicitationNumber?: string; type?: string; postedDate?: string; responseDeadLine?: string; naicsCode?: string; setAside?: string; placeOfPerformance?: string; department?: string; subtier?: string; office?: string; description?: string; pointOfContact?: { fullName?: string; email?: string; phone?: string }[] };
+type SamGovEntity = { ueiSAM?: string; legalBusinessName?: string; entityStatus?: string; registrationDate?: string; expirationDate?: string; cageCode?: string; physicalAddress?: { city?: string; stateOrProvinceCode?: string; countryCode?: string } };
 
 const router: IRouter = Router();
 
@@ -17,7 +20,7 @@ const samLimit = rateLimit({
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
-const samAdapter = services.samgov;
+const samAdapter = (services as any).samgov;
 
 const samMemCache = new Map<string, { data: unknown; expiresAt: number }>();
 
@@ -126,7 +129,7 @@ router.get("/lyte/live/sam-opportunities", samLimit, authMiddleware({ required: 
       opportunities: result.opportunities,
       summary: {
         byType,
-        activeCount: result.opportunities.filter(o => o.active).length,
+        activeCount: result.opportunities.filter((o: any) => o.active).length,
         relevantNaicsCodes: LYTE_RELEVANT_NAICS,
       },
       ...("note" in result && result.note ? { note: result.note } : {}),

@@ -1007,7 +1007,7 @@ router.get("/vessels/dark-pattern-decoder/flagged", authMiddleware(), async (_re
       db.select({
         vesselId: vesselPortCallsTable.vesselId,
         portName: vesselPortCallsTable.portName,
-        arrivedAt: vesselPortCallsTable.arrivedAt,
+        arrivedAt: vesselPortCallsTable.arrivalAt,
       }).from(vesselPortCallsTable),
     ]);
 

@@ -188,7 +188,7 @@ router.get("/vessels/live/ais", vesLiveLimit, authMiddleware({ required: false }
 router.get("/vessels/live/ais/combined", vesLiveLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
     const result = await getCached<any>("ais-combined", 5 * 60 * 1000, async () => {
-      const aisStreamAdapter = services.aisstream;
+      const aisStreamAdapter = (services as any).aisstream;
 
       const [digitraffic, barentswatch] = await Promise.allSettled([
         fetchDigitrafficAis(),
@@ -209,8 +209,8 @@ router.get("/vessels/live/ais/combined", vesLiveLimit, authMiddleware({ required
       let aisStreamSource = "not-configured";
       if (aisStreamAdapter.isLive) {
         aisStreamVessels = aisStreamAdapter.getVessels(500)
-          .filter(v => !mmsiSeen.has(v.mmsi))
-          .map(v => ({
+          .filter((v: any) => !mmsiSeen.has(v.mmsi))
+          .map((v: any) => ({
             mmsi: v.mmsi,
             lat: v.lat,
             lon: v.lon,
@@ -234,10 +234,10 @@ router.get("/vessels/live/ais/combined", vesLiveLimit, authMiddleware({ required
 
       let noaaMarineAlerts: { count: number; alerts: { event: string; severity: string; areas: string }[]; source: string } = { count: 0, alerts: [], source: "not-fetched" };
       try {
-        const alerts = await services.noaaAlerts.getActiveAlerts({ domain: "marine", limit: 10 });
+        const alerts = await (services as any).noaaAlerts.getActiveAlerts({ domain: "marine", limit: 10 });
         noaaMarineAlerts = {
           count: alerts.length,
-          alerts: alerts.slice(0, 5).map(a => ({ event: a.event, severity: a.severity, areas: a.areaDesc.slice(0, 100) })),
+          alerts: alerts.slice(0, 5).map((a: any) => ({ event: a.event, severity: a.severity, areas: a.areaDesc.slice(0, 100) })),
           source: "live-noaa",
         };
       } catch (_e) { noaaMarineAlerts = { count: 0, alerts: [], source: "error" }; }
@@ -255,8 +255,8 @@ router.get("/vessels/live/ais/combined", vesLiveLimit, authMiddleware({ required
       count: (result.data as any[]).length,
       vessels: result.data,
       dataSource: result.source,
-      sources: result.sources,
-      marineWeather: result.noaaMarineAlerts,
+      sources: (result as any).sources,
+      marineWeather: (result as any).noaaMarineAlerts,
       liveData: !result.source.includes("demo"),
       cacheAgeSeconds: result.cacheAge,
       isStale: result.isStale,
