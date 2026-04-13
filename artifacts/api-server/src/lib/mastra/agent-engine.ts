@@ -10,7 +10,22 @@ import { ensureActionAuditTable } from "./action-audit";
 import { ensureDocumentIntelligenceTables } from "./document-intelligence";
 import { ensureTriggerTables, registerDefaultTriggers } from "./event-triggers";
 import { registerCapabilityMeshTools, ensureCapabilityRegistryTable } from "./capability-mesh";
+import { ensureSkillsRegistryTable } from "./skills-registry";
+import { ensureSkillRuntimeTables } from "./skill-runtime";
+import { ensureAgentActivityTable } from "./agent-activity";
+import {
+  registerMcpModule,
+  buildMcpGatewayRouter,
+} from "./mcp-gateway/index";
+import { vesselsMcpModule } from "./mcp-gateway/vessels-module";
+import { aegisMcpModule } from "./mcp-gateway/aegis-module";
+import { terraMcpModule } from "./mcp-gateway/terra-module";
+import { prismMcpModule } from "./mcp-gateway/prism-module";
+import { alloyMcpModule } from "./mcp-gateway/alloy-module";
+import { githubMcpModule } from "./mcp-gateway/github-module";
 import type { MastraAgentConfig, AgentExecutionContext, DelegationResult, TraceSpan, GuardrailResult } from "./types";
+
+export { buildMcpGatewayRouter };
 
 export type { MastraAgentConfig, AgentExecutionContext };
 
@@ -415,10 +430,20 @@ export async function initializeMastra(): Promise<void> {
     try { await initDefaultSlos(agentId); } catch {}
   }
 
+  registerMcpModule(vesselsMcpModule);
+  registerMcpModule(aegisMcpModule);
+  registerMcpModule(terraMcpModule);
+  registerMcpModule(prismMcpModule);
+  registerMcpModule(alloyMcpModule);
+  registerMcpModule(githubMcpModule);
+
   await Promise.allSettled([
     ensureActionAuditTable(),
     ensureDocumentIntelligenceTables(),
     ensureTriggerTables(),
+    ensureSkillsRegistryTable(),
+    ensureSkillRuntimeTables(),
+    ensureAgentActivityTable(),
   ]);
 
   registerDefaultTriggers();
@@ -426,8 +451,11 @@ export async function initializeMastra(): Promise<void> {
   logger.info({
     agents: agentConfigs.size,
     tools: listTools().length,
+    mcpModules: 6,
     actionEngine: "initialized",
-  }, "Mastra agent framework initialized with Action Engine");
+    skillsEngine: "initialized",
+    agentActivity: "initialized",
+  }, "Mastra agent framework initialized with Skills Engine + MCP Gateway v2");
 }
 
 export interface OrchestratorResult {

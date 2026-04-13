@@ -213,3 +213,11 @@ export {
   type EcosystemNotification,
 } from "./ecosystem-nav";
 export { AdPixelProvider, fireConversionEvent, fireGoogleAdsConversion, fireMetaPixelEvent, loadGoogleAds, loadMetaPixel } from "./ad-pixel-provider";
+export {
+  AgentActivityFeed,
+  AutonomyLevelSelector,
+  type AgentActivityEvent,
+  type ActivityEventType,
+  type AgentActivityFeedProps,
+  type AutonomyLevelSelectorProps,
+} from "./agent-activity-feed";

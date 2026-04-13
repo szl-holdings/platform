@@ -14,6 +14,7 @@ import { RevenuePanel } from "./admin/RevenuePanel";
 import { BackupPanel } from "./admin/BackupPanel";
 import { CmsPostsPanel } from "./admin/CmsPostsPanel";
 import { FeedbackPanel } from "./admin/FeedbackPanel";
+import { SkillsCatalogPanel, AgentGovernancePanel } from "./admin/SkillsCatalogPanel";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 import { CapitalReadinessOS } from "@/components/CapitalReadinessOS";
@@ -804,6 +805,8 @@ function AnalyticsPanel() {
 
 const ADMIN_SECTIONS = [
   { id: "dashboard", label: "Dashboard", icon: Gauge },
+  { id: "skills-catalog", label: "Skills Catalog", icon: Layers },
+  { id: "agent-governance", label: "Agent Governance", icon: UserCheck },
   { id: "revenue", label: "Revenue", icon: DollarSign },
   { id: "capital-readiness", label: "Capital Readiness", icon: DollarSign },
   { id: "capital-arsenal", label: "Capital Arsenal", icon: BookOpen },
@@ -1281,6 +1284,8 @@ export default function AdminPage() {
             transition={{ duration: 0.15 }}
           >
             {activeSection === "dashboard" && <DashboardPanel />}
+            {activeSection === "skills-catalog" && <SkillsCatalogPanel />}
+            {activeSection === "agent-governance" && <AgentGovernancePanel />}
             {activeSection === "revenue" && <RevenuePanel />}
             {activeSection === "capital-readiness" && <CapitalReadinessOS />}
             {activeSection === "capital-arsenal" && (

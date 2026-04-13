@@ -144,6 +144,7 @@ import emailMarketingRouter from "./email-marketing";
 import sessionAnalyticsRouter from "./session-analytics";
 import analyticsLakeRouter from "./analytics-lake";
 import analyticsEngineRouter from "./analytics-engine";
+import skillsCatalogRouter from "./skills-catalog";
 
 const router: IRouter = Router();
 
@@ -418,6 +419,9 @@ router.use(prismCounselNyRouter);
 
 router.use("/mcp", _readLimiter);
 router.use(mcpRouter);
+
+router.use("/skills", _readLimiter);
+router.use("/skills", skillsCatalogRouter);
 
 router.use("/approvals", _writeLimiter);
 router.use(approvalsRouter);

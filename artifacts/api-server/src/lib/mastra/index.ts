@@ -36,3 +36,39 @@ export {
   ensureActionAuditTable, generateActionId,
 } from "./action-audit";
 export type { ActionAuditEntry } from "./action-audit";
+
+export {
+  ensureSkillsRegistryTable,
+  listSkills, getSkill, updateSkillStatus,
+  setSkillOrgConfig, getSkillOrgConfigs, isSkillEnabledForOrg,
+  getUserAutonomyLevel, setUserAutonomyLevel, getUserAutonomyPrefs,
+  recordSkillInvocation, getSkillMetrics, getSkillsStats,
+  saveSkillComposition, listCompositions, getComposition,
+} from "./skills-registry";
+export type { AutonomyLevel, SkillDomain, SkillStatus, SkillRegistryEntry, SkillRegistryRow, SkillOrgConfig } from "./skills-registry";
+
+export {
+  ensureSkillRuntimeTables,
+  executeSkill,
+  getPendingApprovals as getPendingSkillApprovals,
+  approveSkillExecution, rejectSkillExecution,
+} from "./skill-runtime";
+export type { SkillExecutionRequest, SkillExecutionResult, PendingApproval } from "./skill-runtime";
+
+export {
+  runComposition, buildCompositionFromTemplate,
+} from "./skill-composition";
+export type { CompositionStep, SkillComposition, CompositionRunResult } from "./skill-composition";
+
+export {
+  ensureAgentActivityTable, emitActivityEvent, getActivityFeed,
+  getRecentActivityFromMemory, getA2ADelegationChain, getAgentActivityStats,
+} from "./agent-activity";
+export type { AgentActivityEvent, ActivityEventType } from "./agent-activity";
+
+export {
+  registerMcpModule, getMcpModule, listMcpModules, getAllMcpTools,
+  getAllMcpResources, getAllMcpPrompts, findModuleForTool, mcpGatewayHealth,
+  buildMcpGatewayRouter,
+} from "./mcp-gateway/index";
+export type { McpTool, McpResource, McpPrompt, McpServerModule } from "./mcp-gateway/index";
