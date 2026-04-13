@@ -1,3 +1,4 @@
+import { GraphQLPanelShell } from "@szl-holdings/shared-ui";
 import { useFirestormAssessments, useFirestormIncidents } from "@szl-holdings/graphql-client/hooks";
 
 export function FirestormGraphQLPanel() {
@@ -12,11 +13,7 @@ export function FirestormGraphQLPanel() {
   if (assessments.length === 0 && incidents.length === 0) return null;
 
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 space-y-3">
-      <div className="flex items-center gap-2">
-        <span className="h-1.5 w-1.5 rounded-full bg-red-400 animate-pulse" />
-        <span className="text-xs font-medium text-zinc-400 uppercase tracking-widest">GraphQL Live Data</span>
-      </div>
+    <GraphQLPanelShell dotColor="bg-red-400">
       {assessments.length > 0 && (
         <div>
           <p className="text-xs text-zinc-500 mb-1">Active Assessments</p>
@@ -43,6 +40,6 @@ export function FirestormGraphQLPanel() {
           </div>
         </div>
       )}
-    </div>
+    </GraphQLPanelShell>
   );
 }

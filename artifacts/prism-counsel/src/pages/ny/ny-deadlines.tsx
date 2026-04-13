@@ -1,5 +1,5 @@
 import { Clock, AlertTriangle, CheckCircle, ShieldOff } from "lucide-react";
-import { NY_DEMO_MATTERS } from "../../data/ny-demo-matters";
+import { NY_DEMO_MATTERS } from "../../data/ny-data";
 
 const STATUS_CONFIG = {
   breached: { color: "#c45a4a", label: "BREACHED" },

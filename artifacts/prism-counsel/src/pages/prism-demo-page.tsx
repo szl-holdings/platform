@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ArrowRight, X, AlertTriangle, Clock, TrendingUp, DollarSign, Building2, ShieldOff, Shield, FileText, MapPin, MessageSquare, Scale } from "lucide-react";
-import { NY_DEMO_MATTERS, type NyMatter } from "../data/ny-demo-matters";
+import { NY_DEMO_MATTERS, type NyMatter } from "../data/ny-data";
 
 const ACCENT = "#c8a96e";
 const BG = "#080c14";

@@ -1,5 +1,5 @@
 import { MapPin, TrendingUp, Scale } from "lucide-react";
-import { NY_DEMO_MATTERS } from "../../data/ny-demo-matters";
+import { NY_DEMO_MATTERS } from "../../data/ny-data";
 
 const VENUE_DATABASE = [
   {

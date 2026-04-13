@@ -15,6 +15,10 @@ import { SituationRooms } from "./nerve-center/situation-rooms";
 import { ExecutiveDailyBrief } from "./nerve-center/executive-daily-brief";
 import { DecisionTrace } from "./nerve-center/decision-trace";
 import { AnomalyDetection } from "./nerve-center/anomaly-detection";
+import {
+  type Domain, type DomainConfig,
+  DOMAINS, DOMAIN_CHANNEL_MAP, resolveDomainFromChannel,
+} from "@/lib/domain-config";
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const BG = {
@@ -38,7 +42,6 @@ const ELECTRIC = "#2dd4bf";
 const ELECTRIC_DIM = "rgba(45,212,191,0.10)";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-type Domain = "aegis" | "vessels" | "terra" | "prism" | "carlotajo" | "alloy";
 type Severity = "critical" | "high" | "medium" | "low" | "info";
 type ActionDecision = "approve" | "reject" | "escalate" | "delegate";
 type WsStatus = "idle" | "connecting" | "connected" | "disconnected" | "error" | "auth_failed";
@@ -55,77 +58,6 @@ const PRISM_LENSES = [
   { key: "S", label: "Signals", color: "#c8953c", icon: Radio, desc: "Structured events indicating operational state changes" },
   { key: "M", label: "Motion", color: "#4a90b8", icon: Workflow, desc: "Velocity and integrity of governed workflows" },
 ];
-
-interface DomainConfig {
-  id: Domain;
-  label: string;
-  shortLabel: string;
-  color: string;
-  bg: string;
-  icon: typeof Shield;
-  externalPath: string;
-  wsChannels: string[];
-  prismLens?: string;
-}
-
-const DOMAINS: Record<Domain, DomainConfig> = {
-  aegis: {
-    id: "aegis", label: "Aegis", shortLabel: "AEG",
-    color: "#4f6ef7", bg: "rgba(79,110,247,0.08)", icon: Shield,
-    externalPath: "/firestorm/", wsChannels: ["aegis-incidents"],
-    prismLens: "Risk",
-  },
-  vessels: {
-    id: "vessels", label: "Vessels", shortLabel: "VES",
-    color: "#38bdf8", bg: "rgba(56,189,248,0.08)", icon: Ship,
-    externalPath: "/vessels/", wsChannels: ["vessel-positions"],
-    prismLens: "Signals",
-  },
-  terra: {
-    id: "terra", label: "Terra", shortLabel: "TER",
-    color: "#a07848", bg: "rgba(160,120,72,0.08)", icon: Building2,
-    externalPath: "/terra/", wsChannels: ["terra-signals"],
-    prismLens: "Intelligence",
-  },
-  prism: {
-    id: "prism", label: "PRISM Counsel", shortLabel: "PRM",
-    color: "#d4a054", bg: "rgba(212,160,84,0.08)", icon: Scale,
-    externalPath: "/prism-counsel/", wsChannels: ["notifications", "workflow-runs"],
-    prismLens: "Motion",
-  },
-  carlotajo: {
-    id: "carlotajo", label: "Carlota Jo", shortLabel: "CLJ",
-    color: "#c4956a", bg: "rgba(196,149,106,0.08)", icon: Users,
-    externalPath: "/carlota-jo/", wsChannels: ["bookings"],
-    prismLens: "Pulse",
-  },
-  alloy: {
-    id: "alloy", label: "Alloy", shortLabel: "ALY",
-    color: "#6c8ebf", bg: "rgba(108,142,191,0.08)", icon: Cpu,
-    externalPath: "/alloy/", wsChannels: ["workflow-runs"],
-    prismLens: "Motion",
-  },
-};
-
-const DOMAIN_CHANNEL_MAP: Record<string, Domain | Domain[]> = {
-  "aegis-incidents": "aegis",
-  "vessel-positions": "vessels",
-  "terra-signals": "terra",
-  "workflow-runs": ["alloy", "prism"],
-  "bookings": "carlotajo",
-  "notifications": "prism",
-};
-
-function resolveDomainFromChannel(channel: string, data?: Record<string, unknown>): Domain | null {
-  const mapping = DOMAIN_CHANNEL_MAP[channel];
-  if (!mapping) return null;
-  if (typeof mapping === "string") return mapping;
-  if (data?.domain && typeof data.domain === "string") {
-    const d = data.domain as Domain;
-    if (DOMAINS[d]) return d;
-  }
-  return mapping[0];
-}
 
 const ALL_WS_CHANNELS = [
   "aegis-incidents", "vessel-positions", "terra-signals",
@@ -1178,7 +1110,7 @@ export default function NerveCenter() {
                   <ChevronLeft className="w-3 h-3" />
                 </button>
               </div>
-              <CommandPostureRing />
+              <CommandPostureRing activeLens={activeLens} />
             </div>
 
             <div className="p-3 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
@@ -1187,7 +1119,7 @@ export default function NerveCenter() {
                 <div className="w-2 h-2 rounded-full" style={{ background: lensConfig.color }} />
                 <span className="text-[11px] font-semibold text-white">{lensConfig.label}</span>
               </div>
-              <p className="text-[9px] leading-relaxed" style={{ color: "rgba(255,255,255,0.35)" }}>{lensConfig.description}</p>
+              <p className="text-[9px] leading-relaxed" style={{ color: "rgba(255,255,255,0.35)" }}>{lensConfig.label} analysis active</p>
             </div>
 
             <div className="flex-1 p-3 overflow-y-auto">
@@ -1220,36 +1152,43 @@ export default function NerveCenter() {
         <div className="flex-1 min-w-0 relative">
           <LivingGraph
             activeLens={activeLens}
-            highlightedNodes={highlightedNodes}
+            highlightedNodeIds={highlightedNodes}
             onNodeClick={handleNodeClick}
           />
 
           {/* Selected node overlay */}
-          {selectedNode && (
-            <div
-              className="absolute bottom-4 left-4 rounded-xl p-3 max-w-xs"
-              style={{ background: "rgba(8,12,20,0.92)", border: `1px solid ${selectedNode.color}30`, backdropFilter: "blur(16px)" }}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-2 h-2 rounded-full" style={{ background: selectedNode.color }} />
-                <span className="text-[10px] font-bold" style={{ color: selectedNode.color }}>{selectedNode.label}</span>
-                <button onClick={() => setSelectedNode(null)} className="ml-auto w-4 h-4 flex items-center justify-center rounded hover:bg-white/10" style={{ color: TEXT.muted }}>
-                  <X className="w-2.5 h-2.5" />
-                </button>
-              </div>
-              <p className="text-[9px]" style={{ color: TEXT.secondary }}>{selectedNode.sublabel}</p>
-              {selectedNode.metrics && (
-                <div className="mt-2 grid grid-cols-2 gap-1">
-                  {Object.entries(selectedNode.metrics).slice(0, 4).map(([k, v]) => (
-                    <div key={k} className="rounded px-1.5 py-1" style={{ background: "rgba(255,255,255,0.04)" }}>
-                      <div className="text-[7px]" style={{ color: TEXT.muted }}>{k}</div>
-                      <div className="text-[9px] font-mono" style={{ color: TEXT.primary }}>{String(v)}</div>
-                    </div>
-                  ))}
+          {selectedNode && (() => {
+            const DOMAIN_COLORS: Record<string, string> = {
+              vessels: "#38bdf8", terra: "#86efac", aegis: "#818cf8",
+              prism: "#fbbf24", lyte: "#2dd4bf", alloy: "#c084fc", people: "#fb923c",
+            };
+            const nodeColor = DOMAIN_COLORS[selectedNode.domain] ?? "#a78bfa";
+            return (
+              <div
+                className="absolute bottom-4 left-4 rounded-xl p-3 max-w-xs"
+                style={{ background: "rgba(8,12,20,0.92)", border: `1px solid ${nodeColor}30`, backdropFilter: "blur(16px)" }}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-2 h-2 rounded-full" style={{ background: nodeColor }} />
+                  <span className="text-[10px] font-bold" style={{ color: nodeColor }}>{selectedNode.label}</span>
+                  <button onClick={() => setSelectedNode(null)} className="ml-auto w-4 h-4 flex items-center justify-center rounded hover:bg-white/10" style={{ color: TEXT.muted }}>
+                    <X className="w-2.5 h-2.5" />
+                  </button>
                 </div>
-              )}
-            </div>
-          )}
+                <p className="text-[9px]" style={{ color: TEXT.secondary }}>{selectedNode.domain} · {selectedNode.type}</p>
+                <div className="mt-2 grid grid-cols-2 gap-1">
+                  <div className="rounded px-1.5 py-1" style={{ background: "rgba(255,255,255,0.04)" }}>
+                    <div className="text-[7px]" style={{ color: TEXT.muted }}>heat</div>
+                    <div className="text-[9px] font-mono" style={{ color: TEXT.primary }}>{(selectedNode.heat * 100).toFixed(0)}%</div>
+                  </div>
+                  <div className="rounded px-1.5 py-1" style={{ background: "rgba(255,255,255,0.04)" }}>
+                    <div className="text-[7px]" style={{ color: TEXT.muted }}>lens weight</div>
+                    <div className="text-[9px] font-mono" style={{ color: TEXT.primary }}>{(selectedNode.lensWeights[activeLens] * 100).toFixed(0)}%</div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Right panel */}

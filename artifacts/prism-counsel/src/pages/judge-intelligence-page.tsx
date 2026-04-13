@@ -210,7 +210,7 @@ export default function JudgeIntelligencePage() {
             <span className="text-sm font-semibold text-slate-100">Motion Grant Rates</span>
           </div>
           <div className="space-y-3">
-            {judge.motionTendencies.map((m) => <MotionTendencyBar key={m.motion} {...m} />)}
+            {judge.motionTendencies.map((m) => <MotionTendencyBar key={m.motion} motion={m.motion} rate={m.grantRate} trend={m.trend} />)}
           </div>
         </div>
 

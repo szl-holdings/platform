@@ -1,7 +1,7 @@
 import { Scale, Clock, AlertTriangle, DollarSign, MapPin, Building2, Shield, ArrowRight, Eye, FileCheck, TrendingUp } from "lucide-react";
 import { Link } from "wouter";
 import { DEMO_MATTERS } from "../data/demo-matters";
-import { WATCHLIST_ITEMS, NO_FAULT_CLAIMS, VENUE_PROFILES, INSURER_PROFILES, CLOCK_RULES, DEMAND_PACKETS } from "../data/demo-ny";
+import { WATCHLIST_ITEMS, NO_FAULT_CLAIMS, VENUE_PROFILES, INSURER_PROFILES, CLOCK_RULES, DEMAND_PACKETS } from "../data/ny-data";
 
 export default function NYDashboardPage() {
   const nyMatters = DEMO_MATTERS.filter((m) => m.jurisdiction.includes("NY") || m.jurisdiction.includes("New York"));

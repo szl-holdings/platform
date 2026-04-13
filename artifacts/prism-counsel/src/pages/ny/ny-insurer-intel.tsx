@@ -1,5 +1,5 @@
 import { Building2, Clock, TrendingUp, AlertTriangle } from "lucide-react";
-import { NY_DEMO_MATTERS } from "../../data/ny-demo-matters";
+import { NY_DEMO_MATTERS } from "../../data/ny-data";
 
 export default function NyInsurerIntelPage() {
   const insurers = NY_DEMO_MATTERS.map(m => ({ ...m.insurerProfile, matterTitle: m.title, matter: m }));

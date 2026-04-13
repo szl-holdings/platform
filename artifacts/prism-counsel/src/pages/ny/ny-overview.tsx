@@ -1,7 +1,7 @@
 import { Scale, AlertTriangle, Clock, TrendingUp, Building2, MapPin, Shield, Activity, FileText, ShieldOff, ArrowRight, ChevronRight, Loader2 } from "lucide-react";
 import { Link } from "wouter";
 import { useNyMatters, useNyHealth } from "../../hooks/use-ny-api";
-import { NY_SIGNAL_FAMILIES } from "../../data/ny-demo-matters";
+import { NY_SIGNAL_FAMILIES } from "../../data/ny-data";
 
 const MODULES = [
   { label: "NY Command Dashboard", href: "/ny/dashboard", icon: TrendingUp, desc: "10+ widgets: deadline watchlist, demand readiness, mediation windows, reserve tracker" },

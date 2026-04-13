@@ -183,3 +183,4 @@ export {
   type ActionHistoryEntry,
   type WorkflowStatus,
 } from "./ai-actions-panel";
+export { GraphQLPanelShell } from "./graphql-panel-shell";

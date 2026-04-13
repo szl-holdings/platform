@@ -1,6 +1,6 @@
 import { Building2, User, Clock, TrendingDown, AlertTriangle, MessageSquare, BarChart3 } from "lucide-react";
 import { useState } from "react";
-import { INSURER_PROFILES, ADJUSTER_PROFILES, COMMUNICATION_WINDOWS } from "../data/demo-ny";
+import { INSURER_PROFILES, ADJUSTER_PROFILES, COMMUNICATION_WINDOWS } from "../data/ny-data";
 
 type Tab = "carriers" | "adjusters" | "communications";
 

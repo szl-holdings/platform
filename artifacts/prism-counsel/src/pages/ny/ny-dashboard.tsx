@@ -1,7 +1,7 @@
 import { AlertTriangle, Clock, TrendingUp, DollarSign, Activity, Building2, ShieldOff, Shield, FileText, MapPin, ChevronRight, Loader2 } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { NY_DEMO_MATTERS } from "../../data/ny-demo-matters";
+import { NY_DEMO_MATTERS } from "../../data/ny-data";
 
 function useNyDashboardSummary() {
   return useQuery({

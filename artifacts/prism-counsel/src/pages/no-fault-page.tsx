@@ -1,6 +1,6 @@
 import { Shield, Clock, AlertTriangle, FileCheck, DollarSign, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
-import { NO_FAULT_CLAIMS, CLOCK_RULES } from "../data/demo-ny";
+import { NO_FAULT_CLAIMS, CLOCK_RULES } from "../data/ny-data";
 import { useState } from "react";
 
 type Tab = "claims" | "clocks";

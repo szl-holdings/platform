@@ -1,5 +1,5 @@
 import { BookOpen, CheckCircle, Circle, AlertTriangle } from "lucide-react";
-import { NY_PLAYBOOKS } from "../../data/ny-demo-matters";
+import { NY_PLAYBOOKS } from "../../data/ny-data";
 
 export default function NyPlaybooksPage() {
   return (

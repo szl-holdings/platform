@@ -391,7 +391,7 @@ export default function AttackReplayTheater() {
                     className={cn("w-full flex items-center gap-2 p-2 rounded-md text-left transition-all", isActive && "ring-1")}
                     style={{
                       background: isActive ? `${SEVERITY_COLOR[step.severity]}12` : isDone ? "rgba(255,255,255,0.02)" : "transparent",
-                      ringColor: isActive ? SEVERITY_COLOR[step.severity] : "transparent",
+                      outlineColor: isActive ? SEVERITY_COLOR[step.severity] : "transparent",
                     }}
                   >
                     <div
