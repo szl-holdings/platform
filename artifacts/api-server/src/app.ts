@@ -10,6 +10,7 @@ import { parse } from "yaml";
 import { fileURLToPath } from "url";
 import { dirname, join, resolve } from "path";
 import { randomBytes } from "crypto";
+import { clerkMiddleware } from "@clerk/express";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { correlationMiddleware } from "./middlewares/correlation";
@@ -18,6 +19,7 @@ import { telemetryMiddleware } from "./middlewares/telemetry";
 import { authMiddleware } from "./middlewares/authMiddleware";
 import { csrfMiddleware } from "./middlewares/csrf";
 import { sessionRefreshPolicy } from "./middlewares/session-policy";
+import { CLERK_PROXY_PATH, clerkProxyMiddleware } from "./middlewares/clerkProxyMiddleware";
 
 const app: Express = express();
 
@@ -27,6 +29,9 @@ const isProduction = process.env.NODE_ENV === "production";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+// Clerk proxy — must be before body parsers
+app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
 
 app.use(correlationMiddleware);
 
@@ -166,6 +171,7 @@ app.use(express.urlencoded({
 app.use(csrfMiddleware);
 app.use(authMiddleware);
 app.use(sessionRefreshPolicy());
+app.use(clerkMiddleware());
 
 app.get("/api/health", async (_req: Request, res: Response) => {
   const memUsage = process.memoryUsage();

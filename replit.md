@@ -336,6 +336,34 @@ A proprietary AI infrastructure command center built at `artifacts/inca-lab/` se
 
 **Workflow note:** Due to a platform workflow registration limit (10/10) and a session-level tool cache inconsistency, the INCA Lab workflow must be manually activated by restarting it. The vite dev server starts successfully on port 5000. Node modules were manually bootstrapped from the pnpm virtual store (symlinked from `artifacts/lyte-command-center/node_modules`).
 
+### Alloy Platform — Standalone AI SaaS Product (Task #431)
+
+A full AI platform product built as a self-contained section within `artifacts/szl-holdings/` at `/alloy-platform/`. Provides a world-class, dark-mode-first AI platform experience (ChatGPT + Replit + Vercel aesthetic) surfacing SZL Holdings' internal AI capabilities.
+
+**Files:** All in `artifacts/szl-holdings/src/alloy-platform/`
+- `AlloyPlatformApp.tsx` — Root module with nested WouterRouter (base: `/alloy-platform`) + ClerkProvider
+- `components/AlloyAppShell.tsx` — App shell with sidebar navigation, topbar, mobile-responsive
+- `components/AlloyCommandPalette.tsx` — Cmd+K command palette with fuzzy search, keyboard navigation
+
+**9 Pages:**
+- `pages/Landing.tsx` — Marketing/landing page with hero, feature grid, how-it-works, CTAs
+- `pages/Chat.tsx` — Chat/Copilot interface (`/app/chat`) with model selector, conversation history, streaming
+- `pages/Agents.tsx` — Agent Studio (`/app/agents`) with status badges, capabilities, model assignment
+- `pages/Workflows.tsx` — Workflow Builder (`/app/workflows`) with canvas nodes/edges, template library
+- `pages/Multimodal.tsx` — Multimodal Workspace (`/app/multimodal`) with upload zone, analysis panels
+- `pages/Connectors.tsx` — Connector Hub (`/app/connectors`) with integrations grid, OAuth connect
+- `pages/Governance.tsx` — Governance Dashboard (`/app/governance`) with policies, audit log, compliance
+- `pages/Developer.tsx` — Developer Portal (`/app/developer`) with API keys, usage charts, SDK docs
+- `pages/Account.tsx` — Account & Billing (`/app/account`) with Clerk user profile, plan, invoices
+
+**Auth:** Clerk authentication via `@clerk/react`. Sign-in at `/alloy-platform/sign-in`, sign-up at `/alloy-platform/sign-up`. Signed-in users redirect to `/app/chat`. Signed-out users see landing page.
+
+**Brand:** #4B8BDB steel blue accent, dark `#080c14` background, Space Grotesk/Inter/JetBrains Mono typography.
+
+**API Server:** Clerk proxy middleware wired in `artifacts/api-server/src/app.ts` — `CLERK_PROXY_PATH=/api/__clerk`, `clerkMiddleware()` applied after session middleware.
+
+**App.tsx:** Routes added — `/alloy-platform/:rest*` and `/alloy-platform` both mount `AlloyPlatformApp`.
+
 ## External Dependencies
 - **Database:** PostgreSQL
 - **Authentication:** Replit Auth

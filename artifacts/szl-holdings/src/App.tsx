@@ -194,6 +194,7 @@ const AcademyPage = lazy(() => import("@/pages/academy"));
 const HelpPage = lazy(() => import("@/pages/help"));
 const DemosPage = lazy(() => import("@/pages/demos"));
 const PulsePage = lazy(() => import("@/pages/pulse"));
+const AlloyPlatformApp = lazy(() => import("@/alloy-platform/AlloyPlatformApp"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -616,6 +617,14 @@ function App() {
             </Route>
             <Route path="/pricing">
               <Suspense fallback={<PageLoader />}><PricingPage /></Suspense>
+            </Route>
+
+            {/* ── Alloy Platform — standalone product at /alloy-platform ── */}
+            <Route path="/alloy-platform/:rest*">
+              <Suspense fallback={<PageLoader />}><AlloyPlatformApp /></Suspense>
+            </Route>
+            <Route path="/alloy-platform">
+              <Suspense fallback={<PageLoader />}><AlloyPlatformApp /></Suspense>
             </Route>
 
             {/* ── Alloy app routes (internal, not public nav) ── */}
