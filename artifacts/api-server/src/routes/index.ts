@@ -142,6 +142,7 @@ import crossDomainIntelligenceRouter from "./cross-domain-intelligence";
 import pulseRouter from "./pulse";
 import emailMarketingRouter from "./email-marketing";
 import sessionAnalyticsRouter from "./session-analytics";
+import analyticsLakeRouter from "./analytics-lake";
 
 const router: IRouter = Router();
 
@@ -527,5 +528,9 @@ router.use("/distribution-os/cohorts", _readLimiter);
 router.use("/distribution-os/funnels", _readLimiter);
 router.use("/distribution-os/realtime", _readLimiter);
 router.use("/distribution-os", sessionAnalyticsRouter);
+
+router.use("/analytics-lake", _readLimiter);
+router.use("/analytics-lake", _writeLimiter);
+router.use(analyticsLakeRouter);
 
 export default router;

@@ -212,3 +212,4 @@ export {
   type EcosystemApp,
   type EcosystemNotification,
 } from "./ecosystem-nav";
+export { AdPixelProvider, fireConversionEvent, fireGoogleAdsConversion, fireMetaPixelEvent, loadGoogleAds, loadMetaPixel } from "./ad-pixel-provider";

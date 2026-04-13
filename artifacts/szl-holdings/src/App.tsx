@@ -1,8 +1,8 @@
-import { lazy, Suspense, type ReactNode } from "react";
+import { lazy, Suspense, useCallback, type ReactNode } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
-import { DemoModeProvider, SandboxModeProvider, StatusBanner, AnalyticsProvider, type StatusBannerConfig } from "@szl-holdings/shared-ui";
+import { DemoModeProvider, SandboxModeProvider, CookieBanner, StatusBanner, AnalyticsProvider, AdPixelProvider, useCookieConsent, fireConversionEvent, type StatusBannerConfig } from "@szl-holdings/shared-ui";
 import { CookieConsentBanner } from "@/components/cookie-consent-banner";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus/provider";
@@ -146,6 +146,9 @@ const DistOsAnalytics = lazy(() => import("@/pages/distribution-os/analytics-das
 const DistOsEmailCampaigns = lazy(() => import("@/pages/distribution-os/campaign-builder"));
 const DistOsDripSequences = lazy(() => import("@/pages/distribution-os/drip-sequences-page"));
 const DistOsPrivacy = lazy(() => import("@/pages/distribution-os/privacy-command-center"));
+const DistOsAnalyticsCommandCenter = lazy(() => import("@/pages/distribution-os/analytics-command-center"));
+const DistOsSessionReplay = lazy(() => import("@/pages/distribution-os/session-replay"));
+const DistOsConversionGoals = lazy(() => import("@/pages/distribution-os/conversion-goals"));
 const DistOsAutomations = lazy(() => import("@/pages/distribution-os/automations-page"));
 const DistOsSettings = lazy(() => import("@/pages/distribution-os/settings-page"));
 const DistOsReports = lazy(() => import("@/pages/distribution-os/reports-page"));
@@ -308,8 +311,22 @@ function PublicWidgets() {
 }
 
 function App() {
+  const { consent } = useCookieConsent();
+  const googleAdsId = import.meta.env.VITE_GOOGLE_ADS_ID as string | undefined;
+  const handleConversionEvent = useCallback((eventName: string, properties?: Record<string, unknown>) => {
+    fireConversionEvent(eventName, googleAdsId, {
+      value: properties?.value as number | undefined,
+      currency: properties?.currency as string | undefined,
+    });
+  }, [googleAdsId]);
   return (
-    <AnalyticsProvider appName="szl-holdings">
+    <AnalyticsProvider appName="szl-holdings" onConversionEvent={handleConversionEvent}>
+    <AdPixelProvider
+      googleAdsId={import.meta.env.VITE_GOOGLE_ADS_ID}
+      metaPixelId={import.meta.env.VITE_META_PIXEL_ID}
+      respectDnt={true}
+      consentGranted={consent === "accepted"}
+    >
     <PrismBusProvider domain="szl-holdings">
     <SandboxModeProvider>
     <DemoModeProvider>
@@ -941,6 +958,15 @@ function App() {
             <Route path="/admin/distribution/calendar">
               <RequireAuth><Suspense fallback={<PageLoader />}><DistOsCalendar /></Suspense></RequireAuth>
             </Route>
+            <Route path="/admin/distribution/analytics/command-center">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsAnalyticsCommandCenter /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/analytics/sessions">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsSessionReplay /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/analytics/goals">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsConversionGoals /></Suspense></RequireAuth>
+            </Route>
             <Route path="/admin/distribution/analytics">
               <RequireAuth><Suspense fallback={<PageLoader />}><DistOsAnalytics /></Suspense></RequireAuth>
             </Route>
@@ -981,6 +1007,7 @@ function App() {
     </DemoModeProvider>
     </SandboxModeProvider>
     </PrismBusProvider>
+    </AdPixelProvider>
     </AnalyticsProvider>
   );
 }
