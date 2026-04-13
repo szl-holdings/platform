@@ -75,9 +75,19 @@ export async function fetchJson(url: string, timeoutMs = 8000): Promise<unknown>
 
 export type CveItem = { id: string; description: string; severity: string; score: number; vendor: string; product: string; published: string; references: number };
 
+type NvdCveEntry = {
+  id?: string;
+  descriptions?: { lang: string; value: string }[];
+  metrics?: { cvssMetricV31?: { cvssData?: { baseScore?: number } }[] };
+  configurations?: { nodes?: { cpeMatch?: { criteria?: string }[] }[] }[];
+  published?: string;
+  references?: unknown[];
+};
+type NvdApiResponse = { vulnerabilities?: { cve: NvdCveEntry }[] };
+
 export async function fetchNvdCves(): Promise<CveItem[]> {
   const raw = await fetchJson("https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=8&startIndex=0", 10000);
-  const data = raw as { vulnerabilities?: { cve: { id?: string; descriptions?: { lang: string; value: string }[]; metrics?: { cvssMetricV31?: { cvssData?: { baseScore?: number } }[] }; configurations?: { nodes?: { cpeMatch?: { criteria?: string }[] }[] }[]; published?: string; references?: unknown[] } }[] } };
+  const data = raw as NvdApiResponse;
   const items = data?.vulnerabilities;
   if (!Array.isArray(items) || items.length === 0) throw new Error("No NVD data");
   return items.map((v, idx: number) => {

@@ -4,7 +4,7 @@ import { pool } from "@szl-holdings/db";
 import { logger } from "./logger";
 
 function getMigrationFilePath(): string {
-  const relativePath = path.join("lib", "db", "drizzle", "0009_export_jobs.sql");
+  const relativePath = path.join("lib", "db", "drizzle", "0020_export_jobs.sql");
   const replHome = process.env["REPL_HOME"];
   if (replHome) {
     const candidate = path.join(replHome, relativePath);
@@ -33,13 +33,9 @@ export async function ensureExportJobsTable(): Promise<void> {
     .filter(s => s.length > 0)
     .map(s => s + ";");
 
-  try {
-    for (const statement of statements) {
-      await pool.query(statement);
-    }
-    logger.info({ statementCount: statements.length }, "Export jobs table ensured");
-  } catch (err) {
-    logger.error({ err }, "Failed to apply export jobs migration");
-    throw err;
+  for (const statement of statements) {
+    await pool.query(statement);
   }
+
+  logger.info({ statementCount: statements.length }, "Export jobs table ensured");
 }

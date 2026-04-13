@@ -19,11 +19,12 @@ function getMigrationFilePath(): string {
 export async function ensureLyteDashboardsTable(): Promise<void> {
   const migrationFile = getMigrationFilePath();
   let migrationSql: string;
+
   try {
     migrationSql = fs.readFileSync(migrationFile, "utf-8");
-  } catch {
-    logger.warn({ path: migrationFile }, "lyte_dashboards migration file not found — skipping");
-    return;
+  } catch (err) {
+    logger.error({ err, path: migrationFile }, "lyte_dashboards migration file not found");
+    throw new Error(`lyte_dashboards migration file not found at ${migrationFile}`);
   }
 
   const statements = migrationSql
@@ -37,17 +38,9 @@ export async function ensureLyteDashboardsTable(): Promise<void> {
     )
     .filter(s => s.length > 0);
 
-  try {
-    for (const statement of statements) {
-      await pool.query(statement);
-    }
-    logger.info({ statementCount: statements.length }, "lyte_dashboards table ensured");
-  } catch (err: unknown) {
-    if ((err as { message?: string }).message?.includes("already exists")) {
-      logger.debug("lyte_dashboards table already exists — skipping");
-      return;
-    }
-    logger.error({ err }, "Failed to apply lyte_dashboards migration");
-    throw err;
+  for (const statement of statements) {
+    await pool.query(statement);
   }
+
+  logger.info({ statementCount: statements.length }, "lyte_dashboards table ensured");
 }

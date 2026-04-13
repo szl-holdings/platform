@@ -13,15 +13,7 @@ import { startDomainNotificationGenerators, stopDomainNotificationGenerators } f
 import { startSelfMonitoring, stopSelfMonitoring } from "./lib/self-monitor";
 import { agentScheduler, registerDefaultSchedules } from "./lib/agent-scheduler";
 import { knowledgeStore } from "./lib/knowledge-store";
-import { ensureAlloyTables } from "./lib/alloy-migrations";
-import { ensureAlloyGovernanceTables } from "./lib/alloy-governance-migrations";
-import { ensurePlatformOpsTables } from "./lib/platform-ops-migrations";
-import { ensureLyteDashboardsTable } from "./lib/lyte-dashboard-migrations";
-import { ensureExportJobsTable } from "./lib/export-migrations";
-import { ensureFeedbackTables } from "./lib/feedback-migrations";
-import { ensureTerraActionItemsTable } from "./lib/terra-action-items-migration";
-import { ensureTradecraftTables } from "./lib/tradecraft-migrations";
-import { ensureOutcomeGraphTables } from "./lib/outcome-graph-migrations";
+import { runDrizzleMigrations } from "./lib/run-migrations";
 import "./lib/terra-nyc-ingestion";
 import { scheduleNycIngestionJob } from "./lib/terra-nyc-ingestion";
 import "./lib/terra-nyc-extended-ingestion";
@@ -91,49 +83,34 @@ startSelfMonitoring();
 
 import { providerHealth } from "./lib/provider-health";
 providerHealth.startActiveProbes();
-ensureAlloyTables()
-  .then(() => ensureAlloyGovernanceTables())
-  .then(() => ensurePlatformOpsTables())
-  .then(() => ensureLyteDashboardsTable())
-  .then(() => ensureExportJobsTable())
-  .then(() => ensureFeedbackTables())
-  .then(() => ensureTerraActionItemsTable())
-  .then(() => ensureTradecraftTables())
-  .then(() => ensureOutcomeGraphTables())
+runDrizzleMigrations()
+  .then(() => ensurePlatformFlags())
   .then(() => knowledgeStore.loadFromDb())
   .then(() => {
     registerDefaultSchedules();
+    seedPlatformData().catch(err => {
+      logger.warn({ err }, "[seed-platform] Seed failed (non-fatal)");
+    });
+    seedTerraDemo().catch(err => {
+      logger.warn({ err }, "[terra-seed] Terra demo seed failed (non-fatal)");
+    });
+    seedMspData().catch(err => {
+      logger.warn({ err }, "[msp-seed] MSP demo seed failed (non-fatal)");
+    });
+    seedAlloyCreativeData().catch(err => {
+      logger.warn({ err }, "[seed-alloy-creative] Alloy Creative seed failed (non-fatal)");
+    });
+    seedDosData().catch(err => {
+      logger.warn({ err }, "[dos-seed] Distribution OS seed failed (non-fatal)");
+    });
+    startScheduledJobs();
+    startNamedScheduledJobs();
+    startPlatformScheduledJobs();
   })
   .catch(err => {
-    logger.fatal({ err }, "Schema bootstrap failed — cannot guarantee data integrity, shutting down");
+    logger.fatal({ err }, "Schema migration failed — cannot guarantee data integrity, shutting down");
     process.exit(1);
   });
-startScheduledJobs();
-startNamedScheduledJobs();
-startPlatformScheduledJobs();
-ensurePlatformFlags().catch((err) => {
-  logger.warn({ err }, "Failed to ensure platform feature flags on startup");
-});
-
-seedPlatformData().catch(err => {
-  logger.warn({ err }, "[seed-platform] Seed failed (non-fatal)");
-});
-
-seedTerraDemo().catch(err => {
-  logger.warn({ err }, "[terra-seed] Terra demo seed failed (non-fatal)");
-});
-
-seedMspData().catch(err => {
-  logger.warn({ err }, "[msp-seed] MSP demo seed failed (non-fatal)");
-});
-
-seedAlloyCreativeData().catch(err => {
-  logger.warn({ err }, "[seed-alloy-creative] Alloy Creative seed failed (non-fatal)");
-});
-
-seedDosData().catch(err => {
-  logger.warn({ err }, "[dos-seed] Distribution OS seed failed (non-fatal)");
-});
 
 registerAllPrismJobHandlers();
 const prismPoller = startPrismJobPoller(5000);

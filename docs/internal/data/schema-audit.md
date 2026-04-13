@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-02  
 **Author:** Engineering  
-**Status:** Current — reflects all applied migrations through `0009_feedback_tables`
+**Status:** Current — reflects all applied migrations through `0021_feedback_tables`
 
 ---
 

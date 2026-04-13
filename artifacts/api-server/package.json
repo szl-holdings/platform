@@ -12,7 +12,9 @@
     "start": "node --max-old-space-size=1024 --expose-gc --optimize-for-size --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "seed:terra": "tsx src/scripts/seed-terra-distress.ts",
-    "seed:ecosystem": "tsx src/scripts/seed-ecosystem.ts"
+    "seed:ecosystem": "tsx src/scripts/seed-ecosystem.ts",
+    "seed:platform-flags": "tsx src/scripts/seed-platform-flags.ts",
+    "db:migrate": "cd ../../lib/db && npx drizzle-kit migrate --config ./drizzle.push.config.ts"
   },
   "dependencies": {
     "@apollo/server": "^5.5.0",
