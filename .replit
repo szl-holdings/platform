@@ -43,9 +43,5 @@ PUBLIC_APP_URL = "https://szlholdings.replit.app"
 [userenv.shared]
 
 [[ports]]
-localPort = 8080
-externalPort = 8080
-
-[[ports]]
 localPort = 21130
 externalPort = 80
