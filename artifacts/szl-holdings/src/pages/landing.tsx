@@ -29,6 +29,8 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 import { useNarrativeRouter } from "@/hooks/useNarrativeRouter";
 import { SegmentedCTA } from "@/components/SegmentedCTA";
 import { DynamicProofPack } from "@/components/DynamicProofPack";
+import { analytics, initScrollDepthTracking, initTimeOnPageTracking } from "@/lib/analytics";
+import { PostDemoPrompt } from "@/components/EmailCapture";
 import {
   WordReveal, MagneticButton, NoiseGrain, LiveIndicator,
   CinematicReveal, EcosystemPulseItem, useMouseParallax,
@@ -868,6 +870,7 @@ function EcosystemPulseSection() {
 
 export default function HomePage() {
   const { visitorType, setIntent } = useNarrativeRouter();
+  const [showPostDemo, setShowPostDemo] = useState(false);
 
   usePageMeta({
     title: "SZL Holdings — Business observability with explainable execution.",
@@ -875,6 +878,33 @@ export default function HomePage() {
       "SZL Holdings builds Lyte, the business observability platform, and Alloy, the execution fabric beneath it. Signal → visibility → forecast → governed action.",
     canonical: "https://szlholdings.com/",
   });
+
+  useEffect(() => {
+    analytics.pageView("/");
+    analytics.funnelStage("landing", "/");
+    const cleanupScroll = initScrollDepthTracking("/");
+    const cleanupTime = initTimeOnPageTracking("/");
+    let dismissed = false;
+    try {
+      dismissed = localStorage.getItem("szl_post_demo_dismissed") === "true"
+        || localStorage.getItem("szl_newsletter_subscribed") === "true";
+    } catch {}
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    if (!dismissed) {
+      timers.push(setTimeout(() => setShowPostDemo(true), 45_000));
+    }
+    const handleDemoEngaged = () => {
+      if (dismissed) return;
+      timers.push(setTimeout(() => setShowPostDemo(true), 8_000));
+    };
+    window.addEventListener("szl:demo_mode_engaged", handleDemoEngaged);
+    return () => {
+      timers.forEach(clearTimeout);
+      window.removeEventListener("szl:demo_mode_engaged", handleDemoEngaged);
+      cleanupScroll();
+      cleanupTime();
+    };
+  }, []);
 
   const { x: pX, y: pY } = useMouseParallax(0.025);
 
@@ -1836,6 +1866,7 @@ export default function HomePage() {
 
       </main>
       <SiteFooter />
+      <PostDemoPrompt show={showPostDemo} onDismiss={() => { setShowPostDemo(false); try { localStorage.setItem("szl_post_demo_dismissed", "true"); } catch {} }} />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "wouter";
 import {
   ArrowRight,
@@ -21,6 +21,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { InlineSegmentedCTA } from "@/components/SegmentedCTA";
+import { analytics, initScrollDepthTracking, initTimeOnPageTracking } from "@/lib/analytics";
 
 function formatCurrency(n: number) {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -296,6 +297,14 @@ export default function InvestorsHubPage() {
     canonical: "https://szlholdings.com/investors",
   });
 
+  useEffect(() => {
+    analytics.pageView("/investors");
+    analytics.funnelStage("investor-hub", "/investors");
+    const cleanupScroll = initScrollDepthTracking("/investors");
+    const cleanupTime = initTimeOnPageTracking("/investors");
+    return () => { cleanupScroll(); cleanupTime(); };
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#070a10] text-white">
       <SiteNav />
@@ -328,6 +337,10 @@ export default function InvestorsHubPage() {
               <Link
                 href="/investors/data-room"
                 className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-5 py-3 text-sm font-semibold text-white/80 transition hover:border-white/25 hover:bg-white/[0.04]"
+                onClick={() => {
+                  analytics.ctaClick("Request data room access", "/investors", "hero");
+                  analytics.funnelStage("data-room-request", "/investors");
+                }}
               >
                 Request data room access
               </Link>
@@ -423,6 +436,10 @@ export default function InvestorsHubPage() {
                 <Link
                   href="/contact"
                   className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-5 py-3 text-sm font-semibold text-white/80 transition hover:border-white/25 hover:bg-white/[0.04]"
+                  onClick={() => {
+                    analytics.ctaClick("Send a note", "/investors", "cta");
+                    analytics.funnelStage("inquiry-form", "/investors");
+                  }}
                 >
                   Send a note
                 </Link>

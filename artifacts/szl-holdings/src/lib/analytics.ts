@@ -27,7 +27,17 @@ type EventName =
   | "ecosystem_node_click"
   | "portfolio_filter"
   | "insights_article_click"
-  | "nav_link_click";
+  | "nav_link_click"
+  | "pricing_tier_view"
+  | "pricing_cta_click"
+  | "email_capture"
+  | "exit_intent_shown"
+  | "chat_opened"
+  | "chat_message_sent"
+  | "funnel_stage"
+  | "demo_mode_engaged"
+  | "newsletter_subscribe"
+  | "time_on_page";
 
 interface EventProperties {
   site?: string;
@@ -42,11 +52,52 @@ interface EventProperties {
   [key: string]: string | number | boolean | undefined;
 }
 
-function track(event: EventName, properties?: EventProperties): void {
-  if (typeof window === "undefined") return;
-  if (typeof (window as any).gtag === "function") {
-    (window as any).gtag("event", event, properties);
+let _doNotTrack: boolean | null = null;
+function shouldTrack(): boolean {
+  if (typeof window === "undefined") return false;
+  if (_doNotTrack === null) {
+    _doNotTrack =
+      navigator.doNotTrack === "1" ||
+      (window as Window & { doNotTrack?: string }).doNotTrack === "1" ||
+      (window as Window & { msDoNotTrack?: string }).msDoNotTrack === "1";
   }
+  return !_doNotTrack;
+}
+
+const EVENT_QUEUE: Array<{ event: EventName; properties?: EventProperties }> = [];
+let _flushing = false;
+
+async function flushQueue() {
+  if (_flushing || EVENT_QUEUE.length === 0) return;
+  _flushing = true;
+  const batch = EVENT_QUEUE.splice(0, 10);
+  try {
+    await fetch("/api/analytics/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ events: batch.map(e => ({ event: e.event, properties: e.properties, timestamp: new Date().toISOString() })) }),
+      keepalive: true,
+    });
+  } catch {
+    // silent — analytics must never break the user experience
+  } finally {
+    _flushing = false;
+    if (EVENT_QUEUE.length > 0) {
+      setTimeout(flushQueue, 300);
+    }
+  }
+}
+
+function track(event: EventName, properties?: EventProperties): void {
+  if (!shouldTrack()) return;
+
+  if (typeof (window as Window & { gtag?: (...args: unknown[]) => void }).gtag === "function") {
+    (window as Window & { gtag?: (...args: unknown[]) => void }).gtag!("event", event, properties);
+  }
+
+  EVENT_QUEUE.push({ event, properties });
+  setTimeout(flushQueue, 100);
+
   if (import.meta.env.DEV) {
     console.debug(`[analytics] ${event}`, properties);
   }
@@ -54,6 +105,32 @@ function track(event: EventName, properties?: EventProperties): void {
 
 let scrollDepthThresholds = [25, 50, 75, 90];
 let trackedDepths: number[] = [];
+
+export function initTimeOnPageTracking(pageSlug: string, site = "szl-holdings"): () => void {
+  const start = Date.now();
+  let flushed = false;
+
+  function flush() {
+    if (flushed) return;
+    flushed = true;
+    const seconds = Math.round((Date.now() - start) / 1000);
+    if (seconds < 3) return;
+    track("time_on_page", { page: pageSlug, site, duration_seconds: seconds });
+  }
+
+  function visibilityHandler() {
+    if (document.hidden) flush();
+  }
+
+  document.addEventListener("visibilitychange", visibilityHandler);
+  window.addEventListener("pagehide", flush);
+
+  return () => {
+    flush();
+    document.removeEventListener("visibilitychange", visibilityHandler);
+    window.removeEventListener("pagehide", flush);
+  };
+}
 
 export function initScrollDepthTracking(pageSlug: string): () => void {
   trackedDepths = [];
@@ -147,4 +224,31 @@ export const analytics = {
 
   navLinkClick: (label: string, href: string) =>
     track("nav_link_click", { label, href }),
+
+  pricingTierView: (tierId: string) =>
+    track("pricing_tier_view", { plan_key: tierId, site: "szl-holdings" }),
+
+  pricingCtaClick: (tierId: string, ctaLabel: string) =>
+    track("pricing_cta_click", { plan_key: tierId, cta_label: ctaLabel, site: "szl-holdings" }),
+
+  emailCapture: (source: string) =>
+    track("email_capture", { section: source, site: "szl-holdings" }),
+
+  exitIntentShown: () =>
+    track("exit_intent_shown", { site: "szl-holdings" }),
+
+  chatOpened: () =>
+    track("chat_opened", { site: "szl-holdings" }),
+
+  chatMessageSent: () =>
+    track("chat_message_sent", { site: "szl-holdings" }),
+
+  funnelStage: (stage: string, page: string) =>
+    track("funnel_stage", { section: stage, page, site: "szl-holdings" }),
+
+  demoModeEngaged: (feature?: string) =>
+    track("demo_mode_engaged", { section: feature, site: "szl-holdings" }),
+
+  newsletterSubscribe: (source: string) =>
+    track("newsletter_subscribe", { section: source, site: "szl-holdings" }),
 };

@@ -482,48 +482,319 @@ function SubmissionsPanel() {
 
 // ─── Analytics Panel ──────────────────────────────────────────────────────────
 
+interface AnalyticsSummary {
+  timestamp: string;
+  businessEvents: Record<string, number>;
+  requestCount: number;
+  errorRate: number;
+  workflowCompletions: number;
+  jobFailures: number;
+  pageViews: number;
+  topPages: Array<{ path: string; views: number }>;
+  topSites: Array<{ site: string; views: number }>;
+  funnelBreakdown: Array<{ stage: string; count: number }>;
+}
+
 function AnalyticsPanel() {
+  const [tab, setTab] = useState<"metrics" | "taxonomy" | "funnel">("metrics");
+  const queryClient = useQueryClient();
+
+  const { data: summary, isLoading, error, dataUpdatedAt } = useQuery<AnalyticsSummary>({
+    queryKey: ["analytics-summary"],
+    queryFn: () => apiFetch<AnalyticsSummary>("/analytics/summary"),
+    refetchInterval: 30_000,
+    retry: 1,
+  });
+
+  const fmt = (n: number | undefined) => (n ?? 0).toLocaleString();
+  const pct = (n: number | undefined) => `${((n ?? 0) * 100).toFixed(1)}%`;
+
+  const topEvents = summary?.businessEvents
+    ? Object.entries(summary.businessEvents)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 12)
+    : [];
+
+  const FUNNEL_STAGES = [
+    { key: "page_view", label: "Page Views", icon: Eye, color: "hsl(192,72%,48%)" },
+    { key: "cta_click", label: "CTA Interactions", icon: Globe, color: "hsl(214,60%,60%)" },
+    { key: "email_capture", label: "Email Captures", icon: Mail, color: "hsl(38,72%,58%)" },
+    { key: "contact_form_submit", label: "Contact Form Submissions", icon: CheckCircle2, color: "hsl(258,55%,68%)" },
+    { key: "demo_request", label: "Demo Requests", icon: CheckCircle2, color: "hsl(145,60%,46%)" },
+  ];
+
   const eventSummary = [
-    { event: "page_view", count: "Track on each route", description: "Every page navigation" },
-    { event: "cta_click", count: "CTA interactions", description: "Button and link clicks with label" },
-    { event: "form_submit", count: "Form completions", description: "All form submissions" },
-    { event: "demo_request", count: "Demo requests", description: "Vessels demo form" },
-    { event: "access_request", count: "Access requests", description: "INCA access form" },
-    { event: "private_inquiry_submit", count: "Private inquiries", description: "Carlota Jo inquiry form" },
-    { event: "article_view", count: "Article views", description: "Article detail page loads" },
-    { event: "case_study_view", count: "Case study views", description: "Case study page loads" },
-    { event: "download_asset", count: "Asset downloads", description: "File and PDF downloads" },
-    { event: "sign_in", count: "Sign in events", description: "Authentication completions" },
-    { event: "dashboard_view", count: "Dashboard loads", description: "Authenticated dashboard views" },
-    { event: "alert_view", count: "Alert views", description: "Alert detail views" },
-    { event: "report_view", count: "Report views", description: "Report page views" },
+    { event: "page_view", description: "Every page navigation, fired on each route change" },
+    { event: "cta_click", description: "Button and link clicks, labelled by CTA text" },
+    { event: "form_submit", description: "All form submissions with form_key property" },
+    { event: "demo_request", description: "Demo form submitted (Vessels demo)" },
+    { event: "access_request", description: "INCA Lab access request form" },
+    { event: "private_inquiry_submit", description: "Carlota Jo private inquiry form" },
+    { event: "article_view", description: "Article detail page load with slug" },
+    { event: "case_study_view", description: "Case study page load with slug" },
+    { event: "download_asset", description: "File/PDF downloads" },
+    { event: "sign_in", description: "Authentication completions" },
+    { event: "dashboard_view", description: "Authenticated dashboard page load" },
+    { event: "email_capture", description: "Newsletter/email sign-up with source field" },
+    { event: "exit_intent_shown", description: "Exit-intent popup displayed" },
+    { event: "chat_opened", description: "AI chat widget opened" },
+    { event: "chat_message_sent", description: "Message sent in AI chat widget" },
+    { event: "pricing_tier_view", description: "Pricing tier card viewed, plan_key property" },
+    { event: "funnel_stage", description: "Conversion funnel stage milestone" },
   ];
 
   return (
     <div className="space-y-4">
-      <div>
-        <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-          <BarChart3 className="w-4 h-4 text-primary" /> Analytics Event Taxonomy
-        </h2>
-        <p className="text-xs text-muted-foreground mt-0.5">All analytics events fire via window.gtag and the analytics utility.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+            <BarChart3 className="w-4 h-4 text-primary" /> Analytics Dashboard
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Live metrics from the server telemetry snapshot
+            {dataUpdatedAt ? ` · Updated ${new Date(dataUpdatedAt).toLocaleTimeString()}` : ""}
+          </p>
+        </div>
+        <button
+          onClick={() => queryClient.invalidateQueries({ queryKey: ["analytics-summary"] })}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground border border-border hover:border-border/80 transition-colors"
+        >
+          <RefreshCw className="w-3 h-3" /> Refresh
+        </button>
       </div>
-      <div className="bg-card border border-border rounded-xl divide-y divide-border/50">
-        {eventSummary.map(e => (
-          <div key={e.event} className="px-4 py-3">
-            <div className="flex items-start justify-between gap-4">
-              <div>
+
+      {/* Tab bar */}
+      <div className="flex gap-1 border-b border-border/50">
+        {([["metrics", "Live Metrics"], ["funnel", "Conversion Funnel"], ["taxonomy", "Event Taxonomy"]] as const).map(([id, label]) => (
+          <button
+            key={id}
+            onClick={() => setTab(id)}
+            className={cn(
+              "px-3 py-2 text-xs font-medium border-b-2 -mb-px transition-colors",
+              tab === id
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "metrics" && (
+        <>
+          {isLoading && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground p-4">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" /> Loading metrics…
+            </div>
+          )}
+          {error && (
+            <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4">
+              <p className="text-xs text-red-500">Could not load analytics — API may be offline.</p>
+            </div>
+          )}
+          {summary && (
+            <>
+              {/* KPI cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { label: "Page View Events", value: fmt(summary.pageViews ?? summary.businessEvents?.["page_view"] ?? 0), sub: "event hits since restart", color: "hsl(192,72%,48%)" },
+                  { label: "Email Captures", value: fmt(summary.businessEvents?.["email_capture"] ?? 0), sub: "newsletter sign-ups", color: "hsl(38,72%,58%)" },
+                  { label: "CTA Clicks", value: fmt(summary.businessEvents?.["cta_click"] ?? 0), sub: "across all pages", color: "hsl(214,60%,60%)" },
+                  { label: "Contact Submits", value: fmt(summary.businessEvents?.["contact_form_submit"] ?? 0), sub: "inquiry completions", color: "hsl(145,60%,46%)" },
+                ].map(card => (
+                  <div key={card.label} className="bg-card border border-border rounded-xl p-4">
+                    <p className="text-xs text-muted-foreground mb-1">{card.label}</p>
+                    <p className="text-xl font-bold" style={{ color: card.color }}>{card.value}</p>
+                    <p className="text-[10px] text-muted-foreground/60 mt-0.5">{card.sub}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Top pages */}
+              {(summary.topPages ?? []).length > 0 && (
+                <div className="bg-card border border-border rounded-xl overflow-hidden">
+                  <div className="px-4 py-3 border-b border-border/50 flex items-center gap-2">
+                    <Globe className="w-3.5 h-3.5 text-primary" />
+                    <p className="text-xs font-semibold text-foreground">Top Pages</p>
+                  </div>
+                  <div className="divide-y divide-border/40">
+                    {(summary.topPages ?? []).map(({ path, views }) => {
+                      const maxViews = summary.topPages[0]?.views ?? 1;
+                      return (
+                        <div key={path} className="px-4 py-2.5">
+                          <div className="flex items-center justify-between gap-4 mb-1">
+                            <code className="text-xs font-mono text-foreground truncate max-w-[220px]">{path}</code>
+                            <span className="text-xs font-semibold text-primary shrink-0">{fmt(views)} views</span>
+                          </div>
+                          <div className="h-1 bg-muted/30 rounded-full overflow-hidden">
+                            <div className="h-full bg-primary/50 rounded-full transition-all" style={{ width: `${Math.round((views / maxViews) * 100)}%` }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Page loads by app/site */}
+              {(summary.topSites ?? []).length > 0 && (
+                <div className="bg-card border border-border rounded-xl overflow-hidden">
+                  <div className="px-4 py-3 border-b border-border/50 flex items-center gap-2">
+                    <Users className="w-3.5 h-3.5 text-primary" />
+                    <p className="text-xs font-semibold text-foreground">Page Loads by App</p>
+                    <span className="text-[10px] text-muted-foreground ml-auto">session-level count</span>
+                  </div>
+                  <div className="divide-y divide-border/40">
+                    {(summary.topSites ?? []).map(({ site, views }) => {
+                      const maxViews = summary.topSites[0]?.views ?? 1;
+                      return (
+                        <div key={site} className="px-4 py-2.5">
+                          <div className="flex items-center justify-between gap-4 mb-1">
+                            <code className="text-xs font-mono text-foreground">{site}</code>
+                            <span className="text-xs font-semibold text-primary">{fmt(views)}</span>
+                          </div>
+                          <div className="h-1 bg-muted/30 rounded-full overflow-hidden">
+                            <div className="h-full bg-primary/40 rounded-full" style={{ width: `${Math.round((views / maxViews) * 100)}%` }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Top business events */}
+              {topEvents.length > 0 && (
+                <div className="bg-card border border-border rounded-xl overflow-hidden">
+                  <div className="px-4 py-3 border-b border-border/50 flex items-center gap-2">
+                    <BarChart3 className="w-3.5 h-3.5 text-primary" />
+                    <p className="text-xs font-semibold text-foreground">All Events</p>
+                  </div>
+                  <div className="divide-y divide-border/40">
+                    {topEvents.map(([event, count]) => {
+                      const maxCount = topEvents[0]?.[1] ?? 1;
+                      return (
+                        <div key={event} className="px-4 py-2.5">
+                          <div className="flex items-center justify-between gap-4 mb-1">
+                            <code className="text-xs font-mono text-primary">{event}</code>
+                            <span className="text-xs font-semibold text-foreground">{fmt(count)}</span>
+                          </div>
+                          <div className="h-1 bg-muted/30 rounded-full overflow-hidden">
+                            <div className="h-full bg-primary/40 rounded-full" style={{ width: `${Math.round((count / maxCount) * 100)}%` }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {topEvents.length === 0 && !isLoading && (
+                <div className="text-center py-8 text-xs text-muted-foreground">
+                  No business events recorded yet. Events will appear here as users interact with the platform.
+                </div>
+              )}
+            </>
+          )}
+        </>
+      )}
+
+      {tab === "funnel" && (
+        <div className="space-y-3">
+          <p className="text-xs text-muted-foreground">Conversion funnel from landing to trial — based on server-side event telemetry.</p>
+
+          {/* Primary funnel stages */}
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-border/50 flex items-center gap-2">
+              <TrendingUp className="w-3.5 h-3.5 text-primary" />
+              <p className="text-xs font-semibold text-foreground">Funnel Stages</p>
+            </div>
+            {FUNNEL_STAGES.map((stage, i) => {
+              const count = summary?.businessEvents?.[stage.key] ?? 0;
+              const topCount = summary?.businessEvents?.[FUNNEL_STAGES[0].key] ?? 1;
+              const prevCount = i === 0 ? null : (summary?.businessEvents?.[FUNNEL_STAGES[i - 1].key] ?? 1);
+              const convRate = prevCount && prevCount > 0 ? ((count / prevCount) * 100).toFixed(1) : null;
+              const dropOff = prevCount && prevCount > 0 ? (100 - (count / prevCount) * 100).toFixed(1) : null;
+              const barWidth = topCount > 0 ? Math.round((count / topCount) * 100) : 0;
+              const Icon = stage.icon;
+              return (
+                <div key={stage.key} className="px-4 py-3 border-b border-border/40 last:border-b-0">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 text-[10px] font-bold" style={{ background: `${stage.color}18`, color: stage.color }}>
+                      {i + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-foreground">{stage.label}</p>
+                      <code className="text-[10px] text-muted-foreground font-mono">{stage.key}</code>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-bold" style={{ color: stage.color }}>{fmt(count)}</p>
+                      {convRate !== null && (
+                        <p className="text-[10px] text-muted-foreground">
+                          {convRate}% conv · <span className="text-red-400">{dropOff}% drop</span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="h-1.5 bg-muted/30 rounded-full overflow-hidden">
+                    <div className="h-full rounded-full transition-all" style={{ width: `${barWidth}%`, background: stage.color }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Stage-level breakdown from funnel_stage events */}
+          {(summary?.funnelBreakdown ?? []).length > 0 && (
+            <div className="bg-card border border-border rounded-xl overflow-hidden">
+              <div className="px-4 py-3 border-b border-border/50 flex items-center gap-2">
+                <Map className="w-3.5 h-3.5 text-primary" />
+                <p className="text-xs font-semibold text-foreground">Stage Milestones</p>
+                <span className="text-[10px] text-muted-foreground ml-auto">from funnel_stage events</span>
+              </div>
+              <div className="divide-y divide-border/40">
+                {(summary?.funnelBreakdown ?? []).map(({ stage, count }) => {
+                  const maxCount = summary!.funnelBreakdown[0]?.count ?? 1;
+                  return (
+                    <div key={stage} className="px-4 py-2.5">
+                      <div className="flex items-center justify-between gap-4 mb-1">
+                        <code className="text-xs font-mono text-foreground">{stage}</code>
+                        <span className="text-xs font-semibold text-primary">{fmt(count)}</span>
+                      </div>
+                      <div className="h-1 bg-muted/30 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary/50 rounded-full" style={{ width: `${Math.round((count / maxCount) * 100)}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4">
+            <p className="text-xs text-amber-600 font-medium">Note on funnel accuracy</p>
+            <p className="text-xs text-muted-foreground mt-1">Server telemetry accumulates event counts across process restarts. For full session-level funnel analysis, cross-reference with the Submissions panel and any CRM data.</p>
+          </div>
+        </div>
+      )}
+
+      {tab === "taxonomy" && (
+        <div className="space-y-3">
+          <div className="bg-card border border-border rounded-xl divide-y divide-border/50">
+            {eventSummary.map(e => (
+              <div key={e.event} className="px-4 py-3">
                 <code className="text-xs font-mono text-primary bg-primary/5 px-2 py-0.5 rounded">{e.event}</code>
                 <p className="text-xs text-muted-foreground mt-1">{e.description}</p>
               </div>
-              <span className="text-[10px] text-muted-foreground shrink-0">{e.count}</span>
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4">
-        <p className="text-xs text-amber-600 font-medium">Event Properties</p>
-        <p className="text-xs text-muted-foreground mt-1">All events include: <code className="font-mono">site</code>, <code className="font-mono">page</code>, <code className="font-mono">section</code>, <code className="font-mono">cta_label</code>, <code className="font-mono">form_key</code>, <code className="font-mono">content_slug</code></p>
-      </div>
+          <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4">
+            <p className="text-xs text-amber-600 font-medium">Event Properties</p>
+            <p className="text-xs text-muted-foreground mt-1">All events include: <code className="font-mono">site</code>, <code className="font-mono">page</code>, <code className="font-mono">section</code>, <code className="font-mono">cta_label</code>, <code className="font-mono">form_key</code>, <code className="font-mono">content_slug</code></p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

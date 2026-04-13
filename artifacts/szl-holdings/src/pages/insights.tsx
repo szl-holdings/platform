@@ -6,6 +6,8 @@ import { insights, CATEGORIES, getInsightsByCategory } from "@/data/insights";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { InlineEmailCTA } from "@/components/EmailCapture";
+import { analytics, initScrollDepthTracking, initTimeOnPageTracking } from "@/lib/analytics";
 
 const CATEGORY_COLORS: Record<string, string> = {
   "Annual Letter": "text-amber-600 bg-amber-50 border-amber-200",
@@ -50,9 +52,14 @@ export default function InsightsPage() {
     script.id = "insights-ld";
     script.textContent = JSON.stringify(INSIGHTS_LD);
     document.head.appendChild(script);
+    analytics.pageView("/insights");
+    const cleanupScroll = initScrollDepthTracking("/insights");
+    const cleanupTime = initTimeOnPageTracking("/insights");
     return () => {
       const el = document.getElementById("insights-ld");
       if (el) el.remove();
+      cleanupScroll();
+      cleanupTime();
     };
   }, []);
 
@@ -252,6 +259,14 @@ export default function InsightsPage() {
               No articles in this category yet.
             </div>
           )}
+
+          <div className="mt-12">
+            <InlineEmailCTA
+              title="Analysis like this, directly in your inbox."
+              description="Founder-written perspectives on business observability, AI operations, maritime intelligence, and enterprise architecture. Published when it's worth reading."
+              source="insights-page-bottom"
+            />
+          </div>
         </section>
       </main>
 

@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Link } from "wouter";
+import { analytics } from "@/lib/analytics";
 
 const FOOTER_COLS = [
   {
@@ -106,6 +108,99 @@ const SOCIAL_LINKS = [
   },
 ];
 
+function FooterNewsletter() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.includes("@")) return;
+    setStatus("submitting");
+    try {
+      const res = await fetch("/api/contact/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "general",
+          name: email.split("@")[0],
+          email,
+          message: "Newsletter subscription via footer.",
+          app: "szl-holdings",
+          metadata: { source: "footer-newsletter" },
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error((body as { error?: string }).error ?? "Subscription failed");
+      }
+      setStatus("success");
+      analytics.emailCapture("footer");
+      analytics.newsletterSubscribe("footer");
+      try { localStorage.setItem("szl_newsletter_subscribed", "true"); } catch {}
+    } catch {
+      setStatus("error");
+    }
+  };
+
+  if (status === "success") {
+    return (
+      <p style={{ fontSize: "0.75rem", color: "hsl(145,60%,46%)", marginBottom: "0.5rem" }}>
+        Subscribed. We'll send analysis when it's worth reading.
+      </p>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} style={{ marginBottom: "0.5rem" }}>
+      <p style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", marginBottom: "0.5rem" }}>
+        Strategic Analysis
+      </p>
+      <div style={{ display: "flex", gap: "0.375rem" }}>
+        <input
+          type="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          placeholder="your@email.com"
+          required
+          style={{
+            flex: 1,
+            padding: "0.4375rem 0.625rem",
+            background: "hsla(214,12%,8%,0.72)",
+            border: "1px solid hsla(0,0%,100%,0.1)",
+            borderRadius: "0.375rem",
+            fontSize: "0.75rem",
+            color: "hsl(38,8%,92%)",
+            outline: "none",
+            minWidth: 0,
+          }}
+        />
+        <button
+          type="submit"
+          disabled={status === "submitting"}
+          style={{
+            padding: "0.4375rem 0.75rem",
+            background: "hsla(192,72%,48%,0.15)",
+            border: "1px solid hsla(192,72%,48%,0.3)",
+            borderRadius: "0.375rem",
+            color: "hsl(192,72%,60%)",
+            fontSize: "0.6875rem",
+            fontWeight: 600,
+            cursor: status === "submitting" ? "not-allowed" : "pointer",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {status === "submitting" ? "…" : "Subscribe"}
+        </button>
+      </div>
+      {status === "error" && (
+        <p style={{ fontSize: "0.6875rem", color: "hsl(0,72%,60%)", marginTop: "0.25rem" }}>
+          Could not subscribe. Try again.
+        </p>
+      )}
+    </form>
+  );
+}
+
 export function SiteFooter() {
   return (
     <footer style={{ borderTop: "1px solid var(--color-szl-border)", background: "hsl(210,12%,4%)", padding: "4rem 0 2rem" }}>
@@ -141,7 +236,8 @@ export function SiteFooter() {
             <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", marginBottom: "1rem" }}>
               hello@szlholdings.com
             </p>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <FooterNewsletter />
+            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginTop: "1rem" }}>
               {SOCIAL_LINKS.map((link) => (
                 <a
                   key={link.label}

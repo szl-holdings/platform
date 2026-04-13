@@ -1,5 +1,5 @@
 import { lazy, Suspense, type ReactNode } from "react";
-import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
+import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
 import { DemoModeProvider, SandboxModeProvider, CookieBanner, StatusBanner, AnalyticsProvider, type StatusBannerConfig } from "@szl-holdings/shared-ui";
@@ -9,6 +9,8 @@ import { useAuth } from "@szl-holdings/replit-auth-web";
 import { AlloyLayout } from "@/alloy/components/alloy-layout";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
+import { AIChatWidget } from "@/components/AIChatWidget";
+import { ExitIntentPopup } from "@/components/EmailCapture";
 
 const SZL_ACCENT = LANE_ACCENT_HEX.szl.primary;
 
@@ -267,6 +269,36 @@ function PageLoader() {
         animation: "spin 0.8s linear infinite",
       }} />
     </div>
+  );
+}
+
+const PUBLIC_WIDGET_PATHS = [
+  "/", "/pricing", "/platform", "/contact", "/demo", "/design-partners",
+  "/design-partner", "/insights", "/solutions", "/company", "/founder",
+  "/investors", "/ventures", "/how-it-works", "/lyte", "/alloy",
+  "/faq", "/case-studies", "/ecosystem",
+];
+
+function PublicWidgets() {
+  const [location] = useLocation();
+  const isPublicPage = PUBLIC_WIDGET_PATHS.some(p =>
+    p === "/" ? location === "/" || location === "" : location.startsWith(p)
+  );
+  const isAdminOrAuthPage =
+    location.startsWith("/admin") ||
+    location.startsWith("/alloy") ||
+    location.startsWith("/trust") ||
+    location.startsWith("/legal") ||
+    location.startsWith("/status") ||
+    location.startsWith("/helm") ||
+    location.startsWith("/ops") ||
+    location.startsWith("/kpi");
+  if (!isPublicPage || isAdminOrAuthPage) return null;
+  return (
+    <>
+      <AIChatWidget />
+      <ExitIntentPopup />
+    </>
   );
 }
 
@@ -922,6 +954,7 @@ function App() {
               <Suspense fallback={<PageLoader />}><NotFoundPage /></Suspense>
             </Route>
           </Switch>
+          <PublicWidgets />
         </WouterRouter>
       </LazyMotion>
       <Toaster />
