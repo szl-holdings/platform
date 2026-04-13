@@ -36,8 +36,6 @@ import { csrfMiddleware } from "./middlewares/csrf";
 import { sessionRefreshPolicy } from "./middlewares/session-policy";
 import { CLERK_PROXY_PATH, clerkProxyMiddleware } from "./middlewares/clerkProxyMiddleware";
 
-const _require = createRequire(import.meta.url);
-
 const app: Express = express();
 
 app.set("trust proxy", 1);

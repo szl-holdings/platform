@@ -9,148 +9,49 @@ import {
 } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { logger } from "../lib/logger";
+import {
+  ensureForgeTables,
+  getOnboardingRecord,
+  upsertOnboarding,
+  getClientHealth,
+  upsertClientHealth,
+  getClientProposals,
+  getProposal,
+  upsertProposal,
+  getAllPackages,
+  getPackage,
+  upsertPackage,
+  incrementPackageSubscribers,
+  getClientCommunications,
+  getCommunication,
+  upsertCommunication,
+  getCommPrefs,
+  upsertCommPrefs,
+} from "../lib/forge-db";
 
 const router: IRouter = Router();
 
 type Domain = "vessels" | "terra" | "legal" | "security";
 
-interface OnboardingRecord {
-  id: string;
-  userId: number;
-  status: "in_progress" | "completed" | "pending_review";
-  currentStep: number;
-  totalSteps: number;
-  companyProfile: {
-    name: string;
-    industry: string;
-    size: string;
-    website: string;
-    headquarters: string;
-  } | null;
-  domainInterests: Domain[];
-  kycStatus: "pending" | "uploaded" | "verified" | "rejected";
-  kycDocuments: { name: string; type: string; uploadedAt: string; status: string }[];
-  portfolioConfig: {
-    investmentHorizon: string;
-    riskProfile: string;
-    targetAllocation: Record<string, number>;
-  } | null;
-  teamInvitations: { email: string; role: string; status: string; sentAt: string }[];
-  billingSetup: {
-    tier: string;
-    billingCycle: string;
-    stripeCustomerId: string | null;
-  } | null;
-  startedAt: string;
-  completedAt: string | null;
-  lastUpdatedAt: string;
+function getClientId(userId: number): string {
+  return `c-${userId}`;
 }
 
-interface ClientHealthScore {
-  clientId: string;
-  overallScore: number;
-  trend: "improving" | "stable" | "declining";
-  trendDelta: number;
-  dimensions: {
-    engagement: number;
-    adoption: number;
-    satisfaction: number;
-    growth: number;
-    billing: number;
-  };
-  riskLevel: "low" | "medium" | "high" | "critical";
-  churnProbability: number;
-  daysSinceLastLogin: number;
-  reportsViewedLast30d: number;
-  featuresAdopted: number;
-  totalFeatures: number;
-  supportTicketsOpen: number;
-  npsScore: number | null;
-  recommendations: { action: string; impact: string; priority: "high" | "medium" | "low" }[];
-  computedAt: string;
+// ─── Bootstrap tables and seed on startup ────────────────────────────────────
+
+let _booted = false;
+async function boot() {
+  if (_booted) return;
+  _booted = true;
+  await ensureForgeTables();
+  await seedPackagesIfEmpty();
 }
+boot().catch(err => logger.error({ err }, "forge-revenue boot failed"));
 
-interface Proposal {
-  id: string;
-  clientId: string;
-  title: string;
-  type: "consulting" | "advisory" | "intelligence" | "custom";
-  status: "draft" | "sent" | "viewed" | "accepted" | "declined" | "expired";
-  executiveSummary: string;
-  services: { name: string; description: string; deliverables: string[] }[];
-  timeline: { phase: string; duration: string; milestones: string[] }[];
-  pricing: {
-    total: number;
-    currency: string;
-    breakdown: { item: string; amount: number }[];
-    paymentTerms: string;
-  };
-  domains: Domain[];
-  validUntil: string;
-  createdAt: string;
-  sentAt: string | null;
-  viewedAt: string | null;
-  respondedAt: string | null;
-}
-
-interface IntelligencePackage {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  domains: Domain[];
-  tier: "starter" | "professional" | "enterprise";
-  features: { name: string; description: string; included: boolean }[];
-  deliverables: { name: string; frequency: string }[];
-  pricing: {
-    monthly: number;
-    annual: number;
-    currency: string;
-  };
-  agentWorkflows: string[];
-  usageLimits: { metric: string; limit: number; unit: string }[];
-  subscriberCount: number;
-  isActive: boolean;
-}
-
-interface Communication {
-  id: string;
-  clientId: string;
-  type: "briefing" | "alert" | "milestone" | "newsletter" | "report";
-  subject: string;
-  summary: string;
-  body: string;
-  domain: Domain | "general";
-  priority: "urgent" | "high" | "normal" | "low";
-  status: "scheduled" | "sent" | "read" | "archived";
-  scheduledAt: string;
-  sentAt: string | null;
-  readAt: string | null;
-  metadata: Record<string, unknown>;
-}
-
-interface CommunicationPreferences {
-  clientId: string;
-  briefingFrequency: "daily" | "weekly" | "monthly";
-  alertThreshold: "all" | "high" | "critical";
-  newsletterOptIn: boolean;
-  emailNotifications: boolean;
-  inPortalNotifications: boolean;
-  domainPreferences: Record<Domain, boolean>;
-  quietHoursStart: string | null;
-  quietHoursEnd: string | null;
-}
-
-const onboardingStore = new Map<number, OnboardingRecord>();
-const healthStore = new Map<string, ClientHealthScore>();
-const proposalsStore = new Map<string, Proposal>();
-const packagesStore = new Map<string, IntelligencePackage>();
-const communicationsStore = new Map<string, Communication>();
-const preferencesStore = new Map<string, CommunicationPreferences>();
-
-function seedPackages() {
-  if (packagesStore.size > 0) return;
-  const pkgs: IntelligencePackage[] = [
+async function seedPackagesIfEmpty() {
+  const existing = await getAllPackages();
+  if (existing.length > 0) return;
+  const pkgs = [
     {
       id: "pkg-maritime-risk",
       name: "Maritime Risk Premium",
@@ -307,22 +208,21 @@ function seedPackages() {
       isActive: true,
     },
   ];
-  for (const pkg of pkgs) packagesStore.set(pkg.id, pkg);
+  for (const pkg of pkgs) {
+    await upsertPackage(pkg).catch(err => logger.warn({ err, pkgId: pkg.id }, "Failed to seed package"));
+  }
+  logger.info("Forge intelligence packages seeded");
 }
 
-function seedClientHealth(clientId: string): ClientHealthScore {
-  const score: ClientHealthScore = {
+async function seedHealthIfMissing(clientId: string): Promise<any> {
+  const existing = await getClientHealth(clientId);
+  if (existing) return existing;
+  const health = {
     clientId,
     overallScore: 82,
     trend: "improving",
     trendDelta: 4.2,
-    dimensions: {
-      engagement: 78,
-      adoption: 85,
-      satisfaction: 88,
-      growth: 72,
-      billing: 95,
-    },
+    dimensions: { engagement: 78, adoption: 85, satisfaction: 88, growth: 72, billing: 95 },
     riskLevel: "low",
     churnProbability: 8.3,
     daysSinceLastLogin: 1,
@@ -339,20 +239,22 @@ function seedClientHealth(clientId: string): ClientHealthScore {
     ],
     computedAt: new Date().toISOString(),
   };
-  healthStore.set(clientId, score);
-  return score;
+  await upsertClientHealth(health).catch(() => {});
+  return health;
 }
 
-function seedProposals(clientId: string) {
-  if ([...proposalsStore.values()].some(p => p.clientId === clientId)) return;
-  const proposals: Proposal[] = [
+async function seedProposalsIfMissing(clientId: string): Promise<void> {
+  const existing = await getClientProposals(clientId);
+  if (existing.length > 0) return;
+  const now = new Date().toISOString();
+  const proposals = [
     {
       id: `prop-${clientId}-1`,
       clientId,
       title: "Strategic Maritime Intelligence Advisory",
       type: "advisory",
       status: "sent",
-      executiveSummary: "A comprehensive advisory engagement to optimize your maritime portfolio through AI-powered intelligence, risk modeling, and strategic fleet positioning. Leveraging SZL's Alloy cognitive engine for cross-domain insights.",
+      executiveSummary: "A comprehensive advisory engagement to optimize your maritime portfolio through AI-powered intelligence, risk modeling, and strategic fleet positioning.",
       services: [
         { name: "Fleet Risk Assessment", description: "Deep analysis of current fleet exposure across geopolitical, weather, and market risk factors", deliverables: ["Risk Matrix Report", "Mitigation Strategy", "Insurance Optimization Plan"] },
         { name: "Route Optimization Study", description: "AI-driven analysis of current routes with recommendations for cost and time savings", deliverables: ["Route Analysis Report", "Savings Projection", "Implementation Roadmap"] },
@@ -363,16 +265,7 @@ function seedProposals(clientId: string) {
         { phase: "Analysis & Modeling", duration: "4 weeks", milestones: ["Risk model built", "Route optimization complete", "Market brief drafted"] },
         { phase: "Strategy & Recommendations", duration: "2 weeks", milestones: ["Final report delivered", "Strategy session conducted", "Implementation plan approved"] },
       ],
-      pricing: {
-        total: 125000,
-        currency: "USD",
-        breakdown: [
-          { item: "Fleet Risk Assessment", amount: 45000 },
-          { item: "Route Optimization Study", amount: 55000 },
-          { item: "Market Intelligence Brief", amount: 25000 },
-        ],
-        paymentTerms: "50% upon engagement, 25% at Phase 2, 25% upon delivery",
-      },
+      pricing: { total: 125000, currency: "USD", breakdown: [{ item: "Fleet Risk Assessment", amount: 45000 }, { item: "Route Optimization Study", amount: 55000 }, { item: "Market Intelligence Brief", amount: 25000 }], paymentTerms: "50% upon engagement, 25% at Phase 2, 25% upon delivery" },
       domains: ["vessels"],
       validUntil: "2026-05-15",
       createdAt: "2026-04-01T09:00:00Z",
@@ -395,15 +288,7 @@ function seedProposals(clientId: string) {
         { phase: "Configuration", duration: "1 week", milestones: ["System audit", "Configuration complete"] },
         { phase: "Deployment", duration: "2 weeks", milestones: ["Models deployed", "Alerts active", "Dashboard live"] },
       ],
-      pricing: {
-        total: 68000,
-        currency: "USD",
-        breakdown: [
-          { item: "Predictive Analytics Integration", amount: 42000 },
-          { item: "Distress Signal Engine", amount: 26000 },
-        ],
-        paymentTerms: "Net 30",
-      },
+      pricing: { total: 68000, currency: "USD", breakdown: [{ item: "Predictive Analytics Integration", amount: 42000 }, { item: "Distress Signal Engine", amount: 26000 }], paymentTerms: "Net 30" },
       domains: ["terra"],
       validUntil: "2026-06-01",
       createdAt: "2026-04-10T11:00:00Z",
@@ -412,12 +297,15 @@ function seedProposals(clientId: string) {
       respondedAt: null,
     },
   ];
-  for (const p of proposals) proposalsStore.set(p.id, p);
+  for (const p of proposals) {
+    await upsertProposal(p).catch(err => logger.warn({ err }, "Failed to seed proposal"));
+  }
 }
 
-function seedCommunications(clientId: string) {
-  if ([...communicationsStore.values()].some(c => c.clientId === clientId)) return;
-  const comms: Communication[] = [
+async function seedCommunicationsIfMissing(clientId: string): Promise<void> {
+  const existing = await getClientCommunications(clientId);
+  if (existing.length > 0) return;
+  const comms = [
     {
       id: `comm-${clientId}-1`,
       clientId,
@@ -439,7 +327,7 @@ function seedCommunications(clientId: string) {
       type: "alert",
       subject: "Alert: Gulf Explorer Cargo Temperature Variance",
       summary: "Cargo temperature variance detected on MV Gulf Explorer. Monitoring situation. No action required at this time.",
-      body: "Our monitoring systems detected a cargo temperature variance on MV Gulf Explorer (IMO 9876543) at 09:05 UTC on April 12, 2026. Current position: Gulf of Mexico — 25.1°N, 90.2°W. The variance was 2.3°C above the threshold for 47 minutes before self-correcting. The technical team has confirmed this was caused by a routine engine room ventilation cycle during tropical weather transit. No cargo damage is expected. We will continue monitoring and provide an update in tomorrow's daily digest.",
+      body: "Our monitoring systems detected a cargo temperature variance on MV Gulf Explorer (IMO 9876543) at 09:05 UTC on April 12, 2026. Current position: Gulf of Mexico — 25.1°N, 90.2°W. The variance was 2.3°C above the threshold for 47 minutes before self-correcting. No cargo damage is expected.",
       domain: "vessels",
       priority: "high",
       status: "read",
@@ -454,7 +342,7 @@ function seedCommunications(clientId: string) {
       type: "milestone",
       subject: "Milestone: Harbor Logistics Hub Lease Renewal — Negotiation Entered",
       summary: "Lease renewal negotiations have formally commenced for Harbor Logistics Hub in Long Beach, CA.",
-      body: "We are pleased to confirm that lease renewal negotiations for Harbor Logistics Hub (Long Beach, CA) have formally commenced as of April 8, 2026. Your legal counsel, James Okafor, is leading negotiations for a 10-year renewal term. Current terms expire on May 15, 2026. Next deadline: Counter-offer review by April 22. We will provide weekly updates on negotiation progress through this communication channel.",
+      body: "We are pleased to confirm that lease renewal negotiations for Harbor Logistics Hub (Long Beach, CA) have formally commenced as of April 8, 2026. Your legal counsel, James Okafor, is leading negotiations for a 10-year renewal term. Current terms expire on May 15, 2026. Next deadline: Counter-offer review by April 22.",
       domain: "terra",
       priority: "normal",
       status: "sent",
@@ -469,7 +357,7 @@ function seedCommunications(clientId: string) {
       type: "newsletter",
       subject: "SZL Holdings Monthly Intelligence Digest — March 2026",
       summary: "March recap: Portfolio up 3.2% QoQ, 2 new distress opportunities identified, maritime market outlook positive.",
-      body: "March 2026 was a strong month across your portfolio. Maritime holdings gained 6.4% QoQ driven by favorable charter rates in the Pacific basin. Real estate portfolio NAV increased 3.2% with strong occupancy across industrial assets. Your legal team resolved the Gulf Explorer Crew Compliance matter, achieving full STCW certification for all crew members. Looking ahead: We've identified 2 distress property opportunities in the Houston market that match your investment criteria. Your relationship manager will reach out to discuss further.",
+      body: "March 2026 was a strong month across your portfolio. Maritime holdings gained 6.4% QoQ driven by favorable charter rates in the Pacific basin. Real estate portfolio NAV increased 3.2% with strong occupancy across industrial assets.",
       domain: "general",
       priority: "low",
       status: "read",
@@ -484,29 +372,27 @@ function seedCommunications(clientId: string) {
       type: "report",
       subject: "Q1 2026 Security Posture Assessment",
       summary: "Overall security posture: Strong. SOC 2 compliance maintained. Zero breaches. 3 advisories addressed.",
-      body: "Your Q1 2026 security posture assessment is complete. Key findings: (1) SOC 2 Type II compliance maintained with zero audit findings. (2) No security breaches or incidents detected across your infrastructure. (3) Three CVE advisories were proactively addressed — CVE-2026-1842 (critical, patched within 4 hours), CVE-2026-2104 (high, mitigated), CVE-2026-2291 (medium, scheduled patch). (4) Employee security awareness training completion rate: 96%. Recommendation: Schedule annual penetration test for Q2 to maintain compliance posture.",
+      body: "Your Q1 2026 security posture assessment is complete. Key findings: (1) SOC 2 Type II compliance maintained with zero audit findings. (2) No security breaches or incidents detected. (3) Three CVE advisories were proactively addressed. Employee security awareness training completion rate: 96%.",
       domain: "security",
       priority: "normal",
       status: "sent",
-      scheduledAt: "2026-04-05T09:00:00Z",
-      sentAt: "2026-04-05T09:01:12Z",
+      scheduledAt: "2026-04-07T09:00:00Z",
+      sentAt: "2026-04-07T09:00:33Z",
       readAt: null,
-      metadata: { quarter: "Q1 2026", complianceStatus: "maintained" },
+      metadata: { quarter: "Q1 2026", postureScore: "A" },
     },
   ];
-  for (const c of comms) communicationsStore.set(c.id, c);
+  for (const c of comms) {
+    await upsertCommunication(c).catch(err => logger.warn({ err }, "Failed to seed communication"));
+  }
 }
 
-function getClientId(userId: number): string {
-  return `c-${userId}`;
-}
+// ─── Routes ───────────────────────────────────────────────────────────────────
 
-seedPackages();
-
-router.get("/forge-portal/onboarding/status", authMiddleware(), (req: Request, res: Response) => {
+router.get("/forge-portal/onboarding/status", authMiddleware(), async (req: Request, res: Response) => {
   try {
     if (!req.user) { sendBadRequest(res, "Auth required"); return; }
-    const record = onboardingStore.get(req.user.id);
+    const record = await getOnboardingRecord(req.user.id);
     if (!record) {
       sendSuccess(res, { status: "not_started", currentStep: 0, totalSteps: 6 });
       return;
@@ -517,13 +403,13 @@ router.get("/forge-portal/onboarding/status", authMiddleware(), (req: Request, r
   }
 });
 
-router.post("/forge-portal/onboarding/submit", authMiddleware(), (req: Request, res: Response) => {
+router.post("/forge-portal/onboarding/submit", authMiddleware(), async (req: Request, res: Response) => {
   try {
     if (!req.user) { sendBadRequest(res, "Auth required"); return; }
     const { step, data } = req.body as { step: number; data: Record<string, unknown> };
     if (typeof step !== "number" || step < 1 || step > 6) { sendBadRequest(res, "step must be 1-6"); return; }
 
-    let record = onboardingStore.get(req.user.id);
+    let record = await getOnboardingRecord(req.user.id);
     const now = new Date().toISOString();
 
     if (!record) {
@@ -550,29 +436,13 @@ router.post("/forge-portal/onboarding/submit", authMiddleware(), (req: Request, 
     if (step !== record.currentStep) { sendBadRequest(res, `Expected step ${record.currentStep}, got ${step}`); return; }
 
     switch (step) {
-      case 1:
-        record.companyProfile = data as OnboardingRecord["companyProfile"];
-        record.currentStep = 2;
-        break;
-      case 2:
-        record.domainInterests = (data.domains as Domain[]) ?? [];
-        record.currentStep = 3;
-        break;
-      case 3:
-        record.kycStatus = "uploaded";
-        record.kycDocuments = (data.documents as OnboardingRecord["kycDocuments"]) ?? [];
-        record.currentStep = 4;
-        break;
-      case 4:
-        record.portfolioConfig = data as OnboardingRecord["portfolioConfig"];
-        record.currentStep = 5;
-        break;
-      case 5:
-        record.teamInvitations = (data.invitations as OnboardingRecord["teamInvitations"]) ?? [];
-        record.currentStep = 6;
-        break;
+      case 1: record.companyProfile = data; record.currentStep = 2; break;
+      case 2: record.domainInterests = (data.domains as Domain[]) ?? []; record.currentStep = 3; break;
+      case 3: record.kycStatus = "uploaded"; record.kycDocuments = (data.documents ?? []) as any; record.currentStep = 4; break;
+      case 4: record.portfolioConfig = data; record.currentStep = 5; break;
+      case 5: record.teamInvitations = (data.invitations ?? []) as any; record.currentStep = 6; break;
       case 6:
-        record.billingSetup = data as OnboardingRecord["billingSetup"];
+        record.billingSetup = data;
         record.status = "completed";
         record.completedAt = now;
         record.kycStatus = "verified";
@@ -580,7 +450,7 @@ router.post("/forge-portal/onboarding/submit", authMiddleware(), (req: Request, 
     }
 
     record.lastUpdatedAt = now;
-    onboardingStore.set(req.user.id, record);
+    await upsertOnboarding(record);
     logger.info({ userId: req.user.id, step, status: record.status }, "forge-revenue: onboarding step submitted");
     sendSuccess(res, record);
   } catch (err) {
@@ -588,43 +458,42 @@ router.post("/forge-portal/onboarding/submit", authMiddleware(), (req: Request, 
   }
 });
 
-router.get("/forge-portal/health-score", authMiddleware(), (req: Request, res: Response) => {
+router.get("/forge-portal/health-score", authMiddleware(), async (req: Request, res: Response) => {
   try {
     if (!req.user) { sendBadRequest(res, "Auth required"); return; }
     const clientId = getClientId(req.user.id);
-    let score = healthStore.get(clientId);
-    if (!score) score = seedClientHealth(clientId);
+    const score = await seedHealthIfMissing(clientId);
     sendSuccess(res, score);
   } catch (err) {
     handleRouteError(res, err, "forge-revenue health score");
   }
 });
 
-router.get("/forge-portal/proposals", authMiddleware(), (req: Request, res: Response) => {
+router.get("/forge-portal/proposals", authMiddleware(), async (req: Request, res: Response) => {
   try {
     if (!req.user) { sendBadRequest(res, "Auth required"); return; }
     const clientId = getClientId(req.user.id);
-    seedProposals(clientId);
-    const proposals = [...proposalsStore.values()].filter(p => p.clientId === clientId);
+    await seedProposalsIfMissing(clientId);
+    let proposals = await getClientProposals(clientId);
     const { status } = req.query as Record<string, string>;
-    const filtered = status ? proposals.filter(p => p.status === status) : proposals;
-    sendSuccess(res, { proposals: filtered, count: filtered.length });
+    if (status) proposals = proposals.filter(p => p.status === status);
+    sendSuccess(res, { proposals, count: proposals.length });
   } catch (err) {
     handleRouteError(res, err, "forge-revenue proposals list");
   }
 });
 
-router.get("/forge-portal/proposals/:proposalId", authMiddleware(), (req: Request, res: Response) => {
+router.get("/forge-portal/proposals/:proposalId", authMiddleware(), async (req: Request, res: Response) => {
   try {
     if (!req.user) { sendBadRequest(res, "Auth required"); return; }
     const clientId = getClientId(req.user.id);
-    seedProposals(clientId);
-    const proposal = proposalsStore.get(String(req.params.proposalId));
+    await seedProposalsIfMissing(clientId);
+    const proposal = await getProposal(String(req.params.proposalId));
     if (!proposal || proposal.clientId !== clientId) { sendNotFound(res, "Proposal"); return; }
     if (proposal.status === "sent") {
       proposal.status = "viewed";
       proposal.viewedAt = new Date().toISOString();
-      proposalsStore.set(proposal.id, proposal);
+      await upsertProposal(proposal);
     }
     sendSuccess(res, proposal);
   } catch (err) {
@@ -632,21 +501,19 @@ router.get("/forge-portal/proposals/:proposalId", authMiddleware(), (req: Reques
   }
 });
 
-router.post("/forge-portal/proposals/generate", authMiddleware(), (req: Request, res: Response) => {
+router.post("/forge-portal/proposals/generate", authMiddleware(), async (req: Request, res: Response) => {
   try {
     if (!req.user) { sendBadRequest(res, "Auth required"); return; }
     const clientId = getClientId(req.user.id);
-    const { title, type, domains, description } = req.body as {
-      title?: string; type?: string; domains?: string[]; description?: string;
-    };
+    const { title, type, domains, description } = req.body as { title?: string; type?: string; domains?: string[]; description?: string };
     if (!title) { sendBadRequest(res, "title is required"); return; }
 
     const now = new Date().toISOString();
-    const proposal: Proposal = {
+    const proposal = {
       id: `prop-${clientId}-${Date.now()}`,
       clientId,
       title,
-      type: (type as Proposal["type"]) ?? "consulting",
+      type: type ?? "consulting",
       status: "draft",
       executiveSummary: description ?? `AI-generated proposal for ${title}. This engagement leverages SZL's cross-domain intelligence capabilities to deliver actionable insights and measurable outcomes.`,
       services: [
@@ -658,22 +525,15 @@ router.post("/forge-portal/proposals/generate", authMiddleware(), (req: Request,
         { phase: "Implementation", duration: "4 weeks", milestones: ["Solution Deployed", "UAT Complete", "Go-Live"] },
       ],
       pricing: {
-        total: 75000,
-        currency: "USD",
-        breakdown: [
-          { item: "Discovery & Assessment", amount: 25000 },
-          { item: "Solution Design & Implementation", amount: 50000 },
-        ],
+        total: 75000, currency: "USD",
+        breakdown: [{ item: "Discovery & Assessment", amount: 25000 }, { item: "Solution Design & Implementation", amount: 50000 }],
         paymentTerms: "Net 30",
       },
       domains: (domains as Domain[]) ?? [],
       validUntil: new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0],
-      createdAt: now,
-      sentAt: null,
-      viewedAt: null,
-      respondedAt: null,
+      createdAt: now, sentAt: null, viewedAt: null, respondedAt: null,
     };
-    proposalsStore.set(proposal.id, proposal);
+    await upsertProposal(proposal);
     logger.info({ proposalId: proposal.id, clientId }, "forge-revenue: proposal generated");
     sendCreated(res, proposal);
   } catch (err) {
@@ -681,29 +541,19 @@ router.post("/forge-portal/proposals/generate", authMiddleware(), (req: Request,
   }
 });
 
-router.patch("/forge-portal/proposals/:proposalId/accept", authMiddleware(), (req: Request, res: Response) => {
+router.patch("/forge-portal/proposals/:proposalId/accept", authMiddleware(), async (req: Request, res: Response) => {
   try {
     if (!req.user) { sendBadRequest(res, "Auth required"); return; }
     const clientId = getClientId(req.user.id);
-    const proposal = proposalsStore.get(String(req.params.proposalId));
+    const proposal = await getProposal(String(req.params.proposalId));
     if (!proposal || proposal.clientId !== clientId) { sendNotFound(res, "Proposal"); return; }
     if (proposal.status === "accepted") { sendBadRequest(res, "Proposal already accepted"); return; }
     if (proposal.status === "expired") { sendBadRequest(res, "Proposal has expired"); return; }
     proposal.status = "accepted";
     proposal.respondedAt = new Date().toISOString();
-    proposalsStore.set(proposal.id, proposal);
+    await upsertProposal(proposal);
     const engagementId = `eng-${Date.now()}`;
-    const engagement = {
-      id: engagementId,
-      proposalId: proposal.id,
-      clientId,
-      title: proposal.title,
-      type: proposal.type ?? "consulting",
-      status: "active",
-      domains: proposal.domains ?? [],
-      startDate: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-    };
+    const engagement = { id: engagementId, proposalId: proposal.id, clientId, title: proposal.title, type: proposal.type ?? "consulting", status: "active", domains: proposal.domains ?? [], startDate: new Date().toISOString(), createdAt: new Date().toISOString() };
     logger.info({ proposalId: proposal.id, clientId, engagementId }, "forge-revenue: proposal accepted, engagement auto-created");
     sendSuccess(res, { ...proposal, engagement });
   } catch (err) {
@@ -711,20 +561,18 @@ router.patch("/forge-portal/proposals/:proposalId/accept", authMiddleware(), (re
   }
 });
 
-router.get("/forge-portal/packages", authMiddleware(), (_req: Request, res: Response) => {
+router.get("/forge-portal/packages", authMiddleware(), async (_req: Request, res: Response) => {
   try {
-    seedPackages();
-    const packages = [...packagesStore.values()].filter(p => p.isActive);
+    const packages = await getAllPackages();
     sendSuccess(res, { packages, count: packages.length });
   } catch (err) {
     handleRouteError(res, err, "forge-revenue packages list");
   }
 });
 
-router.get("/forge-portal/packages/:packageId", authMiddleware(), (req: Request, res: Response) => {
+router.get("/forge-portal/packages/:packageId", authMiddleware(), async (req: Request, res: Response) => {
   try {
-    seedPackages();
-    const pkg = packagesStore.get(String(req.params.packageId));
+    const pkg = await getPackage(String(req.params.packageId));
     if (!pkg) { sendNotFound(res, "Package"); return; }
     sendSuccess(res, pkg);
   } catch (err) {
@@ -732,43 +580,36 @@ router.get("/forge-portal/packages/:packageId", authMiddleware(), (req: Request,
   }
 });
 
-router.post("/forge-portal/packages/:packageId/subscribe", authMiddleware(), (req: Request, res: Response) => {
+router.post("/forge-portal/packages/:packageId/subscribe", authMiddleware(), async (req: Request, res: Response) => {
   try {
     if (!req.user) { sendBadRequest(res, "Auth required"); return; }
-    const pkg = packagesStore.get(String(req.params.packageId));
+    const pkg = await getPackage(String(req.params.packageId));
     if (!pkg) { sendNotFound(res, "Package"); return; }
     const { billingCycle } = req.body as { billingCycle?: "monthly" | "annual" };
     const price = billingCycle === "annual" ? pkg.pricing.annual : pkg.pricing.monthly;
-    pkg.subscriberCount += 1;
-    packagesStore.set(pkg.id, pkg);
+    await incrementPackageSubscribers(pkg.id);
     logger.info({ packageId: pkg.id, userId: req.user.id, billingCycle }, "forge-revenue: package subscribed");
     sendCreated(res, {
       subscriptionId: `sub-${pkg.id}-${Date.now()}`,
-      packageId: pkg.id,
-      packageName: pkg.name,
-      billingCycle: billingCycle ?? "monthly",
-      price,
-      currency: pkg.pricing.currency,
-      status: "active",
-      activatedAt: new Date().toISOString(),
-      agentWorkflows: pkg.agentWorkflows,
+      packageId: pkg.id, packageName: pkg.name,
+      billingCycle: billingCycle ?? "monthly", price, currency: pkg.pricing.currency,
+      status: "active", activatedAt: new Date().toISOString(), agentWorkflows: pkg.agentWorkflows,
     });
   } catch (err) {
     handleRouteError(res, err, "forge-revenue package subscribe");
   }
 });
 
-router.get("/forge-portal/communications", authMiddleware(), (req: Request, res: Response) => {
+router.get("/forge-portal/communications", authMiddleware(), async (req: Request, res: Response) => {
   try {
     if (!req.user) { sendBadRequest(res, "Auth required"); return; }
     const clientId = getClientId(req.user.id);
-    seedCommunications(clientId);
-    let comms = [...communicationsStore.values()].filter(c => c.clientId === clientId);
+    await seedCommunicationsIfMissing(clientId);
+    let comms = await getClientCommunications(clientId);
     const { type, domain, status } = req.query as Record<string, string>;
     if (type) comms = comms.filter(c => c.type === type);
     if (domain) comms = comms.filter(c => c.domain === domain);
     if (status) comms = comms.filter(c => c.status === status);
-    comms.sort((a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime());
     const unread = comms.filter(c => c.status === "sent").length;
     sendSuccess(res, { communications: comms, unread, count: comms.length });
   } catch (err) {
@@ -776,24 +617,19 @@ router.get("/forge-portal/communications", authMiddleware(), (req: Request, res:
   }
 });
 
-router.get("/forge-portal/communications/preferences", authMiddleware(), (req: Request, res: Response) => {
+router.get("/forge-portal/communications/preferences", authMiddleware(), async (req: Request, res: Response) => {
   try {
     if (!req.user) { sendBadRequest(res, "Auth required"); return; }
     const clientId = getClientId(req.user.id);
-    let prefs = preferencesStore.get(clientId);
+    let prefs = await getCommPrefs(clientId);
     if (!prefs) {
       prefs = {
-        clientId,
-        briefingFrequency: "weekly",
-        alertThreshold: "high",
-        newsletterOptIn: true,
-        emailNotifications: true,
-        inPortalNotifications: true,
+        clientId, briefingFrequency: "weekly", alertThreshold: "high",
+        newsletterOptIn: true, emailNotifications: true, inPortalNotifications: true,
         domainPreferences: { vessels: true, terra: true, legal: true, security: true },
-        quietHoursStart: null,
-        quietHoursEnd: null,
+        quietHoursStart: null, quietHoursEnd: null,
       };
-      preferencesStore.set(clientId, prefs);
+      await upsertCommPrefs(prefs);
     }
     sendSuccess(res, prefs);
   } catch (err) {
@@ -801,27 +637,22 @@ router.get("/forge-portal/communications/preferences", authMiddleware(), (req: R
   }
 });
 
-router.patch("/forge-portal/communications/preferences", authMiddleware(), (req: Request, res: Response) => {
+router.patch("/forge-portal/communications/preferences", authMiddleware(), async (req: Request, res: Response) => {
   try {
     if (!req.user) { sendBadRequest(res, "Auth required"); return; }
     const clientId = getClientId(req.user.id);
-    let prefs = preferencesStore.get(clientId);
+    let prefs = await getCommPrefs(clientId);
     if (!prefs) {
       prefs = {
-        clientId,
-        briefingFrequency: "weekly",
-        alertThreshold: "high",
-        newsletterOptIn: true,
-        emailNotifications: true,
-        inPortalNotifications: true,
+        clientId, briefingFrequency: "weekly", alertThreshold: "high",
+        newsletterOptIn: true, emailNotifications: true, inPortalNotifications: true,
         domainPreferences: { vessels: true, terra: true, legal: true, security: true },
-        quietHoursStart: null,
-        quietHoursEnd: null,
+        quietHoursStart: null, quietHoursEnd: null,
       };
     }
-    const updates = req.body as Partial<CommunicationPreferences>;
+    const updates = req.body as Partial<typeof prefs>;
     Object.assign(prefs, updates, { clientId });
-    preferencesStore.set(clientId, prefs);
+    await upsertCommPrefs(prefs);
     logger.info({ clientId, userId: req.user.id }, "forge-revenue: communication preferences updated");
     sendSuccess(res, prefs);
   } catch (err) {
@@ -829,16 +660,16 @@ router.patch("/forge-portal/communications/preferences", authMiddleware(), (req:
   }
 });
 
-router.get("/forge-portal/communications/:commId", authMiddleware(), (req: Request, res: Response) => {
+router.get("/forge-portal/communications/:commId", authMiddleware(), async (req: Request, res: Response) => {
   try {
     if (!req.user) { sendBadRequest(res, "Auth required"); return; }
     const clientId = getClientId(req.user.id);
-    const comm = communicationsStore.get(String(req.params.commId));
+    const comm = await getCommunication(String(req.params.commId));
     if (!comm || comm.clientId !== clientId) { sendNotFound(res, "Communication"); return; }
     if (comm.status === "sent") {
       comm.status = "read";
       comm.readAt = new Date().toISOString();
-      communicationsStore.set(comm.id, comm);
+      await upsertCommunication(comm);
     }
     sendSuccess(res, comm);
   } catch (err) {
@@ -853,21 +684,9 @@ router.get("/forge-portal/revenue/summary", authMiddleware(), (req: Request, res
     const isInternal = userRoles.some(r => ["admin", "super_admin", "ops", "executive"].includes(r));
     if (!isInternal) { res.status(403).json({ ok: false, error: "Insufficient permissions — internal access only" }); return; }
     const summary = {
-      mrr: 287500,
-      arr: 3450000,
-      mrrGrowth: 8.4,
-      totalClients: 42,
-      activeClients: 38,
-      churnRate: 2.1,
-      avgLtv: 248000,
-      avgContractValue: 82000,
-      pipeline: {
-        prospects: 15,
-        onboarding: 4,
-        active: 38,
-        expanded: 12,
-        churned: 2,
-      },
+      mrr: 287500, arr: 3450000, mrrGrowth: 8.4, totalClients: 42, activeClients: 38,
+      churnRate: 2.1, avgLtv: 248000, avgContractValue: 82000,
+      pipeline: { prospects: 15, onboarding: 4, active: 38, expanded: 12, churned: 2 },
       revenueByDomain: [
         { domain: "Maritime", revenue: 112500, percentage: 39.1, clients: 14 },
         { domain: "Real Estate", revenue: 83600, percentage: 29.1, clients: 12 },
@@ -882,27 +701,18 @@ router.get("/forge-portal/revenue/summary", authMiddleware(), (req: Request, res
         { package: "Security Sentinel", revenue: 51000, subscribers: 6 },
       ],
       monthlyTrend: [
-        { month: "Nov 2025", mrr: 218000, clients: 32 },
-        { month: "Dec 2025", mrr: 232000, clients: 34 },
-        { month: "Jan 2026", mrr: 248000, clients: 35 },
-        { month: "Feb 2026", mrr: 261000, clients: 37 },
-        { month: "Mar 2026", mrr: 274000, clients: 39 },
-        { month: "Apr 2026", mrr: 287500, clients: 42 },
+        { month: "Nov 2025", mrr: 218000, clients: 32 }, { month: "Dec 2025", mrr: 232000, clients: 34 },
+        { month: "Jan 2026", mrr: 248000, clients: 35 }, { month: "Feb 2026", mrr: 261000, clients: 37 },
+        { month: "Mar 2026", mrr: 274000, clients: 39 }, { month: "Apr 2026", mrr: 287500, clients: 42 },
       ],
-      churnRisk: {
-        low: 28,
-        medium: 7,
-        high: 2,
-        critical: 1,
-      },
+      churnRisk: { low: 28, medium: 7, high: 2, critical: 1 },
       upsellOpportunities: [
         { clientName: "Hale Capital Partners", currentPackage: "Maritime Risk Premium", recommended: "Cross-Domain Fusion", incrementalMrr: 14000, probability: 72 },
         { clientName: "Oceanic Holdings", currentPackage: "Real Estate Alpha", recommended: "Real Estate Alpha + Legal Shield", incrementalMrr: 5200, probability: 65 },
         { clientName: "Vanguard Maritime", currentPackage: "Maritime Risk Premium", recommended: "Maritime Risk Premium + Security Sentinel", incrementalMrr: 8500, probability: 58 },
       ],
       aiAttributedRevenue: {
-        total: 84200,
-        percentage: 29.3,
+        total: 84200, percentage: 29.3,
         topInsights: [
           { insight: "Distress property alert led to $12M acquisition", attributedRevenue: 26000 },
           { insight: "Route optimization saved $2.1M in fuel costs", attributedRevenue: 31500 },
@@ -923,68 +733,15 @@ router.get("/forge-portal/upgrades", authMiddleware(), (req: Request, res: Respo
     const upgrades = {
       currentTier: "platinum",
       currentDomains: ["vessels", "terra", "legal", "security"],
-      currentPackages: [
-        { id: "pkg-maritime-risk", name: "Maritime Risk Premium", status: "active", since: "2025-06-15" },
-      ],
+      currentPackages: [{ id: "pkg-maritime-risk", name: "Maritime Risk Premium", status: "active", since: "2025-06-15" }],
       availableUpgrades: [
-        {
-          id: "upgrade-cross-domain",
-          type: "package",
-          name: "Cross-Domain Fusion",
-          description: "Unlock unified cross-domain analytics and full Alloy cognitive engine access",
-          currentCost: 4500,
-          upgradeCost: 18500,
-          incrementalCost: 14000,
-          currency: "USD",
-          benefits: ["Unified Intelligence Canvas", "AI Decision Support", "Custom Agent Fleet", "Priority Support"],
-        },
-        {
-          id: "upgrade-real-estate-alpha",
-          type: "package",
-          name: "Real Estate Alpha",
-          description: "Add AI-powered real estate intelligence to your portfolio",
-          currentCost: 0,
-          upgradeCost: 3800,
-          incrementalCost: 3800,
-          currency: "USD",
-          benefits: ["Distress Signal Monitoring", "Opportunity Scoring", "Market Pulse Analytics"],
-        },
-        {
-          id: "upgrade-legal-shield",
-          type: "package",
-          name: "Legal Shield Pro",
-          description: "Proactive legal intelligence and compliance monitoring",
-          currentCost: 0,
-          upgradeCost: 5200,
-          incrementalCost: 5200,
-          currency: "USD",
-          benefits: ["Deadline Management", "Compliance Monitoring", "Filing Analysis"],
-        },
-        {
-          id: "upgrade-security-sentinel",
-          type: "package",
-          name: "Security Sentinel",
-          description: "Enterprise-grade security intelligence and incident response",
-          currentCost: 0,
-          upgradeCost: 8500,
-          incrementalCost: 8500,
-          currency: "USD",
-          benefits: ["Threat Intelligence Feed", "Vulnerability Scanning", "Incident Response Automation"],
-        },
+        { id: "upgrade-cross-domain", type: "package", name: "Cross-Domain Fusion", description: "Unlock unified cross-domain analytics and full Alloy cognitive engine access", currentCost: 4500, upgradeCost: 18500, incrementalCost: 14000, currency: "USD", benefits: ["Unified Intelligence Canvas", "AI Decision Support", "Custom Agent Fleet", "Priority Support"] },
+        { id: "upgrade-real-estate-alpha", type: "package", name: "Real Estate Alpha", description: "Add AI-powered real estate intelligence to your portfolio", currentCost: 0, upgradeCost: 3800, incrementalCost: 3800, currency: "USD", benefits: ["Distress Signal Monitoring", "Opportunity Scoring", "Market Pulse Analytics"] },
+        { id: "upgrade-legal-shield", type: "package", name: "Legal Shield Pro", description: "Proactive legal intelligence and compliance monitoring", currentCost: 0, upgradeCost: 5200, incrementalCost: 5200, currency: "USD", benefits: ["Deadline Management", "Compliance Monitoring", "Filing Analysis"] },
+        { id: "upgrade-security-sentinel", type: "package", name: "Security Sentinel", description: "Enterprise-grade security intelligence and incident response", currentCost: 0, upgradeCost: 8500, incrementalCost: 8500, currency: "USD", benefits: ["Threat Intelligence Feed", "Vulnerability Scanning", "Incident Response Automation"] },
       ],
-      seatManagement: {
-        currentSeats: 3,
-        maxSeats: 10,
-        pricePerSeat: 250,
-        currency: "USD",
-      },
-      customAgentDeployment: {
-        available: true,
-        basePrice: 2500,
-        currency: "USD",
-        description: "Deploy custom AI agents tailored to your specific workflows",
-        examples: ["Custom risk model agent", "Proprietary data integration agent", "Automated reporting agent"],
-      },
+      seatManagement: { currentSeats: 3, maxSeats: 10, pricePerSeat: 250, currency: "USD" },
+      customAgentDeployment: { available: true, basePrice: 2500, currency: "USD", description: "Deploy custom AI agents tailored to your specific workflows", examples: ["Custom risk model agent", "Proprietary data integration agent", "Automated reporting agent"] },
     };
     sendSuccess(res, upgrades);
   } catch (err) {
@@ -995,20 +752,14 @@ router.get("/forge-portal/upgrades", authMiddleware(), (req: Request, res: Respo
 router.post("/forge-portal/upgrades/request", authMiddleware(), (req: Request, res: Response) => {
   try {
     if (!req.user) { sendBadRequest(res, "Auth required"); return; }
-    const { upgradeId, type, details } = req.body as {
-      upgradeId?: string; type?: string; details?: Record<string, unknown>;
-    };
+    const { upgradeId, type, details } = req.body as { upgradeId?: string; type?: string; details?: Record<string, unknown> };
     if (!upgradeId || !type) { sendBadRequest(res, "upgradeId and type are required"); return; }
     logger.info({ userId: req.user.id, upgradeId, type }, "forge-revenue: upgrade provisioned");
     sendCreated(res, {
-      requestId: `req-${Date.now()}`,
-      upgradeId,
-      type,
-      status: "provisioned",
+      requestId: `req-${Date.now()}`, upgradeId, type, status: "provisioned",
       provisionedAt: new Date().toISOString(),
       message: "Upgrade has been automatically provisioned and is now active.",
-      details,
-      requestedAt: new Date().toISOString(),
+      details, requestedAt: new Date().toISOString(),
     });
   } catch (err) {
     handleRouteError(res, err, "forge-revenue upgrade request");

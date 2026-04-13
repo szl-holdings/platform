@@ -6,6 +6,7 @@ import {
   ChevronRight, BarChart2, Users, Clock, Tag, Shield, Brain,
   MessageSquare, FileText, Globe, Database, Layers, Activity,
   Eye, Play, Pause, ArrowUpRight, Sparkles, Award, Package,
+  Loader2, RefreshCw,
 } from "lucide-react";
 
 interface SkillEntry {
@@ -27,7 +28,7 @@ interface SkillEntry {
   isPopular: boolean;
   isFeatured: boolean;
   publisher: string;
-  lastUpdated: string;
+  updatedAt: string;
   capabilities: string[];
 }
 
@@ -35,7 +36,7 @@ interface MarketplaceStats {
   totalSkills: number;
   activatedSkills: number;
   totalInvocations: number;
-  topDomains: string[];
+  userActivations: number;
 }
 
 const DOMAIN_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -50,232 +51,6 @@ const DOMAIN_ICONS: Record<string, React.ComponentType<{ className?: string }>> 
   "Productivity": Zap,
   "Media": Activity,
 };
-
-const DEMO_SKILLS: SkillEntry[] = [
-  {
-    id: "sk_presentation_engine",
-    name: "AI Presentation Engine",
-    slug: "presentation-engine",
-    version: "3.1.0",
-    description: "Generate structured slide decks — investor pitches, board briefs, client presentations — directly from natural language prompts. Supports 8 layout types with domain-aware tone profiles.",
-    domain: "Documents",
-    category: "Content Generation",
-    tags: ["slides", "decks", "investor", "board", "content"],
-    rating: 4.8,
-    ratingCount: 312,
-    usageCount: 18420,
-    activeUsers: 47,
-    successRate: 98.2,
-    avgLatencyMs: 1240,
-    isActivated: true,
-    isPopular: true,
-    isFeatured: true,
-    publisher: "SZL Platform",
-    lastUpdated: new Date(Date.now() - 2 * 86400000).toISOString(),
-    capabilities: ["Multi-layout slides", "Domain tone profiles", "Speaker notes", "PDF export"],
-  },
-  {
-    id: "sk_email_composer",
-    name: "AI Email Composer",
-    slug: "email-composer",
-    version: "2.4.1",
-    description: "Smart email drafting, intelligent reply suggestions, tone adjustment, and thread summarization. Domain-aware profiles for legal, maritime, security, and executive contexts.",
-    domain: "Communication",
-    category: "Communication",
-    tags: ["email", "drafting", "tone", "summarize"],
-    rating: 4.7,
-    ratingCount: 287,
-    usageCount: 23100,
-    activeUsers: 62,
-    successRate: 97.8,
-    avgLatencyMs: 890,
-    isActivated: true,
-    isPopular: true,
-    isFeatured: false,
-    publisher: "SZL Platform",
-    lastUpdated: new Date(Date.now() - 5 * 86400000).toISOString(),
-    capabilities: ["Draft mode", "Reply suggestions", "Tone adjustment", "Thread summarization"],
-  },
-  {
-    id: "sk_design_studio",
-    name: "AI Design Studio",
-    slug: "design-studio",
-    version: "1.8.0",
-    description: "On-demand generation of charts, diagrams, branded assets, and marketing visuals. Returns structured visual specifications compatible with any renderer.",
-    domain: "Media",
-    category: "Visual",
-    tags: ["design", "graphics", "charts", "branding", "visual"],
-    rating: 4.5,
-    ratingCount: 189,
-    usageCount: 9870,
-    activeUsers: 31,
-    successRate: 96.1,
-    avgLatencyMs: 1650,
-    isActivated: false,
-    isPopular: false,
-    isFeatured: true,
-    publisher: "SZL Platform",
-    lastUpdated: new Date(Date.now() - 10 * 86400000).toISOString(),
-    capabilities: ["Charts", "Branded graphics", "UI mockups", "Infographics"],
-  },
-  {
-    id: "sk_smart_spreadsheet",
-    name: "AI Smart Spreadsheet",
-    slug: "smart-spreadsheet",
-    version: "2.2.0",
-    description: "Natural language data queries returning structured tables, pivot analyses, and exportable CSV. Domain schemas for real estate, maritime, security, and general business.",
-    domain: "Data",
-    category: "Data",
-    tags: ["spreadsheet", "data", "csv", "pivot", "tables"],
-    rating: 4.9,
-    ratingCount: 421,
-    usageCount: 31200,
-    activeUsers: 78,
-    successRate: 99.0,
-    avgLatencyMs: 720,
-    isActivated: true,
-    isPopular: true,
-    isFeatured: true,
-    publisher: "SZL Platform",
-    lastUpdated: new Date(Date.now() - 1 * 86400000).toISOString(),
-    capabilities: ["Natural language queries", "Pivot tables", "CSV export", "Domain schemas"],
-  },
-  {
-    id: "sk_scheduling_engine",
-    name: "AI Scheduling Intelligence",
-    slug: "scheduling-engine",
-    version: "2.0.3",
-    description: "Calendar-aware scheduling with timezone intelligence, priority scoring, conflict detection, and predictive patterns. Powers the Carlota Jo Rhythm Calendar.",
-    domain: "Productivity",
-    category: "Productivity",
-    tags: ["scheduling", "calendar", "timezone", "conflicts"],
-    rating: 4.6,
-    ratingCount: 156,
-    usageCount: 7430,
-    activeUsers: 24,
-    successRate: 97.3,
-    avgLatencyMs: 540,
-    isActivated: false,
-    isPopular: false,
-    isFeatured: false,
-    publisher: "SZL Platform",
-    lastUpdated: new Date(Date.now() - 7 * 86400000).toISOString(),
-    capabilities: ["Slot finding", "Conflict detection", "Pattern prediction", "Calendar optimization"],
-  },
-  {
-    id: "sk_content_engine",
-    name: "AI Writing & Content Engine",
-    slug: "content-engine",
-    version: "3.0.1",
-    description: "Long-form content generation with domain-specific tone profiles. Supports reports, proposals, briefs, marketing copy, executive memos, and advisory notes.",
-    domain: "Documents",
-    category: "Content Generation",
-    tags: ["writing", "content", "reports", "proposals", "marketing"],
-    rating: 4.7,
-    ratingCount: 298,
-    usageCount: 14800,
-    activeUsers: 53,
-    successRate: 97.5,
-    avgLatencyMs: 1120,
-    isActivated: true,
-    isPopular: true,
-    isFeatured: false,
-    publisher: "SZL Platform",
-    lastUpdated: new Date(Date.now() - 3 * 86400000).toISOString(),
-    capabilities: ["8 content types", "Domain tone profiles", "Style transfer", "Multi-format output"],
-  },
-  {
-    id: "sk_knowledge_vault",
-    name: "AI Knowledge Vault",
-    slug: "knowledge-vault",
-    version: "2.5.0",
-    description: "Self-organizing cross-domain knowledge base with auto-tagging, smart linking, and semantic retrieval. Aggregates intelligence across all 7 domain agents.",
-    domain: "Intelligence",
-    category: "Intelligence",
-    tags: ["knowledge", "semantic", "search", "retrieval", "graph"],
-    rating: 4.8,
-    ratingCount: 267,
-    usageCount: 22100,
-    activeUsers: 67,
-    successRate: 98.7,
-    avgLatencyMs: 380,
-    isActivated: true,
-    isPopular: true,
-    isFeatured: true,
-    publisher: "SZL Platform",
-    lastUpdated: new Date(Date.now() - 4 * 86400000).toISOString(),
-    capabilities: ["Semantic retrieval", "Auto-tagging", "Cross-domain links", "Knowledge graph"],
-  },
-  {
-    id: "sk_meeting_intel",
-    name: "AI Meeting Intelligence",
-    slug: "meeting-intel",
-    version: "1.9.2",
-    description: "Transcription processing, summarization, action item extraction, and automated follow-up scheduling. Specialized modes for depositions, board meetings, and ops stand-ups.",
-    domain: "Productivity",
-    category: "Productivity",
-    tags: ["meetings", "transcription", "action items", "follow-up"],
-    rating: 4.5,
-    ratingCount: 143,
-    usageCount: 6200,
-    activeUsers: 29,
-    successRate: 96.8,
-    avgLatencyMs: 960,
-    isActivated: false,
-    isPopular: false,
-    isFeatured: false,
-    publisher: "SZL Platform",
-    lastUpdated: new Date(Date.now() - 14 * 86400000).toISOString(),
-    capabilities: ["Transcription", "Summarization", "Action item extraction", "Auto-scheduling"],
-  },
-  {
-    id: "sk_viz_engine",
-    name: "AI Data Visualization",
-    slug: "viz-engine",
-    version: "2.1.0",
-    description: "Natural language to interactive chart generation compatible with Recharts. Supports bar, line, scatter, heatmap, and geographic visualizations from any data source.",
-    domain: "Analytics",
-    category: "Data",
-    tags: ["charts", "visualization", "recharts", "analytics"],
-    rating: 4.6,
-    ratingCount: 201,
-    usageCount: 11300,
-    activeUsers: 41,
-    successRate: 97.9,
-    avgLatencyMs: 820,
-    isActivated: true,
-    isPopular: false,
-    isFeatured: false,
-    publisher: "SZL Platform",
-    lastUpdated: new Date(Date.now() - 6 * 86400000).toISOString(),
-    capabilities: ["6 chart types", "Natural language queries", "Recharts-compatible", "Multi-source data"],
-  },
-  {
-    id: "sk_video_engine",
-    name: "AI Video Generation",
-    slug: "video-engine",
-    version: "1.3.0",
-    description: "Agent-driven creation of summary videos, briefing clips, and data walkthroughs. Generates scripts, storyboards, and structured video specs from natural language.",
-    domain: "Media",
-    category: "Media",
-    tags: ["video", "briefing", "storyboard", "media"],
-    rating: 4.3,
-    ratingCount: 98,
-    usageCount: 3100,
-    activeUsers: 18,
-    successRate: 95.2,
-    avgLatencyMs: 2100,
-    isActivated: false,
-    isPopular: false,
-    isFeatured: false,
-    publisher: "SZL Platform",
-    lastUpdated: new Date(Date.now() - 20 * 86400000).toISOString(),
-    capabilities: ["Script generation", "Storyboards", "Summary clips", "Data walkthroughs"],
-  },
-];
-
-const ALL_DOMAINS = ["All", ...Array.from(new Set(DEMO_SKILLS.map(s => s.domain)))];
-const ALL_CATEGORIES = ["All", "Content Generation", "Communication", "Data", "Productivity", "Analytics", "Intelligence", "Media", "Visual"];
 
 function StarRating({ rating, count }: { rating: number; count: number }) {
   return (
@@ -293,7 +68,11 @@ function StarRating({ rating, count }: { rating: number; count: number }) {
   );
 }
 
-function SkillCard({ skill, onToggle }: { skill: SkillEntry; onToggle: (id: string, activate: boolean) => void }) {
+function SkillCard({ skill, onToggle, isToggling }: {
+  skill: SkillEntry;
+  onToggle: (id: string, activate: boolean) => void;
+  isToggling: boolean;
+}) {
   const DomainIcon = DOMAIN_ICONS[skill.domain] ?? Package;
   return (
     <div className={`relative rounded-xl border transition-all duration-200 hover:border-white/20 group ${
@@ -330,17 +109,18 @@ function SkillCard({ skill, onToggle }: { skill: SkillEntry; onToggle: (id: stri
           </div>
           <button
             onClick={() => onToggle(skill.id, !skill.isActivated)}
-            className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all ${
+            disabled={isToggling}
+            className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all disabled:opacity-50 ${
               skill.isActivated
                 ? "bg-violet-500/20 text-violet-400 hover:bg-red-500/20 hover:text-red-400"
                 : "bg-white/5 text-white/50 hover:bg-violet-500/20 hover:text-violet-400"
             }`}
           >
-            {skill.isActivated ? (
-              <><Pause className="w-3 h-3" /> Deactivate</>
-            ) : (
-              <><Play className="w-3 h-3" /> Activate</>
-            )}
+            {isToggling
+              ? <Loader2 className="w-3 h-3 animate-spin" />
+              : skill.isActivated
+                ? <><Pause className="w-3 h-3" /> Deactivate</>
+                : <><Play className="w-3 h-3" /> Activate</>}
           </button>
         </div>
 
@@ -367,7 +147,7 @@ function SkillCard({ skill, onToggle }: { skill: SkillEntry; onToggle: (id: stri
             <div className="text-[10px] text-white/40 mt-0.5">Total Uses</div>
           </div>
           <div className="text-center">
-            <div className="text-sm font-semibold text-emerald-400">{skill.successRate.toFixed(1)}%</div>
+            <div className="text-sm font-semibold text-emerald-400">{(skill.successRate ?? 0).toFixed(1)}%</div>
             <div className="text-[10px] text-white/40 mt-0.5">Success Rate</div>
           </div>
           <div className="text-center">
@@ -379,7 +159,7 @@ function SkillCard({ skill, onToggle }: { skill: SkillEntry; onToggle: (id: stri
         <div className="mt-4 pt-3 border-t border-white/5">
           <div className="text-[10px] text-white/40 mb-2">Capabilities</div>
           <div className="flex flex-wrap gap-1">
-            {skill.capabilities.slice(0, 3).map(cap => (
+            {(skill.capabilities ?? []).slice(0, 3).map(cap => (
               <span key={cap} className="flex items-center gap-1 text-[10px] text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded">
                 <CheckCircle className="w-2.5 h-2.5" />{cap}
               </span>
@@ -392,51 +172,88 @@ function SkillCard({ skill, onToggle }: { skill: SkillEntry; onToggle: (id: stri
 }
 
 export default function SkillsMarketplace() {
+  const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [selectedDomain, setSelectedDomain] = useState("All");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showActivatedOnly, setShowActivatedOnly] = useState(false);
   const [sortBy, setSortBy] = useState<"popular" | "rating" | "newest" | "usage">("popular");
-  const [skills, setSkills] = useState<SkillEntry[]>(DEMO_SKILLS);
+  const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
 
-  const stats: MarketplaceStats = useMemo(() => ({
-    totalSkills: skills.length,
-    activatedSkills: skills.filter(s => s.isActivated).length,
-    totalInvocations: skills.reduce((acc, s) => acc + s.usageCount, 0),
-    topDomains: ["Data", "Documents", "Intelligence"],
-  }), [skills]);
+  const listingsQuery = useQuery({
+    queryKey: ["marketplace-skills", search, selectedDomain, selectedCategory],
+    queryFn: () => {
+      const params = new URLSearchParams({ kind: "skill" });
+      if (selectedDomain !== "All") params.set("domain", selectedDomain);
+      if (selectedCategory !== "All") params.set("category", selectedCategory);
+      if (search) params.set("search", search);
+      return apiFetch<{ skills: SkillEntry[] }>(`/api/marketplace/listings?${params.toString()}`);
+    },
+    staleTime: 30_000,
+  });
+
+  const statsQuery = useQuery({
+    queryKey: ["marketplace-stats-skills"],
+    queryFn: () => apiFetch<{ totalSkills: number; userActivations: number; totalUsage: number }>("/api/marketplace/stats"),
+    staleTime: 60_000,
+  });
+
+  const activateMutation = useMutation({
+    mutationFn: ({ id }: { id: string }) =>
+      apiFetch<{ isActivated: boolean }>(`/api/marketplace/listings/${id}/activate`, { method: "POST", body: JSON.stringify({}) }),
+    onMutate: ({ id }) => setTogglingIds(prev => new Set([...prev, id])),
+    onSettled: (_, __, { id }) => {
+      setTogglingIds(prev => { const s = new Set(prev); s.delete(id); return s; });
+      qc.invalidateQueries({ queryKey: ["marketplace-skills"] });
+      qc.invalidateQueries({ queryKey: ["marketplace-stats-skills"] });
+    },
+  });
+
+  const deactivateMutation = useMutation({
+    mutationFn: ({ id }: { id: string }) =>
+      apiFetch<{ isActivated: boolean }>(`/api/marketplace/listings/${id}/activate`, { method: "DELETE" }),
+    onMutate: ({ id }) => setTogglingIds(prev => new Set([...prev, id])),
+    onSettled: (_, __, { id }) => {
+      setTogglingIds(prev => { const s = new Set(prev); s.delete(id); return s; });
+      qc.invalidateQueries({ queryKey: ["marketplace-skills"] });
+      qc.invalidateQueries({ queryKey: ["marketplace-stats-skills"] });
+    },
+  });
+
+  function toggleSkill(id: string, activate: boolean) {
+    if (activate) {
+      activateMutation.mutate({ id });
+    } else {
+      deactivateMutation.mutate({ id });
+    }
+  }
+
+  const skills: SkillEntry[] = listingsQuery.data?.skills ?? [];
+
+  const allDomains = useMemo(() => ["All", ...Array.from(new Set(skills.map(s => s.domain)))], [skills]);
+  const allCategories = useMemo(() => ["All", ...Array.from(new Set(skills.map(s => s.category)))], [skills]);
 
   const filteredSkills = useMemo(() => {
     let result = [...skills];
-    if (search) {
-      const q = search.toLowerCase();
-      result = result.filter(s =>
-        s.name.toLowerCase().includes(q) ||
-        s.description.toLowerCase().includes(q) ||
-        s.tags.some(t => t.includes(q))
-      );
-    }
-    if (selectedDomain !== "All") result = result.filter(s => s.domain === selectedDomain);
-    if (selectedCategory !== "All") result = result.filter(s => s.category === selectedCategory);
     if (showActivatedOnly) result = result.filter(s => s.isActivated);
-
     result.sort((a, b) => {
       switch (sortBy) {
         case "popular": return (b.isPopular ? 1 : 0) - (a.isPopular ? 1 : 0) || b.usageCount - a.usageCount;
         case "rating": return b.rating - a.rating;
         case "usage": return b.usageCount - a.usageCount;
-        case "newest": return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime();
+        case "newest": return new Date(b.updatedAt ?? 0).getTime() - new Date(a.updatedAt ?? 0).getTime();
         default: return 0;
       }
     });
     return result;
-  }, [skills, search, selectedDomain, selectedCategory, showActivatedOnly, sortBy]);
-
-  function toggleSkill(id: string, activate: boolean) {
-    setSkills(prev => prev.map(s => s.id === id ? { ...s, isActivated: activate } : s));
-  }
+  }, [skills, showActivatedOnly, sortBy]);
 
   const featured = skills.filter(s => s.isFeatured);
+  const activatedCount = skills.filter(s => s.isActivated).length;
+  const totalInvocations = statsQuery.data?.totalUsage ?? skills.reduce((acc, s) => acc + (s.usageCount ?? 0), 0);
+  const avgSuccessRate = skills.length
+    ? skills.reduce((a, s) => a + (s.successRate ?? 0), 0) / skills.length
+    : 0;
 
   return (
     <div className="min-h-screen bg-[#080c14] text-white">
@@ -448,23 +265,37 @@ export default function SkillsMarketplace() {
                 <Store className="w-5 h-5 text-violet-400" />
               </div>
               <h1 className="text-2xl font-bold text-white">Skills Marketplace</h1>
+              {listingsQuery.isFetching && <Loader2 className="w-4 h-4 animate-spin text-white/40" />}
             </div>
             <p className="text-sm text-white/50 ml-13">Discover, activate, and manage AI skills across the SZL platform ecosystem</p>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => { qc.invalidateQueries({ queryKey: ["marketplace-skills"] }); qc.invalidateQueries({ queryKey: ["marketplace-stats-skills"] }); }}
+              className="p-2 rounded-lg bg-white/5 text-white/40 hover:text-white/70 transition-colors"
+              title="Refresh"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </button>
             <div className="flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-400/10 px-3 py-1.5 rounded-lg border border-emerald-400/20">
               <Sparkles className="w-3.5 h-3.5" />
-              {stats.activatedSkills} Active Skills
+              {activatedCount} Active Skills
             </div>
           </div>
         </div>
 
+        {listingsQuery.error && (
+          <div className="mb-6 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-400">
+            Failed to load skills: {(listingsQuery.error as Error).message}
+          </div>
+        )}
+
         <div className="grid grid-cols-4 gap-4 mb-8">
           {[
-            { label: "Total Skills", value: stats.totalSkills, icon: Package, color: "text-violet-400" },
-            { label: "Activated", value: stats.activatedSkills, icon: CheckCircle, color: "text-emerald-400" },
-            { label: "Total Invocations", value: stats.totalInvocations.toLocaleString(), icon: TrendingUp, color: "text-blue-400" },
-            { label: "Avg Success Rate", value: `${(DEMO_SKILLS.reduce((a, s) => a + s.successRate, 0) / DEMO_SKILLS.length).toFixed(1)}%`, icon: BarChart2, color: "text-amber-400" },
+            { label: "Total Skills", value: statsQuery.data?.totalSkills ?? skills.length, icon: Package, color: "text-violet-400" },
+            { label: "Activated", value: activatedCount, icon: CheckCircle, color: "text-emerald-400" },
+            { label: "Total Invocations", value: totalInvocations.toLocaleString(), icon: TrendingUp, color: "text-blue-400" },
+            { label: "Avg Success Rate", value: `${avgSuccessRate.toFixed(1)}%`, icon: BarChart2, color: "text-amber-400" },
           ].map(stat => (
             <div key={stat.label} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
               <div className="flex items-center gap-2 mb-2">
@@ -504,13 +335,14 @@ export default function SkillsMarketplace() {
                     <span className="text-[10px] text-white/40">{skill.usageCount.toLocaleString()} uses</span>
                     <button
                       onClick={() => toggleSkill(skill.id, !skill.isActivated)}
-                      className={`text-[10px] font-medium px-2.5 py-1 rounded-lg transition-all ${
+                      disabled={togglingIds.has(skill.id)}
+                      className={`text-[10px] font-medium px-2.5 py-1 rounded-lg transition-all disabled:opacity-50 ${
                         skill.isActivated
                           ? "bg-violet-500/20 text-violet-400"
                           : "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
                       }`}
                     >
-                      {skill.isActivated ? "Activated" : "Activate"}
+                      {togglingIds.has(skill.id) ? "..." : skill.isActivated ? "Activated" : "Activate"}
                     </button>
                   </div>
                 </div>
@@ -535,7 +367,7 @@ export default function SkillsMarketplace() {
             value={selectedDomain}
             onChange={e => setSelectedDomain(e.target.value)}
           >
-            {ALL_DOMAINS.map(d => <option key={d} value={d} className="bg-[#0f1623]">{d}</option>)}
+            {allDomains.map(d => <option key={d} value={d} className="bg-[#0f1623]">{d}</option>)}
           </select>
 
           <select
@@ -543,7 +375,7 @@ export default function SkillsMarketplace() {
             value={selectedCategory}
             onChange={e => setSelectedCategory(e.target.value)}
           >
-            {ALL_CATEGORIES.map(c => <option key={c} value={c} className="bg-[#0f1623]">{c}</option>)}
+            {allCategories.map(c => <option key={c} value={c} className="bg-[#0f1623]">{c}</option>)}
           </select>
 
           <select
@@ -571,16 +403,27 @@ export default function SkillsMarketplace() {
         </div>
 
         <div className="text-xs text-white/40 mb-4">
-          {filteredSkills.length} skill{filteredSkills.length !== 1 ? "s" : ""} found
+          {listingsQuery.isPending ? "Loading…" : `${filteredSkills.length} skill${filteredSkills.length !== 1 ? "s" : ""} found`}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-          {filteredSkills.map(skill => (
-            <SkillCard key={skill.id} skill={skill} onToggle={toggleSkill} />
-          ))}
-        </div>
+        {listingsQuery.isPending ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-white/20" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {filteredSkills.map(skill => (
+              <SkillCard
+                key={skill.id}
+                skill={skill}
+                onToggle={toggleSkill}
+                isToggling={togglingIds.has(skill.id)}
+              />
+            ))}
+          </div>
+        )}
 
-        {filteredSkills.length === 0 && (
+        {!listingsQuery.isPending && filteredSkills.length === 0 && (
           <div className="text-center py-20">
             <Store className="w-12 h-12 text-white/20 mx-auto mb-4" />
             <div className="text-white/40 text-sm">No skills match your filters</div>

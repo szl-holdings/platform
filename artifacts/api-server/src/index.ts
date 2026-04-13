@@ -85,37 +85,6 @@ startSelfMonitoring();
 
 import { providerHealth } from "./lib/provider-health";
 providerHealth.startActiveProbes();
-runDrizzleMigrations()
-  .then(() => ensurePrismCounselSchema())
-  .then(() => ensureA2AV3Schema().catch(err => logger.warn({ err }, "[a2a-v3] A2A v3 schema migration failed — lifecycle endpoints will be unavailable")))
-  .then(() => ensurePlatformFlags())
-  .then(() => knowledgeStore.loadFromDb())
-  .then(() => {
-    registerDefaultSchedules();
-    seedPlatformData().catch(err => {
-      logger.warn({ err }, "[seed-platform] Seed failed (non-fatal)");
-    });
-    seedTerraDemo().catch(err => {
-      logger.warn({ err }, "[terra-seed] Terra demo seed failed (non-fatal)");
-    });
-    seedMspData().catch(err => {
-      logger.warn({ err }, "[msp-seed] MSP demo seed failed (non-fatal)");
-    });
-    seedAlloyCreativeData().catch(err => {
-      logger.warn({ err }, "[seed-alloy-creative] Alloy Creative seed failed (non-fatal)");
-    });
-    seedDosData().catch(err => {
-      logger.warn({ err }, "[dos-seed] Distribution OS seed failed (non-fatal)");
-    });
-    startScheduledJobs();
-    startNamedScheduledJobs();
-    startPlatformScheduledJobs();
-  })
-  .catch(err => {
-    logger.fatal({ err }, "Schema migration failed — cannot guarantee data integrity, shutting down");
-    process.exit(1);
-  });
-
 registerAllPrismJobHandlers();
 const prismPoller = startPrismJobPoller(5000);
 
@@ -161,6 +130,35 @@ server.listen(port, "0.0.0.0", () => {
     logger.warn({ err }, "[mastra] Module load failed (non-fatal)");
   });
 });
+
+runDrizzleMigrations()
+  .then(() => ensurePrismCounselSchema())
+  .then(() => ensurePlatformFlags())
+  .then(() => knowledgeStore.loadFromDb())
+  .then(() => {
+    registerDefaultSchedules();
+    seedPlatformData().catch(err => {
+      logger.warn({ err }, "[seed-platform] Seed failed (non-fatal)");
+    });
+    seedTerraDemo().catch(err => {
+      logger.warn({ err }, "[terra-seed] Terra demo seed failed (non-fatal)");
+    });
+    seedMspData().catch(err => {
+      logger.warn({ err }, "[msp-seed] MSP demo seed failed (non-fatal)");
+    });
+    seedAlloyCreativeData().catch(err => {
+      logger.warn({ err }, "[seed-alloy-creative] Alloy Creative seed failed (non-fatal)");
+    });
+    seedDosData().catch(err => {
+      logger.warn({ err }, "[dos-seed] Distribution OS seed failed (non-fatal)");
+    });
+    startScheduledJobs();
+    startNamedScheduledJobs();
+    startPlatformScheduledJobs();
+  })
+  .catch(err => {
+    logger.fatal({ err }, "Schema migration failed — continuing with degraded functionality");
+  });
 
 const SHUTDOWN_TIMEOUT_MS = 10_000;
 

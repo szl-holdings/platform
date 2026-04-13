@@ -150,6 +150,7 @@ import analyticsLakeRouter from "./analytics-lake";
 import analyticsEngineRouter from "./analytics-engine";
 import skillsCatalogRouter from "./skills-catalog";
 import forgeRevenueRouter from "./forge-revenue";
+import marketplaceRouter from "./marketplace";
 import { multimodalRouter } from "./multimodal";
 import gatewayIntelligenceRouter from "./gateway-intelligence";
 import copilotRouter from "./copilot";
@@ -547,6 +548,7 @@ router.use(pulseRouter);
 router.use("/forge-portal", _readLimiter);
 router.use(forgePortalRouter);
 router.use(forgeRevenueRouter);
+router.use(marketplaceRouter);
 
 router.use("/distribution-os/email-campaigns", _writeLimiter);
 router.use("/distribution-os/drip-sequences", _writeLimiter);

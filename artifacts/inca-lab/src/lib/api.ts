@@ -1,6 +1,6 @@
 import { getApiBase } from "./utils";
 
-async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
+export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const base = getApiBase();
   const resp = await fetch(`${base}${path}`, {
     headers: { "Content-Type": "application/json" },

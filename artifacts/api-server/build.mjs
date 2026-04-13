@@ -172,6 +172,8 @@ async function buildAll() {
       "http-proxy-middleware",
       // Large packages externalized to reduce bundle size and heap usage
       "pdfkit",
+      "swagger-ui-express",
+      "swagger-ui-dist",
     ],
     sourcemap: process.env.NODE_ENV === "production" ? "linked" : false,
     plugins: [

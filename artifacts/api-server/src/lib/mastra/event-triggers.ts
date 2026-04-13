@@ -1,6 +1,7 @@
 import { pool } from "@szl-holdings/db";
 import { logger } from "../logger";
 import { logAction, updateActionStatus, generateActionId } from "./action-audit";
+import type { FusionDomain, ModalityInput } from "./multimodal-fusion";
 
 export type TriggerEventType =
   | "new_threat_detected"
@@ -360,6 +361,18 @@ export async function emitDomainEvent(
     t => t.enabled && t.eventType === eventType
   );
 
+  // Always-on: run multimodal fusion for intelligence-bearing events
+  const FUSION_EVENT_TYPES: TriggerEventType[] = [
+    "new_threat_detected", "vessel_incident", "property_distress", "document_ingested",
+  ];
+  if (FUSION_EVENT_TYPES.includes(eventType)) {
+    setImmediate(() => {
+      runFusionForEvent(eventType, eventData, emittedBy).catch(err =>
+        logger.warn({ err, eventType }, "Background fusion analysis failed — non-fatal")
+      );
+    });
+  }
+
   if (matchingTriggers.length === 0) return [];
 
   const results = await Promise.allSettled(
@@ -370,6 +383,75 @@ export async function emitDomainEvent(
     if (r.status === "fulfilled") return r.value;
     return { triggerId: "unknown", actionId: "", status: "failed" as const, reason: r.reason?.message };
   });
+}
+
+// ─── Proactive Fusion Hook ─────────────────────────────────────────────────────
+// Automatically runs cross-modal fusion on domain events and saves proactive insights.
+// Imported lazily to break circular dependencies.
+
+async function runFusionForEvent(
+  eventType: TriggerEventType,
+  eventData: Record<string, unknown>,
+  triggeredBy: string
+): Promise<void> {
+  try {
+    const { runCrossModalFusion } = await import("./multimodal-fusion");
+    const { saveInsight } = await import("./proactive-intelligence");
+
+    const domainMap: Partial<Record<TriggerEventType, FusionDomain>> = {
+      new_threat_detected: "defense",
+      vessel_incident: "maritime",
+      property_distress: "real_estate",
+      document_ingested: "general",
+    };
+    const domain: FusionDomain = domainMap[eventType] ?? "general";
+
+    const modalities: ModalityInput[] = [
+      {
+        type: "structured_data",
+        label: `${eventType} event payload`,
+        content: JSON.stringify(eventData, null, 2),
+      },
+    ];
+
+    // Include raw description if present
+    if (typeof eventData.description === "string" && eventData.description) {
+      modalities.push({ type: "text", label: "Event description", content: eventData.description });
+    }
+    if (typeof eventData.documentContent === "string" && eventData.documentContent) {
+      modalities.push({ type: "document", label: "Document content", content: eventData.documentContent.slice(0, 3000) });
+    }
+    if (typeof eventData.rawTranscript === "string" && eventData.rawTranscript) {
+      modalities.push({ type: "audio_transcript", label: "Audio transcript", content: eventData.rawTranscript.slice(0, 3000) });
+    }
+
+    const assessment = await runCrossModalFusion(modalities, domain, {
+      triggeredBy,
+      focusQuestion: `What are the key intelligence signals in this ${eventType.replace(/_/g, " ")} event and what immediate actions are recommended?`,
+    });
+
+    const insightId = `ins_evt_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+    await saveInsight({
+      insightId,
+      agentId: `event-trigger:${eventType}`,
+      domain,
+      category: assessment.threatLevel && ["high", "critical"].includes(assessment.threatLevel) ? "risk" : "pattern",
+      title: `[Auto] ${eventType.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())} — Fusion Assessment`,
+      description: assessment.overallConclusion,
+      dataPoints: assessment.keyFindings,
+      confidence: assessment.confidenceScore,
+      priority: assessment.threatLevel === "critical" ? "critical" : assessment.threatLevel === "high" ? "high" : "medium",
+      actionable: assessment.recommendedActions.length > 0,
+      suggestedActions: assessment.recommendedActions,
+      relatedDomains: [domain],
+      createdAt: new Date().toISOString(),
+      dismissed: false,
+    });
+
+    logger.info({ eventType, domain, fusionId: assessment.fusionId, confidence: assessment.confidenceScore }, "Proactive fusion insight generated from event");
+  } catch (err) {
+    logger.warn({ err, eventType }, "Fusion analysis skipped — model or DB unavailable");
+  }
 }
 
 export function getPendingApprovals(): Array<typeof pendingApprovals extends Map<string, infer V> ? V : never> {

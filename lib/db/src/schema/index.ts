@@ -82,3 +82,6 @@ export * from "./analytics_lake";
 export * from "./prism_counsel_recovery";
 export * from "./email-marketing";
 export * from "./analytics-engine";
+
+export * from "./forge";
+export * from "./marketplace";

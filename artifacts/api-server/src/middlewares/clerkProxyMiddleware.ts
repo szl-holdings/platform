@@ -19,11 +19,7 @@
  *   app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
  */
 
-import { createRequire } from "node:module";
-import type { RequestHandler, Request } from "express";
-import { logger } from "../lib/logger";
-
-const _require = createRequire(import.meta.url);
+import type { RequestHandler } from "express";
 
 const CLERK_FAPI = "https://frontend-api.clerk.dev";
 export const CLERK_PROXY_PATH = "/api/__clerk";
@@ -45,7 +41,6 @@ async function getProxyMiddleware(): Promise<((opts: Record<string, unknown>) =>
 }
 
 export function clerkProxyMiddleware(): RequestHandler {
-  // Only run proxy in production — Clerk proxying doesn't work for dev instances
   if (process.env.NODE_ENV !== "production") {
     return (_req, _res, next) => next();
   }
@@ -68,12 +63,13 @@ export function clerkProxyMiddleware(): RequestHandler {
       pathRewrite: (path: string) =>
         path.replace(new RegExp(`^${CLERK_PROXY_PATH}`), ""),
       on: {
-        proxyReq: (proxyReq: { setHeader: (k: string, v: string) => void }, req: { headers: Record<string, string | string[] | undefined>; socket?: { remoteAddress?: string } }) => {
+        proxyReq: (proxyReq: import("http").ClientRequest, req: import("express").Request) => {
           const protocol = req.headers["x-forwarded-proto"] || "https";
-          const host = req.headers["host"] || "";
+          const host = req.headers.host || "";
           const proxyUrl = `${protocol}://${host}${CLERK_PROXY_PATH}`;
           proxyReq.setHeader("Clerk-Proxy-Url", proxyUrl);
           proxyReq.setHeader("Clerk-Secret-Key", secretKey);
+
           const xff = req.headers["x-forwarded-for"];
           const clientIp =
             (Array.isArray(xff) ? xff[0] : xff)?.split(",")[0]?.trim() ||
