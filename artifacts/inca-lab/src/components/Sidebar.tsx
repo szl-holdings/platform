@@ -33,6 +33,7 @@ import {
   ShoppingBag,
   Globe,
   Crown,
+  Cpu,
 } from "lucide-react";
 
 interface NavItem {
@@ -61,6 +62,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: "deployment", label: "Deployment Runway", sublabel: "Self-hosted readiness", icon: Server },
       { id: "observatory", label: "LLMOps Observatory", sublabel: "Usage, compliance & traces", icon: BarChart3 },
       { id: "lab", label: "Model Lab", sublabel: "A/B testing & prompts", icon: FlaskConical },
+      { id: "model-training", label: "Fine-Tuning Pipeline", sublabel: "Train & deploy custom models", icon: Cpu },
       { id: "security", label: "Security Posture", sublabel: "Trust scores & injection", icon: ShieldCheck },
       { id: "memory", label: "Agent Memory", sublabel: "Cross-session knowledge", icon: Database },
     ],

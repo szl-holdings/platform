@@ -154,6 +154,11 @@ import { multimodalRouter } from "./multimodal";
 import gatewayIntelligenceRouter from "./gateway-intelligence";
 import copilotRouter from "./copilot";
 import packageRegistryRouter from "./package-registry";
+import modelFinetuningRouter from "./model-finetuning";
+import soundStudioRouter from "./sound-studio";
+import videoStreamingRouter from "./video-streaming";
+import multimodalDocumentsRouter from "./multimodal-documents";
+import aboRouter from "./abo";
 
 const router: IRouter = Router();
 
@@ -570,7 +575,6 @@ router.use("/analytics/heatmap-events", _writeLimiter);
 router.use("/analytics/consent", _writeLimiter);
 router.use(analyticsEngineRouter);
 
-import aboRouter from "./abo";
 router.use("/abo", _readLimiter);
 router.use("/abo", _writeLimiter);
 router.use(aboRouter);
@@ -582,5 +586,17 @@ router.use("/package-registry", packageRegistryRouter);
 import championRouter from "./champion";
 router.use("/champion", _readLimiter);
 router.use(championRouter);
+
+router.use("/model-finetuning", _writeLimiter);
+router.use(modelFinetuningRouter);
+
+router.use("/sound-studio", _writeLimiter);
+router.use(soundStudioRouter);
+
+router.use("/video-streaming", _writeLimiter);
+router.use(videoStreamingRouter);
+
+router.use("/multimodal-documents", _writeLimiter);
+router.use(multimodalDocumentsRouter);
 
 export default router;

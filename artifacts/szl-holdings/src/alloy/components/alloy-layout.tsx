@@ -37,6 +37,7 @@ const CREATIVE_NAV = [
   { href: "/alloy/creative/brand-voice", label: "Brand Voice", icon: Mic },
   { href: "/alloy/creative/content-calendar", label: "Content Calendar", icon: Calendar },
   { href: "/alloy/creative/ai-studio", label: "AI Studio", icon: Wand2 },
+  { href: "/alloy/creative/sound-studio", label: "Sound Studio", icon: Radio },
 ];
 
 const DOCS_NAV = [

@@ -167,15 +167,11 @@ async function buildAll() {
       "puppeteer",
       "puppeteer-core",
       "electron",
+      // Clerk auth + proxy (optional — gracefully degraded when unavailable)
       "@clerk/express",
       "http-proxy-middleware",
       // Large packages externalized to reduce bundle size and heap usage
       "pdfkit",
-      "swagger-ui-express",
-      "swagger-ui-dist",
-      // Clerk auth + proxy (optional — gracefully degraded when unavailable)
-      "@clerk/express",
-      "http-proxy-middleware",
     ],
     sourcemap: process.env.NODE_ENV === "production" ? "linked" : false,
     plugins: [

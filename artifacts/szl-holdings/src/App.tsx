@@ -174,6 +174,7 @@ const AlloyCampaignDetail = lazy(() => import("@/alloy/pages/creative/campaign-d
 const AlloyBrandVoice = lazy(() => import("@/alloy/pages/creative/brand-voice"));
 const AlloyContentCalendar = lazy(() => import("@/alloy/pages/creative/content-calendar"));
 const AlloyAIStudio = lazy(() => import("@/alloy/pages/creative/ai-studio"));
+const AlloySoundStudio = lazy(() => import("@/alloy/pages/creative/sound-studio"));
 const AlloyDocumentEngine = lazy(() => import("@/alloy/pages/document-engine"));
 const AlloyWorkspaceHome = lazy(() => import("@/alloy/pages/workspace-home"));
 const AlloyDecisionObjects = lazy(() => import("@/alloy/pages/decision-objects"));
@@ -683,6 +684,9 @@ function App() {
             </Route>
             <Route path="/alloy/creative/ai-studio">
               <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyAIStudio /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/creative/sound-studio">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloySoundStudio /></AlloyAppPage></Suspense>
             </Route>
             <Route path="/alloy/documents">
               <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyDocumentEngine /></AlloyAppPage></Suspense>

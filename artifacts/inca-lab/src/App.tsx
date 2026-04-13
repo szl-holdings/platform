@@ -30,6 +30,7 @@ import { AlloyForge } from "./pages/AlloyForge";
 import { TrainingStudio } from "./pages/TrainingStudio";
 import { PublicMarketplace } from "./pages/PublicMarketplace";
 import { ChampionArena } from "./pages/ChampionArena";
+import { ModelTrainingPipeline } from "./pages/ModelTrainingPipeline";
 
 export type Page =
   | "dashboard"
@@ -58,7 +59,8 @@ export type Page =
   | "alloy-forge"
   | "training-studio"
   | "public-marketplace"
-  | "champion-arena";
+  | "champion-arena"
+  | "model-training";
 
 const PAGE_ROUTES: Record<Page, string> = {
   dashboard: "/inca-lab/",
@@ -88,6 +90,7 @@ const PAGE_ROUTES: Record<Page, string> = {
   "revenue-roi": "/inca-lab/revenue-roi",
   "skill-playground": "/inca-lab/skill-playground",
   "champion-arena": "/inca-lab/champion-arena",
+  "model-training": "/inca-lab/model-training",
 };
 
 function AppShell() {
@@ -120,6 +123,7 @@ function AppShell() {
     if (location.startsWith("/inca-lab/white-label")) return "white-label";
     if (location.startsWith("/inca-lab/revenue-roi")) return "revenue-roi";
     if (location.startsWith("/inca-lab/skill-playground")) return "skill-playground";
+    if (location.startsWith("/inca-lab/model-training")) return "model-training";
     return "dashboard";
   })();
 
@@ -164,6 +168,7 @@ function AppShell() {
           <Route path="/inca-lab/training-studio" component={TrainingStudio} />
           <Route path="/inca-lab/public-marketplace" component={PublicMarketplace} />
           <Route path="/inca-lab/champion-arena" component={ChampionArena} />
+          <Route path="/inca-lab/model-training" component={ModelTrainingPipeline} />
           <Route>
             <Dashboard onNavigate={onNavigate} />
           </Route>
