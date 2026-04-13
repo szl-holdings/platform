@@ -50,8 +50,8 @@ Built by a single founder. Every line ships to production.
 | **Database Tables** | 600 |
 | **Database Columns** | 5,300+ |
 | **Database Indexes** | 940+ |
-| **API Route Modules** | 135 |
-| **Shared Libraries** | 31 |
+| **API Route Modules** | 150 |
+| **Shared Libraries** | 28 |
 | **Schema Definitions** | 82 files |
 | **GitHub Commits** | 730+ |
 | **Industries Served** | 5 |
@@ -283,14 +283,13 @@ szl-holdings-platform/
 |   |-- api-server/               #   Unified API server (Express 5)
 |   |-- *-mobile/                 #   7 companion mobile apps (Expo)
 |   +-- mockup-sandbox/           #   Component design sandbox
-|-- lib/                          # 31 shared libraries
+|-- lib/                          # 28 shared libraries
 |   |-- db/                       #   Drizzle ORM schemas (600 tables, 82 schema files)
 |   |-- ai-engine/                #   Multi-provider AI gateway
 |   |-- shared-ui/                #   Design system (80+ component exports)
 |   |-- services/                 #   Business logic & external adapters
 |   |-- workflow-engine/          #   Alloy execution fabric
 |   |-- proof-chain/              #   Immutable audit trail engine
-|   |-- outcome-graph/            #   Cross-domain ontology graph
 |   |-- covenant-policy/          #   Governance policy enforcement
 |   +-- api-spec/                 #   OpenAPI specification
 |-- docs/                         # Architecture, investor, trust docs
@@ -343,7 +342,7 @@ The platform includes a live **Investor Dashboard** with real-time database metr
 
 ## Release Status
 
-**Active development.** 730+ commits. 19 production applications. 600 database tables. 31 shared libraries. 135 API route modules. 5 industries. One architecture.
+**Active development.** 740+ commits. 19 production applications. 600 database tables. 28 shared libraries. 150 API route modules. 5 industries. One architecture.
 
 See [CHANGELOG.md](CHANGELOG.md) &bull; [ROADMAP.md](ROADMAP.md)
 

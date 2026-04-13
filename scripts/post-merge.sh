@@ -34,4 +34,4 @@ const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 " 2>&1 || true
 
 echo "Running drizzle-kit push (non-interactive)..."
-timeout 55 bash -c 'cd lib/db && npx drizzle-kit push --config ./drizzle.push.config.ts --force < /dev/null 2>&1' || echo "drizzle-kit push timed out or failed (non-fatal)"
+timeout 55 bash -c 'cd lib/db && npx drizzle-kit push --config ./drizzle.push.cjs --force < /dev/null 2>&1' || echo "drizzle-kit push timed out or failed (non-fatal)"

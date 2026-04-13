@@ -72,7 +72,7 @@ All 7 mobile apps now share components via `lib/mobile-ai` (`@szl-holdings/mobil
 The platform is built as a pnpm monorepo utilizing Node.js 24 and TypeScript 5.9.
 - **Frontend:** React, Vite, TanStack React Query, Wouter, Tailwind CSS, Framer Motion, Lucide React, Recharts. Internationalization is handled by `react-i18next` with RTL support.
 - **Backend:** Express 5, Drizzle ORM, Zod validation, pino logging.
-- **Database:** PostgreSQL with Drizzle ORM (560+ tables), pgvector extension for AI embeddings, managing multiple schemas including CMS, product, client portal, organization membership, and AI agent state.
+- **Database:** PostgreSQL with Drizzle ORM (600 tables, 82 schema files), pgvector extension for AI embeddings, managing multiple schemas including CMS, product, client portal, organization membership, and AI agent state.
 - **Investor Dashboard:** `/stephen/investor` route on stephen-site — acquisition-grade due diligence surface with live DB metrics, defensibility scoring, TAM analysis, and CTA for Acquire.com. API endpoint: `GET /api/stephen/acquisition-metrics`.
 - **Authentication:** Replit Auth (OIDC/PKCE), session-based with cookie+Bearer token, 7-role RBAC.
 - **API Codegen:** Orval from OpenAPI specification.
