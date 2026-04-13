@@ -41,6 +41,7 @@ export default defineConfig({
     emptyOutDir: true,
     cssCodeSplit: true,
     rollupOptions: {
+      external: ["ioredis"],
       output: {
         manualChunks(id): string | undefined {
           if (id.includes('node_modules')) {
