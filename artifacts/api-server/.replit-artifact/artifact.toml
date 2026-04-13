@@ -12,6 +12,9 @@ kind = "api"
   [services.development]
   run = "pnpm --filter @workspace/api-server run dev:fast"
 
+  [services.env]
+  PORT = "8080"
+
   [services.production]
 
   [services.production.build]
