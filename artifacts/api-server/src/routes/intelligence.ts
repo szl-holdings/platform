@@ -576,6 +576,7 @@ router.get("/intelligence/cultural-calendar", intelRateLimit, authMiddleware({ r
   } catch (err) { handleRouteError(res, err, "Failed to fetch cultural calendar"); }
 });
 
+
 router.post("/intelligence/ai/summarize", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
   try {
     const { text } = req.body;
@@ -943,6 +944,7 @@ router.get("/intelligence/daily-digest", intelRateLimit, authMiddleware({ requir
     sendSuccess(res, digest);
   } catch (err) { handleRouteError(res, err, "Failed to generate daily digest"); }
 });
+
 
 router.get("/intelligence/ai-models", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
@@ -1797,5 +1799,6 @@ Be precise, tactical, and time-sensitive.`;
     });
   } catch (err) { handleRouteError(res, err, "Threat triage failed"); }
 });
+
 
 export default router;
