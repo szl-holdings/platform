@@ -2,38 +2,41 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, type AgentDef } from "../lib/api";
 import { cn } from "../lib/utils";
-import { Brain, Shield, BarChart3, Server, Compass, ArrowRight, Loader2, AlertCircle, Users, Zap, Clock, MessageSquare } from "lucide-react";
+import {
+  Brain, Shield, BarChart3, Server, Compass, ArrowRight, Loader2, AlertCircle,
+  Users, Zap, Clock, MessageSquare,
+  ChevronDown, ChevronUp, Copy, Check, Database, Star, Code2,
+  GitFork, Pin, Upload, RotateCcw, AlertTriangle
+} from "lucide-react";
+import { type Page } from "../App";
 
-const AGENT_ICONS: Record<string, React.ComponentType<{className?: string}>> = {
-  alloy: Brain,
-  helmsman: Anchor,
-  sentinel: Shield,
-  inca: Telescope,
-  muse: Palette,
-  beacon: BarChart3,
-  zeus: Server,
-  compass: Compass,
-};
+interface NuroMeshCommandProps {
+  onNavigate?: (page: Page) => void;
+}
 
-const PROVIDER_COLORS: Record<string, string> = {
+const AGENT_COLORS: Record<string, string> = {
   openai: "#22c55e",
   anthropic: "#f97316",
   gemini: "#60a5fa",
   huggingface: "#a78bfa",
+  "self-hosted": "#22d3ee",
 };
 
 const PROVIDER_BG: Record<string, string> = {
-  openai: "bg-green-500/10 border-green-500/25 text-green-400",
-  anthropic: "bg-orange-500/10 border-orange-500/25 text-orange-400",
-  gemini: "bg-blue-400/10 border-blue-400/25 text-blue-400",
-  huggingface: "bg-violet-400/10 border-violet-400/25 text-violet-400",
+  openai: "badge-running",
+  anthropic: "badge-warning",
+  gemini: "badge-staged",
+  huggingface: "badge-idle",
+  "self-hosted": "badge-idle",
 };
 
 const AVAILABLE_MODELS = [
   { model: "gpt-5.2", provider: "openai" },
+  { model: "gpt-5.2-mini", provider: "openai" },
+  { model: "gpt-4.1", provider: "openai" },
   { model: "claude-sonnet-4-6", provider: "anthropic" },
+  { model: "claude-opus-4-6", provider: "anthropic" },
   { model: "gemini-3.1-pro-preview", provider: "gemini" },
-  { model: "gemini-3-flash-preview", provider: "gemini" },
   { model: "Qwen/Qwen3-8B", provider: "huggingface" },
   { model: "Qwen/Qwen3-0.6B", provider: "huggingface" },
 ];
@@ -72,6 +75,81 @@ const EXEC_STATE_CONFIG: Record<ExecutionState, { label: string; color: string; 
   "waiting-approval": { label: "approval", color: "text-red-400", pulse: true },
 };
 
+// A2A Agent Card metadata — capabilities, skills, protocols, auth, version
+const A2A_META: Record<string, {
+  capabilities: string[];
+  skills: string[];
+  protocols: string[];
+  auth: string;
+  version: string;
+  agentUrl: string;
+}> = {
+  alloy: {
+    capabilities: ["Multi-agent orchestration", "Task routing", "Priority escalation", "Cross-agent synthesis"],
+    skills: ["query_routing", "task_delegation", "consensus_check", "health_monitor"],
+    protocols: ["A2A v1.0", "MCP 2.0", "OpenAI Assistants"],
+    auth: "Bearer (internal)",
+    version: "3.2.1",
+    agentUrl: "https://mesh.szl.internal/agents/alloy",
+  },
+  helmsman: {
+    capabilities: ["AIS vessel tracking", "Route risk assessment", "Sanctions screening", "Fleet emergency dispatch"],
+    skills: ["vessel_lookup", "route_optimize", "sanctions_check", "weather_advisory"],
+    protocols: ["A2A v1.0", "MCP 2.0", "IHO S-100"],
+    auth: "mTLS + Bearer",
+    version: "2.8.4",
+    agentUrl: "https://mesh.szl.internal/agents/helmsman",
+  },
+  sentinel: {
+    capabilities: ["CVE analysis", "Threat intelligence", "Incident response", "Maker-checker validation"],
+    skills: ["cve_lookup", "threat_score", "incident_triage", "output_validate"],
+    protocols: ["A2A v1.0", "MCP 2.0", "STIX 2.1"],
+    auth: "mTLS + Bearer",
+    version: "4.1.0",
+    agentUrl: "https://mesh.szl.internal/agents/sentinel",
+  },
+  inca: {
+    capabilities: ["arXiv paper scouting", "HuggingFace discovery", "Model evaluation", "Research synthesis"],
+    skills: ["paper_search", "model_rank", "benchmark_compare", "trend_detect"],
+    protocols: ["A2A v1.0", "MCP 2.0"],
+    auth: "Bearer (internal)",
+    version: "2.3.0",
+    agentUrl: "https://mesh.szl.internal/agents/inca",
+  },
+  muse: {
+    capabilities: ["Brand content creation", "Campaign strategy", "Copy generation", "Creative synthesis"],
+    skills: ["content_generate", "brand_align", "campaign_plan", "copy_variations"],
+    protocols: ["A2A v1.0", "MCP 2.0"],
+    auth: "Bearer (internal)",
+    version: "1.9.2",
+    agentUrl: "https://mesh.szl.internal/agents/muse",
+  },
+  beacon: {
+    capabilities: ["KPI anomaly detection", "Platform analytics", "Performance trending", "Ops alerting"],
+    skills: ["anomaly_detect", "kpi_report", "trend_forecast", "alert_dispatch"],
+    protocols: ["A2A v1.0", "MCP 2.0", "OpenTelemetry"],
+    auth: "Bearer (internal)",
+    version: "2.1.3",
+    agentUrl: "https://mesh.szl.internal/agents/beacon",
+  },
+  zeus: {
+    capabilities: ["Azure infrastructure ops", "Kubernetes management", "Deployment orchestration", "Health checks"],
+    skills: ["k8s_deploy", "azure_provision", "health_check", "rollback_trigger"],
+    protocols: ["A2A v1.0", "MCP 2.0", "Kubernetes API"],
+    auth: "mTLS + Service Account",
+    version: "3.0.5",
+    agentUrl: "https://mesh.szl.internal/agents/zeus",
+  },
+  compass: {
+    capabilities: ["Deployment readiness scoring", "Hardware benchmarking", "Cost modeling", "Quantization guidance"],
+    skills: ["readiness_score", "vram_estimate", "cost_model", "quant_advise"],
+    protocols: ["A2A v1.0", "MCP 2.0"],
+    auth: "Bearer (internal)",
+    version: "1.5.1",
+    agentUrl: "https://mesh.szl.internal/agents/compass",
+  },
+};
+
 function Anchor(props: { className?: string }) {
   return (
     <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -96,7 +174,149 @@ function Telescope(props: { className?: string }) {
   );
 }
 
-export function NuroMeshCommand() {
+const AGENT_ICONS: Record<string, React.ComponentType<{className?: string}>> = {
+  alloy: Brain,
+  helmsman: Anchor,
+  sentinel: Shield,
+  inca: Telescope,
+  muse: Palette,
+  beacon: BarChart3,
+  zeus: Server,
+  compass: Compass,
+};
+
+const PROVIDER_COLORS: Record<string, string> = {
+  openai: "#22c55e",
+  anthropic: "#f97316",
+  gemini: "#60a5fa",
+  huggingface: "#a78bfa",
+  "self-hosted": "#22d3ee",
+};
+
+function A2ACardModal({ agent, onClose }: { agent: AgentDef; onClose: () => void }) {
+  const meta = A2A_META[agent.id];
+  const [copied, setCopied] = useState(false);
+
+  if (!meta) return null;
+
+  const cardJson = JSON.stringify({
+    name: agent.name,
+    version: meta.version,
+    agentUrl: meta.agentUrl,
+    domain: agent.domain,
+    capabilities: meta.capabilities,
+    skills: meta.skills,
+    supportedProtocols: meta.protocols,
+    authentication: { scheme: meta.auth },
+    model: agent.preferredModel,
+    provider: agent.preferredProvider,
+    tools: agent.tools,
+  }, null, 2);
+
+  function copyCard() {
+    navigator.clipboard.writeText(cardJson).catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-card border border-primary/25 rounded-xl p-6 max-w-lg w-full mx-4 shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/25 flex items-center justify-center">
+            {(() => { const Icon = AGENT_ICONS[agent.id] || Brain; return <Icon className="w-5 h-5 text-primary" />; })()}
+          </div>
+          <div>
+            <div className="font-display font-semibold text-foreground">{agent.name} — A2A Agent Card</div>
+            <div className="text-xs text-muted-foreground">v{meta.version} · {agent.domain} domain</div>
+          </div>
+          <button onClick={onClose} className="ml-auto text-muted-foreground hover:text-foreground transition-colors">✕</button>
+        </div>
+
+        <div className="space-y-3 mb-4">
+          <div>
+            <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-1.5">Capabilities</div>
+            <div className="flex flex-wrap gap-1">
+              {meta.capabilities.map(c => <span key={c} className="badge-staged px-1.5 py-0.5 rounded text-xs">{c}</span>)}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-1.5">Skills</div>
+            <div className="flex flex-wrap gap-1">
+              {meta.skills.map(s => <span key={s} className="font-mono text-xs bg-secondary border border-border rounded px-1.5 py-0.5 text-muted-foreground">{s}</span>)}
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <div className="text-muted-foreground mb-1">Protocols</div>
+              {meta.protocols.map(p => <div key={p} className="text-foreground">{p}</div>)}
+            </div>
+            <div>
+              <div className="text-muted-foreground mb-1">Auth</div>
+              <div className="text-foreground">{meta.auth}</div>
+              <div className="text-muted-foreground mt-2 mb-1">Model</div>
+              <div className="font-mono text-primary">{agent.preferredModel}</div>
+            </div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground mb-1">Agent URL</div>
+            <div className="font-mono text-xs text-muted-foreground bg-secondary px-2 py-1.5 rounded">{meta.agentUrl}</div>
+          </div>
+        </div>
+
+        <div className="border-t border-border pt-3">
+          <button
+            onClick={copyCard}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-primary/10 border border-primary/20 text-primary rounded-lg text-sm font-medium hover:bg-primary/15 transition-colors"
+          >
+            {copied ? <><Check className="w-3.5 h-3.5" /> Copied!</> : <><Copy className="w-3.5 h-3.5" /> Copy Agent Card JSON</>}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function InlineActions({ agentId, agentName }: { agentId: string; agentName: string }) {
+  const [actionDone, setActionDone] = useState<string | null>(null);
+
+  function doAction(action: string) {
+    setActionDone(action);
+    setTimeout(() => setActionDone(null), 2000);
+  }
+
+  const actions = [
+    { id: "escalate", label: "Escalate", icon: AlertTriangle, className: "text-red-400 bg-red-500/10 border-red-500/20 hover:bg-red-500/15" },
+    { id: "rerun", label: "Re-run", icon: RotateCcw, className: "text-blue-400 bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/15" },
+    { id: "fork", label: "Fork Workflow", icon: GitFork, className: "text-amber-400 bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/15" },
+    { id: "pin", label: "Pin to Memory", icon: Pin, className: "text-primary bg-primary/10 border-primary/20 hover:bg-primary/15" },
+    { id: "export", label: "Export Trace", icon: Upload, className: "text-muted-foreground bg-secondary border-border hover:text-foreground" },
+  ];
+
+  return (
+    <div className="border-t border-border/50 pt-3 mt-3">
+      <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-2">Inline Actions</div>
+      <div className="flex flex-wrap gap-1.5">
+        {actions.map(action => {
+          const Icon = action.icon;
+          const done = actionDone === action.id;
+          return (
+            <button
+              key={action.id}
+              onClick={() => doAction(action.id)}
+              className={cn("flex items-center gap-1 px-2 py-1.5 rounded-lg border text-xs font-medium transition-all", action.className, done && "opacity-60")}
+            >
+              {done ? <Check className="w-3 h-3" /> : <Icon className="w-3 h-3" />}
+              {done ? "Done" : action.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+export function NuroMeshCommand({ onNavigate }: NuroMeshCommandProps) {
   const queryClient = useQueryClient();
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [editingAgent, setEditingAgent] = useState<string | null>(null);
@@ -106,6 +326,8 @@ export function NuroMeshCommand() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"topology" | "crews" | "messages">("topology");
+  const [a2aCard, setA2aCard] = useState<string | null>(null);
+  const [expandedSection, setExpandedSection] = useState<"details" | "a2a" | null>("details");
 
   const agentsQuery = useQuery({
     queryKey: ["inca-agents"],
@@ -115,6 +337,7 @@ export function NuroMeshCommand() {
 
   const agents: AgentDef[] = agentsQuery.data?.data ?? [];
   const selected = agents.find(a => a.id === selectedAgent);
+  const a2aAgent = agents.find(a => a.id === a2aCard);
 
   function startEdit(agentId: string) {
     const agent = agents.find(a => a.id === agentId);
@@ -163,16 +386,42 @@ export function NuroMeshCommand() {
     );
   }
 
+  const meta = selected ? A2A_META[selected.id] : null;
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
+      {a2aCard && a2aAgent && (
+        <A2ACardModal agent={a2aAgent} onClose={() => setA2aCard(null)} />
+      )}
+
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-1">
           <div className="w-1.5 h-5 rounded-full bg-primary" />
           <h1 className="text-xl font-display font-semibold text-foreground">Nuro Mesh Command</h1>
         </div>
         <p className="text-sm text-muted-foreground ml-3.5">
-          Live agent topology with crew assignments, execution states, and real-time message flows.
+          Live agent topology with crew assignments, execution states, real-time message flows, and A2A agent cards.
         </p>
+      </div>
+
+      {/* Level 1: Topology KPIs */}
+      <div className="grid grid-cols-4 gap-3 mb-4">
+        <div className="kpi-tile p-3 text-center">
+          <div className="text-xl font-display font-bold text-primary">{agents.length}</div>
+          <div className="text-xs text-muted-foreground">Total Agents</div>
+        </div>
+        <div className="kpi-tile p-3 text-center">
+          <div className="text-xl font-display font-bold text-emerald-400">{agents.length}</div>
+          <div className="text-xs text-muted-foreground">Online</div>
+        </div>
+        <div className="kpi-tile p-3 text-center">
+          <div className="text-xl font-display font-bold text-foreground">1</div>
+          <div className="text-xs text-muted-foreground">Orchestrator</div>
+        </div>
+        <div className="kpi-tile p-3 text-center">
+          <div className="text-xl font-display font-bold text-foreground">{agents.length - 1}</div>
+          <div className="text-xs text-muted-foreground">Domain Agents</div>
+        </div>
       </div>
 
       {/* View mode tabs */}
@@ -298,85 +547,170 @@ export function NuroMeshCommand() {
           <div className="lg:col-span-2">
             {selected ? (
               <div className="inca-panel-active p-5 animate-scale-in">
+                {/* Level 1: Summary header */}
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/25 flex items-center justify-center">
-                    {(() => {
-                      const Icon = AGENT_ICONS[selected.id] || Brain;
-                      return <Icon className="w-5 h-5 text-primary" />;
-                    })()}
+                    {(() => { const Icon = AGENT_ICONS[selected.id] || Brain; return <Icon className="w-5 h-5 text-primary" />; })()}
                   </div>
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <div className="font-display font-semibold text-foreground">{selected.name}</div>
                     <div className="text-xs text-muted-foreground capitalize">{selected.domain} domain</div>
                   </div>
-                  <div className="ml-auto">
-                    {(() => {
-                      const execState = AGENT_EXEC_STATES[selected.id] ?? "idle";
-                      const cfg = EXEC_STATE_CONFIG[execState];
-                      return (
-                        <span className={cn("text-xs font-medium px-2 py-0.5 rounded-full border", {
-                          "badge-idle": execState === "idle",
-                          "badge-staged": execState === "reasoning",
-                          "badge-running": execState === "executing",
-                          "badge-warning": execState === "debating",
-                          "badge-error": execState === "waiting-approval",
-                        })}>
-                          {cfg.pulse && <span className="inline-block w-1.5 h-1.5 rounded-full mr-1 animate-pulse-dot" style={{backgroundColor: "currentColor"}} />}
-                          {cfg.label}
-                        </span>
-                      );
-                    })()}
-                  </div>
+                  {meta && (
+                    <span className="text-xs text-muted-foreground font-mono badge-idle px-1.5 py-0.5 rounded">v{meta.version}</span>
+                  )}
+                  {(() => {
+                    const execState = AGENT_EXEC_STATES[selected.id] ?? "idle";
+                    const cfg = EXEC_STATE_CONFIG[execState];
+                    return (
+                      <span className={cn("text-xs font-medium px-2 py-0.5 rounded-full border", {
+                        "badge-idle": execState === "idle",
+                        "badge-staged": execState === "reasoning",
+                        "badge-running": execState === "executing",
+                        "badge-warning": execState === "debating",
+                        "badge-error": execState === "waiting-approval",
+                      })}>
+                        {cfg.pulse && <span className="inline-block w-1.5 h-1.5 rounded-full mr-1 animate-pulse-dot" style={{ backgroundColor: "currentColor" }} />}
+                        {cfg.label}
+                      </span>
+                    );
+                  })()}
                 </div>
 
-                <div className="space-y-3 mb-4">
-                  <div>
-                    <div className="text-xs text-muted-foreground mb-1">Current Model</div>
-                    <div className="font-mono text-sm text-foreground bg-secondary px-3 py-1.5 rounded-md">{selected.preferredModel}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground mb-1">Provider</div>
-                    <span className={cn("inline-block px-2 py-0.5 rounded border text-xs font-medium", PROVIDER_BG[selected.preferredProvider] || "badge-idle")}>
-                      {selected.preferredProvider}
-                    </span>
-                  </div>
+                {/* Tab bar: Details / A2A Card */}
+                <div className="flex gap-1 p-1 bg-secondary rounded-lg mb-4">
+                  <button
+                    onClick={() => setExpandedSection("details")}
+                    className={cn("flex-1 py-1 rounded text-xs font-medium transition-all", expandedSection === "details" ? "bg-card text-foreground" : "text-muted-foreground hover:text-foreground")}
+                  >
+                    Details
+                  </button>
+                  <button
+                    onClick={() => setExpandedSection("a2a")}
+                    className={cn("flex-1 py-1 rounded text-xs font-medium transition-all flex items-center justify-center gap-1", expandedSection === "a2a" ? "bg-card text-foreground" : "text-muted-foreground hover:text-foreground")}
+                  >
+                    <Star className="w-3 h-3" /> A2A Card
+                  </button>
+                </div>
 
-                  {selected.highStakesDomains.length > 0 && (
+                {/* Level 2: Details panel */}
+                {expandedSection === "details" && (
+                  <div className="space-y-3 mb-4 animate-fade-in">
                     <div>
-                      <div className="text-xs text-muted-foreground mb-1">High-stakes domains</div>
+                      <div className="text-xs text-muted-foreground mb-1">Current Model</div>
+                      <div className="font-mono text-sm text-foreground bg-secondary px-3 py-1.5 rounded-md">{selected.preferredModel}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground mb-1">Provider</div>
+                      <span className={cn("inline-block px-2 py-0.5 rounded border text-xs font-medium", PROVIDER_BG[selected.preferredProvider] || "badge-idle")}>
+                        {selected.preferredProvider}
+                      </span>
+                    </div>
+
+                    {selected.highStakesDomains.length > 0 && (
+                      <div>
+                        <div className="text-xs text-muted-foreground mb-1">High-stakes domains</div>
+                        <div className="flex flex-wrap gap-1">
+                          {selected.highStakesDomains.map(d => (
+                            <span key={d} className="badge-warning px-1.5 py-0.5 rounded text-xs">{d.replace("_", " ")}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div>
+                      <div className="text-xs text-muted-foreground mb-1">Tool access</div>
                       <div className="flex flex-wrap gap-1">
-                        {selected.highStakesDomains.map(d => (
-                          <span key={d} className="badge-warning px-1.5 py-0.5 rounded text-xs">{d.replace("_", " ")}</span>
+                        {selected.tools.map(t => (
+                          <span key={t} className="badge-idle px-1.5 py-0.5 rounded text-xs">{t}</span>
                         ))}
                       </div>
                     </div>
-                  )}
 
-                  <div>
-                    <div className="text-xs text-muted-foreground mb-1">Tool access</div>
-                    <div className="flex flex-wrap gap-1">
-                      {selected.tools.map(t => (
-                        <span key={t} className="badge-idle px-1.5 py-0.5 rounded text-xs">{t}</span>
-                      ))}
+                    {/* Crew memberships */}
+                    <div>
+                      <div className="text-xs text-muted-foreground mb-1">Active Crews</div>
+                      <div className="space-y-1">
+                        {ACTIVE_CREWS.filter(c => c.agents.includes(selected.id)).map(crew => (
+                          <div key={crew.name} className="flex items-center gap-2">
+                            <div className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", crew.status === "active" ? "bg-green-500" : "bg-amber-500")} />
+                            <div className="text-xs text-muted-foreground">{crew.name}</div>
+                          </div>
+                        ))}
+                        {ACTIVE_CREWS.filter(c => c.agents.includes(selected.id)).length === 0 && (
+                          <div className="text-xs text-muted-foreground">Not assigned to any crew</div>
+                        )}
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Crew memberships */}
-                  <div>
-                    <div className="text-xs text-muted-foreground mb-1">Active Crews</div>
-                    <div className="space-y-1">
-                      {ACTIVE_CREWS.filter(c => c.agents.includes(selected.id)).map(crew => (
-                        <div key={crew.name} className="flex items-center gap-2">
-                          <div className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", crew.status === "active" ? "bg-green-500" : "bg-amber-500")} />
-                          <div className="text-xs text-muted-foreground">{crew.name}</div>
-                        </div>
-                      ))}
-                      {ACTIVE_CREWS.filter(c => c.agents.includes(selected.id)).length === 0 && (
-                        <div className="text-xs text-muted-foreground">Not assigned to any crew</div>
+                    {/* Quick links */}
+                    <div className="flex gap-2">
+                      {onNavigate && (
+                        <button
+                          onClick={() => onNavigate("memory")}
+                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-secondary border border-border text-xs text-muted-foreground hover:text-primary hover:border-primary/25 transition-all"
+                        >
+                          <Database className="w-3 h-3" /> View Memory
+                        </button>
                       )}
+                      <button
+                        onClick={() => setA2aCard(selected.id)}
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-secondary border border-border text-xs text-muted-foreground hover:text-primary hover:border-primary/25 transition-all"
+                      >
+                        <Code2 className="w-3 h-3" /> Agent Card JSON
+                      </button>
                     </div>
+
+                    {/* Inline Actions */}
+                    <InlineActions agentId={selected.id} agentName={selected.name} />
                   </div>
-                </div>
+                )}
+
+                {/* Level 2: A2A Card */}
+                {expandedSection === "a2a" && meta && (
+                  <div className="space-y-3 animate-fade-in">
+                    <div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-1.5">Capabilities</div>
+                      <div className="flex flex-wrap gap-1">
+                        {meta.capabilities.map(c => <span key={c} className="badge-staged px-1.5 py-0.5 rounded text-xs">{c}</span>)}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-1.5">Skills</div>
+                      <div className="flex flex-wrap gap-1">
+                        {meta.skills.map(s => <span key={s} className="font-mono text-xs bg-secondary border border-border rounded px-1.5 py-0.5 text-muted-foreground">{s}</span>)}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2 text-xs">
+                      <div>
+                        <div className="text-muted-foreground mb-1">Protocols</div>
+                        <div className="flex flex-wrap gap-1">
+                          {meta.protocols.map(p => <span key={p} className="badge-idle px-1.5 py-0.5 rounded">{p}</span>)}
+                        </div>
+                      </div>
+                      <div className="flex justify-between">
+                        <div>
+                          <div className="text-muted-foreground mb-0.5">Authentication</div>
+                          <div className="text-foreground">{meta.auth}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-muted-foreground mb-0.5">Version</div>
+                          <div className="font-mono text-foreground">v{meta.version}</div>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-muted-foreground mb-0.5">Agent URL</div>
+                        <div className="font-mono text-xs text-muted-foreground bg-secondary px-2 py-1 rounded truncate">{meta.agentUrl}</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setA2aCard(selected.id)}
+                      className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-primary/10 border border-primary/20 text-primary rounded-lg text-sm font-medium hover:bg-primary/15 transition-colors"
+                    >
+                      <Copy className="w-3.5 h-3.5" /> Copy Agent Card JSON
+                    </button>
+                  </div>
+                )}
 
                 {/* Swap model */}
                 {editingAgent === selected.id ? (
@@ -418,7 +752,7 @@ export function NuroMeshCommand() {
                 ) : (
                   <button
                     onClick={() => startEdit(selected.id)}
-                    className="w-full px-3 py-2 border border-primary/25 text-primary rounded-lg text-sm font-medium hover:bg-primary/10 transition-colors flex items-center justify-center gap-2"
+                    className="w-full mt-3 px-3 py-2 border border-primary/25 text-primary rounded-lg text-sm font-medium hover:bg-primary/10 transition-colors flex items-center justify-center gap-2"
                   >
                     <ArrowRight className="w-3.5 h-3.5" />
                     Reassign Model
@@ -429,12 +763,11 @@ export function NuroMeshCommand() {
               <div className="inca-panel p-5 flex items-center justify-center h-48 text-center">
                 <div>
                   <Brain className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                  <div className="text-sm text-muted-foreground">Select an agent to inspect<br />model assignments and routing</div>
+                  <div className="text-sm text-muted-foreground">Select an agent to inspect<br />model assignments, A2A cards, and routing</div>
                 </div>
               </div>
             )}
 
-            {/* Maker-checker info */}
             <div className="inca-panel p-4 mt-4">
               <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-2">Maker-Checker Protocol</div>
               <div className="flex items-center gap-2 mb-2">

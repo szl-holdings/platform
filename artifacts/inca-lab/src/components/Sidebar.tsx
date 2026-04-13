@@ -18,6 +18,8 @@ import {
   Library,
   ChevronDown,
   ChevronUp,
+  ShieldCheck,
+  Database,
 } from "lucide-react";
 
 interface NavItem {
@@ -25,7 +27,6 @@ interface NavItem {
   label: string;
   sublabel: string;
   icon: React.ComponentType<{ className?: string }>;
-  group?: string;
 }
 
 interface NavGroup {
@@ -47,6 +48,8 @@ const NAV_GROUPS: NavGroup[] = [
       { id: "deployment", label: "Deployment Runway", sublabel: "Self-hosted readiness", icon: Server },
       { id: "observatory", label: "LLMOps Observatory", sublabel: "Usage, compliance & traces", icon: BarChart3 },
       { id: "lab", label: "Model Lab", sublabel: "A/B testing & prompts", icon: FlaskConical },
+      { id: "security", label: "Security Posture", sublabel: "Trust scores & injection", icon: ShieldCheck },
+      { id: "memory", label: "Agent Memory", sublabel: "Cross-session knowledge", icon: Database },
     ],
   },
   {
@@ -58,7 +61,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: "agent-library", label: "Agent Library", sublabel: "Domain agent catalog", icon: Library },
       { id: "crew-builder", label: "Crew Builder", sublabel: "Assemble agent crews", icon: Users },
       { id: "workflow-forge", label: "Workflow Forge", sublabel: "Visual graph designer", icon: GitBranch },
-      { id: "consensus-chamber", label: "Consensus Chamber", sublabel: "Multi-agent deliberation", icon: MessageSquare },
+      { id: "consensus", label: "Consensus Chamber", sublabel: "Multi-agent deliberation", icon: MessageSquare },
       { id: "protocol-bridge", label: "Protocol Bridge", sublabel: "MCP + A2A connectivity", icon: Link2 },
     ],
   },
@@ -152,5 +155,28 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
         <div className="text-xs text-muted-foreground">SZL Holdings · v3.0.0</div>
       </div>
     </aside>
+  );
+}
+
+function NavButton({ item, active, onNavigate }: { item: NavItem; active: boolean; onNavigate: (page: Page) => void }) {
+  const Icon = item.icon;
+  return (
+    <button
+      key={item.id}
+      onClick={() => onNavigate(item.id)}
+      className={cn(
+        "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all duration-150 group",
+        active
+          ? "bg-primary/8 text-primary"
+          : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+      )}
+    >
+      <Icon className={cn("w-4 h-4 flex-shrink-0", active ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
+      <div className="flex-1 min-w-0">
+        <div className={cn("text-sm font-medium leading-none", active ? "text-primary" : "")}>{item.label}</div>
+        <div className="text-xs text-muted-foreground mt-0.5 leading-none truncate">{item.sublabel}</div>
+      </div>
+      {active && <ChevronRight className="w-3 h-3 text-primary flex-shrink-0" />}
+    </button>
   );
 }

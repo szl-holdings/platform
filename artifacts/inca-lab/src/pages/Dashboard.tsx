@@ -1,10 +1,12 @@
 import { type Page } from "../App";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api, type AgentDef, type RoutingEvent, type BenchmarkEntry } from "../lib/api";
 import { cn, formatNumber, formatCost, formatLatency } from "../lib/utils";
 import {
   Brain, Zap, Server, BarChart3, ChevronRight,
-  Clock, DollarSign, AlertTriangle, Loader2, Users, GitBranch, MessageSquare, Link2
+  Clock, DollarSign, AlertTriangle, Loader2, Users, GitBranch, MessageSquare, Link2,
+  Calendar, Plus, CheckCircle, Play, XCircle
 } from "lucide-react";
 
 interface DashboardProps {
@@ -41,6 +43,179 @@ function KpiCard({ label, value, sub, icon: Icon, accent = false }: { label: str
     </div>
   );
 }
+
+// ─── Task Scheduler ───────────────────────────────────────────────────────────
+
+interface ScheduledTask {
+  id: string;
+  name: string;
+  naturalLang: string;
+  cron: string;
+  agent: string;
+  enabled: boolean;
+  lastRun: string | null;
+  nextRun: string;
+  status: "success" | "running" | "failed" | "pending";
+}
+
+const INITIAL_TASKS: ScheduledTask[] = [
+  { id: "t1", name: "Morning Compliance Sweep", naturalLang: "every morning at 9am, run compliance sweep", cron: "0 9 * * *", agent: "Sentinel", enabled: true, lastRun: "2026-04-13T09:00:00Z", nextRun: "2026-04-14T09:00:00Z", status: "success" },
+  { id: "t2", name: "Fleet Position Update", naturalLang: "every 6 hours, fetch fleet positions", cron: "0 */6 * * *", agent: "Helmsman", enabled: true, lastRun: "2026-04-13T06:00:00Z", nextRun: "2026-04-13T12:00:00Z", status: "success" },
+  { id: "t3", name: "Weekly Benchmark Report", naturalLang: "every monday at 8am, run model benchmarks", cron: "0 8 * * 1", agent: "INCA", enabled: true, lastRun: "2026-04-07T08:00:00Z", nextRun: "2026-04-14T08:00:00Z", status: "success" },
+  { id: "t4", name: "Infra Health Check", naturalLang: "every 30 minutes, check infrastructure health", cron: "*/30 * * * *", agent: "Zeus", enabled: false, lastRun: "2026-04-13T10:30:00Z", nextRun: "—", status: "failed" },
+];
+
+function parseCronFromNaturalLang(text: string): string {
+  const lower = text.toLowerCase();
+  if (lower.includes("every morning") || lower.includes("daily at 9")) return "0 9 * * *";
+  if (lower.includes("every evening") || lower.includes("daily at 6pm")) return "0 18 * * *";
+  if (lower.includes("every hour")) return "0 * * * *";
+  if (lower.includes("every 30 min")) return "*/30 * * * *";
+  if (lower.includes("every 6 hours")) return "0 */6 * * *";
+  if (lower.includes("every monday")) return "0 9 * * 1";
+  if (lower.includes("every day")) return "0 9 * * *";
+  if (lower.includes("every week")) return "0 9 * * 1";
+  return "0 9 * * *";
+}
+
+function taskStatusIcon(status: ScheduledTask["status"]) {
+  if (status === "success") return <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />;
+  if (status === "running") return <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />;
+  if (status === "failed") return <XCircle className="w-3.5 h-3.5 text-red-400" />;
+  return <Clock className="w-3.5 h-3.5 text-muted-foreground" />;
+}
+
+function TaskSchedulerPanel() {
+  const [tasks, setTasks] = useState<ScheduledTask[]>(INITIAL_TASKS);
+  const [showForm, setShowForm] = useState(false);
+  const [nlInput, setNlInput] = useState("");
+  const [taskName, setTaskName] = useState("");
+  const [taskAgent, setTaskAgent] = useState("Sentinel");
+
+  function toggleTask(id: string) {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, enabled: !t.enabled, nextRun: t.enabled ? "—" : "2026-04-14T09:00:00Z" } : t));
+  }
+
+  function addTask() {
+    if (!nlInput.trim() || !taskName.trim()) return;
+    const cron = parseCronFromNaturalLang(nlInput);
+    const newTask: ScheduledTask = {
+      id: `t${Date.now()}`,
+      name: taskName,
+      naturalLang: nlInput,
+      cron,
+      agent: taskAgent,
+      enabled: true,
+      lastRun: null,
+      nextRun: "2026-04-14T09:00:00Z",
+      status: "pending",
+    };
+    setTasks(prev => [newTask, ...prev]);
+    setNlInput("");
+    setTaskName("");
+    setShowForm(false);
+  }
+
+  return (
+    <div className="inca-panel overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <div className="flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-primary" />
+          <div className="text-sm font-medium text-foreground">Task Scheduler</div>
+          <span className="badge-idle px-1.5 py-0.5 rounded text-xs">{tasks.filter(t => t.enabled).length} active</span>
+        </div>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs font-medium hover:bg-primary/15 transition-colors"
+        >
+          <Plus className="w-3 h-3" /> New Task
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="px-4 py-3 border-b border-border bg-secondary/20 animate-fade-in">
+          <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-3">Create Scheduled Task</div>
+          <div className="space-y-2">
+            <input
+              value={taskName}
+              onChange={e => setTaskName(e.target.value)}
+              placeholder="Task name…"
+              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40"
+            />
+            <input
+              value={nlInput}
+              onChange={e => setNlInput(e.target.value)}
+              placeholder="Natural language schedule (e.g. every morning at 9am, run compliance sweep)"
+              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40"
+            />
+            {nlInput && (
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-muted-foreground">Parsed cron:</span>
+                <code className="font-mono text-primary bg-primary/10 px-2 py-0.5 rounded">{parseCronFromNaturalLang(nlInput)}</code>
+              </div>
+            )}
+            <select
+              value={taskAgent}
+              onChange={e => setTaskAgent(e.target.value)}
+              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary/40"
+            >
+              {["Alloy", "Helmsman", "Sentinel", "INCA", "Muse", "Beacon", "Zeus", "Compass"].map(a => (
+                <option key={a} value={a}>{a}</option>
+              ))}
+            </select>
+            <div className="flex gap-2">
+              <button onClick={addTask} className="flex-1 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
+                Schedule Task
+              </button>
+              <button onClick={() => setShowForm(false)} className="px-3 py-2 bg-secondary text-muted-foreground rounded-lg text-sm hover:text-foreground transition-colors">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="divide-y divide-border/30">
+        {tasks.map(task => (
+          <div key={task.id} className={cn("px-4 py-3 hover:bg-secondary/20 transition-colors", !task.enabled && "opacity-50")}>
+            <div className="flex items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  {taskStatusIcon(task.status)}
+                  <span className="text-sm font-medium text-foreground">{task.name}</span>
+                  <span className="font-mono text-xs text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">{task.cron}</span>
+                </div>
+                <div className="text-xs text-muted-foreground mb-1">{task.naturalLang}</div>
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  <span className="badge-idle px-1.5 py-0.5 rounded">{task.agent}</span>
+                  {task.lastRun && <span>Last: {task.lastRun.replace("T", " ").slice(0, 16)}</span>}
+                  <span>Next: {task.nextRun === "—" ? "—" : task.nextRun.replace("T", " ").slice(0, 16)}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <button
+                  onClick={() => {}}
+                  className="w-6 h-6 flex items-center justify-center rounded bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-primary transition-colors"
+                  title="Run now"
+                >
+                  <Play className="w-3 h-3" />
+                </button>
+                <button
+                  onClick={() => toggleTask(task.id)}
+                  className={cn("w-8 h-4 rounded-full transition-all relative flex-shrink-0", task.enabled ? "bg-primary" : "bg-secondary border border-border")}
+                >
+                  <div className={cn("w-3 h-3 rounded-full bg-white absolute top-0.5 transition-all", task.enabled ? "left-4" : "left-0.5")} />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Dashboard ────────────────────────────────────────────────────────────────
 
 export function Dashboard({ onNavigate }: DashboardProps) {
   const agentsQuery = useQuery({
@@ -131,7 +306,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           <div className="text-xs text-muted-foreground mt-1">4 running · 3 idle</div>
         </button>
         <button
-          onClick={() => onNavigate("consensus-chamber")}
+          onClick={() => onNavigate("consensus")}
           className="kpi-tile p-4 rounded-lg text-left hover:border-primary/30 transition-all group"
         >
           <div className="flex items-start justify-between mb-2">
@@ -269,16 +444,10 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               <div className="space-y-2">
                 {Object.entries(providerDist).map(([provider, count]) => (
                   <div key={provider} className="flex items-center gap-2.5">
-                    <div
-                      className="w-2 h-2 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: PROVIDER_COLORS[provider] || "#888" }}
-                    />
+                    <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: PROVIDER_COLORS[provider] || "#888" }} />
                     <div className="text-xs text-muted-foreground w-28 flex-shrink-0">{PROVIDER_LABELS[provider] || provider}</div>
                     <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{ width: `${(count / agents.length) * 100}%`, backgroundColor: PROVIDER_COLORS[provider] || "#888" }}
-                      />
+                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(count / agents.length) * 100}%`, backgroundColor: PROVIDER_COLORS[provider] || "#888" }} />
                     </div>
                     <div className="text-xs text-foreground w-12 text-right flex-shrink-0">{count} agent{count > 1 ? "s" : ""}</div>
                   </div>
@@ -289,12 +458,18 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         </div>
       </div>
 
+      {/* Task Scheduler */}
+      <div className="mt-4">
+        <TaskSchedulerPanel />
+      </div>
+
       {/* Quick nav */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
         {[
           { page: "intelligence" as Page, label: "Model Intelligence", sub: "Scout HuggingFace + arXiv", icon: Telescope },
           { page: "deployment" as Page, label: "Deployment Runway", sub: "Self-hosted readiness calculator", icon: Server },
           { page: "observatory" as Page, label: "LLMOps Observatory", sub: "Cost trends + governance audit", icon: BarChart3 },
+          { page: "security" as Page, label: "Security Posture", sub: "Trust scores + injection detection", icon: ShieldIcon },
         ].map(({ page, label, sub, icon: Icon }) => (
           <button
             key={page}
@@ -319,6 +494,14 @@ function Telescope(props: { className?: string }) {
   return (
     <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
       <circle cx="15" cy="6" r="1"/><path d="M20.2 8.5 22 5l-5.3-1.8-1.8 3.5"/><path d="m11.2 5.2 6 16.4"/><path d="m3.4 14.2 6.1-3.1a1 1 0 0 0 .4-1.4L8.1 7.5a1 1 0 0 0-1.4-.4L0 10.2"/><path d="m4 14 3.5 6"/>
+    </svg>
+  );
+}
+
+function ShieldIcon(props: { className?: string }) {
+  return (
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
     </svg>
   );
 }
