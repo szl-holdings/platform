@@ -221,3 +221,4 @@ export {
   type AgentActivityFeedProps,
   type AutonomyLevelSelectorProps,
 } from "./agent-activity-feed";
+export { ABODoctrinePanel, type ABODoctrinePanelProps } from "./abo-doctrine-panel";

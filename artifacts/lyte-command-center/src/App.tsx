@@ -114,6 +114,7 @@ const DeferLane = lazy(() => import("@/pages/defer-lane"));
 const ShadowMode = lazy(() => import("@/pages/shadow-mode"));
 const AutonomousRemediation = lazy(() => import("@/pages/autonomous-remediation"));
 const ChaosPrediction = lazy(() => import("@/pages/chaos-prediction"));
+const CognitiveObservabilityCanvas = lazy(() => import("@/pages/cognitive-observability-canvas"));
 const CostPerformance = lazy(() => import("@/pages/cost-performance"));
 const OperationalNarrative = lazy(() => import("@/pages/operational-narrative"));
 const DecisionCostXRay = lazy(() => import("@/pages/decision-cost-xray"));
@@ -226,6 +227,7 @@ function PrivateRouter() {
         <Route path="/atlas-artifacts" component={LyteAtlasArtifactsPage} />
         <Route path="/autonomous-remediation" component={AutonomousRemediation} />
         <Route path="/chaos-prediction" component={ChaosPrediction} />
+        <Route path="/abo/canvas" component={CognitiveObservabilityCanvas} />
         <Route path="/cost-performance" component={CostPerformance} />
         <Route path="/operational-narrative" component={OperationalNarrative} />
         <Route path="/decision-cost-xray" component={DecisionCostXRay} />

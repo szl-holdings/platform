@@ -547,4 +547,9 @@ router.use("/analytics/heatmap-events", _writeLimiter);
 router.use("/analytics/consent", _writeLimiter);
 router.use(analyticsEngineRouter);
 
+import aboRouter from "./abo";
+router.use("/abo", _readLimiter);
+router.use("/abo", _writeLimiter);
+router.use(aboRouter);
+
 export default router;
