@@ -21,6 +21,7 @@ import { CognitiveVisualizer } from "./pages/CognitiveVisualizer";
 import { SlaManagement } from "./pages/SlaManagement";
 import { WhiteLabelPackaging } from "./pages/WhiteLabelPackaging";
 import { RevenueRoi } from "./pages/RevenueRoi";
+import { SkillPlayground } from "./pages/SkillPlayground";
 
 export type Page =
   | "dashboard"
@@ -43,7 +44,8 @@ export type Page =
   | "cognitive-visualizer"
   | "sla-management"
   | "white-label"
-  | "revenue-roi";
+  | "revenue-roi"
+  | "skill-playground";
 
 const PAGE_ROUTES: Record<Page, string> = {
   dashboard: "/inca-lab/",
@@ -67,6 +69,7 @@ const PAGE_ROUTES: Record<Page, string> = {
   "sla-management": "/inca-lab/sla-management",
   "white-label": "/inca-lab/white-label",
   "revenue-roi": "/inca-lab/revenue-roi",
+  "skill-playground": "/inca-lab/skill-playground",
 };
 
 function AppShell() {
@@ -93,6 +96,7 @@ function AppShell() {
     if (location.startsWith("/inca-lab/sla-management")) return "sla-management";
     if (location.startsWith("/inca-lab/white-label")) return "white-label";
     if (location.startsWith("/inca-lab/revenue-roi")) return "revenue-roi";
+    if (location.startsWith("/inca-lab/skill-playground")) return "skill-playground";
     return "dashboard";
   })();
 
@@ -129,6 +133,7 @@ function AppShell() {
           <Route path="/inca-lab/sla-management" component={SlaManagement} />
           <Route path="/inca-lab/white-label" component={WhiteLabelPackaging} />
           <Route path="/inca-lab/revenue-roi" component={RevenueRoi} />
+          <Route path="/inca-lab/skill-playground" component={SkillPlayground} />
           <Route>
             <Dashboard onNavigate={onNavigate} />
           </Route>

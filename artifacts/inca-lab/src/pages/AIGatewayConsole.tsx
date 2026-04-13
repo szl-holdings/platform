@@ -2,8 +2,78 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api, type RoutingEvent } from "../lib/api";
 import { cn, formatCost, formatLatency, timeAgo, formatNumber } from "../lib/utils";
-import { AlertTriangle, Loader2, RefreshCw } from "lucide-react";
+import { AlertTriangle, Loader2, RefreshCw, CheckCircle2, XCircle, ShieldAlert } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+
+const CIRCUIT_STATE_CONFIG = {
+  closed: { label: "Closed", color: "#22c55e", icon: CheckCircle2, desc: "Healthy" },
+  "half-open": { label: "Half-open", color: "#f59e0b", icon: ShieldAlert, desc: "Recovering" },
+  open: { label: "Open", color: "#ef4444", icon: XCircle, desc: "Tripped" },
+};
+
+function McpHealthPanel() {
+  const mcpHealthQuery = useQuery({
+    queryKey: ["mcp-gateway-health"],
+    queryFn: () => api.getMcpHealth(),
+    staleTime: 15_000,
+    refetchInterval: 30_000,
+  });
+
+  const modules = mcpHealthQuery.data?.modules ?? [];
+
+  return (
+    <div className="inca-panel mb-4">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <div className="text-sm font-medium text-foreground">MCP Gateway — Module Observability</div>
+        <div className="flex items-center gap-2">
+          {mcpHealthQuery.isFetching && <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />}
+          <span className="text-xs text-muted-foreground">{modules.length} modules</span>
+        </div>
+      </div>
+      {mcpHealthQuery.isLoading ? (
+        <div className="flex items-center gap-2 px-4 py-5 text-xs text-muted-foreground">
+          <Loader2 className="w-4 h-4 animate-spin" /> Loading MCP health…
+        </div>
+      ) : modules.length === 0 ? (
+        <div className="px-4 py-5 text-xs text-muted-foreground">No MCP modules registered.</div>
+      ) : (
+        <div className="divide-y divide-border/50">
+          {modules.map((m) => {
+            const circuit = CIRCUIT_STATE_CONFIG[m.circuitState];
+            const Icon = circuit.icon;
+            return (
+              <div key={m.moduleId} className="px-4 py-3 flex items-center gap-4">
+                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: m.healthy ? "#22c55e" : "#ef4444" }} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-foreground capitalize">{m.name}</span>
+                    <span className="text-[10px] text-muted-foreground px-1.5 py-0.5 rounded bg-secondary border border-border">{m.domain}</span>
+                    <span className="text-[10px] text-muted-foreground">{m.tools} tools</span>
+                  </div>
+                  {m.lastError && <div className="text-[10px] text-destructive mt-0.5 truncate">{m.lastError}</div>}
+                </div>
+                <div className="flex items-center gap-4 text-xs">
+                  <div className="text-right">
+                    <div className="text-foreground font-mono">{m.callsPerMinute}</div>
+                    <div className="text-[10px] text-muted-foreground">calls/min</div>
+                  </div>
+                  <div className="text-right">
+                    <div className={cn("font-mono", m.errorsPerMinute > 0 ? "text-amber-400" : "text-foreground")}>{m.errorsPerMinute}</div>
+                    <div className="text-[10px] text-muted-foreground">errors/min</div>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-2 py-1 rounded-md border text-[11px] font-medium" style={{ background: `${circuit.color}10`, borderColor: `${circuit.color}30`, color: circuit.color }}>
+                    <Icon className="w-3 h-3" />
+                    {circuit.label}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const PROVIDER_COLORS: Record<string, string> = {
   openai: "#22c55e",
@@ -262,6 +332,9 @@ export function AIGatewayConsole() {
               </button>
             )}
           </div>
+
+          {/* MCP Module Health */}
+          <McpHealthPanel />
 
           {/* Event stream */}
           <div className="inca-panel overflow-hidden">

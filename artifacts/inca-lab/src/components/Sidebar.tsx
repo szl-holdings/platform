@@ -27,6 +27,7 @@ import {
   Shield,
   Package,
   TrendingUp,
+  Blocks,
 } from "lucide-react";
 
 interface NavItem {
@@ -84,6 +85,14 @@ const NAV_GROUPS: NavGroup[] = [
       { id: "sla-management", label: "SLA Management", sublabel: "Contracts & compliance", icon: Shield },
       { id: "white-label", label: "White-Label Packaging", sublabel: "Client branded deployments", icon: Package },
       { id: "revenue-roi", label: "Revenue & ROI", sublabel: "Cost, revenue & margins", icon: TrendingUp },
+    ],
+  },
+  {
+    id: "skills",
+    label: "Skills Engine",
+    defaultExpanded: true,
+    items: [
+      { id: "skill-playground", label: "Skill Playground", sublabel: "Test & explore skills live", icon: Blocks },
     ],
   },
 ];

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { colors, effects, typography } from "./tokens";
 import type { ExplainabilityModel } from "./doctrine-layer";
 import { ExplainabilityToggle } from "./explainability-panel";
+import { AgentActivityFeed, AutonomyLevelSelector } from "./agent-activity-feed";
 
 export interface VoiceProfile {
   voice: "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer";
@@ -20,6 +21,61 @@ export interface CopilotConfig {
   agentId?: string;
   isAdvisoryAgent?: boolean;
 }
+
+const COPILOT_TO_DOMAIN_AGENT: Record<string, string> = {
+  "helmsman": "vessels",
+  "sentinel": "firestorm",
+  "beacon": "lyte",
+  "terra": "terra",
+  "navigator": "szl-holdings",
+  "nexus": "admin",
+  "compass": "readiness-report",
+  "muse": "carlota-jo",
+  "alloy-predict": "szl-holdings",
+  "stephen-ai": "stephen",
+};
+
+interface SkillSuggestion {
+  label: string;
+  prompt: string;
+}
+
+const DOMAIN_SKILL_SUGGESTIONS: Record<string, SkillSuggestion[]> = {
+  "vessels": [
+    { label: "Fleet Status", prompt: "Give me the current fleet status and any vessel alerts" },
+    { label: "Route Risks", prompt: "What are the highest-risk shipping routes right now?" },
+    { label: "Weather Impact", prompt: "How is current weather affecting our shipping lanes?" },
+    { label: "Port Analysis", prompt: "Analyze congestion at our key port destinations" },
+  ],
+  "firestorm": [
+    { label: "Threat Brief", prompt: "Give me the current threat intelligence brief" },
+    { label: "Vuln Triage", prompt: "Prioritize current vulnerabilities by exploitability and impact" },
+    { label: "IR Playbook", prompt: "Generate an incident response playbook for ransomware" },
+    { label: "Risk Score", prompt: "What is our current security risk score and drivers?" },
+  ],
+  "lyte": [
+    { label: "Signal Triage", prompt: "Which signals need immediate attention right now?" },
+    { label: "Incident Status", prompt: "Summarize current open incidents and their severity" },
+    { label: "Ops Recs", prompt: "What are your top operational improvement recommendations?" },
+    { label: "Playbook", prompt: "Generate a runbook for the highest-priority active alert" },
+  ],
+  "terra": [
+    { label: "Portfolio Health", prompt: "What is the current portfolio performance and key metrics?" },
+    { label: "At-Risk Properties", prompt: "Which properties have the highest risk exposure right now?" },
+    { label: "Market Trends", prompt: "Summarize current market trends affecting our portfolio" },
+    { label: "Deal Pipeline", prompt: "What is the status of the current deal pipeline?" },
+  ],
+  "readiness-report": [
+    { label: "Readiness Score", prompt: "What is our current overall readiness score?" },
+    { label: "Biggest Gaps", prompt: "Where are the biggest capability gaps we need to close?" },
+    { label: "Quick Wins", prompt: "What are the highest-impact quick wins we can act on now?" },
+  ],
+  "carlota-jo": [
+    { label: "Campaign Brief", prompt: "Help me draft a campaign brief for our next product launch" },
+    { label: "Content Strategy", prompt: "What content strategy would work best for our audience?" },
+    { label: "Creative Concept", prompt: "Generate three creative concept directions for our brand" },
+  ],
+};
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -514,6 +570,11 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
   const [voiceTranscript, setVoiceTranscript] = useState("");
   const [activeExecution, setActiveExecution] = useState<ActionExecution | null>(null);
   const executionApprovalRef = useRef<((approved: boolean) => void) | null>(null);
+  const [activePanel, setActivePanel] = useState<"chat" | "activity" | "autonomy">("chat");
+  const [autonomyLevel, setAutonomyLevel] = useState<"observer" | "advisor" | "operator">("advisor");
+  const conversationIdRef = useRef<string>(`copilot_${config.agentId ?? "default"}_${Math.random().toString(36).slice(2, 8)}`);
+  const domainAgentType = config.agentId ? COPILOT_TO_DOMAIN_AGENT[config.agentId] : undefined;
+  const domainSkillSuggestions = domainAgentType ? (DOMAIN_SKILL_SUGGESTIONS[domainAgentType] ?? []) : [];
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -602,59 +663,65 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
 
     abortRef.current = new AbortController();
 
-    try {
-      const response = await fetch("/api/intelligence/ai/chat/stream", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: apiMessages }),
-        signal: abortRef.current.signal,
-      });
-
-      if (!response.ok) throw new Error("Stream failed");
-
+    const streamSSEResponse = async (response: Response): Promise<string> => {
       const reader = response.body?.getReader();
       if (!reader) throw new Error("No body");
-
       const decoder = new TextDecoder();
       let accumulated = "";
       let buffer = "";
       let hadError = false;
-
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split("\n");
         buffer = lines.pop() ?? "";
-
         for (const line of lines) {
           const trimmedLine = line.trim();
           if (!trimmedLine || !trimmedLine.startsWith("data: ")) continue;
           const data = trimmedLine.slice(6);
           if (data === "[DONE]") break;
           try {
-            const parsed = JSON.parse(data) as { content?: string; error?: string };
-            if (parsed.error) {
-              hadError = true;
-            } else if (parsed.content) {
-              accumulated += parsed.content;
-              setStreamingContent(accumulated);
-            }
-          } catch {
-            continue;
-          }
+            const parsed = JSON.parse(data) as { content?: string; reply?: string; error?: string };
+            if (parsed.error) { hadError = true; }
+            else if (parsed.content) { accumulated += parsed.content; setStreamingContent(accumulated); }
+            else if (parsed.reply) { accumulated += parsed.reply; setStreamingContent(accumulated); }
+          } catch { continue; }
         }
       }
+      if (hadError && !accumulated) throw new Error("Server reported stream error");
+      return accumulated;
+    };
 
-      if (hadError && !accumulated) {
-        throw new Error("Server reported stream error");
+    try {
+      let accumulated = "";
+      if (domainAgentType) {
+        const response = await fetch(`/api/domain-agents/${domainAgentType}/chat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: userContent,
+            stream: true,
+            conversationId: conversationIdRef.current,
+          }),
+          signal: abortRef.current.signal,
+        });
+        if (!response.ok) throw new Error(`Agent response ${response.status}`);
+        accumulated = await streamSSEResponse(response);
+      } else {
+        const response = await fetch("/api/intelligence/ai/chat/stream", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: apiMessages }),
+          signal: abortRef.current.signal,
+        });
+        if (!response.ok) throw new Error("Stream failed");
+        accumulated = await streamSSEResponse(response);
       }
 
-      const finalContent = accumulated || "I'm here to help! Could you rephrase that?";
+      const finalContent = accumulated || "I'm here to help. Could you rephrase that?";
       const assistantMsg: ChatMessage = { role: "assistant", content: finalContent, id: `a-${Date.now()}` };
       setMessages([...newMessages, assistantMsg]);
-
       if (voiceOutputEnabled && voiceMode && finalContent) {
         await speakText(finalContent);
       }
@@ -685,10 +752,26 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
       setStreamingContent("");
       abortRef.current = null;
     }
-  }, [config.systemPrompt, config.welcomeMessage, streamingContent, voiceMode, voiceOutputEnabled, speakText, isRecording]);
+  }, [config.systemPrompt, config.welcomeMessage, streamingContent, voiceMode, voiceOutputEnabled, speakText, isRecording, domainAgentType]);
 
   const runActionExecution = useCallback(async (intent: string) => {
-    const steps = generateActionSteps(intent);
+    let steps: ActionStep[];
+    try {
+      const planRes = await fetch("/api/copilot/nla/plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ command: intent, agentId: config.agentId }),
+      });
+      if (planRes.ok) {
+        const plan = await planRes.json() as { steps: Array<{ id: string; label: string; tool?: string; requiresApproval?: boolean }> };
+        steps = (plan.steps ?? []).map(s => ({ ...s, status: "pending" as const }));
+        if (steps.length === 0) steps = generateActionSteps(intent);
+      } else {
+        steps = generateActionSteps(intent);
+      }
+    } catch {
+      steps = generateActionSteps(intent);
+    }
     const execId = `exec-${Date.now()}`;
     const execution: ActionExecution = { id: execId, intent, steps, status: "planning" };
     setActiveExecution({ ...execution });
@@ -763,7 +846,7 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
     await new Promise(r => setTimeout(r, 800));
     setActiveExecution(null);
     return "Action completed successfully. All steps executed and verified.";
-  }, []);
+  }, [config.agentId]);
 
   const getStepOutput = (tool: string): string | undefined => {
     const outputs: Record<string, string> = {
@@ -1123,7 +1206,46 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
           </div>
         </div>
 
-        {config.isAdvisoryAgent && (
+        {config.agentId && domainAgentType && (
+          <div style={{
+            display: "flex",
+            gap: "4px",
+            padding: "6px 1.25rem",
+            borderBottom: `1px solid ${colors.border.DEFAULT}`,
+            background: "hsla(220, 20%, 8%, 0.4)",
+            flexShrink: 0,
+            alignItems: "center",
+          }}>
+            {(["chat", "activity", "autonomy"] as const).map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActivePanel(tab)}
+                style={{
+                  padding: "3px 10px",
+                  borderRadius: "4px",
+                  border: `1px solid ${activePanel === tab ? config.accentColor : "rgba(255,255,255,0.08)"}`,
+                  background: activePanel === tab ? `${config.accentColor}20` : "transparent",
+                  color: activePanel === tab ? config.accentColor : "rgba(255,255,255,0.35)",
+                  fontSize: "10px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  letterSpacing: "0.04em",
+                  fontFamily: "inherit",
+                  transition: "all 0.15s",
+                }}
+              >
+                {tab === "chat" ? "💬 Chat" : tab === "activity" ? "⚡ Activity" : "🎛 Autonomy"}
+              </button>
+            ))}
+            {activePanel === "autonomy" && (
+              <span style={{ marginLeft: "auto", fontSize: "10px", color: `${config.accentColor}90`, alignSelf: "center", fontWeight: 600 }}>
+                {autonomyLevel.charAt(0).toUpperCase() + autonomyLevel.slice(1)} Mode
+              </span>
+            )}
+          </div>
+        )}
+
+        {config.isAdvisoryAgent && activePanel === "chat" && (
           <div style={{
             padding: "0.625rem 1.25rem",
             background: "hsla(40, 90%, 50%, 0.1)",
@@ -1139,11 +1261,61 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
           </div>
         )}
 
+        {activePanel === "activity" && (
+          <div style={{ flex: 1, overflowY: "auto", padding: "1rem 1.25rem" }}>
+            <div style={{ fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "10px" }}>
+              Agent Activity Feed
+            </div>
+            <AgentActivityFeed
+              agentId={config.agentId}
+              accentColor={config.accentColor}
+              compact={false}
+              showFilters={true}
+              pollIntervalMs={8000}
+              maxEvents={40}
+            />
+          </div>
+        )}
+
+        {activePanel === "autonomy" && (
+          <div style={{ flex: 1, overflowY: "auto", padding: "1rem 1.25rem" }}>
+            <div style={{ fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "6px" }}>
+              Agent Autonomy Level
+            </div>
+            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", marginBottom: "14px", lineHeight: 1.5 }}>
+              Control how much authority {config.name} has to act on your behalf.
+            </div>
+            <AutonomyLevelSelector
+              skillId={config.agentId ?? "default"}
+              currentLevel={autonomyLevel}
+              onLevelChange={(_skillId, level) => {
+                setAutonomyLevel(level);
+                if (config.agentId) {
+                  fetch(`/api/skills/autonomy/${config.agentId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ autonomyLevel: level, consentGiven: true }),
+                  }).catch(() => {});
+                }
+              }}
+              accentColor={config.accentColor}
+            />
+            <div style={{ marginTop: "20px", padding: "10px 12px", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "6px" }}>
+              <div style={{ fontSize: "10px", fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>
+                Governance Principle
+              </div>
+              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.35)", lineHeight: 1.5 }}>
+                All AI agents are advisory by default. Operator mode enables automated execution of pre-approved action classes only. Every action is logged and auditable.
+              </div>
+            </div>
+          </div>
+        )}
+
         <div style={{
-          flex: 1,
+          flex: activePanel === "chat" ? 1 : 0,
           overflowY: "auto",
           padding: "1rem 1.25rem",
-          display: "flex",
+          display: activePanel === "chat" ? "flex" : "none",
           flexDirection: "column",
           gap: "1rem",
           WebkitOverflowScrolling: "touch",
@@ -1208,6 +1380,45 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
                       {q}
                     </button>
                   ))}
+                </div>
+              )}
+              {domainSkillSuggestions.length > 0 && (
+                <div style={{ marginTop: "1rem" }}>
+                  <div style={{ fontSize: "10px", fontWeight: 700, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "6px" }}>
+                    Quick Actions
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "center" }}>
+                    {domainSkillSuggestions.map((s, i) => (
+                      <button
+                        key={i}
+                        onClick={() => handleSuggestion(s.prompt)}
+                        style={{
+                          padding: "4px 10px",
+                          borderRadius: "20px",
+                          border: `1px solid ${config.accentColor}35`,
+                          background: `${config.accentColor}12`,
+                          color: config.accentColor,
+                          fontSize: "11px",
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          fontFamily: "inherit",
+                          letterSpacing: "0.02em",
+                          transition: "all 0.15s",
+                          WebkitTapHighlightColor: "transparent",
+                        }}
+                        onMouseEnter={e => {
+                          e.currentTarget.style.background = `${config.accentColor}25`;
+                          e.currentTarget.style.borderColor = `${config.accentColor}60`;
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.background = `${config.accentColor}12`;
+                          e.currentTarget.style.borderColor = `${config.accentColor}35`;
+                        }}
+                      >
+                        ⚡ {s.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -1312,6 +1523,7 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
           borderTop: `1px solid ${colors.border.DEFAULT}`,
           background: "hsla(220, 20%, 8%, 0.6)",
           flexShrink: 0,
+          display: activePanel === "chat" ? "block" : "none",
         }}>
           {isRecording && (
             <div style={{ marginBottom: "0.5rem" }}>

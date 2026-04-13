@@ -41,8 +41,81 @@ export interface McpServerModule {
 
 const registeredModules = new Map<string, McpServerModule>();
 
+interface ModuleStats {
+  callTimestamps: number[];
+  errorTimestamps: number[];
+  circuitState: "closed" | "half-open" | "open";
+  lastStateChange: number;
+  lastError?: string;
+}
+
+const moduleStats = new Map<string, ModuleStats>();
+
+function getOrCreateStats(moduleId: string): ModuleStats {
+  if (!moduleStats.has(moduleId)) {
+    moduleStats.set(moduleId, {
+      callTimestamps: [],
+      errorTimestamps: [],
+      circuitState: "closed",
+      lastStateChange: Date.now(),
+    });
+  }
+  return moduleStats.get(moduleId)!;
+}
+
+function pruneWindow(timestamps: number[], windowMs: number): number[] {
+  const cutoff = Date.now() - windowMs;
+  return timestamps.filter(t => t > cutoff);
+}
+
+export function recordMcpCall(moduleId: string, success: boolean, errorMsg?: string): void {
+  const stats = getOrCreateStats(moduleId);
+  const now = Date.now();
+  stats.callTimestamps = pruneWindow(stats.callTimestamps, 60_000);
+  stats.callTimestamps.push(now);
+  if (!success) {
+    stats.errorTimestamps = pruneWindow(stats.errorTimestamps, 60_000);
+    stats.errorTimestamps.push(now);
+    if (errorMsg) stats.lastError = errorMsg;
+  }
+  const recentCalls = stats.callTimestamps.length;
+  const recentErrors = stats.errorTimestamps.length;
+  const errorRate = recentCalls > 0 ? recentErrors / recentCalls : 0;
+  if (errorRate >= 0.5 && recentCalls >= 3 && stats.circuitState === "closed") {
+    stats.circuitState = "open";
+    stats.lastStateChange = now;
+    logger.warn({ moduleId, errorRate: (errorRate * 100).toFixed(0) + "%" }, "MCP circuit breaker opened");
+  } else if (stats.circuitState === "open" && now - stats.lastStateChange > 30_000) {
+    stats.circuitState = "half-open";
+    stats.lastStateChange = now;
+    logger.info({ moduleId }, "MCP circuit breaker moved to half-open");
+  } else if (stats.circuitState === "half-open" && success) {
+    stats.circuitState = "closed";
+    stats.lastStateChange = now;
+    logger.info({ moduleId }, "MCP circuit breaker closed");
+  }
+}
+
+export function getMcpModuleStats(moduleId: string): {
+  callsPerMinute: number;
+  errorsPerMinute: number;
+  circuitState: "closed" | "half-open" | "open";
+  lastStateChange: number;
+  lastError?: string;
+} {
+  const stats = getOrCreateStats(moduleId);
+  return {
+    callsPerMinute: pruneWindow(stats.callTimestamps, 60_000).length,
+    errorsPerMinute: pruneWindow(stats.errorTimestamps, 60_000).length,
+    circuitState: stats.circuitState,
+    lastStateChange: stats.lastStateChange,
+    lastError: stats.lastError,
+  };
+}
+
 export function registerMcpModule(module: McpServerModule): void {
   registeredModules.set(module.moduleId, module);
+  getOrCreateStats(module.moduleId);
   logger.info({ moduleId: module.moduleId, tools: module.tools.length }, "MCP module registered");
 }
 
@@ -75,7 +148,19 @@ export function findModuleForTool(toolName: string): McpServerModule | undefined
 
 export async function mcpGatewayHealth(): Promise<{
   gateway: string;
-  modules: Array<{ moduleId: string; name: string; domain: string; healthy: boolean; tools: number; details?: string }>;
+  modules: Array<{
+    moduleId: string;
+    name: string;
+    domain: string;
+    healthy: boolean;
+    tools: number;
+    details?: string;
+    callsPerMinute: number;
+    errorsPerMinute: number;
+    circuitState: "closed" | "half-open" | "open";
+    lastStateChange: number;
+    lastError?: string;
+  }>;
 }> {
   const moduleHealth = await Promise.all(
     Array.from(registeredModules.values()).map(async (m) => {
@@ -91,7 +176,17 @@ export async function mcpGatewayHealth(): Promise<{
           details = err.message;
         }
       }
-      return { moduleId: m.moduleId, name: m.name, domain: m.domain, healthy, tools: m.tools.length, details };
+      const stats = getMcpModuleStats(m.moduleId);
+      if (stats.circuitState === "open") healthy = false;
+      return {
+        moduleId: m.moduleId,
+        name: m.name,
+        domain: m.domain,
+        healthy,
+        tools: m.tools.length,
+        details,
+        ...stats,
+      };
     })
   );
   return { gateway: "healthy", modules: moduleHealth };
@@ -272,6 +367,7 @@ export function buildMcpGatewayRouter(authMiddleware: any): Router {
           try {
             const result = await module.executeTool(toolName, toolArgs, user);
             const latencyMs = Date.now() - start;
+            recordMcpCall(module.moduleId, true);
 
             await writeGatewayAuditLog({
               userId: user?.id ? Number(user.id) : null,
@@ -282,12 +378,15 @@ export function buildMcpGatewayRouter(authMiddleware: any): Router {
               latencyMs,
             });
 
+            logger.info({ moduleId: module.moduleId, toolName, latencyMs }, "MCP tool invoked");
+
             res.json(mcpResponse(id, {
               content: [{ type: "text", text: typeof result === "string" ? result : JSON.stringify(result, null, 2) }],
               isError: false,
             }));
           } catch (err: any) {
             const latencyMs = Date.now() - start;
+            recordMcpCall(module.moduleId, false, err.message);
             await writeGatewayAuditLog({
               userId: user?.id ? Number(user.id) : null,
               moduleId: module.moduleId,
@@ -296,6 +395,7 @@ export function buildMcpGatewayRouter(authMiddleware: any): Router {
               result: `ERROR: ${err.message}`,
               latencyMs,
             });
+            logger.warn({ moduleId: module.moduleId, toolName, err: err.message, latencyMs }, "MCP tool error");
             res.json(mcpError(id, JSON_RPC_ERRORS.INTERNAL_ERROR, err.message));
           }
           return;

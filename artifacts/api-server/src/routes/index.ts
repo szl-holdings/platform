@@ -150,6 +150,7 @@ import skillsCatalogRouter from "./skills-catalog";
 import forgeRevenueRouter from "./forge-revenue";
 import { multimodalRouter } from "./multimodal";
 import gatewayIntelligenceRouter from "./gateway-intelligence";
+import copilotRouter from "./copilot";
 
 const router: IRouter = Router();
 
@@ -432,6 +433,8 @@ router.use(mcpRouter);
 
 router.use("/skills", _readLimiter);
 router.use("/skills", skillsCatalogRouter);
+
+router.use("/copilot", copilotRouter);
 
 router.use("/approvals", _writeLimiter);
 router.use(approvalsRouter);

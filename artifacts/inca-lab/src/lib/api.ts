@@ -118,6 +118,43 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ prompt, models }),
     }),
+
+  getSkills: () =>
+    apiFetch<{ data: SkillEntry[] }>("/api/skills").then((r) => r.data ?? []),
+
+  testSkill: (skillId: string, input: Record<string, unknown>, userId = "playground-user") =>
+    apiFetch<{ status: string; output?: unknown; error?: string; latencyMs?: number; requiresApproval?: boolean; approvalToken?: string }>(
+      `/api/skills/${skillId}/test`,
+      { method: "POST", body: JSON.stringify({ input, userId }) },
+    ),
+
+  getMcpHealth: () =>
+    apiFetch<{
+      gateway: string;
+      modules: Array<{
+        moduleId: string;
+        name: string;
+        domain: string;
+        healthy: boolean;
+        tools: number;
+        details?: string;
+        callsPerMinute: number;
+        errorsPerMinute: number;
+        circuitState: "closed" | "half-open" | "open";
+        lastStateChange: number;
+        lastError?: string;
+      }>;
+    }>("/api/skills/mcp/health"),
+
+  getSkillsStats: () =>
+    apiFetch<{
+      data: {
+        total: number;
+        active: number;
+        byCategory: Record<string, number>;
+        topByUsage: Array<{ skillId: string; label: string; invocations: number }>;
+      };
+    }>("/api/skills/stats"),
 };
 
 export interface RoutingEvent {
@@ -194,4 +231,18 @@ export interface GovernanceAudit {
   sensitiveData: boolean;
   flag: string | null;
   status: "approved" | "requires_approval" | "blocked";
+}
+
+export interface SkillEntry {
+  skill_id: string;
+  label: string;
+  description: string;
+  category: string;
+  domains: string[];
+  status: string;
+  required_autonomy_level: string;
+  invocations: number;
+  successful_invocations: number;
+  avg_latency_ms: number;
+  tags: string[];
 }
