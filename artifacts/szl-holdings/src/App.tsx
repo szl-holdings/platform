@@ -192,6 +192,7 @@ const AlloyMcpToolCreator = lazy(() => import("@/alloy/pages/mcp-tool-creator"))
 const AlloySkillsMarketplace = lazy(() => import("@/alloy/pages/skills-marketplace"));
 const AlloyMcpDeveloperPortal = lazy(() => import("@/alloy/pages/mcp-developer-portal"));
 const AlloyEvolutionPage = lazy(() => import("@/alloy/pages/evolution-radar").then(m => ({ default: m.AlloyEvolutionPage })));
+const AlloyProtocolMeshPage = lazy(() => import("@/alloy/pages/ProtocolMeshPage").then(m => ({ default: m.ProtocolMeshPage })));
 const AcademyPage = lazy(() => import("@/pages/academy"));
 const HelpPage = lazy(() => import("@/pages/help"));
 const DemosPage = lazy(() => import("@/pages/demos"));
@@ -734,6 +735,9 @@ function App() {
             </Route>
             <Route path="/alloy/evolution">
               <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyEvolutionPage /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/protocol-mesh">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyProtocolMeshPage /></AlloyAppPage></Suspense>
             </Route>
 
             {/* ── External platform redirects ── */}

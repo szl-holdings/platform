@@ -33,6 +33,7 @@ import { registerGenAITelemetryBridge } from "./lib/genai-telemetry-bridge";
 import "./lib/cross-app-notification-relay.js";
 import { bootstrapPersistence, restoreJobsFromDb } from "./lib/persistence-bootstrap";
 import { ensurePrismCounselSchema } from "./lib/prism-counsel-migrations";
+import { ensureA2AV3Schema } from "./lib/mastra/a2a-lifecycle";
 
 failFastOnInvalidConfig();
 
@@ -86,6 +87,7 @@ import { providerHealth } from "./lib/provider-health";
 providerHealth.startActiveProbes();
 runDrizzleMigrations()
   .then(() => ensurePrismCounselSchema())
+  .then(() => ensureA2AV3Schema().catch(err => logger.warn({ err }, "[a2a-v3] A2A v3 schema migration failed — lifecycle endpoints will be unavailable")))
   .then(() => ensurePlatformFlags())
   .then(() => knowledgeStore.loadFromDb())
   .then(() => {

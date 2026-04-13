@@ -19,6 +19,8 @@
   "dependencies": {
     "@apollo/server": "^5.5.0",
     "@as-integrations/express5": "^1.1.2",
+    "@clerk/express": "^5.0.0",
+    "http-proxy-middleware": "^3.0.0",
     "@graphql-tools/schema": "^10.0.31",
     "@react-pdf/renderer": "^4.3.2",
     "@swc/helpers": "^0.5.20",

@@ -98,6 +98,7 @@ import prismCounselCoreRouter from "./prism-counsel-core";
 import { prismCounselPilotOneRouter } from "./prism-counsel-pilot-one";
 import prismCounselReviewRouter from "./prism-counsel-review";
 import prismCounselPurviewRouter from "./prism-counsel-purview";
+import alloyGatewayRouter from "./alloy-gateway";
 import alloyEvolutionRouter from "./alloy-evolution";
 import alloyMlRouter from "./alloy-ml";
 import alloyEmailRouter from "./alloy-email";
@@ -324,6 +325,9 @@ router.use("/alloy/governance", _writeLimiter);
 router.use("/alloy/usage", _writeLimiter);
 router.use("/alloy/admin", _readLimiter);
 router.use(alloyGovernanceRouter);
+
+router.use("/alloy/gateway", _writeLimiter);
+router.use(alloyGatewayRouter);
 
 router.use("/capital", _writeLimiter);
 router.use(capitalReadinessRouter);

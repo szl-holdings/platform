@@ -10,8 +10,23 @@ import { parse } from "yaml";
 import { fileURLToPath } from "url";
 import { dirname, join, resolve } from "path";
 import { randomBytes } from "crypto";
-import { clerkMiddleware } from "@clerk/express";
+// @clerk/express is loaded dynamically to allow graceful fallback if not installed
+let _clerkMiddleware: (() => (req: Request, res: Response, next: NextFunction) => void) | null = null;
+async function getClerkMiddleware() {
+  if (_clerkMiddleware !== null) return _clerkMiddleware;
+  try {
+    const mod = await import("@clerk/express");
+    _clerkMiddleware = mod.clerkMiddleware as typeof _clerkMiddleware;
+  } catch (err) {
+    // @clerk/express is not installed; Clerk session enrichment will be skipped.
+    // Install @clerk/express to enable Clerk-based identity in middleware pipeline.
+    console.warn("[clerkMiddleware] @clerk/express unavailable, Clerk middleware disabled:", (err as Error).message);
+    _clerkMiddleware = () => (_req: Request, _res: Response, next: NextFunction) => next();
+  }
+  return _clerkMiddleware!;
+}
 import router from "./routes";
+import { wellKnownRouter } from "./routes/alloy-gateway";
 import { logger } from "./lib/logger";
 import { correlationMiddleware } from "./middlewares/correlation";
 import { globalLimiter } from "./middlewares/rate-limiters";
@@ -171,7 +186,11 @@ app.use(express.urlencoded({
 app.use(csrfMiddleware);
 app.use(authMiddleware);
 app.use(sessionRefreshPolicy());
-app.use(clerkMiddleware());
+// Clerk middleware — lazily initialized to support environments where @clerk/express is not installed
+app.use(async (req: Request, res: Response, next: NextFunction) => {
+  const clerkMw = await getClerkMiddleware();
+  clerkMw()(req, res, next);
+});
 
 app.get("/api/health", async (_req: Request, res: Response) => {
   const memUsage = process.memoryUsage();
@@ -390,6 +409,7 @@ app.get("/api/csrf-token", (req: Request, res: Response) => {
   res.json({ csrfToken: token });
 });
 
+app.use(wellKnownRouter);
 app.use("/api", router);
 
 let _graphqlHandler: ((req: Request, res: Response, next: import("express").NextFunction) => void) | null = null;

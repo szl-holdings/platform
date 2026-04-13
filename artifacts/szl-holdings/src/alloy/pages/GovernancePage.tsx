@@ -124,16 +124,56 @@ export default function GovernancePage({ onNavigate }: NavProps) {
         </div>
       </div>
 
+      {/* Protocol Fabric HITL Governance */}
+      <div className="mb-10">
+        <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#f59e0b" }}>Protocol Fabric</div>
+        <h2 className="text-2xl font-bold mb-2">Cross-Protocol HITL Enforcement</h2>
+        <p className="text-white/50 mb-6 leading-relaxed">
+          Every agent-to-agent crossing over a protocol boundary (MCP → A2A, A2A → ANP) is subject to the same governance guarantees. Non-trusted identities are held at the boundary gate — no action proceeds without a human approval decision, recorded in the durable approval registry.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            {
+              label: "Protocol Boundary Gate",
+              desc: "ANP→A2A and other crossings are blocked at the Fusion Gateway until an approval is granted.",
+              color: "#6366f1",
+              badge: "MCP · A2A · ANP · ACP",
+            },
+            {
+              label: "Durable Approval Registry",
+              desc: "Every HITL approval request is persisted in PostgreSQL. Approvals survive restarts and are auditable.",
+              color: "#10b981",
+              badge: "PostgreSQL-backed",
+            },
+            {
+              label: "Continuation on Approval",
+              desc: "When an admin resolves a boundary approval, a hitl_governance_resolved event is emitted on the agent bus so the originating agent can replay the blocked action.",
+              color: "#f59e0b",
+              badge: "Event-mesh continuation",
+            },
+          ].map(item => (
+            <div key={item.label} className="rounded-xl border p-5" style={{ borderColor: `${item.color}33`, background: `${item.color}08` }}>
+              <div className="text-xs font-mono mb-2 px-2 py-0.5 rounded-full inline-block" style={{ background: `${item.color}22`, color: item.color }}>{item.badge}</div>
+              <div className="font-semibold mb-1 text-sm">{item.label}</div>
+              <p className="text-white/50 text-xs leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* CTA */}
       <div className="rounded-2xl border p-8 text-center" style={{ borderColor: "rgba(75,139,219,0.15)", background: "linear-gradient(135deg, rgba(75,139,219,0.04), rgba(99,102,241,0.04))" }}>
         <h3 className="text-xl font-bold mb-3">See governance in context</h3>
-        <p className="text-white/50 mb-6">Explore how approval flows integrate with the Workflow Coordinator and Approval Agent.</p>
+        <p className="text-white/50 mb-6">Explore how approval flows integrate with the Workflow Coordinator and Approval Agent, or view the full Protocol Mesh dashboard.</p>
         <div className="flex flex-wrap justify-center gap-3">
           <button onClick={() => onNavigate("agents")} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-black" style={{ background: "#4B8BDB" }}>
             View Agents <ArrowRight className="w-4 h-4" />
           </button>
           <button onClick={() => onNavigate("workflows")} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium border" style={{ borderColor: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.75)" }}>
             View Workflows
+          </button>
+          <button onClick={() => onNavigate("protocol-mesh")} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium border" style={{ borderColor: "rgba(245,158,11,0.3)", color: "#f59e0b" }}>
+            Protocol Mesh
           </button>
         </div>
       </div>
