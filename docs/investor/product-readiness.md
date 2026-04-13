@@ -98,10 +98,11 @@
 |-----------|-----------|
 | **Readiness Label** | Functional Alpha |
 | **Core Architecture** | Production-grade |
-| **Feature Completeness** | Secure document vault, investor relations dashboard, client portal, deal flow management |
+| **Feature Completeness** | Investor relations dashboard, client pipeline, deal tracking, document management, secure document vault, client portal, deal flow management |
 | **Auth** | OIDC PKCE + role-based access — investor view, client view, internal team |
-| **Alloy Integration** | Approval workflows and audit trail for document access and deal actions |
-| **What's Needed for GA** | Client intake activation, document encryption at rest, billing |
+| **AI Integration** | Alloy-governed client communications and portfolio signal routing; approval workflows and audit trail for document access and deal actions |
+| **Data State** | Seeded demo data — labeled accordingly |
+| **What's Needed for GA** | Client intake activation, Stripe billing, domain configuration, document encryption at rest |
 
 ### Nexus — Cross-Domain Fusion Intelligence Canvas
 
@@ -109,9 +110,10 @@
 |-----------|-----------|
 | **Readiness Label** | Functional Alpha |
 | **Core Architecture** | Production-grade |
-| **Feature Completeness** | Force-directed graph, cross-domain entity fusion, cascade visualization, depth-4 traversal, domain/risk filtering |
-| **Data State** | Seeded multi-domain entity data — clearly labeled in UI |
-| **What's Needed for GA** | Live entity data pipeline connections, real-time WebSocket updates per domain, performance tuning for large graphs |
+| **Feature Completeness** | Entity graph, cross-vertical relationship traversal, signal overlay, cascade prediction visualization, force-directed graph, cross-domain entity fusion, depth-4 traversal, domain/risk filtering |
+| **AI Integration** | Live compound intelligence engine — behavioral genome and cascade prediction feeds |
+| **Data State** | Seeded multi-domain entity data representing all five verticals — clearly labeled in UI |
+| **What's Needed for GA** | Live entity data feeds, expanded relationship coverage, performance tuning for large graphs, commercial deployment |
 
 ### INCA Lab — AI Model Command & Deployment
 
@@ -119,9 +121,10 @@
 |-----------|-----------|
 | **Readiness Label** | Functional Alpha |
 | **Core Architecture** | Production-grade |
-| **Feature Completeness** | Model registry, experiment tracking, ensemble evaluation, LLM governance audit trail, deployment pipeline with approval gates |
-| **AI Integration** | Multi-provider (Anthropic, OpenAI, Gemini, Groq) evaluation framework active |
-| **What's Needed for GA** | Production model deployment hooks, live inference volume tracking, billing per inference unit |
+| **Feature Completeness** | Model registry, experiment tracking, LLM governance, ensemble evaluation, deployment orchestration with approval gates |
+| **AI Integration** | Direct integration with ai-engine — provider routing (Anthropic, OpenAI, Gemini, Groq), cost attribution, quality gating |
+| **Data State** | Seeded experiment and model data |
+| **What's Needed for GA** | Live model deployment pipeline, production LLM cost and inference volume tracking, billing |
 
 ### SZL Holdings — Corporate Platform
 
@@ -185,7 +188,7 @@ The following operational capabilities have been added and documented:
 
 ## Honest Summary
 
-The SZL Holdings platform ecosystem is a **technically credible, architecturally mature, operationally documented, investor-ready demonstration** of a multi-product software platform. Every platform is functional, documented, and visually polished. Operational backbone (observability, incident response, release discipline, analytics) is now in place.
+The SZL Holdings platform ecosystem is a **technically credible, architecturally mature, operationally documented, investor-ready demonstration** of a multi-product software platform. Twenty-plus production artifacts — including three new platforms added in 2026 (Forge, Nexus, INCA Lab) — are functional, documented, and visually polished. Operational backbone (observability, incident response, release discipline, analytics) is now in place.
 
 The gap between current state and General Availability is primarily:
 1. **Data activation** — Live AIS feeds, live connector data for Lyte, expanded Terra coverage

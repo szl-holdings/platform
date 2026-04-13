@@ -11,9 +11,10 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Apps-22_Production-00C853?style=flat-square" alt="22 Apps" />
+  <img src="https://img.shields.io/badge/Apps-20+-00C853?style=flat-square" alt="20+ Apps" />
   <img src="https://img.shields.io/badge/Database-600+_Tables-4169E1?style=flat-square" alt="600+ Tables" />
   <img src="https://img.shields.io/badge/Commits-750+-6A0DAD?style=flat-square" alt="750+ Commits" />
+  <img src="https://img.shields.io/badge/Libraries-28-purple?style=flat-square" alt="28 Libraries" />
   <img src="https://img.shields.io/badge/Industries-5_Verticals-FF6F00?style=flat-square" alt="5 Industries" />
   <img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React" />
@@ -29,9 +30,9 @@ SZL Holdings builds the **governed operational intelligence layer** — the plat
 **Lyte** is the command surface. **Alloy** is the execution fabric. **Nexus** is the cross-domain intelligence canvas. Domain intelligence packs extend the same system into cybersecurity, maritime, real estate, legal, and private advisory. **Forge** surfaces it all for clients and investors. **INCA Lab** governs the AI that powers it.
 
 ```
-22 Production Applications     600+ Database Tables     5,300+ Columns
-15 Web Platforms               940+ Database Indexes    28 Shared Libraries
- 7 Mobile Apps (Expo)            5 Industry Verticals    1 Founder
+20+ Production Applications      600+ Database Tables     5,300+ Columns
+11 Web Platforms                940+ Database Indexes    28 Shared Libraries
+ 7 Mobile Apps (Expo)             5 Industry Verticals    1 Founder
 ```
 
 ---
@@ -72,7 +73,6 @@ SZL Holdings builds the **governed operational intelligence layer** — the plat
 SZL Holdings
 ├── Lyte              Business observability — PRISM framework, autonomous remediation, chaos prediction
 ├── Alloy             Execution fabric — signal routing, workflow orchestration, approval gates, audit trail
-├── Nexus             Cross-domain canvas — force-directed fusion graph, real-time cascade visualization
 │
 ├── Aegis             Cybersecurity — adversary personas, attack replay, blast radius, threat hunting
 ├── Vessels           Maritime — voyage digital twin, knowledge graph, congestion prediction, compliance
@@ -80,8 +80,8 @@ SZL Holdings
 ├── PRISM Counsel     Legal — case outcome oracle, judge intelligence, smart discovery, recovery tracking
 ├── Carlota Jo        Advisory — AI concierge, lifestyle intelligence, engagement timelines, discretion mode
 │
-├── Forge             Client & investor portal — deal flow, document management, investor relations
-├── INCA Lab          AI command — model registry, experiment tracking, ensemble evaluation, LLM governance
+├── Forge             Client & investor portal — deal intelligence, portfolio command, document management
+├── INCA Lab          AI model command — model registry, experiment tracking, LLM governance, deployment pipeline
 │
 └── 7 Mobile Apps     Voice commands, haptics, biometrics, offline-first, AR overlays, command palette
 ```

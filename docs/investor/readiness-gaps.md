@@ -1,6 +1,6 @@
 # SZL Holdings — Readiness Gaps (Honest Assessment)
 
-**Date:** Q1 2026  
+**Date:** April 2026  
 **Purpose:** Transparent disclosure of current platform gaps for qualified evaluators
 
 ---
@@ -125,7 +125,8 @@ The following are often raised in due diligence and are **not** gaps in this pla
 - **Architecture design** — Production-grade, documented, validated
 - **Security architecture** — RBAC, OIDC, audit trail, HMAC WebSocket — all implemented correctly
 - **Scalability** — Monorepo + Azure Bicep IaC designed for enterprise scale
-- **Mobile coverage** — All 7 platforms have Expo/React Native apps
+- **Mobile coverage** — All 7 primary platforms have Expo/React Native apps
+- **Platform breadth** — 20+ applications covering 5 verticals plus cross-domain intelligence (Nexus), AI governance (INCA Lab), and client engagement (Forge)
 - **AI governance** — Human-in-the-loop enforced at code level (Alloy), not just policy
 - **API documentation** — OpenAPI 3.1 specification implemented
 - **Deployment automation** — CI/CD workflows, post-merge automation, health checks — all in place

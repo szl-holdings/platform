@@ -148,58 +148,58 @@ Principal-led advisory on brand strategy, operations, and executive engagement.
 
 ## Forge — Client & Investor Portal
 
-**Category:** Client Engagement & Investor Relations  
-**Layer:** Engage  
+**Category:** Client Intelligence & Investor Relations  
+**Layer:** Engage / Report  
 **Readiness:** Functional Alpha  
 
-Secure portal for managing client relationships, deal flow, investor communications, and document access — all within the governed SZL ecosystem.
+The gateway platform for external stakeholders — clients, investors, and partners. Forge delivers a premium, governed interface for deal tracking, investor relations, client pipeline management, and secure document access.
 
 **Capability highlights:**
-- Secure document vault with access-controlled sharing
-- Investor relations dashboard with deal status and milestones
-- Client portal with personalized engagement timelines
-- Integrated with Alloy for approval workflows and audit trail
-- Role-aware access: investor view, client view, internal team view
+- Investor relations dashboard with real-time portfolio metrics
+- Client pipeline management with deal stage tracking
+- Secure document vault and data room access
+- Integration with Alloy for governed client communications and audit trails
+- Role-aware views for investors, clients, and internal staff
 
-**Strategic position:** The external-facing layer that closes the loop between platform intelligence and stakeholder communication. Positions SZL for enterprise and UHNW client acquisition.
+**Strategic position:** Enables commercialization of the ecosystem — the surface through which clients and investors interact with SZL Holdings intelligence without direct platform access.
 
 ---
 
 ## Nexus — Cross-Domain Fusion Intelligence Canvas
 
-**Category:** Cross-Domain Intelligence  
-**Layer:** Fuse / Visualize  
+**Category:** Cross-Domain Intelligence Visualization  
+**Layer:** Fuse / Visualize / Synthesize  
 **Readiness:** Functional Alpha  
 
-An interactive force-directed intelligence canvas that visualizes the compound relationships between entities across all five SZL domains in real-time.
+The visualization layer of the compound intelligence engine. Nexus renders the cross-domain ontology as an interactive force-directed canvas — linking entities, tracing relationships, and surfacing emergent patterns across all five verticals in real-time.
 
 **Capability highlights:**
-- Force-directed graph rendering for entity relationship traversal
-- Cross-domain signal fusion — entities from cybersecurity, maritime, real estate, legal, and advisory on one canvas
-- Real-time cascade visualization — shows how an event in one domain propagates across others
-- Depth-4 relationship traversal with 8 entity types per domain and 22 relationship types
+- Interactive force-directed entity graph across 5 domains
+- Cross-vertical relationship traversal up to depth 4 with 22 relationship types
+- Real-time signal overlay and cascade prediction visualization
+- Behavioral genome display per entity
 - Filterable by domain, risk score, entity type, and time window
 
-**Strategic position:** The most visceral demonstration of SZL's compound intelligence thesis. Shows investors and buyers — visually — what no competitor can replicate: a connected view across five industries simultaneously.
+**Strategic position:** Makes the Compound Intelligence Engine visible and legible to buyers and investors — the primary demonstration of the ONE-OF-ONE moat and SZL's compound intelligence thesis.
 
 ---
 
 ## INCA Lab — AI Model Command & Deployment
 
-**Category:** AI Operations & Governance  
-**Layer:** Govern / Deploy  
+**Category:** AI Model Governance & Operations  
+**Layer:** Govern / Deploy / Evaluate  
 **Readiness:** Functional Alpha  
 
-The command center for all AI that runs inside the SZL ecosystem — model registry, experiment tracking, ensemble evaluation, LLM governance, and deployment pipeline.
+The AI governance and model lifecycle management platform. INCA Lab provides the command surface for all AI model operations across the SZL Holdings ecosystem — model registry, experiment tracking, ensemble evaluation, and deployment.
 
 **Capability highlights:**
-- Model registry with version control and performance history
-- Experiment tracking: A/B tests, prompt strategy evolution, accuracy benchmarks
-- Ensemble evaluation: compare model outputs across providers (Anthropic, OpenAI, Gemini, Groq)
+- Model registry with version tracking, performance history, and lineage
+- Experiment tracking with prompt strategy evolution and accuracy benchmarks
+- Ensemble evaluation: compare model outputs across multi-provider gateway (Anthropic, OpenAI, Gemini, Groq)
 - LLM governance: audit trail for every AI inference decision across the platform
-- Deployment pipeline: promote models from experiment to production with approval gates
+- Deployment orchestration: promote models with approval gates and automated rollback
 
-**Strategic position:** The AI governance layer that makes SZL's AI auditable and defensible — critical for enterprise and regulated-industry buyers. Also demonstrates that SZL operates its own AI ops infrastructure, not third-party black boxes.
+**Strategic position:** Differentiates the AI layer from commodity AI integrations. Demonstrates production-grade AI operations discipline and auditability — critical for regulated enterprise buyers.
 
 ---
 
@@ -209,7 +209,7 @@ The compounding value of this portfolio:
 
 | Investment | Benefits | Platforms |
 |-----------|----------|----------|
-| `@workspace/shared-ui` | One component library, consistent premium aesthetic | All 7 web, all 7 mobile |
+| `@workspace/shared-ui` | One component library, consistent premium aesthetic | All 11 web, all 7 mobile |
 | `@workspace/db` + Drizzle | One schema, one migration system, one query layer | All platforms |
 | `@workspace/auth` | OIDC PKCE + RBAC built once | All platforms |
 | `@workspace/workflow-engine` | Alloy execution fabric built once | All platforms |

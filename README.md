@@ -21,6 +21,7 @@
   <img src="https://img.shields.io/badge/DB%20Tables-600%2B-blue?style=flat-square" alt="600+ Tables" />
   <img src="https://img.shields.io/badge/Apps-22-green?style=flat-square" alt="22 Apps" />
   <img src="https://img.shields.io/badge/Commits-750%2B-6A0DAD?style=flat-square" alt="750+ Commits" />
+  <img src="https://img.shields.io/badge/Libraries-28-purple?style=flat-square" alt="28 Libraries" />
   <img src="https://img.shields.io/badge/Industries-5-orange?style=flat-square" alt="5 Industries" />
   <img src="https://img.shields.io/badge/License-Proprietary-red?style=flat-square" alt="License" />
 </p>
@@ -136,13 +137,18 @@ Built by a single founder. Every line ships to production.
 | **PRISM Counsel** | Litigation Intelligence | Autonomous legal intelligence, litigation prediction, contract triage, settlement forecasting, judge profiling |
 | **Carlota Jo** | Private Advisory | Anticipation engine, proactive client recommendations, sentiment analysis, UHNW lifestyle intelligence |
 
-### Client, Investor & Intelligence Surfaces
+### Cross-Domain Intelligence & Engagement Surfaces
 
 | Product | Domain | Description |
 |---------|--------|-------------|
 | **Forge** | Client & Investor Portal | Secure client portal for deal flow, investor relations, and document management |
 | **Nexus** | Cross-Domain Intelligence Canvas | Force-directed graph fusing signals across all five domains — real-time relationship traversal and cascade visualization |
 | **INCA Lab** | AI Model Command & Deployment | Model registry, experiment tracking, ensemble evaluation, LLM governance, and deployment pipeline for all platform AI |
+
+### Executive & Investor Surfaces
+
+| Product | Domain | Description |
+|---------|--------|-------------|
 | **SZL Holdings** | Corporate Command | Portfolio intelligence, investor due diligence dashboard, platform flywheel visualization |
 | **Stephen Lutar** | Founder Portfolio | Interactive founder journey, live platform proof, acquisition-grade metrics |
 

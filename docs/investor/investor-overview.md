@@ -1,7 +1,7 @@
 # SZL Holdings — Investor Overview
 
 **For:** Qualified strategic investors and institutional evaluators  
-**Date:** Q1 2026  
+**Date:** April 2026  
 **Contact:** inquiries@szlholdings.com
 
 ---
@@ -16,8 +16,8 @@
 | **Founder** | Stephen Lutar |
 | **Model** | Unified platform ecosystem — shared infrastructure across domain verticals |
 | **Primary Vertical** | Business Observability (Lyte) |
-| **Adjacent Verticals** | Defense Intelligence (Aegis), Real Estate (Terra), Maritime (Vessels), Advisory (Carlota Jo), Litigation (PRISM Counsel) |
-| **Intelligence Surfaces** | Client & Investor Portal (Forge), Cross-Domain Canvas (Nexus), AI Command (INCA Lab) |
+| **Adjacent Verticals** | Defense Intelligence (Aegis), Real Estate (Terra), Maritime (Vessels), Legal/Litigation (PRISM Counsel), Advisory (Carlota Jo) |
+| **Intelligence Surfaces** | Client & Investor Portal (Forge), Cross-Domain Fusion Canvas (Nexus), AI Command & Deployment (INCA Lab) |
 | **Revenue Model** | SaaS subscriptions, usage-based billing, enterprise contracts |
 | **Primary Markets** | Enterprise and mid-market operations, security, maritime, real estate |
 
@@ -41,7 +41,7 @@ The architecture is unique: five domain verticals sharing one intelligence backb
 
 ## What Has Been Built
 
-As of Q1 2026, SZL Holdings has:
+As of April 2026, SZL Holdings has:
 
 - **22 deployable artifacts** — 15 web/API applications, 7 mobile apps (Expo/React Native)
 - **Production-grade shared infrastructure** — database schema, auth, audit trail, real-time layer, AI engine, workflow engine

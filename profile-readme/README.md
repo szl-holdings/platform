@@ -18,7 +18,7 @@
 
 ### Builder-operator behind SZL Holdings.
 
-One holding company. Six platforms. 16 live applications. One architect.
+One holding company. Eleven platforms. 20+ live applications. One architect.
 
 I build governed operational intelligence software for industries where silent failures, invisible risk, and unaccountable AI are not acceptable. Everything ships from a single TypeScript monorepo. Every improvement compounds across every platform.
 
@@ -81,6 +81,27 @@ I build governed operational intelligence software for industries where silent f
       <img src="screenshots/stephen-site-fresh.jpg" width="100%" alt="Stephen Lutar" />
     </td>
   </tr>
+  <tr>
+    <td width="50%" align="center">
+      <strong>Forge — Client & Investor Portal</strong><br/>
+      Deal intelligence, investor relations command, client pipeline<br/><br/>
+      <img src="screenshots/forge.jpg" width="100%" alt="Forge Portal" />
+    </td>
+    <td width="50%" align="center">
+      <strong>Nexus — Cross-Domain Fusion Canvas</strong><br/>
+      Entity graph, cross-vertical signal correlation, ontology visualization<br/><br/>
+      <img src="screenshots/nexus.jpg" width="100%" alt="Nexus Intelligence Canvas" />
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <strong>INCA Lab — AI Model Command</strong><br/>
+      Model registry, experiment tracking, LLM governance, deployment<br/><br/>
+      <img src="screenshots/inca-lab.jpg" width="100%" alt="INCA Lab" />
+    </td>
+    <td width="50%" align="center">
+    </td>
+  </tr>
 </table>
 
 ---
@@ -94,10 +115,10 @@ I build governed operational intelligence software for industries where silent f
 ### The Numbers
 
 ```
-16    applications live              8 web + 8 mobile (Expo)
-446   database tables                one shared PostgreSQL schema
-1,618+ API endpoints                 full TypeScript, zero JavaScript
-6     operating platforms            one compounding architecture
+20+   applications live              11 web + 7 mobile (Expo)
+600+  database tables                one shared PostgreSQL schema
+28    shared libraries               full TypeScript, zero JavaScript
+11    operating platforms            one compounding architecture
 1     founder                        builder-operator
 ```
 

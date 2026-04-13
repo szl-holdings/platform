@@ -29,12 +29,12 @@ Complete step-by-step instructions for setting up and publishing SZL Holdings' s
 1. Go to x.com → Profile → Edit Profile
 2. Upload avatar: `szl-avatar-square.png` (profile photo)
 3. Upload banner: `szl-x-banner.png` (header photo, crop to 1500×500)
-4. Bio: "AI-native enterprise intelligence. 10 platforms. Maritime, defense, real estate, legal, advisory + compound intelligence layer. Founder: @stephenlutar. szlholdings.com"
+4. Bio: "AI-native enterprise intelligence. 11 platforms. Maritime, defense, real estate, legal, advisory + compound intelligence layer. Founder: @stephenlutar. szlholdings.com"
 5. Website: https://szlholdings.com
 6. Location: Washington, DC
 
 **First Content — Pinned Thread:**
-Go to Distribution OS → X Studio. Find the 6-tweet thread starting with "Introducing SZL Holdings." Queue all 6, publish, then pin the first tweet to profile.
+Go to Distribution OS → X Studio. Find the 6-tweet thread starting with "Introducing SZL Holdings." Queue all 6, publish, then pin the first tweet to profile. Update thread content to reference 11 platforms including Forge, Nexus, and INCA Lab.
 
 **Ongoing:** Post from X Studio. Aim for 1 post/day minimum. Mix of thread parts, platform spotlights, and authority posts.
 
@@ -102,7 +102,7 @@ Go to Distribution OS → Newsletters. Find "Signal Over Noise — Inaugural Iss
 **Upload Steps:**
 1. Create account at instagram.com
 2. Upload avatar: `szl-avatar-square.png`
-3. Bio: "AI-native enterprise intelligence. 10 platforms across maritime, defense, real estate, legal, advisory + compound intelligence layer. 🔗 szlholdings.com"
+3. Bio: "AI-native enterprise intelligence. 11 platforms across maritime, defense, real estate, legal + advisory. 🔗 szlholdings.com"
 4. Add link: https://szlholdings.com
 
 **Content:**
