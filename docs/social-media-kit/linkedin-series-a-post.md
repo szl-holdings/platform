@@ -43,7 +43,7 @@ In the last 18 months, from a single TypeScript monorepo, we've shipped:
 - **Nexus** — Cross-domain fusion canvas that makes the compound intelligence engine visible
 - **INCA Lab** — AI model command center with full governance, experiment tracking, and deployment orchestration
 
-22 production applications. 600+ database tables. 28 shared libraries. 7 mobile apps with biometric auth, haptics, and offline-first architecture.
+18 production applications (11 web + 7 mobile). 600+ database tables. 28 shared libraries. 7 mobile apps with biometric auth, haptics, and offline-first architecture.
 
 Built by one founder.
 
@@ -88,7 +88,7 @@ szlholdings.com
 - **Bold the platform names** on first mention
 - Add line breaks before and after the bulleted platform list
 - Do not use the word "revolutionary" or "groundbreaking" — let the specifics carry the weight
-- The platform count (22) and moat score (0.94) are the two statistics that land hardest with technical investors — lead with those in comments and follow-ups
+- The platform count (18) and moat score (0.94) are the two statistics that land hardest with technical investors — lead with those in comments and follow-ups
 - For the comment strategy: post the competitive moat table as the first comment so the LinkedIn algorithm doesn't suppress the post for containing it
 - Post natively on LinkedIn (not via scheduler for maximum reach)
 - First comment: link to platform thesis or investor dashboard
