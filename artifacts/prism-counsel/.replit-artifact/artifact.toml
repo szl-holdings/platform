@@ -12,7 +12,7 @@ version = "1.0.0"
 [[services]]
 name = "web"
 paths = [ "/prism-counsel/" ]
-localPort = 26500
+localPort = 6800
 
 [services.development]
 run = "pnpm --filter @workspace/prism-counsel run dev"
@@ -27,5 +27,5 @@ from = "/*"
 to = "/index.html"
 
 [services.env]
-PORT = "26500"
+PORT = "6800"
 BASE_PATH = "/prism-counsel/"

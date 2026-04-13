@@ -12,7 +12,7 @@ version = "1.0.0"
 [[services]]
 name = "web"
 paths = [ "/lyte-command-center/" ]
-localPort = 19290
+localPort = 6000
 
 [services.development]
 run = "pnpm --filter @workspace/lyte-command-center run dev"
@@ -27,5 +27,5 @@ from = "/*"
 to = "/index.html"
 
 [services.env]
-PORT = "19290"
+PORT = "6000"
 BASE_PATH = "/lyte-command-center/"

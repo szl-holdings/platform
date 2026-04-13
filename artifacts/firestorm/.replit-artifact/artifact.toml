@@ -12,7 +12,7 @@ version = "1.0.0"
 [[services]]
 name = "web"
 paths = [ "/firestorm/" ]
-localPort = 23932
+localPort = 3001
 
 [services.development]
 run = "pnpm --filter @workspace/firestorm run dev"
@@ -27,5 +27,5 @@ from = "/*"
 to = "/index.html"
 
 [services.env]
-PORT = "23932"
+PORT = "3001"
 BASE_PATH = "/firestorm/"

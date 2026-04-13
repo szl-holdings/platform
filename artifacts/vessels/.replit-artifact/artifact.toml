@@ -12,7 +12,7 @@ version = "1.0.0"
 [[services]]
 name = "web"
 paths = [ "/vessels/" ]
-localPort = 18485
+localPort = 3003
 
 [services.development]
 run = "pnpm --filter @workspace/vessels run dev"
@@ -27,5 +27,5 @@ from = "/*"
 to = "/index.html"
 
 [services.env]
-PORT = "18485"
+PORT = "3003"
 BASE_PATH = "/vessels/"
