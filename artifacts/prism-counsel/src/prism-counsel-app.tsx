@@ -6,6 +6,9 @@ import { DemoModeProvider } from "@szl-holdings/shared-ui";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { PrismCounselShell } from "./components/prism-shell";
+import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
+import { prismCounselConfig } from "@szl-holdings/shared-ui/copilot-configs";
+import { AIStatusBar } from "@szl-holdings/shared-ui/ai-status-bar";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -553,10 +556,12 @@ export function PrismCounselApp() {
     <QueryClientProvider client={queryClient}>
       <LazyMotion features={domMax}>
         <DemoModeProvider>
+          <AIStatusBar domain="prism" accentColor="hsl(38, 72%, 58%)" />
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
             <PrismCounselRoutes />
             <Toaster />
           </WouterRouter>
+          <AgentCopilot config={prismCounselConfig} />
         </DemoModeProvider>
       </LazyMotion>
     </QueryClientProvider>

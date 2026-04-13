@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Shield, AlertTriangle, Eye, Clock, Activity, Target, Radio, Wifi, Lock, Zap, ChevronRight } from "lucide-react";
 import { api } from "@/lib/api";
+import { AIInsightCard } from "@szl-holdings/shared-ui/ai-insight-card";
+import { useMeshFeed, useDomainInsights, type MeshSignal, type DomainInsight } from "@szl-holdings/shared-ui/use-ai-agent";
 
 const threatFeeds = [
   { source: "MITRE ATT&CK", threats: 142, severity: "high", lastUpdate: "2m ago", status: "active" },
@@ -74,6 +76,14 @@ export default function SentinelDashboard() {
   const mitreCoverage = mitreCoverageData?.data?.coverage ?? MITRE_COVERAGE;
   const aptCampaign = threatSummaryData?.data?.aptCampaign;
 
+  const { signals: meshThreats, isLoading: meshLoading, isStale: meshStale } = useMeshFeed({
+    targetVenture: "aegis",
+    limit: 6,
+    pollIntervalMs: 30_000,
+  });
+
+  const { insights: threatInsights, isStale: threatInsightsStale } = useDomainInsights("aegis", 3, 60_000);
+
   return (
     <div className="p-4 md:p-6 space-y-5 max-w-[1400px]">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -102,6 +112,54 @@ export default function SentinelDashboard() {
           <ChevronRight className="w-3 h-3" /> Respond
         </div>
       </div>
+
+      <AIInsightCard domain="aegis" accentColor="hsl(0, 72%, 51%)" maxInsights={2} compact title="AI Threat Intelligence" />
+
+      {/* Live Cross-Domain Threat Feed — Intelligence Mesh */}
+      {(meshThreats.length > 0 || meshLoading) && (
+        <div className="rounded-xl border border-red-500/15 bg-red-500/3 p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <Activity className="w-3 h-3 text-red-400/70" />
+            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-red-400/70">Live Cross-Domain Threat Events</span>
+            {!meshLoading && <span className="text-[10px] text-muted-foreground opacity-50">· {meshThreats.length} events from intelligence mesh</span>}
+            {meshStale && <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">cached</span>}
+          </div>
+          {meshLoading ? (
+            <div className="text-xs text-muted-foreground py-2">Connecting to threat intelligence mesh…</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
+              {meshThreats.map((sig: MeshSignal, i: number) => (
+                <div key={sig.id ?? i} className="flex items-start gap-2 px-2.5 py-1.5 rounded-lg bg-card/40 border border-border/50">
+                  <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${sig.severity === "critical" ? "bg-red-400 animate-pulse" : sig.severity === "high" ? "bg-orange-400" : "bg-amber-400"}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[11px] font-medium leading-tight text-foreground truncate">{sig.title}</div>
+                    <div className="text-[10px] text-muted-foreground font-mono mt-0.5">{sig.sourceVenture ?? "mesh"} → aegis · {Math.round((sig.confidence ?? 0.8) * 100)}% confidence</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* AI Threat Recommendations */}
+      {threatInsights.length > 0 && (
+        <div className="rounded-xl border border-red-500/10 bg-card/60 p-3">
+          <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-red-400/50 mb-2 flex items-center gap-2">AI Threat Recommendations{threatInsightsStale && <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">cached</span>}</div>
+          <div className="space-y-1.5">
+            {threatInsights.filter((ins: DomainInsight) => ins.recommendedAction).map((ins: DomainInsight) => (
+              <div key={ins.id} className="flex items-start gap-2 px-2.5 py-1.5 rounded-lg bg-card/40 border border-border/50">
+                <AlertTriangle className={`w-3 h-3 mt-0.5 shrink-0 ${ins.severity === "critical" ? "text-red-400" : ins.severity === "high" ? "text-orange-400" : "text-amber-400"}`} />
+                <div className="flex-1 min-w-0">
+                  <div className="text-[11px] font-medium text-foreground">{ins.title}</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">{ins.recommendedAction}</div>
+                </div>
+                <span className="text-[9px] font-mono shrink-0 text-muted-foreground mt-0.5">{Math.round(ins.confidence * 100)}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {monitoringZones.map((zone) => (

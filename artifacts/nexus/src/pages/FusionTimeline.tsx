@@ -8,6 +8,7 @@ import {
   Ship, Shield, Building2, Scale, Activity,
   Eye, Zap, ArrowRight, Search
 } from "lucide-react";
+import { AIInsightCard } from "@szl-holdings/shared-ui/ai-insight-card";
 
 const DOMAIN_META: Record<string, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
   vessels: { label: "Vessels", color: "hsl(206,72%,52%)", icon: Ship },
@@ -105,6 +106,10 @@ export default function FusionTimeline() {
           <RefreshCw className={cn("w-3 h-3", isRefetching && "animate-spin")} />
           Refresh
         </button>
+      </div>
+
+      <div className="px-6 py-3 border-b border-border shrink-0">
+        <AIInsightCard domain="nexus" accentColor="hsl(258, 80%, 62%)" maxInsights={2} compact title="Timeline Intelligence" />
       </div>
 
       {/* Filters */}

@@ -12,6 +12,8 @@ import { CommandModeSurface, type CommandModeSignal, useRealtimeChannel } from "
 import { useVessels, useFleetExceptions, useVoyages, useMaintenance } from "@/hooks/use-vessels-data";
 import { useQueryClient } from "@tanstack/react-query";
 import { PackBanner } from "@/components/pack-banner";
+import { AIInsightCard } from "@szl-holdings/shared-ui/ai-insight-card";
+import { useDomainInsights, type DomainInsight } from "@szl-holdings/shared-ui/use-ai-agent";
 
 const statusConfig: Record<string, { label: string; color: string; dot: string }> = {
   at_sea: { label: "At Sea", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", dot: "bg-emerald-400" },
@@ -266,6 +268,7 @@ export default function CommandOverviewPage() {
   const { user } = useAuth();
   const { vessels, isLive, refetch } = useVessels();
   const { fleetExceptions } = useFleetExceptions();
+  const { insights: fleetInsights, isStale: fleetInsightsStale } = useDomainInsights("vessels", 3, 60_000);
   const { voyageEconomics } = useVoyages();
   const { maintenanceItems } = useMaintenance();
 
@@ -327,6 +330,30 @@ export default function CommandOverviewPage() {
           </div>
         </div>
       </div>
+
+      <AIInsightCard domain="vessels" accentColor="hsl(200, 80%, 55%)" maxInsights={2} compact title="Fleet Intelligence Signals" />
+
+      {fleetInsights.length > 0 && (
+        <div className="rounded-xl border border-sky-500/10 bg-[#0a1628]/60 p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <Activity className="w-3 h-3 text-sky-400/70" />
+            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-sky-400/70">AI Fleet Recommendations</span>
+            {fleetInsightsStale && <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">cached</span>}
+          </div>
+          <div className="space-y-1.5">
+            {fleetInsights.filter((ins: DomainInsight) => ins.recommendedAction).map((ins: DomainInsight) => (
+              <div key={ins.id} className="flex items-start gap-2 px-2.5 py-1.5 rounded-lg bg-[#0a1628]/40 border border-sky-500/8">
+                <AlertTriangle className={`w-3 h-3 mt-0.5 shrink-0 ${ins.severity === "critical" ? "text-red-400" : ins.severity === "high" ? "text-orange-400" : "text-sky-400"}`} />
+                <div className="flex-1 min-w-0">
+                  <div className="text-[11px] font-medium text-slate-100">{ins.title}</div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">{ins.recommendedAction}</div>
+                </div>
+                <span className="text-[9px] font-mono shrink-0 text-slate-500 mt-0.5">{Math.round(ins.confidence * 100)}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Fleet status command strip */}
       {criticalExceptions > 0 && (

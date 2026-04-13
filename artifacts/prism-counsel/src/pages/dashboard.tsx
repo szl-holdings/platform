@@ -5,6 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { DEMO_MATTERS, PILLAR_LABELS } from "../data/demo-matters";
 import { usePrismDashboard, usePrismMatters } from "../hooks/use-prism-api";
 import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
+import { AIInsightCard } from "@szl-holdings/shared-ui/ai-insight-card";
+import { useDomainInsights, type DomainInsight } from "@szl-holdings/shared-ui/use-ai-agent";
 
 function useFilingGateStats() {
   return useQuery({
@@ -78,6 +80,7 @@ function DataSourceBadge({ isLive }: { isLive: boolean }) {
 export default function PrismCounselDashboard() {
   const dashQ = usePrismDashboard();
   const mattersQ = usePrismMatters();
+  const { insights: legalInsights, isStale: legalInsightsStale } = useDomainInsights("prism", 3, 60_000);
 
   const isLive = !!dashQ.data && !dashQ.isError;
   const liveMatters = mattersQ.data;
@@ -127,6 +130,30 @@ export default function PrismCounselDashboard() {
           {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
         </div>
       </div>
+
+      <AIInsightCard domain="prism" accentColor="hsl(38, 60%, 57%)" maxInsights={2} compact title="Legal Intelligence Signals" />
+
+      {legalInsights.length > 0 && (
+        <div className="rounded-lg border border-white/[0.06] p-3" style={{ background: "#0c1220" }}>
+          <div className="flex items-center gap-2 mb-2">
+            <Scale className="w-3 h-3" style={{ color: "hsl(38, 60%, 57%)" }} />
+            <span className="text-[10px] font-mono font-bold uppercase tracking-widest" style={{ color: "hsl(38, 60%, 57%)" }}>AI Legal Recommendations</span>
+            {legalInsightsStale && <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">cached</span>}
+          </div>
+          <div className="space-y-1.5">
+            {legalInsights.filter((ins: DomainInsight) => ins.recommendedAction).map((ins: DomainInsight) => (
+              <div key={ins.id} className="flex items-start gap-2 px-2.5 py-1.5 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
+                <AlertTriangle className={`w-3 h-3 mt-0.5 shrink-0 ${ins.severity === "critical" ? "text-red-400" : ins.severity === "high" ? "text-amber-400" : "text-slate-400"}`} />
+                <div className="flex-1 min-w-0">
+                  <div className="text-[11px] font-medium text-slate-100">{ins.title}</div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">{ins.recommendedAction}</div>
+                </div>
+                <span className="text-[9px] font-mono shrink-0 text-slate-500 mt-0.5">{Math.round(ins.confidence * 100)}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <SectionErrorBoundary sectionName="KPI Summary">
       <div className="grid grid-cols-4 gap-3">

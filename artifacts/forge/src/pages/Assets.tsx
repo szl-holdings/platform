@@ -4,6 +4,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { portalApi, type AssetsResponse } from "@/lib/api";
 import { Anchor, Building2, MapPin, Clock, AlertTriangle, Bell, BellOff } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AIInsightCard } from "@szl-holdings/shared-ui/ai-insight-card";
+import { useDomainInsights, type DomainInsight } from "@szl-holdings/shared-ui/use-ai-agent";
 
 type Tab = "all" | "vessels" | "terra";
 
@@ -24,6 +26,8 @@ export default function Assets() {
     queryFn: () => portalApi.getAssets(),
     retry: 1,
   });
+
+  const { insights: assetInsights, isLoading: insightsLoading, isStale: assetInsightsStale } = useDomainInsights("forge", 3, 60_000);
 
   const thresholdMutation = useMutation({
     mutationFn: ({ id, threshold }: { id: string; threshold: number }) =>
@@ -57,6 +61,33 @@ export default function Assets() {
             color="var(--color-forge-warning)"
           />
         </div>
+
+        <div className="animate-fade-in-up stagger-2">
+          <AIInsightCard domain="forge" accentColor="hsl(38, 72%, 55%)" maxInsights={2} compact title="Asset Intelligence" />
+        </div>
+
+        {/* Live Asset Risk Signals */}
+        {assetInsights.length > 0 && (
+          <div className="animate-fade-in-up stagger-3 forge-card-elevated p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle className="w-3.5 h-3.5" style={{ color: "var(--color-forge-warning)" }} />
+              <span className="text-xs font-semibold" style={{ color: "var(--color-forge-text)" }}>AI Asset Risk Flags</span>
+              {assetInsightsStale && <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">cached</span>}
+            </div>
+            <div className="space-y-1.5">
+              {assetInsights.filter((ins: DomainInsight) => ins.recommendedAction).map((ins: DomainInsight) => (
+                <div key={ins.id} className="flex items-start gap-2.5 p-2.5 rounded-lg" style={{ background: "var(--color-forge-surface)", border: "1px solid var(--color-forge-border)" }}>
+                  <div className="mt-0.5 w-2 h-2 rounded-full shrink-0" style={{ background: ins.severity === "critical" || ins.severity === "high" ? "var(--color-forge-alert)" : "var(--color-forge-warning)" }} />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-medium leading-tight" style={{ color: "var(--color-forge-text)" }}>{ins.title}</div>
+                    <div className="text-[11px] mt-0.5" style={{ color: "var(--color-forge-text-faint)" }}>{ins.recommendedAction}</div>
+                  </div>
+                  <span className="text-[9px] font-mono shrink-0 mt-0.5" style={{ color: "var(--color-forge-text-faint)" }}>{Math.round(ins.confidence * 100)}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Tab filter */}
         <div className="flex items-center gap-2">

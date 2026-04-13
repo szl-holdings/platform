@@ -8,6 +8,7 @@ import { PrismBusProvider } from "@szl-holdings/prism-bus/provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { terraConfig } from "@szl-holdings/shared-ui/copilot-configs";
+import { AIStatusBar } from "@szl-holdings/shared-ui/ai-status-bar";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
 import { TerraLayout } from "@/components/terra-layout";
@@ -188,6 +189,7 @@ function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
       <div className="flex flex-col h-screen" style={{ background: "#0a0c10" }}>
         <EcosystemNav currentAppId="terra" currentAppName="Terra — Property Intelligence" accentColor={TERRA_ACCENT} />
         <SandboxModeBanner />
+        <AIStatusBar domain="terra" accentColor={TERRA_ACCENT} />
         <div className="flex-1 overflow-hidden">
           <TerraLayout>
             <PrivateRouter />

@@ -605,6 +605,12 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
     }
   }, [isOpen, voiceMode]);
 
+  useEffect(() => {
+    const handler = () => setIsOpen(true);
+    window.addEventListener("szl:open-copilot", handler);
+    return () => window.removeEventListener("szl:open-copilot", handler);
+  }, []);
+
   const submitFeedback = useCallback(async (rating: number, msg: ChatMessage) => {
     if (!config.agentId) return;
     try {

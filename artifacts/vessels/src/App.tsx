@@ -14,6 +14,7 @@ import {
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { helmsmanConfig } from "@szl-holdings/shared-ui/copilot-configs";
+import { AIStatusBar } from "@szl-holdings/shared-ui/ai-status-bar";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { toAlpha } from "@szl-holdings/shared-ui/utils";
 import { AuthProvider, useAuth as useVesselsRoleAuth, roleLabels, type UserRole } from "@/contexts/auth-context";
@@ -555,6 +556,7 @@ function VesselsDashboard({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpe
         <EcosystemNav currentAppId="vessels" currentAppName="Vessels Maritime Intelligence" accentColor={VESSELS_ACCENT} />
         <SandboxModeBanner />
         <DemoModeBanner />
+        <AIStatusBar domain="vessels" accentColor={VESSELS_ACCENT} />
         <SharedDashboardShell
           sidebar={<VesselsSidebarContent expanded={sidebarExpanded} onMobileClose={() => setSidebarOpen(false)} />}
           mobileOpen={sidebarOpen}

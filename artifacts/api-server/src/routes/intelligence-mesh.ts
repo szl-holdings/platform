@@ -625,4 +625,40 @@ router.get("/venture-inbox/:ventureId", (req: Request, res: Response) => {
   }
 });
 
+router.get("/insights", (req: Request, res: Response) => {
+  try {
+    ensureMeshData();
+    const domain = req.query.domain as string | undefined;
+    const limit = parseInt(req.query.limit as string) || 5;
+
+    let events = [...meshEventStore];
+    if (domain) events = events.filter(e => e.targetVenture === domain);
+
+    const insights = events.slice(0, limit).map(e => ({
+      id: e.id,
+      title: e.title,
+      summary: e.enrichmentContext,
+      confidence: e.confidence,
+      severity: e.severity,
+      domain: e.targetVenture,
+      recommendedAction: e.actionRecommendation ?? undefined,
+      entities: [],
+      enrichedAt: e.enrichedAt,
+      agentId: "intelligence-mesh",
+      signalType: e.signalType,
+      sourceVenture: e.sourceVenture,
+    }));
+
+    res.json({
+      insights,
+      total: events.length,
+      domain: domain ?? "all",
+      generatedAt: new Date(lastGeneratedAt).toISOString(),
+    });
+  } catch (err) {
+    logger.error({ err }, "Failed to get domain insights");
+    res.status(500).json({ error: "Failed to get domain insights" });
+  }
+});
+
 export default router;

@@ -1,5 +1,8 @@
 import { Router, Route, Switch, useLocation } from "wouter";
 import { Sidebar } from "./components/Sidebar";
+import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
+import { incaConfig } from "@szl-holdings/shared-ui/copilot-configs";
+import { AIStatusBar } from "@szl-holdings/shared-ui/ai-status-bar";
 import { Dashboard } from "./pages/Dashboard";
 import { ModelIntelligence } from "./pages/ModelIntelligence";
 import { NuroMeshCommand } from "./pages/NuroMeshCommand";
@@ -105,7 +108,9 @@ function AppShell() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex flex-col h-screen bg-background overflow-hidden">
+      <AIStatusBar domain="inca" accentColor="hsl(160, 70%, 50%)" />
+      <div className="flex flex-1 overflow-hidden">
       <Sidebar currentPage={currentPage} onNavigate={onNavigate} />
       <main className="flex-1 overflow-auto">
         <Switch>
@@ -139,6 +144,7 @@ function AppShell() {
           </Route>
         </Switch>
       </main>
+      </div>
     </div>
   );
 }
@@ -147,6 +153,7 @@ export default function App() {
   return (
     <Router>
       <AppShell />
+      <AgentCopilot config={incaConfig} />
     </Router>
   );
 }

@@ -5,6 +5,8 @@ import { analytics } from "@/lib/analytics";
 import { DataProvenance, ActionLoop, RoleSelector } from "@szl-holdings/shared-ui";
 import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
 import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
+import { AIInsightCard } from "@szl-holdings/shared-ui/ai-insight-card";
+import { useDomainInsights, type DomainInsight } from "@szl-holdings/shared-ui/use-ai-agent";
 import { Link } from "wouter";
 import {
   ChevronRight, Zap, Target, Activity,
@@ -109,6 +111,7 @@ const PRISM = [
 export default function Dashboard() {
   const [activeRole, setActiveRole] = useState("operator");
   const [auditSignal, setAuditSignal] = useState<LyteSignal | null>(null);
+  const { insights: opsInsights, isStale: opsInsightsStale } = useDomainInsights("lyte", 3, 60_000);
 
   useEffect(() => {
     const start = Date.now();
@@ -204,6 +207,31 @@ export default function Dashboard() {
 
   return (
     <div className="p-3 lg:p-4 space-y-3" style={{ maxWidth: 1440 }}>
+
+      {/* AI Signals */}
+      <AIInsightCard domain="lyte" accentColor="hsl(38, 72%, 55%)" maxInsights={2} compact title="Operational Intelligence" />
+
+      {opsInsights.length > 0 && (
+        <div className="rounded-lg p-3" style={{ background: BG.elevated, border: `1px solid ${BORDER.accent}` }}>
+          <div className="flex items-center gap-2 mb-2">
+            <Target className="w-3 h-3" style={{ color: "hsl(38, 72%, 55%)" }} />
+            <span className="text-[10px] font-mono font-bold uppercase tracking-widest" style={{ color: "hsl(38, 72%, 55%)" }}>AI Operational Recommendations</span>
+            {opsInsightsStale && <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">cached</span>}
+          </div>
+          <div className="space-y-1.5">
+            {opsInsights.filter((ins: DomainInsight) => ins.recommendedAction).map((ins: DomainInsight) => (
+              <div key={ins.id} className="flex items-start gap-2 px-2.5 py-1.5 rounded-lg" style={{ background: BG.surface, border: `1px solid ${BORDER.subtle}` }}>
+                <AlertTriangle className={`w-3 h-3 mt-0.5 shrink-0 ${ins.severity === "critical" ? "text-red-400" : ins.severity === "high" ? "text-amber-400" : "text-slate-400"}`} />
+                <div className="flex-1 min-w-0">
+                  <div className="text-[11px] font-medium" style={{ color: TEXT.primary }}>{ins.title}</div>
+                  <div className="text-[10px] mt-0.5" style={{ color: TEXT.secondary }}>{ins.recommendedAction}</div>
+                </div>
+                <span className="text-[9px] font-mono shrink-0 mt-0.5" style={{ color: TEXT.tertiary }}>{Math.round(ins.confidence * 100)}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Header */}
       <div className="flex items-center justify-between">

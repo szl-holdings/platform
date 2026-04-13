@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { Activity, Cpu, DollarSign, Clock, CheckCircle, XCircle, RefreshCw, Zap, Brain, BarChart3, MessageSquare, Shield } from "lucide-react";
+import { Activity, Cpu, DollarSign, Clock, CheckCircle, XCircle, RefreshCw, Zap, Brain, BarChart3, MessageSquare, Shield, Radio } from "lucide-react";
+import { AIInsightCard } from "@szl-holdings/shared-ui/ai-insight-card";
+import { useAgentStatus, useAgentTraces, type AgentTrace } from "@szl-holdings/shared-ui/use-ai-agent";
 
 interface AgentStatus {
   id: string;
@@ -62,6 +64,11 @@ export default function AgentConsolePage() {
   const totalDecisions = AGENTS.reduce((a, b) => a + b.decisionsToday, 0);
   const avgSuccess = AGENTS.reduce((a, b) => a + b.successRate, 0) / AGENTS.length;
 
+  const liveStatus = useAgentStatus(30_000);
+  const { traces, isLoading: tracesLoading, refresh: refreshTraces } = useAgentTraces(15, 30_000);
+
+  const isLive = liveStatus.totalAgents > 0;
+
   return (
     <div style={{ padding: "24px 32px", minHeight: "100vh" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
@@ -98,6 +105,62 @@ export default function AgentConsolePage() {
             <div style={{ fontSize: "1.375rem", fontWeight: 700, fontFamily: "monospace", color: s.color }}>{s.value}</div>
           </div>
         ))}
+      </div>
+
+      <div style={{ marginBottom: "20px" }}>
+        <AIInsightCard domain="inca" accentColor="hsl(160, 70%, 50%)" maxInsights={2} compact title="AI Research Signals" />
+      </div>
+
+      {/* Live Agent Traces — Nuro Mesh */}
+      <div style={{ marginBottom: "20px", background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "8px" }}>
+        <div style={{ padding: "10px 16px", borderBottom: "1px solid hsla(0,0%,100%,0.06)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <Radio size={13} style={{ color: "#a78bfa" }} />
+            <span style={{ fontSize: "0.8125rem", fontWeight: 600, color: "#e5e7eb" }}>Live Agent Traces</span>
+            {isLive && (
+              <span style={{ fontSize: "0.6rem", fontFamily: "monospace", color: "#22c55e", background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)", padding: "1px 6px", borderRadius: "4px" }}>
+                LIVE · {liveStatus.totalAgents} agents · {(liveStatus.avgSuccessRate * 100).toFixed(0)}% success · avg {liveStatus.avgLatencyMs}ms
+              </span>
+            )}
+            {!isLive && (
+              <span style={{ fontSize: "0.6rem", fontFamily: "monospace", color: "#6b7280", background: "hsla(0,0%,100%,0.04)", padding: "1px 6px", borderRadius: "4px" }}>
+                DEGRADED — API unavailable
+              </span>
+            )}
+          </div>
+          <button onClick={refreshTraces} style={{ fontSize: "0.65rem", color: "#6b7280", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}>
+            <RefreshCw size={10} /> Refresh
+          </button>
+        </div>
+        <div style={{ overflow: "auto", maxHeight: "180px" }}>
+          {tracesLoading ? (
+            <div style={{ padding: "20px", textAlign: "center", color: "#6b7280", fontSize: "0.75rem" }}>Connecting to Nuro Mesh…</div>
+          ) : traces.length === 0 ? (
+            <div style={{ padding: "20px", textAlign: "center", color: "#4b5563", fontSize: "0.75rem" }}>No recent traces — agent network is idle or API is offline. Copilot and decision logs are still available.</div>
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.75rem" }}>
+              <thead>
+                <tr style={{ borderBottom: "1px solid hsla(0,0%,100%,0.05)" }}>
+                  {["Agent", "Status", "Latency", "Started"].map(h => (
+                    <th key={h} style={{ padding: "6px 14px", textAlign: "left", fontSize: "0.625rem", fontFamily: "monospace", color: "#4b5563", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 500 }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {traces.map((tr: AgentTrace, i: number) => (
+                  <tr key={tr.id ?? i} style={{ borderBottom: "1px solid hsla(0,0%,100%,0.03)" }}>
+                    <td style={{ padding: "6px 14px", color: "#c4b5fd", fontFamily: "monospace", fontSize: "0.75rem" }}>{tr.agentId}</td>
+                    <td style={{ padding: "6px 14px" }}>
+                      <span style={{ fontSize: "0.6rem", padding: "2px 8px", borderRadius: "4px", background: tr.status === "success" ? "rgba(34,197,94,0.08)" : tr.status === "error" ? "rgba(239,68,68,0.08)" : "rgba(255,255,255,0.04)", color: tr.status === "success" ? "#22c55e" : tr.status === "error" ? "#ef4444" : "#9ca3af", border: `1px solid ${tr.status === "success" ? "rgba(34,197,94,0.2)" : tr.status === "error" ? "rgba(239,68,68,0.2)" : "hsla(0,0%,100%,0.08)"}` }}>{tr.status}</span>
+                    </td>
+                    <td style={{ padding: "6px 14px", color: tr.latencyMs > 3000 ? "#f59e0b" : "#9ca3af", fontFamily: "monospace" }}>{tr.latencyMs ? `${tr.latencyMs}ms` : "—"}</td>
+                    <td style={{ padding: "6px 14px", color: "#4b5563", fontFamily: "monospace", fontSize: "0.65rem" }}>{tr.startedAt ? new Date(tr.startedAt).toLocaleTimeString() : "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>

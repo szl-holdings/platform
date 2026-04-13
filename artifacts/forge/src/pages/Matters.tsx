@@ -3,6 +3,7 @@ import { Scale, Clock, CheckCircle2, PauseCircle, FileText, User, Calendar } fro
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { portalApi, type LegalMatter, type MattersResponse } from "@/lib/api";
+import { AIInsightCard } from "@szl-holdings/shared-ui/ai-insight-card";
 
 const STATUS_CONFIG: Record<string, { icon: React.ComponentType<React.SVGProps<SVGSVGElement>>; color: string; label: string; badge: string }> = {
   active: { icon: CheckCircle2, color: "var(--color-forge-success)", label: "Active", badge: "forge-badge-success" },
@@ -34,6 +35,9 @@ export default function Matters() {
   return (
     <AppShell title="Matter Tracker" subtitle="Active legal matters and recovery management">
       <div className="p-6 max-w-7xl mx-auto">
+        <div className="mb-5 animate-fade-in-up">
+          <AIInsightCard domain="forge" accentColor="hsl(38, 72%, 55%)" maxInsights={2} compact title="Legal Intelligence" />
+        </div>
         <div className="flex gap-6">
           {/* Matter list */}
           <div className="w-80 flex-shrink-0 space-y-3">

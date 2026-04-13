@@ -4,6 +4,8 @@ import { TrendingUp, ArrowUpRight, Anchor, Building2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { portalApi, type PortfolioResponse } from "@/lib/api";
 import { TREND_DATA, DOMAIN_RETURNS, fmt } from "@/data/mock";
+import { AIInsightCard } from "@szl-holdings/shared-ui/ai-insight-card";
+import { useDomainInsights } from "@szl-holdings/shared-ui/use-ai-agent";
 
 const DOMAIN_COLORS: Record<string, string> = {
   vessels: "var(--color-forge-vessels)",
@@ -28,6 +30,8 @@ export default function Portfolio() {
   const gain = totalValue - totalDeployed;
   const blendedReturn = totalDeployed > 0 ? `+${(((totalValue - totalDeployed) / totalDeployed) * 100).toFixed(1)}%` : "—";
 
+  const { insights: liveInsights, isLoading: insightsLoading, isStale, refresh: refreshInsights } = useDomainInsights("forge", 3, 60_000);
+
   const byDomain = holdings.reduce((acc, h) => {
     if (!acc[h.domain]) acc[h.domain] = { deployed: 0, value: 0, count: 0 };
     acc[h.domain].deployed += h.capitalDeployed;
@@ -47,6 +51,43 @@ export default function Portfolio() {
           <KPI label="Total Gain" value={isLoading ? "—" : fmt(gain)} sub="Unrealized gain" color="var(--color-forge-success)" positive />
           <KPI label="Blended Return" value={isLoading ? "—" : blendedReturn} sub="vs. 9.5% target" color="var(--color-forge-vessels)" positive />
         </div>
+
+        {/* AI Intelligence Panel */}
+        <div className="animate-fade-in-up stagger-2">
+          <AIInsightCard domain="forge" accentColor="hsl(38, 72%, 55%)" maxInsights={2} compact title="Portfolio Intelligence" />
+        </div>
+
+        {/* Live Portfolio Signals — Nuro Mesh */}
+        {(liveInsights.length > 0 || insightsLoading) && (
+          <div className="animate-fade-in-up stagger-3 forge-card-elevated p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-3.5 h-3.5" style={{ color: "var(--color-forge-primary)" }} />
+                <span className="text-xs font-semibold" style={{ color: "var(--color-forge-text)" }}>Live Investment Signals</span>
+                {isStale && <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ color: "var(--color-forge-text-faint)", background: "var(--color-forge-surface)" }}>cached</span>}
+              </div>
+              <button onClick={refreshInsights} className="text-[10px] font-mono flex items-center gap-1" style={{ color: "var(--color-forge-text-faint)", background: "none", border: "none", cursor: "pointer" }}>
+                ↻ Refresh signals
+              </button>
+            </div>
+            {insightsLoading ? (
+              <div className="text-xs py-3" style={{ color: "var(--color-forge-text-faint)" }}>Connecting to intelligence mesh…</div>
+            ) : (
+              <div className="space-y-2">
+                {liveInsights.map((ins) => (
+                  <div key={ins.id} className="flex items-start gap-3 p-2.5 rounded-lg" style={{ background: "var(--color-forge-surface)", border: "1px solid var(--color-forge-border)" }}>
+                    <div className="mt-0.5 w-2 h-2 rounded-full shrink-0" style={{ background: ins.severity === "critical" || ins.severity === "high" ? "var(--color-forge-alert)" : "var(--color-forge-primary)" }} />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-medium leading-tight" style={{ color: "var(--color-forge-text)" }}>{ins.title}</div>
+                      <div className="text-[11px] mt-0.5 leading-relaxed" style={{ color: "var(--color-forge-text-faint)" }}>{ins.summary}</div>
+                    </div>
+                    <span className="text-[9px] font-mono shrink-0 mt-0.5" style={{ color: "var(--color-forge-text-faint)" }}>{Math.round(ins.confidence * 100)}%</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Charts row */}
         <div className="grid lg:grid-cols-3 gap-4">

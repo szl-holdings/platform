@@ -9,6 +9,8 @@ import {
   GitFork, Pin, Upload, RotateCcw, AlertTriangle
 } from "lucide-react";
 import { type Page } from "../App";
+import { AIInsightCard } from "@szl-holdings/shared-ui/ai-insight-card";
+import { useAgentStatus } from "@szl-holdings/shared-ui/use-ai-agent";
 
 interface NuroMeshCommandProps {
   onNavigate?: (page: Page) => void;
@@ -329,6 +331,8 @@ export function NuroMeshCommand({ onNavigate }: NuroMeshCommandProps) {
   const [a2aCard, setA2aCard] = useState<string | null>(null);
   const [expandedSection, setExpandedSection] = useState<"details" | "a2a" | null>("details");
 
+  const agentHealth = useAgentStatus(30_000);
+
   const agentsQuery = useQuery({
     queryKey: ["inca-agents"],
     queryFn: () => api.getAgentRegistry(),
@@ -404,19 +408,24 @@ export function NuroMeshCommand({ onNavigate }: NuroMeshCommandProps) {
         </p>
       </div>
 
-      {/* Level 1: Topology KPIs */}
+      <div className="mb-4">
+        <AIInsightCard domain="inca" accentColor="hsl(160, 70%, 50%)" maxInsights={2} compact title="Mesh Intelligence" />
+      </div>
+
+      {/* Level 1: Topology KPIs — enriched with live agent health from Mastra */}
       <div className="grid grid-cols-4 gap-3 mb-4">
         <div className="kpi-tile p-3 text-center">
-          <div className="text-xl font-display font-bold text-primary">{agents.length}</div>
+          <div className="text-xl font-display font-bold text-primary">{agentHealth.totalAgents || agents.length}</div>
           <div className="text-xs text-muted-foreground">Total Agents</div>
         </div>
         <div className="kpi-tile p-3 text-center">
-          <div className="text-xl font-display font-bold text-emerald-400">{agents.length}</div>
+          <div className="text-xl font-display font-bold text-emerald-400">{agentHealth.activeAgents || agents.length}</div>
           <div className="text-xs text-muted-foreground">Online</div>
+          {agentHealth.status === "degraded" && <div className="text-[9px] text-amber-400 mt-0.5">degraded</div>}
         </div>
         <div className="kpi-tile p-3 text-center">
-          <div className="text-xl font-display font-bold text-foreground">1</div>
-          <div className="text-xs text-muted-foreground">Orchestrator</div>
+          <div className="text-xl font-display font-bold text-foreground">{agentHealth.avgSuccessRate > 0 ? `${(agentHealth.avgSuccessRate * 100).toFixed(0)}%` : "—"}</div>
+          <div className="text-xs text-muted-foreground">Success Rate</div>
         </div>
         <div className="kpi-tile p-3 text-center">
           <div className="text-xl font-display font-bold text-foreground">{agents.length - 1}</div>

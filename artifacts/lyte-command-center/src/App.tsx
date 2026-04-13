@@ -8,6 +8,7 @@ import { PrismBusProvider } from "@szl-holdings/prism-bus/provider";
 import { LyteLayout } from "@/components/lyte-layout";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { beaconConfig } from "@szl-holdings/shared-ui/copilot-configs";
+import { AIStatusBar } from "@szl-holdings/shared-ui/ai-status-bar";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
 import { useAuth } from "@szl-holdings/replit-auth-web";
@@ -277,6 +278,7 @@ function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
       <div className="flex flex-col h-screen bg-[#080c14]">
         <EcosystemNav currentAppId="lyte" currentAppName="Lyte" accentColor={LYTE_ACCENT} />
         <SandboxModeBanner />
+        <AIStatusBar domain="lyte" accentColor={LYTE_ACCENT} />
         <div className="flex-1 overflow-hidden">
           <LyteLayout>
             <PrivateRouter />

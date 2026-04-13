@@ -108,7 +108,19 @@
     "./sandbox-mode": "./src/sandbox-mode.tsx",
     "./operational-primitives": "./src/operational-primitives.tsx",
     "./notification-center": "./src/notification-center.tsx",
-    "./demo-mode": "./src/demo-mode.tsx"
+    "./demo-mode": "./src/demo-mode.tsx",
+    "./ai-status-bar": {
+      "types": "./dist/ai-status-bar.d.ts",
+      "default": "./src/ai-status-bar.tsx"
+    },
+    "./ai-insight-card": {
+      "types": "./dist/ai-insight-card.d.ts",
+      "default": "./src/ai-insight-card.tsx"
+    },
+    "./use-ai-agent": {
+      "types": "./dist/use-ai-agent.d.ts",
+      "default": "./src/use-ai-agent.ts"
+    }
   },
   "dependencies": {
     "@radix-ui/react-accordion": "catalog:",

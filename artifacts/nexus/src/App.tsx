@@ -3,6 +3,9 @@ import { Router, Route, Switch, useLocation } from "wouter";
 import { SettingsProvider } from "./lib/SettingsContext";
 import LivePulseStrip from "./components/LivePulseStrip";
 import Sidebar from "./components/Sidebar";
+import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
+import { nexusFusionConfig } from "@szl-holdings/shared-ui/copilot-configs";
+import { AIStatusBar } from "@szl-holdings/shared-ui/ai-status-bar";
 import FusionTimeline from "./pages/FusionTimeline";
 import EntityCanvas from "./pages/EntityCanvas";
 import CorrelationEngine from "./pages/CorrelationEngine";
@@ -42,6 +45,7 @@ function AppShell() {
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden">
       <LivePulseStrip />
+      <AIStatusBar domain="nexus" accentColor="hsl(258, 80%, 62%)" />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar
           currentPage={currentPage}
@@ -71,6 +75,7 @@ export default function App() {
     <Router base="">
       <SettingsProvider>
         <AppShell />
+        <AgentCopilot config={nexusFusionConfig} />
       </SettingsProvider>
     </Router>
   );

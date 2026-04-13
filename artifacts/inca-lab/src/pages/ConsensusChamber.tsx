@@ -5,6 +5,7 @@ import {
   ChevronDown, ChevronUp, Users, TrendingUp, AlertTriangle, CheckCircle, XCircle,
   Pin, GitFork, Upload, Check, Zap, Eye
 } from "lucide-react";
+import { AIInsightCard } from "@szl-holdings/shared-ui/ai-insight-card";
 
 // ─── Debate Simulation data (interactive mode) ────────────────────────────────
 
@@ -286,6 +287,10 @@ export function ConsensusChamber() {
         <p className="text-sm text-muted-foreground ml-3.5">
           Multi-agent debate with contribution scoring, rubber-stamp detection, minority dissent, and interactive deliberation.
         </p>
+      </div>
+
+      <div className="mb-4">
+        <AIInsightCard domain="inca" accentColor="hsl(160, 70%, 50%)" maxInsights={2} compact title="Consensus Intelligence" />
       </div>
 
       {/* Mode tabs */}

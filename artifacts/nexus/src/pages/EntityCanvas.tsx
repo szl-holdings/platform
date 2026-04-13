@@ -6,6 +6,7 @@ import {
   Ship, Shield, Building2, Scale, Activity, Plus, Trash2,
   Network, ZoomIn, ZoomOut, RefreshCw, Loader2, AlertCircle
 } from "lucide-react";
+import { AIInsightCard } from "@szl-holdings/shared-ui/ai-insight-card";
 
 interface EntityNode {
   id: string;
@@ -143,7 +144,8 @@ export default function EntityCanvas() {
             {canvasNodes.length} entities · {connections.length} mapped relationships
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <AIInsightCard domain="nexus" accentColor="hsl(258, 80%, 62%)" maxInsights={1} compact title="Entity Intelligence" />
           <button
             onClick={() => setZoom(z => Math.min(z + 0.1, 2))}
             className="w-7 h-7 flex items-center justify-center rounded border border-border text-muted-foreground hover:text-foreground transition-colors"
