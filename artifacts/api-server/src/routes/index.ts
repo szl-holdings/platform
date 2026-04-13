@@ -152,6 +152,7 @@ import forgeRevenueRouter from "./forge-revenue";
 import { multimodalRouter } from "./multimodal";
 import gatewayIntelligenceRouter from "./gateway-intelligence";
 import copilotRouter from "./copilot";
+import packageRegistryRouter from "./package-registry";
 
 const router: IRouter = Router();
 
@@ -569,5 +570,9 @@ import aboRouter from "./abo";
 router.use("/abo", _readLimiter);
 router.use("/abo", _writeLimiter);
 router.use(aboRouter);
+
+router.use("/package-registry", _readLimiter);
+router.use("/package-registry", _writeLimiter);
+router.use("/package-registry", packageRegistryRouter);
 
 export default router;

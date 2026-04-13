@@ -28,6 +28,10 @@ import {
   Package,
   TrendingUp,
   Blocks,
+  Boxes,
+  Beaker,
+  ShoppingBag,
+  Globe,
 } from "lucide-react";
 
 interface NavItem {
@@ -93,6 +97,17 @@ const NAV_GROUPS: NavGroup[] = [
     defaultExpanded: true,
     items: [
       { id: "skill-playground", label: "Skill Playground", sublabel: "Test & explore skills live", icon: Blocks },
+    ],
+  },
+  {
+    id: "supply-chain",
+    label: "AI Supply Chain",
+    defaultExpanded: true,
+    items: [
+      { id: "package-registry", label: "Package Registry", sublabel: "AI capability bundles", icon: Package },
+      { id: "alloy-forge", label: "Alloy Forge", sublabel: "Agent environment manager", icon: Boxes },
+      { id: "training-studio", label: "Training Studio", sublabel: "Provider-routed fine-tuning", icon: Beaker },
+      { id: "public-marketplace", label: "Public Marketplace", sublabel: "Public storefront & AIBOM", icon: Globe },
     ],
   },
 ];

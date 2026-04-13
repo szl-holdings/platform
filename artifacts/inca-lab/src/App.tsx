@@ -25,6 +25,10 @@ import { SlaManagement } from "./pages/SlaManagement";
 import { WhiteLabelPackaging } from "./pages/WhiteLabelPackaging";
 import { RevenueRoi } from "./pages/RevenueRoi";
 import { SkillPlayground } from "./pages/SkillPlayground";
+import { PackageRegistry } from "./pages/PackageRegistry";
+import { AlloyForge } from "./pages/AlloyForge";
+import { TrainingStudio } from "./pages/TrainingStudio";
+import { PublicMarketplace } from "./pages/PublicMarketplace";
 
 export type Page =
   | "dashboard"
@@ -48,11 +52,19 @@ export type Page =
   | "sla-management"
   | "white-label"
   | "revenue-roi"
-  | "skill-playground";
+  | "skill-playground"
+  | "package-registry"
+  | "alloy-forge"
+  | "training-studio"
+  | "public-marketplace";
 
 const PAGE_ROUTES: Record<Page, string> = {
   dashboard: "/inca-lab/",
   intelligence: "/inca-lab/intelligence",
+  "package-registry": "/inca-lab/package-registry",
+  "alloy-forge": "/inca-lab/alloy-forge",
+  "training-studio": "/inca-lab/training-studio",
+  "public-marketplace": "/inca-lab/public-marketplace",
   "nuro-mesh": "/inca-lab/nuro-mesh",
   gateway: "/inca-lab/gateway",
   deployment: "/inca-lab/deployment",
@@ -79,6 +91,10 @@ function AppShell() {
   const [location, setLocation] = useLocation();
 
   const currentPage: Page = (() => {
+    if (location.startsWith("/inca-lab/package-registry")) return "package-registry";
+    if (location.startsWith("/inca-lab/alloy-forge")) return "alloy-forge";
+    if (location.startsWith("/inca-lab/training-studio")) return "training-studio";
+    if (location.startsWith("/inca-lab/public-marketplace")) return "public-marketplace";
     if (location.startsWith("/inca-lab/intelligence")) return "intelligence";
     if (location.startsWith("/inca-lab/nuro-mesh")) return "nuro-mesh";
     if (location.startsWith("/inca-lab/gateway")) return "gateway";
@@ -139,6 +155,10 @@ function AppShell() {
           <Route path="/inca-lab/white-label" component={WhiteLabelPackaging} />
           <Route path="/inca-lab/revenue-roi" component={RevenueRoi} />
           <Route path="/inca-lab/skill-playground" component={SkillPlayground} />
+          <Route path="/inca-lab/package-registry" component={PackageRegistry} />
+          <Route path="/inca-lab/alloy-forge" component={AlloyForge} />
+          <Route path="/inca-lab/training-studio" component={TrainingStudio} />
+          <Route path="/inca-lab/public-marketplace" component={PublicMarketplace} />
           <Route>
             <Dashboard onNavigate={onNavigate} />
           </Route>
