@@ -898,3 +898,153 @@ export function registerCapabilityMeshTools(): void {
 
   logger.info("Registered 11 AI capability mesh tool modules");
 }
+
+export function registerMultimodalTools(): void {
+  registerTool({
+    name: "cross_modal_fusion",
+    description: "Fuse intelligence from multiple modalities (text, images, audio transcripts, structured data, documents) into a unified cross-modal assessment. Finds connections and contradictions invisible when modalities are analyzed in isolation. Use for maritime incident analysis (satellite + AIS + radio), legal evidence fusion (contract + deposition + emails), real estate assessment (photos + records + drone footage).",
+    inputSchema: z.object({
+      modalities: z.array(z.object({
+        type: z.enum(["text", "image_url", "image_base64", "audio_transcript", "structured_data", "document"]),
+        content: z.string().min(1),
+        label: z.string().optional(),
+        sourceId: z.string().optional(),
+      })).min(2).describe("At least 2 modality inputs to fuse"),
+      domain: z.enum(["maritime", "real_estate", "legal", "defense", "financial", "general"]).default("general"),
+      focusQuestion: z.string().optional().describe("Specific intelligence question to focus the fusion on"),
+    }),
+    handler: async (input, context) => {
+      const { runCrossModalFusion } = await import("./multimodal-fusion");
+      return runCrossModalFusion(input.modalities, input.domain, {
+        triggeredBy: `agent:${context.agentId}`,
+        focusQuestion: input.focusQuestion,
+      });
+    },
+  });
+
+  registerTool({
+    name: "analyze_image",
+    description: "Analyze an image using computer vision intelligence. Supports object detection, OCR (text extraction), scene classification, geolocation estimation, vessel identification (maritime), property assessment (real estate), and anomaly detection.",
+    inputSchema: z.object({
+      imageUrl: z.string().url().optional().describe("URL of image to analyze"),
+      imageDescription: z.string().optional().describe("Text description of image content when URL not available"),
+      tasks: z.array(z.enum(["object_detection", "scene_classification", "ocr", "geolocation_estimation", "vessel_identification", "property_assessment", "document_layout", "anomaly_detection", "full_analysis"])).default(["full_analysis"]),
+      domain: z.enum(["maritime", "real_estate", "legal", "defense", "general"]).default("general"),
+      contextText: z.string().optional(),
+    }),
+    handler: async (input, context) => {
+      const { analyzeImage } = await import("./vision-intelligence");
+      return analyzeImage({
+        imageUrl: input.imageUrl,
+        imageBase64: undefined,
+        tasks: input.tasks,
+        domain: input.domain,
+        contextText: input.contextText ?? input.imageDescription,
+        triggeredBy: `agent:${context.agentId}`,
+      });
+    },
+  });
+
+  registerTool({
+    name: "analyze_audio_transcript",
+    description: "Perform deep intelligence analysis on audio transcripts beyond basic speech-to-text. Includes speaker diarization, sentiment analysis, stress/deception indicators, keyword spotting, topic modeling, key decision extraction, action items, and disputed fact identification for legal depositions.",
+    inputSchema: z.object({
+      transcript: z.string().min(10).describe("Audio transcript text to analyze"),
+      domain: z.enum(["legal", "defense", "maritime", "business", "security", "general"]).default("general"),
+      enableStressAnalysis: z.boolean().default(true),
+      enableKeywordSpotting: z.boolean().default(true),
+      speakerLabels: z.record(z.string()).optional().describe("Known speaker ID to role mappings"),
+    }),
+    handler: async (input, context) => {
+      const { analyzeAudioTranscript } = await import("./audio-intelligence");
+      return analyzeAudioTranscript({
+        transcript: input.transcript,
+        domain: input.domain,
+        speakerLabels: input.speakerLabels,
+        enableStressAnalysis: input.enableStressAnalysis,
+        enableKeywordSpotting: input.enableKeywordSpotting,
+        triggeredBy: `agent:${context.agentId}`,
+      });
+    },
+  });
+
+  registerTool({
+    name: "generate_analysis_code",
+    description: "Generate production-ready Python or SQL code to perform custom data analysis when no existing tool handles the task. Validates code for security, provides execution plan, and runs in a sandboxed simulation environment. Use when a user asks a complex data question requiring custom analytical code.",
+    inputSchema: z.object({
+      task: z.string().min(10).describe("What the code should do — be specific about inputs, transformations, and expected output"),
+      language: z.enum(["python", "sql", "javascript", "typescript", "r"]).default("python"),
+      domain: z.enum(["data_analysis", "report_generation", "automation", "visualization", "etl", "general"]).default("data_analysis"),
+      contextData: z.string().optional().describe("Schema or sample data the code should work with"),
+      constraints: z.array(z.string()).optional().describe("Any constraints or requirements"),
+      executeAfterGeneration: z.boolean().default(false).describe("Whether to simulate execution after generation"),
+    }),
+    handler: async (input, context) => {
+      const { generateCode, executeCodeSandboxed } = await import("./code-generation");
+      const result = await generateCode({
+        task: input.task,
+        language: input.language,
+        domain: input.domain,
+        contextData: input.contextData,
+        constraints: input.constraints,
+        triggeredBy: `agent:${context.agentId}`,
+        agentId: context.agentId,
+      });
+
+      if (!input.executeAfterGeneration || !result.securityValidation.safe) {
+        return result;
+      }
+
+      const execution = await executeCodeSandboxed({
+        code: result.code,
+        language: result.language,
+        codeGenId: result.codeGenId,
+      });
+
+      return { ...result, execution };
+    },
+  });
+
+  registerTool({
+    name: "multimodal_rag_query",
+    description: "Search the multimodal knowledge base that stores text, images, audio transcripts, documents, and structured data in a unified vector space. A text query can surface relevant images, audio clips, or documents. Use for cross-format knowledge retrieval.",
+    inputSchema: z.object({
+      query: z.string().min(1).describe("Natural language search query"),
+      domain: z.string().optional().describe("Filter by domain (maritime, legal, real_estate, etc.)"),
+      modalityTypes: z.array(z.enum(["text", "image", "audio", "video", "document", "structured_data"])).optional().describe("Filter by modality type"),
+      topK: z.number().int().min(1).max(20).default(5),
+      produceSummary: z.boolean().default(true),
+    }),
+    handler: async (input) => {
+      const { queryMultimodalRag } = await import("./multimodal-rag");
+      return queryMultimodalRag(input.query, {
+        domain: input.domain,
+        modalityTypes: input.modalityTypes as any,
+        topK: input.topK,
+        produceSummary: input.produceSummary,
+      });
+    },
+  });
+
+  registerTool({
+    name: "generate_intelligence_briefing",
+    description: "Generate structured intelligence briefings and multimodal output bundles from analysis results. Produces formal reports with executive summaries, section breakdowns, chart specifications, audio summaries for mobile, and actionable briefing cards. Use to synthesize multiple intelligence assessments into a shareable briefing.",
+    inputSchema: z.object({
+      domain: z.enum(["maritime", "real_estate", "legal", "defense", "financial", "general"]),
+      content: z.string().min(10).describe("Intelligence content to package into briefing"),
+      title: z.string().optional(),
+      outputModalities: z.array(z.enum(["text", "chart", "annotated_image", "audio_summary", "structured_report", "briefing_card"])).default(["text", "chart", "structured_report", "briefing_card"]),
+    }),
+    handler: async (input) => {
+      const { generateMultimodalOutput } = await import("./multimodal-output");
+      return generateMultimodalOutput({
+        content: input.content,
+        domain: input.domain as any,
+        requestedModalities: input.outputModalities as any,
+        title: input.title,
+      });
+    },
+  });
+
+  logger.info("Registered 6 multimodal intelligence tools");
+}

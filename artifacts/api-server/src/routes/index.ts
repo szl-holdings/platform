@@ -147,6 +147,7 @@ import analyticsLakeRouter from "./analytics-lake";
 import analyticsEngineRouter from "./analytics-engine";
 import skillsCatalogRouter from "./skills-catalog";
 import forgeRevenueRouter from "./forge-revenue";
+import { multimodalRouter } from "./multimodal";
 
 const router: IRouter = Router();
 
@@ -394,6 +395,9 @@ router.use("/ai/mastra", mastraRouter);
 router.use("/ai/mastra/action-engine", _writeLimiter);
 router.use("/ai/mastra", actionEngineRouter);
 router.use("/ai/mastra/cognitive", cognitiveRouter);
+
+router.use("/ai/multimodal", _writeLimiter);
+router.use("/ai/multimodal", multimodalRouter);
 
 router.use("/analytics", _writeLimiter);
 router.use(analyticsRouter);

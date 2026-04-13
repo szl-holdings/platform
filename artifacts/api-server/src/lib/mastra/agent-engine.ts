@@ -9,7 +9,7 @@ import { registerGitHubIntegration } from "./external-integrations";
 import { ensureActionAuditTable } from "./action-audit";
 import { ensureDocumentIntelligenceTables } from "./document-intelligence";
 import { ensureTriggerTables, registerDefaultTriggers } from "./event-triggers";
-import { registerCapabilityMeshTools, ensureCapabilityRegistryTable } from "./capability-mesh";
+import { registerCapabilityMeshTools, ensureCapabilityRegistryTable, registerMultimodalTools } from "./capability-mesh";
 import { ensureSkillsRegistryTable } from "./skills-registry";
 import { ensureSkillRuntimeTables } from "./skill-runtime";
 import { ensureAgentActivityTable } from "./agent-activity";
@@ -610,6 +610,7 @@ export async function initializeMastra(): Promise<void> {
   registerGitHubIntegration();
   registerGitHubTools();
   registerCapabilityMeshTools();
+  registerMultimodalTools();
   await ensureCapabilityRegistryTable();
   await loadAgentConfigs();
 

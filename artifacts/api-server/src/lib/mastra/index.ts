@@ -126,3 +126,40 @@ export {
   getActiveInsights, dismissInsight, proposeMonitoringObjective, listMonitoringObjectives,
 } from "./proactive-intelligence";
 export type { ProactiveInsight, MonitoringObjective } from "./proactive-intelligence";
+
+export {
+  runCrossModalFusion, listFusionAssessments, getFusionAssessment,
+  buildMaritimeFusionInputs, buildLegalFusionInputs,
+} from "./multimodal-fusion";
+export type { FusionAssessment, ModalityInput, FusionDomain, CrossModalConnection, FusionCitation } from "./multimodal-fusion";
+
+export {
+  analyzeImage, summarizeVideo, getVisionResult, listVisionResults,
+} from "./vision-intelligence";
+export type { VisionAnalysisResult, VideoSummaryResult, VisionDomain, VisionTask } from "./vision-intelligence";
+
+export {
+  analyzeAudioTranscript, classifyAudioEvents, getAudioIntelResult, listAudioIntelResults,
+} from "./audio-intelligence";
+export type { AudioIntelligenceResult, AudioEventClassification, AudioDomain } from "./audio-intelligence";
+
+export {
+  generateCode, executeCodeSandboxed, iterativeCodeRefinement, getCodeGenResult, listCodeGenResults,
+} from "./code-generation";
+export type { CodeGenerationResult, CodeExecutionResult, CodeLanguage, CodeGenDomain } from "./code-generation";
+
+export {
+  ingestMultimodalContent, queryMultimodalRag, processDocumentIntoChunks, getChunk, listChunks,
+} from "./multimodal-rag";
+export type { MultimodalChunk, RagModalityType, MultimodalRagQueryResult, MultimodalRagIngestionResult } from "./multimodal-rag";
+
+export {
+  generateMultimodalOutput, generateIntelligenceBriefing, generateDomainBriefingCard,
+} from "./multimodal-output";
+export type { MultimodalOutputBundle, StructuredReport, BriefingCard, ChartSpec, AudioSummarySpec } from "./multimodal-output";
+
+export {
+  createVoiceSession, processVoiceTurn, getVoiceSession, getVoiceSessionTurns,
+  listVoiceSessions, endVoiceSession, DOMAIN_AGENT_MAP, DOMAIN_VOICE_PERSONAS,
+} from "./voice-agent";
+export type { VoiceConversationSession, VoiceTurn, VoiceAgentResponse, VoiceAgentDomain } from "./voice-agent";
