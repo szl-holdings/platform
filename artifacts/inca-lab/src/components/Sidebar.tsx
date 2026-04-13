@@ -21,6 +21,12 @@ import {
   ShieldCheck,
   Database,
   Activity,
+  Store,
+  Trophy,
+  Eye,
+  Shield,
+  Package,
+  TrendingUp,
 } from "lucide-react";
 
 interface NavItem {
@@ -65,6 +71,19 @@ const NAV_GROUPS: NavGroup[] = [
       { id: "consensus", label: "Consensus Chamber", sublabel: "Multi-agent deliberation", icon: MessageSquare },
       { id: "protocol-bridge", label: "Protocol Bridge", sublabel: "MCP + A2A connectivity", icon: Link2 },
       { id: "agent-console", label: "Agent Console", sublabel: "Health, cost & decisions", icon: Activity },
+    ],
+  },
+  {
+    id: "marketplace",
+    label: "Marketplace & Economy",
+    defaultExpanded: true,
+    items: [
+      { id: "agent-marketplace", label: "Agent Marketplace", sublabel: "Browse & deploy agents", icon: Store },
+      { id: "performance-arena", label: "Performance Arena", sublabel: "Benchmarks & leaderboards", icon: Trophy },
+      { id: "cognitive-visualizer", label: "Cognitive Visualizer", sublabel: "Real-time agent cognition", icon: Eye },
+      { id: "sla-management", label: "SLA Management", sublabel: "Contracts & compliance", icon: Shield },
+      { id: "white-label", label: "White-Label Packaging", sublabel: "Client branded deployments", icon: Package },
+      { id: "revenue-roi", label: "Revenue & ROI", sublabel: "Cost, revenue & margins", icon: TrendingUp },
     ],
   },
 ];

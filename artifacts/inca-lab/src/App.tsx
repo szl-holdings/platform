@@ -15,6 +15,12 @@ import { SecurityPosture } from "./pages/SecurityPosture";
 import { AgentMemoryViewer } from "./pages/AgentMemoryViewer";
 import { ConsensusChamber } from "./pages/ConsensusChamber";
 import AgentConsole from "./pages/AgentConsole";
+import { AgentMarketplace } from "./pages/AgentMarketplace";
+import { PerformanceArena } from "./pages/PerformanceArena";
+import { CognitiveVisualizer } from "./pages/CognitiveVisualizer";
+import { SlaManagement } from "./pages/SlaManagement";
+import { WhiteLabelPackaging } from "./pages/WhiteLabelPackaging";
+import { RevenueRoi } from "./pages/RevenueRoi";
 
 export type Page =
   | "dashboard"
@@ -31,7 +37,13 @@ export type Page =
   | "security"
   | "memory"
   | "consensus"
-  | "agent-console";
+  | "agent-console"
+  | "agent-marketplace"
+  | "performance-arena"
+  | "cognitive-visualizer"
+  | "sla-management"
+  | "white-label"
+  | "revenue-roi";
 
 const PAGE_ROUTES: Record<Page, string> = {
   dashboard: "/inca-lab/",
@@ -49,6 +61,12 @@ const PAGE_ROUTES: Record<Page, string> = {
   memory: "/inca-lab/memory",
   consensus: "/inca-lab/consensus",
   "agent-console": "/inca-lab/agent-console",
+  "agent-marketplace": "/inca-lab/agent-marketplace",
+  "performance-arena": "/inca-lab/performance-arena",
+  "cognitive-visualizer": "/inca-lab/cognitive-visualizer",
+  "sla-management": "/inca-lab/sla-management",
+  "white-label": "/inca-lab/white-label",
+  "revenue-roi": "/inca-lab/revenue-roi",
 };
 
 function AppShell() {
@@ -69,6 +87,12 @@ function AppShell() {
     if (location.startsWith("/inca-lab/memory")) return "memory";
     if (location.startsWith("/inca-lab/consensus")) return "consensus";
     if (location.startsWith("/inca-lab/agent-console")) return "agent-console";
+    if (location.startsWith("/inca-lab/agent-marketplace")) return "agent-marketplace";
+    if (location.startsWith("/inca-lab/performance-arena")) return "performance-arena";
+    if (location.startsWith("/inca-lab/cognitive-visualizer")) return "cognitive-visualizer";
+    if (location.startsWith("/inca-lab/sla-management")) return "sla-management";
+    if (location.startsWith("/inca-lab/white-label")) return "white-label";
+    if (location.startsWith("/inca-lab/revenue-roi")) return "revenue-roi";
     return "dashboard";
   })();
 
@@ -99,6 +123,12 @@ function AppShell() {
           </Route>
           <Route path="/inca-lab/consensus" component={ConsensusChamber} />
           <Route path="/inca-lab/agent-console" component={AgentConsole} />
+          <Route path="/inca-lab/agent-marketplace" component={AgentMarketplace} />
+          <Route path="/inca-lab/performance-arena" component={PerformanceArena} />
+          <Route path="/inca-lab/cognitive-visualizer" component={CognitiveVisualizer} />
+          <Route path="/inca-lab/sla-management" component={SlaManagement} />
+          <Route path="/inca-lab/white-label" component={WhiteLabelPackaging} />
+          <Route path="/inca-lab/revenue-roi" component={RevenueRoi} />
           <Route>
             <Dashboard onNavigate={onNavigate} />
           </Route>

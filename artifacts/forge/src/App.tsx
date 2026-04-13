@@ -14,6 +14,7 @@ const Proposals = lazy(() => import("@/pages/Proposals"));
 const Packages = lazy(() => import("@/pages/Packages"));
 const Communications = lazy(() => import("@/pages/Communications"));
 const Upgrades = lazy(() => import("@/pages/Upgrades"));
+const IntelligenceSubscriptions = lazy(() => import("@/pages/IntelligenceSubscriptions"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -57,6 +58,7 @@ export default function App() {
             <Route path="/packages" component={Packages} />
             <Route path="/communications" component={Communications} />
             <Route path="/upgrades" component={Upgrades} />
+            <Route path="/intelligence" component={IntelligenceSubscriptions} />
             <Route component={() => <Redirect to="/dashboard" />} />
           </Switch>
         </Suspense>

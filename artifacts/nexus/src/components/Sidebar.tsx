@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils";
 import {
   Activity, GitBranch, Zap, Shield, ChevronLeft, ChevronRight,
-  Network, TerminalSquare, Settings2
+  Network, TerminalSquare, Settings2, Image, Cpu
 } from "lucide-react";
 
-type Page = "timeline" | "canvas" | "correlations" | "rooms" | "actions" | "settings";
+type Page = "timeline" | "canvas" | "correlations" | "rooms" | "actions" | "settings" | "multimodal" | "swarm";
 
 interface SidebarProps {
   currentPage: Page;
@@ -19,6 +19,8 @@ const NAV_ITEMS: Array<{ id: Page; label: string; icon: React.ComponentType<{ cl
   { id: "correlations", label: "Correlations", icon: Zap, description: "AI pattern detection" },
   { id: "rooms", label: "Situation Rooms", icon: Shield, description: "Persistent investigations" },
   { id: "actions", label: "Command Actions", icon: TerminalSquare, description: "Cross-domain triggers" },
+  { id: "multimodal", label: "Multimodal Gallery", icon: Image, description: "Annotated multimedia evidence" },
+  { id: "swarm", label: "Agent Swarm", icon: Cpu, description: "Real-time A2A network graph" },
   { id: "settings", label: "Settings", icon: Settings2, description: "Domain toggles & routing rules" },
 ];
 

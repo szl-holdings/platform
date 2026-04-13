@@ -9,8 +9,10 @@ import CorrelationEngine from "./pages/CorrelationEngine";
 import SituationRooms from "./pages/SituationRooms";
 import CommandActions from "./pages/CommandActions";
 import Settings from "./pages/Settings";
+import MultimodalGallery from "./pages/MultimodalGallery";
+import AgentSwarm from "./pages/AgentSwarm";
 
-type Page = "timeline" | "canvas" | "correlations" | "rooms" | "actions" | "settings";
+type Page = "timeline" | "canvas" | "correlations" | "rooms" | "actions" | "settings" | "multimodal" | "swarm";
 
 const PAGE_TO_PATH: Record<Page, string> = {
   timeline:     "/nexus/timeline",
@@ -19,6 +21,8 @@ const PAGE_TO_PATH: Record<Page, string> = {
   rooms:        "/nexus/rooms",
   actions:      "/nexus/actions",
   settings:     "/nexus/settings",
+  multimodal:   "/nexus/multimodal",
+  swarm:        "/nexus/swarm",
 };
 
 const PATH_TO_PAGE: Record<string, Page> = Object.fromEntries(
@@ -52,6 +56,8 @@ function AppShell() {
             <Route path="/nexus/rooms" component={SituationRooms} />
             <Route path="/nexus/actions" component={CommandActions} />
             <Route path="/nexus/settings" component={Settings} />
+            <Route path="/nexus/multimodal" component={MultimodalGallery} />
+            <Route path="/nexus/swarm" component={AgentSwarm} />
             <Route component={FusionTimeline} />
           </Switch>
         </main>

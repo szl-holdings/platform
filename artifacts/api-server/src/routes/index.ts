@@ -18,6 +18,7 @@ import connectorsRouter from "./connectors";
 import notificationsRouter from "./notifications";
 import auditRouter from "./audit";
 import billingRouter from "./billing";
+import billingMarketplaceRouter from "./billing-marketplace";
 import featureFlagsRouter from "./feature-flags";
 import filesRouter from "./files";
 import stephenRouter from "./stephen";
@@ -190,6 +191,7 @@ router.use(connectorsRouter);
 router.use(notificationsRouter);
 router.use(auditRouter);
 router.use(billingRouter);
+router.use(billingMarketplaceRouter);
 router.use(featureFlagsRouter);
 router.use(filesRouter);
 

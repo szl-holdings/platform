@@ -2,7 +2,8 @@ import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, TrendingUp, Scale, Anchor, FileText,
   MessageSquare, Settings, LogOut, Shield, ChevronRight,
-  Hexagon, UserPlus, FileSignature, Package, Mail, ArrowUpCircle
+  Hexagon, UserPlus, FileSignature, Package, Mail, ArrowUpCircle,
+  Zap
 } from "lucide-react";
 import { CLIENT } from "@/data/mock";
 import { cn } from "@/lib/utils";
@@ -14,6 +15,7 @@ const NAV_ITEMS = [
   { path: "/assets", label: "Assets", icon: Anchor },
   { path: "/documents", label: "Documents", icon: FileText },
   { path: "/messages", label: "Messages", icon: MessageSquare, badge: 2 },
+  { path: "/intelligence", label: "Intelligence", icon: Zap },
   { path: "/settings", label: "Settings", icon: Settings },
 ];
 
