@@ -119,6 +119,7 @@ const OperationalNarrative = lazy(() => import("@/pages/operational-narrative"))
 const DecisionCostXRay = lazy(() => import("@/pages/decision-cost-xray"));
 const AiCapabilities = lazy(() => import("@/pages/ai-capabilities"));
 const WorkflowAutomation = lazy(() => import("@/pages/workflow-automation"));
+const RevenueIntelligence = lazy(() => import("@/pages/revenue-intelligence"));
 
 const ADMIN_ROLES = ["admin", "super_admin", "ops"];
 
@@ -198,6 +199,7 @@ function PrivateRouter() {
         <Route path="/alloy/simulate" component={AlloyPolicySim} />
         <Route path="/alloy/handoffs" component={AlloyAgentHandoffs} />
         <Route path="/alloy/receipts" component={AlloyTrustReceipts} />
+        <Route path="/revenue-intelligence" component={RevenueIntelligence} />
         <Route path="/powerbi" component={PowerBiReport} />
         <Route path="/dashboards" component={DashboardBuilder} />
         <Route path="/apm" component={ApmInstrumentation} />

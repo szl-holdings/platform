@@ -53,9 +53,28 @@ export default function Onboarding() {
   });
 
   useEffect(() => {
-    if (status && status.status === "in_progress" && status.currentStep > 1) {
+    if (!status || status.status === "not_started") return;
+    if (status.status === "in_progress" && status.currentStep > 1) {
       setCurrentStep(status.currentStep);
     }
+    setFormData(prev => ({
+      ...prev,
+      companyName: status.companyProfile?.name ?? prev.companyName,
+      industry: status.companyProfile?.industry ?? prev.industry,
+      size: status.companyProfile?.size ?? prev.size,
+      website: status.companyProfile?.website ?? prev.website,
+      headquarters: status.companyProfile?.headquarters ?? prev.headquarters,
+      selectedDomains: status.domainInterests?.length ? status.domainInterests : prev.selectedDomains,
+      kycFiles: status.kycDocuments?.length ? status.kycDocuments.map(d => ({ name: d.name, type: d.type })) : prev.kycFiles,
+      investmentHorizon: status.portfolioConfig?.investmentHorizon ?? prev.investmentHorizon,
+      riskProfile: status.portfolioConfig?.riskProfile ?? prev.riskProfile,
+      allocations: status.portfolioConfig?.targetAllocation
+        ? { vessels: status.portfolioConfig.targetAllocation.vessels ?? 30, terra: status.portfolioConfig.targetAllocation.terra ?? 40, legal: status.portfolioConfig.targetAllocation.legal ?? 15, security: status.portfolioConfig.targetAllocation.security ?? 15 }
+        : prev.allocations,
+      invitations: status.teamInvitations?.length ? status.teamInvitations.map(t => ({ email: t.email, role: t.role })) : prev.invitations,
+      selectedTier: status.billingSetup?.tier ?? prev.selectedTier,
+      billingCycle: status.billingSetup?.billingCycle ?? prev.billingCycle,
+    }));
   }, [status]);
 
   const submitStep = useMutation({

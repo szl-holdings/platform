@@ -126,6 +126,7 @@ const NAV_GROUPS = [
       { href: "/logs", label: "Log Explorer", icon: Database },
       { href: "/alert-management", label: "Alert Management", icon: Bell },
       { href: "/executive-summary", label: "Executive Summary", icon: BarChart3 },
+      { href: "/revenue-intelligence", label: "Revenue Intelligence", icon: DollarSign },
       { href: "/ownership", label: "Ownership", icon: Users },
       { href: "/workflows", label: "Workflows", icon: Workflow },
       { href: "/readiness", label: "Readiness", icon: Shield },
