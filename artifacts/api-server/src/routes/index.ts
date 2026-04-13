@@ -149,6 +149,7 @@ import analyticsEngineRouter from "./analytics-engine";
 import skillsCatalogRouter from "./skills-catalog";
 import forgeRevenueRouter from "./forge-revenue";
 import { multimodalRouter } from "./multimodal";
+import gatewayIntelligenceRouter from "./gateway-intelligence";
 
 const router: IRouter = Router();
 
@@ -547,6 +548,10 @@ router.use("/distribution-os", sessionAnalyticsRouter);
 router.use("/analytics-lake", _readLimiter);
 router.use("/analytics-lake", _writeLimiter);
 router.use(analyticsLakeRouter);
+
+router.use("/gateway-intelligence", _readLimiter);
+router.use("/gateway-intelligence", _writeLimiter);
+router.use("/gateway-intelligence", gatewayIntelligenceRouter);
 
 router.use("/analytics/recordings", _writeLimiter);
 router.use("/analytics/heatmap-events", _writeLimiter);

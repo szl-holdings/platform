@@ -32,3 +32,12 @@ export type { UseOfflineCacheOptions, CacheEntry } from "./useOfflineCache";
 
 export { useSecureVault } from "./useSecureVault";
 export type { UseSecureVaultReturn, VaultMessage } from "./useSecureVault";
+
+export { usePersistentThreads } from "./usePersistentThreads";
+export type { PersistentThread, UsePersistentThreadsOptions } from "./usePersistentThreads";
+
+export { ToolResultCard } from "./ToolResultCard";
+export type { ToolResultCardProps } from "./ToolResultCard";
+
+export { useProactiveSuggestions } from "./useProactiveSuggestions";
+export type { ProactiveSuggestion, ProactiveSuggestionsConfig } from "./useProactiveSuggestions";

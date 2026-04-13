@@ -189,6 +189,8 @@ const AlloyCanonicalDemos = lazy(() => import("@/alloy/pages/canonical-demos"));
 const AlloyPilotOnboarding = lazy(() => import("@/alloy/pages/pilot-onboarding"));
 const AlloyMcpStore = lazy(() => import("@/alloy/pages/mcp-store"));
 const AlloyMcpToolCreator = lazy(() => import("@/alloy/pages/mcp-tool-creator"));
+const AlloySkillsMarketplace = lazy(() => import("@/alloy/pages/skills-marketplace"));
+const AlloyMcpDeveloperPortal = lazy(() => import("@/alloy/pages/mcp-developer-portal"));
 const AlloyEvolutionPage = lazy(() => import("@/alloy/pages/evolution-radar").then(m => ({ default: m.AlloyEvolutionPage })));
 const AcademyPage = lazy(() => import("@/pages/academy"));
 const HelpPage = lazy(() => import("@/pages/help"));
@@ -723,6 +725,12 @@ function App() {
             </Route>
             <Route path="/alloy/mcp-tools">
               <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyMcpToolCreator /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/mcp-developer-portal">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyMcpDeveloperPortal /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/skills-marketplace">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloySkillsMarketplace /></AlloyAppPage></Suspense>
             </Route>
             <Route path="/alloy/evolution">
               <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyEvolutionPage /></AlloyAppPage></Suspense>

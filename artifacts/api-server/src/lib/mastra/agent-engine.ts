@@ -34,6 +34,9 @@ import { getOrCreateIntentStack, updateIntentStack, extractIntent, buildIntentCo
 import { requiresConsensus, runConsensusVerification } from "./consensus-verification";
 import { getOrCreateUserProfile, buildPersonalizationContext, buildPersonalizedSystemPrompt, recordInteraction, ensurePersonalizationTables } from "./personalization";
 import { ensureProactiveTables } from "./proactive-intelligence";
+import { assessQueryComplexity, generateExecutionPlan } from "./cognitive-engine";
+import { buildPersonalizedContext, storeEpisodicMemory, ensureMemoryPersistenceTables } from "./memory-persistence";
+import { ensureGatewayIntelligenceTables } from "../ai-gateway-intelligence";
 
 export { buildMcpGatewayRouter };
 
@@ -266,6 +269,24 @@ export async function runAgent(
     }
   }
 
+  let personalizedContext = "";
+  if (options.userId) {
+    try {
+      personalizedContext = await buildPersonalizedContext(options.userId, agentId, userMessage.slice(0, 120));
+    } catch { }
+  }
+
+  let cognitivePlan = "";
+  try {
+    const complexity = assessQueryComplexity(userMessage);
+    if (complexity.mode === "system2" || complexity.requiresDeepThinking) {
+      const plan = await generateExecutionPlan(userMessage, agentId, listTools().map(t => t.name), context);
+      if (plan?.steps?.length) {
+        cognitivePlan = `\n\n[Reasoning Plan — ${complexity.complexity}]:\n${plan.steps.slice(0, 4).map((s, i) => `${i + 1}. ${s.action}`).join("\n")}`;
+      }
+    }
+  } catch { }
+
   const toolPrompt = buildToolPrompt();
   let systemPrompt = config.systemPrompt;
 
@@ -282,7 +303,7 @@ export async function runAgent(
     if (intentCtx) systemPrompt += "\n\n[SESSION CONTEXT]\n" + intentCtx;
   }
 
-  systemPrompt += toolPrompt + semanticContext;
+  systemPrompt += toolPrompt + semanticContext + personalizedContext + cognitivePlan;
 
   const messages: { role: string; content: string }[] = [
     { role: "system", content: systemPrompt },
@@ -502,6 +523,18 @@ export async function runAgent(
     ]);
   }
 
+  if (options.userId) {
+    storeEpisodicMemory({
+      userId: options.userId,
+      agentId,
+      topic: userMessage.slice(0, 120),
+      summary: userMessage.slice(0, 200),
+      outcome: finalResponse.slice(0, 400),
+      keyEntities: toolsUsed.slice(0, 5),
+      importanceScore: toolsUsed.length > 0 ? 0.8 : 0.5,
+    }).catch(() => { });
+  }
+
   return {
     runId, agentId, response: finalResponse, toolsUsed,
     tokensUsed: totalTokens, latencyMs,
@@ -642,6 +675,8 @@ export async function initializeMastra(): Promise<void> {
     ensureIntentTables(),
     ensurePersonalizationTables(),
     ensureProactiveTables(),
+    ensureMemoryPersistenceTables(),
+    ensureGatewayIntelligenceTables(),
   ]);
 
   registerDefaultTriggers();
