@@ -16,6 +16,7 @@ import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 import { AUTH_TOKEN_KEY } from "@/context/AuthContext";
 import { Stack } from "expo-router";
+import { reloadAppAsync } from "expo";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
 import React, { useEffect } from "react";
@@ -101,7 +102,7 @@ export default function RootLayout() {
   return (
     <PrismBusProvider domain="aegis">
     <SafeAreaProvider>
-      <ErrorBoundary>
+      <ErrorBoundary onReload={() => reloadAppAsync()}>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <BiometricProvider>

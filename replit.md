@@ -56,6 +56,16 @@ All 7 mobile apps (Aegis, Lyte, Vessels, Terra, SZL Holdings, Carlota Jo, Stephe
 - **Prism Counsel SSE**: `copilot-page.tsx` wired to real SSE stream with conversation creation, real document extraction via `/api/ai/extract`, and real approval POSTs
 - **Auth Token Wiring**: All mcp-tools screens load auth tokens from `expo-secure-store` and pass them to push notification hooks and health check requests
 
+## Mobile Shared Component Library (Task #411)
+All 7 mobile apps now share components via `lib/mobile-ai` (`@szl-holdings/mobile-ai`) instead of copy-pasting identical code:
+- **`CommandPalette`**: Single shared implementation in `lib/mobile-ai/src/CommandPalette.tsx` — was 255 lines × 7 = 1,785 lines, now 7 re-export files of 1 line each
+- **`SwipeableCard`**: Single shared implementation in `lib/mobile-ai/src/SwipeableCard.tsx` — was 169 lines × 7, now 7 re-export files
+- **`VoiceCommandOverlay`**: Single shared implementation in `lib/mobile-ai/src/VoiceCommandOverlay.tsx`, uses `useVoiceCommand` hook also added to the shared lib — was 261 lines × 7, now 7 re-export files
+- **`useVoiceCommand`**: Extracted to `lib/mobile-ai/src/useVoiceCommand.ts` — was duplicated in all 7 app `hooks/` directories (still there for backward compat, can be removed later)
+- **`AICopilotModal`**: New shared wrapper in `lib/mobile-ai/src/AICopilotModal.tsx` handling auth token loading; each app's `AICopilot.tsx` is now a thin wrapper with app-specific constants (auth token key, agent name, accent color, system context)
+- **`PushNotificationWrapper`**: Shared `useAppPushNotifications` + `NotificationOverlay` in `lib/mobile-ai/src/PushNotificationWrapper.tsx`; all 7 identical 288-line `PushNotificationManager.tsx` files are now 5-line re-exports
+- **`ErrorBoundary`**: Shared generic version in `lib/mobile-ai/src/ErrorBoundary.tsx`; 6 of 7 apps now re-export from shared (carlota-jo kept its own due to unique `FallbackComponent` prop pattern)
+
 ## System Architecture
 
 ### Core Technologies

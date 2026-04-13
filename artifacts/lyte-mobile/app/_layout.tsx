@@ -7,6 +7,7 @@ import {
 } from "@expo-google-fonts/inter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
+import { reloadAppAsync } from "expo";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
 import React, { useEffect } from "react";
@@ -60,7 +61,7 @@ export default function RootLayout() {
   return (
     <PrismBusProvider domain="lyte">
     <SafeAreaProvider>
-      <ErrorBoundary>
+      <ErrorBoundary onReload={() => reloadAppAsync()}>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <NotificationProvider>
