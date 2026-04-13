@@ -159,6 +159,8 @@ import soundStudioRouter from "./sound-studio";
 import videoStreamingRouter from "./video-streaming";
 import multimodalDocumentsRouter from "./multimodal-documents";
 import aboRouter from "./abo";
+import aiGatewayPerfRouter from "./ai-gateway-perf";
+import promptPipelineRouter from "./prompt-pipeline";
 
 const router: IRouter = Router();
 
@@ -569,6 +571,14 @@ router.use(analyticsLakeRouter);
 router.use("/gateway-intelligence", _readLimiter);
 router.use("/gateway-intelligence", _writeLimiter);
 router.use("/gateway-intelligence", gatewayIntelligenceRouter);
+
+router.use("/gateway-perf", _readLimiter);
+router.use("/gateway-perf", _writeLimiter);
+router.use("/gateway-perf", aiGatewayPerfRouter);
+
+router.use("/prompt-pipeline", _readLimiter);
+router.use("/prompt-pipeline", _writeLimiter);
+router.use("/prompt-pipeline", promptPipelineRouter);
 
 router.use("/analytics/recordings", _writeLimiter);
 router.use("/analytics/heatmap-events", _writeLimiter);

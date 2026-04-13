@@ -335,3 +335,134 @@ export const championApi = {
   getCostQuality: (): Promise<{ data: CostQualityPoint[] }> =>
     apiFetch("/champion/evolution/cost-quality"),
 };
+
+export interface GatewayPerfStats {
+  cache: {
+    hits: number;
+    misses: number;
+    hitRate: number;
+    hitRatePct: number;
+    totalEntries: number;
+    estimatedSavingsUsd: number;
+    savedTokens: number;
+  };
+  queue: {
+    enqueued: number;
+    processed: number;
+    shed: number;
+    queueDepth: number;
+    activeConcurrent: number;
+    queueByPriority: Record<string, number>;
+    byPriority: Record<string, number>;
+  };
+  domainTtls: Record<string, number>;
+}
+
+export interface CacheEntry {
+  id: string;
+  domain: string;
+  promptHash: string;
+  promptText: string;
+  response: string;
+  model: string;
+  provider: string;
+  usage: { promptTokens: number; completionTokens: number; totalTokens: number };
+  estimatedCostUsd: number;
+  createdAt: number;
+  expiresAt: number;
+  hitCount: number;
+}
+
+export interface PromptTemplate {
+  id: string;
+  name: string;
+  domain: string;
+  taskType: string;
+  systemPrompt: string;
+  userPromptTemplate: string;
+  variables: Array<{ name: string; type: string; description?: string; required?: boolean }>;
+  version: number;
+  status: "active" | "draft" | "archived";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PromptABTest {
+  testId: string;
+  name: string;
+  templateId: string;
+  versionA: number;
+  versionB: number;
+  weightA: number;
+  weightB: number;
+  domain: string;
+  taskType: string;
+  metric: string;
+  status: string;
+  startedAt: string;
+  results?: {
+    requestsA: number;
+    requestsB: number;
+    avgQualityA: number;
+    avgQualityB: number;
+    winner?: string;
+    confidence: number;
+  };
+}
+
+export interface VersionPerformance {
+  version: number;
+  requestCount: number;
+  avgQualityScore: number;
+  avgLatencyMs: number;
+  successRate: number;
+}
+
+export const gatewayPerfApi = {
+  getStats: () => apiFetch<GatewayPerfStats>("/gateway-perf/stats"),
+  getCacheEntries: (domain?: string) =>
+    apiFetch<{ entries: CacheEntry[]; count: number }>(`/gateway-perf/cache/entries${domain ? `?domain=${domain}` : ""}`),
+  invalidateDomain: (domain: string) =>
+    apiFetch<{ success: boolean; invalidatedCount: number }>(`/gateway-perf/cache/domain/${domain}`, { method: "DELETE" }),
+  getQueueStats: () => apiFetch<Record<string, unknown>>("/gateway-perf/queue/stats"),
+};
+
+export const promptPipelineApi = {
+  listTemplates: (domain?: string, taskType?: string) =>
+    apiFetch<{ templates: PromptTemplate[]; count: number }>(
+      `/prompt-pipeline/templates${domain ? `?domain=${domain}` : ""}${taskType ? `&taskType=${taskType}` : ""}`
+    ),
+  getTemplate: (id: string) => apiFetch<{ template: PromptTemplate }>(`/prompt-pipeline/templates/${id}`),
+  createTemplate: (body: Partial<PromptTemplate> & { name: string; systemPrompt: string }) =>
+    apiFetch<{ template: PromptTemplate }>("/prompt-pipeline/templates", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  updateTemplate: (id: string, patch: Partial<PromptTemplate> & { changeNote?: string }) =>
+    apiFetch<{ template: PromptTemplate }>(`/prompt-pipeline/templates/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(patch),
+    }),
+  getVersions: (id: string) =>
+    apiFetch<{ versions: Array<{ version: number; createdAt: string; changeNote?: string; avgQualityScore: number; requestCount: number }> }>(
+      `/prompt-pipeline/templates/${id}/versions`
+    ),
+  rollback: (id: string, version: number) =>
+    apiFetch<{ template: PromptTemplate }>(`/prompt-pipeline/templates/${id}/rollback`, {
+      method: "POST",
+      body: JSON.stringify({ version }),
+    }),
+  getPerformance: (id: string) =>
+    apiFetch<{ performance: VersionPerformance[] }>(`/prompt-pipeline/templates/${id}/performance`),
+  listABTests: (templateId?: string) =>
+    apiFetch<{ tests: PromptABTest[]; count: number }>(
+      `/prompt-pipeline/ab-tests${templateId ? `?templateId=${templateId}` : ""}`
+    ),
+  createABTest: (body: { name: string; templateId: string; versionA: number; versionB: number; metric?: string }) =>
+    apiFetch<{ test: PromptABTest }>("/prompt-pipeline/ab-tests", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  getABTestResults: (testId: string) =>
+    apiFetch<{ testId: string; results: PromptABTest["results"] }>(`/prompt-pipeline/ab-tests/${testId}/results`),
+};
