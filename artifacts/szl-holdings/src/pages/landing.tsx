@@ -1,6 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Link } from "wouter";
-import { m, AnimatePresence } from "framer-motion";
+
+const PlatformIn90Seconds = lazy(() => import("@/components/sections/PlatformIn90Seconds").then(m => ({ default: m.PlatformIn90Seconds })));
+const OutcomeMetricsSectionLazy = lazy(() => import("@/components/sections/OutcomeMetricsSection").then(m => ({ default: m.OutcomeMetricsSection })));
+const EcosystemPulseSectionLazy = lazy(() => import("@/components/sections/EcosystemPulseSection").then(m => ({ default: m.EcosystemPulseSection })));
+
+import { m } from "framer-motion";
 import {
   ArrowRight,
   ChevronRight,
@@ -9,19 +14,12 @@ import {
   Shield,
   CheckCircle2,
   Activity,
-  GitBranch,
   Lock,
   Database,
   Globe,
   Layers,
-  Network,
-  TrendingUp,
-  Clock,
   Mail,
-  Newspaper,
   Play,
-  Ship,
-  Building2,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -263,232 +261,7 @@ function NewsletterSection() {
   );
 }
 
-const PLATFORM_STEPS = [
-  { icon: Eye, label: "Signal", desc: "Lyte ingests operational signals — stuck approvals, drift, risk flags", color: "hsl(192,72%,48%)", duration: "0–15s" },
-  { icon: Shield, label: "Detection", desc: "Domain AI surfaces anomalies across Vessels, Terra, and Aegis simultaneously", color: "hsl(222,60%,62%)", duration: "15–30s" },
-  { icon: Network, label: "Cross-domain mesh", desc: "Intelligence compounds — a maritime anomaly enriches credit risk in Lyte", color: "hsl(38,72%,58%)", duration: "30–50s" },
-  { icon: Activity, label: "Governed action", desc: "Signal → action with full audit trail and human-in-the-loop controls", color: "hsl(140,50%,48%)", duration: "50–70s" },
-  { icon: Lock, label: "Proof chain", desc: "Immutable record of every decision, inference, and action taken", color: "hsl(280,50%,65%)", duration: "70–90s" },
-];
 
-function PlatformIn90Seconds() {
-  const [activeStep, setActiveStep] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    if (!isPlaying) {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      return;
-    }
-    intervalRef.current = setInterval(() => {
-      setActiveStep((prev) => (prev + 1) % PLATFORM_STEPS.length);
-    }, 4000);
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [isPlaying]);
-
-  const step = PLATFORM_STEPS[activeStep];
-  const StepIcon = step.icon;
-  const progress = ((activeStep + 1) / PLATFORM_STEPS.length) * 100;
-
-  return (
-    <div style={{ display: "grid", gap: "2rem", alignItems: "center" }} className="lg:grid-cols-[1fr_1.2fr]">
-      <div>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1rem" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", padding: "0.25rem 0.625rem", borderRadius: "2rem", background: "hsla(192,72%,48%,0.1)", border: "1px solid hsla(192,72%,48%,0.2)" }}>
-            <Play size={10} style={{ color: "hsl(192,72%,48%)" }} />
-            <span style={{ fontSize: "0.5625rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(192,72%,48%)", fontFamily: "var(--font-mono)" }}>
-              Platform in 90 Seconds
-            </span>
-          </div>
-          <button
-            onClick={() => setIsPlaying((p) => !p)}
-            style={{ background: "transparent", border: "none", color: "hsla(0,0%,100%,0.35)", fontSize: "0.625rem", fontFamily: "var(--font-mono)", cursor: "pointer", letterSpacing: "0.08em" }}
-          >
-            {isPlaying ? "PAUSE" : "PLAY"}
-          </button>
-        </div>
-        <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)", marginBottom: "0.5rem" }}>
-          From signal to governed action.
-        </h2>
-        <p style={{ fontSize: "0.9375rem", lineHeight: 1.7, color: "var(--color-szl-text-secondary)", marginBottom: "1.5rem" }}>
-          Watch the full platform cycle: signal ingestion, cross-domain intelligence, governed action routing, and immutable proof chain — in five steps.
-        </p>
-        <div style={{ height: "3px", borderRadius: "2px", background: "hsla(0,0%,100%,0.06)", marginBottom: "1.25rem", overflow: "hidden" }}>
-          <m.div
-            key={activeStep}
-            initial={{ width: `${((activeStep) / PLATFORM_STEPS.length) * 100}%` }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 3.8, ease: "linear" }}
-            style={{ height: "100%", borderRadius: "2px", background: step.color }}
-          />
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-          {PLATFORM_STEPS.map((s, i) => {
-            const Icon = s.icon;
-            const isActive = i === activeStep;
-            return (
-              <button
-                key={s.label}
-                onClick={() => { setActiveStep(i); setIsPlaying(false); }}
-                style={{
-                  display: "flex", alignItems: "center", gap: "0.75rem",
-                  padding: "0.625rem 0.875rem",
-                  borderRadius: "0.5rem",
-                  background: isActive ? `${s.color}10` : "transparent",
-                  border: `1px solid ${isActive ? s.color + "25" : "transparent"}`,
-                  color: isActive ? "hsl(38,8%,92%)" : "hsla(0,0%,100%,0.4)",
-                  fontSize: "0.8125rem",
-                  fontWeight: isActive ? 600 : 400,
-                  cursor: "pointer",
-                  textAlign: "left",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                <Icon size={14} style={{ color: isActive ? s.color : "hsla(0,0%,100%,0.25)", flexShrink: 0 }} />
-                <span>{s.label}</span>
-                <span style={{ marginLeft: "auto", fontSize: "0.5625rem", color: "hsla(0,0%,100%,0.2)", fontFamily: "var(--font-mono)" }}>{s.duration}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <AnimatePresence mode="wait">
-        <m.div
-          key={activeStep}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.35 }}
-          style={{
-            padding: "2.5rem",
-            borderRadius: "1rem",
-            background: `${step.color}06`,
-            border: `1px solid ${step.color}20`,
-            textAlign: "center",
-            minHeight: "280px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "1.25rem",
-          }}
-        >
-          <div style={{
-            width: 56, height: 56, borderRadius: "0.75rem",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            background: `${step.color}12`, border: `1px solid ${step.color}30`,
-          }}>
-            <StepIcon size={24} style={{ color: step.color }} />
-          </div>
-          <div>
-            <p style={{ fontSize: "0.5625rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: step.color, fontFamily: "var(--font-mono)", marginBottom: "0.5rem" }}>
-              Step {activeStep + 1} of {PLATFORM_STEPS.length}
-            </p>
-            <h3 style={{ fontSize: "1.375rem", fontWeight: 600, letterSpacing: "-0.015em", color: "hsl(38,8%,94%)", marginBottom: "0.625rem" }}>
-              {step.label}
-            </h3>
-            <p style={{ fontSize: "0.9375rem", lineHeight: 1.65, color: "hsla(0,0%,100%,0.55)", maxWidth: "30ch", margin: "0 auto" }}>
-              {step.desc}
-            </p>
-          </div>
-        </m.div>
-      </AnimatePresence>
-    </div>
-  );
-}
-
-function useAnimatedCounter(target: number, duration = 1800, start = false) {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    if (!start) return;
-    let startTime: number | null = null;
-    const step = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.round(eased * target));
-      if (progress < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }, [start, target, duration]);
-  return count;
-}
-
-function OutcomeMetricsSection() {
-  const [inView, setInView] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setInView(true); },
-      { threshold: 0.3 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
-
-  const c1 = useAnimatedCounter(40, 1600, inView);
-  const c2 = useAnimatedCounter(3, 1400, inView);
-  const c3 = useAnimatedCounter(62, 1800, inView);
-  const c4 = useAnimatedCounter(19, 1500, inView);
-  const c5 = useAnimatedCounter(34, 1700, inView);
-  const c6 = useAnimatedCounter(94, 1600, inView);
-
-  const metrics = [
-    { value: `${c1}%`, label: "Faster threat detection", sub: "Aegis SOC command vs. manual review", color: "hsl(222,60%,62%)" },
-    { value: `${c2}×`, label: "Portfolio visibility improvement", sub: "Terra vs. manual property monitoring", color: "hsl(140,50%,48%)" },
-    { value: `${c3}%`, label: "Approval overhead reduction", sub: "Lyte design-partner benchmark", color: "hsl(192,72%,48%)" },
-    { value: `+${c4}d`, label: "Distress signal lead time", sub: "Before public filing — Terra intelligence", color: "hsl(140,50%,48%)" },
-    { value: `${c5}d`, label: "Pre-designation lead time", sub: "Before sanctions — Vessels anomaly detection", color: "hsl(206,72%,52%)" },
-    { value: `${c6}%`, label: "MITRE ATT&CK coverage", sub: "Continuous simulation — Aegis platform", color: "hsl(222,60%,62%)" },
-  ];
-
-  return (
-    <section ref={ref} style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(192,72%,48%,0.015)" }}>
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
-        <m.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
-          <div style={{ marginBottom: "3rem", maxWidth: "42rem" }}>
-            <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
-              Quantified outcomes
-            </p>
-            <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)" }}>
-              What the platform produces — in numbers.
-            </h2>
-            <p style={{ fontSize: "0.9375rem", lineHeight: 1.7, color: "var(--color-szl-text-secondary)", marginTop: "0.75rem" }}>
-              From design-partner benchmarks and operational proof across Vessels, Terra, and Aegis. Sample data — not a financial guarantee.
-            </p>
-          </div>
-        </m.div>
-        <div style={{ display: "grid", gap: "1rem" }} className="sm:grid-cols-2 lg:grid-cols-3">
-          {metrics.map((m_, i) => (
-            <m.div
-              key={m_.label}
-              custom={i}
-              variants={fadeUp}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true }}
-              style={{
-                padding: "1.75rem",
-                borderRadius: "0.875rem",
-                background: "hsla(0,0%,100%,0.025)",
-                border: "1px solid hsla(0,0%,100%,0.07)",
-              }}
-            >
-              <div style={{ fontSize: "clamp(2rem,3.5vw,2.75rem)", fontWeight: 800, letterSpacing: "-0.035em", color: m_.color, lineHeight: 1, marginBottom: "0.625rem" }}>
-                {m_.value}
-              </div>
-              <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(38,8%,90%)", marginBottom: "0.25rem" }}>{m_.label}</p>
-              <p style={{ fontSize: "0.75rem", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", lineHeight: 1.45 }}>{m_.sub}</p>
-            </m.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 const PRESS_LOGOS = [
   { name: "TechCrunch", placeholder: "TC" },
@@ -666,204 +439,6 @@ function InvestorNewsletterCapture() {
             )}
           </div>
         </m.div>
-      </div>
-    </section>
-  );
-}
-
-const ECOSYSTEM_APPS = [
-  { name: "Lyte", description: "Business Observability", color: "hsl(192,72%,48%)" },
-  { name: "Vessels", description: "Maritime Intelligence", color: "hsl(206,72%,52%)" },
-  { name: "Aegis", description: "Defense & Intelligence", color: "hsl(222,60%,62%)" },
-  { name: "Terra", description: "Real Estate Intelligence", color: "hsl(140,50%,48%)" },
-  { name: "PRISM Counsel", description: "Legal Matter Command", color: "hsl(38,72%,58%)" },
-  { name: "Carlota Jo", description: "Private Advisory", color: "hsl(280,50%,65%)" },
-];
-
-interface MeshStats {
-  totalSignalsGenerated: number;
-  totalCrossVentureRoutes: number;
-  signalsMissedInIsolation: number;
-}
-
-function EcosystemPulseSection() {
-  const [pulseData, setPulseData] = useState<Array<{ name: string; status: "operational" | "degraded" | "down" | "unknown"; description: string; color: string; lastChecked: string }>>([]);
-  const [loading, setLoading] = useState(true);
-  const [meshStats, setMeshStats] = useState<MeshStats | null>(null);
-
-  useEffect(() => {
-    const fallback = ECOSYSTEM_APPS.map(app => ({
-      name: app.name,
-      status: "operational" as const,
-      description: app.description,
-      color: app.color,
-      lastChecked: "just now",
-    }));
-    // /api/health/detailed returns overall API status + checks (database, job_queue, telemetry).
-    // We map the overall status to all ecosystem apps since a single API server backs the ecosystem.
-    // Statuses: "healthy" → operational, "warning" → degraded, "degraded" → down.
-    Promise.all([
-      fetch("/api/health/detailed").then(r => r.ok ? r.json() : null).catch(() => null),
-      fetch("/api/intelligence-mesh/compound-value").then(r => r.ok ? r.json() : null).catch(() => null),
-    ]).then(([healthData, meshData]) => {
-      if (!healthData) { setPulseData(fallback); }
-      else {
-        // Map API health status to UI status. "degraded" means some checks are failing
-        // (e.g. database unreachable) but the service is still responding — we show "degraded"
-        // rather than "down" to avoid overstating severity. Unknown/unexpected values map to
-        // "unknown" (not "operational") to avoid falsely signalling a green state.
-        const overallStatus = healthData.status === "healthy" ? "operational" as const
-          : healthData.status === "warning" ? "degraded" as const
-          : healthData.status === "degraded" ? "degraded" as const
-          : "unknown" as const;
-        setPulseData(ECOSYSTEM_APPS.map(app => ({
-          name: app.name,
-          status: overallStatus,
-          description: app.description,
-          color: app.color,
-          lastChecked: "just now",
-        })));
-      }
-      if (meshData) {
-        setMeshStats({
-          totalSignalsGenerated: meshData.totalSignalsGenerated ?? 0,
-          totalCrossVentureRoutes: meshData.totalCrossVentureRoutes ?? 0,
-          signalsMissedInIsolation: meshData.signalsMissedInIsolation ?? 0,
-        });
-      }
-    }).catch(() => setPulseData(fallback)).finally(() => setLoading(false));
-  }, []);
-
-  return (
-    <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.01)" }}>
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
-        <CinematicReveal>
-          <div style={{ marginBottom: "2.5rem", display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
-            <div>
-              <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
-                Ecosystem
-              </p>
-              <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)" }}>
-                One platform. Six operational domains.
-              </h2>
-            </div>
-            <LiveIndicator label="ECOSYSTEM PULSE" color="hsl(192,72%,48%)" />
-          </div>
-        </CinematicReveal>
-        {loading ? (
-          <div style={{ display: "grid", gap: "0.875rem", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))" }}>
-            {ECOSYSTEM_APPS.map(app => (
-              <div key={app.name} style={{ height: 90, borderRadius: "0.75rem", background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.05)", animation: "pulse 2s ease-in-out infinite" }} />
-            ))}
-          </div>
-        ) : (
-          <div style={{ display: "grid", gap: "0.875rem", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))" }}>
-            {pulseData.map((item, i) => (
-              <CinematicReveal key={item.name} delay={i * 0.06}>
-                <EcosystemPulseItem
-                  name={item.name}
-                  status={item.status}
-                  description={item.description}
-                  color={item.color}
-                  lastChecked={item.lastChecked}
-                />
-              </CinematicReveal>
-            ))}
-          </div>
-        )}
-
-        {/* Intelligence Mesh teaser */}
-        <CinematicReveal delay={0.3}>
-          <m.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            style={{
-              marginTop: "2rem",
-              padding: "1.25rem 1.5rem",
-              borderRadius: "0.875rem",
-              background: "hsla(192,72%,48%,0.04)",
-              border: "1px solid hsla(192,72%,48%,0.2)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-              gap: "1.25rem",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div style={{
-                width: 40, height: 40, borderRadius: "0.625rem", flexShrink: 0,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                background: "hsla(192,72%,48%,0.12)",
-                border: "1px solid hsla(192,72%,48%,0.3)",
-              }}>
-                <Network size={18} color="hsl(192,72%,48%)" />
-              </div>
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.125rem" }}>
-                  <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(38,8%,92%)" }}>
-                    Compound Intelligence Mesh
-                  </span>
-                  <span style={{
-                    display: "inline-flex", alignItems: "center",
-                    padding: "0.1rem 0.4rem",
-                    borderRadius: "99px",
-                    fontSize: "0.625rem",
-                    fontWeight: 700,
-                    letterSpacing: "0.08em",
-                    color: "hsl(192,72%,48%)",
-                    background: "hsla(192,72%,48%,0.12)",
-                    border: "1px solid hsla(192,72%,48%,0.3)",
-                  }}>
-                    LIVE
-                  </span>
-                </div>
-                <p style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", margin: 0 }}>
-                  Cross-venture signals auto-enrich every relevant domain. Intelligence compounds across the ecosystem.
-                </p>
-              </div>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap" }}>
-              {meshStats && (
-                <div style={{ display: "flex", gap: "1.25rem" }}>
-                  {[
-                    { label: "Signals", value: meshStats.totalSignalsGenerated },
-                    { label: "Routes", value: meshStats.totalCrossVentureRoutes },
-                    { label: "Compound insights", value: meshStats.signalsMissedInIsolation },
-                  ].map(s => (
-                    <div key={s.label} style={{ textAlign: "center" }}>
-                      <div style={{ fontSize: "1.125rem", fontWeight: 700, color: "hsl(192,72%,48%)" }}>{s.value}</div>
-                      <div style={{ fontSize: "0.625rem", color: "var(--color-szl-text-faint)" }}>{s.label}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <Link
-                href="/intelligence-mesh"
-                style={{
-                  display: "inline-flex", alignItems: "center", gap: "0.375rem",
-                  padding: "0.5rem 1rem",
-                  background: "hsla(192,72%,48%,0.12)",
-                  border: "1px solid hsla(192,72%,48%,0.3)",
-                  borderRadius: "0.375rem",
-                  color: "hsl(192,72%,48%)",
-                  fontSize: "0.8125rem",
-                  fontWeight: 600,
-                  textDecoration: "none",
-                  transition: "background 0.2s ease",
-                  flexShrink: 0,
-                }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsla(192,72%,48%,0.2)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsla(192,72%,48%,0.12)"; }}
-              >
-                View Mesh
-                <ArrowRight size={13} />
-              </Link>
-            </div>
-          </m.div>
-        </CinematicReveal>
       </div>
     </section>
   );
@@ -1063,7 +638,9 @@ export default function HomePage() {
         <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.008)" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(3rem,6vw,4.5rem) var(--space-content-x)" }}>
             <m.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
-              <PlatformIn90Seconds />
+              <Suspense fallback={<div style={{ height: 300 }} />}>
+                <PlatformIn90Seconds />
+              </Suspense>
             </m.div>
           </div>
         </section>
@@ -1631,7 +1208,9 @@ export default function HomePage() {
         </section>
 
         {/* ── 10a. Outcome Metrics (animated counters) ────────────────── */}
-        <OutcomeMetricsSection />
+        <Suspense fallback={<div style={{ height: 400 }} />}>
+          <OutcomeMetricsSectionLazy />
+        </Suspense>
 
         {/* ── 10b. Press / Media Mentions ─────────────────────────────── */}
         <PressSection />
@@ -1746,7 +1325,9 @@ export default function HomePage() {
         </section>
 
         {/* ── 11. Ecosystem Pulse ─────────────────────────────────────── */}
-        <EcosystemPulseSection />
+        <Suspense fallback={<div style={{ height: 500 }} />}>
+          <EcosystemPulseSectionLazy />
+        </Suspense>
 
         {/* ── 11b. Newsletter Signup ────────────────────────────────────── */}
         <NewsletterSection />

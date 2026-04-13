@@ -42,7 +42,9 @@ export default function XStudioPage() {
   const [publishing, setPublishing] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch(`${API}/api/distribution-os/x-posts`, { credentials: "include" }).then(r => r.json()).then(setPosts).catch(() => {});
+    fetch(`${API}/api/distribution-os/x-posts`, { credentials: "include" }).then(r => r.json()).then(setPosts).catch((err) => {
+      console.error("[X Studio] Failed to load posts:", err);
+    });
   }, []);
 
   async function createPost() {
@@ -87,10 +89,15 @@ export default function XStudioPage() {
         const refreshed = await refreshRes.json();
         setPosts(prev => prev.map(p => p.id === id ? refreshed : p));
       }
-    } catch {
-      const refreshRes = await fetch(`${API}/api/distribution-os/x-posts/${id}`, { credentials: "include" });
-      const refreshed = await refreshRes.json();
-      setPosts(prev => prev.map(p => p.id === id ? refreshed : p));
+    } catch (publishErr) {
+      console.error("[X Studio] Failed to publish post:", publishErr);
+      try {
+        const refreshRes = await fetch(`${API}/api/distribution-os/x-posts/${id}`, { credentials: "include" });
+        const refreshed = await refreshRes.json();
+        setPosts(prev => prev.map(p => p.id === id ? refreshed : p));
+      } catch (refreshErr) {
+        console.error("[X Studio] Failed to refresh post after publish error:", refreshErr);
+      }
     }
     setPublishing(null);
   }

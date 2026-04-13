@@ -54,6 +54,7 @@ const MIGRATION_SENTINELS: Array<{
   { idx: 19, hash: "1d4d1c2f5f30fef48c9196c36b59ef189720986dbb8cc288a8365f0a34b1be2d", when: 1775110000000, checkSql: "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='terra_brokerages') AS ok" },
   { idx: 20, hash: "89614890f4049d2c9ece580e68dea1074f8c15668841a2bb34ee8bb73ca0d264", when: 1775120000000, checkSql: "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='export_jobs') AS ok" },
   { idx: 21, hash: "ec9abcdbb47dce5a05f87144bf99ff9001e1208ae63e8128783d584decf18ab9", when: 1775130000000, checkSql: "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='feedback') AS ok" },
+  { idx: 22, hash: "86d812f3215601e0e1729265cfd9f19ce87f366b9993795d5147c4f99b39aae4", when: 1775140000000, checkSql: "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='pc_matters' AND column_name='practice_area') AS ok" },
 ];
 
 /**

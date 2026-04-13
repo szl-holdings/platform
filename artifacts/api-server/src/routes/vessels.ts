@@ -312,7 +312,9 @@ router.post("/vessels/simulations", authMiddleware(), requireRole("ops", "exec",
             ],
           },
         }).where(eq(vesselsSimulationsTable.id, simulation.id));
-      } catch {}
+      } catch (simErr) {
+        console.error("[Vessels] Failed to update simulation result:", simErr);
+      }
     }, 3000);
 
     sendCreated(res, simulation);

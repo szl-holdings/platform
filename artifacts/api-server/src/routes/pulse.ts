@@ -3,7 +3,7 @@
  * API routes for briefing generation, library, confidence, custom briefs, dissent, settings, and PDF export.
  * All data persisted via Drizzle ORM to PostgreSQL.
  */
-import { Router, type Request, type Response } from "express";
+import { Router, type Request, type Response, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { logger } from "../lib/logger";
 import { AGENT_REGISTRY, callAgent, routeToAgents, getSharedContext } from "./nuro-mesh";
@@ -38,7 +38,7 @@ const readLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 const writeLimiter = rateLimit({
   windowMs: 60 * 1000,
@@ -46,7 +46,7 @@ const writeLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -350,7 +350,7 @@ router.get("/pulse/briefs", readLimiter, async (req: Request, res: Response) => 
   const { domain, riskLevel, q, limit = "20", offset = "0" } = req.query as Record<string, string>;
 
   const conditions: ReturnType<typeof eq>[] = [];
-  if (riskLevel) conditions.push(eq(pulseBriefs.riskLevel, riskLevel));
+  if (riskLevel) conditions.push(eq(pulseBriefs.riskLevel, riskLevel as "critical" | "high" | "medium" | "low"));
 
   let rows = await db.select().from(pulseBriefs)
     .where(conditions.length > 0 ? and(...conditions) : undefined)
@@ -391,7 +391,7 @@ router.get("/pulse/briefs/today", readLimiter, async (_req: Request, res: Respon
 
 router.get("/pulse/briefs/:id", readLimiter, async (req: Request, res: Response) => {
   await ensureInit();
-  const brief = await getBriefWithDissents(req.params.id);
+  const brief = await getBriefWithDissents(req.params.id as string);
   if (!brief) { res.status(404).json({ error: "Brief not found" }); return; }
   res.json({ brief });
 });
@@ -656,7 +656,7 @@ router.patch("/pulse/dissent/:id", writeLimiter, async (req: Request, res: Respo
   if (body.status) updates.status = body.status;
   if (body.resolution) { updates.resolution = body.resolution; updates.resolvedAt = new Date(); }
 
-  const [updated] = await db.update(pulseDissents).set(updates).where(eq(pulseDissents.dissentId, req.params.id)).returning();
+  const [updated] = await db.update(pulseDissents).set(updates).where(eq(pulseDissents.dissentId, req.params.id as string)).returning();
   if (!updated) { res.status(404).json({ error: "Dissent not found" }); return; }
   res.json({ dissent: { ...updated, id: updated.dissentId, submittedAt: updated.submittedAt.toISOString(), resolvedAt: updated.resolvedAt?.toISOString() ?? null } });
 });
@@ -673,65 +673,65 @@ router.get("/pulse/agents", readLimiter, (_req: Request, res: Response) => {
 
 router.get("/pulse/briefs/:id/pdf", readLimiter, async (req: Request, res: Response) => {
   await ensureInit();
-  const brief = await getBriefWithDissents(req.params.id);
+  const brief = await getBriefWithDissents(req.params.id as string);
   if (!brief) { res.status(404).json({ error: "Brief not found" }); return; }
 
   try {
+    let _bid = 0;
+    const bid = () => `blk_${++_bid}`;
     const blocks: BlockNode[] = [];
 
-    blocks.push({ type: "heading1", children: [{ text: `PULSE EXECUTIVE BRIEFING — ${brief.date}` }] });
-    blocks.push({ type: "paragraph", children: [{ text: `Classification: ${brief.classification}` }] });
-    blocks.push({ type: "paragraph", children: [{ text: `Overall Confidence: ${brief.overallConfidence}% | Risk Level: ${brief.riskLevel.toUpperCase()}` }] });
-    blocks.push({ type: "paragraph", children: [{ text: `Generated: ${brief.generatedAt} | Agents: ${brief.agentsContributed.join(", ")}` }] });
-    blocks.push({ type: "horizontal_rule", children: [{ text: "" }] });
+    blocks.push({ id: bid(), type: "heading1", children: [{ text: `PULSE EXECUTIVE BRIEFING — ${brief.date}` }] });
+    blocks.push({ id: bid(), type: "paragraph", children: [{ text: `Classification: ${brief.classification}` }] });
+    blocks.push({ id: bid(), type: "paragraph", children: [{ text: `Overall Confidence: ${brief.overallConfidence}% | Risk Level: ${brief.riskLevel.toUpperCase()}` }] });
+    blocks.push({ id: bid(), type: "paragraph", children: [{ text: `Generated: ${brief.generatedAt} | Agents: ${brief.agentsContributed.join(", ")}` }] });
+    blocks.push({ id: bid(), type: "horizontal_rule", children: [{ text: "" }] });
 
-    blocks.push({ type: "heading2", children: [{ text: "HEADLINE" }] });
-    blocks.push({ type: "paragraph", children: [{ text: brief.headline }] });
+    blocks.push({ id: bid(), type: "heading2", children: [{ text: "HEADLINE" }] });
+    blocks.push({ id: bid(), type: "paragraph", children: [{ text: brief.headline }] });
 
-    blocks.push({ type: "heading2", children: [{ text: "EXECUTIVE SUMMARY" }] });
-    blocks.push({ type: "paragraph", children: [{ text: brief.executiveSummary }] });
-    blocks.push({ type: "horizontal_rule", children: [{ text: "" }] });
+    blocks.push({ id: bid(), type: "heading2", children: [{ text: "EXECUTIVE SUMMARY" }] });
+    blocks.push({ id: bid(), type: "paragraph", children: [{ text: brief.executiveSummary }] });
+    blocks.push({ id: bid(), type: "horizontal_rule", children: [{ text: "" }] });
 
     for (const section of brief.sections) {
-      blocks.push({ type: "heading2", children: [{ text: `${section.title} — ${section.agentName}` }] });
-      blocks.push({ type: "paragraph", children: [{ text: `Confidence: ${section.confidenceScore}% | Risk: ${section.riskLevel}` }] });
-      blocks.push({ type: "paragraph", children: [{ text: section.content }] });
+      blocks.push({ id: bid(), type: "heading2", children: [{ text: `${section.title} — ${section.agentName}` }] });
+      blocks.push({ id: bid(), type: "paragraph", children: [{ text: `Confidence: ${section.confidenceScore}% | Risk: ${section.riskLevel}` }] });
+      blocks.push({ id: bid(), type: "paragraph", children: [{ text: section.content }] });
 
       if (section.keyFindings.length > 0) {
-        blocks.push({ type: "heading3", children: [{ text: "Key Findings" }] });
-        blocks.push({ type: "bullet_list", children: section.keyFindings.map(f => ({ type: "list_item" as const, children: [{ text: f }] })) });
+        blocks.push({ id: bid(), type: "heading3", children: [{ text: "Key Findings" }] });
+        blocks.push({ id: bid(), type: "bullet_list", children: section.keyFindings.map(f => ({ text: f })) });
       }
 
       if (section.actionItems.length > 0) {
-        blocks.push({ type: "heading3", children: [{ text: "Action Items" }] });
-        blocks.push({ type: "bullet_list", children: section.actionItems.map(a => ({ type: "list_item" as const, children: [{ text: a }] })) });
+        blocks.push({ id: bid(), type: "heading3", children: [{ text: "Action Items" }] });
+        blocks.push({ id: bid(), type: "bullet_list", children: section.actionItems.map(a => ({ text: a })) });
       }
     }
 
     if (brief.recommendedActions.length > 0) {
-      blocks.push({ type: "horizontal_rule", children: [{ text: "" }] });
-      blocks.push({ type: "heading2", children: [{ text: "RECOMMENDED ACTIONS" }] });
+      blocks.push({ id: bid(), type: "horizontal_rule", children: [{ text: "" }] });
+      blocks.push({ id: bid(), type: "heading2", children: [{ text: "RECOMMENDED ACTIONS" }] });
       blocks.push({
+        id: bid(),
         type: "bullet_list",
-        children: brief.recommendedActions.map(a => ({
-          type: "list_item" as const,
-          children: [{ text: `[${a.priority}] ${a.action} — ${a.owner} (${a.domain}): ${a.rationale}` }],
-        })),
+        children: brief.recommendedActions.map(a => ({ text: `[${a.priority}] ${a.action} — ${a.owner} (${a.domain}): ${a.rationale}` })),
       });
     }
 
     if (brief.dissents.length > 0) {
-      blocks.push({ type: "horizontal_rule", children: [{ text: "" }] });
-      blocks.push({ type: "heading2", children: [{ text: "ACTIVE DISSENTS" }] });
+      blocks.push({ id: bid(), type: "horizontal_rule", children: [{ text: "" }] });
+      blocks.push({ id: bid(), type: "heading2", children: [{ text: "ACTIVE DISSENTS" }] });
       for (const d of brief.dissents) {
-        blocks.push({ type: "blockquote", children: [{ text: `Claim: "${d.claim}"` }] });
-        blocks.push({ type: "paragraph", children: [{ text: `Dissenting View: ${d.dissentingView}` }] });
-        blocks.push({ type: "paragraph", children: [{ text: `Basis: ${d.basis} | Status: ${d.status} | Filed by: ${d.submittedBy}` }] });
+        blocks.push({ id: bid(), type: "blockquote", children: [{ text: `Claim: "${d.claim}"` }] });
+        blocks.push({ id: bid(), type: "paragraph", children: [{ text: `Dissenting View: ${d.dissentingView}` }] });
+        blocks.push({ id: bid(), type: "paragraph", children: [{ text: `Basis: ${d.basis} | Status: ${d.status} | Filed by: ${d.submittedBy}` }] });
       }
     }
 
     const pdfBuffer = await renderDocumentToPdfBuffer({
-      content: { blocks },
+      content: { blocks, version: 1 },
       title: `Pulse Brief — ${brief.date}`,
       appSource: "Pulse Briefing Engine",
     });

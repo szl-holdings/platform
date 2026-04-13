@@ -3,6 +3,7 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { DataStateBadge, useRealtimeChannel, ActionLoop } from "@szl-holdings/shared-ui";
+import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
 import {
   Building2, MapPin, TrendingUp, Users, Activity,
   ArrowRight, AlertTriangle, Eye, Globe, Map, Shield, BarChart3,
@@ -153,6 +154,7 @@ export default function TerraIntelligence() {
         </div>
       </div>
 
+      <SectionErrorBoundary sectionName="Market KPIs">
       <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.012)" }}>
         <div className="grid grid-cols-3 md:grid-cols-6">
           {[
@@ -174,7 +176,9 @@ export default function TerraIntelligence() {
           ))}
         </div>
       </div>
+      </SectionErrorBoundary>
 
+      <SectionErrorBoundary sectionName="Intelligence Panels">
       <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
         {DOCTRINE_MODULES.map((mod) => (
           <Link key={mod.id} href={mod.href} className="group rounded-xl border p-3 transition-all hover:border-white/10 cursor-pointer" style={{
@@ -192,7 +196,9 @@ export default function TerraIntelligence() {
           </Link>
         ))}
       </div>
+      </SectionErrorBoundary>
 
+      <SectionErrorBoundary sectionName="Deal Intelligence">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 space-y-4">
           <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.012)" }}>
@@ -443,6 +449,7 @@ export default function TerraIntelligence() {
           accentColor="#40856a"
         />
       </div>
+      </SectionErrorBoundary>
     </div>
   );
 }

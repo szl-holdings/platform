@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Key, Plus, Trash2, Copy, Check, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { apiFetch, isAuthenticated } from "../../lib/admin-api";
 import AuthGate from "@szl-holdings/shared-ui/AuthGate";
 
@@ -197,7 +198,22 @@ export default function ApiKeys() {
 
       <div className="space-y-3">
         {loading ? (
-          <div className="text-center py-12 text-text-muted">Loading API keys...</div>
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="bg-surface rounded-xl border border-border p-4 flex items-center justify-between">
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-4 w-4 rounded" />
+                  <Skeleton className="h-4 w-32 rounded" />
+                  <Skeleton className="h-3 w-20 rounded" />
+                </div>
+                <div className="flex gap-2">
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </div>
+              </div>
+              <Skeleton className="h-8 w-8 rounded ml-4" />
+            </div>
+          ))
         ) : keys.length === 0 ? (
           <div className="text-center py-12 bg-surface rounded-xl border border-border">
             <Key className="w-12 h-12 text-text-muted mx-auto mb-3" />

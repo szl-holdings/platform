@@ -158,7 +158,7 @@ aiRouter.post("/agents/:agentId/run", async (req: Request, res: Response) => {
   }
 
   try {
-    const result = await runAgent(req.params.agentId, task, {
+    const result = await runAgent(req.params.agentId as string, task, {
       userId,
       context,
     });

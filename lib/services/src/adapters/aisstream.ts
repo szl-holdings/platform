@@ -90,7 +90,8 @@ export class AisStreamAdapter extends ServiceAdapter {
         try {
           const msg = JSON.parse(typeof data === "string" ? data : data.toString());
           this.processMessage(msg);
-        } catch (_parseErr) {
+        } catch (parseErr) {
+          console.debug("[AISstream] Failed to parse AIS message:", parseErr);
         }
       });
 
@@ -100,12 +101,14 @@ export class AisStreamAdapter extends ServiceAdapter {
         this.scheduleReconnect();
       });
 
-      ws.on("error", (_wsErr: Error) => {
+      ws.on("error", (wsErr: Error) => {
+        console.error("[AISstream] WebSocket error:", wsErr.message);
         this.wsConnected = false;
         this.wsInstance = null;
         this.scheduleReconnect();
       });
-    } catch (_connErr) {
+    } catch (connErr) {
+      console.error("[AISstream] Failed to establish WebSocket connection:", connErr);
     }
   }
 

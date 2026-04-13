@@ -48,7 +48,7 @@ mastraRouter.get("/agents", async (_req: Request, res: Response) => {
 
 mastraRouter.get("/agents/:agentId", async (req: Request, res: Response) => {
   try {
-    const agent = await getAgent(req.params.agentId);
+    const agent = await getAgent(req.params.agentId as string);
     if (!agent) return res.status(404).json({ error: "Agent not found" });
     const tools = listTools();
     res.json({
@@ -77,7 +77,7 @@ mastraRouter.post("/agents/:agentId/run", async (req: Request, res: Response) =>
   try {
     const { message, threadId, userId, context } = req.body;
     if (!message) return res.status(400).json({ error: "message required" });
-    const result = await runAgent(req.params.agentId, message, { threadId, userId, context });
+    const result = await runAgent(req.params.agentId as string, message, { threadId, userId, context });
     res.json(result);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -110,8 +110,8 @@ mastraRouter.get("/memory/threads", async (req: Request, res: Response) => {
 
 mastraRouter.get("/memory/threads/:threadId", async (req: Request, res: Response) => {
   try {
-    const messages = await getShortTermMemory(req.params.threadId, 50);
-    res.json({ threadId: req.params.threadId, messages, total: messages.length });
+    const messages = await getShortTermMemory(req.params.threadId as string, 50);
+    res.json({ threadId: req.params.threadId as string, messages, total: messages.length });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -145,7 +145,7 @@ mastraRouter.post("/knowledge/entity", async (req: Request, res: Response) => {
 mastraRouter.get("/knowledge/graph/:entityId", async (req: Request, res: Response) => {
   try {
     const maxDepth = parseInt(req.query.maxDepth as string) || 2;
-    const graph = await getKnowledgeGraph(req.params.entityId, maxDepth);
+    const graph = await getKnowledgeGraph(req.params.entityId as string, maxDepth);
     res.json(graph);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -194,7 +194,7 @@ mastraRouter.get("/agentops/metrics", async (req: Request, res: Response) => {
 mastraRouter.get("/agentops/metrics/:agentId", async (req: Request, res: Response) => {
   try {
     const windowHours = parseInt(req.query.windowHours as string) || 24;
-    const metrics = await getAgentMetrics(req.params.agentId, windowHours);
+    const metrics = await getAgentMetrics(req.params.agentId as string, windowHours);
     res.json(metrics);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -233,7 +233,7 @@ mastraRouter.get("/a2a/agents", async (_req: Request, res: Response) => {
 
 mastraRouter.get("/a2a/agents/:agentId", async (req: Request, res: Response) => {
   try {
-    const card = await getAgentCard(req.params.agentId);
+    const card = await getAgentCard(req.params.agentId as string);
     if (!card) return res.status(404).json({ error: "Agent card not found" });
     res.json(card);
   } catch (err: any) {
@@ -243,7 +243,7 @@ mastraRouter.get("/a2a/agents/:agentId", async (req: Request, res: Response) => 
 
 mastraRouter.get("/a2a/agents/:agentId/.well-known/agent.json", async (req: Request, res: Response) => {
   try {
-    const card = await getAgentCard(req.params.agentId);
+    const card = await getAgentCard(req.params.agentId as string);
     if (!card) return res.status(404).json({ error: "Agent card not found" });
     res.json(card);
   } catch (err: any) {
@@ -266,7 +266,7 @@ mastraRouter.post("/a2a/tasks", async (req: Request, res: Response) => {
 
 mastraRouter.get("/a2a/tasks/:taskId", async (req: Request, res: Response) => {
   try {
-    const task = await getTask(req.params.taskId);
+    const task = await getTask(req.params.taskId as string);
     if (!task) return res.status(404).json({ error: "Task not found" });
     res.json(task);
   } catch (err: any) {
@@ -313,7 +313,7 @@ mastraRouter.get("/workflows", async (req: Request, res: Response) => {
 
 mastraRouter.get("/workflows/:workflowId", async (req: Request, res: Response) => {
   try {
-    const workflow = await getWorkflow(req.params.workflowId);
+    const workflow = await getWorkflow(req.params.workflowId as string);
     if (!workflow) return res.status(404).json({ error: "Workflow not found" });
     res.json(workflow);
   } catch (err: any) {
@@ -323,7 +323,7 @@ mastraRouter.get("/workflows/:workflowId", async (req: Request, res: Response) =
 
 mastraRouter.post("/workflows/:workflowId/pause", async (req: Request, res: Response) => {
   try {
-    await pauseWorkflow(req.params.workflowId);
+    await pauseWorkflow(req.params.workflowId as string);
     res.json({ status: "paused" });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -332,7 +332,7 @@ mastraRouter.post("/workflows/:workflowId/pause", async (req: Request, res: Resp
 
 mastraRouter.post("/workflows/:workflowId/cancel", async (req: Request, res: Response) => {
   try {
-    await cancelWorkflow(req.params.workflowId);
+    await cancelWorkflow(req.params.workflowId as string);
     res.json({ status: "cancelled" });
   } catch (err: any) {
     res.status(500).json({ error: err.message });

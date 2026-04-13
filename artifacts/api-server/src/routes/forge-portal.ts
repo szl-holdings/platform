@@ -557,6 +557,7 @@ router.get("/forge-portal/dashboard", authMiddleware(), (req: Request, res: Resp
     const nextDeadline = matters
       .filter(m => m.nextDeadline && m.status !== "resolved")
       .sort((a, b) => a.nextDeadline.localeCompare(b.nextDeadline))[0] ?? null;
+    const demoMode = process.env["DEMO_MODE"] === "true";
     sendSuccess(res, {
       client,
       summary: { totalValue, totalDeployed, totalReturn, openMatters, unreadMessages },
@@ -567,6 +568,7 @@ router.get("/forge-portal/dashboard", authMiddleware(), (req: Request, res: Resp
         { type: "message", description: "New message from Diana Reyes re: Q1 Review", date: "2026-04-05" },
         { type: "alert", description: "Gulf Explorer cargo temp variance flagged", date: "2026-04-11" },
       ],
+      demoMode,
     });
   } catch (err) {
     handleRouteError(res, err, "forge-portal dashboard");

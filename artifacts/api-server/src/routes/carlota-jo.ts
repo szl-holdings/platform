@@ -542,7 +542,7 @@ router.get("/orchestration/queue", authMiddleware(), async (req, res) => {
 router.get("/orchestration/queue/:id", authMiddleware(), async (req, res) => {
   try {
     initSilentQueue();
-    const plan = silentQueueStore.get(req.params.id);
+    const plan = silentQueueStore.get(req.params.id as string);
     if (!plan) { sendNotFound(res, "Action plan"); return; }
     sendSuccess(res, plan);
   } catch (err) {
@@ -553,7 +553,7 @@ router.get("/orchestration/queue/:id", authMiddleware(), async (req, res) => {
 router.patch("/orchestration/queue/:id/approve", authMiddleware(), async (req, res) => {
   try {
     initSilentQueue();
-    const plan = silentQueueStore.get(req.params.id);
+    const plan = silentQueueStore.get(req.params.id as string);
     if (!plan) { sendNotFound(res, "Action plan"); return; }
     if (plan.status !== "pending" && plan.status !== "modified") {
       sendBadRequest(res, `Plan is already ${plan.status}`);
@@ -588,7 +588,7 @@ router.patch("/orchestration/queue/:id/approve", authMiddleware(), async (req, r
 router.patch("/orchestration/queue/:id/dismiss", authMiddleware(), async (req, res) => {
   try {
     initSilentQueue();
-    const plan = silentQueueStore.get(req.params.id);
+    const plan = silentQueueStore.get(req.params.id as string);
     if (!plan) { sendNotFound(res, "Action plan"); return; }
     if (plan.status === "approved") {
       sendBadRequest(res, "Cannot dismiss an already-approved plan");
@@ -611,7 +611,7 @@ router.patch("/orchestration/queue/:id/dismiss", authMiddleware(), async (req, r
 router.patch("/orchestration/queue/:id/modify", authMiddleware(), async (req, res) => {
   try {
     initSilentQueue();
-    const plan = silentQueueStore.get(req.params.id);
+    const plan = silentQueueStore.get(req.params.id as string);
     if (!plan) { sendNotFound(res, "Action plan"); return; }
     if (plan.status === "approved" || plan.status === "dismissed") {
       sendBadRequest(res, `Plan is already ${plan.status}`);
@@ -638,7 +638,7 @@ router.patch("/orchestration/queue/:id/modify", authMiddleware(), async (req, re
 router.get("/orchestration/queue/:id/draft-comm", authMiddleware(), async (req, res) => {
   try {
     initSilentQueue();
-    const plan = silentQueueStore.get(req.params.id);
+    const plan = silentQueueStore.get(req.params.id as string);
     if (!plan) { sendNotFound(res, "Action plan"); return; }
     if (!plan.draftComm) { sendNotFound(res, "Draft communication"); return; }
     sendSuccess(res, { id: plan.id, title: plan.title, draftComm: plan.draftComm, status: plan.status });

@@ -1107,7 +1107,7 @@ router.get("/prism-counsel/review-desk/filing-gate/audits", async (req: Request,
 
 router.get("/prism-counsel/review-desk/filing-gate/audits/:auditId", async (req: Request, res: Response) => {
   try {
-    const { auditId } = req.params;
+    const { auditId } = req.params as Record<string, string>;
     const [report] = await db
       .select()
       .from(pcCitationAuditReportsTable)
@@ -1122,7 +1122,7 @@ router.get("/prism-counsel/review-desk/filing-gate/audits/:auditId", async (req:
 
 router.post("/prism-counsel/review-desk/filing-gate/audits/:auditId/seal", async (req: Request, res: Response) => {
   try {
-    const { auditId } = req.params;
+    const { auditId } = req.params as Record<string, string>;
     const { note, sealedBy } = req.body as { note?: string; sealedBy?: number };
 
     const [existing] = await db

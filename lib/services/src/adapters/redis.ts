@@ -105,6 +105,9 @@ let _redisClient: RedisClient | null = null;
 let _isRealRedis = false;
 let _initialized = false;
 
+type IoRedisConstructor = new (url: string) => RedisClient;
+type IoRedisModule = { default?: IoRedisConstructor } & IoRedisConstructor;
+
 async function createRedisClient(): Promise<{ client: RedisClient; isReal: boolean }> {
   const redisUrl = process.env["REDIS_URL"] ?? process.env["AZURE_REDIS_CONNECTION_STRING"];
 
@@ -113,11 +116,13 @@ async function createRedisClient(): Promise<{ client: RedisClient; isReal: boole
   }
 
   try {
-    const { default: Redis } = await import("ioredis") as { default: new (url: string) => RedisClient };
-    const client = new Redis(redisUrl);
+    const ioredis = (await import("ioredis" as string)) as unknown as IoRedisModule;
+    const RedisConstructor: IoRedisConstructor = ioredis.default ?? ioredis;
+    const client = new RedisConstructor(redisUrl);
     await client.ping();
     return { client, isReal: true };
-  } catch {
+  } catch (err) {
+    console.warn("[redis] Failed to connect to Redis — falling back to in-memory store:", err instanceof Error ? err.message : String(err));
     return { client: new InMemoryRedisClient(), isReal: false };
   }
 }
@@ -152,8 +157,8 @@ export async function cacheSet<T>(key: string, value: T, ttlSeconds?: number): P
     const client = await getRedisClient();
     const raw = JSON.stringify(value);
     await client.set(key, raw, ttlSeconds ? { ex: ttlSeconds } : undefined);
-  } catch {
-    // Cache failures are non-fatal
+  } catch (err) {
+    console.warn("[redis] cacheSet failed (non-fatal):", err instanceof Error ? err.message : String(err));
   }
 }
 
@@ -161,8 +166,8 @@ export async function cacheDel(key: string): Promise<void> {
   try {
     const client = await getRedisClient();
     await client.del(key);
-  } catch {
-    // Cache failures are non-fatal
+  } catch (err) {
+    console.warn("[redis] cacheDel failed (non-fatal):", err instanceof Error ? err.message : String(err));
   }
 }
 

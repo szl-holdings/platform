@@ -96,11 +96,15 @@ export function validateStartupConfig(): ValidationResult {
   if (!process.env.ALLOY_INTERNAL_TOKEN) {
     const generated = require("crypto").randomBytes(48).toString("hex");
     process.env.ALLOY_INTERNAL_TOKEN = generated;
-    warnings.push("ALLOY_INTERNAL_TOKEN not set — auto-generated a secure 96-char token for this session");
+    if (isProduction) {
+      warnings.push("ALLOY_INTERNAL_TOKEN not set — auto-generated a secure 96-char token for this session");
+    }
   } else if (process.env.ALLOY_INTERNAL_TOKEN.length < 32) {
     const generated = require("crypto").randomBytes(48).toString("hex");
     process.env.ALLOY_INTERNAL_TOKEN = generated;
-    warnings.push("ALLOY_INTERNAL_TOKEN was too short (< 32 characters) — auto-generated a secure 96-char token for this session");
+    if (isProduction) {
+      warnings.push("ALLOY_INTERNAL_TOKEN was too short (< 32 characters) — auto-generated a secure 96-char token for this session");
+    }
   }
 
   if (!process.env.OAUTH_STATE_SECRET) {

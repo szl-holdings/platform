@@ -32,6 +32,7 @@ import { startPrismJobPoller } from "./services/prism-queue";
 import { registerGenAITelemetryBridge } from "./lib/genai-telemetry-bridge";
 import "./lib/cross-app-notification-relay.js";
 import { bootstrapPersistence, restoreJobsFromDb } from "./lib/persistence-bootstrap";
+import { ensurePrismCounselSchema } from "./lib/prism-counsel-migrations";
 
 failFastOnInvalidConfig();
 
@@ -84,6 +85,7 @@ startSelfMonitoring();
 import { providerHealth } from "./lib/provider-health";
 providerHealth.startActiveProbes();
 runDrizzleMigrations()
+  .then(() => ensurePrismCounselSchema())
   .then(() => ensurePlatformFlags())
   .then(() => knowledgeStore.loadFromDb())
   .then(() => {

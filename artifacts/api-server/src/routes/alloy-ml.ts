@@ -84,7 +84,7 @@ router.post("/ml/models", authMiddleware(), async (req: Request, res: Response) 
 router.post("/ml/models/:id/train", authMiddleware(), async (req: Request, res: Response) => {
   try {
     const orgId = getOrgId(req);
-    const modelId = parseInt(req.params.id);
+    const modelId = parseInt(req.params.id as string);
     const { config, trainingData } = req.body;
 
     const trainingConfig = {
@@ -137,7 +137,7 @@ router.post("/ml/predictions/:id/resolve", authMiddleware(), async (req: Request
 
     const result = await resolvePrediction({
       orgId,
-      predictionId: parseInt(req.params.id),
+      predictionId: parseInt(req.params.id as string),
       actualValue,
       actualLabel,
     });
@@ -431,7 +431,7 @@ router.get("/ontology/graph/:entityId", async (req: Request, res: Response) => {
     const { depth, linkTypes, domains } = req.query;
     const graph = await traverseOntologyGraph({
       orgId,
-      entityId: req.params.entityId,
+      entityId: req.params.entityId as string,
       depth: depth ? parseInt(depth as string) : undefined,
       linkTypes: linkTypes ? (linkTypes as string).split(",") : undefined,
       domains: domains ? (domains as string).split(",") : undefined,

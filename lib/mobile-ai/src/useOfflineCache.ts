@@ -65,7 +65,8 @@ async function initDb(): Promise<void> {
       );
       _db = db as SqliteDb;
       _dbInitialized = true;
-    } catch {
+    } catch (err) {
+      console.warn("[offline-cache] SQLite init failed — cache disabled:", err instanceof Error ? err.message : String(err));
       _dbInitialized = true;
     }
   })();
@@ -228,7 +229,9 @@ export function useOfflineCache<T>(options: UseOfflineCacheOptions) {
       setIsStale(false);
       await writeCache(fresh);
       await replayPendingWrites();
-    } catch {} finally {
+    } catch (err) {
+      console.warn("[offline-cache] Background sync failed:", err instanceof Error ? err.message : String(err));
+    } finally {
       syncInProgress.current = false;
     }
   }, [fetchFn, writeCache]);

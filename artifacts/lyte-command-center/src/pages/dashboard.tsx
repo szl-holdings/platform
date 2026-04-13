@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import React from "react";
 import { analytics } from "@/lib/analytics";
 import { DataProvenance, ActionLoop, RoleSelector } from "@szl-holdings/shared-ui";
+import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
 import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
 import { Link } from "wouter";
 import {
@@ -226,6 +227,7 @@ export default function Dashboard() {
       </div>
 
       {/* KPI Strip — dense cockpit style */}
+      <SectionErrorBoundary sectionName="KPI Strip">
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-px rounded overflow-hidden" style={{ background: BORDER.subtle }}>
         {metrics.map(m => (
           <div key={m.label} className="px-3 py-2.5 relative" style={{ background: BG.surface }}>
@@ -238,8 +240,10 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
+      </SectionErrorBoundary>
 
       {/* PRISM strip with scores */}
+      <SectionErrorBoundary sectionName="PRISM Strip">
       <div className="grid grid-cols-5 gap-1.5">
         {PRISM.map(p => {
           const scoreColor = p.score >= 70 ? "#6b8f71" : p.score >= 50 ? "#c8953c" : "#c45a4a";
@@ -263,6 +267,7 @@ export default function Dashboard() {
           );
         })}
       </div>
+      </SectionErrorBoundary>
 
       {/* Role context bar */}
       {activeRole && (
@@ -281,6 +286,7 @@ export default function Dashboard() {
       )}
 
       {/* Main grid */}
+      <SectionErrorBoundary sectionName="Signal Intelligence Grid">
       <div className="grid grid-cols-12 gap-3">
 
         {/* Left column — priority actions + signal timeline */}
@@ -703,6 +709,7 @@ function CausalAIPanel() {
           )}
         </div>
       </div>
+      </SectionErrorBoundary>
     </div>
   );
 }

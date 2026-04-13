@@ -125,7 +125,7 @@ router.post("/evolution/populations", authMiddleware(), async (req: Request, res
 
 router.post("/evolution/populations/:id/evolve", authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const populationId = parseInt(req.params.id);
+    const populationId = parseInt(req.params.id as string);
     const generations = Math.min(req.body.generations || 1, 10);
 
     const orgId = getOrgId(req);
@@ -206,7 +206,7 @@ router.post("/evolution/populations/:id/evolve", authMiddleware(), async (req: R
 
 router.get("/evolution/populations/:id/genomes", authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const populationId = parseInt(req.params.id);
+    const populationId = parseInt(req.params.id as string);
     const eliteOnly = req.query.elite === "true";
 
     const orgId = getOrgId(req);
@@ -429,7 +429,7 @@ router.post("/gaps/detect", authMiddleware(), async (_req: Request, res: Respons
 
 router.patch("/gaps/:id/status", authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const gapId = parseInt(req.params.id);
+    const gapId = parseInt(req.params.id as string);
     const { status } = req.body;
     if (!["open", "acknowledged", "resolved"].includes(status)) {
       return sendBadRequest(res, "status must be open, acknowledged, or resolved");
@@ -502,7 +502,7 @@ router.post("/proposals/generate", authMiddleware(), async (req: Request, res: R
 
 router.post("/proposals/:id/approve", authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const proposalId = parseInt(req.params.id);
+    const proposalId = parseInt(req.params.id as string);
     const userId = req.user?.id;
 
     await updateProposalStatus(proposalId, "approved", { userId });
@@ -516,7 +516,7 @@ router.post("/proposals/:id/approve", authMiddleware(), async (req: Request, res
 
 router.post("/proposals/:id/dismiss", authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const proposalId = parseInt(req.params.id);
+    const proposalId = parseInt(req.params.id as string);
     const userId = req.user?.id;
     const { reason } = req.body;
 

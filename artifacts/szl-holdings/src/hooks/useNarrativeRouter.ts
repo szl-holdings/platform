@@ -159,7 +159,9 @@ export function useNarrativeRouter(): NarrativeState {
     let progression: string[] = [];
     try {
       progression = JSON.parse(sessionStorage.getItem(PAGE_PROGRESSION_KEY) ?? "[]");
-    } catch {}
+    } catch (err) {
+      console.warn("[narrative-router] Failed to parse page progression:", err instanceof Error ? err.message : String(err));
+    }
     if (!progression.includes(currentPath)) {
       progression = [...progression, currentPath].slice(-20);
       try { sessionStorage.setItem(PAGE_PROGRESSION_KEY, JSON.stringify(progression)); } catch {}
@@ -177,7 +179,9 @@ export function useNarrativeRouter(): NarrativeState {
           resolved.current = true;
           return;
         }
-      } catch {}
+      } catch (err) {
+        console.warn("[narrative-router] Failed to parse visitor session:", err instanceof Error ? err.message : String(err));
+      }
     }
 
     type DetectionResult = { type: VisitorType; confidence: number; signals: string[] };

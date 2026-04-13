@@ -13,6 +13,7 @@ function HeroMesh() {
     if (!ctx) return;
     let animFrame: number;
     let time = 0;
+    let inView = true;
     const resize = () => {
       canvas.width = canvas.offsetWidth * window.devicePixelRatio;
       canvas.height = canvas.offsetHeight * window.devicePixelRatio;
@@ -21,10 +22,15 @@ function HeroMesh() {
     };
     resize();
     window.addEventListener("resize", resize);
+    const observer = new IntersectionObserver(
+      ([entry]) => { inView = entry.isIntersecting; },
+      { threshold: 0 }
+    );
+    observer.observe(canvas);
     const w = () => canvas.offsetWidth;
     const h = () => canvas.offsetHeight;
     const draw = () => {
-      if (document.hidden) { animFrame = requestAnimationFrame(draw); return; }
+      if (!inView || document.hidden) { animFrame = requestAnimationFrame(draw); return; }
       time += 0.002;
       ctx.clearRect(0, 0, w(), h());
       const cols = 50, rows = 30;
@@ -45,7 +51,11 @@ function HeroMesh() {
       animFrame = requestAnimationFrame(draw);
     };
     draw();
-    return () => { cancelAnimationFrame(animFrame); window.removeEventListener("resize", resize); };
+    return () => {
+      cancelAnimationFrame(animFrame);
+      window.removeEventListener("resize", resize);
+      observer.disconnect();
+    };
   }, []);
   return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.7 }} aria-hidden="true" />;
 }

@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { DEMO_MATTERS, PILLAR_LABELS } from "../data/demo-matters";
 import { usePrismDashboard, usePrismMatters } from "../hooks/use-prism-api";
+import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
 
 function useFilingGateStats() {
   return useQuery({
@@ -127,13 +128,16 @@ export default function PrismCounselDashboard() {
         </div>
       </div>
 
+      <SectionErrorBoundary sectionName="KPI Summary">
       <div className="grid grid-cols-4 gap-3">
         <KpiCard label="Active Matters" value={String(activeCount)} sub={hasLiveMatters ? `${liveMatters.filter(m => m.status === "discovery").length} in discovery` : "2 in discovery · 1 pre-trial"} icon={FolderOpen} accent="#d4a054" />
         <KpiCard label="Total Exposure" value={totalExposure} sub="Across all active matters" icon={DollarSign} accent="#c8953c" />
         <KpiCard label="Upcoming Deadlines" value={String(displayDeadlineCount)} sub={`${displayUpcoming} within 14 days`} icon={Clock} accent="#c45a4a" />
         <KpiCard label="Pending Approvals" value={String(pendingApprovals)} sub={isLive ? "from approval queue" : "1 demand send · 2 filings"} icon={ShieldCheck} accent="#4a90b8" />
       </div>
+      </SectionErrorBoundary>
 
+      <SectionErrorBoundary sectionName="Matter Intelligence">
       <div className="grid grid-cols-3 gap-4">
         <div className="col-span-2 space-y-4">
           <div className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
@@ -274,6 +278,7 @@ export default function PrismCounselDashboard() {
           <AutonomousLegalPanel />
         </div>
       </div>
+      </SectionErrorBoundary>
     </div>
   );
 }

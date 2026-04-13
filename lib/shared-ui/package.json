@@ -36,6 +36,7 @@
     "./keyboard-shortcuts": "./src/keyboard-shortcuts.tsx",
     "./inca-agent-indicator": "./src/inca-agent-indicator.tsx",
     "./UserButton": "./src/UserButton.tsx",
+    "./data-state-badge": "./src/data-state-badge.tsx",
     "./doctrine-layer-badge": "./src/doctrine-layer-badge.tsx",
     "./explainability-panel": "./src/explainability-panel.tsx",
     "./document-intelligence-panel": "./src/document-intelligence-panel.tsx",

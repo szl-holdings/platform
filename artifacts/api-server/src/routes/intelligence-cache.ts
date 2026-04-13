@@ -4,6 +4,7 @@ import { services } from "@szl-holdings/services";
 import { db, intelligenceCacheTable } from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
 import { logger } from "../lib/logger";
+import { withCircuitBreaker, fetchWithBackoff } from "../lib/circuit-breaker";
 
 export const memCache = new Map<string, { data: unknown; expiresAt: number }>();
 const refreshing = new Set<string>();
@@ -19,11 +20,15 @@ export async function getCached<T>(key: string, ttlMs: number, fetcher: () => Pr
       memCache.set(key, { data, expiresAt: new Date(row.expiresAt).getTime() });
       if (!refreshing.has(key) && new Date(row.expiresAt).getTime() - now < ttlMs * 0.25) {
         refreshing.add(key);
-        fetcher().then(async (fresh) => { await upsertCache(key, fresh, ttlMs); }).catch(() => {}).finally(() => refreshing.delete(key));
+        fetcher().then(async (fresh) => { await upsertCache(key, fresh, ttlMs); }).catch((err) => {
+          logger.debug({ err, key }, "[intelligence-cache] Background refresh failed");
+        }).finally(() => refreshing.delete(key));
       }
       return data;
     }
-  } catch {}
+  } catch (dbErr) {
+    logger.debug({ err: dbErr, key }, "[intelligence-cache] DB cache lookup failed, fetching fresh");
+  }
   const fresh = await fetcher().catch(async () => {
     const [stale] = await db.select().from(intelligenceCacheTable).where(eq(intelligenceCacheTable.key, key)).limit(1).catch(() => [null]);
     if (stale) return stale.data as T;
@@ -40,7 +45,9 @@ export async function upsertCache<T>(key: string, data: T, ttlMs: number): Promi
   try {
     await db.insert(intelligenceCacheTable).values({ key, data, expiresAt, fetchedAt: new Date() })
       .onConflictDoUpdate({ target: intelligenceCacheTable.key, set: { data, expiresAt, fetchedAt: new Date() } });
-  } catch {}
+  } catch (upsertErr) {
+    logger.debug({ err: upsertErr, key }, "[intelligence-cache] Failed to persist cache entry to DB");
+  }
 }
 
 export const intelRateLimit = rateLimit({
@@ -142,7 +149,10 @@ export async function fetchOpenMeteoMarineWeather(): Promise<MarineWeatherItem[]
 export type GeoEvent = { id: string; title: string; region: string; severity: string | undefined; category: string; timestamp: string; source: string; impact: string };
 
 export async function fetchGdeltGeopolitical(): Promise<GeoEvent[]> {
-  const raw = await fetchJson("https://api.gdeltproject.org/api/v2/doc/doc?query=cybersecurity%20OR%20maritime%20OR%20sanctions&mode=ArtList&maxrecords=6&format=json&timespan=24h", 5000);
+  const raw = await withCircuitBreaker(
+    () => fetchWithBackoff("https://api.gdeltproject.org/api/v2/doc/doc?query=cybersecurity%20OR%20maritime%20OR%20sanctions&mode=ArtList&maxrecords=6&format=json&timespan=24h", { timeoutMs: 8000, maxRetries: 3, label: "GDELT" }),
+    { name: "gdelt", failureThreshold: 5, recoveryWindowMs: 120000 }
+  );
   const gdelt = raw as { articles?: { title?: string; url?: string; socialimage?: string; seendate?: string; sourcecountry?: string; domain?: string }[] };
   const articles = gdelt?.articles;
   if (!Array.isArray(articles) || articles.length === 0) throw new Error("No GDELT data");
@@ -158,7 +168,10 @@ export async function fetchGdeltGeopolitical(): Promise<GeoEvent[]> {
 export type MaritimeVessel = { mmsi: string; name: string; type: string; lat: number; lon: number; speed: number; course: number; heading: number; destination: string; status: string; flag: string; length: number; timestamp: string };
 
 export async function fetchLiveMaritimeVessels(): Promise<MaritimeVessel[]> {
-  const raw = await fetchJson("https://meri.digitraffic.fi/api/ais/v1/locations/latest?from=0&to=100", 8000);
+  const raw = await withCircuitBreaker(
+    () => fetchWithBackoff("https://meri.digitraffic.fi/api/ais/v1/locations/latest?from=0&to=100", { timeoutMs: 10000, maxRetries: 2, label: "Digitraffic AIS" }),
+    { name: "digitraffic-ais", failureThreshold: 4, recoveryWindowMs: 90000 }
+  );
   type AisFeature = { properties?: { mmsi?: string | number; sog?: number; cog?: number; heading?: number; navStat?: number; timestampExternal?: number }; geometry?: { coordinates?: [number, number] } };
   const aisData = raw as { features?: AisFeature[] };
   const features = aisData?.features;
@@ -282,7 +295,9 @@ export function scheduleIntelligenceRefresh(): NodeJS.Timeout {
       const mem = memCache.get(key);
       if (mem && mem.expiresAt > Date.now() + ttlMs * 0.25) continue;
       refreshing.add(key);
-      fetcher().then((data) => upsertCache(key, data, ttlMs)).catch(() => {}).finally(() => refreshing.delete(key));
+      fetcher().then((data) => upsertCache(key, data, ttlMs)).catch((err) => {
+        logger.debug({ err, key }, "[intelligence-cache] Scheduled refresh failed");
+      }).finally(() => refreshing.delete(key));
     }
   }, 60000);
 }

@@ -1,4 +1,5 @@
 import { logger } from "./logger";
+import { withCircuitBreaker } from "./circuit-breaker";
 import { jobQueue } from "./job-queue";
 import { db } from "@szl-holdings/db";
 import { auditLogsTable, terraDistressPropertiesTable } from "@szl-holdings/db";
@@ -49,23 +50,34 @@ function buildSodaUrl(dataset: string, params: Record<string, string | number> =
 }
 
 async function sodaFetch(url: string): Promise<unknown[]> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 30000);
   try {
-    const res = await fetch(url, {
-      signal: controller.signal,
-      headers: { Accept: "application/json" },
-    });
-    if (!res.ok) {
-      logger.warn({ status: res.status, url }, "NYC Open Data fetch failed");
-      return [];
-    }
-    return (await res.json()) as unknown[];
+    const data = await withCircuitBreaker(async () => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 30000);
+      try {
+        const res = await fetch(url, {
+          signal: controller.signal,
+          headers: { Accept: "application/json" },
+        });
+        if (res.status === 429) {
+          const retryAfter = res.headers.get("retry-after");
+          const waitMs = retryAfter ? parseInt(retryAfter, 10) * 1000 : 15000;
+          logger.warn({ url, waitMs }, "[NYC Open Data] Rate limited (429) — backing off");
+          await new Promise(resolve => setTimeout(resolve, Math.min(waitMs, 60000)));
+          throw new Error("NYC Open Data: HTTP 429 — rate limited");
+        }
+        if (!res.ok) {
+          throw new Error(`NYC Open Data: HTTP ${res.status} — ${res.statusText || "error"}`);
+        }
+        return (await res.json()) as unknown[];
+      } finally {
+        clearTimeout(timer);
+      }
+    }, { name: "nyc-open-data", failureThreshold: 5, recoveryWindowMs: 180000 });
+    return data;
   } catch (err) {
-    logger.warn({ err, url }, "NYC Open Data fetch error");
+    logger.warn({ err, url }, "[NYC Open Data] Fetch error (circuit open or all retries failed) — returning empty");
     return [];
-  } finally {
-    clearTimeout(timer);
   }
 }
 

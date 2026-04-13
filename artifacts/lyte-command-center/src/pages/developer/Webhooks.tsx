@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Webhook, Plus, Trash2, ChevronDown, AlertCircle, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { apiFetch, isAuthenticated } from "../../lib/admin-api";
 import AuthGate from "@szl-holdings/shared-ui/AuthGate";
+import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 
 interface WebhookData {
   id: number;
@@ -216,7 +217,21 @@ export default function Webhooks() {
 
       <div className="space-y-3">
         {loading ? (
-          <div className="text-center py-12 text-text-muted">Loading webhooks...</div>
+          <div className="space-y-3" aria-label="Loading webhooks">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="bg-surface rounded-xl border border-border p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <Skeleton className="w-4 h-4 rounded" />
+                  <Skeleton className="h-4 w-64 rounded" />
+                  <Skeleton className="h-4 w-12 rounded" />
+                </div>
+                <div className="flex gap-1 flex-wrap">
+                  <Skeleton className="h-4 w-20 rounded-full" />
+                  <Skeleton className="h-4 w-16 rounded-full" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : webhooks.length === 0 ? (
           <div className="text-center py-12 bg-surface rounded-xl border border-border">
             <Webhook className="w-12 h-12 text-text-muted mx-auto mb-3" />

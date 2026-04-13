@@ -235,4 +235,5 @@ export interface DashboardData {
     description: string;
     date: string;
   }[];
+  demoMode?: boolean;
 }

@@ -9,6 +9,8 @@ import { useQuery } from "@tanstack/react-query";
 import { portalApi, type DashboardData } from "@/lib/api";
 import { DOMAIN_CARDS, fmt } from "@/data/mock";
 import { cn } from "@/lib/utils";
+import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
+import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 
 const DOMAIN_ICONS: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
   vessels: Anchor,
@@ -65,6 +67,9 @@ export default function Dashboard() {
       subtitle={`${companyName}${relationship ? ` · ${relationship}` : ""}`}
     >
       <div className="p-6 space-y-6 max-w-7xl mx-auto">
+        <div className="flex items-center justify-end">
+          <DataStateBadge state={data?.demoMode ? "demo" : isError ? "stub" : "live"} />
+        </div>
         {isError && (
           <div className="rounded-lg border p-3 text-sm flex items-center gap-2" style={{ borderColor: "var(--color-forge-warning)", background: "color-mix(in srgb, var(--color-forge-warning) 8%, transparent)", color: "var(--color-forge-warning)" }}>
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -73,6 +78,7 @@ export default function Dashboard() {
         )}
 
         {/* Summary strip */}
+        <SectionErrorBoundary sectionName="Portfolio Summary">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up">
           <SummaryCard
             label="Portfolio Value"
@@ -104,8 +110,10 @@ export default function Dashboard() {
             color="var(--color-forge-security)"
           />
         </div>
+        </SectionErrorBoundary>
 
         {/* Domain cards */}
+        <SectionErrorBoundary sectionName="Domain Verticals">
         <section>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-base font-600" style={{ color: "var(--color-forge-text)", fontFamily: "var(--font-display)" }}>Your Verticals</h2>
@@ -167,8 +175,10 @@ export default function Dashboard() {
             })}
           </div>
         </section>
+        </SectionErrorBoundary>
 
         {/* Two-column: Recent Activity + Quick Actions */}
+        <SectionErrorBoundary sectionName="Recent Activity">
         <div className="grid lg:grid-cols-3 gap-4">
           <div className="forge-card-elevated p-5 lg:col-span-2 animate-fade-in-up stagger-4">
             <div className="flex items-center justify-between mb-4">
@@ -235,6 +245,7 @@ export default function Dashboard() {
             )}
           </div>
         </div>
+        </SectionErrorBoundary>
       </div>
     </AppShell>
   );
