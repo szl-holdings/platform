@@ -1,5 +1,6 @@
 export type PrismDomain =
   | "aegis"
+  | "alloy"
   | "lyte"
   | "vessels"
   | "terra"
