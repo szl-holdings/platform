@@ -442,9 +442,6 @@ importers:
       '@szl-holdings/approvals':
         specifier: workspace:*
         version: link:../../lib/approvals
-      '@szl-holdings/atlas-artifacts':
-        specifier: workspace:*
-        version: link:../../lib/atlas-artifacts
       '@szl-holdings/audit':
         specifier: workspace:*
         version: link:../../lib/audit
@@ -457,9 +454,6 @@ importers:
       '@szl-holdings/covenant-policy':
         specifier: workspace:*
         version: link:../../lib/covenant-policy
-      '@szl-holdings/data-connectors':
-        specifier: workspace:*
-        version: link:../../lib/data-connectors
       '@szl-holdings/db':
         specifier: workspace:*
         version: link:../../lib/db
@@ -478,9 +472,6 @@ importers:
       '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
-      '@szl-holdings/outcome-graph':
-        specifier: workspace:*
-        version: link:../../lib/outcome-graph
       '@szl-holdings/prism-bus':
         specifier: workspace:*
         version: link:../../lib/prism-bus
@@ -3404,25 +3395,6 @@ importers:
         specifier: 'catalog:'
         version: 25.3.5
 
-  lib/atlas-artifacts:
-    dependencies:
-      '@szl-holdings/db':
-        specifier: workspace:*
-        version: link:../db
-      '@szl-holdings/proof-chain':
-        specifier: workspace:*
-        version: link:../proof-chain
-      drizzle-orm:
-        specifier: 'catalog:'
-        version: 0.45.2(@types/pg@8.18.0)(expo-sqlite@15.1.4(expo@54.0.33)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0))(pg@8.20.0)
-      zod:
-        specifier: 'catalog:'
-        version: 3.25.76
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 25.3.5
-
   lib/audit:
     dependencies:
       '@szl-holdings/db':
@@ -3465,16 +3437,6 @@ importers:
       '@szl-holdings/prism-bus':
         specifier: workspace:*
         version: link:../prism-bus
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 25.3.5
-
-  lib/data-connectors:
-    dependencies:
-      '@szl-holdings/services':
-        specifier: workspace:*
-        version: link:../services
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -3533,18 +3495,6 @@ importers:
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14
-
-  lib/i18n:
-    dependencies:
-      i18next:
-        specifier: ^26.0.3
-        version: 26.0.3(typescript@5.9.3)
-      i18next-browser-languagedetector:
-        specifier: ^8.2.1
-        version: 8.2.1
-      react-i18next:
-        specifier: ^17.0.2
-        version: 17.0.2(i18next@26.0.3(typescript@5.9.3))(react-dom@19.1.0(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0)(typescript@5.9.3)
 
   lib/integrations-anthropic-ai:
     dependencies:
@@ -3624,22 +3574,6 @@ importers:
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14
-
-  lib/outcome-graph:
-    dependencies:
-      '@szl-holdings/db':
-        specifier: workspace:*
-        version: link:../db
-      drizzle-orm:
-        specifier: 'catalog:'
-        version: 0.45.2(@types/pg@8.18.0)(expo-sqlite@15.1.4(expo@54.0.33)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0))(pg@8.20.0)
-      zod:
-        specifier: 'catalog:'
-        version: 3.25.76
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 25.3.5
 
   lib/prism-bus:
     dependencies:
