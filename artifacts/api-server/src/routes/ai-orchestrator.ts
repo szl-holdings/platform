@@ -5,15 +5,15 @@ import {
   listAgents,
   orchestrateWorkflow,
   registerCrossplatformTools,
-} from "../lib/agent-orchestrator.js";
+} from "../lib/agent-orchestrator";
 import {
   ingestDocument,
   searchKnowledge,
   ragQuery,
   getCollectionStats,
-} from "../lib/rag-pipeline.js";
+} from "../lib/rag-pipeline";
 import { pool } from "@szl-holdings/db";
-import { logger } from "../lib/logger.js";
+import { logger } from "../lib/logger";
 import { authMiddleware } from "../middlewares/auth";
 
 const aiRouter: IRouter = Router();

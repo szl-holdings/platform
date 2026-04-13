@@ -1,4 +1,4 @@
-import { parseIntId } from "../utils.js";
+import { parseIntId } from "../utils";
 
 export const approvalsTypeDefs = `#graphql
   type ApprovalRequest {

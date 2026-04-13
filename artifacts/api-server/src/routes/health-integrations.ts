@@ -598,7 +598,7 @@ router.get("/health/ai", async (_req, res) => {
 
 router.get("/health/websocket", async (_req, res) => {
   try {
-    const { getWsStats } = await import("../lib/websocket.js");
+    const { getWsStats } = await import("../lib/websocket");
     const stats = getWsStats();
     res.json({
       status: "operational",

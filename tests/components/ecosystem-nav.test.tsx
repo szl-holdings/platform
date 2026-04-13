@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { EcosystemNav, type EcosystemNavProps } from "../../lib/shared-ui/src/ecosystem-nav";
+import { EcosystemNav, type EcosystemNavProps } from "@szl-holdings/shared-ui/ecosystem-nav";
 
-vi.mock("../../lib/shared-ui/src/notification-center", () => ({
+vi.mock("@szl-holdings/shared-ui/notification-center", () => ({
   useNotificationCenter: vi.fn().mockReturnValue({
     notifications: [],
     unreadCount: 0,
@@ -11,7 +11,7 @@ vi.mock("../../lib/shared-ui/src/notification-center", () => ({
   }),
 }));
 
-vi.mock("../../lib/shared-ui/src/demo-mode", () => ({
+vi.mock("@szl-holdings/shared-ui/demo-mode", () => ({
   DemoModeSwitcher: () => null,
 }));
 

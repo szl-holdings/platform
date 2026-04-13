@@ -8,7 +8,7 @@ import swaggerUi from "swagger-ui-express";
 import { readFileSync } from "fs";
 import { parse } from "yaml";
 import { fileURLToPath } from "url";
-import { dirname, join } from "path";
+import { dirname, join, resolve } from "path";
 import { randomBytes } from "crypto";
 import router from "./routes";
 import { logger } from "./lib/logger";
@@ -195,7 +195,7 @@ app.get("/api/health", async (_req: Request, res: Response) => {
   let queueStatus: "ok" | "backpressure" | "unavailable" = "unavailable";
   let queueDepth = 0;
   try {
-    const { jobQueue } = await import("./lib/job-queue.js");
+    const { jobQueue } = await import("./lib/job-queue");
     const stats = jobQueue.getStats();
     queueDepth = stats.pending + stats.running;
     queueStatus = queueDepth > 50 ? "backpressure" : "ok";
@@ -297,7 +297,7 @@ app.get("/api/health/detailed", async (req: Request, res: Response) => {
   }
 
   try {
-    const { jobQueue } = await import("./lib/job-queue.js");
+    const { jobQueue } = await import("./lib/job-queue");
     const stats = jobQueue.getStats();
     const queueDepth = stats.pending + stats.running;
     checks["job_queue"] = {
@@ -344,7 +344,18 @@ app.get("/api/health/detailed", async (req: Request, res: Response) => {
 });
 
 try {
-  const specPath = join(__dirname, "../../../lib/api-spec/openapi.yaml");
+  const specPath = (() => {
+    if (process.env.OPENAPI_SPEC_PATH) return resolve(process.env.OPENAPI_SPEC_PATH);
+    const candidates = [
+      join(__dirname, "../../lib/api-spec/openapi.yaml"),
+      join(__dirname, "../../../lib/api-spec/openapi.yaml"),
+      join(__dirname, "openapi.yaml"),
+    ];
+    for (const p of candidates) {
+      try { readFileSync(p); return p; } catch { /* try next */ }
+    }
+    return candidates[1];
+  })();
   const specContent = readFileSync(specPath, "utf-8");
   const swaggerDocument = parse(specContent) as Record<string, unknown>;
   app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument, {

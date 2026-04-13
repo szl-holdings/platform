@@ -26,13 +26,15 @@ import {
   insertFirestormWorkflowActionSchema,
   insertFirestormCaseSchema,
 } from "@szl-holdings/db";
-import { REFERENCE_COMPLIANCE_CONTROLS } from "./readiness.js";
-import { eq, desc, sql, inArray, and } from "drizzle-orm";
+import { REFERENCE_COMPLIANCE_CONTROLS } from "./readiness";
+import { eq, desc, sql, inArray, and, ne } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendNoContent, handleRouteError } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
-import { broadcastWs, pubsub, FIRESTORM_EVENTS } from "../lib/pubsub-bridge.js";
-import tradecraftRouter from './firestorm-tradecraft.js';
-import businessImpactRouter from './firestorm-business-impact.js';
+import { queryEvidenceIndex, ingestDecisionToEvidenceIndex } from "../lib/tradecraft-evidence-store";
+import { validateAndBuildDecision, type DecisionObjectType } from "@szl-holdings/ai-engine";
+import { broadcastWs, pubsub, FIRESTORM_EVENTS } from "../lib/pubsub-bridge";
+import tradecraftRouter from "./firestorm-tradecraft";
+import businessImpactRouter from "./firestorm-business-impact";
 
 const router: IRouter = Router();
 
@@ -1422,7 +1424,7 @@ router.get("/firestorm/mitre-detections/:techniqueId", authMiddleware({ required
 
 router.post("/firestorm/seed", authMiddleware({ required: true }), async (_req, res) => {
   try {
-    const { seedAegis } = await import("../scripts/seed-aegis.js");
+    const { seedAegis } = await import("../scripts/seed-aegis");
     const result = await seedAegis();
     sendSuccess(res, { message: "Aegis data seeded successfully", result });
   } catch (err) { handleRouteError(res, err, "Failed to seed Aegis data"); }

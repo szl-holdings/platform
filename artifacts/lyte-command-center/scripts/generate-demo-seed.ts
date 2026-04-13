@@ -13,7 +13,7 @@
  * module load time using `const now = Date.now()`.
  */
 
-import { getDemoSeed } from "../src/lib/demo-seed.ts";
+import { getDemoSeed } from "../src/lib/demo-seed";
 
 const seed = getDemoSeed();
 

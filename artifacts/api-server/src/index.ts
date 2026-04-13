@@ -32,12 +32,12 @@ import { seedTerraDemo } from "./lib/terra-seed";
 import { seedMspData } from "./lib/seed-msp";
 import { seedAlloyCreativeData } from "./lib/seed-dreamscape";
 import { seedDosData } from "./lib/seed-dos";
-import { buildGraphQLMiddleware } from "./graphql/index.js";
-import { registerGraphQLHandler } from "./app.js";
-import { prewarmIntelligenceCache, scheduleIntelligenceRefresh } from "./routes/intelligence.js";
+import { buildGraphQLMiddleware } from "./graphql/index";
+import { registerGraphQLHandler } from "./app";
+import { prewarmIntelligenceCache, scheduleIntelligenceRefresh } from "./routes/intelligence";
 import { registerAllPrismJobHandlers } from "./services/prism-job-handlers";
 import { startPrismJobPoller } from "./services/prism-queue";
-import { registerGenAITelemetryBridge } from "./lib/genai-telemetry-bridge.js";
+import { registerGenAITelemetryBridge } from "./lib/genai-telemetry-bridge";
 import "./lib/cross-app-notification-relay.js";
 import { bootstrapPersistence, restoreJobsFromDb } from "./lib/persistence-bootstrap";
 
@@ -172,7 +172,7 @@ server.listen(port, "0.0.0.0", () => {
     });
     scheduleIntelligenceRefresh();
   }, 5 * 60 * 1000);
-  import("./lib/mastra/index.js").then(({ initializeMastra }) => {
+  import("./lib/mastra/index").then(({ initializeMastra }) => {
     initializeMastra().catch(err => {
       logger.warn({ err }, "[mastra] Initialization failed (non-fatal)");
     });

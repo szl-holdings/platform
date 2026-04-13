@@ -1,5 +1,5 @@
 import { withFilter } from "graphql-subscriptions";
-import { pubsub, VESSELS_EVENTS } from "../../lib/pubsub-bridge.js";
+import { pubsub, VESSELS_EVENTS } from "../../lib/pubsub-bridge";
 
 export const vesselsTypeDefs = `#graphql
   type Vessel {

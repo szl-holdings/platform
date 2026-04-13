@@ -5,7 +5,7 @@ import {
   pcConnectorAccountsTable, pcAiRecommendationsTable,
 } from "@szl-holdings/db";
 import { eq, desc, and, sql } from "drizzle-orm";
-import type { GraphQLContext } from "../index.js";
+import type { GraphQLContext } from "../index";
 
 export const prismCounselTypeDefs = `#graphql
 

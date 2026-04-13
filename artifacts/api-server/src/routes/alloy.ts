@@ -30,7 +30,7 @@ import {
   parsePagination,
 } from "../lib/api-response";
 import { logger } from "../lib/logger";
-import { broadcastWs, pubsub, ALLOY_EVENTS } from "../lib/pubsub-bridge.js";
+import { broadcastWs, pubsub, ALLOY_EVENTS } from "../lib/pubsub-bridge";
 const router: IRouter = Router();
 
 function getUserOrgIds(user?: AuthenticatedUser): number[] {

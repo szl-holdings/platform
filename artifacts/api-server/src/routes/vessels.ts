@@ -24,7 +24,7 @@ import {
 import { eq, desc } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendNoContent, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
-import { broadcastWs, pubsub, VESSELS_EVENTS } from "../lib/pubsub-bridge.js";
+import { broadcastWs, pubsub, VESSELS_EVENTS } from "../lib/pubsub-bridge";
 
 const router: IRouter = Router();
 

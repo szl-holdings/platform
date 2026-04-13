@@ -17,7 +17,7 @@ import { sendSuccess, sendNotFound, handleRouteError, sendBadRequest, parsePagin
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { services } from "@szl-holdings/services";
 import { logger } from "../lib/logger";
-import { broadcastWs, pubsub, CARLOTA_EVENTS } from "../lib/pubsub-bridge.js";
+import { broadcastWs, pubsub, CARLOTA_EVENTS } from "../lib/pubsub-bridge";
 import {
   sendEmail,
   buildCarlotaContactAckEmail,

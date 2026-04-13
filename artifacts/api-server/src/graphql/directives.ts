@@ -10,7 +10,7 @@
  * the existing makeExecutableSchema setup.
  */
 
-import { logger } from "../lib/logger.js";
+import { logger } from "../lib/logger";
 
 export const directiveTypeDefs = `#graphql
   directive @requireRole(roles: [String!]!) on FIELD_DEFINITION

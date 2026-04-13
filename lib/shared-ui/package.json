@@ -105,7 +105,9 @@
     "./agent-insights-widget": "./src/agent-insights-widget.tsx",
     "./core-observability-data": "./src/core-observability-data.ts",
     "./sandbox-mode": "./src/sandbox-mode.tsx",
-    "./operational-primitives": "./src/operational-primitives.tsx"
+    "./operational-primitives": "./src/operational-primitives.tsx",
+    "./notification-center": "./src/notification-center.tsx",
+    "./demo-mode": "./src/demo-mode.tsx"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "catalog:",

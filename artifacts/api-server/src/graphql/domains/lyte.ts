@@ -1,5 +1,5 @@
-import { parseIntId } from "../utils.js";
-import { pubsub, LYTE_EVENTS } from "../../lib/pubsub-bridge.js";
+import { parseIntId } from "../utils";
+import { pubsub, LYTE_EVENTS } from "../../lib/pubsub-bridge";
 
 // ─── Valid DB enum values (must match drizzle schema exactly) ─────────────────
 // lyteSignalsTable.severity:  critical | high | medium | low | info

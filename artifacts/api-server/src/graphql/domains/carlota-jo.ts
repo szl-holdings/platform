@@ -1,5 +1,5 @@
-import { publish, WS_CHANNELS } from "../../lib/websocket.js";
-import { pubsub, CARLOTA_EVENTS } from "../../lib/pubsub-bridge.js";
+import { publish, WS_CHANNELS } from "../../lib/websocket";
+import { pubsub, CARLOTA_EVENTS } from "../../lib/pubsub-bridge";
 
 export const carlotaJoTypeDefs = `#graphql
   type CarlotaService {

@@ -8,9 +8,9 @@ import {
   createWorkflow, executeWorkflow, getWorkflow, listWorkflows, pauseWorkflow, cancelWorkflow,
   runEvalSuite, runRedTeam, detectHallucinations, getRedTeamCatalog, getRedTeamCategories,
   executeCompoundPipeline, buildAnalysisPipeline,
-} from "../lib/mastra/index.js";
+} from "../lib/mastra/index";
 import { pool } from "@szl-holdings/db";
-import { logger } from "../lib/logger.js";
+import { logger } from "../lib/logger";
 
 const mastraRouter: IRouter = Router();
 

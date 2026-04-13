@@ -3,7 +3,7 @@ import { db } from "@szl-holdings/db";
 import { aiSafetyEvents, agentModelAssignments, agentUsageStats } from "@szl-holdings/db";
 import { eq, desc, and, gte, sql } from "drizzle-orm";
 import rateLimit from "express-rate-limit";
-import { AGENT_REGISTRY } from "./nuro-mesh.js";
+import { AGENT_REGISTRY } from "./nuro-mesh";
 
 const safetyRouter: IRouter = Router();
 
