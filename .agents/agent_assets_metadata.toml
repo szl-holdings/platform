@@ -563,3 +563,15 @@ id = "A_I4L5-swbnyvs4cntUMj"
 uri = "file://screenshots/13-szl-founder.jpg"
 type = "image"
 title = "SZL Founder Page — 16 Apps, 552 Tables"
+
+[[outputs]]
+id = "MQ6kkrDFena795056FEiH"
+uri = "file://exports/linkedin-series-a-post.pdf"
+type = "pdf"
+title = "LinkedIn Series A Post — Ready to Copy & Paste"
+
+[[outputs]]
+id = "TWwJG0i1AuBSwan5rPSMD"
+uri = "file://exports/szl-screenshots.tar.gz"
+type = "unspecified"
+title = "All Platform Screenshots (156 + 22 = 178 images)"
