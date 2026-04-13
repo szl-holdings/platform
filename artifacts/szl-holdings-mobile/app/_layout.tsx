@@ -13,13 +13,16 @@ import { Provider as UrqlProvider } from "urql";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
-import React, { useEffect } from "react";
+import React, { Suspense, lazy, useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+const OnboardingCarousel = lazy(() => import("@/components/OnboardingCarousel").then(m => ({ default: m.OnboardingCarousel })));
 import { AuthProvider } from "@/context/AuthContext";
 import { BiometricLockProvider } from "@/context/BiometricLockContext";
+import { useOnboarding } from "@/hooks/useOnboarding";
 import { PrismBusProvider } from "@szl-holdings/prism-bus/provider";
 
 if (process.env.EXPO_PUBLIC_DOMAIN) {
@@ -40,6 +43,16 @@ const queryClient = new QueryClient({
 });
 
 function RootLayoutNav() {
+  const { isLoading: onboardingLoading, hasCompletedOnboarding, completeOnboarding } = useOnboarding();
+
+  if (!onboardingLoading && !hasCompletedOnboarding) {
+    return (
+      <Suspense fallback={<View style={{ flex: 1, backgroundColor: "#080c14", justifyContent: "center", alignItems: "center" }}><ActivityIndicator color="#6366f1" /></View>}>
+        <OnboardingCarousel onComplete={completeOnboarding} />
+      </Suspense>
+    );
+  }
+
   return (
     <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

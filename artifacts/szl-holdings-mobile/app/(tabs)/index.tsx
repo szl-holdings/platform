@@ -32,7 +32,7 @@ import { VoiceCommandOverlay } from "@/components/VoiceCommandOverlay";
 import { CommandPalette, type CommandItem } from "@/components/CommandPalette";
 import { useShakeGesture } from "@/hooks/useShakeGesture";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
-import { useRouter } from "expo-router";
+import { useRouter, type Href } from "expo-router";
 
 type FeatherIconName = React.ComponentProps<typeof Feather>["name"];
 
@@ -395,21 +395,21 @@ export default function CommandScreen() {
   const handleVoiceCommand = useCallback((text: string) => {
     const lower = text.toLowerCase();
     if (lower.includes("pulse") || lower.includes("heartbeat")) {
-      router.push("/(tabs)/pulse" as any);
+      router.push({ pathname: "/(tabs)/pulse" } as Href);
     } else if (lower.includes("portfolio")) {
-      router.push("/(tabs)/portfolio" as any);
+      router.push({ pathname: "/(tabs)/portfolio" } as Href);
     } else if (lower.includes("alloy")) {
-      router.push("/(tabs)/alloy" as any);
+      router.push({ pathname: "/(tabs)/alloy" } as Href);
     } else if (lower.includes("alert") || lower.includes("critical")) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     }
   }, [router]);
 
   const paletteCommands: CommandItem[] = [
-    { id: "pulse", label: "Portfolio Pulse", subtitle: "Live heartbeat for all platforms", icon: "heart", tags: ["pulse", "health", "status"], action: () => router.push("/(tabs)/pulse" as any) },
-    { id: "portfolio", label: "Portfolio", subtitle: "View all ventures", icon: "briefcase", tags: ["ventures", "portfolio"], action: () => router.push("/(tabs)/portfolio" as any) },
-    { id: "alloy", label: "Alloy AI", subtitle: "AI intelligence assistant", icon: "zap", tags: ["ai", "alloy"], action: () => router.push("/(tabs)/alloy" as any) },
-    { id: "investor", label: "Investor Deck", subtitle: "Fundraising materials", icon: "trending-up", tags: ["investor", "fundraise"], action: () => router.push("/(tabs)/investor" as any) },
+    { id: "pulse", label: "Portfolio Pulse", subtitle: "Live heartbeat for all platforms", icon: "heart", tags: ["pulse", "health", "status"], action: () => router.push({ pathname: "/(tabs)/pulse" } as Href) },
+    { id: "portfolio", label: "Portfolio", subtitle: "View all ventures", icon: "briefcase", tags: ["ventures", "portfolio"], action: () => router.push({ pathname: "/(tabs)/portfolio" } as Href) },
+    { id: "alloy", label: "Alloy AI", subtitle: "AI intelligence assistant", icon: "zap", tags: ["ai", "alloy"], action: () => router.push({ pathname: "/(tabs)/alloy" } as Href) },
+    { id: "investor", label: "Investor Deck", subtitle: "Fundraising materials", icon: "trending-up", tags: ["investor", "fundraise"], action: () => router.push({ pathname: "/(tabs)/investor" } as Href) },
     { id: "voice", label: "Voice Command", subtitle: "Say a command", icon: "mic", tags: ["voice"], action: () => setVoiceVisible(true) },
     { id: "refresh", label: "Refresh All", subtitle: "Sync latest data", icon: "refresh-cw", tags: ["sync", "refresh"], action: () => onRefresh() },
   ];

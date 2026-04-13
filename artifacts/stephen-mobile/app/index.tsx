@@ -14,9 +14,11 @@ import {
   ActivityIndicator,
   Dimensions,
   Image,
+  Switch,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useBiometric } from "@/context/BiometricContext";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 import { Ionicons, Feather } from "@expo/vector-icons";
@@ -975,6 +977,9 @@ export default function Home() {
             </View>
           )}
         </View>
+
+        {/* Privacy & Security Footer */}
+        <BiometricFooter colors={colors} />
       </Animated.ScrollView>
 
       {/* Gradient fade at top */}
@@ -1128,6 +1133,60 @@ function ActionButton({
         </Text>
       </TouchableOpacity>
     </Animated.View>
+  );
+}
+
+function BiometricFooter({ colors }: { colors: ReturnType<typeof useColors> }) {
+  const router = useRouter();
+  const { isEnabled, isAvailable, enableBiometric, disableBiometric } = useBiometric();
+
+  if (!isAvailable) return null;
+
+  const toggleBiometric = async () => {
+    if (isEnabled) {
+      await disableBiometric();
+    } else {
+      await enableBiometric();
+    }
+  };
+
+  return (
+    <View style={{ paddingHorizontal: 20, paddingVertical: 24, gap: 12 }}>
+      <View style={{
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: 16,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.silverBorder,
+        backgroundColor: colors.card,
+      }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <Feather name="lock" size={16} color={colors.silver} />
+          <View>
+            <Text style={{ fontSize: 14, fontFamily: "Inter_500Medium", color: colors.foreground }}>
+              Biometric Lock
+            </Text>
+            <Text style={{ fontSize: 12, fontFamily: "Inter_300Light", color: colors.mutedForeground, marginTop: 2 }}>
+              Face ID / fingerprint
+            </Text>
+          </View>
+        </View>
+        <Switch
+          value={isEnabled}
+          onValueChange={toggleBiometric}
+          trackColor={{ false: "rgba(255,255,255,0.1)", true: "rgba(201,168,76,0.6)" }}
+          thumbColor={isEnabled ? "#c9a84c" : "rgba(255,255,255,0.4)"}
+        />
+      </View>
+
+      <TouchableOpacity onPress={() => router.push("/privacy")} style={{ alignItems: "center", paddingVertical: 8 }}>
+        <Text style={{ fontSize: 12, fontFamily: "Inter_400Regular", color: colors.mutedForeground }}>
+          Privacy Policy
+        </Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 

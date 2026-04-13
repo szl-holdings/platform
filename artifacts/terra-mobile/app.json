@@ -20,7 +20,9 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.terra.realestate.mobile",
       "buildNumber": "1",
+      "associatedDomains": ["applinks:terra.ai", "applinks:app.terra.ai"],
       "infoPlist": {
+        "NSFaceIDUsageDescription": "Terra uses Face ID for secure real estate analyst authentication.",
         "NSCameraUsageDescription": "Terra uses your camera to photograph properties on-site.",
         "NSLocationWhenInUseUsageDescription": "Terra uses your location to show nearby properties and auto-tag photos.",
         "NSLocationAlwaysUsageDescription": "Terra uses your location to show nearby properties.",
@@ -53,13 +55,23 @@
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#0d0b08"
       },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [{ "scheme": "https", "host": "terra.ai" }, { "scheme": "https", "host": "app.terra.ai" }],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.INTERNET",
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.RECEIVE_BOOT_COMPLETED",
-        "android.permission.VIBRATE"
+        "android.permission.VIBRATE",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
       ]
     },
     "web": {
@@ -75,6 +87,12 @@
       "expo-font",
       "expo-web-browser",
       "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow Terra to use Face ID for secure real estate analyst access."
+        }
+      ],
       [
         "expo-camera",
         {
@@ -104,6 +122,9 @@
       "eas": {
         "projectId": "terra-mobile"
       },
+      "description": "Terra — Real Estate Intelligence. NYC market analysis, distress property scanner, investment pipeline management, and borough-level market pulse for professional real estate analysts.",
+      "keywords": "real estate, NYC, property, investment, distress properties, market analysis, MLS, Manhattan, Brooklyn, real estate intelligence",
+      "category": "Business",
       "supportUrl": "https://terra.ai/support",
       "privacyUrl": "https://terra.ai/privacy",
       "termsUrl": "https://terra.ai/terms"

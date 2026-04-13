@@ -222,6 +222,10 @@ export default function AlertsScreen() {
           keyExtractor={a => String(a.id)}
           contentContainerStyle={styles.listContent}
           ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+          initialNumToRender={10}
+          maxToRenderPerBatch={8}
+          windowSize={8}
+          removeClippedSubviews
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
           renderItem={({ item }) => <AlertCard alert={item} />}
           ListEmptyComponent={

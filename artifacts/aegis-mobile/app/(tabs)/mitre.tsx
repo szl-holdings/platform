@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Modal,
   Platform,
+  RefreshControl,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
@@ -150,11 +151,18 @@ export default function MitreScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [selectedTech, setSelectedTech] = useState<{ id: string; name: string; tactic: string; detection: MitreDetection | null } | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const { data: detections = [], isLoading } = useQuery<MitreDetection[]>({
+  const { data: detections = [], isLoading, refetch } = useQuery<MitreDetection[]>({
     queryKey: ["aegis-mitre-detections"],
     queryFn: fetchMitreDetections,
   });
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   const { data: relatedIncidents = [], isLoading: loadingRelated } = useQuery<RelatedIncident[]>({
     queryKey: ["aegis-mitre-related", selectedTech?.id],
@@ -195,6 +203,7 @@ export default function MitreScreen() {
           contentContainerStyle={{ padding: 16, paddingBottom: bottomInsets + 100 }}
           showsVerticalScrollIndicator={false}
           horizontal={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
         >
           <View style={styles.statsRow}>
             {[

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
 import { Platform } from "react-native";
+import { router, type Href } from "expo-router";
 
 export interface NotificationPreferences {
   enabled: boolean;
@@ -101,7 +102,18 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             setExpoPushToken(tokenData.data);
           } catch {}
           listenerRef.current = Notifications.addNotificationReceivedListener(() => {});
-          responseListenerRef.current = Notifications.addNotificationResponseReceivedListener(() => {});
+          responseListenerRef.current = Notifications.addNotificationResponseReceivedListener((response) => {
+            try {
+              const data = response.notification.request.content.data as Record<string, unknown>;
+              const SIGNALS_HREF: Href = { pathname: "/(tabs)/signals" };
+              const RECEIPTS_HREF: Href = { pathname: "/(tabs)/receipts" };
+              if (data?.type === "critical" || data?.type === "signal") {
+                router.push(SIGNALS_HREF);
+              } else if (data?.type === "action") {
+                router.push(RECEIPTS_HREF);
+              }
+            } catch {}
+          });
         }
       } catch {}
     };

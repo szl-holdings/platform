@@ -23,6 +23,11 @@ const VALID_TEMPLATES: NotificationTemplate[] = [
   "lyte_kpi_alert",
   "lyte_escalation",
   "lyte_milestone",
+  "szl_portfolio_update",
+  "szl_digest_ready",
+  "szl_approval_required",
+  "stephen_contact_received",
+  "stephen_system_update",
 ];
 
 router.post("/push-notifications/send", authMiddleware(), requireRole("ops"), async (req, res) => {

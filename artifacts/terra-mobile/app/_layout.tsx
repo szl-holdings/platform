@@ -13,13 +13,18 @@ import { AUTH_TOKEN_KEY } from "@/context/AuthContext";
 import { Redirect, Slot, Stack, usePathname } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
-import React, { useEffect } from "react";
+import React, { Suspense, lazy, useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { BiometricProvider, useBiometric } from "@/context/BiometricContext";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { useOnboarding } from "@/hooks/useOnboarding";
+const OnboardingCarousel = lazy(() => import("@/components/OnboardingCarousel").then(m => ({ default: m.OnboardingCarousel })));
+import { BiometricLockScreen } from "@/components/BiometricLockScreen";
 import { PrismBusProvider } from "@szl-holdings/prism-bus/provider";
 
 if (process.env.EXPO_PUBLIC_DOMAIN) {
@@ -68,7 +73,21 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 }
 
 function RootLayoutNav() {
+  const { isLoading: onboardingLoading, hasCompletedOnboarding, completeOnboarding } = useOnboarding();
+  const { isEnabled, isLocked } = useBiometric();
   usePushNotifications();
+
+  if (isEnabled && isLocked) {
+    return <BiometricLockScreen />;
+  }
+
+  if (!onboardingLoading && !hasCompletedOnboarding) {
+    return (
+      <Suspense fallback={<View style={{ flex: 1, backgroundColor: "#0a0a0a", justifyContent: "center", alignItems: "center" }}><ActivityIndicator color="#10b981" /></View>}>
+        <OnboardingCarousel onComplete={completeOnboarding} />
+      </Suspense>
+    );
+  }
 
   return (
     <AuthGuard>
@@ -104,11 +123,13 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            <KeyboardProvider>
-              <RootLayoutNav />
-            </KeyboardProvider>
-          </GestureHandlerRootView>
+          <BiometricProvider>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+              <KeyboardProvider>
+                <RootLayoutNav />
+              </KeyboardProvider>
+            </GestureHandlerRootView>
+          </BiometricProvider>
         </AuthProvider>
       </QueryClientProvider>
     </SafeAreaProvider>

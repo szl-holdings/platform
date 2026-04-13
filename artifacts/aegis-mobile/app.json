@@ -15,6 +15,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.aegis.soc.mobile",
       "buildNumber": "1",
+      "associatedDomains": ["applinks:aegis.ai", "applinks:app.aegis.ai"],
       "infoPlist": {
         "NSFaceIDUsageDescription": "Aegis uses Face ID for secure SOC operator authentication.",
         "NSCameraUsageDescription": "Aegis uses your camera to scan QR codes for device enrollment.",
@@ -46,6 +47,14 @@
       },
       "package": "com.aegis.soc.mobile",
       "versionCode": 1,
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [{ "scheme": "https", "host": "aegis.ai" }, { "scheme": "https", "host": "app.aegis.ai" }],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.RECEIVE_BOOT_COMPLETED",
@@ -101,6 +110,9 @@
       "eas": {
         "projectId": "aegis-mobile"
       },
+      "description": "Aegis — Unified Defense & Intelligence Command. SOC operator dashboard with real-time threat detection, MITRE ATT&CK mapping, incident response, and biometric secure access for enterprise security operations.",
+      "keywords": "SOC, security operations, threat detection, MITRE, incident response, cybersecurity, defense intelligence, enterprise security",
+      "category": "Business",
       "supportUrl": "https://aegis.ai/support",
       "privacyUrl": "https://aegis.ai/privacy",
       "termsUrl": "https://aegis.ai/terms"

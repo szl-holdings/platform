@@ -20,7 +20,9 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.carlotajo.advisory.mobile",
       "buildNumber": "1",
+      "associatedDomains": ["applinks:carlotajo.com", "applinks:app.carlotajo.com"],
       "infoPlist": {
+        "NSFaceIDUsageDescription": "Carlota Jo uses Face ID for secure client portal access.",
         "NSCameraUsageDescription": "Carlota Jo uses your camera for document scanning.",
         "ITSAppUsesNonExemptEncryption": false
       },
@@ -50,10 +52,20 @@
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#0e0c09"
       },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [{ "scheme": "https", "host": "carlotajo.com" }, { "scheme": "https", "host": "app.carlotajo.com" }],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.RECEIVE_BOOT_COMPLETED",
-        "android.permission.VIBRATE"
+        "android.permission.VIBRATE",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
       ]
     },
     "web": {
@@ -69,6 +81,12 @@
       "expo-font",
       "expo-web-browser",
       "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow Carlota Jo to use Face ID for secure client portal access."
+        }
+      ],
       [
         "expo-notifications",
         {
@@ -86,6 +104,9 @@
       "eas": {
         "projectId": "carlota-jo-mobile"
       },
+      "description": "Carlota Jo — Private Client Advisory Portal. Secure client portal for personalized consulting engagements, session history, document management, and direct communication with your advisory team.",
+      "keywords": "consulting, advisory, client portal, luxury advisory, private client, executive coaching, business consulting, strategic advisory",
+      "category": "Business",
       "supportUrl": "https://carlotajo.com/support",
       "privacyUrl": "https://carlotajo.com/privacy",
       "termsUrl": "https://carlotajo.com/terms"

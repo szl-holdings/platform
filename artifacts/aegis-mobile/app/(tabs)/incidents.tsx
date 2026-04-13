@@ -443,6 +443,10 @@ export default function IncidentsScreen() {
           contentContainerStyle={{ padding: 16, paddingBottom: bottomInsets + 100 }}
           showsVerticalScrollIndicator={false}
           scrollEnabled={filtered.length > 0}
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={10}
+          removeClippedSubviews
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.amber} />}
           ListEmptyComponent={
             <View style={[styles.empty, { borderColor: colors.border }]}>

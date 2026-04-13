@@ -19,15 +19,20 @@ import { AUTH_TOKEN_KEY } from "@/context/AuthContext";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
-import React, { useEffect } from "react";
+import React, { Suspense, lazy, useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+const OnboardingCarousel = lazy(() => import("@/components/OnboardingCarousel").then(m => ({ default: m.OnboardingCarousel })));
+import { BiometricLockScreen } from "@/components/BiometricLockScreen";
 import { AuthProvider } from "@/context/AuthContext";
+import { BiometricProvider, useBiometric } from "@/context/BiometricContext";
 import { NotificationProvider } from "@/context/NotificationContext";
 import { PushNotificationBootstrap } from "@/components/PushNotificationBootstrap";
+import { useOnboarding } from "@/hooks/useOnboarding";
 import { PrismBusProvider } from "@szl-holdings/prism-bus/provider";
 
 if (process.env.EXPO_PUBLIC_DOMAIN) {
@@ -57,6 +62,21 @@ const queryClient = new QueryClient({
 });
 
 function RootLayoutNav() {
+  const { isLoading: onboardingLoading, hasCompletedOnboarding, completeOnboarding } = useOnboarding();
+  const { isEnabled, isLocked } = useBiometric();
+
+  if (isEnabled && isLocked) {
+    return <BiometricLockScreen />;
+  }
+
+  if (!onboardingLoading && !hasCompletedOnboarding) {
+    return (
+      <Suspense fallback={<View style={{ flex: 1, backgroundColor: "#0f0e0c", justifyContent: "center", alignItems: "center" }}><ActivityIndicator color="#c9a84c" /></View>}>
+        <OnboardingCarousel onComplete={completeOnboarding} />
+      </Suspense>
+    );
+  }
+
   return (
     <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -96,14 +116,16 @@ export default function RootLayout() {
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <NotificationProvider>
-              <PushNotificationBootstrap />
-              <GestureHandlerRootView style={{ flex: 1 }}>
-                <KeyboardProvider>
-                  <RootLayoutNav />
-                </KeyboardProvider>
-              </GestureHandlerRootView>
-            </NotificationProvider>
+            <BiometricProvider>
+              <NotificationProvider>
+                <PushNotificationBootstrap />
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                  <KeyboardProvider>
+                    <RootLayoutNav />
+                  </KeyboardProvider>
+                </GestureHandlerRootView>
+              </NotificationProvider>
+            </BiometricProvider>
           </AuthProvider>
         </QueryClientProvider>
       </ErrorBoundary>

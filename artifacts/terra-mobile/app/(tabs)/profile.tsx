@@ -1,6 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
+import { router, type Href } from "expo-router";
 import React, { useState } from "react";
 import type { ComponentProps } from "react";
 import {
@@ -9,13 +10,17 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
+import { useBiometric } from "@/context/BiometricContext";
 import { useQuery } from "@tanstack/react-query";
+
+const PRIVACY_HREF: Href = { pathname: "/privacy" };
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
   ? "https://" + process.env.EXPO_PUBLIC_DOMAIN + "/api"
@@ -80,7 +85,21 @@ export default function ProfileTab() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user, signOut } = useAuth();
+  const { isEnabled: biometricEnabled, isAvailable: biometricAvailable, enableBiometric, disableBiometric } = useBiometric();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+
+  const handleToggleBiometric = async (value: boolean) => {
+    if (value) {
+      const ok = await enableBiometric();
+      if (!ok) Alert.alert("Authentication Failed", "Biometric lock could not be enabled.");
+      else Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } else {
+      Alert.alert("Disable Biometric Lock", "The app will no longer require authentication on resume.", [
+        { text: "Cancel", style: "cancel" },
+        { text: "Disable", style: "destructive", onPress: async () => { await disableBiometric(); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } },
+      ]);
+    }
+  };
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
@@ -162,9 +181,27 @@ export default function ProfileTab() {
           <SettingRow icon="user" label="Account Type" value="Pro Analyst" />
           <SettingRow icon="shield" label="Data Access" value="NYC Full" />
           <SettingRow icon="help-circle" label="Support" onPress={() => Haptics.selectionAsync()} />
-          <SettingRow icon="file-text" label="Terms & Privacy" onPress={() => Haptics.selectionAsync()} />
+          <SettingRow icon="file-text" label="Privacy Policy" onPress={() => { Haptics.selectionAsync(); router.push(PRIVACY_HREF); }} />
         </View>
       </View>
+
+      {biometricAvailable && (
+        <View style={{ paddingHorizontal: 20, marginBottom: 16 }}>
+          <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>SECURITY</Text>
+          <View style={[styles.settingsBlock, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <View style={[styles.settingRow, { borderBottomColor: colors.border }]}>
+              <Feather name="lock" size={14} color={colors.mutedForeground} />
+              <Text style={[styles.settingLabel, { color: colors.cream, flex: 1 }]}>Biometric Lock</Text>
+              <Switch
+                value={biometricEnabled}
+                onValueChange={handleToggleBiometric}
+                trackColor={{ false: colors.border, true: colors.gold + "40" }}
+                thumbColor={biometricEnabled ? colors.gold : colors.mutedForeground}
+              />
+            </View>
+          </View>
+        </View>
+      )}
 
       <View style={{ paddingHorizontal: 20 }}>
         <Pressable

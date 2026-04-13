@@ -20,6 +20,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.lyte.aiops.mobile",
       "buildNumber": "1",
+      "associatedDomains": ["applinks:lyte.ai", "applinks:app.lyte.ai"],
       "infoPlist": {
         "NSCameraUsageDescription": "Lyte uses your camera to scan QR codes for device configuration.",
         "NSPhotoLibraryUsageDescription": "Lyte accesses photos to attach files to incidents.",
@@ -53,6 +54,14 @@
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#070c14"
       },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [{ "scheme": "https", "host": "lyte.ai" }, { "scheme": "https", "host": "app.lyte.ai" }],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.INTERNET",
@@ -97,6 +106,9 @@
       "eas": {
         "projectId": "lyte-aiops-mobile"
       },
+      "description": "Lyte — AIOps Command Center. On-call incident management, signal triage, real-time alerting, business health observability, and runbook-driven action tracking for infrastructure operations teams.",
+      "keywords": "AIOps, on-call, incident management, alerting, observability, DevOps, SRE, infrastructure, signal triage, operations",
+      "category": "Business",
       "supportUrl": "https://lyte.ai/support",
       "privacyUrl": "https://lyte.ai/privacy",
       "termsUrl": "https://lyte.ai/terms"

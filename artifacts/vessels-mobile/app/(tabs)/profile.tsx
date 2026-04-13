@@ -1,11 +1,16 @@
 import React from "react";
 import {
-  View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert,
+  View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Switch,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as Haptics from "expo-haptics";
+import { router, type Href } from "expo-router";
 import { VesselIcon, featherIcon } from "@/components/VesselIcon";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
+import { useBiometric } from "@/context/BiometricContext";
+
+const PRIVACY_HREF: Href = { pathname: "/privacy" };
 
 function InfoRow({ icon, label, value }: { icon: string; label: string; value: string }) {
   const colors = useColors();
@@ -35,6 +40,30 @@ function SectionCard({ title, children }: { title: string; children: React.React
 export default function ProfileScreen() {
   const colors = useColors();
   const { user, logout } = useAuth();
+  const { isEnabled, isAvailable, enableBiometric, disableBiometric } = useBiometric();
+
+  const handleToggleBiometric = async (value: boolean) => {
+    if (value) {
+      const ok = await enableBiometric();
+      if (!ok) {
+        Alert.alert("Authentication Failed", "Biometric lock could not be enabled.");
+      } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    } else {
+      Alert.alert("Disable Biometric Lock", "The app will no longer require authentication on resume.", [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Disable",
+          style: "destructive",
+          onPress: async () => {
+            await disableBiometric();
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          },
+        },
+      ]);
+    }
+  };
 
   const handleLogout = () => {
     Alert.alert(
@@ -89,6 +118,14 @@ export default function ProfileScreen() {
           <InfoRow icon="info" label="Version" value="1.0.0" />
           <InfoRow icon="server" label="Backend" value="Vessels Maritime Intelligence API" />
           <InfoRow icon="wifi" label="Connectivity" value="Offline cache + WebSocket live data" />
+          <View style={[styles.infoRow, { borderBottomColor: colors.border }]}>
+            <View style={[styles.infoIcon, { backgroundColor: colors.primaryDim }]}>
+              <VesselIcon name="file-text" size={13} color={colors.primary} />
+            </View>
+            <TouchableOpacity style={{ flex: 1 }} onPress={() => { Haptics.selectionAsync(); router.push(PRIVACY_HREF); }}>
+              <Text style={[styles.infoValue, { color: colors.primary }]}>Privacy Policy</Text>
+            </TouchableOpacity>
+          </View>
         </SectionCard>
 
         <SectionCard title="MARITIME INTELLIGENCE">
@@ -133,6 +170,26 @@ export default function ProfileScreen() {
             </View>
           </View>
         </SectionCard>
+
+        {isAvailable && (
+          <SectionCard title="SECURITY">
+            <View style={[styles.infoRow, { borderBottomColor: colors.border }]}>
+              <View style={[styles.infoIcon, { backgroundColor: colors.primaryDim }]}>
+                <VesselIcon name="lock" size={13} color={colors.primary} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.infoValue, { color: colors.text }]}>Biometric Lock</Text>
+                <Text style={[styles.infoLabel, { color: colors.textFaint }]}>Face ID / Touch ID on app resume</Text>
+              </View>
+              <Switch
+                value={isEnabled}
+                onValueChange={handleToggleBiometric}
+                trackColor={{ false: colors.border, true: colors.primaryDim }}
+                thumbColor={isEnabled ? colors.primary : colors.textFaint}
+              />
+            </View>
+          </SectionCard>
+        )}
 
         <TouchableOpacity
           onPress={handleLogout}

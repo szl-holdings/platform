@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
+import { router, type Href } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
@@ -16,7 +16,10 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAuth } from "@/context/AuthContext";
+import { useBiometric } from "@/context/BiometricContext";
 import { useColors } from "@/hooks/useColors";
+
+const PRIVACY_HREF: Href = { pathname: "/privacy" };
 
 const SESSION_HISTORY = [
   { id: 1, title: "Discovery Call", date: "Feb 15, 2026", duration: "45 min" },
@@ -107,6 +110,20 @@ export default function ProfileScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user, logout } = useAuth();
+  const { isEnabled: biometricEnabled, isAvailable: biometricAvailable, enableBiometric, disableBiometric } = useBiometric();
+
+  const handleToggleBiometric = async (value: boolean) => {
+    if (value) {
+      const ok = await enableBiometric();
+      if (!ok) Alert.alert("Authentication Failed", "Biometric lock could not be enabled.");
+      else Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } else {
+      Alert.alert("Disable Biometric Lock", "The app will no longer require authentication on resume.", [
+        { text: "Cancel", style: "cancel" },
+        { text: "Disable", style: "destructive", onPress: async () => { await disableBiometric(); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } },
+      ]);
+    }
+  };
 
   const displayName = user?.displayName ?? "Client";
   const email = user?.email ?? "";
@@ -262,8 +279,8 @@ export default function ProfileScreen() {
           <View style={[styles.settingsGroup, { borderColor: colors.creamFaint }]}>
             <SettingRow
               icon="lock"
-              label="Privacy & Security"
-              onPress={() => {}}
+              label="Privacy Policy"
+              onPress={() => router.push(PRIVACY_HREF)}
             />
             <SettingRow
               icon="mail"
@@ -278,6 +295,21 @@ export default function ProfileScreen() {
             />
           </View>
         </View>
+
+        {biometricAvailable && (
+          <View style={[styles.section, { borderTopColor: colors.creamFaint }]}>
+            <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>SECURITY</Text>
+            <View style={[styles.settingsGroup, { borderColor: colors.creamFaint }]}>
+              <SettingRow
+                icon="lock"
+                label="Biometric Lock"
+                toggle
+                toggleValue={biometricEnabled}
+                onToggle={handleToggleBiometric}
+              />
+            </View>
+          </View>
+        )}
 
         <Pressable onPress={handleLogout}>
           <View style={[styles.logoutRow, { borderColor: "rgba(192,80,80,0.2)" }]}>

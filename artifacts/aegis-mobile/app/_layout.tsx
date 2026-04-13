@@ -19,16 +19,19 @@ import { Stack } from "expo-router";
 import { reloadAppAsync } from "expo";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
-import React, { useEffect } from "react";
+import React, { Suspense, lazy, useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { BiometricLockScreen } from "@/components/BiometricLockScreen";
+const OnboardingCarousel = lazy(() => import("@/components/OnboardingCarousel").then(m => ({ default: m.OnboardingCarousel })));
 import { AuthProvider } from "@/context/AuthContext";
 import { BiometricProvider, useBiometric } from "@/context/BiometricContext";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { useOnboarding } from "@/hooks/useOnboarding";
 import { PrismBusProvider } from "@szl-holdings/prism-bus/provider";
 
 if (process.env.EXPO_PUBLIC_DOMAIN) {
@@ -59,10 +62,19 @@ const queryClient = new QueryClient({
 
 function AppShell() {
   const { isLocked, isEnabled } = useBiometric();
+  const { isLoading: onboardingLoading, hasCompletedOnboarding, completeOnboarding } = useOnboarding();
   usePushNotifications();
 
   if (isEnabled && isLocked) {
     return <BiometricLockScreen />;
+  }
+
+  if (!onboardingLoading && !hasCompletedOnboarding) {
+    return (
+      <Suspense fallback={<View style={{ flex: 1, backgroundColor: "#080c14", justifyContent: "center", alignItems: "center" }}><ActivityIndicator color="#f59e0b" /></View>}>
+        <OnboardingCarousel onComplete={completeOnboarding} />
+      </Suspense>
+    );
   }
 
   return (

@@ -7,6 +7,7 @@ import {
   Pressable,
   Platform,
   Dimensions,
+  RefreshControl,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -117,6 +118,7 @@ export default function PulseScreen() {
   const colors = useColors();
   const router = useRouter();
   const [refreshKey, setRefreshKey] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
 
   const { data: health } = useQuery<EcosystemHealth>({
     queryKey: ["szl-ecosystem-health"],
@@ -139,12 +141,14 @@ export default function PulseScreen() {
     };
   });
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     }
+    setRefreshing(true);
     setRefreshKey((k) => k + 1);
-  };
+    setTimeout(() => setRefreshing(false), 1000);
+  }, []);
 
   return (
     <LinearGradient colors={["#090810", "#0d0b1a"]} style={{ flex: 1 }}>
@@ -155,6 +159,7 @@ export default function PulseScreen() {
           { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 100 },
         ]}
         showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#c9a84c" />}
       >
         <View style={styles.header}>
           <View>
