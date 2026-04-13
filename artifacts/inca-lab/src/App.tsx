@@ -7,8 +7,25 @@ import { AIGatewayConsole } from "./pages/AIGatewayConsole";
 import { DeploymentRunway } from "./pages/DeploymentRunway";
 import { LLMOpsObservatory } from "./pages/LLMOpsObservatory";
 import { ModelLab } from "./pages/ModelLab";
+import { AgentCrewBuilder } from "./pages/AgentCrewBuilder";
+import { WorkflowForge } from "./pages/WorkflowForge";
+import { ConsensusChamber } from "./pages/ConsensusChamber";
+import { ProtocolBridge } from "./pages/ProtocolBridge";
+import { DomainAgentLibrary } from "./pages/DomainAgentLibrary";
 
-export type Page = "dashboard" | "intelligence" | "nuro-mesh" | "gateway" | "deployment" | "observatory" | "lab";
+export type Page =
+  | "dashboard"
+  | "intelligence"
+  | "nuro-mesh"
+  | "gateway"
+  | "deployment"
+  | "observatory"
+  | "lab"
+  | "crew-builder"
+  | "workflow-forge"
+  | "consensus-chamber"
+  | "protocol-bridge"
+  | "agent-library";
 
 const PAGE_ROUTES: Record<Page, string> = {
   dashboard: "/inca-lab/",
@@ -18,6 +35,11 @@ const PAGE_ROUTES: Record<Page, string> = {
   deployment: "/inca-lab/deployment",
   observatory: "/inca-lab/observatory",
   lab: "/inca-lab/lab",
+  "crew-builder": "/inca-lab/crew-builder",
+  "workflow-forge": "/inca-lab/workflow-forge",
+  "consensus-chamber": "/inca-lab/consensus-chamber",
+  "protocol-bridge": "/inca-lab/protocol-bridge",
+  "agent-library": "/inca-lab/agent-library",
 };
 
 function AppShell() {
@@ -30,6 +52,11 @@ function AppShell() {
     if (location.startsWith("/inca-lab/deployment")) return "deployment";
     if (location.startsWith("/inca-lab/observatory")) return "observatory";
     if (location.startsWith("/inca-lab/lab")) return "lab";
+    if (location.startsWith("/inca-lab/crew-builder")) return "crew-builder";
+    if (location.startsWith("/inca-lab/workflow-forge")) return "workflow-forge";
+    if (location.startsWith("/inca-lab/consensus-chamber")) return "consensus-chamber";
+    if (location.startsWith("/inca-lab/protocol-bridge")) return "protocol-bridge";
+    if (location.startsWith("/inca-lab/agent-library")) return "agent-library";
     return "dashboard";
   })();
 
@@ -48,6 +75,11 @@ function AppShell() {
           <Route path="/inca-lab/deployment" component={DeploymentRunway} />
           <Route path="/inca-lab/observatory" component={LLMOpsObservatory} />
           <Route path="/inca-lab/lab" component={ModelLab} />
+          <Route path="/inca-lab/crew-builder" component={AgentCrewBuilder} />
+          <Route path="/inca-lab/workflow-forge" component={WorkflowForge} />
+          <Route path="/inca-lab/consensus-chamber" component={ConsensusChamber} />
+          <Route path="/inca-lab/protocol-bridge" component={ProtocolBridge} />
+          <Route path="/inca-lab/agent-library" component={DomainAgentLibrary} />
           <Route>
             <Dashboard onNavigate={onNavigate} />
           </Route>

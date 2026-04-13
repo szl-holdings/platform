@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api, type TokenUsage, type CostTrend, type GovernanceAudit } from "../lib/api";
 import { cn, formatNumber } from "../lib/utils";
-import { Shield, CheckCircle, XCircle, AlertTriangle, Loader2 } from "lucide-react";
+import { Shield, CheckCircle, XCircle, AlertTriangle, Loader2, GitBranch, Play, ChevronRight, Clock, Zap, Brain } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const PROVIDER_COLORS: Record<string, string> = {
@@ -18,9 +18,75 @@ function StatusIcon({ status }: { status: string }) {
   return <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />;
 }
 
+const SWIM_LANES = [
+  { agentId: "alloy", label: "Alloy", color: "#7c3aed" },
+  { agentId: "helmsman", label: "Helmsman", color: "#3b82f6" },
+  { agentId: "sentinel", label: "Sentinel", color: "#f43f5e" },
+  { agentId: "beacon", label: "Beacon", color: "#10b981" },
+];
+
+interface ExecutionBlock {
+  agentId: string;
+  startPct: number;
+  widthPct: number;
+  label: string;
+  type: "task" | "wait" | "validation" | "output";
+  tokens?: number;
+  latencyMs?: number;
+  inputSummary?: string;
+  outputSummary?: string;
+  reasoningTrace?: string;
+}
+
+const SAMPLE_RUNS = [
+  {
+    id: "run-001",
+    name: "Maritime Sanctions Investigation",
+    duration: "4m 32s",
+    status: "complete",
+    timestamp: "2026-04-13 14:22:00",
+    blocks: [
+      { agentId: "alloy", startPct: 0, widthPct: 8, label: "Route & Plan", type: "task" as const, tokens: 1240, latencyMs: 820, inputSummary: "User query: investigate MV Kairos Star", outputSummary: "Crew assembled. Tasks dispatched to Helmsman, Sentinel, Beacon.", reasoningTrace: "1. Parse intent → sanctions investigation. 2. Identify required domain agents: Helmsman (AIS), Sentinel (OFAC), Beacon (anomaly). 3. Assign roles: Helmsman=lead-data, Sentinel=validator, Beacon=analytics. 4. Dispatch parallel tasks with shared context token." },
+      { agentId: "helmsman", startPct: 10, widthPct: 30, label: "AIS Analysis", type: "task" as const, tokens: 8420, latencyMs: 4200, inputSummary: "Vessel MMSI: 123456789", outputSummary: "14 dark periods detected. Ownership opacity flagged.", reasoningTrace: "1. Query AIS feed for MMSI 123456789 — 90d window. 2. Identify 14 signal gaps >4h in restricted zones. 3. Cross-reference flag state compliance registry: score 23/100. 4. Resolve ownership chain via vessel DB — Panama shell entity, no UBO. 5. Package risk profile for Sentinel." },
+      { agentId: "sentinel", startPct: 12, widthPct: 25, label: "Sanctions Screen", type: "task" as const, tokens: 5200, latencyMs: 3100, inputSummary: "Ownership entities from Helmsman", outputSummary: "OFAC secondary match found. Risk score: 0.87.", reasoningTrace: "1. Extract entity list from Helmsman output. 2. Direct OFAC SDN match: none found. 3. Graph traverse — shipping agent linked to SDN entity added March 2025. 4. Compute composite risk score: 0.87 (threshold 0.75). 5. Classify as CRITICAL." },
+      { agentId: "beacon", startPct: 15, widthPct: 20, label: "Anomaly Detection", type: "task" as const, tokens: 3800, latencyMs: 2400, inputSummary: "Port call frequency data", outputSummary: "3σ deviation detected. Correlated with Helmsman.", reasoningTrace: "1. Load 12-month port call baseline for vessel class. 2. Compute deviation in Iranian Sea corridor call frequency. 3. Result: 3.1σ deviation — exceeds alert threshold of 2.5σ. 4. False-positive probability: 23% initially, reduced to 4.2% after Helmsman AIS confirmation." },
+      { agentId: "sentinel", startPct: 40, widthPct: 15, label: "Validation", type: "validation" as const, tokens: 2100, latencyMs: 1800, inputSummary: "Aggregated findings", outputSummary: "Maker-checker: APPROVED with critical risk flag.", reasoningTrace: "1. Review Helmsman AIS report. 2. Review own OFAC findings. 3. Review Beacon anomaly data. 4. No exculpatory evidence found. 5. Maker-checker: all signals independently corroborated. 6. APPROVED — escalate to human gate." },
+      { agentId: "alloy", startPct: 58, widthPct: 10, label: "Wait: Human Gate", type: "wait" as const, latencyMs: 14000, inputSummary: "Escalated to human approver", reasoningTrace: "Policy §4.2 requires human sign-off for CRITICAL risk classification. Holding all output delivery. Timeout: 30min." },
+      { agentId: "alloy", startPct: 72, widthPct: 15, label: "Synthesize Output", type: "output" as const, tokens: 4200, latencyMs: 2100, inputSummary: "All agent outputs", outputSummary: "Investigation report generated. Risk: CRITICAL.", reasoningTrace: "1. Merge Helmsman, Sentinel, Beacon outputs into unified report structure. 2. Apply SZL report template. 3. Compute executive summary. 4. Attach evidence citations. 5. Mark risk classification: CRITICAL. 6. Deliver to Forge client portal." },
+    ],
+  },
+  {
+    id: "run-002",
+    name: "AI Model Scouting — Q2 Assessment",
+    duration: "2m 18s",
+    status: "complete",
+    timestamp: "2026-04-13 12:45:00",
+    blocks: [
+      { agentId: "alloy", startPct: 0, widthPct: 6, label: "Route", type: "task" as const, tokens: 820, latencyMs: 540, inputSummary: "Scout new text-generation models", outputSummary: "Routing to INCA." },
+      { agentId: "helmsman", startPct: 0, widthPct: 0, label: "", type: "task" as const },
+      { agentId: "sentinel", startPct: 0, widthPct: 0, label: "", type: "task" as const },
+      { agentId: "beacon", startPct: 8, widthPct: 45, label: "HuggingFace Scout", type: "task" as const, tokens: 12400, latencyMs: 8200, inputSummary: "task=text-generation, limit=20", outputSummary: "38 models evaluated. Top 5 shortlisted." },
+    ],
+  },
+];
+
+function BlockTypeColor(type: ExecutionBlock["type"]): string {
+  if (type === "task") return "#7c3aed";
+  if (type === "wait") return "#6b7280";
+  if (type === "validation") return "#f97316";
+  return "#22c55e";
+}
+
 export function LLMOpsObservatory() {
   const [costView, setCostView] = useState<"stacked" | "total">("stacked");
   const [auditFilter, setAuditFilter] = useState<string | null>(null);
+  const [mainTab, setMainTab] = useState<"analytics" | "execution-timeline">("analytics");
+  const [selectedRun, setSelectedRun] = useState<string>("run-001");
+  const [replayStep, setReplayStep] = useState<number>(100);
+  const [selectedBlock, setSelectedBlock] = useState<ExecutionBlock | null>(null);
+
+  const currentRun = SAMPLE_RUNS.find(r => r.id === selectedRun) ?? SAMPLE_RUNS[0]!;
+  const visibleBlocks = currentRun.blocks.filter(b => b.widthPct > 0 && b.startPct <= replayStep);
 
   const tokenQuery = useQuery({
     queryKey: ["inca-tokens"],
@@ -71,10 +137,183 @@ export function LLMOpsObservatory() {
           <h1 className="text-xl font-display font-semibold text-foreground">LLMOps Observatory</h1>
         </div>
         <p className="text-sm text-muted-foreground ml-3.5">
-          Token usage analytics, provider cost trends, and governance audit trail across the entire Nuro Mesh.
+          Token usage analytics, cost trends, governance audit, and multi-agent execution timeline with time-travel debugging.
         </p>
       </div>
 
+      {/* Main tab toggle */}
+      <div className="flex gap-1 mb-5 p-1 bg-secondary rounded-lg w-fit">
+        <button onClick={() => setMainTab("analytics")} className={cn("flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all", mainTab === "analytics" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+          <Shield className="w-3.5 h-3.5" /> Analytics & Governance
+        </button>
+        <button onClick={() => setMainTab("execution-timeline")} className={cn("flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all", mainTab === "execution-timeline" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+          <GitBranch className="w-3.5 h-3.5" /> Execution Timeline
+        </button>
+      </div>
+
+      {mainTab === "execution-timeline" && (
+        <div className="space-y-4">
+          {/* Run selector */}
+          <div className="flex items-center gap-3">
+            <div className="text-xs text-muted-foreground">Workflow Run:</div>
+            <div className="flex gap-2">
+              {SAMPLE_RUNS.map(run => (
+                <button
+                  key={run.id}
+                  onClick={() => { setSelectedRun(run.id); setReplayStep(100); setSelectedBlock(null); }}
+                  className={cn("px-3 py-1.5 rounded-lg text-xs font-medium border transition-all", selectedRun === run.id ? "border-primary/40 bg-primary/8 text-primary" : "border-border text-muted-foreground hover:text-foreground")}
+                >
+                  {run.name}
+                </button>
+              ))}
+            </div>
+            <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
+              <Clock className="w-3.5 h-3.5" /> {currentRun.timestamp}
+              <span className="badge-running px-1.5 py-0.5 rounded">{currentRun.duration}</span>
+            </div>
+          </div>
+
+          {/* Replay slider */}
+          <div className="inca-panel p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <Play className="w-4 h-4 text-primary flex-shrink-0" />
+              <div className="text-sm font-medium text-foreground">Execution Replay</div>
+              <div className="ml-auto text-xs text-muted-foreground">Step: {replayStep}%</div>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={replayStep}
+              onChange={e => { setReplayStep(parseInt(e.target.value)); setSelectedBlock(null); }}
+              className="w-full accent-primary"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>Start</span>
+              <span>End</span>
+            </div>
+          </div>
+
+          {/* Swim lane timeline */}
+          <div className="inca-panel overflow-hidden">
+            <div className="px-4 py-3 border-b border-border">
+              <div className="text-sm font-medium text-foreground">Agent Execution Swim Lanes</div>
+            </div>
+            <div className="p-4 space-y-3">
+              {SWIM_LANES.map(lane => {
+                const laneBlocks = visibleBlocks.filter(b => b.agentId === lane.agentId);
+                return (
+                  <div key={lane.agentId} className="flex items-center gap-3">
+                    <div className="w-20 flex-shrink-0">
+                      <div className="text-xs font-medium text-foreground">{lane.label}</div>
+                    </div>
+                    <div className="flex-1 h-8 bg-secondary rounded-lg relative overflow-hidden">
+                      {/* Replay progress overlay */}
+                      <div
+                        className="absolute inset-y-0 left-0 bg-primary/5 transition-all duration-150"
+                        style={{ width: `${replayStep}%` }}
+                      />
+                      {laneBlocks.map((block, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setSelectedBlock(selectedBlock?.label === block.label && selectedBlock?.agentId === block.agentId ? null : block)}
+                          className="absolute inset-y-1 rounded flex items-center justify-center text-xs font-medium transition-all hover:brightness-110"
+                          style={{
+                            left: `${block.startPct}%`,
+                            width: `${block.widthPct}%`,
+                            backgroundColor: `${BlockTypeColor(block.type)}28`,
+                            border: `1px solid ${BlockTypeColor(block.type)}50`,
+                            color: BlockTypeColor(block.type),
+                          }}
+                        >
+                          <span className="truncate px-1">{block.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Time axis */}
+              <div className="flex items-center gap-3">
+                <div className="w-20 flex-shrink-0" />
+                <div className="flex-1 flex justify-between text-xs text-muted-foreground pt-1 border-t border-border/40">
+                  <span>0s</span>
+                  <span>{Math.round(parseInt(currentRun.duration.replace(/m.*/, "")) * 60 * 0.25)}s</span>
+                  <span>{Math.round(parseInt(currentRun.duration.replace(/m.*/, "")) * 60 * 0.5)}s</span>
+                  <span>{Math.round(parseInt(currentRun.duration.replace(/m.*/, "")) * 60 * 0.75)}s</span>
+                  <span>{currentRun.duration}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Block type legend */}
+            <div className="px-4 pb-3 flex items-center gap-4">
+              {[
+                { type: "task" as const, label: "Agent Task" },
+                { type: "validation" as const, label: "Validation" },
+                { type: "wait" as const, label: "Wait/Gate" },
+                { type: "output" as const, label: "Output" },
+              ].map(({ type, label }) => (
+                <div key={type} className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: `${BlockTypeColor(type)}40`, border: `1px solid ${BlockTypeColor(type)}60` }} />
+                  <div className="text-xs text-muted-foreground">{label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Block inspector */}
+          {selectedBlock && (
+            <div className="inca-panel-active p-4 animate-scale-in">
+              <div className="flex items-center gap-2 mb-3">
+                <Brain className="w-4 h-4 text-primary" />
+                <div className="text-sm font-medium text-foreground">{selectedBlock.label}</div>
+                <span className="badge-staged px-1.5 py-0.5 rounded text-xs capitalize ml-1">{selectedBlock.type}</span>
+                <div className="ml-auto text-xs text-muted-foreground capitalize">{selectedBlock.agentId}</div>
+              </div>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+                {selectedBlock.tokens && (
+                  <div className="bg-secondary rounded-lg p-2">
+                    <div className="text-xs text-muted-foreground mb-0.5">Tokens</div>
+                    <div className="text-sm font-mono text-foreground">{selectedBlock.tokens.toLocaleString()}</div>
+                  </div>
+                )}
+                {selectedBlock.latencyMs && (
+                  <div className="bg-secondary rounded-lg p-2">
+                    <div className="text-xs text-muted-foreground mb-0.5">Latency</div>
+                    <div className="text-sm font-mono text-foreground">{selectedBlock.latencyMs >= 1000 ? `${(selectedBlock.latencyMs / 1000).toFixed(1)}s` : `${selectedBlock.latencyMs}ms`}</div>
+                  </div>
+                )}
+              </div>
+              {selectedBlock.inputSummary && (
+                <div className="mb-2">
+                  <div className="text-xs text-muted-foreground mb-1">Input</div>
+                  <div className="bg-secondary rounded-lg px-3 py-2 text-xs font-mono text-foreground">{selectedBlock.inputSummary}</div>
+                </div>
+              )}
+              {selectedBlock.outputSummary && (
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Output</div>
+                  <div className="bg-secondary rounded-lg px-3 py-2 text-xs font-mono text-foreground">{selectedBlock.outputSummary}</div>
+                </div>
+              )}
+              {selectedBlock.reasoningTrace && (
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1.5">
+                    <Brain className="w-3 h-3" />
+                    Reasoning Trace
+                  </div>
+                  <div className="bg-primary/5 border border-primary/15 rounded-lg px-3 py-2 text-xs font-mono text-foreground leading-relaxed">{selectedBlock.reasoningTrace}</div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {mainTab === "analytics" && (
+      <div>
       {loading && (
         <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground">
           <Loader2 className="w-4 h-4 animate-spin text-primary" />
@@ -299,6 +538,8 @@ export function LLMOpsObservatory() {
           </table>
         </div>
       </div>
+      </div>
+      )}
     </div>
   );
 }

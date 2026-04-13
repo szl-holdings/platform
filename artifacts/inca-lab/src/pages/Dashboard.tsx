@@ -4,7 +4,7 @@ import { api, type AgentDef, type RoutingEvent, type BenchmarkEntry } from "../l
 import { cn, formatNumber, formatCost, formatLatency } from "../lib/utils";
 import {
   Brain, Zap, Server, BarChart3, ChevronRight,
-  Clock, DollarSign, AlertTriangle, Loader2
+  Clock, DollarSign, AlertTriangle, Loader2, Users, GitBranch, MessageSquare, Link2
 } from "lucide-react";
 
 interface DashboardProps {
@@ -95,11 +95,67 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       )}
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
         <KpiCard label="Active Agents" value={agents.length > 0 ? String(agents.length) : "—"} sub="Nuro Mesh online" icon={Brain} accent />
         <KpiCard label="Routing Events" value={events.length > 0 ? formatNumber(events.length) : "—"} sub="Last 72 hours" icon={Zap} />
         <KpiCard label="Avg Latency" value={avgLatency > 0 ? formatLatency(avgLatency) : "—"} sub="P50 across all routes" icon={Clock} />
         <KpiCard label="Total Cost" value={totalCost > 0 ? formatCost(totalCost) : "—"} sub="Estimated last 72h" icon={DollarSign} />
+      </div>
+
+      {/* Orchestration summary row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <button
+          onClick={() => onNavigate("crew-builder")}
+          className="kpi-tile p-4 rounded-lg text-left hover:border-primary/30 transition-all group"
+        >
+          <div className="flex items-start justify-between mb-2">
+            <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Active Crews</div>
+            <div className="w-7 h-7 rounded-md bg-secondary flex items-center justify-center">
+              <Users className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+            </div>
+          </div>
+          <div className="text-2xl font-display font-bold text-foreground">3</div>
+          <div className="text-xs text-muted-foreground mt-1">2 active · 1 paused</div>
+        </button>
+        <button
+          onClick={() => onNavigate("workflow-forge")}
+          className="kpi-tile p-4 rounded-lg text-left hover:border-primary/30 transition-all group"
+        >
+          <div className="flex items-start justify-between mb-2">
+            <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Workflows</div>
+            <div className="w-7 h-7 rounded-md bg-secondary flex items-center justify-center">
+              <GitBranch className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+            </div>
+          </div>
+          <div className="text-2xl font-display font-bold text-foreground">7</div>
+          <div className="text-xs text-muted-foreground mt-1">4 running · 3 idle</div>
+        </button>
+        <button
+          onClick={() => onNavigate("consensus-chamber")}
+          className="kpi-tile p-4 rounded-lg text-left hover:border-primary/30 transition-all group"
+        >
+          <div className="flex items-start justify-between mb-2">
+            <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Consensus Sessions</div>
+            <div className="w-7 h-7 rounded-md bg-secondary flex items-center justify-center">
+              <MessageSquare className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+            </div>
+          </div>
+          <div className="text-2xl font-display font-bold text-foreground">2</div>
+          <div className="text-xs text-muted-foreground mt-1">1 pending verdict</div>
+        </button>
+        <button
+          onClick={() => onNavigate("protocol-bridge")}
+          className="kpi-tile p-4 rounded-lg text-left hover:border-primary/30 transition-all group"
+        >
+          <div className="flex items-start justify-between mb-2">
+            <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Protocol Health</div>
+            <div className="w-7 h-7 rounded-md bg-secondary flex items-center justify-center">
+              <Link2 className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+            </div>
+          </div>
+          <div className="text-2xl font-display font-bold text-foreground"><span className="text-green-400">13</span><span className="text-sm text-muted-foreground">/15</span></div>
+          <div className="text-xs text-muted-foreground mt-1">MCP tools connected</div>
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
