@@ -69,7 +69,7 @@ export {
 export { NpsSurvey, NpsSurveyOverlay, useNpsSurvey, type NpsSurveyProps, type NpsSurveyOverlayProps } from "./nps-survey";
 export { ContextualFeedback, ContextualFeedbackBar, type ContextualFeedbackProps, type ContextualFeedbackBarProps } from "./contextual-feedback";
 export { PackBanner, PACK_ACCENT_COLORS, type PackBannerProps, type PackVariant } from "./pack-banner";
-export { CookieBanner, useCookieConsent, type CookieBannerProps, type CookieConsentState } from "./cookie-banner";
+export { CookieBanner, useCookieConsent, ConsentPreferencesButton, CookieConsentModal, initConsentSystem, getConsentState, onConsentChange, CONSENT_VERSION, type CookieBannerProps, type CookieConsentState, type ConsentState, type ConsentCategories } from "./cookie-banner";
 export { StatusBanner, useStatusBanner, type StatusBannerProps, type StatusBannerConfig, type StatusLevel } from "./status-banner";
 export {
   ConfidenceBand,

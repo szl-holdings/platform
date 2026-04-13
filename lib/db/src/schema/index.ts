@@ -81,3 +81,4 @@ export * from "./prism_counsel_p2";
 export * from "./analytics_lake";
 export * from "./prism_counsel_recovery";
 export * from "./email-marketing";
+export * from "./analytics-engine";

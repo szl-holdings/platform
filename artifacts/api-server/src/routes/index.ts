@@ -143,6 +143,7 @@ import pulseRouter from "./pulse";
 import emailMarketingRouter from "./email-marketing";
 import sessionAnalyticsRouter from "./session-analytics";
 import analyticsLakeRouter from "./analytics-lake";
+import analyticsEngineRouter from "./analytics-engine";
 
 const router: IRouter = Router();
 
@@ -532,5 +533,10 @@ router.use("/distribution-os", sessionAnalyticsRouter);
 router.use("/analytics-lake", _readLimiter);
 router.use("/analytics-lake", _writeLimiter);
 router.use(analyticsLakeRouter);
+
+router.use("/analytics/recordings", _writeLimiter);
+router.use("/analytics/heatmap-events", _writeLimiter);
+router.use("/analytics/consent", _writeLimiter);
+router.use(analyticsEngineRouter);
 
 export default router;

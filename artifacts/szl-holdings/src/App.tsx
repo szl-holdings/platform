@@ -149,10 +149,13 @@ const DistOsDripSequences = lazy(() => import("@/pages/distribution-os/drip-sequ
 const DistOsPrivacy = lazy(() => import("@/pages/distribution-os/privacy-command-center"));
 const DistOsAnalyticsCommandCenter = lazy(() => import("@/pages/distribution-os/analytics-command-center"));
 const DistOsSessionReplay = lazy(() => import("@/pages/distribution-os/session-replay"));
+const DistOsSessionJourneys = lazy(() => import("@/pages/distribution-os/session-journeys"));
 const DistOsConversionGoals = lazy(() => import("@/pages/distribution-os/conversion-goals"));
 const DistOsAutomations = lazy(() => import("@/pages/distribution-os/automations-page"));
 const DistOsSettings = lazy(() => import("@/pages/distribution-os/settings-page"));
 const DistOsReports = lazy(() => import("@/pages/distribution-os/reports-page"));
+const DistOsHeatmaps = lazy(() => import("@/pages/distribution-os/heatmap-viewer"));
+const DistOsExperiments = lazy(() => import("@/pages/distribution-os/experiments"));
 
 const VenturePortfolioPage = lazy(() => import("@/pages/venture-portfolio"));
 const AlloyFactoryFloor = lazy(() => import("@/alloy/pages/factory-floor"));
@@ -966,7 +969,7 @@ function App() {
               <RequireAuth><Suspense fallback={<PageLoader />}><DistOsAnalyticsCommandCenter /></Suspense></RequireAuth>
             </Route>
             <Route path="/admin/distribution/analytics/sessions">
-              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsSessionReplay /></Suspense></RequireAuth>
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsSessionJourneys /></Suspense></RequireAuth>
             </Route>
             <Route path="/admin/distribution/analytics/goals">
               <RequireAuth><Suspense fallback={<PageLoader />}><DistOsConversionGoals /></Suspense></RequireAuth>
@@ -991,6 +994,15 @@ function App() {
             </Route>
             <Route path="/admin/distribution/reports">
               <RequireAuth><Suspense fallback={<PageLoader />}><DistOsReports /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/session-replay">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsSessionReplay /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/heatmaps">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsHeatmaps /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/experiments">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsExperiments /></Suspense></RequireAuth>
             </Route>
             <Route path="/admin/distribution">
               <RequireAuth><Suspense fallback={<PageLoader />}><DistOsDashboard /></Suspense></RequireAuth>

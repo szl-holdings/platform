@@ -5,7 +5,8 @@ import {
   LayoutDashboard, FileText, Mail, Image, Twitter, Users, Megaphone,
   Calendar, BarChart3, Settings, Zap, TrendingUp, Eye, UserPlus, Send,
   AlertCircle, ChevronRight, Globe, Link2, Target, Clock, CheckCircle2,
-  Activity, RefreshCw, LineChart, GitBranch, Shield,
+  Activity, RefreshCw, LineChart, GitBranch, Shield, Video, Flame, FlaskConical,
+  ScrollText,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 
@@ -41,15 +42,20 @@ const NAV_ITEMS = [
   { href: "/admin/distribution/calendar", icon: Calendar, label: "Calendar" },
   { href: "/admin/distribution/analytics", icon: BarChart3, label: "Analytics" },
   { href: "/admin/distribution/analytics/command-center", icon: Activity, label: "Command Center" },
-  { href: "/admin/distribution/analytics/sessions", icon: Eye, label: "Session Replay" },
+  { href: "/admin/distribution/analytics/sessions", icon: ScrollText, label: "Session Journeys" },
   { href: "/admin/distribution/analytics/goals", icon: Target, label: "Conv. Goals" },
+  { href: "/admin/distribution/session-replay", icon: Video, label: "Session Replay" },
+  { href: "/admin/distribution/heatmaps", icon: Flame, label: "Heatmaps" },
+  { href: "/admin/distribution/experiments", icon: FlaskConical, label: "A/B Experiments" },
   { href: "/admin/distribution/reports", icon: LineChart, label: "Reports" },
   { href: "/admin/distribution/automations", icon: Zap, label: "Automations" },
   { href: "/admin/distribution/privacy", icon: Shield, label: "Privacy" },
   { href: "/admin/distribution/settings", icon: Settings, label: "Settings" },
 ];
 
-export function DistributionOsLayout({ children, currentPath }: { children: React.ReactNode; currentPath: string }) {
+export function DistributionOsLayout({ children, currentPath: currentPathProp }: { children: React.ReactNode; currentPath?: string }) {
+  const [location] = useLocation();
+  const currentPath = currentPathProp ?? location;
   return (
     <div style={{ minHeight: "100vh", background: "#070a10" }}>
       <SiteNav />
@@ -59,7 +65,9 @@ export function DistributionOsLayout({ children, currentPath }: { children: Reac
             <h2 style={{ fontSize: "0.6875rem", fontWeight: 700, color: "#d4a054", letterSpacing: "0.1em", textTransform: "uppercase" }}>Marketing OS</h2>
           </div>
           {NAV_ITEMS.map(item => {
-            const active = currentPath === item.href || currentPath.startsWith(item.href + "/");
+            const active = item.href === "/admin/distribution"
+              ? currentPath === item.href
+              : currentPath === item.href || currentPath.startsWith(item.href + "/");
             return (
               <a
                 key={item.href}

@@ -1,4 +1,5 @@
 import { createContext, useContext, useCallback, useEffect, useRef, type ReactNode } from "react";
+import { initConsentSystem, onConsentChange, type ConsentState } from "./cookie-banner";
 
 interface AnalyticsEvent {
   name: string;
@@ -30,6 +31,7 @@ interface AnalyticsContextValue {
   identify: (userId: string, traits?: Record<string, unknown>) => void;
   sessionId: () => string;
   visitorId: () => string;
+  consent: ConsentState | null;
 }
 
 const AnalyticsContext = createContext<AnalyticsContextValue>({
@@ -38,6 +40,7 @@ const AnalyticsContext = createContext<AnalyticsContextValue>({
   identify: () => {},
   sessionId: () => "",
   visitorId: () => "",
+  consent: null,
 });
 
 export function useAnalytics(): AnalyticsContextValue {
@@ -49,6 +52,10 @@ interface AnalyticsProviderProps {
   children: ReactNode;
   enabled?: boolean;
   onConversionEvent?: (eventName: string, properties?: Record<string, unknown>) => void;
+  sessionId?: string;
+  enableSessionReplay?: boolean;
+  enableHeatmaps?: boolean;
+  sessionReplaySampleRate?: number;
 }
 
 const ANALYTICS_CONVERSION_EVENTS = new Set([
@@ -175,14 +182,23 @@ async function flushEvents(appName: string): Promise<void> {
   }
 }
 
-export function AnalyticsProvider({ appName, children, enabled = true, onConversionEvent }: AnalyticsProviderProps) {
+export function AnalyticsProvider({
+  appName,
+  children,
+  enabled = true,
+  onConversionEvent,
+  sessionId,
+  enableSessionReplay = false,
+  enableHeatmaps = false,
+  sessionReplaySampleRate = 10,
+}: AnalyticsProviderProps) {
   const pageEnterAt = useRef<number>(Date.now());
   const currentPath = useRef<string>(typeof window !== "undefined" ? window.location.pathname : "");
   const clickCountRef = useRef<number>(0);
+  const consentState = initConsentSystem();
 
   useEffect(() => {
     if (!enabled) return;
-
     const handleClick = () => { clickCountRef.current++; };
     document.addEventListener("click", handleClick, { passive: true });
     return () => document.removeEventListener("click", handleClick);
@@ -198,6 +214,62 @@ export function AnalyticsProvider({ appName, children, enabled = true, onConvers
       window.removeEventListener("beforeunload", handleUnload);
     };
   }, [appName, enabled]);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const unsub = onConsentChange((newConsent: ConsentState) => {
+      if (!newConsent.analytics) {
+        stopReplayAndHeatmaps();
+      } else {
+        startReplayAndHeatmaps(newConsent);
+      }
+    });
+
+    if (consentState.analytics) {
+      startReplayAndHeatmaps(consentState);
+    }
+
+    return () => {
+      unsub();
+      stopReplayAndHeatmaps();
+    };
+  }, [enabled, sessionId, enableSessionReplay, enableHeatmaps, sessionReplaySampleRate]);
+
+  async function startReplayAndHeatmaps(consent: ConsentState): Promise<void> {
+    const sid = sessionId || getSessionId();
+
+    if (enableSessionReplay && consent.analytics) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const analyticsLib = await (Function('return import("@szl-holdings/analytics")')() as Promise<any>);
+        const startFn = analyticsLib?.startSessionRecorder;
+        if (startFn) {
+          await startFn({ sessionId: sid, sampleRate: sessionReplaySampleRate, enabled: true });
+        }
+      } catch {}
+    }
+
+    if (enableHeatmaps && consent.analytics) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const analyticsLib = await (Function('return import("@szl-holdings/analytics")')() as Promise<any>);
+        const initFn = analyticsLib?.initHeatmapCollector;
+        if (initFn) {
+          initFn({ sessionId: sid, enabled: true });
+        }
+      } catch {}
+    }
+  }
+
+  async function stopReplayAndHeatmaps(): Promise<void> {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const analyticsLib = await (Function('return import("@szl-holdings/analytics")')() as Promise<any>);
+      const stopFn = analyticsLib?.stopSessionRecorder;
+      if (stopFn) stopFn();
+    } catch {}
+  }
 
   const enrichEvent = useCallback((name: string, properties?: Record<string, unknown>): AnalyticsEvent => {
     const utm = getUtmParams();
@@ -224,6 +296,8 @@ export function AnalyticsProvider({ appName, children, enabled = true, onConvers
 
   const track = useCallback((name: string, properties?: Record<string, unknown>) => {
     if (!enabled) return;
+    const consent = initConsentSystem();
+    if (!consent.analytics && name !== "page_view") return;
     const event = enrichEvent(name, properties);
 
     if (name === "page_view") {
@@ -261,6 +335,7 @@ export function AnalyticsProvider({ appName, children, enabled = true, onConvers
       identify,
       sessionId: getSessionId,
       visitorId: getVisitorId,
+      consent: consentState,
     }}>
       {children}
     </AnalyticsContext.Provider>

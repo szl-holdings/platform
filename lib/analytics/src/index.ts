@@ -1,5 +1,10 @@
 export * from "./events";
 export { configurePlausible, trackEvent, trackPageView } from "./plausible";
+export { start as startSessionRecorder, stop as stopSessionRecorder, markConversion as markRecordingConversion, isRecording } from "./session-recorder";
+export { initHeatmapCollector } from "./heatmap-collector";
+export { configureBridge, bridgeEvent } from "./bridge";
+export { initConsent, getConsent, setConsent, acceptAll, declineAll, onConsentChange, CONSENT_VERSION } from "./consent";
+export type { ConsentState, ConsentCategories } from "./consent";
 
 import { trackEvent } from "./plausible";
 import type {
