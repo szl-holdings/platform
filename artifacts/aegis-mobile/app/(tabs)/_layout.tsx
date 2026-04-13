@@ -37,6 +37,10 @@ function NativeTabLayout() {
         <Icon sf={{ default: "doc.text", selected: "doc.text.fill" }} />
         <Label>Digest</Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="briefing">
+        <Icon sf={{ default: "sunrise", selected: "sunrise.fill" }} />
+        <Label>Brief</Label>
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
         <Icon sf={{ default: "person", selected: "person.fill" }} />
         <Label>Profile</Label>
@@ -147,6 +151,24 @@ function ClassicTabLayout() {
             ) : (
               <Ionicons name="document-text-outline" size={20} color={color} />
             ),
+        }}
+      />
+      <Tabs.Screen
+        name="briefing"
+        options={{
+          title: "Brief",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="sunrise" tintColor={color} size={22} />
+            ) : (
+              <Ionicons name="sunny-outline" size={20} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="intel-feed"
+        options={{
+          href: null,
         }}
       />
       <Tabs.Screen

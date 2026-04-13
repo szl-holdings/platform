@@ -29,7 +29,11 @@ function NativeTabLayout() {
         <Icon sf={{ default: "chart.line.uptrend.xyaxis", selected: "chart.line.uptrend.xyaxis.circle.fill" }} />
         <Label>Economics</Label>
       </NativeTabs.Trigger>
-            <NativeTabs.Trigger name="mcp-tools">
+            <NativeTabs.Trigger name="briefing">
+        <Icon sf={{ default: "sunrise", selected: "sunrise.fill" }} />
+        <Label>Brief</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="mcp-tools">
         <Icon sf={{ default: "cpu", selected: "cpu.fill" }} />
         <Label>Tools</Label>
       </NativeTabs.Trigger>
@@ -122,6 +126,20 @@ function ClassicTabLayout() {
             ),
         }}
       />
+      <Tabs.Screen
+        name="briefing"
+        options={{
+          title: "Brief",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="sunrise" tintColor={color} size={22} />
+            ) : (
+              <Feather name="sunrise" size={20} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen name="intel-feed" options={{ href: null }} />
+      <Tabs.Screen name="mcp-tools" options={{ href: null }} />
       <Tabs.Screen
         name="profile"
         options={{

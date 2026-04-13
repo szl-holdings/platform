@@ -41,3 +41,51 @@ export type { ToolResultCardProps } from "./ToolResultCard";
 
 export { useProactiveSuggestions } from "./useProactiveSuggestions";
 export type { ProactiveSuggestion, ProactiveSuggestionsConfig } from "./useProactiveSuggestions";
+
+export { useContextualAwareness } from "./useContextualAwareness";
+export type {
+  AwarenessContext,
+  DomainRule,
+  DomainKey,
+  TimeOfDay,
+  LocationContext,
+  ContextualSignal,
+} from "./useContextualAwareness";
+
+export { useProactiveBriefing } from "./useProactiveBriefing";
+export type {
+  DomainBriefing,
+  BriefingMetric,
+  BriefingAnomaly,
+  BriefingAction,
+  ProactiveBriefingConfig,
+} from "./useProactiveBriefing";
+
+export { BriefingCard } from "./BriefingCard";
+export type { BriefingCardProps } from "./BriefingCard";
+
+export { IntelligenceFeed } from "./IntelligenceFeed";
+export type {
+  IntelFeedItem,
+  IntelligenceFeedConfig,
+  FeedItemDomain,
+  FeedItemSeverity,
+} from "./IntelligenceFeed";
+
+export { useEdgeIntelligence } from "./useEdgeIntelligence";
+export type {
+  DocumentClass,
+  SentimentResult,
+  DocumentClassificationResult,
+  SentimentAnalysisResult,
+  AnomalyDetectionResult,
+} from "./useEdgeIntelligence";
+
+export { useAmbientBackground } from "./useAmbientBackground";
+export type {
+  AmbientAlert,
+  AmbientBackgroundConfig,
+  GeofenceZone,
+  AlertSeverity,
+  AlertDomain,
+} from "./useAmbientBackground";

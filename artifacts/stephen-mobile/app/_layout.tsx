@@ -64,6 +64,8 @@ function RootLayoutNav() {
       <Stack.Screen name="article/[slug]" options={{ headerShown: false, animation: "slide_from_right" }} />
       <Stack.Screen name="venture/[slug]" options={{ headerShown: false, animation: "slide_from_right" }} />
       <Stack.Screen name="mcp-tools" options={{ headerShown: false, animation: "slide_from_right" }} />
+      <Stack.Screen name="briefing" options={{ headerShown: false, animation: "slide_from_bottom" }} />
+      <Stack.Screen name="intel-feed" options={{ headerShown: false, animation: "slide_from_bottom" }} />
       <Stack.Screen name="privacy" options={{ headerShown: false, animation: "slide_from_right" }} />
       <Stack.Screen name="+not-found" />
     </Stack>

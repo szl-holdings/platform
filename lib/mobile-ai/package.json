@@ -15,7 +15,13 @@
     "./push-notification-wrapper": "./src/PushNotificationWrapper.tsx",
     "./documents": "./src/DocumentCapture.tsx",
     "./cache": "./src/useOfflineCache.ts",
-    "./vault": "./src/useSecureVault.ts"
+    "./vault": "./src/useSecureVault.ts",
+    "./contextual-awareness": "./src/useContextualAwareness.ts",
+    "./proactive-briefing": "./src/useProactiveBriefing.ts",
+    "./briefing-card": "./src/BriefingCard.tsx",
+    "./intelligence-feed": "./src/IntelligenceFeed.tsx",
+    "./edge-intelligence": "./src/useEdgeIntelligence.ts",
+    "./ambient-background": "./src/useAmbientBackground.ts"
   },
   "peerDependencies": {
     "react": ">=18",

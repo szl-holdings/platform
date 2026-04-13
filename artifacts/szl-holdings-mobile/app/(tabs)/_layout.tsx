@@ -106,6 +106,19 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="briefing"
+        options={{
+          title: "Brief",
+          tabBarIcon: ({ color }) => (
+            <Feather name="sunrise" size={20} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="intel-feed"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
         name="mcp-tools"
         options={{
           title: "AI Command",
