@@ -176,3 +176,16 @@ export interface AgentOpsMetrics {
   runsLast24h: number;
   sloStatus: "healthy" | "degraded" | "breached";
 }
+
+export interface CognitiveRunMetadata {
+  cognitiveMode: "system1" | "system2";
+  complexityScore: number;
+  planningStrategy: string;
+  riskLevel: string;
+  planningTrace?: import("./advanced-planner").PlanningTrace;
+  metacognitiveState?: import("./metacognition").MetacognitiveState;
+  consensusUsed?: boolean;
+  recoveryAttempted?: boolean;
+  intentPreserved?: boolean;
+  personalizationApplied?: boolean;
+}

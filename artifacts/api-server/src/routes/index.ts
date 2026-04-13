@@ -125,6 +125,7 @@ import crossAppHandoffsRouter from "./cross-app-handoffs";
 import { aiRouter as aiOrchestratorRouter } from "./ai-orchestrator";
 import { mastraRouter } from "./mastra-agents";
 import actionEngineRouter from "./action-engine";
+import { cognitiveRouter } from "./cognitive";
 import stephenTelemetryRouter from "./stephen-telemetry";
 import aistreamLiveRouter from "./aisstream-live";
 import courtlistenerLiveRouter from "./courtlistener-live";
@@ -392,6 +393,7 @@ router.use("/ai/orchestrator", aiOrchestratorRouter);
 router.use("/ai/mastra", mastraRouter);
 router.use("/ai/mastra/action-engine", _writeLimiter);
 router.use("/ai/mastra", actionEngineRouter);
+router.use("/ai/mastra/cognitive", cognitiveRouter);
 
 router.use("/analytics", _writeLimiter);
 router.use(analyticsRouter);

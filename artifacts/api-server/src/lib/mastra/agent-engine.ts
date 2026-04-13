@@ -23,7 +23,17 @@ import { terraMcpModule } from "./mcp-gateway/terra-module";
 import { prismMcpModule } from "./mcp-gateway/prism-module";
 import { alloyMcpModule } from "./mcp-gateway/alloy-module";
 import { githubMcpModule } from "./mcp-gateway/github-module";
-import type { MastraAgentConfig, AgentExecutionContext, DelegationResult, TraceSpan, GuardrailResult } from "./types";
+import type { MastraAgentConfig, AgentExecutionContext, DelegationResult, TraceSpan, GuardrailResult, CognitiveRunMetadata } from "./types";
+import { classifyRequest } from "./cognitive-router";
+import { runTreeOfThought, runPlanCritique, runMonteCarlo, buildPlanningTrace } from "./advanced-planner";
+import { runMetacognitiveAssessment, runSelfReflection, generateClarifyingQuestion } from "./metacognition";
+import { recordOutcome, getActiveStrategyProfile, updateProfileMetrics, ensureSelfEvolutionTables } from "./self-evolution";
+import { diagnoseFailure, generateRecoveryPlan, recordRecoveryAttempt, updateRecoveryOutcome, ensureFailureRecoveryTables } from "./failure-recovery";
+import { recordToolChain, ensureDynamicToolTables } from "./dynamic-tools";
+import { getOrCreateIntentStack, updateIntentStack, extractIntent, buildIntentContext, ensureIntentTables } from "./intent-graph";
+import { requiresConsensus, runConsensusVerification } from "./consensus-verification";
+import { getOrCreateUserProfile, buildPersonalizationContext, buildPersonalizedSystemPrompt, recordInteraction, ensurePersonalizationTables } from "./personalization";
+import { ensureProactiveTables } from "./proactive-intelligence";
 
 export { buildMcpGatewayRouter };
 
@@ -161,6 +171,7 @@ export async function runAgent(
     context?: Record<string, unknown>;
     maxToolRounds?: number;
     parentRunId?: string;
+    skipCognitive?: boolean;
   } = {}
 ): Promise<OrchestratorResult> {
   const startTime = Date.now();
@@ -198,97 +209,260 @@ export async function runAgent(
     throw new Error(`Input guardrail failed: ${inputGuard.reason}`);
   }
 
+  const sanitizedMessage = inputGuard.sanitizedContent ?? userMessage;
+
+  const isCognitiveRun = !options.skipCognitive && !options.parentRunId;
+
+  const cognitiveMetadata: CognitiveRunMetadata = {
+    cognitiveMode: "system1",
+    complexityScore: 0,
+    planningStrategy: "direct",
+    riskLevel: "low",
+  };
+
+  let cognitiveClassification: Awaited<ReturnType<typeof classifyRequest>> | null = null;
+  let intentStack: Awaited<ReturnType<typeof getOrCreateIntentStack>> | null = null;
+  let personalizationCtx: ReturnType<typeof buildPersonalizationContext> | null = null;
+  let activeStrategyProfile: Awaited<ReturnType<typeof getActiveStrategyProfile>> = null;
+
+  if (isCognitiveRun) {
+    [cognitiveClassification, intentStack, activeStrategyProfile] = await Promise.all([
+      classifyRequest(sanitizedMessage, config.domain, options.context),
+      getOrCreateIntentStack(threadId, options.userId),
+      getActiveStrategyProfile(agentId),
+    ]);
+
+    cognitiveMetadata.cognitiveMode = cognitiveClassification.mode;
+    cognitiveMetadata.complexityScore = cognitiveClassification.complexityScore;
+    cognitiveMetadata.planningStrategy = cognitiveClassification.planningStrategy;
+    cognitiveMetadata.riskLevel = cognitiveClassification.riskLevel;
+
+    if (options.userId) {
+      const [userProfile] = await Promise.all([
+        getOrCreateUserProfile(options.userId),
+        recordInteraction(options.userId, sanitizedMessage, config.domain),
+      ]);
+      personalizationCtx = buildPersonalizationContext(userProfile);
+      cognitiveMetadata.personalizationApplied = true;
+    }
+
+    if (intentStack) {
+      const intentExtraction = await extractIntent(
+        sanitizedMessage,
+        intentStack.primaryIntent?.intent,
+        []
+      );
+      intentStack = await updateIntentStack(intentStack, intentExtraction, Date.now());
+      cognitiveMetadata.intentPreserved = true;
+    }
+  }
+
   const shortTermMemory = await getShortTermMemory(threadId, config.memory?.shortTerm?.maxMessages ?? 20);
   let semanticContext = "";
   if (config.memory?.longTerm?.semanticRecall) {
-    const recalled = await semanticRecall(userMessage, { agentId, topK: config.memory.longTerm.topK });
+    const recalled = await semanticRecall(sanitizedMessage, { agentId, topK: config.memory.longTerm.topK });
     if (recalled.length > 0) {
       semanticContext = "\n\nRelevant past context:\n" + recalled.map(r => `[${r.role}]: ${r.content}`).join("\n");
     }
   }
 
   const toolPrompt = buildToolPrompt();
-  const systemPrompt = config.systemPrompt + toolPrompt + semanticContext;
+  let systemPrompt = config.systemPrompt;
+
+  if (activeStrategyProfile?.systemPromptVariant) {
+    systemPrompt = activeStrategyProfile.systemPromptVariant;
+  }
+
+  if (personalizationCtx) {
+    systemPrompt = buildPersonalizedSystemPrompt(systemPrompt, personalizationCtx);
+  }
+
+  if (intentStack) {
+    const intentCtx = buildIntentContext(intentStack);
+    if (intentCtx) systemPrompt += "\n\n[SESSION CONTEXT]\n" + intentCtx;
+  }
+
+  systemPrompt += toolPrompt + semanticContext;
 
   const messages: { role: string; content: string }[] = [
     { role: "system", content: systemPrompt },
     ...shortTermMemory.map(m => ({ role: m.role, content: m.content })),
-    { role: "user", content: inputGuard.sanitizedContent ?? userMessage },
+    { role: "user", content: sanitizedMessage },
   ];
 
   await storeMessage(threadId, "user", userMessage);
 
+  let finalResponse = "";
   const toolsUsed: string[] = [];
   const delegations: DelegationResult[] = [];
   let totalTokens = 0;
-  let finalResponse = "";
+  let executionError: Error | null = null;
 
-  for (let round = 0; round <= maxToolRounds; round++) {
-    const inferenceTraceId = generateId("trace");
-    const inferStart = Date.now();
+  if (isCognitiveRun && cognitiveClassification && cognitiveClassification.mode === "system2") {
+    const strategy = cognitiveClassification.planningStrategy;
+    const sysCtx = messages.find(m => m.role === "system")?.content || config.systemPrompt;
 
-    await emitTrace(runId, agentId, {
-      traceId: inferenceTraceId, parentTraceId: traceId,
-      spanType: "llm_inference", name: `${config.model} inference`,
-      status: "running", model: config.model, provider: config.provider,
-    });
-
-    let response: any;
     try {
-      response = await gatewayInfer({
-        model: config.model,
-        preferredProvider: config.provider as any,
-        messages: messages.map(m => ({ role: m.role as "system" | "user" | "assistant", content: m.content })),
-        maxTokens: config.maxTokens,
-        strategy: (config.routing as "fastest" | "cheapest" | "preferred" | "fallback") ?? "preferred",
-      });
+      let planResult: any;
+      let planningTrace: Awaited<ReturnType<typeof buildPlanningTrace>> | null = null;
+
+      if (strategy === "tot") {
+        planResult = await runTreeOfThought(sanitizedMessage, sysCtx);
+        finalResponse = planResult.finalReasoning;
+        planningTrace = await buildPlanningTrace("tot", planResult);
+      } else if (strategy === "plan_critique") {
+        planResult = await runPlanCritique(sanitizedMessage, sysCtx);
+        finalResponse = planResult.revisedPlan;
+        planningTrace = await buildPlanningTrace("plan_critique", planResult);
+      } else if (strategy === "monte_carlo") {
+        planResult = await runMonteCarlo(sanitizedMessage, sysCtx);
+        finalResponse = planResult.expectedOutcome;
+        planningTrace = await buildPlanningTrace("monte_carlo", planResult);
+      }
+
+      if (planningTrace) {
+        cognitiveMetadata.planningTrace = planningTrace;
+      }
     } catch (err: any) {
+      logger.warn({ err, strategy }, "Advanced planning failed, falling back to standard execution");
+    }
+  }
+
+  if (!finalResponse) {
+    let recoveryAttemptId: string | null = null;
+
+    for (let round = 0; round <= maxToolRounds; round++) {
+      const inferenceTraceId = generateId("trace");
+      const inferStart = Date.now();
+
       await emitTrace(runId, agentId, {
         traceId: inferenceTraceId, parentTraceId: traceId,
         spanType: "llm_inference", name: `${config.model} inference`,
-        status: "failed", error: err.message, latencyMs: Date.now() - inferStart,
-        model: config.model, provider: config.provider,
+        status: "running", model: config.model, provider: config.provider,
       });
-      throw err;
+
+      let response: any;
+      try {
+        response = await gatewayInfer({
+          model: config.model,
+          preferredProvider: config.provider as any,
+          messages: messages.map(m => ({ role: m.role as "system" | "user" | "assistant", content: m.content })),
+          maxTokens: config.maxTokens,
+          strategy: (config.routing as "fastest" | "cheapest" | "preferred" | "fallback") ?? "preferred",
+        });
+      } catch (err: any) {
+        await emitTrace(runId, agentId, {
+          traceId: inferenceTraceId, parentTraceId: traceId,
+          spanType: "llm_inference", name: `${config.model} inference`,
+          status: "failed", error: err.message, latencyMs: Date.now() - inferStart,
+          model: config.model, provider: config.provider,
+        });
+
+        if (isCognitiveRun && round === 0) {
+          const diagnosis = await diagnoseFailure(err.message, sanitizedMessage, agentId, toolsUsed);
+          if (diagnosis.isRecoverable && diagnosis.recoveryStrategy !== "abort") {
+            const recoveryPlan = await generateRecoveryPlan(sanitizedMessage, diagnosis, config.systemPrompt, toolsUsed);
+            const attempt = await recordRecoveryAttempt(runId, agentId, err.message, diagnosis, recoveryPlan);
+            recoveryAttemptId = attempt.attemptId;
+            cognitiveMetadata.recoveryAttempted = true;
+            finalResponse = recoveryPlan;
+            break;
+          }
+        }
+        executionError = err;
+        break;
+      }
+
+      const inferMs = Date.now() - inferStart;
+      const tokens = response.usage?.totalTokens ?? 0;
+      totalTokens += tokens;
+
+      await emitTrace(runId, agentId, {
+        traceId: inferenceTraceId, parentTraceId: traceId,
+        spanType: "llm_inference", name: `${config.model} inference`,
+        status: "completed", tokensInput: response.usage?.promptTokens ?? 0,
+        tokensOutput: response.usage?.completionTokens ?? 0,
+        latencyMs: inferMs, model: response.model, provider: response.provider,
+        costUsd: estimateCost(response.model, response.usage),
+      });
+
+      const content = response.content || "";
+      const toolCall = extractToolCall(content);
+
+      if (!toolCall || round === maxToolRounds) {
+        finalResponse = toolCall ? content.replace(/\{[\s\S]*"tool"[\s\S]*\}/, "").trim() || content : content;
+        break;
+      }
+
+      toolsUsed.push(toolCall.name);
+      let toolResult = await executeTool(toolCall.name, toolCall.input, context);
+
+      if (toolResult.error && isCognitiveRun) {
+        const diagnosis = await diagnoseFailure(toolResult.error, sanitizedMessage, agentId, toolsUsed);
+        if (diagnosis.isRecoverable && diagnosis.recoveryStrategy === "fallback") {
+          const recoveryPlan = await generateRecoveryPlan(sanitizedMessage, diagnosis, config.systemPrompt, toolsUsed);
+          const attempt = await recordRecoveryAttempt(runId, agentId, toolResult.error, diagnosis, recoveryPlan);
+          recoveryAttemptId = attempt.attemptId;
+          cognitiveMetadata.recoveryAttempted = true;
+        }
+      }
+
+      if (toolCall.name === "delegate_to_agent" && toolResult.output) {
+        delegations.push(toolResult.output as DelegationResult);
+      }
+
+      messages.push({ role: "assistant", content });
+      messages.push({
+        role: "tool",
+        content: JSON.stringify({
+          tool: toolCall.name,
+          result: toolResult.output,
+          error: toolResult.error,
+        }),
+      });
     }
 
-    const inferMs = Date.now() - inferStart;
-    const tokens = response.usage?.totalTokens ?? 0;
-    totalTokens += tokens;
+    if (recoveryAttemptId && finalResponse) {
+      await updateRecoveryOutcome(recoveryAttemptId, "succeeded", finalResponse.slice(0, 200));
+    }
+  }
 
-    await emitTrace(runId, agentId, {
-      traceId: inferenceTraceId, parentTraceId: traceId,
-      spanType: "llm_inference", name: `${config.model} inference`,
-      status: "completed", tokensInput: response.usage?.promptTokens ?? 0,
-      tokensOutput: response.usage?.completionTokens ?? 0,
-      latencyMs: inferMs, model: response.model, provider: response.provider,
-      costUsd: estimateCost(response.model, response.usage),
-    });
+  if (executionError && !finalResponse) {
+    throw executionError;
+  }
 
-    const content = response.content || "";
-    const toolCall = extractToolCall(content);
+  if (isCognitiveRun && finalResponse) {
+    const metacogState = await runMetacognitiveAssessment(
+      sanitizedMessage,
+      finalResponse,
+      config.domain,
+      { toolErrors: 0 }
+    );
+    cognitiveMetadata.metacognitiveState = metacogState;
 
-    if (!toolCall || round === maxToolRounds) {
-      finalResponse = toolCall ? content.replace(/\{[\s\S]*"tool"[\s\S]*\}/, "").trim() || content : content;
-      break;
+    if (metacogState.recommendedAction === "clarify" && metacogState.ambiguityLevel === "high") {
+      const question = await generateClarifyingQuestion(sanitizedMessage, metacogState.ambiguityLevel, metacogState.knowledgeGaps);
+      finalResponse = `${finalResponse}\n\n---\n*To provide a more accurate response, could you clarify: ${question}*`;
     }
 
-    toolsUsed.push(toolCall.name);
-    const toolResult = await executeTool(toolCall.name, toolCall.input, context);
-
-    if (toolCall.name === "delegate_to_agent" && toolResult.output) {
-      delegations.push(toolResult.output as DelegationResult);
+    if (cognitiveClassification?.requiresConsensus || requiresConsensus(config.domain, cognitiveClassification?.riskLevel || "low")) {
+      try {
+        const consensus = await runConsensusVerification(sanitizedMessage, config.systemPrompt, config.domain);
+        if (consensus.analysis.consensusReached && consensus.analysis.consensusScore > 0.75) {
+          finalResponse = consensus.finalResponse;
+          cognitiveMetadata.consensusUsed = true;
+        }
+      } catch (err) {
+        logger.warn({ err }, "Consensus verification failed, using original response");
+      }
     }
 
-    messages.push({ role: "assistant", content });
-    messages.push({
-      role: "tool",
-      content: JSON.stringify({
-        tool: toolCall.name,
-        result: toolResult.output,
-        error: toolResult.error,
-      }),
-    });
+    if (metacogState.confidence > 0.6) {
+      const reflection = await runSelfReflection(sanitizedMessage, finalResponse, config.systemPrompt);
+      if (reflection.shouldCorrect && reflection.correctedResponse) {
+        finalResponse = reflection.correctedResponse;
+      }
+    }
   }
 
   const outputGuard = await runGuardrails(config.guardrails, finalResponse, "output", context);
@@ -299,7 +473,7 @@ export async function runAgent(
   await storeMessage(threadId, "assistant", finalResponse, {
     tokensUsed: totalTokens, latencyMs,
     model: config.model, provider: config.provider,
-    metadata: { toolsUsed, delegations: delegations.length },
+    metadata: { toolsUsed, delegations: delegations.length, cognitiveMode: cognitiveMetadata.cognitiveMode },
   });
 
   await emitTrace(runId, agentId, {
@@ -307,16 +481,33 @@ export async function runAgent(
     status: "completed", output: { response: finalResponse.slice(0, 500) },
     tokensInput: totalTokens, latencyMs,
     model: config.model, provider: config.provider,
+    metadata: { cognitiveMetadata },
   });
 
   await recordAgentRun(runId, agentId, config.domain, "completed", startTime, finalResponse.slice(0, 200));
-  await autoEvaluate(runId, agentId, finalResponse, latencyMs, totalTokens);
+
+  const evalResult = await autoEvaluate(runId, agentId, finalResponse, latencyMs, totalTokens);
+
+  if (isCognitiveRun) {
+    const successScore = (evalResult.quality + evalResult.latency) / 2;
+    await Promise.allSettled([
+      recordOutcome({
+        runId, agentId,
+        profileId: activeStrategyProfile?.profileId || "default",
+        successScore, latencyMs, toolsUsed,
+        feedbackSignals: { quality: evalResult.quality, latency: evalResult.latency, cost: evalResult.cost },
+      }),
+      updateProfileMetrics(agentId, successScore),
+      toolsUsed.length >= 2 ? recordToolChain(toolsUsed, agentId, latencyMs) : Promise.resolve(),
+    ]);
+  }
 
   return {
     runId, agentId, response: finalResponse, toolsUsed,
     tokensUsed: totalTokens, latencyMs,
     model: config.model, provider: config.provider, delegations,
     threadId, traceId,
+    cognitiveMetadata,
   };
 }
 
@@ -413,7 +604,7 @@ async function recordAgentRun(
 }
 
 export async function initializeMastra(): Promise<void> {
-  logger.info("Initializing Mastra agent framework...");
+  logger.info("Initializing Mastra agent framework with Cognitive Core...");
 
   registerCrossPlatformTools();
   registerGitHubIntegration();
@@ -444,6 +635,12 @@ export async function initializeMastra(): Promise<void> {
     ensureSkillsRegistryTable(),
     ensureSkillRuntimeTables(),
     ensureAgentActivityTable(),
+    ensureSelfEvolutionTables(),
+    ensureFailureRecoveryTables(),
+    ensureDynamicToolTables(),
+    ensureIntentTables(),
+    ensurePersonalizationTables(),
+    ensureProactiveTables(),
   ]);
 
   registerDefaultTriggers();
@@ -455,7 +652,14 @@ export async function initializeMastra(): Promise<void> {
     actionEngine: "initialized",
     skillsEngine: "initialized",
     agentActivity: "initialized",
-  }, "Mastra agent framework initialized with Skills Engine + MCP Gateway v2");
+    cognitiveCore: "active",
+    modules: [
+      "cognitive-router", "advanced-planner", "metacognition",
+      "self-evolution", "failure-recovery", "dynamic-tools",
+      "intent-graph", "consensus-verification", "personalization",
+      "proactive-intelligence",
+    ],
+  }, "Mastra agent framework initialized with Skills Engine + MCP Gateway v2 + Cognitive Core (6th Ring)");
 }
 
 export interface OrchestratorResult {
@@ -470,4 +674,5 @@ export interface OrchestratorResult {
   delegations: DelegationResult[];
   threadId: string;
   traceId: string;
+  cognitiveMetadata?: CognitiveRunMetadata;
 }

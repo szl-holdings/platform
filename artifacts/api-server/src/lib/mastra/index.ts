@@ -72,3 +72,57 @@ export {
   buildMcpGatewayRouter,
 } from "./mcp-gateway/index";
 export type { McpTool, McpResource, McpPrompt, McpServerModule } from "./mcp-gateway/index";
+
+export { classifyRequest, classifyWithLLM } from "./cognitive-router";
+export type { CognitiveClassification, CognitiveMode } from "./cognitive-router";
+
+export { runTreeOfThought, runPlanCritique, runMonteCarlo, buildPlanningTrace } from "./advanced-planner";
+export type { TreeOfThoughtResult, PlanCritiqueResult, MonteCarloResult, PlanningTrace } from "./advanced-planner";
+
+export { runMetacognitiveAssessment, runSelfReflection, generateClarifyingQuestion } from "./metacognition";
+export type { MetacognitiveState, SelfReflectionResult } from "./metacognition";
+
+export {
+  ensureSelfEvolutionTables, recordOutcome, getActiveStrategyProfile,
+  listStrategyProfiles, proposePromptRefinement, saveProposedProfile,
+  approveStrategyProfile, updateProfileMetrics, getRecentOutcomes,
+} from "./self-evolution";
+export type { StrategyProfile, EvolutionOutcome, PromptRefinement } from "./self-evolution";
+
+export {
+  ensureFailureRecoveryTables, diagnoseFailure, generateRecoveryPlan,
+  recordRecoveryAttempt, updateRecoveryOutcome, getRecoveryHistory,
+} from "./failure-recovery";
+export type { FailureDiagnosis, RecoveryAttempt, RecoveryPattern } from "./failure-recovery";
+
+export {
+  ensureDynamicToolTables, recordToolChain, identifyRepeatedChains,
+  proposeCompoundTool, activateCompoundTool, listCompoundTools,
+  runPeriodicToolAnalysis,
+} from "./dynamic-tools";
+export type { ToolChainUsage, CompoundToolDefinition } from "./dynamic-tools";
+
+export {
+  ensureIntentTables, getOrCreateIntentStack, updateIntentStack,
+  extractIntent, buildIntentContext, markIntentResolved, getIntentStack,
+} from "./intent-graph";
+export type { IntentStack, IntentNode, IntentExtraction } from "./intent-graph";
+
+export {
+  requiresConsensus, runConsensusVerification, quickFactCheck,
+} from "./consensus-verification";
+export type { ConsensusResult, ConsensusAnalysis } from "./consensus-verification";
+
+export {
+  ensurePersonalizationTables, getOrCreateUserProfile, getUserProfile,
+  buildPersonalizationContext, buildPersonalizedSystemPrompt,
+  recordInteraction, recordFeedback, updateProfileFromInference,
+  inferProfileFromHistory,
+} from "./personalization";
+export type { UserProfile, PersonalizationContext, FeedbackSignal } from "./personalization";
+
+export {
+  ensureProactiveTables, generateCrossDomainInsight, saveInsight,
+  getActiveInsights, dismissInsight, proposeMonitoringObjective, listMonitoringObjectives,
+} from "./proactive-intelligence";
+export type { ProactiveInsight, MonitoringObjective } from "./proactive-intelligence";
