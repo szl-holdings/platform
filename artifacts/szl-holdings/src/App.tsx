@@ -193,6 +193,11 @@ const AlloySkillsMarketplace = lazy(() => import("@/alloy/pages/skills-marketpla
 const AlloyMcpDeveloperPortal = lazy(() => import("@/alloy/pages/mcp-developer-portal"));
 const AlloyEvolutionPage = lazy(() => import("@/alloy/pages/evolution-radar").then(m => ({ default: m.AlloyEvolutionPage })));
 const AlloyProtocolMeshPage = lazy(() => import("@/alloy/pages/ProtocolMeshPage").then(m => ({ default: m.ProtocolMeshPage })));
+const AlloyKnowledgeGraph = lazy(() => import("@/alloy/pages/intelligence-fabric").then(m => ({ default: m.KnowledgeGraphPage })));
+const AlloyEvalScorecard = lazy(() => import("@/alloy/pages/intelligence-fabric").then(m => ({ default: m.EvalScorecardPage })));
+const AlloyEnrichmentTrace = lazy(() => import("@/alloy/pages/intelligence-fabric").then(m => ({ default: m.EnrichmentTracePage })));
+const AlloyPtcLogs = lazy(() => import("@/alloy/pages/intelligence-fabric").then(m => ({ default: m.PtcLogsPage })));
+const AlloyContextMonitor = lazy(() => import("@/alloy/pages/intelligence-fabric").then(m => ({ default: m.ContextMonitorPage })));
 const AcademyPage = lazy(() => import("@/pages/academy"));
 const HelpPage = lazy(() => import("@/pages/help"));
 const DemosPage = lazy(() => import("@/pages/demos"));
@@ -738,6 +743,21 @@ function App() {
             </Route>
             <Route path="/alloy/protocol-mesh">
               <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyProtocolMeshPage /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/knowledge-graph">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyKnowledgeGraph /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/eval-scorecard">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyEvalScorecard /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/enrichment">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyEnrichmentTrace /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/ptc-logs">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyPtcLogs /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/context-monitor">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyContextMonitor /></AlloyAppPage></Suspense>
             </Route>
 
             {/* ── External platform redirects ── */}

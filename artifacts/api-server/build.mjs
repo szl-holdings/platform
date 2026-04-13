@@ -173,6 +173,9 @@ async function buildAll() {
       "pdfkit",
       "swagger-ui-express",
       "swagger-ui-dist",
+      // Clerk auth + proxy (optional — gracefully degraded when unavailable)
+      "@clerk/express",
+      "http-proxy-middleware",
     ],
     sourcemap: process.env.NODE_ENV === "production" ? "linked" : false,
     plugins: [

@@ -101,6 +101,7 @@ import prismCounselPurviewRouter from "./prism-counsel-purview";
 import alloyGatewayRouter from "./alloy-gateway";
 import alloyEvolutionRouter from "./alloy-evolution";
 import alloyMlRouter from "./alloy-ml";
+import alloyIntelligenceRouter from "./alloy-intelligence";
 import alloyEmailRouter from "./alloy-email";
 import alloyMeetingsRouter from "./alloy-meetings";
 import alloyDigestRouter from "./alloy-digest";
@@ -498,6 +499,9 @@ router.use("/alloy", alloyEvolutionRouter);
 
 router.use("/alloy/ml", _readLimiter);
 router.use("/alloy", alloyMlRouter);
+
+router.use("/alloy/intelligence", _readLimiter);
+router.use("/alloy", alloyIntelligenceRouter);
 
 router.use("/stephen/telemetry", _readLimiter);
 router.use(stephenTelemetryRouter);

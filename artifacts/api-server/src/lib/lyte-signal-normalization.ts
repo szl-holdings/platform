@@ -1,6 +1,7 @@
 import { logger } from "./logger";
 import { pool } from "@szl-holdings/db";
 import { serverTelemetry } from "@szl-holdings/observability";
+import { extractEntitiesAndTriples } from "./alloy-knowledge-graph";
 
 export interface NormalizedSignal {
   source: "datadog" | "pagerduty" | "sentry" | "cloudwatch" | "synthetic";
@@ -394,8 +395,20 @@ export async function runSignalNormalization(): Promise<{
 
   for (const signal of allSignals) {
     const wasInserted = await upsertSignal(signal);
-    if (wasInserted) inserted++;
-    else updated++;
+    if (wasInserted) {
+      inserted++;
+      // Background KG extraction for newly inserted signals — enriches the cross-domain
+      // knowledge graph with entities, services, and relationships from each signal.
+      extractEntitiesAndTriples({
+        orgId: 1,
+        content: `${signal.title}. ${signal.description}`,
+        domain: "lyte",
+      }).catch(kgErr => {
+        logger.debug({ err: kgErr, signalId: signal.externalId }, "Signal KG extraction failed (non-critical)");
+      });
+    } else {
+      updated++;
+    }
     if (signal.severity === "critical") criticalCount++;
     if (signal.severity === "high") highCount++;
   }

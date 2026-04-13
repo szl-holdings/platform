@@ -19,7 +19,11 @@
  *   app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
  */
 
-import type { RequestHandler } from "express";
+import { createRequire } from "node:module";
+import type { RequestHandler, Request } from "express";
+import { logger } from "../lib/logger";
+
+const _require = createRequire(import.meta.url);
 
 const CLERK_FAPI = "https://frontend-api.clerk.dev";
 export const CLERK_PROXY_PATH = "/api/__clerk";

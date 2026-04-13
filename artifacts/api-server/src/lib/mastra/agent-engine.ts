@@ -37,6 +37,8 @@ import { ensureProactiveTables } from "./proactive-intelligence";
 import { assessQueryComplexity, generateExecutionPlan } from "./cognitive-engine";
 import { buildPersonalizedContext, storeEpisodicMemory, ensureMemoryPersistenceTables } from "./memory-persistence";
 import { ensureGatewayIntelligenceTables } from "../ai-gateway-intelligence";
+import { compactContextWindow } from "../alloy-context-engineering";
+import { extractEntitiesAndTriples } from "../alloy-knowledge-graph";
 
 export { buildMcpGatewayRouter };
 
@@ -305,9 +307,32 @@ export async function runAgent(
 
   systemPrompt += toolPrompt + semanticContext + personalizedContext + cognitivePlan;
 
+  // Context compaction: if the thread has accumulated many messages, compact the
+  // context window before building the messages array for this inference round.
+  let compactedMemory: { role: string; content: string; createdAt: Date }[] = shortTermMemory;
+  if (shortTermMemory.length >= 20) {
+    try {
+      const compactionResult = await compactContextWindow({
+        threadId,
+        agentId,
+        messages: shortTermMemory.map(m => ({ role: m.role, content: m.content })),
+      });
+      if (compactionResult.tokensEstimatedAfter < compactionResult.tokensEstimatedBefore) {
+        compactedMemory = compactionResult.preservedMessages.map(m => ({
+          role: m.role,
+          content: m.content,
+          createdAt: new Date(),
+        }));
+        logger.info({ threadId, agentId, originalCount: shortTermMemory.length, compactedCount: compactedMemory.length, tokensBefore: compactionResult.tokensEstimatedBefore, tokensAfter: compactionResult.tokensEstimatedAfter }, "Context compacted for agent run");
+      }
+    } catch (compactErr) {
+      logger.warn({ err: compactErr, threadId }, "Context compaction failed — using uncompacted history");
+    }
+  }
+
   const messages: { role: string; content: string }[] = [
     { role: "system", content: systemPrompt },
-    ...shortTermMemory.map(m => ({ role: m.role, content: m.content })),
+    ...compactedMemory.map(m => ({ role: m.role, content: m.content })),
     { role: "user", content: sanitizedMessage },
   ];
 
@@ -495,6 +520,16 @@ export async function runAgent(
     tokensUsed: totalTokens, latencyMs,
     model: config.model, provider: config.provider,
     metadata: { toolsUsed, delegations: delegations.length, cognitiveMode: cognitiveMetadata.cognitiveMode },
+  });
+
+  // Background KG extraction: extract entities and triples from the conversation
+  // for cross-domain knowledge graph enrichment. Fire-and-forget; does not block response.
+  extractEntitiesAndTriples({
+    orgId: 1,
+    content: `[User]: ${userMessage}\n[${config.name}]: ${finalResponse}`,
+    domain: config.domain,
+  }).catch(kgErr => {
+    logger.debug({ err: kgErr, agentId, runId }, "Background KG extraction failed (non-critical)");
   });
 
   await emitTrace(runId, agentId, {
