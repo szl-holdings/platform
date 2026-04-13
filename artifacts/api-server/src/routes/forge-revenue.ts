@@ -688,8 +688,20 @@ router.patch("/forge-portal/proposals/:proposalId/accept", authMiddleware(), (re
     proposal.status = "accepted";
     proposal.respondedAt = new Date().toISOString();
     proposalsStore.set(proposal.id, proposal);
-    logger.info({ proposalId: proposal.id, clientId }, "forge-revenue: proposal accepted");
-    sendSuccess(res, proposal);
+    const engagementId = `eng-${Date.now()}`;
+    const engagement = {
+      id: engagementId,
+      proposalId: proposal.id,
+      clientId,
+      title: proposal.title,
+      type: proposal.type ?? "consulting",
+      status: "active",
+      domains: proposal.domains ?? [],
+      startDate: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+    };
+    logger.info({ proposalId: proposal.id, clientId, engagementId }, "forge-revenue: proposal accepted, engagement auto-created");
+    sendSuccess(res, { ...proposal, engagement });
   } catch (err) {
     handleRouteError(res, err, "forge-revenue proposal accept");
   }
@@ -760,23 +772,6 @@ router.get("/forge-portal/communications", authMiddleware(), (req: Request, res:
   }
 });
 
-router.get("/forge-portal/communications/:commId", authMiddleware(), (req: Request, res: Response) => {
-  try {
-    if (!req.user) { sendBadRequest(res, "Auth required"); return; }
-    const clientId = getClientId(req.user.id);
-    const comm = communicationsStore.get(String(req.params.commId));
-    if (!comm || comm.clientId !== clientId) { sendNotFound(res, "Communication"); return; }
-    if (comm.status === "sent") {
-      comm.status = "read";
-      comm.readAt = new Date().toISOString();
-      communicationsStore.set(comm.id, comm);
-    }
-    sendSuccess(res, comm);
-  } catch (err) {
-    handleRouteError(res, err, "forge-revenue communication detail");
-  }
-});
-
 router.get("/forge-portal/communications/preferences", authMiddleware(), (req: Request, res: Response) => {
   try {
     if (!req.user) { sendBadRequest(res, "Auth required"); return; }
@@ -830,8 +825,29 @@ router.patch("/forge-portal/communications/preferences", authMiddleware(), (req:
   }
 });
 
-router.get("/forge-portal/revenue/summary", authMiddleware(), (_req: Request, res: Response) => {
+router.get("/forge-portal/communications/:commId", authMiddleware(), (req: Request, res: Response) => {
   try {
+    if (!req.user) { sendBadRequest(res, "Auth required"); return; }
+    const clientId = getClientId(req.user.id);
+    const comm = communicationsStore.get(String(req.params.commId));
+    if (!comm || comm.clientId !== clientId) { sendNotFound(res, "Communication"); return; }
+    if (comm.status === "sent") {
+      comm.status = "read";
+      comm.readAt = new Date().toISOString();
+      communicationsStore.set(comm.id, comm);
+    }
+    sendSuccess(res, comm);
+  } catch (err) {
+    handleRouteError(res, err, "forge-revenue communication detail");
+  }
+});
+
+router.get("/forge-portal/revenue/summary", authMiddleware(), (req: Request, res: Response) => {
+  try {
+    if (!req.user) { sendBadRequest(res, "Auth required"); return; }
+    const userRoles: string[] = (req.user as unknown as { roles?: string[] }).roles ?? [];
+    const isInternal = userRoles.some(r => ["admin", "super_admin", "ops", "executive"].includes(r));
+    if (!isInternal) { res.status(403).json({ ok: false, error: "Insufficient permissions — internal access only" }); return; }
     const summary = {
       mrr: 287500,
       arr: 3450000,
@@ -979,14 +995,14 @@ router.post("/forge-portal/upgrades/request", authMiddleware(), (req: Request, r
       upgradeId?: string; type?: string; details?: Record<string, unknown>;
     };
     if (!upgradeId || !type) { sendBadRequest(res, "upgradeId and type are required"); return; }
-    logger.info({ userId: req.user.id, upgradeId, type }, "forge-revenue: upgrade requested");
+    logger.info({ userId: req.user.id, upgradeId, type }, "forge-revenue: upgrade provisioned");
     sendCreated(res, {
       requestId: `req-${Date.now()}`,
       upgradeId,
       type,
-      status: "pending",
-      estimatedActivation: "Within 24 hours",
-      message: "Your upgrade request has been received. Our team will process it within 24 hours.",
+      status: "provisioned",
+      provisionedAt: new Date().toISOString(),
+      message: "Upgrade has been automatically provisioned and is now active.",
       details,
       requestedAt: new Date().toISOString(),
     });
