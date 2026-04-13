@@ -184,3 +184,31 @@ export {
   type WorkflowStatus,
 } from "./ai-actions-panel";
 export { GraphQLPanelShell } from "./graphql-panel-shell";
+export {
+  useColorMode,
+  initColorMode,
+  type ColorMode,
+  type ColorModeState,
+} from "./use-color-mode";
+export {
+  ProgressiveSection,
+  DensityToggle,
+  useDensity,
+  type ProgressiveSectionProps,
+  type DensityToggleProps,
+  type DisplayDensity,
+} from "./progressive-section";
+export {
+  AppTransitionOverlay,
+  useAppTransition,
+  type AppTransitionConfig,
+  type AppTransitionOverlayProps,
+} from "./app-transition";
+export {
+  EcosystemNav,
+  useEcosystemNotifications,
+  ECOSYSTEM_APPS as ECOSYSTEM_NAV_APPS,
+  type EcosystemNavProps,
+  type EcosystemApp,
+  type EcosystemNotification,
+} from "./ecosystem-nav";

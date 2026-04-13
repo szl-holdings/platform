@@ -10,6 +10,8 @@ import {
 import { DemoModeSwitcher } from "./demo-mode";
 import { SandboxToggle } from "./sandbox-mode";
 import { useAuth } from "@szl-holdings/replit-auth-web";
+import { useColorMode } from "./use-color-mode";
+import { useAppTransition, AppTransitionOverlay } from "./app-transition";
 
 export interface EcosystemApp {
   id: string;
@@ -43,7 +45,7 @@ export interface EcosystemNavProps {
   userRole?: string;
 }
 
-const ECOSYSTEM_APPS: EcosystemApp[] = [
+export const ECOSYSTEM_APPS: EcosystemApp[] = [
   {
     id: "szl-holdings",
     name: "SZL Holdings",
@@ -150,12 +152,13 @@ function useClickOutside(ref: React.RefObject<HTMLElement | null>, handler: () =
   }, [ref]);
 }
 
-function AppGridIcon({ app, isCurrent }: { app: EcosystemApp; isCurrent: boolean }) {
+function AppGridIcon({ app, isCurrent, onNavigate }: { app: EcosystemApp; isCurrent: boolean; onNavigate?: (app: EcosystemApp) => void }) {
   return (
     <a
       href={app.path}
       aria-label={`${app.name}${isCurrent ? " (current)" : ""}`}
       aria-current={isCurrent ? "page" : undefined}
+      onClick={onNavigate && !isCurrent ? (e) => { e.preventDefault(); onNavigate(app); } : undefined}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -221,9 +224,11 @@ function AppGridIcon({ app, isCurrent }: { app: EcosystemApp; isCurrent: boolean
 function DoctrineLayerSection({
   layer,
   currentAppId,
+  onNavigate,
 }: {
   layer: DoctrineLayer;
   currentAppId: string;
+  onNavigate?: (app: EcosystemApp) => void;
 }) {
   const layerApps = DOCTRINE_APP_MAP.filter((c) => c.layers.includes(layer));
   if (layerApps.length === 0) return null;
@@ -265,6 +270,7 @@ function DoctrineLayerSection({
               key={app.id}
               href={app.path}
               title={docApp.primaryRole}
+              onClick={onNavigate && !isCurrent ? (e) => { e.preventDefault(); onNavigate(app); } : undefined}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -313,9 +319,11 @@ function DoctrineLayerSection({
 function AppSwitcherPanel({
   currentAppId,
   onClose,
+  onNavigate,
 }: {
   currentAppId: string;
   onClose: () => void;
+  onNavigate?: (app: EcosystemApp) => void;
 }) {
   const [viewMode, setViewMode] = useState<"layer" | "grid">("layer");
 
@@ -408,7 +416,7 @@ function AppSwitcherPanel({
       {viewMode === "layer" ? (
         <div>
           {DOCTRINE_LAYER_ORDER.map((layer) => (
-            <DoctrineLayerSection key={layer} layer={layer} currentAppId={currentAppId} />
+            <DoctrineLayerSection key={layer} layer={layer} currentAppId={currentAppId} onNavigate={onNavigate} />
           ))}
         </div>
       ) : (
@@ -420,7 +428,7 @@ function AppSwitcherPanel({
           }}
         >
           {ECOSYSTEM_APPS.map((app) => (
-            <AppGridIcon key={app.id} app={app} isCurrent={app.id === currentAppId} />
+            <AppGridIcon key={app.id} app={app} isCurrent={app.id === currentAppId} onNavigate={onNavigate} />
           ))}
         </div>
       )}
@@ -1039,6 +1047,9 @@ export function EcosystemNav({
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
 
+  const { toggle: toggleColorMode, resolved: colorModeResolved } = useColorMode();
+  const { navigate: navigateToApp } = useAppTransition();
+
   const appSwitcherRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
 
@@ -1236,6 +1247,36 @@ export function EcosystemNav({
             </span>
           </button>
 
+          <button
+            onClick={toggleColorMode}
+            aria-label={colorModeResolved === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            title={colorModeResolved === "dark" ? "Light mode" : "Dark mode"}
+            style={{
+              width: "34px",
+              height: "34px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.09)",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontSize: "15px",
+              transition: "all 0.15s",
+              color: "rgba(255,255,255,0.55)",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.08)";
+              (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.8)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
+              (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.55)";
+            }}
+          >
+            {colorModeResolved === "dark" ? "☀" : "☾"}
+          </button>
+
           <div ref={notificationsRef} style={{ position: "relative" }}>
             <button
               onClick={() => {
@@ -1341,6 +1382,16 @@ export function EcosystemNav({
               <AppSwitcherPanel
                 currentAppId={currentAppId}
                 onClose={() => setShowAppSwitcher(false)}
+                onNavigate={(app) => {
+                  setShowAppSwitcher(false);
+                  navigateToApp({
+                    toAppId: app.id,
+                    toAppName: app.name,
+                    toPath: app.path,
+                    accentColor: app.accent,
+                    icon: app.icon,
+                  });
+                }}
               />
             )}
           </div>
@@ -1431,6 +1482,8 @@ export function EcosystemNav({
           onSearch={onSearch}
         />
       )}
+
+      <AppTransitionOverlay accentColor={accentColor} />
 
       <style>{`
         @media (min-width: 640px) {

@@ -1,0 +1,93 @@
+/**
+ * Light mode overrides for the SZL ecosystem.
+ * Applied when [data-color-mode="light"] is set on <html>.
+ * Dark mode is the default — these rules override it for light mode.
+ */
+
+:root[data-color-mode="light"] {
+  --bg-primary: hsl(210 20% 97%);
+  --bg-secondary: hsl(210 18% 94%);
+  --bg-tertiary: hsl(210 16% 91%);
+  --bg-elevated: hsl(0 0% 100%);
+  --text-primary: hsl(210 15% 12%);
+  --text-secondary: hsl(210 10% 32%);
+  --text-muted: hsl(210 8% 50%);
+  --text-subtle: hsl(210 6% 62%);
+  --border-default: hsla(210 20% 20% / 0.12);
+  --border-strong: hsla(210 20% 20% / 0.20);
+  --surface-card: hsla(0 0% 100% / 0.85);
+  --surface-glass: hsla(210 20% 98% / 0.80);
+}
+
+[data-color-mode="light"] body {
+  background-color: hsl(210 20% 97%);
+  color: hsl(210 15% 12%);
+}
+
+[data-color-mode="light"] .szl-dashboard-shell {
+  background: hsl(210 20% 97%) !important;
+  color: hsl(210 15% 12%) !important;
+}
+
+[data-color-mode="light"] .szl-sidebar {
+  background: hsl(210 18% 93%) !important;
+  border-right-color: hsla(210 20% 20% / 0.12) !important;
+}
+
+[data-color-mode="light"] .szl-topbar {
+  background: hsla(210 20% 97% / 0.92) !important;
+  border-bottom-color: hsla(210 20% 20% / 0.12) !important;
+}
+
+[data-color-mode="light"] .eco-nav {
+  background: hsla(210 20% 97% / 0.92) !important;
+  border-bottom-color: hsla(210 20% 20% / 0.10) !important;
+  box-shadow: 0 1px 0 0 hsla(210 20% 50% / 0.15), 0 4px 16px rgba(0,0,0,0.06) !important;
+}
+
+[data-color-mode="light"] .eco-nav button,
+[data-color-mode="light"] .eco-nav a {
+  color: hsl(210 12% 30%) !important;
+}
+
+[data-color-mode="light"] .eco-nav button:hover {
+  background: hsla(210 20% 20% / 0.07) !important;
+  color: hsl(210 15% 12%) !important;
+}
+
+[data-color-mode="light"] .szl-card,
+[data-color-mode="light"] .szl-surface {
+  background: hsl(0 0% 100%) !important;
+  border-color: hsla(210 20% 20% / 0.12) !important;
+  color: hsl(210 15% 12%) !important;
+}
+
+[data-color-mode="light"] .szl-text-muted {
+  color: hsl(210 8% 50%) !important;
+}
+
+[data-color-mode="light"] .szl-text-subtle {
+  color: hsl(210 6% 62%) !important;
+}
+
+[data-color-mode="light"] .szl-border {
+  border-color: hsla(210 20% 20% / 0.12) !important;
+}
+
+[data-color-mode="light"] .szl-kpi-cell {
+  background: hsl(0 0% 100%) !important;
+  color: hsl(210 15% 12%) !important;
+}
+
+[data-color-mode="light"] .szl-sidebar-item-active {
+  background: hsla(210 40% 50% / 0.10) !important;
+}
+
+[data-color-mode="light"] .szl-sidebar-item {
+  color: hsl(210 12% 30%) !important;
+}
+
+[data-color-mode="light"] .szl-sidebar-item:hover {
+  background: hsla(210 20% 20% / 0.06) !important;
+  color: hsl(210 15% 12%) !important;
+}
