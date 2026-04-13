@@ -5,6 +5,12 @@ import { incaConfig } from "@szl-holdings/shared-ui/copilot-configs";
 import { AIStatusBar } from "@szl-holdings/shared-ui/ai-status-bar";
 import { Dashboard } from "./pages/Dashboard";
 import { ModelIntelligence } from "./pages/ModelIntelligence";
+import { ModelCatalog } from "./pages/ModelCatalog";
+import { ModelSecurityScanning } from "./pages/ModelSecurityScanning";
+import { EnvironmentSnapshots } from "./pages/EnvironmentSnapshots";
+import { LocalLab } from "./pages/LocalLab";
+import { GovernanceEngine } from "./pages/GovernanceEngine";
+import { ModelLifecycle } from "./pages/ModelLifecycle";
 import { NuroMeshCommand } from "./pages/NuroMeshCommand";
 import { AIGatewayConsole } from "./pages/AIGatewayConsole";
 import { DeploymentRunway } from "./pages/DeploymentRunway";
@@ -34,7 +40,13 @@ import { ModelTrainingPipeline } from "./pages/ModelTrainingPipeline";
 
 export type Page =
   | "dashboard"
+  | "model-catalog"
   | "intelligence"
+  | "model-security"
+  | "environments"
+  | "local-lab"
+  | "governance"
+  | "model-lifecycle"
   | "nuro-mesh"
   | "gateway"
   | "deployment"
@@ -64,7 +76,13 @@ export type Page =
 
 const PAGE_ROUTES: Record<Page, string> = {
   dashboard: "/inca-lab/",
+  "model-catalog": "/inca-lab/model-catalog",
   intelligence: "/inca-lab/intelligence",
+  "model-security": "/inca-lab/model-security",
+  environments: "/inca-lab/environments",
+  "local-lab": "/inca-lab/local-lab",
+  governance: "/inca-lab/governance",
+  "model-lifecycle": "/inca-lab/model-lifecycle",
   "package-registry": "/inca-lab/package-registry",
   "alloy-forge": "/inca-lab/alloy-forge",
   "training-studio": "/inca-lab/training-studio",
@@ -97,6 +115,12 @@ function AppShell() {
   const [location, setLocation] = useLocation();
 
   const currentPage: Page = (() => {
+    if (location.startsWith("/inca-lab/model-catalog")) return "model-catalog";
+    if (location.startsWith("/inca-lab/model-security")) return "model-security";
+    if (location.startsWith("/inca-lab/environments")) return "environments";
+    if (location.startsWith("/inca-lab/local-lab")) return "local-lab";
+    if (location.startsWith("/inca-lab/governance")) return "governance";
+    if (location.startsWith("/inca-lab/model-lifecycle")) return "model-lifecycle";
     if (location.startsWith("/inca-lab/package-registry")) return "package-registry";
     if (location.startsWith("/inca-lab/alloy-forge")) return "alloy-forge";
     if (location.startsWith("/inca-lab/training-studio")) return "training-studio";
@@ -138,7 +162,13 @@ function AppShell() {
       <Sidebar currentPage={currentPage} onNavigate={onNavigate} />
       <main className="flex-1 overflow-auto">
         <Switch>
+          <Route path="/inca-lab/model-catalog" component={ModelCatalog} />
           <Route path="/inca-lab/intelligence" component={ModelIntelligence} />
+          <Route path="/inca-lab/model-security" component={ModelSecurityScanning} />
+          <Route path="/inca-lab/environments" component={EnvironmentSnapshots} />
+          <Route path="/inca-lab/local-lab" component={LocalLab} />
+          <Route path="/inca-lab/governance" component={GovernanceEngine} />
+          <Route path="/inca-lab/model-lifecycle" component={ModelLifecycle} />
           <Route path="/inca-lab/nuro-mesh">
             <NuroMeshCommand onNavigate={onNavigate} />
           </Route>

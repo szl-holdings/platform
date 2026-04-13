@@ -34,6 +34,11 @@ import {
   Globe,
   Crown,
   Cpu,
+  BookOpen,
+  Bug,
+  Layers,
+  Scale,
+  RefreshCw,
 } from "lucide-react";
 
 interface NavItem {
@@ -41,6 +46,7 @@ interface NavItem {
   label: string;
   sublabel: string;
   icon: React.ComponentType<{ className?: string }>;
+  badge?: string;
 }
 
 interface NavGroup {
@@ -57,14 +63,27 @@ const NAV_GROUPS: NavGroup[] = [
     defaultExpanded: true,
     items: [
       { id: "dashboard", label: "Dashboard", sublabel: "System overview", icon: LayoutDashboard },
-      { id: "intelligence", label: "Model Intelligence", sublabel: "HuggingFace + arXiv feed", icon: Telescope },
       { id: "gateway", label: "AI Gateway", sublabel: "Routing & telemetry", icon: Zap },
-      { id: "deployment", label: "Deployment Runway", sublabel: "Self-hosted readiness", icon: Server },
       { id: "observatory", label: "LLMOps Observatory", sublabel: "Usage, compliance & traces", icon: BarChart3 },
-      { id: "lab", label: "Model Lab", sublabel: "A/B testing & prompts", icon: FlaskConical },
       { id: "model-training", label: "Fine-Tuning Pipeline", sublabel: "Train & deploy custom models", icon: Cpu },
       { id: "security", label: "Security Posture", sublabel: "Trust scores & injection", icon: ShieldCheck },
       { id: "memory", label: "Agent Memory", sublabel: "Cross-session knowledge", icon: Database },
+    ],
+  },
+  {
+    id: "model-governance",
+    label: "AI Governance & Models",
+    defaultExpanded: true,
+    items: [
+      { id: "model-catalog", label: "Model Catalog", sublabel: "AIBOM governed registry", icon: BookOpen, badge: "NEW" },
+      { id: "model-security", label: "Security Scanning", sublabel: "Vuln intelligence & policy", icon: Bug, badge: "NEW" },
+      { id: "governance", label: "Governance Engine", sublabel: "RBAC, policies & audit", icon: Scale, badge: "NEW" },
+      { id: "model-lifecycle", label: "Model Lifecycle", sublabel: "Pipeline & cost intelligence", icon: RefreshCw, badge: "NEW" },
+      { id: "environments", label: "Environments", sublabel: "Reproducible snapshots", icon: Layers, badge: "NEW" },
+      { id: "local-lab", label: "Local Lab", sublabel: "Browser-side inference", icon: Cpu, badge: "NEW" },
+      { id: "intelligence", label: "Model Intelligence", sublabel: "HuggingFace + arXiv feed", icon: Telescope },
+      { id: "deployment", label: "Deployment Runway", sublabel: "Self-hosted readiness", icon: Server },
+      { id: "lab", label: "Model Lab", sublabel: "A/B testing & prompts", icon: FlaskConical },
     ],
   },
   {
@@ -84,7 +103,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     id: "marketplace",
     label: "Marketplace & Economy",
-    defaultExpanded: true,
+    defaultExpanded: false,
     items: [
       { id: "agent-marketplace", label: "Agent Marketplace", sublabel: "Browse & deploy agents", icon: Store },
       { id: "champion-arena", label: "Champion Arena", sublabel: "Fusion intelligence & rankings", icon: Crown },
@@ -142,7 +161,7 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
           </div>
           <div>
             <div className="text-sm font-display font-semibold text-foreground leading-none">INCA Lab</div>
-            <div className="text-xs text-muted-foreground mt-0.5 leading-none">Multi-Agent Orchestration</div>
+            <div className="text-xs text-muted-foreground mt-0.5 leading-none">AI Governance & Orchestration</div>
           </div>
         </div>
       </div>
@@ -178,7 +197,14 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
                       >
                         <Icon className={cn("w-4 h-4 flex-shrink-0", active ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
                         <div className="flex-1 min-w-0">
-                          <div className={cn("text-xs font-medium leading-none", active ? "text-primary" : "")}>{item.label}</div>
+                          <div className={cn("text-xs font-medium leading-none flex items-center gap-1.5", active ? "text-primary" : "")}>
+                            {item.label}
+                            {item.badge && (
+                              <span className="text-xs px-1 py-0 rounded bg-primary/20 text-primary font-medium" style={{ fontSize: "9px" }}>
+                                {item.badge}
+                              </span>
+                            )}
+                          </div>
                           <div className="text-xs text-muted-foreground mt-0.5 leading-none truncate opacity-70">{item.sublabel}</div>
                         </div>
                         {active && <ChevronRight className="w-3 h-3 text-primary flex-shrink-0" />}
@@ -201,31 +227,8 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
             <div className="text-xs font-medium text-foreground">8 agents · 3 crews active</div>
           </div>
         </div>
-        <div className="text-xs text-muted-foreground">SZL Holdings · v3.0.0</div>
+        <div className="text-xs text-muted-foreground">SZL Holdings · v4.0.0</div>
       </div>
     </aside>
-  );
-}
-
-function NavButton({ item, active, onNavigate }: { item: NavItem; active: boolean; onNavigate: (page: Page) => void }) {
-  const Icon = item.icon;
-  return (
-    <button
-      key={item.id}
-      onClick={() => onNavigate(item.id)}
-      className={cn(
-        "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all duration-150 group",
-        active
-          ? "bg-primary/8 text-primary"
-          : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-      )}
-    >
-      <Icon className={cn("w-4 h-4 flex-shrink-0", active ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
-      <div className="flex-1 min-w-0">
-        <div className={cn("text-sm font-medium leading-none", active ? "text-primary" : "")}>{item.label}</div>
-        <div className="text-xs text-muted-foreground mt-0.5 leading-none truncate">{item.sublabel}</div>
-      </div>
-      {active && <ChevronRight className="w-3 h-3 text-primary flex-shrink-0" />}
-    </button>
   );
 }

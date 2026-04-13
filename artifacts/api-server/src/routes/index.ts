@@ -162,6 +162,7 @@ import multimodalDocumentsRouter from "./multimodal-documents";
 import aboRouter from "./abo";
 import aiGatewayPerfRouter from "./ai-gateway-perf";
 import promptPipelineRouter from "./prompt-pipeline";
+import incaModelGovernanceRouter from "./inca-model-governance";
 
 const router: IRouter = Router();
 
@@ -581,6 +582,19 @@ router.use("/gateway-perf", aiGatewayPerfRouter);
 router.use("/prompt-pipeline", _readLimiter);
 router.use("/prompt-pipeline", _writeLimiter);
 router.use("/prompt-pipeline", promptPipelineRouter);
+
+router.use("/inca-lab/models", _readLimiter);
+router.use("/inca-lab/models/catalog", _readLimiter);
+router.use("/inca-lab/models/security-scans", _readLimiter);
+router.use("/inca-lab/models/lifecycle", _readLimiter);
+router.use("/inca-lab/models/:id/approve", _writeLimiter);
+router.use("/inca-lab/models/:id/scan", _writeLimiter);
+router.use("/inca-lab/governance", _readLimiter);
+router.use("/inca-lab/governance/policies", _writeLimiter);
+router.use("/inca-lab/governance/audit", _writeLimiter);
+router.use("/inca-lab/environments", _readLimiter);
+router.use("/inca-lab/environments/snapshots", _writeLimiter);
+router.use(incaModelGovernanceRouter);
 
 router.use("/analytics/recordings", _writeLimiter);
 router.use("/analytics/heatmap-events", _writeLimiter);

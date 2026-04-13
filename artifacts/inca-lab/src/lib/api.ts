@@ -155,6 +155,80 @@ export const api = {
         topByUsage: Array<{ skillId: string; label: string; invocations: number }>;
       };
     }>("/api/skills/stats"),
+
+  // ── Model Catalog & AIBOM ────────────────────────────────────────────────
+  getModelCatalog: () =>
+    apiFetch<{ data: CatalogModel[]; meta: { total: number; approved: number } }>("/inca-lab/models/catalog"),
+  getModelById: (id: string) =>
+    apiFetch<{ data: CatalogModel }>(`/inca-lab/models/catalog/${id}`),
+  approveModel: (id: string, actor?: string, overrideReason?: string) =>
+    apiFetch<{ data: CatalogModel; evaluation: { allowed: boolean; flaggedBy: { id: string; name: string }[]; requiresApproval: boolean }; audit: ModelAuditRecord }>(
+      `/inca-lab/models/${id}/approve`,
+      { method: "POST", body: JSON.stringify({ actor: actor ?? "ops-lead@szl.internal", overrideReason }) }
+    ),
+
+  // ── Security Scanning ─────────────────────────────────────────────────────
+  getSecurityScans: () =>
+    apiFetch<{ data: { scans: SecurityScan[]; vulnerabilities: ModelVulnerability[]; summary: { avgFleetScore: number; activeVulnerabilities: number; failedScans: number; policyBlocked: number } } }>("/inca-lab/models/security-scans"),
+  triggerScan: (modelId: string) =>
+    apiFetch<{ data: SecurityScan }>(`/inca-lab/models/${modelId}/scan`, { method: "POST" }),
+  updateVulnerabilityStatus: (vulnId: string, status: ModelVulnerability["status"]) =>
+    apiFetch<{ data: ModelVulnerability }>(`/inca-lab/models/vulnerabilities/${vulnId}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
+
+  // ── Governance Policies & Audit ───────────────────────────────────────────
+  getGovernancePolicies: () =>
+    apiFetch<{ data: GovernancePolicy[] }>("/inca-lab/governance/policies"),
+  updateGovernancePolicy: (id: string, patch: Partial<GovernancePolicy>) =>
+    apiFetch<{ data: GovernancePolicy }>(`/inca-lab/governance/policies/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(patch),
+    }),
+  getModelAuditLog: () =>
+    apiFetch<{ data: ModelAuditRecord[] }>("/inca-lab/governance/audit"),
+  createAuditEntry: (entry: Omit<ModelAuditRecord, "id" | "timestamp">) =>
+    apiFetch<{ data: ModelAuditRecord }>("/inca-lab/governance/audit", {
+      method: "POST",
+      body: JSON.stringify(entry),
+    }),
+  getComplianceStatus: () =>
+    apiFetch<{ data: ComplianceStatus[] }>("/inca-lab/governance/compliance"),
+  getGatewayStatus: () =>
+    apiFetch<{ data: GatewayStatus[] }>("/inca-lab/governance/gateway-status"),
+
+  // ── Environment Snapshots ─────────────────────────────────────────────────
+  getSnapshots: () =>
+    apiFetch<{ data: EnvironmentSnapshot[]; meta: { total: number; production: number } }>("/inca-lab/environments/snapshots"),
+  getSnapshotById: (id: string) =>
+    apiFetch<{ data: EnvironmentSnapshot }>(`/inca-lab/environments/snapshots/${id}`),
+  cloneSnapshot: (id: string, actor?: string) =>
+    apiFetch<{ data: EnvironmentSnapshot }>(`/inca-lab/environments/snapshots/${id}/clone`, {
+      method: "POST",
+      body: JSON.stringify({ actor: actor ?? "user@szl.internal" }),
+    }),
+  promoteSnapshot: (id: string, target: "staging" | "production") =>
+    apiFetch<{ data: EnvironmentSnapshot }>(`/inca-lab/environments/snapshots/${id}/promote`, {
+      method: "POST",
+      body: JSON.stringify({ target }),
+    }),
+  deleteSnapshot: (id: string) =>
+    apiFetch<{ data: EnvironmentSnapshot }>(`/inca-lab/environments/snapshots/${id}`, { method: "DELETE" }),
+
+  // ── Model Lifecycle ───────────────────────────────────────────────────────
+  getModelLifecycle: () =>
+    apiFetch<{ data: { pipeline: LifecycleRecord[]; costIntelligence: CostIntelligence[]; summary: { inProduction: number; blocked: number; rotationCandidates: number; totalMonthlyCost: number; potentialSavings: number } } }>("/inca-lab/models/lifecycle"),
+  advanceLifecycle: (modelId: string, patch: Partial<LifecycleRecord>) =>
+    apiFetch<{ data: LifecycleRecord }>(`/inca-lab/models/${modelId}/lifecycle`, {
+      method: "POST",
+      body: JSON.stringify(patch),
+    }),
+  initiateRotation: (modelId: string, candidateModelId: string) =>
+    apiFetch<{ data: LifecycleRecord; rotationInitiated: boolean; candidateModel: string }>(`/inca-lab/models/lifecycle/${modelId}/rotate`, {
+      method: "PATCH",
+      body: JSON.stringify({ candidateModelId }),
+    }),
 };
 
 export interface RoutingEvent {
@@ -466,3 +540,170 @@ export const promptPipelineApi = {
   getABTestResults: (testId: string) =>
     apiFetch<{ testId: string; results: PromptABTest["results"] }>(`/prompt-pipeline/ab-tests/${testId}/results`),
 };
+
+// ── INCA Model Governance types ─────────────────────────────────────────────
+
+export interface CatalogModel {
+  id: string;
+  name: string;
+  provider: string;
+  task: string;
+  license: string;
+  licenseType: "commercial" | "research-only" | "restricted";
+  securityScore: number;
+  vulnerabilities: number;
+  mmlu: number | null;
+  humaneval: number | null;
+  gsm8k: number | null;
+  hellaswag: number | null;
+  costPer1kTokens: number;
+  contextWindow: number;
+  parameters: string;
+  trainingCutoff: string;
+  dataOrigin: string;
+  provenance: string;
+  compliance: { gdpr: boolean; hipaa: boolean; sox: boolean; fedramp: boolean };
+  approvalStatus: "approved" | "pending" | "blocked" | "under-review";
+  inProduction: boolean;
+  aibomHash: string;
+  lastScanned: string;
+  featured?: boolean;
+}
+
+export interface SecurityScan {
+  id: string;
+  modelId: string;
+  model: string;
+  provider: string;
+  scanDate: string;
+  overallScore: number;
+  promptInjectionScore: number;
+  toxicityScore: number;
+  dataLeakageScore: number;
+  adversarialRobustnessScore: number;
+  biasScore: number;
+  status: "passed" | "failed" | "warning";
+  vulnerabilitiesFound: number;
+  scanDurationMs: number;
+}
+
+export interface ModelVulnerability {
+  id: string;
+  modelId: string;
+  model: string;
+  provider: string;
+  cveId: string;
+  title: string;
+  severity: "critical" | "high" | "medium" | "low";
+  category: "prompt-injection" | "data-leakage" | "toxicity" | "adversarial" | "bias";
+  status: "active" | "cleared" | "mitigated" | "disputed";
+  cvssScore: number;
+  description: string;
+  remediation: string;
+  discoveredDate: string;
+  updatedDate: string;
+}
+
+export interface GovernancePolicy {
+  id: string;
+  name: string;
+  description: string;
+  enabled: boolean;
+  ruleType: "license" | "benchmark" | "cost" | "security" | "residency";
+  condition: string;
+  action: "block" | "flag" | "require-approval" | "restrict";
+  triggeredCount: number;
+  lastTriggered: string | null;
+}
+
+export interface ModelAuditRecord {
+  id: string;
+  timestamp: string;
+  actor: string;
+  role: string;
+  action: string;
+  modelId: string;
+  model: string;
+  decision: "approved" | "blocked" | "flagged";
+  policyTriggered: string | null;
+  benchmarksPassed: string[];
+  notes: string;
+}
+
+export interface ComplianceStatus {
+  modelId: string;
+  model: string;
+  provider: string;
+  overallCompliant: boolean;
+  securityPolicyMet: boolean;
+  licensePolicyMet: boolean;
+  benchmarkPolicyMet: boolean;
+  costPolicyMet: boolean;
+  noActiveHighVulnerabilities: boolean;
+  lastReviewed: string;
+  drift: boolean;
+}
+
+export interface EnvironmentSnapshot {
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  createdAt: string;
+  createdBy: string;
+  domain: string;
+  tag: string;
+  modelId: string;
+  model: string;
+  provider: string;
+  systemPromptHash: string;
+  toolsHash: string;
+  memoryConfig: string;
+  hyperparameters: Record<string, string | number>;
+  pinned: boolean;
+  deployedTo: string | null;
+  parentSnapshotId: string | null;
+  diffFromParent?: { added: number; removed: number; changed: number };
+}
+
+export interface LifecycleRecord {
+  id: string;
+  modelId: string;
+  name: string;
+  provider: string;
+  stage: string;
+  stageStatus: "in-progress" | "passed" | "failed" | "pending" | "blocked";
+  enteredStageAt: string;
+  daysInStage: number;
+  securityScore?: number;
+  benchmarkScore?: number;
+  costPer1kTokens?: number;
+  agentCount?: number;
+  qualityScore?: number;
+  nextAction: string;
+  rotation?: { reason: string; candidateModel: string; savingsEstimate: string };
+}
+
+export interface CostIntelligence {
+  model: string;
+  agent: string;
+  domain: string;
+  monthlyCost: number;
+  alternativeModel: string;
+  alternativeCost: number;
+  qualityDelta: number;
+  savings: number;
+}
+
+export interface GatewayStatus {
+  modelId: string;
+  name: string;
+  provider: string;
+  approvalStatus: string;
+  securityScore: number;
+  inProduction: boolean;
+  routingAllowed: boolean;
+  reason: string | null;
+}
+
+
