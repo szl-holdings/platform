@@ -85,6 +85,7 @@ interface Proposal {
     breakdown: { item: string; amount: number }[];
     paymentTerms: string;
   };
+  domains: Domain[];
   validUntil: string;
   createdAt: string;
   sentAt: string | null;
@@ -372,6 +373,7 @@ function seedProposals(clientId: string) {
         ],
         paymentTerms: "50% upon engagement, 25% at Phase 2, 25% upon delivery",
       },
+      domains: ["vessels"],
       validUntil: "2026-05-15",
       createdAt: "2026-04-01T09:00:00Z",
       sentAt: "2026-04-02T10:30:00Z",
@@ -402,6 +404,7 @@ function seedProposals(clientId: string) {
         ],
         paymentTerms: "Net 30",
       },
+      domains: ["terra"],
       validUntil: "2026-06-01",
       createdAt: "2026-04-10T11:00:00Z",
       sentAt: null,
@@ -663,6 +666,7 @@ router.post("/forge-portal/proposals/generate", authMiddleware(), (req: Request,
         ],
         paymentTerms: "Net 30",
       },
+      domains: (domains as Domain[]) ?? [],
       validUntil: new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0],
       createdAt: now,
       sentAt: null,
