@@ -43,10 +43,18 @@ Cross-ecosystem innovation features that differentiate Alloy from Palantir, Andu
 
 ### Forge — Client & Investor Portal (`/forge/`)
 External-facing portal for SZL Holdings clients, investors, and partners. Premium light-mode institutional design. Built as `artifacts/forge` (Vite + React + TanStack Query, port 5000).
-- **7 Pages**: Dashboard, Portfolio, Matter Tracker, Assets, Documents, Messages, Settings
-- **API Layer**: `artifacts/api-server/src/routes/forge-portal.ts` — client-scoped REST API with in-memory data store (seeded per userId), domain-based RBAC (vessels/terra/legal/security)
-- **Frontend API Client**: `artifacts/forge/src/lib/api.ts` — typed fetch client with all portal endpoints and shared TypeScript interfaces
-- **Security**: Document access audit logging, message read receipts, domain entitlement enforcement on all read/write routes, client-scoped data isolation
+- **12 Pages**: Dashboard, Portfolio, Matter Tracker, Assets, Documents, Messages, Settings + 5 Revenue Engine pages (Onboarding, Proposals, Packages, Communications, Upgrades)
+- **API Layer**: `artifacts/api-server/src/routes/forge-portal.ts` (core portal) + `forge-revenue.ts` (revenue engine) — client-scoped REST API with in-memory data stores, domain-based RBAC
+- **Revenue Engine** (Task #440): Autonomous Client Revenue Engine with 7 sub-systems:
+  - **Client Onboarding Wizard** (`Onboarding.tsx`): 6-step wizard (Company Profile → Domain Interests → KYC → Portfolio Config → Team Invitations → Billing Setup) with server-side step validation and state hydration
+  - **Client Health Scoring**: Real-time health score with churn prediction at `/forge-portal/health-score`
+  - **AI Proposal Generator** (`Proposals.tsx`): Generate/accept SOWs with engagement type, scope, timeline, pricing
+  - **Intelligence Packages** (`Packages.tsx`): 5 dynamic packages (Maritime Watch, Real Estate Pulse, Legal Shield, Threat Matrix, Cross-Domain Fusion) with subscribe flow
+  - **Communications Hub** (`Communications.tsx`): Unified comms with type/urgency/domain filtering + notification preferences panel
+  - **Revenue Dashboard**: API at `/forge-portal/revenue/summary` (frontend in Lyte/SZL pending)
+  - **Self-Service Upgrades** (`Upgrades.tsx`): Seat management + AI agent deployment with tier-based pricing
+- **Frontend API Client**: `artifacts/forge/src/lib/api.ts` — typed fetch client with all portal + revenue endpoints and complete TypeScript interfaces
+- **Security**: Document access audit logging, message read receipts, domain entitlement enforcement, onboarding step-order validation, client-scoped data isolation
 - **Design Tokens**: forge-* CSS custom properties (warm neutral palette, light backgrounds, institutional typography)
 
 ## User Preferences

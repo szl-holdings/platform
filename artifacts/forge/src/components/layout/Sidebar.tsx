@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, TrendingUp, Scale, Anchor, FileText,
   MessageSquare, Settings, LogOut, Shield, ChevronRight,
-  Hexagon
+  Hexagon, UserPlus, FileSignature, Package, Mail, ArrowUpCircle
 } from "lucide-react";
 import { CLIENT } from "@/data/mock";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,14 @@ const NAV_ITEMS = [
   { path: "/documents", label: "Documents", icon: FileText },
   { path: "/messages", label: "Messages", icon: MessageSquare, badge: 2 },
   { path: "/settings", label: "Settings", icon: Settings },
+];
+
+const REVENUE_ITEMS = [
+  { path: "/onboarding", label: "Onboarding", icon: UserPlus },
+  { path: "/proposals", label: "Proposals", icon: FileSignature },
+  { path: "/packages", label: "Packages", icon: Package },
+  { path: "/communications", label: "Comms Hub", icon: Mail },
+  { path: "/upgrades", label: "Upgrades", icon: ArrowUpCircle },
 ];
 
 const DOMAIN_COLORS: Record<string, string> = {
@@ -37,7 +45,6 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <aside className="forge-sidebar flex flex-col h-full w-64 min-w-[16rem]">
-      {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-4 border-b" style={{ borderColor: "var(--color-forge-border)" }}>
         <div
           className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -51,7 +58,6 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         </div>
       </div>
 
-      {/* Client info */}
       <div className="px-4 py-3 border-b" style={{ borderColor: "var(--color-forge-border)", background: "hsla(210, 20%, 94%, 0.6)" }}>
         <div className="flex items-center gap-2.5">
           <div
@@ -68,7 +74,6 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             {CLIENT.tier}
           </span>
         </div>
-        {/* Active domains */}
         <div className="flex items-center gap-1 mt-2 flex-wrap">
           {CLIENT.domains.map(d => (
             <span
@@ -86,10 +91,8 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         </div>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">
         {NAV_ITEMS.map(({ path, label, icon: Icon, badge }) => {
-          const fullPath = base + path;
           const isActive = location === path || location.startsWith(path + "/");
           return (
             <Link
@@ -112,9 +115,27 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             </Link>
           );
         })}
+
+        <div className="pt-3 mt-2" style={{ borderTop: "1px solid var(--color-forge-border)" }}>
+          <div className="forge-eyebrow px-3 mb-1.5">Revenue Engine</div>
+          {REVENUE_ITEMS.map(({ path, label, icon: Icon }) => {
+            const isActive = location === path || location.startsWith(path + "/");
+            return (
+              <Link
+                key={path}
+                href={path}
+                onClick={onNavigate}
+                className={cn("forge-nav-item w-full", isActive && "active")}
+              >
+                <Icon className="w-4 h-4 flex-shrink-0" />
+                <span className="flex-1">{label}</span>
+                {isActive && <ChevronRight className="w-3 h-3 opacity-50 flex-shrink-0" />}
+              </Link>
+            );
+          })}
+        </div>
       </nav>
 
-      {/* Bottom section */}
       <div className="p-3 border-t space-y-1" style={{ borderColor: "var(--color-forge-border)" }}>
         <div className="flex items-center gap-2 px-3 py-2">
           <Shield className="w-3.5 h-3.5" style={{ color: "var(--color-forge-success)" }} />

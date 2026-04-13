@@ -9,6 +9,11 @@ const Assets = lazy(() => import("@/pages/Assets"));
 const Documents = lazy(() => import("@/pages/Documents"));
 const Messages = lazy(() => import("@/pages/Messages"));
 const Settings = lazy(() => import("@/pages/Settings"));
+const Onboarding = lazy(() => import("@/pages/Onboarding"));
+const Proposals = lazy(() => import("@/pages/Proposals"));
+const Packages = lazy(() => import("@/pages/Packages"));
+const Communications = lazy(() => import("@/pages/Communications"));
+const Upgrades = lazy(() => import("@/pages/Upgrades"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -47,6 +52,11 @@ export default function App() {
             <Route path="/documents" component={Documents} />
             <Route path="/messages" component={Messages} />
             <Route path="/settings" component={Settings} />
+            <Route path="/onboarding" component={Onboarding} />
+            <Route path="/proposals" component={Proposals} />
+            <Route path="/packages" component={Packages} />
+            <Route path="/communications" component={Communications} />
+            <Route path="/upgrades" component={Upgrades} />
             <Route component={() => <Redirect to="/dashboard" />} />
           </Switch>
         </Suspense>
