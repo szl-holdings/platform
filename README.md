@@ -18,8 +18,8 @@
   <img src="https://img.shields.io/badge/Node.js-24-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node" />
   <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL" />
   <img src="https://img.shields.io/badge/Expo-React%20Native-000020?style=flat-square&logo=expo&logoColor=white" alt="Expo" />
-  <img src="https://img.shields.io/badge/DB%20Tables-560%2B-blue?style=flat-square" alt="560+ Tables" />
-  <img src="https://img.shields.io/badge/Apps-16-green?style=flat-square" alt="16 Apps" />
+  <img src="https://img.shields.io/badge/DB%20Tables-600%2B-blue?style=flat-square" alt="600+ Tables" />
+  <img src="https://img.shields.io/badge/Apps-19-green?style=flat-square" alt="19 Apps" />
   <img src="https://img.shields.io/badge/Industries-5-orange?style=flat-square" alt="5 Industries" />
   <img src="https://img.shields.io/badge/License-Proprietary-red?style=flat-square" alt="License" />
 </p>
@@ -46,12 +46,12 @@ Built by a single founder. Every line ships to production.
 
 | Metric | Value |
 |--------|-------|
-| **Production Applications** | 16 (9 web + 7 mobile) |
-| **Database Tables** | 560+ |
+| **Production Applications** | 19 (12 web/API + 7 mobile) |
+| **Database Tables** | 600+ |
 | **Database Columns** | 5,300+ |
 | **Database Indexes** | 940+ |
 | **API Endpoints** | 500+ |
-| **GitHub Commits** | 700+ |
+| **GitHub Commits** | 725+ |
 | **Industries Served** | 5 |
 | **Shared Libraries** | 6 |
 | **Competitive Moat Score** | 0.94 / 1.00 (8/8 unique capabilities) |
@@ -257,7 +257,7 @@ Auto-Execute (policy-approved)    Human Review Gate (HITL)
 | **Frontend** | React 19, Vite 7, Tailwind CSS 4, Framer Motion, Recharts, TanStack Query |
 | **Mobile** | Expo SDK 53, React Native, biometric auth, haptics, offline-first |
 | **Backend** | Express 5, Drizzle ORM, Zod validation, Pino structured logging |
-| **Database** | PostgreSQL 16 with pgvector, 560+ tables, 940+ indexes |
+| **Database** | PostgreSQL 16 with pgvector, 600+ tables, 940+ indexes |
 | **AI/ML** | Multi-provider gateway (Anthropic, OpenAI, Gemini, Groq), genetic algorithms, LLM-based training |
 | **Intelligence** | Cross-domain ontology, behavioral genomes, cascade prediction, anticipatory signals |
 | **Auth** | OIDC/PKCE, session-based, 7-role RBAC, SCIM 2.0 provisioning |
@@ -283,7 +283,7 @@ szl-holdings-platform/
 |   |-- *-mobile/                 #   7 companion mobile apps (Expo)
 |   +-- mockup-sandbox/           #   Component design sandbox
 |-- lib/                          # 6 shared libraries
-|   |-- db/                       #   Drizzle ORM schemas (560+ tables)
+|   |-- db/                       #   Drizzle ORM schemas (600+ tables)
 |   |-- ai-engine/                #   Multi-provider AI gateway
 |   |-- shared-ui/                #   Design system components
 |   |-- workflow-engine/          #   Alloy execution fabric
@@ -339,7 +339,7 @@ The platform includes a live **Investor Dashboard** with real-time database metr
 
 ## Release Status
 
-**Active development.** 700+ commits. 16 production applications. 560+ database tables. 5 industries. One architecture.
+**Active development.** 725+ commits. 19 production applications. 600+ database tables. 5 industries. One architecture.
 
 See [CHANGELOG.md](CHANGELOG.md) &bull; [ROADMAP.md](ROADMAP.md)
 
