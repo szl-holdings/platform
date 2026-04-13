@@ -84,6 +84,7 @@ const ConfidenceChallenge = lazy(() => import("@/pages/confidence-challenge"));
 const BoardBriefGenerator = lazy(() => import("@/pages/board-brief-generator"));
 const ResilienceDrill = lazy(() => import("@/pages/resilience-drill"));
 const AnalystScorecard = lazy(() => import("@/pages/analyst-scorecard"));
+const ThreatGlobePage = lazy(() => import("@/pages/threat-globe"));
 
 // ─── Task-375: Deep Evolution Pages ───────────────────────────────────────────
 const AdversaryPersonaEngine = lazy(() => import("@/pages/adversary-persona-engine"));
@@ -696,6 +697,7 @@ function AppRouter() {
         <Route path="/board-ready-risk-narrative" component={BoardReadyRiskNarrative} />
         <Route path="/threat-hunt-workbench" component={ThreatHuntWorkbench} />
 
+        <Route path="/threat-globe" component={ThreatGlobePage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground">Page not found</p>

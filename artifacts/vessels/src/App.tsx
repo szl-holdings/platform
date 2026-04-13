@@ -95,6 +95,7 @@ const MarketingDemoPage = lazy(() => import("@/pages/marketing-demo"));
 const SignInPage = lazy(() => import("@/pages/marketing-sign-in"));
 const LegalPrivacyPage = lazy(() => import("@/pages/legal-privacy"));
 const LegalTermsPage = lazy(() => import("@/pages/legal-terms"));
+const GlobeCommandPage = lazy(() => import("@/pages/globe-command"));
 
 // Dashboard / product pages
 const CommandOverviewPage = lazy(() => import("@/pages/command-overview"));
@@ -510,6 +511,7 @@ function DashboardRouter() {
         <Route path="/fleet-morning-brief-ai" component={FleetMorningBriefAiPage} />
         <Route path="/compliance-autopilot" component={ComplianceAutopilotPage} />
         <Route path="/dark-pattern-decoder" component={DarkPatternDecoderPage} />
+        <Route path="/globe-command" component={GlobeCommandPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-sky-400/40">Page not found</p>
@@ -613,7 +615,8 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     location.startsWith("/voyage-digital-twin") || location.startsWith("/maritime-knowledge-graph") ||
     location.startsWith("/predictive-congestion") || location.startsWith("/fleet-morning-brief-ai") ||
     location.startsWith("/compliance-autopilot") ||
-    location.startsWith("/dark-pattern-decoder");
+    location.startsWith("/dark-pattern-decoder") ||
+    location.startsWith("/globe-command");
 
   if (isDashboard) {
     return (

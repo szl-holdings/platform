@@ -30,6 +30,16 @@ CIA-PDB–style automated intelligence product within the SZL Holdings app that 
 - **Schema**: `lib/db/src/schema/pulse.ts`
 - **Frontend**: `artifacts/szl-holdings/src/pages/pulse/` (8 page components + utils)
 
+### One-of-One Innovation Features (Competitive Differentiation)
+Cross-ecosystem innovation features that differentiate Alloy from Palantir, Anduril, Windward, CrowdStrike, Datadog, Litify, and Reonomy:
+- **Interactive Particle Mesh Hero** (`artifacts/szl-holdings/src/components/ParticleMesh.tsx`): Canvas-based animated particle network on the SZL Holdings landing page hero. Pure Canvas API, no dependencies.
+- **3D Globe Command** (`artifacts/vessels/src/pages/globe-command.tsx` + `GlobeVisualization.tsx`): Interactive CSS/SVG globe showing vessel positions, trade routes, anomaly hotspots, and satellite pass schedules. Route: `/globe-command` in Vessels.
+- **Agent Health Console** (`artifacts/inca-lab/src/pages/AgentConsole.tsx`): Unified agent monitoring — status, token usage, cost tracking, success rates, decision replay timeline. Route: `/agent-console` in INCA Lab.
+- **Predictive Property Scores** (`artifacts/terra/src/pages/predictive-scores.tsx`): "Likelihood to Sell" 0–100 predictive scoring on properties with visual badges, trend indicators, confidence breakdowns. Route: `/predictive-scores` in Terra.
+- **Threat Globe** (`artifacts/firestorm/src/pages/threat-globe.tsx` + `ThreatGlobe.tsx`): Global threat map showing attack origins, active campaigns, threat actor locations. Route: `/threat-globe` in Firestorm.
+- **Alloy MCP Server** (`artifacts/szl-holdings/src/pages/mcp-server.tsx`): Model Context Protocol integration page showing how external AI agents (Claude, GPT, Gemini) connect to the Alloy ontology. 6 tool specs, architecture diagram, code samples. Route: `/mcp-server` in SZL Holdings.
+- **Developer Portal** (`artifacts/szl-holdings/src/pages/developers.tsx`): Alloy SDK docs, API reference, webhooks, code samples (893 lines). Redirects to `/docs`.
+
 ### Forge — Client & Investor Portal (`/forge/`)
 External-facing portal for SZL Holdings clients, investors, and partners. Premium light-mode institutional design. Built as `artifacts/forge` (Vite + React + TanStack Query, port 5000).
 - **7 Pages**: Dashboard, Portfolio, Matter Tracker, Assets, Documents, Messages, Settings

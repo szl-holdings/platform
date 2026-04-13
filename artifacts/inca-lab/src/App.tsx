@@ -14,6 +14,7 @@ import { DomainAgentLibrary } from "./pages/DomainAgentLibrary";
 import { SecurityPosture } from "./pages/SecurityPosture";
 import { AgentMemoryViewer } from "./pages/AgentMemoryViewer";
 import { ConsensusChamber } from "./pages/ConsensusChamber";
+import AgentConsole from "./pages/AgentConsole";
 
 export type Page =
   | "dashboard"
@@ -29,7 +30,8 @@ export type Page =
   | "agent-library"
   | "security"
   | "memory"
-  | "consensus";
+  | "consensus"
+  | "agent-console";
 
 const PAGE_ROUTES: Record<Page, string> = {
   dashboard: "/inca-lab/",
@@ -46,6 +48,7 @@ const PAGE_ROUTES: Record<Page, string> = {
   security: "/inca-lab/security",
   memory: "/inca-lab/memory",
   consensus: "/inca-lab/consensus",
+  "agent-console": "/inca-lab/agent-console",
 };
 
 function AppShell() {
@@ -65,6 +68,7 @@ function AppShell() {
     if (location.startsWith("/inca-lab/security")) return "security";
     if (location.startsWith("/inca-lab/memory")) return "memory";
     if (location.startsWith("/inca-lab/consensus")) return "consensus";
+    if (location.startsWith("/inca-lab/agent-console")) return "agent-console";
     return "dashboard";
   })();
 
@@ -94,6 +98,7 @@ function AppShell() {
             <AgentMemoryViewer />
           </Route>
           <Route path="/inca-lab/consensus" component={ConsensusChamber} />
+          <Route path="/inca-lab/agent-console" component={AgentConsole} />
           <Route>
             <Dashboard onNavigate={onNavigate} />
           </Route>

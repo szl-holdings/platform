@@ -20,6 +20,7 @@ import {
   ChevronUp,
   ShieldCheck,
   Database,
+  Activity,
 } from "lucide-react";
 
 interface NavItem {
@@ -63,6 +64,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: "workflow-forge", label: "Workflow Forge", sublabel: "Visual graph designer", icon: GitBranch },
       { id: "consensus", label: "Consensus Chamber", sublabel: "Multi-agent deliberation", icon: MessageSquare },
       { id: "protocol-bridge", label: "Protocol Bridge", sublabel: "MCP + A2A connectivity", icon: Link2 },
+      { id: "agent-console", label: "Agent Console", sublabel: "Health, cost & decisions", icon: Activity },
     ],
   },
 ];

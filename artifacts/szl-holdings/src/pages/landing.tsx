@@ -35,6 +35,7 @@ import {
   WordReveal, MagneticButton, NoiseGrain, LiveIndicator,
   CinematicReveal, EcosystemPulseItem, useMouseParallax,
 } from "@szl-holdings/shared-ui";
+import { ParticleMesh } from "@/components/ParticleMesh";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -916,6 +917,7 @@ export default function HomePage() {
 
         {/* ── 1. Hero ─────────────────────────────────────────────────── */}
         <section style={{ position: "relative", overflow: "hidden", borderBottom: "1px solid var(--color-szl-border)" }}>
+          <ParticleMesh />
           <div style={{ pointerEvents: "none", position: "absolute", inset: 0 }}>
             <m.div style={{ x: pX, y: pY, position: "absolute", top: "-10rem", left: "50%", transform: "translateX(-50%)", width: "900px", height: "600px", borderRadius: "50%", background: "hsla(192,72%,48%,0.055)", filter: "blur(120px)" }} />
             <m.div style={{ x: pX, y: pY, position: "absolute", top: "5rem", right: "-15rem", width: "600px", height: "500px", borderRadius: "50%", background: "hsla(215,72%,55%,0.025)", filter: "blur(100px)" }} />
