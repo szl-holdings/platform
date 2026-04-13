@@ -38,6 +38,7 @@ Cross-ecosystem innovation features that differentiate Alloy from Palantir, Andu
 - **Predictive Property Scores** (`artifacts/terra/src/pages/predictive-scores.tsx`): "Likelihood to Sell" 0–100 predictive scoring on properties with visual badges, trend indicators, confidence breakdowns. Route: `/predictive-scores` in Terra.
 - **Threat Globe** (`artifacts/firestorm/src/pages/threat-globe.tsx` + `ThreatGlobe.tsx`): Global threat map showing attack origins, active campaigns, threat actor locations. Route: `/threat-globe` in Firestorm.
 - **Alloy MCP Server** (`artifacts/szl-holdings/src/pages/mcp-server.tsx`): Model Context Protocol integration page showing how external AI agents (Claude, GPT, Gemini) connect to the Alloy ontology. 6 tool specs, architecture diagram, code samples. Route: `/mcp-server` in SZL Holdings.
+- **Cognitive Fabric** (`artifacts/szl-holdings/src/pages/cognitive-fabric.tsx`): The new innovation layer above agentic AI. Interactive neural canvas, 6 sovereignty layers (Cognitive Sovereignty, Cross-Domain Fusion, Autonomous Decision Fabric, Digital Twin Wargaming, Self-Healing Ops, Data Sovereignty), live 16-second decision timeline demo, competitive matrix vs Palantir/Anduril/CrowdStrike/Datadog/Windward, "Innovation Sources" cards. Route: `/cognitive-fabric` in SZL Holdings. Added to main nav.
 - **Developer Portal** (`artifacts/szl-holdings/src/pages/developers.tsx`): Alloy SDK docs, API reference, webhooks, code samples (893 lines). Redirects to `/docs`.
 
 ### Forge — Client & Investor Portal (`/forge/`)

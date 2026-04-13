@@ -21,6 +21,12 @@ const NAV_ITEMS = [
     children: null,
   },
   {
+    label: "Cognitive Fabric",
+    href: "/cognitive-fabric",
+    highlight: false,
+    children: null,
+  },
+  {
     label: "Lyte",
     href: "/lyte",
     highlight: false,
@@ -63,6 +69,8 @@ const NAV_LINKS_MOBILE = [
   { label: "Founder", href: "/founder", primary: false },
   { label: "Investors", href: "/investor-relations", primary: false },
   { label: "Trust Center", href: "/trust", primary: false },
+  { label: "Cognitive Fabric", href: "/cognitive-fabric", primary: false },
+  { label: "MCP Server", href: "/mcp-server", primary: false },
 ];
 
 export function SiteNav() {

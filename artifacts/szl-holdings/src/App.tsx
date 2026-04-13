@@ -86,6 +86,7 @@ const DocsModelMeshPage = lazy(() => import("@/pages/docs-model-mesh"));
 const DocsTrustPage = lazy(() => import("@/pages/docs-trust"));
 const DocsGithubPage = lazy(() => import("@/pages/docs-github"));
 const MCPServerPage = lazy(() => import("@/pages/mcp-server"));
+const CognitiveFabricPage = lazy(() => import("@/pages/cognitive-fabric"));
 
 const SolutionsPrismCounselPage = lazy(() => import("@/pages/solutions-prism-counsel"));
 const SolutionsPrismCounselTrustPage = lazy(() => import("@/pages/solutions-prism-counsel-trust"));
@@ -896,6 +897,9 @@ function App() {
             </Route>
             <Route path="/mcp-server">
               <Suspense fallback={<PageLoader />}><MCPServerPage /></Suspense>
+            </Route>
+            <Route path="/cognitive-fabric">
+              <Suspense fallback={<PageLoader />}><CognitiveFabricPage /></Suspense>
             </Route>
             <Route path="/developers">
               <Redirect to="/docs" />
