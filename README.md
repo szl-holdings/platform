@@ -19,7 +19,8 @@
   <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL" />
   <img src="https://img.shields.io/badge/Expo-React%20Native-000020?style=flat-square&logo=expo&logoColor=white" alt="Expo" />
   <img src="https://img.shields.io/badge/DB%20Tables-600%2B-blue?style=flat-square" alt="600+ Tables" />
-  <img src="https://img.shields.io/badge/Apps-19-green?style=flat-square" alt="19 Apps" />
+  <img src="https://img.shields.io/badge/Apps-22-green?style=flat-square" alt="22 Apps" />
+  <img src="https://img.shields.io/badge/Commits-750%2B-6A0DAD?style=flat-square" alt="750+ Commits" />
   <img src="https://img.shields.io/badge/Industries-5-orange?style=flat-square" alt="5 Industries" />
   <img src="https://img.shields.io/badge/License-Proprietary-red?style=flat-square" alt="License" />
 </p>
@@ -46,14 +47,14 @@ Built by a single founder. Every line ships to production.
 
 | Metric | Value |
 |--------|-------|
-| **Production Applications** | 19 (12 web/API + 7 mobile) |
-| **Database Tables** | 600 |
+| **Production Applications** | 22 (15 web/API + 7 mobile) |
+| **Database Tables** | 600+ |
 | **Database Columns** | 5,300+ |
 | **Database Indexes** | 940+ |
 | **API Route Modules** | 150 |
 | **Shared Libraries** | 28 |
 | **Schema Definitions** | 82 files |
-| **GitHub Commits** | 730+ |
+| **GitHub Commits** | 750+ |
 | **Industries Served** | 5 |
 | **Competitive Moat Score** | 0.94 / 1.00 (8/8 unique capabilities) |
 
@@ -135,10 +136,13 @@ Built by a single founder. Every line ships to production.
 | **PRISM Counsel** | Litigation Intelligence | Autonomous legal intelligence, litigation prediction, contract triage, settlement forecasting, judge profiling |
 | **Carlota Jo** | Private Advisory | Anticipation engine, proactive client recommendations, sentiment analysis, UHNW lifestyle intelligence |
 
-### Executive & Investor Surfaces
+### Client, Investor & Intelligence Surfaces
 
 | Product | Domain | Description |
 |---------|--------|-------------|
+| **Forge** | Client & Investor Portal | Secure client portal for deal flow, investor relations, and document management |
+| **Nexus** | Cross-Domain Intelligence Canvas | Force-directed graph fusing signals across all five domains — real-time relationship traversal and cascade visualization |
+| **INCA Lab** | AI Model Command & Deployment | Model registry, experiment tracking, ensemble evaluation, LLM governance, and deployment pipeline for all platform AI |
 | **SZL Holdings** | Corporate Command | Portfolio intelligence, investor due diligence dashboard, platform flywheel visualization |
 | **Stephen Lutar** | Founder Portfolio | Interactive founder journey, live platform proof, acquisition-grade metrics |
 
@@ -192,9 +196,23 @@ Every web platform has a companion Expo/React Native mobile app with voice comma
     </td>
   </tr>
   <tr>
-    <td align="center" colspan="2">
+    <td align="center">
+      <strong>Forge &mdash; Client & Investor Portal</strong><br>
+      <img src="docs/media/screenshots/forge-hero.jpg" width="100%" alt="Forge Client & Investor Portal" />
+    </td>
+    <td align="center">
+      <strong>Nexus &mdash; Cross-Domain Intelligence Canvas</strong><br>
+      <img src="docs/media/screenshots/nexus-hero.jpg" width="100%" alt="Nexus Intelligence Canvas" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <strong>INCA Lab &mdash; AI Model Command & Deployment</strong><br>
+      <img src="docs/media/screenshots/inca-lab-hero.jpg" width="100%" alt="INCA Lab AI Command" />
+    </td>
+    <td align="center">
       <strong>Investor Due Diligence Dashboard</strong><br>
-      <img src="docs/media/screenshots/investor-dashboard.jpg" width="80%" alt="Investor Dashboard" />
+      <img src="docs/media/screenshots/investor-dashboard.jpg" width="100%" alt="Investor Dashboard" />
     </td>
   </tr>
 </table>
@@ -271,7 +289,7 @@ Auto-Execute (policy-approved)    Human Review Gate (HITL)
 
 ```
 szl-holdings-platform/
-|-- artifacts/                    # 16 deployable applications
+|-- artifacts/                    # 22 deployable applications
 |   |-- szl-holdings/             #   Corporate command (React + Vite)
 |   |-- firestorm/                #   Aegis cybersecurity command
 |   |-- vessels/                  #   Maritime intelligence
@@ -280,6 +298,9 @@ szl-holdings-platform/
 |   |-- prism-counsel/            #   Litigation intelligence
 |   |-- carlota-jo/               #   Private advisory
 |   |-- stephen-site/             #   Founder portfolio
+|   |-- forge/                    #   Client & investor portal
+|   |-- nexus/                    #   Cross-domain intelligence canvas
+|   |-- inca-lab/                 #   AI model command & deployment
 |   |-- api-server/               #   Unified API server (Express 5)
 |   |-- *-mobile/                 #   7 companion mobile apps (Expo)
 |   +-- mockup-sandbox/           #   Component design sandbox
@@ -324,7 +345,7 @@ The platform includes a live **Investor Dashboard** with real-time database metr
 | [Platform Thesis](docs/investor/platform-thesis.md) | Why this exists and where it's going |
 | [Product Readiness](docs/investor/product-readiness.md) | What's built, what's validated |
 | [Go-to-Market](docs/investor/go-to-market.md) | Revenue strategy and market approach |
-| [Portfolio Overview](docs/investor/platform-portfolio.md) | All 16 applications with positioning |
+| [Portfolio Overview](docs/investor/platform-portfolio.md) | All 22 applications with positioning |
 | [Data Room Index](docs/investor/data-room-index.md) | Complete diligence document inventory |
 
 ---
@@ -342,7 +363,7 @@ The platform includes a live **Investor Dashboard** with real-time database metr
 
 ## Release Status
 
-**Active development.** 740+ commits. 19 production applications. 600 database tables. 28 shared libraries. 150 API route modules. 5 industries. One architecture.
+**Active development.** 750+ commits. 22 production applications. 600+ database tables. 28 shared libraries. 150 API route modules. 5 industries. One architecture.
 
 See [CHANGELOG.md](CHANGELOG.md) &bull; [ROADMAP.md](ROADMAP.md)
 

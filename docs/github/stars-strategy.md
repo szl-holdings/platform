@@ -23,7 +23,7 @@ Starring a repo is not appreciation or social signal. It is an act of curation. 
 500 well-organized stars beat 2,000 random ones. When in doubt, don't star.
 
 **3. Stars serve the products.**
-Everything curated should connect back to Lyte, Alloy, Aegis, Vessels, Terra, Carlota Jo, or the SZL infrastructure layer. Tangential repos do not earn a star.
+Everything curated should connect back to Lyte, Alloy, Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, Forge, Nexus, INCA Lab, or the SZL infrastructure layer. Tangential repos do not earn a star.
 
 **4. Lists are mandatory for intent.**
 If a starred repo is not assigned to a list, it has no strategic value. Stars without lists are noise.

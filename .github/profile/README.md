@@ -11,8 +11,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Apps-16_Production-00C853?style=flat-square" alt="16 Apps" />
-  <img src="https://img.shields.io/badge/Database-415+_Tables-4169E1?style=flat-square" alt="415+ Tables" />
+  <img src="https://img.shields.io/badge/Apps-22_Production-00C853?style=flat-square" alt="22 Apps" />
+  <img src="https://img.shields.io/badge/Database-600+_Tables-4169E1?style=flat-square" alt="600+ Tables" />
+  <img src="https://img.shields.io/badge/Commits-750+-6A0DAD?style=flat-square" alt="750+ Commits" />
   <img src="https://img.shields.io/badge/Industries-5_Verticals-FF6F00?style=flat-square" alt="5 Industries" />
   <img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React" />
@@ -25,12 +26,12 @@
 
 SZL Holdings builds the **governed operational intelligence layer** — the platform that connects what's observable to what's executable, under governance, with full attribution.
 
-**Lyte** is the command surface. **Alloy** is the execution fabric. Domain intelligence packs extend the same system into cybersecurity, maritime, real estate, legal, and private advisory.
+**Lyte** is the command surface. **Alloy** is the execution fabric. **Nexus** is the cross-domain intelligence canvas. Domain intelligence packs extend the same system into cybersecurity, maritime, real estate, legal, and private advisory. **Forge** surfaces it all for clients and investors. **INCA Lab** governs the AI that powers it.
 
 ```
-16 Production Applications     415+ Database Tables     5,300+ Columns
- 9 Web Platforms                940+ Database Indexes    6 Shared Libraries
- 7 Mobile Apps (Expo)            5  Industry Verticals   1 Founder
+22 Production Applications     600+ Database Tables     5,300+ Columns
+15 Web Platforms               940+ Database Indexes    28 Shared Libraries
+ 7 Mobile Apps (Expo)            5 Industry Verticals    1 Founder
 ```
 
 ---
@@ -52,7 +53,14 @@ SZL Holdings builds the **governed operational intelligence layer** — the plat
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/szl-holdings/szl-holdings-platform"><img src="https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/master/docs/media/screenshots/carlota-jo-hero.jpg" width="400" alt="Carlota Jo" /></a><br><strong>Carlota Jo</strong><br><sub>Private Advisory & AI Concierge</sub></td>
-    <td align="center"><a href="https://github.com/szl-holdings/szl-holdings-platform"><img src="https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/master/docs/media/screenshots/stephen-lutar-hero.jpg" width="400" alt="Stephen Lutar" /></a><br><strong>Stephen Lutar</strong><br><sub>Founder Portfolio & Investor Dashboard</sub></td>
+    <td align="center"><a href="https://github.com/szl-holdings/szl-holdings-platform"><img src="https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/master/docs/media/screenshots/forge-hero.jpg" width="400" alt="Forge" /></a><br><strong>Forge</strong><br><sub>Client & Investor Portal</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/szl-holdings/szl-holdings-platform"><img src="https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/master/docs/media/screenshots/nexus-hero.jpg" width="400" alt="Nexus" /></a><br><strong>Nexus</strong><br><sub>Cross-Domain Fusion Intelligence Canvas</sub></td>
+    <td align="center"><a href="https://github.com/szl-holdings/szl-holdings-platform"><img src="https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/master/docs/media/screenshots/inca-lab-hero.jpg" width="400" alt="INCA Lab" /></a><br><strong>INCA Lab</strong><br><sub>AI Model Command & Deployment</sub></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2"><a href="https://github.com/szl-holdings/szl-holdings-platform"><img src="https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/master/docs/media/screenshots/stephen-lutar-hero.jpg" width="400" alt="Stephen Lutar" /></a><br><strong>Stephen Lutar</strong><br><sub>Founder Portfolio & Investor Dashboard</sub></td>
   </tr>
 </table>
 
@@ -64,12 +72,16 @@ SZL Holdings builds the **governed operational intelligence layer** — the plat
 SZL Holdings
 ├── Lyte              Business observability — PRISM framework, autonomous remediation, chaos prediction
 ├── Alloy             Execution fabric — signal routing, workflow orchestration, approval gates, audit trail
+├── Nexus             Cross-domain canvas — force-directed fusion graph, real-time cascade visualization
 │
 ├── Aegis             Cybersecurity — adversary personas, attack replay, blast radius, threat hunting
 ├── Vessels           Maritime — voyage digital twin, knowledge graph, congestion prediction, compliance
 ├── Terra             Real estate — property genome, distress scoring, deal war rooms, market pulse
 ├── PRISM Counsel     Legal — case outcome oracle, judge intelligence, smart discovery, recovery tracking
 ├── Carlota Jo        Advisory — AI concierge, lifestyle intelligence, engagement timelines, discretion mode
+│
+├── Forge             Client & investor portal — deal flow, document management, investor relations
+├── INCA Lab          AI command — model registry, experiment tracking, ensemble evaluation, LLM governance
 │
 └── 7 Mobile Apps     Voice commands, haptics, biometrics, offline-first, AR overlays, command palette
 ```
@@ -92,6 +104,7 @@ TypeScript 5.9 · React 19 · Vite 7 · Express 5 · PostgreSQL 16 · Drizzle OR
 | Platform Thesis | [platform-thesis.md](https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/investor/platform-thesis.md) |
 | Product Readiness | [product-readiness.md](https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/investor/product-readiness.md) |
 | Go-to-Market | [go-to-market.md](https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/investor/go-to-market.md) |
+| Platform Portfolio | [platform-portfolio.md](https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/investor/platform-portfolio.md) |
 | Data Room Index | [data-room-index.md](https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/investor/data-room-index.md) |
 | Architecture | [system-overview.md](https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/architecture/system-overview.md) |
 | Trust & Security | [trust-center.md](https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/trust/trust-center.md) |

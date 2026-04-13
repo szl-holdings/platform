@@ -29,7 +29,7 @@ Complete step-by-step instructions for setting up and publishing SZL Holdings' s
 1. Go to x.com → Profile → Edit Profile
 2. Upload avatar: `szl-avatar-square.png` (profile photo)
 3. Upload banner: `szl-x-banner.png` (header photo, crop to 1500×500)
-4. Bio: "AI-native enterprise intelligence. 6 platforms. Maritime, defense, real estate, AIOps, legal, creative. Founder: @stephenlutar. szlholdings.com"
+4. Bio: "AI-native enterprise intelligence. 10 platforms. Maritime, defense, real estate, legal, advisory + compound intelligence layer. Founder: @stephenlutar. szlholdings.com"
 5. Website: https://szlholdings.com
 6. Location: Washington, DC
 
@@ -102,7 +102,7 @@ Go to Distribution OS → Newsletters. Find "Signal Over Noise — Inaugural Iss
 **Upload Steps:**
 1. Create account at instagram.com
 2. Upload avatar: `szl-avatar-square.png`
-3. Bio: "AI-native enterprise intelligence. 6 platforms across maritime, defense, real estate + AIOps. 🔗 szlholdings.com"
+3. Bio: "AI-native enterprise intelligence. 10 platforms across maritime, defense, real estate, legal, advisory + compound intelligence layer. 🔗 szlholdings.com"
 4. Add link: https://szlholdings.com
 
 **Content:**

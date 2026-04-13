@@ -92,6 +92,37 @@
 | **Mobile** | ✅ Carlota Jo Mobile (Expo/React Native) |
 | **What's Needed for GA** | Client intake flow activation, billing, domain configuration |
 
+### Forge — Client & Investor Portal
+
+| Dimension | Assessment |
+|-----------|-----------|
+| **Readiness Label** | Functional Alpha |
+| **Core Architecture** | Production-grade |
+| **Feature Completeness** | Secure document vault, investor relations dashboard, client portal, deal flow management |
+| **Auth** | OIDC PKCE + role-based access — investor view, client view, internal team |
+| **Alloy Integration** | Approval workflows and audit trail for document access and deal actions |
+| **What's Needed for GA** | Client intake activation, document encryption at rest, billing |
+
+### Nexus — Cross-Domain Fusion Intelligence Canvas
+
+| Dimension | Assessment |
+|-----------|-----------|
+| **Readiness Label** | Functional Alpha |
+| **Core Architecture** | Production-grade |
+| **Feature Completeness** | Force-directed graph, cross-domain entity fusion, cascade visualization, depth-4 traversal, domain/risk filtering |
+| **Data State** | Seeded multi-domain entity data — clearly labeled in UI |
+| **What's Needed for GA** | Live entity data pipeline connections, real-time WebSocket updates per domain, performance tuning for large graphs |
+
+### INCA Lab — AI Model Command & Deployment
+
+| Dimension | Assessment |
+|-----------|-----------|
+| **Readiness Label** | Functional Alpha |
+| **Core Architecture** | Production-grade |
+| **Feature Completeness** | Model registry, experiment tracking, ensemble evaluation, LLM governance audit trail, deployment pipeline with approval gates |
+| **AI Integration** | Multi-provider (Anthropic, OpenAI, Gemini, Groq) evaluation framework active |
+| **What's Needed for GA** | Production model deployment hooks, live inference volume tracking, billing per inference unit |
+
 ### SZL Holdings — Corporate Platform
 
 | Dimension | Assessment |

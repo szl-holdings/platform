@@ -16,7 +16,8 @@
 | **Founder** | Stephen Lutar |
 | **Model** | Unified platform ecosystem — shared infrastructure across domain verticals |
 | **Primary Vertical** | Business Observability (Lyte) |
-| **Adjacent Verticals** | Defense Intelligence (Aegis), Real Estate (Terra), Maritime (Vessels), Advisory (Carlota Jo) |
+| **Adjacent Verticals** | Defense Intelligence (Aegis), Real Estate (Terra), Maritime (Vessels), Advisory (Carlota Jo), Litigation (PRISM Counsel) |
+| **Intelligence Surfaces** | Client & Investor Portal (Forge), Cross-Domain Canvas (Nexus), AI Command (INCA Lab) |
 | **Revenue Model** | SaaS subscriptions, usage-based billing, enterprise contracts |
 | **Primary Markets** | Enterprise and mid-market operations, security, maritime, real estate |
 
@@ -42,9 +43,9 @@ The architecture is unique: five domain verticals sharing one intelligence backb
 
 As of Q1 2026, SZL Holdings has:
 
-- **16 deployable artifacts** — 7 web apps, 7 mobile apps (Expo/React Native), 1 API server, 1 design system
+- **22 deployable artifacts** — 15 web/API applications, 7 mobile apps (Expo/React Native)
 - **Production-grade shared infrastructure** — database schema, auth, audit trail, real-time layer, AI engine, workflow engine
-- **5 domain platforms** fully implemented with seeded/demo data and role-aware dashboards
+- **8 domain and intelligence platforms** fully implemented with seeded/demo data and role-aware dashboards — including three new surfaces: **Forge** (Client & Investor Portal), **Nexus** (Cross-Domain Fusion Intelligence Canvas), and **INCA Lab** (AI Model Command & Deployment)
 - **Azure Bicep IaC** — enterprise deployment architecture ready
 - **Stripe billing infrastructure** — built and pending activation
 - **OpenAPI 3.1 specification** — full API documentation
