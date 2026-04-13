@@ -18,10 +18,10 @@
     "./schema/canonical": "./src/schema/canonical.ts"
   },
   "scripts": {
-    "generate": "drizzle-kit generate --config ./drizzle.manual.ts",
-    "migrate": "drizzle-kit migrate --config ./drizzle.manual.ts",
-    "push": "drizzle-kit push --config ./drizzle.manual.ts",
-    "push-force": "drizzle-kit push --force --config ./drizzle.manual.ts"
+    "generate": "drizzle-kit generate --config ./drizzle.push.config.ts",
+    "migrate": "drizzle-kit migrate --config ./drizzle.push.config.ts",
+    "push": "drizzle-kit push --config ./drizzle.push.config.ts",
+    "push-force": "drizzle-kit push --force --config ./drizzle.push.config.ts"
   },
   "dependencies": {
     "drizzle-orm": "catalog:",

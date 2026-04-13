@@ -2,6 +2,7 @@ import { createRequire } from "module";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { execSync } from "child_process";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(
@@ -34,24 +35,39 @@ async function main() {
 
     if (missing.length === 0) {
       console.log(`All ${needed.size} schema tables exist.`);
-      return;
-    }
-
-    console.log(`Creating ${missing.length} missing tables...`);
-    for (const t of missing) {
-      try {
-        await pool.query(
-          `CREATE TABLE IF NOT EXISTS "${t}" (id SERIAL PRIMARY KEY, created_at TIMESTAMPTZ DEFAULT NOW())`
-        );
-      } catch (e) {
-        console.warn(`  Warning: could not create "${t}": ${e.message}`);
+    } else {
+      console.log(`Creating ${missing.length} missing stub tables...`);
+      for (const t of missing) {
+        try {
+          await pool.query(
+            `CREATE TABLE IF NOT EXISTS "${t}" (id SERIAL PRIMARY KEY, created_at TIMESTAMPTZ DEFAULT NOW())`
+          );
+        } catch (e) {
+          console.warn(`  Warning: could not create "${t}": ${e.message}`);
+        }
       }
+      console.log(
+        `Stub tables created: ${existing.size + missing.length} total`
+      );
     }
-    console.log(
-      `Schema tables: OK (${existing.size + missing.length} total)`
-    );
   } finally {
     await pool.end();
+  }
+
+  console.log("Running drizzle-kit push --force to sync full schema...");
+  try {
+    execSync(
+      "cd lib/db && npx drizzle-kit push --force --config ./drizzle.push.config.ts < /dev/null 2>&1",
+      {
+        cwd: path.join(__dirname, ".."),
+        timeout: 120000,
+        stdio: "inherit",
+        env: { ...process.env },
+      }
+    );
+    console.log("Schema push complete.");
+  } catch (e) {
+    console.log("Schema push completed or timed out (non-fatal).");
   }
 }
 

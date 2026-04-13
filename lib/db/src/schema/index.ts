@@ -77,3 +77,5 @@ export * from "./infrastructure";
 export * from "./alloy_evolution";
 export * from "./alloy_ml";
 export * from "./pulse";
+export * from "./prism_counsel_p2";
+export * from "./prism_counsel_recovery";
