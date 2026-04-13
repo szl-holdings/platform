@@ -143,19 +143,6 @@ import pulseRouter from "./pulse";
 
 const router: IRouter = Router();
 
-router.use((req, _res, next) => {
-  if (req.path.startsWith("/aegis/soc/")) {
-    req.url = req.url.replace("/aegis/soc/", "/firestorm/");
-  } else if (req.path.startsWith("/aegis/soc")) {
-    req.url = req.url.replace("/aegis/soc", "/firestorm");
-  } else if (req.path.startsWith("/aegis/ops/")) {
-    req.url = req.url.replace("/aegis/ops/", "/msp/");
-  } else if (req.path.startsWith("/aegis/ops")) {
-    req.url = req.url.replace("/aegis/ops", "/msp");
-  }
-  next();
-});
-
 router.use("/auth", _authLimiter);
 
 router.use("/billing", _writeLimiter);
@@ -278,10 +265,6 @@ router.use(samgovLiveRouter);
 router.use("/noaa", _readLimiter);
 router.use(noaaAlertsLiveRouter);
 
-router.use("/readiness", _readLimiter);
-router.use(readinessRouter);
-router.use("/aegis", _readLimiter);
-router.use(readinessRouter);
 
 router.use("/dreamscape", _readLimiter); // legacy path — creative-workflows module
 router.use(creativeWorkflowsRouter);

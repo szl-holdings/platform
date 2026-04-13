@@ -1,4 +1,4 @@
-import { Router, type IRouter } from 'express';
+import { Router, type IRouter } from "express";
 import {
   db,
   firestormTradecraftDecisionsTable,
@@ -8,12 +8,12 @@ import {
   insertFirestormTradecraftDecisionSchema,
   insertFirestormAnalystNotebookSchema,
   type InsertFirestormCaseMemory,
-} from '@szl-holdings/db';
-import { eq, desc, sql, and } from 'drizzle-orm';
-import { sendSuccess, sendCreated, sendNotFound, sendNoContent, handleRouteError } from '../lib/api-response';
-import { authMiddleware, parseIdParam } from '../middlewares/auth';
-import { queryEvidenceIndex, ingestDecisionToEvidenceIndex } from '../lib/tradecraft-evidence-store';
-import { validateAndBuildDecision, type DecisionObjectType } from '@szl-holdings/ai-engine';
+} from "@szl-holdings/db";
+import { eq, desc, sql, and } from "drizzle-orm";
+import { sendSuccess, sendCreated, sendNotFound, sendNoContent, handleRouteError } from "../lib/api-response";
+import { authMiddleware } from "../middlewares/auth";
+import { queryEvidenceIndex, ingestDecisionToEvidenceIndex } from "../lib/tradecraft-evidence-store";
+import { validateAndBuildDecision, type DecisionObjectType } from "@szl-holdings/ai-engine";
 
 const router: IRouter = Router();
 
@@ -45,25 +45,13 @@ async function upsertCaseMemoryFromDecision(
 
   const existing = await db.select().from(firestormCaseMemoryTable).where(sql`${firestormCaseMemoryTable.caseId} = ${caseId}`);
   if (existing.length === 0) {
-    const initialSummary = {
-      totalDecisions: 1,
-      lastDecisionAt: now.toISOString(),
-      currentRiskLevel: decision.impactLevel,
-      pendingApprovals: decision.approvalRequired ? 1 : 0,
-      humanReviewRequired: decision.humanReviewRequired,
-    };
+    const initialSummary = { totalDecisions: 1, lastDecisionAt: now.toISOString(), currentRiskLevel: decision.impactLevel, pendingApprovals: decision.approvalRequired ? 1 : 0, humanReviewRequired: decision.humanReviewRequired };
     await db.insert(firestormCaseMemoryTable).values({
-      caseId,
-      incidentId,
-      phase: "triage",
+      caseId, incidentId, phase: "triage",
       phaseHistory: [{ phase: "detection", enteredAt: now.toISOString(), exitedAt: now.toISOString() }, { phase: "triage", enteredAt: now.toISOString(), exitedAt: null }],
-      decisions: [decisionSnapshot],
-      evidenceSnapshots: [],
-      analystNotes: [],
+      decisions: [decisionSnapshot], evidenceSnapshots: [], analystNotes: [],
       changeLog: [{ changeId: `change_${Date.now()}`, fieldChanged: "decision_added", previousValue: null, newValue: decision.objectId, changedBy: "system", changedAt: now.toISOString(), decisionObjectId: decision.objectId }],
-      summary: initialSummary,
-      openedAt: now,
-      lastUpdatedAt: now,
+      summary: initialSummary, openedAt: now, lastUpdatedAt: now,
     });
   } else {
     const current = existing[0]!;
@@ -71,23 +59,12 @@ async function upsertCaseMemoryFromDecision(
     const updatedDecisions = [...currentDecisions, decisionSnapshot];
     const pendingApprovals = updatedDecisions.filter(d => d.approvalRequired).length;
     const humanReviewRequired = updatedDecisions.some(d => d.humanReviewRequired);
-    const updatedSummary = {
-      totalDecisions: updatedDecisions.length,
-      lastDecisionAt: now.toISOString(),
-      currentRiskLevel: decision.impactLevel,
-      pendingApprovals,
-      humanReviewRequired,
-    };
+    const updatedSummary = { totalDecisions: updatedDecisions.length, lastDecisionAt: now.toISOString(), currentRiskLevel: decision.impactLevel, pendingApprovals, humanReviewRequired };
     const currentChangeLog = Array.isArray(current.changeLog) ? current.changeLog : [];
-    await db.update(firestormCaseMemoryTable)
-      .set({
-        decisions: updatedDecisions,
-        summary: updatedSummary,
-        lastUpdatedAt: now,
-        updatedAt: now,
-        changeLog: [...currentChangeLog, { changeId: `change_${Date.now()}`, fieldChanged: "decision_added", previousValue: null, newValue: decision.objectId, changedBy: "system", changedAt: now.toISOString(), decisionObjectId: decision.objectId }],
-      })
-      .where(sql`${firestormCaseMemoryTable.caseId} = ${caseId}`);
+    await db.update(firestormCaseMemoryTable).set({
+      decisions: updatedDecisions, summary: updatedSummary, lastUpdatedAt: now, updatedAt: now,
+      changeLog: [...currentChangeLog, { changeId: `change_${Date.now()}`, fieldChanged: "decision_added", previousValue: null, newValue: decision.objectId, changedBy: "system", changedAt: now.toISOString(), decisionObjectId: decision.objectId }],
+    }).where(sql`${firestormCaseMemoryTable.caseId} = ${caseId}`);
   }
 }
 
@@ -106,23 +83,17 @@ router.get("/firestorm/tradecraft/decisions", authMiddleware({ required: true })
       ...(decisionType ? [eq(firestormTradecraftDecisionsTable.decisionType, decisionType as "TriageDecision")] : []),
       ...(status ? [eq(firestormTradecraftDecisionsTable.status, status as "active")] : []),
     ];
-    const decisions = await db
-      .select()
-      .from(firestormTradecraftDecisionsTable)
-      .where(and(...conditions))
-      .orderBy(desc(firestormTradecraftDecisionsTable.createdAt))
-      .limit(limit);
+    const decisions = await db.select().from(firestormTradecraftDecisionsTable).where(and(...conditions)).orderBy(desc(firestormTradecraftDecisionsTable.createdAt)).limit(limit);
     sendSuccess(res, decisions);
   } catch (err) { handleRouteError(res, err, "Failed to list tradecraft decisions"); }
 });
 
 router.get("/firestorm/tradecraft/decisions/:objectId", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const [decision] = await db.select().from(firestormTradecraftDecisionsTable)
-      .where(and(
-        sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId}`,
-        eq(firestormTradecraftDecisionsTable.tenantId, "default"),
-      ));
+    const [decision] = await db.select().from(firestormTradecraftDecisionsTable).where(and(
+      sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId}`,
+      eq(firestormTradecraftDecisionsTable.tenantId, "default"),
+    ));
     if (!decision) { sendNotFound(res, "Tradecraft Decision"); return; }
     sendSuccess(res, decision);
   } catch (err) { handleRouteError(res, err, "Failed to get tradecraft decision"); }
@@ -157,11 +128,7 @@ router.post("/firestorm/tradecraft/decisions", authMiddleware({ required: true }
     const tenantId = "default";
     const modelRoute = typeof body.modelRoute === "string" ? body.modelRoute : "unknown";
 
-    const validationResult = validateAndBuildDecision(body, body.decisionType as DecisionObjectType, {
-      tenantId,
-      modelRoute,
-      rawOutput,
-    });
+    const validationResult = validateAndBuildDecision(body, body.decisionType as DecisionObjectType, { tenantId, modelRoute, rawOutput });
 
     if (!validationResult.valid || !validationResult.object) {
       const { randomUUID: uuid422 } = await import("crypto");
@@ -177,9 +144,7 @@ router.post("/firestorm/tradecraft/decisions", authMiddleware({ required: true }
         modelRoute: typeof body.modelRoute === "string" ? body.modelRoute : "unknown",
         errorClass: "schema_validation",
         resolved: false,
-      }).catch((auditErr) => {
-        console.warn("[tradecraft] Failed to persist validation audit record — non-fatal", { auditErr });
-      });
+      }).catch((auditErr) => { console.warn("[tradecraft] Failed to persist validation audit record — non-fatal", { auditErr }); });
       res.status(422).json({
         error: "Decision object failed structured validation. Payload does not satisfy the required schema for this decision type.",
         decisionType: body.decisionType,
@@ -243,9 +208,7 @@ router.post("/firestorm/tradecraft/decisions", authMiddleware({ required: true }
         approvalRequired: decision.approvalRequired,
         humanReviewRequired: decision.humanReviewRequired,
         gapsAndUnknowns: Array.isArray(decision.gapsAndUnknowns) ? decision.gapsAndUnknowns : [],
-      }).catch(err => {
-        console.warn("[tradecraft] Failed to upsert case memory from decision — non-fatal", { err, caseId: decision.caseId });
-      });
+      }).catch(err => { console.warn("[tradecraft] Failed to upsert case memory from decision — non-fatal", { err, caseId: decision.caseId }); });
     }
 
     ingestDecisionToEvidenceIndex({
@@ -269,26 +232,18 @@ router.put("/firestorm/tradecraft/decisions/:objectId", authMiddleware({ require
     const user = req.user;
 
     if (action === "approve" || action === "reject") {
-      const canApprove = user && (
-        user.roles.includes("admin") ||
-        user.roles.includes("super_admin") ||
-        user.roles.includes("ops")
-      );
+      const canApprove = user && (user.roles.includes("admin") || user.roles.includes("super_admin") || user.roles.includes("ops"));
       if (!canApprove) {
         res.status(403).json({ error: "Forbidden: decision approval requires admin, super_admin, or ops role", code: "INSUFFICIENT_ROLE" });
         return;
       }
       const reviewerName = user.displayName ?? user.email ?? `user:${user.id}`;
-
       const decisionTenant = "default";
 
       if (action === "approve") {
         const [decision] = await db.update(firestormTradecraftDecisionsTable)
           .set({ approvedBy: reviewerName, approvedAt: new Date(), rejectedBy: null, rejectedAt: null, rejectionReason: null, updatedAt: new Date() })
-          .where(and(
-            sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId}`,
-            eq(firestormTradecraftDecisionsTable.tenantId, decisionTenant),
-          ))
+          .where(and(sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId}`, eq(firestormTradecraftDecisionsTable.tenantId, decisionTenant)))
           .returning();
         if (!decision) { sendNotFound(res, "Tradecraft Decision"); return; }
         sendSuccess(res, { ...decision, reviewStatus: "approved" });
@@ -298,26 +253,17 @@ router.put("/firestorm/tradecraft/decisions/:objectId", authMiddleware({ require
       const rejectionReason = typeof body.rejectionReason === "string" ? body.rejectionReason : null;
       const [decision] = await db.update(firestormTradecraftDecisionsTable)
         .set({ rejectedBy: reviewerName, rejectedAt: new Date(), approvedBy: null, approvedAt: null, rejectionReason, updatedAt: new Date() })
-        .where(and(
-          sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId}`,
-          eq(firestormTradecraftDecisionsTable.tenantId, decisionTenant),
-        ))
+        .where(and(sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId}`, eq(firestormTradecraftDecisionsTable.tenantId, decisionTenant)))
         .returning();
       if (!decision) { sendNotFound(res, "Tradecraft Decision"); return; }
       sendSuccess(res, { ...decision, reviewStatus: "rejected" });
       return;
     }
 
-    const allowedUpdates = insertFirestormTradecraftDecisionSchema
-      .omit({ approvedBy: true, approvedAt: true, rejectedBy: true, rejectedAt: true, rejectionReason: true })
-      .partial()
-      .parse(body);
+    const allowedUpdates = insertFirestormTradecraftDecisionSchema.omit({ approvedBy: true, approvedAt: true, rejectedBy: true, rejectedAt: true, rejectionReason: true }).partial().parse(body);
     const [decision] = await db.update(firestormTradecraftDecisionsTable)
       .set({ ...allowedUpdates, updatedAt: new Date() })
-      .where(and(
-        sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId}`,
-        eq(firestormTradecraftDecisionsTable.tenantId, "default"),
-      ))
+      .where(and(sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId}`, eq(firestormTradecraftDecisionsTable.tenantId, "default")))
       .returning();
     if (!decision) { sendNotFound(res, "Tradecraft Decision"); return; }
     sendSuccess(res, decision);
@@ -326,8 +272,7 @@ router.put("/firestorm/tradecraft/decisions/:objectId", authMiddleware({ require
 
 router.get("/firestorm/tradecraft/case-memory/:caseId", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const [memory] = await db.select().from(firestormCaseMemoryTable)
-      .where(sql`${firestormCaseMemoryTable.caseId} = ${req.params.caseId}`);
+    const [memory] = await db.select().from(firestormCaseMemoryTable).where(sql`${firestormCaseMemoryTable.caseId} = ${req.params.caseId}`);
     if (!memory) { sendNotFound(res, "Case Memory"); return; }
     sendSuccess(res, memory);
   } catch (err) { handleRouteError(res, err, "Failed to get case memory"); }
@@ -340,23 +285,14 @@ router.post("/firestorm/tradecraft/case-memory", authMiddleware({ required: true
     if (!caseId) { res.status(400).json({ error: "caseId required" }); return; }
     const incidentId = typeof body.incidentId === "string" ? body.incidentId : null;
     const existing = await db.select().from(firestormCaseMemoryTable).where(sql`${firestormCaseMemoryTable.caseId} = ${caseId}`);
-    if (existing.length > 0) {
-      sendSuccess(res, existing[0]);
-      return;
-    }
+    if (existing.length > 0) { sendSuccess(res, existing[0]); return; }
     const now = new Date();
     const [memory] = await db.insert(firestormCaseMemoryTable).values({
-      caseId,
-      incidentId,
-      phase: "detection",
+      caseId, incidentId, phase: "detection",
       phaseHistory: [{ phase: "detection", enteredAt: now.toISOString(), exitedAt: null }],
-      decisions: [],
-      evidenceSnapshots: [],
-      analystNotes: [],
-      changeLog: [],
+      decisions: [], evidenceSnapshots: [], analystNotes: [], changeLog: [],
       summary: { totalDecisions: 0, lastDecisionAt: null, currentRiskLevel: null, pendingApprovals: 0, humanReviewRequired: false },
-      openedAt: now,
-      lastUpdatedAt: now,
+      openedAt: now, lastUpdatedAt: now,
     }).returning();
     sendCreated(res, memory);
   } catch (err) { handleRouteError(res, err, "Failed to create case memory"); }
@@ -368,34 +304,18 @@ router.put("/firestorm/tradecraft/case-memory/:caseId", authMiddleware({ require
     const phaseEnum = ["detection", "triage", "investigation", "containment", "eradication", "recovery", "closed"] as const;
     type CaseMemoryPhase = typeof phaseEnum[number];
 
-    const update: Partial<InsertFirestormCaseMemory> & { lastUpdatedAt: Date; updatedAt: Date } = {
-      lastUpdatedAt: new Date(),
-      updatedAt: new Date(),
-    };
+    const update: Partial<InsertFirestormCaseMemory> & { lastUpdatedAt: Date; updatedAt: Date } = { lastUpdatedAt: new Date(), updatedAt: new Date() };
 
     if (typeof body.phase === "string" && (phaseEnum as readonly string[]).includes(body.phase)) {
       update.phase = body.phase as CaseMemoryPhase;
     }
-    if (Array.isArray(body.phaseHistory)) {
-      update.phaseHistory = body.phaseHistory as Array<{ phase: string; enteredAt: string; exitedAt: string | null }>;
-    }
-    if (Array.isArray(body.analystNotes)) {
-      update.analystNotes = body.analystNotes as Array<{ noteId: string; content: string; author: string; noteType: string; createdAt: string }>;
-    }
-    if (Array.isArray(body.changeLog)) {
-      update.changeLog = body.changeLog as unknown[];
-    }
-    if (typeof body.summary === "object" && body.summary !== null && !Array.isArray(body.summary)) {
-      update.summary = body.summary as Record<string, unknown>;
-    }
-    if (typeof body.closedAt === "string") {
-      update.closedAt = new Date(body.closedAt);
-    }
+    if (Array.isArray(body.phaseHistory)) update.phaseHistory = body.phaseHistory as Array<{ phase: string; enteredAt: string; exitedAt: string | null }>;
+    if (Array.isArray(body.analystNotes)) update.analystNotes = body.analystNotes as Array<{ noteId: string; content: string; author: string; noteType: string; createdAt: string }>;
+    if (Array.isArray(body.changeLog)) update.changeLog = body.changeLog as unknown[];
+    if (typeof body.summary === "object" && body.summary !== null && !Array.isArray(body.summary)) update.summary = body.summary as Record<string, unknown>;
+    if (typeof body.closedAt === "string") update.closedAt = new Date(body.closedAt);
 
-    const [memory] = await db.update(firestormCaseMemoryTable)
-      .set(update)
-      .where(sql`${firestormCaseMemoryTable.caseId} = ${req.params.caseId}`)
-      .returning();
+    const [memory] = await db.update(firestormCaseMemoryTable).set(update).where(sql`${firestormCaseMemoryTable.caseId} = ${req.params.caseId}`).returning();
     if (!memory) { sendNotFound(res, "Case Memory"); return; }
     sendSuccess(res, memory);
   } catch (err) { handleRouteError(res, err, "Failed to update case memory"); }
@@ -428,10 +348,7 @@ router.post("/firestorm/tradecraft/notebook", authMiddleware({ required: true })
       res.status(422).json({ error: "content is required and must be at least 3 characters." });
       return;
     }
-    const noteData = {
-      ...body,
-      noteId: typeof body.noteId === "string" ? body.noteId : `note_${randomUUID()}`,
-    };
+    const noteData = { ...body, noteId: typeof body.noteId === "string" ? body.noteId : `note_${randomUUID()}` };
     const data = insertFirestormAnalystNotebookSchema.parse(noteData);
     const [note] = await db.insert(firestormAnalystNotebookTable).values(data).returning();
 
@@ -445,27 +362,16 @@ router.post("/firestorm/tradecraft/notebook", authMiddleware({ required: true })
         const currentNotes = Array.isArray(cm.analystNotes) ? (cm.analystNotes as typeof noteSnapshot[]) : [];
         const currentChangeLog = Array.isArray(cm.changeLog) ? (cm.changeLog as typeof changeEntry[]) : [];
         await db.update(firestormCaseMemoryTable)
-          .set({
-            analystNotes: [...currentNotes, noteSnapshot],
-            lastUpdatedAt: nowNote,
-            updatedAt: nowNote,
-            changeLog: [...currentChangeLog, changeEntry],
-          })
+          .set({ analystNotes: [...currentNotes, noteSnapshot], lastUpdatedAt: nowNote, updatedAt: nowNote, changeLog: [...currentChangeLog, changeEntry] })
           .where(sql`${firestormCaseMemoryTable.caseId} = ${note.caseId}`)
           .catch((err: unknown) => { console.warn("[tradecraft] Failed to auto-update case memory with note — non-fatal", { err }); });
       } else {
         await db.insert(firestormCaseMemoryTable).values({
-          caseId: note.caseId,
-          incidentId: note.incidentId ?? null,
-          phase: "investigation",
+          caseId: note.caseId, incidentId: note.incidentId ?? null, phase: "investigation",
           phaseHistory: [{ phase: "investigation", enteredAt: nowNote.toISOString(), exitedAt: null }],
-          decisions: [],
-          evidenceSnapshots: [],
-          analystNotes: [noteSnapshot],
-          changeLog: [changeEntry],
+          decisions: [], evidenceSnapshots: [], analystNotes: [noteSnapshot], changeLog: [changeEntry],
           summary: { totalDecisions: 0, lastDecisionAt: null, currentRiskLevel: "medium", pendingApprovals: 0, humanReviewRequired: false } as unknown as Record<string, unknown>,
-          openedAt: nowNote,
-          lastUpdatedAt: nowNote,
+          openedAt: nowNote, lastUpdatedAt: nowNote,
         }).catch((err: unknown) => { console.warn("[tradecraft] Failed to create case memory for note — non-fatal", { err }); });
       }
     }
@@ -478,10 +384,7 @@ router.put("/firestorm/tradecraft/notebook/:noteId", authMiddleware({ required: 
   try {
     const body = req.body as Record<string, unknown>;
     const data = insertFirestormAnalystNotebookSchema.partial().parse(body);
-    const [note] = await db.update(firestormAnalystNotebookTable)
-      .set({ ...data, updatedAt: new Date() })
-      .where(sql`${firestormAnalystNotebookTable.noteId} = ${req.params.noteId}`)
-      .returning();
+    const [note] = await db.update(firestormAnalystNotebookTable).set({ ...data, updatedAt: new Date() }).where(sql`${firestormAnalystNotebookTable.noteId} = ${req.params.noteId}`).returning();
     if (!note) { sendNotFound(res, "Analyst Note"); return; }
     sendSuccess(res, note);
   } catch (err) { handleRouteError(res, err, "Failed to update analyst note"); }
@@ -489,9 +392,7 @@ router.put("/firestorm/tradecraft/notebook/:noteId", authMiddleware({ required: 
 
 router.delete("/firestorm/tradecraft/notebook/:noteId", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const [note] = await db.delete(firestormAnalystNotebookTable)
-      .where(sql`${firestormAnalystNotebookTable.noteId} = ${req.params.noteId}`)
-      .returning();
+    const [note] = await db.delete(firestormAnalystNotebookTable).where(sql`${firestormAnalystNotebookTable.noteId} = ${req.params.noteId}`).returning();
     if (!note) { sendNotFound(res, "Analyst Note"); return; }
     sendNoContent(res);
   } catch (err) { handleRouteError(res, err, "Failed to delete analyst note"); }
@@ -504,19 +405,8 @@ router.get("/firestorm/tradecraft/evidence-index", authMiddleware({ required: tr
     const incidentId = typeof req.query.incidentId === "string" ? req.query.incidentId : undefined;
     const maxResults = Math.min(parseInt(typeof req.query.limit === "string" ? req.query.limit : "20", 10), 100);
     const minRelevance = typeof req.query.minRelevance === "string" ? parseFloat(req.query.minRelevance) : 0.0;
-
     const result = await queryEvidenceIndex({ query, caseId, incidentId, maxResults, minRelevance });
-
-    sendSuccess(res, {
-      entries: result.entries,
-      totalIndexed: result.totalIndexed,
-      method: result.method,
-      confidenceDowngraded: result.confidenceDowngraded,
-      confidenceDowngradeReason: result.confidenceDowngradeReason ?? null,
-      weakRetrievalWarning: result.weakRetrievalWarning ?? null,
-      latencyMs: result.latencyMs,
-      indexedAt: new Date().toISOString(),
-    });
+    sendSuccess(res, { entries: result.entries, totalIndexed: result.totalIndexed, method: result.method, confidenceDowngraded: result.confidenceDowngraded, confidenceDowngradeReason: result.confidenceDowngradeReason ?? null, weakRetrievalWarning: result.weakRetrievalWarning ?? null, latencyMs: result.latencyMs, indexedAt: new Date().toISOString() });
   } catch (err) { handleRouteError(res, err, "Failed to query evidence index"); }
 });
 
@@ -524,30 +414,15 @@ router.post("/firestorm/tradecraft/evidence-index/query", authMiddleware({ requi
   try {
     const body = req.body as Record<string, unknown>;
     const query = typeof body.query === "string" ? body.query.trim() : "";
-    if (!query) {
-      res.status(422).json({ error: "query string is required." });
-      return;
-    }
+    if (!query) { res.status(422).json({ error: "query string is required." }); return; }
     const caseId = typeof body.caseId === "string" ? body.caseId : undefined;
     const incidentId = typeof body.incidentId === "string" ? body.incidentId : undefined;
     const sourceTypes = Array.isArray(body.sourceTypes) ? (body.sourceTypes as string[]) : undefined;
     const maxResults = typeof body.maxResults === "number" ? Math.min(body.maxResults, 50) : 15;
     const minRelevance = typeof body.minRelevance === "number" ? body.minRelevance : 0.0;
-
     const result = await queryEvidenceIndex({ query, caseId, incidentId, sourceTypes, maxResults, minRelevance });
-
-    sendSuccess(res, {
-      query,
-      entries: result.entries,
-      totalIndexed: result.totalIndexed,
-      method: result.method,
-      confidenceDowngraded: result.confidenceDowngraded,
-      confidenceDowngradeReason: result.confidenceDowngradeReason ?? null,
-      weakRetrievalWarning: result.weakRetrievalWarning ?? null,
-      latencyMs: result.latencyMs,
-    });
+    sendSuccess(res, { query, entries: result.entries, totalIndexed: result.totalIndexed, method: result.method, confidenceDowngraded: result.confidenceDowngraded, confidenceDowngradeReason: result.confidenceDowngradeReason ?? null, weakRetrievalWarning: result.weakRetrievalWarning ?? null, latencyMs: result.latencyMs });
   } catch (err) { handleRouteError(res, err, "Failed to query evidence index"); }
 });
-
 
 export default router;

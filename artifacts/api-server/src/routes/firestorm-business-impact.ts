@@ -1,17 +1,10 @@
-import { Router, type IRouter } from 'express';
-import {
-  db,
-  firestormIncidentsTable,
-  mspClientsTable,
-  mspContractsTable,
-} from '@szl-holdings/db';
-import { eq, desc, ne, and } from 'drizzle-orm';
-import { sendSuccess, sendNotFound, handleRouteError } from '../lib/api-response';
-import { authMiddleware, parseIdParam } from '../middlewares/auth';
+import { Router, type IRouter } from "express";
+import { db, firestormIncidentsTable, mspClientsTable, mspContractsTable } from "@szl-holdings/db";
+import { eq, desc, and, ne } from "drizzle-orm";
+import { sendSuccess, sendNotFound, handleRouteError } from "../lib/api-response";
+import { authMiddleware, parseIdParam } from "../middlewares/auth";
 
 const router: IRouter = Router();
-
-// ─── Business Impact — Incident-to-Invoice Correlation Engine ─────────────────
 
 interface SlaTierConfig {
   tier: string;
@@ -56,10 +49,7 @@ const SLA_TIERS: Record<string, SlaTierConfig> = {
 };
 
 const REMEDIATION_COST_BY_SEVERITY: Record<string, number> = {
-  critical: 45000,
-  high: 18000,
-  medium: 6000,
-  low: 1500,
+  critical: 45000, high: 18000, medium: 6000, low: 1500,
 };
 
 const INDUSTRY_ATTACK_AFFINITY: Record<string, string[]> = {
@@ -86,24 +76,14 @@ function scoreClientAffinity(incident: { title: string; description: string | nu
   const clientIndustry = (client.industry ?? "").toLowerCase();
   const clientName = client.name.toLowerCase();
   const clientTags: string[] = Array.isArray(client.tags) ? client.tags.map((t) => t.toLowerCase()) : [];
-
   let score = 0;
-
   const affinityTerms = INDUSTRY_ATTACK_AFFINITY[clientIndustry] ?? [];
-  for (const term of affinityTerms) {
-    if (corpus.includes(term)) score += 20;
-  }
-
-  for (const tag of clientTags) {
-    if (corpus.includes(tag)) score += 15;
-  }
-
+  for (const term of affinityTerms) { if (corpus.includes(term)) score += 20; }
+  for (const tag of clientTags) { if (corpus.includes(tag)) score += 15; }
   if (corpus.includes(clientName)) score += 30;
   if (corpus.includes(clientIndustry)) score += 10;
-
   if (client.mrr && client.mrr >= 15000) score += 5;
   if (client.status === "at-risk") score += 8;
-
   return score;
 }
 
@@ -112,18 +92,13 @@ function correlateIncidentToClients(
   clients: MspClientRow[],
 ): { client: MspClientRow; confidence: number } | null {
   if (clients.length === 0) return null;
-
   const scored = clients.map((c) => ({ client: c, score: scoreClientAffinity(incident, c) }));
   scored.sort((a, b) => b.score - a.score);
-
   const best = scored[0];
   const hasSemanticSignal = best.score > 0;
-
   const confidenceBase = incident.severity === "critical" ? 0.88 : incident.severity === "high" ? 0.76 : 0.58;
   const confidenceBoost = hasSemanticSignal ? Math.min(0.10, best.score / 100) : 0;
-  const confidence = Math.min(0.97, confidenceBase + confidenceBoost);
-
-  return { client: best.client, confidence };
+  return { client: best.client, confidence: Math.min(0.97, confidenceBase + confidenceBoost) };
 }
 
 function buildBoardBrief(
@@ -137,7 +112,6 @@ function buildBoardBrief(
   const mrr = client.mrr ?? 0;
   const industry = client.industry ?? "enterprise";
   const sevLabel = incident.severity === "critical" ? "critical" : "high-severity";
-
   return {
     headline: `${incident.severity === "critical" ? "CRITICAL: " : ""}${incident.title} — ${client.name} impacted${slaBreached ? " · SLA BREACHED" : ""}`,
     whatHappened: `A ${sevLabel} security incident was detected on infrastructure serving ${client.name} (${industry} sector). The incident "${incident.title}" was identified at the ${incident.status} phase. Initial analysis indicates ${incident.severity === "critical" || incident.severity === "high" ? "active threat actor behavior with lateral movement indicators" : "anomalous activity requiring investigation and containment"}.`,
@@ -154,14 +128,8 @@ router.get("/firestorm/incident-impact/:incidentId", authMiddleware({ required: 
     const [incident] = await db.select().from(firestormIncidentsTable).where(eq(firestormIncidentsTable.id, incidentId));
     if (!incident) { sendNotFound(res, "Incident"); return; }
 
-    const clients = await db.select({
-      id: mspClientsTable.id,
-      name: mspClientsTable.name,
-      industry: mspClientsTable.industry,
-      mrr: mspClientsTable.mrr,
-      tags: mspClientsTable.tags,
-      status: mspClientsTable.status,
-    }).from(mspClientsTable).where(eq(mspClientsTable.status, "active")).orderBy(desc(mspClientsTable.mrr)).limit(30);
+    const clients = await db.select({ id: mspClientsTable.id, name: mspClientsTable.name, industry: mspClientsTable.industry, mrr: mspClientsTable.mrr, tags: mspClientsTable.tags, status: mspClientsTable.status })
+      .from(mspClientsTable).where(eq(mspClientsTable.status, "active")).orderBy(desc(mspClientsTable.mrr)).limit(30);
 
     const correlation = correlateIncidentToClients(incident, clients as MspClientRow[]);
     const correlatedClient = correlation?.client ?? null;
@@ -169,17 +137,8 @@ router.get("/firestorm/incident-impact/:incidentId", authMiddleware({ required: 
 
     let contractValue = 0;
     if (correlatedClient) {
-      const [contract] = await db.select({
-        id: mspContractsTable.id,
-        clientId: mspContractsTable.clientId,
-        value: mspContractsTable.value,
-        mrr: mspContractsTable.mrr,
-        type: mspContractsTable.type,
-        status: mspContractsTable.status,
-      }).from(mspContractsTable)
-        .where(and(eq(mspContractsTable.clientId, correlatedClient.id), eq(mspContractsTable.status, "active")))
-        .orderBy(desc(mspContractsTable.value))
-        .limit(1);
+      const [contract] = await db.select({ id: mspContractsTable.id, clientId: mspContractsTable.clientId, value: mspContractsTable.value, mrr: mspContractsTable.mrr, type: mspContractsTable.type, status: mspContractsTable.status })
+        .from(mspContractsTable).where(and(eq(mspContractsTable.clientId, correlatedClient.id), eq(mspContractsTable.status, "active"))).orderBy(desc(mspContractsTable.value)).limit(1);
       contractValue = (contract as MspContractRow | undefined)?.value ?? (correlatedClient.mrr ?? 0) * 12;
     }
 
@@ -201,133 +160,66 @@ router.get("/firestorm/incident-impact/:incidentId", authMiddleware({ required: 
     const totalExposure = revenueAtRisk + remediationCost + (slaBreachPenalty ?? 0);
 
     const isHighSeverity = incident.severity === "critical" || incident.severity === "high";
-    const boardBrief: BoardBriefSections | null = isHighSeverity && correlatedClient
-      ? buildBoardBrief(incident, correlatedClient, contractValue, totalExposure, breached)
-      : null;
+    const boardBrief: BoardBriefSections | null = isHighSeverity && correlatedClient ? buildBoardBrief(incident, correlatedClient, contractValue, totalExposure, breached) : null;
 
     sendSuccess(res, {
       incidentId,
-      correlatedClient: correlatedClient ? {
-        id: correlatedClient.id,
-        name: correlatedClient.name,
-        industry: correlatedClient.industry ?? "Enterprise",
-        tier,
-        mrr,
-        contractValue,
-      } : null,
-      slaStatus: correlatedClient ? {
-        tier,
-        responseTarget: slaConfig.responseTarget,
-        resolutionTarget: slaConfig.resolutionTarget,
-        breachThresholdMs: slaConfig.breachThresholdMs,
-        timeElapsedMs,
-        timeRemainingMs,
-        percentConsumed,
-        breached,
-        escalationRecommended: percentConsumed > 80 || breached,
-      } : null,
-      financialExposure: {
-        revenueAtRisk,
-        estimatedRemediationCost: remediationCost,
-        slaBreachPenalty,
-        totalExposure,
-      },
+      correlatedClient: correlatedClient ? { id: correlatedClient.id, name: correlatedClient.name, industry: correlatedClient.industry ?? "Enterprise", tier, mrr, contractValue } : null,
+      slaStatus: correlatedClient ? { tier, responseTarget: slaConfig.responseTarget, resolutionTarget: slaConfig.resolutionTarget, breachThresholdMs: slaConfig.breachThresholdMs, timeElapsedMs, timeRemainingMs, percentConsumed, breached, escalationRecommended: percentConsumed > 80 || breached } : null,
+      financialExposure: { revenueAtRisk, estimatedRemediationCost: remediationCost, slaBreachPenalty, totalExposure },
       boardBrief,
       correlationConfidence,
       generatedAt: new Date().toISOString(),
     });
-  } catch (err) {
-    handleRouteError(res, err, "Failed to compute incident business impact");
-  }
+  } catch (err) { handleRouteError(res, err, "Failed to compute incident business impact"); }
 });
 
 router.get("/firestorm/business-impact/revenue-at-risk", authMiddleware({ required: true }), async (_req, res) => {
   try {
-    const activeIncidents = await db.select().from(firestormIncidentsTable)
-      .where(ne(firestormIncidentsTable.status, "closed"))
-      .orderBy(desc(firestormIncidentsTable.createdAt))
-      .limit(50);
+    const activeIncidents = await db.select().from(firestormIncidentsTable).where(ne(firestormIncidentsTable.status, "closed")).orderBy(desc(firestormIncidentsTable.createdAt)).limit(50);
+    const clients = await db.select({ id: mspClientsTable.id, name: mspClientsTable.name, industry: mspClientsTable.industry, mrr: mspClientsTable.mrr, tags: mspClientsTable.tags, status: mspClientsTable.status })
+      .from(mspClientsTable).where(eq(mspClientsTable.status, "active")).orderBy(desc(mspClientsTable.mrr)).limit(30);
 
-    const clients = await db.select({
-      id: mspClientsTable.id,
-      name: mspClientsTable.name,
-      industry: mspClientsTable.industry,
-      mrr: mspClientsTable.mrr,
-      tags: mspClientsTable.tags,
-      status: mspClientsTable.status,
-    }).from(mspClientsTable).where(eq(mspClientsTable.status, "active")).orderBy(desc(mspClientsTable.mrr)).limit(30);
-
-    let totalRevenueAtRisk = 0;
-    let totalRemediationCost = 0;
-    let totalSlaBreachPenalty = 0;
-    let slaBreachedCount = 0;
-    let criticalCount = 0;
+    let totalRevenueAtRisk = 0, totalRemediationCost = 0, totalSlaBreachPenalty = 0, slaBreachedCount = 0, criticalCount = 0;
     const impactedClientIds = new Set<number>();
-
     interface BreakdownEntry { incidentId: number; incidentTitle: string; severity: string; clientName: string; revenueAtRisk: number; slaBreached: boolean }
     const breakdown: BreakdownEntry[] = [];
 
     for (const incident of activeIncidents) {
       const severity = incident.severity;
       if (severity === "critical") criticalCount++;
-
       const remediationCost = REMEDIATION_COST_BY_SEVERITY[severity] ?? 6000;
       totalRemediationCost += remediationCost;
-
       const correlation = correlateIncidentToClients(incident, clients as MspClientRow[]);
       if (!correlation) continue;
-
       const client = correlation.client;
       const mrr = client.mrr ?? 0;
       const tier = assignClientTier(mrr);
       const slaConfig = SLA_TIERS[tier] ?? SLA_TIERS.Standard;
       const contractValue = mrr * 12;
-
       const timeElapsedMs = Date.now() - incident.createdAt.getTime();
       const breached = timeElapsedMs > slaConfig.breachThresholdMs;
-      if (breached) {
-        slaBreachedCount++;
-        totalSlaBreachPenalty += Math.round(contractValue * slaConfig.penaltyPct);
-      }
-
+      if (breached) { slaBreachedCount++; totalSlaBreachPenalty += Math.round(contractValue * slaConfig.penaltyPct); }
       const revenueAtRisk = Math.round(mrr * (severity === "critical" ? 3 : severity === "high" ? 1.5 : 0.5));
       totalRevenueAtRisk += revenueAtRisk;
       impactedClientIds.add(client.id);
-
       breakdown.push({ incidentId: incident.id, incidentTitle: incident.title, severity, clientName: client.name, revenueAtRisk, slaBreached: breached });
     }
 
     breakdown.sort((a, b) => b.revenueAtRisk - a.revenueAtRisk);
-
-    sendSuccess(res, {
-      totalRevenueAtRisk,
-      totalRemediationCost,
-      totalExposure: totalRevenueAtRisk + totalRemediationCost + totalSlaBreachPenalty,
-      activeIncidentCount: activeIncidents.length,
-      slaBreachedCount,
-      criticalIncidentCount: criticalCount,
-      impactedClients: impactedClientIds.size,
-      breakdown: breakdown.slice(0, 10),
-      computedAt: new Date().toISOString(),
-    });
-  } catch (err) {
-    handleRouteError(res, err, "Failed to compute revenue at risk");
-  }
+    sendSuccess(res, { totalRevenueAtRisk, totalRemediationCost, totalExposure: totalRevenueAtRisk + totalRemediationCost + totalSlaBreachPenalty, activeIncidentCount: activeIncidents.length, slaBreachedCount, criticalIncidentCount: criticalCount, impactedClients: impactedClientIds.size, breakdown: breakdown.slice(0, 10), computedAt: new Date().toISOString() });
+  } catch (err) { handleRouteError(res, err, "Failed to compute revenue at risk"); }
 });
 
 router.get("/firestorm/business-impact/historical", authMiddleware({ required: true }), async (_req, res) => {
   try {
-    const allIncidents = await db.select().from(firestormIncidentsTable)
-      .orderBy(desc(firestormIncidentsTable.createdAt))
-      .limit(100);
-
+    const allIncidents = await db.select().from(firestormIncidentsTable).orderBy(desc(firestormIncidentsTable.createdAt)).limit(100);
     const bySeverity: Record<string, { count: number; totalExposure: number; avgExposure: number }> = {
       critical: { count: 0, totalExposure: 0, avgExposure: 0 },
       high:     { count: 0, totalExposure: 0, avgExposure: 0 },
       medium:   { count: 0, totalExposure: 0, avgExposure: 0 },
       low:      { count: 0, totalExposure: 0, avgExposure: 0 },
     };
-
     const last30Days: Record<string, number> = {};
     const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
@@ -335,38 +227,19 @@ router.get("/firestorm/business-impact/historical", authMiddleware({ required: t
       const severity = incident.severity;
       const remediation = REMEDIATION_COST_BY_SEVERITY[severity] ?? 6000;
       const exposure = remediation + (severity === "critical" ? 45000 : severity === "high" ? 15000 : 3000);
-
-      if (bySeverity[severity]) {
-        bySeverity[severity].count++;
-        bySeverity[severity].totalExposure += exposure;
-      }
-
+      if (bySeverity[severity]) { bySeverity[severity].count++; bySeverity[severity].totalExposure += exposure; }
       const dayKey = incident.createdAt.toISOString().slice(0, 10);
-      if (dayKey >= cutoff) {
-        last30Days[dayKey] = (last30Days[dayKey] ?? 0) + exposure;
-      }
+      if (dayKey >= cutoff) last30Days[dayKey] = (last30Days[dayKey] ?? 0) + exposure;
     }
 
     for (const sev of Object.keys(bySeverity)) {
-      if (bySeverity[sev].count > 0) {
-        bySeverity[sev].avgExposure = Math.round(bySeverity[sev].totalExposure / bySeverity[sev].count);
-      }
+      if (bySeverity[sev].count > 0) bySeverity[sev].avgExposure = Math.round(bySeverity[sev].totalExposure / bySeverity[sev].count);
     }
 
-    const timeline = Object.entries(last30Days)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([date, exposure]) => ({ date, exposure }));
+    const timeline = Object.entries(last30Days).sort(([a], [b]) => a.localeCompare(b)).map(([date, exposure]) => ({ date, exposure }));
 
-    sendSuccess(res, {
-      totalIncidents: allIncidents.length,
-      closedIncidents: allIncidents.filter((i) => i.status === "closed").length,
-      bySeverity,
-      timeline,
-      computedAt: new Date().toISOString(),
-    });
-  } catch (err) {
-    handleRouteError(res, err, "Failed to compute historical impact data");
-  }
+    sendSuccess(res, { totalIncidents: allIncidents.length, closedIncidents: allIncidents.filter((i) => i.status === "closed").length, bySeverity, timeline, computedAt: new Date().toISOString() });
+  } catch (err) { handleRouteError(res, err, "Failed to compute historical impact data"); }
 });
 
 export default router;
