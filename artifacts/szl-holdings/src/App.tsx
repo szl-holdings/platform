@@ -31,6 +31,8 @@ const TrustApprovalsPage = lazy(() => import("@/pages/trust-approvals"));
 const TrustExportsPage = lazy(() => import("@/pages/trust-exports"));
 const TrustOperationsPage = lazy(() => import("@/pages/trust-operations"));
 const InvestorsHubPage = lazy(() => import("@/pages/investors-hub"));
+const InvestorsDemoModePage = lazy(() => import("@/pages/investors-demo-mode"));
+const InvestorsCompetitivePage = lazy(() => import("@/pages/investors-competitive"));
 const InvestorsOverviewPage = lazy(() => import("@/pages/investors-overview-v2"));
 const ArchitecturePage = lazy(() => import("@/pages/architecture-page"));
 const InvestorsArchitecturePage = lazy(() => import("@/pages/investors-architecture"));
@@ -492,6 +494,12 @@ function App() {
             </Route>
             <Route path="/investors/data-room">
               <Suspense fallback={<PageLoader />}><InvestorsDataRoomPage /></Suspense>
+            </Route>
+            <Route path="/investors/demo">
+              <Suspense fallback={<PageLoader />}><InvestorsDemoModePage /></Suspense>
+            </Route>
+            <Route path="/investors/competitive">
+              <Suspense fallback={<PageLoader />}><InvestorsCompetitivePage /></Suspense>
             </Route>
             <Route path="/investors/founder">
               <Suspense fallback={<PageLoader />}><InvestorsFounderPage /></Suspense>

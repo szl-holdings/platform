@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "wouter";
-import { m } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
   ChevronRight,
@@ -15,6 +15,13 @@ import {
   Globe,
   Layers,
   Network,
+  TrendingUp,
+  Clock,
+  Mail,
+  Newspaper,
+  Play,
+  Ship,
+  Building2,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -243,6 +250,414 @@ function NewsletterSection() {
                 <p style={{ fontSize: "0.75rem", color: "var(--color-szl-text-faint)", marginTop: "0.5rem" }}>
                   No spam. Unsubscribe anytime.{" "}
                   <Link href="/insights" style={{ color: "var(--color-szl-text-secondary)", textDecoration: "underline" }}>Browse the archive</Link>
+                </p>
+              </form>
+            )}
+          </div>
+        </m.div>
+      </div>
+    </section>
+  );
+}
+
+const PLATFORM_STEPS = [
+  { icon: Eye, label: "Signal", desc: "Lyte ingests operational signals — stuck approvals, drift, risk flags", color: "hsl(192,72%,48%)", duration: "0–15s" },
+  { icon: Shield, label: "Detection", desc: "Domain AI surfaces anomalies across Vessels, Terra, and Aegis simultaneously", color: "hsl(222,60%,62%)", duration: "15–30s" },
+  { icon: Network, label: "Cross-domain mesh", desc: "Intelligence compounds — a maritime anomaly enriches credit risk in Lyte", color: "hsl(38,72%,58%)", duration: "30–50s" },
+  { icon: Activity, label: "Governed action", desc: "Signal → action with full audit trail and human-in-the-loop controls", color: "hsl(140,50%,48%)", duration: "50–70s" },
+  { icon: Lock, label: "Proof chain", desc: "Immutable record of every decision, inference, and action taken", color: "hsl(280,50%,65%)", duration: "70–90s" },
+];
+
+function PlatformIn90Seconds() {
+  const [activeStep, setActiveStep] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (!isPlaying) {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      return;
+    }
+    intervalRef.current = setInterval(() => {
+      setActiveStep((prev) => (prev + 1) % PLATFORM_STEPS.length);
+    }, 4000);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [isPlaying]);
+
+  const step = PLATFORM_STEPS[activeStep];
+  const StepIcon = step.icon;
+  const progress = ((activeStep + 1) / PLATFORM_STEPS.length) * 100;
+
+  return (
+    <div style={{ display: "grid", gap: "2rem", alignItems: "center" }} className="lg:grid-cols-[1fr_1.2fr]">
+      <div>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1rem" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", padding: "0.25rem 0.625rem", borderRadius: "2rem", background: "hsla(192,72%,48%,0.1)", border: "1px solid hsla(192,72%,48%,0.2)" }}>
+            <Play size={10} style={{ color: "hsl(192,72%,48%)" }} />
+            <span style={{ fontSize: "0.5625rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(192,72%,48%)", fontFamily: "var(--font-mono)" }}>
+              Platform in 90 Seconds
+            </span>
+          </div>
+          <button
+            onClick={() => setIsPlaying((p) => !p)}
+            style={{ background: "transparent", border: "none", color: "hsla(0,0%,100%,0.35)", fontSize: "0.625rem", fontFamily: "var(--font-mono)", cursor: "pointer", letterSpacing: "0.08em" }}
+          >
+            {isPlaying ? "PAUSE" : "PLAY"}
+          </button>
+        </div>
+        <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)", marginBottom: "0.5rem" }}>
+          From signal to governed action.
+        </h2>
+        <p style={{ fontSize: "0.9375rem", lineHeight: 1.7, color: "var(--color-szl-text-secondary)", marginBottom: "1.5rem" }}>
+          Watch the full platform cycle: signal ingestion, cross-domain intelligence, governed action routing, and immutable proof chain — in five steps.
+        </p>
+        <div style={{ height: "3px", borderRadius: "2px", background: "hsla(0,0%,100%,0.06)", marginBottom: "1.25rem", overflow: "hidden" }}>
+          <m.div
+            key={activeStep}
+            initial={{ width: `${((activeStep) / PLATFORM_STEPS.length) * 100}%` }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 3.8, ease: "linear" }}
+            style={{ height: "100%", borderRadius: "2px", background: step.color }}
+          />
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+          {PLATFORM_STEPS.map((s, i) => {
+            const Icon = s.icon;
+            const isActive = i === activeStep;
+            return (
+              <button
+                key={s.label}
+                onClick={() => { setActiveStep(i); setIsPlaying(false); }}
+                style={{
+                  display: "flex", alignItems: "center", gap: "0.75rem",
+                  padding: "0.625rem 0.875rem",
+                  borderRadius: "0.5rem",
+                  background: isActive ? `${s.color}10` : "transparent",
+                  border: `1px solid ${isActive ? s.color + "25" : "transparent"}`,
+                  color: isActive ? "hsl(38,8%,92%)" : "hsla(0,0%,100%,0.4)",
+                  fontSize: "0.8125rem",
+                  fontWeight: isActive ? 600 : 400,
+                  cursor: "pointer",
+                  textAlign: "left",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                <Icon size={14} style={{ color: isActive ? s.color : "hsla(0,0%,100%,0.25)", flexShrink: 0 }} />
+                <span>{s.label}</span>
+                <span style={{ marginLeft: "auto", fontSize: "0.5625rem", color: "hsla(0,0%,100%,0.2)", fontFamily: "var(--font-mono)" }}>{s.duration}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <AnimatePresence mode="wait">
+        <m.div
+          key={activeStep}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.35 }}
+          style={{
+            padding: "2.5rem",
+            borderRadius: "1rem",
+            background: `${step.color}06`,
+            border: `1px solid ${step.color}20`,
+            textAlign: "center",
+            minHeight: "280px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "1.25rem",
+          }}
+        >
+          <div style={{
+            width: 56, height: 56, borderRadius: "0.75rem",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            background: `${step.color}12`, border: `1px solid ${step.color}30`,
+          }}>
+            <StepIcon size={24} style={{ color: step.color }} />
+          </div>
+          <div>
+            <p style={{ fontSize: "0.5625rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: step.color, fontFamily: "var(--font-mono)", marginBottom: "0.5rem" }}>
+              Step {activeStep + 1} of {PLATFORM_STEPS.length}
+            </p>
+            <h3 style={{ fontSize: "1.375rem", fontWeight: 600, letterSpacing: "-0.015em", color: "hsl(38,8%,94%)", marginBottom: "0.625rem" }}>
+              {step.label}
+            </h3>
+            <p style={{ fontSize: "0.9375rem", lineHeight: 1.65, color: "hsla(0,0%,100%,0.55)", maxWidth: "30ch", margin: "0 auto" }}>
+              {step.desc}
+            </p>
+          </div>
+        </m.div>
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function useAnimatedCounter(target: number, duration = 1800, start = false) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!start) return;
+    let startTime: number | null = null;
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.round(eased * target));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [start, target, duration]);
+  return count;
+}
+
+function OutcomeMetricsSection() {
+  const [inView, setInView] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setInView(true); },
+      { threshold: 0.3 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const c1 = useAnimatedCounter(40, 1600, inView);
+  const c2 = useAnimatedCounter(3, 1400, inView);
+  const c3 = useAnimatedCounter(62, 1800, inView);
+  const c4 = useAnimatedCounter(19, 1500, inView);
+  const c5 = useAnimatedCounter(34, 1700, inView);
+  const c6 = useAnimatedCounter(94, 1600, inView);
+
+  const metrics = [
+    { value: `${c1}%`, label: "Faster threat detection", sub: "Aegis SOC command vs. manual review", color: "hsl(222,60%,62%)" },
+    { value: `${c2}×`, label: "Portfolio visibility improvement", sub: "Terra vs. manual property monitoring", color: "hsl(140,50%,48%)" },
+    { value: `${c3}%`, label: "Approval overhead reduction", sub: "Lyte design-partner benchmark", color: "hsl(192,72%,48%)" },
+    { value: `+${c4}d`, label: "Distress signal lead time", sub: "Before public filing — Terra intelligence", color: "hsl(140,50%,48%)" },
+    { value: `${c5}d`, label: "Pre-designation lead time", sub: "Before sanctions — Vessels anomaly detection", color: "hsl(206,72%,52%)" },
+    { value: `${c6}%`, label: "MITRE ATT&CK coverage", sub: "Continuous simulation — Aegis platform", color: "hsl(222,60%,62%)" },
+  ];
+
+  return (
+    <section ref={ref} style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(192,72%,48%,0.015)" }}>
+      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
+        <m.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+          <div style={{ marginBottom: "3rem", maxWidth: "42rem" }}>
+            <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
+              Quantified outcomes
+            </p>
+            <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)" }}>
+              What the platform produces — in numbers.
+            </h2>
+            <p style={{ fontSize: "0.9375rem", lineHeight: 1.7, color: "var(--color-szl-text-secondary)", marginTop: "0.75rem" }}>
+              From design-partner benchmarks and operational proof across Vessels, Terra, and Aegis. Sample data — not a financial guarantee.
+            </p>
+          </div>
+        </m.div>
+        <div style={{ display: "grid", gap: "1rem" }} className="sm:grid-cols-2 lg:grid-cols-3">
+          {metrics.map((m_, i) => (
+            <m.div
+              key={m_.label}
+              custom={i}
+              variants={fadeUp}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true }}
+              style={{
+                padding: "1.75rem",
+                borderRadius: "0.875rem",
+                background: "hsla(0,0%,100%,0.025)",
+                border: "1px solid hsla(0,0%,100%,0.07)",
+              }}
+            >
+              <div style={{ fontSize: "clamp(2rem,3.5vw,2.75rem)", fontWeight: 800, letterSpacing: "-0.035em", color: m_.color, lineHeight: 1, marginBottom: "0.625rem" }}>
+                {m_.value}
+              </div>
+              <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(38,8%,90%)", marginBottom: "0.25rem" }}>{m_.label}</p>
+              <p style={{ fontSize: "0.75rem", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", lineHeight: 1.45 }}>{m_.sub}</p>
+            </m.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const PRESS_LOGOS = [
+  { name: "TechCrunch", placeholder: "TC" },
+  { name: "Forbes", placeholder: "F" },
+  { name: "The Information", placeholder: "TI" },
+  { name: "Bloomberg", placeholder: "BB" },
+  { name: "Wall Street Journal", placeholder: "WSJ" },
+  { name: "Financial Times", placeholder: "FT" },
+  { name: "Reuters", placeholder: "R" },
+  { name: "Axios", placeholder: "AX" },
+];
+
+function PressSection() {
+  const doubled = [...PRESS_LOGOS, ...PRESS_LOGOS];
+  return (
+    <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.008)", overflow: "hidden" }}>
+      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "2.5rem var(--space-content-x)" }}>
+        <m.div initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }}>
+          <p style={{ fontSize: "0.5625rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", textAlign: "center", marginBottom: "1.5rem" }}>
+            Featured in — press coverage coming as we scale
+          </p>
+        </m.div>
+      </div>
+      <div style={{ position: "relative", overflow: "hidden", maskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "1.5rem",
+            animation: "pressScroll 30s linear infinite",
+            width: "max-content",
+          }}
+        >
+          {doubled.map((logo, i) => (
+            <div key={`${logo.name}-${i}`} title={logo.name} style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "0.625rem 1.75rem",
+              borderRadius: "0.375rem",
+              background: "hsla(0,0%,100%,0.03)",
+              border: "1px solid hsla(0,0%,100%,0.07)",
+              minWidth: "88px",
+              flexShrink: 0,
+            }}>
+              <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: "hsla(0,0%,100%,0.22)", letterSpacing: "0.04em", fontFamily: "var(--font-mono)", whiteSpace: "nowrap" }}>{logo.placeholder}</span>
+            </div>
+          ))}
+        </div>
+        <style>{`@keyframes pressScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }`}</style>
+      </div>
+      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0.875rem var(--space-content-x) 2rem" }}>
+        <p style={{ fontSize: "0.625rem", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", textAlign: "center", letterSpacing: "0.06em" }}>
+          Logo slots reserved — for press inquiries: press@szlholdings.com
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function InvestorNewsletterCapture() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+    setStatus("submitting");
+    try {
+      const res = await fetch("/api/contact/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "newsletter",
+          name: email.split("@")[0],
+          email,
+          app: "szl-holdings",
+          message: "Monthly Investor Update signup from landing page",
+          metadata: { source: "landing-investor-newsletter" },
+        }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      setStatus("success");
+      setEmail("");
+    } catch {
+      setStatus("error");
+    }
+  };
+
+  return (
+    <section style={{ borderBottom: "1px solid var(--color-szl-border)" }}>
+      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(3rem,6vw,4rem) var(--space-content-x)" }}>
+        <m.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          style={{
+            display: "flex", flexWrap: "wrap", gap: "2rem", alignItems: "center", justifyContent: "space-between",
+            padding: "2rem 2.5rem",
+            borderRadius: "0.875rem",
+            background: "hsla(38,72%,58%,0.04)",
+            border: "1px solid hsla(38,72%,58%,0.15)",
+          }}
+        >
+          <div style={{ maxWidth: "32rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+              <Mail size={14} style={{ color: "hsl(38,72%,58%)" }} />
+              <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(38,72%,58%)", fontFamily: "var(--font-mono)" }}>
+                Monthly Investor Update
+              </p>
+            </div>
+            <h3 style={{ fontSize: "clamp(1.1rem,2vw,1.4rem)", fontWeight: 600, letterSpacing: "-0.018em", color: "hsl(38,8%,92%)", marginBottom: "0.5rem" }}>
+              Platform progress. Portfolio signals. No filler.
+            </h3>
+            <p style={{ fontSize: "0.875rem", color: "var(--color-szl-text-secondary)", lineHeight: 1.6 }}>
+              Monthly investor updates — design-partner milestones, architectural progress, and the honest view on where the platform stands.
+            </p>
+          </div>
+          <div style={{ minWidth: "280px", flex: "1 1 280px", maxWidth: "420px" }}>
+            {status === "success" ? (
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.875rem 1.125rem", borderRadius: "0.5rem", background: "hsla(145,60%,46%,0.12)", border: "1px solid hsla(145,60%,46%,0.25)" }}>
+                <CheckCircle2 size={16} style={{ color: "hsl(145,60%,72%)" }} />
+                <div>
+                  <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(145,60%,72%)", margin: 0 }}>You're on the investor update list.</p>
+                  <p style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", margin: "0.15rem 0 0" }}>Monthly updates as the platform scales.</p>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} noValidate>
+                <label htmlFor="investor-newsletter-email" style={{ display: "block", fontSize: "0.75rem", fontWeight: 500, color: "var(--color-szl-text-secondary)", marginBottom: "0.5rem" }}>
+                  Email address
+                </label>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <input
+                    id="investor-newsletter-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => { setEmail(e.target.value); if (status === "error") setStatus("idle"); }}
+                    placeholder="you@firm.com"
+                    disabled={status === "submitting"}
+                    style={{
+                      flex: 1,
+                      padding: "0.625rem 0.875rem",
+                      background: "hsla(0,0%,100%,0.06)",
+                      border: "1px solid hsla(0,0%,100%,0.14)",
+                      borderRadius: "0.375rem",
+                      color: "hsl(38,8%,92%)",
+                      fontSize: "0.875rem",
+                      outline: "none",
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    disabled={status === "submitting"}
+                    style={{
+                      padding: "0.625rem 1rem",
+                      background: "hsl(38,72%,58%)",
+                      color: "hsl(214,18%,4%)",
+                      border: "none",
+                      borderRadius: "0.375rem",
+                      fontSize: "0.8125rem",
+                      fontWeight: 700,
+                      cursor: status === "submitting" ? "not-allowed" : "pointer",
+                      opacity: status === "submitting" ? 0.7 : 1,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {status === "submitting" ? "…" : "Subscribe"}
+                  </button>
+                </div>
+                <p style={{ fontSize: "0.75rem", color: "var(--color-szl-text-faint)", marginTop: "0.5rem" }}>
+                  Investor-focused updates only. Unsubscribe anytime.
                 </p>
               </form>
             )}
@@ -585,7 +1000,38 @@ export default function HomePage() {
                     <ArrowRight size={13} />
                   </a>
                 </MagneticButton>
+                <MagneticButton>
+                  <Link
+                    href="/investors/demo"
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: "0.5rem",
+                      padding: "0.75rem 1.5rem",
+                      background: "transparent",
+                      color: "var(--color-szl-text-faint)",
+                      border: "1px solid hsla(0,0%,100%,0.06)",
+                      borderRadius: "0.375rem",
+                      fontSize: "0.8125rem", fontWeight: 500,
+                      textDecoration: "none",
+                      letterSpacing: "0.03em",
+                      transition: "border-color 0.2s ease, color 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(38,72%,58%,0.3)"; (e.currentTarget as HTMLElement).style.color = "hsl(38,72%,58%)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.06)"; (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-faint)"; }}
+                  >
+                    Interactive Demo
+                    <Play size={12} />
+                  </Link>
+                </MagneticButton>
               </m.div>
+            </m.div>
+          </div>
+        </section>
+
+        {/* ── 1b. Platform in 90 Seconds ────────────────────────────── */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.008)" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(3rem,6vw,4.5rem) var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+              <PlatformIn90Seconds />
             </m.div>
           </div>
         </section>
@@ -1152,6 +1598,15 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ── 10a. Outcome Metrics (animated counters) ────────────────── */}
+        <OutcomeMetricsSection />
+
+        {/* ── 10b. Press / Media Mentions ─────────────────────────────── */}
+        <PressSection />
+
+        {/* ── 10c. Investor Newsletter Capture ────────────────────────── */}
+        <InvestorNewsletterCapture />
+
         {/* ── 10. Social Proof / Design Partner Program ───────────────── */}
         <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.01)" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
@@ -1222,7 +1677,7 @@ export default function HomePage() {
               ))}
             </div>
 
-            {/* Design partner logos placeholder */}
+            {/* Design partner logos — scrolling strip */}
             <m.div
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -1233,21 +1688,26 @@ export default function HomePage() {
               <p style={{ fontSize: "0.6875rem", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", textAlign: "center", marginBottom: "1.5rem", letterSpacing: "0.08em" }}>
                 Design partners — names withheld at request of participants
               </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", justifyContent: "center" }}>
-                {["Financial Services", "Maritime Operations", "Real Estate Investment", "Cybersecurity", "Legal Operations", "Private Advisory"].map((sector) => (
-                  <div key={sector} style={{
-                    padding: "0.5rem 1.25rem",
-                    borderRadius: "2rem",
-                    background: "hsla(0,0%,100%,0.03)",
-                    border: "1px solid hsla(0,0%,100%,0.08)",
-                    fontSize: "0.6875rem",
-                    color: "var(--color-szl-text-faint)",
-                    fontFamily: "var(--font-mono)",
-                    letterSpacing: "0.06em",
-                  }}>
-                    {sector}
-                  </div>
-                ))}
+              <div style={{ overflow: "hidden", maskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)" }}>
+                <div style={{ display: "flex", gap: "1.25rem", animation: "partnerScroll 25s linear infinite", width: "max-content" }}>
+                  {[...["Financial Services", "Maritime Operations", "Real Estate Investment", "Cybersecurity", "Legal Operations", "Private Advisory"], ...["Financial Services", "Maritime Operations", "Real Estate Investment", "Cybersecurity", "Legal Operations", "Private Advisory"]].map((sector, i) => (
+                    <div key={`${sector}-${i}`} style={{
+                      padding: "0.5rem 1.25rem",
+                      borderRadius: "2rem",
+                      background: "hsla(0,0%,100%,0.03)",
+                      border: "1px solid hsla(0,0%,100%,0.08)",
+                      fontSize: "0.6875rem",
+                      color: "var(--color-szl-text-faint)",
+                      fontFamily: "var(--font-mono)",
+                      letterSpacing: "0.06em",
+                      whiteSpace: "nowrap",
+                      flexShrink: 0,
+                    }}>
+                      {sector}
+                    </div>
+                  ))}
+                </div>
+                <style>{`@keyframes partnerScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }`}</style>
               </div>
             </m.div>
           </div>
