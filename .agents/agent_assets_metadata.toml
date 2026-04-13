@@ -575,3 +575,9 @@ id = "TWwJG0i1AuBSwan5rPSMD"
 uri = "file://exports/szl-screenshots.tar.gz"
 type = "unspecified"
 title = "All Platform Screenshots (156 + 22 = 178 images)"
+
+[[outputs]]
+id = "CNNt6zYklK70fcbqsIVI7"
+uri = "file://exports/new-screenshots.tar.gz"
+type = "unspecified"
+title = "New Screenshots Only (13 images: Forge, Nexus, INCA Lab, Investor Demo/Competitive/Hub)"
