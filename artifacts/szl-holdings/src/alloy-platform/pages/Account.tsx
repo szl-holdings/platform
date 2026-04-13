@@ -1,5 +1,5 @@
 import { AlloyAppShell } from "../components/AlloyAppShell";
-import { useUser } from "@clerk/react";
+import { useUser } from "../clerk-stub";
 import { CreditCard, Zap, Download, Check } from "lucide-react";
 
 export default function AccountPage() {

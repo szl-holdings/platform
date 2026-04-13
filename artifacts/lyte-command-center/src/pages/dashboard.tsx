@@ -623,6 +623,7 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+    </SectionErrorBoundary>
     </div>
   );
 }
@@ -709,7 +710,6 @@ function CausalAIPanel() {
           )}
         </div>
       </div>
-      </SectionErrorBoundary>
     </div>
   );
 }

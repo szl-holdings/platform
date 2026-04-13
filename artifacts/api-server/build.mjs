@@ -167,6 +167,8 @@ async function buildAll() {
       "puppeteer",
       "puppeteer-core",
       "electron",
+      "@clerk/express",
+      "http-proxy-middleware",
       // Large packages externalized to reduce bundle size and heap usage
       "pdfkit",
       "swagger-ui-express",

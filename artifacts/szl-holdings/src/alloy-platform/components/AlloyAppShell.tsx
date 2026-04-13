@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { useUser, useClerk } from "@clerk/react";
+import { useUser, useClerk } from "../clerk-stub";
 import { 
   MessageSquare, Users, GitBranch, Image, Share2, 
   Shield, Code2, User, LogOut, Menu, X, Search
