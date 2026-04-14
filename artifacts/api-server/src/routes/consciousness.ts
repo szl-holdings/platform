@@ -70,13 +70,18 @@ router.get("/nuro-mesh/consciousness/emotions", ...adminOnly, safeHandler("emoti
 
 router.get("/nuro-mesh/consciousness/temporal", ...adminOnly, safeHandler("temporal", () => temporalAwareness.getState()));
 
+function safeLimit(raw: unknown, fallback: number, max: number): number {
+  const parsed = parseInt(String(raw ?? fallback), 10);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, max) : fallback;
+}
+
 router.get("/nuro-mesh/consciousness/history/snapshots", ...adminOnly, asyncHandler("history/snapshots", async (req) => {
-  const limit = Math.min(100, parseInt(String(req.query?.limit ?? "20"), 10));
+  const limit = safeLimit(req.query?.limit, 20, 100);
   return db.select().from(consciousnessSnapshotsTable).orderBy(desc(consciousnessSnapshotsTable.createdAt)).limit(limit);
 }));
 
 router.get("/nuro-mesh/consciousness/history/monologue", ...adminOnly, asyncHandler("history/monologue", async (req) => {
-  const limit = Math.min(200, parseInt(String(req.query?.limit ?? "50"), 10));
+  const limit = safeLimit(req.query?.limit, 50, 200);
   return db.select().from(consciousnessMonologueTable).orderBy(desc(consciousnessMonologueTable.createdAt)).limit(limit);
 }));
 
@@ -89,13 +94,13 @@ router.get("/nuro-mesh/consciousness/history/profiles", ...adminOnly, asyncHandl
 }));
 
 router.get("/nuro-mesh/consciousness/history/emotions", ...adminOnly, asyncHandler("history/emotions", async (req) => {
-  const limit = Math.min(200, parseInt(String(req.query?.limit ?? "50"), 10));
+  const limit = safeLimit(req.query?.limit, 50, 200);
   return db.select().from(consciousnessEmotionalHistoryTable).orderBy(desc(consciousnessEmotionalHistoryTable.capturedAt)).limit(limit);
 }));
 
 router.get("/nuro-mesh/consciousness/history/temporal", ...adminOnly, asyncHandler("history/temporal", async (req) => {
   const agentId = req.query?.agentId ? String(req.query.agentId) : undefined;
-  const limit = Math.min(200, parseInt(String(req.query?.limit ?? "50"), 10));
+  const limit = safeLimit(req.query?.limit, 50, 200);
   const query = db.select().from(consciousnessTemporalMetricsTable);
   if (agentId) {
     return query.where(eq(consciousnessTemporalMetricsTable.agentId, agentId)).orderBy(desc(consciousnessTemporalMetricsTable.createdAt)).limit(limit);
