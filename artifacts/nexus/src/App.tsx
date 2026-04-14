@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { Router, Route, Switch, useLocation } from "wouter";
 import { SettingsProvider } from "./lib/SettingsContext";
 import LivePulseStrip from "./components/LivePulseStrip";
@@ -14,6 +14,7 @@ import CommandActions from "./pages/CommandActions";
 import Settings from "./pages/Settings";
 import MultimodalGallery from "./pages/MultimodalGallery";
 import AgentSwarm from "./pages/AgentSwarm";
+const NexusPulse = lazy(() => import("./pages/pulse"));
 
 type Page = "timeline" | "canvas" | "correlations" | "rooms" | "actions" | "settings" | "multimodal" | "swarm";
 
@@ -55,6 +56,7 @@ function AppShell() {
         />
         <main className="flex-1 overflow-hidden flex flex-col">
           <Switch>
+            <Route path="/nexus/pulse">{() => <Suspense fallback={<div />}><NexusPulse /></Suspense>}</Route>
             <Route path="/nexus/canvas" component={EntityCanvas} />
             <Route path="/nexus/correlations" component={CorrelationEngine} />
             <Route path="/nexus/rooms" component={SituationRooms} />

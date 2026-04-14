@@ -13,6 +13,7 @@ import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 const CARLOTA_ACCENT = LANE_ACCENT_HEX.carlotaJo.primary;
 
 
+const CarlotaJoPulse = lazy(() => import("@/pages/pulse"));
 const Home = lazy(() => import("@/pages/PremiumHome"));
 const ServicesPage = lazy(() => import("@/pages/Services"));
 const ApproachPage = lazy(() => import("@/pages/Approach"));
@@ -92,6 +93,7 @@ function Router() {
     <Suspense fallback={<PageLoader />}>
       <Switch>
         {/* Marketing / public pages */}
+        <Route path="/pulse" component={CarlotaJoPulse} />
         <Route path="/" component={Home} />
         <Route path="/services" component={ServicesPage} />
         <Route path="/methodology" component={MethodologyPage} />

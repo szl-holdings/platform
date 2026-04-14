@@ -20,6 +20,7 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60_000, retry: 1 } },
 });
 
+const TerraPulse = lazy(() => import("@/pages/pulse"));
 const TerraAtlasArtifactsPage = lazy(() => import("@/pages/atlas-artifacts"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const DistressEngine = lazy(() => import("@/pages/distress-engine"));
@@ -79,6 +80,7 @@ function PrivateRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
+        <Route path="/pulse" component={TerraPulse} />
         <Route path="/" component={() => <Redirect to="/dashboard" />} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/home" component={() => <Redirect to="/dashboard" />} />
@@ -170,7 +172,7 @@ function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
 
 function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   const { isLoading, isAuthenticated, login } = useAuth();
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const prevAuth = useRef(isAuthenticated);
 
   const params = new URLSearchParams(window.location.search);
@@ -182,6 +184,11 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     }
     prevAuth.current = isAuthenticated;
   }, [isAuthenticated, navigate]);
+
+  const normalizedPath = location.replace(/\/+$/, "") || "/";
+  if (normalizedPath === "/pulse") {
+    return <Suspense fallback={<div style={{ height: "100vh", background: "#0a0c10" }} />}><TerraPulse /></Suspense>;
+  }
 
   if (demoMode) {
     return <PrivateApp cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />;

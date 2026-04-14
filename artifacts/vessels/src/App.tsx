@@ -83,6 +83,7 @@ const VESSELS_ONBOARDING_CONFIG: OnboardingConfig = {
 };
 
 // Marketing pages
+const VesselsPulse = lazy(() => import("@/pages/pulse"));
 const VesselsAtlasArtifactsPage = lazy(() => import("@/pages/atlas-artifacts"));
 const MarketingHomePage = lazy(() => import("@/pages/marketing-home"));
 const MarketingPlatformPage = lazy(() => import("@/pages/marketing-platform"));
@@ -576,6 +577,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
   return (
     <Suspense fallback={<div className="flex items-center justify-center h-screen bg-[#060e1a]"><div className="w-6 h-6 border-2 border-sky-500/40 border-t-sky-400 rounded-full animate-spin" /></div>}>
       <Switch>
+        <Route path="/pulse" component={VesselsPulse} />
         <Route path="/" component={MarketingHomePage} />
         <Route path="/platform" component={MarketingPlatformPage} />
         <Route path="/capabilities" component={MarketingCapabilitiesPage} />

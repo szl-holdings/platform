@@ -7,6 +7,7 @@ import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { AnalyticsProvider } from "@szl-holdings/shared-ui";
 import { TooltipProvider } from "@szl-holdings/shared-ui/ui/tooltip";
 
+const StephenPulse = lazy(() => import("@/pages/pulse"));
 const Home = lazy(() => import("@/pages/Home").then(m => ({ default: m.Home })));
 const Work = lazy(() => import("@/pages/Work").then(m => ({ default: m.Work })));
 const WorkDetail = lazy(() => import("@/pages/WorkDetail").then(m => ({ default: m.WorkDetail })));
@@ -60,6 +61,7 @@ function Router() {
     <Suspense fallback={<PageLoader />}>
       <Switch>
         {/* Primary nav routes */}
+        <Route path="/pulse" component={StephenPulse} />
         <Route path="/" component={Home} />
         <Route path="/work/:slug" component={WorkDetail} />
         <Route path="/work" component={Work} />

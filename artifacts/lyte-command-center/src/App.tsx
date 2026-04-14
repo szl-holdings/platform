@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from "react";
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { SandboxModeProvider, SandboxModeBanner, CookieBanner, StatusBanner, AnalyticsProvider } from "@szl-holdings/shared-ui";
@@ -35,6 +35,7 @@ function PageLoader() {
   );
 }
 
+const LytePulse = lazy(() => import("@/pages/pulse"));
 const LyteAtlasArtifactsPage = lazy(() => import("@/pages/atlas-artifacts"));
 const ExecutiveCommand = lazy(() => import("@/pages/executive-command"));
 const BlockerBoard = lazy(() => import("@/pages/blocker-board"));
@@ -135,6 +136,7 @@ function PrivateRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
+        <Route path="/pulse" component={LytePulse} />
         <Route path="/" component={ExecutiveCommand} />
         <Route path="/overview" component={Dashboard} />
         <Route path="/dashboard" component={DemoDashboard} />
@@ -278,10 +280,16 @@ function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
 
 function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   const { isLoading, isAuthenticated, login } = useAuth();
+  const [location] = useLocation();
 
   const params = new URLSearchParams(window.location.search);
   const forceWebsite = params.get("view") === "website";
   const forceApp = params.get("view") === "app" || params.get("demo") === "true";
+
+  const normalizedPath = location.replace(/\/+$/, "") || "/";
+  if (normalizedPath === "/pulse") {
+    return <Suspense fallback={<div style={{ height: "100vh", background: "#080c14" }} />}><LytePulse /></Suspense>;
+  }
 
   if (forceApp) {
     return <PrivateApp cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />;

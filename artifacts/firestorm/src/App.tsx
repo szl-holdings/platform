@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState, useEffect, useCallback } from "react";
+const AegisPulse = lazy(() => import("@/pages/pulse"));
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { DemoModeProvider, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig, SandboxModeProvider, SandboxModeBanner, AnalyticsProvider } from "@szl-holdings/shared-ui";
@@ -695,7 +696,7 @@ const aegisShortcuts: KeyboardShortcut[] = [
   { key: "E", description: "Go to Intelligence Dashboard", category: "Intelligence" },
 ];
 
-const MARKETING_ROUTES = ["/", "/home", "/demo"];
+const MARKETING_ROUTES = ["/", "/home", "/demo", "/pulse"];
 
 function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -714,6 +715,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     return (
       <Suspense fallback={<PageLoader />}>
         <Switch>
+          <Route path="/pulse" component={AegisPulse} />
           <Route path="/home" component={AegisMarketingHome} />
           <Route path="/demo" component={EnterpriseDemo} />
           <Route path="/" component={AegisMarketingHome} />

@@ -25,6 +25,7 @@ function Wrap({ children }: { children: React.ReactNode }) {
   return <PrismCounselShell>{children}</PrismCounselShell>;
 }
 
+const PrismPulse = lazy(() => import("./pages/pulse"));
 const PrismDashboard = lazy(() => import("./pages/dashboard"));
 const PrismMattersList = lazy(() => import("./pages/matters-list"));
 const PrismMatterDetail = lazy(() => import("./pages/matter-detail"));
@@ -139,6 +140,10 @@ function MatterDeskV2Wrapper() {
 function PrismCounselRoutes() {
   return (
     <Switch>
+      {/* Pulse */}
+      <Route path="/prism-counsel/pulse">
+        <Suspense fallback={<PageLoader />}><PrismPulse /></Suspense>
+      </Route>
       {/* ── Canonical enterprise IA routes (new top-level contract) ── */}
       {/* /overview → dashboard */}
       <Route path="/prism-counsel/overview">
