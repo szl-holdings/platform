@@ -85,6 +85,7 @@ const ExecutiveBoardView = lazy(() => import("@/pages/executive-board-view"));
 
 // ─── Governance & Orchestration (Phase 3) ────────────────────────────────────
 const OperatorAnalytics = lazy(() => import("@/pages/governance/operator-analytics"));
+const AgentConfigPage = lazy(() => import("@/pages/governance/agent-config"));
 const IncidentAnalytics = lazy(() => import("@/pages/governance/incident-analytics"));
 const TrustAnalytics = lazy(() => import("@/pages/governance/trust-analytics"));
 const EnterpriseGovernance = lazy(() => import("@/pages/governance/enterprise-governance"));
@@ -596,6 +597,7 @@ function AppRouter() {
         <Route path="/atlas-artifacts" component={AegisAtlasArtifactsPage} />
 
         {/* Governance & Reporting (Phase 3) */}
+        <Route path="/gov/agent-config" component={AgentConfigPage} />
         <Route path="/gov/operator-analytics" component={OperatorAnalytics} />
         <Route path="/gov/incident-analytics" component={IncidentAnalytics} />
         <Route path="/gov/trust-analytics" component={TrustAnalytics} />

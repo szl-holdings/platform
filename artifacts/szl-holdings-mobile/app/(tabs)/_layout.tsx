@@ -97,6 +97,24 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="mcp-tools"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="agent-chat"
+        options={{
+          title: "Agents",
+          tabBarIcon: ({ color }) => <Feather name="message-circle" size={20} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="agents"
+        options={{
+          title: "Mesh",
+          tabBarIcon: ({ color }) => <Feather name="share-2" size={20} color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{ href: null }}
       />

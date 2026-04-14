@@ -29,9 +29,9 @@ function NativeTabLayout() {
         <Icon sf={{ default: "message", selected: "message.fill" }} />
         <Label>Messages</Label>
       </NativeTabs.Trigger>
-            <NativeTabs.Trigger name="mcp-tools">
-        <Icon sf={{ default: "cpu", selected: "cpu.fill" }} />
-        <Label>Tools</Label>
+      <NativeTabs.Trigger name="agent-chat">
+        <Icon sf={{ default: "sparkles", selected: "sparkles" }} />
+        <Label>Muse AI</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
         <Icon sf={{ default: "person", selected: "person.fill" }} />
@@ -124,6 +124,22 @@ function ClassicTabLayout() {
           tabBarIcon: ({ color }) =>
             isIOS ? (
               <SymbolView name="message" tintColor={color} size={22} />
+            ) : (
+              <Feather name="message-circle" size={20} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="mcp-tools"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="agent-chat"
+        options={{
+          title: "Muse AI",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="sparkles" tintColor={color} size={22} />
             ) : (
               <Feather name="message-circle" size={20} color={color} />
             ),

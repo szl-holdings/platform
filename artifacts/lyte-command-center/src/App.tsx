@@ -62,6 +62,7 @@ const AdminExportHistoryPage = lazy(() => import("@/pages/admin/export-history")
 const AdminDiagnosticsPage = lazy(() => import("@/pages/admin/diagnostics"));
 const AdminBillingPage = lazy(() => import("@/pages/admin/billing-admin"));
 const AdminOpsConsolePage = lazy(() => import("@/pages/admin/ops-console"));
+const AdminIntegrationManagerPage = lazy(() => import("@/pages/admin/integration-manager"));
 const OperationalQueue = lazy(() => import("@/pages/operational-queue"));
 const SignalsPage = lazy(() => import("@/pages/signals-page"));
 const ActionsPage = lazy(() => import("@/pages/actions-page"));
@@ -206,6 +207,7 @@ function PrivateRouter() {
         <Route path="/admin/diagnostics">{() => <AdminRoute component={AdminDiagnosticsPage} />}</Route>
         <Route path="/admin/billing">{() => <AdminRoute component={AdminBillingPage} />}</Route>
         <Route path="/admin/ops">{() => <AdminRoute component={AdminOpsConsolePage} />}</Route>
+        <Route path="/admin/integrations">{() => <AdminRoute component={AdminIntegrationManagerPage} />}</Route>
         <Route path="/pricing" component={PricingPage} />
         <Route path="/demo-live" component={DemoLive} />
         <Route path="/bottleneck-heatmap" component={BottleneckHeatmap} />

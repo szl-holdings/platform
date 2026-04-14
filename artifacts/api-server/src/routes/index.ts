@@ -120,6 +120,8 @@ import telemetryRouter from "./telemetry";
 import crossAppHandoffsRouter from "./cross-app-handoffs";
 import alloyCognitiveLearningRouter from "./alloy-cognitive-learning";
 import externalIntegrationsRouter from "./external-integrations";
+import agentFederationRouter from "./agent-federation";
+import streamingIngestionRouter from "./streaming-ingestion";
 
 const router: IRouter = Router();
 
@@ -451,5 +453,11 @@ router.use(crossAppHandoffsRouter);
 router.use("/alloy/cognitive", _readLimiter);
 router.use("/alloy/cognitive", _writeLimiter);
 router.use(alloyCognitiveLearningRouter);
+
+router.use("/federation", _readLimiter);
+router.use(agentFederationRouter);
+
+router.use("/stream", _readLimiter);
+router.use(streamingIngestionRouter);
 
 export default router;

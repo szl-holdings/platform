@@ -29,9 +29,9 @@ function NativeTabLayout() {
         <Icon sf={{ default: "chart.line.uptrend.xyaxis", selected: "chart.line.uptrend.xyaxis.circle.fill" }} />
         <Label>Economics</Label>
       </NativeTabs.Trigger>
-            <NativeTabs.Trigger name="mcp-tools">
-        <Icon sf={{ default: "cpu", selected: "cpu.fill" }} />
-        <Label>Tools</Label>
+      <NativeTabs.Trigger name="agent-chat">
+        <Icon sf={{ default: "bubble.left.and.bubble.right", selected: "bubble.left.and.bubble.right.fill" }} />
+        <Label>Helmsman</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
         <Icon sf={{ default: "person", selected: "person.fill" }} />
@@ -119,6 +119,22 @@ function ClassicTabLayout() {
               <SymbolView name="chart.line.uptrend.xyaxis" tintColor={color} size={22} />
             ) : (
               <Feather name="trending-up" size={20} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="mcp-tools"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="agent-chat"
+        options={{
+          title: "Helmsman",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="bubble.left.and.bubble.right.fill" tintColor={color} size={22} />
+            ) : (
+              <Feather name="message-circle" size={20} color={color} />
             ),
         }}
       />

@@ -29,9 +29,13 @@ function NativeTabLayout() {
         <Icon sf={{ default: "doc.text", selected: "doc.text.fill" }} />
         <Label>Digest</Label>
       </NativeTabs.Trigger>
-            <NativeTabs.Trigger name="mcp-tools">
-        <Icon sf={{ default: "cpu", selected: "cpu.fill" }} />
-        <Label>Tools</Label>
+            <NativeTabs.Trigger name="agent-chat">
+        <Icon sf={{ default: "bubble.left.and.bubble.right", selected: "bubble.left.and.bubble.right.fill" }} />
+        <Label>Agents</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="agents">
+        <Icon sf={{ default: "network", selected: "network" }} />
+        <Label>Mesh</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
         <Icon sf={{ default: "person", selected: "person.fill" }} />
@@ -123,14 +127,38 @@ function ClassicTabLayout() {
       />
       <Tabs.Screen
         name="findings"
-        options={{
-          href: null,
-        }}
+        options={{ href: null }}
       />
       <Tabs.Screen
         name="mitre"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="mcp-tools"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="agent-chat"
         options={{
-          href: null,
+          title: "Agents",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="bubble.left.and.bubble.right.fill" tintColor={color} size={22} />
+            ) : (
+              <Feather name="message-circle" size={20} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="agents"
+        options={{
+          title: "Mesh",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="network" tintColor={color} size={22} />
+            ) : (
+              <Feather name="share-2" size={20} color={color} />
+            ),
         }}
       />
       <Tabs.Screen
