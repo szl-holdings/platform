@@ -121,6 +121,14 @@ const GpuComputeObservatory = lazy(() => import("@/pages/gpu-compute-observatory
 const BusinessSignalsIntelligence = lazy(() => import("@/pages/business-signals-intelligence"));
 const LytePredictiveIntelligence = lazy(() => import("@/pages/predictive-intelligence"));
 
+// ─── Self-Healing Ops & Revenue Attribution (new) ─────────────────────────────
+const RevenueImpact = lazy(() => import("@/pages/revenue-impact"));
+const SelfHealing = lazy(() => import("@/pages/self-healing"));
+const FailureTimeline = lazy(() => import("@/pages/failure-timeline"));
+const ClientValue = lazy(() => import("@/pages/client-value"));
+const OpsSavings = lazy(() => import("@/pages/ops-savings"));
+const EscalationIntelligence = lazy(() => import("@/pages/escalation-intelligence"));
+
 const ADMIN_ROLES = ["admin", "super_admin", "ops"];
 
 function AdminRoute({ component: Component }: { component: React.ComponentType }) {
@@ -230,6 +238,13 @@ function PrivateRouter() {
         <Route path="/gpu-observatory" component={GpuComputeObservatory} />
         <Route path="/business-signals" component={BusinessSignalsIntelligence} />
         <Route path="/predictive-intelligence" component={LytePredictiveIntelligence} />
+        {/* Self-Healing Ops & Revenue Attribution */}
+        <Route path="/revenue-impact" component={RevenueImpact} />
+        <Route path="/self-healing" component={SelfHealing} />
+        <Route path="/failure-timeline" component={FailureTimeline} />
+        <Route path="/client-value" component={ClientValue} />
+        <Route path="/ops-savings" component={OpsSavings} />
+        <Route path="/escalation-intelligence" component={EscalationIntelligence} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>
@@ -259,6 +274,12 @@ const lyteCommands: CommandItem[] = [
   { id: "nav-gpu-observatory", label: "GPU & AI Observatory", icon: "🖥️", group: "Living Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/gpu-observatory"); } },
   { id: "nav-business-signals", label: "Business Signal Intelligence", icon: "💰", group: "Living Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/business-signals"); } },
   { id: "nav-predictive-intel", label: "Predictive Intelligence", icon: "🔮", group: "Living Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/predictive-intelligence"); } },
+  { id: "nav-revenue-impact", label: "Revenue Impact Engine", icon: "💵", group: "Revenue & Self-Healing", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/revenue-impact"); } },
+  { id: "nav-self-healing", label: "Self-Healing Orchestrator", icon: "🔄", group: "Revenue & Self-Healing", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/self-healing"); } },
+  { id: "nav-failure-timeline", label: "Predictive Failure Timeline", icon: "📈", group: "Revenue & Self-Healing", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/failure-timeline"); } },
+  { id: "nav-client-value", label: "Client Value Dashboard", icon: "👥", group: "Revenue & Self-Healing", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/client-value"); } },
+  { id: "nav-ops-savings", label: "Ops Savings Calculator", icon: "🧮", group: "Revenue & Self-Healing", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ops-savings"); } },
+  { id: "nav-escalation-intel", label: "Escalation Intelligence", icon: "🧠", group: "Revenue & Self-Healing", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/escalation-intelligence"); } },
 ];
 
 const lyteShortcuts: KeyboardShortcut[] = [

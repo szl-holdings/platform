@@ -7,7 +7,7 @@ import {
   Database, Play, Activity, CheckSquare, Shield, Network, Heart,
   AlertTriangle, Brain, Radio, Workflow, Inbox, Search, UserCheck,
   ChevronRight, Gauge, BarChart3, LayoutDashboard, Download, Clapperboard, Power,
-  GitBranch, Send, Cpu, TrendingUp, DollarSign
+  GitBranch, Send, Cpu, TrendingUp, DollarSign, RotateCcw, Calculator
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, useSandboxMode, EnvironmentLabel, type OnboardingConfig } from "@szl-holdings/shared-ui";
 import { useDemoMode } from "@/lib/demo-mode";
@@ -115,6 +115,17 @@ const NAV_GROUPS = [
       { href: "/gpu-observatory", label: "GPU & AI Observatory", icon: Cpu },
       { href: "/business-signals", label: "Business Signals", icon: DollarSign },
       { href: "/predictive-intelligence", label: "Predictive Intel", icon: TrendingUp },
+    ],
+  },
+  {
+    label: "Revenue & Self-Healing",
+    items: [
+      { href: "/revenue-impact", label: "Revenue Impact", icon: DollarSign },
+      { href: "/self-healing", label: "Self-Healing Ops", icon: RotateCcw },
+      { href: "/failure-timeline", label: "Failure Timeline", icon: TrendingUp },
+      { href: "/client-value", label: "Client Value", icon: Users },
+      { href: "/ops-savings", label: "Ops Savings", icon: Calculator },
+      { href: "/escalation-intelligence", label: "Escalation Intel", icon: Brain },
     ],
   },
   {
