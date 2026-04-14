@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<RemoteSiteSetting xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>SZL Holdings Platform API endpoint — required for outbound callouts from Apex classes and Flows.</description>
-    <disableProtocolSecurity>false</disableProtocolSecurity>
-    <isActive>true</isActive>
-    <name>SZL_Platform_API</name>
-    <url>https://api.szlholdings.com</url>
-</RemoteSiteSetting>

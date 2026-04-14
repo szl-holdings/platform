@@ -103,7 +103,11 @@
     "./agent-insights-widget": "./src/agent-insights-widget.tsx",
     "./core-observability-data": "./src/core-observability-data.ts",
     "./sandbox-mode": "./src/sandbox-mode.tsx",
-    "./operational-primitives": "./src/operational-primitives.tsx"
+    "./operational-primitives": "./src/operational-primitives.tsx",
+    "./ai-status-bar": "./src/ai-status-bar.tsx",
+    "./ai-insight-card": "./src/ai-insight-card.tsx",
+    "./use-ai-agent": "./src/use-ai-agent.ts",
+    "./data-state-badge": "./src/data-state-badge.tsx"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.4",

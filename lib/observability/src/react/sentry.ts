@@ -31,9 +31,6 @@ export function initSentry(config: SentryConfig) {
   const env = import.meta.env;
   const dsn = config.dsn || env.VITE_SENTRY_DSN;
   if (!dsn) {
-    if (env["DEV"] !== "true" && env["MODE"] !== "development") {
-      console.debug(`[${config.appSlug}] Sentry DSN not configured — error tracking in console-only mode`);
-    }
     setupGlobalHandlers(config.appSlug);
     return;
   }
