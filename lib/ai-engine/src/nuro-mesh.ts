@@ -601,19 +601,21 @@ export async function callAgent(
     consciousnessDirective += " Confusion streak detected — provide extra reasoning transparency and flag uncertainties.";
   }
 
-  const workspaceState = cognitiveWorkspace.getState();
-  let workspaceContext = "";
-  if (workspaceState.workingMemory.length > 0) {
-    const relevant = workspaceState.workingMemory
-      .filter(wm => wm.tags.length === 0 || wm.tags.includes(agent.domain))
-      .slice(0, 3);
-    if (relevant.length > 0) {
-      workspaceContext = `\n\n## Cognitive Workspace\nFocus: ${workspaceState.attentionFocus.primaryTopic}\n` +
-        relevant.map(wm => `- [${wm.source}] ${wm.content.slice(0, 200)}`).join("\n");
-    }
+  const preCheck = metacognitiveMonitor.preFlightCheck(agent.id, agent.domain, query.length);
+  let contextBudget = 3000;
+  if (preCheck.adjustments.includes("reduce_context_window")) {
+    contextBudget = 2000;
+  }
+  if (preCheck.adjustments.includes("increase_reasoning_transparency")) {
+    consciousnessDirective += " IMPORTANT: Show your reasoning step-by-step and flag any assumptions.";
+  }
+  if (preCheck.adjustments.includes("request_evidence_citations")) {
+    consciousnessDirective += " Cite specific data or evidence for each claim.";
   }
 
-  const fullPrompt = `${agent.systemPrompt}${learningSection}${consciousnessDirective}${workspaceContext}\n\n## Shared Context from Nuro Mesh\n${context}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with a confidence score (0-100) on a new line in format: CONFIDENCE: [score]`;
+  const focusedContext = cognitiveWorkspace.buildFocusedContext(context, agent.domain, contextBudget);
+
+  const fullPrompt = `${agent.systemPrompt}${learningSection}${consciousnessDirective}\n\n${focusedContext}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with a confidence score (0-100) on a new line in format: CONFIDENCE: [score]`;
 
   let forkId: string | undefined;
 
@@ -629,7 +631,7 @@ export async function callAgent(
       tokensUsed = (result.usage.input_tokens + result.usage.output_tokens);
       success = true;
     } else if (agent.preferredProvider === "openai") {
-      const systemWithLearning = `${agent.systemPrompt}${learningSection}${consciousnessDirective}${workspaceContext}`;
+      const systemWithLearning = `${agent.systemPrompt}${learningSection}${consciousnessDirective}\n\n${focusedContext}`;
       const result = await openai.chat.completions.create({
         model: actualModel,
         max_completion_tokens: 2048,
@@ -1301,6 +1303,36 @@ export const confidenceCalibrator = new ConfidenceCalibrator();
 export const conflictResolver = new ConflictResolver();
 export const agentTelemetry = new AgentTelemetryTracker();
 
+let _selfModelRehydrated = false;
+
+async function rehydrateSelfModelFromDb(): Promise<void> {
+  if (_selfModelRehydrated) return;
+  _selfModelRehydrated = true;
+  try {
+    const rows = await db
+      .select()
+      .from(consciousnessAgentProfilesTable)
+      .orderBy(desc(consciousnessAgentProfilesTable.updatedAt))
+      .limit(50);
+    if (rows.length > 0) {
+      selfModelEngine.hydrateProfiles(
+        rows.map(r => ({
+          agentId: r.agentId,
+          domain: r.domain,
+          successRate: Number(r.successRate),
+          avgConfidence: Number(r.avgConfidence),
+          totalInvocations: r.totalInvocations,
+          recentTrend: r.recentTrend,
+          strengths: (r.strengths as string[]) ?? [],
+          weaknesses: (r.weaknesses as string[]) ?? [],
+        })),
+      );
+    }
+  } catch {
+    // DB may not be available yet; proceed with fresh state
+  }
+}
+
 export class NuroMeshOrchestrator {
   async orchestrate(
     query: string,
@@ -1331,6 +1363,8 @@ export class NuroMeshOrchestrator {
     precomputeHit?: boolean;
     consciousness?: ConsciousnessSnapshot;
   }> {
+    await rehydrateSelfModelFromDb();
+
     const orchestrationStart = Date.now();
     const orchestrationStartTime = orchestrationStart;
     const orchestrationId = `orch-${orchestrationStart}-${Math.random().toString(36).slice(2, 8)}`;
@@ -1532,7 +1566,7 @@ export class NuroMeshOrchestrator {
 
         selfModelEngine.updateAgentProfile(agent.id, agent.domain, {
           confidence: result.confidence,
-          success: result.confidence > 0,
+          success: result.confidence >= 40 && !result.response.includes("[unavailable") && !result.response.includes("[Blocked"),
           latencyMs: result.latencyMs,
         });
 
@@ -1997,6 +2031,19 @@ async function persistConsciousnessState(
         strengths: cap.strengths,
         weaknesses: cap.weaknesses,
         snapshotData: capJson,
+      }).onConflictDoUpdate({
+        target: consciousnessAgentProfilesTable.agentId,
+        set: {
+          domain: cap.domain,
+          successRate: cap.successRate,
+          avgConfidence: cap.avgConfidence,
+          totalInvocations: cap.totalInvocations,
+          recentTrend: cap.recentTrend,
+          strengths: cap.strengths,
+          weaknesses: cap.weaknesses,
+          snapshotData: capJson,
+          updatedAt: new Date(),
+        },
       });
     }
   } catch {

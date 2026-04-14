@@ -46,7 +46,7 @@ export const consciousnessGoalsTable = pgTable("consciousness_goals", {
 
 export const consciousnessAgentProfilesTable = pgTable("consciousness_agent_profiles", {
   id: serial("id").primaryKey(),
-  agentId: text("agent_id").notNull(),
+  agentId: text("agent_id").notNull().unique(),
   domain: text("domain").notNull(),
   successRate: real("success_rate").notNull().default(0.5),
   avgConfidence: real("avg_confidence").notNull().default(50),
@@ -56,6 +56,7 @@ export const consciousnessAgentProfilesTable = pgTable("consciousness_agent_prof
   weaknesses: text("weaknesses").array().notNull().default([]),
   snapshotData: jsonb("snapshot_data"),
   capturedAt: timestamp("captured_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const consciousnessEmotionalHistoryTable = pgTable("consciousness_emotional_history", {

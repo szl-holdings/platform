@@ -163,6 +163,53 @@ class CognitiveWorkspace {
     return lines.join("\n");
   }
 
+  buildFocusedContext(rawContext: string, agentDomain: string, tokenBudget = 3000): string {
+    const focus = this.computeAttentionFocus();
+    const domainWeight = focus.attentionDistribution[agentDomain] ?? 0.1;
+    const adjustedBudget = Math.floor(tokenBudget * Math.max(0.5, Math.min(1.5, 0.7 + domainWeight)));
+
+    const relevantMemory = this.recall([agentDomain], 5);
+    const memorySection = relevantMemory.length > 0
+      ? relevantMemory.map(m => `[${m.source}] ${m.content.slice(0, 150)}`).join("\n")
+      : "";
+
+    const rawTokens = Math.ceil(rawContext.length / 4);
+    let contextPortion: string;
+    if (rawTokens <= adjustedBudget) {
+      contextPortion = rawContext;
+    } else {
+      const charBudget = adjustedBudget * 4;
+      const paragraphs = rawContext.split(/\n\n+/);
+      const scored = paragraphs.map(p => {
+        const domainRelevance = p.toLowerCase().includes(agentDomain) ? 2 : 0;
+        const focusRelevance = focus.activeDomains.some(d => p.toLowerCase().includes(d)) ? 1 : 0;
+        const goalRelevance = this.activeGoals.some(g => p.toLowerCase().includes(g.toLowerCase())) ? 1.5 : 0;
+        return { text: p, score: domainRelevance + focusRelevance + goalRelevance + 0.1 };
+      });
+      scored.sort((a, b) => b.score - a.score);
+
+      const selected: string[] = [];
+      let usedChars = 0;
+      for (const s of scored) {
+        if (usedChars + s.text.length > charBudget) break;
+        selected.push(s.text);
+        usedChars += s.text.length;
+      }
+      contextPortion = selected.join("\n\n");
+    }
+
+    const parts = [
+      `## Focused Context (attention: ${focus.primaryTopic}, budget: ${adjustedBudget} tokens)`,
+    ];
+    if (memorySection) {
+      parts.push(`### Working Memory\n${memorySection}`);
+    }
+    if (contextPortion) {
+      parts.push(`### Shared Intelligence\n${contextPortion}`);
+    }
+    return parts.join("\n\n");
+  }
+
   private estimateTokenUsage(): number {
     return this.items.reduce((s, item) => s + Math.ceil(item.content.length / 4), 0);
   }

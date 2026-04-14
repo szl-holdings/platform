@@ -246,6 +246,41 @@ class MetacognitiveMonitor {
     };
   }
 
+  preFlightCheck(agentId: string, agentDomain: string, queryComplexity: number): {
+    proceed: boolean;
+    adjustments: string[];
+    riskLevel: "low" | "medium" | "high";
+  } {
+    const adjustments: string[] = [];
+    let riskLevel: "low" | "medium" | "high" = "low";
+
+    if (this.confusionStreak > 2) {
+      adjustments.push("increase_reasoning_transparency");
+      riskLevel = "high";
+    }
+    if (this.rollingCertainty < 0.4) {
+      adjustments.push("request_evidence_citations");
+      riskLevel = riskLevel === "low" ? "medium" : riskLevel;
+    }
+    if (this.rollingQuality < 0.5) {
+      adjustments.push("simplify_query_decomposition");
+      riskLevel = "high";
+    }
+
+    const lastAssessment = this.assessments.length > 0 ? this.assessments[this.assessments.length - 1] : null;
+    if (lastAssessment?.cognitiveLoad === "overloaded") {
+      adjustments.push("reduce_context_window");
+      riskLevel = riskLevel === "low" ? "medium" : riskLevel;
+    }
+    if (lastAssessment?.knowledgeGaps.some(g => g.toLowerCase().includes(agentDomain))) {
+      adjustments.push("flag_domain_knowledge_gap");
+      riskLevel = "high";
+    }
+
+    const proceed = riskLevel !== "high" || this.confusionStreak < 5;
+    return { proceed, adjustments, riskLevel };
+  }
+
   buildMetacognitiveContext(): string {
     if (this.assessments.length === 0) return "";
 

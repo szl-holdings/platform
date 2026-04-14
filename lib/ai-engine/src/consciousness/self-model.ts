@@ -185,6 +185,33 @@ class SelfModelEngine {
     return parts.join(" ");
   }
 
+  hydrateProfiles(profiles: Array<{
+    agentId: string;
+    domain: string;
+    successRate: number;
+    avgConfidence: number;
+    totalInvocations: number;
+    recentTrend: string;
+    strengths: string[];
+    weaknesses: string[];
+  }>): void {
+    for (const p of profiles) {
+      if (!this.capabilities.has(p.agentId)) {
+        this.capabilities.set(p.agentId, {
+          agentId: p.agentId,
+          domain: p.domain,
+          strengths: p.strengths ?? [],
+          weaknesses: p.weaknesses ?? [],
+          successRate: p.successRate,
+          avgConfidence: p.avgConfidence,
+          totalInvocations: p.totalInvocations,
+          recentTrend: (p.recentTrend as AgentCapabilityProfile["recentTrend"]) ?? "stable",
+          lastUpdated: new Date().toISOString(),
+        });
+      }
+    }
+  }
+
   buildSelfModelContext(): string {
     const model = this.getSelfModel();
     const lines = [
