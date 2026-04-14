@@ -2219,7 +2219,7 @@ async function persistConsciousnessState(
     }
   } catch (err) {
     console.warn("[consciousness] persistConsciousnessState failed:", err instanceof Error ? err.message : String(err));
-    emotionalSignals.recordSignal("frustration", 0.4, "persistence_failure");
+    emotionalSignals.emit("frustration", 0.4, "persistence_failure");
   }
 }
 
