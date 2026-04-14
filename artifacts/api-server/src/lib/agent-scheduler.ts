@@ -9,6 +9,7 @@ import { agentScheduler } from "@szl-holdings/workflow-engine";
 import { logger } from "./logger";
 
 const BASE_URL = `http://localhost:${process.env["PORT"] || 3000}`;
+const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
 
 function getInternalHeaders(): Record<string, string> {
   const headers: Record<string, string> = { Accept: "application/json" };
