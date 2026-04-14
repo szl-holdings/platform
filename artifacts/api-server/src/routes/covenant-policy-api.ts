@@ -189,7 +189,7 @@ router.post("/covenant/policies", authMiddleware(), requireRole("admin", "super_
 router.delete("/covenant/policies/:policyId", authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
   try {
     const { policyId } = req.params;
-    covenantEngine.unregister(String(policyId ?? ""));
+    covenantEngine.unregister(policyId!);
     sendSuccess(res, { policyId, removed: true });
   } catch (err) {
     handleRouteError(res, err, "COVENANT unregister policy");

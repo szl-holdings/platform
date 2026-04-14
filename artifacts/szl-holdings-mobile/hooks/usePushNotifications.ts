@@ -1,7 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import { Platform } from "react-native";
 import * as Notifications from "expo-notifications";
-import { router, type Href } from "expo-router";
 import * as Device from "expo-device";
 import { getAuthToken, getApiBase } from "@/lib/apiClient";
 
@@ -70,20 +69,7 @@ export function usePushNotifications(enabled: boolean) {
     );
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
-        const data = response.notification.request.content.data as Record<string, unknown>;
-        const PORTFOLIO_HREF: Href = { pathname: "/(tabs)/portfolio" };
-        const PULSE_HREF: Href = { pathname: "/(tabs)/pulse" };
-        const TRANSACTIONS_HREF: Href = { pathname: "/(tabs)/transactions" };
-        try {
-          if (data?.type === "portfolio_update" || data?.type === "entity") {
-            router.push(PORTFOLIO_HREF);
-          } else if (data?.type === "pulse" || data?.type === "signal") {
-            router.push(PULSE_HREF);
-          } else if (data?.type === "transaction") {
-            router.push(TRANSACTIONS_HREF);
-          }
-        } catch {}
+      (_response) => {
       }
     );
   }, [enabled]);

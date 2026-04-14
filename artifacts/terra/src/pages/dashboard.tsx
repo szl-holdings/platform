@@ -3,9 +3,6 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { DataStateBadge, useRealtimeChannel, ActionLoop } from "@szl-holdings/shared-ui";
-import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
-import { AIInsightCard } from "@szl-holdings/shared-ui/ai-insight-card";
-import { useDomainInsights, type DomainInsight } from "@szl-holdings/shared-ui/use-ai-agent";
 import {
   Building2, MapPin, TrendingUp, Users, Activity,
   ArrowRight, AlertTriangle, Eye, Globe, Map, Shield, BarChart3,
@@ -112,7 +109,6 @@ const API = "/api";
 
 export default function TerraIntelligence() {
   const qc = useQueryClient();
-  const { insights: propertyInsights, isStale: propertyInsightsStale } = useDomainInsights("terra", 3, 60_000);
   const { lastMessage: wsSignal } = useRealtimeChannel("terra-signals");
 
   const { data: healthData, isError: apiDown } = useQuery({
@@ -157,31 +153,6 @@ export default function TerraIntelligence() {
         </div>
       </div>
 
-      <AIInsightCard domain="terra" accentColor="hsl(140, 50%, 48%)" maxInsights={2} compact title="Property Intelligence Signals" />
-
-      {propertyInsights.length > 0 && (
-        <div className="rounded-lg border border-white/[0.06] p-3" style={{ background: "#0c1220" }}>
-          <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-3 h-3" style={{ color: "hsl(140, 50%, 48%)" }} />
-            <span className="text-[10px] font-mono font-bold uppercase tracking-widest" style={{ color: "hsl(140, 50%, 48%)" }}>AI Property Recommendations</span>
-            {propertyInsightsStale && <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">cached</span>}
-          </div>
-          <div className="space-y-1.5">
-            {propertyInsights.filter((ins: DomainInsight) => ins.recommendedAction).map((ins: DomainInsight) => (
-              <div key={ins.id} className="flex items-start gap-2 px-2.5 py-1.5 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
-                <AlertTriangle className={`w-3 h-3 mt-0.5 shrink-0 ${ins.severity === "critical" ? "text-red-400" : ins.severity === "high" ? "text-amber-400" : "text-slate-400"}`} />
-                <div className="flex-1 min-w-0">
-                  <div className="text-[11px] font-medium text-slate-100">{ins.title}</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">{ins.recommendedAction}</div>
-                </div>
-                <span className="text-[9px] font-mono shrink-0 text-slate-500 mt-0.5">{Math.round(ins.confidence * 100)}%</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <SectionErrorBoundary sectionName="Market KPIs">
       <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.012)" }}>
         <div className="grid grid-cols-3 md:grid-cols-6">
           {[
@@ -203,9 +174,7 @@ export default function TerraIntelligence() {
           ))}
         </div>
       </div>
-      </SectionErrorBoundary>
 
-      <SectionErrorBoundary sectionName="Intelligence Panels">
       <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
         {DOCTRINE_MODULES.map((mod) => (
           <Link key={mod.id} href={mod.href} className="group rounded-xl border p-3 transition-all hover:border-white/10 cursor-pointer" style={{
@@ -223,9 +192,7 @@ export default function TerraIntelligence() {
           </Link>
         ))}
       </div>
-      </SectionErrorBoundary>
 
-      <SectionErrorBoundary sectionName="Deal Intelligence">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 space-y-4">
           <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.012)" }}>
@@ -476,7 +443,6 @@ export default function TerraIntelligence() {
           accentColor="#40856a"
         />
       </div>
-      </SectionErrorBoundary>
     </div>
   );
 }

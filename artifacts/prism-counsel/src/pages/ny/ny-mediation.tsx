@@ -1,5 +1,5 @@
 import { Activity, TrendingUp, Clock, DollarSign } from "lucide-react";
-import { NY_DEMO_MATTERS } from "../../data/ny-data";
+import { NY_DEMO_MATTERS } from "../../data/ny-demo-matters";
 
 export default function NyMediationPage() {
   const allMediations = NY_DEMO_MATTERS.flatMap(m =>

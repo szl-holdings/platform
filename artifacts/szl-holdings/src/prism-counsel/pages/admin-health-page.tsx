@@ -4,38 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
-interface PcServiceMetric {
-  id: number;
-  service: string;
-  healthStatus: string;
-  latencyP50Ms?: number | null;
-  latencyP95Ms?: number | null;
-  errorCount?: number | null;
-  measuredAt: string;
-}
-
-interface PcIncident {
-  id: number;
-  title: string;
-  severity: string;
-  service?: string | null;
-  description?: string | null;
-  status: string;
-  detectedAt: string;
-}
-
-interface PcOnboardingChecklist {
-  id: number;
-  step: string;
-  status: string;
-  blockerReason?: string | null;
-  completedAt?: string | null;
-}
-
-interface ServiceMetricsResponse { metrics: PcServiceMetric[] }
-interface IncidentsResponse { incidents: PcIncident[] }
-interface OnboardingResponse { checklist: PcOnboardingChecklist[] }
-
 const DASHBOARD_TYPES = [
   { id: "executive_health", label: "Executive Health", icon: Activity },
   { id: "connector_health", label: "Connector Health", icon: Wifi },
@@ -82,26 +50,35 @@ function ServiceHealthRow({ service }: { service: string }) {
 export default function AdminHealthPage() {
   const [activeView, setActiveView] = useState<string>("executive_health");
 
-  const { data: metricsData } = useQuery<ServiceMetricsResponse>({
+  const { data: metricsData } = useQuery({
     queryKey: ["service-metrics"],
-    queryFn: () => apiRequest<ServiceMetricsResponse>("GET", "/api/prism-counsel/admin/service-metrics"),
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/prism-counsel/admin/service-metrics");
+      return res.json();
+    },
   });
 
-  const { data: incidentsData } = useQuery<IncidentsResponse>({
+  const { data: incidentsData } = useQuery({
     queryKey: ["prism-incidents"],
-    queryFn: () => apiRequest<IncidentsResponse>("GET", "/api/prism-counsel/admin/incidents"),
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/prism-counsel/admin/incidents");
+      return res.json();
+    },
     enabled: activeView === "incident_response",
   });
 
-  const { data: onboardingData } = useQuery<OnboardingResponse>({
+  const { data: onboardingData } = useQuery({
     queryKey: ["prism-onboarding"],
-    queryFn: () => apiRequest<OnboardingResponse>("GET", "/api/prism-counsel/admin/onboarding"),
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/prism-counsel/admin/onboarding");
+      return res.json();
+    },
     enabled: activeView === "onboarding_health",
   });
 
-  const metrics = metricsData?.metrics ?? [];
-  const incidents = incidentsData?.incidents ?? [];
-  const checklist = onboardingData?.checklist ?? [];
+  const metrics = metricsData?.data?.metrics ?? [];
+  const incidents = incidentsData?.data?.incidents ?? [];
+  const checklist = onboardingData?.data?.checklist ?? [];
 
   return (
     <div className="p-5 max-w-[1200px] mx-auto space-y-5">
@@ -142,7 +119,7 @@ export default function AdminHealthPage() {
           <div className="grid grid-cols-4 gap-3">
             {[
               { label: "Services Healthy", value: "14/15", color: "#5aa87a" },
-              { label: "Active Incidents", value: incidents.filter((i) => i.status === "open").length, color: incidents.length > 0 ? "#c45a4a" : "#5aa87a" },
+              { label: "Active Incidents", value: incidents.filter((i: any) => i.status === "open").length, color: incidents.length > 0 ? "#c45a4a" : "#5aa87a" },
               { label: "GraphQL Ops (24h)", value: "—", color: "#4a90b8" },
               { label: "Approval Queue", value: "—", color: "#d4a054" },
             ].map(kpi => (
@@ -193,7 +170,7 @@ export default function AdminHealthPage() {
               <div className="text-xs text-slate-400">No active incidents</div>
             </div>
           )}
-          {incidents.map((inc) => (
+          {incidents.map((inc: any) => (
             <div key={inc.id} className="rounded-lg border border-[#c45a4a]/30 p-4" style={{ background: "#0c1220" }}>
               <div className="flex items-center justify-between mb-2">
                 <div className="text-xs font-semibold text-slate-200">{inc.title}</div>
@@ -211,7 +188,7 @@ export default function AdminHealthPage() {
           <h3 className="text-xs font-semibold text-slate-200 mb-3">Onboarding Checklist</h3>
           {checklist.length === 0 && <div className="text-xs text-slate-500">No onboarding steps recorded</div>}
           <div className="space-y-2">
-            {checklist.map((step) => (
+            {checklist.map((step: any) => (
               <div key={step.id} className="flex items-center gap-3 py-1.5">
                 {step.status === "complete"
                   ? <CheckCircle2 className="w-4 h-4 text-[#5aa87a]" />

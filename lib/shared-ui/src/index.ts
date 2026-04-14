@@ -69,7 +69,7 @@ export {
 export { NpsSurvey, NpsSurveyOverlay, useNpsSurvey, type NpsSurveyProps, type NpsSurveyOverlayProps } from "./nps-survey";
 export { ContextualFeedback, ContextualFeedbackBar, type ContextualFeedbackProps, type ContextualFeedbackBarProps } from "./contextual-feedback";
 export { PackBanner, PACK_ACCENT_COLORS, type PackBannerProps, type PackVariant } from "./pack-banner";
-export { CookieBanner, useCookieConsent, ConsentPreferencesButton, CookieConsentModal, initConsentSystem, getConsentState, onConsentChange, CONSENT_VERSION, type CookieBannerProps, type CookieConsentState, type ConsentState, type ConsentCategories } from "./cookie-banner";
+export { CookieBanner, useCookieConsent, type CookieBannerProps, type CookieConsentState } from "./cookie-banner";
 export { StatusBanner, useStatusBanner, type StatusBannerProps, type StatusBannerConfig, type StatusLevel } from "./status-banner";
 export {
   ConfidenceBand,
@@ -116,26 +116,6 @@ export { AnalyticsProvider, useAnalytics } from "./analytics-provider";
 export { useFeatureFlag, type FeatureFlag } from "./hooks";
 
 export {
-  useMouseParallax,
-  useScrollY,
-  useInViewOnce,
-  WordReveal,
-  LetterReveal,
-  MagneticButton,
-  NoiseGrain,
-  WarmGrain,
-  CustomCursor,
-  ScrollCounter,
-  LiveIndicator,
-  ThreatTicker,
-  SignalTicker,
-  CinematicReveal,
-  EcosystemPulseItem,
-  PageTransition,
-  ParallaxLayer,
-} from "./cinematic-utils";
-
-export {
   OperationalStatusBadge,
   OperationalRiskBadge,
   OperationalApprovalBadge,
@@ -168,59 +148,3 @@ export {
   type OperationalEntity,
   type StatusConfig,
 } from "./operational-primitives";
-export {
-  DocumentIntelligencePanel,
-  type DocumentIntelligencePanelProps,
-  type DocumentIntelligenceResult,
-  type DocumentEntity,
-  type DocumentClassification,
-} from "./document-intelligence-panel";
-export {
-  AIActionsPanel,
-  DOMAIN_ACTIONS,
-  type AIActionsPanelProps,
-  type AIAction,
-  type ActionHistoryEntry,
-  type WorkflowStatus,
-} from "./ai-actions-panel";
-export { GraphQLPanelShell } from "./graphql-panel-shell";
-export {
-  useColorMode,
-  initColorMode,
-  type ColorMode,
-  type ColorModeState,
-} from "./use-color-mode";
-export {
-  ProgressiveSection,
-  DensityToggle,
-  useDensity,
-  type ProgressiveSectionProps,
-  type DensityToggleProps,
-  type DisplayDensity,
-} from "./progressive-section";
-export {
-  AppTransitionOverlay,
-  useAppTransition,
-  type AppTransitionConfig,
-  type AppTransitionOverlayProps,
-} from "./app-transition";
-export {
-  EcosystemNav,
-  useEcosystemNotifications,
-  ECOSYSTEM_APPS as ECOSYSTEM_NAV_APPS,
-  type EcosystemNavProps,
-  type EcosystemApp,
-  type EcosystemNotification,
-} from "./ecosystem-nav";
-export { AdPixelProvider, fireConversionEvent, fireGoogleAdsConversion, fireMetaPixelEvent, loadGoogleAds, loadMetaPixel } from "./ad-pixel-provider";
-export {
-  AgentActivityFeed,
-  AutonomyLevelSelector,
-  type AgentActivityEvent,
-  type ActivityEventType,
-  type AgentActivityFeedProps,
-  type AutonomyLevelSelectorProps,
-} from "./agent-activity-feed";
-export { ABODoctrinePanel, type ABODoctrinePanelProps } from "./abo-doctrine-panel";
-export { LiveStreamPanel, type StreamDomain, type StreamAlert, type StreamDetection, type LiveStreamPanelProps } from './live-stream-panel';
-export { MultimodalDocUpload, type InputModality, type MultimodalResult, type MultimodalDocUploadProps } from './multimodal-doc-upload';

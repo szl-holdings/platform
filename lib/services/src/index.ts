@@ -1,6 +1,5 @@
 export { ServiceAdapter, type ServiceStatus, type ServiceHealthReport, type ConnectionTestResult } from "./base.js";
 export { ServiceRegistry, type IntegrationHealthMatrix, services } from "./registry.js";
-export { getRedisClient, isRedisReal, cacheGet, cacheSet, cacheDel, rateLimitIncr, getRedisStatus } from "./adapters/redis.js";
 
 export {
   type ProviderMode,
@@ -80,16 +79,7 @@ export { GoogleAdapter, type GoogleAuthStatus } from "./adapters/google.js";
 export { NotionAdapter, type NotionPage, type NotionDatabase } from "./adapters/notion.js";
 export { StorageAdapter, type UploadResult, type StoredFile } from "./adapters/storage.js";
 export { MonitoringAdapter, type ErrorReport, type AnalyticsEvent } from "./adapters/monitoring.js";
-export {
-  GitHubAdapter,
-  type GitHubRepo,
-  type GitHubWebhookEvent,
-  type GitHubIssue,
-  type GitHubPullRequest,
-  type GitHubCommit,
-  type GitHubCodeSearchResult,
-  type GitHubWorkflowRun,
-} from "./adapters/github.js";
+export { GitHubAdapter, type GitHubRepo, type GitHubWebhookEvent } from "./adapters/github.js";
 export { GoogleCalendarAdapter, type CalendarEvent } from "./adapters/google-calendar.js";
 export { GoogleDocsAdapter, type GoogleDoc } from "./adapters/google-docs.js";
 export { GoogleDriveAdapter, type DriveFile } from "./adapters/google-drive.js";
@@ -165,17 +155,6 @@ export { XTwitterAdapter, type XPostResult } from "./adapters/x-twitter.js";
 export { MediumAdapter, type MediumPublishResult } from "./adapters/medium.js";
 export { SubstackAdapter, type SubstackPublishResult } from "./adapters/substack.js";
 export { LinkedInAdapter, type LinkedInPostResult } from "./adapters/linkedin.js";
-export { AisStreamAdapter, type AisStreamVessel } from "./adapters/aisstream.js";
-export { CourtListenerAdapter, type CourtListenerDocket, type CourtListenerOpinion } from "./adapters/courtlistener.js";
-export { PhishTankAdapter, ThreatFoxAdapter, type PhishTankEntry, type ThreatFoxIoc } from "./adapters/phishtank.js";
-export { OpenSkyAdapter, type OpenSkyAircraft } from "./adapters/opensky.js";
-export { SamGovAdapter, type SamGovOpportunity, type SamGovEntity } from "./adapters/samgov.js";
-export { NoaaAlertsAdapter, type NoaaAlert, type NoaaAlertDomain } from "./adapters/noaa-alerts.js";
-export {
-  NycDobAdapter, NycHpdAdapter, NycDofAdapter, NycDobComplaintsAdapter,
-  type NycDobPermit, type NycHpdViolation, type NycDofSale,
-  type NycDobComplaint,
-} from "./adapters/nyc-open-data.js";
 
 export {
   HuggingFaceAdapter,

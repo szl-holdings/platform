@@ -101,7 +101,7 @@ function parseFindingsFromText(text: string): Array<{ title: string; severity: s
   return findings;
 }
 
-const MAX_RUN_HISTORY = 10;
+const MAX_RUN_HISTORY = 50;
 const DB_CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
 const DB_CLEANUP_MAX_AGE_DAYS = 7;
 
@@ -130,7 +130,7 @@ export class AgentScheduler {
 
     for (const [agentId, schedule] of this.schedules) {
       if (!schedule.enabled) continue;
-      const initialDelay = Math.random() * Math.min(schedule.intervalMs, 300000);
+      const initialDelay = Math.random() * Math.min(schedule.intervalMs, 60000);
       setTimeout(() => {
         this.runAgent(agentId).catch(err => {
           logger.error({ err, agentId }, "Initial agent run failed");
@@ -379,9 +379,6 @@ export class AgentScheduler {
       persistAgentRun(record).catch(() => {});
     } finally {
       this.activeAgents.delete(agentId);
-      if (typeof global.gc === "function") {
-        setImmediate(() => (global.gc as () => void)());
-      }
     }
 
     return record;

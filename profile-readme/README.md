@@ -1,164 +1,87 @@
-<p align="center">
-  <img src="assets/hero.svg" width="100%" alt="Stephen Lutar — Founder and CEO, SZL Holdings" />
-</p>
+# Stephen Lutar
 
-<p align="center">
-  <a href="https://szlholdings.com"><img src="https://img.shields.io/badge/PLATFORM-szlholdings.com-D4A054?style=for-the-badge&logo=google-chrome&logoColor=white" /></a>
-  <a href="https://linkedin.com/in/stephenlutar"><img src="https://img.shields.io/badge/LINKEDIN-stephenlutar-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" /></a>
-  <a href="https://szlholdings.substack.com"><img src="https://img.shields.io/badge/SUBSTACK-Signal_Over_Noise-FF6719?style=for-the-badge&logo=substack&logoColor=white" /></a>
-</p>
+**Founder & CEO — SZL Holdings**
 
-<p align="center">
-  <a href="https://x.com/szlholdings"><img src="https://img.shields.io/badge/X-@szlholdings-000000?style=for-the-badge&logo=x&logoColor=white" /></a>
-  <a href="https://medium.com/@stephen_38454"><img src="https://img.shields.io/badge/MEDIUM-@stephen__38454-000000?style=for-the-badge&logo=medium&logoColor=white" /></a>
-  <a href="mailto:stephenlutar2@gmail.com"><img src="https://img.shields.io/badge/CONTACT-stephenlutar2@gmail.com-1e293b?style=for-the-badge&logo=gmail&logoColor=white" /></a>
-</p>
+Building governed operational intelligence software. Systems where AI-assisted decisions require human accountability, and where observability connects to action — not just visualization.
 
 ---
 
-### Builder-operator behind SZL Holdings.
+## About
 
-One holding company. Eleven platforms. 20+ live applications. One architect.
+I build governed, production-ready command software for organizations that cannot afford silent failures, invisible risk, or unaccountable AI. Every system I build has explicit audit trails, human-in-the-loop controls, and traceable decision paths.
 
-I build governed operational intelligence software for industries where silent failures, invisible risk, and unaccountable AI are not acceptable. Everything ships from a single TypeScript monorepo. Every improvement compounds across every platform.
-
----
-
-<p align="center">
-  <img src="assets/platform-map.svg" width="100%" alt="SZL Holdings — Platform Architecture" />
-</p>
+AI outputs without traceability create noise, not trust. Signal → routing → approval gate → audit trail. That's the model.
 
 ---
 
-### The Platforms — Live and Deployed
+## Current Build
 
-<table>
-  <tr>
-    <td width="50%" align="center">
-      <strong>Vessels — Maritime Intelligence</strong><br/>
-      Fleet command, AIS analytics, voyage management, compliance monitoring<br/><br/>
-      <img src="screenshots/vessels.jpg" width="100%" alt="Vessels Maritime Intelligence" />
-    </td>
-    <td width="50%" align="center">
-      <strong>Aegis — Defense and Intelligence</strong><br/>
-      Unified SOC command, threat correlation, incident governance<br/><br/>
-      <img src="screenshots/firestorm-aegis.jpg" width="100%" alt="Aegis Defense and Intelligence" />
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
-      <strong>Terra — Real Estate Intelligence</strong><br/>
-      Market intelligence, distress engine, deal pipeline, portfolio analytics<br/><br/>
-      <img src="screenshots/terra.jpg" width="100%" alt="Terra Real Estate Intelligence" />
-    </td>
-    <td width="50%" align="center">
-      <strong>Lyte — Business Observability</strong><br/>
-      Execution risk, ownership drift, workflow friction analysis<br/><br/>
-      <img src="screenshots/lyte-command-center.jpg" width="100%" alt="Lyte Command Center" />
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
-      <strong>PRISM Counsel — Legal Matter Command</strong><br/>
-      Deadline tracking, pressure scoring, proof chain export<br/><br/>
-      <img src="screenshots/prism-counsel.jpg" width="100%" alt="PRISM Counsel" />
-    </td>
-    <td width="50%" align="center">
-      <strong>Carlota Jo — Private Advisory</strong><br/>
-      Bespoke coordination for luxury residential environments<br/><br/>
-      <img src="screenshots/carlota-jo.jpg" width="100%" alt="Carlota Jo Consulting" />
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
-      <strong>SZL Holdings — Command Surface</strong><br/>
-      Holding company dashboard, cross-platform intelligence<br/><br/>
-      <img src="screenshots/szl-holdings.jpg" width="100%" alt="SZL Holdings" />
-    </td>
-    <td width="50%" align="center">
-      <strong>Stephen Lutar — Founder Portfolio</strong><br/>
-      Personal site, ecosystem overview, case studies<br/><br/>
-      <img src="screenshots/stephen-site-fresh.jpg" width="100%" alt="Stephen Lutar" />
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
-      <strong>Forge — Client & Investor Portal</strong><br/>
-      Deal intelligence, investor relations command, client pipeline<br/><br/>
-      <img src="screenshots/forge.jpg" width="100%" alt="Forge Portal" />
-    </td>
-    <td width="50%" align="center">
-      <strong>Nexus — Cross-Domain Fusion Canvas</strong><br/>
-      Entity graph, cross-vertical signal correlation, ontology visualization<br/><br/>
-      <img src="screenshots/nexus.jpg" width="100%" alt="Nexus Intelligence Canvas" />
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
-      <strong>INCA Lab — AI Model Command</strong><br/>
-      Model registry, experiment tracking, LLM governance, deployment<br/><br/>
-      <img src="screenshots/inca-lab.jpg" width="100%" alt="INCA Lab" />
-    </td>
-    <td width="50%" align="center">
-    </td>
-  </tr>
-</table>
+**SZL Holdings Platform** — 16-artifact pnpm monorepo. TypeScript throughout.
+
+**[Lyte](https://szlholdings.com)** — Business observability platform. Surfaces execution risk, ownership drift, and workflow friction before they compound. PRISM framework: People, Revenue, Infrastructure, Security, Market.
+
+**Alloy** — Execution fabric. Signal normalization, workflow orchestration, approval controls, human-in-the-loop gates, and immutable audit trail. The layer that makes AI-assisted operations durable and accountable.
 
 ---
 
-<p align="center">
-  <img src="assets/ecosystem-map.svg" width="100%" alt="SZL Holdings — Doctrine" />
-</p>
+## Platforms
+
+| Platform | Domain |
+|----------|--------|
+| **Aegis** | Security & defense intelligence |
+| **Vessels** | Maritime fleet command |
+| **Terra** | Real estate intelligence |
+| **Carlota Jo** | Premium advisory operations |
 
 ---
 
-### The Numbers
+## Architecture
 
 ```
-20+   applications live              11 web + 7 mobile (Expo)
-600+  database tables                one shared PostgreSQL schema
-28    shared libraries               full TypeScript, zero JavaScript
-11    operating platforms            one compounding architecture
-1     founder                        builder-operator
-```
-
-### Stack
-
-<p align="center">
-  <img src="https://skillicons.dev/icons?i=ts,react,vite,nodejs,express,postgres,tailwind,docker&theme=dark" />
-</p>
-
-```
-TypeScript · React · Vite · Express 5 · PostgreSQL · Drizzle ORM · Expo · pnpm monorepo
-AI Advisors (governed) · RBAC · Audit Trail · Signal Pipeline · WebSocket · GraphQL
+Lyte + Alloy                │  Full-Stack TypeScript     │  AI Governance
+Business observability      │  React + Node + PostgreSQL  │  Evidence-backed decisions
+Signal → action pipelines   │  Monorepo discipline        │  Human-in-the-loop gates
+Execution accountability    │  Shared infrastructure      │  Audit-first design
 ```
 
 ---
 
-### Principles
+## Architecture Principles
 
-- **AI governance by design.** Advisory agents cannot execute without explicit human confirmation.
-- **Evidence-backed decisions.** Every AI recommendation includes source citations and confidence scores.
-- **Explicit over implicit.** Platform state is always visible. Failures surface, not hide.
-- **Shared fabric, domain specialization.** Every improvement compounds across every platform.
+**AI governance by design.** Advisory agents cannot execute consequential actions without explicit human confirmation. Enforced at the workflow layer — not just the UI.
 
----
+**Evidence-backed decisions.** Every AI recommendation includes source citations, confidence scores, and retrieval provenance. No opaque outputs.
 
-### Writing
+**Explicit over implicit.** Platform state is always visible. No silent fallbacks. Failures surface, not hide.
 
-- **Substack:** [Signal Over Noise](https://szlholdings.substack.com) — intelligence brief on business observability, AI governance, and founder operations
-- **Medium:** [Stephen Lutar](https://medium.com/@stephen_38454) — long-form thinking on architecture, domain intelligence, and operating philosophy
+**Shared fabric, domain specialization.** Lyte and Alloy are not product-specific — they are platform infrastructure. Domain packs are structured applications built on the same foundation.
 
 ---
 
-<p align="center">
-  <em>We do not publish source code. This organization operates private repositories.</em>
-</p>
+## Stack
 
-<p align="center">
-  <em>Open to design partner conversations, enterprise evaluation, and investment introductions.</em>
-</p>
+```
+TypeScript · React · Express · PostgreSQL · Drizzle ORM
+pnpm monorepo · Expo / React Native · Azure · OIDC/PKCE
+HuggingFace Inference · Apollo GraphQL · Vite
+```
 
-<p align="center">
-  <a href="mailto:stephenlutar2@gmail.com"><strong>stephenlutar2@gmail.com</strong></a>
-</p>
+16 deployable artifacts · 120+ database tables · 7 web apps · 7 mobile apps
+
+---
+
+## Featured Repository
+
+**[szl-holdings-platform](https://github.com/szl-holdings/szl-holdings-platform)** — Full platform ecosystem. 16 deployable artifacts, 120+ database tables, TypeScript everywhere.
+
+→ **[Live Demo](https://szlholdings.com)** | **[Security Policy](https://github.com/szl-holdings/szl-holdings-platform/blob/master/SECURITY.md)** | **[Architecture](https://github.com/szl-holdings/szl-holdings-platform/tree/master/docs/architecture)**
+
+---
+
+## Connect
+
+**LinkedIn:** [linkedin.com/in/stephen-l-279315240](https://linkedin.com/in/stephen-l-279315240)  
+**Website:** [szlholdings.com](https://szlholdings.com)  
+**Email:** inquiries@szlholdings.com
+
+*Open to design partner conversations, enterprise evaluation, and investment introductions.*

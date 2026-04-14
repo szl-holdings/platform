@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { m } from "framer-motion";
 import { Link } from "wouter";
 import { ArrowRight, CheckCircle2, Shield } from "lucide-react";
@@ -6,7 +6,6 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { toast } from "sonner";
-import { analytics, initScrollDepthTracking, initTimeOnPageTracking } from "@/lib/analytics";
 
 const API = "/api";
 
@@ -41,14 +40,6 @@ export default function ContactPage() {
     description: "Demo requests, design partner sessions, general inquiries, media, and security disclosures. All conversations go directly to the founder.",
     canonical: "https://szlholdings.com/contact",
   });
-
-  useEffect(() => {
-    analytics.pageView("/contact");
-    analytics.funnelStage("contact-page", "/contact");
-    const cleanupScroll = initScrollDepthTracking("/contact");
-    const cleanupTime = initTimeOnPageTracking("/contact");
-    return () => { cleanupScroll(); cleanupTime(); };
-  }, []);
 
   const [form, setForm] = useState<FormState>({ name: "", email: "", org: "", type: "demo", message: "" });
   const [submitting, setSubmitting] = useState(false);
@@ -100,8 +91,6 @@ export default function ContactPage() {
         throw new Error((body as { error?: string }).error ?? "Submission failed");
       }
       setSubmitted(true);
-      analytics.contactFormSubmit(form.type);
-      analytics.funnelStage("inquiry-form-submit", "/contact");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Something went wrong.";
       toast.error(`${msg} Please try again or email hello@szlholdings.com directly.`);

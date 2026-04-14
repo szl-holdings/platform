@@ -78,19 +78,3 @@ docs/audit/public-mirror-report.md
 # Database dumps
 *.dump
 *.pgdump
-
-# Secrets and credentials
-*.pem
-*.key
-*.p12
-*.pfx
-.secrets
-secrets/
-credentials/
-
-# Screenshots (development only)
-screenshots/
-
-# Logs
-*.log
-/tmp/

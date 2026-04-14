@@ -2,30 +2,26 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { CaseStudiesSection } from "@/components/sections/CaseStudiesSection";
-import { PlatformArchitectureSection } from "@/components/sections/PlatformArchitectureSection";
-import { ThesisSection } from "@/components/sections/ThesisSection";
 import { ServicesSection } from "@/components/sections/ServicesSection";
+import { ThesisSection } from "@/components/sections/ThesisSection";
+import { EcosystemRoleSection } from "@/components/sections/EcosystemRoleSection";
 import { ContactSection } from "@/components/sections/ContactSection";
-import { FounderJourneySection } from "@/components/sections/FounderJourneySection";
-import { LivePlatformProofSection } from "@/components/sections/LivePlatformProofSection";
-import { TechStackShowcaseSection } from "@/components/sections/TechStackShowcaseSection";
-import { NoiseGrain } from "@szl-holdings/shared-ui";
+import { StephenGraphQLPanel } from "@/components/graphql-data-panel";
 
 export function Home() {
   return (
-    <div className="min-h-screen bg-[#080b12] text-white selection:bg-indigo-500/30 selection:text-white relative">
-      <NoiseGrain opacity={0.02} />
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 selection:text-primary relative">
       <Navbar />
       <main>
         <HeroSection />
-        <FounderJourneySection />
-        <LivePlatformProofSection />
         <CaseStudiesSection />
-        <PlatformArchitectureSection />
-        <ThesisSection />
-        <TechStackShowcaseSection />
         <ServicesSection />
+        <ThesisSection />
+        <EcosystemRoleSection />
         <ContactSection />
+        <div className="max-w-4xl mx-auto px-6 py-8">
+          <StephenGraphQLPanel />
+        </div>
       </main>
       <Footer />
     </div>

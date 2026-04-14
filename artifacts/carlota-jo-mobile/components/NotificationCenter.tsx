@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { router, type Href } from "expo-router";
+import { router } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -63,7 +63,7 @@ function NotificationRow({ notification, onMarkRead, onDelete, colors }: Notific
     }
     if (notification.actionUrl) {
       try {
-        router.push({ pathname: notification.actionUrl } as Href);
+        router.push(notification.actionUrl as any);
       } catch {
         console.warn("[notification] Deep-link failed:", notification.actionUrl);
       }

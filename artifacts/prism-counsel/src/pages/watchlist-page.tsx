@@ -1,6 +1,6 @@
 import { AlertTriangle, Clock, FileWarning, Eye, TrendingDown, Shield, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
-import { WATCHLIST_ITEMS } from "../data/ny-data";
+import { WATCHLIST_ITEMS } from "../data/demo-ny";
 
 const RISK_COLORS: Record<string, string> = {
   critical: "#c45a4a",

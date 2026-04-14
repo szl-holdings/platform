@@ -86,17 +86,17 @@ export default function PortfolioOverviewPage() {
 
       <div className="grid grid-cols-5 gap-3">
         <MetricCard label="Total Matters" value={s.totalMatters} sub="Across all open files" color="#d4a054" icon={Layers} />
-        <MetricCard label="Critical Pressure" value={s.criticalPressureCount} sub="Need immediate action" color="#c45a4a" icon={AlertTriangle} href="/portfolio/pressure-board" />
-        <MetricCard label="Review Backlog" value={s.reviewBacklogSize} sub={`Avg ${s.avgReviewLagDays}d lag`} color="#c8953c" icon={Clock} href="/portfolio/review-backlog" />
-        <MetricCard label="Movement Ready" value={s.readyToMoveCount} sub="Can advance now" color="#4a90b8" icon={TrendingUp} href="/portfolio/movement-opportunity" />
-        <MetricCard label="Approval Bottlenecks" value={s.approvalBottleneckCount} sub="Blocked on approval" color="#8b7ac8" icon={Users} href="/portfolio/approval-bottleneck" />
+        <MetricCard label="Critical Pressure" value={s.criticalPressureCount} sub="Need immediate action" color="#c45a4a" icon={AlertTriangle} href="/prism-counsel/portfolio/pressure-board" />
+        <MetricCard label="Review Backlog" value={s.reviewBacklogSize} sub={`Avg ${s.avgReviewLagDays}d lag`} color="#c8953c" icon={Clock} href="/prism-counsel/portfolio/review-backlog" />
+        <MetricCard label="Movement Ready" value={s.readyToMoveCount} sub="Can advance now" color="#4a90b8" icon={TrendingUp} href="/prism-counsel/portfolio/movement-opportunity" />
+        <MetricCard label="Approval Bottlenecks" value={s.approvalBottleneckCount} sub="Blocked on approval" color="#8b7ac8" icon={Users} href="/prism-counsel/portfolio/approval-bottleneck" />
       </div>
 
       <div className="grid grid-cols-3 gap-4">
         <div className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-slate-200">Pressure Band Distribution</h3>
-            <Link href="/portfolio/pressure-board">
+            <Link href="/prism-counsel/portfolio/pressure-board">
               <span className="text-[10px] text-slate-500 hover:text-[#d4a054] cursor-pointer flex items-center gap-1">View board <ChevronRight className="w-3 h-3" /></span>
             </Link>
           </div>
@@ -116,7 +116,7 @@ export default function PortfolioOverviewPage() {
         <div className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-slate-200">Top Pressure Matters</h3>
-            <Link href="/portfolio/pressure-board">
+            <Link href="/prism-counsel/portfolio/pressure-board">
               <span className="text-[10px] text-slate-500 hover:text-[#d4a054] cursor-pointer flex items-center gap-1">All <ChevronRight className="w-3 h-3" /></span>
             </Link>
           </div>
@@ -139,7 +139,7 @@ export default function PortfolioOverviewPage() {
         <div className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-slate-200">Team Throughput</h3>
-            <Link href="/portfolio/throughput">
+            <Link href="/prism-counsel/portfolio/throughput">
               <span className="text-[10px] text-slate-500 hover:text-[#d4a054] cursor-pointer flex items-center gap-1">All <ChevronRight className="w-3 h-3" /></span>
             </Link>
           </div>
@@ -162,10 +162,10 @@ export default function PortfolioOverviewPage() {
 
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: "Insurer Drag", value: s.insurerDragCount, sub: "carrier behavior blocking", color: "#c8953c", href: "/portfolio/insurer-pressure" },
-          { label: "Recovery/Lien Drag", value: s.recoveryDragCount, sub: "lien resolution blocking", color: "#c45a4a", href: "/portfolio/recovery-lien" },
-          { label: "High Friction", value: s.highFrictionCount, sub: "settlement friction elevated", color: "#d4a054", href: "/portfolio/friction-board" },
-          { label: "Quiet Risk", value: s.quietRiskCount, sub: "silently deteriorating", color: "#8b7ac8", href: "/portfolio/quiet-risk" },
+          { label: "Insurer Drag", value: s.insurerDragCount, sub: "carrier behavior blocking", color: "#c8953c", href: "/prism-counsel/portfolio/insurer-pressure" },
+          { label: "Recovery/Lien Drag", value: s.recoveryDragCount, sub: "lien resolution blocking", color: "#c45a4a", href: "/prism-counsel/portfolio/recovery-lien" },
+          { label: "High Friction", value: s.highFrictionCount, sub: "settlement friction elevated", color: "#d4a054", href: "/prism-counsel/portfolio/friction-board" },
+          { label: "Quiet Risk", value: s.quietRiskCount, sub: "silently deteriorating", color: "#8b7ac8", href: "/prism-counsel/portfolio/quiet-risk" },
         ].map(c => (
           <Link key={c.label} href={c.href}>
             <div className="rounded-lg border border-white/[0.06] p-3 hover:border-white/[0.10] transition-colors cursor-pointer" style={{ background: "#0c1220" }}>

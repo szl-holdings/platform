@@ -2,7 +2,6 @@ import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
-import { services } from "@szl-holdings/services";
 
 const router: IRouter = Router();
 
@@ -15,121 +14,7 @@ const vesLiveLimit = rateLimit({
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
-interface CacheEntry { data: unknown; expiry: number; fetchedAt: number; source: string }
-const cache = new Map<string, CacheEntry>();
-
-interface DigitrafficAisProperties {
-  mmsi?: number;
-  imo?: number;
-  name?: string;
-  shipType?: number;
-  navStat?: number;
-  sog?: number;
-  cog?: number;
-  heading?: number;
-  destination?: string;
-  draught?: number;
-  dimensions?: { a?: number; b?: number; c?: number; d?: number };
-  callSign?: string;
-  timestampExternal?: number;
-}
-
-interface DigitrafficAisFeature {
-  properties?: DigitrafficAisProperties;
-  geometry?: { coordinates?: number[] };
-}
-
-interface DigitrafficAisResponse {
-  features?: DigitrafficAisFeature[];
-}
-
-interface BarentsWatchVessel {
-  mmsi?: number;
-  imo?: number;
-  name?: string;
-  shipType?: number;
-  latitude?: number;
-  longitude?: number;
-  speedOverGround?: number;
-  courseOverGround?: number;
-  trueHeading?: number;
-  destination?: string;
-  navigationalStatus?: number;
-  draught?: number;
-  dimension?: { a?: number; b?: number; c?: number; d?: number };
-  callSign?: string;
-  msgtime?: string;
-}
-
-interface OpenMeteoMarineResponse {
-  current?: {
-    wave_height?: number;
-    wind_wave_height?: number;
-    swell_wave_height?: number;
-    wave_period?: number;
-    wave_direction?: number;
-  };
-  hourly?: {
-    time?: string[];
-    wave_height?: number[];
-    swell_wave_height?: number[];
-    wave_period?: number[];
-  };
-}
-
-interface OpenMeteoWindResponse {
-  current?: {
-    wind_speed_10m?: number;
-    wind_direction_10m?: number;
-    temperature_2m?: number;
-    precipitation?: number;
-  };
-}
-
-interface DigitrafficVesselDetail {
-  mmsi?: number;
-  imo?: number;
-  name?: string;
-  callSign?: string;
-  shipType?: number;
-  destination?: string;
-  eta?: string;
-  draught?: number;
-  dimensions?: { a?: number; b?: number; c?: number; d?: number };
-}
-
-interface AISStreamService {
-  isLive: boolean;
-  getVessels: (limit: number) => Array<{
-    mmsi: string;
-    lat: number;
-    lon: number;
-    speed: number;
-    course: number;
-    name?: string;
-    shipType?: number;
-    shipTypeName?: string;
-    heading?: number;
-    navStatus?: number;
-    navStatusName?: string;
-    destination?: string;
-    timestamp?: string;
-  }>;
-}
-
-interface NOAAAlertService {
-  getActiveAlerts: (opts: { domain: string; limit: number }) => Promise<Array<{
-    event: string;
-    severity: string;
-    areaDesc: string;
-  }>>;
-}
-
-interface ExtendedServices {
-  aisstream?: AISStreamService;
-  noaaAlerts?: NOAAAlertService;
-  [key: string]: unknown;
-}
+const cache = new Map<string, { data: unknown; expiry: number; fetchedAt: number; source: string }>();
 
 function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<{ data: T; source: string }>): Promise<{ data: T; source: string; cacheAge: number; isStale: boolean }> {
   const c = cache.get(key);
@@ -195,13 +80,13 @@ const FALLBACK_AIS_VESSELS = [
   { mmsi: "244123456", imo: "9123456", name: "NORTH SEA PIONEER", type: "Tanker", shipTypeCode: 80, lat: 57.7, lon: 1.8, speed: 6.5, course: 180, heading: 178, destination: "ABERDEEN", status: "Under way using engine", navStatus: 0, flag: "NL", length: 274, beam: 46, draft: 12.8, timestamp: new Date(Date.now() - 200000).toISOString(), callsign: "PBHE3" },
 ];
 
-export async function fetchDigitrafficAis(): Promise<{ vessels: typeof FALLBACK_AIS_VESSELS; source: string }> {
+async function fetchDigitrafficAis(): Promise<{ vessels: typeof FALLBACK_AIS_VESSELS; source: string }> {
   try {
-    const data = await fetchJson("https://meri.digitraffic.fi/api/ais/v1/locations/latest?from=0&to=100", 10000) as DigitrafficAisResponse;
+    const data = await fetchJson("https://meri.digitraffic.fi/api/ais/v1/locations/latest?from=0&to=100", 10000) as any;
     const features = data?.features;
     if (!Array.isArray(features) || features.length === 0) throw new Error("No AIS data");
 
-    const vessels = features.slice(0, 20).map((f: DigitrafficAisFeature, idx: number) => {
+    const vessels = features.slice(0, 20).map((f: any, idx: number) => {
       const props = f.properties ?? {};
       const coords = f.geometry?.coordinates ?? [25.0, 60.0];
       const shipType = props.shipType ?? 0;
@@ -233,24 +118,24 @@ export async function fetchDigitrafficAis(): Promise<{ vessels: typeof FALLBACK_
       };
     });
 
-    return { vessels: vessels as typeof FALLBACK_AIS_VESSELS, source: "live-digitraffic" };
+    return { vessels: vessels as any, source: "live-digitraffic" };
   } catch {
     return { vessels: FALLBACK_AIS_VESSELS, source: "demo" };
   }
 }
 
-export async function fetchBarentsWatchAis(): Promise<{ vessels: any[]; source: string }> {
+async function fetchBarentsWatchAis(): Promise<{ vessels: any[]; source: string }> {
   try {
     const data = await fetchJson(
       "https://www.barentswatch.no/bwapi/v2/latest/combined?Xabcd=positions&area=NOR",
       10000,
-    ) as BarentsWatchVessel[];
+    ) as any;
     if (!Array.isArray(data) || data.length === 0) throw new Error("No BarentsWatch data");
-    const vessels = data.slice(0, 15).map((v: BarentsWatchVessel) => ({
+    const vessels = data.slice(0, 15).map((v: any) => ({
       mmsi: String(v.mmsi ?? ""),
       imo: v.imo ? String(v.imo) : null,
       name: v.name?.trim() || `VESSEL-${v.mmsi}`,
-      type: SHIP_TYPE_MAP[v.shipType ?? 0] ?? "Unknown",
+      type: SHIP_TYPE_MAP[v.shipType] ?? "Unknown",
       shipTypeCode: v.shipType ?? 0,
       lat: v.latitude,
       lon: v.longitude,
@@ -258,11 +143,11 @@ export async function fetchBarentsWatchAis(): Promise<{ vessels: any[]; source: 
       course: Math.round(v.courseOverGround ?? 0),
       heading: v.trueHeading && v.trueHeading < 360 ? Math.round(v.trueHeading) : Math.round(v.courseOverGround ?? 0),
       destination: v.destination?.trim() || "In Transit",
-      status: NAV_STATUS_MAP[v.navigationalStatus ?? 15] ?? "Unknown",
+      status: NAV_STATUS_MAP[v.navigationalStatus] ?? "Unknown",
       navStatus: v.navigationalStatus ?? 15,
       flag: "NO",
-      length: v.dimension ? (v.dimension.a ?? 0) + (v.dimension.b ?? 0) : null,
-      beam: v.dimension ? (v.dimension.c ?? 0) + (v.dimension.d ?? 0) : null,
+      length: v.dimension ? v.dimension.a + v.dimension.b : null,
+      beam: v.dimension ? v.dimension.c + v.dimension.d : null,
       draft: v.draught ? +(v.draught / 10).toFixed(1) : null,
       callsign: v.callSign?.trim() || null,
       timestamp: v.msgtime ? new Date(v.msgtime).toISOString() : new Date().toISOString(),
@@ -274,28 +159,20 @@ export async function fetchBarentsWatchAis(): Promise<{ vessels: any[]; source: 
   }
 }
 
-type VesselRecord = Record<string, unknown>;
-
-interface CombinedAisPayload {
-  vessels: VesselRecord[];
-  sources: { digitraffic: string; barentswatch: string; aisstream: string };
-  noaaMarineAlerts: { count: number; alerts: { event: string; severity: string; areas: string }[]; source: string };
-}
-
 router.get("/vessels/live/ais", vesLiveLimit, authMiddleware({ required: false }), async (req, res) => {
   try {
     const provider = (req.query.provider as string) ?? "digitraffic";
     const cacheKey = `ais-${provider}`;
 
-    const result = await getCached<VesselRecord[]>(cacheKey, 5 * 60 * 1000, async () => {
+    const result = await getCached<any>(cacheKey, 5 * 60 * 1000, async () => {
       const fetched = provider === "barentswatch" ? await fetchBarentsWatchAis() : await fetchDigitrafficAis();
-      return { data: fetched.vessels as VesselRecord[], source: fetched.source };
+      return { data: fetched.vessels, source: fetched.source };
     });
 
     sendSuccess(res, {
       source: provider === "barentswatch" ? "BarentsWatch AIS (Norwegian Coastal Administration)" : "Digitraffic AIS (Finnish Transport Infrastructure Agency)",
       url: provider === "barentswatch" ? "https://www.barentswatch.no/bwapi/" : "https://meri.digitraffic.fi/",
-      count: result.data.length,
+      count: (result.data as any[]).length,
       vessels: result.data,
       dataSource: result.source,
       liveData: !result.source.includes("demo"),
@@ -309,10 +186,7 @@ router.get("/vessels/live/ais", vesLiveLimit, authMiddleware({ required: false }
 
 router.get("/vessels/live/ais/combined", vesLiveLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const extServices = services as unknown as ExtendedServices;
-    const result = await getCached<CombinedAisPayload>("ais-combined", 5 * 60 * 1000, async () => {
-      const aisStreamAdapter = extServices.aisstream;
-
+    const result = await getCached<any>("ais-combined", 5 * 60 * 1000, async () => {
       const [digitraffic, barentswatch] = await Promise.allSettled([
         fetchDigitrafficAis(),
         fetchBarentsWatchAis(),
@@ -323,65 +197,20 @@ router.get("/vessels/live/ais/combined", vesLiveLimit, authMiddleware({ required
       const dtSource = digitraffic.status === "fulfilled" ? digitraffic.value.source : "demo";
       const bwSource = barentswatch.status === "fulfilled" ? barentswatch.value.source : "demo";
 
-      const mmsiSeen = new Set(dtVessels.map(v => v.mmsi));
-      const uniqueBwVessels = bwVessels.filter(v => !mmsiSeen.has(String(v.mmsi ?? "")));
-      uniqueBwVessels.forEach(v => mmsiSeen.add(String(v.mmsi ?? "")));
-      const combined = [...dtVessels, ...uniqueBwVessels] as VesselRecord[];
-
-      let aisStreamVessels: VesselRecord[] = [];
-      let aisStreamSource = "not-configured";
-      if (aisStreamAdapter?.isLive) {
-        aisStreamVessels = aisStreamAdapter.getVessels(500)
-          .filter((v: any) => !mmsiSeen.has(v.mmsi))
-          .map((v: any) => ({
-            mmsi: v.mmsi,
-            lat: v.lat,
-            lon: v.lon,
-            sog: v.speed,
-            cog: v.course,
-            name: v.name || `MMSI ${v.mmsi}`,
-            shipType: v.shipType,
-            shipTypeName: v.shipTypeName,
-            heading: v.heading,
-            navStatus: v.navStatus,
-            navStatusName: v.navStatusName,
-            destination: v.destination,
-            timestamp: v.timestamp,
-            source: "aisstream-ws" as const,
-          }));
-        aisStreamSource = aisStreamVessels.length > 0 ? "live-aisstream-ws" : "aisstream-connected-no-data";
-      }
-
-      const allVessels = [...combined, ...aisStreamVessels];
-      const isLive = dtSource !== "demo" || bwSource !== "demo" || aisStreamVessels.length > 0;
-
-      let noaaMarineAlerts: { count: number; alerts: { event: string; severity: string; areas: string }[]; source: string } = { count: 0, alerts: [], source: "not-fetched" };
-      try {
-        const alerts = await extServices.noaaAlerts?.getActiveAlerts({ domain: "marine", limit: 10 }) ?? [];
-        noaaMarineAlerts = {
-          count: alerts.length,
-          alerts: alerts.slice(0, 5).map((a: any) => ({ event: a.event, severity: a.severity, areas: a.areaDesc.slice(0, 100) })),
-          source: "live-noaa",
-        };
-      } catch (_e) { noaaMarineAlerts = { count: 0, alerts: [], source: "error" }; }
+      const mmsiSeen = new Set(dtVessels.map((v: any) => v.mmsi));
+      const combined = [...dtVessels, ...bwVessels.filter((v: any) => !mmsiSeen.has(v.mmsi))];
 
       return {
-        data: {
-          vessels: allVessels,
-          sources: { digitraffic: dtSource, barentswatch: bwSource, aisstream: aisStreamSource },
-          noaaMarineAlerts,
-        },
-        source: isLive ? "live" : "demo",
+        data: combined,
+        source: dtSource !== "demo" || bwSource !== "demo" ? "live" : "demo",
       };
     });
 
     sendSuccess(res, {
-      source: "Combined AIS Feed — Digitraffic + BarentsWatch + AISStream",
-      count: result.data.vessels.length,
-      vessels: result.data.vessels,
+      source: "Combined AIS Feed — Digitraffic + BarentsWatch",
+      count: (result.data as any[]).length,
+      vessels: result.data,
       dataSource: result.source,
-      sources: result.data.sources,
-      marineWeather: result.data.noaaMarineAlerts,
       liveData: !result.source.includes("demo"),
       cacheAgeSeconds: result.cacheAge,
       isStale: result.isStale,
@@ -393,12 +222,12 @@ router.get("/vessels/live/ais/combined", vesLiveLimit, authMiddleware({ required
 router.get("/vessels/live/vessel-details/:mmsi", vesLiveLimit, authMiddleware({ required: false }), async (req, res) => {
   try {
     const { mmsi } = req.params;
-    const result = await getCached<VesselRecord>(`vessel-details-${mmsi}`, 5 * 60 * 1000, async () => {
+    const result = await getCached<any>(`vessel-details-${mmsi}`, 5 * 60 * 1000, async () => {
       try {
         const data = await fetchJson(
           `https://meri.digitraffic.fi/api/ais/v1/vessels/${mmsi}`,
           8000,
-        ) as DigitrafficVesselDetail;
+        ) as any;
 
         if (!data?.mmsi) throw new Error("No vessel data");
 
@@ -445,18 +274,18 @@ router.get("/vessels/live/weather", vesLiveLimit, authMiddleware({ required: fal
   try {
     const lat = parseFloat(req.query.lat as string) || 60.0;
     const lon = parseFloat(req.query.lon as string) || 25.0;
-    const result = await getCached<VesselRecord>(`weather-marine-${lat.toFixed(2)}-${lon.toFixed(2)}`, 15 * 60 * 1000, async () => {
+    const result = await getCached<any>(`weather-marine-${lat.toFixed(2)}-${lon.toFixed(2)}`, 15 * 60 * 1000, async () => {
       try {
         const raw = await fetchJson(
           `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height,wave_direction,wave_period,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction&current=wave_height,wind_wave_height,swell_wave_height,wave_direction,wave_period&timezone=UTC&forecast_days=3`,
           8000,
-        ) as OpenMeteoMarineResponse;
+        ) as any;
         if (!raw?.current) throw new Error("No marine weather data");
 
         const windRaw = await fetchJson(
           `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=wind_speed_10m,wind_direction_10m,temperature_2m,precipitation&timezone=UTC`,
           6000,
-        ) as OpenMeteoWindResponse;
+        ) as any;
 
         const windSpeed = Math.round(windRaw?.current?.wind_speed_10m ?? 0);
         const windDir = windRaw?.current?.wind_direction_10m ?? 0;
@@ -485,9 +314,9 @@ router.get("/vessels/live/weather", vesLiveLimit, authMiddleware({ required: fal
             },
             forecast3h: raw.hourly?.time?.slice(0, 24).map((t: string, i: number) => ({
               time: t,
-              waveHeight: raw.hourly?.wave_height?.[i] ?? null,
-              swellHeight: raw.hourly?.swell_wave_height?.[i] ?? null,
-              wavePeriod: raw.hourly?.wave_period?.[i] ?? null,
+              waveHeight: raw.hourly.wave_height?.[i] ?? null,
+              swellHeight: raw.hourly.swell_wave_height?.[i] ?? null,
+              wavePeriod: raw.hourly.wave_period?.[i] ?? null,
             })) ?? [],
           },
           source: "live-open-meteo",

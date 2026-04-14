@@ -185,10 +185,10 @@ export default function QuietRiskPage() {
             </div>
             <div className="space-y-2">
               {[
-                { label: "Clear approval — Rodriguez demand", minutes: 5, impact: 0.92, href: "/signoff-queue" },
-                { label: "Follow up on Park carrier silence", minutes: 10, impact: 0.87, href: "/matter-desk/4" },
-                { label: "Re-issue records requests — Williams", minutes: 15, impact: 0.83, href: "/matter-desk/6" },
-                { label: "Review NF-2 verification — Chen", minutes: 10, impact: 0.76, href: "/matter-desk/2" },
+                { label: "Clear approval — Rodriguez demand", minutes: 5, impact: 0.92, href: "/prism-counsel/signoff-queue" },
+                { label: "Follow up on Park carrier silence", minutes: 10, impact: 0.87, href: "/prism-counsel/matter-desk/4" },
+                { label: "Re-issue records requests — Williams", minutes: 15, impact: 0.83, href: "/prism-counsel/matter-desk/6" },
+                { label: "Review NF-2 verification — Chen", minutes: 10, impact: 0.76, href: "/prism-counsel/matter-desk/2" },
               ].map((a, i) => (
                 <Link key={i} href={a.href}>
                   <div className="flex items-center gap-3 py-2 px-3 rounded border border-white/[0.04] hover:border-white/[0.08] cursor-pointer transition-colors" style={{ background: "#080c14" }}>

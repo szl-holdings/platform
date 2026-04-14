@@ -1,6 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
 import { Platform } from "react-native";
-import { router, type Href } from "expo-router";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 
@@ -50,17 +49,7 @@ export function usePushNotifications(enabled: boolean) {
     );
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
-        const data = response.notification.request.content.data as Record<string, unknown>;
-        const HOME_HREF: Href = { pathname: "/" };
-        try {
-          if (data?.type === "contact" || data?.type === "system") {
-            router.push(HOME_HREF);
-          }
-        } catch {
-          console.warn("[Push] Navigation failed for:", data?.type);
-        }
-      }
+      (_response) => {}
     );
   }, [enabled]);
 

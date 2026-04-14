@@ -1,9 +1,0 @@
-Started writing Signal Over Noise — a biweekly intelligence brief on:
-
-1. Business observability (the 6 Lenses framework)
-2. Domain intelligence from 6 operating platforms
-3. Founder operating notes from building 16 apps solo
-
-No fluff. No vaporware. Signal.
-
-Subscribe free: szlholdings.substack.com

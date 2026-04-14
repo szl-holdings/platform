@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://szlholdings.com/lyte-command-center/sitemap.xml

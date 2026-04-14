@@ -1,7 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
@@ -232,36 +231,6 @@ export default function PipelineTab() {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.gold} />
         }
       >
-        <View style={{ marginBottom: 16 }}>
-          <Text style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", fontFamily: "Inter_500Medium", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>
-            READINESS TOOLS
-          </Text>
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            <Pressable
-              onPress={() => { Haptics.selectionAsync(); router.push("/readiness"); }}
-              style={{ flex: 1, borderRadius: 12, borderWidth: 1, borderColor: "rgba(64,133,106,0.2)", backgroundColor: "rgba(64,133,106,0.06)", padding: 12, flexDirection: "row", alignItems: "center", gap: 8 }}
-            >
-              <Feather name="git-branch" size={15} color="#40856a" />
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 12, fontWeight: "600", color: "rgba(255,255,255,0.85)", fontFamily: "Inter_600SemiBold" }}>Readiness Graph</Text>
-                <Text style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", fontFamily: "Inter_400Regular", marginTop: 1 }}>Goal-based blockers</Text>
-              </View>
-              <Feather name="chevron-right" size={13} color="rgba(255,255,255,0.2)" />
-            </Pressable>
-            <Pressable
-              onPress={() => { Haptics.selectionAsync(); router.push("/countdown"); }}
-              style={{ flex: 1, borderRadius: 12, borderWidth: 1, borderColor: "rgba(184,148,60,0.2)", backgroundColor: "rgba(184,148,60,0.06)", padding: 12, flexDirection: "row", alignItems: "center", gap: 8 }}
-            >
-              <Feather name="clock" size={15} color="#b8943c" />
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 12, fontWeight: "600", color: "rgba(255,255,255,0.85)", fontFamily: "Inter_600SemiBold" }}>Countdown</Text>
-                <Text style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", fontFamily: "Inter_400Regular", marginTop: 1 }}>Milestone tracker</Text>
-              </View>
-              <Feather name="chevron-right" size={13} color="rgba(255,255,255,0.2)" />
-            </Pressable>
-          </View>
-        </View>
-
         {displayLeads.map(l => (
           <LeadCard key={l.id} lead={l} onEdit={(lead) => { setSelectedLead(lead); setEditStage(lead.stage); setEditNote(""); setShowEditModal(true); }} />
         ))}

@@ -14,7 +14,6 @@ import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { useRealtimeChannel } from "@szl-holdings/shared-ui";
 import { ExportButton } from "@szl-holdings/shared-ui/data-export";
-import { BusinessImpactPanel } from "@/components/business-impact-panel";
 import {
   OperationalDetailPane,
   OperationalStatusBadge,
@@ -230,8 +229,7 @@ function IncidentDetailSidePane({ incident, onClose, onUpdate }: {
           </button>
         </div>
 
-        <div className="p-5 space-y-6">
-          <BusinessImpactPanel incidentId={incident.id} severity={incident.severity} />
+        <div className="p-5">
           <OperationalDetailPane entity={entity}>
             <div>
               <p className="text-[9px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(255,255,255,0.28)" }}>Investigation Thread</p>

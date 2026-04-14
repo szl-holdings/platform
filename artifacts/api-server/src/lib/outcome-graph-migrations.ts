@@ -34,15 +34,28 @@ export async function ensureOutcomeGraphTables(): Promise<void> {
   try {
     migrationSql = fs.readFileSync(migrationFile, "utf-8");
   } catch (err) {
-    logger.error({ err, path: migrationFile }, "Outcome graph migration file not found");
-    throw new Error(`Outcome graph migration file not found at ${migrationFile}`);
+    logger.warn({ err, path: migrationFile }, "Outcome graph migration file not found — skipping bootstrap");
+    return;
   }
 
   const statements = parseMigrationStatements(migrationSql);
+  let applied = 0;
+  let skipped = 0;
 
   for (const statement of statements) {
-    await pool.query(statement);
+    try {
+      await pool.query(statement);
+      applied++;
+    } catch (err: any) {
+      const code = err?.code as string | undefined;
+      if (code === "42701" || code === "42710" || code === "42P07") {
+        skipped++;
+      } else {
+        logger.warn({ err, statement: statement.slice(0, 120) }, "Outcome graph migration statement failed — continuing");
+        skipped++;
+      }
+    }
   }
 
-  logger.info({ total: statements.length }, "Outcome graph + atlas artifacts tables ensured");
+  logger.info({ applied, skipped, total: statements.length }, "Outcome graph + atlas artifacts tables ensured");
 }

@@ -1,5 +1,5 @@
 import { PubSub } from "graphql-subscriptions";
-import { publish, WS_CHANNELS } from "./websocket";
+import { publish, WS_CHANNELS } from "./websocket.js";
 
 export const pubsub = new PubSub();
 

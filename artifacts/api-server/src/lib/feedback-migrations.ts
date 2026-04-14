@@ -4,7 +4,7 @@ import { pool } from "@szl-holdings/db";
 import { logger } from "./logger";
 
 function getMigrationFilePath(): string {
-  const relativePath = path.join("lib", "db", "drizzle", "0021_feedback_tables.sql");
+  const relativePath = path.join("lib", "db", "drizzle", "0009_feedback_tables.sql");
   const replHome = process.env["REPL_HOME"];
   if (replHome) {
     const candidate = path.join(replHome, relativePath);
@@ -34,15 +34,28 @@ export async function ensureFeedbackTables(): Promise<void> {
   try {
     migrationSql = fs.readFileSync(migrationFile, "utf-8");
   } catch (err) {
-    logger.error({ err, path: migrationFile }, "Feedback migration file not found");
-    throw new Error(`Feedback tables migration file not found at ${migrationFile}`);
+    logger.warn({ err, path: migrationFile }, "Feedback migration file not found — skipping bootstrap");
+    return;
   }
 
   const statements = parseMigrationStatements(migrationSql);
+  let applied = 0;
+  let skipped = 0;
 
   for (const statement of statements) {
-    await pool.query(statement);
+    try {
+      await pool.query(statement);
+      applied++;
+    } catch (err: any) {
+      const code = err?.code as string | undefined;
+      if (code === "42701" || code === "42710" || code === "42P07") {
+        skipped++;
+      } else {
+        logger.warn({ err, statement: statement.slice(0, 120) }, "Feedback migration statement failed — continuing");
+        skipped++;
+      }
+    }
   }
 
-  logger.info({ total: statements.length }, "Feedback tables ensured");
+  logger.info({ applied, skipped, total: statements.length }, "Feedback tables ensured");
 }

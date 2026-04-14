@@ -97,37 +97,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="pulse"
-        options={{
-          title: "Pulse",
-          tabBarIcon: ({ color }) => (
-            <Feather name="heart" size={20} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="briefing"
-        options={{
-          title: "Brief",
-          tabBarIcon: ({ color }) => (
-            <Feather name="sunrise" size={20} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="intel-feed"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="mcp-tools"
-        options={{
-          title: "AI Command",
-          tabBarIcon: ({ color }) => (
-            <Feather name="cpu" size={20} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="profile"
         options={{ href: null }}
       />

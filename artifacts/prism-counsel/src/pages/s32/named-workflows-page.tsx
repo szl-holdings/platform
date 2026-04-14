@@ -346,7 +346,7 @@ function OpenMyDayWorkflow({ onBack }: { onBack: () => void }) {
       </div>
 
       <div className="flex items-center justify-end gap-2">
-        <Link href="/today">
+        <Link href="/prism-counsel/today">
           <button className="px-4 py-2 rounded text-xs font-medium bg-[#d4a054]/15 text-[#d4a054] hover:bg-[#d4a054]/25 transition-colors flex items-center gap-1.5">
             Go to Today <ChevronRight className="w-3 h-3" />
           </button>

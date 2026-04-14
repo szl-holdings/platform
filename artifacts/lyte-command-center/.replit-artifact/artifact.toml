@@ -12,10 +12,10 @@ version = "1.0.0"
 [[services]]
 name = "web"
 paths = [ "/lyte-command-center/" ]
-localPort = 6000
+localPort = 19290
 
 [services.development]
-run = "bash -c 'cd /home/runner/workspace/artifacts/lyte-command-center && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
+run = "pnpm --filter @workspace/lyte-command-center run dev"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/lyte-command-center", "run", "build" ]
@@ -27,5 +27,5 @@ from = "/*"
 to = "/index.html"
 
 [services.env]
-PORT = "6000"
+PORT = "19290"
 BASE_PATH = "/lyte-command-center/"

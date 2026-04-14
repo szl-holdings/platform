@@ -1,17 +1,14 @@
-import { lazy, Suspense, useCallback, type ReactNode } from "react";
-import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
+import { lazy, Suspense, type ReactNode } from "react";
+import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
-import { DemoModeProvider, SandboxModeProvider, CookieBanner, StatusBanner, AnalyticsProvider, AdPixelProvider, useCookieConsent, fireConversionEvent, type StatusBannerConfig } from "@szl-holdings/shared-ui";
-import { CookieConsentBanner } from "@/components/cookie-consent-banner";
+import { DemoModeProvider, SandboxModeProvider, CookieBanner, StatusBanner, AnalyticsProvider, type StatusBannerConfig } from "@szl-holdings/shared-ui";
 import { McpOverlay } from "@szl-holdings/mcp-client";
-import { PrismBusProvider } from "@szl-holdings/prism-bus/provider";
+import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { AlloyLayout } from "@/alloy/components/alloy-layout";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
-import { AIChatWidget } from "@/components/AIChatWidget";
-import { ExitIntentPopup } from "@/components/EmailCapture";
 
 const SZL_ACCENT = LANE_ACCENT_HEX.szl.primary;
 
@@ -34,8 +31,6 @@ const TrustApprovalsPage = lazy(() => import("@/pages/trust-approvals"));
 const TrustExportsPage = lazy(() => import("@/pages/trust-exports"));
 const TrustOperationsPage = lazy(() => import("@/pages/trust-operations"));
 const InvestorsHubPage = lazy(() => import("@/pages/investors-hub"));
-const InvestorsDemoModePage = lazy(() => import("@/pages/investors-demo-mode"));
-const InvestorsCompetitivePage = lazy(() => import("@/pages/investors-competitive"));
 const InvestorsOverviewPage = lazy(() => import("@/pages/investors-overview-v2"));
 const ArchitecturePage = lazy(() => import("@/pages/architecture-page"));
 const InvestorsArchitecturePage = lazy(() => import("@/pages/investors-architecture"));
@@ -68,7 +63,6 @@ const HelmConsolePage = lazy(() => import("@/pages/helm-console"));
 const CommercialPackagingPage = lazy(() => import("@/pages/commercial-packaging"));
 const RoiCalculatorPage = lazy(() => import("@/pages/roi-calculator"));
 const ReliefMessagingPage = lazy(() => import("@/pages/relief-messaging"));
-const TrustRoutePage = lazy(() => import("@/pages/trust-route"));
 
 // New platform-repositioning pages
 const LytePage = lazy(() => import("@/pages/lyte-page"));
@@ -85,8 +79,6 @@ const DocsProofChainPage = lazy(() => import("@/pages/docs-proof-chain"));
 const DocsModelMeshPage = lazy(() => import("@/pages/docs-model-mesh"));
 const DocsTrustPage = lazy(() => import("@/pages/docs-trust"));
 const DocsGithubPage = lazy(() => import("@/pages/docs-github"));
-const MCPServerPage = lazy(() => import("@/pages/mcp-server"));
-const CognitiveFabricPage = lazy(() => import("@/pages/cognitive-fabric"));
 
 const SolutionsPrismCounselPage = lazy(() => import("@/pages/solutions-prism-counsel"));
 const SolutionsPrismCounselTrustPage = lazy(() => import("@/pages/solutions-prism-counsel-trust"));
@@ -103,15 +95,8 @@ const CaseStudiesPage = lazy(() => import("@/pages/case-studies"));
 const InsightsPage = lazy(() => import("@/pages/insights"));
 const InsightsArticlePage = lazy(() => import("@/pages/insights-article"));
 const CoreCommandPage = lazy(() => import("@/pages/core-command"));
-const NerveCenterPage = lazy(() => import("@/pages/nerve-center"));
 const ControlPlanePage = lazy(() => import("@/pages/control-plane"));
 const PortfolioOpsPage = lazy(() => import("@/pages/portfolio-ops"));
-const PortfolioCommandPage = lazy(() => import("@/pages/portfolio-command"));
-const InvestorIntelligencePage = lazy(() => import("@/pages/investor-intelligence"));
-const PitchModePage = lazy(() => import("@/pages/pitch-mode"));
-const FlywheelVizPage = lazy(() => import("@/pages/flywheel-viz"));
-const RevenueMetricsPage = lazy(() => import("@/pages/revenue-metrics"));
-const IntelligenceMeshPage = lazy(() => import("@/pages/intelligence-mesh"));
 
 // Public infrastructure pages (trust center, legal baseline, API, investor, press, brand, faq, roadmap)
 const SecurityPage = lazy(() => import("@/pages/security"));
@@ -144,18 +129,9 @@ const DistOsLeads = lazy(() => import("@/pages/distribution-os/leads-page"));
 const DistOsCampaigns = lazy(() => import("@/pages/distribution-os/campaigns-page"));
 const DistOsCalendar = lazy(() => import("@/pages/distribution-os/content-calendar"));
 const DistOsAnalytics = lazy(() => import("@/pages/distribution-os/analytics-dashboard"));
-const DistOsEmailCampaigns = lazy(() => import("@/pages/distribution-os/campaign-builder"));
-const DistOsDripSequences = lazy(() => import("@/pages/distribution-os/drip-sequences-page"));
-const DistOsPrivacy = lazy(() => import("@/pages/distribution-os/privacy-command-center"));
-const DistOsAnalyticsCommandCenter = lazy(() => import("@/pages/distribution-os/analytics-command-center"));
-const DistOsSessionReplay = lazy(() => import("@/pages/distribution-os/session-replay"));
-const DistOsSessionJourneys = lazy(() => import("@/pages/distribution-os/session-journeys"));
-const DistOsConversionGoals = lazy(() => import("@/pages/distribution-os/conversion-goals"));
 const DistOsAutomations = lazy(() => import("@/pages/distribution-os/automations-page"));
 const DistOsSettings = lazy(() => import("@/pages/distribution-os/settings-page"));
 const DistOsReports = lazy(() => import("@/pages/distribution-os/reports-page"));
-const DistOsHeatmaps = lazy(() => import("@/pages/distribution-os/heatmap-viewer"));
-const DistOsExperiments = lazy(() => import("@/pages/distribution-os/experiments"));
 
 const VenturePortfolioPage = lazy(() => import("@/pages/venture-portfolio"));
 const AlloyFactoryFloor = lazy(() => import("@/alloy/pages/factory-floor"));
@@ -174,7 +150,6 @@ const AlloyCampaignDetail = lazy(() => import("@/alloy/pages/creative/campaign-d
 const AlloyBrandVoice = lazy(() => import("@/alloy/pages/creative/brand-voice"));
 const AlloyContentCalendar = lazy(() => import("@/alloy/pages/creative/content-calendar"));
 const AlloyAIStudio = lazy(() => import("@/alloy/pages/creative/ai-studio"));
-const AlloySoundStudio = lazy(() => import("@/alloy/pages/creative/sound-studio"));
 const AlloyDocumentEngine = lazy(() => import("@/alloy/pages/document-engine"));
 const AlloyWorkspaceHome = lazy(() => import("@/alloy/pages/workspace-home"));
 const AlloyDecisionObjects = lazy(() => import("@/alloy/pages/decision-objects"));
@@ -190,20 +165,9 @@ const AlloyCanonicalDemos = lazy(() => import("@/alloy/pages/canonical-demos"));
 const AlloyPilotOnboarding = lazy(() => import("@/alloy/pages/pilot-onboarding"));
 const AlloyMcpStore = lazy(() => import("@/alloy/pages/mcp-store"));
 const AlloyMcpToolCreator = lazy(() => import("@/alloy/pages/mcp-tool-creator"));
-const AlloySkillsMarketplace = lazy(() => import("@/alloy/pages/skills-marketplace"));
-const AlloyMcpDeveloperPortal = lazy(() => import("@/alloy/pages/mcp-developer-portal"));
-const AlloyEvolutionPage = lazy(() => import("@/alloy/pages/evolution-radar").then(m => ({ default: m.AlloyEvolutionPage })));
-const AlloyProtocolMeshPage = lazy(() => import("@/alloy/pages/ProtocolMeshPage").then(m => ({ default: m.ProtocolMeshPage })));
-const AlloyKnowledgeGraph = lazy(() => import("@/alloy/pages/intelligence-fabric").then(m => ({ default: m.KnowledgeGraphPage })));
-const AlloyEvalScorecard = lazy(() => import("@/alloy/pages/intelligence-fabric").then(m => ({ default: m.EvalScorecardPage })));
-const AlloyEnrichmentTrace = lazy(() => import("@/alloy/pages/intelligence-fabric").then(m => ({ default: m.EnrichmentTracePage })));
-const AlloyPtcLogs = lazy(() => import("@/alloy/pages/intelligence-fabric").then(m => ({ default: m.PtcLogsPage })));
-const AlloyContextMonitor = lazy(() => import("@/alloy/pages/intelligence-fabric").then(m => ({ default: m.ContextMonitorPage })));
 const AcademyPage = lazy(() => import("@/pages/academy"));
 const HelpPage = lazy(() => import("@/pages/help"));
 const DemosPage = lazy(() => import("@/pages/demos"));
-const PulsePage = lazy(() => import("@/pages/pulse"));
-const AlloyPlatformApp = lazy(() => import("@/alloy-platform/AlloyPlatformApp"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -294,53 +258,9 @@ function PageLoader() {
   );
 }
 
-const PUBLIC_WIDGET_PATHS = [
-  "/", "/pricing", "/platform", "/contact", "/demo", "/design-partners",
-  "/design-partner", "/insights", "/solutions", "/company", "/founder",
-  "/investors", "/ventures", "/how-it-works", "/lyte", "/alloy",
-  "/faq", "/case-studies", "/ecosystem",
-];
-
-function PublicWidgets() {
-  const [location] = useLocation();
-  const isPublicPage = PUBLIC_WIDGET_PATHS.some(p =>
-    p === "/" ? location === "/" || location === "" : location.startsWith(p)
-  );
-  const isAdminOrAuthPage =
-    location.startsWith("/admin") ||
-    location.startsWith("/alloy") ||
-    location.startsWith("/trust") ||
-    location.startsWith("/legal") ||
-    location.startsWith("/status") ||
-    location.startsWith("/helm") ||
-    location.startsWith("/ops") ||
-    location.startsWith("/kpi");
-  if (!isPublicPage || isAdminOrAuthPage) return null;
-  return (
-    <>
-      <AIChatWidget />
-      <ExitIntentPopup />
-    </>
-  );
-}
-
 function App() {
-  const { consent } = useCookieConsent();
-  const googleAdsId = import.meta.env.VITE_GOOGLE_ADS_ID as string | undefined;
-  const handleConversionEvent = useCallback((eventName: string, properties?: Record<string, unknown>) => {
-    fireConversionEvent(eventName, googleAdsId, {
-      value: properties?.value as number | undefined,
-      currency: properties?.currency as string | undefined,
-    });
-  }, [googleAdsId]);
   return (
-    <AnalyticsProvider appName="szl-holdings" onConversionEvent={handleConversionEvent}>
-    <AdPixelProvider
-      googleAdsId={import.meta.env.VITE_GOOGLE_ADS_ID}
-      metaPixelId={import.meta.env.VITE_META_PIXEL_ID}
-      respectDnt={true}
-      consentGranted={consent === "accepted"}
-    >
+    <AnalyticsProvider appName="szl-holdings">
     <PrismBusProvider domain="szl-holdings">
     <SandboxModeProvider>
     <DemoModeProvider>
@@ -470,9 +390,6 @@ function App() {
             </Route>
 
             {/* ── Trust Center ── */}
-            <Route path="/trust-route">
-              <Suspense fallback={<PageLoader />}><TrustRoutePage /></Suspense>
-            </Route>
             <Route path="/trust/security">
               <Suspense fallback={<PageLoader />}><TrustSecurityPage /></Suspense>
             </Route>
@@ -563,12 +480,6 @@ function App() {
             <Route path="/investors/data-room">
               <Suspense fallback={<PageLoader />}><InvestorsDataRoomPage /></Suspense>
             </Route>
-            <Route path="/investors/demo">
-              <Suspense fallback={<PageLoader />}><InvestorsDemoModePage /></Suspense>
-            </Route>
-            <Route path="/investors/competitive">
-              <Suspense fallback={<PageLoader />}><InvestorsCompetitivePage /></Suspense>
-            </Route>
             <Route path="/investors/founder">
               <Suspense fallback={<PageLoader />}><InvestorsFounderPage /></Suspense>
             </Route>
@@ -597,43 +508,12 @@ function App() {
               <Suspense fallback={<PageLoader />}><PortfolioPage /></Suspense>
             </Route>
 
-            {/* ── Investor Readiness & Platform Intelligence ── */}
-            <Route path="/portfolio-command">
-              <Suspense fallback={<PageLoader />}><PortfolioCommandPage /></Suspense>
-            </Route>
-            <Route path="/investor-intelligence">
-              <Suspense fallback={<PageLoader />}><InvestorIntelligencePage /></Suspense>
-            </Route>
-            <Route path="/pitch-mode">
-              <Suspense fallback={<PageLoader />}><PitchModePage /></Suspense>
-            </Route>
-            <Route path="/flywheel">
-              <Suspense fallback={<PageLoader />}><FlywheelVizPage /></Suspense>
-            </Route>
-            <Route path="/revenue-metrics">
-              <Suspense fallback={<PageLoader />}><RevenueMetricsPage /></Suspense>
-            </Route>
-            <Route path="/intelligence-mesh">
-              <Suspense fallback={<PageLoader />}><IntelligenceMeshPage /></Suspense>
-            </Route>
-            <Route path="/nerve-center">
-              <Suspense fallback={<PageLoader />}><NerveCenterPage /></Suspense>
-            </Route>
-
             {/* ── Product pages — accessible but not in primary nav ── */}
             <Route path="/demo">
               <Suspense fallback={<PageLoader />}><DemoPage /></Suspense>
             </Route>
             <Route path="/pricing">
               <Suspense fallback={<PageLoader />}><PricingPage /></Suspense>
-            </Route>
-
-            {/* ── Alloy Platform — standalone product at /alloy-platform ── */}
-            <Route path="/alloy-platform/:rest*">
-              <Suspense fallback={<PageLoader />}><AlloyPlatformApp /></Suspense>
-            </Route>
-            <Route path="/alloy-platform">
-              <Suspense fallback={<PageLoader />}><AlloyPlatformApp /></Suspense>
             </Route>
 
             {/* ── Alloy app routes (internal, not public nav) ── */}
@@ -685,9 +565,6 @@ function App() {
             <Route path="/alloy/creative/ai-studio">
               <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyAIStudio /></AlloyAppPage></Suspense>
             </Route>
-            <Route path="/alloy/creative/sound-studio">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloySoundStudio /></AlloyAppPage></Suspense>
-            </Route>
             <Route path="/alloy/documents">
               <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyDocumentEngine /></AlloyAppPage></Suspense>
             </Route>
@@ -735,33 +612,6 @@ function App() {
             </Route>
             <Route path="/alloy/mcp-tools">
               <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyMcpToolCreator /></AlloyAppPage></Suspense>
-            </Route>
-            <Route path="/alloy/mcp-developer-portal">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyMcpDeveloperPortal /></AlloyAppPage></Suspense>
-            </Route>
-            <Route path="/alloy/skills-marketplace">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloySkillsMarketplace /></AlloyAppPage></Suspense>
-            </Route>
-            <Route path="/alloy/evolution">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyEvolutionPage /></AlloyAppPage></Suspense>
-            </Route>
-            <Route path="/alloy/protocol-mesh">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyProtocolMeshPage /></AlloyAppPage></Suspense>
-            </Route>
-            <Route path="/alloy/knowledge-graph">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyKnowledgeGraph /></AlloyAppPage></Suspense>
-            </Route>
-            <Route path="/alloy/eval-scorecard">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyEvalScorecard /></AlloyAppPage></Suspense>
-            </Route>
-            <Route path="/alloy/enrichment">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyEnrichmentTrace /></AlloyAppPage></Suspense>
-            </Route>
-            <Route path="/alloy/ptc-logs">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyPtcLogs /></AlloyAppPage></Suspense>
-            </Route>
-            <Route path="/alloy/context-monitor">
-              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyContextMonitor /></AlloyAppPage></Suspense>
             </Route>
 
             {/* ── External platform redirects ── */}
@@ -943,26 +793,11 @@ function App() {
             <Route path="/integrations/:sub">
               <Redirect to="/platform" />
             </Route>
-            <Route path="/mcp-server">
-              <Suspense fallback={<PageLoader />}><MCPServerPage /></Suspense>
-            </Route>
-            <Route path="/cognitive-fabric">
-              <Suspense fallback={<PageLoader />}><CognitiveFabricPage /></Suspense>
-            </Route>
             <Route path="/developers">
               <Redirect to="/docs" />
             </Route>
             <Route path="/developers/:section">
               <Redirect to="/docs" />
-            </Route>
-            <Route path="/pulse/brief/:id">
-              <RequireAuth><Suspense fallback={<PageLoader />}><PulsePage /></Suspense></RequireAuth>
-            </Route>
-            <Route path="/pulse/:tab">
-              <RequireAuth><Suspense fallback={<PageLoader />}><PulsePage /></Suspense></RequireAuth>
-            </Route>
-            <Route path="/pulse">
-              <RequireAuth><Suspense fallback={<PageLoader />}><PulsePage /></Suspense></RequireAuth>
             </Route>
             <Route path="/core">
               <Suspense fallback={<PageLoader />}><CoreCommandPage /></Suspense>
@@ -1010,26 +845,8 @@ function App() {
             <Route path="/admin/distribution/calendar">
               <RequireAuth><Suspense fallback={<PageLoader />}><DistOsCalendar /></Suspense></RequireAuth>
             </Route>
-            <Route path="/admin/distribution/analytics/command-center">
-              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsAnalyticsCommandCenter /></Suspense></RequireAuth>
-            </Route>
-            <Route path="/admin/distribution/analytics/sessions">
-              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsSessionJourneys /></Suspense></RequireAuth>
-            </Route>
-            <Route path="/admin/distribution/analytics/goals">
-              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsConversionGoals /></Suspense></RequireAuth>
-            </Route>
             <Route path="/admin/distribution/analytics">
               <RequireAuth><Suspense fallback={<PageLoader />}><DistOsAnalytics /></Suspense></RequireAuth>
-            </Route>
-            <Route path="/admin/distribution/email-campaigns">
-              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsEmailCampaigns /></Suspense></RequireAuth>
-            </Route>
-            <Route path="/admin/distribution/drip-sequences">
-              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsDripSequences /></Suspense></RequireAuth>
-            </Route>
-            <Route path="/admin/distribution/privacy">
-              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsPrivacy /></Suspense></RequireAuth>
             </Route>
             <Route path="/admin/distribution/automations">
               <RequireAuth><Suspense fallback={<PageLoader />}><DistOsAutomations /></Suspense></RequireAuth>
@@ -1040,15 +857,6 @@ function App() {
             <Route path="/admin/distribution/reports">
               <RequireAuth><Suspense fallback={<PageLoader />}><DistOsReports /></Suspense></RequireAuth>
             </Route>
-            <Route path="/admin/distribution/session-replay">
-              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsSessionReplay /></Suspense></RequireAuth>
-            </Route>
-            <Route path="/admin/distribution/heatmaps">
-              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsHeatmaps /></Suspense></RequireAuth>
-            </Route>
-            <Route path="/admin/distribution/experiments">
-              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsExperiments /></Suspense></RequireAuth>
-            </Route>
             <Route path="/admin/distribution">
               <RequireAuth><Suspense fallback={<PageLoader />}><DistOsDashboard /></Suspense></RequireAuth>
             </Route>
@@ -1058,17 +866,15 @@ function App() {
               <Suspense fallback={<PageLoader />}><NotFoundPage /></Suspense>
             </Route>
           </Switch>
-          <PublicWidgets />
         </WouterRouter>
       </LazyMotion>
       <Toaster />
       <McpOverlay domain="szl-holdings" />
-      <CookieConsentBanner />
+      <CookieBanner privacyUrl="/legal/privacy" accentColor={SZL_ACCENT} />
     </QueryClientProvider>
     </DemoModeProvider>
     </SandboxModeProvider>
     </PrismBusProvider>
-    </AdPixelProvider>
     </AnalyticsProvider>
   );
 }

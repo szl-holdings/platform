@@ -11,158 +11,10 @@ import {
   User,
   CheckCircle2,
   Mail,
-  TrendingUp,
-  Eye,
-  BarChart3,
-  Zap,
 } from "lucide-react";
-import { m } from "framer-motion";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
-
-const BLURRED_METRICS = [
-  { label: "ARR Trajectory", value: "••••", sub: "YoY growth rate — NDA required", icon: TrendingUp, color: "hsl(140,50%,48%)" },
-  { label: "Platform Valuation", value: "••••", sub: "Current cap structure — NDA required", icon: BarChart3, color: "hsl(38,72%,58%)" },
-  { label: "Design Partner MRR", value: "••••", sub: "Aggregate design-partner revenue", icon: Zap, color: "hsl(192,72%,48%)" },
-  { label: "Cap Table Summary", value: "••••", sub: "Investor composition — qualified only", icon: User, color: "hsl(222,60%,62%)" },
-];
-
-const BLURRED_DOCS = [
-  { title: "Pitch Deck — Series A", pages: "28 slides", tag: "Investor framed" },
-  { title: "Financial Model — 5Y", pages: "Excel workbook", tag: "Full projections" },
-  { title: "Cap Table & Terms", pages: "3 pages", tag: "NDA required" },
-  { title: "Architecture Overview", pages: "12 pages", tag: "Technical diligence" },
-  { title: "PULSE EVALS Report", pages: "8 pages", tag: "Benchmark data" },
-  { title: "Design Partner Case Studies", pages: "6 case studies", tag: "Redacted names" },
-];
-
-function DataRoomNewsletterCapture() {
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
-    setStatus("submitting");
-    try {
-      const res = await fetch("/api/contact/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "newsletter",
-          name: email.split("@")[0],
-          email,
-          app: "szl-holdings",
-          message: "Monthly Investor Update signup from data room",
-          metadata: { source: "data-room-newsletter" },
-        }),
-      });
-      if (!res.ok) throw new Error("Failed");
-      setStatus("success");
-      setEmail("");
-    } catch {
-      setStatus("error");
-    }
-  }
-
-  return (
-    <div style={{ padding: "1.5rem 2rem", borderRadius: "0.875rem", background: "hsla(38,72%,58%,0.04)", border: "1px solid hsla(38,72%,58%,0.15)", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "1.5rem" }}>
-      <div>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
-          <Mail size={14} style={{ color: "hsl(38,72%,58%)" }} />
-          <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(38,72%,58%)", fontFamily: "var(--font-mono)" }}>
-            Monthly Investor Update
-          </p>
-        </div>
-        <p style={{ fontSize: "0.875rem", color: "hsla(0,0%,100%,0.6)", lineHeight: 1.5 }}>
-          Platform milestones, design-partner signals, and the honest view while you wait for data room access.
-        </p>
-      </div>
-      <div style={{ minWidth: "260px", flex: "1 1 260px", maxWidth: "380px" }}>
-        {status === "success" ? (
-          <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", padding: "0.75rem 1rem", borderRadius: "0.5rem", background: "hsla(145,60%,46%,0.12)", border: "1px solid hsla(145,60%,46%,0.25)" }}>
-            <CheckCircle2 size={14} style={{ color: "hsl(145,60%,72%)" }} />
-            <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: "hsl(145,60%,72%)" }}>You're on the investor update list.</p>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} style={{ display: "flex", gap: "0.5rem" }}>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@firm.com" disabled={status === "submitting"} style={{ flex: 1, padding: "0.5rem 0.875rem", background: "hsla(0,0%,100%,0.06)", border: "1px solid hsla(0,0%,100%,0.12)", borderRadius: "0.375rem", color: "hsl(38,8%,92%)", fontSize: "0.8125rem", outline: "none" }} />
-            <button type="submit" disabled={status === "submitting"} style={{ padding: "0.5rem 1rem", background: "hsl(38,72%,58%)", color: "hsl(214,18%,4%)", border: "none", borderRadius: "0.375rem", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
-              {status === "submitting" ? "…" : "Subscribe"}
-            </button>
-          </form>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function BlurredDataRoomPreview() {
-  return (
-    <div style={{ position: "relative", borderRadius: "1rem", border: "1px solid hsla(0,0%,100%,0.08)", overflow: "hidden" }}>
-      <div style={{ padding: "1.5rem", filter: "blur(4px)", pointerEvents: "none", userSelect: "none" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "0.75rem", marginBottom: "1.5rem" }} className="sm:grid-cols-4">
-          {BLURRED_METRICS.map((m) => {
-            const Icon = m.icon;
-            return (
-              <div key={m.label} style={{ padding: "1rem", borderRadius: "0.625rem", background: "hsla(0,0%,100%,0.03)", border: "1px solid hsla(0,0%,100%,0.07)" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", marginBottom: "0.5rem" }}>
-                  <Icon size={11} style={{ color: m.color }} />
-                  <span style={{ fontSize: "0.5625rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsla(0,0%,100%,0.35)", fontFamily: "var(--font-mono)" }}>{m.label}</span>
-                </div>
-                <p style={{ fontSize: "1.5rem", fontWeight: 800, color: m.color, letterSpacing: "-0.02em" }}>{m.value}</p>
-                <p style={{ fontSize: "0.625rem", color: "hsla(0,0%,100%,0.3)", marginTop: "0.25rem" }}>{m.sub}</p>
-              </div>
-            );
-          })}
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "0.625rem" }} className="sm:grid-cols-3">
-          {BLURRED_DOCS.map((doc) => (
-            <div key={doc.title} style={{ padding: "0.875rem 1rem", borderRadius: "0.5rem", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)", display: "flex", alignItems: "center", gap: "0.75rem" }}>
-              <FileText size={14} style={{ color: "hsla(0,0%,100%,0.3)", flexShrink: 0 }} />
-              <div>
-                <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: "hsl(38,8%,88%)" }}>{doc.title}</p>
-                <p style={{ fontSize: "0.625rem", color: "hsla(0,0%,100%,0.35)", fontFamily: "var(--font-mono)", marginTop: "0.125rem" }}>{doc.pages} · {doc.tag}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div style={{
-        position: "absolute",
-        inset: 0,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "linear-gradient(to bottom, hsla(214,18%,4%,0.4) 0%, hsla(214,18%,4%,0.85) 100%)",
-        backdropFilter: "blur(2px)",
-        gap: "1rem",
-        padding: "2rem",
-        textAlign: "center",
-      }}>
-        <div style={{ width: 44, height: 44, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: "hsla(0,0%,100%,0.05)", border: "1px solid hsla(0,0%,100%,0.12)" }}>
-          <Lock size={18} style={{ color: "hsl(38,72%,58%)" }} />
-        </div>
-        <div>
-          <p style={{ fontSize: "1rem", fontWeight: 600, color: "hsl(38,8%,92%)", marginBottom: "0.375rem" }}>Full data room requires qualification</p>
-          <p style={{ fontSize: "0.8125rem", color: "hsla(0,0%,100%,0.5)", maxWidth: "28ch", lineHeight: 1.5 }}>
-            Request access below — we respond within 24 hours with materials matched to your stage.
-          </p>
-        </div>
-        <a
-          href="#access-request"
-          style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.375rem", background: "hsl(38,72%,58%)", color: "hsl(214,18%,4%)", borderRadius: "0.375rem", fontSize: "0.875rem", fontWeight: 700, textDecoration: "none" }}
-        >
-          <Eye size={14} />
-          Request Full Access
-        </a>
-      </div>
-    </div>
-  );
-}
 
 const documentCategories = [
   {
@@ -378,19 +230,6 @@ export default function InvestorsDataRoomPage() {
           </div>
         </section>
 
-        {/* Blurred preview section */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-14 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40 mb-3">
-              Preview — data room contents
-            </p>
-            <h2 className="text-xl font-semibold tracking-tight text-white mb-8">
-              A glimpse inside. Full access requires qualification.
-            </h2>
-            <BlurredDataRoomPreview />
-          </div>
-        </section>
-
         {/* Document categories */}
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-6xl px-6 py-14 lg:px-8">
@@ -432,7 +271,7 @@ export default function InvestorsDataRoomPage() {
         </section>
 
         {/* Request form */}
-        <section id="access-request">
+        <section>
           <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
             <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr]">
               <div>
@@ -546,13 +385,6 @@ export default function InvestorsDataRoomPage() {
             </div>
           </div>
         </section>
-        {/* Investor Newsletter Capture */}
-        <section style={{ borderTop: "1px solid hsla(0,0%,100%,0.07)" }}>
-          <div className="mx-auto max-w-6xl px-6 py-10 lg:px-8">
-            <DataRoomNewsletterCapture />
-          </div>
-        </section>
-
       </main>
       <SiteFooter />
     </div>

@@ -1,5 +1,5 @@
 import { MapPin, Clock, Users, BarChart3, ArrowRight } from "lucide-react";
-import { VENUE_PROFILES } from "../data/ny-data";
+import { VENUE_PROFILES } from "../data/demo-ny";
 
 const VELOCITY_COLORS: Record<string, string> = {
   fast: "#4a90b8",

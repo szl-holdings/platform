@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { Gauge, TrendingUp, AlertTriangle, BarChart3 } from "lucide-react";
 import { apiFetch, isAuthenticated } from "../../lib/admin-api";
 import AuthGate from "@szl-holdings/shared-ui/AuthGate";
-import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 
 interface UsageStats {
   totalRequests: number;
@@ -132,26 +131,7 @@ export default function RateLimits() {
           </div>
 
           {loading ? (
-            <div className="space-y-4" aria-label="Loading usage data">
-              <div className="grid grid-cols-3 gap-4">
-                {[0, 1, 2].map((i) => (
-                  <div key={i} className="bg-surface rounded-xl border border-border p-4 text-center">
-                    <Skeleton className="w-5 h-5 rounded mx-auto mb-2" />
-                    <Skeleton className="h-8 w-20 rounded mx-auto mb-1" />
-                    <Skeleton className="h-3 w-24 rounded mx-auto" />
-                  </div>
-                ))}
-              </div>
-              <div className="space-y-2">
-                {[0, 1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <Skeleton className="h-4 w-32 rounded" />
-                    <Skeleton className="h-4 flex-1 rounded" />
-                    <Skeleton className="h-4 w-16 rounded" />
-                  </div>
-                ))}
-              </div>
-            </div>
+            <div className="text-center py-8 text-text-muted">Loading usage data...</div>
           ) : stats ? (
             <>
               <div className="grid grid-cols-3 gap-4">

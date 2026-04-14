@@ -1,11 +1,11 @@
-import { Feather } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { Redirect, Tabs } from "expo-router";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { SymbolView } from "expo-symbols";
 import React from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View, useColorScheme } from "react-native";
 
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
@@ -21,14 +21,6 @@ function NativeTabLayout() {
         <Icon sf={{ default: "calendar", selected: "calendar" }} />
         <Label>Sessions</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="anticipation">
-        <Icon sf={{ default: "bolt", selected: "bolt.fill" }} />
-        <Label>Anticipate</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="rhythm">
-        <Icon sf={{ default: "calendar.badge.clock", selected: "calendar.badge.clock" }} />
-        <Label>Rhythm</Label>
-      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="documents">
         <Icon sf={{ default: "folder", selected: "folder.fill" }} />
         <Label>Vault</Label>
@@ -37,11 +29,7 @@ function NativeTabLayout() {
         <Icon sf={{ default: "message", selected: "message.fill" }} />
         <Label>Messages</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="briefing">
-        <Icon sf={{ default: "sunrise", selected: "sunrise.fill" }} />
-        <Label>Brief</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="mcp-tools">
+            <NativeTabs.Trigger name="mcp-tools">
         <Icon sf={{ default: "cpu", selected: "cpu.fill" }} />
         <Label>Tools</Label>
       </NativeTabs.Trigger>
@@ -55,6 +43,7 @@ function NativeTabLayout() {
 
 function ClassicTabLayout() {
   const colors = useColors();
+  const isDark = true;
   const isIOS = Platform.OS === "ios";
   const isWeb = Platform.OS === "web";
 
@@ -117,30 +106,6 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen
-        name="anticipation"
-        options={{
-          title: "Anticipate",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="bolt" tintColor={color} size={22} />
-            ) : (
-              <Feather name="zap" size={20} color={color} />
-            ),
-        }}
-      />
-      <Tabs.Screen
-        name="rhythm"
-        options={{
-          title: "Rhythm",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="clock" tintColor={color} size={22} />
-            ) : (
-              <Feather name="clock" size={20} color={color} />
-            ),
-        }}
-      />
-      <Tabs.Screen
         name="documents"
         options={{
           title: "Vault",
@@ -164,32 +129,6 @@ function ClassicTabLayout() {
             ),
         }}
       />
-      <Tabs.Screen
-        name="mcp-tools"
-        options={{
-          title: "Tools",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="cpu" tintColor={color} size={22} />
-            ) : (
-              <Feather name="cpu" size={20} color={color} />
-            ),
-        }}
-      />
-      <Tabs.Screen
-        name="briefing"
-        options={{
-          title: "Brief",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="sunrise" tintColor={color} size={22} />
-            ) : (
-              <Feather name="sunrise" size={20} color={color} />
-            ),
-        }}
-      />
-      <Tabs.Screen name="intel-feed" options={{ href: null }} />
-      <Tabs.Screen name="mcp-tools" options={{ href: null }} />
       <Tabs.Screen
         name="profile"
         options={{

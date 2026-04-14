@@ -1,6 +1,6 @@
-import { parseIntId } from "../utils";
-import { publish, WS_CHANNELS } from "../../lib/websocket";
-import { pubsub, TERRA_EVENTS } from "../../lib/pubsub-bridge";
+import { parseIntId } from "../utils.js";
+import { publish, WS_CHANNELS } from "../../lib/websocket.js";
+import { pubsub, TERRA_EVENTS } from "../../lib/pubsub-bridge.js";
 
 export const terraTypeDefs = `#graphql
   type TerraProperty {

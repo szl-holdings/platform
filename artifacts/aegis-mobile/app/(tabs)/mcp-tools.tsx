@@ -4,69 +4,77 @@ import {
   ActivityIndicator, Platform, RefreshControl,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Feather } from "@expo/vector-icons";
-import { AICopilot } from "@/components/AICopilot";
-import { DocumentCapture } from "@/components/DocumentCapture";
-import { NotificationOverlay, usePushNotifications } from "@/components/PushNotificationManager";
-import { useOfflineCache } from "@/hooks/useOfflineCache";
-import * as SecureStore from "expo-secure-store";
-import { AUTH_TOKEN_KEY } from "@/context/AuthContext";
 
-type DocEntry = { id: string; classification: string; processedAt: number };
+interface McpTool {
+  name: string;
+  description: string;
+  inputSchema?: { properties?: Record<string, { type: string; description?: string }> };
+}
+
+interface McpResult {
+  tool: string;
+  content: string;
+  isError?: boolean;
+  elapsed: number;
+}
+
+const BUILT_IN_TOOLS: McpTool[] = [
+  { name: "get_capabilities", description: "List all MCP capabilities and connected servers" },
+  { name: "get_status", description: "Check system and integration health status" },
+  { name: "list_agents", description: "List all registered AI agents and their states" },
+  { name: "run_search", description: "Semantic search across indexed data", inputSchema: { properties: { query: { type: "string", description: "Search query" } } } },
+  { name: "fetch_context", description: "Retrieve live context from data sources" },
+  { name: "trigger_action", description: "Execute a named action or workflow", inputSchema: { properties: { action: { type: "string", description: "Action name" } } } },
+];
 
 const ACCENT = "#ef4444";
 const BG = "#08080f";
 const CARD = "rgba(25,25,35,0.95)";
 const BORDER = "rgba(255,255,255,0.06)";
 
-const QUICK_ACTIONS = [
-  { id: "threat-scan", label: "Threat Scan", icon: "shield", color: "#ef4444" },
-  { id: "incident-report", label: "Incident Report", icon: "file-text", color: "#f59e0b" },
-  { id: "comms-check", label: "Comms Check", icon: "radio", color: "#3b82f6" },
-  { id: "protocol-review", label: "Protocols", icon: "list", color: "#10b981" },
-];
-
-function getApiBase(): string {
-  if (process.env.EXPO_PUBLIC_DOMAIN) return `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
-  return "";
+function ToolRow({ tool, selected, onPress }: { tool: McpTool; selected: boolean; onPress: () => void }) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      style={[styles.toolRow, selected && { backgroundColor: `${ACCENT}10`, borderColor: `${ACCENT}30` }]}
+      activeOpacity={0.7}
+    >
+      <View style={styles.toolDot} />
+      <View style={{ flex: 1 }}>
+        <Text style={[styles.toolName, selected && { color: ACCENT }]}>{tool.name}</Text>
+        <Text style={styles.toolDesc} numberOfLines={2}>{tool.description}</Text>
+      </View>
+    </TouchableOpacity>
+  );
 }
 
-export default function AICommandScreen() {
+export default function McpToolsScreen() {
   const insets = useSafeAreaInsets();
-  const [authToken, setAuthToken] = useState<string | null>(null);
-  const [copilotVisible, setCopilotVisible] = useState(false);
-  const [docScanVisible, setDocScanVisible] = useState(false);
+  const [tools, setTools] = useState<McpTool[]>(BUILT_IN_TOOLS);
+  const [selected, setSelected] = useState<McpTool | null>(null);
+  const [params, setParams] = useState<Record<string, string>>({});
+  const [running, setRunning] = useState(false);
+  const [result, setResult] = useState<McpResult | null>(null);
   const [serverStatus, setServerStatus] = useState<"checking" | "healthy" | "error">("checking");
   const [refreshing, setRefreshing] = useState(false);
-  const { cached: cachedDocs, save: saveDocs } = useOfflineCache<DocEntry[]>("aegis-recent-docs");
-  const [recentDocs, setRecentDocs] = useState<DocEntry[]>([]);
-
-  useEffect(() => {
-    if (Platform.OS !== "web") {
-      SecureStore.getItemAsync(AUTH_TOKEN_KEY).then(t => setAuthToken(t)).catch(() => {});
-    }
-  }, []);
-
-  const apiBase = getApiBase();
-  const { notifications, handleAction, dismissNotification } = usePushNotifications(ACCENT, apiBase, "aegis", authToken);
 
   const checkHealth = useCallback(async () => {
     try {
-      const base = apiBase || "";
-      const res = await fetch(`${base}/api/mcp/health`);
+      const res = await fetch("/api/mcp/health");
       setServerStatus(res.ok ? "healthy" : "error");
+      if (res.ok) {
+        const listRes = await fetch("/api/mcp/tools/list");
+        if (listRes.ok) {
+          const data = await listRes.json();
+          if (data?.tools?.length) setTools([...BUILT_IN_TOOLS, ...data.tools]);
+        }
+      }
     } catch {
       setServerStatus("error");
     }
-  }, [apiBase]);
+  }, []);
 
   useEffect(() => { checkHealth(); }, [checkHealth]);
-
-  useEffect(() => {
-    if (cachedDocs && cachedDocs.length > 0 && recentDocs.length === 0) {
-      setRecentDocs(cachedDocs.slice(0, 5));
-    }
-  }, [cachedDocs]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -74,29 +82,43 @@ export default function AICommandScreen() {
     setRefreshing(false);
   };
 
-  const statusColor = serverStatus === "healthy" ? "#10b981" : serverStatus === "error" ? ACCENT : "#f59e0b";
+  const callTool = async () => {
+    if (!selected) return;
+    setRunning(true);
+    setResult(null);
+    const start = Date.now();
+    try {
+      const res = await fetch("/api/mcp/tools/call", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: selected.name, arguments: params }),
+      });
+      const data = await res.json().catch(() => ({ content: "No response" }));
+      const content = typeof data.content === "string" ? data.content : JSON.stringify(data.content ?? data, null, 2);
+      setResult({ tool: selected.name, content, isError: !res.ok, elapsed: Date.now() - start });
+    } catch (e: any) {
+      setResult({ tool: selected.name, content: e?.message ?? "Network error", isError: true, elapsed: Date.now() - start });
+    }
+    setRunning(false);
+  };
+
+  const statusColor = serverStatus === "healthy" ? "#10b981" : serverStatus === "error" ? "#ef4444" : "#f59e0b";
+  const hasParams = selected?.inputSchema?.properties && Object.keys(selected.inputSchema.properties).length > 0;
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>AI Command</Text>
-          <Text style={styles.headerSub}>Aegis Intelligence Engine</Text>
+          <Text style={styles.headerTitle}>MCP Tools</Text>
+          <Text style={styles.headerSub}>Model Context Protocol · Aegis</Text>
         </View>
         <View style={styles.statusBadge}>
           <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
           <Text style={[styles.statusText, { color: statusColor }]}>
-            {serverStatus === "healthy" ? "Live" : serverStatus === "error" ? "Offline" : "..."}
+            {serverStatus === "healthy" ? "Online" : serverStatus === "error" ? "Offline" : "..."}
           </Text>
         </View>
       </View>
-
-      <NotificationOverlay
-        accentColor={ACCENT}
-        notifications={notifications}
-        onAction={handleAction}
-        onDismiss={dismissNotification}
-      />
 
       <ScrollView
         style={{ flex: 1 }}
@@ -104,125 +126,59 @@ export default function AICommandScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={ACCENT} />}
       >
-        <TouchableOpacity
-          onPress={() => setCopilotVisible(true)}
-          style={styles.copilotCard}
-          activeOpacity={0.85}
-        >
-          <View style={[styles.copilotGlow, { backgroundColor: ACCENT }]} />
-          <View style={styles.copilotInner}>
-            <View style={styles.copilotLeft}>
-              <View style={[styles.copilotIcon, { backgroundColor: ACCENT + "20", borderColor: ACCENT + "40" }]}>
-                <Feather name="cpu" size={22} color={ACCENT} />
-              </View>
-              <View>
-                <Text style={styles.copilotTitle}>Aegis AI Copilot</Text>
-                <Text style={styles.copilotDesc}>Streaming threat analysis • Tool calls • Action approval</Text>
-              </View>
-            </View>
-            <Feather name="chevron-right" size={18} color="rgba(255,255,255,0.3)" />
-          </View>
-        </TouchableOpacity>
+        <Text style={styles.sectionLabel}>Available Tools ({tools.length})</Text>
+        {tools.map(tool => (
+          <ToolRow
+            key={tool.name}
+            tool={tool}
+            selected={selected?.name === tool.name}
+            onPress={() => { setSelected(tool); setParams({}); setResult(null); }}
+          />
+        ))}
 
-        <Text style={styles.sectionLabel}>Quick Actions</Text>
-        <View style={styles.quickGrid}>
-          {QUICK_ACTIONS.map(action => (
-            <TouchableOpacity
-              key={action.id}
-              style={[styles.quickCard, { borderColor: action.color + "25" }]}
-              onPress={() => setCopilotVisible(true)}
-              activeOpacity={0.7}
-            >
-              <View style={[styles.quickIcon, { backgroundColor: action.color + "15" }]}>
-                <Feather name={action.icon as React.ComponentProps<typeof Feather>["name"]} size={18} color={action.color} />
-              </View>
-              <Text style={styles.quickLabel}>{action.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        {selected && (
+          <View style={styles.callSection}>
+            <Text style={styles.sectionLabel}>Call: {selected.name}</Text>
 
-        <Text style={styles.sectionLabel}>Document Intelligence</Text>
-        <TouchableOpacity
-          onPress={() => setDocScanVisible(true)}
-          style={styles.docCard}
-          activeOpacity={0.8}
-        >
-          <View style={styles.docLeft}>
-            <Feather name="camera" size={18} color="#f59e0b" />
-            <View>
-              <Text style={styles.docTitle}>Document Scanner</Text>
-              <Text style={styles.docDesc}>Capture & analyze field documents with AI</Text>
-            </View>
-          </View>
-          <Feather name="arrow-right" size={16} color="rgba(255,255,255,0.3)" />
-        </TouchableOpacity>
-
-        {recentDocs.length > 0 && (
-          <>
-            <Text style={styles.sectionLabel}>Recent Documents</Text>
-            {recentDocs.map(doc => (
-              <View key={doc.id} style={styles.recentDoc}>
-                <Feather name="file-text" size={14} color="rgba(255,255,255,0.3)" />
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.recentDocTitle}>{doc.classification}</Text>
-                  <Text style={styles.recentDocTime}>{new Date(doc.processedAt).toLocaleTimeString()}</Text>
-                </View>
+            {hasParams && Object.entries(selected.inputSchema!.properties!).map(([key, schema]) => (
+              <View key={key} style={{ marginBottom: 8 }}>
+                <Text style={styles.paramLabel}>{schema.description ?? key}</Text>
+                <TextInput
+                  value={params[key] ?? ""}
+                  onChangeText={val => setParams(p => ({ ...p, [key]: val }))}
+                  placeholder={key}
+                  placeholderTextColor="rgba(255,255,255,0.2)"
+                  style={styles.input}
+                />
               </View>
             ))}
-          </>
-        )}
 
-        <Text style={styles.sectionLabel}>System Status</Text>
-        {[
-          { label: "Threat Engine", status: "Operational", color: "#10b981" },
-          { label: "Communications", status: "Encrypted", color: "#10b981" },
-          { label: "Satellite Feeds", status: "12/12 Active", color: "#10b981" },
-          { label: "AI Models", status: "Loaded", color: "#10b981" },
-          { label: "Offline Cache", status: "Synced", color: "#10b981" },
-        ].map(item => (
-          <View key={item.label} style={styles.statusRow}>
-            <Text style={styles.statusLabel}>{item.label}</Text>
-            <View style={styles.statusRight}>
-              <View style={[styles.statusIndicator, { backgroundColor: item.color }]} />
-              <Text style={[styles.statusValue, { color: item.color }]}>{item.status}</Text>
-            </View>
+            <TouchableOpacity
+              onPress={callTool}
+              disabled={running}
+              style={[styles.callButton, running && { opacity: 0.6 }]}
+              activeOpacity={0.8}
+            >
+              {running ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.callButtonText}>Execute Tool</Text>
+              )}
+            </TouchableOpacity>
+
+            {result && (
+              <View style={[styles.resultCard, result.isError ? styles.resultError : styles.resultSuccess]}>
+                <Text style={[styles.resultStatus, { color: result.isError ? "#ef4444" : "#10b981" }]}>
+                  {result.isError ? "Error" : "Success"} · {result.elapsed}ms
+                </Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <Text style={styles.resultContent}>{result.content}</Text>
+                </ScrollView>
+              </View>
+            )}
           </View>
-        ))}
+        )}
       </ScrollView>
-
-      <AICopilot
-        visible={copilotVisible}
-        onClose={() => setCopilotVisible(false)}
-        agentName="Aegis"
-        agentId="aegis"
-        accentColor={ACCENT}
-        welcomeMessage="Aegis AI online. I have full situational awareness across all monitored domains. What requires your attention?"
-        suggestions={[
-          "Show me all active threats",
-          "Generate an incident briefing",
-          "Check perimeter status",
-          "Review pending approvals",
-        ]}
-      />
-
-      <DocumentCapture
-        visible={docScanVisible}
-        onClose={() => setDocScanVisible(false)}
-        onResult={(result) => {
-          setDocScanVisible(false);
-          const newEntry: DocEntry = { id: result.id, classification: result.classification, processedAt: result.processedAt };
-          setRecentDocs(prev => {
-            const updated = [newEntry, ...prev].slice(0, 5);
-            saveDocs(updated).catch(() => {});
-            return updated;
-          });
-        }}
-        documentType="legal"
-        accentColor={ACCENT}
-        title="Field Document Scanner"
-        apiBase={apiBase}
-        authToken={authToken}
-      />
     </View>
   );
 }
@@ -236,27 +192,18 @@ const styles = StyleSheet.create({
   statusDot: { width: 5, height: 5, borderRadius: 3 },
   statusText: { fontSize: 10, fontWeight: "600" },
   sectionLabel: { fontSize: 9, fontWeight: "700", color: "rgba(255,255,255,0.25)", letterSpacing: 1.2, textTransform: "uppercase", paddingHorizontal: 16, paddingTop: 16, paddingBottom: 6 },
-  copilotCard: { margin: 14, borderRadius: 16, overflow: "hidden", borderWidth: 1, borderColor: ACCENT + "30", backgroundColor: CARD, position: "relative" },
-  copilotGlow: { position: "absolute", top: 0, left: 0, right: 0, height: 1, opacity: 0.6 },
-  copilotInner: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 16 },
-  copilotLeft: { flexDirection: "row", alignItems: "center", gap: 14, flex: 1 },
-  copilotIcon: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center", borderWidth: 1 },
-  copilotTitle: { fontSize: 15, fontWeight: "700", color: "#fff", marginBottom: 2 },
-  copilotDesc: { fontSize: 11, color: "rgba(255,255,255,0.4)", lineHeight: 15 },
-  quickGrid: { flexDirection: "row", flexWrap: "wrap", paddingHorizontal: 12, gap: 8 },
-  quickCard: { width: "46%", borderRadius: 12, borderWidth: 1, padding: 14, gap: 10, backgroundColor: CARD },
-  quickIcon: { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" },
-  quickLabel: { fontSize: 12, fontWeight: "600", color: "rgba(255,255,255,0.7)" },
-  docCard: { marginHorizontal: 14, borderRadius: 12, borderWidth: 1, borderColor: "#f59e0b30", backgroundColor: CARD, flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 14 },
-  docLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
-  docTitle: { fontSize: 13, fontWeight: "600", color: "#fff" },
-  docDesc: { fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 1 },
-  recentDoc: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: BORDER },
-  recentDocTitle: { fontSize: 12, fontWeight: "600", color: "rgba(255,255,255,0.65)" },
-  recentDocTime: { fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 1 },
-  statusRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: BORDER },
-  statusLabel: { fontSize: 12, color: "rgba(255,255,255,0.55)" },
-  statusRight: { flexDirection: "row", alignItems: "center", gap: 5 },
-  statusIndicator: { width: 5, height: 5, borderRadius: 3 },
-  statusValue: { fontSize: 11, fontWeight: "600" },
+  toolRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: BORDER, borderLeftWidth: 2, borderLeftColor: "transparent" },
+  toolDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.2)", flexShrink: 0 },
+  toolName: { fontSize: 12, fontWeight: "600", color: "rgba(255,255,255,0.75)", fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace", marginBottom: 2 },
+  toolDesc: { fontSize: 10, color: "rgba(255,255,255,0.35)", lineHeight: 14 },
+  callSection: { margin: 12, borderRadius: 12, padding: 14, backgroundColor: CARD, borderWidth: 1, borderColor: BORDER },
+  paramLabel: { fontSize: 9, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 4 },
+  input: { backgroundColor: "rgba(255,255,255,0.04)", borderWidth: 1, borderColor: "rgba(255,255,255,0.08)", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, fontSize: 12, color: "rgba(255,255,255,0.7)" },
+  callButton: { backgroundColor: ACCENT, borderRadius: 10, paddingVertical: 12, alignItems: "center", marginTop: 10 },
+  callButtonText: { color: "#fff", fontSize: 13, fontWeight: "700" },
+  resultCard: { marginTop: 10, borderRadius: 8, overflow: "hidden", borderWidth: 1, maxHeight: 200 },
+  resultError: { backgroundColor: "rgba(239,68,68,0.05)", borderColor: "rgba(239,68,68,0.2)" },
+  resultSuccess: { backgroundColor: "rgba(16,185,129,0.05)", borderColor: "rgba(16,185,129,0.2)" },
+  resultStatus: { fontSize: 10, fontWeight: "600", padding: 8, paddingBottom: 4 },
+  resultContent: { fontSize: 10, color: "rgba(255,255,255,0.6)", paddingHorizontal: 8, paddingBottom: 8, fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace" },
 });

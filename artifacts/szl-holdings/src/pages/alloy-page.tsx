@@ -3,124 +3,141 @@ import { Link } from "wouter";
 import {
   ArrowRight, GitBranch, Layers, CheckSquare, FileText, AlertOctagon,
   Workflow, Shield, Zap, Lock, Download, RefreshCw, Database, Filter,
-  BarChart3, Network, BookOpen, Puzzle, Activity, Eye, Send,
-  Dna, Brain, Target, Crosshair, Globe, Cpu, TrendingUp, Radio,
-  ShieldAlert, Bug, Fingerprint, ScanLine,
-  FlaskConical, History, LineChart, Gauge, Microscope, GitCompare, Timer, Sparkles,
-  Link2, Orbit, Waves, Radar, BrainCircuit, Crown, Hexagon, Flame
+  BarChart3, Network, BookOpen, Puzzle, Activity, Eye, Send
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { AlloyOperatingLoopDiagram } from "@/components/diagrams/AlloyOperatingLoopDiagram";
 
-const EVOLUTION_CAPABILITIES = [
-  {
-    icon: Dna,
-    title: "Genetic Algorithm Core",
-    body: "Alloy evolves its own decision architectures using tournament, roulette, rank, and elitist selection strategies. Workflows aren't designed — they're bred across generations against real fitness functions measured on your operational data.",
-    badge: "Self-improving",
-  },
-  {
-    icon: TrendingUp,
-    title: "Multi-Objective Fitness",
-    body: "Every genome is scored against configurable fitness dimensions — accuracy, latency, cost efficiency, and domain expertise. Pareto-optimal solutions surface automatically. No manual tuning required.",
-    badge: "Pareto-optimal",
-  },
-  {
-    icon: Cpu,
-    title: "Crossover & Mutation Operators",
-    body: "Single-point, two-point, and uniform crossover strategies combined with Gaussian and adaptive mutation. Alloy doesn't guess — it systematically explores the solution space with provable convergence.",
-    badge: "Systematic exploration",
-  },
-  {
-    icon: Activity,
-    title: "Population Persistence",
-    body: "Every generation, every genome, every fitness score is persisted and queryable. Roll back to any generation. Compare evolution trajectories. Audit exactly how and why a decision architecture emerged.",
-    badge: "Full lineage",
-  },
-];
-
-const EXPERT_DOMAINS = [
-  { name: "Defense & Intelligence", desc: "Kill chain mapping, APT attribution, threat correlation, SIGINT/HUMINT fusion" },
-  { name: "Maritime Operations", desc: "AIS monitoring, route optimization, fleet logistics, port operations" },
-  { name: "Legal & Compliance", desc: "Case analysis, regulatory interpretation, deadline management, filing" },
-  { name: "Real Estate Intelligence", desc: "Property valuation, market analysis, portfolio optimization, due diligence" },
-  { name: "Financial Operations", desc: "Risk assessment, capital allocation, transaction monitoring, audit" },
-  { name: "Executive Advisory", desc: "Strategic planning, stakeholder communication, lifestyle operations" },
-  { name: "Technology Operations", desc: "Infrastructure monitoring, incident response, capacity planning" },
-  { name: "Cross-Domain Synthesis", desc: "Multi-venture signal correlation, portfolio-level pattern recognition" },
-  { name: "Governance & Policy", desc: "Compliance verification, policy simulation, regulatory alignment" },
-];
-
-const ROUTING_STRATEGIES = [
-  { name: "Affinity-Weighted", desc: "Routes signals to experts based on a learned domain affinity matrix — the expert with the strongest cross-domain affinity score handles the signal." },
-  { name: "Cascade", desc: "Tries the primary expert first. If confidence falls below threshold, cascades to the next-best expert. Continues until confidence is met or all experts are exhausted." },
-  { name: "Ensemble", desc: "Routes to multiple experts simultaneously. Responses are merged with confidence-weighted voting. Higher confidence from domain specialists carries more weight." },
-  { name: "Least-Loaded", desc: "Routes to the expert with the lowest current queue depth. Prevents bottlenecks and ensures consistent response latency across high-volume periods." },
-];
-
-const THREAT_FRAMEWORK = [
-  { phase: "Spoofing", desc: "Identity impersonation across API, session, and credential boundaries" },
-  { phase: "Tampering", desc: "Unauthorized modification of data in transit, at rest, and in processing pipelines" },
-  { phase: "Repudiation", desc: "Actions taken without attribution or audit trail — the anti-pattern Alloy's governance eliminates" },
-  { phase: "Information Disclosure", desc: "Data exfiltration, side-channel leaks, and unauthorized access to classified signals" },
-  { phase: "Denial of Service", desc: "Resource exhaustion, queue flooding, and cascading failure scenarios" },
-  { phase: "Elevation of Privilege", desc: "Horizontal and vertical privilege escalation across multi-tenant boundaries" },
-];
-
-const KILL_CHAIN_PHASES = [
-  "Reconnaissance", "Weaponization", "Delivery", "Exploitation",
-  "Installation", "Command & Control", "Actions on Objectives",
-];
-
-const APT_PROFILES = [
-  { name: "APT-29 (Cozy Bear)", attribution: "SVR — Russian Foreign Intelligence", tactics: "Supply-chain compromise, cloud infrastructure exploitation, long-term persistence" },
-  { name: "APT-28 (Fancy Bear)", attribution: "GRU — Russian Military Intelligence", tactics: "Spear-phishing, zero-day exploitation, credential harvesting at scale" },
-  { name: "FIN7", attribution: "Financial Crime Syndicate", tactics: "Point-of-sale malware, social engineering, supply chain infiltration" },
-];
-
-const COMPETITIVE_MATRIX = [
-  { feature: "Self-Evolving Decision Architecture", alloy: true, palantir: false, langchain: false, dify: false },
-  { feature: "Genetic Algorithm Optimization", alloy: true, palantir: false, langchain: false, dify: false },
-  { feature: "STRIDE Threat Modeling (Built-in)", alloy: true, palantir: false, langchain: false, dify: false },
-  { feature: "Kill Chain Analysis", alloy: true, palantir: true, langchain: false, dify: false },
-  { feature: "Multi-Expert Routing (MoE)", alloy: true, palantir: false, langchain: false, dify: false },
-  { feature: "Human-in-the-Loop Gates", alloy: true, palantir: true, langchain: false, dify: true },
-  { feature: "Immutable Audit Trail", alloy: true, palantir: true, langchain: false, dify: false },
-  { feature: "Cross-Domain Signal Fusion", alloy: true, palantir: true, langchain: false, dify: false },
-  { feature: "9-Phase Operating Loop", alloy: true, palantir: false, langchain: false, dify: false },
-  { feature: "Real APT Adversary Profiles", alloy: true, palantir: true, langchain: false, dify: false },
-];
-
 const OPERATING_LOOP = [
-  { phase: "Ingestion", step: "01", icon: Database, description: "Alloy receives structured signal feeds from all connected packs and integrations — PRISM Counsel, Terra, Vessels, Aegis, Carlota Jo, and external data sources. Every signal enters the pipeline with source attribution, timestamp, and context metadata intact." },
-  { phase: "Normalization", step: "02", icon: Filter, description: "Raw signals are normalized into a consistent schema — typed, de-duplicated, and enriched with entity resolution. Signals from different packs using different schemas are reconciled into a single structured format before evaluation begins." },
-  { phase: "Evaluation", step: "03", icon: BarChart3, description: "Each normalized signal is evaluated against configurable criteria — severity thresholds, SLA proximity, asset criticality, and cross-pack blast radius. Evaluation logic is auditable and explainable: every score has a traceable rationale." },
-  { phase: "Recommendation", step: "04", icon: Layers, description: "Evaluated signals are scored, ranked, and assembled into prioritized action recommendations. Recommendation factors include severity, velocity, ownership gap, and portfolio-level impact." },
-  { phase: "Routing", step: "05", icon: Network, description: "Ranked signals are routed to the right actor — with role-based assignment, escalation paths, and channel context already structured. Every routing decision is logged with the routing key, assignee, and authority basis." },
-  { phase: "Workflow Execution", step: "06", icon: GitBranch, description: "Consequential actions pass through human approval gates before execution. Alloy tracks SLAs, escalates stalled approvals, and verifies that actions taken match actions authorized." },
-  { phase: "Audit Preservation", step: "07", icon: FileText, description: "Every stage — ingestion, evaluation, routing, approval, execution — is logged in a structured audit record. Attributed to real actors and exportable for compliance." },
-  { phase: "Explainability", step: "08", icon: BookOpen, description: "Every signal evaluation, routing decision, and action outcome is explainable — who scored it, what criteria applied, what alternative paths existed, and why the chosen path was taken." },
-  { phase: "Extensibility", step: "09", icon: Puzzle, description: "New packs plug in via the connector mesh. New evaluation criteria can be configured without code changes. New workflow types register against existing approval infrastructure." },
+  {
+    phase: "Ingestion",
+    step: "01",
+    icon: Database,
+    description: "Alloy receives structured signal feeds from all connected packs and integrations — PRISM Counsel, Terra, Vessels, Aegis, Carlota Jo, and external data sources. Every signal enters the pipeline with source attribution, timestamp, and context metadata intact.",
+  },
+  {
+    phase: "Normalization",
+    step: "02",
+    icon: Filter,
+    description: "Raw signals are normalized into a consistent schema — typed, de-duplicated, and enriched with entity resolution. Signals from different packs using different schemas are reconciled into a single structured format before evaluation begins.",
+  },
+  {
+    phase: "Evaluation",
+    step: "03",
+    icon: BarChart3,
+    description: "Each normalized signal is evaluated against configurable criteria — severity thresholds, SLA proximity, asset criticality, and cross-pack blast radius. Evaluation logic is auditable and explainable: every score has a traceable rationale.",
+  },
+  {
+    phase: "Recommendation",
+    step: "04",
+    icon: Layers,
+    description: "Evaluated signals are scored, ranked, and assembled into prioritized action recommendations. Recommendation factors include severity, velocity, ownership gap, and portfolio-level impact. The action queue updates continuously as new signals arrive and conditions change.",
+  },
+  {
+    phase: "Routing",
+    step: "05",
+    icon: Network,
+    description: "Ranked signals are routed to the right actor — with role-based assignment, escalation paths, and channel context already structured. Every routing decision is logged with the routing key, the assignee, and the authority basis.",
+  },
+  {
+    phase: "Workflow Execution",
+    step: "06",
+    icon: GitBranch,
+    description: "Consequential actions pass through human approval gates before execution. Alloy tracks SLAs, escalates stalled approvals, and verifies that actions taken match actions authorized. Nothing executes without confirmation.",
+  },
+  {
+    phase: "Audit Preservation",
+    step: "07",
+    icon: FileText,
+    description: "Every stage — ingestion, evaluation, routing, approval, execution — is logged in a structured audit record. The record is attributed to real actors and exportable for compliance, capital review, or customer diligence.",
+  },
+  {
+    phase: "Explainability",
+    step: "08",
+    icon: BookOpen,
+    description: "Every signal evaluation, routing decision, and action outcome is explainable — who scored it, what criteria applied, what alternative paths existed, and why the chosen path was taken. No black boxes in a consequential workflow.",
+  },
+  {
+    phase: "Extensibility",
+    step: "09",
+    icon: Puzzle,
+    description: "Alloy is designed to extend — new packs plug in via the connector mesh, new evaluation criteria can be configured without code changes, and new workflow types can be registered against existing approval infrastructure.",
+  },
 ];
 
 const CAPABILITIES = [
-  { icon: GitBranch, title: "Workflow Orchestration", body: "Structured workflows with role-based assignment, escalation paths, and SLA tracking. Every task has an owner, a deadline, and a record." },
-  { icon: CheckSquare, title: "Human-in-the-Loop Gates", body: "Consequential actions require explicit human approval before execution. HITL gates are configurable by action type, risk level, and role." },
-  { icon: AlertOctagon, title: "Escalation Logic", body: "When actions stall, Alloy escalates automatically — reassignment, supervisor notification, or hard stops for high-risk situations." },
-  { icon: FileText, title: "Immutable Audit Trail", body: "Every action, decision, approval, and outcome is logged with full attribution — who acted, when, with what authority, and what changed." },
-  { icon: Download, title: "Export & Write-Back Controls", body: "Structured exports, redaction controls, and write-back authorizations. Every data movement has an owner and a record." },
-  { icon: Layers, title: "Signal Normalization", body: "Signals from Lyte and connected systems normalized into a structured action queue — standardized priority, context, and routing logic." },
-  { icon: Workflow, title: "Connector Mesh", body: "Integrates with CRMs, communication tools, approval systems, and vertical-specific platforms. No rip and replace." },
-  { icon: RefreshCw, title: "Cross-Pack Orchestration", body: "A single Alloy action can span multiple packs. An Aegis incident triggers a Terra diligence hold. A PRISM approval gates a Vessels clearance." },
-  { icon: Zap, title: "Execution Verification", body: "Confirms actions taken, tracks exceptions where actions weren't taken, and escalates when execution diverges from approval." },
+  {
+    icon: GitBranch,
+    title: "Workflow Orchestration",
+    body: "Alloy routes work through structured workflows with role-based assignment, escalation paths, and SLA tracking. Every task has an owner, a deadline, and a record. No action falls through untracked.",
+  },
+  {
+    icon: CheckSquare,
+    title: "Human-in-the-Loop Gates",
+    body: "Consequential actions require explicit human approval before execution. HITL gates are configurable by action type, risk level, and role — enforced as a structural constraint, not a policy afterthought.",
+  },
+  {
+    icon: AlertOctagon,
+    title: "Escalation Logic",
+    body: "When actions stall, Alloy escalates automatically — reassignment, supervisor notification, or hard stops for high-risk situations. Nothing falls through silently. Every exception is tracked.",
+  },
+  {
+    icon: FileText,
+    title: "Immutable Audit Trail",
+    body: "Every action, decision, approval, and outcome is logged with full attribution — who acted, when, with what authority, and what changed. Structured, auditable, and exportable for compliance and capital review.",
+  },
+  {
+    icon: Download,
+    title: "Export & Write-Back Controls",
+    body: "Alloy governs how outputs leave the system — structured exports, redaction controls, and write-back authorizations. Every data movement has an owner and a record.",
+  },
+  {
+    icon: Layers,
+    title: "Signal Normalization",
+    body: "Alloy normalizes signals from Lyte and connected systems into a structured action queue — standardized priority, context, and routing logic regardless of the originating pack or data source.",
+  },
+  {
+    icon: Workflow,
+    title: "Connector Mesh",
+    body: "Alloy's connector layer integrates with CRMs, communication tools, approval systems, and vertical-specific platforms. Execution happens where work already lives — no rip and replace.",
+  },
+  {
+    icon: RefreshCw,
+    title: "Cross-Pack Orchestration",
+    body: "A single Alloy action can span multiple packs. An Aegis incident can trigger a Terra diligence hold. A PRISM Counsel approval can gate a Vessels cargo clearance. Alloy orchestrates across the portfolio.",
+  },
+  {
+    icon: Zap,
+    title: "Execution Verification",
+    body: "Alloy doesn't just route. It verifies outcomes — confirming actions taken, tracking exceptions where actions weren't taken, and escalating when execution diverges from approval.",
+  },
 ];
 
 const AUDIT_FIELDS = [
-  "Actor identity (role + name)", "Timestamp and duration", "Decision context and rationale",
-  "Before/after state", "Authorization basis", "Escalation path taken",
-  "Outcome classification", "Linked signal reference", "AI involvement flag", "Export and write-back log",
+  "Actor identity (role + name)",
+  "Timestamp and duration",
+  "Decision context and rationale",
+  "Before/after state",
+  "Authorization basis",
+  "Escalation path taken",
+  "Outcome classification",
+  "Linked signal reference",
+  "AI involvement flag",
+  "Export and write-back log",
+];
+
+const PIPELINE_STEPS = [
+  { step: "Ingest", desc: "Signal enters from pack or integration" },
+  { step: "Normalize", desc: "Schema reconciled, entity resolved" },
+  { step: "Evaluate", desc: "Severity, blast radius, SLA proximity" },
+  { step: "Recommend", desc: "Priority scored, action proposed" },
+  { step: "Route", desc: "Right person, right context, right channel" },
+  { step: "Gate", desc: "Human approval for consequential actions" },
+  { step: "Execute", desc: "Confirmed action with authorization logged" },
+  { step: "Verify", desc: "Outcome tracked, exceptions escalated" },
+  { step: "Audit", desc: "Immutable record created and attributable" },
 ];
 
 const EXPANSION_LANES = [
@@ -132,180 +149,10 @@ const EXPANSION_LANES = [
   { name: "Carlota Jo", desc: "Intake authorizations, service milestone confirmations, and delivery approvals structured through Alloy." },
 ];
 
-const ML_TRAINING_CAPABILITIES = [
-  {
-    icon: FlaskConical,
-    title: "LLM-Based Model Training",
-    body: "No custom model infrastructure. Alloy trains 'models' by evolving prompt strategies, reasoning chains, and confidence calibration through genetic algorithms. Each generation breeds better decision logic — measured against real operational data.",
-    badge: "Zero-infrastructure ML",
-  },
-  {
-    icon: Dna,
-    title: "Evolutionary Prompt Engineering",
-    body: "Prompt strategies are genomes. Temperature, reasoning depth, few-shot selection, confidence thresholds — all genes that mutate, crossover, and compete. The fittest prompt strategies survive. Manual prompt tuning becomes obsolete.",
-    badge: "Self-optimizing",
-  },
-  {
-    icon: Microscope,
-    title: "Five Training Strategies",
-    body: "Evolutionary optimization, few-shot refinement, chain-of-thought tuning, ensemble distillation, and reinforcement from human feedback. Each strategy evolves differently — pick the right one for your domain, or let Alloy auto-select.",
-    badge: "Multi-strategy",
-  },
-  {
-    icon: LineChart,
-    title: "Real-Time Epoch Metrics",
-    body: "Watch training in real time: train/validation accuracy, loss curves, diversity index, elite count, and convergence rate. Early stopping prevents overfitting. Every generation is persisted — roll back to any checkpoint.",
-    badge: "Full observability",
-  },
-];
-
-const BACKTEST_CAPABILITIES = [
-  {
-    icon: History,
-    title: "Historical Backtesting",
-    body: "Replay every past prediction through the current model. Compare what was predicted vs what actually happened. Measure accuracy, precision, recall, F1, and calibration — not on toy benchmarks, but on your real production data.",
-    badge: "Production-grade",
-  },
-  {
-    icon: GitCompare,
-    title: "Drift Detection",
-    body: "Alloy compares early vs late accuracy windows to detect model drift automatically. When the world changes and your model hasn't caught up, drift detection flags it before your decisions degrade.",
-    badge: "Auto-monitoring",
-  },
-  {
-    icon: Gauge,
-    title: "Confidence Calibration",
-    body: "A model that says '90% confident' should be right 90% of the time. Backtesting measures calibration — the gap between stated confidence and actual accuracy — and feeds corrections back into training.",
-    badge: "Trustworthy AI",
-  },
-  {
-    icon: Timer,
-    title: "Time-Series Accuracy",
-    body: "See how model accuracy changes over time — not just one number, but a curve. Identify when your model started degrading, correlate with real-world events, and quantify the impact.",
-    badge: "Temporal analysis",
-  },
-];
-
-const FORECAST_CAPABILITIES = [
-  {
-    icon: TrendingUp,
-    title: "Multi-Horizon Forecasting",
-    body: "Project any operational metric forward: 1 day, 7 days, 30 days, 90 days, up to a full year. Each forecast includes upper and lower confidence bounds, seasonal decomposition, and causal reasoning — not just trend extrapolation.",
-    badge: "Confidence intervals",
-  },
-  {
-    icon: Sparkles,
-    title: "Ensemble Methodology",
-    body: "Five forecasting approaches combined: trend extrapolation, seasonal decomposition, causal reasoning, ensemble averaging, and anomaly-adjusted projection. The methodology is selected automatically based on data characteristics.",
-    badge: "Adaptive",
-  },
-  {
-    icon: Brain,
-    title: "Causal Reasoning",
-    body: "Forecasts aren't just curves — they're explanations. Each projection comes with a reasoning chain: which factors drove it, what assumptions were made, and what would change the forecast. Decision-makers get context, not just numbers.",
-    badge: "Explainable",
-  },
-];
-
-const ML_MODEL_TYPES = [
-  { type: "Classifier", desc: "Categorize signals, entities, or events into discrete classes — risk levels, threat categories, outcome predictions" },
-  { type: "Predictor", desc: "Forecast continuous values — settlement amounts, vessel risk scores, property valuations, cost projections" },
-  { type: "Anomaly Detector", desc: "Identify unusual patterns — AIS gaps, transaction anomalies, behavioral deviations, compliance outliers" },
-  { type: "Forecaster", desc: "Project time-series metrics forward — portfolio performance, case volume, fleet utilization, market trends" },
-  { type: "Ranker", desc: "Prioritize items by multi-criteria scoring — lead quality, threat severity, investment attractiveness, escalation urgency" },
-  { type: "Recommender", desc: "Generate actionable recommendations — next best action, optimal allocation, strategic moves, remediation steps" },
-];
-
-const COMPETITIVE_ML_MATRIX = [
-  { feature: "LLM-Based Training (No Custom Models)", alloy: true, aws: false, gcp: false, azure: false },
-  { feature: "Genetic Prompt Evolution", alloy: true, aws: false, gcp: false, azure: false },
-  { feature: "Historical Backtesting", alloy: true, aws: true, gcp: true, azure: true },
-  { feature: "Automatic Drift Detection", alloy: true, aws: true, gcp: true, azure: true },
-  { feature: "Confidence Calibration Feedback", alloy: true, aws: false, gcp: false, azure: false },
-  { feature: "Multi-Strategy Training", alloy: true, aws: false, gcp: false, azure: false },
-  { feature: "Zero-Infrastructure Deployment", alloy: true, aws: false, gcp: false, azure: false },
-  { feature: "Cross-Domain Transfer Learning", alloy: true, aws: false, gcp: false, azure: false },
-  { feature: "Causal Forecast Reasoning", alloy: true, aws: false, gcp: false, azure: false },
-  { feature: "Full Lineage Audit Trail", alloy: true, aws: true, gcp: true, azure: false },
-];
-
-const COMPOUND_INTELLIGENCE_CAPABILITIES = [
-  {
-    icon: Orbit,
-    title: "Cross-Domain Ontology Fusion",
-    body: "Real-time entity linking across defense, maritime, legal, real estate, and advisory — 8 entity types per domain, 22 relationship types, graph traversal up to depth 4 with inferred relationships and behavioral DNA integration.",
-    badge: "One-of-one",
-    vs: "Palantir links entities within one context. Alloy links them across five industries simultaneously.",
-  },
-  {
-    icon: Fingerprint,
-    title: "Behavioral Genome Profiling",
-    body: "Builds behavioral DNA fingerprints for every entity — temporal patterns, action entropy via Shannon information theory, anomaly scoring, and domain-specific risk factors: AIS gaps, privilege escalation, missed deadlines, distress signals.",
-    badge: "Behavioral DNA",
-    vs: "Windward profiles maritime entities. Alloy profiles everything — people, vessels, properties, cases, threats — across all domains.",
-  },
-  {
-    icon: Flame,
-    title: "Predictive Cascade Engine",
-    body: "When an event occurs in one domain, Alloy predicts consequences across all others. A vessel sanctions violation cascades to legal liability, property value impact, advisory needs, and platform health alerts — with time-to-impact estimation.",
-    badge: "Cross-domain causality",
-    vs: "Datadog detects cascading failures in infrastructure. Alloy predicts cascading consequences across entire business domains.",
-  },
-  {
-    icon: Radar,
-    title: "Anticipatory Intelligence",
-    body: "Domain-specific prediction rules anticipate events BEFORE they happen — settlement windows, APT campaigns, distress opportunities, weather disruptions, client needs shifts — with evidence chains and recommended actions.",
-    badge: "Pre-emptive",
-    vs: "No competitor predicts events across maritime + legal + defense + real estate + advisory simultaneously.",
-  },
-  {
-    icon: Link2,
-    title: "Cross-Domain Correlation Detection",
-    body: "Scans ontology entities, behavioral genomes, and cascade predictions to detect hidden multi-domain relationships — shared entity properties, multi-domain risk convergence, and cascade convergence patterns no human analyst would find.",
-    badge: "Hidden patterns",
-    vs: "Each competitor finds patterns in their vertical. Alloy finds patterns that span all verticals.",
-  },
-  {
-    icon: Crown,
-    title: "Competitive Moat Analysis",
-    body: "Live competitive positioning against Palantir AIP, Anduril Lattice, Windward Maritime AI, Datadog Bits AI, Litify Platform of Action, and Reonomy/Cherre — capability-by-capability scoring with one-of-one uniqueness assessment.",
-    badge: "Verified moat",
-    vs: "Average moat score: 0.94. All 8 capabilities rated ONE-OF-ONE — no single competitor can replicate.",
-  },
-];
-
-const COMPETITIVE_MOAT_MATRIX = [
-  { capability: "Five-Industry Unified Command", alloy: true, palantir: false, anduril: false, windward: false, datadog: false, litify: false, reonomy: false, moat: 0.98 },
-  { capability: "Self-Evolving Platform Architecture", alloy: true, palantir: false, anduril: false, windward: false, datadog: false, litify: false, reonomy: false, moat: 0.97 },
-  { capability: "Cross-Domain Ontology Fusion", alloy: true, palantir: false, anduril: false, windward: false, datadog: false, litify: false, reonomy: false, moat: 0.95 },
-  { capability: "Agent-to-Agent Cross-Domain Delegation", alloy: true, palantir: false, anduril: false, windward: false, datadog: false, litify: false, reonomy: false, moat: 0.94 },
-  { capability: "Anticipatory Intelligence", alloy: true, palantir: false, anduril: false, windward: false, datadog: false, litify: false, reonomy: false, moat: 0.93 },
-  { capability: "Predictive Cascade Engine", alloy: true, palantir: false, anduril: false, windward: false, datadog: false, litify: false, reonomy: false, moat: 0.92 },
-  { capability: "Behavioral Genome Profiling", alloy: true, palantir: false, anduril: false, windward: false, datadog: false, litify: false, reonomy: false, moat: 0.91 },
-  { capability: "Zero-Infrastructure LLM ML", alloy: true, palantir: false, anduril: false, windward: false, datadog: false, litify: false, reonomy: false, moat: 0.89 },
-];
-
-const sectionPad = "var(--space-section-md)";
-const contentMax = { maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" } as const;
-const cardPad = "var(--space-card-pad)";
-const monoLabel: React.CSSProperties = { fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" };
-const sectionH2: React.CSSProperties = { fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "34ch", marginBottom: "1.25rem" };
-const sectionP: React.CSSProperties = { fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "2.5rem" };
-const iconBox: React.CSSProperties = { width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "0.4375rem", marginBottom: "1rem" };
-const badgeStyle: React.CSSProperties = { display: "inline-block", fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-alloy-light)", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "4px", padding: "2px 8px" };
-
-function SectionShell({ children, border = true }: { children: React.ReactNode; border?: boolean }) {
-  return (
-    <section style={{ borderBottom: border ? "1px solid var(--color-szl-border)" : undefined, padding: `${sectionPad} 0` }}>
-      <div style={contentMax}>{children}</div>
-    </section>
-  );
-}
-
 export default function AlloyPage() {
   usePageMeta({
-    title: "Alloy — Self-Evolving AI Platform | SZL Holdings",
-    description: "Alloy is a self-evolving AI platform with genetic decision architecture, mixture-of-experts routing, defense-grade threat modeling, and governed execution — built for enterprises operating across defense, maritime, legal, real estate, and technology.",
+    title: "Alloy — Execution Fabric & Action Spine | SZL Holdings",
+    description: "Alloy is the execution fabric beneath every SZL Holdings product. Ingestion, normalization, evaluation, ranking, routing, workflow execution, audit preservation, explainability, and extensibility.",
     canonical: "https://szlholdings.com/platform/alloy",
   });
 
@@ -314,7 +161,7 @@ export default function AlloyPage() {
       <SiteNav />
       <main id="main-content" role="main">
 
-        {/* ===== HERO ===== */}
+        {/* Hero */}
         <section
           className="szl-grid-texture szl-depth-glow-alloy"
           style={{
@@ -323,10 +170,10 @@ export default function AlloyPage() {
             borderBottom: "1px solid var(--color-szl-border)",
           }}
         >
-          <div style={contentMax}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
               <span className="szl-badge-alloy" style={{ borderRadius: "9999px", marginBottom: "1.75rem", display: "inline-block" }}>
-                Alloy · Self-Evolving AI Platform
+                Alloy · Execution Fabric & Action Spine
               </span>
             </m.div>
 
@@ -342,7 +189,7 @@ export default function AlloyPage() {
                     maxWidth: "22ch",
                   }}
                 >
-                  Intelligence that evolves itself.
+                  The action spine that makes intelligence accountable.
                 </h1>
                 <p
                   style={{
@@ -353,7 +200,7 @@ export default function AlloyPage() {
                     marginBottom: "0.875rem",
                   }}
                 >
-                  Alloy is a self-evolving AI platform that breeds its own decision architectures through genetic algorithms, routes signals through domain-specialized experts, and models threats against real-world adversary profiles — all with defense-grade governance and full audit preservation.
+                  Alloy is the execution fabric beneath every SZL Holdings product. Every signal — from Lyte, from any pack, or from any integration — enters Alloy's operating loop: ingestion, normalization, evaluation, ranking, routing, governed execution, and structured audit preservation.
                 </p>
                 <p
                   style={{
@@ -364,7 +211,7 @@ export default function AlloyPage() {
                     marginBottom: "2.25rem",
                   }}
                 >
-                  Not another wrapper around an LLM. A platform that gets measurably better every generation — with provable convergence, explainable decisions, and zero autonomous execution without human approval.
+                  Signal to confirmed action. No black boxes. No autonomous execution without approval. Full explainability at every stage.
                 </p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
                   <Link href="/demo" className="szl-btn-primary">
@@ -384,24 +231,16 @@ export default function AlloyPage() {
                 style={{ borderRadius: "0.875rem", padding: "clamp(1.25rem,3vw,1.75rem)" }}
               >
                 <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>
-                  Platform Architecture
+                  Alloy's full pipeline
                 </p>
-                {[
-                  { label: "Genetic Evolution Engine", detail: "4 selection strategies, crossover + mutation" },
-                  { label: "Expert Router (MoE)", detail: "9 domain experts, 4 routing strategies" },
-                  { label: "STRIDE Threat Engine", detail: "Kill chain mapping, 3 APT profiles" },
-                  { label: "9-Phase Operating Loop", detail: "Ingest → Audit, zero bypass" },
-                  { label: "COVENANT Policy Engine", detail: "Simulation-first, no autonomous execution" },
-                  { label: "A2A Agent Protocol", detail: "Structured delegation with receipts" },
-                  { label: "Connector Mesh", detail: "CRM, legal, maritime, defense integrations" },
-                ].map((item, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.875rem", marginBottom: i < 6 ? "0.5rem" : 0 }}>
+                {PIPELINE_STEPS.map((item, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.875rem", marginBottom: i < PIPELINE_STEPS.length - 1 ? "0.5rem" : 0 }}>
                     <div style={{ width: "20px", height: "20px", borderRadius: "50%", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.55rem", fontWeight: 700, color: "var(--color-alloy-light)" }}>{i + 1}</span>
                     </div>
                     <div>
-                      <span style={{ fontSize: "0.8125rem", fontWeight: 600, color: "var(--color-alloy-light)", letterSpacing: "-0.01em" }}>{item.label}</span>
-                      <span style={{ fontSize: "0.75rem", color: "var(--color-szl-text-muted)", marginLeft: "0.5rem" }}>{item.detail}</span>
+                      <span style={{ fontSize: "0.8125rem", fontWeight: 600, color: "var(--color-alloy-light)", letterSpacing: "-0.01em" }}>{item.step}</span>
+                      <span style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-muted)", marginLeft: "0.5rem" }}>{item.desc}</span>
                     </div>
                   </div>
                 ))}
@@ -410,922 +249,313 @@ export default function AlloyPage() {
           </div>
         </section>
 
-        {/* ===== GENETIC EVOLUTION ENGINE ===== */}
-        <SectionShell>
-          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-            <p style={monoLabel}>
-              <Dna size={12} style={{ display: "inline", marginRight: "6px", verticalAlign: "-1px" }} />
-              Genetic Evolution Engine
-            </p>
-            <h2 style={sectionH2}>
-              Alloy doesn't just run workflows. It evolves them.
-            </h2>
-            <p style={sectionP}>
-              Most AI platforms are static — you configure a prompt chain and it runs the same way forever. Alloy uses real genetic algorithms to evolve its decision architectures across generations. Every population breeds, mutates, crosses over, and converges toward Pareto-optimal solutions measured against your actual operational fitness functions.
-            </p>
-          </m.div>
-          <div style={{ display: "grid", gap: "1rem" }} className="lg:grid-cols-2">
-            {EVOLUTION_CAPABILITIES.map((cap, i) => {
-              const Icon = cap.icon;
-              return (
+        {/* Operating loop diagram */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>
+                The Operating Loop
+              </p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "34ch", marginBottom: "1.25rem" }}>
+                Every signal follows the same governed path — from ingestion to audit record.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "2.5rem" }}>
+                No stage is skipped. No signal bypasses evaluation or routing. Human approval gates are structural — not configurable away. The loop is the same for a legal approval, a security remediation, and a maritime rerouting decision.
+              </p>
+            </m.div>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }}>
+              <AlloyOperatingLoopDiagram />
+            </m.div>
+          </div>
+        </section>
+
+        {/* Operating loop — detailed phases */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>
+                Each Phase
+              </p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "3rem" }}>
+                Nine phases. Every consequential action covered.
+              </h2>
+            </m.div>
+            <div style={{ display: "grid", gap: "1rem" }} className="lg:grid-cols-3 md:grid-cols-2">
+              {OPERATING_LOOP.map((phase, i) => {
+                const Icon = phase.icon;
+                return (
+                  <m.div
+                    key={phase.phase}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.38, delay: i * 0.05 }}
+                    className="szl-card"
+                    style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.875rem" }}>
+                      <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "6px", flexShrink: 0 }}>
+                        <Icon size={14} color="var(--color-alloy-light)" />
+                      </div>
+                      <div>
+                        <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 600, color: "var(--color-alloy-light)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{phase.step}</div>
+                        <h3 style={{ fontSize: "0.9375rem", fontWeight: 700, letterSpacing: "-0.012em", color: "hsl(38,8%,88%)" }}>{phase.phase}</h3>
+                      </div>
+                    </div>
+                    <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{phase.description}</p>
+                  </m.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* Relationship to Lyte and expansion lanes */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>
+                Alloy Across the Portfolio
+              </p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "1.25rem" }}>
+                One execution fabric. Every pack inherits it.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "2.5rem" }}>
+                Alloy is not built once per pack. It is the shared execution infrastructure that every pack — and every new lane — inherits. When a new vertical joins the platform, it gets Alloy's full approval, audit, routing, and governance stack from day one.
+              </p>
+            </m.div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+              {EXPANSION_LANES.map((lane, i) => (
                 <m.div
-                  key={cap.title}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  key={lane.name}
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.38, delay: i * 0.06 }}
-                  className="szl-card"
-                  style={{ borderRadius: "0.75rem", padding: cardPad }}
+                  transition={{ duration: 0.36, delay: i * 0.06 }}
+                  style={{ display: "flex", alignItems: "flex-start", gap: "1.25rem", padding: "1rem 1.25rem", borderRadius: "8px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)" }}
                 >
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.875rem" }}>
-                    <div style={{ ...iconBox, marginBottom: 0 }}>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-alloy-light)", minWidth: "110px", paddingTop: "1px" }}>{lane.name}</span>
+                  <p style={{ fontSize: "0.875rem", lineHeight: 1.6, color: "hsl(214,7%,60%)" }}>{lane.desc}</p>
+                </m.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Capabilities */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>
+                Capabilities
+              </p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "3rem" }}>
+                Every layer of the execution stack, built for accountability and control.
+              </h2>
+            </m.div>
+            <div className="szl-grid-3">
+              {CAPABILITIES.map((cap, i) => {
+                const Icon = cap.icon;
+                return (
+                  <m.div
+                    key={cap.title}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.38, delay: i * 0.06 }}
+                    className="szl-card"
+                    style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}
+                  >
+                    <div style={{ width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "0.4375rem", marginBottom: "1rem" }}>
                       <Icon size={16} color="var(--color-alloy-light)" />
                     </div>
-                    <h3 style={{ fontSize: "1rem", fontWeight: 700, letterSpacing: "-0.012em", color: "hsl(38,8%,88%)" }}>{cap.title}</h3>
-                  </div>
-                  <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)", marginBottom: "0.875rem" }}>{cap.body}</p>
-                  <span style={badgeStyle}>{cap.badge}</span>
-                </m.div>
-              );
-            })}
-          </div>
-
-          <m.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.25 }}
-            className="szl-alloy-card"
-            style={{ borderRadius: "0.875rem", padding: "clamp(1.25rem,3vw,1.75rem)", marginTop: "1.5rem" }}
-          >
-            <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>
-              Evolution Lifecycle
-            </p>
-            <div style={{ display: "grid", gap: "0.5rem" }} className="md:grid-cols-2">
-              {[
-                "Initialize random population with configurable genome length",
-                "Evaluate each genome against multi-dimensional fitness function",
-                "Select parents via tournament, roulette, rank, or elitist strategy",
-                "Apply crossover (single-point, two-point, uniform) to breed offspring",
-                "Mutate offspring genes with Gaussian noise and adaptive rates",
-                "Persist population state, fitness history, and lineage to database",
-                "Promote elite genomes and cull low-fitness individuals",
-                "Repeat until convergence threshold or generation limit reached",
-              ].map((step, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem" }}>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.625rem", fontWeight: 700, color: "var(--color-alloy-light)", minWidth: "14px", paddingTop: "2px" }}>{String(i + 1).padStart(2, "0")}</span>
-                  <span style={{ fontSize: "0.8125rem", lineHeight: 1.55, color: "hsl(214,7%,68%)" }}>{step}</span>
-                </div>
-              ))}
+                    <h3 style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.625rem" }}>{cap.title}</h3>
+                    <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{cap.body}</p>
+                  </m.div>
+                );
+              })}
             </div>
-          </m.div>
-        </SectionShell>
+          </div>
+        </section>
 
-        {/* ===== EXPERT ROUTING (MoE) ===== */}
-        <SectionShell>
-          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-            <p style={monoLabel}>
-              <Brain size={12} style={{ display: "inline", marginRight: "6px", verticalAlign: "-1px" }} />
-              Mixture-of-Experts Router
-            </p>
-            <h2 style={sectionH2}>
-              Every signal routed to the expert that knows the domain best.
-            </h2>
-            <p style={sectionP}>
-              Inspired by Mixture-of-Experts architectures in large language models, Alloy's Expert Router maintains 9 specialized domain experts with a learned affinity matrix. Signals are routed using configurable strategies — affinity-weighted, cascade, ensemble, or least-loaded — with confidence scoring and structured routing logs.
-            </p>
-          </m.div>
-
-          <div style={{ display: "grid", gap: "1rem", marginBottom: "2rem" }} className="lg:grid-cols-2">
-            {ROUTING_STRATEGIES.map((strat, i) => (
+        {/* Audit trail detail */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <div style={{ display: "grid", gap: "clamp(3rem,6vw,5rem)", alignItems: "center" }} className="lg:grid-cols-2">
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>
+                  Audit-grade execution
+                </p>
+                <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, marginBottom: "1.25rem" }}>
+                  Not just logging. Full attribution for every decision, action, and export.
+                </h2>
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "46ch", marginBottom: "1.5rem" }}>
+                  Alloy's audit trail is designed for capital, compliance, and customer diligence — not just internal debugging. Every field is structured, exportable, and tied to an actor, a timestamp, and an authorization basis. Export logs capture where data went, who authorized it, and what controls applied.
+                </p>
+                <Link href="/trust/governance" className="szl-btn-ghost" style={{ paddingLeft: 0 }}>
+                  See governance architecture <ArrowRight size={14} />
+                </Link>
+              </m.div>
               <m.div
-                key={strat.name}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.36, delay: i * 0.06 }}
-                className="szl-card"
-                style={{ borderRadius: "0.75rem", padding: cardPad }}
+                transition={{ duration: 0.45, delay: 0.10 }}
+                className="szl-alloy-card"
+                style={{ borderRadius: "0.875rem", padding: "clamp(1.5rem,3vw,2rem)" }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.625rem" }}>
-                  <Radio size={14} color="var(--color-alloy-light)" />
-                  <h3 style={{ fontSize: "0.9375rem", fontWeight: 700, letterSpacing: "-0.012em", color: "hsl(38,8%,88%)" }}>{strat.name}</h3>
-                </div>
-                <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{strat.desc}</p>
-              </m.div>
-            ))}
-          </div>
-
-          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-            <p style={{ ...monoLabel, marginBottom: "0.75rem" }}>Domain Experts</p>
-          </m.div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-            {EXPERT_DOMAINS.map((expert, i) => (
-              <m.div
-                key={expert.name}
-                initial={{ opacity: 0, x: -8 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.32, delay: i * 0.04 }}
-                style={{ display: "flex", alignItems: "flex-start", gap: "1.25rem", padding: "0.75rem 1rem", borderRadius: "8px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)" }}
-              >
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-alloy-light)", minWidth: "180px", paddingTop: "1px" }}>{expert.name}</span>
-                <p style={{ fontSize: "0.8125rem", lineHeight: 1.55, color: "hsl(214,7%,60%)" }}>{expert.desc}</p>
-              </m.div>
-            ))}
-          </div>
-        </SectionShell>
-
-        {/* ===== THREAT ENGINE (STRIDE + KILL CHAIN) ===== */}
-        <SectionShell>
-          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-            <p style={monoLabel}>
-              <ShieldAlert size={12} style={{ display: "inline", marginRight: "6px", verticalAlign: "-1px" }} />
-              Defense-Grade Threat Engine
-            </p>
-            <h2 style={sectionH2}>
-              STRIDE threat modeling meets Lockheed Martin Kill Chain analysis.
-            </h2>
-            <p style={sectionP}>
-              Alloy doesn't wait for attacks. It models them — using the STRIDE framework for systematic threat identification and Lockheed Martin's Cyber Kill Chain for adversary progression mapping. Real APT profiles (Cozy Bear, Fancy Bear, FIN7) provide ground-truth adversary behavior patterns for threat simulation.
-            </p>
-          </m.div>
-
-          <div style={{ display: "grid", gap: "1rem", marginBottom: "2rem" }} className="lg:grid-cols-3 md:grid-cols-2">
-            {THREAT_FRAMEWORK.map((threat, i) => (
-              <m.div
-                key={threat.phase}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.36, delay: i * 0.05 }}
-                className="szl-card"
-                style={{ borderRadius: "0.75rem", padding: cardPad }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.625rem" }}>
-                  <ScanLine size={14} color="var(--color-alloy-light)" />
-                  <h3 style={{ fontSize: "0.9375rem", fontWeight: 700, letterSpacing: "-0.012em", color: "hsl(38,8%,88%)" }}>{threat.phase}</h3>
-                </div>
-                <p style={{ fontSize: "0.8125rem", lineHeight: 1.65, color: "hsl(214,7%,60%)" }}>{threat.desc}</p>
-              </m.div>
-            ))}
-          </div>
-
-          <div style={{ display: "grid", gap: "1.5rem" }} className="lg:grid-cols-2">
-            <m.div
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-              className="szl-alloy-card"
-              style={{ borderRadius: "0.875rem", padding: "clamp(1.25rem,3vw,1.5rem)" }}
-            >
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "0.75rem" }}>
-                Cyber Kill Chain Phases
-              </p>
-              {KILL_CHAIN_PHASES.map((phase, i) => (
-                <div key={phase} style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: i < KILL_CHAIN_PHASES.length - 1 ? "0.375rem" : 0 }}>
-                  <div style={{ width: "18px", height: "18px", borderRadius: "50%", background: i < 4 ? "hsla(45,80%,55%,0.15)" : "hsla(0,70%,55%,0.15)", border: `1px solid ${i < 4 ? "hsla(45,80%,55%,0.3)" : "hsla(0,70%,55%,0.3)"}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.5rem", fontWeight: 700, color: i < 4 ? "hsl(45,80%,65%)" : "hsl(0,70%,65%)" }}>{i + 1}</span>
-                  </div>
-                  <span style={{ fontSize: "0.8125rem", fontWeight: 600, color: "hsl(214,7%,72%)" }}>{phase}</span>
-                </div>
-              ))}
-            </m.div>
-
-            <m.div
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: 0.15 }}
-              className="szl-alloy-card"
-              style={{ borderRadius: "0.875rem", padding: "clamp(1.25rem,3vw,1.5rem)" }}
-            >
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "0.75rem" }}>
-                Real Adversary Profiles
-              </p>
-              {APT_PROFILES.map((apt, i) => (
-                <div key={apt.name} style={{ padding: "0.625rem 0", borderBottom: i < APT_PROFILES.length - 1 ? "1px solid hsla(0,0%,100%,0.06)" : undefined }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem" }}>
-                    <Fingerprint size={12} color="var(--color-alloy-light)" />
-                    <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: "hsl(38,8%,88%)" }}>{apt.name}</span>
-                  </div>
-                  <p style={{ fontSize: "0.75rem", color: "hsl(214,7%,55%)", marginBottom: "0.125rem" }}>{apt.attribution}</p>
-                  <p style={{ fontSize: "0.75rem", color: "hsl(214,7%,48%)" }}>{apt.tactics}</p>
-                </div>
-              ))}
-            </m.div>
-          </div>
-        </SectionShell>
-
-        {/* ===== COMPETITIVE POSITIONING ===== */}
-        <SectionShell>
-          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-            <p style={monoLabel}>
-              <Target size={12} style={{ display: "inline", marginRight: "6px", verticalAlign: "-1px" }} />
-              Competitive Position
-            </p>
-            <h2 style={sectionH2}>
-              Not another AI wrapper. A category of one.
-            </h2>
-            <p style={sectionP}>
-              Palantir AIP starts at $1M+ ARR and offers no self-evolution. LangChain is a developer toolkit with no governance. Dify is a no-code builder with no threat modeling. Alloy combines genetic evolution, expert routing, and defense-grade threat modeling in a single governed platform — and it's running in production today.
-            </p>
-          </m.div>
-
-          <m.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}
-          >
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem", minWidth: "600px" }}>
-              <thead>
-                <tr style={{ borderBottom: "1px solid hsla(0,0%,100%,0.1)" }}>
-                  <th style={{ textAlign: "left", padding: "0.75rem 0.875rem", fontFamily: "var(--font-mono)", fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)" }}>Capability</th>
-                  <th style={{ textAlign: "center", padding: "0.75rem 0.625rem", fontFamily: "var(--font-mono)", fontSize: "0.625rem", fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-alloy-light)" }}>Alloy</th>
-                  <th style={{ textAlign: "center", padding: "0.75rem 0.625rem", fontFamily: "var(--font-mono)", fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)" }}>Palantir AIP</th>
-                  <th style={{ textAlign: "center", padding: "0.75rem 0.625rem", fontFamily: "var(--font-mono)", fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)" }}>LangChain</th>
-                  <th style={{ textAlign: "center", padding: "0.75rem 0.625rem", fontFamily: "var(--font-mono)", fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)" }}>Dify</th>
-                </tr>
-              </thead>
-              <tbody>
-                {COMPETITIVE_MATRIX.map((row, i) => (
-                  <tr key={i} style={{ borderBottom: "1px solid hsla(0,0%,100%,0.04)" }}>
-                    <td style={{ padding: "0.5rem 0.875rem", color: "hsl(214,7%,72%)" }}>{row.feature}</td>
-                    {[row.alloy, row.palantir, row.langchain, row.dify].map((v, j) => (
-                      <td key={j} style={{ textAlign: "center", padding: "0.5rem 0.625rem" }}>
-                        {v ? (
-                          <span style={{ color: "hsl(142,60%,55%)", fontWeight: 700 }}>&#10003;</span>
-                        ) : (
-                          <span style={{ color: "hsl(0,0%,35%)" }}>&#8212;</span>
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </m.div>
-        </SectionShell>
-
-        {/* ===== OPERATING LOOP ===== */}
-        <SectionShell>
-          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-            <p style={monoLabel}>The Operating Loop</p>
-            <h2 style={sectionH2}>
-              Every signal follows the same governed path — from ingestion to audit record.
-            </h2>
-            <p style={sectionP}>
-              No stage is skipped. No signal bypasses evaluation or routing. Human approval gates are structural — not configurable away. The loop is the same for a legal approval, a security remediation, and a maritime rerouting decision.
-            </p>
-          </m.div>
-          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }}>
-            <AlloyOperatingLoopDiagram />
-          </m.div>
-        </SectionShell>
-
-        {/* ===== DETAILED PHASES ===== */}
-        <SectionShell>
-          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-            <p style={monoLabel}>Each Phase</p>
-            <h2 style={{ ...sectionH2, maxWidth: "30ch", marginBottom: "3rem" }}>
-              Nine phases. Every consequential action covered.
-            </h2>
-          </m.div>
-          <div style={{ display: "grid", gap: "1rem" }} className="lg:grid-cols-3 md:grid-cols-2">
-            {OPERATING_LOOP.map((phase, i) => {
-              const Icon = phase.icon;
-              return (
-                <m.div
-                  key={phase.phase}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.38, delay: i * 0.05 }}
-                  className="szl-card"
-                  style={{ borderRadius: "0.75rem", padding: cardPad }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.875rem" }}>
-                    <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "6px", flexShrink: 0 }}>
-                      <Icon size={14} color="var(--color-alloy-light)" />
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1.25rem" }}>
+                  Every audit record captures
+                </p>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.625rem" }}>
+                  {AUDIT_FIELDS.map((field) => (
+                    <div key={field} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
+                      <Shield size={12} color="var(--color-alloy-light)" style={{ marginTop: "3px", flexShrink: 0, opacity: 0.7 }} />
+                      <span style={{ fontSize: "0.8125rem", lineHeight: 1.55, color: "hsl(214,7%,68%)" }}>{field}</span>
                     </div>
-                    <div>
-                      <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 600, color: "var(--color-alloy-light)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{phase.step}</div>
-                      <h3 style={{ fontSize: "0.9375rem", fontWeight: 700, letterSpacing: "-0.012em", color: "hsl(38,8%,88%)" }}>{phase.phase}</h3>
-                    </div>
-                  </div>
-                  <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{phase.description}</p>
-                </m.div>
-              );
-            })}
-          </div>
-        </SectionShell>
-
-        {/* ===== EXPANSION LANES ===== */}
-        <SectionShell>
-          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-            <p style={monoLabel}>Alloy Across the Portfolio</p>
-            <h2 style={{ ...sectionH2, maxWidth: "30ch" }}>
-              One execution fabric. Every pack inherits it.
-            </h2>
-            <p style={sectionP}>
-              Alloy is not built once per pack. It is the shared execution infrastructure that every pack — and every new lane — inherits. When a new vertical joins the platform, it gets Alloy's full approval, audit, routing, and governance stack from day one.
-            </p>
-          </m.div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-            {EXPANSION_LANES.map((lane, i) => (
-              <m.div
-                key={lane.name}
-                initial={{ opacity: 0, x: -10 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.36, delay: i * 0.06 }}
-                style={{ display: "flex", alignItems: "flex-start", gap: "1.25rem", padding: "1rem 1.25rem", borderRadius: "8px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)" }}
-              >
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-alloy-light)", minWidth: "110px", paddingTop: "1px" }}>{lane.name}</span>
-                <p style={{ fontSize: "0.875rem", lineHeight: 1.6, color: "hsl(214,7%,60%)" }}>{lane.desc}</p>
+                  ))}
+                </div>
               </m.div>
-            ))}
+            </div>
           </div>
-        </SectionShell>
+        </section>
 
-        {/* ===== CORE CAPABILITIES ===== */}
-        <SectionShell>
-          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-            <p style={monoLabel}>Capabilities</p>
-            <h2 style={{ ...sectionH2, maxWidth: "30ch", marginBottom: "3rem" }}>
-              Every layer of the execution stack, built for accountability and control.
-            </h2>
-          </m.div>
-          <div className="szl-grid-3">
-            {CAPABILITIES.map((cap, i) => {
-              const Icon = cap.icon;
-              return (
-                <m.div
-                  key={cap.title}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.38, delay: i * 0.06 }}
-                  className="szl-card"
-                  style={{ borderRadius: "0.75rem", padding: cardPad }}
-                >
-                  <div style={iconBox}>
-                    <Icon size={16} color="var(--color-alloy-light)" />
-                  </div>
-                  <h3 style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.625rem" }}>{cap.title}</h3>
-                  <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{cap.body}</p>
-                </m.div>
-              );
-            })}
-          </div>
-        </SectionShell>
-
-        {/* ===== AUDIT TRAIL ===== */}
-        <SectionShell>
-          <div style={{ display: "grid", gap: "clamp(3rem,6vw,5rem)", alignItems: "center" }} className="lg:grid-cols-2">
+        {/* Export and write-back */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-              <p style={monoLabel}>Audit-grade execution</p>
-              <h2 style={{ ...sectionH2, marginBottom: "1.25rem" }}>
-                Not just logging. Full attribution for every decision, action, and export.
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>
+                Controlled Outputs
+              </p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "1.5rem" }}>
+                Every export and write-back is governed, not assumed.
               </h2>
-              <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "46ch", marginBottom: "1.5rem" }}>
-                Alloy's audit trail is designed for capital, compliance, and customer diligence — not just internal debugging. Every field is structured, exportable, and tied to an actor, a timestamp, and an authorization basis.
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "2.5rem" }}>
+                Alloy treats data movement as a consequential action. Exports to Word, PDF, or external systems require authorization. Write-backs to connected platforms are tracked. Redaction rules apply at the record level. Nothing leaves without a record of where it went.
               </p>
-              <Link href="/trust/governance" className="szl-btn-ghost" style={{ paddingLeft: 0 }}>
-                See governance architecture <ArrowRight size={14} />
-              </Link>
             </m.div>
-            <m.div
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.45, delay: 0.10 }}
-              className="szl-alloy-card"
-              style={{ borderRadius: "0.875rem", padding: "clamp(1.5rem,3vw,2rem)" }}
-            >
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1.25rem" }}>
-                Every audit record captures
+            <div style={{ display: "grid", gap: "1rem" }} className="lg:grid-cols-3">
+              {[
+                { icon: Download, title: "Structured Export", body: "Demand letters, audit packets, compliance reports, and data exports governed by format, content, and authorization controls." },
+                { icon: Lock, title: "Redaction Controls", body: "Privilege-aware, PII-aware, and role-aware redaction applied at the record level before any export leaves the system." },
+                { icon: RefreshCw, title: "Write-Back Governance", body: "Data written back to CRMs, case management systems, or connected platforms is tracked with actor attribution and authorization basis." },
+              ].map((item, i) => {
+                const Icon = item.icon;
+                return (
+                  <m.div
+                    key={i}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.38, delay: i * 0.07 }}
+                    className="szl-card"
+                    style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}
+                  >
+                    <div style={{ width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "0.4375rem", marginBottom: "1rem" }}>
+                      <Icon size={16} color="var(--color-alloy-light)" />
+                    </div>
+                    <h3 style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.625rem" }}>{item.title}</h3>
+                    <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{item.body}</p>
+                  </m.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* Product-level features — new capabilities */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>
+                Governed Execution Layer
               </p>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.625rem" }}>
-                {AUDIT_FIELDS.map((field) => (
-                  <div key={field} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
-                    <Shield size={12} color="var(--color-alloy-light)" style={{ marginTop: "3px", flexShrink: 0, opacity: 0.7 }} />
-                    <span style={{ fontSize: "0.8125rem", lineHeight: 1.55, color: "hsl(214,7%,68%)" }}>{field}</span>
-                  </div>
-                ))}
-              </div>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "32ch", marginBottom: "1.25rem" }}>
+                From intent to verified execution — with accountability at every step.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "3rem" }}>
+                Alloy's product layer turns goals into governed DAGs, replays every decision, simulates policy outcomes before going live, and delegates to specialized agents with structured receipts.
+              </p>
             </m.div>
-          </div>
-        </SectionShell>
-
-        {/* ===== GOVERNED EXECUTION ===== */}
-        <SectionShell>
-          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-            <p style={monoLabel}>Governed Execution Layer</p>
-            <h2 style={{ ...sectionH2, maxWidth: "32ch" }}>
-              From intent to verified execution — with accountability at every step.
-            </h2>
-            <p style={sectionP}>
-              Alloy's product layer turns goals into governed DAGs, replays every decision, simulates policy outcomes before going live, and delegates to specialized agents with structured receipts.
-            </p>
-          </m.div>
-          <div style={{ display: "grid", gap: "1rem" }} className="lg:grid-cols-2 xl:grid-cols-3">
-            {[
-              { icon: GitBranch, tag: "Action Graph Compiler", title: "Goal \u2192 Executable DAG", body: "Define an objective. Alloy compiles it into an executable plan with branch logic, fallback paths, and approval gates \u2014 rendered as an interactive DAG before any execution begins.", badge: "Simulation-first" },
-              { icon: Activity, tag: "Execution Replay", title: "Step-by-step Replay Timeline", body: "Every completed run shows a full replay: what tools were called, what was seen, what was approved or blocked, evidence collected, and timestamps \u2014 down to the millisecond.", badge: "Structured audit trail" },
-              { icon: Shield, tag: "COVENANT Policy Engine", title: "Policy Simulation Console", body: "Test 'what would happen if' scenarios against COVENANT policies before running live. See projected approve, block, escalate, and defer outcomes for any proposed action.", badge: "No live execution" },
-              { icon: Send, tag: "A2A Protocol", title: "Agent Handoff & Delegation", body: "Alloy delegates subtasks to specialized agents \u2014 internal or remote \u2014 using the A2A protocol. Every delegation is tracked with a structured receipt including status and completion verification.", badge: "Tracked receipts" },
-              { icon: FileText, tag: "Trust Layer", title: "Run-grade Trust Receipts", body: "Every completed run produces a structured receipt: inputs, outputs, policy decisions, evidence chain, confidence levels, approval records, and duration \u2014 designed for compliance export.", badge: "Audit-grade receipts" },
-              { icon: Eye, tag: "Governance", title: "Clearly Marked Boundaries", body: "Alloy is explicit about what is simulation versus live execution. Policy gates are structural, not configurable away. Human approval is enforced \u2014 not optional \u2014 for consequential actions.", badge: "No autonomous execution" },
-            ].map((cap, i) => {
-              const Icon = cap.icon;
-              return (
-                <m.div
-                  key={cap.title}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.38, delay: i * 0.06 }}
-                  className="szl-card"
-                  style={{ borderRadius: "0.75rem", padding: cardPad }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.875rem" }}>
-                    <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "6px", flexShrink: 0 }}>
-                      <Icon size={14} color="var(--color-alloy-light)" />
-                    </div>
-                    <div>
-                      <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 600, color: "var(--color-alloy-light)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{cap.tag}</div>
-                      <h3 style={{ fontSize: "0.9375rem", fontWeight: 700, letterSpacing: "-0.012em", color: "hsl(38,8%,88%)", marginTop: "1px" }}>{cap.title}</h3>
-                    </div>
-                  </div>
-                  <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)", marginBottom: "0.875rem" }}>{cap.body}</p>
-                  <span style={badgeStyle}>{cap.badge}</span>
-                </m.div>
-              );
-            })}
-          </div>
-        </SectionShell>
-
-        {/* ===== EXPORT / WRITE-BACK ===== */}
-        <SectionShell>
-          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-            <p style={monoLabel}>Controlled Outputs</p>
-            <h2 style={{ ...sectionH2, maxWidth: "30ch", marginBottom: "1.5rem" }}>
-              Every export and write-back is governed, not assumed.
-            </h2>
-            <p style={sectionP}>
-              Alloy treats data movement as a consequential action. Exports to Word, PDF, or external systems require authorization. Write-backs to connected platforms are tracked. Redaction rules apply at the record level.
-            </p>
-          </m.div>
-          <div style={{ display: "grid", gap: "1rem" }} className="lg:grid-cols-3">
-            {[
-              { icon: Download, title: "Structured Export", body: "Demand letters, audit packets, compliance reports, and data exports governed by format, content, and authorization controls." },
-              { icon: Lock, title: "Redaction Controls", body: "Privilege-aware, PII-aware, and role-aware redaction applied at the record level before any export leaves the system." },
-              { icon: RefreshCw, title: "Write-Back Governance", body: "Data written back to CRMs, case management systems, or connected platforms is tracked with actor attribution and authorization basis." },
-            ].map((item, i) => {
-              const Icon = item.icon;
-              return (
-                <m.div
-                  key={i}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.38, delay: i * 0.07 }}
-                  className="szl-card"
-                  style={{ borderRadius: "0.75rem", padding: cardPad }}
-                >
-                  <div style={iconBox}>
-                    <Icon size={16} color="var(--color-alloy-light)" />
-                  </div>
-                  <h3 style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.625rem" }}>{item.title}</h3>
-                  <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{item.body}</p>
-                </m.div>
-              );
-            })}
-          </div>
-        </SectionShell>
-
-        {/* ===== LLM-BASED ML TRAINING ===== */}
-        <SectionShell>
-          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-            <p style={monoLabel}>LLM-Based ML Training</p>
-            <h2 style={sectionH2}>
-              Custom models without custom infrastructure.
-            </h2>
-            <p style={sectionP}>
-              Traditional ML requires data pipelines, GPU clusters, and months of iteration. Alloy trains decision models by evolving LLM prompt strategies through genetic algorithms — achieving custom model performance using reasoning-based intelligence instead of statistical weight tuning.
-            </p>
-          </m.div>
-          <div style={{ display: "grid", gap: "1.25rem" }} className="lg:grid-cols-2">
-            {ML_TRAINING_CAPABILITIES.map((cap, i) => {
-              const Icon = cap.icon;
-              return (
-                <m.div
-                  key={i}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.38, delay: i * 0.07 }}
-                  className="szl-card"
-                  style={{ borderRadius: "0.75rem", padding: cardPad }}
-                >
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem", marginBottom: "1rem" }}>
-                    <div style={iconBox}><Icon size={16} color="var(--color-alloy-light)" /></div>
-                    <div style={{ flex: 1 }}>
-                      <h3 style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.5rem" }}>{cap.title}</h3>
-                      <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{cap.body}</p>
-                    </div>
-                  </div>
-                  <span style={badgeStyle}>{cap.badge}</span>
-                </m.div>
-              );
-            })}
-          </div>
-
-          <m.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-            style={{ marginTop: "2.5rem" }}
-          >
-            <p style={{ ...monoLabel, marginBottom: "1.25rem" }}>Model Types</p>
-            <div style={{ display: "grid", gap: "0.75rem" }} className="lg:grid-cols-3">
-              {ML_MODEL_TYPES.map((mt, i) => (
-                <div key={i} className="szl-card" style={{ borderRadius: "0.625rem", padding: "1rem 1.25rem" }}>
-                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "0.375rem" }}>{mt.type}</p>
-                  <p style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "hsl(214,7%,58%)" }}>{mt.desc}</p>
-                </div>
-              ))}
-            </div>
-          </m.div>
-
-          <m.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.35 }}
-            style={{ marginTop: "2.5rem" }}
-          >
-            <p style={{ ...monoLabel, marginBottom: "1.25rem" }}>Training Strategies</p>
-            <div style={{ display: "grid", gap: "0.5rem" }}>
+            <div style={{ display: "grid", gap: "1rem" }} className="lg:grid-cols-2 xl:grid-cols-3">
               {[
-                { name: "Evolutionary Optimization", desc: "Genetic algorithm evolves prompt strategies across generations. Tournament selection, crossover, and mutation breed increasingly effective reasoning patterns." },
-                { name: "Few-Shot Optimization", desc: "Evolves the selection and ordering of few-shot examples to maximize in-context learning. The best examples survive; irrelevant ones are eliminated." },
-                { name: "Chain-of-Thought Tuning", desc: "Refines multi-step reasoning chains by measuring each step's contribution to final accuracy. Steps that don't improve outcomes are pruned." },
-                { name: "Ensemble Distillation", desc: "Runs multiple model configurations in parallel, then distills the best-performing elements into a single optimized strategy." },
-                { name: "Reinforcement from Feedback", desc: "Human feedback signals (approve/reject/correct) feed directly into the fitness function. Models evolve toward what operators actually want." },
-              ].map((s, i) => (
-                <div key={i} className="szl-card" style={{ borderRadius: "0.5rem", padding: "0.875rem 1.25rem", display: "flex", gap: "1rem", alignItems: "baseline" }}>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.625rem", fontWeight: 700, color: "var(--color-alloy-light)", flexShrink: 0, width: "1.5rem" }}>{String(i + 1).padStart(2, "0")}</span>
-                  <div>
-                    <span style={{ fontSize: "0.875rem", fontWeight: 600, marginRight: "0.5rem" }}>{s.name}</span>
-                    <span style={{ fontSize: "0.8125rem", color: "hsl(214,7%,58%)" }}>{s.desc}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </m.div>
-        </SectionShell>
-
-        {/* ===== HISTORICAL BACKTESTING ===== */}
-        <SectionShell>
-          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-            <p style={monoLabel}>Historical Backtesting</p>
-            <h2 style={sectionH2}>
-              Every prediction, verified against reality.
-            </h2>
-            <p style={sectionP}>
-              Before you trust an AI model with consequential decisions, you need proof that it works — not on curated benchmarks, but on your actual historical data. Alloy's backtesting engine replays every past prediction and measures what was right, what was wrong, and what's drifting.
-            </p>
-          </m.div>
-          <div style={{ display: "grid", gap: "1.25rem" }} className="lg:grid-cols-2">
-            {BACKTEST_CAPABILITIES.map((cap, i) => {
-              const Icon = cap.icon;
-              return (
-                <m.div
-                  key={i}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.38, delay: i * 0.07 }}
-                  className="szl-card"
-                  style={{ borderRadius: "0.75rem", padding: cardPad }}
-                >
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem", marginBottom: "1rem" }}>
-                    <div style={iconBox}><Icon size={16} color="var(--color-alloy-light)" /></div>
-                    <div style={{ flex: 1 }}>
-                      <h3 style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.5rem" }}>{cap.title}</h3>
-                      <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{cap.body}</p>
+                {
+                  icon: GitBranch,
+                  tag: "Action Graph Compiler",
+                  title: "Goal → Executable DAG",
+                  body: "Define an objective. Alloy compiles it into an executable plan with branch logic, fallback paths, and approval gates — rendered as an interactive DAG before any execution begins.",
+                  badge: "Simulation-first",
+                },
+                {
+                  icon: Activity,
+                  tag: "Execution Replay",
+                  title: "Step-by-step Replay Timeline",
+                  body: "Every completed run shows a full replay: what tools were called, what was seen, what was approved or blocked, evidence collected, and timestamps — down to the millisecond.",
+                  badge: "Structured audit trail",
+                },
+                {
+                  icon: Shield,
+                  tag: "COVENANT Policy Engine",
+                  title: "Policy Simulation Console",
+                  body: "Test 'what would happen if' scenarios against COVENANT policies before running live. See projected approve, block, escalate, and defer outcomes for any proposed action.",
+                  badge: "No live execution",
+                },
+                {
+                  icon: Send,
+                  tag: "A2A Protocol",
+                  title: "Agent Handoff & Delegation",
+                  body: "Alloy delegates subtasks to specialized agents — internal or remote — using the A2A protocol. Every delegation is tracked with a structured receipt including status and completion verification.",
+                  badge: "Tracked receipts",
+                },
+                {
+                  icon: FileText,
+                  tag: "Trust Layer",
+                  title: "Run-grade Trust Receipts",
+                  body: "Every completed run produces a structured receipt: inputs, outputs, policy decisions, evidence chain, confidence levels, approval records, and duration — designed for compliance export.",
+                  badge: "Audit-grade receipts",
+                },
+                {
+                  icon: Eye,
+                  tag: "Governance",
+                  title: "Clearly Marked Boundaries",
+                  body: "Alloy is explicit about what is simulation versus live execution. Policy gates are structural, not configurable away. Human approval is enforced — not optional — for consequential actions.",
+                  badge: "No autonomous execution",
+                },
+              ].map((cap, i) => {
+                const Icon = cap.icon;
+                return (
+                  <m.div
+                    key={cap.title}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.38, delay: i * 0.06 }}
+                    className="szl-card"
+                    style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.875rem" }}>
+                      <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "6px", flexShrink: 0 }}>
+                        <Icon size={14} color="var(--color-alloy-light)" />
+                      </div>
+                      <div>
+                        <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 600, color: "var(--color-alloy-light)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{cap.tag}</div>
+                        <h3 style={{ fontSize: "0.9375rem", fontWeight: 700, letterSpacing: "-0.012em", color: "hsl(38,8%,88%)", marginTop: "1px" }}>{cap.title}</h3>
+                      </div>
                     </div>
-                  </div>
-                  <span style={badgeStyle}>{cap.badge}</span>
-                </m.div>
-              );
-            })}
+                    <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)", marginBottom: "0.875rem" }}>{cap.body}</p>
+                    <span style={{ display: "inline-block", fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-alloy-light)", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "4px", padding: "2px 8px" }}>
+                      {cap.badge}
+                    </span>
+                  </m.div>
+                );
+              })}
+            </div>
           </div>
+        </section>
 
-          <m.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-            className="szl-card"
-            style={{ borderRadius: "0.75rem", padding: cardPad, marginTop: "2.5rem" }}
-          >
-            <p style={{ ...monoLabel, marginBottom: "1.25rem" }}>Backtest Metrics</p>
-            <div style={{ display: "grid", gap: "1.5rem" }} className="lg:grid-cols-4">
-              {[
-                { metric: "Accuracy", desc: "Overall correctness rate across all predictions in the backtest window" },
-                { metric: "Precision", desc: "When the model says 'yes', how often it's actually right — minimizes false positives" },
-                { metric: "Recall", desc: "Of all the true positives, how many the model caught — minimizes missed signals" },
-                { metric: "F1 Score", desc: "Harmonic mean of precision and recall — the single best measure of model quality" },
-                { metric: "Calibration", desc: "Gap between stated confidence and actual accuracy — measures trustworthiness" },
-                { metric: "Time-Series Accuracy", desc: "How accuracy changes over time — identifies degradation windows" },
-                { metric: "Confusion Matrix", desc: "Full breakdown of true/false positives/negatives across all predictions" },
-                { metric: "Drift Score", desc: "Statistical measure of model performance degradation over time" },
-              ].map((m, i) => (
-                <div key={i} style={{ borderLeft: "2px solid var(--color-alloy-border)", paddingLeft: "1rem" }}>
-                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.625rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "0.25rem" }}>{m.metric}</p>
-                  <p style={{ fontSize: "0.8125rem", lineHeight: 1.55, color: "hsl(214,7%,56%)" }}>{m.desc}</p>
-                </div>
-              ))}
-            </div>
-          </m.div>
-        </SectionShell>
-
-        {/* ===== FORECASTING ENGINE ===== */}
-        <SectionShell>
-          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-            <p style={monoLabel}>Forecasting Engine</p>
-            <h2 style={sectionH2}>
-              From answering questions to predicting outcomes.
-            </h2>
-            <p style={sectionP}>
-              Most AI platforms react. Alloy forecasts. Multi-horizon projections with confidence intervals, causal reasoning, and seasonal decomposition — across every domain in the ecosystem.
-            </p>
-          </m.div>
-          <div style={{ display: "grid", gap: "1.25rem" }} className="lg:grid-cols-3">
-            {FORECAST_CAPABILITIES.map((cap, i) => {
-              const Icon = cap.icon;
-              return (
-                <m.div
-                  key={i}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.38, delay: i * 0.07 }}
-                  className="szl-card"
-                  style={{ borderRadius: "0.75rem", padding: cardPad }}
-                >
-                  <div style={iconBox}><Icon size={16} color="var(--color-alloy-light)" /></div>
-                  <h3 style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.625rem" }}>{cap.title}</h3>
-                  <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)", marginBottom: "0.75rem" }}>{cap.body}</p>
-                  <span style={badgeStyle}>{cap.badge}</span>
-                </m.div>
-              );
-            })}
-          </div>
-
-          <m.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.25 }}
-            style={{ marginTop: "2rem" }}
-          >
-            <div style={{ display: "grid", gap: "0.5rem" }} className="lg:grid-cols-5">
-              {["1 Day", "7 Days", "30 Days", "90 Days", "1 Year"].map((h, i) => (
-                <div key={i} className="szl-card" style={{ borderRadius: "0.5rem", padding: "0.875rem 1rem", textAlign: "center" }}>
-                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-alloy-light)" }}>{h}</p>
-                  <p style={{ fontSize: "0.6875rem", color: "hsl(214,7%,50%)", marginTop: "0.25rem" }}>
-                    {i === 0 ? "95% confidence" : i === 1 ? "92% confidence" : i === 2 ? "85% confidence" : i === 3 ? "72% confidence" : "58% confidence"}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </m.div>
-        </SectionShell>
-
-        {/* ===== ML COMPETITIVE MATRIX ===== */}
-        <SectionShell>
-          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-            <p style={monoLabel}>ML Competitive Advantage</p>
-            <h2 style={sectionH2}>
-              What Alloy ML does that nobody else can.
-            </h2>
-            <p style={sectionP}>
-              AWS SageMaker, GCP Vertex AI, and Azure ML require data engineers, GPU clusters, and months of iteration. Alloy achieves custom model performance through LLM reasoning evolution — zero infrastructure, zero data pipelines, zero MLOps overhead.
-            </p>
-          </m.div>
-          <m.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            className="szl-card"
-            style={{ borderRadius: "0.75rem", overflow: "hidden" }}
-          >
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
-                <thead>
-                  <tr style={{ borderBottom: "1px solid var(--color-alloy-border)" }}>
-                    <th style={{ padding: "1rem 1.25rem", textAlign: "left", fontWeight: 600, fontSize: "0.75rem", letterSpacing: "0.04em", textTransform: "uppercase", color: "hsl(214,7%,62%)" }}>Capability</th>
-                    <th style={{ padding: "1rem 0.75rem", textAlign: "center", fontWeight: 700, color: "var(--color-alloy-light)", fontSize: "0.75rem", letterSpacing: "0.04em" }}>ALLOY</th>
-                    <th style={{ padding: "1rem 0.75rem", textAlign: "center", fontWeight: 500, color: "hsl(214,7%,50%)", fontSize: "0.75rem" }}>AWS</th>
-                    <th style={{ padding: "1rem 0.75rem", textAlign: "center", fontWeight: 500, color: "hsl(214,7%,50%)", fontSize: "0.75rem" }}>GCP</th>
-                    <th style={{ padding: "1rem 0.75rem", textAlign: "center", fontWeight: 500, color: "hsl(214,7%,50%)", fontSize: "0.75rem" }}>Azure</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {COMPETITIVE_ML_MATRIX.map((row, i) => (
-                    <tr key={i} style={{ borderBottom: i < COMPETITIVE_ML_MATRIX.length - 1 ? "1px solid hsl(214,10%,12%)" : undefined }}>
-                      <td style={{ padding: "0.75rem 1.25rem", color: "hsl(38,8%,82%)" }}>{row.feature}</td>
-                      <td style={{ padding: "0.75rem", textAlign: "center", color: row.alloy ? "hsl(142,60%,55%)" : "hsl(0,60%,55%)" }}>{row.alloy ? "\u2713" : "\u2717"}</td>
-                      <td style={{ padding: "0.75rem", textAlign: "center", color: row.aws ? "hsl(142,60%,55%)" : "hsl(0,60%,55%)" }}>{row.aws ? "\u2713" : "\u2717"}</td>
-                      <td style={{ padding: "0.75rem", textAlign: "center", color: row.gcp ? "hsl(142,60%,55%)" : "hsl(0,60%,55%)" }}>{row.gcp ? "\u2713" : "\u2717"}</td>
-                      <td style={{ padding: "0.75rem", textAlign: "center", color: row.azure ? "hsl(142,60%,55%)" : "hsl(0,60%,55%)" }}>{row.azure ? "\u2713" : "\u2717"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </m.div>
-        </SectionShell>
-
-        {/* ===== COMPOUND INTELLIGENCE — ONE-OF-ONE ===== */}
-        <SectionShell>
-          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
-              <p style={{ ...monoLabel, marginBottom: 0 }}>Compound Intelligence</p>
-              <span style={{ ...badgeStyle, background: "hsla(142,50%,40%,0.15)", border: "1px solid hsla(142,50%,40%,0.3)", color: "hsl(142,60%,55%)" }}>ONE-OF-ONE</span>
-            </div>
-            <h2 style={sectionH2}>
-              Capabilities no competitor can replicate — individually or combined.
-            </h2>
-            <p style={sectionP}>
-              Every competitor owns a vertical: Palantir owns defense intelligence, Windward owns maritime AI, Datadog owns observability, Litify owns legal ops, Reonomy owns property data. Alloy fuses all five into a single compound intelligence fabric that predicts across domains, profiles behavioral DNA, and anticipates events before they happen.
-            </p>
-          </m.div>
-          <div style={{ display: "grid", gap: "1.5rem" }} className="lg:grid-cols-2">
-            {COMPOUND_INTELLIGENCE_CAPABILITIES.map((cap, i) => {
-              const Icon = cap.icon;
-              return (
-                <m.div
-                  key={i}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.38, delay: i * 0.06 }}
-                  className="szl-card"
-                  style={{ borderRadius: "0.75rem", padding: cardPad }}
-                >
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem", marginBottom: "1rem" }}>
-                    <div style={iconBox}><Icon size={16} color="var(--color-alloy-light)" /></div>
-                    <div style={{ flex: 1 }}>
-                      <h3 style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.5rem" }}>{cap.title}</h3>
-                      <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{cap.body}</p>
-                    </div>
-                  </div>
-                  <div style={{ borderTop: "1px solid hsl(214,10%,14%)", paddingTop: "0.875rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <p style={{ fontSize: "0.75rem", lineHeight: 1.55, color: "hsl(214,7%,48%)", fontStyle: "italic", maxWidth: "38ch" }}>{cap.vs}</p>
-                    <span style={badgeStyle}>{cap.badge}</span>
-                  </div>
-                </m.div>
-              );
-            })}
-          </div>
-        </SectionShell>
-
-        {/* ===== COMPETITIVE MOAT MATRIX ===== */}
-        <SectionShell>
-          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-            <p style={monoLabel}>Competitive Moat</p>
-            <h2 style={sectionH2}>
-              Alloy vs. every industry leader — at once.
-            </h2>
-            <p style={sectionP}>
-              Not a comparison against one competitor. A comparison against all of them simultaneously. Each of these capabilities exists in Alloy's production backend today — with persisted data, live API endpoints, and real-time scoring.
-            </p>
-          </m.div>
-          <m.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            className="szl-card"
-            style={{ borderRadius: "0.75rem", overflow: "hidden" }}
-          >
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.75rem" }}>
-                <thead>
-                  <tr style={{ borderBottom: "1px solid var(--color-alloy-border)" }}>
-                    <th style={{ padding: "1rem 1.25rem", textAlign: "left", fontWeight: 600, fontSize: "0.6875rem", letterSpacing: "0.04em", textTransform: "uppercase", color: "hsl(214,7%,62%)" }}>Capability</th>
-                    <th style={{ padding: "1rem 0.5rem", textAlign: "center", fontWeight: 700, color: "var(--color-alloy-light)", fontSize: "0.625rem", letterSpacing: "0.04em" }}>ALLOY</th>
-                    <th style={{ padding: "1rem 0.5rem", textAlign: "center", fontWeight: 500, color: "hsl(214,7%,50%)", fontSize: "0.625rem" }}>Palantir</th>
-                    <th style={{ padding: "1rem 0.5rem", textAlign: "center", fontWeight: 500, color: "hsl(214,7%,50%)", fontSize: "0.625rem" }}>Anduril</th>
-                    <th style={{ padding: "1rem 0.5rem", textAlign: "center", fontWeight: 500, color: "hsl(214,7%,50%)", fontSize: "0.625rem" }}>Windward</th>
-                    <th style={{ padding: "1rem 0.5rem", textAlign: "center", fontWeight: 500, color: "hsl(214,7%,50%)", fontSize: "0.625rem" }}>Datadog</th>
-                    <th style={{ padding: "1rem 0.5rem", textAlign: "center", fontWeight: 500, color: "hsl(214,7%,50%)", fontSize: "0.625rem" }}>Litify</th>
-                    <th style={{ padding: "1rem 0.5rem", textAlign: "center", fontWeight: 500, color: "hsl(214,7%,50%)", fontSize: "0.625rem" }}>Reonomy</th>
-                    <th style={{ padding: "1rem 0.5rem", textAlign: "center", fontWeight: 700, color: "hsl(142,60%,55%)", fontSize: "0.625rem" }}>MOAT</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {COMPETITIVE_MOAT_MATRIX.map((row, i) => (
-                    <tr key={i} style={{ borderBottom: i < COMPETITIVE_MOAT_MATRIX.length - 1 ? "1px solid hsl(214,10%,12%)" : undefined }}>
-                      <td style={{ padding: "0.75rem 1.25rem", color: "hsl(38,8%,82%)", fontSize: "0.8125rem" }}>{row.capability}</td>
-                      <td style={{ padding: "0.75rem 0.5rem", textAlign: "center", color: "hsl(142,60%,55%)" }}>{"\u2713"}</td>
-                      <td style={{ padding: "0.75rem 0.5rem", textAlign: "center", color: "hsl(0,60%,55%)" }}>{"\u2717"}</td>
-                      <td style={{ padding: "0.75rem 0.5rem", textAlign: "center", color: "hsl(0,60%,55%)" }}>{"\u2717"}</td>
-                      <td style={{ padding: "0.75rem 0.5rem", textAlign: "center", color: "hsl(0,60%,55%)" }}>{"\u2717"}</td>
-                      <td style={{ padding: "0.75rem 0.5rem", textAlign: "center", color: "hsl(0,60%,55%)" }}>{"\u2717"}</td>
-                      <td style={{ padding: "0.75rem 0.5rem", textAlign: "center", color: "hsl(0,60%,55%)" }}>{"\u2717"}</td>
-                      <td style={{ padding: "0.75rem 0.5rem", textAlign: "center", color: "hsl(0,60%,55%)" }}>{"\u2717"}</td>
-                      <td style={{ padding: "0.75rem 0.5rem", textAlign: "center", fontFamily: "var(--font-mono)", fontWeight: 700, color: "hsl(142,60%,55%)" }}>{row.moat.toFixed(2)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr style={{ borderTop: "2px solid var(--color-alloy-border)" }}>
-                    <td colSpan={8} style={{ padding: "0.875rem 1.25rem", textAlign: "right", fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "hsl(214,7%,62%)" }}>Average Moat Score</td>
-                    <td style={{ padding: "0.875rem 0.5rem", textAlign: "center", fontFamily: "var(--font-mono)", fontWeight: 800, fontSize: "1rem", color: "hsl(142,60%,55%)" }}>0.94</td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          </m.div>
-
-          <m.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.25 }}
-            className="szl-card"
-            style={{ borderRadius: "0.75rem", padding: cardPad, marginTop: "2rem", textAlign: "center" }}
-          >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "1rem", marginBottom: "0.75rem" }}>
-              <Crown size={20} color="hsl(45,80%,55%)" />
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.875rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(45,80%,55%)" }}>Verdict: One-of-One</p>
-              <Crown size={20} color="hsl(45,80%,55%)" />
-            </div>
-            <p style={{ fontSize: "0.875rem", lineHeight: 1.7, color: "hsl(214,7%,60%)", maxWidth: "60ch", margin: "0 auto" }}>
-              8 of 8 capabilities are unique to Alloy. No single competitor — and no combination of competitors — can replicate what this platform does across defense, maritime, legal, real estate, and advisory intelligence simultaneously.
-            </p>
-          </m.div>
-        </SectionShell>
-
-        {/* ===== COMPOUND DASHBOARD STATS ===== */}
-        <SectionShell>
-          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-            <p style={monoLabel}>Live Intelligence Fabric</p>
-            <h2 style={sectionH2}>
-              Seven subsystems. One intelligence organism.
-            </h2>
-            <p style={sectionP}>
-              Every subsystem operates continuously — linking entities, profiling behavior, predicting cascades, anticipating events, detecting correlations, and measuring competitive position. The compound dashboard unifies all seven into a single operational picture.
-            </p>
-          </m.div>
-          <div style={{ display: "grid", gap: "0.75rem" }} className="lg:grid-cols-4">
-            {[
-              { icon: Orbit, label: "Ontology Entities", value: "40+", sub: "Across 5 domains" },
-              { icon: Link2, label: "Relationship Links", value: "22", sub: "Link types" },
-              { icon: Fingerprint, label: "Behavioral Genomes", value: "Live", sub: "Per-entity DNA" },
-              { icon: Flame, label: "Cascade Predictions", value: "Real-time", sub: "Cross-domain" },
-              { icon: Radar, label: "Anticipatory Signals", value: "Active", sub: "Pre-emptive" },
-              { icon: Waves, label: "Correlations", value: "Scanning", sub: "Hidden patterns" },
-              { icon: Crown, label: "Moat Score", value: "0.94", sub: "One-of-one" },
-              { icon: BrainCircuit, label: "API Endpoints", value: "15+", sub: "All returning 200" },
-            ].map((stat, i) => {
-              const Icon = stat.icon;
-              return (
-                <m.div
-                  key={i}
-                  initial={{ opacity: 0, y: 8 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.35, delay: i * 0.05 }}
-                  className="szl-card"
-                  style={{ borderRadius: "0.625rem", padding: "1.25rem", textAlign: "center" }}
-                >
-                  <div style={{ ...iconBox, margin: "0 auto 0.75rem" }}>
-                    <Icon size={16} color="var(--color-alloy-light)" />
-                  </div>
-                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "1.25rem", fontWeight: 700, color: "hsl(142,60%,55%)", marginBottom: "0.25rem" }}>{stat.value}</p>
-                  <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: "hsl(38,8%,82%)", marginBottom: "0.125rem" }}>{stat.label}</p>
-                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 500, color: "hsl(214,7%,48%)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{stat.sub}</p>
-                </m.div>
-              );
-            })}
-          </div>
-        </SectionShell>
-
-        {/* ===== CTA ===== */}
-        <section style={{ padding: `${sectionPad} 0` }}>
-          <div style={contentMax}>
+        {/* CTA */}
+        <section style={{ padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <m.div
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -1336,10 +566,10 @@ export default function AlloyPage() {
             >
               <div>
                 <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.2, marginBottom: "0.875rem" }}>
-                  Ready to deploy intelligence that evolves itself?
+                  Ready to add execution accountability to your workflows?
                 </h2>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "48ch" }}>
-                  Talk to us about applying Alloy to one critical workflow — with genetic evolution, expert routing, defense-grade threat modeling, and full governance from day one.
+                  Talk to us about applying Alloy to one critical workflow — with Lyte for portfolio observability and Alloy for governed, auditable execution.
                 </p>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", flexShrink: 0 }}>

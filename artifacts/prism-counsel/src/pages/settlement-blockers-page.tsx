@@ -201,7 +201,7 @@ export default function SettlementBlockersPage() {
           </div>
           <p className="text-xs text-slate-500 mt-0.5">12-type blocker classification — severity, ownership, consequences, clearing actions</p>
         </div>
-        <Link href="/recovery-ops">
+        <Link href="/prism-counsel/recovery-ops">
           <button className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium bg-[#c45a4a]/10 text-[#c45a4a] border border-[#c45a4a]/20 hover:bg-[#c45a4a]/20 transition-colors">
             <ShieldAlert className="w-3.5 h-3.5" />
             Recovery & Lien Ops

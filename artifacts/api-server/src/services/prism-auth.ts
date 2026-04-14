@@ -1,6 +1,5 @@
 import { type Request, type Response, type NextFunction } from "express";
-import pino from "pino";
-const logger = pino({ name: "prism-auth" });
+import { logger } from "@szl-holdings/workflow-engine";
 
 export const PRISM_ROLES = {
   FOUNDER_ADMIN: "founder_admin",
@@ -75,7 +74,7 @@ export function requirePrismRole(...allowedRoles: PrismRole[]) {
       return;
     }
     logger.warn({
-      userId: req.user.id,
+      userId: req.user.userId,
       requiredRoles: allowedRoles,
       actualRoles: userRoles,
     }, "[prism-auth] Access denied: insufficient role");
@@ -106,7 +105,7 @@ export function requirePrismExport() {
     }
     const userRoles = getUserRoles(req);
     if (!hasAnyRole(userRoles, EXPORT_ROLES)) {
-      logger.warn({ userId: req.user.id }, "[prism-auth] Export access denied");
+      logger.warn({ userId: req.user.userId }, "[prism-auth] Export access denied");
       res.status(403).json({ error: "Export access requires attorney or admin role" });
       return;
     }

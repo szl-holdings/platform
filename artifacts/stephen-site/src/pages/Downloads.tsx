@@ -43,7 +43,7 @@ export function Downloads() {
 
         <div className="mt-12 border-t border-white/5 pt-8">
           <p className="text-muted-foreground/40 text-[13px]">
-            Other materials available on request. <a href="mailto:inquiries@szlholdings.com" className="text-primary hover:text-primary/80 transition-colors">Email me</a>.
+            Other materials available on request. <a href="mailto:contact@stephenl.dev" className="text-primary hover:text-primary/80 transition-colors">Email me</a>.
           </p>
         </div>
       </div>

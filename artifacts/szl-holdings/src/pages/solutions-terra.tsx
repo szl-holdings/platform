@@ -74,53 +74,6 @@ export default function SolutionsTerraPage() {
             </div>
           </div>
         </section>
-
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-terra)", marginBottom: "1rem" }}>Built on Lyte + Alloy</p>
-              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "32ch", marginBottom: "1.25rem" }}>
-                The same architecture. Domain-specific intelligence.
-              </h2>
-              <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "hsl(214,7%,60%)", maxWidth: "56ch", marginBottom: "2.5rem" }}>
-                Terra shares its execution fabric, governance model, and audit infrastructure with every SZL vertical.
-                Signal detection, human-in-the-loop approval, and proof chain verification — applied to real estate operations.
-              </p>
-            </m.div>
-            <div className="szl-grid-3">
-              {[
-                { label: "Platform Architecture", desc: "How signal detection, twin enrichment, and governed action work across all verticals.", href: "/architecture", color: "var(--color-lyte-light)" },
-                { label: "Trust Center", desc: "Security controls, data handling, AI governance, and compliance documentation.", href: "/trust", color: "hsl(145,62%,46%)" },
-                { label: "All Solutions", desc: "Explore PRISM Counsel, Vessels, Aegis, and the full SZL vertical portfolio.", href: "/solutions", color: "hsl(38,72%,58%)" },
-              ].map((link, i) => (
-                <m.div key={link.label} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.38, delay: i * 0.06 }}>
-                  <Link href={link.href} style={{ textDecoration: "none", color: "inherit" }}>
-                    <div className="szl-card" style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)", cursor: "pointer", transition: "border-color 0.2s" }}>
-                      <div style={{ width: "4px", height: "16px", borderRadius: "2px", background: link.color, marginBottom: "1rem" }} />
-                      <h3 style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.625rem" }}>{link.label}</h3>
-                      <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{link.desc}</p>
-                    </div>
-                  </Link>
-                </m.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section style={{ padding: "var(--space-section-md) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }} className="szl-card szl-grid-cta" style={{ borderRadius: "1rem", padding: "clamp(2.5rem,5vw,4rem)", gap: "2.5rem", alignItems: "center" }}>
-              <div>
-                <h2 style={{ fontSize: "clamp(1.5rem,3vw,2rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.2, marginBottom: "0.875rem" }}>Discuss a pilot or walkthrough.</h2>
-                <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "48ch" }}>Terra is in design-partner stage with real estate operators and investors managing complex acquisition and portfolio workflows. Talk to us about your operating environment.</p>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", flexShrink: 0 }}>
-                <Link href="/contact" className="szl-btn-primary">Discuss a pilot <ArrowRight size={14} /></Link>
-                <Link href="/demos" className="szl-btn-secondary" style={{ textAlign: "center" }}>See live demos</Link>
-              </div>
-            </m.div>
-          </div>
-        </section>
       </main>
       <SiteFooter />
     </div>

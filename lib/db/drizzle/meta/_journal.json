@@ -31,48 +31,6 @@
       "breakpoints": true
     },
     {
-      "idx": 4,
-      "version": "7",
-      "when": 1774965000000,
-      "tag": "0004_alloy_canonical_schema",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1774970000000,
-      "tag": "0005_platform_ops_tables",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1774980000000,
-      "tag": "0006_firestorm_hardening_platform",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1774990000000,
-      "tag": "0007_azure_tenants_dataverse",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1775000000000,
-      "tag": "0008_lyte_dashboards",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1775010000000,
-      "tag": "0009_capital_certification_readiness",
-      "breakpoints": true
-    },
-    {
       "idx": 10,
       "version": "7",
       "when": 1775020000000,
@@ -84,90 +42,6 @@
       "version": "7",
       "when": 1775030000000,
       "tag": "0011_org_members_unique_constraint",
-      "breakpoints": true
-    },
-    {
-      "idx": 12,
-      "version": "7",
-      "when": 1775040000000,
-      "tag": "0012_alloy_governance_policies",
-      "breakpoints": true
-    },
-    {
-      "idx": 13,
-      "version": "7",
-      "when": 1775050000000,
-      "tag": "0013_terra_action_items",
-      "breakpoints": true
-    },
-    {
-      "idx": 14,
-      "version": "7",
-      "when": 1775060000000,
-      "tag": "0014_firestorm_tradecraft_tables",
-      "breakpoints": true
-    },
-    {
-      "idx": 15,
-      "version": "7",
-      "when": 1775070000000,
-      "tag": "0015_prism_counsel_ny",
-      "breakpoints": true
-    },
-    {
-      "idx": 16,
-      "version": "7",
-      "when": 1775080000000,
-      "tag": "0016_outcome_graph_atlas_artifacts",
-      "breakpoints": true
-    },
-    {
-      "idx": 17,
-      "version": "7",
-      "when": 1775090000000,
-      "tag": "0017_pc_citation_audit_reports",
-      "breakpoints": true
-    },
-    {
-      "idx": 18,
-      "version": "7",
-      "when": 1775100000000,
-      "tag": "0018_nexus_persistence",
-      "breakpoints": true
-    },
-    {
-      "idx": 19,
-      "version": "7",
-      "when": 1775110000000,
-      "tag": "0019_terra_broker_schema",
-      "breakpoints": true
-    },
-    {
-      "idx": 20,
-      "version": "7",
-      "when": 1775120000000,
-      "tag": "0020_export_jobs",
-      "breakpoints": true
-    },
-    {
-      "idx": 21,
-      "version": "7",
-      "when": 1775130000000,
-      "tag": "0021_feedback_tables",
-      "breakpoints": true
-    },
-    {
-      "idx": 22,
-      "version": "7",
-      "when": 1775140000000,
-      "tag": "0022_pc_matters_practice_area",
-      "breakpoints": true
-    },
-    {
-      "idx": 23,
-      "version": "7",
-      "when": 1776140000000,
-      "tag": "0023_dos_sessions_app_column",
       "breakpoints": true
     }
   ]

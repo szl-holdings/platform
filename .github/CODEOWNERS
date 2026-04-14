@@ -8,10 +8,6 @@ artifacts/terra/ @stephenlutar2-hash
 artifacts/vessels/ @stephenlutar2-hash
 artifacts/carlota-jo/ @stephenlutar2-hash
 artifacts/stephen-site/ @stephenlutar2-hash
-artifacts/prism-counsel/ @stephenlutar2-hash
-artifacts/forge/ @stephenlutar2-hash
-artifacts/nexus/ @stephenlutar2-hash
-artifacts/inca-lab/ @stephenlutar2-hash
 
 artifacts/*-mobile/ @stephenlutar2-hash
 

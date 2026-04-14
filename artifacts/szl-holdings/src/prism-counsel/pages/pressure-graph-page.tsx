@@ -3,26 +3,6 @@ import { BarChart3, TrendingUp, TrendingDown, Minus, AlertTriangle, ArrowRight }
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 
-interface PcPressureDimension {
-  id: number;
-  matterId: number;
-  dimension: string;
-  currentScore: number;
-  priorScore?: number | null;
-  movementDirection: string;
-  topDrivers?: unknown;
-  recommendedNextActions?: unknown;
-  confidence?: number | null;
-  likelyConsequence?: string | null;
-  computedAt: string;
-}
-
-interface PressureResponse {
-  matterId: number;
-  dimensions: PcPressureDimension[];
-  computedAt: string;
-}
-
 const DIMENSIONS = [
   { id: "deadline", label: "Deadline", color: "#c45a4a" },
   { id: "insurer", label: "Insurer", color: "#d4a054" },
@@ -38,7 +18,7 @@ const DIMENSIONS = [
   { id: "governance", label: "Governance", color: "#4a90b8" },
 ];
 
-function DimensionCard({ dim, liveData }: { dim: typeof DIMENSIONS[number]; liveData?: PcPressureDimension }) {
+function DimensionCard({ dim, liveData }: { dim: typeof DIMENSIONS[number]; liveData?: any }) {
   const score = liveData?.currentScore ?? Math.random() * 100;
   const prior = liveData?.priorScore ?? score + (Math.random() - 0.5) * 20;
   const direction = liveData?.movementDirection ?? (score > prior ? "rising" : score < prior ? "falling" : "stable");
@@ -47,8 +27,8 @@ function DimensionCard({ dim, liveData }: { dim: typeof DIMENSIONS[number]; live
   const DirectionIcon = direction === "rising" ? TrendingUp : direction === "falling" ? TrendingDown : Minus;
   const dirColor = direction === "rising" ? "#c45a4a" : direction === "falling" ? "#5aa87a" : "#8a7a6a";
 
-  const drivers = Array.isArray(liveData?.topDrivers) ? (liveData.topDrivers as Array<string | { label?: string }>) : [];
-  const actions = Array.isArray(liveData?.recommendedNextActions) ? (liveData.recommendedNextActions as Array<string | { action?: string }>) : [];
+  const drivers = liveData?.topDrivers ?? [];
+  const actions = liveData?.recommendedNextActions ?? [];
 
   return (
     <div className="rounded-lg border border-white/[0.06] p-4 space-y-3" style={{ background: "#0c1220" }}>
@@ -79,10 +59,10 @@ function DimensionCard({ dim, liveData }: { dim: typeof DIMENSIONS[number]; live
       {drivers.length > 0 && (
         <div className="space-y-1">
           <div className="text-[9px] text-slate-500 uppercase tracking-wider">Top Drivers</div>
-          {drivers.slice(0, 2).map((d, i) => (
+          {drivers.slice(0, 2).map((d: any, i: number) => (
             <div key={i} className="text-[10px] text-slate-400 flex items-center gap-1">
               <div className="w-1 h-1 rounded-full bg-slate-500" />
-              {typeof d === "string" ? d : (d.label ?? JSON.stringify(d))}
+              {typeof d === "string" ? d : d.label ?? JSON.stringify(d)}
             </div>
           ))}
         </div>
@@ -91,10 +71,10 @@ function DimensionCard({ dim, liveData }: { dim: typeof DIMENSIONS[number]; live
       {actions.length > 0 && (
         <div className="space-y-1">
           <div className="text-[9px] text-slate-500 uppercase tracking-wider">Next Actions</div>
-          {actions.slice(0, 1).map((a, i) => (
+          {actions.slice(0, 1).map((a: any, i: number) => (
             <div key={i} className="flex items-start gap-1 text-[10px] text-[#4a90b8]">
               <ArrowRight className="w-2.5 h-2.5 mt-0.5 flex-shrink-0" />
-              {typeof a === "string" ? a : (a.action ?? JSON.stringify(a))}
+              {typeof a === "string" ? a : a.action ?? JSON.stringify(a)}
             </div>
           ))}
         </div>
@@ -107,14 +87,17 @@ export default function PressureGraphPage() {
   const [, params] = useRoute("/prism-counsel/matters/:id/pressure");
   const matterId = parseInt(params?.id ?? "0");
 
-  const { data: pressureData, isLoading } = useQuery<PressureResponse>({
+  const { data: pressureData, isLoading } = useQuery({
     queryKey: ["pressure-graph", matterId],
-    queryFn: () => apiRequest<PressureResponse>("GET", `/api/prism-counsel/matters/${matterId}/pressure`),
+    queryFn: async () => {
+      const res = await apiRequest("GET", `/api/prism-counsel/matters/${matterId}/pressure`);
+      return res.json();
+    },
     enabled: matterId > 0,
   });
 
-  const dimensions = pressureData?.dimensions ?? [];
-  const dimMap: Record<string, PcPressureDimension> = {};
+  const dimensions = pressureData?.data?.dimensions ?? [];
+  const dimMap: Record<string, any> = {};
   for (const d of dimensions) {
     dimMap[d.dimension] = d;
   }

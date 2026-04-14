@@ -35,7 +35,6 @@
     "@szl-holdings/analytics": "workspace:*",
     "@szl-holdings/graphql-client": "workspace:*",
     "@szl-holdings/observability": "workspace:*",
-    "@szl-holdings/prism-bus": "workspace:*",
     "@szl-holdings/replit-auth-web": "workspace:*",
     "@szl-holdings/shared-ui": "workspace:*",
     "clsx": "catalog:",
@@ -44,6 +43,7 @@
     "i18next-browser-languagedetector": "^8.2.1",
     "react-i18next": "^17.0.2",
     "sonner": "^2.0.7",
+    "@szl-holdings/prism-bus": "workspace:*",
     "zod": "catalog:"
   }
 }

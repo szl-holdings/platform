@@ -1,10 +1,9 @@
 import { lazy, Suspense, useState, useEffect, useCallback } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
-import { AnimatePresence, motion as m, useReducedMotion } from "framer-motion";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { DemoModeProvider, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig, SandboxModeProvider, SandboxModeBanner, AnalyticsProvider } from "@szl-holdings/shared-ui";
 import { McpOverlay } from "@szl-holdings/mcp-client";
-import { PrismBusProvider } from "@szl-holdings/prism-bus/provider";
+import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 import { UserButton } from "@szl-holdings/shared-ui/UserButton";
@@ -21,7 +20,6 @@ import {
 } from "lucide-react";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { sentinelConfig } from "@szl-holdings/shared-ui/copilot-configs";
-import { AIStatusBar } from "@szl-holdings/shared-ui/ai-status-bar";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { toAlpha } from "@szl-holdings/shared-ui/utils";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
@@ -36,8 +34,6 @@ const AEGIS_ACCENT = LANE_ACCENT_HEX.aegis.primary;
 const AegisAtlasArtifactsPage = lazy(() => import("@/pages/atlas-artifacts"));
 const AegisMarketingHome = lazy(() => import("@/pages/aegis-home"));
 const AegisPricingPage = lazy(() => import("@/pages/aegis-pricing"));
-const AegisUseCasesPage = lazy(() => import("@/pages/aegis-use-cases"));
-const AegisTrustPage = lazy(() => import("@/pages/aegis-trust"));
 const EnterpriseDemo = lazy(() => import("@/pages/enterprise-demo"));
 const SOCDashboard = lazy(() => import("@/pages/soc-dashboard"));
 const ThreatIntelligence = lazy(() => import("@/pages/threat-intelligence"));
@@ -63,7 +59,6 @@ const ExecutiveRisk = lazy(() => import("@/pages/executive-risk"));
 const SacsayhuamanShield = lazy(() => import("@/pages/sacsayhuaman-shield"));
 const AdversaryEmulation = lazy(() => import("@/pages/simulation-runner"));
 const AgentInsightsPage = lazy(() => import("@/pages/agent-insights"));
-const AIIntelligencePage = lazy(() => import("@/pages/ai-intelligence"));
 const AssetInventoryPage = lazy(() => import("@/pages/asset-inventory"));
 const VulnerabilityDashboard = lazy(() => import("@/pages/vulnerability-dashboard"));
 const HardeningControlsPage = lazy(() => import("@/pages/hardening-controls"));
@@ -80,19 +75,6 @@ const ReadinessAIInsights = lazy(() => import("@/pages/compliance/readiness-ai-i
 const SoarPlaybooks = lazy(() => import("@/pages/soar-playbooks"));
 const StixTaxii = lazy(() => import("@/pages/stix-taxii"));
 const TradecraftEnginePage = lazy(() => import("@/pages/tradecraft-engine"));
-const HypothesisEngine = lazy(() => import("@/pages/hypothesis-engine"));
-const ConfidenceChallenge = lazy(() => import("@/pages/confidence-challenge"));
-const BoardBriefGenerator = lazy(() => import("@/pages/board-brief-generator"));
-const ResilienceDrill = lazy(() => import("@/pages/resilience-drill"));
-const AnalystScorecard = lazy(() => import("@/pages/analyst-scorecard"));
-const ThreatGlobePage = lazy(() => import("@/pages/threat-globe"));
-
-// ─── Task-375: Deep Evolution Pages ───────────────────────────────────────────
-const AdversaryPersonaEngine = lazy(() => import("@/pages/adversary-persona-engine"));
-const AttackReplayTheater = lazy(() => import("@/pages/attack-replay-theater"));
-const BlastRadiusSimulator = lazy(() => import("@/pages/blast-radius-simulator"));
-const BoardReadyRiskNarrative = lazy(() => import("@/pages/board-ready-risk-narrative"));
-const ThreatHuntWorkbench = lazy(() => import("@/pages/threat-hunt-workbench"));
 
 // ─── Command Surfaces (Phase 1) ───────────────────────────────────────────────
 const CommandHome = lazy(() => import("@/pages/command-home"));
@@ -253,7 +235,6 @@ const intelCortexNav = [
   { path: "/intel/dual-mind", label: "Dual-Mind Monitor", icon: Sun },
   { path: "/intel/willaq-umu", label: "Willaq Umu Oracle", icon: Eye },
   { path: "/agent-insights", label: "Agent Insights", icon: BrainIcon },
-  { path: "/ai-intelligence", label: "AI Intelligence", icon: BrainIcon },
 ];
 
 type Module = "security" | "operations" | "intelligence";
@@ -375,28 +356,6 @@ function AegisSidebarContent({ location, onNavigate }: { location: string; onNav
         { id: "action-queue", label: "Action Queue", href: "/soc/action-queue", icon: <Zap className="w-3.5 h-3.5" /> },
         { id: "readiness", label: "Incident Readiness", href: "/soc/readiness", icon: <BarChart3 className="w-3.5 h-3.5" /> },
         { id: "governance", label: "Governance Review", href: "/soc/governance", icon: <FileText className="w-3.5 h-3.5" /> },
-      ],
-    },
-    {
-      id: "tradecraft-tools",
-      label: "Intelligence Tradecraft",
-      items: [
-        { id: "hypothesis-engine", label: "Hypothesis Engine", href: "/tradecraft/hypothesis-engine", icon: <BrainIcon className="w-3 h-3" /> },
-        { id: "confidence-challenge", label: "Confidence Challenge", href: "/tradecraft/confidence-challenge", icon: <BarChart3 className="w-3 h-3" /> },
-        { id: "board-brief", label: "Board Brief Generator", href: "/tradecraft/board-brief", icon: <FileText className="w-3 h-3" /> },
-        { id: "resilience-drill", label: "Resilience Drill", href: "/tradecraft/resilience-drill", icon: <Shield className="w-3 h-3" /> },
-        { id: "analyst-scorecard", label: "Analyst Scorecard", href: "/tradecraft/analyst-scorecard", icon: <TrendingUp className="w-3 h-3" /> },
-      ],
-    },
-    {
-      id: "adversary-intel",
-      label: "Adversary Intelligence",
-      items: [
-        { id: "adversary-persona-engine", label: "Adversary Persona Engine", href: "/adversary-persona-engine", icon: <Users className="w-3 h-3" /> },
-        { id: "attack-replay-theater", label: "Attack Replay Theater", href: "/attack-replay-theater", icon: <Play className="w-3 h-3" /> },
-        { id: "blast-radius-simulator", label: "Blast Radius Simulator", href: "/blast-radius-simulator", icon: <Zap className="w-3 h-3" /> },
-        { id: "board-ready-risk-narrative", label: "Board-Ready Risk Narrative", href: "/board-ready-risk-narrative", icon: <FileText className="w-3 h-3" /> },
-        { id: "threat-hunt-workbench", label: "Threat Hunt Workbench", href: "/threat-hunt-workbench", icon: <Search className="w-3 h-3" /> },
       ],
     },
     {
@@ -578,17 +537,11 @@ function SidebarContent({ onNavigate, onReplayTour }: { onNavigate: (path: strin
 }
 
 function AppRouter() {
-  const [location] = useLocation();
-  const prefersReducedMotion = useReducedMotion();
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      <m.div key={location} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: prefersReducedMotion ? 0 : 0.25, ease: "easeInOut" }} style={{ position: "relative", minHeight: "100vh" }}>
-      <Suspense fallback={<PageLoader />}>
+    <Suspense fallback={<PageLoader />}>
       <Switch>
         {/* Aegis Home & Enterprise */}
         <Route path="/home" component={AegisMarketingHome} />
-        <Route path="/use-cases" component={AegisUseCasesPage} />
-        <Route path="/security" component={AegisTrustPage} />
         <Route path="/demo" component={EnterpriseDemo} />
         {/* Command Surfaces (Phase 1) */}
         <Route path="/command-home" component={CommandHome} />
@@ -633,7 +586,6 @@ function AppRouter() {
         <Route path="/sacsayhuaman-shield" component={SacsayhuamanShield} />
         <Route path="/adversary-emulation" component={AdversaryEmulation} />
         <Route path="/agent-insights" component={AgentInsightsPage} />
-        <Route path="/ai-intelligence" component={AIIntelligencePage} />
         <Route path="/vulnerabilities" component={VulnerabilityDashboard} />
         <Route path="/hardening-controls" component={HardeningControlsPage} />
         <Route path="/cases" component={CasesPage} />
@@ -684,21 +636,6 @@ function AppRouter() {
         <Route path="/soc/readiness" component={IncidentReadinessView} />
         <Route path="/soc/governance" component={GovernanceReview} />
 
-        {/* Intelligence Tradecraft Tools */}
-        <Route path="/tradecraft/hypothesis-engine" component={HypothesisEngine} />
-        <Route path="/tradecraft/confidence-challenge" component={ConfidenceChallenge} />
-        <Route path="/tradecraft/board-brief" component={BoardBriefGenerator} />
-        <Route path="/tradecraft/resilience-drill" component={ResilienceDrill} />
-        <Route path="/tradecraft/analyst-scorecard" component={AnalystScorecard} />
-
-        {/* Adversary Intelligence — Task 375 */}
-        <Route path="/adversary-persona-engine" component={AdversaryPersonaEngine} />
-        <Route path="/attack-replay-theater" component={AttackReplayTheater} />
-        <Route path="/blast-radius-simulator" component={BlastRadiusSimulator} />
-        <Route path="/board-ready-risk-narrative" component={BoardReadyRiskNarrative} />
-        <Route path="/threat-hunt-workbench" component={ThreatHuntWorkbench} />
-
-        <Route path="/threat-globe" component={ThreatGlobePage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground">Page not found</p>
@@ -706,8 +643,6 @@ function AppRouter() {
         </Route>
       </Switch>
     </Suspense>
-      </m.div>
-    </AnimatePresence>
   );
 }
 
@@ -743,15 +678,9 @@ const aegisCommands: CommandItem[] = [
   { id: "nav-models", label: "Models", icon: "⚙️", group: "Intelligence Engine", action: nav("/intel/models") },
   { id: "nav-predictions", label: "Predictions", icon: "📈", group: "Intelligence Engine", action: nav("/intel/predictions") },
   { id: "nav-intel-insights", label: "Intel Insights", icon: "💡", group: "Intelligence Engine", action: nav("/intel/insights") },
-  { id: "nav-hypothesis-engine", label: "Hypothesis Engine", icon: "🧩", group: "Intelligence Tradecraft", keywords: ["hypothesis", "ach", "competing", "alternative", "analysis"], action: nav("/tradecraft/hypothesis-engine") },
-  { id: "nav-confidence-challenge", label: "Confidence Challenge Mode", icon: "📊", group: "Intelligence Tradecraft", keywords: ["confidence", "calibration", "challenge", "audit"], action: nav("/tradecraft/confidence-challenge") },
-  { id: "nav-board-brief", label: "Board Brief Generator", icon: "📄", group: "Intelligence Tradecraft", keywords: ["board", "brief", "executive", "report", "restricted"], action: nav("/tradecraft/board-brief") },
-  { id: "nav-resilience-drill", label: "Resilience Drill Simulator", icon: "🏋️", group: "Intelligence Tradecraft", keywords: ["drill", "simulation", "exercise", "tabletop", "resilience"], action: nav("/tradecraft/resilience-drill") },
-  { id: "nav-analyst-scorecard", label: "Analyst Tradecraft Scorecard", icon: "🏆", group: "Intelligence Tradecraft", keywords: ["analyst", "scorecard", "performance", "tradecraft", "metrics"], action: nav("/tradecraft/analyst-scorecard") },
   { id: "app-alloy", label: "Switch to Alloy", icon: "⬡", group: "Switch App", description: "Execution Fabric", action: () => { window.location.href = "/alloy/"; } },
   { id: "app-lyte", label: "Switch to Lyte", icon: "⚡", group: "Switch App", description: "Command Center", action: () => { window.location.href = "/lyte-command-center/"; } },
   { id: "app-vessels", label: "Switch to Vessels", icon: "⚓", group: "Switch App", description: "Maritime Intelligence", action: () => { window.location.href = "/vessels/"; } },
-  { id: "nav-ai-intelligence", label: "AI Intelligence", icon: "🤖", group: "AI", description: "Document analysis, NER, AI actions & workflows", keywords: ["ai", "document", "intelligence", "ner", "actions"], action: nav("/ai-intelligence") },
 ];
 
 const aegisShortcuts: KeyboardShortcut[] = [
@@ -762,7 +691,7 @@ const aegisShortcuts: KeyboardShortcut[] = [
   { key: "E", description: "Go to Intelligence Dashboard", category: "Intelligence" },
 ];
 
-const MARKETING_ROUTES = ["/", "/home", "/demo", "/use-cases", "/security", "/pricing"];
+const MARKETING_ROUTES = ["/", "/home", "/demo"];
 
 function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -782,10 +711,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
       <Suspense fallback={<PageLoader />}>
         <Switch>
           <Route path="/home" component={AegisMarketingHome} />
-          <Route path="/use-cases" component={AegisUseCasesPage} />
-          <Route path="/security" component={AegisTrustPage} />
           <Route path="/demo" component={EnterpriseDemo} />
-          <Route path="/pricing" component={AegisPricingPage} />
           <Route path="/" component={AegisMarketingHome} />
         </Switch>
         <Toaster />
@@ -828,7 +754,6 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
         </a>
         <EcosystemNav currentAppId="aegis" currentAppName="Aegis — Unified Defense & Intelligence" accentColor={AEGIS_ACCENT} />
         <SandboxModeBanner />
-        <AIStatusBar domain="aegis" accentColor={AEGIS_ACCENT} />
         <SharedDashboardShell
           sidebar={<SidebarContent onNavigate={(path) => { navigate(path); setSidebarOpen(false); }} onReplayTour={replayOnboarding} />}
           mobileOpen={sidebarOpen}

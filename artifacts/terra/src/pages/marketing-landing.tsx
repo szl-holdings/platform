@@ -1,15 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight, Building2, MapPin, TrendingUp, DollarSign, Flame,
   BarChart3, Users, Search, FileText, Shield, Layers,
   CheckCircle, Menu, X, Eye, Activity,
 } from "lucide-react";
-import { ContactModal, NoiseGrain, MagneticButton, WordReveal, ScrollCounter, CinematicReveal, LiveIndicator } from "@szl-holdings/shared-ui";
-
-type HeroCounterStat = { value: number; prefix?: string; suffix?: string; label: string };
-type HeroStaticStat = { display: string; label: string };
-type HeroStat = HeroCounterStat | HeroStaticStat;
+import { ContactModal } from "@szl-holdings/shared-ui";
 
 const ACCENT = "#2d6a4f";
 const ACCENT_LIGHT = "#40856a";
@@ -130,15 +125,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
   }, []);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0, transition: { duration: 0.2, ease: "easeIn" } }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className="min-h-screen overflow-x-hidden"
-      style={{ background: BG, color: "#c8ccd6", fontFamily: "'Inter', system-ui, sans-serif" }}
-    >
-      <NoiseGrain opacity={0.026} />
+    <div className="min-h-screen overflow-x-hidden" style={{ background: BG, color: "#c8ccd6", fontFamily: "'Inter', system-ui, sans-serif" }}>
 
       {/* NAV */}
       <nav className={`fixed top-0 left-0 right-0 z-50 h-14 flex items-center transition-all duration-400 ${scrolled ? "border-b" : ""}`}
@@ -181,34 +168,20 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
       {/* HERO */}
       <section className="relative pt-32 sm:pt-44 pb-24 sm:pb-32 max-w-[1100px] mx-auto px-6">
         <div className="absolute top-0 left-0 right-0 h-[600px] pointer-events-none overflow-hidden">
-          <div className="absolute top-[200px] left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full" style={{ background: "radial-gradient(ellipse, rgba(45,106,79,0.04) 0%, transparent 70%)" }} />
+          <div className="absolute top-[200px] left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full" style={{ background: "radial-gradient(ellipse, rgba(45,106,79,0.035) 0%, transparent 70%)" }} />
         </div>
 
         <Reveal>
-          <div className="flex items-center gap-2 mb-8">
-            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>
-              SZL Holdings &middot; Property / Portfolio / Broker Intelligence
-            </p>
-            <LiveIndicator color={ACCENT_LIGHT} showTimestamp={false} label="LIVE" />
-          </div>
+          <p className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-8 font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>
+            SZL Holdings &middot; Property / Portfolio / Broker Intelligence
+          </p>
         </Reveal>
 
         <Reveal delay={80}>
-          <WordReveal
-            text="The operating surface for"
-            as="h1"
-            delay={0.1}
-            stagger={0.06}
-            className="text-[clamp(2.6rem,6.5vw,4.8rem)] font-extrabold leading-[1.03] tracking-[-0.03em] text-white max-w-[860px]"
-          />
-          <WordReveal
-            text="serious real estate."
-            as="h1"
-            delay={0.45}
-            stagger={0.06}
-            className="text-[clamp(2.6rem,6.5vw,4.8rem)] font-extrabold leading-[1.03] tracking-[-0.03em] max-w-[860px]"
-            style={{ color: ACCENT_LIGHT }}
-          />
+          <h1 className="text-[clamp(2.6rem,6.5vw,4.8rem)] font-extrabold leading-[1.03] tracking-[-0.03em] text-white max-w-[860px]">
+            The operating surface for<br />
+            <span style={{ color: ACCENT_LIGHT }}>serious real estate.</span>
+          </h1>
         </Reveal>
 
         <Reveal delay={180}>
@@ -219,35 +192,25 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
 
         <Reveal delay={280}>
           <div className="flex flex-wrap gap-3 mb-20">
-            <MagneticButton>
-              <button onClick={onSignIn} className="inline-flex items-center gap-2 text-[13px] font-semibold px-7 py-3 rounded-lg transition-all" style={{ background: ACCENT_LIGHT, color: "#fff", boxShadow: "0 0 28px rgba(64,133,106,0.22)" }}>
-                Sign In <ArrowRight size={14} />
-              </button>
-            </MagneticButton>
-            <MagneticButton>
-              <a href="./dashboard?demo=true" className="inline-flex items-center gap-2 text-[13px] font-medium px-7 py-3 rounded-lg transition-all" style={{ color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.12)" }}>
-                Try Platform Demo →
-              </a>
-            </MagneticButton>
+            <button onClick={onSignIn} className="inline-flex items-center gap-2 text-[13px] font-semibold px-7 py-3 rounded-lg transition-all" style={{ background: ACCENT_LIGHT, color: "#fff" }}>
+              Sign In <ArrowRight size={14} />
+            </button>
+            <a href="./dashboard?demo=true" className="inline-flex items-center gap-2 text-[13px] font-medium px-7 py-3 rounded-lg transition-all" style={{ color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.12)" }}>
+              Try Platform Demo →
+            </a>
           </div>
         </Reveal>
 
         <Reveal delay={360}>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-px rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
-            {([
-              { value: 1025, suffix: "+", label: "Distress properties" },
-              { value: 4.8, prefix: "$", suffix: "B", label: "Pipeline tracked" },
-              { display: "5 boroughs", label: "NYC coverage" },
-              { display: "6 modules", label: "Intelligence domains" },
-            ] as HeroStat[]).map((s) => (
+            {[
+              { value: "1,025+", label: "Distress properties" },
+              { value: "$4.8B", label: "Pipeline tracked" },
+              { value: "5 boroughs", label: "NYC coverage" },
+              { value: "6 modules", label: "Intelligence domains" },
+            ].map(s => (
               <div key={s.label} className="py-5 px-5" style={{ background: BG }}>
-                <span className="text-[22px] font-extrabold font-mono text-white block">
-                  {"value" in s ? (
-                    <ScrollCounter target={(s as HeroCounterStat).value} prefix={(s as HeroCounterStat).prefix} suffix={(s as HeroCounterStat).suffix} />
-                  ) : (
-                    (s as HeroStaticStat).display
-                  )}
-                </span>
+                <span className="text-[22px] font-extrabold font-mono text-white block">{s.value}</span>
                 <span className="text-[10px] tracking-[0.06em] uppercase mt-1 block" style={{ color: "rgba(255,255,255,0.22)" }}>{s.label}</span>
               </div>
             ))}
@@ -557,74 +520,6 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
         </div>
       </section>
 
-      {/* SOCIAL PROOF */}
-      <section className="py-24 sm:py-32 px-6" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-        <div className="max-w-[1100px] mx-auto">
-          <Reveal>
-            <div className="max-w-[560px] mb-14">
-              <p className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-4 font-mono" style={{ color: "rgba(255,255,255,0.18)" }}>Documented Results</p>
-              <h2 className="text-[clamp(1.5rem,3.5vw,2.4rem)] font-bold leading-[1.15] tracking-tight text-white mb-4">
-                Real operators. Real outcomes.
-              </h2>
-              <p className="text-[15px] leading-[1.85]" style={{ color: "rgba(255,255,255,0.28)" }}>
-                From individual investors to acquisition teams at private equity firms — these are the results Terra delivers in production environments.
-              </p>
-            </div>
-          </Reveal>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
-            {[
-              { metric: "3×", label: "Faster deal sourcing", detail: "Operators move from market research to qualified pipeline in 3× less time vs. manual processes." },
-              { metric: "18%", label: "Higher off-market ratio", detail: "Average improvement in off-market acquisitions vs. MLS-first sourcing strategies." },
-              { metric: "$2.4M", label: "Average pipeline value at setup", detail: "Typical pipeline value tracked within 60 days of first deployment, across all tiers." },
-              { metric: "< 30 min", label: "Time to first distress lead", detail: "From platform connection to first ranked distress opportunity — typically under 30 minutes." },
-            ].map((p, i) => (
-              <Reveal key={p.label} delay={i * 60}>
-                <div className="p-7 rounded-xl h-full" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
-                  <span className="text-[2.5rem] font-extrabold font-mono block mb-2" style={{ color: ACCENT_LIGHT }}>{p.metric}</span>
-                  <p className="text-[12px] font-bold text-white mb-2">{p.label}</p>
-                  <p className="text-[11px] leading-[1.75]" style={{ color: "rgba(255,255,255,0.3)" }}>{p.detail}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
-            {[
-              { quote: "I was spending 2 hours every morning pulling from ACRIS, PropStream, and two other tools. Terra replaced all of it. I get to actual deals before the competition does.", attribution: "Acquisition Lead, NYC Investor Group", context: "50-unit portfolio, Brooklyn / Queens focus" },
-              { quote: "The LLC unmasking alone is worth the subscription. We identified three beneficial owners that weren't visible in any other database we had access to. All three deals closed.", attribution: "Principal, Real Estate Private Equity", context: "Series of distressed multi-family acquisitions" },
-              { quote: "Our team went from 6 properties in active pipeline to 34 in the first month. The distress scoring is genuinely predictive — not just a filtered public records list.", attribution: "Director of Acquisitions, Opportunity Zone Fund", context: "Bronx and Upper Manhattan market coverage" },
-            ].map((t, i) => (
-              <Reveal key={i} delay={i * 60}>
-                <div className="p-7 rounded-xl h-full" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
-                  <p className="text-[14px] leading-[1.85] mb-5 italic" style={{ color: "rgba(255,255,255,0.55)" }}>"{t.quote}"</p>
-                  <p className="text-[12px] font-semibold text-white mb-0.5">{t.attribution}</p>
-                  <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.25)" }}>{t.context}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-
-          <Reveal>
-            <div className="p-6 rounded-xl" style={{ background: "rgba(45,106,79,0.03)", border: "1px solid rgba(45,106,79,0.08)" }}>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                  <p className="text-[13px] font-semibold text-white mb-1">Part of the SZL Holdings platform family</p>
-                  <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.3)" }}>
-                    Terra runs on the SZL shared security and data infrastructure — SOC 2 compliant, enterprise-grade.{" "}
-                    <a href="/szl-holdings/trust" className="underline" style={{ color: "rgba(64,133,106,0.7)" }}>View Trust Center →</a>
-                  </p>
-                </div>
-                <div className="flex gap-3 shrink-0">
-                  <a href="/szl-holdings/" className="text-[11px] px-3 py-1.5 rounded-lg" style={{ color: "rgba(255,255,255,0.35)", border: "1px solid rgba(255,255,255,0.08)" }}>SZL Holdings →</a>
-                  <a href="/szl-holdings/architecture" className="text-[11px] px-3 py-1.5 rounded-lg" style={{ color: "rgba(255,255,255,0.35)", border: "1px solid rgba(255,255,255,0.08)" }}>Architecture →</a>
-                </div>
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
       {/* FOOTER */}
       <footer className="border-t px-6 py-10" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
         <div className="max-w-[1100px] mx-auto flex flex-col gap-6">
@@ -634,14 +529,13 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 <Building2 size={12} style={{ color: ACCENT_LIGHT }} />
               </div>
               <span className="text-sm font-bold text-white">Terra</span>
-              <span className="text-[9px] font-mono ml-1" style={{ color: "rgba(255,255,255,0.2)" }}>An SZL Holdings Company</span>
+              <span className="text-[9px] font-mono ml-1" style={{ color: "rgba(255,255,255,0.2)" }}>Property Intelligence</span>
             </div>
             <div className="flex items-center gap-4">
               {[
                 { name: "Lyte", href: "/lyte-command-center/" },
                 { name: "Vessels", href: "/vessels/" },
                 { name: "Aegis", href: "/firestorm/" },
-                { name: "PRISM Counsel", href: "/prism-counsel/" },
                 { name: "Carlota Jo", href: "/carlota-jo/" },
                 { name: "SZL", href: "/szl-holdings/" },
               ].map(l => (
@@ -651,15 +545,12 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-[11px] text-center sm:text-left" style={{ color: "rgba(255,255,255,0.12)" }}>
-              &copy; 2026 SZL Holdings. All rights reserved.
+              &copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
               <a href="https://x.com/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.15)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.15)")}>X</a>
               <a href="https://linkedin.com/company/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.15)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.15)")}>LinkedIn</a>
               <a href="https://medium.com/@stephen_38454" target="_blank" rel="noopener noreferrer" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.15)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.15)")}>Medium</a>
-              <a href="/legal/privacy" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.15)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.15)")}>Privacy</a>
-              <a href="/legal/terms" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.15)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.15)")}>Terms</a>
-              <a href="/security" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.15)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.15)")}>Security</a>
             </div>
           </div>
         </div>
@@ -672,6 +563,6 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
         app="terra"
         subtitle="Terra — Real Estate Intelligence"
       />
-    </motion.div>
+    </div>
   );
 }

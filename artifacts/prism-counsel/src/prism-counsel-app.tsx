@@ -4,11 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
 import { DemoModeProvider } from "@szl-holdings/shared-ui";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
-import { useAuth } from "@szl-holdings/replit-auth-web";
 import { PrismCounselShell } from "./components/prism-shell";
-import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
-import { prismCounselConfig } from "@szl-holdings/shared-ui/copilot-configs";
-import { AIStatusBar } from "@szl-holdings/shared-ui/ai-status-bar";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,7 +26,6 @@ function Wrap({ children }: { children: React.ReactNode }) {
 }
 
 const PrismDashboard = lazy(() => import("./pages/dashboard"));
-const AIIntelligencePage = lazy(() => import("./pages/ai-intelligence"));
 const PrismMattersList = lazy(() => import("./pages/matters-list"));
 const PrismMatterDetail = lazy(() => import("./pages/matter-detail"));
 const PrismForecast = lazy(() => import("./pages/forecast-page"));
@@ -41,8 +36,6 @@ const PrismApprovals = lazy(() => import("./pages/approvals-page"));
 const PrismCopilot = lazy(() => import("./pages/copilot-page"));
 const PrismParties = lazy(() => import("./pages/parties-page"));
 const PrismTrust = lazy(() => import("./pages/trust-page"));
-const PrismMarketingLanding = lazy(() => import("./pages/marketing-landing"));
-const PrismDemoPage = lazy(() => import("./pages/prism-demo-page"));
 const PrismAdmin = lazy(() => import("./pages/admin-page"));
 const PrismWatchlist = lazy(() => import("./pages/watchlist-page"));
 const PrismInsurerIntel = lazy(() => import("./pages/insurer-intel-page"));
@@ -62,7 +55,6 @@ const PrismReviewDesk = lazy(() => import("./pages/review-desk/review-desk-page"
 const PrismReviewMetrics = lazy(() => import("./pages/review-desk/review-metrics-page"));
 const PrismReviewAdmin = lazy(() => import("./pages/review-desk/review-admin-page"));
 const PrismMyReview = lazy(() => import("./pages/review-desk/my-review-page"));
-const PrismFilingGate = lazy(() => import("./pages/review-desk/filing-gate-page"));
 
 const PilotToday = lazy(() => import("./pages/pilot/today-page"));
 const PilotMatterDesk = lazy(() => import("./pages/pilot/matter-desk-page"));
@@ -112,14 +104,6 @@ const P2PortfolioForecast = lazy(() => import("./pages/p2/portfolio-forecast-pag
 const P2PartnerLifeOs = lazy(() => import("./pages/p2/partner-life-os-page"));
 const P2AdminPortfolio = lazy(() => import("./pages/p2/admin-portfolio-page"));
 
-// ─── Task-375: AI Intelligence Pages ─────────────────────────────────────────
-const CaseOraclePage = lazy(() => import("./pages/case-oracle-page"));
-const JudgeIntelligencePage = lazy(() => import("./pages/judge-intelligence-page"));
-const LitigationWarMapPage = lazy(() => import("./pages/litigation-war-map-page"));
-const InsurerFrictionV2Page = lazy(() => import("./pages/insurer-friction-v2-page"));
-const SmartDiscoveryAutopilotPage = lazy(() => import("./pages/smart-discovery-autopilot-page"));
-const RecoveryVelocityDashboardPage = lazy(() => import("./pages/recovery-velocity-dashboard-page"));
-
 const S32MorningBrief = lazy(() => import("./pages/s32/morning-brief-page"));
 const S32PrepMode = lazy(() => import("./pages/s32/prep-mode-page"));
 const S32QuietRisk = lazy(() => import("./pages/s32/quiet-risk-page"));
@@ -153,389 +137,337 @@ function MatterDeskV2Wrapper() {
 }
 
 function PrismCounselRoutes() {
-  const { isLoading, isAuthenticated } = useAuth();
-
-  if (isLoading) {
-    return <PageLoader />;
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <Switch>
-        <Route path="/demo">
-          <Suspense fallback={<PageLoader />}><PrismDemoPage /></Suspense>
-        </Route>
-        <Route>
-          <Suspense fallback={<PageLoader />}><PrismMarketingLanding /></Suspense>
-        </Route>
-      </Switch>
-    );
-  }
-
   return (
     <Switch>
-      <Route path="/marketing">
-        <Suspense fallback={<PageLoader />}><PrismMarketingLanding /></Suspense>
-      </Route>
-
-      <Route path="/demo">
-        <Suspense fallback={<PageLoader />}><PrismDemoPage /></Suspense>
-      </Route>
-
-      <Route path="/overview">
-        <Redirect to="/" />
+      {/* ── Canonical enterprise IA routes (new top-level contract) ── */}
+      {/* /overview → dashboard */}
+      <Route path="/prism-counsel/overview">
+        <Redirect to="/prism-counsel" />
       </Route>
       {/* /matters (canonical) */}
-      <Route path="/matters">
+      <Route path="/prism-counsel/matters">
         <Suspense fallback={<PageLoader />}><Wrap><PrismMattersList /></Wrap></Suspense>
       </Route>
       {/* /documents → discovery */}
-      <Route path="/documents">
-        <Redirect to="/discovery" />
+      <Route path="/prism-counsel/documents">
+        <Redirect to="/prism-counsel/discovery" />
       </Route>
       {/* /review → review-desk */}
-      <Route path="/review">
-        <Redirect to="/review-desk" />
+      <Route path="/prism-counsel/review">
+        <Redirect to="/prism-counsel/review-desk" />
       </Route>
       {/* /section-31 → worldline (Section 31 entry) */}
-      <Route path="/section-31">
-        <Redirect to="/worldline" />
+      <Route path="/prism-counsel/section-31">
+        <Redirect to="/prism-counsel/worldline" />
       </Route>
       {/* /practice/ny → NY Command */}
-      <Route path="/practice/ny">
-        <Redirect to="/ny" />
+      <Route path="/prism-counsel/practice/ny">
+        <Redirect to="/prism-counsel/ny" />
       </Route>
-      <Route path="/practice/ny/:sub">
-        {(params) => <Redirect to={`/ny/${params.sub}`} />}
+      <Route path="/prism-counsel/practice/ny/:sub">
+        {(params) => <Redirect to={`/prism-counsel/ny/${params.sub}`} />}
       </Route>
       {/* /search → open command bar alias (redirect to dashboard with search param) */}
-      <Route path="/search">
-        <Redirect to="/" />
+      <Route path="/prism-counsel/search">
+        <Redirect to="/prism-counsel" />
       </Route>
       {/* /settings → admin */}
-      <Route path="/settings">
-        <Redirect to="/admin" />
+      <Route path="/prism-counsel/settings">
+        <Redirect to="/prism-counsel/admin" />
       </Route>
       {/* /intelligence → copilot */}
-      <Route path="/intelligence">
-        <Redirect to="/copilot" />
-      </Route>
-
-      <Route path="/ai-intelligence">
-        <Suspense fallback={<PageLoader />}><Wrap><AIIntelligencePage /></Wrap></Suspense>
+      <Route path="/prism-counsel/intelligence">
+        <Redirect to="/prism-counsel/copilot" />
       </Route>
 
       {/* ── Primary app route: dashboard ── */}
-      <Route path="/">
+      <Route path="/prism-counsel">
         <Suspense fallback={<PageLoader />}><Wrap><PrismDashboard /></Wrap></Suspense>
       </Route>
-      <Route path="/matters/:id/twin">
+      <Route path="/prism-counsel/matters/:id/twin">
         {(params) => <Suspense fallback={<PageLoader />}><Wrap><PrismMatterTwin /></Wrap></Suspense>}
       </Route>
-      <Route path="/matters/:id/pressure">
+      <Route path="/prism-counsel/matters/:id/pressure">
         {(params) => <Suspense fallback={<PageLoader />}><Wrap><PrismPressureGraph /></Wrap></Suspense>}
       </Route>
-      <Route path="/matters/:id/proof-chain">
+      <Route path="/prism-counsel/matters/:id/proof-chain">
         {(params) => <Suspense fallback={<PageLoader />}><Wrap><PrismProofChain /></Wrap></Suspense>}
       </Route>
-      <Route path="/matters/:id">
+      <Route path="/prism-counsel/matters/:id">
         {(params) => <Suspense fallback={<PageLoader />}><Wrap><MatterRoute params={params} /></Wrap></Suspense>}
       </Route>
-      <Route path="/forecast">
+      <Route path="/prism-counsel/forecast">
         <Suspense fallback={<PageLoader />}><Wrap><PrismForecast /></Wrap></Suspense>
       </Route>
-      <Route path="/deadlines">
+      <Route path="/prism-counsel/deadlines">
         <Suspense fallback={<PageLoader />}><Wrap><PrismDeadlines /></Wrap></Suspense>
       </Route>
-      <Route path="/discovery">
+      <Route path="/prism-counsel/discovery">
         <Suspense fallback={<PageLoader />}><Wrap><PrismDiscovery /></Wrap></Suspense>
       </Route>
-      <Route path="/playbooks">
+      <Route path="/prism-counsel/playbooks">
         <Suspense fallback={<PageLoader />}><Wrap><PrismPlaybooks /></Wrap></Suspense>
       </Route>
-      <Route path="/approvals">
+      <Route path="/prism-counsel/approvals">
         <Suspense fallback={<PageLoader />}><Wrap><PrismApprovals /></Wrap></Suspense>
       </Route>
-      <Route path="/copilot">
+      <Route path="/prism-counsel/copilot">
         <Suspense fallback={<PageLoader />}><Wrap><PrismCopilot /></Wrap></Suspense>
       </Route>
-      <Route path="/parties">
+      <Route path="/prism-counsel/parties">
         <Suspense fallback={<PageLoader />}><Wrap><PrismParties /></Wrap></Suspense>
       </Route>
-      <Route path="/trust">
+      <Route path="/prism-counsel/trust">
         <Suspense fallback={<PageLoader />}><Wrap><PrismTrust /></Wrap></Suspense>
       </Route>
-      <Route path="/admin">
+      <Route path="/prism-counsel/admin">
         <Suspense fallback={<PageLoader />}><Wrap><PrismAdmin /></Wrap></Suspense>
       </Route>
-      <Route path="/watchlist">
+      <Route path="/prism-counsel/watchlist">
         <Suspense fallback={<PageLoader />}><Wrap><PrismWatchlist /></Wrap></Suspense>
       </Route>
-      <Route path="/insurer-intel">
+      <Route path="/prism-counsel/insurer-intel">
         <Suspense fallback={<PageLoader />}><Wrap><PrismInsurerIntel /></Wrap></Suspense>
       </Route>
-      <Route path="/venue-intel">
+      <Route path="/prism-counsel/venue-intel">
         <Suspense fallback={<PageLoader />}><Wrap><PrismVenueIntel /></Wrap></Suspense>
       </Route>
-
-      {/* AI Intelligence — Task 375 */}
-      <Route path="/case-oracle">
-        <Suspense fallback={<PageLoader />}><Wrap><CaseOraclePage /></Wrap></Suspense>
-      </Route>
-      <Route path="/judge-intelligence">
-        <Suspense fallback={<PageLoader />}><Wrap><JudgeIntelligencePage /></Wrap></Suspense>
-      </Route>
-      <Route path="/litigation-war-map">
-        <Suspense fallback={<PageLoader />}><Wrap><LitigationWarMapPage /></Wrap></Suspense>
-      </Route>
-      <Route path="/insurer-friction-v2">
-        <Suspense fallback={<PageLoader />}><Wrap><InsurerFrictionV2Page /></Wrap></Suspense>
-      </Route>
-      <Route path="/smart-discovery-autopilot">
-        <Suspense fallback={<PageLoader />}><Wrap><SmartDiscoveryAutopilotPage /></Wrap></Suspense>
-      </Route>
-      <Route path="/recovery-velocity">
-        <Suspense fallback={<PageLoader />}><Wrap><RecoveryVelocityDashboardPage /></Wrap></Suspense>
-      </Route>
-      <Route path="/no-fault">
+      <Route path="/prism-counsel/no-fault">
         <Suspense fallback={<PageLoader />}><Wrap><PrismNoFault /></Wrap></Suspense>
       </Route>
-      <Route path="/connectors">
+      <Route path="/prism-counsel/connectors">
         <Suspense fallback={<PageLoader />}><Wrap><PrismConnectors /></Wrap></Suspense>
       </Route>
 
-      <Route path="/review-desk/metrics">
+      <Route path="/prism-counsel/review-desk/metrics">
         <Suspense fallback={<PageLoader />}><Wrap><PrismReviewMetrics /></Wrap></Suspense>
       </Route>
-      <Route path="/review-desk/admin">
+      <Route path="/prism-counsel/review-desk/admin">
         <Suspense fallback={<PageLoader />}><Wrap><PrismReviewAdmin /></Wrap></Suspense>
       </Route>
-      <Route path="/review-desk/my-review">
+      <Route path="/prism-counsel/review-desk/my-review">
         <Suspense fallback={<PageLoader />}><Wrap><PrismMyReview /></Wrap></Suspense>
       </Route>
-      <Route path="/review-desk/filing-gate">
-        <Suspense fallback={<PageLoader />}><Wrap><PrismFilingGate /></Wrap></Suspense>
-      </Route>
-      <Route path="/review-desk">
+      <Route path="/prism-counsel/review-desk">
         <Suspense fallback={<PageLoader />}><Wrap><PrismReviewDesk /></Wrap></Suspense>
       </Route>
 
-      <Route path="/today">
+      <Route path="/prism-counsel/today">
         <Suspense fallback={<PageLoader />}><Wrap><PilotToday /></Wrap></Suspense>
       </Route>
-      <Route path="/matter-desk/:id">
+      <Route path="/prism-counsel/matter-desk/:id">
         <Suspense fallback={<PageLoader />}><Wrap><PilotMatterDesk /></Wrap></Suspense>
       </Route>
-      <Route path="/what-changed">
+      <Route path="/prism-counsel/what-changed">
         <Suspense fallback={<PageLoader />}><Wrap><PilotWhatChanged /></Wrap></Suspense>
       </Route>
-      <Route path="/review-before-send">
+      <Route path="/prism-counsel/review-before-send">
         <Suspense fallback={<PageLoader />}><Wrap><PilotReviewBeforeSend /></Wrap></Suspense>
       </Route>
-      <Route path="/signoff-queue">
+      <Route path="/prism-counsel/signoff-queue">
         <Suspense fallback={<PageLoader />}><Wrap><PilotSignoffQueue /></Wrap></Suspense>
       </Route>
-      <Route path="/word-export">
+      <Route path="/prism-counsel/word-export">
         <Suspense fallback={<PageLoader />}><Wrap><PilotWordExport /></Wrap></Suspense>
       </Route>
-      <Route path="/pilot-admin">
+      <Route path="/prism-counsel/pilot-admin">
         <Suspense fallback={<PageLoader />}><Wrap><PilotAdmin /></Wrap></Suspense>
       </Route>
-      <Route path="/pressure-board">
+      <Route path="/prism-counsel/pressure-board">
         <Suspense fallback={<PageLoader />}><Wrap><PilotOnePressureBoard /></Wrap></Suspense>
       </Route>
-      <Route path="/friction-board">
+      <Route path="/prism-counsel/friction-board">
         <Suspense fallback={<PageLoader />}><Wrap><PilotOneFrictionBoard /></Wrap></Suspense>
       </Route>
-      <Route path="/carrier-watch">
+      <Route path="/prism-counsel/carrier-watch">
         <Suspense fallback={<PageLoader />}><Wrap><PilotOneCarrierWatch /></Wrap></Suspense>
       </Route>
-      <Route path="/movement-board">
+      <Route path="/prism-counsel/movement-board">
         <Suspense fallback={<PageLoader />}><Wrap><PilotOneMovementBoard /></Wrap></Suspense>
       </Route>
-      <Route path="/pilot-one-admin">
+      <Route path="/prism-counsel/pilot-one-admin">
         <Suspense fallback={<PageLoader />}><Wrap><PilotOneAdmin /></Wrap></Suspense>
       </Route>
 
-      <Route path="/recovery-ops">
+      <Route path="/prism-counsel/recovery-ops">
         <Suspense fallback={<PageLoader />}><Wrap><RecoveryOpsPage /></Wrap></Suspense>
       </Route>
-      <Route path="/settlement-blockers">
+      <Route path="/prism-counsel/settlement-blockers">
         <Suspense fallback={<PageLoader />}><Wrap><SettlementBlockersPage /></Wrap></Suspense>
       </Route>
-      <Route path="/admin/recovery">
+      <Route path="/prism-counsel/admin/recovery">
         <Suspense fallback={<PageLoader />}><Wrap><AdminRecoveryPage /></Wrap></Suspense>
       </Route>
-      <Route path="/admin/purview">
+      <Route path="/prism-counsel/admin/purview">
         <Suspense fallback={<PageLoader />}><Wrap><AdminPurviewPage /></Wrap></Suspense>
       </Route>
-      <Route path="/admin/quality">
+      <Route path="/prism-counsel/admin/quality">
         <Suspense fallback={<PageLoader />}><Wrap><AdminQualityPage /></Wrap></Suspense>
       </Route>
-      <Route path="/admin/ops-diagnostics">
+      <Route path="/prism-counsel/admin/ops-diagnostics">
         <Suspense fallback={<PageLoader />}><Wrap><AdminOpsDiagnosticsPage /></Wrap></Suspense>
       </Route>
-      <Route path="/admin/replays">
+      <Route path="/prism-counsel/admin/replays">
         <Suspense fallback={<PageLoader />}><Wrap><AdminReplaysEnhancedPage /></Wrap></Suspense>
       </Route>
-      <Route path="/admin/model-costs">
+      <Route path="/prism-counsel/admin/model-costs">
         <Suspense fallback={<PageLoader />}><Wrap><AdminModelCostsEnhancedPage /></Wrap></Suspense>
       </Route>
-      <Route path="/admin/m365">
+      <Route path="/prism-counsel/admin/m365">
         <Suspense fallback={<PageLoader />}><Wrap><AdminM365Page /></Wrap></Suspense>
       </Route>
-      <Route path="/admin/health">
+      <Route path="/prism-counsel/admin/health">
         <Suspense fallback={<PageLoader />}><Wrap><PrismAdminHealth /></Wrap></Suspense>
       </Route>
 
-      <Route path="/pressure-graph">
+      <Route path="/prism-counsel/pressure-graph">
         <Suspense fallback={<PageLoader />}><Wrap><S31PressureGraph /></Wrap></Suspense>
       </Route>
-      <Route path="/matter-twin">
+      <Route path="/prism-counsel/matter-twin">
         <Suspense fallback={<PageLoader />}><Wrap><S31MatterTwin /></Wrap></Suspense>
       </Route>
-      <Route path="/proof-chain">
+      <Route path="/prism-counsel/proof-chain">
         <Suspense fallback={<PageLoader />}><Wrap><S31ProofChain /></Wrap></Suspense>
       </Route>
-      <Route path="/model-mesh">
+      <Route path="/prism-counsel/model-mesh">
         <Suspense fallback={<PageLoader />}><Wrap><S31ModelMesh /></Wrap></Suspense>
       </Route>
-      <Route path="/costs">
+      <Route path="/prism-counsel/costs">
         <Suspense fallback={<PageLoader />}><Wrap><S31CostTracking /></Wrap></Suspense>
       </Route>
-      <Route path="/data-products">
+      <Route path="/prism-counsel/data-products">
         <Suspense fallback={<PageLoader />}><Wrap><S31DataProducts /></Wrap></Suspense>
       </Route>
-      <Route path="/worldline">
+      <Route path="/prism-counsel/worldline">
         <Suspense fallback={<PageLoader />}><Wrap><PrismWorldline /></Wrap></Suspense>
       </Route>
-      <Route path="/copilot-workbench">
+      <Route path="/prism-counsel/copilot-workbench">
         <Suspense fallback={<PageLoader />}><Wrap><PrismCopilotWorkbench /></Wrap></Suspense>
       </Route>
-      <Route path="/signal-forge">
+      <Route path="/prism-counsel/signal-forge">
         <Suspense fallback={<PageLoader />}><Wrap><PrismSignalForge /></Wrap></Suspense>
       </Route>
-      <Route path="/forecast-diff">
+      <Route path="/prism-counsel/forecast-diff">
         <Suspense fallback={<PageLoader />}><Wrap><PrismForecastDiff /></Wrap></Suspense>
       </Route>
 
-      <Route path="/portfolio/pressure-board">
+      <Route path="/prism-counsel/portfolio/pressure-board">
         <Suspense fallback={<PageLoader />}><Wrap><P2PressureBoard /></Wrap></Suspense>
       </Route>
-      <Route path="/portfolio/friction-board">
+      <Route path="/prism-counsel/portfolio/friction-board">
         <Suspense fallback={<PageLoader />}><Wrap><P2FrictionBoard /></Wrap></Suspense>
       </Route>
-      <Route path="/portfolio/review-backlog">
+      <Route path="/prism-counsel/portfolio/review-backlog">
         <Suspense fallback={<PageLoader />}><Wrap><P2ReviewBacklog /></Wrap></Suspense>
       </Route>
-      <Route path="/portfolio/approval-bottleneck">
+      <Route path="/prism-counsel/portfolio/approval-bottleneck">
         <Suspense fallback={<PageLoader />}><Wrap><P2ApprovalBottleneck /></Wrap></Suspense>
       </Route>
-      <Route path="/portfolio/recovery-lien">
+      <Route path="/prism-counsel/portfolio/recovery-lien">
         <Suspense fallback={<PageLoader />}><Wrap><P2RecoveryLien /></Wrap></Suspense>
       </Route>
-      <Route path="/portfolio/insurer-pressure">
+      <Route path="/prism-counsel/portfolio/insurer-pressure">
         <Suspense fallback={<PageLoader />}><Wrap><P2InsurerPressure /></Wrap></Suspense>
       </Route>
-      <Route path="/portfolio/movement-opportunity">
+      <Route path="/prism-counsel/portfolio/movement-opportunity">
         <Suspense fallback={<PageLoader />}><Wrap><P2MovementOpportunity /></Wrap></Suspense>
       </Route>
-      <Route path="/portfolio/quiet-risk">
+      <Route path="/prism-counsel/portfolio/quiet-risk">
         <Suspense fallback={<PageLoader />}><Wrap><P2QuietRisk /></Wrap></Suspense>
       </Route>
-      <Route path="/portfolio/throughput">
+      <Route path="/prism-counsel/portfolio/throughput">
         <Suspense fallback={<PageLoader />}><Wrap><P2TeamThroughput /></Wrap></Suspense>
       </Route>
-      <Route path="/portfolio/digests">
+      <Route path="/prism-counsel/portfolio/digests">
         <Suspense fallback={<PageLoader />}><Wrap><P2PortfolioDigests /></Wrap></Suspense>
       </Route>
-      <Route path="/portfolio/forecast">
+      <Route path="/prism-counsel/portfolio/forecast">
         <Suspense fallback={<PageLoader />}><Wrap><P2PortfolioForecast /></Wrap></Suspense>
       </Route>
-      <Route path="/portfolio/partner-view">
+      <Route path="/prism-counsel/portfolio/partner-view">
         <Suspense fallback={<PageLoader />}><Wrap><P2PartnerLifeOs /></Wrap></Suspense>
       </Route>
-      <Route path="/portfolio/admin">
+      <Route path="/prism-counsel/portfolio/admin">
         <Suspense fallback={<PageLoader />}><Wrap><P2AdminPortfolio /></Wrap></Suspense>
       </Route>
-      <Route path="/portfolio">
+      <Route path="/prism-counsel/portfolio">
         <Suspense fallback={<PageLoader />}><Wrap><P2PortfolioOverview /></Wrap></Suspense>
       </Route>
 
-      <Route path="/morning-brief">
+      <Route path="/prism-counsel/morning-brief">
         <Suspense fallback={<PageLoader />}><Wrap><S32MorningBrief /></Wrap></Suspense>
       </Route>
-      <Route path="/prep/:flow">
+      <Route path="/prism-counsel/prep/:flow">
         <Suspense fallback={<PageLoader />}><Wrap><S32PrepMode /></Wrap></Suspense>
       </Route>
-      <Route path="/prep">
+      <Route path="/prism-counsel/prep">
         <Suspense fallback={<PageLoader />}><Wrap><S32PrepMode /></Wrap></Suspense>
       </Route>
-      <Route path="/quiet-risk">
+      <Route path="/prism-counsel/quiet-risk">
         <Suspense fallback={<PageLoader />}><Wrap><S32QuietRisk /></Wrap></Suspense>
       </Route>
-      <Route path="/ops-lite">
+      <Route path="/prism-counsel/ops-lite">
         <Suspense fallback={<PageLoader />}><Wrap><S32OpsLite /></Wrap></Suspense>
       </Route>
-      <Route path="/workflows/:id">
+      <Route path="/prism-counsel/workflows/:id">
         <Suspense fallback={<PageLoader />}><Wrap><S32NamedWorkflows /></Wrap></Suspense>
       </Route>
-      <Route path="/workflows">
+      <Route path="/prism-counsel/workflows">
         <Suspense fallback={<PageLoader />}><Wrap><S32NamedWorkflows /></Wrap></Suspense>
       </Route>
-      <Route path="/copilot-workbench-v2">
+      <Route path="/prism-counsel/copilot-workbench-v2">
         <Suspense fallback={<PageLoader />}><Wrap><S32CopilotWorkbenchV2 /></Wrap></Suspense>
       </Route>
-      <Route path="/purview-bridge">
+      <Route path="/prism-counsel/purview-bridge">
         <Suspense fallback={<PageLoader />}><Wrap><S32PurviewBridge /></Wrap></Suspense>
       </Route>
-      <Route path="/matter-desk-v2/:id">
+      <Route path="/prism-counsel/matter-desk-v2/:id">
         <Suspense fallback={<PageLoader />}><Wrap><MatterDeskV2Wrapper /></Wrap></Suspense>
       </Route>
-      <Route path="/recovery-view">
+      <Route path="/prism-counsel/recovery-view">
         <Suspense fallback={<PageLoader />}><Wrap><S32RecoveryView /></Wrap></Suspense>
       </Route>
-      <Route path="/settlement-blockers-view">
+      <Route path="/prism-counsel/settlement-blockers-view">
         <Suspense fallback={<PageLoader />}><Wrap><S32SettlementBlockersView /></Wrap></Suspense>
       </Route>
 
-      <Route path="/ny/dashboard">
+      <Route path="/prism-counsel/ny/dashboard">
         <Suspense fallback={<PageLoader />}><Wrap><NyDashboard /></Wrap></Suspense>
       </Route>
-      <Route path="/ny/watchlist">
+      <Route path="/prism-counsel/ny/watchlist">
         <Suspense fallback={<PageLoader />}><Wrap><NyWatchlist /></Wrap></Suspense>
       </Route>
-      <Route path="/ny/deadlines">
+      <Route path="/prism-counsel/ny/deadlines">
         <Suspense fallback={<PageLoader />}><Wrap><NyDeadlines /></Wrap></Suspense>
       </Route>
-      <Route path="/ny/no-fault">
+      <Route path="/prism-counsel/ny/no-fault">
         <Suspense fallback={<PageLoader />}><Wrap><NyNoFault /></Wrap></Suspense>
       </Route>
-      <Route path="/ny/coverage">
+      <Route path="/prism-counsel/ny/coverage">
         <Suspense fallback={<PageLoader />}><Wrap><NyCoverage /></Wrap></Suspense>
       </Route>
-      <Route path="/ny/mediation">
+      <Route path="/prism-counsel/ny/mediation">
         <Suspense fallback={<PageLoader />}><Wrap><NyMediation /></Wrap></Suspense>
       </Route>
-      <Route path="/ny/forecast">
+      <Route path="/prism-counsel/ny/forecast">
         <Suspense fallback={<PageLoader />}><Wrap><NyForecast /></Wrap></Suspense>
       </Route>
-      <Route path="/ny/insurer-intel">
+      <Route path="/prism-counsel/ny/insurer-intel">
         <Suspense fallback={<PageLoader />}><Wrap><NyInsurerIntel /></Wrap></Suspense>
       </Route>
-      <Route path="/ny/venue-intel">
+      <Route path="/prism-counsel/ny/venue-intel">
         <Suspense fallback={<PageLoader />}><Wrap><NyVenueIntel /></Wrap></Suspense>
       </Route>
-      <Route path="/ny/copilot">
+      <Route path="/prism-counsel/ny/copilot">
         <Suspense fallback={<PageLoader />}><Wrap><NyCopilot /></Wrap></Suspense>
       </Route>
-      <Route path="/ny/trust">
+      <Route path="/prism-counsel/ny/trust">
         <Suspense fallback={<PageLoader />}><Wrap><NyTrust /></Wrap></Suspense>
       </Route>
-      <Route path="/ny/playbooks">
+      <Route path="/prism-counsel/ny/playbooks">
         <Suspense fallback={<PageLoader />}><Wrap><NyPlaybooks /></Wrap></Suspense>
       </Route>
-      <Route path="/ny">
+      <Route path="/prism-counsel/ny">
         <Suspense fallback={<PageLoader />}><Wrap><NyOverview /></Wrap></Suspense>
       </Route>
 
@@ -556,12 +488,10 @@ export function PrismCounselApp() {
     <QueryClientProvider client={queryClient}>
       <LazyMotion features={domMax}>
         <DemoModeProvider>
-          <AIStatusBar domain="prism" accentColor="hsl(38, 72%, 58%)" />
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <WouterRouter>
             <PrismCounselRoutes />
             <Toaster />
           </WouterRouter>
-          <AgentCopilot config={prismCounselConfig} />
         </DemoModeProvider>
       </LazyMotion>
     </QueryClientProvider>

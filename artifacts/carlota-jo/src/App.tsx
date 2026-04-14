@@ -2,13 +2,13 @@ import { lazy, Suspense, type ReactNode } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { McpOverlay } from "@szl-holdings/mcp-client";
-import { PrismBusProvider } from "@szl-holdings/prism-bus/provider";
+import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
 import { SandboxModeProvider, AnalyticsProvider } from "@szl-holdings/shared-ui";
-import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
+import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 import { useAuth } from "@szl-holdings/replit-auth-web";
+import { Users, MessageSquare } from "lucide-react";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
-import { GenomeProvider } from "@/context/GenomeContext";
 
 const CARLOTA_ACCENT = LANE_ACCENT_HEX.carlotaJo.primary;
 
@@ -47,18 +47,6 @@ const BrandAudit = lazy(() => import("@/pages/brand-audit"));
 const ContentStrategy = lazy(() => import("@/pages/content-strategy"));
 const DocumentEngine = lazy(() => import("@/pages/document-engine"));
 const MethodologyPage = lazy(() => import("@/pages/methodology"));
-const PreferenceGenome = lazy(() => import("@/pages/preference-genome"));
-const AnticipationEngine = lazy(() => import("@/pages/anticipation-engine"));
-const RhythmCalendar = lazy(() => import("@/pages/rhythm-calendar"));
-const SummaryComposer = lazy(() => import("@/pages/summary-composer"));
-const DiscretionScore = lazy(() => import("@/pages/discretion-score"));
-const LifestyleGraph = lazy(() => import("@/pages/lifestyle-graph"));
-const AIConcierge = lazy(() => import("@/pages/ai-concierge"));
-const EngagementTimeline = lazy(() => import("@/pages/engagement-timeline"));
-const DiscretionMode = lazy(() => import("@/pages/discretion-mode"));
-const SilentQueue = lazy(() => import("@/pages/silent-queue"));
-const RhythmTimeline = lazy(() => import("@/pages/rhythm-timeline"));
-const OrchestrationReport = lazy(() => import("@/pages/orchestration-report"));
 
 function PageLoader() {
   return (
@@ -140,18 +128,6 @@ function Router() {
         <Route path="/content-strategy" component={ContentStrategy} />
         <Route path="/document-engine" component={DocumentEngine} />
         <Route path="/document-engine/:sub" component={DocumentEngine} />
-        <Route path="/preference-genome" component={PreferenceGenome} />
-        <Route path="/anticipation" component={AnticipationEngine} />
-        <Route path="/rhythm-calendar" component={RhythmCalendar} />
-        <Route path="/summary-composer" component={SummaryComposer} />
-        <Route path="/discretion" component={DiscretionScore} />
-        <Route path="/lifestyle-graph" component={LifestyleGraph} />
-        <Route path="/ai-concierge" component={AIConcierge} />
-        <Route path="/engagement-timeline" component={EngagementTimeline} />
-        <Route path="/discretion-mode" component={DiscretionMode} />
-        <Route path="/silent-queue" component={SilentQueue} />
-        <Route path="/rhythm-timeline" component={RhythmTimeline} />
-        <Route path="/orchestration-report" component={OrchestrationReport} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
@@ -183,14 +159,10 @@ function App() {
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <PowerUserProvider shortcuts={carlotaShortcuts} appName="Carlota Jo" accentColor={CARLOTA_ACCENT}>
           <div style={{ minHeight: "100vh" }}>
-            <EcosystemNav
-              currentAppId="carlota-jo"
-              currentAppName="Carlota Jo"
-              accentColor={CARLOTA_ACCENT}
-            />
-            <GenomeProvider>
-              <Router />
-            </GenomeProvider>
+            <div style={{ position: "fixed", top: 12, right: 16, zIndex: 9999 }}>
+              <UserButton />
+            </div>
+            <Router />
           </div>
           <CommandPalette
             open={cmdOpen}

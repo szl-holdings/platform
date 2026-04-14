@@ -2,20 +2,9 @@ import { Link } from "wouter";
 import { Ship, ChevronRight, Shield, BarChart3, AlertTriangle, Activity, Globe, Anchor, Navigation, DollarSign, ArrowRight, Eye, TrendingUp, Zap, Clock, Waves, MapPin, Lock } from "lucide-react";
 import { MarketingNav } from "@/components/MarketingNav";
 import { MarketingFooter } from "@/components/MarketingFooter";
-import { ContactModal, NoiseGrain, CustomCursor, MagneticButton, SignalTicker, CinematicReveal } from "@szl-holdings/shared-ui";
+import { ContactModal } from "@szl-holdings/shared-ui";
 import { motion as m, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-
-const FLEET_TICKER_FALLBACK = [
-  { label: "VESSELS LIVE", value: "214", color: "rgba(56,189,248,0.8)" },
-  { label: "ON-TIME ARRIVAL", value: "84%", color: "rgba(70,200,150,0.8)" },
-  { label: "HIGH RISK", value: "3 flagged", delta: "+1", color: "rgba(239,68,68,0.8)" },
-  { label: "SANCTIONS QUEUE", value: "0 alerts", color: "rgba(70,200,150,0.8)" },
-  { label: "CANAL DELAYS", value: "2 vessels", color: "rgba(251,191,36,0.8)" },
-  { label: "AIS COVERAGE", value: "99.97%", color: "rgba(56,189,248,0.8)" },
-  { label: "VOYAGE ECONOMICS", value: "$18.4M TCE", color: "rgba(56,189,248,0.8)" },
-  { label: "PORT CALLS TODAY", value: "12 active", color: "rgba(70,200,150,0.8)" },
-];
 
 function AnimatedCounter({ value, suffix = "", prefix = "" }: { value: number; suffix?: string; prefix?: string }) {
   const [display, setDisplay] = useState(0);
@@ -241,44 +230,11 @@ const useCases = [
 
 export default function MarketingHomePage() {
   const [demoOpen, setDemoOpen] = useState(false);
-  const [fleetTicker, setFleetTicker] = useState(FLEET_TICKER_FALLBACK);
-
-  useEffect(() => {
-    fetch("/api/vessels/live/fleet-summary")
-      .then((r) => r.json())
-      .then((d) => {
-        const f = d?.data;
-        if (!f || typeof f.totalVesselsTracked !== "number") return;
-        setFleetTicker([
-          { label: "VESSELS TRACKED", value: String(f.totalVesselsTracked), color: "rgba(56,189,248,0.8)" },
-          { label: "UNDERWAY", value: String(f.underwayCount), color: "rgba(70,200,150,0.8)" },
-          { label: "ANCHORED", value: String(f.anchoredCount), color: "rgba(251,191,36,0.8)" },
-          { label: "MOORED", value: String(f.mooredCount), color: "rgba(56,189,248,0.8)" },
-          { label: "AVG SPEED", value: `${f.avgSpeedKnots} kts`, color: "rgba(56,189,248,0.8)" },
-          { label: "DATA SOURCE", value: f.liveData ? "LIVE AIS" : "Demo", color: f.liveData ? "rgba(70,200,150,0.8)" : "rgba(212,160,84,0.8)" },
-        ]);
-      })
-      .catch(() => {});
-  }, []);
-
   return (
-    <m.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0, transition: { duration: 0.2, ease: "easeIn" } }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className="min-h-screen bg-[#050c17] text-sky-50 overflow-x-hidden"
-    >
-      <NoiseGrain opacity={0.026} />
-      <CustomCursor variant="crosshair" color="rgba(56,189,248,0.6)" />
+    <div className="min-h-screen bg-[#050c17] text-sky-50 overflow-x-hidden">
       <MarketingNav />
 
-      {/* FLEET SIGNAL TICKER */}
-      <div className="pt-14">
-        <SignalTicker items={fleetTicker} bgColor="rgba(5,12,23,0.9)" speed={32} />
-      </div>
-
-      <section className="relative pt-16 pb-6 sm:pt-20 sm:pb-8 lg:pt-24 lg:pb-10 overflow-hidden">
+      <section className="relative pt-28 pb-6 sm:pt-32 sm:pb-8 lg:pt-36 lg:pb-10 overflow-hidden">
         <OceanCanvas />
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-sky-500/10 to-transparent" />
@@ -287,7 +243,7 @@ export default function MarketingHomePage() {
 
         <div className="relative z-10 max-w-6xl mx-auto px-5 sm:px-6">
           <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="flex items-center gap-2 mb-6">
-            <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+            <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
             <span className="text-[11px] font-semibold text-cyan-400/70 tracking-[0.12em] uppercase">Maritime Intelligence Platform</span>
           </m.div>
 
@@ -319,20 +275,16 @@ export default function MarketingHomePage() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="flex flex-col sm:flex-row items-start gap-3"
             >
-              <MagneticButton>
-                <a href="./dashboard?demo=true">
-                  <button className="flex items-center gap-2 px-7 py-3.5 bg-cyan-400 hover:bg-cyan-300 text-[#050c17] font-semibold text-[13px] tracking-wide transition-all duration-200" style={{ boxShadow: "0 0 32px rgba(34,211,238,0.22)" }}>
-                    Enter Fleet Command <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                </a>
-              </MagneticButton>
-              <MagneticButton>
-                <Link href="/demo">
-                  <button className="flex items-center gap-2 px-7 py-3.5 border border-sky-500/15 hover:border-sky-400/30 text-sky-300/70 hover:text-sky-200 font-medium text-[13px] transition-all duration-200">
-                    Request a demo <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </Link>
-              </MagneticButton>
+              <a href="./dashboard?demo=true">
+                <button className="flex items-center gap-2 px-7 py-3.5 bg-cyan-400 hover:bg-cyan-300 text-[#050c17] font-semibold text-[13px] tracking-wide transition-all duration-200">
+                  Enter Fleet Command <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </a>
+              <Link href="/demo">
+                <button className="flex items-center gap-2 px-7 py-3.5 border border-sky-500/15 hover:border-sky-400/30 text-sky-300/70 hover:text-sky-200 font-medium text-[13px] transition-all duration-200">
+                  Request a demo <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </Link>
             </m.div>
           </div>
 
@@ -564,73 +516,6 @@ export default function MarketingHomePage() {
         </div>
       </section>
 
-      {/* Social Proof */}
-      <section className="py-24 sm:py-32 border-t border-sky-500/6">
-        <div className="max-w-[1140px] mx-auto px-5 sm:px-6">
-          <div className="text-center mb-14">
-            <p className="text-[10px] font-mono tracking-[0.3em] uppercase mb-3 text-cyan-400/40">Documented Results</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-sky-50 mb-4 tracking-tight">Real fleets. Real outcomes.</h2>
-            <p className="text-sky-300/30 text-[14px] max-w-xl mx-auto">From regional operators to global fleet managers — Vessels delivers measurable results in production environments.</p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-sky-500/[0.04] rounded-xl overflow-hidden mb-14">
-            {[
-              { metric: "< 15 min", label: "Fleet intelligence activation", detail: "From AIS connection to live fleet command with risk scoring active." },
-              { metric: "94%", label: "Dark period detection accuracy", detail: "AIS spoofing and signal loss detected across all monitored vessel classes." },
-              { metric: "3.2×", label: "Faster exception resolution", detail: "Teams using Vessels resolve compliance and safety alerts faster than manual workflows." },
-              { metric: "100%", label: "OFAC / sanctions coverage", detail: "Real-time screening against all major sanctions lists with daily update cycle." },
-            ].map((p, i) => (
-              <m.div
-                key={p.label}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.07 }}
-                className="p-7 bg-[#050c17]"
-              >
-                <span className="text-[2rem] font-extrabold font-mono block mb-1 text-cyan-400">{p.metric}</span>
-                <p className="text-[11px] font-bold text-sky-100 mb-1.5">{p.label}</p>
-                <p className="text-[11px] leading-[1.7] text-sky-300/30">{p.detail}</p>
-              </m.div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
-            {[
-              { quote: "We were tracking 340 vessels across 12 trade lanes with spreadsheets and satellite phone calls. Vessels gave us a single command view in 20 minutes. Our compliance incidents dropped by 60% in the first quarter.", attribution: "Fleet Operations Director, Tanker Operator", context: "340-vessel fleet, 12 trade lanes" },
-              { quote: "The dark period detection caught a flag-of-convenience vessel attempting AIS manipulation in the Strait of Malacca. We had the alert before the port authority did. That kind of intelligence used to take weeks to surface.", attribution: "Head of Maritime Intelligence, Commodity Trader", context: "Global cargo tracking, 180 vessels under watch" },
-              { quote: "Vessels replaced three separate data subscriptions — AIS, sanctions screening, and weather routing. The Helmsman AI contextualizes everything. Our operations team made better decisions on day one.", attribution: "VP Commercial Operations, Dry Bulk Operator", context: "Multi-flag fleet, Atlantic / Pacific routes" },
-            ].map((t, i) => (
-              <m.div
-                key={i}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                className="p-7 rounded-xl bg-sky-400/[0.02] border border-sky-400/[0.06]"
-              >
-                <p className="text-[14px] leading-[1.85] mb-5 italic text-sky-200/50">"{t.quote}"</p>
-                <p className="text-[12px] font-semibold text-sky-50">{t.attribution}</p>
-                <p className="text-[11px] text-sky-400/30 mt-0.5">{t.context}</p>
-              </m.div>
-            ))}
-          </div>
-
-          <div className="p-6 rounded-xl bg-sky-400/[0.02] border border-sky-400/[0.06]">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div>
-                <p className="text-[13px] font-semibold text-sky-100 mb-1">Part of the SZL Holdings platform family</p>
-                <p className="text-[12px] text-sky-300/35">Vessels runs on SZL's shared security infrastructure — SOC 2 compliant, enterprise-grade. <a href="/szl-holdings/trust" className="underline text-cyan-400/50 hover:text-cyan-400/80 transition-colors">View Trust Center →</a></p>
-              </div>
-              <div className="flex gap-3 shrink-0">
-                <a href="/szl-holdings/" className="text-[11px] px-3 py-1.5 rounded-lg text-sky-400/40 border border-sky-400/10 hover:text-sky-400/70 transition-colors">SZL Holdings →</a>
-                <a href="/szl-holdings/architecture" className="text-[11px] px-3 py-1.5 rounded-lg text-sky-400/40 border border-sky-400/10 hover:text-sky-400/70 transition-colors">Architecture →</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section className="py-20 sm:py-24 border-t border-sky-500/6">
         <div className="max-w-3xl mx-auto px-5 sm:px-6 text-center">
           <m.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
@@ -664,6 +549,6 @@ export default function MarketingHomePage() {
         app="vessels"
         subtitle="Vessels — Maritime Fleet Intelligence"
       />
-    </m.div>
+    </div>
   );
 }

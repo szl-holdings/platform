@@ -1,4 +1,4 @@
-modules = ["nodejs-24", "python3", "postgresql-16"]
+modules = ["nodejs-24", "postgresql-16"]
 
 [[artifacts]]
 id = "artifacts/api-server"
@@ -10,14 +10,33 @@ id = "artifacts/mockup-sandbox"
 router = "application"
 deploymentTarget = "autoscale"
 
-[deployment.build]
-args = ["node", "scripts/ensure-tables.mjs"]
-
 [deployment.postBuild]
 args = ["pnpm", "store", "prune"]
 env = { "CI" = "true" }
 
 [workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "artifacts/aegis-mobile: expo"
+
+[[workflows.workflow]]
+name = "artifacts/aegis-mobile: expo"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "pnpm --filter @workspace/aegis-mobile run dev"
+waitForPort = 8083
+
+[workflows.workflow.metadata]
+outputType = "webview"
 
 [agent]
 stack = "PNPM_WORKSPACE"
@@ -30,7 +49,6 @@ timeoutMs = 120000
 
 [nix]
 channel = "stable-25_05"
-packages = ["freetype", "glibcLocales", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "tcl", "tk", "zlib"]
 
 [userenv]
 
@@ -41,7 +59,4 @@ CORS_ORIGINS = "https://*.replit.app,https://*.replit.dev,https://*.repl.co"
 PUBLIC_APP_URL = "https://szlholdings.replit.app"
 
 [userenv.shared]
-
-[[ports]]
-localPort = 21130
-externalPort = 80
+OAUTH_STATE_SECRET = "0d5148c24475c3a022f044e15ad8a6088ccdadb82fd4a9c873eed64fe79c4e48"

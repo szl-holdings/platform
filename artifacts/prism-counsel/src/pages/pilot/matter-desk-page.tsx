@@ -59,7 +59,7 @@ export default function MatterDeskPage() {
   return (
     <div className="space-y-6 max-w-6xl">
       <div className="flex items-center gap-4">
-        <Link href="/today">
+        <Link href="/prism-counsel/today">
           <button className="p-1.5 rounded hover:bg-slate-700/50 text-slate-400 hover:text-white transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -178,7 +178,7 @@ export default function MatterDeskPage() {
                 <span className="text-sm text-white capitalize">{desk.signoffStatus}</span>
               </div>
               {desk.pendingSignoffs > 0 && (
-                <Link href="/signoff-queue">
+                <Link href="/prism-counsel/signoff-queue">
                   <p className="text-xs text-[#d4a054] mt-1 cursor-pointer hover:underline">{desk.pendingSignoffs} pending sign-off(s) →</p>
                 </Link>
               )}

@@ -7,7 +7,7 @@ import {
   Database, Play, Activity, CheckSquare, Shield, Network, Heart,
   AlertTriangle, Brain, Radio, Workflow, Inbox, Search, UserCheck,
   ChevronRight, Gauge, BarChart3, LayoutDashboard, Download, Clapperboard, Power,
-  GitBranch, Send, DollarSign, Cpu
+  GitBranch, Send
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, useSandboxMode, EnvironmentLabel, type OnboardingConfig } from "@szl-holdings/shared-ui";
 import { useDemoMode } from "@/lib/demo-mode";
@@ -95,7 +95,6 @@ const NAV_GROUPS = [
       { href: "/decision-receipts", label: "Decision Receipts", icon: FileText },
       { href: "/digest", label: "Digest Center", icon: FileText },
       { href: "/approvals", label: "Approvals", icon: CheckSquare },
-      { href: "/decision-cost-xray", label: "Cost X-Ray", icon: DollarSign },
       { href: "/trust-audit", label: "Trust & Audit", icon: Shield },
     ],
   },
@@ -126,16 +125,9 @@ const NAV_GROUPS = [
       { href: "/logs", label: "Log Explorer", icon: Database },
       { href: "/alert-management", label: "Alert Management", icon: Bell },
       { href: "/executive-summary", label: "Executive Summary", icon: BarChart3 },
-      { href: "/revenue-intelligence", label: "Revenue Intelligence", icon: DollarSign },
       { href: "/ownership", label: "Ownership", icon: Users },
       { href: "/workflows", label: "Workflows", icon: Workflow },
       { href: "/readiness", label: "Readiness", icon: Shield },
-    ],
-  },
-  {
-    label: "AI Capability Mesh",
-    items: [
-      { href: "/ai-capabilities", label: "AI Capabilities", icon: Cpu },
     ],
   },
   {

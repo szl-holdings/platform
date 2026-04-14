@@ -1,5 +1,5 @@
 -- ─────────────────────────────────────────────────────────────────────────────
--- Rollback for migration: 0019_terra_broker_schema (formerly 0004_terra_broker_schema)
+-- Rollback for migration: 0004_terra_broker_schema
 -- Reverts: terra_transactions, terra_inquiries, terra_listings,
 --          terra_properties, terra_agents, terra_brokerages tables + all indexes
 --

@@ -11,7 +11,6 @@ import {
   GitBranch, Lock, Search, ListChecks, UserCheck
 } from "lucide-react";
 import { PackBanner } from "@/components/pack-banner";
-import { useQuery } from "@tanstack/react-query";
 
 const WORKSPACES = [
   { id: "command" as const, label: "Command", icon: Server, color: "#3b82f6", desc: "Managed Operations" },
@@ -452,126 +451,12 @@ export default function AegisUnifiedOverview() {
 
       <GuidedInvestigationWorkflow />
 
-      <AgenticSOCPanel />
-
       <div className="pb-2">
         <PackBanner
           vertical="Security Intelligence Pack"
           description="Aegis runs on the Lyte + Alloy core — the same AI orchestration layer, policy engine, and execution fabric powering SZL's enterprise intelligence stack."
           accentColor="#3b82f6"
         />
-      </div>
-    </div>
-  );
-}
-
-function AgenticSOCPanel() {
-  const [launching, setLaunching] = useState(false);
-  const [lastInvestigation, setLastInvestigation] = useState<Record<string, unknown> | null>(null);
-
-  const attackSurface = useQuery({
-    queryKey: ["aegis-attack-surface"],
-    queryFn: async () => {
-      const res = await fetch("/api/firestorm/agentic-soc/attack-surface");
-      if (!res.ok) throw new Error("fetch failed");
-      return res.json() as Promise<{ assets: Array<{ asset_id: string; asset_name: string; asset_type: string; exposure_score: number; blast_radius_score: number; vulnerabilities: Array<{ cve: string; severity: string }> }>; criticalExposure: number; highExposure: number; source: string }>;
-    },
-    staleTime: 60000,
-    retry: false,
-  });
-
-  const adversaryGaps = useQuery({
-    queryKey: ["aegis-adversary-gaps"],
-    queryFn: async () => {
-      const res = await fetch("/api/firestorm/agentic-soc/adversary-gaps");
-      if (!res.ok) throw new Error("fetch failed");
-      return res.json() as Promise<{ techniques: Array<{ technique_id: string; technique_name: string; tactic: string; tested: boolean; detection_coverage: number; priority: string }>; overallCoverage: number; untestedCount: number; source: string }>;
-    },
-    staleTime: 60000,
-    retry: false,
-  });
-
-  async function launchInvestigation() {
-    setLaunching(true);
-    try {
-      const res = await fetch("/api/firestorm/agentic-soc/investigate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ alertId: `ALT-${Math.floor(Math.random() * 9999)}`, alertData: { hostname: "DC-PROD-03" } }),
-      });
-      if (!res.ok) throw new Error("failed");
-      const data = await res.json() as { data: Record<string, unknown> };
-      setLastInvestigation(data.data ?? data);
-    } catch {}
-    setLaunching(false);
-  }
-
-  const surface = attackSurface.data;
-  const gaps = adversaryGaps.data;
-
-  return (
-    <div className="rounded-xl border p-4 space-y-4" style={{ borderColor: "rgba(59,130,246,0.2)", background: "rgba(59,130,246,0.03)" }}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Brain className="w-4 h-4" style={{ color: "#3b82f6" }} />
-          <span className="text-sm font-semibold text-white">Agentic SOC · 2026</span>
-          <span className="text-[8px] px-1.5 py-0.5 rounded font-mono uppercase" style={{ background: "rgba(59,130,246,0.1)", color: "#3b82f6", border: "1px solid rgba(59,130,246,0.2)" }}>AI-Native</span>
-        </div>
-        <button
-          onClick={launchInvestigation}
-          disabled={launching}
-          className="text-[10px] px-3 py-1.5 rounded font-medium transition-all hover:opacity-80 disabled:opacity-40"
-          style={{ background: "rgba(59,130,246,0.15)", color: "#3b82f6", border: "1px solid rgba(59,130,246,0.25)" }}
-        >
-          {launching ? "Investigating..." : "Launch Agentic Investigation"}
-        </button>
-      </div>
-
-      {lastInvestigation && (
-        <div className="rounded-lg p-3" style={{ background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.15)" }}>
-          <div className="text-[10px] font-mono text-blue-300">Investigation launched: {String(lastInvestigation.investigationId)}</div>
-          <div className="text-[9px] mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>{String(lastInvestigation.message ?? "Multi-step investigation pipeline activated")}</div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>Attack Surface</div>
-          {surface ? (
-            <div className="space-y-1.5">
-              {surface.assets.slice(0, 4).map(asset => (
-                <div key={asset.asset_id} className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: asset.exposure_score >= 80 ? "#ef4444" : asset.exposure_score >= 60 ? "#f97316" : "#f59e0b" }} />
-                  <span className="text-[10px] flex-1 truncate" style={{ color: "rgba(255,255,255,0.7)" }}>{asset.asset_name}</span>
-                  <span className="text-[9px] font-mono" style={{ color: asset.exposure_score >= 80 ? "#ef4444" : "#f97316" }}>{asset.exposure_score.toFixed(0)}</span>
-                </div>
-              ))}
-              <div className="text-[8px] mt-2" style={{ color: "rgba(255,255,255,0.25)" }}>{surface.criticalExposure} critical · {surface.highExposure} high exposure assets · {surface.source}</div>
-            </div>
-          ) : (
-            <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>{attackSurface.isLoading ? "Scanning..." : "No data"}</div>
-          )}
-        </div>
-
-        <div>
-          <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>Adversary Coverage Gaps</div>
-          {gaps ? (
-            <div className="space-y-1.5">
-              {gaps.techniques.filter(t => !t.tested).slice(0, 4).map(t => (
-                <div key={t.technique_id} className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full shrink-0 bg-red-500/60" />
-                  <span className="text-[9px] flex-1 truncate" style={{ color: "rgba(255,255,255,0.6)" }}>{t.technique_id}</span>
-                  <span className="text-[8px] px-1 rounded" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444" }}>No coverage</span>
-                </div>
-              ))}
-              <div className="text-[8px] mt-2" style={{ color: "rgba(255,255,255,0.25)" }}>
-                Overall coverage: <span style={{ color: gaps.overallCoverage >= 0.7 ? "#10b981" : "#f97316" }}>{Math.round(gaps.overallCoverage * 100)}%</span> · {gaps.untestedCount} untested techniques
-              </div>
-            </div>
-          ) : (
-            <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>{adversaryGaps.isLoading ? "Loading..." : "No data"}</div>
-          )}
-        </div>
       </div>
     </div>
   );

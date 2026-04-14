@@ -132,12 +132,12 @@ router.post("/matters", authMiddleware(), async (req, res) => {
       jurisdiction,
       courtName,
       filingDate: filingDate ? new Date(filingDate) : null,
-      createdBy: req.user?.id,
-      updatedBy: req.user?.id,
+      createdBy: req.user?.userId,
+      updatedBy: req.user?.userId,
     }).returning();
 
     await db.insert(pcAuditEventsTable).values({
-      orgId, matterId: matter.id, actorId: req.user?.id ?? null,
+      orgId, matterId: matter.id, actorId: req.user?.userId ?? null,
       action: "matter_created", entityType: "matter", entityId: matter.id,
       details: { title, matterType, jurisdiction },
     });
@@ -156,28 +156,16 @@ router.patch("/matters/:matterId", authMiddleware(), async (req, res) => {
       .where(and(eq(pcMattersTable.id, matterId), eq(pcMattersTable.orgId, orgId)));
     if (!existing) return sendNotFound(res, "Matter not found");
 
-    const updates: Record<string, unknown> = { updatedAt: new Date(), updatedBy: req.user?.id };
-    const stringFields = ["title", "caseNumber", "status", "stage", "jurisdiction", "courtName", "notes"];
-    const numericFields = ["healthScore"];
-    for (const field of stringFields) {
-      const val = req.body[field];
-      if (val !== undefined) {
-        if (typeof val !== "string") return res.status(400).json({ error: `Field '${field}' must be a string` });
-        updates[field] = val;
-      }
-    }
-    for (const field of numericFields) {
-      const val = req.body[field];
-      if (val !== undefined) {
-        if (typeof val !== "number" || !Number.isFinite(val)) return res.status(400).json({ error: `Field '${field}' must be a number` });
-        updates[field] = val;
-      }
+    const updates: Record<string, unknown> = { updatedAt: new Date(), updatedBy: req.user?.userId };
+    const allowedFields = ["title", "caseNumber", "status", "stage", "jurisdiction", "courtName", "notes", "healthScore"];
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) updates[field] = req.body[field];
     }
 
     const [updated] = await db.update(pcMattersTable).set(updates as any).where(eq(pcMattersTable.id, matterId)).returning();
 
     await db.insert(pcAuditEventsTable).values({
-      orgId, matterId, actorId: req.user?.id ?? null,
+      orgId, matterId, actorId: req.user?.userId ?? null,
       action: "matter_updated", entityType: "matter", entityId: matterId,
       details: { changes: Object.keys(updates).filter(k => k !== "updatedAt" && k !== "updatedBy") },
     });
@@ -300,11 +288,11 @@ router.post("/approvals", authMiddleware(), async (req, res) => {
     const [approval] = await db.insert(pcApprovalRequestsTable).values({
       matterId, requestType, title, description,
       sourceBasis: sourceBasis ?? null,
-      requestedBy: req.user?.id ?? null,
+      requestedBy: req.user?.userId ?? null,
     }).returning();
 
     await db.insert(pcAuditEventsTable).values({
-      orgId, matterId, actorId: req.user?.id ?? null,
+      orgId, matterId, actorId: req.user?.userId ?? null,
       action: "approval_requested", entityType: "approval_request", entityId: approval.id,
       details: { requestType, title },
     });
@@ -327,14 +315,14 @@ router.patch("/approvals/:approvalId/resolve", authMiddleware(), async (req, res
 
     const [updated] = await db.update(pcApprovalRequestsTable).set({
       status: decision,
-      approvedBy: req.user?.id ?? null,
+      approvedBy: req.user?.userId ?? null,
       resolvedAt: new Date(),
     }).where(eq(pcApprovalRequestsTable.id, approvalId)).returning();
 
     if (!updated) return sendNotFound(res, "Approval not found");
 
     await db.insert(pcAuditEventsTable).values({
-      orgId, matterId: updated.matterId, actorId: req.user?.id ?? null,
+      orgId, matterId: updated.matterId, actorId: req.user?.userId ?? null,
       action: `approval_${decision}`, entityType: "approval_request", entityId: approvalId,
       details: { decision },
     });
@@ -351,16 +339,16 @@ router.post("/exports", authMiddleware(), async (req, res) => {
 
     const [exp] = await db.insert(pcExportsTable).values({
       orgId, matterId: matterId ?? null, exportType, format,
-      exportedBy: req.user?.id ?? null,
+      exportedBy: req.user?.userId ?? null,
       status: "pending",
     }).returning();
 
     await enqueuePrismJob(orgId, PRISM_JOB_TYPES.EXPORT_GENERATE, {
       exportId: exp.id, matterId, exportType, format,
-    }, { matterId, actorId: req.user?.id });
+    }, { matterId, actorId: req.user?.userId });
 
     await db.insert(pcAuditEventsTable).values({
-      orgId, matterId: matterId ?? null, actorId: req.user?.id ?? null,
+      orgId, matterId: matterId ?? null, actorId: req.user?.userId ?? null,
       action: "export_requested", entityType: "export", entityId: exp.id,
       details: { exportType, format },
     });
@@ -382,7 +370,7 @@ router.post("/connectors/:accountId/sync", authMiddleware(), async (req, res) =>
     const orgId = getOrgId(req);
     const accountId = parseIdParam(req.params.accountId);
     if (!accountId) return sendBadRequest(res, "Invalid account ID");
-    const syncRunId = await triggerSync(accountId, orgId, { actorId: req.user?.id });
+    const syncRunId = await triggerSync(accountId, orgId, { actorId: req.user?.userId });
     sendSuccess(res, { syncRunId }, 201);
   } catch (err) { handleRouteError(res, err, "Failed to trigger sync"); }
 });
@@ -421,7 +409,7 @@ router.post("/jobs/dead-letter/:eventId/replay", authMiddleware(), async (req, r
   try {
     const eventId = parseIdParam(req.params.eventId);
     if (!eventId) return sendBadRequest(res, "Invalid event ID");
-    const newJobId = await replayDeadLetterEvent(eventId, req.user?.id ?? 0);
+    const newJobId = await replayDeadLetterEvent(eventId, req.user?.userId ?? 0);
     sendSuccess(res, { newJobId }, 201);
   } catch (err) { handleRouteError(res, err, "Failed to replay dead letter event"); }
 });
@@ -437,7 +425,7 @@ router.get("/pipeline/stats", authMiddleware(), async (req, res) => {
 router.get("/notifications", authMiddleware(), async (req, res) => {
   try {
     const orgId = getOrgId(req);
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     const notifications = await db.select().from(pcNotificationsTable)
       .where(and(
         eq(pcNotificationsTable.orgId, orgId),
@@ -471,16 +459,15 @@ router.get("/dashboard", authMiddleware({ required: false }), async (req, res) =
   try {
     const orgId = getOrgId(req);
 
-    const matterStatsResult = await db.execute(sql`
+    const [matterStats] = await db.execute(sql`
       SELECT
         COUNT(*)::int as total_matters,
         COUNT(*) FILTER (WHERE status NOT IN ('closed', 'archived'))::int as active_matters,
         SUM(CASE WHEN settlement_mid IS NOT NULL THEN settlement_mid::numeric ELSE 0 END)::numeric(14,2) as total_exposure
       FROM pc_matters WHERE org_id = ${orgId}
     `);
-    const matterStats = matterStatsResult.rows[0];
 
-    const deadlineStatsResult = await db.execute(sql`
+    const [deadlineStats] = await db.execute(sql`
       SELECT
         COUNT(*) FILTER (WHERE status = 'pending' AND due_date <= NOW() + INTERVAL '14 days')::int as upcoming_14d,
         COUNT(*) FILTER (WHERE status = 'overdue')::int as overdue,
@@ -489,15 +476,13 @@ router.get("/dashboard", authMiddleware({ required: false }), async (req, res) =
       JOIN pc_matters m ON d.matter_id = m.id
       WHERE m.org_id = ${orgId}
     `);
-    const deadlineStats = deadlineStatsResult.rows[0];
 
-    const approvalStatsResult = await db.execute(sql`
+    const [approvalStats] = await db.execute(sql`
       SELECT COUNT(*)::int as pending_approvals
       FROM pc_approval_requests ar
       JOIN pc_matters m ON ar.matter_id = m.id
       WHERE m.org_id = ${orgId} AND ar.status = 'pending'
     `);
-    const approvalStats = approvalStatsResult.rows[0];
 
     const recentActivity = await db.select().from(pcAuditEventsTable)
       .where(eq(pcAuditEventsTable.orgId, orgId))
@@ -505,9 +490,9 @@ router.get("/dashboard", authMiddleware({ required: false }), async (req, res) =
       .limit(10);
 
     sendSuccess(res, {
-      matters: matterStats,
-      deadlines: deadlineStats,
-      approvals: approvalStats,
+      matters: matterStats.rows?.[0] ?? matterStats,
+      deadlines: deadlineStats.rows?.[0] ?? deadlineStats,
+      approvals: approvalStats.rows?.[0] ?? approvalStats,
       recentActivity,
     });
   } catch (err) { handleRouteError(res, err, "Failed to build dashboard"); }

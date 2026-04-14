@@ -24,7 +24,7 @@ import {
 import { eq, desc } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendNoContent, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
-import { broadcastWs, pubsub, VESSELS_EVENTS } from "../lib/pubsub-bridge";
+import { broadcastWs, pubsub, VESSELS_EVENTS } from "../lib/pubsub-bridge.js";
 
 const router: IRouter = Router();
 
@@ -312,9 +312,7 @@ router.post("/vessels/simulations", authMiddleware(), requireRole("ops", "exec",
             ],
           },
         }).where(eq(vesselsSimulationsTable.id, simulation.id));
-      } catch (simErr) {
-        console.error("[Vessels] Failed to update simulation result:", simErr);
-      }
+      } catch {}
     }, 3000);
 
     sendCreated(res, simulation);

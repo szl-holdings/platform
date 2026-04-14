@@ -44,7 +44,7 @@ Roll back in reverse order (newest migration first):
 | 2 | `0007_azure_tenants_dataverse` | `004_rollback_0007_azure_tenants_dataverse.sql` |
 | 3 | `0006_firestorm_hardening_platform` | `003_rollback_0006_firestorm_hardening.sql` |
 | 4 | `0005_platform_ops_tables` | `002_rollback_0005_platform_ops_tables.sql` |
-| 5 (oldest) | `0019_terra_broker_schema` (formerly `0004_terra_broker_schema`) | `001_rollback_0004_terra_broker_schema.sql` |
+| 5 (oldest) | `0004_terra_broker_schema` | `001_rollback_0004_terra_broker_schema.sql` |
 
 ## What each script reverts
 

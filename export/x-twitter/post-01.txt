@@ -1,7 +1,0 @@
-I built 16 applications across 5 industries as a solo founder.
-
-Not a pitch deck. Not a prototype. 16 live apps, 446 database tables, 1,618 API endpoints, one TypeScript monorepo.
-
-This is SZL Holdings — and this is how one architecture compounds across everything it touches.
-
-szlholdings.com

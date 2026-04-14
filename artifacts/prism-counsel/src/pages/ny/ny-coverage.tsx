@@ -1,5 +1,5 @@
 import { ShieldOff, AlertTriangle, CheckCircle } from "lucide-react";
-import { NY_DEMO_MATTERS } from "../../data/ny-data";
+import { NY_DEMO_MATTERS } from "../../data/ny-demo-matters";
 
 export default function NyCoveragePage() {
   const DISCLAIMER_RULES = [

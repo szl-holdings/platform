@@ -10,21 +10,16 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 import { AUTH_TOKEN_KEY } from "@/context/AuthContext";
-import { Stack, router, type Href } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
-import React, { Suspense, lazy, useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
+import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-const OnboardingCarousel = lazy(() => import("@/components/OnboardingCarousel").then(m => ({ default: m.OnboardingCarousel })));
-import { BiometricLockScreen } from "@/components/BiometricLockScreen";
 import { AuthProvider } from "@/context/AuthContext";
-import { BiometricProvider, useBiometric } from "@/context/BiometricContext";
-import { useOnboarding } from "@/hooks/useOnboarding";
-import { PrismBusProvider } from "@szl-holdings/prism-bus/provider";
+import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import {
   registerForPushNotifications,
   addNotificationReceivedListener,
@@ -58,21 +53,6 @@ const queryClient = new QueryClient({
 });
 
 function RootLayoutNav() {
-  const { isLoading: onboardingLoading, hasCompletedOnboarding, completeOnboarding } = useOnboarding();
-  const { isEnabled, isLocked } = useBiometric();
-
-  if (isEnabled && isLocked) {
-    return <BiometricLockScreen />;
-  }
-
-  if (!onboardingLoading && !hasCompletedOnboarding) {
-    return (
-      <Suspense fallback={<View style={{ flex: 1, backgroundColor: "#0a1628", justifyContent: "center", alignItems: "center" }}><ActivityIndicator color="#3b82f6" /></View>}>
-        <OnboardingCarousel onComplete={completeOnboarding} />
-      </Suspense>
-    );
-  }
-
   return (
     <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -109,16 +89,8 @@ export default function RootLayout() {
 
     const responseSub = addNotificationResponseListener((response) => {
       const data = response.notification.request.content.data as Record<string, unknown>;
-      const FLEET_HREF: Href = { pathname: "/(tabs)/fleet" };
-      const ALERTS_HREF: Href = { pathname: "/(tabs)/alerts" };
-      if (data?.vesselId) {
+      if (typeof data?.vesselId === "number") {
         queryClient.invalidateQueries({ queryKey: ["vessel-detail", data.vesselId] });
-        const vesselHref: Href = { pathname: "/vessel/[id]", params: { id: String(data.vesselId) } };
-        router.push(vesselHref);
-      } else if (data?.type === "alert" || data?.type === "distress") {
-        router.push(ALERTS_HREF);
-      } else if (data?.type === "vessel") {
-        router.push(FLEET_HREF);
       }
     });
 
@@ -136,11 +108,9 @@ export default function RootLayout() {
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <BiometricProvider>
-              <GestureHandlerRootView style={{ flex: 1 }}>
-                <RootLayoutNav />
-              </GestureHandlerRootView>
-            </BiometricProvider>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+              <RootLayoutNav />
+            </GestureHandlerRootView>
           </AuthProvider>
         </QueryClientProvider>
       </ErrorBoundary>

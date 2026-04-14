@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { colors, effects, typography } from "./tokens";
 import type { ExplainabilityModel } from "./doctrine-layer";
 import { ExplainabilityToggle } from "./explainability-panel";
-import { AgentActivityFeed, AutonomyLevelSelector } from "./agent-activity-feed";
 
 export interface VoiceProfile {
   voice: "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer";
@@ -21,61 +20,6 @@ export interface CopilotConfig {
   agentId?: string;
   isAdvisoryAgent?: boolean;
 }
-
-const COPILOT_TO_DOMAIN_AGENT: Record<string, string> = {
-  "helmsman": "vessels",
-  "sentinel": "firestorm",
-  "beacon": "lyte",
-  "terra": "terra",
-  "navigator": "szl-holdings",
-  "nexus": "admin",
-  "compass": "readiness-report",
-  "muse": "carlota-jo",
-  "alloy-predict": "szl-holdings",
-  "stephen-ai": "stephen",
-};
-
-interface SkillSuggestion {
-  label: string;
-  prompt: string;
-}
-
-const DOMAIN_SKILL_SUGGESTIONS: Record<string, SkillSuggestion[]> = {
-  "vessels": [
-    { label: "Fleet Status", prompt: "Give me the current fleet status and any vessel alerts" },
-    { label: "Route Risks", prompt: "What are the highest-risk shipping routes right now?" },
-    { label: "Weather Impact", prompt: "How is current weather affecting our shipping lanes?" },
-    { label: "Port Analysis", prompt: "Analyze congestion at our key port destinations" },
-  ],
-  "firestorm": [
-    { label: "Threat Brief", prompt: "Give me the current threat intelligence brief" },
-    { label: "Vuln Triage", prompt: "Prioritize current vulnerabilities by exploitability and impact" },
-    { label: "IR Playbook", prompt: "Generate an incident response playbook for ransomware" },
-    { label: "Risk Score", prompt: "What is our current security risk score and drivers?" },
-  ],
-  "lyte": [
-    { label: "Signal Triage", prompt: "Which signals need immediate attention right now?" },
-    { label: "Incident Status", prompt: "Summarize current open incidents and their severity" },
-    { label: "Ops Recs", prompt: "What are your top operational improvement recommendations?" },
-    { label: "Playbook", prompt: "Generate a runbook for the highest-priority active alert" },
-  ],
-  "terra": [
-    { label: "Portfolio Health", prompt: "What is the current portfolio performance and key metrics?" },
-    { label: "At-Risk Properties", prompt: "Which properties have the highest risk exposure right now?" },
-    { label: "Market Trends", prompt: "Summarize current market trends affecting our portfolio" },
-    { label: "Deal Pipeline", prompt: "What is the status of the current deal pipeline?" },
-  ],
-  "readiness-report": [
-    { label: "Readiness Score", prompt: "What is our current overall readiness score?" },
-    { label: "Biggest Gaps", prompt: "Where are the biggest capability gaps we need to close?" },
-    { label: "Quick Wins", prompt: "What are the highest-impact quick wins we can act on now?" },
-  ],
-  "carlota-jo": [
-    { label: "Campaign Brief", prompt: "Help me draft a campaign brief for our next product launch" },
-    { label: "Content Strategy", prompt: "What content strategy would work best for our audience?" },
-    { label: "Creative Concept", prompt: "Generate three creative concept directions for our brand" },
-  ],
-};
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -244,189 +188,6 @@ function detectAdvisoryType(content: string): "informational" | "advisory" | "ac
   return null;
 }
 
-export type ActionStepStatus = "pending" | "running" | "done" | "error" | "awaiting-approval";
-
-export interface ActionStep {
-  id: string;
-  label: string;
-  tool?: string;
-  status: ActionStepStatus;
-  output?: string;
-  requiresApproval?: boolean;
-}
-
-export interface ActionExecution {
-  id: string;
-  intent: string;
-  steps: ActionStep[];
-  approved?: boolean;
-  status: "planning" | "running" | "awaiting-approval" | "approved" | "rejected" | "done" | "error";
-}
-
-const DESTRUCTIVE_INTENT_PATTERNS = [
-  /\b(delete|remove|drop|destroy|terminate|disable|deactivate|wipe|reset|purge|revoke|cancel|reject|close|archive|override)\b/i,
-  /\b(force\s+\w+|hard\s+reset|bulk\s+(delete|remove|update))\b/i,
-];
-
-const ACTION_INTENT_PATTERNS = [
-  /\b(create|add|generate|draft|send|submit|approve|flag|escalate|assign|schedule|trigger|run|execute|process|analyze|extract|summarize|classify)\b/i,
-  /\b(update|change|modify|edit|move|transfer|convert|export|import|deploy|launch|start|stop|restart)\b/i,
-];
-
-export function detectActionIntent(text: string): { isAction: boolean; isDestructive: boolean } {
-  const isDestructive = DESTRUCTIVE_INTENT_PATTERNS.some(p => p.test(text));
-  const isAction = isDestructive || ACTION_INTENT_PATTERNS.some(p => p.test(text));
-  return { isAction, isDestructive };
-}
-
-function generateActionSteps(intent: string): ActionStep[] {
-  const lower = intent.toLowerCase();
-  const steps: ActionStep[] = [];
-  const id = () => Math.random().toString(36).slice(2, 8);
-
-  if (/draft|generate|create/.test(lower)) {
-    steps.push({ id: id(), label: "Parsing intent & extracting parameters", tool: "intent_parser", status: "pending" });
-    steps.push({ id: id(), label: "Fetching relevant context", tool: "context_retrieval", status: "pending" });
-    steps.push({ id: id(), label: "Generating draft content", tool: "content_generator", status: "pending" });
-    steps.push({ id: id(), label: "Reviewing output for compliance", tool: "compliance_check", status: "pending" });
-  } else if (/send|submit|file/.test(lower)) {
-    steps.push({ id: id(), label: "Validating submission requirements", tool: "validation", status: "pending" });
-    steps.push({ id: id(), label: "Preparing submission package", tool: "packager", status: "pending" });
-    steps.push({ id: id(), label: "Awaiting human approval before sending", tool: "approval_gate", status: "pending", requiresApproval: true });
-    steps.push({ id: id(), label: "Submitting via secure channel", tool: "submission_api", status: "pending" });
-  } else if (/analyze|extract|summarize|classify/.test(lower)) {
-    steps.push({ id: id(), label: "Loading document corpus", tool: "doc_loader", status: "pending" });
-    steps.push({ id: id(), label: "Running entity extraction (NER)", tool: "ner_engine", status: "pending" });
-    steps.push({ id: id(), label: "Classifying document type & risk", tool: "classifier", status: "pending" });
-    steps.push({ id: id(), label: "Generating structured summary", tool: "summarizer", status: "pending" });
-  } else if (/delete|remove|terminate|disable/.test(lower)) {
-    steps.push({ id: id(), label: "Identifying target resources", tool: "resource_resolver", status: "pending" });
-    steps.push({ id: id(), label: "Checking dependencies & impact", tool: "dependency_check", status: "pending" });
-    steps.push({ id: id(), label: "HUMAN APPROVAL REQUIRED — destructive action", tool: "approval_gate", status: "pending", requiresApproval: true });
-    steps.push({ id: id(), label: "Executing deletion with audit log", tool: "delete_executor", status: "pending" });
-  } else {
-    steps.push({ id: id(), label: "Understanding request context", tool: "context_resolver", status: "pending" });
-    steps.push({ id: id(), label: "Planning action sequence", tool: "planner", status: "pending" });
-    steps.push({ id: id(), label: "Executing action", tool: "executor", status: "pending" });
-    steps.push({ id: id(), label: "Verifying completion", tool: "verifier", status: "pending" });
-  }
-  return steps;
-}
-
-function ActionStepItem({ step, accentColor }: { step: ActionStep; accentColor: string }) {
-  const statusIcon = {
-    pending: <span style={{ color: "rgba(255,255,255,0.25)", fontSize: "12px" }}>○</span>,
-    running: <span style={{ animation: "copilotSpin 1s linear infinite", display: "inline-block", fontSize: "11px", color: accentColor }}>◌</span>,
-    done: <span style={{ color: "#22c55e", fontSize: "12px" }}>✓</span>,
-    error: <span style={{ color: "#ef4444", fontSize: "12px" }}>✗</span>,
-    "awaiting-approval": <span style={{ color: "#f59e0b", fontSize: "12px" }}>⏸</span>,
-  }[step.status];
-
-  const labelColor = step.status === "done" ? "rgba(255,255,255,0.6)"
-    : step.status === "running" ? "rgba(255,255,255,0.9)"
-    : step.status === "awaiting-approval" ? "#f59e0b"
-    : step.status === "error" ? "#ef4444"
-    : "rgba(255,255,255,0.35)";
-
-  return (
-    <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", padding: "3px 0" }}>
-      <span style={{ flexShrink: 0, marginTop: "1px", width: "14px", textAlign: "center" }}>{statusIcon}</span>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: "11.5px", color: labelColor, fontFamily: "inherit", lineHeight: 1.4 }}>
-          {step.requiresApproval && <span style={{ fontSize: "9px", background: "rgba(245,158,11,0.15)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)", borderRadius: "3px", padding: "1px 5px", marginRight: "5px", letterSpacing: "0.05em", textTransform: "uppercase" }}>Approval</span>}
-          {step.label}
-        </div>
-        {step.tool && step.status !== "pending" && (
-          <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.2)", marginTop: "1px", fontFamily: "monospace" }}>tool:{step.tool}</div>
-        )}
-        {step.output && (
-          <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)", marginTop: "2px", fontStyle: "italic" }}>{step.output}</div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function ActionExecutionCard({
-  execution,
-  accentColor,
-  onApprove,
-  onReject,
-}: {
-  execution: ActionExecution;
-  accentColor: string;
-  onApprove: (id: string) => void;
-  onReject: (id: string) => void;
-}) {
-  const statusLabel = {
-    planning: "Planning…",
-    running: "Executing…",
-    "awaiting-approval": "Awaiting Approval",
-    approved: "Approved — Continuing…",
-    rejected: "Rejected by User",
-    done: "Completed",
-    error: "Failed",
-  }[execution.status];
-
-  const statusColor = {
-    planning: accentColor,
-    running: accentColor,
-    "awaiting-approval": "#f59e0b",
-    approved: "#22c55e",
-    rejected: "#ef4444",
-    done: "#22c55e",
-    error: "#ef4444",
-  }[execution.status];
-
-  return (
-    <div style={{
-      background: "rgba(255,255,255,0.03)",
-      border: `1px solid ${execution.status === "awaiting-approval" ? "rgba(245,158,11,0.35)" : "rgba(255,255,255,0.07)"}`,
-      borderRadius: "8px",
-      padding: "10px 12px",
-      margin: "4px 0",
-    }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
-        <div style={{ fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-          AI Action Execution
-        </div>
-        <div style={{ fontSize: "10px", fontWeight: 600, color: statusColor, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-          {statusLabel}
-        </div>
-      </div>
-      <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)", marginBottom: "8px", fontStyle: "italic" }}>
-        "{execution.intent.length > 60 ? execution.intent.slice(0, 60) + "…" : execution.intent}"
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
-        {execution.steps.map(step => (
-          <ActionStepItem key={step.id} step={step} accentColor={accentColor} />
-        ))}
-      </div>
-      {execution.status === "awaiting-approval" && (
-        <div style={{ marginTop: "10px", padding: "8px 10px", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: "6px" }}>
-          <div style={{ fontSize: "11px", color: "#f59e0b", marginBottom: "6px", fontWeight: 600 }}>
-            ⚠ Human approval required before proceeding
-          </div>
-          <div style={{ display: "flex", gap: "6px" }}>
-            <button
-              onClick={() => onApprove(execution.id)}
-              style={{ flex: 1, padding: "5px 10px", background: "rgba(34,197,94,0.15)", border: "1px solid rgba(34,197,94,0.4)", borderRadius: "5px", color: "#22c55e", fontSize: "11px", fontWeight: 600, cursor: "pointer" }}
-            >
-              Approve & Continue
-            </button>
-            <button
-              onClick={() => onReject(execution.id)}
-              style={{ flex: 1, padding: "5px 10px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: "5px", color: "#ef4444", fontSize: "11px", fontWeight: 600, cursor: "pointer" }}
-            >
-              Reject
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 function WaveformVisualizer({ isActive, color }: { isActive: boolean; color: string }) {
   if (!isActive) return null;
   return (
@@ -568,13 +329,6 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voiceTranscript, setVoiceTranscript] = useState("");
-  const [activeExecution, setActiveExecution] = useState<ActionExecution | null>(null);
-  const executionApprovalRef = useRef<((approved: boolean) => void) | null>(null);
-  const [activePanel, setActivePanel] = useState<"chat" | "activity" | "autonomy">("chat");
-  const [autonomyLevel, setAutonomyLevel] = useState<"observer" | "advisor" | "operator">("advisor");
-  const conversationIdRef = useRef<string>(`copilot_${config.agentId ?? "default"}_${Math.random().toString(36).slice(2, 8)}`);
-  const domainAgentType = config.agentId ? COPILOT_TO_DOMAIN_AGENT[config.agentId] : undefined;
-  const domainSkillSuggestions = domainAgentType ? (DOMAIN_SKILL_SUGGESTIONS[domainAgentType] ?? []) : [];
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -604,12 +358,6 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
       inputRef.current.focus();
     }
   }, [isOpen, voiceMode]);
-
-  useEffect(() => {
-    const handler = () => setIsOpen(true);
-    window.addEventListener("szl:open-copilot", handler);
-    return () => window.removeEventListener("szl:open-copilot", handler);
-  }, []);
 
   const submitFeedback = useCallback(async (rating: number, msg: ChatMessage) => {
     if (!config.agentId) return;
@@ -669,65 +417,59 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
 
     abortRef.current = new AbortController();
 
-    const streamSSEResponse = async (response: Response): Promise<string> => {
+    try {
+      const response = await fetch("/api/intelligence/ai/chat/stream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: apiMessages }),
+        signal: abortRef.current.signal,
+      });
+
+      if (!response.ok) throw new Error("Stream failed");
+
       const reader = response.body?.getReader();
       if (!reader) throw new Error("No body");
+
       const decoder = new TextDecoder();
       let accumulated = "";
       let buffer = "";
       let hadError = false;
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
+
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split("\n");
         buffer = lines.pop() ?? "";
+
         for (const line of lines) {
           const trimmedLine = line.trim();
           if (!trimmedLine || !trimmedLine.startsWith("data: ")) continue;
           const data = trimmedLine.slice(6);
           if (data === "[DONE]") break;
           try {
-            const parsed = JSON.parse(data) as { content?: string; reply?: string; error?: string };
-            if (parsed.error) { hadError = true; }
-            else if (parsed.content) { accumulated += parsed.content; setStreamingContent(accumulated); }
-            else if (parsed.reply) { accumulated += parsed.reply; setStreamingContent(accumulated); }
-          } catch { continue; }
+            const parsed = JSON.parse(data) as { content?: string; error?: string };
+            if (parsed.error) {
+              hadError = true;
+            } else if (parsed.content) {
+              accumulated += parsed.content;
+              setStreamingContent(accumulated);
+            }
+          } catch {
+            continue;
+          }
         }
       }
-      if (hadError && !accumulated) throw new Error("Server reported stream error");
-      return accumulated;
-    };
 
-    try {
-      let accumulated = "";
-      if (domainAgentType) {
-        const response = await fetch(`/api/domain-agents/${domainAgentType}/chat`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            message: userContent,
-            stream: true,
-            conversationId: conversationIdRef.current,
-          }),
-          signal: abortRef.current.signal,
-        });
-        if (!response.ok) throw new Error(`Agent response ${response.status}`);
-        accumulated = await streamSSEResponse(response);
-      } else {
-        const response = await fetch("/api/intelligence/ai/chat/stream", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: apiMessages }),
-          signal: abortRef.current.signal,
-        });
-        if (!response.ok) throw new Error("Stream failed");
-        accumulated = await streamSSEResponse(response);
+      if (hadError && !accumulated) {
+        throw new Error("Server reported stream error");
       }
 
-      const finalContent = accumulated || "I'm here to help. Could you rephrase that?";
+      const finalContent = accumulated || "I'm here to help! Could you rephrase that?";
       const assistantMsg: ChatMessage = { role: "assistant", content: finalContent, id: `a-${Date.now()}` };
       setMessages([...newMessages, assistantMsg]);
+
       if (voiceOutputEnabled && voiceMode && finalContent) {
         await speakText(finalContent);
       }
@@ -758,161 +500,18 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
       setStreamingContent("");
       abortRef.current = null;
     }
-  }, [config.systemPrompt, config.welcomeMessage, streamingContent, voiceMode, voiceOutputEnabled, speakText, isRecording, domainAgentType]);
-
-  const runActionExecution = useCallback(async (intent: string) => {
-    let steps: ActionStep[];
-    try {
-      const planRes = await fetch("/api/copilot/nla/plan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ command: intent, agentId: config.agentId }),
-      });
-      if (planRes.ok) {
-        const plan = await planRes.json() as { steps: Array<{ id: string; label: string; tool?: string; requiresApproval?: boolean }> };
-        steps = (plan.steps ?? []).map(s => ({ ...s, status: "pending" as const }));
-        if (steps.length === 0) steps = generateActionSteps(intent);
-      } else {
-        steps = generateActionSteps(intent);
-      }
-    } catch {
-      steps = generateActionSteps(intent);
-    }
-    const execId = `exec-${Date.now()}`;
-    const execution: ActionExecution = { id: execId, intent, steps, status: "planning" };
-    setActiveExecution({ ...execution });
-
-    await new Promise(r => setTimeout(r, 400));
-
-    let currentExec: ActionExecution = { ...execution, status: "running" };
-    setActiveExecution({ ...currentExec });
-
-    for (let i = 0; i < steps.length; i++) {
-      const step = steps[i]!;
-
-      if (step.requiresApproval) {
-        currentExec = {
-          ...currentExec,
-          status: "awaiting-approval",
-          steps: currentExec.steps.map((s, idx) =>
-            idx === i ? { ...s, status: "awaiting-approval" } : s
-          ),
-        };
-        setActiveExecution({ ...currentExec });
-
-        const approved = await new Promise<boolean>(resolve => {
-          executionApprovalRef.current = resolve;
-        });
-        executionApprovalRef.current = null;
-
-        if (!approved) {
-          currentExec = {
-            ...currentExec,
-            status: "rejected",
-            steps: currentExec.steps.map((s, idx) =>
-              idx === i ? { ...s, status: "error", output: "Rejected by user" } : s
-            ),
-          };
-          setActiveExecution({ ...currentExec });
-          return "Action was rejected at the approval gate. No changes were made.";
-        }
-
-        currentExec = {
-          ...currentExec,
-          status: "approved",
-          steps: currentExec.steps.map((s, idx) =>
-            idx === i ? { ...s, status: "running" } : s
-          ),
-        };
-        setActiveExecution({ ...currentExec });
-        await new Promise(r => setTimeout(r, 300));
-      } else {
-        currentExec = {
-          ...currentExec,
-          steps: currentExec.steps.map((s, idx) =>
-            idx === i ? { ...s, status: "running" } : s
-          ),
-        };
-        setActiveExecution({ ...currentExec });
-      }
-
-      await new Promise(r => setTimeout(r, 600 + Math.random() * 600));
-
-      currentExec = {
-        ...currentExec,
-        steps: currentExec.steps.map((s, idx) =>
-          idx === i ? { ...s, status: "done", output: getStepOutput(step.tool ?? "") } : s
-        ),
-      };
-      setActiveExecution({ ...currentExec });
-    }
-
-    currentExec = { ...currentExec, status: "done" };
-    setActiveExecution({ ...currentExec });
-    await new Promise(r => setTimeout(r, 800));
-    setActiveExecution(null);
-    return "Action completed successfully. All steps executed and verified.";
-  }, [config.agentId]);
-
-  const getStepOutput = (tool: string): string | undefined => {
-    const outputs: Record<string, string> = {
-      intent_parser: "Parameters extracted",
-      context_retrieval: "Context loaded",
-      content_generator: "Draft ready",
-      compliance_check: "Passed",
-      validation: "Valid",
-      packager: "Package prepared",
-      submission_api: "Submitted",
-      doc_loader: "3 documents loaded",
-      ner_engine: "12 entities found",
-      classifier: "Classified: Contract (high confidence)",
-      summarizer: "Summary generated",
-      resource_resolver: "2 resources identified",
-      dependency_check: "No blockers found",
-      delete_executor: "Deleted with audit log entry",
-      context_resolver: "Context resolved",
-      planner: "4-step plan created",
-      executor: "Executed",
-      verifier: "Verified",
-    };
-    return outputs[tool];
-  };
+  }, [config.systemPrompt, config.welcomeMessage, streamingContent, voiceMode, voiceOutputEnabled, speakText, isRecording]);
 
   const sendMessage = async () => {
     const trimmed = input.trim();
     if (!trimmed || isStreaming) return;
-    const { isAction } = detectActionIntent(trimmed);
-    if (isAction && !activeExecution) {
-      const userMsg: ChatMessage = { role: "user", content: trimmed, id: `u-${Date.now()}` };
-      const newMessages = [...messages, userMsg];
-      setMessages(newMessages);
-      setInput("");
-      setIsStreaming(true);
-      const result = await runActionExecution(trimmed);
-      const assistantMsg: ChatMessage = { role: "assistant", content: result, id: `a-${Date.now()}` };
-      setMessages([...newMessages, assistantMsg]);
-      setIsStreaming(false);
-    } else {
-      await executeChat(trimmed, messages);
-    }
+    await executeChat(trimmed, messages);
   };
 
   const handleSuggestion = (q: string) => {
     if (isStreaming) return;
     executeChat(q, messages);
   };
-
-  const handleApproveExecution = useCallback((execId: string) => {
-    if (activeExecution?.id === execId && executionApprovalRef.current) {
-      executionApprovalRef.current(true);
-    }
-  }, [activeExecution]);
-
-  const handleRejectExecution = useCallback((execId: string) => {
-    if (activeExecution?.id === execId && executionApprovalRef.current) {
-      executionApprovalRef.current(false);
-    }
-  }, [activeExecution]);
 
   const startVoiceRecording = useCallback(async () => {
     try {
@@ -1066,10 +665,6 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
           0%, 100% { box-shadow: 0 4px 20px ${config.accentColor}40; }
           50% { box-shadow: 0 4px 30px ${config.accentColor}60; }
         }
-        @keyframes copilotSpin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
         .copilot-msg-feedback { opacity: 0; transition: opacity 0.2s; }
         .copilot-msg:hover .copilot-msg-feedback { opacity: 1; }
       `}</style>
@@ -1212,46 +807,7 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
           </div>
         </div>
 
-        {config.agentId && domainAgentType && (
-          <div style={{
-            display: "flex",
-            gap: "4px",
-            padding: "6px 1.25rem",
-            borderBottom: `1px solid ${colors.border.DEFAULT}`,
-            background: "hsla(220, 20%, 8%, 0.4)",
-            flexShrink: 0,
-            alignItems: "center",
-          }}>
-            {(["chat", "activity", "autonomy"] as const).map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActivePanel(tab)}
-                style={{
-                  padding: "3px 10px",
-                  borderRadius: "4px",
-                  border: `1px solid ${activePanel === tab ? config.accentColor : "rgba(255,255,255,0.08)"}`,
-                  background: activePanel === tab ? `${config.accentColor}20` : "transparent",
-                  color: activePanel === tab ? config.accentColor : "rgba(255,255,255,0.35)",
-                  fontSize: "10px",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  letterSpacing: "0.04em",
-                  fontFamily: "inherit",
-                  transition: "all 0.15s",
-                }}
-              >
-                {tab === "chat" ? "💬 Chat" : tab === "activity" ? "⚡ Activity" : "🎛 Autonomy"}
-              </button>
-            ))}
-            {activePanel === "autonomy" && (
-              <span style={{ marginLeft: "auto", fontSize: "10px", color: `${config.accentColor}90`, alignSelf: "center", fontWeight: 600 }}>
-                {autonomyLevel.charAt(0).toUpperCase() + autonomyLevel.slice(1)} Mode
-              </span>
-            )}
-          </div>
-        )}
-
-        {config.isAdvisoryAgent && activePanel === "chat" && (
+        {config.isAdvisoryAgent && (
           <div style={{
             padding: "0.625rem 1.25rem",
             background: "hsla(40, 90%, 50%, 0.1)",
@@ -1267,61 +823,11 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
           </div>
         )}
 
-        {activePanel === "activity" && (
-          <div style={{ flex: 1, overflowY: "auto", padding: "1rem 1.25rem" }}>
-            <div style={{ fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "10px" }}>
-              Agent Activity Feed
-            </div>
-            <AgentActivityFeed
-              agentId={config.agentId}
-              accentColor={config.accentColor}
-              compact={false}
-              showFilters={true}
-              pollIntervalMs={8000}
-              maxEvents={40}
-            />
-          </div>
-        )}
-
-        {activePanel === "autonomy" && (
-          <div style={{ flex: 1, overflowY: "auto", padding: "1rem 1.25rem" }}>
-            <div style={{ fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "6px" }}>
-              Agent Autonomy Level
-            </div>
-            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", marginBottom: "14px", lineHeight: 1.5 }}>
-              Control how much authority {config.name} has to act on your behalf.
-            </div>
-            <AutonomyLevelSelector
-              skillId={config.agentId ?? "default"}
-              currentLevel={autonomyLevel}
-              onLevelChange={(_skillId, level) => {
-                setAutonomyLevel(level);
-                if (config.agentId) {
-                  fetch(`/api/skills/autonomy/${config.agentId}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ autonomyLevel: level, consentGiven: true }),
-                  }).catch(() => {});
-                }
-              }}
-              accentColor={config.accentColor}
-            />
-            <div style={{ marginTop: "20px", padding: "10px 12px", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "6px" }}>
-              <div style={{ fontSize: "10px", fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>
-                Governance Principle
-              </div>
-              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.35)", lineHeight: 1.5 }}>
-                All AI agents are advisory by default. Operator mode enables automated execution of pre-approved action classes only. Every action is logged and auditable.
-              </div>
-            </div>
-          </div>
-        )}
-
         <div style={{
-          flex: activePanel === "chat" ? 1 : 0,
+          flex: 1,
           overflowY: "auto",
           padding: "1rem 1.25rem",
-          display: activePanel === "chat" ? "flex" : "none",
+          display: "flex",
           flexDirection: "column",
           gap: "1rem",
           WebkitOverflowScrolling: "touch",
@@ -1386,45 +892,6 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
                       {q}
                     </button>
                   ))}
-                </div>
-              )}
-              {domainSkillSuggestions.length > 0 && (
-                <div style={{ marginTop: "1rem" }}>
-                  <div style={{ fontSize: "10px", fontWeight: 700, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "6px" }}>
-                    Quick Actions
-                  </div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "center" }}>
-                    {domainSkillSuggestions.map((s, i) => (
-                      <button
-                        key={i}
-                        onClick={() => handleSuggestion(s.prompt)}
-                        style={{
-                          padding: "4px 10px",
-                          borderRadius: "20px",
-                          border: `1px solid ${config.accentColor}35`,
-                          background: `${config.accentColor}12`,
-                          color: config.accentColor,
-                          fontSize: "11px",
-                          fontWeight: 600,
-                          cursor: "pointer",
-                          fontFamily: "inherit",
-                          letterSpacing: "0.02em",
-                          transition: "all 0.15s",
-                          WebkitTapHighlightColor: "transparent",
-                        }}
-                        onMouseEnter={e => {
-                          e.currentTarget.style.background = `${config.accentColor}25`;
-                          e.currentTarget.style.borderColor = `${config.accentColor}60`;
-                        }}
-                        onMouseLeave={e => {
-                          e.currentTarget.style.background = `${config.accentColor}12`;
-                          e.currentTarget.style.borderColor = `${config.accentColor}35`;
-                        }}
-                      >
-                        ⚡ {s.label}
-                      </button>
-                    ))}
-                  </div>
                 </div>
               )}
             </div>
@@ -1504,22 +971,6 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
             </div>
           )}
 
-          {activeExecution && (
-            <div style={{
-              background: "rgba(255,255,255,0.02)",
-              borderRadius: "0.625rem",
-              padding: "0.125rem 0.125rem",
-              marginBottom: "0.25rem",
-            }}>
-              <ActionExecutionCard
-                execution={activeExecution}
-                accentColor={config.accentColor}
-                onApprove={handleApproveExecution}
-                onReject={handleRejectExecution}
-              />
-            </div>
-          )}
-
           <div ref={messagesEndRef} />
         </div>
 
@@ -1529,7 +980,6 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
           borderTop: `1px solid ${colors.border.DEFAULT}`,
           background: "hsla(220, 20%, 8%, 0.6)",
           flexShrink: 0,
-          display: activePanel === "chat" ? "block" : "none",
         }}>
           {isRecording && (
             <div style={{ marginBottom: "0.5rem" }}>

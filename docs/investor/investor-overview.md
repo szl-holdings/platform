@@ -1,7 +1,7 @@
 # SZL Holdings — Investor Overview
 
 **For:** Qualified strategic investors and institutional evaluators  
-**Date:** April 2026  
+**Date:** Q1 2026  
 **Contact:** inquiries@szlholdings.com
 
 ---
@@ -16,8 +16,7 @@
 | **Founder** | Stephen Lutar |
 | **Model** | Unified platform ecosystem — shared infrastructure across domain verticals |
 | **Primary Vertical** | Business Observability (Lyte) |
-| **Adjacent Verticals** | Defense Intelligence (Aegis), Real Estate (Terra), Maritime (Vessels), Legal/Litigation (PRISM Counsel), Advisory (Carlota Jo) |
-| **Intelligence Surfaces** | Client & Investor Portal (Forge), Cross-Domain Fusion Canvas (Nexus), AI Command & Deployment (INCA Lab) |
+| **Adjacent Verticals** | Defense Intelligence (Aegis), Real Estate (Terra), Maritime (Vessels), Advisory (Carlota Jo) |
 | **Revenue Model** | SaaS subscriptions, usage-based billing, enterprise contracts |
 | **Primary Markets** | Enterprise and mid-market operations, security, maritime, real estate |
 
@@ -41,11 +40,11 @@ The architecture is unique: five domain verticals sharing one intelligence backb
 
 ## What Has Been Built
 
-As of April 2026, SZL Holdings has:
+As of Q1 2026, SZL Holdings has:
 
-- **22 deployable artifacts** — 15 web/API applications, 7 mobile apps (Expo/React Native)
+- **16 deployable artifacts** — 7 web apps, 7 mobile apps (Expo/React Native), 1 API server, 1 design system
 - **Production-grade shared infrastructure** — database schema, auth, audit trail, real-time layer, AI engine, workflow engine
-- **8 domain and intelligence platforms** fully implemented with seeded/demo data and role-aware dashboards — including three new surfaces: **Forge** (Client & Investor Portal), **Nexus** (Cross-Domain Fusion Intelligence Canvas), and **INCA Lab** (AI Model Command & Deployment)
+- **5 domain platforms** fully implemented with seeded/demo data and role-aware dashboards
 - **Azure Bicep IaC** — enterprise deployment architecture ready
 - **Stripe billing infrastructure** — built and pending activation
 - **OpenAPI 3.1 specification** — full API documentation

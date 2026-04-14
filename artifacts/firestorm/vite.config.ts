@@ -4,7 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
-const port = Number(process.env.PORT) || 3001;
+const port = Number(process.env.PORT) || 3000;
 const basePath = process.env.BASE_PATH || "/firestorm/";
 
 export default defineConfig({
@@ -27,9 +27,6 @@ export default defineConfig({
         ]
       : []),
   ],
-  optimizeDeps: {
-    exclude: ["ioredis"],
-  },
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "src"),
@@ -44,7 +41,6 @@ export default defineConfig({
     emptyOutDir: true,
     cssCodeSplit: true,
     rollupOptions: {
-      external: ["ioredis"],
       output: {
         manualChunks(id): string | undefined {
           if (id.includes('node_modules')) {

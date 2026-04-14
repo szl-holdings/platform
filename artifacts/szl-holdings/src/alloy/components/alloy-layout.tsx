@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
 import { ReactNode, useState } from "react";
-import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard, ArrowLeft, FileText, Brain, Layers, Home, BookOpen, Globe, Lock, Play, Star, DollarSign, Store, Code2, Dna, Cpu, Crown } from "lucide-react";
+import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard, ArrowLeft, FileText, Brain, Layers, Home, BookOpen, Globe, Lock, Play, Star, DollarSign, Store, Code2 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator } from "@szl-holdings/shared-ui";
 import { CommandBar, CommandBarTrigger, useCommandBar } from "./command-bar";
 
@@ -37,7 +37,6 @@ const CREATIVE_NAV = [
   { href: "/alloy/creative/brand-voice", label: "Brand Voice", icon: Mic },
   { href: "/alloy/creative/content-calendar", label: "Content Calendar", icon: Calendar },
   { href: "/alloy/creative/ai-studio", label: "AI Studio", icon: Wand2 },
-  { href: "/alloy/creative/sound-studio", label: "Sound Studio", icon: Radio },
 ];
 
 const DOCS_NAV = [
@@ -61,14 +60,6 @@ const ENTERPRISE_NAV = [
 const MCP_NAV = [
   { href: "/alloy/mcp-store", label: "MCP Marketplace", icon: Store, badge: "New" },
   { href: "/alloy/mcp-tools", label: "Custom Tool Creator", icon: Code2, badge: "New" },
-];
-
-const EVOLUTION_NAV = [
-  { href: "/alloy/evolution", label: "Innovation Radar", icon: Dna, badge: "New" },
-];
-
-const PROTOCOL_FABRIC_NAV = [
-  { href: "/alloy/protocol-mesh", label: "Protocol Mesh", icon: Cpu, badge: "New" },
 ];
 
 function NavItem({ href, label, icon: Icon, exact, badge, onClick }: {
@@ -122,7 +113,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-sm tracking-wide text-white leading-none">ALLOY</span>
-                <span className="text-[9px] uppercase tracking-widest leading-none mt-0.5" style={{ color: "#f59e0b" }}>Fusion Intelligence</span>
+                <span className="text-[9px] uppercase tracking-widest leading-none mt-0.5" style={{ color: "#4B8BDB" }}>Execution Fabric</span>
               </div>
             </div>
           </div>
@@ -188,16 +179,6 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             {MCP_NAV.map(item => (
               <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
             ))}
-
-            <div className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium" style={{ color: "rgba(139,92,246,0.8)" }}>Self-Evolution</div>
-            {EVOLUTION_NAV.map(item => (
-              <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
-            ))}
-
-            <div className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium" style={{ color: "rgba(245,158,11,0.8)" }}>Protocol Fabric</div>
-            {PROTOCOL_FABRIC_NAV.map(item => (
-              <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
-            ))}
           </nav>
 
           <div className="mt-auto shrink-0 px-3 py-3 mx-2 mb-2 rounded-lg" style={{ background: "rgba(75,139,219,0.04)", border: "1px solid rgba(75,139,219,0.08)" }}>
@@ -259,11 +240,6 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             <span style={{ color: "#10b981" }}>8 Done</span>
             <span className="hidden sm:block" style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
             <span className="hidden sm:block" style={{ color: "#ef4444" }}>2 Failed</span>
-            <span className="hidden sm:block" style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
-            <span className="hidden sm:flex items-center gap-1" style={{ color: "#f59e0b" }}>
-              <Crown className="w-3 h-3" />
-              Fusion Active · 5 Champions
-            </span>
           </div>
           <div className="flex items-center gap-3">
             <CommandBarTrigger onClick={openCmd} />

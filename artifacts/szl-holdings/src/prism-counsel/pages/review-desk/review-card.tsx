@@ -60,12 +60,12 @@ interface ReviewItemRaw {
   sendSafe?: boolean;
   whatThisIs?: string;
   whyItsHere?: string;
-  whatSupportsIt?: string | string[] | null;
-  whatsMissing?: string | string[] | null;
+  whatSupportsIt?: unknown;
+  whatsMissing?: unknown;
   whatRiskExists?: string;
   whatActionClearsIt?: string;
-  whoIsWaiting?: string | string[] | null;
-  whatItUnblocks?: string | string[] | null;
+  whoIsWaiting?: unknown;
+  whatItUnblocks?: unknown;
   assignedTo?: number;
   blockedReason?: string;
   escalatedTo?: string;

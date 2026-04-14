@@ -16,7 +16,7 @@ import { settlementFrictionEngine } from "../../services/prism-settlement-fricti
 import { portfolioLearning } from "../../services/prism-portfolio-learning";
 import { forecastExpanded } from "../../services/prism-forecast-expanded";
 import { copilotPilotOne } from "../../services/prism-copilot-pilot-one";
-import type { GraphQLContext } from "../index";
+import type { GraphQLContext } from "../index.js";
 
 export const prismCounselPilotOneTypeDefs = `#graphql
 

@@ -22,8 +22,8 @@ export async function ensureTerraActionItemsTable(): Promise<void> {
   try {
     migrationSql = fs.readFileSync(migrationFile, "utf-8");
   } catch (err) {
-    logger.error({ err, path: migrationFile }, "terra_action_items migration file not found");
-    throw new Error(`terra_action_items migration file not found at ${migrationFile}`);
+    logger.warn({ err, path: migrationFile }, "terra_action_items migration file not found — skipping");
+    return;
   }
 
   const statements = migrationSql
@@ -32,9 +32,18 @@ export async function ensureTerraActionItemsTable(): Promise<void> {
     .filter(s => s.length > 0)
     .map(s => s + ";");
 
-  for (const statement of statements) {
-    await pool.query(statement);
+  try {
+    for (const statement of statements) {
+      await pool.query(statement);
+    }
+    logger.info({ statementCount: statements.length }, "terra_action_items table ensured");
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("already exists")) {
+      logger.debug("terra_action_items table already exists — skipping");
+      return;
+    }
+    logger.error({ err }, "Failed to apply terra_action_items migration");
+    throw err;
   }
-
-  logger.info({ statementCount: statements.length }, "terra_action_items table ensured");
 }

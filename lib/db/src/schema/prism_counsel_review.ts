@@ -1,48 +1,6 @@
 import { pgTable, serial, integer, text, timestamp, boolean, jsonb, real, index } from "drizzle-orm/pg-core";
 import { pcMattersTable } from "./prism_counsel";
 
-export const pcCitationAuditReportsTable = pgTable("pc_citation_audit_reports", {
-  id: serial("id").primaryKey(),
-  orgId: integer("org_id").notNull(),
-  matterId: integer("matter_id").references(() => pcMattersTable.id, { onDelete: "set null" }),
-  reviewItemId: integer("review_item_id"),
-
-  auditId: text("audit_id").notNull().unique(),
-  documentId: text("document_id").notNull(),
-  documentTitle: text("document_title").notNull(),
-  documentType: text("document_type"),
-
-  totalCitations: integer("total_citations").notNull().default(0),
-  verifiedCount: integer("verified_count").notNull().default(0),
-  unverifiedCount: integer("unverified_count").notNull().default(0),
-  suspiciousCount: integer("suspicious_count").notNull().default(0),
-  averageConfidence: real("average_confidence").notNull().default(0),
-  overallStatus: text("overall_status", { enum: ["clear", "needs_review", "blocked"] }).notNull(),
-
-  citations: jsonb("citations").notNull().default([]),
-  blockingCitations: jsonb("blocking_citations").notNull().default([]),
-  ragVerificationNotes: jsonb("rag_verification_notes").notNull().default({}),
-
-  sealedAt: timestamp("sealed_at"),
-  sealedBy: integer("sealed_by"),
-  sealedNote: text("sealed_note"),
-  proofChainId: integer("proof_chain_id"),
-
-  verificationDurationMs: integer("verification_duration_ms"),
-  verifiedAt: timestamp("verified_at").notNull().defaultNow(),
-  createdBy: integer("created_by"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (table) => [
-  index("pc_car_org_idx").on(table.orgId),
-  index("pc_car_matter_idx").on(table.matterId),
-  index("pc_car_review_item_idx").on(table.reviewItemId),
-  index("pc_car_audit_id_idx").on(table.auditId),
-  index("pc_car_status_idx").on(table.overallStatus),
-]);
-
-export type PcCitationAuditReport = typeof pcCitationAuditReportsTable.$inferSelect;
-
 export const pcManagedReviewItemsTable = pgTable("pc_managed_review_items", {
   id: serial("id").primaryKey(),
   orgId: integer("org_id").notNull(),

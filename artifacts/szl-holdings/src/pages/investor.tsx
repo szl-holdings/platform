@@ -42,7 +42,7 @@ const WEDGE_PLATFORM = [
 ];
 
 const VERTICALS = [
-  { icon: Target, name: "PRISM Counsel", color: "hsl(38,72%,58%)", wedge: true, body: "Legal matter observability — deadlines, exposure tracking, approval governance, export safety. The commercial wedge. First vertical entering design-partner engagement." },
+  { icon: Target, name: "PRISM Counsel", color: "#d4a054", wedge: true, body: "Legal matter observability — deadlines, exposure tracking, approval governance, export safety. The commercial wedge. First vertical entering design-partner engagement." },
   { icon: Ship, name: "Vessels", color: "#4a90b8", body: "Maritime intelligence — voyage twins, AIS monitoring, route risk, port congestion, sanctions compliance. Second vertical. Infrastructure ready." },
   { icon: ShieldCheck, name: "Aegis", color: "#c45a4a", body: "Security and defense observability — threat twins, incident workflows, exposure prioritization. Third vertical. Architecture shared." },
   { icon: Home, name: "Terra", color: "#c8953c", body: "Real estate intelligence — property twins, diligence workflows, distress scoring. Fourth vertical. Same execution model." },

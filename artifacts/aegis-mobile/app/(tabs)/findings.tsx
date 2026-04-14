@@ -186,10 +186,6 @@ export default function FindingsScreen() {
           keyExtractor={(item) => String(item.id)}
           contentContainerStyle={{ padding: 16, paddingBottom: bottomInsets + 100 }}
           showsVerticalScrollIndicator={false}
-          initialNumToRender={10}
-          maxToRenderPerBatch={10}
-          windowSize={10}
-          removeClippedSubviews
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.amber} />}
           ListEmptyComponent={
             <View style={[styles.empty, { borderColor: colors.border }]}>

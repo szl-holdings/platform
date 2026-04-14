@@ -53,14 +53,37 @@ const GOVERNANCE_STATEMENTS = [
   `CREATE INDEX IF NOT EXISTS "platform_usage_org_idx" ON "platform_usage_events" ("org_id")`,
   `CREATE INDEX IF NOT EXISTS "platform_usage_event_type_idx" ON "platform_usage_events" ("event_type")`,
   `CREATE INDEX IF NOT EXISTS "platform_usage_created_idx" ON "platform_usage_events" ("created_at")`,
-  `ALTER TABLE "platform_governance_incidents" ADD COLUMN IF NOT EXISTS "workflow_run_id" integer REFERENCES "platform_workflow_runs"("id") ON DELETE set null`,
-  `ALTER TABLE "platform_usage_events" ADD COLUMN IF NOT EXISTS "workflow_run_id" integer REFERENCES "platform_workflow_runs"("id") ON DELETE set null`,
+  // Add workflow_run_id column to incidents table if it was created without it (idempotent)
+  `DO $$ BEGIN
+    ALTER TABLE "platform_governance_incidents" ADD COLUMN IF NOT EXISTS "workflow_run_id" integer REFERENCES "platform_workflow_runs"("id") ON DELETE set null;
+  EXCEPTION WHEN duplicate_column THEN NULL;
+  END $$`,
+  // Add workflow_run_id column to usage events table if it was created without it (idempotent)
+  `DO $$ BEGIN
+    ALTER TABLE "platform_usage_events" ADD COLUMN IF NOT EXISTS "workflow_run_id" integer REFERENCES "platform_workflow_runs"("id") ON DELETE set null;
+  EXCEPTION WHEN duplicate_column THEN NULL;
+  END $$`,
 ];
 
 export async function ensureAlloyGovernanceTables(): Promise<void> {
+  let applied = 0;
+  let skipped = 0;
+
   for (const statement of GOVERNANCE_STATEMENTS) {
-    await pool.query(statement);
+    try {
+      await pool.query(statement);
+      applied++;
+    } catch (err: unknown) {
+      const pgErr = err as { code?: string };
+      const benign = ["42P07", "42701", "42703", "42710", "23505"];
+      if (pgErr.code && benign.includes(pgErr.code)) {
+        skipped++;
+      } else {
+        logger.warn({ err, statement: statement.slice(0, 120) }, "Governance migration statement failed (non-fatal)");
+        skipped++;
+      }
+    }
   }
 
-  logger.info({ total: GOVERNANCE_STATEMENTS.length }, "Alloy governance migration complete");
+  logger.info({ applied, skipped }, "Alloy governance migration complete");
 }

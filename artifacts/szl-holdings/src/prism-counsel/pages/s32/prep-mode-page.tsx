@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BookOpen, FileText, AlertTriangle, CheckCircle, ChevronRight, Download, Clock, TrendingUp, MessageSquare, Shield, Users, Briefcase, ArrowRight, XCircle, Building2 } from "lucide-react";
+import { BookOpen, FileText, AlertTriangle, CheckCircle, ChevronRight, Download, Clock, TrendingUp, MessageSquare, Shield, Users, Briefcase, ArrowRight, XCircle } from "lucide-react";
 import { Link } from "wouter";
 import { DEMO_MATTERS } from "../../data/demo-matters";
 

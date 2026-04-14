@@ -693,7 +693,7 @@ export function scheduleNycExtendedIngestionJob(
       .catch(err => logger.error({ err }, "Failed to enqueue NYC extended ingestion job"));
   };
 
-  const initialDelay = 15 * 60 * 1000 + Math.random() * 60000;
+  const initialDelay = Math.random() * Math.min(120000, intervalMs * 0.15);
   setTimeout(() => {
     runJob();
     setInterval(runJob, intervalMs);

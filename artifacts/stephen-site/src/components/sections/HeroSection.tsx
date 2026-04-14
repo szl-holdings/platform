@@ -1,7 +1,9 @@
-import { motion, useInView } from "framer-motion";
-import { ArrowRight, Linkedin, Github, Mail, Activity } from "lucide-react";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { motion } from "framer-motion";
+import { ArrowRight, Linkedin, Mail, ExternalLink } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "wouter";
 
+const BASE_URL = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API_BASE = "/api";
 
 type EcosystemApp = {
@@ -11,58 +13,36 @@ type EcosystemApp = {
   description: string;
 };
 
+type EcosystemStatus = {
+  apps: EcosystemApp[];
+  lastChecked: string;
+};
+
 const fallbackApps = [
   { name: "SZL Holdings", slug: "szl-holdings", status: "operational", description: "Parent Company" },
   { name: "Lyte", slug: "lyte", status: "operational", description: "Business Observability" },
   { name: "Vessels", slug: "vessels", status: "operational", description: "Maritime Intelligence" },
   { name: "Aegis", slug: "aegis", status: "operational", description: "Defense & Intelligence" },
   { name: "Terra", slug: "terra", status: "operational", description: "Real Estate Intelligence" },
-  { name: "PRISM Counsel", slug: "prism-counsel", status: "operational", description: "Legal Intelligence" },
   { name: "Carlota Jo", slug: "carlota-jo", status: "operational", description: "Private Advisory" },
 ];
 
 const brandColors: Record<string, string> = {
-  "szl-holdings": "#D4A054",
-  "lyte": "#00D4FF",
-  "vessels": "#3B8BEB",
-  "aegis": "#6366F1",
-  "firestorm": "#6366F1",
-  "terra": "#22C55E",
-  "prism-counsel": "#F59E0B",
-  "carlota-jo": "#D4A054",
+  "szl-holdings": "hsl(38,55%,60%)",
+  "lyte": "hsl(190,90%,55%)",
+  "vessels": "hsl(205,85%,55%)",
+  "aegis": "hsl(232,68%,60%)",
+  "firestorm": "hsl(232,68%,60%)",
+  "terra": "hsl(140,56%,40%)",
+  "carlota-jo": "hsl(38,55%,58%)",
 };
 
-function useAnimatedCounter(target: number, duration: number = 2000, startDelay: number = 0) {
-  const [value, setValue] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-
-  useEffect(() => {
-    if (!isInView) return;
-    const timeout = setTimeout(() => {
-      const startTime = Date.now();
-      const tick = () => {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        setValue(Math.floor(eased * target));
-        if (progress < 1) requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-    }, startDelay);
-    return () => clearTimeout(timeout);
-  }, [isInView, target, duration, startDelay]);
-
-  return { value, ref };
-}
-
-function DotGrid() {
+function SubtleGrid() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const isMobile = window.innerWidth < 640;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     let animFrame: number;
@@ -79,29 +59,19 @@ function DotGrid() {
     const h = () => canvas.offsetHeight;
     const draw = () => {
       if (document.hidden) { animFrame = requestAnimationFrame(draw); return; }
-      time += 0.002;
+      time += 0.003;
       ctx.clearRect(0, 0, w(), h());
-      const spacing = isMobile ? 42 : 28;
-      const cols = Math.ceil(w() / spacing);
-      const rows = Math.ceil(h() / spacing);
+      const cols = 25, rows = 16;
+      const cellW = w() / cols, cellH = h() / rows;
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
-          const x = c * spacing + spacing / 2;
-          const y = r * spacing + spacing / 2;
-          const cx = w() * 0.7, cy = h() * 0.3;
-          const d = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
-          const maxD = Math.sqrt(w() * w() + h() * h());
-          const wave = Math.sin(d * 0.008 - time * 2) * 0.5 + 0.5;
-          const proximity = 1 - (d / maxD);
-          const alpha = 0.015 + wave * 0.035 * proximity;
-          const green = wave > 0.7 && proximity > 0.4;
-          if (green) {
-            ctx.fillStyle = `rgba(34,197,94,${alpha * 2.5})`;
-          } else {
-            ctx.fillStyle = `rgba(148,163,184,${alpha})`;
-          }
+          const x = c * cellW + cellW / 2;
+          const y = r * cellH + cellH / 2;
+          const d = Math.sqrt((x - w() * 0.65) ** 2 + (y - h() * 0.35) ** 2);
+          const wave = Math.sin(d * 0.005 + time) * 0.5 + 0.5;
           ctx.beginPath();
-          ctx.arc(x, y, 0.8, 0, Math.PI * 2);
+          ctx.arc(x, y, 0.6 + wave * 0.3, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(148,163,184,${0.02 + wave * 0.04})`;
           ctx.fill();
         }
       }
@@ -113,228 +83,218 @@ function DotGrid() {
   return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true" />;
 }
 
-function MetricCard({ value, suffix, label, color, delay }: { value: number; suffix?: string; label: string; color: string; delay: number }) {
-  const counter = useAnimatedCounter(value, 2200, delay);
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: delay / 1000 + 0.3 }}
-      className="relative p-5 overflow-hidden"
-      style={{
-        background: "rgba(15,20,30,0.8)",
-        border: "1px solid rgba(255,255,255,0.06)",
-        backdropFilter: "blur(12px)",
-      }}
-    >
-      <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, ${color}, transparent)` }} />
-      <div className="flex items-baseline gap-1 mb-1.5">
-        <span ref={counter.ref} className="text-3xl sm:text-4xl font-bold tabular-nums" style={{ fontFamily: "'JetBrains Mono', monospace", color }}>
-          {counter.value.toLocaleString()}
-        </span>
-        {suffix && <span className="text-lg font-semibold" style={{ color: `${color}99` }}>{suffix}</span>}
-      </div>
-      <span className="text-[10px] font-medium tracking-[0.2em] uppercase" style={{ color: "rgba(255,255,255,0.35)" }}>
-        {label}
-      </span>
-    </motion.div>
-  );
-}
-
-function SystemStatusBar() {
-  const [apps, setApps] = useState<EcosystemApp[]>(fallbackApps);
+function EcosystemWidget() {
+  const [data, setData] = useState<EcosystemStatus | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    const load = async () => {
       try {
         const res = await fetch(`${API_BASE}/stephen/ecosystem-status`);
-        if (res.ok) {
-          const json = await res.json();
-          if (!cancelled && json.apps) setApps(json.apps);
-        }
-      } catch {}
-    })();
+        if (!res.ok) throw new Error("Failed");
+        const json = await res.json();
+        if (!cancelled) setData(json);
+      } catch {
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
     return () => { cancelled = true; };
   }, []);
 
-  const allOp = apps.every(a => a.status === "operational");
+  const apps = data?.apps ?? fallbackApps;
+  const allOperational = apps.every(a => a.status === "operational");
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, delay: 1.2 }}
-      className="mt-8 p-4 sm:p-5"
-      style={{
-        background: "rgba(15,20,30,0.6)",
-        border: "1px solid rgba(255,255,255,0.05)",
-        backdropFilter: "blur(8px)",
-      }}
-    >
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <Activity size={12} style={{ color: allOp ? "#22C55E" : "#F59E0B" }} />
-          <span className="text-[10px] font-semibold tracking-[0.18em] uppercase" style={{ color: "rgba(255,255,255,0.3)" }}>
-            System Status
+    <div className="p-4" style={{
+      background: "hsla(210,16%,10%,0.7)",
+      border: "1px solid hsla(0,0%,100%,0.06)",
+      boxShadow: "0 16px 48px hsla(0,0%,0%,0.4)",
+      backdropFilter: "blur(12px)",
+    }}>
+      <div className="flex items-center justify-between mb-3 pb-2.5" style={{ borderBottom: "1px solid hsla(0,0%,100%,0.05)" }}>
+        <span className="text-[10px] font-semibold tracking-[0.12em] uppercase" style={{ color: "hsl(210,5%,42%)" }}>
+          The Ecosystem
+        </span>
+        {loading ? (
+          <span className="text-[10px] text-white/20">Checking…</span>
+        ) : (
+          <span className="flex items-center gap-1.5 text-[10px]" style={{ color: allOperational ? "hsl(142,62%,48%)" : "hsl(38,90%,60%)" }}>
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: allOperational ? "hsl(142,62%,48%)" : "hsl(38,90%,60%)" }} />
+            {allOperational ? "All systems live" : "Partial"}
           </span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full" style={{ background: allOp ? "#22C55E" : "#F59E0B", boxShadow: `0 0 8px ${allOp ? "rgba(34,197,94,0.5)" : "rgba(245,158,11,0.5)"}` }} />
-          <span className="text-[10px] font-medium" style={{ color: allOp ? "#22C55E" : "#F59E0B" }}>
-            {allOp ? "All Systems Operational" : "Partial Degradation"}
-          </span>
-        </div>
+        )}
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+      <div className="space-y-0.5">
         {apps.map((app, i) => {
-          const color = brandColors[app.slug] ?? "#94A3B8";
+          const color = brandColors[app.slug] ?? "hsl(210,8%,56%)";
           return (
             <motion.div
               key={app.name}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: 1.4 + i * 0.05 }}
-              className="flex items-center gap-2 px-2.5 py-2 transition-colors"
-              style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}
+              initial={{ opacity: 0, x: 8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: 0.5 + i * 0.05 }}
+              className="flex items-center gap-2.5 py-1.5 px-2 transition-colors"
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.03)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
             >
-              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color, boxShadow: `0 0 6px ${color}60` }} />
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-semibold truncate" style={{ color: "rgba(255,255,255,0.6)" }}>{app.name}</p>
-                <p className="text-[8px] font-mono truncate" style={{ color: "rgba(255,255,255,0.2)" }}>{app.description}</p>
-              </div>
-              <span className="text-[9px] font-mono flex-shrink-0" style={{ color: `${color}99` }}>99.9%</span>
+              <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color, boxShadow: `0 0 6px ${color}80` }} />
+              <span className="text-[11px] font-semibold text-foreground/65">{app.name}</span>
+              <span className="text-[9px] ml-auto text-foreground/25 font-mono">{app.description ?? app.slug}</span>
+              <ExternalLink size={9} className="text-foreground/15 flex-shrink-0" />
             </motion.div>
           );
         })}
       </div>
-    </motion.div>
+      <div className="mt-3 pt-2.5" style={{ borderTop: "1px solid hsla(0,0%,100%,0.05)" }}>
+        <p className="text-[9px] text-foreground/20 text-center tracking-wide">One founder. One architecture. Full ownership.</p>
+      </div>
+    </div>
   );
 }
 
+const PLATFORM_VERTICALS = [
+  { label: "Cybersecurity", color: "hsl(232,68%,60%)", dot: true },
+  { label: "Maritime", color: "hsl(205,85%,55%)", dot: true },
+  { label: "Real Estate", color: "hsl(140,56%,40%)", dot: true },
+  { label: "AI Orchestration", color: "hsl(190,90%,55%)", dot: true },
+  { label: "Private Advisory", color: "hsl(38,55%,58%)", dot: true },
+];
+
 export function HeroSection() {
   return (
-    <section id="hero" className="relative overflow-hidden bg-[#080b12] pt-28 pb-16 sm:pt-32 sm:pb-20 lg:pt-36 lg:pb-24" style={{ minHeight: "min(100vh, 960px)" }}>
-      <DotGrid />
+    <section id="hero" className="relative overflow-hidden bg-[#0a0e14] pt-24 pb-16 sm:pt-28 sm:pb-20 lg:pt-32 lg:pb-24" style={{ minHeight: "min(88vh, 860px)" }}>
+      <SubtleGrid />
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[-10%] right-[10%] w-[700px] h-[600px] rounded-full blur-[240px]" style={{ background: "rgba(99,102,241,0.06)" }} />
-        <div className="absolute bottom-[20%] left-[5%] w-[500px] h-[400px] rounded-full blur-[200px]" style={{ background: "rgba(34,197,94,0.04)" }} />
-        <div className="absolute top-[40%] right-[30%] w-[300px] h-[300px] rounded-full blur-[160px]" style={{ background: "rgba(0,212,255,0.03)" }} />
+        <div className="absolute top-0 right-[20%] w-[600px] h-[500px] rounded-full blur-[200px]" style={{ background: "hsla(232,68%,60%,0.04)" }} />
+        <div className="absolute bottom-[30%] left-[10%] w-[400px] h-[300px] rounded-full blur-[160px]" style={{ background: "hsla(140,56%,40%,0.03)" }} />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/5 to-transparent" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="inline-flex items-center gap-2.5 mb-6 px-4 py-2"
-          style={{ border: "1px solid rgba(34,197,94,0.2)", background: "rgba(34,197,94,0.05)" }}
-        >
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: "#22C55E" }} />
-            <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: "#22C55E" }} />
-          </span>
-          <span className="text-[11px] font-semibold tracking-[0.15em] uppercase" style={{ color: "rgba(34,197,94,0.8)" }}>
-            All systems live
-          </span>
-        </motion.div>
+      <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+          <div className="lg:col-span-7">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.08 }}
+              className="inline-flex items-center gap-2 mb-7 px-3 py-1.5"
+              style={{ border: "1px solid hsla(0,0%,100%,0.07)", background: "hsla(0,0%,100%,0.03)" }}
+            >
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" style={{ boxShadow: "0 0 8px hsla(160,80%,52%,0.6)" }} />
+              <span className="text-[10px] font-semibold text-foreground/45 tracking-[0.18em] uppercase">
+                Founder — CEO — Architect
+              </span>
+            </motion.div>
 
-        <div className="max-w-4xl mb-10">
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.15 }}
-            className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.95] tracking-tight mb-6"
-            style={{ color: "rgba(255,255,255,0.95)", fontFamily: "'Inter', system-ui, sans-serif" }}
-          >
-            Stephen Lutar
-          </motion.h1>
+            <motion.h1
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.14 }}
+              className="text-5xl sm:text-6xl lg:text-[4.25rem] font-serif font-normal text-foreground leading-[1.03] mb-5 tracking-tight"
+            >
+              Stephen<br />
+              <span className="text-foreground/50">Lutar</span>
+            </motion.h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
-            className="text-lg sm:text-xl lg:text-2xl font-light leading-relaxed max-w-3xl"
-            style={{ color: "rgba(255,255,255,0.45)" }}
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.28 }}
+              className="text-base sm:text-lg text-foreground/55 max-w-xl mb-4 leading-relaxed font-light"
+            >
+              I build command systems that close the loop from signal to decision to auditable action — across five distinct industries under one compounding architecture.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.36 }}
+              className="flex flex-wrap gap-2 mb-7"
+            >
+              {PLATFORM_VERTICALS.map((v) => (
+                <span
+                  key={v.label}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-medium tracking-wide"
+                  style={{ border: `1px solid ${v.color}22`, background: `${v.color}0d`, color: v.color }}
+                >
+                  <span className="w-1 h-1 rounded-full" style={{ background: v.color }} />
+                  {v.label}
+                </span>
+              ))}
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.44 }}
+              className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6"
+            >
+              <Link
+                href="/contact"
+                className="group inline-flex items-center gap-2.5 px-7 py-3.5 text-[13px] font-semibold transition-all duration-200"
+                style={{ background: "hsl(210,8%,88%)", color: "hsl(210,12%,8%)" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(0,0%,100%)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(210,8%,88%)"; }}
+              >
+                Start a conversation
+                <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+              <Link
+                href="/work"
+                className="inline-flex items-center gap-2 text-[13px] font-medium text-foreground/40 hover:text-foreground/65 transition-colors duration-200 px-2 py-3.5"
+              >
+                Case studies <ArrowRight size={12} />
+              </Link>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.52 }}
+              className="flex items-center gap-5 mb-8"
+            >
+              <a href="https://linkedin.com/in/stephen-l-279315240" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[11px] text-foreground/30 hover:text-foreground/60 transition-colors">
+                <Linkedin size={13} /> LinkedIn
+              </a>
+              <a href="mailto:contact@stephenl.dev" className="inline-flex items-center gap-1.5 text-[11px] text-foreground/30 hover:text-foreground/60 transition-colors">
+                <Mail size={13} /> contact@stephenl.dev
+              </a>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.6 }}
+              className="flex flex-wrap gap-8 sm:gap-12 pt-6"
+              style={{ borderTop: "1px solid hsla(0,0%,100%,0.05)" }}
+            >
+              {[
+                { value: "6", label: "Products live" },
+                { value: "5+", label: "Years operating" },
+                { value: "Solo", label: "Full-stack build" },
+                { value: "1", label: "Architecture" },
+              ].map((stat) => (
+                <div key={stat.label} className="flex flex-col">
+                  <span className="text-2xl sm:text-3xl font-serif text-primary leading-none mb-1">{stat.value}</span>
+                  <span className="text-[9px] text-foreground/28 uppercase tracking-[0.2em]">{stat.label}</span>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.38 }}
+            className="hidden lg:block lg:col-span-5"
           >
-            Founder & CEO, SZL Holdings. I build command systems that close the loop from
-            signal to decision to auditable action — across{" "}
-            <span style={{ color: "#00D4FF" }}>five industries</span>,{" "}
-            <span style={{ color: "#6366F1" }}>one architecture</span>.
-          </motion.p>
+            <EcosystemWidget />
+          </motion.div>
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.45 }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8"
-        >
-          <MetricCard value={16} label="Applications Live" color="#22C55E" delay={0} />
-          <MetricCard value={375} label="Database Tables" color="#00D4FF" delay={100} />
-          <MetricCard value={1618} suffix="+" label="API Endpoints" color="#6366F1" delay={200} />
-          <MetricCard value={8} label="Industries Served" color="#F59E0B" delay={300} />
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.7 }}
-          className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6"
-        >
-          <a
-            href="#contact"
-            onClick={(e) => { e.preventDefault(); document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" }); }}
-            className="group inline-flex items-center gap-3 px-8 py-4 text-[14px] font-bold tracking-wide transition-all duration-200"
-            style={{ background: "white", color: "#080b12" }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#E2E8F0"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "white"; }}
-          >
-            Start a conversation
-            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-          </a>
-          <a
-            href="#portfolio"
-            onClick={(e) => { e.preventDefault(); document.querySelector("#portfolio")?.scrollIntoView({ behavior: "smooth" }); }}
-            className="inline-flex items-center gap-2 text-[14px] font-medium transition-colors duration-200 px-3 py-4"
-            style={{ color: "rgba(255,255,255,0.4)" }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.7)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.4)"; }}
-          >
-            View the ecosystem <ArrowRight size={14} />
-          </a>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.85 }}
-          className="flex flex-wrap items-center gap-4 sm:gap-6"
-        >
-          <a href="https://linkedin.com/in/stephenlutar" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[12px] transition-colors" style={{ color: "rgba(255,255,255,0.25)" }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.6)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.25)"; }}
-          >
-            <Linkedin size={14} /> LinkedIn
-          </a>
-          <a href="https://github.com/szl-holdings" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[12px] transition-colors" style={{ color: "rgba(255,255,255,0.25)" }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.6)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.25)"; }}
-          >
-            <Github size={14} /> GitHub
-          </a>
-          <a href="mailto:stephenlutar2@gmail.com" className="inline-flex items-center gap-2 text-[12px] transition-colors" style={{ color: "rgba(255,255,255,0.25)" }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.6)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.25)"; }}
-          >
-            <Mail size={14} /> stephenlutar2@gmail.com
-          </a>
-        </motion.div>
-
-        <SystemStatusBar />
       </div>
-
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
     </section>
   );
 }

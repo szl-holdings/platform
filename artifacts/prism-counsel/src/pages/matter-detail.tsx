@@ -90,7 +90,7 @@ export default function MatterDetailPage({ id }: { id: number }) {
         ) : (
           <>
             <p className="text-slate-400">Matter not found</p>
-            <Link href="/matters"><span className="text-[#d4a054] text-sm cursor-pointer">Back to matters</span></Link>
+            <Link href="/prism-counsel/matters"><span className="text-[#d4a054] text-sm cursor-pointer">Back to matters</span></Link>
           </>
         )}
       </div>
@@ -102,7 +102,7 @@ export default function MatterDetailPage({ id }: { id: number }) {
   return (
     <div className="p-6 max-w-[1400px] mx-auto space-y-4">
       <div className="flex items-center gap-2 text-[11px] text-slate-500">
-        <Link href="/matters"><span className="hover:text-slate-300 cursor-pointer flex items-center gap-1"><ArrowLeft className="w-3 h-3" /> Matters</span></Link>
+        <Link href="/prism-counsel/matters"><span className="hover:text-slate-300 cursor-pointer flex items-center gap-1"><ArrowLeft className="w-3 h-3" /> Matters</span></Link>
         <ChevronRight className="w-3 h-3" />
         <span className="text-slate-400">{matter.caseNumber}</span>
         <span className={`ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium ${
@@ -626,7 +626,7 @@ function RecoveryTab({ matter }: { matter: MatterLike & { id?: number } }) {
             <ShieldAlert className="w-4 h-4 text-[#c45a4a]" />
             Recovery & Lien Panel
           </h3>
-          <Link href="/recovery-ops">
+          <Link href="/prism-counsel/recovery-ops">
             <span className="text-[10px] text-slate-500 hover:text-[#d4a054] cursor-pointer flex items-center gap-1">
               Firm view <ChevronRight className="w-3 h-3" />
             </span>
@@ -774,7 +774,7 @@ function SettlementBlockersTab({ matter }: { matter: MatterLike & { id?: number 
             <Layers className="w-4 h-4 text-[#d4a054]" />
             Settlement Blockers
           </h3>
-          <Link href="/settlement-blockers">
+          <Link href="/prism-counsel/settlement-blockers">
             <span className="text-[10px] text-slate-500 hover:text-[#d4a054] cursor-pointer flex items-center gap-1">
               All blockers <ChevronRight className="w-3 h-3" />
             </span>

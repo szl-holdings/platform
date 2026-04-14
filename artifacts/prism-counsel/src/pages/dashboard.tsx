@@ -1,27 +1,7 @@
-import { Scale, AlertTriangle, Clock, TrendingUp, DollarSign, ShieldCheck, FileText, ArrowRight, ChevronRight, Wifi, WifiOff, Shield, CheckCircle, XCircle, Brain, Gavel, Target } from "lucide-react";
-import { useState } from "react";
+import { Scale, AlertTriangle, Clock, TrendingUp, DollarSign, ShieldCheck, FileText, ArrowRight, ChevronRight, Wifi, WifiOff } from "lucide-react";
 import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import { DEMO_MATTERS, PILLAR_LABELS } from "../data/demo-matters";
 import { usePrismDashboard, usePrismMatters } from "../hooks/use-prism-api";
-import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
-import { AIInsightCard } from "@szl-holdings/shared-ui/ai-insight-card";
-import { useDomainInsights, type DomainInsight } from "@szl-holdings/shared-ui/use-ai-agent";
-
-function useFilingGateStats() {
-  return useQuery({
-    queryKey: ["filing-gate", "stats"],
-    queryFn: async () => {
-      const res = await fetch("/api/prism-counsel/review-desk/filing-gate/stats", {
-        headers: { "Content-Type": "application/json" },
-      });
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
-    },
-    staleTime: 60000,
-    retry: false,
-  });
-}
 
 function PillarBar({ label, score, max = 100 }: { label: string; score: number; max?: number }) {
   const pct = Math.round((score / max) * 100);
@@ -80,7 +60,6 @@ function DataSourceBadge({ isLive }: { isLive: boolean }) {
 export default function PrismCounselDashboard() {
   const dashQ = usePrismDashboard();
   const mattersQ = usePrismMatters();
-  const { insights: legalInsights, isStale: legalInsightsStale } = useDomainInsights("prism", 3, 60_000);
 
   const isLive = !!dashQ.data && !dashQ.isError;
   const liveMatters = mattersQ.data;
@@ -131,46 +110,19 @@ export default function PrismCounselDashboard() {
         </div>
       </div>
 
-      <AIInsightCard domain="prism" accentColor="hsl(38, 60%, 57%)" maxInsights={2} compact title="Legal Intelligence Signals" />
-
-      {legalInsights.length > 0 && (
-        <div className="rounded-lg border border-white/[0.06] p-3" style={{ background: "#0c1220" }}>
-          <div className="flex items-center gap-2 mb-2">
-            <Scale className="w-3 h-3" style={{ color: "hsl(38, 60%, 57%)" }} />
-            <span className="text-[10px] font-mono font-bold uppercase tracking-widest" style={{ color: "hsl(38, 60%, 57%)" }}>AI Legal Recommendations</span>
-            {legalInsightsStale && <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">cached</span>}
-          </div>
-          <div className="space-y-1.5">
-            {legalInsights.filter((ins: DomainInsight) => ins.recommendedAction).map((ins: DomainInsight) => (
-              <div key={ins.id} className="flex items-start gap-2 px-2.5 py-1.5 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
-                <AlertTriangle className={`w-3 h-3 mt-0.5 shrink-0 ${ins.severity === "critical" ? "text-red-400" : ins.severity === "high" ? "text-amber-400" : "text-slate-400"}`} />
-                <div className="flex-1 min-w-0">
-                  <div className="text-[11px] font-medium text-slate-100">{ins.title}</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">{ins.recommendedAction}</div>
-                </div>
-                <span className="text-[9px] font-mono shrink-0 text-slate-500 mt-0.5">{Math.round(ins.confidence * 100)}%</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <SectionErrorBoundary sectionName="KPI Summary">
       <div className="grid grid-cols-4 gap-3">
         <KpiCard label="Active Matters" value={String(activeCount)} sub={hasLiveMatters ? `${liveMatters.filter(m => m.status === "discovery").length} in discovery` : "2 in discovery · 1 pre-trial"} icon={FolderOpen} accent="#d4a054" />
         <KpiCard label="Total Exposure" value={totalExposure} sub="Across all active matters" icon={DollarSign} accent="#c8953c" />
         <KpiCard label="Upcoming Deadlines" value={String(displayDeadlineCount)} sub={`${displayUpcoming} within 14 days`} icon={Clock} accent="#c45a4a" />
         <KpiCard label="Pending Approvals" value={String(pendingApprovals)} sub={isLive ? "from approval queue" : "1 demand send · 2 filings"} icon={ShieldCheck} accent="#4a90b8" />
       </div>
-      </SectionErrorBoundary>
 
-      <SectionErrorBoundary sectionName="Matter Intelligence">
       <div className="grid grid-cols-3 gap-4">
         <div className="col-span-2 space-y-4">
           <div className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-slate-200">Matter Health</h2>
-              <Link href="/matters">
+              <Link href="/prism-counsel/matters">
                 <span className="text-[10px] text-slate-500 hover:text-[#d4a054] cursor-pointer flex items-center gap-1">
                   View all <ChevronRight className="w-3 h-3" />
                 </span>
@@ -300,247 +252,12 @@ export default function PrismCounselDashboard() {
               })}
             </div>
           </div>
-
-          <FilingGateHealthWidget />
-          <AutonomousLegalPanel />
         </div>
       </div>
-      </SectionErrorBoundary>
     </div>
   );
 }
 
 function FolderOpen(props: any) {
   return <FileText {...props} />;
-}
-
-function FilingGateHealthWidget() {
-  const { data, isLoading } = useFilingGateStats();
-  const stats = data ?? {};
-  const documentsVerified: number = stats.documentsVerified ?? 0;
-  const citationsAnalyzed: number = stats.citationsAnalyzed ?? 0;
-  const suspiciousCaught: number = stats.suspiciousCaught ?? 0;
-  const blockedDocuments: number = stats.blockedDocuments ?? 0;
-  const sealedAudits: number = stats.sealedAudits ?? 0;
-  const catchRate: number = stats.catchRate ?? 0;
-  const recentActivity: Array<{ auditId: string; documentTitle: string; overallStatus: string; suspiciousCount: number; createdAt: string; sealed: boolean }> = stats.recentActivity ?? [];
-
-  function timeAgo(iso: string) {
-    const diffMs = Date.now() - new Date(iso).getTime();
-    const mins = Math.floor(diffMs / 60000);
-    if (mins < 60) return `${mins}m ago`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
-    return `${Math.floor(hrs / 24)}d ago`;
-  }
-
-  return (
-    <div className="rounded-lg border border-[#c8a96e]/15 p-4" style={{ background: "#0c1220" }}>
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-1.5">
-          <Shield className="w-3.5 h-3.5 text-[#c8a96e]" />
-          <h2 className="text-sm font-semibold text-slate-200">Filing Gate Health</h2>
-          <span className="text-[8px] px-1 py-0.5 rounded font-mono bg-[#c8a96e]/10 text-[#c8a96e]">{isLoading ? "LOADING" : "LIVE"}</span>
-        </div>
-        <Link href="/review-desk/filing-gate">
-          <span className="text-[10px] text-slate-500 hover:text-[#c8a96e] cursor-pointer flex items-center gap-1 transition-colors">
-            Open Gate <ChevronRight className="w-3 h-3" />
-          </span>
-        </Link>
-      </div>
-
-      <div className="grid grid-cols-3 gap-2 mb-3">
-        <div className="rounded border border-white/[0.04] p-2 text-center" style={{ background: "#080c14" }}>
-          <div className="text-lg font-bold text-[#4a90b8]">{documentsVerified}</div>
-          <div className="text-[8px] text-slate-600 uppercase">Verified</div>
-        </div>
-        <div className="rounded border border-white/[0.04] p-2 text-center" style={{ background: "#080c14" }}>
-          <div className="text-lg font-bold text-[#d4a054]">{citationsAnalyzed}</div>
-          <div className="text-[8px] text-slate-600 uppercase">Citations</div>
-        </div>
-        <div className="rounded border border-white/[0.04] p-2 text-center" style={{ background: "#080c14" }}>
-          <div className="text-lg font-bold text-[#c45a4a]">{suspiciousCaught}</div>
-          <div className="text-[8px] text-slate-600 uppercase">Suspicious</div>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-[9px] text-slate-500">Citation Catch Rate (30d)</span>
-        <span className="text-[9px] font-mono text-[#c8a96e]">{catchRate}%</span>
-      </div>
-      <div className="h-1.5 rounded-full overflow-hidden mb-3" style={{ background: "rgba(255,255,255,0.06)" }}>
-        <div className="h-full rounded-full" style={{ width: `${Math.min(catchRate, 100)}%`, background: "#c45a4a" }} />
-      </div>
-
-      <div className="space-y-1.5">
-        <div className="text-[9px] text-slate-600 uppercase tracking-wider mb-1">Recent Activity</div>
-        {recentActivity.length > 0 ? recentActivity.slice(0, 4).map((item, i) => (
-          <div key={i} className="flex items-center gap-2">
-            {item.overallStatus === "clear" || item.sealed
-              ? <CheckCircle className="w-2.5 h-2.5 text-[#4a90b8] flex-shrink-0" />
-              : item.overallStatus === "blocked"
-                ? <XCircle className="w-2.5 h-2.5 text-[#c45a4a] flex-shrink-0" />
-                : <AlertTriangle className="w-2.5 h-2.5 text-[#d4a054] flex-shrink-0" />
-            }
-            <span className="text-[9px] text-slate-400 flex-1 truncate">{item.documentTitle}</span>
-            <span className="text-[8px] text-slate-600 flex-shrink-0">{timeAgo(item.createdAt)}</span>
-          </div>
-        )) : (
-          <div className="text-[9px] text-slate-600">No audits in the last 30 days. Run verification on a document to begin.</div>
-        )}
-      </div>
-
-      <div className="mt-3 pt-2.5 border-t border-white/[0.04] flex items-center justify-between">
-        <span className="text-[8.5px] text-slate-600">{blockedDocuments} docs flagged in 30d</span>
-        <span className="text-[8.5px] text-[#4a90b8]">{sealedAudits} audit{sealedAudits !== 1 ? "s" : ""} sealed</span>
-      </div>
-    </div>
-  );
-}
-
-type LitigationPredictionRow = {
-  id: number;
-  matter_id: string;
-  case_type: string;
-  jurisdiction: string;
-  claim_amount: number;
-  predicted_outcome: string;
-  win_probability: number;
-  settlement_recommendation: number;
-  confidence: number;
-  computed_at: string;
-};
-
-type ContractTriageRow = {
-  id: number;
-  triage_id: string;
-  document_name: string;
-  document_type: string;
-  classification: string;
-  risk_level: string;
-  auto_routed: boolean;
-  routing_decision: string;
-  approval_status: string;
-  ai_confidence: number;
-};
-
-type ZeroTouchTriageResult = {
-  triageId: string;
-  classification: string;
-  riskLevel: string;
-  routingDecision: string;
-  autoRouted: boolean;
-  confidence: number;
-  triageCompleted: boolean;
-};
-
-function AutonomousLegalPanel() {
-  const [running, setRunning] = useState(false);
-  const [result, setResult] = useState<ZeroTouchTriageResult | null>(null);
-
-  const predictions = useQuery({
-    queryKey: ["prism-litigation-predictions"],
-    queryFn: async () => {
-      const res = await fetch("/api/prism-counsel/litigation-predictions");
-      if (!res.ok) throw new Error("fetch failed");
-      return res.json() as Promise<LitigationPredictionRow[]>;
-    },
-    staleTime: 60000,
-    retry: false,
-  });
-
-  const contracts = useQuery({
-    queryKey: ["prism-contract-triage"],
-    queryFn: async () => {
-      const res = await fetch("/api/prism-counsel/contract-triage");
-      if (!res.ok) throw new Error("fetch failed");
-      return res.json() as Promise<{ items: ContractTriageRow[]; totalCount: number }>;
-    },
-    staleTime: 60000,
-    retry: false,
-  });
-
-  async function runZeroTouchTriage() {
-    setRunning(true);
-    try {
-      const res = await fetch("/api/prism-counsel/zero-touch-triage", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ documentName: `Document-${Math.floor(Math.random() * 9000 + 1000)}`, documentType: "contract" }),
-      });
-      if (!res.ok) throw new Error("failed");
-      const body = await res.json() as ZeroTouchTriageResult;
-      setResult(body);
-    } catch {}
-    setRunning(false);
-  }
-
-  const preds = predictions.data;
-  const ctracts = contracts.data;
-
-  return (
-    <div className="rounded-lg border p-4 space-y-3" style={{ borderColor: "rgba(212,160,84,0.2)", background: "rgba(212,160,84,0.03)" }}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Brain className="w-4 h-4 text-[#d4a054]" />
-          <span className="text-sm font-semibold text-slate-100">Autonomous Legal Intelligence · 2026</span>
-          <span className="text-[8px] px-1.5 py-0.5 rounded font-mono uppercase bg-[#d4a054]/10 text-[#d4a054] border border-[#d4a054]/20">AI-Native</span>
-        </div>
-        <button
-          onClick={runZeroTouchTriage}
-          disabled={running}
-          className="text-[10px] px-2.5 py-1 rounded font-medium hover:opacity-80 disabled:opacity-40"
-          style={{ background: "rgba(212,160,84,0.1)", color: "#d4a054", border: "1px solid rgba(212,160,84,0.25)" }}
-        >
-          {running ? "Running..." : "Zero-Touch Triage"}
-        </button>
-      </div>
-
-      {result && (
-        <div className="rounded p-2.5" style={{ background: "rgba(212,160,84,0.06)", border: "1px solid rgba(212,160,84,0.15)" }}>
-          <div className="text-[10px] text-[#d4a054] font-mono">{result.triageId} · {result.classification} · {result.riskLevel} risk</div>
-          <div className="text-[9px] mt-0.5 text-slate-500">{result.routingDecision?.replace(/_/g, " ")} · {result.autoRouted ? "auto-approved" : "manual review required"}</div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <div className="text-[9px] uppercase tracking-widest text-slate-600 mb-2">Litigation Predictions</div>
-          {preds && preds.length > 0 ? (
-            <div className="space-y-1.5">
-              {preds.slice(0, 3).map(p => (
-                <div key={p.id} className="flex items-center gap-2">
-                  <Target className="w-2.5 h-2.5 shrink-0 text-[#d4a054]/50" />
-                  <span className="text-[10px] flex-1 truncate" style={{ color: "rgba(226,232,240,0.7)" }}>{p.matter_id}</span>
-                  <span className="text-[8px] px-1 rounded" style={{ background: Number(p.win_probability) < 0.4 ? "rgba(239,68,68,0.1)" : "rgba(16,185,129,0.1)", color: Number(p.win_probability) < 0.4 ? "#ef4444" : "#10b981" }}>{Math.round(Number(p.win_probability) * 100)}% win</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-[9px] text-slate-600">{predictions.isLoading ? "Loading..." : "No predictions yet"}</div>
-          )}
-        </div>
-
-        <div>
-          <div className="text-[9px] uppercase tracking-widest text-slate-600 mb-2">Contract Risk Triage</div>
-          {ctracts ? (
-            <div className="space-y-1.5">
-              {(ctracts.items ?? []).slice(0, 3).map(c => (
-                <div key={c.triage_id} className="flex items-center gap-2">
-                  <Gavel className="w-2.5 h-2.5 shrink-0 text-[#d4a054]/50" />
-                  <span className="text-[10px] flex-1 truncate" style={{ color: "rgba(226,232,240,0.7)" }}>{c.document_name}</span>
-                  <span className="text-[8px] px-1 rounded" style={{ background: c.risk_level === "high" ? "rgba(239,68,68,0.1)" : "rgba(245,158,11,0.1)", color: c.risk_level === "high" ? "#ef4444" : "#f59e0b" }}>{c.risk_level}</span>
-                </div>
-              ))}
-              {(ctracts.items ?? []).length === 0 && (
-                <div className="text-[9px] text-slate-600">Run triage to generate records</div>
-              )}
-            </div>
-          ) : (
-            <div className="text-[9px] text-slate-600">{contracts.isLoading ? "Loading..." : "No contracts"}</div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
 }

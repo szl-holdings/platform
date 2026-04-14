@@ -7,22 +7,11 @@ export interface DataProvider<T> {
   search(query: string): Promise<T[]>;
 }
 
-const LIVE_DEFAULT_DOMAINS = new Set([
-  "vessels",
-  "terra",
-  "prism",
-  "aegis",
-  "lyte",
-  "firestorm",
-]);
-
 export function resolveProviderMode(domain: string): ProviderMode {
   const envKey = `${domain.toUpperCase()}_PROVIDER_MODE`;
   const globalKey = "PROVIDER_MODE";
-  const envOverride = process.env[envKey] ?? process.env[globalKey];
-  if (envOverride === "mock") return "mock";
-  if (envOverride === "live") return "live";
-  return LIVE_DEFAULT_DOMAINS.has(domain.toLowerCase()) ? "live" : "mock";
+  const value = process.env[envKey] || process.env[globalKey] || "mock";
+  return value === "live" ? "live" : "mock";
 }
 
 export function createProvider<T>(

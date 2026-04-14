@@ -37,6 +37,9 @@
       "path": "./lib/replit-auth-web"
     },
     {
+      "path": "./lib/data-connectors"
+    },
+    {
       "path": "./lib/workflow-engine"
     },
     {

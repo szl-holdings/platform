@@ -4,7 +4,6 @@ import { desc, eq, and, gte, count, sql } from "drizzle-orm";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { logger } from "../lib/logger";
-import { services, type ThreatFoxIoc, type PhishTankEntry, type OpenSkyAircraft } from "@szl-holdings/services";
 
 const router: IRouter = Router();
 
@@ -33,64 +32,11 @@ router.get("/firestorm/live/incidents", authMiddleware({ required: false }), asy
   } catch (err) { handleRouteError(res, err, "Failed to fetch live incidents"); }
 });
 
-const threatFeedCache = new Map<string, { data: unknown; expiresAt: number }>();
-async function getThreatFeedCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
-  const cached = threatFeedCache.get(key);
-  if (cached && cached.expiresAt > Date.now()) return cached.data as T;
-  const data = await fetcher();
-  threatFeedCache.set(key, { data, expiresAt: Date.now() + ttlMs });
-  return data;
-}
-
 router.get("/firestorm/live/threat-summary", authMiddleware({ required: false }), async (_req, res) => {
   try {
-    type IocSummary = { total: number; byType: Record<string, number>; highConfidence: number; recentSample: { iocValue: string; iocType: string; malware: string; confidence: number }[]; source: string; error?: string };
-    type PhishSummary = { total: number; recentSample: { url: string; target: string; verified: boolean }[]; source: string; error?: string };
-    type AirSummary = { total: number; onGround: number; inFlight: number; source: string; error?: string };
-
-    const [incidentStats, alertStats, threatfoxSummary, phishtankSummary, openSkySummary] = await Promise.all([
+    const [incidentStats, alertStats] = await Promise.all([
       db.select({ count: count() }).from(firestormIncidentsTable),
       db.select({ count: count() }).from(firestormAlertsTable),
-      getThreatFeedCached<IocSummary>("firestorm-threatfox-summary", 3600000, async () => {
-        try {
-          const iocs = await services.threatfox.getRecentIocs(1, 100);
-          return {
-            total: iocs.length,
-            byType: iocs.reduce<Record<string, number>>((acc, i) => { acc[i.ioc_type] = (acc[i.ioc_type] ?? 0) + 1; return acc; }, {}),
-            highConfidence: iocs.filter((i: ThreatFoxIoc) => i.confidence_level >= 75).length,
-            recentSample: iocs.slice(0, 5).map(i => ({ iocValue: i.ioc, iocType: i.ioc_type, malware: i.malware ?? "", confidence: i.confidence_level })),
-            source: "live-threatfox",
-          };
-        } catch (err: unknown) {
-          return { total: 0, byType: {}, highConfidence: 0, recentSample: [], source: "error", error: err instanceof Error ? err.message : String(err) };
-        }
-      }),
-      getThreatFeedCached<PhishSummary>("firestorm-phishtank-summary", 3600000, async () => {
-        try {
-          const entries = await services.phishtank.getRecentPhishingUrls(20);
-          return {
-            total: entries.length,
-            recentSample: entries.slice(0, 5).map((e: PhishTankEntry) => ({ url: e.url, target: e.target ?? "", verified: e.verified })),
-            source: "live-phishtank",
-          };
-        } catch (err: unknown) {
-          return { total: 0, recentSample: [], source: "error", error: err instanceof Error ? err.message : String(err) };
-        }
-      }),
-      getThreatFeedCached<AirSummary>("firestorm-opensky-summary", 300000, async () => {
-        try {
-          const ac = await services.opensky.getAircraftNearCoords(38.9, -77.0, 5);
-          const onGround = ac.filter((a: OpenSkyAircraft) => a.onGround).length;
-          return {
-            total: ac.length,
-            onGround,
-            inFlight: ac.length - onGround,
-            source: "live-opensky",
-          };
-        } catch (err: unknown) {
-          return { total: 0, onGround: 0, inFlight: 0, source: "error", error: err instanceof Error ? err.message : String(err) };
-        }
-      }),
     ]);
 
     const totalIncidents = incidentStats[0]?.count ?? 0;
@@ -121,23 +67,6 @@ router.get("/firestorm/live/threat-summary", authMiddleware({ required: false })
         lastSeenAt: new Date().toISOString(),
       },
       topTactics: ["Initial Access", "Lateral Movement", "Credential Access", "Exfiltration"],
-      externalFeedSummary: {
-        threatfox: {
-          name: "Abuse.ch ThreatFox",
-          url: "https://threatfox.abuse.ch/",
-          ...threatfoxSummary,
-        },
-        phishtank: {
-          name: "PhishTank",
-          url: "https://www.phishtank.com/",
-          ...phishtankSummary,
-        },
-        opensky: {
-          name: "OpenSky Network (DC airspace)",
-          url: "https://opensky-network.org/",
-          ...openSkySummary,
-        },
-      },
       fetchedAt: new Date().toISOString(),
     });
   } catch (err) { handleRouteError(res, err, "Failed to fetch Firestorm threat summary"); }

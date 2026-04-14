@@ -1,6 +1,5 @@
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { router, type Href } from "expo-router";
 import { Platform } from "react-native";
 import { useEffect, useRef, useState } from "react";
 
@@ -74,20 +73,8 @@ export function usePushNotifications() {
       setNotification(n);
     });
 
-    responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
-      const data = response.notification.request.content.data as Record<string, unknown>;
-      const PROPERTIES_HREF: Href = { pathname: "/(tabs)/properties" };
-      const PIPELINE_HREF: Href = { pathname: "/(tabs)/pipeline" };
-      if (data?.type === "distress_alert" || data?.type === "watchlist_update") {
-        if (data?.propertyId) {
-          const propertyHref: Href = { pathname: "/property/[id]", params: { id: String(data.propertyId) } };
-          router.push(propertyHref);
-        } else {
-          router.push(PROPERTIES_HREF);
-        }
-      } else if (data?.type === "lead_activity") {
-        router.push(PIPELINE_HREF);
-      }
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(() => {
+      // Navigate to relevant screen based on notification data
     });
 
     return () => {

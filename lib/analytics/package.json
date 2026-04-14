@@ -17,9 +17,6 @@
     "./plausible": "./src/plausible.ts",
     "./events": "./src/events.ts"
   },
-  "dependencies": {
-    "rrweb": "^2.0.0-alpha.17"
-  },
   "devDependencies": {
     "@types/node": "catalog:"
   }

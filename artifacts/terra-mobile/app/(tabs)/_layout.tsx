@@ -42,9 +42,7 @@ export default function TabLayout() {
       <Tabs.Screen name="properties" options={{ title: "Properties", tabBarIcon: ({ color }) => <Feather name="list" size={20} color={color} /> }} />
       <Tabs.Screen name="scanner" options={{ title: "Scanner", tabBarIcon: ({ color }) => <Feather name="zap" size={20} color={color} /> }} />
       <Tabs.Screen name="pipeline" options={{ title: "Pipeline", tabBarIcon: ({ color }) => <Feather name="activity" size={20} color={color} /> }} />
-      <Tabs.Screen name="briefing" options={{ title: "Brief", tabBarIcon: ({ color }) => <Feather name="sunrise" size={20} color={color} /> }} />
-      <Tabs.Screen name="intel-feed" options={{ href: null }} />
-      <Tabs.Screen name="mcp-tools" options={{ href: null }} />
+      <Tabs.Screen name="mcp-tools" options={{ title: "Tools", tabBarIcon: ({ color }) => <Feather name="cpu" size={20} color={color} /> }} />
       <Tabs.Screen name="profile" options={{ title: "Profile", tabBarIcon: ({ color }) => <Feather name="user" size={20} color={color} /> }} />
     </Tabs>
   );

@@ -20,7 +20,7 @@ const CASE_STUDIES_LD = {
   "@context": "https://schema.org",
   "@type": "CollectionPage",
   "name": "Case Studies — SZL Holdings",
-  "description": "Documented design partner scenarios from Lyte, PRISM Counsel, Vessels, Alloy, Terra, and Aegis. Each case follows the same structure: problem, context, constraints, system built, how it worked, outcome, and why it matters.",
+  "description": "Documented design partner scenarios from Lyte, Vessels, Alloy, Terra, and Aegis. Each case follows the same structure: problem, context, constraints, system built, how it worked, outcome, and why it matters.",
   "url": "https://szlholdings.com/case-studies",
   "breadcrumb": {
     "@type": "BreadcrumbList",
@@ -34,7 +34,7 @@ const CASE_STUDIES_LD = {
 export default function CaseStudiesPage() {
   usePageMeta({
     title: "Case Studies — Design Partner Scenarios | SZL Holdings",
-    description: "Documented design partner scenarios from Lyte, PRISM Counsel, Vessels, Alloy, Terra, and Aegis — structured case studies with documented problems, constraints, systems built, and proof.",
+    description: "Documented design partner scenarios from Lyte, Vessels, Alloy, Terra, and Aegis — structured case studies with documented problems, constraints, systems built, and proof.",
     canonical: "https://szlholdings.com/case-studies",
     ogImage: "https://szlholdings.com/opengraph.jpg",
   });
@@ -78,7 +78,7 @@ export default function CaseStudiesPage() {
               <div>
                 <h1 className="text-3xl font-bold text-white leading-tight">Case Studies</h1>
                 <p className="text-base text-white/45 mt-2 max-w-2xl leading-relaxed">
-                  Documented design partner scenarios from Lyte, PRISM Counsel, Vessels, Alloy, Terra, and Aegis. Each case follows the same structure: problem, context, constraints, system built, how it worked, outcome, and why it matters.
+                  Documented design partner scenarios from Lyte, Vessels, Alloy, and Terra. Each case follows the same structure: problem, context, constraints, system built, how it worked, outcome, and why it matters.
                 </p>
               </div>
             </div>
@@ -86,7 +86,7 @@ export default function CaseStudiesPage() {
             <div className="mt-8 flex flex-wrap gap-3" role="list" aria-label="Filter by product">
               {[
                 { label: "All", count: caseStudies.length },
-                ...["Lyte", "PRISM Counsel", "Vessels", "Alloy", "Terra", "Aegis", "Carlota Jo"].map(p => ({ label: p, count: caseStudies.filter(c => c.product === p).length })),
+                ...["Lyte", "Vessels", "Alloy", "Terra", "Aegis", "Carlota Jo"].map(p => ({ label: p, count: caseStudies.filter(c => c.product === p).length })),
               ].filter(({ count }) => count > 0).map(({ label, count }) => (
                 <span key={label} role="listitem" className="text-xs px-3 py-1.5 rounded-full border text-white/50 border-white/10 bg-white/3">
                   {label} <span className="text-white/25 ml-1">{count}</span>

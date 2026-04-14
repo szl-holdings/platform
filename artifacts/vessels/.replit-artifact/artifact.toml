@@ -12,10 +12,10 @@ version = "1.0.0"
 [[services]]
 name = "web"
 paths = [ "/vessels/" ]
-localPort = 3003
+localPort = 18485
 
 [services.development]
-run = "bash -c 'cd /home/runner/workspace/artifacts/vessels && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
+run = "pnpm --filter @workspace/vessels run dev"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/vessels", "run", "build" ]
@@ -27,5 +27,5 @@ from = "/*"
 to = "/index.html"
 
 [services.env]
-PORT = "3003"
+PORT = "18485"
 BASE_PATH = "/vessels/"

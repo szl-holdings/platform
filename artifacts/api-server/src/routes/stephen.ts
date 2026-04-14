@@ -9,7 +9,7 @@ import {
   stephenBookingRequestsTable,
 } from "@szl-holdings/db";
 import { z } from "zod";
-import { eq, desc, asc, sql } from "drizzle-orm";
+import { eq, desc, asc } from "drizzle-orm";
 
 const CONTENT_BLOCK_TYPES = ["achievement", "about", "service", "stat", "skill", "thesis", "doctrine"] as const;
 const BOOKING_TYPES = ["consultation", "project", "recruitment", "partnership", "investment", "speaking", "other"] as const;
@@ -431,139 +431,6 @@ async function probeHealth(url: string): Promise<"operational" | "degraded"> {
     return "degraded";
   }
 }
-
-router.get("/stephen/acquisition-metrics", async (_req, res) => {
-  try {
-    const [tableCountResult, columnCountResult, indexCountResult] = await Promise.all([
-      db.execute(sql`SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'`),
-      db.execute(sql`SELECT COUNT(*) as count FROM information_schema.columns WHERE table_schema = 'public'`),
-      db.execute(sql`SELECT COUNT(*) as count FROM pg_indexes WHERE schemaname = 'public'`),
-    ]);
-    const tableCount = parseInt(String((tableCountResult as any).rows?.[0]?.count ?? "0"), 10);
-    const columnCount = parseInt(String((columnCountResult as any).rows?.[0]?.count ?? "0"), 10);
-    const indexCount = parseInt(String((indexCountResult as any).rows?.[0]?.count ?? "0"), 10);
-
-    const webApps = [
-      { name: "SZL Holdings", slug: "szl-holdings", domain: "Corporate Platform & Alloy Execution Fabric", industry: "Enterprise SaaS", status: "live" },
-      { name: "Aegis", slug: "firestorm", domain: "Unified Defense & Intelligence", industry: "Cybersecurity", status: "live" },
-      { name: "Vessels", slug: "vessels", domain: "Maritime Intelligence Platform", industry: "Maritime / Logistics", status: "live" },
-      { name: "Terra", slug: "terra", domain: "Real Estate Intelligence", industry: "Real Estate / PropTech", status: "live" },
-      { name: "Lyte", slug: "lyte", domain: "Business Observability", industry: "Enterprise SaaS", status: "live" },
-      { name: "Carlota Jo", slug: "carlota-jo", domain: "Private Advisory Operations", industry: "Wealth Management", status: "live" },
-      { name: "PRISM Counsel", slug: "prism-counsel", domain: "Litigation Intelligence", industry: "Legal Tech", status: "live" },
-      { name: "Stephen Lutar", slug: "stephen", domain: "Founder Portfolio & Command", industry: "Executive Platform", status: "live" },
-    ];
-
-    const mobileApps = [
-      { name: "Terra Mobile", platform: "iOS / Android", status: "live" },
-      { name: "Vessels Mobile", platform: "iOS / Android", status: "live" },
-      { name: "Carlota Jo Mobile", platform: "iOS / Android", status: "live" },
-      { name: "Stephen Mobile", platform: "iOS / Android", status: "live" },
-      { name: "Aegis Mobile", platform: "iOS / Android", status: "live" },
-      { name: "Lyte Mobile", platform: "iOS / Android", status: "live" },
-      { name: "SZL Holdings Mobile", platform: "iOS / Android", status: "live" },
-    ];
-
-    const techStack = {
-      languages: ["TypeScript", "SQL", "HTML/CSS"],
-      frontend: ["React 19", "Vite 7", "Tailwind CSS 4", "Framer Motion", "Recharts", "TanStack Query"],
-      mobile: ["Expo SDK 54", "React Native 0.81", "Expo Router 6"],
-      backend: ["Node.js 24", "Express 5", "Drizzle ORM", "PostgreSQL", "Pino"],
-      ai: ["OpenAI GPT-5.2", "Anthropic Claude Sonnet 4", "Google Gemini 2.5", "Mastra Agent Framework", "Promptfoo Eval", "Gray Swan Red Team", "Vectara HHEM"],
-      infrastructure: ["Replit Deployments", "PostgreSQL (managed)", "OpenTelemetry", "Sentry"],
-      security: ["Clerk Auth", "Rate Limiting", "CORS", "Helmet", "Input Validation (Zod)"],
-    };
-
-    const defensibility = {
-      score: 92,
-      factors: [
-        { name: "Proprietary AI Architecture", score: 95, detail: "10-layer agentic AI stack with compound pipelines, eval suites, red teaming, and hallucination detection" },
-        { name: "Multi-Industry Moat", score: 90, detail: "Single architecture deployed across 5 industries — cybersecurity, maritime, real estate, legal, wealth management" },
-        { name: "Data Network Effects", score: 88, detail: "Cross-platform signal feed, knowledge graphs, and decision objects create compounding intelligence" },
-        { name: "Switching Costs", score: 94, detail: "Deep workflow integration with Alloy execution fabric, connector mesh, and governance controls" },
-        { name: "Technical Complexity", score: 96, detail: `${tableCount}+ DB tables, 1,618+ API endpoints, 15 apps — extremely high barrier to replicate` },
-      ],
-    };
-
-    const acquisitionReadiness = {
-      overallScore: 88,
-      categories: [
-        { name: "Product Maturity", score: 92, status: "strong", detail: "8 web apps + 7 mobile apps in production" },
-        { name: "Technical Depth", score: 95, status: "strong", detail: `${tableCount}+ tables, 1,618+ endpoints, full TypeScript monorepo` },
-        { name: "AI Integration", score: 94, status: "strong", detail: "NVIDIA Inception-grade: eval, red team, hallucination detection, compound AI" },
-        { name: "Architecture Quality", score: 90, status: "strong", detail: "Shared monorepo, typed APIs, unified auth, observability" },
-        { name: "Multi-Market Coverage", score: 88, status: "strong", detail: "5 industries from single codebase — massive TAM expansion" },
-        { name: "Documentation", score: 78, status: "good", detail: "API documented, architecture mapped, needs more SOPs" },
-        { name: "Revenue Model", score: 72, status: "developing", detail: "Platform SaaS + per-seat + API metering designed, pre-revenue" },
-      ],
-    };
-
-    const valuationDrivers = {
-      strengths: [
-        "AI-native platform commanding premium multiples (Acquire.com 2026 data)",
-        "5-industry horizontal play = massive TAM vs. single-vertical competitors",
-        "375+ DB tables and 1,618+ API endpoints = 18-24 month replication barrier",
-        "Full TypeScript monorepo = acquirer-friendly, auditable codebase",
-        "NVIDIA Inception portfolio integration = institutional credibility",
-        "Human-in-the-loop governance = enterprise-ready compliance",
-        "Single founder = low acquisition cost, high IP concentration",
-      ],
-      opportunities: [
-        "First $100K ARR triggers 3-5x profit multiple valuation",
-        "Enterprise pilot with single Fortune 500 = strategic acquisition signal",
-        "SOC 2 Type II certification = instant enterprise credibility",
-        "Open-source Alloy core = community + strategic acquisition interest",
-      ],
-    };
-
-    const industries = [
-      { name: "Cybersecurity", tam: "$266B by 2027", products: ["Aegis XDR", "Managed Threat Hunting", "Compliance Automation"] },
-      { name: "Maritime / Logistics", tam: "$240B by 2030", products: ["Fleet Intelligence", "Voyage Economics", "Sanctions Screening"] },
-      { name: "Real Estate / PropTech", tam: "$86B by 2032", products: ["Property Intelligence", "Pipeline Management", "Ownership Analysis"] },
-      { name: "Legal Tech", tam: "$35B by 2027", products: ["Matter Intelligence", "Settlement Analytics", "Insurer Behavior"] },
-      { name: "Wealth Management", tam: "$5T AUM market", products: ["Concierge Operations", "Household Systems", "Advisory Continuity"] },
-    ];
-
-    res.json({
-      platform: {
-        name: "SZL Holdings",
-        founder: "Stephen Lutar",
-        founded: "2024",
-        stage: "Design Partner / Pre-Revenue",
-        type: "AI-Native Multi-Industry Platform",
-      },
-      scale: {
-        webApps: webApps.length,
-        mobileApps: mobileApps.length,
-        totalApps: webApps.length + mobileApps.length,
-        databaseTables: tableCount,
-        databaseColumns: columnCount,
-        databaseIndexes: indexCount,
-        apiEndpoints: 1618,
-        industries: 5,
-        founders: 1,
-      },
-      dataSourceNotes: {
-        databaseTables: "Live query: information_schema.tables",
-        databaseColumns: "Live query: information_schema.columns",
-        databaseIndexes: "Live query: pg_indexes",
-        apiEndpoints: "Counted from route registrations at build time",
-        appCounts: "Derived from artifact registry at build time",
-        scores: "Assessed by founder; methodology documented in /investor",
-      },
-      webApps,
-      mobileApps,
-      techStack,
-      defensibility,
-      acquisitionReadiness,
-      valuationDrivers,
-      industries,
-      generatedAt: new Date().toISOString(),
-    });
-  } catch (err) {
-    handleError(err, _req, res, "Failed to compute acquisition metrics");
-  }
-});
 
 router.get("/stephen/ecosystem-status", async (_req, res) => {
   const now = new Date().toISOString();

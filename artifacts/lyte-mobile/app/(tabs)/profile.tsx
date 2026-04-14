@@ -1,7 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import { router, type Href } from "expo-router";
 import React, { type ComponentProps, useEffect, useState, useCallback } from "react";
 
 import {
@@ -18,9 +17,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LYTE_COLORS } from "@/constants/colors";
 import { useLyte } from "@/context/LyteContext";
 import { useNotifications } from "@/context/NotificationContext";
-import { useBiometric } from "@/context/BiometricContext";
-
-const PRIVACY_HREF: Href = { pathname: "/privacy" };
 
 type FeatherName = ComponentProps<typeof Feather>["name"];
 
@@ -65,23 +61,6 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { signals, actions, criticalCount } = useLyte();
   const { permissionGranted, requestPermission, preferences, setPreferences } = useNotifications();
-  const { isEnabled: biometricEnabled, isAvailable: biometricAvailable, enableBiometric, disableBiometric } = useBiometric();
-
-  const handleToggleBiometric = useCallback(async (value: boolean) => {
-    if (value) {
-      const ok = await enableBiometric();
-      if (!ok) Alert.alert("Authentication Failed", "Biometric lock could not be enabled.");
-      else Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } else {
-      Alert.alert("Disable Biometric Lock", "The app will no longer require authentication on resume.", [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Disable", style: "destructive",
-          onPress: async () => { await disableBiometric(); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); },
-        },
-      ]);
-    }
-  }, [enableBiometric, disableBiometric]);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
@@ -175,12 +154,6 @@ export default function ProfileScreen() {
       value: process.env.EXPO_PUBLIC_DOMAIN ? "Production" : "Local",
       color: LYTE_COLORS.textSecondary,
     },
-    {
-      icon: "file-text",
-      label: "Privacy Policy",
-      color: LYTE_COLORS.textSecondary,
-      onPress: () => router.push(PRIVACY_HREF),
-    },
   ];
 
   const resolvedCount = signals.filter(s => s.status === "resolved").length;
@@ -271,22 +244,6 @@ export default function ProfileScreen() {
             </View>
           ))}
         </View>
-
-        {biometricAvailable && (
-          <>
-            <Text style={styles.sectionLabel}>SECURITY</Text>
-            <View style={styles.settingGroup}>
-              <SettingItem item={{
-                icon: "lock",
-                label: "Biometric Lock",
-                toggle: true,
-                toggleValue: biometricEnabled,
-                color: LYTE_COLORS.electricBlue,
-                onToggle: handleToggleBiometric,
-              }} />
-            </View>
-          </>
-        )}
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>Lyte Mobile · v1.0.0</Text>

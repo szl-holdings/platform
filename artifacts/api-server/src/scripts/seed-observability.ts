@@ -1,4 +1,4 @@
-import { seedLyteObservability } from "../lib/lyte-observability-seed";
+import { seedLyteObservability } from "../lib/lyte-observability-seed.js";
 
 async function main() {
   console.log("[seed] Starting Lyte observability seed...");

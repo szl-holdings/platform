@@ -1,9 +1,0 @@
-Your security team is toggling between 6 tools to run one investigation.
-
-That is not a process problem. It is an architecture problem.
-
-Aegis: SOC command, threat correlation, analyst tradecraft tools, incident governance — one surface. Zero blind spots.
-
-Built for the analysts who actually do the work.
-
-szlholdings.com/firestorm

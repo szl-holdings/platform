@@ -1,5 +1,4 @@
 import http from "http";
-import { HEAP_LIMIT_MB, HEAP_GC_THRESHOLD_MB, HEAP_WARN_THRESHOLD_MB, HEAP_CRITICAL_THRESHOLD_MB } from "./lib/heap-limits";
 import app from "./app";
 import { logger } from "./lib/logger";
 import { failFastOnInvalidConfig } from "./lib/startup-validation";
@@ -13,7 +12,15 @@ import { startDomainNotificationGenerators, stopDomainNotificationGenerators } f
 import { startSelfMonitoring, stopSelfMonitoring } from "./lib/self-monitor";
 import { agentScheduler, registerDefaultSchedules } from "./lib/agent-scheduler";
 import { knowledgeStore } from "./lib/knowledge-store";
-import { runDrizzleMigrations } from "./lib/run-migrations";
+import { ensureAlloyTables } from "./lib/alloy-migrations";
+import { ensureAlloyGovernanceTables } from "./lib/alloy-governance-migrations";
+import { ensurePlatformOpsTables } from "./lib/platform-ops-migrations";
+import { ensureLyteDashboardsTable } from "./lib/lyte-dashboard-migrations";
+import { ensureExportJobsTable } from "./lib/export-migrations";
+import { ensureFeedbackTables } from "./lib/feedback-migrations";
+import { ensureTerraActionItemsTable } from "./lib/terra-action-items-migration";
+import { ensureTradecraftTables } from "./lib/tradecraft-migrations";
+import { ensureOutcomeGraphTables } from "./lib/outcome-graph-migrations";
 import "./lib/terra-nyc-ingestion";
 import { scheduleNycIngestionJob } from "./lib/terra-nyc-ingestion";
 import "./lib/terra-nyc-extended-ingestion";
@@ -22,23 +29,17 @@ import { seedPlatformData } from "./lib/seed-platform";
 import { initializeOpenTelemetry } from "@szl-holdings/observability";
 import { seedTerraDemo } from "./lib/terra-seed";
 import { seedMspData } from "./lib/seed-msp";
-import { seedAlloyCreativeData } from "./lib/seed-dreamscape";
+import { seedDreamscapeData } from "./lib/seed-dreamscape";
 import { seedDosData } from "./lib/seed-dos";
-import { buildGraphQLMiddleware } from "./graphql/index";
-import { registerGraphQLHandler } from "./app";
-import { prewarmIntelligenceCache, scheduleIntelligenceRefresh } from "./routes/intelligence";
+import { buildGraphQLMiddleware } from "./graphql/index.js";
+import { registerGraphQLHandler } from "./app.js";
+import { prewarmIntelligenceCache, scheduleIntelligenceRefresh } from "./routes/intelligence.js";
 import { registerAllPrismJobHandlers } from "./services/prism-job-handlers";
 import { startPrismJobPoller } from "./services/prism-queue";
-import { registerGenAITelemetryBridge } from "./lib/genai-telemetry-bridge";
+import { registerGenAITelemetryBridge } from "./lib/genai-telemetry-bridge.js";
 import "./lib/cross-app-notification-relay.js";
-import { bootstrapPersistence, restoreJobsFromDb } from "./lib/persistence-bootstrap";
-import { ensurePrismCounselSchema } from "./lib/prism-counsel-migrations";
-import { ensureA2AV3Schema } from "./lib/mastra/a2a-lifecycle";
 
 failFastOnInvalidConfig();
-
-bootstrapPersistence();
-restoreJobsFromDb().catch(() => {});
 
 registerGenAITelemetryBridge();
 
@@ -53,176 +54,175 @@ initializeOpenTelemetry({
   logger.warn({ err }, "OpenTelemetry initialization failed — continuing without OTel");
 });
 
+const rawPort = process.env["PORT"];
+
+if (!rawPort) {
+  throw new Error(
+    "PORT environment variable is required but was not provided.",
+  );
+}
+
+const port = Number(rawPort);
+
+if (Number.isNaN(port) || port <= 0) {
+  throw new Error(`Invalid PORT value: "${rawPort}"`);
+}
+
+const server = http.createServer(app);
+
+buildGraphQLMiddleware(server)
+  .then(middleware => {
+    registerGraphQLHandler(middleware);
+    logger.info("GraphQL endpoint mounted at /api/graphql");
+    logger.info("GraphQL subscriptions available at ws://.../api/graphql/ws");
+  })
+  .catch(err => {
+    logger.warn({ err }, "GraphQL initialization failed — continuing without GraphQL");
+  });
+
+initWebSocket(server);
+startDomainNotificationGenerators();
+startSelfMonitoring();
+
 import { providerHealth } from "./lib/provider-health";
+providerHealth.startActiveProbes();
+ensureAlloyTables()
+  .then(() => ensureAlloyGovernanceTables())
+  .then(() => ensurePlatformOpsTables())
+  .then(() => ensureLyteDashboardsTable())
+  .then(() => ensureExportJobsTable())
+  .then(() => ensureFeedbackTables())
+  .then(() => ensureTerraActionItemsTable())
+  .then(() => ensureTradecraftTables())
+  .then(() => ensureOutcomeGraphTables())
+  .then(() => knowledgeStore.loadFromDb())
+  .then(() => {
+    registerDefaultSchedules();
+  })
+  .catch(err => {
+    logger.fatal({ err }, "Schema bootstrap failed — cannot guarantee data integrity, shutting down");
+    process.exit(1);
+  });
+startScheduledJobs();
+startNamedScheduledJobs();
+startPlatformScheduledJobs();
+ensurePlatformFlags().catch((err) => {
+  logger.warn({ err }, "Failed to ensure platform feature flags on startup");
+});
 
-export { app };
+seedPlatformData().catch(err => {
+  logger.warn({ err }, "[seed-platform] Seed failed (non-fatal)");
+});
 
-export async function bootstrap(server: http.Server, port: number): Promise<http.RequestListener> {
-  buildGraphQLMiddleware(server)
-    .then(middleware => {
-      registerGraphQLHandler(middleware);
-      logger.info("GraphQL endpoint mounted at /api/graphql");
-      logger.info("GraphQL subscriptions available at wss://.../api/graphql/ws");
-    })
-    .catch(err => {
-      logger.warn({ err }, "GraphQL initialization failed — continuing without GraphQL");
-    });
+seedTerraDemo().catch(err => {
+  logger.warn({ err }, "[terra-seed] Terra demo seed failed (non-fatal)");
+});
 
-  initWebSocket(server);
-  startDomainNotificationGenerators();
-  startSelfMonitoring();
+seedMspData().catch(err => {
+  logger.warn({ err }, "[msp-seed] MSP demo seed failed (non-fatal)");
+});
 
-  providerHealth.startActiveProbes();
-  registerAllPrismJobHandlers();
-  const prismPoller = startPrismJobPoller(5000);
+seedDreamscapeData().catch(err => {
+  logger.warn({ err }, "[seed-dreamscape] Creative Workflows seed failed (non-fatal)");
+});
 
-  const memoryMonitor = setInterval(() => {
-    const { heapUsed, heapTotal } = process.memoryUsage();
-    const heapUsedMb = Math.round(heapUsed / 1024 / 1024);
-    const heapTotalMb = Math.round(heapTotal / 1024 / 1024);
-    if (heapUsedMb >= HEAP_CRITICAL_THRESHOLD_MB) {
-      logger.error({
-        heapUsedMb,
-        heapTotalMb,
-        limitMb: HEAP_LIMIT_MB,
-      }, "[memory] Heap usage critical — forcing GC");
-      if (global.gc) { global.gc(); global.gc(); }
-    } else if (heapUsedMb >= HEAP_WARN_THRESHOLD_MB) {
-      logger.warn({
-        heapUsedMb,
-        heapTotalMb,
-        limitMb: HEAP_LIMIT_MB,
-      }, "[memory] Heap usage elevated — running GC");
-      if (global.gc) global.gc();
-    } else if (heapUsedMb >= HEAP_GC_THRESHOLD_MB) {
-      if (global.gc) global.gc();
-    }
-  }, 20_000);
-  memoryMonitor.unref();
+seedDosData().catch(err => {
+  logger.warn({ err }, "[dos-seed] Distribution OS seed failed (non-fatal)");
+});
 
+registerAllPrismJobHandlers();
+const prismPoller = startPrismJobPoller(5000);
+
+const HEAP_WARN_THRESHOLD = 0.88;
+const HEAP_CRITICAL_THRESHOLD = 0.97;
+const memoryMonitor = setInterval(() => {
+  const { heapUsed, heapTotal } = process.memoryUsage();
+  const ratio = heapUsed / heapTotal;
+  if (ratio >= HEAP_CRITICAL_THRESHOLD) {
+    logger.error({
+      heapUsedMb: Math.round(heapUsed / 1024 / 1024),
+      heapTotalMb: Math.round(heapTotal / 1024 / 1024),
+      ratio: ratio.toFixed(3),
+    }, "[memory] Heap usage critical — consider increasing --max-old-space-size");
+    if (global.gc) global.gc();
+  } else if (ratio >= HEAP_WARN_THRESHOLD) {
+    logger.warn({
+      heapUsedMb: Math.round(heapUsed / 1024 / 1024),
+      heapTotalMb: Math.round(heapTotal / 1024 / 1024),
+      ratio: ratio.toFixed(3),
+    }, "[memory] Heap usage elevated");
+  }
+}, 30_000);
+memoryMonitor.unref();
+
+server.listen(port, "0.0.0.0", () => {
   logger.info({ port, host: "0.0.0.0" }, "Server listening");
-
   scheduleNycIngestionJob();
   scheduleNycExtendedIngestionJob();
-  setTimeout(() => {
-    prewarmIntelligenceCache().catch(err => {
-      logger.warn({ err }, "[intelligence-cache] Prewarm failed (non-fatal)");
-    });
-    scheduleIntelligenceRefresh();
-  }, 5 * 60 * 1000);
-  import("./lib/mastra/index").then(({ initializeMastra }) => {
-    initializeMastra().catch(err => {
-      logger.warn({ err }, "[mastra] Initialization failed (non-fatal)");
-    });
-  }).catch(err => {
-    logger.warn({ err }, "[mastra] Module load failed (non-fatal)");
+  prewarmIntelligenceCache().catch(err => {
+    logger.warn({ err }, "[intelligence-cache] Prewarm failed (non-fatal)");
   });
+  scheduleIntelligenceRefresh();
+});
 
-  runDrizzleMigrations()
-    .then(() => ensurePrismCounselSchema())
-    .then(() => ensurePlatformFlags())
-    .then(() => knowledgeStore.loadFromDb())
-    .then(() => {
-      registerDefaultSchedules();
-      seedPlatformData().catch(err => {
-        logger.warn({ err }, "[seed-platform] Seed failed (non-fatal)");
+const SHUTDOWN_TIMEOUT_MS = 10_000;
+
+async function shutdown(signal: string) {
+  logger.info({ signal }, "Graceful shutdown initiated");
+
+  const shutdownTimer = setTimeout(() => {
+    logger.error("Shutdown timeout exceeded — forcing exit");
+    process.exit(1);
+  }, SHUTDOWN_TIMEOUT_MS);
+  shutdownTimer.unref();
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      server.close((err) => {
+        if (err) reject(err);
+        else resolve();
       });
-      seedTerraDemo().catch(err => {
-        logger.warn({ err }, "[terra-seed] Terra demo seed failed (non-fatal)");
-      });
-      seedMspData().catch(err => {
-        logger.warn({ err }, "[msp-seed] MSP demo seed failed (non-fatal)");
-      });
-      seedAlloyCreativeData().catch(err => {
-        logger.warn({ err }, "[seed-alloy-creative] Alloy Creative seed failed (non-fatal)");
-      });
-      seedDosData().catch(err => {
-        logger.warn({ err }, "[dos-seed] Distribution OS seed failed (non-fatal)");
-      });
-      startScheduledJobs();
-      startNamedScheduledJobs();
-      startPlatformScheduledJobs();
-    })
-    .catch(err => {
-      logger.fatal({ err }, "Schema migration failed — continuing with degraded functionality");
     });
-
-  const SHUTDOWN_TIMEOUT_MS = 10_000;
-
-  async function shutdown(signal: string) {
-    logger.info({ signal }, "Graceful shutdown initiated");
-
-    const shutdownTimer = setTimeout(() => {
-      logger.error("Shutdown timeout exceeded — forcing exit");
-      process.exit(1);
-    }, SHUTDOWN_TIMEOUT_MS);
-    shutdownTimer.unref();
-
-    try {
-      await new Promise<void>((resolve, reject) => {
-        server.close((err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
-      logger.info("HTTP server closed");
-    } catch (err) {
-      logger.warn({ err }, "Error closing HTTP server");
-    }
-
-    stopDomainNotificationGenerators();
-    stopSelfMonitoring();
-    providerHealth.stopActiveProbes();
-    agentScheduler.stop();
-    clearInterval(prismPoller);
-
-    try {
-      await jobQueue.shutdown();
-      logger.info("Job queue flushed");
-    } catch (err) {
-      logger.warn({ err }, "Error flushing job queue");
-    }
-
-    try {
-      const { pool } = await import("@szl-holdings/db");
-      await pool.end();
-      logger.info("Database pool closed");
-    } catch (err) {
-      logger.warn({ err }, "Error closing DB pool (may not be configured)");
-    }
-
-    clearTimeout(shutdownTimer);
-    logger.info("Graceful shutdown complete");
-    process.exit(0);
+    logger.info("HTTP server closed");
+  } catch (err) {
+    logger.warn({ err }, "Error closing HTTP server");
   }
 
-  process.on("SIGTERM", () => shutdown("SIGTERM"));
-  process.on("SIGINT", () => shutdown("SIGINT"));
+  stopDomainNotificationGenerators();
+  stopSelfMonitoring();
+  providerHealth.stopActiveProbes();
+  agentScheduler.stop();
+  clearInterval(prismPoller);
 
-  process.on("uncaughtException", (err) => {
-    logger.fatal({ err }, "Uncaught exception — shutting down");
-    shutdown("uncaughtException");
-  });
+  try {
+    await jobQueue.shutdown();
+    logger.info("Job queue flushed");
+  } catch (err) {
+    logger.warn({ err }, "Error flushing job queue");
+  }
 
-  process.on("unhandledRejection", (reason) => {
-    logger.fatal({ reason }, "Unhandled promise rejection — shutting down");
-    shutdown("unhandledRejection");
-  });
+  try {
+    const { pool } = await import("@szl-holdings/db");
+    await pool.end();
+    logger.info("Database pool closed");
+  } catch (err) {
+    logger.warn({ err }, "Error closing DB pool (may not be configured)");
+  }
 
-  return app as unknown as http.RequestListener;
+  clearTimeout(shutdownTimer);
+  logger.info("Graceful shutdown complete");
+  process.exit(0);
 }
 
-if (!process.env.__FAST_START_SERVER) {
-  const rawPort = process.env["PORT"];
-  if (!rawPort) {
-    throw new Error("PORT environment variable is required but was not provided.");
-  }
-  const port = Number(rawPort);
-  if (Number.isNaN(port) || port <= 0) {
-    throw new Error(`Invalid PORT value: "${rawPort}"`);
-  }
-  const server = http.createServer(app);
-  server.listen(port, "0.0.0.0", () => {
-    bootstrap(server, port);
-  });
-}
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
+
+process.on("uncaughtException", (err) => {
+  logger.fatal({ err }, "Uncaught exception — shutting down");
+  shutdown("uncaughtException");
+});
+
+process.on("unhandledRejection", (reason) => {
+  logger.fatal({ reason }, "Unhandled promise rejection — shutting down");
+  shutdown("unhandledRejection");
+});

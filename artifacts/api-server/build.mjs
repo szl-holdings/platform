@@ -167,15 +167,8 @@ async function buildAll() {
       "puppeteer",
       "puppeteer-core",
       "electron",
-      // Clerk auth + proxy (optional — gracefully degraded when unavailable)
-      "@clerk/express",
-      "http-proxy-middleware",
-      // Large packages externalized to reduce bundle size and heap usage
-      "pdfkit",
-      "swagger-ui-express",
-      "swagger-ui-dist",
     ],
-    sourcemap: process.env.NODE_ENV === "production" ? "linked" : false,
+    sourcemap: "linked",
     plugins: [
       workspacePlugin(workspacePackageMap),
       // pino relies on workers to handle logging, instead of externalizing it we use a plugin to handle it

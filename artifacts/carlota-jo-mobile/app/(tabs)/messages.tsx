@@ -198,10 +198,6 @@ export default function MessagesScreen() {
           renderItem={({ item }) => <MessageBubble msg={item} />}
           contentContainerStyle={[styles.listContent, { paddingBottom: 16 }]}
           showsVerticalScrollIndicator={false}
-          initialNumToRender={20}
-          maxToRenderPerBatch={10}
-          windowSize={10}
-          removeClippedSubviews
           onContentSizeChange={() =>
             flatListRef.current?.scrollToEnd({ animated: true })
           }

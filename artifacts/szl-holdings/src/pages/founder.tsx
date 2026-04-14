@@ -14,7 +14,6 @@ const METRICS = [
 
 const PORTFOLIO = [
   { name: "Lyte", domain: "Business Observability", color: "#d4a054" },
-  { name: "PRISM Counsel", domain: "Legal Operations", color: "hsl(38,72%,58%)" },
   { name: "Vessels", domain: "Maritime Intelligence", color: "#22d3ee" },
   { name: "Aegis", domain: "Defense & Intelligence", color: "#ef4444" },
   { name: "Terra", domain: "Real Estate Intelligence", color: "#4ade80" },

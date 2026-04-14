@@ -13,7 +13,7 @@ import {
   legalReviewFlagsTable,
   governanceDocumentsTable,
   ownershipDecisionLogsTable,
-  featureFlagsTable,
+  szlFeatureFlagsTable,
 } from "@szl-holdings/db";
 import { eq, desc, asc, and, sql } from "drizzle-orm";
 import { handleRouteError, sendSuccess, sendNotFound, parsePagination } from "../lib/api-response";
@@ -28,8 +28,8 @@ async function ownershipOsGuard(req: Request, res: Response, next: NextFunction)
   try {
     const [flag] = await db
       .select()
-      .from(featureFlagsTable)
-      .where(eq(featureFlagsTable.key, "ownership_readiness_os_enabled"))
+      .from(szlFeatureFlagsTable)
+      .where(eq(szlFeatureFlagsTable.key, "ownership_readiness_os_enabled"))
       .limit(1);
     if (!flag?.isEnabled) {
       res.status(403).json({ error: "Ownership Readiness OS is not enabled" });

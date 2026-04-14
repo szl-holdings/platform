@@ -32,7 +32,6 @@
   "dependencies": {
     "@szl-holdings/analytics": "workspace:*",
     "@szl-holdings/observability": "workspace:*",
-    "@szl-holdings/replit-auth-web": "workspace:*",
     "@szl-holdings/shared-ui": "workspace:*",
     "clsx": "catalog:",
     "date-fns": "^3.6.0",

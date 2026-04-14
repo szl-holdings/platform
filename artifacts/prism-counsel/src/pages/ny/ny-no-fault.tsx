@@ -1,5 +1,5 @@
 import { FileText, AlertTriangle, CheckCircle, Clock } from "lucide-react";
-import { NY_DEMO_MATTERS } from "../../data/ny-data";
+import { NY_DEMO_MATTERS } from "../../data/ny-demo-matters";
 
 export default function NyNoFaultPage() {
   const noFaultMatters = NY_DEMO_MATTERS.filter(m => m.noFaultClaims.length > 0);

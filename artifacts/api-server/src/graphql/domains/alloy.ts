@@ -1,14 +1,14 @@
 import { withFilter } from "graphql-subscriptions";
-import { parseIntId } from "../utils";
-import { publish, WS_CHANNELS } from "../../lib/websocket";
-import { pubsub, ALLOY_EVENTS } from "../../lib/pubsub-bridge";
+import { parseIntId } from "../utils.js";
+import { publish, WS_CHANNELS } from "../../lib/websocket.js";
+import { pubsub, ALLOY_EVENTS } from "../../lib/pubsub-bridge.js";
 import {
   requestApproval,
   reviewApproval,
   startWorkflowRun,
   writeAuditLog,
   processSignalIntoWorkflow,
-} from "../../lib/alloy-orchestration";
+} from "../../lib/alloy-orchestration.js";
 
 export { pubsub, ALLOY_EVENTS };
 
@@ -728,7 +728,7 @@ export const alloyResolvers = {
         if (!["completed", "failed"].includes(args.result)) {
           throw new Error(`Invalid step result '${args.result}' — must be 'completed' or 'failed'`);
         }
-        const { advanceWorkflowStep } = await import("../../lib/alloy-orchestration");
+        const { advanceWorkflowStep } = await import("../../lib/alloy-orchestration.js");
         await advanceWorkflowStep(parseIntId(args.runId), args.stepNumber, args.result as "completed" | "failed", { error: args.error });
         const { db } = await import("@szl-holdings/db");
         const { alloyWorkflowRuns } = await import("@szl-holdings/db/schema");

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { CommandPalette, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
+import { CommandPalette, type CommandItem } from "../../lib/shared-ui/src/command-palette";
 
 const mockCommands: CommandItem[] = [
   {

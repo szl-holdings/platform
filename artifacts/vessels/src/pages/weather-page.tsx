@@ -243,11 +243,11 @@ export default function WeatherPage() {
                   </p>
                 </div>
               </div>
-              {(marineWeather.forecastHours?.length ?? 0) > 0 && (
+              {marineWeather.forecastHours?.length > 0 && (
                 <div>
                   <p className="text-xs text-muted-foreground mb-2">24-Hour Forecast</p>
                   <div className="flex gap-2 overflow-x-auto pb-1">
-                    {(marineWeather.forecastHours ?? []).slice(0, 12).map((h: ForecastHour, i: number) => (
+                    {marineWeather.forecastHours.slice(0, 12).map((h: ForecastHour, i: number) => (
                       <div key={i} className="shrink-0 text-center p-2 rounded bg-muted/30 min-w-[50px]">
                         <p className="text-[9px] text-muted-foreground">{h.time?.slice(11, 16) ?? ""}</p>
                         <p className="text-xs font-medium text-blue-400">{h.waveHeight != null ? `${h.waveHeight.toFixed(1)}m` : "—"}</p>

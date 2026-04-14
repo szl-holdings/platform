@@ -35,5 +35,4 @@ export {
   type WorkflowStatus,
   type WorkflowTransition,
   type WorkflowContext,
-  type WorkflowDbPersistFn,
 } from "./workflow-state-machine.js";

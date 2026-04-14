@@ -38,19 +38,19 @@ const ENTITY_SCORING: Record<
       "debt_to_value",
       "auction_proximity",
     ],
-    domain: "terra",
+    domain: "beacon",
     actionPrefix: "Acquire or note-purchase",
   },
   lead: {
     baseWeight: 1.0,
     factors: ["conversion_probability", "engagement_score", "recency"],
-    domain: "terra",
+    domain: "beacon",
     actionPrefix: "Re-engage via direct outreach",
   },
   deal: {
     baseWeight: 1.1,
     factors: ["stage_velocity", "deal_size", "close_probability"],
-    domain: "terra",
+    domain: "beacon",
     actionPrefix: "Advance deal stage",
   },
   vulnerability: {
@@ -62,7 +62,7 @@ const ENTITY_SCORING: Record<
   incident: {
     baseWeight: 1.4,
     factors: ["severity", "blast_radius", "containment_status"],
-    domain: "aegis-ops",
+    domain: "rosie",
     actionPrefix: "Escalate and contain",
   },
   asset: {
@@ -375,8 +375,8 @@ router.get("/core/health", async (_req, res) => {
             memory_mb: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
           },
           intelligence: { status: "ok", version: "2.0.0" },
-          terra: { status: "ok" },
-          "aegis-ops": { status: "ok" },
+          beacon: { status: "ok" },
+          rosie: { status: "ok" },
           alloy: { status: "ok" },
           lyte: { status: "ok" },
         },

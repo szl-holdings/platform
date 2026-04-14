@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -10,7 +10,6 @@ import {
   TextInput,
   Alert,
   Platform,
-  Pressable,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -26,11 +25,6 @@ import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { useColors } from "@/hooks/useColors";
 import { useIncidentSubscription } from "@/hooks/useGraphQL";
 import { apiGet, apiPut } from "@/lib/apiClient";
-import { RedAlertOverlay } from "@/components/RedAlertOverlay";
-import { SecureComms } from "@/components/SecureComms";
-import { VoiceCommandOverlay } from "@/components/VoiceCommandOverlay";
-import { CommandPalette, type CommandItem } from "@/components/CommandPalette";
-import { useShakeGesture } from "@/hooks/useShakeGesture";
 
 interface Incident {
   id: number;
@@ -201,11 +195,6 @@ export default function IncidentsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [bulkMode, setBulkMode] = useState(false);
   const [selected, setSelected] = useState<Set<number>>(new Set());
-  const [redAlertVisible, setRedAlertVisible] = useState(false);
-  const [redAlertIncident, setRedAlertIncident] = useState<Incident | null>(null);
-  const [commsVisible, setCommsVisible] = useState(false);
-  const [voiceVisible, setVoiceVisible] = useState(false);
-  const [paletteVisible, setPaletteVisible] = useState(false);
   useIncidentSubscription();
 
   const { data: incidents = [], refetch, isLoading } = useQuery<Incident[]>({
@@ -328,26 +317,6 @@ export default function IncidentsScreen() {
     );
   };
 
-  useShakeGesture({ onShake: () => setPaletteVisible(true) });
-
-  const criticalIncidents = incidents.filter((i) => i.severity === "critical" && i.status !== "closed");
-
-  const triggerRedAlert = useCallback((inc: Incident) => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {});
-    }
-    setRedAlertIncident(inc);
-    setRedAlertVisible(true);
-  }, []);
-
-  const paletteCommands: CommandItem[] = [
-    { id: "redalert", label: "Red Alert Mode", subtitle: criticalIncidents.length > 0 ? `${criticalIncidents.length} critical incidents` : "No critical incidents", icon: "alert-octagon", tags: ["red", "alert", "critical"], action: () => { if (criticalIncidents[0]) triggerRedAlert(criticalIncidents[0]); } },
-    { id: "comms", label: "Secure Comms", subtitle: "Open IR team channel", icon: "message-square", tags: ["comms", "secure", "channel"], action: () => setCommsVisible(true) },
-    { id: "voice", label: "Voice Command", subtitle: "Speak a command", icon: "mic", tags: ["voice"], action: () => setVoiceVisible(true) },
-    { id: "filter-critical", label: "Filter: Critical", icon: "filter", tags: ["filter", "critical"], action: () => setSeverityFilter("critical") },
-    { id: "filter-all", label: "Show All Incidents", icon: "list", tags: ["filter", "all"], action: () => setSeverityFilter("all") },
-  ];
-
   const filtered = incidents.filter((i) => {
     const matchSearch = !search || i.title?.toLowerCase().includes(search.toLowerCase());
     const matchSev = severityFilter === "all" || i.severity === severityFilter;
@@ -443,10 +412,6 @@ export default function IncidentsScreen() {
           contentContainerStyle={{ padding: 16, paddingBottom: bottomInsets + 100 }}
           showsVerticalScrollIndicator={false}
           scrollEnabled={filtered.length > 0}
-          initialNumToRender={10}
-          maxToRenderPerBatch={10}
-          windowSize={10}
-          removeClippedSubviews
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.amber} />}
           ListEmptyComponent={
             <View style={[styles.empty, { borderColor: colors.border }]}>
@@ -475,151 +440,9 @@ export default function IncidentsScreen() {
           )}
         />
       )}
-
-      <View style={incidentStyles.floatingBar}>
-        {criticalIncidents.length > 0 && (
-          <Pressable
-            style={incidentStyles.redAlertBtn}
-            onPress={() => triggerRedAlert(criticalIncidents[0])}
-          >
-            <Feather name="alert-octagon" size={16} color="#fff" />
-            <Text style={incidentStyles.redAlertBtnText}>Red Alert</Text>
-            <View style={incidentStyles.redAlertCount}>
-              <Text style={incidentStyles.redAlertCountText}>{criticalIncidents.length}</Text>
-            </View>
-          </Pressable>
-        )}
-        <Pressable style={incidentStyles.commsBtn} onPress={() => setCommsVisible(true)}>
-          <Feather name="message-square" size={16} color="#ef4444" />
-        </Pressable>
-        <Pressable style={incidentStyles.micBtn} onPress={() => setVoiceVisible(true)}>
-          <Feather name="mic" size={16} color="#6366f1" />
-        </Pressable>
-        <Pressable style={incidentStyles.paletteBtn} onPress={() => setPaletteVisible(true)}>
-          <Feather name="command" size={16} color="#6366f1" />
-        </Pressable>
-      </View>
-
-      <RedAlertOverlay
-        visible={redAlertVisible}
-        incident={redAlertIncident}
-        onDismiss={() => setRedAlertVisible(false)}
-        onAcknowledge={() => {
-          if (redAlertIncident) handleAcknowledge(redAlertIncident.id);
-          setRedAlertVisible(false);
-        }}
-        onEscalate={() => {
-          if (redAlertIncident) handleEscalate(redAlertIncident.id);
-          setRedAlertVisible(false);
-        }}
-        onContain={() => {
-          if (redAlertIncident) updateMut.mutate({ id: redAlertIncident.id, data: { status: "containment" } });
-          setRedAlertVisible(false);
-        }}
-      />
-
-      <SecureComms
-        visible={commsVisible}
-        onClose={() => setCommsVisible(false)}
-        incidentId={redAlertIncident?.id}
-      />
-
-      <VoiceCommandOverlay
-        visible={voiceVisible}
-        onClose={() => setVoiceVisible(false)}
-        onCommand={(text) => {
-          const lower = text.toLowerCase();
-          if (lower.includes("critical")) setSeverityFilter("critical");
-          else if (lower.includes("all")) setSeverityFilter("all");
-          else if (lower.includes("red") || lower.includes("alert")) {
-            if (criticalIncidents[0]) triggerRedAlert(criticalIncidents[0]);
-          } else if (lower.includes("comms") || lower.includes("channel")) {
-            setCommsVisible(true);
-          }
-        }}
-        appName="Aegis"
-        accentColor="#ef4444"
-        suggestions={["Show critical incidents", "Open secure comms", "Red alert mode", "Filter all incidents"]}
-      />
-
-      <CommandPalette
-        visible={paletteVisible}
-        onClose={() => setPaletteVisible(false)}
-        commands={paletteCommands}
-        accentColor="#ef4444"
-        placeholder="Search Aegis commands…"
-      />
     </View>
   );
 }
-
-const incidentStyles = StyleSheet.create({
-  floatingBar: {
-    position: "absolute",
-    bottom: 90,
-    right: 16,
-    flexDirection: "column",
-    gap: 8,
-    alignItems: "center",
-  },
-  redAlertBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "#ef4444",
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-  redAlertBtnText: {
-    fontSize: 13,
-    fontFamily: "Inter_600SemiBold",
-    color: "#fff",
-  },
-  redAlertCount: {
-    backgroundColor: "#fff",
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  redAlertCountText: {
-    fontSize: 10,
-    fontFamily: "Inter_700Bold",
-    color: "#ef4444",
-  },
-  commsBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(239,68,68,0.1)",
-    borderWidth: 1,
-    borderColor: "rgba(239,68,68,0.3)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  micBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(99,102,241,0.1)",
-    borderWidth: 1,
-    borderColor: "rgba(99,102,241,0.3)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  paletteBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(99,102,241,0.1)",
-    borderWidth: 1,
-    borderColor: "rgba(99,102,241,0.3)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
 
 const styles = StyleSheet.create({
   container: { flex: 1 },

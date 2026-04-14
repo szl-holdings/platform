@@ -1,4 +1,3 @@
-import { m } from "framer-motion";
 import { Link } from "wouter";
 import { Building2, ArrowRight, Layers, Shield, Target, Globe, TrendingUp, Users } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
@@ -6,158 +5,145 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 const packs = [
-  { name: "Lyte", role: "Business observability — surfaces signals, routes action, verifies follow-through", color: "hsl(192,72%,48%)", href: "/lyte" },
-  { name: "Alloy", role: "Execution fabric — workflow orchestration, connector mesh, governance layer", color: "hsl(258,55%,68%)", href: "/alloy-fabric" },
-  { name: "PRISM Counsel", role: "Legal matter observability — deadlines, pressure, proof chain, export safety", color: "hsl(38,72%,58%)", href: "/solutions/prism-counsel" },
-  { name: "Terra", role: "Real estate intelligence — property twins, diligence, distress, readiness scoring", color: "hsl(140,50%,48%)", href: "/solutions/terra" },
-  { name: "Vessels", role: "Maritime intelligence — voyage twins, route risk, port congestion, compliance", color: "hsl(206,72%,52%)", href: "/solutions/vessels" },
-  { name: "Aegis", role: "Security & defense — threat twins, exposure prioritization, governance response", color: "hsl(222,60%,62%)", href: "/solutions/aegis" },
+  { name: "Lyte", role: "Business observability — surfaces signals, routes action, verifies follow-through", color: "#4a90b8", href: "/lyte" },
+  { name: "Alloy", role: "Execution fabric — workflow orchestration, connector mesh, governance layer", color: "#8b7ac8", href: "/alloy-fabric" },
+  { name: "PRISM Counsel", role: "Legal matter observability — deadlines, pressure, proof chain, export safety", color: "#d4a054", href: "/solutions/prism-counsel" },
+  { name: "Terra", role: "Real estate intelligence — property twins, diligence, distress, readiness scoring", color: "#c8953c", href: "/solutions/terra" },
+  { name: "Vessels", role: "Maritime intelligence — voyage twins, route risk, port congestion, compliance", color: "#4a90b8", href: "/solutions/vessels" },
+  { name: "Aegis", role: "Security & defense — threat twins, exposure prioritization, governance response", color: "#c45a4a", href: "/solutions/aegis" },
 ];
 
 export default function InvestorsOverviewPage() {
   usePageMeta({
     title: "Investor Overview — SZL Holdings",
-    description: "SZL Holdings company overview for investors and capital partners — category creation, shared architecture, six verticals, and operational proof.",
+    description: "SZL Holdings company overview for investors and capital partners.",
     canonical: "https://szlholdings.com/investors/overview",
   });
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
+    <div className="min-h-screen bg-[#070a10] text-white">
       <SiteNav />
-      <main id="main-content" role="main">
-
-        <section className="szl-grid-texture szl-depth-glow-gold" style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)", borderBottom: "1px solid var(--color-szl-border)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.3rem 0.875rem", borderRadius: "99px", border: "1px solid hsla(38,72%,58%,0.25)", background: "hsla(38,72%,58%,0.08)", marginBottom: "1.75rem" }}>
-                <Building2 size={13} color="hsl(38,72%,58%)" />
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(38,72%,58%)" }}>Investor Overview</span>
-              </div>
-              <h1 style={{ fontSize: "clamp(2.25rem,5vw,3.75rem)", fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1.06, maxWidth: "22ch", marginBottom: "1.5rem" }}>
-                One architecture. Six verticals. Operational proof first.
-              </h1>
-              <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "54ch", marginBottom: "2.25rem" }}>
-                SZL Holdings is building the business observability category — software that connects
-                signal detection, action routing, and outcome verification into a single accountable
-                workflow. Lyte is the product. Alloy is the engine. Vertical packs extend the same
-                architecture into specific operating domains.
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-                <Link href="/demo" className="szl-btn-primary">See the live product <ArrowRight size={15} /></Link>
-                <Link href="/investors/architecture" className="szl-btn-secondary">Architecture deep dive</Link>
-              </div>
-            </m.div>
-          </div>
-        </section>
-
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(38,72%,58%)", marginBottom: "1rem" }}>Investment Thesis</p>
-              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "3rem" }}>
-                The thesis
-              </h2>
-            </m.div>
-            <div className="szl-grid-3">
-              {[
-                { icon: Target, label: "Category creation", body: "Business observability is an emerging category. Dashboards show what happened. Observability shows what needs to happen next — and verifies that it did.", color: "hsl(38,72%,58%)" },
-                { icon: Layers, label: "Shared architecture", body: "Every vertical pack shares the same Alloy execution fabric, Model Mesh, GraphQL control plane, and audit infrastructure. Build once, deploy into any operating domain.", color: "hsl(258,55%,68%)" },
-                { icon: Shield, label: "Trust as moat", body: "Trust is not a feature — it is the product boundary. Source grounding, approval governance, proof chains, and export safety create defensible differentiation.", color: "hsl(206,72%,52%)" },
-              ].map((item, i) => {
-                const Icon = item.icon;
-                return (
-                  <m.div key={item.label} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.38, delay: i * 0.06 }} className="szl-card" style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}>
-                    <div style={{ width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", background: `${item.color}15`, border: `1px solid ${item.color}30`, borderRadius: "0.4375rem", marginBottom: "1rem" }}>
-                      <Icon size={16} color={item.color} />
-                    </div>
-                    <h3 style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.625rem" }}>{item.label}</h3>
-                    <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{item.body}</p>
-                  </m.div>
-                );
-              })}
+      <main>
+        <section className="border-b border-white/10">
+          <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#d4a054]/20 bg-[#d4a054]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#d4a054]">
+              <Building2 className="h-3.5 w-3.5" />
+              Investor Overview
+            </div>
+            <h1 className="mt-6 max-w-4xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
+              One architecture. Six verticals. Operational proof first.
+            </h1>
+            <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
+              SZL Holdings is building the business observability category — software that connects
+              signal detection, action routing, and outcome verification into a single accountable
+              workflow. Lyte is the product. Alloy is the engine. Vertical packs extend the same
+              architecture into specific operating domains.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/demo" className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90">
+                See the live product <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link href="/investors/architecture" className="inline-flex items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/[0.08]">
+                Architecture deep dive
+              </Link>
             </div>
           </div>
         </section>
 
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(192,72%,48%)", marginBottom: "1rem" }}>Portfolio</p>
-              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "0.75rem" }}>
-                Portfolio map
-              </h2>
-              <p style={{ fontSize: "0.9375rem", lineHeight: 1.65, color: "hsl(214,7%,55%)", marginBottom: "2.5rem" }}>Six products, one shared execution fabric, one governance model.</p>
-            </m.div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-              {packs.map((p, i) => (
-                <m.div key={p.name} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: i * 0.05 }}>
-                  <Link href={p.href} style={{ textDecoration: "none", color: "inherit" }}>
-                    <div className="szl-card" style={{ borderRadius: "0.75rem", padding: "1rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", transition: "border-color 0.2s" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                        <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: p.color, flexShrink: 0 }} />
-                        <div>
-                          <span style={{ fontSize: "0.9375rem", fontWeight: 600, letterSpacing: "-0.01em" }}>{p.name}</span>
-                          <p style={{ fontSize: "0.8125rem", lineHeight: 1.55, color: "hsl(214,7%,55%)", marginTop: "0.125rem" }}>{p.role}</p>
-                        </div>
+        <section className="border-b border-white/10">
+          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+            <h2 className="text-2xl font-semibold text-white">The thesis</h2>
+            <div className="mt-8 grid gap-6 md:grid-cols-3">
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
+                <Target className="h-5 w-5 text-[#d4a054]" />
+                <h3 className="mt-4 text-base font-semibold text-white">Category creation</h3>
+                <p className="mt-2 text-sm leading-6 text-white/60">
+                  Business observability is an emerging category. Dashboards show what happened.
+                  Observability shows what needs to happen next — and verifies that it did.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
+                <Layers className="h-5 w-5 text-[#8b7ac8]" />
+                <h3 className="mt-4 text-base font-semibold text-white">Shared architecture</h3>
+                <p className="mt-2 text-sm leading-6 text-white/60">
+                  Every vertical pack shares the same Alloy execution fabric, Model Mesh, GraphQL
+                  control plane, and audit infrastructure. Build once, deploy into any operating domain.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
+                <Shield className="h-5 w-5 text-[#4a90b8]" />
+                <h3 className="mt-4 text-base font-semibold text-white">Trust as moat</h3>
+                <p className="mt-2 text-sm leading-6 text-white/60">
+                  Trust is not a feature — it is the product boundary. Source grounding, approval
+                  governance, proof chains, and export safety create defensible differentiation.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="border-b border-white/10">
+          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+            <h2 className="text-2xl font-semibold text-white">Portfolio map</h2>
+            <p className="mt-2 text-sm text-white/56">Six products, one shared execution fabric, one governance model.</p>
+            <div className="mt-8 space-y-3">
+              {packs.map((p) => (
+                <Link key={p.name} href={p.href}>
+                  <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-6 py-4 transition hover:bg-white/[0.04] cursor-pointer">
+                    <div className="flex items-center gap-4">
+                      <div className="h-2 w-2 rounded-full" style={{ background: p.color }} />
+                      <div>
+                        <div className="text-sm font-semibold text-white">{p.name}</div>
+                        <div className="text-xs text-white/56">{p.role}</div>
                       </div>
-                      <ArrowRight size={16} color="hsl(214,7%,35%)" />
                     </div>
-                  </Link>
-                </m.div>
+                    <ArrowRight className="h-4 w-4 text-white/32" />
+                  </div>
+                </Link>
               ))}
             </div>
           </div>
         </section>
 
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(145,62%,46%)", marginBottom: "1rem" }}>Status</p>
-              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "2.5rem" }}>
-                Stage and status
-              </h2>
-            </m.div>
-            <div className="szl-grid-2">
-              {[
-                { label: "Current stage", body: "Design-partner stage. Working directly with early teams to prove the workflow instrumentation thesis in real operating environments before scaling." },
-                { label: "GTM approach", body: "Founder-led sales into one vertical (legal operations via PRISM Counsel), then expand horizontally through the shared architecture into adjacent verticals." },
-              ].map((item, i) => (
-                <m.div key={item.label} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.38, delay: i * 0.06 }} className="szl-card" style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}>
-                  <h3 style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.75rem" }}>{item.label}</h3>
-                  <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{item.body}</p>
-                </m.div>
-              ))}
+        <section className="border-b border-white/10">
+          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+            <h2 className="text-2xl font-semibold text-white">Stage and status</h2>
+            <div className="mt-8 grid gap-6 md:grid-cols-2">
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
+                <h3 className="text-base font-semibold text-white">Current stage</h3>
+                <p className="mt-2 text-sm leading-6 text-white/60">
+                  Design-partner stage. Working directly with early teams to prove the workflow
+                  instrumentation thesis in real operating environments before scaling.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
+                <h3 className="text-base font-semibold text-white">GTM approach</h3>
+                <p className="mt-2 text-sm leading-6 text-white/60">
+                  Founder-led sales into one vertical (legal operations via PRISM Counsel), then
+                  expand horizontally through the shared architecture into adjacent verticals.
+                </p>
+              </div>
             </div>
           </div>
         </section>
 
-        <section style={{ padding: "var(--space-section-md) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(38,72%,58%)", marginBottom: "1rem" }}>Explore</p>
-              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "2.5rem" }}>
-                Explore further
-              </h2>
-            </m.div>
-            <div className="szl-grid-4">
+        <section>
+          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+            <h2 className="text-2xl font-semibold text-white">Explore further</h2>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
-                { label: "Architecture", href: "/investors/architecture", icon: Layers, color: "hsl(258,55%,68%)" },
-                { label: "Moat & Defensibility", href: "/investors/moat", icon: Shield, color: "hsl(206,72%,52%)" },
-                { label: "Trust Center", href: "/trust", icon: Shield, color: "hsl(145,62%,46%)" },
-                { label: "Founder", href: "/investors/founder", icon: Users, color: "hsl(38,72%,58%)" },
-              ].map((item, i) => {
-                const Icon = item.icon;
-                return (
-                  <m.div key={item.label} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: i * 0.05 }}>
-                    <Link href={item.href} style={{ textDecoration: "none", color: "inherit" }}>
-                      <div className="szl-card" style={{ borderRadius: "0.75rem", padding: "1rem 1.25rem", display: "flex", alignItems: "center", gap: "0.75rem", cursor: "pointer", transition: "border-color 0.2s" }}>
-                        <Icon size={16} color={item.color} />
-                        <span style={{ fontSize: "0.9375rem", fontWeight: 500 }}>{item.label}</span>
-                      </div>
-                    </Link>
-                  </m.div>
-                );
-              })}
+                { label: "Architecture", href: "/investors/architecture", icon: Layers },
+                { label: "Moat & Defensibility", href: "/investors/moat", icon: Shield },
+                { label: "Trust Center", href: "/trust", icon: Shield },
+                { label: "Founder", href: "/investors/founder", icon: Users },
+              ].map((item) => (
+                <Link key={item.label} href={item.href}>
+                  <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 transition hover:bg-white/[0.04] cursor-pointer">
+                    <item.icon className="h-4 w-4 text-[#d4a054]" />
+                    <span className="text-sm font-medium text-white/80">{item.label}</span>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         </section>

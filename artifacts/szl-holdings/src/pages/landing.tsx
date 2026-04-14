@@ -1,10 +1,5 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState } from "react";
 import { Link } from "wouter";
-
-const PlatformIn90Seconds = lazy(() => import("@/components/sections/PlatformIn90Seconds").then(m => ({ default: m.PlatformIn90Seconds })));
-const OutcomeMetricsSectionLazy = lazy(() => import("@/components/sections/OutcomeMetricsSection").then(m => ({ default: m.OutcomeMetricsSection })));
-const EcosystemPulseSectionLazy = lazy(() => import("@/components/sections/EcosystemPulseSection").then(m => ({ default: m.EcosystemPulseSection })));
-
 import { m } from "framer-motion";
 import {
   ArrowRight,
@@ -14,33 +9,22 @@ import {
   Shield,
   CheckCircle2,
   Activity,
+  GitBranch,
   Lock,
   Database,
   Globe,
   Layers,
-  Mail,
-  Play,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { useNarrativeRouter } from "@/hooks/useNarrativeRouter";
-import { SegmentedCTA } from "@/components/SegmentedCTA";
-import { DynamicProofPack } from "@/components/DynamicProofPack";
-import { analytics, initScrollDepthTracking, initTimeOnPageTracking } from "@/lib/analytics";
-import { PostDemoPrompt } from "@/components/EmailCapture";
-import {
-  WordReveal, MagneticButton, NoiseGrain, LiveIndicator,
-  CinematicReveal, EcosystemPulseItem, useMouseParallax,
-} from "@szl-holdings/shared-ui";
-import { ParticleMesh } from "@/components/ParticleMesh";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
   show: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
+    transition: { duration: 0.5, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] },
   }),
 };
 
@@ -81,7 +65,7 @@ const EXPANSION_LANES = [
     slug: "PRISM Counsel",
     category: "Legal Observability",
     desc: "Matter twins, deadline tracking, and governed demand workflows for litigation teams.",
-    color: "hsl(38,72%,58%)",
+    color: "#8b7ac8",
     href: "/solutions/prism-counsel",
     status: "Design partner stage",
   },
@@ -89,7 +73,7 @@ const EXPANSION_LANES = [
     slug: "Vessels",
     category: "Maritime Intelligence",
     desc: "Voyage and fleet twins with risk-ranked action surfaces for fleet operators.",
-    color: "hsl(206,72%,52%)",
+    color: "#4a90b8",
     href: "/solutions/vessels",
     status: "Design partner stage",
   },
@@ -97,7 +81,7 @@ const EXPANSION_LANES = [
     slug: "Aegis",
     category: "Security & Defense",
     desc: "Threat twins and SOC command for environments where every decision has consequence.",
-    color: "hsl(222,60%,62%)",
+    color: "#c85a5a",
     href: "/solutions/aegis",
     status: "Design partner stage",
   },
@@ -105,7 +89,7 @@ const EXPANSION_LANES = [
     slug: "Terra",
     category: "Real Estate Intelligence",
     desc: "Property twins with distress signals, deal tracking, and governed underwriting flows.",
-    color: "hsl(140,50%,48%)",
+    color: "#5fa87a",
     href: "/solutions/terra",
     status: "Design partner stage",
   },
@@ -113,7 +97,7 @@ const EXPANSION_LANES = [
     slug: "Carlota Jo",
     category: "Private Advisory",
     desc: "Premium client advisory with discreet intake, managed service flows, and audit-grade delivery.",
-    color: "hsl(280,50%,65%)",
+    color: "#c8a05a",
     href: "/carlota-jo/",
     status: "Active",
   },
@@ -261,193 +245,7 @@ function NewsletterSection() {
   );
 }
 
-
-
-const PRESS_LOGOS = [
-  { name: "TechCrunch", placeholder: "TC" },
-  { name: "Forbes", placeholder: "F" },
-  { name: "The Information", placeholder: "TI" },
-  { name: "Bloomberg", placeholder: "BB" },
-  { name: "Wall Street Journal", placeholder: "WSJ" },
-  { name: "Financial Times", placeholder: "FT" },
-  { name: "Reuters", placeholder: "R" },
-  { name: "Axios", placeholder: "AX" },
-];
-
-function PressSection() {
-  const doubled = [...PRESS_LOGOS, ...PRESS_LOGOS];
-  return (
-    <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.008)", overflow: "hidden" }}>
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "2.5rem var(--space-content-x)" }}>
-        <m.div initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }}>
-          <p style={{ fontSize: "0.5625rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", textAlign: "center", marginBottom: "1.5rem" }}>
-            Featured in — press coverage coming as we scale
-          </p>
-        </m.div>
-      </div>
-      <div style={{ position: "relative", overflow: "hidden", maskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)" }}>
-        <div
-          style={{
-            display: "flex",
-            gap: "1.5rem",
-            animation: "pressScroll 30s linear infinite",
-            width: "max-content",
-          }}
-        >
-          {doubled.map((logo, i) => (
-            <div key={`${logo.name}-${i}`} title={logo.name} style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "0.625rem 1.75rem",
-              borderRadius: "0.375rem",
-              background: "hsla(0,0%,100%,0.03)",
-              border: "1px solid hsla(0,0%,100%,0.07)",
-              minWidth: "88px",
-              flexShrink: 0,
-            }}>
-              <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: "hsla(0,0%,100%,0.22)", letterSpacing: "0.04em", fontFamily: "var(--font-mono)", whiteSpace: "nowrap" }}>{logo.placeholder}</span>
-            </div>
-          ))}
-        </div>
-        <style>{`@keyframes pressScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }`}</style>
-      </div>
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0.875rem var(--space-content-x) 2rem" }}>
-        <p style={{ fontSize: "0.625rem", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", textAlign: "center", letterSpacing: "0.06em" }}>
-          Logo slots reserved — for press inquiries: press@szlholdings.com
-        </p>
-      </div>
-    </section>
-  );
-}
-
-function InvestorNewsletterCapture() {
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
-    setStatus("submitting");
-    try {
-      const res = await fetch("/api/contact/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "newsletter",
-          name: email.split("@")[0],
-          email,
-          app: "szl-holdings",
-          message: "Monthly Investor Update signup from landing page",
-          metadata: { source: "landing-investor-newsletter" },
-        }),
-      });
-      if (!res.ok) throw new Error("Failed");
-      setStatus("success");
-      setEmail("");
-    } catch {
-      setStatus("error");
-    }
-  };
-
-  return (
-    <section style={{ borderBottom: "1px solid var(--color-szl-border)" }}>
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(3rem,6vw,4rem) var(--space-content-x)" }}>
-        <m.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          style={{
-            display: "flex", flexWrap: "wrap", gap: "2rem", alignItems: "center", justifyContent: "space-between",
-            padding: "2rem 2.5rem",
-            borderRadius: "0.875rem",
-            background: "hsla(38,72%,58%,0.04)",
-            border: "1px solid hsla(38,72%,58%,0.15)",
-          }}
-        >
-          <div style={{ maxWidth: "32rem" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
-              <Mail size={14} style={{ color: "hsl(38,72%,58%)" }} />
-              <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(38,72%,58%)", fontFamily: "var(--font-mono)" }}>
-                Monthly Investor Update
-              </p>
-            </div>
-            <h3 style={{ fontSize: "clamp(1.1rem,2vw,1.4rem)", fontWeight: 600, letterSpacing: "-0.018em", color: "hsl(38,8%,92%)", marginBottom: "0.5rem" }}>
-              Platform progress. Portfolio signals. No filler.
-            </h3>
-            <p style={{ fontSize: "0.875rem", color: "var(--color-szl-text-secondary)", lineHeight: 1.6 }}>
-              Monthly investor updates — design-partner milestones, architectural progress, and the honest view on where the platform stands.
-            </p>
-          </div>
-          <div style={{ minWidth: "280px", flex: "1 1 280px", maxWidth: "420px" }}>
-            {status === "success" ? (
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.875rem 1.125rem", borderRadius: "0.5rem", background: "hsla(145,60%,46%,0.12)", border: "1px solid hsla(145,60%,46%,0.25)" }}>
-                <CheckCircle2 size={16} style={{ color: "hsl(145,60%,72%)" }} />
-                <div>
-                  <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(145,60%,72%)", margin: 0 }}>You're on the investor update list.</p>
-                  <p style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", margin: "0.15rem 0 0" }}>Monthly updates as the platform scales.</p>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} noValidate>
-                <label htmlFor="investor-newsletter-email" style={{ display: "block", fontSize: "0.75rem", fontWeight: 500, color: "var(--color-szl-text-secondary)", marginBottom: "0.5rem" }}>
-                  Email address
-                </label>
-                <div style={{ display: "flex", gap: "0.5rem" }}>
-                  <input
-                    id="investor-newsletter-email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => { setEmail(e.target.value); if (status === "error") setStatus("idle"); }}
-                    placeholder="you@firm.com"
-                    disabled={status === "submitting"}
-                    style={{
-                      flex: 1,
-                      padding: "0.625rem 0.875rem",
-                      background: "hsla(0,0%,100%,0.06)",
-                      border: "1px solid hsla(0,0%,100%,0.14)",
-                      borderRadius: "0.375rem",
-                      color: "hsl(38,8%,92%)",
-                      fontSize: "0.875rem",
-                      outline: "none",
-                    }}
-                  />
-                  <button
-                    type="submit"
-                    disabled={status === "submitting"}
-                    style={{
-                      padding: "0.625rem 1rem",
-                      background: "hsl(38,72%,58%)",
-                      color: "hsl(214,18%,4%)",
-                      border: "none",
-                      borderRadius: "0.375rem",
-                      fontSize: "0.8125rem",
-                      fontWeight: 700,
-                      cursor: status === "submitting" ? "not-allowed" : "pointer",
-                      opacity: status === "submitting" ? 0.7 : 1,
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {status === "submitting" ? "…" : "Subscribe"}
-                  </button>
-                </div>
-                <p style={{ fontSize: "0.75rem", color: "var(--color-szl-text-faint)", marginTop: "0.5rem" }}>
-                  Investor-focused updates only. Unsubscribe anytime.
-                </p>
-              </form>
-            )}
-          </div>
-        </m.div>
-      </div>
-    </section>
-  );
-}
-
 export default function HomePage() {
-  const { visitorType, setIntent } = useNarrativeRouter();
-  const [showPostDemo, setShowPostDemo] = useState(false);
-
   usePageMeta({
     title: "SZL Holdings — Business observability with explainable execution.",
     description:
@@ -455,192 +253,97 @@ export default function HomePage() {
     canonical: "https://szlholdings.com/",
   });
 
-  useEffect(() => {
-    analytics.pageView("/");
-    analytics.funnelStage("landing", "/");
-    const cleanupScroll = initScrollDepthTracking("/");
-    const cleanupTime = initTimeOnPageTracking("/");
-    let dismissed = false;
-    try {
-      dismissed = localStorage.getItem("szl_post_demo_dismissed") === "true"
-        || localStorage.getItem("szl_newsletter_subscribed") === "true";
-    } catch {}
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    if (!dismissed) {
-      timers.push(setTimeout(() => setShowPostDemo(true), 45_000));
-    }
-    const handleDemoEngaged = () => {
-      if (dismissed) return;
-      timers.push(setTimeout(() => setShowPostDemo(true), 8_000));
-    };
-    window.addEventListener("szl:demo_mode_engaged", handleDemoEngaged);
-    return () => {
-      timers.forEach(clearTimeout);
-      window.removeEventListener("szl:demo_mode_engaged", handleDemoEngaged);
-      cleanupScroll();
-      cleanupTime();
-    };
-  }, []);
-
-  const { x: pX, y: pY } = useMouseParallax(0.025);
-
   return (
     <div className="min-h-screen" style={{ background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
-      <NoiseGrain opacity={0.028} />
       <SiteNav />
       <main id="main-content">
 
         {/* ── 1. Hero ─────────────────────────────────────────────────── */}
         <section style={{ position: "relative", overflow: "hidden", borderBottom: "1px solid var(--color-szl-border)" }}>
-          <ParticleMesh />
-          <div style={{ pointerEvents: "none", position: "absolute", inset: 0 }}>
-            <m.div style={{ x: pX, y: pY, position: "absolute", top: "-10rem", left: "50%", transform: "translateX(-50%)", width: "900px", height: "600px", borderRadius: "50%", background: "hsla(192,72%,48%,0.055)", filter: "blur(120px)" }} />
-            <m.div style={{ x: pX, y: pY, position: "absolute", top: "5rem", right: "-15rem", width: "600px", height: "500px", borderRadius: "50%", background: "hsla(215,72%,55%,0.025)", filter: "blur(100px)" }} />
+          <div style={{
+            pointerEvents: "none",
+            position: "absolute",
+            inset: 0,
+          }}>
+            <div style={{
+              position: "absolute",
+              top: "-10rem",
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: "900px",
+              height: "600px",
+              borderRadius: "50%",
+              background: "hsla(192,72%,48%,0.04)",
+              filter: "blur(140px)",
+            }} />
           </div>
           <div style={{ position: "relative", maxWidth: "1280px", margin: "0 auto", padding: "clamp(7rem,14vw,10rem) var(--space-content-x) clamp(4rem,8vw,6rem)" }}>
             <m.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
+              transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem" }}>
-                <p style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)" }}>
-                  SZL Holdings · Design-partner stage · 2026
-                </p>
-                <LiveIndicator color="hsl(192,72%,48%)" showTimestamp={false} />
-              </div>
-              <WordReveal
-                text="Business observability with explainable execution."
-                as="h1"
-                delay={0.1}
-                stagger={0.055}
-                style={{
-                  fontSize: "clamp(2.5rem,5.5vw,4.25rem)",
-                  fontWeight: 600,
-                  letterSpacing: "-0.028em",
-                  lineHeight: 1.08,
-                  maxWidth: "22ch",
-                  marginBottom: "1.5rem",
-                  color: "hsl(38,8%,96%)",
-                }}
-              />
-              <m.p
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-                style={{
-                  fontSize: "clamp(1rem,1.8vw,1.125rem)",
-                  lineHeight: 1.72,
-                  color: "var(--color-szl-text-secondary)",
-                  maxWidth: "46ch",
-                  marginBottom: "2.5rem",
-                }}
-              >
+              <p style={{ marginBottom: "1.5rem", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)" }}>
+                SZL Holdings · Design-partner stage · 2026
+              </p>
+              <h1 style={{
+                fontSize: "clamp(2.5rem,5.5vw,4.25rem)",
+                fontWeight: 600,
+                letterSpacing: "-0.028em",
+                lineHeight: 1.08,
+                maxWidth: "22ch",
+                marginBottom: "1.5rem",
+                color: "hsl(38,8%,96%)",
+              }}>
+                Business observability<br />with explainable execution.
+              </h1>
+              <p style={{
+                fontSize: "clamp(1rem,1.8vw,1.125rem)",
+                lineHeight: 1.72,
+                color: "var(--color-szl-text-secondary)",
+                maxWidth: "46ch",
+                marginBottom: "2.5rem",
+              }}>
                 Lyte surfaces what's stuck, at risk, and about to break — before the damage compounds. Alloy routes the right action with a full audit trail. One platform, every high-consequence domain.
-              </m.p>
-              <m.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.65 }}
-                style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}
-              >
-                <MagneticButton>
-                  <Link
-                    href="/demo"
-                    style={{
-                      display: "inline-flex", alignItems: "center", gap: "0.5rem",
-                      padding: "0.75rem 1.5rem",
-                      background: "hsl(192,72%,48%)",
-                      color: "hsl(214,18%,4%)",
-                      borderRadius: "0.375rem",
-                      fontSize: "0.875rem", fontWeight: 600,
-                      textDecoration: "none",
-                      transition: "background 0.2s ease, box-shadow 0.2s ease",
-                      boxShadow: "0 0 24px hsla(192,72%,48%,0.18)",
-                    }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,54%)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 0 36px hsla(192,72%,48%,0.32)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,48%)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 0 24px hsla(192,72%,48%,0.18)"; }}
-                  >
-                    Request a demo
-                    <ArrowRight size={15} />
-                  </Link>
-                </MagneticButton>
-                <MagneticButton>
-                  <Link
-                    href="/platform"
-                    style={{
-                      display: "inline-flex", alignItems: "center", gap: "0.5rem",
-                      padding: "0.75rem 1.5rem",
-                      background: "transparent",
-                      color: "var(--color-szl-text-secondary)",
-                      border: "1px solid var(--color-szl-border-hover)",
-                      borderRadius: "0.375rem",
-                      fontSize: "0.875rem", fontWeight: 500,
-                      textDecoration: "none",
-                      transition: "border-color 0.2s ease, color 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.25)"; (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--color-szl-border-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-                  >
-                    Explore the platform
-                  </Link>
-                </MagneticButton>
-                <MagneticButton>
-                  <a
-                    href="/stephen-site/investor"
-                    style={{
-                      display: "inline-flex", alignItems: "center", gap: "0.5rem",
-                      padding: "0.75rem 1.5rem",
-                      background: "transparent",
-                      color: "var(--color-szl-text-faint)",
-                      border: "1px solid hsla(0,0%,100%,0.06)",
-                      borderRadius: "0.375rem",
-                      fontSize: "0.8125rem", fontWeight: 500,
-                      textDecoration: "none",
-                      letterSpacing: "0.03em",
-                      transition: "border-color 0.2s ease, color 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(192,72%,48%,0.3)"; (e.currentTarget as HTMLElement).style.color = "hsl(192,72%,48%)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.06)"; (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-faint)"; }}
-                  >
-                    For Investors
-                    <ArrowRight size={13} />
-                  </a>
-                </MagneticButton>
-                <MagneticButton>
-                  <Link
-                    href="/investors/demo"
-                    style={{
-                      display: "inline-flex", alignItems: "center", gap: "0.5rem",
-                      padding: "0.75rem 1.5rem",
-                      background: "transparent",
-                      color: "var(--color-szl-text-faint)",
-                      border: "1px solid hsla(0,0%,100%,0.06)",
-                      borderRadius: "0.375rem",
-                      fontSize: "0.8125rem", fontWeight: 500,
-                      textDecoration: "none",
-                      letterSpacing: "0.03em",
-                      transition: "border-color 0.2s ease, color 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(38,72%,58%,0.3)"; (e.currentTarget as HTMLElement).style.color = "hsl(38,72%,58%)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.06)"; (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-faint)"; }}
-                  >
-                    Interactive Demo
-                    <Play size={12} />
-                  </Link>
-                </MagneticButton>
-              </m.div>
-            </m.div>
-          </div>
-        </section>
-
-        {/* ── 1b. Platform in 90 Seconds ────────────────────────────── */}
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.008)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(3rem,6vw,4.5rem) var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
-              <Suspense fallback={<div style={{ height: 300 }} />}>
-                <PlatformIn90Seconds />
-              </Suspense>
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+                <Link
+                  href="/demo"
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: "0.5rem",
+                    padding: "0.75rem 1.5rem",
+                    background: "hsl(192,72%,48%)",
+                    color: "hsl(214,18%,4%)",
+                    borderRadius: "0.375rem",
+                    fontSize: "0.875rem", fontWeight: 600,
+                    textDecoration: "none",
+                    transition: "background 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,54%)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,48%)"; }}
+                >
+                  Request a demo
+                  <ArrowRight size={15} />
+                </Link>
+                <Link
+                  href="/platform"
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: "0.5rem",
+                    padding: "0.75rem 1.5rem",
+                    background: "transparent",
+                    color: "var(--color-szl-text-secondary)",
+                    border: "1px solid var(--color-szl-border-hover)",
+                    borderRadius: "0.375rem",
+                    fontSize: "0.875rem", fontWeight: 500,
+                    textDecoration: "none",
+                    transition: "border-color 0.2s ease, color 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.25)"; (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--color-szl-border-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+                >
+                  Explore the platform
+                </Link>
+              </div>
             </m.div>
           </div>
         </section>
@@ -995,27 +698,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 6b. Segmented Intent / Proof Pack ───────────────────────── */}
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.015)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
-            <m.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
-              <div style={{ marginBottom: "2rem", maxWidth: "42rem" }}>
-                <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
-                  Proof by intent
-                </p>
-                <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)" }}>
-                  The right evidence for who you are.
-                </h2>
-              </div>
-              {visitorType !== "unknown" ? (
-                <DynamicProofPack visitorType={visitorType} onChangeIntent={() => setIntent("unknown")} />
-              ) : (
-                <SegmentedCTA visitorType={visitorType} onSelectIntent={setIntent} />
-              )}
-            </m.div>
-          </div>
-        </section>
-
         {/* ── 7. Integration / Architecture ───────────────────────────── */}
         <section style={{ borderBottom: "1px solid var(--color-szl-border)" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
@@ -1207,17 +889,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 10a. Outcome Metrics (animated counters) ────────────────── */}
-        <Suspense fallback={<div style={{ height: 400 }} />}>
-          <OutcomeMetricsSectionLazy />
-        </Suspense>
-
-        {/* ── 10b. Press / Media Mentions ─────────────────────────────── */}
-        <PressSection />
-
-        {/* ── 10c. Investor Newsletter Capture ────────────────────────── */}
-        <InvestorNewsletterCapture />
-
         {/* ── 10. Social Proof / Design Partner Program ───────────────── */}
         <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.01)" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
@@ -1288,7 +959,7 @@ export default function HomePage() {
               ))}
             </div>
 
-            {/* Design partner logos — scrolling strip */}
+            {/* Design partner logos placeholder */}
             <m.div
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -1299,149 +970,92 @@ export default function HomePage() {
               <p style={{ fontSize: "0.6875rem", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", textAlign: "center", marginBottom: "1.5rem", letterSpacing: "0.08em" }}>
                 Design partners — names withheld at request of participants
               </p>
-              <div style={{ overflow: "hidden", maskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)" }}>
-                <div style={{ display: "flex", gap: "1.25rem", animation: "partnerScroll 25s linear infinite", width: "max-content" }}>
-                  {[...["Financial Services", "Maritime Operations", "Real Estate Investment", "Cybersecurity", "Legal Operations", "Private Advisory"], ...["Financial Services", "Maritime Operations", "Real Estate Investment", "Cybersecurity", "Legal Operations", "Private Advisory"]].map((sector, i) => (
-                    <div key={`${sector}-${i}`} style={{
-                      padding: "0.5rem 1.25rem",
-                      borderRadius: "2rem",
-                      background: "hsla(0,0%,100%,0.03)",
-                      border: "1px solid hsla(0,0%,100%,0.08)",
-                      fontSize: "0.6875rem",
-                      color: "var(--color-szl-text-faint)",
-                      fontFamily: "var(--font-mono)",
-                      letterSpacing: "0.06em",
-                      whiteSpace: "nowrap",
-                      flexShrink: 0,
-                    }}>
-                      {sector}
-                    </div>
-                  ))}
-                </div>
-                <style>{`@keyframes partnerScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }`}</style>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", justifyContent: "center" }}>
+                {["Financial Services", "Maritime Operations", "Real Estate Investment", "Cybersecurity", "Legal Operations", "Private Advisory"].map((sector) => (
+                  <div key={sector} style={{
+                    padding: "0.5rem 1.25rem",
+                    borderRadius: "2rem",
+                    background: "hsla(0,0%,100%,0.03)",
+                    border: "1px solid hsla(0,0%,100%,0.08)",
+                    fontSize: "0.6875rem",
+                    color: "var(--color-szl-text-faint)",
+                    fontFamily: "var(--font-mono)",
+                    letterSpacing: "0.06em",
+                  }}>
+                    {sector}
+                  </div>
+                ))}
               </div>
             </m.div>
           </div>
         </section>
 
-        {/* ── 11. Ecosystem Pulse ─────────────────────────────────────── */}
-        <Suspense fallback={<div style={{ height: 500 }} />}>
-          <EcosystemPulseSectionLazy />
-        </Suspense>
-
-        {/* ── 11b. Newsletter Signup ────────────────────────────────────── */}
+        {/* ── 11. Newsletter Signup ────────────────────────────────────── */}
         <NewsletterSection />
 
-        {/* ── 12. Final CTA — Dynamic by visitor type ──────────────────── */}
+        {/* ── 12. Demo CTA ────────────────────────────────────────────── */}
         <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(192,72%,48%,0.02)" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
             <m.div
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
+              transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
               style={{
                 borderRadius: "1rem",
-                border: visitorType === "investor" ? "1px solid hsla(38,72%,58%,0.18)" : visitorType === "lender" ? "1px solid hsla(192,72%,48%,0.18)" : visitorType === "design-partner" ? "1px solid hsla(222,60%,60%,0.18)" : "1px solid hsla(192,72%,48%,0.18)",
+                border: "1px solid hsla(192,72%,48%,0.18)",
                 padding: "clamp(2rem,5vw,3.5rem)",
                 background: "hsla(0,0%,100%,0.025)",
               }}
             >
               <div style={{ maxWidth: "32rem" }}>
-                {visitorType === "investor" && (
-                  <>
-                    <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(38,72%,58%)", fontFamily: "var(--font-mono)", marginBottom: "1rem" }}>
-                      For investors
-                    </p>
-                    <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.12, color: "hsl(38,8%,94%)", marginBottom: "1rem" }}>
-                      The thesis, architecture, and moat — all in one place.
-                    </h2>
-                    <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "2rem" }}>
-                      Walk through the investor materials at your own pace, or request data room access to start a qualified conversation.
-                    </p>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-                      <Link href="/investors/overview" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 1.5rem", background: "hsl(38,72%,58%)", color: "hsl(214,18%,4%)", borderRadius: "0.375rem", fontSize: "0.875rem", fontWeight: 600, textDecoration: "none" }}>
-                        View investor materials <ArrowRight size={15} />
-                      </Link>
-                      <Link href="/investors/data-room" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 1.5rem", background: "transparent", color: "var(--color-szl-text-secondary)", border: "1px solid var(--color-szl-border-hover)", borderRadius: "0.375rem", fontSize: "0.875rem", fontWeight: 500, textDecoration: "none" }}>
-                        Data room access
-                      </Link>
-                    </div>
-                  </>
-                )}
-                {visitorType === "lender" && (
-                  <>
-                    <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(192,72%,48%)", fontFamily: "var(--font-mono)", marginBottom: "1rem" }}>
-                      For lenders &amp; banks
-                    </p>
-                    <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.12, color: "hsl(38,8%,94%)", marginBottom: "1rem" }}>
-                      Capital materials built for lender conversations.
-                    </h2>
-                    <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "2rem" }}>
-                      Bank brief, operating plan, and financial narrative — structured for bank and SBA conversations. Request the full package and we'll respond within 24 hours.
-                    </p>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-                      <Link href="/investor-relations" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 1.5rem", background: "hsl(192,72%,48%)", color: "hsl(214,18%,4%)", borderRadius: "0.375rem", fontSize: "0.875rem", fontWeight: 600, textDecoration: "none" }}>
-                        Request lender brief <ArrowRight size={15} />
-                      </Link>
-                      <Link href="/contact" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 1.5rem", background: "transparent", color: "var(--color-szl-text-secondary)", border: "1px solid var(--color-szl-border-hover)", borderRadius: "0.375rem", fontSize: "0.875rem", fontWeight: 500, textDecoration: "none" }}>
-                        Start a conversation
-                      </Link>
-                    </div>
-                  </>
-                )}
-                {visitorType === "design-partner" && (
-                  <>
-                    <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(222,60%,60%)", fontFamily: "var(--font-mono)", marginBottom: "1rem" }}>
-                      Design partner
-                    </p>
-                    <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.12, color: "hsl(38,8%,94%)", marginBottom: "1rem" }}>
-                      Instrument one real workflow. Build proof in 90 days.
-                    </h2>
-                    <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "2rem" }}>
-                      Design partner slots are limited and selected carefully. The conversation starts here — founder-led, structured, and commitment-free until we both agree it's the right fit.
-                    </p>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-                      <Link href="/contact" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 1.5rem", background: "hsl(222,60%,60%)", color: "hsl(214,18%,4%)", borderRadius: "0.375rem", fontSize: "0.875rem", fontWeight: 600, textDecoration: "none" }}>
-                        Apply as a design partner <ArrowRight size={15} />
-                      </Link>
-                      <Link href="/design-partners" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 1.5rem", background: "transparent", color: "var(--color-szl-text-secondary)", border: "1px solid var(--color-szl-border-hover)", borderRadius: "0.375rem", fontSize: "0.875rem", fontWeight: 500, textDecoration: "none" }}>
-                        See the program
-                      </Link>
-                    </div>
-                  </>
-                )}
-                {(visitorType === "buyer" || visitorType === "unknown") && (
-                  <>
-                    <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(192,72%,48%)", fontFamily: "var(--font-mono)", marginBottom: "1rem" }}>
-                      Request a demo
-                    </p>
-                    <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.12, color: "hsl(38,8%,94%)", marginBottom: "1rem" }}>
-                      See how Lyte works on a real workflow.
-                    </h2>
-                    <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "2rem" }}>
-                      The demo covers the full signal-to-action arc using staged data. You can also request a design-partner conversation if you want to explore a live instrumentation of one of your own workflows.
-                    </p>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-                      <Link
-                        href="/demo"
-                        style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 1.5rem", background: "hsl(192,72%,48%)", color: "hsl(214,18%,4%)", borderRadius: "0.375rem", fontSize: "0.875rem", fontWeight: 600, textDecoration: "none", transition: "background 0.2s ease" }}
-                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,54%)"; }}
-                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,48%)"; }}
-                      >
-                        Request a demo <ArrowRight size={15} />
-                      </Link>
-                      <Link
-                        href="/design-partner"
-                        style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 1.5rem", background: "transparent", color: "var(--color-szl-text-secondary)", border: "1px solid var(--color-szl-border-hover)", borderRadius: "0.375rem", fontSize: "0.875rem", fontWeight: 500, textDecoration: "none", transition: "border-color 0.2s ease, color 0.2s ease" }}
-                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.25)"; (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; }}
-                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--color-szl-border-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-                      >
-                        Become a design partner
-                      </Link>
-                    </div>
-                  </>
-                )}
+                <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(192,72%,48%)", fontFamily: "var(--font-mono)", marginBottom: "1rem" }}>
+                  Request a demo
+                </p>
+                <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.12, color: "hsl(38,8%,94%)", marginBottom: "1rem" }}>
+                  See how Lyte works on a real workflow.
+                </h2>
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "2rem" }}>
+                  The demo covers the full signal-to-action arc using staged data. You can also request a design-partner conversation if you want to explore a live instrumentation of one of your own workflows.
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+                  <Link
+                    href="/demo"
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: "0.5rem",
+                      padding: "0.75rem 1.5rem",
+                      background: "hsl(192,72%,48%)",
+                      color: "hsl(214,18%,4%)",
+                      borderRadius: "0.375rem",
+                      fontSize: "0.875rem", fontWeight: 600,
+                      textDecoration: "none",
+                      transition: "background 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,54%)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,48%)"; }}
+                  >
+                    Request a demo
+                    <ArrowRight size={15} />
+                  </Link>
+                  <Link
+                    href="/design-partner"
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: "0.5rem",
+                      padding: "0.75rem 1.5rem",
+                      background: "transparent",
+                      color: "var(--color-szl-text-secondary)",
+                      border: "1px solid var(--color-szl-border-hover)",
+                      borderRadius: "0.375rem",
+                      fontSize: "0.875rem", fontWeight: 500,
+                      textDecoration: "none",
+                      transition: "border-color 0.2s ease, color 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.25)"; (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--color-szl-border-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+                  >
+                    Become a design partner
+                  </Link>
+                </div>
               </div>
             </m.div>
           </div>
@@ -1449,7 +1063,6 @@ export default function HomePage() {
 
       </main>
       <SiteFooter />
-      <PostDemoPrompt show={showPostDemo} onDismiss={() => { setShowPostDemo(false); try { localStorage.setItem("szl_post_demo_dismissed", "true"); } catch {} }} />
     </div>
   );
 }

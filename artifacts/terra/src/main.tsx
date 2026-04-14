@@ -8,7 +8,7 @@ import App from "./App";
 import "./index.css";
 
 configurePlausible({
-  domain: import.meta.env.VITE_PLAUSIBLE_DOMAIN || "terra.szlholdings.com",
+  domain: import.meta.env.VITE_PLAUSIBLE_DOMAIN || "beacon.szlholdings.com",
   debugMode: import.meta.env.DEV,
   trackLocalhost: false,
 });

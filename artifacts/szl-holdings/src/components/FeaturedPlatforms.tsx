@@ -8,7 +8,6 @@ interface EcosystemSummary {
   aegis: { incidents: number; findings: number };
   terra: { distressProperties: number; activeDeals: number };
   carlotaJo: { inquiries: number };
-  prism?: { mattersActive?: number };
 }
 
 const PLATFORM_DEFS = [
@@ -91,24 +90,6 @@ const PLATFORM_DEFS = [
     ],
   },
   {
-    name: "PRISM Counsel",
-    label: "Legal Intelligence Platform",
-    copy: "Matter command, settlement forecasting, insurer intelligence, and portfolio analytics for plaintiff-side litigation teams.",
-    cta: "Explore PRISM Counsel",
-    href: "/prism-counsel/",
-    accent: "hsl(38,62%,56%)",
-    accentRgb: "200,169,110",
-    accentBg: "hsla(38,62%,56%,0.05)",
-    accentBorder: "hsla(38,62%,56%,0.12)",
-    key: "prism" as const,
-    getMetrics: (_d: EcosystemSummary) => [
-      { label: "Legal Intelligence", value: "Live" },
-    ],
-    fallbackMetrics: [
-      { label: "Legal Intelligence", value: "Live" },
-    ],
-  },
-  {
     name: "Carlota Jo",
     label: "Private Advisory & Residential Support",
     copy: "A refined advisory brand for high-trust private client operations.",
@@ -174,7 +155,7 @@ export function FeaturedPlatforms() {
             lineHeight: "1.06",
             fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
           }}>
-            Six platforms. One architecture.
+            Five platforms. One architecture.
           </h2>
         </m.div>
 

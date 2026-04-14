@@ -1,9 +1,8 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
-import { Ship, Anchor, Navigation, AlertTriangle, Cloud, ShieldAlert, Globe, Radio, Waves, Thermometer, Wind, Eye, EyeOff, MapPin, Languages, Loader2, Target, ChevronRight, Zap } from "lucide-react";
+import { Ship, Anchor, Navigation, AlertTriangle, Cloud, ShieldAlert, Globe, Radio, Waves, Thermometer, Wind, Eye, MapPin, Languages, Loader2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { Link } from "wouter";
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
@@ -29,7 +28,7 @@ function AnimatedCounter({ value }: { value: number }) {
   return <>{display}</>;
 }
 
-interface MapVessel { lat?: number; lon?: number; latitude?: number; longitude?: number; name?: string; mmsi?: string; course?: number; }
+interface MapVessel { lat?: number; lon?: number; latitude?: number; longitude?: number; name?: string; mmsi?: string; }
 interface MapChokepoint { lat?: number; lon?: number; name?: string; riskLevel?: string; status?: string; vesselCount?: number; dailyTransits?: number; oilFlowMbpd?: number; }
 interface WeatherRow { region: string; warning?: string; windSpeed?: number; windDirection?: string; waveHeight?: number; seaTemp?: number; visibility?: string; }
 interface SanctionEntity { entity: string; word: string; }
@@ -61,8 +60,8 @@ function VesselMapCanvas({ vessels, chokepoints }: { vessels: MapVessel[]; choke
     const toY = (lat: number) => ((90 - lat) / 180) * h;
 
     chokepoints.forEach((cp) => {
-      const x = toX(cp.lon ?? 0);
-      const y = toY(cp.lat ?? 0);
+      const x = toX(cp.lon);
+      const y = toY(cp.lat);
       const color = cp.riskLevel === "critical" ? "rgba(239, 68, 68, 0.6)" : cp.riskLevel === "warning" ? "rgba(234, 179, 8, 0.6)" : cp.riskLevel === "elevated" ? "rgba(249, 115, 22, 0.5)" : "rgba(6, 182, 212, 0.4)";
 
       ctx.beginPath();
@@ -81,14 +80,14 @@ function VesselMapCanvas({ vessels, chokepoints }: { vessels: MapVessel[]; choke
     });
 
     vessels.forEach((v) => {
-      const x = toX(v.lon ?? 0);
-      const y = toY(v.lat ?? 0);
+      const x = toX(v.lon);
+      const y = toY(v.lat);
       ctx.fillStyle = "rgba(6, 182, 212, 0.9)";
       ctx.beginPath();
       ctx.arc(x, y, 4, 0, Math.PI * 2);
       ctx.fill();
 
-      const rad = ((v.course ?? 0) * Math.PI) / 180;
+      const rad = (v.course * Math.PI) / 180;
       ctx.strokeStyle = "rgba(6, 182, 212, 0.5)";
       ctx.lineWidth = 1;
       ctx.beginPath();
@@ -146,30 +145,6 @@ export default function MaritimeIntelligence() {
           <span className="text-[10px] text-muted-foreground font-mono hidden md:block">UTC {new Date().toISOString().slice(11, 19)}</span>
         </div>
       </div>
-
-      {/* Dark Pattern Decoder Preview Banner */}
-      <Link href="/dark-pattern-decoder">
-        <div className="rounded-xl border border-red-500/20 bg-red-500/5 px-5 py-4 flex items-center gap-4 cursor-pointer hover:border-red-500/35 hover:bg-red-500/8 transition-all animate-fade-in-up">
-          <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0">
-            <EyeOff className="w-5 h-5 text-red-400" />
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-0.5">
-              <span className="text-sm font-bold text-red-400">Dark Pattern Decoder</span>
-              <span className="text-[9px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20 font-bold tracking-wider">PREDICTIVE AI</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-            </div>
-            <p className="text-xs text-muted-foreground">3 vessels with elevated sanctions evasion probability detected — behavioral fingerprints show pre-dark signals on 2 critical vessels</p>
-          </div>
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="text-right">
-              <div className="text-xl font-bold font-display text-red-400">94<span className="text-sm font-normal text-red-400/60">%</span></div>
-              <div className="text-[9px] text-muted-foreground font-mono">TOP SCORE</div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-red-400/50" />
-          </div>
-        </div>
-      </Link>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-fade-in-up stagger-1">
         <Card className="bg-card border-border hover:border-primary/20 transition-all group">
@@ -309,7 +284,7 @@ export default function MaritimeIntelligence() {
                       <span>Flag: {v.flag}</span>
                       <span>Source: {v.source}</span>
                       <button
-                        onClick={() => translateMutation.mutate({ text: v.reason ?? "", imo: v.imo, targetLang: "fr" })}
+                        onClick={() => translateMutation.mutate({ text: v.reason, imo: v.imo, targetLang: "fr" })}
                         disabled={translateMutation.isPending || !!translations[v.imo]}
                         className="flex items-center gap-1 text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
                         title="Translate to French"

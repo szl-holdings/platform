@@ -1,12 +1,11 @@
 import { Router, Request, Response } from "express";
 import { db } from "@szl-holdings/db";
-import { eq, and, desc, or, sql, isNull, not, gte, count } from "drizzle-orm";
+import { eq, and, desc, or, sql, isNull, not, gte } from "drizzle-orm";
 import {
   pcManagedReviewItemsTable,
   pcManagedReviewAssignmentsTable,
   pcManagedReviewNotesTable,
   pcReviewAuditEventsTable,
-  pcCitationAuditReportsTable,
 } from "@szl-holdings/db/schema";
 import { logger } from "../lib/logger";
 
@@ -106,10 +105,10 @@ router.get("/review-desk/my-queue", async (req: Request, res: Response) => {
       ))
       .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
       .limit(50);
-    return res.json({ items, count: items.length });
+    res.json({ items, count: items.length });
   } catch (err: any) {
     logger.error({ err }, "Failed to get my review queue");
-    return res.status(500).json({ error: "Failed to get review queue" });
+    res.status(500).json({ error: "Failed to get review queue" });
   }
 });
 
@@ -123,10 +122,10 @@ router.get("/review-desk/team-queue", async (_req: Request, res: Response) => {
       ))
       .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
       .limit(100);
-    return res.json({ items, count: items.length });
+    res.json({ items, count: items.length });
   } catch (err: any) {
     logger.error({ err }, "Failed to get team review queue");
-    return res.status(500).json({ error: "Failed to get team review queue" });
+    res.status(500).json({ error: "Failed to get team review queue" });
   }
 });
 
@@ -140,9 +139,9 @@ router.get("/review-desk/high-risk", async (_req: Request, res: Response) => {
       ))
       .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
       .limit(50);
-    return res.json({ items, count: items.length });
+    res.json({ items, count: items.length });
   } catch (err: any) {
-    return res.status(500).json({ error: "Failed to get high-risk queue" });
+    res.status(500).json({ error: "Failed to get high-risk queue" });
   }
 });
 
@@ -156,9 +155,9 @@ router.get("/review-desk/low-confidence", async (_req: Request, res: Response) =
       ))
       .orderBy(desc(pcManagedReviewItemsTable.lowConfidenceScore))
       .limit(50);
-    return res.json({ items, count: items.length });
+    res.json({ items, count: items.length });
   } catch (err: any) {
-    return res.status(500).json({ error: "Failed to get low-confidence queue" });
+    res.status(500).json({ error: "Failed to get low-confidence queue" });
   }
 });
 
@@ -172,9 +171,9 @@ router.get("/review-desk/contradiction", async (_req: Request, res: Response) =>
       ))
       .orderBy(desc(pcManagedReviewItemsTable.contradictionSeverityScore))
       .limit(50);
-    return res.json({ items, count: items.length });
+    res.json({ items, count: items.length });
   } catch (err: any) {
-    return res.status(500).json({ error: "Failed to get contradiction queue" });
+    res.status(500).json({ error: "Failed to get contradiction queue" });
   }
 });
 
@@ -187,9 +186,9 @@ router.get("/review-desk/needs-attorney", async (_req: Request, res: Response) =
       ))
       .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
       .limit(50);
-    return res.json({ items, count: items.length });
+    res.json({ items, count: items.length });
   } catch (err: any) {
-    return res.status(500).json({ error: "Failed to get attorney review queue" });
+    res.status(500).json({ error: "Failed to get attorney review queue" });
   }
 });
 
@@ -202,9 +201,9 @@ router.get("/review-desk/needs-partner", async (_req: Request, res: Response) =>
       ))
       .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
       .limit(50);
-    return res.json({ items, count: items.length });
+    res.json({ items, count: items.length });
   } catch (err: any) {
-    return res.status(500).json({ error: "Failed to get partner review queue" });
+    res.status(500).json({ error: "Failed to get partner review queue" });
   }
 });
 
@@ -218,9 +217,9 @@ router.get("/review-desk/ready-to-export", async (_req: Request, res: Response) 
       ))
       .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
       .limit(50);
-    return res.json({ items, count: items.length });
+    res.json({ items, count: items.length });
   } catch (err: any) {
-    return res.status(500).json({ error: "Failed to get ready-to-export queue" });
+    res.status(500).json({ error: "Failed to get ready-to-export queue" });
   }
 });
 
@@ -236,9 +235,9 @@ router.get("/review-desk/blocked", async (_req: Request, res: Response) => {
       ))
       .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
       .limit(50);
-    return res.json({ items, count: items.length });
+    res.json({ items, count: items.length });
   } catch (err: any) {
-    return res.status(500).json({ error: "Failed to get blocked queue" });
+    res.status(500).json({ error: "Failed to get blocked queue" });
   }
 });
 
@@ -280,7 +279,7 @@ router.get("/review-desk/overview", async (_req: Request, res: Response) => {
       ? all.reduce((sum, i) => sum + (Date.now() - new Date(i.createdAt).getTime()), 0) / all.length / 3600000
       : 0;
 
-    return res.json({
+    res.json({
       totalActive: all.length,
       highPriority,
       slaBreaches: slaBreaches.length,
@@ -293,13 +292,13 @@ router.get("/review-desk/overview", async (_req: Request, res: Response) => {
     });
   } catch (err: any) {
     logger.error({ err }, "Failed to get review desk overview");
-    return res.status(500).json({ error: "Failed to get overview" });
+    res.status(500).json({ error: "Failed to get overview" });
   }
 });
 
 router.get("/review-desk/items/:id", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(String(req.params.id ?? "0"), 10);
+    const id = parseInt(req.params.id);
     const [item, notes, assignments] = await Promise.all([
       db.select().from(pcManagedReviewItemsTable)
         .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
@@ -311,9 +310,9 @@ router.get("/review-desk/items/:id", async (req: Request, res: Response) => {
         .where(eq(pcManagedReviewAssignmentsTable.reviewItemId, id)),
     ]);
     if (!item.length) return res.status(404).json({ error: "Review item not found" });
-    return res.json({ item: item[0], notes, assignments });
+    res.json({ item: item[0], notes, assignments });
   } catch (err: any) {
-    return res.status(500).json({ error: "Failed to get review item" });
+    res.status(500).json({ error: "Failed to get review item" });
   }
 });
 
@@ -381,16 +380,16 @@ router.post("/review-desk/items", async (req: Request, res: Response) => {
       details: { reviewWorkType, title },
     });
 
-    return res.status(201).json({ item });
+    res.status(201).json({ item });
   } catch (err: any) {
     logger.error({ err }, "Failed to create review item");
-    return res.status(500).json({ error: "Failed to create review item" });
+    res.status(500).json({ error: "Failed to create review item" });
   }
 });
 
 router.post("/review-desk/items/:id/transition", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(String(req.params.id ?? "0"), 10);
+    const id = parseInt(req.params.id);
     const { toState, actorId, reason } = req.body;
     const validTransitions = buildValidTransitions();
 
@@ -443,56 +442,22 @@ router.post("/review-desk/items/:id/transition", async (req: Request, res: Respo
       details: { reason },
     });
 
-    return res.json({ item: updated });
+    res.json({ item: updated });
   } catch (err: any) {
     logger.error({ err }, "Failed to transition review item");
-    return res.status(500).json({ error: "Failed to transition review item" });
+    res.status(500).json({ error: "Failed to transition review item" });
   }
 });
 
 router.post("/review-desk/items/:id/approve", async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(String(req.params.id ?? "0"), 10);
-    const { actorId, reason } = req.body as { actorId?: number; reason?: string };
-    const validTransitions = buildValidTransitions();
-
-    const [item] = await db.select().from(pcManagedReviewItemsTable)
-      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
-      .limit(1);
-    if (!item) return res.status(404).json({ error: "Review item not found" });
-
-    const allowed = validTransitions[item.lifecycleState] ?? [];
-    if (!allowed.includes("approved")) {
-      return res.status(400).json({ error: `Invalid transition from ${item.lifecycleState} to approved`, allowed });
-    }
-
-    const now = new Date();
-    const [updated] = await db.update(pcManagedReviewItemsTable)
-      .set({ lifecycleState: "approved", approvedBy: actorId, approvedAt: now, updatedAt: now })
-      .where(eq(pcManagedReviewItemsTable.id, id))
-      .returning();
-
-    await emitReviewAudit({
-      orgId: ORG_ID,
-      matterId: item.matterId,
-      reviewItemId: id,
-      actorId,
-      action: "review_approved",
-      fromState: item.lifecycleState,
-      toState: "approved",
-      details: { reason },
-    });
-
-    return res.json({ item: updated });
-  } catch (err) {
-    logger.error({ err }, "Failed to approve review item");
-    return res.status(500).json({ error: "Failed to approve review item" });
-  }
+  req.body.toState = "approved";
+  req.params.id = req.params.id;
+  return router.handle?.(req, res, () => {}) ?? res.status(500).json({ error: "Route error" });
 });
 
 router.post("/review-desk/items/:id/actions/approve", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(String(req.params.id ?? "0"), 10);
+    const id = parseInt(req.params.id);
     const { actorId, notes } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -518,15 +483,15 @@ router.post("/review-desk/items/:id/actions/approve", async (req: Request, res: 
     }
 
     await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_approved", fromState: item.lifecycleState, toState: "approved" });
-    return res.json({ item: updated });
+    res.json({ item: updated });
   } catch (err: any) {
-    return res.status(500).json({ error: "Failed to approve" });
+    res.status(500).json({ error: "Failed to approve" });
   }
 });
 
 router.post("/review-desk/items/:id/actions/reject", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(String(req.params.id ?? "0"), 10);
+    const id = parseInt(req.params.id);
     const { actorId, reason } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -547,15 +512,15 @@ router.post("/review-desk/items/:id/actions/reject", async (req: Request, res: R
     }
 
     await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_rejected", fromState: item.lifecycleState, toState: "rejected", details: { reason } });
-    return res.json({ item: updated });
+    res.json({ item: updated });
   } catch (err: any) {
-    return res.status(500).json({ error: "Failed to reject" });
+    res.status(500).json({ error: "Failed to reject" });
   }
 });
 
 router.post("/review-desk/items/:id/actions/revise", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(String(req.params.id ?? "0"), 10);
+    const id = parseInt(req.params.id);
     const { actorId, notes } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -576,15 +541,15 @@ router.post("/review-desk/items/:id/actions/revise", async (req: Request, res: R
     }
 
     await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_revised", fromState: item.lifecycleState, toState: "revised" });
-    return res.json({ item: updated });
+    res.json({ item: updated });
   } catch (err: any) {
-    return res.status(500).json({ error: "Failed to revise" });
+    res.status(500).json({ error: "Failed to revise" });
   }
 });
 
 router.post("/review-desk/items/:id/actions/escalate", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(String(req.params.id ?? "0"), 10);
+    const id = parseInt(req.params.id);
     const { actorId, escalateTo, reason } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -607,15 +572,15 @@ router.post("/review-desk/items/:id/actions/escalate", async (req: Request, res:
     });
 
     await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_escalated", fromState: item.lifecycleState, toState: newState, details: { escalateTo, reason } });
-    return res.json({ item: updated });
+    res.json({ item: updated });
   } catch (err: any) {
-    return res.status(500).json({ error: "Failed to escalate" });
+    res.status(500).json({ error: "Failed to escalate" });
   }
 });
 
 router.post("/review-desk/items/:id/actions/assign", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(String(req.params.id ?? "0"), 10);
+    const id = parseInt(req.params.id);
     const { actorId, assignTo, role } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -641,15 +606,15 @@ router.post("/review-desk/items/:id/actions/assign", async (req: Request, res: R
       .returning();
 
     await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_assigned", fromState: item.lifecycleState, toState: "assigned", details: { assignTo, role } });
-    return res.json({ item: updated });
+    res.json({ item: updated });
   } catch (err: any) {
-    return res.status(500).json({ error: "Failed to assign" });
+    res.status(500).json({ error: "Failed to assign" });
   }
 });
 
 router.post("/review-desk/items/:id/actions/block", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(String(req.params.id ?? "0"), 10);
+    const id = parseInt(req.params.id);
     const { actorId, reason } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -663,15 +628,15 @@ router.post("/review-desk/items/:id/actions/block", async (req: Request, res: Re
       .returning();
 
     await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_blocked", fromState: item.lifecycleState, toState: "blocked", details: { reason } });
-    return res.json({ item: updated });
+    res.json({ item: updated });
   } catch (err: any) {
-    return res.status(500).json({ error: "Failed to block" });
+    res.status(500).json({ error: "Failed to block" });
   }
 });
 
 router.post("/review-desk/items/:id/actions/request-support", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(String(req.params.id ?? "0"), 10);
+    const id = parseInt(req.params.id);
     const { actorId, request } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -690,15 +655,15 @@ router.post("/review-desk/items/:id/actions/request-support", async (req: Reques
     });
 
     await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_support_requested", fromState: item.lifecycleState, toState: "needs_evidence" });
-    return res.json({ item: updated });
+    res.json({ item: updated });
   } catch (err: any) {
-    return res.status(500).json({ error: "Failed to request support" });
+    res.status(500).json({ error: "Failed to request support" });
   }
 });
 
 router.post("/review-desk/items/:id/actions/generate-review-packet", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(String(req.params.id ?? "0"), 10);
+    const id = parseInt(req.params.id);
     const { actorId } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -712,15 +677,15 @@ router.post("/review-desk/items/:id/actions/generate-review-packet", async (req:
       .where(eq(pcManagedReviewItemsTable.id, id));
 
     await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_packet_generated", details: { packetRef } });
-    return res.json({ packetRef, message: "Review packet generation queued" });
+    res.json({ packetRef, message: "Review packet generation queued" });
   } catch (err: any) {
-    return res.status(500).json({ error: "Failed to generate review packet" });
+    res.status(500).json({ error: "Failed to generate review packet" });
   }
 });
 
 router.post("/review-desk/items/:id/actions/export-packet", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(String(req.params.id ?? "0"), 10);
+    const id = parseInt(req.params.id);
     const { actorId } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -742,15 +707,15 @@ router.post("/review-desk/items/:id/actions/export-packet", async (req: Request,
       .returning();
 
     await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_exported", fromState: "approved", toState: "exported", details: { exportRef } });
-    return res.json({ item: updated, exportRef });
+    res.json({ item: updated, exportRef });
   } catch (err: any) {
-    return res.status(500).json({ error: "Failed to create export packet" });
+    res.status(500).json({ error: "Failed to create export packet" });
   }
 });
 
 router.post("/review-desk/items/:id/notes", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(String(req.params.id ?? "0"), 10);
+    const id = parseInt(req.params.id);
     const { authorId, noteType, content, isPrivileged } = req.body;
 
     const [note] = await db.insert(pcManagedReviewNotesTable).values({
@@ -758,9 +723,9 @@ router.post("/review-desk/items/:id/notes", async (req: Request, res: Response) 
       content, authorId, isPrivileged: isPrivileged ?? false,
     }).returning();
 
-    return res.status(201).json({ note });
+    res.status(201).json({ note });
   } catch (err: any) {
-    return res.status(500).json({ error: "Failed to add note" });
+    res.status(500).json({ error: "Failed to add note" });
   }
 });
 
@@ -821,7 +786,7 @@ router.get("/review-desk/metrics", async (req: Request, res: Response) => {
     const backlogByType: Record<string, number> = {};
     all.forEach(i => { backlogByType[i.reviewWorkType] = (backlogByType[i.reviewWorkType] ?? 0) + 1; });
 
-    return res.json({
+    res.json({
       period: { days: periodDays, since: since.toISOString() },
       avgReviewAgeHours: Math.round(avgAge * 10) / 10,
       throughputPerDay: Math.round(throughput * 100) / 100,
@@ -838,7 +803,7 @@ router.get("/review-desk/metrics", async (req: Request, res: Response) => {
     });
   } catch (err: any) {
     logger.error({ err }, "Failed to get review metrics");
-    return res.status(500).json({ error: "Failed to get review metrics" });
+    res.status(500).json({ error: "Failed to get review metrics" });
   }
 });
 
@@ -866,7 +831,7 @@ router.get("/review-desk/admin", async (_req: Request, res: Response) => {
     const lowConfBacklog = all.filter(i => i.reviewWorkType === "low_confidence_extraction_review" && i.lifecycleState !== "closed").length;
     const failedPackets = all.filter(i => i.auditPacketRef !== null && i.lifecycleState === "blocked").length;
 
-    return res.json({
+    res.json({
       backlogByType,
       backlogByState,
       slaBreaches: breaches.map(i => ({
@@ -883,7 +848,7 @@ router.get("/review-desk/admin", async (_req: Request, res: Response) => {
       totalActive: all.filter(i => !["closed", "exported"].includes(i.lifecycleState)).length,
     });
   } catch (err: any) {
-    return res.status(500).json({ error: "Failed to get admin view" });
+    res.status(500).json({ error: "Failed to get admin view" });
   }
 });
 
@@ -908,7 +873,7 @@ router.get("/review-desk/my-review", async (req: Request, res: Response) => {
       .sort((a, b) => b.workUnblockedScore - a.workUnblockedScore)
       .slice(0, 5);
 
-    return res.json({
+    res.json({
       needsAction: needsAction.length,
       risky: risky.length,
       missing: missing.length,
@@ -919,7 +884,7 @@ router.get("/review-desk/my-review", async (req: Request, res: Response) => {
       topUnblockers: unblocks,
     });
   } catch (err: any) {
-    return res.status(500).json({ error: "Failed to get my review summary" });
+    res.status(500).json({ error: "Failed to get my review summary" });
   }
 });
 
@@ -936,7 +901,7 @@ router.get("/review-desk/copilot/max-unblock", async (_req: Request, res: Respon
       .limit(10);
 
     const top = items[0];
-    return res.json({
+    res.json({
       topUnblocker: top ? {
         id: top.id,
         title: top.title,
@@ -956,281 +921,7 @@ router.get("/review-desk/copilot/max-unblock", async (_req: Request, res: Respon
       })),
     });
   } catch (err: any) {
-    return res.status(500).json({ error: "Failed to get max-unblock item" });
-  }
-});
-
-
-// ─── FILING GATE: Citation Audit Report Endpoints ─────────────────────────────
-
-router.post("/prism-counsel/review-desk/filing-gate/verify", async (req: Request, res: Response) => {
-  try {
-    const {
-      documentId,
-      documentTitle,
-      documentType,
-      documentText,
-      matterId,
-      reviewItemId,
-      citations,
-      overallStatus,
-      verifiedCount,
-      unverifiedCount,
-      suspiciousCount,
-      totalCitations,
-      averageConfidence,
-      blockingCitations,
-      verificationDurationMs,
-    } = req.body as {
-      documentId: string;
-      documentTitle: string;
-      documentType?: string;
-      documentText?: string;
-      matterId?: number;
-      reviewItemId?: number;
-      citations: unknown[];
-      overallStatus: "clear" | "needs_review" | "blocked";
-      verifiedCount: number;
-      unverifiedCount: number;
-      suspiciousCount: number;
-      totalCitations: number;
-      averageConfidence: number;
-      blockingCitations: unknown[];
-      verificationDurationMs: number;
-    };
-
-    if (!documentId || !documentTitle || !overallStatus) {
-      return res.status(400).json({ error: "documentId, documentTitle, and overallStatus are required" });
-    }
-
-    const auditId = `audit_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-
-    let ragVerificationNotes: Record<string, unknown> = {};
-
-    if (documentText && citations && Array.isArray(citations) && citations.length > 0) {
-      try {
-        const { searchKnowledge } = await import("../lib/rag-pipeline");
-        const suspiciousCites = (citations as Array<{ raw: string; status: string }>)
-          .filter((c) => c.status === "suspicious")
-          .slice(0, 3);
-
-        for (const cite of suspiciousCites) {
-          try {
-            const results = await searchKnowledge(cite.raw, { limit: 3, minSimilarity: 0.2 });
-            ragVerificationNotes[cite.raw] = {
-              kbHits: results.length,
-              topMatch: results[0]
-                ? { docId: results[0].documentId, similarity: results[0].similarity, snippet: results[0].content.slice(0, 200) }
-                : null,
-              kbVerified: results.length > 0 && results[0].similarity > 0.5,
-            };
-          } catch {
-            ragVerificationNotes[cite.raw] = { kbHits: 0, kbVerified: false, error: "kb_search_failed" };
-          }
-        }
-      } catch {
-        logger.warn("RAG pipeline unavailable for citation KB cross-check");
-      }
-    }
-
-    const [report] = await db.insert(pcCitationAuditReportsTable).values({
-      orgId: ORG_ID,
-      matterId: matterId ?? null,
-      reviewItemId: reviewItemId ?? null,
-      auditId,
-      documentId,
-      documentTitle,
-      documentType: documentType ?? null,
-      totalCitations,
-      verifiedCount,
-      unverifiedCount,
-      suspiciousCount,
-      averageConfidence,
-      overallStatus,
-      citations: citations as unknown[],
-      blockingCitations: blockingCitations as unknown[],
-      ragVerificationNotes,
-      verificationDurationMs: verificationDurationMs ?? null,
-    }).returning();
-
-    await emitReviewAudit({
-      orgId: ORG_ID,
-      matterId: matterId ?? undefined,
-      reviewItemId: reviewItemId ?? undefined,
-      action: "citation_audit_created",
-      details: {
-        auditId,
-        documentId,
-        documentTitle,
-        overallStatus,
-        totalCitations,
-        suspiciousCount,
-      },
-    });
-
-    return res.json({ success: true, report });
-  } catch (err: any) {
-    logger.error({ err }, "Failed to create citation audit report");
-    return res.status(500).json({ error: "Failed to create citation audit report" });
-  }
-});
-
-router.get("/prism-counsel/review-desk/filing-gate/audits", async (req: Request, res: Response) => {
-  try {
-    const { matterId, limit = "50", offset = "0", status } = req.query as {
-      matterId?: string;
-      limit?: string;
-      offset?: string;
-      status?: string;
-    };
-
-    const conditions = [eq(pcCitationAuditReportsTable.orgId, ORG_ID)];
-    if (matterId) conditions.push(eq(pcCitationAuditReportsTable.matterId, parseInt(matterId)));
-    if (status && ["clear", "needs_review", "blocked"].includes(status)) {
-      conditions.push(eq(pcCitationAuditReportsTable.overallStatus, status as "clear" | "needs_review" | "blocked"));
-    }
-
-    const reports = await db
-      .select()
-      .from(pcCitationAuditReportsTable)
-      .where(and(...conditions))
-      .orderBy(desc(pcCitationAuditReportsTable.createdAt))
-      .limit(parseInt(limit))
-      .offset(parseInt(offset));
-
-    return res.json({ reports, total: reports.length });
-  } catch (err: any) {
-    logger.error({ err }, "Failed to list citation audit reports");
-    return res.status(500).json({ error: "Failed to list citation audit reports" });
-  }
-});
-
-router.get("/prism-counsel/review-desk/filing-gate/audits/:auditId", async (req: Request, res: Response) => {
-  try {
-    const { auditId } = req.params as Record<string, string>;
-    const [report] = await db
-      .select()
-      .from(pcCitationAuditReportsTable)
-      .where(and(eq(pcCitationAuditReportsTable.auditId, auditId), eq(pcCitationAuditReportsTable.orgId, ORG_ID)));
-
-    if (!report) return res.status(404).json({ error: "Audit report not found" });
-    return res.json({ report });
-  } catch (err: any) {
-    return res.status(500).json({ error: "Failed to get citation audit report" });
-  }
-});
-
-router.post("/prism-counsel/review-desk/filing-gate/audits/:auditId/seal", async (req: Request, res: Response) => {
-  try {
-    const { auditId } = req.params as Record<string, string>;
-    const { note, sealedBy } = req.body as { note?: string; sealedBy?: number };
-
-    const [existing] = await db
-      .select()
-      .from(pcCitationAuditReportsTable)
-      .where(and(eq(pcCitationAuditReportsTable.auditId, auditId), eq(pcCitationAuditReportsTable.orgId, ORG_ID)));
-
-    if (!existing) return res.status(404).json({ error: "Audit report not found" });
-    if (existing.sealedAt) return res.status(409).json({ error: "Audit report already sealed" });
-
-    const [updated] = await db
-      .update(pcCitationAuditReportsTable)
-      .set({
-        sealedAt: new Date(),
-        sealedBy: sealedBy ?? null,
-        sealedNote: note ?? null,
-        updatedAt: new Date(),
-      })
-      .where(and(eq(pcCitationAuditReportsTable.auditId, auditId), eq(pcCitationAuditReportsTable.orgId, ORG_ID)))
-      .returning();
-
-    await emitReviewAudit({
-      orgId: ORG_ID,
-      matterId: existing.matterId ?? undefined,
-      reviewItemId: existing.reviewItemId ?? undefined,
-      action: "citation_audit_sealed",
-      details: { auditId, documentTitle: existing.documentTitle, overallStatus: existing.overallStatus, sealedNote: note },
-    });
-
-    return res.json({ success: true, report: updated });
-  } catch (err: any) {
-    logger.error({ err }, "Failed to seal citation audit report");
-    return res.status(500).json({ error: "Failed to seal citation audit report" });
-  }
-});
-
-router.get("/prism-counsel/review-desk/filing-gate/stats", async (req: Request, res: Response) => {
-  try {
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-
-    const allReports = await db
-      .select({
-        overallStatus: pcCitationAuditReportsTable.overallStatus,
-        totalCitations: pcCitationAuditReportsTable.totalCitations,
-        suspiciousCount: pcCitationAuditReportsTable.suspiciousCount,
-        verifiedCount: pcCitationAuditReportsTable.verifiedCount,
-        averageConfidence: pcCitationAuditReportsTable.averageConfidence,
-        sealedAt: pcCitationAuditReportsTable.sealedAt,
-        createdAt: pcCitationAuditReportsTable.createdAt,
-        auditId: pcCitationAuditReportsTable.auditId,
-        documentTitle: pcCitationAuditReportsTable.documentTitle,
-      })
-      .from(pcCitationAuditReportsTable)
-      .where(and(eq(pcCitationAuditReportsTable.orgId, ORG_ID), gte(pcCitationAuditReportsTable.createdAt, thirtyDaysAgo)))
-      .orderBy(desc(pcCitationAuditReportsTable.createdAt));
-
-    const totalDocuments = allReports.length;
-    const totalCitations = allReports.reduce((s, r) => s + (r.totalCitations || 0), 0);
-    const totalSuspicious = allReports.reduce((s, r) => s + (r.suspiciousCount || 0), 0);
-    const sealedCount = allReports.filter((r) => r.sealedAt != null).length;
-    const blockedCount = allReports.filter((r) => r.overallStatus === "blocked").length;
-    const avgConfidence = totalDocuments > 0
-      ? allReports.reduce((s, r) => s + (r.averageConfidence || 0), 0) / totalDocuments
-      : 0;
-    const catchRate = totalCitations > 0 ? totalSuspicious / totalCitations : 0;
-
-    return res.json({
-      documentsVerified: totalDocuments,
-      citationsAnalyzed: totalCitations,
-      suspiciousCaught: totalSuspicious,
-      catchRate: parseFloat((catchRate * 100).toFixed(1)),
-      averageConfidence: parseFloat((avgConfidence * 100).toFixed(1)),
-      sealedAudits: sealedCount,
-      blockedDocuments: blockedCount,
-      recentActivity: allReports.slice(0, 10).map((r) => ({
-        auditId: r.auditId,
-        documentTitle: r.documentTitle,
-        overallStatus: r.overallStatus,
-        suspiciousCount: r.suspiciousCount,
-        createdAt: r.createdAt,
-        sealed: r.sealedAt != null,
-      })),
-    });
-  } catch (err: any) {
-    logger.error({ err }, "Failed to get filing gate stats");
-    return res.status(500).json({ error: "Failed to get filing gate stats" });
-  }
-});
-
-router.get("/prism-counsel/review-desk/draft-reviews", async (req: Request, res: Response) => {
-  try {
-    const { matterId } = req.query as { matterId?: string };
-    const conditions = [
-      eq(pcManagedReviewItemsTable.orgId, ORG_ID),
-      eq(pcManagedReviewItemsTable.reviewWorkType, "draft_review"),
-    ];
-    if (matterId) conditions.push(eq(pcManagedReviewItemsTable.matterId, parseInt(matterId)));
-
-    const items = await db
-      .select()
-      .from(pcManagedReviewItemsTable)
-      .where(and(...conditions))
-      .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
-      .limit(50);
-
-    return res.json({ items });
-  } catch (err: any) {
-    return res.status(500).json({ error: "Failed to get draft reviews" });
+    res.status(500).json({ error: "Failed to get max-unblock item" });
   }
 });
 

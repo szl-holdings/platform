@@ -461,7 +461,7 @@ export const ListObservabilityAppsResponse = zod.array(ListObservabilityAppsResp
 export const GetAppObservabilityParams = zod.object({
   appSlug: zod.coerce
     .string()
-    .describe('App identifier slug (e.g. \"aegis-ops\", \"terra\", \"alloy\")'),
+    .describe('App identifier slug (e.g. \"rosie\", \"terra\", \"alloy\")'),
 });
 
 export const GetAppObservabilityResponse = zod.object({}).passthrough();

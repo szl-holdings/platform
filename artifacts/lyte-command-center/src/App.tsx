@@ -4,11 +4,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { SandboxModeProvider, SandboxModeBanner, CookieBanner, StatusBanner, AnalyticsProvider } from "@szl-holdings/shared-ui";
 import { McpOverlay } from "@szl-holdings/mcp-client";
-import { PrismBusProvider } from "@szl-holdings/prism-bus/provider";
+import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { LyteLayout } from "@/components/lyte-layout";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { beaconConfig } from "@szl-holdings/shared-ui/copilot-configs";
-import { AIStatusBar } from "@szl-holdings/shared-ui/ai-status-bar";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
 import { useAuth } from "@szl-holdings/replit-auth-web";
@@ -113,15 +112,6 @@ const DecisionReceipts = lazy(() => import("@/pages/decision-receipts"));
 const OutcomeLoop = lazy(() => import("@/pages/outcome-loop"));
 const DeferLane = lazy(() => import("@/pages/defer-lane"));
 const ShadowMode = lazy(() => import("@/pages/shadow-mode"));
-const AutonomousRemediation = lazy(() => import("@/pages/autonomous-remediation"));
-const ChaosPrediction = lazy(() => import("@/pages/chaos-prediction"));
-const CognitiveObservabilityCanvas = lazy(() => import("@/pages/cognitive-observability-canvas"));
-const CostPerformance = lazy(() => import("@/pages/cost-performance"));
-const OperationalNarrative = lazy(() => import("@/pages/operational-narrative"));
-const DecisionCostXRay = lazy(() => import("@/pages/decision-cost-xray"));
-const AiCapabilities = lazy(() => import("@/pages/ai-capabilities"));
-const WorkflowAutomation = lazy(() => import("@/pages/workflow-automation"));
-const RevenueIntelligence = lazy(() => import("@/pages/revenue-intelligence"));
 
 const ADMIN_ROLES = ["admin", "super_admin", "ops"];
 
@@ -201,7 +191,6 @@ function PrivateRouter() {
         <Route path="/alloy/simulate" component={AlloyPolicySim} />
         <Route path="/alloy/handoffs" component={AlloyAgentHandoffs} />
         <Route path="/alloy/receipts" component={AlloyTrustReceipts} />
-        <Route path="/revenue-intelligence" component={RevenueIntelligence} />
         <Route path="/powerbi" component={PowerBiReport} />
         <Route path="/dashboards" component={DashboardBuilder} />
         <Route path="/apm" component={ApmInstrumentation} />
@@ -226,14 +215,6 @@ function PrivateRouter() {
         <Route path="/defer-lane" component={DeferLane} />
         <Route path="/shadow-mode" component={ShadowMode} />
         <Route path="/atlas-artifacts" component={LyteAtlasArtifactsPage} />
-        <Route path="/autonomous-remediation" component={AutonomousRemediation} />
-        <Route path="/chaos-prediction" component={ChaosPrediction} />
-        <Route path="/abo/canvas" component={CognitiveObservabilityCanvas} />
-        <Route path="/cost-performance" component={CostPerformance} />
-        <Route path="/operational-narrative" component={OperationalNarrative} />
-        <Route path="/decision-cost-xray" component={DecisionCostXRay} />
-        <Route path="/ai-capabilities" component={AiCapabilities} />
-        <Route path="/workflow-automation" component={WorkflowAutomation} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>
@@ -248,7 +229,6 @@ const lyteCommands: CommandItem[] = [
   { id: "nav-digest", label: "Digest Center", icon: "📄", group: "Executive", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/digest"); } },
   { id: "nav-approvals", label: "Approvals", icon: "✅", group: "Executive", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/approvals"); } },
   { id: "nav-trust", label: "Trust & Audit", icon: "🛡️", group: "Executive", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/trust-audit"); } },
-  { id: "nav-cost-xray", label: "Decision Cost X-Ray", icon: "💸", group: "Executive", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/decision-cost-xray"); } },
   { id: "nav-inbox", label: "Command Inbox", icon: "📥", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/inbox"); } },
   { id: "nav-signals", label: "Signals Feed", icon: "📡", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/signals"); } },
   { id: "nav-ownership", label: "Ownership Map", icon: "👥", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ownership"); } },
@@ -260,7 +240,6 @@ const lyteCommands: CommandItem[] = [
   { id: "nav-alloy-simulate", label: "Policy Simulation Console", icon: "🧪", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/simulate"); } },
   { id: "nav-alloy-handoffs", label: "Agent Handoffs (A2A)", icon: "🔗", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/handoffs"); } },
   { id: "nav-alloy-receipts", label: "Trust Receipts", icon: "🛡️", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/receipts"); } },
-  { id: "nav-workflow-automation", label: "Workflow Automation", icon: "🤖", group: "AI", description: "Event-driven triggers and human-in-the-loop approvals", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/workflow-automation"); } },
 ];
 
 const lyteShortcuts: KeyboardShortcut[] = [
@@ -278,7 +257,6 @@ function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
       <div className="flex flex-col h-screen bg-[#080c14]">
         <EcosystemNav currentAppId="lyte" currentAppName="Lyte" accentColor={LYTE_ACCENT} />
         <SandboxModeBanner />
-        <AIStatusBar domain="lyte" accentColor={LYTE_ACCENT} />
         <div className="flex-1 overflow-hidden">
           <LyteLayout>
             <PrivateRouter />

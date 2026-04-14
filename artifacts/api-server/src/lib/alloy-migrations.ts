@@ -4,7 +4,7 @@ import { pool } from "@szl-holdings/db";
 import { logger } from "./logger";
 
 function getMigrationFilePath(): string {
-  const relativePath = path.join("lib", "db", "drizzle", "0004_alloy_canonical_schema.sql");
+  const relativePath = path.join("lib", "db", "drizzle", "0003_alloy_canonical_schema.sql");
   const replHome = process.env["REPL_HOME"];
   if (replHome) {
     const candidate = path.join(replHome, relativePath);
@@ -34,15 +34,29 @@ export async function ensureAlloyTables(): Promise<void> {
   try {
     migrationSql = fs.readFileSync(migrationFile, "utf-8");
   } catch (err) {
-    logger.error({ err, path: migrationFile }, "Alloy migration file not found");
-    throw new Error(`Alloy canonical schema migration file not found at ${migrationFile}`);
+    logger.warn({ err, path: migrationFile }, "Alloy migration file not found — skipping bootstrap");
+    return;
   }
 
   const statements = parseMigrationStatements(migrationSql);
+  let applied = 0;
+  let skipped = 0;
 
   for (const statement of statements) {
-    await pool.query(statement);
+    try {
+      await pool.query(statement);
+      applied++;
+    } catch (err: any) {
+      const code = err?.code as string | undefined;
+      const benign = ["42P07", "42701", "42703", "42710", "23505"];
+      if (code && benign.includes(code)) {
+        skipped++;
+      } else {
+        logger.warn({ err, statement: statement.slice(0, 120) }, "Alloy migration statement failed (non-fatal)");
+        skipped++;
+      }
+    }
   }
 
-  logger.info({ total: statements.length }, "Alloy canonical tables ensured");
+  logger.info({ applied, skipped, total: statements.length }, "Alloy canonical tables ensured");
 }

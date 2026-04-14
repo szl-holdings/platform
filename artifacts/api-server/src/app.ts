@@ -8,25 +8,9 @@ import swaggerUi from "swagger-ui-express";
 import { readFileSync } from "fs";
 import { parse } from "yaml";
 import { fileURLToPath } from "url";
-import { dirname, join, resolve } from "path";
+import { dirname, join } from "path";
 import { randomBytes } from "crypto";
-// @clerk/express is loaded dynamically to allow graceful fallback if not installed
-let _clerkMiddleware: (() => (req: Request, res: Response, next: NextFunction) => void) | null = null;
-async function getClerkMiddleware() {
-  if (_clerkMiddleware !== null) return _clerkMiddleware;
-  try {
-    const mod = await import("@clerk/express");
-    _clerkMiddleware = mod.clerkMiddleware as typeof _clerkMiddleware;
-  } catch (err) {
-    // @clerk/express is not installed; Clerk session enrichment will be skipped.
-    // Install @clerk/express to enable Clerk-based identity in middleware pipeline.
-    console.warn("[clerkMiddleware] @clerk/express unavailable, Clerk middleware disabled:", (err as Error).message);
-    _clerkMiddleware = () => (_req: Request, _res: Response, next: NextFunction) => next();
-  }
-  return _clerkMiddleware!;
-}
 import router from "./routes";
-import { wellKnownRouter } from "./routes/alloy-gateway";
 import { logger } from "./lib/logger";
 import { correlationMiddleware } from "./middlewares/correlation";
 import { globalLimiter } from "./middlewares/rate-limiters";
@@ -34,7 +18,6 @@ import { telemetryMiddleware } from "./middlewares/telemetry";
 import { authMiddleware } from "./middlewares/authMiddleware";
 import { csrfMiddleware } from "./middlewares/csrf";
 import { sessionRefreshPolicy } from "./middlewares/session-policy";
-import { CLERK_PROXY_PATH, clerkProxyMiddleware } from "./middlewares/clerkProxyMiddleware";
 
 const app: Express = express();
 
@@ -44,9 +27,6 @@ const isProduction = process.env.NODE_ENV === "production";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-// Clerk proxy — must be before body parsers
-app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
 
 app.use(correlationMiddleware);
 
@@ -186,11 +166,6 @@ app.use(express.urlencoded({
 app.use(csrfMiddleware);
 app.use(authMiddleware);
 app.use(sessionRefreshPolicy());
-// Clerk middleware — lazily initialized to support environments where @clerk/express is not installed
-app.use(async (req: Request, res: Response, next: NextFunction) => {
-  const clerkMw = await getClerkMiddleware();
-  clerkMw()(req, res, next);
-});
 
 app.get("/api/health", async (_req: Request, res: Response) => {
   const memUsage = process.memoryUsage();
@@ -220,7 +195,7 @@ app.get("/api/health", async (_req: Request, res: Response) => {
   let queueStatus: "ok" | "backpressure" | "unavailable" = "unavailable";
   let queueDepth = 0;
   try {
-    const { jobQueue } = await import("./lib/job-queue");
+    const { jobQueue } = await import("./lib/job-queue.js");
     const stats = jobQueue.getStats();
     queueDepth = stats.pending + stats.running;
     queueStatus = queueDepth > 50 ? "backpressure" : "ok";
@@ -322,7 +297,7 @@ app.get("/api/health/detailed", async (req: Request, res: Response) => {
   }
 
   try {
-    const { jobQueue } = await import("./lib/job-queue");
+    const { jobQueue } = await import("./lib/job-queue.js");
     const stats = jobQueue.getStats();
     const queueDepth = stats.pending + stats.running;
     checks["job_queue"] = {
@@ -369,18 +344,7 @@ app.get("/api/health/detailed", async (req: Request, res: Response) => {
 });
 
 try {
-  const specPath = (() => {
-    if (process.env.OPENAPI_SPEC_PATH) return resolve(process.env.OPENAPI_SPEC_PATH);
-    const candidates = [
-      join(__dirname, "../../lib/api-spec/openapi.yaml"),
-      join(__dirname, "../../../lib/api-spec/openapi.yaml"),
-      join(__dirname, "openapi.yaml"),
-    ];
-    for (const p of candidates) {
-      try { readFileSync(p); return p; } catch { /* try next */ }
-    }
-    return candidates[1];
-  })();
+  const specPath = join(__dirname, "../../../lib/api-spec/openapi.yaml");
   const specContent = readFileSync(specPath, "utf-8");
   const swaggerDocument = parse(specContent) as Record<string, unknown>;
   app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
@@ -409,7 +373,6 @@ app.get("/api/csrf-token", (req: Request, res: Response) => {
   res.json({ csrfToken: token });
 });
 
-app.use(wellKnownRouter);
 app.use("/api", router);
 
 let _graphqlHandler: ((req: Request, res: Response, next: import("express").NextFunction) => void) | null = null;

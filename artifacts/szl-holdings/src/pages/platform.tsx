@@ -38,29 +38,24 @@ const LAYERS = [
 
 const EXPANSION_VERTICALS = [
   {
-    name: "PRISM Counsel",
-    domain: "Legal matter intelligence — deadline compliance, demand readiness, settlement band forecasting, insurer profiling.",
-    accent: "hsl(38,72%,58%)",
+    name: "Terra",
+    domain: "Real estate intelligence — distress tracking, deal pipeline, market data.",
+    accent: "hsl(88,42%,44%)",
   },
   {
     name: "Vessels",
     domain: "Maritime command — fleet visibility, voyage performance, operational exceptions.",
-    accent: "hsl(206,72%,52%)",
+    accent: "hsl(205,85%,55%)",
   },
   {
     name: "Aegis",
     domain: "Defense & intelligence — SOC command, XDR, managed operations.",
-    accent: "hsl(222,60%,62%)",
-  },
-  {
-    name: "Terra",
-    domain: "Real estate intelligence — distress tracking, deal pipeline, market data.",
-    accent: "hsl(140,50%,48%)",
+    accent: "hsl(232,68%,60%)",
   },
   {
     name: "Carlota Jo",
     domain: "Private advisory — high-trust operational support for high-consequence decisions.",
-    accent: "hsl(280,50%,65%)",
+    accent: "hsl(38,55%,58%)",
   },
 ];
 

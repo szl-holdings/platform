@@ -40,11 +40,11 @@ export interface AlertRecord {
 
 const WINDOW_SIZE = 300_000;
 
-const MAX_BUSINESS_EVENTS = 400;
-const MAX_ALERTS = 30;
-const MAX_APM_SPANS = 200;
-const MAX_EXTERNAL_CALLS = 100;
-const MAX_REQUESTS = 800;
+const MAX_BUSINESS_EVENTS = 1000;
+const MAX_ALERTS = 50;
+const MAX_APM_SPANS = 500;
+const MAX_EXTERNAL_CALLS = 200;
+const MAX_REQUESTS = 2000;
 
 export interface ApmSpan {
   route: string;
@@ -157,8 +157,8 @@ export class ServerTelemetryCollector {
   }
 
   recordDbQueryLatency(durationMs: number, query?: string) {
-    this.dbQueryLatencies.push({ durationMs, timestamp: Date.now(), query: query?.slice(0, 80) });
-    const MAX_DB_SAMPLES = 200;
+    this.dbQueryLatencies.push({ durationMs, timestamp: Date.now(), query: query?.slice(0, 120) });
+    const MAX_DB_SAMPLES = 500;
     if (this.dbQueryLatencies.length > MAX_DB_SAMPLES) {
       this.dbQueryLatencies.splice(0, this.dbQueryLatencies.length - MAX_DB_SAMPLES);
     }

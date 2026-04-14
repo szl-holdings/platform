@@ -26,10 +26,10 @@ const BRIEF_DATA = {
     { type: "lien_drag", label: "Kim v. Progressive — Medicare lien unresolved, blocking settlement", severity: "medium" },
   ],
   recommendedFirstActions: [
-    { label: "Review reserve increase — Rodriguez", reason: "Carrier softening posture. Update demand strategy before mediation.", minutes: 10, href: "/matter-desk/1" },
-    { label: "Clear interrogatory responses — Rodriguez", reason: "2-day deadline. 80% drafted. Requires final review and approval.", minutes: 20, href: "/review-before-send" },
-    { label: "Draft mediation memo — Vasquez", reason: "Mediation in 19 days with no memo started. High leverage window.", minutes: 30, href: "/prep/mediation" },
-    { label: "Escalate carrier silence — Park", reason: "18 days without response exceeds firm threshold. Escalation warranted.", minutes: 5, href: "/matter-desk/4" },
+    { label: "Review reserve increase — Rodriguez", reason: "Carrier softening posture. Update demand strategy before mediation.", minutes: 10, href: "/prism-counsel/matter-desk/1" },
+    { label: "Clear interrogatory responses — Rodriguez", reason: "2-day deadline. 80% drafted. Requires final review and approval.", minutes: 20, href: "/prism-counsel/review-before-send" },
+    { label: "Draft mediation memo — Vasquez", reason: "Mediation in 19 days with no memo started. High leverage window.", minutes: 30, href: "/prism-counsel/prep/mediation" },
+    { label: "Escalate carrier silence — Park", reason: "18 days without response exceeds firm threshold. Escalation warranted.", minutes: 5, href: "/prism-counsel/matter-desk/4" },
   ],
   quietRisks: [
     { matter: "Kim v. Progressive", risk: "SOL approaching in 45 days — matter appears quiet but filing must occur", severity: "critical" },

@@ -2,21 +2,6 @@ import { TrendingUp, TrendingDown, Minus, BarChart3 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 
-interface PcForecastDiff {
-  id: number;
-  matterId: number;
-  forecastType: string;
-  currentScore: number;
-  priorScore?: number | null;
-  trend: string;
-  confidence?: number | null;
-  whatChanged?: string | null;
-  highestLeverageAction?: string | null;
-  approvalRequired?: boolean | null;
-}
-
-interface ForecastDiffsResponse { matterId: number; diffs: PcForecastDiff[] }
-
 const FORECAST_TYPES = [
   "deadline_breach_risk", "no_fault_evidence_lock", "disclaimer_denial_vulnerability",
   "demand_readiness", "settlement_band_scenarios", "offer_movement_likelihood",
@@ -25,7 +10,7 @@ const FORECAST_TYPES = [
   "insurer_response_latency", "document_review_bottleneck", "ai_defensibility"
 ];
 
-function ForecastDiffCard({ diff, matterId }: { diff?: PcForecastDiff; matterId?: number }) {
+function ForecastDiffCard({ diff, matterId }: { diff?: any; matterId?: number }) {
   const type = diff?.forecastType ?? "unknown";
   const current = diff?.currentScore ?? Math.random() * 100;
   const prior = diff?.priorScore ?? current + (Math.random() - 0.5) * 20;
@@ -81,19 +66,22 @@ function ForecastDiffCard({ diff, matterId }: { diff?: PcForecastDiff; matterId?
 export default function ForecastDiffPage() {
   const matterId = 1;
 
-  const { data: diffData, isLoading } = useQuery<ForecastDiffsResponse>({
+  const { data: diffData, isLoading } = useQuery({
     queryKey: ["forecast-diffs", matterId],
-    queryFn: () => apiRequest<ForecastDiffsResponse>("GET", `/api/prism-counsel/matters/${matterId}/forecast-diffs`),
+    queryFn: async () => {
+      const res = await apiRequest("GET", `/api/prism-counsel/matters/${matterId}/forecast-diffs`);
+      return res.json();
+    },
     enabled: !!matterId,
   });
 
-  const diffs = diffData?.diffs ?? [];
-  const diffMap: Record<string, PcForecastDiff> = {};
+  const diffs = diffData?.data?.diffs ?? [];
+  const diffMap: Record<string, any> = {};
   for (const d of diffs) diffMap[d.forecastType] = d;
 
-  const improving = diffs.filter((d) => d.trend === "improving").length;
-  const declining = diffs.filter((d) => d.trend === "declining").length;
-  const requiresApproval = diffs.filter((d) => d.approvalRequired).length;
+  const improving = diffs.filter((d: any) => d.trend === "improving").length;
+  const declining = diffs.filter((d: any) => d.trend === "declining").length;
+  const requiresApproval = diffs.filter((d: any) => d.approvalRequired).length;
 
   return (
     <div className="p-5 max-w-[1200px] mx-auto space-y-5">

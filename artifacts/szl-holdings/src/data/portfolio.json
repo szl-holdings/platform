@@ -134,11 +134,11 @@
     "marketContext": "Global AI market projected to reach $1.81T by 2030 (Grand View Research)"
   },
   {
-    "id": "aegis-ops",
-    "name": "Aegis Operations",
+    "id": "rosie",
+    "name": "Rosie",
     "doctrineRole": "OBSERVE",
     "tagline": "Threat & Anomaly Visibility — Incident Command",
-    "description": "Evidence-backed incident command platform delivering threat detection, anomaly visibility, and MSP-grade operational intelligence. Integrates government contract intelligence, FedRAMP compliance tracking, and CMMC maturity scoring for defense-aware operators.",
+    "description": "Evidence-backed incident command platform delivering threat detection, anomaly visibility, and MSP-grade operational intelligence. Rosie integrates government contract intelligence, FedRAMP compliance tracking, and CMMC maturity scoring for defense-aware operators.",
     "status": "Live",
     "category": "Security",
     "link": "/firestorm/ops/dashboard",

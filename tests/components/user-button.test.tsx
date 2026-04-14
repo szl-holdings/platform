@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { UserButton } from "@szl-holdings/shared-ui/UserButton";
+import { UserButton } from "../../lib/shared-ui/src/UserButton";
 
 const { useAuth } = await import("@workspace/replit-auth-web");
 const mockUseAuth = useAuth as ReturnType<typeof vi.fn>;

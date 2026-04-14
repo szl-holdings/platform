@@ -3,7 +3,7 @@ import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-respon
 import { authMiddleware } from "../middlewares/auth";
 import { prismBus, prismConnectorRegistry } from "@szl-holdings/prism-bus";
 import { PRISM_BUILT_IN_TOOLS, PRISM_DOMAIN_TOOLS } from "@szl-holdings/prism-bus";
-import type { PrismDomain, PrismBusEventType } from "@szl-holdings/prism-bus";
+import type { PrismDomain } from "@szl-holdings/prism-bus";
 
 const router: IRouter = Router();
 
@@ -41,7 +41,7 @@ router.get("/prism-bus/events", authMiddleware(), async (req: Request, res: Resp
 
     const events = prismBus.getHistory({
       domain: domain as PrismDomain | undefined,
-      type: type as PrismBusEventType | undefined,
+      type: type as Parameters<typeof prismBus.getHistory>[0]["type"],
       limit: limit ? Number(limit) : 100,
       since: since ? Number(since) : undefined,
       correlationId,

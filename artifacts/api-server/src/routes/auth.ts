@@ -6,7 +6,7 @@ import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendForbidden, sendError, handleRouteError } from "../lib/api-response";
 import { logActivity } from "../lib/activity-logger";
 import { createAuthService } from "@szl-holdings/auth";
-import { issueWsTicket } from "../lib/websocket";
+import { issueWsTicket } from "../lib/websocket.js";
 import { getSessionToken, getSessionUser } from "../lib/auth";
 import { loginLimiter } from "../middlewares/rate-limiters";
 import { z } from "zod";

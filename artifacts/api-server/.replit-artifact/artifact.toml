@@ -1,32 +1,32 @@
 kind = "api"
-  previewPath = "/api"
-  title = "API Server"
-  version = "1.0.0"
-  id = "3B4_FFSkEVBkAeYMFRJ2e"
+previewPath = "/api" # TODO - should be excluded from preview in the first place
+title = "API Server"
+version = "1.0.0"
+id = "3B4_FFSkEVBkAeYMFRJ2e"
 
-  [[services]]
-  localPort = 8080
-  name = "API Server"
-  paths = ["/api"]
+[[services]]
+localPort = 8080
+name = "API Server"
+paths = ["/api"]
 
-  [services.development]
-  run = "node -e \"require('http').createServer((q,r)=>{r.writeHead(200);r.end('ok')}).listen(8080,'0.0.0.0',()=>console.log('API ready on 8080'))\""
+[services.development]
+run = "pnpm --filter @workspace/api-server run dev"
 
-  [services.env]
-  PORT = "8080"
+[services.production]
 
-  [services.production]
+[services.production.build]
+args = ["pnpm", "--filter", "@workspace/api-server", "run", "build"]
 
-  [services.production.build]
-  args = ["bash", "-c", "pnpm --filter @workspace/api-server run build && (timeout 90 pnpm --filter @workspace/api-server run db:push || echo 'db:push skipped')"]
+[services.production.build.env]
+NODE_ENV = "production"
 
-  [services.production.build.env]
-  NODE_ENV = "production"
+[services.production.run]
+# --max-old-space-size caps heap at 1 GB; --expose-gc allows manual GC in the memory monitor
+args = ["node", "--max-old-space-size=1024", "--expose-gc", "--enable-source-maps", "artifacts/api-server/dist/index.mjs"]
 
-  [services.production.run]
-  args = ["node", "--max-old-space-size=1024", "--expose-gc", "--enable-source-maps", "artifacts/api-server/dist/index.mjs"]
+[services.production.run.env]
+PORT = "8080"
+NODE_ENV = "production"
 
-  [services.production.run.env]
-  PORT = "8080"
-  NODE_ENV = "production"
-
+[services.production.health.startup]
+path = "/api/healthz"

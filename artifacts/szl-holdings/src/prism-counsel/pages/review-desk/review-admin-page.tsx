@@ -102,9 +102,9 @@ export default function ReviewAdminPage() {
             <div className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
               <h3 className="text-sm font-semibold text-slate-200 mb-3">Backlog by Work Type</h3>
               <div className="space-y-2">
-                {Object.entries(d.backlogByType as Record<string, number> ?? {}).sort(([, a], [, b]) => (b as number) - (a as number)).map(([type, count]) => {
-                  const max = Math.max(...Object.values(d.backlogByType as Record<string, number> ?? {}));
-                  const pct = max > 0 ? ((count as number) / max) * 100 : 0;
+                {Object.entries(d.backlogByType ?? {}).sort(([, a], [, b]) => b - a).map(([type, count]) => {
+                  const max = Math.max(...Object.values(d.backlogByType ?? {}));
+                  const pct = max > 0 ? (count / max) * 100 : 0;
                   const color = pct >= 50 ? "#c45a4a" : pct >= 25 ? "#d4a054" : "#4a90b8";
                   return (
                     <div key={type} className="flex items-center gap-3">
@@ -112,7 +112,7 @@ export default function ReviewAdminPage() {
                       <div className="flex-1 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
                         <div className="h-full rounded-full" style={{ width: `${pct}%`, background: color }} />
                       </div>
-                      <span className="text-[10px] font-mono text-slate-400 w-4 text-right">{count as number}</span>
+                      <span className="text-[10px] font-mono text-slate-400 w-4 text-right">{count}</span>
                     </div>
                   );
                 })}
@@ -122,11 +122,11 @@ export default function ReviewAdminPage() {
             <div className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
               <h3 className="text-sm font-semibold text-slate-200 mb-3">Backlog by Lifecycle State</h3>
               <div className="space-y-2">
-                {Object.entries(d.backlogByState as Record<string, number> ?? {}).sort(([, a], [, b]) => (b as number) - (a as number)).map(([state, count]) => (
+                {Object.entries(d.backlogByState ?? {}).sort(([, a], [, b]) => b - a).map(([state, count]) => (
                   <div key={state} className="flex items-center gap-3">
                     <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: STATE_COLORS[state] ?? "#64748b" }} />
                     <span className="text-[10px] text-slate-400 flex-1">{state.replace(/_/g, " ")}</span>
-                    <span className="text-[10px] font-mono text-slate-400">{count as number}</span>
+                    <span className="text-[10px] font-mono text-slate-400">{count}</span>
                   </div>
                 ))}
               </div>

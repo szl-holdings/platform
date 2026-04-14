@@ -2,7 +2,6 @@ import { db, lyteSignalsTable } from "@szl-holdings/db";
 import { lt, sql } from "drizzle-orm";
 import { publish, WS_CHANNELS } from "./websocket";
 import { logger } from "./logger";
-import { HEAP_LIMIT_MB } from "./heap-limits";
 
 const POLL_INTERVAL_MS = 5 * 60_000;
 const SIGNAL_COOLDOWN_MS = 10 * 60_000;
@@ -272,37 +271,36 @@ async function runMonitoringCycle(): Promise<void> {
   }
 
   if (memory) {
-    const criticalThresholdMb = Math.round(HEAP_LIMIT_MB * 0.88);
-    const elevatedThresholdMb = Math.round(HEAP_LIMIT_MB * 0.72);
-    if (memory.heapUsedMb > criticalThresholdMb) {
+    const heapPct = (memory.heapUsedMb / memory.heapTotalMb) * 100;
+    if (heapPct > 90) {
       if (shouldEmitSignal("heap-critical")) {
         await createSignal({
           severity: "critical",
-          title: `API Server heap memory critical — ${memory.heapUsedMb}MB / ${HEAP_LIMIT_MB}MB limit`,
-          body: `Node.js heap memory is at ${memory.heapUsedMb}MB (limit: ${HEAP_LIMIT_MB}MB). GC pressure is causing latency spikes. OOM crash risk is elevated.`,
+          title: `API Server heap memory critical — ${heapPct.toFixed(0)}% (${memory.heapUsedMb}MB / ${memory.heapTotalMb}MB)`,
+          body: `Node.js heap memory is at ${heapPct.toFixed(0)}% capacity (${memory.heapUsedMb}MB used of ${memory.heapTotalMb}MB total). GC pressure is causing latency spikes. OOM crash risk is elevated.`,
           metadata: {
             affectedFunction: "API Infrastructure",
             owner: "Platform Team",
             ownerTeam: "SRE",
             recommendedAction: "Immediate: identify and kill memory-leaking processes. Schedule rolling restart. Investigate large request caches or WebSocket accumulation.",
-            anomaly: `Heap at ${memory.heapUsedMb}MB — OOM risk`,
+            anomaly: `Heap at ${heapPct.toFixed(0)}% — OOM risk`,
             sourceData: "process.memoryUsage() — API Server",
             heapUsedMb: memory.heapUsedMb,
             heapTotalMb: memory.heapTotalMb,
           },
         });
       }
-    } else if (memory.heapUsedMb > elevatedThresholdMb) {
+    } else if (heapPct > 75) {
       if (shouldEmitSignal("heap-elevated")) {
         await createSignal({
           severity: "medium",
-          title: `API Server heap memory elevated — ${memory.heapUsedMb}MB / ${HEAP_LIMIT_MB}MB limit`,
-          body: `Node.js heap utilization is at ${memory.heapUsedMb}MB (limit: ${HEAP_LIMIT_MB}MB). No immediate action required, but trend monitoring recommended to prevent GC pressure.`,
+          title: `API Server heap memory elevated — ${heapPct.toFixed(0)}% (${memory.heapUsedMb}MB / ${memory.heapTotalMb}MB)`,
+          body: `Node.js heap utilization is at ${heapPct.toFixed(0)}% (${memory.heapUsedMb}MB). No immediate action required, but trend monitoring recommended to prevent GC pressure.`,
           metadata: {
             affectedFunction: "API Infrastructure",
             owner: "Platform Team",
             ownerTeam: "SRE",
-            recommendedAction: `Monitor heap trend over next 30 minutes. If crossing ${criticalThresholdMb}MB, plan a non-disruptive restart.`,
+            recommendedAction: "Monitor heap trend over next 30 minutes. If crossing 85%, plan a non-disruptive restart.",
             sourceData: "process.memoryUsage() — API Server",
             heapUsedMb: memory.heapUsedMb,
             heapTotalMb: memory.heapTotalMb,

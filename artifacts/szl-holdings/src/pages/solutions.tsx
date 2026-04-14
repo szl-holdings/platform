@@ -1,26 +1,11 @@
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight, ShieldCheck, Ship, Building2, BriefcaseBusiness, Scale } from "lucide-react";
+import { ArrowRight, ShieldCheck, Ship, Building2, BriefcaseBusiness } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { InlineSegmentedCTA, SegmentedCTA } from "@/components/SegmentedCTA";
-import { useNarrativeRouter } from "@/hooks/useNarrativeRouter";
-import { DynamicProofPack } from "@/components/DynamicProofPack";
 
 const SOLUTIONS = [
-  {
-    icon: Scale,
-    name: "PRISM Counsel",
-    slug: "prism-counsel",
-    domain: "Legal Operations",
-    tagline: "Legal matter observability and execution governance — deadline intelligence, approval routing, document-safe exports, and full audit lineage for law firms and in-house teams. The flagship vertical and commercial wedge.",
-    color: "hsl(38,72%,58%)",
-    colorMuted: "hsla(38,72%,58%,0.08)",
-    border: "hsla(38,72%,58%,0.18)",
-    capabilities: ["Matter signal detection", "Deadline & statute tracking", "Approval chain governance", "Document export safety", "Proof Chain audit trail", "Demand packet generation"],
-    href: "/solutions/prism-counsel",
-  },
   {
     icon: ShieldCheck,
     name: "Aegis",
@@ -67,16 +52,14 @@ const SOLUTIONS = [
     colorMuted: "var(--color-carlota-muted)",
     border: "hsla(36,48%,52%,0.18)",
     capabilities: ["Strategic execution advisory", "Capital situation support", "Organizational design", "Operating model review", "Founder & principal support", "Confidential engagement model"],
-    href: "/services/carlota-jo",
+    href: "/carlota-jo",
   },
 ];
 
 export default function SolutionsPage() {
-  const { visitorType, setIntent } = useNarrativeRouter();
-
   usePageMeta({
     title: "Solutions — SZL Holdings",
-    description: "Five vertical domain packs that extend the Lyte + Alloy operating platform into legal operations (PRISM Counsel), defense & intelligence (Aegis), maritime (Vessels), real estate (Terra), and executive advisory (Carlota Jo).",
+    description: "Vertical domain packs that extend the Lyte + Alloy operating platform into defense & intelligence, maritime, real estate, and executive advisory.",
     canonical: "https://szlholdings.com/solutions",
   });
 
@@ -110,7 +93,7 @@ export default function SolutionsPage() {
                   marginBottom: "1.5rem",
                 }}
               >
-                One operating platform. Five domain packs.
+                One operating platform. Four domain packs.
               </h1>
               <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,62%)", maxWidth: "52ch" }}>
                 Each vertical pack extends the same Lyte + Alloy core into the specific signal
@@ -209,25 +192,6 @@ export default function SolutionsPage() {
                 Start a conversation <ArrowRight size={14} />
               </Link>
             </m.div>
-          </div>
-        </section>
-
-        {/* Proof pack by intent */}
-        <section style={{ borderTop: "1px solid var(--color-szl-border)", padding: "clamp(3rem,5vw,4rem) 0" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
-            <div style={{ marginBottom: "1.75rem" }}>
-              <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(214,7%,38%)", fontFamily: "var(--font-mono)", marginBottom: "0.5rem" }}>
-                Proof by intent
-              </p>
-              <p style={{ fontSize: "0.875rem", color: "hsl(214,7%,55%)" }}>
-                {visitorType !== "unknown" ? "We've selected the right evidence for your context." : "Tell us who you are and we'll show you the right materials."}
-              </p>
-            </div>
-            {visitorType !== "unknown" ? (
-              <DynamicProofPack visitorType={visitorType} onChangeIntent={() => setIntent("unknown")} />
-            ) : (
-              <SegmentedCTA visitorType={visitorType} onSelectIntent={setIntent} />
-            )}
           </div>
         </section>
 

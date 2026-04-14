@@ -1,4 +1,3 @@
-import { GraphQLPanelShell } from "@szl-holdings/shared-ui";
 import { useStephenCaseStudies, useStephenContentBlocks } from "@szl-holdings/graphql-client/hooks";
 
 export function StephenGraphQLPanel() {
@@ -13,7 +12,11 @@ export function StephenGraphQLPanel() {
   if (caseStudies.length === 0 && contentBlocks.length === 0) return null;
 
   return (
-    <GraphQLPanelShell dotColor="bg-blue-400">
+    <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 space-y-3">
+      <div className="flex items-center gap-2">
+        <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
+        <span className="text-xs font-medium text-zinc-400 uppercase tracking-widest">GraphQL Live Data</span>
+      </div>
       {caseStudies.length > 0 && (
         <div>
           <p className="text-xs text-zinc-500 mb-1">Case Studies</p>
@@ -39,6 +42,6 @@ export function StephenGraphQLPanel() {
           </div>
         </div>
       )}
-    </GraphQLPanelShell>
+    </div>
   );
 }

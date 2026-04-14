@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { motion as m } from "framer-motion";
-import { ContactModal, NoiseGrain, MagneticButton, WordReveal, SignalTicker, LiveIndicator, CinematicReveal } from "@szl-holdings/shared-ui";
+import { ContactModal } from "@szl-holdings/shared-ui";
 import {
   ArrowRight, Activity, Eye, TrendingUp, Radio, Gauge,
   Target, Users, Shield, Zap, CheckCircle,
@@ -8,17 +7,6 @@ import {
   Briefcase, HeartPulse, Factory, CreditCard, CheckSquare,
   Menu, X, Monitor, GitBranch, Network, Lock, Scale, Cpu,
 } from "lucide-react";
-
-const LYTE_SIGNALS_FALLBACK = [
-  { label: "APPROVAL QUEUE", value: "14 aging", delta: "+3", color: "rgba(212,160,84,0.9)" },
-  { label: "OWNERSHIP GAPS", value: "7 active", delta: "+1", color: "rgba(196,98,80,0.9)" },
-  { label: "DECISION LATENCY", value: "3.4 days avg", delta: "+0.2d", color: "rgba(196,98,80,0.9)" },
-  { label: "SIGNALS LIVE", value: "1,284 tracked", delta: "+22", color: "rgba(70,200,150,0.9)" },
-  { label: "STUCK WORKFLOWS", value: "9 flagged", delta: "+2", color: "rgba(196,98,80,0.9)" },
-  { label: "AUDIT COVERAGE", value: "100%", color: "rgba(70,200,150,0.9)" },
-  { label: "CONNECTORS LIVE", value: "16 active", color: "rgba(212,160,84,0.9)" },
-  { label: "RISK EXPOSURE", value: "$2.1M tracked", color: "rgba(212,160,84,0.9)" },
-];
 
 const prism = [
   { key: "P", name: "Pulse", color: "#d4a054", icon: Activity, meaning: "Business health, operating heartbeat, trend status", detail: "Pulse monitors the continuous rhythm of your operations — revenue velocity, delivery cadence, customer health, operational tempo. Not infrastructure uptime. Business uptime." },
@@ -78,11 +66,10 @@ function useInView(threshold = 0.12) {
   return { ref, visible };
 }
 
-function Reveal({ children, className = "", delay = 0, immediate = false }: { children: React.ReactNode; className?: string; delay?: number; immediate?: boolean }) {
+function Reveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const { ref, visible } = useInView();
-  const show = immediate || visible;
   return (
-    <div ref={ref} className={`transition-all duration-1000 ease-out ${show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"} ${className}`} style={{ transitionDelay: immediate ? "0ms" : `${delay}ms` }}>
+    <div ref={ref} className={`transition-all duration-1000 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"} ${className}`} style={{ transitionDelay: `${delay}ms` }}>
       {children}
     </div>
   );
@@ -93,7 +80,6 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
   const [mobileNav, setMobileNav] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [demoOpen, setDemoOpen] = useState(false);
-  const [liveSignals, setLiveSignals] = useState(LYTE_SIGNALS_FALLBACK);
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 40);
@@ -101,41 +87,8 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
     return () => window.removeEventListener("scroll", h);
   }, []);
 
-  useEffect(() => {
-    // Uses /api/lyte/live/signals (auth-optional) rather than /api/lyte/signals (requires auth).
-    // The live endpoint is the correct choice for the public marketing ticker — it returns
-    // sanitised operational metrics without requiring a session.
-    fetch("/api/lyte/live/signals")
-      .then((r) => r.json())
-      .then((d) => {
-        const signals: Array<{ name: string; value: string; status: string }> =
-          Array.isArray(d?.data?.signals) ? d.data.signals : [];
-        if (signals.length > 0) {
-          setLiveSignals(
-            signals.map((s) => ({
-              label: s.name.toUpperCase(),
-              value: s.value,
-              color:
-                s.status === "healthy" ? "rgba(70,200,150,0.9)" :
-                s.status === "critical" || s.status === "degraded" ? "rgba(196,98,80,0.9)" :
-                "rgba(212,160,84,0.9)",
-            }))
-          );
-        }
-      })
-      .catch(() => {});
-  }, []);
-
   return (
-    <m.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0, transition: { duration: 0.2, ease: "easeIn" } }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className="min-h-screen bg-[#0a0d14] text-slate-300 overflow-x-hidden"
-      style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
-    >
-      <NoiseGrain opacity={0.028} />
+    <div className="min-h-screen bg-[#0a0d14] text-slate-300 overflow-x-hidden" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
 
       <nav className={`fixed top-0 left-0 right-0 z-50 h-14 flex items-center transition-all duration-500 ${scrolled ? "bg-[#0a0d14]/92 backdrop-blur-2xl border-b" : "bg-transparent border-b border-transparent"}`} style={{ borderColor: scrolled ? "rgba(212,160,84,0.06)" : "transparent" }}>
         <div className="max-w-[1140px] mx-auto px-6 w-full flex items-center justify-between">
@@ -183,69 +136,48 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
         <div className="absolute top-[180px] left-1/2 -translate-x-1/2 w-[1000px] h-[600px] rounded-full" style={{ background: "radial-gradient(ellipse, rgba(212,160,84,0.025) 0%, transparent 65%)" }} />
       </div>
 
-      {/* SIGNAL TICKER */}
-      <div className="pt-14">
-        <SignalTicker items={liveSignals} bgColor="rgba(10,13,20,0.8)" />
-      </div>
-
       {/* HERO */}
-      <section className="relative pt-20 sm:pt-28 pb-28 sm:pb-36 max-w-[1140px] mx-auto px-6">
-        <Reveal immediate>
-          <div className="flex items-center gap-2 mb-6">
-            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase font-mono" style={{ color: "rgba(212,160,84,0.65)" }}>Business Observability</p>
-            <LiveIndicator color="#d4a054" showTimestamp={false} label="LIVE" />
-          </div>
+      <section className="relative pt-36 sm:pt-44 pb-28 sm:pb-36 max-w-[1140px] mx-auto px-6">
+        <Reveal>
+          <p className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-6 font-mono" style={{ color: "rgba(212,160,84,0.45)" }}>Business Observability</p>
         </Reveal>
 
-        <Reveal immediate>
-          <WordReveal
-            text="In the dark,"
-            as="h1"
-            delay={0.1}
-            stagger={0.07}
-            className="text-[clamp(2.2rem,5.5vw,4rem)] font-extrabold leading-[1.06] tracking-[-0.03em] text-white max-w-[820px] mb-3"
-          />
+        <Reveal delay={100}>
+          <h1 className="text-[clamp(2.2rem,5.5vw,4rem)] font-extrabold leading-[1.06] tracking-[-0.03em] text-white max-w-[820px] mb-3">
+            In the dark,
+          </h1>
         </Reveal>
-        <Reveal immediate>
-          <WordReveal
-            text="let Lyte guide you."
-            as="h1"
-            delay={0.3}
-            stagger={0.06}
-            className="text-[clamp(2.2rem,5.5vw,4rem)] font-extrabold leading-[1.06] tracking-[-0.03em] max-w-[820px] mb-10"
-            style={{ color: "#d4a054" }}
-          />
+        <Reveal delay={200}>
+          <h1 className="text-[clamp(2.2rem,5.5vw,4rem)] font-extrabold leading-[1.06] tracking-[-0.03em] max-w-[820px] mb-10">
+            <span style={{ color: "#d4a054" }}>let Lyte guide you.</span>
+          </h1>
         </Reveal>
 
-        <Reveal immediate>
-          <p className="text-[17px] sm:text-[18px] leading-[1.85] max-w-[600px] mb-14" style={{ color: "rgba(255,255,255,0.48)" }}>
+        <Reveal delay={300}>
+          <p className="text-[17px] sm:text-[18px] leading-[1.85] max-w-[600px] mb-14" style={{ color: "rgba(255,255,255,0.3)" }}>
             Revenue stalling. Approvals aging. Ownership gaps widening. By the time
             these surface as problems, the damage has already compounded. Lyte makes
             the invisible visible — before it costs you.
           </p>
         </Reveal>
 
-        <Reveal immediate>
+        <Reveal delay={400}>
           <div className="flex flex-wrap gap-3 mb-24">
-            <MagneticButton>
-              <button onClick={onSignIn} className="text-[13px] font-semibold rounded-lg px-7 py-3 flex items-center gap-2 transition-all" style={{ background: "#d4a054", color: "#0a0d14", boxShadow: "0 0 28px rgba(212,160,84,0.18)" }}>
-                Sign In <ArrowRight size={14} />
-              </button>
-            </MagneticButton>
-            <MagneticButton>
-              <button onClick={() => { window.location.href = "/lyte-command-center/?view=app"; }} className="text-[13px] font-medium border rounded-lg px-7 py-3 transition-all" style={{ color: "rgba(255,255,255,0.5)", borderColor: "rgba(255,255,255,0.12)" }}>
-                Try Live Demo →
-              </button>
-            </MagneticButton>
+            <button onClick={onSignIn} className="text-[13px] font-semibold rounded-lg px-7 py-3 flex items-center gap-2 transition-all hover:shadow-lg" style={{ background: "#d4a054", color: "#0a0d14", boxShadow: "0 0 24px rgba(212,160,84,0.08)" }}>
+              Sign In <ArrowRight size={14} />
+            </button>
+            <button onClick={() => { window.location.href = "/lyte-command-center/?view=app"; }} className="text-[13px] font-medium border rounded-lg px-7 py-3 transition-all hover:border-[rgba(212,160,84,0.3)] hover:text-[rgba(212,160,84,0.8)]" style={{ color: "rgba(255,255,255,0.5)", borderColor: "rgba(255,255,255,0.12)" }}>
+              Try Live Demo →
+            </button>
           </div>
         </Reveal>
 
-        <Reveal immediate>
+        <Reveal delay={500}>
           <div className="grid grid-cols-5 gap-px rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)" }}>
             {prism.map((p) => (
               <div key={p.key} className="bg-[#0a0d14] py-6 px-4 text-center">
                 <span className="text-[28px] font-extrabold font-mono block leading-none" style={{ color: p.color }}>{p.key}</span>
-                <span className="text-[9px] tracking-[0.12em] uppercase mt-2 block" style={{ color: "rgba(255,255,255,0.35)" }}>{p.name}</span>
+                <span className="text-[9px] tracking-[0.12em] uppercase mt-2 block" style={{ color: "rgba(255,255,255,0.18)" }}>{p.name}</span>
               </div>
             ))}
           </div>
@@ -633,53 +565,17 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
         </section>
       </Reveal>
 
-      {/* SOCIAL PROOF */}
-      <Reveal>
-        <section className="py-20 sm:py-28 px-6" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-          <div className="max-w-[1140px] mx-auto">
-            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-8 font-mono text-center" style={{ color: "rgba(255,255,255,0.15)" }}>Documented Results</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-px rounded-xl overflow-hidden mb-12" style={{ background: "rgba(255,255,255,0.03)" }}>
-              {[
-                { metric: "67%", label: "Reduction in decision lag", detail: "Operations that connect Lyte see 67% faster resolution on aging decisions vs. pre-deployment baseline." },
-                { metric: "$1.2M+", label: "Average annual drag identified", detail: "Financial exposure surfaced across approval queues, churn risk, and vendor gaps in first 90 days." },
-                { metric: "16", label: "Tool connectors", detail: "Connect your entire ops stack — Salesforce, Jira, Slack, GitHub, Snowflake, and 11 more — in one session." },
-                { metric: "< 5 min", label: "Time to first signal", detail: "Average time from first connector activation to first business-relevant signal surfaced." },
-              ].map((p, i) => (
-                <div key={p.label} className="p-7" style={{ background: "#0a0d14" }}>
-                  <span className="text-[2.2rem] font-extrabold font-mono block mb-1" style={{ color: "#d4a054" }}>{p.metric}</span>
-                  <p className="text-[11px] font-bold text-white mb-1.5">{p.label}</p>
-                  <p className="text-[11px] leading-[1.7]" style={{ color: "rgba(255,255,255,0.25)" }}>{p.detail}</p>
-                </div>
-              ))}
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {[
-                { quote: "I used to lose two hours in ops syncs every Monday. Lyte surfaces everything that needs my attention before I open a single tool. My calendar cleared itself.", attribution: "VP Operations, SaaS Company", context: "350-person org, 11 tools connected" },
-                { quote: "We identified $1.8M in stalled pipeline within the first week. Three deals had no owner after a rep departure. Lyte surfaced the ownership gap before the quarter closed.", attribution: "Chief Revenue Officer, Enterprise Software", context: "Salesforce + HubSpot integration" },
-                { quote: "As a CFO, the approval drag visibility was the first thing that got my attention. Fourteen procurement approvals sitting 35+ days — costing us 60 days of delayed vendor onboarding.", attribution: "CFO, Infrastructure Services Group", context: "NetSuite + ServiceNow integration" },
-              ].map((t, i) => (
-                <div key={i} className="p-7 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
-                  <p className="text-[14px] leading-[1.85] mb-5 italic" style={{ color: "rgba(255,255,255,0.45)" }}>"{t.quote}"</p>
-                  <p className="text-[12px] font-semibold text-white mb-0.5">{t.attribution}</p>
-                  <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.25)" }}>{t.context}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      </Reveal>
-
       {/* CTA CLOSE */}
       <Reveal>
         <section className="relative py-28 sm:py-36 px-6">
-          <div className="max-w-[640px] mx-auto text-center">
+          <div className="max-w-[600px] mx-auto text-center">
             <h2 className="text-[clamp(1.5rem,3.5vw,2.25rem)] font-bold text-white mb-4 tracking-tight">
               In the dark, let Lyte guide you.
             </h2>
             <p className="text-[15px] mb-12" style={{ color: "rgba(255,255,255,0.25)" }}>
               Connect your first tool in under 5 minutes. See what you've been missing.
             </p>
-            <div className="flex justify-center flex-wrap gap-3 mb-8">
+            <div className="flex justify-center flex-wrap gap-3">
               <button onClick={onSignIn} className="text-[14px] font-semibold rounded-lg px-8 py-3.5 flex items-center gap-2 transition-all" style={{ background: "#d4a054", color: "#0a0d14" }}>
                 Start Free Trial <ArrowRight size={15} />
               </button>
@@ -687,20 +583,9 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
                 Schedule a Demo
               </button>
             </div>
-            <p className="text-[11px] mb-6" style={{ color: "rgba(255,255,255,0.12)" }}>
+            <p className="text-[11px] mt-8" style={{ color: "rgba(255,255,255,0.12)" }}>
               Enterprise inquiries: <a href="mailto:contact@stephenl.dev" className="underline" style={{ color: "rgba(212,160,84,0.4)" }}>contact@stephenl.dev</a>
             </p>
-            <div className="pt-6 border-t" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-              <p className="text-[11px] mb-3" style={{ color: "rgba(255,255,255,0.15)" }}>Part of the SZL Holdings platform family</p>
-              <div className="flex flex-wrap gap-4 justify-center text-[11px]" style={{ color: "rgba(255,255,255,0.2)" }}>
-                <a href="/szl-holdings/" className="hover:text-white/50 transition-colors">SZL Holdings →</a>
-                <a href="/szl-holdings/trust" className="hover:text-white/50 transition-colors">Trust Center →</a>
-                <a href="/szl-holdings/architecture" className="hover:text-white/50 transition-colors">Architecture →</a>
-                <a href="/terra/" className="hover:text-white/50 transition-colors">Terra →</a>
-                <a href="/vessels/" className="hover:text-white/50 transition-colors">Vessels →</a>
-                <a href="/firestorm/" className="hover:text-white/50 transition-colors">Aegis →</a>
-              </div>
-            </div>
           </div>
         </section>
       </Reveal>
@@ -719,14 +604,13 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
             <div className="flex items-center gap-2.5">
               <Zap size={12} style={{ color: "rgba(212,160,84,0.4)" }} />
               <span className="text-[12px] font-semibold" style={{ color: "rgba(255,255,255,0.2)" }}>Lyte</span>
-              <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.1)" }}>An SZL Holdings Company</span>
+              <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.1)" }}>by SZL Holdings</span>
             </div>
             <div className="flex items-center gap-4">
               {[
                 { name: "Terra", href: "/terra/" },
                 { name: "Vessels", href: "/vessels/" },
                 { name: "Aegis", href: "/firestorm/" },
-                { name: "PRISM Counsel", href: "/prism-counsel/" },
                 { name: "Carlota Jo", href: "/carlota-jo/" },
                 { name: "SZL", href: "/szl-holdings/" },
               ].map(l => (
@@ -735,18 +619,15 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
             </div>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-[10px] text-center sm:text-left" style={{ color: "rgba(255,255,255,0.08)" }}>&copy; 2026 SZL Holdings. All rights reserved.</p>
+            <p className="text-[10px] text-center sm:text-left" style={{ color: "rgba(255,255,255,0.08)" }}>&copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
             <div className="flex items-center gap-4">
               <a href="https://x.com/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.1)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.1)")}>X</a>
               <a href="https://linkedin.com/company/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.1)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.1)")}>LinkedIn</a>
               <a href="https://medium.com/@stephen_38454" target="_blank" rel="noopener noreferrer" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.1)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.1)")}>Medium</a>
-              <a href="/legal/privacy" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.1)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.1)")}>Privacy</a>
-              <a href="/legal/terms" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.1)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.1)")}>Terms</a>
-              <a href="/security" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.1)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.1)")}>Security</a>
             </div>
           </div>
         </div>
       </footer>
-    </m.div>
+    </div>
   );
 }

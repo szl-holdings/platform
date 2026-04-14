@@ -20,9 +20,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.vessels.maritime.mobile",
       "buildNumber": "1",
-      "associatedDomains": ["applinks:vessels.ai", "applinks:app.vessels.ai"],
       "infoPlist": {
-        "NSFaceIDUsageDescription": "Vessels uses Face ID for secure fleet commander authentication.",
         "NSLocationWhenInUseUsageDescription": "Vessels uses your location to show nearby fleet activity.",
         "NSCameraUsageDescription": "Vessels uses your camera to scan vessel QR codes.",
         "ITSAppUsesNonExemptEncryption": false
@@ -53,21 +51,11 @@
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#020d18"
       },
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "autoVerify": true,
-          "data": [{ "scheme": "https", "host": "vessels.ai" }, { "scheme": "https", "host": "app.vessels.ai" }],
-          "category": ["BROWSABLE", "DEFAULT"]
-        }
-      ],
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.RECEIVE_BOOT_COMPLETED",
-        "android.permission.VIBRATE",
-        "android.permission.USE_BIOMETRIC",
-        "android.permission.USE_FINGERPRINT"
+        "android.permission.VIBRATE"
       ]
     },
     "web": {
@@ -83,12 +71,6 @@
       "expo-font",
       "expo-web-browser",
       "expo-secure-store",
-      [
-        "expo-local-authentication",
-        {
-          "faceIDPermission": "Allow Vessels to use Face ID for secure fleet commander access."
-        }
-      ],
       [
         "expo-notifications",
         {
@@ -106,9 +88,6 @@
       "eas": {
         "projectId": "vessels-mobile"
       },
-      "description": "Vessels — Maritime Fleet Intelligence. Real-time AIS tracking, sanctions screening (OFAC/EU), dark vessel detection, geopolitical risk monitoring, and weather routing for maritime operations commanders.",
-      "keywords": "maritime, fleet tracking, AIS, vessel, sanctions, OFAC, shipping, dark vessel, geopolitical risk, fleet management",
-      "category": "Business",
       "supportUrl": "https://vessels.ai/support",
       "privacyUrl": "https://vessels.ai/privacy",
       "termsUrl": "https://vessels.ai/terms"

@@ -3,10 +3,7 @@ import { useState, useEffect } from "react";
 import React from "react";
 import { analytics } from "@/lib/analytics";
 import { DataProvenance, ActionLoop, RoleSelector } from "@szl-holdings/shared-ui";
-import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
 import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
-import { AIInsightCard } from "@szl-holdings/shared-ui/ai-insight-card";
-import { useDomainInsights, type DomainInsight } from "@szl-holdings/shared-ui/use-ai-agent";
 import { Link } from "wouter";
 import {
   ChevronRight, Zap, Target, Activity,
@@ -111,7 +108,6 @@ const PRISM = [
 export default function Dashboard() {
   const [activeRole, setActiveRole] = useState("operator");
   const [auditSignal, setAuditSignal] = useState<LyteSignal | null>(null);
-  const { insights: opsInsights, isStale: opsInsightsStale } = useDomainInsights("lyte", 3, 60_000);
 
   useEffect(() => {
     const start = Date.now();
@@ -208,31 +204,6 @@ export default function Dashboard() {
   return (
     <div className="p-3 lg:p-4 space-y-3" style={{ maxWidth: 1440 }}>
 
-      {/* AI Signals */}
-      <AIInsightCard domain="lyte" accentColor="hsl(38, 72%, 55%)" maxInsights={2} compact title="Operational Intelligence" />
-
-      {opsInsights.length > 0 && (
-        <div className="rounded-lg p-3" style={{ background: BG.elevated, border: `1px solid ${BORDER.accent}` }}>
-          <div className="flex items-center gap-2 mb-2">
-            <Target className="w-3 h-3" style={{ color: "hsl(38, 72%, 55%)" }} />
-            <span className="text-[10px] font-mono font-bold uppercase tracking-widest" style={{ color: "hsl(38, 72%, 55%)" }}>AI Operational Recommendations</span>
-            {opsInsightsStale && <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">cached</span>}
-          </div>
-          <div className="space-y-1.5">
-            {opsInsights.filter((ins: DomainInsight) => ins.recommendedAction).map((ins: DomainInsight) => (
-              <div key={ins.id} className="flex items-start gap-2 px-2.5 py-1.5 rounded-lg" style={{ background: BG.surface, border: `1px solid ${BORDER.subtle}` }}>
-                <AlertTriangle className={`w-3 h-3 mt-0.5 shrink-0 ${ins.severity === "critical" ? "text-red-400" : ins.severity === "high" ? "text-amber-400" : "text-slate-400"}`} />
-                <div className="flex-1 min-w-0">
-                  <div className="text-[11px] font-medium" style={{ color: TEXT.primary }}>{ins.title}</div>
-                  <div className="text-[10px] mt-0.5" style={{ color: TEXT.secondary }}>{ins.recommendedAction}</div>
-                </div>
-                <span className="text-[9px] font-mono shrink-0 mt-0.5" style={{ color: TEXT.tertiary }}>{Math.round(ins.confidence * 100)}%</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -255,7 +226,6 @@ export default function Dashboard() {
       </div>
 
       {/* KPI Strip — dense cockpit style */}
-      <SectionErrorBoundary sectionName="KPI Strip">
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-px rounded overflow-hidden" style={{ background: BORDER.subtle }}>
         {metrics.map(m => (
           <div key={m.label} className="px-3 py-2.5 relative" style={{ background: BG.surface }}>
@@ -268,10 +238,8 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
-      </SectionErrorBoundary>
 
       {/* PRISM strip with scores */}
-      <SectionErrorBoundary sectionName="PRISM Strip">
       <div className="grid grid-cols-5 gap-1.5">
         {PRISM.map(p => {
           const scoreColor = p.score >= 70 ? "#6b8f71" : p.score >= 50 ? "#c8953c" : "#c45a4a";
@@ -295,7 +263,6 @@ export default function Dashboard() {
           );
         })}
       </div>
-      </SectionErrorBoundary>
 
       {/* Role context bar */}
       {activeRole && (
@@ -314,7 +281,6 @@ export default function Dashboard() {
       )}
 
       {/* Main grid */}
-      <SectionErrorBoundary sectionName="Signal Intelligence Grid">
       <div className="grid grid-cols-12 gap-3">
 
         {/* Left column — priority actions + signal timeline */}
@@ -575,8 +541,6 @@ export default function Dashboard() {
         { id: "5", label: "Escalate vendor renewal gap to COO", severity: "medium", type: "escalate" },
       ]} />
 
-      <CausalAIPanel />
-
       {/* Audit Trace Drawer */}
       {auditSignal && (
         <div className="fixed inset-0 z-50 flex" onClick={() => setAuditSignal(null)}>
@@ -651,93 +615,6 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-    </SectionErrorBoundary>
-    </div>
-  );
-}
-
-type LyteCausalGraph = {
-  incident_id: string;
-  root_cause_id: string;
-  root_cause_service: string;
-  root_cause_type: string;
-  root_cause_description: string;
-  confidence: number;
-  affected_services: string[];
-  computed_at: string;
-};
-
-function CausalAIPanel() {
-  const causalGraphs = useQuery({
-    queryKey: ["lyte-causal-graphs"],
-    queryFn: async () => {
-      const res = await fetch("/api/lyte/causal-graphs");
-      if (!res.ok) throw new Error("fetch failed");
-      return res.json() as Promise<LyteCausalGraph[]>;
-    },
-    staleTime: 60000,
-    retry: false,
-  });
-
-  const predictiveAlerts = useQuery({
-    queryKey: ["lyte-predictive-alerts"],
-    queryFn: async () => {
-      const res = await fetch("/api/lyte/predictive-alerts");
-      if (!res.ok) throw new Error("fetch failed");
-      return res.json() as Promise<{ alerts: Array<{ alert_id: string; service: string; slo_type: string; breach_probability: number; time_to_breach_minutes: number; trend_direction: string; contributing_factors: string[] }>; count: number; source: string }>;
-    },
-    staleTime: 30000,
-    retry: false,
-  });
-
-  const graphs = causalGraphs.data;
-  const alerts = predictiveAlerts.data;
-
-  return (
-    <div className="mx-4 mb-4 rounded-xl border p-4 space-y-4" style={{ borderColor: "rgba(212,160,84,0.2)", background: "rgba(212,160,84,0.03)" }}>
-      <div className="flex items-center gap-2">
-        <GitBranch className="w-4 h-4" style={{ color: "#d4a054" }} />
-        <span className="text-sm font-semibold text-white">Causal AI & Predictive SLO · 2026</span>
-        <span className="text-[8px] px-1.5 py-0.5 rounded font-mono uppercase" style={{ background: "rgba(212,160,84,0.1)", color: "#d4a054", border: "1px solid rgba(212,160,84,0.2)" }}>Autonomous</span>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>Causal Root Analysis</div>
-          {graphs && graphs.length > 0 ? (
-            <div className="space-y-2">
-              {graphs.slice(0, 3).map(g => (
-                <div key={g.root_cause_id} className="rounded p-2" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
-                  <div className="text-[10px] truncate font-medium" style={{ color: "rgba(255,255,255,0.7)" }}>{g.root_cause_service}</div>
-                  <div className="text-[9px] mt-0.5 truncate" style={{ color: "rgba(212,160,84,0.7)" }}>{g.root_cause_type.replace(/_/g, " ")}</div>
-                  <div className="text-[8px] font-mono mt-1" style={{ color: "rgba(255,255,255,0.3)" }}>{Math.round(Number(g.confidence) * 100)}% confidence</div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>{causalGraphs.isLoading ? "Analyzing..." : "No causal graphs — run POST /lyte/causal-analysis to generate"}</div>
-          )}
-        </div>
-
-        <div>
-          <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>SLO Breach Predictions</div>
-          {alerts ? (
-            <div className="space-y-1.5">
-              {alerts.alerts.slice(0, 4).map(a => (
-                <div key={a.alert_id} className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: a.breach_probability >= 0.8 ? "#ef4444" : a.breach_probability >= 0.6 ? "#f97316" : "#f59e0b" }} />
-                  <span className="text-[10px] flex-1 truncate" style={{ color: "rgba(255,255,255,0.6)" }}>{a.service}</span>
-                  <span className="text-[8px] font-mono" style={{ color: a.breach_probability >= 0.8 ? "#ef4444" : "#f59e0b" }}>{Math.round(a.breach_probability * 100)}%</span>
-                  <span className="text-[8px]" style={{ color: "rgba(255,255,255,0.25)" }}>{a.time_to_breach_minutes}m</span>
-                </div>
-              ))}
-              {alerts.count === 0 && <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>No active SLO threats</div>}
-            </div>
-          ) : (
-            <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>{predictiveAlerts.isLoading ? "Loading..." : "No predictions"}</div>
-          )}
-        </div>
-      </div>
     </div>
   );
 }

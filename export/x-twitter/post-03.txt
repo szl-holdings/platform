@@ -1,9 +1,0 @@
-People ask why I built 16 applications as one person.
-
-The real question is: why do most companies need 16 teams to build one?
-
-When the architecture is right, one person can do what an organization does — because every platform compounds the same foundation.
-
-One monorepo. One schema. One mind.
-
-szlholdings.com

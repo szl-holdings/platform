@@ -7,7 +7,7 @@ import { VesselsGraphQLPanel } from "@/components/graphql-data-panel";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Link } from "wouter";
-import { Ship, Globe, MapPin, X, ChevronRight, Radio, Shield, Clock, AlertTriangle, Eye, EyeOff, Anchor, TrendingUp, Package, BarChart3, Leaf, Activity } from "lucide-react";
+import { Ship, Globe, MapPin, X, ChevronRight, Radio, Shield, Clock, AlertTriangle, Eye, EyeOff, Anchor, TrendingUp, Package, BarChart3 } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import { ExportButton } from "@szl-holdings/shared-ui/data-export";
 import { ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
@@ -836,84 +836,6 @@ export default function FleetDashboard() {
       </div>
 
       <VesselsGraphQLPanel />
-      <DigitalTwinDecarbPanel />
-    </div>
-  );
-}
-
-type DecarbVoyage = {
-  voyage_id: string;
-  vessel_name: string;
-  departure_port: string;
-  arrival_port: string;
-  cii_score: number;
-  cii_rating: string;
-  co2_emissions_mt: number;
-  fuel_consumed_mt: number;
-  distance_nm: number;
-};
-
-function DigitalTwinDecarbPanel() {
-  const fleet = useQuery({
-    queryKey: ["vessels-decarb-fleet"],
-    queryFn: async () => {
-      const res = await fetch("/api/vessels/decarbonization/fleet");
-      if (!res.ok) throw new Error("fetch failed");
-      return res.json() as Promise<{
-        voyages: DecarbVoyage[];
-        fleetSummary: { averageCiiScore: number; fleetCiiRating: string; totalCo2EmissionsMT: number; eexiCompliantVessels: number; totalVessels: number; co2ReductionTargetPct: number };
-        source: string;
-      }>;
-    },
-    staleTime: 60000,
-    retry: false,
-  });
-
-  const data = fleet.data;
-
-  return (
-    <div className="shrink-0 mx-4 mb-4 rounded-xl border p-4 space-y-4" style={{ borderColor: "rgba(16,185,129,0.2)", background: "rgba(16,185,129,0.03)" }}>
-      <div className="flex items-center gap-2">
-        <Leaf className="w-4 h-4" style={{ color: "#10b981" }} />
-        <span className="text-sm font-semibold text-white">Decarbonization Dashboard · 2026</span>
-        <span className="text-[8px] px-1.5 py-0.5 rounded font-mono uppercase" style={{ background: "rgba(16,185,129,0.1)", color: "#10b981", border: "1px solid rgba(16,185,129,0.2)" }}>IMO 2028</span>
-      </div>
-
-      {data?.fleetSummary && (
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: "Fleet CII", value: `${data.fleetSummary.fleetCiiRating} (${data.fleetSummary.averageCiiScore.toFixed(1)})`, color: data.fleetSummary.fleetCiiRating <= "B" ? "#10b981" : data.fleetSummary.fleetCiiRating <= "C" ? "#f59e0b" : "#ef4444" },
-            { label: "Total CO₂", value: `${(data.fleetSummary.totalCo2EmissionsMT / 1000).toFixed(1)}kt`, color: "#f97316" },
-            { label: "EEXI Compliant", value: `${data.fleetSummary.eexiCompliantVessels}/${data.fleetSummary.totalVessels}`, color: "#0ea5e9" },
-          ].map(m => (
-            <div key={m.label} className="rounded p-2.5 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
-              <div className="text-[9px]" style={{ color: "rgba(255,255,255,0.35)" }}>{m.label}</div>
-              <div className="text-[11px] font-mono font-semibold mt-0.5" style={{ color: m.color }}>{m.value}</div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div>
-        <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>Recent Voyage Emissions</div>
-        {data ? (
-          <div className="space-y-1.5">
-            {data.voyages.slice(0, 4).map(v => (
-              <div key={v.voyage_id} className="flex items-center gap-2">
-                <span className="text-[9px] px-1 rounded font-mono font-bold shrink-0" style={{
-                  background: v.cii_rating === "A" || v.cii_rating === "B" ? "rgba(16,185,129,0.15)" : v.cii_rating === "C" ? "rgba(245,158,11,0.15)" : "rgba(239,68,68,0.15)",
-                  color: v.cii_rating === "A" || v.cii_rating === "B" ? "#10b981" : v.cii_rating === "C" ? "#f59e0b" : "#ef4444",
-                }}>{v.cii_rating}</span>
-                <span className="text-[10px] flex-1 truncate" style={{ color: "rgba(255,255,255,0.7)" }}>{v.vessel_name}</span>
-                <span className="text-[8px] font-mono" style={{ color: "rgba(255,255,255,0.35)" }}>{v.departure_port} → {v.arrival_port}</span>
-                <Activity className="w-2.5 h-2.5 shrink-0" style={{ color: "rgba(16,185,129,0.6)" }} />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>{fleet.isLoading ? "Loading fleet data..." : "No data"}</div>
-        )}
-      </div>
     </div>
   );
 }

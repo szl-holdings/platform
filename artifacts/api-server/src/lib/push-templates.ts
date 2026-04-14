@@ -15,12 +15,7 @@ export type NotificationTemplate =
   | "carlota_message"
   | "lyte_kpi_alert"
   | "lyte_escalation"
-  | "lyte_milestone"
-  | "szl_portfolio_update"
-  | "szl_digest_ready"
-  | "szl_approval_required"
-  | "stephen_contact_received"
-  | "stephen_system_update";
+  | "lyte_milestone";
 
 export type TemplateVars = Record<string, string | number>;
 
@@ -159,51 +154,6 @@ export function buildPushMessage(template: NotificationTemplate, vars: TemplateV
         data: { screen: "/milestones", templateId: template, ...vars },
         sound: null,
         channelId: "lyte-milestones",
-      };
-
-    case "szl_portfolio_update":
-      return {
-        title: `Portfolio Update — ${vars.venture ?? "Venture"}`,
-        body: `${vars.update ?? "Your portfolio has a new update."} ${vars.detail ?? ""}`,
-        data: { screen: "/portfolio", type: "portfolio_update", templateId: template, ...vars },
-        sound: "default",
-        channelId: "szl-portfolio",
-      };
-
-    case "szl_digest_ready":
-      return {
-        title: `Executive Digest Ready`,
-        body: `Your ${vars.period ?? "weekly"} executive digest is ready. ${vars.highlights ?? ""}`,
-        data: { screen: "/pulse", type: "pulse", templateId: template, ...vars },
-        sound: null,
-        channelId: "szl-digest",
-      };
-
-    case "szl_approval_required":
-      return {
-        title: `Approval Required`,
-        body: `${vars.requestTitle ?? "A request"} is awaiting your approval.`,
-        data: { screen: "/pulse", type: "pulse", templateId: template, ...vars },
-        sound: "default",
-        channelId: "szl-approvals",
-      };
-
-    case "stephen_contact_received":
-      return {
-        title: `New Contact Request`,
-        body: `${vars.senderName ?? "Someone"} has reached out via your portfolio site.`,
-        data: { screen: "/", type: "contact", templateId: template, ...vars },
-        sound: "default",
-        channelId: "stephen-contacts",
-      };
-
-    case "stephen_system_update":
-      return {
-        title: `System Update`,
-        body: `${vars.message ?? "A system update is available for your review."}`,
-        data: { screen: "/", type: "system", templateId: template, ...vars },
-        sound: null,
-        channelId: "stephen-system",
       };
 
     default:

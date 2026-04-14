@@ -223,28 +223,7 @@ export default function FaqPage() {
               </m.div>
             ))}
 
-            <m.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }} style={{ marginTop: "2rem" }}>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(192,72%,48%)", marginBottom: "1.25rem" }}>Related Resources</p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0.75rem", marginBottom: "2.5rem" }}>
-                {[
-                  { label: "Trust Center", href: "/trust", color: "hsl(145,62%,46%)" },
-                  { label: "Platform Architecture", href: "/architecture", color: "hsl(258,55%,68%)" },
-                  { label: "Solutions", href: "/solutions", color: "hsl(38,72%,58%)" },
-                  { label: "Academy", href: "/academy", color: "hsl(192,72%,48%)" },
-                  { label: "Investor Overview", href: "/investor", color: "hsl(38,72%,58%)" },
-                  { label: "Live Demos", href: "/demos", color: "hsl(206,72%,52%)" },
-                ].map((link) => (
-                  <Link key={link.label} href={link.href} style={{ textDecoration: "none", color: "inherit" }}>
-                    <div className="szl-card" style={{ borderRadius: "0.625rem", padding: "0.875rem 1rem", cursor: "pointer", transition: "border-color 0.2s", display: "flex", alignItems: "center", gap: "0.625rem" }}>
-                      <div style={{ width: "4px", height: "14px", borderRadius: "2px", background: link.color }} />
-                      <span style={{ fontSize: "0.875rem", fontWeight: 500 }}>{link.label}</span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </m.div>
-
-            <m.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }} className="szl-card" style={{ borderRadius: "0.875rem", padding: "clamp(1.5rem,3vw,2rem)" }}>
+            <m.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }} className="szl-card" style={{ borderRadius: "0.875rem", padding: "clamp(1.5rem,3vw,2rem)", marginTop: "2rem" }}>
               <h2 style={{ fontSize: "1.125rem", fontWeight: 600, letterSpacing: "-0.015em", marginBottom: "0.625rem" }}>Still have questions?</h2>
               <p style={{ fontSize: "0.9rem", lineHeight: 1.65, color: "hsl(214,7%,60%)", marginBottom: "1.25rem" }}>
                 For anything not covered here — demos, diligence conversations, partnership inquiries, or technical questions — reach out directly.
@@ -253,8 +232,7 @@ export default function FaqPage() {
                 <Link href="/contact" className="szl-btn-primary">
                   Get in touch <ArrowRight size={14} />
                 </Link>
-                <Link href="/help" className="szl-btn-secondary">Help Center →</Link>
-                <Link href="/docs" className="szl-btn-ghost">Documentation →</Link>
+                <Link href="/docs" className="szl-btn-secondary">Documentation →</Link>
               </div>
             </m.div>
           </div>

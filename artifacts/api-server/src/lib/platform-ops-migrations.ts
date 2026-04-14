@@ -40,9 +40,13 @@ export async function ensurePlatformOpsTables(): Promise<void> {
 
   const statements = parseMigrationStatements(migrationSql);
 
-  for (const statement of statements) {
-    await pool.query(statement);
+  try {
+    for (const statement of statements) {
+      await pool.query(statement);
+    }
+    logger.info({ statementCount: statements.length, migrationFile }, "Platform ops tables (workflow_runs, artifact_approvals) ensured from migration file");
+  } catch (err) {
+    logger.error({ err }, "Failed to apply platform ops migration");
+    throw err;
   }
-
-  logger.info({ statementCount: statements.length, migrationFile }, "Platform ops tables ensured");
 }

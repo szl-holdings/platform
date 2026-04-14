@@ -5,7 +5,7 @@
 
 import { registerTelemetryHandler, type ModelRouterTelemetry } from "@szl-holdings/ai-engine";
 import { genAITelemetry } from "@szl-holdings/observability";
-import { logger } from "./logger";
+import { logger } from "./logger.js";
 
 let registered = false;
 

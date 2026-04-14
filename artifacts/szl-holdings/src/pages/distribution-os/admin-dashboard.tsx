@@ -5,8 +5,7 @@ import {
   LayoutDashboard, FileText, Mail, Image, Twitter, Users, Megaphone,
   Calendar, BarChart3, Settings, Zap, TrendingUp, Eye, UserPlus, Send,
   AlertCircle, ChevronRight, Globe, Link2, Target, Clock, CheckCircle2,
-  Activity, RefreshCw, LineChart, GitBranch, Shield, Video, Flame, FlaskConical,
-  ScrollText,
+  Activity, RefreshCw, LineChart,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 
@@ -35,27 +34,16 @@ const NAV_ITEMS = [
   { href: "/admin/distribution/campaigns", icon: Megaphone, label: "Campaigns" },
   { href: "/admin/distribution/articles", icon: FileText, label: "Articles" },
   { href: "/admin/distribution/newsletters", icon: Mail, label: "Newsletters" },
-  { href: "/admin/distribution/email-campaigns", icon: Send, label: "Email Campaigns" },
-  { href: "/admin/distribution/drip-sequences", icon: GitBranch, label: "Drip Sequences" },
   { href: "/admin/distribution/carousel-lab", icon: Image, label: "Carousel Lab" },
   { href: "/admin/distribution/x-studio", icon: Twitter, label: "X Studio" },
   { href: "/admin/distribution/calendar", icon: Calendar, label: "Calendar" },
   { href: "/admin/distribution/analytics", icon: BarChart3, label: "Analytics" },
-  { href: "/admin/distribution/analytics/command-center", icon: Activity, label: "Command Center" },
-  { href: "/admin/distribution/analytics/sessions", icon: ScrollText, label: "Session Journeys" },
-  { href: "/admin/distribution/analytics/goals", icon: Target, label: "Conv. Goals" },
-  { href: "/admin/distribution/session-replay", icon: Video, label: "Session Replay" },
-  { href: "/admin/distribution/heatmaps", icon: Flame, label: "Heatmaps" },
-  { href: "/admin/distribution/experiments", icon: FlaskConical, label: "A/B Experiments" },
   { href: "/admin/distribution/reports", icon: LineChart, label: "Reports" },
   { href: "/admin/distribution/automations", icon: Zap, label: "Automations" },
-  { href: "/admin/distribution/privacy", icon: Shield, label: "Privacy" },
   { href: "/admin/distribution/settings", icon: Settings, label: "Settings" },
 ];
 
-export function DistributionOsLayout({ children, currentPath: currentPathProp }: { children: React.ReactNode; currentPath?: string }) {
-  const [location] = useLocation();
-  const currentPath = currentPathProp ?? location;
+export function DistributionOsLayout({ children, currentPath }: { children: React.ReactNode; currentPath: string }) {
   return (
     <div style={{ minHeight: "100vh", background: "#070a10" }}>
       <SiteNav />
@@ -65,9 +53,7 @@ export function DistributionOsLayout({ children, currentPath: currentPathProp }:
             <h2 style={{ fontSize: "0.6875rem", fontWeight: 700, color: "#d4a054", letterSpacing: "0.1em", textTransform: "uppercase" }}>Marketing OS</h2>
           </div>
           {NAV_ITEMS.map(item => {
-            const active = item.href === "/admin/distribution"
-              ? currentPath === item.href
-              : currentPath === item.href || currentPath.startsWith(item.href + "/");
+            const active = currentPath === item.href || currentPath.startsWith(item.href + "/");
             return (
               <a
                 key={item.href}

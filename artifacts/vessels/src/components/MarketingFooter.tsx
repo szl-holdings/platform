@@ -9,18 +9,15 @@ const productLinks = [
 ];
 
 const ecosystemLinks = [
-  { label: "SZL Holdings", href: "/szl-holdings/" },
-  { label: "Lyte", href: "/lyte-command-center/" },
-  { label: "Terra", href: "/terra/" },
-  { label: "Aegis", href: "/firestorm/" },
-  { label: "PRISM Counsel", href: "/prism-counsel/" },
+  { label: "SZL Holdings", href: "/" },
   { label: "Carlota Jo", href: "/carlota-jo/" },
+  { label: "Stephen Site", href: "/stephen/" },
 ];
 
 const legalLinks = [
   { label: "Privacy", href: "/legal/privacy" },
   { label: "Terms", href: "/legal/terms" },
-  { label: "Security", href: "/security" },
+  { label: "Contact", href: "/demo" },
 ];
 
 export function MarketingFooter() {
@@ -35,10 +32,9 @@ export function MarketingFooter() {
               </div>
               <span className="font-bold text-[14px] text-sky-50">Vessels</span>
             </div>
-            <p className="text-sky-300/30 text-[13px] leading-relaxed max-w-xs mb-1">
-              Maritime intelligence platform for fleet executives, operations, and commercial teams.
+            <p className="text-sky-300/30 text-[13px] leading-relaxed max-w-xs mb-3">
+              Maritime intelligence platform for fleet executives, operations, and commercial teams. Built by SZL Holdings.
             </p>
-            <p className="text-sky-300/20 text-[11px] font-mono mb-3">An SZL Holdings Company</p>
           </div>
 
           <div>
@@ -70,7 +66,7 @@ export function MarketingFooter() {
 
         <div className="pt-6 border-t border-sky-500/10 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-sky-400/20 text-[12px]">
-            &copy; 2026 Vessels · SZL Holdings. All rights reserved.
+            &copy; {new Date().getFullYear()} Vessels · SZL Holdings. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
             <a href="https://x.com/szlholdings" target="_blank" rel="noopener noreferrer" className="text-sky-400/20 text-[12px] hover:text-sky-300/50 transition-colors">X</a>

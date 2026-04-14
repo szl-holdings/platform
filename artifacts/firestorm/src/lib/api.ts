@@ -180,11 +180,6 @@ export const api = {
     evidenceQuery: (data: { query: string; caseId?: string; incidentId?: string; sourceTypes?: string[]; maxResults?: number; minRelevance?: number }) =>
       apiFetch<any>("/firestorm/tradecraft/evidence-index/query", { method: "POST", body: JSON.stringify(data) }),
   },
-  businessImpact: {
-    incidentImpact: (incidentId: number) => apiFetch<any>(`/firestorm/incident-impact/${incidentId}`),
-    revenueAtRisk: () => apiFetch<any>("/firestorm/business-impact/revenue-at-risk"),
-    historical: () => apiFetch<any>("/firestorm/business-impact/historical"),
-  },
   command: {
     posture: () => apiFetch<any>("/firestorm/command/posture"),
     investigations: () => apiFetch<any>("/firestorm/command/investigations"),

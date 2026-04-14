@@ -69,7 +69,7 @@ export function Contact() {
               ))}
             </div>
             <div className="border-t border-white/5 pt-6">
-              <p className="text-[12px] text-muted-foreground/40">inquiries@szlholdings.com</p>
+              <p className="text-[12px] text-muted-foreground/40">contact@stephenl.dev</p>
               <p className="text-[12px] text-muted-foreground/40 mt-1">London, UK</p>
             </div>
           </div>

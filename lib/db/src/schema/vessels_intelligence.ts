@@ -12,7 +12,7 @@ export const fleetExceptionsTable = pgTable("fleet_exceptions", {
   vesselId: integer("vessel_id").references(() => vesselsTable.id, { onDelete: "cascade" }),
   voyageId: integer("voyage_id").references(() => voyagesTable.id, { onDelete: "set null" }),
   exceptionRef: text("exception_ref").notNull(),
-  exceptionType: text("exception_type", { enum: ["route_deviation", "delay_risk", "port_congestion", "weather_disruption", "maintenance_risk", "fuel_anomaly", "schedule_variance", "security_alert", "ais_dark", "sanctions_match", "overdue_arrival", "inspection_failure", "predicted_evasion"] }).notNull(),
+  exceptionType: text("exception_type", { enum: ["route_deviation", "delay_risk", "port_congestion", "weather_disruption", "maintenance_risk", "fuel_anomaly", "schedule_variance", "security_alert", "ais_dark", "sanctions_match", "overdue_arrival", "inspection_failure"] }).notNull(),
   severity: text("severity", { enum: ["critical", "high", "watch", "normal"] }).notNull().default("watch"),
   title: text("title").notNull(),
   description: text("description").notNull(),

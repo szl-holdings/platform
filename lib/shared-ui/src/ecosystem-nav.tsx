@@ -10,8 +10,6 @@ import {
 import { DemoModeSwitcher } from "./demo-mode";
 import { SandboxToggle } from "./sandbox-mode";
 import { useAuth } from "@szl-holdings/replit-auth-web";
-import { useColorMode } from "./use-color-mode";
-import { useAppTransition, AppTransitionOverlay } from "./app-transition";
 
 export interface EcosystemApp {
   id: string;
@@ -45,7 +43,7 @@ export interface EcosystemNavProps {
   userRole?: string;
 }
 
-export const ECOSYSTEM_APPS: EcosystemApp[] = [
+const ECOSYSTEM_APPS: EcosystemApp[] = [
   {
     id: "szl-holdings",
     name: "SZL Holdings",
@@ -54,6 +52,15 @@ export const ECOSYSTEM_APPS: EcosystemApp[] = [
     accent: "#94a3b8",
     icon: "◆",
     description: "Premium Command Systems Ecosystem",
+  },
+  {
+    id: "alloy",
+    name: "Alloy",
+    subtitle: "Engine · SZL Holdings Module",
+    path: "/alloy",
+    accent: "#60a5fa",
+    icon: "⬡",
+    description: "Execution Fabric & Orchestration Engine",
   },
   {
     id: "lyte",
@@ -109,15 +116,6 @@ export const ECOSYSTEM_APPS: EcosystemApp[] = [
     icon: "○",
     description: "Systems, Visibility, and Execution",
   },
-  {
-    id: "prism-counsel",
-    name: "PRISM Counsel",
-    subtitle: "Platform · Legal Matter Command",
-    path: "/prism-counsel/",
-    accent: "#c8a96e",
-    icon: "⚖",
-    description: "Legal Matter Intelligence Platform",
-  },
 ];
 
 const LEVEL_COLORS: Record<EcosystemNotification["level"], string> = {
@@ -152,13 +150,12 @@ function useClickOutside(ref: React.RefObject<HTMLElement | null>, handler: () =
   }, [ref]);
 }
 
-function AppGridIcon({ app, isCurrent, onNavigate }: { app: EcosystemApp; isCurrent: boolean; onNavigate?: (app: EcosystemApp) => void }) {
+function AppGridIcon({ app, isCurrent }: { app: EcosystemApp; isCurrent: boolean }) {
   return (
     <a
       href={app.path}
       aria-label={`${app.name}${isCurrent ? " (current)" : ""}`}
       aria-current={isCurrent ? "page" : undefined}
-      onClick={onNavigate && !isCurrent ? (e) => { e.preventDefault(); onNavigate(app); } : undefined}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -224,11 +221,9 @@ function AppGridIcon({ app, isCurrent, onNavigate }: { app: EcosystemApp; isCurr
 function DoctrineLayerSection({
   layer,
   currentAppId,
-  onNavigate,
 }: {
   layer: DoctrineLayer;
   currentAppId: string;
-  onNavigate?: (app: EcosystemApp) => void;
 }) {
   const layerApps = DOCTRINE_APP_MAP.filter((c) => c.layers.includes(layer));
   if (layerApps.length === 0) return null;
@@ -270,7 +265,6 @@ function DoctrineLayerSection({
               key={app.id}
               href={app.path}
               title={docApp.primaryRole}
-              onClick={onNavigate && !isCurrent ? (e) => { e.preventDefault(); onNavigate(app); } : undefined}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -319,11 +313,9 @@ function DoctrineLayerSection({
 function AppSwitcherPanel({
   currentAppId,
   onClose,
-  onNavigate,
 }: {
   currentAppId: string;
   onClose: () => void;
-  onNavigate?: (app: EcosystemApp) => void;
 }) {
   const [viewMode, setViewMode] = useState<"layer" | "grid">("layer");
 
@@ -416,7 +408,7 @@ function AppSwitcherPanel({
       {viewMode === "layer" ? (
         <div>
           {DOCTRINE_LAYER_ORDER.map((layer) => (
-            <DoctrineLayerSection key={layer} layer={layer} currentAppId={currentAppId} onNavigate={onNavigate} />
+            <DoctrineLayerSection key={layer} layer={layer} currentAppId={currentAppId} />
           ))}
         </div>
       ) : (
@@ -428,7 +420,7 @@ function AppSwitcherPanel({
           }}
         >
           {ECOSYSTEM_APPS.map((app) => (
-            <AppGridIcon key={app.id} app={app} isCurrent={app.id === currentAppId} onNavigate={onNavigate} />
+            <AppGridIcon key={app.id} app={app} isCurrent={app.id === currentAppId} />
           ))}
         </div>
       )}
@@ -967,6 +959,7 @@ function getDomainSearchResults(q: string): SearchResult[] {
   const searchableContent = [
     { keywords: ["fleet", "vessel", "ship", "port", "maritime", "route", "anchor"], app: "Vessels", icon: "🚢", accent: "#4a90b8", href: "/vessels/", items: ["Fleet Dashboard", "Port Analytics", "Route Planning", "Risk Scoring", "Dark Vessel Detection"] },
     { keywords: ["signal", "workflow", "observability", "playbook", "ops", "anomaly", "business", "escalation"], app: "Lyte", icon: "⚡", accent: "#d4a054", href: "/lyte-command-center/", items: ["Command Inbox", "Approvals Center", "Ownership Map", "Escalation Center", "Intervention Workspace"] },
+    { keywords: ["alloy", "automation", "connector", "workflow", "orchestration", "execution", "run"], app: "Alloy", icon: "⬡", accent: "#60a5fa", href: "/alloy/", items: ["Execution Runs", "Workflow Orchestration", "Connector Mesh", "Governance", "Automation Analytics"] },
     { keywords: ["brand", "consulting", "advisory", "discreet", "residence", "estate", "private"], app: "Carlota Jo", icon: "◈", accent: "#d4b896", href: "/carlota-jo/", items: ["Services", "Approach", "Private Inquiry"] },
     { keywords: ["founder", "stephen", "lutar", "systems", "visibility", "writing", "frameworks"], app: "Stephen Lutar", icon: "○", accent: "#94a3b8", href: "/stephen/", items: ["Work", "Frameworks", "Writing", "Contact"] },
   ];
@@ -1046,9 +1039,6 @@ export function EcosystemNav({
   const [showAppSwitcher, setShowAppSwitcher] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
-
-  const { toggle: toggleColorMode, resolved: colorModeResolved } = useColorMode();
-  const { navigate: navigateToApp } = useAppTransition();
 
   const appSwitcherRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
@@ -1247,36 +1237,6 @@ export function EcosystemNav({
             </span>
           </button>
 
-          <button
-            onClick={toggleColorMode}
-            aria-label={colorModeResolved === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-            title={colorModeResolved === "dark" ? "Light mode" : "Dark mode"}
-            style={{
-              width: "34px",
-              height: "34px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.09)",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontSize: "15px",
-              transition: "all 0.15s",
-              color: "rgba(255,255,255,0.55)",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.08)";
-              (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.8)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
-              (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.55)";
-            }}
-          >
-            {colorModeResolved === "dark" ? "☀" : "☾"}
-          </button>
-
           <div ref={notificationsRef} style={{ position: "relative" }}>
             <button
               onClick={() => {
@@ -1382,16 +1342,6 @@ export function EcosystemNav({
               <AppSwitcherPanel
                 currentAppId={currentAppId}
                 onClose={() => setShowAppSwitcher(false)}
-                onNavigate={(app) => {
-                  setShowAppSwitcher(false);
-                  navigateToApp({
-                    toAppId: app.id,
-                    toAppName: app.name,
-                    toPath: app.path,
-                    accentColor: app.accent,
-                    icon: app.icon,
-                  });
-                }}
               />
             )}
           </div>
@@ -1482,8 +1432,6 @@ export function EcosystemNav({
           onSearch={onSearch}
         />
       )}
-
-      <AppTransitionOverlay accentColor={accentColor} />
 
       <style>{`
         @media (min-width: 640px) {

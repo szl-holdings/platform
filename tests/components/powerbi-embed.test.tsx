@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { PowerBiEmbed, type PowerBiEmbedConfig } from "@szl-holdings/shared-ui";
+import { PowerBiEmbed, type PowerBiEmbedConfig } from "../../lib/shared-ui/src/powerbi-embed";
 
 const mockConfig: PowerBiEmbedConfig = {
   reportId: "test-report-id",

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cn, formatDate, formatCurrency, formatNumber } from "@szl-holdings/shared-ui";
+import { cn, formatDate, formatCurrency, formatNumber } from "../../lib/shared-ui/src/utils";
 
 describe("cn (class merge utility)", () => {
   it("merges class names correctly", () => {

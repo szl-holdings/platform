@@ -11,10 +11,10 @@ function usePrismHealth() {
 const DEMO_SUBSYSTEMS = [
   { name: "API Server", status: "operational", latencyMs: 42, uptime: "99.98%", lastError: null, detail: "All PRISM Counsel API routes responding normally" },
   { name: "Job Queue (pc_background_jobs)", status: "operational", latencyMs: null, uptime: "99.9%", lastError: null, detail: "0 stuck jobs, queue depth nominal", extra: "12 completed in last hour" },
-  { name: "Dead Letter Queue", status: "warn", latencyMs: null, uptime: null, lastError: "2026-04-02T11:00:00Z", detail: "2 unresolved DLQ events — manual review required", replayPath: "/pilot-admin" },
+  { name: "Dead Letter Queue", status: "warn", latencyMs: null, uptime: null, lastError: "2026-04-02T11:00:00Z", detail: "2 unresolved DLQ events — manual review required", replayPath: "/prism-counsel/pilot-admin" },
   { name: "Azure Document Intelligence", status: "operational", latencyMs: 1240, uptime: "99.5%", lastError: null, detail: "Extraction pipeline healthy — 156 jobs completed today" },
   { name: "Microsoft Graph Connector", status: "operational", latencyMs: 145, uptime: "99.7%", lastError: null, detail: "Outlook, Teams, SharePoint syncing normally" },
-  { name: "Purview Bridge", status: "warn", latencyMs: 320, uptime: null, lastError: null, detail: "Export quota at 78% — no action required yet", replayPath: "/admin/purview" },
+  { name: "Purview Bridge", status: "warn", latencyMs: 320, uptime: null, lastError: null, detail: "Export quota at 78% — no action required yet", replayPath: "/prism-counsel/admin/purview" },
   { name: "Worldline Signal Refinery", status: "operational", latencyMs: 88, uptime: "99.9%", lastError: null, detail: "7 source classes active, 3,883 signals indexed" },
   { name: "PostgreSQL Database", status: "operational", latencyMs: 8, uptime: "100%", lastError: null, detail: "37 tables, all connections healthy, pool at 4/20" },
   { name: "Proof Chain Service", status: "operational", latencyMs: 15, uptime: "100%", lastError: null, detail: "SHA-256 hash integrity — 6 entries pending review" },

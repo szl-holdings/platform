@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Platform } from "react-native";
 import * as Notifications from "expo-notifications";
-import { router, type Href } from "expo-router";
 import { apiPost } from "@/lib/apiClient";
 
 Notifications.setNotificationHandler({
@@ -95,28 +94,8 @@ export function usePushNotifications() {
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(
       (response) => {
-        const data = response.notification.request.content.data as Record<string, unknown>;
-        const INCIDENTS_HREF: Href = { pathname: "/(tabs)/incidents" };
-        const FINDINGS_HREF: Href = { pathname: "/(tabs)/findings" };
-        try {
-          if (data?.type === "incident") {
-            if (data?.incidentId) {
-              const incidentHref: Href = { pathname: "/incident/[id]", params: { id: String(data.incidentId) } };
-              router.push(incidentHref);
-            } else {
-              router.push(INCIDENTS_HREF);
-            }
-          } else if (data?.type === "intelligence" || data?.type === "threat" || data?.type === "asset") {
-            if (data?.findingId) {
-              const findingHref: Href = { pathname: "/finding/[id]", params: { id: String(data.findingId) } };
-              router.push(findingHref);
-            } else {
-              router.push(FINDINGS_HREF);
-            }
-          }
-        } catch {
-          console.warn("[Push] Navigation failed for:", data?.type);
-        }
+        const data = response.notification.request.content.data;
+        console.log("[Push] Notification tapped:", data);
       },
     );
 

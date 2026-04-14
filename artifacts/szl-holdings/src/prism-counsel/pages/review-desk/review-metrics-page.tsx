@@ -71,7 +71,7 @@ export default function ReviewMetricsPage() {
   const m = data ?? DEMO_METRICS;
   const isLive = !!data;
 
-  const maxBacklog = Math.max(...Object.values(m.backlogByType as Record<string, number> ?? {}));
+  const maxBacklog = Math.max(...Object.values(m.backlogByType ?? {}));
 
   return (
     <div className="p-6 max-w-[1100px] mx-auto space-y-5">
@@ -122,8 +122,8 @@ export default function ReviewMetricsPage() {
             <div className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
               <h3 className="text-sm font-semibold text-slate-200 mb-3">Backlog by Review Type</h3>
               <div className="space-y-0">
-                {Object.entries(m.backlogByType as Record<string, number> ?? {}).sort(([, a], [, b]) => (b as number) - (a as number)).map(([type, count]) => (
-                  <BacklogBar key={type} label={TYPE_LABELS[type] ?? type} count={count as number} max={maxBacklog} />
+                {Object.entries(m.backlogByType ?? {}).sort(([, a], [, b]) => b - a).map(([type, count]) => (
+                  <BacklogBar key={type} label={TYPE_LABELS[type] ?? type} count={count} max={maxBacklog} />
                 ))}
               </div>
               <div className="mt-3 pt-3 border-t border-white/[0.04] flex items-center justify-between">

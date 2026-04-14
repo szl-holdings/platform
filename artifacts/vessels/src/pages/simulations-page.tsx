@@ -11,7 +11,6 @@ import { Progress } from "@szl-holdings/shared-ui/ui/progress";
 import { Activity, Play, Clock, AlertTriangle, CheckCircle, TrendingDown, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { type VesselsSimulation, type VesselsRoute, type VesselSummary } from "@/lib/api";
 
 const statusColors: Record<string, string> = {
   pending: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
@@ -72,21 +71,21 @@ function SimSkeleton() {
 
 export default function SimulationsPage() {
   const qc = useQueryClient();
-  const { data: simulations = [], isLoading } = useQuery<VesselsSimulation[]>({ queryKey: ["simulations"], queryFn: api.simulations.list });
-  const { data: vessels = [] } = useQuery<VesselSummary[]>({ queryKey: ["vessels"], queryFn: api.vessels.list });
-  const { data: routes = [] } = useQuery<VesselsRoute[]>({ queryKey: ["routes"], queryFn: api.routes.list });
+  const { data: simulations = [], isLoading } = useQuery({ queryKey: ["simulations"], queryFn: api.simulations.list });
+  const { data: vessels = [] } = useQuery({ queryKey: ["vessels"], queryFn: api.vessels.list });
+  const { data: routes = [] } = useQuery({ queryKey: ["routes"], queryFn: api.routes.list });
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", vesselId: "", routeId: "", simulationType: "route_risk" });
 
   const createMut = useMutation({
-    mutationFn: (data: Parameters<typeof api.simulations.create>[0]) => api.simulations.create(data),
+    mutationFn: (data: any) => api.simulations.create(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["simulations"] });
       setOpen(false);
       toast.success("Simulation started");
       setTimeout(() => qc.invalidateQueries({ queryKey: ["simulations"] }), 4000);
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: any) => toast.error(e.message),
   });
 
   const handleCreate = () => {
@@ -130,14 +129,14 @@ export default function SimulationsPage() {
                 <Label>Vessel (optional)</Label>
                 <Select value={form.vesselId} onValueChange={v => setForm(p => ({ ...p, vesselId: v }))}>
                   <SelectTrigger><SelectValue placeholder="Select vessel" /></SelectTrigger>
-                  <SelectContent>{vessels.map((v) => <SelectItem key={v.id} value={String(v.id)}>{v.name}</SelectItem>)}</SelectContent>
+                  <SelectContent>{vessels.map((v: any) => <SelectItem key={v.id} value={String(v.id)}>{v.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div>
                 <Label>Route (optional)</Label>
                 <Select value={form.routeId} onValueChange={v => setForm(p => ({ ...p, routeId: v }))}>
                   <SelectTrigger><SelectValue placeholder="Select route" /></SelectTrigger>
-                  <SelectContent>{routes.map((r) => <SelectItem key={r.id} value={String(r.id)}>{r.originPort} → {r.destinationPort}</SelectItem>)}</SelectContent>
+                  <SelectContent>{routes.map((r: any) => <SelectItem key={r.id} value={String(r.id)}>{r.originPort} → {r.destinationPort}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <Button onClick={handleCreate} disabled={createMut.isPending} className="w-full">{createMut.isPending ? "Starting..." : "Start Simulation"}</Button>
@@ -162,11 +161,11 @@ export default function SimulationsPage() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {simulations.map((sim, i) => {
-            const vessel = vessels.find((v) => v.id === sim.vesselId);
-            const route = routes.find((r) => r.id === sim.routeId);
+          {simulations.map((sim: any, i: number) => {
+            const vessel = vessels.find((v: any) => v.id === sim.vesselId);
+            const route = routes.find((r: any) => r.id === sim.routeId);
             const riskScore = sim.riskScore ? Number(sim.riskScore) : null;
-            const results = sim.results;
+            const results = sim.results as any;
             const isRunning = sim.status === "running";
 
             return (
@@ -216,19 +215,19 @@ export default function SimulationsPage() {
                         <p className="text-xs text-muted-foreground mb-1">Overall Risk</p>
                         <p className={`text-xl font-bold font-display ${getRiskColor(riskScore)}`}>{riskScore.toFixed(1)}</p>
                       </div>
-                      {results?.weatherRisk != null && (
+                      {results?.weatherRisk && (
                         <div className={`${getRiskBg(Number(results.weatherRisk))} rounded-lg p-3 text-center border border-transparent hover:border-primary/10 transition-colors`}>
                           <p className="text-xs text-muted-foreground mb-1">Weather Risk</p>
                           <p className={`text-xl font-bold font-display ${getRiskColor(Number(results.weatherRisk))}`}>{Number(results.weatherRisk).toFixed(1)}</p>
                         </div>
                       )}
-                      {results?.routeRisk != null && (
+                      {results?.routeRisk && (
                         <div className={`${getRiskBg(Number(results.routeRisk))} rounded-lg p-3 text-center border border-transparent hover:border-primary/10 transition-colors`}>
                           <p className="text-xs text-muted-foreground mb-1">Route Risk</p>
                           <p className={`text-xl font-bold font-display ${getRiskColor(Number(results.routeRisk))}`}>{Number(results.routeRisk).toFixed(1)}</p>
                         </div>
                       )}
-                      {results?.scheduleRisk != null && (
+                      {results?.scheduleRisk && (
                         <div className={`${getRiskBg(Number(results.scheduleRisk))} rounded-lg p-3 text-center border border-transparent hover:border-primary/10 transition-colors`}>
                           <p className="text-xs text-muted-foreground mb-1">Schedule Risk</p>
                           <p className={`text-xl font-bold font-display ${getRiskColor(Number(results.scheduleRisk))}`}>{Number(results.scheduleRisk).toFixed(1)}</p>
@@ -237,11 +236,11 @@ export default function SimulationsPage() {
                     </div>
                   )}
 
-                  {results?.recommendations != null && Array.isArray(results.recommendations) && (
+                  {results?.recommendations && Array.isArray(results.recommendations) && (
                     <div className="mt-3 pt-3 border-t border-border">
                       <p className="text-xs text-muted-foreground mb-2">Recommendations</p>
                       <ul className="space-y-1">
-                        {(results.recommendations as string[]).map((rec, idx) => (
+                        {results.recommendations.map((rec: string, idx: number) => (
                           <li key={idx} className="text-xs flex items-start gap-2">
                             <TrendingDown className="w-3 h-3 text-primary mt-0.5 shrink-0" />
                             <span>{rec}</span>

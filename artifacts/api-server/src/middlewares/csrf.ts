@@ -46,10 +46,6 @@ function isExempt(path: string): boolean {
   if (path.startsWith("/api/alloy/integrations/webhooks/receive/")) return true;
   if (path === "/api/mcp" || path.startsWith("/api/mcp/")) return true;
   if (path.match(/^\/api\/distribution-os\/linktree\/\d+\/click$/)) return true;
-  if (path.startsWith("/api/alloy/evolution/")) return true;
-  if (path.startsWith("/api/alloy/experts/")) return true;
-  if (path.startsWith("/api/alloy/threats/")) return true;
-  if (path.startsWith("/api/alloy/ml/")) return true;
   return false;
 }
 

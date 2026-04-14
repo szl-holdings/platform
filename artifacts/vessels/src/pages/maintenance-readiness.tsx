@@ -159,9 +159,9 @@ export default function MaintenanceReadinessPage() {
     refetchInterval: 120_000,
   });
 
-  const { data: liveVessels = [] } = useQuery<{ id: number; name: string }[]>({
+  const { data: liveVessels = [] } = useQuery({
     queryKey: ["vessels-list"],
-    queryFn: () => api.vessels.list() as Promise<{ id: number; name: string }[]>,
+    queryFn: () => api.vessels.list(),
   });
 
   const vesselNameMap = useMemo(() => {

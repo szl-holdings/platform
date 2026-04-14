@@ -101,7 +101,7 @@ export default function FleetAPMPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider">Avg EEXI</p>
-                <p className="text-2xl font-bold font-display mt-1">{vessels.length > 0 ? (vessels.reduce((s, v) => s + (v.eexi ?? 0), 0) / vessels.length).toFixed(1) : 0}</p>
+                <p className="text-2xl font-bold font-display mt-1">{vessels.length > 0 ? (vessels.reduce((s, v) => s + v.eexi, 0) / vessels.length).toFixed(1) : 0}</p>
                 <div className="flex items-center gap-1 mt-1">
                   <ArrowDownRight className="w-3 h-3 text-emerald-400" />
                   <span className="text-xs text-emerald-400">-2.1% improving</span>

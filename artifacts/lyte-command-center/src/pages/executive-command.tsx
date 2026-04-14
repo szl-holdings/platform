@@ -4,10 +4,9 @@ import {
   Activity, AlertTriangle, CheckCircle2, ChevronRight,
   Clock, Eye, Globe, Heart, Radio, Shield, TrendingDown,
   TrendingUp, Zap, BarChart3, Users, FileText, ArrowUpRight,
-  Target, Layers, DollarSign
+  Target, Layers
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getEnrichedDecisions, formatCostCompact } from "@/lib/decision-cost-xray";
 
 const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e", panel: "#0e1219" };
 const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.06)", accent: "rgba(45,212,191,0.12)" };
@@ -178,19 +177,6 @@ export default function ExecutiveCommandPage() {
     return sum + (p.riskValue.includes("M") ? v : v / 1000);
   }, 0);
 
-  const enrichedDecisions = getEnrichedDecisions();
-  const totalIndecisionCost = enrichedDecisions.reduce((s, d) => s + d.totalCostOfDelay, 0);
-  const thresholdBreaches = enrichedDecisions.filter(d => d.thresholdBreached).length;
-
-  function approvalCostOfDelay(ageStr: string, urgency: string): { cost: number; perHour: number } {
-    const hours = ageStr.includes("d")
-      ? parseInt(ageStr) * 24
-      : parseInt(ageStr);
-    const baseRate = urgency === "high" ? 2800 : urgency === "medium" ? 1600 : 800;
-    const perHour = baseRate + hours * 8;
-    return { cost: perHour * hours, perHour };
-  }
-
   return (
     <div className="p-4 md:p-5 space-y-5" style={{ background: BG.page }}>
       {/* Header */}
@@ -212,12 +198,6 @@ export default function ExecutiveCommandPage() {
             <div className="text-[11px] font-mono font-bold" style={{ color: "#c45a4a" }}>${totalRisk.toFixed(1)}M</div>
             <div className="text-[7px] uppercase tracking-wider" style={{ color: "rgba(196,90,74,0.55)" }}>At Risk</div>
           </div>
-          <Link href="/decision-cost-xray">
-            <div className="rounded px-2.5 py-1.5 text-center cursor-pointer hover:opacity-80 transition-opacity" style={{ background: "rgba(200,149,60,0.08)", border: `1px solid rgba(200,149,60,0.18)` }}>
-              <div className="text-[11px] font-mono font-bold" style={{ color: "#c8953c" }}>{formatCostCompact(totalIndecisionCost)}</div>
-              <div className="text-[7px] uppercase tracking-wider" style={{ color: "rgba(200,149,60,0.55)" }}>Indecision Cost</div>
-            </div>
-          </Link>
         </div>
       </div>
 
@@ -270,14 +250,7 @@ export default function ExecutiveCommandPage() {
               {t === "pressure" ? "Pressure Board" : "Movement Board"}
             </button>
           ))}
-          <div className="ml-auto px-3 flex items-center gap-2">
-            {tab === "pressure" && (
-              <Link href="/decision-cost-xray">
-                <span className="text-[8px] flex items-center gap-1" style={{ color: "#c8953c" }}>
-                  <DollarSign className="w-2.5 h-2.5" /> Cost X-Ray
-                </span>
-              </Link>
-            )}
+          <div className="ml-auto px-3">
             <Link href={tab === "pressure" ? "/blocker-board" : "/movement-board"}>
               <span className="text-[8px] flex items-center gap-1" style={{ color: TEXT.tertiary }}>
                 View all <ChevronRight className="w-3 h-3" />
@@ -340,49 +313,27 @@ export default function ExecutiveCommandPage() {
             <CheckCircle2 className="w-3.5 h-3.5" style={{ color: ELECTRIC }} />
             <span className="text-[11px] font-medium" style={{ color: TEXT.primary }}>Approval Overwatch</span>
             <span className="w-4 h-4 rounded text-[8px] font-mono flex items-center justify-center" style={{ background: "rgba(196,90,74,0.12)", color: "#c45a4a" }}>{PENDING_APPROVALS.length}</span>
-            {thresholdBreaches > 0 && (
-              <span className="text-[7px] font-bold uppercase tracking-widest px-1.5 rounded animate-pulse" style={{ color: "#ec4899", background: "#ec489912" }}>
-                {thresholdBreaches} breach{thresholdBreaches !== 1 ? "es" : ""}
-              </span>
-            )}
           </div>
-          <div className="flex items-center gap-2">
-            <Link href="/decision-cost-xray">
-              <span className="text-[8px] flex items-center gap-1" style={{ color: "#c8953c" }}>
-                <DollarSign className="w-2.5 h-2.5" /> Cost X-Ray
-              </span>
-            </Link>
-            <Link href="/approvals">
-              <span className="text-[9px] flex items-center gap-1" style={{ color: TEXT.tertiary }}>
-                Full console <ArrowUpRight className="w-3 h-3" />
-              </span>
-            </Link>
-          </div>
+          <Link href="/approvals">
+            <span className="text-[9px] flex items-center gap-1" style={{ color: TEXT.tertiary }}>
+              Full console <ArrowUpRight className="w-3 h-3" />
+            </span>
+          </Link>
         </div>
         <div className="divide-y" style={{ "--tw-divide-opacity": 1 } as any}>
-          {PENDING_APPROVALS.map((a) => {
-            const { cost, perHour } = approvalCostOfDelay(a.age, a.urgency);
-            const costColor = cost > 100000 ? "#c45a4a" : cost > 50000 ? "#c8953c" : "#d4a054";
-            return (
-              <div key={a.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-white/[0.02] transition-colors">
-                <span className="text-[8px] font-mono shrink-0" style={{ color: TEXT.tertiary }}>{a.id}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] truncate" style={{ color: TEXT.secondary }}>{a.title}</p>
-                  <span className="text-[8px]" style={{ color: TEXT.muted }}>{a.requestedBy}</span>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <div className="text-right">
-                    <div className="text-[10px] font-mono font-semibold" style={{ color: costColor }}>
-                      {formatCostCompact(cost)}
-                    </div>
-                    <div className="text-[7px] uppercase tracking-wider" style={{ color: TEXT.muted }}>delay cost</div>
-                  </div>
-                  <SeverityBadge sev={a.urgency} />
-                  <span className="text-[8px] font-mono" style={{ color: TEXT.muted }}>{a.age}</span>
-                </div>
+          {PENDING_APPROVALS.map(a => (
+            <div key={a.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-white/[0.02] transition-colors">
+              <span className="text-[8px] font-mono shrink-0" style={{ color: TEXT.tertiary }}>{a.id}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] truncate" style={{ color: TEXT.secondary }}>{a.title}</p>
+                <span className="text-[8px]" style={{ color: TEXT.muted }}>{a.requestedBy}</span>
               </div>
-            );
-          })}
+              <div className="flex items-center gap-2 shrink-0">
+                <SeverityBadge sev={a.urgency} />
+                <span className="text-[8px] font-mono" style={{ color: TEXT.muted }}>{a.age}</span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -390,7 +341,7 @@ export default function ExecutiveCommandPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {[
           { href: "/blocker-board", label: "Blocker Board", icon: AlertTriangle, color: "#c45a4a" },
-          { href: "/decision-cost-xray", label: "Cost X-Ray", icon: DollarSign, color: "#c8953c" },
+          { href: "/digest", label: "Digest Center", icon: FileText, color: "#d4a054" },
           { href: "/approvals", label: "Approvals", icon: CheckCircle2, color: ELECTRIC },
           { href: "/trust-audit", label: "Trust & Audit", icon: Shield, color: "#8b7ac8" },
         ].map(link => (

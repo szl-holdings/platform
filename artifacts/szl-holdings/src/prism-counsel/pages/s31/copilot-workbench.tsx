@@ -65,7 +65,7 @@ export default function CopilotWorkbenchPage() {
         sessionId = session.id;
         setActiveSessionId(session.id);
       }
-      await sendMessage.mutateAsync({ sessionId: sessionId!, content: input });
+      await sendMessage.mutateAsync({ sessionId, content: input });
     } catch {
       setDemoMessages(prev => [...prev, { role: "user", content: input }, { role: "assistant", content: `Processing your query in **${activeMode}** mode...\n\n*This is a demo response. Connect to the Model Mesh for live AI-powered answers with full Proof Chain traceability.*\n\n**Query**: "${input}"\n**Mode**: ${activeMode}\n**Sources**: Pressure Graph, Matter Twin, Proof Chain\n**Confidence**: 0.78` }]);
     }

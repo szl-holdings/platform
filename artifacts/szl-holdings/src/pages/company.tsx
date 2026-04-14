@@ -23,11 +23,11 @@ const PRODUCT_HIERARCHY = [
 ];
 
 const EXPANSION_LANES = [
-  { name: "PRISM Counsel", domain: "Legal observability", color: "hsl(38,72%,58%)", status: "Design partner stage", href: "/solutions/prism-counsel" },
-  { name: "Vessels", domain: "Maritime intelligence", color: "#4a90b8", status: "Design partner stage", href: "/solutions/vessels" },
-  { name: "Aegis", domain: "Security & defense", color: "#c85a5a", status: "Design partner stage", href: "/solutions/aegis" },
-  { name: "Terra", domain: "Real estate intelligence", color: "#5fa87a", status: "Design partner stage", href: "/solutions/terra" },
-  { name: "Carlota Jo", domain: "Private advisory", color: "#c8a05a", status: "Active", href: "/services/carlota-jo" },
+  { name: "PRISM Counsel", domain: "Legal observability", color: "#8b7ac8", status: "Design partner stage" },
+  { name: "Vessels", domain: "Maritime intelligence", color: "#4a90b8", status: "Design partner stage" },
+  { name: "Aegis", domain: "Security & defense", color: "#c85a5a", status: "Design partner stage" },
+  { name: "Terra", domain: "Real estate intelligence", color: "#5fa87a", status: "Design partner stage" },
+  { name: "Carlota Jo", domain: "Private advisory", color: "#c8a05a", status: "Active" },
 ];
 
 const GO_TO_MARKET = [
@@ -77,7 +77,7 @@ export default function CompanyPage() {
                   <p style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", marginBottom: "0.5rem" }}>
                     About SZL Holdings
                   </p>
-                  <p style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)" }}>Est. 2023 · Washington, D.C. · London · Singapore</p>
+                  <p style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)" }}>Est. 2023 · London · Owner-Operated</p>
                 </div>
               </div>
               <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 600, letterSpacing: "-0.026em", lineHeight: 1.1, maxWidth: "22ch", marginBottom: "1.5rem", color: "hsl(38,8%,96%)" }}>
@@ -165,20 +165,17 @@ export default function CompanyPage() {
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.625rem" }}>
               {EXPANSION_LANES.map((lane) => (
-                <Link key={lane.name} href={lane.href} style={{
+                <div key={lane.name} style={{
                   display: "flex", alignItems: "center", gap: "0.5rem",
                   padding: "0.5rem 0.875rem",
                   borderRadius: "0.375rem",
                   background: "hsla(0,0%,100%,0.025)",
                   border: "1px solid hsla(0,0%,100%,0.07)",
-                  textDecoration: "none",
-                  transition: "border-color 0.2s ease",
-                  cursor: "pointer",
                 }}>
                   <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: lane.color, flexShrink: 0 }} />
                   <span style={{ fontSize: "0.8125rem", fontWeight: 500, color: "hsl(38,8%,86%)" }}>{lane.name}</span>
                   <span style={{ fontSize: "0.6875rem", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)" }}>— {lane.domain}</span>
-                </Link>
+                </div>
               ))}
             </div>
           </div>

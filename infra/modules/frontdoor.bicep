@@ -237,7 +237,7 @@ resource swaRoutes 'Microsoft.Cdn/profiles/afdEndpoints/routes@2024-02-01' = [fo
     originGroup: {
       id: swaOriginGroups[i].id
     }
-    patternsToMatch: ['/${appName}/*']
+    patternsToMatch: appName == 'rosie' ? ['/*'] : ['/${appName}/*']
     forwardingProtocol: 'HttpsOnly'
     httpsRedirect: 'Enabled'
     linkToDefaultDomain: 'Enabled'
@@ -289,7 +289,7 @@ resource customDomainSwaRoutes 'Microsoft.Cdn/profiles/afdEndpoints/routes@2024-
     customDomains: [
       { id: customDomainResource.id }
     ]
-    patternsToMatch: ['/${appName}/*']
+    patternsToMatch: appName == 'rosie' ? ['/*'] : ['/${appName}/*']
     forwardingProtocol: 'HttpsOnly'
     httpsRedirect: 'Enabled'
     supportedProtocols: ['Http', 'Https']

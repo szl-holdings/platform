@@ -212,7 +212,7 @@ function PlaceholderSubpage({ subpageId }: { subpageId: string }) {
 }
 
 export default function MatterTwinPage() {
-  const [, params] = useRoute("/matters/:id/twin/:subpage?");
+  const [, params] = useRoute("/prism-counsel/matters/:id/twin/:subpage?");
   const [activeSubpage, setActiveSubpage] = useState<SubpageId>("summary");
   const matterId = parseInt(params?.id ?? "0");
 

@@ -1,8 +1,6 @@
 import { WORKFLOWS, APPROVALS, EVENTS, KPI_FRAMEWORK, DRIFT_EVENTS, formatCurrency, getSeverityColor, getStateColor, type Severity } from "@szl-holdings/shared-ui/core-observability-data";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { AlertTriangle, Clock, DollarSign, TrendingUp, TrendingDown, ArrowRight, Zap, Eye, Activity, CloudRain, Home } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { AlertTriangle, Clock, DollarSign, TrendingUp, TrendingDown, ArrowRight, Zap, Eye, Activity } from "lucide-react";
 
 function KpiCard({ label, value, trend, unit, description }: { label: string; value: string; trend: number; unit?: string; description?: string }) {
   const up = trend > 0;
@@ -189,8 +187,6 @@ export default function ExecutiveOverview() {
         </div>
       </div>
 
-      <LivingValuationsPanel />
-
       <div className="rounded-xl border p-5" style={{ borderColor: "rgba(14,165,233,0.2)", background: "rgba(14,165,233,0.04)" }}>
         <div className="flex items-center gap-2 mb-3">
           <TrendingUp className="w-4 h-4" style={{ color: "#0ea5e9" }} />
@@ -214,88 +210,6 @@ export default function ExecutiveOverview() {
             </div>
           ))}
         </div>
-      </div>
-    </div>
-  );
-}
-
-type TerraValuationProperty = {
-  property_id: string;
-  address: string;
-  current_valuation: number;
-  previous_valuation: number;
-  valuation_delta_pct: number;
-  confidence_score: number;
-  risk_tier: string;
-};
-
-function LivingValuationsPanel() {
-  const valuations = useQuery({
-    queryKey: ["terra-living-valuations"],
-    queryFn: async () => {
-      const res = await fetch("/api/terra/living-valuations");
-      if (!res.ok) throw new Error("fetch failed");
-      return res.json() as Promise<{ properties: TerraValuationProperty[]; totalCount: number; source: string; updatedAt: string }>;
-    },
-    staleTime: 30000,
-    retry: false,
-  });
-
-  const [tab, setTab] = useState<"values" | "risk">("values");
-  const data = valuations.data;
-
-  const totalVal = data
-    ? data.properties.reduce((s, p) => s + Number(p.current_valuation), 0)
-    : 0;
-
-  return (
-    <div className="rounded-xl border p-4 space-y-3" style={{ borderColor: "rgba(14,165,233,0.2)", background: "rgba(14,165,233,0.03)" }}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Home className="w-4 h-4" style={{ color: "#0ea5e9" }} />
-          <span className="text-sm font-semibold text-white">Living Valuations · 2026</span>
-          <span className="text-[8px] px-1.5 py-0.5 rounded font-mono uppercase" style={{ background: "rgba(14,165,233,0.1)", color: "#0ea5e9", border: "1px solid rgba(14,165,233,0.2)" }}>Real-Time</span>
-        </div>
-        <div className="flex gap-1">
-          {(["values", "risk"] as const).map(t => (
-            <button key={t} onClick={() => setTab(t)} className="text-[9px] px-2 py-0.5 rounded transition-colors" style={{ background: tab === t ? "rgba(14,165,233,0.15)" : "rgba(255,255,255,0.04)", color: tab === t ? "#0ea5e9" : "rgba(255,255,255,0.4)", border: `1px solid ${tab === t ? "rgba(14,165,233,0.3)" : "rgba(255,255,255,0.06)"}` }}>
-              {t === "values" ? "Live Values" : "Risk Tier"}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {data && totalVal > 0 && (
-        <div className="text-[10px] mb-1" style={{ color: "rgba(255,255,255,0.5)" }}>
-          Portfolio: <span className="font-mono font-semibold text-white">${(totalVal / 1e6).toFixed(1)}M</span>
-          <span className="ml-2 text-[8px]" style={{ color: "rgba(255,255,255,0.3)" }}>{data.source} · {data.totalCount} properties</span>
-        </div>
-      )}
-
-      <div className="space-y-1.5">
-        {data ? (
-          data.properties.slice(0, 4).map(p => (
-            <div key={p.property_id} className="flex items-center gap-2 py-1">
-              {tab === "values" ? (
-                <>
-                  <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: Number(p.valuation_delta_pct) >= 0 ? "#10b981" : "#ef4444" }} />
-                  <span className="text-[10px] flex-1 truncate" style={{ color: "rgba(255,255,255,0.7)" }}>{p.address}</span>
-                  <span className="text-[9px] font-mono font-semibold" style={{ color: Number(p.valuation_delta_pct) >= 0 ? "#10b981" : "#ef4444" }}>{Number(p.valuation_delta_pct) >= 0 ? "+" : ""}{Number(p.valuation_delta_pct).toFixed(2)}%</span>
-                  <span className="text-[8px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>${(Number(p.current_valuation) / 1e6).toFixed(1)}M</span>
-                </>
-              ) : (
-                <>
-                  <CloudRain className="w-2.5 h-2.5 shrink-0" style={{ color: p.risk_tier === "critical" ? "#ef4444" : p.risk_tier === "high" ? "#f97316" : "#10b981" }} />
-                  <span className="text-[10px] flex-1 truncate" style={{ color: "rgba(255,255,255,0.7)" }}>{p.address}</span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ background: p.risk_tier === "critical" ? "rgba(239,68,68,0.1)" : p.risk_tier === "high" ? "rgba(249,115,22,0.1)" : "rgba(245,158,11,0.1)", color: p.risk_tier === "critical" ? "#ef4444" : p.risk_tier === "high" ? "#f97316" : "#f59e0b" }}>{p.risk_tier}</span>
-                  <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.35)" }}>{Number(p.confidence_score * 100).toFixed(0)}% conf</span>
-                </>
-              )}
-            </div>
-          ))
-        ) : (
-          <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>{valuations.isLoading ? "Loading portfolio..." : "No valuation data available"}</div>
-        )}
       </div>
     </div>
   );

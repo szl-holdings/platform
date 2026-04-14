@@ -96,70 +96,12 @@ export class HubSpotAdapter extends ServiceAdapter {
 
   async listContacts(): Promise<HubSpotContact[]> {
     if (!this.isLive) return [...MOCK_CONTACTS];
-
-    try {
-      const data = (await this.hsRequest(
-        "/crm/v3/objects/contacts?limit=100&properties=email,firstname,lastname,company,lifecyclestage,lastmodifieddate",
-      )) as {
-        results: Array<{
-          id: string;
-          properties: {
-            email?: string;
-            firstname?: string;
-            lastname?: string;
-            company?: string;
-            lifecyclestage?: string;
-            lastmodifieddate?: string;
-          };
-        }>;
-      };
-
-      return data.results.map((r) => ({
-        id: r.id,
-        email: r.properties.email ?? "",
-        firstName: r.properties.firstname ?? "",
-        lastName: r.properties.lastname ?? "",
-        company: r.properties.company ?? "",
-        lifecycleStage: r.properties.lifecyclestage ?? "lead",
-        lastActivity: r.properties.lastmodifieddate ?? new Date().toISOString(),
-      }));
-    } catch {
-      return [...MOCK_CONTACTS];
-    }
+    return [...MOCK_CONTACTS];
   }
 
   async listDeals(): Promise<HubSpotDeal[]> {
     if (!this.isLive) return [...MOCK_DEALS];
-
-    try {
-      const data = (await this.hsRequest(
-        "/crm/v3/objects/deals?limit=100&properties=dealname,dealstage,amount,closedate,associations",
-      )) as {
-        results: Array<{
-          id: string;
-          properties: {
-            dealname?: string;
-            dealstage?: string;
-            amount?: string;
-            closedate?: string;
-          };
-          associations?: {
-            contacts?: { results: Array<{ id: string }> };
-          };
-        }>;
-      };
-
-      return data.results.map((r) => ({
-        id: r.id,
-        name: r.properties.dealname ?? "",
-        stage: r.properties.dealstage ?? "appointmentscheduled",
-        amount: parseFloat(r.properties.amount ?? "0"),
-        closeDate: r.properties.closedate ?? "",
-        contactId: r.associations?.contacts?.results?.[0]?.id ?? "",
-      }));
-    } catch {
-      return [...MOCK_DEALS];
-    }
+    return [...MOCK_DEALS];
   }
 
   async sync(): Promise<{ synced: number; timestamp: string }> {

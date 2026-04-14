@@ -1,7 +1,7 @@
 import { Scale, Clock, AlertTriangle, DollarSign, MapPin, Building2, Shield, ArrowRight, Eye, FileCheck, TrendingUp } from "lucide-react";
 import { Link } from "wouter";
 import { DEMO_MATTERS } from "../data/demo-matters";
-import { WATCHLIST_ITEMS, NO_FAULT_CLAIMS, VENUE_PROFILES, INSURER_PROFILES, CLOCK_RULES, DEMAND_PACKETS } from "../data/ny-data";
+import { WATCHLIST_ITEMS, NO_FAULT_CLAIMS, VENUE_PROFILES, INSURER_PROFILES, CLOCK_RULES, DEMAND_PACKETS } from "../data/demo-ny";
 
 export default function NYDashboardPage() {
   const nyMatters = DEMO_MATTERS.filter((m) => m.jurisdiction.includes("NY") || m.jurisdiction.includes("New York"));
@@ -49,7 +49,7 @@ export default function NYDashboardPage() {
           <div className="rounded-lg border border-white/[0.06] p-5" style={{ background: "#0c1220" }}>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-slate-200">Priority Watchlist</h2>
-              <Link href="/watchlist">
+              <Link href="/prism-counsel/watchlist">
                 <span className="text-[10px] text-[#4a90b8] hover:text-[#5aa0c8] cursor-pointer flex items-center gap-1">
                   View all <ArrowRight className="w-2.5 h-2.5" />
                 </span>
@@ -148,7 +148,7 @@ export default function NYDashboardPage() {
           <div className="rounded-lg border border-white/[0.06] p-5" style={{ background: "#0c1220" }}>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-slate-200">No-Fault Claims</h2>
-              <Link href="/no-fault">
+              <Link href="/prism-counsel/no-fault">
                 <span className="text-[10px] text-[#4a90b8] hover:text-[#5aa0c8] cursor-pointer flex items-center gap-1">
                   Details <ArrowRight className="w-2.5 h-2.5" />
                 </span>
@@ -178,7 +178,7 @@ export default function NYDashboardPage() {
           <div className="rounded-lg border border-white/[0.06] p-5" style={{ background: "#0c1220" }}>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-slate-200">Carrier Intelligence</h2>
-              <Link href="/insurer-intel">
+              <Link href="/prism-counsel/insurer-intel">
                 <span className="text-[10px] text-[#4a90b8] hover:text-[#5aa0c8] cursor-pointer flex items-center gap-1">
                   Full profiles <ArrowRight className="w-2.5 h-2.5" />
                 </span>
@@ -217,7 +217,7 @@ export default function NYDashboardPage() {
           <div className="rounded-lg border border-white/[0.06] p-5" style={{ background: "#0c1220" }}>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-slate-200">NY Venue Snapshot</h2>
-              <Link href="/venue-intel">
+              <Link href="/prism-counsel/venue-intel">
                 <span className="text-[10px] text-[#4a90b8] hover:text-[#5aa0c8] cursor-pointer flex items-center gap-1">
                   All venues <ArrowRight className="w-2.5 h-2.5" />
                 </span>

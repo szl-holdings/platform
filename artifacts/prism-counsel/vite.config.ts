@@ -5,7 +5,7 @@ import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 import fs from "fs";
 
-const port = Number(process.env.PORT) || 6800;
+const port = Number(process.env.PORT) || 26500;
 const basePath = process.env.BASE_PATH || "/prism-counsel/";
 
 const libRoot = path.resolve(import.meta.dirname, "../../lib");
@@ -103,7 +103,6 @@ export default defineConfig({
   },
   server: {
     port,
-    strictPort: true,
     host: "0.0.0.0",
     allowedHosts: true,
     fs: {

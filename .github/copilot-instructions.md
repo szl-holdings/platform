@@ -12,21 +12,18 @@ This is the **SZL Holdings Platform** — a pnpm monorepo hosted on Replit.
 
 ## Frontend apps (`artifacts/`)
 
-11 web applications + 1 design sandbox (React 19 + Vite 7 + Tailwind CSS 4):
+9 web applications (React 19 + Vite 7 + Tailwind CSS 4):
 
 | App | Package |
 |-----|---------|
-| SZL Holdings | `@workspace/szl-holdings` |
+| Admin Control Plane | `@workspace/admin-panel` |
+| Project List | `@workspace/project-list` |
 | Stephen Lutar | `@workspace/stephen-site` |
 | Vessels Maritime Intelligence | `@workspace/vessels` |
-| Aegis (Firestorm) Defense Command | `@workspace/firestorm` |
+| Firestorm Security Simulation | `@workspace/firestorm` |
 | Lyte Command Center | `@workspace/lyte-command-center` |
-| PRISM Counsel | `@workspace/prism-counsel` |
-| Terra Real Estate Intelligence | `@workspace/terra` |
-| Carlota Jo Advisory | `@workspace/carlota-jo` |
-| Forge Client & Investor Portal | `@workspace/forge` |
-| Nexus Cross-Domain Fusion Canvas | `@workspace/nexus` |
-| INCA Lab AI Model Command | `@workspace/inca-lab` |
+| Readiness Report | `@workspace/readiness-report` |
+| Dreamscape Creative Engine | `@workspace/dreamscape` |
 | Component Preview Server | `@workspace/mockup-sandbox` |
 
 All frontends use:
@@ -45,33 +42,19 @@ All frontends use:
 
 ## Shared libraries (`lib/`)
 
-28 shared libraries powering all platforms:
-
 | Library | Purpose |
 |---------|---------|
-| `@workspace/db` | Drizzle ORM schema and database client (600+ tables) |
-| `@workspace/ai-engine` | Multi-provider AI gateway (Anthropic, OpenAI, Gemini, Groq) |
-| `@workspace/shared-ui` | Design system — 80+ component exports |
-| `@workspace/services` | Shared business logic and external adapters |
-| `@workspace/workflow-engine` | Alloy execution fabric |
-| `@workspace/proof-chain` | Immutable audit trail engine |
-| `@workspace/covenant-policy` | Governance policy enforcement |
-| `@workspace/api-spec` | OpenAPI 3.1 specification and code generation |
+| `@workspace/db` | Drizzle ORM schema and database client |
 | `@workspace/api-client-react` | Generated React Query hooks from OpenAPI spec |
 | `@workspace/api-zod` | Zod schemas for API request/response validation |
-| `@workspace/auth` | OIDC/PKCE authentication utilities, 7-role RBAC |
-| `@workspace/audit` | Audit event logging and attribution |
-| `@workspace/analytics` | Event instrumentation and analytics |
-| `@workspace/observability` | OpenTelemetry traces and metrics |
-| `@workspace/prism-bus` | Cross-domain event bus |
-| `@workspace/receipt-graph` | Entity relationship and ontology graph |
-| `@workspace/mobile-ai` | AI integration for Expo mobile apps |
-| `@workspace/forge-runtime` | Forge portal runtime utilities |
-| `@workspace/mcp-client` | MCP protocol client |
-| `@workspace/graphql-client` | GraphQL client for data federation |
-| `@workspace/pulse-evals` | Evaluation harness for AI model quality |
-| `@workspace/worldline` | Timeline and temporal signal processing |
+| `@workspace/api-spec` | OpenAPI specification and code generation |
+| `@workspace/services` | Shared business logic services |
+| `@workspace/shared-ui` | Reusable React UI components |
 | `@workspace/config` | Shared configuration constants |
+| `@workspace/shared-types` | Shared TypeScript type definitions |
+| `@workspace/utils` | General utility functions |
+| `@workspace/notifications` | Notification system utilities |
+| `@workspace/auth` | Authentication utilities |
 
 ## Conventions
 

@@ -1,17 +1,17 @@
-import { authTypeDefs, authResolvers } from "./domains/auth";
-import { alloyTypeDefs, alloyResolvers, pubsub } from "./domains/alloy";
-import { firestormTypeDefs, firestormResolvers } from "./domains/firestorm";
-import { vesselsTypeDefs, vesselsResolvers } from "./domains/vessels";
-import { terraTypeDefs, terraResolvers } from "./domains/terra";
-import { lyteTypeDefs, lyteResolvers } from "./domains/lyte";
-import { holdingsTypeDefs, holdingsResolvers } from "./domains/holdings";
-import { stephenTypeDefs, stephenResolvers } from "./domains/stephen";
-import { carlotaJoTypeDefs, carlotaJoResolvers } from "./domains/carlota-jo";
-import { prismCounselTypeDefs, prismCounselResolvers } from "./domains/prism-counsel";
-import { prismCounselPilotOneTypeDefs, prismCounselPilotOneResolvers } from "./domains/prism-counsel-pilot-one";
-import { directiveTypeDefs } from "./directives";
-import { approvalsTypeDefs, approvalsResolvers } from "./domains/approvals";
-import { proofChainTypeDefs, proofChainResolvers } from "./domains/proof-chain";
+import { authTypeDefs, authResolvers } from "./domains/auth.js";
+import { alloyTypeDefs, alloyResolvers, pubsub } from "./domains/alloy.js";
+import { firestormTypeDefs, firestormResolvers } from "./domains/firestorm.js";
+import { vesselsTypeDefs, vesselsResolvers } from "./domains/vessels.js";
+import { terraTypeDefs, terraResolvers } from "./domains/terra.js";
+import { lyteTypeDefs, lyteResolvers } from "./domains/lyte.js";
+import { holdingsTypeDefs, holdingsResolvers } from "./domains/holdings.js";
+import { stephenTypeDefs, stephenResolvers } from "./domains/stephen.js";
+import { carlotaJoTypeDefs, carlotaJoResolvers } from "./domains/carlota-jo.js";
+import { prismCounselTypeDefs, prismCounselResolvers } from "./domains/prism-counsel.js";
+import { prismCounselPilotOneTypeDefs, prismCounselPilotOneResolvers } from "./domains/prism-counsel-pilot-one.js";
+import { directiveTypeDefs } from "./directives.js";
+import { approvalsTypeDefs, approvalsResolvers } from "./domains/approvals.js";
+import { proofChainTypeDefs, proofChainResolvers } from "./domains/proof-chain.js";
 
 const baseTypeDefs = `#graphql
   type Query {

@@ -119,7 +119,7 @@ function ContradictionCard({ c }: { c: any }) {
 }
 
 export default function ProofChainPage() {
-  const [, params] = useRoute("/matters/:id/proof-chain");
+  const [, params] = useRoute("/prism-counsel/matters/:id/proof-chain");
   const [view, setView] = useState<ProofView>("entries");
   const matterId = parseInt(params?.id ?? "0");
 

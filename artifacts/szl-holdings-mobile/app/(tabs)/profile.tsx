@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from "react";
-import { router, type Href } from "expo-router";
 import {
   View,
   Text,
@@ -21,7 +20,6 @@ import { usePushNotifications, registerForPushNotificationsAsync } from "@/hooks
 
 type FeatherIconName = React.ComponentProps<typeof Feather>["name"];
 
-const PRIVACY_HREF: Href = { pathname: "/privacy" };
 
 const COMPLIANCE_FRAMEWORKS: Array<{
   name: string;
@@ -356,9 +354,6 @@ export default function ProfileScreen() {
           >
             <Feather name="log-out" size={15} color="#ef4444" />
             <Text style={[styles.logoutBtnText, { color: "#ef4444" }]}>Sign Out</Text>
-          </Pressable>
-          <Pressable onPress={() => { Haptics.selectionAsync(); router.push(PRIVACY_HREF); }}>
-            <Text style={[styles.versionText, { color: "#c9a84c" }]}>Privacy Policy</Text>
           </Pressable>
           <Text style={[styles.versionText, { color: colors.mutedForeground }]}>
             SZL Holdings v1.0.0 · Build 2026.04.01

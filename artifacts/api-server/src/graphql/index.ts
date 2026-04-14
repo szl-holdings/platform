@@ -7,8 +7,8 @@ import depthLimit from "graphql-depth-limit";
 import type { Server as HttpServer } from "http";
 import type { Request, RequestHandler } from "express";
 import { WebSocketServer } from "ws";
-import { typeDefs, resolvers } from "./schema";
-import { logger } from "../lib/logger";
+import { typeDefs, resolvers } from "./schema.js";
+import { logger } from "../lib/logger.js";
 
 const MAX_QUERY_DEPTH = 10;
 

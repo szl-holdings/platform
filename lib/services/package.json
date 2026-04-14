@@ -18,13 +18,7 @@
       "import": "./src/index.ts"
     }
   },
-  "dependencies": {
-    "ioredis": "^5.3.2",
-    "ws": "^8.18.0"
-  },
   "devDependencies": {
-    "@types/ioredis": "^5.0.0",
-    "@types/node": "catalog:",
-    "@types/ws": "^8.5.13"
+    "@types/node": "catalog:"
   }
 }

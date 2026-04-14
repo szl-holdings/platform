@@ -3,7 +3,7 @@ import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 import { McpOverlay } from "@szl-holdings/mcp-client";
-import { PrismBusProvider } from "@szl-holdings/prism-bus/provider";
+import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { AnalyticsProvider } from "@szl-holdings/shared-ui";
 import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 import {
@@ -14,7 +14,6 @@ import {
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { helmsmanConfig } from "@szl-holdings/shared-ui/copilot-configs";
-import { AIStatusBar } from "@szl-holdings/shared-ui/ai-status-bar";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { toAlpha } from "@szl-holdings/shared-ui/utils";
 import { AuthProvider, useAuth as useVesselsRoleAuth, roleLabels, type UserRole } from "@/contexts/auth-context";
@@ -85,7 +84,6 @@ const VESSELS_ONBOARDING_CONFIG: OnboardingConfig = {
 
 // Marketing pages
 const VesselsAtlasArtifactsPage = lazy(() => import("@/pages/atlas-artifacts"));
-const AIIntelligencePage = lazy(() => import("@/pages/ai-intelligence"));
 const MarketingHomePage = lazy(() => import("@/pages/marketing-home"));
 const MarketingPlatformPage = lazy(() => import("@/pages/marketing-platform"));
 const MarketingCapabilitiesPage = lazy(() => import("@/pages/marketing-capabilities"));
@@ -96,7 +94,6 @@ const MarketingDemoPage = lazy(() => import("@/pages/marketing-demo"));
 const SignInPage = lazy(() => import("@/pages/marketing-sign-in"));
 const LegalPrivacyPage = lazy(() => import("@/pages/legal-privacy"));
 const LegalTermsPage = lazy(() => import("@/pages/legal-terms"));
-const GlobeCommandPage = lazy(() => import("@/pages/globe-command"));
 
 // Dashboard / product pages
 const CommandOverviewPage = lazy(() => import("@/pages/command-overview"));
@@ -131,17 +128,6 @@ const FleetWhatChangedPage = lazy(() => import("@/pages/fleet-what-changed"));
 const ExceptionQueuePage = lazy(() => import("@/pages/exception-queue"));
 const RouteRiskPage = lazy(() => import("@/pages/route-risk"));
 const VesselsApprovalReviewPage = lazy(() => import("@/pages/vessels-approval-review"));
-const VoyageInterventionSimulatorPage = lazy(() => import("@/pages/voyage-intervention-simulator"));
-const ReadinessDragIndexPage = lazy(() => import("@/pages/readiness-drag-index"));
-const PortFrictionMemoryPage = lazy(() => import("@/pages/port-friction-memory"));
-const FleetMorningBriefPage = lazy(() => import("@/pages/fleet-morning-brief"));
-const CommandModeTogglePage = lazy(() => import("@/pages/command-mode-toggle"));
-const VoyageDigitalTwinPage = lazy(() => import("@/pages/voyage-digital-twin"));
-const MaritimeKnowledgeGraphPage = lazy(() => import("@/pages/maritime-knowledge-graph"));
-const PredictiveCongestionPage = lazy(() => import("@/pages/predictive-congestion"));
-const FleetMorningBriefAiPage = lazy(() => import("@/pages/fleet-morning-brief-ai"));
-const ComplianceAutopilotPage = lazy(() => import("@/pages/compliance-autopilot"));
-const DarkPatternDecoderPage = lazy(() => import("@/pages/dark-pattern-decoder"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -177,7 +163,6 @@ const legacyNavItems = [
   { path: "/intelligence", label: "Maritime Intel", icon: Globe },
   { path: "/corridors", label: "Corridors", icon: Navigation },
   { path: "/agent-insights", label: "Agent Insights", icon: Brain },
-  { path: "/ai-intelligence", label: "AI Intelligence", icon: Brain },
   { path: "/command-workflows", label: "Command Workflows", icon: ShieldAlert },
   { path: "/document-engine", label: "Document Engine", icon: FileText },
 ];
@@ -289,29 +274,12 @@ function VesselsSidebarContent({ expanded, onMobileClose }: { expanded: boolean;
       id: "operations",
       label: "Operations",
       items: [
-        { id: "fleet-morning-brief", label: "Morning Brief", href: "/fleet-morning-brief", icon: <Activity className="w-3.5 h-3.5" /> },
         { id: "voyage-desk", label: "Voyage Desk", href: "/voyage-desk", icon: <Anchor className="w-3.5 h-3.5" /> },
         { id: "what-changed", label: "What Changed", href: "/what-changed", icon: <Radio className="w-3.5 h-3.5" /> },
         { id: "exception-queue", label: "Exceptions", href: "/exception-queue", icon: <AlertTriangle className="w-3.5 h-3.5" /> },
         { id: "route-risk", label: "Route Risk", href: "/route-risk", icon: <Navigation className="w-3.5 h-3.5" /> },
         { id: "approval-review", label: "Review & Approval", href: "/approval-review", icon: <Shield className="w-3.5 h-3.5" /> },
-        { id: "voyage-intervention-simulator", label: "Intervention Simulator", href: "/voyage-intervention-simulator", icon: <BarChart3 className="w-3.5 h-3.5" /> },
-        { id: "readiness-drag-index", label: "Drag Index", href: "/readiness-drag-index", icon: <AlertTriangle className="w-3.5 h-3.5" /> },
-        { id: "port-friction-memory", label: "Port Friction", href: "/port-friction-memory", icon: <MapPin className="w-3.5 h-3.5" /> },
-        { id: "command-mode-toggle", label: "Captain / Exec Mode", href: "/command-mode-toggle", icon: <User className="w-3.5 h-3.5" /> },
       ]
-    },
-    {
-      id: "ai-features",
-      label: "AI Intelligence",
-      items: [
-        { id: "fleet-morning-brief-ai", label: "AI Morning Brief", href: "/fleet-morning-brief-ai", icon: <Brain className="w-3.5 h-3.5" /> },
-        { id: "voyage-digital-twin", label: "Voyage Digital Twin", href: "/voyage-digital-twin", icon: <Navigation className="w-3.5 h-3.5" /> },
-        { id: "maritime-knowledge-graph", label: "Knowledge Graph", href: "/maritime-knowledge-graph", icon: <Globe className="w-3.5 h-3.5" /> },
-        { id: "predictive-congestion", label: "Congestion Forecast", href: "/predictive-congestion", icon: <Anchor className="w-3.5 h-3.5" /> },
-        { id: "compliance-autopilot", label: "Compliance Autopilot", href: "/compliance-autopilot", icon: <Shield className="w-3.5 h-3.5" /> },
-        { id: "dark-pattern-decoder", label: "Dark Pattern Decoder", href: "/dark-pattern-decoder", icon: <EyeOff className="w-3.5 h-3.5" /> },
-      ],
     },
     {
       id: "admin",
@@ -476,7 +444,6 @@ function DashboardRouter() {
         <Route path="/command" component={CommandModePage} />
         <Route path="/analytics" component={PerformanceAnalyticsPage} />
         <Route path="/intelligence" component={MaritimeIntelligence} />
-        <Route path="/ai-intelligence" component={AIIntelligencePage} />
         <Route path="/routes" component={CorridorRoutesPage} />
         <Route path="/alerts" component={AlertCenterPage} />
         <Route path="/weather" component={WeatherPage} />
@@ -501,18 +468,6 @@ function DashboardRouter() {
         <Route path="/exception-queue" component={ExceptionQueuePage} />
         <Route path="/route-risk" component={RouteRiskPage} />
         <Route path="/approval-review" component={VesselsApprovalReviewPage} />
-        <Route path="/voyage-intervention-simulator" component={VoyageInterventionSimulatorPage} />
-        <Route path="/readiness-drag-index" component={ReadinessDragIndexPage} />
-        <Route path="/port-friction-memory" component={PortFrictionMemoryPage} />
-        <Route path="/fleet-morning-brief" component={FleetMorningBriefPage} />
-        <Route path="/command-mode-toggle" component={CommandModeTogglePage} />
-        <Route path="/voyage-digital-twin" component={VoyageDigitalTwinPage} />
-        <Route path="/maritime-knowledge-graph" component={MaritimeKnowledgeGraphPage} />
-        <Route path="/predictive-congestion" component={PredictiveCongestionPage} />
-        <Route path="/fleet-morning-brief-ai" component={FleetMorningBriefAiPage} />
-        <Route path="/compliance-autopilot" component={ComplianceAutopilotPage} />
-        <Route path="/dark-pattern-decoder" component={DarkPatternDecoderPage} />
-        <Route path="/globe-command" component={GlobeCommandPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-sky-400/40">Page not found</p>
@@ -532,7 +487,6 @@ const vesselsCommands: CommandItem[] = [
   { id: "nav-command", label: "Command Mode", icon: "🎯", group: "Navigation", keywords: ["command", "operational", "focused"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/command"); } },
   { id: "app-lyte", label: "Switch to Lyte", icon: "⚡", group: "Switch App", description: "Business Observability", action: () => { window.location.href = "/lyte-command-center/"; } },
   { id: "app-alloy", label: "Switch to Alloy", icon: "⬡", group: "Switch App", description: "Execution Fabric", action: () => { window.location.href = "/alloy"; } },
-  { id: "nav-ai-intelligence", label: "AI Intelligence", icon: "🤖", group: "AI", description: "Maritime document analysis, sanctions screening AI actions", keywords: ["ai", "document", "intelligence", "sanctions", "manifest"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ai-intelligence"); } },
 ];
 
 const vesselsShortcuts: KeyboardShortcut[] = [
@@ -556,7 +510,6 @@ function VesselsDashboard({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpe
         <EcosystemNav currentAppId="vessels" currentAppName="Vessels Maritime Intelligence" accentColor={VESSELS_ACCENT} />
         <SandboxModeBanner />
         <DemoModeBanner />
-        <AIStatusBar domain="vessels" accentColor={VESSELS_ACCENT} />
         <SharedDashboardShell
           sidebar={<VesselsSidebarContent expanded={sidebarExpanded} onMobileClose={() => setSidebarOpen(false)} />}
           mobileOpen={sidebarOpen}
@@ -610,15 +563,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     location.startsWith("/document-engine") ||
     location.startsWith("/voyage-desk") || location.startsWith("/what-changed") ||
     location.startsWith("/exception-queue") || location.startsWith("/route-risk") ||
-    location.startsWith("/approval-review") ||
-    location.startsWith("/voyage-intervention-simulator") || location.startsWith("/readiness-drag-index") ||
-    location.startsWith("/port-friction-memory") || location.startsWith("/fleet-morning-brief") ||
-    location.startsWith("/command-mode-toggle") ||
-    location.startsWith("/voyage-digital-twin") || location.startsWith("/maritime-knowledge-graph") ||
-    location.startsWith("/predictive-congestion") || location.startsWith("/fleet-morning-brief-ai") ||
-    location.startsWith("/compliance-autopilot") ||
-    location.startsWith("/dark-pattern-decoder") ||
-    location.startsWith("/globe-command");
+    location.startsWith("/approval-review");
 
   if (isDashboard) {
     return (

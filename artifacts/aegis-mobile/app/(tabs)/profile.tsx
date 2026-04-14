@@ -13,12 +13,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
 import * as Haptics from "expo-haptics";
-import { router, type Href } from "expo-router";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
 import { useBiometric } from "@/context/BiometricContext";
-
-const PRIVACY_HREF: Href = { pathname: "/privacy" };
 
 export default function ProfileScreen() {
   const colors = useColors();
@@ -208,9 +205,6 @@ export default function ProfileScreen() {
           <Text style={[styles.logoutText, { color: colors.red, fontFamily: "Inter_600SemiBold" }]}>
             Sign Out
           </Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push(PRIVACY_HREF); }} style={{ marginTop: 12, alignItems: "center" }}>
-          <Text style={{ fontSize: 12, color: colors.primary, fontFamily: "Inter_400Regular" }}>Privacy Policy</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

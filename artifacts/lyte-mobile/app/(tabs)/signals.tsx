@@ -205,10 +205,6 @@ export default function SignalsScreen() {
         contentContainerStyle={{ paddingTop: 12, paddingBottom: bottomPad, paddingHorizontal: 16 }}
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-        initialNumToRender={12}
-        maxToRenderPerBatch={10}
-        windowSize={10}
-        removeClippedSubviews
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={LYTE_COLORS.electricBlue} />}
         ListEmptyComponent={() => (
           <View style={styles.empty}>

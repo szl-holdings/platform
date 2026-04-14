@@ -23,9 +23,9 @@ const ENDPOINTS: Endpoint[] = [
   { method: "GET", path: "/api/aegis/ops/tickets", summary: "MSP ticket queue and SLA status", tag: "Security", auth: true },
   { method: "GET", path: "/api/aegis/intel/models", summary: "Intelligence engine model registry", tag: "Security", auth: true },
 
-  { method: "GET", path: "/api/terra/health", summary: "Terra analytics health", tag: "Analytics", auth: false },
-  { method: "GET", path: "/api/terra/metrics", summary: "Decision analytics metrics", tag: "Analytics", auth: true },
-  { method: "GET", path: "/api/terra/projects", summary: "Tracked project metrics", tag: "Analytics", auth: true },
+  { method: "GET", path: "/api/beacon/health", summary: "Beacon analytics health", tag: "Analytics", auth: false },
+  { method: "GET", path: "/api/beacon/metrics", summary: "Decision analytics metrics", tag: "Analytics", auth: true },
+  { method: "GET", path: "/api/beacon/projects", summary: "Tracked project metrics", tag: "Analytics", auth: true },
   { method: "GET", path: "/api/lyte/health", summary: "Lyte observability health", tag: "Analytics", auth: false },
   { method: "GET", path: "/api/lyte/services", summary: "Monitored services status", tag: "Analytics", auth: true },
   { method: "GET", path: "/api/lyte/alerts", summary: "Active observability alerts", tag: "Analytics", auth: true },

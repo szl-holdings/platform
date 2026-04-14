@@ -22,22 +22,3 @@ export type {
   LangfuseTrace,
   LangfuseObservation,
 } from "./genai-telemetry.js";
-
-// ABO Doctrine — Pillar 1 + Pillar 5: Agent Telemetry, Agent Vitals, Trust Mesh
-export { agentTelemetry, AgentTelemetryCollector } from "./agent-telemetry.js";
-export type {
-  AgentVitals,
-  AgentReasoningSpan,
-  ReasoningStepType,
-  DelegationLink,
-  DelegationChain,
-  TrustReceipt,
-  PredictiveRiskSignal,
-  AgentGovernanceIdentity,
-  AgentAutonomyLevel,
-  AgentLifecycleStatus,
-  ComplianceRule,
-  ComplianceFramework,
-  AgentComplianceContext,
-  ComplianceEvalResult,
-} from "./agent-telemetry.js";

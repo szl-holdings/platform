@@ -18,7 +18,6 @@ import connectorsRouter from "./connectors";
 import notificationsRouter from "./notifications";
 import auditRouter from "./audit";
 import billingRouter from "./billing";
-import billingMarketplaceRouter from "./billing-marketplace";
 import featureFlagsRouter from "./feature-flags";
 import filesRouter from "./files";
 import stephenRouter from "./stephen";
@@ -29,7 +28,7 @@ import creativeWorkflowsRouter from "./dreamscape"; // creative-workflows module
 import readinessRouter from "./readiness";
 import adminRouter from "./admin";
 import intelligenceRouter from "./intelligence";
-import intelligenceMeshRouter from "./intelligence-mesh";
+import aegisIntelRouter from "./inca";
 import bookingRouter from "./booking";
 import holdingsRouter from "./holdings";
 import carlotaJoRouter from "./carlota-jo";
@@ -38,7 +37,6 @@ import alloyChatRouter from "./alloy-chat";
 import jobsRouter from "./jobs";
 import nueroMeshRouter from "./nuro-mesh";
 import aiSafetyRouter from "./ai-safety";
-import nexusRouter from "./nexus";
 import domainAgentsRouter from "./domain-agents/index";
 import govDataRouter from "./gov-data";
 import terraRouter from "./terra";
@@ -98,10 +96,6 @@ import prismCounselCoreRouter from "./prism-counsel-core";
 import { prismCounselPilotOneRouter } from "./prism-counsel-pilot-one";
 import prismCounselReviewRouter from "./prism-counsel-review";
 import prismCounselPurviewRouter from "./prism-counsel-purview";
-import alloyGatewayRouter from "./alloy-gateway";
-import alloyEvolutionRouter from "./alloy-evolution";
-import alloyMlRouter from "./alloy-ml";
-import alloyIntelligenceRouter from "./alloy-intelligence";
 import alloyEmailRouter from "./alloy-email";
 import alloyMeetingsRouter from "./alloy-meetings";
 import alloyDigestRouter from "./alloy-digest";
@@ -115,7 +109,6 @@ import worldlineRouter from "./worldline";
 import distributionOsRouter from "./distribution-os";
 import prismBusApiRouter from "./prism-bus-api";
 import forgeRuntimeApiRouter from "./forge-runtime-api";
-import forgePortalRouter from "./forge-portal";
 import covenantPolicyApiRouter from "./covenant-policy-api";
 import receiptGraphRouter from "./receipt-graph";
 import pulseEvalsRouter from "./pulse-evals";
@@ -125,46 +118,25 @@ import atlasRouter from "./atlas-artifacts";
 import helmRouter from "./helm-console";
 import telemetryRouter from "./telemetry";
 import crossAppHandoffsRouter from "./cross-app-handoffs";
-import { aiRouter as aiOrchestratorRouter } from "./ai-orchestrator";
-import { mastraRouter } from "./mastra-agents";
-import actionEngineRouter from "./action-engine";
-import { cognitiveRouter } from "./cognitive";
-import stephenTelemetryRouter from "./stephen-telemetry";
-import aistreamLiveRouter from "./aisstream-live";
-import courtlistenerLiveRouter from "./courtlistener-live";
-import threatFeedsLiveRouter from "./threat-feeds-live";
-import samgovLiveRouter from "./samgov-live";
-import noaaAlertsLiveRouter from "./noaa-alerts-live";
-import firestormAgenticSocRouter from "./firestorm-agentic-soc";
-import vesselsDigitalTwinRouter from "./vessels-digital-twin";
-import terraInnovationsRouter from "./terra-innovations";
-import prismCounselInnovationsRouter from "./prism-counsel-innovations";
-import carlotaJoInnovationsRouter from "./carlota-jo-innovations";
-import lyteInnovationsRouter from "./lyte-innovations";
-import aiInnovationsRouter from "./ai-innovations";
-import crossDomainIntelligenceRouter from "./cross-domain-intelligence";
-import pulseRouter from "./pulse";
-import emailMarketingRouter from "./email-marketing";
-import sessionAnalyticsRouter from "./session-analytics";
-import analyticsLakeRouter from "./analytics-lake";
-import analyticsEngineRouter from "./analytics-engine";
-import skillsCatalogRouter from "./skills-catalog";
-import forgeRevenueRouter from "./forge-revenue";
-import marketplaceRouter from "./marketplace";
-import { multimodalRouter } from "./multimodal";
-import gatewayIntelligenceRouter from "./gateway-intelligence";
-import copilotRouter from "./copilot";
-import packageRegistryRouter from "./package-registry";
-import modelFinetuningRouter from "./model-finetuning";
-import soundStudioRouter from "./sound-studio";
-import videoStreamingRouter from "./video-streaming";
-import multimodalDocumentsRouter from "./multimodal-documents";
-import aboRouter from "./abo";
-import aiGatewayPerfRouter from "./ai-gateway-perf";
-import promptPipelineRouter from "./prompt-pipeline";
-import incaModelGovernanceRouter from "./inca-model-governance";
 
 const router: IRouter = Router();
+
+router.use((req, _res, next) => {
+  if (req.path.startsWith("/aegis/soc/")) {
+    req.url = req.url.replace("/aegis/soc/", "/firestorm/");
+  } else if (req.path.startsWith("/aegis/soc")) {
+    req.url = req.url.replace("/aegis/soc", "/firestorm");
+  } else if (req.path.startsWith("/aegis/ops/")) {
+    req.url = req.url.replace("/aegis/ops/", "/msp/");
+  } else if (req.path.startsWith("/aegis/ops")) {
+    req.url = req.url.replace("/aegis/ops", "/msp");
+  } else if (req.path.startsWith("/aegis/intel/")) {
+    req.url = req.url.replace("/aegis/intel/", "/inca/");
+  } else if (req.path.startsWith("/aegis/intel")) {
+    req.url = req.url.replace("/aegis/intel", "/inca");
+  }
+  next();
+});
 
 router.use("/auth", _authLimiter);
 
@@ -183,6 +155,7 @@ router.use("/files", _writeLimiter);
 router.use("/vessels", _readLimiter);
 router.use("/intelligence", _readLimiter);
 router.use("/firestorm", _readLimiter);
+router.use("/inca", _readLimiter);
 router.use("/msp", _readLimiter);
 router.use("/aegis", _readLimiter);
 router.use("/booking", _readLimiter);
@@ -205,7 +178,6 @@ router.use(connectorsRouter);
 router.use(notificationsRouter);
 router.use(auditRouter);
 router.use(billingRouter);
-router.use(billingMarketplaceRouter);
 router.use(featureFlagsRouter);
 router.use(filesRouter);
 
@@ -225,10 +197,6 @@ router.use(vesselsPlatformRouter);
 router.use(vesselsRouter);
 router.use(aegisSocRouter);
 router.use(aegisSocLiveRouter);
-router.use("/vessels", _readLimiter);
-router.use(aistreamLiveRouter);
-router.use("/aegis", _readLimiter);
-router.use(threatFeedsLiveRouter);
 router.use("/firestorm/command", _readLimiter);
 router.use(firestormCommandRouter);
 router.use(lyteRouter);
@@ -237,7 +205,7 @@ router.use(readinessRouter);
 router.use("/admin", adminGuard);
 router.use(adminRouter);
 router.use(intelligenceRouter);
-router.use("/intelligence-mesh", intelligenceMeshRouter);
+router.use(aegisIntelRouter);
 router.use(bookingRouter);
 router.use(holdingsRouter);
 router.use("/demo-requests", _writeLimiter);
@@ -253,7 +221,6 @@ router.use("/nuro-mesh", _readLimiter);
 router.use(nueroMeshRouter);
 router.use("/ai-safety", _readLimiter);
 router.use(aiSafetyRouter);
-router.use("/nexus", _readLimiter, nexusRouter);
 router.use("/domain-agents", _readLimiter);
 router.use(domainAgentsRouter);
 router.use("/gov", _readLimiter);
@@ -280,15 +247,10 @@ router.use(terraLiveRouter);
 router.use("/beacon", _readLimiter);
 router.use(terraLiveRouter);
 
-router.use("/prism", _readLimiter);
-router.use(courtlistenerLiveRouter);
-
-router.use("/lyte", _readLimiter);
-router.use(samgovLiveRouter);
-
-router.use("/noaa", _readLimiter);
-router.use(noaaAlertsLiveRouter);
-
+router.use("/readiness", _readLimiter);
+router.use(readinessRouter);
+router.use("/aegis", _readLimiter);
+router.use(readinessRouter);
 
 router.use("/dreamscape", _readLimiter); // legacy path — creative-workflows module
 router.use(creativeWorkflowsRouter);
@@ -336,9 +298,6 @@ router.use("/alloy/governance", _writeLimiter);
 router.use("/alloy/usage", _writeLimiter);
 router.use("/alloy/admin", _readLimiter);
 router.use(alloyGovernanceRouter);
-
-router.use("/alloy/gateway", _writeLimiter);
-router.use(alloyGatewayRouter);
 
 router.use("/capital", _writeLimiter);
 router.use(capitalReadinessRouter);
@@ -409,15 +368,6 @@ router.use("/ai", _readLimiter);
 router.use("/ai/tools/execute", idempotencyMiddleware);
 router.use(aiEngineRouter);
 
-router.use("/ai/orchestrator", aiOrchestratorRouter);
-router.use("/ai/mastra", mastraRouter);
-router.use("/ai/mastra/action-engine", _writeLimiter);
-router.use("/ai/mastra", actionEngineRouter);
-router.use("/ai/mastra/cognitive", cognitiveRouter);
-
-router.use("/ai/multimodal", _writeLimiter);
-router.use("/ai/multimodal", multimodalRouter);
-
 router.use("/analytics", _writeLimiter);
 router.use(analyticsRouter);
 
@@ -445,11 +395,6 @@ router.use(prismCounselNyRouter);
 
 router.use("/mcp", _readLimiter);
 router.use(mcpRouter);
-
-router.use("/skills", _readLimiter);
-router.use("/skills", skillsCatalogRouter);
-
-router.use("/copilot", copilotRouter);
 
 router.use("/approvals", _writeLimiter);
 router.use(approvalsRouter);
@@ -499,145 +444,5 @@ router.use(telemetryRouter);
 router.use("/cross-app", _readLimiter);
 router.use("/cross-app", _writeLimiter);
 router.use(crossAppHandoffsRouter);
-
-router.use("/alloy/evolution", _readLimiter);
-router.use("/alloy/experts", _readLimiter);
-router.use("/alloy/threats", _readLimiter);
-router.use("/alloy/capabilities", _readLimiter);
-router.use("/alloy", alloyEvolutionRouter);
-
-router.use("/alloy/ml", _readLimiter);
-router.use("/alloy", alloyMlRouter);
-
-router.use("/alloy/intelligence", _readLimiter);
-router.use("/alloy", alloyIntelligenceRouter);
-
-router.use("/stephen/telemetry", _readLimiter);
-router.use(stephenTelemetryRouter);
-
-router.use("/intelligence-mesh", _readLimiter);
-router.use(intelligenceMeshRouter);
-
-router.use("/firestorm", _readLimiter);
-router.use(firestormAgenticSocRouter);
-
-router.use("/vessels", _readLimiter);
-router.use(vesselsDigitalTwinRouter);
-
-router.use("/terra", _readLimiter);
-router.use(terraInnovationsRouter);
-
-router.use("/prism-counsel", _readLimiter);
-router.use(prismCounselInnovationsRouter);
-
-router.use("/carlota-jo", _readLimiter);
-router.use(carlotaJoInnovationsRouter);
-
-router.use("/lyte", _readLimiter);
-router.use(lyteInnovationsRouter);
-
-router.use("/ai", _readLimiter);
-router.use(aiInnovationsRouter);
-
-router.use("/cross-domain", _readLimiter);
-router.use(crossDomainIntelligenceRouter);
-
-router.use("/pulse", _readLimiter);
-router.use("/pulse", _writeLimiter);
-router.use(pulseRouter);
-
-router.use("/forge-portal", _readLimiter);
-router.use(forgePortalRouter);
-router.use(forgeRevenueRouter);
-router.use(marketplaceRouter);
-
-router.use("/distribution-os/email-campaigns", _writeLimiter);
-router.use("/distribution-os/drip-sequences", _writeLimiter);
-router.use("/distribution-os/segments", _writeLimiter);
-router.use("/distribution-os/campaign-dashboard", _readLimiter);
-router.use("/distribution-os/privacy", _writeLimiter);
-router.use("/distribution-os/preferences", _writeLimiter);
-router.use("/distribution-os/cookie-consent", _writeLimiter);
-router.use("/distribution-os/unsubscribe", _readLimiter);
-router.use("/distribution-os", emailMarketingRouter);
-
-router.use("/distribution-os/sessions", _writeLimiter);
-router.use("/distribution-os/cohorts", _readLimiter);
-router.use("/distribution-os/funnels", _readLimiter);
-router.use("/distribution-os/realtime", _readLimiter);
-router.use("/distribution-os", sessionAnalyticsRouter);
-
-router.use("/analytics-lake", _readLimiter);
-router.use("/analytics-lake", _writeLimiter);
-router.use(analyticsLakeRouter);
-
-router.use("/gateway-intelligence", _readLimiter);
-router.use("/gateway-intelligence", _writeLimiter);
-router.use("/gateway-intelligence", gatewayIntelligenceRouter);
-
-router.use("/gateway-perf", _readLimiter);
-router.use("/gateway-perf", _writeLimiter);
-router.use("/gateway-perf", aiGatewayPerfRouter);
-
-router.use("/prompt-pipeline", _readLimiter);
-router.use("/prompt-pipeline", _writeLimiter);
-router.use("/prompt-pipeline", promptPipelineRouter);
-
-router.use("/inca-lab/models", _readLimiter);
-router.use("/inca-lab/models/catalog", _readLimiter);
-router.use("/inca-lab/models/security-scans", _readLimiter);
-router.use("/inca-lab/models/lifecycle", _readLimiter);
-router.use("/inca-lab/models/:id/approve", _writeLimiter);
-router.use("/inca-lab/models/:id/scan", _writeLimiter);
-router.use("/inca-lab/governance", _readLimiter);
-router.use("/inca-lab/governance/policies", _writeLimiter);
-router.use("/inca-lab/governance/audit", _writeLimiter);
-router.use("/inca-lab/environments", _readLimiter);
-router.use("/inca-lab/environments/snapshots", _writeLimiter);
-router.use(incaModelGovernanceRouter);
-
-router.use("/analytics/recordings", _writeLimiter);
-router.use("/analytics/heatmap-events", _writeLimiter);
-router.use("/analytics/consent", _writeLimiter);
-router.use(analyticsEngineRouter);
-
-router.use("/abo", _readLimiter);
-router.use("/abo", _writeLimiter);
-router.use(aboRouter);
-
-router.use("/package-registry", _readLimiter);
-router.use("/package-registry", _writeLimiter);
-router.use("/package-registry", packageRegistryRouter);
-
-import championRouter from "./champion";
-router.use("/champion", _readLimiter);
-router.use(championRouter);
-
-router.use("/model-finetuning", _writeLimiter);
-router.use(modelFinetuningRouter);
-
-router.use("/sound-studio", _writeLimiter);
-router.use(soundStudioRouter);
-
-router.use("/video-streaming", _writeLimiter);
-router.use(videoStreamingRouter);
-
-router.use("/multimodal-documents", _writeLimiter);
-router.use(multimodalDocumentsRouter);
-
-import trainingForgeRouter from "./training-forge";
-router.use("/training-forge", _readLimiter);
-router.use("/training-forge", _writeLimiter);
-router.use(trainingForgeRouter);
-
-import soundSovereignRouter from "./sound-sovereign";
-router.use("/sound-sovereign", _readLimiter);
-router.use("/sound-sovereign", _writeLimiter);
-router.use(soundSovereignRouter);
-
-import commandBroadcastRouter from "./command-broadcast";
-router.use("/command-broadcast", _readLimiter);
-router.use("/command-broadcast", _writeLimiter);
-router.use(commandBroadcastRouter);
 
 export default router;

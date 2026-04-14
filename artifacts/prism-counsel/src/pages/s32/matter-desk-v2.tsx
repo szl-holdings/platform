@@ -73,7 +73,7 @@ export default function MatterDeskV2() {
   return (
     <div className="flex flex-col h-full max-w-[1200px] mx-auto" style={{ maxHeight: "calc(100vh - 120px)" }}>
       <div className="flex items-center gap-3 mb-4 flex-shrink-0">
-        <Link href="/matters">
+        <Link href="/prism-counsel/matters">
           <button className="text-slate-500 hover:text-slate-300 text-xs flex items-center gap-1 transition-colors">
             <ArrowLeft className="w-3 h-3" /> Matters
           </button>
@@ -103,7 +103,7 @@ export default function MatterDeskV2() {
               <Brain className="w-3 h-3" /> Prep
             </button>
           </Link>
-          <Link href="/word-export">
+          <Link href="/prism-counsel/word-export">
             <button className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs bg-white/[0.04] text-slate-400 hover:bg-white/[0.08] transition-colors">
               <Download className="w-3 h-3" /> Export
             </button>
@@ -496,7 +496,7 @@ function ReviewTab({ matterId }: { matterId: number }) {
               {r.contradictions > 0 && <span className="text-[#c45a4a]">{r.contradictions} contradictions</span>}
               {r.unsupported === 0 && r.contradictions === 0 && <span className="text-[#4a90b8]">All clear</span>}
             </div>
-            <Link href="/review-before-send">
+            <Link href="/prism-counsel/review-before-send">
               <button className="px-2 py-0.5 rounded text-[10px] bg-white/[0.04] text-slate-400 hover:bg-white/[0.08] transition-colors">Review</button>
             </Link>
           </div>
@@ -552,7 +552,7 @@ function SignOffTab({ matterId }: { matterId: number }) {
         </div>
       ))}
       <div className="text-center py-4">
-        <Link href="/signoff-queue">
+        <Link href="/prism-counsel/signoff-queue">
           <span className="text-xs text-[#d4a054] hover:underline cursor-pointer">View all pending sign-offs →</span>
         </Link>
       </div>

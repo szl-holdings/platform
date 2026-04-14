@@ -3,14 +3,10 @@ import { inferenceTelemetry, estimateCost, type InferenceProvider } from "./infe
 import { providerHealth } from "./provider-health";
 import { services } from "@szl-holdings/services";
 import type { ChatMessage, ChatCompletionResult } from "@szl-holdings/services";
-import { classifyTaskCategory, shouldUseFusion, selectCostMode } from "./category-classifier";
-import { championRegistry } from "./champion-registry";
-import type { TaskCategory } from "./champion-registry";
-import { runMultiChampionSynthesis } from "./champion-synthesis";
 
-export type RoutingStrategy = "fastest" | "cheapest" | "preferred" | "fallback" | "champion" | "fusion";
+export type RoutingStrategy = "fastest" | "cheapest" | "preferred" | "fallback";
 
-const VALID_STRATEGIES = new Set<RoutingStrategy>(["fastest", "cheapest", "preferred", "fallback", "champion", "fusion"]);
+const VALID_STRATEGIES = new Set<RoutingStrategy>(["fastest", "cheapest", "preferred", "fallback"]);
 const VALID_PROVIDERS = new Set<InferenceProvider>(["openai", "anthropic", "replit-proxy", "gemini", "huggingface", "mock"]);
 
 export interface GatewayRequest {
@@ -23,9 +19,6 @@ export interface GatewayRequest {
   strategy?: RoutingStrategy;
   timeoutMs?: number;
   maxRetries?: number;
-  categoryHint?: TaskCategory;
-  riskLevel?: "low" | "medium" | "high" | "critical";
-  enableFusion?: boolean;
 }
 
 export interface GatewayResponse {
@@ -42,11 +35,6 @@ export interface GatewayResponse {
     retryCount: number;
     totalLatencyMs: number;
     cached: boolean;
-    taskCategory?: TaskCategory;
-    categoryConfidence?: number;
-    championUsed?: string;
-    fusionUsed?: boolean;
-    costMode?: string;
   };
   telemetryId: string;
 }
@@ -60,44 +48,7 @@ interface ProviderCandidate {
 
 type TargetableProvider = "replit-proxy" | "openai" | "anthropic" | "gemini" | "huggingface";
 
-const CHAMPION_PROVIDER_MAP: Record<TaskCategory, Array<{ provider: InferenceProvider; model: string }>> = {
-  writing: [
-    { provider: "anthropic", model: "claude-opus-4-6" },
-    { provider: "openai", model: "gpt-5.4" },
-    { provider: "replit-proxy", model: "gpt-5.2" },
-  ],
-  research: [
-    { provider: "gemini", model: "gemini-3.1-pro" },
-    { provider: "openai", model: "chatgpt-deep-research" },
-    { provider: "anthropic", model: "claude-sonnet-4-20250514" },
-  ],
-  analysis: [
-    { provider: "anthropic", model: "claude-opus-4-6" },
-    { provider: "anthropic", model: "claude-sonnet-4-20250514" },
-    { provider: "openai", model: "gpt-5.4" },
-  ],
-  coding: [
-    { provider: "anthropic", model: "claude-sonnet-4-20250514" },
-    { provider: "gemini", model: "gemini-3-pro-preview" },
-    { provider: "openai", model: "gpt-5.4" },
-  ],
-  speed: [
-    { provider: "gemini", model: "gemini-2.5-flash" },
-    { provider: "replit-proxy", model: "gpt-4o-mini" },
-    { provider: "anthropic", model: "claude-3-haiku-20240307" },
-  ],
-  image_gen: [
-    { provider: "openai", model: "dall-e-3" },
-    { provider: "replit-proxy", model: "gpt-5.2" },
-  ],
-  multimodal: [
-    { provider: "openai", model: "gpt-5.4" },
-    { provider: "anthropic", model: "claude-opus-4-6" },
-    { provider: "gemini", model: "gemini-3.1-pro" },
-  ],
-};
-
-const LEGACY_PROVIDER_MODELS: Record<string, { provider: InferenceProvider; model: string }[]> = {
+const PROVIDER_MODELS: Record<string, { provider: InferenceProvider; model: string }[]> = {
   reasoning: [
     { provider: "replit-proxy", model: "gpt-5.2" },
     { provider: "anthropic", model: "claude-sonnet-4-20250514" },
@@ -144,26 +95,8 @@ function isProviderAvailable(provider: InferenceProvider): boolean {
 function selectCandidates(request: GatewayRequest): ProviderCandidate[] {
   const strategy = request.strategy ?? "fastest";
   const candidates: ProviderCandidate[] = [];
-
-  const classification = classifyTaskCategory(request.messages, request.categoryHint);
-  const costMode = selectCostMode(classification, strategy);
-
-  let modelList: { provider: InferenceProvider; model: string }[];
-
-  if (strategy === "champion" || strategy === "fusion") {
-    const championList = CHAMPION_PROVIDER_MAP[classification.category];
-    if (costMode === "budget") {
-      modelList = CHAMPION_PROVIDER_MAP.speed;
-    } else {
-      modelList = championList ?? LEGACY_PROVIDER_MODELS["default"]!;
-    }
-  } else {
-    const legacyType = classification.category === "speed" ? "fast"
-      : classification.category === "coding" || classification.category === "writing" ? "generation"
-      : classification.category === "analysis" || classification.category === "research" ? "analysis"
-      : "default";
-    modelList = LEGACY_PROVIDER_MODELS[legacyType] ?? LEGACY_PROVIDER_MODELS["default"]!;
-  }
+  const taskType = detectTaskType(request.messages);
+  const modelList = PROVIDER_MODELS[taskType] ?? PROVIDER_MODELS["default"]!;
 
   if (strategy === "preferred" && request.preferredProvider) {
     const preferred = request.preferredProvider;
@@ -192,7 +125,7 @@ function selectCandidates(request: GatewayRequest): ProviderCandidate[] {
 
     let score = 100;
 
-    if (strategy === "fastest" || strategy === "champion") {
+    if (strategy === "fastest") {
       const avgLatency = inferenceTelemetry.getProviderLatencyForModel(provider, model);
       score -= Math.min(avgLatency / 10, 80);
     } else if (strategy === "cheapest") {
@@ -208,15 +141,23 @@ function selectCandidates(request: GatewayRequest): ProviderCandidate[] {
       provider,
       model: request.model ?? model,
       score,
-      reason: `${strategy}: score=${Math.round(score)}, health=${health.status}, category=${classification.category}`,
+      reason: `${strategy}: score=${Math.round(score)}, health=${health.status}`,
     });
   }
 
   return candidates.sort((a, b) => b.score - a.score);
 }
 
-function isValidTaskType(type: string): type is TaskCategory {
-  return ["writing", "research", "analysis", "coding", "speed", "image_gen", "multimodal"].includes(type);
+function detectTaskType(messages: ChatMessage[]): string {
+  const content = messages.map(m => m.content).join(" ").toLowerCase();
+  const analysisKeywords = ["analyze", "analysis", "explain", "why", "how does", "debug", "diagnose", "review", "assess", "compare", "evaluate"];
+  const generationKeywords = ["generate", "create", "write", "compose", "draft", "design", "build"];
+  const fastKeywords = ["quick", "brief", "short", "summarize", "classify", "tag", "label"];
+
+  if (fastKeywords.some(k => content.includes(k))) return "fast";
+  if (analysisKeywords.some(k => content.includes(k))) return "analysis";
+  if (generationKeywords.some(k => content.includes(k))) return "generation";
+  return "default";
 }
 
 async function executeProviderInference(
@@ -249,63 +190,10 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
   const agentId = request.agentId ?? "anonymous";
   const domain = request.domain ?? "general";
 
-  const classification = classifyTaskCategory(request.messages, request.categoryHint);
-  const costMode = selectCostMode(classification, strategy);
-
-  const useFusion = (strategy as string) === "fusion" || (strategy === "champion" && shouldUseFusion(classification, request.riskLevel) && request.enableFusion !== false);
-  const telemetryStrategy: "fastest" | "cheapest" | "preferred" | "fallback" = (strategy === "champion" || (strategy as string) === "fusion") ? "preferred" : strategy as "fastest" | "cheapest" | "preferred" | "fallback";
-
-  if (useFusion) {
-    logger.info({ agentId, domain, category: classification.category, confidence: classification.confidence }, "Gateway: activating multi-champion fusion");
-
-    const synthesis = await runMultiChampionSynthesis(request.messages, {
-      category: classification.category,
-      maxModels: 3,
-      timeoutMs,
-      costGuardUsd: request.maxTokens ? request.maxTokens * 0.00003 * 5 : 0.25,
-      agentId,
-      domain,
-    });
-
-    const totalPromptTokens = synthesis.modelResponses.reduce((s, r) => s + r.tokens.prompt, 0);
-    const totalCompletionTokens = synthesis.modelResponses.reduce((s, r) => s + r.tokens.completion, 0);
-
-    const primaryProvider = (synthesis.modelResponses.find(r => r.success)?.provider ?? "anthropic") as InferenceProvider;
-
-    return {
-      content: synthesis.fusedContent,
-      model: synthesis.championsQueried[0] ?? "fusion",
-      provider: primaryProvider,
-      usage: {
-        promptTokens: totalPromptTokens,
-        completionTokens: totalCompletionTokens,
-        totalTokens: totalPromptTokens + totalCompletionTokens,
-      },
-      estimatedCostUsd: synthesis.totalCostUsd,
-      confidence: synthesis.synthesisConfidence,
-      routing: {
-        strategy,
-        selectedProvider: primaryProvider,
-        attemptedProviders: synthesis.modelResponses.map(r => r.provider as InferenceProvider),
-        retryCount: 0,
-        totalLatencyMs: Date.now() - startTime,
-        cached: false,
-        taskCategory: classification.category,
-        categoryConfidence: classification.confidence,
-        championUsed: synthesis.championsQueried.join(", "),
-        fusionUsed: true,
-        costMode,
-      },
-      telemetryId: `fusion-${Date.now()}-${agentId}`,
-    };
-  }
-
   const candidates = selectCandidates(request);
   if (candidates.length === 0) {
     throw new Error("No healthy providers available for inference");
   }
-
-  const championForCategory = championRegistry.getChampionForCategory(classification.category);
 
   const attemptedProviders: InferenceProvider[] = [];
   let lastError: Error | null = null;
@@ -345,7 +233,7 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
           promptTokens: result.usage.promptTokens,
           completionTokens: result.usage.completionTokens,
           success: true,
-          routingStrategy: telemetryStrategy,
+          routingStrategy: strategy,
           retryCount: attempt,
           cached: false,
         });
@@ -373,11 +261,6 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
             retryCount: attempt,
             totalLatencyMs: Date.now() - startTime,
             cached: false,
-            taskCategory: classification.category,
-            categoryConfidence: classification.confidence,
-            championUsed: championForCategory?.name,
-            fusionUsed: false,
-            costMode,
           },
           telemetryId: telemetryRecord.id,
         };
@@ -395,7 +278,7 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
           completionTokens: 0,
           success: false,
           errorType: lastError.message.slice(0, 100),
-          routingStrategy: telemetryStrategy,
+          routingStrategy: strategy,
           retryCount: attempt,
           cached: false,
         });
@@ -420,7 +303,6 @@ export function getGatewayStatus(): {
   defaultStrategy: RoutingStrategy;
   supportedStrategies: RoutingStrategy[];
   taskTypes: string[];
-  championMap: Record<string, string>;
 } {
   const providers: TargetableProvider[] = ["replit-proxy", "openai", "anthropic", "gemini", "huggingface"];
   const availableProviders = providers.map(p => {
@@ -434,19 +316,11 @@ export function getGatewayStatus(): {
     };
   });
 
-  const categories: TaskCategory[] = ["writing", "research", "analysis", "coding", "speed", "image_gen", "multimodal"];
-  const championMap: Record<string, string> = {};
-  for (const cat of categories) {
-    const c = championRegistry.getChampionForCategory(cat);
-    if (c) championMap[cat] = c.name;
-  }
-
   return {
     availableProviders,
     defaultStrategy: "fastest",
-    supportedStrategies: ["fastest", "cheapest", "preferred", "fallback", "champion", "fusion"],
-    taskTypes: categories,
-    championMap,
+    supportedStrategies: ["fastest", "cheapest", "preferred", "fallback"],
+    taskTypes: Object.keys(PROVIDER_MODELS),
   };
 }
 

@@ -53,11 +53,6 @@ export function useOnboardingState(appId: string) {
     active: boolean;
   }>(() => {
     try {
-      const params = new URLSearchParams(window.location.search);
-      const skipTour = params.get("skip_tour") === "true" || params.get("demo") === "true";
-      if (skipTour) {
-        return { completed: true, currentStep: 0, active: false };
-      }
       const stored = localStorage.getItem(key);
       if (stored) {
         const parsed = JSON.parse(stored);

@@ -263,12 +263,12 @@ function DemandPrepFlow({ onBack }: { onBack: () => void }) {
           </div>
         </div>
         <div className="flex gap-2">
-          <Link href="/review-before-send">
+          <Link href="/prism-counsel/review-before-send">
             <button className="px-3 py-1.5 rounded text-xs font-medium bg-white/[0.06] text-slate-300 hover:bg-white/[0.10] transition-colors">
               Go to Review
             </button>
           </Link>
-          <Link href="/word-export">
+          <Link href="/prism-counsel/word-export">
             <button className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium hover:opacity-80 transition-opacity" style={{ background: safetyColor + "20", color: safetyColor, border: `1px solid ${safetyColor}40` }}>
               <Download className="w-3 h-3" /> Export Draft
             </button>

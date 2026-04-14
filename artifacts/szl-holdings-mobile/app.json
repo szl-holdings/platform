@@ -20,7 +20,6 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.szlholdings.executive.mobile",
       "buildNumber": "1",
-      "associatedDomains": ["applinks:szlholdings.com", "applinks:app.szlholdings.com"],
       "infoPlist": {
         "NSFaceIDUsageDescription": "SZL Holdings uses Face ID for secure principal access.",
         "NSCameraUsageDescription": "SZL Holdings uses your camera for document scanning.",
@@ -52,14 +51,6 @@
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#090810"
       },
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "autoVerify": true,
-          "data": [{ "scheme": "https", "host": "szlholdings.com" }, { "scheme": "https", "host": "app.szlholdings.com" }],
-          "category": ["BROWSABLE", "DEFAULT"]
-        }
-      ],
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.RECEIVE_BOOT_COMPLETED",
@@ -102,9 +93,6 @@
       "eas": {
         "projectId": "szl-holdings-mobile"
       },
-      "description": "SZL Holdings — Executive Portfolio Command. Real-time portfolio intelligence, fund performance monitoring, deal flow management, AI-powered market signals, and secure biometric access for principals.",
-      "keywords": "portfolio management, fund performance, deal flow, private equity, investment intelligence, executive dashboard, holdings, asset management",
-      "category": "Finance",
       "supportUrl": "https://szlholdings.com/support",
       "privacyUrl": "https://szlholdings.com/privacy",
       "termsUrl": "https://szlholdings.com/terms"

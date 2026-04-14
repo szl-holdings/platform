@@ -57,31 +57,31 @@ const verticals = [
     icon: Target,
     name: "PRISM Counsel",
     wedge: true,
-    color: "hsl(38,72%,58%)",
+    color: "#d4a054",
     body: "Legal matter observability — deadlines, exposure tracking, approval governance, export safety. The commercial wedge. First vertical entering design-partner engagement.",
   },
   {
     icon: Ship,
     name: "Vessels",
-    color: "hsl(206,72%,52%)",
+    color: "#4a90b8",
     body: "Maritime intelligence — voyage twins, AIS monitoring, route risk, port congestion, sanctions compliance. Second vertical. Infrastructure ready.",
   },
   {
     icon: ShieldCheck,
     name: "Aegis",
-    color: "hsl(222,60%,62%)",
+    color: "#c45a4a",
     body: "Security and defense observability — threat twins, incident workflows, exposure prioritization. Third vertical. Architecture shared.",
   },
   {
     icon: Home,
     name: "Terra",
-    color: "hsl(140,50%,48%)",
+    color: "#c8953c",
     body: "Real estate intelligence — property twins, diligence workflows, distress scoring. Fourth vertical. Same execution model.",
   },
   {
     icon: BriefcaseBusiness,
     name: "Carlota Jo",
-    color: "hsl(280,50%,65%)",
+    color: "#8b7ac8",
     body: "Advisory and consulting intelligence. Premium client-facing layer. Near-term revenue opportunity while the software matures.",
   },
 ];
@@ -140,7 +140,7 @@ export default function InvestorsOverviewPage() {
         {/* Hero */}
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[hsl(38,72%,58%)]/20 bg-[hsl(38,72%,58%)]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em]" style={{ color: "hsl(38,72%,58%)", borderColor: "hsla(38,72%,58%,0.20)", background: "hsla(38,72%,58%,0.08)" }}>
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#d4a054]/20 bg-[#d4a054]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#d4a054]">
               <Building2 className="h-3.5 w-3.5" />
               Company Overview
             </div>
@@ -231,7 +231,7 @@ export default function InvestorsOverviewPage() {
                     className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-6"
                   >
                     <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.08] bg-black/20">
-                      <Icon className="h-4.5 w-4.5" style={{ color: "hsl(38,72%,58%)" }} />
+                      <Icon className="h-4.5 w-4.5 text-[#d4a054]" />
                     </div>
                     <h3 className="text-base font-semibold text-white">{item.title}</h3>
                     <p className="mt-3 text-sm leading-6 text-white/55">{item.body}</p>
@@ -268,8 +268,8 @@ export default function InvestorsOverviewPage() {
         {/* Why the demo matters */}
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <div className="rounded-[2rem] p-8 lg:p-10" style={{ border: "1px solid hsla(206,72%,52%,0.15)", background: "hsla(206,72%,52%,0.06)" }}>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em]" style={{ color: "hsla(206,72%,52%,0.7)" }}>
+            <div className="rounded-[2rem] border border-[#4a90b8]/15 bg-[#4a90b8]/[0.06] p-8 lg:p-10">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#4a90b8]/70">
                 Why the demo matters
               </p>
               <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
@@ -325,7 +325,7 @@ export default function InvestorsOverviewPage() {
                       <div className="flex items-center gap-3">
                         <span className="text-sm font-semibold text-white">{v.name}</span>
                         {v.wedge && (
-                          <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]" style={{ border: "1px solid hsla(38,72%,58%,0.25)", background: "hsla(38,72%,58%,0.10)", color: "hsl(38,72%,58%)" }}>
+                          <span className="rounded-full border border-[#d4a054]/25 bg-[#d4a054]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#d4a054]">
                             Commercial wedge
                           </span>
                         )}
@@ -357,7 +357,7 @@ export default function InvestorsOverviewPage() {
                   <p
                     className="text-xs font-semibold uppercase tracking-[0.2em]"
                     style={{
-                      color: i === 0 ? "hsl(38,72%,58%)" : i === 1 ? "hsl(206,72%,52%)" : "hsl(258,55%,68%)",
+                      color: i === 0 ? "#d4a054" : i === 1 ? "#4a90b8" : "#8b7ac8",
                     }}
                   >
                     {phase.phase}
@@ -400,7 +400,7 @@ export default function InvestorsOverviewPage() {
                     key={item}
                     className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
                   >
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" style={{ color: "hsl(38,72%,58%)" }} />
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#d4a054]" />
                     <p className="text-sm leading-6 text-white/70">{item}</p>
                   </div>
                 ))}
@@ -424,7 +424,7 @@ export default function InvestorsOverviewPage() {
               ].map((item) => (
                 <Link key={item.label} href={item.href}>
                   <div className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 transition hover:bg-white/[0.04]">
-                    <item.icon className="h-4 w-4" style={{ color: "hsl(38,72%,58%)" }} />
+                    <item.icon className="h-4 w-4 text-[#d4a054]" />
                     <span className="text-sm font-medium text-white/80">{item.label}</span>
                   </div>
                 </Link>

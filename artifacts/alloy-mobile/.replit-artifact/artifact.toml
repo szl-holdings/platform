@@ -1,6 +1,0 @@
-kind = "mobile"
-  previewPath = "/alloy-mobile/"
-  title = "Alloy Mobile"
-  version = "1.0.0"
-  id = "artifacts/aegis-mobile"
-  

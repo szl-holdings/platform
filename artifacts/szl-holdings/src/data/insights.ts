@@ -19,7 +19,6 @@ export const CATEGORIES = [
   "Cybersecurity",
   "AI/ML",
   "Real Estate",
-  "Legal Intelligence",
   "Creative Tech",
   "Operations",
   "Annual Letter",

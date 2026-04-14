@@ -1,4 +1,4 @@
-import { parseIntId } from "../utils";
+import { parseIntId } from "../utils.js";
 
 export const holdingsTypeDefs = `#graphql
   type TrustFramework {

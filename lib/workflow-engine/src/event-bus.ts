@@ -38,17 +38,10 @@ interface Subscription {
 
 const MAX_HISTORY = 500;
 
-type DbPersistFn = (event: AgentEvent) => void;
-
 export class AgentEventBus {
   private subscriptions: Map<string, Subscription> = new Map();
   private history: AgentEvent[] = [];
   private eventCounts: Map<AgentEventType, number> = new Map();
-  private persistFn?: DbPersistFn;
-
-  setDbPersistFn(fn: DbPersistFn): void {
-    this.persistFn = fn;
-  }
 
   subscribe(agentId: string, eventTypes: AgentEventType[] | "*", handler: EventHandler): () => void {
     const id = `sub-${agentId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
@@ -74,14 +67,6 @@ export class AgentEventBus {
     this.eventCounts.set(full.type, (this.eventCounts.get(full.type) ?? 0) + 1);
 
     logger.info({ eventId: full.id, type: full.type, sourceAgent: full.sourceAgent, severity: full.severity }, "Agent event published");
-
-    if (this.persistFn) {
-      try {
-        this.persistFn(full);
-      } catch {
-        // DB persistence failures are non-fatal for the pub/sub system
-      }
-    }
 
     const handlers: Array<Promise<void>> = [];
     for (const sub of this.subscriptions.values()) {

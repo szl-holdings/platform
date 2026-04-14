@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "SZL Holdings Dashboard"
+title = "SZL Holdings"
 version = "1.0.0"
 id = "artifacts/szl-holdings"
 router = "path"
@@ -12,10 +12,10 @@ version = "1.0.0"
 [[services]]
 name = "web"
 paths = [ "/" ]
-localPort = 3000
+localPort = 18490
 
 [services.development]
-run = "bash -c 'cd /home/runner/workspace/artifacts/szl-holdings && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
+run = "pnpm --filter @workspace/szl-holdings run dev"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/szl-holdings", "run", "build" ]
@@ -27,5 +27,5 @@ from = "/*"
 to = "/index.html"
 
 [services.env]
-PORT = "3000"
+PORT = "18490"
 BASE_PATH = "/"

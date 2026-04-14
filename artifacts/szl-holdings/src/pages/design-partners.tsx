@@ -3,9 +3,6 @@ import { ArrowRight, Users, Calendar, CheckCircle2, Zap, Shield, BarChart3, Mess
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { SegmentedCTA } from "@/components/SegmentedCTA";
-import { useNarrativeRouter } from "@/hooks/useNarrativeRouter";
-import { DynamicProofPack } from "@/components/DynamicProofPack";
 
 const WHAT_YOU_GET = [
   {
@@ -77,8 +74,6 @@ const NOT_FIT = [
 ];
 
 export default function DesignPartnersPage() {
-  const { visitorType, setIntent } = useNarrativeRouter();
-
   usePageMeta({
     title: "Design Partners — SZL Holdings",
     description:
@@ -243,25 +238,6 @@ export default function DesignPartnersPage() {
                 </Link>
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* Proof pack by intent */}
-        <section style={{ borderTop: "1px solid hsla(0,0%,100%,0.07)", padding: "clamp(3rem,5vw,4rem) 0" }}>
-          <div className="mx-auto max-w-6xl px-6 lg:px-8">
-            <div style={{ marginBottom: "1.75rem" }}>
-              <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsla(0,0%,100%,0.3)", fontFamily: "var(--font-mono)", marginBottom: "0.5rem" }}>
-                Proof by intent
-              </p>
-              <p style={{ fontSize: "0.875rem", color: "hsla(0,0%,100%,0.45)", lineHeight: 1.6 }}>
-                {visitorType !== "unknown" ? "Tailored evidence for your context." : "Not here as a design partner? We'll show you the right materials."}
-              </p>
-            </div>
-            {visitorType !== "unknown" ? (
-              <DynamicProofPack visitorType={visitorType} onChangeIntent={() => setIntent("unknown")} />
-            ) : (
-              <SegmentedCTA visitorType={visitorType} onSelectIntent={setIntent} compact />
-            )}
           </div>
         </section>
 

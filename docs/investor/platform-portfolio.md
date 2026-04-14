@@ -146,70 +146,13 @@ Principal-led advisory on brand strategy, operations, and executive engagement.
 
 ---
 
-## Forge — Client & Investor Portal
-
-**Category:** Client Intelligence & Investor Relations  
-**Layer:** Engage / Report  
-**Readiness:** Functional Alpha  
-
-The gateway platform for external stakeholders — clients, investors, and partners. Forge delivers a premium, governed interface for deal tracking, investor relations, client pipeline management, and secure document access.
-
-**Capability highlights:**
-- Investor relations dashboard with real-time portfolio metrics
-- Client pipeline management with deal stage tracking
-- Secure document vault and data room access
-- Integration with Alloy for governed client communications and audit trails
-- Role-aware views for investors, clients, and internal staff
-
-**Strategic position:** Enables commercialization of the ecosystem — the surface through which clients and investors interact with SZL Holdings intelligence without direct platform access.
-
----
-
-## Nexus — Cross-Domain Fusion Intelligence Canvas
-
-**Category:** Cross-Domain Intelligence Visualization  
-**Layer:** Fuse / Visualize / Synthesize  
-**Readiness:** Functional Alpha  
-
-The visualization layer of the compound intelligence engine. Nexus renders the cross-domain ontology as an interactive force-directed canvas — linking entities, tracing relationships, and surfacing emergent patterns across all five verticals in real-time.
-
-**Capability highlights:**
-- Interactive force-directed entity graph across 5 domains
-- Cross-vertical relationship traversal up to depth 4 with 22 relationship types
-- Real-time signal overlay and cascade prediction visualization
-- Behavioral genome display per entity
-- Filterable by domain, risk score, entity type, and time window
-
-**Strategic position:** Makes the Compound Intelligence Engine visible and legible to buyers and investors — the primary demonstration of the ONE-OF-ONE moat and SZL's compound intelligence thesis.
-
----
-
-## INCA Lab — AI Model Command & Deployment
-
-**Category:** AI Model Governance & Operations  
-**Layer:** Govern / Deploy / Evaluate  
-**Readiness:** Functional Alpha  
-
-The AI governance and model lifecycle management platform. INCA Lab provides the command surface for all AI model operations across the SZL Holdings ecosystem — model registry, experiment tracking, ensemble evaluation, and deployment.
-
-**Capability highlights:**
-- Model registry with version tracking, performance history, and lineage
-- Experiment tracking with prompt strategy evolution and accuracy benchmarks
-- Ensemble evaluation: compare model outputs across multi-provider gateway (Anthropic, OpenAI, Gemini, Groq)
-- LLM governance: audit trail for every AI inference decision across the platform
-- Deployment orchestration: promote models with approval gates and automated rollback
-
-**Strategic position:** Differentiates the AI layer from commodity AI integrations. Demonstrates production-grade AI operations discipline and auditability — critical for regulated enterprise buyers.
-
----
-
 ## Portfolio Leverage
 
 The compounding value of this portfolio:
 
 | Investment | Benefits | Platforms |
 |-----------|----------|----------|
-| `@workspace/shared-ui` | One component library, consistent premium aesthetic | All 11 web, all 7 mobile |
+| `@workspace/shared-ui` | One component library, consistent premium aesthetic | All 7 web, all 7 mobile |
 | `@workspace/db` + Drizzle | One schema, one migration system, one query layer | All platforms |
 | `@workspace/auth` | OIDC PKCE + RBAC built once | All platforms |
 | `@workspace/workflow-engine` | Alloy execution fabric built once | All platforms |
