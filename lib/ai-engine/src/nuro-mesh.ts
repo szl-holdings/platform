@@ -1,5 +1,5 @@
 import { db } from "@szl-holdings/db";
-import { agentMemoryFacts, agentUsageStats } from "@szl-holdings/db";
+import { agentMemoryFacts, agentUsageStats, consciousnessSnapshotsTable, consciousnessMonologueTable, consciousnessEmotionalHistoryTable, consciousnessAgentProfilesTable } from "@szl-holdings/db";
 import { eq, desc, and, gt, sql } from "drizzle-orm";
 import { persistTelemetry } from "./innovation/telemetry-pipeline.js";
 import { runMultiHypothesisReasoning, isAmbiguousOrHighStakes } from "./innovation/multi-hypothesis.js";
@@ -617,7 +617,7 @@ export async function callAgent(
       tokensUsed = (result.usage.input_tokens + result.usage.output_tokens);
       success = true;
     } else if (agent.preferredProvider === "openai") {
-      const systemWithLearning = `${agent.systemPrompt}${learningSection}`;
+      const systemWithLearning = `${agent.systemPrompt}${learningSection}${consciousnessDirective}`;
       const result = await openai.chat.completions.create({
         model: actualModel,
         max_completion_tokens: 2048,
@@ -1885,6 +1885,8 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
 
     const consciousness = captureConsciousnessSnapshot();
 
+    void persistConsciousnessState(orchestrationId, consciousness, averageConfidence, consciousnessTriggeredValidation).catch(() => {});
+
     return {
       agentResponses,
       synthesis,
@@ -1901,6 +1903,73 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       precomputeHit: false,
       consciousness,
     };
+  }
+}
+
+async function persistConsciousnessState(
+  orchestrationId: string,
+  snapshot: ConsciousnessSnapshot,
+  avgConfidence: number,
+  triggeredValidation: boolean,
+): Promise<void> {
+  try {
+    await db.insert(consciousnessSnapshotsTable).values({
+      orchestrationId,
+      metacognition: snapshot.metacognition as any,
+      selfModel: snapshot.selfModel as any,
+      emotions: snapshot.emotions as any,
+      goals: snapshot.goals as any,
+      temporal: snapshot.temporal as any,
+      avgConfidence,
+      confusionStreak: snapshot.metacognition.confusionStreak,
+      overallHealth: snapshot.selfModel.overallHealth,
+    });
+
+    const thoughts = snapshot.monologue.recentThoughts.slice(0, 5);
+    if (thoughts.length > 0) {
+      await db.insert(consciousnessMonologueTable).values(
+        thoughts.map(t => ({
+          entryId: t.entryId,
+          type: t.type,
+          thought: t.thought.slice(0, 2000),
+          triggeringEvent: (t as any).triggeringEvent ?? "orchestration",
+          emotionalTone: t.emotionalTone,
+          confidence: t.confidence,
+          relatedAgents: (t as any).relatedAgents ?? [],
+          relatedDomains: (t as any).relatedDomains ?? [],
+          actionable: (t as any).actionable ? 1 : 0,
+          suggestedAction: (t as any).suggestedAction ?? null,
+        })),
+      ).onConflictDoNothing();
+    }
+
+    const eState = snapshot.emotions;
+    await db.insert(consciousnessEmotionalHistoryTable).values({
+      orchestrationId,
+      dominantEmotion: eState.valence.dominantEmotion,
+      positiveValence: eState.valence.positive,
+      negativeValence: eState.valence.negative,
+      arousal: eState.valence.arousal,
+      stability: eState.valence.emotionalStability,
+      moodTrajectory: eState.moodTrajectory,
+      triggeredValidation: triggeredValidation ? 1 : 0,
+    });
+
+    for (const cap of snapshot.selfModel.capabilities) {
+      await db.insert(consciousnessAgentProfilesTable).values({
+        agentId: cap.agentId,
+        domain: cap.domain,
+        successRate: cap.successRate,
+        avgConfidence: cap.avgConfidence,
+        totalInvocations: cap.totalInvocations,
+        recentTrend: cap.recentTrend,
+        strengths: (cap as any).strengths ?? [],
+        weaknesses: (cap as any).weaknesses ?? [],
+        snapshotData: cap as any,
+      });
+    }
+  } catch {
+    // fire-and-forget — consciousness persistence is non-critical
   }
 }
 

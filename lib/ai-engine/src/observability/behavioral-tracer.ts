@@ -14,7 +14,7 @@
 
 import { randomUUID } from "crypto";
 
-export type DecisionForkType = "routing" | "tool_call" | "validation" | "synthesis" | "escalation" | "governance_check";
+export type DecisionForkType = "routing" | "tool_call" | "validation" | "synthesis" | "escalation" | "governance_check" | "consciousness";
 
 export interface DecisionFork {
   forkId: string;

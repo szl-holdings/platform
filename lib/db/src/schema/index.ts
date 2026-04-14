@@ -48,6 +48,7 @@ export * from "./lyte_product";
 export * from "./vessels_intelligence";
 export * from "./platform_ops";
 export * from "./msp";
+export * from "./consciousness";
 export * from "./recommendations";
 export * from "./azure_tenants";
 export * from "./documents";
