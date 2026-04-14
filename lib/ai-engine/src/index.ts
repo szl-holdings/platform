@@ -82,6 +82,53 @@ export { AlloyRetrievalEngine, alloyRetrieval, type RetrievalChunk, type Retriev
 export { GOLDEN_SET } from "./evals/golden-set.js";
 export { runEvals, type EvalResult, type EvalReport } from "./evals/run-evals.js";
 
+export {
+  exportTrainingData,
+  serializeToJSONL,
+  serializeToHuggingFaceJSON,
+  type ExportFormat,
+  type DatasetExportResult,
+  type OpenAITrainingSample,
+  type HuggingFaceSample,
+} from "./fine-tuning/dataset-exporter.js";
+
+export {
+  curateDatasetForAgent,
+  curateAllDomainDatasets,
+  getDomainCuratorConfig,
+  getAllSupportedAgents,
+  DOMAIN_CURATOR_CONFIGS,
+  type DomainCuratorConfig,
+  type CuratedDatasetResult,
+} from "./fine-tuning/domain-curators.js";
+
+export {
+  submitFineTuningJob,
+  pollJobStatus,
+  listFineTuningJobs,
+  cancelFineTuningJob,
+  type FineTuningProvider,
+  type FineTuningJobRequest,
+  type FineTuningJobStatus,
+} from "./fine-tuning/job-manager.js";
+
+export {
+  runValidationGate,
+  promoteFineTunedModel,
+  type ModelEvalScores,
+  type ValidationGateResult,
+} from "./fine-tuning/validation-gate.js";
+
+export {
+  getActiveFineTunedModel,
+  resolveModelForAgent,
+  getAllFineTunedModels,
+  deprecateFineTunedModel,
+  invalidateModelCache,
+  getModelLineage,
+  type FineTunedModelInfo,
+} from "./fine-tuning/model-registry-extension.js";
+
 export { startScheduledEvals, stopScheduledEvals, persistEvalReport, getLatestEvalReport, getEvalHistory, computeAgentCalibrations } from "./learning/eval-pipeline.js";
 export { recordOutcome, getRelevantOutcomes, getConfidenceCalibration, buildCalibrationInstruction, type OutcomeRecord, type OutcomeType, type ConfidenceCalibration } from "./learning/outcome-learning.js";
 export { storeCorrection, getRelevantCorrections, type CorrectionRecord } from "./learning/agent-corrections.js";

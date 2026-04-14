@@ -124,6 +124,7 @@ import alloyCognitiveLearningRouter from "./alloy-cognitive-learning";
 import externalIntegrationsRouter from "./external-integrations";
 import agentFederationRouter from "./agent-federation";
 import streamingIngestionRouter from "./streaming-ingestion";
+import fineTuningRouter from "./fine-tuning";
 
 const router: IRouter = Router();
 
@@ -463,5 +464,9 @@ router.use(agentFederationRouter);
 
 router.use("/stream", _readLimiter);
 router.use(streamingIngestionRouter);
+
+router.use("/fine-tuning", _readLimiter);
+router.use("/fine-tuning", _writeLimiter);
+router.use(fineTuningRouter);
 
 export default router;
