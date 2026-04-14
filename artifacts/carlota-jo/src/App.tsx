@@ -48,6 +48,12 @@ const BrandAudit = lazy(() => import("@/pages/brand-audit"));
 const ContentStrategy = lazy(() => import("@/pages/content-strategy"));
 const DocumentEngine = lazy(() => import("@/pages/document-engine"));
 const MethodologyPage = lazy(() => import("@/pages/methodology"));
+const StrategicDiagnostic = lazy(() => import("@/pages/strategic-diagnostic"));
+const CompetitiveRadar = lazy(() => import("@/pages/competitive-radar"));
+const EngagementROI = lazy(() => import("@/pages/engagement-roi"));
+const ScenarioSimulator = lazy(() => import("@/pages/scenario-simulator"));
+const ClientHealth = lazy(() => import("@/pages/client-health"));
+const ProposalGenerator = lazy(() => import("@/pages/proposal-generator"));
 
 function PageLoader() {
   return (
@@ -130,6 +136,12 @@ function Router() {
         <Route path="/content-strategy" component={ContentStrategy} />
         <Route path="/document-engine" component={DocumentEngine} />
         <Route path="/document-engine/:sub" component={DocumentEngine} />
+        <Route path="/strategic-diagnostic" component={StrategicDiagnostic} />
+        <Route path="/competitive-radar" component={CompetitiveRadar} />
+        <Route path="/engagement-roi" component={EngagementROI} />
+        <Route path="/scenario-simulator" component={ScenarioSimulator} />
+        <Route path="/client-health" component={ClientHealth} />
+        <Route path="/proposal-generator" component={ProposalGenerator} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
@@ -143,6 +155,12 @@ const carlotaCommands: CommandItem[] = [
   { id: "nav-founder", label: "About Carlota Jo", icon: "👤", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/founder"); } },
   { id: "nav-contact", label: "Request Consultation", icon: "📬", group: "Actions", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/contact"); } },
   { id: "nav-portal", label: "Client Portal", icon: "🔐", group: "Actions", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/client-portal"); } },
+  { id: "nav-diagnostic", label: "Strategic Diagnostic Engine", icon: "🧠", group: "AI Platform", keywords: ["diagnosis", "strategy", "analysis", "market"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/strategic-diagnostic"); } },
+  { id: "nav-radar", label: "Competitive Intelligence Radar", icon: "📡", group: "AI Platform", keywords: ["competitor", "competitive", "monitor", "intelligence"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/competitive-radar"); } },
+  { id: "nav-roi", label: "Engagement ROI Tracker", icon: "📊", group: "AI Platform", keywords: ["roi", "impact", "return", "recommendations"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/engagement-roi"); } },
+  { id: "nav-simulator", label: "Strategy Scenario Simulator", icon: "⚗️", group: "AI Platform", keywords: ["scenario", "what-if", "simulate", "model"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/scenario-simulator"); } },
+  { id: "nav-health", label: "Client Health Score", icon: "❤️", group: "AI Platform", keywords: ["health", "client", "score", "risk"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/client-health"); } },
+  { id: "nav-proposal", label: "Proposal Auto-Generator", icon: "📄", group: "AI Platform", keywords: ["proposal", "generate", "prospect", "pitch"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/proposal-generator"); } },
   { id: "app-szl", label: "SZL Holdings", icon: "🏛️", group: "Switch App", description: "Portfolio", action: () => { window.location.href = "/"; } },
 ];
 
