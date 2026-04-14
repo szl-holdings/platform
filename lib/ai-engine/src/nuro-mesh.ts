@@ -772,7 +772,7 @@ export async function callAgent(
     latencyMs,
   });
 
-  if (postFlightAssessment.certaintyLevel === "very_low" || postFlightAssessment.reasoningQuality === "poor") {
+  if (postFlightAssessment.certaintyLevel === "very_low" || postFlightAssessment.reasoningQuality === "degraded") {
     innerMonologue.addThought(
       "doubt",
       `Post-flight: agent ${agent.id} produced ${postFlightAssessment.certaintyLevel} certainty / ${postFlightAssessment.reasoningQuality} quality (conf=${confidence}, ${latencyMs}ms)`,
