@@ -1,23 +1,17 @@
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Platform } from "react-native";
 import { useAuth } from "@/context/AuthContext";
+import { configurePushNotificationHandler } from "@szl-holdings/mobile-shared/notifications";
+import { usePushNotificationsBase } from "@szl-holdings/mobile-shared/notifications";
+
+configurePushNotificationHandler();
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
   : "/api";
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowAlert: true,
-  }),
-});
 
 export interface PushNotificationState {
   expoPushToken: string | null;
@@ -72,8 +66,32 @@ export function usePushNotifications(): PushNotificationState {
   const [permissionStatus, setPermissionStatus] = useState<Notifications.PermissionStatus | null>(null);
   const [notification, setNotification] = useState<Notifications.Notification | null>(null);
 
-  const notificationListener = useRef<Notifications.EventSubscription | null>(null);
-  const responseListener = useRef<Notifications.EventSubscription | null>(null);
+  // Trigger permission/token registration automatically when the user becomes authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      requestPermission();
+    }
+  // requestPermission is stable (useCallback with no deps), so this is safe
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
+
+  // Shared base manages listeners; registration is handled manually via requestPermission
+  usePushNotificationsBase({
+    enabled: isAuthenticated,
+    skipAutoRegistration: true,
+    onNotificationReceived: (notif) => setNotification(notif),
+    onNotificationResponse: (response) => {
+      const data = response.notification.request.content.data as Record<string, string> | undefined;
+      if (data?.screen) {
+        const { router } = require("expo-router");
+        try {
+          router.push(data.screen);
+        } catch {
+          console.warn("[push] Deep-link navigation failed:", data.screen);
+        }
+      }
+    },
+  });
 
   const requestPermission = useCallback(async (): Promise<boolean> => {
     if (Platform.OS === "web") {
@@ -143,33 +161,6 @@ export function usePushNotifications(): PushNotificationState {
       return false;
     }
   }, []);
-
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    requestPermission();
-
-    notificationListener.current = Notifications.addNotificationReceivedListener((notif) => {
-      setNotification(notif);
-    });
-
-    responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
-      const data = response.notification.request.content.data as Record<string, string> | undefined;
-      if (data?.screen) {
-        const { router } = require("expo-router");
-        try {
-          router.push(data.screen);
-        } catch {
-          console.warn("[push] Deep-link navigation failed:", data.screen);
-        }
-      }
-    });
-
-    return () => {
-      notificationListener.current?.remove();
-      responseListener.current?.remove();
-    };
-  }, [isAuthenticated, requestPermission]);
 
   return {
     expoPushToken,

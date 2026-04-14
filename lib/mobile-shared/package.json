@@ -1,0 +1,49 @@
+{
+  "name": "@szl-holdings/mobile-shared",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./components": "./src/components/index.ts",
+    "./hooks": "./src/hooks/index.ts",
+    "./notifications": "./src/push-index.ts"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "*",
+    "expo": "*",
+    "expo-device": "*",
+    "expo-notifications": "*",
+    "react": "*",
+    "react-native": "*",
+    "react-native-keyboard-controller": "*",
+    "react-native-safe-area-context": "*"
+  },
+  "peerDependenciesMeta": {
+    "expo-device": {
+      "optional": true
+    },
+    "expo-notifications": {
+      "optional": true
+    },
+    "react-native-keyboard-controller": {
+      "optional": true
+    },
+    "react-native-safe-area-context": {
+      "optional": true
+    },
+    "expo": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "@tanstack/react-query": "catalog:",
+    "expo": "~54.0.27",
+    "expo-device": "~8.0.10",
+    "expo-notifications": "~0.30.6",
+    "react": "catalog:",
+    "react-native": "0.81.5",
+    "react-native-keyboard-controller": "1.18.5"
+  }
+}

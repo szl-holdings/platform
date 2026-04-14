@@ -18,8 +18,8 @@ import { useQuery } from "@tanstack/react-query";
 
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
-import { useApiStatus } from "@/hooks/useApiStatus";
-import { SkeletonLoader } from "@/components/SkeletonLoader";
+import { useApiStatus } from "@szl-holdings/mobile-shared";
+import { SkeletonLoader } from "@szl-holdings/mobile-shared";
 import { NotificationBell } from "@/components/NotificationCenter";
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";

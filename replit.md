@@ -55,6 +55,7 @@ The platform consists of 13 interconnected applications sharing authentication a
 - **Feature Gating:** Entitlement-based access control using `checkFeatureAccess`.
 - **Admin Panel CMS:** Centralized administration for 16 CMS tables, media assets, and site settings.
 - **Collaboration & Notifications:** In-app collaboration layer via `comments` table and a universal notification/real-time alerting system with multi-channel dispatch (Slack, MS Teams) and Expo Push Notifications for mobile.
+- **Mobile Shared Library (`lib/mobile-shared`, `@szl-holdings/mobile-shared`):** Shared React Native components and hooks used across all 7 mobile apps: `ErrorBoundary`, `SkeletonLoader`, `KeyboardAwareScrollViewCompat`, and `useApiStatus`. Each mobile app's metro.config.js includes this package in its watchFolders.
 - **Email Delivery:** Triple-failover email chain (SendGrid → Resend → SMTP nodemailer).
 - **Alloy Platform Core:** Orchestration engine with canonical shared data model, ingestion, normalization, and workflow orchestration.
 - **Alloy Unified Command Surface:** Features a Global Command Bar, Workspace Home, Decision Objects, Skill Registry, and Operator Control Center.

@@ -21,6 +21,8 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
+import { ErrorBoundary } from "@szl-holdings/mobile-shared";
+import { ErrorFallback } from "@/components/ErrorFallback";
 
 if (process.env.EXPO_PUBLIC_DOMAIN) {
   setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
@@ -102,6 +104,7 @@ export default function RootLayout() {
   return (
     <PrismBusProvider domain="terra">
     <SafeAreaProvider>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <GestureHandlerRootView style={{ flex: 1 }}>
@@ -111,6 +114,7 @@ export default function RootLayout() {
           </GestureHandlerRootView>
         </AuthProvider>
       </QueryClientProvider>
+      </ErrorBoundary>
     </SafeAreaProvider>
     </PrismBusProvider>
   );

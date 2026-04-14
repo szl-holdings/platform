@@ -26,7 +26,7 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
-import { useApiStatus } from "@/hooks/useApiStatus";
+import { useApiStatus } from "@szl-holdings/mobile-shared";
 
 import { apiGet } from "@/lib/apiClient";
 

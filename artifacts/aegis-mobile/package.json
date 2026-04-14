@@ -36,6 +36,7 @@
     "expo-linear-gradient": "~15.0.8",
     "expo-linking": "~8.0.10",
     "expo-local-authentication": "~17.0.8",
+    "expo-device": "~8.0.10",
     "expo-notifications": "~0.30.6",
     "expo-router": "~6.0.17",
     "expo-secure-store": "~15.0.8",
@@ -57,7 +58,8 @@
     "react-native-worklets": "0.5.1",
     "typescript": "~5.9.2",
     "zod": "catalog:",
-    "zod-validation-error": "^3.4.0"
+    "zod-validation-error": "^3.4.0",
+    "@szl-holdings/mobile-shared": "workspace:*"
   },
   "dependencies": {
     "@szl-holdings/prism-bus": "workspace:*"

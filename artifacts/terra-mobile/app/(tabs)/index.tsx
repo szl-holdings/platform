@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
-import { useApiStatus } from "@/hooks/useApiStatus";
+import { useApiStatus } from "@szl-holdings/mobile-shared";
 import { useQuery } from "@tanstack/react-query";
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN

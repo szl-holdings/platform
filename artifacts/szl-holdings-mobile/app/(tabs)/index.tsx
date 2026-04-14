@@ -25,8 +25,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
-import { useApiStatus } from "@/hooks/useApiStatus";
-import { SkeletonLoader } from "@/components/SkeletonLoader";
+import { useApiStatus } from "@szl-holdings/mobile-shared";
+import { SkeletonLoader } from "@szl-holdings/mobile-shared";
 import { apiFetch } from "@/lib/apiClient";
 
 type FeatherIconName = React.ComponentProps<typeof Feather>["name"];

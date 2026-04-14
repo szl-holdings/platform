@@ -1,13 +1,21 @@
 import React, { useEffect, useRef } from "react";
-import { Animated, StyleSheet, View, type ViewStyle } from "react-native";
+import { Animated, StyleSheet, type ViewStyle } from "react-native";
 
 interface Props {
   width?: number | string;
   height?: number;
+  borderRadius?: number;
+  color?: string;
   style?: ViewStyle;
 }
 
-export function SkeletonLoader({ width = "100%", height = 16, style }: Props) {
+export function SkeletonLoader({
+  width = "100%",
+  height = 16,
+  borderRadius,
+  color = "rgba(200,169,106,0.12)",
+  style,
+}: Props) {
   const pulse = useRef(new Animated.Value(0.3)).current;
 
   useEffect(() => {
@@ -36,6 +44,8 @@ export function SkeletonLoader({ width = "100%", height = 16, style }: Props) {
         {
           width: width as number,
           height,
+          borderRadius,
+          backgroundColor: color,
           opacity: pulse,
         },
         style,
@@ -46,6 +56,6 @@ export function SkeletonLoader({ width = "100%", height = 16, style }: Props) {
 
 const styles = StyleSheet.create({
   skeleton: {
-    backgroundColor: "rgba(200,169,106,0.12)",
+    overflow: "hidden",
   },
 });

@@ -1,43 +1,14 @@
-import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { configurePushNotificationHandler } from "@szl-holdings/mobile-shared/notifications";
+import { usePushNotificationsBase } from "@szl-holdings/mobile-shared/notifications";
+
+configurePushNotificationHandler();
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
   ? "https://" + process.env.EXPO_PUBLIC_DOMAIN + "/api"
   : "/api";
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
-
-async function registerForPushNotificationsAsync(): Promise<string | null> {
-  if (Platform.OS === "web") return null;
-  if (!Device.isDevice) return null;
-
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
-
-  if (existingStatus !== "granted") {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
-  }
-
-  if (finalStatus !== "granted") return null;
-
-  try {
-    const token = await Notifications.getExpoPushTokenAsync();
-    return token.data;
-  } catch {
-    return null;
-  }
-}
 
 async function registerTokenWithServer(token: string): Promise<void> {
   try {
@@ -58,30 +29,16 @@ async function registerTokenWithServer(token: string): Promise<void> {
 export function usePushNotifications() {
   const [pushToken, setPushToken] = useState<string | null>(null);
   const [notification, setNotification] = useState<Notifications.Notification | null>(null);
-  const notificationListener = useRef<Notifications.EventSubscription | null>(null);
-  const responseListener = useRef<Notifications.EventSubscription | null>(null);
 
-  useEffect(() => {
-    registerForPushNotificationsAsync().then(token => {
-      if (token) {
-        setPushToken(token);
-        registerTokenWithServer(token);
-      }
-    });
-
-    notificationListener.current = Notifications.addNotificationReceivedListener(n => {
+  usePushNotificationsBase({
+    onTokenAcquired: async (token) => {
+      setPushToken(token);
+      await registerTokenWithServer(token);
+    },
+    onNotificationReceived: (n) => {
       setNotification(n);
-    });
-
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(() => {
-      // Navigate to relevant screen based on notification data
-    });
-
-    return () => {
-      notificationListener.current?.remove();
-      responseListener.current?.remove();
-    };
-  }, []);
+    },
+  });
 
   return { pushToken, notification };
 }

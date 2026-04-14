@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 type ApiStatus = "checking" | "connected" | "degraded" | "offline";
 
-interface ApiStatusResult {
+export interface ApiStatusResult {
   status: ApiStatus;
   isOffline: boolean;
   isDegraded: boolean;

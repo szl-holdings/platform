@@ -5,10 +5,10 @@ import type { ErrorFallbackProps } from "@szl-holdings/mobile-shared";
 export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Something went wrong</Text>
+      <Text style={styles.title}>System Error</Text>
       {error && <Text style={styles.message}>{error.message}</Text>}
       <TouchableOpacity style={styles.button} onPress={resetError}>
-        <Text style={styles.buttonText}>Try Again</Text>
+        <Text style={styles.buttonText}>Restart</Text>
       </TouchableOpacity>
     </View>
   );
@@ -19,18 +19,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#0d0b08",
+    backgroundColor: "#070c14",
     padding: 24,
   },
   title: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#b8943c",
+    color: "#00d4ff",
     marginBottom: 8,
   },
   message: {
     fontSize: 13,
-    color: "rgba(184,148,60,0.5)",
+    color: "rgba(0,212,255,0.5)",
     textAlign: "center",
     marginBottom: 24,
   },
@@ -38,11 +38,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 6,
-    backgroundColor: "#b8943c",
+    backgroundColor: "#00d4ff",
   },
   buttonText: {
-    color: "#0d0b08",
+    color: "#070c14",
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "700",
+    letterSpacing: 0.5,
   },
 });

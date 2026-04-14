@@ -48,7 +48,8 @@
     "react-native-svg": "15.12.1",
     "react-native-web": "^0.21.0",
     "typescript": "~5.9.2",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@szl-holdings/mobile-shared": "workspace:*"
   },
   "dependencies": {
     "graphql": "^16.13.2",

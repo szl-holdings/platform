@@ -24,7 +24,8 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ErrorBoundary } from "@szl-holdings/mobile-shared";
+import { ErrorFallback } from "@/components/ErrorFallback";
 import { AuthProvider } from "@/context/AuthContext";
 import { NotificationProvider } from "@/context/NotificationContext";
 import { PushNotificationBootstrap } from "@/components/PushNotificationBootstrap";
@@ -93,7 +94,7 @@ export default function RootLayout() {
   return (
     <PrismBusProvider domain="carlota-jo">
     <SafeAreaProvider>
-      <ErrorBoundary>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <NotificationProvider>

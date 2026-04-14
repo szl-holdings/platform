@@ -34,6 +34,7 @@
     "expo-image": "~3.0.11",
     "expo-linear-gradient": "~15.0.8",
     "expo-linking": "~8.0.10",
+    "expo-device": "~8.0.10",
     "expo-notifications": "~0.29.14",
     "expo-router": "~6.0.17",
     "expo-secure-store": "~15.0.8",
@@ -55,7 +56,8 @@
     "typescript": "~5.9.2",
     "zod": "catalog:",
     "eventemitter3": "^5.0.1",
-    "zod-validation-error": "^3.4.0"
+    "zod-validation-error": "^3.4.0",
+    "@szl-holdings/mobile-shared": "workspace:*"
   },
   "dependencies": {
     "@szl-holdings/prism-bus": "workspace:*"

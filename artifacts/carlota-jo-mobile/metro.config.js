@@ -9,6 +9,7 @@ const projectRoot = __dirname;
 config.watchFolders = [
   projectRoot,
   path.resolve(workspaceRoot, "lib/api-client-react"),
+  path.resolve(workspaceRoot, "lib/mobile-shared"),
   path.resolve(workspaceRoot, "lib/api-zod"),
   path.resolve(workspaceRoot, "packages"),
 ];

@@ -14,7 +14,8 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AlertNotifierBridge } from "@/components/AlertNotifierBridge";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ErrorBoundary } from "@szl-holdings/mobile-shared";
+import { ErrorFallback } from "@/components/ErrorFallback";
 import { AuthProvider } from "@/context/AuthContext";
 import { LyteProvider } from "@/context/LyteContext";
 import { NotificationProvider } from "@/context/NotificationContext";
@@ -60,7 +61,7 @@ export default function RootLayout() {
   return (
     <PrismBusProvider domain="lyte">
     <SafeAreaProvider>
-      <ErrorBoundary>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <NotificationProvider>

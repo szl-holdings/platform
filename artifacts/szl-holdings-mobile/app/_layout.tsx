@@ -17,7 +17,8 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ErrorBoundary } from "@szl-holdings/mobile-shared";
+import { ErrorFallback } from "@/components/ErrorFallback";
 import { AuthProvider } from "@/context/AuthContext";
 import { BiometricLockProvider } from "@/context/BiometricLockContext";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
@@ -69,7 +70,7 @@ export default function RootLayout() {
   return (
     <PrismBusProvider domain="szl-holdings">
     <SafeAreaProvider>
-      <ErrorBoundary>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
         <QueryClientProvider client={queryClient}>
           <UrqlProvider value={getGraphQLClient()}>
             <AuthProvider>

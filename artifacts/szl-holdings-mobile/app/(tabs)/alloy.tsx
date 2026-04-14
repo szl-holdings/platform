@@ -16,7 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useColors } from "@/hooks/useColors";
-import { SkeletonLoader } from "@/components/SkeletonLoader";
+import { SkeletonLoader } from "@szl-holdings/mobile-shared";
 import { useAlloyWebSocket } from "@/hooks/useAlloyWebSocket";
 import { apiFetch as sharedApiFetch } from "@/lib/apiClient";
 
