@@ -3,6 +3,9 @@ import { BarChart3, TrendingUp, TrendingDown, Minus, AlertTriangle, ArrowRight }
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 
+interface PressureDimension { dimension?: string; [key: string]: unknown; }
+interface PressureApiResponse { data?: { dimensions?: PressureDimension[] } }
+
 const DIMENSIONS = [
   { id: "deadline", label: "Deadline", color: "#c45a4a" },
   { id: "insurer", label: "Insurer", color: "#d4a054" },
@@ -89,17 +92,14 @@ export default function PressureGraphPage() {
 
   const { data: pressureData, isLoading } = useQuery({
     queryKey: ["pressure-graph", matterId],
-    queryFn: async () => {
-      const res = await apiRequest("GET", `/api/prism-counsel/matters/${matterId}/pressure`);
-      return res.json();
-    },
+    queryFn: () => apiRequest<PressureApiResponse>("GET", `/api/prism-counsel/matters/${matterId}/pressure`),
     enabled: matterId > 0,
   });
 
   const dimensions = pressureData?.data?.dimensions ?? [];
   const dimMap: Record<string, any> = {};
   for (const d of dimensions) {
-    dimMap[d.dimension] = d;
+    if (d.dimension) dimMap[d.dimension] = d;
   }
 
   const avgScore = DIMENSIONS.reduce((sum, d) => sum + (dimMap[d.id]?.currentScore ?? 50), 0) / DIMENSIONS.length;

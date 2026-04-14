@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
+interface DraftsApiResponse { data?: { drafts?: unknown[] } }
+
 const WORKBENCH_MODULES = [
   { id: "outlook", label: "Outlook", icon: Mail, description: "Email ingestion, entity extraction, silence-window detection, follow-up recommendations" },
   { id: "word", label: "Word", icon: FileText, description: "Source-grounded drafting: chronologies, demands, memos, checklists" },
@@ -191,10 +193,7 @@ function CalendarModule() {
 function DraftsModule({ matterId }: { matterId?: number }) {
   const { data: draftsData } = useQuery({
     queryKey: ["copilot-drafts", matterId],
-    queryFn: async () => {
-      const res = await apiRequest("GET", `/api/prism-counsel/matters/${matterId}/copilot-drafts`);
-      return res.json();
-    },
+    queryFn: () => apiRequest<DraftsApiResponse>("GET", `/api/prism-counsel/matters/${matterId}/copilot-drafts`),
     enabled: !!matterId,
   });
 

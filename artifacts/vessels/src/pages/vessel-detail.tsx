@@ -177,7 +177,7 @@ export default function VesselDetailPage() {
                       </p>
                     </div>
                   </div>
-                  <Badge variant="outline" className={statusColors[route.status] || ""}>{route.status}</Badge>
+                  <Badge variant="outline" className={route.status ? statusColors[route.status] ?? "" : ""}>{route.status}</Badge>
                 </div>
                 {route.waypoints && Array.isArray(route.waypoints) && route.waypoints.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1">
@@ -208,7 +208,7 @@ export default function VesselDetailPage() {
                     <p className="font-semibold text-sm">{c.cargoType}</p>
                     <p className="text-xs text-muted-foreground">{c.quantity} {c.unit} | {c.origin} → {c.destination}</p>
                   </div>
-                  <Badge variant="outline" className={statusColors[c.status] || ""}>{c.status?.replace("_", " ")}</Badge>
+                  <Badge variant="outline" className={c.status ? statusColors[c.status] ?? "" : ""}>{c.status?.replace("_", " ")}</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -237,7 +237,7 @@ export default function VesselDetailPage() {
                   </div>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Clock className="w-3 h-3" />
-                    {new Date(pos.recordedAt).toLocaleString()}
+                    {pos.recordedAt ? new Date(pos.recordedAt).toLocaleString() : "—"}
                   </div>
                 </div>
               </CardContent>

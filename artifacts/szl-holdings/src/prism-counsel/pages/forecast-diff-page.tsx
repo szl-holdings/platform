@@ -2,6 +2,12 @@ import { TrendingUp, TrendingDown, Minus, BarChart3 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 
+interface ForecastDiff {
+  forecastType?: string; trend?: string; approvalRequired?: boolean;
+  [key: string]: unknown;
+}
+interface DiffsApiResponse { data?: { diffs?: ForecastDiff[] } }
+
 const FORECAST_TYPES = [
   "deadline_breach_risk", "no_fault_evidence_lock", "disclaimer_denial_vulnerability",
   "demand_readiness", "settlement_band_scenarios", "offer_movement_likelihood",
@@ -68,16 +74,13 @@ export default function ForecastDiffPage() {
 
   const { data: diffData, isLoading } = useQuery({
     queryKey: ["forecast-diffs", matterId],
-    queryFn: async () => {
-      const res = await apiRequest("GET", `/api/prism-counsel/matters/${matterId}/forecast-diffs`);
-      return res.json();
-    },
+    queryFn: () => apiRequest<DiffsApiResponse>("GET", `/api/prism-counsel/matters/${matterId}/forecast-diffs`),
     enabled: !!matterId,
   });
 
   const diffs = diffData?.data?.diffs ?? [];
   const diffMap: Record<string, any> = {};
-  for (const d of diffs) diffMap[d.forecastType] = d;
+  for (const d of diffs) if (d.forecastType) diffMap[d.forecastType] = d;
 
   const improving = diffs.filter((d: any) => d.trend === "improving").length;
   const declining = diffs.filter((d: any) => d.trend === "declining").length;

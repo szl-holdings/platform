@@ -93,8 +93,10 @@ export default function DigitalExperiencePage() {
         <CardContent>
           <div className="space-y-4">
             {shipments.map(s => {
-              const daysTotal = Math.max(1, Math.ceil((new Date(s.eta).getTime() - new Date(s.departureDate).getTime()) / 86400000));
-              const daysPassed = Math.max(0, Math.ceil((Date.now() - new Date(s.departureDate).getTime()) / 86400000));
+              const etaMs = s.eta ? new Date(s.eta).getTime() : Date.now();
+              const departureMs = s.departureDate ? new Date(s.departureDate).getTime() : Date.now();
+              const daysTotal = Math.max(1, Math.ceil((etaMs - departureMs) / 86400000));
+              const daysPassed = Math.max(0, Math.ceil((Date.now() - departureMs) / 86400000));
               const progress = Math.min(100, Math.round((daysPassed / daysTotal) * 100));
               return (
                 <div key={s.id} className={`p-4 rounded-lg border transition-all ${s.demurrageRisk === "High" ? "border-red-500/20 bg-red-500/5" : "border-border bg-background/50"} hover:border-primary/20`}>
@@ -106,8 +108,8 @@ export default function DigitalExperiencePage() {
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">{s.vesselName}</p>
                     </div>
-                    <Badge variant="outline" className={`text-xs ${demurrageColors[s.demurrageRisk]}`}>
-                      {s.demurrageRisk === "High" && <AlertTriangle className="w-3 h-3 mr-1" />}
+                    <Badge variant="outline" className={`text-xs ${s.demurrageRisk ? demurrageColors[String(s.demurrageRisk)] ?? "" : ""}`}>
+                      {String(s.demurrageRisk) === "High" && <AlertTriangle className="w-3 h-3 mr-1" />}
                       {s.demurrageRisk} Risk
                     </Badge>
                   </div>
@@ -123,7 +125,7 @@ export default function DigitalExperiencePage() {
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <div className="flex items-center gap-4">
                       <span>{(s.weight ?? 0).toLocaleString()} MT</span>
-                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> ETA: {new Date(s.eta).toLocaleDateString()}</span>
+                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> ETA: {s.eta ? new Date(s.eta).toLocaleDateString() : "—"}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="flex items-center gap-1">
@@ -131,7 +133,7 @@ export default function DigitalExperiencePage() {
                         {(s.onTimeScore ?? 0)}% on-time
                       </span>
                       <span className="flex items-center gap-0.5">
-                        {[1,2,3,4,5].map(i => <Star key={i} className={`w-2.5 h-2.5 ${i <= Math.round(s.customerSatisfaction) ? "text-amber-400 fill-amber-400" : "text-muted-foreground/30"}`} />)}
+                        {[1,2,3,4,5].map(i => <Star key={i} className={`w-2.5 h-2.5 ${i <= Math.round(s.customerSatisfaction ?? 0) ? "text-amber-400 fill-amber-400" : "text-muted-foreground/30"}`} />)}
                       </span>
                     </div>
                   </div>

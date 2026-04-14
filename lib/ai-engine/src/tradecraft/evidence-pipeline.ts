@@ -141,7 +141,6 @@ async function persistEntryToDb(entry: EvidenceIndexEntry): Promise<void> {
       objectId: entry.objectId,
       relevanceBoost: entry.relevanceBoost,
       embedding: entry.embedding ? (entry.embedding as unknown as Record<string, unknown>) : null,
-      updatedAt: new Date(),
     }).onConflictDoUpdate({
       target: alloyEvidenceIndex.id,
       set: {
@@ -149,7 +148,6 @@ async function persistEntryToDb(entry: EvidenceIndexEntry): Promise<void> {
         freshness: entry.freshness,
         relevanceBoost: entry.relevanceBoost,
         embedding: entry.embedding ? (entry.embedding as unknown as Record<string, unknown>) : null,
-        updatedAt: new Date(),
       },
     });
   } catch {

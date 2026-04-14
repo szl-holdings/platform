@@ -56,7 +56,7 @@ const STATE_COLORS: Record<string, string> = {
 
 export default function ReviewAdminPage() {
   const { data, isLoading } = useReviewAdminView();
-  const d = data ?? DEMO_ADMIN;
+  const d = (data ?? DEMO_ADMIN) as typeof DEMO_ADMIN;
   const isLive = !!data;
 
   return (

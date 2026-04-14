@@ -3,6 +3,13 @@ import { Globe, Radio, Activity, AlertTriangle, CheckCircle2, RefreshCw } from "
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 
+interface WorldlineSource {
+  sourceClass?: string; status?: string; name?: string; class?: string;
+  lastUpdate?: string; totalSignals?: number; [key: string]: unknown;
+}
+interface WorldlineSourcesApiResponse { sources?: WorldlineSource[] }
+interface WorldlineSignalsApiResponse { data?: { signals?: unknown[] } }
+
 const SOURCE_CLASSES = [
   { id: "regulatory_insurance", label: "Regulatory / Insurance", color: "#4a90b8", icon: "📋" },
   { id: "crash_incident", label: "Crash / Incident", color: "#c45a4a", icon: "🚨" },
@@ -46,18 +53,12 @@ export default function WorldlinePage() {
 
   const { data: sourcesData, isLoading } = useQuery({
     queryKey: ["worldline-sources"],
-    queryFn: async () => {
-      const res = await apiRequest("GET", "/api/prism-counsel/s31/worldline/sources");
-      return res.json();
-    },
+    queryFn: () => apiRequest<WorldlineSourcesApiResponse>("GET", "/api/prism-counsel/s31/worldline/sources"),
   });
 
   const { data: signalsData } = useQuery({
     queryKey: ["worldline-signals"],
-    queryFn: async () => {
-      const res = await apiRequest("GET", "/api/prism-counsel/worldline/signals");
-      return res.json();
-    },
+    queryFn: () => apiRequest<WorldlineSignalsApiResponse>("GET", "/api/prism-counsel/worldline/signals"),
     enabled: view === "signals",
   });
 

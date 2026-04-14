@@ -147,12 +147,12 @@ router.get("/integrations/status", async (_req: Request, res: Response) => {
 
 router.get("/integrations/status/:adapter", async (req: Request, res: Response) => {
   try {
-    const { adapter } = req.params;
-    if (!TRACKED_INTEGRATIONS.includes(adapter!)) {
+    const adapter = req.params.adapter as string;
+    if (!TRACKED_INTEGRATIONS.includes(adapter)) {
       sendError(res, `Unknown integration: ${adapter}. Available: ${TRACKED_INTEGRATIONS.join(", ")}`, 404);
       return;
     }
-    const status = buildIntegrationStatus(adapter!);
+    const status = buildIntegrationStatus(adapter);
     sendSuccess(res, status);
   } catch (err) {
     handleRouteError(res, err, "Failed to retrieve adapter status");
@@ -558,7 +558,7 @@ router.get("/integrations/pagerduty/incidents", ...opsAuth, async (req: Request,
   try {
     const status = req.query.status
       ? String(req.query.status).split(",") as Array<"triggered" | "acknowledged" | "resolved">
-      : ["triggered", "acknowledged"];
+      : ["triggered", "acknowledged"] as Array<"triggered" | "acknowledged" | "resolved">;
     const limit = Math.min(parseInt((req.query.limit as string) ?? "25", 10), 100);
     const incidents = await services.pagerduty.listIncidents({ status, limit });
     const summary = await services.pagerduty.getActiveIncidentSummary();

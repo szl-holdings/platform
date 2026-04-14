@@ -97,7 +97,7 @@ router.get("/nuro-mesh/observability/traces", (req: Request, res: Response) => {
 });
 
 router.get("/nuro-mesh/observability/traces/:traceId", (req: Request, res: Response) => {
-  const trace = behavioralTracer.getTrace(req.params.traceId);
+  const trace = behavioralTracer.getTrace(req.params.traceId as string);
   if (!trace) {
     res.status(404).json({ error: "Trace not found", traceId: req.params.traceId });
     return;
@@ -141,7 +141,7 @@ router.get("/nuro-mesh/cost/analytics", (req: Request, res: Response) => {
 
 router.get("/nuro-mesh/cost/budget/:workflowId", (req: Request, res: Response) => {
   const orgId = req.query.orgId ? parseInt(String(req.query.orgId), 10) : undefined;
-  const status = budgetManager.getBudgetStatus(req.params.workflowId, orgId);
+  const status = budgetManager.getBudgetStatus(req.params.workflowId as string, orgId);
   res.json({ workflowId: req.params.workflowId, ...status });
 });
 
@@ -173,7 +173,7 @@ router.post("/nuro-mesh/cost/budget", (req: Request, res: Response) => {
 });
 
 router.get("/nuro-mesh/memory/stats/:agentId", (req: Request, res: Response) => {
-  const stats = rlMemoryManager.getMemoryStats(req.params.agentId);
+  const stats = rlMemoryManager.getMemoryStats(req.params.agentId as string);
   const opLog = rlMemoryManager.getOperationLog().filter(l => l.agentId === req.params.agentId).slice(-20);
   res.json({ agentId: req.params.agentId, ...stats, recentOperations: opLog });
 });

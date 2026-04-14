@@ -163,7 +163,7 @@ export function ReviewCard({ item, compact = false }: { item: ReviewItemRaw; com
                 <p className="text-[10px] text-[#4a90b8] leading-relaxed">{item.whatActionClearsIt}</p>
               </div>
             )}
-            {item.whatsMissing && (
+            {!!item.whatsMissing && (
               <div>
                 <div className="text-[9px] text-slate-500 uppercase tracking-wider mb-0.5">What's Missing</div>
                 <p className="text-[10px] text-[#d4a054] leading-relaxed">
@@ -171,7 +171,7 @@ export function ReviewCard({ item, compact = false }: { item: ReviewItemRaw; com
                 </p>
               </div>
             )}
-            {item.whatItUnblocks && (
+            {!!item.whatItUnblocks && (
               <div>
                 <div className="text-[9px] text-slate-500 uppercase tracking-wider mb-0.5">
                   <span className="flex items-center gap-1"><Zap className="w-2.5 h-2.5 text-[#d4a054]" /> Unblocks</span>
@@ -181,7 +181,7 @@ export function ReviewCard({ item, compact = false }: { item: ReviewItemRaw; com
                 </p>
               </div>
             )}
-            {item.whoIsWaiting && (
+            {!!item.whoIsWaiting && (
               <div>
                 <div className="text-[9px] text-slate-500 uppercase tracking-wider mb-0.5">
                   <span className="flex items-center gap-1"><Users className="w-2.5 h-2.5" /> Who's Waiting</span>

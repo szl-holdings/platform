@@ -86,7 +86,7 @@ router.get("/a2a/agents/:agentId/health", (req: Request, res: Response) => {
 
 router.get("/a2a/agents/:agentId/status", (req: Request, res: Response) => {
   try {
-    const card = getAgentCard(req.params.agentId!);
+    const card = getAgentCard(req.params.agentId as string);
     if (!card) return sendError(res, "Agent not found", 404);
     sendSuccess(res, {
       agentId: card.agentId,
@@ -103,7 +103,7 @@ router.get("/a2a/agents/:agentId/status", (req: Request, res: Response) => {
 
 router.post("/a2a/agents/:agentId/heartbeat", (req: Request, res: Response) => {
   try {
-    recordHeartbeat(req.params.agentId!);
+    recordHeartbeat(req.params.agentId as string);
     sendSuccess(res, { recorded: true, agentId: req.params.agentId });
   } catch (err) {
     sendError(res, "Failed to record heartbeat", 500);

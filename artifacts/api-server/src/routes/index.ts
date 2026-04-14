@@ -121,7 +121,6 @@ import helmRouter from "./helm-console";
 import telemetryRouter from "./telemetry";
 import crossAppHandoffsRouter from "./cross-app-handoffs";
 import alloyCognitiveLearningRouter from "./alloy-cognitive-learning";
-import a2aRouter from "./a2a";
 import agentAutonomyRouter from "./agent-autonomy";
 import alloySkillsRouter from "./alloy-skills";
 import externalIntegrationsRouter from "./external-integrations";

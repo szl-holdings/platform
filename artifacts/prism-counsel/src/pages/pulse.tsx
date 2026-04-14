@@ -28,20 +28,20 @@ function MatterTimeline() {
   ];
   return (
     <div className="space-y-3">
-      {matters.map(m => (
-        <div key={m.name} className="rounded-md p-3" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
+      {matters.map(matter => (
+        <div key={matter.name} className="rounded-md p-3" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[11px] font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>{m.name}</span>
-            <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: `${m.color}15`, color: m.color }}>{m.risk} risk</span>
+            <span className="text-[11px] font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>{matter.name}</span>
+            <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: `${matter.color}15`, color: matter.color }}>{matter.risk} risk</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.25)" }}>{m.phase}</span>
+            <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.25)" }}>{matter.phase}</span>
             <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
               <m.div className="h-full rounded-full" initial={{ width: 0 }}
-                animate={{ width: `${m.progress}%` }} transition={{ duration: 1.5 }}
-                style={{ background: `linear-gradient(90deg, ${m.color}60, ${m.color})` }} />
+                animate={{ width: `${matter.progress}%` }} transition={{ duration: 1.5 }}
+                style={{ background: `linear-gradient(90deg, ${matter.color}60, ${matter.color})` }} />
             </div>
-            <span className="text-[9px] tabular-nums font-medium" style={{ color: m.color }}>{m.progress}%</span>
+            <span className="text-[9px] tabular-nums font-medium" style={{ color: matter.color }}>{matter.progress}%</span>
           </div>
         </div>
       ))}

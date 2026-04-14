@@ -5,6 +5,12 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
+interface MatterTwinData {
+  title?: string; caseNumber?: string; matter?: unknown; subpages?: unknown;
+  [key: string]: unknown;
+}
+interface TwinApiResponse { data?: MatterTwinData }
+
 const SUBPAGES = [
   { id: "summary", label: "Summary", icon: Brain },
   { id: "twin", label: "Twin", icon: Layers },
@@ -218,10 +224,7 @@ export default function MatterTwinPage() {
 
   const { data: twinData, isLoading } = useQuery({
     queryKey: ["matter-twin", matterId],
-    queryFn: async () => {
-      const res = await apiRequest("GET", `/api/prism-counsel/matters/${matterId}/twin`);
-      return res.json();
-    },
+    queryFn: () => apiRequest<TwinApiResponse>("GET", `/api/prism-counsel/matters/${matterId}/twin`),
     enabled: matterId > 0,
   });
 
@@ -283,9 +286,9 @@ export default function MatterTwinPage() {
             <Brain className="w-4 h-4 text-[#d4a054]" />
             <div>
               <h1 className="text-sm font-semibold text-slate-100">
-                {matter?.title ?? `Matter #${matterId}`}
+                {twin?.title ?? `Matter #${matterId}`}
               </h1>
-              <div className="text-[10px] text-slate-500">{matter?.caseNumber} · Matter Twin · {SUBPAGES.find(s => s.id === activeSubpage)?.label}</div>
+              <div className="text-[10px] text-slate-500">{twin?.caseNumber} · Matter Twin · {SUBPAGES.find(s => s.id === activeSubpage)?.label}</div>
             </div>
           </div>
           {renderSubpage()}

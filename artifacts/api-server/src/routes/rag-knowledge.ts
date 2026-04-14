@@ -217,7 +217,7 @@ ragKnowledgeRouter.post("/rag/ingest/knowledge", authMiddleware, async (req: Req
 
 ragKnowledgeRouter.delete("/rag/chunks/:objectId", authMiddleware, requireRole("admin"), async (req: Request, res: Response) => {
   try {
-    const { objectId } = req.params;
+    const objectId = req.params.objectId as string;
     const { sourceType } = req.query;
 
     const deleted = await deleteChunksByObjectId(objectId, sourceType as RagSourceType | undefined);

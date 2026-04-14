@@ -444,7 +444,7 @@ router.post("/integrations/jira/webhook", async (req: Request, res: Response) =>
     }
 
     const adapter = services.jira;
-    const event = await adapter.handleWebhookEvent(body);
+    const event = await adapter.handleWebhookEvent(body, JSON.stringify(body));
 
     const webhookEvent = (body["webhookEvent"] as string) ?? "jira_event";
     const issue = body["issue"] as Record<string, unknown> | undefined;

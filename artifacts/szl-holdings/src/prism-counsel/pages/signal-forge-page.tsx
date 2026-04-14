@@ -3,6 +3,18 @@ import { Radio, Zap, CheckCircle2, AlertTriangle, Activity, TrendingUp } from "l
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 
+interface SignalRun {
+  id?: number; stage?: string; inputCount?: number; outputCount?: number;
+  rejectedCount?: number; contradictionsFound?: number; product?: string;
+  [key: string]: unknown;
+}
+interface DataScore {
+  product?: string; label?: string; description?: string; color?: string;
+  score?: number; [key: string]: unknown;
+}
+interface SignalRunsApiResponse { data?: { runs?: SignalRun[] } }
+interface DataProductsApiResponse { data?: { scores?: DataScore[] } }
+
 const DATA_PRODUCTS = [
   { id: "insurer_pressure_index", label: "Insurer Pressure Index", description: "Blends insurer response patterns, reservation history, and adjuster behavior signals", color: "#c45a4a" },
   { id: "venue_velocity_index", label: "Venue Velocity Index", description: "Court/venue settlement and verdict velocity based on county and judge-level outcomes", color: "#4a90b8" },
@@ -17,25 +29,19 @@ export default function SignalForgePage() {
 
   const { data: runsData, isLoading } = useQuery({
     queryKey: ["signal-forge-runs"],
-    queryFn: async () => {
-      const res = await apiRequest("GET", "/api/prism-counsel/signal-forge/runs");
-      return res.json();
-    },
+    queryFn: () => apiRequest<SignalRunsApiResponse>("GET", "/api/prism-counsel/signal-forge/runs"),
   });
 
   const { data: dataProductsData } = useQuery({
     queryKey: ["data-products"],
-    queryFn: async () => {
-      const res = await apiRequest("GET", "/api/prism-counsel/data-products");
-      return res.json();
-    },
+    queryFn: () => apiRequest<DataProductsApiResponse>("GET", "/api/prism-counsel/data-products"),
     enabled: view === "data_products",
   });
 
   const runs = runsData?.data?.runs ?? [];
   const scores = dataProductsData?.data?.scores ?? [];
   const scoresByProduct: Record<string, any[]> = {};
-  for (const s of scores) scoresByProduct[s.product] = [...(scoresByProduct[s.product] ?? []), s];
+  for (const s of scores) if (s.product) scoresByProduct[s.product] = [...(scoresByProduct[s.product] ?? []), s];
 
   const PIPELINE_STAGES = [
     "ingest", "clean", "normalize", "enrich", "contradiction_detect",
@@ -75,7 +81,7 @@ export default function SignalForgePage() {
               <div className="text-xs font-semibold text-slate-200 mb-3">Latest Pipeline Run</div>
               <div className="flex items-center gap-4 mb-3">
                 {PIPELINE_STAGES.map((stage, i) => {
-                  const reached = PIPELINE_STAGES.indexOf(latestRun.stage) >= i;
+                  const reached = PIPELINE_STAGES.indexOf(latestRun.stage ?? "") >= i;
                   const isActive = latestRun.stage === stage;
                   return (
                     <div key={stage} className="flex items-center gap-1">

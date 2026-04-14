@@ -20,7 +20,7 @@ router.get("/connector-hub/registry", authMiddleware(), async (_req, res) => {
 
 router.get("/connector-hub/registry/:connectorId", authMiddleware(), async (req, res) => {
   try {
-    const entry = connectorHub.getRegistryEntry(req.params.connectorId!);
+    const entry = connectorHub.getRegistryEntry(req.params.connectorId as string);
     if (!entry) {
       sendNotFound(res, `Connector '${req.params.connectorId}' not found`);
       return;
@@ -74,7 +74,7 @@ router.get("/connector-hub/health", authMiddleware(), async (_req, res) => {
 
 router.get("/connector-hub/health/:connectorId", authMiddleware(), async (req, res) => {
   try {
-    const connector = connectorHub.getConnector(req.params.connectorId!);
+    const connector = connectorHub.getConnector(req.params.connectorId as string);
     if (!connector) {
       sendNotFound(res, `Connector '${req.params.connectorId}' not found`);
       return;
@@ -129,7 +129,7 @@ router.patch("/connector-hub/connectors/:connectorId/toggle", authMiddleware(), 
       return;
     }
 
-    const success = connectorHub.setConnectorEnabled(connectorId!, enabled);
+    const success = connectorHub.setConnectorEnabled(connectorId as string, enabled);
     if (!success) {
       sendNotFound(res, `Connector '${connectorId}' not found`);
       return;

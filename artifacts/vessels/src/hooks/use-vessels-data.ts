@@ -323,6 +323,7 @@ export function usePerformanceMetrics() {
       fuelEfficiency: 0,
       onTimeArrivalRate: 0,
       avgDelayHours: 0,
+      routeProfitability: 0,
       cargoTonnes: 0,
       revenuePerDay: 0,
     };

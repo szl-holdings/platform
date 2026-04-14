@@ -166,7 +166,7 @@ export default function MaintenanceReadinessPage() {
 
   const vesselNameMap = useMemo(() => {
     const m = new Map<number, string>();
-    for (const v of liveVessels) m.set(v.id, v.name);
+    for (const v of liveVessels) m.set(v.id as number, v.name as string);
     return m;
   }, [liveVessels]);
 

@@ -79,7 +79,7 @@ function AgentCard({ agent }: { agent: Record<string, unknown> }) {
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-white">{card.agentName as string}</span>
             <AgentStatusBadge availability={card.availability as string} />
-            {perf?.flaggedForReview && (
+            {!!perf?.flaggedForReview && (
               <span className="text-xs bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-2 py-0.5 rounded-full">⚠ Flagged</span>
             )}
           </div>
@@ -131,7 +131,7 @@ function AgentCard({ agent }: { agent: Record<string, unknown> }) {
                   Calibration bias: {Math.round((perf.calibrationBias as number) * 100)}%
                 </span>
               </div>
-              {perf.reviewReason && (
+              {!!perf.reviewReason && (
                 <div className="mt-2 text-xs text-yellow-400 bg-yellow-500/10 rounded px-2 py-1 border border-yellow-500/20">
                   ⚠ {perf.reviewReason as string}
                 </div>
@@ -199,14 +199,14 @@ function DelegationChain({ delegation }: { delegation: Record<string, unknown> }
       <span className="text-white font-medium">{delegation.toAgentId as string}</span>
       <span className="mx-2 text-zinc-700">|</span>
       <span className={statusColors[delegation.status as string] ?? "text-zinc-400"}>{delegation.status as string}</span>
-      {delegation.result && (
+      {!!delegation.result && (
         <>
           <span className="text-zinc-700 mx-1">|</span>
           <span className="text-zinc-400">conf: {(delegation.result as Record<string, unknown>).confidence as number}%</span>
           <span className="text-zinc-400 ml-1">{(delegation.result as Record<string, unknown>).latencyMs as number}ms</span>
         </>
       )}
-      {delegation.error && <span className="text-red-400 ml-1 truncate max-w-xs">{delegation.error as string}</span>}
+      {!!delegation.error && <span className="text-red-400 ml-1 truncate max-w-xs">{delegation.error as string}</span>}
     </div>
   );
 }
@@ -250,7 +250,7 @@ function SkillRow({ skill }: { skill: Record<string, unknown> }) {
         </div>
         <div className="text-xs text-zinc-500 mt-0.5">{skill.description as string}</div>
       </div>
-      {skill.chainable && (
+      {!!skill.chainable && (
         <span className="text-xs text-indigo-400 flex items-center gap-1">
           <Link2 className="w-3 h-3" />chainable
         </span>
@@ -705,7 +705,7 @@ export default function AgentAutonomyDashboard() {
                           </div>
                           <div className="flex items-center gap-2">
                             <TrendBadge trend={snap.confidenceTrend as string} />
-                            {snap.flaggedForReview && (
+                            {!!snap.flaggedForReview && (
                               <span className="text-xs bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-2 py-0.5 rounded-full">⚠ Needs Review</span>
                             )}
                           </div>
@@ -730,7 +730,7 @@ export default function AgentAutonomyDashboard() {
                             <div className="text-xs text-zinc-500">cal. bias</div>
                           </div>
                         </div>
-                        {snap.reviewReason && (
+                        {!!snap.reviewReason && (
                           <div className="text-xs text-yellow-400 bg-yellow-500/10 rounded px-2 py-1 border border-yellow-500/20">
                             {snap.reviewReason as string}
                           </div>

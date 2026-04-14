@@ -153,7 +153,7 @@ export default function RoutePlanningPage() {
                           <ArrowRight className={`w-4 h-4 ${isActive ? "text-emerald-400" : "text-muted-foreground"}`} />
                           <h3 className="font-display font-semibold">{route.destinationPort}</h3>
                         </div>
-                        <p className="text-sm text-muted-foreground">{vessel?.name || "Unassigned vessel"}</p>
+                        <p className="text-sm text-muted-foreground">{(vessel?.name as string) || "Unassigned vessel"}</p>
                         <RoutePathIndicator status={route.status} />
                         <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
                           {route.departureAt && (

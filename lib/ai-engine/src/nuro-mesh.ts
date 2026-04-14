@@ -1734,7 +1734,7 @@ export class NuroMeshOrchestrator {
           conflictCount: 0,
           validationPassed: true,
           tokensBurned: result.tokensUsed ?? 0,
-          latencyMs: result.latencyMs,
+          latencyMs: result.latencyMs ?? 0,
           toolCallCount: 0,
         });
 
@@ -1744,7 +1744,7 @@ export class NuroMeshOrchestrator {
           agent.domain,
           agentSuccess ? result.confidence / 100 : 0,
           result.confidence,
-          result.latencyMs,
+          result.latencyMs ?? 0,
         );
 
         if (result.confidence < 30) {

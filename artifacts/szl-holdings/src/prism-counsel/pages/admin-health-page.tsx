@@ -4,6 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
+interface MetricsApiResponse { data?: { metrics?: unknown[] } }
+interface IncidentsApiResponse { data?: { incidents?: unknown[] } }
+interface OnboardingApiResponse { data?: { checklist?: unknown[] } }
+
 const DASHBOARD_TYPES = [
   { id: "executive_health", label: "Executive Health", icon: Activity },
   { id: "connector_health", label: "Connector Health", icon: Wifi },
@@ -52,27 +56,18 @@ export default function AdminHealthPage() {
 
   const { data: metricsData } = useQuery({
     queryKey: ["service-metrics"],
-    queryFn: async () => {
-      const res = await apiRequest("GET", "/api/prism-counsel/admin/service-metrics");
-      return res.json();
-    },
+    queryFn: () => apiRequest<MetricsApiResponse>("GET", "/api/prism-counsel/admin/service-metrics"),
   });
 
   const { data: incidentsData } = useQuery({
     queryKey: ["prism-incidents"],
-    queryFn: async () => {
-      const res = await apiRequest("GET", "/api/prism-counsel/admin/incidents");
-      return res.json();
-    },
+    queryFn: () => apiRequest<IncidentsApiResponse>("GET", "/api/prism-counsel/admin/incidents"),
     enabled: activeView === "incident_response",
   });
 
   const { data: onboardingData } = useQuery({
     queryKey: ["prism-onboarding"],
-    queryFn: async () => {
-      const res = await apiRequest("GET", "/api/prism-counsel/admin/onboarding");
-      return res.json();
-    },
+    queryFn: () => apiRequest<OnboardingApiResponse>("GET", "/api/prism-counsel/admin/onboarding"),
     enabled: activeView === "onboarding_health",
   });
 

@@ -31,6 +31,7 @@ export interface AgentCallResult {
   domain: string;
   tokensUsed?: number;
   latencyMs?: number;
+  modelUsed?: string;
   consultations?: AgentConsultationResult[];
 }
 

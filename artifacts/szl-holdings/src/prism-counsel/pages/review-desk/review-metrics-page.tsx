@@ -68,7 +68,7 @@ function BacklogBar({ label, count, max }: { label: string; count: number; max: 
 export default function ReviewMetricsPage() {
   const [days, setDays] = useState(30);
   const { data, isLoading } = useReviewMetrics(days);
-  const m = data ?? DEMO_METRICS;
+  const m = (data ?? DEMO_METRICS) as typeof DEMO_METRICS;
   const isLive = !!data;
 
   const maxBacklog = Math.max(...Object.values(m.backlogByType ?? {}));

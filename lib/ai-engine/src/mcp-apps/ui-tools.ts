@@ -113,7 +113,7 @@ export function buildDataTableComponent(
   return {
     type: "ui_component",
     componentType: "data_table",
-    props: config,
+    props: config as unknown as Record<string, unknown>,
     sandboxed: true,
     renderMode,
     title: config.title ?? "Data Table",
@@ -130,7 +130,7 @@ export function buildChartComponent(
   return {
     type: "ui_component",
     componentType: "chart",
-    props: config,
+    props: config as unknown as Record<string, unknown>,
     sandboxed: true,
     renderMode,
     title: config.title,
@@ -183,7 +183,7 @@ export function buildMetricCardComponent(
   return {
     type: "ui_component",
     componentType: "metric_card",
-    props: config,
+    props: config as unknown as Record<string, unknown>,
     sandboxed: true,
     renderMode,
     title: config.title ?? "Metrics",
@@ -200,7 +200,7 @@ export function buildTimelineComponent(
   return {
     type: "ui_component",
     componentType: "timeline",
-    props: config,
+    props: config as unknown as Record<string, unknown>,
     sandboxed: true,
     renderMode,
     title: config.title ?? "Timeline",

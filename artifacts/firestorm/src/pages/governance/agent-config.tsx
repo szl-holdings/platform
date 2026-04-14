@@ -2,10 +2,10 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Brain, Shield, Play, Pause, Settings, Save, X, ChevronDown, ChevronUp,
-  AlertTriangle, CheckCircle2, RefreshCw, Zap, Toggle, ToggleLeft, ToggleRight,
+  AlertTriangle, CheckCircle2, RefreshCw, Zap, ToggleLeft, ToggleRight,
   Cpu, Lock, Wrench, SlidersHorizontal, Eye, EyeOff, Info,
 } from "lucide-react";
-import { api } from "@/lib/api";
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 interface AgentDef {
   id: string;
@@ -204,7 +204,7 @@ export default function AgentConfigPage() {
 
   const { data: liveAgents, isLoading } = useQuery({
     queryKey: ["nuro-mesh-agent-list"],
-    queryFn: () => api.get("/nuro-mesh/agents").then(r => r.data),
+    queryFn: () => apiFetch<AgentDef[]>("/nuro-mesh/agents"),
     retry: 1,
   });
 
@@ -212,14 +212,17 @@ export default function AgentConfigPage() {
     setSavingId(updated.id);
     setAgents(prev => prev.map(a => a.id === updated.id ? updated : a));
     try {
-      await api.put(`/nuro-mesh/agents/${updated.id}/config`, {
-        systemPrompt: updated.systemPrompt,
-        preferredModel: updated.preferredModel,
-        preferredProvider: updated.preferredProvider,
-        confidenceThreshold: updated.confidenceThreshold,
-        tools: updated.tools,
-        highStakesDomains: updated.highStakesDomains,
-        active: updated.active,
+      await apiFetch<void>(`/nuro-mesh/agents/${updated.id}/config`, {
+        method: "PUT",
+        body: JSON.stringify({
+          systemPrompt: updated.systemPrompt,
+          preferredModel: updated.preferredModel,
+          preferredProvider: updated.preferredProvider,
+          confidenceThreshold: updated.confidenceThreshold,
+          tools: updated.tools,
+          highStakesDomains: updated.highStakesDomains,
+          active: updated.active,
+        }),
       });
       qc.invalidateQueries({ queryKey: ["nuro-mesh-agent-list"] });
     } catch {

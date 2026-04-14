@@ -1,4 +1,5 @@
 import { apiFetch, type PaginatedResponse } from "@szl-holdings/shared-ui";
+import type { Fleet } from "@/data/types";
 
 async function apiFetchList<T>(path: string): Promise<T[]> {
   const json = await apiFetch<T[] | PaginatedResponse<T>>(path);
@@ -313,21 +314,21 @@ type MutationInput = Record<string, string | number | boolean | null | undefined
 
 export const api = {
   fleets: {
-    list: () => apiFetch<unknown[]>("/vessels/fleets"),
-    get: (id: number) => apiFetch<unknown>(`/vessels/fleets/${id}`),
-    create: (data: MutationInput) => apiFetch<unknown>("/vessels/fleets", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: number, data: MutationInput) => apiFetch<unknown>(`/vessels/fleets/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    list: () => apiFetch<Fleet[]>("/vessels/fleets"),
+    get: (id: number) => apiFetch<Fleet>(`/vessels/fleets/${id}`),
+    create: (data: MutationInput) => apiFetch<Fleet>("/vessels/fleets", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: number, data: MutationInput) => apiFetch<Fleet>(`/vessels/fleets/${id}`, { method: "PUT", body: JSON.stringify(data) }),
     delete: (id: number) => apiFetch<void>(`/vessels/fleets/${id}`, { method: "DELETE" }),
   },
   vessels: {
-    list: () => apiFetch<unknown[]>("/vessels"),
-    get: (id: number) => apiFetch<unknown>(`/vessels/${id}`),
-    create: (data: MutationInput) => apiFetch<unknown>("/vessels", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: number, data: MutationInput) => apiFetch<unknown>(`/vessels/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    list: () => apiFetch<Record<string, unknown>[]>("/vessels"),
+    get: (id: number) => apiFetch<Record<string, unknown>>(`/vessels/${id}`),
+    create: (data: MutationInput) => apiFetch<Record<string, unknown>>("/vessels", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: number, data: MutationInput) => apiFetch<Record<string, unknown>>(`/vessels/${id}`, { method: "PUT", body: JSON.stringify(data) }),
     delete: (id: number) => apiFetch<void>(`/vessels/${id}`, { method: "DELETE" }),
-    positions: (id: number) => apiFetch<unknown[]>(`/vessels/${id}/positions`),
-    cargo: (id: number) => apiFetch<unknown[]>(`/vessels/${id}/cargo`),
-    routes: (id: number) => apiFetch<unknown[]>(`/vessels/${id}/routes`),
+    positions: (id: number) => apiFetch<Record<string, unknown>[]>(`/vessels/${id}/positions`),
+    cargo: (id: number) => apiFetch<Record<string, unknown>[]>(`/vessels/${id}/cargo`),
+    routes: (id: number) => apiFetch<Record<string, unknown>[]>(`/vessels/${id}/routes`),
     maintenance: (id: number) => apiFetch<VesselMaintenance[]>(`/vessels/${id}/maintenance`),
     portCalls: (id: number) => apiFetch<PortCall[]>(`/vessels/${id}/port-calls`),
     voyages: (id: number) => apiFetch<VoyageEconomics[]>(`/vessels/${id}/voyages`),
@@ -335,27 +336,27 @@ export const api = {
     sanctions: (id: number) => apiFetch<SanctionsScreening>(`/vessels/${id}/sanctions`),
   },
   routes: {
-    list: () => apiFetch<unknown[]>("/vessels/routes/all"),
-    create: (data: MutationInput) => apiFetch<unknown>("/vessels/routes", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: number, data: MutationInput) => apiFetch<unknown>(`/vessels/routes/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    list: () => apiFetch<Record<string, unknown>[]>("/vessels/routes/all"),
+    create: (data: MutationInput) => apiFetch<Record<string, unknown>>("/vessels/routes", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: number, data: MutationInput) => apiFetch<Record<string, unknown>>(`/vessels/routes/${id}`, { method: "PUT", body: JSON.stringify(data) }),
     delete: (id: number) => apiFetch<void>(`/vessels/routes/${id}`, { method: "DELETE" }),
   },
   alertRules: {
-    list: () => apiFetch<unknown[]>("/vessels/alert-rules/all"),
-    create: (data: MutationInput) => apiFetch<unknown>("/vessels/alert-rules", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: number, data: MutationInput) => apiFetch<unknown>(`/vessels/alert-rules/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    list: () => apiFetch<Record<string, unknown>[]>("/vessels/alert-rules/all"),
+    create: (data: MutationInput) => apiFetch<Record<string, unknown>>("/vessels/alert-rules", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: number, data: MutationInput) => apiFetch<Record<string, unknown>>(`/vessels/alert-rules/${id}`, { method: "PUT", body: JSON.stringify(data) }),
     delete: (id: number) => apiFetch<void>(`/vessels/alert-rules/${id}`, { method: "DELETE" }),
   },
   alerts: {
-    list: () => apiFetch<unknown[]>("/vessels/alerts/all"),
+    list: () => apiFetch<Record<string, unknown>[]>("/vessels/alerts/all"),
   },
   weather: {
-    snapshots: (routeId?: number) => apiFetch<unknown[]>(`/vessels/weather/snapshots${routeId ? `?routeId=${routeId}` : ""}`),
+    snapshots: (routeId?: number) => apiFetch<Record<string, unknown>[]>(`/vessels/weather/snapshots${routeId ? `?routeId=${routeId}` : ""}`),
   },
   simulations: {
-    list: () => apiFetch<unknown[]>("/vessels/simulations/all"),
-    get: (id: number) => apiFetch<unknown>(`/vessels/simulations/${id}`),
-    create: (data: MutationInput) => apiFetch<unknown>("/vessels/simulations", { method: "POST", body: JSON.stringify(data) }),
+    list: () => apiFetch<Record<string, unknown>[]>("/vessels/simulations/all"),
+    get: (id: number) => apiFetch<Record<string, unknown>>(`/vessels/simulations/${id}`),
+    create: (data: MutationInput) => apiFetch<Record<string, unknown>>("/vessels/simulations", { method: "POST", body: JSON.stringify(data) }),
   },
   dashboard: () => apiFetch<VesselsDashboard>("/vessels/dashboard"),
   roster: () => apiFetchList<RosterVessel>("/vessels/roster"),

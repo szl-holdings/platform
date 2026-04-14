@@ -283,7 +283,6 @@ export {
   type AgentAccuracyScore,
   type ConfidenceCalibrationScore,
   type SkillEffectivenessScore,
-  type AgentPerformanceProfile,
   type ScoringWindowConfig,
   type SelfReflectionContext,
   type ReasoningAdjustment,

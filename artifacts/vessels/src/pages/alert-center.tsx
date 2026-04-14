@@ -112,9 +112,9 @@ export default function AlertCenterPage() {
   const { data: alertRulesRaw = [] } = useQuery({ queryKey: ["alertRules"], queryFn: api.alertRules.list });
   const { data: vesselsRaw = [] } = useQuery({ queryKey: ["vessels"], queryFn: api.vessels.list });
 
-  const alerts = alertsRaw as FleetAlert[];
-  const alertRules = alertRulesRaw as AlertRuleData[];
-  const vessels = vesselsRaw as FleetVessel[];
+  const alerts = alertsRaw as unknown as FleetAlert[];
+  const alertRules = alertRulesRaw as unknown as AlertRuleData[];
+  const vessels = vesselsRaw as unknown as FleetVessel[];
   const isLive = !alertsError && !loadingAlerts;
   const [ruleOpen, setRuleOpen] = useState(false);
   const [ruleForm, setRuleForm] = useState({ name: "", ruleType: "speed", severity: "medium" });

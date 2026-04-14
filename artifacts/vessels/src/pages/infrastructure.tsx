@@ -40,7 +40,7 @@ export default function InfrastructurePage() {
   const inProgressCount = maintenanceLogs.filter(m => m.status === "In Progress").length;
   const overdueCount = maintenanceLogs.filter(m => m.status === "Overdue").length;
   const scheduledCount = maintenanceLogs.filter(m => m.status === "Scheduled").length;
-  const totalCost = maintenanceLogs.reduce((s, m) => s + m.cost ?? 0, 0);
+  const totalCost = maintenanceLogs.reduce((s, m) => s + (m.cost ?? 0), 0);
 
   const avgEngine = vessels.length > 0 ? Math.round(vessels.reduce((s, v) => s + (v.engineHealth ?? 0), 0) / vessels.length) : 0;
   const avgHull = vessels.length > 0 ? Math.round(vessels.reduce((s, v) => s + (v.hullCondition ?? 0), 0) / vessels.length) : 0;
@@ -156,7 +156,7 @@ export default function InfrastructurePage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className={`text-xs ${severityColors[log.severity] || ""}`}>{log.severity}</Badge>
+                      <Badge variant="outline" className={`text-xs ${log.severity ? severityColors[log.severity] ?? "" : ""}`}>{log.severity}</Badge>
                       <Badge variant="outline" className={`text-xs ${log.status === "Completed" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : log.status === "Overdue" ? "bg-red-500/10 text-red-400 border-red-500/20" : log.status === "In Progress" ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-muted text-muted-foreground"}`}>{log.status}</Badge>
                     </div>
                   </div>

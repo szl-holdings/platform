@@ -7,6 +7,7 @@ const ACCENT = "hsl(205 70% 50%)";
 const RISK_STYLE = {
   low: { color: "#40856a", bg: "#40856a15", border: "#40856a30", label: "Low" },
   moderate: { color: "#c08a2c", bg: "#c08a2c15", border: "#c08a2c30", label: "Moderate" },
+  high: { color: "#c04a2a", bg: "#c04a2a15", border: "#c04a2a30", label: "High" },
   elevated: { color: "#c04a2a", bg: "#c04a2a15", border: "#c04a2a30", label: "Elevated" },
   critical: { color: "#f87171", bg: "#9b1c1c15", border: "#9b1c1c40", label: "Critical" },
 };

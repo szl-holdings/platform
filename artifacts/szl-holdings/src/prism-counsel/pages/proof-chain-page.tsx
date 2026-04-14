@@ -5,6 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
+interface ProofChainApiResponse { data?: { entries?: unknown[] } }
+interface ContradictionsApiResponse { data?: { contradictions?: unknown[] } }
+interface AuditPacketsApiResponse { data?: { packets?: unknown[] } }
+
 const PROOF_VIEWS = [
   { id: "entries", label: "Proof Entries" },
   { id: "audit_packets", label: "Audit Packets" },
@@ -125,28 +129,19 @@ export default function ProofChainPage() {
 
   const { data: proofData, isLoading: pcLoading } = useQuery({
     queryKey: ["proof-chain", matterId],
-    queryFn: async () => {
-      const res = await apiRequest("GET", `/api/prism-counsel/matters/${matterId}/proof-chain`);
-      return res.json();
-    },
+    queryFn: () => apiRequest<ProofChainApiResponse>("GET", `/api/prism-counsel/matters/${matterId}/proof-chain`),
     enabled: matterId > 0 && view === "entries",
   });
 
   const { data: contradictionData, isLoading: cdLoading } = useQuery({
     queryKey: ["contradictions", matterId],
-    queryFn: async () => {
-      const res = await apiRequest("GET", `/api/prism-counsel/matters/${matterId}/contradictions`);
-      return res.json();
-    },
+    queryFn: () => apiRequest<ContradictionsApiResponse>("GET", `/api/prism-counsel/matters/${matterId}/contradictions`),
     enabled: matterId > 0 && view === "contradictions",
   });
 
   const { data: auditData } = useQuery({
     queryKey: ["audit-packets", matterId],
-    queryFn: async () => {
-      const res = await apiRequest("GET", `/api/prism-counsel/matters/${matterId}/audit-packets`);
-      return res.json();
-    },
+    queryFn: () => apiRequest<AuditPacketsApiResponse>("GET", `/api/prism-counsel/matters/${matterId}/audit-packets`),
     enabled: matterId > 0 && view === "audit_packets",
   });
 
