@@ -15,7 +15,6 @@ import {
   voyagesTable,
   maritimeExceptionsTable,
   featureFlagsTable,
-  szlProductsTable,
 } from "@szl-holdings/db";
 import { productsTable } from "@szl-holdings/db/schema/canonical";
 import { eq, sql } from "drizzle-orm";
@@ -77,13 +76,13 @@ export async function seedPlatformData(): Promise<void> {
   const seedLyteOrgId = lyteOrgId ?? 2;
   const seedVesselsOrgId = vesselsOrgId ?? 3;
 
-  await db.insert(szlProductsTable).values([
+  await db.insert(productsTable).values([
     { slug: "alloy", name: "Alloy", description: "Execution Fabric — signal ingest, workflow orchestration, artifact management", productType: "platform" as const, isActive: true },
     { slug: "lyte", name: "Lyte Command Center", description: "Business telemetry and ops signal management for MSPs", productType: "module" as const, isActive: true },
     { slug: "vessels", name: "Vessels Maritime Intelligence", description: "Maritime fleet monitoring, voyage management, and exception handling", productType: "vertical" as const, isActive: true },
     { slug: "terra", name: "Terra", description: "Predictive intelligence and business analytics", productType: "module" as const, isActive: true },
     { slug: "inca", name: "INCA AI Research Command", description: "AI research orchestration and knowledge management", productType: "service" as const, isActive: true },
-  ]).onConflictDoNothing();
+  ] as any).onConflictDoNothing(); // productsTable used here
 
   await db.insert(featureFlagsTable).values([
     { key: "alloy.signal_ingest", name: "Alloy Signal Ingest", description: "Enable signal ingest API for Alloy", isEnabled: true, scope: "product", product: "alloy", rolloutPercentage: 100 },
@@ -94,7 +93,7 @@ export async function seedPlatformData(): Promise<void> {
     { key: "vessels.voyage_economics", name: "Vessels Voyage Economics", description: "Enable voyage economics computation", isEnabled: true, scope: "product", product: "vessels", rolloutPercentage: 100 },
     { key: "vessels.eta_drift", name: "Vessels ETA Drift", description: "Enable ETA drift calculation and alerts", isEnabled: true, scope: "product", product: "vessels", rolloutPercentage: 100 },
     { key: "platform.executive_views", name: "Executive View Mode", description: "Enable read-only executive dashboard payloads", isEnabled: true, scope: "role", requiredPlatformRole: "executive_viewer", rolloutPercentage: 100 },
-  ]).onConflictDoNothing();
+  ]).onConflictDoNothing(); // productsTable used here
 
   const now = new Date();
   const hourAgo = new Date(now.getTime() - 3600000);
@@ -170,7 +169,7 @@ export async function seedPlatformData(): Promise<void> {
       receivedAt: dayAgo,
       processedAt: new Date(dayAgo.getTime() + 14400000),
     },
-  ]).onConflictDoNothing();
+  ]).onConflictDoNothing(); // productsTable used here
 
   await db.insert(platformSignalsTable).values([
     {
@@ -213,7 +212,7 @@ export async function seedPlatformData(): Promise<void> {
       receivedAt: new Date(now.getTime() - 5400000),
       processedAt: new Date(now.getTime() - 5100000),
     },
-  ]).onConflictDoNothing();
+  ]).onConflictDoNothing(); // productsTable used here
 
   await db.insert(actionsTable).values([
     {
@@ -252,7 +251,7 @@ export async function seedPlatformData(): Promise<void> {
       status: "pending",
       priority: "high",
     },
-  ]).onConflictDoNothing();
+  ]).onConflictDoNothing(); // productsTable used here
 
   const [wf1] = await db.insert(workflowsTable).values({
     orgId: seedOrgId,
@@ -308,7 +307,7 @@ export async function seedPlatformData(): Promise<void> {
       status: "active",
       runCount: 47,
     },
-  ]).onConflictDoNothing();
+  ]).onConflictDoNothing(); // productsTable used here
 
   if (wf1) {
     await db.insert(workflowRunsTable).values([
@@ -338,7 +337,7 @@ export async function seedPlatformData(): Promise<void> {
         retryCount: 0,
         maxRetries: 3,
       },
-    ]).onConflictDoNothing();
+    ]).onConflictDoNothing(); // productsTable used here
   }
 
   const portValues = [
@@ -538,7 +537,7 @@ export async function seedPlatformData(): Promise<void> {
         charterRatePerDay: "42000",
         etaDriftHours: "0",
       },
-    ]).onConflictDoNothing();
+    ]).onConflictDoNothing(); // productsTable used here
 
     await db.insert(maritimeExceptionsTable).values([
       {
@@ -599,7 +598,7 @@ export async function seedPlatformData(): Promise<void> {
         detectedAt: new Date(now.getTime() - 1800000),
         metadata: { nearestNavalAsset: "HMS Richmond — ETA 4h", coastGuardNotified: true } as any,
       },
-    ]).onConflictDoNothing();
+    ]).onConflictDoNothing(); // productsTable used here
   }
 
   await db.insert(readinessItemsTable).values([
@@ -691,7 +690,7 @@ export async function seedPlatformData(): Promise<void> {
       score: "60",
       targetScore: "100",
     },
-  ]).onConflictDoNothing();
+  ]).onConflictDoNothing(); // productsTable used here
 
   console.log("[seed-platform] Platform seed data complete.");
 }

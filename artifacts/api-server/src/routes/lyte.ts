@@ -277,10 +277,10 @@ router.delete("/lyte/recommendations/:id", authMiddleware(), requireRole("ops", 
 router.get("/lyte/executive-summary", authMiddleware(), async (_req, res) => {
   try {
     const [signals, incidents, recommendations, commandCards] = await Promise.all([
-      db.select().from(lyteSignalsTable).orderBy(desc(lyteSignalsTable.receivedAt)).catch((err) => { logger.warn({ err, table: "lyte_signals" }, "[executive-summary] lyte_signals query failed — returning empty"); return []; }),
-      db.select().from(lyteIncidentsTable).orderBy(desc(lyteIncidentsTable.createdAt)).catch((err) => { logger.warn({ err, table: "lyte_incidents" }, "[executive-summary] lyte_incidents query failed — returning empty"); return []; }),
-      db.select().from(lyteRecommendationsTable).orderBy(desc(lyteRecommendationsTable.createdAt)).catch((err) => { logger.warn({ err, table: "lyte_recommendations" }, "[executive-summary] lyte_recommendations query failed — returning empty"); return []; }),
-      db.select().from(lyteCommandCardsTable).orderBy(desc(lyteCommandCardsTable.createdAt)).catch((err) => { logger.warn({ err, table: "lyte_command_cards" }, "[executive-summary] lyte_command_cards query failed — returning empty"); return []; }),
+      db.select().from(lyteSignalsTable).orderBy(desc(lyteSignalsTable.receivedAt)).catch((err): any[] => { logger.warn({ err, table: "lyte_signals" }, "[executive-summary] lyte_signals query failed — returning empty"); return []; }),
+      db.select().from(lyteIncidentsTable).orderBy(desc(lyteIncidentsTable.createdAt)).catch((err): any[] => { logger.warn({ err, table: "lyte_incidents" }, "[executive-summary] lyte_incidents query failed — returning empty"); return []; }),
+      db.select().from(lyteRecommendationsTable).orderBy(desc(lyteRecommendationsTable.createdAt)).catch((err): any[] => { logger.warn({ err, table: "lyte_recommendations" }, "[executive-summary] lyte_recommendations query failed — returning empty"); return []; }),
+      db.select().from(lyteCommandCardsTable).orderBy(desc(lyteCommandCardsTable.createdAt)).catch((err): any[] => { logger.warn({ err, table: "lyte_command_cards" }, "[executive-summary] lyte_command_cards query failed — returning empty"); return []; }),
     ]);
 
     const openIncidents = incidents.filter(i => !["resolved", "closed"].includes(i.status));

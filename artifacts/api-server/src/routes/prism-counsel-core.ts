@@ -145,7 +145,7 @@ router.post("/prism-counsel/matters", authMiddleware(), async (req, res) => {
       courtName: body.courtName ? String(body.courtName) : undefined,
       notes: body.notes ? String(body.notes) : undefined,
       createdBy: req.user?.id,
-    }).returning();
+    } as any).returning();
     sendSuccess(res, matter, 201);
   } catch (err) {
     handleRouteError(res, err, "POST /prism-counsel/matters");
@@ -237,7 +237,7 @@ router.get("/prism-counsel/matters/:id/proof-chain", authMiddleware(), async (re
       const { pcProofChainEntriesTable } = await import("@szl-holdings/db");
       entries = await db.select().from(pcProofChainEntriesTable)
         .where(eq(pcProofChainEntriesTable.matterId, matterId))
-        .orderBy(desc(pcProofChainEntriesTable.generatedAt)).limit(50);
+        .orderBy(desc(pcProofChainEntriesTable.createdAt)).limit(50);
     } catch { entries = []; }
 
     sendSuccess(res, { matterId, entries });

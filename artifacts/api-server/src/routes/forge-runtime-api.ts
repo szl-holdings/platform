@@ -96,7 +96,7 @@ router.post("/forge/submit", authMiddleware(), async (req: Request, res: Respons
 
 router.get("/forge/executions/:executionId", authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const { executionId } = req.params;
+    const executionId = req.params.executionId as string;
     const execution = forgeRuntime.getExecution(executionId!);
     if (!execution) {
       sendNotFound(res, `Execution ${executionId} not found`);
@@ -132,7 +132,7 @@ router.get("/forge/executions/:executionId", authMiddleware(), async (req: Reque
 
 router.post("/forge/executions/:executionId/approve", authMiddleware(), requireRole("admin", "super_admin", "exec", "compliance", "ops"), async (req: Request, res: Response) => {
   try {
-    const { executionId } = req.params;
+    const executionId = req.params.executionId as string;
     const { approvalId } = req.body as { approvalId?: string };
 
     if (!approvalId) {

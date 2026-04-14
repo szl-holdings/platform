@@ -16,7 +16,7 @@ import { sql, count, avg, desc, gte, eq, and } from "drizzle-orm";
 const helmRouter: IRouter = Router();
 
 helmRouter.use("/helm", authMiddleware({ required: true }));
-helmRouter.use("/helm", requireRole(["admin", "super_admin"]));
+helmRouter.use("/helm", requireRole("admin", "super_admin"));
 
 helmRouter.get("/helm/overview", async (_req: Request, res: Response) => {
   try {
@@ -33,7 +33,7 @@ helmRouter.get("/helm/overview", async (_req: Request, res: Response) => {
     ] = await Promise.allSettled([
       db.select({ total: count(), avgLatency: avg(agentUsageStats.latencyMs), avgTokens: avg(agentUsageStats.tokensUsed) })
         .from(agentUsageStats)
-        .where(gte(agentUsageStats.createdAt, since24h)),
+        .where(gte(agentUsageStats.recordedAt, since24h)),
 
       db.select({ status: atlasArtifactsTable.status, total: count() })
         .from(atlasArtifactsTable)
@@ -60,7 +60,7 @@ helmRouter.get("/helm/overview", async (_req: Request, res: Response) => {
         .groupBy(proofChainTable.reviewState),
     ]);
 
-    return res.json({
+    return void res.json({
       success: true,
       data: {
         generatedAt: new Date().toISOString(),
@@ -75,7 +75,7 @@ helmRouter.get("/helm/overview", async (_req: Request, res: Response) => {
     });
   } catch (err) {
     console.error("GET /helm/overview error:", err);
-    return res.status(500).json({ error: "Failed to fetch HELM overview" });
+    return void res.status(500).json({ error: "Failed to fetch HELM overview" });
   }
 });
 
@@ -94,14 +94,14 @@ helmRouter.get("/helm/agent-runs", async (req: Request, res: Response) => {
       avgTokens: avg(agentUsageStats.tokensUsed),
     })
       .from(agentUsageStats)
-      .where(gte(agentUsageStats.createdAt, since))
+      .where(gte(agentUsageStats.recordedAt, since))
       .groupBy(agentUsageStats.agentId, agentUsageStats.agentName, agentUsageStats.domain)
       .orderBy(desc(count()));
 
-    return res.json({ success: true, data: rows });
+    return void res.json({ success: true, data: rows });
   } catch (err) {
     console.error("GET /helm/agent-runs error:", err);
-    return res.status(500).json({ error: "Failed to fetch agent runs" });
+    return void res.status(500).json({ error: "Failed to fetch agent runs" });
   }
 });
 
@@ -135,10 +135,10 @@ helmRouter.get("/helm/outcome-graph", async (req: Request, res: Response) => {
         .limit(10),
     ]);
 
-    return res.json({ success: true, data: { byDomain, topOverrideAgents: overrides } });
+    return void res.json({ success: true, data: { byDomain, topOverrideAgents: overrides } });
   } catch (err) {
     console.error("GET /helm/outcome-graph error:", err);
-    return res.status(500).json({ error: "Failed to fetch outcome graph stats" });
+    return void res.status(500).json({ error: "Failed to fetch outcome graph stats" });
   }
 });
 
@@ -173,10 +173,10 @@ helmRouter.get("/helm/atlas-artifacts", async (req: Request, res: Response) => {
         .limit(5),
     ]);
 
-    return res.json({ success: true, data: { byTemplate, exportsByFormat, failedExports: recentJobs } });
+    return void res.json({ success: true, data: { byTemplate, exportsByFormat, failedExports: recentJobs } });
   } catch (err) {
     console.error("GET /helm/atlas-artifacts error:", err);
-    return res.status(500).json({ error: "Failed to fetch atlas artifact stats" });
+    return void res.status(500).json({ error: "Failed to fetch atlas artifact stats" });
   }
 });
 
@@ -190,7 +190,7 @@ helmRouter.get("/helm/worldline", async (_req: Request, res: Response) => {
     const inactive = sources.filter(s => s.status === "inactive" || s.status === "paused");
     const active = sources.filter(s => s.status === "active");
 
-    return res.json({
+    return void res.json({
       success: true,
       data: {
         total: sources.length,
@@ -209,7 +209,7 @@ helmRouter.get("/helm/worldline", async (_req: Request, res: Response) => {
     });
   } catch (err) {
     console.error("GET /helm/worldline error:", err);
-    return res.status(500).json({ error: "Failed to fetch worldline health" });
+    return void res.status(500).json({ error: "Failed to fetch worldline health" });
   }
 });
 
@@ -237,10 +237,10 @@ helmRouter.get("/helm/proof-chain", async (req: Request, res: Response) => {
       .where(gte(proofChainTable.createdAt, since))
       .groupBy(proofChainTable.reviewState, proofChainTable.exportSafetyState);
 
-    return res.json({ success: true, data: { anomalies, byState } });
+    return void res.json({ success: true, data: { anomalies, byState } });
   } catch (err) {
     console.error("GET /helm/proof-chain error:", err);
-    return res.status(500).json({ error: "Failed to fetch proof chain stats" });
+    return void res.status(500).json({ error: "Failed to fetch proof chain stats" });
   }
 });
 

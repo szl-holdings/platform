@@ -67,7 +67,6 @@ export class PilotChangeTracker {
 
     const upcomingDeadlines = await db.select().from(pcDeadlinesTable)
       .where(and(
-        eq(pcDeadlinesTable.orgId as any, orgId),
         sql`${pcDeadlinesTable.dueDate} <= ${tenDays}`,
         sql`${pcDeadlinesTable.dueDate} >= NOW()`,
         eq(pcDeadlinesTable.status, "active" as any)

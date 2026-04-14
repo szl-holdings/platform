@@ -12,9 +12,9 @@ router.post("/telemetry/events", async (req, res) => {
     }
 
     const rows = events.slice(0, 50).map((e: { name: string; properties?: Record<string, unknown>; timestamp?: number }) => ({
-      eventType: e.name,
-      eventData: { app, ...e.properties },
-      createdAt: e.timestamp ? new Date(e.timestamp) : new Date(),
+      eventType: "page_view" as const,
+      path: typeof e.properties?.path === "string" ? e.properties.path : null,
+      metadata: { app, eventName: e.name, ...e.properties },
     }));
 
     await db.insert(dosAnalyticsEventsTable).values(rows);

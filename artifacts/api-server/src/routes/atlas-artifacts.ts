@@ -54,7 +54,7 @@ atlasRouter.post("/atlas/artifacts", async (req: Request, res: Response) => {
   try {
     const parsed = createArtifactSchema.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({ error: "Validation failed", details: parsed.error.issues });
+      return void res.status(400).json({ error: "Validation failed", details: parsed.error.issues });
     }
 
     const user = (req as any).user;
@@ -81,10 +81,10 @@ atlasRouter.post("/atlas/artifacts", async (req: Request, res: Response) => {
       isLatest: true,
     }).returning();
 
-    return res.status(201).json({ success: true, data: artifact });
+    return void res.status(201).json({ success: true, data: artifact });
   } catch (err) {
     console.error("POST /atlas/artifacts error:", err);
-    return res.status(500).json({ error: "Failed to create artifact" });
+    return void res.status(500).json({ error: "Failed to create artifact" });
   }
 });
 
@@ -115,38 +115,38 @@ atlasRouter.get("/atlas/artifacts", async (req: Request, res: Response) => {
       .offset(offset);
 
     const rows = conditions.length > 0 ? await q.where(and(...conditions)) : await q;
-    return res.json({ success: true, data: rows, total: rows.length });
+    return void res.json({ success: true, data: rows, total: rows.length });
   } catch (err) {
     console.error("GET /atlas/artifacts error:", err);
-    return res.status(500).json({ error: "Failed to list artifacts" });
+    return void res.status(500).json({ error: "Failed to list artifacts" });
   }
 });
 
 atlasRouter.get("/atlas/artifacts/:id", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id ?? "0", 10);
-    if (!id) return res.status(400).json({ error: "Invalid id" });
+    const id = parseInt(req.params.id as string ?? "0", 10);
+    if (!id) return void res.status(400).json({ error: "Invalid id" });
 
     const [artifact] = await db.select().from(atlasArtifactsTable).where(eq(atlasArtifactsTable.id, id));
-    if (!artifact) return res.status(404).json({ error: "Artifact not found" });
+    if (!artifact) return void res.status(404).json({ error: "Artifact not found" });
 
-    return res.json({ success: true, data: artifact });
+    return void res.json({ success: true, data: artifact });
   } catch (err) {
     console.error("GET /atlas/artifacts/:id error:", err);
-    return res.status(500).json({ error: "Failed to get artifact" });
+    return void res.status(500).json({ error: "Failed to get artifact" });
   }
 });
 
 atlasRouter.patch("/atlas/artifacts/:id", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id ?? "0", 10);
-    if (!id) return res.status(400).json({ error: "Invalid id" });
+    const id = parseInt(req.params.id as string ?? "0", 10);
+    if (!id) return void res.status(400).json({ error: "Invalid id" });
 
     const parsed = updateArtifactSchema.safeParse(req.body);
-    if (!parsed.success) return res.status(400).json({ error: "Validation failed", details: parsed.error.issues });
+    if (!parsed.success) return void res.status(400).json({ error: "Validation failed", details: parsed.error.issues });
 
     const [existing] = await db.select().from(atlasArtifactsTable).where(eq(atlasArtifactsTable.id, id));
-    if (!existing) return res.status(404).json({ error: "Artifact not found" });
+    if (!existing) return void res.status(404).json({ error: "Artifact not found" });
 
     const [updated] = await db.update(atlasArtifactsTable)
       .set({
@@ -159,20 +159,20 @@ atlasRouter.patch("/atlas/artifacts/:id", async (req: Request, res: Response) =>
       .where(eq(atlasArtifactsTable.id, id))
       .returning();
 
-    return res.json({ success: true, data: updated });
+    return void res.json({ success: true, data: updated });
   } catch (err) {
     console.error("PATCH /atlas/artifacts/:id error:", err);
-    return res.status(500).json({ error: "Failed to update artifact" });
+    return void res.status(500).json({ error: "Failed to update artifact" });
   }
 });
 
 atlasRouter.post("/atlas/artifacts/:id/regenerate", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id ?? "0", 10);
-    if (!id) return res.status(400).json({ error: "Invalid id" });
+    const id = parseInt(req.params.id as string ?? "0", 10);
+    if (!id) return void res.status(400).json({ error: "Invalid id" });
 
     const [existing] = await db.select().from(atlasArtifactsTable).where(eq(atlasArtifactsTable.id, id));
-    if (!existing) return res.status(404).json({ error: "Artifact not found" });
+    if (!existing) return void res.status(404).json({ error: "Artifact not found" });
 
     await db.update(atlasArtifactsTable)
       .set({ isLatest: false })
@@ -200,17 +200,17 @@ atlasRouter.post("/atlas/artifacts/:id/regenerate", async (req: Request, res: Re
       isLatest: true,
     }).returning();
 
-    return res.status(201).json({ success: true, data: newVersion });
+    return void res.status(201).json({ success: true, data: newVersion });
   } catch (err) {
     console.error("POST /atlas/artifacts/:id/regenerate error:", err);
-    return res.status(500).json({ error: "Failed to regenerate artifact" });
+    return void res.status(500).json({ error: "Failed to regenerate artifact" });
   }
 });
 
 atlasRouter.get("/atlas/artifacts/:slug/versions", async (req: Request, res: Response) => {
   try {
-    const slug = req.params.slug;
-    if (!slug) return res.status(400).json({ error: "Invalid slug" });
+    const slug = req.params.slug as string;
+    if (!slug) return void res.status(400).json({ error: "Invalid slug" });
 
     const rows = await db
       .select({
@@ -225,17 +225,17 @@ atlasRouter.get("/atlas/artifacts/:slug/versions", async (req: Request, res: Res
       .where(eq(atlasArtifactsTable.slug, slug))
       .orderBy(desc(atlasArtifactsTable.version));
 
-    return res.json({ success: true, data: rows });
+    return void res.json({ success: true, data: rows });
   } catch (err) {
     console.error("GET /atlas/artifacts/:slug/versions error:", err);
-    return res.status(500).json({ error: "Failed to get version history" });
+    return void res.status(500).json({ error: "Failed to get version history" });
   }
 });
 
 atlasRouter.post("/atlas/artifacts/:id/share", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id ?? "0", 10);
-    if (!id) return res.status(400).json({ error: "Invalid id" });
+    const id = parseInt(req.params.id as string ?? "0", 10);
+    if (!id) return void res.status(400).json({ error: "Invalid id" });
 
     const { expiresInHours = 72 } = req.body as { expiresInHours?: number };
     const token = randomBytes(24).toString("base64url");
@@ -245,46 +245,46 @@ atlasRouter.post("/atlas/artifacts/:id/share", async (req: Request, res: Respons
       .set({ shareToken: token, shareExpiresAt: expiresAt, updatedAt: new Date() })
       .where(eq(atlasArtifactsTable.id, id));
 
-    return res.json({ success: true, token, expiresAt });
+    return void res.json({ success: true, token, expiresAt });
   } catch (err) {
     console.error("POST /atlas/artifacts/:id/share error:", err);
-    return res.status(500).json({ error: "Failed to create share link" });
+    return void res.status(500).json({ error: "Failed to create share link" });
   }
 });
 
 atlasRouter.get("/atlas/shared/:token", async (req: Request, res: Response) => {
   try {
-    const token = req.params.token;
-    if (!token) return res.status(400).json({ error: "Invalid token" });
+    const token = req.params.token as string;
+    if (!token) return void res.status(400).json({ error: "Invalid token" });
 
     const [artifact] = await db.select().from(atlasArtifactsTable)
       .where(eq(atlasArtifactsTable.shareToken, token));
 
-    if (!artifact) return res.status(404).json({ error: "Artifact not found or link expired" });
+    if (!artifact) return void res.status(404).json({ error: "Artifact not found or link expired" });
     if (artifact.shareExpiresAt && artifact.shareExpiresAt < new Date()) {
-      return res.status(410).json({ error: "Share link has expired" });
+      return void res.status(410).json({ error: "Share link has expired" });
     }
 
-    return res.json({ success: true, data: artifact });
+    return void res.json({ success: true, data: artifact });
   } catch (err) {
     console.error("GET /atlas/shared/:token error:", err);
-    return res.status(500).json({ error: "Failed to get shared artifact" });
+    return void res.status(500).json({ error: "Failed to get shared artifact" });
   }
 });
 
 atlasRouter.post("/atlas/artifacts/:id/export", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id ?? "0", 10);
-    if (!id) return res.status(400).json({ error: "Invalid id" });
+    const id = parseInt(req.params.id as string ?? "0", 10);
+    if (!id) return void res.status(400).json({ error: "Invalid id" });
 
     const schema = z.object({
       format: z.enum(ATLAS_EXPORT_FORMATS),
     });
     const parsed = schema.safeParse(req.body);
-    if (!parsed.success) return res.status(400).json({ error: "Invalid export format" });
+    if (!parsed.success) return void res.status(400).json({ error: "Invalid export format" });
 
     const [artifact] = await db.select().from(atlasArtifactsTable).where(eq(atlasArtifactsTable.id, id));
-    if (!artifact) return res.status(404).json({ error: "Artifact not found" });
+    if (!artifact) return void res.status(404).json({ error: "Artifact not found" });
 
     const user = (req as any).user;
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -299,25 +299,25 @@ atlasRouter.post("/atlas/artifacts/:id/export", async (req: Request, res: Respon
       metadata: { templateType: artifact.templateType, title: artifact.title },
     }).returning();
 
-    return res.status(202).json({ success: true, data: job, message: "Export job queued" });
+    return void res.status(202).json({ success: true, data: job, message: "Export job queued" });
   } catch (err) {
     console.error("POST /atlas/artifacts/:id/export error:", err);
-    return res.status(500).json({ error: "Failed to create export job" });
+    return void res.status(500).json({ error: "Failed to create export job" });
   }
 });
 
 atlasRouter.get("/atlas/export-jobs/:id", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id ?? "0", 10);
-    if (!id) return res.status(400).json({ error: "Invalid id" });
+    const id = parseInt(req.params.id as string ?? "0", 10);
+    if (!id) return void res.status(400).json({ error: "Invalid id" });
 
     const [job] = await db.select().from(atlasExportJobsTable).where(eq(atlasExportJobsTable.id, id));
-    if (!job) return res.status(404).json({ error: "Export job not found" });
+    if (!job) return void res.status(404).json({ error: "Export job not found" });
 
-    return res.json({ success: true, data: job });
+    return void res.json({ success: true, data: job });
   } catch (err) {
     console.error("GET /atlas/export-jobs/:id error:", err);
-    return res.status(500).json({ error: "Failed to get export job" });
+    return void res.status(500).json({ error: "Failed to get export job" });
   }
 });
 

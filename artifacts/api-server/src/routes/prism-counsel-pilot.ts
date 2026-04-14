@@ -38,13 +38,13 @@ router.get("/today", async (_req: Request, res: Response) => {
       db.select().from(pcMattersTable)
         .where(and(eq(pcMattersTable.orgId, ORG_ID), eq(pcMattersTable.status, "active" as any))),
       db.select().from(pcDeadlinesTable)
-        .where(and(eq(pcDeadlinesTable.orgId as any, ORG_ID), sql`${pcDeadlinesTable.dueDate} <= ${threeDays}`, sql`${pcDeadlinesTable.dueDate} >= NOW()`, eq(pcDeadlinesTable.status, "active" as any)))
+        .where(and(eq((pcDeadlinesTable as any).orgId, ORG_ID), sql`${pcDeadlinesTable.dueDate} <= ${threeDays}`, sql`${pcDeadlinesTable.dueDate} >= NOW()`, eq(pcDeadlinesTable.status, "active" as any)))
         .orderBy(pcDeadlinesTable.dueDate),
       db.select().from(pcDeadlinesTable)
-        .where(and(eq(pcDeadlinesTable.orgId as any, ORG_ID), sql`${pcDeadlinesTable.dueDate} <= ${fiveDays}`, sql`${pcDeadlinesTable.dueDate} >= NOW()`, eq(pcDeadlinesTable.status, "active" as any)))
+        .where(and(eq((pcDeadlinesTable as any).orgId, ORG_ID), sql`${pcDeadlinesTable.dueDate} <= ${fiveDays}`, sql`${pcDeadlinesTable.dueDate} >= NOW()`, eq(pcDeadlinesTable.status, "active" as any)))
         .orderBy(pcDeadlinesTable.dueDate),
       db.select().from(pcDeadlinesTable)
-        .where(and(eq(pcDeadlinesTable.orgId as any, ORG_ID), sql`${pcDeadlinesTable.dueDate} <= ${tenDays}`, sql`${pcDeadlinesTable.dueDate} >= NOW()`, eq(pcDeadlinesTable.status, "active" as any)))
+        .where(and(eq((pcDeadlinesTable as any).orgId, ORG_ID), sql`${pcDeadlinesTable.dueDate} <= ${tenDays}`, sql`${pcDeadlinesTable.dueDate} >= NOW()`, eq(pcDeadlinesTable.status, "active" as any)))
         .orderBy(pcDeadlinesTable.dueDate),
       db.select().from(pcSignoffQueueTable)
         .where(and(eq(pcSignoffQueueTable.orgId, ORG_ID), eq(pcSignoffQueueTable.status, "pending"))),
@@ -158,7 +158,7 @@ router.get("/today/next-actions", async (req: Request, res: Response) => {
 
 router.post("/today/next-actions/:id/complete", async (req: Request, res: Response) => {
   try {
-    const result = await pilotChangeTracker.completeAction(ORG_ID, parseInt(req.params.id));
+    const result = await pilotChangeTracker.completeAction(ORG_ID, parseInt(req.params.id as string));
     res.json({ action: result[0] });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to complete action" });
@@ -167,7 +167,7 @@ router.post("/today/next-actions/:id/complete", async (req: Request, res: Respon
 
 router.get("/matter-desk/:id", async (req: Request, res: Response) => {
   try {
-    const matterId = parseInt(req.params.id);
+    const matterId = parseInt(req.params.id as string);
     const yesterday = new Date(Date.now() - 48 * 60 * 60 * 1000);
 
     const [matter, changes, deadlines, reviews, signoffs, forecasts, quietRisks, nextActions] = await Promise.all([
@@ -181,7 +181,7 @@ router.get("/matter-desk/:id", async (req: Request, res: Response) => {
       db.select().from(pcNextActionsTable).where(and(eq(pcNextActionsTable.matterId, matterId), eq(pcNextActionsTable.status, "suggested"))).orderBy(desc(pcNextActionsTable.impactScore)).limit(5),
     ]);
 
-    if (!matter.length) return res.status(404).json({ error: "Matter not found" });
+    if (!matter.length) return void res.status(404).json({ error: "Matter not found" });
     const m = matter[0];
 
     const newComms = changes.filter(c => c.changeType === "new_communication");
@@ -254,7 +254,7 @@ router.get("/what-changed", async (req: Request, res: Response) => {
 router.post("/what-changed/mark-read", async (req: Request, res: Response) => {
   try {
     const { ids } = req.body;
-    if (!ids?.length) return res.status(400).json({ error: "ids required" });
+    if (!ids?.length) return void res.status(400).json({ error: "ids required" });
     await pilotChangeTracker.markRead(ORG_ID, ids);
     res.json({ marked: ids.length });
   } catch (err: any) {
@@ -275,8 +275,8 @@ router.get("/reviews", async (req: Request, res: Response) => {
 
 router.get("/reviews/:id", async (req: Request, res: Response) => {
   try {
-    const review = await pilotReview.getReview(ORG_ID, parseInt(req.params.id));
-    if (!review) return res.status(404).json({ error: "Review not found" });
+    const review = await pilotReview.getReview(ORG_ID, parseInt(req.params.id as string));
+    if (!review) return void res.status(404).json({ error: "Review not found" });
     res.json({ review });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch review" });
@@ -295,7 +295,7 @@ router.post("/reviews", async (req: Request, res: Response) => {
 router.patch("/reviews/:id/state", async (req: Request, res: Response) => {
   try {
     const { state } = req.body;
-    const review = await pilotReview.updateReviewState(ORG_ID, parseInt(req.params.id), state, 1);
+    const review = await pilotReview.updateReviewState(ORG_ID, parseInt(req.params.id as string), state, 1);
     res.json({ review });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to update review state" });
@@ -304,7 +304,7 @@ router.patch("/reviews/:id/state", async (req: Request, res: Response) => {
 
 router.post("/reviews/:id/submit-signoff", async (req: Request, res: Response) => {
   try {
-    const signoff = await pilotReview.submitForSignoff(ORG_ID, parseInt(req.params.id), 1);
+    const signoff = await pilotReview.submitForSignoff(ORG_ID, parseInt(req.params.id as string), 1);
     res.json({ signoff });
   } catch (err: any) {
     res.status(500).json({ error: err.message || "Failed to submit for signoff" });
@@ -333,8 +333,8 @@ router.get("/signoffs/pending", async (_req: Request, res: Response) => {
 router.post("/signoffs/:id/resolve", async (req: Request, res: Response) => {
   try {
     const { decision } = req.body;
-    if (!["approved", "rejected"].includes(decision)) return res.status(400).json({ error: "decision must be approved or rejected" });
-    const result = await pilotSignoff.resolve(ORG_ID, parseInt(req.params.id), decision, 1);
+    if (!["approved", "rejected"].includes(decision)) return void res.status(400).json({ error: "decision must be approved or rejected" });
+    const result = await pilotSignoff.resolve(ORG_ID, parseInt(req.params.id as string), decision, 1);
     res.json({ signoff: result });
   } catch (err: any) {
     res.status(500).json({ error: err.message || "Failed to resolve signoff" });
@@ -362,8 +362,8 @@ router.post("/exports", async (req: Request, res: Response) => {
 
 router.get("/exports/:id", async (req: Request, res: Response) => {
   try {
-    const exp = await pilotExport.getExport(ORG_ID, parseInt(req.params.id));
-    if (!exp) return res.status(404).json({ error: "Export not found" });
+    const exp = await pilotExport.getExport(ORG_ID, parseInt(req.params.id as string));
+    if (!exp) return void res.status(404).json({ error: "Export not found" });
     await pilotExport.logAccess(ORG_ID, exp.id, 1);
     res.json({ export: exp });
   } catch (err: any) {
@@ -373,7 +373,7 @@ router.get("/exports/:id", async (req: Request, res: Response) => {
 
 router.get("/exports/:id/content", async (req: Request, res: Response) => {
   try {
-    const content = await pilotExport.buildDocxContent(ORG_ID, parseInt(req.params.id));
+    const content = await pilotExport.buildDocxContent(ORG_ID, parseInt(req.params.id as string));
     res.json(content);
   } catch (err: any) {
     res.status(500).json({ error: err.message || "Failed to build export content" });
@@ -443,7 +443,7 @@ router.get("/admin/health", async (_req: Request, res: Response) => {
 
 router.get("/forecasts/:matterId", async (req: Request, res: Response) => {
   try {
-    const matterId = parseInt(req.params.matterId);
+    const matterId = parseInt(req.params.matterId as string);
     const forecasts = await db.select().from(pcForecastsTable)
       .where(eq(pcForecastsTable.matterId, matterId))
       .orderBy(desc(pcForecastsTable.createdAt));

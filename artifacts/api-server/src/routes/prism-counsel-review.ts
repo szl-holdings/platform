@@ -298,7 +298,7 @@ router.get("/review-desk/overview", async (_req: Request, res: Response) => {
 
 router.get("/review-desk/items/:id", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const [item, notes, assignments] = await Promise.all([
       db.select().from(pcManagedReviewItemsTable)
         .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
@@ -309,7 +309,7 @@ router.get("/review-desk/items/:id", async (req: Request, res: Response) => {
       db.select().from(pcManagedReviewAssignmentsTable)
         .where(eq(pcManagedReviewAssignmentsTable.reviewItemId, id)),
     ]);
-    if (!item.length) return res.status(404).json({ error: "Review item not found" });
+    if (!item.length) return void res.status(404).json({ error: "Review item not found" });
     res.json({ item: item[0], notes, assignments });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to get review item" });
@@ -389,18 +389,18 @@ router.post("/review-desk/items", async (req: Request, res: Response) => {
 
 router.post("/review-desk/items/:id/transition", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const { toState, actorId, reason } = req.body;
     const validTransitions = buildValidTransitions();
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
       .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
       .limit(1);
-    if (!item) return res.status(404).json({ error: "Review item not found" });
+    if (!item) return void res.status(404).json({ error: "Review item not found" });
 
     const allowed = validTransitions[item.lifecycleState] ?? [];
     if (!allowed.includes(toState)) {
-      return res.status(400).json({ error: `Invalid transition from ${item.lifecycleState} to ${toState}`, allowed });
+      return void res.status(400).json({ error: `Invalid transition from ${item.lifecycleState} to ${toState}`, allowed });
     }
 
     const now = new Date();
@@ -452,22 +452,22 @@ router.post("/review-desk/items/:id/transition", async (req: Request, res: Respo
 router.post("/review-desk/items/:id/approve", async (req: Request, res: Response) => {
   req.body.toState = "approved";
   req.params.id = req.params.id;
-  return router.handle?.(req, res, () => {}) ?? res.status(500).json({ error: "Route error" });
+  return void ((router as any).handle?.(req, res, () => {}) ?? res.status(500).json({ error: "Route error" }));
 });
 
 router.post("/review-desk/items/:id/actions/approve", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const { actorId, notes } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
       .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
       .limit(1);
-    if (!item) return res.status(404).json({ error: "Not found" });
+    if (!item) return void res.status(404).json({ error: "Not found" });
 
     const allowed = buildValidTransitions()[item.lifecycleState] ?? [];
     if (!allowed.includes("approved")) {
-      return res.status(400).json({ error: `Cannot approve from state: ${item.lifecycleState}` });
+      return void res.status(400).json({ error: `Cannot approve from state: ${item.lifecycleState}` });
     }
 
     const [updated] = await db.update(pcManagedReviewItemsTable)
@@ -491,13 +491,13 @@ router.post("/review-desk/items/:id/actions/approve", async (req: Request, res: 
 
 router.post("/review-desk/items/:id/actions/reject", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const { actorId, reason } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
       .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
       .limit(1);
-    if (!item) return res.status(404).json({ error: "Not found" });
+    if (!item) return void res.status(404).json({ error: "Not found" });
 
     const [updated] = await db.update(pcManagedReviewItemsTable)
       .set({ lifecycleState: "rejected", rejectedBy: actorId, rejectedAt: new Date(), updatedAt: new Date() })
@@ -520,13 +520,13 @@ router.post("/review-desk/items/:id/actions/reject", async (req: Request, res: R
 
 router.post("/review-desk/items/:id/actions/revise", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const { actorId, notes } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
       .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
       .limit(1);
-    if (!item) return res.status(404).json({ error: "Not found" });
+    if (!item) return void res.status(404).json({ error: "Not found" });
 
     const [updated] = await db.update(pcManagedReviewItemsTable)
       .set({ lifecycleState: "revised", updatedAt: new Date() })
@@ -549,13 +549,13 @@ router.post("/review-desk/items/:id/actions/revise", async (req: Request, res: R
 
 router.post("/review-desk/items/:id/actions/escalate", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const { actorId, escalateTo, reason } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
       .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
       .limit(1);
-    if (!item) return res.status(404).json({ error: "Not found" });
+    if (!item) return void res.status(404).json({ error: "Not found" });
 
     const newState = escalateTo === "partner" ? "needs_partner_review" : "needs_attorney_review";
     const [updated] = await db.update(pcManagedReviewItemsTable)
@@ -580,13 +580,13 @@ router.post("/review-desk/items/:id/actions/escalate", async (req: Request, res:
 
 router.post("/review-desk/items/:id/actions/assign", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const { actorId, assignTo, role } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
       .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
       .limit(1);
-    if (!item) return res.status(404).json({ error: "Not found" });
+    if (!item) return void res.status(404).json({ error: "Not found" });
 
     await db.update(pcManagedReviewAssignmentsTable)
       .set({ status: "reassigned" })
@@ -614,13 +614,13 @@ router.post("/review-desk/items/:id/actions/assign", async (req: Request, res: R
 
 router.post("/review-desk/items/:id/actions/block", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const { actorId, reason } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
       .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
       .limit(1);
-    if (!item) return res.status(404).json({ error: "Not found" });
+    if (!item) return void res.status(404).json({ error: "Not found" });
 
     const [updated] = await db.update(pcManagedReviewItemsTable)
       .set({ lifecycleState: "blocked", blockedReason: reason, updatedAt: new Date() })
@@ -636,13 +636,13 @@ router.post("/review-desk/items/:id/actions/block", async (req: Request, res: Re
 
 router.post("/review-desk/items/:id/actions/request-support", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const { actorId, request } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
       .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
       .limit(1);
-    if (!item) return res.status(404).json({ error: "Not found" });
+    if (!item) return void res.status(404).json({ error: "Not found" });
 
     const [updated] = await db.update(pcManagedReviewItemsTable)
       .set({ lifecycleState: "needs_evidence", updatedAt: new Date() })
@@ -663,13 +663,13 @@ router.post("/review-desk/items/:id/actions/request-support", async (req: Reques
 
 router.post("/review-desk/items/:id/actions/generate-review-packet", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const { actorId } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
       .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
       .limit(1);
-    if (!item) return res.status(404).json({ error: "Not found" });
+    if (!item) return void res.status(404).json({ error: "Not found" });
 
     const packetRef = `review-packet-${id}-${Date.now()}`;
     await db.update(pcManagedReviewItemsTable)
@@ -685,19 +685,19 @@ router.post("/review-desk/items/:id/actions/generate-review-packet", async (req:
 
 router.post("/review-desk/items/:id/actions/export-packet", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const { actorId } = req.body;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
       .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
       .limit(1);
-    if (!item) return res.status(404).json({ error: "Not found" });
+    if (!item) return void res.status(404).json({ error: "Not found" });
 
     if (item.lifecycleState !== "approved") {
-      return res.status(400).json({ error: "Item must be approved before export" });
+      return void res.status(400).json({ error: "Item must be approved before export" });
     }
     if (!item.exportSafe) {
-      return res.status(400).json({ error: "Item is not marked export-safe" });
+      return void res.status(400).json({ error: "Item is not marked export-safe" });
     }
 
     const exportRef = `export-packet-${id}-${Date.now()}`;
@@ -715,7 +715,7 @@ router.post("/review-desk/items/:id/actions/export-packet", async (req: Request,
 
 router.post("/review-desk/items/:id/notes", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const { authorId, noteType, content, isPrivileged } = req.body;
 
     const [note] = await db.insert(pcManagedReviewNotesTable).values({

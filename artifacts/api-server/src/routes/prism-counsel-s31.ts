@@ -101,7 +101,7 @@ router.post("/worldline/initialize", async (_req: Request, res: Response) => {
 
 router.post("/worldline/fetch/:sourceId", async (req: Request, res: Response) => {
   try {
-    const count = await worldlineEngine.fetchSource(ORG_ID, parseInt(req.params.sourceId));
+    const count = await worldlineEngine.fetchSource(ORG_ID, parseInt(req.params.sourceId as string));
     res.json({ fetched: count });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -122,7 +122,7 @@ router.get("/worldline/signals", async (req: Request, res: Response) => {
 
 router.get("/worldline/features/:matterId", async (req: Request, res: Response) => {
   try {
-    const features = await worldlineEngine.getFeatures(ORG_ID, parseInt(req.params.matterId));
+    const features = await worldlineEngine.getFeatures(ORG_ID, parseInt(req.params.matterId as string));
     res.json({ features });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -131,8 +131,8 @@ router.get("/worldline/features/:matterId", async (req: Request, res: Response) 
 
 router.get("/pressure-graph/:matterId", async (req: Request, res: Response) => {
   try {
-    const pressure = await pressureGraph.getMatterPressure(ORG_ID, parseInt(req.params.matterId));
-    res.json({ matterId: parseInt(req.params.matterId), dimensions: pressure });
+    const pressure = await pressureGraph.getMatterPressure(ORG_ID, parseInt(req.params.matterId as string));
+    res.json({ matterId: parseInt(req.params.matterId as string), dimensions: pressure });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
@@ -140,7 +140,7 @@ router.get("/pressure-graph/:matterId", async (req: Request, res: Response) => {
 
 router.post("/pressure-graph/:matterId/compute", async (req: Request, res: Response) => {
   try {
-    const matterId = parseInt(req.params.matterId);
+    const matterId = parseInt(req.params.matterId as string);
     await pressureGraph.computeAllDimensions({ orgId: ORG_ID, matterId });
     await pressureGraph.computeDataProducts(ORG_ID, matterId);
     const pressure = await pressureGraph.getMatterPressure(ORG_ID, matterId);
@@ -152,8 +152,8 @@ router.post("/pressure-graph/:matterId/compute", async (req: Request, res: Respo
 
 router.get("/data-products/:matterId", async (req: Request, res: Response) => {
   try {
-    const products = await pressureGraph.getMatterDataProducts(ORG_ID, parseInt(req.params.matterId));
-    res.json({ matterId: parseInt(req.params.matterId), products });
+    const products = await pressureGraph.getMatterDataProducts(ORG_ID, parseInt(req.params.matterId as string));
+    res.json({ matterId: parseInt(req.params.matterId as string), products });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
@@ -161,7 +161,7 @@ router.get("/data-products/:matterId", async (req: Request, res: Response) => {
 
 router.get("/proof-chain/matter/:matterId", async (req: Request, res: Response) => {
   try {
-    const chain = await proofChain.getMatterChain(ORG_ID, parseInt(req.params.matterId));
+    const chain = await proofChain.getMatterChain(ORG_ID, parseInt(req.params.matterId as string));
     res.json({ chain });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -170,7 +170,7 @@ router.get("/proof-chain/matter/:matterId", async (req: Request, res: Response) 
 
 router.get("/proof-chain/:id/trace", async (req: Request, res: Response) => {
   try {
-    const trace = await proofChain.getTrace(parseInt(req.params.id));
+    const trace = await proofChain.getTrace(parseInt(req.params.id as string));
     res.json({ trace });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -179,7 +179,7 @@ router.get("/proof-chain/:id/trace", async (req: Request, res: Response) => {
 
 router.get("/proof-chain/:id/verify", async (req: Request, res: Response) => {
   try {
-    const result = await proofChain.verifyIntegrity(parseInt(req.params.id));
+    const result = await proofChain.verifyIntegrity(parseInt(req.params.id as string));
     res.json(result);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -188,7 +188,7 @@ router.get("/proof-chain/:id/verify", async (req: Request, res: Response) => {
 
 router.post("/proof-chain/:id/review", async (req: Request, res: Response) => {
   try {
-    await proofChain.setReviewState(parseInt(req.params.id), req.body.state, req.body.reviewerId ?? 1);
+    await proofChain.setReviewState(parseInt(req.params.id as string), req.body.state, req.body.reviewerId ?? 1);
     res.json({ updated: true });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -197,7 +197,7 @@ router.post("/proof-chain/:id/review", async (req: Request, res: Response) => {
 
 router.post("/proof-chain/:id/approve", async (req: Request, res: Response) => {
   try {
-    await proofChain.setApprovalState(parseInt(req.params.id), req.body.state, req.body.approverId ?? 1);
+    await proofChain.setApprovalState(parseInt(req.params.id as string), req.body.state, req.body.approverId ?? 1);
     res.json({ updated: true });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -215,7 +215,7 @@ router.get("/proof-chain/pending-reviews", async (_req: Request, res: Response) 
 
 router.get("/proof-chain/audit-packet/:matterId", async (req: Request, res: Response) => {
   try {
-    const packet = await proofChain.generateAuditPacket(ORG_ID, parseInt(req.params.matterId));
+    const packet = await proofChain.generateAuditPacket(ORG_ID, parseInt(req.params.matterId as string));
     res.json(packet);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -224,7 +224,7 @@ router.get("/proof-chain/audit-packet/:matterId", async (req: Request, res: Resp
 
 router.get("/matter-twin/:matterId", async (req: Request, res: Response) => {
   try {
-    const snapshot = await matterTwin.getLatestSnapshot(ORG_ID, parseInt(req.params.matterId));
+    const snapshot = await matterTwin.getLatestSnapshot(ORG_ID, parseInt(req.params.matterId as string));
     res.json({ snapshot });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -233,7 +233,7 @@ router.get("/matter-twin/:matterId", async (req: Request, res: Response) => {
 
 router.post("/matter-twin/:matterId/snapshot", async (req: Request, res: Response) => {
   try {
-    const snapshot = await matterTwin.buildSnapshot(ORG_ID, parseInt(req.params.matterId), req.body.type ?? "manual");
+    const snapshot = await matterTwin.buildSnapshot(ORG_ID, parseInt(req.params.matterId as string), req.body.type ?? "manual");
     res.json({ snapshot });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -242,7 +242,7 @@ router.post("/matter-twin/:matterId/snapshot", async (req: Request, res: Respons
 
 router.get("/matter-twin/:matterId/history", async (req: Request, res: Response) => {
   try {
-    const history = await matterTwin.getSnapshotHistory(ORG_ID, parseInt(req.params.matterId));
+    const history = await matterTwin.getSnapshotHistory(ORG_ID, parseInt(req.params.matterId as string));
     res.json({ history });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -252,7 +252,7 @@ router.get("/matter-twin/:matterId/history", async (req: Request, res: Response)
 router.get("/forecast-diff/:matterId", async (req: Request, res: Response) => {
   try {
     const diffs = await db.select().from(pcForecastDiffsTable)
-      .where(and(eq(pcForecastDiffsTable.orgId, ORG_ID), eq(pcForecastDiffsTable.matterId, parseInt(req.params.matterId))))
+      .where(and(eq(pcForecastDiffsTable.orgId, ORG_ID), eq(pcForecastDiffsTable.matterId, parseInt(req.params.matterId as string))))
       .orderBy(desc(pcForecastDiffsTable.createdAt)).limit(20);
     res.json({ diffs });
   } catch (e: any) {
@@ -281,7 +281,7 @@ router.get("/copilot/sessions", async (_req: Request, res: Response) => {
 
 router.post("/copilot/sessions/:sessionId/message", async (req: Request, res: Response) => {
   try {
-    const result = await copilotWorkbench.sendMessage(parseInt(req.params.sessionId), req.body.content, 1);
+    const result = await copilotWorkbench.sendMessage(parseInt(req.params.sessionId as string), req.body.content, 1);
     res.json(result);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -290,7 +290,7 @@ router.post("/copilot/sessions/:sessionId/message", async (req: Request, res: Re
 
 router.get("/copilot/sessions/:sessionId/history", async (req: Request, res: Response) => {
   try {
-    const messages = await copilotWorkbench.getSessionHistory(parseInt(req.params.sessionId));
+    const messages = await copilotWorkbench.getSessionHistory(parseInt(req.params.sessionId as string));
     res.json({ messages });
   } catch (e: any) {
     res.status(500).json({ error: e.message });

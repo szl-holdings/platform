@@ -41,7 +41,7 @@ router.get("/prism-bus/events", authMiddleware(), async (req: Request, res: Resp
 
     const events = prismBus.getHistory({
       domain: domain as PrismDomain | undefined,
-      type: type as Parameters<typeof prismBus.getHistory>[0]["type"],
+      type: type as any,
       limit: limit ? Number(limit) : 100,
       since: since ? Number(since) : undefined,
       correlationId,

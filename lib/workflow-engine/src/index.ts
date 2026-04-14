@@ -6,6 +6,7 @@
  */
 
 export { AgentEventBus, agentEventBus, type AgentEventType, type AgentEvent } from "./event-bus.js";
+export { logger } from "./logger.js";
 export {
   KnowledgeStore,
   knowledgeStore,
