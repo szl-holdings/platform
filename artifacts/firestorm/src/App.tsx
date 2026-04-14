@@ -266,6 +266,12 @@ const intelCortexNav = [
   { path: "/intel/dual-mind", label: "Dual-Mind Monitor", icon: Sun },
   { path: "/intel/willaq-umu", label: "Willaq Umu Oracle", icon: Eye },
   { path: "/intel/agent-autonomy", label: "Agent Autonomy", icon: BrainIcon },
+  { path: "/intel/agent-autonomy/agents", label: "↳ Live Agents", icon: Users },
+  { path: "/intel/agent-autonomy/a2a", label: "↳ A2A Graph", icon: Network },
+  { path: "/intel/agent-autonomy/skills", label: "↳ Skill Analytics", icon: Zap },
+  { path: "/intel/agent-autonomy/rag", label: "↳ RAG Monitor", icon: Database },
+  { path: "/intel/agent-autonomy/connectors", label: "↳ Connector Health", icon: Link2 },
+  { path: "/intel/agent-autonomy/self-improvement", label: "↳ Self-Improvement", icon: Sparkles },
   { path: "/agent-insights", label: "Agent Insights", icon: BrainIcon },
   { path: "/consciousness", label: "Consciousness", icon: Sparkles },
 ];
@@ -668,6 +674,12 @@ function AppRouter() {
         <Route path="/intel/dual-mind">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><DualMindMonitor /></RoleGate>}</Route>
         <Route path="/intel/willaq-umu">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><WillaqUmu /></RoleGate>}</Route>
         <Route path="/intel/agent-autonomy">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><AgentAutonomyDashboard /></RoleGate>}</Route>
+        <Route path="/intel/agent-autonomy/agents">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><AgentAutonomyDashboard /></RoleGate>}</Route>
+        <Route path="/intel/agent-autonomy/a2a">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><AgentAutonomyDashboard /></RoleGate>}</Route>
+        <Route path="/intel/agent-autonomy/skills">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><AgentAutonomyDashboard /></RoleGate>}</Route>
+        <Route path="/intel/agent-autonomy/rag">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><AgentAutonomyDashboard /></RoleGate>}</Route>
+        <Route path="/intel/agent-autonomy/connectors">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><AgentAutonomyDashboard /></RoleGate>}</Route>
+        <Route path="/intel/agent-autonomy/self-improvement">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><AgentAutonomyDashboard /></RoleGate>}</Route>
         <Route path="/intel/models">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><Models /></RoleGate>}</Route>
         <Route path="/intel/predictions">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><Predictions /></RoleGate>}</Route>
         <Route path="/intel/projects">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><IntelProjects /></RoleGate>}</Route>
