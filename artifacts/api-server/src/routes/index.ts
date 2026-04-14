@@ -125,6 +125,7 @@ import externalIntegrationsRouter from "./external-integrations";
 import agentFederationRouter from "./agent-federation";
 import streamingIngestionRouter from "./streaming-ingestion";
 import fineTuningRouter from "./fine-tuning";
+import connectorHubRouter from "./connector-hub";
 
 const router: IRouter = Router();
 
@@ -468,5 +469,9 @@ router.use(streamingIngestionRouter);
 router.use("/fine-tuning", _readLimiter);
 router.use("/fine-tuning", _writeLimiter);
 router.use(fineTuningRouter);
+
+router.use("/connector-hub", _readLimiter);
+router.use("/connector-hub", _writeLimiter);
+router.use(connectorHubRouter);
 
 export default router;

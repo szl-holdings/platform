@@ -133,6 +133,33 @@ export {
 } from "@szl-holdings/services";
 
 export {
+  ToolConnector,
+  ConnectorHub,
+  connectorHub,
+  JiraConnector,
+  PagerDutyConnector,
+  SlackConnector,
+  SalesforceConnector,
+  SiemConnector,
+  GroqConnector,
+  FalAiConnector,
+  HoneyhiveConnector,
+  HuggingFaceConnector,
+  ElevenLabsConnector,
+  type ConnectorCategory,
+  type AuthScheme,
+  type ConnectorHealthStatus,
+  type CircuitBreakerState,
+  type AuthConfig,
+  type CapabilityParameter,
+  type Capability,
+  type ConnectorHealth,
+  type ConnectorResult,
+  type ConnectorRegistryEntry,
+  type ConnectorHubSnapshot,
+} from "@szl-holdings/services";
+
+export {
   vesselsMockProvider,
   type VesselRecord,
   incaMockProvider,

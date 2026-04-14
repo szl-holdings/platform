@@ -1,6 +1,7 @@
 import { Router, type Request, type Response } from "express";
 import { db, alloyWorkflowsTable, alloyWorkflowRunsTable, alloyArtifactsTable, alloyDecisions, alloySkills, alloySkillRuns, alloyAuditLogTable } from "@szl-holdings/db";
 import { eq, desc, and, inArray } from "drizzle-orm";
+import { connectorHub } from "@szl-holdings/services";
 import { authMiddleware, requireRole, type AuthenticatedUser } from "../middlewares/auth";
 import { logger } from "../lib/logger";
 import { AGENT_CONFIGS } from "./domain-agents/configs";
@@ -342,6 +343,41 @@ const PLATFORM_TOOLS: McpTool[] = [
         dryRun: { type: "boolean", description: "If true, validates without executing (for skills that support dry run)" },
       },
       required: ["skillSlug", "input"],
+    },
+  },
+  {
+    name: "connector_hub_discover",
+    description: "Discover all registered tool connectors and their capabilities in the universal connector hub. Returns auth config, capability schemas, and category metadata.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        category: { type: "string", description: "Filter by category (ticketing, alerting, communication, crm, security, ai_inference, ai_voice, ai_media, ai_observability, ai_models)" },
+        connectorId: { type: "string", description: "Filter to a specific connector by ID" },
+        tags: { type: "string", description: "Comma-separated tags to filter capabilities" },
+      },
+    },
+  },
+  {
+    name: "connector_hub_execute",
+    description: "Execute a specific capability on a connector in the universal connector hub. Handles auth, rate limiting, retry, and circuit breaking automatically.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        connectorId: { type: "string", description: "Connector ID (jira, slack, pagerduty, salesforce, siem, groq, fal-ai, honeyhive, huggingface, elevenlabs)" },
+        capabilityId: { type: "string", description: "Capability ID within the connector" },
+        params: { type: "object", description: "Capability-specific parameters" },
+      },
+      required: ["connectorId", "capabilityId"],
+    },
+  },
+  {
+    name: "connector_hub_health",
+    description: "Get real-time health monitoring for all connectors or a specific one — includes status, latency, error rate, and circuit breaker state.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        connectorId: { type: "string", description: "Specific connector ID to check (omit for full snapshot)" },
+      },
     },
   },
 ];
@@ -774,6 +810,40 @@ async function executeTool(
     case "query_notifications": {
       const data = await internalGet("/api/notifications", token);
       return { tool: toolName, result: data };
+    }
+    case "connector_hub_discover": {
+      const category = toolArgs["category"] as string | undefined;
+      const connectorId = toolArgs["connectorId"] as string | undefined;
+      const tagsRaw = toolArgs["tags"] as string | undefined;
+      const tags = tagsRaw ? tagsRaw.split(",").map((t) => t.trim()) : undefined;
+      const results = connectorHub.discoverCapabilities({ category, connectorId, tags });
+      return {
+        tool: toolName,
+        connectors: results,
+        totalConnectors: results.length,
+        totalCapabilities: results.reduce((acc, c) => acc + c.capabilities.length, 0),
+      };
+    }
+    case "connector_hub_execute": {
+      const connectorId = toolArgs["connectorId"] as string;
+      const capabilityId = toolArgs["capabilityId"] as string;
+      const params = (toolArgs["params"] as Record<string, unknown>) ?? {};
+      if (!connectorId) throw new Error("connectorId is required");
+      if (!capabilityId) throw new Error("capabilityId is required");
+      logger.info({ connectorId, capabilityId }, "MCP connector_hub_execute");
+      const result = await connectorHub.execute(connectorId, capabilityId, params);
+      return { tool: toolName, ...result };
+    }
+    case "connector_hub_health": {
+      const connectorId = toolArgs["connectorId"] as string | undefined;
+      if (connectorId) {
+        const connector = connectorHub.getConnector(connectorId);
+        if (!connector) throw new Error(`Connector '${connectorId}' not found`);
+        const health = await connector.healthCheck();
+        return { tool: toolName, health };
+      }
+      const snapshot = await connectorHub.getSnapshot();
+      return { tool: toolName, snapshot };
     }
     default:
       throw new Error(`Unknown tool: ${toolName}`);

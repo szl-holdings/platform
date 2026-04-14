@@ -341,6 +341,50 @@ export const ALLOY_TOOL_DEFINITIONS: HFToolDef[] = [
   {
     type: "function",
     function: {
+      name: "connector_hub_discover",
+      description: "Discover all available tool connectors and their capabilities in the universal connector hub. Use this to understand what external systems can be invoked.",
+      parameters: {
+        type: "object",
+        properties: {
+          category: { type: "string", description: "Filter by category: ticketing, alerting, communication, crm, security, ai_inference, ai_voice, ai_media, ai_observability, ai_models" },
+          tags: { type: "string", description: "Comma-separated capability tags to filter by (e.g. 'read,incidents')" },
+          connectorId: { type: "string", description: "Narrow to a specific connector by ID (e.g. jira, slack, groq)" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "connector_hub_execute",
+      description: "Execute a specific capability on a tool connector in the universal connector hub. Use connector_hub_discover first to find the connector and capability IDs.",
+      parameters: {
+        type: "object",
+        required: ["connectorId", "capabilityId"],
+        properties: {
+          connectorId: { type: "string", description: "Connector ID (e.g. jira, slack, pagerduty, salesforce, siem, groq, fal-ai, honeyhive, huggingface, elevenlabs)" },
+          capabilityId: { type: "string", description: "Capability ID within the connector (e.g. search_issues, post_message, chat_completion)" },
+          params: { type: "object", description: "Parameters to pass to the capability (depends on the capability's parameter schema)" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "connector_hub_health",
+      description: "Get the health status and monitoring metrics for all or a specific connector in the universal connector hub.",
+      parameters: {
+        type: "object",
+        properties: {
+          connectorId: { type: "string", description: "Specific connector ID to check (omit for all connectors)" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "close_action",
       description: "Close an action item with a resolution status and notes.",
       parameters: {
