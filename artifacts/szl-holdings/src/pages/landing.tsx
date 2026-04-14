@@ -343,6 +343,25 @@ export default function HomePage() {
                 >
                   Explore the platform
                 </Link>
+                <Link
+                  href="/pulse"
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: "0.5rem",
+                    padding: "0.75rem 1.5rem",
+                    background: "linear-gradient(135deg, rgba(212,160,84,0.15), rgba(212,160,84,0.05))",
+                    color: "#d4a054",
+                    border: "1px solid rgba(212,160,84,0.3)",
+                    borderRadius: "0.375rem",
+                    fontSize: "0.875rem", fontWeight: 500,
+                    textDecoration: "none",
+                    transition: "border-color 0.2s ease, background 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(212,160,84,0.6)"; (e.currentTarget as HTMLElement).style.background = "linear-gradient(135deg, rgba(212,160,84,0.25), rgba(212,160,84,0.1))"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(212,160,84,0.3)"; (e.currentTarget as HTMLElement).style.background = "linear-gradient(135deg, rgba(212,160,84,0.15), rgba(212,160,84,0.05))"; }}
+                >
+                  <Activity size={15} />
+                  Platform Pulse
+                </Link>
               </div>
             </m.div>
           </div>
