@@ -123,6 +123,7 @@ import crossAppHandoffsRouter from "./cross-app-handoffs";
 import alloyCognitiveLearningRouter from "./alloy-cognitive-learning";
 import a2aRouter from "./a2a";
 import agentAutonomyRouter from "./agent-autonomy";
+import alloySkillsRouter from "./alloy-skills";
 import externalIntegrationsRouter from "./external-integrations";
 import agentFederationRouter from "./agent-federation";
 import streamingIngestionRouter from "./streaming-ingestion";
@@ -486,5 +487,16 @@ router.use(a2aRouter);
 router.use("/agent-autonomy", _readLimiter);
 router.use("/agent-autonomy", _writeLimiter);
 router.use(agentAutonomyRouter);
+
+router.use("/alloy/skills", _readLimiter);
+router.use("/alloy/skills", _writeLimiter);
+router.use("/alloy/agents", _readLimiter);
+router.use("/alloy/agents", _writeLimiter);
+router.use("/alloy/performance", _readLimiter);
+router.use("/alloy/performance", _writeLimiter);
+router.use("/alloy/self-improvement", _readLimiter);
+router.use("/alloy/self-improvement", _writeLimiter);
+router.use("/alloy/decisions", _writeLimiter);
+router.use(alloySkillsRouter);
 
 export default router;

@@ -52,3 +52,54 @@ export {
   type CaseMemoryEntry,
   type DecisionDiff,
 } from "./case-memory.js";
+
+export {
+  SkillRegistry,
+  skillRegistry,
+  type SkillManifest,
+  type SkillCapability,
+  type SkillDomain,
+  type SkillInputField,
+  type SkillOutputField,
+  type SkillTriggerCondition,
+  type SkillChainMetadata,
+  type SkillChain,
+} from "./skill-registry.js";
+
+export {
+  SkillManager,
+  skillManager,
+  type SkillSelectionResult,
+  type ChainCompositionResult,
+  type ChainExecutionPlan,
+} from "./skill-manager.js";
+
+export {
+  ScoringEngine,
+  scoringEngine,
+  type DecisionOutcomeRecord,
+  type AgentAccuracyScore,
+  type ConfidenceCalibrationScore,
+  type SkillEffectivenessScore,
+  type AgentPerformanceProfile,
+  type ScoringWindowConfig,
+} from "./scoring-engine.js";
+
+export {
+  buildSelfReflectionContext,
+  applyConfidenceAdjustment,
+  injectReflectionIntoPrompt,
+  persistReflectionSnapshot,
+  type SelfReflectionContext,
+  type ReasoningAdjustment,
+  type SelfReflectionConfig,
+} from "./self-reflection.js";
+
+export {
+  ConfidenceMonitor,
+  confidenceMonitor,
+  type ConfidenceAlert,
+  type AlertSeverity,
+  type AlertType,
+  type MonitorConfig,
+} from "./confidence-monitor.js";
