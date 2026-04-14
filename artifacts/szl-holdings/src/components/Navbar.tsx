@@ -10,6 +10,7 @@ const navLinks = [
   { label: "Lyte", href: "/lyte", external: "/lyte-command-center/" },
   { label: "Vessels", href: "/vessels", external: "/vessels/" },
   { label: "Trust", href: "/trust" },
+  { label: "Pulse", href: "/pulse" },
   { label: "Founder", href: "/founder" },
   { label: "Contact", href: "/contact" },
 ];

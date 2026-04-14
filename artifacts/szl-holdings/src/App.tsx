@@ -118,6 +118,7 @@ const AegisPublicPage = lazy(() => import("@/pages/aegis-public"));
 const CarlotaJoPublicPage = lazy(() => import("@/pages/carlota-jo-public"));
 
 
+const PulsePage = lazy(() => import("@/pages/pulse"));
 const LinkInBioPage = lazy(() => import("@/pages/link-in-bio"));
 const NewsletterLandingPage = lazy(() => import("@/pages/newsletter-landing"));
 const DistOsDashboard = lazy(() => import("@/pages/distribution-os/admin-dashboard"));
@@ -705,6 +706,9 @@ function App() {
             {/* ── Legal / utility routes ── */}
             <Route path="/status">
               <Suspense fallback={<PageLoader />}><StatusPage /></Suspense>
+            </Route>
+            <Route path="/pulse">
+              <Suspense fallback={<PageLoader />}><PulsePage /></Suspense>
             </Route>
             <Route path="/legal/privacy">
               <Suspense fallback={<PageLoader />}><LegalPrivacyPage /></Suspense>

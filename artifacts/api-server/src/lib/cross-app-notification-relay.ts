@@ -111,13 +111,12 @@ export function getCrossAppSignalStats() {
 
 agentEventBus.subscribe(
   "cross-app-relay-listener",
-  ["anomaly_detected", "threat_identified", "alert_raised", "metric_spike", "cross_domain_signal"],
+  ["anomaly_detected", "threat_identified", "alert_raised", "metric_spike"],
   async (event) => {
     const signalTypeMap: Record<string, CrossAppSignalType> = {
       threat_identified: "aegis_threat_confirmed",
       anomaly_detected: "lyte_priority_detected",
       metric_spike: "lyte_priority_detected",
-      cross_domain_signal: "lyte_priority_detected",
       alert_raised: "lyte_priority_detected",
     };
 

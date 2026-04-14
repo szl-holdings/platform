@@ -63,6 +63,7 @@ The platform consists of 13 interconnected applications sharing authentication a
 - **HELM Console:** Operator control plane providing platform health, agent stats, outcome metrics, and trust receipt anomalies.
 - **Platform Marketing Readiness:** Includes feature flags, analytics integration, elite layer pages (`/academy`, `/help`, `/demos`), robust demo data, and full Open Graph/Twitter Card meta tags.
 - **Cross-App Compounding:** Implements cross-app handoff contracts, notification relay, and a family dashboard in HELM for visualizing cross-platform KPIs and health.
+- **Platform Pulse:** Real-time ecosystem intelligence dashboard at `/pulse` showing animated constellation of all 16 platform apps, live agent neural mesh activity, cross-domain intelligence flow visualization, domain health matrix, and animated platform metrics (16 apps, 446 DB tables, 1,618+ endpoints, 12 active agents, 9 domains).
 - **Commercialization:** Includes dedicated pages for commercial packaging (`/packages`), ROI calculation (`/roi`), and relief-based messaging (`/relief`).
 
 ## External Dependencies
