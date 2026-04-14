@@ -30,6 +30,12 @@ const FinancialResearch = lazy(() => import("@/pages/financial-research"));
 const HackajobProfile = lazy(() => import("@/pages/hackajob-profile"));
 const CareerCommand = lazy(() => import("@/pages/career-command"));
 const Speaking = lazy(() => import("@/pages/speaking"));
+const ContentStudio = lazy(() => import("@/pages/content-studio"));
+const AudienceIntelligence = lazy(() => import("@/pages/audience-intelligence"));
+const AdvisoryPipeline = lazy(() => import("@/pages/advisory-pipeline"));
+const ThesisTracker = lazy(() => import("@/pages/thesis-tracker"));
+const InfluenceMetrics = lazy(() => import("@/pages/influence-metrics"));
+const NetworkGraph = lazy(() => import("@/pages/network-graph"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -86,6 +92,12 @@ function Router() {
           <Redirect to="/writing" />
         </Route>
         <Route path="/speaking" component={Speaking} />
+        <Route path="/content-studio" component={ContentStudio} />
+        <Route path="/audience" component={AudienceIntelligence} />
+        <Route path="/pipeline" component={AdvisoryPipeline} />
+        <Route path="/thesis-tracker" component={ThesisTracker} />
+        <Route path="/influence" component={InfluenceMetrics} />
+        <Route path="/network" component={NetworkGraph} />
         <Route path="/case-studies">
           <Redirect to="/work" />
         </Route>

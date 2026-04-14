@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ArrowRight, ExternalLink } from "lucide-react";
+import { Menu, X, ArrowRight, ExternalLink, Sparkles, Users, Briefcase, Target, BarChart3, Network } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 
@@ -13,10 +13,21 @@ const navLinks = [
   { name: "Contact", href: "/contact" },
 ];
 
+const studioLinks = [
+  { name: "Content Studio", href: "/content-studio", icon: Sparkles, desc: "Transform ideas into platform content" },
+  { name: "Audience Intelligence", href: "/audience", icon: Users, desc: "Living map of influence & reach" },
+  { name: "Advisory Pipeline", href: "/pipeline", icon: Briefcase, desc: "Speaking & advisory opportunity CRM" },
+  { name: "Thesis Tracker", href: "/thesis-tracker", icon: Target, desc: "Investment positions & validation track record" },
+  { name: "Influence Metrics", href: "/influence", icon: BarChart3, desc: "Reach, engagement & brand sentiment" },
+  { name: "Network Graph", href: "/network", icon: Network, desc: "Professional relationships & co-investments" },
+];
+
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [studioOpen, setStudioOpen] = useState(false);
   const [location] = useLocation();
+  const studioRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -24,7 +35,17 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => setMobileMenuOpen(false), [location]);
+  useEffect(() => { setMobileMenuOpen(false); setStudioOpen(false); }, [location]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (studioRef.current && !studioRef.current.contains(e.target as Node)) {
+        setStudioOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <header
@@ -69,7 +90,58 @@ export function Navbar() {
               </Link>
             );
           })}
-          <a
+
+          {/* Studio dropdown */}
+          <div ref={studioRef} className="relative">
+            <button
+              onClick={() => setStudioOpen(prev => !prev)}
+              className="flex items-center gap-1 text-[13px] font-medium transition-colors duration-200"
+              style={{ color: studioOpen ? "hsl(0,0%,75%)" : "hsl(0,0%,42%)" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(0,0%,75%)"; }}
+              onMouseLeave={(e) => { if (!studioOpen) (e.currentTarget as HTMLElement).style.color = "hsl(0,0%,42%)"; }}
+            >
+              <Sparkles size={11} />
+              Studio
+            </button>
+            <AnimatePresence>
+              {studioOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+                  className="absolute top-full right-0 mt-3 w-72 rounded-xl border overflow-hidden z-50"
+                  style={{ background: "rgba(8,12,17,0.98)", borderColor: "hsla(0,0%,100%,0.08)", boxShadow: "0 24px 48px rgba(0,0,0,0.6)" }}
+                >
+                  <div className="p-2">
+                    <p className="text-[9px] font-semibold tracking-[0.18em] uppercase px-2 py-1.5" style={{ color: "hsl(120,30%,55%,0.6)" }}>Command Center</p>
+                    {studioLinks.map(item => {
+                      const Icon = item.icon;
+                      const isActive = location === item.href;
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className="group flex items-start gap-3 px-2 py-2.5 rounded-lg transition-colors"
+                          style={{ background: isActive ? "hsla(0,0%,100%,0.06)" : "transparent", textDecoration: "none" }}
+                          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.05)"; }}
+                          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = isActive ? "hsla(0,0%,100%,0.06)" : "transparent"; }}
+                        >
+                          <Icon size={13} className="mt-0.5 shrink-0" style={{ color: "hsl(0,0%,40%)" }} />
+                          <div>
+                            <p className="text-[12px] font-medium" style={{ color: "hsl(0,0%,72%)" }}>{item.name}</p>
+                            <p className="text-[10px] mt-0.5" style={{ color: "hsl(0,0%,36%)" }}>{item.desc}</p>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <
             href="/szl-holdings/"
             className="flex items-center gap-1.5 text-[10px] font-medium tracking-[0.12em] uppercase transition-colors duration-200"
             style={{ color: "hsl(0,0%,30%)", textDecoration: "none" }}
@@ -127,6 +199,26 @@ export function Navbar() {
                   {link.name}
                 </Link>
               ))}
+              <div className="border-t border-white/5 pt-3">
+                <p className="text-[9px] font-semibold tracking-[0.18em] uppercase mb-2" style={{ color: "hsl(120,30%,55%,0.5)" }}>Command Center</p>
+                {studioLinks.map(item => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-2 text-[13px] font-medium transition-colors py-1.5 border-b border-white/5"
+                      style={{ color: "hsl(0,0%,50%)", textDecoration: "none" }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(0,0%,80%)"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(0,0%,50%)"; }}
+                    >
+                      <Icon size={12} style={{ color: "hsl(0,0%,35%)" }} />
+                      {item.name}
+                    </Link>
+                  );
+                })}
+              </div>
               <a
                 href="/szl-holdings/"
                 className="flex items-center gap-2 text-[12px] font-medium transition-colors py-1.5"
