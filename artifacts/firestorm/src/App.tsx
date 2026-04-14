@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState, useEffect, useCallback } from "react";
 const AegisPulse = lazy(() => import("@/pages/pulse"));
+const ConsciousnessPage = lazy(() => import("@/pages/consciousness"));
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { DemoModeProvider, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig, SandboxModeProvider, SandboxModeBanner, AnalyticsProvider } from "@szl-holdings/shared-ui";
@@ -17,7 +18,7 @@ import {
   Play, LayoutDashboard, Ticket, Monitor, DollarSign, Wrench, Server,
   FlaskConical, Cpu, Cpu as CpuIcon, Network, Radio, Plus, Sun, Eye,
   Database, Trophy, Boxes, GitBranch, Link2, Flame, Menu, X, ChevronDown,
-  Hexagon, Zap, Briefcase, Globe
+  Hexagon, Zap, Briefcase, Globe, Sparkles
 } from "lucide-react";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { sentinelConfig } from "@szl-holdings/shared-ui/copilot-configs";
@@ -238,6 +239,7 @@ const intelCortexNav = [
   { path: "/intel/dual-mind", label: "Dual-Mind Monitor", icon: Sun },
   { path: "/intel/willaq-umu", label: "Willaq Umu Oracle", icon: Eye },
   { path: "/agent-insights", label: "Agent Insights", icon: BrainIcon },
+  { path: "/consciousness", label: "Consciousness", icon: Sparkles },
 ];
 
 type Module = "security" | "operations" | "intelligence";
@@ -261,7 +263,7 @@ function AccessDenied() {
 
 function deriveModule(loc: string): Module {
   if (loc.startsWith("/ops/") || loc === "/ops") return "operations";
-  if (loc.startsWith("/intel/") || loc === "/intel" || loc.startsWith("/agent-insights")) return "intelligence";
+  if (loc.startsWith("/intel/") || loc === "/intel" || loc.startsWith("/agent-insights") || loc.startsWith("/consciousness")) return "intelligence";
   return "security";
 }
 
@@ -598,6 +600,7 @@ function AppRouter() {
         <Route path="/document-engine" component={DocumentEngine} />
         <Route path="/document-engine/:sub" component={DocumentEngine} />
         <Route path="/atlas-artifacts" component={AegisAtlasArtifactsPage} />
+        <Route path="/consciousness" component={ConsciousnessPage} />
 
         {/* Governance & Reporting (Phase 3) */}
         <Route path="/gov/agent-config" component={AgentConfigPage} />

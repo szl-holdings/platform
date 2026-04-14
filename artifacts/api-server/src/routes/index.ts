@@ -126,6 +126,7 @@ import agentFederationRouter from "./agent-federation";
 import streamingIngestionRouter from "./streaming-ingestion";
 import fineTuningRouter from "./fine-tuning";
 import connectorHubRouter from "./connector-hub";
+import consciousnessRouter from "./consciousness";
 
 const router: IRouter = Router();
 
@@ -473,5 +474,7 @@ router.use(fineTuningRouter);
 router.use("/connector-hub", _readLimiter);
 router.use("/connector-hub", _writeLimiter);
 router.use(connectorHubRouter);
+
+router.use(consciousnessRouter);
 
 export default router;

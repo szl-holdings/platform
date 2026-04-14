@@ -31,6 +31,14 @@ import { behavioralTracer } from "./observability/behavioral-tracer.js";
 import { budgetManager } from "./cost/budget-manager.js";
 import { rlMemoryManager } from "./memory/rl-memory.js";
 import { issueScopeCertificate } from "./kernel/agent-kernel.js";
+import { metacognitiveMonitor } from "./consciousness/metacognitive-monitor.js";
+import { selfModelEngine } from "./consciousness/self-model.js";
+import { cognitiveWorkspace } from "./consciousness/cognitive-workspace.js";
+import { innerMonologue } from "./consciousness/inner-monologue.js";
+import { goalEngine } from "./consciousness/goal-engine.js";
+import { emotionalSignals } from "./consciousness/emotional-signals.js";
+import { temporalAwareness } from "./consciousness/temporal-awareness.js";
+import { captureConsciousnessSnapshot, buildConsciousnessContext, type ConsciousnessSnapshot } from "./consciousness/index.js";
 
 export const AGENT_REGISTRY: AgentDefinition[] = [
   {
@@ -1289,6 +1297,7 @@ export class NuroMeshOrchestrator {
     multiHypothesis?: Awaited<ReturnType<typeof runMultiHypothesisReasoning>>;
     redTeam?: Awaited<ReturnType<typeof runRedTeamProtocol>>;
     precomputeHit?: boolean;
+    consciousness?: ConsciousnessSnapshot;
   }> {
     const orchestrationStart = Date.now();
     const orchestrationStartTime = orchestrationStart;
@@ -1307,6 +1316,10 @@ export class NuroMeshOrchestrator {
     }
 
     const { traceId } = behavioralTracer.startTrace(query, options.orgId);
+
+    temporalAwareness.recordMarker(`Orchestration: "${query.slice(0, 80)}"`, "orchestration", { orchestrationId, workflowId });
+    cognitiveWorkspace.recordQuery(query);
+
     const context = await getSharedContext();
 
     let targetAgents: AgentDefinition[] = [];
@@ -1358,6 +1371,19 @@ export class NuroMeshOrchestrator {
     }
 
     if (targetAgents.length === 0) targetAgents = [AGENT_REGISTRY.find(a => a.id === "beacon")!];
+
+    const routedDomains = targetAgents.map(a => a.domain);
+    innerMonologue.preRoutingThought(query, targetAgents.length, routedDomains);
+
+    const consciousnessCtx = buildConsciousnessContext();
+    if (consciousnessCtx) {
+      cognitiveWorkspace.addToWorkingMemory(
+        consciousnessCtx.slice(0, 500),
+        "consciousness",
+        5,
+        routedDomains,
+      );
+    }
 
     const costEstimate = budgetManager.estimateRunCost(
       query,
@@ -1730,6 +1756,62 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       } catch {}
     })();
 
+    const consciousnessConflictCount = conflicts.length;
+
+    const metacognition = metacognitiveMonitor.assess({
+      query,
+      agentResponses: agentResponses.map(r => ({ confidence: r.confidence, response: r.response, domain: r.domain })),
+      conflictCount: consciousnessConflictCount,
+      validationPassed: validation?.validated ?? true,
+      tokensBurned: telemetry.tokensBurned,
+      latencyMs: elapsedMs,
+      toolCallCount: 0,
+    });
+
+    innerMonologue.postSynthesisReflection(
+      averageConfidence,
+      consciousnessConflictCount,
+      agentResponses.length,
+      synthesis.length,
+      validation?.validated ?? true,
+    );
+
+    emotionalSignals.emitFromOrchestration({
+      avgConfidence: averageConfidence,
+      conflictCount: consciousnessConflictCount,
+      isHighStakes,
+      validationPassed: validation?.validated ?? true,
+      latencyMs: elapsedMs,
+      knowledgeGapCount: metacognition.knowledgeGaps.length,
+    });
+
+    for (const r of agentResponses) {
+      selfModelEngine.updateAgentProfile(r.agentId, r.domain, {
+        confidence: r.confidence,
+        success: r.confidence > 30,
+        latencyMs: r.latencyMs ?? 0,
+        validationPassed: validation?.validated,
+      });
+    }
+
+    goalEngine.detectGoalsFromOrchestration(
+      query,
+      routedDomains,
+      metacognition.knowledgeGaps,
+      metacognition.confusionSignals,
+    );
+
+    if (synthesis.length > 200) {
+      cognitiveWorkspace.addToWorkingMemory(
+        `Synthesis for "${query.slice(0, 60)}": ${synthesis.slice(0, 300)}`,
+        "orchestration",
+        Math.round(averageConfidence / 15),
+        routedDomains,
+      );
+    }
+
+    const consciousness = captureConsciousnessSnapshot();
+
     return {
       agentResponses,
       synthesis,
@@ -1744,6 +1826,7 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       multiHypothesis,
       redTeam,
       precomputeHit: false,
+      consciousness,
     };
   }
 }
