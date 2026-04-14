@@ -27,6 +27,9 @@ export default defineConfig({
         ]
       : []),
   ],
+  optimizeDeps: {
+    exclude: ["ioredis"],
+  },
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "src"),

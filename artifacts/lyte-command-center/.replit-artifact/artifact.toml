@@ -15,7 +15,7 @@ paths = [ "/lyte-command-center/" ]
 localPort = 6000
 
 [services.development]
-run = "pnpm --filter @workspace/lyte-command-center run dev"
+run = "bash -c 'cd /home/runner/workspace/artifacts/lyte-command-center && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/lyte-command-center", "run", "build" ]

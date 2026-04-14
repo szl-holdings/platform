@@ -15,7 +15,7 @@ paths = [ "/nexus/" ]
 localPort = 5173
 
 [services.development]
-run = "pnpm --filter @workspace/nexus run dev"
+run = "bash -c 'cd /home/runner/workspace/artifacts/nexus && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/nexus", "run", "build" ]

@@ -15,7 +15,7 @@ paths = [ "/inca-lab/" ]
 localPort = 5000
 
 [services.development]
-run = "pnpm --filter @workspace/inca-lab run dev"
+run = "bash -c 'cd /home/runner/workspace/artifacts/inca-lab && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/inca-lab", "run", "build" ]

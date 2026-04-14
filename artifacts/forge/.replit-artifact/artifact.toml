@@ -15,7 +15,7 @@ paths = [ "/forge/" ]
 localPort = 8000
 
 [services.development]
-run = "pnpm --filter @workspace/forge run dev"
+run = "bash -c 'cd /home/runner/workspace/artifacts/forge && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/forge", "run", "build" ]

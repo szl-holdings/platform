@@ -15,7 +15,7 @@ paths = [ "/stephen/" ]
 localPort = 8008
 
 [services.development]
-run = "pnpm --filter @workspace/stephen-site run dev"
+run = "bash -c 'cd /home/runner/workspace/artifacts/stephen-site && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/stephen-site", "run", "build" ]

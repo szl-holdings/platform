@@ -15,7 +15,7 @@ paths = [ "/firestorm/" ]
 localPort = 3001
 
 [services.development]
-run = "pnpm --filter @workspace/firestorm run dev"
+run = "bash -c 'cd /home/runner/workspace/artifacts/firestorm && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/firestorm", "run", "build" ]

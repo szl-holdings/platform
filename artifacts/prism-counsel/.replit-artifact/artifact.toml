@@ -15,7 +15,7 @@ paths = [ "/prism-counsel/" ]
 localPort = 6800
 
 [services.development]
-run = "pnpm --filter @workspace/prism-counsel run dev"
+run = "bash -c 'cd /home/runner/workspace/artifacts/prism-counsel && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/prism-counsel", "run", "build" ]
