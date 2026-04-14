@@ -615,7 +615,7 @@ export async function callAgent(
   }
 
   const preCheck = metacognitiveMonitor.preFlightCheck(agent.id, agent.domain, query.length);
-  const ENABLE_PREFLIGHT_BLOCKING = process.env.CONSCIOUSNESS_PREFLIGHT_BLOCKING !== "false";
+  const ENABLE_PREFLIGHT_BLOCKING = process.env.CONSCIOUSNESS_PREFLIGHT_BLOCKING === "true";
   if (ENABLE_PREFLIGHT_BLOCKING && !preCheck.proceed) {
     innerMonologue.addThought(
       "doubt",
@@ -2208,6 +2208,28 @@ async function persistConsciousnessState(
           progress: goal.progress,
           status: goal.status,
           priority: goal.priority,
+          updatedAt: new Date(),
+        },
+      });
+    }
+
+    const curiosityQueue = snapshot.goals.curiosityQueue ?? [];
+    for (const signal of curiosityQueue) {
+      const curiosityGoalId = `curiosity_goal_${signal.signalId}`;
+      await db.insert(consciousnessGoalsTable).values({
+        goalId: curiosityGoalId,
+        title: `Curiosity: ${signal.topic}`,
+        description: signal.suggestedExploration,
+        priority: signal.intensity > 0.7 ? "medium" : "exploratory",
+        progress: 0,
+        status: "curiosity",
+        source: signal.source,
+        relatedDomains: [signal.topic.split(" ")[0]?.toLowerCase() ?? "exploration"],
+        metadata: JSON.parse(JSON.stringify({ intensity: signal.intensity, signalId: signal.signalId })),
+      }).onConflictDoUpdate({
+        target: consciousnessGoalsTable.goalId,
+        set: {
+          status: "curiosity",
           updatedAt: new Date(),
         },
       });
