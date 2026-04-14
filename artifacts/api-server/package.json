@@ -17,6 +17,7 @@
     "db:migrate": "cd ../../lib/db && npx drizzle-kit migrate --config ./drizzle.push.config.ts"
   },
   "dependencies": {
+    "@clerk/express": "^1.3.4",
     "@apollo/server": "^5.5.0",
     "@as-integrations/express5": "^1.1.2",
     "@clerk/express": "^5.0.0",

@@ -37,6 +37,9 @@ import { TrainingStudio } from "./pages/TrainingStudio";
 import { PublicMarketplace } from "./pages/PublicMarketplace";
 import { ChampionArena } from "./pages/ChampionArena";
 import { ModelTrainingPipeline } from "./pages/ModelTrainingPipeline";
+import { TrainingForge } from "./pages/TrainingForge";
+import { SoundSovereign } from "./pages/SoundSovereign";
+import { CommandBroadcast } from "./pages/CommandBroadcast";
 
 export type Page =
   | "dashboard"
@@ -52,6 +55,9 @@ export type Page =
   | "deployment"
   | "observatory"
   | "lab"
+  | "training-forge"
+  | "sound-sovereign"
+  | "command-broadcast"
   | "crew-builder"
   | "workflow-forge"
   | "protocol-bridge"
@@ -92,6 +98,9 @@ const PAGE_ROUTES: Record<Page, string> = {
   deployment: "/inca-lab/deployment",
   observatory: "/inca-lab/observatory",
   lab: "/inca-lab/lab",
+  "training-forge": "/inca-lab/training-forge",
+  "sound-sovereign": "/inca-lab/sound-sovereign",
+  "command-broadcast": "/inca-lab/command-broadcast",
   "crew-builder": "/inca-lab/crew-builder",
   "workflow-forge": "/inca-lab/workflow-forge",
   "protocol-bridge": "/inca-lab/protocol-bridge",
@@ -131,6 +140,9 @@ function AppShell() {
     if (location.startsWith("/inca-lab/deployment")) return "deployment";
     if (location.startsWith("/inca-lab/observatory")) return "observatory";
     if (location.startsWith("/inca-lab/lab")) return "lab";
+    if (location.startsWith("/inca-lab/training-forge")) return "training-forge";
+    if (location.startsWith("/inca-lab/sound-sovereign")) return "sound-sovereign";
+    if (location.startsWith("/inca-lab/command-broadcast")) return "command-broadcast";
     if (location.startsWith("/inca-lab/crew-builder")) return "crew-builder";
     if (location.startsWith("/inca-lab/workflow-forge")) return "workflow-forge";
     if (location.startsWith("/inca-lab/protocol-bridge")) return "protocol-bridge";
@@ -176,6 +188,9 @@ function AppShell() {
           <Route path="/inca-lab/deployment" component={DeploymentRunway} />
           <Route path="/inca-lab/observatory" component={LLMOpsObservatory} />
           <Route path="/inca-lab/lab" component={ModelLab} />
+          <Route path="/inca-lab/training-forge" component={TrainingForge} />
+          <Route path="/inca-lab/sound-sovereign" component={SoundSovereign} />
+          <Route path="/inca-lab/command-broadcast" component={CommandBroadcast} />
           <Route path="/inca-lab/crew-builder" component={AgentCrewBuilder} />
           <Route path="/inca-lab/workflow-forge" component={WorkflowForge} />
           <Route path="/inca-lab/protocol-bridge" component={ProtocolBridge} />

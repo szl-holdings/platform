@@ -625,4 +625,19 @@ router.use(videoStreamingRouter);
 router.use("/multimodal-documents", _writeLimiter);
 router.use(multimodalDocumentsRouter);
 
+import trainingForgeRouter from "./training-forge";
+router.use("/training-forge", _readLimiter);
+router.use("/training-forge", _writeLimiter);
+router.use(trainingForgeRouter);
+
+import soundSovereignRouter from "./sound-sovereign";
+router.use("/sound-sovereign", _readLimiter);
+router.use("/sound-sovereign", _writeLimiter);
+router.use(soundSovereignRouter);
+
+import commandBroadcastRouter from "./command-broadcast";
+router.use("/command-broadcast", _readLimiter);
+router.use("/command-broadcast", _writeLimiter);
+router.use(commandBroadcastRouter);
+
 export default router;

@@ -39,6 +39,8 @@ import {
   Layers,
   Scale,
   RefreshCw,
+  Waves,
+  Radio,
 } from "lucide-react";
 
 interface NavItem {
@@ -66,6 +68,9 @@ const NAV_GROUPS: NavGroup[] = [
       { id: "gateway", label: "AI Gateway", sublabel: "Routing & telemetry", icon: Zap },
       { id: "observatory", label: "LLMOps Observatory", sublabel: "Usage, compliance & traces", icon: BarChart3 },
       { id: "model-training", label: "Fine-Tuning Pipeline", sublabel: "Train & deploy custom models", icon: Cpu },
+      { id: "training-forge", label: "Training Forge", sublabel: "Multi-provider fine-tuning", icon: Cpu },
+      { id: "sound-sovereign", label: "Sound Sovereign", sublabel: "Music distribution & royalties", icon: Waves },
+      { id: "command-broadcast", label: "Command Broadcast", sublabel: "AI-intelligent streaming hub", icon: Radio },
       { id: "security", label: "Security Posture", sublabel: "Trust scores & injection", icon: ShieldCheck },
       { id: "memory", label: "Agent Memory", sublabel: "Cross-session knowledge", icon: Database },
     ],
