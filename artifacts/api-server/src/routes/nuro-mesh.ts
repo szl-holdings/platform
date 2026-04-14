@@ -1,7 +1,7 @@
 import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
 import { db } from "@szl-holdings/db";
-import { agentMemoryFacts, agentUsageStats, agentToolCalls, advisoryFindings } from "@szl-holdings/db";
-import { eq, desc, and, gt } from "drizzle-orm";
+import { agentMemoryFacts, agentUsageStats, agentToolCalls, advisoryFindings, orchestrationTelemetryTable, redTeamFindingsTable, predictivePrecomputeCacheTable, agentPromptEvolutionTable } from "@szl-holdings/db";
+import { eq, desc, and, gt, gte } from "drizzle-orm";
 import { openai } from "@szl-holdings/integrations-openai-ai-server";
 import { anthropic } from "@szl-holdings/integrations-anthropic-ai";
 import { ai as geminiAi } from "@szl-holdings/integrations-gemini-ai";
@@ -973,6 +973,301 @@ nueroMeshRouter.get("/nuro-mesh/telemetry", async (_req: Request, res: Response)
     });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch telemetry" });
+  }
+});
+
+nueroMeshRouter.get("/nuro-mesh/telemetry/history", async (req: Request, res: Response) => {
+  try {
+    const { limit = "50", since, hasConflicts, hasCausalChains, agentId } = req.query as Record<string, string>;
+    const limitNum = Math.min(parseInt(limit) || 50, 200);
+
+    const rows = await db
+      .select()
+      .from(orchestrationTelemetryTable)
+      .orderBy(desc(orchestrationTelemetryTable.timestamp))
+      .limit(limitNum);
+
+    let filtered = rows;
+
+    if (since) {
+      const sinceDate = new Date(since);
+      filtered = filtered.filter(r => r.timestamp >= sinceDate);
+    }
+    if (hasConflicts === "true") {
+      filtered = filtered.filter(r => Array.isArray(r.conflicts) && (r.conflicts as unknown[]).length > 0);
+    }
+    if (hasCausalChains === "true") {
+      filtered = filtered.filter(r => Array.isArray(r.causalChains) && (r.causalChains as unknown[]).length > 0);
+    }
+    if (agentId) {
+      filtered = filtered.filter(r => Array.isArray(r.selectedAgents) && r.selectedAgents.includes(agentId));
+    }
+
+    res.json({ history: filtered, total: filtered.length });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch telemetry history" });
+  }
+});
+
+nueroMeshRouter.get("/nuro-mesh/telemetry/summary", async (_req: Request, res: Response) => {
+  try {
+    const recent = await db
+      .select()
+      .from(orchestrationTelemetryTable)
+      .orderBy(desc(orchestrationTelemetryTable.timestamp))
+      .limit(100);
+
+    if (recent.length === 0) {
+      res.json({ totalRuns: 0, avgLatencyMs: 0, totalTokensBurned: 0, conflictRate: 0, causalChainRate: 0, proactiveActivationRate: 0 });
+      return;
+    }
+
+    const totalRuns = recent.length;
+    const avgLatencyMs = Math.round(recent.reduce((sum, r) => sum + r.totalLatencyMs, 0) / totalRuns);
+    const totalTokensBurned = recent.reduce((sum, r) => sum + r.tokensBurned, 0);
+    const conflictCount = recent.filter(r => Array.isArray(r.conflicts) && (r.conflicts as unknown[]).length > 0).length;
+    const causalCount = recent.filter(r => Array.isArray(r.causalChains) && (r.causalChains as unknown[]).length > 0).length;
+    const proactiveCount = recent.filter(r => Array.isArray(r.proactiveActivations) && (r.proactiveActivations as unknown[]).length > 0).length;
+    const avgAgents = Math.round(recent.reduce((sum, r) => sum + r.selectedAgents.length, 0) / totalRuns * 10) / 10;
+
+    res.json({
+      totalRuns,
+      avgLatencyMs,
+      totalTokensBurned,
+      conflictRate: Math.round((conflictCount / totalRuns) * 100),
+      causalChainRate: Math.round((causalCount / totalRuns) * 100),
+      proactiveActivationRate: Math.round((proactiveCount / totalRuns) * 100),
+      avgAgentsPerRun: avgAgents,
+      description: "Aggregated orchestration telemetry across recent 100 runs",
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch telemetry summary" });
+  }
+});
+
+nueroMeshRouter.get("/nuro-mesh/red-team/findings", async (req: Request, res: Response) => {
+  try {
+    const { limit = "20", orchestrationId } = req.query as Record<string, string>;
+    const limitNum = Math.min(parseInt(limit) || 20, 100);
+
+    const findings = await db
+      .select()
+      .from(redTeamFindingsTable)
+      .orderBy(desc(redTeamFindingsTable.createdAt))
+      .limit(limitNum);
+
+    const filtered = orchestrationId
+      ? findings.filter(f => f.orchestrationId === orchestrationId)
+      : findings;
+
+    res.json({ findings: filtered, total: filtered.length });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch red team findings" });
+  }
+});
+
+nueroMeshRouter.post("/nuro-mesh/red-team", meshRateLimit, async (req: Request, res: Response) => {
+  const { query, agentResponses } = req.body as {
+    query: string;
+    agentResponses: Array<{ agentId: string; agentName: string; domain: string; response: string; confidence: number }>;
+  };
+
+  if (!query?.trim() || !Array.isArray(agentResponses) || agentResponses.length === 0) {
+    res.status(400).json({ error: "query and agentResponses are required" });
+    return;
+  }
+
+  try {
+    const orchestrationId = `manual-rt-${Date.now()}`;
+    const challengers = ["sentinel", "lexis", "atlas", "beacon", "compass"].filter(
+      id => !agentResponses.some(r => r.agentId === id)
+    );
+    const challengerAgent = AGENT_REGISTRY.find(a => challengers.includes(a.id)) ?? AGENT_REGISTRY.find(a => a.id === "sentinel");
+
+    if (!challengerAgent) {
+      res.status(400).json({ error: "No available challenger agent" });
+      return;
+    }
+
+    const findings = [];
+    const context = await getSharedContext();
+
+    for (const target of agentResponses.slice(0, 2)) {
+      const challengePrompt = `You are performing adversarial red-team analysis.
+
+## Original Query: ${query.slice(0, 300)}
+## Agent Response to Challenge (${target.agentName}, ${target.domain}):
+${target.response.slice(0, 1500)}
+
+Identify: logical gaps, unstated assumptions, contradictory evidence, failure modes. Be rigorous.
+Respond with JSON: { "logicalGaps": [...], "unstatedAssumptions": [...], "contradictoryEvidence": [...], "failureModes": [...], "overallVulnerability": "critical|high|medium|low", "recommendation": "..." }`;
+
+      const result = await callAgent(challengerAgent, challengePrompt, context, { action: "red_team" });
+      let parsed: Record<string, unknown> = {};
+      try {
+        const match = result.response.match(/\{[\s\S]*\}/);
+        if (match) parsed = JSON.parse(match[0]) as Record<string, unknown>;
+      } catch {}
+
+      const vulnerability = (["critical", "high", "medium", "low"].includes(String(parsed.overallVulnerability)) ? parsed.overallVulnerability : "medium") as string;
+      findings.push({
+        findingId: `rt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        challengerAgentId: challengerAgent.id,
+        challengerAgentName: challengerAgent.name,
+        targetAgentId: target.agentId,
+        logicalGaps: Array.isArray(parsed.logicalGaps) ? parsed.logicalGaps.map(String).slice(0, 3) : [],
+        unstatedAssumptions: Array.isArray(parsed.unstatedAssumptions) ? parsed.unstatedAssumptions.map(String).slice(0, 3) : [],
+        contradictoryEvidence: Array.isArray(parsed.contradictoryEvidence) ? parsed.contradictoryEvidence.map(String).slice(0, 2) : [],
+        failureModes: Array.isArray(parsed.failureModes) ? parsed.failureModes.map(String).slice(0, 3) : [],
+        overallVulnerability: vulnerability,
+        recommendation: String(parsed.recommendation ?? "Additional verification recommended"),
+      });
+    }
+
+    const criticalIssues = findings.filter(f => f.overallVulnerability === "critical" || f.overallVulnerability === "high").length;
+
+    try {
+      await db.insert(redTeamFindingsTable).values({
+        orchestrationId,
+        query: query.slice(0, 500),
+        findings: findings as unknown as Record<string, unknown>,
+        overallAssessment: criticalIssues > 0 ? `${criticalIssues} high-severity issue(s) found` : "No critical issues found",
+        challengesRaised: findings.length,
+        criticalIssues,
+      });
+    } catch {}
+
+    res.json({ orchestrationId, findings, challengesRaised: findings.length, criticalIssues });
+  } catch (err) {
+    res.status(500).json({ error: "Red team analysis failed" });
+  }
+});
+
+nueroMeshRouter.get("/nuro-mesh/predictive-cache", async (req: Request, res: Response) => {
+  try {
+    const { limit = "20" } = req.query as Record<string, string>;
+    const now = new Date();
+
+    const entries = await db
+      .select()
+      .from(predictivePrecomputeCacheTable)
+      .where(gte(predictivePrecomputeCacheTable.expiresAt, now))
+      .orderBy(desc(predictivePrecomputeCacheTable.createdAt))
+      .limit(Math.min(parseInt(limit) || 20, 100));
+
+    res.json({
+      cacheSize: entries.length,
+      entries: entries.map(e => ({
+        cacheKey: e.cacheKey,
+        predictedQuery: e.predictedQuery,
+        likelihood: e.likelihood,
+        domains: e.domains,
+        avgConfidence: e.avgConfidence,
+        agentCount: e.agentCount,
+        hitCount: e.hitCount,
+        computedAt: e.createdAt,
+        expiresAt: e.expiresAt,
+      })),
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch predictive cache" });
+  }
+});
+
+nueroMeshRouter.get("/nuro-mesh/prompt-evolution", async (req: Request, res: Response) => {
+  try {
+    const { agentId, status, limit = "50" } = req.query as Record<string, string>;
+
+    const rows = await db
+      .select()
+      .from(agentPromptEvolutionTable)
+      .orderBy(desc(agentPromptEvolutionTable.createdAt))
+      .limit(Math.min(parseInt(limit) || 50, 200));
+
+    let filtered = rows;
+    if (agentId) filtered = filtered.filter(r => r.agentId === agentId);
+    if (status) filtered = filtered.filter(r => r.status === status);
+
+    const summary = {
+      total: filtered.length,
+      byRiskLevel: {
+        low: filtered.filter(r => r.riskLevel === "low").length,
+        medium: filtered.filter(r => r.riskLevel === "medium").length,
+        high: filtered.filter(r => r.riskLevel === "high").length,
+      },
+      byStatus: {
+        proposed: filtered.filter(r => r.status === "proposed").length,
+        applied: filtered.filter(r => r.status === "applied").length,
+        rejected: filtered.filter(r => r.status === "rejected").length,
+      },
+    };
+
+    res.json({ proposals: filtered, summary });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch prompt evolution proposals" });
+  }
+});
+
+nueroMeshRouter.post("/nuro-mesh/prompt-evolution/run", meshRateLimit, async (_req: Request, res: Response) => {
+  try {
+    const { agentUsageStats: statsTable } = await import("@szl-holdings/db");
+    const results: Array<{ agentId: string; agentName: string; status: string; reason: string }> = [];
+
+    for (const agent of AGENT_REGISTRY.filter(a => a.id !== "alloy")) {
+      const stats = await db
+        .select()
+        .from(statsTable)
+        .where(eq(statsTable.agentId, agent.id))
+        .orderBy(desc(statsTable.recordedAt))
+        .limit(50);
+
+      if (stats.length < 10) {
+        results.push({ agentId: agent.id, agentName: agent.name, status: "skipped", reason: "Insufficient invocations (<10)" });
+        continue;
+      }
+
+      const successRate = stats.filter(s => s.success).length / stats.length;
+      const avgConfidence = 75;
+      const needsWork = successRate < 0.8 || avgConfidence < 70;
+
+      if (!needsWork) {
+        results.push({ agentId: agent.id, agentName: agent.name, status: "skipped", reason: "Performance within acceptable bounds" });
+        continue;
+      }
+
+      const riskLevel = successRate < 0.6 ? "high" : successRate < 0.75 ? "medium" : "low";
+
+      try {
+        await db.insert(agentPromptEvolutionTable).values({
+          agentId: agent.id,
+          agentName: agent.name,
+          currentPromptHash: agent.systemPrompt.slice(0, 8),
+          refinementType: successRate < 0.7 ? "remove_weakness" : "calibrate_tone",
+          proposedAddition: `Focus on providing concrete, quantified ${agent.domain} metrics. Always cite specific data points.`,
+          proposedRemoval: null,
+          rationale: `Success rate at ${Math.round(successRate * 100)}% — below 80% threshold for ${agent.domain} domain`,
+          riskLevel,
+          expectedConfidenceImpact: 5,
+          requiresHumanReview: riskLevel !== "low",
+          avgConfidenceBefore: avgConfidence,
+          successRateBefore: Math.round(successRate * 100),
+          totalInvocations: stats.length,
+          status: "proposed",
+        });
+
+        results.push({ agentId: agent.id, agentName: agent.name, status: "proposed", reason: `Success rate: ${Math.round(successRate * 100)}%` });
+      } catch {
+        results.push({ agentId: agent.id, agentName: agent.name, status: "error", reason: "DB insert failed" });
+      }
+    }
+
+    res.json({
+      proposalsGenerated: results.filter(r => r.status === "proposed").length,
+      skipped: results.filter(r => r.status === "skipped").length,
+      results,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Prompt evolution cycle failed" });
   }
 });
 

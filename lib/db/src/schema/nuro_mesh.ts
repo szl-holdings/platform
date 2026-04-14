@@ -263,3 +263,90 @@ export const a2aTaskLog = pgTable("a2a_task_log", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   completedAt: timestamp("completed_at", { withTimezone: true }),
 });
+
+export const orchestrationTelemetryTable = pgTable("orchestration_telemetry", {
+  id: serial("id").primaryKey(),
+  orchestrationId: text("orchestration_id").notNull().unique(),
+  timestamp: timestamp("timestamp", { withTimezone: true }).notNull(),
+  selectedAgents: text("selected_agents").array().notNull().default([]),
+  routingScores: jsonb("routing_scores"),
+  agentPerformance: jsonb("agent_performance").notNull().default({}),
+  causalChains: jsonb("causal_chains").notNull().default([]),
+  conflicts: jsonb("conflicts").notNull().default([]),
+  proactiveActivations: jsonb("proactive_activations").notNull().default([]),
+  totalLatencyMs: integer("total_latency_ms").notNull().default(0),
+  tokensBurned: integer("tokens_burned").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  index("orch_telemetry_timestamp_idx").on(table.timestamp),
+  index("orch_telemetry_id_idx").on(table.orchestrationId),
+]);
+
+export const multiHypothesisSessionsTable = pgTable("multi_hypothesis_sessions", {
+  id: serial("id").primaryKey(),
+  query: text("query").notNull(),
+  hypothesisCount: integer("hypothesis_count").notNull().default(0),
+  clusterCount: integer("cluster_count").notNull().default(0),
+  topCluster: jsonb("top_cluster"),
+  allClusters: jsonb("all_clusters").notNull().default([]),
+  recommendation: text("recommendation").notNull().default(""),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  index("multi_hyp_created_idx").on(table.createdAt),
+]);
+
+export const redTeamFindingsTable = pgTable("red_team_findings", {
+  id: serial("id").primaryKey(),
+  orchestrationId: text("orchestration_id").notNull(),
+  query: text("query").notNull(),
+  findings: jsonb("findings").notNull().default([]),
+  overallAssessment: text("overall_assessment").notNull().default(""),
+  challengesRaised: integer("challenges_raised").notNull().default(0),
+  criticalIssues: integer("critical_issues").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  index("red_team_orch_idx").on(table.orchestrationId),
+  index("red_team_created_idx").on(table.createdAt),
+]);
+
+export const agentPromptEvolutionTable = pgTable("agent_prompt_evolution", {
+  id: serial("id").primaryKey(),
+  agentId: text("agent_id").notNull(),
+  agentName: text("agent_name").notNull(),
+  currentPromptHash: text("current_prompt_hash").notNull(),
+  refinementType: text("refinement_type").notNull(),
+  proposedAddition: text("proposed_addition").notNull().default(""),
+  proposedRemoval: text("proposed_removal"),
+  rationale: text("rationale").notNull().default(""),
+  riskLevel: text("risk_level").notNull().default("medium"),
+  expectedConfidenceImpact: real("expected_confidence_impact").notNull().default(0),
+  requiresHumanReview: boolean("requires_human_review").notNull().default(true),
+  avgConfidenceBefore: real("avg_confidence_before").notNull().default(0),
+  successRateBefore: real("success_rate_before").notNull().default(0),
+  totalInvocations: integer("total_invocations").notNull().default(0),
+  status: text("status").notNull().default("proposed"),
+  appliedAt: timestamp("applied_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  index("prompt_evolution_agent_idx").on(table.agentId),
+  index("prompt_evolution_status_idx").on(table.status),
+  index("prompt_evolution_created_idx").on(table.createdAt),
+]);
+
+export const predictivePrecomputeCacheTable = pgTable("predictive_precompute_cache", {
+  id: serial("id").primaryKey(),
+  cacheKey: text("cache_key").notNull().unique(),
+  originalQuery: text("original_query").notNull(),
+  predictedQuery: text("predicted_query").notNull(),
+  likelihood: integer("likelihood").notNull().default(50),
+  domains: text("domains").array().notNull().default([]),
+  synthesis: text("synthesis").notNull().default(""),
+  agentCount: integer("agent_count").notNull().default(0),
+  avgConfidence: integer("avg_confidence").notNull().default(0),
+  hitCount: integer("hit_count").notNull().default(0),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  index("precompute_expires_idx").on(table.expiresAt),
+  index("precompute_key_idx").on(table.cacheKey),
+]);

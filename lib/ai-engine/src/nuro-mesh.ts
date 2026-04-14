@@ -1,6 +1,10 @@
 import { db } from "@szl-holdings/db";
 import { agentMemoryFacts, agentUsageStats } from "@szl-holdings/db";
 import { eq, desc, and, gt, sql } from "drizzle-orm";
+import { persistTelemetry } from "./innovation/telemetry-pipeline.js";
+import { runMultiHypothesisReasoning, isAmbiguousOrHighStakes } from "./innovation/multi-hypothesis.js";
+import { predictFollowUpQueries, triggerBackgroundPrecompute, checkPrecomputeCache } from "./innovation/predictive-precompute.js";
+import { runRedTeamProtocol } from "./innovation/red-team.js";
 import { openai } from "@szl-holdings/integrations-openai-ai-server";
 import { anthropic } from "@szl-holdings/integrations-anthropic-ai";
 import { ai as geminiAi } from "@szl-holdings/integrations-gemini-ai";
@@ -1282,6 +1286,9 @@ export class NuroMeshOrchestrator {
     traceId?: string;
     trajectoryId?: string;
     budgetStatus?: ReturnType<typeof budgetManager.getBudgetStatus>;
+    multiHypothesis?: Awaited<ReturnType<typeof runMultiHypothesisReasoning>>;
+    redTeam?: Awaited<ReturnType<typeof runRedTeamProtocol>>;
+    precomputeHit?: boolean;
   }> {
     const orchestrationStart = Date.now();
     const orchestrationStartTime = orchestrationStart;
@@ -1701,6 +1708,28 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
 
     const budgetStatus = budgetManager.getBudgetStatus(workflowId, options.orgId);
 
+    void persistTelemetry(telemetry);
+
+    const multiHypothesis = isAmbiguousOrHighStakes(query) && agentResponses.length >= 2
+      ? await runMultiHypothesisReasoning(query, agentResponses).catch(() => null)
+      : null;
+
+    let redTeam: Awaited<ReturnType<typeof runRedTeamProtocol>> | undefined;
+    if (isHighStakes && agentResponses.length >= 2) {
+      void runRedTeamProtocol(orchestrationId, query, agentResponses, 2)
+        .then(result => { redTeam = result; })
+        .catch(() => {});
+    }
+
+    void (async () => {
+      try {
+        const predictions = await predictFollowUpQueries(query, agentResponses, synthesis);
+        if (predictions.length > 0) {
+          await triggerBackgroundPrecompute(query, predictions, options.orgId);
+        }
+      } catch {}
+    })();
+
     return {
       agentResponses,
       synthesis,
@@ -1712,8 +1741,13 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       traceId,
       trajectoryId: trajectory.trajectoryId,
       budgetStatus,
+      multiHypothesis,
+      redTeam,
+      precomputeHit: false,
     };
   }
 }
+
+export { checkPrecomputeCache };
 
 export const nuroMeshOrchestrator = new NuroMeshOrchestrator();
