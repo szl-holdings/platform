@@ -128,6 +128,8 @@ import agentFederationRouter from "./agent-federation";
 import streamingIngestionRouter from "./streaming-ingestion";
 import fineTuningRouter from "./fine-tuning";
 import connectorHubRouter from "./connector-hub";
+import complianceRouter from "./compliance";
+import crmRouter from "./crm";
 import consciousnessRouter from "./consciousness";
 import ragKnowledgeRouter from "./rag-knowledge";
 
@@ -500,5 +502,15 @@ router.use("/alloy/self-improvement", _readLimiter);
 router.use("/alloy/self-improvement", _writeLimiter);
 router.use("/alloy/decisions", _writeLimiter);
 router.use(alloySkillsRouter);
+
+router.use("/compliance", _readLimiter);
+router.use("/compliance", _writeLimiter);
+router.use(complianceRouter);
+
+router.use("/salesforce", _readLimiter);
+router.use("/hubspot", _readLimiter);
+router.use("/dynamics", _readLimiter);
+router.use("/crm", _writeLimiter);
+router.use(crmRouter);
 
 export default router;

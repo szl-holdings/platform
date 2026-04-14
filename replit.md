@@ -67,6 +67,15 @@ The platform consists of 13 interconnected applications sharing authentication a
 - **Platform Pulse:** Real-time ecosystem intelligence dashboard at `/pulse` showing animated constellation of all 16 platform apps, live agent neural mesh activity, cross-domain intelligence flow visualization, domain health matrix, and animated platform metrics (16 apps, 446 DB tables, 1,618+ endpoints, 12 active agents, 9 domains).
 - **Commercialization:** Includes dedicated pages for commercial packaging (`/packages`), ROI calculation (`/roi`), and relief-based messaging (`/relief`).
 
+## Financial Compliance & CRM Intelligence Infrastructure (Task #486)
+- **New Financial Data Adapters** (`lib/services/src/adapters/`): `edgar.ts` (SEC EDGAR XBRL/FilingsAPI, no key required), `fred.ts` (FRED economic indicators, `FRED_API_KEY`), `market-data.ts` (Alpha Vantage / Polygon.io with auto-provider detection). All adapters fall back to realistic demo data when API keys are absent.
+- **Compliance DB Schema** (`lib/db/src/schema/compliance.ts`): 5 new tables — `compliance_suitability` (Reg BI suitability docs), `compliance_archival` (Rule 17a-4 immutable write-once with SHA-256 hash chains), `compliance_supervision_queue` (supervision workflow), `compliance_calendar` (Form ADV/CRS/exam deadlines), `compliance_risk_scores`.
+- **Compliance API** (`artifacts/api-server/src/routes/compliance.ts`): Full CRUD for suitability (with approve/reject review workflow), archival (hash-chained immutable entries), supervision queue (escalate/resolve/assign actions), compliance calendar, market-context, and intelligence-fusion endpoints. Mounted at `/compliance/*`.
+- **CRM API** (`artifacts/api-server/src/routes/crm.ts`): Routes for `/salesforce/opportunities`, `/salesforce/accounts`, `/salesforce/leads`, `/hubspot/deals`, `/hubspot/contacts`, `/dynamics/opportunities`, and `/crm/sync/:type` (bidirectional sync trigger). All routes return realistic demo data when live CRM APIs are not configured.
+- **Firestorm SEC/FINRA Compliance Page** (`artifacts/firestorm/src/pages/compliance/financial-compliance.tsx`): 5-tab command page — Compliance Posture (score gauges), Supervision Queue (action buttons), Compliance Calendar (regulatory deadlines), Rule 17a-4 Archival panel, Intelligence Fusion (market × CRM × compliance cross-domain insights). Accessible at `/cr/financial-compliance` with nav item added.
+- **SZL Holdings CRM Intelligence Dashboard** (`artifacts/szl-holdings/src/pages/crm-intelligence.tsx`): Unified pipeline across Salesforce/HubSpot/Dynamics 365 (4 tabs: Pipeline, Accounts, Leads, Sync Status). Accessible at `/crm-intelligence`.
+- **ServiceRegistry** updated with `secEdgar`, `fred`, `marketData` adapters in properties, constructor, and adapters health array.
+
 ## Ecosystem Audit Notes (Task #474)
 - All 9 web app Vite configs have `process.env.GOMAXPROCS = "2"` (limits esbuild threads per process) and `optimizeDeps.holdUntilCrawlEnd: true` to prevent OS thread exhaustion when 18+ dev servers run simultaneously.
 - `artifacts/alloy-mobile/` (ghost directory — only node_modules, no source) removed.

@@ -65,6 +65,8 @@ const CommercialPackagingPage = lazy(() => import("@/pages/commercial-packaging"
 const RoiCalculatorPage = lazy(() => import("@/pages/roi-calculator"));
 const ReliefMessagingPage = lazy(() => import("@/pages/relief-messaging"));
 
+const CrmIntelligencePage = lazy(() => import("@/pages/crm-intelligence"));
+
 // New platform-repositioning pages
 const LytePage = lazy(() => import("@/pages/lyte-page"));
 const AlloyPublicPage = lazy(() => import("@/pages/alloy-page"));
@@ -867,6 +869,10 @@ function App() {
             </Route>
             <Route path="/admin/distribution">
               <RequireAuth><Suspense fallback={<PageLoader />}><DistOsDashboard /></Suspense></RequireAuth>
+            </Route>
+
+            <Route path="/crm-intelligence">
+              <Suspense fallback={<PageLoader />}><CrmIntelligencePage /></Suspense>
             </Route>
 
             {/* Catch-all → 404 */}

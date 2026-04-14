@@ -48,6 +48,9 @@ import { XTwitterAdapter } from "./adapters/x-twitter.js";
 import { MediumAdapter } from "./adapters/medium.js";
 import { SubstackAdapter } from "./adapters/substack.js";
 import { LinkedInAdapter } from "./adapters/linkedin.js";
+import { SecEdgarAdapter } from "./adapters/edgar.js";
+import { FredAdapter } from "./adapters/fred.js";
+import { MarketDataAdapter } from "./adapters/market-data.js";
 
 export interface IntegrationHealthMatrix {
   timestamp: string;
@@ -110,6 +113,9 @@ export class ServiceRegistry {
   readonly medium: MediumAdapter;
   readonly substack: SubstackAdapter;
   readonly linkedin: LinkedInAdapter;
+  readonly secEdgar: SecEdgarAdapter;
+  readonly fred: FredAdapter;
+  readonly marketData: MarketDataAdapter;
 
   private readonly adapters: ServiceAdapter[];
 
@@ -163,6 +169,9 @@ export class ServiceRegistry {
     this.medium = new MediumAdapter();
     this.substack = new SubstackAdapter();
     this.linkedin = new LinkedInAdapter();
+    this.secEdgar = new SecEdgarAdapter();
+    this.fred = new FredAdapter();
+    this.marketData = new MarketDataAdapter();
 
     this.adapters = [
       this.ai,
@@ -214,6 +223,9 @@ export class ServiceRegistry {
       this.medium,
       this.substack,
       this.linkedin,
+      this.secEdgar,
+      this.fred,
+      this.marketData,
     ];
   }
 

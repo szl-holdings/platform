@@ -18,7 +18,7 @@ import {
   Play, LayoutDashboard, Ticket, Monitor, DollarSign, Wrench, Server,
   FlaskConical, Cpu, Cpu as CpuIcon, Network, Radio, Plus, Sun, Eye,
   Database, Trophy, Boxes, GitBranch, Link2, Flame, Menu, X, ChevronDown,
-  Hexagon, Zap, Briefcase, Globe, Sparkles, Crosshair
+  Hexagon, Zap, Briefcase, Globe, Sparkles, Crosshair, Scale
 } from "lucide-react";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { sentinelConfig } from "@szl-holdings/shared-ui/copilot-configs";
@@ -75,6 +75,7 @@ const ComplianceRisks = lazy(() => import("@/pages/compliance/compliance-risks")
 const VendorRisk = lazy(() => import("@/pages/compliance/vendor-risk"));
 const MilestonesTrends = lazy(() => import("@/pages/compliance/milestones-trends"));
 const ReadinessAIInsights = lazy(() => import("@/pages/compliance/readiness-ai-insights"));
+const FinancialCompliancePage = lazy(() => import("@/pages/compliance/financial-compliance"));
 const SoarPlaybooks = lazy(() => import("@/pages/soar-playbooks"));
 const StixTaxii = lazy(() => import("@/pages/stix-taxii"));
 const TradecraftEnginePage = lazy(() => import("@/pages/tradecraft-engine"));
@@ -233,6 +234,7 @@ const complianceNavItems = [
   { path: "/cr/vendor-risk", label: "Vendor Risk", icon: Building2 },
   { path: "/cr/milestones", label: "Milestones & Trends", icon: TrendingUp },
   { path: "/cr/ai-insights", label: "AI Insights", icon: Target },
+  { path: "/cr/financial-compliance", label: "SEC/FINRA Compliance", icon: Scale },
 ];
 
 const opsNavItems = [
@@ -596,6 +598,7 @@ function AppRouter() {
         <Route path="/findings" component={FindingsPage} />
         <Route path="/mitre-attack" component={MitreAttackPage} />
         <Route path="/compliance" component={CompliancePage} />
+        <Route path="/cr/financial-compliance" component={FinancialCompliancePage} />
         <Route path="/alerts" component={AlertsPage} />
         <Route path="/risk-scoring" component={RiskScoringPage} />
         <Route path="/reports" component={ReportsPage} />
