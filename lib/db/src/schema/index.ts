@@ -79,3 +79,5 @@ export * from "./fine_tuning";
 export * from "./a2a";
 export * from "./agent_skills";
 export * from "./compliance";
+export * from "./vessels_trading";
+export * from "./marine_insurance";

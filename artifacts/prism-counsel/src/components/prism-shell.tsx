@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import {
   Scale, LayoutDashboard, FolderOpen, TrendingUp, Clock, FileText, Users,
-  MessageSquare, Shield, Settings, ChevronLeft, ChevronRight, Search, Bell,
+  MessageSquare, Shield, Anchor, Settings, ChevronLeft, ChevronRight, Search, Bell,
   Sun, Eye, CheckSquare, Download, Brain, Globe, Activity, Layers, Link2,
   DollarSign, BarChart3, Zap, AlertTriangle, Building2, MapPin, Plug,
   Server, Radio, Gauge, Waves, Car, Move, ClipboardList, ClipboardCheck,
@@ -87,6 +87,15 @@ const NAV: NavSection[] = [
       { label: "Litigation Cost", href: "/prism-counsel/predict/litigation-cost", icon: DollarSign },
       { label: "Case Strength", href: "/prism-counsel/predict/case-strength", icon: ShieldAlert },
       { label: "Insurance Optimizer", href: "/prism-counsel/predict/insurance-optimizer", icon: Star },
+    ],
+  },
+  {
+    label: "Marine Underwriting",
+    items: [
+      { label: "Underwriting Desk", href: "/prism-counsel/marine-underwriting", icon: Anchor },
+      { label: "Policies", href: "/prism-counsel/marine-underwriting/policies", icon: Shield },
+      { label: "Claims", href: "/prism-counsel/marine-underwriting/claims", icon: AlertTriangle },
+      { label: "Portfolio", href: "/prism-counsel/marine-underwriting/portfolio", icon: BarChart3 },
     ],
   },
   {

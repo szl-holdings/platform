@@ -105,6 +105,8 @@ const P2PortfolioForecast = lazy(() => import("./pages/p2/portfolio-forecast-pag
 const P2PartnerLifeOs = lazy(() => import("./pages/p2/partner-life-os-page"));
 const P2AdminPortfolio = lazy(() => import("./pages/p2/admin-portfolio-page"));
 
+const MarineUnderwriting = lazy(() => import("./pages/marine-underwriting-page"));
+
 const S32MorningBrief = lazy(() => import("./pages/s32/morning-brief-page"));
 const S32PrepMode = lazy(() => import("./pages/s32/prep-mode-page"));
 const S32QuietRisk = lazy(() => import("./pages/s32/quiet-risk-page"));
@@ -460,6 +462,10 @@ function PrismCounselRoutes() {
       </Route>
       <Route path="/prism-counsel/predict/insurance-optimizer">
         <Suspense fallback={<PageLoader />}><Wrap><InsuranceOptimizerPage /></Wrap></Suspense>
+      </Route>
+
+      <Route path="/prism-counsel/marine-underwriting">
+        <Suspense fallback={<PageLoader />}><Wrap><MarineUnderwriting /></Wrap></Suspense>
       </Route>
 
       <Route path="/prism-counsel/ny/dashboard">

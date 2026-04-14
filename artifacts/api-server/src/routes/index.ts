@@ -132,6 +132,8 @@ import complianceRouter from "./compliance";
 import crmRouter from "./crm";
 import consciousnessRouter from "./consciousness";
 import ragKnowledgeRouter from "./rag-knowledge";
+import vesselsTradingRouter from "./vessels-trading";
+import vesselsInsuranceRouter from "./vessels-insurance";
 
 const router: IRouter = Router();
 
@@ -260,6 +262,10 @@ router.use(terraBrokerRouter);
 
 router.use(aegisOpsLiveRouter);
 router.use(aegisOpsRouter);
+router.use("/vessels/trading", _readLimiter);
+router.use(vesselsTradingRouter);
+router.use("/vessels/insurance", _readLimiter);
+router.use(vesselsInsuranceRouter);
 
 router.use("/terra", _readLimiter);
 router.use(terraLiveRouter);

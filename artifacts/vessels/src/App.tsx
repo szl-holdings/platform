@@ -135,6 +135,7 @@ const DarkFleetEconomicsPage = lazy(() => import("@/pages/dark-fleet-economics")
 const VoyagePnLPage = lazy(() => import("@/pages/voyage-pnl"));
 const TradeFlowHeatmapPage = lazy(() => import("@/pages/trade-flow-heatmap"));
 const IntelligenceBriefsPage = lazy(() => import("@/pages/intelligence-briefs"));
+const TradingDeskPage = lazy(() => import("@/pages/trading-desk"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -286,6 +287,15 @@ function VesselsSidebarContent({ expanded, onMobileClose }: { expanded: boolean;
         { id: "voyage-pnl", label: "Voyage P&L Predictor", href: "/voyage-pnl", icon: <TrendingUp className="w-3.5 h-3.5" /> },
         { id: "trade-flow-heatmap", label: "Trade Flow Heatmap", href: "/trade-flow-heatmap", icon: <BarChart3 className="w-3.5 h-3.5" /> },
         { id: "intelligence-briefs", label: "Intelligence Briefs", href: "/intelligence-briefs", icon: <Zap className="w-3.5 h-3.5" /> },
+      ]
+    },
+    {
+      id: "trading",
+      label: "Commodity Trading",
+      items: [
+        { id: "trading-desk", label: "Trading Desk", href: "/trading-desk", icon: <TrendingUp className="w-3.5 h-3.5" /> },
+        { id: "commodity-flow", label: "Commodity Flow", href: "/commodity-flow", icon: <BarChart3 className="w-3.5 h-3.5" /> },
+        { id: "voyage-pnl", label: "Voyage P&L", href: "/voyage-pnl", icon: <DollarSign className="w-3.5 h-3.5" /> },
       ]
     },
     {
@@ -491,6 +501,7 @@ function DashboardRouter() {
         <Route path="/voyage-pnl" component={VoyagePnLPage} />
         <Route path="/trade-flow-heatmap" component={TradeFlowHeatmapPage} />
         <Route path="/intelligence-briefs" component={IntelligenceBriefsPage} />
+        <Route path="/trading-desk" component={TradingDeskPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-sky-400/40">Page not found</p>
