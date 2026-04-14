@@ -152,3 +152,80 @@ export {
   type CaseMemoryEntry,
   type DecisionDiff,
 } from "./tradecraft/index.js";
+
+export {
+  executeWithKernel,
+  issueScopeCertificate,
+  getKernelAuditTrail,
+  verifyAuditChainIntegrity,
+  kernelAuditChain,
+  type ScopeCertificate,
+  type KernelAuditEntry,
+  type KernelExecutionOptions,
+  type KernelExecutionResult,
+} from "./kernel/agent-kernel.js";
+
+export {
+  rlMemoryManager,
+  type MemoryEntry,
+  type MemoryTier,
+  type MemoryOperation,
+  type MemoryOperationResult,
+  type MemoryRewardSignal,
+} from "./memory/rl-memory.js";
+
+export {
+  trajectoryStore,
+  type OrchestrateTrajectory,
+  type AgentRoutingStep,
+  type ToolCallRecord,
+  type QualityDimensions,
+  type TrajectoryStatus,
+} from "./flywheel/trajectory-store.js";
+
+export {
+  behavioralTracer,
+  type ExecutionTrace,
+  type DecisionFork,
+  type JudgeEvaluation,
+  type DecisionTreeNode,
+  type DecisionForkType,
+} from "./observability/behavioral-tracer.js";
+
+export {
+  budgetManager,
+  MODEL_PRICING,
+  type ModelPricing,
+  type BudgetConfig,
+  type BudgetUsage,
+  type CostEstimate,
+  type SpendRecord,
+} from "./cost/budget-manager.js";
+
+export {
+  buildAgentCard,
+  buildMeshAgentIndex,
+  a2aTaskManager,
+  type A2AAgentCard,
+  type A2ASkill,
+  type A2ATask,
+  type A2AJsonRpcRequest,
+  type A2AJsonRpcResponse,
+} from "./a2a/agent-cards.js";
+
+export {
+  buildDataTableComponent,
+  buildChartComponent,
+  buildApprovalFormComponent,
+  buildMetricCardComponent,
+  buildTimelineComponent,
+  isUIComponentResponse,
+  MCP_APP_TOOLS,
+  type UIComponentResponse,
+  type UIComponentType,
+  type DataTableConfig,
+  type ChartConfig,
+  type ApprovalFormConfig,
+  type MetricCardConfig,
+  type TimelineConfig,
+} from "./mcp-apps/ui-tools.js";

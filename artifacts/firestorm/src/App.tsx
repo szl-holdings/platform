@@ -59,6 +59,7 @@ const ExecutiveRisk = lazy(() => import("@/pages/executive-risk"));
 const SacsayhuamanShield = lazy(() => import("@/pages/sacsayhuaman-shield"));
 const AdversaryEmulation = lazy(() => import("@/pages/simulation-runner"));
 const AgentInsightsPage = lazy(() => import("@/pages/agent-insights"));
+const AgentOpsExplorerPage = lazy(() => import("@/pages/agentops-explorer"));
 const AssetInventoryPage = lazy(() => import("@/pages/asset-inventory"));
 const VulnerabilityDashboard = lazy(() => import("@/pages/vulnerability-dashboard"));
 const HardeningControlsPage = lazy(() => import("@/pages/hardening-controls"));
@@ -587,6 +588,7 @@ function AppRouter() {
         <Route path="/sacsayhuaman-shield" component={SacsayhuamanShield} />
         <Route path="/adversary-emulation" component={AdversaryEmulation} />
         <Route path="/agent-insights" component={AgentInsightsPage} />
+        <Route path="/agentops-explorer" component={AgentOpsExplorerPage} />
         <Route path="/vulnerabilities" component={VulnerabilityDashboard} />
         <Route path="/hardening-controls" component={HardeningControlsPage} />
         <Route path="/cases" component={CasesPage} />

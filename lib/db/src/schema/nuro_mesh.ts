@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, boolean, timestamp, real, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, boolean, timestamp, real, jsonb, doublePrecision, index } from "drizzle-orm/pg-core";
 
 export const agentMemoryFacts = pgTable("agent_memory_facts", {
   id: serial("id").primaryKey(),
@@ -88,6 +88,90 @@ export const alloyEvidenceIndex = pgTable("alloy_evidence_index", {
   objectId: text("object_id"),
   relevanceBoost: real("relevance_boost").notNull().default(1.0),
   embedding: jsonb("embedding"),
+});
+
+export const agentKernelAuditLog = pgTable("agent_kernel_audit_log", {
+  id: serial("id").primaryKey(),
+  entryId: text("entry_id").notNull().unique(),
+  previousHash: text("previous_hash").notNull(),
+  currentHash: text("current_hash").notNull(),
+  idempotencyKey: text("idempotency_key").notNull(),
+  agentId: text("agent_id").notNull(),
+  toolName: text("tool_name").notNull(),
+  arguments: jsonb("arguments").notNull().default({}),
+  validationResult: text("validation_result").notNull(),
+  validationErrors: text("validation_errors").array().notNull().default([]),
+  authorizationResult: text("authorization_result").notNull(),
+  authorizationReason: text("authorization_reason").notNull(),
+  executionResult: text("execution_result").notNull(),
+  compensationApplied: boolean("compensation_applied").notNull().default(false),
+  compensationSteps: text("compensation_steps").array().notNull().default([]),
+  durationMs: integer("duration_ms").notNull().default(0),
+  calledBy: text("called_by").notNull(),
+  tenantId: text("tenant_id"),
+  recordedAt: timestamp("recorded_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const agentScopeCertificates = pgTable("agent_scope_certificates", {
+  id: serial("id").primaryKey(),
+  agentId: text("agent_id").notNull(),
+  allowedTools: text("allowed_tools").array().notNull().default([]),
+  maxRiskLevel: text("max_risk_level").notNull().default("medium"),
+  issuedAt: timestamp("issued_at", { withTimezone: true }).notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  issuerSignature: text("issuer_signature").notNull(),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const agentTrajectories = pgTable("agent_trajectories", {
+  id: serial("id").primaryKey(),
+  trajectoryId: text("trajectory_id").notNull().unique(),
+  contentHash: text("content_hash").notNull(),
+  query: text("query").notNull(),
+  agentRouting: jsonb("agent_routing").notNull().default([]),
+  toolCalls: jsonb("tool_calls").notNull().default([]),
+  finalSynthesis: text("final_synthesis").notNull(),
+  averageConfidence: doublePrecision("average_confidence").notNull().default(0),
+  totalTokens: integer("total_tokens").notNull().default(0),
+  totalLatencyMs: integer("total_latency_ms").notNull().default(0),
+  isHighStakes: boolean("is_high_stakes").notNull().default(false),
+  validationPassed: boolean("validation_passed").notNull().default(true),
+  userFeedbackScore: doublePrecision("user_feedback_score"),
+  qualityScore: doublePrecision("quality_score"),
+  qualityDimensions: jsonb("quality_dimensions"),
+  status: text("status").notNull().default("captured"),
+  goldenRunRank: integer("golden_run_rank"),
+  fewShotExample: text("few_shot_example"),
+  orgId: integer("org_id"),
+  capturedAt: timestamp("captured_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const agentDecisionTraces = pgTable("agent_decision_traces", {
+  id: serial("id").primaryKey(),
+  traceId: text("trace_id").notNull().unique(),
+  runId: text("run_id").notNull(),
+  query: text("query").notNull(),
+  orgId: integer("org_id"),
+  forks: jsonb("forks").notNull().default([]),
+  startTime: timestamp("start_time", { withTimezone: true }).notNull(),
+  endTime: timestamp("end_time", { withTimezone: true }),
+  totalLatencyMs: integer("total_latency_ms").notNull().default(0),
+  status: text("status").notNull().default("in_progress"),
+  judgeEvaluation: jsonb("judge_evaluation"),
+  decisionTree: jsonb("decision_tree"),
+  regressionFlags: text("regression_flags").array().notNull().default([]),
+  recordedAt: timestamp("recorded_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const workflowBudgets = pgTable("workflow_budgets", {
+  id: serial("id").primaryKey(),
+  workflowId: text("workflow_id").notNull().unique(),
+  orgId: integer("org_id"),
+  budgetUsd: doublePrecision("budget_usd").notNull().default(5.0),
+  warningThreshold: doublePrecision("warning_threshold").notNull().default(0.8),
+  hardCapThreshold: doublePrecision("hard_cap_threshold").notNull().default(1.0),
+  allowModelDowngrade: boolean("allow_model_downgrade").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
@@ -150,4 +234,32 @@ export const evalRuns = pgTable("eval_runs", {
   results: jsonb("results").notNull(),
   triggeredBy: text("triggered_by").notNull().default("scheduled"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const agentSpendRecords = pgTable("agent_spend_records", {
+  id: serial("id").primaryKey(),
+  workflowId: text("workflow_id").notNull(),
+  orgId: integer("org_id"),
+  model: text("model").notNull(),
+  provider: text("provider").notNull(),
+  tokensUsed: integer("tokens_used").notNull().default(0),
+  costUsd: doublePrecision("cost_usd").notNull().default(0),
+  agentId: text("agent_id").notNull(),
+  recordedAt: timestamp("recorded_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const a2aTaskLog = pgTable("a2a_task_log", {
+  id: serial("id").primaryKey(),
+  taskId: text("task_id").notNull().unique(),
+  agentId: text("agent_id").notNull(),
+  inputQuery: text("input_query").notNull(),
+  inputContext: jsonb("input_context"),
+  status: text("status").notNull().default("pending"),
+  output: text("output"),
+  error: text("error"),
+  callerAgentId: text("caller_agent_id"),
+  callerPlatform: text("caller_platform"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
 });

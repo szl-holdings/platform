@@ -44,6 +44,7 @@ const PilotTerraPage = lazy(() => import("@/pages/pilot-terra"));
 const PilotVesselsPage = lazy(() => import("@/pages/pilot-vessels"));
 const PilotAegisPage = lazy(() => import("@/pages/pilot-aegis"));
 const KpiDashboardPage = lazy(() => import("@/pages/kpi-dashboard"));
+const AICostAnalyticsPage = lazy(() => import("@/pages/ai-cost-analytics"));
 const AdminPage = lazy(() => import("@/pages/admin"));
 const OpsPage = lazy(() => import("@/pages/ops"));
 const AzureTenantOnboardingPage = lazy(() => import("@/pages/azure-tenant-onboarding"));
@@ -664,6 +665,9 @@ function App() {
             {/* ── Admin routes ── */}
             <Route path="/kpis">
               <RequireAuth><Suspense fallback={<PageLoader />}><KpiDashboardPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/ai-cost-analytics">
+              <RequireAuth><Suspense fallback={<PageLoader />}><AICostAnalyticsPage /></Suspense></RequireAuth>
             </Route>
             <Route path="/admin/azure-onboarding">
               <RequireAuth><Suspense fallback={<PageLoader />}><AzureTenantOnboardingPage /></Suspense></RequireAuth>

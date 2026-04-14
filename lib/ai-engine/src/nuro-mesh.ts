@@ -22,6 +22,11 @@ import type {
   ConfidenceCalibrationEntry,
   OrchestrationTelemetry,
 } from "./types.js";
+import { trajectoryStore } from "./flywheel/trajectory-store.js";
+import { behavioralTracer } from "./observability/behavioral-tracer.js";
+import { budgetManager } from "./cost/budget-manager.js";
+import { rlMemoryManager } from "./memory/rl-memory.js";
+import { issueScopeCertificate } from "./kernel/agent-kernel.js";
 
 export const AGENT_REGISTRY: AgentDefinition[] = [
   {
@@ -473,7 +478,15 @@ export async function callAgent(
   agent: AgentDefinition,
   query: string,
   context: string,
-  options?: { orgId?: number | null; action?: string; callerUserId?: number | null; callerRoles?: string[] },
+  options?: {
+    orgId?: number | null;
+    action?: string;
+    callerUserId?: number | null;
+    callerRoles?: string[];
+    workflowId?: string;
+    traceId?: string;
+    parentForkId?: string;
+  },
 ): Promise<AgentCallResult> {
   const startTime = Date.now();
   let response = "";
@@ -488,6 +501,25 @@ export async function callAgent(
     options?.callerUserId ?? null,
     options?.callerRoles ?? [],
   );
+
+  if (options?.traceId) {
+    behavioralTracer.recordFork(options.traceId, {
+      parentForkId: options.parentForkId ?? null,
+      forkType: "governance_check",
+      agentId: agent.id,
+      agentName: agent.name,
+      domain: agent.domain,
+      inputContext: `Governance check for ${agent.id} running "${options.action ?? "agent_run"}"`,
+      decision: enforcement.allowed ? "allowed" : "blocked",
+      output: enforcement.allowed ? "Governance passed" : `Blocked: ${enforcement.reason ?? "policy"}`,
+      alternatives: [],
+      confidence: enforcement.allowed ? 100 : 0,
+      latencyMs: 0,
+      tokensUsed: 0,
+      metadata: { governance: enforcement },
+    });
+  }
+
   if (!enforcement.allowed) {
     return {
       agentId: agent.id,
@@ -503,12 +535,21 @@ export async function callAgent(
   const learningContext = await getAgentLearningContext(agent.id, query);
   const learningSection = learningContext ? `\n\n${learningContext}` : "";
 
+  let actualModel = agent.preferredModel;
+  if (options?.workflowId) {
+    const modelDecision = budgetManager.getModelForBudget(agent.preferredModel, options.workflowId, options.orgId);
+    actualModel = modelDecision.model;
+  }
+
   const fullPrompt = `${agent.systemPrompt}${learningSection}\n\n## Shared Context from Nuro Mesh\n${context}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with a confidence score (0-100) on a new line in format: CONFIDENCE: [score]`;
+
+  let forkId: string | undefined;
 
   try {
     if (agent.preferredProvider === "anthropic") {
+      const modelToUse = actualModel !== agent.preferredModel && !actualModel.startsWith("claude") ? agent.preferredModel : actualModel;
       const result = await anthropic.messages.create({
-        model: agent.preferredModel,
+        model: modelToUse,
         max_tokens: 2048,
         messages: [{ role: "user", content: fullPrompt }],
       });
@@ -518,7 +559,7 @@ export async function callAgent(
     } else if (agent.preferredProvider === "openai") {
       const systemWithLearning = `${agent.systemPrompt}${learningSection}`;
       const result = await openai.chat.completions.create({
-        model: agent.preferredModel,
+        model: actualModel,
         max_completion_tokens: 2048,
         messages: [
           { role: "system", content: systemWithLearning },
@@ -531,15 +572,16 @@ export async function callAgent(
     } else if (agent.preferredProvider === "gemini") {
       try {
         const result = await geminiAi.models.generateContent({
-          model: agent.preferredModel,
+          model: actualModel,
           contents: [{ role: "user", parts: [{ text: fullPrompt }] }],
           config: { maxOutputTokens: 2048 },
         });
         response = result.text ?? "";
         success = true;
       } catch {
+        const fallbackModel = budgetManager.getModelForBudget("gpt-5.2", options?.workflowId ?? "default", options?.orgId).model;
         const fallback = await openai.chat.completions.create({
-          model: "gpt-5.2",
+          model: fallbackModel,
           max_completion_tokens: 2048,
           messages: [{ role: "system", content: agent.systemPrompt }, { role: "user", content: fullPrompt }],
         });
@@ -559,6 +601,40 @@ export async function callAgent(
   const confidence = confidenceMatch ? Math.min(100, parseInt(confidenceMatch[1]!)) : 75;
   const cleanResponse = response.replace(/CONFIDENCE:\s*\d+/gi, "").trim();
 
+  if (options?.traceId) {
+    const fork = behavioralTracer.recordFork(options.traceId, {
+      parentForkId: options.parentForkId ?? null,
+      forkType: "routing",
+      agentId: agent.id,
+      agentName: agent.name,
+      domain: agent.domain,
+      inputContext: `Query: ${query.slice(0, 200)}`,
+      decision: `Routed to ${agent.name} using ${actualModel}`,
+      output: cleanResponse.slice(0, 300),
+      alternatives: [],
+      confidence,
+      latencyMs,
+      tokensUsed,
+      metadata: { model: actualModel, originalModel: agent.preferredModel, success },
+    });
+    forkId = fork.forkId;
+  }
+
+  if (options?.workflowId) {
+    budgetManager.recordSpend(options.workflowId, agent.id, actualModel, tokensUsed, options.orgId);
+  }
+
+  try {
+    await rlMemoryManager.store(
+      agent.id,
+      `Query: "${query.slice(0, 100)}" — Response: ${cleanResponse.slice(0, 200)}`,
+      "episodic",
+      [agent.domain, "query_response"],
+      Math.round(confidence / 10),
+      { model: actualModel, latencyMs, success },
+    );
+  } catch {}
+
   try {
     await db.insert(agentUsageStats).values({
       agentId: agent.id,
@@ -567,7 +643,7 @@ export async function callAgent(
       tokensUsed,
       latencyMs,
       success,
-      model: agent.preferredModel,
+      model: actualModel,
       provider: agent.preferredProvider,
     }).onConflictDoNothing();
   } catch {}
@@ -1164,6 +1240,8 @@ export class NuroMeshOrchestrator {
       callerUserId?: number | null;
       callerRoles?: string[];
       enableConsultations?: boolean;
+      workflowId?: string;
+      budgetUsd?: number;
     } = {},
   ): Promise<{
     agentResponses: AgentCallResult[];
@@ -1173,9 +1251,27 @@ export class NuroMeshOrchestrator {
     isHighStakes: boolean;
     routingScores?: SemanticRoutingScore[];
     telemetry?: OrchestrationTelemetry;
+    traceId?: string;
+    trajectoryId?: string;
+    budgetStatus?: ReturnType<typeof budgetManager.getBudgetStatus>;
   }> {
     const orchestrationStart = Date.now();
+    const orchestrationStartTime = orchestrationStart;
     const orchestrationId = `orch-${orchestrationStart}-${Math.random().toString(36).slice(2, 8)}`;
+    const workflowId = options.workflowId ?? `orchestrate_${orchestrationId}`;
+
+    if (options.budgetUsd) {
+      budgetManager.configureBudget({
+        workflowId,
+        orgId: options.orgId ?? null,
+        budgetUsd: options.budgetUsd,
+        warningThreshold: 0.8,
+        hardCapThreshold: 1.0,
+        allowModelDowngrade: true,
+      });
+    }
+
+    const { traceId } = behavioralTracer.startTrace(query, options.orgId);
     const context = await getSharedContext();
 
     let targetAgents: AgentDefinition[];
@@ -1201,11 +1297,35 @@ export class NuroMeshOrchestrator {
 
     if (targetAgents.length === 0) targetAgents = [AGENT_REGISTRY.find(a => a.id === "beacon")!];
 
+    const costEstimate = budgetManager.estimateRunCost(
+      query,
+      targetAgents.map(a => ({ agentId: a.id, model: a.preferredModel })),
+      workflowId,
+      options.orgId,
+    );
+
+    if (!costEstimate.budgetSufficient) {
+      const budgetStatus = budgetManager.getBudgetStatus(workflowId, options.orgId);
+      behavioralTracer.endTrace(traceId, "failed");
+      return {
+        agentResponses: [],
+        synthesis: `[Budget exceeded — orchestration blocked. Remaining budget: $${costEstimate.budgetRemaining.toFixed(4)}. ${costEstimate.recommendation}]`,
+        validation: null,
+        averageConfidence: 0,
+        isHighStakes: false,
+        traceId,
+        budgetStatus,
+      };
+    }
+
+    const goldenContext = trajectoryStore.getGoldenRunsContext(2);
+    const baseContext = goldenContext ? `${context}\n\n${goldenContext}` : context;
+
     const agentResponses = await Promise.all(
       targetAgents.map(async agent => {
         const agentContext = await getSharedContext(agent.id);
 
-        let enrichedContext = agentContext;
+        let enrichedContext = goldenContext ? `${agentContext}\n\n${goldenContext}` : agentContext;
         const preTurnConsultations: AgentConsultationResult[] = [];
 
         if (options.enableConsultations !== false && agent.collaboratesWith && agent.collaboratesWith.length > 0) {
@@ -1243,7 +1363,7 @@ export class NuroMeshOrchestrator {
               .map(c => `## Pre-turn consultation: ${c.consultingAgentName} (${c.confidence}% confidence)\n${c.response}`)
               .join("\n\n");
             if (consultationContext) {
-              enrichedContext = `${agentContext}\n\n## Peer Domain Intelligence (pre-response consultations)\n${consultationContext}`;
+              enrichedContext = `${enrichedContext}\n\n## Peer Domain Intelligence (pre-response consultations)\n${consultationContext}`;
             }
           }
         }
@@ -1253,6 +1373,8 @@ export class NuroMeshOrchestrator {
           action: options.action ?? "orchestrate",
           callerUserId: options.callerUserId ?? null,
           callerRoles: options.callerRoles ?? [],
+          workflowId,
+          traceId,
         });
 
         if (preTurnConsultations.length > 0) {
@@ -1262,6 +1384,22 @@ export class NuroMeshOrchestrator {
         return result;
       }),
     );
+
+    behavioralTracer.recordFork(traceId, {
+      parentForkId: null,
+      forkType: "routing",
+      agentId: "alloy",
+      agentName: "Alloy",
+      domain: "orchestration",
+      inputContext: `Routing query to ${targetAgents.length} agents`,
+      decision: `Routed to: ${targetAgents.map(a => a.name).join(", ")}`,
+      output: `${agentResponses.filter(r => r.confidence > 0).length}/${agentResponses.length} agents responded successfully`,
+      alternatives: [],
+      confidence: Math.round(agentResponses.reduce((s, r) => s + r.confidence, 0) / Math.max(1, agentResponses.length)),
+      latencyMs: Date.now() - orchestrationStartTime,
+      tokensUsed: agentResponses.reduce((s, r) => s + (r.tokensUsed ?? 0), 0),
+      metadata: { agentCount: targetAgents.length, workflowId },
+    });
 
     const isHighStakes = options.requireValidation || agentResponses.some(r => {
       const agent = AGENT_REGISTRY.find(a => a.id === r.agentId);
@@ -1273,6 +1411,22 @@ export class NuroMeshOrchestrator {
       const primaryOutput = agentResponses.map(r => `## ${r.agentName} (${r.domain})\n${r.response}`).join("\n\n");
       const primaryAgentId = agentResponses[0]?.agentId;
       validation = await runMakerChecker(primaryOutput, context, undefined, primaryAgentId, query);
+
+      behavioralTracer.recordFork(traceId, {
+        parentForkId: null,
+        forkType: "validation",
+        agentId: "sentinel",
+        agentName: "Sentinel",
+        domain: "security",
+        inputContext: "Maker-checker validation of high-stakes output",
+        decision: validation.status,
+        output: validation.validatorNotes.slice(0, 200),
+        alternatives: [],
+        confidence: validation.validated ? 90 : 10,
+        latencyMs: 0,
+        tokensUsed: 0,
+        metadata: { validated: validation.validated, status: validation.status },
+      });
     }
 
     const alloyAgent = AGENT_REGISTRY.find(a => a.id === "alloy")!;
@@ -1317,16 +1471,64 @@ ${validation ? `## Sentinel Validation\nValidated: ${validation.validated}\nNote
 Synthesize these domain expert responses into a unified, actionable answer. Prioritize higher-confidence responses. When causal chains are identified, connect the dots across domains and surface cascading implications. When agent conflicts exist, present the strongest position with a note on the dissenting view. Be direct and operational.`;
 
     let synthesis = "";
+    let synthesisTokens = 0;
     try {
+      const alloyModel = budgetManager.getModelForBudget(alloyAgent.preferredModel, workflowId, options.orgId).model;
       const synthResult = await openai.chat.completions.create({
-        model: alloyAgent.preferredModel,
+        model: alloyModel,
         max_completion_tokens: 4096,
         messages: [{ role: "user", content: aggregationPrompt }],
       });
       synthesis = synthResult.choices[0]?.message?.content ?? "";
+      synthesisTokens = synthResult.usage?.total_tokens ?? 0;
+      budgetManager.recordSpend(workflowId, "alloy", alloyModel, synthesisTokens, options.orgId);
     } catch {
       synthesis = agentResponses.map(r => `${r.agentName}: ${r.response}`).join("\n\n");
     }
+
+    behavioralTracer.recordFork(traceId, {
+      parentForkId: null,
+      forkType: "synthesis",
+      agentId: "alloy",
+      agentName: "Alloy",
+      domain: "orchestration",
+      inputContext: "Synthesizing domain agent responses",
+      decision: "Unified synthesis produced",
+      output: synthesis.slice(0, 300),
+      alternatives: [],
+      confidence: Math.round(agentResponses.reduce((s, r) => s + r.confidence, 0) / Math.max(1, agentResponses.length)),
+      latencyMs: 0,
+      tokensUsed: synthesisTokens,
+      metadata: { isHighStakes, validationStatus: validation?.status },
+    });
+
+    const completedTrace = behavioralTracer.endTrace(traceId, "completed");
+
+    const totalTokens = agentResponses.reduce((s, r) => s + (r.tokensUsed ?? 0), 0) + synthesisTokens;
+    const totalLatencyMs = Date.now() - orchestrationStartTime;
+
+    const trajectory = trajectoryStore.capture({
+      query,
+      agentRouting: agentResponses.map(r => ({
+        agentId: r.agentId,
+        agentName: r.agentName,
+        domain: r.domain,
+        tokensUsed: r.tokensUsed ?? 0,
+        latencyMs: r.latencyMs ?? 0,
+        confidence: r.confidence,
+        success: r.confidence > 0,
+        response: r.response.slice(0, 200),
+      })),
+      finalSynthesis: synthesis,
+      averageConfidence: Math.round(agentResponses.reduce((s, r) => s + r.confidence, 0) / Math.max(1, agentResponses.length)),
+      totalTokens,
+      totalLatencyMs,
+      isHighStakes,
+      validationPassed: validation?.validated ?? true,
+      validationNotes: validation?.validatorNotes ?? "",
+      orgId: options.orgId,
+      metadata: { workflowId, traceId },
+    });
 
     try {
       if (synthesis.length > 100) {
@@ -1383,6 +1585,17 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       }
     }
 
+    try {
+      await rlMemoryManager.store(
+        "alloy",
+        `Orchestration: "${query.slice(0, 80)}" → ${targetAgents.map(a => a.name).join(", ")} → ${synthesis.slice(0, 150)}`,
+        "procedural",
+        targetAgents.map(a => a.domain),
+        Math.round(agentResponses.reduce((s, r) => s + r.confidence, 0) / Math.max(1, agentResponses.length) / 10),
+        { workflowId, agentCount: targetAgents.length, isHighStakes },
+      );
+    } catch {}
+
     const averageConfidence = Math.round(
       agentResponses.reduce((sum, r) => sum + r.confidence, 0) / agentResponses.length
     );
@@ -1406,7 +1619,7 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
             targetAgent,
             activation.suggestedQuery,
             `${context}\n\n[PROACTIVE ACTIVATION] ${activation.reason}\nCorrelated signals: ${activation.correlatedSignals.map(s => `${s.sourceDomain}: ${s.signal}`).join(", ")}`,
-            { orgId: options.orgId ?? null, action: "proactive_activation", callerUserId: options.callerUserId ?? null, callerRoles: options.callerRoles ?? [] },
+            { orgId: options.orgId ?? null, action: "proactive_activation", callerUserId: options.callerUserId ?? null, callerRoles: options.callerRoles ?? [], workflowId, traceId },
           );
           proactiveResponses.push(proactiveResult);
         } catch {}
@@ -1431,7 +1644,20 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       tokensBurned: agentResponses.reduce((sum, r) => sum + (r.tokensUsed ?? 0), 0),
     };
 
-    return { agentResponses, synthesis, validation, averageConfidence, isHighStakes, routingScores, telemetry };
+    const budgetStatus = budgetManager.getBudgetStatus(workflowId, options.orgId);
+
+    return {
+      agentResponses,
+      synthesis,
+      validation,
+      averageConfidence,
+      isHighStakes,
+      routingScores,
+      telemetry,
+      traceId,
+      trajectoryId: trajectory.trajectoryId,
+      budgetStatus,
+    };
   }
 }
 
