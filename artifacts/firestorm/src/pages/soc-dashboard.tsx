@@ -9,6 +9,7 @@ import {
   TrendingUp, Bell, Crosshair, Network, Radio,
   BarChart3, Bug, FileText, Ticket, CheckCircle, Hexagon,
   GitBranch, Lock, Search, ListChecks, UserCheck, Grid,
+  DollarSign, ArrowUpRight,
 } from "lucide-react";
 import { PackBanner } from "@/components/pack-banner";
 
@@ -124,6 +125,82 @@ const CROSS_CORRELATIONS = [
     detail: "CVE-2024-3400 on FW-EDGE-01 is a managed asset under Apex Logistics SLA. Unpatched state violates NIST 800-53 SI-2.",
   },
 ];
+
+/* Breach Exposure Meter — real-time financial exposure from active threats */
+const ACTIVE_THREAT_EXPOSURE = [
+  { id: "INC-2847", label: "APT29 Lateral Movement", severity: "critical", total: 17_350_000, components: { reg: 3_200_000, interrupt: 4_800_000, data: 6_100_000, ir: 850_000, rep: 2_400_000 } },
+  { id: "CVE-3400", label: "Palo Alto FW CVE-2024-3400", severity: "critical", total: 9_620_000, components: { reg: 1_800_000, interrupt: 3_200_000, data: 2_900_000, ir: 620_000, rep: 1_100_000 } },
+  { id: "INC-2846", label: "APT29 C2 Beacon", severity: "high", total: 5_990_000, components: { reg: 900_000, interrupt: 1_800_000, data: 2_100_000, ir: 410_000, rep: 780_000 } },
+  { id: "ALT-5821", label: "Brute Force Campaign", severity: "high", total: 2_500_000, components: { reg: 420_000, interrupt: 680_000, data: 900_000, ir: 180_000, rep: 320_000 } },
+];
+const TOTAL_BREACH_EXPOSURE = ACTIVE_THREAT_EXPOSURE.reduce((s, t) => s + t.total, 0);
+const BREACH_EXPOSURE_MAX = 50_000_000;
+
+const EXPOSURE_SEV_COLORS: Record<string, string> = { critical: "#ef4444", high: "#f97316", medium: "#f59e0b" };
+
+function BreachExposureMeter() {
+  const pct = Math.min(100, (TOTAL_BREACH_EXPOSURE / BREACH_EXPOSURE_MAX) * 100);
+  const meterColor = pct > 60 ? "#ef4444" : pct > 35 ? "#f97316" : "#eab308";
+
+  function fmtM(n: number) {
+    if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+    return `$${(n / 1_000).toFixed(0)}K`;
+  }
+
+  return (
+    <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(239,68,68,0.18)", background: "rgba(239,68,68,0.03)" }}>
+      <div style={{ height: 2, background: `linear-gradient(90deg, ${meterColor}, #f97316, transparent)` }} />
+      <div className="px-4 py-3 border-b flex items-center gap-3" style={{ borderColor: "rgba(239,68,68,0.08)" }}>
+        <div className="w-6 h-6 rounded flex items-center justify-center shrink-0" style={{ background: "rgba(239,68,68,0.12)" }}>
+          <DollarSign className="w-3.5 h-3.5 text-red-400" />
+        </div>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-red-400">Breach Exposure Meter</span>
+        <span className="text-[9px] font-mono text-red-400/50 ml-auto">Live · {ACTIVE_THREAT_EXPOSURE.length} active threats</span>
+        <Link href="/breach-cost" className="flex items-center gap-1 text-[9px] text-red-400/70 hover:text-red-400 transition-colors">
+          Full analysis <ArrowUpRight className="w-3 h-3" />
+        </Link>
+      </div>
+      <div className="px-4 py-3">
+        {/* Meter bar */}
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-sm font-bold font-mono" style={{ color: meterColor }}>{fmtM(TOTAL_BREACH_EXPOSURE)}</span>
+          <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>{pct.toFixed(0)}% of $50M max insurable</span>
+        </div>
+        <div className="h-3 rounded-full overflow-hidden mb-3" style={{ background: "rgba(255,255,255,0.05)" }}>
+          {/* Segmented by threat */}
+          <div className="h-full flex rounded-full overflow-hidden">
+            {ACTIVE_THREAT_EXPOSURE.map((t, i) => (
+              <div
+                key={t.id}
+                title={`${t.label}: ${fmtM(t.total)}`}
+                className="h-full transition-all"
+                style={{
+                  width: `${(t.total / BREACH_EXPOSURE_MAX) * 100}%`,
+                  background: EXPOSURE_SEV_COLORS[t.severity],
+                  opacity: 0.7 + i * 0.08,
+                  borderRight: i < ACTIVE_THREAT_EXPOSURE.length - 1 ? "1px solid rgba(0,0,0,0.3)" : "none",
+                }}
+              />
+            ))}
+          </div>
+        </div>
+        {/* Threat breakdown row */}
+        <div className="grid grid-cols-4 gap-2">
+          {ACTIVE_THREAT_EXPOSURE.map(t => (
+            <div key={t.id} className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: EXPOSURE_SEV_COLORS[t.severity] }} />
+                <span className="text-[8px] font-mono truncate" style={{ color: "rgba(255,255,255,0.35)" }}>{t.id}</span>
+              </div>
+              <span className="text-[10px] font-bold font-mono" style={{ color: EXPOSURE_SEV_COLORS[t.severity] }}>{fmtM(t.total)}</span>
+              <span className="text-[8px] truncate" style={{ color: "rgba(255,255,255,0.25)" }}>{t.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /* MITRE ATT&CK heat map — simplified tactic/technique grid */
 const MITRE_TACTICS = [
@@ -408,6 +485,9 @@ export default function AegisUnifiedOverview() {
           </button>
         ))}
       </div>
+
+      {/* Breach Exposure Meter — financial impact of active threats */}
+      <BreachExposureMeter />
 
       {/* MITRE ATT&CK Heat Map — new addition */}
       <MitreHeatMap />

@@ -18,7 +18,7 @@ import {
   Play, LayoutDashboard, Ticket, Monitor, DollarSign, Wrench, Server,
   FlaskConical, Cpu, Cpu as CpuIcon, Network, Radio, Plus, Sun, Eye,
   Database, Trophy, Boxes, GitBranch, Link2, Flame, Menu, X, ChevronDown,
-  Hexagon, Zap, Briefcase, Globe, Sparkles
+  Hexagon, Zap, Briefcase, Globe, Sparkles, Crosshair
 } from "lucide-react";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { sentinelConfig } from "@szl-holdings/shared-ui/copilot-configs";
@@ -123,6 +123,12 @@ const Predictions = lazy(() => import("@/pages/intel/predictions"));
 const IntelProjects = lazy(() => import("@/pages/intel/projects"));
 const IntelInsights = lazy(() => import("@/pages/intel/insights"));
 
+const BreachCostPredictor = lazy(() => import("@/pages/breach-cost-predictor"));
+const PurpleTeam = lazy(() => import("@/pages/purple-team"));
+const CyberInsuranceScore = lazy(() => import("@/pages/cyber-insurance-score"));
+const AttackPathViz = lazy(() => import("@/pages/attack-path-viz"));
+const ThreatActorProfiling = lazy(() => import("@/pages/threat-actor-profiling"));
+
 const ThreatDesk = lazy(() => import("@/pages/threat-desk"));
 const AegisWhatChanged = lazy(() => import("@/pages/aegis-what-changed"));
 const ActionQueue = lazy(() => import("@/pages/action-queue"));
@@ -206,6 +212,11 @@ const securityNavSecondary = [
   { path: "/tradecraft", label: "Tradecraft Engine", icon: BrainIcon },
   { path: "/observability", label: "Observability", icon: Activity },
   { path: "/adversary-emulation", label: "Red Team Exercises", icon: Target },
+  { path: "/breach-cost", label: "Breach Cost Predictor", icon: DollarSign },
+  { path: "/purple-team", label: "Purple Team Simulation", icon: Crosshair },
+  { path: "/cyber-insurance", label: "Cyber Insurance Score", icon: ShieldCheck },
+  { path: "/attack-path", label: "Attack Path Visualization", icon: Network },
+  { path: "/threat-actors", label: "Threat Actor Profiling", icon: Users },
 ];
 
 const livingIntelNav = [
@@ -658,6 +669,12 @@ function AppRouter() {
         <Route path="/intel/predictions">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><Predictions /></RoleGate>}</Route>
         <Route path="/intel/projects">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><IntelProjects /></RoleGate>}</Route>
         <Route path="/intel/insights">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><IntelInsights /></RoleGate>}</Route>
+
+        <Route path="/breach-cost" component={BreachCostPredictor} />
+        <Route path="/purple-team" component={PurpleTeam} />
+        <Route path="/cyber-insurance" component={CyberInsuranceScore} />
+        <Route path="/attack-path" component={AttackPathViz} />
+        <Route path="/threat-actors" component={ThreatActorProfiling} />
 
         <Route path="/soc/threat-desk" component={ThreatDesk} />
         <Route path="/soc/what-changed" component={AegisWhatChanged} />
