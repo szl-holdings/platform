@@ -138,6 +138,13 @@ const DistOsSettings = lazy(() => import("@/pages/distribution-os/settings-page"
 const DistOsReports = lazy(() => import("@/pages/distribution-os/reports-page"));
 
 const VenturePortfolioPage = lazy(() => import("@/pages/venture-portfolio"));
+const VentureIntelHubPage = lazy(() => import("@/pages/venture-intel-hub"));
+const VentureIntelHealthRadarPage = lazy(() => import("@/pages/venture-intel/health-radar"));
+const VentureIntelCapitalOptimizerPage = lazy(() => import("@/pages/venture-intel/capital-optimizer"));
+const VentureIntelSynergyMapPage = lazy(() => import("@/pages/venture-intel/synergy-map"));
+const VentureIntelLpPortalPage = lazy(() => import("@/pages/venture-intel/lp-portal"));
+const VentureIntelMarketSignalsPage = lazy(() => import("@/pages/venture-intel/market-signals"));
+const VentureIntelExitModelerPage = lazy(() => import("@/pages/venture-intel/exit-modeler"));
 const AlloyFactoryFloor = lazy(() => import("@/alloy/pages/factory-floor"));
 const AlloyExecutionHistory = lazy(() => import("@/alloy/pages/execution-history"));
 const AlloyRunDetail = lazy(() => import("@/alloy/pages/run-detail"));
@@ -510,6 +517,29 @@ function App() {
             </Route>
             <Route path="/portfolio">
               <Suspense fallback={<PageLoader />}><PortfolioPage /></Suspense>
+            </Route>
+
+            {/* ── Venture Intelligence Portal ── */}
+            <Route path="/venture-intelligence/health-radar">
+              <Suspense fallback={<PageLoader />}><VentureIntelHealthRadarPage /></Suspense>
+            </Route>
+            <Route path="/venture-intelligence/capital-optimizer">
+              <Suspense fallback={<PageLoader />}><VentureIntelCapitalOptimizerPage /></Suspense>
+            </Route>
+            <Route path="/venture-intelligence/synergy-map">
+              <Suspense fallback={<PageLoader />}><VentureIntelSynergyMapPage /></Suspense>
+            </Route>
+            <Route path="/venture-intelligence/lp-portal">
+              <Suspense fallback={<PageLoader />}><VentureIntelLpPortalPage /></Suspense>
+            </Route>
+            <Route path="/venture-intelligence/market-signals">
+              <Suspense fallback={<PageLoader />}><VentureIntelMarketSignalsPage /></Suspense>
+            </Route>
+            <Route path="/venture-intelligence/exit-modeler">
+              <Suspense fallback={<PageLoader />}><VentureIntelExitModelerPage /></Suspense>
+            </Route>
+            <Route path="/venture-intelligence">
+              <Suspense fallback={<PageLoader />}><VentureIntelHubPage /></Suspense>
             </Route>
 
             {/* ── Product pages — accessible but not in primary nav ── */}
