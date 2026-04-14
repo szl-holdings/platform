@@ -1,5 +1,5 @@
 import { db } from "@szl-holdings/db";
-import { agentMemoryFacts, agentUsageStats, consciousnessSnapshotsTable, consciousnessMonologueTable, consciousnessEmotionalHistoryTable, consciousnessAgentProfilesTable } from "@szl-holdings/db";
+import { agentMemoryFacts, agentUsageStats, consciousnessSnapshotsTable, consciousnessMonologueTable, consciousnessEmotionalHistoryTable, consciousnessAgentProfilesTable, consciousnessGoalsTable } from "@szl-holdings/db";
 import { eq, desc, and, gt, sql } from "drizzle-orm";
 import { persistTelemetry } from "./innovation/telemetry-pipeline.js";
 import { runMultiHypothesisReasoning, isAmbiguousOrHighStakes } from "./innovation/multi-hypothesis.js";
@@ -637,7 +637,7 @@ export async function callAgent(
         max_completion_tokens: 2048,
         messages: [
           { role: "system", content: systemWithLearning },
-          { role: "user", content: `## Shared Context\n${context}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with: CONFIDENCE: [0-100]` },
+          { role: "user", content: `${focusedContext}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with: CONFIDENCE: [0-100]` },
         ],
       });
       response = result.choices[0]?.message?.content ?? "";
@@ -2018,6 +2018,29 @@ async function persistConsciousnessState(
       moodTrajectory: eState.moodTrajectory,
       triggeredValidation: triggeredValidation ? 1 : 0,
     });
+
+    const activeGoals = snapshot.goals.activeGoals ?? [];
+    for (const goal of activeGoals) {
+      await db.insert(consciousnessGoalsTable).values({
+        goalId: goal.goalId,
+        title: goal.title,
+        description: goal.description,
+        priority: goal.priority,
+        progress: goal.progress,
+        status: goal.status,
+        source: "orchestration",
+        relatedDomains: goal.tags ?? [],
+        metadata: JSON.parse(JSON.stringify({ successCriteria: goal.successCriteria, parentGoalId: goal.parentGoalId })),
+      }).onConflictDoUpdate({
+        target: consciousnessGoalsTable.goalId,
+        set: {
+          progress: goal.progress,
+          status: goal.status,
+          priority: goal.priority,
+          updatedAt: new Date(),
+        },
+      });
+    }
 
     for (const cap of snapshot.selfModel.capabilities) {
       const capJson = JSON.parse(JSON.stringify(cap));

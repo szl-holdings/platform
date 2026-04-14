@@ -9,6 +9,7 @@ import {
   emotionalSignals,
   temporalAwareness,
 } from "@szl-holdings/ai-engine";
+import { authMiddleware } from "../middlewares/auth";
 
 const router = Router();
 
@@ -24,25 +25,25 @@ function safeHandler(label: string, fn: (req: Request) => unknown) {
   };
 }
 
-router.get("/nuro-mesh/consciousness/snapshot", safeHandler("snapshot", () => captureConsciousnessSnapshot()));
+router.get("/nuro-mesh/consciousness/snapshot", authMiddleware(), safeHandler("snapshot", () => captureConsciousnessSnapshot()));
 
-router.get("/nuro-mesh/consciousness/metacognition", safeHandler("metacognition", () => metacognitiveMonitor.getState()));
+router.get("/nuro-mesh/consciousness/metacognition", authMiddleware(), safeHandler("metacognition", () => metacognitiveMonitor.getState()));
 
-router.get("/nuro-mesh/consciousness/self-model", safeHandler("self-model", () => selfModelEngine.getSelfModel()));
+router.get("/nuro-mesh/consciousness/self-model", authMiddleware(), safeHandler("self-model", () => selfModelEngine.getSelfModel()));
 
-router.get("/nuro-mesh/consciousness/workspace", safeHandler("workspace", () => cognitiveWorkspace.getState()));
+router.get("/nuro-mesh/consciousness/workspace", authMiddleware(), safeHandler("workspace", () => cognitiveWorkspace.getState()));
 
-router.get("/nuro-mesh/consciousness/monologue", safeHandler("monologue", (req) => {
+router.get("/nuro-mesh/consciousness/monologue", authMiddleware(), safeHandler("monologue", (req) => {
   const limit = Math.min(50, parseInt(String(req.query?.limit ?? "20"), 10));
   const state = innerMonologue.getState();
   state.recentThoughts = state.recentThoughts.slice(0, limit);
   return state;
 }));
 
-router.get("/nuro-mesh/consciousness/goals", safeHandler("goals", () => goalEngine.getState()));
+router.get("/nuro-mesh/consciousness/goals", authMiddleware(), safeHandler("goals", () => goalEngine.getState()));
 
-router.get("/nuro-mesh/consciousness/emotions", safeHandler("emotions", () => emotionalSignals.getState()));
+router.get("/nuro-mesh/consciousness/emotions", authMiddleware(), safeHandler("emotions", () => emotionalSignals.getState()));
 
-router.get("/nuro-mesh/consciousness/temporal", safeHandler("temporal", () => temporalAwareness.getState()));
+router.get("/nuro-mesh/consciousness/temporal", authMiddleware(), safeHandler("temporal", () => temporalAwareness.getState()));
 
 export default router;
