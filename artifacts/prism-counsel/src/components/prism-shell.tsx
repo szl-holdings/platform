@@ -79,6 +79,17 @@ const NAV: NavSection[] = [
     ],
   },
   {
+    label: "Predict",
+    items: [
+      { label: "Settlement Predictor", href: "/prism-counsel/predict/settlement", icon: TrendingUp },
+      { label: "Judge Analytics", href: "/prism-counsel/predict/judge-analytics", icon: Gavel },
+      { label: "Counsel Scouting", href: "/prism-counsel/predict/counsel-scouting", icon: Users },
+      { label: "Litigation Cost", href: "/prism-counsel/predict/litigation-cost", icon: DollarSign },
+      { label: "Case Strength", href: "/prism-counsel/predict/case-strength", icon: ShieldAlert },
+      { label: "Insurance Optimizer", href: "/prism-counsel/predict/insurance-optimizer", icon: Star },
+    ],
+  },
+  {
     label: "Section 31",
     items: [
       { label: "Worldline", href: "/prism-counsel/worldline", icon: Globe },

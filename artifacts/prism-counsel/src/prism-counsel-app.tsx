@@ -114,6 +114,13 @@ const S32CopilotWorkbenchV2 = lazy(() => import("./pages/s32/copilot-workbench-v
 const S32PurviewBridge = lazy(() => import("./pages/s32/purview-bridge-page"));
 const S32MatterDeskV2 = lazy(() => import("./pages/s32/matter-desk-v2"));
 
+const SettlementPredictorPage = lazy(() => import("./pages/settlement-predictor-page"));
+const JudgeAnalyticsPage = lazy(() => import("./pages/judge-analytics-page"));
+const CounselScoutingPage = lazy(() => import("./pages/counsel-scouting-page"));
+const LitigationCostPage = lazy(() => import("./pages/litigation-cost-page"));
+const CaseStrengthPage = lazy(() => import("./pages/case-strength-page"));
+const InsuranceOptimizerPage = lazy(() => import("./pages/insurance-optimizer-page"));
+
 const NyOverview = lazy(() => import("./pages/ny/ny-overview"));
 const NyDashboard = lazy(() => import("./pages/ny/ny-dashboard"));
 const NyWatchlist = lazy(() => import("./pages/ny/ny-watchlist"));
@@ -434,6 +441,25 @@ function PrismCounselRoutes() {
       </Route>
       <Route path="/prism-counsel/settlement-blockers-view">
         <Suspense fallback={<PageLoader />}><Wrap><S32SettlementBlockersView /></Wrap></Suspense>
+      </Route>
+
+      <Route path="/prism-counsel/predict/settlement">
+        <Suspense fallback={<PageLoader />}><Wrap><SettlementPredictorPage /></Wrap></Suspense>
+      </Route>
+      <Route path="/prism-counsel/predict/judge-analytics">
+        <Suspense fallback={<PageLoader />}><Wrap><JudgeAnalyticsPage /></Wrap></Suspense>
+      </Route>
+      <Route path="/prism-counsel/predict/counsel-scouting">
+        <Suspense fallback={<PageLoader />}><Wrap><CounselScoutingPage /></Wrap></Suspense>
+      </Route>
+      <Route path="/prism-counsel/predict/litigation-cost">
+        <Suspense fallback={<PageLoader />}><Wrap><LitigationCostPage /></Wrap></Suspense>
+      </Route>
+      <Route path="/prism-counsel/predict/case-strength">
+        <Suspense fallback={<PageLoader />}><Wrap><CaseStrengthPage /></Wrap></Suspense>
+      </Route>
+      <Route path="/prism-counsel/predict/insurance-optimizer">
+        <Suspense fallback={<PageLoader />}><Wrap><InsuranceOptimizerPage /></Wrap></Suspense>
       </Route>
 
       <Route path="/prism-counsel/ny/dashboard">
