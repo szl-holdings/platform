@@ -4,6 +4,10 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
+// Limit esbuild Go runtime threads to prevent OS thread exhaustion
+// when multiple Vite dev servers run simultaneously
+process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
+
 const port = Number(process.env.PORT) || 3000;
 const basePath = process.env.BASE_PATH || "/vessels/";
 
@@ -56,6 +60,9 @@ export default defineConfig({
         },
       },
     },
+  },
+  optimizeDeps: {
+    holdUntilCrawlEnd: true,
   },
   server: {
     port,

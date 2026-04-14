@@ -67,6 +67,15 @@ The platform consists of 13 interconnected applications sharing authentication a
 - **Platform Pulse:** Real-time ecosystem intelligence dashboard at `/pulse` showing animated constellation of all 16 platform apps, live agent neural mesh activity, cross-domain intelligence flow visualization, domain health matrix, and animated platform metrics (16 apps, 446 DB tables, 1,618+ endpoints, 12 active agents, 9 domains).
 - **Commercialization:** Includes dedicated pages for commercial packaging (`/packages`), ROI calculation (`/roi`), and relief-based messaging (`/relief`).
 
+## Ecosystem Audit Notes (Task #474)
+- All 9 web app Vite configs have `process.env.GOMAXPROCS = "2"` (limits esbuild threads per process) and `optimizeDeps.holdUntilCrawlEnd: true` to prevent OS thread exhaustion when 18+ dev servers run simultaneously.
+- `artifacts/alloy-mobile/` (ghost directory — only node_modules, no source) removed.
+- `artifacts/forge/` and `artifacts/inca-lab/` (unregistered dev experiments) removed.
+- All 7 Expo mobile apps standardized to `expo-notifications ~0.32.16` and `expo-device ~8.0.10`.
+- `artifacts/api-server/src/lib/startup-validation.ts` hardened: replaced `require("crypto")` with ESM `import { randomBytes }`, production now errors on missing/short `ALLOY_INTERNAL_TOKEN`.
+- `artifacts/api-server/src/lib/distribution-os-migrations.ts` created to apply `next_follow_up` column to `dos_leads` table (schema-to-DB drift fix).
+- `.npmrc` updated to use `${NODE_AUTH_TOKEN:-}` (empty fallback) to suppress NODE_AUTH_TOKEN warning when not set.
+
 ## External Dependencies
 - **Database:** PostgreSQL
 - **Authentication:** Replit Auth

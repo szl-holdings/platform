@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { logger } from "./logger";
 
 interface EnvVarSpec {
@@ -28,7 +29,7 @@ const ENV_SPECS: EnvVarSpec[] = [
   { key: "REPL_ID", required: false, description: "Replit deployment REPL_ID used for OIDC client ID", group: "auth" },
   { key: "ISSUER_URL", required: false, description: "OIDC issuer URL (defaults to https://replit.com/oidc)", group: "auth" },
 
-  { key: "ALLOY_INTERNAL_TOKEN", required: false, description: "Internal admin token for AlloyChat admin context (enables privileged agent access)", sensitive: true, group: "alloy" },
+  { key: "ALLOY_INTERNAL_TOKEN", required: false, description: "Internal admin token for AlloyChat admin context (enables privileged agent access) — must be 32+ chars", sensitive: true, group: "alloy" },
 
   { key: "STRIPE_SECRET_KEY", required: false, description: "Stripe secret key for payment processing", sensitive: true, group: "billing" },
 
@@ -93,18 +94,27 @@ export function validateStartupConfig(): ValidationResult {
     warnings.push("SERVICE_ROLE_KEY not set — machine-to-machine calls requiring admin bypass will fail");
   }
 
-  if (!process.env.ALLOY_INTERNAL_TOKEN) {
-    const generated = require("crypto").randomBytes(48).toString("hex");
-    process.env.ALLOY_INTERNAL_TOKEN = generated;
-    warnings.push("ALLOY_INTERNAL_TOKEN not set — auto-generated a secure 96-char token for this session");
-  } else if (process.env.ALLOY_INTERNAL_TOKEN.length < 32) {
-    const generated = require("crypto").randomBytes(48).toString("hex");
-    process.env.ALLOY_INTERNAL_TOKEN = generated;
-    warnings.push("ALLOY_INTERNAL_TOKEN was too short (< 32 characters) — auto-generated a secure 96-char token for this session");
+  const alloyToken = process.env.ALLOY_INTERNAL_TOKEN;
+  if (!alloyToken) {
+    if (isProduction) {
+      errors.push("ALLOY_INTERNAL_TOKEN is not set — this is required in production. Set a secure 32+ character secret.");
+    } else {
+      const generated = randomBytes(48).toString("hex");
+      process.env.ALLOY_INTERNAL_TOKEN = generated;
+      warnings.push("ALLOY_INTERNAL_TOKEN not set — auto-generated a secure 96-char token for this session (set a permanent secret for production)");
+    }
+  } else if (alloyToken.length < 32) {
+    if (isProduction) {
+      errors.push(`ALLOY_INTERNAL_TOKEN is too short (${alloyToken.length} chars, minimum 32) — replace with a secure 32+ character secret.`);
+    } else {
+      const generated = randomBytes(48).toString("hex");
+      process.env.ALLOY_INTERNAL_TOKEN = generated;
+      warnings.push("ALLOY_INTERNAL_TOKEN was too short (< 32 characters) — auto-generated a secure 96-char token for this session (set a permanent secret for production)");
+    }
   }
 
   if (!process.env.OAUTH_STATE_SECRET) {
-    const generated = require("crypto").randomBytes(32).toString("hex");
+    const generated = randomBytes(32).toString("hex");
     process.env.OAUTH_STATE_SECRET = generated;
     warnings.push("OAUTH_STATE_SECRET not set — auto-generated a secure 64-char secret for this session");
   }

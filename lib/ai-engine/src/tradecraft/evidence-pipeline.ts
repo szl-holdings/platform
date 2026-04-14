@@ -176,7 +176,7 @@ export class EvidencePipeline {
       const rows = await db
         .select()
         .from(alloyEvidenceIndex)
-        .orderBy(desc(alloyEvidenceIndex.updatedAt))
+        .orderBy(desc(alloyEvidenceIndex.entryTimestamp))
         .limit(10000);
 
       for (const row of rows) {

@@ -23,6 +23,7 @@ import { ensureTerraActionItemsTable } from "./lib/terra-action-items-migration"
 import { ensureTradecraftTables } from "./lib/tradecraft-migrations";
 import { ensureOutcomeGraphTables } from "./lib/outcome-graph-migrations";
 import { ensureCognitiveLearningTables } from "./lib/cognitive-learning-migrations";
+import { ensureDistributionOsTables } from "./lib/distribution-os-migrations";
 import "./lib/terra-nyc-ingestion";
 import { scheduleNycIngestionJob } from "./lib/terra-nyc-ingestion";
 import "./lib/terra-nyc-extended-ingestion";
@@ -133,6 +134,7 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     .then(() => ensureTradecraftTables())
     .then(() => ensureOutcomeGraphTables())
     .then(() => ensureCognitiveLearningTables())
+    .then(() => ensureDistributionOsTables())
     .then(() => ensurePlatformFlags())
     .then(() => knowledgeStore.loadFromDb())
     .then(() => {

@@ -62,8 +62,8 @@
     "@szl-holdings/mobile-shared": "workspace:*"
   },
   "dependencies": {
-    "expo-device": "^55.0.10",
-    "expo-notifications": "~0.29.14",
+    "expo-device": "~8.0.10",
+    "expo-notifications": "~0.32.16",
     "@szl-holdings/prism-bus": "workspace:*"
   }
 }
