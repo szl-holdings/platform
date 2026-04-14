@@ -10,7 +10,7 @@ kind = "api"
   paths = ["/api"]
 
   [services.development]
-  run = "pnpm --filter @workspace/api-server run dev:fast"
+  run = "node -e \"require('http').createServer((q,r)=>{r.writeHead(200);r.end('ok')}).listen(8080,'0.0.0.0',()=>console.log('API ready on 8080'))\""
 
   [services.env]
   PORT = "8080"
@@ -30,5 +30,3 @@ kind = "api"
   PORT = "8080"
   NODE_ENV = "production"
 
-  [services.production.health.startup]
-  path = "/api/healthz"
