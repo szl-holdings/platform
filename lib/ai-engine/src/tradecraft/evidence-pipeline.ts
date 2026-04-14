@@ -61,8 +61,9 @@ function scoreFreshness(timestamp: string | null): { freshness: EvidenceIndexEnt
 }
 
 function cosineSimilarity(a: number[], b: number[]): number {
+  if (a.length !== b.length) return 0;
   let dot = 0, magA = 0, magB = 0;
-  for (let i = 0; i < Math.min(a.length, b.length); i++) {
+  for (let i = 0; i < a.length; i++) {
     dot += a[i]! * b[i]!;
     magA += a[i]! * a[i]!;
     magB += b[i]! * b[i]!;
@@ -110,14 +111,101 @@ function buildQueryEmbedding(query: string): number[] {
   return buildTfIdfEmbedding(query);
 }
 
+async function generateNeuralEmbedding(text: string): Promise<number[] | null> {
+  try {
+    const { openai } = await import("@szl-holdings/integrations-openai-ai-server");
+    const response = await openai.embeddings.create({
+      model: "text-embedding-3-small",
+      input: text.slice(0, 8000),
+    });
+    return response.data[0]?.embedding ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function persistEntryToDb(entry: EvidenceIndexEntry): Promise<void> {
+  try {
+    const { db, alloyEvidenceIndex } = await import("@szl-holdings/db");
+    await db.insert(alloyEvidenceIndex).values({
+      id: entry.id,
+      caseId: entry.caseId,
+      incidentId: entry.incidentId,
+      source: entry.source,
+      sourceType: entry.sourceType,
+      title: entry.title,
+      content: entry.content.slice(0, 4000),
+      tags: entry.tags,
+      freshness: entry.freshness,
+      entryTimestamp: entry.timestamp,
+      objectId: entry.objectId,
+      relevanceBoost: entry.relevanceBoost,
+      embedding: entry.embedding ? (entry.embedding as unknown as Record<string, unknown>) : null,
+      updatedAt: new Date(),
+    }).onConflictDoUpdate({
+      target: alloyEvidenceIndex.id,
+      set: {
+        content: entry.content.slice(0, 4000),
+        freshness: entry.freshness,
+        relevanceBoost: entry.relevanceBoost,
+        embedding: entry.embedding ? (entry.embedding as unknown as Record<string, unknown>) : null,
+        updatedAt: new Date(),
+      },
+    });
+  } catch {
+  }
+}
+
 export class EvidencePipeline {
   private index: EvidenceIndexEntry[] = [];
   private static readonly MAX_ENTRIES = 50000;
   private static readonly WEAK_RETRIEVAL_THRESHOLD = 0.2;
   private static readonly MIN_RESULTS_FOR_CONFIDENCE = 3;
+  private _hydrated = false;
 
   get totalIndexed(): number {
     return this.index.length;
+  }
+
+  async hydrateFromDb(): Promise<void> {
+    if (this._hydrated) return;
+    this._hydrated = true;
+    try {
+      const { db, alloyEvidenceIndex } = await import("@szl-holdings/db");
+      const { desc } = await import("drizzle-orm");
+      const rows = await db
+        .select()
+        .from(alloyEvidenceIndex)
+        .orderBy(desc(alloyEvidenceIndex.updatedAt))
+        .limit(10000);
+
+      for (const row of rows) {
+        const entry: EvidenceIndexEntry = {
+          id: row.id,
+          caseId: row.caseId,
+          incidentId: row.incidentId,
+          source: row.source,
+          sourceType: row.sourceType as EvidenceSourceType,
+          title: row.title,
+          content: row.content,
+          tags: row.tags,
+          freshness: row.freshness as EvidenceIndexEntry["freshness"],
+          timestamp: row.entryTimestamp ?? new Date().toISOString(),
+          objectId: row.objectId,
+          relevanceBoost: row.relevanceBoost,
+          embedding: row.embedding ? (row.embedding as number[]) : buildTfIdfEmbedding(`${row.title} ${row.content}`),
+        };
+        const existing = this.index.findIndex(e => e.id === entry.id);
+        if (existing >= 0) {
+          this.index[existing] = entry;
+        } else {
+          this.index.push(entry);
+        }
+      }
+      console.log(`[evidence-pipeline] Hydrated ${rows.length} entries from DB`);
+    } catch (err) {
+      console.warn("[evidence-pipeline] Hydration failed:", err);
+    }
   }
 
   ingestAlert(data: {
@@ -492,6 +580,18 @@ export class EvidencePipeline {
         this.index.splice(0, this.index.length - EvidencePipeline.MAX_ENTRIES);
       }
     }
+    void this.enrichWithNeuralEmbeddingAndPersist(entry);
+  }
+
+  private async enrichWithNeuralEmbeddingAndPersist(entry: EvidenceIndexEntry): Promise<void> {
+    const textForEmbedding = `${entry.title} ${entry.content.slice(0, 1000)}`;
+    const neural = await generateNeuralEmbedding(textForEmbedding);
+    if (neural) {
+      entry.embedding = neural;
+      const inMemory = this.index.find(e => e.id === entry.id);
+      if (inMemory) inMemory.embedding = neural;
+    }
+    await persistEntryToDb(entry);
   }
 
   setEmbedding(entryId: string, embedding: number[]): void {
@@ -499,7 +599,24 @@ export class EvidencePipeline {
     if (entry) entry.embedding = embedding;
   }
 
-  query(params: EvidenceQuery): EvidenceQueryResult {
+  /**
+   * Async retrieval using neural embeddings by default.
+   * Generates a neural query embedding (OpenAI text-embedding-3-small) and
+   * falls back to keyword-only retrieval if the embedding call fails.
+   * Callers should always prefer this over querySync() for best ranking quality.
+   */
+  async query(params: EvidenceQuery): Promise<EvidenceQueryResult> {
+    const neuralEmbedding = params.embedding ?? (await generateNeuralEmbedding(params.query)) ?? undefined;
+    return this.querySync({ ...params, embedding: neuralEmbedding });
+  }
+
+  /**
+   * Synchronous retrieval. Uses TF-IDF query vector unless an explicit embedding
+   * is passed. Neural-embedded index entries will not be semantically scored
+   * (dimension mismatch yields 0); keyword scoring still operates.
+   * Prefer query() for full semantic retrieval quality.
+   */
+  querySync(params: EvidenceQuery): EvidenceQueryResult {
     const start = Date.now();
     const { query, caseId, incidentId, sourceTypes, maxResults = 15, minRelevance = 0.0 } = params;
     const queryEmbedding = params.embedding ?? buildQueryEmbedding(query);
@@ -558,12 +675,19 @@ export class EvidencePipeline {
     return {
       entries: results,
       totalIndexed: this.index.length,
-      method: params.embedding ? "hybrid" : (this.index.some(e => e.embedding) ? "hybrid" : "keyword"),
+      method: params.embedding ? "hybrid" : (this.index.some(e => e.embedding && e.embedding.length > 200) ? "hybrid" : "keyword"),
       confidenceDowngraded,
       confidenceDowngradeReason,
       weakRetrievalWarning,
       latencyMs: Date.now() - start,
     };
+  }
+
+  /**
+   * @deprecated Use query() directly — it now generates neural embeddings by default.
+   */
+  async queryWithNeuralEmbedding(params: EvidenceQuery): Promise<EvidenceQueryResult> {
+    return this.query(params);
   }
 
   private querySemantic(pool: EvidenceIndexEntry[], embedding: number[], topK: number): Array<EvidenceIndexEntry & { score: number }> {
@@ -614,9 +738,11 @@ export class EvidencePipeline {
     for (const e of this.index) {
       byType[e.sourceType] = (byType[e.sourceType] || 0) + 1;
     }
+    const withNeuralEmbeddings = this.index.filter(e => e.embedding && e.embedding.length > 200).length;
     return {
       totalEntries: this.index.length,
       withEmbeddings: this.index.filter(e => e.embedding).length,
+      withNeuralEmbeddings,
       bySourceType: byType,
     };
   }

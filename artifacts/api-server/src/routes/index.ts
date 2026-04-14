@@ -118,6 +118,7 @@ import atlasRouter from "./atlas-artifacts";
 import helmRouter from "./helm-console";
 import telemetryRouter from "./telemetry";
 import crossAppHandoffsRouter from "./cross-app-handoffs";
+import alloyCognitiveLearningRouter from "./alloy-cognitive-learning";
 
 const router: IRouter = Router();
 
@@ -444,5 +445,9 @@ router.use(telemetryRouter);
 router.use("/cross-app", _readLimiter);
 router.use("/cross-app", _writeLimiter);
 router.use(crossAppHandoffsRouter);
+
+router.use("/alloy/cognitive", _readLimiter);
+router.use("/alloy/cognitive", _writeLimiter);
+router.use(alloyCognitiveLearningRouter);
 
 export default router;

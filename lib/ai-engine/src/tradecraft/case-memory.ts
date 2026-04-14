@@ -77,8 +77,53 @@ export interface DecisionDiff {
   summary: string;
 }
 
+async function persistCaseToDb(entry: CaseMemoryEntry): Promise<void> {
+  try {
+    const { db, alloyCaseMemory } = await import("@szl-holdings/db");
+    await db.insert(alloyCaseMemory).values({
+      caseId: entry.caseId,
+      snapshot: entry as unknown as Record<string, unknown>,
+      updatedAt: new Date(),
+    }).onConflictDoUpdate({
+      target: alloyCaseMemory.caseId,
+      set: {
+        snapshot: entry as unknown as Record<string, unknown>,
+        updatedAt: new Date(),
+      },
+    });
+  } catch {
+  }
+}
+
+async function loadCasesFromDb(): Promise<CaseMemoryEntry[]> {
+  try {
+    const { db, alloyCaseMemory } = await import("@szl-holdings/db");
+    const rows = await db.select().from(alloyCaseMemory);
+    return rows.map(r => r.snapshot as unknown as CaseMemoryEntry);
+  } catch {
+    return [];
+  }
+}
+
 export class CaseMemoryStore {
   private store = new Map<string, CaseMemoryEntry>();
+  private _hydrated = false;
+
+  async hydrateFromDb(): Promise<void> {
+    if (this._hydrated) return;
+    this._hydrated = true;
+    try {
+      const entries = await loadCasesFromDb();
+      for (const entry of entries) {
+        this.store.set(entry.caseId, entry);
+      }
+      if (entries.length > 0) {
+        console.log(`[case-memory] Hydrated ${entries.length} cases from DB`);
+      }
+    } catch (err) {
+      console.warn("[case-memory] Hydration failed:", err);
+    }
+  }
 
   getOrCreate(caseId: string, incidentId: string | null = null): CaseMemoryEntry {
     if (!this.store.has(caseId)) {
@@ -153,6 +198,18 @@ export class CaseMemoryStore {
     memory.summary.pendingApprovals = memory.decisions.filter(d => d.approvalRequired).length;
     memory.summary.humanReviewRequired = memory.decisions.some(d => d.humanReviewRequired);
     memory.lifecycle.lastUpdatedAt = now;
+
+    void persistCaseToDb(memory);
+
+    void this.runPatternDetectionAfterDecision();
+  }
+
+  private async runPatternDetectionAfterDecision(): Promise<void> {
+    try {
+      const { runPatternDetectionAndStore } = await import("../learning/pattern-detector.js");
+      await runPatternDetectionAndStore(this.getAll());
+    } catch {
+    }
   }
 
   recordNote(
@@ -170,6 +227,7 @@ export class CaseMemoryStore {
       createdAt: new Date().toISOString(),
     });
     memory.lifecycle.lastUpdatedAt = new Date().toISOString();
+    void persistCaseToDb(memory);
   }
 
   transitionPhase(caseId: string, newPhase: CaseMemoryEntry["lifecycle"]["phase"], changedBy: string): void {
@@ -192,6 +250,7 @@ export class CaseMemoryStore {
       changedAt: now,
       decisionObjectId: null,
     });
+    void persistCaseToDb(memory);
   }
 
   computeDecisionDiff(caseId: string, currentDecision: AnyDecisionObject): DecisionDiff {

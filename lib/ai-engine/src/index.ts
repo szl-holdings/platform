@@ -46,6 +46,20 @@ export { AlloyRetrievalEngine, alloyRetrieval, type RetrievalChunk, type Retriev
 export { GOLDEN_SET } from "./evals/golden-set.js";
 export { runEvals, type EvalResult, type EvalReport } from "./evals/run-evals.js";
 
+export { startScheduledEvals, stopScheduledEvals, persistEvalReport, getLatestEvalReport, getEvalHistory, computeAgentCalibrations } from "./learning/eval-pipeline.js";
+export { recordOutcome, getRelevantOutcomes, getConfidenceCalibration, buildCalibrationInstruction, type OutcomeRecord, type OutcomeType, type ConfidenceCalibration } from "./learning/outcome-learning.js";
+export { storeCorrection, getRelevantCorrections, type CorrectionRecord } from "./learning/agent-corrections.js";
+export { detectCrossPatterns, runPatternDetectionAndStore } from "./learning/pattern-detector.js";
+
+export async function startCognitiveLearning(): Promise<void> {
+  const { evidencePipeline } = await import("./tradecraft/evidence-pipeline.js");
+  const { caseMemory } = await import("./tradecraft/case-memory.js");
+  const { startScheduledEvals: _startScheduledEvals } = await import("./learning/eval-pipeline.js");
+  await evidencePipeline.hydrateFromDb();
+  await caseMemory.hydrateFromDb();
+  await _startScheduledEvals();
+}
+
 export {
   createAlloyDecision,
   validateAlloyDecision,

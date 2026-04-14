@@ -21,6 +21,7 @@ import { ensureFeedbackTables } from "./lib/feedback-migrations";
 import { ensureTerraActionItemsTable } from "./lib/terra-action-items-migration";
 import { ensureTradecraftTables } from "./lib/tradecraft-migrations";
 import { ensureOutcomeGraphTables } from "./lib/outcome-graph-migrations";
+import { ensureCognitiveLearningTables } from "./lib/cognitive-learning-migrations";
 import "./lib/terra-nyc-ingestion";
 import { scheduleNycIngestionJob } from "./lib/terra-nyc-ingestion";
 import "./lib/terra-nyc-extended-ingestion";
@@ -114,6 +115,10 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
   });
   scheduleIntelligenceRefresh();
 
+  import("@szl-holdings/ai-engine")
+    .then(({ startCognitiveLearning }) => startCognitiveLearning())
+    .catch(err => logger.warn({ err }, "[cognitive] Cognitive learning startup failed (non-fatal)"));
+
   ensureAlloyTables()
     .then(() => ensureAlloyGovernanceTables())
     .then(() => ensurePlatformOpsTables())
@@ -123,6 +128,7 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     .then(() => ensureTerraActionItemsTable())
     .then(() => ensureTradecraftTables())
     .then(() => ensureOutcomeGraphTables())
+    .then(() => ensureCognitiveLearningTables())
     .then(() => ensurePlatformFlags())
     .then(() => knowledgeStore.loadFromDb())
     .then(() => {

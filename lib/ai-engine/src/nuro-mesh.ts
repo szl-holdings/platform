@@ -1,6 +1,6 @@
 import { db } from "@szl-holdings/db";
 import { agentMemoryFacts, agentUsageStats } from "@szl-holdings/db";
-import { eq, desc, and, gt } from "drizzle-orm";
+import { eq, desc, and, gt, sql } from "drizzle-orm";
 import { openai } from "@szl-holdings/integrations-openai-ai-server";
 import { anthropic } from "@szl-holdings/integrations-anthropic-ai";
 import { ai as geminiAi } from "@szl-holdings/integrations-gemini-ai";
@@ -132,15 +132,11 @@ async function checkGovernanceEnforce(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // Must match the header name in auth middleware (x-internal-token)
         ...(ALLOY_TOKEN ? { "x-internal-token": ALLOY_TOKEN } : {}),
       },
-      // Pass caller's identity so /enforce evaluates agent_permission against
-      // the actual end-user's roles, not the super_admin service principal
       body: JSON.stringify({ orgId, action, model, agentId: agent.id, callerUserId, callerRoles }),
     });
     if (!resp.ok) {
-      // Governance auth failure or endpoint error — fail closed for protected orgs
       return { allowed: false, reason: `Governance enforcement unavailable (HTTP ${resp.status}) — agent run blocked for safety` };
     }
     const data = await resp.json() as { allowed: boolean; hardBlocked?: boolean; requiresApproval?: boolean; approvalLevel?: string; violations?: Array<{ reason: string }> };
@@ -154,9 +150,34 @@ async function checkGovernanceEnforce(
         : data.violations?.[0]?.reason,
     };
   } catch {
-    // Network error — fail closed for protected orgs to prevent governance bypass
     return { allowed: false, reason: "Governance enforcement unreachable — agent run blocked for safety" };
   }
+}
+
+async function getAgentLearningContext(agentId: string, query: string): Promise<string> {
+  const parts: string[] = [];
+  try {
+    const { getRelevantCorrections } = await import("./learning/agent-corrections.js");
+    const corrections = await getRelevantCorrections(agentId, query);
+    if (corrections) parts.push(corrections);
+  } catch (err) {
+    console.warn("[nuro-mesh] getRelevantCorrections failed", err);
+  }
+  try {
+    const { getRelevantOutcomes } = await import("./learning/outcome-learning.js");
+    const outcomes = await getRelevantOutcomes(agentId, query);
+    if (outcomes) parts.push(outcomes);
+  } catch (err) {
+    console.warn("[nuro-mesh] getRelevantOutcomes failed", err);
+  }
+  try {
+    const { buildCalibrationInstruction } = await import("./learning/outcome-learning.js");
+    const calibration = await buildCalibrationInstruction(agentId);
+    if (calibration) parts.push(calibration);
+  } catch (err) {
+    console.warn("[nuro-mesh] buildCalibrationInstruction failed", err);
+  }
+  return parts.join("\n\n");
 }
 
 export async function callAgent(
@@ -170,7 +191,6 @@ export async function callAgent(
   let tokensUsed = 0;
   let success = false;
 
-  // Governance enforcement — check model routing + cost controls before calling
   const enforcement = await checkGovernanceEnforce(
     agent,
     agent.preferredModel,
@@ -191,7 +211,10 @@ export async function callAgent(
     };
   }
 
-  const fullPrompt = `${agent.systemPrompt}\n\n## Shared Context from Nuro Mesh\n${context}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with a confidence score (0-100) on a new line in format: CONFIDENCE: [score]`;
+  const learningContext = await getAgentLearningContext(agent.id, query);
+  const learningSection = learningContext ? `\n\n${learningContext}` : "";
+
+  const fullPrompt = `${agent.systemPrompt}${learningSection}\n\n## Shared Context from Nuro Mesh\n${context}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with a confidence score (0-100) on a new line in format: CONFIDENCE: [score]`;
 
   try {
     if (agent.preferredProvider === "anthropic") {
@@ -204,11 +227,12 @@ export async function callAgent(
       tokensUsed = (result.usage.input_tokens + result.usage.output_tokens);
       success = true;
     } else if (agent.preferredProvider === "openai") {
+      const systemWithLearning = `${agent.systemPrompt}${learningSection}`;
       const result = await openai.chat.completions.create({
         model: agent.preferredModel,
         max_completion_tokens: 2048,
         messages: [
-          { role: "system", content: agent.systemPrompt },
+          { role: "system", content: systemWithLearning },
           { role: "user", content: `## Shared Context\n${context}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with: CONFIDENCE: [0-100]` },
         ],
       });
@@ -272,6 +296,8 @@ export async function runMakerChecker(
   primaryOutput: string,
   context: string,
   validatorAgent: AgentDefinition = AGENT_REGISTRY.find(a => a.id === "sentinel")!,
+  sourceAgentId?: string,
+  query?: string,
 ): Promise<ValidationResult> {
   const validationPrompt = `You are performing a maker-checker validation. Review the following AI-generated recommendation for accuracy, risks, and potential issues.
 
@@ -308,6 +334,10 @@ ADJUSTED_OUTPUT: [If approved or approved_with_notes, provide the final output (
     const notes = notesMatch?.[1]?.trim() ?? "";
     const adjustedOutput = outputMatch?.[1]?.trim() ?? primaryOutput;
 
+    if (sourceAgentId && status !== "APPROVED") {
+      void storeAgentCorrectionAsync(sourceAgentId, validatorAgent.id, primaryOutput, adjustedOutput, notes, status, query ?? "");
+    }
+
     return {
       validated: status !== "REJECTED",
       validatorNotes: notes,
@@ -318,6 +348,32 @@ ADJUSTED_OUTPUT: [If approved or approved_with_notes, provide the final output (
     return { validated: true, validatorNotes: "Validation unavailable", adjustedOutput: primaryOutput, status: "APPROVED" };
   }
 }
+
+async function storeAgentCorrectionAsync(
+  sourceAgentId: string,
+  validatorAgentId: string,
+  originalOutput: string,
+  correctedOutput: string,
+  notes: string,
+  status: string,
+  query: string,
+): Promise<void> {
+  try {
+    const { storeCorrection } = await import("./learning/agent-corrections.js");
+    await storeCorrection({
+      sourceAgentId,
+      validatorAgentId,
+      originalOutput,
+      correctedOutput,
+      validationNotes: notes,
+      validationStatus: status as "APPROVED_WITH_NOTES" | "REJECTED",
+      query,
+    });
+  } catch {}
+}
+
+const PERMANENT_FACT_EXPIRY = new Date("2099-12-31T00:00:00Z");
+const PROMOTION_RETRIEVAL_THRESHOLD = 5;
 
 export async function getSharedContext(): Promise<string> {
   try {
@@ -330,9 +386,28 @@ export async function getSharedContext(): Promise<string> {
 
     if (facts.length === 0) return "No shared context available yet.";
 
-    return facts.map(f =>
-      `[${f.agentId.toUpperCase()}] ${f.factType.toUpperCase()}: ${f.content} (importance: ${f.importance}/10)`
-    ).join("\n");
+    for (const fact of facts) {
+      const newCount = (fact.retrievalCount ?? 0) + 1;
+      const shouldPromote = newCount >= PROMOTION_RETRIEVAL_THRESHOLD && fact.expiresAt < PERMANENT_FACT_EXPIRY;
+
+      if (shouldPromote) {
+        void db.update(agentMemoryFacts)
+          .set({ retrievalCount: newCount, expiresAt: PERMANENT_FACT_EXPIRY })
+          .where(eq(agentMemoryFacts.id, fact.id))
+          .catch(() => {});
+      } else {
+        void db.update(agentMemoryFacts)
+          .set({ retrievalCount: newCount })
+          .where(eq(agentMemoryFacts.id, fact.id))
+          .catch(() => {});
+      }
+    }
+
+    return facts.map(f => {
+      const permanent = f.expiresAt >= PERMANENT_FACT_EXPIRY;
+      const retrievals = f.retrievalCount ?? 0;
+      return `[${f.agentId.toUpperCase()}] ${f.factType.toUpperCase()}: ${f.content} (importance: ${f.importance}/10${permanent ? ", permanent" : ""}${retrievals > 0 ? `, retrieved ${retrievals}×` : ""})`;
+    }).join("\n");
   } catch {
     return "Context retrieval unavailable.";
   }
@@ -367,8 +442,6 @@ export class NuroMeshOrchestrator {
 
     if (targetAgents.length === 0) targetAgents = [AGENT_REGISTRY.find(a => a.id === "beacon")!];
 
-    // Propagate org context AND caller identity so every agent run passes through
-    // governance enforcement against the actual end-user, not the service principal
     const agentResponses = await Promise.all(
       targetAgents.map(agent => callAgent(agent, query, context, {
         orgId: options.orgId ?? null,
@@ -386,7 +459,8 @@ export class NuroMeshOrchestrator {
     let validation: ValidationResult | null = null;
     if (isHighStakes && agentResponses.length > 0) {
       const primaryOutput = agentResponses.map(r => `## ${r.agentName} (${r.domain})\n${r.response}`).join("\n\n");
-      validation = await runMakerChecker(primaryOutput, context);
+      const primaryAgentId = agentResponses[0]?.agentId;
+      validation = await runMakerChecker(primaryOutput, context, undefined, primaryAgentId, query);
     }
 
     const alloyAgent = AGENT_REGISTRY.find(a => a.id === "alloy")!;
@@ -427,6 +501,7 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
           content: `Query: "${query.slice(0, 100)}" — ${synthesis.slice(0, 300)}`,
           importance: Math.round(agentResponses.reduce((sum, r) => sum + r.confidence, 0) / agentResponses.length / 10),
           tags: targetAgents.map(a => a.domain),
+          retrievalCount: 0,
           expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         }).onConflictDoNothing();
       }
