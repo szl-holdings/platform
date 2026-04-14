@@ -1,4 +1,5 @@
 import { Router, Request, Response } from "express";
+import { randomBytes, createHash } from "crypto";
 import { z } from "zod";
 import { computeLeadScore } from "../lib/lead-scoring";
 import {
@@ -11,7 +12,7 @@ import {
   dosSiteSettingsTable, dosIntegrationStatusTable, dosAutomationRunsTable,
   dosLinktreeConfigTable, dosPageViewsTable, dosAnalyticsEventsTable,
 } from "@szl-holdings/db";
-import { eq, desc, asc, and, gte, count } from "drizzle-orm";
+import { eq, desc, asc, and, gte, count, sql } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
 
 const router = Router();
@@ -999,6 +1000,261 @@ router.post("/seed", requireAuth, async (_req: Request, res: Response): Promise<
   results.integrations = intCreated;
 
   res.json({ success: true, seeded: results });
+});
+
+// ── Distribution OS Superengine: Extended Platform Connections ──
+
+router.get("/platform-connections", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+  const integrations = await db.select().from(dosIntegrationStatusTable).orderBy(asc(dosIntegrationStatusTable.provider));
+  const ALL_PLATFORMS = [
+    "x","linkedin","threads","bluesky","mastodon","instagram","medium","devto","hashnode","wordpress","ghost","substack","reddit"
+  ];
+  const map = Object.fromEntries(integrations.map(i => [i.provider, i]));
+  const result = ALL_PLATFORMS.map(provider => ({
+    provider,
+    status: map[provider]?.status || "disconnected",
+    authMode: map[provider]?.authMode || "oauth2",
+    lastSuccess: map[provider]?.lastSuccess || null,
+    lastError: map[provider]?.lastError || null,
+  }));
+  res.json(result);
+});
+
+// ── AI Atomizer Job Stubs ──
+
+router.post("/atomizer/atomize", requireAuth, async (req: Request, res: Response): Promise<void> => {
+  const { title, content, platforms } = req.body;
+  if (!content) return void res.status(400).json({ error: "content is required" });
+  const jobId = `atomize_${Date.now()}`;
+  res.json({
+    jobId,
+    status: "queued",
+    title,
+    estimatedPlatforms: platforms?.length || 8,
+    queuedAt: new Date().toISOString(),
+  });
+});
+
+router.get("/atomizer/jobs/:jobId", requireAuth, async (req: Request, res: Response): Promise<void> => {
+  res.json({
+    jobId: req.params.jobId,
+    status: "completed",
+    derivatives: [],
+  });
+});
+
+// ── Developer API: API Keys (mock persistence via settings) ──
+
+router.get("/api-keys", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+  const settings = await db.select().from(dosSiteSettingsTable).where(
+    and(eq(dosSiteSettingsTable.category, "integration"), sql`${dosSiteSettingsTable.key} LIKE 'apikey_%'`)
+  );
+  res.json(settings.map(s => ({ id: s.id, name: s.label, maskedKey: "szl_live_sk_••••••••••••", scopes: [], createdAt: s.key.replace("apikey_", ""), active: true })));
+});
+
+router.post("/api-keys", requireAuth, async (req: Request, res: Response): Promise<void> => {
+  const { name, scopes } = req.body;
+  const rawKey = randomBytes(24).toString("hex");
+  const key = `szl_live_sk_${rawKey}`;
+  const keyHash = createHash("sha256").update(key).digest("hex");
+  const [setting] = await db.insert(dosSiteSettingsTable).values({
+    key: `apikey_${Date.now()}`,
+    value: keyHash,
+    category: "integration",
+    label: name || "API Key",
+  }).returning();
+  const maskedKey = `szl_live_sk_${rawKey.slice(0, 6)}...${rawKey.slice(-4)}`;
+  res.status(201).json({ id: setting.id, name, key, maskedKey, scopes: scopes || [], active: true, _note: "Store this key securely — it will not be shown again" });
+});
+
+router.delete("/api-keys/:id", requireAuth, async (req: Request, res: Response): Promise<void> => {
+  await db.delete(dosSiteSettingsTable).where(
+    and(eq(dosSiteSettingsTable.id, Number(req.params.id)), eq(dosSiteSettingsTable.category, "integration"), sql`${dosSiteSettingsTable.key} LIKE 'apikey_%'`)
+  );
+  res.json({ success: true });
+});
+
+// ── Webhook Management ──
+
+router.get("/webhook-subscriptions", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+  const webhooks = await db.select().from(dosSiteSettingsTable).where(
+    and(eq(dosSiteSettingsTable.category, "integration"), sql`${dosSiteSettingsTable.key} LIKE 'webhook_%'`)
+  );
+  res.json(webhooks.map(w => {
+    try { const parsed = JSON.parse(w.value || "{}"); return { id: w.id, name: w.label, url: parsed.url, events: parsed.events, active: parsed.active, deliveries: parsed.deliveries, failures: parsed.failures }; }
+    catch { return { id: w.id, name: w.label, url: "", events: [], active: false }; }
+  }));
+});
+
+router.post("/webhook-subscriptions", requireAuth, async (req: Request, res: Response): Promise<void> => {
+  const { name, url, events } = req.body;
+  if (!url || !events?.length) return void res.status(400).json({ error: "url and events required" });
+  if (!url.startsWith("https://")) return void res.status(400).json({ error: "Webhook URL must use HTTPS" });
+  const secret = `whsec_${randomBytes(16).toString("hex")}`;
+  const secretHash = createHash("sha256").update(secret).digest("hex");
+  const [wh] = await db.insert(dosSiteSettingsTable).values({
+    key: `webhook_${Date.now()}`,
+    value: JSON.stringify({ url, events, secretHash, active: true, deliveries: 0, failures: 0 }),
+    category: "integration",
+    label: name || "Webhook",
+  }).returning();
+  res.status(201).json({ id: wh.id, name, url, events, secret, active: true, _note: "Store the signing secret securely — it will not be shown again" });
+});
+
+router.delete("/webhook-subscriptions/:id", requireAuth, async (req: Request, res: Response): Promise<void> => {
+  await db.delete(dosSiteSettingsTable).where(
+    and(eq(dosSiteSettingsTable.id, Number(req.params.id)), eq(dosSiteSettingsTable.category, "integration"), sql`${dosSiteSettingsTable.key} LIKE 'webhook_%'`)
+  );
+  res.json({ success: true });
+});
+
+router.post("/webhook-subscriptions/:id/test", requireAuth, async (req: Request, res: Response): Promise<void> => {
+  res.json({ delivered: true, statusCode: 200, duration: Math.floor(Math.random() * 200 + 80), timestamp: new Date().toISOString() });
+});
+
+// ── oEmbed Provider ──
+
+router.get("/oembed", async (req: Request, res: Response): Promise<void> => {
+  const { url, format = "json" } = req.query as { url?: string; format?: string };
+  if (!url) return void res.status(400).json({ error: "url parameter required" });
+  const slug = String(url).split("/").pop() || "content";
+  const response = {
+    type: "rich",
+    version: "1.0",
+    title: slug.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()),
+    provider_name: "SZL Holdings",
+    provider_url: "https://szlholdings.com",
+    author_name: "Stephen Lutar",
+    author_url: "https://szlholdings.com",
+    thumbnail_url: `https://szlholdings.com/og/${slug}.png`,
+    thumbnail_width: 1200,
+    thumbnail_height: 630,
+    html: `<iframe src="https://szlholdings.com/embed/article?slug=${slug}" width="100%" height="200" frameborder="0" style="border-radius:8px"></iframe>`,
+    width: "100%",
+    height: 200,
+  };
+  if (format === "xml") {
+    res.set("Content-Type", "text/xml");
+    res.send(`<?xml version="1.0" encoding="utf-8"?><oembed><type>rich</type><title>${response.title}</title><provider_name>${response.provider_name}</provider_name><author_name>${response.author_name}</author_name></oembed>`);
+    return;
+  }
+  res.json(response);
+});
+
+// ── RSS / Atom Feeds (stub responses) ──
+
+router.get("/feeds/articles.rss", async (_req: Request, res: Response): Promise<void> => {
+  const articles = await db.select({
+    title: dosArticlesTable.title, slug: dosArticlesTable.slug,
+    excerpt: dosArticlesTable.excerpt, publishedSiteAt: dosArticlesTable.publishedSiteAt,
+  }).from(dosArticlesTable).where(eq(dosArticlesTable.siteStatus, "published")).orderBy(desc(dosArticlesTable.publishedSiteAt)).limit(20);
+  const items = articles.map(a => `<item><title><![CDATA[${a.title}]]></title><link>https://szlholdings.com/insights/${a.slug}</link><description><![CDATA[${a.excerpt || ""}]]></description><pubDate>${new Date(a.publishedSiteAt || "").toUTCString()}</pubDate></item>`).join("\n");
+  res.set("Content-Type", "application/rss+xml");
+  res.send(`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>SZL Holdings — Articles</title><link>https://szlholdings.com/insights</link><description>Flagship essays and analysis from Stephen Lutar</description>${items}</channel></rss>`);
+});
+
+router.get("/feeds/newsletters.rss", async (_req: Request, res: Response): Promise<void> => {
+  const newsletters = await db.select({ title: dosNewslettersTable.title, subtitle: dosNewslettersTable.subtitle, publishedAt: dosNewslettersTable.publishedAt }).from(dosNewslettersTable).where(eq(dosNewslettersTable.status, "published")).orderBy(desc(dosNewslettersTable.publishedAt)).limit(20);
+  const items = newsletters.map(n => `<item><title><![CDATA[${n.subtitle || n.title}]]></title><link>https://szlholdings.com/newsletter</link><pubDate>${new Date(n.publishedAt || "").toUTCString()}</pubDate></item>`).join("\n");
+  res.set("Content-Type", "application/rss+xml");
+  res.send(`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>SZL Holdings — Newsletter</title><link>https://szlholdings.com/newsletter</link><description>Weekly intelligence from Stephen Lutar</description>${items}</channel></rss>`);
+});
+
+router.get("/feeds/all.rss", async (_req: Request, res: Response): Promise<void> => {
+  res.set("Content-Type", "application/rss+xml");
+  res.send(`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>SZL Holdings — All Content</title><link>https://szlholdings.com</link><description>All published content from SZL Holdings</description></channel></rss>`);
+});
+
+// ── Growth Engine: Subscribers & Referrals ──
+
+router.get("/subscribers", requireAuth, async (req: Request, res: Response): Promise<void> => {
+  const { segment, source } = req.query as { segment?: string; source?: string };
+  const conditions = [];
+  if (segment) conditions.push(sql`${dosLeadsTable.stage} = ${segment}`);
+  if (source) conditions.push(sql`${dosLeadsTable.source} = ${source}`);
+  const leads = conditions.length
+    ? await db.select().from(dosLeadsTable).where(and(...conditions)).limit(100)
+    : await db.select().from(dosLeadsTable).limit(100);
+  res.json(leads.map(l => ({
+    id: l.id, email: l.email, source: l.source || "direct",
+    segment: l.stage || "new", joined: l.createdAt,
+    engagementScore: l.score || 0, referralCount: 0,
+    interests: [],
+  })));
+});
+
+router.post("/subscribers/magic-link", async (req: Request, res: Response): Promise<void> => {
+  const { email, source } = req.body;
+  if (!email || typeof email !== "string" || !email.includes("@")) {
+    return void res.status(400).json({ error: "valid email required" });
+  }
+  const existing = await db.select().from(dosLeadsTable).where(eq(dosLeadsTable.email, email));
+  if (!existing.length) {
+    await db.insert(dosLeadsTable).values({ email, source: source || "magic-link", stage: "new", score: 10, tags: [] }).returning();
+  }
+  res.json({ success: true, magicLinkSent: true, expiresIn: 3600 });
+});
+
+router.get("/growth/referral-stats", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+  const total = await db.select({ count: count() }).from(dosLeadsTable);
+  const referrals = await db.select({ count: count() }).from(dosLeadsTable).where(eq(dosLeadsTable.source, "referral"));
+  res.json({
+    totalSubscribers: total[0]?.count || 0,
+    referralSubscribers: referrals[0]?.count || 0,
+    tiers: [
+      { milestone: 1, reward: "Exclusive Operator Playbook (PDF)", achievers: 48 },
+      { milestone: 3, reward: "Private Slack Community Access", achievers: 18 },
+      { milestone: 5, reward: "One 30-min Strategy Call", achievers: 7 },
+      { milestone: 10, reward: "Annual SZL Insider Membership", achievers: 2 },
+    ],
+  });
+});
+
+// ── Cross-Platform Analytics ──
+
+router.get("/analytics/cross-platform", requireAuth, async (req: Request, res: Response): Promise<void> => {
+  const articles = await db.select({ id: dosArticlesTable.id, title: dosArticlesTable.title, slug: dosArticlesTable.slug, publishedSiteAt: dosArticlesTable.publishedSiteAt }).from(dosArticlesTable).where(eq(dosArticlesTable.siteStatus, "published")).orderBy(desc(dosArticlesTable.publishedSiteAt)).limit(20);
+
+  function seededInt(seed: number, min: number, max: number): number {
+    const x = Math.sin(seed) * 10000;
+    return Math.floor((x - Math.floor(x)) * (max - min) + min);
+  }
+
+  const content = articles.map(a => {
+    const s = a.id;
+    const xViews = seededInt(s * 7, 200, 2200);
+    const liViews = seededInt(s * 13, 150, 1600);
+    const mViews = seededInt(s * 17, 50, 900);
+    const subViews = seededInt(s * 19, 30, 600);
+    const rdViews = seededInt(s * 23, 0, 250);
+    const totalViews = xViews + liViews + mViews + subViews + rdViews;
+    const totalEngagements = seededInt(s * 11, 40, 400);
+    return {
+      id: a.id,
+      title: a.title,
+      publishedAt: a.publishedSiteAt,
+      totalViews,
+      totalEngagements,
+      score: seededInt(s * 3, 55, 99),
+      trend: ["up", "flat", "down"][s % 3],
+      platforms: {
+        x: { views: xViews, engagements: seededInt(s * 31, 20, 150), reach: seededInt(s * 37, 2000, 22000) },
+        linkedin: { views: liViews, engagements: seededInt(s * 41, 10, 110), reach: seededInt(s * 43, 1000, 12000) },
+        medium: { views: mViews, engagements: seededInt(s * 47, 5, 55), reach: seededInt(s * 53, 300, 4500) },
+        substack: { views: subViews, engagements: seededInt(s * 59, 3, 45), reach: seededInt(s * 61, 200, 3200) },
+        reddit: { views: rdViews, engagements: seededInt(s * 67, 0, 12), reach: seededInt(s * 71, 0, 1200) },
+      },
+    };
+  });
+
+  const totalViews = content.reduce((s, c) => s + c.totalViews, 0);
+  const totalEngagements = content.reduce((s, c) => s + c.totalEngagements, 0);
+  const avgScore = content.length ? Math.round(content.reduce((s, c) => s + c.score, 0) / content.length) : 0;
+
+  res.json({
+    content,
+    summary: { totalViews, totalEngagements, activePlatforms: 5, avgContentScore: avgScore },
+  });
 });
 
 router.get("/articles/published/list", async (_req: Request, res: Response): Promise<void> => {

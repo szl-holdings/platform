@@ -136,6 +136,12 @@ const DistOsAnalytics = lazy(() => import("@/pages/distribution-os/analytics-das
 const DistOsAutomations = lazy(() => import("@/pages/distribution-os/automations-page"));
 const DistOsSettings = lazy(() => import("@/pages/distribution-os/settings-page"));
 const DistOsReports = lazy(() => import("@/pages/distribution-os/reports-page"));
+const DistOsPlatforms = lazy(() => import("@/pages/distribution-os/platform-connections"));
+const DistOsAtomizer = lazy(() => import("@/pages/distribution-os/content-atomizer"));
+const DistOsEmbeds = lazy(() => import("@/pages/distribution-os/embeds-feeds"));
+const DistOsDeveloperApi = lazy(() => import("@/pages/distribution-os/developer-api"));
+const DistOsCrossAnalytics = lazy(() => import("@/pages/distribution-os/cross-platform-analytics"));
+const DistOsGrowth = lazy(() => import("@/pages/distribution-os/growth-engine"));
 
 const VenturePortfolioPage = lazy(() => import("@/pages/venture-portfolio"));
 const VentureIntelHubPage = lazy(() => import("@/pages/venture-intel-hub"));
@@ -896,6 +902,24 @@ function App() {
             </Route>
             <Route path="/admin/distribution/reports">
               <RequireAuth><Suspense fallback={<PageLoader />}><DistOsReports /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/platforms">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsPlatforms /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/atomizer">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsAtomizer /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/embeds">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsEmbeds /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/developer-api">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsDeveloperApi /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/cross-analytics">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsCrossAnalytics /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/growth">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsGrowth /></Suspense></RequireAuth>
             </Route>
             <Route path="/admin/distribution">
               <RequireAuth><Suspense fallback={<PageLoader />}><DistOsDashboard /></Suspense></RequireAuth>

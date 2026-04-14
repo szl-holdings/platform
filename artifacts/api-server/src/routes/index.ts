@@ -109,6 +109,7 @@ import approvalsRouter from "./approvals";
 import proofChainRouter from "./proof-chain";
 import worldlineRouter from "./worldline";
 import distributionOsRouter from "./distribution-os";
+import dosPublicApiRouter from "./dos-public-api";
 import prismBusApiRouter from "./prism-bus-api";
 import forgeRuntimeApiRouter from "./forge-runtime-api";
 import covenantPolicyApiRouter from "./covenant-policy-api";
@@ -432,6 +433,8 @@ router.use(worldlineRouter);
 
 router.use("/distribution-os", _writeLimiter);
 router.use("/distribution-os", distributionOsRouter);
+
+router.use("/v1", dosPublicApiRouter);
 
 router.use("/prism-bus", _readLimiter);
 router.use(prismBusApiRouter);

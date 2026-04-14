@@ -6,6 +6,7 @@ import {
   Calendar, BarChart3, Settings, Zap, TrendingUp, Eye, UserPlus, Send,
   AlertCircle, ChevronRight, Globe, Link2, Target, Clock, CheckCircle2,
   Activity, RefreshCw, LineChart, ArrowUpRight, ArrowDownRight, Minus,
+  Atom, Code2, Rss, Gift, Layers,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { RoleSelector, DataProvenance, ActionLoop } from "@szl-holdings/shared-ui";
@@ -48,8 +49,14 @@ const NAV_ITEMS = [
   { href: "/admin/distribution/newsletters", icon: Mail, label: "Newsletters" },
   { href: "/admin/distribution/carousel-lab", icon: Image, label: "Carousel Lab" },
   { href: "/admin/distribution/x-studio", icon: Twitter, label: "X Studio" },
+  { href: "/admin/distribution/platforms", icon: Globe, label: "Platforms" },
+  { href: "/admin/distribution/atomizer", icon: Atom, label: "AI Atomizer" },
   { href: "/admin/distribution/calendar", icon: Calendar, label: "Calendar" },
   { href: "/admin/distribution/analytics", icon: BarChart3, label: "Analytics" },
+  { href: "/admin/distribution/cross-analytics", icon: Layers, label: "Cross-Platform" },
+  { href: "/admin/distribution/embeds", icon: Rss, label: "Embeds & Feeds" },
+  { href: "/admin/distribution/developer-api", icon: Code2, label: "Developer API" },
+  { href: "/admin/distribution/growth", icon: Gift, label: "Growth Engine" },
   { href: "/admin/distribution/reports", icon: LineChart, label: "Reports" },
   { href: "/admin/distribution/automations", icon: Zap, label: "Automations" },
   { href: "/admin/distribution/settings", icon: Settings, label: "Settings" },
