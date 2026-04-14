@@ -7,6 +7,17 @@ export type { CorrelatedEventGroup } from "./event-bus.js";
 export { initializeOpenTelemetry, getTracer, getOtelConfig, isOtelInitialized } from "./otel.js";
 export type { OtelConfig, Span } from "./otel.js";
 export { genAITelemetry } from "./genai-telemetry.js";
+export { livingMesh, seedLivingMeshData } from "./living-mesh.js";
+export type {
+  HeartbeatSignal,
+  DistributedTraceSpan,
+  DistributedTrace,
+  GpuMetric,
+  ModelInferenceMetric,
+  BusinessImpactEvent,
+  PredictiveSignal,
+  LivingMeshEvent,
+} from "./living-mesh.js";
 export type {
   GenAISpanKind,
   GenAISpanStatus,

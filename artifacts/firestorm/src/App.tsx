@@ -128,6 +128,12 @@ const ActionQueue = lazy(() => import("@/pages/action-queue"));
 const IncidentReadinessView = lazy(() => import("@/pages/incident-readiness-view"));
 const GovernanceReview = lazy(() => import("@/pages/governance-review"));
 
+// ─── Living Intelligence Platform (new) ──────────────────────────────────────
+const AutonomousThreatEngine = lazy(() => import("@/pages/autonomous-threat-engine"));
+const IntelligenceFusionGrid = lazy(() => import("@/pages/intelligence-fusion-grid"));
+const AegisBusinessSignalIntelligence = lazy(() => import("@/pages/business-signal-intelligence"));
+const AegisPredictiveIntelligence = lazy(() => import("@/pages/predictive-intelligence"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -199,6 +205,13 @@ const securityNavSecondary = [
   { path: "/tradecraft", label: "Tradecraft Engine", icon: BrainIcon },
   { path: "/observability", label: "Observability", icon: Activity },
   { path: "/adversary-emulation", label: "Red Team Exercises", icon: Target },
+];
+
+const livingIntelNav = [
+  { path: "/autonomous-threat-engine", label: "Autonomous Threat Engine", icon: BrainIcon },
+  { path: "/intelligence-fusion-grid", label: "Intelligence Fusion Grid", icon: Layers },
+  { path: "/business-signal-intelligence", label: "Business Signal Intel", icon: DollarSign },
+  { path: "/predictive-intelligence", label: "Predictive Intelligence", icon: TrendingUp },
 ];
 
 const complianceNavItems = [
@@ -362,6 +375,11 @@ function AegisSidebarContent({ location, onNavigate }: { location: string; onNav
         { id: "readiness", label: "Incident Readiness", href: "/soc/readiness", icon: <BarChart3 className="w-3.5 h-3.5" /> },
         { id: "governance", label: "Governance Review", href: "/soc/governance", icon: <FileText className="w-3.5 h-3.5" /> },
       ],
+    },
+    {
+      id: "living-intel",
+      label: "Living Intelligence",
+      items: livingIntelNav.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3.5 h-3.5" /> })),
     },
     {
       id: "governance",
@@ -643,6 +661,12 @@ function AppRouter() {
         <Route path="/soc/action-queue" component={ActionQueue} />
         <Route path="/soc/readiness" component={IncidentReadinessView} />
         <Route path="/soc/governance" component={GovernanceReview} />
+
+        {/* Living Intelligence Platform */}
+        <Route path="/autonomous-threat-engine" component={AutonomousThreatEngine} />
+        <Route path="/intelligence-fusion-grid" component={IntelligenceFusionGrid} />
+        <Route path="/business-signal-intelligence" component={AegisBusinessSignalIntelligence} />
+        <Route path="/predictive-intelligence" component={AegisPredictiveIntelligence} />
 
         <Route>
           <div className="flex items-center justify-center h-full">

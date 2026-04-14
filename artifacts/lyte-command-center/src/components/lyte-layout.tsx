@@ -7,7 +7,7 @@ import {
   Database, Play, Activity, CheckSquare, Shield, Network, Heart,
   AlertTriangle, Brain, Radio, Workflow, Inbox, Search, UserCheck,
   ChevronRight, Gauge, BarChart3, LayoutDashboard, Download, Clapperboard, Power,
-  GitBranch, Send
+  GitBranch, Send, Cpu, TrendingUp, DollarSign
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, useSandboxMode, EnvironmentLabel, type OnboardingConfig } from "@szl-holdings/shared-ui";
 import { useDemoMode } from "@/lib/demo-mode";
@@ -106,6 +106,15 @@ const NAV_GROUPS = [
       { href: "/prism/intelligence", label: "Intelligence", icon: Brain },
       { href: "/prism/signals", label: "Signals Feed", icon: Radio },
       { href: "/prism/motion", label: "Motion", icon: Workflow },
+    ],
+  },
+  {
+    label: "Living Intelligence",
+    items: [
+      { href: "/living-topology", label: "Living Topology", icon: Network },
+      { href: "/gpu-observatory", label: "GPU & AI Observatory", icon: Cpu },
+      { href: "/business-signals", label: "Business Signals", icon: DollarSign },
+      { href: "/predictive-intelligence", label: "Predictive Intel", icon: TrendingUp },
     ],
   },
   {

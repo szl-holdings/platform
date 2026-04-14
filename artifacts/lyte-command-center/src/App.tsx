@@ -115,6 +115,12 @@ const OutcomeLoop = lazy(() => import("@/pages/outcome-loop"));
 const DeferLane = lazy(() => import("@/pages/defer-lane"));
 const ShadowMode = lazy(() => import("@/pages/shadow-mode"));
 
+// ─── Living Intelligence Platform (new) ──────────────────────────────────────
+const LivingTopology = lazy(() => import("@/pages/living-topology"));
+const GpuComputeObservatory = lazy(() => import("@/pages/gpu-compute-observatory"));
+const BusinessSignalsIntelligence = lazy(() => import("@/pages/business-signals-intelligence"));
+const LytePredictiveIntelligence = lazy(() => import("@/pages/predictive-intelligence"));
+
 const ADMIN_ROLES = ["admin", "super_admin", "ops"];
 
 function AdminRoute({ component: Component }: { component: React.ComponentType }) {
@@ -219,6 +225,11 @@ function PrivateRouter() {
         <Route path="/defer-lane" component={DeferLane} />
         <Route path="/shadow-mode" component={ShadowMode} />
         <Route path="/atlas-artifacts" component={LyteAtlasArtifactsPage} />
+        {/* Living Intelligence Platform */}
+        <Route path="/living-topology" component={LivingTopology} />
+        <Route path="/gpu-observatory" component={GpuComputeObservatory} />
+        <Route path="/business-signals" component={BusinessSignalsIntelligence} />
+        <Route path="/predictive-intelligence" component={LytePredictiveIntelligence} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>
@@ -244,6 +255,10 @@ const lyteCommands: CommandItem[] = [
   { id: "nav-alloy-simulate", label: "Policy Simulation Console", icon: "🧪", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/simulate"); } },
   { id: "nav-alloy-handoffs", label: "Agent Handoffs (A2A)", icon: "🔗", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/handoffs"); } },
   { id: "nav-alloy-receipts", label: "Trust Receipts", icon: "🛡️", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/receipts"); } },
+  { id: "nav-living-topology", label: "Living Topology", icon: "🔗", group: "Living Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/living-topology"); } },
+  { id: "nav-gpu-observatory", label: "GPU & AI Observatory", icon: "🖥️", group: "Living Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/gpu-observatory"); } },
+  { id: "nav-business-signals", label: "Business Signal Intelligence", icon: "💰", group: "Living Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/business-signals"); } },
+  { id: "nav-predictive-intel", label: "Predictive Intelligence", icon: "🔮", group: "Living Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/predictive-intelligence"); } },
 ];
 
 const lyteShortcuts: KeyboardShortcut[] = [
