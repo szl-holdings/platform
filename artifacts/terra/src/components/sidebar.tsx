@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Building2, LayoutDashboard, AlertTriangle, Home, ChevronLeft, ChevronRight, Users, Brain, Zap, FileText, ClipboardList, DollarSign, Activity, List, UserCheck, ArrowLeftRight, Flame, Handshake } from "lucide-react";
+import { Building2, LayoutDashboard, AlertTriangle, Home, ChevronLeft, ChevronRight, Users, Brain, Zap, FileText, ClipboardList, DollarSign, Activity, List, UserCheck, ArrowLeftRight, Flame, Handshake, Radar, BarChart3, TrendingDown, Sliders, Thermometer } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { useState, useEffect } from "react";
 import { UserButton } from "@szl-holdings/shared-ui/UserButton";
@@ -22,7 +22,10 @@ const navSections: { title: string; items: NavItem[] }[] = [
   {
     title: "Deal Discovery",
     items: [
-      { path: "/distress-engine", label: "Distress Engine", icon: Flame, badge: "NEW" },
+      { path: "/distress-radar", label: "Distress Radar", icon: Radar, badge: "NEW" },
+      { path: "/distress-engine", label: "Distress Engine", icon: Flame },
+      { path: "/neighborhood-momentum", label: "Neighborhood Momentum", icon: BarChart3 },
+      { path: "/seller-motivation", label: "Seller Motivation AI", icon: TrendingDown },
       { path: "/deals", label: "Deal Pipeline", icon: Activity },
     ],
   },
@@ -44,6 +47,8 @@ const navSections: { title: string; items: NavItem[] }[] = [
   {
     title: "Intelligence",
     items: [
+      { path: "/portfolio-scenario", label: "Portfolio Scenario", icon: Sliders },
+      { path: "/climate-risk-enhanced", label: "Climate Risk Overlay", icon: Thermometer },
       { path: "/team", label: "Team Performance", icon: Users },
       { path: "/market-intelligence", label: "Market Intelligence", icon: Activity },
       { path: "/predictions", label: "Alloy Intelligence", icon: Brain },

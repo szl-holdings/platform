@@ -1,0 +1,406 @@
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  TrendingUp, TrendingDown, MapPin, BarChart3, ArrowUpRight, ArrowDownRight,
+  Building2, DollarSign, Users, Activity, Layers, Info, Target, Zap, Eye
+} from "lucide-react";
+import { cn } from "@szl-holdings/shared-ui/utils";
+
+type Trajectory = "accelerating" | "gentrifying" | "stable" | "declining" | "distressed";
+
+interface MicroMarket {
+  id: string;
+  name: string;
+  borough: string;
+  trajectory: Trajectory;
+  momentumScore: number;
+  priceChangePct: number;
+  permitActivity: number;
+  institutionalFlowM: number;
+  populationGrowthPct: number;
+  medianPrice: number;
+  capRateCompression: number;
+  topSignals: string[];
+  description: string;
+  lat: number;
+  lng: number;
+}
+
+const TRAJECTORY_META: Record<Trajectory, { label: string; color: string; bg: string; barColor: string; icon: typeof TrendingUp }> = {
+  accelerating: { label: "Accelerating", color: "text-emerald-400", bg: "bg-emerald-400/10 border-emerald-400/20", barColor: "#34d399", icon: TrendingUp },
+  gentrifying: { label: "Gentrifying", color: "text-sky-400", bg: "bg-sky-400/10 border-sky-400/20", barColor: "#38bdf8", icon: ArrowUpRight },
+  stable: { label: "Stable", color: "text-slate-400", bg: "bg-slate-400/10 border-slate-400/20", barColor: "#94a3b8", icon: Activity },
+  declining: { label: "Declining", color: "text-amber-400", bg: "bg-amber-400/10 border-amber-400/20", barColor: "#fbbf24", icon: TrendingDown },
+  distressed: { label: "Distressed", color: "text-red-400", bg: "bg-red-400/10 border-red-400/20", barColor: "#f87171", icon: ArrowDownRight },
+};
+
+const NEIGHBORHOODS: MicroMarket[] = [
+  {
+    id: "n-01", name: "Bushwick", borough: "Brooklyn", trajectory: "accelerating",
+    momentumScore: 91, priceChangePct: 18.4, permitActivity: 87, institutionalFlowM: 142,
+    populationGrowthPct: 4.2, medianPrice: 1_250_000, capRateCompression: -1.8,
+    lat: 40.6958, lng: -73.9226,
+    topSignals: ["Institutional buyer volume +340%", "New restaurant permits +62%", "Median days-on-market: 9"],
+    description: "Strong acceleration driven by creative industry spillover from Williamsburg. Institutional capital rotating in at scale.",
+  },
+  {
+    id: "n-02", name: "Crown Heights", borough: "Brooklyn", trajectory: "gentrifying",
+    momentumScore: 78, priceChangePct: 11.2, permitActivity: 64, institutionalFlowM: 89,
+    populationGrowthPct: 2.8, medianPrice: 980_000, capRateCompression: -0.9,
+    lat: 40.6689, lng: -73.9503,
+    topSignals: ["Renovation permits up 48%", "Median HHI rising +$18K", "3 boutique hotels permitted"],
+    description: "Classic gentrification pattern: rising permits, demographic shift, early institutional interest. 3-5 year runway.",
+  },
+  {
+    id: "n-03", name: "East New York", borough: "Brooklyn", trajectory: "gentrifying",
+    momentumScore: 68, priceChangePct: 7.8, permitActivity: 52, institutionalFlowM: 61,
+    populationGrowthPct: 1.4, medianPrice: 710_000, capRateCompression: -0.4,
+    lat: 40.6643, lng: -73.8868,
+    topSignals: ["Rezoning 2025 activated", "Transit investment confirmed", "Land assemblage activity emerging"],
+    description: "City-driven rezoning catalyst. Earliest gentrification stage — highest upside, highest execution risk.",
+  },
+  {
+    id: "n-04", name: "Ridgewood", borough: "Queens", trajectory: "accelerating",
+    momentumScore: 84, priceChangePct: 14.6, permitActivity: 72, institutionalFlowM: 108,
+    populationGrowthPct: 3.1, medianPrice: 1_090_000, capRateCompression: -1.4,
+    lat: 40.7003, lng: -73.9044,
+    topSignals: ["Bushwick price compression driving demand", "L-train accessible corridor", "Multi-family conversion surge"],
+    description: "Overflow neighborhood from Bushwick hitting inflection. Buyers priced out of core are creating demand surge.",
+  },
+  {
+    id: "n-05", name: "Wakefield", borough: "Bronx", trajectory: "stable",
+    momentumScore: 48, priceChangePct: 3.1, permitActivity: 29, institutionalFlowM: 18,
+    populationGrowthPct: 0.4, medianPrice: 620_000, capRateCompression: 0.1,
+    lat: 40.8878, lng: -73.8643,
+    topSignals: ["Cash flow positive market", "Low competition, moderate demand", "No catalyst identified yet"],
+    description: "Income-stable, appreciation-limited. Good for yield-focused strategies; minimal appreciation expectation.",
+  },
+  {
+    id: "n-06", name: "East Flatbush", borough: "Brooklyn", trajectory: "declining",
+    momentumScore: 34, priceChangePct: -2.4, permitActivity: 15, institutionalFlowM: 8,
+    populationGrowthPct: -1.1, medianPrice: 780_000, capRateCompression: 0.6,
+    lat: 40.6312, lng: -73.9278,
+    topSignals: ["Days-on-market expanding (+34d)", "Landlord distress signals rising", "Retail vacancy increasing"],
+    description: "Micro-market losing momentum. Distress buying opportunity emerging, but appreciation thesis weak near-term.",
+  },
+  {
+    id: "n-07", name: "Brownsville", borough: "Brooklyn", trajectory: "distressed",
+    momentumScore: 19, priceChangePct: -6.8, permitActivity: 8, institutionalFlowM: 3,
+    populationGrowthPct: -2.4, medianPrice: 510_000, capRateCompression: 1.4,
+    lat: 40.6634, lng: -73.9138,
+    topSignals: ["Highest vacancy rate in borough", "Systematic landlord abandonment", "Insurance withdrawal risk"],
+    description: "Deep distress. Contra-cyclical opportunity only — requires patient capital and operational expertise.",
+  },
+  {
+    id: "n-08", name: "Long Island City", borough: "Queens", trajectory: "accelerating",
+    momentumScore: 89, priceChangePct: 16.1, permitActivity: 94, institutionalFlowM: 287,
+    populationGrowthPct: 6.8, medianPrice: 1_820_000, capRateCompression: -2.1,
+    lat: 40.7447, lng: -73.9484,
+    topSignals: ["Amazon HQ2 adjacent spillover", "Major office-to-resi conversion", "Transit megaproject activated"],
+    description: "Institutional-grade momentum. Cap rate compression accelerating. Prime entry window closing in 12-18 months.",
+  },
+];
+
+function formatCurrency(n: number) {
+  if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
+  if (n >= 1e3) return `$${(n / 1e3).toFixed(0)}K`;
+  return `$${n}`;
+}
+
+function MomentumBar({ score, trajectory }: { score: number; trajectory: Trajectory }) {
+  const meta = TRAJECTORY_META[trajectory];
+  return (
+    <div className="flex items-center gap-2">
+      <div className="flex-1 bg-white/5 rounded-full h-1.5">
+        <div className="h-1.5 rounded-full transition-all" style={{ width: `${score}%`, background: meta.barColor }} />
+      </div>
+      <span className="text-xs font-bold w-6 text-right" style={{ color: meta.barColor }}>{score}</span>
+    </div>
+  );
+}
+
+function HeatmapCanvas({ markets, selected, onSelect }: {
+  markets: MicroMarket[];
+  selected: MicroMarket | null;
+  onSelect: (m: MicroMarket) => void;
+}) {
+  const minLat = Math.min(...markets.map(m => m.lat));
+  const maxLat = Math.max(...markets.map(m => m.lat));
+  const minLng = Math.min(...markets.map(m => m.lng));
+  const maxLng = Math.max(...markets.map(m => m.lng));
+  const padLat = (maxLat - minLat) * 0.15 || 0.05;
+  const padLng = (maxLng - minLng) * 0.15 || 0.05;
+
+  const W = 620, H = 320;
+  const toXY = (lat: number, lng: number) => ({
+    x: ((lng - (minLng - padLng)) / ((maxLng + padLng) - (minLng - padLng))) * W,
+    y: (1 - (lat - (minLat - padLat)) / ((maxLat + padLat) - (minLat - padLat))) * H,
+  });
+
+  const scoreToOpacity = (score: number) => 0.15 + (score / 100) * 0.55;
+  const scoreToRadius = (score: number) => 28 + (score / 100) * 32;
+
+  return (
+    <div className="relative bg-[#06090e] rounded-xl border border-white/6 overflow-hidden" style={{ height: H }}>
+      <div className="absolute inset-0 opacity-5">
+        <svg width="100%" height="100%">
+          <defs>
+            <pattern id="hmGrid" width="30" height="30" patternUnits="userSpaceOnUse">
+              <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="0.5" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#hmGrid)" />
+        </svg>
+      </div>
+      <svg width="100%" height="100%" viewBox={`0 0 ${W} ${H}`} className="absolute inset-0">
+        <defs>
+          {markets.map(m => {
+            const meta = TRAJECTORY_META[m.trajectory];
+            const { x, y } = toXY(m.lat, m.lng);
+            const r = scoreToRadius(m.momentumScore);
+            return (
+              <radialGradient key={m.id} id={`hm-${m.id}`} cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor={meta.barColor} stopOpacity={scoreToOpacity(m.momentumScore)} />
+                <stop offset="100%" stopColor={meta.barColor} stopOpacity={0} />
+              </radialGradient>
+            );
+          })}
+        </defs>
+        {markets.map(m => {
+          const { x, y } = toXY(m.lat, m.lng);
+          const r = scoreToRadius(m.momentumScore);
+          return (
+            <circle key={`hm-blob-${m.id}`} cx={x} cy={y} r={r} fill={`url(#hm-${m.id})`} />
+          );
+        })}
+        {markets.map(m => {
+          const { x, y } = toXY(m.lat, m.lng);
+          const meta = TRAJECTORY_META[m.trajectory];
+          const isSelected = selected?.id === m.id;
+          return (
+            <g key={m.id} onClick={() => onSelect(m)} style={{ cursor: "pointer" }}>
+              {isSelected && <circle cx={x} cy={y} r={16} fill={meta.barColor} fillOpacity={0.2} />}
+              <circle cx={x} cy={y} r={isSelected ? 7 : 5} fill={meta.barColor} />
+              <circle cx={x} cy={y} r={isSelected ? 7 : 5} fill="none" stroke={meta.barColor} strokeWidth={2} strokeOpacity={0.4} />
+              <foreignObject x={x + 10} y={y - 16} width={130} height={34}>
+                <div className="bg-black/70 backdrop-blur border border-white/10 rounded-lg px-1.5 py-1">
+                  <p className="text-[9px] font-semibold text-white leading-tight">{m.name}</p>
+                  <p className="text-[9px]" style={{ color: meta.barColor }}>Score {m.momentumScore} · {meta.label}</p>
+                </div>
+              </foreignObject>
+            </g>
+          );
+        })}
+      </svg>
+      <div className="absolute bottom-3 left-3 text-[9px] text-white/30 flex items-center gap-1">
+        <Layers className="w-3 h-3" />
+        Neighborhood Momentum Heatmap
+      </div>
+    </div>
+  );
+}
+
+function MarketCard({ market, selected, onClick }: { market: MicroMarket; selected: boolean; onClick: () => void }) {
+  const meta = TRAJECTORY_META[market.trajectory];
+  const Icon = meta.icon;
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      onClick={onClick}
+      className={cn(
+        "p-4 rounded-xl border cursor-pointer transition-all duration-200",
+        selected ? "bg-white/4 border-white/15" : "bg-[#0f1115] border-white/5 hover:border-white/10"
+      )}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-white">{market.name}</span>
+            <span className="text-xs text-white/30">· {market.borough}</span>
+            <div className={cn("flex items-center gap-1 px-1.5 py-0.5 rounded border text-[9px] font-semibold", meta.bg)}>
+              <Icon className={cn("w-2.5 h-2.5", meta.color)} />
+              <span className={meta.color}>{meta.label}</span>
+            </div>
+          </div>
+          <div className="mt-2">
+            <MomentumBar score={market.momentumScore} trajectory={market.trajectory} />
+          </div>
+          <div className="grid grid-cols-3 gap-3 mt-2">
+            <div>
+              <p className="text-[9px] text-white/30">Price Δ (YoY)</p>
+              <p className={cn("text-xs font-bold", market.priceChangePct > 0 ? "text-emerald-400" : "text-red-400")}>
+                {market.priceChangePct > 0 ? "+" : ""}{market.priceChangePct}%
+              </p>
+            </div>
+            <div>
+              <p className="text-[9px] text-white/30">Inst. Capital</p>
+              <p className="text-xs font-bold text-sky-400">${market.institutionalFlowM}M</p>
+            </div>
+            <div>
+              <p className="text-[9px] text-white/30">Median Price</p>
+              <p className="text-xs font-bold text-white/70">{formatCurrency(market.medianPrice)}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function DetailSidebar({ market, onClose }: { market: MicroMarket; onClose: () => void }) {
+  const meta = TRAJECTORY_META[market.trajectory];
+  const Icon = meta.icon;
+  return (
+    <motion.div
+      initial={{ x: 40, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      exit={{ x: 40, opacity: 0 }}
+      className="flex flex-col bg-[#0a0c10] border-l border-white/6 overflow-hidden"
+      style={{ width: 380, flexShrink: 0 }}
+    >
+      <div className="p-5 border-b border-white/6">
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <h3 className="text-sm font-bold text-white">{market.name}</h3>
+            <p className="text-xs text-white/40">{market.borough}</p>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded hover:bg-white/5 text-white/30 hover:text-white/60 transition-colors">
+            <span className="text-white/30 text-lg leading-none">×</span>
+          </button>
+        </div>
+        <div className={cn("flex items-center gap-2 mt-3 px-2 py-1.5 rounded-lg border", meta.bg)}>
+          <Icon className={cn("w-4 h-4", meta.color)} />
+          <span className={cn("text-sm font-semibold", meta.color)}>{meta.label}</span>
+          <span className="ml-auto text-xs text-white/40">Score {market.momentumScore}/100</span>
+        </div>
+      </div>
+
+      <div className="p-5 border-b border-white/6">
+        <p className="text-xs text-white/50 leading-relaxed">{market.description}</p>
+      </div>
+
+      <div className="p-5 border-b border-white/6">
+        <p className="text-[10px] text-white/30 uppercase tracking-wider mb-3">Momentum Metrics</p>
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { label: "Price Change YoY", value: `${market.priceChangePct > 0 ? "+" : ""}${market.priceChangePct}%`, color: market.priceChangePct > 0 ? "text-emerald-400" : "text-red-400" },
+            { label: "Permit Activity", value: `${market.permitActivity}/100`, color: "text-sky-400" },
+            { label: "Institutional Flow", value: `$${market.institutionalFlowM}M`, color: "text-purple-400" },
+            { label: "Population Growth", value: `${market.populationGrowthPct > 0 ? "+" : ""}${market.populationGrowthPct}%`, color: market.populationGrowthPct > 0 ? "text-emerald-400" : "text-red-400" },
+            { label: "Median Price", value: formatCurrency(market.medianPrice), color: "text-white/80" },
+            { label: "Cap Rate Δ", value: `${market.capRateCompression > 0 ? "+" : ""}${market.capRateCompression}%`, color: market.capRateCompression < 0 ? "text-emerald-400" : "text-red-400" },
+          ].map(m => (
+            <div key={m.label} className="bg-white/3 border border-white/5 rounded-lg p-2.5">
+              <p className="text-[9px] text-white/30">{m.label}</p>
+              <p className={cn("text-sm font-bold mt-0.5", m.color)}>{m.value}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="p-5 flex-1">
+        <p className="text-[10px] text-white/30 uppercase tracking-wider mb-3">Key Momentum Signals</p>
+        <div className="space-y-2">
+          {market.topSignals.map((s, i) => (
+            <div key={i} className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: meta.barColor }} />
+              <p className="text-xs text-white/60">{s}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="p-4 border-t border-white/6">
+        <button className="w-full py-2.5 rounded-lg border border-[#40856a]/30 text-[#40856a] text-sm font-medium hover:bg-[#40856a]/10 transition-colors flex items-center justify-center gap-2">
+          <Target className="w-4 h-4" />
+          Find Distressed Properties Here
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
+export default function NeighborhoodMomentum() {
+  const [selected, setSelected] = useState<MicroMarket | null>(null);
+  const [trajectoryFilter, setTrajectoryFilter] = useState<Trajectory | "all">("all");
+
+  const filtered = NEIGHBORHOODS
+    .filter(m => trajectoryFilter === "all" || m.trajectory === trajectoryFilter)
+    .sort((a, b) => b.momentumScore - a.momentumScore);
+
+  const summaryStats = {
+    accelerating: NEIGHBORHOODS.filter(n => n.trajectory === "accelerating").length,
+    gentrifying: NEIGHBORHOODS.filter(n => n.trajectory === "gentrifying").length,
+    declining: NEIGHBORHOODS.filter(n => n.trajectory === "declining" || n.trajectory === "distressed").length,
+    totalInstitutional: NEIGHBORHOODS.reduce((s, n) => s + n.institutionalFlowM, 0),
+  };
+
+  return (
+    <div className="flex h-full overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-shrink-0 p-6 border-b border-white/6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-xl font-bold text-white flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-[#40856a]" />
+                Neighborhood Momentum Score
+              </h1>
+              <p className="text-xs text-white/40 mt-1">Micro-market trajectory analysis — gentrification indicators, capital flows, and entry timing intelligence</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-4 gap-3 mt-4">
+            {[
+              { label: "Accelerating Markets", value: summaryStats.accelerating.toString(), color: "text-emerald-400" },
+              { label: "Gentrifying Markets", value: summaryStats.gentrifying.toString(), color: "text-sky-400" },
+              { label: "Declining / Distressed", value: summaryStats.declining.toString(), color: "text-red-400" },
+              { label: "Institutional Capital Flow", value: `$${(summaryStats.totalInstitutional / 1000).toFixed(1)}B`, color: "text-purple-400" },
+            ].map(m => (
+              <div key={m.label} className="bg-white/2 border border-white/5 rounded-xl p-3">
+                <p className="text-[9px] text-white/30 uppercase tracking-wider">{m.label}</p>
+                <p className={cn("text-xl font-bold mt-1", m.color)}>{m.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex-shrink-0 px-6 py-3 border-b border-white/6 flex items-center gap-2">
+          {(["all", "accelerating", "gentrifying", "stable", "declining", "distressed"] as const).map(t => {
+            const meta = t !== "all" ? TRAJECTORY_META[t] : null;
+            return (
+              <button
+                key={t}
+                onClick={() => setTrajectoryFilter(t)}
+                className={cn(
+                  "px-3 py-1 rounded-lg text-xs border transition-colors font-medium",
+                  trajectoryFilter === t
+                    ? meta ? `${meta.bg} ${meta.color} border-current/40` : "bg-white/8 text-white border-white/20"
+                    : "text-white/30 border-white/8 hover:border-white/15 hover:text-white/50"
+                )}
+              >
+                {t === "all" ? "All" : TRAJECTORY_META[t].label}
+              </button>
+            );
+          })}
+          <span className="ml-auto text-xs text-white/30">{filtered.length} neighborhoods</span>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6">
+          <HeatmapCanvas markets={filtered} selected={selected} onSelect={setSelected} />
+          <div className="space-y-2 mt-4">
+            <p className="text-[10px] text-white/30 uppercase tracking-wider font-medium mb-3">Ranked by Momentum Score</p>
+            {filtered.map(m => (
+              <MarketCard key={m.id} market={m} selected={selected?.id === m.id} onClick={() => setSelected(m)} />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {selected && (
+        <DetailSidebar market={selected} onClose={() => setSelected(null)} />
+      )}
+    </div>
+  );
+}

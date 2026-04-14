@@ -59,6 +59,11 @@ const WhatChanged = lazy(() => import("@/pages/what-changed"));
 const DiligencePrep = lazy(() => import("@/pages/diligence-prep"));
 const ReadinessBoard = lazy(() => import("@/pages/readiness-board"));
 const ApprovalReview = lazy(() => import("@/pages/approval-review"));
+const DistressRadar = lazy(() => import("@/pages/distress-radar"));
+const NeighborhoodMomentum = lazy(() => import("@/pages/neighborhood-momentum"));
+const SellerMotivation = lazy(() => import("@/pages/seller-motivation"));
+const PortfolioScenario = lazy(() => import("@/pages/portfolio-scenario"));
+const ClimateRiskEnhanced = lazy(() => import("@/pages/climate-risk-enhanced"));
 
 function PageLoader() {
   return (
@@ -121,6 +126,11 @@ function PrivateRouter() {
         <Route path="/diligence-prep" component={DiligencePrep} />
         <Route path="/readiness-board" component={ReadinessBoard} />
         <Route path="/approval-review" component={ApprovalReview} />
+        <Route path="/distress-radar" component={DistressRadar} />
+        <Route path="/neighborhood-momentum" component={NeighborhoodMomentum} />
+        <Route path="/seller-motivation" component={SellerMotivation} />
+        <Route path="/portfolio-scenario" component={PortfolioScenario} />
+        <Route path="/climate-risk-enhanced" component={ClimateRiskEnhanced} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
