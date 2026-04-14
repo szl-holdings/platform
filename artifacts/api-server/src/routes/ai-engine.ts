@@ -285,18 +285,20 @@ Consider constraints: ${constraints?.join("; ") || "none specified"}`,
   }
 });
 
-router.post("/ai/retrieve", async (req, res) => {
+router.post("/ai/retrieve", authMiddleware({ required: true }), async (req, res) => {
   try {
     const { query, topK, method } = req.body as { query?: string; topK?: number; method?: "semantic" | "keyword" | "hybrid" };
     if (!query) { res.status(400).json({ error: "query required" }); return; }
 
     const k = Math.min(topK || 12, 50);
+    const isAdmin = req.user && isGlobalAdmin(req.user);
+    const maxSensitivity = isAdmin ? "restricted" : "internal";
     let result;
     if (method === "keyword") {
       const chunks = alloyRetrieval.retrieveKeyword(query, k);
       result = { chunks, query, method: "keyword" as const, totalIndexed: alloyRetrieval.indexedCount, latencyMs: 0 };
     } else {
-      result = alloyRetrieval.retrieveHybrid(query, null, k);
+      result = await alloyRetrieval.retrieveFromDb(query, null, { topK: k, maxSensitivityLevel: maxSensitivity as any });
     }
     const evidence = alloyRetrieval.toEvidenceItems(result.chunks);
 
@@ -520,8 +522,10 @@ router.post("/ai/decision", authMiddleware({ required: true }), async (req, res)
 
     const policy = getApprovalPolicy(riskLevel as RiskLevel);
 
+    const isAdminUser = req.user && isGlobalAdmin(req.user);
+    const decisionSensitivity = isAdminUser ? "restricted" : "internal";
     const retrievalContext = rawInput
-      ? alloyRetrieval.retrieveHybrid(rawInput as string, null, 5)
+      ? await alloyRetrieval.retrieveFromDb(rawInput as string, null, { topK: 5, maxSensitivityLevel: decisionSensitivity as any })
       : null;
 
     const enrichedEvidence = [

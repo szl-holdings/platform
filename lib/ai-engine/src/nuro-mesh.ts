@@ -1417,6 +1417,33 @@ async function rehydrateSelfModelFromDb(): Promise<void> {
   }
 }
 
+async function getRagContext(query: string): Promise<string> {
+  try {
+    const { hybridSearch, ensureRagTables } = await import("./rag-vector-store.js");
+    await ensureRagTables();
+
+    let queryEmbedding: number[] | null = null;
+    try {
+      const embResp = await openai.embeddings.create({ model: "text-embedding-3-small", input: query.slice(0, 8000) });
+      queryEmbedding = embResp.data[0]?.embedding ?? null;
+    } catch {
+      // embedding unavailable — fall back to keyword only
+    }
+
+    const { results } = await hybridSearch({ query, queryEmbedding, topK: 6, maxSensitivityLevel: "internal" });
+    if (results.length === 0) return "";
+
+    const formatted = results.map((r, i) =>
+      `[${i + 1}] [${r.sourceType.toUpperCase()}] ${r.source}\n${r.content.slice(0, 400)}`
+    ).join("\n\n");
+
+    return `## Retrieved Knowledge (RAG)\n${formatted}`;
+  } catch (err) {
+    console.warn("[nuro-mesh] RAG context retrieval failed:", err);
+    return "";
+  }
+}
+
 export class NuroMeshOrchestrator {
   async orchestrate(
     query: string,
@@ -1470,7 +1497,11 @@ export class NuroMeshOrchestrator {
     temporalAwareness.recordMarker(`Orchestration: "${query.slice(0, 80)}"`, "orchestration", { orchestrationId, workflowId });
     cognitiveWorkspace.recordQuery(query);
 
-    const context = await getSharedContext();
+    const [sharedContext, ragContext] = await Promise.all([
+      getSharedContext(),
+      getRagContext(query),
+    ]);
+    const context = ragContext ? `${sharedContext}\n\n${ragContext}` : sharedContext;
 
     const preRoutingMetacog = metacognitiveMonitor.getState();
     const preRoutingSelfModel = selfModelEngine.getSelfModel();

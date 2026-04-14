@@ -130,6 +130,7 @@ import streamingIngestionRouter from "./streaming-ingestion";
 import fineTuningRouter from "./fine-tuning";
 import connectorHubRouter from "./connector-hub";
 import consciousnessRouter from "./consciousness";
+import ragKnowledgeRouter from "./rag-knowledge";
 
 const router: IRouter = Router();
 
@@ -234,6 +235,8 @@ router.use("/nuro-mesh", _readLimiter);
 router.use(nueroMeshRouter);
 router.use(nueroMeshAdvancedRouter);
 router.use(a2aRouter);
+router.use("/rag", _readLimiter);
+router.use(ragKnowledgeRouter);
 router.use("/ai-safety", _readLimiter);
 router.use(aiSafetyRouter);
 router.use("/domain-agents", _readLimiter);

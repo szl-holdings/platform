@@ -239,8 +239,27 @@ if (!process.env.__FAST_START_SERVER) {
   if (Number.isNaN(port) || port <= 0) {
     throw new Error(`Invalid PORT value: "${rawPort}"`);
   }
-  const server = http.createServer(app);
+
+  let readyHandler: http.RequestListener = app as unknown as http.RequestListener;
+  let bootstrapDone = false;
+  const startingHandler: http.RequestListener = (_req, res) => {
+    if (bootstrapDone) return readyHandler(_req, res);
+    (res as http.ServerResponse).writeHead(503, { "Content-Type": "application/json" });
+    (res as http.ServerResponse).end(JSON.stringify({ status: "starting", message: "API server is initializing, please retry" }));
+  };
+
+  const server = http.createServer((req, res) => startingHandler(req, res));
   server.listen(port, "0.0.0.0", () => {
-    bootstrap(server, port);
+    logger.info({ port, host: "0.0.0.0" }, "Server listening (fast-start)");
+    bootstrap(server, port)
+      .then(handler => {
+        readyHandler = handler;
+        bootstrapDone = true;
+        logger.info({ port }, "[api-server] Fully ready — switching to live handler");
+      })
+      .catch(err => {
+        logger.fatal({ err }, "Bootstrap failed — shutting down");
+        process.exit(1);
+      });
   });
 }

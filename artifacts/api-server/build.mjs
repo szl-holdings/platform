@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { build as esbuild } from "esbuild";
 import esbuildPluginPino from "esbuild-plugin-pino";
-import { rm, readFile, readdir, cp, mkdir } from "node:fs/promises";
+import { rm, readFile, readdir, cp, mkdir, rename, writeFile } from "node:fs/promises";
 
 // Plugins (e.g. 'esbuild-plugin-pino') may use `require` to resolve dependencies
 globalThis.require = createRequire(import.meta.url);
@@ -188,6 +188,46 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
   });
 }
 
+async function createFastStartWrapper(distDir) {
+  const serverBundle = path.join(distDir, "index.mjs");
+  const serverBundleMap = path.join(distDir, "index.mjs.map");
+  const serverDest = path.join(distDir, "server.mjs");
+  const serverDestMap = path.join(distDir, "server.mjs.map");
+
+  await rename(serverBundle, serverDest);
+  try { await rename(serverBundleMap, serverDestMap); } catch { /* no map */ }
+
+  const wrapper = `import http from "node:http";
+
+const port = parseInt(process.env.PORT || "8080", 10);
+process.env.__FAST_START_SERVER = "1";
+
+let appHandler = (_req, res) => {
+  res.writeHead(503, { "Content-Type": "application/json" });
+  res.end(JSON.stringify({ status: "starting", message: "API server is initializing, please retry" }));
+};
+
+const server = http.createServer((req, res) => appHandler(req, res));
+
+server.listen(port, "0.0.0.0", async () => {
+  console.log(\`  ➜  Local:   http://localhost:\${port}/\`);
+  console.log(\`  ➜  Network: http://0.0.0.0:\${port}/\`);
+  try {
+    const mod = await import("./server.mjs");
+    const handler = await mod.bootstrap(server, port);
+    appHandler = handler;
+    console.log("[api-server] Fully ready on port " + port);
+  } catch (err) {
+    console.error("[api-server] Fatal bootstrap error:", err);
+    process.exit(1);
+  }
+});
+`;
+
+  await writeFile(path.join(distDir, "index.mjs"), wrapper, "utf8");
+  console.log("Fast-start wrapper written to dist/index.mjs (server bundle: dist/server.mjs)");
+}
+
 async function copyPdfkitData() {
   let pdfkitDataSrc;
   const searchPaths = [
@@ -224,7 +264,9 @@ async function copyPdfkitData() {
   }
 }
 
-buildAll().then(() => copyPdfkitData()).catch((err) => {
+buildAll()
+  .then(() => createFastStartWrapper(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "dist")))
+  .then(() => copyPdfkitData()).catch((err) => {
   console.error(err);
   process.exit(1);
 });

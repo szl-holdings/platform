@@ -1,4 +1,5 @@
 import type { EvidenceItem } from "../schemas/action-decision.js";
+import type { SensitivityLevel, RagSourceType } from "../types.js";
 
 export interface RetrievalChunk {
   id: string;
@@ -141,6 +142,52 @@ export class AlloyRetrievalEngine {
       totalIndexed: this.chunks.length,
       latencyMs: Date.now() - start,
     };
+  }
+
+  async retrieveFromDb(query: string, queryEmbedding: number[] | null, options: {
+    topK?: number;
+    maxSensitivityLevel?: SensitivityLevel;
+    domains?: string[];
+    sourceTypes?: RagSourceType[];
+  } = {}): Promise<RetrievalResult> {
+    const start = Date.now();
+    const { topK = 10, maxSensitivityLevel = "restricted", domains, sourceTypes } = options;
+
+    try {
+      const { hybridSearch } = await import("../rag-vector-store.js");
+      const { results, totalIndexed, latencyMs } = await hybridSearch({
+        query,
+        queryEmbedding,
+        topK,
+        maxSensitivityLevel,
+        domains,
+        sourceTypes,
+      });
+
+      const chunks: ScoredChunk[] = results.map(r => ({
+        id: r.id,
+        content: r.content,
+        source: r.source,
+        sourceType: r.sourceType as EvidenceItem["sourceType"],
+        objectId: r.objectId,
+        timestamp: (r.metadata.timestamp as string) ?? null,
+        sensitivityClass: r.sensitivityLevel,
+        metadata: r.metadata,
+        score: r.score,
+        matchType: r.matchType === "hybrid" ? "semantic" : r.matchType,
+      }));
+
+      return {
+        chunks,
+        query,
+        method: queryEmbedding ? "hybrid" : "keyword",
+        totalIndexed,
+        latencyMs,
+      };
+    } catch (err) {
+      console.warn("[alloy-retrieval] DB retrieval failed, falling back to in-memory:", err);
+      return this.retrieveHybrid(query, queryEmbedding, topK);
+    }
   }
 
   toEvidenceItems(chunks: ScoredChunk[]): EvidenceItem[] {

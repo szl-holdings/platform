@@ -1,0 +1,18 @@
+export {
+  ensureRagTables,
+  upsertChunk,
+  upsertChunksBatch,
+  semanticSearch,
+  keywordSearch,
+  hybridSearch,
+  getChunkCount,
+  getKnowledgeBaseStats,
+  deleteChunksByObjectId,
+  type RagChunk,
+  type RagSearchResult,
+  type SensitivityLevel,
+  type RagSourceType,
+  type SemanticSearchOptions,
+  type KeywordSearchOptions,
+  type HybridSearchOptions,
+} from "@szl-holdings/ai-engine";

@@ -41,6 +41,18 @@ export interface RAGChunk {
   metadata?: Record<string, unknown>;
 }
 
+export type SensitivityLevel = "public" | "internal" | "confidential" | "restricted";
+
+export type RagSourceType =
+  | "ai_decision"
+  | "case_memory"
+  | "incident"
+  | "agent_knowledge"
+  | "document"
+  | "playbook"
+  | "evidence"
+  | "alert";
+
 export interface ToolDefinition {
   name: string;
   description: string;

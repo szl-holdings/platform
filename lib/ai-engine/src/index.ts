@@ -46,6 +46,8 @@ export type {
   ConflictResolution,
   ConfidenceCalibrationEntry,
   OrchestrationTelemetry,
+  SensitivityLevel,
+  RagSourceType,
 } from "./types.js";
 
 export { RAGPipeline, chunkText } from "./rag-pipeline.js";
@@ -79,6 +81,39 @@ export { type ResolutionSummary, validateResolutionSummary } from "./schemas/res
 export { ALLOY_TOOL_DEFINITIONS, executeToolCall, checkToolPolicy, isHighRiskTool, getExecutionMode, type ToolExecutionResult, type ToolAuditEntry, type ExecutionMode } from "./tools/alloy-tools.js";
 
 export { AlloyRetrievalEngine, alloyRetrieval, type RetrievalChunk, type RetrievalResult, type ScoredChunk, type RerankResult } from "./retrieval/alloy-retrieval.js";
+
+export {
+  ensureRagTables,
+  upsertChunk,
+  upsertChunksBatch,
+  semanticSearch,
+  keywordSearch,
+  hybridSearch,
+  getChunkCount,
+  getKnowledgeBaseStats,
+  deleteChunksByObjectId,
+  type RagChunk,
+  type RagSearchResult,
+  type SemanticSearchOptions,
+  type KeywordSearchOptions,
+  type HybridSearchOptions,
+} from "./rag-vector-store.js";
+
+export {
+  createChunks,
+  chunkWithOverlap,
+  chunkByParagraphs,
+  generateEmbedding,
+  ingestToVectorStore,
+  ingestAiDecision,
+  ingestCaseMemory,
+  ingestIncidentReport,
+  ingestAgentKnowledge,
+  ingestDocument,
+  runFullReindex,
+  type RawChunk,
+  type ChunkMetadata,
+} from "./rag-ingestion.js";
 
 export { GOLDEN_SET } from "./evals/golden-set.js";
 export { runEvals, type EvalResult, type EvalReport } from "./evals/run-evals.js";
@@ -157,8 +192,12 @@ export async function startCognitiveLearning(): Promise<void> {
   const { evidencePipeline } = await import("./tradecraft/evidence-pipeline.js");
   const { caseMemory } = await import("./tradecraft/case-memory.js");
   const { startScheduledEvals: _startScheduledEvals } = await import("./learning/eval-pipeline.js");
-  await evidencePipeline.hydrateFromDb();
-  await caseMemory.hydrateFromDb();
+  const { ensureRagTables: _ensureRagTables } = await import("./rag-vector-store.js");
+  await Promise.all([
+    evidencePipeline.hydrateFromDb(),
+    caseMemory.hydrateFromDb(),
+    _ensureRagTables(),
+  ]);
   await _startScheduledEvals();
 }
 
