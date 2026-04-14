@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "SZL Holdings"
+title = "SZL Holdings Dashboard"
 version = "1.0.0"
 id = "artifacts/szl-holdings"
 router = "path"
