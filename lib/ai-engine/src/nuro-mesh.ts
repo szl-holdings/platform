@@ -615,7 +615,8 @@ export async function callAgent(
   }
 
   const preCheck = metacognitiveMonitor.preFlightCheck(agent.id, agent.domain, query.length);
-  if (!preCheck.proceed) {
+  const ENABLE_PREFLIGHT_BLOCKING = process.env.CONSCIOUSNESS_PREFLIGHT_BLOCKING !== "false";
+  if (ENABLE_PREFLIGHT_BLOCKING && !preCheck.proceed) {
     innerMonologue.addThought(
       "doubt",
       `Pre-flight blocked agent ${agent.id} (risk: ${preCheck.riskLevel}, adjustments: ${preCheck.adjustments.join(", ")}). Returning degraded response.`,
@@ -1361,8 +1362,33 @@ async function rehydrateSelfModelFromDb(): Promise<void> {
         })),
       );
     }
+
+    const { getConfidenceCalibration } = await import("./learning/outcome-learning.js");
+    for (const agent of AGENT_REGISTRY) {
+      try {
+        const cal = await getConfidenceCalibration(agent.id);
+        if (cal.totalDecisions >= 5) {
+          const weaknesses: string[] = [];
+          const strengths: string[] = [];
+          if (cal.calibrationBias > 0.1) weaknesses.push("overconfident");
+          if (cal.calibrationBias < -0.1) weaknesses.push("underconfident");
+          if (cal.acceptanceRate > 0.8) strengths.push("high_acceptance");
+          if (cal.rejectedCount > cal.totalDecisions * 0.3) weaknesses.push("frequent_rejections");
+
+          selfModelEngine.updateAgentProfile(agent.id, agent.domain, {
+            confidence: cal.acceptanceRate * 100,
+            success: cal.acceptanceRate > 0.5,
+            latencyMs: 0,
+          });
+
+          if (weaknesses.length > 0) {
+            for (const w of weaknesses) selfModelEngine.addLimitation(`${agent.id}: ${w}`);
+          }
+        }
+      } catch {}
+    }
   } catch {
-    // DB may not be available yet; proceed with fresh state
+    console.warn("[consciousness] Self-model rehydration failed — proceeding with fresh state");
   }
 }
 
@@ -2024,6 +2050,24 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       );
     }
 
+    const tracerStats = behavioralTracer.getObservabilityStats();
+    if (tracerStats.topWeaknesses.length > 0) {
+      for (const w of tracerStats.topWeaknesses) {
+        selfModelEngine.addLimitation(`behavioral: ${w}`);
+      }
+    }
+    if (tracerStats.regressionRate > 0.2) {
+      selfModelEngine.recordLearningEvent(false);
+      innerMonologue.addThought(
+        "self_correction",
+        `Behavioral tracer reports ${(tracerStats.regressionRate * 100).toFixed(0)}% regression rate across ${tracerStats.totalTraces} traces. Self-model adjusted.`,
+        "negative",
+        30,
+      );
+    } else if (tracerStats.avgOverallScore > 0.8) {
+      selfModelEngine.recordLearningEvent(true);
+    }
+
     const consciousness = captureConsciousnessSnapshot();
 
     void persistConsciousnessState(orchestrationId, consciousness, averageConfidence, consciousnessTriggeredValidation).catch(() => {});
@@ -2173,8 +2217,9 @@ async function persistConsciousnessState(
         },
       });
     }
-  } catch {
-    // fire-and-forget — consciousness persistence is non-critical
+  } catch (err) {
+    console.warn("[consciousness] persistConsciousnessState failed:", err instanceof Error ? err.message : String(err));
+    emotionalSignals.recordSignal("frustration", 0.4, "persistence_failure");
   }
 }
 
