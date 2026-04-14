@@ -42,6 +42,8 @@ import { Dynamics365Adapter } from "./adapters/dynamics365.js";
 import { SharePointSPFxAdapter } from "./adapters/sharepoint-spfx.js";
 import { SalesforceAdapter } from "./adapters/salesforce.js";
 import { JiraAdapter } from "./adapters/jira.js";
+import { PagerDutyAdapter } from "./adapters/pagerduty.js";
+import { SiemAdapter } from "./adapters/siem.js";
 import { XTwitterAdapter } from "./adapters/x-twitter.js";
 import { MediumAdapter } from "./adapters/medium.js";
 import { SubstackAdapter } from "./adapters/substack.js";
@@ -102,6 +104,8 @@ export class ServiceRegistry {
   readonly sharepointSpfx: SharePointSPFxAdapter;
   readonly salesforce: SalesforceAdapter;
   readonly jira: JiraAdapter;
+  readonly pagerduty: PagerDutyAdapter;
+  readonly siem: SiemAdapter;
   readonly xTwitter: XTwitterAdapter;
   readonly medium: MediumAdapter;
   readonly substack: SubstackAdapter;
@@ -153,6 +157,8 @@ export class ServiceRegistry {
     this.sharepointSpfx = new SharePointSPFxAdapter();
     this.salesforce = new SalesforceAdapter();
     this.jira = new JiraAdapter();
+    this.pagerduty = new PagerDutyAdapter();
+    this.siem = new SiemAdapter();
     this.xTwitter = new XTwitterAdapter();
     this.medium = new MediumAdapter();
     this.substack = new SubstackAdapter();
@@ -202,6 +208,8 @@ export class ServiceRegistry {
       this.sharepointSpfx,
       this.salesforce,
       this.jira,
+      this.pagerduty,
+      this.siem,
       this.xTwitter,
       this.medium,
       this.substack,

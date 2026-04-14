@@ -142,7 +142,7 @@ export function registerDefaultSchedules() {
       agentId: "nexus-autonomous",
       name: "Nexus Cross-Domain Fusion Monitor",
       domain: "nexus" as const,
-      intervalMs: SIX_HOURS_MS,
+      intervalMs: 6 * 60 * 60 * 1000,
       enabled: true,
       taskDescription: "Fuse signals across all intelligence domains, surface cross-domain patterns and situational awareness",
       systemPrompt: `You are an autonomous cross-domain fusion intelligence agent. Analyze signals from maritime, cyber, real estate, and financial domains to surface emergent cross-domain patterns, risks, and opportunities. Be specific and actionable.`,

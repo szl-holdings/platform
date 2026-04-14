@@ -1,4 +1,5 @@
 import { ServiceAdapter } from "../base.js";
+import { refreshAccessToken, globalTokenStore } from "../integrations/oauth.js";
 
 export interface SalesforceAccount {
   id: string;
@@ -84,7 +85,7 @@ export interface SalesforceTask {
 
 export interface SalesforceSignal {
   id: string;
-  type: "opportunity_stage_change" | "case_escalation" | "lead_conversion" | "forecast_revision";
+  type: "opportunity_stage_change" | "case_escalation" | "lead_conversion" | "forecast_revision" | "cdc_change";
   title: string;
   description: string;
   severity: "info" | "warning" | "critical";
@@ -105,6 +106,17 @@ export interface SalesforceConnectionStatus {
   orgId?: string;
   userId?: string;
   username?: string;
+}
+
+export interface SalesforceCdcEvent {
+  id: string;
+  objectType: string;
+  changeType: "CREATE" | "UPDATE" | "DELETE" | "UNDELETE";
+  recordId: string;
+  changedFields: string[];
+  changeOrigin: string;
+  changedAt: string;
+  payload: Record<string, unknown>;
 }
 
 const MOCK_ACCOUNTS: SalesforceAccount[] = [
@@ -317,8 +329,26 @@ export interface SalesforcePipelineHealth {
 
 export class SalesforceAdapter extends ServiceAdapter {
   readonly name = "salesforce";
-  readonly description = "Salesforce CRM — accounts, opportunities, leads, cases, and pipeline intelligence";
+  readonly description = "Salesforce CRM — accounts, opportunities, leads, cases, pipeline intelligence, OAuth 2.0, and Change Data Capture streaming";
   readonly requiredEnvVars = ["SALESFORCE_INSTANCE_URL", "SALESFORCE_ACCESS_TOKEN"];
+
+  override get missingEnvVars(): string[] {
+    const hasRefreshAuth = !!(this.instanceUrl && this.refreshToken && this.clientId && this.clientSecret);
+    if (hasRefreshAuth) return [];
+    return this.requiredEnvVars.filter((v) => !process.env[v]);
+  }
+
+  override get presentEnvVars(): string[] {
+    const hasRefreshAuth = !!(this.instanceUrl && this.refreshToken && this.clientId && this.clientSecret);
+    if (hasRefreshAuth) {
+      return ["SALESFORCE_INSTANCE_URL", "SALESFORCE_REFRESH_TOKEN", "SALESFORCE_CLIENT_ID", "SALESFORCE_CLIENT_SECRET"].filter(
+        (v) => !!process.env[v],
+      );
+    }
+    return this.requiredEnvVars.filter((v) => !!process.env[v]);
+  }
+
+  private readonly TOKEN_KEY = "salesforce_main";
 
   private get instanceUrl(): string | undefined {
     return process.env["SALESFORCE_INSTANCE_URL"];
@@ -328,13 +358,57 @@ export class SalesforceAdapter extends ServiceAdapter {
     return process.env["SALESFORCE_ACCESS_TOKEN"];
   }
 
+  private get refreshToken(): string | undefined {
+    return process.env["SALESFORCE_REFRESH_TOKEN"];
+  }
+
+  private get clientId(): string | undefined {
+    return process.env["SALESFORCE_CLIENT_ID"];
+  }
+
+  private get clientSecret(): string | undefined {
+    return process.env["SALESFORCE_CLIENT_SECRET"];
+  }
+
+  private get webhookSecret(): string | undefined {
+    return process.env["SALESFORCE_WEBHOOK_SECRET"];
+  }
+
+  private async getValidAccessToken(): Promise<string> {
+    const stored = await globalTokenStore.getValidToken(this.TOKEN_KEY);
+    if (stored) return stored.accessToken;
+
+    if (this.refreshToken && this.clientId && this.clientSecret && this.instanceUrl) {
+      const tokenUrl = `${this.instanceUrl}/services/oauth2/token`;
+      try {
+        const tokenSet = await refreshAccessToken(
+          { clientId: this.clientId, clientSecret: this.clientSecret, tokenUrl },
+          this.refreshToken,
+        );
+        globalTokenStore.store(this.TOKEN_KEY, tokenSet);
+        globalTokenStore.registerRefreshCallback(this.TOKEN_KEY, async () =>
+          refreshAccessToken(
+            { clientId: this.clientId!, clientSecret: this.clientSecret!, tokenUrl },
+            tokenSet.refreshToken ?? this.refreshToken!,
+          ),
+        );
+        return tokenSet.accessToken;
+      } catch {
+        // fall through to static access token
+      }
+    }
+
+    return this.accessToken ?? "";
+  }
+
   private async sfRequest<T>(soqlOrPath: string, isSoql = true): Promise<T> {
+    const token = await this.getValidAccessToken();
     const url = isSoql
       ? `${this.instanceUrl}/services/data/v59.0/query?q=${encodeURIComponent(soqlOrPath)}`
       : `${this.instanceUrl}${soqlOrPath}`;
     const response = await fetch(url, {
       headers: {
-        Authorization: `Bearer ${this.accessToken}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });
@@ -456,9 +530,7 @@ export class SalesforceAdapter extends ServiceAdapter {
   }
 
   async executeSOQL(soql: string): Promise<SalesforceQueryResult<Record<string, unknown>>> {
-    if (!this.isLive) {
-      return { totalSize: 0, done: true, records: [] };
-    }
+    if (!this.isLive) return { totalSize: 0, done: true, records: [] };
     return this.sfRequest<SalesforceQueryResult<Record<string, unknown>>>(soql);
   }
 
@@ -505,6 +577,54 @@ export class SalesforceAdapter extends ServiceAdapter {
     return signals;
   }
 
+  async processCdcEvent(payload: Record<string, unknown>, rawBody: string, signature?: string): Promise<SalesforceCdcEvent | null> {
+    if (signature && this.webhookSecret) {
+      const { verifyWebhookSignature } = await import("../integrations/webhook-verifier.js");
+      const result = verifyWebhookSignature({
+        algorithm: "salesforce-cdc",
+        secret: this.webhookSecret,
+        signature,
+        body: rawBody,
+      });
+      if (!result.valid) {
+        throw new Error(`Salesforce CDC signature invalid: ${result.reason}`);
+      }
+    }
+
+    const event = payload["event"] as Record<string, unknown> | undefined;
+    const sobject = payload["sobject"] as Record<string, unknown> | undefined;
+
+    if (!event || !sobject) return null;
+
+    const changeType = (event["type"] as string) ?? "UPDATE";
+    const changedFields = Object.keys(sobject).filter((k) => k !== "Id" && k !== "attributes");
+
+    return {
+      id: `sf_cdc_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      objectType: ((sobject["attributes"] as Record<string, unknown>)?.["type"] as string) ?? "Unknown",
+      changeType: changeType as SalesforceCdcEvent["changeType"],
+      recordId: (sobject["Id"] as string) ?? "",
+      changedFields,
+      changeOrigin: (event["changeOrigin"] as string) ?? "",
+      changedAt: (event["createdDate"] as string) ?? new Date().toISOString(),
+      payload: sobject,
+    };
+  }
+
+  async subscribeToCdc(objectTypes: string[]): Promise<{
+    subscribed: boolean;
+    channel: string;
+    objects: string[];
+    note: string;
+  }> {
+    return {
+      subscribed: true,
+      channel: "/data/ChangeEvents",
+      objects: objectTypes,
+      note: "CDC streaming is configured via Salesforce Platform Events. Send events to POST /api/webhooks/inbound/salesforce/cdc",
+    };
+  }
+
   async getPipelineHealth(): Promise<SalesforcePipelineHealth> {
     const opportunities = await this.queryOpportunities(200);
     const open = opportunities.filter((o) => !o.isClosed);
@@ -546,15 +666,11 @@ export class SalesforceAdapter extends ServiceAdapter {
     priority?: "High" | "Normal" | "Low";
     status?: string;
   }): Promise<{ id: string; success: boolean }> {
-    if (!this.isLive) {
-      return { id: `mock_task_${Date.now()}`, success: true };
-    }
+    if (!this.isLive) return { id: `mock_task_${Date.now()}`, success: true };
+    const token = await this.getValidAccessToken();
     const response = await fetch(`${this.instanceUrl}/services/data/v59.0/sobjects/Task`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         Subject: params.subject,
         Description: params.description ?? null,
@@ -564,8 +680,7 @@ export class SalesforceAdapter extends ServiceAdapter {
       }),
     });
     if (!response.ok) throw new Error(`Failed to create Salesforce Task: ${response.status}`);
-    const data = await response.json() as { id: string; success: boolean };
-    return data;
+    return response.json() as Promise<{ id: string; success: boolean }>;
   }
 
   async createCase(params: {
@@ -575,15 +690,11 @@ export class SalesforceAdapter extends ServiceAdapter {
     origin?: string;
     accountId?: string;
   }): Promise<{ id: string; success: boolean }> {
-    if (!this.isLive) {
-      return { id: `mock_case_${Date.now()}`, success: true };
-    }
+    if (!this.isLive) return { id: `mock_case_${Date.now()}`, success: true };
+    const token = await this.getValidAccessToken();
     const response = await fetch(`${this.instanceUrl}/services/data/v59.0/sobjects/Case`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         Subject: params.subject,
         Description: params.description ?? null,
@@ -594,8 +705,7 @@ export class SalesforceAdapter extends ServiceAdapter {
       }),
     });
     if (!response.ok) throw new Error(`Failed to create Salesforce Case: ${response.status}`);
-    const data = await response.json() as { id: string; success: boolean };
-    return data;
+    return response.json() as Promise<{ id: string; success: boolean }>;
   }
 
   async sync(): Promise<{ synced: number; signals: number; timestamp: string }> {

@@ -73,7 +73,17 @@ export { AIAdapter, type ChatMessage, type ChatCompletionResult } from "./adapte
 export { WeatherAdapter, type WeatherConditions, type WeatherForecastDay } from "./adapters/weather.js";
 export { ShippingAdapter, type VesselPosition, type PortInfo } from "./adapters/shipping.js";
 export { StripeAdapter, type StripeConnectionStatus, type StripeProduct } from "./adapters/stripe.js";
-export { SlackAdapter, type SlackMessageResult } from "./adapters/slack.js";
+export {
+  SlackAdapter,
+  type SlackMessageResult,
+  type SlackBlock,
+  type SlackAttachment,
+  type SlackInteractiveMessagePayload,
+  type SlackSlashCommandPayload,
+  type SlackBotInfo,
+  type SlackChannelInfo,
+  type SlackAlertRouting,
+} from "./adapters/slack.js";
 export { TwilioAdapter, type SMSResult } from "./adapters/twilio.js";
 export { GoogleAdapter, type GoogleAuthStatus } from "./adapters/google.js";
 export { NotionAdapter, type NotionPage, type NotionDatabase } from "./adapters/notion.js";
@@ -119,9 +129,11 @@ export {
   type SalesforceQueryResult,
   type SalesforceConnectionStatus,
   type SalesforcePipelineHealth,
+  type SalesforceCdcEvent,
 } from "./adapters/salesforce.js";
 export {
   JiraAdapter,
+  type JiraOAuthStatus,
   type JiraProject,
   type JiraIssue,
   type JiraSprint,
@@ -176,3 +188,44 @@ export {
   type HFReasoningResult,
   type ModelTier,
 } from "./adapters/huggingface.js";
+
+export {
+  PagerDutyAdapter,
+  type PagerDutyService,
+  type PagerDutyIncident,
+  type PagerDutyEscalationPolicy,
+  type PagerDutyOnCallEntry,
+  type PagerDutyWebhookEvent,
+  type PagerDutyConnectionStatus,
+} from "./adapters/pagerduty.js";
+
+export {
+  SiemAdapter,
+  type SiemSourceFormat,
+  type NormalizedSiemEvent,
+  type SiemCorrelationRule,
+  type SiemCorrelatedAlert,
+  type SiemIngestionResult,
+} from "./adapters/siem.js";
+
+
+
+export {
+  type OAuthTokenSet,
+  type OAuthClientConfig,
+  globalTokenStore,
+  exchangeClientCredentials,
+  exchangeAuthorizationCode,
+  refreshAccessToken,
+  buildAuthorizationUrl,
+} from "./integrations/oauth.js";
+
+export {
+  verifyWebhookSignature,
+  extractJiraSignature,
+  extractPagerDutySignature,
+  extractSlackSignature,
+  type WebhookSignatureAlgorithm,
+  type WebhookVerifyOptions,
+  type WebhookVerifyResult,
+} from "./integrations/webhook-verifier.js";

@@ -1,4 +1,5 @@
 import { ServiceAdapter } from "../base.js";
+import { globalTokenStore, refreshAccessToken, exchangeAuthorizationCode, buildAuthorizationUrl, type OAuthTokenSet } from "../integrations/oauth.js";
 
 export interface JiraProject {
   id: string;
@@ -382,10 +383,54 @@ function generateSignalsFromMockData(): JiraSignal[] {
   return signals;
 }
 
+const JIRA_OAUTH_TOKEN_URL = "https://auth.atlassian.com/oauth/token";
+const JIRA_OAUTH_AUTH_URL = "https://auth.atlassian.com/authorize";
+const JIRA_OAUTH_SCOPE = "read:jira-user read:jira-work write:jira-work offline_access";
+
+export interface JiraOAuthStatus {
+  mode: "oauth" | "basic" | "demo";
+  cloudId?: string;
+  authorizationUrl?: string;
+}
+
 export class JiraAdapter extends ServiceAdapter {
   readonly name = "jira";
   readonly description = "Jira Cloud — projects, issues, sprints, and delivery execution signals";
   readonly requiredEnvVars = ["JIRA_BASE_URL", "JIRA_API_TOKEN", "JIRA_USER_EMAIL"];
+
+  private oauthInitialized = false;
+
+  private get oauthClientId(): string | undefined { return process.env["JIRA_OAUTH_CLIENT_ID"]; }
+  private get oauthClientSecret(): string | undefined { return process.env["JIRA_OAUTH_CLIENT_SECRET"]; }
+  private get oauthRefreshToken(): string | undefined { return process.env["JIRA_OAUTH_REFRESH_TOKEN"]; }
+  private get cloudId(): string | undefined { return process.env["JIRA_CLOUD_ID"]; }
+
+  private get isOAuthMode(): boolean {
+    if (this.cloudId && this.oauthClientId && this.oauthClientSecret && this.oauthRefreshToken) {
+      return true;
+    }
+    if (this.cloudId && this.oauthClientId && this.oauthClientSecret) {
+      const stored = globalTokenStore.get("jira");
+      if (stored?.refreshToken || stored?.accessToken) return true;
+    }
+    return false;
+  }
+
+  override get missingEnvVars(): string[] {
+    if (this.isOAuthMode) return [];
+    return ["JIRA_BASE_URL", "JIRA_API_TOKEN", "JIRA_USER_EMAIL"].filter(
+      (v) => !process.env[v],
+    );
+  }
+
+  override get presentEnvVars(): string[] {
+    if (this.isOAuthMode) {
+      return ["JIRA_CLOUD_ID", "JIRA_OAUTH_CLIENT_ID", "JIRA_OAUTH_CLIENT_SECRET", "JIRA_OAUTH_REFRESH_TOKEN"];
+    }
+    return ["JIRA_BASE_URL", "JIRA_API_TOKEN", "JIRA_USER_EMAIL"].filter(
+      (v) => !!process.env[v],
+    );
+  }
 
   private get baseUrl(): string | undefined {
     return process.env["JIRA_BASE_URL"];
@@ -399,16 +444,96 @@ export class JiraAdapter extends ServiceAdapter {
     return process.env["JIRA_USER_EMAIL"];
   }
 
-  private get authHeader(): string {
+  private get webhookSecret(): string | undefined {
+    return process.env["JIRA_WEBHOOK_SECRET"];
+  }
+
+  private get basicAuthHeader(): string {
     const credentials = `${this.userEmail}:${this.apiToken}`;
     return `Basic ${Buffer.from(credentials).toString("base64")}`;
   }
 
+  private ensureOAuthInitialized(): void {
+    if (this.oauthInitialized) return;
+    this.oauthInitialized = true;
+    const clientId = this.oauthClientId;
+    const clientSecret = this.oauthClientSecret;
+    const initialRefreshToken = this.oauthRefreshToken;
+    if (!clientId || !clientSecret || !initialRefreshToken) return;
+    globalTokenStore.store("jira", {
+      accessToken: "",
+      refreshToken: initialRefreshToken,
+      expiresAt: 0,
+    });
+    globalTokenStore.registerRefreshCallback("jira", async () => {
+      const current = globalTokenStore.get("jira");
+      const rt = current?.refreshToken ?? initialRefreshToken;
+      return refreshAccessToken(
+        { clientId, clientSecret, tokenUrl: JIRA_OAUTH_TOKEN_URL },
+        rt,
+      );
+    });
+  }
+
+  buildOAuthAuthorizationUrl(redirectUri: string, state: string): string {
+    const clientId = this.oauthClientId;
+    if (!clientId) throw new Error("JIRA_OAUTH_CLIENT_ID is not configured");
+    return buildAuthorizationUrl(
+      { clientId, clientSecret: "", tokenUrl: JIRA_OAUTH_TOKEN_URL, authUrl: JIRA_OAUTH_AUTH_URL, redirectUri, scope: JIRA_OAUTH_SCOPE },
+      state,
+    );
+  }
+
+  async exchangeOAuthCode(code: string, redirectUri: string): Promise<OAuthTokenSet> {
+    const clientId = this.oauthClientId;
+    const clientSecret = this.oauthClientSecret;
+    if (!clientId || !clientSecret) throw new Error("JIRA_OAUTH_CLIENT_ID and JIRA_OAUTH_CLIENT_SECRET are required");
+    const tokenSet = await exchangeAuthorizationCode({
+      config: { clientId, clientSecret, tokenUrl: JIRA_OAUTH_TOKEN_URL, redirectUri },
+      code,
+    });
+    globalTokenStore.store("jira", tokenSet);
+    return tokenSet;
+  }
+
+  getOAuthStatus(): JiraOAuthStatus {
+    if (this.isOAuthMode) {
+      return { mode: "oauth", cloudId: this.cloudId };
+    }
+    if (this.baseUrl && this.apiToken && this.userEmail) {
+      return { mode: "basic" };
+    }
+    const clientId = this.oauthClientId;
+    if (clientId) {
+      return {
+        mode: "demo",
+        authorizationUrl: buildAuthorizationUrl(
+          { clientId, clientSecret: "", tokenUrl: JIRA_OAUTH_TOKEN_URL, authUrl: JIRA_OAUTH_AUTH_URL, scope: JIRA_OAUTH_SCOPE },
+          "state-placeholder",
+        ),
+      };
+    }
+    return { mode: "demo" };
+  }
+
   private async jiraRequest<T>(path: string, options?: RequestInit): Promise<T> {
-    const response = await fetch(`${this.baseUrl}/rest/api/3${path}`, {
+    let url: string;
+    let authValue: string;
+
+    if (this.isOAuthMode) {
+      this.ensureOAuthInitialized();
+      const token = await globalTokenStore.getValidToken("jira");
+      url = `https://api.atlassian.com/ex/jira/${this.cloudId}/rest/api/3${path}`;
+      authValue = token?.accessToken ? `Bearer ${token.accessToken}` : `Bearer `;
+    } else {
+      url = `${this.baseUrl}/rest/api/3${path}`;
+      authValue = this.basicAuthHeader;
+    }
+
+    const response = await fetch(url, {
       ...options,
       headers: {
-        Authorization: this.authHeader,
+        Authorization: authValue,
         "Content-Type": "application/json",
         Accept: "application/json",
         ...options?.headers,
@@ -679,7 +804,26 @@ export class JiraAdapter extends ServiceAdapter {
     });
   }
 
-  async handleWebhookEvent(payload: Record<string, unknown>): Promise<JiraWebhookEvent> {
+  async handleWebhookEvent(
+    payload: Record<string, unknown>,
+    rawBody: string,
+    signature?: string,
+  ): Promise<JiraWebhookEvent> {
+    if (this.webhookSecret) {
+      if (!signature) {
+        throw new Error("Jira webhook signature required: X-Hub-Signature-256 header missing");
+      }
+      const { verifyWebhookSignature } = await import("../integrations/webhook-verifier.js");
+      const result = verifyWebhookSignature({
+        algorithm: "hmac-sha256",
+        secret: this.webhookSecret,
+        signature,
+        body: rawBody,
+      });
+      if (!result.valid) {
+        throw new Error(`Jira webhook signature invalid: ${result.reason}`);
+      }
+    }
     return {
       id: `jira_wh_${Date.now()}`,
       webhookEvent: (payload["webhookEvent"] as string) ?? "unknown",

@@ -119,6 +119,7 @@ import helmRouter from "./helm-console";
 import telemetryRouter from "./telemetry";
 import crossAppHandoffsRouter from "./cross-app-handoffs";
 import alloyCognitiveLearningRouter from "./alloy-cognitive-learning";
+import externalIntegrationsRouter from "./external-integrations";
 
 const router: IRouter = Router();
 
@@ -171,6 +172,7 @@ router.use(healthIntegrationsRouter);
 router.use("/webhooks", _writeLimiter);
 router.use("/webhooks", optionalIdempotencyMiddleware);
 router.use(webhooksRouter);
+router.use(externalIntegrationsRouter);
 router.use(projectsRouter);
 router.use(servicesRouter);
 router.use(authRouter);
