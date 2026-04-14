@@ -168,6 +168,8 @@ class MetacognitiveMonitor {
     tokensBurned: number;
     latencyMs: number;
     toolCallCount: number;
+    tracerSignals?: { regressionRate: number; avgOverallScore: number; topWeaknesses: string[] };
+    calibrationBias?: number;
   }): MetacognitiveAssessment {
     const avgConfidence = input.agentResponses.length > 0
       ? input.agentResponses.reduce((s, r) => s + r.confidence, 0) / input.agentResponses.length
@@ -179,11 +181,29 @@ class MetacognitiveMonitor {
 
     const hasEvidence = input.agentResponses.some(r => r.response.length > 500);
 
-    const certaintyLevel = classifyCertainty(avgConfidence, input.agentResponses.length, input.conflictCount);
-    const reasoningQuality = classifyQuality(input.validationPassed, agentAgreement, hasEvidence, input.latencyMs);
+    let effectiveConflicts = input.conflictCount;
+    if (input.tracerSignals && input.tracerSignals.regressionRate > 0.15) {
+      effectiveConflicts += Math.ceil(input.tracerSignals.regressionRate * 5);
+    }
+
+    let effectiveValidation = input.validationPassed;
+    if (input.tracerSignals && input.tracerSignals.avgOverallScore < 0.4) {
+      effectiveValidation = false;
+    }
+
+    const certaintyLevel = classifyCertainty(avgConfidence, input.agentResponses.length, effectiveConflicts);
+    const reasoningQuality = classifyQuality(effectiveValidation, agentAgreement, hasEvidence, input.latencyMs);
     const cognitiveLoad = classifyLoad(input.agentResponses.length, input.tokensBurned, input.toolCallCount);
 
-    const confusionSignals = detectConfusionSignals(input.agentResponses, input.conflictCount);
+    const confusionSignals = detectConfusionSignals(input.agentResponses, effectiveConflicts);
+    if (input.tracerSignals) {
+      for (const w of input.tracerSignals.topWeaknesses.slice(0, 2)) {
+        confusionSignals.push(`Behavioral tracer weakness: ${w}`);
+      }
+    }
+    if (input.calibrationBias !== undefined && Math.abs(input.calibrationBias) > 0.15) {
+      confusionSignals.push(`Calibration drift: ${input.calibrationBias > 0 ? "overconfident" : "underconfident"} by ${(Math.abs(input.calibrationBias) * 100).toFixed(0)}%`);
+    }
     const knowledgeGaps = detectKnowledgeGaps(input.query, input.agentResponses);
 
     const certScore = CERTAINTY_SCORES[certaintyLevel];

@@ -1697,12 +1697,6 @@ export class NuroMeshOrchestrator {
           traceId,
         });
 
-        selfModelEngine.updateAgentProfile(agent.id, agent.domain, {
-          confidence: result.confidence,
-          success: result.confidence >= 40 && !result.response.includes("[unavailable") && !result.response.includes("[Blocked"),
-          latencyMs: result.latencyMs,
-        });
-
         metacognitiveMonitor.assess({
           query: `[per-agent: ${agent.id}] ${query.slice(0, 100)}`,
           agentResponses: [{ confidence: result.confidence, response: result.response.slice(0, 300), domain: result.domain }],
@@ -1908,6 +1902,21 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
     }
 
     try {
+      const { detectCrossPatterns } = await import("./learning/pattern-detector.js");
+      const { caseMemory: caseMemoryInstance } = await import("./tradecraft/case-memory.js");
+      const allCases = caseMemoryInstance.getAll();
+      const recentCases = allCases.slice(-20);
+      if (recentCases.length >= 3) {
+        const patterns = await detectCrossPatterns(recentCases);
+        if (patterns.length > 0) {
+          goalEngine.integratePatternDetectorAlerts(patterns);
+        }
+      }
+    } catch {
+      // pattern-detector integration is best-effort
+    }
+
+    try {
       if (synthesis.length > 100) {
         const domains = targetAgents.map(a => a.domain);
         await db.insert(agentMemoryFacts).values({
@@ -2047,6 +2056,7 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
 
     const consciousnessConflictCount = conflicts.length;
 
+    const tracerStatsForMetacog = behavioralTracer.getObservabilityStats();
     const metacognition = metacognitiveMonitor.assess({
       query,
       agentResponses: agentResponses.map(r => ({ confidence: r.confidence, response: r.response, domain: r.domain })),
@@ -2055,6 +2065,11 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       tokensBurned: telemetry.tokensBurned,
       latencyMs: elapsedMs,
       toolCallCount: 0,
+      tracerSignals: {
+        regressionRate: tracerStatsForMetacog.regressionRate,
+        avgOverallScore: tracerStatsForMetacog.avgOverallScore,
+        topWeaknesses: tracerStatsForMetacog.topWeaknesses,
+      },
     });
 
     innerMonologue.postSynthesisReflection(

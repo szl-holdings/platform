@@ -195,6 +195,35 @@ class GoalFormationEngine {
     }
   }
 
+  integratePatternDetectorAlerts(patterns: Array<{
+    dimension: string;
+    value: string;
+    count: number;
+    significance: "high" | "medium" | "low";
+    summary: string;
+  }>): void {
+    for (const pattern of patterns) {
+      if (pattern.significance === "high" || (pattern.significance === "medium" && pattern.count >= 3)) {
+        this.registerCuriosity({
+          topic: `Pattern: ${pattern.dimension}=${pattern.value} (${pattern.count} occurrences)`,
+          intensity: pattern.significance === "high" ? 0.9 : 0.6,
+          source: "pattern",
+          suggestedExploration: pattern.summary,
+        });
+      }
+
+      if (pattern.significance === "high" && pattern.count >= 5) {
+        this.createGoal({
+          title: `Address recurring pattern: ${pattern.dimension}`,
+          description: `${pattern.summary}. This pattern has been detected ${pattern.count} times with high significance — requires systematic investigation.`,
+          priority: "high",
+          tags: [pattern.dimension, pattern.value, "pattern_detector"],
+          successCriteria: `Pattern occurrence rate reduced or root cause identified for ${pattern.dimension}=${pattern.value}`,
+        });
+      }
+    }
+  }
+
   integrateTrajectoryInsights(trajectories: Array<{
     query: string;
     averageConfidence: number;
