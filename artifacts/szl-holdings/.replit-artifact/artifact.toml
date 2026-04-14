@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "SZL Holdings"
+title = "SZL Holdings Dashboard"
 version = "1.0.0"
 id = "artifacts/szl-holdings"
 router = "path"
@@ -12,7 +12,7 @@ version = "1.0.0"
 [[services]]
 name = "web"
 paths = [ "/" ]
-localPort = 18490
+localPort = 5173
 
 [services.development]
 run = "pnpm --filter @workspace/szl-holdings run dev"
@@ -27,5 +27,5 @@ from = "/*"
 to = "/index.html"
 
 [services.env]
-PORT = "18490"
+PORT = "5173"
 BASE_PATH = "/"
