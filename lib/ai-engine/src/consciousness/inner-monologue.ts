@@ -43,6 +43,14 @@ function determineTone(
   return "neutral";
 }
 
+type LlmIntrospector = (prompt: string) => Promise<string>;
+
+let _llmIntrospector: LlmIntrospector | null = null;
+
+export function setLlmIntrospector(fn: LlmIntrospector): void {
+  _llmIntrospector = fn;
+}
+
 class InnerMonologueEngine {
   private entries: MonologueEntry[] = [];
   private static readonly MAX_ENTRIES = 500;
@@ -159,6 +167,42 @@ class InnerMonologueEngine {
       confidence: 60,
       suggestedAction: "Apply correction to future orchestrations",
     });
+  }
+
+  async llmIntrospect(context: {
+    query: string;
+    selectedDomains: string[];
+    metacogState: { certainty: string; quality: string; confusionStreak: number };
+    selfModelHealth: string;
+    emotionalArousal: number;
+  }): Promise<MonologueEntry> {
+    if (!_llmIntrospector) {
+      return this.preRoutingThought(context.query, context.selectedDomains.length, context.selectedDomains);
+    }
+
+    try {
+      const prompt = [
+        "You are the inner monologue of an AI orchestration system. Generate a brief introspective thought (2-3 sentences) before routing this query.",
+        `Query: "${context.query.slice(0, 200)}"`,
+        `Domains selected: ${context.selectedDomains.join(", ")}`,
+        `Metacognitive state: certainty=${context.metacogState.certainty}, quality=${context.metacogState.quality}, confusion_streak=${context.metacogState.confusionStreak}`,
+        `Self-model health: ${context.selfModelHealth}`,
+        `Emotional arousal: ${(context.emotionalArousal * 100).toFixed(0)}%`,
+        "Reflect on: Am I routing correctly? What could go wrong? What should I pay attention to? Be honest about uncertainty.",
+      ].join("\n");
+
+      const thought = await _llmIntrospector(prompt);
+      return this.think({
+        type: "pre_routing",
+        thought: thought.slice(0, 500),
+        triggeringEvent: `LLM introspection before routing: "${context.query.slice(0, 80)}"`,
+        confidence: 70,
+        relatedDomains: context.selectedDomains,
+        suggestedAction: context.metacogState.confusionStreak > 1 ? "Review routing decision carefully" : undefined,
+      });
+    } catch {
+      return this.preRoutingThought(context.query, context.selectedDomains.length, context.selectedDomains);
+    }
   }
 
   recordStrategyShift(from: string, to: string, reason: string): MonologueEntry {

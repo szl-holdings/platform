@@ -23,6 +23,7 @@ export {
 
 export {
   innerMonologue,
+  setLlmIntrospector,
   type MonologueEntry,
   type MonologueType,
   type InnerMonologueState,

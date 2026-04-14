@@ -38,7 +38,20 @@ import { innerMonologue } from "./consciousness/inner-monologue.js";
 import { goalEngine } from "./consciousness/goal-engine.js";
 import { emotionalSignals } from "./consciousness/emotional-signals.js";
 import { temporalAwareness } from "./consciousness/temporal-awareness.js";
-import { captureConsciousnessSnapshot, buildConsciousnessContext, type ConsciousnessSnapshot } from "./consciousness/index.js";
+import { captureConsciousnessSnapshot, buildConsciousnessContext, setLlmIntrospector, type ConsciousnessSnapshot } from "./consciousness/index.js";
+
+setLlmIntrospector(async (prompt: string): Promise<string> => {
+  try {
+    const result = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      max_completion_tokens: 150,
+      messages: [{ role: "user", content: prompt }],
+    });
+    return result.choices[0]?.message?.content ?? "Proceeding with standard routing.";
+  } catch {
+    return "Introspection unavailable — proceeding with standard routing.";
+  }
+});
 
 export const AGENT_REGISTRY: AgentDefinition[] = [
   {
@@ -602,6 +615,26 @@ export async function callAgent(
   }
 
   const preCheck = metacognitiveMonitor.preFlightCheck(agent.id, agent.domain, query.length);
+  if (!preCheck.proceed) {
+    innerMonologue.addThought(
+      "doubt",
+      `Pre-flight blocked agent ${agent.id} (risk: ${preCheck.riskLevel}, adjustments: ${preCheck.adjustments.join(", ")}). Returning degraded response.`,
+      "cautious",
+      10,
+    );
+    const latencyMs = Date.now() - startTime;
+    return {
+      agentId: agent.id,
+      agentName: agent.name ?? agent.id,
+      domain: agent.domain,
+      response: `[Deferred — metacognitive pre-flight blocked this agent due to ${preCheck.riskLevel} risk: ${preCheck.adjustments.join(", ")}. The system is in a confusion state and recommends human review.]`,
+      confidence: 0,
+      tokensUsed: 0,
+      latencyMs,
+      modelUsed: actualModel,
+    };
+  }
+
   let contextBudget = 3000;
   if (preCheck.adjustments.includes("reduce_context_window")) {
     contextBudget = 2000;
@@ -1468,7 +1501,20 @@ export class NuroMeshOrchestrator {
     if (targetAgents.length === 0) targetAgents = [AGENT_REGISTRY.find(a => a.id === "beacon")!];
 
     const routedDomains = targetAgents.map(a => a.domain);
-    innerMonologue.preRoutingThought(query, targetAgents.length, routedDomains);
+    const metacogStateSummary = metacognitiveMonitor.getState();
+    const selfModelSummary = selfModelEngine.getSelfModel();
+    const emotionalSummary = emotionalSignals.getState();
+    await innerMonologue.llmIntrospect({
+      query,
+      selectedDomains: routedDomains,
+      metacogState: {
+        certainty: metacogStateSummary.currentAssessment?.certaintyLevel ?? "moderate",
+        quality: metacogStateSummary.currentAssessment?.reasoningQuality ?? "adequate",
+        confusionStreak: metacogStateSummary.confusionStreak,
+      },
+      selfModelHealth: selfModelSummary.overallHealth,
+      emotionalArousal: emotionalSummary.valence.arousal,
+    });
 
     const consciousnessCtx = buildConsciousnessContext();
     if (consciousnessCtx) {
