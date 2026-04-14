@@ -601,7 +601,19 @@ export async function callAgent(
     consciousnessDirective += " Confusion streak detected — provide extra reasoning transparency and flag uncertainties.";
   }
 
-  const fullPrompt = `${agent.systemPrompt}${learningSection}${consciousnessDirective}\n\n## Shared Context from Nuro Mesh\n${context}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with a confidence score (0-100) on a new line in format: CONFIDENCE: [score]`;
+  const workspaceState = cognitiveWorkspace.getState();
+  let workspaceContext = "";
+  if (workspaceState.workingMemory.length > 0) {
+    const relevant = workspaceState.workingMemory
+      .filter(wm => wm.tags.length === 0 || wm.tags.includes(agent.domain))
+      .slice(0, 3);
+    if (relevant.length > 0) {
+      workspaceContext = `\n\n## Cognitive Workspace\nFocus: ${workspaceState.attentionFocus.primaryTopic}\n` +
+        relevant.map(wm => `- [${wm.source}] ${wm.content.slice(0, 200)}`).join("\n");
+    }
+  }
+
+  const fullPrompt = `${agent.systemPrompt}${learningSection}${consciousnessDirective}${workspaceContext}\n\n## Shared Context from Nuro Mesh\n${context}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with a confidence score (0-100) on a new line in format: CONFIDENCE: [score]`;
 
   let forkId: string | undefined;
 
@@ -617,7 +629,7 @@ export async function callAgent(
       tokensUsed = (result.usage.input_tokens + result.usage.output_tokens);
       success = true;
     } else if (agent.preferredProvider === "openai") {
-      const systemWithLearning = `${agent.systemPrompt}${learningSection}${consciousnessDirective}`;
+      const systemWithLearning = `${agent.systemPrompt}${learningSection}${consciousnessDirective}${workspaceContext}`;
       const result = await openai.chat.completions.create({
         model: actualModel,
         max_completion_tokens: 2048,
@@ -1524,11 +1536,28 @@ export class NuroMeshOrchestrator {
           latencyMs: result.latencyMs,
         });
 
+        metacognitiveMonitor.assess({
+          query: `[per-agent: ${agent.id}] ${query.slice(0, 100)}`,
+          agentResponses: [{ confidence: result.confidence, response: result.response.slice(0, 300), domain: result.domain }],
+          conflictCount: 0,
+          validationPassed: true,
+          tokensBurned: result.tokensUsed ?? 0,
+          latencyMs: result.latencyMs,
+          toolCallCount: 0,
+        });
+
         if (result.confidence < 30) {
           innerMonologue.addThought(
             "doubt",
             `Agent ${agent.name} returned low confidence (${result.confidence}%) — possible knowledge gap or ambiguous query.`,
             "cautious",
+            result.confidence,
+          );
+        } else if (result.confidence > 85) {
+          innerMonologue.addThought(
+            "satisfaction",
+            `Agent ${agent.name} responded with high confidence (${result.confidence}%).`,
+            "positive",
             result.confidence,
           );
         }
@@ -1859,12 +1888,7 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
     });
 
     for (const r of agentResponses) {
-      selfModelEngine.updateAgentProfile(r.agentId, r.domain, {
-        confidence: r.confidence,
-        success: r.confidence > 30,
-        latencyMs: r.latencyMs ?? 0,
-        validationPassed: validation?.validated,
-      });
+      selfModelEngine.recordLearningEvent(validation?.validated ?? (r.confidence > 50));
     }
 
     goalEngine.detectGoalsFromOrchestration(
@@ -1913,13 +1937,19 @@ async function persistConsciousnessState(
   triggeredValidation: boolean,
 ): Promise<void> {
   try {
+    const metacogJson = JSON.parse(JSON.stringify(snapshot.metacognition));
+    const selfModelJson = JSON.parse(JSON.stringify(snapshot.selfModel));
+    const emotionsJson = JSON.parse(JSON.stringify(snapshot.emotions));
+    const goalsJson = JSON.parse(JSON.stringify(snapshot.goals));
+    const temporalJson = JSON.parse(JSON.stringify(snapshot.temporal));
+
     await db.insert(consciousnessSnapshotsTable).values({
       orchestrationId,
-      metacognition: snapshot.metacognition as any,
-      selfModel: snapshot.selfModel as any,
-      emotions: snapshot.emotions as any,
-      goals: snapshot.goals as any,
-      temporal: snapshot.temporal as any,
+      metacognition: metacogJson,
+      selfModel: selfModelJson,
+      emotions: emotionsJson,
+      goals: goalsJson,
+      temporal: temporalJson,
       avgConfidence,
       confusionStreak: snapshot.metacognition.confusionStreak,
       overallHealth: snapshot.selfModel.overallHealth,
@@ -1932,13 +1962,13 @@ async function persistConsciousnessState(
           entryId: t.entryId,
           type: t.type,
           thought: t.thought.slice(0, 2000),
-          triggeringEvent: (t as any).triggeringEvent ?? "orchestration",
+          triggeringEvent: t.triggeringEvent,
           emotionalTone: t.emotionalTone,
           confidence: t.confidence,
-          relatedAgents: (t as any).relatedAgents ?? [],
-          relatedDomains: (t as any).relatedDomains ?? [],
-          actionable: (t as any).actionable ? 1 : 0,
-          suggestedAction: (t as any).suggestedAction ?? null,
+          relatedAgents: t.relatedAgents,
+          relatedDomains: t.relatedDomains,
+          actionable: t.actionable ? 1 : 0,
+          suggestedAction: t.suggestedAction ?? null,
         })),
       ).onConflictDoNothing();
     }
@@ -1956,6 +1986,7 @@ async function persistConsciousnessState(
     });
 
     for (const cap of snapshot.selfModel.capabilities) {
+      const capJson = JSON.parse(JSON.stringify(cap));
       await db.insert(consciousnessAgentProfilesTable).values({
         agentId: cap.agentId,
         domain: cap.domain,
@@ -1963,9 +1994,9 @@ async function persistConsciousnessState(
         avgConfidence: cap.avgConfidence,
         totalInvocations: cap.totalInvocations,
         recentTrend: cap.recentTrend,
-        strengths: (cap as any).strengths ?? [],
-        weaknesses: (cap as any).weaknesses ?? [],
-        snapshotData: cap as any,
+        strengths: cap.strengths,
+        weaknesses: cap.weaknesses,
+        snapshotData: capJson,
       });
     }
   } catch {
