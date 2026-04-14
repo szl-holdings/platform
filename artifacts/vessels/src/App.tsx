@@ -9,7 +9,8 @@ import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 import {
   Ship, AlertTriangle, Activity, LayoutDashboard, WifiOff,
   BarChart3, ChevronDown, User, ChevronRight, DollarSign, Wrench,
-  MapPin, Radio, List, Globe, Navigation, EyeOff, ShieldAlert, Shield, Anchor, Brain, Menu, FileText
+  MapPin, Radio, List, Globe, Navigation, EyeOff, ShieldAlert, Shield, Anchor, Brain, Menu, FileText,
+  TrendingUp, Calculator, Zap
 } from "lucide-react";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
@@ -129,6 +130,11 @@ const FleetWhatChangedPage = lazy(() => import("@/pages/fleet-what-changed"));
 const ExceptionQueuePage = lazy(() => import("@/pages/exception-queue"));
 const RouteRiskPage = lazy(() => import("@/pages/route-risk"));
 const VesselsApprovalReviewPage = lazy(() => import("@/pages/vessels-approval-review"));
+const DisruptionForecastPage = lazy(() => import("@/pages/disruption-forecast"));
+const DarkFleetEconomicsPage = lazy(() => import("@/pages/dark-fleet-economics"));
+const VoyagePnLPage = lazy(() => import("@/pages/voyage-pnl"));
+const TradeFlowHeatmapPage = lazy(() => import("@/pages/trade-flow-heatmap"));
+const IntelligenceBriefsPage = lazy(() => import("@/pages/intelligence-briefs"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -270,6 +276,17 @@ function VesselsSidebarContent({ expanded, onMobileClose }: { expanded: boolean;
         href: path,
         icon: <Icon className="w-3.5 h-3.5" />,
       })),
+    },
+    {
+      id: "predictive",
+      label: "Predictive Intelligence",
+      items: [
+        { id: "disruption-forecast", label: "Disruption Forecast", href: "/disruption-forecast", icon: <Globe className="w-3.5 h-3.5" /> },
+        { id: "dark-fleet-economics", label: "Dark Fleet Economics", href: "/dark-fleet-economics", icon: <Calculator className="w-3.5 h-3.5" /> },
+        { id: "voyage-pnl", label: "Voyage P&L Predictor", href: "/voyage-pnl", icon: <TrendingUp className="w-3.5 h-3.5" /> },
+        { id: "trade-flow-heatmap", label: "Trade Flow Heatmap", href: "/trade-flow-heatmap", icon: <BarChart3 className="w-3.5 h-3.5" /> },
+        { id: "intelligence-briefs", label: "Intelligence Briefs", href: "/intelligence-briefs", icon: <Zap className="w-3.5 h-3.5" /> },
+      ]
     },
     {
       id: "operations",
@@ -469,6 +486,11 @@ function DashboardRouter() {
         <Route path="/exception-queue" component={ExceptionQueuePage} />
         <Route path="/route-risk" component={RouteRiskPage} />
         <Route path="/approval-review" component={VesselsApprovalReviewPage} />
+        <Route path="/disruption-forecast" component={DisruptionForecastPage} />
+        <Route path="/dark-fleet-economics" component={DarkFleetEconomicsPage} />
+        <Route path="/voyage-pnl" component={VoyagePnLPage} />
+        <Route path="/trade-flow-heatmap" component={TradeFlowHeatmapPage} />
+        <Route path="/intelligence-briefs" component={IntelligenceBriefsPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-sky-400/40">Page not found</p>
@@ -564,7 +586,10 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     location.startsWith("/document-engine") ||
     location.startsWith("/voyage-desk") || location.startsWith("/what-changed") ||
     location.startsWith("/exception-queue") || location.startsWith("/route-risk") ||
-    location.startsWith("/approval-review");
+    location.startsWith("/approval-review") ||
+    location.startsWith("/disruption-forecast") || location.startsWith("/dark-fleet-economics") ||
+    location.startsWith("/voyage-pnl") || location.startsWith("/trade-flow-heatmap") ||
+    location.startsWith("/intelligence-briefs");
 
   if (isDashboard) {
     return (

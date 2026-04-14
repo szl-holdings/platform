@@ -1798,4 +1798,35 @@ Be precise, tactical, and time-sensitive.`;
   } catch (err) { handleRouteError(res, err, "Threat triage failed"); }
 });
 
+router.post("/intelligence/ai/maritime-intelligence", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const { query, context } = req.body as { query?: string; context?: string };
+    if (!query || typeof query !== "string") { sendError(res, "Query is required and must be a string", 400); return; }
+    if (query.length > 4000) { sendError(res, "Query exceeds maximum length of 4000 characters", 400); return; }
+    if (context && (typeof context !== "string" || context.length > 1000)) { sendError(res, "Context must be a string of max 1000 characters", 400); return; }
+
+    const systemPrompt = `You are Helmsman, the maritime intelligence agent. You specialise in predictive trade disruption analysis, dark fleet economics, sanctions screening, voyage economics, and geopolitical risk assessment for global commodity flows. Produce structured, executive-grade intelligence briefs with clear situation summaries, dollar-denominated impact estimates, and numbered recommended actions. Be precise, actionable, and professional.`;
+
+    const userPrompt = `${context ? `Context: ${context}\n\n` : ""}${query}`;
+
+    const startTime = Date.now();
+    const result = await anthropic.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1800,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userPrompt }],
+    });
+
+    const content = result.content[0]?.type === "text" ? result.content[0].text : "";
+    sendSuccess(res, {
+      response: content,
+      query,
+      model: "claude-sonnet-4-6",
+      provider: "anthropic",
+      latencyMs: Date.now() - startTime,
+      generatedAt: new Date().toISOString(),
+    });
+  } catch (err) { handleRouteError(res, err, "Maritime intelligence brief generation failed"); }
+});
+
 export default router;
