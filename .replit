@@ -15,28 +15,6 @@ args = ["pnpm", "store", "prune"]
 env = { "CI" = "true" }
 
 [workflows]
-runButton = "Project"
-
-[[workflows.workflow]]
-name = "Project"
-mode = "parallel"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "artifacts/aegis-mobile: expo"
-
-[[workflows.workflow]]
-name = "artifacts/aegis-mobile: expo"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "pnpm --filter @workspace/aegis-mobile run dev"
-waitForPort = 8083
-
-[workflows.workflow.metadata]
-outputType = "webview"
 
 [agent]
 stack = "PNPM_WORKSPACE"
@@ -60,7 +38,3 @@ PUBLIC_APP_URL = "https://szlholdings.replit.app"
 
 [userenv.shared]
 OAUTH_STATE_SECRET = "0d5148c24475c3a022f044e15ad8a6088ccdadb82fd4a9c873eed64fe79c4e48"
-
-[[ports]]
-localPort = 21130
-externalPort = 80

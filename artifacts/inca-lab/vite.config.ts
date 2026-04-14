@@ -4,8 +4,8 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
-const port = Number(process.env.PORT) || 3000;
-const basePath = process.env.BASE_PATH || "/stephen/";
+const port = Number(process.env.PORT) || 5000;
+const basePath = process.env.BASE_PATH || "/inca-lab/";
 
 export default defineConfig({
   base: basePath,
@@ -30,14 +30,13 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "src"),
-      "@assets": path.resolve(import.meta.dirname, "..", "..", "attached_assets"),
     },
     dedupe: ["react", "react-dom"],
   },
   root: path.resolve(import.meta.dirname),
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
-      sourcemap: "hidden",
+    sourcemap: "hidden",
     emptyOutDir: true,
     cssCodeSplit: true,
     rollupOptions: {

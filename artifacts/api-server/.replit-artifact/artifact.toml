@@ -1,5 +1,5 @@
 kind = "api"
-previewPath = "/api" # TODO - should be excluded from preview in the first place
+previewPath = "/api"
 title = "API Server"
 version = "1.0.0"
 id = "3B4_FFSkEVBkAeYMFRJ2e"
@@ -9,8 +9,8 @@ localPort = 8080
 name = "API Server"
 paths = ["/api"]
 
-[services.development]
-run = "pnpm --filter @workspace/api-server run dev"
+  [services.development]
+  run = "bash -c 'cd /home/runner/workspace/artifacts/api-server && exec node --max-old-space-size=512 --expose-gc --enable-source-maps ./fast-start.mjs'"
 
 [services.production]
 
@@ -21,7 +21,6 @@ args = ["pnpm", "--filter", "@workspace/api-server", "run", "build"]
 NODE_ENV = "production"
 
 [services.production.run]
-# --max-old-space-size caps heap at 1 GB; --expose-gc allows manual GC in the memory monitor
 args = ["node", "--max-old-space-size=1024", "--expose-gc", "--enable-source-maps", "artifacts/api-server/dist/index.mjs"]
 
 [services.production.run.env]

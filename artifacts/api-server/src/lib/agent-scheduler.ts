@@ -138,6 +138,23 @@ export function registerDefaultSchedules() {
       },
     },
     {
+      agentId: "nexus-autonomous",
+      name: "Nexus Cross-Domain Fusion Monitor",
+      domain: "nexus" as const,
+      intervalMs: SIX_HOURS_MS,
+      enabled: true,
+      taskDescription: "Fuse signals across all intelligence domains, surface cross-domain patterns and situational awareness",
+      systemPrompt: `You are an autonomous cross-domain fusion intelligence agent. Analyze signals from maritime, cyber, real estate, and financial domains to surface emergent cross-domain patterns, risks, and opportunities. Be specific and actionable.`,
+      analysisPrompt: async () => {
+        const [maritime, threats, geopolitical] = await Promise.all([
+          fetchData("/api/intelligence/maritime/vessels"),
+          fetchData("/api/intelligence/threats"),
+          fetchData("/api/intelligence/geopolitical"),
+        ]);
+        return `Analyze these cross-domain signals and identify the top 1-2 most significant fused findings:\n\nMaritime: ${safeSerialize(maritime, 1000)}\nCyber Threats: ${safeSerialize(threats, 1000)}\nGeopolitical: ${safeSerialize(geopolitical, 1000)}\n\nRespond with findings in this format:\nFINDING: [title]\nSEVERITY: [low|medium|high|critical]\nSUMMARY: [2-3 sentence summary]\nTAGS: [comma-separated tags]`;
+      },
+    },
+    {
       agentId: "msp-autonomous",
       name: "MSP Client Monitor",
       domain: "msp" as const,

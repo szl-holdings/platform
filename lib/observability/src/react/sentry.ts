@@ -1,6 +1,17 @@
 import * as Sentry from "@sentry/react";
 
-let sentryInitialized = false;
+const SENTRY_INIT_KEY = "__szl_sentry_initialized";
+
+function isSentryInitialized(): boolean {
+  if (typeof window === "undefined") return false;
+  return !!(window as Record<string, unknown>)[SENTRY_INIT_KEY];
+}
+
+function markSentryInitialized(): void {
+  if (typeof window !== "undefined") {
+    (window as Record<string, unknown>)[SENTRY_INIT_KEY] = true;
+  }
+}
 
 interface SentryConfig {
   appSlug: string;
@@ -14,13 +25,15 @@ interface SentryConfig {
 }
 
 export function initSentry(config: SentryConfig) {
-  if (sentryInitialized || typeof window === "undefined") return;
-  sentryInitialized = true;
+  if (isSentryInitialized() || typeof window === "undefined") return;
+  markSentryInitialized();
 
   const env = import.meta.env;
   const dsn = config.dsn || env.VITE_SENTRY_DSN;
   if (!dsn) {
-    console.debug(`[${config.appSlug}] Sentry DSN not configured — error tracking in console-only mode`);
+    if (env["DEV"] !== "true" && env["MODE"] !== "development") {
+      console.debug(`[${config.appSlug}] Sentry DSN not configured — error tracking in console-only mode`);
+    }
     setupGlobalHandlers(config.appSlug);
     return;
   }
@@ -64,7 +77,7 @@ function setupGlobalHandlers(appSlug: string) {
 }
 
 export function reportError(error: Error, context?: Record<string, string>) {
-  if (sentryInitialized && Sentry.isInitialized()) {
+  if (isSentryInitialized() && Sentry.isInitialized()) {
     Sentry.captureException(error, { tags: context });
   }
   console.error("[ErrorTracking]", error.message, context);
