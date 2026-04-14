@@ -281,6 +281,27 @@ class MetacognitiveMonitor {
     return { proceed, adjustments, riskLevel };
   }
 
+  assessAgent(input: {
+    agentId: string;
+    domain: string;
+    confidence: number;
+    latencyMs: number;
+    success: boolean;
+    responseLength: number;
+    tokensUsed: number;
+  }): { certaintyLevel: CertaintyLevel; reasoningQuality: ReasoningQuality } {
+    const certaintyLevel = classifyCertainty(input.confidence, 1, input.success ? 0 : 1);
+    const hasEvidence = input.responseLength > 300;
+    const reasoningQuality = classifyQuality(input.success, 0.7, hasEvidence, input.latencyMs);
+
+    const certScore = CERTAINTY_SCORES[certaintyLevel];
+    const qualScore = QUALITY_SCORES[reasoningQuality];
+    this.rollingCertainty = this.rollingCertainty * (1 - MetacognitiveMonitor.EMA_ALPHA * 0.5) + certScore * (MetacognitiveMonitor.EMA_ALPHA * 0.5);
+    this.rollingQuality = this.rollingQuality * (1 - MetacognitiveMonitor.EMA_ALPHA * 0.5) + qualScore * (MetacognitiveMonitor.EMA_ALPHA * 0.5);
+
+    return { certaintyLevel, reasoningQuality };
+  }
+
   buildMetacognitiveContext(): string {
     if (this.assessments.length === 0) return "";
 

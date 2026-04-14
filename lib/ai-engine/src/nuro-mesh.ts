@@ -756,6 +756,31 @@ export async function callAgent(
     }).onConflictDoNothing();
   } catch {}
 
+  const postFlightAssessment = metacognitiveMonitor.assessAgent({
+    agentId: agent.id,
+    domain: agent.domain,
+    confidence,
+    latencyMs,
+    success,
+    responseLength: cleanResponse.length,
+    tokensUsed,
+  });
+
+  selfModelEngine.updateAgentProfile(agent.id, agent.domain, {
+    confidence,
+    success,
+    latencyMs,
+  });
+
+  if (postFlightAssessment.certaintyLevel === "very_low" || postFlightAssessment.reasoningQuality === "poor") {
+    innerMonologue.addThought(
+      "doubt",
+      `Post-flight: agent ${agent.id} produced ${postFlightAssessment.certaintyLevel} certainty / ${postFlightAssessment.reasoningQuality} quality (conf=${confidence}, ${latencyMs}ms)`,
+      "negative",
+      15,
+    );
+  }
+
   return {
     agentId: agent.id,
     agentName: agent.name,
@@ -1447,6 +1472,33 @@ export class NuroMeshOrchestrator {
 
     const context = await getSharedContext();
 
+    const preRoutingMetacog = metacognitiveMonitor.getState();
+    const preRoutingSelfModel = selfModelEngine.getSelfModel();
+    const preRoutingEmotional = emotionalSignals.getState();
+
+    const allDomains = [...new Set(AGENT_REGISTRY.map(a => a.domain))];
+    const introspection = await innerMonologue.llmIntrospect({
+      query,
+      selectedDomains: allDomains,
+      metacogState: {
+        certainty: preRoutingMetacog.currentAssessment?.certaintyLevel ?? "moderate",
+        quality: preRoutingMetacog.currentAssessment?.reasoningQuality ?? "adequate",
+        confusionStreak: preRoutingMetacog.confusionStreak,
+      },
+      selfModelHealth: preRoutingSelfModel.overallHealth,
+      emotionalArousal: preRoutingEmotional.valence.arousal,
+    });
+
+    const introspectionDomainBoosts = new Map<string, number>();
+    if (introspection?.thought) {
+      const lower = introspection.thought.toLowerCase();
+      for (const domain of allDomains) {
+        if (lower.includes(domain)) {
+          introspectionDomainBoosts.set(domain, 0.05);
+        }
+      }
+    }
+
     let targetAgents: AgentDefinition[] = [];
     let routingScores: SemanticRoutingScore[] | undefined;
 
@@ -1463,6 +1515,13 @@ export class NuroMeshOrchestrator {
             const boost = (profile.successRate - 0.5) * 0.1;
             score.combinedScore = Math.max(0, Math.min(1, score.combinedScore + boost));
           }
+        }
+      }
+
+      for (const score of routingScores) {
+        const introspectBoost = introspectionDomainBoosts.get(score.domain);
+        if (introspectBoost) {
+          score.combinedScore = Math.min(1, score.combinedScore + introspectBoost);
         }
       }
 
@@ -1527,20 +1586,6 @@ export class NuroMeshOrchestrator {
     if (targetAgents.length === 0) targetAgents = [AGENT_REGISTRY.find(a => a.id === "beacon")!];
 
     const routedDomains = targetAgents.map(a => a.domain);
-    const metacogStateSummary = metacognitiveMonitor.getState();
-    const selfModelSummary = selfModelEngine.getSelfModel();
-    const emotionalSummary = emotionalSignals.getState();
-    await innerMonologue.llmIntrospect({
-      query,
-      selectedDomains: routedDomains,
-      metacogState: {
-        certainty: metacogStateSummary.currentAssessment?.certaintyLevel ?? "moderate",
-        quality: metacogStateSummary.currentAssessment?.reasoningQuality ?? "adequate",
-        confusionStreak: metacogStateSummary.confusionStreak,
-      },
-      selfModelHealth: selfModelSummary.overallHealth,
-      emotionalArousal: emotionalSummary.valence.arousal,
-    });
 
     const consciousnessCtx = buildConsciousnessContext();
     if (consciousnessCtx) {
@@ -1552,22 +1597,21 @@ export class NuroMeshOrchestrator {
       );
     }
 
-    const preMetacog = metacognitiveMonitor.getState();
     behavioralTracer.recordFork(traceId, {
       parentForkId: null,
       forkType: "consciousness",
       agentId: "alloy",
       agentName: "Consciousness Layer",
       domain: "orchestration",
-      inputContext: `Pre-routing consciousness state for "${query.slice(0, 80)}"`,
-      decision: `Certainty: ${(preMetacog.rollingCertainty * 100).toFixed(0)}%, Confusion streak: ${preMetacog.confusionStreak}, Health: ${selfModelEngine.getSelfModel().overallHealth}`,
-      output: consciousnessCtx?.slice(0, 200) ?? "No consciousness context",
+      inputContext: `Pre-routing introspection for "${query.slice(0, 80)}"`,
+      decision: `Certainty: ${(preRoutingMetacog.rollingCertainty * 100).toFixed(0)}%, Confusion streak: ${preRoutingMetacog.confusionStreak}, Health: ${preRoutingSelfModel.overallHealth}. Introspection influenced ${introspectionDomainBoosts.size} domain(s).`,
+      output: (introspection?.thought ?? "No introspection").slice(0, 200),
       alternatives: [],
-      confidence: Math.round(preMetacog.rollingCertainty * 100),
+      confidence: Math.round(preRoutingMetacog.rollingCertainty * 100),
       latencyMs: 0,
       tokensUsed: 0,
       metadata: {
-        confusionStreak: preMetacog.confusionStreak,
+        confusionStreak: preRoutingMetacog.confusionStreak,
         emotionalValence: emotionalSignals.getState().valence.dominantEmotion,
         sessionDepth: cognitiveWorkspace.getState().sessionDepth,
       },
