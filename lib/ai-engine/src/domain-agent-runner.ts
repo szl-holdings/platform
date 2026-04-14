@@ -1,10 +1,24 @@
-import type { DomainAgentConfig } from "./types.js";
+import type { DomainAgentConfig, StructuredToolCall, StructuredToolResult, ToolDefinition } from "./types.js";
 
 export const MAX_TOOL_ROUNDS = 6;
 
 export interface ConversationMessage {
-  role: "system" | "user" | "assistant";
+  role: "system" | "user" | "assistant" | "tool";
   content: string;
+  toolCallId?: string;
+  toolName?: string;
+}
+
+export interface NativeToolCall {
+  id: string;
+  name: string;
+  arguments: Record<string, unknown>;
+}
+
+export interface StructuredCompletionResult {
+  content: string | null;
+  toolCalls: NativeToolCall[];
+  stopReason: "stop" | "tool_calls" | "max_tokens" | "other";
 }
 
 export interface ChatInterface {
@@ -17,6 +31,15 @@ export interface ChatInterface {
     messages: Array<{ role: "system" | "user" | "assistant"; content: string }>,
     options?: { model?: string; maxTokens?: number },
   ): AsyncIterable<string>;
+
+  chatCompletionWithTools?(
+    messages: Array<{ role: "system" | "user" | "assistant" | "tool"; content: string; toolCallId?: string; name?: string }>,
+    tools: Array<{
+      type: "function";
+      function: { name: string; description: string; parameters: Record<string, unknown> };
+    }>,
+    options?: { model?: string; maxTokens?: number },
+  ): Promise<StructuredCompletionResult>;
 }
 
 interface StoredConversation {
@@ -199,6 +222,90 @@ export function getOrCreateConversation(conversationId: string, systemPrompt: st
   return messages;
 }
 
+function toOpenAIToolSchema(tools: ToolDefinition[]): Array<{
+  type: "function";
+  function: { name: string; description: string; parameters: Record<string, unknown> };
+}> {
+  return tools.map(t => ({
+    type: "function" as const,
+    function: {
+      name: t.name,
+      description: t.description,
+      parameters: t.parameters,
+    },
+  }));
+}
+
+async function executeToolChain(
+  toolCalls: NativeToolCall[],
+  executeTool: DomainAgentConfig["executeTool"],
+): Promise<StructuredToolResult[]> {
+  const results: StructuredToolResult[] = [];
+  for (const toolCall of toolCalls) {
+    try {
+      const output = await executeTool(toolCall.name, toolCall.arguments);
+      results.push({
+        toolCallId: toolCall.id,
+        toolName: toolCall.name,
+        content: output,
+        success: true,
+      });
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : `Tool ${toolCall.name} failed`;
+      results.push({
+        toolCallId: toolCall.id,
+        toolName: toolCall.name,
+        content: `Error executing ${toolCall.name}: ${errorMsg}`,
+        success: false,
+        error: errorMsg,
+      });
+    }
+  }
+  return results;
+}
+
+function textFallbackParseToolCalls(responseText: string): NativeToolCall[] {
+  const calls: NativeToolCall[] = [];
+  const trimmed = responseText.trim();
+
+  try {
+    if (trimmed.startsWith("[")) {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed) && parsed.every((p: unknown) => typeof (p as Record<string, unknown>).tool === "string")) {
+        return parsed.map((p: Record<string, unknown>, idx: number) => ({
+          id: `tc-${Date.now()}-${idx}`,
+          name: p.tool as string,
+          arguments: (p.args ?? p.arguments ?? {}) as Record<string, unknown>,
+        }));
+      }
+    }
+  } catch {}
+
+  const jsonMatch = responseText.match(/\{[\s\S]*?"tool"\s*:\s*"[^"]+"/);
+  if (jsonMatch) {
+    try {
+      const braceStart = responseText.indexOf("{", jsonMatch.index);
+      let depth = 0;
+      let end = braceStart;
+      for (let i = braceStart; i < responseText.length; i++) {
+        if (responseText[i] === "{") depth++;
+        if (responseText[i] === "}") depth--;
+        if (depth === 0) { end = i + 1; break; }
+      }
+      const parsed = JSON.parse(responseText.slice(braceStart, end)) as Record<string, unknown>;
+      if (typeof parsed.tool === "string") {
+        calls.push({
+          id: `tc-${Date.now()}-0`,
+          name: parsed.tool,
+          arguments: (parsed.args ?? parsed.arguments ?? {}) as Record<string, unknown>,
+        });
+      }
+    } catch {}
+  }
+
+  return calls;
+}
+
 export class DomainAgentRunner {
   constructor(
     private readonly config: DomainAgentConfig,
@@ -217,59 +324,144 @@ export class DomainAgentRunner {
 
     messages.push({ role: "user", content: userMessage });
 
-    const toolDescriptions = this.config.tools.length > 0
-      ? `\n\nYou have access to these tools:\n${this.config.tools.map(t => `- ${t.name}: ${t.description}`).join("\n")}\n\nTo use a tool, respond with JSON: {"tool": "tool_name", "args": {...}}\nAfter receiving tool results, provide your final answer to the user.`
-      : "";
+    const hasTools = this.config.tools.length > 0;
+    const supportsNativeTools = hasTools && typeof ai.chatCompletionWithTools === "function";
 
-    const systemMessage = this.config.systemPrompt + toolDescriptions + (pastContext ? `\n\n${pastContext}` : "");
-    const chatMessages = [
-      { role: "system" as const, content: systemMessage },
-      ...messages.filter(m => m.role !== "system").slice(-20).map(m => ({
-        role: m.role as "user" | "assistant",
-        content: m.content,
-      })),
+    if (supportsNativeTools) {
+      return this._chatWithNativeTools(messages, ai, pastContext);
+    }
+    return this._chatWithTextFallback(messages, ai, pastContext);
+  }
+
+  private async _chatWithNativeTools(
+    messages: ConversationMessage[],
+    ai: ChatInterface,
+    pastContext?: string,
+  ): Promise<string> {
+    const toolSchema = toOpenAIToolSchema(this.config.tools);
+    const systemPrompt = this.config.systemPrompt + (pastContext ? `\n\n${pastContext}` : "");
+
+    const buildNativeMessages = () => [
+      { role: "system" as const, content: systemPrompt },
+      ...messages
+        .filter(m => m.role !== "system")
+        .slice(-20)
+        .map(m => {
+          if (m.role === "tool") {
+            return {
+              role: "tool" as const,
+              content: m.content,
+              toolCallId: m.toolCallId,
+              name: m.toolName,
+            };
+          }
+          return {
+            role: m.role as "user" | "assistant",
+            content: m.content,
+          };
+        }),
     ];
 
     let rounds = 0;
     while (rounds < MAX_TOOL_ROUNDS) {
       rounds++;
 
-      const result = await ai.chatCompletion(chatMessages, {
+      const result = await ai.chatCompletionWithTools!(
+        buildNativeMessages(),
+        toolSchema,
+        { model: this.modelConfig.model, maxTokens: this.modelConfig.maxCompletionTokens },
+      );
+
+      if (result.toolCalls.length === 0) {
+        const finalContent = result.content ?? "Analysis complete.";
+        messages.push({ role: "assistant", content: finalContent });
+        return finalContent;
+      }
+
+      if (result.content) {
+        messages.push({ role: "assistant", content: result.content });
+      }
+
+      const toolResults = await executeToolChain(result.toolCalls, this.config.executeTool);
+
+      for (const toolCall of result.toolCalls) {
+        messages.push({
+          role: "assistant",
+          content: `[native_tool_call:${toolCall.name}]`,
+          toolCallId: toolCall.id,
+          toolName: toolCall.name,
+        });
+      }
+
+      for (const toolResult of toolResults) {
+        messages.push({
+          role: "tool",
+          content: toolResult.content,
+          toolCallId: toolResult.toolCallId,
+          toolName: toolResult.toolName,
+        });
+      }
+    }
+
+    const fallback = "I've reached the maximum number of analysis steps. Here's what I've gathered so far based on the available data.";
+    messages.push({ role: "assistant", content: fallback });
+    return fallback;
+  }
+
+  private async _chatWithTextFallback(
+    messages: ConversationMessage[],
+    ai: ChatInterface,
+    pastContext?: string,
+  ): Promise<string> {
+    const toolDescriptions = this.config.tools.length > 0
+      ? `\n\nYou have access to these tools:\n${this.config.tools.map(t =>
+          `- ${t.name}: ${t.description}\n  Parameters: ${JSON.stringify(t.parameters)}`
+        ).join("\n")}\n\nTo use a single tool: {"tool": "tool_name", "args": {...}}\nTo use multiple tools: [{"tool": "tool1", "args": {...}}, {"tool": "tool2", "args": {...}}]\nAfter tool results, provide your final answer.`
+      : "";
+
+    const systemMessage = this.config.systemPrompt + toolDescriptions + (pastContext ? `\n\n${pastContext}` : "");
+    const buildChatMessages = () => [
+      { role: "system" as const, content: systemMessage },
+      ...messages
+        .filter(m => m.role !== "system")
+        .slice(-20)
+        .map(m => ({
+          role: (m.role === "tool" ? "user" : m.role) as "user" | "assistant",
+          content: m.role === "tool"
+            ? `[Tool Result - ${m.toolName ?? "unknown"}]: ${m.content}`
+            : m.content,
+        })),
+    ];
+
+    let rounds = 0;
+    while (rounds < MAX_TOOL_ROUNDS) {
+      rounds++;
+
+      const result = await ai.chatCompletion(buildChatMessages(), {
         model: this.modelConfig.model,
         maxTokens: this.modelConfig.maxCompletionTokens,
       });
 
       const responseText = result.content.trim();
+      const toolCalls = textFallbackParseToolCalls(responseText);
 
-      let toolCall: { tool: string; args: Record<string, unknown> } | null = null;
-      try {
-        const jsonMatch = responseText.match(/\{[\s\S]*"tool"\s*:\s*"[^"]+"/);
-        if (jsonMatch) {
-          const braceStart = responseText.indexOf("{", jsonMatch.index);
-          let depth = 0;
-          let end = braceStart;
-          for (let i = braceStart; i < responseText.length; i++) {
-            if (responseText[i] === "{") depth++;
-            if (responseText[i] === "}") depth--;
-            if (depth === 0) { end = i + 1; break; }
-          }
-          const parsed = JSON.parse(responseText.slice(braceStart, end));
-          if (parsed.tool && typeof parsed.tool === "string") {
-            toolCall = { tool: parsed.tool, args: parsed.args || {} };
-          }
-        }
-      } catch {
-        toolCall = null;
-      }
-
-      if (!toolCall) {
+      if (toolCalls.length === 0) {
         messages.push({ role: "assistant", content: responseText });
         return responseText;
       }
 
-      const toolResult = await this.config.executeTool(toolCall.tool, toolCall.args);
-      chatMessages.push({ role: "assistant", content: responseText });
-      chatMessages.push({ role: "user", content: `Tool result for ${toolCall.tool}:\n${toolResult}` });
+      const toolResults = await executeToolChain(toolCalls, this.config.executeTool);
+
+      messages.push({ role: "assistant", content: responseText });
+
+      for (const toolResult of toolResults) {
+        messages.push({
+          role: "tool",
+          content: toolResult.content,
+          toolCallId: toolResult.toolCallId,
+          toolName: toolResult.toolName,
+        });
+      }
     }
 
     const fallback = "I've reached the maximum number of analysis steps. Here's what I've gathered so far based on the available data.";

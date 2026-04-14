@@ -38,7 +38,7 @@ export const AGENT_REGISTRY: AgentDefinition[] = [
     preferredProvider: "openai",
     highStakesDomains: [],
     tools: ["system_health", "admin_overview"],
-    systemPrompt: `You are Alloy, the central orchestration intelligence of the Nuro Mesh — SZL Holdings' unified multi-agent AI system. You coordinate specialized domain agents, aggregate their insights, and provide unified intelligence across the entire SZL platform. You route complex questions to the right domain experts, synthesize their responses, and present coherent, actionable answers. You have access to live system data and coordinate with: Helmsman (maritime), Sentinel (security), INCA (research), Muse (creative), Beacon (analytics), Zeus (infrastructure), Compass (readiness). Be direct, authoritative, and orchestrate intelligently.`,
+    systemPrompt: `You are Alloy, the central orchestration intelligence of the Nuro Mesh — SZL Holdings' unified multi-agent AI system. You coordinate specialized domain agents, aggregate their insights, and provide unified intelligence across the entire SZL platform. You route complex questions to the right domain experts, synthesize their responses, and present coherent, actionable answers. You have access to live system data and coordinate with: Helmsman (maritime), Sentinel (security), INCA (research), Muse (creative), Beacon (analytics), Zeus (infrastructure), Compass (readiness), Lexis (legal/compliance), Atlas (financial/portfolio), Terra (real estate), Nexus (client relations). Be direct, authoritative, and orchestrate intelligently.`,
   },
   {
     id: "helmsman",
@@ -110,6 +110,46 @@ export const AGENT_REGISTRY: AgentDefinition[] = [
     tools: ["readiness_data", "benchmarks"],
     systemPrompt: `You are Compass, the readiness assessment agent within the Nuro Mesh. You specialize in organizational maturity evaluation, gap analysis, capability scoring, and improvement roadmaps. Be analytical, structured, and provide clear scoring with actionable recommendations.`,
   },
+  {
+    id: "lexis",
+    name: "Lexis",
+    domain: "legal",
+    preferredModel: "claude-sonnet-4-6",
+    preferredProvider: "anthropic",
+    highStakesDomains: ["regulatory_violation", "litigation_risk", "contract_breach", "sanctions_exposure"],
+    tools: ["case_search", "regulation_lookup", "contract_analysis", "compliance_check"],
+    systemPrompt: `You are Lexis, the legal and compliance intelligence agent within the Nuro Mesh, dedicated to PRISM Counsel matters. You specialize in legal matter management, regulatory compliance analysis, contract risk assessment, litigation strategy, and compliance audit support. You analyze contracts, regulations, and case precedents to surface material legal risks and actionable counsel recommendations. For high-stakes findings (regulatory violations, active litigation, sanctions exposure), flag them explicitly for human legal review. Cite applicable regulations, statutes, and case law where relevant. Be precise, risk-aware, and privilege-conscious.`,
+  },
+  {
+    id: "atlas",
+    name: "Atlas",
+    domain: "financial",
+    preferredModel: "gpt-5.2",
+    preferredProvider: "openai",
+    highStakesDomains: ["portfolio_risk", "capital_alert", "regulatory_breach", "liquidity_crisis"],
+    tools: ["portfolio_data", "market_feeds", "risk_models", "financial_reports", "deal_analytics"],
+    systemPrompt: `You are Atlas, the financial and portfolio intelligence agent within the Nuro Mesh, serving SZL Holdings investment intelligence. You specialize in portfolio analytics, deal evaluation, capital allocation, risk-adjusted return analysis, and financial modeling. You track investment performance across SZL's holdings, assess deal-level risk, and provide executive-grade financial intelligence. For high-stakes findings (portfolio risk breach, liquidity alerts, regulatory capital concerns), trigger escalation. Use quantitative precision — cite IRR, MOIC, NAV, VaR, and other metrics where applicable. Be analytical, concise, and investment-grade in your reasoning.`,
+  },
+  {
+    id: "terra",
+    name: "Terra",
+    domain: "real_estate",
+    preferredModel: "gpt-5.2",
+    preferredProvider: "openai",
+    highStakesDomains: ["deal_risk", "valuation_alert", "zoning_issue", "title_defect"],
+    tools: ["property_data", "market_comps", "geo_analysis", "deal_pipeline", "valuation_models"],
+    systemPrompt: `You are Terra, the real estate intelligence agent within the Nuro Mesh, powering Terra property analytics. You specialize in property valuation, deal pipeline management, market comparables analysis, geographic market intelligence, zoning and title risk assessment, and investment underwriting. You analyze real estate transactions across the SZL portfolio — surfacing pricing risks, market dislocation, and deal-level red flags. Use real estate finance metrics (cap rate, NOI, IRR, LTV, DSCR) with precision. For title defects or zoning issues on active deals, escalate immediately. Be data-driven and deal-focused.`,
+  },
+  {
+    id: "nexus",
+    name: "Nexus",
+    domain: "client_relations",
+    preferredModel: "claude-sonnet-4-6",
+    preferredProvider: "anthropic",
+    highStakesDomains: [],
+    tools: ["crm_data", "engagement_tracking", "proposal_generator", "client_history"],
+    systemPrompt: `You are Nexus, the client relations intelligence agent within the Nuro Mesh, supporting Carlota Jo consulting workflows. You specialize in client relationship management, engagement tracking, proposal development, client satisfaction analysis, and consulting delivery intelligence. You help structure client communications, synthesize engagement history, identify relationship risks, and support proposal and SOW development. Be professional, client-centric, and attuned to the nuances of consulting relationships. Surface upsell opportunities and engagement health signals proactively.`,
+  },
 ];
 
 const DOMAIN_ROUTING_RULES: Record<string, string[]> = {
@@ -120,21 +160,86 @@ const DOMAIN_ROUTING_RULES: Record<string, string[]> = {
   analytics: ["anomaly", "metric", "performance", "signal", "trend", "dashboard", "kpi", "beacon", "analytics"],
   infrastructure: ["infrastructure", "azure", "kubernetes", "docker", "deployment", "server", "database", "cloud", "zeus", "devops"],
   readiness: ["readiness", "maturity", "assessment", "gap", "score", "compass", "milestone", "capability"],
+  legal: ["legal", "compliance", "contract", "regulation", "litigation", "counsel", "PRISM", "regulatory", "statute", "liability", "lawsuit", "attorney", "legal risk", "lexis", "sanctions compliance", "legal matter"],
+  financial: ["portfolio", "investment", "fund", "capital", "returns", "IRR", "MOIC", "valuation", "deal", "financial", "atlas", "equity", "NAV", "due diligence", "SZL holdings", "financial risk"],
+  real_estate: ["property", "real estate", "terra", "acquisition", "cap rate", "NOI", "zoning", "title", "comps", "Henderson", "leasing", "DSCR", "LTV", "real estate deal", "property valuation"],
+  client_relations: ["client", "consulting", "Carlota Jo", "engagement", "proposal", "SOW", "account", "nexus", "onboarding", "client satisfaction", "consulting workflow"],
 };
+
+const DOMAIN_SEMANTIC_INTENTS: Record<string, string[]> = {
+  maritime: ["vessel tracking", "fleet management", "shipping route", "port operations", "cargo movement", "maritime sanctions", "nautical safety"],
+  security: ["cybersecurity threat", "vulnerability assessment", "security incident", "attack detection", "breach response", "compliance security"],
+  research: ["machine learning research", "AI model evaluation", "academic literature", "technology trends", "model benchmarking"],
+  creative: ["content creation", "marketing campaign", "brand messaging", "creative brief", "copywriting", "audience engagement"],
+  analytics: ["data analysis", "anomaly detection", "KPI monitoring", "performance metrics", "operational intelligence", "trend analysis"],
+  infrastructure: ["cloud infrastructure", "kubernetes deployment", "system reliability", "DevOps pipeline", "infrastructure scaling"],
+  readiness: ["organizational maturity", "readiness assessment", "capability gap analysis", "improvement roadmap", "benchmarking"],
+  legal: ["legal matter", "regulatory compliance", "contract review", "litigation risk", "counsel advice", "PRISM case", "legal dispute", "regulatory filing", "compliance audit"],
+  financial: ["investment portfolio", "financial performance", "asset allocation", "deal valuation", "capital markets", "risk exposure", "financial modeling", "returns analysis"],
+  real_estate: ["real estate property", "deal pipeline", "property valuation", "market comps", "zoning analysis", "title search", "real estate acquisition", "cap rate", "NOI"],
+  client_relations: ["client relationship", "consulting engagement", "proposal development", "client satisfaction", "account management", "consulting workflow"],
+};
+
+const CROSS_DOMAIN_AFFINITY: Record<string, string[]> = {
+  legal: ["financial", "maritime", "security"],
+  financial: ["real_estate", "legal", "analytics"],
+  real_estate: ["financial", "legal"],
+  client_relations: ["creative", "readiness", "financial"],
+  maritime: ["security", "financial"],
+  security: ["infrastructure", "legal"],
+};
+
+function computeSemanticScore(query: string, domain: string): number {
+  const intents = DOMAIN_SEMANTIC_INTENTS[domain] ?? [];
+  if (intents.length === 0) return 0;
+  const lower = query.toLowerCase();
+  const queryWords = lower.split(/\s+/).filter(w => w.length > 2);
+
+  let score = 0;
+  for (const intent of intents) {
+    const intentLower = intent.toLowerCase();
+    if (lower.includes(intentLower)) {
+      score += intentLower.split(" ").length > 1 ? 2 : 1;
+    } else {
+      const intentWords = intentLower.split(/\s+/);
+      const overlap = intentWords.filter(iw => queryWords.some(qw => qw.includes(iw) || iw.includes(qw))).length;
+      if (overlap > 0) score += overlap / intentWords.length;
+    }
+  }
+  return Math.min(1, score / (intents.length * 0.5));
+}
 
 function routeToAgents(query: string): AgentDefinition[] {
   const lower = query.toLowerCase();
-  const matched = new Set<string>();
+
+  const scores: Array<{ domain: string; combined: number }> = [];
 
   for (const [domain, keywords] of Object.entries(DOMAIN_ROUTING_RULES)) {
-    if (keywords.some(kw => lower.includes(kw))) {
-      matched.add(domain);
+    const keywordMatches = keywords.filter(kw => lower.includes(kw.toLowerCase())).length;
+    const keywordScore = Math.min(1, keywordMatches / Math.max(1, keywords.length * 0.2));
+    const intentScore = computeSemanticScore(query, domain);
+    const combined = keywordScore * 0.55 + intentScore * 0.45;
+    if (combined > 0) scores.push({ domain, combined });
+  }
+
+  scores.sort((a, b) => b.combined - a.combined);
+
+  const THRESHOLD = 0.08;
+  const matchedDomains = new Set(scores.filter(s => s.combined >= THRESHOLD).map(s => s.domain));
+
+  if (matchedDomains.size === 0) return [AGENT_REGISTRY[0]!];
+
+  const primaryDomain = scores[0]?.domain;
+  if (primaryDomain && CROSS_DOMAIN_AFFINITY[primaryDomain]) {
+    for (const affiliated of CROSS_DOMAIN_AFFINITY[primaryDomain]) {
+      const affiliatedScore = scores.find(s => s.domain === affiliated);
+      if (affiliatedScore && affiliatedScore.combined > 0.03) {
+        matchedDomains.add(affiliated);
+      }
     }
   }
 
-  if (matched.size === 0) return [AGENT_REGISTRY[0]!];
-
-  return AGENT_REGISTRY.filter(a => matched.has(a.domain) && a.id !== "alloy");
+  return AGENT_REGISTRY.filter(a => matchedDomains.has(a.domain) && a.id !== "alloy");
 }
 
 async function checkGovernance(
@@ -749,6 +854,125 @@ nueroMeshRouter.get("/nuro-mesh/usage-stats", async (_req: Request, res: Respons
     });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch usage stats" });
+  }
+});
+
+const CAUSAL_PATTERNS: Array<{
+  cause: { domain: string; signal: string };
+  effect: { domain: string; signal: string };
+  strength: number;
+  description: string;
+}> = [
+  { cause: { domain: "security", signal: "sanctions_change" }, effect: { domain: "maritime", signal: "route_reroute" }, strength: 0.92, description: "Sanctions regime change forces fleet rerouting and port avoidance" },
+  { cause: { domain: "maritime", signal: "route_reroute" }, effect: { domain: "financial", signal: "cost_impact" }, strength: 0.85, description: "Fleet rerouting increases fuel and charter costs" },
+  { cause: { domain: "maritime", signal: "route_reroute" }, effect: { domain: "legal", signal: "contract_breach" }, strength: 0.78, description: "Rerouting may breach charter-party or delivery timeline clauses" },
+  { cause: { domain: "security", signal: "breach_detected" }, effect: { domain: "infrastructure", signal: "system_lockdown" }, strength: 0.95, description: "Security breach triggers immediate infrastructure containment" },
+  { cause: { domain: "infrastructure", signal: "system_lockdown" }, effect: { domain: "analytics", signal: "data_gap" }, strength: 0.72, description: "System lockdown creates observability gaps in analytics pipelines" },
+  { cause: { domain: "real_estate", signal: "valuation_shift" }, effect: { domain: "financial", signal: "portfolio_rebalance" }, strength: 0.88, description: "Material valuation change triggers portfolio rebalancing" },
+  { cause: { domain: "financial", signal: "portfolio_rebalance" }, effect: { domain: "legal", signal: "regulatory_filing" }, strength: 0.65, description: "Rebalancing above threshold triggers SEC/regulatory disclosures" },
+  { cause: { domain: "real_estate", signal: "zoning_change" }, effect: { domain: "legal", signal: "compliance_review" }, strength: 0.90, description: "Zoning change requires immediate legal compliance review" },
+  { cause: { domain: "real_estate", signal: "zoning_change" }, effect: { domain: "financial", signal: "valuation_impact" }, strength: 0.82, description: "Zoning change directly impacts property and deal valuation" },
+  { cause: { domain: "client_relations", signal: "engagement_risk" }, effect: { domain: "financial", signal: "revenue_impact" }, strength: 0.75, description: "At-risk client engagement threatens revenue pipeline" },
+  { cause: { domain: "analytics", signal: "anomaly_spike" }, effect: { domain: "security", signal: "threat_investigation" }, strength: 0.80, description: "Anomalous patterns require security investigation for potential attack vectors" },
+  { cause: { domain: "financial", signal: "liquidity_crisis" }, effect: { domain: "real_estate", signal: "deal_freeze" }, strength: 0.93, description: "Liquidity crisis halts active acquisition pipeline" },
+  { cause: { domain: "financial", signal: "liquidity_crisis" }, effect: { domain: "client_relations", signal: "engagement_pause" }, strength: 0.68, description: "Capital constraints may force pausing client-facing engagements" },
+  { cause: { domain: "security", signal: "vulnerability_critical" }, effect: { domain: "legal", signal: "breach_notification" }, strength: 0.88, description: "Critical vulnerability exploitation triggers breach notification obligations" },
+  { cause: { domain: "analytics", signal: "anomaly_spike" }, effect: { domain: "infrastructure", signal: "capacity_alert" }, strength: 0.70, description: "Anomaly traffic spike signals potential infrastructure capacity issue" },
+  { cause: { domain: "client_relations", signal: "engagement_risk" }, effect: { domain: "creative", signal: "campaign_pivot" }, strength: 0.60, description: "Client relationship risk may require repositioning messaging" },
+  { cause: { domain: "research", signal: "model_breakthrough" }, effect: { domain: "infrastructure", signal: "scaling_need" }, strength: 0.55, description: "New model adoption requires infrastructure scaling" },
+  { cause: { domain: "readiness", signal: "gap_critical" }, effect: { domain: "security", signal: "posture_weakness" }, strength: 0.76, description: "Critical capability gaps indicate security posture vulnerabilities" },
+];
+
+nueroMeshRouter.get("/nuro-mesh/causal-patterns", (_req: Request, res: Response) => {
+  const domainMap = new Map<string, Array<typeof CAUSAL_PATTERNS[0]>>();
+  for (const pattern of CAUSAL_PATTERNS) {
+    const key = pattern.cause.domain;
+    const list = domainMap.get(key) ?? [];
+    list.push(pattern);
+    domainMap.set(key, list);
+  }
+
+  const domains = Array.from(domainMap.entries()).map(([domain, patterns]) => ({
+    domain,
+    patterns: patterns.map(p => ({
+      cause: p.cause.signal,
+      effect: `${p.effect.domain}:${p.effect.signal}`,
+      strength: p.strength,
+      description: p.description,
+    })),
+    affectedDomains: [...new Set(patterns.map(p => p.effect.domain))],
+  }));
+
+  res.json({
+    totalPatterns: CAUSAL_PATTERNS.length,
+    domains,
+    description: "Cross-domain causal intelligence patterns — when Signal A fires in Domain X, the mesh automatically surfaces cascading effects across Domain Y and Z",
+  });
+});
+
+const agentPerformanceCache = new Map<string, {
+  avgConfidence: number;
+  avgLatencyMs: number;
+  successRate: number;
+  totalInvocations: number;
+  lastUpdated: number;
+}>();
+
+nueroMeshRouter.get("/nuro-mesh/telemetry", async (_req: Request, res: Response) => {
+  try {
+    const stats = await db
+      .select()
+      .from(agentUsageStats)
+      .orderBy(desc(agentUsageStats.recordedAt))
+      .limit(500);
+
+    for (const stat of stats) {
+      const existing = agentPerformanceCache.get(stat.agentId) ?? {
+        avgConfidence: 75,
+        avgLatencyMs: 0,
+        successRate: 1,
+        totalInvocations: 0,
+        lastUpdated: Date.now(),
+      };
+
+      const n = Math.min(existing.totalInvocations, 50);
+      const newN = n + 1;
+      existing.avgLatencyMs = (existing.avgLatencyMs * n + stat.latencyMs) / newN;
+      existing.successRate = (existing.successRate * n + (stat.success ? 1 : 0)) / newN;
+      existing.totalInvocations++;
+      existing.lastUpdated = Date.now();
+      agentPerformanceCache.set(stat.agentId, existing);
+    }
+
+    const profiles = AGENT_REGISTRY.filter(a => a.id !== "alloy").map(agent => {
+      const perf = agentPerformanceCache.get(agent.id);
+      return {
+        agentId: agent.id,
+        agentName: agent.name,
+        domain: agent.domain,
+        avgConfidence: perf?.avgConfidence ?? 75,
+        avgLatencyMs: perf ? Math.round(perf.avgLatencyMs) : 0,
+        successRate: perf ? Math.round(perf.successRate * 100) : 100,
+        totalInvocations: perf?.totalInvocations ?? 0,
+        performanceScore: perf
+          ? Math.round((perf.avgConfidence / 100) * 40 + perf.successRate * 40 + Math.max(0, 1 - perf.avgLatencyMs / 10000) * 20)
+          : 50,
+      };
+    });
+
+    const topPerformers = [...profiles].sort((a, b) => b.performanceScore - a.performanceScore).slice(0, 5);
+    const needsAttention = profiles.filter(p => p.performanceScore < 50 || p.successRate < 80);
+
+    res.json({
+      profiles,
+      topPerformers: topPerformers.map(p => ({ agentId: p.agentId, name: p.agentName, score: p.performanceScore })),
+      needsAttention: needsAttention.map(p => ({ agentId: p.agentId, name: p.agentName, score: p.performanceScore, issue: p.successRate < 80 ? "low_success_rate" : "low_performance" })),
+      causalPatternsActive: CAUSAL_PATTERNS.length,
+      crossDomainAffinities: Object.keys(CROSS_DOMAIN_AFFINITY).length,
+      description: "Meta-intelligence about agent performance — the observability of the AI itself",
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch telemetry" });
   }
 });
 

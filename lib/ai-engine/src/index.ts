@@ -4,16 +4,52 @@ export {
   AGENT_REGISTRY,
   DOMAIN_ROUTING_RULES,
   routeToAgents,
+  computeRoutingScores,
   callAgent,
+  consultAgent,
+  storeInsight,
   runMakerChecker,
   getSharedContext,
+  CAUSAL_PATTERNS,
+  CausalReasoningEngine,
+  SignalCorrelator,
+  ConfidenceCalibrator,
+  ConflictResolver,
+  AgentTelemetryTracker,
+  causalEngine,
+  signalCorrelator,
+  confidenceCalibrator,
+  conflictResolver,
+  agentTelemetry,
 } from "./nuro-mesh.js";
 
-export type { AgentDefinition, DomainRoutingRule, ValidationResult, AgentCallResult, RAGChunk, ToolDefinition, DomainAgentConfig } from "./types.js";
+export type {
+  AgentDefinition,
+  DomainRoutingRule,
+  ValidationResult,
+  AgentCallResult,
+  RAGChunk,
+  ToolDefinition,
+  DomainAgentConfig,
+  AgentConsultationRequest,
+  AgentConsultationResult,
+  CrossAgentInsight,
+  StructuredToolCall,
+  StructuredToolResult,
+  SemanticRoutingScore,
+  CausalLink,
+  CausalChain,
+  ProactiveActivation,
+  SignalCorrelation,
+  AgentPerformanceProfile,
+  ConflictResolution,
+  ConfidenceCalibrationEntry,
+  OrchestrationTelemetry,
+} from "./types.js";
 
 export { RAGPipeline, chunkText } from "./rag-pipeline.js";
 
-export { DomainAgentRunner, getOrCreateConversation, MAX_TOOL_ROUNDS, type ConversationMessage, type ChatInterface } from "./domain-agent-runner.js";
+export { DomainAgentRunner, getOrCreateConversation, MAX_TOOL_ROUNDS, type ConversationMessage, type ChatInterface, type NativeToolCall, type StructuredCompletionResult } from "./domain-agent-runner.js";
 
 export { routeModel, getModelSlots, getRouteConfig, type RouteClass, type ModelSlot, type RouteResult } from "./providers/hf-router.js";
 export {

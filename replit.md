@@ -48,7 +48,8 @@ The platform consists of 13 interconnected applications sharing authentication a
 - **Intelligence Layer:** Over 40 REST endpoints providing cross-platform intelligence, including government data feeds and AI services.
 - **Core Command Center:** A unified cross-platform dashboard at `/core`.
 - **Alloy AI Decision Engine:** HuggingFace-powered AI execution fabric with schema-validated decision types, a model registry, and policy-gated tool execution.
-- **AI Models & Agents:** Utilizes Qwen3-8B (HuggingFace) primarily, with OpenAI and Anthropic as fallbacks. Includes 10 specialized advisory-only domain AI agents and domain-specific AI copilots with SSE streaming and voice input/output.
+- **AI Models & Agents:** Utilizes Qwen3-8B (HuggingFace) primarily, with OpenAI and Anthropic as fallbacks. Includes 12 specialized domain AI agents (Alloy, Helmsman, Sentinel, INCA, Muse, Beacon, Zeus, Compass, Lexis, Atlas, Terra, Nexus) and domain-specific AI copilots with SSE streaming and voice input/output.
+- **Nuro Mesh Intelligence Layer:** Cross-domain causal reasoning engine (18 causal patterns), proactive agent activation via signal correlation, Bayesian confidence calibration, structured conflict resolution between agents, and agent performance telemetry. Hybrid semantic+keyword routing with cross-domain affinity, pre-turn agent consultation pattern, and maker-checker validation for high-stakes outputs.
 - **AlloyChat:** A multi-model AI operations assistant.
 - **Observability:** Structured logging via pino and an 8-pillar domain-native observability framework.
 - **Feature Gating:** Entitlement-based access control using `checkFeatureAccess`.
