@@ -43,13 +43,23 @@ function isBusinessHours(date: Date): boolean {
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
+export interface AgentTemporalEvolution {
+  agentId: string;
+  domain: string;
+  samples: Array<{ timestamp: number; successRate: number; confidence: number; latencyMs: number }>;
+  trend: "improving" | "declining" | "stable" | "volatile";
+  selfReflection: string;
+}
+
 class TemporalAwarenessEngine {
   private markers: TemporalMarker[] = [];
   private patterns: Map<string, TemporalPattern> = new Map();
   private orchestrationTimestamps: number[] = [];
+  private agentEvolution: Map<string, AgentTemporalEvolution> = new Map();
   private sessionStart = Date.now();
   private static readonly MAX_MARKERS = 500;
   private static readonly MAX_TIMESTAMPS = 1000;
+  private static readonly MAX_EVOLUTION_SAMPLES = 100;
 
   recordMarker(label: string, eventType: TemporalMarker["eventType"], metadata: Record<string, unknown> = {}): TemporalMarker {
     const marker: TemporalMarker = {
@@ -136,6 +146,66 @@ class TemporalAwarenessEngine {
         predictedNext: null,
       });
     }
+  }
+
+  recordAgentPerformance(agentId: string, domain: string, successRate: number, confidence: number, latencyMs: number): void {
+    let evo = this.agentEvolution.get(agentId);
+    if (!evo) {
+      evo = { agentId, domain, samples: [], trend: "stable", selfReflection: "" };
+      this.agentEvolution.set(agentId, evo);
+    }
+    evo.samples.push({ timestamp: Date.now(), successRate, confidence, latencyMs });
+    if (evo.samples.length > TemporalAwarenessEngine.MAX_EVOLUTION_SAMPLES) {
+      evo.samples.splice(0, evo.samples.length - TemporalAwarenessEngine.MAX_EVOLUTION_SAMPLES);
+    }
+    evo.trend = this.computeTrend(evo.samples);
+    evo.selfReflection = this.generateSelfReflection(evo);
+  }
+
+  private computeTrend(samples: AgentTemporalEvolution["samples"]): AgentTemporalEvolution["trend"] {
+    if (samples.length < 3) return "stable";
+    const recentHalf = samples.slice(-Math.floor(samples.length / 2));
+    const olderHalf = samples.slice(0, Math.floor(samples.length / 2));
+    const recentAvg = recentHalf.reduce((s, x) => s + x.successRate, 0) / recentHalf.length;
+    const olderAvg = olderHalf.reduce((s, x) => s + x.successRate, 0) / olderHalf.length;
+    const diff = recentAvg - olderAvg;
+    const stdDev = Math.sqrt(recentHalf.reduce((s, x) => s + (x.successRate - recentAvg) ** 2, 0) / recentHalf.length);
+    if (stdDev > 0.25) return "volatile";
+    if (diff > 0.05) return "improving";
+    if (diff < -0.05) return "declining";
+    return "stable";
+  }
+
+  private generateSelfReflection(evo: AgentTemporalEvolution): string {
+    const n = evo.samples.length;
+    if (n === 0) return "No data yet.";
+    const latest = evo.samples[n - 1]!;
+    const avgRate = evo.samples.reduce((s, x) => s + x.successRate, 0) / n;
+    const avgConf = evo.samples.reduce((s, x) => s + x.confidence, 0) / n;
+    const avgLat = evo.samples.reduce((s, x) => s + x.latencyMs, 0) / n;
+    const parts = [
+      `Agent ${evo.agentId} (${evo.domain}): ${n} observations over session.`,
+      `Current success rate: ${(latest.successRate * 100).toFixed(0)}% (avg: ${(avgRate * 100).toFixed(0)}%).`,
+      `Confidence: ${latest.confidence.toFixed(0)} (avg: ${avgConf.toFixed(0)}).`,
+      `Latency: ${latest.latencyMs.toFixed(0)}ms (avg: ${avgLat.toFixed(0)}ms).`,
+      `Performance trend: ${evo.trend}.`,
+    ];
+    if (evo.trend === "declining") {
+      parts.push("Self-reflection: Performance degradation detected. May need prompt tuning, model upgrade, or domain knowledge refresh.");
+    } else if (evo.trend === "improving") {
+      parts.push("Self-reflection: Positive trajectory — learning from interactions is bearing fruit.");
+    } else if (evo.trend === "volatile") {
+      parts.push("Self-reflection: High variance in outcomes. Consider query complexity analysis and specialization boundaries.");
+    }
+    return parts.join(" ");
+  }
+
+  getAgentEvolution(agentId?: string): AgentTemporalEvolution[] {
+    if (agentId) {
+      const evo = this.agentEvolution.get(agentId);
+      return evo ? [evo] : [];
+    }
+    return Array.from(this.agentEvolution.values());
   }
 
   getState(): TemporalAwarenessState {

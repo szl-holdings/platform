@@ -72,8 +72,24 @@ export const consciousnessEmotionalHistoryTable = pgTable("consciousness_emotion
   capturedAt: timestamp("captured_at").notNull().defaultNow(),
 });
 
+export const consciousnessTemporalMetricsTable = pgTable("consciousness_temporal_metrics", {
+  id: serial("id").primaryKey(),
+  agentId: text("agent_id").notNull(),
+  domain: text("domain").notNull(),
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  avgSuccessRate: real("avg_success_rate").notNull(),
+  avgConfidence: real("avg_confidence").notNull(),
+  avgLatencyMs: real("avg_latency_ms").notNull(),
+  totalInvocations: integer("total_invocations").notNull().default(0),
+  trend: text("trend").notNull().default("stable"),
+  selfReflection: text("self_reflection"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export type ConsciousnessSnapshotRow = typeof consciousnessSnapshotsTable.$inferSelect;
 export type ConsciousnessMonologueRow = typeof consciousnessMonologueTable.$inferSelect;
 export type ConsciousnessGoalRow = typeof consciousnessGoalsTable.$inferSelect;
 export type ConsciousnessAgentProfileRow = typeof consciousnessAgentProfilesTable.$inferSelect;
 export type ConsciousnessEmotionalHistoryRow = typeof consciousnessEmotionalHistoryTable.$inferSelect;
+export type ConsciousnessTemporalMetricsRow = typeof consciousnessTemporalMetricsTable.$inferSelect;

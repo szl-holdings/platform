@@ -1,5 +1,5 @@
 import { db } from "@szl-holdings/db";
-import { agentMemoryFacts, agentUsageStats, consciousnessSnapshotsTable, consciousnessMonologueTable, consciousnessEmotionalHistoryTable, consciousnessAgentProfilesTable, consciousnessGoalsTable } from "@szl-holdings/db";
+import { agentMemoryFacts, agentUsageStats, consciousnessSnapshotsTable, consciousnessMonologueTable, consciousnessEmotionalHistoryTable, consciousnessAgentProfilesTable, consciousnessGoalsTable, consciousnessTemporalMetricsTable } from "@szl-holdings/db";
 import { eq, desc, and, gt, sql } from "drizzle-orm";
 import { persistTelemetry } from "./innovation/telemetry-pipeline.js";
 import { runMultiHypothesisReasoning, isAmbiguousOrHighStakes } from "./innovation/multi-hypothesis.js";
@@ -1405,8 +1405,25 @@ export class NuroMeshOrchestrator {
             score.combinedScore = Math.max(0, Math.min(1, score.combinedScore + boost));
           }
         }
-        routingScores.sort((a, b) => b.combinedScore - a.combinedScore);
       }
+
+      const emotionalState = emotionalSignals.getState();
+      if (emotionalState.valence.arousal > 0.7) {
+        for (const score of routingScores) {
+          if (score.domain === "security" || score.domain === "legal") {
+            score.combinedScore = Math.min(1, score.combinedScore * 1.15);
+          }
+        }
+      }
+      if (emotionalState.valence.emotionalStability < 0.3) {
+        for (const score of routingScores) {
+          if (score.domain === "orchestration") {
+            score.combinedScore = Math.min(1, score.combinedScore * 1.2);
+          }
+        }
+      }
+
+      routingScores.sort((a, b) => b.combinedScore - a.combinedScore);
 
       // A2A discovery-based routing — falls back to keyword rules if unavailable
       let a2aResolved = false;
@@ -1579,6 +1596,15 @@ export class NuroMeshOrchestrator {
           latencyMs: result.latencyMs,
           toolCallCount: 0,
         });
+
+        const agentSuccess = result.confidence >= 40 && !result.response.includes("[unavailable") && !result.response.includes("[Blocked");
+        temporalAwareness.recordAgentPerformance(
+          agent.id,
+          agent.domain,
+          agentSuccess ? result.confidence / 100 : 0,
+          result.confidence,
+          result.latencyMs,
+        );
 
         if (result.confidence < 30) {
           innerMonologue.addThought(
@@ -1753,6 +1779,17 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       orgId: options.orgId,
       metadata: { workflowId, traceId },
     });
+
+    const recentTrajectories = trajectoryStore.getTrajectories(20);
+    if (recentTrajectories.length >= 3) {
+      goalEngine.integrateTrajectoryInsights(recentTrajectories.map(t => ({
+        query: t.query,
+        averageConfidence: t.averageConfidence,
+        agentRouting: t.agentRouting.map(r => ({ agentId: r.agentId, domain: r.domain })),
+        validationPassed: t.validationPassed,
+        qualityScore: t.qualityScore,
+      })));
+    }
 
     try {
       if (synthesis.length > 100) {
@@ -2039,6 +2076,27 @@ async function persistConsciousnessState(
           priority: goal.priority,
           updatedAt: new Date(),
         },
+      });
+    }
+
+    const evolutions = temporalAwareness.getAgentEvolution();
+    const now = new Date();
+    for (const evo of evolutions) {
+      if (evo.samples.length < 2) continue;
+      const avgRate = evo.samples.reduce((s, x) => s + x.successRate, 0) / evo.samples.length;
+      const avgConf = evo.samples.reduce((s, x) => s + x.confidence, 0) / evo.samples.length;
+      const avgLat = evo.samples.reduce((s, x) => s + x.latencyMs, 0) / evo.samples.length;
+      await db.insert(consciousnessTemporalMetricsTable).values({
+        agentId: evo.agentId,
+        domain: evo.domain,
+        periodStart: new Date(evo.samples[0]!.timestamp),
+        periodEnd: new Date(evo.samples[evo.samples.length - 1]!.timestamp),
+        avgSuccessRate: avgRate,
+        avgConfidence: avgConf,
+        avgLatencyMs: avgLat,
+        totalInvocations: evo.samples.length,
+        trend: evo.trend,
+        selfReflection: evo.selfReflection,
       });
     }
 

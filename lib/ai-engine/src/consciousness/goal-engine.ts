@@ -195,6 +195,47 @@ class GoalFormationEngine {
     }
   }
 
+  integrateTrajectoryInsights(trajectories: Array<{
+    query: string;
+    averageConfidence: number;
+    agentRouting: Array<{ agentId: string; domain: string }>;
+    validationPassed: boolean;
+    qualityScore: number | null;
+  }>): void {
+    if (trajectories.length < 3) return;
+
+    const domainPerformance: Record<string, { total: number; lowConf: number }> = {};
+    for (const t of trajectories) {
+      for (const r of t.agentRouting) {
+        if (!domainPerformance[r.domain]) domainPerformance[r.domain] = { total: 0, lowConf: 0 };
+        domainPerformance[r.domain]!.total++;
+        if (t.averageConfidence < 50) domainPerformance[r.domain]!.lowConf++;
+      }
+    }
+
+    for (const [domain, stats] of Object.entries(domainPerformance)) {
+      const failRate = stats.lowConf / stats.total;
+      if (failRate > 0.3 && stats.total >= 3) {
+        this.registerCuriosity({
+          topic: `${domain} domain underperformance (${(failRate * 100).toFixed(0)}% low confidence)`,
+          intensity: Math.min(1, failRate + 0.2),
+          source: "pattern",
+          suggestedExploration: `Investigate recurring low-confidence responses in ${domain} domain. Review prompt effectiveness and knowledge coverage.`,
+        });
+      }
+    }
+
+    const failedValidations = trajectories.filter(t => !t.validationPassed);
+    if (failedValidations.length >= 2) {
+      this.registerCuriosity({
+        topic: `Validation failure pattern (${failedValidations.length}/${trajectories.length})`,
+        intensity: 0.8,
+        source: "anomaly",
+        suggestedExploration: `Multiple orchestrations failed validation. Analyze common patterns in: ${failedValidations.map(f => f.query.slice(0, 40)).join("; ")}`,
+      });
+    }
+  }
+
   getTopPriority(): CognitiveGoal | null {
     const active = Array.from(this.goals.values())
       .filter(g => g.status === "active")
