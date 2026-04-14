@@ -5,11 +5,23 @@ import {
   LayoutDashboard, FileText, Mail, Image, Twitter, Users, Megaphone,
   Calendar, BarChart3, Settings, Zap, TrendingUp, Eye, UserPlus, Send,
   AlertCircle, ChevronRight, Globe, Link2, Target, Clock, CheckCircle2,
-  Activity, RefreshCw, LineChart,
+  Activity, RefreshCw, LineChart, ArrowUpRight, ArrowDownRight, Minus,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
+import { RoleSelector, DataProvenance, ActionLoop } from "@szl-holdings/shared-ui";
+import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
 
 const API = import.meta.env.VITE_API_URL || "";
+
+const DS = {
+  page: "#070a10",
+  surface: "#0b0f19",
+  elevated: "#0f1420",
+  border: "rgba(255,255,255,0.05)",
+  borderMuted: "rgba(255,255,255,0.08)",
+  accent: "#d4a054",
+  text: { primary: "rgba(255,255,255,0.88)", secondary: "rgba(255,255,255,0.5)", tertiary: "rgba(255,255,255,0.28)", muted: "rgba(255,255,255,0.14)" },
+};
 
 export interface DashboardStats {
   visitsThisWeek: number;
@@ -45,12 +57,12 @@ const NAV_ITEMS = [
 
 export function DistributionOsLayout({ children, currentPath }: { children: React.ReactNode; currentPath: string }) {
   return (
-    <div style={{ minHeight: "100vh", background: "#070a10" }}>
+    <div style={{ minHeight: "100vh", background: DS.page }}>
       <SiteNav />
       <div style={{ display: "flex", paddingTop: "4rem" }}>
-        <aside style={{ width: 220, borderRight: "1px solid hsla(0,0%,100%,0.06)", padding: "1.5rem 0", position: "sticky", top: "4rem", height: "calc(100vh - 4rem)", overflowY: "auto", flexShrink: 0 }}>
-          <div style={{ padding: "0 1rem 1rem", borderBottom: "1px solid hsla(0,0%,100%,0.06)", marginBottom: "1rem" }}>
-            <h2 style={{ fontSize: "0.6875rem", fontWeight: 700, color: "#d4a054", letterSpacing: "0.1em", textTransform: "uppercase" }}>Marketing OS</h2>
+        <aside style={{ width: 220, borderRight: `1px solid ${DS.border}`, padding: "1.5rem 0", position: "sticky", top: "4rem", height: "calc(100vh - 4rem)", overflowY: "auto", flexShrink: 0 }}>
+          <div style={{ padding: "0 1rem 1rem", borderBottom: `1px solid ${DS.border}`, marginBottom: "1rem" }}>
+            <h2 style={{ fontSize: "0.6875rem", fontWeight: 700, color: DS.accent, letterSpacing: "0.1em", textTransform: "uppercase" }}>Marketing OS</h2>
           </div>
           {NAV_ITEMS.map(item => {
             const active = currentPath === item.href || currentPath.startsWith(item.href + "/");
@@ -62,15 +74,16 @@ export function DistributionOsLayout({ children, currentPath }: { children: Reac
                   display: "flex", alignItems: "center", gap: "0.625rem",
                   padding: "0.5rem 1rem", margin: "0.125rem 0.5rem",
                   borderRadius: "6px",
-                  color: active ? "#e8e4de" : "#6b6560",
-                  background: active ? "hsla(0,0%,100%,0.06)" : "transparent",
+                  color: active ? DS.text.primary : DS.text.tertiary,
+                  background: active ? `rgba(212,160,84,0.08)` : "transparent",
+                  borderLeft: active ? `2px solid ${DS.accent}` : "2px solid transparent",
                   textDecoration: "none",
                   fontSize: "0.8125rem",
                   fontWeight: active ? 600 : 400,
                   transition: "all 0.15s",
                 }}
               >
-                <item.icon size={15} />
+                <item.icon size={14} />
                 {item.label}
               </a>
             );
@@ -84,42 +97,88 @@ export function DistributionOsLayout({ children, currentPath }: { children: Reac
   );
 }
 
-function KpiCard({ icon: Icon, label, value, color, sub }: { icon: typeof Eye; label: string; value: number | string; color: string; sub?: string }) {
+function TrendIcon({ trend }: { trend?: "up" | "down" | "flat" }) {
+  if (trend === "up") return <ArrowUpRight size={11} style={{ color: "#5a9c5a" }} />;
+  if (trend === "down") return <ArrowDownRight size={11} style={{ color: "#c45a4a" }} />;
+  return <Minus size={11} style={{ color: DS.text.muted }} />;
+}
+
+function KpiCard({ icon: Icon, label, value, color, sub, trend, pulse }: {
+  icon: typeof Eye; label: string; value: number | string; color: string; sub?: string; trend?: "up" | "down" | "flat"; pulse?: boolean;
+}) {
   return (
-    <div style={{ padding: "1.25rem", background: "hsla(0,0%,100%,0.03)", border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "10px" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
-        <Icon size={16} style={{ color }} />
+    <div style={{ padding: "1.125rem 1.25rem", background: DS.surface, border: `1px solid ${DS.border}`, borderRadius: "10px", position: "relative", overflow: "hidden" }}>
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: `linear-gradient(90deg, ${color}60, transparent)` }} />
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.625rem" }}>
+        <Icon size={14} style={{ color }} />
+        {trend && <TrendIcon trend={trend} />}
       </div>
-      <div style={{ fontSize: "1.75rem", fontWeight: 700, color: "#e8e4de", letterSpacing: "-0.02em", lineHeight: 1 }}>{value}</div>
-      <div style={{ fontSize: "0.75rem", color: "#8b8579", marginTop: "0.375rem" }}>{label}</div>
-      {sub && <div style={{ fontSize: "0.6875rem", color: "#4a4540", marginTop: "0.125rem" }}>{sub}</div>}
+      <div style={{ display: "flex", alignItems: "baseline", gap: "0.375rem" }}>
+        <div style={{ fontSize: "1.625rem", fontWeight: 700, color: DS.text.primary, letterSpacing: "-0.025em", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{value}</div>
+        {pulse && <span style={{ width: 6, height: 6, borderRadius: "50%", background: color, animation: "pulse 2s infinite", display: "inline-block", marginBottom: 4 }} />}
+      </div>
+      <div style={{ fontSize: "0.6875rem", color: DS.text.tertiary, marginTop: "0.375rem", letterSpacing: "0.02em" }}>{label}</div>
+      {sub && <div style={{ fontSize: "0.625rem", color: DS.text.muted, marginTop: "0.125rem" }}>{sub}</div>}
     </div>
   );
 }
 
-function QuickAction({ icon: Icon, label, href }: { icon: typeof FileText; label: string; href: string }) {
+function PipelineStage({ label, value, icon: Icon, color, total }: { label: string; value: number; icon: typeof Send; color: string; total?: number }) {
+  const pct = total && total > 0 ? Math.round((value / total) * 100) : 0;
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+      <div style={{ width: 28, height: 28, borderRadius: "6px", background: `${color}12`, border: `1px solid ${color}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <Icon size={13} style={{ color }} />
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.3rem" }}>
+          <span style={{ fontSize: "0.75rem", color: DS.text.secondary }}>{label}</span>
+          <span style={{ fontSize: "0.875rem", fontWeight: 700, color: DS.text.primary, fontVariantNumeric: "tabular-nums" }}>{value}</span>
+        </div>
+        {total !== undefined && (
+          <div style={{ height: 3, background: `${color}12`, borderRadius: 2, overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${pct}%`, background: color, borderRadius: 2 }} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function QuickAction({ icon: Icon, label, href, badge }: { icon: typeof FileText; label: string; href: string; badge?: number }) {
   const [, navigate] = useLocation();
   return (
     <button
       onClick={() => navigate(href)}
       style={{
         display: "flex", alignItems: "center", gap: "0.625rem",
-        padding: "0.625rem 0.875rem", width: "100%",
-        background: "hsla(0,0%,100%,0.02)",
-        border: "1px solid hsla(0,0%,100%,0.05)",
-        borderRadius: "8px",
-        color: "#e8e4de",
+        padding: "0.5625rem 0.875rem", width: "100%",
+        background: "transparent",
+        border: `1px solid ${DS.border}`,
+        borderRadius: "7px",
+        color: DS.text.secondary,
         fontSize: "0.8125rem",
         cursor: "pointer",
         transition: "all 0.15s",
         textAlign: "left",
       }}
-      onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "hsla(0,0%,100%,0.05)"; }}
-      onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "hsla(0,0%,100%,0.02)"; }}
+      onMouseEnter={e => {
+        (e.currentTarget as HTMLButtonElement).style.background = `rgba(212,160,84,0.05)`;
+        (e.currentTarget as HTMLButtonElement).style.borderColor = `rgba(212,160,84,0.2)`;
+        (e.currentTarget as HTMLButtonElement).style.color = DS.text.primary;
+      }}
+      onMouseLeave={e => {
+        (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+        (e.currentTarget as HTMLButtonElement).style.borderColor = DS.border;
+        (e.currentTarget as HTMLButtonElement).style.color = DS.text.secondary;
+      }}
     >
-      <Icon size={14} style={{ color: "#d4a054" }} />
+      <Icon size={13} style={{ color: DS.accent, flexShrink: 0 }} />
       <span style={{ flex: 1 }}>{label}</span>
-      <ChevronRight size={12} style={{ color: "#4a4540" }} />
+      {badge !== undefined && badge > 0 && (
+        <span style={{ fontSize: "0.625rem", fontWeight: 700, padding: "0.125rem 0.375rem", borderRadius: "10px", background: "rgba(196,90,74,0.12)", color: "#c45a4a", border: "1px solid rgba(196,90,74,0.18)", fontVariantNumeric: "tabular-nums" }}>{badge}</span>
+      )}
+      <ChevronRight size={11} style={{ color: DS.text.muted, flexShrink: 0 }} />
     </button>
   );
 }
@@ -128,14 +187,17 @@ export default function DistributionOsDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [location] = useLocation();
+  const [activeRole, setActiveRole] = useState("operator");
 
-  useEffect(() => {
+  const load = () => {
     setLoading(true);
     fetch(`${API}/api/distribution-os/analytics/dashboard`)
       .then(r => r.json())
       .then(d => { setStats(d); setLoading(false); })
       .catch(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { load(); }, []);
 
   const s = stats || {
     visitsThisWeek: 0, leadsThisWeek: 0, publishedArticles: 0,
@@ -148,38 +210,110 @@ export default function DistributionOsDashboard() {
     ? ((s.leadsThisWeek / s.visitsThisWeek) * 100).toFixed(1) + "%"
     : "0.0%";
 
+  const pipelineTotal = s.xQueued + s.xSentTotal + (s.xFailed || 0);
+
   return (
     <DistributionOsLayout currentPath={location}>
-      <m.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "2rem" }}>
+      <m.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "1.75rem" }}>
           <div>
-            <h1 style={{ fontSize: "1.5rem", fontWeight: 700, color: "#e8e4de", letterSpacing: "-0.02em" }}>Marketing OS</h1>
-            <p style={{ fontSize: "0.8125rem", color: "#6b6560", marginTop: "0.25rem" }}>Command center — leads, campaigns, content, and distribution</p>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.25rem" }}>
+              <h1 style={{ fontSize: "1.25rem", fontWeight: 700, color: DS.text.primary, letterSpacing: "-0.025em" }}>Marketing OS</h1>
+              <span style={{ fontSize: "0.625rem", fontWeight: 700, padding: "0.125rem 0.5rem", borderRadius: "4px", background: "rgba(90,156,90,0.1)", color: "#5a9c5a", border: "1px solid rgba(90,156,90,0.2)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                {loading ? "SYNCING" : "LIVE"}
+              </span>
+            </div>
+            <p style={{ fontSize: "0.75rem", color: DS.text.tertiary }}>Leads · campaigns · content · distribution</p>
           </div>
           <button
-            onClick={() => { setLoading(true); fetch(`${API}/api/distribution-os/analytics/dashboard`).then(r => r.json()).then(d => { setStats(d); setLoading(false); }).catch(() => setLoading(false)); }}
-            style={{ display: "flex", alignItems: "center", gap: "0.375rem", padding: "0.5rem 0.875rem", background: "hsla(0,0%,100%,0.05)", border: "1px solid hsla(0,0%,100%,0.08)", borderRadius: "6px", color: "#8b8579", fontSize: "0.75rem", cursor: "pointer" }}
+            onClick={load}
+            style={{ display: "flex", alignItems: "center", gap: "0.375rem", padding: "0.4375rem 0.75rem", background: DS.surface, border: `1px solid ${DS.border}`, borderRadius: "6px", color: DS.text.tertiary, fontSize: "0.6875rem", cursor: "pointer", transition: "all 0.15s", fontFamily: "monospace" }}
           >
-            <RefreshCw size={13} className={loading ? "animate-spin" : ""} /> Refresh
+            <RefreshCw size={11} className={loading ? "animate-spin" : ""} />
+            Refresh
           </button>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(175px, 1fr))", gap: "0.875rem", marginBottom: "2rem" }}>
-          <KpiCard icon={Eye} label="Visits This Week" value={s.visitsThisWeek} color="#4a90b8" />
-          <KpiCard icon={UserPlus} label="Leads This Week" value={s.leadsThisWeek} color="#5a9c5a" />
-          <KpiCard icon={Target} label="Conversion Rate" value={conversionRate} color="#d4a054" sub="visits → leads" />
-          <KpiCard icon={Megaphone} label="Top Campaign" value={s.topCampaign || "—"} color="#8b7ac8" />
-          <KpiCard icon={Globe} label="Top Landing Page" value={s.topPage || "—"} color="#4a90b8" />
-          <KpiCard icon={FileText} label="Content Generated" value={s.publishedArticles} color="#c8953c" sub="published articles" />
-          <KpiCard icon={Activity} label="Automations Health" value={s.automationsHealth || "OK"} color={s.xFailed > 0 ? "#c45a4a" : "#5a9c5a"} />
-          <KpiCard icon={Clock} label="Needs Follow-up" value={s.leadsNeedingFollowup ?? 0} color="#c45a4a" sub="leads awaiting action" />
+        {/* Role Selector + Provenance row */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", marginBottom: "1.25rem" }}>
+          <RoleSelector
+            currentRole={activeRole}
+            onRoleChange={setActiveRole}
+            roles={[
+              { id: "executive", label: "Executive", description: "Top-line KPIs, conversion, campaign ROI" },
+              { id: "operator", label: "Operator", description: "Leads, automations, queue health" },
+              { id: "analyst", label: "Analyst", description: "Content performance, distribution metrics" },
+              { id: "admin", label: "Admin", description: "System health, integrations, settings" },
+            ]}
+          />
+          <DataProvenance compact provenance={{
+            source: "Marketing OS Data Engine",
+            lastUpdated: new Date().toISOString(),
+            freshness: "minutes",
+            confidence: "high",
+            dataState: "live",
+            owner: "SZL Holdings Distribution OS",
+          } as DataProvenanceInfo} />
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
-          <div>
-            <h2 style={{ fontSize: "0.6875rem", fontWeight: 700, color: "#4a4540", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.875rem" }}>Quick Actions</h2>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-              <QuickAction icon={Users} label="Lead Inbox" href="/admin/distribution/leads" />
+        {/* Role context bar */}
+        {activeRole && (
+          <div style={{ background: "rgba(212,160,84,0.04)", border: "1px solid rgba(212,160,84,0.12)", borderRadius: "10px", padding: "0.75rem 1.25rem", marginBottom: "1.25rem", display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+            <span style={{ fontSize: "0.625rem", fontWeight: 700, color: DS.text.muted, textTransform: "uppercase", letterSpacing: "0.1em", flexShrink: 0 }}>
+              {activeRole === "executive" ? "C-Suite View" : activeRole === "operator" ? "Ops Focus" : activeRole === "analyst" ? "Analytics Focus" : "Admin View"}
+            </span>
+            <span style={{ fontSize: "0.6875rem", color: "rgba(255,255,255,0.6)", lineHeight: 1.5 }}>
+              {activeRole === "executive" && `${s.leadsThisWeek} leads this week · ${conversionRate} conversion rate · ${s.leadsNeedingFollowup ?? 0} requiring follow-up · Top campaign: "${s.topCampaign ?? "—"}"`}
+              {activeRole === "operator" && `${s.xQueued} queued · ${s.xFailed > 0 ? `${s.xFailed} X posts failed — review needed` : "No failures"} · ${s.automationsCompletedThisWeek} automations run this week`}
+              {activeRole === "analyst" && `${s.publishedArticles} articles live · ${s.contentGenerated ?? 0} AI-generated pieces · Newsletters ready: ${s.newslettersReady}`}
+              {activeRole === "admin" && `System status: ${s.automationsHealth ?? "OK"} · API: Connected · Data refresh every 5 minutes`}
+            </span>
+          </div>
+        )}
+
+        {/* Executive KPI Hero — top-line strip */}
+        <div style={{ background: DS.surface, border: `1px solid ${DS.border}`, borderRadius: "12px", marginBottom: "1.25rem", overflow: "hidden" }}>
+          <div style={{ height: "2px", background: `linear-gradient(90deg, ${DS.accent}, rgba(212,160,84,0.2), transparent)` }} />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)" }}>
+            {[
+              { label: "Visits", value: s.visitsThisWeek, color: "#4a90b8", sub: "this week" },
+              { label: "Leads", value: s.leadsThisWeek, color: "#5a9c5a", sub: "this week", pulse: (s.leadsNeedingFollowup ?? 0) > 0 },
+              { label: "Conversion", value: conversionRate, color: DS.accent, sub: "visits → leads" },
+              { label: "Needs Follow-up", value: s.leadsNeedingFollowup ?? 0, color: s.leadsNeedingFollowup ? "#c45a4a" : "#5a9c5a", sub: "awaiting action" },
+            ].map((item, i) => (
+              <div key={item.label} style={{ padding: "1rem 1.25rem", borderLeft: i > 0 ? `1px solid ${DS.border}` : "none" }}>
+                <div style={{ fontSize: "0.625rem", fontWeight: 600, color: DS.text.muted, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.375rem" }}>{item.label}</div>
+                <div style={{ display: "flex", alignItems: "baseline", gap: "0.375rem" }}>
+                  <span style={{ fontSize: "1.5rem", fontWeight: 700, color: item.color, letterSpacing: "-0.025em", fontVariantNumeric: "tabular-nums" }}>{item.value}</span>
+                  {item.pulse && <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#c45a4a", display: "inline-block", marginBottom: 3, animation: "pulse 2s infinite" }} />}
+                </div>
+                <div style={{ fontSize: "0.625rem", color: DS.text.muted, marginTop: "0.25rem" }}>{item.sub}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Main KPI Grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: "0.75rem", marginBottom: "1.5rem" }}>
+          <KpiCard icon={Globe} label="Top Landing Page" value={s.topPage || "—"} color="#4a90b8" trend="up" />
+          <KpiCard icon={Megaphone} label="Top Campaign" value={s.topCampaign || "—"} color="#8b7ac8" />
+          <KpiCard icon={FileText} label="Published Articles" value={s.publishedArticles} color="#c8953c" trend="up" />
+          <KpiCard icon={Activity} label="Automations Health" value={s.automationsHealth || "OK"} color={s.xFailed > 0 ? "#c45a4a" : "#5a9c5a"} />
+          <KpiCard icon={Clock} label="Automations (7d)" value={s.automationsCompletedThisWeek} color="#4a90b8" trend="flat" />
+        </div>
+
+        {/* Two-column: Actions + Pipeline */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", marginBottom: "1.25rem" }}>
+
+          {/* Quick Actions */}
+          <div style={{ background: DS.surface, border: `1px solid ${DS.border}`, borderRadius: "10px", overflow: "hidden" }}>
+            <div style={{ padding: "0.875rem 1rem", borderBottom: `1px solid ${DS.border}` }}>
+              <span style={{ fontSize: "0.6875rem", fontWeight: 700, color: DS.text.muted, letterSpacing: "0.1em", textTransform: "uppercase" }}>Quick Actions</span>
+            </div>
+            <div style={{ padding: "0.75rem", display: "flex", flexDirection: "column", gap: "0.3125rem" }}>
+              <QuickAction icon={Users} label="Lead Inbox" href="/admin/distribution/leads" badge={s.leadsNeedingFollowup ?? undefined} />
               <QuickAction icon={Megaphone} label="Campaigns & UTM Builder" href="/admin/distribution/campaigns" />
               <QuickAction icon={FileText} label="New Article" href="/admin/distribution/articles" />
               <QuickAction icon={Mail} label="New Newsletter" href="/admin/distribution/newsletters" />
@@ -187,9 +321,13 @@ export default function DistributionOsDashboard() {
               <QuickAction icon={Twitter} label="X Studio" href="/admin/distribution/x-studio" />
             </div>
           </div>
-          <div>
-            <h2 style={{ fontSize: "0.6875rem", fontWeight: 700, color: "#4a4540", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.875rem" }}>Reports & Configuration</h2>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+
+          {/* Reports & Config */}
+          <div style={{ background: DS.surface, border: `1px solid ${DS.border}`, borderRadius: "10px", overflow: "hidden" }}>
+            <div style={{ padding: "0.875rem 1rem", borderBottom: `1px solid ${DS.border}` }}>
+              <span style={{ fontSize: "0.6875rem", fontWeight: 700, color: DS.text.muted, letterSpacing: "0.1em", textTransform: "uppercase" }}>Reports & Configuration</span>
+            </div>
+            <div style={{ padding: "0.75rem", display: "flex", flexDirection: "column", gap: "0.3125rem" }}>
               <QuickAction icon={LineChart} label="Reports (Weekly / Monthly)" href="/admin/distribution/reports" />
               <QuickAction icon={BarChart3} label="Analytics Dashboard" href="/admin/distribution/analytics" />
               <QuickAction icon={Zap} label="Automations" href="/admin/distribution/automations" />
@@ -200,26 +338,41 @@ export default function DistributionOsDashboard() {
           </div>
         </div>
 
-        <div style={{ marginTop: "2rem", padding: "1.25rem", background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.05)", borderRadius: "10px" }}>
-          <h3 style={{ fontSize: "0.75rem", fontWeight: 600, color: "#8b8579", letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: "0.875rem" }}>Distribution Pipeline Status</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1rem" }}>
-            {[
-              { label: "X Posts Queued", value: s.xQueued, icon: Send, color: "#8b7ac8" },
-              { label: "X Posts Sent", value: s.xSentTotal, icon: CheckCircle2, color: "#5a9c5a" },
-              { label: "X Posts Failed", value: s.xFailed, icon: AlertCircle, color: s.xFailed > 0 ? "#c45a4a" : "#4a4540" },
-              { label: "Newsletters Ready", value: s.newslettersReady, icon: Mail, color: "#c8953c" },
-              { label: "Automations (7d)", value: s.automationsCompletedThisWeek, icon: Zap, color: "#4a90b8" },
-            ].map(item => (
-              <div key={item.label} style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
-                <item.icon size={14} style={{ color: item.color }} />
-                <div>
-                  <div style={{ fontSize: "1rem", fontWeight: 700, color: "#e8e4de" }}>{item.value}</div>
-                  <div style={{ fontSize: "0.6875rem", color: "#6b6560" }}>{item.label}</div>
-                </div>
-              </div>
-            ))}
+        {/* Distribution Pipeline — improved with progress bars */}
+        <div style={{ background: DS.surface, border: `1px solid ${DS.border}`, borderRadius: "10px", overflow: "hidden" }}>
+          <div style={{ padding: "0.875rem 1.25rem", borderBottom: `1px solid ${DS.border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ fontSize: "0.6875rem", fontWeight: 700, color: DS.text.muted, letterSpacing: "0.1em", textTransform: "uppercase" }}>Distribution Pipeline</span>
+            <span style={{ fontSize: "0.625rem", color: DS.text.muted, fontFamily: "monospace" }}>
+              {pipelineTotal} total posts tracked
+            </span>
           </div>
+          <div style={{ padding: "1rem 1.25rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.875rem" }}>
+            <PipelineStage label="X Posts Queued" value={s.xQueued} icon={Send} color="#8b7ac8" total={pipelineTotal} />
+            <PipelineStage label="X Posts Sent" value={s.xSentTotal} icon={CheckCircle2} color="#5a9c5a" total={pipelineTotal} />
+            <PipelineStage label="X Posts Failed" value={s.xFailed} icon={AlertCircle} color={s.xFailed > 0 ? "#c45a4a" : DS.text.muted} />
+            <PipelineStage label="Newsletters Ready" value={s.newslettersReady} icon={Mail} color="#c8953c" />
+          </div>
+          {s.xFailed > 0 && (
+            <div style={{ margin: "0 1.25rem 1rem", padding: "0.625rem 0.875rem", background: "rgba(196,90,74,0.06)", border: "1px solid rgba(196,90,74,0.15)", borderRadius: "7px", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <AlertCircle size={12} style={{ color: "#c45a4a", flexShrink: 0 }} />
+              <span style={{ fontSize: "0.75rem", color: "#c45a4a" }}>{s.xFailed} post{s.xFailed !== 1 ? "s" : ""} failed — review X Studio for errors</span>
+            </div>
+          )}
         </div>
+
+        {/* Action Loop — cross-cutting pattern */}
+        <div style={{ marginTop: "1.25rem" }}>
+          <ActionLoop
+            title="Priority Marketing Actions"
+            actions={[
+              { id: "1", label: s.leadsNeedingFollowup ? `Follow up ${s.leadsNeedingFollowup} leads — SLA breach risk` : "Review lead queue — all current", type: "approve", severity: s.leadsNeedingFollowup ? "critical" : "medium" },
+              { id: "2", label: s.xFailed > 0 ? `Resolve ${s.xFailed} failed X posts in X Studio` : "X pipeline healthy — no action needed", type: "investigate", severity: s.xFailed > 0 ? "high" : "low" },
+              { id: "3", label: `Review ${s.newslettersReady} newsletter${s.newslettersReady !== 1 ? "s" : ""} staged for send`, type: "approve", severity: "medium" },
+              { id: "4", label: `Campaign performance review — top: "${s.topCampaign ?? "N/A"}"`, type: "investigate", severity: "low" },
+            ]}
+          />
+        </div>
+
       </m.div>
     </DistributionOsLayout>
   );

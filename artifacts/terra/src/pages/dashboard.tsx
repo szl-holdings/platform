@@ -2,11 +2,12 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { DataStateBadge, useRealtimeChannel, ActionLoop } from "@szl-holdings/shared-ui";
+import { DataStateBadge, useRealtimeChannel, ActionLoop, RoleSelector, DataProvenance } from "@szl-holdings/shared-ui";
+import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
 import {
   Building2, MapPin, TrendingUp, Users, Activity,
   ArrowRight, AlertTriangle, Eye, Globe, Map, Shield, BarChart3,
-  ChevronRight, Layers, FileText, CheckCircle
+  ChevronRight, Layers, FileText, CheckCircle, ArrowUpRight, Circle,
 } from "lucide-react";
 import { brokerageSummary, brokerageDeals, riskSignals, agents } from "@/data/brokerage";
 import { RiskBadge, StageBadge, formatCurrency, AgentAvatar } from "@/components/brokerage-ui";
@@ -16,12 +17,21 @@ import { PackBanner } from "@/components/pack-banner";
 
 const PropertyMap = lazy(() => import("@/components/property-map"));
 
+const DS = {
+  page: "#08090e",
+  surface: "rgba(255,255,255,0.025)",
+  border: "rgba(255,255,255,0.05)",
+  borderMuted: "rgba(255,255,255,0.03)",
+  accent: { gold: "#b8943c", blue: "#3a7ad4", green: "#40856a", red: "#c0503a" },
+  text: { primary: "rgba(255,255,255,0.85)", secondary: "rgba(255,255,255,0.5)", tertiary: "rgba(255,255,255,0.3)", muted: "rgba(255,255,255,0.18)" },
+};
+
 const DOCTRINE_MODULES = [
-  { id: "foundation", label: "Foundation", icon: Building2, color: "rgba(255,255,255,0.3)", desc: "Data layer", href: "/investor-mode" },
-  { id: "watch", label: "Watch", icon: Eye, color: "#f59e0b", count: 3, desc: "Distress signals", href: "/distress-engine" },
-  { id: "pipeline", label: "Pipeline", icon: Activity, color: "#3a7ad4", count: 8, desc: "Active deals", href: "/pipeline" },
-  { id: "intelligence", label: "Intelligence", icon: BarChart3, color: "rgba(255,255,255,0.3)", desc: "Market data", href: "/market" },
-  { id: "action", label: "Action", icon: ArrowRight, color: "rgba(255,255,255,0.3)", desc: "Execute", href: "/deals" },
+  { id: "foundation", label: "Foundation", icon: Building2, color: DS.text.tertiary, desc: "Data layer", href: "/investor-mode" },
+  { id: "watch", label: "Watch", icon: Eye, color: DS.accent.gold, count: 3, desc: "Distress signals", href: "/distress-engine" },
+  { id: "pipeline", label: "Pipeline", icon: Activity, color: DS.accent.blue, count: 8, desc: "Active deals", href: "/pipeline" },
+  { id: "intelligence", label: "Intelligence", icon: BarChart3, color: DS.text.tertiary, desc: "Market data", href: "/market" },
+  { id: "action", label: "Action", icon: ArrowRight, color: DS.text.tertiary, desc: "Execute", href: "/deals" },
 ];
 
 const MARKET_SIGNALS = [
@@ -34,75 +44,34 @@ const MARKET_SIGNALS = [
 ];
 
 const SEVERITY_COLORS: Record<string, string> = {
-  critical: "#c0503a",
-  high: "#b8943c",
-  medium: "rgba(255,255,255,0.3)",
-  low: "rgba(255,255,255,0.18)",
+  critical: DS.accent.red,
+  high: DS.accent.gold,
+  medium: DS.text.tertiary,
+  low: DS.text.muted,
 };
 
 const OPPORTUNITY_QUEUE = [
-  {
-    address: "847 Park Ave, Queens",
-    type: "Pre-Foreclosure",
-    owner: "Estate of R. Martinez",
-    stage: "Distress",
-    confidence: 87,
-    evidence: "14yr hold · Q2 2026 debt maturity · filing confirmed",
-    nextAction: "Initiate outreach",
-    value: "$2.1M",
-    flag: "urgent" as const,
-  },
-  {
-    address: "1240 Broadway, Manhattan",
-    type: "Commercial",
-    owner: "Midtown RE LLC (unmask: Cerberus Capital)",
-    stage: "Watch",
-    confidence: 74,
-    evidence: "Listing price down 8% · 47 DOM · LLC transfer pending",
-    nextAction: "Comp analysis",
-    value: "$3.9M",
-    flag: "active" as const,
-  },
-  {
-    address: "45 Warren St, Tribeca",
-    type: "Multi-Family",
-    owner: "W.Capital Partners LLC",
-    stage: "Investigate",
-    confidence: 61,
-    evidence: "LLC transfer detected · 11yr hold · no active filings",
-    nextAction: "Ownership verify",
-    value: "$4.8M",
-    flag: "watch" as const,
-  },
-  {
-    address: "1890 Adam C Powell Blvd, Harlem",
-    type: "Mixed-Use",
-    owner: "R&B Holding Corp",
-    stage: "Distress",
-    confidence: 82,
-    evidence: "Cluster alert: 4 filings, zip 10029 · tax lien delinquent",
-    nextAction: "File review",
-    value: "$1.6M",
-    flag: "urgent" as const,
-  },
-  {
-    address: "312 W 23rd St, Chelsea",
-    type: "Residential",
-    owner: "J. Park (individual)",
-    stage: "Qualified",
-    confidence: 55,
-    evidence: "3 active buyer matches · motivated seller indicated",
-    nextAction: "Schedule showing",
-    value: "$890K",
-    flag: "active" as const,
-  },
+  { address: "847 Park Ave, Queens", type: "Pre-Foreclosure", owner: "Estate of R. Martinez", stage: "Distress", confidence: 87, evidence: "14yr hold · Q2 2026 debt maturity · filing confirmed", nextAction: "Initiate outreach", value: "$2.1M", flag: "urgent" as const },
+  { address: "1240 Broadway, Manhattan", type: "Commercial", owner: "Midtown RE LLC (unmask: Cerberus Capital)", stage: "Watch", confidence: 74, evidence: "Listing price down 8% · 47 DOM · LLC transfer pending", nextAction: "Comp analysis", value: "$3.9M", flag: "active" as const },
+  { address: "45 Warren St, Tribeca", type: "Multi-Family", owner: "W.Capital Partners LLC", stage: "Investigate", confidence: 61, evidence: "LLC transfer detected · 11yr hold · no active filings", nextAction: "Ownership verify", value: "$4.8M", flag: "watch" as const },
+  { address: "1890 Adam C Powell Blvd, Harlem", type: "Mixed-Use", owner: "R&B Holding Corp", stage: "Distress", confidence: 82, evidence: "Cluster alert: 4 filings, zip 10029 · tax lien delinquent", nextAction: "File review", value: "$1.6M", flag: "urgent" as const },
+  { address: "312 W 23rd St, Chelsea", type: "Residential", owner: "J. Park (individual)", stage: "Qualified", confidence: 55, evidence: "3 active buyer matches · motivated seller indicated", nextAction: "Schedule showing", value: "$890K", flag: "active" as const },
 ];
 
 const FLAG_STYLES: Record<string, { color: string; label: string }> = {
-  urgent: { color: "#c0503a", label: "Urgent" },
-  active: { color: "#b8943c", label: "Active" },
-  watch: { color: "rgba(255,255,255,0.3)", label: "Watch" },
+  urgent: { color: DS.accent.red, label: "Urgent" },
+  active: { color: DS.accent.gold, label: "Active" },
+  watch: { color: DS.text.tertiary, label: "Watch" },
 };
+
+const PIPELINE_STAGES = [
+  { stage: "Distress", color: DS.accent.red, deals: OPPORTUNITY_QUEUE.filter(o => o.stage === "Distress").length },
+  { stage: "Watch", color: DS.accent.gold, deals: OPPORTUNITY_QUEUE.filter(o => o.stage === "Watch").length },
+  { stage: "Investigate", color: DS.accent.blue, deals: OPPORTUNITY_QUEUE.filter(o => o.stage === "Investigate").length },
+  { stage: "Qualified", color: DS.accent.green, deals: OPPORTUNITY_QUEUE.filter(o => o.stage === "Qualified").length },
+  { stage: "Closed", color: DS.text.secondary, deals: 2 },
+];
+const stageTotalDeals = PIPELINE_STAGES.reduce((s, p) => s + p.deals, 0);
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API = "/api";
@@ -126,6 +95,7 @@ export default function TerraIntelligence() {
     qc.invalidateQueries({ queryKey: ["terra-leads"] });
   }, [wsSignal, qc]);
 
+  const [activeRole, setActiveRole] = useState("operator");
   const activeSignals = riskSignals.filter(s => !s.acknowledged);
   const criticalSignals = activeSignals.filter(s => s.severity === "critical");
   const topDeals = [...brokerageDeals].sort((a, b) => b.price - a.price).slice(0, 5);
@@ -135,17 +105,24 @@ export default function TerraIntelligence() {
 
   return (
     <div className="space-y-4 max-w-[1400px]">
+
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-base font-bold text-white tracking-tight font-display">Property Intelligence</h1>
-          <p className="text-[10px] mt-0.5 font-mono" style={{ color: "rgba(255,255,255,0.25)" }}>
-            Terra · {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
+          <div className="flex items-center gap-2.5 mb-0.5">
+            <h1 className="text-base font-bold text-white tracking-tight font-display">Property Intelligence</h1>
+            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded uppercase tracking-wider font-bold" style={{ color: DS.accent.gold, background: `${DS.accent.gold}10`, border: `1px solid ${DS.accent.gold}20` }}>
+              Terra
+            </span>
+          </div>
+          <p className="text-[10px] mt-0.5 font-mono" style={{ color: DS.text.muted }}>
+            {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
           </p>
         </div>
         <div className="flex items-center gap-2.5">
           <DataStateBadge state={dataMode} label={dataMode === "live" ? "Live" : "Demo"} />
           {criticalSignals.length > 0 && (
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-semibold animate-pulse" style={{ color: "#c0503a", background: "rgba(192,80,58,0.09)", border: "1px solid rgba(192,80,58,0.18)" }}>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold" style={{ color: DS.accent.red, background: `${DS.accent.red}09`, border: `1px solid ${DS.accent.red}18`, animation: "pulse 2s infinite" }}>
               <AlertTriangle className="w-3 h-3" />
               {criticalSignals.length} Critical
             </div>
@@ -153,34 +130,77 @@ export default function TerraIntelligence() {
         </div>
       </div>
 
-      <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.012)" }}>
+      {/* Role Selector + Data Provenance row */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <RoleSelector
+          currentRole={activeRole}
+          onRoleChange={setActiveRole}
+          roles={[
+            { id: "executive", label: "Executive", description: "Portfolio health, acquisition pipeline, top-line metrics" },
+            { id: "operator", label: "Analyst", description: "Distress signals, opportunity queue, ownership intelligence" },
+            { id: "analyst", label: "Broker", description: "Deal pipeline, lead queue, SLA tracking" },
+            { id: "admin", label: "Admin", description: "System configuration, data freshness, audit" },
+            { id: "buyer", label: "Buyer / Demo", description: "Product capabilities overview" },
+          ]}
+        />
+        <DataProvenance compact provenance={{
+          source: "Terra Property Intelligence Engine",
+          lastUpdated: new Date().toISOString(),
+          freshness: dataMode === "live" ? "realtime" : "minutes",
+          confidence: "high",
+          dataState: dataMode,
+          owner: "Terra Acquisitions",
+        } as DataProvenanceInfo} />
+      </div>
+
+      {/* Role-based context bar */}
+      {activeRole && (
+        <div className="rounded-xl border px-4 py-2.5 flex items-center gap-3 flex-wrap" style={{ borderColor: `rgba(${activeRole === "executive" ? "184,148,60" : activeRole === "analyst" ? "58,122,212" : activeRole === "buyer" ? "58,122,212" : "64,133,106"},0.15)`, background: `rgba(${activeRole === "executive" ? "184,148,60" : activeRole === "analyst" ? "58,122,212" : activeRole === "buyer" ? "58,122,212" : "64,133,106"},0.04)` }}>
+          <div className="text-[10px] uppercase tracking-wider font-semibold shrink-0" style={{ color: DS.text.muted }}>
+            {activeRole === "executive" && "Portfolio View"}
+            {activeRole === "operator" && "Analyst Focus"}
+            {activeRole === "analyst" && "Broker Focus"}
+            {activeRole === "admin" && "Admin View"}
+            {activeRole === "buyer" && "Demo View"}
+          </div>
+          <div className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>
+            {activeRole === "executive" && `${brokerageSummary.activeListings} active listings · ${OPPORTUNITY_QUEUE.length} live acquisition targets · ${OPPORTUNITY_QUEUE.filter(o => o.flag === "urgent").length} urgent. Distress cluster activity in East Harlem and Queens. Total portfolio tracked: $2.4B.`}
+            {activeRole === "operator" && `${criticalSignals.length} critical market signals active. ${OPPORTUNITY_QUEUE.filter(o => o.stage === "Distress").length} distress opportunities require outreach. Confidence-weighted queue ready for review.`}
+            {activeRole === "analyst" && `${topDeals.length} deals in pipeline. ${topAgents.length} active brokers. ${OPPORTUNITY_QUEUE.filter(o => o.flag === "urgent").length} inquiries require same-day response. Broker SLA warning on 2 aging inquiries.`}
+            {activeRole === "admin" && `Data mode: ${dataMode}. All Terra intelligence sources connected. Property map token: ${mapToken ? "Active" : "Inactive"}.`}
+            {activeRole === "buyer" && "You're viewing Terra — SZL's property intelligence platform. Distress detection, ownership stack analysis, and broker orchestration all demonstrated with sample market data."}
+          </div>
+        </div>
+      )}
+
+      {/* KPI Strip */}
+      <div className="rounded-xl border overflow-hidden" style={{ borderColor: DS.border, background: DS.surface }}>
+        <div style={{ height: 2, background: `linear-gradient(90deg, ${DS.accent.gold}, ${DS.accent.blue}40, transparent)` }} />
         <div className="grid grid-cols-3 md:grid-cols-6">
           {[
-            { label: "Active Listings", value: brokerageSummary.activeListings.toString(), color: "#b8943c" },
-            { label: "Distress Signals", value: "3", color: "#c0503a", pulse: true },
-            { label: "Deals in Motion", value: brokerageSummary.activeDeals.toString(), color: "#3a7ad4" },
-            { label: "Broker Response", value: "2.4h", color: "#40856a", sub: "avg" },
-            { label: "Market Movement", value: "+2.1%", color: "#40856a", sub: "30d" },
-            { label: "Portfolio Tracked", value: "$2.4B", color: "#b8943c" },
+            { label: "Active Listings", value: brokerageSummary.activeListings.toString(), color: DS.accent.gold },
+            { label: "Distress Signals", value: "3", color: DS.accent.red, pulse: true },
+            { label: "Deals in Motion", value: brokerageSummary.activeDeals.toString(), color: DS.accent.blue },
+            { label: "Broker Response", value: "2.4h", color: DS.accent.green, sub: "avg" },
+            { label: "Market Movement", value: "+2.1%", color: DS.accent.green, sub: "30d" },
+            { label: "Portfolio Tracked", value: "$2.4B", color: DS.accent.gold },
           ].map((c, i) => (
-            <div key={c.label} className="px-3 py-3 text-center" style={{ borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
+            <div key={c.label} className="px-3 py-3 text-center" style={{ borderLeft: i > 0 ? `1px solid ${DS.borderMuted}` : "none" }}>
               <div className="flex items-center justify-center gap-1.5 mb-0.5">
-                <span className="text-base font-bold font-mono" style={{ color: c.color }}>{c.value}</span>
+                <span className="text-base font-bold font-mono tabular-nums" style={{ color: c.color }}>{c.value}</span>
                 {c.pulse && <span className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0" style={{ background: c.color }} />}
               </div>
-              <div className="text-[8px] font-medium uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.25)" }}>{c.label}</div>
-              {c.sub && <div className="text-[7px] mt-0.5" style={{ color: "rgba(255,255,255,0.15)" }}>{c.sub}</div>}
+              <div className="text-[8px] font-medium uppercase tracking-wider" style={{ color: DS.text.muted }}>{c.label}</div>
+              {c.sub && <div className="text-[7px] mt-0.5" style={{ color: DS.text.muted }}>{c.sub}</div>}
             </div>
           ))}
         </div>
       </div>
 
+      {/* Doctrine Modules */}
       <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
         {DOCTRINE_MODULES.map((mod) => (
-          <Link key={mod.id} href={mod.href} className="group rounded-xl border p-3 transition-all hover:border-white/10 cursor-pointer" style={{
-            borderColor: "rgba(255,255,255,0.05)",
-            background: "rgba(255,255,255,0.012)",
-          }}>
+          <Link key={mod.id} href={mod.href} className="group rounded-xl border p-3 transition-all hover:border-white/10 cursor-pointer" style={{ borderColor: DS.border, background: DS.surface }}>
             <div className="flex items-center gap-2 mb-1.5">
               <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.05)" }}>
                 <mod.icon className="w-3 h-3" style={{ color: mod.color }} />
@@ -188,73 +208,111 @@ export default function TerraIntelligence() {
               {mod.count !== undefined && mod.count > 0 && <span className="text-[9px] font-bold font-mono" style={{ color: mod.color }}>{mod.count}</span>}
             </div>
             <div className="text-[10px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>{mod.label}</div>
-            <div className="text-[8px] mt-0.5 hidden sm:block" style={{ color: "rgba(255,255,255,0.2)" }}>{mod.desc}</div>
+            <div className="text-[8px] mt-0.5 hidden sm:block" style={{ color: DS.text.muted }}>{mod.desc}</div>
           </Link>
         ))}
       </div>
 
+      {/* Pipeline Stage Visualization */}
+      <div className="rounded-xl border overflow-hidden" style={{ borderColor: DS.border, background: DS.surface }}>
+        <div className="flex items-center gap-2 px-4 py-2.5 border-b" style={{ borderColor: DS.borderMuted }}>
+          <Activity className="w-3.5 h-3.5" style={{ color: DS.accent.blue }} />
+          <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: `${DS.accent.blue}99` }}>Stage Pipeline</span>
+          <span className="text-[10px] font-mono ml-auto" style={{ color: DS.text.muted }}>{stageTotalDeals} active</span>
+        </div>
+        <div className="px-4 py-3 flex items-center gap-1.5">
+          {PIPELINE_STAGES.map((ps, i) => (
+            <div key={ps.stage} className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[8px] uppercase tracking-wider font-semibold" style={{ color: ps.color }}>{ps.stage}</span>
+                <span className="text-[10px] font-bold font-mono" style={{ color: ps.color }}>{ps.deals}</span>
+              </div>
+              <div style={{ height: 4, background: `${ps.color}12`, borderRadius: 2, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: stageTotalDeals > 0 ? `${Math.round((ps.deals / stageTotalDeals) * 100)}%` : "0%", background: ps.color, borderRadius: 2 }} />
+              </div>
+              {i < PIPELINE_STAGES.length - 1 && (
+                <div style={{ textAlign: "right", marginTop: 2 }}>
+                  <ChevronRight className="w-2 h-2 inline" style={{ color: DS.text.muted }} />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Main grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 space-y-4">
-          <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.012)" }}>
-            <div className="flex items-center gap-2 px-4 py-2.5 border-b" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-              <MapPin className="w-3.5 h-3.5" style={{ color: "#b8943c" }} />
-              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(184,148,60,0.7)" }}>Opportunity Queue</span>
-              <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>({OPPORTUNITY_QUEUE.length})</span>
-              <Link href="/distress-engine" className="ml-auto flex items-center gap-1 text-[10px] font-medium transition-opacity hover:opacity-70" style={{ color: "#b8943c" }}>
+
+          {/* Opportunity Queue */}
+          <div className="rounded-xl border overflow-hidden" style={{ borderColor: DS.border, background: DS.surface }}>
+            <div style={{ height: 2, background: `linear-gradient(90deg, ${DS.accent.gold}, transparent)` }} />
+            <div className="flex items-center gap-2 px-4 py-2.5 border-b" style={{ borderColor: DS.borderMuted }}>
+              <MapPin className="w-3.5 h-3.5" style={{ color: DS.accent.gold }} />
+              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: `${DS.accent.gold}99` }}>Opportunity Queue</span>
+              <span className="text-[10px] font-mono" style={{ color: DS.text.muted }}>({OPPORTUNITY_QUEUE.length})</span>
+              <Link href="/distress-engine" className="ml-auto flex items-center gap-1 text-[10px] font-medium transition-opacity hover:opacity-70" style={{ color: DS.accent.gold }}>
                 Full watchlist <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
 
-            <div className="hidden md:grid grid-cols-12 gap-2 px-4 py-1.5 border-b" style={{ borderColor: "rgba(255,255,255,0.03)" }}>
+            {/* Table header */}
+            <div className="hidden md:grid grid-cols-12 gap-2 px-4 py-1.5 border-b" style={{ borderColor: DS.borderMuted }}>
               {["Property", "Owner", "Stage", "Conf.", "Evidence", "Action"].map((h, i) => (
-                <div key={h} className={`text-[8px] font-semibold uppercase tracking-wider ${i === 0 ? "col-span-3" : i === 1 ? "col-span-2" : i === 4 ? "col-span-3" : "col-span-1"}`} style={{ color: "rgba(255,255,255,0.2)" }}>
+                <div key={h} className={`text-[8px] font-semibold uppercase tracking-wider ${i === 0 ? "col-span-3" : i === 1 ? "col-span-2" : i === 4 ? "col-span-3" : "col-span-1"}`} style={{ color: DS.text.muted }}>
                   {h}
                 </div>
               ))}
             </div>
 
-            <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.03)" }}>
+            <div className="divide-y" style={{ borderColor: DS.borderMuted }}>
               {OPPORTUNITY_QUEUE.map((item, i) => {
                 const flag = FLAG_STYLES[item.flag];
+                const confColor = item.confidence >= 80 ? DS.accent.green : item.confidence >= 65 ? DS.accent.gold : DS.text.tertiary;
                 return (
                   <div key={i}>
-                    <div className="hidden md:grid grid-cols-12 gap-2 px-4 py-2.5 items-start hover:bg-white/[0.015] transition-colors">
+                    <div className="hidden md:grid grid-cols-12 gap-2 px-4 py-2.5 items-start hover:bg-white/[0.015] transition-colors group">
                       <div className="col-span-3 min-w-0">
                         <div className="flex items-center gap-1.5 mb-0.5">
                           <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: flag.color }} />
-                          <p className="text-[11px] font-medium text-white/80 truncate">{item.address}</p>
+                          <p className="text-[11px] font-medium truncate" style={{ color: "rgba(255,255,255,0.8)" }}>{item.address}</p>
                         </div>
-                        <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>{item.type} · {item.value}</span>
+                        <span className="text-[9px]" style={{ color: DS.text.muted }}>{item.type} · {item.value}</span>
                       </div>
                       <div className="col-span-2 min-w-0">
-                        <p className="text-[10px] truncate" style={{ color: "rgba(255,255,255,0.4)" }}>{item.owner}</p>
+                        <p className="text-[10px] truncate" style={{ color: DS.text.tertiary }}>{item.owner}</p>
                       </div>
                       <div className="col-span-1">
                         <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ color: flag.color, background: `${flag.color}12` }}>{item.stage}</span>
                       </div>
                       <div className="col-span-1">
-                        <span className="text-[11px] font-bold font-mono" style={{ color: item.confidence >= 80 ? "#40856a" : item.confidence >= 65 ? "#b8943c" : "rgba(255,255,255,0.4)" }}>{item.confidence}%</span>
+                        <div className="flex flex-col items-center gap-0.5">
+                          <span className="text-[11px] font-bold font-mono" style={{ color: confColor }}>{item.confidence}%</span>
+                          <div style={{ width: 24, height: 3, background: `${confColor}15`, borderRadius: 2, overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${item.confidence}%`, background: confColor, borderRadius: 2 }} />
+                          </div>
+                        </div>
                       </div>
                       <div className="col-span-3 min-w-0">
-                        <p className="text-[9px] leading-relaxed" style={{ color: "rgba(255,255,255,0.3)" }}>{item.evidence}</p>
+                        <p className="text-[9px] leading-relaxed" style={{ color: DS.text.muted }}>{item.evidence}</p>
                       </div>
                       <div className="col-span-2 min-w-0">
-                        <p className="text-[9px] font-medium" style={{ color: "#40856a" }}>→ {item.nextAction}</p>
+                        <p className="text-[9px] font-semibold" style={{ color: DS.accent.green }}>→ {item.nextAction}</p>
                       </div>
                     </div>
                     <div className="flex flex-col gap-1.5 md:hidden px-4 py-3 hover:bg-white/[0.015] transition-colors">
                       <div className="flex items-start gap-2 justify-between">
                         <div className="flex items-center gap-1.5 min-w-0">
                           <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-0.5" style={{ background: flag.color }} />
-                          <p className="text-[11px] font-medium text-white/80 truncate">{item.address}</p>
+                          <p className="text-[11px] font-medium truncate" style={{ color: "rgba(255,255,255,0.8)" }}>{item.address}</p>
                         </div>
-                        <span className="text-[11px] font-bold font-mono shrink-0" style={{ color: item.confidence >= 80 ? "#40856a" : item.confidence >= 65 ? "#b8943c" : "rgba(255,255,255,0.4)" }}>{item.confidence}%</span>
+                        <span className="text-[11px] font-bold font-mono shrink-0" style={{ color: confColor }}>{item.confidence}%</span>
                       </div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>{item.type} · {item.value}</span>
+                        <span className="text-[9px]" style={{ color: DS.text.muted }}>{item.type} · {item.value}</span>
                         <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ color: flag.color, background: `${flag.color}12` }}>{item.stage}</span>
                       </div>
-                      <p className="text-[9px] font-medium" style={{ color: "#40856a" }}>→ {item.nextAction}</p>
+                      <p className="text-[9px] font-semibold" style={{ color: DS.accent.green }}>→ {item.nextAction}</p>
                     </div>
                   </div>
                 );
@@ -262,51 +320,54 @@ export default function TerraIntelligence() {
             </div>
           </div>
 
-          <div className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.012)" }}>
+          {/* Deal Pipeline */}
+          <div className="rounded-xl border p-4" style={{ borderColor: DS.border, background: DS.surface }}>
             <div className="flex items-center gap-2 mb-3">
-              <Activity className="w-3.5 h-3.5" style={{ color: "#3a7ad4" }} />
-              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(58,122,212,0.7)" }}>Deal Pipeline</span>
-              <Link href="/deals" className="ml-auto flex items-center gap-1 text-[10px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#3a7ad4" }}>
+              <Activity className="w-3.5 h-3.5" style={{ color: DS.accent.blue }} />
+              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: `${DS.accent.blue}99` }}>Deal Pipeline</span>
+              <Link href="/deals" className="ml-auto flex items-center gap-1 text-[10px] font-medium hover:opacity-70 transition-opacity" style={{ color: DS.accent.blue }}>
                 Full pipeline <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
             <div className="space-y-0">
               {topDeals.map((deal, i) => (
-                <div key={deal.id} className="flex items-center gap-3 py-2 hover:bg-white/[0.015] transition-colors" style={{ borderTop: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
+                <div key={deal.id} className="flex items-center gap-3 py-2 hover:bg-white/[0.015] transition-colors" style={{ borderTop: i > 0 ? `1px solid ${DS.borderMuted}` : "none" }}>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-medium text-white/80 truncate">{deal.address}</p>
-                    {deal.buyerName && <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>{deal.buyerName}</span>}
+                    <p className="text-[11px] font-medium truncate" style={{ color: "rgba(255,255,255,0.8)" }}>{deal.address}</p>
+                    {deal.buyerName && <span className="text-[9px]" style={{ color: DS.text.muted }}>{deal.buyerName}</span>}
                   </div>
                   <StageBadge stage={deal.stage} />
                   <RiskBadge level={deal.riskLevel} />
-                  <span className="text-[11px] font-mono font-bold" style={{ color: "#b8943c" }}>{formatCurrency(deal.price)}</span>
+                  <span className="text-[11px] font-mono font-bold" style={{ color: DS.accent.gold }}>{formatCurrency(deal.price)}</span>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
+        {/* Right sidebar */}
         <div className="space-y-4">
-          <div className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.012)" }}>
+
+          {/* Market Signals — severity-weighted */}
+          <div className="rounded-xl border p-4" style={{ borderColor: DS.border, background: DS.surface }}>
+            <div style={{ height: 2, background: `linear-gradient(90deg, ${DS.accent.gold}60, transparent)`, margin: "-1rem -1rem 0.75rem", borderRadius: "10px 10px 0 0" }} />
             <div className="flex items-center gap-2 mb-3">
-              <AlertTriangle className="w-3.5 h-3.5" style={{ color: "#b8943c" }} />
-              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(184,148,60,0.7)" }}>Market Signals</span>
+              <AlertTriangle className="w-3.5 h-3.5" style={{ color: DS.accent.gold }} />
+              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: `${DS.accent.gold}99` }}>Market Signals</span>
+              <span className="text-[9px] font-mono ml-auto" style={{ color: DS.text.muted }}>{MARKET_SIGNALS.length} active</span>
             </div>
             <div className="space-y-0">
               {MARKET_SIGNALS.map((sig, i) => (
-                <div key={i} className="flex gap-2.5 py-2" style={{ borderTop: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
+                <div key={i} className="flex gap-2.5 py-2" style={{ borderTop: i > 0 ? `1px solid ${DS.borderMuted}` : "none" }}>
                   <div className="flex flex-col items-center shrink-0 pt-0.5">
-                    <span className="w-2 h-2 rounded-full shrink-0" style={{ background: SEVERITY_COLORS[sig.severity] }} />
-                    {i < MARKET_SIGNALS.length - 1 && <div className="w-px flex-1 mt-1" style={{ background: "rgba(255,255,255,0.04)" }} />}
+                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: SEVERITY_COLORS[sig.severity], boxShadow: sig.severity === "critical" ? `0 0 6px ${SEVERITY_COLORS[sig.severity]}60` : "none" }} />
+                    {i < MARKET_SIGNALS.length - 1 && <div className="w-px flex-1 mt-1" style={{ background: DS.borderMuted }} />}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>{sig.text}</p>
+                    <p className="text-[10px] leading-relaxed" style={{ color: DS.text.secondary }}>{sig.text}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[8px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>{sig.time}</span>
-                      <span className="text-[8px] px-1 py-0.5 rounded uppercase font-semibold" style={{
-                        color: SEVERITY_COLORS[sig.severity],
-                        background: `${SEVERITY_COLORS[sig.severity]}12`,
-                      }}>{sig.severity}</span>
+                      <span className="text-[8px] font-mono" style={{ color: DS.text.muted }}>{sig.time}</span>
+                      <span className="text-[8px] px-1 py-0.5 rounded uppercase font-semibold" style={{ color: SEVERITY_COLORS[sig.severity], background: `${SEVERITY_COLORS[sig.severity]}12` }}>{sig.severity}</span>
                     </div>
                   </div>
                 </div>
@@ -314,46 +375,53 @@ export default function TerraIntelligence() {
             </div>
           </div>
 
-          <div className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.012)" }}>
+          {/* Top Brokers */}
+          <div className="rounded-xl border p-4" style={{ borderColor: DS.border, background: DS.surface }}>
             <div className="flex items-center gap-2 mb-3">
-              <Users className="w-3.5 h-3.5" style={{ color: "#3a7ad4" }} />
-              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(58,122,212,0.7)" }}>Top Brokers</span>
-              <Link href="/leads" className="ml-auto flex items-center gap-1 text-[10px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#3a7ad4" }}>
+              <Users className="w-3.5 h-3.5" style={{ color: DS.accent.blue }} />
+              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: `${DS.accent.blue}99` }}>Top Brokers</span>
+              <Link href="/leads" className="ml-auto flex items-center gap-1 text-[10px] font-medium hover:opacity-70 transition-opacity" style={{ color: DS.accent.blue }}>
                 Scorecards <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
             {topAgents.map((agent, i) => (
-              <div key={agent.id} className="flex items-center gap-3 py-2" style={{ borderTop: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
+              <div key={agent.id} className="flex items-center gap-3 py-2" style={{ borderTop: i > 0 ? `1px solid ${DS.borderMuted}` : "none" }}>
                 <AgentAvatar agent={agent} size="sm" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-medium text-white/70">{agent.name}</p>
-                  <p className="text-[8px]" style={{ color: "rgba(255,255,255,0.25)" }}>{agent.activeDeals} deals · {agent.conversionRate}% conv</p>
+                  <p className="text-[10px] font-medium" style={{ color: "rgba(255,255,255,0.7)" }}>{agent.name}</p>
+                  <p className="text-[8px]" style={{ color: DS.text.muted }}>{agent.activeDeals} deals · {agent.conversionRate}% conv</p>
                 </div>
-                <span className="text-[10px] font-mono font-bold" style={{ color: "#40856a" }}>{formatCurrency(agent.commissionMTD)}</span>
+                <div className="text-right">
+                  <span className="text-[10px] font-mono font-bold block" style={{ color: DS.accent.green }}>{formatCurrency(agent.commissionMTD)}</span>
+                  <div style={{ width: 40, height: 3, background: `${DS.accent.green}15`, borderRadius: 2, overflow: "hidden", marginTop: 2, marginLeft: "auto" }}>
+                    <div style={{ height: "100%", width: `${Math.min((agent.commissionMTD / 30000) * 100, 100)}%`, background: DS.accent.green, borderRadius: 2 }} />
+                  </div>
+                </div>
               </div>
             ))}
           </div>
 
-          <div className="rounded-xl border p-3" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.012)" }}>
-            <div className="flex items-center justify-between mb-2">
+          {/* System State */}
+          <div className="rounded-xl border p-3" style={{ borderColor: DS.border, background: DS.surface }}>
+            <div className="flex items-center justify-between mb-2.5">
               <div className="flex items-center gap-2">
-                <Shield className="w-3 h-3" style={{ color: "rgba(255,255,255,0.25)" }} />
-                <span className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: "rgba(255,255,255,0.25)" }}>System</span>
+                <Shield className="w-3 h-3" style={{ color: DS.text.muted }} />
+                <span className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: DS.text.muted }}>System</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full" style={{ background: dataMode === "live" ? "#40856a" : "#9a7840" }} />
-                <span className="text-[9px] font-mono font-semibold" style={{ color: dataMode === "live" ? "#40856a" : "#9a7840" }}>{dataMode === "live" ? "Live" : "Demo"}</span>
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: dataMode === "live" ? DS.accent.green : "#9a7840" }} />
+                <span className="text-[9px] font-mono font-semibold" style={{ color: dataMode === "live" ? DS.accent.green : "#9a7840" }}>{dataMode === "live" ? "Live" : "Demo"}</span>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { label: "Occupancy", value: "81%", color: "#b8943c" },
-                { label: "Pipeline", value: formatCurrency(brokerageSummary.pipelineValue), color: "#3a7ad4" },
-                { label: "Freshness", value: "2m ago", color: "rgba(255,255,255,0.35)" },
-                { label: "Confidence", value: "High", color: "#40856a" },
+                { label: "Occupancy", value: "81%", color: DS.accent.gold },
+                { label: "Pipeline", value: formatCurrency(brokerageSummary.pipelineValue), color: DS.accent.blue },
+                { label: "Freshness", value: "2m ago", color: DS.text.tertiary },
+                { label: "Confidence", value: "High", color: DS.accent.green },
               ].map(s => (
                 <div key={s.label}>
-                  <div className="text-[8px]" style={{ color: "rgba(255,255,255,0.2)" }}>{s.label}</div>
+                  <div className="text-[8px]" style={{ color: DS.text.muted }}>{s.label}</div>
                   <div className="text-[10px] font-mono font-bold" style={{ color: s.color }}>{s.value}</div>
                 </div>
               ))}
@@ -362,26 +430,35 @@ export default function TerraIntelligence() {
         </div>
       </div>
 
-      <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(184,148,60,0.08)", background: "rgba(255,255,255,0.012)" }}>
-        <div className="flex items-center justify-between px-4 py-2.5 border-b" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+      {/* Spatial Context */}
+      <div className="rounded-xl border overflow-hidden" style={{ borderColor: `${DS.accent.gold}10`, background: DS.surface }}>
+        <div className="flex items-center justify-between px-4 py-2.5 border-b" style={{ borderColor: DS.borderMuted }}>
           <div className="flex items-center gap-2">
-            <Map className="w-3.5 h-3.5" style={{ color: "#b8943c" }} />
-            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(184,148,60,0.6)" }}>Spatial Context</span>
-            <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>— {properties.length} properties tracked</span>
+            <Map className="w-3.5 h-3.5" style={{ color: DS.accent.gold }} />
+            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: `${DS.accent.gold}80` }}>Spatial Context</span>
+            <span className="text-[10px] font-mono" style={{ color: DS.text.muted }}>— {properties.length} properties tracked</span>
           </div>
           <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
+              {[
+                { label: "Performing", color: DS.accent.green, count: properties.filter(p => p.status === "performing").length },
+                { label: "Watch", color: DS.accent.gold, count: properties.filter(p => p.status === "watch").length },
+                { label: "Critical", color: DS.accent.red, count: properties.filter(p => p.status === "critical").length },
+              ].map(s => (
+                <div key={s.label} className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.color }} />
+                  <span className="text-[9px]" style={{ color: DS.text.muted }}>{s.count} {s.label}</span>
+                </div>
+              ))}
+            </div>
             <button
               onClick={() => setShowMap(s => !s)}
               className="text-[9px] px-2.5 py-1 rounded-lg border transition-all"
-              style={{
-                color: showMap ? "#b8943c" : "rgba(255,255,255,0.35)",
-                borderColor: showMap ? "rgba(184,148,60,0.25)" : "rgba(255,255,255,0.07)",
-                background: showMap ? "rgba(184,148,60,0.06)" : "transparent",
-              }}
+              style={{ color: showMap ? DS.accent.gold : DS.text.tertiary, borderColor: showMap ? `${DS.accent.gold}25` : `rgba(255,255,255,0.07)`, background: showMap ? `${DS.accent.gold}06` : "transparent" }}
             >
               {showMap ? "Hide Map" : "Show Map"}
             </button>
-            <Link href="/property-map" className="text-[9px] px-2.5 py-1 rounded-lg border transition-all hover:bg-white/5" style={{ color: "#b8943c", borderColor: "rgba(184,148,60,0.18)" }}>
+            <Link href="/property-map" className="text-[9px] px-2.5 py-1 rounded-lg border transition-all hover:bg-white/5" style={{ color: DS.accent.gold, borderColor: `${DS.accent.gold}18` }}>
               Full Map →
             </Link>
           </div>
@@ -389,202 +466,33 @@ export default function TerraIntelligence() {
         {showMap && (
           <div style={{ height: 300 }}>
             {mapToken ? (
-              <Suspense fallback={
-                <div className="flex items-center justify-center h-full">
-                  <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(184,148,60,0.2)", borderTopColor: "#b8943c" }} />
-                </div>
-              }>
+              <Suspense fallback={<div className="flex items-center justify-center h-full"><div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: `${DS.accent.gold}20`, borderTopColor: DS.accent.gold }} /></div>}>
                 <PropertyMap properties={properties} token={mapToken} height="300px" showPanel={false} />
               </Suspense>
             ) : (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center space-y-1">
-                  <Globe className="w-5 h-5 mx-auto" style={{ color: "rgba(184,148,60,0.3)" }} />
-                  <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.25)" }}>Map loading…</p>
+                  <Globe className="w-5 h-5 mx-auto" style={{ color: `${DS.accent.gold}30` }} />
+                  <p className="text-[10px]" style={{ color: DS.text.muted }}>Map loading…</p>
                 </div>
               </div>
             )}
           </div>
         )}
-        {!showMap && (
-          <div className="px-4 py-2.5 flex items-center gap-4">
-            {[
-              { label: "Performing", color: "#40856a", count: properties.filter(p => p.status === "performing").length },
-              { label: "Watch", color: "#b8943c", count: properties.filter(p => p.status === "watch").length },
-              { label: "Critical", color: "#c0503a", count: properties.filter(p => p.status === "critical").length },
-            ].map(s => (
-              <div key={s.label} className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full" style={{ background: s.color }} />
-                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>{s.count} {s.label}</span>
-              </div>
-            ))}
-            <span className="ml-auto text-[9px]" style={{ color: "rgba(255,255,255,0.2)" }}>Click "Show Map" to view geographic distribution</span>
-          </div>
-        )}
       </div>
 
+      {/* Action Loop — cross-cutting pattern */}
       <ActionLoop
-        title="Next Best Actions"
+        title="Priority Field Actions"
         actions={[
-          { id: "1", label: "Review 847 Park Ave pre-foreclosure — outreach window open", type: "investigate", severity: "high" },
-          { id: "2", label: "Verify Tribeca LLC transfer on 45 Warren St", type: "investigate" },
-          { id: "3", label: "Respond to 2 aging broker inquiries (SLA breach)", type: "remediate", severity: "high" },
-          { id: "4", label: "Approve East Harlem cluster analysis — zip 10029", type: "approve" },
-          { id: "5", label: "Assign 1240 Broadway price reduction to acquisition team", type: "assign" },
+          { id: "1", label: `Initiate outreach — ${OPPORTUNITY_QUEUE[0]?.address ?? "high-priority target"}`, type: "investigate", severity: "critical" },
+          { id: "2", label: `Verify ownership — ${OPPORTUNITY_QUEUE[2]?.address ?? "LLC entity"}`, type: "assign", severity: "high" },
+          { id: "3", label: "Review broker SLA breaches — 2 inquiries aging past 4h target", type: "approve", severity: "high" },
+          { id: "4", label: "Comp analysis on 1240 Broadway listing price drop", type: "investigate", severity: "medium" },
+          { id: "5", label: "File review — distress cluster Harlem zip 10029", type: "escalate", severity: "critical" },
         ]}
       />
 
-      <OwnershipIntelligencePanel />
-
-      <div className="pb-2">
-        <PackBanner
-          vertical="Real Estate Intelligence Pack"
-          description="Terra runs on the Lyte + Alloy core — property distress detection, ownership stack analysis, underwriting workflows, and document diligence all powered by the same intelligence fabric."
-          accentColor="#40856a"
-        />
-      </div>
-    </div>
-  );
-}
-
-const OWNERSHIP_RECORDS = [
-  {
-    address: "847 Park Ave, Queens",
-    type: "Pre-Foreclosure",
-    value: "$2.1M",
-    ownershipStack: [
-      { entity: "Estate of R. Martinez (individual)", role: "Title Holder", flags: ["Probate pending"], risk: "high" as const },
-      { entity: "Chase Mortgage Corp", role: "First Lien", flags: ["Q2 2026 maturity"], risk: "high" as const },
-      { entity: "NYC Dept. of Finance", role: "Tax Authority", flags: ["$12K delinquent"], risk: "medium" as const },
-    ],
-    distressSignals: ["14yr hold", "Q2 2026 debt maturity", "Filing confirmed"],
-    diligenceState: { status: "active" as const, docs: 3, open: 2 },
-  },
-  {
-    address: "1240 Broadway, Manhattan",
-    type: "Commercial",
-    value: "$3.9M",
-    ownershipStack: [
-      { entity: "Midtown RE LLC", role: "Title Holder", flags: ["Identity: Cerberus Capital"], risk: "medium" as const },
-      { entity: "NYCB Commercial Lending", role: "First Lien", flags: ["Performing"], risk: "low" as const },
-    ],
-    distressSignals: ["Listing price down 8%", "47 DOM", "LLC transfer pending"],
-    diligenceState: { status: "watch" as const, docs: 1, open: 1 },
-  },
-  {
-    address: "45 Warren St, Tribeca",
-    type: "Multi-Family",
-    value: "$4.8M",
-    ownershipStack: [
-      { entity: "W.Capital Partners LLC", role: "Title Holder", flags: ["Transfer detected"], risk: "medium" as const },
-      { entity: "Signature Bridge Bank", role: "First Lien", flags: ["Receiver-held"], risk: "high" as const },
-    ],
-    distressSignals: ["LLC transfer detected", "11yr hold", "No active filings"],
-    diligenceState: { status: "pending" as const, docs: 0, open: 0 },
-  },
-];
-
-function OwnershipIntelligencePanel() {
-  const [selected, setSelected] = useState(0);
-  const record = OWNERSHIP_RECORDS[selected];
-
-  const riskColors = {
-    high: { text: "#c0503a", bg: "rgba(192,80,58,0.08)", border: "rgba(192,80,58,0.15)" },
-    medium: { text: "#b8943c", bg: "rgba(184,148,60,0.08)", border: "rgba(184,148,60,0.15)" },
-    low: { text: "#40856a", bg: "rgba(64,133,106,0.08)", border: "rgba(64,133,106,0.15)" },
-  };
-
-  const diligenceColors = {
-    active: { text: "#b8943c", label: "Active Review" },
-    watch: { text: "rgba(255,255,255,0.4)", label: "Watchlist" },
-    pending: { text: "rgba(255,255,255,0.25)", label: "Pending" },
-    complete: { text: "#40856a", label: "Complete" },
-  };
-
-  return (
-    <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(64,133,106,0.10)", background: "rgba(64,133,106,0.015)" }}>
-      <div className="px-4 py-3 flex items-center gap-2" style={{ borderBottom: "1px solid rgba(64,133,106,0.08)", background: "rgba(64,133,106,0.03)" }}>
-        <Layers className="w-3.5 h-3.5" style={{ color: "#40856a" }} />
-        <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(64,133,106,0.8)" }}>Ownership Stack Intelligence</span>
-        <span className="text-[8px] font-mono px-1.5 py-0.5 rounded uppercase tracking-wide" style={{ color: "rgba(245,158,11,0.6)", background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.12)" }}>Demo Scenario</span>
-        <span className="ml-auto text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>Select a property to drill in</span>
-      </div>
-
-      <div className="flex divide-x" style={{ borderColor: "rgba(64,133,106,0.06)" }}>
-        <div className="w-48 shrink-0 p-2 space-y-0.5 border-r" style={{ borderColor: "rgba(64,133,106,0.06)" }}>
-          {OWNERSHIP_RECORDS.map((rec, i) => (
-            <button
-              key={i}
-              onClick={() => setSelected(i)}
-              className="w-full text-left px-3 py-2 rounded-lg transition-all"
-              style={{
-                background: selected === i ? "rgba(64,133,106,0.10)" : "transparent",
-                border: selected === i ? "1px solid rgba(64,133,106,0.18)" : "1px solid transparent",
-              }}
-            >
-              <p className="text-[10px] font-medium truncate" style={{ color: selected === i ? "#40856a" : "rgba(255,255,255,0.45)" }}>{rec.address.split(",")[0]}</p>
-              <p className="text-[8px] mt-0.5" style={{ color: "rgba(255,255,255,0.2)" }}>{rec.type} · {rec.value}</p>
-            </button>
-          ))}
-        </div>
-
-        <div className="flex-1 p-4 space-y-4">
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <p className="text-[11px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>{record.address}</p>
-              <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>{record.type} · {record.value}</span>
-            </div>
-
-            <div className="text-[9px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(255,255,255,0.2)" }}>Ownership Stack</div>
-            <div className="space-y-1.5">
-              {record.ownershipStack.map((layer, i) => {
-                const rc = riskColors[layer.risk];
-                return (
-                  <div key={i} className="flex items-start gap-2.5 px-3 py-2 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
-                    <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[8px] font-bold" style={{ background: rc.bg, color: rc.text, border: `1px solid ${rc.border}` }}>{i + 1}</div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[10px] font-medium" style={{ color: "rgba(255,255,255,0.65)" }}>{layer.entity}</span>
-                        <span className="text-[8px] px-1.5 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.3)" }}>{layer.role}</span>
-                      </div>
-                      {layer.flags.map((f, fi) => (
-                        <span key={fi} className="text-[9px] px-1.5 py-0.5 rounded mr-1 mt-1 inline-block" style={{ color: rc.text, background: rc.bg, border: `1px solid ${rc.border}` }}>{f}</span>
-                      ))}
-                    </div>
-                    <span className="text-[8px] uppercase font-semibold shrink-0" style={{ color: rc.text }}>{layer.risk}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <div className="text-[9px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(255,255,255,0.2)" }}>Distress Signals</div>
-              <div className="space-y-1">
-                {record.distressSignals.map((s, i) => (
-                  <div key={i} className="flex items-center gap-1.5">
-                    <span className="w-1 h-1 rounded-full shrink-0" style={{ background: "#b8943c" }} />
-                    <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.4)" }}>{s}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div>
-              <div className="text-[9px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(255,255,255,0.2)" }}>Diligence State</div>
-              <div className="flex items-center gap-2 mb-1.5">
-                <FileText className="w-3.5 h-3.5" style={{ color: diligenceColors[record.diligenceState.status]?.text || "rgba(255,255,255,0.3)" }} />
-                <span className="text-[10px] font-medium" style={{ color: diligenceColors[record.diligenceState.status]?.text || "rgba(255,255,255,0.3)" }}>
-                  {diligenceColors[record.diligenceState.status]?.label}
-                </span>
-              </div>
-              <p className="text-[9px]" style={{ color: "rgba(255,255,255,0.35)" }}>
-                {record.diligenceState.docs} docs uploaded · {record.diligenceState.open} items open
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

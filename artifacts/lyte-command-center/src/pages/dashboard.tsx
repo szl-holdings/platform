@@ -9,7 +9,7 @@ import {
   ChevronRight, Zap, Target, Activity,
   ArrowUpRight, RefreshCw, Shield, CheckCircle2, AlertTriangle, Radio,
   Eye, Gauge, Heart, FileText, GitBranch,
-  UserCheck, Crosshair,
+  UserCheck, Crosshair, TrendingDown, TrendingUp, Minus,
 } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { useQuery } from "@tanstack/react-query";
@@ -18,8 +18,8 @@ import { api, type LyteSignal, type LyteDashboard, type LyteRecommendation } fro
 import { severityColors } from "@/lib/business-data";
 import type { SignalSeverity } from "@/lib/business-data";
 
-const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e", panel: "#0e1219" };
-const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.06)", accent: "rgba(212,160,84,0.12)" };
+const BG = { page: "#080c14", surface: "#0b0f19", elevated: "#0f1420", panel: "#0d1118" };
+const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.07)", accent: "rgba(212,160,84,0.12)" };
 const TEXT = { primary: "rgba(255,255,255,0.88)", secondary: "rgba(255,255,255,0.55)", tertiary: "rgba(255,255,255,0.28)", muted: "rgba(255,255,255,0.14)" };
 
 function fmt(n: number): string {
@@ -39,7 +39,12 @@ function timeAgo(iso: string): string {
 
 function Dot({ sev, pulse }: { sev: string; pulse?: boolean }) {
   const colors: Record<string, string> = { critical: "#c45a4a", high: "#c8953c", medium: "#d4a054", low: "#4a90b8", stable: "#6b8f71" };
-  return <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", pulse && "animate-pulse")} style={{ background: colors[sev] ?? colors.medium }} />;
+  return (
+    <div
+      className={cn("w-1.5 h-1.5 rounded-full shrink-0", pulse && "animate-pulse")}
+      style={{ background: colors[sev] ?? colors.medium, boxShadow: sev === "critical" && pulse ? `0 0 6px ${colors.critical}60` : "none" }}
+    />
+  );
 }
 
 function Badge({ sev }: { sev: string }) {
@@ -77,8 +82,8 @@ function ConfidenceBar({ level }: { level: "high" | "medium" | "low" }) {
 
 function Panel({ children, accent, className = "" }: { children: React.ReactNode; accent?: string; className?: string }) {
   return (
-    <div className={cn("rounded-md overflow-hidden", className)} style={{ background: BG.surface, border: `1px solid ${BORDER.subtle}` }}>
-      {accent && <div className="h-px" style={{ background: accent }} />}
+    <div className={cn("rounded-lg overflow-hidden", className)} style={{ background: BG.surface, border: `1px solid ${BORDER.subtle}` }}>
+      {accent && <div className="h-0.5" style={{ background: `linear-gradient(90deg, ${accent}, transparent)` }} />}
       {children}
     </div>
   );
@@ -96,7 +101,7 @@ function PanelHead({ icon: Icon, title, right, accent }: { icon: React.ElementTy
   );
 }
 
-const PRISM = [
+const PRISM_DATA = [
   { key: "P", name: "Pulse", icon: Heart, color: "#d4a054", href: "/prism/pulse", score: 72 },
   { key: "R", name: "Risk", icon: AlertTriangle, color: "#c45a4a", href: "/prism/risk", score: 41 },
   { key: "I", name: "Intelligence", icon: Eye, color: "#8b7ac8", href: "/prism/intelligence", score: 68 },
@@ -104,6 +109,53 @@ const PRISM = [
   { key: "M", name: "Motion", icon: Gauge, color: "#4a90b8", href: "/prism/motion", score: 63 },
 ];
 
+/* PRISM Composite Arc Ring */
+function PrismCompositeRing({ composite, prismData }: { composite: number; prismData: typeof PRISM_DATA }) {
+  const r = 40;
+  const c = 2 * Math.PI * r;
+  const compositeColor = composite >= 70 ? "#6b8f71" : composite >= 50 ? "#c8953c" : "#c45a4a";
+  const filled = (composite / 100) * c;
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <div className="relative flex items-center justify-center" style={{ width: 96, height: 96 }}>
+        <svg width="96" height="96" className="rotate-[-90deg]">
+          <circle cx="48" cy="48" r={r} strokeWidth="5" stroke="rgba(255,255,255,0.05)" fill="none" />
+          <circle cx="48" cy="48" r={r} strokeWidth="5" stroke={compositeColor} fill="none"
+            strokeDasharray={`${filled} ${c - filled}`} strokeLinecap="round" />
+        </svg>
+        <div className="absolute flex flex-col items-center">
+          <span className="text-xl font-bold font-mono tabular-nums" style={{ color: compositeColor }}>{composite}</span>
+          <span className="text-[7px] font-mono uppercase tracking-widest" style={{ color: TEXT.muted }}>composite</span>
+        </div>
+      </div>
+
+      {/* Individual arcs */}
+      <div className="flex items-center gap-1.5">
+        {prismData.map(p => {
+          const scoreColor = p.score >= 70 ? "#6b8f71" : p.score >= 50 ? "#c8953c" : "#c45a4a";
+          return (
+            <Link key={p.key} href={p.href}>
+              <div className="flex flex-col items-center gap-0.5 cursor-pointer group" title={`${p.name}: ${p.score}`}>
+                <div style={{ width: 24, height: 24, position: "relative" }}>
+                  <svg width="24" height="24" className="rotate-[-90deg]">
+                    <circle cx="12" cy="12" r="9" strokeWidth="3" stroke="rgba(255,255,255,0.05)" fill="none" />
+                    <circle cx="12" cy="12" r="9" strokeWidth="3" stroke={p.color} fill="none"
+                      strokeDasharray={`${(p.score / 100) * 2 * Math.PI * 9} ${2 * Math.PI * 9}`} strokeLinecap="round" />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-[8px] font-black font-mono" style={{ color: p.color }}>{p.key}</span>
+                  </div>
+                </div>
+                <span className="text-[7px] font-mono" style={{ color: scoreColor }}>{p.score}</span>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const [activeRole, setActiveRole] = useState("operator");
@@ -111,9 +163,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     const start = Date.now();
-    return () => {
-      analytics.dashboardViewed("main", Date.now() - start);
-    };
+    return () => { analytics.dashboardViewed("main", Date.now() - start); };
   }, []);
 
   const { data: dashboardData, isLoading: dashLoading, error: dashError, refetch } = useQuery<LyteDashboard>({
@@ -167,6 +217,7 @@ export default function Dashboard() {
   })();
 
   const narratives = insightsData?.narratives ?? [];
+  const prismComposite = Math.round(PRISM_DATA.reduce((s, p) => s + p.score, 0) / PRISM_DATA.length);
 
   const metrics = [
     { label: "Critical Exposures", value: isLoading ? "—" : (summary?.criticalUnresolved ?? criticalSignals.length), color: "#c45a4a", pulse: true, sub: "live" },
@@ -178,16 +229,8 @@ export default function Dashboard() {
   ];
 
   const queue = [
-    ...criticalSignals.slice(0, 3).map(s => ({
-      title: s.title, severity: s.severity, owner: (s.metadata?.affectedFunction as string | undefined) ?? "Unassigned",
-      time: timeAgo(s.receivedAt ?? s.createdAt), confidence: "high" as const, source: s.source, action: "Investigate",
-      impact: "$80K+", signal: s,
-    })),
-    ...highSignals.slice(0, 3).map(s => ({
-      title: s.title, severity: s.severity, owner: (s.metadata?.affectedFunction as string | undefined) ?? "Unassigned",
-      time: timeAgo(s.receivedAt ?? s.createdAt), confidence: "medium" as const, source: s.source, action: "Review",
-      impact: "$20K+", signal: s,
-    })),
+    ...criticalSignals.slice(0, 3).map(s => ({ title: s.title, severity: s.severity, owner: (s.metadata?.affectedFunction as string | undefined) ?? "Unassigned", time: timeAgo(s.receivedAt ?? s.createdAt), confidence: "high" as const, source: s.source, action: "Investigate", impact: "$80K+", signal: s })),
+    ...highSignals.slice(0, 3).map(s => ({ title: s.title, severity: s.severity, owner: (s.metadata?.affectedFunction as string | undefined) ?? "Unassigned", time: timeAgo(s.receivedAt ?? s.createdAt), confidence: "medium" as const, source: s.source, action: "Review", impact: "$20K+", signal: s })),
   ];
 
   const correlations = dashboardData?.correlations ?? [];
@@ -199,8 +242,6 @@ export default function Dashboard() {
     { label: "Terra", count: signals.filter(s => (s.source.toLowerCase().includes("terra") || s.source.toLowerCase().includes("beacon")) && s.status !== "resolved").length },
   ];
 
-  const prismComposite = Math.round(PRISM.reduce((s, p) => s + p.score, 0) / PRISM.length);
-
   return (
     <div className="p-3 lg:p-4 space-y-3" style={{ maxWidth: 1440 }}>
 
@@ -208,9 +249,7 @@ export default function Dashboard() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h1 className="text-[13px] font-semibold tracking-tight" style={{ color: TEXT.primary }}>Command Overview</h1>
-          <span className="text-[9px] font-mono px-2 py-px rounded" style={{ color: "#c45a4a", background: "rgba(196,90,74,0.06)", border: "1px solid rgba(196,90,74,0.12)" }}>
-            LIVE
-          </span>
+          <span className="text-[9px] font-mono px-2 py-px rounded" style={{ color: "#c45a4a", background: "rgba(196,90,74,0.06)", border: "1px solid rgba(196,90,74,0.12)" }}>LIVE</span>
           <span className="text-[9px] font-mono" style={{ color: TEXT.muted }}>
             {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })} · {new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
           </span>
@@ -225,13 +264,14 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* KPI Strip — dense cockpit style */}
-      <div className="grid grid-cols-3 lg:grid-cols-6 gap-px rounded overflow-hidden" style={{ background: BORDER.subtle }}>
+      {/* KPI Strip — cockpit style with accent tops */}
+      <div className="grid grid-cols-3 lg:grid-cols-6 rounded-lg overflow-hidden" style={{ background: BORDER.subtle, gap: "1px" }}>
         {metrics.map(m => (
           <div key={m.label} className="px-3 py-2.5 relative" style={{ background: BG.surface }}>
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${m.color}50, transparent)` }} />
             <div className="text-[8px] uppercase tracking-widest font-medium mb-1" style={{ color: TEXT.muted }}>{m.label}</div>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-xl font-bold font-mono leading-none" style={{ color: m.color }}>{m.value}</span>
+              <span className="text-xl font-bold font-mono leading-none tabular-nums" style={{ color: m.color }}>{m.value}</span>
               {m.sub && <span className="text-[8px] font-mono" style={{ color: TEXT.muted }}>{m.sub}</span>}
               {m.pulse && typeof m.value === "number" && m.value > 0 && <span className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0" style={{ background: "#c45a4a" }} />}
             </div>
@@ -239,24 +279,36 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* PRISM strip with scores */}
+      {/* PRISM Strip — enhanced with arc rings */}
       <div className="grid grid-cols-5 gap-1.5">
-        {PRISM.map(p => {
+        {PRISM_DATA.map(p => {
           const scoreColor = p.score >= 70 ? "#6b8f71" : p.score >= 50 ? "#c8953c" : "#c45a4a";
+          const pr = 9;
+          const pc = 2 * Math.PI * pr;
+          const pfilled = (p.score / 100) * pc;
           return (
             <Link key={p.key} href={p.href}>
-              <div className="rounded px-3 py-2 cursor-pointer transition-all group relative overflow-hidden" style={{ background: BG.surface, border: `1px solid ${p.color}14` }}>
+              <div className="rounded-lg px-3 py-2 cursor-pointer transition-all group relative overflow-hidden hover:bg-white/[0.02]" style={{ background: BG.surface, border: `1px solid ${p.color}14` }}>
                 <div className="absolute left-0 top-0 bottom-0 w-[2px]" style={{ background: p.color, opacity: 0.5 }} />
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-sm font-black font-mono" style={{ color: p.color }}>{p.key}</span>
+                <div className="flex items-center gap-2 mb-2">
+                  <div style={{ width: 20, height: 20, position: "relative", flexShrink: 0 }}>
+                    <svg width="20" height="20" className="rotate-[-90deg]">
+                      <circle cx="10" cy="10" r={pr} strokeWidth="2.5" stroke="rgba(255,255,255,0.05)" fill="none" />
+                      <circle cx="10" cy="10" r={pr} strokeWidth="2.5" stroke={p.color} fill="none"
+                        strokeDasharray={`${pfilled} ${pc - pfilled}`} strokeLinecap="round" />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-[8px] font-black font-mono" style={{ color: p.color }}>{p.key}</span>
+                    </div>
+                  </div>
                   <span className="text-[10px] font-semibold" style={{ color: TEXT.primary }}>{p.name}</span>
-                  <p.icon size={10} className="ml-auto opacity-30 group-hover:opacity-60 transition-opacity" style={{ color: p.color }} />
+                  <p.icon size={9} className="ml-auto opacity-30 group-hover:opacity-60 transition-opacity" style={{ color: p.color }} />
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
                     <div className="h-full rounded-full" style={{ width: `${p.score}%`, background: scoreColor }} />
                   </div>
-                  <span className="text-[9px] font-mono shrink-0" style={{ color: scoreColor }}>{p.score}</span>
+                  <span className="text-[9px] font-mono shrink-0 tabular-nums" style={{ color: scoreColor }}>{p.score}</span>
                 </div>
               </div>
             </Link>
@@ -266,7 +318,7 @@ export default function Dashboard() {
 
       {/* Role context bar */}
       {activeRole && (
-        <div className="rounded px-3 py-1.5 flex items-center gap-3" style={{ background: BG.surface, borderLeft: `2px solid ${activeRole === "analyst" ? "#8b7ac8" : activeRole === "buyer" ? "#4a90b8" : "#d4a054"}` }}>
+        <div className="rounded-lg px-3 py-1.5 flex items-center gap-3" style={{ background: BG.surface, borderLeft: `2px solid ${activeRole === "analyst" ? "#8b7ac8" : activeRole === "buyer" ? "#4a90b8" : "#d4a054"}` }}>
           <span className="text-[8px] uppercase tracking-widest font-mono shrink-0" style={{ color: TEXT.muted }}>{activeRole === "buyer" ? "demo" : activeRole}</span>
           <span className="text-[10px]" style={{ color: TEXT.secondary }}>
             {activeRole === "executive" && `${criticalSignals.length} critical. ${highSignals.length} high. PRISM composite ${prismComposite}/100. Decision latency 34h.`}
@@ -283,7 +335,7 @@ export default function Dashboard() {
       {/* Main grid */}
       <div className="grid grid-cols-12 gap-3">
 
-        {/* Left column — priority actions + signal timeline */}
+        {/* Left column — priority actions + recommendations */}
         <div className="col-span-12 lg:col-span-5 space-y-3">
           <Panel accent="#c45a4a">
             <PanelHead icon={Target} title="Priority Action Queue" accent="#c45a4a" right={
@@ -295,7 +347,8 @@ export default function Dashboard() {
             <div className="divide-y" style={{ borderColor: BORDER.subtle }}>
               {queue.length > 0 ? queue.slice(0, 5).map((a, i) => (
                 <div key={i} className="px-3 py-2.5 hover:bg-white/[0.015] transition-colors cursor-pointer" onClick={() => setAuditSignal(a.signal)}>
-                  <div className="flex items-start gap-2">
+                  {/* Priority weight: critical items get accent left border */}
+                  <div className="flex items-start gap-2" style={{ borderLeft: a.severity === "critical" ? "2px solid rgba(196,90,74,0.5)" : "2px solid transparent", paddingLeft: a.severity === "critical" ? "0.5rem" : "0" }}>
                     <Dot sev={a.severity} pulse={a.severity === "critical"} />
                     <div className="flex-1 min-w-0">
                       <div className="text-[10px] font-medium leading-snug line-clamp-1 mb-1" style={{ color: TEXT.primary }}>{a.title}</div>
@@ -311,7 +364,7 @@ export default function Dashboard() {
                           <span className="text-[8px] font-mono" style={{ color: TEXT.muted }}>via {a.source}</span>
                           <ConfidenceBar level={a.confidence} />
                         </div>
-                        <span className="text-[8px] font-semibold px-1.5 py-px rounded" style={{ color: "#d4a054", background: "rgba(212,160,84,0.06)", border: `1px solid rgba(212,160,84,0.1)` }}>{a.action} →</span>
+                        <span className="text-[8px] font-semibold px-1.5 py-px rounded" style={{ color: "#d4a054", background: "rgba(212,160,84,0.06)", border: "1px solid rgba(212,160,84,0.1)" }}>{a.action} →</span>
                       </div>
                     </div>
                   </div>
@@ -340,9 +393,7 @@ export default function Dashboard() {
                 recommendationsData.slice(0, 4).map((a) => (
                   <div key={a.id} className="px-3 py-2 hover:bg-white/[0.015] transition-colors cursor-pointer">
                     <div className="flex items-start gap-2">
-                      <div className="mt-0.5">
-                        <Dot sev={a.category === "critical" ? "critical" : "high"} pulse={a.category === "critical"} />
-                      </div>
+                      <div className="mt-0.5"><Dot sev={a.category === "critical" ? "critical" : "high"} pulse={a.category === "critical"} /></div>
                       <div className="flex-1 min-w-0">
                         <div className="text-[10px] font-medium line-clamp-1 mb-1" style={{ color: TEXT.primary }}>{a.title}</div>
                         <div className="flex items-center gap-1.5">
@@ -350,9 +401,7 @@ export default function Dashboard() {
                           <span className="text-[8px] font-mono capitalize" style={{ color: TEXT.muted }}>{a.effort} effort</span>
                         </div>
                       </div>
-                      <button className="shrink-0 text-[8px] px-2 py-px rounded font-mono hover:opacity-80" style={{ color: "#8b7ac8", background: "rgba(139,122,200,0.08)", border: "1px solid rgba(139,122,200,0.15)" }}>
-                        Review
-                      </button>
+                      <button className="shrink-0 text-[8px] px-2 py-px rounded font-mono hover:opacity-80" style={{ color: "#8b7ac8", background: "rgba(139,122,200,0.08)", border: "1px solid rgba(139,122,200,0.15)" }}>Review</button>
                     </div>
                   </div>
                 ))
@@ -363,6 +412,33 @@ export default function Dashboard() {
 
         {/* Center column */}
         <div className="col-span-12 lg:col-span-4 space-y-3">
+
+          {/* PRISM composite ring + breakdown */}
+          <Panel accent="#d4a054">
+            <PanelHead icon={Gauge} title="PRISM Score" accent="#d4a054" right={
+              <span className="text-[8px] font-mono tabular-nums" style={{ color: TEXT.muted }}>{prismComposite}/100</span>
+            } />
+            <div className="px-3 py-3 flex items-center gap-4">
+              <PrismCompositeRing composite={prismComposite} prismData={PRISM_DATA} />
+              <div className="flex-1 space-y-1.5">
+                {PRISM_DATA.map(p => {
+                  const scoreColor = p.score >= 70 ? "#6b8f71" : p.score >= 50 ? "#c8953c" : "#c45a4a";
+                  return (
+                    <div key={p.key} className="flex items-center gap-1.5">
+                      <p.icon size={8} style={{ color: p.color, flexShrink: 0 }} />
+                      <span className="text-[8px]" style={{ color: TEXT.tertiary, width: 64 }}>{p.name}</span>
+                      <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
+                        <div className="h-full rounded-full" style={{ width: `${p.score}%`, background: scoreColor }} />
+                      </div>
+                      <span className="text-[8px] font-mono tabular-nums w-6 text-right" style={{ color: scoreColor }}>{p.score}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </Panel>
+
+          {/* Signal Volume chart */}
           <Panel>
             <PanelHead icon={Activity} title="Signal Volume" accent="#c8953c" right={<span className="text-[8px] font-mono" style={{ color: TEXT.muted }}>7d</span>} />
             <div className="px-3 py-2 h-28">
@@ -381,7 +457,7 @@ export default function Dashboard() {
             </div>
           </Panel>
 
-          {/* Signal timeline */}
+          {/* Signal Timeline */}
           <Panel accent="#c8953c">
             <PanelHead icon={Radio} title="Signal Timeline" accent="#c8953c" right={
               <Link href="/signals" className="text-[9px] font-mono flex items-center gap-0.5 hover:opacity-80" style={{ color: TEXT.tertiary }}>Feed <ArrowUpRight className="w-2.5 h-2.5" /></Link>
@@ -402,108 +478,26 @@ export default function Dashboard() {
                   <span className="text-[8px] font-mono shrink-0" style={{ color: TEXT.muted }}>{timeAgo(s.receivedAt ?? s.createdAt)}</span>
                   <span className="text-[7px] font-mono px-1 py-px rounded uppercase shrink-0" style={{
                     color: s.status === "resolved" ? "rgba(74,144,184,0.5)" : s.status === "acknowledged" ? "rgba(139,122,200,0.4)" : TEXT.muted,
-                    background: s.status === "resolved" ? "rgba(74,144,184,0.04)" : s.status === "acknowledged" ? "rgba(139,122,200,0.04)" : "rgba(255,255,255,0.02)",
+                    background: "rgba(255,255,255,0.02)", border: `1px solid ${BORDER.subtle}`,
                   }}>{s.status}</span>
                 </div>
               ))}
-            </div>
-          </Panel>
-
-          {/* Intelligence */}
-          <Panel accent="#8b7ac8">
-            <PanelHead icon={Eye} title="Intelligence" accent="#8b7ac8" />
-            <div className="px-3 py-1">
-              {narratives.slice(0, 3).map((n, i: number) => (
-                <div key={i} className="py-2" style={{ borderBottom: `1px solid ${BORDER.subtle}` }}>
-                  <div className="text-[9px] leading-relaxed line-clamp-2" style={{ color: TEXT.secondary }}>{n.headline || n.detail || "Intelligence insight pending"}</div>
-                  <div className="text-[7px] font-mono mt-1" style={{ color: "rgba(139,122,200,0.3)" }}>{n.priority ?? "medium"} · recent</div>
-                </div>
-              ))}
-              {narratives.length === 0 && <div className="text-[9px] py-3" style={{ color: TEXT.muted }}>Intelligence engine processing...</div>}
             </div>
           </Panel>
         </div>
 
         {/* Right column */}
         <div className="col-span-12 lg:col-span-3 space-y-3">
-          <Panel accent="#c45a4a">
-            <PanelHead icon={AlertTriangle} title="Active Critical" accent="#c45a4a" right={
-              <span className="text-[7px] font-mono uppercase px-1.5 py-px rounded" style={{ color: "#d4a054", background: "rgba(212,160,84,0.06)", border: `1px solid rgba(212,160,84,0.08)` }}>Live</span>
-            } />
-            <div className="px-3">
-              {signalsLoading ? (
-                <div className="py-3 space-y-1.5">{[...Array(3)].map((_, i) => <div key={i} className="h-8 rounded animate-pulse" style={{ background: "rgba(255,255,255,0.02)" }} />)}</div>
-              ) : (
-                <>
-                  {criticalSignals.slice(0, 3).map(s => (
-                    <div key={s.id} className="py-2 cursor-pointer group" style={{ borderBottom: `1px solid ${BORDER.subtle}` }} onClick={() => setAuditSignal(s)}>
-                      <div className="flex items-start gap-2">
-                        <Dot sev="critical" pulse />
-                        <div className="flex-1 min-w-0">
-                          <div className="text-[9px] font-medium line-clamp-1" style={{ color: TEXT.primary }}>{s.title}</div>
-                          <div className="text-[8px] mt-0.5 font-mono" style={{ color: TEXT.muted }}>{s.source} · {timeAgo(s.receivedAt ?? s.createdAt)}</div>
-                        </div>
-                        <ChevronRight className="w-3 h-3 shrink-0 opacity-0 group-hover:opacity-30 transition-opacity" style={{ color: TEXT.tertiary }} />
-                      </div>
-                    </div>
-                  ))}
-                  {highSignals.slice(0, 2).map(s => (
-                    <div key={s.id} className="py-2 cursor-pointer group" style={{ borderBottom: `1px solid ${BORDER.subtle}` }} onClick={() => setAuditSignal(s)}>
-                      <div className="flex items-start gap-2">
-                        <Dot sev="high" />
-                        <div className="flex-1 min-w-0">
-                          <div className="text-[9px] font-medium line-clamp-1" style={{ color: "rgba(255,255,255,0.7)" }}>{s.title}</div>
-                          <div className="text-[8px] mt-0.5 font-mono" style={{ color: TEXT.muted }}>{s.source} · {timeAgo(s.receivedAt ?? s.createdAt)}</div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  {criticalSignals.length === 0 && highSignals.length === 0 && (
-                    <div className="flex items-center gap-2 py-3">
-                      <CheckCircle2 className="w-3 h-3" style={{ color: "#4a90b8" }} />
-                      <span className="text-[9px]" style={{ color: TEXT.secondary }}>System nominal</span>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          </Panel>
-
-          <Panel accent="#d4a054">
-            <PanelHead icon={GitBranch} title="Correlations" accent="#d4a054" />
-            <div className="px-3">
-              {correlations.length === 0 ? (
-                <div className="py-4 flex items-center gap-2">
-                  <CheckCircle2 className="w-3 h-3" style={{ color: "#6b8f71" }} />
-                  <span className="text-[9px]" style={{ color: TEXT.secondary }}>No cross-signal correlations detected</span>
-                </div>
-              ) : (
-                correlations.map((c, i) => (
-                  <div key={i} className="py-2 cursor-pointer hover:bg-white/[0.01] transition-colors" style={{ borderBottom: `1px solid ${BORDER.subtle}` }}>
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <Dot sev={c.sev} />
-                      <span className="text-[9px] font-medium truncate flex-1" style={{ color: TEXT.secondary }}>{c.cluster}</span>
-                      <ImpactBadge impact={c.impact} />
-                    </div>
-                    <div className="flex gap-1 ml-3">
-                      {c.entities.map(e => (
-                        <span key={e} className="text-[7px] font-mono px-1 py-px rounded" style={{ color: TEXT.tertiary, background: "rgba(255,255,255,0.03)", border: `1px solid ${BORDER.subtle}` }}>{e}</span>
-                      ))}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </Panel>
-
-          <Panel>
+          <Panel accent="#8b7ac8">
             <PanelHead icon={Shield} title="Platform Health" accent="#8b7ac8" />
             <div className="px-3 py-1">
               {platforms.map(p => (
                 <div key={p.label} className="flex items-center justify-between py-1.5 text-[9px]" style={{ borderBottom: `1px solid ${BORDER.subtle}` }}>
                   <span style={{ color: TEXT.tertiary }}>{p.label}</span>
                   <div className="flex items-center gap-1.5">
-                    <span className="w-1 h-1 rounded-full" style={{ background: signalsLoading ? TEXT.muted : p.count === 0 ? "#6b8f71" : p.count <= 2 ? "#c8953c" : "#c45a4a" }} />
+                    <div style={{ width: 40, height: 3, background: "rgba(255,255,255,0.04)", borderRadius: 2, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: signalsLoading ? "0%" : p.count === 0 ? "100%" : `${Math.min(p.count * 15, 100)}%`, background: signalsLoading ? TEXT.muted : p.count === 0 ? "#6b8f71" : p.count <= 2 ? "#c8953c" : "#c45a4a", borderRadius: 2 }} />
+                    </div>
                     <span className="font-mono" style={{ color: signalsLoading ? TEXT.muted : p.count === 0 ? "#6b8f71" : p.count <= 2 ? "#c8953c" : "#c45a4a" }}>
                       {signalsLoading ? "—" : p.count === 0 ? "nominal" : `${p.count}`}
                     </span>
@@ -545,12 +539,8 @@ export default function Dashboard() {
       {auditSignal && (
         <div className="fixed inset-0 z-50 flex" onClick={() => setAuditSignal(null)}>
           <div className="flex-1 bg-black/50" />
-          <div
-            className="w-full max-w-md flex flex-col h-full overflow-y-auto"
-            style={{ background: "#090d15", borderLeft: `1px solid rgba(255,255,255,0.08)` }}
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="px-5 py-4 flex items-start justify-between" style={{ borderBottom: `1px solid rgba(255,255,255,0.06)` }}>
+          <div className="w-full max-w-md flex flex-col h-full overflow-y-auto" style={{ background: "#090d15", borderLeft: "1px solid rgba(255,255,255,0.08)" }} onClick={e => e.stopPropagation()}>
+            <div className="px-5 py-4 flex items-start justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
               <div>
                 <div className="text-[9px] font-mono uppercase tracking-widest mb-1" style={{ color: "#d4a054" }}>Audit Trace</div>
                 <h2 className="text-sm font-bold text-white leading-snug">{auditSignal.title}</h2>
@@ -559,13 +549,10 @@ export default function Dashboard() {
               <button onClick={() => setAuditSignal(null)} className="text-slate-500 hover:text-white text-sm shrink-0 ml-4">✕</button>
             </div>
             <div className="px-5 py-4 space-y-4 flex-1">
-              {/* Severity + status */}
               <div className="flex items-center gap-2">
                 <Badge sev={auditSignal.severity} />
                 <span className="text-[8px] font-mono px-1.5 py-px rounded uppercase" style={{ color: auditSignal.status === "resolved" ? "#6b8f71" : auditSignal.status === "acknowledged" ? "#8b7ac8" : "#c45a4a", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>{auditSignal.status}</span>
               </div>
-
-              {/* Immutable event log */}
               <div>
                 <div className="text-[9px] font-mono uppercase tracking-widest mb-3" style={{ color: TEXT.muted }}>Event Log — Immutable</div>
                 <div className="relative">
@@ -599,10 +586,8 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-
-              {/* Actions */}
               {auditSignal.status !== "resolved" && (
-                <div className="pt-2" style={{ borderTop: `1px solid rgba(255,255,255,0.06)` }}>
+                <div className="pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
                   <div className="text-[9px] font-mono uppercase tracking-widest mb-2" style={{ color: TEXT.muted }}>Operator Actions</div>
                   <div className="flex gap-2 flex-wrap">
                     <button className="text-[10px] px-3 py-1.5 rounded font-medium hover:opacity-80" style={{ color: "#6b8f71", background: "rgba(107,143,113,0.1)", border: "1px solid rgba(107,143,113,0.25)" }}>Approve</button>

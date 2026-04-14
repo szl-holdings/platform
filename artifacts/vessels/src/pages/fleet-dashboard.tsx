@@ -85,6 +85,11 @@ function FleetMap({ vessels, onVesselClick, selectedVesselId }: { vessels: Roste
             <feGaussianBlur stdDeviation="3" result="blur" />
             <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
+          <linearGradient id="threat-corridor" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#ef4444" stopOpacity="0.7" />
+            <stop offset="50%" stopColor="#f97316" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#ef4444" stopOpacity="0.7" />
+          </linearGradient>
         </defs>
         <rect width={W} height={H} fill="url(#ocean-glow)" />
         <g opacity="0.12" stroke="rgba(56,189,248,0.4)" strokeWidth="0.5" fill="none">
@@ -123,6 +128,37 @@ function FleetMap({ vessels, onVesselClick, selectedVesselId }: { vessels: Roste
             </g>
           );
         })}
+        {/* Threat corridors — lines between high-risk vessels */}
+        {(() => {
+          const highRisk = vessels.filter(v => v.latitude && v.longitude && (v.status === "detained" || v.status === "diverting" || v.status === "dark"));
+          const pts = highRisk.map(v => ({ ...toMapCoords(parseFloat(v.latitude!), parseFloat(v.longitude!), W, H), id: v.id, status: v.status }));
+          const corridors: React.ReactElement[] = [];
+          for (let i = 0; i < pts.length; i++) {
+            for (let j = i + 1; j < pts.length; j++) {
+              const dist = Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y);
+              if (dist < 350) {
+                const corrId = `corr-${pts[i].id}-${pts[j].id}`;
+                corridors.push(
+                  <line key={corrId}
+                    x1={pts[i].x} y1={pts[i].y} x2={pts[j].x} y2={pts[j].y}
+                    stroke="url(#threat-corridor)" strokeWidth={1.5} opacity={0.45} strokeDasharray="6 4"
+                  />
+                );
+              }
+            }
+          }
+          return <>{corridors}</>;
+        })()}
+        {/* Risk cluster zones — radial halos around high-concentration areas */}
+        {(() => {
+          const atRisk = vessels.filter(v => v.latitude && v.longitude && (v.status === "detained" || v.status === "dark" || v.status === "diverting"));
+          return atRisk.map(v => {
+            const { x, y } = toMapCoords(parseFloat(v.latitude!), parseFloat(v.longitude!), W, H);
+            return (
+              <circle key={`cluster-${v.id}`} cx={x} cy={y} r={32} fill="rgba(239,68,68,0.04)" stroke="rgba(239,68,68,0.15)" strokeWidth={1} strokeDasharray="3 5" />
+            );
+          });
+        })()}
         {vessels.filter(v => v.latitude && v.longitude).map((v) => {
           const { x, y } = toMapCoords(parseFloat(v.latitude!), parseFloat(v.longitude!), W, H);
           const color = vesselStatusDotColors[v.status] || "#666";
@@ -178,18 +214,33 @@ function FleetMap({ vessels, onVesselClick, selectedVesselId }: { vessels: Roste
         );
       })()}
 
-      <div className="absolute bottom-3 left-3 flex items-center gap-3 bg-[#0a1628]/80 backdrop-blur rounded-lg px-3 py-2 border border-sky-500/10">
-        {[
-          { label: "At Sea", color: "#22c55e" },
-          { label: "In Port", color: "#0ea5e9" },
-          { label: "Anchored", color: "#eab308" },
-          { label: "Maintenance", color: "#ef4444" },
-        ].map(s => (
-          <span key={s.label} className="flex items-center gap-1.5 text-[10px] text-sky-200/60">
-            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
-            {s.label}
+      <div className="absolute bottom-3 left-3 flex flex-col gap-1.5">
+        <div className="flex items-center gap-3 bg-[#0a1628]/80 backdrop-blur rounded-lg px-3 py-2 border border-sky-500/10">
+          {[
+            { label: "At Sea", color: "#22c55e" },
+            { label: "In Port", color: "#0ea5e9" },
+            { label: "Anchored", color: "#eab308" },
+            { label: "Maintenance", color: "#ef4444" },
+          ].map(s => (
+            <span key={s.label} className="flex items-center gap-1.5 text-[10px] text-sky-200/60">
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
+              {s.label}
+            </span>
+          ))}
+        </div>
+        <div className="flex items-center gap-3 bg-[#0a1628]/80 backdrop-blur rounded-lg px-3 py-2 border border-red-500/15">
+          <span className="flex items-center gap-1.5 text-[10px] text-red-300/70">
+            <svg width="20" height="6"><line x1="0" y1="3" x2="20" y2="3" stroke="url(#tc-preview)" strokeWidth="1.5" strokeDasharray="4 3" /><defs><linearGradient id="tc-preview"><stop offset="0%" stopColor="#ef4444" /><stop offset="100%" stopColor="#f97316" /></linearGradient></defs></svg>
+            Threat Corridor
           </span>
-        ))}
+          <span className="flex items-center gap-1.5 text-[10px] text-red-300/60">
+            <svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="rgba(239,68,68,0.08)" stroke="rgba(239,68,68,0.3)" strokeWidth="1" strokeDasharray="2 3" /></svg>
+            Risk Cluster
+          </span>
+          <span className="flex items-center gap-1.5 text-[10px] text-sky-400/40 ml-1">
+            {vessels.filter(v => v.status === "detained" || v.status === "dark" || v.status === "diverting").length} high-risk
+          </span>
+        </div>
       </div>
       <div className="absolute bottom-3 right-3 text-[10px] text-sky-400/40 font-mono bg-[#0a1628]/80 backdrop-blur rounded-lg px-3 py-2 border border-sky-500/10">
         <Radio className="w-3 h-3 inline mr-1 text-emerald-400" />
@@ -636,7 +687,9 @@ export default function FleetDashboard() {
       <div className="flex flex-1 overflow-hidden">
         <div className="flex-1 flex flex-col min-w-0">
           {kpis && (
-            <div className="flex items-center gap-0.5 px-3 py-1.5 border-b border-sky-500/10 bg-[#0a1628]/80 backdrop-blur shrink-0 overflow-x-auto">
+            <div className="border-b border-sky-500/10 bg-[#0a1628]/80 backdrop-blur shrink-0 relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "linear-gradient(90deg, #0ea5e9, rgba(14,165,233,0.3), transparent)" }} />
+              <div className="flex items-center gap-0.5 px-3 py-1.5 overflow-x-auto">
               <div className="flex items-center gap-2 mr-3 shrink-0">
                 <Globe className="w-3.5 h-3.5 text-sky-400" />
                 <span className="font-display text-xs font-bold text-sky-50 uppercase tracking-wider">Fleet Command</span>
@@ -687,6 +740,7 @@ export default function FleetDashboard() {
                   </div>
                 </>
               )}
+              </div>
             </div>
           )}
 
@@ -811,18 +865,23 @@ export default function FleetDashboard() {
 
       {/* Intelligence Panel — full width bottom strip */}
       <div className="shrink-0 bg-[#060e1a] border-t border-sky-500/10" style={{ height: 260 }}>
-        <div className="flex items-center gap-1 px-4 pt-2 pb-0 border-b border-sky-500/10">
+        <div className="flex items-center gap-0 px-4 pt-0 border-b border-sky-500/10 relative">
+          <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "linear-gradient(90deg, rgba(14,165,233,0.4), transparent)" }} />
           {intelTabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setIntelTab(tab.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-mono rounded-t transition-colors ${intelTab === tab.id ? "bg-sky-500/10 text-sky-300 border-b-2 border-sky-400" : "text-sky-400/50 hover:text-sky-400/80"}`}
+              className={`flex items-center gap-1.5 px-3 py-2 text-[11px] font-mono transition-colors relative ${intelTab === tab.id ? "text-sky-300" : "text-sky-400/50 hover:text-sky-400/80"}`}
             >
+              {intelTab === tab.id && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-sky-400" />}
               <tab.icon className="w-3 h-3" />
               {tab.label}
             </button>
           ))}
-          <span className="ml-auto text-[9px] font-mono text-sky-400/30 pr-2">Maritime Intelligence · DB-backed</span>
+          <div className="ml-auto flex items-center gap-2 pr-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[9px] font-mono text-sky-400/30">Maritime Intelligence · Live</span>
+          </div>
         </div>
         <div className="p-3 overflow-auto h-[210px]">
           {intelTab === "behavioral" && <BehavioralRiskPanel exceptions={fleetExceptions} />}
