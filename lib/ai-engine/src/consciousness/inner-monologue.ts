@@ -131,6 +131,16 @@ class InnerMonologueEngine {
     });
   }
 
+  addThought(type: MonologueType, thought: string, tone: "positive" | "neutral" | "negative" | "cautious", confidence: number): MonologueEntry {
+    return this.think({
+      type,
+      thought,
+      triggeringEvent: "Per-agent consciousness observation",
+      confidence,
+      confusionCount: tone === "cautious" || tone === "negative" ? 1 : 0,
+    });
+  }
+
   recordRealization(insight: string, domains: string[]): MonologueEntry {
     return this.think({
       type: "realization",

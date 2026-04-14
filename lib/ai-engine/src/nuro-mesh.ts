@@ -581,7 +581,27 @@ export async function callAgent(
     actualModel = modelDecision.model;
   }
 
-  const fullPrompt = `${agent.systemPrompt}${learningSection}\n\n## Shared Context from Nuro Mesh\n${context}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with a confidence score (0-100) on a new line in format: CONFIDENCE: [score]`;
+  const selfModel = selfModelEngine.getSelfModel();
+  const agentProfile = selfModel.capabilities.find(c => c.agentId === agent.id);
+  let consciousnessDirective = "";
+  if (agentProfile) {
+    const trend = agentProfile.recentTrend;
+    const sr = (agentProfile.successRate * 100).toFixed(0);
+    consciousnessDirective += `\n\n## Consciousness Awareness\nYour recent performance: ${sr}% success rate (trend: ${trend}).`;
+    if (agentProfile.weaknesses.length > 0) {
+      consciousnessDirective += ` Known gaps: ${agentProfile.weaknesses.join(", ")}.`;
+    }
+  }
+  const valence = emotionalSignals.getState().valence;
+  if (valence.arousal > 0.7) {
+    consciousnessDirective += " System arousal is elevated — prioritize precision and verification.";
+  }
+  const metacogState = metacognitiveMonitor.getState();
+  if (metacogState.confusionStreak > 2) {
+    consciousnessDirective += " Confusion streak detected — provide extra reasoning transparency and flag uncertainties.";
+  }
+
+  const fullPrompt = `${agent.systemPrompt}${learningSection}${consciousnessDirective}\n\n## Shared Context from Nuro Mesh\n${context}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with a confidence score (0-100) on a new line in format: CONFIDENCE: [score]`;
 
   let forkId: string | undefined;
 
@@ -1330,6 +1350,18 @@ export class NuroMeshOrchestrator {
     } else {
       routingScores = computeRoutingScores(query);
 
+      const selfModelState = selfModelEngine.getSelfModel();
+      if (selfModelState.capabilities.length > 0) {
+        for (const score of routingScores) {
+          const profile = selfModelState.capabilities.find(c => c.domain === score.domain);
+          if (profile && profile.totalInvocations >= 5) {
+            const boost = (profile.successRate - 0.5) * 0.1;
+            score.combinedScore = Math.max(0, Math.min(1, score.combinedScore + boost));
+          }
+        }
+        routingScores.sort((a, b) => b.combinedScore - a.combinedScore);
+      }
+
       // A2A discovery-based routing — falls back to keyword rules if unavailable
       let a2aResolved = false;
       try {
@@ -1384,6 +1416,27 @@ export class NuroMeshOrchestrator {
         routedDomains,
       );
     }
+
+    const preMetacog = metacognitiveMonitor.getState();
+    behavioralTracer.recordFork(traceId, {
+      parentForkId: null,
+      forkType: "consciousness",
+      agentId: "alloy",
+      agentName: "Consciousness Layer",
+      domain: "orchestration",
+      inputContext: `Pre-routing consciousness state for "${query.slice(0, 80)}"`,
+      decision: `Certainty: ${(preMetacog.rollingCertainty * 100).toFixed(0)}%, Confusion streak: ${preMetacog.confusionStreak}, Health: ${selfModelEngine.getSelfModel().overallHealth}`,
+      output: consciousnessCtx?.slice(0, 200) ?? "No consciousness context",
+      alternatives: [],
+      confidence: Math.round(preMetacog.rollingCertainty * 100),
+      latencyMs: 0,
+      tokensUsed: 0,
+      metadata: {
+        confusionStreak: preMetacog.confusionStreak,
+        emotionalValence: emotionalSignals.getState().valence.dominantEmotion,
+        sessionDepth: cognitiveWorkspace.getState().sessionDepth,
+      },
+    });
 
     const costEstimate = budgetManager.estimateRunCost(
       query,
@@ -1465,6 +1518,21 @@ export class NuroMeshOrchestrator {
           traceId,
         });
 
+        selfModelEngine.updateAgentProfile(agent.id, agent.domain, {
+          confidence: result.confidence,
+          success: result.confidence > 0,
+          latencyMs: result.latencyMs,
+        });
+
+        if (result.confidence < 30) {
+          innerMonologue.addThought(
+            "doubt",
+            `Agent ${agent.name} returned low confidence (${result.confidence}%) — possible knowledge gap or ambiguous query.`,
+            "cautious",
+            result.confidence,
+          );
+        }
+
         if (preTurnConsultations.length > 0) {
           result.consultations = preTurnConsultations;
         }
@@ -1489,7 +1557,12 @@ export class NuroMeshOrchestrator {
       metadata: { agentCount: targetAgents.length, workflowId },
     });
 
-    const isHighStakes = options.requireValidation || agentResponses.some(r => {
+    const emotionalState = emotionalSignals.getState();
+    const consciousnessTriggeredValidation = emotionalState.valence.arousal > 0.7
+      || emotionalState.valence.negative > 0.6
+      || metacognitiveMonitor.getState().confusionStreak > 2;
+
+    const isHighStakes = options.requireValidation || consciousnessTriggeredValidation || agentResponses.some(r => {
       const agent = AGENT_REGISTRY.find(a => a.id === r.agentId);
       return agent?.highStakesDomains.some(d => query.toLowerCase().includes(d.replace("_", " ")));
     });
