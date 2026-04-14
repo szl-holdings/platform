@@ -121,6 +121,8 @@ import helmRouter from "./helm-console";
 import telemetryRouter from "./telemetry";
 import crossAppHandoffsRouter from "./cross-app-handoffs";
 import alloyCognitiveLearningRouter from "./alloy-cognitive-learning";
+import a2aRouter from "./a2a";
+import agentAutonomyRouter from "./agent-autonomy";
 import externalIntegrationsRouter from "./external-integrations";
 import agentFederationRouter from "./agent-federation";
 import streamingIngestionRouter from "./streaming-ingestion";
@@ -476,5 +478,13 @@ router.use("/connector-hub", _writeLimiter);
 router.use(connectorHubRouter);
 
 router.use(consciousnessRouter);
+
+router.use("/a2a", _readLimiter);
+router.use("/a2a", _writeLimiter);
+router.use(a2aRouter);
+
+router.use("/agent-autonomy", _readLimiter);
+router.use("/agent-autonomy", _writeLimiter);
+router.use(agentAutonomyRouter);
 
 export default router;

@@ -1,20 +1,47 @@
 /**
  * A2A v0.3 Agent Cards & Interoperability Routes
  *
- * Endpoints:
+ * Standard A2A Protocol:
  *   GET  /.well-known/agent-card.json  — Mesh index of all agent cards
+ *   GET  /a2a/agents                   — List all agent cards
  *   GET  /a2a/agents/:agentId          — Individual agent card
  *   GET  /a2a/agents/:agentId/health   — Agent health check
+ *   GET  /a2a/agents/:agentId/status   — Agent availability & trust status
+ *   POST /a2a/agents/:agentId/heartbeat — Record agent heartbeat
  *   POST /a2a/agents/:agentId/tasks    — Create a new A2A task
  *   GET  /a2a/agents/:agentId/tasks    — List agent tasks
  *   GET  /a2a/agents/:agentId/tasks/:taskId — Get task status/output
  *   GET  /a2a/agents/:agentId/stream   — SSE streaming for task results
  *   POST /a2a/agents/:agentId/rpc      — JSON-RPC 2.0 endpoint
+ *
+ * Agentic Discovery & Delegation:
+ *   GET  /a2a/discover                 — Discover agents by capability/domain/task
+ *   POST /a2a/delegate                 — Delegate a task from one agent to another
+ *   POST /a2a/multi-delegate           — Delegate to multiple agents and merge results
+ *   GET  /a2a/delegations              — Active + historical delegations
+ *   GET  /a2a/delegations/stats        — Delegation statistics by agent
  */
 
 import { Router, type Request, type Response } from "express";
 import { buildAgentCard, buildMeshAgentIndex, a2aTaskManager, type A2AJsonRpcRequest } from "@szl-holdings/ai-engine";
 import { nuroMeshOrchestrator, AGENT_REGISTRY } from "@szl-holdings/ai-engine";
+import { sendSuccess, sendError } from "../lib/api-response";
+import { logger } from "../lib/logger";
+import {
+  getAllAgentCards,
+  getAgentCard,
+  discoverAgentsByCapability,
+  discoverAgentsByDomain,
+  rankAgentsForTask,
+  recordHeartbeat,
+} from "@szl-holdings/ai-engine/a2a/agent-registry";
+import {
+  delegateTask,
+  multiDelegateAndMerge,
+  getActiveDelegations,
+  getDelegationHistory,
+  getDelegationStats,
+} from "@szl-holdings/ai-engine/a2a/agent-delegation";
 
 const router = Router();
 
@@ -55,6 +82,32 @@ router.get("/a2a/agents/:agentId/health", (req: Request, res: Response) => {
     platform: "Nuro Mesh",
     version: "1.0.0",
   });
+});
+
+router.get("/a2a/agents/:agentId/status", (req: Request, res: Response) => {
+  try {
+    const card = getAgentCard(req.params.agentId!);
+    if (!card) return sendError(res, "Agent not found", 404);
+    sendSuccess(res, {
+      agentId: card.agentId,
+      availability: card.availability,
+      trustLevel: card.trustLevel,
+      lastHeartbeat: card.metadata.lastHeartbeat,
+      successRate: card.metadata.successRate,
+      totalDelegations: card.metadata.totalDelegations,
+    });
+  } catch (err) {
+    sendError(res, "Failed to get agent status", 500);
+  }
+});
+
+router.post("/a2a/agents/:agentId/heartbeat", (req: Request, res: Response) => {
+  try {
+    recordHeartbeat(req.params.agentId!);
+    sendSuccess(res, { recorded: true, agentId: req.params.agentId });
+  } catch (err) {
+    sendError(res, "Failed to record heartbeat", 500);
+  }
 });
 
 router.post("/a2a/agents/:agentId/tasks", async (req: Request, res: Response) => {
@@ -185,6 +238,101 @@ router.post("/a2a/agents/:agentId/rpc", (req: Request, res: Response) => {
 
   const response = a2aTaskManager.handleJsonRpc(request, agentId);
   res.json(response);
+});
+
+router.get("/a2a/discover", (req: Request, res: Response) => {
+  try {
+    const { capability, domain, query } = req.query as Record<string, string>;
+
+    let agents;
+    if (query) {
+      agents = rankAgentsForTask(query);
+    } else if (domain) {
+      agents = discoverAgentsByDomain(domain);
+    } else if (capability) {
+      agents = discoverAgentsByCapability(capability);
+    } else {
+      agents = getAllAgentCards();
+    }
+
+    sendSuccess(res, { agents, total: agents.length, discoveryMode: query ? "task_rank" : domain ? "domain" : capability ? "capability" : "all" });
+  } catch (err) {
+    logger.error({ err }, "Discovery failed");
+    sendError(res, "Discovery failed", 500);
+  }
+});
+
+router.post("/a2a/delegate", async (req: Request, res: Response) => {
+  try {
+    const { fromAgentId, toAgentId, query, context, priority, orgId } = req.body as {
+      fromAgentId: string;
+      toAgentId: string;
+      query: string;
+      context?: string;
+      priority?: "low" | "medium" | "high" | "critical";
+      orgId?: number;
+    };
+
+    if (!fromAgentId || !toAgentId || !query) {
+      return sendError(res, "fromAgentId, toAgentId, and query are required", 400);
+    }
+
+    const result = await delegateTask({
+      fromAgentId,
+      toAgentId,
+      query,
+      context,
+      priority,
+      orgId: orgId ?? null,
+    });
+
+    sendSuccess(res, result);
+  } catch (err) {
+    logger.error({ err }, "Delegation failed");
+    const message = err instanceof Error ? err.message : "Delegation failed";
+    sendError(res, message, 500);
+  }
+});
+
+router.post("/a2a/multi-delegate", async (req: Request, res: Response) => {
+  try {
+    const { fromAgentId, toAgentIds, query, context, orgId } = req.body as {
+      fromAgentId: string;
+      toAgentIds: string[];
+      query: string;
+      context?: string;
+      orgId?: number;
+    };
+
+    if (!fromAgentId || !toAgentIds?.length || !query) {
+      return sendError(res, "fromAgentId, toAgentIds, and query are required", 400);
+    }
+
+    const result = await multiDelegateAndMerge({ fromAgentId, toAgentIds, query, context, orgId });
+    sendSuccess(res, result);
+  } catch (err) {
+    logger.error({ err }, "Multi-delegation failed");
+    sendError(res, "Multi-delegation failed", 500);
+  }
+});
+
+router.get("/a2a/delegations", (_req: Request, res: Response) => {
+  try {
+    const active = getActiveDelegations();
+    const history = getDelegationHistory(20);
+    const stats = getDelegationStats();
+    sendSuccess(res, { active, history, stats });
+  } catch (err) {
+    sendError(res, "Failed to get delegations", 500);
+  }
+});
+
+router.get("/a2a/delegations/stats", (_req: Request, res: Response) => {
+  try {
+    sendSuccess(res, getDelegationStats());
+  } catch {
+    sendError(res, "Failed to get delegation stats", 500);
+  }
 });
 
 export default router;

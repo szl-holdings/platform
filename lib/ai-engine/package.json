@@ -13,7 +13,16 @@
   },
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./nuro-mesh": "./src/nuro-mesh.ts",
+    "./a2a/agent-registry": "./src/a2a/agent-registry.ts",
+    "./a2a/agent-delegation": "./src/a2a/agent-delegation.ts",
+    "./skills/skill-registry": "./src/skills/skill-registry.ts",
+    "./skills/skill-manager": "./src/skills/skill-manager.ts",
+    "./connectors": "./src/connectors/index.ts",
+    "./connectors/connector-registry": "./src/connectors/connector-registry.ts",
+    "./learning/self-improvement": "./src/learning/self-improvement.ts",
+    "./rag/knowledge-store": "./src/rag/knowledge-store.ts"
   },
   "dependencies": {
     "@szl-holdings/db": "workspace:*",

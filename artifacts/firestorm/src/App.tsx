@@ -117,6 +117,7 @@ const QuipuCommand = lazy(() => import("@/pages/intel/quipu-command"));
 const ChasquiRelay = lazy(() => import("@/pages/intel/chasqui-relay"));
 const DualMindMonitor = lazy(() => import("@/pages/intel/dual-mind-monitor"));
 const WillaqUmu = lazy(() => import("@/pages/intel/willaq-umu"));
+const AgentAutonomyDashboard = lazy(() => import("@/pages/intel/agent-autonomy"));
 const Models = lazy(() => import("@/pages/intel/models"));
 const Predictions = lazy(() => import("@/pages/intel/predictions"));
 const IntelProjects = lazy(() => import("@/pages/intel/projects"));
@@ -251,6 +252,7 @@ const intelCortexNav = [
   { path: "/intel/chasqui-relay", label: "Chasqui Relay", icon: Radio },
   { path: "/intel/dual-mind", label: "Dual-Mind Monitor", icon: Sun },
   { path: "/intel/willaq-umu", label: "Willaq Umu Oracle", icon: Eye },
+  { path: "/intel/agent-autonomy", label: "Agent Autonomy", icon: BrainIcon },
   { path: "/agent-insights", label: "Agent Insights", icon: BrainIcon },
   { path: "/consciousness", label: "Consciousness", icon: Sparkles },
 ];
@@ -651,6 +653,7 @@ function AppRouter() {
         <Route path="/intel/chasqui-relay">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><ChasquiRelay /></RoleGate>}</Route>
         <Route path="/intel/dual-mind">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><DualMindMonitor /></RoleGate>}</Route>
         <Route path="/intel/willaq-umu">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><WillaqUmu /></RoleGate>}</Route>
+        <Route path="/intel/agent-autonomy">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><AgentAutonomyDashboard /></RoleGate>}</Route>
         <Route path="/intel/models">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><Models /></RoleGate>}</Route>
         <Route path="/intel/predictions">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><Predictions /></RoleGate>}</Route>
         <Route path="/intel/projects">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><IntelProjects /></RoleGate>}</Route>
