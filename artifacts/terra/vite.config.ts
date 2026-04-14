@@ -7,7 +7,7 @@ import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 // Limit esbuild Go runtime threads to prevent OS thread exhaustion
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
-const port = Number(process.env.PORT) || 3000;
+const port = Number(process.env.PORT) || 25100;
 const basePath = process.env.BASE_PATH || "/terra/";
 
 export default defineConfig({
@@ -64,6 +64,7 @@ export default defineConfig({
   },
   server: {
     port,
+    strictPort: true,
     host: "0.0.0.0",
     allowedHosts: true,
     hmr: { clientPort: 443 },

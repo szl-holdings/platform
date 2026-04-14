@@ -9,7 +9,7 @@ import fs from "fs";
 // when multiple Vite dev servers run simultaneously
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
-const port = Number(process.env.PORT) || 3000;
+const port = Number(process.env.PORT) || 5173;
 const basePath = process.env.BASE_PATH || "/";
 
 const libRoot = path.resolve(import.meta.dirname, "../../lib");

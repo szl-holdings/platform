@@ -8,7 +8,7 @@ import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 // when multiple Vite dev servers run simultaneously
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
-const port = Number(process.env.PORT) || 3000;
+const port = Number(process.env.PORT) || 23932;
 const basePath = process.env.BASE_PATH || "/firestorm/";
 
 export default defineConfig({

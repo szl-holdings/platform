@@ -7,7 +7,7 @@ import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 // Limit esbuild Go runtime threads to prevent OS thread exhaustion
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
-const port = Number(process.env.PORT) || 3000;
+const port = Number(process.env.PORT) || 19290;
 const basePath = process.env.BASE_PATH || "/lyte-command-center/";
 
 export default defineConfig({
