@@ -7,8 +7,11 @@ import { getModelConfig } from "../../lib/model-registry";
 import { sendSuccess, sendError } from "../../lib/api-response";
 import { authMiddleware } from "../../middlewares/auth";
 import { logger } from "../../lib/logger";
+import a2aRouter from "./a2a";
 
 const router = Router();
+
+router.use(a2aRouter);
 
 const agentChatLimit = rateLimit({
   windowMs: 15 * 60 * 1000,

@@ -260,6 +260,34 @@ export function routeToAgents(query: string): AgentDefinition[] {
   return AGENT_REGISTRY.filter(a => matchedDomains.has(a.domain) && a.id !== "alloy");
 }
 
+export async function routeToAgentsWithA2A(query: string): Promise<AgentDefinition[]> {
+  try {
+    const { a2aRegistry } = await import("./a2a-registry.js");
+    const results = await a2aRegistry.discover({
+      queryText: query,
+      maxResults: 6,
+      requireOnline: true,
+    });
+
+    if (results.length > 0) {
+      const RELEVANCE_THRESHOLD = 0.05;
+      const topResults = results.filter(r => r.relevanceScore >= RELEVANCE_THRESHOLD);
+
+      if (topResults.length > 0) {
+        const agentIds = new Set(topResults.map(r => r.agentId));
+        const matched = AGENT_REGISTRY.filter(a => agentIds.has(a.id) && a.id !== "alloy");
+        if (matched.length > 0) {
+          return matched;
+        }
+      }
+    }
+  } catch {
+    // A2A discovery unavailable — fall through to keyword routing
+  }
+
+  return routeToAgents(query);
+}
+
 async function checkGovernanceEnforce(
   agent: AgentDefinition,
   model: string,
@@ -1274,25 +1302,52 @@ export class NuroMeshOrchestrator {
     const { traceId } = behavioralTracer.startTrace(query, options.orgId);
     const context = await getSharedContext();
 
-    let targetAgents: AgentDefinition[];
+    let targetAgents: AgentDefinition[] = [];
     let routingScores: SemanticRoutingScore[] | undefined;
 
     if (options.preferredAgents && options.preferredAgents.length > 0) {
       targetAgents = AGENT_REGISTRY.filter(a => options.preferredAgents!.includes(a.id) && a.id !== "alloy");
     } else {
       routingScores = computeRoutingScores(query);
-      const THRESHOLD = 0.08;
-      const matchedDomains = new Set(routingScores.filter(s => s.combinedScore >= THRESHOLD).map(s => s.domain));
-      const primaryDomain = routingScores[0]?.domain;
-      if (primaryDomain && CROSS_DOMAIN_AFFINITY[primaryDomain]) {
-        for (const affiliated of CROSS_DOMAIN_AFFINITY[primaryDomain]) {
-          const affiliatedScore = routingScores.find(s => s.domain === affiliated);
-          if (affiliatedScore && affiliatedScore.combinedScore > 0.03) matchedDomains.add(affiliated);
+
+      // A2A discovery-based routing — falls back to keyword rules if unavailable
+      let a2aResolved = false;
+      try {
+        const { a2aRegistry } = await import("./a2a-registry.js");
+        const a2aResults = await a2aRegistry.discover({
+          queryText: query,
+          maxResults: 6,
+          requireOnline: true,
+          requestingAgentId: "alloy",
+        });
+        const A2A_THRESHOLD = 0.05;
+        const topA2A = a2aResults.filter(r => r.relevanceScore >= A2A_THRESHOLD);
+        if (topA2A.length > 0) {
+          const agentIds = new Set(topA2A.map(r => r.agentId));
+          const matched = AGENT_REGISTRY.filter(a => agentIds.has(a.id) && a.id !== "alloy");
+          if (matched.length > 0) {
+            targetAgents = matched;
+            a2aResolved = true;
+          }
         }
+      } catch {
+        // A2A discovery unavailable — use keyword-based fallback below
       }
-      targetAgents = matchedDomains.size > 0
-        ? AGENT_REGISTRY.filter(a => matchedDomains.has(a.domain) && a.id !== "alloy")
-        : [AGENT_REGISTRY[0]!];
+
+      if (!a2aResolved) {
+        const THRESHOLD = 0.08;
+        const matchedDomains = new Set(routingScores.filter(s => s.combinedScore >= THRESHOLD).map(s => s.domain));
+        const primaryDomain = routingScores[0]?.domain;
+        if (primaryDomain && CROSS_DOMAIN_AFFINITY[primaryDomain]) {
+          for (const affiliated of CROSS_DOMAIN_AFFINITY[primaryDomain]) {
+            const affiliatedScore = routingScores.find(s => s.domain === affiliated);
+            if (affiliatedScore && affiliatedScore.combinedScore > 0.03) matchedDomains.add(affiliated);
+          }
+        }
+        targetAgents = matchedDomains.size > 0
+          ? AGENT_REGISTRY.filter(a => matchedDomains.has(a.domain) && a.id !== "alloy")
+          : [AGENT_REGISTRY[0]!];
+      }
     }
 
     if (targetAgents.length === 0) targetAgents = [AGENT_REGISTRY.find(a => a.id === "beacon")!];

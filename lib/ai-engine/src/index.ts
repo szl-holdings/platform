@@ -4,6 +4,7 @@ export {
   AGENT_REGISTRY,
   DOMAIN_ROUTING_RULES,
   routeToAgents,
+  routeToAgentsWithA2A,
   computeRoutingScores,
   callAgent,
   consultAgent,
@@ -133,6 +134,24 @@ export { startScheduledEvals, stopScheduledEvals, persistEvalReport, getLatestEv
 export { recordOutcome, getRelevantOutcomes, getConfidenceCalibration, buildCalibrationInstruction, type OutcomeRecord, type OutcomeType, type ConfidenceCalibration } from "./learning/outcome-learning.js";
 export { storeCorrection, getRelevantCorrections, type CorrectionRecord } from "./learning/agent-corrections.js";
 export { detectCrossPatterns, runPatternDetectionAndStore } from "./learning/pattern-detector.js";
+
+export {
+  A2ARegistryService,
+  a2aRegistry,
+  type AgentCard,
+  type DiscoveryQuery,
+  type DiscoveryResult,
+} from "./a2a-registry.js";
+
+export {
+  delegateTask,
+  getDelegationTask,
+  getDelegationHistory,
+  type DelegationRequest,
+  type DelegationResult,
+  type DelegationStatus,
+  type DelegationTaskRecord,
+} from "./a2a-delegation.js";
 
 export async function startCognitiveLearning(): Promise<void> {
   const { evidencePipeline } = await import("./tradecraft/evidence-pipeline.js");

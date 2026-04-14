@@ -14,6 +14,7 @@ import { agentScheduler, registerDefaultSchedules } from "./lib/agent-scheduler"
 import { knowledgeStore } from "./lib/knowledge-store";
 import { ensureAlloyTables } from "./lib/alloy-migrations";
 import { ensureAlloyGovernanceTables } from "./lib/alloy-governance-migrations";
+import { ensureA2ATables } from "./lib/a2a-migrations";
 import { ensurePlatformOpsTables } from "./lib/platform-ops-migrations";
 import { ensureLyteDashboardsTable } from "./lib/lyte-dashboard-migrations";
 import { ensureExportJobsTable } from "./lib/export-migrations";
@@ -118,6 +119,9 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
   import("@szl-holdings/ai-engine")
     .then(({ startCognitiveLearning }) => startCognitiveLearning())
     .catch(err => logger.warn({ err }, "[cognitive] Cognitive learning startup failed (non-fatal)"));
+
+  ensureA2ATables()
+    .catch(err => logger.warn({ err }, "[a2a] A2A table migration failed (non-fatal)"));
 
   ensureAlloyTables()
     .then(() => ensureAlloyGovernanceTables())
