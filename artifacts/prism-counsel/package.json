@@ -23,19 +23,13 @@
     "lucide-react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "recharts": "catalog:",
     "tailwind-merge": "catalog:",
     "tailwindcss": "catalog:",
     "vite": "catalog:",
     "wouter": "^3.3.5"
   },
   "dependencies": {
-    "@szl-holdings/analytics": "workspace:*",
-    "@szl-holdings/observability": "workspace:*",
     "@szl-holdings/shared-ui": "workspace:*",
-    "clsx": "catalog:",
-    "date-fns": "^3.6.0",
-    "sonner": "^2.0.7",
-    "zod": "catalog:"
+    "clsx": "catalog:"
   }
 }
