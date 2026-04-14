@@ -95,8 +95,8 @@ export default function PortfolioIntel() {
               <ResponsiveContainer width="100%" height={120}>
                 <PieChart>
                   <Pie data={sectorAllocation} cx="50%" cy="50%" innerRadius={35} outerRadius={55} dataKey="value">
-                    {sectorAllocation.map((entry, index) => (
-                      <Cell key={index} fill={entry.color} />
+                    {sectorAllocation.map((entry) => (
+                      <Cell key={entry.name} fill={entry.color} />
                     ))}
                   </Pie>
                 </PieChart>

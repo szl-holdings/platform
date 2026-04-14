@@ -408,9 +408,9 @@ export function ClientPortalDocuments() {
             Shared materials, reports, and signed agreements
           </p>
           {isDemo && (
-            <p className="text-[10px] mt-1 font-light" style={{ color: "rgba(200,169,106,0.4)" }}>
-              Showing demo documents — your live documents will appear here once Rosa shares them with you.
-            </p>
+            <span className="inline-flex items-center mt-2 px-2 py-0.5 text-[9px] tracking-widest uppercase font-medium rounded" style={{ background: "rgba(200,169,106,0.08)", border: "1px solid rgba(200,169,106,0.18)", color: "rgba(200,169,106,0.55)" }}>
+              Sample data
+            </span>
           )}
           {uploadSuccess && (
             <p className="text-[10px] mt-1 font-light" style={{ color: "rgba(120,200,120,0.7)" }}>{uploadSuccess}</p>
@@ -552,9 +552,9 @@ export function ClientPortalUpdates() {
           Operational progress, delivery notes, and engagement milestones
         </p>
         {isDemo && (
-          <p className="text-[10px] mt-1 font-light" style={{ color: "rgba(200,169,106,0.4)" }}>
-            Showing demo updates — Rosa will post your actual updates here as the engagement progresses.
-          </p>
+          <span className="inline-flex items-center mt-2 px-2 py-0.5 text-[9px] tracking-widest uppercase font-medium rounded" style={{ background: "rgba(200,169,106,0.08)", border: "1px solid rgba(200,169,106,0.18)", color: "rgba(200,169,106,0.55)" }}>
+            Sample data
+          </span>
         )}
       </div>
       <div className="space-y-8">
@@ -645,9 +645,9 @@ export function ClientPortalMessages() {
           Private correspondence with Carlota Jo
         </p>
         {isDemo && (
-          <p className="text-[10px] mt-1 font-light" style={{ color: "rgba(200,169,106,0.4)" }}>
-            Showing demo messages — your private correspondence with Carlota Jo will appear here once your engagement begins.
-          </p>
+          <span className="inline-flex items-center mt-2 px-2 py-0.5 text-[9px] tracking-widest uppercase font-medium rounded" style={{ background: "rgba(200,169,106,0.08)", border: "1px solid rgba(200,169,106,0.18)", color: "rgba(200,169,106,0.55)" }}>
+            Sample data
+          </span>
         )}
       </div>
       <div className="space-y-3.5 mb-6">

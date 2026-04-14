@@ -392,8 +392,8 @@ export default function CargoTrackingPage() {
                   <div className="flex items-center gap-4">
                     <PieChart width={100} height={100}>
                       <Pie data={COMMODITY_SHARE} cx={50} cy={50} innerRadius={28} outerRadius={45} dataKey="value" strokeWidth={0}>
-                        {COMMODITY_SHARE.map((entry, index) => (
-                          <Cell key={index} fill={entry.color} opacity={entry.name === cfg.label ? 1 : 0.3} />
+                        {COMMODITY_SHARE.map((entry) => (
+                          <Cell key={entry.name} fill={entry.color} opacity={entry.name === cfg.label ? 1 : 0.3} />
                         ))}
                       </Pie>
                     </PieChart>

@@ -4,12 +4,12 @@ const SENTRY_INIT_KEY = "__szl_sentry_initialized";
 
 function isSentryInitialized(): boolean {
   if (typeof window === "undefined") return false;
-  return !!(window as Record<string, unknown>)[SENTRY_INIT_KEY];
+  return !!(window as unknown as Record<string, unknown>)[SENTRY_INIT_KEY];
 }
 
 function markSentryInitialized(): void {
   if (typeof window !== "undefined") {
-    (window as Record<string, unknown>)[SENTRY_INIT_KEY] = true;
+    (window as unknown as Record<string, unknown>)[SENTRY_INIT_KEY] = true;
   }
 }
 
@@ -31,13 +31,14 @@ export function initSentry(config: SentryConfig) {
   const env = import.meta.env;
   const dsn = config.dsn || env.VITE_SENTRY_DSN;
   if (!dsn) {
+    console.warn("[Sentry] DSN not configured — error tracking disabled.");
     setupGlobalHandlers(config.appSlug);
     return;
   }
 
   Sentry.init({
     dsn,
-    environment: config.environment || (env as Record<string, string>).MODE || "development",
+    environment: config.environment || env.MODE || "development",
     release: config.release || `${config.appSlug}@${env.VITE_APP_VERSION || "0.0.0"}`,
     sampleRate: config.sampleRate ?? 1.0,
     tracesSampleRate: config.tracesSampleRate ?? 0.2,
@@ -48,7 +49,7 @@ export function initSentry(config: SentryConfig) {
       Sentry.replayIntegration({ maskAllText: false, blockAllMedia: false }),
     ],
     beforeSend(event) {
-      if ((env as Record<string, unknown>).DEV) {
+      if (env.DEV) {
         console.debug("[Sentry] Would send event:", event.event_id);
       }
       return event;

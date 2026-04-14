@@ -176,7 +176,7 @@ export default function IncidentAnalyticsPage() {
               <ResponsiveContainer width={140} height={140}>
                 <PieChart>
                   <Pie data={RESOLUTION_BY_SEVERITY} dataKey="value" cx="50%" cy="50%" innerRadius={40} outerRadius={65}>
-                    {RESOLUTION_BY_SEVERITY.map((entry, index) => <Cell key={index} fill={entry.color} />)}
+                    {RESOLUTION_BY_SEVERITY.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
