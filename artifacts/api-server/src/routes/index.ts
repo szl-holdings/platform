@@ -163,6 +163,7 @@ import deltaSyncRouter from "./delta-sync";
 import changesRouter from "./changes";
 import webPushSubscriptionsRouter from "./web-push-subscriptions";
 import notificationRecipientsRouter from "./notification-recipients";
+import imperiumRouter from "./imperium";
 
 const router: IRouter = Router();
 
@@ -630,5 +631,8 @@ router.use(webPushSubscriptionsRouter);
 
 router.use("/notification-recipients", _writeLimiter);
 router.use(notificationRecipientsRouter);
+
+router.use("/imperium", _readLimiter);
+router.use(imperiumRouter);
 
 export default router;
