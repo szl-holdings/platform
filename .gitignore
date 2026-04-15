@@ -75,6 +75,9 @@ test-results/
 scripts/public-mirror/mirror-report.md
 docs/audit/public-mirror-report.md
 
+# Playwright generated output
+playwright-report/
+
 # Database dumps
 *.dump
 *.pgdump
