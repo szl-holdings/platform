@@ -17,6 +17,24 @@ import {
   type StreamEvent,
   type StreamCategory,
 } from "../lib/ingestion-framework";
+import { z } from "zod";
+import { validateBody } from "../lib/validation";
+import { authMiddleware } from "../middlewares/auth";
+
+const ingestSchema = z.object({
+  source: z.string().min(1).max(200),
+  category: z.enum(["siem", "market", "ais"]),
+  events: z.array(z.record(z.unknown())).min(1).max(1000),
+});
+
+const registerSourceSchema = z.object({
+  name: z.string().min(1).max(200),
+  type: z.enum(["webhook", "polling"]),
+  category: z.enum(["siem", "market", "ais"]),
+  endpoint: z.string().url().max(2048).optional(),
+  authToken: z.string().max(500).optional(),
+  pollingIntervalMs: z.number().int().min(1000).max(3600000).optional(),
+});
 
 const streamingRouter: IRouter = Router();
 
@@ -245,23 +263,8 @@ streamingRouter.post("/stream/ais-nmea", async (req: Request, res: Response) => 
   res.json({ status: "accepted", accepted, timestamp: new Date().toISOString() });
 });
 
-streamingRouter.post("/stream/ingest", async (req: Request, res: Response) => {
-  const { source, category, events } = req.body as {
-    source?: string;
-    category?: string;
-    events?: unknown[];
-  };
-
-  if (!source || !Array.isArray(events) || !category) {
-    res.status(400).json({ error: "source, category, and events array required" });
-    return;
-  }
-
-  const validCategories: StreamCategory[] = ["siem", "market", "ais"];
-  if (!validCategories.includes(category as StreamCategory)) {
-    res.status(400).json({ error: `category must be one of: ${validCategories.join(", ")}` });
-    return;
-  }
+streamingRouter.post("/stream/ingest", validateBody(ingestSchema), async (req: Request, res: Response) => {
+  const { source, category, events } = req.body as z.infer<typeof ingestSchema>;
 
   const normalized = (events as Record<string, unknown>[]).map(e => ({
     id: (e["id"] as string) ?? undefined,
@@ -294,33 +297,14 @@ streamingRouter.get("/stream/sources", (_req, res) => {
   res.json({ sources, timestamp: new Date().toISOString() });
 });
 
-streamingRouter.post("/stream/sources", async (req: Request, res: Response) => {
-  const { name, type, category, endpoint, authToken, pollingIntervalMs } = req.body as {
-    name?: string;
-    type?: string;
-    category?: string;
-    endpoint?: string;
-    authToken?: string;
-    pollingIntervalMs?: number;
-  };
-
-  if (!name || !type || !category) {
-    res.status(400).json({ error: "name, type, and category are required" });
-    return;
-  }
-
-  const validTypes = ["webhook", "polling"];
-  const validCategories: StreamCategory[] = ["siem", "market", "ais"];
-  if (!validTypes.includes(type) || !validCategories.includes(category as StreamCategory)) {
-    res.status(400).json({ error: "Invalid type or category" });
-    return;
-  }
+streamingRouter.post("/stream/sources", authMiddleware(), validateBody(registerSourceSchema), async (req: Request, res: Response) => {
+  const { name, type, category, endpoint, authToken, pollingIntervalMs } = req.body as z.infer<typeof registerSourceSchema>;
 
   try {
     const source = await registerDataSource({
       name,
-      type: type as "webhook" | "polling",
-      category: category as StreamCategory,
+      type,
+      category,
       endpoint,
       authToken,
       pollingIntervalMs: pollingIntervalMs ?? 30000,
@@ -333,7 +317,7 @@ streamingRouter.post("/stream/sources", async (req: Request, res: Response) => {
   }
 });
 
-streamingRouter.post("/stream/sources/:id/pause", async (req: Request, res: Response) => {
+streamingRouter.post("/stream/sources/:id/pause", authMiddleware(), async (req: Request, res: Response) => {
   const id = parseInt(String(req.params["id"]), 10);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
   try {
@@ -344,7 +328,7 @@ streamingRouter.post("/stream/sources/:id/pause", async (req: Request, res: Resp
   }
 });
 
-streamingRouter.post("/stream/sources/:id/resume", async (req: Request, res: Response) => {
+streamingRouter.post("/stream/sources/:id/resume", authMiddleware(), async (req: Request, res: Response) => {
   const id = parseInt(String(req.params["id"]), 10);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
   try {

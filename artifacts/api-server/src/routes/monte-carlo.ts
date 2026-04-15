@@ -3,6 +3,26 @@ import rateLimit from "express-rate-limit";
 import type { RequestHandler } from "express";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
+import { z } from "zod";
+import { validateBody } from "../lib/validation";
+
+const simulateSchema = z.object({
+  scenarioId: z.string().min(1).max(200),
+  iterations: z.number().int().min(1000).max(100000).optional(),
+  batchSize: z.number().int().min(100).max(5000).optional(),
+  snapshotInterval: z.number().int().min(100).max(50000).optional(),
+});
+
+const customSimulateSchema = z.object({
+  scenario: z.record(z.unknown()),
+  iterations: z.number().int().min(1000).max(50000).optional(),
+  batchSize: z.number().int().min(100).max(5000).optional(),
+});
+
+const compareSchema = z.object({
+  scenarioIds: z.array(z.string().min(1).max(200)).min(2).max(10),
+  iterations: z.number().int().min(100).max(100000).optional(),
+});
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -87,23 +107,14 @@ router.get("/monte-carlo/scenarios/:id", authMiddleware({ required: false }), (r
   }
 });
 
-router.post("/monte-carlo/simulate", simulationLimiter, authMiddleware(), (req, res) => {
+router.post("/monte-carlo/simulate", simulationLimiter, authMiddleware(), validateBody(simulateSchema), (req, res) => {
   try {
-    const { scenarioId, iterations, batchSize, snapshotInterval } = req.body ?? {};
-    if (!scenarioId) { sendBadRequest(res, "scenarioId is required"); return; }
+    const { scenarioId, iterations, batchSize, snapshotInterval } = req.body as z.infer<typeof simulateSchema>;
     if (!getScenario(scenarioId)) { sendNotFound(res, "Scenario"); return; }
 
-    const parsedIterations = parsePositiveInt(iterations, 10_000, 1_000, 100_000);
-    if (parsedIterations === null) { sendBadRequest(res, "iterations must be a positive integer between 1,000 and 100,000"); return; }
-    const parsedBatchSize = parsePositiveInt(batchSize, 1_000, 100, 5_000);
-    if (parsedBatchSize === null) { sendBadRequest(res, "batchSize must be a positive integer between 100 and 5,000"); return; }
-
-    let parsedSnapshotInterval: number | undefined;
-    if (snapshotInterval !== undefined && snapshotInterval !== null) {
-      const sv = parsePositiveInt(snapshotInterval, undefined, 100, 50_000);
-      if (sv === null) { sendBadRequest(res, "snapshotInterval must be a positive integer between 100 and 50,000"); return; }
-      parsedSnapshotInterval = sv;
-    }
+    const parsedIterations = parsePositiveInt(iterations, 10_000, 1_000, 100_000) ?? 10_000;
+    const parsedBatchSize = parsePositiveInt(batchSize, 1_000, 100, 5_000) ?? 1_000;
+    const parsedSnapshotInterval = snapshotInterval !== undefined ? (parsePositiveInt(snapshotInterval, undefined, 100, 50_000) ?? undefined) : undefined;
 
     const config = { iterations: parsedIterations, batchSize: parsedBatchSize, ...(parsedSnapshotInterval !== undefined ? { snapshotInterval: parsedSnapshotInterval } : {}) };
 
@@ -125,11 +136,10 @@ router.post("/monte-carlo/simulate", simulationLimiter, authMiddleware(), (req, 
   }
 });
 
-router.post("/monte-carlo/simulate/custom", simulationLimiter, authMiddleware(), (req, res) => {
+router.post("/monte-carlo/simulate/custom", simulationLimiter, authMiddleware(), validateBody(customSimulateSchema), (req, res) => {
   try {
-    const { scenario, iterations, batchSize } = req.body ?? {};
+    const { scenario, iterations, batchSize } = req.body as z.infer<typeof customSimulateSchema>;
 
-    if (!scenario) { sendBadRequest(res, "scenario definition is required"); return; }
     if (!validateSerializableScenario(scenario)) {
       sendBadRequest(res, "Invalid scenario definition. Must include id, title, domain, inputs[], outputs[], outputExprs[] (1:1 with outputs), and optionally constraints[] with valid BoolExpr trees.");
       return;
@@ -311,29 +321,20 @@ function buildCompletePayload(job: ReturnType<typeof getJob>) {
   };
 }
 
-router.post("/monte-carlo/compare", simulationLimiter, authMiddleware(), async (req, res) => {
+const fullCompareSchema = z.object({
+  scenarioId: z.string().min(1).max(200),
+  outputId: z.string().min(1).max(200),
+  variantIds: z.array(z.string().min(1).max(200)).max(20).optional(),
+  iterations: z.number().int().min(1000).max(20000).optional(),
+  weights: z.array(z.number().nonnegative().finite()).max(20).optional(),
+});
+
+router.post("/monte-carlo/compare", simulationLimiter, authMiddleware(), validateBody(fullCompareSchema), async (req, res) => {
   try {
-    const { scenarioId, variantIds, outputId, iterations, weights } = req.body ?? {};
-    if (!scenarioId) { sendBadRequest(res, "scenarioId is required"); return; }
-    if (!outputId || typeof outputId !== "string") { sendBadRequest(res, "outputId must be a non-empty string"); return; }
+    const { scenarioId, variantIds, outputId, iterations, weights } = req.body as z.infer<typeof fullCompareSchema>;
     if (!getScenario(scenarioId)) { sendNotFound(res, "Scenario"); return; }
 
-    if (variantIds !== undefined && variantIds !== null) {
-      if (!Array.isArray(variantIds)) { sendBadRequest(res, "variantIds must be an array of strings"); return; }
-      for (const v of variantIds) {
-        if (typeof v !== "string" || !v.trim()) { sendBadRequest(res, "each variantId must be a non-empty string"); return; }
-      }
-      if (variantIds.length > 20) { sendBadRequest(res, "variantIds may contain at most 20 entries"); return; }
-    }
-
-    if (weights !== undefined && weights !== null) {
-      if (!Array.isArray(weights) || weights.some((w: unknown) => typeof w !== "number" || !isFinite(w) || w < 0)) {
-        sendBadRequest(res, "weights must be an array of non-negative finite numbers"); return;
-      }
-    }
-
-    const parsedIterations = parsePositiveInt(iterations, 5_000, 1_000, 20_000);
-    if (parsedIterations === null) { sendBadRequest(res, "iterations must be a positive integer between 1,000 and 20,000"); return; }
+    const parsedIterations = parsePositiveInt(iterations, 5_000, 1_000, 20_000) ?? 5_000;
     const config = { iterations: parsedIterations };
     const comparison = await runComparison(scenarioId, Array.isArray(variantIds) ? variantIds : [], outputId, config, weights ?? undefined);
     sendSuccess(res, comparison);

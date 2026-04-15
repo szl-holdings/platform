@@ -13,7 +13,6 @@ import { db } from "@szl-holdings/db";
 import { pcModelLanesTable, pcCostTrackingTable, pcForecastDiffsTable, pcM365SubscriptionsTable, pcM365DeltaCursorsTable } from "@szl-holdings/db/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
-
 const router: Router = Router();
 
 router.use(authMiddleware());

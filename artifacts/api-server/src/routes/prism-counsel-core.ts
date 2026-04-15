@@ -15,8 +15,26 @@ import { eq, desc, sql, and } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendForbidden, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { ingestPrismMatter } from "@szl-holdings/ai-engine/domain-embedding-hooks";
+import { z } from "zod";
+import { validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
+
+const matterCreateSchema = z.object({
+  title: z.string().min(1).max(500),
+  matterType: z.enum(["litigation", "transactional", "advisory", "regulatory", "ip", "employment", "other"]),
+  status: z.enum(["intake", "active", "on-hold", "closed", "archived"]).optional(),
+  caseNumber: z.string().max(200).optional(),
+  jurisdiction: z.string().max(200).optional(),
+  courtName: z.string().max(300).optional(),
+  notes: z.string().max(10000).optional(),
+});
+
+const matterPatchSchema = matterCreateSchema.partial();
+
+const approvalActionSchema = z.object({
+  comment: z.string().max(5000).optional(),
+});
 
 function getOrgId(req: Request): number | null {
   const user = req.user;
@@ -128,23 +146,20 @@ router.get("/prism-counsel/matters/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/prism-counsel/matters", authMiddleware(), async (req, res) => {
+router.post("/prism-counsel/matters", authMiddleware(), validateBody(matterCreateSchema), async (req, res) => {
   try {
     const orgId = requireAuth(req, res);
     if (!orgId) return;
-    const body = req.body as Record<string, unknown>;
-    if (!body.title || !body.matterType) return sendBadRequest(res, "title and matterType are required");
-    type MatterType = "litigation" | "transactional" | "advisory" | "regulatory" | "ip" | "employment" | "other";
-    type MatterStatus = "intake" | "active" | "on-hold" | "closed" | "archived";
+    const { title, matterType, status, caseNumber, jurisdiction, courtName, notes } = req.body as z.infer<typeof matterCreateSchema>;
     const [matter] = await db.insert(pcMattersTable).values({
       orgId,
-      title: String(body.title),
-      matterType: String(body.matterType) as MatterType,
-      status: (String(body.status ?? "intake")) as MatterStatus,
-      caseNumber: body.caseNumber ? String(body.caseNumber) : undefined,
-      jurisdiction: body.jurisdiction ? String(body.jurisdiction) : undefined,
-      courtName: body.courtName ? String(body.courtName) : undefined,
-      notes: body.notes ? String(body.notes) : undefined,
+      title,
+      matterType,
+      status: status ?? "intake",
+      caseNumber,
+      jurisdiction,
+      courtName,
+      notes,
       createdBy: req.user?.id,
     } as any).returning();
     // Fire-and-forget: ingest into knowledge graph + schedule embedding
@@ -157,14 +172,13 @@ router.post("/prism-counsel/matters", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/prism-counsel/matters/:id", authMiddleware(), async (req, res) => {
+router.patch("/prism-counsel/matters/:id", authMiddleware(), validateBody(matterPatchSchema), async (req, res) => {
   try {
     const orgId = requireAuth(req, res);
     if (!orgId) return;
     const matterId = parseIdParam(req.params.id);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
-    const body = req.body as Record<string, unknown>;
-    const patch = body as typeof pcMattersTable.$inferInsert;
+    const patch = req.body as z.infer<typeof matterPatchSchema>;
     const [updated] = await db.update(pcMattersTable)
       .set({ ...patch, updatedBy: req.user?.id, updatedAt: new Date() })
       .where(eq(pcMattersTable.id, matterId)).returning();

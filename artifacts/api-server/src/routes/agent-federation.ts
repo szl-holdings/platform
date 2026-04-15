@@ -3,6 +3,22 @@ import rateLimit from "express-rate-limit";
 import { AGENT_REGISTRY, type AgentDefinition } from "./nuro-mesh";
 import { logger } from "../lib/logger";
 import { db, auditEventsTable } from "@szl-holdings/db";
+import { z } from "zod";
+import { validateBody } from "../lib/validation";
+
+const federationChatSchema = z.object({
+  message: z.string().min(1).max(50000),
+  context: z.record(z.unknown()).optional(),
+  sessionId: z.string().max(200).optional(),
+});
+
+const federationDelegateSchema = z.object({
+  targetAgentId: z.string().min(1).max(100),
+  task: z.string().min(1).max(10000),
+  requesterName: z.string().max(200).optional(),
+  requesterUrl: z.string().url().max(2048).optional(),
+  priority: z.enum(["low", "normal", "high", "critical"]).optional(),
+});
 
 const federationRouter: IRouter = Router();
 
@@ -155,11 +171,12 @@ federationRouter.post("/federation/agents/:agentId/chat", async (req, res) => {
     return;
   }
 
-  const { message, context, sessionId } = req.body as { message?: string; context?: unknown; sessionId?: string };
-  if (!message) {
-    res.status(400).json({ error: "message is required" });
+  const parseResult = federationChatSchema.safeParse(req.body);
+  if (!parseResult.success) {
+    res.status(400).json({ error: "Validation failed", details: parseResult.error.flatten().fieldErrors });
     return;
   }
+  const { message, context, sessionId } = parseResult.data;
 
   const start = Date.now();
 
@@ -203,15 +220,8 @@ federationRouter.post("/federation/agents/:agentId/chat", async (req, res) => {
   });
 });
 
-federationRouter.post("/federation/delegate", async (req, res) => {
-  const { targetAgentId, task, requesterName, requesterUrl, priority = "normal" } = req.body as {
-    targetAgentId: string; task: string; requesterName?: string; requesterUrl?: string; priority?: string;
-  };
-
-  if (!targetAgentId || !task) {
-    res.status(400).json({ error: "targetAgentId and task are required" });
-    return;
-  }
+federationRouter.post("/federation/delegate", validateBody(federationDelegateSchema), async (req, res) => {
+  const { targetAgentId, task, requesterName, requesterUrl, priority = "normal" } = req.body as z.infer<typeof federationDelegateSchema>;
 
   const agent = AGENT_REGISTRY.find(a => a.id === targetAgentId);
   if (!agent) {

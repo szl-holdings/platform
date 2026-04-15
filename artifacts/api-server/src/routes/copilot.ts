@@ -3,8 +3,14 @@ import { openai } from "@szl-holdings/ai-engine/providers/openai";
 import { anthropic } from "@szl-holdings/ai-engine/providers/anthropic";
 import rateLimit from "express-rate-limit";
 import type { RequestHandler } from "express";
+import { z } from "zod";
+import { authMiddleware } from "../middlewares/auth";
+import { validateBody } from "../lib/validation";
+import { tenantScope } from "../middlewares/tenant-scope";
 
 const copilotRouter: IRouter = Router();
+
+copilotRouter.use(tenantScope({ required: false }));
 
 const copilotLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -62,18 +68,25 @@ function buildSystemPrompt(agentId?: string, baseSystemPrompt?: string, context?
   return base + contextSection + footer;
 }
 
-copilotRouter.post("/copilot/chat", copilotLimit, async (req: Request, res: Response) => {
+const chatMessageSchema = z.object({
+  role: z.enum(["user", "assistant", "system"]),
+  content: z.string().min(1).max(50000),
+});
+
+const copilotChatSchema = z.object({
+  messages: z.array(chatMessageSchema).min(1).max(100),
+  agentId: z.string().max(100).optional(),
+  context: z.record(z.unknown()).optional(),
+  stream: z.boolean().optional().default(true),
+});
+
+copilotRouter.post("/copilot/chat", copilotLimit, authMiddleware(), validateBody(copilotChatSchema), async (req: Request, res: Response) => {
   const {
     messages,
     agentId,
     context,
     stream = true,
-  } = req.body as {
-    messages: ChatMessage[];
-    agentId?: string;
-    context?: Record<string, unknown>;
-    stream?: boolean;
-  };
+  } = req.body as z.infer<typeof copilotChatSchema>;
 
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     res.status(400).json({ error: "messages array is required" });

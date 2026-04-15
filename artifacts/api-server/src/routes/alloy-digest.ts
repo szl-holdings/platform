@@ -6,8 +6,11 @@ import { services } from "@szl-holdings/services";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendSuccess, sendCreated, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
+import { tenantScope } from "../middlewares/tenant-scope";
 
 const router: IRouter = Router();
+
+router.use(tenantScope({ required: false }));
 
 
 interface DigestContent {

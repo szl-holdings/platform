@@ -11,6 +11,7 @@ import {
   insertAlloyUsageEventSchema,
 } from "@szl-holdings/db";
 import { eq, desc, and, isNull, count, sum, gte, sql } from "drizzle-orm";
+import { tenantScope } from "../middlewares/tenant-scope";
 import {
   authMiddleware,
   requireRole,
@@ -31,6 +32,8 @@ import {
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
+
+router.use(tenantScope({ required: false }));
 
 function getUserOrgIds(user?: AuthenticatedUser): number[] {
   if (!user) return [];

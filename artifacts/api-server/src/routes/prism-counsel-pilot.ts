@@ -23,7 +23,6 @@ import {
   pcConnectorAccountsTable,
 } from "@szl-holdings/db/schema";
 import { logger } from "../lib/logger";
-
 const router = Router();
 
 router.use(authMiddleware());

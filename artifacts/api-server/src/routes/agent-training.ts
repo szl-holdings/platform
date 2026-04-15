@@ -9,9 +9,55 @@ import {
 import { eq, desc, asc, and, avg, count } from "drizzle-orm";
 import { openai } from "@szl-holdings/ai-engine/providers/openai";
 import multer from "multer";
+import { z } from "zod";
+import { authMiddleware } from "../middlewares/auth";
+import { validateBody } from "../lib/validation";
 
 const trainingRouter: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
+
+trainingRouter.use(authMiddleware());
+
+const trainingPairSchema = z.object({
+  agentId: z.string().min(1).max(100),
+  question: z.string().min(1).max(5000).trim(),
+  answer: z.string().min(1).max(10000).trim(),
+  category: z.string().max(100).optional(),
+});
+
+const behaviorPrefSchema = z.object({
+  tone: z.string().max(100).optional(),
+  detailLevel: z.string().max(100).optional(),
+  domainJargon: z.boolean().optional(),
+  responseLength: z.string().max(100).optional(),
+  customInstructions: z.string().max(5000).optional(),
+});
+
+const feedbackSchema = z.object({
+  agentId: z.string().min(1).max(100),
+  rating: z.number().int().min(1).max(5),
+  messageContent: z.string().max(5000).optional(),
+  responseContent: z.string().max(10000).optional(),
+  feedbackNote: z.string().max(2000).optional(),
+});
+
+const advisoryAuditSchema = z.object({
+  agentId: z.string().min(1).max(100),
+  recommendationType: z.string().min(1).max(100),
+  riskLevel: z.enum(["low", "medium", "high", "critical"]),
+  title: z.string().min(1).max(500).trim(),
+  description: z.string().min(1).max(5000).trim(),
+  runbook: z.string().max(10000).optional(),
+});
+
+const advisoryAuditActionSchema = z.object({
+  status: z.string().min(1).max(100),
+});
+
+const ttsSchema = z.object({
+  text: z.string().min(1).max(4096),
+  voice: z.enum(["alloy", "echo", "fable", "onyx", "nova", "shimmer"]).optional(),
+});
 
 trainingRouter.get("/agent-training/pairs/:agentId", async (req: Request, res: Response) => {
   try {
@@ -28,18 +74,9 @@ trainingRouter.get("/agent-training/pairs/:agentId", async (req: Request, res: R
   }
 });
 
-trainingRouter.post("/agent-training/pairs", async (req: Request, res: Response) => {
+trainingRouter.post("/agent-training/pairs", validateBody(trainingPairSchema), async (req: Request, res: Response) => {
   try {
-    const { agentId, question, answer, category } = req.body as {
-      agentId: string;
-      question: string;
-      answer: string;
-      category?: string;
-    };
-    if (!agentId || !question || !answer) {
-      res.status(400).json({ error: "agentId, question, and answer are required" });
-      return;
-    }
+    const { agentId, question, answer, category } = req.body as z.infer<typeof trainingPairSchema>;
     const [pair] = await db
       .insert(agentTrainingPairs)
       .values({ agentId, question, answer, category: category ?? "general" })
@@ -77,16 +114,10 @@ trainingRouter.get("/agent-training/prefs/:agentId", async (req: Request, res: R
   }
 });
 
-trainingRouter.post("/agent-training/prefs/:agentId", async (req: Request, res: Response) => {
+trainingRouter.post("/agent-training/prefs/:agentId", validateBody(behaviorPrefSchema), async (req: Request, res: Response) => {
   try {
     const agentId = String(req.params["agentId"]);
-    const { tone, detailLevel, domainJargon, responseLength, customInstructions } = req.body as {
-      tone?: string;
-      detailLevel?: string;
-      domainJargon?: boolean;
-      responseLength?: string;
-      customInstructions?: string;
-    };
+    const { tone, detailLevel, domainJargon, responseLength, customInstructions } = req.body as z.infer<typeof behaviorPrefSchema>;
     const existing = await db
       .select()
       .from(agentBehaviorPrefs)
@@ -112,19 +143,9 @@ trainingRouter.post("/agent-training/prefs/:agentId", async (req: Request, res: 
   }
 });
 
-trainingRouter.post("/agent-training/feedback", async (req: Request, res: Response) => {
+trainingRouter.post("/agent-training/feedback", validateBody(feedbackSchema), async (req: Request, res: Response) => {
   try {
-    const { agentId, rating, messageContent, responseContent, feedbackNote } = req.body as {
-      agentId: string;
-      rating: number;
-      messageContent?: string;
-      responseContent?: string;
-      feedbackNote?: string;
-    };
-    if (!agentId || typeof rating !== "number") {
-      res.status(400).json({ error: "agentId and rating are required" });
-      return;
-    }
+    const { agentId, rating, messageContent, responseContent, feedbackNote } = req.body as z.infer<typeof feedbackSchema>;
     const [fb] = await db
       .insert(agentFeedback)
       .values({ agentId, rating, messageContent, responseContent, feedbackNote })
@@ -184,20 +205,9 @@ trainingRouter.get("/agent-training/advisory-audit", async (_req: Request, res: 
   }
 });
 
-trainingRouter.post("/agent-training/advisory-audit", async (req: Request, res: Response) => {
+trainingRouter.post("/agent-training/advisory-audit", validateBody(advisoryAuditSchema), async (req: Request, res: Response) => {
   try {
-    const { agentId, recommendationType, riskLevel, title, description, runbook } = req.body as {
-      agentId: string;
-      recommendationType: string;
-      riskLevel: string;
-      title: string;
-      description: string;
-      runbook?: string;
-    };
-    if (!agentId || !recommendationType || !riskLevel || !title || !description) {
-      res.status(400).json({ error: "Missing required fields" });
-      return;
-    }
+    const { agentId, recommendationType, riskLevel, title, description, runbook } = req.body as z.infer<typeof advisoryAuditSchema>;
     const [audit] = await db
       .insert(advisoryAudit)
       .values({ agentId, recommendationType, riskLevel, title, description, runbook })
@@ -208,10 +218,10 @@ trainingRouter.post("/agent-training/advisory-audit", async (req: Request, res: 
   }
 });
 
-trainingRouter.patch("/agent-training/advisory-audit/:id/action", async (req: Request, res: Response) => {
+trainingRouter.patch("/agent-training/advisory-audit/:id/action", validateBody(advisoryAuditActionSchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(String(req.params["id"]!), 10);
-    const { status } = req.body as { status: string };
+    const { status } = req.body as z.infer<typeof advisoryAuditActionSchema>;
     const [updated] = await db
       .update(advisoryAudit)
       .set({ status: status ?? "actioned", actionedAt: new Date() })
@@ -264,13 +274,9 @@ trainingRouter.post("/agent-training/transcribe", upload.single("audio"), async 
   }
 });
 
-trainingRouter.post("/agent-training/tts", async (req: Request, res: Response) => {
+trainingRouter.post("/agent-training/tts", validateBody(ttsSchema), async (req: Request, res: Response) => {
   try {
-    const { text, voice = "alloy" } = req.body as { text: string; voice?: string };
-    if (!text) {
-      res.status(400).json({ error: "text is required" });
-      return;
-    }
+    const { text, voice = "alloy" } = req.body as z.infer<typeof ttsSchema>;
 
     const mp3 = await openai.audio.speech.create({
       model: "tts-1",

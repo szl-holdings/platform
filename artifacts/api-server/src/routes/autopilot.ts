@@ -1,8 +1,11 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { serverTelemetry } from "@szl-holdings/observability";
 import { getJobRegistry } from "../lib/scheduled-jobs";
+import { authMiddleware } from "../middlewares/auth";
 
 const autopilotRouter: IRouter = Router();
+
+autopilotRouter.use(authMiddleware());
 
 // ─── Capability Genome ────────────────────────────────────────────────────────
 // Maturity levels: missing | stub | functional | polished | best-in-class

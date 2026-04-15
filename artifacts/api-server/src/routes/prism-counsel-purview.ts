@@ -12,6 +12,17 @@ import {
 } from "@szl-holdings/db";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
+import { z } from "zod";
+import { validateBody } from "../lib/validation";
+
+const diagnosticsRunSchema = z.object({
+  orgId: z.number().int().positive().optional(),
+  check: z.enum(["all", "hold", "export", "scope", "case_links"]).optional(),
+});
+
+const exportHandoffConfirmSchema = z.object({
+  orgId: z.number().int().positive().optional(),
+});
 
 const router: IRouter = Router();
 
@@ -171,22 +182,24 @@ router.get("/purview/diagnostics", authMiddleware({ required: false }), async (r
   } catch (err) { handleRouteError(res, err, "Failed to get Purview diagnostics"); }
 });
 
-router.post("/purview/diagnostics/run", authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.post("/purview/diagnostics/run", authMiddleware({ required: false }), validateBody(diagnosticsRunSchema), async (req: Request, res: Response) => {
   try {
-    const orgId = Number(req.body.orgId ?? 1);
+    const { orgId: bodyOrgId, check } = req.body as z.infer<typeof diagnosticsRunSchema>;
+    const orgId = Number(bodyOrgId ?? 1);
     logger.info({ orgId }, "[purview] Running diagnostics check");
     await db.insert(pcAuditEventsTable).values({
       orgId, action: "purview_diagnostics_run", entityType: "purview_bridge",
-      details: { triggeredBy: "admin", checkType: req.body.check ?? "all" },
+      details: { triggeredBy: "admin", checkType: check ?? "all" },
     }).catch(() => {});
     sendSuccess(res, { ran: true, message: "Diagnostics run scheduled — results available in 15–30 seconds", runAt: new Date().toISOString() });
   } catch (err) { handleRouteError(res, err, "Failed to run Purview diagnostics"); }
 });
 
-router.post("/purview/export-handoffs/:id/confirm", authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.post("/purview/export-handoffs/:id/confirm", authMiddleware({ required: false }), validateBody(exportHandoffConfirmSchema), async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
-    const orgId = Number(req.body.orgId ?? 1);
+    const { orgId: bodyOrgId } = req.body as z.infer<typeof exportHandoffConfirmSchema>;
+    const orgId = Number(bodyOrgId ?? 1);
     try {
       await db.update(pcPurviewExportHandoffsTable)
         .set({ exportStatus: "transferred", handoffCompletedAt: new Date(), updatedAt: new Date() })

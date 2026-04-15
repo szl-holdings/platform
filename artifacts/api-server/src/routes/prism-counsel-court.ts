@@ -15,6 +15,68 @@ import { courtListener } from "../services/prism-court-listener";
 import { privilegeEngine } from "../services/prism-privilege-engine";
 import { modelRouter } from "../services/prism-model-router";
 import { logger } from "../lib/logger";
+import { z } from "zod";
+import { validateBody } from "../lib/validation";
+
+const docketLinkSchema = z.object({
+  docketEntryId: z.string().max(200).optional(),
+  docketId: z.string().max(200).optional(),
+  docketSource: z.enum(["court_listener", "pacer", "manual"]).optional(),
+  courtId: z.string().max(200).optional(),
+  caseNumber: z.string().max(200).optional(),
+}).transform(data => ({
+  ...data,
+  docketEntryId: data.docketEntryId ?? data.docketId,
+})).refine(data => !!data.docketEntryId, {
+  message: "docketEntryId (or legacy docketId alias) is required",
+  path: ["docketEntryId"],
+});
+
+const privilegeClassifySchema = z.object({
+  content: z.string().min(1).max(500000),
+  authorRole: z.string().max(200).optional(),
+  recipientRoles: z.array(z.string().max(200)).max(20).optional(),
+  subject: z.string().max(1000).optional(),
+});
+
+const privilegeTagSchema = z.object({
+  entityType: z.string().min(1).max(100),
+  entityId: z.number().int().nonnegative(),
+  matterId: z.number().int().positive(),
+  privilegeType: z.enum(["attorney_client", "work_product", "joint_defense", "common_interest", "none"]),
+  title: z.string().max(500).optional(),
+  documentType: z.string().max(200).optional(),
+  date: z.string().max(100).optional(),
+  author: z.string().max(500).optional(),
+  recipients: z.array(z.string().max(500)).max(50).optional(),
+  subject: z.string().max(1000).optional(),
+});
+
+const privilegeExportCheckSchema = z.object({
+  items: z.array(z.record(z.unknown())).min(1).max(500),
+});
+
+const draftGenerateSchema = z.object({
+  draftType: z.string().min(1).max(200),
+  matterId: z.union([z.number().int().positive(), z.string().regex(/^\d+$/)]).optional(),
+  groundingContext: z.record(z.unknown()).optional(),
+});
+
+const privilegeResolveSchema = z.object({
+  decision: z.enum(["confirmed", "waived", "disputed"]),
+  notes: z.string().max(5000).optional(),
+});
+
+const privilegeClawbackSchema = z.object({
+  reason: z.string().min(1).max(5000),
+  urgency: z.enum(["standard", "urgent"]).optional(),
+});
+
+const draftAdvanceSchema = z.object({
+  matterId: z.union([z.number().int().positive(), z.string().regex(/^\d+$/)]),
+  toState: z.enum(["attorney_review", "approved", "final"]),
+  notes: z.string().max(5000).optional(),
+});
 
 const router = Router();
 
@@ -167,13 +229,14 @@ router.get("/court/judges/search", authMiddleware(), courtListenerLimiter, async
 
 /* ━━━ Court ↔ Matter linking (attorney+ required) ━━━ */
 
-router.post("/court/matters/:matterId/link-docket", authMiddleware(), async (req, res) => {
+router.post("/court/matters/:matterId/link-docket", authMiddleware(), validateBody(docketLinkSchema), async (req, res) => {
   try {
     if (!hasAttorneyRole(req)) return sendForbidden(res, "Attorney role required");
     const matterId = parseInt(String(req.params.matterId), 10);
     if (isNaN(matterId)) return sendBadRequest(res, "Invalid matter ID");
-    const { docketId, courtId, caseNumber } = req.body;
-    if (!docketId) return sendBadRequest(res, "docketId is required");
+    const { docketEntryId: docketId } = req.body as z.infer<typeof docketLinkSchema>;
+    const { courtId, caseNumber } = req.body as { courtId?: string; caseNumber?: string };
+    if (!docketId) return sendBadRequest(res, "docketEntryId is required");
     const orgId = getOrgId(req);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
     const actorId = req.user?.id as number | undefined;
@@ -308,11 +371,10 @@ router.get("/privilege/review-queue", authMiddleware(), async (req, res) => {
 
 /* ━━━ Privilege Engine: AI Classification (attorney+ required) ━━━ */
 
-router.post("/privilege/classify", authMiddleware(), async (req, res) => {
+router.post("/privilege/classify", authMiddleware(), validateBody(privilegeClassifySchema), async (req, res) => {
   try {
     if (!hasAttorneyRole(req)) return sendForbidden(res, "Attorney role required");
-    const { content, authorRole, recipientRoles, subject } = req.body;
-    if (!content) return sendBadRequest(res, "content is required");
+    const { content, authorRole, recipientRoles, subject } = req.body as z.infer<typeof privilegeClassifySchema>;
 
     const orgId = getOrgId(req);
 
@@ -349,16 +411,13 @@ router.post("/privilege/classify", authMiddleware(), async (req, res) => {
 
 /* ━━━ Privilege Engine: Tag Entity (attorney+ required, DB-persisted) ━━━ */
 
-router.post("/privilege/tag", authMiddleware(), async (req, res) => {
+router.post("/privilege/tag", authMiddleware(), validateBody(privilegeTagSchema), async (req, res) => {
   try {
     if (!hasAttorneyRole(req)) return sendForbidden(res, "Attorney role required");
 
     const { entityType, entityId, matterId, title, documentType, date, author, recipients, subject, privilegeType } =
-      req.body;
+      req.body as z.infer<typeof privilegeTagSchema>;
 
-    if (!entityType || entityId == null || !matterId || !privilegeType) {
-      return sendBadRequest(res, "entityType, entityId, matterId, and privilegeType are required");
-    }
     if (privilegeType === "none") {
       return sendBadRequest(res, "Cannot tag with privilege type 'none' — use classify to assess");
     }
@@ -385,16 +444,13 @@ router.post("/privilege/tag", authMiddleware(), async (req, res) => {
 
 /* ━━━ Privilege Engine: Resolve Review (attorney+ required, DB-persisted) ━━━ */
 
-router.post("/privilege/review/:tagId/resolve", authMiddleware(), async (req, res) => {
+router.post("/privilege/review/:tagId/resolve", authMiddleware(), validateBody(privilegeResolveSchema), async (req, res) => {
   try {
     if (!hasAttorneyRole(req)) return sendForbidden(res, "Attorney role required");
 
     const tagId = parseInt(String(req.params.tagId), 10);
     if (isNaN(tagId)) return sendBadRequest(res, "Invalid tag ID");
-    const { decision } = req.body;
-    if (!decision || !["confirmed", "waived", "disputed"].includes(decision)) {
-      return sendBadRequest(res, "decision must be confirmed, waived, or disputed");
-    }
+    const { decision } = req.body as z.infer<typeof privilegeResolveSchema>;
 
     const orgId = getOrgId(req);
     const actorId = req.user?.id as number | undefined;
@@ -409,14 +465,13 @@ router.post("/privilege/review/:tagId/resolve", authMiddleware(), async (req, re
 
 /* ━━━ Privilege Engine: Clawback Request (attorney+ required, DB-persisted) ━━━ */
 
-router.post("/privilege/clawback/:tagId", authMiddleware(), async (req, res) => {
+router.post("/privilege/clawback/:tagId", authMiddleware(), validateBody(privilegeClawbackSchema), async (req, res) => {
   try {
     if (!hasAttorneyRole(req)) return sendForbidden(res, "Attorney role required");
 
     const tagId = parseInt(String(req.params.tagId), 10);
     if (isNaN(tagId)) return sendBadRequest(res, "Invalid tag ID");
-    const { reason } = req.body;
-    if (!reason) return sendBadRequest(res, "reason is required");
+    const { reason } = req.body as z.infer<typeof privilegeClawbackSchema>;
 
     const orgId = getOrgId(req);
     const actorId = req.user?.id as number | undefined;
@@ -431,11 +486,10 @@ router.post("/privilege/clawback/:tagId", authMiddleware(), async (req, res) => 
 
 /* ━━━ Privilege Engine: Export Safety Check (attorney+ required, DB-backed) ━━━ */
 
-router.post("/privilege/export-check", authMiddleware(), async (req, res) => {
+router.post("/privilege/export-check", authMiddleware(), validateBody(privilegeExportCheckSchema), async (req, res) => {
   try {
     if (!hasAttorneyRole(req)) return sendForbidden(res, "Attorney role required");
-    const { items } = req.body;
-    if (!items || !Array.isArray(items)) return sendBadRequest(res, "items array required");
+    const { items } = req.body as z.infer<typeof privilegeExportCheckSchema>;
     const orgId = getOrgId(req);
     const result = await privilegeEngine.filterForExport(items, orgId);
     sendSuccess(res, result);
@@ -446,12 +500,11 @@ router.post("/privilege/export-check", authMiddleware(), async (req, res) => {
 
 /* ━━━ Copilot Workbench: AI Document Generation (attorney+ required, DB-persisted) ━━━ */
 
-router.post("/copilot/generate-draft", authMiddleware(), async (req, res) => {
+router.post("/copilot/generate-draft", authMiddleware(), validateBody(draftGenerateSchema), async (req, res) => {
   try {
     if (!hasAttorneyRole(req)) return sendForbidden(res, "Attorney role required");
 
-    const { draftType, matterId, groundingContext } = req.body;
-    if (!draftType) return sendBadRequest(res, "draftType is required");
+    const { draftType, matterId, groundingContext } = req.body as z.infer<typeof draftGenerateSchema>;
 
     const orgId = getOrgId(req);
     const actorId = req.user?.id as number | undefined;
@@ -527,15 +580,12 @@ router.post("/copilot/generate-draft", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/copilot/drafts/:draftId/advance", authMiddleware(), async (req, res) => {
+router.post("/copilot/drafts/:draftId/advance", authMiddleware(), validateBody(draftAdvanceSchema), async (req, res) => {
   try {
     if (!hasAttorneyRole(req)) return sendForbidden(res, "Attorney role required");
 
     const draftId = String(req.params.draftId);
-    const { toState, matterId } = req.body;
-
-    if (!matterId) return sendBadRequest(res, "matterId is required to advance a draft");
-    if (!toState) return sendBadRequest(res, "toState is required");
+    const { toState, matterId } = req.body as z.infer<typeof draftAdvanceSchema>;
 
     const NEXT_VALID_STATE: Record<string, string> = {
       ai_draft: "attorney_review",

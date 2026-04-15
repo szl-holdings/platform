@@ -30,8 +30,34 @@ import {
   serializeToHuggingFaceJSON,
   type FineTuningProvider,
 } from "@szl-holdings/ai-engine";
+import { z } from "zod";
+import { validateBody } from "../lib/validation";
 
 const fineTuningRouter: IRouter = Router();
+
+const submitJobSchema = z.object({
+  agentId: z.string().min(1).max(100),
+  provider: z.enum(["openai", "huggingface"]).optional(),
+  baseModel: z.string().max(200).optional(),
+  hyperparameters: z.object({
+    nEpochs: z.number().int().min(1).max(50).optional(),
+    batchSize: z.number().int().min(1).max(256).optional(),
+    learningRateMultiplier: z.number().positive().max(100).optional(),
+  }).optional(),
+  options: z.object({
+    minSamples: z.number().int().min(1).optional(),
+  }).optional(),
+});
+
+const datasetPreviewSchema = z.object({
+  agentId: z.string().min(1).max(100),
+  format: z.enum(["openai-jsonl", "huggingface-json"]).optional(),
+  curate: z.boolean().optional(),
+});
+
+const lifecycleSchema = z.object({
+  lifecycle: z.enum(["staging", "canary", "active", "deprecated"]),
+});
 
 fineTuningRouter.get("/fine-tuning/jobs", async (req: Request, res: Response) => {
   try {
@@ -56,7 +82,7 @@ fineTuningRouter.get("/fine-tuning/jobs/:jobId", async (req: Request, res: Respo
   }
 });
 
-fineTuningRouter.post("/fine-tuning/jobs", async (req: Request, res: Response) => {
+fineTuningRouter.post("/fine-tuning/jobs", validateBody(submitJobSchema), async (req: Request, res: Response) => {
   try {
     const {
       agentId,
@@ -64,18 +90,7 @@ fineTuningRouter.post("/fine-tuning/jobs", async (req: Request, res: Response) =
       baseModel,
       hyperparameters,
       options,
-    } = req.body as {
-      agentId: string;
-      provider?: FineTuningProvider;
-      baseModel?: string;
-      hyperparameters?: { nEpochs?: number; batchSize?: number; learningRateMultiplier?: number };
-      options?: { minSamples?: number };
-    };
-
-    if (!agentId) {
-      res.status(400).json({ error: "agentId is required" });
-      return;
-    }
+    } = req.body as z.infer<typeof submitJobSchema>;
 
     const supportedAgents = getAllSupportedAgents();
     if (!supportedAgents.includes(agentId)) {
@@ -83,12 +98,6 @@ fineTuningRouter.post("/fine-tuning/jobs", async (req: Request, res: Response) =
         error: `Agent '${agentId}' not supported for fine-tuning`,
         supportedAgents,
       });
-      return;
-    }
-
-    const validProviders: FineTuningProvider[] = ["openai", "huggingface"];
-    if (!validProviders.includes(provider)) {
-      res.status(400).json({ error: `Invalid provider. Must be one of: ${validProviders.join(", ")}` });
       return;
     }
 
@@ -190,16 +199,10 @@ fineTuningRouter.get("/fine-tuning/models/:modelId/evals", async (req: Request, 
   }
 });
 
-fineTuningRouter.patch("/fine-tuning/models/:modelId/lifecycle", async (req: Request, res: Response) => {
+fineTuningRouter.patch("/fine-tuning/models/:modelId/lifecycle", validateBody(lifecycleSchema), async (req: Request, res: Response) => {
   try {
     const modelId = decodeURIComponent(String(req.params["modelId"]));
-    const { lifecycle } = req.body as { lifecycle: string };
-
-    const validLifecycles = ["staging", "canary", "active", "deprecated"];
-    if (!validLifecycles.includes(lifecycle)) {
-      res.status(400).json({ error: `Invalid lifecycle. Must be one of: ${validLifecycles.join(", ")}` });
-      return;
-    }
+    const { lifecycle } = req.body as z.infer<typeof lifecycleSchema>;
 
     if (lifecycle === "deprecated") {
       await deprecateFineTunedModel(modelId);
@@ -229,18 +232,9 @@ fineTuningRouter.get("/fine-tuning/datasets", async (req: Request, res: Response
   }
 });
 
-fineTuningRouter.post("/fine-tuning/datasets/preview", async (req: Request, res: Response) => {
+fineTuningRouter.post("/fine-tuning/datasets/preview", validateBody(datasetPreviewSchema), async (req: Request, res: Response) => {
   try {
-    const { agentId, format = "openai-jsonl", curate = true } = req.body as {
-      agentId: string;
-      format?: "openai-jsonl" | "huggingface-json";
-      curate?: boolean;
-    };
-
-    if (!agentId) {
-      res.status(400).json({ error: "agentId is required" });
-      return;
-    }
+    const { agentId, format = "openai-jsonl", curate = true } = req.body as z.infer<typeof datasetPreviewSchema>;
 
     const result = curate
       ? await curateDatasetForAgent(agentId, format)

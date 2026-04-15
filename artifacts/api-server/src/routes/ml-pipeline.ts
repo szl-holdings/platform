@@ -14,14 +14,44 @@ import {
   getMlPipelineStatus,
 } from "../lib/ml-pipeline-service";
 import type { ModelLifecycle } from "@szl-holdings/ai-engine";
+import { z } from "zod";
+import { validateBody } from "../lib/validation";
 
 const router = Router();
+
+const featureComputeSchema = z.object({
+  featureId: z.string().min(1).max(200),
+  domain: z.string().min(1).max(100),
+  entityId: z.string().min(1).max(200),
+  entityType: z.string().min(1).max(100),
+  value: z.unknown(),
+});
+
+const featureVectorSchema = z.object({
+  entityId: z.string().min(1).max(200),
+  entityType: z.string().min(1).max(100),
+  featureIds: z.array(z.string().min(1).max(200)).min(1).max(100),
+});
+
+const createDatasetSchema = z.object({
+  domain: z.string().min(1).max(100),
+  name: z.string().min(1).max(300).optional(),
+  entityType: z.string().min(1).max(100).optional(),
+  maxRows: z.number().int().min(1).max(1000000).optional(),
+});
+
+const createTrainingRunSchema = z.object({
+  datasetId: z.string().min(1).max(200),
+  domain: z.string().min(1).max(100),
+  modelType: z.string().min(1).max(100).optional(),
+  hyperparameters: z.record(z.unknown()).optional(),
+});
 
 // ---------------------------------------------------------------------------
 // Status
 // ---------------------------------------------------------------------------
 
-router.get("/ml/status", authMiddleware, (_req, res) => {
+router.get("/ml/status", authMiddleware(), (_req, res) => {
   try {
     res.json(getMlPipelineStatus());
   } catch (err) {
@@ -33,7 +63,7 @@ router.get("/ml/status", authMiddleware, (_req, res) => {
 // Feature Store
 // ---------------------------------------------------------------------------
 
-router.get("/ml/features", authMiddleware, (req, res) => {
+router.get("/ml/features", authMiddleware(), (req, res) => {
   try {
     const { domain } = req.query as { domain?: string };
     res.json(featureStoreService.getDefinitions(domain));
@@ -42,7 +72,7 @@ router.get("/ml/features", authMiddleware, (req, res) => {
   }
 });
 
-router.get("/ml/features/catalog", authMiddleware, (_req, res) => {
+router.get("/ml/features/catalog", authMiddleware(), (_req, res) => {
   try {
     res.json(featureStoreService.getCatalog());
   } catch (err) {
@@ -50,7 +80,7 @@ router.get("/ml/features/catalog", authMiddleware, (_req, res) => {
   }
 });
 
-router.get("/ml/features/freshness", authMiddleware, (req, res) => {
+router.get("/ml/features/freshness", authMiddleware(), (req, res) => {
   try {
     const { domain } = req.query as { domain?: string };
     res.json(featureStoreService.checkFreshness(domain));
@@ -59,7 +89,7 @@ router.get("/ml/features/freshness", authMiddleware, (req, res) => {
   }
 });
 
-router.get("/ml/features/summary", authMiddleware, (_req, res) => {
+router.get("/ml/features/summary", authMiddleware(), (_req, res) => {
   try {
     res.json(featureStoreService.getSummary());
   } catch (err) {
@@ -67,12 +97,9 @@ router.get("/ml/features/summary", authMiddleware, (_req, res) => {
   }
 });
 
-router.post("/ml/features/compute", authMiddleware, (req, res) => {
+router.post("/ml/features/compute", authMiddleware(), validateBody(featureComputeSchema), (req, res) => {
   try {
-    const { featureId, domain, entityId, entityType, value } = req.body;
-    if (!featureId || !domain || !entityId || !entityType || value === undefined) {
-      return sendBadRequest(res, "featureId, domain, entityId, entityType, and value are required");
-    }
+    const { featureId, domain, entityId, entityType, value } = req.body as z.infer<typeof featureComputeSchema>;
     const result = featureStoreService.computeFeature(featureId, domain, entityId, entityType, value);
     res.status(201).json(result);
   } catch (err) {
@@ -80,12 +107,9 @@ router.post("/ml/features/compute", authMiddleware, (req, res) => {
   }
 });
 
-router.post("/ml/features/vector", authMiddleware, (req, res) => {
+router.post("/ml/features/vector", authMiddleware(), validateBody(featureVectorSchema), (req, res) => {
   try {
-    const { entityId, entityType, featureIds } = req.body;
-    if (!entityId || !entityType || !Array.isArray(featureIds)) {
-      return sendBadRequest(res, "entityId, entityType, and featureIds[] are required");
-    }
+    const { entityId, entityType, featureIds } = req.body as z.infer<typeof featureVectorSchema>;
     res.json(featureStoreService.getFeatureVector(entityId, entityType, featureIds));
   } catch (err) {
     sendError(res, err);
@@ -96,7 +120,7 @@ router.post("/ml/features/vector", authMiddleware, (req, res) => {
 // Domain Templates
 // ---------------------------------------------------------------------------
 
-router.get("/ml/templates", authMiddleware, (_req, res) => {
+router.get("/ml/templates", authMiddleware(), (_req, res) => {
   try {
     res.json(domainTemplatesService.getAllTemplates());
   } catch (err) {
@@ -104,7 +128,7 @@ router.get("/ml/templates", authMiddleware, (_req, res) => {
   }
 });
 
-router.get("/ml/templates/:domain", authMiddleware, (req, res) => {
+router.get("/ml/templates/:domain", authMiddleware(), (req, res) => {
   try {
     const { domain } = req.params;
     res.json(domainTemplatesService.getTemplates(domain));
@@ -113,7 +137,7 @@ router.get("/ml/templates/:domain", authMiddleware, (req, res) => {
   }
 });
 
-router.get("/ml/templates/:domain/:modelType", authMiddleware, (req, res) => {
+router.get("/ml/templates/:domain/:modelType", authMiddleware(), (req, res) => {
   try {
     const { domain, modelType } = req.params;
     const template = domainTemplatesService.getTemplate(domain, modelType);
@@ -128,7 +152,7 @@ router.get("/ml/templates/:domain/:modelType", authMiddleware, (req, res) => {
 // Datasets
 // ---------------------------------------------------------------------------
 
-router.get("/ml/datasets", authMiddleware, (req, res) => {
+router.get("/ml/datasets", authMiddleware(), (req, res) => {
   try {
     const { domain } = req.query as { domain?: string };
     res.json(datasetService.list(domain));
@@ -137,7 +161,7 @@ router.get("/ml/datasets", authMiddleware, (req, res) => {
   }
 });
 
-router.get("/ml/datasets/summary", authMiddleware, (_req, res) => {
+router.get("/ml/datasets/summary", authMiddleware(), (_req, res) => {
   try {
     res.json(datasetService.getSummary());
   } catch (err) {
@@ -145,7 +169,7 @@ router.get("/ml/datasets/summary", authMiddleware, (_req, res) => {
   }
 });
 
-router.get("/ml/datasets/:datasetId", authMiddleware, (req, res) => {
+router.get("/ml/datasets/:datasetId", authMiddleware(), (req, res) => {
   try {
     const ds = datasetService.get(req.params.datasetId);
     if (!ds) return sendNotFound(res, "Dataset not found");
@@ -155,12 +179,22 @@ router.get("/ml/datasets/:datasetId", authMiddleware, (req, res) => {
   }
 });
 
-router.post("/ml/datasets", authMiddleware, async (req, res) => {
+const fullDatasetSchema = z.object({
+  name: z.string().min(1).max(300),
+  domain: z.string().min(1).max(100),
+  featureIds: z.array(z.string().min(1).max(200)).min(1).max(200),
+  labelColumn: z.string().min(1).max(200),
+  splitStrategy: z.enum(["random", "temporal", "stratified"]).optional(),
+  temporalRange: z.object({
+    start: z.string().optional(),
+    end: z.string().optional(),
+  }).optional(),
+  description: z.string().max(2000).optional(),
+});
+
+router.post("/ml/datasets", authMiddleware(), validateBody(fullDatasetSchema), async (req, res) => {
   try {
-    const { name, domain, featureIds, labelColumn, splitStrategy, temporalRange, description } = req.body;
-    if (!name || !domain || !Array.isArray(featureIds) || !labelColumn) {
-      return sendBadRequest(res, "name, domain, featureIds[], and labelColumn are required");
-    }
+    const { name, domain, featureIds, labelColumn, splitStrategy, temporalRange, description } = req.body as z.infer<typeof fullDatasetSchema>;
     const ds = await datasetService.create({ name, domain, featureIds, labelColumn, splitStrategy, temporalRange, description });
     res.status(201).json(ds);
   } catch (err) {
@@ -168,7 +202,7 @@ router.post("/ml/datasets", authMiddleware, async (req, res) => {
   }
 });
 
-router.post("/ml/datasets/bootstrap", authMiddleware, async (_req, res) => {
+router.post("/ml/datasets/bootstrap", authMiddleware(), async (_req, res) => {
   try {
     const datasets = await datasetService.bootstrap();
     res.status(201).json({ bootstrapped: datasets.length, datasets });
@@ -177,7 +211,7 @@ router.post("/ml/datasets/bootstrap", authMiddleware, async (_req, res) => {
   }
 });
 
-router.post("/ml/datasets/:datasetId/refresh", authMiddleware, async (req, res) => {
+router.post("/ml/datasets/:datasetId/refresh", authMiddleware(), async (req, res) => {
   try {
     const ds = await datasetService.refresh(req.params.datasetId);
     res.json(ds);
@@ -190,7 +224,7 @@ router.post("/ml/datasets/:datasetId/refresh", authMiddleware, async (req, res) 
 // Training Pipeline
 // ---------------------------------------------------------------------------
 
-router.get("/ml/training/runs", authMiddleware, (req, res) => {
+router.get("/ml/training/runs", authMiddleware(), (req, res) => {
   try {
     const { domain } = req.query as { domain?: string };
     res.json(trainingService.listRuns(domain));
@@ -199,7 +233,7 @@ router.get("/ml/training/runs", authMiddleware, (req, res) => {
   }
 });
 
-router.get("/ml/training/summary", authMiddleware, (_req, res) => {
+router.get("/ml/training/summary", authMiddleware(), (_req, res) => {
   try {
     res.json(trainingService.getSummary());
   } catch (err) {
@@ -207,7 +241,7 @@ router.get("/ml/training/summary", authMiddleware, (_req, res) => {
   }
 });
 
-router.get("/ml/training/runs/:runId", authMiddleware, (req, res) => {
+router.get("/ml/training/runs/:runId", authMiddleware(), (req, res) => {
   try {
     const run = trainingService.getRun(req.params.runId);
     if (!run) return sendNotFound(res, "Training run not found");
@@ -217,12 +251,19 @@ router.get("/ml/training/runs/:runId", authMiddleware, (req, res) => {
   }
 });
 
-router.post("/ml/training/runs", authMiddleware, async (req, res) => {
+const startTrainingRunSchema = z.object({
+  domain: z.string().min(1).max(100),
+  modelType: z.string().min(1).max(100),
+  algorithmFamily: z.string().min(1).max(100),
+  datasetId: z.string().min(1).max(200),
+  featureIds: z.array(z.string().min(1).max(200)).min(1).max(200),
+  hyperparameters: z.record(z.unknown()).optional(),
+  triggeredBy: z.string().max(200).optional(),
+});
+
+router.post("/ml/training/runs", authMiddleware(), validateBody(startTrainingRunSchema), async (req, res) => {
   try {
-    const { domain, modelType, algorithmFamily, datasetId, featureIds, hyperparameters, triggeredBy } = req.body;
-    if (!domain || !modelType || !algorithmFamily || !datasetId || !Array.isArray(featureIds)) {
-      return sendBadRequest(res, "domain, modelType, algorithmFamily, datasetId, and featureIds[] are required");
-    }
+    const { domain, modelType, algorithmFamily, datasetId, featureIds, hyperparameters, triggeredBy } = req.body as z.infer<typeof startTrainingRunSchema>;
     const run = await trainingService.startRun({ domain, modelType, algorithmFamily, datasetId, featureIds, hyperparameters: hyperparameters ?? {}, triggeredBy });
     res.status(201).json(run);
   } catch (err) {
@@ -230,7 +271,7 @@ router.post("/ml/training/runs", authMiddleware, async (req, res) => {
   }
 });
 
-router.post("/ml/training/trigger/:domain", authMiddleware, async (req, res) => {
+router.post("/ml/training/trigger/:domain", authMiddleware(), async (req, res) => {
   try {
     const runs = await trainingService.triggerDomain(req.params.domain);
     res.status(201).json({ triggered: runs.length, runs });
@@ -243,7 +284,7 @@ router.post("/ml/training/trigger/:domain", authMiddleware, async (req, res) => 
 // Model Registry
 // ---------------------------------------------------------------------------
 
-router.get("/ml/registry/models", authMiddleware, (req, res) => {
+router.get("/ml/registry/models", authMiddleware(), (req, res) => {
   try {
     const { domain, lifecycle } = req.query as { domain?: string; lifecycle?: ModelLifecycle };
     res.json(modelRegistryService.listModels(domain, lifecycle));
@@ -252,7 +293,7 @@ router.get("/ml/registry/models", authMiddleware, (req, res) => {
   }
 });
 
-router.get("/ml/registry/summary", authMiddleware, (_req, res) => {
+router.get("/ml/registry/summary", authMiddleware(), (_req, res) => {
   try {
     res.json(modelRegistryService.getSummary());
   } catch (err) {
@@ -260,7 +301,7 @@ router.get("/ml/registry/summary", authMiddleware, (_req, res) => {
   }
 });
 
-router.get("/ml/registry/models/:modelVersionId", authMiddleware, (req, res) => {
+router.get("/ml/registry/models/:modelVersionId", authMiddleware(), (req, res) => {
   try {
     const model = modelRegistryService.getModel(req.params.modelVersionId);
     if (!model) return sendNotFound(res, "Model version not found");
@@ -270,7 +311,7 @@ router.get("/ml/registry/models/:modelVersionId", authMiddleware, (req, res) => 
   }
 });
 
-router.get("/ml/registry/models/:modelVersionId/lineage", authMiddleware, (req, res) => {
+router.get("/ml/registry/models/:modelVersionId/lineage", authMiddleware(), (req, res) => {
   try {
     const lineage = modelRegistryService.getLineage(req.params.modelVersionId);
     if (!lineage) return sendNotFound(res, "Model version not found");
@@ -280,7 +321,7 @@ router.get("/ml/registry/models/:modelVersionId/lineage", authMiddleware, (req, 
   }
 });
 
-router.post("/ml/registry/models/:modelVersionId/promote", authMiddleware, (req, res) => {
+router.post("/ml/registry/models/:modelVersionId/promote", authMiddleware(), (req, res) => {
   try {
     const { lifecycle, promotedBy } = req.body;
     if (!lifecycle) return sendBadRequest(res, "lifecycle is required (experimental | staging | production | deprecated)");
@@ -296,7 +337,7 @@ router.post("/ml/registry/models/:modelVersionId/promote", authMiddleware, (req,
 // Inference
 // ---------------------------------------------------------------------------
 
-router.post("/ml/inference/predict", authMiddleware, async (req, res) => {
+router.post("/ml/inference/predict", authMiddleware(), async (req, res) => {
   try {
     const { domain, modelType, entityId, entityType, inputFeatures, includeExplanation, forceRefresh } = req.body;
     if (!domain || !modelType || !entityId || !entityType) {
@@ -309,7 +350,7 @@ router.post("/ml/inference/predict", authMiddleware, async (req, res) => {
   }
 });
 
-router.post("/ml/inference/batch", authMiddleware, async (req, res) => {
+router.post("/ml/inference/batch", authMiddleware(), async (req, res) => {
   try {
     const { domain, modelType, entities, includeExplanation } = req.body;
     if (!domain || !modelType || !Array.isArray(entities)) {
@@ -322,7 +363,7 @@ router.post("/ml/inference/batch", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/ml/inference/stats", authMiddleware, (_req, res) => {
+router.get("/ml/inference/stats", authMiddleware(), (_req, res) => {
   try {
     res.json(inferenceService.getStats());
   } catch (err) {
@@ -330,7 +371,7 @@ router.get("/ml/inference/stats", authMiddleware, (_req, res) => {
   }
 });
 
-router.delete("/ml/inference/cache", authMiddleware, (req, res) => {
+router.delete("/ml/inference/cache", authMiddleware(), (req, res) => {
   try {
     const { modelVersionId } = req.query as { modelVersionId?: string };
     const cleared = inferenceService.clearCache(modelVersionId);
@@ -344,7 +385,7 @@ router.delete("/ml/inference/cache", authMiddleware, (req, res) => {
 // Monitoring
 // ---------------------------------------------------------------------------
 
-router.get("/ml/monitoring/snapshots", authMiddleware, (req, res) => {
+router.get("/ml/monitoring/snapshots", authMiddleware(), (req, res) => {
   try {
     const { modelVersionId } = req.query as { modelVersionId?: string };
     res.json(monitoringService.getSnapshots(modelVersionId));
@@ -353,7 +394,7 @@ router.get("/ml/monitoring/snapshots", authMiddleware, (req, res) => {
   }
 });
 
-router.get("/ml/monitoring/summary", authMiddleware, (_req, res) => {
+router.get("/ml/monitoring/summary", authMiddleware(), (_req, res) => {
   try {
     res.json(monitoringService.getSummary());
   } catch (err) {
@@ -361,7 +402,7 @@ router.get("/ml/monitoring/summary", authMiddleware, (_req, res) => {
   }
 });
 
-router.get("/ml/monitoring/retraining-log", authMiddleware, (_req, res) => {
+router.get("/ml/monitoring/retraining-log", authMiddleware(), (_req, res) => {
   try {
     res.json(monitoringService.getRetrainingLog());
   } catch (err) {
@@ -369,7 +410,7 @@ router.get("/ml/monitoring/retraining-log", authMiddleware, (_req, res) => {
   }
 });
 
-router.post("/ml/monitoring/run/:modelVersionId", authMiddleware, async (req, res) => {
+router.post("/ml/monitoring/run/:modelVersionId", authMiddleware(), async (req, res) => {
   try {
     const snapshot = await monitoringService.runCycle(req.params.modelVersionId);
     res.status(201).json(snapshot);
@@ -378,7 +419,7 @@ router.post("/ml/monitoring/run/:modelVersionId", authMiddleware, async (req, re
   }
 });
 
-router.post("/ml/monitoring/run-all", authMiddleware, async (_req, res) => {
+router.post("/ml/monitoring/run-all", authMiddleware(), async (_req, res) => {
   try {
     const snapshots = await monitoringService.runAllProduction();
     res.status(201).json({ count: snapshots.length, snapshots });
@@ -391,7 +432,7 @@ router.post("/ml/monitoring/run-all", authMiddleware, async (_req, res) => {
 // A/B Testing
 // ---------------------------------------------------------------------------
 
-router.get("/ml/ab-tests", authMiddleware, (req, res) => {
+router.get("/ml/ab-tests", authMiddleware(), (req, res) => {
   try {
     const { domain } = req.query as { domain?: string };
     res.json(abTestingService.list(domain));
@@ -400,7 +441,7 @@ router.get("/ml/ab-tests", authMiddleware, (req, res) => {
   }
 });
 
-router.get("/ml/ab-tests/summary", authMiddleware, (_req, res) => {
+router.get("/ml/ab-tests/summary", authMiddleware(), (_req, res) => {
   try {
     res.json(abTestingService.getSummary());
   } catch (err) {
@@ -408,7 +449,7 @@ router.get("/ml/ab-tests/summary", authMiddleware, (_req, res) => {
   }
 });
 
-router.post("/ml/ab-tests", authMiddleware, (req, res) => {
+router.post("/ml/ab-tests", authMiddleware(), (req, res) => {
   try {
     const { name, domain, controlModelVersionId, treatmentModelVersionId, trafficSplitPct, primaryMetric, significanceThreshold, minSampleSize, description } = req.body;
     if (!name || !domain || !controlModelVersionId || !treatmentModelVersionId) {
@@ -421,7 +462,7 @@ router.post("/ml/ab-tests", authMiddleware, (req, res) => {
   }
 });
 
-router.post("/ml/ab-tests/:testId/assign", authMiddleware, (req, res) => {
+router.post("/ml/ab-tests/:testId/assign", authMiddleware(), (req, res) => {
   try {
     const { entityId } = req.body;
     if (!entityId) return sendBadRequest(res, "entityId is required");
@@ -433,7 +474,7 @@ router.post("/ml/ab-tests/:testId/assign", authMiddleware, (req, res) => {
   }
 });
 
-router.post("/ml/ab-tests/:testId/outcome", authMiddleware, (req, res) => {
+router.post("/ml/ab-tests/:testId/outcome", authMiddleware(), (req, res) => {
   try {
     const { variant, metricValue } = req.body;
     if (!variant || metricValue === undefined) return sendBadRequest(res, "variant and metricValue are required");
@@ -444,7 +485,7 @@ router.post("/ml/ab-tests/:testId/outcome", authMiddleware, (req, res) => {
   }
 });
 
-router.get("/ml/ab-tests/:testId/evaluate", authMiddleware, (req, res) => {
+router.get("/ml/ab-tests/:testId/evaluate", authMiddleware(), (req, res) => {
   try {
     const result = abTestingService.evaluate(req.params.testId);
     if (!result) return res.json({ status: "insufficient_samples" });
@@ -454,7 +495,7 @@ router.get("/ml/ab-tests/:testId/evaluate", authMiddleware, (req, res) => {
   }
 });
 
-router.post("/ml/ab-tests/:testId/conclude", authMiddleware, (req, res) => {
+router.post("/ml/ab-tests/:testId/conclude", authMiddleware(), (req, res) => {
   try {
     const test = abTestingService.conclude(req.params.testId);
     if (!test) return sendNotFound(res, "A/B test not found or already concluded");
@@ -468,7 +509,7 @@ router.post("/ml/ab-tests/:testId/conclude", authMiddleware, (req, res) => {
 // Explainability
 // ---------------------------------------------------------------------------
 
-router.post("/ml/explain", authMiddleware, (req, res) => {
+router.post("/ml/explain", authMiddleware(), (req, res) => {
   try {
     const { domain, modelType, prediction, featureImportance, featureValues } = req.body;
     if (!domain || !modelType || prediction === undefined || !featureImportance || !featureValues) {
@@ -480,7 +521,7 @@ router.post("/ml/explain", authMiddleware, (req, res) => {
   }
 });
 
-router.post("/ml/explain/shap", authMiddleware, (req, res) => {
+router.post("/ml/explain/shap", authMiddleware(), (req, res) => {
   try {
     const { featureImportance, featureValues, prediction } = req.body;
     if (!featureImportance || !featureValues || prediction === undefined) {

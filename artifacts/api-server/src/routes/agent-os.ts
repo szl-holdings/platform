@@ -5,8 +5,11 @@ import { agentEventBus } from "../lib/event-bus";
 import { agentScheduler } from "../lib/agent-scheduler";
 import { logger } from "../lib/logger";
 import { authMiddleware, requireRole } from "../middlewares/auth";
+import { tenantScope } from "../middlewares/tenant-scope";
 
 const router = Router();
+
+router.use(tenantScope({ required: false }));
 
 router.get("/agent-os/status", (_req, res) => {
   const schedulerStats = agentScheduler.getStats();

@@ -22,8 +22,11 @@ import {
 } from "@szl-holdings/db";
 import { desc, eq } from "drizzle-orm";
 import { authMiddleware, requireRole } from "../middlewares/auth";
+import { tenantScope } from "../middlewares/tenant-scope";
 
 const router = Router();
+
+router.use(tenantScope({ required: false }));
 
 const adminOnly = [authMiddleware(), requireRole("admin")];
 

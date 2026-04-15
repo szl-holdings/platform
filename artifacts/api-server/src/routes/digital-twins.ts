@@ -3,6 +3,17 @@ import { authMiddleware } from "../middlewares/auth";
 import { sendError, sendBadRequest } from "../lib/api-response";
 import { twinRegistry, vesselTwin, propertyTwin, postureTwin } from "@szl-holdings/ai-engine";
 import type { VesselTwinState, PropertyTwinState, PostureTwinState, SimulationScenario } from "@szl-holdings/ai-engine";
+import { z } from "zod";
+import { validateBody } from "../lib/validation";
+
+const twinEntitySchema = z.object({
+  entityId: z.string().min(1).max(200),
+  state: z.record(z.unknown()),
+});
+
+const simulateSchema = z.object({
+  scenario: z.record(z.unknown()),
+});
 
 const router = Router();
 
@@ -30,43 +41,39 @@ router.get("/digital-twins/type/:type", authMiddleware, async (req, res) => {
   res.json({ success: true, twins });
 });
 
-router.post("/digital-twins/vessel", authMiddleware, async (req, res) => {
+router.post("/digital-twins/vessel", authMiddleware(), validateBody(twinEntitySchema), async (req, res) => {
   try {
-    const { entityId, state } = req.body as { entityId: string; state: VesselTwinState };
-    if (!entityId || !state) return sendBadRequest(res, "entityId and state are required");
-    const twin = vesselTwin.createTwin(entityId, state);
+    const { entityId, state } = req.body as z.infer<typeof twinEntitySchema>;
+    const twin = vesselTwin.createTwin(entityId, state as unknown as VesselTwinState);
     res.json({ success: true, twin });
   } catch (err) {
     res.status(500).json({ success: false, error: "Failed to create vessel twin" });
   }
 });
 
-router.post("/digital-twins/property", authMiddleware, async (req, res) => {
+router.post("/digital-twins/property", authMiddleware(), validateBody(twinEntitySchema), async (req, res) => {
   try {
-    const { entityId, state } = req.body as { entityId: string; state: PropertyTwinState };
-    if (!entityId || !state) return sendBadRequest(res, "entityId and state are required");
-    const twin = propertyTwin.createTwin(entityId, state);
+    const { entityId, state } = req.body as z.infer<typeof twinEntitySchema>;
+    const twin = propertyTwin.createTwin(entityId, state as unknown as PropertyTwinState);
     res.json({ success: true, twin });
   } catch (err) {
     res.status(500).json({ success: false, error: "Failed to create property twin" });
   }
 });
 
-router.post("/digital-twins/posture", authMiddleware, async (req, res) => {
+router.post("/digital-twins/posture", authMiddleware(), validateBody(twinEntitySchema), async (req, res) => {
   try {
-    const { entityId, state } = req.body as { entityId: string; state: PostureTwinState };
-    if (!entityId || !state) return sendBadRequest(res, "entityId and state are required");
-    const twin = postureTwin.createTwin(entityId, state);
+    const { entityId, state } = req.body as z.infer<typeof twinEntitySchema>;
+    const twin = postureTwin.createTwin(entityId, state as unknown as PostureTwinState);
     res.json({ success: true, twin });
   } catch (err) {
     res.status(500).json({ success: false, error: "Failed to create posture twin" });
   }
 });
 
-router.post("/digital-twins/:twinId/simulate", authMiddleware, async (req, res) => {
+router.post("/digital-twins/:twinId/simulate", authMiddleware(), validateBody(simulateSchema), async (req, res) => {
   try {
-    const { scenario } = req.body as { scenario: SimulationScenario };
-    if (!scenario) return sendBadRequest(res, "scenario is required");
+    const { scenario } = req.body as z.infer<typeof simulateSchema>;
 
     const twin = twinRegistry.get(req.params.twinId);
     if (!twin) return sendError(res, 404, "Twin not found");
@@ -89,7 +96,7 @@ router.post("/digital-twins/:twinId/simulate", authMiddleware, async (req, res) 
   }
 });
 
-router.patch("/digital-twins/:twinId", authMiddleware, async (req, res) => {
+router.patch("/digital-twins/:twinId", authMiddleware(), async (req, res) => {
   try {
     const updated = twinRegistry.update(req.params.twinId, req.body);
     if (!updated) return sendError(res, 404, "Twin not found");
@@ -99,7 +106,7 @@ router.patch("/digital-twins/:twinId", authMiddleware, async (req, res) => {
   }
 });
 
-router.post("/digital-twins/demo/seed", authMiddleware, async (_req, res) => {
+router.post("/digital-twins/demo/seed", authMiddleware(), async (_req, res) => {
   try {
     const vesselState: VesselTwinState = {
       imoNumber: "9234567",

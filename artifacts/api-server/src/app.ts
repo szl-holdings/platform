@@ -16,6 +16,7 @@ import { correlationMiddleware } from "./middlewares/correlation";
 import { globalLimiter } from "./middlewares/rate-limiters";
 import { telemetryMiddleware } from "./middlewares/telemetry";
 import { authMiddleware } from "./middlewares/authMiddleware";
+import { globalAuthEnforcer } from "./middlewares/global-auth-enforcer";
 import { csrfMiddleware } from "./middlewares/csrf";
 import { sessionRefreshPolicy } from "./middlewares/session-policy";
 import { apiVersionMiddleware } from "./middlewares/api-version";
@@ -381,6 +382,7 @@ app.get("/api/csrf-token", (req: Request, res: Response) => {
 });
 
 app.use("/api", etagMiddleware);
+app.use(globalAuthEnforcer);
 app.use("/api", router);
 
 let _graphqlHandler: ((req: Request, res: Response, next: import("express").NextFunction) => void) | null = null;

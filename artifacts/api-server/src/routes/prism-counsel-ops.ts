@@ -36,6 +36,52 @@ import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { enqueuePrismJob, PRISM_JOB_TYPES, getJobStats, replayDeadLetterEvent } from "../services/prism-queue";
 import { getConnectorHealth, triggerSync, getConnectorSyncHistory } from "../services/prism-connectors";
 import { getDocumentPipelineStats, getDocumentsForMatter } from "../services/prism-document-pipeline";
+import { z } from "zod";
+import { validateBody } from "../lib/validation";
+
+const createMatterSchema = z.object({
+  title: z.string().min(1).max(500),
+  matterType: z.enum(["litigation", "transactional", "advisory", "regulatory", "ip", "employment", "other"]),
+  status: z.enum(["intake", "active", "on-hold", "closed", "archived"]).optional(),
+  jurisdiction: z.string().max(200).optional(),
+  notes: z.string().max(10000).optional(),
+  caseNumber: z.string().max(200).optional(),
+  courtName: z.string().max(300).optional(),
+  filingDate: z.string().optional(),
+});
+
+const addPartySchema = z.object({
+  name: z.string().min(1).max(500),
+  role: z.enum(["plaintiff", "defendant", "witness", "counsel", "expert", "other"]),
+  email: z.string().email().max(300).optional(),
+  phone: z.string().max(50).optional(),
+  notes: z.string().max(5000).optional(),
+  organization: z.string().max(500).optional(),
+});
+
+const addDeadlineSchema = z.object({
+  title: z.string().min(1).max(500),
+  dueDate: z.string().min(1),
+  priority: z.enum(["low", "medium", "high", "critical"]).optional(),
+  description: z.string().max(5000).optional(),
+  deadlineType: z.string().max(100).optional(),
+});
+
+const createApprovalSchema = z.object({
+  title: z.string().min(1).max(500),
+  description: z.string().max(10000).optional(),
+  requestedFrom: z.string().max(500).optional(),
+  dueDate: z.string().optional(),
+  matterId: z.number().int().positive().optional(),
+  requestType: z.string().max(200).optional(),
+  sourceBasis: z.string().max(1000).optional(),
+});
+
+const createExportSchema = z.object({
+  exportType: z.string().min(1).max(200),
+  format: z.enum(["pdf", "csv", "json", "xlsx", "docx"]),
+  matterId: z.number().int().positive().optional(),
+});
 
 const router: IRouter = Router();
 
@@ -118,11 +164,11 @@ router.get("/matters/:matterId", authMiddleware(), async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to fetch matter detail"); }
 });
 
-router.post("/matters", authMiddleware(), async (req, res) => {
+router.post("/matters", authMiddleware(), validateBody(createMatterSchema), async (req, res) => {
   try {
     const orgId = getOrgId(req);
-    const { title, caseNumber, matterType, jurisdiction, courtName, filingDate } = req.body;
-    if (!title || !matterType) return sendBadRequest(res, "title and matterType required");
+    const { title, matterType, jurisdiction } = req.body as z.infer<typeof createMatterSchema>;
+    const { caseNumber, courtName, filingDate } = req.body as { caseNumber?: string; courtName?: string; filingDate?: string };
 
     const [matter] = await db.insert(pcMattersTable).values({
       orgId,
@@ -183,12 +229,12 @@ router.get("/matters/:matterId/parties", authMiddleware(), async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to fetch parties"); }
 });
 
-router.post("/matters/:matterId/parties", authMiddleware(), async (req, res) => {
+router.post("/matters/:matterId/parties", authMiddleware(), validateBody(addPartySchema), async (req, res) => {
   try {
     const matterId = parseIdParam(req.params.matterId);
     if (!matterId) return sendBadRequest(res, "Invalid matter ID");
-    const { role, name, organization, email, phone } = req.body;
-    if (!role || !name) return sendBadRequest(res, "role and name required");
+    const { role, name, email, phone } = req.body as z.infer<typeof addPartySchema>;
+    const { organization } = req.body as { organization?: string };
 
     const [party] = await db.insert(pcPartiesTable).values({ matterId, role, name, organization, email, phone }).returning();
     sendSuccess(res, { party }, 201);
@@ -204,12 +250,12 @@ router.get("/matters/:matterId/deadlines", authMiddleware(), async (req, res) =>
   } catch (err) { handleRouteError(res, err, "Failed to fetch deadlines"); }
 });
 
-router.post("/matters/:matterId/deadlines", authMiddleware(), async (req, res) => {
+router.post("/matters/:matterId/deadlines", authMiddleware(), validateBody(addDeadlineSchema), async (req, res) => {
   try {
     const matterId = parseIdParam(req.params.matterId);
     if (!matterId) return sendBadRequest(res, "Invalid matter ID");
-    const { title, deadlineType, dueDate, priority } = req.body;
-    if (!title || !dueDate) return sendBadRequest(res, "title and dueDate required");
+    const { title, dueDate, priority } = req.body as z.infer<typeof addDeadlineSchema>;
+    const { deadlineType } = req.body as { deadlineType?: string };
 
     const [deadline] = await db.insert(pcDeadlinesTable).values({
       matterId, title, deadlineType: deadlineType ?? "other",
@@ -279,10 +325,11 @@ router.get("/approvals", authMiddleware(), async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to fetch approvals"); }
 });
 
-router.post("/approvals", authMiddleware(), async (req, res) => {
+router.post("/approvals", authMiddleware(), validateBody(createApprovalSchema), async (req, res) => {
   try {
     const orgId = getOrgId(req);
-    const { matterId, requestType, title, description, sourceBasis } = req.body;
+    const { title, description } = req.body as z.infer<typeof createApprovalSchema>;
+    const { matterId, requestType, sourceBasis } = req.body as { matterId?: number; requestType?: string; sourceBasis?: string };
     if (!matterId || !requestType || !title) return sendBadRequest(res, "matterId, requestType, and title required");
 
     const [approval] = await db.insert(pcApprovalRequestsTable).values({
@@ -331,11 +378,10 @@ router.patch("/approvals/:approvalId/resolve", authMiddleware(), async (req, res
   } catch (err) { handleRouteError(res, err, "Failed to resolve approval"); }
 });
 
-router.post("/exports", authMiddleware(), async (req, res) => {
+router.post("/exports", authMiddleware(), validateBody(createExportSchema), async (req, res) => {
   try {
     const orgId = getOrgId(req);
-    const { matterId, exportType, format } = req.body;
-    if (!exportType || !format) return sendBadRequest(res, "exportType and format required");
+    const { matterId, exportType, format } = req.body as z.infer<typeof createExportSchema>;
 
     const [exp] = await db.insert(pcExportsTable).values({
       orgId, matterId: matterId ?? null, exportType, format,

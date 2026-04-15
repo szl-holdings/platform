@@ -6,8 +6,13 @@ import { openai } from "@szl-holdings/ai-engine/providers/openai";
 import { anthropic } from "@szl-holdings/ai-engine/providers/anthropic";
 import { ai as geminiAi } from "@szl-holdings/ai-engine/providers/gemini";
 import rateLimit from "express-rate-limit";
+import { authMiddleware } from "../middlewares/auth";
+import { tenantScope } from "../middlewares/tenant-scope";
 
 const nueroMeshRouter: IRouter = Router();
+
+nueroMeshRouter.use(authMiddleware());
+nueroMeshRouter.use(tenantScope({ required: false }));
 
 const meshRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,

@@ -40,6 +40,53 @@ import {
 } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { runAllForecasts, runSingleForecast, type ForecastType } from "../lib/ny-forecast-engine";
+import { z } from "zod";
+import { validateBody } from "../lib/validation";
+
+const clockCreateSchema = z.object({
+  clockType: z.string().min(1).max(100),
+  startedAt: z.string().min(1),
+  deadlineAt: z.string().min(1),
+  ruleRef: z.string().max(500).optional(),
+  notes: z.string().max(5000).optional(),
+});
+
+const noFaultClaimSchema = z.object({
+  claimantName: z.string().min(1).max(500),
+  dateOfLoss: z.string().min(1),
+  carrierName: z.string().max(300).optional(),
+  claimType: z.string().max(100).optional(),
+  notes: z.string().max(5000).optional(),
+});
+
+const appealSchema = z.object({
+  appealType: z.string().min(1).max(100),
+  filedAt: z.string().min(1),
+  targetDeadline: z.string().optional(),
+  basis: z.string().max(10000).optional(),
+  notes: z.string().max(5000).optional(),
+  denialId: z.number().int().positive().optional(),
+});
+
+const offerMovementSchema = z.object({
+  offerType: z.enum(["demand", "offer", "counter", "initial", "final"]),
+  amount: z.number().positive(),
+  offeredAt: z.string().min(1),
+  offeringParty: z.string().max(500).optional(),
+  notes: z.string().max(5000).optional(),
+});
+
+const demandPacketSchema = z.object({
+  recipientName: z.string().min(1).max(500),
+  recipientType: z.enum(["insurer", "counsel", "court", "other"]).optional(),
+  sentAt: z.string().optional(),
+  notes: z.string().max(5000).optional(),
+  demandAmount: z.number().positive().optional(),
+});
+
+const forecastComputeSchema = z.object({
+  type: z.string().max(100).optional(),
+});
 
 const router: IRouter = Router();
 
@@ -112,22 +159,21 @@ router.get("/prism-counsel/ny/matters/:matterId/clocks", authMiddleware(), async
   }
 });
 
-router.post("/prism-counsel/ny/matters/:matterId/clocks", authMiddleware(), async (req, res) => {
+router.post("/prism-counsel/ny/matters/:matterId/clocks", authMiddleware(), validateBody(clockCreateSchema), async (req, res) => {
   try {
     const orgId = getAuthOrgId(req);
     if (!orgId) return sendForbidden(res, "Authentication required");
     const matterId = parseIdParam(req.params.matterId);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
-    const body = req.body as Record<string, unknown>;
-    if (!body.clockType || !body.startedAt || !body.deadlineAt) return sendBadRequest(res, "clockType, startedAt, deadlineAt are required");
+    const { clockType, startedAt, deadlineAt, ruleRef, notes } = req.body as z.infer<typeof clockCreateSchema>;
     const [clock] = await db.insert(pcMatterClocksTable).values({
       orgId,
       matterId,
-      clockType: String(body.clockType) as typeof pcMatterClocksTable.$inferInsert["clockType"],
-      startedAt: new Date(String(body.startedAt)),
-      deadlineAt: new Date(String(body.deadlineAt)),
-      ruleRef: body.ruleRef ? String(body.ruleRef) : undefined,
-      notes: body.notes ? String(body.notes) : undefined,
+      clockType: clockType as typeof pcMatterClocksTable.$inferInsert["clockType"],
+      startedAt: new Date(startedAt),
+      deadlineAt: new Date(deadlineAt),
+      ruleRef,
+      notes,
       actorId: req.user?.id,
     }).returning();
     sendSuccess(res, clock, 201);
@@ -165,20 +211,20 @@ router.get("/prism-counsel/ny/matters/:matterId/no-fault-claims", authMiddleware
   }
 });
 
-router.post("/prism-counsel/ny/matters/:matterId/no-fault-claims", authMiddleware(), async (req, res) => {
+router.post("/prism-counsel/ny/matters/:matterId/no-fault-claims", authMiddleware(), validateBody(noFaultClaimSchema), async (req, res) => {
   try {
     const orgId = getAuthOrgId(req);
     if (!orgId) return sendForbidden(res, "Authentication required");
     const matterId = parseIdParam(req.params.matterId);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
-    const body = req.body as Record<string, unknown>;
-    if (!body.claimantName || !body.dateOfLoss) return sendBadRequest(res, "claimantName, dateOfLoss required");
+    const { claimantName, claimType, notes } = req.body as z.infer<typeof noFaultClaimSchema>;
+    const { carrierName, dateOfLoss } = req.body as { carrierName?: string; dateOfLoss: string };
     const [claim] = await db.insert(pcNoFaultClaimsTable).values({
       orgId,
       matterId,
-      claimantName: String(body.claimantName),
-      carrierName: body.carrierName ? String(body.carrierName) : undefined,
-      dateOfLoss: new Date(String(body.dateOfLoss)),
+      claimantName,
+      carrierName,
+      dateOfLoss: new Date(dateOfLoss),
       actorId: req.user?.id,
     }).returning();
     sendSuccess(res, claim, 201);
@@ -229,20 +275,20 @@ router.get("/prism-counsel/ny/matters/:matterId/appeals", authMiddleware(), asyn
   }
 });
 
-router.post("/prism-counsel/ny/matters/:matterId/appeals", authMiddleware(), async (req, res) => {
+router.post("/prism-counsel/ny/matters/:matterId/appeals", authMiddleware(), validateBody(appealSchema), async (req, res) => {
   try {
     const orgId = getAuthOrgId(req);
     if (!orgId) return sendForbidden(res, "Authentication required");
     const matterId = parseIdParam(req.params.matterId);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
-    const body = req.body as Record<string, unknown>;
-    if (!body.appealType) return sendBadRequest(res, "appealType required");
+    const { appealType, basis: groundsForAppeal } = req.body as z.infer<typeof appealSchema>;
+    const { denialId } = req.body as { denialId?: number };
     const [appeal] = await db.insert(pcAppealsTable).values({
       orgId,
       matterId,
-      appealType: String(body.appealType) as typeof pcAppealsTable.$inferInsert["appealType"],
-      denialId: body.denialId ? Number(body.denialId) : undefined,
-      groundsForAppeal: body.groundsForAppeal ? String(body.groundsForAppeal) : undefined,
+      appealType: appealType as typeof pcAppealsTable.$inferInsert["appealType"],
+      denialId,
+      groundsForAppeal,
       actorId: req.user?.id,
     }).returning();
     sendSuccess(res, appeal, 201);
@@ -321,22 +367,21 @@ router.get("/prism-counsel/ny/matters/:matterId/offer-movements", authMiddleware
   }
 });
 
-router.post("/prism-counsel/ny/matters/:matterId/offer-movements", authMiddleware(), async (req, res) => {
+router.post("/prism-counsel/ny/matters/:matterId/offer-movements", authMiddleware(), validateBody(offerMovementSchema), async (req, res) => {
   try {
     const orgId = getAuthOrgId(req);
     if (!orgId) return sendForbidden(res, "Authentication required");
     const matterId = parseIdParam(req.params.matterId);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
-    const body = req.body as Record<string, unknown>;
-    if (!body.offerType || !body.amount || !body.offeredAt) return sendBadRequest(res, "offerType, amount, offeredAt required");
+    const { offerType, amount, offeredAt, offeringParty, notes } = req.body as z.infer<typeof offerMovementSchema>;
     const [offer] = await db.insert(pcOfferMovementsTable).values({
       orgId,
       matterId,
-      offerType: String(body.offerType) as typeof pcOfferMovementsTable.$inferInsert["offerType"],
-      amount: String(body.amount),
-      offeredAt: new Date(String(body.offeredAt)),
-      offeringParty: body.offeringParty ? String(body.offeringParty) : undefined,
-      notes: body.notes ? String(body.notes) : undefined,
+      offerType: offerType as typeof pcOfferMovementsTable.$inferInsert["offerType"],
+      amount: String(amount),
+      offeredAt: new Date(offeredAt),
+      offeringParty,
+      notes,
       actorId: req.user?.id,
     }).returning();
     sendSuccess(res, offer, 201);
@@ -401,18 +446,19 @@ router.get("/prism-counsel/ny/matters/:matterId/demand-packets", authMiddleware(
   }
 });
 
-router.post("/prism-counsel/ny/matters/:matterId/demand-packets", authMiddleware(), async (req, res) => {
+router.post("/prism-counsel/ny/matters/:matterId/demand-packets", authMiddleware(), validateBody(demandPacketSchema), async (req, res) => {
   try {
     const orgId = getAuthOrgId(req);
     if (!orgId) return sendForbidden(res, "Authentication required");
     const matterId = parseIdParam(req.params.matterId);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
-    const body = req.body as Record<string, unknown>;
+    const { notes } = req.body as z.infer<typeof demandPacketSchema>;
+    const { demandAmount } = req.body as { demandAmount?: number };
     const [packet] = await db.insert(pcDemandPacketsTable).values({
       orgId,
       matterId,
-      demandAmount: body.demandAmount ? String(body.demandAmount) : undefined,
-      notes: body.notes ? String(body.notes) : undefined,
+      demandAmount: demandAmount ? String(demandAmount) : undefined,
+      notes,
       actorId: req.user?.id,
     }).returning();
     sendSuccess(res, packet, 201);
@@ -501,13 +547,13 @@ router.get("/prism-counsel/ny/matters/:matterId/forecasts", authMiddleware(), as
   }
 });
 
-router.post("/prism-counsel/ny/matters/:matterId/forecasts/compute", authMiddleware(), async (req, res) => {
+router.post("/prism-counsel/ny/matters/:matterId/forecasts/compute", authMiddleware(), validateBody(forecastComputeSchema), async (req, res) => {
   try {
     const orgId = getAuthOrgId(req);
     if (!orgId) return sendForbidden(res, "Authentication required");
     const matterId = parseIdParam(req.params.matterId);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
-    const { type } = req.body as { type?: string };
+    const { type } = req.body as z.infer<typeof forecastComputeSchema>;
     if (type) {
       const result = await runSingleForecast(matterId, orgId, type as ForecastType, req.user?.id);
       sendSuccess(res, result, 201);

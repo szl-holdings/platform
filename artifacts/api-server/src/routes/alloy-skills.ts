@@ -9,6 +9,7 @@ import {
   alloyAgentReflections,
 } from "@szl-holdings/db";
 import { eq, desc, and, isNull } from "drizzle-orm";
+import { tenantScope } from "../middlewares/tenant-scope";
 import {
   authMiddleware,
   requireRole,
@@ -28,6 +29,8 @@ import {
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
+
+router.use(tenantScope({ required: false }));
 
 function isGlobalAdmin(user?: AuthenticatedUser): boolean {
   if (!user) return false;
