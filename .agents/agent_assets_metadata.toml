@@ -107,3 +107,9 @@ id = "b1reLrNmV7iV6ofLCVWsA"
 uri = "file://screenshots/01-szl-holdings-dashboard.jpg"
 type = "image"
 title = "SZL Holdings Dashboard Screenshot"
+
+[[outputs]]
+id = "PnFNWIPVC-2yCmO79atDQ"
+uri = "file://project-export.zip"
+type = "unspecified"
+title = "Full Project Source Export (project-export.zip)"
