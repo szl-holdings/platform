@@ -238,3 +238,44 @@ export {
   getVapidPublicKey,
   type WebPushRegistrationOptions,
 } from "./web-push-registration";
+
+export {
+  AmbientBar,
+  useAmbientIntelligence,
+  type AmbientSignal,
+  type AmbientBarProps,
+  type AmbientIntelligenceConfig,
+} from "./ambient-intelligence";
+
+export {
+  EnergyPulse,
+  useEnergyHeartbeat,
+  type EnergyMetrics,
+  type EnergyHeartbeatConfig,
+  type EnergyPulseProps,
+} from "./energy-heartbeat";
+
+export {
+  DecisionShieldPanel,
+  useDecisionShield,
+  type DecisionItem,
+  type DecisionShieldSummary,
+  type DecisionShieldPanelProps,
+} from "./decision-shield";
+
+export {
+  StakeholderLensProvider,
+  StakeholderLensSwitcher,
+  StakeholderContent,
+  useStakeholderLens,
+  STAKEHOLDER_VIEWS,
+  type StakeholderView,
+  type StakeholderLensConfig,
+  type StakeholderLensSwitcherProps,
+} from "./stakeholder-lens";
+
+export {
+  CorrelationFeed,
+  type CrossDomainCorrelation,
+  type CorrelationFeedProps,
+} from "./cross-domain-correlation";

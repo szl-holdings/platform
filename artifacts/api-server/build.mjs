@@ -160,6 +160,7 @@ async function buildAll() {
       "serialport",
       "snappy",
       "tinypool",
+      "@szl-holdings/workflow-engine",
       "@szl-holdings/intelligence-feeds/feed-scheduler",
       "@szl-holdings/intelligence-feeds/adapters/ais",
       "@szl-holdings/intelligence-feeds/adapters/stix-taxii",

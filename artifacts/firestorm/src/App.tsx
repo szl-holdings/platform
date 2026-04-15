@@ -181,6 +181,7 @@ const ThreatActorProfiling = lazy(() => import("@/pages/threat-actor-profiling")
 
 const ThreatDesk = lazy(() => import("@/pages/threat-desk"));
 const AegisWhatChanged = lazy(() => import("@/pages/aegis-what-changed"));
+const ThreatCostTranslator = lazy(() => import("@/pages/threat-cost-translator"));
 const ActionQueue = lazy(() => import("@/pages/action-queue"));
 const IncidentReadinessView = lazy(() => import("@/pages/incident-readiness-view"));
 const GovernanceReview = lazy(() => import("@/pages/governance-review"));
@@ -336,6 +337,7 @@ const livingIntelNav = [
   { path: "/intelligence-fusion-grid", label: "Intelligence Fusion Grid", icon: Layers },
   { path: "/business-signal-intelligence", label: "Business Signal Intel", icon: DollarSign },
   { path: "/predictive-intelligence", label: "Predictive Intelligence", icon: TrendingUp },
+  { path: "/threat-cost-translator", label: "Threat Cost Translator", icon: DollarSign },
 ];
 
 const complianceNavItems = [
@@ -903,6 +905,7 @@ function AppRouter() {
         <Route path="/intelligence-fusion-grid" component={IntelligenceFusionGrid} />
         <Route path="/business-signal-intelligence" component={AegisBusinessSignalIntelligence} />
         <Route path="/predictive-intelligence" component={AegisPredictiveIntelligence} />
+        <Route path="/threat-cost-translator" component={ThreatCostTranslator} />
 
         {/* Agentic SOC & Autonomous Cyber Defense (Task 521) */}
         <Route path="/agentic-soc" component={AgenticSOC} />

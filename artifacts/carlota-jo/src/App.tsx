@@ -61,6 +61,7 @@ const KnowledgeGraph = lazy(() => import("@/pages/knowledge-graph"));
 const RevenueIntelligence = lazy(() => import("@/pages/revenue-intelligence"));
 const WorkshopPlatform = lazy(() => import("@/pages/workshop-platform"));
 const ExpertNetwork = lazy(() => import("@/pages/expert-network"));
+const InvisibleServiceDesign = lazy(() => import("@/pages/invisible-service-design"));
 
 function PageLoader() {
   return (
@@ -154,6 +155,7 @@ function Router() {
         <Route path="/revenue-intelligence" component={RevenueIntelligence} />
         <Route path="/workshop-platform" component={WorkshopPlatform} />
         <Route path="/expert-network" component={ExpertNetwork} />
+        <Route path="/invisible-service-design" component={InvisibleServiceDesign} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

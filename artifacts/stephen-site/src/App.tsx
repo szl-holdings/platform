@@ -47,6 +47,7 @@ const ContentCalendar = lazy(() => import("@/pages/content-calendar"));
 const DigitalProducts = lazy(() => import("@/pages/digital-products"));
 const BrandHealth = lazy(() => import("@/pages/brand-health"));
 const MonetizationAI = lazy(() => import("@/pages/monetization-ai"));
+const ThoughtResonanceEngine = lazy(() => import("@/pages/thought-resonance-engine"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -117,6 +118,7 @@ function Router() {
         <Route path="/products" component={DigitalProducts} />
         <Route path="/brand-health" component={BrandHealth} />
         <Route path="/monetization" component={MonetizationAI} />
+        <Route path="/thought-resonance" component={ThoughtResonanceEngine} />
 
         <Route path="/case-studies">
           <Redirect to="/work" />

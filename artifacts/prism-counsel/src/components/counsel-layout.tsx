@@ -85,6 +85,7 @@ const NAV_SECTIONS = [
     items: [
       { label: "Trust", href: "/prism-counsel/trust", icon: Shield },
       { label: "Connectors", href: "/prism-counsel/connectors", icon: Plug },
+      { label: "Judicial Patterns", href: "/prism-counsel/judicial-pattern-intelligence", icon: Building2 },
       { label: "Model Mesh", href: "/prism-counsel/model-mesh", icon: Zap },
       { label: "Costs", href: "/prism-counsel/costs", icon: DollarSign },
       { label: "Admin", href: "/prism-counsel/admin", icon: Settings },

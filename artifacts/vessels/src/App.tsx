@@ -179,6 +179,7 @@ const PortTwinPage = lazy(() => import("@/pages/port-twin"));
 const PiracySanctionsPage = lazy(() => import("@/pages/piracy-sanctions"));
 const WeatherRoutingPage = lazy(() => import("@/pages/weather-routing"));
 const BunkeringPage = lazy(() => import("@/pages/bunkering"));
+const VoyageCarbonPassport = lazy(() => import("@/pages/voyage-carbon-passport"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -342,6 +343,7 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
         { id: "predictive-maintenance-ml", label: "Predictive Maintenance", href: "/predictive-maintenance-ml", icon: <Wrench className="w-3.5 h-3.5" /> },
         { id: "blockchain-bol", label: "Blockchain BoL", href: "/blockchain-bol", icon: <Shield className="w-3.5 h-3.5" /> },
         { id: "decarbonization", label: "Decarbonization", href: "/decarbonization", icon: <Leaf className="w-3.5 h-3.5" /> },
+        { id: "carbon-passport", label: "Carbon Passport", href: "/voyage-carbon-passport", icon: <Leaf className="w-3.5 h-3.5" /> },
         { id: "port-twin", label: "Port Digital Twin", href: "/port-twin", icon: <Anchor className="w-3.5 h-3.5" /> },
         { id: "piracy-sanctions", label: "Piracy & Sanctions", href: "/piracy-sanctions", icon: <ShieldAlert className="w-3.5 h-3.5" /> },
         { id: "weather-routing", label: "Weather Routing", href: "/weather-routing", icon: <Waves className="w-3.5 h-3.5" /> },
@@ -591,6 +593,7 @@ function DashboardRouter() {
         <Route path="/predictive-maintenance-ml" component={PredictiveMaintenancePage} />
         <Route path="/blockchain-bol" component={BlockchainBoLPage} />
         <Route path="/decarbonization" component={DecarbonizationPage} />
+        <Route path="/voyage-carbon-passport" component={VoyageCarbonPassport} />
         <Route path="/port-twin" component={PortTwinPage} />
         <Route path="/piracy-sanctions" component={PiracySanctionsPage} />
         <Route path="/weather-routing" component={WeatherRoutingPage} />

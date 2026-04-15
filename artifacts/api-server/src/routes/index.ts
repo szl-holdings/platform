@@ -165,6 +165,7 @@ import changesRouter from "./changes";
 import webPushSubscriptionsRouter from "./web-push-subscriptions";
 import notificationRecipientsRouter from "./notification-recipients";
 import imperiumRouter from "./imperium";
+import innovationEngineRouter from "./innovation-engine";
 
 const router: IRouter = Router();
 
@@ -638,5 +639,8 @@ router.use(notificationRecipientsRouter);
 
 router.use("/imperium", _readLimiter);
 router.use(imperiumRouter);
+
+router.use("/innovation-engine", _readLimiter);
+router.use("/innovation-engine", innovationEngineRouter);
 
 export default router;

@@ -163,6 +163,7 @@ const NyVenueIntel = lazy(() => import("./pages/ny/ny-venue-intel"));
 const NyCopilot = lazy(() => import("./pages/ny/ny-copilot"));
 const NyTrust = lazy(() => import("./pages/ny/ny-trust"));
 const NyPlaybooks = lazy(() => import("./pages/ny/ny-playbooks"));
+const JudicialPatternIntelligence = lazy(() => import("./pages/judicial-pattern-intelligence"));
 
 function MatterRoute({ params }: { params: { id: string } }) {
   const id = parseInt(params.id ?? "0");
@@ -278,6 +279,9 @@ function PrismCounselRoutes() {
       </Route>
       <Route path="/prism-counsel/connectors">
         <Suspense fallback={<PageLoader />}><Wrap><PrismConnectors /></Wrap></Suspense>
+      </Route>
+      <Route path="/prism-counsel/judicial-pattern-intelligence">
+        <Suspense fallback={<PageLoader />}><Wrap><JudicialPatternIntelligence /></Wrap></Suspense>
       </Route>
 
       <Route path="/prism-counsel/review-desk/metrics">

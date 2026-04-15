@@ -151,6 +151,7 @@ const ChangeManagement = lazy(() => import("@/pages/change-management"));
 const NoiseReduction = lazy(() => import("@/pages/noise-reduction"));
 const KnowledgeGraph = lazy(() => import("@/pages/knowledge-graph"));
 const DevFeedback = lazy(() => import("@/pages/dev-feedback"));
+const SelfHealingConfidence = lazy(() => import("@/pages/self-healing-confidence"));
 
 const ADMIN_ROLES = ["admin", "super_admin", "ops"];
 
@@ -278,6 +279,7 @@ function PrivateRouter() {
         <Route path="/noise-reduction" component={NoiseReduction} />
         <Route path="/knowledge-graph" component={KnowledgeGraph} />
         <Route path="/dev-feedback" component={DevFeedback} />
+        <Route path="/self-healing-confidence" component={SelfHealingConfidence} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>
@@ -322,6 +324,7 @@ const lyteCommands: CommandItem[] = [
   { id: "nav-dex", label: "DEX Scoring", icon: "🖥️", group: "Autonomous NOC", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/dex"); } },
   { id: "nav-msp-command", label: "Multi-Tenant MSP Command", icon: "🏢", group: "Autonomous NOC", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/msp-command"); } },
   { id: "nav-dev-feedback", label: "Observability Dev Feedback", icon: "💻", group: "Autonomous NOC", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/dev-feedback"); } },
+  { id: "nav-self-healing", label: "Self-Healing Confidence Index", icon: "🩺", group: "Innovation Engine", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/self-healing-confidence"); } },
   ...createBaselineWebActions(
     (path) => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, path); },
     {
