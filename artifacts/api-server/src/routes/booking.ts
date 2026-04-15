@@ -1,8 +1,11 @@
 import { Router, type IRouter } from "express";
+import { authMiddleware } from "../middlewares/auth";
 import { db, carlotaReservationsTable } from "@szl-holdings/db";
 import { desc, eq, ilike, or } from "drizzle-orm";
 
 const router: IRouter = Router();
+
+router.use(authMiddleware());
 
 router.get("/booking/health", (_req, res) => {
   res.json({

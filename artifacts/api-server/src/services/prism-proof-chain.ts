@@ -45,9 +45,9 @@ class ProofChainService {
     return entry.id;
   }
 
-  async getTrace(proofChainId: number) {
+  async getTrace(orgId: number, proofChainId: number) {
     const [entry] = await db.select().from(pcProofChainEntriesTable)
-      .where(eq(pcProofChainEntriesTable.id, proofChainId));
+      .where(and(eq(pcProofChainEntriesTable.id, proofChainId), eq(pcProofChainEntriesTable.orgId, orgId)));
     if (!entry) return null;
 
     return {
@@ -69,21 +69,23 @@ class ProofChainService {
     };
   }
 
-  async setReviewState(proofChainId: number, state: string, reviewerId: number) {
-    await db.update(pcProofChainEntriesTable).set({
+  async setReviewState(orgId: number, proofChainId: number, state: string, reviewerId: number) {
+    const result = await db.update(pcProofChainEntriesTable).set({
       reviewState: state as any,
       reviewedBy: reviewerId,
       reviewedAt: new Date(),
-    }).where(eq(pcProofChainEntriesTable.id, proofChainId));
+    }).where(and(eq(pcProofChainEntriesTable.id, proofChainId), eq(pcProofChainEntriesTable.orgId, orgId))).returning({ id: pcProofChainEntriesTable.id });
+    if (!result.length) throw Object.assign(new Error("Proof chain entry not found"), { statusCode: 404 });
   }
 
-  async setApprovalState(proofChainId: number, state: string, approverId: number) {
-    await db.update(pcProofChainEntriesTable).set({
+  async setApprovalState(orgId: number, proofChainId: number, state: string, approverId: number) {
+    const result = await db.update(pcProofChainEntriesTable).set({
       approvalState: state as any,
       approvedBy: approverId,
       approvedAt: new Date(),
       exportSafe: state === "approved",
-    }).where(eq(pcProofChainEntriesTable.id, proofChainId));
+    }).where(and(eq(pcProofChainEntriesTable.id, proofChainId), eq(pcProofChainEntriesTable.orgId, orgId))).returning({ id: pcProofChainEntriesTable.id });
+    if (!result.length) throw Object.assign(new Error("Proof chain entry not found"), { statusCode: 404 });
   }
 
   async getMatterChain(orgId: number, matterId: number) {
@@ -98,9 +100,9 @@ class ProofChainService {
       .orderBy(desc(pcProofChainEntriesTable.createdAt));
   }
 
-  async verifyIntegrity(proofChainId: number): Promise<{ valid: boolean; details: any }> {
+  async verifyIntegrity(orgId: number, proofChainId: number): Promise<{ valid: boolean; details: any }> {
     const [entry] = await db.select().from(pcProofChainEntriesTable)
-      .where(eq(pcProofChainEntriesTable.id, proofChainId));
+      .where(and(eq(pcProofChainEntriesTable.id, proofChainId), eq(pcProofChainEntriesTable.orgId, orgId)));
     if (!entry) return { valid: false, details: { error: "Entry not found" } };
 
     const currentHash = createHash("sha256").update(entry.outputContent ?? "").digest("hex");

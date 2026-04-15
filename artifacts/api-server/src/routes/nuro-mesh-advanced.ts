@@ -10,6 +10,8 @@
  */
 
 import { Router, type Request, type Response } from "express";
+import { authMiddleware } from "../middlewares/auth";
+import { tenantScope } from "../middlewares/tenant-scope";
 import {
   getKernelAuditTrail,
   verifyAuditChainIntegrity,
@@ -21,6 +23,19 @@ import { budgetManager, MODEL_PRICING } from "@szl-holdings/ai-engine";
 import { rlMemoryManager } from "@szl-holdings/ai-engine";
 
 const router = Router();
+
+router.use(authMiddleware());
+router.use(tenantScope({ required: true }));
+
+function getOrgId(req: Request): number {
+  if (req.user?.roles.includes("super_admin") && req.headers["x-org-id"]) {
+    const headerOrgId = parseInt(String(req.headers["x-org-id"]), 10);
+    if (!isNaN(headerOrgId) && headerOrgId > 0) return headerOrgId;
+  }
+  const orgId = req.tenantOrgId ?? req.user?.orgs[0]?.orgId;
+  if (!orgId) throw Object.assign(new Error("Organization context required"), { statusCode: 403 });
+  return orgId;
+}
 
 router.get("/nuro-mesh/kernel/audit-trail", (req: Request, res: Response) => {
   const limit = Math.min(500, parseInt(String(req.query.limit ?? "50"), 10));
@@ -91,8 +106,7 @@ router.post("/nuro-mesh/flywheel/feedback", (req: Request, res: Response) => {
 
 router.get("/nuro-mesh/observability/traces", (req: Request, res: Response) => {
   const limit = Math.min(100, parseInt(String(req.query.limit ?? "20"), 10));
-  const orgId = req.query.orgId ? parseInt(String(req.query.orgId), 10) : undefined;
-  const traces = behavioralTracer.getRecentTraces(limit, orgId);
+  const traces = behavioralTracer.getRecentTraces(limit, getOrgId(req));
   res.json({ traces, total: traces.length });
 });
 
@@ -106,16 +120,14 @@ router.get("/nuro-mesh/observability/traces/:traceId", (req: Request, res: Respo
 });
 
 router.get("/nuro-mesh/observability/stats", (req: Request, res: Response) => {
-  const orgId = req.query.orgId ? parseInt(String(req.query.orgId), 10) : undefined;
-  res.json(behavioralTracer.getObservabilityStats(orgId));
+  res.json(behavioralTracer.getObservabilityStats(getOrgId(req)));
 });
 
 router.get("/nuro-mesh/cost/estimate", (req: Request, res: Response) => {
-  const { query, agents, workflowId, orgId } = req.query as {
+  const { query, agents, workflowId } = req.query as {
     query?: string;
     agents?: string;
     workflowId?: string;
-    orgId?: string;
   };
 
   if (!query) {
@@ -124,14 +136,13 @@ router.get("/nuro-mesh/cost/estimate", (req: Request, res: Response) => {
   }
 
   const agentList = agents ? agents.split(",").map(a => ({ agentId: a.trim(), model: "gpt-5.2" })) : [{ agentId: "alloy", model: "gpt-5.2" }];
-  const estimate = budgetManager.estimateRunCost(query, agentList, workflowId ?? "default", orgId ? parseInt(orgId, 10) : null);
+  const estimate = budgetManager.estimateRunCost(query, agentList, workflowId ?? "default", getOrgId(req));
   res.json(estimate);
 });
 
 router.get("/nuro-mesh/cost/analytics", (req: Request, res: Response) => {
-  const orgId = req.query.orgId ? parseInt(String(req.query.orgId), 10) : undefined;
   const limit = Math.min(500, parseInt(String(req.query.limit ?? "100"), 10));
-  const analytics = budgetManager.getSpendAnalytics(orgId, limit);
+  const analytics = budgetManager.getSpendAnalytics(getOrgId(req), limit);
   res.json({
     ...analytics,
     modelPricing: MODEL_PRICING,
@@ -140,15 +151,13 @@ router.get("/nuro-mesh/cost/analytics", (req: Request, res: Response) => {
 });
 
 router.get("/nuro-mesh/cost/budget/:workflowId", (req: Request, res: Response) => {
-  const orgId = req.query.orgId ? parseInt(String(req.query.orgId), 10) : undefined;
-  const status = budgetManager.getBudgetStatus(req.params.workflowId as string, orgId);
+  const status = budgetManager.getBudgetStatus(req.params.workflowId as string, getOrgId(req));
   res.json({ workflowId: req.params.workflowId, ...status });
 });
 
 router.post("/nuro-mesh/cost/budget", (req: Request, res: Response) => {
-  const { workflowId, orgId, budgetUsd, warningThreshold, hardCapThreshold, allowModelDowngrade } = req.body as {
+  const { workflowId, budgetUsd, warningThreshold, hardCapThreshold, allowModelDowngrade } = req.body as {
     workflowId?: string;
-    orgId?: number;
     budgetUsd?: number;
     warningThreshold?: number;
     hardCapThreshold?: number;
@@ -162,7 +171,7 @@ router.post("/nuro-mesh/cost/budget", (req: Request, res: Response) => {
 
   budgetManager.configureBudget({
     workflowId,
-    orgId: orgId ?? null,
+    orgId: getOrgId(req),
     budgetUsd,
     warningThreshold: warningThreshold ?? 0.8,
     hardCapThreshold: hardCapThreshold ?? 1.0,

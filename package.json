@@ -81,7 +81,9 @@
       "@types/react": "catalog:",
       "@types/react-dom": "catalog:",
       "react": "$react",
-      "react-dom": "$react-dom"
+      "react-dom": "$react-dom",
+      "path-to-regexp": "8.4.2",
+      "brace-expansion": "2.1.0"
     }
   }
 }

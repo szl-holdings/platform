@@ -45,10 +45,10 @@ class CopilotWorkbenchService {
     return session;
   }
 
-  async sendMessage(sessionId: number, content: string, userId: number): Promise<any> {
+  async sendMessage(orgId: number, userId: number, sessionId: number, content: string): Promise<any> {
     const [session] = await db.select().from(pcCopilotSessionsTable)
-      .where(eq(pcCopilotSessionsTable.id, sessionId));
-    if (!session) throw new Error(`Session ${sessionId} not found`);
+      .where(and(eq(pcCopilotSessionsTable.id, sessionId), eq(pcCopilotSessionsTable.orgId, orgId), eq(pcCopilotSessionsTable.userId, userId)));
+    if (!session) throw Object.assign(new Error("Session not found"), { statusCode: 404 });
 
     await db.insert(pcCopilotMessagesTable).values({
       sessionId, role: "user", content, mode: session.mode,
@@ -133,7 +133,10 @@ class CopilotWorkbenchService {
     return responses[mode] ?? responses.matter;
   }
 
-  async getSessionHistory(sessionId: number) {
+  async getSessionHistory(orgId: number, userId: number, sessionId: number) {
+    const [session] = await db.select({ id: pcCopilotSessionsTable.id }).from(pcCopilotSessionsTable)
+      .where(and(eq(pcCopilotSessionsTable.id, sessionId), eq(pcCopilotSessionsTable.orgId, orgId), eq(pcCopilotSessionsTable.userId, userId)));
+    if (!session) throw Object.assign(new Error("Session not found"), { statusCode: 404 });
     return db.select().from(pcCopilotMessagesTable)
       .where(eq(pcCopilotMessagesTable.sessionId, sessionId))
       .orderBy(pcCopilotMessagesTable.createdAt);

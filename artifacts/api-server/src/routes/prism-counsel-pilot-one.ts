@@ -1,4 +1,7 @@
 import { Router, Request, Response } from "express";
+import { z } from "zod";
+import { authMiddleware, requireRole } from "../middlewares/auth";
+import { tenantScope } from "../middlewares/tenant-scope";
 import { insurerPressureEngine } from "../services/prism-insurer-pressure";
 import { settlementFrictionEngine } from "../services/prism-settlement-friction";
 import { portfolioLearning } from "../services/prism-portfolio-learning";
@@ -19,14 +22,36 @@ import {
 import { logger } from "../lib/logger";
 
 const router = Router();
-const ORG_ID = 1;
+
+router.use(authMiddleware());
+router.use(tenantScope({ required: true }));
+
+const CarrierEventSchema = z.object({
+  carrierName: z.string().min(1).max(200),
+  eventType: z.string().min(1).max(100),
+  description: z.string().max(2000).optional(),
+  daysSinceLastContact: z.number().int().min(0).optional(),
+  signalStrength: z.number().min(0).max(1).optional(),
+  sourceRef: z.string().max(500).optional(),
+});
+
+const PilotOneExecuteSchema = z.object({
+  matterId: z.number().int().positive(),
+  cardId: z.enum(["why_harder_than_looks", "what_blocking_settlement", "explain_pressure_score", "what_changed_since_monday", "smallest_action_readiness", "draft_partner_briefing", "draft_escalation_note", "settlement_friction_memo", "matter_movement_summary", "carrier_watch_summary", "pressure_trend_narrative", "movement_board_item"]),
+});
+
+function getOrgId(req: Request): number {
+  const orgId = req.tenantOrgId ?? req.user?.orgs[0]?.orgId;
+  if (!orgId) throw Object.assign(new Error("Organization context required"), { statusCode: 403 });
+  return orgId;
+}
 
 /* ─── Insurer Pressure Engine ─────────────────────────────────────────── */
 
 router.post("/pressure/:matterId/compute", async (req: Request, res: Response) => {
   try {
     const matterId = parseInt(req.params.matterId as string);
-    const { snapshotId, analysis } = await insurerPressureEngine.compute(ORG_ID, matterId);
+    const { snapshotId, analysis } = await insurerPressureEngine.compute(getOrgId(req), matterId);
     res.json({ snapshotId, analysis });
   } catch (err: any) {
     logger.error({ err }, "Error computing insurer pressure");
@@ -37,16 +62,16 @@ router.post("/pressure/:matterId/compute", async (req: Request, res: Response) =
 router.get("/pressure/:matterId", async (req: Request, res: Response) => {
   try {
     const matterId = parseInt(req.params.matterId as string);
-    const data = await insurerPressureEngine.getLatestSnapshot(ORG_ID, matterId);
+    const data = await insurerPressureEngine.getLatestSnapshot(getOrgId(req), matterId);
     res.json({ data });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch pressure snapshot" });
   }
 });
 
-router.get("/pressure/portfolio/view", async (_req: Request, res: Response) => {
+router.get("/pressure/portfolio/view", async (req: Request, res: Response) => {
   try {
-    const view = await insurerPressureEngine.getPortfolioPressureView(ORG_ID);
+    const view = await insurerPressureEngine.getPortfolioPressureView(getOrgId(req));
     res.json({ view });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch portfolio pressure view" });
@@ -56,7 +81,7 @@ router.get("/pressure/portfolio/view", async (_req: Request, res: Response) => {
 router.get("/pressure/carrier/patterns", async (req: Request, res: Response) => {
   try {
     const carrierName = req.query.carrier as string | undefined;
-    const patterns = await insurerPressureEngine.getCarrierPatterns(ORG_ID, carrierName);
+    const patterns = await insurerPressureEngine.getCarrierPatterns(getOrgId(req), carrierName);
     res.json({ patterns });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch carrier patterns" });
@@ -66,7 +91,7 @@ router.get("/pressure/carrier/patterns", async (req: Request, res: Response) => 
 router.get("/pressure/silence-windows", async (req: Request, res: Response) => {
   try {
     const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;
-    const windows = await insurerPressureEngine.getSilenceWindows(ORG_ID, matterId);
+    const windows = await insurerPressureEngine.getSilenceWindows(getOrgId(req), matterId);
     res.json({ windows });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch silence windows" });
@@ -75,8 +100,10 @@ router.get("/pressure/silence-windows", async (req: Request, res: Response) => {
 
 router.post("/pressure/:matterId/events", async (req: Request, res: Response) => {
   try {
+    const parsed = CarrierEventSchema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
     const matterId = parseInt(req.params.matterId as string);
-    await insurerPressureEngine.recordCarrierEvent(ORG_ID, matterId, req.body);
+    await insurerPressureEngine.recordCarrierEvent(getOrgId(req), matterId, parsed.data);
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to record carrier event" });
@@ -88,7 +115,7 @@ router.post("/pressure/:matterId/events", async (req: Request, res: Response) =>
 router.post("/friction/:matterId/compute", async (req: Request, res: Response) => {
   try {
     const matterId = parseInt(req.params.matterId as string);
-    const { snapshotId, analysis } = await settlementFrictionEngine.compute(ORG_ID, matterId);
+    const { snapshotId, analysis } = await settlementFrictionEngine.compute(getOrgId(req), matterId);
     res.json({ snapshotId, analysis });
   } catch (err: any) {
     logger.error({ err }, "Error computing settlement friction");
@@ -99,16 +126,16 @@ router.post("/friction/:matterId/compute", async (req: Request, res: Response) =
 router.get("/friction/:matterId", async (req: Request, res: Response) => {
   try {
     const matterId = parseInt(req.params.matterId as string);
-    const data = await settlementFrictionEngine.getLatestSnapshot(ORG_ID, matterId);
+    const data = await settlementFrictionEngine.getLatestSnapshot(getOrgId(req), matterId);
     res.json({ data });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch friction snapshot" });
   }
 });
 
-router.get("/friction/portfolio/view", async (_req: Request, res: Response) => {
+router.get("/friction/portfolio/view", async (req: Request, res: Response) => {
   try {
-    const view = await settlementFrictionEngine.getPortfolioFrictionView(ORG_ID);
+    const view = await settlementFrictionEngine.getPortfolioFrictionView(getOrgId(req));
     res.json({ view });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch portfolio friction view" });
@@ -118,7 +145,7 @@ router.get("/friction/portfolio/view", async (_req: Request, res: Response) => {
 router.get("/friction/:matterId/recommendations", async (req: Request, res: Response) => {
   try {
     const matterId = parseInt(req.params.matterId as string);
-    const recommendations = await settlementFrictionEngine.getMovementRecommendations(ORG_ID, matterId);
+    const recommendations = await settlementFrictionEngine.getMovementRecommendations(getOrgId(req), matterId);
     res.json({ recommendations });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch movement recommendations" });
@@ -128,8 +155,8 @@ router.get("/friction/:matterId/recommendations", async (req: Request, res: Resp
 router.post("/friction/recommendations/:id/accept", async (req: Request, res: Response) => {
   try {
     await db.update(pcMovementRecommendationsTable)
-      .set({ status: "accepted", acceptedBy: 1, acceptedAt: new Date() })
-      .where(and(eq(pcMovementRecommendationsTable.id, parseInt(req.params.id as string)), eq(pcMovementRecommendationsTable.orgId, ORG_ID)));
+      .set({ status: "accepted", acceptedBy: req.user!.id, acceptedAt: new Date() })
+      .where(and(eq(pcMovementRecommendationsTable.id, parseInt(req.params.id as string)), eq(pcMovementRecommendationsTable.orgId, getOrgId(req))));
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to accept recommendation" });
@@ -141,7 +168,7 @@ router.post("/friction/recommendations/:id/accept", async (req: Request, res: Re
 router.post("/forecasts/pilot-one/:matterId/compute", async (req: Request, res: Response) => {
   try {
     const matterId = parseInt(req.params.matterId as string);
-    const forecasts = await forecastExpanded.runForecastCycle(ORG_ID, matterId);
+    const forecasts = await forecastExpanded.runForecastCycle(getOrgId(req), matterId);
     res.json({ forecasts });
   } catch (err: any) {
     logger.error({ err }, "Error computing Pilot One forecasts");
@@ -152,7 +179,7 @@ router.post("/forecasts/pilot-one/:matterId/compute", async (req: Request, res: 
 router.get("/forecasts/pilot-one/:matterId/diff-view", async (req: Request, res: Response) => {
   try {
     const matterId = parseInt(req.params.matterId as string);
-    const diffView = await forecastExpanded.getForecastDiffView(ORG_ID, matterId);
+    const diffView = await forecastExpanded.getForecastDiffView(getOrgId(req), matterId);
     res.json(diffView);
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch forecast diff view" });
@@ -161,9 +188,9 @@ router.get("/forecasts/pilot-one/:matterId/diff-view", async (req: Request, res:
 
 /* ─── Portfolio Learning ──────────────────────────────────────────────── */
 
-router.post("/portfolio/run-learning", async (_req: Request, res: Response) => {
+router.post("/portfolio/run-learning", async (req: Request, res: Response) => {
   try {
-    await portfolioLearning.runFullPortfolioLearning(ORG_ID);
+    await portfolioLearning.runFullPortfolioLearning(getOrgId(req));
     res.json({ success: true, message: "Portfolio learning cycle complete" });
   } catch (err: any) {
     logger.error({ err }, "Error running portfolio learning");
@@ -174,16 +201,16 @@ router.post("/portfolio/run-learning", async (_req: Request, res: Response) => {
 router.get("/portfolio/benchmarks", async (req: Request, res: Response) => {
   try {
     const benchmarkType = req.query.type as string | undefined;
-    const benchmarks = await portfolioLearning.getBenchmarks(ORG_ID, benchmarkType);
+    const benchmarks = await portfolioLearning.getBenchmarks(getOrgId(req), benchmarkType);
     res.json({ benchmarks });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch benchmarks" });
   }
 });
 
-router.get("/portfolio/action-effectiveness", async (_req: Request, res: Response) => {
+router.get("/portfolio/action-effectiveness", async (req: Request, res: Response) => {
   try {
-    const effectiveness = await portfolioLearning.getActionEffectiveness(ORG_ID);
+    const effectiveness = await portfolioLearning.getActionEffectiveness(getOrgId(req));
     res.json({ effectiveness });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch action effectiveness" });
@@ -193,16 +220,16 @@ router.get("/portfolio/action-effectiveness", async (_req: Request, res: Respons
 router.get("/portfolio/cohorts", async (req: Request, res: Response) => {
   try {
     const cohortType = req.query.type as string | undefined;
-    const cohorts = await portfolioLearning.getMatterCohorts(ORG_ID, cohortType);
+    const cohorts = await portfolioLearning.getMatterCohorts(getOrgId(req), cohortType);
     res.json({ cohorts });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch matter cohorts" });
   }
 });
 
-router.get("/portfolio/watchlist", async (_req: Request, res: Response) => {
+router.get("/portfolio/watchlist", async (req: Request, res: Response) => {
   try {
-    const watchlist = await portfolioLearning.getManagerWatchlist(ORG_ID);
+    const watchlist = await portfolioLearning.getManagerWatchlist(getOrgId(req));
     res.json({ watchlist });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch manager watchlist" });
@@ -212,7 +239,7 @@ router.get("/portfolio/watchlist", async (_req: Request, res: Response) => {
 router.get("/portfolio/best-next-30/:userId", async (req: Request, res: Response) => {
   try {
     const userId = parseInt(req.params.userId as string);
-    const actions = await portfolioLearning.getBestNext30Minutes(ORG_ID, userId);
+    const actions = await portfolioLearning.getBestNext30Minutes(getOrgId(req), userId);
     res.json({ actions });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch best next 30 minutes" });
@@ -222,7 +249,7 @@ router.get("/portfolio/best-next-30/:userId", async (req: Request, res: Response
 router.post("/portfolio/quiet-risk/:matterId", async (req: Request, res: Response) => {
   try {
     const matterId = parseInt(req.params.matterId as string);
-    const result = await portfolioLearning.detectQuietRisk(ORG_ID, matterId);
+    const result = await portfolioLearning.detectQuietRisk(getOrgId(req), matterId);
     res.json(result);
   } catch (err: any) {
     res.status(500).json({ error: "Failed to detect quiet risk" });
@@ -242,9 +269,10 @@ router.get("/copilot/pilot-one/cards", (_req: Request, res: Response) => {
 
 router.post("/copilot/pilot-one/execute", async (req: Request, res: Response): Promise<void> => {
   try {
-    const { matterId, cardId } = req.body;
-    if (!matterId || !cardId) { res.status(400).json({ error: "matterId and cardId are required" }); return; }
-    const result = await copilotPilotOne.executeActionCard(ORG_ID, parseInt(matterId), cardId);
+    const parsed = PilotOneExecuteSchema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
+    const { matterId, cardId } = parsed.data;
+    const result = await copilotPilotOne.executeActionCard(getOrgId(req), matterId, cardId);
     res.json(result);
   } catch (err: any) {
     logger.error({ err }, "Error executing Pilot One action card");
@@ -254,10 +282,10 @@ router.post("/copilot/pilot-one/execute", async (req: Request, res: Response): P
 
 /* ─── Lawyer Life OS Boards ──────────────────────────────────────────── */
 
-router.get("/boards/pressure", async (_req: Request, res: Response) => {
+router.get("/boards/pressure", async (req: Request, res: Response) => {
   try {
-    const pressureView = await insurerPressureEngine.getPortfolioPressureView(ORG_ID);
-    const silenceWindows = await insurerPressureEngine.getSilenceWindows(ORG_ID);
+    const pressureView = await insurerPressureEngine.getPortfolioPressureView(getOrgId(req));
+    const silenceWindows = await insurerPressureEngine.getSilenceWindows(getOrgId(req));
     res.json({
       boardType: "pressure",
       title: "Pressure Board",
@@ -270,10 +298,10 @@ router.get("/boards/pressure", async (_req: Request, res: Response) => {
   }
 });
 
-router.get("/boards/friction", async (_req: Request, res: Response) => {
+router.get("/boards/friction", async (req: Request, res: Response) => {
   try {
-    const frictionView = await settlementFrictionEngine.getPortfolioFrictionView(ORG_ID);
-    const recommendations = await settlementFrictionEngine.getMovementRecommendations(ORG_ID);
+    const frictionView = await settlementFrictionEngine.getPortfolioFrictionView(getOrgId(req));
+    const recommendations = await settlementFrictionEngine.getMovementRecommendations(getOrgId(req));
     res.json({
       boardType: "friction",
       title: "Friction Board",
@@ -286,11 +314,11 @@ router.get("/boards/friction", async (_req: Request, res: Response) => {
   }
 });
 
-router.get("/boards/carrier-watch", async (_req: Request, res: Response) => {
+router.get("/boards/carrier-watch", async (req: Request, res: Response) => {
   try {
-    const silenceWindows = await insurerPressureEngine.getSilenceWindows(ORG_ID);
-    const patterns = await insurerPressureEngine.getCarrierPatterns(ORG_ID);
-    const pressureView = await insurerPressureEngine.getPortfolioPressureView(ORG_ID);
+    const silenceWindows = await insurerPressureEngine.getSilenceWindows(getOrgId(req));
+    const patterns = await insurerPressureEngine.getCarrierPatterns(getOrgId(req));
+    const pressureView = await insurerPressureEngine.getPortfolioPressureView(getOrgId(req));
     res.json({
       boardType: "carrier_watch",
       title: "Carrier Watch",
@@ -304,10 +332,10 @@ router.get("/boards/carrier-watch", async (_req: Request, res: Response) => {
   }
 });
 
-router.get("/boards/movement", async (_req: Request, res: Response) => {
+router.get("/boards/movement", async (req: Request, res: Response) => {
   try {
-    const frictionView = await settlementFrictionEngine.getPortfolioFrictionView(ORG_ID);
-    const recommendations = await settlementFrictionEngine.getMovementRecommendations(ORG_ID);
+    const frictionView = await settlementFrictionEngine.getPortfolioFrictionView(getOrgId(req));
+    const recommendations = await settlementFrictionEngine.getMovementRecommendations(getOrgId(req));
     const movingMatters = frictionView.filter(f => f.friction.direction === "falling" || f.friction.overallScore < 0.4);
     res.json({
       boardType: "movement",
@@ -322,14 +350,14 @@ router.get("/boards/movement", async (_req: Request, res: Response) => {
   }
 });
 
-router.get("/boards/today-enhanced", async (_req: Request, res: Response) => {
+router.get("/boards/today-enhanced", async (req: Request, res: Response) => {
   try {
     const [pressureView, frictionView, watchlist, bestActions, silenceWindows] = await Promise.all([
-      insurerPressureEngine.getPortfolioPressureView(ORG_ID),
-      settlementFrictionEngine.getPortfolioFrictionView(ORG_ID),
-      portfolioLearning.getManagerWatchlist(ORG_ID),
-      portfolioLearning.getBestNext30Minutes(ORG_ID, 1),
-      insurerPressureEngine.getSilenceWindows(ORG_ID),
+      insurerPressureEngine.getPortfolioPressureView(getOrgId(req)),
+      settlementFrictionEngine.getPortfolioFrictionView(getOrgId(req)),
+      portfolioLearning.getManagerWatchlist(getOrgId(req)),
+      portfolioLearning.getBestNext30Minutes(getOrgId(req), req.user!.id),
+      insurerPressureEngine.getSilenceWindows(getOrgId(req)),
     ]);
 
     res.json({
@@ -370,8 +398,8 @@ router.get("/worldline/signal-overlays", async (req: Request, res: Response) => 
   try {
     const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;
     const conditions = matterId
-      ? and(eq(pcWorldlineSignalOverlaysTable.orgId, ORG_ID), eq(pcWorldlineSignalOverlaysTable.matterId, matterId))
-      : eq(pcWorldlineSignalOverlaysTable.orgId, ORG_ID);
+      ? and(eq(pcWorldlineSignalOverlaysTable.orgId, getOrgId(req)), eq(pcWorldlineSignalOverlaysTable.matterId, matterId))
+      : eq(pcWorldlineSignalOverlaysTable.orgId, getOrgId(req));
     const overlays = await db.select().from(pcWorldlineSignalOverlaysTable).where(conditions).orderBy(desc(pcWorldlineSignalOverlaysTable.createdAt)).limit(50);
     res.json({ overlays });
   } catch (err: any) {
@@ -379,10 +407,10 @@ router.get("/worldline/signal-overlays", async (req: Request, res: Response) => 
   }
 });
 
-router.get("/worldline/weather", async (_req: Request, res: Response) => {
+router.get("/worldline/weather", async (req: Request, res: Response) => {
   try {
     const events = await db.select().from(pcWorldlineWeatherEventsTable)
-      .where(eq(pcWorldlineWeatherEventsTable.orgId, ORG_ID))
+      .where(eq(pcWorldlineWeatherEventsTable.orgId, getOrgId(req)))
       .orderBy(desc(pcWorldlineWeatherEventsTable.fetchedAt)).limit(20);
     res.json({ events });
   } catch (err: any) {
@@ -390,10 +418,10 @@ router.get("/worldline/weather", async (_req: Request, res: Response) => {
   }
 });
 
-router.get("/worldline/regulatory", async (_req: Request, res: Response) => {
+router.get("/worldline/regulatory", async (req: Request, res: Response) => {
   try {
     const events = await db.select().from(pcWorldlineRegulatoryEventsTable)
-      .where(eq(pcWorldlineRegulatoryEventsTable.orgId, ORG_ID))
+      .where(eq(pcWorldlineRegulatoryEventsTable.orgId, getOrgId(req)))
       .orderBy(desc(pcWorldlineRegulatoryEventsTable.fetchedAt)).limit(20);
     res.json({ events });
   } catch (err: any) {
@@ -405,8 +433,8 @@ router.get("/worldline/recovery-markers", async (req: Request, res: Response) =>
   try {
     const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;
     const conditions = matterId
-      ? and(eq(pcWorldlineRecoveryMarkersTable.orgId, ORG_ID), eq(pcWorldlineRecoveryMarkersTable.matterId, matterId))
-      : eq(pcWorldlineRecoveryMarkersTable.orgId, ORG_ID);
+      ? and(eq(pcWorldlineRecoveryMarkersTable.orgId, getOrgId(req)), eq(pcWorldlineRecoveryMarkersTable.matterId, matterId))
+      : eq(pcWorldlineRecoveryMarkersTable.orgId, getOrgId(req));
     const markers = await db.select().from(pcWorldlineRecoveryMarkersTable).where(conditions).orderBy(desc(pcWorldlineRecoveryMarkersTable.fetchedAt)).limit(20);
     res.json({ markers });
   } catch (err: any) {
@@ -416,15 +444,15 @@ router.get("/worldline/recovery-markers", async (req: Request, res: Response) =>
 
 /* ─── Admin Surfaces ──────────────────────────────────────────────────── */
 
-router.get("/admin/pressure", async (_req: Request, res: Response) => {
+router.get("/admin/pressure", requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
   try {
     const snapshots = await db.select().from(pcInsurerPressureSnapshotsTable)
-      .where(eq(pcInsurerPressureSnapshotsTable.orgId, ORG_ID))
+      .where(eq(pcInsurerPressureSnapshotsTable.orgId, getOrgId(req)))
       .orderBy(desc(pcInsurerPressureSnapshotsTable.computedAt)).limit(50);
     const requiresReview = snapshots.filter(s => s.requiresReview).length;
     const highPressure = snapshots.filter(s => s.overallScore >= 0.70).length;
     const silenceWindows = await db.select().from(pcCarrierSilenceWindowsTable)
-      .where(and(eq(pcCarrierSilenceWindowsTable.orgId, ORG_ID), eq(pcCarrierSilenceWindowsTable.isCurrent, true)));
+      .where(and(eq(pcCarrierSilenceWindowsTable.orgId, getOrgId(req)), eq(pcCarrierSilenceWindowsTable.isCurrent, true)));
     res.json({
       summary: { totalSnapshots: snapshots.length, requiresReview, highPressure, activeSilenceWindows: silenceWindows.length },
       recentSnapshots: snapshots.slice(0, 20),
@@ -435,15 +463,15 @@ router.get("/admin/pressure", async (_req: Request, res: Response) => {
   }
 });
 
-router.get("/admin/friction", async (_req: Request, res: Response) => {
+router.get("/admin/friction", requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
   try {
     const snapshots = await db.select().from(pcSettlementFrictionSnapshotsTable)
-      .where(eq(pcSettlementFrictionSnapshotsTable.orgId, ORG_ID))
+      .where(eq(pcSettlementFrictionSnapshotsTable.orgId, getOrgId(req)))
       .orderBy(desc(pcSettlementFrictionSnapshotsTable.computedAt)).limit(50);
     const requiresReview = snapshots.filter(s => s.requiresReview).length;
     const highFriction = snapshots.filter(s => s.overallScore >= 0.70).length;
     const recommendations = await db.select().from(pcMovementRecommendationsTable)
-      .where(and(eq(pcMovementRecommendationsTable.orgId, ORG_ID), eq(pcMovementRecommendationsTable.status, "suggested"))).limit(20);
+      .where(and(eq(pcMovementRecommendationsTable.orgId, getOrgId(req)), eq(pcMovementRecommendationsTable.status, "suggested"))).limit(20);
     res.json({
       summary: { totalSnapshots: snapshots.length, requiresReview, highFriction, pendingRecommendations: recommendations.length },
       recentSnapshots: snapshots.slice(0, 20),
@@ -454,13 +482,13 @@ router.get("/admin/friction", async (_req: Request, res: Response) => {
   }
 });
 
-router.get("/admin/portfolio-learning", async (_req: Request, res: Response) => {
+router.get("/admin/portfolio-learning", requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
   try {
     const [benchmarks, effectiveness, cohorts, teamLag] = await Promise.all([
-      db.select().from(pcPortfolioBenchmarkSnapshotsTable).where(eq(pcPortfolioBenchmarkSnapshotsTable.orgId, ORG_ID)).orderBy(desc(pcPortfolioBenchmarkSnapshotsTable.computedAt)).limit(20),
-      db.select().from(pcPortfolioActionEffectivenessTable).where(eq(pcPortfolioActionEffectivenessTable.orgId, ORG_ID)).limit(20),
-      db.select().from(pcPortfolioMatterCohortsTable).where(eq(pcPortfolioMatterCohortsTable.orgId, ORG_ID)).orderBy(desc(pcPortfolioMatterCohortsTable.computedAt)).limit(30),
-      db.select().from(pcPortfolioTeamLagMetricsTable).where(eq(pcPortfolioTeamLagMetricsTable.orgId, ORG_ID)).limit(20),
+      db.select().from(pcPortfolioBenchmarkSnapshotsTable).where(eq(pcPortfolioBenchmarkSnapshotsTable.orgId, getOrgId(req))).orderBy(desc(pcPortfolioBenchmarkSnapshotsTable.computedAt)).limit(20),
+      db.select().from(pcPortfolioActionEffectivenessTable).where(eq(pcPortfolioActionEffectivenessTable.orgId, getOrgId(req))).limit(20),
+      db.select().from(pcPortfolioMatterCohortsTable).where(eq(pcPortfolioMatterCohortsTable.orgId, getOrgId(req))).orderBy(desc(pcPortfolioMatterCohortsTable.computedAt)).limit(30),
+      db.select().from(pcPortfolioTeamLagMetricsTable).where(eq(pcPortfolioTeamLagMetricsTable.orgId, getOrgId(req))).limit(20),
     ]);
     res.json({ benchmarks, effectiveness, cohorts, teamLag });
   } catch (err: any) {
@@ -468,13 +496,13 @@ router.get("/admin/portfolio-learning", async (_req: Request, res: Response) => 
   }
 });
 
-router.get("/admin/worldline", async (_req: Request, res: Response) => {
+router.get("/admin/worldline", requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
   try {
     const [overlays, weather, regulatory, recovery] = await Promise.all([
-      db.select().from(pcWorldlineSignalOverlaysTable).where(eq(pcWorldlineSignalOverlaysTable.orgId, ORG_ID)).orderBy(desc(pcWorldlineSignalOverlaysTable.createdAt)).limit(20),
-      db.select().from(pcWorldlineWeatherEventsTable).where(eq(pcWorldlineWeatherEventsTable.orgId, ORG_ID)).orderBy(desc(pcWorldlineWeatherEventsTable.fetchedAt)).limit(10),
-      db.select().from(pcWorldlineRegulatoryEventsTable).where(eq(pcWorldlineRegulatoryEventsTable.orgId, ORG_ID)).orderBy(desc(pcWorldlineRegulatoryEventsTable.fetchedAt)).limit(10),
-      db.select().from(pcWorldlineRecoveryMarkersTable).where(eq(pcWorldlineRecoveryMarkersTable.orgId, ORG_ID)).orderBy(desc(pcWorldlineRecoveryMarkersTable.fetchedAt)).limit(10),
+      db.select().from(pcWorldlineSignalOverlaysTable).where(eq(pcWorldlineSignalOverlaysTable.orgId, getOrgId(req))).orderBy(desc(pcWorldlineSignalOverlaysTable.createdAt)).limit(20),
+      db.select().from(pcWorldlineWeatherEventsTable).where(eq(pcWorldlineWeatherEventsTable.orgId, getOrgId(req))).orderBy(desc(pcWorldlineWeatherEventsTable.fetchedAt)).limit(10),
+      db.select().from(pcWorldlineRegulatoryEventsTable).where(eq(pcWorldlineRegulatoryEventsTable.orgId, getOrgId(req))).orderBy(desc(pcWorldlineRegulatoryEventsTable.fetchedAt)).limit(10),
+      db.select().from(pcWorldlineRecoveryMarkersTable).where(eq(pcWorldlineRecoveryMarkersTable.orgId, getOrgId(req))).orderBy(desc(pcWorldlineRecoveryMarkersTable.fetchedAt)).limit(10),
     ]);
     res.json({
       summary: { signalOverlays: overlays.length, weatherEvents: weather.length, regulatoryEvents: regulatory.length, recoveryMarkers: recovery.length },
@@ -488,10 +516,10 @@ router.get("/admin/worldline", async (_req: Request, res: Response) => {
   }
 });
 
-router.get("/admin/quality", async (_req: Request, res: Response) => {
+router.get("/admin/quality", requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
   try {
     const quietRisks = await db.select().from(pcQuietRiskSnapshotsTable)
-      .where(eq(pcQuietRiskSnapshotsTable.orgId, ORG_ID))
+      .where(eq(pcQuietRiskSnapshotsTable.orgId, getOrgId(req)))
       .orderBy(desc(pcQuietRiskSnapshotsTable.riskScore)).limit(20);
     const highRiskCount = quietRisks.filter(r => r.riskScore >= 0.60).length;
     res.json({

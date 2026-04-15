@@ -1,4 +1,7 @@
 import { Router, Request, Response } from "express";
+import { z } from "zod";
+import { authMiddleware, requireRole } from "../middlewares/auth";
+import { tenantScope } from "../middlewares/tenant-scope";
 import { db } from "@szl-holdings/db";
 import { eq, and, desc, or, sql, isNull, not, gte } from "drizzle-orm";
 import {
@@ -10,7 +13,91 @@ import {
 import { logger } from "../lib/logger";
 
 const router = Router();
-const ORG_ID = 1;
+
+router.use(authMiddleware());
+router.use(tenantScope({ required: true }));
+
+const REVIEW_LIFECYCLE_STATES = ["new", "pending_review", "in_review", "approved", "rejected", "revised", "needs_evidence", "needs_partner_review", "needs_attorney_review", "assigned", "blocked", "exported", "closed"] as const;
+
+const ReviewItemCreateSchema = z.object({
+  matterId: z.number().int().positive(),
+  reviewWorkType: z.enum(["draft_review", "chronology_review", "evidence_review", "contradiction_review", "low_confidence_extraction_review", "safe_to_send_review", "safe_to_export_review", "recovery_lien_review", "approval_preparation_review"]),
+  title: z.string().min(1).max(500),
+  description: z.string().max(5000).optional(),
+  sourceEntityType: z.string().max(100).optional(),
+  sourceEntityId: z.number().int().positive().optional(),
+  sourceLineage: z.string().max(2000).optional(),
+  isGenerated: z.boolean().optional(),
+  confidence: z.number().min(0).max(1).optional(),
+  privilegeSensitive: z.boolean().optional(),
+  whatThisIs: z.string().max(5000).optional(),
+  whyItsHere: z.string().max(5000).optional(),
+  whatSupportsIt: z.string().max(5000).optional(),
+  whatsMissing: z.string().max(5000).optional(),
+  whatRiskExists: z.string().max(5000).optional(),
+  whatActionClearsIt: z.string().max(5000).optional(),
+  whoIsWaiting: z.string().max(500).optional(),
+  whatItUnblocks: z.string().max(5000).optional(),
+  deadlineRiskScore: z.number().int().min(0).max(10).optional(),
+  settlementFrictionScore: z.number().int().min(0).max(10).optional(),
+  insurerPressureScore: z.number().int().min(0).max(10).optional(),
+  contradictionSeverityScore: z.number().int().min(0).max(10).optional(),
+  lowConfidenceScore: z.number().int().min(0).max(10).optional(),
+  exportSendDependencyScore: z.number().int().min(0).max(10).optional(),
+  workUnblockedScore: z.number().int().min(0).max(10).optional(),
+  partnerUrgencyScore: z.number().int().min(0).max(10).optional(),
+  clientFacingImpactScore: z.number().int().min(0).max(10).optional(),
+  recoveryLienDependencyScore: z.number().int().min(0).max(10).optional(),
+  slaHours: z.number().int().min(1).optional(),
+  dueBy: z.string().datetime().optional(),
+});
+
+const TransitionSchema = z.object({
+  toState: z.string().min(1).max(100),
+  reason: z.string().max(2000).optional(),
+});
+
+const ApproveActionSchema = z.object({
+  notes: z.string().max(5000).optional(),
+});
+
+const RejectActionSchema = z.object({
+  reason: z.string().max(2000).optional(),
+});
+
+const ReviseActionSchema = z.object({
+  notes: z.string().max(5000).optional(),
+});
+
+const EscalateActionSchema = z.object({
+  escalateTo: z.enum(["partner", "attorney"]),
+  reason: z.string().max(2000).optional(),
+});
+
+const AssignActionSchema = z.object({
+  assignTo: z.number().int().positive(),
+  role: z.enum(["primary", "attorney", "partner", "secondary"]).optional(),
+});
+
+const BlockActionSchema = z.object({
+  reason: z.string().max(2000).optional(),
+});
+
+const SupportRequestSchema = z.object({
+  request: z.string().min(1).max(5000),
+});
+
+const AddNoteSchema = z.object({
+  noteType: z.enum(["general", "missing_support_request", "escalation", "rejection_reason", "revision_request", "attorney_note", "partner_note"]).optional(),
+  content: z.string().min(1).max(10000),
+  isPrivileged: z.boolean().optional(),
+});
+
+function getOrgId(req: Request): number {
+  const orgId = req.tenantOrgId ?? req.user?.orgs[0]?.orgId;
+  if (!orgId) throw Object.assign(new Error("Organization context required"), { statusCode: 403 });
+  return orgId;
+}
 
 async function emitReviewAudit(opts: {
   orgId: number;
@@ -98,7 +185,7 @@ router.get("/review-desk/my-queue", async (req: Request, res: Response) => {
     const userId = req.query.userId ? parseInt(req.query.userId as string) : null;
     const items = await db.select().from(pcManagedReviewItemsTable)
       .where(and(
-        eq(pcManagedReviewItemsTable.orgId, ORG_ID),
+        eq(pcManagedReviewItemsTable.orgId, getOrgId(req)),
         userId ? eq(pcManagedReviewItemsTable.assignedTo, userId) : sql`true`,
         not(eq(pcManagedReviewItemsTable.lifecycleState, "closed")),
         not(eq(pcManagedReviewItemsTable.lifecycleState, "exported")),
@@ -112,11 +199,11 @@ router.get("/review-desk/my-queue", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/review-desk/team-queue", async (_req: Request, res: Response) => {
+router.get("/review-desk/team-queue", async (req: Request, res: Response) => {
   try {
     const items = await db.select().from(pcManagedReviewItemsTable)
       .where(and(
-        eq(pcManagedReviewItemsTable.orgId, ORG_ID),
+        eq(pcManagedReviewItemsTable.orgId, getOrgId(req)),
         not(eq(pcManagedReviewItemsTable.lifecycleState, "closed")),
         not(eq(pcManagedReviewItemsTable.lifecycleState, "exported")),
       ))
@@ -129,11 +216,11 @@ router.get("/review-desk/team-queue", async (_req: Request, res: Response) => {
   }
 });
 
-router.get("/review-desk/high-risk", async (_req: Request, res: Response) => {
+router.get("/review-desk/high-risk", async (req: Request, res: Response) => {
   try {
     const items = await db.select().from(pcManagedReviewItemsTable)
       .where(and(
-        eq(pcManagedReviewItemsTable.orgId, ORG_ID),
+        eq(pcManagedReviewItemsTable.orgId, getOrgId(req)),
         sql`${pcManagedReviewItemsTable.priorityScore} >= 0.70`,
         not(eq(pcManagedReviewItemsTable.lifecycleState, "closed")),
       ))
@@ -145,11 +232,11 @@ router.get("/review-desk/high-risk", async (_req: Request, res: Response) => {
   }
 });
 
-router.get("/review-desk/low-confidence", async (_req: Request, res: Response) => {
+router.get("/review-desk/low-confidence", async (req: Request, res: Response) => {
   try {
     const items = await db.select().from(pcManagedReviewItemsTable)
       .where(and(
-        eq(pcManagedReviewItemsTable.orgId, ORG_ID),
+        eq(pcManagedReviewItemsTable.orgId, getOrgId(req)),
         eq(pcManagedReviewItemsTable.reviewWorkType, "low_confidence_extraction_review"),
         not(eq(pcManagedReviewItemsTable.lifecycleState, "closed")),
       ))
@@ -161,11 +248,11 @@ router.get("/review-desk/low-confidence", async (_req: Request, res: Response) =
   }
 });
 
-router.get("/review-desk/contradiction", async (_req: Request, res: Response) => {
+router.get("/review-desk/contradiction", async (req: Request, res: Response) => {
   try {
     const items = await db.select().from(pcManagedReviewItemsTable)
       .where(and(
-        eq(pcManagedReviewItemsTable.orgId, ORG_ID),
+        eq(pcManagedReviewItemsTable.orgId, getOrgId(req)),
         eq(pcManagedReviewItemsTable.reviewWorkType, "contradiction_review"),
         not(eq(pcManagedReviewItemsTable.lifecycleState, "closed")),
       ))
@@ -177,11 +264,11 @@ router.get("/review-desk/contradiction", async (_req: Request, res: Response) =>
   }
 });
 
-router.get("/review-desk/needs-attorney", async (_req: Request, res: Response) => {
+router.get("/review-desk/needs-attorney", async (req: Request, res: Response) => {
   try {
     const items = await db.select().from(pcManagedReviewItemsTable)
       .where(and(
-        eq(pcManagedReviewItemsTable.orgId, ORG_ID),
+        eq(pcManagedReviewItemsTable.orgId, getOrgId(req)),
         eq(pcManagedReviewItemsTable.lifecycleState, "needs_attorney_review"),
       ))
       .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
@@ -192,11 +279,11 @@ router.get("/review-desk/needs-attorney", async (_req: Request, res: Response) =
   }
 });
 
-router.get("/review-desk/needs-partner", async (_req: Request, res: Response) => {
+router.get("/review-desk/needs-partner", async (req: Request, res: Response) => {
   try {
     const items = await db.select().from(pcManagedReviewItemsTable)
       .where(and(
-        eq(pcManagedReviewItemsTable.orgId, ORG_ID),
+        eq(pcManagedReviewItemsTable.orgId, getOrgId(req)),
         eq(pcManagedReviewItemsTable.lifecycleState, "needs_partner_review"),
       ))
       .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
@@ -207,11 +294,11 @@ router.get("/review-desk/needs-partner", async (_req: Request, res: Response) =>
   }
 });
 
-router.get("/review-desk/ready-to-export", async (_req: Request, res: Response) => {
+router.get("/review-desk/ready-to-export", async (req: Request, res: Response) => {
   try {
     const items = await db.select().from(pcManagedReviewItemsTable)
       .where(and(
-        eq(pcManagedReviewItemsTable.orgId, ORG_ID),
+        eq(pcManagedReviewItemsTable.orgId, getOrgId(req)),
         eq(pcManagedReviewItemsTable.lifecycleState, "approved"),
         eq(pcManagedReviewItemsTable.exportSafe, true),
       ))
@@ -223,11 +310,11 @@ router.get("/review-desk/ready-to-export", async (_req: Request, res: Response) 
   }
 });
 
-router.get("/review-desk/blocked", async (_req: Request, res: Response) => {
+router.get("/review-desk/blocked", async (req: Request, res: Response) => {
   try {
     const items = await db.select().from(pcManagedReviewItemsTable)
       .where(and(
-        eq(pcManagedReviewItemsTable.orgId, ORG_ID),
+        eq(pcManagedReviewItemsTable.orgId, getOrgId(req)),
         or(
           eq(pcManagedReviewItemsTable.lifecycleState, "blocked"),
           eq(pcManagedReviewItemsTable.lifecycleState, "needs_evidence"),
@@ -241,12 +328,12 @@ router.get("/review-desk/blocked", async (_req: Request, res: Response) => {
   }
 });
 
-router.get("/review-desk/overview", async (_req: Request, res: Response) => {
+router.get("/review-desk/overview", async (req: Request, res: Response) => {
   try {
     const [all, byState, slaBreaches] = await Promise.all([
       db.select().from(pcManagedReviewItemsTable)
         .where(and(
-          eq(pcManagedReviewItemsTable.orgId, ORG_ID),
+          eq(pcManagedReviewItemsTable.orgId, getOrgId(req)),
           not(eq(pcManagedReviewItemsTable.lifecycleState, "closed")),
         )),
       db.select({
@@ -255,13 +342,13 @@ router.get("/review-desk/overview", async (_req: Request, res: Response) => {
         count: sql<number>`count(*)::int`,
       }).from(pcManagedReviewItemsTable)
         .where(and(
-          eq(pcManagedReviewItemsTable.orgId, ORG_ID),
+          eq(pcManagedReviewItemsTable.orgId, getOrgId(req)),
           not(eq(pcManagedReviewItemsTable.lifecycleState, "closed")),
         ))
         .groupBy(pcManagedReviewItemsTable.lifecycleState, pcManagedReviewItemsTable.reviewWorkType),
       db.select().from(pcManagedReviewItemsTable)
         .where(and(
-          eq(pcManagedReviewItemsTable.orgId, ORG_ID),
+          eq(pcManagedReviewItemsTable.orgId, getOrgId(req)),
           not(isNull(pcManagedReviewItemsTable.slaBreachedAt)),
           not(eq(pcManagedReviewItemsTable.lifecycleState, "closed")),
         )),
@@ -301,7 +388,7 @@ router.get("/review-desk/items/:id", async (req: Request, res: Response) => {
     const id = parseInt(req.params.id as string);
     const [item, notes, assignments] = await Promise.all([
       db.select().from(pcManagedReviewItemsTable)
-        .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
+        .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, getOrgId(req))))
         .limit(1),
       db.select().from(pcManagedReviewNotesTable)
         .where(eq(pcManagedReviewNotesTable.reviewItemId, id))
@@ -318,6 +405,8 @@ router.get("/review-desk/items/:id", async (req: Request, res: Response) => {
 
 router.post("/review-desk/items", async (req: Request, res: Response) => {
   try {
+    const bodyParsed = ReviewItemCreateSchema.safeParse(req.body);
+    if (!bodyParsed.success) { res.status(400).json({ error: "Invalid request body", issues: bodyParsed.error.issues }); return; }
     const {
       matterId, reviewWorkType, title, description,
       sourceEntityType, sourceEntityId, sourceLineage, isGenerated,
@@ -328,7 +417,7 @@ router.post("/review-desk/items", async (req: Request, res: Response) => {
       contradictionSeverityScore, lowConfidenceScore, exportSendDependencyScore,
       workUnblockedScore, partnerUrgencyScore, clientFacingImpactScore,
       recoveryLienDependencyScore, slaHours, dueBy,
-    } = req.body;
+    } = bodyParsed.data;
 
     const scores = {
       deadlineRiskScore: deadlineRiskScore ?? 0,
@@ -345,7 +434,7 @@ router.post("/review-desk/items", async (req: Request, res: Response) => {
     const priorityScore = computePriorityScore(scores);
 
     const [item] = await db.insert(pcManagedReviewItemsTable).values({
-      orgId: ORG_ID,
+      orgId: getOrgId(req),
       matterId,
       reviewWorkType,
       title,
@@ -372,7 +461,7 @@ router.post("/review-desk/items", async (req: Request, res: Response) => {
     }).returning();
 
     await emitReviewAudit({
-      orgId: ORG_ID,
+      orgId: getOrgId(req),
       matterId,
       reviewItemId: item.id,
       action: "review_item_created",
@@ -390,11 +479,14 @@ router.post("/review-desk/items", async (req: Request, res: Response) => {
 router.post("/review-desk/items/:id/transition", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const { toState, actorId, reason } = req.body;
+    const parsed = TransitionSchema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
+    const { toState, reason } = parsed.data;
+    const actorId = req.user!.id;
     const validTransitions = buildValidTransitions();
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
-      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
+      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, getOrgId(req))))
       .limit(1);
     if (!item) return void res.status(404).json({ error: "Review item not found" });
 
@@ -432,7 +524,7 @@ router.post("/review-desk/items/:id/transition", async (req: Request, res: Respo
       .returning();
 
     await emitReviewAudit({
-      orgId: ORG_ID,
+      orgId: getOrgId(req),
       matterId: item.matterId,
       reviewItemId: id,
       actorId,
@@ -458,10 +550,13 @@ router.post("/review-desk/items/:id/approve", async (req: Request, res: Response
 router.post("/review-desk/items/:id/actions/approve", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const { actorId, notes } = req.body;
+    const parsed = ApproveActionSchema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
+    const { notes } = parsed.data;
+    const actorId = req.user!.id;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
-      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
+      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, getOrgId(req))))
       .limit(1);
     if (!item) return void res.status(404).json({ error: "Not found" });
 
@@ -477,12 +572,12 @@ router.post("/review-desk/items/:id/actions/approve", async (req: Request, res: 
 
     if (notes) {
       await db.insert(pcManagedReviewNotesTable).values({
-        orgId: ORG_ID, reviewItemId: id, noteType: "general",
+        orgId: getOrgId(req), reviewItemId: id, noteType: "general",
         content: notes, authorId: actorId,
       });
     }
 
-    await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_approved", fromState: item.lifecycleState, toState: "approved" });
+    await emitReviewAudit({ orgId: getOrgId(req), matterId: item.matterId, reviewItemId: id, actorId, action: "review_approved", fromState: item.lifecycleState, toState: "approved" });
     res.json({ item: updated });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to approve" });
@@ -492,10 +587,13 @@ router.post("/review-desk/items/:id/actions/approve", async (req: Request, res: 
 router.post("/review-desk/items/:id/actions/reject", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const { actorId, reason } = req.body;
+    const parsed = RejectActionSchema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
+    const { reason } = parsed.data;
+    const actorId = req.user!.id;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
-      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
+      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, getOrgId(req))))
       .limit(1);
     if (!item) return void res.status(404).json({ error: "Not found" });
 
@@ -506,12 +604,12 @@ router.post("/review-desk/items/:id/actions/reject", async (req: Request, res: R
 
     if (reason) {
       await db.insert(pcManagedReviewNotesTable).values({
-        orgId: ORG_ID, reviewItemId: id, noteType: "rejection_reason",
+        orgId: getOrgId(req), reviewItemId: id, noteType: "rejection_reason",
         content: reason, authorId: actorId,
       });
     }
 
-    await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_rejected", fromState: item.lifecycleState, toState: "rejected", details: { reason } });
+    await emitReviewAudit({ orgId: getOrgId(req), matterId: item.matterId, reviewItemId: id, actorId, action: "review_rejected", fromState: item.lifecycleState, toState: "rejected", details: { reason } });
     res.json({ item: updated });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to reject" });
@@ -521,10 +619,13 @@ router.post("/review-desk/items/:id/actions/reject", async (req: Request, res: R
 router.post("/review-desk/items/:id/actions/revise", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const { actorId, notes } = req.body;
+    const parsed = ReviseActionSchema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
+    const { notes } = parsed.data;
+    const actorId = req.user!.id;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
-      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
+      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, getOrgId(req))))
       .limit(1);
     if (!item) return void res.status(404).json({ error: "Not found" });
 
@@ -535,12 +636,12 @@ router.post("/review-desk/items/:id/actions/revise", async (req: Request, res: R
 
     if (notes) {
       await db.insert(pcManagedReviewNotesTable).values({
-        orgId: ORG_ID, reviewItemId: id, noteType: "revision_request",
+        orgId: getOrgId(req), reviewItemId: id, noteType: "revision_request",
         content: notes, authorId: actorId,
       });
     }
 
-    await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_revised", fromState: item.lifecycleState, toState: "revised" });
+    await emitReviewAudit({ orgId: getOrgId(req), matterId: item.matterId, reviewItemId: id, actorId, action: "review_revised", fromState: item.lifecycleState, toState: "revised" });
     res.json({ item: updated });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to revise" });
@@ -550,10 +651,13 @@ router.post("/review-desk/items/:id/actions/revise", async (req: Request, res: R
 router.post("/review-desk/items/:id/actions/escalate", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const { actorId, escalateTo, reason } = req.body;
+    const parsed = EscalateActionSchema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
+    const { escalateTo, reason } = parsed.data;
+    const actorId = req.user!.id;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
-      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
+      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, getOrgId(req))))
       .limit(1);
     if (!item) return void res.status(404).json({ error: "Not found" });
 
@@ -567,11 +671,11 @@ router.post("/review-desk/items/:id/actions/escalate", async (req: Request, res:
       .returning();
 
     await db.insert(pcManagedReviewNotesTable).values({
-      orgId: ORG_ID, reviewItemId: id, noteType: "escalation",
+      orgId: getOrgId(req), reviewItemId: id, noteType: "escalation",
       content: reason ?? `Escalated to ${escalateTo}`, authorId: actorId,
     });
 
-    await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_escalated", fromState: item.lifecycleState, toState: newState, details: { escalateTo, reason } });
+    await emitReviewAudit({ orgId: getOrgId(req), matterId: item.matterId, reviewItemId: id, actorId, action: "review_escalated", fromState: item.lifecycleState, toState: newState, details: { escalateTo, reason } });
     res.json({ item: updated });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to escalate" });
@@ -581,10 +685,13 @@ router.post("/review-desk/items/:id/actions/escalate", async (req: Request, res:
 router.post("/review-desk/items/:id/actions/assign", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const { actorId, assignTo, role } = req.body;
+    const parsed = AssignActionSchema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
+    const { assignTo, role } = parsed.data;
+    const actorId = req.user!.id;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
-      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
+      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, getOrgId(req))))
       .limit(1);
     if (!item) return void res.status(404).json({ error: "Not found" });
 
@@ -596,7 +703,7 @@ router.post("/review-desk/items/:id/actions/assign", async (req: Request, res: R
       ));
 
     await db.insert(pcManagedReviewAssignmentsTable).values({
-      orgId: ORG_ID, reviewItemId: id, assignedTo: assignTo,
+      orgId: getOrgId(req), reviewItemId: id, assignedTo: assignTo,
       assignedBy: actorId, role: role ?? "primary", status: "active",
     });
 
@@ -605,7 +712,7 @@ router.post("/review-desk/items/:id/actions/assign", async (req: Request, res: R
       .where(eq(pcManagedReviewItemsTable.id, id))
       .returning();
 
-    await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_assigned", fromState: item.lifecycleState, toState: "assigned", details: { assignTo, role } });
+    await emitReviewAudit({ orgId: getOrgId(req), matterId: item.matterId, reviewItemId: id, actorId, action: "review_assigned", fromState: item.lifecycleState, toState: "assigned", details: { assignTo, role } });
     res.json({ item: updated });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to assign" });
@@ -615,10 +722,13 @@ router.post("/review-desk/items/:id/actions/assign", async (req: Request, res: R
 router.post("/review-desk/items/:id/actions/block", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const { actorId, reason } = req.body;
+    const parsed = BlockActionSchema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
+    const { reason } = parsed.data;
+    const actorId = req.user!.id;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
-      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
+      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, getOrgId(req))))
       .limit(1);
     if (!item) return void res.status(404).json({ error: "Not found" });
 
@@ -627,7 +737,7 @@ router.post("/review-desk/items/:id/actions/block", async (req: Request, res: Re
       .where(eq(pcManagedReviewItemsTable.id, id))
       .returning();
 
-    await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_blocked", fromState: item.lifecycleState, toState: "blocked", details: { reason } });
+    await emitReviewAudit({ orgId: getOrgId(req), matterId: item.matterId, reviewItemId: id, actorId, action: "review_blocked", fromState: item.lifecycleState, toState: "blocked", details: { reason } });
     res.json({ item: updated });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to block" });
@@ -637,10 +747,13 @@ router.post("/review-desk/items/:id/actions/block", async (req: Request, res: Re
 router.post("/review-desk/items/:id/actions/request-support", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const { actorId, request } = req.body;
+    const parsed = SupportRequestSchema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
+    const { request } = parsed.data;
+    const actorId = req.user!.id;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
-      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
+      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, getOrgId(req))))
       .limit(1);
     if (!item) return void res.status(404).json({ error: "Not found" });
 
@@ -650,11 +763,11 @@ router.post("/review-desk/items/:id/actions/request-support", async (req: Reques
       .returning();
 
     await db.insert(pcManagedReviewNotesTable).values({
-      orgId: ORG_ID, reviewItemId: id, noteType: "missing_support_request",
+      orgId: getOrgId(req), reviewItemId: id, noteType: "missing_support_request",
       content: request, authorId: actorId,
     });
 
-    await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_support_requested", fromState: item.lifecycleState, toState: "needs_evidence" });
+    await emitReviewAudit({ orgId: getOrgId(req), matterId: item.matterId, reviewItemId: id, actorId, action: "review_support_requested", fromState: item.lifecycleState, toState: "needs_evidence" });
     res.json({ item: updated });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to request support" });
@@ -664,10 +777,10 @@ router.post("/review-desk/items/:id/actions/request-support", async (req: Reques
 router.post("/review-desk/items/:id/actions/generate-review-packet", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const { actorId } = req.body;
+    const actorId = req.user!.id;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
-      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
+      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, getOrgId(req))))
       .limit(1);
     if (!item) return void res.status(404).json({ error: "Not found" });
 
@@ -676,7 +789,7 @@ router.post("/review-desk/items/:id/actions/generate-review-packet", async (req:
       .set({ auditPacketRef: packetRef, updatedAt: new Date() })
       .where(eq(pcManagedReviewItemsTable.id, id));
 
-    await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_packet_generated", details: { packetRef } });
+    await emitReviewAudit({ orgId: getOrgId(req), matterId: item.matterId, reviewItemId: id, actorId, action: "review_packet_generated", details: { packetRef } });
     res.json({ packetRef, message: "Review packet generation queued" });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to generate review packet" });
@@ -686,10 +799,10 @@ router.post("/review-desk/items/:id/actions/generate-review-packet", async (req:
 router.post("/review-desk/items/:id/actions/export-packet", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const { actorId } = req.body;
+    const actorId = req.user!.id;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
-      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, ORG_ID)))
+      .where(and(eq(pcManagedReviewItemsTable.id, id), eq(pcManagedReviewItemsTable.orgId, getOrgId(req))))
       .limit(1);
     if (!item) return void res.status(404).json({ error: "Not found" });
 
@@ -706,7 +819,7 @@ router.post("/review-desk/items/:id/actions/export-packet", async (req: Request,
       .where(eq(pcManagedReviewItemsTable.id, id))
       .returning();
 
-    await emitReviewAudit({ orgId: ORG_ID, matterId: item.matterId, reviewItemId: id, actorId, action: "review_exported", fromState: "approved", toState: "exported", details: { exportRef } });
+    await emitReviewAudit({ orgId: getOrgId(req), matterId: item.matterId, reviewItemId: id, actorId, action: "review_exported", fromState: "approved", toState: "exported", details: { exportRef } });
     res.json({ item: updated, exportRef });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to create export packet" });
@@ -716,10 +829,13 @@ router.post("/review-desk/items/:id/actions/export-packet", async (req: Request,
 router.post("/review-desk/items/:id/notes", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const { authorId, noteType, content, isPrivileged } = req.body;
+    const parsed = AddNoteSchema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
+    const { noteType, content, isPrivileged } = parsed.data;
+    const authorId = req.user!.id;
 
     const [note] = await db.insert(pcManagedReviewNotesTable).values({
-      orgId: ORG_ID, reviewItemId: id, noteType: noteType ?? "general",
+      orgId: getOrgId(req), reviewItemId: id, noteType: noteType ?? "general",
       content, authorId, isPrivileged: isPrivileged ?? false,
     }).returning();
 
@@ -737,18 +853,18 @@ router.get("/review-desk/metrics", async (req: Request, res: Response) => {
     const [closed, all, breaches] = await Promise.all([
       db.select().from(pcManagedReviewItemsTable)
         .where(and(
-          eq(pcManagedReviewItemsTable.orgId, ORG_ID),
+          eq(pcManagedReviewItemsTable.orgId, getOrgId(req)),
           eq(pcManagedReviewItemsTable.lifecycleState, "closed"),
           gte(pcManagedReviewItemsTable.updatedAt, since),
         )),
       db.select().from(pcManagedReviewItemsTable)
         .where(and(
-          eq(pcManagedReviewItemsTable.orgId, ORG_ID),
+          eq(pcManagedReviewItemsTable.orgId, getOrgId(req)),
           not(eq(pcManagedReviewItemsTable.lifecycleState, "closed")),
         )),
       db.select().from(pcManagedReviewItemsTable)
         .where(and(
-          eq(pcManagedReviewItemsTable.orgId, ORG_ID),
+          eq(pcManagedReviewItemsTable.orgId, getOrgId(req)),
           not(isNull(pcManagedReviewItemsTable.slaBreachedAt)),
           gte(pcManagedReviewItemsTable.slaBreachedAt, since),
         )),
@@ -807,14 +923,14 @@ router.get("/review-desk/metrics", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/review-desk/admin", async (_req: Request, res: Response) => {
+router.get("/review-desk/admin", requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
   try {
     const [all, breaches] = await Promise.all([
       db.select().from(pcManagedReviewItemsTable)
-        .where(eq(pcManagedReviewItemsTable.orgId, ORG_ID)),
+        .where(eq(pcManagedReviewItemsTable.orgId, getOrgId(req))),
       db.select().from(pcManagedReviewItemsTable)
         .where(and(
-          eq(pcManagedReviewItemsTable.orgId, ORG_ID),
+          eq(pcManagedReviewItemsTable.orgId, getOrgId(req)),
           not(isNull(pcManagedReviewItemsTable.slaBreachedAt)),
           not(eq(pcManagedReviewItemsTable.lifecycleState, "closed")),
         )),
@@ -858,7 +974,7 @@ router.get("/review-desk/my-review", async (req: Request, res: Response) => {
 
     const items = await db.select().from(pcManagedReviewItemsTable)
       .where(and(
-        eq(pcManagedReviewItemsTable.orgId, ORG_ID),
+        eq(pcManagedReviewItemsTable.orgId, getOrgId(req)),
         userId ? eq(pcManagedReviewItemsTable.assignedTo, userId) : sql`true`,
         not(eq(pcManagedReviewItemsTable.lifecycleState, "closed")),
       ))
@@ -888,11 +1004,11 @@ router.get("/review-desk/my-review", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/review-desk/copilot/max-unblock", async (_req: Request, res: Response) => {
+router.get("/review-desk/copilot/max-unblock", async (req: Request, res: Response) => {
   try {
     const items = await db.select().from(pcManagedReviewItemsTable)
       .where(and(
-        eq(pcManagedReviewItemsTable.orgId, ORG_ID),
+        eq(pcManagedReviewItemsTable.orgId, getOrgId(req)),
         not(eq(pcManagedReviewItemsTable.lifecycleState, "closed")),
         not(eq(pcManagedReviewItemsTable.lifecycleState, "approved")),
         not(eq(pcManagedReviewItemsTable.lifecycleState, "exported")),

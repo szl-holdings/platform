@@ -21,7 +21,7 @@ interface HfTaskResult {
 class HuggingFaceGateway {
   async execute(req: HfTaskRequest): Promise<HfTaskResult> {
     const endpoint = req.options?.endpointId
-      ? (await db.select().from(pcHfEndpointsTable).where(eq(pcHfEndpointsTable.id, req.options.endpointId)))[0]
+      ? (await db.select().from(pcHfEndpointsTable).where(and(eq(pcHfEndpointsTable.id, req.options.endpointId), eq(pcHfEndpointsTable.orgId, req.orgId))))[0]
       : (await db.select().from(pcHfEndpointsTable).where(and(eq(pcHfEndpointsTable.orgId, req.orgId), eq(pcHfEndpointsTable.task, req.task as any), eq(pcHfEndpointsTable.status, "healthy"))).limit(1))[0];
 
     if (!endpoint) {

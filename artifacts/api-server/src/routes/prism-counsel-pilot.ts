@@ -1,4 +1,7 @@
 import { Router, Request, Response } from "express";
+import { z } from "zod";
+import { authMiddleware, requireRole } from "../middlewares/auth";
+import { tenantScope } from "../middlewares/tenant-scope";
 import { pilotIngestion } from "../services/prism-pilot-ingestion";
 import { pilotChangeTracker } from "../services/prism-pilot-change-tracker";
 import { pilotReview, pilotSignoff } from "../services/prism-pilot-review";
@@ -22,9 +25,68 @@ import {
 import { logger } from "../lib/logger";
 
 const router = Router();
-const ORG_ID = 1;
 
-router.get("/today", async (_req: Request, res: Response) => {
+router.use(authMiddleware());
+router.use(tenantScope({ required: true }));
+
+const ReviewStateSchema = z.object({
+  state: z.string().min(1).max(100),
+});
+
+const SignoffResolveSchema = z.object({
+  decision: z.enum(["approved", "rejected"]),
+});
+
+const ExportCreateSchema = z.object({
+  matterId: z.number().int().positive(),
+  exportType: z.string().min(1).max(100),
+  title: z.string().min(1).max(500),
+  reviewItemId: z.number().int().positive().optional(),
+});
+
+const ReviewCreateSchema = z.object({
+  matterId: z.number().int().positive(),
+  reviewType: z.string().min(1).max(100),
+  title: z.string().min(1).max(500),
+  draftContent: z.string().max(50000).optional(),
+  sourceSupport: z.unknown().optional(),
+  unsupportedStatements: z.unknown().optional(),
+  contradictionWarnings: z.unknown().optional(),
+  privilegeWarnings: z.unknown().optional(),
+});
+
+const MarkReadSchema = z.object({
+  ids: z.array(z.number().int().positive()).min(1).max(500),
+});
+
+const IngestEmailSchema = z.object({
+  matterId: z.number().int().positive(),
+  subject: z.string().min(1).max(500),
+  from: z.string().min(1).max(500),
+  body: z.string().max(100000),
+  receivedAt: z.string().datetime(),
+  attachments: z.array(z.object({
+    name: z.string().min(1).max(500),
+    type: z.string().min(1).max(100),
+    size: z.number().int().min(0),
+  })).optional(),
+});
+
+const IngestFileSchema = z.object({
+  matterId: z.number().int().positive(),
+  fileName: z.string().min(1).max(500),
+  fileType: z.string().min(1).max(100),
+  filePath: z.string().min(1).max(1000),
+  source: z.string().min(1).max(200),
+});
+
+function getOrgId(req: Request): number {
+  const orgId = req.tenantOrgId ?? req.user?.orgs[0]?.orgId;
+  if (!orgId) throw Object.assign(new Error("Organization context required"), { statusCode: 403 });
+  return orgId;
+}
+
+router.get("/today", async (req: Request, res: Response) => {
   try {
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const threeDays = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
@@ -33,27 +95,27 @@ router.get("/today", async (_req: Request, res: Response) => {
 
     const [recentChanges, matters, deadlines3, deadlines5, deadlines10, pendingSignoffs, pendingReviews, quietRisks, nextActions] = await Promise.all([
       db.select().from(pcChangeEventsTable)
-        .where(and(eq(pcChangeEventsTable.orgId, ORG_ID), gte(pcChangeEventsTable.createdAt, yesterday)))
+        .where(and(eq(pcChangeEventsTable.orgId, getOrgId(req)), gte(pcChangeEventsTable.createdAt, yesterday)))
         .orderBy(desc(pcChangeEventsTable.createdAt)).limit(50),
       db.select().from(pcMattersTable)
-        .where(and(eq(pcMattersTable.orgId, ORG_ID), eq(pcMattersTable.status, "active" as any))),
+        .where(and(eq(pcMattersTable.orgId, getOrgId(req)), eq(pcMattersTable.status, "active" as any))),
       db.select().from(pcDeadlinesTable)
-        .where(and(eq((pcDeadlinesTable as any).orgId, ORG_ID), sql`${pcDeadlinesTable.dueDate} <= ${threeDays}`, sql`${pcDeadlinesTable.dueDate} >= NOW()`, eq(pcDeadlinesTable.status, "active" as any)))
+        .where(and(eq((pcDeadlinesTable as any).orgId, getOrgId(req)), sql`${pcDeadlinesTable.dueDate} <= ${threeDays}`, sql`${pcDeadlinesTable.dueDate} >= NOW()`, eq(pcDeadlinesTable.status, "active" as any)))
         .orderBy(pcDeadlinesTable.dueDate),
       db.select().from(pcDeadlinesTable)
-        .where(and(eq((pcDeadlinesTable as any).orgId, ORG_ID), sql`${pcDeadlinesTable.dueDate} <= ${fiveDays}`, sql`${pcDeadlinesTable.dueDate} >= NOW()`, eq(pcDeadlinesTable.status, "active" as any)))
+        .where(and(eq((pcDeadlinesTable as any).orgId, getOrgId(req)), sql`${pcDeadlinesTable.dueDate} <= ${fiveDays}`, sql`${pcDeadlinesTable.dueDate} >= NOW()`, eq(pcDeadlinesTable.status, "active" as any)))
         .orderBy(pcDeadlinesTable.dueDate),
       db.select().from(pcDeadlinesTable)
-        .where(and(eq((pcDeadlinesTable as any).orgId, ORG_ID), sql`${pcDeadlinesTable.dueDate} <= ${tenDays}`, sql`${pcDeadlinesTable.dueDate} >= NOW()`, eq(pcDeadlinesTable.status, "active" as any)))
+        .where(and(eq((pcDeadlinesTable as any).orgId, getOrgId(req)), sql`${pcDeadlinesTable.dueDate} <= ${tenDays}`, sql`${pcDeadlinesTable.dueDate} >= NOW()`, eq(pcDeadlinesTable.status, "active" as any)))
         .orderBy(pcDeadlinesTable.dueDate),
       db.select().from(pcSignoffQueueTable)
-        .where(and(eq(pcSignoffQueueTable.orgId, ORG_ID), eq(pcSignoffQueueTable.status, "pending"))),
+        .where(and(eq(pcSignoffQueueTable.orgId, getOrgId(req)), eq(pcSignoffQueueTable.status, "pending"))),
       db.select().from(pcReviewItemsTable)
-        .where(and(eq(pcReviewItemsTable.orgId, ORG_ID), eq(pcReviewItemsTable.reviewState, "pending"))),
+        .where(and(eq(pcReviewItemsTable.orgId, getOrgId(req)), eq(pcReviewItemsTable.reviewState, "pending"))),
       db.select().from(pcQuietRisksTable)
-        .where(and(eq(pcQuietRisksTable.orgId, ORG_ID), eq(pcQuietRisksTable.isResolved, false))),
+        .where(and(eq(pcQuietRisksTable.orgId, getOrgId(req)), eq(pcQuietRisksTable.isResolved, false))),
       db.select().from(pcNextActionsTable)
-        .where(and(eq(pcNextActionsTable.orgId, ORG_ID), eq(pcNextActionsTable.status, "suggested")))
+        .where(and(eq(pcNextActionsTable.orgId, getOrgId(req)), eq(pcNextActionsTable.status, "suggested")))
         .orderBy(desc(pcNextActionsTable.impactScore)).limit(5),
     ]);
 
@@ -110,36 +172,36 @@ router.get("/today", async (_req: Request, res: Response) => {
   }
 });
 
-router.get("/today/brief", async (_req: Request, res: Response) => {
+router.get("/today/brief", async (req: Request, res: Response) => {
   try {
-    const brief = await pilotChangeTracker.getLatestBrief(ORG_ID, 1);
+    const brief = await pilotChangeTracker.getLatestBrief(getOrgId(req), req.user!.id);
     res.json({ brief });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch brief" });
   }
 });
 
-router.post("/today/brief/generate", async (_req: Request, res: Response) => {
+router.post("/today/brief/generate", async (req: Request, res: Response) => {
   try {
-    const brief = await pilotChangeTracker.generateMorningBrief(ORG_ID, 1);
+    const brief = await pilotChangeTracker.generateMorningBrief(getOrgId(req), req.user!.id);
     res.json({ brief });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to generate brief" });
   }
 });
 
-router.get("/today/quiet-risks", async (_req: Request, res: Response) => {
+router.get("/today/quiet-risks", async (req: Request, res: Response) => {
   try {
-    const risks = await pilotChangeTracker.getQuietRisks(ORG_ID);
+    const risks = await pilotChangeTracker.getQuietRisks(getOrgId(req));
     res.json({ risks });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch quiet risks" });
   }
 });
 
-router.post("/today/detect-risks", async (_req: Request, res: Response) => {
+router.post("/today/detect-risks", async (req: Request, res: Response) => {
   try {
-    const newRisks = await pilotChangeTracker.detectQuietRisks(ORG_ID);
+    const newRisks = await pilotChangeTracker.detectQuietRisks(getOrgId(req));
     res.json({ detected: newRisks.length, risks: newRisks });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to detect risks" });
@@ -149,7 +211,7 @@ router.post("/today/detect-risks", async (_req: Request, res: Response) => {
 router.get("/today/next-actions", async (req: Request, res: Response) => {
   try {
     const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;
-    const actions = await pilotChangeTracker.getNextActions(ORG_ID, matterId);
+    const actions = await pilotChangeTracker.getNextActions(getOrgId(req), matterId);
     res.json({ actions });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch next actions" });
@@ -158,7 +220,7 @@ router.get("/today/next-actions", async (req: Request, res: Response) => {
 
 router.post("/today/next-actions/:id/complete", async (req: Request, res: Response) => {
   try {
-    const result = await pilotChangeTracker.completeAction(ORG_ID, parseInt(req.params.id as string));
+    const result = await pilotChangeTracker.completeAction(getOrgId(req), parseInt(req.params.id as string));
     res.json({ action: result[0] });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to complete action" });
@@ -171,14 +233,14 @@ router.get("/matter-desk/:id", async (req: Request, res: Response) => {
     const yesterday = new Date(Date.now() - 48 * 60 * 60 * 1000);
 
     const [matter, changes, deadlines, reviews, signoffs, forecasts, quietRisks, nextActions] = await Promise.all([
-      db.select().from(pcMattersTable).where(and(eq(pcMattersTable.id, matterId), eq(pcMattersTable.orgId, ORG_ID))).limit(1),
-      db.select().from(pcChangeEventsTable).where(and(eq(pcChangeEventsTable.matterId, matterId), eq(pcChangeEventsTable.orgId, ORG_ID))).orderBy(desc(pcChangeEventsTable.createdAt)).limit(20),
-      db.select().from(pcDeadlinesTable).where(and(eq(pcDeadlinesTable.matterId, matterId), eq(pcDeadlinesTable.status, "active" as any))).orderBy(pcDeadlinesTable.dueDate).limit(10),
-      db.select().from(pcReviewItemsTable).where(and(eq(pcReviewItemsTable.matterId, matterId), eq(pcReviewItemsTable.orgId, ORG_ID))).orderBy(desc(pcReviewItemsTable.createdAt)).limit(10),
-      db.select().from(pcSignoffQueueTable).where(and(eq(pcSignoffQueueTable.matterId, matterId), eq(pcSignoffQueueTable.orgId, ORG_ID), eq(pcSignoffQueueTable.status, "pending"))),
+      db.select().from(pcMattersTable).where(and(eq(pcMattersTable.id, matterId), eq(pcMattersTable.orgId, getOrgId(req)))).limit(1),
+      db.select().from(pcChangeEventsTable).where(and(eq(pcChangeEventsTable.matterId, matterId), eq(pcChangeEventsTable.orgId, getOrgId(req)))).orderBy(desc(pcChangeEventsTable.createdAt)).limit(20),
+      db.select().from(pcDeadlinesTable).where(and(eq((pcDeadlinesTable as any).orgId, getOrgId(req)), eq(pcDeadlinesTable.matterId, matterId), eq(pcDeadlinesTable.status, "active" as any))).orderBy(pcDeadlinesTable.dueDate).limit(10),
+      db.select().from(pcReviewItemsTable).where(and(eq(pcReviewItemsTable.matterId, matterId), eq(pcReviewItemsTable.orgId, getOrgId(req)))).orderBy(desc(pcReviewItemsTable.createdAt)).limit(10),
+      db.select().from(pcSignoffQueueTable).where(and(eq(pcSignoffQueueTable.matterId, matterId), eq(pcSignoffQueueTable.orgId, getOrgId(req)), eq(pcSignoffQueueTable.status, "pending"))),
       db.select().from(pcForecastsTable).where(eq(pcForecastsTable.matterId, matterId)).orderBy(desc(pcForecastsTable.createdAt)).limit(5),
-      db.select().from(pcQuietRisksTable).where(and(eq(pcQuietRisksTable.matterId, matterId), eq(pcQuietRisksTable.isResolved, false))),
-      db.select().from(pcNextActionsTable).where(and(eq(pcNextActionsTable.matterId, matterId), eq(pcNextActionsTable.status, "suggested"))).orderBy(desc(pcNextActionsTable.impactScore)).limit(5),
+      db.select().from(pcQuietRisksTable).where(and(eq(pcQuietRisksTable.orgId, getOrgId(req)), eq(pcQuietRisksTable.matterId, matterId), eq(pcQuietRisksTable.isResolved, false))),
+      db.select().from(pcNextActionsTable).where(and(eq(pcNextActionsTable.orgId, getOrgId(req)), eq(pcNextActionsTable.matterId, matterId), eq(pcNextActionsTable.status, "suggested"))).orderBy(desc(pcNextActionsTable.impactScore)).limit(5),
     ]);
 
     if (!matter.length) return void res.status(404).json({ error: "Matter not found" });
@@ -211,7 +273,7 @@ router.get("/what-changed", async (req: Request, res: Response) => {
     const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;
     const hours = parseInt(req.query.hours as string) || 24;
     const since = new Date(Date.now() - hours * 60 * 60 * 1000);
-    const changes = await pilotChangeTracker.getChanges(ORG_ID, matterId, { since, limit: 100 });
+    const changes = await pilotChangeTracker.getChanges(getOrgId(req), matterId, { since, limit: 100 });
 
     const grouped: Record<string, any[]> = {};
     for (const c of changes) {
@@ -253,9 +315,10 @@ router.get("/what-changed", async (req: Request, res: Response) => {
 
 router.post("/what-changed/mark-read", async (req: Request, res: Response) => {
   try {
-    const { ids } = req.body;
-    if (!ids?.length) return void res.status(400).json({ error: "ids required" });
-    await pilotChangeTracker.markRead(ORG_ID, ids);
+    const parsed = MarkReadSchema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
+    const { ids } = parsed.data;
+    await pilotChangeTracker.markRead(getOrgId(req), ids);
     res.json({ marked: ids.length });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to mark read" });
@@ -266,7 +329,7 @@ router.get("/reviews", async (req: Request, res: Response) => {
   try {
     const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;
     const state = req.query.state as string | undefined;
-    const reviews = await pilotReview.getReviews(ORG_ID, { matterId, state });
+    const reviews = await pilotReview.getReviews(getOrgId(req), { matterId, state });
     res.json({ reviews });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch reviews" });
@@ -275,7 +338,7 @@ router.get("/reviews", async (req: Request, res: Response) => {
 
 router.get("/reviews/:id", async (req: Request, res: Response) => {
   try {
-    const review = await pilotReview.getReview(ORG_ID, parseInt(req.params.id as string));
+    const review = await pilotReview.getReview(getOrgId(req), parseInt(req.params.id as string));
     if (!review) return void res.status(404).json({ error: "Review not found" });
     res.json({ review });
   } catch (err: any) {
@@ -285,7 +348,9 @@ router.get("/reviews/:id", async (req: Request, res: Response) => {
 
 router.post("/reviews", async (req: Request, res: Response) => {
   try {
-    const review = await pilotReview.createReview(ORG_ID, req.body);
+    const parsed = ReviewCreateSchema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
+    const review = await pilotReview.createReview(getOrgId(req), parsed.data);
     res.json({ review });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to create review" });
@@ -294,8 +359,10 @@ router.post("/reviews", async (req: Request, res: Response) => {
 
 router.patch("/reviews/:id/state", async (req: Request, res: Response) => {
   try {
-    const { state } = req.body;
-    const review = await pilotReview.updateReviewState(ORG_ID, parseInt(req.params.id as string), state, 1);
+    const parsed = ReviewStateSchema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
+    const { state } = parsed.data;
+    const review = await pilotReview.updateReviewState(getOrgId(req), parseInt(req.params.id as string), state, req.user!.id);
     res.json({ review });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to update review state" });
@@ -304,7 +371,7 @@ router.patch("/reviews/:id/state", async (req: Request, res: Response) => {
 
 router.post("/reviews/:id/submit-signoff", async (req: Request, res: Response) => {
   try {
-    const signoff = await pilotReview.submitForSignoff(ORG_ID, parseInt(req.params.id as string), 1);
+    const signoff = await pilotReview.submitForSignoff(getOrgId(req), parseInt(req.params.id as string), req.user!.id);
     res.json({ signoff });
   } catch (err: any) {
     res.status(500).json({ error: err.message || "Failed to submit for signoff" });
@@ -314,16 +381,16 @@ router.post("/reviews/:id/submit-signoff", async (req: Request, res: Response) =
 router.get("/signoffs", async (req: Request, res: Response) => {
   try {
     const status = req.query.status as string | undefined;
-    const signoffs = await pilotSignoff.getAll(ORG_ID, { status });
+    const signoffs = await pilotSignoff.getAll(getOrgId(req), { status });
     res.json({ signoffs });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch signoffs" });
   }
 });
 
-router.get("/signoffs/pending", async (_req: Request, res: Response) => {
+router.get("/signoffs/pending", async (req: Request, res: Response) => {
   try {
-    const signoffs = await pilotSignoff.getPending(ORG_ID);
+    const signoffs = await pilotSignoff.getPending(getOrgId(req));
     res.json({ signoffs });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch pending signoffs" });
@@ -332,9 +399,10 @@ router.get("/signoffs/pending", async (_req: Request, res: Response) => {
 
 router.post("/signoffs/:id/resolve", async (req: Request, res: Response) => {
   try {
-    const { decision } = req.body;
-    if (!["approved", "rejected"].includes(decision)) return void res.status(400).json({ error: "decision must be approved or rejected" });
-    const result = await pilotSignoff.resolve(ORG_ID, parseInt(req.params.id as string), decision, 1);
+    const parsed = SignoffResolveSchema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
+    const { decision } = parsed.data;
+    const result = await pilotSignoff.resolve(getOrgId(req), parseInt(req.params.id as string), decision, req.user!.id);
     res.json({ signoff: result });
   } catch (err: any) {
     res.status(500).json({ error: err.message || "Failed to resolve signoff" });
@@ -344,7 +412,7 @@ router.post("/signoffs/:id/resolve", async (req: Request, res: Response) => {
 router.get("/exports", async (req: Request, res: Response) => {
   try {
     const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;
-    const exports = await pilotExport.getExports(ORG_ID, { matterId });
+    const exports = await pilotExport.getExports(getOrgId(req), { matterId });
     res.json({ exports });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch exports" });
@@ -353,7 +421,9 @@ router.get("/exports", async (req: Request, res: Response) => {
 
 router.post("/exports", async (req: Request, res: Response) => {
   try {
-    const exp = await pilotExport.generateExport(ORG_ID, { ...req.body, generatedBy: 1 });
+    const parsed = ExportCreateSchema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
+    const exp = await pilotExport.generateExport(getOrgId(req), { ...parsed.data, generatedBy: req.user!.id });
     res.json({ export: exp });
   } catch (err: any) {
     res.status(500).json({ error: err.message || "Failed to generate export" });
@@ -362,9 +432,9 @@ router.post("/exports", async (req: Request, res: Response) => {
 
 router.get("/exports/:id", async (req: Request, res: Response) => {
   try {
-    const exp = await pilotExport.getExport(ORG_ID, parseInt(req.params.id as string));
+    const exp = await pilotExport.getExport(getOrgId(req), parseInt(req.params.id as string));
     if (!exp) return void res.status(404).json({ error: "Export not found" });
-    await pilotExport.logAccess(ORG_ID, exp.id, 1);
+    await pilotExport.logAccess(getOrgId(req), exp.id, req.user!.id);
     res.json({ export: exp });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch export" });
@@ -373,7 +443,7 @@ router.get("/exports/:id", async (req: Request, res: Response) => {
 
 router.get("/exports/:id/content", async (req: Request, res: Response) => {
   try {
-    const content = await pilotExport.buildDocxContent(ORG_ID, parseInt(req.params.id as string));
+    const content = await pilotExport.buildDocxContent(getOrgId(req), parseInt(req.params.id as string));
     res.json(content);
   } catch (err: any) {
     res.status(500).json({ error: err.message || "Failed to build export content" });
@@ -382,7 +452,9 @@ router.get("/exports/:id/content", async (req: Request, res: Response) => {
 
 router.post("/ingest/email", async (req: Request, res: Response) => {
   try {
-    const job = await pilotIngestion.ingestEmail(ORG_ID, req.body);
+    const parsed = IngestEmailSchema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
+    const job = await pilotIngestion.ingestEmail(getOrgId(req), parsed.data);
     res.json({ job });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to ingest email" });
@@ -391,42 +463,44 @@ router.post("/ingest/email", async (req: Request, res: Response) => {
 
 router.post("/ingest/file", async (req: Request, res: Response) => {
   try {
-    const job = await pilotIngestion.ingestFile(ORG_ID, req.body);
+    const parsed = IngestFileSchema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
+    const job = await pilotIngestion.ingestFile(getOrgId(req), parsed.data);
     res.json({ job });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to ingest file" });
   }
 });
 
-router.get("/admin/jobs", async (req: Request, res: Response) => {
+router.get("/admin/jobs", requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
   try {
     const status = req.query.status as string | undefined;
-    const jobs = await pilotIngestion.getJobs(ORG_ID, { status });
-    const stats = await pilotIngestion.getJobStats(ORG_ID);
+    const jobs = await pilotIngestion.getJobs(getOrgId(req), { status });
+    const stats = await pilotIngestion.getJobStats(getOrgId(req));
     res.json({ jobs, stats });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch jobs" });
   }
 });
 
-router.get("/admin/connectors", async (_req: Request, res: Response) => {
+router.get("/admin/connectors", requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
   try {
     const connectors = await db.select().from(pcConnectorAccountsTable)
-      .where(eq(pcConnectorAccountsTable.orgId, ORG_ID));
+      .where(eq(pcConnectorAccountsTable.orgId, getOrgId(req)));
     res.json({ connectors });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to fetch connectors" });
   }
 });
 
-router.get("/admin/health", async (_req: Request, res: Response) => {
+router.get("/admin/health", requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
   try {
     const [connectors, jobStats, pendingReviews, pendingSignoffs, recentExports] = await Promise.all([
-      db.select().from(pcConnectorAccountsTable).where(eq(pcConnectorAccountsTable.orgId, ORG_ID)),
-      pilotIngestion.getJobStats(ORG_ID),
-      db.select().from(pcReviewItemsTable).where(and(eq(pcReviewItemsTable.orgId, ORG_ID), eq(pcReviewItemsTable.reviewState, "pending"))),
-      db.select().from(pcSignoffQueueTable).where(and(eq(pcSignoffQueueTable.orgId, ORG_ID), eq(pcSignoffQueueTable.status, "pending"))),
-      db.select().from(pcWordExportsTable).where(eq(pcWordExportsTable.orgId, ORG_ID)).orderBy(desc(pcWordExportsTable.createdAt)).limit(10),
+      db.select().from(pcConnectorAccountsTable).where(eq(pcConnectorAccountsTable.orgId, getOrgId(req))),
+      pilotIngestion.getJobStats(getOrgId(req)),
+      db.select().from(pcReviewItemsTable).where(and(eq(pcReviewItemsTable.orgId, getOrgId(req)), eq(pcReviewItemsTable.reviewState, "pending"))),
+      db.select().from(pcSignoffQueueTable).where(and(eq(pcSignoffQueueTable.orgId, getOrgId(req)), eq(pcSignoffQueueTable.status, "pending"))),
+      db.select().from(pcWordExportsTable).where(eq(pcWordExportsTable.orgId, getOrgId(req))).orderBy(desc(pcWordExportsTable.createdAt)).limit(10),
     ]);
 
     res.json({
@@ -444,6 +518,9 @@ router.get("/admin/health", async (_req: Request, res: Response) => {
 router.get("/forecasts/:matterId", async (req: Request, res: Response) => {
   try {
     const matterId = parseInt(req.params.matterId as string);
+    const [matter] = await db.select({ id: pcMattersTable.id }).from(pcMattersTable)
+      .where(and(eq(pcMattersTable.id, matterId), eq(pcMattersTable.orgId, getOrgId(req)))).limit(1);
+    if (!matter) return void res.status(404).json({ error: "Matter not found" });
     const forecasts = await db.select().from(pcForecastsTable)
       .where(eq(pcForecastsTable.matterId, matterId))
       .orderBy(desc(pcForecastsTable.createdAt));

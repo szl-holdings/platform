@@ -1,6 +1,9 @@
 import { Router } from "express";
+import { authMiddleware } from "../middlewares/auth";
 
 const router = Router();
+
+router.use(authMiddleware());
 
 router.get("/imperium/cloud/resources", (_req, res) => {
   res.json({

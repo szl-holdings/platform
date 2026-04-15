@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { authMiddleware } from "../middlewares/auth";
 import { sendSuccess, sendError } from "../lib/api-response";
 import { logger } from "../lib/logger";
 import { AGENT_REGISTRY } from "@szl-holdings/ai-engine/nuro-mesh";
@@ -15,6 +16,8 @@ import {
 import { getKnowledgeStoreStats, autoIngestFromDecisionStore } from "@szl-holdings/ai-engine/rag/knowledge-store";
 
 const router = Router();
+
+router.use(authMiddleware());
 
 router.get("/agent-autonomy/overview", async (_req, res) => {
   try {

@@ -20,8 +20,15 @@ export class PilotReviewService {
     privilegeWarnings?: any;
   }) {
     const result = await db.insert(pcReviewItemsTable).values({
+      matterId: data.matterId,
+      reviewType: data.reviewType,
+      title: data.title,
+      draftContent: data.draftContent,
+      sourceSupport: data.sourceSupport,
+      unsupportedStatements: data.unsupportedStatements,
+      contradictionWarnings: data.contradictionWarnings,
+      privilegeWarnings: data.privilegeWarnings,
       orgId,
-      ...data,
       reviewState: "pending",
       approvalState: "none",
       safeToSend: false,

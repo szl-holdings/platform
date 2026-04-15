@@ -1,6 +1,9 @@
 import { Router, type IRouter } from "express";
+import { authMiddleware } from "../middlewares/auth";
 
 const router: IRouter = Router();
+
+router.use(authMiddleware());
 
 const now = () => Date.now();
 
