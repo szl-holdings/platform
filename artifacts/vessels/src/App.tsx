@@ -180,6 +180,14 @@ const PiracySanctionsPage = lazy(() => import("@/pages/piracy-sanctions"));
 const WeatherRoutingPage = lazy(() => import("@/pages/weather-routing"));
 const BunkeringPage = lazy(() => import("@/pages/bunkering"));
 const VoyageCarbonPassport = lazy(() => import("@/pages/voyage-carbon-passport"));
+const CharterPartyPage = lazy(() => import("@/pages/charter-party"));
+const DemurragePage = lazy(() => import("@/pages/demurrage"));
+const FreightRatesPage = lazy(() => import("@/pages/freight-rates"));
+const StsDetectionPage = lazy(() => import("@/pages/sts-detection"));
+const CrewTrackerPage = lazy(() => import("@/pages/crew-tracker"));
+const BunkerOptimizerPage = lazy(() => import("@/pages/bunker-optimizer"));
+const PscInspectorPage = lazy(() => import("@/pages/psc-inspector"));
+const InsurancePanelPage = lazy(() => import("@/pages/insurance-panel"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -348,6 +356,26 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
         { id: "piracy-sanctions", label: "Piracy & Sanctions", href: "/piracy-sanctions", icon: <ShieldAlert className="w-3.5 h-3.5" /> },
         { id: "weather-routing", label: "Weather Routing", href: "/weather-routing", icon: <Waves className="w-3.5 h-3.5" /> },
         { id: "bunkering", label: "Bunkering Intelligence", href: "/bunkering", icon: <Fuel className="w-3.5 h-3.5" /> },
+      ],
+    },
+    {
+      id: "commercial",
+      label: "Commercial",
+      items: [
+        { id: "charter-party", label: "Charter Party Manager", href: "/charter-party", icon: <FileText className="w-3.5 h-3.5" /> },
+        { id: "demurrage", label: "Demurrage Calculator", href: "/demurrage", icon: <Calculator className="w-3.5 h-3.5" /> },
+        { id: "freight-rates", label: "Freight Rate Benchmarking", href: "/freight-rates", icon: <BarChart3 className="w-3.5 h-3.5" /> },
+        { id: "bunker-optimizer", label: "Bunker Optimizer", href: "/bunker-optimizer", icon: <Fuel className="w-3.5 h-3.5" /> },
+      ],
+    },
+    {
+      id: "compliance",
+      label: "Compliance & Crew",
+      items: [
+        { id: "crew-tracker", label: "Crew & Certification", href: "/crew-tracker", icon: <User className="w-3.5 h-3.5" /> },
+        { id: "psc-inspector", label: "PSC Inspector", href: "/psc-inspector", icon: <Shield className="w-3.5 h-3.5" /> },
+        { id: "sts-detection", label: "STS Transfer Detection", href: "/sts-detection", icon: <Radio className="w-3.5 h-3.5" /> },
+        { id: "insurance-panel", label: "Insurance & P&I", href: "/insurance-panel", icon: <ShieldAlert className="w-3.5 h-3.5" /> },
       ],
     },
     {
@@ -598,6 +626,14 @@ function DashboardRouter() {
         <Route path="/piracy-sanctions" component={PiracySanctionsPage} />
         <Route path="/weather-routing" component={WeatherRoutingPage} />
         <Route path="/bunkering" component={BunkeringPage} />
+        <Route path="/charter-party" component={CharterPartyPage} />
+        <Route path="/demurrage" component={DemurragePage} />
+        <Route path="/freight-rates" component={FreightRatesPage} />
+        <Route path="/sts-detection" component={StsDetectionPage} />
+        <Route path="/crew-tracker" component={CrewTrackerPage} />
+        <Route path="/bunker-optimizer" component={BunkerOptimizerPage} />
+        <Route path="/psc-inspector" component={PscInspectorPage} />
+        <Route path="/insurance-panel" component={InsurancePanelPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-sky-400/40">Page not found</p>
@@ -730,7 +766,11 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     location.startsWith("/predictive-maintenance-ml") || location.startsWith("/blockchain-bol") ||
     location.startsWith("/decarbonization") || location.startsWith("/port-twin") ||
     location.startsWith("/piracy-sanctions") || location.startsWith("/weather-routing") ||
-    location.startsWith("/bunkering");
+    location.startsWith("/bunkering") ||
+    location.startsWith("/charter-party") || location.startsWith("/demurrage") ||
+    location.startsWith("/freight-rates") || location.startsWith("/sts-detection") ||
+    location.startsWith("/crew-tracker") || location.startsWith("/bunker-optimizer") ||
+    location.startsWith("/psc-inspector") || location.startsWith("/insurance-panel");
 
   if (isDashboard) {
     return (
