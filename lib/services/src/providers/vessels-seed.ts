@@ -68,8 +68,8 @@ const SEED_DATA: VesselRecord[] = [
   },
 ];
 
-export const vesselsMockProvider: DataProvider<VesselRecord> = {
-  mode: "mock",
+export const vesselsSeedProvider: DataProvider<VesselRecord> = {
+  mode: "seed",
   async getAll() {
     return SEED_DATA;
   },

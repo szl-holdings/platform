@@ -4,7 +4,7 @@ import { Search, Filter, AlertTriangle, Clock, User, ArrowUp, ArrowDown, Minus, 
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
-import { tickets as fallbackTickets, type Ticket } from "@/data/mock-data";
+import { tickets as fallbackTickets, type Ticket } from "@/data/seed-data";
 import { apiFetch } from "@szl-holdings/shared-ui";
 
 interface ApiTicket {

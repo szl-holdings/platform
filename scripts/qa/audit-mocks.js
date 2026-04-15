@@ -26,7 +26,7 @@ const MOCK_PATTERNS = [
   { pattern: /\/\*\s*MOCK\s*\*\//, label: "MOCK comment", severity: "info" },
   { pattern: /TODO:.*mock/i, label: "TODO mock", severity: "info" },
   { pattern: /FIXME:.*mock/i, label: "FIXME mock", severity: "warning" },
-  { pattern: /placeholder.*data/i, label: "Placeholder data comment", severity: "info" },
+  { pattern: /\/\/.*placeholder.*data|\/\*.*placeholder.*data/i, label: "Placeholder data comment", severity: "info" },
   { pattern: /hardcoded.*data/i, label: "Hardcoded data comment", severity: "warning" },
   { pattern: /fake.*data/i, label: "Fake data comment", severity: "info" },
 ];

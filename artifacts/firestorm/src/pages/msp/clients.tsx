@@ -4,7 +4,7 @@ import { Search, Filter, ArrowUpDown, Building2, Monitor, Ticket, AlertTriangle,
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
-import { clients as fallbackClients, type Client } from "@/data/mock-data";
+import { clients as fallbackClients, type Client } from "@/data/seed-data";
 import { ExportButton } from "@szl-holdings/shared-ui/data-export";
 import { apiFetch } from "@szl-holdings/shared-ui";
 

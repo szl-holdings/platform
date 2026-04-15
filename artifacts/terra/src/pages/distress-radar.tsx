@@ -43,7 +43,7 @@ const SIGNAL_META: Record<SignalType, { label: string; icon: typeof AlertTriangl
   "ownership-change": { label: "Ownership Change", icon: Users, color: "text-sky-400", bg: "bg-sky-400/10 border-sky-400/20" },
 };
 
-const MOCK_PROPERTIES: RadarProperty[] = [
+const RADAR_PROPERTIES: RadarProperty[] = [
   {
     id: "r-001", address: "1847 Myrtle Ave", neighborhood: "Bushwick", borough: "Brooklyn",
     propertyType: "Multi-Family", estimatedValue: 1_850_000, distressScore: 94, marketAdvantage: 42,
@@ -382,17 +382,17 @@ export default function DistressRadar() {
   const [minScore, setMinScore] = useState(60);
 
   const filtered = useMemo(() => {
-    return MOCK_PROPERTIES
+    return RADAR_PROPERTIES
       .filter(p => p.distressScore >= minScore)
       .filter(p => signalFilter === "all" || p.signals.some(s => s.type === signalFilter))
       .sort((a, b) => b.distressScore - a.distressScore);
   }, [signalFilter, minScore]);
 
   const stats = useMemo(() => ({
-    critical: MOCK_PROPERTIES.filter(p => p.distressScore >= 90).length,
-    total: MOCK_PROPERTIES.length,
-    avgAdvantage: Math.round(MOCK_PROPERTIES.reduce((s, p) => s + p.marketAdvantage, 0) / MOCK_PROPERTIES.length),
-    totalValue: MOCK_PROPERTIES.reduce((s, p) => s + p.estimatedValue, 0),
+    critical: RADAR_PROPERTIES.filter(p => p.distressScore >= 90).length,
+    total: RADAR_PROPERTIES.length,
+    avgAdvantage: Math.round(RADAR_PROPERTIES.reduce((s, p) => s + p.marketAdvantage, 0) / RADAR_PROPERTIES.length),
+    totalValue: RADAR_PROPERTIES.reduce((s, p) => s + p.estimatedValue, 0),
   }), []);
 
   return (

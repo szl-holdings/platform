@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
-import type { VesselProfile } from "@/data/mock-data";
+import type { VesselProfile } from "@/data/types";
 import { useVessels, useFleetExceptions, useMaintenance } from "@/hooks/use-vessels-data";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import {

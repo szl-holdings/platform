@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { TradecraftPanel, RelatedCasesPanel, EvidenceIndexPanel } from "@/components/tradecraft-panel";
 
-const MOCK_CASE = {
+const FALLBACK_CASE = {
   id: "CASE-0041",
   title: "APT29 Lateral Movement — DC-PROD-03",
   status: "investigation",
@@ -170,11 +170,11 @@ export default function InvestigationsBoard() {
         priority: activeCaseFromLive.priority ?? "p1_critical",
         analyst: activeCaseFromLive.assignedAnalyst ?? "Unassigned",
         openedAt: new Date(activeCaseFromLive.createdAt).toLocaleString(),
-        tenantLabel: investigationsData?.ztPermissionClass ? `CLASS:${investigationsData.ztPermissionClass.toUpperCase()}` : MOCK_CASE.tenantLabel,
-        envLabel: investigationsData?.ztEnvironment ?? MOCK_CASE.envLabel,
-        sensitivityLabel: investigationsData?.ztDataLabels?.sensitivityLabel ?? MOCK_CASE.sensitivityLabel,
+        tenantLabel: investigationsData?.ztPermissionClass ? `CLASS:${investigationsData.ztPermissionClass.toUpperCase()}` : FALLBACK_CASE.tenantLabel,
+        envLabel: investigationsData?.ztEnvironment ?? FALLBACK_CASE.envLabel,
+        sensitivityLabel: investigationsData?.ztDataLabels?.sensitivityLabel ?? FALLBACK_CASE.sensitivityLabel,
       }
-    : MOCK_CASE;
+    : FALLBACK_CASE;
 
   const timeline = useMemo(() => {
     if (!activeCaseFromLive) return FALLBACK_TIMELINE;

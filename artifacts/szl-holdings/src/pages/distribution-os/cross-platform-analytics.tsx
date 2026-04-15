@@ -27,7 +27,7 @@ interface ContentPerformance {
   platforms: Record<string, { views: number; engagements: number; reach: number }>;
 }
 
-const MOCK_CONTENT: ContentPerformance[] = [
+const CONTENT_PERFORMANCE: ContentPerformance[] = [
   {
     id: 1,
     title: "Why Enterprise AI Adoption Fails (And How to Fix It)",
@@ -156,9 +156,9 @@ export default function CrossPlatformAnalyticsPage() {
   const [selectedPlatform, setSelectedPlatform] = useState<string>("all");
   const [expandedContent, setExpandedContent] = useState<number | null>(null);
 
-  const totalViews = MOCK_CONTENT.reduce((s, c) => s + c.totalViews, 0);
-  const totalEngagements = MOCK_CONTENT.reduce((s, c) => s + c.totalEngagements, 0);
-  const avgScore = Math.round(MOCK_CONTENT.reduce((s, c) => s + c.score, 0) / MOCK_CONTENT.length);
+  const totalViews = CONTENT_PERFORMANCE.reduce((s, c) => s + c.totalViews, 0);
+  const totalEngagements = CONTENT_PERFORMANCE.reduce((s, c) => s + c.totalEngagements, 0);
+  const avgScore = Math.round(CONTENT_PERFORMANCE.reduce((s, c) => s + c.score, 0) / CONTENT_PERFORMANCE.length);
 
   return (
     <DistributionOsLayout currentPath={location}>
@@ -207,8 +207,8 @@ export default function CrossPlatformAnalyticsPage() {
             </div>
             <div style={{ padding: "1rem 1.25rem", display: "flex", flexDirection: "column", gap: "0.875rem" }}>
               {PLATFORMS.map(platform => {
-                const totalForPlatform = MOCK_CONTENT.reduce((s, c) => s + (c.platforms[platform.id]?.views || 0), 0);
-                const totalReach = MOCK_CONTENT.reduce((s, c) => s + (c.platforms[platform.id]?.reach || 0), 0);
+                const totalForPlatform = CONTENT_PERFORMANCE.reduce((s, c) => s + (c.platforms[platform.id]?.views || 0), 0);
+                const totalReach = CONTENT_PERFORMANCE.reduce((s, c) => s + (c.platforms[platform.id]?.reach || 0), 0);
                 const pct = Math.round((totalForPlatform / totalViews) * 100);
                 return (
                   <div key={platform.id} style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
@@ -270,7 +270,7 @@ export default function CrossPlatformAnalyticsPage() {
             <span style={{ fontSize: "0.6875rem", color: "#4a4540" }}>Scored by cross-platform reach × engagement</span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
-            {MOCK_CONTENT.map((content, idx) => (
+            {CONTENT_PERFORMANCE.map((content, idx) => (
               <div key={content.id} style={{ borderBottom: "1px solid hsla(0,0%,100%,0.04)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "1rem 1.25rem", cursor: "pointer" }} onClick={() => setExpandedContent(expandedContent === content.id ? null : content.id)}>
                   <ScoreBadge score={content.score} />

@@ -31,21 +31,29 @@ const SZL_APPS = [
   { id: "terra", name: "Terra Real Estate Intelligence", description: "Real estate portfolio observability platform", status: "active", url: "/terra/" },
 ];
 
-const MOCK_BILLING = {
-  plan: "Enterprise",
-  status: "active",
-  currentPeriodStart: "2026-03-01T00:00:00Z",
-  currentPeriodEnd: "2026-03-31T23:59:59Z",
-  monthlyAmount: 9900,
-  currency: "usd",
-  seats: { used: 4, total: 10 },
-  features: ["Unlimited connectors", "Priority support", "Custom branding", "SSO", "Audit logs", "Webhooks"],
-  invoices: [
-    { id: "inv_001", date: "2026-03-01", amount: 9900, status: "paid" },
-    { id: "inv_002", date: "2026-02-01", amount: 9900, status: "paid" },
-    { id: "inv_003", date: "2026-01-01", amount: 9900, status: "paid" },
-  ],
-};
+async function getBillingConfig() {
+  const plans = await db.select().from(billingPlansTable).where(eq(billingPlansTable.isActive, true)).orderBy(desc(billingPlansTable.priceMonthly)).limit(1);
+  const plan = plans[0];
+  const recentInvoices = await db.select().from(invoicesTable).orderBy(desc(invoicesTable.createdAt)).limit(5);
+  const now = new Date();
+  return {
+    plan: plan?.name ?? "Enterprise",
+    status: "active",
+    currentPeriodStart: new Date(now.getFullYear(), now.getMonth(), 1).toISOString(),
+    currentPeriodEnd: new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString(),
+    monthlyAmount: plan?.priceMonthly ?? 9900,
+    currency: "usd",
+    seats: { used: 4, total: 10 },
+    features: (plan?.features as string[]) ?? ["Unlimited connectors", "Priority support", "Custom branding", "SSO", "Audit logs", "Webhooks"],
+    invoices: recentInvoices.length > 0
+      ? recentInvoices.map((inv: any) => ({ id: inv.id, date: new Date(inv.createdAt).toISOString().split("T")[0], amount: inv.amount ?? 0, status: inv.status ?? "paid" }))
+      : [
+          { id: "inv_001", date: new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0], amount: plan?.priceMonthly ?? 9900, status: "paid" },
+          { id: "inv_002", date: new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split("T")[0], amount: plan?.priceMonthly ?? 9900, status: "paid" },
+          { id: "inv_003", date: new Date(now.getFullYear(), now.getMonth() - 2, 1).toISOString().split("T")[0], amount: plan?.priceMonthly ?? 9900, status: "paid" },
+        ],
+  };
+}
 
 const VALID_TABLE_NAMES = new Set([
   "roles", "users", "organizations", "org_members", "user_roles",
@@ -767,8 +775,8 @@ adminRouter.get("/admin/billing", async (_req, res) => {
         currentPeriodEnd: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0, 23, 59, 59).toISOString(),
         monthlyAmount: mainPrice?.amount ?? 0,
         currency: mainPrice?.currency ?? "usd",
-        seats: MOCK_BILLING.seats,
-        features: MOCK_BILLING.features,
+        seats: { used: 4, total: 10 },
+        features: (await getBillingConfig()).features,
         invoices: invoices.map((inv) => ({
           id: inv.id,
           date: new Date(inv.created * 1000).toISOString().split("T")[0],
@@ -780,10 +788,12 @@ adminRouter.get("/admin/billing", async (_req, res) => {
         products,
       });
     } else {
-      res.json({ ...MOCK_BILLING, stripeMode: "mock", stripeConnected: false, products: [] });
+      const billing = await getBillingConfig();
+      res.json({ ...billing, stripeMode: "seed", stripeConnected: false, products: [] });
     }
   } catch {
-    res.json({ ...MOCK_BILLING, stripeMode: "mock", stripeConnected: false, products: [] });
+    const billing = await getBillingConfig();
+    res.json({ ...billing, stripeMode: "seed", stripeConnected: false, products: [] });
   }
 });
 

@@ -53,7 +53,7 @@ const STAGE_CONFIG: Record<PipelineStage, { label: string; color: string; step: 
   closed: { label: "Closed", color: "#22c55e", step: 6 },
 };
 
-const MOCK_PROPERTIES: DistressedProperty[] = [
+const PIPELINE_PROPERTIES: DistressedProperty[] = [
   {
     id: "dp-001", address: "247 W 116th St", borough: "Manhattan", class: "B", distressCategory: "foreclosure",
     stage: "diligence", distressScore: 91, estimatedValue: 4200000, distressDiscount: 32, debtBalance: 3100000,
@@ -210,13 +210,13 @@ export default function DistressPipelinePage() {
   const [search, setSearch] = useState("");
   const [sortBy] = useState<SortField>("distressScore");
 
-  const selectedProperty = MOCK_PROPERTIES.find((p) => p.id === selected);
-  const filtered = MOCK_PROPERTIES
+  const selectedProperty = PIPELINE_PROPERTIES.find((p) => p.id === selected);
+  const filtered = PIPELINE_PROPERTIES
     .filter((p) => search === "" || p.address.toLowerCase().includes(search.toLowerCase()) || p.borough.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => b[sortBy] - a[sortBy]);
 
-  const totalValue = MOCK_PROPERTIES.reduce((s, p) => s + p.estimatedValue, 0);
-  const avgDiscount = Math.round(MOCK_PROPERTIES.reduce((s, p) => s + p.distressDiscount, 0) / MOCK_PROPERTIES.length);
+  const totalValue = PIPELINE_PROPERTIES.reduce((s, p) => s + p.estimatedValue, 0);
+  const avgDiscount = Math.round(PIPELINE_PROPERTIES.reduce((s, p) => s + p.distressDiscount, 0) / PIPELINE_PROPERTIES.length);
 
   return (
     <div className="flex flex-col h-full overflow-hidden" style={{ background: BG.page }}>
@@ -225,7 +225,7 @@ export default function DistressPipelinePage() {
           <TrendingDown className="w-4 h-4" style={{ color: ACCENT }} />
           <span className="text-[13px] font-semibold" style={{ color: TEXT.primary }}>Distress Pipeline</span>
           <span className="rounded-full px-2 py-0.5 text-[10px]" style={{ background: `${ACCENT}18`, color: ACCENT }}>
-            {MOCK_PROPERTIES.length} active
+            {PIPELINE_PROPERTIES.length} active
           </span>
         </div>
         <div className="relative">
@@ -244,8 +244,8 @@ export default function DistressPipelinePage() {
         {[
           { label: "Pipeline value", value: formatCurrency(totalValue), color: ACCENT },
           { label: "Avg. discount", value: `-${avgDiscount}%`, color: "#22c55e" },
-          { label: "In diligence+", value: String(MOCK_PROPERTIES.filter((p) => ["diligence", "offer", "under_contract"].includes(p.stage)).length), color: "#7ba3d4" },
-          { label: "High-risk (score > 75)", value: String(MOCK_PROPERTIES.filter((p) => p.distressScore > 75).length), color: "#ef4444" },
+          { label: "In diligence+", value: String(PIPELINE_PROPERTIES.filter((p) => ["diligence", "offer", "under_contract"].includes(p.stage)).length), color: "#7ba3d4" },
+          { label: "High-risk (score > 75)", value: String(PIPELINE_PROPERTIES.filter((p) => p.distressScore > 75).length), color: "#ef4444" },
         ].map((s) => (
           <div key={s.label} className="px-4 py-3" style={{ background: BG.page }}>
             <p className="text-[10px] mb-1" style={{ color: TEXT.muted }}>{s.label}</p>

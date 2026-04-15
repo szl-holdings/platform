@@ -27,7 +27,7 @@ interface ReferralTier {
   achievers: number;
 }
 
-const MOCK_SUBSCRIBERS: Subscriber[] = [
+const SUBSCRIBER_DATA: Subscriber[] = [
   { id: 1, email: "stephen@szlholdings.com", source: "linkedin", segment: "power-user", interests: ["ai", "maritime"], joined: "2025-01-12", engagementScore: 98, referralCount: 5 },
   { id: 2, email: "alex.chen@techintel.io", source: "embed", segment: "engaged", interests: ["enterprise-tech", "ai"], joined: "2025-02-08", engagementScore: 82, referralCount: 2 },
   { id: 3, email: "marina.k@logisticsco.com", source: "x", segment: "engaged", interests: ["maritime", "supply-chain"], joined: "2025-03-01", engagementScore: 74, referralCount: 0 },
@@ -105,16 +105,16 @@ export default function GrowthEnginePage() {
 
   const referralLink = "https://szlholdings.com/r/STEPHEN42";
 
-  const filteredSubs = MOCK_SUBSCRIBERS.filter(s => {
+  const filteredSubs = SUBSCRIBER_DATA.filter(s => {
     if (filterSegment !== "all" && s.segment !== filterSegment) return false;
     if (filterSource !== "all" && s.source !== filterSource) return false;
     return true;
   });
 
-  const totalSubs = MOCK_SUBSCRIBERS.length;
-  const powerUsers = MOCK_SUBSCRIBERS.filter(s => s.segment === "power-user").length;
-  const referralSubs = MOCK_SUBSCRIBERS.filter(s => s.source === "referral").length;
-  const avgEngagement = Math.round(MOCK_SUBSCRIBERS.reduce((s, sub) => s + sub.engagementScore, 0) / MOCK_SUBSCRIBERS.length);
+  const totalSubs = SUBSCRIBER_DATA.length;
+  const powerUsers = SUBSCRIBER_DATA.filter(s => s.segment === "power-user").length;
+  const referralSubs = SUBSCRIBER_DATA.filter(s => s.source === "referral").length;
+  const avgEngagement = Math.round(SUBSCRIBER_DATA.reduce((s, sub) => s + sub.engagementScore, 0) / SUBSCRIBER_DATA.length);
 
   const TABS = [
     { key: "referrals" as const, label: "Referral Program", icon: Share2 },

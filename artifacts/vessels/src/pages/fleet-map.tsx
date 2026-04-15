@@ -2,7 +2,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import type * as mapboxgl from "mapbox-gl";
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Link } from "wouter";
-import { type VesselProfile } from "@/data/mock-data";
+import { type VesselProfile } from "@/data/types";
 import { useVessels, useFleetExceptions } from "@/hooks/use-vessels-data";
 import { useMapboxToken } from "@/hooks/use-mapbox-token";
 import { useQuery } from "@tanstack/react-query";

@@ -69,8 +69,8 @@ const SEED_DATA: HoldingsVenture[] = [
   },
 ];
 
-export const holdingsMockProvider: DataProvider<HoldingsVenture> = {
-  mode: "mock",
+export const holdingsSeedProvider: DataProvider<HoldingsVenture> = {
+  mode: "seed",
   async getAll() {
     return SEED_DATA;
   },

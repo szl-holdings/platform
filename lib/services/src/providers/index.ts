@@ -1,9 +1,10 @@
 export { type ProviderMode, type DataProvider, resolveProviderMode, createProvider } from "./factory.js";
-export { vesselsMockProvider, type VesselRecord } from "./vessels-mock.js";
-export { incaMockProvider, type IncaModel } from "./inca-mock.js";
-export { bookingMockProvider, type BookingAppointment } from "./booking-mock.js";
-export { holdingsMockProvider, type HoldingsVenture } from "./holdings-mock.js";
+export { vesselsSeedProvider, vesselsSeedProvider as vesselsMockProvider, type VesselRecord } from "./vessels-seed.js";
+export { incaSeedProvider, incaSeedProvider as incaMockProvider, type IncaModel } from "./inca-seed.js";
+export { bookingSeedProvider, bookingSeedProvider as bookingMockProvider, type BookingAppointment } from "./booking-seed.js";
+export { holdingsSeedProvider, holdingsSeedProvider as holdingsMockProvider, type HoldingsVenture } from "./holdings-seed.js";
 export {
+  mockData as vesselsDomainSeedData,
   mockData as vesselsDomainMockData,
   type VesselProfile,
   type MaintenanceLog,
@@ -15,7 +16,7 @@ export {
   type AIBriefing,
   type PredictiveMaintenance,
   type ForecastModule,
-} from "./vessels-domain-mock.js";
+} from "./vessels-domain-seed.js";
 export {
   clients as mspClients,
   tickets as mspTickets,
@@ -32,14 +33,14 @@ export {
   type Contract as MspContract,
   type Alert as MspAlert,
   type Technician as MspTechnician,
-} from "./msp-mock.js";
+} from "./msp-seed.js";
 export {
   signals as lyteSignals,
   incidents as lyteIncidents,
   recommendations as lyteRecommendations,
   playbooks as lytePlaybooks,
   commandCards as lyteCommandCards,
-} from "./lyte-mock.js";
+} from "./lyte-seed.js";
 export {
   mockPrograms,
   mockDimensions,
@@ -53,4 +54,4 @@ export {
   type Risk,
   type Alert as ReadinessAlert,
   type ScoreHistory,
-} from "./readiness-mock.js";
+} from "./readiness-seed.js";

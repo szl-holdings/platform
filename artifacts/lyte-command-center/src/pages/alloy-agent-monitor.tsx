@@ -47,7 +47,7 @@ interface MetricRow {
   color: string;
 }
 
-const MOCK_AGENTS: Agent[] = [
+const REGISTERED_AGENTS: Agent[] = [
   {
     id: "lyte-autonomous", name: "Lyte Autonomous Agent", status: "running",
     type: "Business Observability", uptime: "14d 6h", runsToday: 48, avgDuration: "1.4s",
@@ -259,16 +259,16 @@ type FilterValue = "all" | AgentStatus;
 export default function AlloyAgentMonitorPage() {
   const [selected, setSelected] = useState<string>("lyte-autonomous");
   const [filter, setFilter] = useState<FilterValue>("all");
-  const selectedAgent = MOCK_AGENTS.find((a) => a.id === selected);
+  const selectedAgent = REGISTERED_AGENTS.find((a) => a.id === selected);
 
   const statusCounts: Record<AgentStatus, number> = {
-    running: MOCK_AGENTS.filter((a) => a.status === "running").length,
-    idle: MOCK_AGENTS.filter((a) => a.status === "idle").length,
-    degraded: MOCK_AGENTS.filter((a) => a.status === "degraded").length,
-    stopped: MOCK_AGENTS.filter((a) => a.status === "stopped").length,
+    running: REGISTERED_AGENTS.filter((a) => a.status === "running").length,
+    idle: REGISTERED_AGENTS.filter((a) => a.status === "idle").length,
+    degraded: REGISTERED_AGENTS.filter((a) => a.status === "degraded").length,
+    stopped: REGISTERED_AGENTS.filter((a) => a.status === "stopped").length,
   };
 
-  const filtered = filter === "all" ? MOCK_AGENTS : MOCK_AGENTS.filter((a) => a.status === filter);
+  const filtered = filter === "all" ? REGISTERED_AGENTS : REGISTERED_AGENTS.filter((a) => a.status === filter);
   const filterOptions: FilterValue[] = ["all", "running", "idle", "degraded"];
 
   return (

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { api, type VoyageEconomics, type SanctionsScreening, type PortCall, type RosterVessel, type VesselDetail } from "@/lib/api";
-import type { VesselProfile } from "@/data/mock-data";
+import type { VesselProfile } from "@/data/types";
 
 type ExceptionType = "route_deviation" | "delay_risk" | "port_congestion" | "weather_disruption" | "maintenance_risk" | "fuel_anomaly" | "schedule_variance" | "security_alert" | "ais_dark" | "sanctions_match" | "overdue_arrival" | "inspection_failure";
 type ExceptionSeverity = "critical" | "high" | "watch" | "normal";

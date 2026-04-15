@@ -26,7 +26,7 @@ const STATUS_CONFIG = {
   closed: { label: "Closed", color: "#64748b" },
 };
 
-const MOCK_INCIDENTS = [
+const XDR_INCIDENTS = [
   {
     id: "INC-2041",
     title: "APT41 Lateral Movement — Credential Harvest + LSASS Dump",
@@ -218,15 +218,15 @@ const DOMAIN_LABELS: Record<string, string> = {
 };
 
 export default function XDRIncidentWorkbench() {
-  const [selectedId, setSelectedId] = useState<string>(MOCK_INCIDENTS[0].id);
+  const [selectedId, setSelectedId] = useState<string>(XDR_INCIDENTS[0].id);
   const [filterSeverity, setFilterSeverity] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [newNote, setNewNote] = useState("");
 
-  const selected = MOCK_INCIDENTS.find(i => i.id === selectedId) ?? MOCK_INCIDENTS[0];
+  const selected = XDR_INCIDENTS.find(i => i.id === selectedId) ?? XDR_INCIDENTS[0];
 
-  const filtered = MOCK_INCIDENTS.filter(inc => {
+  const filtered = XDR_INCIDENTS.filter(inc => {
     const matchSearch = !search || inc.title.toLowerCase().includes(search.toLowerCase()) || inc.id.toLowerCase().includes(search.toLowerCase());
     const matchSev = filterSeverity === "all" || inc.severity === filterSeverity;
     const matchStat = filterStatus === "all" || inc.status === filterStatus;

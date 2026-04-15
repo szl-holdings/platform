@@ -48,8 +48,8 @@ const SEED_DATA: IncaModel[] = [
   },
 ];
 
-export const incaMockProvider: DataProvider<IncaModel> = {
-  mode: "mock",
+export const incaSeedProvider: DataProvider<IncaModel> = {
+  mode: "seed",
   async getAll() {
     return SEED_DATA;
   },

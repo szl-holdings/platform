@@ -55,7 +55,7 @@ interface WebhookDelivery {
   duration: number;
 }
 
-const MOCK_DELIVERIES: WebhookDelivery[] = [
+const RECENT_DELIVERIES: WebhookDelivery[] = [
   { id: "1", webhookId: "1", event: "new_subscriber", statusCode: 200, timestamp: "2025-04-14T11:45:00Z", duration: 124 },
   { id: "2", webhookId: "2", event: "publish_complete", statusCode: 200, timestamp: "2025-04-14T09:15:00Z", duration: 89 },
   { id: "3", webhookId: "1", event: "engagement_milestone", statusCode: 500, timestamp: "2025-04-13T16:30:00Z", duration: 5002 },
@@ -553,7 +553,7 @@ export default function DeveloperApiPage() {
 
         {activeTab === "logs" && (
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-            {MOCK_DELIVERIES.map(delivery => (
+            {RECENT_DELIVERIES.map(delivery => (
               <div key={delivery.id} style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "0.875rem 1rem", background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.05)", borderRadius: "8px" }}>
                 <div style={{ width: 28, height: 28, borderRadius: "6px", background: delivery.statusCode < 300 ? "hsla(120,30%,40%,0.12)" : "hsla(0,60%,50%,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   {delivery.statusCode < 300 ? <CheckCircle2 size={14} style={{ color: "#5a9c5a" }} /> : <AlertCircle size={14} style={{ color: "#c45a4a" }} />}

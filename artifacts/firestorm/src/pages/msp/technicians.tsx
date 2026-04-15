@@ -3,7 +3,7 @@ import { User, CheckCircle2, Clock, Wrench, BarChart3 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
-import { technicians as fallbackTechnicians, type Technician } from "@/data/mock-data";
+import { technicians as fallbackTechnicians, type Technician } from "@/data/seed-data";
 import { apiFetch } from "@szl-holdings/shared-ui";
 
 interface ApiTechnician {

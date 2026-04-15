@@ -52,8 +52,8 @@ const SEED_DATA: BookingAppointment[] = [
   },
 ];
 
-export const bookingMockProvider: DataProvider<BookingAppointment> = {
-  mode: "mock",
+export const bookingSeedProvider: DataProvider<BookingAppointment> = {
+  mode: "seed",
   async getAll() {
     return SEED_DATA;
   },

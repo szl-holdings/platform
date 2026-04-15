@@ -13,7 +13,7 @@ import type {
   SanctionsRiskIndicator,
   ComplianceAlert,
   Fleet,
-} from "./mock-data";
+} from "./types";
 
 export interface DataProvider {
   getVessels(): Promise<VesselProfile[]>;
