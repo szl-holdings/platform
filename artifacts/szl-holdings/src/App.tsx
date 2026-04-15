@@ -192,6 +192,11 @@ const FundCompliancePage = lazy(() => import("@/pages/fund/compliance"));
 const FundLpCrmPage = lazy(() => import("@/pages/fund/lp-crm"));
 const FundBenchmarkingPage = lazy(() => import("@/pages/fund/benchmarking"));
 const FundCoInvestPage = lazy(() => import("@/pages/fund/co-invest"));
+const FundDataRoomPage = lazy(() => import("@/pages/fund/data-room"));
+const FundBoardMeetingsPage = lazy(() => import("@/pages/fund/board-meetings"));
+const FundEsgPage = lazy(() => import("@/pages/fund/esg"));
+const FundSecondaryMarketPage = lazy(() => import("@/pages/fund/secondary-market"));
+const FundNavDashboardPage = lazy(() => import("@/pages/fund/nav-dashboard"));
 
 const VentureIntelHubPage = lazy(() => import("@/pages/venture-intel-hub"));
 const VentureIntelHealthRadarPage = lazy(() => import("@/pages/venture-intel/health-radar"));
@@ -862,6 +867,21 @@ function App() {
             </Route>
             <Route path="/fund/co-invest">
               <RequireAuth><Suspense fallback={<PageLoader />}><FundCoInvestPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/fund/data-room">
+              <RequireAuth><Suspense fallback={<PageLoader />}><FundDataRoomPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/fund/board-meetings">
+              <RequireAuth><Suspense fallback={<PageLoader />}><FundBoardMeetingsPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/fund/esg">
+              <RequireAuth><Suspense fallback={<PageLoader />}><FundEsgPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/fund/secondary-market">
+              <RequireAuth><Suspense fallback={<PageLoader />}><FundSecondaryMarketPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/fund/nav-dashboard">
+              <RequireAuth><Suspense fallback={<PageLoader />}><FundNavDashboardPage /></Suspense></RequireAuth>
             </Route>
 
             <Route path="/venture-portfolio">

@@ -3,7 +3,8 @@ import { Link } from "wouter";
 import {
   Brain, FileText, Activity, Layers, TrendingUp, DollarSign,
   ShieldCheck, Users, BarChart3, GitMerge, ArrowRight, Cpu,
-  Zap, AlertTriangle, CheckCircle2,
+  Zap, AlertTriangle, CheckCircle2, FolderOpen, Calendar, Leaf,
+  ArrowLeftRight,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -99,6 +100,51 @@ const MODULES = [
     href: "/fund/co-invest",
     stats: [{ label: "Active SPVs", value: "4" }, { label: "Co-Investors", value: "11" }, { label: "SPV Capital", value: "$12.8M" }],
     badge: "SPV Engine",
+  },
+  {
+    icon: FolderOpen,
+    color: "#d4a054",
+    title: "Virtual Data Room",
+    subtitle: "Permission-controlled document repository for due diligence & reporting",
+    href: "/fund/data-room",
+    stats: [{ label: "Folders", value: "6" }, { label: "Documents", value: "67" }, { label: "30d Views", value: "504" }],
+    badge: "Secure VDR",
+  },
+  {
+    icon: Calendar,
+    color: "#8b7ac8",
+    title: "Board Meeting Manager",
+    subtitle: "Schedule meetings, materials, action items & resolutions",
+    href: "/fund/board-meetings",
+    stats: [{ label: "Upcoming", value: "2" }, { label: "Open Actions", value: "7" }, { label: "Resolutions", value: "6" }],
+    badge: "Governance",
+  },
+  {
+    icon: Leaf,
+    color: "#6aaa72",
+    title: "ESG & Impact Scoring",
+    subtitle: "Per-company ESG scores, DEI metrics, carbon tracking & LP reports",
+    href: "/fund/esg",
+    stats: [{ label: "Avg. Score", value: "80/100" }, { label: "Improving", value: "4/6 cos" }, { label: "Carbon", value: "504t" }],
+    badge: "Impact",
+  },
+  {
+    icon: ArrowLeftRight,
+    color: "#4a90b8",
+    title: "Secondary Market",
+    subtitle: "LP interest transfers with ROFR workflow & cap table automation",
+    href: "/fund/secondary-market",
+    stats: [{ label: "Pending", value: "3" }, { label: "Completed", value: "1" }, { label: "Avg Discount", value: "14.2%" }],
+    badge: "LP Liquidity",
+  },
+  {
+    icon: BarChart3,
+    color: "#d4a054",
+    title: "Fund Accounting & NAV",
+    subtitle: "Mark-to-market NAV, fee calculations, carry accruals & LP reporting",
+    href: "/fund/nav-dashboard",
+    stats: [{ label: "Fund NAV", value: "$84.2M" }, { label: "TVPI", value: "2.10×" }, { label: "Carry", value: "$488K" }],
+    badge: "Accounting",
   },
 ];
 
