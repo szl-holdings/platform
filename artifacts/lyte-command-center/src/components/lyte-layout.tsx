@@ -8,7 +8,8 @@ import {
   AlertTriangle, Brain, Radio, Workflow, Inbox, Search, UserCheck,
   ChevronRight, Gauge, BarChart3, LayoutDashboard, Download, Clapperboard, Power,
   GitBranch, Send, Cpu, TrendingUp, DollarSign, RotateCcw, Calculator,
-  Bot, Monitor, Building, BookOpen, Layers, Calendar, BellOff, Code
+  Bot, Monitor, Building, BookOpen, Layers, Calendar, BellOff, Code,
+  Target, Globe, Phone
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, useSandboxMode, EnvironmentLabel, type OnboardingConfig } from "@szl-holdings/shared-ui";
 import { useDemoMode } from "@/lib/demo-mode";
@@ -123,14 +124,25 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: "Observability",
+    items: [
+      { href: "/slo", label: "SLO / SLI Management", icon: Target },
+      { href: "/finops", label: "FinOps & Cloud Cost", icon: DollarSign },
+      { href: "/tracing", label: "Distributed Tracing", icon: GitBranch },
+      { href: "/logs", label: "Log Analytics", icon: Database },
+      { href: "/on-call", label: "On-Call Management", icon: Phone },
+      { href: "/change-management", label: "Change Intelligence", icon: Calendar },
+      { href: "/synthetic", label: "Synthetic Monitoring", icon: Globe },
+      { href: "/capacity-planning", label: "Capacity Planning", icon: Layers },
+    ],
+  },
+  {
     label: "Autonomous NOC",
     items: [
       { href: "/autonomous-noc", label: "Autonomous NOC", icon: Bot },
       { href: "/noise-reduction", label: "Noise Reduction", icon: BellOff },
       { href: "/knowledge-graph", label: "Knowledge Graph", icon: Network },
       { href: "/runbook-studio", label: "Runbook Studio", icon: BookOpen },
-      { href: "/change-management", label: "Change Management", icon: Calendar },
-      { href: "/capacity-planning", label: "Capacity Planning", icon: Layers },
       { href: "/dex", label: "DEX Scoring", icon: Monitor },
       { href: "/msp-command", label: "MSP Command", icon: Building },
       { href: "/dev-feedback", label: "Dev Feedback", icon: Code },

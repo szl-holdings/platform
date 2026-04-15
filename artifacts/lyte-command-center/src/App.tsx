@@ -149,6 +149,11 @@ const RunbookStudio = lazy(() => import("@/pages/runbook-studio"));
 const CapacityPlanning = lazy(() => import("@/pages/capacity-planning"));
 const ChangeManagement = lazy(() => import("@/pages/change-management"));
 const NoiseReduction = lazy(() => import("@/pages/noise-reduction"));
+const SLOManagement = lazy(() => import("@/pages/slo-management"));
+const FinOps = lazy(() => import("@/pages/finops"));
+const DistributedTracing = lazy(() => import("@/pages/distributed-tracing"));
+const OnCallCenter = lazy(() => import("@/pages/oncall-center"));
+const SyntheticMonitoring = lazy(() => import("@/pages/synthetic-monitoring"));
 const KnowledgeGraph = lazy(() => import("@/pages/knowledge-graph"));
 const DevFeedback = lazy(() => import("@/pages/dev-feedback"));
 const SelfHealingConfidence = lazy(() => import("@/pages/self-healing-confidence"));
@@ -280,6 +285,12 @@ function PrivateRouter() {
         <Route path="/knowledge-graph" component={KnowledgeGraph} />
         <Route path="/dev-feedback" component={DevFeedback} />
         <Route path="/self-healing-confidence" component={SelfHealingConfidence} />
+        {/* Best-in-class AIOps & Observability */}
+        <Route path="/slo" component={SLOManagement} />
+        <Route path="/finops" component={FinOps} />
+        <Route path="/tracing" component={DistributedTracing} />
+        <Route path="/on-call" component={OnCallCenter} />
+        <Route path="/synthetic" component={SyntheticMonitoring} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>
@@ -324,7 +335,12 @@ const lyteCommands: CommandItem[] = [
   { id: "nav-dex", label: "DEX Scoring", icon: "🖥️", group: "Autonomous NOC", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/dex"); } },
   { id: "nav-msp-command", label: "Multi-Tenant MSP Command", icon: "🏢", group: "Autonomous NOC", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/msp-command"); } },
   { id: "nav-dev-feedback", label: "Observability Dev Feedback", icon: "💻", group: "Autonomous NOC", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/dev-feedback"); } },
-  { id: "nav-self-healing", label: "Self-Healing Confidence Index", icon: "🩺", group: "Innovation Engine", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/self-healing-confidence"); } },
+  { id: "nav-self-healing-confidence", label: "Self-Healing Confidence Index", icon: "🩺", group: "Innovation Engine", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/self-healing-confidence"); } },
+  { id: "nav-slo", label: "SLO / SLI Management", icon: "🎯", group: "Observability", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/slo"); } },
+  { id: "nav-finops", label: "FinOps & Cloud Cost Intelligence", icon: "💰", group: "Observability", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/finops"); } },
+  { id: "nav-tracing", label: "Distributed Tracing Visualizer", icon: "🔍", group: "Observability", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/tracing"); } },
+  { id: "nav-on-call", label: "On-Call Management", icon: "📟", group: "Observability", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/on-call"); } },
+  { id: "nav-synthetic", label: "Synthetic Monitoring", icon: "🌐", group: "Observability", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/synthetic"); } },
   ...createBaselineWebActions(
     (path) => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, path); },
     {
