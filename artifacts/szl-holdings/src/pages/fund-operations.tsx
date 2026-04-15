@@ -48,6 +48,7 @@ type SummaryData = {
 
 type PortfolioFinancial = {
   id: number; companySlug: string; companyName: string; periodLabel: string;
+  periodStart: string; periodEnd: string; periodType: string;
   revenue: string | null; burnRate: string | null; cashAndEquivalents: string | null;
   runwayMonths: string | null; ebitda: string | null; netIncome: string | null;
   grossProfit: string | null; operatingExpenses: string | null;
@@ -70,6 +71,7 @@ type CapTableSummary = {
 
 type LpReport = {
   id: number; reportType: string; reportingPeriod: string; status: string;
+  periodStart: string; periodEnd: string;
   netIrr: string | null; tvpi: string | null; dpi: string | null; rvpi: string | null;
   grossIrr: string | null; fundNav: string | null; totalCommitments: string | null;
   calledCapital: string | null; distributedCapital: string | null;
@@ -178,21 +180,48 @@ function ChartTooltipContent({ active, payload, label }: { active?: boolean; pay
   );
 }
 
+function derivePeriodDates(periodType: string, year: string, periodValue: string): { start: string; end: string; label: string } {
+  const y = parseInt(year, 10);
+  if (periodType === "monthly") {
+    const m = parseInt(periodValue, 10);
+    const lastDay = new Date(y, m, 0).getDate();
+    const monthName = new Date(y, m - 1, 1).toLocaleString("en-US", { month: "short" });
+    return {
+      start: `${y}-${String(m).padStart(2, "0")}-01`,
+      end: `${y}-${String(m).padStart(2, "0")}-${lastDay}`,
+      label: `${monthName} ${y}`,
+    };
+  }
+  const q = parseInt(periodValue, 10);
+  const startMonth = (q - 1) * 3 + 1;
+  const endMonth = q * 3;
+  const lastDay = new Date(y, endMonth, 0).getDate();
+  return {
+    start: `${y}-${String(startMonth).padStart(2, "0")}-01`,
+    end: `${y}-${String(endMonth).padStart(2, "0")}-${lastDay}`,
+    label: `Q${q} ${y}`,
+  };
+}
+
 function DataEntryModal({ open, onClose, onSubmit, title }: {
   open: boolean; onClose: () => void; onSubmit: (data: Record<string, string>) => void; title: string;
 }) {
   const [form, setForm] = useState<Record<string, string>>({
-    companySlug: "vessels", periodLabel: "", revenue: "", operatingExpenses: "",
-    cashAndEquivalents: "", cogs: "",
+    companySlug: "vessels", periodType: "monthly", year: "2026", periodValue: "4",
+    revenue: "", operatingExpenses: "", cashAndEquivalents: "", cogs: "",
   });
 
   if (!open) return null;
 
   const handleSubmit = () => {
-    if (!form.periodLabel || !form.revenue) return;
-    onSubmit(form);
-    setForm({ companySlug: "vessels", periodLabel: "", revenue: "", operatingExpenses: "", cashAndEquivalents: "", cogs: "" });
+    if (!form.revenue || !form.year || !form.periodValue) return;
+    const dates = derivePeriodDates(form.periodType, form.year, form.periodValue);
+    onSubmit({ ...form, periodStart: dates.start, periodEnd: dates.end, periodLabel: dates.label });
+    setForm({ companySlug: "vessels", periodType: "monthly", year: "2026", periodValue: "4", revenue: "", operatingExpenses: "", cashAndEquivalents: "", cogs: "" });
   };
+
+  const inputCls = "w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-[#d4a054]/40";
+  const labelCls = "block text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40 mb-1.5";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
@@ -203,16 +232,34 @@ function DataEntryModal({ open, onClose, onSubmit, title }: {
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40 mb-1.5">Portfolio Company</label>
-            <select value={form.companySlug} onChange={e => setForm(f => ({ ...f, companySlug: e.target.value }))}
-              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#d4a054]/40">
+            <label className={labelCls}>Portfolio Company</label>
+            <select value={form.companySlug} onChange={e => setForm(f => ({ ...f, companySlug: e.target.value }))} className={inputCls}>
               {PORTFOLIO_COMPANIES.map(c => <option key={c.slug} value={c.slug}>{c.name}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40 mb-1.5">Period</label>
-            <input value={form.periodLabel} onChange={e => setForm(f => ({ ...f, periodLabel: e.target.value }))} placeholder="Q2 2026"
-              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-[#d4a054]/40" />
+            <label className={labelCls}>Period Type</label>
+            <select value={form.periodType} onChange={e => setForm(f => ({ ...f, periodType: e.target.value, periodValue: e.target.value === "monthly" ? "1" : "1" }))} className={inputCls}>
+              <option value="monthly">Monthly</option>
+              <option value="quarterly">Quarterly</option>
+            </select>
+          </div>
+          <div>
+            <label className={labelCls}>Year</label>
+            <select value={form.year} onChange={e => setForm(f => ({ ...f, year: e.target.value }))} className={inputCls}>
+              {["2024", "2025", "2026", "2027"].map(y => <option key={y} value={y}>{y}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className={labelCls}>{form.periodType === "monthly" ? "Month" : "Quarter"}</label>
+            <select value={form.periodValue} onChange={e => setForm(f => ({ ...f, periodValue: e.target.value }))} className={inputCls}>
+              {form.periodType === "monthly"
+                ? Array.from({ length: 12 }, (_, i) => {
+                    const m = new Date(2026, i, 1).toLocaleString("en-US", { month: "long" });
+                    return <option key={i + 1} value={String(i + 1)}>{m}</option>;
+                  })
+                : [1, 2, 3, 4].map(q => <option key={q} value={String(q)}>Q{q}</option>)}
+            </select>
           </div>
           {[
             { key: "revenue", label: "Revenue ($)" },
@@ -221,9 +268,8 @@ function DataEntryModal({ open, onClose, onSubmit, title }: {
             { key: "cashAndEquivalents", label: "Cash & Equivalents ($)" },
           ].map(f => (
             <div key={f.key}>
-              <label className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40 mb-1.5">{f.label}</label>
-              <input type="number" value={form[f.key]} onChange={e => setForm(prev => ({ ...prev, [f.key]: e.target.value }))}
-                className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-[#d4a054]/40" />
+              <label className={labelCls}>{f.label}</label>
+              <input type="number" value={form[f.key]} onChange={e => setForm(prev => ({ ...prev, [f.key]: e.target.value }))} className={inputCls} />
             </div>
           ))}
         </div>
@@ -422,23 +468,25 @@ export default function FundOperationsPage() {
   const totalRevenue = financials.reduce((s, f) => s + parseFloat(f.revenue ?? "0"), 0);
 
   const chartData = useMemo(() => {
-    const periodMap: Record<string, Record<string, number>> = {};
+    const periodMap: Record<string, { label: string; startDate: string; data: Record<string, number> }> = {};
     for (const f of financials) {
-      if (!periodMap[f.periodLabel]) periodMap[f.periodLabel] = {};
-      periodMap[f.periodLabel][f.companySlug] = parseFloat(f.revenue ?? "0");
-      periodMap[f.periodLabel]["_total"] = (periodMap[f.periodLabel]["_total"] ?? 0) + parseFloat(f.revenue ?? "0");
-      periodMap[f.periodLabel]["_burn"] = (periodMap[f.periodLabel]["_burn"] ?? 0) + parseFloat(f.burnRate ?? "0");
-      periodMap[f.periodLabel]["_cash"] = (periodMap[f.periodLabel]["_cash"] ?? 0) + parseFloat(f.cashAndEquivalents ?? "0");
+      const key = f.periodStart ?? f.periodLabel;
+      if (!periodMap[key]) periodMap[key] = { label: f.periodLabel, startDate: f.periodStart, data: {} };
+      periodMap[key].data[f.companySlug] = parseFloat(f.revenue ?? "0");
+      periodMap[key].data["_total"] = (periodMap[key].data["_total"] ?? 0) + parseFloat(f.revenue ?? "0");
+      periodMap[key].data["_burn"] = (periodMap[key].data["_burn"] ?? 0) + parseFloat(f.burnRate ?? "0");
+      periodMap[key].data["_cash"] = (periodMap[key].data["_cash"] ?? 0) + parseFloat(f.cashAndEquivalents ?? "0");
     }
-    return Object.entries(periodMap)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([period, data]) => ({ period, ...data }));
+    return Object.values(periodMap)
+      .sort((a, b) => (a.startDate ?? "").localeCompare(b.startDate ?? ""))
+      .map(({ label, data }) => ({ period: label, ...data }));
   }, [financials]);
 
   const companyBreakdown = useMemo(() => {
     const latest: Record<string, PortfolioFinancial> = {};
     for (const f of financials) {
-      if (!latest[f.companySlug] || f.periodLabel > (latest[f.companySlug]?.periodLabel ?? "")) {
+      const existingStart = latest[f.companySlug]?.periodStart ?? "";
+      if (!latest[f.companySlug] || f.periodStart > existingStart) {
         latest[f.companySlug] = f;
       }
     }
@@ -484,10 +532,10 @@ export default function FundOperationsPage() {
       body: JSON.stringify({
         companySlug: data.companySlug,
         companyName: co?.name ?? data.companySlug,
-        periodType: "quarterly",
+        periodType: data.periodType ?? "monthly",
         periodLabel: data.periodLabel,
-        periodStart: "2026-01-01",
-        periodEnd: "2026-03-31",
+        periodStart: data.periodStart,
+        periodEnd: data.periodEnd,
         reportingStatus: "draft",
         revenue: String(rev),
         cogs: String(cogs),
@@ -504,6 +552,104 @@ export default function FundOperationsPage() {
     setShowEntry(false);
     reloadFin();
   };
+
+  const exportLpReportPdf = (report: LpReport) => {
+    const lines = [
+      `SZL Holdings — LP Report`,
+      `${"=".repeat(50)}`,
+      `Report Type: ${report.reportType.replace(/_/g, " ")}`,
+      `Period: ${report.reportingPeriod} (${report.periodStart} – ${report.periodEnd})`,
+      `Status: ${report.status}`,
+      ``,
+      `PERFORMANCE METRICS`,
+      `${"─".repeat(30)}`,
+      `Gross IRR: ${report.grossIrr ? pct(parseFloat(report.grossIrr)) : "—"}`,
+      `Net IRR: ${report.netIrr ? pct(parseFloat(report.netIrr)) : "—"}`,
+      `TVPI: ${report.tvpi ? parseFloat(report.tvpi).toFixed(2) + "x" : "—"}`,
+      `DPI: ${report.dpi ? parseFloat(report.dpi).toFixed(2) + "x" : "—"}`,
+      `RVPI: ${report.rvpi ? parseFloat(report.rvpi).toFixed(2) + "x" : "—"}`,
+      ``,
+      `FUND FINANCIALS`,
+      `${"─".repeat(30)}`,
+      `Fund NAV: ${report.fundNav ? "$" + parseFloat(report.fundNav).toLocaleString() : "—"}`,
+      `Total Commitments: ${report.totalCommitments ? "$" + parseFloat(report.totalCommitments).toLocaleString() : "—"}`,
+      `Called Capital: ${report.calledCapital ? "$" + parseFloat(report.calledCapital).toLocaleString() : "—"}`,
+      `Management Fee Rate: ${report.managementFeeRate ? pct(parseFloat(report.managementFeeRate)) : "—"}`,
+      `Carried Interest: ${report.carryRate ? pct(parseFloat(report.carryRate)) : "—"}`,
+      `Preferred Return: ${report.preferredReturnRate ? pct(parseFloat(report.preferredReturnRate)) : "—"}`,
+    ];
+    if (report.narrativeSummary) {
+      lines.push(``, `NARRATIVE SUMMARY`, `${"─".repeat(30)}`, report.narrativeSummary);
+    }
+    if (report.disclaimers) {
+      lines.push(``, `DISCLAIMERS`, `${"─".repeat(30)}`, report.disclaimers);
+    }
+    lines.push(``, `${"─".repeat(50)}`, `Generated: ${new Date().toISOString()}`, `CONFIDENTIAL — For authorized recipients only.`);
+
+    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `SZL_LP_Report_${report.reportingPeriod.replace(/\s/g, "_")}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const complianceDeadlines = useMemo(() => {
+    const now = new Date();
+    const deadlines: Array<{ label: string; date: string; status: "upcoming" | "overdue" | "complete"; category: string }> = [];
+
+    const q = Math.ceil((now.getMonth() + 1) / 3);
+    const y = now.getFullYear();
+    const nextQEnd = new Date(y, q * 3, 0);
+    const nextReportDue = new Date(nextQEnd);
+    nextReportDue.setDate(nextReportDue.getDate() + 45);
+
+    const hasCurrentReport = lpReports.some(r => r.reportingPeriod === `Q${q} ${y}` || r.reportingPeriod === `Q${q - 1 || 4} ${q === 1 ? y - 1 : y}`);
+    deadlines.push({
+      label: `Q${q} ${y} LP Report`,
+      date: nextReportDue.toISOString().split("T")[0],
+      status: hasCurrentReport ? "complete" : nextReportDue < now ? "overdue" : "upcoming",
+      category: "LP Reporting",
+    });
+
+    const formDAmend = new Date(y, 11, 31);
+    deadlines.push({
+      label: `Form D Annual Amendment (${y})`,
+      date: formDAmend.toISOString().split("T")[0],
+      status: formDFilings.some(f => f.filingType === "amendment") ? "complete" : formDAmend < now ? "overdue" : "upcoming",
+      category: "SEC Filing",
+    });
+
+    for (const inv of investors) {
+      if (inv.verificationExpiresAt) {
+        const exp = new Date(inv.verificationExpiresAt);
+        const daysUntil = Math.ceil((exp.getTime() - now.getTime()) / 86400000);
+        if (daysUntil <= 90) {
+          deadlines.push({
+            label: `${inv.lpName} — Accreditation Renewal`,
+            date: inv.verificationExpiresAt.split("T")[0],
+            status: daysUntil < 0 ? "overdue" : "upcoming",
+            category: "Investor Compliance",
+          });
+        }
+      }
+    }
+
+    for (const call of capCalls) {
+      if (call.status === "notices_sent") {
+        const due = new Date(call.dueDate);
+        deadlines.push({
+          label: `Capital Call #${call.callNumber} Due`,
+          date: call.dueDate,
+          status: due < now ? "overdue" : "upcoming",
+          category: "Fund Admin",
+        });
+      }
+    }
+
+    return deadlines.sort((a, b) => a.date.localeCompare(b.date));
+  }, [lpReports, formDFilings, investors, capCalls]);
 
   const reloadAll = () => { reloadSummary(); reloadFin(); reloadCap(); reloadLp(); reloadCalls(); reloadInvestors(); reloadFormD(); };
   const isLoading = summaryLoading || finLoading || capLoading;
@@ -853,7 +999,15 @@ export default function FundOperationsPage() {
                                   RVPI: {r.rvpi ? `${parseFloat(r.rvpi).toFixed(2)}x` : "—"}
                                 </div>
                               </div>
-                              <StatusBadge status={r.status} />
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => exportLpReportPdf(r)}
+                                  className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-[10px] font-semibold text-white/60 hover:bg-white/[0.06] transition"
+                                  title="Export PDF">
+                                  <Download className="h-3 w-3" /> PDF
+                                </button>
+                                <StatusBadge status={r.status} />
+                              </div>
                             </div>
                             {r.narrativeSummary && (
                               <p className="text-xs text-white/45 leading-5 border-t border-white/[0.05] pt-3 mt-2">{r.narrativeSummary}</p>
@@ -874,6 +1028,31 @@ export default function FundOperationsPage() {
                       </div>
                     ) : (
                       <EmptyState icon={FileText} title="No LP reports yet" description="Seed demo data to populate quarterly LP reports with IRR, TVPI, DPI metrics." />
+                    )}
+                  </div>
+
+                  <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 mt-6">
+                    <h3 className="text-sm font-semibold text-white mb-1">Compliance Calendar</h3>
+                    <p className="text-xs text-white/40 mb-4">Upcoming deadlines and regulatory milestones</p>
+                    {complianceDeadlines.length > 0 ? (
+                      <div className="space-y-2">
+                        {complianceDeadlines.map((dl, i) => (
+                          <div key={i} className="flex items-center gap-3 rounded-xl border border-white/[0.05] bg-white/[0.015] px-4 py-3">
+                            {dl.status === "complete"
+                              ? <CheckCircle2 className="h-4 w-4 shrink-0" style={{ color: "#6aaa72" }} />
+                              : dl.status === "overdue"
+                                ? <AlertCircle className="h-4 w-4 shrink-0" style={{ color: "#c45a4a" }} />
+                                : <Clock className="h-4 w-4 shrink-0" style={{ color: "#d4a054" }} />}
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm text-white">{dl.label}</div>
+                              <div className="text-[10px] text-white/35">{dl.category} · Due: {dl.date}</div>
+                            </div>
+                            <StatusBadge status={dl.status === "complete" ? "compliant" : dl.status} />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-4 text-sm text-white/40">No upcoming deadlines</div>
                     )}
                   </div>
 
