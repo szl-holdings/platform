@@ -16,17 +16,23 @@
 - Session invalidation on role change or security event
 
 **API access:**
-- Bearer token authentication on all API endpoints
+- Bearer token authentication on protected API endpoints (155 of 170 route files); 15 routes are intentionally public (health checks, contact form, demo requests, public status, webhook receivers)
 - HMAC-signed WebSocket tickets with 5-minute TTL and per-channel ACL
 
 ### Authorization
 
 **Model:** Role-based access control (RBAC) with organization scoping.
 
-Every API route is protected. Access is checked at:
-1. Middleware level (role check before handler)
+**Authentication architecture:** A global session hydrator (`authMiddleware.ts`) runs on every request and populates `req.user` from the session cookie or Bearer token. This hydrator does not enforce authentication — it makes user context available. Route-level enforcement is applied explicitly using `authMiddleware({ required: true })` and `requireRole()` from `src/middlewares/auth.ts`.
+
+**Current coverage:** 155 of 170 top-level route files apply explicit authentication middleware. The remaining 15 route files (health checks, contact form, demo request, public status page, webhook receivers) are intentionally unauthenticated. A global deny-by-default enforcement layer is being added to prevent future routes from being inadvertently public.
+
+Authorization is checked at:
+1. Middleware level (role check before handler, explicitly applied per router)
 2. Business logic level (fine-grained entity-level access)
 3. Database query level (organization-scoped queries)
+
+**Known gap:** A route security matrix documenting the auth enforcement level of every route does not yet exist. A companion task is in progress to generate this automatically. See `docs/known-gaps.md §3.2`.
 
 **Principle of least privilege:** Users receive the minimum role necessary for their function. Default role on registration is `viewer`.
 
@@ -49,10 +55,12 @@ Every API route is protected. Access is checked at:
 
 ### Input Validation
 
-- All API inputs validated via Zod schemas before handler execution
-- SQL injection prevented by Drizzle ORM parameterized queries (no raw SQL with user input)
+- **Zod validation is applied to high-risk input surfaces** — contact forms, demo requests, feedback, invitations, auth flows, GDPR requests, and partner portal submissions use Zod schema validation via `validateBody()` / `validateQuery()` middleware helpers from `lib/validation.ts`. Expansion to remaining high-traffic API routes is an active remediation task (see `docs/known-gaps.md §4.1`).
+- SQL injection prevented by Drizzle ORM parameterized queries (no raw SQL with user input) — this applies to all routes regardless of Zod coverage.
 - XSS prevented by React's default HTML escaping + CSP headers
 - CSRF protection via `SameSite` cookie policy and CSRF tokens on state-changing routes
+
+**Known gap:** Zod input validation helpers are currently applied to 21 of 170 top-level route files. The remaining 149 routes rely on Drizzle's parameterized queries for SQL safety but do not have structured input schema validation. Core high-traffic routes (`lyte.ts`, `vessels.ts`, `firestorm.ts`, `terra.ts`, `alloy.ts`, `billing.ts`) are in the expansion scope. A systematic Zod expansion effort is underway.
 
 ### Rate Limiting
 
@@ -132,10 +140,13 @@ Every commit runs:
 
 ## Known Gaps (Honest Assessment)
 
-The following items are tracked in the known-gap register (`docs/internal/security/backup-restore.md`):
+The full technical gap register is maintained at [`docs/known-gaps.md`](../known-gaps.md). Security-relevant gaps are summarized here:
 
 | Gap | Planned Resolution | Timeline |
 |-----|-------------------|----------|
+| Global deny-by-default auth enforcement | Add deny-by-default guard layer | Active remediation |
+| Route security matrix | Automated route→auth audit tooling | Active remediation |
+| Zod input validation (21 of 170 top-level routes covered) | Systematic expansion to high-traffic routes | Active remediation |
 | SOC 2 Type II certification | Initiate after first revenue | 12–18 months post-revenue |
 | Redis for session store (currently in-memory) | Add Redis when scaling beyond single instance | Revenue activation phase |
 | FedRAMP readiness (Aegis) | Begin after DoD/Fed contract engagement | 18–24 months |
@@ -145,4 +156,4 @@ The following items are tracked in the known-gap register (`docs/internal/securi
 | Multi-region failover | Architect after first enterprise contract | Post-initial revenue |
 | Formal penetration test | Commission pen test pre-SOC2 | Pre-SOC2 audit |
 
-These gaps are honest and documented. None of them represent active vulnerabilities in the current demonstration environment. The full gap register with planned resolutions is maintained at `docs/internal/security/backup-restore.md`.
+These gaps are honest and documented. None of them represent active vulnerabilities in the current demonstration environment. The full gap register with risk ratings, quantified current state, and remediation paths is maintained at [`docs/known-gaps.md`](../known-gaps.md).
