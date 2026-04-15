@@ -29,6 +29,9 @@ import {
   BiometricProvider,
   BiometricLockScreen,
   useBiometric,
+  SyncEngineProvider,
+  SyncStatusBanner,
+  ConflictResolutionModal,
 } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
@@ -114,34 +117,38 @@ export default function RootLayout() {
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         <QueryClientProvider client={queryClient}>
           <NotificationProvider apiBase="" enabled={false}>
-            <BiometricProvider config={{ storagePrefix: "stephen", appName: "Stephen", promptMessage: "Authenticate to access Stephen" }}>
-              <GestureHandlerRootView style={{ flex: 1 }}>
-                <ThemeProvider defaultMode="system" storageKey="stephen-theme-mode">
-                  <KeyboardProvider>
-                    <View style={{ flex: 1 }}>
-                      <AppShell />
-                      <OfflineBanner accentColor="#6366f1" />
-                      <CopilotFab config={{
-                        name: "Stephen AI",
-                        icon: "◈",
-                        agentId: "stephen",
-                        accentColor: "#6366f1",
-                        welcomeMessage: "I'm Stephen AI, your personal command centre. Ask about the platform, the thesis, scheduled tasks, or cross-ecosystem updates.",
-                        placeholderText: "Ask anything...",
-                        isAdvisoryAgent: false,
-                        conversationKey: "stephen-mobile",
-                        suggestedQuestions: [
-                          "What needs my attention today?",
-                          "Give me a briefing across all platforms",
-                          "What's the SZL Holdings investment thesis?",
-                        ],
-                        systemPrompt: "You are Stephen AI, the personal AI assistant for Stephen Lutar. You help manage the SZL Holdings ecosystem, surface cross-platform intelligence, and provide strategic context on the platform and investment thesis. Be precise, strategic, and concise.",
-                      }} />
-                    </View>
-                  </KeyboardProvider>
-                </ThemeProvider>
-              </GestureHandlerRootView>
-            </BiometricProvider>
+            <SyncEngineProvider domain="stephen" getToken={async () => null}>
+              <BiometricProvider config={{ storagePrefix: "stephen", appName: "Stephen", promptMessage: "Authenticate to access Stephen" }}>
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                  <ThemeProvider defaultMode="system" storageKey="stephen-theme-mode">
+                    <KeyboardProvider>
+                      <View style={{ flex: 1 }}>
+                        <AppShell />
+                        <OfflineBanner accentColor="#6366f1" />
+                        <SyncStatusBanner accentColor="#6366f1" />
+                        <ConflictResolutionModal accentColor="#6366f1" />
+                        <CopilotFab config={{
+                          name: "Stephen AI",
+                          icon: "◈",
+                          agentId: "stephen",
+                          accentColor: "#6366f1",
+                          welcomeMessage: "I'm Stephen AI, your personal command centre. Ask about the platform, the thesis, scheduled tasks, or cross-ecosystem updates.",
+                          placeholderText: "Ask anything...",
+                          isAdvisoryAgent: false,
+                          conversationKey: "stephen-mobile",
+                          suggestedQuestions: [
+                            "What needs my attention today?",
+                            "Give me a briefing across all platforms",
+                            "What's the SZL Holdings investment thesis?",
+                          ],
+                          systemPrompt: "You are Stephen AI, the personal AI assistant for Stephen Lutar. You help manage the SZL Holdings ecosystem, surface cross-platform intelligence, and provide strategic context on the platform and investment thesis. Be precise, strategic, and concise.",
+                        }} />
+                      </View>
+                    </KeyboardProvider>
+                  </ThemeProvider>
+                </GestureHandlerRootView>
+              </BiometricProvider>
+            </SyncEngineProvider>
           </NotificationProvider>
         </QueryClientProvider>
       </ErrorBoundary>

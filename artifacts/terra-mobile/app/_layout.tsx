@@ -24,7 +24,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
-import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab, setUploadAuthTokenGetter } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab, setUploadAuthTokenGetter, SyncEngineProvider, SyncStatusBanner, ConflictResolutionModal } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 
 if (process.env.EXPO_PUBLIC_DOMAIN) {
@@ -151,12 +151,15 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <NotificationProvider apiBase={TERRA_API_BASE} getAuthToken={getTerraAuthToken}>
+            <SyncEngineProvider domain="terra" getToken={getTerraAuthToken}>
             <GestureHandlerRootView style={{ flex: 1 }}>
               <ThemeProvider defaultMode="dark" storageKey="terra-theme-mode">
                 <KeyboardProvider>
                   <View style={{ flex: 1 }}>
                     <RootLayoutNav />
                     <OfflineBanner accentColor="#b8943c" />
+                    <SyncStatusBanner accentColor="#b8943c" />
+                    <ConflictResolutionModal accentColor="#b8943c" />
                     <CopilotFab config={{
                       name: "Terrain",
                       icon: "🏛",
@@ -177,6 +180,7 @@ export default function RootLayout() {
                 </KeyboardProvider>
               </ThemeProvider>
             </GestureHandlerRootView>
+            </SyncEngineProvider>
           </NotificationProvider>
         </AuthProvider>
       </QueryClientProvider>

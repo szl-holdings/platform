@@ -53,3 +53,9 @@ export {
   type OutboxEntry,
   type LocalReplica,
 } from "./offline-persistence";
+export { SyncEngineProvider, SyncEngineContext, type SyncEngineProviderProps, type SyncEngineContextValue, type SyncEngineState, type EnqueueOptions, type QueuedMutation as SyncQueuedMutation, type ConflictInfo } from "./context/SyncEngineContext";
+export { useSyncEngine, type UseSyncEngineResult } from "./hooks/useSyncEngine";
+export { useSyncMutation, type SyncMutationOptions, type SyncMutationResult, type SyncMutationMethod } from "./hooks/useSyncMutation";
+export { SyncStatusBanner } from "./components/SyncStatusBanner";
+export { ConflictResolutionModal } from "./components/ConflictResolutionModal";
+export { PendingMutationsBadge } from "./components/PendingMutationsBadge";

@@ -57,6 +57,7 @@
     "@tanstack/query-persist-client-core": "^5.99.0",
     "@tanstack/query-sync-storage-persister": "^5.99.0",
     "graphql": "^16.13.2",
-    "urql": "^5.0.1"
+    "urql": "^5.0.1",
+    "@react-native-community/netinfo": "^11.4.1"
   }
 }

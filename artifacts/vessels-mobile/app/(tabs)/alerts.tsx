@@ -10,6 +10,7 @@ import { useColors } from "@/hooks/useColors";
 import { api, type FleetException, CACHE_KEYS, cacheSet, cacheGetStale } from "@/lib/api";
 import { vesselsWs, type AlertUpdate } from "@/lib/websocket";
 import { scheduleLocalAlert } from "@/lib/notifications";
+import { useSyncEngine } from "@szl-holdings/mobile-shared";
 
 const SEVERITY_COLORS: Record<string, string> = {
   critical: "#ef4444",
@@ -113,12 +114,29 @@ export default function AlertsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [cachedAlerts, setCachedAlerts] = useState<FleetException[]>([]);
 
+  const syncEngine = useSyncEngine();
+
   const acknowledgeAlert = useMutation({
     mutationFn: async (id: number) => {
       const base = process.env.EXPO_PUBLIC_DOMAIN
         ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
         : "/api";
-      const res = await fetch(`${base}/vessels/exceptions/${id}/acknowledge`, { method: "POST" });
+      const url = `${base}/vessels/exceptions/${id}/acknowledge`;
+
+      if (!syncEngine.isOnline) {
+        await syncEngine.enqueue({
+          domain: "vessels",
+          method: "POST",
+          url,
+          idempotencyKey: `vessels-acknowledge-exception-${id}`,
+        });
+        return;
+      }
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "X-Idempotency-Key": `vessels-acknowledge-exception-${id}` },
+      });
       if (!res.ok) throw new Error("Acknowledge failed");
     },
     onMutate: async (id) => {
@@ -132,7 +150,11 @@ export default function AlertsScreen() {
     onError: (_err, _id, ctx) => {
       if (ctx?.prev) queryClient.setQueryData(["fleet-exceptions-mobile"], ctx.prev);
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ["fleet-exceptions-mobile"] }),
+    onSettled: () => {
+      if (syncEngine.isOnline) {
+        queryClient.invalidateQueries({ queryKey: ["fleet-exceptions-mobile"] });
+      }
+    },
   });
 
   const { data: alerts = [], isLoading, refetch } = useQuery({

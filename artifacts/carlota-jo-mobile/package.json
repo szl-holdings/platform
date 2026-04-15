@@ -68,6 +68,7 @@
     "@tanstack/query-sync-storage-persister": "^5.99.0",
     "expo-device": "~8.0.10",
     "expo-document-picker": "^55.0.13",
-    "expo-notifications": "~0.32.16"
+    "expo-notifications": "~0.32.16",
+    "@react-native-community/netinfo": "^11.4.1"
   }
 }

@@ -14,6 +14,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useSyncEngine } from "@szl-holdings/mobile-shared";
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
   ? "https://" + process.env.EXPO_PUBLIC_DOMAIN + "/api"
@@ -175,11 +176,27 @@ export default function ScannerTab() {
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
+  const syncEngine = useSyncEngine();
+
   const addToPipeline = useMutation({
     mutationFn: async (card: ScannerCard) => {
-      await fetch(API_BASE + "/terra/convert/distress-to-lead", {
+      const url = `${API_BASE}/terra/convert/distress-to-lead`;
+      const idempotencyKey = `terra-convert-distress-${card.id}`;
+
+      if (!syncEngine.isOnline) {
+        await syncEngine.enqueue({
+          domain: "terra",
+          method: "POST",
+          url,
+          body: { propertyId: card.id },
+          idempotencyKey,
+        });
+        return;
+      }
+
+      await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "X-Idempotency-Key": idempotencyKey },
         body: JSON.stringify({ propertyId: card.id }),
       });
     },

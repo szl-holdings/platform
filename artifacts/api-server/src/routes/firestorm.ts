@@ -37,6 +37,7 @@ import { REFERENCE_COMPLIANCE_CONTROLS } from "./readiness.js";
 import { eq, desc, sql, inArray, and } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendNoContent, handleRouteError } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
+import { validateIfMatch } from "../middlewares/optimistic-concurrency";
 import { queryEvidenceIndex, ingestDecisionToEvidenceIndex } from "../lib/tradecraft-evidence-store";
 import { validateAndBuildDecision, type DecisionObjectType } from "@szl-holdings/ai-engine";
 import { broadcastWs, pubsub, FIRESTORM_EVENTS } from "../lib/pubsub-bridge.js";
@@ -436,6 +437,8 @@ router.put("/firestorm/incidents/:id", authMiddleware({ required: true }), async
 
     const [current] = await db.select().from(firestormIncidentsTable).where(eq(firestormIncidentsTable.id, id));
     if (!current) { sendNotFound(res, "Incident"); return; }
+
+    if (!(await validateIfMatch(req, res, async () => current))) return;
 
     const effectiveStatus = data.status ?? current.status;
     const effectiveSeverity = data.severity ?? current.severity;

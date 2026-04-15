@@ -30,6 +30,9 @@ import {
   BiometricProvider,
   BiometricLockScreen,
   useBiometric,
+  SyncEngineProvider,
+  SyncStatusBanner,
+  ConflictResolutionModal,
 } from "@szl-holdings/mobile-shared";
 import {
   configurePushNotificationHandler,
@@ -175,11 +178,14 @@ export default function RootLayout() {
           <AuthProvider>
             <NotificationProvider apiBase={VESSELS_API_BASE} getAuthToken={getVesselsAuthToken}>
               <BiometricProvider config={{ storagePrefix: "vessels", appName: "Vessels", promptMessage: "Authenticate to access Vessels Fleet Command" }}>
+              <SyncEngineProvider domain="vessels" getToken={getVesselsAuthToken}>
                 <GestureHandlerRootView style={{ flex: 1 }}>
                   <ThemeProvider defaultMode="dark" storageKey="vessels-theme-mode">
                     <View style={{ flex: 1 }}>
                       <AppShell />
                       <OfflineBanner accentColor="#ef4444" />
+                      <SyncStatusBanner accentColor="#0ea5e9" />
+                      <ConflictResolutionModal accentColor="#0ea5e9" />
                       <CopilotFab config={{
                         name: "Helmsman",
                         icon: "⚓",
@@ -199,6 +205,7 @@ export default function RootLayout() {
                     </View>
                   </ThemeProvider>
                 </GestureHandlerRootView>
+              </SyncEngineProvider>
               </BiometricProvider>
             </NotificationProvider>
           </AuthProvider>

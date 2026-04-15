@@ -18,6 +18,7 @@ import { telemetryMiddleware } from "./middlewares/telemetry";
 import { authMiddleware } from "./middlewares/authMiddleware";
 import { csrfMiddleware } from "./middlewares/csrf";
 import { sessionRefreshPolicy } from "./middlewares/session-policy";
+import { etagMiddleware } from "./middlewares/optimistic-concurrency";
 
 const app: Express = express();
 
@@ -373,6 +374,7 @@ app.get("/api/csrf-token", (req: Request, res: Response) => {
   res.json({ csrfToken: token });
 });
 
+app.use("/api", etagMiddleware);
 app.use("/api", router);
 
 let _graphqlHandler: ((req: Request, res: Response, next: import("express").NextFunction) => void) | null = null;

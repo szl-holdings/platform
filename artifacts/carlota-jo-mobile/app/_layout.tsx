@@ -27,7 +27,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab, setUploadAuthTokenGetter } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab, setUploadAuthTokenGetter, SyncEngineProvider, SyncStatusBanner, ConflictResolutionModal } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { PushNotificationBootstrap } from "@/components/PushNotificationBootstrap";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
@@ -153,12 +153,15 @@ export default function RootLayout() {
           <AuthProvider>
             <CJNotificationProvider>
               <PushNotificationBootstrap />
+              <SyncEngineProvider domain="carlota-jo" getToken={cjGetAuthToken}>
               <GestureHandlerRootView style={{ flex: 1 }}>
                 <ThemeProvider defaultMode="dark" storageKey="carlota-theme-mode">
                   <KeyboardProvider>
                     <View style={{ flex: 1 }}>
                       <RootLayoutNav />
                       <OfflineBanner accentColor="#b8943c" />
+                      <SyncStatusBanner accentColor="#5d8a6e" />
+                      <ConflictResolutionModal accentColor="#5d8a6e" />
                       <CopilotFab config={{
                         name: "Carlota",
                         icon: "🌿",
@@ -179,6 +182,7 @@ export default function RootLayout() {
                   </KeyboardProvider>
                 </ThemeProvider>
               </GestureHandlerRootView>
+              </SyncEngineProvider>
             </CJNotificationProvider>
           </AuthProvider>
         </QueryClientProvider>

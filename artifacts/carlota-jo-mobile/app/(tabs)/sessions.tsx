@@ -16,6 +16,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSyncEngine } from "@szl-holdings/mobile-shared";
 import { useColors } from "@/hooks/useColors";
 
 const API_URL = `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
@@ -96,6 +97,8 @@ export default function SessionsScreen() {
     ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
     : "/api";
 
+  const syncEngine = useSyncEngine();
+
   const { data: sessions = UPCOMING_SESSIONS } = useQuery<SessionItem[]>({
     queryKey: ["carlota-sessions"],
     queryFn: async () => {
@@ -111,9 +114,23 @@ export default function SessionsScreen() {
 
   const bookSession = useMutation({
     mutationFn: async ({ service, date, time }: { service: string; date: string; time: string }) => {
-      const res = await fetch(`${apiBase}/carlota-jo/booking/reservations`, {
+      const url = `${apiBase}/carlota-jo/booking/reservations`;
+      const idempotencyKey = `carlota-booking-${service}-${date}-${time}`;
+
+      if (!syncEngine.isOnline) {
+        await syncEngine.enqueue({
+          domain: "carlota-jo",
+          method: "POST",
+          url,
+          body: { service, date, time, clientName: "Client" },
+          idempotencyKey,
+        });
+        return { queued: true };
+      }
+
+      const res = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "X-Idempotency-Key": idempotencyKey },
         body: JSON.stringify({ service, date, time, clientName: "Client" }),
       });
       if (!res.ok) throw new Error("Booking failed");

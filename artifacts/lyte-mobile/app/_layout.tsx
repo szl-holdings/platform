@@ -29,6 +29,9 @@ import {
   BiometricProvider,
   BiometricLockScreen,
   useBiometric,
+  SyncEngineProvider,
+  SyncStatusBanner,
+  ConflictResolutionModal,
 } from "@szl-holdings/mobile-shared";
 import {
   configurePushNotificationHandler,
@@ -146,33 +149,37 @@ export default function RootLayout() {
             <NotificationProvider>
               <SharedNotificationProvider apiBase={LYTE_API_BASE} getAuthToken={getLyteAuthToken}>
                 <BiometricProvider config={{ storagePrefix: "lyte", appName: "Lyte", promptMessage: "Authenticate to access Lyte AIOps" }}>
-                  <LyteProvider>
-                    <AlertNotifierBridge />
-                    <GestureHandlerRootView style={{ flex: 1 }}>
-                      <ThemeProvider defaultMode="dark" storageKey="lyte-theme-mode">
-                        <View style={{ flex: 1 }}>
-                          <AppShell />
-                          <OfflineBanner accentColor="#ef4444" />
-                          <CopilotFab config={{
-                            name: "Lyte Ops",
-                            icon: "⚡",
-                            agentId: "lyte",
-                            accentColor: "#a855f7",
-                            welcomeMessage: "I'm Lyte Ops, your AIOps intelligence analyst. Ask about signals, incidents, operational patterns, or playbook recommendations.",
-                            placeholderText: "Ask about signals & incidents...",
-                            isAdvisoryAgent: true,
-                            conversationKey: "lyte-mobile",
-                            suggestedQuestions: [
-                              "What signals need triage right now?",
-                              "Show me the top operational anomalies",
-                              "What playbooks are recommended?",
-                            ],
-                            systemPrompt: "You are Lyte Ops, the AI copilot for Lyte AIOps Command Center. You specialize in signal analysis, incident triage, operational recommendations, and playbook management. Be operational and action-oriented. IMPORTANT: You are an ADVISORY AGENT — all remediation actions require human confirmation.",
-                          }} />
-                        </View>
-                      </ThemeProvider>
-                    </GestureHandlerRootView>
-                  </LyteProvider>
+                  <SyncEngineProvider domain="lyte" getToken={() => SecureStore.getItemAsync(LYTE_TOKEN_KEY)}>
+                    <LyteProvider>
+                      <AlertNotifierBridge />
+                      <GestureHandlerRootView style={{ flex: 1 }}>
+                        <ThemeProvider defaultMode="dark" storageKey="lyte-theme-mode">
+                          <View style={{ flex: 1 }}>
+                            <AppShell />
+                            <OfflineBanner accentColor="#ef4444" />
+                            <SyncStatusBanner accentColor="#a855f7" />
+                            <ConflictResolutionModal accentColor="#a855f7" />
+                            <CopilotFab config={{
+                              name: "Lyte Ops",
+                              icon: "⚡",
+                              agentId: "lyte",
+                              accentColor: "#a855f7",
+                              welcomeMessage: "I'm Lyte Ops, your AIOps intelligence analyst. Ask about signals, incidents, operational patterns, or playbook recommendations.",
+                              placeholderText: "Ask about signals & incidents...",
+                              isAdvisoryAgent: true,
+                              conversationKey: "lyte-mobile",
+                              suggestedQuestions: [
+                                "What signals need triage right now?",
+                                "Show me the top operational anomalies",
+                                "What playbooks are recommended?",
+                              ],
+                              systemPrompt: "You are Lyte Ops, the AI copilot for Lyte AIOps Command Center. You specialize in signal analysis, incident triage, operational recommendations, and playbook management. Be operational and action-oriented. IMPORTANT: You are an ADVISORY AGENT — all remediation actions require human confirmation.",
+                            }} />
+                          </View>
+                        </ThemeProvider>
+                      </GestureHandlerRootView>
+                    </LyteProvider>
+                  </SyncEngineProvider>
                 </BiometricProvider>
               </SharedNotificationProvider>
             </NotificationProvider>

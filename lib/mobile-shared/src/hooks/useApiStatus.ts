@@ -56,6 +56,7 @@ export function useApiStatus(): ApiStatusResult {
   const queryClient = useQueryClient();
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const prevStatusRef = useRef<ApiStatus>("checking");
+  const netinfoUnsubRef = useRef<(() => void) | null>(null);
 
   const runCheck = useCallback(async () => {
     const result = await checkApiHealth();
@@ -78,9 +79,43 @@ export function useApiStatus(): ApiStatusResult {
   }, []);
 
   useEffect(() => {
-    runCheck();
-    timerRef.current = setInterval(runCheck, CHECK_INTERVAL_MS);
+    let mounted = true;
+
+    const setupNetInfo = async () => {
+      try {
+        const NetInfo = await import("@react-native-community/netinfo");
+
+        netinfoUnsubRef.current = NetInfo.default.addEventListener((state: { isConnected: boolean | null; isInternetReachable: boolean | null }) => {
+          if (!mounted) return;
+          if (state.isConnected === false) {
+            prevStatusRef.current = "offline";
+            setStatus("offline");
+            setLastCheckedAt(new Date());
+          } else if (state.isConnected === true) {
+            runCheck();
+          }
+        });
+
+        const initial = await NetInfo.default.fetch();
+        if (!mounted) return;
+        if (initial.isConnected === false) {
+          setStatus("offline");
+          setLastCheckedAt(new Date());
+          prevStatusRef.current = "offline";
+        } else {
+          runCheck();
+        }
+      } catch {
+        runCheck();
+        timerRef.current = setInterval(runCheck, CHECK_INTERVAL_MS);
+      }
+    };
+
+    setupNetInfo();
+
     return () => {
+      mounted = false;
+      netinfoUnsubRef.current?.();
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [runCheck]);

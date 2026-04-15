@@ -25,7 +25,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
-import { useApiStatus } from "@szl-holdings/mobile-shared";
+import { useApiStatus, useSyncEngine } from "@szl-holdings/mobile-shared";
 import { SkeletonLoader } from "@szl-holdings/mobile-shared";
 import { apiFetch } from "@/lib/apiClient";
 
@@ -386,12 +386,29 @@ export default function CommandScreen() {
   const [locallyDismissed, setLocallyDismissed] = useState<Set<string>>(new Set());
   const pendingApprovals: PendingApproval[] = (approvalsData as PendingApproval[]).filter(a => !locallyDismissed.has(a.id));
 
+  const syncEngine = useSyncEngine();
+
   const approveMutation = useMutation({
     mutationFn: async ({ id, action }: { id: string; action: "approve" | "defer" }) => {
-      await apiFetch(`/api/approvals/${id}/review`, {
+      const url = `/api/approvals/${id}/review`;
+      const body = { decision: action === "approve" ? "approved" : "rejected", note: action === "defer" ? "Deferred via mobile" : undefined };
+      const idempotencyKey = `szl-approval-${id}-${action}`;
+
+      if (!syncEngine.isOnline) {
+        await syncEngine.enqueue({
+          domain: "szl-holdings",
+          method: "POST",
+          url: process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}${url}` : url,
+          body,
+          idempotencyKey,
+        });
+        return;
+      }
+
+      await apiFetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ decision: action === "approve" ? "approved" : "rejected", note: action === "defer" ? "Deferred via mobile" : undefined }),
+        headers: { "Content-Type": "application/json", "X-Idempotency-Key": idempotencyKey },
+        body: JSON.stringify(body),
       });
     },
     onSuccess: (_data, variables) => {

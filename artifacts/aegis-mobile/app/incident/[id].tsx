@@ -16,7 +16,8 @@ import { Ionicons, Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import * as LocalAuthentication from "expo-local-authentication";
 import { useColors } from "@/hooks/useColors";
-import { apiGet, apiPut } from "@/lib/apiClient";
+import { apiFetch } from "@/lib/apiClient";
+import { useSyncEngine } from "@szl-holdings/mobile-shared";
 
 interface IncidentDetail {
   id: number;
@@ -37,12 +38,16 @@ interface IncidentUpdate {
   resolvedAt?: string;
 }
 
-async function fetchIncident(id: string): Promise<IncidentDetail> {
-  return apiGet<IncidentDetail>(`/api/firestorm/incidents/${id}`);
-}
-
-async function updateIncident(id: string, data: IncidentUpdate): Promise<IncidentDetail> {
-  return apiPut<IncidentDetail>(`/api/firestorm/incidents/${id}`, data);
+async function fetchIncidentWithETag(
+  id: string,
+  onETag: (etag: string) => void
+): Promise<IncidentDetail> {
+  const res = await apiFetch(`/api/firestorm/incidents/${id}`);
+  if (!res.ok) throw new Error(`GET /api/firestorm/incidents/${id} failed: ${res.status}`);
+  const etag = res.headers.get("etag");
+  if (etag) onETag(etag);
+  const json = await res.json() as { data?: IncidentDetail } | IncidentDetail;
+  return ((json as { data?: IncidentDetail }).data ?? json) as IncidentDetail;
 }
 
 const SEVERITY_COLORS: Record<string, string> = {
@@ -62,6 +67,7 @@ export default function IncidentDetailScreen() {
   const [updating, setUpdating] = useState(false);
   const [biometricPassed, setBiometricPassed] = useState(Platform.OS === "web");
   const [biometricChecking, setBiometricChecking] = useState(Platform.OS !== "web");
+  const knownETagRef = React.useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (Platform.OS === "web") return;
@@ -91,15 +97,48 @@ export default function IncidentDetailScreen() {
 
   const { data: incident, isLoading, error } = useQuery({
     queryKey: ["aegis-incident", id],
-    queryFn: () => fetchIncident(id!),
+    queryFn: () => fetchIncidentWithETag(id!, (etag) => { knownETagRef.current = etag; }),
     enabled: !!id && biometricPassed,
   });
 
+  const syncEngine = useSyncEngine();
+
   const updateMut = useMutation({
-    mutationFn: (data: IncidentUpdate) => updateIncident(id!, data),
+    mutationFn: async (data: IncidentUpdate) => {
+      const path = `/api/firestorm/incidents/${id}`;
+      const idempotencyKey = `aegis-incident-update-${id}-${Date.now().toString(36)}`;
+
+      const concurrencyHeaders: Record<string, string> = {};
+      if (knownETagRef.current) concurrencyHeaders["If-Match"] = knownETagRef.current;
+
+      if (!syncEngine.isOnline) {
+        await syncEngine.enqueue({
+          domain: "aegis",
+          method: "PUT",
+          url: `${process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : ""}${path}`,
+          body: data,
+          idempotencyKey,
+          headers: Object.keys(concurrencyHeaders).length > 0 ? concurrencyHeaders : undefined,
+        });
+        return {} as IncidentDetail;
+      }
+
+      const res = await apiFetch(path, {
+        method: "PUT",
+        body: JSON.stringify(data),
+        headers: { "X-Idempotency-Key": idempotencyKey, ...concurrencyHeaders },
+      });
+      if (!res.ok) throw new Error(`PUT ${path} failed: ${res.status}`);
+      const newETag = res.headers.get("etag");
+      if (newETag) knownETagRef.current = newETag;
+      const json = await res.json() as { data?: IncidentDetail } | IncidentDetail;
+      return ((json as { data?: IncidentDetail }).data ?? json) as IncidentDetail;
+    },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["aegis-incidents"] });
-      qc.invalidateQueries({ queryKey: ["aegis-incident", id] });
+      if (syncEngine.isOnline) {
+        qc.invalidateQueries({ queryKey: ["aegis-incidents"] });
+        qc.invalidateQueries({ queryKey: ["aegis-incident", id] });
+      }
     },
   });
 

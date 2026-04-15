@@ -21,7 +21,7 @@ import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab, setUploadAuthTokenGetter } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab, setUploadAuthTokenGetter, SyncEngineProvider, SyncStatusBanner, ConflictResolutionModal } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { AuthProvider } from "@/context/AuthContext";
 import { BiometricLockProvider } from "@/context/BiometricLockContext";
@@ -102,11 +102,14 @@ export default function RootLayout() {
             <AuthProvider>
               <NotificationProvider apiBase={SZL_API_BASE} getAuthToken={getAuthToken}>
                 <BiometricLockProvider>
+                  <SyncEngineProvider domain="szl-holdings" getToken={getAuthToken}>
                   <GestureHandlerRootView style={{ flex: 1 }}>
                     <ThemeProvider defaultMode="dark" storageKey="szl-theme-mode">
                       <View style={{ flex: 1 }}>
                         <RootLayoutNav />
                         <OfflineBanner accentColor="#c8a96e" />
+                        <SyncStatusBanner accentColor="#c8a96e" />
+                        <ConflictResolutionModal accentColor="#c8a96e" />
                         <CopilotFab config={{
                           name: "Navigator",
                           icon: "◈",
@@ -126,6 +129,7 @@ export default function RootLayout() {
                       </View>
                     </ThemeProvider>
                   </GestureHandlerRootView>
+                  </SyncEngineProvider>
                 </BiometricLockProvider>
               </NotificationProvider>
             </AuthProvider>

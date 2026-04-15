@@ -26,7 +26,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab, setUploadAuthTokenGetter } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab, setUploadAuthTokenGetter, SyncEngineProvider, SyncStatusBanner, ConflictResolutionModal } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { BiometricLockScreen } from "@/components/BiometricLockScreen";
 import { AuthProvider } from "@/context/AuthContext";
@@ -153,12 +153,15 @@ export default function RootLayout() {
           <AuthProvider>
             <NotificationProvider apiBase={AEGIS_API_BASE} getAuthToken={getAegisAuthToken}>
               <BiometricProvider>
+                <SyncEngineProvider domain="aegis" getToken={getAegisAuthToken}>
                 <GestureHandlerRootView style={{ flex: 1 }}>
                   <ThemeProvider defaultMode="dark" storageKey="aegis-theme-mode">
                     <KeyboardProvider>
                       <View style={{ flex: 1 }}>
                         <AppShell />
                         <OfflineBanner accentColor="#ef4444" />
+                        <SyncStatusBanner accentColor="#6366f1" />
+                        <ConflictResolutionModal accentColor="#ef4444" />
                         <CopilotFab config={{
                           name: "Sentinel",
                           icon: "🛡",
@@ -179,6 +182,7 @@ export default function RootLayout() {
                     </KeyboardProvider>
                   </ThemeProvider>
                 </GestureHandlerRootView>
+                </SyncEngineProvider>
               </BiometricProvider>
             </NotificationProvider>
           </AuthProvider>
