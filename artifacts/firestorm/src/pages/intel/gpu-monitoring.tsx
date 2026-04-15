@@ -280,25 +280,42 @@ export default function GPUMonitoring() {
 
   const liveGpus = liveGpuData?.gpus as DcgmGpu[] | undefined;
 
-  const liveNodes: GpuNode[] | undefined = liveGpus?.map((g) => ({
-    id: g.uuid ?? `gpu-${g.gpuIndex}`,
-    hostname: `gpu-node-${g.gpuIndex}`,
-    gpuModel: g.modelName ?? "NVIDIA GPU",
-    gpuUtilPct: g.utilizationPct ?? 0,
-    vramUsedGb: (g.memoryUsedMb ?? 0) / 1024,
-    vramTotalGb: (g.memoryTotalMb ?? 0) / 1024,
-    tempCelsius: g.temperatureCelsius ?? 0,
-    powerWatts: g.powerDrawWatts ?? 0,
-    fanSpeedPct: g.fanSpeedPct ?? 0,
-    state: g.temperatureCelsius >= 85 ? "error" as const : g.temperatureCelsius >= 75 ? "throttle" as const : g.utilizationPct >= 90 ? "plateau" as const : "ramping" as const,
-    pcieThroughputGbps: ((g.pcieRxBytesPerSec ?? 0) + (g.pcieTxBytesPerSec ?? 0)) / 1_000_000_000,
-    nvlinkBandwidthGbps: 0,
-    xidErrors: 0,
-    eccErrors: { singleBit: g.eccSingleBit ?? 0, doubleBit: g.eccDoubleBit ?? 0 },
-    smClockMhz: g.smClockMhz ?? 0,
-    memClockMhz: g.memClockMhz ?? 0,
-    thermalHistory: [],
-  }));
+  const modelMap: Record<string, GpuNode["model"]> = {
+    "NVIDIA H100 80GB HBM3": "NVIDIA H100 SXM5",
+    "NVIDIA A100 80GB SXM": "NVIDIA A100 80GB",
+    "NVIDIA A100 40GB SXM": "NVIDIA A100 40GB",
+    "NVIDIA H200 141GB HBM3e": "NVIDIA H200 SXM5",
+  };
+
+  const liveNodes: GpuNode[] | undefined = liveGpus?.map((g) => {
+    const state: GpuNode["state"] = g.temperatureCelsius >= 85 ? "error"
+      : g.temperatureCelsius >= 75 ? "throttle"
+      : g.utilizationPct >= 90 ? "plateau"
+      : g.utilizationPct > 5 ? "ramping"
+      : "idle";
+    return {
+      id: g.uuid ?? `gpu-${g.gpuIndex}`,
+      name: `gpu-node-${g.gpuIndex}`,
+      model: modelMap[g.modelName] ?? "NVIDIA H100 SXM5",
+      gpuCount: 1,
+      state,
+      utilizationPct: g.utilizationPct ?? 0,
+      vramUsedGb: (g.memoryUsedMb ?? 0) / 1024,
+      vramTotalGb: (g.memoryTotalMb ?? 0) / 1024,
+      vramFragmentation: 0,
+      tempCelsius: g.temperatureCelsius ?? 0,
+      powerWatts: g.powerDrawWatts ?? 0,
+      powerLimitWatts: g.powerLimitWatts ?? 700,
+      nvlinkBandwidthGbps: 0,
+      nvlinkBandwidthMaxGbps: 600,
+      eccErrorCount: (g.eccSingleBit ?? 0) + (g.eccDoubleBit ?? 0),
+      xidEvents: g.throttleReasons?.length
+        ? g.throttleReasons.map((r) => ({ xidCode: 79, description: r, occurredAt: Date.now(), severity: "warning" as const }))
+        : [],
+      thermalCurve: [],
+      tokenThroughput: 0,
+    };
+  });
 
   interface DcgmClusterSummary {
     totalGpus: number;
