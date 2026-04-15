@@ -85,6 +85,17 @@ The platform consists of 13 interconnected applications sharing authentication a
 - `artifacts/api-server/src/lib/distribution-os-migrations.ts` created to apply `next_follow_up` column to `dos_leads` table (schema-to-DB drift fix).
 - `.npmrc` updated to use `${NODE_AUTH_TOKEN:-}` (empty fallback) to suppress NODE_AUTH_TOKEN warning when not set.
 
+## Ecosystem Gap Closure (Task #502)
+- Orphaned directories physically deleted: `artifacts/alloy-mobile/`, `artifacts/forge/`, `artifacts/inca-lab/` (all had no package.json or source code; content was previously merged into existing apps).
+- Orphaned `artifacts/forge: web` workflow removed — only 16 workflows remain (none auto-started, all on-demand).
+- `.npmrc` simplified: removed `@szl-holdings:registry=https://npm.pkg.github.com` — all `@szl-holdings/*` packages are workspace-local; registry line was triggering NODE_AUTH_TOKEN auth warnings.
+- Sentry DSN missing fallback changed from `console.warn` to `console.debug` in `lib/observability/src/react/sentry.ts` to reduce noise (Sentry without DSN is expected in dev).
+- Database schema dead table audit: 88 schema files, 577 total table definitions, 462 with direct api-server references, 115 with no direct references documented in `docs/schema-audit-2025-04.md`.
+- Post-merge integration verified: A2A (`/a2a`), RAG Knowledge (`/rag`), Connector Hub (`/connector-hub`), and Nuro Mesh (`/nuro-mesh`) routes are all registered in routes/index.ts with source files present.
+- PRISM Counsel (`artifacts/prism-counsel`) verified working: full source tree with `prism-counsel-app.tsx`, pages, components, hooks, lib directories — no App.tsx needed, uses direct main.tsx entry.
+- All 7 mobile apps already had correct package versions: expo-notifications ~0.32.16, @types/react ~19.1.10, @types/react-dom ~19.1.7.
+- SZL Holdings web app confirmed loading cleanly with no unexpected browser console errors.
+
 ## External Dependencies
 - **Database:** PostgreSQL
 - **Authentication:** Replit Auth
