@@ -141,7 +141,7 @@ export function Navbar() {
             </AnimatePresence>
           </div>
 
-          <
+          <a
             href="/szl-holdings/"
             className="flex items-center gap-1.5 text-[10px] font-medium tracking-[0.12em] uppercase transition-colors duration-200"
             style={{ color: "hsl(0,0%,30%)", textDecoration: "none" }}
