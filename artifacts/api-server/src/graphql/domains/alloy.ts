@@ -9,6 +9,7 @@ import {
   writeAuditLog,
   processSignalIntoWorkflow,
 } from "../../lib/alloy-orchestration.js";
+import { domainEventBus } from "../../lib/domain-events/index.js";
 
 export { pubsub, ALLOY_EVENTS };
 
@@ -742,10 +743,38 @@ export const alloyResolvers = {
 
     createAlloySignalWorkflow: async (_: unknown, args: { signalId: string; workflowType?: string; priority?: string }) => {
       try {
-        const workflow = await processSignalIntoWorkflow(parseInt(args.signalId, 10), {
-          workflowType: coerceWorkflowType(args.workflowType) as "investigation" | "remediation" | "escalation" | "review" | "notification" | "report" | "custom",
-          priority: coercePriority(args.priority) as "low" | "medium" | "high" | "critical",
+        const signalId = parseInt(args.signalId, 10);
+        const workflowType = coerceWorkflowType(args.workflowType);
+        const priority = coercePriority(args.priority);
+
+        const { db } = await import("@szl-holdings/db");
+        const { alloySignals } = await import("@szl-holdings/db/schema");
+        const { eq } = await import("drizzle-orm");
+        const [signal] = await db.select().from(alloySignals).where(eq(alloySignals.id, signalId)).limit(1);
+        if (signal) {
+          domainEventBus.publish("alloy.signal-ingested", {
+            signalId: signal.id,
+            severity: signal.severity,
+            domain: signal.domain ?? null,
+            source: signal.source ?? "manual",
+            title: signal.title ?? `Signal #${signal.id}`,
+          });
+        }
+
+        const workflow = await processSignalIntoWorkflow(signalId, {
+          workflowType: workflowType as "investigation" | "remediation" | "escalation" | "review" | "notification" | "report" | "custom",
+          priority: priority as "low" | "medium" | "high" | "critical",
         });
+
+        if (workflow) {
+          domainEventBus.publish("alloy.workflow-created", {
+            workflowId: workflow.id,
+            signalId,
+            workflowType,
+            priority,
+          });
+        }
+
         return workflow ? enrichWorkflow(workflow as unknown as Record<string, unknown>) : null;
       } catch (err) { throw new Error(`Failed to create signal workflow: ${err}`); }
     },

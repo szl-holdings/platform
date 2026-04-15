@@ -1,4 +1,15 @@
 import { parseIntId } from "../utils.js";
+import {
+  getTrustCenterStatus,
+  listHoldingsVentures,
+  getHoldingsVenture,
+  getHoldingsVentureBySlug,
+  listHoldingsMetrics,
+  listHoldingsMilestones,
+  listHoldingsInquiries,
+  createHoldingsInquiry,
+  type HoldingsStoragePort,
+} from "../../lib/domain-services/holdings/index.js";
 
 export const holdingsTypeDefs = `#graphql
   type TrustFramework {
@@ -74,107 +85,77 @@ export const holdingsTypeDefs = `#graphql
   }
 `;
 
+async function buildHoldingsStorage(): Promise<HoldingsStoragePort> {
+  const { db } = await import("@szl-holdings/db");
+  const { holdingsVenturesTable, holdingsMetricsTable, holdingsMilestonesTable, holdingsInquiriesTable } = await import("@szl-holdings/db/schema");
+  const { desc, eq } = await import("drizzle-orm");
+
+  return {
+    async listVentures(args) {
+      try {
+        const q = db.select().from(holdingsVenturesTable).orderBy(desc(holdingsVenturesTable.createdAt)).limit(args.limit).offset(args.offset);
+        if (args.status) return await q.where(eq(holdingsVenturesTable.status, args.status as any));
+        return await q;
+      } catch { return []; }
+    },
+    async getVenture(id) {
+      try {
+        const rows = await db.select().from(holdingsVenturesTable).where(eq(holdingsVenturesTable.id, id)).limit(1);
+        return rows[0] ?? null;
+      } catch { return null; }
+    },
+    async getVentureBySlug(slug) {
+      try {
+        const rows = await db.select().from(holdingsVenturesTable).where(eq(holdingsVenturesTable.slug, slug as any)).limit(1);
+        return rows[0] ?? null;
+      } catch { return null; }
+    },
+    async listMetrics(args) {
+      try { return await db.select().from(holdingsMetricsTable).where(eq(holdingsMetricsTable.ventureId, args.ventureId)).orderBy(desc(holdingsMetricsTable.createdAt)).limit(args.limit); } catch { return []; }
+    },
+    async listMilestones(args) {
+      try { return await db.select().from(holdingsMilestonesTable).where(eq(holdingsMilestonesTable.ventureId, args.ventureId)).orderBy(desc(holdingsMilestonesTable.createdAt)).limit(args.limit); } catch { return []; }
+    },
+    async listInquiries(args) {
+      try {
+        const q = db.select().from(holdingsInquiriesTable).orderBy(desc(holdingsInquiriesTable.createdAt)).limit(args.limit).offset(args.offset);
+        if (args.status) return await q.where(eq(holdingsInquiriesTable.status, args.status as any));
+        return await q;
+      } catch { return []; }
+    },
+    async createInquiry(data) {
+      const rows = await db.insert(holdingsInquiriesTable).values(data).returning();
+      return rows[0];
+    },
+  };
+}
+
 export const holdingsResolvers = {
   Query: {
-    trustCenter: () => ({
-      lastAuditDate: "2026-01-15",
-      nextReviewDate: "2026-07-15",
-      overallScore: 94,
-      frameworks: [
-        { name: "ISO 27001", status: "certified", scope: "Information Security Management", expiry: "Dec 2026" },
-        { name: "SOC 2 Type II", status: "certified", scope: "Security, Availability, Confidentiality", expiry: "Mar 2027" },
-        { name: "GDPR", status: "compliant", scope: "EU Data Protection", expiry: "Ongoing" },
-        { name: "FedRAMP", status: "in-progress", scope: "US Federal Cloud", expiry: "Q3 2026" },
-        { name: "ITAR", status: "compliant", scope: "Defense Technology Controls", expiry: "Ongoing" },
-      ],
-      certifications: [
-        { name: "Pentest by Cobalt Strike", date: "Jan 2026", issuer: "Cobalt Strike" },
-        { name: "AWS Security Partner Certified", date: "Nov 2025", issuer: "Amazon Web Services" },
-        { name: "Zero Trust Architecture", date: "Sep 2025", issuer: "CISA" },
-        { name: "DISA STIGs Applied", date: "Dec 2025", issuer: "DISA" },
-      ],
-    }),
+    trustCenter: () => getTrustCenterStatus(),
     holdingsVentures: async (_: unknown, args: { status?: string; limit?: number; offset?: number }) => {
-      try {
-        const { db } = await import("@szl-holdings/db");
-        const { holdingsVenturesTable } = await import("@szl-holdings/db/schema");
-        const { desc, eq } = await import("drizzle-orm");
-        const query = db.select().from(holdingsVenturesTable).orderBy(desc(holdingsVenturesTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
-        if (args.status) {
-          return await query.where(eq(holdingsVenturesTable.status, args.status as any));
-        }
-        return await query;
-      } catch {
-        return [];
-      }
+      return listHoldingsVentures(await buildHoldingsStorage(), args);
     },
     holdingsVenture: async (_: unknown, args: { id: string }) => {
-      try {
-        const { db } = await import("@szl-holdings/db");
-        const { holdingsVenturesTable } = await import("@szl-holdings/db/schema");
-        const { eq } = await import("drizzle-orm");
-        const rows = await db.select().from(holdingsVenturesTable).where(eq(holdingsVenturesTable.id, parseIntId(args.id))).limit(1);
-        return rows[0] ?? null;
-      } catch {
-        return null;
-      }
+      return getHoldingsVenture(await buildHoldingsStorage(), parseIntId(args.id));
     },
     holdingsVentureBySlug: async (_: unknown, args: { slug: string }) => {
-      try {
-        const { db } = await import("@szl-holdings/db");
-        const { holdingsVenturesTable } = await import("@szl-holdings/db/schema");
-        const { eq } = await import("drizzle-orm");
-        const rows = await db.select().from(holdingsVenturesTable).where(eq(holdingsVenturesTable.slug, args.slug as any)).limit(1);
-        return rows[0] ?? null;
-      } catch {
-        return null;
-      }
+      return getHoldingsVentureBySlug(await buildHoldingsStorage(), args.slug);
     },
     holdingsMetrics: async (_: unknown, args: { ventureId: string; limit?: number }) => {
-      try {
-        const { db } = await import("@szl-holdings/db");
-        const { holdingsMetricsTable } = await import("@szl-holdings/db/schema");
-        const { desc, eq } = await import("drizzle-orm");
-        return await db.select().from(holdingsMetricsTable).where(eq(holdingsMetricsTable.ventureId, parseIntId(args.ventureId, "ventureId"))).orderBy(desc(holdingsMetricsTable.createdAt)).limit(args.limit ?? 20);
-      } catch {
-        return [];
-      }
+      return listHoldingsMetrics(await buildHoldingsStorage(), { ventureId: parseIntId(args.ventureId, "ventureId"), limit: args.limit });
     },
     holdingsMilestones: async (_: unknown, args: { ventureId: string; limit?: number }) => {
-      try {
-        const { db } = await import("@szl-holdings/db");
-        const { holdingsMilestonesTable } = await import("@szl-holdings/db/schema");
-        const { desc, eq } = await import("drizzle-orm");
-        return await db.select().from(holdingsMilestonesTable).where(eq(holdingsMilestonesTable.ventureId, parseIntId(args.ventureId, "ventureId"))).orderBy(desc(holdingsMilestonesTable.createdAt)).limit(args.limit ?? 20);
-      } catch {
-        return [];
-      }
+      return listHoldingsMilestones(await buildHoldingsStorage(), { ventureId: parseIntId(args.ventureId, "ventureId"), limit: args.limit });
     },
     holdingsInquiries: async (_: unknown, args: { status?: string; limit?: number; offset?: number }) => {
-      try {
-        const { db } = await import("@szl-holdings/db");
-        const { holdingsInquiriesTable } = await import("@szl-holdings/db/schema");
-        const { desc, eq } = await import("drizzle-orm");
-        const query = db.select().from(holdingsInquiriesTable).orderBy(desc(holdingsInquiriesTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
-        if (args.status) {
-          return await query.where(eq(holdingsInquiriesTable.status, args.status as any));
-        }
-        return await query;
-      } catch {
-        return [];
-      }
+      return listHoldingsInquiries(await buildHoldingsStorage(), args);
     },
   },
   Mutation: {
     createHoldingsInquiry: async (_: unknown, args: { name: string; email: string; subject: string; message: string }) => {
       try {
-        const { db } = await import("@szl-holdings/db");
-        const { holdingsInquiriesTable } = await import("@szl-holdings/db/schema");
-        const rows = await db
-          .insert(holdingsInquiriesTable)
-          .values({ name: args.name, email: args.email, subject: args.subject, message: args.message, status: "new" })
-          .returning();
-        return rows[0];
+        return await createHoldingsInquiry(await buildHoldingsStorage(), args);
       } catch (err) {
         throw new Error(`Failed to create inquiry: ${err}`);
       }

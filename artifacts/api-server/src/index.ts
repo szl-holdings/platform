@@ -35,8 +35,11 @@ import { providerHealth } from "./lib/provider-health";
 import { startEmbeddingWorker, stopEmbeddingWorker, getWorkerStatus } from "./lib/embedding-worker";
 import { initIngestionFramework } from "./lib/ingestion-framework";
 import { registerAnalyticsJobHandlers } from "./lib/analytics-jobs";
+import { initializeAlloyDomainEventSubscriptions } from "./lib/domain-events/alloy-wiring.js";
 
 failFastOnInvalidConfig();
+
+initializeAlloyDomainEventSubscriptions();
 
 registerGenAITelemetryBridge();
 

@@ -1,5 +1,13 @@
 import { withFilter } from "graphql-subscriptions";
 import { pubsub, VESSELS_EVENTS } from "../../lib/pubsub-bridge.js";
+import {
+  listVessels,
+  listVesselPositions,
+  listVesselRoutes,
+  listVesselEvents,
+  getVessel,
+  type VesselsStoragePort,
+} from "../../lib/domain-services/vessels/index.js";
 
 export const vesselsTypeDefs = `#graphql
   type Vessel {
@@ -51,80 +59,84 @@ export const vesselsTypeDefs = `#graphql
   }
 `;
 
+async function buildVesselsStorage(): Promise<VesselsStoragePort> {
+  const { db } = await import("@szl-holdings/db");
+  const { vesselsTable, vesselsPositionsTable, vesselsRoutesTable, vesselsEventsTable } = await import("@szl-holdings/db/schema");
+  const { desc, eq, and } = await import("drizzle-orm");
+
+  return {
+    async listVessels(args) {
+      try {
+        const q = db.select().from(vesselsTable).orderBy(desc(vesselsTable.createdAt)).limit(args.limit).offset(args.offset);
+        if (args.status) return await q.where(eq(vesselsTable.status, args.status as any));
+        return await q;
+      } catch { return []; }
+    },
+    async getVessel(id) {
+      try {
+        const rows = await db.select().from(vesselsTable).where(eq(vesselsTable.id, id)).limit(1);
+        return rows[0] ?? null;
+      } catch { return null; }
+    },
+    async listPositions(args) {
+      try {
+        const q = db.select().from(vesselsPositionsTable).orderBy(desc(vesselsPositionsTable.recordedAt)).limit(args.limit);
+        if (args.vesselId) return await q.where(eq(vesselsPositionsTable.vesselId, args.vesselId));
+        return await q;
+      } catch { return []; }
+    },
+    async listRoutes(args) {
+      try {
+        const conditions = [];
+        if (args.vesselId) conditions.push(eq(vesselsRoutesTable.vesselId, args.vesselId));
+        if (args.status) conditions.push(eq(vesselsRoutesTable.status, args.status as any));
+        const q = db.select().from(vesselsRoutesTable).orderBy(desc(vesselsRoutesTable.departureAt)).limit(args.limit).offset(args.offset);
+        if (conditions.length > 0) return await q.where(and(...conditions));
+        return await q;
+      } catch { return []; }
+    },
+    async listEvents(args) {
+      try {
+        const conditions = [];
+        if (args.vesselId) conditions.push(eq(vesselsEventsTable.vesselId, args.vesselId));
+        if (args.severity) conditions.push(eq(vesselsEventsTable.severity, args.severity as any));
+        const q = db.select().from(vesselsEventsTable).orderBy(desc(vesselsEventsTable.occurredAt)).limit(args.limit).offset(args.offset);
+        if (conditions.length > 0) return await q.where(and(...conditions));
+        return await q;
+      } catch { return []; }
+    },
+  };
+}
+
 export const vesselsResolvers = {
   Query: {
     vessels: async (_: unknown, args: { status?: string; limit?: number; offset?: number }) => {
-      try {
-        const { db } = await import("@szl-holdings/db");
-        const { vesselsTable } = await import("@szl-holdings/db/schema");
-        const { desc, eq } = await import("drizzle-orm");
-        const query = db.select().from(vesselsTable).orderBy(desc(vesselsTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
-        if (args.status) {
-          return await query.where(eq(vesselsTable.status, args.status as any));
-        }
-        return await query;
-      } catch {
-        return [];
-      }
+      return listVessels(await buildVesselsStorage(), args);
     },
     vessel: async (_: unknown, args: { id: string }) => {
-      try {
-        const { db } = await import("@szl-holdings/db");
-        const { vesselsTable } = await import("@szl-holdings/db/schema");
-        const { eq } = await import("drizzle-orm");
-        const rows = await db.select().from(vesselsTable).where(eq(vesselsTable.id, parseInt(args.id, 10))).limit(1);
-        return rows[0] ?? null;
-      } catch {
-        return null;
-      }
+      return getVessel(await buildVesselsStorage(), parseInt(args.id, 10));
     },
     vesselPositions: async (_: unknown, args: { vesselId?: string; limit?: number }) => {
-      try {
-        const { db } = await import("@szl-holdings/db");
-        const { vesselsPositionsTable } = await import("@szl-holdings/db/schema");
-        const { desc, eq } = await import("drizzle-orm");
-        const query = db.select().from(vesselsPositionsTable).orderBy(desc(vesselsPositionsTable.recordedAt)).limit(args.limit ?? 100);
-        if (args.vesselId) {
-          return await query.where(eq(vesselsPositionsTable.vesselId, parseInt(args.vesselId, 10)));
-        }
-        return await query;
-      } catch {
-        return [];
-      }
+      return listVesselPositions(await buildVesselsStorage(), {
+        vesselId: args.vesselId ? parseInt(args.vesselId, 10) : undefined,
+        limit: args.limit,
+      });
     },
     vesselRoutes: async (_: unknown, args: { vesselId?: string; status?: string; limit?: number; offset?: number }) => {
-      try {
-        const { db } = await import("@szl-holdings/db");
-        const { vesselsRoutesTable } = await import("@szl-holdings/db/schema");
-        const { desc, eq, and } = await import("drizzle-orm");
-        const conditions = [];
-        if (args.vesselId) conditions.push(eq(vesselsRoutesTable.vesselId, parseInt(args.vesselId, 10)));
-        if (args.status) conditions.push(eq(vesselsRoutesTable.status, args.status as any));
-        const query = db.select().from(vesselsRoutesTable).orderBy(desc(vesselsRoutesTable.departureAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
-        if (conditions.length > 0) {
-          return await query.where(and(...conditions));
-        }
-        return await query;
-      } catch {
-        return [];
-      }
+      return listVesselRoutes(await buildVesselsStorage(), {
+        vesselId: args.vesselId ? parseInt(args.vesselId, 10) : undefined,
+        status: args.status,
+        limit: args.limit,
+        offset: args.offset,
+      });
     },
     vesselEvents: async (_: unknown, args: { vesselId?: string; severity?: string; limit?: number; offset?: number }) => {
-      try {
-        const { db } = await import("@szl-holdings/db");
-        const { vesselsEventsTable } = await import("@szl-holdings/db/schema");
-        const { desc, eq, and } = await import("drizzle-orm");
-        const conditions = [];
-        if (args.vesselId) conditions.push(eq(vesselsEventsTable.vesselId, parseInt(args.vesselId, 10)));
-        if (args.severity) conditions.push(eq(vesselsEventsTable.severity, args.severity as any));
-        const query = db.select().from(vesselsEventsTable).orderBy(desc(vesselsEventsTable.occurredAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
-        if (conditions.length > 0) {
-          return await query.where(and(...conditions));
-        }
-        return await query;
-      } catch {
-        return [];
-      }
+      return listVesselEvents(await buildVesselsStorage(), {
+        vesselId: args.vesselId ? parseInt(args.vesselId, 10) : undefined,
+        severity: args.severity,
+        limit: args.limit,
+        offset: args.offset,
+      });
     },
   },
   Subscription: {

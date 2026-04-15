@@ -1,5 +1,14 @@
 import { publish, WS_CHANNELS } from "../../lib/websocket.js";
 import { pubsub, CARLOTA_EVENTS } from "../../lib/pubsub-bridge.js";
+import {
+  listCarlotaServices,
+  listCarlotaReservations,
+  getCarlotaReservation,
+  listCarlotaInquiries,
+  listCarlotaClientProfiles,
+  createCarlotaInquiry,
+  type CarlotaJoStoragePort,
+} from "../../lib/domain-services/carlota-jo/index.js";
 
 export const carlotaJoTypeDefs = `#graphql
   type CarlotaService {
@@ -56,93 +65,77 @@ export const carlotaJoTypeDefs = `#graphql
   }
 `;
 
-export const carlotaJoResolvers = {
-  Query: {
-    carlotaServices: async (_: unknown, args: { category?: string; isActive?: boolean; limit?: number }) => {
+async function buildCarlotaStorage(): Promise<CarlotaJoStoragePort> {
+  const { db } = await import("@szl-holdings/db");
+  const { carlotaServicesTable, carlotaReservationsTable, carlotaInquiriesTable, carlotaClientProfilesTable } = await import("@szl-holdings/db/schema");
+  const { desc, eq, and } = await import("drizzle-orm");
+
+  return {
+    async listServices(args) {
       try {
-        const { db } = await import("@szl-holdings/db");
-        const { carlotaServicesTable } = await import("@szl-holdings/db/schema");
-        const { desc, eq, and } = await import("drizzle-orm");
         const conditions = [];
         if (args.category) conditions.push(eq(carlotaServicesTable.category, args.category as any));
         if (args.isActive != null) conditions.push(eq(carlotaServicesTable.isActive, args.isActive as any));
-        const query = db.select().from(carlotaServicesTable).orderBy(desc(carlotaServicesTable.createdAt)).limit(args.limit ?? 50);
-        if (conditions.length > 0) {
-          return await query.where(and(...conditions));
-        }
-        return await query;
-      } catch {
-        return [];
-      }
+        const q = db.select().from(carlotaServicesTable).orderBy(desc(carlotaServicesTable.createdAt)).limit(args.limit);
+        if (conditions.length > 0) return await q.where(and(...conditions));
+        return await q;
+      } catch { return []; }
+    },
+    async listReservations(args) {
+      try {
+        const q = db.select().from(carlotaReservationsTable).orderBy(desc(carlotaReservationsTable.createdAt)).limit(args.limit).offset(args.offset);
+        if (args.status) return await q.where(eq(carlotaReservationsTable.status, args.status as any));
+        return await q;
+      } catch { return []; }
+    },
+    async getReservationByConfirmationId(confirmationId) {
+      try {
+        const rows = await db.select().from(carlotaReservationsTable).where(eq(carlotaReservationsTable.confirmationId, confirmationId)).limit(1);
+        return rows[0] ?? null;
+      } catch { return null; }
+    },
+    async listInquiries(args) {
+      try {
+        const q = db.select().from(carlotaInquiriesTable).orderBy(desc(carlotaInquiriesTable.createdAt)).limit(args.limit).offset(args.offset);
+        if (args.status) return await q.where(eq(carlotaInquiriesTable.status, args.status as any));
+        return await q;
+      } catch { return []; }
+    },
+    async listClientProfiles(args) {
+      try { return await db.select().from(carlotaClientProfilesTable).orderBy(desc(carlotaClientProfilesTable.createdAt)).limit(args.limit).offset(args.offset); } catch { return []; }
+    },
+    async createInquiry(data) {
+      const rows = await db.insert(carlotaInquiriesTable).values(data as any).returning();
+      const inquiry = rows[0];
+      publish(WS_CHANNELS.BOOKINGS, "inquiry-created", { id: inquiry.id, name: inquiry.name, service: inquiry.service, status: inquiry.status });
+      pubsub.publish(CARLOTA_EVENTS.INQUIRY_CREATED, { carlotaInquiryCreated: inquiry });
+      return inquiry;
+    },
+  };
+}
+
+export const carlotaJoResolvers = {
+  Query: {
+    carlotaServices: async (_: unknown, args: { category?: string; isActive?: boolean; limit?: number }) => {
+      return listCarlotaServices(await buildCarlotaStorage(), args);
     },
     carlotaReservations: async (_: unknown, args: { status?: string; limit?: number; offset?: number }) => {
-      try {
-        const { db } = await import("@szl-holdings/db");
-        const { carlotaReservationsTable } = await import("@szl-holdings/db/schema");
-        const { desc, eq } = await import("drizzle-orm");
-        const query = db.select().from(carlotaReservationsTable).orderBy(desc(carlotaReservationsTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
-        if (args.status) {
-          return await query.where(eq(carlotaReservationsTable.status, args.status as any));
-        }
-        return await query;
-      } catch {
-        return [];
-      }
+      return listCarlotaReservations(await buildCarlotaStorage(), args);
     },
     carlotaReservation: async (_: unknown, args: { confirmationId: string }) => {
-      try {
-        const { db } = await import("@szl-holdings/db");
-        const { carlotaReservationsTable } = await import("@szl-holdings/db/schema");
-        const { eq } = await import("drizzle-orm");
-        const rows = await db.select().from(carlotaReservationsTable).where(eq(carlotaReservationsTable.confirmationId, args.confirmationId)).limit(1);
-        return rows[0] ?? null;
-      } catch {
-        return null;
-      }
+      return getCarlotaReservation(await buildCarlotaStorage(), args.confirmationId);
     },
     carlotaInquiries: async (_: unknown, args: { status?: string; limit?: number; offset?: number }) => {
-      try {
-        const { db } = await import("@szl-holdings/db");
-        const { carlotaInquiriesTable } = await import("@szl-holdings/db/schema");
-        const { desc, eq } = await import("drizzle-orm");
-        const query = db.select().from(carlotaInquiriesTable).orderBy(desc(carlotaInquiriesTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
-        if (args.status) {
-          return await query.where(eq(carlotaInquiriesTable.status, args.status as any));
-        }
-        return await query;
-      } catch {
-        return [];
-      }
+      return listCarlotaInquiries(await buildCarlotaStorage(), args);
     },
     carlotaClientProfiles: async (_: unknown, args: { limit?: number; offset?: number }) => {
-      try {
-        const { db } = await import("@szl-holdings/db");
-        const { carlotaClientProfilesTable } = await import("@szl-holdings/db/schema");
-        const { desc } = await import("drizzle-orm");
-        return await db.select().from(carlotaClientProfilesTable).orderBy(desc(carlotaClientProfilesTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
-      } catch {
-        return [];
-      }
+      return listCarlotaClientProfiles(await buildCarlotaStorage(), args);
     },
   },
   Mutation: {
     createCarlotaInquiry: async (_: unknown, args: { name: string; email: string; service: string; message: string }) => {
       try {
-        const { db } = await import("@szl-holdings/db");
-        const { carlotaInquiriesTable } = await import("@szl-holdings/db/schema");
-        const rows = await db
-          .insert(carlotaInquiriesTable)
-          .values({ name: args.name, email: args.email, service: args.service, message: args.message, status: "new" } as any)
-          .returning();
-        const inquiry = rows[0];
-        publish(WS_CHANNELS.BOOKINGS, "inquiry-created", {
-          id: inquiry.id,
-          name: inquiry.name,
-          service: inquiry.service,
-          status: inquiry.status,
-        });
-        pubsub.publish(CARLOTA_EVENTS.INQUIRY_CREATED, { carlotaInquiryCreated: inquiry });
-        return inquiry;
+        return await createCarlotaInquiry(await buildCarlotaStorage(), args);
       } catch (err) {
         throw new Error(`Failed to create inquiry: ${err}`);
       }
