@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { m, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
+import { useState, useEffect, useRef, useMemo, useCallback, memo } from "react";
+import { m, AnimatePresence } from "framer-motion";
 import {
   Activity, Cpu, Globe, Shield, Anchor, Building2, Scale,
   Zap, Network, Radio, TrendingUp, Eye, Brain,
@@ -87,7 +87,7 @@ function severityColor(severity: string) {
   }
 }
 
-function ParticleField() {
+const ParticleField = memo(function ParticleField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -156,9 +156,9 @@ function ParticleField() {
   }, []);
 
   return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" style={{ pointerEvents: "none", opacity: 0.6 }} />;
-}
+});
 
-function ConstellationView({ onSelectApp }: { onSelectApp: (app: typeof PLATFORM_APPS[0] | null) => void }) {
+const ConstellationView = memo(function ConstellationView({ onSelectApp }: { onSelectApp: (app: typeof PLATFORM_APPS[0] | null) => void }) {
   const [rotation, setRotation] = useState(0);
   const [activeSignals, setActiveSignals] = useState<{ from: number; to: number; id: string; color: string }[]>([]);
   const [hoveredApp, setHoveredApp] = useState<string | null>(null);
@@ -280,9 +280,9 @@ function ConstellationView({ onSelectApp }: { onSelectApp: (app: typeof PLATFORM
       })}
     </svg>
   );
-}
+});
 
-function ThroughputChart() {
+const ThroughputChart = memo(function ThroughputChart() {
   const [dataPoints, setDataPoints] = useState<number[]>(() =>
     Array.from({ length: 30 }, () => Math.random() * 60 + 20)
   );
@@ -320,9 +320,9 @@ function ThroughputChart() {
       </circle>
     </svg>
   );
-}
+});
 
-function GitTicker() {
+const GitTicker = memo(function GitTicker() {
   const commits = [
     { hash: "e0798e0", msg: "feat: Platform Pulse — ecosystem dashboard", author: "stephen", time: "2m ago", files: 4 },
     { hash: "b33ba2a", msg: "feat: dashboard UI redesign across all apps", author: "agent-459", time: "14m ago", files: 18 },
@@ -363,9 +363,9 @@ function GitTicker() {
       </AnimatePresence>
     </div>
   );
-}
+});
 
-function AgentNeuralMesh() {
+const AgentNeuralMesh = memo(function AgentNeuralMesh() {
   const [events, setEvents] = useState<PulseEvent[]>([]);
   useEffect(() => {
     setEvents(Array.from({ length: 8 }, () => generatePulseEvent()));
@@ -406,7 +406,7 @@ function AgentNeuralMesh() {
       </AnimatePresence>
     </div>
   );
-}
+});
 
 function MetricCard({ label, value, suffix, icon: Icon, color, trend, delay = 0 }: {
   label: string; value: number; suffix?: string;

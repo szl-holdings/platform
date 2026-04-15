@@ -170,7 +170,22 @@ export class EvidencePipeline {
     this._hydrated = true;
     try {
       const { db, alloyEvidenceIndex } = await import("@szl-holdings/db");
-      const { desc } = await import("drizzle-orm");
+      if (!alloyEvidenceIndex?.entryTimestamp) {
+        console.warn("[evidence-pipeline] Schema missing entryTimestamp column — skipping hydration");
+        return;
+      }
+      const { desc, sql: rawSql } = await import("drizzle-orm");
+      const tableCheck = await db.execute(rawSql`
+        SELECT EXISTS (
+          SELECT 1 FROM information_schema.tables
+          WHERE table_name = 'alloy_evidence_index'
+        ) AS table_exists
+      `);
+      const exists = (tableCheck as { rows?: { table_exists?: boolean }[] }).rows?.[0]?.table_exists ?? false;
+      if (!exists) {
+        console.warn("[evidence-pipeline] alloy_evidence_index table not found — skipping hydration");
+        return;
+      }
       const rows = await db
         .select()
         .from(alloyEvidenceIndex)
