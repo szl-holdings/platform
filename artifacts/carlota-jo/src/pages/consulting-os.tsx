@@ -6,7 +6,7 @@ import {
   Sparkles, FileText, Network, Radar, Activity, Heart,
   TrendingUp, GraduationCap, Lightbulb, Users, FolderOpen,
   ChevronRight, ArrowUpRight, Zap, Shield, Globe, Clock,
-  BarChart3, Target, Star, CheckCircle, AlertCircle, Cpu
+  BarChart3, Target, Star, CheckCircle, AlertCircle, Cpu, BookOpen
 } from "lucide-react";
 
 const GOLD = "var(--color-gold)";
@@ -131,6 +131,78 @@ const OS_MODULES = [
     status: "active",
     color: "#475569",
     tags: ["Real-Time Visibility", "Document Sharing", "Approval Workflows"],
+  },
+  {
+    id: "time-tracking",
+    icon: Clock,
+    title: "Time Tracking & Smart Billing",
+    subtitle: "Every hour captured. Every invoice optimised.",
+    description: "Granular time entry by engagement, phase, and deliverable. AI suggests entries from calendar activity. Automated invoice generation, rate card management, and billing milestone tracking.",
+    href: "/time-tracking",
+    metric: "94% rate realisation",
+    status: "active",
+    color: "#B8960C",
+    tags: ["Time Capture", "Invoice Generation", "Rate Cards"],
+  },
+  {
+    id: "capacity-planner",
+    icon: Users,
+    title: "Resource & Capacity Planner",
+    subtitle: "Right team. Right engagement. Always.",
+    description: "Visual team allocation heatmap showing utilisation rates, bench time, skill-gap analysis, and forward-looking capacity across all engagements. The #1 feature top consulting firms need.",
+    href: "/capacity-planner",
+    metric: "87% avg utilisation",
+    status: "active",
+    color: "#059669",
+    tags: ["Allocation Heatmap", "Bench Analysis", "Skill Gaps"],
+  },
+  {
+    id: "knowledge-vault",
+    icon: BookOpen,
+    title: "Knowledge Vault & Methodology Library",
+    subtitle: "Institutional intelligence. Always searchable.",
+    description: "Every framework, playbook, template, and case study — searchable, version-controlled, and growing with every engagement. AI-powered 'find me a similar engagement' search.",
+    href: "/knowledge-vault",
+    metric: "8 assets · 93 total uses",
+    status: "active",
+    color: "#7C3AED",
+    tags: ["Frameworks", "Playbooks", "AI Search"],
+  },
+  {
+    id: "benchmark-database",
+    icon: BarChart3,
+    title: "Benchmark Database",
+    subtitle: "Every number in industry context.",
+    description: "Reference-quality industry benchmarks for consulting performance metrics auto-populated into client deliverables. 16 metrics across financial, delivery, talent, and client dimensions.",
+    href: "/benchmark-database",
+    metric: "16 benchmarks · 14 sources",
+    status: "active",
+    color: "#0F766E",
+    tags: ["Industry Data", "Auto-populate", "Context"],
+  },
+  {
+    id: "deliverable-workflow",
+    icon: FileText,
+    title: "Deliverable Approval Workflow",
+    subtitle: "Version-controlled. Client-approved.",
+    description: "Staged review pipeline with internal and client approval workflows, threaded comment resolution, full version history, and change tracking. Every deliverable, perfect every time.",
+    href: "/deliverable-workflow",
+    metric: "4 deliverables in pipeline",
+    status: "active",
+    color: "#6366F1",
+    tags: ["Version Control", "Approval Tracking", "Comment Threads"],
+  },
+  {
+    id: "profitability-analytics",
+    icon: TrendingUp,
+    title: "Engagement Profitability Analytics",
+    subtitle: "True margins. Zero surprises.",
+    description: "Real-time P&L per engagement with rate realization tracking, scope creep detection, write-off monitoring, and margin trend analysis. Know the true profitability of every client relationship.",
+    href: "/profitability-analytics",
+    metric: "48% blended margin",
+    status: "active",
+    color: "#059669",
+    tags: ["Margin Tracking", "Scope Creep", "Write-off Dashboard"],
   },
 ];
 
@@ -259,7 +331,7 @@ export default function ConsultingOS() {
               <Zap size={16} color={GOLD} />
               <h2 style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.08em", color: "#6B5E47", textTransform: "uppercase" }}>Platform Modules</h2>
             </div>
-            <div style={{ fontSize: 12, color: "#A89878" }}>10 modules · All active</div>
+            <div style={{ fontSize: 12, color: "#A89878" }}>16 modules · All active</div>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 16 }}>

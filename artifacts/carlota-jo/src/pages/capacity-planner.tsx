@@ -1,0 +1,303 @@
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { usePageMeta } from "@/hooks/usePageMeta";
+import { Users, TrendingUp, AlertCircle, CheckCircle, Calendar, BarChart3, Zap, Clock } from "lucide-react";
+
+const GOLD = "var(--color-gold)";
+
+type TeamMember = {
+  id: string;
+  name: string;
+  title: string;
+  skills: string[];
+  allocations: { engagement: string; client: string; pct: number; weeks: string; color: string }[];
+  utilisation: number;
+  capacity: number;
+  status: "optimal" | "over" | "under" | "bench";
+  dayRate: number;
+};
+
+type CapacityAlert = {
+  type: "warning" | "critical" | "info";
+  message: string;
+  member?: string;
+};
+
+const TEAM: TeamMember[] = [
+  {
+    id: "m1", name: "Carlota Jo", title: "Lead Advisor", dayRate: 2200,
+    skills: ["Strategy", "Brand", "M&A", "Exec Advisory", "Healthcare"],
+    allocations: [
+      { engagement: "Growth Strategy", client: "Luminary Brands", pct: 30, weeks: "Apr–Jun", color: "#B8960C" },
+      { engagement: "M&A Advisory", client: "Vertex Capital", pct: 40, weeks: "Apr–May", color: "#7C3AED" },
+      { engagement: "Business Development", client: "Internal", pct: 20, weeks: "Ongoing", color: "#94A3B8" },
+    ],
+    utilisation: 90, capacity: 100, status: "optimal",
+  },
+  {
+    id: "m2", name: "Dr. Priya Rajan", title: "Healthcare Transformation", dayRate: 1800,
+    skills: ["Digital Transformation", "EHR", "Clinical Ops", "Change Mgmt"],
+    allocations: [
+      { engagement: "Digital Health Strategy", client: "Solaris Health", pct: 60, weeks: "Jun–Aug", color: "#059669" },
+      { engagement: "Proposal Support", client: "Internal", pct: 10, weeks: "Apr", color: "#94A3B8" },
+    ],
+    utilisation: 70, capacity: 100, status: "under",
+  },
+  {
+    id: "m3", name: "James Whitmore", title: "Brand & Marketing", dayRate: 1400,
+    skills: ["Brand Strategy", "DTC", "Positioning", "Consumer Insights"],
+    allocations: [
+      { engagement: "Brand Repositioning", client: "Kestrel Brands", pct: 50, weeks: "May–Jun", color: "#DC2626" },
+      { engagement: "Brand Positioning Sprint", client: "Kestrel Brands", pct: 20, weeks: "May", color: "#F87171" },
+    ],
+    utilisation: 70, capacity: 100, status: "under",
+  },
+  {
+    id: "m4", name: "Sofia Andersson", title: "Financial Services & M&A", dayRate: 2200,
+    skills: ["M&A Advisory", "Financial Modelling", "Market Entry", "PE"],
+    allocations: [
+      { engagement: "M&A Advisory", client: "Vertex Capital", pct: 80, weeks: "Apr–May", color: "#7C3AED" },
+      { engagement: "Portfolio Strategy", client: "Aurelius PE", pct: 20, weeks: "Apr", color: "#0284C7" },
+    ],
+    utilisation: 100, capacity: 100, status: "over",
+  },
+  {
+    id: "m5", name: "Kai Okonkwo", title: "Organisational Design", dayRate: 1600,
+    skills: ["Org Design", "Culture", "Leadership Dev", "HRBP"],
+    allocations: [
+      { engagement: "Org Design Phase 2", client: "Clearfield Manufacturing", pct: 50, weeks: "Apr–May", color: "#D97706" },
+    ],
+    utilisation: 50, capacity: 100, status: "bench",
+  },
+];
+
+const ALERTS: CapacityAlert[] = [
+  { type: "critical", message: "Sofia Andersson is at 100% capacity through May — no buffer for Solaris Health scope should it advance.", member: "Sofia Andersson" },
+  { type: "warning", message: "Dr. Priya Rajan has 30% bench capacity in April. Consider assigning to Solaris Health pre-engagement work.", member: "Priya Rajan" },
+  { type: "warning", message: "Kai Okonkwo available for Solaris Health or Nimbus Logistics from mid-May onward. Strong fit for org design scope.", member: "Kai Okonkwo" },
+  { type: "info", message: "Team capacity increases by ~40% in Q3 as Vertex and Aurelius engagements close. Begin pipeline development now." },
+];
+
+const SKILL_GAPS = [
+  { skill: "Data Analytics / AI Implementation", demand: "High", gap: "Critical", suggestion: "Source specialist from external network — target: Nimbus Logistics and Solaris Health" },
+  { skill: "Regulatory Strategy (FCA)", demand: "Medium", gap: "Moderate", suggestion: "Sofia partially covers. Consider dedicated specialist for Financial Services pipeline growth" },
+  { skill: "Supply Chain Optimisation", demand: "Medium", gap: "High", suggestion: "No current capacity. Required for Nimbus Logistics scope. Source now." },
+];
+
+const FORWARD_CAPACITY = [
+  { month: "Apr", available: 52, committed: 148, total: 200 },
+  { month: "May", available: 80, committed: 120, total: 200 },
+  { month: "Jun", available: 110, committed: 90, total: 200 },
+  { month: "Jul", available: 160, committed: 40, total: 200 },
+  { month: "Aug", available: 140, committed: 60, total: 200 },
+];
+
+const STATUS_META: Record<TeamMember["status"], { label: string; color: string; bg: string }> = {
+  optimal: { label: "Optimal", color: "#059669", bg: "#ECFDF5" },
+  over:    { label: "Over-allocated", color: "#DC2626", bg: "#FEF2F2" },
+  under:   { label: "Under-utilised", color: "#D97706", bg: "#FFF7ED" },
+  bench:   { label: "Bench", color: "#0284C7", bg: "#EFF6FF" },
+};
+
+export default function CapacityPlanner() {
+  usePageMeta({
+    title: "Resource & Capacity Planner | Carlota Jo",
+    description: "Visual team allocation heatmap, utilisation tracking, skill-gap analysis, and forward capacity planning across engagements.",
+    canonical: "https://szlholdings.com/carlota-jo/capacity-planner",
+  });
+
+  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+
+  const avgUtilisation = Math.round(TEAM.reduce((s, m) => s + m.utilisation, 0) / TEAM.length);
+  const benchCount = TEAM.filter(m => m.status === "bench" || m.status === "under").length;
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#FAFAF8", paddingTop: 64 }}>
+      <div style={{ background: "linear-gradient(135deg, #0A1A14 0%, #142D20 50%, #061408 100%)", padding: "48px 0 40px" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(5,150,105,0.2)", border: "1px solid rgba(5,150,105,0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Users size={16} color="#34D399" />
+              </div>
+              <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", color: "#34D399", textTransform: "uppercase" }}>Resource & Capacity Planner</span>
+            </div>
+            <h1 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 300, color: "#F5F0E8", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.1, marginBottom: 12 }}>
+              The Right People.<br /><em style={{ color: "#34D399" }}>On Every Engagement.</em>
+            </h1>
+            <p style={{ fontSize: 15, color: "#4A7A63", maxWidth: 520, lineHeight: 1.7, marginBottom: 32 }}>
+              Real-time team allocation, bench analysis, skill-gap detection, and forward capacity planning — so you never over-commit or leave capability idle.
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 16, maxWidth: 700 }}>
+              {[
+                { label: "Team Utilisation", value: `${avgUtilisation}%`, sub: "Current average" },
+                { label: "Capacity Available", value: `${benchCount} members`, sub: "Partially or fully available" },
+                { label: "Active Engagements", value: "5", sub: "Across 5 clients" },
+                { label: "Skill Gaps Identified", value: SKILL_GAPS.length.toString(), sub: "Require action" },
+              ].map(kpi => (
+                <div key={kpi.label} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "14px 16px" }}>
+                  <div style={{ fontSize: 22, fontWeight: 600, color: "#F5F0E8", fontFamily: "'Cormorant Garamond', serif" }}>{kpi.value}</div>
+                  <div style={{ fontSize: 11, color: "#4A7A63", marginTop: 2 }}>{kpi.label}</div>
+                  <div style={{ fontSize: 10, color: "#2A5040", marginTop: 2 }}>{kpi.sub}</div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
+        {/* Alerts */}
+        {ALERTS.length > 0 && (
+          <div style={{ padding: "28px 0 0", marginBottom: 28 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {ALERTS.map((alert, i) => (
+                <motion.div key={i} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
+                  style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "12px 16px", background: alert.type === "critical" ? "#FEF2F2" : alert.type === "warning" ? "#FFF7ED" : "#EFF6FF", border: `1px solid ${alert.type === "critical" ? "#FCA5A5" : alert.type === "warning" ? "#FED7AA" : "#BFDBFE"}`, borderRadius: 10 }}>
+                  <AlertCircle size={14} color={alert.type === "critical" ? "#DC2626" : alert.type === "warning" ? "#D97706" : "#0284C7"} style={{ marginTop: 2, flexShrink: 0 }} />
+                  <p style={{ fontSize: 13, color: "#1A1A14", lineHeight: 1.5, margin: 0 }}>{alert.message}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Allocation Heatmap */}
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+            <BarChart3 size={16} color={GOLD} />
+            <h2 style={{ fontSize: 14, fontWeight: 600, color: "#1A1A14" }}>Team Allocation Heatmap</h2>
+            <span style={{ fontSize: 11, color: "#A89878", marginLeft: "auto" }}>Click a team member for details</span>
+          </div>
+
+          <div style={{ background: "#fff", border: "1px solid #E8E2D6", borderRadius: 20, overflow: "hidden" }}>
+            {TEAM.map((member, i) => {
+              const statusMeta = STATUS_META[member.status];
+              const isSelected = selectedMember?.id === member.id;
+              return (
+                <div key={member.id}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px 24px", borderBottom: "1px solid #F0EBE0", cursor: "pointer", background: isSelected ? "#FFFBF0" : "transparent" }}
+                    onClick={() => setSelectedMember(isSelected ? null : member)}>
+                    <div style={{ width: 38, height: 38, borderRadius: "50%", background: `${GOLD}15`, border: `2px solid ${GOLD}30`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 600, color: GOLD, flexShrink: 0 }}>
+                      {member.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                    </div>
+                    <div style={{ minWidth: 180 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "#1A1A14" }}>{member.name}</div>
+                      <div style={{ fontSize: 11, color: "#A89878" }}>{member.title}</div>
+                    </div>
+
+                    {/* Utilisation bar */}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+                        <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                          {member.allocations.map((alloc, j) => (
+                            <span key={j} style={{ fontSize: 10, padding: "2px 6px", borderRadius: 4, background: `${alloc.color}15`, color: alloc.color, fontWeight: 500 }}>{alloc.client} {alloc.pct}%</span>
+                          ))}
+                        </div>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: member.utilisation > 90 ? "#DC2626" : member.utilisation > 75 ? "#059669" : "#D97706", fontFamily: "'Cormorant Garamond', serif", whiteSpace: "nowrap", marginLeft: 12 }}>{member.utilisation}%</span>
+                      </div>
+                      <div style={{ height: 8, background: "#F0EBE0", borderRadius: 4, overflow: "hidden" }}>
+                        <div style={{ display: "flex", height: "100%" }}>
+                          {member.allocations.map((alloc, j) => (
+                            <div key={j} style={{ width: `${alloc.pct}%`, background: alloc.color, transition: "width 0.3s" }} />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <span style={{ fontSize: 10, fontWeight: 600, padding: "3px 10px", borderRadius: 100, background: statusMeta.bg, color: statusMeta.color, whiteSpace: "nowrap", flexShrink: 0 }}>
+                      {statusMeta.label}
+                    </span>
+                  </div>
+
+                  {isSelected && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                      style={{ padding: "20px 24px", background: "#FFFBF0", borderBottom: "1px solid #F0EBE0" }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+                        <div>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: "#6B5E47", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Active Allocations</div>
+                          {member.allocations.map((alloc, j) => (
+                            <div key={j} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, padding: "8px 12px", background: "#fff", borderRadius: 8, border: "1px solid #E8E2D6" }}>
+                              <div style={{ width: 10, height: 10, borderRadius: "50%", background: alloc.color, flexShrink: 0 }} />
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: 12, fontWeight: 600, color: "#1A1A14" }}>{alloc.client}</div>
+                                <div style={{ fontSize: 11, color: "#A89878" }}>{alloc.engagement} · {alloc.weeks}</div>
+                              </div>
+                              <span style={{ fontSize: 13, fontWeight: 700, color: alloc.color }}>{alloc.pct}%</span>
+                            </div>
+                          ))}
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: "#6B5E47", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Skills</div>
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16 }}>
+                            {member.skills.map(skill => (
+                              <span key={skill} style={{ fontSize: 11, padding: "3px 8px", borderRadius: 6, background: `${GOLD}10`, color: "#6B5E47", border: `1px solid ${GOLD}20` }}>{skill}</span>
+                            ))}
+                          </div>
+                          <div style={{ fontSize: 13, color: "#6B5E47" }}>Day rate: <strong style={{ color: "#1A1A14" }}>£{member.dayRate.toLocaleString()}</strong></div>
+                          <div style={{ fontSize: 13, color: "#6B5E47", marginTop: 4 }}>
+                            Bench capacity: <strong style={{ color: "#1A1A14" }}>{100 - member.utilisation}%</strong> ({Math.round((100 - member.utilisation) / 100 * 5)} days/week)
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Forward Capacity */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 32 }}>
+          <div style={{ background: "#fff", border: "1px solid #E8E2D6", borderRadius: 16, padding: 24 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+              <Calendar size={16} color={GOLD} />
+              <h2 style={{ fontSize: 14, fontWeight: 600, color: "#1A1A14" }}>Forward Capacity (Days/Month)</h2>
+            </div>
+            {FORWARD_CAPACITY.map((m, i) => (
+              <div key={m.month} style={{ marginBottom: 12 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4, fontSize: 12 }}>
+                  <span style={{ color: "#6B5E47", fontWeight: 600 }}>{m.month} 2026</span>
+                  <span style={{ color: "#A89878" }}>{m.available} days available of {m.total}</span>
+                </div>
+                <div style={{ height: 10, background: "#F0EBE0", borderRadius: 5, overflow: "hidden" }}>
+                  <div style={{ display: "flex", height: "100%" }}>
+                    <div style={{ width: `${(m.committed / m.total) * 100}%`, background: GOLD, borderRadius: "5px 0 0 5px" }} />
+                    <div style={{ width: `${(m.available / m.total) * 100}%`, background: "#E8E2D6" }} />
+                  </div>
+                </div>
+              </div>
+            ))}
+            <div style={{ display: "flex", gap: 16, marginTop: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "#A89878" }}>
+                <div style={{ width: 12, height: 8, borderRadius: 2, background: GOLD }} /> Committed
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "#A89878" }}>
+                <div style={{ width: 12, height: 8, borderRadius: 2, background: "#E8E2D6" }} /> Available
+              </div>
+            </div>
+          </div>
+
+          {/* Skill Gaps */}
+          <div style={{ background: "#fff", border: "1px solid #E8E2D6", borderRadius: 16, padding: 24 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+              <Zap size={16} color={GOLD} />
+              <h2 style={{ fontSize: 14, fontWeight: 600, color: "#1A1A14" }}>Skill Gap Analysis</h2>
+            </div>
+            {SKILL_GAPS.map((gap, i) => (
+              <div key={i} style={{ marginBottom: 16, padding: "14px 16px", background: "#FFF7ED", border: "1px solid #FED7AA", borderRadius: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "#1A1A14" }}>{gap.skill}</div>
+                  <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: gap.gap === "Critical" ? "#FEE2E2" : "#FFF7ED", color: gap.gap === "Critical" ? "#DC2626" : "#D97706" }}>{gap.gap} Gap</span>
+                </div>
+                <div style={{ fontSize: 11, color: "#6B5E47", marginBottom: 4 }}>Demand: <strong>{gap.demand}</strong></div>
+                <div style={{ fontSize: 12, color: "#92400E", lineHeight: 1.5 }}>→ {gap.suggestion}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

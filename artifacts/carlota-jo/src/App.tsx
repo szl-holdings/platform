@@ -63,6 +63,12 @@ const WorkshopPlatform = lazy(() => import("@/pages/workshop-platform"));
 const ExpertNetwork = lazy(() => import("@/pages/expert-network"));
 const InvisibleServiceDesign = lazy(() => import("@/pages/invisible-service-design"));
 const PortalAdmin = lazy(() => import("@/pages/portal-admin"));
+const TimeTracking = lazy(() => import("@/pages/time-tracking"));
+const CapacityPlanner = lazy(() => import("@/pages/capacity-planner"));
+const KnowledgeVault = lazy(() => import("@/pages/knowledge-vault"));
+const BenchmarkDatabase = lazy(() => import("@/pages/benchmark-database"));
+const DeliverableWorkflow = lazy(() => import("@/pages/deliverable-workflow"));
+const ProfitabilityAnalytics = lazy(() => import("@/pages/profitability-analytics"));
 
 function PageLoader() {
   return (
@@ -158,6 +164,12 @@ function Router() {
         <Route path="/expert-network" component={ExpertNetwork} />
         <Route path="/invisible-service-design" component={InvisibleServiceDesign} />
         <Route path="/portal-admin" component={PortalAdmin} />
+        <Route path="/time-tracking" component={TimeTracking} />
+        <Route path="/capacity-planner" component={CapacityPlanner} />
+        <Route path="/knowledge-vault" component={KnowledgeVault} />
+        <Route path="/benchmark-database" component={BenchmarkDatabase} />
+        <Route path="/deliverable-workflow" component={DeliverableWorkflow} />
+        <Route path="/profitability-analytics" component={ProfitabilityAnalytics} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
@@ -182,6 +194,12 @@ const carlotaCommands: CommandItem[] = [
   { id: "nav-revenue", label: "Revenue Intelligence & Pipeline", icon: "💹", group: "AI Platform", keywords: ["revenue", "pipeline", "deals", "forecast"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/revenue-intelligence"); } },
   { id: "nav-workshop", label: "Workshop & Training Platform", icon: "🎓", group: "AI Platform", keywords: ["workshop", "training", "agenda", "session"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/workshop-platform"); } },
   { id: "nav-experts", label: "Expert Network & Team Assembly", icon: "👥", group: "AI Platform", keywords: ["experts", "team", "assembly", "network", "skills"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/expert-network"); } },
+  { id: "nav-time", label: "Time Tracking & Smart Billing", icon: "⏱️", group: "AI Platform", keywords: ["time", "billing", "invoice", "hours", "rate"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/time-tracking"); } },
+  { id: "nav-capacity", label: "Resource & Capacity Planner", icon: "📊", group: "AI Platform", keywords: ["capacity", "resource", "utilisation", "heatmap", "allocation"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/capacity-planner"); } },
+  { id: "nav-vault", label: "Knowledge Vault & Methodology Library", icon: "📚", group: "AI Platform", keywords: ["knowledge", "vault", "library", "playbook", "framework", "template"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/knowledge-vault"); } },
+  { id: "nav-benchmarks", label: "Benchmark Database", icon: "📈", group: "AI Platform", keywords: ["benchmark", "industry", "data", "metrics", "comparison"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/benchmark-database"); } },
+  { id: "nav-deliverables", label: "Deliverable Approval Workflow", icon: "✅", group: "AI Platform", keywords: ["deliverable", "approval", "review", "version", "sign-off"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/deliverable-workflow"); } },
+  { id: "nav-profitability", label: "Engagement Profitability Analytics", icon: "💰", group: "AI Platform", keywords: ["profitability", "margin", "p&l", "write-off", "scope creep"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/profitability-analytics"); } },
   { id: "app-szl", label: "SZL Holdings", icon: "🏛️", group: "Switch App", description: "Portfolio", action: () => { window.location.href = "/"; } },
 ];
 
