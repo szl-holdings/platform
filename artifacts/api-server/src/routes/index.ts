@@ -160,6 +160,7 @@ import realtimeRouter from "./realtime";
 import monteCarloRouter from "./monte-carlo";
 import partnerPortalRouter from "./partner-portal";
 import deltaSyncRouter from "./delta-sync";
+import changesRouter from "./changes";
 
 const router: IRouter = Router();
 
@@ -620,5 +621,6 @@ router.use("/aegis/sync", _readLimiter);
 router.use("/vessels/sync", _readLimiter);
 router.use("/alloy/sync", _readLimiter);
 router.use(deltaSyncRouter);
+router.use(changesRouter);
 
 export default router;

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
+import { CrdtEntityPanel } from "@szl-holdings/shared-ui";
 import {
   ArrowLeft, Clock, DollarSign, FileText, Users, Activity,
   MessageSquare, ShieldCheck, TrendingUp, AlertTriangle, Stethoscope,
@@ -245,6 +246,12 @@ type MatterLike = {
 function SummaryTab({ matter }: { matter: MatterLike }) {
   return (
     <div className="space-y-3">
+      <CrdtEntityPanel
+        entityType="matter"
+        entityId={String(matter.id)}
+        label="Team Collaboration"
+        schema={{ entityType: "matter", fields: { status: { conflictReview: true }, notes: {} } }}
+      />
       <div className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
         <h3 className="text-sm font-semibold text-slate-200 mb-3">Settlement Forecast</h3>
         {matter.settlementHigh > 0 ? (

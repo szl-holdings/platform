@@ -30,6 +30,7 @@
     "@szl-holdings/config": "workspace:*",
     "@szl-holdings/covenant-policy": "workspace:*",
     "@szl-holdings/data-connectors": "workspace:*",
+    "@szl-holdings/crdt-sync": "workspace:*",
     "@szl-holdings/db": "workspace:*",
     "@szl-holdings/forge-runtime": "workspace:*",
     "@szl-holdings/integrations-anthropic-ai": "workspace:*",

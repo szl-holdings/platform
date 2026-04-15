@@ -213,3 +213,16 @@ export {
   type WebSyncStatusOptions,
   type WebSyncStatus,
 } from "./use-web-sync-status";
+
+export {
+  useCrdtEntity,
+  type UseCrdtEntityOptions,
+  type UseCrdtEntityResult,
+  type CrdtMergeEvent,
+  type EntitySchema as CrdtEntitySchema,
+  type FieldSchema as CrdtFieldSchema,
+} from "./use-crdt-entity";
+
+export { MergeNotification, type MergeNotificationProps } from "./merge-notification";
+
+export { CrdtEntityPanel, type CrdtEntityPanelProps } from "./crdt-entity-panel";

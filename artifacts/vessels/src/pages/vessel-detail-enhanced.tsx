@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useRoute, Link } from "wouter";
+import { CrdtEntityPanel } from "@szl-holdings/shared-ui";
 import { useVesselDetail, useFleetExceptions } from "@/hooks/use-vessels-data";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import {
@@ -439,6 +440,13 @@ export default function VesselDetailEnhancedPage() {
               <p className="text-sky-400/40">No active voyage economics</p>
             </div>
           )}
+
+          <CrdtEntityPanel
+            entityType="vessel"
+            entityId={String(vesselId)}
+            label="Voyage Collaboration"
+            schema={{ entityType: "vessel", fields: { status: { conflictReview: true }, notes: {} } }}
+          />
         </div>
       )}
 

@@ -37,3 +37,19 @@ export { BiometricProvider, useBiometric, promptBiometric, type BiometricConfig,
 export { useDeepLinking, type DeepLinkRoute, type UseDeepLinkingOptions } from "./hooks/useDeepLinking";
 export { useBackgroundRefresh, type BackgroundRefreshTask, type UseBackgroundRefreshOptions } from "./hooks/useBackgroundRefresh";
 export { useAppReady, type UseAppReadyOptions, type AppReadyResult } from "./hooks/useAppReady";
+export { useOfflineReady, type OfflineReadyResult } from "./hooks/useOfflineReady";
+export { useMobileCrdt, type UseMobileCrdtResult, type MobileCrdtMergeEvent } from "./hooks/useMobileCrdt";
+export { MergeNotification } from "./components/MergeNotification";
+export {
+  enqueueOutbox,
+  getOutbox,
+  removeFromOutbox,
+  getLocalReplica,
+  saveLocalReplica,
+  applyDeltaToReplica,
+  getStoredCursor,
+  saveStoredCursor,
+  clearLocalData,
+  type OutboxEntry,
+  type LocalReplica,
+} from "./offline-persistence";

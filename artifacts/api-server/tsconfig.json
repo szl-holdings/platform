@@ -12,6 +12,9 @@
       "path": "../../lib/db"
     },
     {
+      "path": "../../lib/crdt-sync"
+    },
+    {
       "path": "../../lib/api-zod"
     },
     {

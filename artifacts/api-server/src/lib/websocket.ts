@@ -2,8 +2,9 @@ import type { IncomingMessage, Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { createHmac, timingSafeEqual, randomBytes } from "crypto";
 import { logger } from "./logger";
-import { db, sessionsTable, usersTable } from "@szl-holdings/db";
+import { db, sessionsTable, usersTable, changeEventsTable } from "@szl-holdings/db";
 import { eq, gt, and } from "drizzle-orm";
+import { getOrCreateDoc, pruneRegistry } from "@szl-holdings/crdt-sync";
 
 export interface ChannelMessage {
   channel: string;
@@ -25,6 +26,38 @@ interface SubscribedClient {
   sendBuffer: string[];
   rateLimitBucket: { count: number; windowStart: number };
   isSlowConsumer: boolean;
+  crdtRooms: Set<string>;
+}
+
+const CRDT_SYNC_CHANNEL = "crdt-sync";
+const crdtRoomClients = new Map<string, Set<string>>();
+
+function addCrdtRoom(clientId: string, room: string): void {
+  if (!crdtRoomClients.has(room)) crdtRoomClients.set(room, new Set());
+  crdtRoomClients.get(room)!.add(clientId);
+}
+
+function removeCrdtRooms(clientId: string): void {
+  for (const [room, ids] of crdtRoomClients) {
+    ids.delete(clientId);
+    if (ids.size === 0) crdtRoomClients.delete(room);
+  }
+}
+
+function broadcastCrdtDelta(
+  senderClientId: string,
+  room: string,
+  payload: string
+): void {
+  const roomClients = crdtRoomClients.get(room);
+  if (!roomClients) return;
+  for (const clientId of roomClients) {
+    if (clientId === senderClientId) continue;
+    const client = clients.get(clientId);
+    if (client && client.ws.readyState === WebSocket.OPEN) {
+      try { client.ws.send(payload); } catch { /* ignore */ }
+    }
+  }
 }
 
 const MAX_WS_CLIENTS = 500;
@@ -112,6 +145,7 @@ export const PUBLIC_CHANNELS = new Set([
   "health",
   "notifications",
   "feature-flags",
+  CRDT_SYNC_CHANNEL,
 ]);
 
 const CHANNEL_ALLOWED_ROLES: Record<string, Set<string>> = {
@@ -300,6 +334,7 @@ export function initWebSocket(server: Server): void {
       sendBuffer: [],
       rateLimitBucket: { count: 0, windowStart: Date.now() },
       isSlowConsumer: false,
+      crdtRooms: new Set(),
     };
     clients.set(clientId, client);
 
@@ -373,6 +408,88 @@ export function initWebSocket(server: Server): void {
         } else if (msg.type === "catchup" && msg.channel && msg.sinceSeq !== undefined) {
           const missed = getMessagesSince(msg.channel, msg.sinceSeq, 100);
           ws.send(JSON.stringify({ type: "catchup_response", channel: msg.channel, messages: missed }));
+
+        } else if (msg.type === "crdt:subscribe" && (msg as { room?: string }).room) {
+          const room = (msg as { room: string }).room;
+          client.crdtRooms.add(room);
+          addCrdtRoom(clientId, room);
+          if (!client.channels.has(CRDT_SYNC_CHANNEL)) {
+            client.channels.add(CRDT_SYNC_CHANNEL);
+          }
+          ws.send(JSON.stringify({ type: "crdt:subscribed", room, timestamp: Date.now() }));
+          logger.debug({ clientId, room }, "[crdt] Client subscribed to CRDT room");
+
+        } else if (msg.type === "crdt:unsubscribe" && (msg as { room?: string }).room) {
+          const room = (msg as { room: string }).room;
+          client.crdtRooms.delete(room);
+          const roomSet = crdtRoomClients.get(room);
+          if (roomSet) {
+            roomSet.delete(clientId);
+            if (roomSet.size === 0) crdtRoomClients.delete(room);
+          }
+          ws.send(JSON.stringify({ type: "crdt:unsubscribed", room }));
+
+        } else if (msg.type === "crdt:delta") {
+          const crdtMsg = msg as {
+            type: string;
+            room?: string;
+            entityType?: string;
+            entityId?: string;
+            actorId?: string;
+            delta?: Record<string, unknown>;
+            clock?: Record<string, number>;
+            appSource?: string;
+          };
+          const room = crdtMsg.room ?? (crdtMsg.entityType && crdtMsg.entityId ? `${crdtMsg.entityType}:${crdtMsg.entityId}` : null);
+          if (!room || !crdtMsg.entityType || !crdtMsg.entityId || !crdtMsg.delta) {
+            ws.send(JSON.stringify({ type: "error", code: "invalid_crdt_delta", message: "room, entityType, entityId, and delta are required" }));
+          } else {
+            const actorId = String(client.userId ?? clientId);
+            try {
+              const doc = getOrCreateDoc(crdtMsg.entityType, crdtMsg.entityId);
+              const deltaForEngine = {
+                docId: room,
+                entityType: crdtMsg.entityType,
+                entityId: crdtMsg.entityId,
+                actorId,
+                timestamp: Date.now(),
+                clock: crdtMsg.clock ?? {},
+                fields: crdtMsg.delta as Record<string, import("@szl-holdings/crdt-sync").LwwField>,
+              };
+              doc.applyDelta(deltaForEngine);
+              pruneRegistry();
+
+              const broadcast = JSON.stringify({
+                type: "crdt:delta",
+                room,
+                entityType: crdtMsg.entityType,
+                entityId: crdtMsg.entityId,
+                actorId,
+                timestamp: Date.now(),
+                delta: crdtMsg.delta,
+                clock: crdtMsg.clock ?? {},
+              });
+              broadcastCrdtDelta(clientId, room, broadcast);
+
+              db.insert(changeEventsTable).values({
+                entityType: crdtMsg.entityType,
+                entityId: crdtMsg.entityId,
+                actorId,
+                delta: crdtMsg.delta,
+                crdtClock: crdtMsg.clock ?? {},
+                appSource: crdtMsg.appSource,
+              }).then(() => {
+                logger.debug({ room, actorId }, "[crdt] Delta persisted to change_events");
+              }).catch((err: unknown) => {
+                logger.error({ err }, "[crdt] Failed to persist delta to change_events");
+              });
+
+              ws.send(JSON.stringify({ type: "crdt:ack", room, timestamp: Date.now() }));
+            } catch (err) {
+              logger.error({ err, room }, "[crdt] Error processing delta");
+              ws.send(JSON.stringify({ type: "error", code: "crdt_error", message: "Failed to process delta" }));
+            }
+          }
         }
       } catch {
         ws.send(JSON.stringify({ type: "error", message: "Invalid message format" }));
@@ -382,6 +499,7 @@ export function initWebSocket(server: Server): void {
     ws.on("close", () => {
       clients.delete(clientId);
       removePresence(clientId);
+      removeCrdtRooms(clientId);
       logger.debug({ clientId }, "WebSocket client disconnected");
     });
 
@@ -389,6 +507,7 @@ export function initWebSocket(server: Server): void {
       logger.warn({ clientId, err }, "WebSocket client error");
       clients.delete(clientId);
       removePresence(clientId);
+      removeCrdtRooms(clientId);
     });
 
     ws.send(JSON.stringify({ type: "connected", clientId, timestamp: Date.now(), serverSeq: globalSeq }));
@@ -520,6 +639,7 @@ export function getWsStats() {
 
 export const WS_CHANNELS = {
   HEALTH: "health",
+  CRDT_SYNC: CRDT_SYNC_CHANNEL,
   INCIDENTS: "incidents",
   AEGIS_INCIDENTS: "aegis-incidents",
   AEGIS_ALERT_FEED: "aegis:alert-feed",

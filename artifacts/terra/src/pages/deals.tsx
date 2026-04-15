@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import { CrdtEntityPanel } from "@szl-holdings/shared-ui";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRealtimeChannel } from "@szl-holdings/shared-ui";
 import { Activity, AlertTriangle, RefreshCw, Plus, X } from "lucide-react";
@@ -586,6 +587,15 @@ export default function DealsPage() {
           </div>
         </div>
       )}
+
+      <div className="mt-6">
+        <CrdtEntityPanel
+          entityType="deal-pipeline"
+          entityId="terra-pipeline"
+          label="Pipeline Collaboration"
+          schema={{ entityType: "deal-pipeline", fields: { status: { conflictReview: true }, notes: {} } }}
+        />
+      </div>
 
       {showAddModal && (
         <AddDealModal
