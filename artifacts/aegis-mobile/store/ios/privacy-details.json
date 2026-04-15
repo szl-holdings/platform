@@ -1,0 +1,36 @@
+{
+  "privacyPolicyUrl": "https://aegis.ai/privacy",
+  "dataTypes": [
+    {
+      "dataType": "EMAIL_ADDRESS",
+      "purposes": ["APP_FUNCTIONALITY"],
+      "collected": true,
+      "linked": true,
+      "tracking": false
+    },
+    {
+      "dataType": "NAME",
+      "purposes": ["APP_FUNCTIONALITY"],
+      "collected": true,
+      "linked": true,
+      "tracking": false
+    },
+    {
+      "dataType": "CRASH_DATA",
+      "purposes": ["APP_FUNCTIONALITY"],
+      "collected": true,
+      "linked": false,
+      "tracking": false
+    },
+    {
+      "dataType": "PERFORMANCE_DATA",
+      "purposes": ["APP_FUNCTIONALITY"],
+      "collected": true,
+      "linked": false,
+      "tracking": false
+    }
+  ],
+  "ageRating": "4+",
+  "category": "Business",
+  "secondaryCategory": "Utilities"
+}

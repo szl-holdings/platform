@@ -138,9 +138,13 @@
       "termsUrl": "https://terra.ai/terms"
     },
     "updates": {
-      "enabled": false,
+      "enabled": true,
       "fallbackToCacheTimeout": 0,
-      "url": "https://u.expo.dev/terra-mobile"
+      "url": "https://u.expo.dev/terra-mobile",
+      "checkAutomatically": "ON_LOAD",
+      "requestHeaders": {
+        "expo-channel-name": "production"
+      }
     }
   }
 }

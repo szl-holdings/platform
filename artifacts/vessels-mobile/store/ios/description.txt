@@ -1,0 +1,23 @@
+Vessels — Fleet Command Mobile
+
+Maritime fleet intelligence and command for shipping operators, port authorities, and maritime logistics professionals. Vessels delivers real-time AIS tracking, vessel operations management, and port intelligence from anywhere in the world.
+
+REAL-TIME AIS TRACKING
+Live positions of your entire fleet on an interactive maritime chart. Vessel speed, heading, ETA calculations, and route deviation alerts — all updating in real time.
+
+PORT INTELLIGENCE
+Live berth availability, port congestion indexes, weather conditions, and customs status for ports across your operational network.
+
+VESSEL OPERATIONS
+Access vessel specifications, crew manifests, cargo information, and voyage documentation from any device. Critical operational data when you need it, wherever you are.
+
+ROUTE MONITORING
+Active voyage tracking with waypoint alerts, weather overlays, and NAVTEX integration. Know when vessels deviate from planned routes before problems escalate.
+
+INCIDENT ALERTING
+Push notifications for vessel arrivals, departures, delays, and safety incidents. Stay informed on critical fleet events 24/7.
+
+CHARTER & CARGO MANAGEMENT
+Track charter agreements, cargo manifests, and loading/discharge operations in a unified timeline for each vessel.
+
+Built for maritime operators, fleet managers, port agents, and logistics professionals who need reliable fleet intelligence at sea and ashore.

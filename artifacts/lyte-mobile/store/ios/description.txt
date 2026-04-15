@@ -1,0 +1,23 @@
+Lyte — AIOps Command Center
+
+Intelligent infrastructure operations at your fingertips. Lyte puts AI-powered observability, anomaly detection, and incident management in the hands of SREs, platform engineers, and DevOps teams who need instant situational awareness.
+
+AI-POWERED ANOMALY DETECTION
+Lyte's ML engine continuously analyzes your infrastructure telemetry and surfaces meaningful anomalies before they become outages — with root cause hypotheses, not just raw alerts.
+
+UNIFIED OBSERVABILITY
+Metrics, logs, and traces unified in a single operational view. Drill from a high-level health summary down to individual service traces in seconds.
+
+INTELLIGENT INCIDENT MANAGEMENT
+When something breaks, Lyte correlates affected services, suggests remediation steps, and coordinates your response team — all from your phone.
+
+SMART ALERTING
+Noise-reduced alerting that learns from your acknowledgment patterns. Critical pages get through; false positives get suppressed.
+
+INFRASTRUCTURE TOPOLOGY
+Visual service dependency maps let you understand blast radius instantly. Know which downstream services are at risk before users are impacted.
+
+ON-CALL READY
+Integrates with PagerDuty, OpsGenie, and native escalation policies. Acknowledge, escalate, and resolve incidents directly from the app.
+
+Built for modern platform teams running Kubernetes, cloud-native, and hybrid infrastructure at scale.

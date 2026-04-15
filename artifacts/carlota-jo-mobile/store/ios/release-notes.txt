@@ -1,0 +1,8 @@
+Version 1.0.0 — Initial Release
+
+• Private client dashboard with portfolio and engagement overview
+• Encrypted secure messaging with advisory team
+• Document vault with in-app review and signature
+• Meeting scheduling and agenda management
+• Push notifications for critical advisory updates
+• Invitation-only access with enterprise-grade security

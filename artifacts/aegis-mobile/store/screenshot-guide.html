@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Aegis — SOC Command Center — Screenshot Guide</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #080B12; color: #e5e5e5; padding: 2rem; max-width: 900px; margin: 0 auto; }
+    h1 { color: #6366f1; margin-bottom: 0.25rem; }
+    h2 { color: #999; border-bottom: 1px solid #333; padding-bottom: 0.5rem; margin-top: 2rem; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    th { background: #111; color: #6366f1; padding: 0.75rem; text-align: left; }
+    td { padding: 0.75rem; border-bottom: 1px solid #222; }
+    ol, ul { line-height: 2.2; }
+    .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.8em; font-weight: 600; }
+    .required { background: #1a472a; color: #69db7c; }
+    .optional { background: #1c1c2e; color: #888; }
+    code { background: #111; padding: 0.2rem 0.5rem; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+    pre { background: #111; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+    .subtitle { color: #666; margin-top: 0; }
+  </style>
+</head>
+<body>
+  <h1>Aegis — SOC Command Center</h1>
+  <p class="subtitle">Screenshot capture guide for App Store and Google Play submission</p>
+
+  <h2>Capture Steps</h2>
+  <ol>
+    <li>Start the app: <code>cd artifacts/aegis-mobile &amp;&amp; npx expo start --web</code></li>
+    <li>Open Chrome or Safari and navigate to the local Expo dev URL</li>
+    <li>Open Developer Tools &rarr; Device Toolbar (Ctrl+Shift+M / Cmd+Opt+I)</li>
+    <li>Set the viewport to each device size listed below</li>
+    <li>Navigate to each screen and capture using your screenshot tool</li>
+    <li>Save files to the output paths listed in <code>store/screenshot-manifest.json</code></li>
+  </ol>
+
+  <h2>Screens to Capture (5 screens)</h2>
+  <ul>
+    <li><strong>Screen 01:</strong> Threat Dashboard — Live incident feed with severity triage</li>
+          <li><strong>Screen 02:</strong> Active Incidents — List with status and assignee</li>
+          <li><strong>Screen 03:</strong> Incident Detail — Timeline, evidence, and response actions</li>
+          <li><strong>Screen 04:</strong> Intelligence Feed — Correlated threat data and ATT&CK mapping</li>
+          <li><strong>Screen 05:</strong> Alert Settings — Push notification configuration</li>
+  </ul>
+
+  <h2>iOS Device Sizes</h2>
+  <table>
+    <thead>
+      <tr><th>Device</th><th>Resolution</th><th>Status</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>iPhone 6.7" (required)</td>
+        <td>1290 &times; 2796</td>
+        <td><span class="required badge">Required</span></td>
+        <td>iPhone 15 Pro Max / 14 Plus</td>
+      </tr>
+      <tr>
+        <td>iPhone 6.5"</td>
+        <td>1242 &times; 2688</td>
+        <td><span class="optional badge">Optional</span></td>
+        <td>iPhone 11 Pro Max / XS Max</td>
+      </tr>
+      <tr>
+        <td>iPhone 5.5"</td>
+        <td>1242 &times; 2208</td>
+        <td><span class="optional badge">Optional</span></td>
+        <td>iPhone 8 Plus</td>
+      </tr>
+      <tr>
+        <td>iPad Pro 12.9" (required for tablet)</td>
+        <td>2048 &times; 2732</td>
+        <td><span class="optional badge">Optional</span></td>
+        <td>iPad Pro 12.9" 3rd gen+</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Android Device Sizes</h2>
+  <table>
+    <thead>
+      <tr><th>Device</th><th>Resolution</th><th>Status</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Android Phone (required)</td>
+        <td>1080 &times; 1920</td>
+        <td><span class="required badge">Required</span></td>
+        <td>Standard Android phone</td>
+      </tr>
+      <tr>
+        <td>Android Tablet 7"</td>
+        <td>1200 &times; 1920</td>
+        <td><span class="optional badge">Optional</span></td>
+        <td>7-inch tablet</td>
+      </tr>
+      <tr>
+        <td>Android Tablet 10"</td>
+        <td>1920 &times; 1200</td>
+        <td><span class="optional badge">Optional</span></td>
+        <td>10-inch tablet</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Output Directory Structure</h2>
+  <pre><code>screenshots/aegis/
+  ios/
+    iphone-6_7/    ← 1290×2796  (required)
+    iphone-6_5/    ← 1242×2688
+    iphone-5_5/    ← 1242×2208
+    ipad-12_9/     ← 2048×2732
+  android/
+    android-phone/     ← 1080×1920  (required)
+    android-tablet-7/  ← 1200×1920
+    android-tablet-10/ ← 1920×1200</code></pre>
+</body>
+</html>

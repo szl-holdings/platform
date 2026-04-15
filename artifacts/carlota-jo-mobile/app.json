@@ -121,9 +121,13 @@
       "termsUrl": "https://carlotajo.com/terms"
     },
     "updates": {
-      "enabled": false,
+      "enabled": true,
       "fallbackToCacheTimeout": 0,
-      "url": "https://u.expo.dev/carlota-jo-mobile"
+      "url": "https://u.expo.dev/carlota-jo-mobile",
+      "checkAutomatically": "ON_LOAD",
+      "requestHeaders": {
+        "expo-channel-name": "production"
+      }
     }
   }
 }

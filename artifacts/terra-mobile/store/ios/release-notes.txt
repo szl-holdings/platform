@@ -1,0 +1,9 @@
+Version 1.0.0 — Initial Release
+
+• Distressed property intelligence feed with early-signal alerts
+• Field photography with automatic geo-tagging and annotations
+• Full acquisition pipeline lifecycle tracking
+• Market analytics with neighborhood-level pricing data
+• Watchlist with configurable price and status triggers
+• Team coordination with shared deal rooms
+• Offline-capable field mode for remote property visits

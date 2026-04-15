@@ -1,0 +1,10 @@
+{
+  "category": "BUSINESS",
+  "contentRating": "EVERYONE",
+  "privacyPolicyUrl": "https://aegis.ai/privacy",
+  "websiteUrl": "https://aegis.ai",
+  "emailAddress": "FILL_IN_SUPPORT_EMAIL",
+  "phoneNumber": null,
+  "targetAudience": "enterprise",
+  "tags": ["cybersecurity", "SOC", "threat intelligence", "enterprise security", "incident response"]
+}

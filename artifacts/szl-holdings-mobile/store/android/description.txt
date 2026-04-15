@@ -1,0 +1,19 @@
+SZL Holdings — Executive Command
+
+Private command center for SZL Holdings principals. Secure, real-time visibility across the full holdings portfolio and strategic operations — from anywhere.
+
+KEY FEATURES:
+
+📊 Portfolio Command — Consolidated view across all SZL Holdings entities, investments, and strategic assets with executive-clarity KPIs.
+
+🔒 Encrypted Communications — End-to-end encrypted channel for principals and authorized stakeholders.
+
+📋 Deal Flow Tracking — Monitor active transactions, diligence pipeline, and portfolio developments in real time.
+
+📈 Executive Reporting — On-demand financial summaries and strategic metrics formatted for principal consumption.
+
+🔐 Biometric Security — Fingerprint and biometric authentication with role-based access control.
+
+📄 Secure Documents — Board materials, investment memos, and strategic documents — reviewed and signed in-app.
+
+Strictly for SZL Holdings authorized users. Requires credentials issued by SZL Holdings administration.

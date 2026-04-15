@@ -1,0 +1,9 @@
+Version 1.0.0 — Initial Release
+
+• Real-time threat monitoring dashboard with live incident feed
+• Incident creation, assignment, and lifecycle tracking
+• Biometric authentication with Face ID and Touch ID
+• Push notifications for critical severity alerts
+• ATT&CK framework mapping for threat context
+• Secure encrypted data storage and transmission
+• Dark-optimized UI for 24/7 SOC environments

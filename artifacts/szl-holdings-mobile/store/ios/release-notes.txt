@@ -1,0 +1,9 @@
+Version 1.0.0 — Initial Release
+
+• Consolidated portfolio dashboard across all SZL Holdings entities
+• Encrypted secure communications for principals
+• Deal flow and pipeline tracking
+• On-demand financial reporting and analytics
+• Biometric authentication with Face ID and Touch ID
+• Secure document access and in-app review
+• Role-based access control for authorized principals

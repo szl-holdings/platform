@@ -1,0 +1,10 @@
+Version 1.0.0 — Initial Release
+
+• AI-powered anomaly detection with root cause analysis
+• Unified metrics, logs, and traces dashboard
+• Intelligent incident management and team coordination
+• Noise-reduced smart alerting with pattern learning
+• Service dependency topology visualization
+• PagerDuty and OpsGenie integration
+• Biometric authentication for secure access
+• Dark-optimized UI for on-call environments

@@ -1,0 +1,135 @@
+{
+  "app": "carlota-jo",
+  "name": "Carlota Jo — Client App",
+  "generatedAt": "2026-04-15T01:10:23.846Z",
+  "instructions": {
+    "step1": "Run the app with: npx expo start --web",
+    "step2": "Open browser dev tools and set viewport to each device size below",
+    "step3": "Navigate to each screen listed and capture a screenshot",
+    "step4": "Save screenshots with the naming convention: <label>-<screen-index>.png",
+    "step5": "Upload to App Store Connect / Google Play Console using store/ metadata"
+  },
+  "ios": [
+    {
+      "name": "iPhone 6.7\" (required)",
+      "width": 1290,
+      "height": 2796,
+      "label": "iphone-6_7",
+      "required": true,
+      "notes": "iPhone 15 Pro Max / 14 Plus",
+      "screens": [
+        "Dashboard — Portfolio overview and engagement status",
+        "Secure Messaging — Encrypted advisor communication",
+        "Document Vault — Agreements and reports",
+        "Meeting Schedule — Advisory session calendar",
+        "Profile — Account and access settings"
+      ],
+      "outputDir": "screenshots/carlota-jo/ios/iphone-6_7/",
+      "fileNaming": "iphone-6_7-NN.png (01 through 05)"
+    },
+    {
+      "name": "iPhone 6.5\"",
+      "width": 1242,
+      "height": 2688,
+      "label": "iphone-6_5",
+      "required": false,
+      "notes": "iPhone 11 Pro Max / XS Max",
+      "screens": [
+        "Dashboard — Portfolio overview and engagement status",
+        "Secure Messaging — Encrypted advisor communication",
+        "Document Vault — Agreements and reports",
+        "Meeting Schedule — Advisory session calendar",
+        "Profile — Account and access settings"
+      ],
+      "outputDir": "screenshots/carlota-jo/ios/iphone-6_5/",
+      "fileNaming": "iphone-6_5-NN.png (01 through 05)"
+    },
+    {
+      "name": "iPhone 5.5\"",
+      "width": 1242,
+      "height": 2208,
+      "label": "iphone-5_5",
+      "required": false,
+      "notes": "iPhone 8 Plus",
+      "screens": [
+        "Dashboard — Portfolio overview and engagement status",
+        "Secure Messaging — Encrypted advisor communication",
+        "Document Vault — Agreements and reports",
+        "Meeting Schedule — Advisory session calendar",
+        "Profile — Account and access settings"
+      ],
+      "outputDir": "screenshots/carlota-jo/ios/iphone-5_5/",
+      "fileNaming": "iphone-5_5-NN.png (01 through 05)"
+    },
+    {
+      "name": "iPad Pro 12.9\" (required for tablet)",
+      "width": 2048,
+      "height": 2732,
+      "label": "ipad-12_9",
+      "required": false,
+      "notes": "iPad Pro 12.9\" 3rd gen+",
+      "screens": [
+        "Dashboard — Portfolio overview and engagement status",
+        "Secure Messaging — Encrypted advisor communication",
+        "Document Vault — Agreements and reports",
+        "Meeting Schedule — Advisory session calendar",
+        "Profile — Account and access settings"
+      ],
+      "outputDir": "screenshots/carlota-jo/ios/ipad-12_9/",
+      "fileNaming": "ipad-12_9-NN.png (01 through 05)"
+    }
+  ],
+  "android": [
+    {
+      "name": "Android Phone (required)",
+      "width": 1080,
+      "height": 1920,
+      "label": "android-phone",
+      "required": true,
+      "notes": "Standard Android phone",
+      "screens": [
+        "Dashboard — Portfolio overview and engagement status",
+        "Secure Messaging — Encrypted advisor communication",
+        "Document Vault — Agreements and reports",
+        "Meeting Schedule — Advisory session calendar",
+        "Profile — Account and access settings"
+      ],
+      "outputDir": "screenshots/carlota-jo/android/android-phone/",
+      "fileNaming": "android-phone-NN.png (01 through 05)"
+    },
+    {
+      "name": "Android Tablet 7\"",
+      "width": 1200,
+      "height": 1920,
+      "label": "android-tablet-7",
+      "required": false,
+      "notes": "7-inch tablet",
+      "screens": [
+        "Dashboard — Portfolio overview and engagement status",
+        "Secure Messaging — Encrypted advisor communication",
+        "Document Vault — Agreements and reports",
+        "Meeting Schedule — Advisory session calendar",
+        "Profile — Account and access settings"
+      ],
+      "outputDir": "screenshots/carlota-jo/android/android-tablet-7/",
+      "fileNaming": "android-tablet-7-NN.png (01 through 05)"
+    },
+    {
+      "name": "Android Tablet 10\"",
+      "width": 1920,
+      "height": 1200,
+      "label": "android-tablet-10",
+      "required": false,
+      "notes": "10-inch tablet",
+      "screens": [
+        "Dashboard — Portfolio overview and engagement status",
+        "Secure Messaging — Encrypted advisor communication",
+        "Document Vault — Agreements and reports",
+        "Meeting Schedule — Advisory session calendar",
+        "Profile — Account and access settings"
+      ],
+      "outputDir": "screenshots/carlota-jo/android/android-tablet-10/",
+      "fileNaming": "android-tablet-10-NN.png (01 through 05)"
+    }
+  ]
+}

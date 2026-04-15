@@ -132,9 +132,13 @@
       "termsUrl": "https://lyte.ai/terms"
     },
     "updates": {
-      "enabled": false,
+      "enabled": true,
       "fallbackToCacheTimeout": 0,
-      "url": "https://u.expo.dev/lyte-aiops-mobile"
+      "url": "https://u.expo.dev/lyte-aiops-mobile",
+      "checkAutomatically": "ON_LOAD",
+      "requestHeaders": {
+        "expo-channel-name": "production"
+      }
     }
   }
 }
