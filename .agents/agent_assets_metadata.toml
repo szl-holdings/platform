@@ -95,3 +95,15 @@ id = "EKaAPqjUt9LHTMpRNhdAO"
 uri = "file://social-content/banners/header-linkedin-1584x396.png"
 type = "image"
 title = "LinkedIn Header (1584×396)"
+
+[[outputs]]
+id = "Ja2je4_jaUyWYAjHITJFn"
+uri = "file://screenshots/linkedin-post.md"
+type = "text"
+title = "LinkedIn Post Draft"
+
+[[outputs]]
+id = "b1reLrNmV7iV6ofLCVWsA"
+uri = "file://screenshots/01-szl-holdings-dashboard.jpg"
+type = "image"
+title = "SZL Holdings Dashboard Screenshot"
