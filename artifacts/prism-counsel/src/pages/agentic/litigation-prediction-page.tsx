@@ -130,11 +130,11 @@ export default function LitigationPredictionPage() {
           {CASES.map(c => (
             <button key={c.id} onClick={() => setSelected(c)} aria-label={`Select case ${c.title}`}
               className={`flex-1 text-left rounded-xl border p-4 transition ${selected.id === c.id ? "border-white/[0.12] bg-white/[0.04]" : "border-white/[0.05] bg-white/[0.015] hover:bg-white/[0.03]"}`}>
-              <span className="text-[9px] font-mono text-white/20">{c.id}</span>
-              <p className="text-sm font-medium text-white mt-0.5">{c.title}</p>
-              <p className="text-[10px] text-white/30">{c.type}</p>
+              <span className="text-[9px] font-mono text-white/20">${c.id}</span>
+              <p className="text-sm font-medium text-white mt-0.5">${c.title}</p>
+              <p className="text-[10px] text-white/30">${c.type}</p>
               <div className="mt-2 flex items-center gap-3">
-                <span className="text-[10px] text-white/20">Win Prob: <span className="font-semibold" style={{ color: c.prediction.plaintiffWinProb > 60 ? "#ef4444" : "#22c55e" }}>{c.prediction.plaintiffWinProb}%</span></span>
+                <span className="text-[10px] text-white/20">Win Prob: <span className="font-semibold" style={{ color: c.prediction.plaintiffWinProb > 60 ? "#ef4444" : "#22c55e" }}>${c.prediction.plaintiffWinProb}%</span></span>
                 <span className="text-[10px] text-white/20">Settle: <span className="font-semibold" style={{ color: PRISM_GOLD }}>{fmt(c.prediction.recommendedSettlement)}</span></span>
               </div>
             </button>
@@ -146,7 +146,7 @@ export default function LitigationPredictionPage() {
             <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-[10px] uppercase tracking-wider text-white/30 font-semibold">Outcome Prediction</h3>
-                <span className="text-[9px] font-mono text-white/20">{selected.prediction.modelVersion} · Confidence: {selected.prediction.confidenceInterval}%</span>
+                <span className="text-[9px] font-mono text-white/20">${selected.prediction.modelVersion} · Confidence: ${selected.prediction.confidenceInterval}%</span>
               </div>
 
               <div className="grid grid-cols-4 gap-4 mb-6">
@@ -159,9 +159,9 @@ export default function LitigationPredictionPage() {
                   <div key={s.label} className="rounded-lg border border-white/[0.05] bg-white/[0.015] p-3">
                     <div className="flex items-center gap-1.5 mb-1.5">
                       <s.icon className="h-3 w-3" style={{ color: s.color }} />
-                      <span className="text-[8px] uppercase tracking-wider text-white/25">{s.label}</span>
+                      <span className="text-[8px] uppercase tracking-wider text-white/25">${s.label}</span>
                     </div>
-                    <p className="text-lg font-semibold text-white">{s.value}</p>
+                    <p className="text-lg font-semibold text-white">${s.value}</p>
                   </div>
                 ))}
               </div>
@@ -176,7 +176,7 @@ export default function LitigationPredictionPage() {
                     const max = hi * 1.3;
                     return (
                       <>
-                        <div className="absolute top-0 bottom-0 rounded-lg" style={{ left: `${(lo / max) * 100}%`, width: `${((hi - lo) / max) * 100}%`, background: `linear-gradient(90deg, ${PRISM_BLUE}30, ${PRISM_GOLD}30)` }} />
+                        <div className="absolute top-0 bottom-0 rounded-lg" style={{ left: `${(lo / max) * 100}%`, width: `${\((hi - lo) / max) * 100}%`, background: `linear-gradient(90deg, ${PRISM_BLUE}30, ${PRISM_GOLD}30)` }} />
                         <div className="absolute top-0 bottom-0 w-0.5" style={{ left: `${(rec / max) * 100}%`, background: PRISM_GOLD }} />
                         <div className="absolute top-full mt-1 text-[8px] font-mono" style={{ left: `${(lo / max) * 100}%`, color: PRISM_BLUE }}>{fmt(lo)}</div>
                         <div className="absolute text-[8px] font-mono font-bold" style={{ left: `${(rec / max) * 100}%`, top: "-14px", color: PRISM_GOLD, transform: "translateX(-50%)" }}>{fmt(rec)}</div>
@@ -201,7 +201,7 @@ export default function LitigationPredictionPage() {
                     aria-label="Scenario win probability adjustment"
                     className="flex-1 h-1 appearance-none rounded-full bg-white/[0.08] accent-[#c8a96e] cursor-pointer" />
                   <span className="text-[10px] font-mono font-semibold w-10 text-right" style={{ color: scenarioAdjustment > 0 ? "#ef4444" : scenarioAdjustment < 0 ? "#22c55e" : "rgba(255,255,255,0.3)" }}>
-                    {scenarioAdjustment > 0 ? "+" : ""}{scenarioAdjustment}%
+                    {scenarioAdjustment > 0 ? "+" : ""}${scenarioAdjustment}%
                   </span>
                 </div>
                 <textarea value={strategyNotes} onChange={e => setStrategyNotes(e.target.value)}
@@ -215,7 +215,7 @@ export default function LitigationPredictionPage() {
                   <h4 className="text-[9px] uppercase tracking-wider text-white/25 mb-2">Settlement Path</h4>
                   <div className="flex items-center gap-2 mb-1">
                     <Clock className="h-3 w-3 text-white/20" />
-                    <span className="text-[10px] text-white/40">{selected.prediction.timeToResolution.settlement} months</span>
+                    <span className="text-[10px] text-white/40">${selected.prediction.timeToResolution.settlement} months</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <DollarSign className="h-3 w-3 text-white/20" />
@@ -226,7 +226,7 @@ export default function LitigationPredictionPage() {
                   <h4 className="text-[9px] uppercase tracking-wider text-white/25 mb-2">Trial Path</h4>
                   <div className="flex items-center gap-2 mb-1">
                     <Clock className="h-3 w-3 text-white/20" />
-                    <span className="text-[10px] text-white/40">{selected.prediction.timeToResolution.trial} months</span>
+                    <span className="text-[10px] text-white/40">${selected.prediction.timeToResolution.trial} months</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <DollarSign className="h-3 w-3 text-white/20" />
@@ -237,21 +237,21 @@ export default function LitigationPredictionPage() {
             </div>
 
             <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
-              <h3 className="text-[10px] uppercase tracking-wider text-white/30 font-semibold mb-3">Prediction Factors ({selected.factors.length})</h3>
+              <h3 className="text-[10px] uppercase tracking-wider text-white/30 font-semibold mb-3">Prediction Factors (${selected.factors.length})</h3>
               <div className="space-y-2">
                 {selected.factors.map(f => (
                   <div key={f.name} className="flex items-center gap-3 rounded-lg bg-white/[0.015] border border-white/[0.04] p-3">
                     <div className="w-32">
-                      <p className="text-[10px] font-medium text-white">{f.name}</p>
-                      <p className="text-[8px] uppercase tracking-wider" style={{ color: dirColor(f.direction) }}>{f.direction}</p>
+                      <p className="text-[10px] font-medium text-white">${f.name}</p>
+                      <p className="text-[8px] uppercase tracking-wider" style={{ color: dirColor(f.direction) }}>${f.direction}</p>
                     </div>
                     <div className="flex-1">
                       <div className="h-2 rounded-full bg-white/[0.05] overflow-hidden">
                         <div className="h-full rounded-full transition-all" style={{ width: `${f.score}%`, background: dirColor(f.direction) }} />
                       </div>
                     </div>
-                    <span className="text-[11px] font-semibold text-white w-10 text-right">{f.score}</span>
-                    <span className="text-[9px] text-white/20 w-12 text-right">{(f.weight * 100).toFixed(0)}% wt</span>
+                    <span className="text-[11px] font-semibold text-white w-10 text-right">${f.score}</span>
+                    <span className="text-[9px] text-white/20 w-12 text-right">${(f.weight * 100).toFixed(0)}% wt</span>
                   </div>
                 ))}
               </div>
@@ -264,8 +264,8 @@ export default function LitigationPredictionPage() {
                 <Gavel className="h-3.5 w-3.5" style={{ color: PRISM_GOLD }} />
                 <h3 className="text-[10px] uppercase tracking-wider text-white/30 font-semibold">Judge Profile</h3>
               </div>
-              <p className="text-sm font-medium text-white mb-0.5">{selected.judge.name}</p>
-              <p className="text-[10px] text-white/30 mb-3">{selected.judge.court} · {selected.judge.casesAnalyzed} cases analyzed</p>
+              <p className="text-sm font-medium text-white mb-0.5">${selected.judge.name}</p>
+              <p className="text-[10px] text-white/30 mb-3">${selected.judge.court} · ${selected.judge.casesAnalyzed} cases analyzed</p>
               {[
                 { label: "Plaintiff Win Rate", value: `${selected.judge.plaintiffWinRate}%` },
                 { label: "Avg Settlement", value: fmt(selected.judge.avgSettlement) },
@@ -273,8 +273,8 @@ export default function LitigationPredictionPage() {
                 { label: "Temperament", value: selected.judge.temperament },
               ].map(s => (
                 <div key={s.label} className="flex items-center justify-between py-1.5 border-b border-white/[0.03] last:border-0">
-                  <span className="text-[10px] text-white/30">{s.label}</span>
-                  <span className="text-[10px] font-semibold text-white">{s.value}</span>
+                  <span className="text-[10px] text-white/30">${s.label}</span>
+                  <span className="text-[10px] font-semibold text-white">${s.value}</span>
                 </div>
               ))}
               <div className="mt-3">
@@ -282,7 +282,7 @@ export default function LitigationPredictionPage() {
                 {selected.judge.notablePreferences.map(p => (
                   <p key={p} className="text-[9px] text-white/35 flex items-center gap-1.5 mb-1">
                     <span className="h-1 w-1 rounded-full" style={{ background: PRISM_GOLD }} />
-                    {p}
+                    ${p}
                   </p>
                 ))}
               </div>
@@ -293,15 +293,15 @@ export default function LitigationPredictionPage() {
                 <Users className="h-3.5 w-3.5" style={{ color: PRISM_BLUE }} />
                 <h3 className="text-[10px] uppercase tracking-wider text-white/30 font-semibold">Opposing Counsel</h3>
               </div>
-              <p className="text-sm font-medium text-white">{selected.opposingCounsel.name}</p>
-              <p className="text-[10px] text-white/30 mb-3">{selected.opposingCounsel.firm}</p>
+              <p className="text-sm font-medium text-white">${selected.opposingCounsel.name}</p>
+              <p className="text-[10px] text-white/30 mb-3">${selected.opposingCounsel.firm}</p>
               {[
                 { label: "Win Rate", value: `${selected.opposingCounsel.winRate}%` },
                 { label: "Style", value: selected.opposingCounsel.style },
               ].map(s => (
                 <div key={s.label} className="flex items-center justify-between py-1.5 border-b border-white/[0.03] last:border-0">
-                  <span className="text-[10px] text-white/30">{s.label}</span>
-                  <span className="text-[10px] font-semibold text-white">{s.value}</span>
+                  <span className="text-[10px] text-white/30">${s.label}</span>
+                  <span className="text-[10px] font-semibold text-white">${s.value}</span>
                 </div>
               ))}
             </div>
@@ -310,7 +310,7 @@ export default function LitigationPredictionPage() {
               <h3 className="text-[10px] uppercase tracking-wider text-white/30 font-semibold mb-3">AI Recommendation</h3>
               <div className="rounded-lg p-3" style={{ background: PRISM_GOLD + "08", borderLeft: `2px solid ${PRISM_GOLD}` }}>
                 <p className="text-[10px] text-white/50 leading-relaxed">
-                  Based on analysis of {selected.judge.casesAnalyzed} comparable cases under {selected.judge.name}, opposing counsel's {selected.opposingCounsel.style.toLowerCase()} approach, and current evidentiary position, PRISM recommends <strong className="text-white">settlement at {fmt(selected.prediction.recommendedSettlement)}</strong> within {selected.prediction.timeToResolution.settlement} months. Trial path yields net-negative expected value of {fmt(selected.prediction.trialCostEstimate + selected.prediction.settlementRange[1] * selected.prediction.plaintiffWinProb / 100)} after cost adjustment.
+                  Based on analysis of ${selected.judge.casesAnalyzed} comparable cases under ${selected.judge.name}, opposing counsel's ${selected.opposingCounsel.style.toLowerCase()} approach, and current evidentiary position, PRISM recommends <strong className="text-white">settlement at {fmt(selected.prediction.recommendedSettlement)}</strong> within ${selected.prediction.timeToResolution.settlement} months. Trial path yields net-negative expected value of {fmt(selected.prediction.trialCostEstimate + selected.prediction.settlementRange[1] * selected.prediction.plaintiffWinProb / 100)} after cost adjustment.
                 </p>
               </div>
             </div>

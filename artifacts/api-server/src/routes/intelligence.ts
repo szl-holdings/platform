@@ -15,8 +15,24 @@ type AnthropicMessageParam = { role: "user" | "assistant"; content: string | { t
 
 const router: IRouter = Router();
 
+const MEM_CACHE_MAX_SIZE = 50;
 const memCache = new Map<string, { data: unknown; expiresAt: number }>();
 const refreshing = new Set<string>();
+
+function evictExpiredMemCache(): void {
+  const now = Date.now();
+  for (const [k, v] of memCache) {
+    if (v.expiresAt <= now) memCache.delete(k);
+  }
+  if (memCache.size > MEM_CACHE_MAX_SIZE) {
+    const oldest = [...memCache.entries()].sort((a, b) => a[1].expiresAt - b[1].expiresAt);
+    const toDelete = oldest.slice(0, memCache.size - MEM_CACHE_MAX_SIZE);
+    for (const [k] of toDelete) memCache.delete(k);
+  }
+}
+
+const _memCacheEvictTimer = setInterval(evictExpiredMemCache, 5 * 60 * 1000);
+_memCacheEvictTimer.unref();
 
 async function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
   const now = Date.now();

@@ -37,6 +37,16 @@ const RATE_LIMIT_MAX_PER_WINDOW = 50;
 
 const rateLimitCounters: Record<string, { count: number; windowStart: number }> = {};
 
+const _rateLimitCleanupTimer = setInterval(() => {
+  const now = Date.now();
+  for (const key of Object.keys(rateLimitCounters)) {
+    if (now - (rateLimitCounters[key]?.windowStart ?? 0) > RATE_LIMIT_WINDOW_MS * 10) {
+      delete rateLimitCounters[key];
+    }
+  }
+}, 60_000);
+if (typeof _rateLimitCleanupTimer.unref === "function") _rateLimitCleanupTimer.unref();
+
 function isRateLimited(key: string): boolean {
   const now = Date.now();
   const entry = rateLimitCounters[key];
@@ -338,7 +348,15 @@ function getPollerForSource(config: DataSourceConfig): PollerFn | null {
   return null;
 }
 
+let coinGeckoBackoffUntil = 0;
+let coinGeckoBackoffMs = 0;
+
 async function pollCoinGecko(_config: DataSourceConfig): Promise<Array<Omit<StreamEvent, "normalized">>> {
+  const now = Date.now();
+  if (coinGeckoBackoffUntil > now) {
+    throw new Error(`CoinGecko rate-limited — backing off for ${Math.ceil((coinGeckoBackoffUntil - now) / 1000)}s`);
+  }
+
   const COINS = ["bitcoin", "ethereum", "solana", "chainlink", "avalanche-2"];
   const ids = COINS.join(",");
   const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true`;
@@ -348,7 +366,18 @@ async function pollCoinGecko(_config: DataSourceConfig): Promise<Array<Omit<Stre
     signal: AbortSignal.timeout(8000),
   });
 
+  if (res.status === 429) {
+    const retryAfter = res.headers.get("Retry-After");
+    const waitMs = retryAfter ? parseInt(retryAfter, 10) * 1000 : Math.min((coinGeckoBackoffMs || 60_000) * 2, 300_000);
+    coinGeckoBackoffMs = waitMs;
+    coinGeckoBackoffUntil = Date.now() + waitMs;
+    throw new Error(`CoinGecko 429 — backing off ${Math.ceil(waitMs / 1000)}s`);
+  }
+
   if (!res.ok) throw new Error(`CoinGecko returned ${res.status}`);
+
+  coinGeckoBackoffMs = 0;
+  coinGeckoBackoffUntil = 0;
 
   const data = await res.json() as Record<string, {
     usd: number;
@@ -385,7 +414,9 @@ async function pollCoinGecko(_config: DataSourceConfig): Promise<Array<Omit<Stre
   });
 }
 
-let aisVesselPositions = [
+type AisVesselPosition = { mmsi: string; name: string; lat: number; lon: number; speed: number; course: number; status: string };
+
+let aisVesselPositions: AisVesselPosition[] = [
   { mmsi: "123456001", name: "MV PACIFIC STAR", lat: 23.4, lon: 118.7, speed: 14.2, course: 45, status: "underway" },
   { mmsi: "123456002", name: "MV ATLAS", lat: 35.1, lon: -12.3, speed: 18.5, course: 270, status: "underway" },
   { mmsi: "123456003", name: "MV HORIZON", lat: -4.2, lon: 39.8, speed: 11.0, course: 180, status: "underway" },
@@ -393,19 +424,52 @@ let aisVesselPositions = [
   { mmsi: "123456005", name: "MV CORSAIR", lat: 14.6, lon: 120.9, speed: 12.1, course: 315, status: "underway" },
 ];
 
+let aisBackoffUntil = 0;
+let aisBackoffMs = 0;
+
 async function pollAisVessels(_config: DataSourceConfig): Promise<Array<Omit<StreamEvent, "normalized">>> {
-  let liveData: typeof aisVesselPositions | null = null;
+  const now = Date.now();
+  if (aisBackoffUntil > now) {
+    aisVesselPositions = aisVesselPositions.map(v => ({
+      ...v,
+      lat: v.lat + (Math.random() - 0.5) * 0.02,
+      lon: v.lon + (Math.random() - 0.5) * 0.02,
+      speed: Math.max(0, v.speed + (Math.random() - 0.5) * 0.5),
+      course: (v.course + (Math.random() - 0.5) * 5 + 360) % 360,
+    }));
+    return aisVesselPositions.slice(0, 5).map(buildAisEvent);
+  }
+
   try {
     const res = await fetch("https://api.vesselfinder.com/vessels?userkey=demo&lat=0&lng=0&radius=6371", {
       signal: AbortSignal.timeout(4000),
     });
     if (res.ok) {
-      liveData = await res.json() as typeof aisVesselPositions;
+      const raw = await res.json();
+      if (Array.isArray(raw) && raw.length > 0) {
+        const validated = (raw as unknown[]).filter(
+          (v): v is AisVesselPosition =>
+            v !== null &&
+            typeof v === "object" &&
+            typeof (v as Record<string, unknown>).mmsi === "string" &&
+            typeof (v as Record<string, unknown>).lat === "number" &&
+            typeof (v as Record<string, unknown>).lon === "number"
+        );
+        if (validated.length > 0) {
+          aisVesselPositions = validated;
+          aisBackoffMs = 0;
+          aisBackoffUntil = 0;
+          return validated.slice(0, 5).map(buildAisEvent);
+        }
+      }
     }
   } catch {
+    const backoff = Math.min((aisBackoffMs || 30_000) * 2, 300_000);
+    aisBackoffMs = backoff;
+    aisBackoffUntil = Date.now() + backoff;
+    logger.debug({ backoffMs: backoff }, "[ingestion] AIS fetch failed — backing off");
   }
 
-  const vessels = liveData ?? aisVesselPositions;
   aisVesselPositions = aisVesselPositions.map(v => ({
     ...v,
     lat: v.lat + (Math.random() - 0.5) * 0.02,
@@ -414,7 +478,11 @@ async function pollAisVessels(_config: DataSourceConfig): Promise<Array<Omit<Str
     course: (v.course + (Math.random() - 0.5) * 5 + 360) % 360,
   }));
 
-  return vessels.slice(0, 5).map(vessel => ({
+  return aisVesselPositions.slice(0, 5).map(buildAisEvent);
+}
+
+function buildAisEvent(vessel: AisVesselPosition): Omit<StreamEvent, "normalized"> {
+  return {
     id: `ais_${vessel.mmsi}_${Date.now()}`,
     type: "position_update",
     source: "ais_feed",
@@ -430,7 +498,7 @@ async function pollAisVessels(_config: DataSourceConfig): Promise<Array<Omit<Str
       status: vessel.status ?? "underway",
     },
     timestamp: new Date().toISOString(),
-  }));
+  };
 }
 
 const webhookEventQueues: Record<StreamCategory, StreamEvent[]> = {
@@ -487,7 +555,7 @@ const BUILT_IN_SOURCES: Array<Omit<DataSourceConfig, "id" | "eventsIngested" | "
     type: "polling",
     category: "market",
     endpoint: "https://api.coingecko.com/api/v3",
-    pollingIntervalMs: 30000,
+    pollingIntervalMs: 120_000,
     enabled: true,
   },
   {
@@ -495,7 +563,7 @@ const BUILT_IN_SOURCES: Array<Omit<DataSourceConfig, "id" | "eventsIngested" | "
     type: "polling",
     category: "ais",
     endpoint: "internal://ais-simulator",
-    pollingIntervalMs: 8000,
+    pollingIntervalMs: 60_000,
     enabled: true,
   },
 ];
@@ -545,8 +613,24 @@ export async function initIngestionFramework(): Promise<void> {
       } catch (err) {
         logger.warn({ err, name: builtIn.name }, "[ingestion] Failed to register built-in source");
       }
-    } else if (existing.enabled && existing.type === "polling" && !activePollers.has(existing.id)) {
-      startPollingSource(existing);
+    } else {
+      if (existing.pollingIntervalMs !== builtIn.pollingIntervalMs) {
+        try {
+          await db.update(streamDataSourcesTable)
+            .set({ pollingIntervalMs: builtIn.pollingIntervalMs, updatedAt: new Date() })
+            .where(eq(streamDataSourcesTable.id, existing.id));
+          existing.pollingIntervalMs = builtIn.pollingIntervalMs;
+          if (activePollers.has(existing.id)) {
+            stopPollingSource(existing.id);
+          }
+          logger.info({ id: existing.id, name: existing.name, newIntervalMs: builtIn.pollingIntervalMs }, "[ingestion] Updated polling interval for built-in source");
+        } catch (err) {
+          logger.warn({ err, name: builtIn.name }, "[ingestion] Failed to update polling interval");
+        }
+      }
+      if (existing.enabled && existing.type === "polling" && !activePollers.has(existing.id)) {
+        startPollingSource(existing);
+      }
     }
   }
 
