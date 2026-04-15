@@ -7,115 +7,70 @@ import {
   Zap, Eye, Shield, ArrowRight, RefreshCw, Target, Gauge, BarChart3, Wifi, WifiOff
 } from "lucide-react";
 import { AreaChart, Area, LineChart, Line, BarChart, Bar, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, ReferenceLine, Cell } from "recharts";
+import { MetricTimeSeriesSimulator, seededRng } from "@szl-holdings/observability";
 
 const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e" };
 const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.07)" };
 const TEXT = { primary: "rgba(255,255,255,0.88)", secondary: "rgba(255,255,255,0.55)", tertiary: "rgba(255,255,255,0.28)", muted: "rgba(255,255,255,0.14)" };
 const ACCENT = "#d4a054";
 
-const SLOS = [
-  {
-    id: "api-availability",
-    service: "API Gateway",
-    slo_name: "Availability",
-    target_pct: 99.9,
-    current_pct: 99.73,
-    window_days: 30,
-    budget_minutes: 43.2,
-    consumed_minutes: 32.1,
-    burn_rate_1h: 14.2,
-    burn_rate_6h: 8.7,
-    burn_rate_24h: 3.4,
-    status: "burning",
-    remaining_pct: 25.7,
-    alert_threshold: 5,
-    incidents: 3,
-    color: "#c45a4a",
-  },
-  {
-    id: "checkout-latency",
-    service: "Checkout Service",
-    slo_name: "Latency p99 < 400ms",
-    target_pct: 99.5,
-    current_pct: 99.61,
-    window_days: 30,
-    budget_minutes: 216,
-    consumed_minutes: 84.2,
-    burn_rate_1h: 2.1,
-    burn_rate_6h: 1.8,
-    burn_rate_24h: 1.4,
-    status: "healthy",
-    remaining_pct: 61.0,
-    alert_threshold: 20,
-    incidents: 1,
-    color: "#6b8f71",
-  },
-  {
-    id: "auth-availability",
-    service: "Auth Service",
-    slo_name: "Availability",
-    target_pct: 99.99,
-    current_pct: 99.94,
-    window_days: 30,
-    budget_minutes: 4.3,
-    consumed_minutes: 3.7,
-    burn_rate_1h: 6.8,
-    burn_rate_6h: 4.1,
-    burn_rate_24h: 2.2,
-    status: "warning",
-    remaining_pct: 14.0,
-    alert_threshold: 2,
-    incidents: 2,
-    color: "#c8953c",
-  },
-  {
-    id: "payment-success",
-    service: "Payment Processor",
-    slo_name: "Success Rate > 99.8%",
-    target_pct: 99.8,
-    current_pct: 99.84,
-    window_days: 30,
-    budget_minutes: 86.4,
-    consumed_minutes: 12.1,
-    burn_rate_1h: 0.4,
-    burn_rate_6h: 0.3,
-    burn_rate_24h: 0.2,
-    status: "healthy",
-    remaining_pct: 86.0,
-    alert_threshold: 20,
-    incidents: 0,
-    color: "#6b8f71",
-  },
-  {
-    id: "notification-delivery",
-    service: "Notification Worker",
-    slo_name: "Delivery Latency < 5min",
-    target_pct: 99.5,
-    current_pct: 97.12,
-    window_days: 30,
-    budget_minutes: 216,
-    consumed_minutes: 216,
-    burn_rate_1h: 0,
-    burn_rate_6h: 0,
-    burn_rate_24h: 28.4,
-    status: "exhausted",
-    remaining_pct: 0,
-    alert_threshold: 0,
-    incidents: 5,
-    color: "#ef4444",
-  },
-];
+const _sim = new MetricTimeSeriesSimulator(0xc0ffee42);
+const _rng = seededRng(0x5010dead);
 
-const BURN_HISTORY = Array.from({ length: 30 }, (_, i) => ({
-  day: `D-${30 - i}`,
-  api_gateway: Math.max(0, Math.min(100, 80 - i * 2 + Math.sin(i) * 10)),
-  auth: Math.max(0, Math.min(100, 95 - i * 4 + Math.cos(i * 0.8) * 8)),
-  notification: i < 5 ? Math.max(0, 20 - i * 4) : 0,
+const _simSlos = _sim.generateSloStatuses([
+  "api-gateway", "checkout-api", "auth-service", "payment-service", "notification-worker",
+]);
+const STATUS_TO_LOCAL: Record<string, string> = {
+  healthy: "healthy",
+  at_risk: "warning",
+  burning: "burning",
+  exhausted: "exhausted",
+};
+const STATUS_COLORS_MAP: Record<string, string> = {
+  healthy: "#6b8f71",
+  at_risk: "#c8953c",
+  burning: "#c45a4a",
+  exhausted: "#ef4444",
+  warning: "#c8953c",
+};
+const SLOS = _simSlos.map((s, i) => ({
+  id: s.service,
+  service: s.service.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
+  slo_name: s.sloName,
+  target_pct: s.target,
+  current_pct: s.current,
+  window_days: s.windowDays,
+  budget_minutes: s.errorBudgetMinutes,
+  consumed_minutes: parseFloat((s.errorBudgetMinutes * s.errorBudgetConsumedPct / 100).toFixed(2)),
+  burn_rate_1h: s.burnRate1h,
+  burn_rate_6h: s.burnRate6h,
+  burn_rate_24h: s.burnRate24h,
+  status: STATUS_TO_LOCAL[s.status] ?? "healthy",
+  remaining_pct: parseFloat((100 - s.errorBudgetConsumedPct).toFixed(1)),
+  alert_threshold: parseFloat((s.errorBudgetMinutes * 0.1).toFixed(1)),
+  incidents: _rng.int(0, 5),
+  color: STATUS_COLORS_MAP[s.status] ?? "#6b8f71",
 }));
 
+
+const _bhRng = seededRng(0x5010dead + 1);
+const BURN_HISTORY = Array.from({ length: 30 }, (_, i) => {
+  const sloStatuses = _simSlos.map(s => ({
+    id: s.service,
+    remaining: Math.max(0, Math.min(100, 100 - s.errorBudgetConsumedPct - i * _bhRng.range(0.5, 2) + _bhRng.range(-3, 3))),
+  }));
+  return {
+    day: `D-${30 - i}`,
+    api_gateway: sloStatuses[0]?.remaining ?? _bhRng.range(0, 100),
+    auth: sloStatuses[2]?.remaining ?? _bhRng.range(0, 100),
+    notification: sloStatuses[4]?.remaining ?? _bhRng.range(0, 30),
+  };
+});
+
+const _fbRng = seededRng(0x5010dead + 2);
 const FAST_BURN_DATA = Array.from({ length: 60 }, (_, i) => ({
   min: `${i}m`,
-  rate: i < 15 ? 1 + Math.random() * 2 : i < 30 ? 8 + Math.random() * 6 : i < 45 ? 14 + Math.random() * 4 : 3 + Math.random() * 2,
+  rate: i < 15 ? _fbRng.range(1, 3) : i < 30 ? _fbRng.range(8, 14) : i < 45 ? _fbRng.range(12, 18) : _fbRng.range(2, 5),
   threshold: 14.4,
 }));
 

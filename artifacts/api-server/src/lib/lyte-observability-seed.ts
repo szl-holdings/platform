@@ -8,6 +8,10 @@ import {
   lyteSignalsTable,
 } from "@szl-holdings/db";
 import { sql } from "drizzle-orm";
+import { MetricTimeSeriesSimulator, seededRng } from "@szl-holdings/observability";
+
+const _rng = seededRng(0xc0ffee42);
+const _metricSim = new MetricTimeSeriesSimulator(0xc0ffee42);
 
 const SERVICES = [
   "api-gateway", "lyte-core", "alloy-engine", "terra-beacon", "vessels-intel",
@@ -29,7 +33,7 @@ const METRIC_TYPES = [
 ];
 
 function rng(min: number, max: number) {
-  return min + Math.random() * (max - min);
+  return _rng.range(min, max);
 }
 
 function generateMetricValue(m: typeof METRIC_TYPES[0], isAnomaly: boolean): number {
@@ -63,27 +67,42 @@ export async function seedLyteObservability() {
   await db.insert(lytePrismScoresTable).values(scoreTuples);
   results.lyte_prism_scores = scoreTuples.length;
 
-  // ── 2. Metrics (1200+ data points, 100+ per service over 7 days) ─────────
+  // ── 2. Metrics (1200+ data points via MetricTimeSeriesSimulator) ──────────
   await db.execute(sql`TRUNCATE lyte_metrics CASCADE`);
   const metricBatches: any[] = [];
   const now = Date.now();
   const sevenDays = 7 * 24 * 3600 * 1000;
 
+  // 30-min interval golden signals over 7 days = 336 points per service
+  const GOLDEN_INTERVAL_MS = 30 * 60 * 1000;
+  const GOLDEN_POINTS = Math.floor(sevenDays / GOLDEN_INTERVAL_MS);
+
   for (const service of SERVICES) {
-    for (const mt of METRIC_TYPES) {
-      const count = Math.floor(rng(110, 160));
+    // Golden signals time series from simulator
+    const goldenSeries = _metricSim.generateGoldenSignalsHistory(service, GOLDEN_POINTS, GOLDEN_INTERVAL_MS, now);
+    for (const pt of goldenSeries) {
+      const isAnomalyLatency = pt.latencyP99 > 400;
+      const isAnomalyError = pt.errorRate > 5;
+      metricBatches.push(
+        { service, metricName: "latency", metricType: "latency", value: parseFloat(pt.latencyP99.toFixed(2)), unit: "ms", tags: { env: "production", percentile: "p99" }, anomaly: isAnomalyLatency, anomalyScore: isAnomalyLatency ? parseFloat(_rng.range(0.7, 1.0).toFixed(3)) : null, recordedAt: new Date(pt.timestamp) },
+        { service, metricName: "error_rate", metricType: "error_rate", value: parseFloat(pt.errorRate.toFixed(3)), unit: "%", tags: { env: "production" }, anomaly: isAnomalyError, anomalyScore: isAnomalyError ? parseFloat(_rng.range(0.7, 1.0).toFixed(3)) : null, recordedAt: new Date(pt.timestamp) },
+        { service, metricName: "throughput", metricType: "throughput", value: parseFloat(pt.throughput.toFixed(1)), unit: "req/s", tags: { env: "production" }, anomaly: false, anomalyScore: null, recordedAt: new Date(pt.timestamp) },
+        { service, metricName: "cpu", metricType: "cpu", value: parseFloat(pt.saturation.toFixed(1)), unit: "%", tags: { env: "production" }, anomaly: pt.saturation > 90, anomalyScore: pt.saturation > 90 ? parseFloat(_rng.range(0.6, 1.0).toFixed(3)) : null, recordedAt: new Date(pt.timestamp) },
+        { service, metricName: "apdex", metricType: "apdex", value: parseFloat(pt.apdex.toFixed(3)), unit: "score", tags: { env: "production" }, anomaly: pt.apdex < 0.7, anomalyScore: pt.apdex < 0.7 ? parseFloat(_rng.range(0.6, 0.9).toFixed(3)) : null, recordedAt: new Date(pt.timestamp) },
+      );
+    }
+
+    // Legacy metric types (business metrics) still generated for non-golden-signal types
+    for (const mt of METRIC_TYPES.filter(m => !["latency", "error_rate", "throughput", "cpu"].includes(m.type))) {
+      const count = _rng.int(80, 120);
       for (let i = 0; i < count; i++) {
-        const isAnomaly = Math.random() < 0.07;
+        const isAnomaly = _rng.bool(0.07);
         const value = generateMetricValue(mt, isAnomaly);
         const recordedAt = new Date(now - rng(0, sevenDays));
         metricBatches.push({
-          service,
-          metricName: mt.type,
-          metricType: mt.type,
-          value: parseFloat(value.toFixed(2)),
-          unit: mt.unit,
-          tags: { env: "production" },
-          anomaly: isAnomaly,
+          service, metricName: mt.type, metricType: mt.type,
+          value: parseFloat(value.toFixed(2)), unit: mt.unit,
+          tags: { env: "production" }, anomaly: isAnomaly,
           anomalyScore: isAnomaly ? parseFloat(rng(0.7, 1.0).toFixed(3)) : null,
           recordedAt,
         });
@@ -109,7 +128,7 @@ export async function seedLyteObservability() {
   for (const alert of insertedAlerts) {
     const eventCount = Math.floor(rng(8, 40));
     for (let i = 0; i < eventCount; i++) {
-      const eventType = i === 0 ? "fired" : (Math.random() > 0.4 ? "fired" : "resolved");
+      const eventType = i === 0 ? "fired" : (_rng.bool(0.6) ? "fired" : "resolved");
       const occurred = new Date(now - rng(0, sevenDays));
       alertEventBatches.push({
         alertId: alert.id,
@@ -140,12 +159,12 @@ export async function seedLyteObservability() {
   const statusOptions = ["new", "acknowledged", "resolved", "dismissed"] as const;
 
   for (let i = 0; i < 1100; i++) {
-    const severity = signalSeverities[Math.floor(Math.random() * signalSeverities.length)];
-    const sigType = signalTypes[Math.floor(Math.random() * signalTypes.length)];
-    const source = signalSources[Math.floor(Math.random() * signalSources.length)];
-    const service = SERVICES[Math.floor(Math.random() * SERVICES.length)];
-    const sourceType = sourceTypeOptions[Math.floor(Math.random() * sourceTypeOptions.length)];
-    const status = statusOptions[Math.floor(Math.random() * statusOptions.length)];
+    const severity = _rng.pick(signalSeverities);
+    const sigType = _rng.pick(signalTypes);
+    const source = _rng.pick(signalSources);
+    const service = _rng.pick(SERVICES);
+    const sourceType = _rng.pick([...sourceTypeOptions]);
+    const status = _rng.pick([...statusOptions]);
     signalBatches.push({
       title: getSignalTitle(sigType, service),
       body: `Automated signal detected by ${source} on ${service}`,
@@ -153,7 +172,7 @@ export async function seedLyteObservability() {
       source,
       sourceType,
       status,
-      metadata: { service, signalType: sigType, metricType: METRIC_TYPES[Math.floor(Math.random() * METRIC_TYPES.length)].type },
+      metadata: { service, signalType: sigType, metricType: _rng.pick(METRIC_TYPES).type },
       receivedAt: new Date(now - rng(0, sevenDays)),
     });
   }
@@ -337,7 +356,7 @@ function buildEscalationDefs(alerts: any[]) {
       alertId: firingAlerts[i + 4]?.id ?? null,
       severity: i === 0 ? "high" : "medium",
       status: "in_progress",
-      stage: Math.floor(Math.random() * 2) + 1,
+      stage: _rng.int(1, 2),
       maxStage: 3,
       owner: OWNERS[i % 5],
       assignedTo: OWNERS[(i + 1) % 5],
@@ -401,5 +420,5 @@ function getSignalTitle(type: string, service: string): string {
     deployment: [`Deployment event on ${service}`, `Configuration change: ${service}`, `Version rollout completed: ${service}`],
   };
   const options = titles[type] ?? [`Signal detected: ${service}`];
-  return options[Math.floor(Math.random() * options.length)];
+  return _rng.pick(options);
 }

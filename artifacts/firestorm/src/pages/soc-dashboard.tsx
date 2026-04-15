@@ -12,6 +12,12 @@ import {
   DollarSign, ArrowUpRight,
 } from "lucide-react";
 import { PackBanner } from "@/components/pack-banner";
+import { ThreatFeedSimulator } from "@szl-holdings/observability";
+
+const _threatSim = new ThreatFeedSimulator(0xfeed1337);
+const _now = Date.now();
+const _campaigns = _threatSim.generateAptCampaigns(_now);
+const _iocs = _threatSim.generateIocs(20, _now);
 
 const DS = {
   surface: "rgba(255,255,255,0.025)",
@@ -65,16 +71,40 @@ function LiveClock() {
   );
 }
 
+function _minsAgo(ms: number) {
+  const m = Math.round((_now - ms) / 60000);
+  return m < 60 ? `${m}m` : `${Math.floor(m / 60)}h`;
+}
+
 const CROSS_MODULE_FEED = [
-  { time: "2m", module: "defense", severity: "critical", text: "Lateral movement detected on DC-PROD-03 — MITRE T1021.002", icon: Crosshair },
-  { time: "5m", module: "command", severity: "high", text: "SLA breach — Northgate ticket #4827 past 4h response target", icon: Ticket },
-  { time: "8m", module: "defense", severity: "critical", text: "C2 beacon traffic to known APT29 infrastructure detected", icon: Radio },
-  { time: "12m", module: "labs", severity: "high", text: "Churn model v3.2 flagged TechCorp — 88% probability, declining usage", icon: TrendingUp },
-  { time: "18m", module: "defense", severity: "high", text: "Brute force attempt — 847 failed logins from 103.45.x.x", icon: AlertTriangle },
-  { time: "22m", module: "command", severity: "medium", text: "3 managed endpoints entering maintenance window — patch cycle", icon: Server },
-  { time: "31m", module: "labs", severity: "medium", text: "Neural explorer detected anomalous pattern in Q1 threat cluster", icon: Brain },
-  { time: "45m", module: "defense", severity: "high", text: "Unpatched CVE-2024-3400 on Palo Alto FW-EDGE-01", icon: Bug },
-];
+  // Simulator-driven campaign/IOC entries
+  ..._campaigns.slice(0, 3).map((c, i) => ({
+    time: _minsAgo(_now - (i + 1) * 2 * 60000),
+    module: "defense" as const,
+    severity: (c.confidence > 80 ? "critical" : "high") as string,
+    text: `${c.actor} campaign active — ${c.mitreAttack[0] ?? "T1071"} (${c.activePhase.replace(/_/g, " ")}) · ${c.targetSectors[0] ?? "critical"} sector`,
+    icon: Crosshair,
+  })),
+  ..._iocs.slice(0, 3).map((ioc, i) => ({
+    time: _minsAgo(_now - (i + 3) * 5 * 60000),
+    module: "defense" as const,
+    severity: (ioc.confidence > 85 ? "critical" : ioc.confidence > 65 ? "high" : "medium") as string,
+    text: `IOC matched: ${ioc.type.toUpperCase()} ${ioc.value.slice(0, 32)}… — ${ioc.sources[0]?.name ?? "intel"} confidence ${ioc.confidence}%`,
+    icon: Radio,
+  })),
+  // Static high-fidelity contextual entries
+  { time: "5m", module: "command" as const, severity: "high", text: "SLA breach — Northgate ticket #4827 past 4h response target", icon: Ticket },
+  { time: "12m", module: "labs" as const, severity: "high", text: "Churn model v3.2 flagged TechCorp — 88% probability, declining usage", icon: TrendingUp },
+  { time: "22m", module: "command" as const, severity: "medium", text: "3 managed endpoints entering maintenance window — patch cycle", icon: Server },
+  { time: "31m", module: "labs" as const, severity: "medium", text: "Neural explorer detected anomalous pattern in Q1 threat cluster", icon: Brain },
+  { time: "45m", module: "defense" as const, severity: "high", text: "Unpatched CVE-2024-3400 on Palo Alto FW-EDGE-01", icon: Bug },
+].sort((a, b) => {
+  const toMins = (t: string) => {
+    const n = parseInt(t);
+    return t.endsWith("h") ? n * 60 : n;
+  };
+  return toMins(a.time) - toMins(b.time);
+});
 
 const MODULE_COLORS: Record<string, string> = {
   defense: "#ef4444",

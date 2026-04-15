@@ -1,4 +1,5 @@
 export * from "./types.js";
+export * from "./simulators/index.js";
 export { MetricCollector } from "./collector.js";
 export { ServerTelemetryCollector, ClientTelemetryCollector, serverTelemetry, clientTelemetry } from "./telemetry.js";
 export type { TelemetryEvent, RequestTelemetry, WebVitalsReport, BusinessEvent, AlertRecord, ApmSpan, ExternalCallRecord } from "./telemetry.js";

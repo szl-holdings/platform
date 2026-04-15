@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Cpu, Zap, TrendingUp, TrendingDown, AlertTriangle, BarChart3, Activity, Brain, DollarSign, RefreshCw } from "lucide-react";
+import { InfraSimulator, seededRng } from "@szl-holdings/observability";
 
 interface GpuState {
   id: string;
@@ -173,34 +174,45 @@ const GPU_SEED = [
   { id: "gpu-3", name: "GPU-3 · NVIDIA H100", workload: "Drift Detection + Fine-tune" },
 ];
 
-export default function GpuComputeObservatory() {
-  const [gpus, setGpus] = useState<GpuState[]>(() =>
-    GPU_SEED.map(g => ({
-      ...g,
-      utilizationPct: 45 + Math.random() * 50,
-      memUsedGb: 25 + Math.random() * 45,
-      memTotalGb: 80,
-      temperatureC: 55 + Math.random() * 30,
-      powerWatts: 200 + Math.random() * 200,
-      history: Array.from({ length: 20 }, () => 45 + Math.random() * 50),
-      status: "optimal" as const,
-    }))
-  );
+const _infraSim = new InfraSimulator(0x9ef4a2b8);
+const _clusterSnap = _infraSim.generateClusterSnapshot(Date.now());
+const _liveRng = seededRng(0xcafe0001);
 
-  const [models, setModels] = useState<ModelState[]>(() =>
-    MODELS_SEED.map(m => ({
+export default function GpuComputeObservatory() {
+  const [gpus, setGpus] = useState<GpuState[]>(() => {
+    const rng = seededRng(0x9ef4a2b8);
+    return GPU_SEED.map((g, i) => {
+      const node = _clusterSnap.nodes[i % _clusterSnap.nodes.length];
+      const util = node?.utilizationPct ?? rng.range(45, 95);
+      const mem = node?.vramUsedGb ?? rng.range(25, 70);
+      return {
+        ...g,
+        utilizationPct: util,
+        memUsedGb: Math.min(79, mem),
+        memTotalGb: 80,
+        temperatureC: node?.tempCelsius ?? rng.range(55, 85),
+        powerWatts: node?.powerWatts ?? rng.range(200, 400),
+        history: node?.thermalCurve.slice(-20).map(p => p.celsius) ?? Array.from({ length: 20 }, () => rng.range(45, 95)),
+        status: util > 90 ? "critical" as const : util > 75 ? "high" as const : "optimal" as const,
+      };
+    });
+  });
+
+  const [models, setModels] = useState<ModelState[]>(() => {
+    const rng = seededRng(0xdeadbeef);
+    return MODELS_SEED.map(m => ({
       ...m,
-      latencyMs: m.baseLatency + Math.random() * m.baseLatency * 0.4,
-      tokensPerSec: 50 + Math.random() * 150,
-      costPerInference: 0.001 + Math.random() * 0.05,
-      requestCount: Math.floor(100 + Math.random() * 5000),
-      errorRate: Math.random() * 5,
-      driftScore: m.baseDrift + Math.random() * 10,
+      latencyMs: m.baseLatency + rng.range(0, m.baseLatency * 0.4),
+      tokensPerSec: rng.range(50, 200),
+      costPerInference: rng.range(0.001, 0.05),
+      requestCount: rng.int(100, 5000),
+      errorRate: rng.range(0, 5),
+      driftScore: m.baseDrift + rng.range(0, 10),
       driftAlert: m.baseDrift > 12,
-      history: Array.from({ length: 20 }, () => m.baseDrift + Math.random() * 10),
-      trend: (["improving", "stable", "degrading"] as const)[Math.floor(Math.random() * 3)]!,
-    }))
-  );
+      history: Array.from({ length: 20 }, () => m.baseDrift + rng.range(0, 10)),
+      trend: rng.pick(["improving", "stable", "degrading"] as const),
+    }));
+  });
 
   const [animate, setAnimate] = useState(true);
   const [tab, setTab] = useState<"gpu" | "models" | "costs">("gpu");
@@ -208,30 +220,30 @@ export default function GpuComputeObservatory() {
   useEffect(() => {
     const t = setInterval(() => {
       setGpus(prev => prev.map(g => {
-        const newUtil = Math.max(10, Math.min(100, g.utilizationPct + (Math.random() - 0.5) * 8));
-        const newMem = Math.max(10, Math.min(78, g.memUsedGb + (Math.random() - 0.5) * 3));
+        const newUtil = Math.max(10, Math.min(100, g.utilizationPct + (_liveRng.next() - 0.5) * 8));
+        const newMem = Math.max(10, Math.min(78, g.memUsedGb + (_liveRng.next() - 0.5) * 3));
         const status: GpuState["status"] = newUtil > 90 ? "critical" : newUtil > 75 ? "high" : "optimal";
         return {
           ...g,
           utilizationPct: newUtil,
           memUsedGb: newMem,
-          temperatureC: Math.max(45, Math.min(90, g.temperatureC + (Math.random() - 0.5) * 2)),
-          powerWatts: Math.max(150, Math.min(400, g.powerWatts + (Math.random() - 0.5) * 15)),
+          temperatureC: Math.max(45, Math.min(90, g.temperatureC + (_liveRng.next() - 0.5) * 2)),
+          powerWatts: Math.max(150, Math.min(400, g.powerWatts + (_liveRng.next() - 0.5) * 15)),
           history: [...g.history.slice(-19), newUtil],
           status,
         };
       }));
       setModels(prev => prev.map(m => {
-        const newLatency = Math.max(20, m.latencyMs + (Math.random() - 0.5) * m.latencyMs * 0.1);
-        const newDrift = Math.max(0, Math.min(50, m.driftScore + (Math.random() - 0.48) * 1.5));
+        const newLatency = Math.max(20, m.latencyMs + (_liveRng.next() - 0.5) * m.latencyMs * 0.1);
+        const newDrift = Math.max(0, Math.min(50, m.driftScore + (_liveRng.next() - 0.48) * 1.5));
         return {
           ...m,
           latencyMs: newLatency,
-          tokensPerSec: Math.max(10, m.tokensPerSec + (Math.random() - 0.5) * 20),
+          tokensPerSec: Math.max(10, m.tokensPerSec + (_liveRng.next() - 0.5) * 20),
           driftScore: newDrift,
           driftAlert: newDrift > 20,
-          requestCount: m.requestCount + Math.floor(Math.random() * 10),
-          errorRate: Math.max(0, m.errorRate + (Math.random() - 0.5) * 0.3),
+          requestCount: m.requestCount + _liveRng.int(0, 9),
+          errorRate: Math.max(0, m.errorRate + (_liveRng.next() - 0.5) * 0.3),
           history: [...m.history.slice(-19), newDrift],
           trend: newLatency < m.latencyMs * 0.98 ? "improving" : newLatency > m.latencyMs * 1.02 ? "degrading" : "stable",
         };

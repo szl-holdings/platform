@@ -1,6 +1,13 @@
 import { logger } from "./logger";
+import { MetricTimeSeriesSimulator, ThreatFeedSimulator, seededRng } from "@szl-holdings/observability";
 
 const DEMO_MODE = process.env["DEMO_MODE"] === "true" || process.env["DEMO_MODE"] === "1";
+
+// ── Deterministic simulators for demo data generation ────────────────────────
+const _demoMetricSim = new MetricTimeSeriesSimulator(0xc0ffee42);
+const _demoThreatSim = new ThreatFeedSimulator(0xfeed1337);
+const _demoRng = seededRng(0xdeadb00d);
+const _demoNow = Date.now();
 
 export function isDemoMode(): boolean {
   return DEMO_MODE;
@@ -112,6 +119,44 @@ export const demoLyteSignals: DemoSignal[] = [
   { id: 1008, source: "CloudFlare", sourceType: "cdn", severity: "medium", title: "Cache hit ratio dropped 94% → 61% — origin load 4x baseline, scaling in progress", status: "new", receivedAt: ago(75 * MIN), domain: "lyte" },
   { id: 1009, source: "GitHub Actions", sourceType: "ci_cd", severity: "medium", title: "Deploy pipeline timed out — Docker OOM at 45m, hotfix deploy blocked", status: "new", receivedAt: ago(88 * MIN), domain: "lyte" },
   { id: 1010, source: "Stripe", sourceType: "webhook", severity: "high", title: "Payment decline rate 11.8% (baseline 2.1%) — issuer_decline spike", status: "acknowledged", receivedAt: ago(2 * HOUR), domain: "lyte" },
+  // ── Simulator-generated APM anomaly signals ─────────────────────────────
+  ...((): DemoSignal[] => {
+    const services = ["api-gateway", "auth-service", "payment-service"];
+    const signals: DemoSignal[] = [];
+    let id = 1100;
+    for (const svc of services) {
+      const hist = _demoMetricSim.generateGoldenSignalsHistory(svc, 144, 5 * 60 * 1000, _demoNow);
+      for (const pt of hist) {
+        if (pt.latencyP99 > 600 && signals.length < 5) {
+          const minsAgo = Math.round((_demoNow - pt.timestamp) / 60000);
+          signals.push({
+            id: id++,
+            source: "New Relic APM",
+            sourceType: "monitoring",
+            severity: pt.latencyP99 > 1200 ? "critical" : "high",
+            title: `${svc} p99 latency ${pt.latencyP99.toFixed(0)}ms — SLO breach (${minsAgo}m ago)`,
+            status: _demoRng.pick(["new", "acknowledged"] as const),
+            receivedAt: new Date(pt.timestamp).toISOString(),
+            domain: "lyte",
+          });
+        }
+        if (pt.errorRate > 5 && signals.length < 8) {
+          const minsAgo = Math.round((_demoNow - pt.timestamp) / 60000);
+          signals.push({
+            id: id++,
+            source: "Sentry / New Relic",
+            sourceType: "error_tracking",
+            severity: pt.errorRate > 10 ? "critical" : "high",
+            title: `${svc} error rate ${pt.errorRate.toFixed(1)}% — threshold 5% (${minsAgo}m ago)`,
+            status: _demoRng.pick(["new", "acknowledged", "resolved"] as const),
+            receivedAt: new Date(pt.timestamp).toISOString(),
+            domain: "lyte",
+          });
+        }
+      }
+    }
+    return signals;
+  })(),
 ];
 
 export const demoLyteActions: DemoAction[] = [
@@ -205,6 +250,46 @@ export const demoTerraInquiries: DemoTerraInquiry[] = [
   { id: "inq-006", propertyId: "prop-008", propertyName: "Greenfield Office Campus", propertyType: "office", city: "Denver", state: "CO", inquiryType: "acquisition", leadName: "Colorado Tech Partners", leadOrg: "CTP Holdings", email: "deals@ctpholdings.co", budget: 58000000, status: "qualified", receivedAt: ago(12 * HOUR), score: 71 },
 ];
 
+// ── Simulator-generated Firestorm threat intelligence signals ────────────────
+export const demoFirestormSignals: DemoSignal[] = (() => {
+  const iocs = _demoThreatSim.generateIocs(30, _demoNow);
+  const campaigns = _demoThreatSim.generateAptCampaigns(_demoNow);
+  const signals: DemoSignal[] = [];
+  let id = 2000;
+
+  for (const ioc of iocs.slice(0, 12)) {
+    const minsAgo = Math.round((_demoNow - ioc.lastSeen) / 60000);
+    const timeStr = minsAgo < 60 ? `${minsAgo}m ago` : `${Math.floor(minsAgo / 60)}h ago`;
+    signals.push({
+      id: id++,
+      source: ioc.sources[0]?.name ?? "Threat Intel",
+      sourceType: "threat_intel",
+      severity: ioc.severity,
+      title: `IOC ${ioc.type}: ${ioc.value.slice(0, 40)}… — ${ioc.tags[0] ?? "malware"} (${timeStr})`,
+      status: _demoRng.pick(["new", "acknowledged", "resolved"] as const),
+      receivedAt: new Date(ioc.lastSeen).toISOString(),
+      domain: "firestorm",
+    });
+  }
+
+  for (const camp of campaigns.slice(0, 4)) {
+    const minsAgo = Math.round((_demoNow - camp.lastActivity) / 60000);
+    const timeStr = minsAgo < 60 ? `${minsAgo}m ago` : `${Math.floor(minsAgo / 60)}h ago`;
+    signals.push({
+      id: id++,
+      source: "MISP / Recorded Future",
+      sourceType: "threat_intel",
+      severity: camp.confidence > 85 ? "critical" : camp.confidence > 65 ? "high" : "medium",
+      title: `APT campaign: ${camp.actor} — ${camp.activePhase.replace(/_/g, " ")} · ${camp.targetSectors[0] ?? "critical"} sector (${timeStr})`,
+      status: _demoRng.pick(["new", "acknowledged"] as const),
+      receivedAt: new Date(camp.lastActivity).toISOString(),
+      domain: "firestorm",
+    });
+  }
+
+  return signals;
+})();
+
 if (DEMO_MODE) {
-  logger.info({ signalCount: demoLyteSignals.length, actionCount: demoLyteActions.length, workflowCount: demoLyteWorkflows.length, vesselEventCount: demoVesselEvents.length, inquiryCount: demoTerraInquiries.length }, "Demo mode: seed data loaded");
+  logger.info({ signalCount: demoLyteSignals.length, actionCount: demoLyteActions.length, workflowCount: demoLyteWorkflows.length, vesselEventCount: demoVesselEvents.length, inquiryCount: demoTerraInquiries.length, firestormSignalCount: demoFirestormSignals.length }, "Demo mode: seed data loaded");
 }
