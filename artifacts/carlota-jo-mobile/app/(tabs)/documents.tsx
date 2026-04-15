@@ -22,7 +22,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useColors } from "@/hooks/useColors";
-import { useFileUpload } from "@szl-holdings/mobile-shared";
+import { useFileUpload, fromDocumentPickerResult } from "@szl-holdings/mobile-shared";
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
 
@@ -168,8 +168,7 @@ export default function DocumentsScreen() {
           multiple: false,
         });
         if (!result.canceled && result.assets[0]) {
-          const asset = result.assets[0];
-          handleUpload({ uri: asset.uri, name: asset.name, type: asset.mimeType ?? "application/octet-stream", size: asset.size });
+          handleUpload(fromDocumentPickerResult(result.assets[0]));
         }
       }).catch(() => {});
     }

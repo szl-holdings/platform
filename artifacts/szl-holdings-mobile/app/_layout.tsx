@@ -21,7 +21,7 @@ import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab, setUploadAuthTokenGetter } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { AuthProvider } from "@/context/AuthContext";
 import { BiometricLockProvider } from "@/context/BiometricLockContext";
@@ -31,6 +31,7 @@ if (process.env.EXPO_PUBLIC_DOMAIN) {
   setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
 }
 setAuthTokenGetter(() => getAuthToken());
+setUploadAuthTokenGetter(() => getAuthToken());
 
 SplashScreen.preventAutoHideAsync();
 SystemUI.setBackgroundColorAsync("#090810");

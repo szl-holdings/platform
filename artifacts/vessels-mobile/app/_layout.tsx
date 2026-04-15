@@ -20,7 +20,7 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab, setUploadAuthTokenGetter } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { AuthProvider } from "@/context/AuthContext";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
@@ -34,6 +34,16 @@ if (process.env.EXPO_PUBLIC_DOMAIN) {
   setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
 }
 setAuthTokenGetter(() => {
+  if (Platform.OS === "web") {
+    return Promise.resolve(
+      typeof window !== "undefined"
+        ? window.localStorage.getItem(AUTH_TOKEN_KEY)
+        : null
+    );
+  }
+  return SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+});
+setUploadAuthTokenGetter(() => {
   if (Platform.OS === "web") {
     return Promise.resolve(
       typeof window !== "undefined"

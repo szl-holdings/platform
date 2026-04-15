@@ -16,6 +16,19 @@ export { useOfflineQueue, type QueuedMutation } from "./hooks/useOfflineQueue";
 export { ThemeProvider, useTheme, type ThemeMode, type ResolvedTheme } from "./context/ThemeContext";
 export { useSSEStream, type SSEConnectionStatus, type SSEStreamOptions } from "./hooks/useSSEStream";
 export { useEmbeddingSearch, type EmbeddingSearchResult, type EmbeddingSearchOptions } from "./hooks/useEmbeddingSearch";
-export { useFileUpload, type UploadStatus, type UploadedFile, type FileUploadOptions, type FileToUpload } from "./hooks/useFileUpload";
+export {
+  useFileUpload,
+  setUploadAuthTokenGetter,
+  fromImagePickerResult,
+  fromDocumentPickerResult,
+  type UploadStatus,
+  type UploadedFile,
+  type UploadProgressEvent,
+  type FileUploadOptions,
+  type FileToUpload,
+  type FileCategory,
+  type ImagePickerAsset,
+  type DocumentPickerAsset,
+} from "./hooks/useFileUpload";
 export { useEcosystemTabBarScreenOptions, EcosystemTabBarBackground, type EcosystemTabBarConfig, type EcosystemTabBarBackgroundProps } from "./components/EcosystemTabBar";
 export { CopilotFab, type MobileCopilotConfig } from "./components/CopilotFab";

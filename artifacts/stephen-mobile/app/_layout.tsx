@@ -16,7 +16,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab, setUploadAuthTokenGetter } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
@@ -24,6 +24,7 @@ import { usePushNotifications } from "@/hooks/usePushNotifications";
 if (process.env.EXPO_PUBLIC_DOMAIN) {
   setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
 }
+setUploadAuthTokenGetter(() => null);
 
 SplashScreen.preventAutoHideAsync();
 SystemUI.setBackgroundColorAsync("#0a0a0a");

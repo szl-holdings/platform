@@ -18,12 +18,16 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AlertNotifierBridge } from "@/components/AlertNotifierBridge";
-import { ErrorBoundary, NotificationProvider as SharedNotificationProvider, OfflineBanner, ThemeProvider, CopilotFab } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider as SharedNotificationProvider, OfflineBanner, ThemeProvider, CopilotFab, setUploadAuthTokenGetter } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { AuthProvider } from "@/context/AuthContext";
 import { LyteProvider } from "@/context/LyteContext";
 import { NotificationProvider } from "@/context/NotificationContext";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
+import * as SecureStoreLyte from "expo-secure-store";
+
+const LYTE_TOKEN_KEY = "lyte_session_token";
+setUploadAuthTokenGetter(() => SecureStoreLyte.getItemAsync(LYTE_TOKEN_KEY));
 
 SystemUI.setBackgroundColorAsync("#070c14");
 SplashScreen.preventAutoHideAsync();
