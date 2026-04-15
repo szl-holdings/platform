@@ -159,6 +159,7 @@ import meteringRouter from "./metering";
 import realtimeRouter from "./realtime";
 import monteCarloRouter from "./monte-carlo";
 import partnerPortalRouter from "./partner-portal";
+import deltaSyncRouter from "./delta-sync";
 
 const router: IRouter = Router();
 
@@ -614,5 +615,10 @@ router.use("/orgs/:orgId/branding", _writeLimiter);
 router.use("/orgs/:orgId/custom-domains", _writeLimiter);
 router.use("/resolve-domain", _readLimiter);
 router.use(partnerPortalRouter);
+
+router.use("/aegis/sync", _readLimiter);
+router.use("/vessels/sync", _readLimiter);
+router.use("/alloy/sync", _readLimiter);
+router.use(deltaSyncRouter);
 
 export default router;

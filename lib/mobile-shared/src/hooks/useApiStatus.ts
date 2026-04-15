@@ -3,12 +3,19 @@ import { useQueryClient } from "@tanstack/react-query";
 
 type ApiStatus = "checking" | "connected" | "degraded" | "offline";
 
+export type SyncAwareStatus = ApiStatus | "syncing" | "pending" | "conflict";
+
 export interface ApiStatusResult {
   status: ApiStatus;
+  syncAwareStatus: SyncAwareStatus;
   isOffline: boolean;
   isDegraded: boolean;
+  isSyncing: boolean;
+  pendingCount: number;
+  conflictCount: number;
   lastCheckedAt: Date | null;
   retry: () => void;
+  setSyncState: (state: { isSyncing?: boolean; pendingCount?: number; conflictCount?: number }) => void;
 }
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
@@ -43,6 +50,9 @@ async function checkApiHealth(): Promise<{ status: ApiStatus; latencyMs: number 
 export function useApiStatus(): ApiStatusResult {
   const [status, setStatus] = useState<ApiStatus>("checking");
   const [lastCheckedAt, setLastCheckedAt] = useState<Date | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [conflictCount, setConflictCount] = useState(0);
   const queryClient = useQueryClient();
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const prevStatusRef = useRef<ApiStatus>("checking");
@@ -61,6 +71,12 @@ export function useApiStatus(): ApiStatusResult {
     }
   }, [queryClient]);
 
+  const setSyncState = useCallback((state: { isSyncing?: boolean; pendingCount?: number; conflictCount?: number }) => {
+    if (state.isSyncing !== undefined) setIsSyncing(state.isSyncing);
+    if (state.pendingCount !== undefined) setPendingCount(state.pendingCount);
+    if (state.conflictCount !== undefined) setConflictCount(state.conflictCount);
+  }, []);
+
   useEffect(() => {
     runCheck();
     timerRef.current = setInterval(runCheck, CHECK_INTERVAL_MS);
@@ -69,11 +85,24 @@ export function useApiStatus(): ApiStatusResult {
     };
   }, [runCheck]);
 
+  const syncAwareStatus: SyncAwareStatus = (() => {
+    if (status === "offline") return "offline";
+    if (isSyncing) return "syncing";
+    if (conflictCount > 0) return "conflict";
+    if (pendingCount > 0) return "pending";
+    return status;
+  })();
+
   return {
     status,
+    syncAwareStatus,
     isOffline: status === "offline",
     isDegraded: status === "degraded",
+    isSyncing,
+    pendingCount,
+    conflictCount,
     lastCheckedAt,
     retry: runCheck,
+    setSyncState,
   };
 }

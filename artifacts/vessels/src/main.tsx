@@ -15,6 +15,14 @@ configurePlausible({
 initSentry({ appSlug: "vessels", tracesSampleRate: 0.2 });
 initWebVitals("vessels", "/api/");
 
+if ("serviceWorker" in navigator && !import.meta.env.DEV) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/vessels/sw.js", { scope: "/vessels/" }).catch((err) => {
+      console.warn("[Vessels SW] Registration failed:", err);
+    });
+  });
+}
+
 createRoot(document.getElementById("root")!).render(
   <ErrorBoundary appName="Vessels Maritime Intelligence" accentColor="#4a90b8">
     <GraphQLProvider>

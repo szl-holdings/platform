@@ -15,6 +15,14 @@ configurePlausible({
 initSentry({ appSlug: "firestorm", tracesSampleRate: 0.2 });
 initWebVitals("firestorm", "/api/");
 
+if ("serviceWorker" in navigator && !import.meta.env.DEV) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/firestorm/sw.js", { scope: "/firestorm/" }).catch((err) => {
+      console.warn("[Aegis SW] Registration failed:", err);
+    });
+  });
+}
+
 createRoot(document.getElementById("root")!).render(
   <ErrorBoundary appName="Aegis" accentColor="#c45a4a">
     <GraphQLProvider>

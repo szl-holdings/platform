@@ -10,3 +10,12 @@ export {
   addListItem,
   type OptimisticMutationOptions,
 } from "./useOptimisticMutation";
+export {
+  useOfflineSync,
+  type SyncState,
+  type OfflineSyncState,
+  type UseOfflineSyncOptions,
+  type UseOfflineSyncResult,
+} from "./useOfflineSync";
+export { useOfflineQueue, type QueuedMutation } from "./useOfflineQueue";
+

@@ -21,7 +21,8 @@ import { cn } from "@szl-holdings/shared-ui/utils";
 import { toAlpha } from "@szl-holdings/shared-ui/utils";
 import { AuthProvider, useAuth as useVesselsRoleAuth, roleLabels, type UserRole } from "@/contexts/auth-context";
 import { useAuth } from "@szl-holdings/replit-auth-web";
-import { PrivateAppGuard, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui";
+import { PrivateAppGuard, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig, SyncStatusBadge, useWebSyncStatus } from "@szl-holdings/shared-ui";
+import { IndexedDBAdapter, CommandQueue, ConflictResolver } from "@szl-holdings/offline-engine";
 import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
 import { DemoModeProvider, SandboxModeProvider, SandboxModeBanner, CookieBanner } from "@szl-holdings/shared-ui";
@@ -32,6 +33,36 @@ import { DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/
 import { StaleIndicator } from "@szl-holdings/shared-ui/stale-indicator";
 
 const VESSELS_ACCENT = LANE_ACCENT_HEX.vessels.primaryLight;
+
+const _vesselsStorage = new IndexedDBAdapter({ dbName: "szl-vessels-offline" });
+const _vesselsConflictResolver = new ConflictResolver({ storage: _vesselsStorage });
+const _vesselsQueue = new CommandQueue({ storage: _vesselsStorage, conflictResolver: _vesselsConflictResolver });
+
+const API_BASE_VESSELS = import.meta.env.VITE_API_URL ?? "/api";
+
+export async function vesselsEnqueueMutation(params: {
+  method: "POST" | "PUT" | "PATCH" | "DELETE";
+  path: string;
+  body?: unknown;
+  type?: string;
+  priority?: "critical" | "high" | "normal" | "low";
+}): Promise<void> {
+  await _vesselsQueue.enqueue({
+    domain: "vessels",
+    type: params.type ?? "mutation",
+    method: params.method,
+    url: `${API_BASE_VESSELS}${params.path}`,
+    body: params.body,
+    maxRetries: 5,
+    priority: params.priority ?? "normal",
+  });
+}
+
+export async function vesselsReplayQueue(token: string | null): Promise<{ replayed: number; failed: number; conflicts: number }> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  return _vesselsQueue.replay(async () => headers, "vessels");
+}
 
 const VESSELS_ONBOARDING_CONFIG: OnboardingConfig = {
   appId: "vessels",
@@ -616,6 +647,13 @@ function VesselsDashboard({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpe
   };
   const sidebarExpanded = !sidebarCollapsed && (sidebarHovered || sidebarOpen);
   const { status: wsStatus } = useRealtimeChannel("vessel-positions");
+  const { syncState: vesselsSyncState, lastSyncedAt: vesselsLastSynced, pendingCount: vesselsPending, conflictCount: vesselsConflicts } = useWebSyncStatus({
+    domain: "vessels",
+    syncEndpoint: `${import.meta.env.BASE_URL}api/vessels/sync`,
+    syncIntervalMs: 120_000,
+    getPendingCount: () => _vesselsQueue.count("vessels"),
+    getConflictCount: () => _vesselsConflictResolver.getConflictCount("vessels"),
+  });
   return (
     <PowerUserProvider shortcuts={vesselsShortcuts} appName="Vessels" accentColor={VESSELS_ACCENT}>
       <div className="flex flex-col h-screen" style={{ background: "#060e1a" }}>
@@ -639,7 +677,10 @@ function VesselsDashboard({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpe
                 <Menu className="w-4 h-4" />
               </button>
               <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: toAlpha(VESSELS_ACCENT, 0.8) }}>Vessels Maritime Intelligence</span>
-              <div className="ml-auto pr-1"><RealtimeStatusIndicator status={wsStatus} compact /></div>
+              <div className="ml-auto pr-1 flex items-center gap-2">
+                <SyncStatusBadge syncState={vesselsSyncState} lastSyncedAt={vesselsLastSynced} pendingCount={vesselsPending} conflictCount={vesselsConflicts} size="xs" showLabel={false} />
+                <RealtimeStatusIndicator status={wsStatus} compact />
+              </div>
             </div>
           }
         >

@@ -1,0 +1,109 @@
+const CACHE_VERSION = "aegis-v1";
+const STATIC_CACHE = `${CACHE_VERSION}-static`;
+const API_CACHE = `${CACHE_VERSION}-api`;
+const DASHBOARD_CACHE = `${CACHE_VERSION}-dashboard`;
+
+const DASHBOARD_API_PATTERNS = [
+  /\/api\/(firestorm|aegis)\/(incidents|alerts|assets|findings|cases)/,
+];
+
+function isStaticAsset(url) {
+  return /\.(js|css|woff2?|png|jpg|jpeg|svg|ico|webp|json)$/.test(url)
+    && !url.includes("/api/");
+}
+
+function isDashboardApi(url) {
+  return DASHBOARD_API_PATTERNS.some((p) => p.test(url));
+}
+
+function isApiRequest(url) {
+  return url.includes("/api/");
+}
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    Promise.all([
+      caches.open(STATIC_CACHE),
+      caches.open(API_CACHE),
+      caches.open(DASHBOARD_CACHE),
+    ]).then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys()
+      .then((keys) =>
+        Promise.all(
+          keys
+            .filter((k) => !k.startsWith(CACHE_VERSION))
+            .map((k) => caches.delete(k))
+        )
+      )
+      .then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+  if (event.data?.type === "CLEAR_CACHE") {
+    caches.keys().then((keys) => keys.forEach((k) => caches.delete(k)));
+  }
+  if (event.data?.type === "CLEAR_API_CACHE") {
+    caches.delete(API_CACHE);
+    caches.delete(DASHBOARD_CACHE);
+  }
+});
+
+self.addEventListener("fetch", (event) => {
+  const { request } = event;
+  if (request.method !== "GET") return;
+
+  const url = request.url;
+
+  if (isStaticAsset(url)) {
+    event.respondWith(cacheFirst(request, STATIC_CACHE));
+    return;
+  }
+
+  if (isDashboardApi(url)) {
+    event.respondWith(networkFirst(request, DASHBOARD_CACHE));
+    return;
+  }
+
+  if (isApiRequest(url)) {
+    event.respondWith(networkFirst(request, API_CACHE));
+    return;
+  }
+});
+
+async function cacheFirst(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+  try {
+    const response = await fetch(request);
+    if (response.ok) cache.put(request, response.clone());
+    return response;
+  } catch {
+    return new Response("", { status: 503 });
+  }
+}
+
+async function networkFirst(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  try {
+    const response = await fetch(request);
+    if (response.ok) cache.put(request, response.clone());
+    return response;
+  } catch {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    return new Response(
+      JSON.stringify({ error: "offline", cached: false }),
+      { status: 503, headers: { "Content-Type": "application/json", "X-Offline": "true" } }
+    );
+  }
+}

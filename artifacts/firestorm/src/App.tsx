@@ -3,7 +3,8 @@ const AegisPulse = lazy(() => import("@/pages/pulse"));
 const ConsciousnessPage = lazy(() => import("@/pages/consciousness"));
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
-import { DemoModeProvider, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig, SandboxModeProvider, SandboxModeBanner, AnalyticsProvider } from "@szl-holdings/shared-ui";
+import { DemoModeProvider, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig, SandboxModeProvider, SandboxModeBanner, AnalyticsProvider, SyncStatusBadge, useWebSyncStatus } from "@szl-holdings/shared-ui";
+import { IndexedDBAdapter, CommandQueue, ConflictResolver } from "@szl-holdings/offline-engine";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -34,6 +35,36 @@ import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardSh
 import { StaleIndicator } from "@szl-holdings/shared-ui/stale-indicator";
 
 const AEGIS_ACCENT = LANE_ACCENT_HEX.aegis.primary;
+
+const _aegisStorage = new IndexedDBAdapter({ dbName: "szl-aegis-offline" });
+const _aegisConflictResolver = new ConflictResolver({ storage: _aegisStorage });
+const _aegisQueue = new CommandQueue({ storage: _aegisStorage, conflictResolver: _aegisConflictResolver });
+
+const API_BASE = import.meta.env.VITE_API_URL ?? "/api";
+
+export async function aegisEnqueueMutation(params: {
+  method: "POST" | "PUT" | "PATCH" | "DELETE";
+  path: string;
+  body?: unknown;
+  type?: string;
+  priority?: "critical" | "high" | "normal" | "low";
+}): Promise<void> {
+  await _aegisQueue.enqueue({
+    domain: "aegis",
+    type: params.type ?? "mutation",
+    method: params.method,
+    url: `${API_BASE}${params.path}`,
+    body: params.body,
+    maxRetries: 5,
+    priority: params.priority ?? "normal",
+  });
+}
+
+export async function aegisReplayQueue(token: string | null): Promise<{ replayed: number; failed: number; conflicts: number }> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  return _aegisQueue.replay(async () => headers, "aegis");
+}
 
 // ─── Security Operations pages (from Firestorm) ──────────────────────────────
 const AegisAtlasArtifactsPage = lazy(() => import("@/pages/atlas-artifacts"));
@@ -959,6 +990,13 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(readAegisCollapsed);
   const { status: wsStatus } = useRealtimeChannel("aegis-incidents");
+  const { syncState: aegisSyncState, lastSyncedAt: aegisLastSynced, pendingCount: aegisPending, conflictCount: aegisConflicts } = useWebSyncStatus({
+    domain: "aegis",
+    syncEndpoint: `${import.meta.env.BASE_URL}api/aegis/sync`,
+    syncIntervalMs: 120_000,
+    getPendingCount: () => _aegisQueue.count("aegis"),
+    getConflictCount: () => _aegisConflictResolver.getConflictCount("aegis"),
+  });
   const [location, navigate] = useLocation();
   const { replay: replayOnboarding } = useOnboardingState("aegis");
   const { isLoading, isAuthenticated, login } = useAuth();
@@ -1039,7 +1077,10 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
                 <Menu className="w-4 h-4" />
               </button>
               <span className="text-[10px] font-mono ml-2" style={{ color: toAlpha(AEGIS_ACCENT, 0.8) }}>Aegis — Unified Defense & Intelligence</span>
-              <div className="ml-auto pr-1"><RealtimeStatusIndicator status={wsStatus} compact /></div>
+              <div className="ml-auto pr-1 flex items-center gap-2">
+                <SyncStatusBadge syncState={aegisSyncState} lastSyncedAt={aegisLastSynced} pendingCount={aegisPending} conflictCount={aegisConflicts} size="xs" showLabel={false} />
+                <RealtimeStatusIndicator status={wsStatus} compact />
+              </div>
             </div>
           }
         >

@@ -199,3 +199,17 @@ export {
   type TornadoEntry,
   type ScenarioComparisonItem,
 } from "./monte-carlo-viz";
+
+export {
+  SyncStatusBadge,
+  SyncStatusBar,
+  type SyncStatusBadgeProps,
+  type SyncStatusBarProps,
+  type SyncState,
+} from "./sync-status-badge";
+
+export {
+  useWebSyncStatus,
+  type WebSyncStatusOptions,
+  type WebSyncStatus,
+} from "./use-web-sync-status";
