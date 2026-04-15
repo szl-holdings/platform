@@ -364,3 +364,161 @@ export function listPipelines(): Array<{ id: string; name: string; description: 
 export function getPipelineConfig(pipelineId: string): PipelineConfig | undefined {
   return PIPELINES.find(p => p.id === pipelineId);
 }
+
+const COMPOSED_STAGE_DEFAULTS: Record<PipelineStageType, Pick<PipelineStageConfig, "systemPrompt" | "userPromptTemplate" | "maxTokens" | "domain">> = {
+  ingest: {
+    systemPrompt: "You are a data ingestion specialist. Extract and structure the key entities, events, and signals from raw input. Return structured JSON with: entities[], events[], rawSummary.",
+    userPromptTemplate: "Ingest and structure the following input:\n\n{{input}}",
+    maxTokens: 500,
+    domain: "orchestration",
+  },
+  classify: {
+    systemPrompt: "You are a domain classification expert. Classify the input by domain (maritime, real_estate, security, infrastructure, legal, financial, general), priority (low/medium/high/critical), and content type. Return JSON with: domain, priority, contentType, tags[].",
+    userPromptTemplate: "Classify the following content:\n\n{{input}}\n\nPrior stage output: {{previousOutput}}",
+    maxTokens: 400,
+    domain: "orchestration",
+  },
+  score: {
+    systemPrompt: "You are a risk scoring analyst. Evaluate the input and score it on: riskScore (0-1.0), urgencyScore (0-1.0), confidenceScore (0-1.0). Explain each score. Return JSON with: riskScore, urgencyScore, confidenceScore, rationale.",
+    userPromptTemplate: "Score the risk and urgency of the following:\n\n{{input}}\n\nContext: {{previousOutput}}",
+    maxTokens: 500,
+    domain: "orchestration",
+  },
+  enrich: {
+    systemPrompt: "You are a context enrichment specialist. Add relevant context, background, and domain knowledge to the input. Identify related concepts, potential impacts, and key stakeholders. Return enriched analysis.",
+    userPromptTemplate: "Enrich the following with domain context:\n\n{{input}}\n\nCurrent analysis: {{previousOutput}}",
+    maxTokens: 600,
+    domain: "orchestration",
+  },
+  recommend: {
+    systemPrompt: "You are a strategic advisor. Based on the analysis, generate ranked actionable recommendations. Each recommendation should include: action, priority, rationale, and expected outcome. Return JSON with: recommendations[] (action, priority, rationale, expectedOutcome).",
+    userPromptTemplate: "Generate recommendations based on:\n\n{{input}}\n\nAnalysis: {{previousOutput}}",
+    maxTokens: 700,
+    domain: "orchestration",
+  },
+  audit: {
+    systemPrompt: "You are a compliance and governance auditor. Review the pipeline output for policy compliance, data handling standards, and governance requirements. Flag any violations or concerns. Return JSON with: complianceStatus (pass/flag/fail), policies_checked[], violations[], recommendations[].",
+    userPromptTemplate: "Audit the following for compliance:\n\n{{input}}\n\nPipeline output: {{previousOutput}}",
+    maxTokens: 500,
+    domain: "orchestration",
+  },
+};
+
+let composedRunCounter = 0;
+
+export async function executeComposedPipeline(
+  stages: Array<{ id: string; type: PipelineStageType; name: string }>,
+  input: string,
+): Promise<PipelineResult & { composedPipelineId: string }> {
+  const composedPipelineId = `composed-${Date.now()}-${++composedRunCounter}`;
+  const runId = `pipe-${composedPipelineId}`;
+  const startedAt = Date.now();
+
+  logger.info({ runId, composedPipelineId, stageCount: stages.length }, "Composed pipeline execution started");
+
+  void writeAuditLog({
+    entityType: "workflow",
+    entityId: 0,
+    action: "pipeline_started",
+    actorType: "system",
+    newState: { runId, composedPipelineId, stageCount: stages.length, stageTypes: stages.map(s => s.type) },
+    correlationId: runId,
+  });
+
+  const stageResults: PipelineStageResult[] = [];
+  let previousOutput = "";
+  let totalTokens = 0;
+
+  for (let i = 0; i < stages.length; i++) {
+    const stage = stages[i]!;
+    const stageStart = Date.now();
+    const stageNumber = i + 1;
+    const defaults = COMPOSED_STAGE_DEFAULTS[stage.type];
+    const variables: Record<string, string> = { input, previousOutput };
+    const userPrompt = renderTemplate(defaults.userPromptTemplate, variables);
+
+    const messages: ChatMessage[] = [
+      { role: "system", content: defaults.systemPrompt },
+      { role: "user", content: userPrompt },
+    ];
+
+    try {
+      const response = await gatewayInfer({
+        messages,
+        agentId: `composed-${composedPipelineId}-${stage.type}`,
+        domain: defaults.domain,
+        strategy: "fastest",
+        maxTokens: defaults.maxTokens ?? 500,
+      });
+
+      const stageDuration = Date.now() - stageStart;
+      previousOutput = response.content;
+      totalTokens += response.usage.totalTokens;
+
+      stageResults.push({
+        stageName: stage.name,
+        stageType: stage.type,
+        status: "completed",
+        output: response.content,
+        durationMs: stageDuration,
+        tokensUsed: response.usage.totalTokens,
+      });
+
+      void writeAuditLog({
+        entityType: "workflow",
+        entityId: 0,
+        action: "pipeline_stage_completed",
+        actorType: "system",
+        newState: { runId, stage: stage.name, stageNumber, stageType: stage.type, durationMs: stageDuration, provider: response.provider },
+        correlationId: runId,
+      });
+    } catch (err) {
+      const stageDuration = Date.now() - stageStart;
+      stageResults.push({ stageName: stage.name, stageType: stage.type, status: "failed", output: "", durationMs: stageDuration, tokensUsed: 0 });
+
+      void writeAuditLog({
+        entityType: "workflow",
+        entityId: 0,
+        action: "pipeline_stage_failed",
+        actorType: "system",
+        newState: { runId, stage: stage.name, stageNumber, stageType: stage.type, error: err instanceof Error ? err.message : String(err) },
+        correlationId: runId,
+      });
+
+      for (const remaining of stages.slice(i + 1)) {
+        stageResults.push({ stageName: remaining.name, stageType: remaining.type, status: "skipped", output: "", durationMs: 0, tokensUsed: 0 });
+      }
+      break;
+    }
+  }
+
+  const completedAt = Date.now();
+  const completedStages = stageResults.filter(s => s.status === "completed");
+  const status = completedStages.length === stages.length ? "completed" : completedStages.length > 0 ? "partial" : "failed";
+
+  const result = {
+    pipelineId: composedPipelineId,
+    pipelineName: "Composed Pipeline",
+    runId,
+    status,
+    stages: stageResults,
+    finalOutput: previousOutput,
+    totalDurationMs: completedAt - startedAt,
+    totalTokens,
+    startedAt,
+    completedAt,
+    composedPipelineId,
+  } satisfies PipelineResult & { composedPipelineId: string };
+
+  void writeAuditLog({
+    entityType: "workflow",
+    entityId: 0,
+    action: "pipeline_completed",
+    actorType: "system",
+    newState: { runId, status, totalStages: stageResults.length, completedStages: completedStages.length, totalDurationMs: result.totalDurationMs, totalTokens },
+    correlationId: runId,
+  });
+
+  logger.info({ runId, composedPipelineId, status, stages: stageResults.length, completed: completedStages.length, durationMs: result.totalDurationMs }, "Composed pipeline execution finished");
+  return result;
+}

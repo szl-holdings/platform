@@ -1,0 +1,117 @@
+##
+# AI Control Tower — Agent Mesh Manifest
+# Version: 1.0.0
+# Date: 2026-04-15
+#
+# This is the authoritative declarative definition of every agent registered
+# in the Control Tower mesh. Changes to this file require a server deploy,
+# providing an immutable audit trail of agent capability changes.
+#
+# Fields:
+#   id                 Unique agent identifier (kebab-case)
+#   name               Display name
+#   subtitle           Short role description
+#   domain             Primary intelligence domain
+#   capabilities       Allowed tool/action categories
+#   riskTolerance      Agent's own operational risk tolerance: low | medium | high
+#   collaborationRules Governing rules for inter-agent coordination
+#   scopeCertMaxRisk   Maximum risk level this agent may be certified for
+#   version            Manifest version for this agent definition
+##
+
+agents:
+  - id: alloy-orchestrator
+    name: Alloy
+    subtitle: Orchestration Intelligence
+    domain: orchestration
+    capabilities:
+      - multi-agent-coordination
+      - synthesis
+      - signal-routing
+      - artifact-review
+    riskTolerance: low
+    collaborationRules:
+      - Always synthesize before delivering final output
+      - Escalate conflicting signals to human operator
+    scopeCertMaxRisk: critical
+    version: "3.2.1"
+
+  - id: sentinel-security
+    name: Sentinel
+    subtitle: Security Intelligence
+    domain: firestorm
+    capabilities:
+      - vulnerability-assessment
+      - threat-detection
+      - risk-scoring
+      - incident-response
+    riskTolerance: medium
+    collaborationRules:
+      - Validate high-risk findings with a second agent before acting
+      - Auto-escalate critical CVEs to human security team
+    scopeCertMaxRisk: high
+    version: "2.8.0"
+
+  - id: helmsman-maritime
+    name: Helmsman
+    subtitle: Maritime Intelligence
+    domain: vessels
+    capabilities:
+      - fleet-tracking
+      - sanctions-screening
+      - route-analysis
+      - chokepoint-monitoring
+    riskTolerance: medium
+    collaborationRules:
+      - Sanctions hits require Sentinel co-validation before flagging
+      - Dark vessel alerts trigger Alloy escalation automatically
+    scopeCertMaxRisk: high
+    version: "2.5.3"
+
+  - id: atlas-realestate
+    name: Atlas
+    subtitle: Real Estate Intelligence
+    domain: terra
+    capabilities:
+      - market-analysis
+      - property-scoring
+      - distress-detection
+      - investment-recommendation
+    riskTolerance: medium
+    collaborationRules:
+      - Investment recommendations require confidence threshold > 0.7
+      - High-risk deals require explicit human review before recommendation
+    scopeCertMaxRisk: medium
+    version: "1.9.2"
+
+  - id: zeus-infrastructure
+    name: Zeus
+    subtitle: Observability & AIOps
+    domain: lyte
+    capabilities:
+      - health-monitoring
+      - slo-analysis
+      - incident-diagnosis
+      - capacity-planning
+    riskTolerance: high
+    collaborationRules:
+      - Auto-remediate incidents below medium severity
+      - SLO breach escalates to Alloy for cross-domain correlation
+    scopeCertMaxRisk: high
+    version: "3.0.0"
+
+  - id: lexis-legal
+    name: Lexis
+    subtitle: Legal & Compliance Intelligence
+    domain: prism
+    capabilities:
+      - contract-analysis
+      - compliance-review
+      - regulatory-mapping
+      - matter-management
+    riskTolerance: low
+    collaborationRules:
+      - All recommendations must include attorney review flag
+      - Regulatory analysis never auto-executes; always awaits human approval
+    scopeCertMaxRisk: medium
+    version: "1.4.1"

@@ -44,31 +44,36 @@ function resolveExportPath(exports, subpath) {
 }
 
 function workspacePlugin(packageMap) {
+  function resolveFromMap(importPath) {
+    let pkgName = null;
+    let subpath = "";
+    for (const name of Object.keys(packageMap)) {
+      if (importPath === name) {
+        pkgName = name;
+        subpath = "";
+        break;
+      }
+      if (importPath.startsWith(name + "/")) {
+        pkgName = name;
+        subpath = importPath.slice(name.length + 1);
+        break;
+      }
+    }
+    if (!pkgName) return null;
+    const pkg = packageMap[pkgName];
+    const relFile = resolveExportPath(pkg.exports, subpath);
+    if (!relFile) return null;
+    return { path: path.join(pkg.dir, relFile) };
+  }
+
   return {
     name: "workspace-resolver",
     setup(build) {
-      build.onResolve({ filter: /^@workspace\// }, (args) => {
-        const importPath = args.path;
-        let pkgName = null;
-        let subpath = "";
-        for (const name of Object.keys(packageMap)) {
-          if (importPath === name) {
-            pkgName = name;
-            subpath = "";
-            break;
-          }
-          if (importPath.startsWith(name + "/")) {
-            pkgName = name;
-            subpath = importPath.slice(name.length + 1);
-            break;
-          }
-        }
-        if (!pkgName) return null;
-        const pkg = packageMap[pkgName];
-        const relFile = resolveExportPath(pkg.exports, subpath);
-        if (!relFile) return null;
-        return { path: path.join(pkg.dir, relFile) };
-      });
+      // Resolve @workspace/* prefixed imports
+      build.onResolve({ filter: /^@workspace\// }, (args) => resolveFromMap(args.path));
+      // Also resolve @szl-holdings/* packages that live in lib/ and may not be
+      // symlinked in node_modules (e.g. @szl-holdings/crdt-sync)
+      build.onResolve({ filter: /^@szl-holdings\// }, (args) => resolveFromMap(args.path));
     },
   };
 }
@@ -155,6 +160,11 @@ async function buildAll() {
       "serialport",
       "snappy",
       "tinypool",
+      "@szl-holdings/intelligence-feeds/feed-scheduler",
+      "@szl-holdings/intelligence-feeds/adapters/ais",
+      "@szl-holdings/intelligence-feeds/adapters/stix-taxii",
+      "@szl-holdings/intelligence-feeds/adapters/sanctions",
+      "@szl-holdings/intelligence-feeds/adapters/legal-records",
       "@react-pdf/renderer",
       "react",
       "react-dom",
@@ -264,8 +274,22 @@ async function copyPdfkitData() {
   }
 }
 
+async function copyConfigFiles() {
+  const distDir = path.resolve(artifactDir, "dist");
+  const configSrc  = path.join(artifactDir, "src", "config");
+  const configDest = path.join(distDir, "config");
+  try {
+    await mkdir(configDest, { recursive: true });
+    await cp(configSrc, configDest, { recursive: true });
+    console.log("Copied src/config/ → dist/config/");
+  } catch (err) {
+    console.warn("Warning: could not copy config directory:", err.message);
+  }
+}
+
 buildAll()
   .then(() => createFastStartWrapper(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "dist")))
+  .then(() => copyConfigFiles())
   .then(() => copyPdfkitData()).catch((err) => {
   console.error(err);
   process.exit(1);

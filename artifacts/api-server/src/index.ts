@@ -37,6 +37,7 @@ import { initIngestionFramework } from "./lib/ingestion-framework";
 import { registerAnalyticsJobHandlers } from "./lib/analytics-jobs";
 import { initializeAlloyDomainEventSubscriptions } from "./lib/domain-events/alloy-wiring.js";
 import { startIntelligenceFeeds, stopIntelligenceFeeds } from "./lib/intelligence-feeds-init";
+import { startMeshPublisher } from "./lib/control-tower-mesh-publisher";
 
 failFastOnInvalidConfig();
 
@@ -137,6 +138,7 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     .catch(err => logger.warn({ err }, "[cognitive] Cognitive learning startup failed (non-fatal)"));
 
   startIntelligenceFeeds().catch(err => logger.warn({ err }, "[feeds] Intelligence feeds startup failed (non-fatal)"));
+  startMeshPublisher(30_000);
 
   try {
     // Step 1: Run all migrations — single await, schema fully guaranteed before any seed executes
