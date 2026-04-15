@@ -786,6 +786,7 @@ router.post("/fund-ops/seed", ...auth, async (req, res) => {
       return;
     }
 
+    await db.transaction(async (tx) => {
     const companies = [
       { slug: "vessels", name: "Vessels", revenue: [42000, 58000, 71000, 89000, 105000, 124000], burn: [85000, 82000, 78000, 75000, 72000, 70000], cash: [620000, 596000, 589000, 603000, 636000, 690000] },
       { slug: "aegis", name: "Aegis", revenue: [28000, 35000, 48000, 62000, 78000, 95000], burn: [92000, 88000, 85000, 82000, 80000, 78000], cash: [480000, 427000, 390000, 370000, 368000, 385000] },
@@ -809,7 +810,7 @@ router.post("/fund-ops/seed", ...auth, async (req, res) => {
         const runway = burn > 0 ? cash / burn : 99;
         const grossProfit = rev * 0.72;
         const ebitda = rev - burn;
-        await db.insert(fundPortfolioFinancialsTable).values({
+        await tx.insert(fundPortfolioFinancialsTable).values({
           companySlug: co.slug,
           companyName: co.name,
           periodType: "quarterly",
@@ -829,7 +830,7 @@ router.post("/fund-ops/seed", ...auth, async (req, res) => {
           runwayMonths: String(Math.round(runway * 10) / 10),
         });
 
-        await db.insert(fundPortfolioKpisTable).values({
+        await tx.insert(fundPortfolioKpisTable).values({
           companySlug: co.slug,
           companyName: co.name,
           periodLabel: periods[i],
@@ -848,7 +849,7 @@ router.post("/fund-ops/seed", ...auth, async (req, res) => {
       }
     }
 
-    const [founderClass] = await db.insert(fundShareClassesTable).values({
+    const [founderClass] = await tx.insert(fundShareClassesTable).values({
       name: "Common Stock",
       classType: "common",
       issuedShares: "10000000",
@@ -858,7 +859,7 @@ router.post("/fund-ops/seed", ...auth, async (req, res) => {
       seniority: 0,
     }).returning();
 
-    const [safeSeed] = await db.insert(fundShareClassesTable).values({
+    const [safeSeed] = await tx.insert(fundShareClassesTable).values({
       name: "SAFE — Pre-Seed",
       classType: "safe",
       issuedShares: "0",
@@ -869,7 +870,7 @@ router.post("/fund-ops/seed", ...auth, async (req, res) => {
       notes: "Post-money SAFE, $8M cap, MFN",
     }).returning();
 
-    const [optionPool] = await db.insert(fundShareClassesTable).values({
+    const [optionPool] = await tx.insert(fundShareClassesTable).values({
       name: "Employee Option Pool",
       classType: "option_pool",
       issuedShares: "1500000",
@@ -878,7 +879,7 @@ router.post("/fund-ops/seed", ...auth, async (req, res) => {
       seniority: 0,
     }).returning();
 
-    const [prefA] = await db.insert(fundShareClassesTable).values({
+    const [prefA] = await tx.insert(fundShareClassesTable).values({
       name: "Series A Preferred",
       classType: "preferred_a",
       issuedShares: "0",
@@ -894,18 +895,18 @@ router.post("/fund-ops/seed", ...auth, async (req, res) => {
       seniority: 2,
     }).returning();
 
-    const [founder] = await db.insert(fundCapTableHoldersTable).values({
+    const [founder] = await tx.insert(fundCapTableHoldersTable).values({
       name: "Stephen Lutar",
       holderType: "founder",
       email: "stephen@szlholdings.com",
     }).returning();
 
-    const [pool] = await db.insert(fundCapTableHoldersTable).values({
+    const [pool] = await tx.insert(fundCapTableHoldersTable).values({
       name: "Employee Option Pool",
       holderType: "option_pool",
     }).returning();
 
-    await db.insert(fundCapTableTransactionsTable).values({
+    await tx.insert(fundCapTableTransactionsTable).values({
       holderId: founder.id,
       shareClassId: founderClass.id,
       transactionType: "issuance",
@@ -916,7 +917,7 @@ router.post("/fund-ops/seed", ...auth, async (req, res) => {
       notes: "Founder common stock issuance at incorporation",
     });
 
-    await db.insert(fundCapTableTransactionsTable).values({
+    await tx.insert(fundCapTableTransactionsTable).values({
       holderId: pool.id,
       shareClassId: optionPool.id,
       transactionType: "issuance",
@@ -927,7 +928,7 @@ router.post("/fund-ops/seed", ...auth, async (req, res) => {
       notes: "Initial option pool reservation (15%)",
     });
 
-    await db.insert(fundFormDFilingsTable).values({
+    await tx.insert(fundFormDFilingsTable).values({
       entityName: "SZL Holdings LLC",
       filingType: "initial",
       exemption: "rule_506b",
@@ -948,7 +949,7 @@ router.post("/fund-ops/seed", ...auth, async (req, res) => {
 
     const lpIds: number[] = [];
     for (const lp of angelNames) {
-      const [row] = await db.insert(fundAccreditedInvestorsTable).values({
+      const [row] = await tx.insert(fundAccreditedInvestorsTable).values({
         lpName: lp.name,
         lpType: lp.type,
         accreditationBasis: lp.basis,
@@ -961,7 +962,7 @@ router.post("/fund-ops/seed", ...auth, async (req, res) => {
       lpIds.push(row.id);
 
       if (lp.verified) {
-        await db.insert(fundLpCapitalAccountsTable).values({
+        await tx.insert(fundLpCapitalAccountsTable).values({
           lpId: row.id,
           commitmentCents: 25000000,
           calledCents: 10000000,
@@ -974,7 +975,7 @@ router.post("/fund-ops/seed", ...auth, async (req, res) => {
       }
     }
 
-    await db.insert(fundCapitalCallsTable).values({
+    await tx.insert(fundCapitalCallsTable).values({
       callNumber: 1,
       callDate: "2025-09-01",
       dueDate: "2025-09-30",
@@ -984,7 +985,7 @@ router.post("/fund-ops/seed", ...auth, async (req, res) => {
       fundedAmountCents: 20000000,
     });
 
-    await db.insert(fundCapitalCallsTable).values({
+    await tx.insert(fundCapitalCallsTable).values({
       callNumber: 2,
       callDate: "2026-03-01",
       dueDate: "2026-03-31",
@@ -994,7 +995,7 @@ router.post("/fund-ops/seed", ...auth, async (req, res) => {
       fundedAmountCents: 8000000,
     });
 
-    await db.insert(fundLpReportsTable).values({
+    await tx.insert(fundLpReportsTable).values({
       reportType: "quarterly",
       reportingPeriod: "Q4 2025",
       periodStart: "2025-10-01",
@@ -1017,7 +1018,7 @@ router.post("/fund-ops/seed", ...auth, async (req, res) => {
       distributedAt: new Date("2026-01-15"),
     });
 
-    await db.insert(fundLpReportsTable).values({
+    await tx.insert(fundLpReportsTable).values({
       reportType: "quarterly",
       reportingPeriod: "Q1 2026",
       periodStart: "2026-01-01",
@@ -1038,7 +1039,7 @@ router.post("/fund-ops/seed", ...auth, async (req, res) => {
       narrativeSummary: "Accelerating revenue growth across the portfolio. Combined ARR run-rate approaching $1.6M. Aegis closed first enterprise client. Terra launched NYC broker product.",
     });
 
-    await db.insert(fundNavRecordsTable).values({
+    await tx.insert(fundNavRecordsTable).values({
       navDate: "2026-03-31",
       totalNavCents: 142000000,
       calledCapitalCents: 70000000,
@@ -1053,6 +1054,8 @@ router.post("/fund-ops/seed", ...auth, async (req, res) => {
       dpi: "0",
       rvpi: "1.28",
     });
+
+    }); // end transaction
 
     await auditFundOp("create", "seed", 0, { message: "Seeded demo data for fund operations" });
     sendSuccess(res, { seeded: true, message: "Demo data seeded successfully" }, 201);

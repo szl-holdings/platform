@@ -451,19 +451,19 @@ export default function FundOperationsPage() {
   const [seeding, setSeeding] = useState(false);
 
   const { data: summary, loading: summaryLoading, reload: reloadSummary } = useApiFetch<SummaryData>("/fund-ops/summary");
-  const { data: financialsData, loading: finLoading, reload: reloadFin } = useApiFetch<{ data: PortfolioFinancial[]; meta: { total: number } }>("/fund-ops/portfolio-financials?limit=100");
+  const { data: rawFinancials, loading: finLoading, reload: reloadFin } = useApiFetch<PortfolioFinancial[]>("/fund-ops/portfolio-financials?limit=100");
   const { data: capTable, loading: capLoading, reload: reloadCap } = useApiFetch<CapTableSummary>("/fund-ops/cap-table-summary");
-  const { data: lpReportsData, reload: reloadLp } = useApiFetch<{ data: LpReport[] }>("/fund-ops/lp-reports?limit=20");
-  const { data: capCallsData, reload: reloadCalls } = useApiFetch<{ data: CapitalCall[] }>("/fund-ops/capital-calls?limit=20");
-  const { data: investorsData, reload: reloadInvestors } = useApiFetch<{ data: AccreditedInvestor[] }>("/fund-ops/accredited-investors?limit=50");
-  const { data: formDData, reload: reloadFormD } = useApiFetch<{ data: FormDFiling[] }>("/fund-ops/form-d-filings?limit=10");
+  const { data: rawLpReports, reload: reloadLp } = useApiFetch<LpReport[]>("/fund-ops/lp-reports?limit=20");
+  const { data: rawCapCalls, reload: reloadCalls } = useApiFetch<CapitalCall[]>("/fund-ops/capital-calls?limit=20");
+  const { data: rawInvestors, reload: reloadInvestors } = useApiFetch<AccreditedInvestor[]>("/fund-ops/accredited-investors?limit=50");
+  const { data: rawFormD, reload: reloadFormD } = useApiFetch<FormDFiling[]>("/fund-ops/form-d-filings?limit=10");
 
   const nav = summary?.fundAdmin.latestNav;
-  const financials = financialsData?.data ?? [];
-  const lpReports = lpReportsData?.data ?? [];
-  const capCalls = capCallsData?.data ?? [];
-  const investors = investorsData?.data ?? [];
-  const formDFilings = formDData?.data ?? [];
+  const financials: PortfolioFinancial[] = Array.isArray(rawFinancials) ? rawFinancials : [];
+  const lpReports: LpReport[] = Array.isArray(rawLpReports) ? rawLpReports : [];
+  const capCalls: CapitalCall[] = Array.isArray(rawCapCalls) ? rawCapCalls : [];
+  const investors: AccreditedInvestor[] = Array.isArray(rawInvestors) ? rawInvestors : [];
+  const formDFilings: FormDFiling[] = Array.isArray(rawFormD) ? rawFormD : [];
 
   const totalRevenue = financials.reduce((s, f) => s + parseFloat(f.revenue ?? "0"), 0);
 
@@ -553,46 +553,66 @@ export default function FundOperationsPage() {
     reloadFin();
   };
 
-  const exportLpReportPdf = (report: LpReport) => {
-    const lines = [
-      `SZL Holdings — LP Report`,
-      `${"=".repeat(50)}`,
-      `Report Type: ${report.reportType.replace(/_/g, " ")}`,
-      `Period: ${report.reportingPeriod} (${report.periodStart} – ${report.periodEnd})`,
-      `Status: ${report.status}`,
-      ``,
-      `PERFORMANCE METRICS`,
-      `${"─".repeat(30)}`,
-      `Gross IRR: ${report.grossIrr ? pct(parseFloat(report.grossIrr)) : "—"}`,
-      `Net IRR: ${report.netIrr ? pct(parseFloat(report.netIrr)) : "—"}`,
-      `TVPI: ${report.tvpi ? parseFloat(report.tvpi).toFixed(2) + "x" : "—"}`,
-      `DPI: ${report.dpi ? parseFloat(report.dpi).toFixed(2) + "x" : "—"}`,
-      `RVPI: ${report.rvpi ? parseFloat(report.rvpi).toFixed(2) + "x" : "—"}`,
-      ``,
-      `FUND FINANCIALS`,
-      `${"─".repeat(30)}`,
-      `Fund NAV: ${report.fundNav ? "$" + parseFloat(report.fundNav).toLocaleString() : "—"}`,
-      `Total Commitments: ${report.totalCommitments ? "$" + parseFloat(report.totalCommitments).toLocaleString() : "—"}`,
-      `Called Capital: ${report.calledCapital ? "$" + parseFloat(report.calledCapital).toLocaleString() : "—"}`,
-      `Management Fee Rate: ${report.managementFeeRate ? pct(parseFloat(report.managementFeeRate)) : "—"}`,
-      `Carried Interest: ${report.carryRate ? pct(parseFloat(report.carryRate)) : "—"}`,
-      `Preferred Return: ${report.preferredReturnRate ? pct(parseFloat(report.preferredReturnRate)) : "—"}`,
-    ];
-    if (report.narrativeSummary) {
-      lines.push(``, `NARRATIVE SUMMARY`, `${"─".repeat(30)}`, report.narrativeSummary);
-    }
-    if (report.disclaimers) {
-      lines.push(``, `DISCLAIMERS`, `${"─".repeat(30)}`, report.disclaimers);
-    }
-    lines.push(``, `${"─".repeat(50)}`, `Generated: ${new Date().toISOString()}`, `CONFIDENTIAL — For authorized recipients only.`);
+  const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `SZL_LP_Report_${report.reportingPeriod.replace(/\s/g, "_")}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const exportLpReportPdf = (report: LpReport) => {
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>SZL Holdings — LP Report — ${esc(report.reportingPeriod)}</title>
+<style>
+  @page { margin: 1in; size: letter; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #1a1a2e; line-height: 1.6; max-width: 700px; margin: 0 auto; }
+  h1 { font-size: 22px; color: #1a1a2e; border-bottom: 2px solid #d4a054; padding-bottom: 8px; }
+  h2 { font-size: 14px; color: #d4a054; text-transform: uppercase; letter-spacing: 2px; margin-top: 28px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #e5e5e5; font-size: 13px; }
+  th { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #888; font-weight: 600; }
+  td:last-child { text-align: right; font-weight: 600; }
+  .narrative { background: #f8f8f8; padding: 16px; border-radius: 8px; margin: 12px 0; font-size: 13px; }
+  .disclaimer { font-size: 10px; color: #888; margin-top: 24px; padding-top: 16px; border-top: 1px solid #e5e5e5; font-style: italic; }
+  .footer { font-size: 10px; color: #aaa; margin-top: 32px; text-align: center; }
+  .header-meta { font-size: 12px; color: #666; margin-bottom: 4px; }
+</style>
+</head><body>
+<h1>SZL Holdings — LP Report</h1>
+<p class="header-meta">${esc(report.reportType.replace(/_/g, " ").toUpperCase())} · ${esc(report.reportingPeriod)} · (${esc(report.periodStart)} – ${esc(report.periodEnd)})</p>
+<p class="header-meta">Status: ${esc(report.status.toUpperCase())}</p>
+
+<h2>Performance Metrics</h2>
+<table>
+<tr><th>Metric</th><th>Value</th></tr>
+<tr><td>Gross IRR</td><td>${report.grossIrr ? pct(parseFloat(report.grossIrr)) : "—"}</td></tr>
+<tr><td>Net IRR</td><td>${report.netIrr ? pct(parseFloat(report.netIrr)) : "—"}</td></tr>
+<tr><td>TVPI (Total Value to Paid-In)</td><td>${report.tvpi ? parseFloat(report.tvpi).toFixed(2) + "x" : "—"}</td></tr>
+<tr><td>DPI (Distributions to Paid-In)</td><td>${report.dpi ? parseFloat(report.dpi).toFixed(2) + "x" : "—"}</td></tr>
+<tr><td>RVPI (Residual Value to Paid-In)</td><td>${report.rvpi ? parseFloat(report.rvpi).toFixed(2) + "x" : "—"}</td></tr>
+</table>
+
+<h2>Fund Financials</h2>
+<table>
+<tr><th>Metric</th><th>Value</th></tr>
+<tr><td>Fund NAV</td><td>${report.fundNav ? "$" + parseFloat(report.fundNav).toLocaleString() : "—"}</td></tr>
+<tr><td>Total Commitments</td><td>${report.totalCommitments ? "$" + parseFloat(report.totalCommitments).toLocaleString() : "—"}</td></tr>
+<tr><td>Called Capital</td><td>${report.calledCapital ? "$" + parseFloat(report.calledCapital).toLocaleString() : "—"}</td></tr>
+<tr><td>Management Fee Rate</td><td>${report.managementFeeRate ? pct(parseFloat(report.managementFeeRate)) : "—"}</td></tr>
+<tr><td>Carried Interest</td><td>${report.carryRate ? pct(parseFloat(report.carryRate)) : "—"}</td></tr>
+<tr><td>Preferred Return</td><td>${report.preferredReturnRate ? pct(parseFloat(report.preferredReturnRate)) : "—"}</td></tr>
+</table>
+
+${report.narrativeSummary ? `<h2>Narrative Summary</h2><div class="narrative">${esc(report.narrativeSummary)}</div>` : ""}
+
+${report.disclaimers ? `<div class="disclaimer">${esc(report.disclaimers)}</div>` : `<div class="disclaimer">Past performance is not indicative of future results. Net returns are after management fees and estimated carried interest. IRR and multiples are calculated using industry-standard methodologies consistent with ILPA guidelines.</div>`}
+
+<div class="footer">
+  SZL Holdings LLC · Generated ${new Date().toLocaleDateString()} · CONFIDENTIAL — For authorized recipients only.
+</div>
+</body></html>`;
+
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+      setTimeout(() => printWindow.print(), 250);
+    }
   };
 
   const complianceDeadlines = useMemo(() => {
