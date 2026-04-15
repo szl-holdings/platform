@@ -69,7 +69,7 @@ export function FounderBlock() {
                 <ArrowRight size={13} strokeWidth={2.5} />
               </Link>
               <a
-                href="/stephen/"
+                href="/founder"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",

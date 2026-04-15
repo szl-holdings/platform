@@ -58,13 +58,13 @@
     "marketContext": "Private advisory brand for clients who value discretion and precision"
   },
   {
-    "id": "stephen-site",
-    "name": "Stephen Site",
+    "id": "founder",
+    "name": "Founder",
     "tagline": "Personal Authority Platform",
     "description": "A personal authority platform focused on business observability, systems thinking, execution leadership, and modern operational clarity.",
     "status": "Live",
     "category": "Authority",
-    "link": "/stephen/",
+    "link": "/founder",
     "icon": "Zap",
     "color": "#f59e0b",
     "cta": "Explore the thesis",

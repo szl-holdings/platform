@@ -11,7 +11,6 @@ const productLinks = [
 const ecosystemLinks = [
   { label: "SZL Holdings", href: "/" },
   { label: "Carlota Jo", href: "/carlota-jo/" },
-  { label: "Stephen Site", href: "/stephen/" },
 ];
 
 const legalLinks = [

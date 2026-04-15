@@ -7,7 +7,6 @@ const ecosystemLinks = [
   { label: "Vessels", href: "/vessels/" },
   { label: "Aegis", href: "/firestorm/" },
   { label: "Terra", href: "/terra/" },
-  { label: "Stephen Lutar", href: "/stephen/" },
 ];
 
 export default function Footer() {

@@ -79,17 +79,6 @@ const ECOSYSTEM_NODES: EcosystemNode[] = [
     description: "Brand strategy, advisory & consulting intelligence",
     angle: 180,
   },
-  {
-    id: "career",
-    name: "Career",
-    icon: "👤",
-    layer: 3,
-    accent: "#94a3b8",
-    path: "/stephen/",
-    subtitle: "Founder Identity",
-    description: "Personal brand & thought leadership platform",
-    angle: 0,
-  },
 ];
 
 const LAYER_CONFIG = [

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { typography } from "./tokens";
 
 export interface BriefingSignal {
-  domain: "vessels" | "terra" | "aegis" | "prism" | "szl" | "carlota" | "lyte";
+  domain: "vessels" | "terra" | "aegis" | "szl" | "carlota" | "lyte";
   title: string;
   summary: string;
   metric?: string;
@@ -66,15 +66,6 @@ function generateDemoBriefing(date: Date): DailyBriefing {
         trend: "down",
         severity: "medium",
         href: "/terra/",
-      },
-      {
-        domain: "prism",
-        title: "Settlement Deadline in 48 Hours",
-        summary: "Case #P-2024-187 settlement window closes Thursday. Opposing counsel has not confirmed receipt.",
-        metric: "48h remaining",
-        trend: "flat",
-        severity: "critical",
-        href: "/prism-counsel/",
       },
       {
         domain: "szl",

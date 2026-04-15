@@ -66,7 +66,6 @@ const WEB_DOMAIN_ROUTES = {
     "/solutions/aegis",
     "/solutions/vessels",
     "/solutions/terra",
-    "/solutions/prism-counsel",
     "/design-partners",
     "/contact",
     "/pricing",
@@ -93,35 +92,6 @@ const WEB_DOMAIN_ROUTES = {
 
   "Ecosystem Command Portal": [
     "/command",
-  ],
-
-  "PRISM Counsel": [
-    "/prism-counsel",
-    "/prism-counsel/pulse",
-    "/prism-counsel/today",
-    "/prism-counsel/matters",
-    "/prism-counsel/watchlist",
-    "/prism-counsel/deadlines",
-    "/prism-counsel/forecast",
-    "/prism-counsel/playbooks",
-    "/prism-counsel/review-desk",
-    "/prism-counsel/copilot",
-    "/prism-counsel/portfolio",
-    "/prism-counsel/signoff-queue",
-    "/prism-counsel/recovery-ops",
-    "/prism-counsel/discovery",
-    "/prism-counsel/parties",
-    "/prism-counsel/agentic/contracts",
-    "/prism-counsel/agentic/litigation-prediction",
-    "/prism-counsel/agentic/e-discovery",
-    "/prism-counsel/agentic/legal-spend",
-    "/prism-counsel/agentic/regulatory-radar",
-    "/prism-counsel/predict/settlement",
-    "/prism-counsel/predict/judge-analytics",
-    "/prism-counsel/predict/case-strength",
-    "/prism-counsel/worldline",
-    "/prism-counsel/signal-forge",
-    "/prism-counsel/admin",
   ],
 
   "Lyte Command Center": [
@@ -195,13 +165,6 @@ const WEB_DOMAIN_ROUTES = {
     "/carlota-jo/revenue-intelligence",
   ],
 
-  "Stephen Site": [
-    "/stephen",
-    "/stephen/about",
-    "/stephen/contact",
-    "/stephen/career-command",
-    "/stephen/thesis-tracker",
-  ],
 };
 
 const KNOWN_READ_API_ROUTES = [

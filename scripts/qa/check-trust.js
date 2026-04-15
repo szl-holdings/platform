@@ -26,7 +26,6 @@ const REQUIRED_TRUST_ROUTES = [
   { route: "/solutions/aegis/trust", label: "Aegis Trust" },
   { route: "/solutions/vessels/trust", label: "Vessels Trust" },
   { route: "/solutions/terra/trust", label: "Terra Trust" },
-  { route: "/solutions/prism-counsel/trust", label: "PRISM Counsel Trust" },
   { route: "/solutions/lyte/trust", label: "Lyte Trust" },
 ];
 

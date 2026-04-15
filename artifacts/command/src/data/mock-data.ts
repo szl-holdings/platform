@@ -79,7 +79,7 @@ export const baseDomainData: DomainData[] = [
     ],
     alerts: { count: 3, severity: "high" },
     sparkline: [73,72,71,70,71,72,70,69,71,72,71,70,71,72,70,69,71,72,71,70,71,72,71,71],
-    link: "/prism-counsel/",
+    link: "/aegis/",
   },
   {
     id: "terra",
@@ -127,24 +127,24 @@ export const baseDomainData: DomainData[] = [
     ],
     alerts: { count: 1, severity: "low" },
     sparkline: [74,75,76,75,77,76,75,76,77,76,75,76,77,76,75,76,77,76,75,76,77,76,75,76],
-    link: "/stephen/",
+    link: "/founder",
   },
 ];
 
 export const baseTimelineEvents: TimelineEvent[] = [
   { id: 1, time: "2m ago", domain: "aegis", severity: "critical", title: "APT-29 lateral movement", detail: "Threat actor pivoting from phishing compromise on CORP-WS-447 toward Active Directory controllers — isolation recommended." },
-  { id: 2, time: "8m ago", domain: "prism", severity: "high", title: "Deposition deadline: 6 days", detail: "Nexus v. Harrington Ltd deposition scheduled — counsel requesting $2.1M settlement authority before Friday." },
+  { id: 2, time: "8m ago", domain: "aegis", severity: "high", title: "Deposition deadline: 6 days", detail: "Nexus v. Harrington Ltd deposition scheduled — counsel requesting $2.1M settlement authority before Friday." },
   { id: 3, time: "15m ago", domain: "vessels", severity: "high", title: "MV Kestrel Meridian delayed 18hrs", detail: "Port of Singapore congestion affecting Q2 cargo schedule; Horizon Logistics notified." },
   { id: 4, time: "24m ago", domain: "aegis", severity: "high", title: "3 endpoints quarantined", detail: "Containment action executed on CORP-WS-447, CORP-LT-219, CORP-SRV-08; forensic imaging in progress." },
   { id: 5, time: "31m ago", domain: "terra", severity: "medium", title: "Phoenix MSA comp decline 3.2%", detail: "Comparable sales pressure in Phoenix metropolitan area impacts Sunset Ridge Portfolio valuation." },
   { id: 6, time: "45m ago", domain: "lyte", severity: "info", title: "Auto-scaling triggered: +5 nodes", detail: "Kubernetes cluster expanded from 12 to 17 nodes; CPU load normalized to 34%." },
   { id: 7, time: "52m ago", domain: "szl", severity: "info", title: "Alloy Fund III capital call", detail: "$14.7M drawdown request received from Alloy Holdings management; requires executive approval." },
-  { id: 8, time: "1h ago", domain: "prism", severity: "medium", title: "Regulatory filing due: 4 days", detail: "SEC Form D amendment required for Nexus Capital Fund II by April 19." },
+  { id: 8, time: "1h ago", domain: "aegis", severity: "medium", title: "Regulatory filing due: 4 days", detail: "SEC Form D amendment required for Nexus Capital Fund II by April 19." },
   { id: 9, time: "1h 12m ago", domain: "aegis", severity: "medium", title: "Phishing campaign identified", detail: "847 emails blocked across SZL domain — credential-harvesting lure targeting finance team." },
   { id: 10, time: "1h 28m ago", domain: "vessels", severity: "medium", title: "Cargo inspection: Port Houston", detail: "MV Albatross Star cleared customs — 2hr delay adds to transit time estimate." },
   { id: 11, time: "2h ago", domain: "szl", severity: "info", title: "Alloy Holdings Q1 earnings", detail: "Portfolio company Alloy Holdings confirmed Q1 revenue +22% YoY, exceeding projections." },
   { id: 12, time: "2h 15m ago", domain: "terra", severity: "medium", title: "Distress opportunity flagged", detail: "3 off-market Phoenix multifamily assets identified at 15-20% discount to recent comps." },
-  { id: 13, time: "3h ago", domain: "prism", severity: "high", title: "Litigation hold notice issued", detail: "New preservation order for Titan Infrastructure matter — IT and Lyte notified to retain logs." },
+  { id: 13, time: "3h ago", domain: "aegis", severity: "high", title: "Litigation hold notice issued", detail: "New preservation order for Titan Infrastructure matter — IT and Lyte notified to retain logs." },
   { id: 14, time: "3h 22m ago", domain: "lyte", severity: "info", title: "Database maintenance complete", detail: "Scheduled PostgreSQL vacuum and index rebuild completed — zero downtime." },
   { id: 15, time: "4h ago", domain: "vessels", severity: "info", title: "MV Nordic Arrow departed Rotterdam", detail: "On-schedule departure with $124M cargo bound for Houston; ETA April 22." },
   { id: 16, time: "5h ago", domain: "aegis", severity: "low", title: "Vulnerability patch applied", detail: "CVE-2025-1734 patched across 4,821 endpoints — zero exploitation detected." },
@@ -187,7 +187,7 @@ export const baseIntelligenceCards: IntelligenceCard[] = [
 
 export const baseCommandActions: CommandAction[] = [
   { id: "act-1", domain: "aegis", priority: "critical", text: "Acknowledge 7 unacknowledged critical alerts from APT-29 campaign", buttonText: "Acknowledge" },
-  { id: "act-2", domain: "prism", priority: "high", text: "Approve settlement authority: Nexus v. Harrington — $2.1M", buttonText: "Approve" },
+  { id: "act-legal", domain: "aegis", priority: "high", text: "Approve settlement authority: Nexus v. Harrington — $2.1M", buttonText: "Approve" },
   { id: "act-3", domain: "vessels", priority: "high", text: "Escalate MV Kestrel Meridian delay to port authority and Horizon Logistics", buttonText: "Escalate" },
   { id: "act-4", domain: "szl", priority: "medium", text: "Approve Q1 capital call: Alloy Fund III — $14.7M drawdown", buttonText: "Approve" },
   { id: "act-5", domain: "terra", priority: "medium", text: "Sign off on Phoenix market comp report before board meeting", buttonText: "Acknowledge" },

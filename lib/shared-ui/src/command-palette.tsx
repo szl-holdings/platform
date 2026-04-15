@@ -540,7 +540,6 @@ const ECOSYSTEM_APPS = [
   { id: "aegis", name: "Aegis", path: "/firestorm/", icon: "🛡", description: "Unified Defense & Intelligence" },
   { id: "vessels", name: "Vessels", path: "/vessels/", icon: "⚓", description: "Maritime Command Intelligence" },
   { id: "terra", name: "Terra", path: "/terra/", icon: "⬢", description: "Real Estate Broker Command" },
-  { id: "prism-counsel", name: "PRISM Counsel", path: "/prism-counsel/", icon: "⚖", description: "Legal Matter Command" },
   { id: "nexus", name: "Nexus", path: "/nexus/timeline", icon: "🔮", description: "Intelligence Fusion & Command" },
   { id: "carlota-jo", name: "Carlota Jo", path: "/carlota-jo/", icon: "◈", description: "Client & Residence Support" },
 ];
