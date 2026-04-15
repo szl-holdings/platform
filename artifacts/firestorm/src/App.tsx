@@ -80,6 +80,11 @@ const SoarPlaybooks = lazy(() => import("@/pages/soar-playbooks"));
 const StixTaxii = lazy(() => import("@/pages/stix-taxii"));
 const TradecraftEnginePage = lazy(() => import("@/pages/tradecraft-engine"));
 
+// ─── CITADEL Crisis Command ───────────────────────────────────────────────────
+const CitadelWarRoom = lazy(() => import("@/pages/citadel-war-room"));
+const CitadelPlaybooks = lazy(() => import("@/pages/citadel-playbooks"));
+const CitadelAfterAction = lazy(() => import("@/pages/citadel-after-action"));
+
 // ─── Command Surfaces (Phase 1) ───────────────────────────────────────────────
 const CommandHome = lazy(() => import("@/pages/command-home"));
 const InvestigationsBoard = lazy(() => import("@/pages/investigations-board"));
@@ -167,6 +172,12 @@ const commandSurfacesNav = [
   { path: "/decision-console", label: "Decision Console", icon: ClipboardCheck },
   { path: "/response-orchestration", label: "Response Orchestration", icon: Zap },
   { path: "/executive-board", label: "Executive / Board View", icon: BarChart3 },
+];
+
+const citadelNav = [
+  { path: "/citadel", label: "CITADEL War Room", icon: Flame },
+  { path: "/citadel/playbooks", label: "Crisis Playbooks", icon: Play },
+  { path: "/citadel/after-action", label: "After-Action Report", icon: FileText },
 ];
 
 const governanceNavItems = [
@@ -383,6 +394,11 @@ function AegisSidebarContent({ location, onNavigate, collapsed, onToggleCollapse
   const moduleAccent = MODULE_ACCENTS[activeModule];
 
   const securitySections: SidebarNavSection[] = [
+    {
+      id: "citadel",
+      label: "CITADEL Crisis Command",
+      items: citadelNav.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3.5 h-3.5" /> })),
+    },
     {
       id: "core",
       label: "Core",
@@ -612,6 +628,11 @@ function AppRouter() {
         {/* Aegis Home & Enterprise */}
         <Route path="/home" component={AegisMarketingHome} />
         <Route path="/demo" component={EnterpriseDemo} />
+        {/* CITADEL Crisis Command */}
+        <Route path="/citadel" component={CitadelWarRoom} />
+        <Route path="/citadel/playbooks" component={CitadelPlaybooks} />
+        <Route path="/citadel/after-action" component={CitadelAfterAction} />
+
         {/* Command Surfaces (Phase 1) */}
         <Route path="/command-home" component={CommandHome} />
         <Route path="/investigations" component={InvestigationsBoard} />
@@ -748,6 +769,9 @@ function nav(path: string) {
 }
 
 const aegisCommands: CommandItem[] = [
+  { id: "nav-citadel-war-room", label: "CITADEL War Room", icon: "🔥", group: "CITADEL Crisis Command", keywords: ["crisis", "war room", "incident command", "ics", "emergency"], action: nav("/citadel") },
+  { id: "nav-citadel-playbooks", label: "Crisis Playbooks", icon: "⚡", group: "CITADEL Crisis Command", keywords: ["playbook", "crisis", "response", "apt", "ransomware", "scenario"], action: nav("/citadel/playbooks") },
+  { id: "nav-citadel-aar", label: "After-Action Report", icon: "📋", group: "CITADEL Crisis Command", keywords: ["after action", "aar", "post incident", "report", "lessons learned"], action: nav("/citadel/after-action") },
   { id: "nav-command-home", label: "Command Home", icon: "🏠", group: "Command Surfaces", keywords: ["home", "dashboard", "command", "operator"], action: nav("/command-home") },
   { id: "nav-investigations", label: "Investigations Board", icon: "🔍", group: "Command Surfaces", keywords: ["investigation", "case", "timeline", "entities"], action: nav("/investigations") },
   { id: "nav-decision-console", label: "Decision Console", icon: "📋", group: "Command Surfaces", keywords: ["decision", "confidence", "evidence", "approve"], action: nav("/decision-console") },
