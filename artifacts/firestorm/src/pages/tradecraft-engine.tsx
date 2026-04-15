@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { toast } from "sonner";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { EvidenceIndexPanel } from "@/components/tradecraft-panel";
 
 type DecisionType = "TriageDecision" | "IncidentAssessment" | "RiskDecision" | "EscalationDecision" | "ApprovalRecommendation" | "ResponsePlan" | "ExecutiveBrief" | "ControlGapFinding";

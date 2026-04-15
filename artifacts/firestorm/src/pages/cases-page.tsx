@@ -9,9 +9,10 @@ import {
   Search, Filter, ChevronDown, ChevronUp, User, Calendar,
   FileText, Shield, Activity, Plus, Flame
 } from "lucide-react";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { useState, useMemo } from "react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { toast } from "sonner";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import {
   OperationalAuditTimeline,
   OperationalOwnerChip,
@@ -413,10 +414,7 @@ export default function CasesPage() {
               <div className="w-6 h-6 border-2 border-red-500/40 border-t-red-400 rounded-full animate-spin" />
             </div>
           ) : filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 gap-3">
-              <Briefcase className="w-8 h-8 text-muted-foreground/30" />
-              <p className="text-sm text-muted-foreground/60">No cases found</p>
-            </div>
+            <EmptyState icon={Briefcase} headline="No cases found" compact />
           ) : (
             filtered.map((c) => {
               const pc = priorityConfig[c.priority];

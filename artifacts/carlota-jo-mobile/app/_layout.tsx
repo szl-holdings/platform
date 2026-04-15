@@ -15,7 +15,7 @@ import { setBaseUrl, setAuthTokenGetter } from "@szl-holdings/api-client-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
-import { AUTH_TOKEN_KEY } from "@/context/AuthContext";
+import { AUTH_TOKEN_KEY, useAuth } from "@/context/AuthContext";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
@@ -24,10 +24,9 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
-import { AuthProvider } from "@/context/AuthContext";
-import { NotificationProvider } from "@/context/NotificationContext";
+import { AuthProvider, AUTH_TOKEN_KEY } from "@/context/AuthContext";
 import { PushNotificationBootstrap } from "@/components/PushNotificationBootstrap";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 
@@ -47,6 +46,34 @@ setAuthTokenGetter(() => {
 
 SplashScreen.preventAutoHideAsync();
 SystemUI.setBackgroundColorAsync("#0e0c09");
+
+const CJ_API_BASE = process.env.EXPO_PUBLIC_DOMAIN
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
+  : "/api";
+
+async function cjGetAuthToken(): Promise<string | null> {
+  try {
+    if (Platform.OS === "web") {
+      return typeof window !== "undefined" ? window.localStorage.getItem(AUTH_TOKEN_KEY) : null;
+    }
+    return SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function CJNotificationProvider({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated } = useAuth();
+  return (
+    <NotificationProvider
+      apiBase={CJ_API_BASE}
+      getAuthToken={cjGetAuthToken}
+      enabled={isAuthenticated}
+    >
+      {children}
+    </NotificationProvider>
+  );
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -99,14 +126,14 @@ export default function RootLayout() {
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <NotificationProvider>
+            <CJNotificationProvider>
               <PushNotificationBootstrap />
               <GestureHandlerRootView style={{ flex: 1 }}>
                 <KeyboardProvider>
                   <RootLayoutNav />
                 </KeyboardProvider>
               </GestureHandlerRootView>
-            </NotificationProvider>
+            </CJNotificationProvider>
           </AuthProvider>
         </QueryClientProvider>
       </ErrorBoundary>

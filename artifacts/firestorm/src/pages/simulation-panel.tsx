@@ -15,7 +15,7 @@ import {
   ChevronRight, XCircle, RefreshCw, Info
 } from "lucide-react";
 import { type ElementType, useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 
 interface AuditEntry { action: string; user: string; at: string; }
 interface SimulationRun {

@@ -17,7 +17,7 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { AuthProvider } from "@/context/AuthContext";
 import { BiometricLockProvider } from "@/context/BiometricLockContext";
@@ -30,6 +30,10 @@ setAuthTokenGetter(() => getAuthToken());
 
 SplashScreen.preventAutoHideAsync();
 SystemUI.setBackgroundColorAsync("#090810");
+
+const SZL_API_BASE = process.env.EXPO_PUBLIC_DOMAIN
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
+  : "/api";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -78,11 +82,13 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <UrqlProvider value={getGraphQLClient()}>
             <AuthProvider>
-              <BiometricLockProvider>
-                <GestureHandlerRootView style={{ flex: 1 }}>
-                  <RootLayoutNav />
-                </GestureHandlerRootView>
-              </BiometricLockProvider>
+              <NotificationProvider apiBase={SZL_API_BASE} getAuthToken={getAuthToken}>
+                <BiometricLockProvider>
+                  <GestureHandlerRootView style={{ flex: 1 }}>
+                    <RootLayoutNav />
+                  </GestureHandlerRootView>
+                </BiometricLockProvider>
+              </NotificationProvider>
             </AuthProvider>
           </UrqlProvider>
         </QueryClientProvider>

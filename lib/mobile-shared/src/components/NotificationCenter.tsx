@@ -1,6 +1,3 @@
-import { Feather } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
-import { router } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -13,16 +10,14 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-import { useColors } from "@/hooks/useColors";
-import { useNotifications, type AppNotification } from "@szl-holdings/mobile-shared";
+import { useNotifications, type AppNotification } from "../context/NotificationContext";
 
 const TYPE_ICONS: Record<AppNotification["type"], string> = {
-  info: "info",
-  success: "check-circle",
-  warning: "alert-triangle",
-  error: "alert-circle",
-  action_required: "zap",
+  info: "ℹ",
+  success: "✓",
+  warning: "⚠",
+  error: "✕",
+  action_required: "⚡",
 };
 
 const TYPE_COLORS: Record<AppNotification["type"], string> = {
@@ -47,31 +42,36 @@ function formatTimeAgo(dateStr: string): string {
 
 interface NotificationRowProps {
   notification: AppNotification;
+  accentColor: string;
   onMarkRead: (id: number) => void;
   onDelete: (id: number) => void;
-  colors: ReturnType<typeof useColors>;
+  onNavigate?: (url: string) => void;
 }
 
-function NotificationRow({ notification, onMarkRead, onDelete, colors }: NotificationRowProps) {
-  const icon = TYPE_ICONS[notification.type] ?? "bell";
-  const iconColor = TYPE_COLORS[notification.type] ?? colors.gold;
+function NotificationRow({
+  notification,
+  accentColor,
+  onMarkRead,
+  onDelete,
+  onNavigate,
+}: NotificationRowProps) {
+  const iconText = TYPE_ICONS[notification.type] ?? "•";
+  const iconColor = TYPE_COLORS[notification.type] ?? accentColor;
 
   const handlePress = useCallback(() => {
-    Haptics.selectionAsync();
     if (!notification.isRead) {
       onMarkRead(notification.id);
     }
-    if (notification.actionUrl) {
+    if (notification.actionUrl && onNavigate) {
       try {
-        router.push(notification.actionUrl as any);
+        onNavigate(notification.actionUrl);
       } catch {
-        console.warn("[notification] Deep-link failed:", notification.actionUrl);
+        console.warn("[NotificationCenter] Navigate failed:", notification.actionUrl);
       }
     }
-  }, [notification, onMarkRead]);
+  }, [notification, onMarkRead, onNavigate]);
 
   const handleDelete = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onDelete(notification.id);
   }, [notification.id, onDelete]);
 
@@ -82,45 +82,38 @@ function NotificationRow({ notification, onMarkRead, onDelete, colors }: Notific
           style={[
             styles.row,
             {
-              borderBottomColor: colors.creamFaint,
-              opacity: pressed ? 0.7 : 1,
+              opacity: pressed ? 0.75 : 1,
               backgroundColor: notification.isRead
                 ? "transparent"
-                : "rgba(200,169,106,0.04)",
+                : `${accentColor}08`,
             },
           ]}
         >
           {!notification.isRead && (
-            <View style={[styles.unreadDot, { backgroundColor: colors.gold }]} />
+            <View style={[styles.unreadDot, { backgroundColor: accentColor }]} />
           )}
           <View style={[styles.iconWrap, { borderColor: `${iconColor}33` }]}>
-            <Feather name={icon as any} size={14} color={iconColor} />
+            <Text style={[styles.iconText, { color: iconColor }]}>{iconText}</Text>
           </View>
           <View style={styles.rowContent}>
             <Text
               style={[
                 styles.rowTitle,
-                {
-                  color: notification.isRead ? colors.creamDim : colors.cream,
-                  fontFamily: notification.isRead ? "Inter_300Light" : "Inter_400Regular",
-                },
+                { fontWeight: notification.isRead ? "400" : "600" },
               ]}
               numberOfLines={1}
             >
               {notification.title}
             </Text>
-            <Text
-              style={[styles.rowMessage, { color: colors.mutedForeground }]}
-              numberOfLines={2}
-            >
+            <Text style={styles.rowMessage} numberOfLines={2}>
               {notification.message}
             </Text>
-            <Text style={[styles.rowTime, { color: colors.goldSubtle }]}>
+            <Text style={[styles.rowTime, { color: `${accentColor}99` }]}>
               {formatTimeAgo(notification.createdAt)}
             </Text>
           </View>
           <Pressable onPress={handleDelete} style={styles.deleteBtn} hitSlop={8}>
-            <Feather name="x" size={13} color={colors.mutedForeground} />
+            <Text style={styles.deleteText}>✕</Text>
           </Pressable>
         </View>
       )}
@@ -128,28 +121,32 @@ function NotificationRow({ notification, onMarkRead, onDelete, colors }: Notific
   );
 }
 
-interface NotificationBellProps {
+export interface NotificationBellProps {
   size?: number;
+  accentColor?: string;
+  iconColor?: string;
 }
 
-export function NotificationBell({ size = 20 }: NotificationBellProps) {
-  const colors = useColors();
+export function NotificationBell({
+  size = 20,
+  accentColor = "#C8A96A",
+  iconColor = "#E8EAF0",
+}: NotificationBellProps) {
   const { unreadCount } = useNotifications();
   const [modalVisible, setModalVisible] = useState(false);
 
   return (
     <>
       <Pressable
-        onPress={() => {
-          Haptics.selectionAsync();
-          setModalVisible(true);
-        }}
+        onPress={() => setModalVisible(true)}
         style={styles.bellWrap}
         hitSlop={8}
+        accessibilityLabel="Notifications"
+        accessibilityRole="button"
       >
-        <Feather name="bell" size={size} color={colors.cream} />
+        <Text style={[styles.bellIcon, { fontSize: size, color: iconColor }]}>🔔</Text>
         {unreadCount > 0 && (
-          <View style={[styles.badge, { backgroundColor: colors.gold }]}>
+          <View style={[styles.badge, { backgroundColor: accentColor }]}>
             <Text style={styles.badgeText}>
               {unreadCount > 9 ? "9+" : String(unreadCount)}
             </Text>
@@ -157,21 +154,30 @@ export function NotificationBell({ size = 20 }: NotificationBellProps) {
         )}
       </Pressable>
 
-      <NotificationCenter
+      <NotificationCenterModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
+        accentColor={accentColor}
       />
     </>
   );
 }
 
-interface NotificationCenterProps {
+export interface NotificationCenterModalProps {
   visible: boolean;
   onClose: () => void;
+  accentColor?: string;
+  backgroundColor?: string;
+  onNavigate?: (url: string) => void;
 }
 
-export function NotificationCenter({ visible, onClose }: NotificationCenterProps) {
-  const colors = useColors();
+export function NotificationCenterModal({
+  visible,
+  onClose,
+  accentColor = "#C8A96A",
+  backgroundColor = "#080B12",
+  onNavigate,
+}: NotificationCenterModalProps) {
   const insets = useSafeAreaInsets();
   const { notifications, unreadCount, isLoading, refresh, markRead, markAllRead, deleteNotification } =
     useNotifications();
@@ -185,37 +191,31 @@ export function NotificationCenter({ visible, onClose }: NotificationCenterProps
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <View style={[styles.modal, { backgroundColor: colors.background }]}>
-        <View style={[styles.header, { paddingTop: topPad + 16, borderBottomColor: colors.creamFaint }]}>
-          <Pressable onPress={onClose} hitSlop={12}>
-            <Feather name="x" size={18} color={colors.creamDim} />
+      <View style={[styles.modal, { backgroundColor }]}>
+        <View style={[styles.header, { paddingTop: topPad + 16 }]}>
+          <Pressable onPress={onClose} hitSlop={12} accessibilityLabel="Close" accessibilityRole="button">
+            <Text style={styles.closeBtn}>✕</Text>
           </Pressable>
-          <Text style={[styles.headerTitle, { color: colors.cream }]}>Notifications</Text>
+          <Text style={styles.headerTitle}>Notifications</Text>
           {unreadCount > 0 ? (
-            <Pressable
-              onPress={() => {
-                Haptics.selectionAsync();
-                markAllRead();
-              }}
-              hitSlop={12}
-            >
-              <Text style={[styles.headerAction, { color: colors.gold }]}>Mark all read</Text>
+            <Pressable onPress={markAllRead} hitSlop={12}>
+              <Text style={[styles.headerAction, { color: accentColor }]}>Mark all read</Text>
             </Pressable>
           ) : (
             <Pressable onPress={refresh} hitSlop={12}>
               {isLoading ? (
-                <ActivityIndicator size="small" color={colors.goldSubtle} />
+                <ActivityIndicator size="small" color={`${accentColor}80`} />
               ) : (
-                <Feather name="refresh-cw" size={16} color={colors.goldSubtle} />
+                <Text style={[styles.refreshBtn, { color: `${accentColor}80` }]}>↻</Text>
               )}
             </Pressable>
           )}
         </View>
 
         {unreadCount > 0 && (
-          <View style={[styles.unreadBanner, { borderBottomColor: colors.creamFaint }]}>
-            <View style={[styles.unreadDotLarge, { backgroundColor: colors.gold }]} />
-            <Text style={[styles.unreadLabel, { color: colors.gold }]}>
+          <View style={styles.unreadBanner}>
+            <View style={[styles.unreadDotLarge, { backgroundColor: accentColor }]} />
+            <Text style={[styles.unreadLabel, { color: accentColor }]}>
               {unreadCount} unread
             </Text>
           </View>
@@ -230,16 +230,14 @@ export function NotificationCenter({ visible, onClose }: NotificationCenterProps
         >
           {isLoading && notifications.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <ActivityIndicator size="large" color={colors.goldSubtle} />
+              <ActivityIndicator size="large" color={`${accentColor}80`} />
             </View>
           ) : notifications.length === 0 ? (
             <View style={styles.emptyInner}>
-              <Feather name="bell-off" size={32} color={colors.creamFaint} />
-              <Text style={[styles.emptyTitle, { color: colors.creamDim }]}>
-                No notifications yet
-              </Text>
-              <Text style={[styles.emptySubtitle, { color: colors.mutedForeground }]}>
-                Session reminders, document updates, and messages will appear here.
+              <Text style={[styles.emptyIcon, { color: `${accentColor}44` }]}>🔕</Text>
+              <Text style={styles.emptyTitle}>No notifications yet</Text>
+              <Text style={styles.emptySubtitle}>
+                Updates, alerts, and messages will appear here.
               </Text>
             </View>
           ) : (
@@ -247,9 +245,10 @@ export function NotificationCenter({ visible, onClose }: NotificationCenterProps
               <NotificationRow
                 key={notif.id}
                 notification={notif}
+                accentColor={accentColor}
                 onMarkRead={markRead}
                 onDelete={deleteNotification}
-                colors={colors}
+                onNavigate={onNavigate}
               />
             ))
           )}
@@ -270,16 +269,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 16,
     borderBottomWidth: 1,
+    borderBottomColor: "rgba(232,234,240,0.06)",
   },
   headerTitle: {
+    color: "#E8EAF0",
     fontSize: 16,
-    fontFamily: "CormorantGaramond_500Medium",
+    fontWeight: "600",
     letterSpacing: 0.5,
   },
   headerAction: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontWeight: "500",
     letterSpacing: 0.5,
+  },
+  closeBtn: {
+    color: "rgba(232,234,240,0.5)",
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  refreshBtn: {
+    fontSize: 18,
   },
   unreadBanner: {
     flexDirection: "row",
@@ -288,6 +297,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderBottomWidth: 1,
+    borderBottomColor: "rgba(232,234,240,0.06)",
   },
   unreadDotLarge: {
     width: 7,
@@ -296,7 +306,7 @@ const styles = StyleSheet.create({
   },
   unreadLabel: {
     fontSize: 11,
-    fontFamily: "Inter_500Medium",
+    fontWeight: "500",
     letterSpacing: 1,
   },
   list: {
@@ -314,14 +324,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     paddingVertical: 80,
   },
+  emptyIcon: {
+    fontSize: 40,
+  },
   emptyTitle: {
+    color: "rgba(232,234,240,0.5)",
     fontSize: 16,
-    fontFamily: "CormorantGaramond_400Regular",
+    fontWeight: "500",
     textAlign: "center",
   },
   emptySubtitle: {
+    color: "rgba(232,234,240,0.3)",
     fontSize: 12,
-    fontFamily: "Inter_300Light",
     textAlign: "center",
     lineHeight: 18,
   },
@@ -331,6 +345,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
+    borderBottomColor: "rgba(232,234,240,0.06)",
     gap: 12,
     position: "relative",
   },
@@ -346,34 +361,46 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderWidth: 1,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
+  },
+  iconText: {
+    fontSize: 13,
+    fontWeight: "600",
   },
   rowContent: {
     flex: 1,
     gap: 3,
   },
   rowTitle: {
+    color: "#E8EAF0",
     fontSize: 13,
     letterSpacing: 0.2,
   },
   rowMessage: {
+    color: "rgba(232,234,240,0.5)",
     fontSize: 12,
-    fontFamily: "Inter_300Light",
     lineHeight: 17,
   },
   rowTime: {
     fontSize: 10,
-    fontFamily: "Inter_300Light",
     letterSpacing: 0.5,
     marginTop: 2,
   },
   deleteBtn: {
     paddingTop: 2,
   },
+  deleteText: {
+    color: "rgba(232,234,240,0.25)",
+    fontSize: 12,
+  },
   bellWrap: {
     position: "relative",
+  },
+  bellIcon: {
+    lineHeight: undefined,
   },
   badge: {
     position: "absolute",
@@ -388,7 +415,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 9,
-    fontFamily: "Inter_600SemiBold",
-    color: "#0e0c09",
+    fontWeight: "700",
+    color: "#080B12",
   },
 });

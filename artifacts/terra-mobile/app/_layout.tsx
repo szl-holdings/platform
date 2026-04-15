@@ -21,7 +21,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
-import { ErrorBoundary } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 
 if (process.env.EXPO_PUBLIC_DOMAIN) {
@@ -40,6 +40,21 @@ setAuthTokenGetter(() => {
 
 SplashScreen.preventAutoHideAsync();
 SystemUI.setBackgroundColorAsync("#0d0b08");
+
+const TERRA_API_BASE = process.env.EXPO_PUBLIC_DOMAIN
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
+  : "/api";
+
+async function getTerraAuthToken(): Promise<string | null> {
+  try {
+    if (Platform.OS === "web") {
+      return typeof window !== "undefined" ? window.localStorage.getItem(AUTH_TOKEN_KEY) : null;
+    }
+    return SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -109,11 +124,13 @@ export default function RootLayout() {
       <ErrorBoundary FallbackComponent={ErrorFallback}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            <KeyboardProvider>
-              <RootLayoutNav />
-            </KeyboardProvider>
-          </GestureHandlerRootView>
+          <NotificationProvider apiBase={TERRA_API_BASE} getAuthToken={getTerraAuthToken}>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+              <KeyboardProvider>
+                <RootLayoutNav />
+              </KeyboardProvider>
+            </GestureHandlerRootView>
+          </NotificationProvider>
         </AuthProvider>
       </QueryClientProvider>
       </ErrorBoundary>

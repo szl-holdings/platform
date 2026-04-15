@@ -9,7 +9,7 @@ import {
   Zap, Filter, CheckCircle, RefreshCw, TrendingDown, Wind
 } from "lucide-react";
 import React, { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
 const EVENT_TYPE_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string }> = {

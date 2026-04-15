@@ -13,7 +13,7 @@ import {
   CheckCircle, XCircle, Clock, Flame, Zap
 } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 
 const assetTypeIcons: Record<string, any> = {
   server: Server,

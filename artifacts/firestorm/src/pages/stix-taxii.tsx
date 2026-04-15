@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Shield, Globe, Link2, AlertTriangle, Bug, Target, Activity, Download, Upload, CheckCircle, Clock, Radio, Database, FileText, ChevronRight, Eye, Layers } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { api } from "@/lib/api";
-import { toast } from "sonner";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 
 type StixType = "indicator" | "malware" | "attack-pattern" | "threat-actor" | "campaign" | "vulnerability" | "course-of-action";
 

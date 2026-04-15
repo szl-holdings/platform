@@ -6,7 +6,7 @@ import { listings, type Listing } from "@/data/brokerage";
 import { RiskBadge, StageBadge, formatCurrency, AgentAvatar, PropertyDrawer } from "@/components/brokerage-ui";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { useLocation } from "wouter";
-import { toast } from "sonner";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 type SortKey = "dom" | "price" | "showings" | "offerCount" | "riskScore";

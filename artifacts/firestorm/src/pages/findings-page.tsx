@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@szl-holdings/shared-ui/ui/textarea";
 import { AlertTriangle, Plus, Shield, Bug, CheckCircle, XCircle, Search } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { toast } from "sonner";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 
 const severityColors: Record<string, string> = {
   info: "bg-blue-500/10 text-blue-400 border-blue-500/20",

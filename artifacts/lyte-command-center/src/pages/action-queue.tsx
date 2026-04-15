@@ -9,7 +9,7 @@ import {
   ArrowRight, Filter, Zap, Users, BarChart3, Package
 } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
 type Role = "executive" | "operations" | "delivery";

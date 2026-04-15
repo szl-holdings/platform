@@ -12,7 +12,7 @@ import { Textarea } from "@szl-holdings/shared-ui/ui/textarea";
 import { Progress } from "@szl-holdings/shared-ui/ui/progress";
 import { Shield, Target, AlertTriangle, CheckCircle, Plus, Clock, Trash2, ShieldAlert, Download, Loader2 as LoaderIcon } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { toast } from "sonner";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 
 const statusColors: Record<string, string> = {
   draft: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",

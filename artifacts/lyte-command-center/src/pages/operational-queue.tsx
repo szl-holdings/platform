@@ -10,7 +10,7 @@ import {
 import { Button } from "@szl-holdings/shared-ui/ui/button";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
-import { toast } from "sonner";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 

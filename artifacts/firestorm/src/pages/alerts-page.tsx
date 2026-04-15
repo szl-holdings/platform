@@ -9,8 +9,9 @@ import { Label } from "@szl-holdings/shared-ui/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
 import { Textarea } from "@szl-holdings/shared-ui/ui/textarea";
 import { Bell, Plus, AlertTriangle, CheckCircle, Eye, XCircle, Clock } from "lucide-react";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { useState, useEffect, useRef } from "react";
-import { toast } from "sonner";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 
 const severityColors: Record<string, string> = {
   critical: "bg-red-500/10 text-red-400 border-red-500/20",
@@ -177,13 +178,12 @@ export default function AlertsPage() {
           {[...Array(3)].map((_, i) => <Card key={i} className="bg-card border-border"><CardContent className="p-4"><div className="skeleton h-16 w-full" /></CardContent></Card>)}
         </div>
       ) : filtered.length === 0 ? (
-        <Card className="bg-card border-border border-dashed animate-fade-in-up stagger-3">
-          <CardContent className="p-16 text-center">
-            <Bell className="w-8 h-8 text-muted-foreground/30 mx-auto mb-4" />
-            <p className="text-muted-foreground font-medium">No alerts found</p>
-            <p className="text-xs text-muted-foreground/60 mt-1">{filter !== "all" ? "Try a different filter" : "Create alerts to start monitoring"}</p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={Bell}
+          headline="No alerts found"
+          description={filter !== "all" ? "Try a different filter" : "Create alerts to start monitoring"}
+          className="animate-fade-in-up stagger-3 border border-dashed border-border rounded-lg"
+        />
       ) : (
         <div className="space-y-3 animate-fade-in-up stagger-3">
           {filtered.map((alert: any) => {

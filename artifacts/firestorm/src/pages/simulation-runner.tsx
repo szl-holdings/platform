@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@szl-holdings/shared-ui/ui/progress";
 import { Play, Clock, CheckCircle, XCircle, Activity, Target, Shield, Loader2, Zap } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { toast } from "sonner";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { doctrineEventBus } from "@szl-holdings/observability";
 import { DoctrineLayerBadge } from "@szl-holdings/shared-ui/doctrine-layer-badge";
 import { useRole } from "@szl-holdings/shared-ui";

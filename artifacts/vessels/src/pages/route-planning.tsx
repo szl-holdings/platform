@@ -9,7 +9,7 @@ import { Label } from "@szl-holdings/shared-ui/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
 import { Navigation, Plus, MapPin, Clock, Trash2, Route, ArrowRight } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 
 const statusColors: Record<string, string> = {
   planned: "bg-amber-500/10 text-amber-400 border-amber-500/20",

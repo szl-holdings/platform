@@ -23,7 +23,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { BiometricLockScreen } from "@/components/BiometricLockScreen";
 import { AuthProvider } from "@/context/AuthContext";
@@ -47,6 +47,21 @@ setAuthTokenGetter(() => {
 
 SplashScreen.preventAutoHideAsync();
 SystemUI.setBackgroundColorAsync("#080B12");
+
+const AEGIS_API_BASE = process.env.EXPO_PUBLIC_DOMAIN
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
+  : "/api";
+
+async function getAegisAuthToken(): Promise<string | null> {
+  try {
+    if (Platform.OS === "web") {
+      return typeof window !== "undefined" ? window.localStorage.getItem(AUTH_TOKEN_KEY) : null;
+    }
+    return SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -110,13 +125,15 @@ export default function RootLayout() {
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <BiometricProvider>
-              <GestureHandlerRootView style={{ flex: 1 }}>
-                <KeyboardProvider>
-                  <AppShell />
-                </KeyboardProvider>
-              </GestureHandlerRootView>
-            </BiometricProvider>
+            <NotificationProvider apiBase={AEGIS_API_BASE} getAuthToken={getAegisAuthToken}>
+              <BiometricProvider>
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                  <KeyboardProvider>
+                    <AppShell />
+                  </KeyboardProvider>
+                </GestureHandlerRootView>
+              </BiometricProvider>
+            </NotificationProvider>
           </AuthProvider>
         </QueryClientProvider>
       </ErrorBoundary>

@@ -6,7 +6,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { DataStateBadge } from "@/components/DataStateBadge";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { toast } from "sonner";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 
 interface WorkflowStep {
   label: string;

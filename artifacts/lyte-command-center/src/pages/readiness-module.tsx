@@ -7,7 +7,7 @@ import { Progress } from "@szl-holdings/shared-ui/ui/progress";
 import {
   CheckCircle, XCircle, Clock, AlertTriangle, Shield, Zap, User, ArrowRight, Package
 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
 const ITEM_TYPE_CONFIG: Record<string, { label: string; icon: any; color: string }> = {

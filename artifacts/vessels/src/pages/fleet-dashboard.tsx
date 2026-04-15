@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-u
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Link } from "wouter";
 import { Ship, Globe, MapPin, X, ChevronRight, Radio, Shield, Clock, AlertTriangle, Eye, EyeOff, Anchor, TrendingUp, Package, BarChart3 } from "lucide-react";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import React, { useState, useEffect, useRef } from "react";
 import { ExportButton } from "@szl-holdings/shared-ui/data-export";
 import { ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
@@ -271,8 +272,8 @@ function BehavioralRiskPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
   const items = exceptions.filter(e => behavioralTypes.includes(e.type)).slice(0, 5);
   if (items.length === 0) {
     return (
-      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl p-6 flex items-center justify-center">
-        <p className="text-[11px] text-sky-400/40 font-mono">No active behavioral exceptions</p>
+      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl">
+        <EmptyState icon={Shield} headline="No active behavioral exceptions" compact accentColor="#38bdf8" />
       </div>
     );
   }
@@ -305,8 +306,8 @@ function DarkVesselPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
   const items = exceptions.filter(e => e.type === "ais_dark").slice(0, 5);
   if (items.length === 0) {
     return (
-      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl p-6 flex items-center justify-center">
-        <p className="text-[11px] text-sky-400/40 font-mono">No dark vessel events detected</p>
+      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl">
+        <EmptyState icon={EyeOff} headline="No dark vessel events detected" compact accentColor="#38bdf8" />
       </div>
     );
   }
@@ -353,8 +354,8 @@ function SanctionsPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
   const displayItems = items.length > 0 ? items : sanctionExceptions;
   if (displayItems.length === 0) {
     return (
-      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl p-6 flex items-center justify-center">
-        <p className="text-[11px] text-sky-400/40 font-mono">No active sanctions matches</p>
+      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl">
+        <EmptyState icon={AlertTriangle} headline="No active sanctions matches" compact accentColor="#38bdf8" />
       </div>
     );
   }
@@ -399,8 +400,8 @@ function CargoFlowPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
   const portCongestExceptions = exceptions.filter(e => e.type === "port_congestion").slice(0, 4);
   if (portCongestExceptions.length === 0) {
     return (
-      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl p-6 flex items-center justify-center">
-        <p className="text-[11px] text-sky-400/40 font-mono">No cargo-related exceptions</p>
+      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl">
+        <EmptyState icon={Package} headline="No cargo-related exceptions" compact accentColor="#38bdf8" />
       </div>
     );
   }
@@ -433,8 +434,8 @@ function PortCongestionPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
   const delayExceptions = exceptions.filter(e => e.type === "delay_risk" || e.type === "port_congestion").slice(0, 5);
   if (delayExceptions.length === 0) {
     return (
-      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl p-6 flex items-center justify-center">
-        <p className="text-[11px] text-sky-400/40 font-mono">No port congestion exceptions</p>
+      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl">
+        <EmptyState icon={Anchor} headline="No port congestion exceptions" compact accentColor="#38bdf8" />
       </div>
     );
   }

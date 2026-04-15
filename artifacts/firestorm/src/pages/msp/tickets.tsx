@@ -4,8 +4,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ExportButton } from "@szl-holdings/shared-ui/data-export";
 import { CommentThread, ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
-import { toast } from "sonner";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { apiFetch } from "@szl-holdings/shared-ui";
+
+const API_BASE = "/api";
 
 interface TicketItem {
   id: number;

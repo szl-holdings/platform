@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AlertTriangle, Clock, ChevronRight, Filter, RefreshCw, Zap, Users, FileText, Activity } from "lucide-react";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { cn } from "@/lib/utils";
 
 const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e" };
@@ -270,10 +271,12 @@ export default function BlockerBoardPage() {
         ))}
 
         {filtered.length === 0 && (
-          <div className="rounded-md py-12 flex flex-col items-center gap-3" style={{ background: BG.surface, border: `1px solid ${BORDER.subtle}` }}>
-            <Activity className="w-6 h-6" style={{ color: TEXT.muted }} />
-            <p className="text-[11px]" style={{ color: TEXT.tertiary }}>No blockers match the selected filters</p>
-          </div>
+          <EmptyState
+            icon={Activity}
+            headline="No blockers match the selected filters"
+            compact
+            accentColor={ELECTRIC}
+          />
         )}
       </div>
     </div>

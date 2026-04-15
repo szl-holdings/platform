@@ -9,9 +9,10 @@ import { Label } from "@szl-holdings/shared-ui/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
 import { Textarea } from "@szl-holdings/shared-ui/ui/textarea";
 import { Plus, AlertTriangle, Shield, Clock, Users, Trash2, ArrowRight, FileText, Loader2, X, ChevronUp, ChevronDown } from "lucide-react";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { CommentThread, ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 import { useState, useEffect, useRef } from "react";
-import { toast } from "sonner";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { useRealtimeChannel } from "@szl-holdings/shared-ui";
 import { ExportButton } from "@szl-holdings/shared-ui/data-export";
 import {
@@ -450,13 +451,12 @@ export default function IncidentsPage() {
               <Card key={i} className="bg-card border-border"><CardContent className="p-4"><div className="skeleton h-16 w-full" /></CardContent></Card>
             ))
           ) : incidents.length === 0 ? (
-            <Card className="bg-card border-border border-dashed">
-              <CardContent className="p-16 text-center">
-                <Shield className="w-8 h-8 text-muted-foreground/30 mx-auto mb-4" />
-                <p className="text-muted-foreground font-medium">No incidents recorded</p>
-                <p className="text-xs text-muted-foreground/60 mt-1">Create an incident to begin tracking</p>
-              </CardContent>
-            </Card>
+            <EmptyState
+              icon={Shield}
+              headline="No incidents recorded"
+              description="Create an incident to begin tracking"
+              className="border border-dashed border-border rounded-lg"
+            />
           ) : (
             incidents.map((incident: any) => (
               <Card

@@ -14,7 +14,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AlertNotifierBridge } from "@/components/AlertNotifierBridge";
-import { ErrorBoundary } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider as SharedNotificationProvider } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { AuthProvider } from "@/context/AuthContext";
 import { LyteProvider } from "@/context/LyteContext";
@@ -23,6 +23,10 @@ import { PrismBusProvider } from "@szl-holdings/prism-bus";
 
 SystemUI.setBackgroundColorAsync("#070c14");
 SplashScreen.preventAutoHideAsync();
+
+const LYTE_API_BASE = process.env.EXPO_PUBLIC_DOMAIN
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
+  : "/api";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -70,12 +74,14 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <NotificationProvider>
-              <LyteProvider>
-                <AlertNotifierBridge />
-                <GestureHandlerRootView style={{ flex: 1 }}>
-                  <RootLayoutNav />
-                </GestureHandlerRootView>
-              </LyteProvider>
+              <SharedNotificationProvider apiBase={LYTE_API_BASE} enabled={false}>
+                <LyteProvider>
+                  <AlertNotifierBridge />
+                  <GestureHandlerRootView style={{ flex: 1 }}>
+                    <RootLayoutNav />
+                  </GestureHandlerRootView>
+                </LyteProvider>
+              </SharedNotificationProvider>
             </NotificationProvider>
           </AuthProvider>
         </QueryClientProvider>

@@ -3,7 +3,7 @@ import { ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
-import { toast } from "sonner";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { DataStateBadge } from "@szl-holdings/shared-ui";
 import { FirestormGraphQLPanel } from "@/components/graphql-data-panel";
 import { apiFetch } from "@szl-holdings/shared-ui";

@@ -10,7 +10,7 @@ import {
   ChevronDown, ChevronRight, Zap, User, Clock, Calendar
 } from "lucide-react";
 import { type ElementType, useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 
 interface HardeningControl {
   id: number;
