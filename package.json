@@ -34,7 +34,10 @@
     "audit:design-system": "node --experimental-vm-modules scripts/qa/audit-design-system.js",
     "audit:broken-links": "node --experimental-vm-modules scripts/qa/audit-broken-links.js",
     "audit:all": "pnpm audit:mocks && pnpm audit:routes && pnpm audit:copy && pnpm audit:deps && pnpm audit:design-system && pnpm audit:broken-links",
-    "health:check": "node --experimental-vm-modules scripts/qa/health-check.js"
+    "health:check": "node --experimental-vm-modules scripts/qa/health-check.js",
+    "security:audit": "node scripts/qa/generate-sbom.js",
+    "security:audit:fix": "pnpm update --latest",
+    "security:sbom": "node scripts/qa/generate-sbom.js"
   },
   "private": true,
   "devDependencies": {

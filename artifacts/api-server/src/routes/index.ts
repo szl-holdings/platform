@@ -1,11 +1,12 @@
 import { Router, type IRouter } from "express";
 import copilotRouter from "./copilot";
 import mcpRouter from "./mcp";
-import { authLimiter, readLimiter, writeLimiter, SHORT_CACHE, MEDIUM_CACHE } from "../middlewares/rate-limiters";
+import { SHORT_CACHE, MEDIUM_CACHE } from "../middlewares/rate-limiters";
+import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter, strictAuthSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import analyticsEngineRouter from "./analytics-engine";
-const _authLimiter = authLimiter;
-const _readLimiter = readLimiter;
-const _writeLimiter = writeLimiter;
+const _authLimiter = strictAuthSlidingLimiter;
+const _readLimiter = perUserApiSlidingLimiter;
+const _writeLimiter = perUserWriteSlidingLimiter;
 import { adminGuard } from "../middlewares/admin-guard";
 import { tenantScope } from "../middlewares/tenant-scope";
 import documentsRouter from "./documents";
@@ -97,6 +98,8 @@ import aiEngineRouter from "./ai-engine";
 import analyticsRouter from "./analytics";
 import invitationsRouter from "./invitations";
 import { idempotencyMiddleware, optionalIdempotencyMiddleware } from "../middlewares/idempotency";
+import gdprRouter from "./gdpr";
+import privacyRouter from "./privacy";
 import lyteBillingRouter from "./lyte-billing";
 import { alloyResearchRouter } from "./alloy-research";
 import alloyChannelsRouter from "./alloy-channels";
@@ -418,18 +421,18 @@ router.use(pushAnalyticsRouter);
 router.use("/admin/backup", _writeLimiter);
 router.use(backupRouter);
 
-router.use("/exports", writeLimiter);
+router.use("/exports", _writeLimiter);
 router.use("/exports", tenantScope({ required: false }));
 router.use(exportsRouter);
 
-router.use("/reports", readLimiter);
+router.use("/reports", _readLimiter);
 router.use(reportsRouter);
 
 router.use("/public", publicStatusRouter);
-router.use("/admin/status", writeLimiter);
+router.use("/admin/status", _writeLimiter);
 router.use("/admin/status", publicStatusRouter);
 
-router.use("/feedback", writeLimiter);
+router.use("/feedback", _writeLimiter);
 router.use(feedbackRouter);
 
 router.use("/ai", _readLimiter);
@@ -598,5 +601,9 @@ router.use(realtimeRouter);
 
 router.use("/copilot", _writeLimiter);
 router.use(copilotRouter);
+
+router.use(gdprRouter);
+
+router.use(privacyRouter);
 
 export default router;

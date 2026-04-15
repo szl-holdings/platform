@@ -42,6 +42,7 @@ export const platformContactRequests = pgTable("platform_contact_requests", {
   app: text("app").notNull().default("unknown"),
   name: text("name").notNull(),
   email: text("email").notNull(),
+  emailHash: text("email_hash"),
   company: text("company"),
   role: text("role"),
   message: text("message"),

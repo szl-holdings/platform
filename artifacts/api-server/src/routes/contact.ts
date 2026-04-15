@@ -2,13 +2,38 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { db, pool } from "@szl-holdings/db";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
-import { authMiddleware } from "../middlewares/authMiddleware";
+import { authMiddleware } from "../middlewares/auth";
+import { adminGuard } from "../middlewares/admin-guard";
 import { contactSubmitSchema, validateBody, validateQuery } from "../lib/validation";
 import { z } from "zod";
 import { publicSubmitLimiter } from "../middlewares/rate-limiters";
+import { encryptField } from "../middlewares/field-encryption";
+import { createHmac } from "crypto";
 
 const router: IRouter = Router();
 
+/**
+ * Compute a deterministic HMAC-SHA256 hash of an email address.
+ * This allows lookups for GDPR erasure without storing plaintext email.
+ * Uses the same FIELD_ENCRYPTION_KEY as AES-256-GCM encryption.
+ *
+ * In production, this hard-fails if FIELD_ENCRYPTION_KEY is not set.
+ * This is consistent with encryptField's production behavior and prevents
+ * accidental use of the zero-key fallback in a live environment.
+ */
+function hashEmail(email: string): string {
+  const rawKey = process.env.FIELD_ENCRYPTION_KEY;
+  if (!rawKey) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("FIELD_ENCRYPTION_KEY must be set in production — cannot compute email hash");
+    }
+    logger.warn("[contact] FIELD_ENCRYPTION_KEY not set — using zero-key fallback (development only)");
+  }
+  const key = rawKey ?? "0".repeat(64);
+  return createHmac("sha256", Buffer.from(key, "hex"))
+    .update(email.toLowerCase().trim())
+    .digest("hex");
+}
 
 router.post("/contact/submit", publicSubmitLimiter, validateBody(contactSubmitSchema), async (req: Request, res: Response) => {
   try {
@@ -17,8 +42,9 @@ router.post("/contact/submit", publicSubmitLimiter, validateBody(contactSubmitSc
     const sanitized = {
       type: type ?? "general",
       app: app ?? "unknown",
-      name,
-      email,
+      name: encryptField(name, "contact_pii"),
+      email: encryptField(email, "contact_pii"),
+      emailHash: hashEmail(email),
       company: company ?? null,
       role: role ?? null,
       message: message ?? null,
@@ -27,14 +53,15 @@ router.post("/contact/submit", publicSubmitLimiter, validateBody(contactSubmitSc
 
     const result = await pool.query(
       `INSERT INTO platform_contact_requests
-        (type, app, name, email, company, role, message, metadata)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        (type, app, name, email, email_hash, company, role, message, metadata)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING id, created_at`,
       [
         sanitized.type,
         sanitized.app,
         sanitized.name,
         sanitized.email,
+        sanitized.emailHash,
         sanitized.company,
         sanitized.role,
         sanitized.message,
@@ -45,7 +72,7 @@ router.post("/contact/submit", publicSubmitLimiter, validateBody(contactSubmitSc
     const row = result.rows[0];
 
     logger.info(
-      { id: row.id, type: sanitized.type, app: sanitized.app, email: sanitized.email },
+      { id: row.id, type: sanitized.type, app: sanitized.app },
       "Contact request submitted",
     );
 
@@ -65,13 +92,14 @@ const contactListQuerySchema = z.object({
   offset: z.coerce.number().int().min(0).default(0),
 });
 
-router.get("/contact/requests", authMiddleware, validateQuery(contactListQuerySchema), async (req: Request, res: Response) => {
+router.get("/contact/requests", adminGuard, validateQuery(contactListQuerySchema), async (req: Request, res: Response) => {
   try {
     const { app, limit, offset } = req.query as unknown as z.infer<typeof contactListQuerySchema>;
 
     if (app) {
       const result = await pool.query(
-        `SELECT * FROM platform_contact_requests WHERE app = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`,
+        `SELECT id, type, app, company, role, message, status, created_at, updated_at
+         FROM platform_contact_requests WHERE app = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`,
         [app, limit, offset],
       );
       const countResult = await pool.query(
@@ -85,7 +113,8 @@ router.get("/contact/requests", authMiddleware, validateQuery(contactListQuerySc
       });
     } else {
       const result = await pool.query(
-        `SELECT * FROM platform_contact_requests ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
+        `SELECT id, type, app, company, role, message, status, created_at, updated_at
+         FROM platform_contact_requests ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
         [limit, offset],
       );
       const countResult = await pool.query(
@@ -104,3 +133,4 @@ router.get("/contact/requests", authMiddleware, validateQuery(contactListQuerySc
 });
 
 export default router;
+export { hashEmail };

@@ -26,24 +26,6 @@ export const globalLimiter = rateLimit({
     req.path === "/api/health/ready",
 }) as unknown as RequestHandler;
 
-export const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: isProduction ? 20 : 200,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: "Too many authentication attempts, please try again later." },
-  skipSuccessfulRequests: true,
-}) as unknown as RequestHandler;
-
-export const loginLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: isProduction ? 10 : 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: "Too many login attempts from this IP. Please try again in an hour." },
-  skipSuccessfulRequests: true,
-}) as unknown as RequestHandler;
-
 export const writeLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: isProduction ? 100 : 500,
@@ -60,18 +42,18 @@ export const readLimiter = rateLimit({
   message: { error: "Too many requests, please try again later." },
 }) as unknown as RequestHandler;
 
-export const sensitiveWriteLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: isProduction ? 30 : 300,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: "Too many sensitive operations from this IP. Please try again later." },
-}) as unknown as RequestHandler;
-
 export const publicSubmitLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: isProduction ? 5 : 50,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many submissions from this IP. Please try again in an hour." },
+}) as unknown as RequestHandler;
+
+export const gdprLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: isProduction ? 3 : 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many data requests from this IP. Please try again in an hour." },
 }) as unknown as RequestHandler;

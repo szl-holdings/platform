@@ -24,7 +24,7 @@ import { useAuth } from "@szl-holdings/replit-auth-web";
 import { PrivateAppGuard, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui";
 import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
-import { DemoModeProvider, SandboxModeProvider, SandboxModeBanner } from "@szl-holdings/shared-ui";
+import { DemoModeProvider, SandboxModeProvider, SandboxModeBanner, CookieBanner } from "@szl-holdings/shared-ui";
 import { PackBanner } from "@szl-holdings/shared-ui";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 import { SidebarNav, type SidebarNavSection } from "@szl-holdings/shared-ui/design-system";
@@ -699,6 +699,7 @@ function App() {
       </DemoModeProvider>
     </SandboxModeProvider>
     </PrismBusProvider>
+    <CookieBanner privacyUrl="/legal/privacy" />
     </AnalyticsProvider>
   );
 }

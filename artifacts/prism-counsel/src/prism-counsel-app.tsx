@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider, useIsFetching } from "@tanstack/react
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { persistQueryClient } from "@tanstack/query-persist-client-core";
 import { LazyMotion, domMax } from "framer-motion";
-import { DemoModeProvider } from "@szl-holdings/shared-ui";
+import { DemoModeProvider, CookieBanner } from "@szl-holdings/shared-ui";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 import { PrismCounselShell } from "./components/prism-shell";
 
@@ -570,6 +570,7 @@ export function PrismCounselApp() {
           </WouterRouter>
         </DemoModeProvider>
       </LazyMotion>
+      <CookieBanner privacyUrl="/legal/privacy" />
     </QueryClientProvider>
   );
 }
