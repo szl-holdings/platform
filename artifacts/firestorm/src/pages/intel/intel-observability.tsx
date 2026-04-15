@@ -271,8 +271,8 @@ export default function ObservabilityPage() {
                 <YAxis tick={{ fontSize: 8, fill: TEXT.muted }} />
                 <Tooltip contentStyle={{ background: BG.elevated, border: `1px solid ${BORDER.muted}`, fontSize: 10 }} />
                 <Bar dataKey="errRate" radius={[2, 2, 0, 0]}>
-                  {burnRates.map((b, i) => (
-                    <Cell key={i} fill={b.color} />
+                  {burnRates.map((b) => (
+                    <Cell key={b.svc} fill={b.color} />
                   ))}
                 </Bar>
               </BarChart>

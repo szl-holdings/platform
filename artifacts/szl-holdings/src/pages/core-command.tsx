@@ -799,9 +799,9 @@ export default function CoreCommandCenter() {
                   </p>
                 </div>
               ) : (
-                auditEvents.slice(0, 10).map((evt, i) => (
+                auditEvents.slice(0, 10).map((evt) => (
                   <div
-                    key={i}
+                    key={evt.id ?? `${evt.action_type ?? evt.actionType}-${evt.created_at ?? evt.createdAt}`}
                     className="flex items-center gap-3 rounded-lg border border-border/30 bg-card/50 px-4 py-3"
                   >
                     <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 flex-shrink-0" />

@@ -321,8 +321,8 @@ export default function BottleneckHeatmapPage() {
               </span>
             </div>
             <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(cells.length, 4)}, 1fr)` }}>
-              {cells.map((cell, i) => (
-                <HeatCell key={i} cell={cell} />
+              {cells.map((cell) => (
+                <HeatCell key={cell.label} cell={cell} />
               ))}
             </div>
           </div>

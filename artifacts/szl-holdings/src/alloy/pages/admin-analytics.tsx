@@ -303,8 +303,8 @@ export default function AdminAnalytics() {
               <div className="h-32 w-32 shrink-0">
                 <PieChart width={128} height={128}>
                   <Pie data={modelPieData} cx={60} cy={60} innerRadius={32} outerRadius={58} dataKey="value" strokeWidth={0}>
-                    {modelPieData.map((_, i) => (
-                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                    {modelPieData.map((entry, idx) => (
+                      <Cell key={entry.name} fill={PIE_COLORS[idx % PIE_COLORS.length]} />
                     ))}
                   </Pie>
                 </PieChart>

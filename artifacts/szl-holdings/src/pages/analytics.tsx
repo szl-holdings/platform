@@ -196,8 +196,8 @@ export default function AnalyticsDashboard() {
             <ResponsiveContainer width="100%" height={160}>
               <PieChart>
                 <Pie data={referrers} dataKey="share" nameKey="source" cx="50%" cy="50%" innerRadius={45} outerRadius={70} paddingAngle={3}>
-                  {referrers.map((_, i) => (
-                    <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                  {referrers.map((r, idx) => (
+                    <Cell key={r.source} fill={PIE_COLORS[idx % PIE_COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 11 }} />
@@ -323,8 +323,8 @@ export default function AnalyticsDashboard() {
                 <YAxis tick={{ fontSize: 10, fill: "rgba(255,255,255,0.4)" }} axisLine={false} tickLine={false} />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="events" name="Events" radius={[4, 4, 0, 0]}>
-                  {appEventCounts.map((entry, i) => (
-                    <Cell key={i} fill={entry.fill} />
+                  {appEventCounts.map((entry) => (
+                    <Cell key={entry.name} fill={entry.fill} />
                   ))}
                 </Bar>
               </BarChart>

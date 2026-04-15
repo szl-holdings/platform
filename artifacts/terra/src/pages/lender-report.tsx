@@ -278,8 +278,8 @@ export default function LenderReportPage() {
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={capitalByType} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} fontSize={9}>
-                      {capitalByType.map((_, i) => (
-                        <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                      {capitalByType.map((entry, idx) => (
+                        <Cell key={entry.name} fill={PIE_COLORS[idx % PIE_COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip formatter={(v: number) => formatCurrency(v)} contentStyle={{ background: "rgba(10,12,16,0.97)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 8, fontSize: 11 }} />

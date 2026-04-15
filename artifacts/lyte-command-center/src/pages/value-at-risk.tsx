@@ -83,8 +83,8 @@ export default function ValueAtRiskPage() {
                   labelStyle={{ color: "#94a3b8" }}
                 />
                 <Bar dataKey="amount" radius={[0, 4, 4, 0]}>
-                  {valueAtRiskBreakdown.map((entry, i) => (
-                    <Cell key={i} fill={categoryColors[entry.category] || "#64748b"} fillOpacity={0.8} />
+                  {valueAtRiskBreakdown.map((entry) => (
+                    <Cell key={entry.category} fill={categoryColors[entry.category] || "#64748b"} fillOpacity={0.8} />
                   ))}
                 </Bar>
               </BarChart>

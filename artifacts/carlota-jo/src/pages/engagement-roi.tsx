@@ -252,7 +252,7 @@ export default function EngagementROI() {
                   <ResponsiveContainer width="100%" height={180}>
                     <PieChart>
                       <Pie data={chartData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} dataKey="value" paddingAngle={3}>
-                        {chartData.map((entry, index) => <Cell key={index} fill={entry.color} />)}
+                        {chartData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
                       </Pie>
                       <Tooltip formatter={(v: number) => `$${(v / 1000).toFixed(0)}K`} contentStyle={{ fontSize: 11 }} />
                     </PieChart>

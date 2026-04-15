@@ -339,8 +339,7 @@ export default function IntegrationManager() {
         <CredentialEditor
           name={editingCreds}
           onClose={() => setEditingCreds(null)}
-          onSave={(creds) => {
-            console.log(`Saving credentials for ${editingCreds}:`, Object.keys(creds));
+          onSave={() => {
             qc.invalidateQueries({ queryKey: ["admin-connectors"] });
           }}
         />

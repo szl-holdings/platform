@@ -320,7 +320,7 @@ function A2AGraph({ history, byAgent }: { history: Record<string, unknown>[]; by
             const color = statusColor[edge.status as keyof typeof statusColor] ?? "#6b7280";
             const mid = midpoint(from, to);
             return (
-              <g key={i}>
+              <g key={`${edge.from}-${edge.to}`}>
                 <line
                   x1={from.x} y1={from.y} x2={to.x} y2={to.y}
                   stroke={color} strokeWidth={edge.status === "running" ? 2 : 1.5}
@@ -355,8 +355,8 @@ function A2AGraph({ history, byAgent }: { history: Record<string, unknown>[]; by
         {edges.filter(e => e.status === "running").length > 0 && (
           <div className="mt-3 space-y-1.5">
             <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Active Chains</div>
-            {edges.filter(e => e.status === "running").slice(0, 3).map((e, i) => (
-              <div key={i} className="flex items-center gap-2 text-xs bg-yellow-500/5 border border-yellow-500/15 rounded-lg px-3 py-1.5">
+            {edges.filter(e => e.status === "running").slice(0, 3).map((e) => (
+              <div key={`${e.from}-${e.to}`} className="flex items-center gap-2 text-xs bg-yellow-500/5 border border-yellow-500/15 rounded-lg px-3 py-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse flex-shrink-0" />
                 <span className="text-zinc-400">{e.from}</span>
                 <ArrowRight className="w-3 h-3 text-zinc-600" />
@@ -414,8 +414,8 @@ function RagActivityMonitor({ ragData }: { ragData: Record<string, unknown> | nu
             <span className="text-xs text-zinc-600 font-mono">{recentQueries.length} queries</span>
           </div>
           <div className="divide-y divide-zinc-800/60 max-h-72 overflow-y-auto">
-            {recentQueries.map((q, i) => (
-              <div key={i} className="flex items-center gap-3 px-4 py-2.5 hover:bg-zinc-800/20 transition-colors">
+            {recentQueries.map((q) => (
+              <div key={q.query} className="flex items-center gap-3 px-4 py-2.5 hover:bg-zinc-800/20 transition-colors">
                 <div className={cn("w-6 h-6 rounded flex items-center justify-center flex-shrink-0", q.cacheHit ? "bg-emerald-500/15" : "bg-indigo-500/15")}>
                   {q.cacheHit ? <Star className="w-3 h-3 text-emerald-400" /> : <Database className="w-3 h-3 text-indigo-400" />}
                 </div>
@@ -572,7 +572,7 @@ function SelfImprovementFeed({
               const Icon = cfg.icon;
               const sevBg = event.severity === "critical" ? "bg-red-400/5" : event.severity === "warning" ? "bg-yellow-400/5" : "";
               return (
-                <div key={i} className={cn("flex gap-3 px-4 py-3 hover:bg-white/[0.01]", sevBg)}>
+                <div key={event.id ?? `${event.eventType}-${event.timestamp}`} className={cn("flex gap-3 px-4 py-3 hover:bg-white/[0.01]", sevBg)}>
                   <div className={cn("w-6 h-6 rounded flex items-center justify-center flex-shrink-0 mt-0.5",
                     event.severity === "critical" ? "bg-red-500/15" :
                     event.severity === "warning" ? "bg-yellow-500/15" : "bg-zinc-800")}>

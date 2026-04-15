@@ -330,8 +330,8 @@ export default function MarketIntelligence() {
                     <Tooltip contentStyle={{ background: BG.surface, border: `1px solid ${BORDER.muted}`, borderRadius: 6, fontSize: 11 }} />
                     <ReferenceLine x={0} stroke="rgba(255,255,255,0.1)" />
                     <Bar dataKey="absorption" name="Net Absorption (K SF)" radius={[0, 3, 3, 0]}>
-                      {ABSORPTION_DATA.map((entry, i) => (
-                        <Cell key={i} fill={entry.absorption >= 0 ? TERRA_GREEN : "#c45a4a"} fillOpacity={0.85} />
+                      {ABSORPTION_DATA.map((entry) => (
+                        <Cell key={entry.submarket} fill={entry.absorption >= 0 ? TERRA_GREEN : "#c45a4a"} fillOpacity={0.85} />
                       ))}
                     </Bar>
                   </BarChart>

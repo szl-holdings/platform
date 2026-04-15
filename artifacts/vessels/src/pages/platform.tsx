@@ -66,8 +66,8 @@ export default function Platform() {
 
       <section className="border-t border-sky-500/10 py-8 px-6">
         <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
-          {kpiStrip.map((item, i) => (
-            <div key={i} className="flex items-start gap-2.5">
+          {kpiStrip.map((item) => (
+            <div key={item} className="flex items-start gap-2.5">
               <CheckCircle className="w-4 h-4 text-sky-400/50 shrink-0 mt-0.5" />
               <p className="text-xs text-sky-300/50 leading-relaxed">{item}</p>
             </div>
@@ -108,8 +108,8 @@ export default function Platform() {
             <div>
               <h3 className="text-lg font-semibold text-sky-100 mb-6">Built for teams that need cleaner operational awareness.</h3>
               <ul className="grid grid-cols-2 gap-3">
-                {useCases.map((uc, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm text-sky-300/55">
+                {useCases.map((uc) => (
+                  <li key={uc} className="flex items-center gap-2 text-sm text-sky-300/55">
                     <span className="w-1.5 h-1.5 rounded-full bg-sky-400/40 shrink-0" />
                     {uc}
                   </li>

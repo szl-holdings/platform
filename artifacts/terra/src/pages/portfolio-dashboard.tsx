@@ -201,7 +201,7 @@ export default function PortfolioDashboardPage() {
             <div className="flex items-center gap-3">
               <PieChart width={80} height={80}>
                 <Pie data={ALLOCATION_DATA} cx={40} cy={40} innerRadius={22} outerRadius={36} dataKey="value" strokeWidth={0}>
-                  {ALLOCATION_DATA.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                  {ALLOCATION_DATA.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
                 </Pie>
               </PieChart>
               <div className="space-y-1.5">

@@ -329,8 +329,8 @@ export default function NexusCommandPage() {
                     <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg, rgba(129,140,248,0.5), transparent)" }} />
                     <SectionHeader title="Threat Intelligence" icon={Shield} accent="#818cf8" />
                     <div style={{ display: "flex", flexDirection: "column" }}>
-                      {THREAT_FEED.map((item, i) => (
-                        <ThreatRow key={i} item={item} />
+                      {THREAT_FEED.map((item) => (
+                        <ThreatRow key={item.msg} item={item} />
                       ))}
                     </div>
                   </m.div>
@@ -380,8 +380,8 @@ export default function NexusCommandPage() {
                         { insight: "Brooklyn distress score up 12% — 4 new acquisition targets identified", source: "Terra Engine", accent: "#4ade80" },
                         { insight: "Settlement forecast for Rodriguez matter increased to $320K", source: "PRISM Counsel", accent: "#d4a054" },
                         { insight: "Cross-platform signal: insurance fraud pattern detected across Terra + PRISM", source: "Alloy Correlation", accent: "#818cf8" },
-                      ].map((item, i) => (
-                        <div key={i} style={{ display: "flex", gap: "0.625rem", padding: "0.5rem 0", borderBottom: i < 3 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
+                      ].map((item, idx) => (
+                        <div key={item.source} style={{ display: "flex", gap: "0.625rem", padding: "0.5rem 0", borderBottom: idx < 3 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
                           <div style={{ width: "4px", borderRadius: "2px", background: item.accent, flexShrink: 0, marginTop: "2px" }} />
                           <div>
                             <div style={{ fontSize: "11px", color: "hsl(210,10%,78%)", lineHeight: 1.6 }}>{item.insight}</div>

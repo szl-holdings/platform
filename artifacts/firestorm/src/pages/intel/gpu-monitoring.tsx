@@ -181,8 +181,8 @@ function GpuNodeCard({ node }: { node: GpuNode }) {
               <span className="text-[10px] font-medium text-amber-400">Xid Events ({node.xidEvents.length})</span>
             </div>
             <div className="space-y-1">
-              {node.xidEvents.slice(0, 2).map((xid, i) => (
-                <div key={i} className="flex items-center gap-2 text-[10px]">
+              {node.xidEvents.slice(0, 2).map((xid) => (
+                <div key={xid.xidCode} className="flex items-center gap-2 text-[10px]">
                   <span className="font-mono text-amber-400">Xid {xid.xidCode}</span>
                   <span className="text-muted-foreground">{xid.description}</span>
                   <span className="text-muted-foreground ml-auto">{Math.floor((NOW - xid.occurredAt) / 60000)}m ago</span>
@@ -473,8 +473,8 @@ export default function GPUMonitoring() {
             </CardHeader>
             <CardContent className="p-3">
               <div className="grid grid-cols-2 gap-2">
-                {clusterSnapshot.nvlinkTopology.links.slice(0, 6).map((link, i) => (
-                  <div key={i} className="rounded-lg border border-border p-2">
+                {clusterSnapshot.nvlinkTopology.links.slice(0, 6).map((link) => (
+                  <div key={`${link.src}-${link.dst}`} className="rounded-lg border border-border p-2">
                     <div className="flex items-center gap-1 mb-1">
                       <div className={`w-1.5 h-1.5 rounded-full ${link.healthy ? "bg-emerald-400" : "bg-red-400"}`} />
                       <span className="text-[10px] text-muted-foreground font-mono">{link.from} ↔ {link.to}</span>

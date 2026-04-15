@@ -259,8 +259,8 @@ export default function DarkFleetEconomics() {
               formatter={(v: number) => [`$${v}M`, "Exposure"]}
             />
             <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-              {AGGREGATE_BAR.map((entry, i) => (
-                <Cell key={i} fill={entry.color} fillOpacity={0.8} />
+              {AGGREGATE_BAR.map((entry) => (
+                <Cell key={entry.label} fill={entry.color} fillOpacity={0.8} />
               ))}
             </Bar>
           </BarChart>

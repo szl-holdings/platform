@@ -219,8 +219,8 @@ function ModelLineage() {
             [15, 20, 45, 10], [15, 20, 45, 35],
             [45, 10, 75, 22], [45, 35, 75, 22],
             [75, 22, 90, 22],
-          ].map(([x1, y1, x2, y2], i) => (
-            <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(99,102,241,0.3)" strokeWidth="0.8" markerEnd="url(#arrow)" />
+          ].map(([x1, y1, x2, y2]) => (
+            <line key={`${x1}-${y1}-${x2}-${y2}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(99,102,241,0.3)" strokeWidth="0.8" markerEnd="url(#arrow)" />
           ))}
           {modelLineageNodes.map((node) => {
             const color = node.status === "archived" ? "#64748b" : colorMap[node.type] || "#6366f1";
@@ -467,8 +467,8 @@ export default function Dashboard() {
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-400/10 text-emerald-400 font-mono">Draft</span>
             </div>
             <div className="space-y-2">
-              {collaborativeReport.highlights.map((h, i) => (
-                <div key={i} className="flex items-start gap-2 text-[11px] text-muted-foreground">
+              {collaborativeReport.highlights.map((h) => (
+                <div key={h} className="flex items-start gap-2 text-[11px] text-muted-foreground">
                   <CheckCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
                   <span>{h}</span>
                 </div>
