@@ -32,6 +32,7 @@ import { registerGenAITelemetryBridge } from "./lib/genai-telemetry-bridge.js";
 import "./lib/cross-app-notification-relay.js";
 import { providerHealth } from "./lib/provider-health";
 import { startEmbeddingWorker, stopEmbeddingWorker, getWorkerStatus } from "./lib/embedding-worker";
+import { initIngestionFramework } from "./lib/ingestion-framework";
 
 failFastOnInvalidConfig();
 
@@ -170,6 +171,10 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     });
     seedDosData().catch(err => {
       logger.warn({ err }, "[dos-seed] Distribution OS seed failed (non-fatal)");
+    });
+
+    initIngestionFramework().catch(err => {
+      logger.warn({ err }, "[ingestion] Framework init failed (non-fatal)");
     });
 
     logger.info("[bootstrap] Bootstrap sequence complete — server fully ready");
