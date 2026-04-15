@@ -19,6 +19,7 @@ const NAV_ITEMS = [
     highlight: false,
     children: [
       { label: "Platform Overview", href: "/platform" },
+      { label: "CORTEX — Cross-Domain Fusion", href: "/intelligence/cortex" },
       { label: "Lyte — Business Observability", href: "/lyte" },
       { label: "Alloy — Execution Fabric", href: "/alloy-fabric" },
       { label: "Architecture", href: "/architecture" },

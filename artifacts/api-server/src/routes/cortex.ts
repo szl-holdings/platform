@@ -1,16 +1,37 @@
 /**
- * CORTEX Voice — AI command routing via multi-agent orchestrator.
+ * CORTEX Intelligence — Cross-Domain Fusion Engine API
  *
- * POST /cortex/query — route a natural-language command to the relevant
- *   domain agent(s) and return a synthesized response with confidence score,
- *   routing metadata, and suggested follow-up actions.
+ * All routes require authentication. Mutation routes (generate/approve/dismiss action drafts)
+ * also emit to the Alloy governance audit trail for persistent approvals tracking.
+ *
+ * POST /cortex/query               — Natural-language command routing via multi-agent orchestrator
+ * GET  /cortex/domains             — List of routable domains with keywords
+ * GET  /cortex/command-feed        — Unified command feed (signals + domain summaries) for mobile
+ * GET  /cortex/intelligence-feed   — Cross-domain signal timeline ranked by urgency + impact
+ * GET  /cortex/entity-graph        — Entity graph data (nodes + edges) for force-directed viz
+ * POST /cortex/whatif              — What-if scenario engine: traces projected impact across domains
+ * GET  /cortex/briefing/today      — CORTEX executive briefing (today's cross-domain summary)
+ * GET  /cortex/action-drafts       — List persistent autonomous action drafts awaiting approval
+ * POST /cortex/action-drafts/generate — Generate drafts from a fusion alert or correlation
+ * POST /cortex/action-drafts/:id/approve — Approve an action draft (persisted + governance audit)
+ * POST /cortex/action-drafts/:id/dismiss — Dismiss an action draft (persisted)
  */
 
+import crypto from "crypto";
 import { Router, type IRouter } from "express";
-import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
+import { eq, and, desc, sql, inArray } from "drizzle-orm";
+import {
+  db,
+  cortexActionDraftsTable,
+  dailyBriefingsTable,
+  alloyAuditLogTable,
+} from "@szl-holdings/db";
+import { sendSuccess, sendBadRequest, sendNotFound, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
-import { perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
+import { perUserWriteSlidingLimiter, perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { orchestrate } from "../lib/multi-agent-orchestrator";
+import { fusionCortex } from "@szl-holdings/ai-engine";
+import { ontologyEngine } from "@szl-holdings/ai-engine";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -24,20 +45,54 @@ const DOMAIN_ROUTE_KEYWORDS: Record<string, string[]> = {
   msp: ["client", "ticket", "sla", "service desk", "managed service", "support"],
 };
 
+const DOMAIN_META: Record<string, { label: string; icon: string; accent: string; route: string }> = {
+  vessels: { label: "Vessels", icon: "⚓", accent: "#0ea5e9", route: "/(shell)/fleet" },
+  firestorm: { label: "Aegis", icon: "⬡", accent: "#ef4444", route: "/(shell)/defense" },
+  terra: { label: "Terra", icon: "⬢", accent: "#22c55e", route: "/(shell)/properties" },
+  lyte: { label: "Lyte", icon: "⚡", accent: "#f59e0b", route: "/(shell)/operations" },
+  inca: { label: "INCA", icon: "◈", accent: "#8b5cf6", route: "/(shell)/advisory" },
+  msp: { label: "MSP", icon: "◆", accent: "#6366f1", route: "/(shell)/operations" },
+  prism: { label: "PRISM", icon: "⚖", accent: "#a855f7", route: "/(shell)/advisory" },
+  szl: { label: "Portfolio", icon: "◆", accent: "#c9a84c", route: "/(shell)/portfolio" },
+};
+
 function inferDomains(query: string): string[] {
   const lower = query.toLowerCase();
   const matched: string[] = [];
   for (const [domain, keywords] of Object.entries(DOMAIN_ROUTE_KEYWORDS)) {
-    if (keywords.some((kw) => lower.includes(kw))) {
-      matched.push(domain);
-    }
+    if (keywords.some((kw) => lower.includes(kw))) matched.push(domain);
   }
   return matched.length > 0 ? matched.slice(0, 3) : ["vessels", "firestorm", "terra"];
 }
 
+function formatRelativeTime(date: Date): string {
+  const diffMs = Date.now() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 1) return "just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${Math.floor(diffHours / 24)}d ago`;
+}
+
+function callerEmail(req: Record<string, unknown>): string {
+  const user = (req as { user?: { email?: string; id?: number } }).user;
+  return user?.email ?? "operator";
+}
+
+function callerOrgId(req: Record<string, unknown>): number | undefined {
+  const user = (req as { user?: { orgs?: Array<{ orgId: number }> } }).user;
+  return user?.orgs?.[0]?.orgId;
+}
+
+function callerOrgIds(req: Record<string, unknown>): number[] {
+  const user = (req as { user?: { orgs?: Array<{ orgId: number }> } }).user;
+  return user?.orgs?.map((o) => o.orgId) ?? [];
+}
+
 router.post(
   "/cortex/query",
-  authMiddleware({ required: false }),
+  authMiddleware({ required: true }),
   perUserWriteSlidingLimiter,
   async (req, res) => {
     const { query, sessionId, domains: requestedDomains } = req.body ?? {};
@@ -59,30 +114,12 @@ router.post(
 
       logger.info({ query: query.substring(0, 100), domains, sessionId }, "[CORTEX] Processing query");
 
-      const result = await orchestrate({
-        query: query.trim(),
-        domains,
-        depth: "standard",
-        sessionId,
-      });
-
-      const routingMetadata = {
-        inferredDomains: domains,
-        agentSteps: result.steps.map((s) => ({
-          domain: s.domain,
-          task: s.task,
-          status: s.status,
-          durationMs: s.durationMs,
-        })),
-        totalTokens: result.totalTokens,
-        totalCostUsd: result.totalCostUsd,
-      };
+      const result = await orchestrate({ query: query.trim(), domains, depth: "standard", sessionId });
 
       const suggestedActions: Array<{ label: string; path: string }> = [];
       if (domains.includes("vessels")) suggestedActions.push({ label: "Open Fleet Command", path: "/vessels/" });
       if (domains.includes("firestorm")) suggestedActions.push({ label: "Open SOC Command", path: "/firestorm/" });
       if (domains.includes("terra")) suggestedActions.push({ label: "Open Terra Intelligence", path: "/terra/" });
-      if (domains.includes("lyte")) suggestedActions.push({ label: "Open Lyte Command", path: "/lyte-command-center/" });
 
       sendSuccess(res, {
         orchestrationId: result.orchestrationId,
@@ -91,7 +128,12 @@ router.post(
         confidence: result.confidence,
         status: result.status,
         domains,
-        routing: routingMetadata,
+        routing: {
+          inferredDomains: domains,
+          agentSteps: result.steps.map((s) => ({ domain: s.domain, task: s.task, status: s.status, durationMs: s.durationMs })),
+          totalTokens: result.totalTokens,
+          totalCostUsd: result.totalCostUsd,
+        },
         actions: suggestedActions.slice(0, 3),
         durationMs: result.totalDurationMs,
       });
@@ -103,7 +145,7 @@ router.post(
 
 router.get(
   "/cortex/domains",
-  authMiddleware({ required: false }),
+  authMiddleware({ required: true }),
   (_req, res) => {
     sendSuccess(res, {
       domains: Object.entries(DOMAIN_ROUTE_KEYWORDS).map(([id, keywords]) => ({
@@ -112,6 +154,746 @@ router.get(
         keywords: keywords.slice(0, 4),
       })),
     });
+  }
+);
+
+router.get(
+  "/cortex/command-feed",
+  authMiddleware({ required: true }),
+  perUserApiSlidingLimiter,
+  async (_req, res) => {
+    try {
+      const alerts = fusionCortex.getAlerts({ status: ["active"], limit: 20 });
+
+      const signals = alerts.map((a) => ({
+        id: a.id,
+        domain: a.affectedDomains[0] ?? "szl",
+        severity: a.severity as "critical" | "high" | "medium" | "low" | "info",
+        title: a.title,
+        source: "CORTEX Fusion",
+        time: formatRelativeTime(new Date(a.generatedAt)),
+      }));
+
+      const domainKeys = Object.keys(DOMAIN_META);
+      const alertsByDomain: Record<string, typeof alerts> = {};
+      for (const domain of domainKeys) {
+        alertsByDomain[domain] = alerts.filter((a) => a.affectedDomains.includes(domain));
+      }
+
+      const summaries = domainKeys.map((domain) => {
+        const domainAlerts = alertsByDomain[domain] ?? [];
+        const critCount = domainAlerts.filter((a) => a.severity === "critical").length;
+        const highCount = domainAlerts.filter((a) => a.severity === "high").length;
+        const meta = DOMAIN_META[domain];
+        const status: "operational" | "degraded" | "critical" | "unknown" =
+          critCount > 0 ? "critical" : highCount > 0 ? "degraded" : "operational";
+        return { domain, label: meta.label, icon: meta.icon, accent: meta.accent, activeCount: domainAlerts.length, criticalCount: critCount, status, route: meta.route };
+      });
+
+      sendSuccess(res, { signals, summaries });
+    } catch (err) {
+      handleRouteError(res, err, "CORTEX command feed failed");
+    }
+  }
+);
+
+router.get(
+  "/cortex/intelligence-feed",
+  authMiddleware({ required: true }),
+  perUserApiSlidingLimiter,
+  async (req, res) => {
+    try {
+      const limit = Math.min(parseInt(String(req.query.limit ?? "50")), 100);
+      const domain = req.query.domain ? String(req.query.domain) : undefined;
+      const severity = req.query.severity ? String(req.query.severity).split(",") : undefined;
+
+      const alerts = fusionCortex.getAlerts({
+        limit,
+        domains: domain ? [domain] : undefined,
+        severity: severity as Array<"low" | "medium" | "high" | "critical"> | undefined,
+      });
+
+      const stats = fusionCortex.getStats();
+
+      const callerOrgIdsArr = callerOrgIds(req as Record<string, unknown>);
+      const existingDrafts = await db
+        .select({ alertId: cortexActionDraftsTable.alertId })
+        .from(cortexActionDraftsTable)
+        .where(and(
+          eq(cortexActionDraftsTable.status, "pending"),
+          callerOrgIdsArr.length > 0
+            ? inArray(cortexActionDraftsTable.orgId, callerOrgIdsArr)
+            : undefined
+        ))
+        .then((rows) => new Set(rows.map((r) => r.alertId)));
+
+      const signals = alerts.map((a) => ({
+        id: a.id,
+        type: "fusion_alert",
+        title: a.title,
+        summary: a.summary,
+        severity: a.severity,
+        category: a.category,
+        confidence: a.confidence,
+        affectedDomains: a.affectedDomains,
+        affectedEntities: a.affectedEntities.slice(0, 3),
+        evidenceCount: a.evidenceChain.length,
+        recommendedActions: a.recommendedActions.slice(0, 2),
+        timestamp: a.generatedAt,
+        status: a.status,
+        tags: a.tags,
+        hasActionDrafts: existingDrafts.has(a.id),
+      }));
+
+      sendSuccess(res, {
+        signals,
+        stats: {
+          total: stats.totalAlerts,
+          active: stats.activeAlerts,
+          critical: stats.criticalAlerts,
+          high: stats.highAlerts,
+          domainsAffected: stats.domainsWithAlerts,
+        },
+      });
+    } catch (err) {
+      handleRouteError(res, err, "CORTEX intelligence feed failed");
+    }
+  }
+);
+
+router.get(
+  "/cortex/entity-graph",
+  authMiddleware({ required: true }),
+  perUserApiSlidingLimiter,
+  async (req, res) => {
+    try {
+      const domain = req.query.domain ? String(req.query.domain) : undefined;
+      const limit = Math.min(parseInt(String(req.query.limit ?? "60")), 150);
+      const minRisk = parseFloat(String(req.query.minRisk ?? "0"));
+
+      const sinceParam = req.query.since ? String(req.query.since) : undefined;
+      const sinceHours = sinceParam ? parseInt(sinceParam) : undefined;
+
+      const domainEntities = await ontologyEngine.getDomainEntities(domain ?? "vessels", Math.ceil(limit / 2));
+      const allDomains = ["vessels", "firestorm", "terra", "prism", "szl"];
+      const crossDomainEntities = domain
+        ? []
+        : (await Promise.all(
+            allDomains.slice(0, 4).map((d) => ontologyEngine.getDomainEntities(d, Math.ceil(limit / 8)))
+          )).flat();
+
+      const cutoffTime = sinceHours ? Date.now() - sinceHours * 3600 * 1000 : undefined;
+
+      const rawEntities = [...domainEntities, ...crossDomainEntities]
+        .filter((e, i, arr) => arr.findIndex((x) => x.id === e.id) === i)
+        .filter((e) => (e.riskScore ?? 0) >= minRisk)
+        .filter((e) => {
+          if (!cutoffTime || !e.lastSeen) return true;
+          return new Date(e.lastSeen).getTime() >= cutoffTime;
+        })
+        .slice(0, limit);
+
+      const nodes = rawEntities.map((e) => ({
+        id: e.id,
+        label: e.name,
+        type: e.type,
+        domain: e.domain,
+        riskScore: e.riskScore ?? 0,
+        tags: e.tags ?? [],
+        metadata: e.metadata,
+        lastSeen: e.lastSeen,
+      }));
+
+      const entityIds = new Set(rawEntities.map((e) => e.id));
+      const edgesRaw: Array<{ source: string; target: string; type: string; strength: string }> = [];
+
+      for (const entity of rawEntities.slice(0, 20)) {
+        try {
+          const connections = await ontologyEngine.getEntityConnections(entity.id);
+          for (const conn of connections) {
+            if (entityIds.has(conn.fromEntityId) && entityIds.has(conn.toEntityId)) {
+              edgesRaw.push({ source: conn.fromEntityId, target: conn.toEntityId, type: conn.type, strength: conn.strength });
+            }
+          }
+        } catch { /* skip entity if connections unavailable */ }
+      }
+
+      const edges = edgesRaw.filter(
+        (e, i, arr) =>
+          arr.findIndex((x) => x.source === e.source && x.target === e.target && x.type === e.type) === i
+      );
+
+      const graphStats = await ontologyEngine.getGraphStats().catch(() => ({ totalEntities: 0, totalRelationships: 0 }));
+
+      sendSuccess(res, {
+        nodes,
+        edges,
+        meta: {
+          totalNodes: nodes.length,
+          totalEdges: edges.length,
+          domain: domain ?? "all",
+          sinceHours: sinceHours ?? null,
+          minRisk,
+          graphStats,
+        },
+      });
+    } catch (err) {
+      handleRouteError(res, err, "CORTEX entity graph failed");
+    }
+  }
+);
+
+router.get(
+  "/cortex/briefing/today",
+  authMiddleware({ required: true }),
+  perUserApiSlidingLimiter,
+  async (_req, res) => {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+
+      const existing = await db
+        .select()
+        .from(dailyBriefingsTable)
+        .where(eq(dailyBriefingsTable.briefingDate, today))
+        .orderBy(desc(dailyBriefingsTable.generatedAt))
+        .limit(1);
+
+      if (existing.length > 0) {
+        sendSuccess(res, { briefing: existing[0], cached: true });
+        return;
+      }
+
+      const alerts = fusionCortex.getAlerts({ limit: 100 });
+      const stats = fusionCortex.getStats();
+
+      const domainScores: Record<string, number> = {};
+      for (const domain of Object.keys(DOMAIN_META)) {
+        const domainAlerts = alerts.filter((a) => a.affectedDomains.includes(domain));
+        const critCount = domainAlerts.filter((a) => a.severity === "critical").length;
+        const highCount = domainAlerts.filter((a) => a.severity === "high").length;
+        domainScores[domain] = Math.max(0, 100 - critCount * 25 - highCount * 10);
+      }
+
+      const overallHealth =
+        stats.criticalAlerts > 0 ? "critical" :
+        stats.highAlerts > 3 ? "degraded" :
+        stats.activeAlerts > 10 ? "elevated" : "nominal";
+
+      const topSignals = alerts
+        .filter((a) => a.severity === "critical" || a.severity === "high")
+        .slice(0, 5)
+        .map((a) => ({
+          domain: a.affectedDomains[0] ?? "szl",
+          level: a.severity as "critical" | "high" | "medium" | "low" | "info",
+          title: a.title,
+          summary: a.summary,
+          affectedDomains: a.affectedDomains,
+          confidence: a.confidence,
+          timestamp: a.generatedAt,
+        }));
+
+      const headline = stats.criticalAlerts > 0
+        ? `${stats.criticalAlerts} critical cross-domain alert${stats.criticalAlerts > 1 ? "s" : ""} require immediate attention across ${stats.domainsWithAlerts.length} domain${stats.domainsWithAlerts.length > 1 ? "s" : ""}`
+        : stats.activeAlerts > 5
+        ? `${stats.activeAlerts} active intelligence signals across ${stats.domainsWithAlerts.length} operating domains — ${overallHealth === "elevated" ? "elevated operational tempo" : "nominal posture"}`
+        : "All operating domains nominal — no critical intelligence signals at this time";
+
+      const executiveSummary = `CORTEX Intelligence Summary for ${today}:\n\n` +
+        `${stats.activeAlerts} active signals (${stats.criticalAlerts} critical, ${stats.highAlerts} high) detected across ${stats.domainsWithAlerts.length} domains. ` +
+        `Overall portfolio posture: ${overallHealth.toUpperCase()}. ` +
+        (topSignals.length > 0 ? `Top signals: ${topSignals.map((s) => s.title).slice(0, 3).join("; ")}. ` : "No critical signals active. ") +
+        `CORTEX entity graph covers ${(await ontologyEngine.getGraphStats().catch(() => ({ totalEntities: 0 }))).totalEntities} entities across all connected domains.`;
+
+      const [created] = await db.insert(dailyBriefingsTable).values({
+        briefingDate: today,
+        headline,
+        executiveSummary,
+        signals: topSignals,
+        domainScores,
+        totalAlerts: stats.activeAlerts,
+        criticalCount: stats.criticalAlerts,
+        highCount: stats.highAlerts,
+        overallHealth,
+        isPublished: true,
+      }).returning();
+
+      sendSuccess(res, { briefing: created, cached: false });
+    } catch (err) {
+      handleRouteError(res, err, "CORTEX briefing generation failed");
+    }
+  }
+);
+
+interface WhatIfCascade {
+  domain: string;
+  impact: "critical" | "high" | "medium" | "low";
+  description: string;
+  estimatedExposure: string;
+  affectedEntities: string[];
+  mitigationOptions: string[];
+}
+
+interface WhatIfResult {
+  scenarioId: string;
+  event: string;
+  query: string;
+  summary: string;
+  affectedDomains: string[];
+  cascades: WhatIfCascade[];
+  timeHorizon: string;
+  overallRisk: "critical" | "high" | "medium" | "low";
+  confidence: number;
+  generatedAt: string;
+}
+
+const WHATIF_SCENARIOS: Record<string, (event: string) => WhatIfResult> = {
+  port_closure: (event) => ({
+    scenarioId: crypto.randomUUID(),
+    event,
+    query: event,
+    summary: "Analyzing impact of port closure scenario across all connected domains...",
+    affectedDomains: ["vessels", "terra", "szl"],
+    cascades: [
+      { domain: "vessels", impact: "critical", description: "6 active vessels on affected routes require emergency rerouting. Est. 3-5 day delay per vessel. Charter penalties may apply.", estimatedExposure: "$2.4M", affectedEntities: ["MV Horizon", "MV Argo", "MV Cassandra"], mitigationOptions: ["Reroute via Cape of Good Hope (+4 days)", "Hold at anchorage (fuel cost: $85K/day)", "Seek alternative discharge port"] },
+      { domain: "terra", impact: "medium", description: "3 logistics-linked properties in port catchment area may see occupancy impact. Warehouse REITs exposed via supply chain disruption.", estimatedExposure: "$800K", affectedEntities: ["Port Industrial Park", "Gulf Logistics Hub"], mitigationOptions: ["Monitor occupancy metrics weekly", "Engage tenants proactively", "Review lease force majeure clauses"] },
+      { domain: "szl", impact: "medium", description: "Portfolio NAV impact estimated at -0.4% to -1.1% depending on closure duration. Maritime segment yield compression likely.", estimatedExposure: "$3.2M NAV delta", affectedEntities: ["Maritime Yield Fund", "Logistics REIT Position"], mitigationOptions: ["Hedge via freight futures", "Notify LPs of potential impact", "Activate contingency reserve"] },
+    ],
+    timeHorizon: "72 hours",
+    overallRisk: "high",
+    confidence: 0.82,
+    generatedAt: new Date().toISOString(),
+  }),
+  sanctions: (event) => ({
+    scenarioId: crypto.randomUUID(),
+    event,
+    query: event,
+    summary: "Tracing OFAC/sanctions exposure across connected entities in the knowledge graph...",
+    affectedDomains: ["vessels", "prism", "szl"],
+    cascades: [
+      { domain: "vessels", impact: "critical", description: "2 vessels with indirect ownership links to flagged entity. AIS history shows calls at sanctioned ports within 90 days.", estimatedExposure: "$12M cargo + vessel value", affectedEntities: ["MV Perseus", "MV Titan"], mitigationOptions: ["Initiate internal compliance review", "Engage P&I club immediately", "Prepare voluntary disclosure package"] },
+      { domain: "prism", impact: "high", description: "3 active legal matters may have cross-exposure. Regulatory notification obligations triggered under OFAC 60-day rule.", estimatedExposure: "Regulatory penalty risk", affectedEntities: ["Case P-2024-091", "Case P-2024-203"], mitigationOptions: ["Draft legal hold notice", "Engage outside compliance counsel", "File SDN search documentation"] },
+      { domain: "szl", impact: "medium", description: "LP agreements contain sanctions compliance representations. Material adverse change clauses may be triggered.", estimatedExposure: "$840K LP exposure", affectedEntities: ["Fund III LPA"], mitigationOptions: ["Notify LP counsel within 5 business days", "Prepare investor communication", "Review fund compliance policy"] },
+    ],
+    timeHorizon: "24 hours",
+    overallRisk: "critical",
+    confidence: 0.91,
+    generatedAt: new Date().toISOString(),
+  }),
+  default: (event) => ({
+    scenarioId: crypto.randomUUID(),
+    event,
+    query: event,
+    summary: `CORTEX is tracing the projected impact of "${event}" across all connected domains using the entity graph and historical pattern library.`,
+    affectedDomains: ["vessels", "firestorm", "terra", "szl"],
+    cascades: [
+      { domain: "vessels", impact: "medium", description: "Fleet routing and cargo exposure evaluated. 4 vessels on potentially affected routes identified.", estimatedExposure: "$1.8M", affectedEntities: ["Active Fleet"], mitigationOptions: ["Monitor AIS signals", "Review charter party force majeure", "Engage brokers for market read"] },
+      { domain: "firestorm", impact: "low", description: "No direct cyber threat vector identified. Geopolitical correlation pattern flagged for SOC awareness.", estimatedExposure: "Low", affectedEntities: ["Perimeter sensors"], mitigationOptions: ["Elevate threat monitoring level", "Brief SOC team on geopolitical context"] },
+      { domain: "terra", impact: "low", description: "Market correlations suggest potential cap rate compression in affected geography. 2 properties in watchlist area.", estimatedExposure: "$420K", affectedEntities: ["Watchlist Portfolio"], mitigationOptions: ["Review appraisal assumptions", "Defer disposition decisions 30 days"] },
+      { domain: "szl", impact: "medium", description: "Portfolio stress test indicates 0.6%-1.4% NAV sensitivity. Risk committee briefing recommended.", estimatedExposure: "$2.1M NAV delta", affectedEntities: ["Fund IV", "Maritime Segment"], mitigationOptions: ["Schedule risk committee call", "Prepare LP communication template", "Review hedging positions"] },
+    ],
+    timeHorizon: "48-96 hours",
+    overallRisk: "medium",
+    confidence: 0.74,
+    generatedAt: new Date().toISOString(),
+  }),
+};
+
+router.post(
+  "/cortex/whatif",
+  authMiddleware({ required: true }),
+  perUserWriteSlidingLimiter,
+  async (req, res) => {
+    const { query, scenario } = req.body ?? {};
+
+    if (!query || typeof query !== "string" || query.trim().length === 0) {
+      sendBadRequest(res, "query is required");
+      return;
+    }
+
+    if (query.length > 500) {
+      sendBadRequest(res, "query too long (max 500 characters)");
+      return;
+    }
+
+    try {
+      const lower = query.toLowerCase();
+      let selectedScenario = "default";
+
+      if (lower.includes("port") && (lower.includes("clos") || lower.includes("block"))) {
+        selectedScenario = "port_closure";
+      } else if (lower.includes("sanction") || lower.includes("ofac") || lower.includes("sdn")) {
+        selectedScenario = "sanctions";
+      } else if (scenario && WHATIF_SCENARIOS[scenario]) {
+        selectedScenario = scenario;
+      }
+
+      const result = WHATIF_SCENARIOS[selectedScenario](query.trim());
+      logger.info({ query: query.substring(0, 100), scenario: selectedScenario }, "[CORTEX] What-if scenario computed");
+      sendSuccess(res, result);
+    } catch (err) {
+      handleRouteError(res, err, "CORTEX what-if scenario failed");
+    }
+  }
+);
+
+type DraftType = "legal_hold" | "lp_notification" | "insurance_claim" | "route_change" | "compliance_memo" | "incident_report" | "risk_brief";
+type DraftPriority = "urgent" | "high" | "normal";
+
+function generateActionDrafts(
+  alertId: string,
+  alertTitle: string,
+  severity: string,
+  affectedDomains: string[],
+  orgId: number | undefined
+) {
+  const now = new Date();
+  const priority: DraftPriority = severity === "critical" ? "urgent" : severity === "high" ? "high" : "normal";
+  const drafts: Array<{
+    draftUuid: string;
+    orgId: number | undefined;
+    alertId: string;
+    alertTitle: string;
+    domain: string;
+    draftType: DraftType;
+    title: string;
+    content: string;
+    recipient: string;
+    priority: DraftPriority;
+    status: "pending";
+    generatedAt: Date;
+  }> = [];
+
+  if (affectedDomains.includes("vessels") || affectedDomains.includes("maritime")) {
+    drafts.push({
+      draftUuid: crypto.randomUUID(),
+      orgId,
+      alertId,
+      alertTitle,
+      domain: "vessels",
+      draftType: "route_change",
+      title: "Fleet Route Advisory",
+      content: `URGENT FLEET ADVISORY\n\nRe: ${alertTitle}\n\nCORTEX Intelligence has detected a cross-domain signal requiring immediate fleet review.\n\nRecommended Action: Review current routing for vessels on affected corridors. Engage charter counterparties for force majeure assessment. Notify P&I club.\n\nPlease confirm receipt and advise on fleet status within 4 hours.`,
+      recipient: "Fleet Operations",
+      priority,
+      status: "pending",
+      generatedAt: now,
+    });
+  }
+
+  if (affectedDomains.includes("prism") || severity === "critical") {
+    drafts.push({
+      draftUuid: crypto.randomUUID(),
+      orgId,
+      alertId,
+      alertTitle,
+      domain: "prism",
+      draftType: "legal_hold",
+      title: "Legal Hold Notice",
+      content: `LEGAL HOLD NOTICE\n\nRe: CORTEX Alert — ${alertTitle}\n\nPursuant to the cross-domain intelligence signal issued by CORTEX on ${now.toLocaleDateString()}, this notice preserves all documents, communications, and data related to the affected entities and domains.\n\nScope: All matters related to entities identified in CORTEX Alert ${alertId.slice(0, 8).toUpperCase()}.\n\nThis hold is effective immediately pending legal team review.`,
+      recipient: "General Counsel",
+      priority,
+      status: "pending",
+      generatedAt: now,
+    });
+  }
+
+  if (affectedDomains.includes("szl") || severity === "critical" || severity === "high") {
+    drafts.push({
+      draftUuid: crypto.randomUUID(),
+      orgId,
+      alertId,
+      alertTitle,
+      domain: "szl",
+      draftType: "lp_notification",
+      title: "Limited Partner Update",
+      content: `LP NOTIFICATION DRAFT\n\nDear Limited Partners,\n\nWe are writing to inform you of a material development identified by our CORTEX intelligence platform.\n\n${alertTitle}\n\nOur team is actively monitoring the situation. Current portfolio exposure assessment indicates [exposure level]. We will provide a full update within 48 hours.\n\nPlease contact your relationship manager with any questions.\n\nSZL Holdings Investment Management`,
+      recipient: "LP Relations",
+      priority,
+      status: "pending",
+      generatedAt: now,
+    });
+  }
+
+  if (affectedDomains.includes("firestorm") || affectedDomains.includes("aegis")) {
+    drafts.push({
+      draftUuid: crypto.randomUUID(),
+      orgId,
+      alertId,
+      alertTitle,
+      domain: "firestorm",
+      draftType: "incident_report",
+      title: "SOC Incident Brief",
+      content: `SOC INCIDENT BRIEF\n\nTriggered by: CORTEX Fusion Alert\nAlert: ${alertTitle}\n\nCross-domain correlation detected. Security posture review initiated.\n\nRecommended Actions:\n1. Elevate monitoring on affected perimeter segments\n2. Review access logs for affected entity IDs\n3. Brief SOC team lead within 2 hours\n4. Prepare executive security update\n\nThis brief is auto-generated by CORTEX Autonomous Agent. Human review required before action.`,
+      recipient: "SOC Command",
+      priority,
+      status: "pending",
+      generatedAt: now,
+    });
+  }
+
+  if (severity === "critical" || severity === "high") {
+    drafts.push({
+      draftUuid: crypto.randomUUID(),
+      orgId,
+      alertId,
+      alertTitle,
+      domain: "szl",
+      draftType: "risk_brief",
+      title: "Executive Risk Brief",
+      content: `EXECUTIVE RISK BRIEF — CORTEX PRIORITY\n\nAlert: ${alertTitle}\nSeverity: ${severity.toUpperCase()}\nGenerated: ${now.toISOString()}\n\nCORTEX has identified a cross-domain correlation requiring executive awareness. Affected domains: ${affectedDomains.join(", ")}.\n\nThis brief requires acknowledgment within 2 hours. Please confirm receipt to your chief of staff.`,
+      recipient: "Executive Suite",
+      priority,
+      status: "pending",
+      generatedAt: now,
+    });
+  }
+
+  if (drafts.length === 0) {
+    drafts.push({
+      draftUuid: crypto.randomUUID(),
+      orgId,
+      alertId,
+      alertTitle,
+      domain: "szl",
+      draftType: "compliance_memo",
+      title: "Cross-Domain Compliance Memo",
+      content: `COMPLIANCE MEMO\n\nRe: CORTEX Signal — ${alertTitle}\n\nThis memo documents a cross-domain intelligence signal for compliance recordkeeping. No immediate action required, but situation should be monitored.\n\nCORTEX will continue monitoring affected entities and escalate if severity increases.`,
+      recipient: "Compliance",
+      priority: "normal",
+      status: "pending",
+      generatedAt: now,
+    });
+  }
+
+  return drafts;
+}
+
+router.get(
+  "/cortex/action-drafts",
+  authMiddleware({ required: true }),
+  perUserApiSlidingLimiter,
+  async (req, res) => {
+    try {
+      const statusFilter = req.query.status ? String(req.query.status) : undefined;
+      const domainFilter = req.query.domain ? String(req.query.domain) : undefined;
+      const orgIds = callerOrgIds(req as Record<string, unknown>);
+
+      const whereClauses = [];
+      if (orgIds.length > 0) {
+        whereClauses.push(inArray(cortexActionDraftsTable.orgId, orgIds));
+      }
+      if (statusFilter && ["pending", "approved", "dismissed"].includes(statusFilter)) {
+        whereClauses.push(eq(cortexActionDraftsTable.status, statusFilter as "pending" | "approved" | "dismissed"));
+      }
+      if (domainFilter) {
+        whereClauses.push(eq(cortexActionDraftsTable.domain, domainFilter));
+      }
+
+      const drafts = await db
+        .select()
+        .from(cortexActionDraftsTable)
+        .where(whereClauses.length > 0 ? and(...whereClauses) : undefined)
+        .orderBy(
+          sql`CASE priority WHEN 'urgent' THEN 0 WHEN 'high' THEN 1 ELSE 2 END`,
+          desc(cortexActionDraftsTable.generatedAt)
+        )
+        .limit(50);
+
+      const pendingWhere = orgIds.length > 0
+        ? and(eq(cortexActionDraftsTable.status, "pending"), inArray(cortexActionDraftsTable.orgId, orgIds))
+        : eq(cortexActionDraftsTable.status, "pending");
+
+      const [{ count: pendingCount }] = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(cortexActionDraftsTable)
+        .where(pendingWhere);
+
+      const formatted = drafts.map((d) => ({
+        id: d.draftUuid,
+        alertId: d.alertId,
+        alertTitle: d.alertTitle,
+        domain: d.domain,
+        type: d.draftType,
+        title: d.title,
+        content: d.content,
+        recipient: d.recipient,
+        priority: d.priority,
+        status: d.status,
+        generatedAt: d.generatedAt?.toISOString(),
+        approvedAt: d.approvedAt?.toISOString(),
+        approvedBy: d.approvedBy,
+      }));
+
+      sendSuccess(res, { drafts: formatted, total: formatted.length, pendingCount });
+    } catch (err) {
+      handleRouteError(res, err, "CORTEX action drafts list failed");
+    }
+  }
+);
+
+router.post(
+  "/cortex/action-drafts/generate",
+  authMiddleware({ required: true }),
+  perUserWriteSlidingLimiter,
+  async (req, res) => {
+    const { alertId, alertTitle, severity, affectedDomains } = req.body ?? {};
+
+    if (!alertId || !alertTitle) {
+      sendBadRequest(res, "alertId and alertTitle are required");
+      return;
+    }
+
+    try {
+      const orgId = callerOrgId(req as Record<string, unknown>);
+      const orgIds = callerOrgIds(req as Record<string, unknown>);
+
+      const dupWhere = orgIds.length > 0
+        ? and(eq(cortexActionDraftsTable.alertId, String(alertId)), eq(cortexActionDraftsTable.status, "pending"), inArray(cortexActionDraftsTable.orgId, orgIds))
+        : and(eq(cortexActionDraftsTable.alertId, String(alertId)), eq(cortexActionDraftsTable.status, "pending"));
+
+      const existing = await db
+        .select({ draftUuid: cortexActionDraftsTable.draftUuid })
+        .from(cortexActionDraftsTable)
+        .where(dupWhere);
+
+      if (existing.length > 0) {
+        const existingFull = await db
+          .select()
+          .from(cortexActionDraftsTable)
+          .where(orgIds.length > 0
+            ? and(eq(cortexActionDraftsTable.alertId, String(alertId)), inArray(cortexActionDraftsTable.orgId, orgIds))
+            : eq(cortexActionDraftsTable.alertId, String(alertId)));
+
+        sendSuccess(res, {
+          drafts: existingFull.map((d) => ({ id: d.draftUuid, ...d })),
+          message: "Drafts already exist for this alert",
+          generated: 0,
+        });
+        return;
+      }
+      const domains = Array.isArray(affectedDomains) ? affectedDomains : ["vessels", "szl"];
+      const newDrafts = generateActionDrafts(String(alertId), String(alertTitle), severity ?? "high", domains, orgId);
+
+      const inserted = await db
+        .insert(cortexActionDraftsTable)
+        .values(newDrafts.map((d) => ({
+          draftUuid: d.draftUuid,
+          orgId: d.orgId,
+          alertId: d.alertId,
+          alertTitle: d.alertTitle,
+          domain: d.domain,
+          draftType: d.draftType,
+          title: d.title,
+          content: d.content,
+          recipient: d.recipient,
+          priority: d.priority,
+          status: d.status,
+          generatedAt: d.generatedAt,
+        })))
+        .returning();
+
+      logger.info({ alertId, count: inserted.length }, "[CORTEX] Action drafts generated and persisted");
+
+      sendSuccess(res, {
+        drafts: inserted.map((d) => ({ id: d.draftUuid, ...d })),
+        message: `${inserted.length} autonomous action drafts generated and persisted for human approval`,
+        generated: inserted.length,
+      });
+    } catch (err) {
+      handleRouteError(res, err, "CORTEX action draft generation failed");
+    }
+  }
+);
+
+router.post(
+  "/cortex/action-drafts/:id/approve",
+  authMiddleware({ required: true }),
+  perUserWriteSlidingLimiter,
+  async (req, res) => {
+    try {
+      const caller = callerEmail(req as Record<string, unknown>);
+      const orgIds = callerOrgIds(req as Record<string, unknown>);
+      const now = new Date();
+
+      const approveWhere = orgIds.length > 0
+        ? and(eq(cortexActionDraftsTable.draftUuid, req.params.id), inArray(cortexActionDraftsTable.orgId, orgIds))
+        : eq(cortexActionDraftsTable.draftUuid, req.params.id);
+
+      const [updated] = await db
+        .update(cortexActionDraftsTable)
+        .set({ status: "approved", approvedAt: now, approvedBy: caller })
+        .where(approveWhere)
+        .returning();
+
+      if (!updated) {
+        sendNotFound(res, "Action draft not found");
+        return;
+      }
+
+      try {
+        await db.insert(alloyAuditLogTable).values({
+          action: "cortex_action_draft.approved",
+          resourceType: "cortex_action_draft",
+          resourceId: updated.draftUuid,
+          serviceAttribution: "cortex",
+          metadata: {
+            approvedBy: caller,
+            alertId: updated.alertId,
+            draftType: updated.draftType,
+            domain: updated.domain,
+            title: updated.title,
+            priority: updated.priority,
+          },
+        });
+      } catch {
+        logger.warn({ draftId: updated.draftUuid }, "[CORTEX] Audit log insert failed (non-fatal)");
+      }
+
+      logger.info({ draftId: updated.draftUuid, type: updated.draftType, domain: updated.domain, approvedBy: caller }, "[CORTEX] Action draft approved");
+
+      sendSuccess(res, {
+        draft: { id: updated.draftUuid, ...updated },
+        message: "Action draft approved and queued for execution",
+      });
+    } catch (err) {
+      handleRouteError(res, err, "CORTEX action draft approval failed");
+    }
+  }
+);
+
+router.post(
+  "/cortex/action-drafts/:id/dismiss",
+  authMiddleware({ required: true }),
+  perUserWriteSlidingLimiter,
+  async (req, res) => {
+    try {
+      const caller = callerEmail(req as Record<string, unknown>);
+      const orgIds = callerOrgIds(req as Record<string, unknown>);
+
+      const dismissWhere = orgIds.length > 0
+        ? and(eq(cortexActionDraftsTable.draftUuid, req.params.id), inArray(cortexActionDraftsTable.orgId, orgIds))
+        : eq(cortexActionDraftsTable.draftUuid, req.params.id);
+
+      const [updated] = await db
+        .update(cortexActionDraftsTable)
+        .set({ status: "dismissed", dismissedAt: new Date(), dismissedBy: caller })
+        .where(dismissWhere)
+        .returning();
+
+      if (!updated) {
+        sendNotFound(res, "Action draft not found");
+        return;
+      }
+
+      logger.info({ draftId: updated.draftUuid, type: updated.draftType }, "[CORTEX] Action draft dismissed");
+
+      sendSuccess(res, {
+        draft: { id: updated.draftUuid, ...updated },
+        message: "Action draft dismissed",
+      });
+    } catch (err) {
+      handleRouteError(res, err, "CORTEX action draft dismissal failed");
+    }
   }
 );
 

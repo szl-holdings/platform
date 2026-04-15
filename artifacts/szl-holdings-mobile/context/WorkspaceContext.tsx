@@ -9,7 +9,8 @@ export type WorkspaceDomain =
   | "operations"
   | "advisory"
   | "portfolio"
-  | "founder";
+  | "founder"
+  | "intelligence";
 
 export interface WorkspaceConfig {
   id: WorkspaceDomain;
@@ -85,6 +86,14 @@ export const WORKSPACES: WorkspaceConfig[] = [
     route: "/(shell)/founder",
     description: "Stephen personal command",
   },
+  {
+    id: "intelligence",
+    label: "CORTEX",
+    icon: "◈",
+    accent: "#c9a84c",
+    route: "/(shell)/intelligence",
+    description: "Cross-domain fusion intelligence engine",
+  },
 ];
 
 export interface WorkspaceBadge {
@@ -130,6 +139,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     advisory: 0,
     portfolio: 0,
     founder: 0,
+    intelligence: 0,
   });
 
   const setActiveWorkspace = useCallback((domain: WorkspaceDomain) => {

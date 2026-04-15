@@ -105,4 +105,5 @@ export * from "./change_events";
 export * from "./web_push";
 export * from "./audit_chain_events";
 export * from "./daily_briefings";
+export * from "./cortex_action_drafts";
 export * from "./multiplayer_sessions";

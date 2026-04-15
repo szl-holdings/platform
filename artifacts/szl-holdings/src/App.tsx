@@ -50,6 +50,7 @@ const NexusCommandPage = lazy(() => import("@/pages/nexus-command"));
 const NexusExplorerPage = lazy(() => import("@/pages/nexus-explorer"));
 const ControlTowerPage = lazy(() => import("@/pages/control-tower"));
 const IntelligenceFabricPage = lazy(() => import("@/pages/intelligence-fabric"));
+const CortexIntelligenceHubPage = lazy(() => import("@/pages/cortex-intelligence-hub"));
 const AnalystWorkspacePage = lazy(() => import("@/pages/analyst-workspace"));
 const OracleBriefingPage = lazy(() => import("@/pages/oracle-briefing"));
 const KpiDashboardPage = lazy(() => import("@/pages/kpi-dashboard"));
@@ -785,6 +786,9 @@ function App() {
             </Route>
 
             {/* ── Intelligence Fabric ── */}
+            <Route path="/intelligence/cortex">
+              <RequireAuth><Suspense fallback={<PageLoader />}><CortexIntelligenceHubPage /></Suspense></RequireAuth>
+            </Route>
             <Route path="/intelligence/fabric">
               <RequireAuth><Suspense fallback={<PageLoader />}><IntelligenceFabricPage /></Suspense></RequireAuth>
             </Route>

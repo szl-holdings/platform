@@ -307,3 +307,35 @@ export {
 } from "./multiplayer-session";
 
 export { MicroFeedbackWidget, type MicroFeedbackWidgetProps, type FeedbackPayload, type FeedbackSentiment } from "./micro-feedback-widget";
+
+export {
+  CortexIntelligenceFeed,
+  type CortexIntelligenceFeedProps,
+  type IntelligenceSignal,
+  type CortexFeedStats,
+  type CortexSignal,
+} from "./cortex-intelligence-feed";
+
+export {
+  CortexEntityGraph,
+  type CortexEntityGraphProps,
+  type EntityGraphNode,
+  type EntityGraphEdge,
+  type EntityGraphMeta,
+} from "./cortex-entity-graph";
+
+export {
+  CortexActionDrafts,
+  type CortexActionDraftsProps,
+  type ActionDraft,
+  type ActionDraftType,
+  type ActionDraftStatus,
+  type ActionDraftPriority,
+} from "./cortex-action-drafts";
+
+export {
+  CortexWhatIf,
+  type CortexWhatIfProps,
+  type WhatIfResult,
+  type WhatIfCascade,
+} from "./cortex-what-if";
