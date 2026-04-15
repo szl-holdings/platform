@@ -82,6 +82,7 @@ import demoRequestsRouter from "./demo-requests";
 import contactRouter from "./contact";
 import aegisSocLiveRouter from "./firestorm-live";
 import simulationRouter from "./simulation";
+import commandRouter from "./command";
 import firestormCommandRouter from "./firestorm-command-surfaces";
 import publicStatusRouter from "./public-status";
 import { feedbackRouter } from "./feedback";
@@ -139,6 +140,9 @@ import ragKnowledgeRouter from "./rag-knowledge";
 import vesselsTradingRouter from "./vessels-trading";
 import vesselsInsuranceRouter from "./vessels-insurance";
 import rmmRouter from "./rmm";
+import ontologyRouter from "./ontology";
+import digitalTwinsRouter from "./digital-twins";
+import fusionRouter from "./fusion";
 
 const router: IRouter = Router();
 
@@ -220,6 +224,10 @@ router.use(vesselsRouter);
 router.use(aegisSocRouter);
 router.use(aegisSocLiveRouter);
 router.use(simulationRouter);
+
+router.use("/command", _readLimiter);
+router.use("/command", _writeLimiter);
+router.use("/command", commandRouter);
 router.use("/firestorm/command", _readLimiter);
 router.use(firestormCommandRouter);
 router.use(lyteRouter);

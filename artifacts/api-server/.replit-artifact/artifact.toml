@@ -1,0 +1,17 @@
+kind = "web"
+previewPath = "/api/"
+title = "API Server"
+version = "1.0.0"
+id = "artifacts/api-server"
+router = "path"
+
+[[services]]
+name = "api"
+paths = [ "/api/" ]
+localPort = 8080
+
+[services.development]
+run = "PORT=8080 node dist/index.mjs"
+
+[services.env]
+PORT = "8080"

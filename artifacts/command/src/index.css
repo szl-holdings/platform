@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-primary: hsl(210 12% 5%);
+  --color-bg-secondary: hsl(210 12% 7%);
+  --color-bg-elevated: hsl(210 10% 13%);
+  
+  --color-surface-base: hsla(210 10% 12% / 0.55);
+  --color-surface-border: hsla(0 0% 100% / 0.06);
+
+  --color-fg-primary: hsl(38 12% 94%);
+  --color-fg-secondary: hsl(210 6% 68%);
+  --color-fg-muted: hsl(210 5% 46%);
+
+  --color-aegis: #3b82f6;
+  --color-vessels: #0ea5e9;
+  --color-szl: #b8bfcb;
+  --color-lyte: #d4a054;
+  --color-prism: #f59e0b;
+  --color-terra: #40856a;
+
+  --color-critical: hsl(0 62% 52%);
+  --color-high: hsl(22 72% 52%);
+  --color-medium: hsl(42 80% 50%);
+  --color-low: hsl(152 50% 42%);
+  --color-info: hsl(210 60% 52%);
+}
+
+:root {
+  background-color: var(--color-bg-primary);
+  color: var(--color-fg-primary);
+  color-scheme: dark;
+}
+
+body {
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Base custom scrollbar for dashboard feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-fg-muted);
+}
