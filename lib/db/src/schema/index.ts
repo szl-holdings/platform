@@ -58,6 +58,7 @@ export * from "./export_jobs";
 export * from "./feedback";
 export * from "./intelligence_cache";
 export * from "./invitations";
+export * from "./fund_ops";
 export * from "./revenue_events";
 export * from "./governance";
 export * from "./prism_counsel";

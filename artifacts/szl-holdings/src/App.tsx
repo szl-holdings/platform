@@ -54,6 +54,7 @@ const PowerBiConfigPage = lazy(() => import("@/pages/powerbi-config"));
 const ScimProvisioningPage = lazy(() => import("@/pages/scim-provisioning"));
 const CapitalArsenalPage = lazy(() => import("@/pages/capital-arsenal"));
 const OwnershipOsPage = lazy(() => import("@/pages/ownership-os"));
+const FundOperationsPage = lazy(() => import("@/pages/fund-operations"));
 const StatusPage = lazy(() => import("@/pages/status"));
 const LegalPrivacyPage = lazy(() => import("@/pages/legal-privacy"));
 const LegalTermsPage = lazy(() => import("@/pages/legal-terms"));
@@ -739,6 +740,9 @@ function App() {
             </Route>
             <Route path="/ownership">
               <RequireAuth><Suspense fallback={<PageLoader />}><OwnershipOsPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/fund-operations">
+              <RequireAuth><Suspense fallback={<PageLoader />}><FundOperationsPage /></Suspense></RequireAuth>
             </Route>
 
             <Route path="/venture-portfolio">

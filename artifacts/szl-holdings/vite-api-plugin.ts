@@ -12,7 +12,7 @@ export function apiServerPlugin(): Plugin {
     child = spawn("node", [
       "--max-old-space-size=512",
       "--enable-source-maps",
-      resolve(apiRoot, "fast-start.mjs"),
+      resolve(apiRoot, "dist/index.mjs"),
     ], {
       cwd: apiRoot,
       env: { ...process.env, PORT: "9090", __FAST_START_SERVER: "1" },

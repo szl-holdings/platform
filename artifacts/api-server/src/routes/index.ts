@@ -59,6 +59,7 @@ import vesselsPlatformRouter from "./vessels-platform";
 import capitalReadinessRouter from "./capital-readiness";
 import certificationReadinessRouter from "./certification-readiness";
 import ownershipControlRouter from "./ownership-control";
+import fundOpsRouter from "./fund-ops";
 import coreRouter from "./core";
 import lyteExtendedRouter from "./lyte-extended";
 import vesselsExtendedRouter from "./vessels-extended";
@@ -333,6 +334,10 @@ router.use(certificationReadinessRouter);
 
 router.use("/ownership", _writeLimiter);
 router.use(ownershipControlRouter);
+
+router.use("/fund-ops", _writeLimiter);
+router.use("/fund-ops", _readLimiter);
+router.use(fundOpsRouter);
 
 router.use("/terra", _writeLimiter);
 router.use(terraCrmRouter);

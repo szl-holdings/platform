@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 import fs from "fs";
+import { apiServerPlugin } from "./vite-api-plugin";
 
 // Limit esbuild Go runtime threads to prevent OS thread exhaustion
 // when multiple Vite dev servers run simultaneously
@@ -61,6 +62,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
+    apiServerPlugin(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [
@@ -117,6 +119,13 @@ export default defineConfig({
     fs: {
       strict: false,
       deny: ["**/.*"],
+    },
+    proxy: {
+      "/api": {
+        target: "http://localhost:9090",
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
   preview: {
