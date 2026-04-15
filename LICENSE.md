@@ -31,7 +31,7 @@ The following uses are **strictly prohibited**:
 
 ### Trademarks
 
-"SZL Holdings," "Lyte," "Alloy," "Aegis," "Terra," "Vessels," "Carlota Jo," "PRISM," "Helmsman," "Sentinel," "Compass," and associated logos and brand assets are trademarks of SZL Holdings. Use of these marks without written permission is prohibited.
+"SZL Holdings," "Lyte," "Alloy," "Aegis," "Terra," "Vessels," "Carlota Jo," "PRISM," "PRISM Counsel," "CORTEX," "IMPERIUM," "Firestorm," "Helmsman," "Sentinel," "Compass," "Forge," "Worldline," and associated logos and brand assets are trademarks of SZL Holdings. Use of these marks without written permission is prohibited.
 
 ### No Warranty
 

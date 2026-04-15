@@ -1,21 +1,38 @@
 # SZL Holdings Platform
 
-→ [Live Demo](https://szlholdings.com) | [Security](./SECURITY.md) | [Architecture](./docs/architecture/system-overview.md) | [Investor Docs](./docs/investor/platform-thesis.md) | [Trust Center](./docs/trust/trust-center.md)
+> [Live Demo](https://szlholdings.com) | [Security](./SECURITY.md) | [Architecture](./docs/architecture/system-overview.md) | [Investor Docs](./docs/investor/platform-thesis.md) | [Trust Center](./docs/trust/trust-center.md)
 
-[![CI](https://github.com/szlholdings/szl-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/szlholdings/szl-platform/actions/workflows/ci.yml)
-[![E2E Tests](https://github.com/szlholdings/szl-platform/actions/workflows/e2e.yml/badge.svg)](https://github.com/szlholdings/szl-platform/actions/workflows/e2e.yml)
-[![Lighthouse CI](https://github.com/szlholdings/szl-platform/actions/workflows/lighthouse.yml/badge.svg)](https://github.com/szlholdings/szl-platform/actions/workflows/lighthouse.yml)
-[![CodeQL](https://github.com/szlholdings/szl-platform/actions/workflows/codeql.yml/badge.svg)](https://github.com/szlholdings/szl-platform/actions/workflows/codeql.yml)
 ![Status](https://img.shields.io/badge/status-active-brightgreen)
 ![License](https://img.shields.io/badge/license-proprietary-red)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
 ![Node](https://img.shields.io/badge/Node-20.x-green)
+![React](https://img.shields.io/badge/React-19-61DAFB)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)
+![Apps](https://img.shields.io/badge/apps-25-gold)
+![API_Endpoints](https://img.shields.io/badge/API_endpoints-2%2C331-orange)
+![DB_Tables](https://img.shields.io/badge/DB_tables-644-purple)
 
-> Lyte is the command surface. Alloy is the execution fabric. Domain packs extend the same system into security, maritime, and real estate.
+> Lyte is the command surface. Alloy is the execution fabric. CORTEX is the unified mobile command center. Domain packs extend the same system into security, maritime, real estate, legal, and consulting.
 
 > Business observability must connect to action, not just visualization. AI outputs without traceability create noise, not trust. Every decision should have a signal, a routing path, an approval gate, and an audit trail.
 
 **Stephen Lutar** — Founder & CEO, SZL Holdings
+
+---
+
+## Platform at a Glance
+
+| Metric | Count |
+|--------|-------|
+| Production Web Applications | 10 |
+| Native Mobile Apps (Expo) | 2 unified command centers |
+| Shared Libraries | 37 packages |
+| API Route Files | 167 backend services |
+| API Endpoints | 2,331 |
+| Database Tables | 644 |
+| Source Files | 1,620 TypeScript files |
+| Lines of Code | 450,000+ |
+| UI Components | 252 web + 116 mobile screens |
 
 ---
 
@@ -32,94 +49,133 @@ SZL Holdings builds the **governed operational intelligence layer** — the plat
 ## Ecosystem
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        SZL Holdings Platform                            │
-│                                                                         │
-│  ┌─────────────────┐    ┌────────────────────────────────────────────┐  │
-│  │      Lyte       │    │                  Alloy                     │  │
-│  │  Business       │◄──►│  Signal Routing · Workflow Orchestration   │  │
-│  │  Observability  │    │  Approval Gates · Human-in-the-Loop        │  │
-│  │  PRISM Framework│    │  Immutable Audit Trail                     │  │
-│  └─────────────────┘    └────────────────────────────────────────────┘  │
-│                                      │                                  │
-│              ┌───────────────────────┼───────────────────────┐          │
-│              ▼                       ▼                       ▼          │
-│  ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐    │
-│  │      Aegis       │   │     Vessels      │   │      Terra       │    │
-│  │  Security &      │   │  Maritime Fleet  │   │  Real Estate     │    │
-│  │  Defense Intel   │   │  Command         │   │  Intelligence    │    │
-│  └──────────────────┘   └──────────────────┘   └──────────────────┘    │
-│                                                                         │
-│  ┌─────────────────────────────────────────────────────────────────┐    │
-│  │                Carlota Jo — Premium Advisory                    │    │
-│  └─────────────────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                          SZL Holdings Platform                                │
+│                                                                               │
+│  ┌─────────────────┐    ┌──────────────────────────────────────────────────┐  │
+│  │      Lyte       │    │                    Alloy                         │  │
+│  │  Business       │◄──►│  Signal Routing · Workflow Orchestration         │  │
+│  │  Observability  │    │  Approval Gates · Human-in-the-Loop              │  │
+│  │  PRISM Framework│    │  Immutable Audit Trail                           │  │
+│  └─────────────────┘    └──────────────────────────────────────────────────┘  │
+│                                        │                                      │
+│          ┌─────────────────────────────┼─────────────────────────────┐        │
+│          ▼                             ▼                             ▼        │
+│  ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐          │
+│  │      Aegis       │   │     Vessels      │   │      Terra       │          │
+│  │  Security &      │   │  Maritime Fleet  │   │  Real Estate     │          │
+│  │  Defense Intel   │   │  Command         │   │  Intelligence    │          │
+│  │  157 components  │   │  83 components   │   │  77 components   │          │
+│  └──────────────────┘   └──────────────────┘   └──────────────────┘          │
+│                                                                               │
+│  ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐          │
+│  │  PRISM Counsel   │   │    Carlota Jo    │   │    IMPERIUM      │          │
+│  │  Legal Matter    │   │  Premium         │   │  Cloud           │          │
+│  │  Command         │   │  Advisory        │   │  Sovereignty     │          │
+│  │  127 components  │   │  60 components   │   │  Engine          │          │
+│  └──────────────────┘   └──────────────────┘   └──────────────────┘          │
+│                                                                               │
+│  ┌────────────────────────────────────────────────────────────────────────┐   │
+│  │                  CORTEX — Unified Mobile Command                       │   │
+│  │     8 domain workspaces · biometric auth · cross-domain signals       │   │
+│  └────────────────────────────────────────────────────────────────────────┘   │
+│                                                                               │
+│  ┌────────────────────────────────────────────────────────────────────────┐   │
+│  │              Command Portal — Ecosystem Intelligence Hub               │   │
+│  │   Real-time SSE · Cmd+K search · Executive briefing · 8-domain view   │   │
+│  └────────────────────────────────────────────────────────────────────────┘   │
+└───────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## Products
 
-| Product | Domain | Function | Status |
-|---------|--------|----------|--------|
-| **Lyte** | Business observability | Command surface — PRISM framework, signal timeline, action queue | Functional alpha |
-| **Alloy** | Execution fabric | Signal routing, approval gates, workflow engine, audit trail | Functional alpha |
-| **Aegis** | Security & defense | SOC command, SOAR playbooks, threat intelligence, MITRE ATT&CK | Functional alpha |
-| **Vessels** | Maritime intelligence | AIS fleet tracking, sanctions screening, dark activity detection | Functional alpha |
-| **Terra** | Real estate intelligence | Distress signals, ownership graph, deal pipeline, broker workflow | Functional alpha |
-| **Carlota Jo** | Premium advisory | UHNW residential advisory — private intake, client portal | Live |
+| Product | Domain | Function | Components | Status |
+|---------|--------|----------|------------|--------|
+| **Lyte** | Business observability | Command surface — PRISM framework, signal timeline, action queue | 142 | Functional alpha |
+| **Alloy** | Execution fabric | Signal routing, approval gates, workflow engine, audit trail | Integrated | Functional alpha |
+| **Aegis / Firestorm** | Security & defense | SOC command, SOAR playbooks, threat intelligence, MITRE ATT&CK | 157 | Functional alpha |
+| **Vessels** | Maritime intelligence | AIS fleet tracking, sanctions screening, dark activity detection | 83 | Functional alpha |
+| **Terra** | Real estate intelligence | Distress signals, ownership graph, deal pipeline, broker workflow | 77 | Functional alpha |
+| **PRISM Counsel** | Legal command | Matter management, court filings, multi-jurisdictional compliance | 127 | Functional alpha |
+| **Carlota Jo** | Premium advisory | UHNW residential advisory — private intake, client portal | 60 | Live |
+| **IMPERIUM** | Cloud sovereignty | Infrastructure control, tenant provisioning, cost governance | 11 | Functional alpha |
+| **CORTEX** | Unified mobile | All 8 domain workspaces in one native app — biometric auth, cross-domain signals | 116 screens | Functional alpha |
+| **Command Portal** | Ecosystem hub | 8-domain real-time dashboard, executive briefing, global search | 24 | Functional alpha |
+| **Stephen Lutar** | Founder site | Professional portfolio and public presence | 58 | Live |
 
-### Lyte — Business Observability
+### Lyte — Business Observability (142 components)
 
-The command surface for operators who need to see risk, bottlenecks, ownership gaps, and next actions in one place. PRISM framework: **P**eople, **R**evenue, **I**nfrastructure, **S**ecurity, **M**arket. Signal timeline, correlation engine, priority action queue, and execution accountability.
+The command surface for operators who need to see risk, bottlenecks, ownership gaps, and next actions in one place. PRISM framework: **P**eople, **R**evenue, **I**nfrastructure, **S**ecurity, **M**arket. Signal timeline, correlation engine, priority action queue, and execution accountability. Full AIOps with APM, MSP/RMM tooling, ML pipeline management, and cost governance.
 
 ### Alloy — Execution Fabric
 
 Signal normalization, workflow orchestration, approval controls, human-in-the-loop gates, and immutable audit trail. The governance layer that makes AI-assisted operations durable and accountable. Enterprise compliance templates for SOC 2, HIPAA, and financial services.
 
-### Aegis — Security & Defense Intelligence
+### Aegis / Firestorm — Security & Defense Intelligence (157 components)
 
-Unified defense platform: SOC command, MITRE ATT&CK v14 mapping, SOAR playbook engine, STIX/TAXII protocol support, XDR console, AI-assisted triage (Sentinel agent) with human approval gates.
+Unified defense platform: SOC command center, MITRE ATT&CK v14 mapping, SOAR playbook engine, STIX/TAXII protocol support, XDR console, AI-assisted triage (Sentinel agent) with human approval gates. Intelligence feeds from AIS, sanctions lists, legal records, and STIX/TAXII sources. 22 database tables covering the complete security lifecycle.
 
-### Vessels — Maritime Intelligence
+### Vessels — Maritime Intelligence (83 components)
 
-Fleet command, AIS telemetry, route anomaly detection, sanctions screening, voyage economics, dark vessel detection, and exception-based workflows. Helmsman AI agent for maritime intelligence.
+Fleet command, AIS telemetry, route anomaly detection, sanctions screening, voyage economics, dark vessel detection, commodity trading (fills, instruments, orders, positions), marine insurance management, and exception-based workflows. Helmsman AI agent for maritime intelligence. 30+ database tables.
 
-### Terra — Real Estate Intelligence
+### Terra — Real Estate Intelligence (77 components)
 
-NYC distress property pipeline (public data sources), ownership entity graph, deal pipeline via Alloy, Mapbox spatial mapping, broker workflow, market signal intelligence.
+NYC distress property pipeline (public data sources), ownership entity graph, deal pipeline, MLS listing ingestion, commercial property analytics, broker workflow, lead scoring, transaction tracking, and market signal intelligence. 17 database tables.
 
-### Carlota Jo — Premium Advisory
+### PRISM Counsel — Legal Matter Command (127 components)
 
-White-glove advisory operations for UHNW residential clients. Private intake, service lanes, client portal, and structured engagement workflows.
+Full matter management system with court filing integration (NY courts, S31, Purview), document review workflows, multi-jurisdictional support, recovery tracking, and approval chains with audit trail. 120+ legal database tables across 10 schema modules. Rivals standalone LegalTech platforms but with cross-domain intelligence from defense, maritime, and financial verticals.
+
+### Carlota Jo — Premium Advisory (60 components)
+
+White-glove advisory operations for UHNW residential clients. Client profile management, service catalog, booking system, document delivery, client messaging, inquiry tracking, and reservation system. 10 database tables.
+
+### IMPERIUM — Cloud Sovereignty Engine
+
+Multi-tenant infrastructure control plane. Azure tenant provisioning, cost budget governance, ownership control, and compliance monitoring. Built for organizations that need to maintain sovereign control over their cloud infrastructure.
+
+### CORTEX — Unified Mobile Command (116 screens)
+
+All 8 domain workspaces in a single Expo/React Native app. Biometric authentication, workspace switcher with cross-domain badge counts, unified command feed, workspace-adaptive copilot, and SpotlightFab for quick actions. Each workspace inherits its domain accent color and icon set.
+
+### Command Portal — Ecosystem Intelligence Hub (24 components)
+
+Real-time 8-domain dashboard with SSE updates, composite health scoring, per-domain drill-downs, global command bar (Cmd+K), executive briefing view, timeline with filter chips, and severity-based event classification.
 
 ---
 
 ## Screenshots
 
-![Landing Hero](docs/media/screenshots/landing-hero.jpg)
+| SZL Holdings Dashboard | Aegis SOC Command |
+|---|---|
+| ![SZL Holdings](docs/media/screenshots/szl-holdings-home.jpg) | ![Aegis](docs/media/screenshots/aegis-soc-dashboard.jpg) |
 
-![Lyte Overview](docs/media/screenshots/lyte-overview.jpg)
+| Vessels Maritime | Terra Real Estate |
+|---|---|
+| ![Vessels](docs/media/screenshots/vessels-dashboard.jpg) | ![Terra](docs/media/screenshots/terra-marketing.jpg) |
 
-![Alloy Overview](docs/media/screenshots/alloy-overview.jpg)
-
-![Trust Center](docs/media/screenshots/trust-center.jpg)
+| Lyte Command Center | Stephen Lutar |
+|---|---|
+| ![Lyte](docs/media/screenshots/lyte-marketing.jpg) | ![Stephen](docs/media/screenshots/stephen-site.jpg) |
 
 ---
 
 ## Architecture
 
 ```
-External Signals (integrations, telemetry, data feeds)
+External Signals (integrations, telemetry, data feeds, intelligence sources)
         │
         ▼
-  Signal Normalization (Alloy)
+  Signal Normalization (Alloy + PRISM Bus)
         │
         ▼
   Context Engine (correlation, attribution, severity scoring)
         │
         ▼
-  Routing Logic (priority classification, role assignment)
+  Routing Logic (priority classification, role assignment, domain routing)
         │
    ┌────┴────────────────────────────────┐
    ▼                                     ▼
@@ -130,18 +186,47 @@ Auto-Execute (policy-approved)    Human Review Gate
              Action Execution
                     │
                     ▼
-          Immutable Audit Trail (append-only, actor-attributed)
+          Immutable Audit Trail (append-only, actor-attributed, proof-chain)
 ```
 
-**Stack:** TypeScript, React, Express 5, PostgreSQL 16, Drizzle ORM, Vite, Expo (mobile), Apollo GraphQL, pnpm monorepo.
+### Stack
 
-**AI:** HuggingFace Inference (Qwen3-8B primary), evidence-backed hybrid retrieval, 9 schema-validated decision types, policy-gated tool execution.
+| Layer | Technology |
+|-------|-----------|
+| Language | TypeScript (full stack) |
+| Frontend | React 19, Vite, Tailwind CSS, Framer Motion, Recharts |
+| Mobile | Expo / React Native, NativeWind |
+| Backend | Express 5, Node.js |
+| Database | PostgreSQL 16, Drizzle ORM |
+| AI | HuggingFace Inference (Qwen3-8B), evidence-backed hybrid retrieval, 9 schema-validated decision types |
+| Auth | OIDC/PKCE, session-based, 11-role RBAC, SCIM 2.0, Azure AD multi-tenant SSO |
+| Infra | pnpm monorepo, 51 packages, Azure (App Service, PostgreSQL Flexible, Key Vault, Redis, CDN) |
+| Event System | PRISM Bus (cross-domain event bus), Forge Runtime (agent execution engine) |
+| Real-time | SSE, WebSocket, push notifications |
 
-**Auth:** OIDC/PKCE, session-based, 11-role RBAC, SCIM 2.0 provisioning, Azure AD multi-tenant SSO.
+### Shared Libraries (37 packages)
 
-**Infrastructure:** Azure (App Service, PostgreSQL Flexible, Key Vault, Redis, CDN). IaC via Bicep templates.
-
-**Scale:** 16 deployable artifacts, 120+ database tables, 7 web apps, 7 mobile apps.
+| Library | Purpose |
+|---------|---------|
+| `prism-bus` | Cross-domain event bus connecting all verticals |
+| `forge-runtime` | Agent execution engine with policy gates |
+| `ai-engine` | AI orchestration — model routing, safety rails, telemetry |
+| `intelligence-feeds` | Threat intel ingestion (STIX/TAXII, AIS, sanctions, legal) |
+| `covenant-policy` | Policy engine for governance and compliance |
+| `proof-chain` | Cryptographic audit trail with append-only verification |
+| `monte-carlo` | Financial simulation engine for risk modeling |
+| `crdt-sync` | Conflict-free replicated data types for real-time collaboration |
+| `observability` | Full telemetry stack — metrics, traces, structured logging |
+| `worldline` | Global signal publication and routing |
+| `receipt-graph` | Financial receipt tracking and reconciliation |
+| `outcome-graph` | Decision outcome modeling and attribution |
+| `offline-engine` | Offline-first data sync for mobile |
+| `mcp-client` | Model Context Protocol for AI tool use |
+| `mobile-shared` | Shared mobile components and navigation |
+| `shared-ui` | Design system tokens and shared components |
+| `api-spec` | OpenAPI specification and code generation |
+| `auth` | Authentication middleware and session management |
+| `db` | Database schema (644 tables), migrations, and query builders |
 
 ---
 
@@ -153,12 +238,13 @@ An AI-assisted operations platform carries a distinct trust burden. SZL Holdings
 |---------|----------|
 | **AI without oversight** | Advisory agents cannot execute consequential actions without explicit human confirmation — enforced at the Alloy workflow layer |
 | **Opaque AI outputs** | All recommendations include source citations, confidence scores, and retrieval provenance |
-| **Audit accountability** | Every action, approval, and decision generates an immutable audit event with actor attribution |
+| **Audit accountability** | Every action, approval, and decision generates an immutable audit event with actor attribution via proof-chain |
 | **Access control** | 11-role RBAC with org-scoped tenant isolation. Every route and WebSocket channel is access-controlled |
 | **Multi-tenancy** | All database queries include org_id scoping — cross-tenant access is architecturally prevented |
 | **Data in transit** | TLS 1.3 for all connections. HMAC-signed WebSocket tickets with 5-minute TTL |
+| **Cross-domain isolation** | PRISM Bus ensures domain events are routed with provenance — no lateral data leakage between verticals |
 
-See [Trust Center](docs/trust/trust-center.md) · [Security Posture](docs/trust/security-posture.md) · [Wiki: Trust Center](../../wiki/Trust-Center)
+See [Trust Center](docs/trust/trust-center.md) · [Security Posture](docs/trust/security-posture.md)
 
 ---
 
@@ -166,28 +252,30 @@ See [Trust Center](docs/trust/trust-center.md) · [Security Posture](docs/trust/
 
 | Environment | Purpose | Status |
 |-------------|---------|--------|
-| **Replit Workspace** | Active development, internal preview | Live |
+| **Replit Workspace** | Active development, internal preview | Live — 13 workflows |
 | **Azure Production** | Customer-facing production deployment | Production-ready architecture |
 
-See [Deployment Model](docs/trust/deployment-model.md) · [Wiki: Deployment Model](../../wiki/Deployment-Model)
+See [Deployment Model](docs/trust/deployment-model.md)
 
 ---
 
 ## Documentation Map
 
-| Area | Document | Wiki |
-|------|----------|------|
-| System architecture | [system-overview.md](docs/architecture/system-overview.md) | [Architecture](../../wiki/Architecture) |
-| Platform map | [platform-map.md](docs/architecture/platform-map.md) | — |
-| Data flow | [data-flow.md](docs/architecture/data-flow.md) | — |
-| Trust center | [trust-center.md](docs/trust/trust-center.md) | [Trust Center](../../wiki/Trust-Center) |
-| Security posture | [security-posture.md](docs/trust/security-posture.md) | [Security Posture](../../wiki/Security-Posture) |
-| Deployment model | [deployment-model.md](docs/trust/deployment-model.md) | [Deployment Model](../../wiki/Deployment-Model) |
-| Platform thesis | [platform-thesis.md](docs/investor/platform-thesis.md) | [Investor Overview](../../wiki/Investor-Overview) |
-| Product readiness | [product-readiness.md](docs/investor/product-readiness.md) | — |
-| Buyer use cases | [use-cases.md](docs/buyer/use-cases.md) | [Buyer Use Cases](../../wiki/Buyer-Use-Cases) |
-| Release notes | [v0.1.0.md](docs/releases/v0.1.0.md) | [Roadmap](../../wiki/Roadmap) |
-| Public mirror policy | [public-mirror-policy.md](docs/public/public-mirror-policy.md) | — |
+| Area | Document |
+|------|----------|
+| System architecture | [system-overview.md](docs/architecture/system-overview.md) |
+| Platform map | [platform-map.md](docs/architecture/platform-map.md) |
+| Data flow | [data-flow.md](docs/architecture/data-flow.md) |
+| Trust center | [trust-center.md](docs/trust/trust-center.md) |
+| Security posture | [security-posture.md](docs/trust/security-posture.md) |
+| Deployment model | [deployment-model.md](docs/trust/deployment-model.md) |
+| Platform thesis | [platform-thesis.md](docs/investor/platform-thesis.md) |
+| Product readiness | [product-readiness.md](docs/investor/product-readiness.md) |
+| Investor overview | [investor-overview.md](docs/investor/investor-overview.md) |
+| Buyer use cases | [use-cases.md](docs/buyer/use-cases.md) |
+| Ops runbook | [ops-runbook.md](docs/ops-runbook.md) |
+| Release notes | [v0.1.0.md](docs/releases/v0.1.0.md) |
+| Changelog | [CHANGELOG.md](CHANGELOG.md) |
 
 ---
 
@@ -195,29 +283,27 @@ See [Deployment Model](docs/trust/deployment-model.md) · [Wiki: Deployment Mode
 
 | You are... | Start with |
 |------------|------------|
-| **Investor** | [Platform Thesis](docs/investor/platform-thesis.md) → [Product Readiness](docs/investor/product-readiness.md) → [Wiki: Investor Overview](../../wiki/Investor-Overview) |
-| **Technical Reviewer** | [Architecture](docs/architecture/system-overview.md) → [Data Flow](docs/architecture/data-flow.md) → [Wiki: Architecture](../../wiki/Architecture) |
-| **Enterprise Buyer** | [Trust Center](docs/trust/trust-center.md) → [Use Cases](docs/buyer/use-cases.md) → [Wiki: Buyer Use Cases](../../wiki/Buyer-Use-Cases) |
+| **Investor** | [Platform Thesis](docs/investor/platform-thesis.md) → [Product Readiness](docs/investor/product-readiness.md) → [Why Now](docs/investor/why-now.md) |
+| **Technical Reviewer** | [Architecture](docs/architecture/system-overview.md) → [Data Flow](docs/architecture/data-flow.md) → [Trust Center](docs/trust/trust-center.md) |
+| **Enterprise Buyer** | [Trust Center](docs/trust/trust-center.md) → [Use Cases](docs/buyer/use-cases.md) → [Solution Brief](docs/buyer/solution-brief.md) |
 | **Design/Product** | [Platform Map](docs/architecture/platform-map.md) → [Solution Brief](docs/buyer/solution-brief.md) |
-| **General** | [Wiki Home](../../wiki) → [Platform Overview](../../wiki/Platform-Overview) |
 
 ---
 
 ## Release Status
 
-**Current:** v0.1.0 — Initial Public Platform Release (2026-04-01)
+**Current:** v0.1.0 — Platform Ecosystem Release (April 2026)
+
+**Highlights:**
+- 10 production web applications across 8 industry verticals
+- CORTEX unified mobile command center (all domains in one native app)
+- Command Portal with real-time SSE, executive briefing, global search
+- 644 database tables, 2,331 API endpoints, 37 shared libraries
+- Full audit trail, approval chains, and AI governance
 
 **Phase 2 (active):** Azure production deployment, Stripe billing activation, enterprise SSO, OpenAPI developer portal.
 
-See [CHANGELOG.md](CHANGELOG.md) · [ROADMAP.md](ROADMAP.md) · [Wiki: Roadmap](../../wiki/Roadmap)
-
----
-
-## Public Mirror Notice
-
-This repository is a curated public mirror of the SZL Holdings platform workspace. The live Replit workspace is the active source of truth. Proprietary modules, internal tooling, and sensitive configuration are intentionally excluded from the public surface.
-
-See [Public Mirror Policy](docs/public/public-mirror-policy.md) for details.
+See [CHANGELOG.md](CHANGELOG.md)
 
 ---
 
