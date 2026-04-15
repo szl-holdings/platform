@@ -463,6 +463,60 @@ router.post("/stripe/checkout", async (req: Request, res: Response) => {
   }
 });
 
+const COMMAND_PLANS = {
+  "command-pro-monthly": { priceEnv: "STRIPE_PRICE_COMMAND_PRO_MONTHLY", name: "Command Pro (Monthly)", interval: "month" },
+  "command-pro-annual":  { priceEnv: "STRIPE_PRICE_COMMAND_PRO_ANNUAL",  name: "Command Pro (Annual)",  interval: "year"  },
+} as const;
+
+router.get("/billing/command/plans", (_req, res) => {
+  const plans = Object.entries(COMMAND_PLANS).map(([planId, plan]) => ({
+    planId,
+    name: plan.name,
+    interval: plan.interval,
+    configured: !!process.env[plan.priceEnv],
+    stripePriceEnv: plan.priceEnv,
+  }));
+  sendSuccess(res, plans);
+});
+
+router.post("/billing/command/subscribe", async (req: Request, res: Response) => {
+  try {
+    const { planId, email, successUrl, cancelUrl } = req.body as {
+      planId?: string; email?: string; successUrl?: string; cancelUrl?: string;
+    };
+
+    if (!planId || !successUrl || !cancelUrl) {
+      sendBadRequest(res, "planId, successUrl, and cancelUrl are required");
+      return;
+    }
+
+    const plan = COMMAND_PLANS[planId as keyof typeof COMMAND_PLANS];
+    if (!plan) {
+      sendBadRequest(res, `Unknown Command plan "${planId}". Valid: ${Object.keys(COMMAND_PLANS).join(", ")}`);
+      return;
+    }
+
+    const priceId = process.env[plan.priceEnv];
+    if (!priceId) {
+      sendError(res, `Stripe price not configured for "${planId}". Set ${plan.priceEnv}.`, 503);
+      return;
+    }
+
+    const session = await services.stripe.createCheckoutSession({
+      priceId,
+      mode: "subscription",
+      successUrl,
+      cancelUrl,
+      customerEmail: email,
+      metadata: { planId, planName: plan.name, product: "command" },
+    });
+
+    sendSuccess(res, { sessionId: session.id, url: session.url });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to create Command subscription checkout");
+  }
+});
+
 const TERRA_PLANS = {
   "terra-starter-monthly":   { priceEnv: "STRIPE_PRICE_TERRA_STARTER_MONTHLY",  name: "Terra Starter (Monthly)",  interval: "month" },
   "terra-starter-annual":    { priceEnv: "STRIPE_PRICE_TERRA_STARTER_ANNUAL",   name: "Terra Starter (Annual)",   interval: "year"  },

@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db, usersTable, sessionsTable, rolesTable, userRolesTable, toCanonicalRole, type RoleName } from "@szl-holdings/db";
 import { eq, desc, and } from "drizzle-orm";
-import { randomBytes } from "crypto";
+import { randomBytes, pbkdf2Sync, timingSafeEqual } from "crypto";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendForbidden, sendError, handleRouteError } from "../lib/api-response";
 import { logActivity } from "../lib/activity-logger";
@@ -246,6 +246,193 @@ router.post("/auth/ws-ticket", async (req, res) => {
     sendSuccess(res, { ticket, expiresIn: 300 });
   } catch (err) {
     handleRouteError(res, err, "Failed to issue WS ticket");
+  }
+});
+
+const registerBodySchema = z.object({
+  displayName: z.string().min(1, "displayName is required"),
+  email: z.string().email("Valid email is required"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+function hashPassword(password: string, salt: string): string {
+  return pbkdf2Sync(password, salt, 100_000, 64, "sha512").toString("hex");
+}
+
+function generateSalt(): string {
+  return randomBytes(32).toString("hex");
+}
+
+function generateVerificationToken(): string {
+  return randomBytes(48).toString("hex");
+}
+
+router.post("/auth/register", validateBody(registerBodySchema), async (req, res) => {
+  try {
+    const { displayName, email, password } = req.body as z.infer<typeof registerBodySchema>;
+
+    const [existing] = await db
+      .select({ id: usersTable.id })
+      .from(usersTable)
+      .where(eq(usersTable.email, email))
+      .limit(1);
+
+    if (existing) {
+      sendError(res, "An account with this email already exists. Please log in.", 409, "EMAIL_ALREADY_REGISTERED");
+      return;
+    }
+
+    const salt = generateSalt();
+    const passwordHash = `pbkdf2:${salt}:${hashPassword(password, salt)}`;
+
+    const verificationToken = generateVerificationToken();
+    const tokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    const [user] = await db.insert(usersTable).values({
+      displayName,
+      email,
+      replitId: null,
+      isActive: false,
+      passwordHash,
+      emailVerificationToken: verificationToken,
+      emailVerificationTokenExpiresAt: tokenExpiresAt,
+    }).returning({ id: usersTable.id, email: usersTable.email, displayName: usersTable.displayName });
+
+    await logActivity(req, "create", "user", String(user.id)).catch(() => {});
+
+    sendCreated(res, {
+      userId: user.id,
+      email: user.email,
+      displayName: user.displayName,
+      message: "Account created. Check your email to verify and activate your account.",
+    });
+  } catch (err) {
+    req.log?.error({ err }, "Registration failed");
+    handleRouteError(res, err, "Registration failed");
+  }
+});
+
+router.get("/auth/verify-email", async (req, res) => {
+  try {
+    const token = typeof req.query.token === "string" ? req.query.token : null;
+    if (!token) {
+      sendBadRequest(res, "Missing verification token");
+      return;
+    }
+
+    const [user] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.emailVerificationToken, token))
+      .limit(1);
+
+    if (!user) {
+      sendError(res, "Invalid or expired verification link.", 400, "INVALID_TOKEN");
+      return;
+    }
+
+    if (user.emailVerificationTokenExpiresAt && user.emailVerificationTokenExpiresAt < new Date()) {
+      sendError(res, "Verification link has expired. Please register again.", 400, "TOKEN_EXPIRED");
+      return;
+    }
+
+    await db
+      .update(usersTable)
+      .set({
+        isActive: true,
+        emailVerifiedAt: new Date(),
+        emailVerificationToken: null,
+        emailVerificationTokenExpiresAt: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(usersTable.id, user.id));
+
+    const sessionToken = randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+    await db.insert(sessionsTable).values({
+      userId: user.id,
+      token: sessionToken,
+      expiresAt,
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+    });
+
+    sendSuccess(res, {
+      verified: true,
+      token: sessionToken,
+      expiresAt: expiresAt.toISOString(),
+      user: {
+        id: user.id,
+        displayName: user.displayName,
+        email: user.email,
+      },
+    });
+  } catch (err) {
+    req.log?.error({ err }, "Email verification failed");
+    handleRouteError(res, err, "Email verification failed");
+  }
+});
+
+router.post("/auth/login-password", async (req, res) => {
+  try {
+    const { email, password } = req.body as { email?: string; password?: string };
+    if (!email || !password) {
+      sendBadRequest(res, "email and password are required");
+      return;
+    }
+
+    const [user] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, email))
+      .limit(1);
+
+    const invalidMsg = "Invalid email or password.";
+    if (!user || !user.passwordHash) {
+      sendError(res, invalidMsg, 401, "INVALID_CREDENTIALS");
+      return;
+    }
+
+    const [, salt, storedHash] = user.passwordHash.split(":");
+    if (!salt || !storedHash) {
+      sendError(res, invalidMsg, 401, "INVALID_CREDENTIALS");
+      return;
+    }
+
+    const candidateHash = pbkdf2Sync(password, salt, 100_000, 64, "sha512").toString("hex");
+    const isValid = timingSafeEqual(Buffer.from(storedHash, "hex"), Buffer.from(candidateHash, "hex"));
+    if (!isValid) {
+      sendError(res, invalidMsg, 401, "INVALID_CREDENTIALS");
+      return;
+    }
+
+    if (!user.isActive) {
+      sendError(res, "Account is not yet verified. Please check your email.", 403, "EMAIL_NOT_VERIFIED");
+      return;
+    }
+
+    const sessionToken = randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+    await db.insert(sessionsTable).values({
+      userId: user.id,
+      token: sessionToken,
+      expiresAt,
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+    });
+
+    await db.update(usersTable).set({ lastLoginAt: new Date(), updatedAt: new Date() }).where(eq(usersTable.id, user.id));
+
+    sendSuccess(res, {
+      token: sessionToken,
+      expiresAt: expiresAt.toISOString(),
+      user: { id: user.id, displayName: user.displayName, email: user.email },
+    });
+  } catch (err) {
+    req.log?.error({ err }, "Password login failed");
+    handleRouteError(res, err, "Password login failed");
   }
 });
 
