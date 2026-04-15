@@ -1523,6 +1523,8 @@ export class NuroMeshOrchestrator {
     const preRoutingSelfModel = selfModelEngine.getSelfModel();
     const preRoutingEmotional = emotionalSignals.getState();
 
+    const uncertaintyByAgent = new Map<string, import("./consciousness/metacognitive-monitor.js").PredictiveUncertainty>();
+    let maxUncertainty = 0;
     for (const agent of AGENT_REGISTRY) {
       const profile = preRoutingSelfModel.capabilities.find(c => c.agentId === agent.id);
       if (!profile) continue;
@@ -1536,6 +1538,10 @@ export class NuroMeshOrchestrator {
         queryLength: query.length,
         recentFailures: profile.recentTrend === "declining" ? 3 : 0,
       });
+      uncertaintyByAgent.set(agent.id, uncertainty);
+      if (uncertainty.predictedFailureProbability > maxUncertainty) {
+        maxUncertainty = uncertainty.predictedFailureProbability;
+      }
       if (uncertainty.predictedFailureProbability > 0.7) {
         innerMonologue.addThought(
           "doubt",
@@ -1546,18 +1552,34 @@ export class NuroMeshOrchestrator {
       }
     }
 
-    const uncertaintySignals = AGENT_REGISTRY.map(agent => {
-      const profile = preRoutingSelfModel.capabilities.find(c => c.agentId === agent.id);
-      if (!profile) return 0;
-      return metacognitiveMonitor.predictUncertainty({
-        agentId: agent.id, domain: agent.domain, queryComplexity: query.length,
-        agentSuccessRate: profile.successRate, agentAvgConfidence: profile.avgConfidence,
-        knowledgeGapDomains: preRoutingMetacog.currentAssessment?.knowledgeGaps ?? [],
-        queryLength: query.length, recentFailures: profile.recentTrend === "declining" ? 3 : 0,
-      }).predictedFailureProbability;
-    });
-    const maxUncertainty = Math.max(...uncertaintySignals, 0);
     const lowCertainty = preRoutingMetacog.rollingCertainty < 0.5;
+
+    const preRoutingAppraisal = emotionalSignals.appraise({
+      event: `Pre-routing: "${query.slice(0, 80)}"`,
+      novelty: prediction.confidence < 50 ? 0.8 : 0.3,
+      intrinsicPleasantness: preRoutingEmotional.valence.positive,
+      goalRelevance: maxUncertainty > 0.5 ? 0.8 : 0.5,
+      copingPotential: preRoutingMetacog.rollingCertainty,
+      normCompatibility: preRoutingSelfModel.overallHealth === "optimal" ? 0.9 : preRoutingSelfModel.overallHealth === "good" ? 0.7 : 0.4,
+    });
+
+    const preRoutingForecast = emotionalSignals.forecastAffect(
+      `Routing "${query.slice(0, 60)}" with ${maxUncertainty > 0.5 ? "high" : "moderate"} uncertainty`,
+      {
+        confidence: Math.round(preRoutingMetacog.rollingCertainty * 100),
+        stakes: maxUncertainty > 0.7 ? "high" : maxUncertainty > 0.4 ? "medium" : "low",
+        novelty: prediction.confidence < 50 ? 0.8 : 0.3,
+      },
+    );
+
+    if (preRoutingForecast.predictedEmotion === "frustration" || preRoutingForecast.predictedEmotion === "caution") {
+      innerMonologue.addThought(
+        "reflection",
+        `Affective forecast: predicting ${preRoutingForecast.predictedEmotion} (${(preRoutingForecast.predictedIntensity * 100).toFixed(0)}% intensity) — adjusting routing caution level.`,
+        "cautious",
+        Math.round(preRoutingForecast.predictedIntensity * 100),
+      );
+    }
 
     let activeHypotheses: import("./consciousness/metacognitive-monitor.js").MultiHypothesisBranch[] = [];
     if (maxUncertainty > 0.5 || lowCertainty) {
@@ -1645,6 +1667,42 @@ export class NuroMeshOrchestrator {
         }
       }
 
+      if (preRoutingAppraisal.goalRelevance > 0.6) {
+        for (const score of routingScores) {
+          const agentUncertainty = uncertaintyByAgent.get(
+            AGENT_REGISTRY.find(a => a.domain === score.domain)?.id ?? "",
+          );
+          if (agentUncertainty && agentUncertainty.predictedFailureProbability < 0.3) {
+            score.combinedScore = Math.min(1, score.combinedScore * 1.1);
+          }
+          if (agentUncertainty && agentUncertainty.predictedFailureProbability > 0.6) {
+            score.combinedScore *= 0.85;
+          }
+        }
+      }
+      if (preRoutingAppraisal.copingPotential < 0.4) {
+        for (const score of routingScores) {
+          if (score.domain === "orchestration" || score.domain === "security") {
+            score.combinedScore = Math.min(1, score.combinedScore * 1.15);
+          }
+        }
+      }
+      if (preRoutingAppraisal.novelty > 0.6) {
+        for (const score of routingScores) {
+          if (score.domain === "intelligence") {
+            score.combinedScore = Math.min(1, score.combinedScore * 1.1);
+          }
+        }
+      }
+
+      if (preRoutingForecast.predictedEmotion === "frustration" && preRoutingForecast.predictedIntensity > 0.5) {
+        for (const score of routingScores) {
+          if (score.domain === "security" || score.domain === "orchestration") {
+            score.combinedScore = Math.min(1, score.combinedScore * 1.1);
+          }
+        }
+      }
+
       routingScores.sort((a, b) => b.combinedScore - a.combinedScore);
 
       // A2A discovery-based routing — falls back to keyword rules if unavailable
@@ -1699,15 +1757,6 @@ export class NuroMeshOrchestrator {
     const gwtContext = cognitiveWorkspace.buildGWTContext(gwtBroadcast);
 
     cognitiveWorkspace.reportAttentionSchema(routedDomains);
-
-    const appraisal = emotionalSignals.appraise({
-      event: `Orchestration: "${query.slice(0, 80)}"`,
-      novelty: prediction.confidence < 50 ? 0.8 : 0.3,
-      intrinsicPleasantness: preRoutingEmotional.valence.positive,
-      goalRelevance: routedDomains.length > 1 ? 0.7 : 0.5,
-      copingPotential: preRoutingMetacog.rollingCertainty,
-      normCompatibility: preRoutingSelfModel.overallHealth === "optimal" ? 0.9 : preRoutingSelfModel.overallHealth === "good" ? 0.7 : 0.4,
-    });
 
     const queryTypeLower = query.toLowerCase();
     const QUERY_TYPE_KEYWORDS_INLINE: Record<string, string[]> = {
