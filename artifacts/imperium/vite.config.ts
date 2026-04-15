@@ -9,30 +9,12 @@ process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 const port = Number(process.env.PORT) || 3002;
 const basePath = process.env.BASE_PATH || "/imperium/";
 
-function healthCheckPlugin() {
-  return {
-    name: "health-check",
-    apply: "serve" as const,
-    configureServer(server: any) {
-      server.middlewares.use((req: any, res: any, next: any) => {
-        if (req.url === "/" || req.url === "") {
-          res.writeHead(200, { "Content-Type": "text/plain" });
-          res.end("ok");
-          return;
-        }
-        next();
-      });
-    },
-  };
-}
-
 export default defineConfig({
   base: basePath,
   plugins: [
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
-    healthCheckPlugin(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [
@@ -82,7 +64,7 @@ export default defineConfig({
   server: {
     port,
     strictPort: true,
-    host: "::",
+    host: "0.0.0.0",
     allowedHosts: true,
     hmr: { clientPort: 443 },
     fs: {
@@ -92,7 +74,7 @@ export default defineConfig({
   },
   preview: {
     port,
-    host: "::",
+    host: "0.0.0.0",
     allowedHosts: true,
   },
 });

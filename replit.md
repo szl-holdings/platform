@@ -10,6 +10,17 @@ Ask before making major changes.
 Do not make changes to the folder `Z`.
 Do not make changes to the file `Y`.
 
+## Demo Assets
+A full investor showcase package lives in `demo-assets/`:
+- `screenshots/` — 9 high-quality app screenshots (szl-holdings, carlota-jo, terra, vessels, lyte, prism-counsel, stephen-site, command, firestorm-placeholder)
+- `linkedin-carousel.md` — 10-slide carousel design brief for Canva/Figma production
+- `linkedin-post-longform.md` — ~1,100-word long-form post targeting Series A investors
+- `linkedin-series.md` — 7-post series scheduled across 2-3 weeks
+- `README.md` — full ecosystem index and campaign instructions
+
+## Routing Architecture Fix (April 2026)
+All 11 web artifacts previously shared `localPort = 9090` via a `reusePort` health-check proxy, causing routing collisions. Fixed by assigning each app a unique proxy port in both `vite.config.ts` and `.replit-artifact/artifact.toml`. Running apps (carlota-jo, terra, vessels, lyte-command-center, prism-counsel, stephen-site, command) have the fix active via hot-reload. Firestorm and imperium have all config files updated and will start correctly on the next platform restart.
+
 ## System Architecture
 
 ### Core Technologies

@@ -12,7 +12,7 @@ version = "1.0.0"
 [[services]]
 name = "web"
 paths = [ "/terra/" ]
-localPort = 9090
+localPort = 25101
 
 [services.development]
 run = "bash -c 'cd /home/runner/workspace/artifacts/terra && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
@@ -28,4 +28,5 @@ to = "/index.html"
 
 [services.env]
 VITE_PORT = "25100"
+PROXY_PORT = "25101"
 BASE_PATH = "/terra/"

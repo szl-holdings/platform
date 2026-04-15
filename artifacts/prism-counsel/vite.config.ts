@@ -9,6 +9,7 @@ import fs from "fs";
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
 const port = Number(process.env.VITE_PORT) || 26500;
+const proxyPort = Number(process.env.PROXY_PORT) || 26501;
 const basePath = process.env.BASE_PATH || "/prism-counsel/";
 
 const libRoot = path.resolve(import.meta.dirname, "../../lib");
@@ -76,11 +77,15 @@ const workspaceAliases = buildWorkspaceAliases();
           upstream.on("error", () => { if (!res.headersSent) { res.writeHead(503); res.end("Upstream not ready"); } });
           req.pipe(upstream, { end: true });
         });
-        proxyServer.listen({ port: 9090, host: "0.0.0.0", reusePort: true }, () => {
-          console.log("[health-check] Proxy listening on port 9090 (reusePort)");
-        });
-        proxyServer.on("error", (err: NodeJS.ErrnoException) => {
-          console.warn("[health-check] Port 9090 bind failed:", err.code);
+        await new Promise<void>((resolve) => {
+          proxyServer.listen({ port: proxyPort, host: "0.0.0.0" }, () => {
+            console.log("[health-check] Proxy listening on port " + proxyPort);
+            resolve();
+          });
+          proxyServer.on("error", (err: NodeJS.ErrnoException) => {
+            console.warn("[health-check] Proxy bind failed:", err.code);
+            resolve();
+          });
         });
       },
     };
