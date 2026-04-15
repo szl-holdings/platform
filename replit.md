@@ -227,6 +227,18 @@ All pages are auth-gated via `<RequireAuth>`. A "Fund Intel" dropdown menu was a
 - Query persistence (AsyncStorage) added to stephen-mobile (previously missing)
 - vessels-mobile crash fixed (EXPO_NO_TELEMETRY=1 + --clear flags)
 
+## CORTEX Mobile — Unified Command Super App (Task #534)
+- **`artifacts/cortex-mobile`** (`@workspace/cortex-mobile`) — Unified Expo super app consolidating all 7 vertical mobile apps into a single command surface.
+- **Workspace Switcher:** `WorkspaceContext` with 7 verticals (Defense, Fleet, Properties, Operations, Advisory, Portfolio, Founder), each with unique accent color, copilot persona, and tab configuration. Full-screen modal workspace switcher with alert badges and health indicators.
+- **Adaptive Tab Navigation:** 4 tabs (Command, Signals, Feed, Copilot) that dynamically adapt labels, icons, and content based on the active workspace. Uses NativeTabs (iOS 26 Liquid Glass) with BlurView/classic fallback.
+- **CORTEX Feed:** Unified cross-workspace intelligence feed aggregating critical alerts, insights, actions, and updates from all 7 domains. Tap-to-switch workspace navigation.
+- **Workspace-Adaptive Copilot:** Per-workspace AI copilot persona (Sentinel, Helmsman, Terrain, Lyte Ops, Muse, Navigator, Stephen AI) with suggested questions and domain-specific system prompts.
+- **Command Dashboard:** Workspace-aware metrics grid with demo data for all 7 verticals, showing KPIs like Threat Level, Fleet Status, Pipeline Value, Service Health, etc.
+- **Signals Screen:** Severity-coded signal feed (critical/high/medium/low/info) with workspace-specific demo alerts from relevant sources (SIEM, AIS, MLS, APM, CRM, etc.).
+- **Shared Infrastructure:** Full provider stack (PrismBus, Auth, Biometric, Sync, Notifications, QueryClient, ThemeProvider, CopilotFab), SpotlightFab command palette, BiometricLockScreen.
+- **PrismDomain:** Added "cortex" to `PrismDomain` union type in `lib/prism-bus/src/context.ts` and bridge tools in `lib/prism-bus/src/bridge.ts`.
+- **Note:** Artifact registration blocked by 19-artifact limit. Directory fully scaffolded and installable but not formally registered as an artifact. Workflow configuration pending.
+
 ## Nuro Mesh Graph Intelligence (Task #541)
 
 Production-grade graph capabilities and OSINT feed integration extending the Nuro Mesh AI engine:

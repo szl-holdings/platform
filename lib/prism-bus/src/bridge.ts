@@ -48,6 +48,7 @@ export const PRISM_DOMAIN_TOOLS: Record<PrismDomain, string[]> = {
     "get_platform_status",
   ],
   stephen: ["alloy_research", "alloy_create_artifact", "get_platform_info"],
+  cortex: ["alloy_research", "alloy_create_artifact", "alloy_launch_workflow", "query_audit_log", "get_portfolio", "get_platform_status"],
   global: [],
 };
 

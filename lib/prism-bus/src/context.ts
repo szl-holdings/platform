@@ -6,6 +6,7 @@ export type PrismDomain =
   | "carlota-jo"
   | "szl-holdings"
   | "stephen"
+  | "cortex"
   | "global";
 
 export type PrismPermission =
