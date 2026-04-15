@@ -20,15 +20,24 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab, setUploadAuthTokenGetter } from "@szl-holdings/mobile-shared";
+import {
+  ErrorBoundary,
+  NotificationProvider,
+  OfflineBanner,
+  ThemeProvider,
+  CopilotFab,
+  setUploadAuthTokenGetter,
+  BiometricProvider,
+  BiometricLockScreen,
+  useBiometric,
+} from "@szl-holdings/mobile-shared";
+import {
+  configurePushNotificationHandler,
+  usePushNotificationsBase,
+} from "@szl-holdings/mobile-shared/notifications";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { AuthProvider } from "@/context/AuthContext";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
-import {
-  registerForPushNotifications,
-  addNotificationReceivedListener,
-  addNotificationResponseListener,
-} from "@/lib/notifications";
 
 if (process.env.EXPO_PUBLIC_DOMAIN) {
   setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
@@ -53,6 +62,8 @@ setUploadAuthTokenGetter(() => {
   }
   return SecureStore.getItemAsync(AUTH_TOKEN_KEY);
 });
+
+configurePushNotificationHandler();
 
 SplashScreen.preventAutoHideAsync();
 SystemUI.setBackgroundColorAsync("#020d18");
@@ -94,7 +105,40 @@ persistQueryClient({
   buster: "v1",
 });
 
-function RootLayoutNav() {
+function AppShell() {
+  const { isLocked, isEnabled } = useBiometric();
+
+  usePushNotificationsBase({
+    onTokenAcquired: async (token) => {
+      console.log("[Push] Vessels token acquired:", token.substring(0, 20) + "...");
+    },
+    onNotificationReceived: (notification) => {
+      const data = notification.request.content.data as Record<string, unknown>;
+      if (data?.severity === "critical") {
+        queryClient.invalidateQueries({ queryKey: ["fleet-exceptions-mobile"] });
+      }
+    },
+    onNotificationResponse: (response) => {
+      const data = response.notification.request.content.data as Record<string, unknown>;
+      if (typeof data?.vesselId === "number") {
+        queryClient.invalidateQueries({ queryKey: ["vessel-detail", data.vesselId] });
+      }
+    },
+  });
+
+  if (isEnabled && isLocked) {
+    return (
+      <BiometricLockScreen
+        config={{
+          appName: "Vessels",
+          subtitle: "Authenticate to access Fleet Command",
+          accentColor: "#0ea5e9",
+          backgroundColor: "#020d18",
+        }}
+      />
+    );
+  }
+
   return (
     <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -121,29 +165,6 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, fontError]);
 
-  useEffect(() => {
-    registerForPushNotifications().catch(() => {});
-
-    const receivedSub = addNotificationReceivedListener((notification) => {
-      const data = notification.request.content.data as Record<string, unknown>;
-      if (data?.severity === "critical") {
-        queryClient.invalidateQueries({ queryKey: ["fleet-exceptions-mobile"] });
-      }
-    });
-
-    const responseSub = addNotificationResponseListener((response) => {
-      const data = response.notification.request.content.data as Record<string, unknown>;
-      if (typeof data?.vesselId === "number") {
-        queryClient.invalidateQueries({ queryKey: ["vessel-detail", data.vesselId] });
-      }
-    });
-
-    return () => {
-      receivedSub.remove();
-      responseSub.remove();
-    };
-  }, []);
-
   if (!fontsLoaded && !fontError) return null;
 
   return (
@@ -153,30 +174,32 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <NotificationProvider apiBase={VESSELS_API_BASE} getAuthToken={getVesselsAuthToken}>
-              <GestureHandlerRootView style={{ flex: 1 }}>
-                <ThemeProvider defaultMode="dark" storageKey="vessels-theme-mode">
-                  <View style={{ flex: 1 }}>
-                    <RootLayoutNav />
-                    <OfflineBanner accentColor="#ef4444" />
-                    <CopilotFab config={{
-                      name: "Helmsman",
-                      icon: "⚓",
-                      agentId: "vessels",
-                      accentColor: "#0ea5e9",
-                      welcomeMessage: "I'm Helmsman, your maritime intelligence analyst. Ask about fleet status, voyage economics, route risk, or AIS anomalies.",
-                      placeholderText: "Ask about fleet & voyages...",
-                      isAdvisoryAgent: true,
-                      conversationKey: "vessels-mobile",
-                      suggestedQuestions: [
-                        "What vessels have exceptions right now?",
-                        "Summarise fleet performance this week",
-                        "Are there any route risk alerts?",
-                      ],
-                      systemPrompt: "You are Helmsman, the AI copilot for Vessels Maritime Intelligence. You specialize in fleet tracking, AIS data, voyage economics, route risk, dark vessel detection, and maritime compliance. Be operational and precise. IMPORTANT: You are an ADVISORY AGENT — all voyage decisions require human confirmation.",
-                    }} />
-                  </View>
-                </ThemeProvider>
-              </GestureHandlerRootView>
+              <BiometricProvider config={{ storagePrefix: "vessels", appName: "Vessels", promptMessage: "Authenticate to access Vessels Fleet Command" }}>
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                  <ThemeProvider defaultMode="dark" storageKey="vessels-theme-mode">
+                    <View style={{ flex: 1 }}>
+                      <AppShell />
+                      <OfflineBanner accentColor="#ef4444" />
+                      <CopilotFab config={{
+                        name: "Helmsman",
+                        icon: "⚓",
+                        agentId: "vessels",
+                        accentColor: "#0ea5e9",
+                        welcomeMessage: "I'm Helmsman, your maritime intelligence analyst. Ask about fleet status, voyage economics, route risk, or AIS anomalies.",
+                        placeholderText: "Ask about fleet & voyages...",
+                        isAdvisoryAgent: true,
+                        conversationKey: "vessels-mobile",
+                        suggestedQuestions: [
+                          "What vessels have exceptions right now?",
+                          "Summarise fleet performance this week",
+                          "Are there any route risk alerts?",
+                        ],
+                        systemPrompt: "You are Helmsman, the AI copilot for Vessels Maritime Intelligence. You specialize in fleet tracking, AIS data, voyage economics, route risk, dark vessel detection, and maritime compliance. Be operational and precise. IMPORTANT: You are an ADVISORY AGENT — all voyage decisions require human confirmation.",
+                      }} />
+                    </View>
+                  </ThemeProvider>
+                </GestureHandlerRootView>
+              </BiometricProvider>
             </NotificationProvider>
           </AuthProvider>
         </QueryClientProvider>

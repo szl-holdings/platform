@@ -22,6 +22,7 @@
       "bundleIdentifier": "com.vessels.maritime.mobile",
       "buildNumber": "1",
       "infoPlist": {
+        "NSFaceIDUsageDescription": "Vessels uses Face ID for secure access to fleet operations.",
         "NSLocationWhenInUseUsageDescription": "Vessels uses your location to show nearby fleet activity.",
         "NSCameraUsageDescription": "Vessels uses your camera to scan vessel QR codes.",
         "NSUserNotificationUsageDescription": "Vessels sends vessel alerts, compliance warnings, and port arrival notifications to keep your fleet operations on track.",
@@ -58,6 +59,8 @@
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.VIBRATE",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
         "android.permission.POST_NOTIFICATIONS"
       ],
       "googleServicesFile": "./google-services.json"
@@ -75,6 +78,12 @@
       "expo-font",
       "expo-web-browser",
       "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow Vessels to use Face ID for secure fleet access."
+        }
+      ],
       [
         "expo-notifications",
         {

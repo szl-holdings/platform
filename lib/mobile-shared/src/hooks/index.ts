@@ -18,4 +18,7 @@ export {
   type UseOfflineSyncResult,
 } from "./useOfflineSync";
 export { useOfflineQueue, type QueuedMutation } from "./useOfflineQueue";
+export { useDeepLinking, type DeepLinkRoute, type UseDeepLinkingOptions } from "./useDeepLinking";
+export { useBackgroundRefresh, type BackgroundRefreshTask, type UseBackgroundRefreshOptions } from "./useBackgroundRefresh";
+export { useAppReady, type UseAppReadyOptions, type AppReadyResult } from "./useAppReady";
 

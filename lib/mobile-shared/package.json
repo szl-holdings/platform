@@ -15,7 +15,10 @@
     "expo": "*",
     "expo-blur": "*",
     "expo-device": "*",
+    "expo-linking": "*",
+    "expo-local-authentication": "*",
     "expo-notifications": "*",
+    "expo-secure-store": "*",
     "react": "*",
     "react-native": "*",
     "react-native-keyboard-controller": "*",
@@ -31,7 +34,16 @@
     "expo-device": {
       "optional": true
     },
+    "expo-linking": {
+      "optional": true
+    },
+    "expo-local-authentication": {
+      "optional": true
+    },
     "expo-notifications": {
+      "optional": true
+    },
+    "expo-secure-store": {
       "optional": true
     },
     "react-native-keyboard-controller": {
@@ -54,6 +66,9 @@
     "expo-notifications": "~0.30.6",
     "react": "catalog:",
     "react-native": "0.81.5",
+    "expo-linking": "~8.0.10",
+    "expo-local-authentication": "~17.0.8",
+    "expo-secure-store": "~15.0.8",
     "react-native-keyboard-controller": "1.18.5"
   },
   "dependencies": {

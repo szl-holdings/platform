@@ -32,3 +32,8 @@ export {
 } from "./hooks/useFileUpload";
 export { useEcosystemTabBarScreenOptions, EcosystemTabBarBackground, type EcosystemTabBarConfig, type EcosystemTabBarBackgroundProps } from "./components/EcosystemTabBar";
 export { CopilotFab, type MobileCopilotConfig } from "./components/CopilotFab";
+export { BiometricLockScreen, type BiometricLockScreenConfig } from "./components/BiometricLockScreen";
+export { BiometricProvider, useBiometric, promptBiometric, type BiometricConfig, type BiometricContextValue } from "./context/BiometricContext";
+export { useDeepLinking, type DeepLinkRoute, type UseDeepLinkingOptions } from "./hooks/useDeepLinking";
+export { useBackgroundRefresh, type BackgroundRefreshTask, type UseBackgroundRefreshOptions } from "./hooks/useBackgroundRefresh";
+export { useAppReady, type UseAppReadyOptions, type AppReadyResult } from "./hooks/useAppReady";

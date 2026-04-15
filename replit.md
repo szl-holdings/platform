@@ -211,6 +211,21 @@ A new `/fund` route section adds the industry's first agentic fund operations pl
 
 All pages are auth-gated via `<RequireAuth>`. A "Fund Intel" dropdown menu was added to the main site navigation.
 
+## Mobile Fleet Stabilization (Task #529)
+- **lib/mobile-shared** (`@szl-holdings/mobile-shared`) — shared infrastructure for all 7 Expo mobile apps:
+  - **BiometricProvider** + **BiometricLockScreen** — parameterized FaceID/TouchID with auto-lock after configurable timeout, SecureStore-backed preferences
+  - **usePushNotificationsBase** — shared push notification registration with token callback, notification listeners
+  - **useDeepLinking** — URL scheme handler with pattern matching and param extraction
+  - **useBackgroundRefresh** — foreground-aware interval-based data refresh with automatic re-run on app resume
+  - **useAppReady** — app lifecycle tracking (foreground/background transitions, session duration)
+  - **OfflineBanner**, **useOfflineQueue**, **useOfflineSync** — offline-first data sync
+  - **ErrorBoundary**, **NotificationProvider**, **ThemeProvider**, **CopilotFab** — shared UI infrastructure
+- All 7 apps have: EAS Build configs (dev/preview/production), App Store metadata, deep linking schemes, notification channels, privacy manifests
+- Biometric auth now available in all 7 apps (previously only aegis, carlota-jo, szl-holdings, terra)
+- Push notification infrastructure standardized across all 7 apps via shared hooks
+- Query persistence (AsyncStorage) added to stephen-mobile (previously missing)
+- vessels-mobile crash fixed (EXPO_NO_TELEMETRY=1 + --clear flags)
+
 ## External Dependencies
 - **Database:** PostgreSQL
 - **Authentication:** Replit Auth

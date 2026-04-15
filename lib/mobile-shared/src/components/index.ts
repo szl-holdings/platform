@@ -7,3 +7,4 @@ export { NotificationBell, NotificationCenterModal, type NotificationBellProps, 
 export { SpotlightModal, SpotlightFab, type SpotlightCommand } from "./Spotlight";
 export { OfflineBanner } from "./OfflineBanner";
 export { NotificationHub, type NotificationItem, type NotificationFetcher } from "./NotificationHub";
+export { BiometricLockScreen, type BiometricLockScreenConfig } from "./BiometricLockScreen";
