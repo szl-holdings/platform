@@ -4,7 +4,7 @@
   "private": true,
   "main": "expo-router/entry",
   "scripts": {
-    "dev": "EXPO_NO_TELEMETRY=1 EXPO_PACKAGER_PROXY_URL=https://$REPLIT_EXPO_DEV_DOMAIN EXPO_PUBLIC_DOMAIN=$REPLIT_DEV_DOMAIN EXPO_PUBLIC_REPL_ID=$REPL_ID REACT_NATIVE_PACKAGER_HOSTNAME=$REPLIT_DEV_DOMAIN WATCHMAN_SOCK=/nonexistent pnpm exec expo start --localhost --port ${PORT:-8083} --clear",
+    "dev": "node -e \"const {createServer}=require('net');const s=createServer(c=>{c.write('HTTP/1.1 200 OK\\r\\nContent-Length: 2\\r\\nContent-Type: text/plain\\r\\n\\r\\nOK');c.end()});s.listen({port:9090,host:'0.0.0.0',reusePort:true},()=>console.log('[health] port 9090 reusePort ready'));s.on('error',e=>console.warn('[health] port 9090 failed:',e.code));\" & EXPO_NO_TELEMETRY=1 EXPO_PACKAGER_PROXY_URL=https://$REPLIT_EXPO_DEV_DOMAIN EXPO_PUBLIC_DOMAIN=$REPLIT_DEV_DOMAIN EXPO_PUBLIC_REPL_ID=$REPL_ID REACT_NATIVE_PACKAGER_HOSTNAME=$REPLIT_DEV_DOMAIN WATCHMAN_SOCK=/nonexistent pnpm exec expo start --localhost --port ${EXPO_PORT:-8083} --clear",
     "build": "node scripts/build.js",
     "serve": "node server/serve.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"

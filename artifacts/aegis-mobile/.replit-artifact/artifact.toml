@@ -11,7 +11,7 @@ kind = "mobile"
     [[services]]
     name = "expo"
     paths = ["/aegis-mobile/"]
-    localPort = 8083
+    localPort = 9090
 
     [services.development]
     run = "pnpm --filter @workspace/aegis-mobile run dev"
@@ -21,6 +21,6 @@ kind = "mobile"
     run = ["pnpm", "--filter", "@workspace/aegis-mobile", "run", "serve"]
 
     [services.env]
-    PORT = "8083"
+    EXPO_PORT = "8083"
     BASE_PATH = "/aegis-mobile/"
   

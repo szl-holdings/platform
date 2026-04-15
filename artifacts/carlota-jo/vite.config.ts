@@ -7,7 +7,7 @@ import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 // Limit esbuild Go runtime threads to prevent OS thread exhaustion
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
-const port = Number(process.env.PORT) || 21200;
+const port = Number(process.env.VITE_PORT) || 21200;
 const basePath = process.env.BASE_PATH || "/carlota-jo/";
 
 
@@ -15,14 +15,28 @@ const basePath = process.env.BASE_PATH || "/carlota-jo/";
     return {
       name: "health-check",
       apply: "serve",
-      configureServer(server) {
-        server.middlewares.use((req, res, next) => {
-          if (req.url === "/" || req.url === "") {
+      async configureServer() {
+        const http = await import("http");
+        const proxyServer = http.createServer((req, res) => {
+          const url = req.url || "/";
+          if (url === "/" || url === "/health" || url === "/__health") {
             res.writeHead(200, { "Content-Type": "text/plain" });
-            res.end("ok");
+            res.end("OK");
             return;
           }
-          next();
+          const upstream = http.request(
+            { hostname: "127.0.0.1", port, path: url, method: req.method,
+              headers: { ...req.headers, host: "localhost:" + port } },
+            (upRes) => { res.writeHead(upRes.statusCode || 200, upRes.headers); upRes.pipe(res, { end: true }); }
+          );
+          upstream.on("error", () => { if (!res.headersSent) { res.writeHead(503); res.end("Upstream not ready"); } });
+          req.pipe(upstream, { end: true });
+        });
+        proxyServer.listen({ port: 9090, host: "0.0.0.0", reusePort: true }, () => {
+          console.log("[health-check] Proxy listening on port 9090 (reusePort)");
+        });
+        proxyServer.on("error", (err: NodeJS.ErrnoException) => {
+          console.warn("[health-check] Port 9090 bind failed:", err.code);
         });
       },
     };

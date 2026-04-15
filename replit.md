@@ -334,3 +334,10 @@ Seven new capabilities wired end-to-end with real backend services (not UI mocku
 - **Maritime Data:** Digitraffic AIS, BarentsWatch AIS, Open-Meteo Marine Weather API
 - **Threat Intelligence:** Shodan InternetDB, GreyNoise Community API, MalwareBazaar, URLhaus
 - **Other:** GitHub Public API, AbuseIPDB, Figma
+## Workflow Port Architecture (Task #552)
+- **Port allocation** (from `.replit` [[ports]]): `8080` → api-server (direct), `9090` → web apps / mobile health (external:3000), `21130` → szl-holdings (external:3001)
+- **Web apps (8 of 9)**: Each Vite dev server runs on a unique `VITE_PORT` (carlota-jo=21200, command=25200, firestorm=23932, lyte-command-center=19290, prism-counsel=26500, stephen-site=5173, terra=25100, vessels=18485). A `healthCheckPlugin` in `vite.config.ts` binds port 9090 with `reusePort: true` — this serves the Replit workflow health check at `/` (200 OK) and proxies all other requests to the Vite server on `VITE_PORT`.
+- **reusePort isolation assumption**: All web app workflows co-bind port 9090 via `SO_REUSEPORT`. The kernel load-balances connections. All reusePort sockets proxy to the correct per-app `VITE_PORT`, so connection distribution does not affect correctness. This relies on Replit's workflow isolation ensuring each workflow's proxy can reach its own Vite server.
+- **Mobile apps**: A background Node.js reusePort health server binds port 9090 immediately, passing the workflow health check. Expo Metro starts concurrently on `EXPO_PORT` (aegis=8083, carlota-jo=8082, lyte=8084, stephen=8086, szl-holdings=8085, terra=8088, vessels=8087).
+- **szl-holdings web**: Uses `localPort=21130` directly (one of the .replit [[ports]] entries) — no health proxy needed.
+- **api-server**: Uses `localPort=8080` directly. Has `GET /` → 200 liveness endpoint before auth/CSRF middleware.

@@ -1,32 +1,31 @@
 kind = "web"
-  previewPath = "/stephen/"
-  title = "Stephen Lutar"
-  version = "1.0.0"
-  id = "artifacts/stephen-site"
-  router = "path"
+previewPath = "/stephen/"
+title = "Stephen Lutar"
+version = "1.0.0"
+id = "artifacts/stephen-site"
+router = "path"
 
-  [[integratedSkills]]
-  name = "react-vite"
-  version = "1.0.0"
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
 
-  [[services]]
-  name = "web"
-  paths = [ "/stephen/" ]
-  localPort = 5173
+[[services]]
+name = "web"
+paths = [ "/stephen/" ]
+localPort = 9090
 
-  [services.development]
-  run = "bash -c 'cd /home/runner/workspace/artifacts/stephen-site && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
+[services.development]
+run = "bash -c 'cd /home/runner/workspace/artifacts/stephen-site && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
 
-  [services.production]
-  build = [ "pnpm", "--filter", "@workspace/stephen-site", "run", "build" ]
-  publicDir = "artifacts/stephen-site/dist/public"
-  serve = "static"
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/stephen-site", "run", "build" ]
+publicDir = "artifacts/stephen-site/dist/public"
+serve = "static"
 
-  [[services.production.rewrites]]
-  from = "/*"
-  to = "/index.html"
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
 
-  [services.env]
-  PORT = "5173"
-  BASE_PATH = "/stephen/"
-  
+[services.env]
+VITE_PORT = "5173"
+BASE_PATH = "/stephen/"

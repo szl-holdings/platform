@@ -1,32 +1,31 @@
 kind = "web"
-  previewPath = "/terra/"
-  title = "Terra — Real Estate Intelligence"
-  version = "1.0.0"
-  id = "artifacts/terra"
-  router = "path"
+previewPath = "/terra/"
+title = "Terra — Real Estate Intelligence"
+version = "1.0.0"
+id = "artifacts/terra"
+router = "path"
 
-  [[integratedSkills]]
-  name = "react-vite"
-  version = "1.0.0"
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
 
-  [[services]]
-  name = "web"
-  paths = [ "/terra/" ]
-  localPort = 25100
+[[services]]
+name = "web"
+paths = [ "/terra/" ]
+localPort = 9090
 
-  [services.development]
-  run = "bash -c 'cd /home/runner/workspace/artifacts/terra && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
+[services.development]
+run = "bash -c 'cd /home/runner/workspace/artifacts/terra && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
 
-  [services.production]
-  build = [ "pnpm", "--filter", "@workspace/terra", "run", "build" ]
-  publicDir = "artifacts/terra/dist/public"
-  serve = "static"
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/terra", "run", "build" ]
+publicDir = "artifacts/terra/dist/public"
+serve = "static"
 
-  [[services.production.rewrites]]
-  from = "/*"
-  to = "/index.html"
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
 
-  [services.env]
-  PORT = "25100"
-  BASE_PATH = "/terra/"
-  
+[services.env]
+VITE_PORT = "25100"
+BASE_PATH = "/terra/"

@@ -11,7 +11,7 @@ kind = "mobile"
   [[services]]
   name = "expo"
   paths = ["/lyte-mobile/"]
-  localPort = 8084
+  localPort = 9090
 
   [services.development]
   run = "pnpm --filter @workspace/lyte-mobile run dev"
@@ -21,5 +21,5 @@ kind = "mobile"
   run = ["pnpm", "--filter", "@workspace/lyte-mobile", "run", "serve"]
 
   [services.env]
-  PORT = "8084"
+  EXPO_PORT = "8084"
   BASE_PATH = "/lyte-mobile/"

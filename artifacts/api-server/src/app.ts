@@ -166,6 +166,10 @@ app.use(express.urlencoded({
     }
   },
 }));
+app.get("/", (_req: Request, res: Response) => {
+  res.status(200).send("OK");
+});
+
 app.use(csrfMiddleware);
 app.use(authMiddleware);
 app.use(sessionRefreshPolicy());
