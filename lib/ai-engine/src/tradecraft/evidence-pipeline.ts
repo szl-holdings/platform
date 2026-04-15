@@ -165,13 +165,15 @@ export class EvidencePipeline {
     return this.index.length;
   }
 
-  async hydrateFromDb(): Promise<void> {
+  async hydrateFromDb(retryCount = 0): Promise<void> {
     if (this._hydrated) return;
-    this._hydrated = true;
     try {
       const { db, alloyEvidenceIndex } = await import("@szl-holdings/db");
       if (!alloyEvidenceIndex?.entryTimestamp) {
-        console.warn("[evidence-pipeline] Schema missing entryTimestamp column — skipping hydration");
+        console.warn("[evidence-pipeline] Schema missing entryTimestamp column — deferring hydration");
+        if (retryCount < 3) {
+          setTimeout(() => this.hydrateFromDb(retryCount + 1), 5000 * (retryCount + 1));
+        }
         return;
       }
       const { desc, sql: rawSql } = await import("drizzle-orm");
@@ -183,9 +185,16 @@ export class EvidencePipeline {
       `);
       const exists = (tableCheck as { rows?: { table_exists?: boolean }[] }).rows?.[0]?.table_exists ?? false;
       if (!exists) {
-        console.warn("[evidence-pipeline] alloy_evidence_index table not found — skipping hydration");
+        console.warn(`[evidence-pipeline] alloy_evidence_index table not found (attempt ${retryCount + 1}/4) — will retry`);
+        if (retryCount < 3) {
+          setTimeout(() => this.hydrateFromDb(retryCount + 1), 5000 * (retryCount + 1));
+        } else {
+          console.warn("[evidence-pipeline] alloy_evidence_index table not found after 4 attempts — giving up");
+          this._hydrated = true;
+        }
         return;
       }
+      this._hydrated = true;
       const rows = await db
         .select()
         .from(alloyEvidenceIndex)
