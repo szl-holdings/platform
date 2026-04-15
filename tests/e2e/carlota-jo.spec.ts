@@ -47,6 +47,12 @@ test.describe("Carlota Jo — Route Smoke Tests", () => {
     { path: "/booking", label: "booking" },
     { path: "/contact", label: "contact" },
     { path: "/founder", label: "founder" },
+    { path: "/consulting-os", label: "consulting OS" },
+    { path: "/revenue-intelligence", label: "revenue intelligence" },
+    { path: "/advisory-intel", label: "advisory intel" },
+    { path: "/competitive-radar", label: "competitive radar" },
+    { path: "/scenario-simulator", label: "scenario simulator" },
+    { path: "/strategic-diagnostic", label: "strategic diagnostic" },
   ];
 
   for (const route of routes) {

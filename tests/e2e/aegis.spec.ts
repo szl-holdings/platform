@@ -47,6 +47,14 @@ test.describe("Aegis — Route Smoke Tests", () => {
     { path: "/findings", label: "findings" },
     { path: "/executive-risk", label: "executive risk" },
     { path: "/asset-inventory", label: "asset inventory" },
+    { path: "/command-home", label: "command home" },
+    { path: "/simulation-runner", label: "simulation runner" },
+    { path: "/scenario-library", label: "scenario library" },
+    { path: "/agentic-soc", label: "agentic SOC" },
+    { path: "/apt-emulation", label: "APT emulation" },
+    { path: "/adversary-engine", label: "adversary engine" },
+    { path: "/deception-grid", label: "deception grid" },
+    { path: "/nexus/analyst-workspace", label: "nexus analyst workspace" },
   ];
 
   for (const route of routes) {

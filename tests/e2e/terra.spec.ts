@@ -48,6 +48,13 @@ test.describe("Terra — Route Smoke Tests", () => {
     { path: "/analytics", label: "analytics" },
     { path: "/executive-overview", label: "executive overview" },
     { path: "/climate-risk", label: "climate risk" },
+    { path: "/agents-command", label: "agents command" },
+    { path: "/unified-command", label: "unified command" },
+    { path: "/portfolio-scenario", label: "portfolio scenario" },
+    { path: "/causal-drilldown", label: "causal drilldown" },
+    { path: "/distress-engine", label: "distress engine" },
+    { path: "/avm-engine", label: "AVM engine" },
+    { path: "/spatial-walkthrough", label: "spatial walkthrough" },
   ];
 
   for (const route of routes) {

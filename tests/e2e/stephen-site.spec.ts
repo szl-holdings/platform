@@ -44,6 +44,10 @@ test.describe("Stephen Lutar — Route Smoke Tests", () => {
     { path: "", label: "home" },
     { path: "/about", label: "about" },
     { path: "/contact", label: "contact" },
+    { path: "/career-command", label: "career command" },
+    { path: "/thesis-tracker", label: "thesis tracker" },
+    { path: "/advisory-pipeline", label: "advisory pipeline" },
+    { path: "/audience-intelligence", label: "audience intelligence" },
   ];
 
   for (const route of routes) {

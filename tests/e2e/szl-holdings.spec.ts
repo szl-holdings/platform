@@ -51,6 +51,10 @@ test.describe("SZL Holdings — Route Smoke Tests", () => {
     { path: "/trust/governance", label: "trust governance" },
     { path: "/legal/privacy", label: "privacy policy" },
     { path: "/legal/terms", label: "terms of service" },
+    { path: "/nuro-forge", label: "nuro forge" },
+    { path: "/nuro-forge/arena", label: "nuro forge arena" },
+    { path: "/nuro-forge/governance", label: "nuro forge governance" },
+    { path: "/nuro-forge/composition", label: "nuro forge composition" },
   ];
 
   for (const route of routes) {

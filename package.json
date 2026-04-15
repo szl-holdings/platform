@@ -35,6 +35,8 @@
     "audit:broken-links": "node --experimental-vm-modules scripts/qa/audit-broken-links.js",
     "audit:all": "pnpm audit:mocks && pnpm audit:routes && pnpm audit:copy && pnpm audit:deps && pnpm audit:design-system && pnpm audit:broken-links",
     "health:check": "node --experimental-vm-modules scripts/qa/health-check.js",
+    "qa:verify": "node scripts/qa/post-merge-verify.js",
+    "qa:verify:skip-e2e": "node scripts/qa/post-merge-verify.js --skip-e2e",
     "security:audit": "node scripts/qa/generate-sbom.js",
     "security:audit:fix": "pnpm update --latest",
     "security:sbom": "node scripts/qa/generate-sbom.js"

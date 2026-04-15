@@ -45,6 +45,13 @@ test.describe("Lyte Command Center — Route Smoke Tests", () => {
     { path: "/ai-ops", label: "ai-ops" },
     { path: "/alerts", label: "alerts" },
     { path: "/action-center", label: "action center" },
+    { path: "/executive-command", label: "executive command" },
+    { path: "/alloy-workflow-canvas", label: "alloy workflow canvas" },
+    { path: "/alloy-policy-sim", label: "alloy policy sim" },
+    { path: "/autonomous-noc", label: "autonomous NOC" },
+    { path: "/intervention-workspace", label: "intervention workspace" },
+    { path: "/living-topology", label: "living topology" },
+    { path: "/failure-timeline", label: "failure timeline" },
   ];
 
   for (const route of routes) {

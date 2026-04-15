@@ -47,6 +47,12 @@ test.describe("Vessels — Route Smoke Tests", () => {
     { path: "/alert-center", label: "alert center" },
     { path: "/command-overview", label: "command overview" },
     { path: "/document-engine", label: "document engine" },
+    { path: "/simulations-page", label: "simulations" },
+    { path: "/disruption-forecast", label: "disruption forecast" },
+    { path: "/command-mode", label: "command mode" },
+    { path: "/voyage-desk", label: "voyage desk" },
+    { path: "/dark-vessel-detection", label: "dark vessel detection" },
+    { path: "/autonomous-routing", label: "autonomous routing" },
   ];
 
   for (const route of routes) {
