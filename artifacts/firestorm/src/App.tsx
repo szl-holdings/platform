@@ -20,7 +20,7 @@ import {
   Play, LayoutDashboard, Ticket, Monitor, DollarSign, Wrench, Server,
   FlaskConical, Cpu, Cpu as CpuIcon, Network, Radio, Plus, Sun, Eye,
   Database, Trophy, Boxes, GitBranch, Link2, Flame, Menu, X, ChevronDown,
-  Hexagon, Zap, Briefcase, Globe, Sparkles, Crosshair, Scale, Settings
+  Hexagon, Zap, Briefcase, Globe, Sparkles, Crosshair, Scale, Settings, Clock
 } from "lucide-react";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { sentinelConfig } from "@szl-holdings/shared-ui/copilot-configs";
@@ -171,6 +171,18 @@ const VulnLifecycle = lazy(() => import("@/pages/vuln-lifecycle"));
 const CyberInsuranceIntel = lazy(() => import("@/pages/cyber-insurance-intel"));
 const SOARBuilder = lazy(() => import("@/pages/soar-builder"));
 const AdversaryEngine = lazy(() => import("@/pages/adversary-engine"));
+
+// ─── Nexus — Geopolitical AI Fusion & Predictive War-Gaming ──────────────────
+const NexusCrossDomainCorrelation = lazy(() => import("@/pages/nexus/cross-domain-correlation"));
+const NexusScenarioWargaming = lazy(() => import("@/pages/nexus/scenario-wargaming"));
+const NexusExecutiveBriefing = lazy(() => import("@/pages/nexus/executive-briefing"));
+const NexusGeopoliticalRiskScoring = lazy(() => import("@/pages/nexus/geopolitical-risk-scoring"));
+const NexusOsintPipeline = lazy(() => import("@/pages/nexus/osint-pipeline"));
+const NexusThreatActorProfiling = lazy(() => import("@/pages/nexus/threat-actor-profiling"));
+const NexusEarlyWarning = lazy(() => import("@/pages/nexus/early-warning"));
+const NexusDecisionSupport = lazy(() => import("@/pages/nexus/decision-support"));
+const NexusAnalystWorkspace = lazy(() => import("@/pages/nexus/analyst-workspace"));
+const NexusHistoricalPatterns = lazy(() => import("@/pages/nexus/historical-patterns"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -345,6 +357,19 @@ const intelCortexNav = [
   { path: "/consciousness", label: "Consciousness", icon: Sparkles },
 ];
 
+const nexusNavItems = [
+  { path: "/nexus/correlation", label: "Cross-Domain Correlation", icon: Network },
+  { path: "/nexus/war-gaming", label: "Scenario War-Gaming", icon: Target },
+  { path: "/nexus/briefing", label: "Executive Briefing", icon: FileText },
+  { path: "/nexus/geo-risk", label: "Geo Risk Scoring", icon: Globe },
+  { path: "/nexus/osint", label: "OSINT Pipeline", icon: Rss },
+  { path: "/nexus/actors", label: "Threat Actor Profiling", icon: Users },
+  { path: "/nexus/early-warning", label: "Early Warning System", icon: AlertTriangle },
+  { path: "/nexus/decisions", label: "Decision Support", icon: Zap },
+  { path: "/nexus/workspace", label: "Analyst Workspace", icon: BrainIcon },
+  { path: "/nexus/patterns", label: "Historical Patterns", icon: Clock },
+];
+
 type Module = "security" | "operations" | "intelligence";
 
 function PageLoader() {
@@ -366,7 +391,7 @@ function AccessDenied() {
 
 function deriveModule(loc: string): Module {
   if (loc.startsWith("/ops/") || loc === "/ops") return "operations";
-  if (loc.startsWith("/intel/") || loc === "/intel" || loc.startsWith("/agent-insights") || loc.startsWith("/consciousness")) return "intelligence";
+  if (loc.startsWith("/intel/") || loc === "/intel" || loc.startsWith("/agent-insights") || loc.startsWith("/consciousness") || loc.startsWith("/nexus/") || loc === "/nexus") return "intelligence";
   return "security";
 }
 
@@ -524,6 +549,11 @@ function AegisSidebarContent({ location, onNavigate, collapsed, onToggleCollapse
       id: "intelligence",
       label: "Intelligence",
       items: intelCortexNav.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3 h-3" /> })),
+    },
+    {
+      id: "nexus",
+      label: "NEXUS — Geopolitical AI Fusion",
+      items: nexusNavItems.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3 h-3" /> })),
     },
   ];
 
@@ -803,6 +833,18 @@ function AppRouter() {
         <Route path="/intel/predictions">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><Predictions /></RoleGate>}</Route>
         <Route path="/intel/projects">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><IntelProjects /></RoleGate>}</Route>
         <Route path="/intel/insights">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><IntelInsights /></RoleGate>}</Route>
+
+        {/* NEXUS — Geopolitical AI Fusion & Predictive War-Gaming */}
+        <Route path="/nexus/correlation">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><NexusCrossDomainCorrelation /></RoleGate>}</Route>
+        <Route path="/nexus/war-gaming">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><NexusScenarioWargaming /></RoleGate>}</Route>
+        <Route path="/nexus/briefing">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><NexusExecutiveBriefing /></RoleGate>}</Route>
+        <Route path="/nexus/geo-risk">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><NexusGeopoliticalRiskScoring /></RoleGate>}</Route>
+        <Route path="/nexus/osint">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><NexusOsintPipeline /></RoleGate>}</Route>
+        <Route path="/nexus/actors">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><NexusThreatActorProfiling /></RoleGate>}</Route>
+        <Route path="/nexus/early-warning">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><NexusEarlyWarning /></RoleGate>}</Route>
+        <Route path="/nexus/decisions">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><NexusDecisionSupport /></RoleGate>}</Route>
+        <Route path="/nexus/workspace">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><NexusAnalystWorkspace /></RoleGate>}</Route>
+        <Route path="/nexus/patterns">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><NexusHistoricalPatterns /></RoleGate>}</Route>
 
         <Route path="/breach-cost" component={BreachCostPredictor} />
         <Route path="/purple-team" component={PurpleTeam} />
