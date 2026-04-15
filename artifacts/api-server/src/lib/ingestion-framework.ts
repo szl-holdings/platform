@@ -502,11 +502,69 @@ const BUILT_IN_SOURCES: Array<Omit<DataSourceConfig, "id" | "eventsIngested" | "
 
 let frameworkInitialized = false;
 
+async function ensureStreamTablesExist(): Promise<boolean> {
+  try {
+    const { sql } = await import("drizzle-orm");
+    const result = await db.execute(sql`
+      SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_name = 'stream_data_sources'
+      ) AS table_exists
+    `);
+    const exists = (result as { rows?: { table_exists?: boolean }[] }).rows?.[0]?.table_exists ?? false;
+    if (!exists) {
+      logger.warn("[ingestion] stream_data_sources table does not exist — running inline migration");
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS "stream_data_sources" (
+          "id" SERIAL PRIMARY KEY,
+          "name" TEXT NOT NULL,
+          "type" TEXT NOT NULL,
+          "category" TEXT NOT NULL,
+          "endpoint" TEXT,
+          "auth_config" JSONB,
+          "polling_interval_ms" INTEGER DEFAULT 30000,
+          "enabled" BOOLEAN NOT NULL DEFAULT true,
+          "status" TEXT NOT NULL DEFAULT 'idle',
+          "last_health_at" TIMESTAMP,
+          "last_error_at" TIMESTAMP,
+          "last_error" TEXT,
+          "events_ingested" INTEGER NOT NULL DEFAULT 0,
+          "created_at" TIMESTAMP NOT NULL DEFAULT now(),
+          "updated_at" TIMESTAMP NOT NULL DEFAULT now()
+        )
+      `);
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS "stream_ingested_events" (
+          "id" SERIAL PRIMARY KEY,
+          "external_id" TEXT,
+          "source_id" INTEGER REFERENCES "stream_data_sources"("id") ON DELETE SET NULL,
+          "category" TEXT NOT NULL,
+          "type" TEXT NOT NULL,
+          "source" TEXT NOT NULL,
+          "severity" TEXT,
+          "payload" JSONB NOT NULL,
+          "normalized_at" TIMESTAMP NOT NULL DEFAULT now(),
+          "event_ts" TIMESTAMP NOT NULL DEFAULT now()
+        )
+      `);
+      logger.info("[ingestion] stream_data_sources tables created via inline migration");
+    }
+    return true;
+  } catch (err) {
+    logger.warn({ err }, "[ingestion] Failed to verify/create stream tables — continuing without DB persistence");
+    return false;
+  }
+}
+
 export async function initIngestionFramework(): Promise<void> {
   if (frameworkInitialized) return;
   frameworkInitialized = true;
 
-  await loadDataSourcesFromDb();
+  const tablesReady = await ensureStreamTablesExist();
+
+  if (tablesReady) {
+    await loadDataSourcesFromDb();
+  }
 
   const existingSources = listDataSources();
 
