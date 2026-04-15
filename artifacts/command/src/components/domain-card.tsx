@@ -1,5 +1,5 @@
 import { LineChart, Line, ResponsiveContainer, YAxis } from "recharts";
-import { ArrowUpRight, ArrowDownRight, ArrowRight, ShieldAlert, Ship, Briefcase, Activity, Scale, Building2 } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, ArrowRight, ShieldAlert, Ship, Briefcase, Activity, Scale, Building2, Users, User } from "lucide-react";
 import type { DomainData } from "../types";
 import { ElementType } from "react";
 
@@ -10,6 +10,8 @@ const DOMAIN_ICONS: Record<string, ElementType> = {
   Activity,
   Scale,
   Building2,
+  Users,
+  User,
 };
 
 interface DomainCardProps {
@@ -32,7 +34,7 @@ export function DomainCard({ data }: DomainCardProps) {
   const alertColor = alertColors[data.alerts.severity] ?? "var(--color-fg-muted)";
 
   return (
-    <a href={data.link} className="block group" data-testid={`card-domain-${data.id}`}>
+    <a href={`/command/domain/${data.id}`} className="block group" data-testid={`card-domain-${data.id}`}>
       <div
         className="flex flex-col h-full rounded-xl overflow-hidden transition-colors"
         style={{

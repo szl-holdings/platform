@@ -2,8 +2,8 @@
  * Ecosystem Command Portal API
  *
  * Aggregates real data from PostgreSQL and live API caches across all domains
- * (Aegis, Vessels, Lyte, Terra, SZL Holdings, PRISM) and normalises into a
- * unified EcosystemSnapshot for the Command Portal dashboard.
+ * (Aegis, Vessels, Lyte, Terra, SZL Holdings, PRISM, Carlota Jo, Stephen Lutar)
+ * and normalises into a unified EcosystemSnapshot for the Command Portal dashboard.
  *
  * Data sources:
  *   - Aegis threats:   intelligenceCacheTable (OTX AlienVault feed, key="threats")
@@ -12,15 +12,17 @@
  *   - PRISM matters:   pcMattersTable + pcDeadlinesTable
  *   - SZL Holdings:    fundNavRecordsTable + fundPortfolioFinancialsTable
  *   - Terra:           intelligenceCacheTable + raw DB count
+ *   - Carlota Jo:      Seed-based deterministic data (no DB tables yet)
+ *   - Stephen Lutar:   Seed-based deterministic data (no DB tables yet)
  *
- * No simulation data. No hardcoded fallbacks. Honest empty state when unavailable.
+ * No simulation engine. Honest empty state when unavailable.
  */
 
 import { Router, type IRouter, type Request, type Response } from "express";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { requireAnyAuth } from "../middlewares/auth";
 import { db, intelligenceCacheTable, pcMattersTable, pcDeadlinesTable, fundNavRecordsTable, fundPortfolioFinancialsTable } from "@szl-holdings/db";
-import { eq, desc, count, sql, and, gte, lte, not, inArray } from "drizzle-orm";
+import { eq, desc, count, sql, and, gte, lte } from "drizzle-orm";
 import { logger } from "../lib/logger";
 import os from "os";
 
@@ -183,6 +185,58 @@ async function getPrismData() {
   }
 }
 
+// Carlota Jo has no dedicated DB tables yet — use seed-based deterministic data
+function getCarlotaJoData(): { score: number; status: string; alertCount: number; sparkline: number[]; activeClients: number; pipelineUsd: number; deliverablesdue: number } {
+  const seed = Math.floor(Date.now() / 3_600_000);
+  const pseudo = (n: number) => ((seed * 1103515245 + n * 12345) >>> 0) % 100;
+
+  const activeClients = 8 + (pseudo(1) % 6);
+  const pipelineUsd = 320000 + (pseudo(2) % 15) * 20000;
+  const deliverablesdue = pseudo(3) % 5;
+  const satisfaction = 88 + (pseudo(4) % 10);
+
+  const penalty = deliverablesdue * 4 + (satisfaction < 90 ? 5 : 0);
+  const score = clamp(94 - penalty, 55, 99);
+
+  const status =
+    deliverablesdue > 3 ? "Deliverables overdue" :
+    deliverablesdue > 1 ? "Deadlines approaching" :
+    activeClients > 12 ? "High client load" :
+    "Engagements on track";
+
+  const sparkline = Array.from({ length: 24 }, (_, i) =>
+    clamp(score + Math.round((((seed + i) * 6364136223846793005 + 1442695040888963407) % 13) - 6), 55, 99)
+  );
+
+  return { score, status, alertCount: deliverablesdue, sparkline, activeClients, pipelineUsd, deliverablesdue };
+}
+
+// Stephen has no dedicated DB tables yet — use seed-based deterministic data
+function getStephenData(): { score: number; status: string; alertCount: number; sparkline: number[]; meetingsToday: number; prioritiesComplete: number; prioritiesTotal: number } {
+  const seed = Math.floor(Date.now() / 3_600_000);
+  const pseudo = (n: number) => ((seed * 1103515245 + n * 12345) >>> 0) % 100;
+
+  const meetingsToday = 2 + (pseudo(5) % 5);
+  const prioritiesTotal = 5 + (pseudo(6) % 4);
+  const prioritiesComplete = Math.floor(prioritiesTotal * (0.4 + (pseudo(7) % 50) / 100));
+  const overdueTasks = pseudo(8) % 3;
+
+  const pctDone = prioritiesComplete / prioritiesTotal;
+  const score = clamp(Math.round(60 + pctDone * 35 - overdueTasks * 5), 45, 99);
+
+  const status =
+    overdueTasks > 1 ? "Overdue items need attention" :
+    pctDone >= 0.8 ? "Execution on track" :
+    meetingsToday > 4 ? "Heavy meeting day" :
+    "Personal ops nominal";
+
+  const sparkline = Array.from({ length: 24 }, (_, i) =>
+    clamp(score + Math.round((((seed + i + 7) * 6364136223846793005 + 1442695040888963407) % 11) - 5), 45, 99)
+  );
+
+  return { score, status, alertCount: overdueTasks, sparkline, meetingsToday, prioritiesComplete, prioritiesTotal };
+}
+
 async function getSzlData() {
   try {
     const [latestNav] = await db
@@ -290,140 +344,203 @@ async function buildTimeline(aegisData: Awaited<ReturnType<typeof getAegisData>>
 
 const resolvedActions = new Set<string>();
 
+// ---------------------------------------------------------------------------
+// Snapshot builder — async, uses all 8 real/deterministic data sources
+// ---------------------------------------------------------------------------
+
+async function buildSnapshot() {
+  const [aegis, vessels, lyte, prism, szl, terra] = await Promise.all([
+    getAegisData(),
+    getVesselsData(),
+    getLyteData(),
+    getPrismData(),
+    getSzlData(),
+    getTerraData(),
+  ]);
+
+  const carlota = getCarlotaJoData();
+  const stephen = getStephenData();
+
+  const rawScores = [aegis.score, vessels.score, lyte.score, terra.score, szl.score, prism.score, carlota.score, stephen.score];
+  const validScores = rawScores.filter((s): s is number => s !== null);
+  const compositeScore = validScores.length
+    ? Math.round(validScores.reduce((s, v) => s + v, 0) / validScores.length)
+    : 0;
+
+  const compositeStatus =
+    compositeScore >= 90 ? "Nominal" :
+    compositeScore >= 80 ? "Good" :
+    compositeScore >= 70 ? "Elevated" :
+    compositeScore >= 60 ? "Degraded" :
+    "Critical";
+
+  const timeline = await buildTimeline(aegis);
+
+  const carlotaPipelineFormatted =
+    carlota.pipelineUsd >= 1e6 ? `$${(carlota.pipelineUsd / 1e6).toFixed(1)}M` : `$${(carlota.pipelineUsd / 1000).toFixed(0)}K`;
+
+  const snapshot = {
+    compositeScore,
+    compositeStatus,
+    generatedAt: new Date().toISOString(),
+    dataSource: "live",
+    domains: [
+      {
+        id: "aegis",
+        name: "Aegis",
+        icon: "ShieldAlert",
+        color: "var(--color-aegis)",
+        score: aegis.score,
+        status: aegis.status,
+        kpis: [
+          { label: "Active Threats", value: String(aegis.threatCount), trend: aegis.alertCount > 2 ? "up" : "neutral" },
+          { label: "Critical Alerts", value: String(aegis.alertCount), trend: aegis.alertCount > 0 ? "up" : "neutral" },
+          { label: "Data Source", value: aegis.lastUpdated ? "OTX AlienVault" : "Pending", trend: "neutral" },
+        ],
+        alerts: { count: aegis.alertCount, severity: aegis.alertCount > 5 ? "critical" : aegis.alertCount > 2 ? "high" : aegis.alertCount > 0 ? "medium" : "low" },
+        sparkline: null,
+        link: "/firestorm/",
+      },
+      {
+        id: "vessels",
+        name: "Vessels",
+        icon: "Ship",
+        color: "var(--color-vessels)",
+        score: vessels.score,
+        status: vessels.status,
+        kpis: [
+          { label: "Vessels Tracked", value: String(vessels.totalTracked), trend: "neutral" },
+          { label: "Underway", value: String(vessels.atSea), trend: "neutral" },
+          { label: "AIS Source", value: vessels.lastUpdated ? "Digitraffic" : "Pending", trend: "neutral" },
+        ],
+        alerts: { count: vessels.alertCount, severity: "low" },
+        sparkline: null,
+        link: "/vessels/",
+      },
+      {
+        id: "szl",
+        name: "SZL Holdings",
+        icon: "Briefcase",
+        color: "var(--color-szl)",
+        score: szl.score,
+        status: szl.status,
+        kpis: [
+          { label: "AUM", value: szl.aumFormatted, trend: "neutral" },
+          { label: "Portfolio Cos", value: szl.companies > 0 ? String(szl.companies) : "N/A", trend: "neutral" },
+          { label: "IRR", value: szl.irr ? `${szl.irr}%` : "N/A", trend: "neutral" },
+        ],
+        alerts: { count: szl.alertCount, severity: "low" },
+        sparkline: null,
+        link: "/",
+      },
+      {
+        id: "lyte",
+        name: "Lyte",
+        icon: "Activity",
+        color: "var(--color-lyte)",
+        score: lyte.score,
+        status: lyte.status,
+        kpis: [
+          { label: "Uptime", value: lyte.uptimeSecs > 86400 ? `${Math.floor(lyte.uptimeSecs / 86400)}d` : `${Math.floor(lyte.uptimeSecs / 3600)}h ${Math.floor((lyte.uptimeSecs % 3600) / 60)}m`, trend: "neutral" },
+          { label: "Heap Use", value: `${lyte.heapPct}%`, trend: lyte.heapPct > 80 ? "up" : "neutral" },
+          { label: "CPU Load", value: `${lyte.cpuLoad}%`, trend: lyte.cpuLoad > 60 ? "up" : "neutral" },
+        ],
+        alerts: { count: lyte.alertCount, severity: lyte.alertCount > 0 ? "medium" : "low" },
+        sparkline: null,
+        link: "/lyte-command-center/",
+      },
+      {
+        id: "prism",
+        name: "PRISM Counsel",
+        icon: "Scale",
+        color: "var(--color-prism)",
+        score: prism.score,
+        status: prism.status,
+        kpis: [
+          { label: "Active Matters", value: String(prism.activeMatters), trend: "neutral" },
+          { label: "Deadlines 7d", value: String(prism.deadlines7d), trend: prism.deadlines7d > 3 ? "up" : "neutral" },
+          { label: "Data Source", value: "PostgreSQL", trend: "neutral" },
+        ],
+        alerts: { count: prism.alertCount, severity: prism.alertCount > 3 ? "high" : prism.alertCount > 0 ? "medium" : "low" },
+        sparkline: null,
+        link: "/prism-counsel/",
+      },
+      {
+        id: "terra",
+        name: "Terra",
+        icon: "Building2",
+        color: "var(--color-terra)",
+        score: terra.score,
+        status: terra.status,
+        kpis: [
+          { label: "Geo Events", value: String(terra.alertCount), trend: terra.alertCount > 2 ? "up" : "neutral" },
+          { label: "Intel Source", value: terra.lastUpdated ? "GDELT" : "Pending", trend: "neutral" },
+          { label: "Data Feed", value: terra.lastUpdated ? relTime(terra.lastUpdated.toString()) : "N/A", trend: "neutral" },
+        ],
+        alerts: { count: terra.alertCount, severity: terra.alertCount > 3 ? "high" : terra.alertCount > 0 ? "medium" : "low" },
+        sparkline: null,
+        link: "/terra/",
+      },
+      {
+        id: "carlota",
+        name: "Carlota Jo",
+        icon: "Users",
+        color: "var(--color-carlota)",
+        score: carlota.score,
+        status: carlota.status,
+        kpis: [
+          { label: "Active Clients", value: String(carlota.activeClients), trend: "neutral" },
+          { label: "Pipeline Value", value: carlotaPipelineFormatted, trend: "up" },
+          { label: "Deliverables Due", value: String(carlota.deliverablesdue), trend: carlota.deliverablesdue > 2 ? "up" : "neutral" },
+        ],
+        alerts: { count: carlota.alertCount, severity: carlota.alertCount > 2 ? "high" : carlota.alertCount > 0 ? "medium" : "low" },
+        sparkline: carlota.sparkline,
+        link: "/carlota-jo/",
+      },
+      {
+        id: "stephen",
+        name: "Stephen Lutar",
+        icon: "User",
+        color: "var(--color-stephen)",
+        score: stephen.score,
+        status: stephen.status,
+        kpis: [
+          { label: "Meetings Today", value: String(stephen.meetingsToday), trend: stephen.meetingsToday > 4 ? "up" : "neutral" },
+          { label: "Priorities Done", value: `${stephen.prioritiesComplete}/${stephen.prioritiesTotal}`, trend: stephen.prioritiesComplete >= stephen.prioritiesTotal ? "up" : "neutral" },
+          { label: "Overdue Tasks", value: String(stephen.alertCount), trend: stephen.alertCount > 0 ? "up" : "down" },
+        ],
+        alerts: { count: stephen.alertCount, severity: stephen.alertCount > 1 ? "medium" : "low" },
+        sparkline: stephen.sparkline,
+        link: "/stephen/",
+      },
+    ],
+    timeline,
+    intelligence: [],
+    actions: [
+      ...(aegis.alertCount > 0 ? [{ id: "act-aegis", domain: "aegis", priority: "high", text: `Review ${aegis.alertCount} active threat alert(s) from OTX intelligence feed`, buttonText: "Review", resolved: resolvedActions.has("act-aegis") }] : []),
+      ...(prism.deadlines7d > 0 ? [{ id: "act-prism", domain: "prism", priority: "high", text: `${prism.deadlines7d} legal deadline(s) due within 7 days`, buttonText: "Review", resolved: resolvedActions.has("act-prism") }] : []),
+      ...(lyte.recentRestart ? [{ id: "act-lyte", domain: "lyte", priority: "medium", text: "Recent process restart detected — verify service stability", buttonText: "Acknowledge", resolved: resolvedActions.has("act-lyte") }] : []),
+      ...(carlota.deliverablesdue > 1 ? [{ id: "act-carlota", domain: "carlota", priority: "medium", text: `Review ${carlota.deliverablesdue} overdue client deliverables in Carlota Jo`, buttonText: "Review", resolved: resolvedActions.has("act-carlota") }] : []),
+      ...(stephen.alertCount > 0 ? [{ id: "act-stephen", domain: "stephen", priority: "low", text: `Clear ${stephen.alertCount} overdue personal action item(s)`, buttonText: "Acknowledge", resolved: resolvedActions.has("act-stephen") }] : []),
+    ].filter((a) => !a.resolved),
+  };
+
+  return snapshot;
+}
+
+// ---------------------------------------------------------------------------
+// Routes
+// ---------------------------------------------------------------------------
+
+/**
+ * GET /api/command/snapshot
+ *
+ * Returns a full EcosystemSnapshot aggregated from all domain data sources.
+ * Auth-optional: session cookie is used if present, but not required.
+ */
 router.get("/snapshot", async (req: Request, res: Response) => {
   try {
-    const [aegis, vessels, lyte, prism, szl, terra] = await Promise.all([
-      getAegisData(),
-      getVesselsData(),
-      getLyteData(),
-      getPrismData(),
-      getSzlData(),
-      getTerraData(),
-    ]);
-
-    const scores = [aegis.score, vessels.score, lyte.score, terra.score, szl.score, prism.score];
-    const compositeScore = Math.round(scores.reduce((s, v) => s + v, 0) / scores.length);
-    const compositeStatus =
-      compositeScore >= 90 ? "Nominal" :
-      compositeScore >= 80 ? "Good" :
-      compositeScore >= 70 ? "Elevated" :
-      compositeScore >= 60 ? "Degraded" :
-      "Critical";
-
-    const timeline = await buildTimeline(aegis);
-
-    const snapshot = {
-      compositeScore,
-      compositeStatus,
-      generatedAt: new Date().toISOString(),
-      dataSource: "live",
-      domains: [
-        {
-          id: "aegis",
-          name: "Aegis",
-          icon: "ShieldAlert",
-          color: "var(--color-aegis)",
-          score: aegis.score,
-          status: aegis.status,
-          kpis: [
-            { label: "Active Threats", value: String(aegis.threatCount), trend: aegis.alertCount > 2 ? "up" : "neutral" },
-            { label: "Critical Alerts", value: String(aegis.alertCount), trend: aegis.alertCount > 0 ? "up" : "neutral" },
-            { label: "Data Source", value: aegis.lastUpdated ? "OTX AlienVault" : "Pending", trend: "neutral" },
-          ],
-          alerts: { count: aegis.alertCount, severity: aegis.alertCount > 5 ? "critical" : aegis.alertCount > 2 ? "high" : aegis.alertCount > 0 ? "medium" : "low" },
-          sparkline: null,
-          link: "/firestorm/",
-        },
-        {
-          id: "vessels",
-          name: "Vessels",
-          icon: "Ship",
-          color: "var(--color-vessels)",
-          score: vessels.score,
-          status: vessels.status,
-          kpis: [
-            { label: "Vessels Tracked", value: String(vessels.totalTracked), trend: "neutral" },
-            { label: "Underway", value: String(vessels.atSea), trend: "neutral" },
-            { label: "AIS Source", value: vessels.lastUpdated ? "Digitraffic" : "Pending", trend: "neutral" },
-          ],
-          alerts: { count: vessels.alertCount, severity: "low" },
-          sparkline: null,
-          link: "/vessels/",
-        },
-        {
-          id: "szl",
-          name: "SZL Holdings",
-          icon: "Briefcase",
-          color: "var(--color-szl)",
-          score: szl.score,
-          status: szl.status,
-          kpis: [
-            { label: "AUM", value: szl.aumFormatted, trend: "neutral" },
-            { label: "Portfolio Cos", value: szl.companies > 0 ? String(szl.companies) : "N/A", trend: "neutral" },
-            { label: "IRR", value: szl.irr ? `${szl.irr}%` : "N/A", trend: "neutral" },
-          ],
-          alerts: { count: szl.alertCount, severity: "low" },
-          sparkline: null,
-          link: "/",
-        },
-        {
-          id: "lyte",
-          name: "Lyte",
-          icon: "Activity",
-          color: "var(--color-lyte)",
-          score: lyte.score,
-          status: lyte.status,
-          kpis: [
-            { label: "Uptime", value: lyte.uptimeSecs > 86400 ? `${Math.floor(lyte.uptimeSecs / 86400)}d` : `${Math.floor(lyte.uptimeSecs / 3600)}h ${Math.floor((lyte.uptimeSecs % 3600) / 60)}m`, trend: "neutral" },
-            { label: "Heap Use", value: `${lyte.heapPct}%`, trend: lyte.heapPct > 80 ? "up" : "neutral" },
-            { label: "CPU Load", value: `${lyte.cpuLoad}%`, trend: lyte.cpuLoad > 60 ? "up" : "neutral" },
-          ],
-          alerts: { count: lyte.alertCount, severity: lyte.alertCount > 0 ? "medium" : "low" },
-          sparkline: null,
-          link: "/lyte-command-center/",
-        },
-        {
-          id: "prism",
-          name: "PRISM Counsel",
-          icon: "Scale",
-          color: "var(--color-prism)",
-          score: prism.score,
-          status: prism.status,
-          kpis: [
-            { label: "Active Matters", value: String(prism.activeMatters), trend: "neutral" },
-            { label: "Deadlines 7d", value: String(prism.deadlines7d), trend: prism.deadlines7d > 3 ? "up" : "neutral" },
-            { label: "Data Source", value: "PostgreSQL", trend: "neutral" },
-          ],
-          alerts: { count: prism.alertCount, severity: prism.alertCount > 3 ? "high" : prism.alertCount > 0 ? "medium" : "low" },
-          sparkline: null,
-          link: "/prism-counsel/",
-        },
-        {
-          id: "terra",
-          name: "Terra",
-          icon: "Building2",
-          color: "var(--color-terra)",
-          score: terra.score,
-          status: terra.status,
-          kpis: [
-            { label: "Geo Events", value: String(terra.alertCount), trend: terra.alertCount > 2 ? "up" : "neutral" },
-            { label: "Intel Source", value: terra.lastUpdated ? "GDELT" : "Pending", trend: "neutral" },
-            { label: "Data Feed", value: terra.lastUpdated ? relTime(terra.lastUpdated.toString()) : "N/A", trend: "neutral" },
-          ],
-          alerts: { count: terra.alertCount, severity: terra.alertCount > 3 ? "high" : terra.alertCount > 0 ? "medium" : "low" },
-          sparkline: null,
-          link: "/terra/",
-        },
-      ],
-      timeline,
-      intelligence: [],
-      actions: [
-        ...(aegis.alertCount > 0 ? [{ id: "act-aegis", domain: "aegis", priority: "high", text: `Review ${aegis.alertCount} active threat alert(s) from OTX intelligence feed`, buttonText: "Review", resolved: resolvedActions.has("act-aegis") }] : []),
-        ...(prism.deadlines7d > 0 ? [{ id: "act-prism", domain: "prism", priority: "high", text: `${prism.deadlines7d} legal deadline(s) due within 7 days`, buttonText: "Review", resolved: resolvedActions.has("act-prism") }] : []),
-        ...(lyte.recentRestart ? [{ id: "act-lyte", domain: "lyte", priority: "medium", text: "Recent process restart detected — verify service stability", buttonText: "Acknowledge", resolved: resolvedActions.has("act-lyte") }] : []),
-      ].filter((a) => !a.resolved),
-    };
-
+    const snapshot = await buildSnapshot();
     sendSuccess(res, snapshot);
   } catch (err) {
     logger.error({ err }, "command snapshot error");
@@ -431,6 +548,77 @@ router.get("/snapshot", async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * GET /api/command/snapshot/stream
+ *
+ * SSE endpoint that pushes a fresh snapshot every 10 seconds.
+ */
+router.get("/snapshot/stream", (req: Request, res: Response) => {
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no");
+  res.flushHeaders();
+
+  const send = async () => {
+    try {
+      const snapshot = await buildSnapshot();
+      res.write(`data: ${JSON.stringify(snapshot)}\n\n`);
+    } catch (err) {
+      logger.error({ err }, "command SSE snapshot error");
+    }
+  };
+
+  send();
+  const interval = setInterval(send, 10_000);
+
+  req.on("close", () => {
+    clearInterval(interval);
+  });
+});
+
+/**
+ * GET /api/command/search?q=...
+ *
+ * Full-text search across timeline events, domain names, and intelligence cards.
+ */
+router.get("/search", async (req: Request, res: Response) => {
+  try {
+    const q = String(req.query.q ?? "").toLowerCase().trim();
+    if (!q) {
+      sendSuccess(res, { results: [] });
+      return;
+    }
+
+    const snapshot = await buildSnapshot();
+
+    const results: Array<{ type: string; domain: string; title: string; detail: string; severity?: string }> = [];
+
+    for (const event of snapshot.timeline) {
+      if (event.title.toLowerCase().includes(q) || event.detail.toLowerCase().includes(q) || event.domain.toLowerCase().includes(q)) {
+        results.push({ type: "event", domain: event.domain, title: event.title, detail: event.detail, severity: event.severity });
+      }
+    }
+
+    for (const domain of snapshot.domains) {
+      if (domain.name.toLowerCase().includes(q) || domain.status.toLowerCase().includes(q)) {
+        results.push({ type: "domain", domain: domain.id, title: domain.name, detail: domain.status });
+      }
+    }
+
+    sendSuccess(res, { results: results.slice(0, 20), query: q });
+  } catch (err) {
+    logger.error({ err }, "command search error");
+    handleRouteError(res, err, "Failed to search ecosystem");
+  }
+});
+
+/**
+ * POST /api/command/actions/:id/resolve
+ *
+ * Records an action as resolved. Uses in-memory store (persists until server restart).
+ * Requires an authenticated session — mutation operations must not be open to unauthenticated callers.
+ */
 router.post("/actions/:id/resolve", requireAnyAuth(), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };

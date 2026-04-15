@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Router as WouterRouter, Switch, Route, useLocation } from "wouter";
 import { Dashboard } from "./pages/dashboard";
@@ -13,9 +13,12 @@ import { MarketingOnboarding } from "./pages/marketing/onboarding";
 import { MarketingStatus } from "./pages/marketing/status";
 import { MarketingVerifyEmail } from "./pages/marketing/verify-email";
 import { CortexVoice, CortexVoiceTrigger, useCortexVoice, MultiplayerSessionBanner } from "@szl-holdings/shared-ui";
+import { CommandBar } from "./components/command-bar";
 
 const SimulationPage = lazy(() => import("./pages/simulation"));
 const BriefingHistoryPage = lazy(() => import("./pages/briefing-history"));
+const DomainDetailPage = lazy(() => import("./pages/domain-detail").then((m) => ({ default: m.DomainDetail })));
+const ExecutiveBriefingPage = lazy(() => import("./pages/executive-briefing").then((m) => ({ default: m.ExecutiveBriefing })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,11 +31,27 @@ const BASE = import.meta.env.BASE_URL;
 function AppShell() {
   const [location] = useLocation();
   const isMarketing = location.startsWith("/marketing");
+  const isDomainDetail = location.startsWith("/domain/");
+  const isExecutiveBriefing = location === "/executive-briefing";
   const { open: cortexOpen, setOpen: setCortexOpen } = useCortexVoice();
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen((v) => !v);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  const showNav = !isMarketing && !isDomainDetail && !isExecutiveBriefing;
 
   return (
     <>
-      {!isMarketing && (
+      {showNav && (
         <>
           <MultiplayerSessionBanner
             sessionId="cmd-main"
@@ -49,8 +68,17 @@ function AppShell() {
           </div>
         </>
       )}
+
+      <CommandBar open={searchOpen} onClose={() => setSearchOpen(false)} />
+
       <Switch>
         <Route path="/" component={Dashboard} />
+        <Route path="/domain/:id">
+          {() => <Suspense fallback={null}><DomainDetailPage /></Suspense>}
+        </Route>
+        <Route path="/executive-briefing">
+          {() => <Suspense fallback={null}><ExecutiveBriefingPage /></Suspense>}
+        </Route>
         <Route path="/simulation">
           {() => <Suspense fallback={null}><SimulationPage /></Suspense>}
         </Route>
@@ -65,6 +93,7 @@ function AppShell() {
         <Route path="/marketing/status" component={MarketingStatus} />
         <Route path="/marketing/verify-email" component={MarketingVerifyEmail} />
       </Switch>
+
       <CortexVoice
         open={cortexOpen}
         onClose={() => setCortexOpen(false)}

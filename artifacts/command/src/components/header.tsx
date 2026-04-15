@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { Activity } from "lucide-react";
+import { Activity, Search } from "lucide-react";
 
 interface HeaderProps {
   lastUpdatedAt: number;
+  sseConnected?: boolean;
+  onSearchOpen?: () => void;
 }
 
-export function Header({ lastUpdatedAt }: HeaderProps) {
+export function Header({ lastUpdatedAt, sseConnected = false, onSearchOpen }: HeaderProps) {
   const [time, setTime] = useState(new Date());
   const [countdown, setCountdown] = useState(30);
 
@@ -18,11 +20,12 @@ export function Header({ lastUpdatedAt }: HeaderProps) {
 
   useEffect(() => {
     setCountdown(30);
+    if (sseConnected) return;
     const interval = setInterval(() => {
       setCountdown((prev) => (prev <= 1 ? 30 : prev - 1));
     }, 1000);
     return () => clearInterval(interval);
-  }, [lastUpdatedAt]);
+  }, [lastUpdatedAt, sseConnected]);
 
   return (
     <header
@@ -41,18 +44,57 @@ export function Header({ lastUpdatedAt }: HeaderProps) {
           ECOSYSTEM COMMAND
         </h1>
       </div>
-      <div
-        className="flex items-center gap-6 text-xs font-mono"
-        style={{ color: "var(--color-fg-muted)" }}
-      >
-        <div className="flex items-center gap-2">
-          <span
-            className="w-2 h-2 rounded-full animate-pulse"
-            style={{ backgroundColor: "var(--color-aegis)" }}
-          />
-          <span>Refreshing in: {countdown}s</span>
+
+      <div className="flex items-center gap-4">
+        {onSearchOpen && (
+          <button
+            onClick={onSearchOpen}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors"
+            style={{
+              backgroundColor: "var(--color-surface-base)",
+              border: "1px solid var(--color-surface-border)",
+              color: "var(--color-fg-muted)",
+            }}
+            aria-label="Open search"
+          >
+            <Search className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Search</span>
+            <kbd
+              className="hidden sm:inline text-[10px] px-1 rounded"
+              style={{
+                backgroundColor: "var(--color-bg-elevated)",
+                border: "1px solid var(--color-surface-border)",
+                color: "var(--color-fg-muted)",
+              }}
+            >
+              ⌘K
+            </kbd>
+          </button>
+        )}
+
+        <div
+          className="flex items-center gap-6 text-xs font-mono"
+          style={{ color: "var(--color-fg-muted)" }}
+        >
+          {sseConnected ? (
+            <div className="flex items-center gap-2">
+              <span
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: "var(--color-low)", boxShadow: "0 0 6px var(--color-low)" }}
+              />
+              <span style={{ color: "var(--color-low)" }}>LIVE</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span
+                className="w-2 h-2 rounded-full animate-pulse"
+                style={{ backgroundColor: "var(--color-aegis)" }}
+              />
+              <span>Refreshing in: {countdown}s</span>
+            </div>
+          )}
+          <div className="hidden md:block">{time.toISOString().replace("T", " ").substring(0, 19)} UTC</div>
         </div>
-        <div>{time.toISOString().replace("T", " ").substring(0, 19)} UTC</div>
       </div>
     </header>
   );

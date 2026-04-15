@@ -1,14 +1,17 @@
+import { useState } from "react";
 import { Header } from "../components/header";
 import { EcosystemPulse } from "../components/ecosystem-pulse";
 import { DomainGrid } from "../components/domain-grid";
 import { Timeline } from "../components/timeline";
 import { IntelligencePanel } from "../components/intelligence-panel";
 import { CommandActions } from "../components/command-actions";
+import { CommandBar } from "../components/command-bar";
 import { useEcosystemData } from "../hooks/use-ecosystem-data";
 import { MorningBriefingCard, DEMO_BRIEFING_HISTORY } from "@szl-holdings/shared-ui";
 
 export function Dashboard() {
-  const { data, dataUpdatedAt } = useEcosystemData();
+  const { data, dataUpdatedAt, sseConnected } = useEcosystemData();
+  const [searchOpen, setSearchOpen] = useState(false);
 
   if (!data) {
     return (
@@ -28,7 +31,13 @@ export function Dashboard() {
       className="min-h-screen flex flex-col"
       style={{ backgroundColor: "var(--color-bg-primary)", color: "var(--color-fg-primary)" }}
     >
-      <Header lastUpdatedAt={dataUpdatedAt} />
+      <Header
+        lastUpdatedAt={dataUpdatedAt}
+        sseConnected={sseConnected}
+        onSearchOpen={() => setSearchOpen(true)}
+      />
+
+      <CommandBar open={searchOpen} onClose={() => setSearchOpen(false)} />
 
       <main className="flex-1 p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto w-full flex flex-col gap-8">
         <EcosystemPulse

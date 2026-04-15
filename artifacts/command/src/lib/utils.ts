@@ -24,6 +24,8 @@ export function getDomainColor(domainId: string) {
     case "lyte": return "var(--color-lyte)";
     case "prism": return "var(--color-prism)";
     case "terra": return "var(--color-terra)";
+    case "carlota": return "var(--color-carlota)";
+    case "stephen": return "var(--color-stephen)";
     default: return "var(--color-fg-muted)";
   }
 }

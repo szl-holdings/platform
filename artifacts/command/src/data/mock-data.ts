@@ -97,6 +97,38 @@ export const baseDomainData: DomainData[] = [
     sparkline: [71,70,69,68,69,70,68,67,69,70,69,68,69,70,68,67,69,70,69,68,69,70,69,69],
     link: "/terra/",
   },
+  {
+    id: "carlota",
+    name: "Carlota Jo",
+    icon: "Users",
+    color: "var(--color-carlota)",
+    score: 88,
+    status: "Engagements on track",
+    kpis: [
+      { label: "Active Clients", value: "11", trend: "neutral" },
+      { label: "Pipeline Value", value: "$480K", trend: "up" },
+      { label: "Deliverables Due", value: "2", trend: "neutral" },
+    ],
+    alerts: { count: 2, severity: "medium" },
+    sparkline: [86,87,88,89,88,87,88,89,90,88,87,88,89,88,87,88,89,88,87,88,89,88,87,88],
+    link: "/carlota-jo/",
+  },
+  {
+    id: "stephen",
+    name: "Stephen Lutar",
+    icon: "User",
+    color: "var(--color-stephen)",
+    score: 76,
+    status: "Personal ops nominal",
+    kpis: [
+      { label: "Meetings Today", value: "4", trend: "neutral" },
+      { label: "Priorities Done", value: "3/6", trend: "up" },
+      { label: "Overdue Tasks", value: "1", trend: "up" },
+    ],
+    alerts: { count: 1, severity: "low" },
+    sparkline: [74,75,76,75,77,76,75,76,77,76,75,76,77,76,75,76,77,76,75,76,77,76,75,76],
+    link: "/stephen/",
+  },
 ];
 
 export const baseTimelineEvents: TimelineEvent[] = [
