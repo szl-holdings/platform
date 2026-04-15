@@ -527,4 +527,16 @@ router.use("/dynamics", _readLimiter);
 router.use("/crm", _writeLimiter);
 router.use(crmRouter);
 
+router.use("/ontology", _readLimiter);
+router.use("/ontology", _writeLimiter);
+router.use(ontologyRouter);
+
+router.use("/digital-twins", _readLimiter);
+router.use("/digital-twins", _writeLimiter);
+router.use(digitalTwinsRouter);
+
+router.use("/fusion", _readLimiter);
+router.use("/fusion", _writeLimiter);
+router.use(fusionRouter);
+
 export default router;

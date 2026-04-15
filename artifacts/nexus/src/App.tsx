@@ -16,19 +16,23 @@ import MultimodalGallery from "./pages/MultimodalGallery";
 import AgentSwarm from "./pages/AgentSwarm";
 import DealAutopilot from "./pages/DealAutopilot";
 const NexusPulse = lazy(() => import("./pages/pulse"));
+const OntologyGraph = lazy(() => import("./pages/OntologyGraph"));
+const FusionAlerts = lazy(() => import("./pages/FusionAlerts"));
 
-type Page = "timeline" | "canvas" | "correlations" | "rooms" | "actions" | "deal-autopilot" | "settings" | "multimodal" | "swarm";
+type Page = "timeline" | "canvas" | "correlations" | "rooms" | "actions" | "deal-autopilot" | "settings" | "multimodal" | "swarm" | "ontology" | "fusion-alerts";
 
 const PAGE_TO_PATH: Record<Page, string> = {
-  timeline:       "/nexus/timeline",
-  canvas:         "/nexus/canvas",
-  correlations:   "/nexus/correlations",
-  rooms:          "/nexus/rooms",
-  actions:        "/nexus/actions",
+  timeline:         "/nexus/timeline",
+  canvas:           "/nexus/canvas",
+  correlations:     "/nexus/correlations",
+  rooms:            "/nexus/rooms",
+  actions:          "/nexus/actions",
   "deal-autopilot": "/nexus/deal-autopilot",
-  settings:       "/nexus/settings",
-  multimodal:     "/nexus/multimodal",
-  swarm:          "/nexus/swarm",
+  settings:         "/nexus/settings",
+  multimodal:       "/nexus/multimodal",
+  swarm:            "/nexus/swarm",
+  ontology:         "/nexus/ontology",
+  "fusion-alerts":  "/nexus/fusion-alerts",
 };
 
 const PATH_TO_PAGE: Record<string, Page> = Object.fromEntries(
@@ -67,6 +71,8 @@ function AppShell() {
             <Route path="/nexus/settings" component={Settings} />
             <Route path="/nexus/multimodal" component={MultimodalGallery} />
             <Route path="/nexus/swarm" component={AgentSwarm} />
+            <Route path="/nexus/ontology">{() => <Suspense fallback={<div />}><OntologyGraph /></Suspense>}</Route>
+            <Route path="/nexus/fusion-alerts">{() => <Suspense fallback={<div />}><FusionAlerts /></Suspense>}</Route>
             <Route component={FusionTimeline} />
           </Switch>
         </main>

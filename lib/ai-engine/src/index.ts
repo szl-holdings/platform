@@ -408,3 +408,56 @@ export {
   type TemporalPattern,
   type TemporalAwarenessState,
 } from "./consciousness/index.js";
+
+export {
+  OntologyEngine,
+  ontologyEngine,
+  type OntologyEntityType,
+  type RelationshipType,
+  type OntologyEntity,
+  type OntologyRelationship,
+  type GraphNode,
+  type GraphTraversalResult,
+  type EvidenceLink,
+  type CrossDomainConnection,
+  type GraphQueryResult,
+} from "./ontology/ontology-engine.js";
+
+export {
+  GraphRAGEngine,
+  graphRAGEngine,
+  type GraphRAGQuery,
+  type GraphRAGResult,
+  type GraphScoredChunk,
+  type CrossDomainInsight,
+  type ReasoningStep,
+} from "./ontology/graph-rag.js";
+
+export {
+  twinRegistry,
+  vesselTwin,
+  propertyTwin,
+  postureTwin,
+  type TwinType,
+  type TwinStatus,
+  type TwinState,
+  type PredictedState,
+  type TwinAlert,
+  type SimulationScenario,
+  type SimulationResult,
+  type VesselTwinState,
+  type PropertyTwinState,
+  type PostureTwinState,
+} from "./digital-twins/twin-engine.js";
+
+export {
+  FusionCortex,
+  fusionCortex,
+  type FusionAlert,
+  type FusionAlertSeverity,
+  type FusionAlertCategory,
+  type FusionEvidenceItem,
+  type FusionPattern,
+  type FusionScanResult,
+  type FusionCortexStats,
+} from "./fusion/fusion-cortex.js";

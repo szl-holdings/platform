@@ -149,3 +149,4 @@ export {
   type OperationalEntity,
   type StatusConfig,
 } from "./operational-primitives";
+export { DigitalTwinCard, type TwinCardProps, type TwinAlert, type PredictedState } from "./digital-twin-card";

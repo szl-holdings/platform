@@ -126,6 +126,8 @@ const IntelInsights = lazy(() => import("@/pages/intel/insights"));
 
 const BreachCostPredictor = lazy(() => import("@/pages/breach-cost-predictor"));
 const PurpleTeam = lazy(() => import("@/pages/purple-team"));
+const APTEmulationPage = lazy(() => import("@/pages/apt-emulation"));
+const ZeroTrustScorecard = lazy(() => import("@/pages/zero-trust-scorecard"));
 const CyberInsuranceScore = lazy(() => import("@/pages/cyber-insurance-score"));
 const AttackPathViz = lazy(() => import("@/pages/attack-path-viz"));
 const ThreatActorProfiling = lazy(() => import("@/pages/threat-actor-profiling"));
@@ -215,6 +217,8 @@ const securityNavSecondary = [
   { path: "/adversary-emulation", label: "Red Team Exercises", icon: Target },
   { path: "/breach-cost", label: "Breach Cost Predictor", icon: DollarSign },
   { path: "/purple-team", label: "Purple Team Simulation", icon: Crosshair },
+  { path: "/apt-emulation", label: "APT Adversary Emulation", icon: Target },
+  { path: "/zero-trust-scorecard", label: "NSA Zero Trust Scorecard", icon: ShieldCheck },
   { path: "/cyber-insurance", label: "Cyber Insurance Score", icon: ShieldCheck },
   { path: "/attack-path", label: "Attack Path Visualization", icon: Network },
   { path: "/threat-actors", label: "Threat Actor Profiling", icon: Users },
@@ -687,6 +691,8 @@ function AppRouter() {
 
         <Route path="/breach-cost" component={BreachCostPredictor} />
         <Route path="/purple-team" component={PurpleTeam} />
+        <Route path="/apt-emulation" component={APTEmulationPage} />
+        <Route path="/zero-trust-scorecard" component={ZeroTrustScorecard} />
         <Route path="/cyber-insurance" component={CyberInsuranceScore} />
         <Route path="/attack-path" component={AttackPathViz} />
         <Route path="/threat-actors" component={ThreatActorProfiling} />

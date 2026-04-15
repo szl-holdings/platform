@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils";
 import {
   Activity, GitBranch, Zap, Shield, ChevronLeft, ChevronRight,
-  Network, TerminalSquare, Settings2, Image, Cpu, Target
+  Network, TerminalSquare, Settings2, Image, Cpu, Target, Layers
 } from "lucide-react";
 
-type Page = "timeline" | "canvas" | "correlations" | "rooms" | "actions" | "deal-autopilot" | "settings" | "multimodal" | "swarm";
+type Page = "timeline" | "canvas" | "correlations" | "rooms" | "actions" | "deal-autopilot" | "settings" | "multimodal" | "swarm" | "ontology" | "fusion-alerts";
 
 interface SidebarProps {
   currentPage: Page;
@@ -16,10 +16,12 @@ interface SidebarProps {
 const NAV_ITEMS: Array<{ id: Page; label: string; icon: React.ComponentType<{ className?: string }>; description: string; badge?: string }> = [
   { id: "timeline", label: "Fusion Timeline", icon: Activity, description: "Live cross-domain event stream" },
   { id: "canvas", label: "Entity Canvas", icon: GitBranch, description: "Interactive relationship graph" },
+  { id: "ontology", label: "Ontology Graph", icon: Network, description: "Unified knowledge graph", badge: "NEW" },
+  { id: "fusion-alerts", label: "Fusion Intelligence", icon: Layers, description: "Cross-domain fusion alerts", badge: "NEW" },
   { id: "correlations", label: "Correlations", icon: Zap, description: "AI pattern detection" },
   { id: "rooms", label: "Situation Rooms", icon: Shield, description: "Persistent investigations" },
   { id: "actions", label: "Command Actions", icon: TerminalSquare, description: "Cross-domain triggers" },
-  { id: "deal-autopilot", label: "Deal Autopilot", icon: Target, description: "AI underwriting packages", badge: "NEW" },
+  { id: "deal-autopilot", label: "Deal Autopilot", icon: Target, description: "AI underwriting packages" },
   { id: "multimodal", label: "Multimodal Gallery", icon: Image, description: "Annotated multimedia evidence" },
   { id: "swarm", label: "Agent Swarm", icon: Cpu, description: "Real-time A2A network graph" },
   { id: "settings", label: "Settings", icon: Settings2, description: "Domain toggles & routing rules" },
