@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { LRUCache } from "lru-cache";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { db } from "@szl-holdings/db";
@@ -10,7 +11,7 @@ const DEMO_MODE = process.env["DEMO_MODE"] === "true" || process.env["DEMO_MODE"
 
 const router: IRouter = Router();
 
-const lyteCache = new Map<string, { data: unknown; expiry: number; fetchedAt: number; source: string }>();
+const lyteCache = new LRUCache<string, { data: unknown; expiry: number; fetchedAt: number; source: string }>({ max: 300 });
 
 function getLyteCached<T>(key: string, ttlMs: number, fetcher: () => Promise<{ data: T; source: string }>): Promise<{ data: T; source: string; cacheAgeSeconds: number; isStale: boolean }> {
   const c = lyteCache.get(key);

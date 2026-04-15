@@ -208,7 +208,7 @@ function mockSupervisionItems() {
   ];
 }
 
-router.get("/compliance/posture", authMiddleware({ required: false }), async (req, res) => {
+router.get("/compliance/posture", authMiddleware(), async (req, res) => {
   try {
     const [latestScore] = await db
       .select()
@@ -237,7 +237,7 @@ router.get("/compliance/posture", authMiddleware({ required: false }), async (re
   }
 });
 
-router.get("/compliance/suitability", authMiddleware({ required: false }), async (req, res) => {
+router.get("/compliance/suitability", authMiddleware(), async (req, res) => {
   try {
     const { status, advisorId, limit, offset } = req.query;
     const conditions = [];
@@ -328,7 +328,7 @@ router.patch("/compliance/suitability/:id/review", authMiddleware({ required: tr
   }
 });
 
-router.get("/compliance/archival", authMiddleware({ required: false }), async (req, res) => {
+router.get("/compliance/archival", authMiddleware(), async (req, res) => {
   try {
     const { type, limit, offset } = req.query;
     const conditions = [];
@@ -405,7 +405,7 @@ router.post("/compliance/archival", authMiddleware({ required: true }), async (r
   }
 });
 
-router.get("/compliance/supervision", authMiddleware({ required: false }), async (req, res) => {
+router.get("/compliance/supervision", authMiddleware(), async (req, res) => {
   try {
     const { status, priority, category, limit, offset } = req.query;
     const conditions = [];
@@ -524,7 +524,7 @@ router.patch("/compliance/supervision/:itemId/action", authMiddleware({ required
   }
 });
 
-router.get("/compliance/calendar", authMiddleware({ required: false }), async (req, res) => {
+router.get("/compliance/calendar", authMiddleware(), async (req, res) => {
   try {
     const { status, eventType, from, to } = req.query;
     const conditions = [];
@@ -582,7 +582,7 @@ router.post("/compliance/calendar", authMiddleware({ required: true }), async (r
   }
 });
 
-router.get("/compliance/market-context", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/compliance/market-context", authMiddleware(), async (_req, res) => {
   try {
     const { services } = await import("@szl-holdings/services");
     const [fredSnap, marketIndices] = await Promise.allSettled([
@@ -607,7 +607,7 @@ router.get("/compliance/market-context", authMiddleware({ required: false }), as
   }
 });
 
-router.get("/compliance/intelligence-fusion", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/compliance/intelligence-fusion", authMiddleware(), async (_req, res) => {
   try {
     sendSuccess(res, {
       insights: [

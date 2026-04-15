@@ -1,4 +1,5 @@
 import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
+import { LRUCache } from "lru-cache";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
@@ -24,7 +25,7 @@ const terraRateLimit = rateLimit({
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
-const terraCache = new Map<string, { data: unknown; expiry: number }>();
+const terraCache = new LRUCache<string, { data: unknown; expiry: number }>({ max: 300 });
 function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
   const cached = terraCache.get(key);
   if (cached && cached.expiry > Date.now()) return Promise.resolve(cached.data as T);

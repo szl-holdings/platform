@@ -1,7 +1,8 @@
 import { logger } from "../lib/logger";
+import { LRUCache } from "lru-cache";
 
 const COURT_LISTENER_BASE = "https://www.courtlistener.com/api/rest/v4";
-const REQUEST_CACHE: Map<string, { data: unknown; ts: number }> = new Map();
+const REQUEST_CACHE = new LRUCache<string, { data: unknown; ts: number }>({ max: 500 });
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 function getApiKey(): string | undefined {

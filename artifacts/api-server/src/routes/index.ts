@@ -174,22 +174,6 @@ import multiplayerSessionsRouter from "./multiplayer-sessions";
 
 const router: IRouter = Router();
 
-router.use((req, _res, next) => {
-  if (req.path.startsWith("/aegis/soc/")) {
-    req.url = req.url.replace("/aegis/soc/", "/firestorm/");
-  } else if (req.path.startsWith("/aegis/soc")) {
-    req.url = req.url.replace("/aegis/soc", "/firestorm");
-  } else if (req.path.startsWith("/aegis/ops/")) {
-    req.url = req.url.replace("/aegis/ops/", "/msp/");
-  } else if (req.path.startsWith("/aegis/ops")) {
-    req.url = req.url.replace("/aegis/ops", "/msp");
-  } else if (req.path.startsWith("/aegis/intel/")) {
-    req.url = req.url.replace("/aegis/intel/", "/inca/");
-  } else if (req.path.startsWith("/aegis/intel")) {
-    req.url = req.url.replace("/aegis/intel", "/inca");
-  }
-  next();
-});
 
 router.use("/auth", _authLimiter);
 

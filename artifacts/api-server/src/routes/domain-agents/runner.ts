@@ -1,5 +1,6 @@
 import { services, type ChatMessage } from "@szl-holdings/services";
 import type { Response } from "express";
+import { LRUCache } from "lru-cache";
 import { AGENT_CONFIGS, type AgentType } from "./configs";
 import { getModelConfig } from "../../lib/model-registry";
 import { logger } from "../../lib/logger";
@@ -11,7 +12,7 @@ interface ConversationMessage {
   content: string;
 }
 
-const conversationStore = new Map<string, { messages: ConversationMessage[]; lastAccess: number }>();
+const conversationStore = new LRUCache<string, { messages: ConversationMessage[]; lastAccess: number }>({ max: 200 });
 const MAX_CONVERSATIONS = 200;
 const CONVERSATION_TTL = 30 * 60 * 1000;
 

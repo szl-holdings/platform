@@ -1,3 +1,4 @@
+import { LRUCache } from "lru-cache";
 import { Expo, type ExpoPushMessage, type ExpoPushTicket, type ExpoPushReceiptId } from "expo-server-sdk";
 import {
   db,
@@ -34,7 +35,7 @@ export type SendResult = {
 
 const USER_RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const USER_RATE_LIMIT_MAX = 10;
-const userRateBuckets = new Map<number, { count: number; windowStart: number }>();
+const userRateBuckets = new LRUCache<number, { count: number; windowStart: number }>({ max: 10000 });
 
 // userId is nullable for anonymous device tokens (e.g. public apps without auth).
 // Anonymous tokens bypass per-user rate limiting — they are deduplicated by token

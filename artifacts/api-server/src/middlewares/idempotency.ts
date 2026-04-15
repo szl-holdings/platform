@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { createHash } from "crypto";
+import { LRUCache } from "lru-cache";
 import { logger } from "../lib/logger";
 
 interface IdempotencyRecord {
@@ -14,7 +15,7 @@ interface IdempotencyRecord {
 }
 
 const TTL_MS = 24 * 60 * 60 * 1000;
-const store = new Map<string, IdempotencyRecord>();
+const store = new LRUCache<string, IdempotencyRecord>({ max: 5000 });
 
 function cleanupExpired(): void {
   const now = Date.now();

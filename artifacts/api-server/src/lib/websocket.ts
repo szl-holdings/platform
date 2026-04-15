@@ -1,6 +1,7 @@
 import type { IncomingMessage, Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { createHmac, timingSafeEqual, randomBytes } from "crypto";
+import { LRUCache } from "lru-cache";
 import { logger } from "./logger";
 import { db, sessionsTable, usersTable, changeEventsTable } from "@szl-holdings/db";
 import { eq, gt, and } from "drizzle-orm";
@@ -308,7 +309,7 @@ function drainBuffer(clientId: string, client: SubscribedClient): void {
 
 let totalPublished = 0;
 let totalConnections = 0;
-const publishedPerChannel = new Map<string, number>();
+const publishedPerChannel = new LRUCache<string, number>({ max: 2000 });
 const GLOBAL_ADMIN_ROLES = new Set(["founder_admin", "platform_admin"]);
 
 export function initWebSocket(server: Server): void {

@@ -1,3 +1,4 @@
+import { LRUCache } from "lru-cache";
 import {
   runSimulation,
   runSerializableSimulation,
@@ -37,7 +38,7 @@ export type { SimulationResult, SensitivityReport, ScenarioComparison, Calibrati
  * Jobs are lost on process restart and cannot be shared across replicas.
  * Replace with a Redis or database-backed store before horizontal scaling.
  */
-const jobStore = new Map<string, SimulationJob>();
+const jobStore = new LRUCache<string, SimulationJob>({ max: 500 });
 
 const JOB_TTL_MS = 2 * 60 * 60 * 1000;
 const AUTO_CLEANUP_INTERVAL_MS = 15 * 60 * 1000;

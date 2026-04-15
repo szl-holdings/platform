@@ -1,4 +1,5 @@
 import { Router, type IRouter, type RequestHandler } from "express";
+import { LRUCache } from "lru-cache";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
@@ -14,7 +15,7 @@ const tradingLimit = rateLimit({
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
-const cache = new Map<string, { data: unknown; expiry: number; fetchedAt: number }>();
+const cache = new LRUCache<string, { data: unknown; expiry: number; fetchedAt: number }>({ max: 200 });
 function getCached<T>(key: string, ttlMs: number, fetcher: () => T): T {
   const c = cache.get(key);
   const now = Date.now();

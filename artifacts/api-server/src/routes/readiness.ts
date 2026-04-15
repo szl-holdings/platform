@@ -1,5 +1,6 @@
 import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
+import { LRUCache } from "lru-cache";
 import { z } from "zod";
 import {
   db,
@@ -313,7 +314,7 @@ const readinessLiveRateLimit = rateLimit({
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
-const readinessCache = new Map<string, { data: unknown; expiry: number }>();
+const readinessCache = new LRUCache<string, { data: unknown; expiry: number }>({ max: 100 });
 function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
   const cached = readinessCache.get(key);
   if (cached && cached.expiry > Date.now()) return Promise.resolve(cached.data as T);
@@ -393,7 +394,7 @@ const REFERENCE_FRAMEWORK_MAPPINGS = {
   "PCI DSS v4.0": { controls: 259, aligned: 201, gap: 58, complianceScore: 78 },
 };
 
-router.get("/readiness/live/nist-framework", readinessLiveRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/readiness/live/nist-framework", readinessLiveRateLimit, authMiddleware(), async (_req, res) => {
   try {
     sendSuccess(res, {
       source: "NIST Cybersecurity Framework 2.0",
@@ -404,7 +405,7 @@ router.get("/readiness/live/nist-framework", readinessLiveRateLimit, authMiddlew
   } catch (err) { handleRouteError(res, err, "Failed to fetch NIST framework"); }
 });
 
-router.get("/readiness/live/controls", readinessLiveRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/readiness/live/controls", readinessLiveRateLimit, authMiddleware(), async (req, res) => {
   try {
     const func = req.query.function as string;
     const status = req.query.status as string;
@@ -427,7 +428,7 @@ router.get("/readiness/live/controls", readinessLiveRateLimit, authMiddleware({ 
   } catch (err) { handleRouteError(res, err, "Failed to fetch compliance controls"); }
 });
 
-router.get("/readiness/live/audit-findings", readinessLiveRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/readiness/live/audit-findings", readinessLiveRateLimit, authMiddleware(), async (req, res) => {
   try {
     const severity = req.query.severity as string;
     let findings = REFERENCE_AUDIT_FINDINGS;
@@ -445,7 +446,7 @@ router.get("/readiness/live/audit-findings", readinessLiveRateLimit, authMiddlew
   } catch (err) { handleRouteError(res, err, "Failed to fetch audit findings"); }
 });
 
-router.get("/readiness/live/framework-mappings", readinessLiveRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/readiness/live/framework-mappings", readinessLiveRateLimit, authMiddleware(), async (_req, res) => {
   try {
     sendSuccess(res, {
       source: "Multi-Framework Compliance Mapping Engine",
@@ -459,7 +460,7 @@ router.get("/readiness/live/framework-mappings", readinessLiveRateLimit, authMid
   } catch (err) { handleRouteError(res, err, "Failed to fetch framework mappings"); }
 });
 
-router.get("/readiness/live/risk-posture", readinessLiveRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/readiness/live/risk-posture", readinessLiveRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const openFindings = REFERENCE_AUDIT_FINDINGS.filter(f => f.status === "open").length;
     const criticalFindings = REFERENCE_AUDIT_FINDINGS.filter(f => f.severity === "critical").length;

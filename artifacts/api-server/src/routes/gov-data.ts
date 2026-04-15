@@ -1,10 +1,12 @@
 import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
+import { LRUCache } from "lru-cache";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { withExternalSpan } from "../middlewares/telemetry";
 import { db, intelligenceCacheTable } from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
+import { redisGet, redisSet } from "../lib/redis-client.js";
 
 const router: IRouter = Router();
 
@@ -17,23 +19,34 @@ const govRateLimit = rateLimit({
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
-const govMemCache = new Map<string, { data: unknown; expiresAt: number }>();
+const govMemCache = new LRUCache<string, { data: unknown; expiresAt: number }>({ max: 300 });
 
 async function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
+  const now = Date.now();
   const mem = govMemCache.get(key);
-  if (mem && mem.expiresAt > Date.now()) return mem.data as T;
-  const expiresAt = new Date(Date.now() + ttlMs);
-  const dbKey = `gov-${key}`;
+  if (mem && mem.expiresAt > now) return mem.data as T;
+
+  const redisKey = `gov-${key}`;
+  const cached = await redisGet<T>(redisKey);
+  if (cached !== null) {
+    govMemCache.set(key, { data: cached, expiresAt: now + ttlMs });
+    return cached;
+  }
+
+  const expiresAt = new Date(now + ttlMs);
+  const dbKey = redisKey;
   try {
     const [row] = await db.select().from(intelligenceCacheTable).where(eq(intelligenceCacheTable.key, dbKey)).limit(1);
     if (row && new Date(row.expiresAt) > new Date()) {
       govMemCache.set(key, { data: row.data, expiresAt: new Date(row.expiresAt).getTime() });
+      await redisSet(redisKey, row.data, new Date(row.expiresAt).getTime() - now);
       return row.data as T;
     }
   } catch { /* DB unavailable — fall through to fetch */ }
   try {
     const data = await fetcher();
     govMemCache.set(key, { data, expiresAt: expiresAt.getTime() });
+    await redisSet(redisKey, data, ttlMs);
     await db.insert(intelligenceCacheTable).values({ key: dbKey, data: data as Record<string, unknown>, expiresAt, fetchedAt: new Date() })
       .onConflictDoUpdate({ target: intelligenceCacheTable.key, set: { data: data as Record<string, unknown>, expiresAt, fetchedAt: new Date() } })
       .catch(() => undefined);
@@ -138,7 +151,7 @@ async function fetchArxivPapersXml(query: string, maxResults = 8): Promise<Arxiv
   return entries;
 }
 
-router.get("/gov/cisa-kev", govRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/gov/cisa-kev", govRateLimit, authMiddleware(), async (req, res) => {
   try {
     const data = await withExternalSpan(req, "cisa.gov", () => getCached("cisa-kev", 3600000, fetchCisaKev));
     sendSuccess(res, {
@@ -151,7 +164,7 @@ router.get("/gov/cisa-kev", govRateLimit, authMiddleware({ required: false }), a
   } catch (err) { handleRouteError(res, err, "Failed to fetch CISA KEV data"); }
 });
 
-router.get("/gov/nvd-cves", govRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/gov/nvd-cves", govRateLimit, authMiddleware(), async (req, res) => {
   try {
     const severity = (req.query.severity as string)?.toUpperCase();
     const keyword = req.query.keyword as string;
@@ -214,7 +227,7 @@ router.get("/gov/nvd-cves", govRateLimit, authMiddleware({ required: false }), a
   } catch (err) { handleRouteError(res, err, "Failed to fetch NVD CVE data"); }
 });
 
-router.get("/gov/mitre-attack", govRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/gov/mitre-attack", govRateLimit, authMiddleware(), async (req, res) => {
   try {
     const tactic = req.query.tactic as string;
     const platform = req.query.platform as string;
@@ -255,7 +268,7 @@ router.get("/gov/mitre-attack", govRateLimit, authMiddleware({ required: false }
   } catch (err) { handleRouteError(res, err, "Failed to fetch MITRE ATT&CK data"); }
 });
 
-router.get("/gov/fedramp", govRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/gov/fedramp", govRateLimit, authMiddleware(), async (req, res) => {
   try {
     const impactLevel = req.query.impactLevel as string;
     const status = (req.query.status as string) || "Authorized";
@@ -306,7 +319,7 @@ router.get("/gov/fedramp", govRateLimit, authMiddleware({ required: false }), as
   } catch (err) { handleRouteError(res, err, "Failed to fetch FedRAMP data"); }
 });
 
-router.get("/gov/census", govRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/gov/census", govRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const data = await getCached("census-acs", 86400000, async () => {
       const raw = await fetchJson("https://api.census.gov/data/2022/acs/acs5?get=B01003_001E,B19013_001E,B25077_001E&for=us:1", {}, 10000) as any;
@@ -328,7 +341,7 @@ router.get("/gov/census", govRateLimit, authMiddleware({ required: false }), asy
   } catch (err) { handleRouteError(res, err, "Failed to fetch Census data"); }
 });
 
-router.get("/gov/bls-employment", govRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/gov/bls-employment", govRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const data = await getCached("bls-employment", 86400000, async () => {
       const raw = await fetchJson("https://api.bls.gov/publicAPI/v2/timeseries/data/LNS14000000", {}, 10000) as any;
@@ -350,7 +363,7 @@ router.get("/gov/bls-employment", govRateLimit, authMiddleware({ required: false
   } catch (err) { handleRouteError(res, err, "Failed to fetch BLS employment data"); }
 });
 
-router.get("/gov/fema-risk", govRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/gov/fema-risk", govRateLimit, authMiddleware(), async (req, res) => {
   try {
     const region = req.query.region as string;
     sendSuccess(res, {
@@ -363,7 +376,7 @@ router.get("/gov/fema-risk", govRateLimit, authMiddleware({ required: false }), 
   } catch (err) { handleRouteError(res, err, "Failed to fetch FEMA risk data"); }
 });
 
-router.get("/gov/usaspending", govRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/gov/usaspending", govRateLimit, authMiddleware(), async (req, res) => {
   try {
     const agency = req.query.agency as string;
     const minAmount = parseFloat(req.query.minAmount as string) || 0;
@@ -473,7 +486,7 @@ async function fetchNoaaStation(station: typeof NOAA_COOPS_STATIONS[0]): Promise
   }
 }
 
-router.get("/gov/noaa-marine", govRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/gov/noaa-marine", govRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const data = await getCached("noaa-marine", 1800000, async () => {
       const results = await Promise.all(NOAA_COOPS_STATIONS.map(station => fetchNoaaStation(station)));
@@ -489,7 +502,7 @@ router.get("/gov/noaa-marine", govRateLimit, authMiddleware({ required: false })
   } catch (err) { handleRouteError(res, err, "Failed to fetch NOAA marine data"); }
 });
 
-router.get("/gov/arxiv", govRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/gov/arxiv", govRateLimit, authMiddleware(), async (req, res) => {
   try {
     const query = (req.query.q as string) || "machine learning";
     const limit = Math.min(parseInt(req.query.limit as string) || 8, 20);
@@ -505,7 +518,7 @@ router.get("/gov/arxiv", govRateLimit, authMiddleware({ required: false }), asyn
   } catch (err) { handleRouteError(res, err, "Failed to fetch arXiv papers"); }
 });
 
-router.get("/gov/pubmed", govRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/gov/pubmed", govRateLimit, authMiddleware(), async (req, res) => {
   try {
     const query = (req.query.q as string) || "artificial intelligence medicine";
     const papers = await getCached(`pubmed-${query}`, 3600000, async () => {
@@ -538,7 +551,7 @@ router.get("/gov/pubmed", govRateLimit, authMiddleware({ required: false }), asy
   } catch (err) { handleRouteError(res, err, "Failed to fetch PubMed data"); }
 });
 
-router.get("/gov/sec-edgar", govRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/gov/sec-edgar", govRateLimit, authMiddleware(), async (req, res) => {
   try {
     const ticker = (req.query.ticker as string)?.toUpperCase() || "SPG";
     const formType = (req.query.formType as string) || "10-K";
@@ -571,7 +584,7 @@ router.get("/gov/sec-edgar", govRateLimit, authMiddleware({ required: false }), 
   } catch (err) { handleRouteError(res, err, "Failed to fetch SEC EDGAR data"); }
 });
 
-router.get("/gov/summary", govRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/gov/summary", govRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const summary = {
       sources: [

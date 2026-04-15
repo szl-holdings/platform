@@ -1,8 +1,9 @@
 import type { Request, Response, NextFunction } from "express";
+import { LRUCache } from "lru-cache";
 import { db, featureFlagsTable } from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
 
-const flagCache = new Map<string, { value: boolean; expiresAt: number }>();
+const flagCache = new LRUCache<string, { value: boolean; expiresAt: number }>({ max: 500 });
 const CACHE_TTL = 30_000;
 
 async function isFlagEnabled(key: string): Promise<boolean> {

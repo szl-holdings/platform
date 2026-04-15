@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import express, { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
+import { LRUCache } from "lru-cache";
 import { services } from "@szl-holdings/services";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
@@ -9,41 +10,36 @@ import { getAiModels, getAiModelById, getModelObservabilitySummary } from "../li
 import { getRegistrySummary } from "../lib/model-registry";
 import { openai } from "@szl-holdings/integrations-openai-ai-server";
 import { anthropic } from "@szl-holdings/integrations-anthropic-ai";
-import { db, intelligenceCacheTable } from "@szl-holdings/db";
-import { eq } from "drizzle-orm";
+import { db, intelligenceCacheTable, pool } from "@szl-holdings/db";
+import { eq, lt, sql } from "drizzle-orm";
+import { redisGet, redisSet } from "../lib/redis-client.js";
 type AnthropicMessageParam = { role: "user" | "assistant"; content: string | { type: string; text: string }[] };
 
 const router: IRouter = Router();
 
-const MEM_CACHE_MAX_SIZE = 50;
-const memCache = new Map<string, { data: unknown; expiresAt: number }>();
+const memCache = new LRUCache<string, { data: unknown; expiresAt: number }>({ max: 500 });
+const MAX_CONCURRENT_REFRESHES = 50;
 const refreshing = new Set<string>();
 
-function evictExpiredMemCache(): void {
-  const now = Date.now();
-  for (const [k, v] of memCache) {
-    if (v.expiresAt <= now) memCache.delete(k);
-  }
-  if (memCache.size > MEM_CACHE_MAX_SIZE) {
-    const oldest = [...memCache.entries()].sort((a, b) => a[1].expiresAt - b[1].expiresAt);
-    const toDelete = oldest.slice(0, memCache.size - MEM_CACHE_MAX_SIZE);
-    for (const [k] of toDelete) memCache.delete(k);
-  }
-}
-
-const _memCacheEvictTimer = setInterval(evictExpiredMemCache, 5 * 60 * 1000);
-_memCacheEvictTimer.unref();
 
 async function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
   const now = Date.now();
   const mem = memCache.get(key);
   if (mem && mem.expiresAt > now) return mem.data as T;
+
+  const cached = await redisGet<T>(key);
+  if (cached !== null) {
+    memCache.set(key, { data: cached, expiresAt: now + ttlMs });
+    return cached;
+  }
+
   try {
     const [row] = await db.select().from(intelligenceCacheTable).where(eq(intelligenceCacheTable.key, key)).limit(1);
     if (row && new Date(row.expiresAt).getTime() > now) {
       const data = row.data as T;
       memCache.set(key, { data, expiresAt: new Date(row.expiresAt).getTime() });
-      if (!refreshing.has(key) && new Date(row.expiresAt).getTime() - now < ttlMs * 0.25) {
+      await redisSet(key, data, new Date(row.expiresAt).getTime() - now);
+      if (!refreshing.has(key) && refreshing.size < MAX_CONCURRENT_REFRESHES && new Date(row.expiresAt).getTime() - now < ttlMs * 0.25) {
         refreshing.add(key);
         fetcher().then(async (fresh) => {
           await upsertCache(key, fresh, ttlMs);
@@ -65,10 +61,47 @@ async function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T
 async function upsertCache<T>(key: string, data: T, ttlMs: number): Promise<void> {
   const expiresAt = new Date(Date.now() + ttlMs);
   memCache.set(key, { data, expiresAt: expiresAt.getTime() });
+  await redisSet(key, data, ttlMs);
   try {
     await db.insert(intelligenceCacheTable).values({ key, data, expiresAt, fetchedAt: new Date() })
       .onConflictDoUpdate({ target: intelligenceCacheTable.key, set: { data, expiresAt, fetchedAt: new Date() } });
   } catch {}
+}
+
+export function scheduleIntelligenceCachePruning(): NodeJS.Timeout {
+  const prune = async () => {
+    try {
+      await db.execute(
+        sql`DELETE FROM intelligence_cache WHERE expires_at < NOW() AND ctid IN (SELECT ctid FROM intelligence_cache WHERE expires_at < NOW() LIMIT 10000)`
+      );
+
+      const countResult = await db.execute(sql`SELECT COUNT(*)::int AS cnt FROM intelligence_cache`);
+      const rows = (countResult as unknown as { rows?: { cnt: number }[] }).rows ?? (countResult as unknown as { cnt: number }[]);
+      const total = rows[0]?.cnt ?? 0;
+      if (total > 10000) {
+        const excess = total - 10000;
+        await db.execute(
+          sql`DELETE FROM intelligence_cache WHERE ctid IN (SELECT ctid FROM intelligence_cache ORDER BY expires_at ASC LIMIT ${excess})`
+        );
+        logger.info({ removed: excess }, "Capped intelligence_cache table at 10000 rows");
+      }
+      logger.debug({ total }, "intelligence_cache pruning complete");
+
+      const vacuumClient = await pool.connect();
+      try {
+        await vacuumClient.query("VACUUM (ANALYZE, SKIP_LOCKED) intelligence_cache");
+        logger.debug("intelligence_cache VACUUM ANALYZE complete");
+      } catch (vacuumErr) {
+        logger.warn({ err: vacuumErr }, "intelligence_cache VACUUM ANALYZE skipped (non-fatal)");
+      } finally {
+        vacuumClient.release();
+      }
+    } catch (err) {
+      logger.warn({ err }, "intelligence_cache pruning failed");
+    }
+  };
+  prune().catch(() => {});
+  return setInterval(prune, 60 * 60 * 1000);
 }
 
 async function computeIntelligenceBriefing(): Promise<Record<string, unknown>> {
@@ -126,7 +159,7 @@ export function scheduleIntelligenceRefresh(): NodeJS.Timeout {
       ["briefing", 300000, computeIntelligenceBriefing],
     ];
     for (const [key, ttlMs, fetcher] of jobs) {
-      if (refreshing.has(key)) continue;
+      if (refreshing.has(key) || refreshing.size >= MAX_CONCURRENT_REFRESHES) continue;
       const mem = memCache.get(key);
       if (mem && mem.expiresAt > Date.now() + ttlMs * 0.25) continue;
       refreshing.add(key);
@@ -390,7 +423,7 @@ async function fetchOtxThreats(): Promise<ThreatItem[]> {
 }
 
 
-router.get("/intelligence/threats", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/threats", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const data = await getCached("threats", 300000, fetchOtxThreats).catch((err) => {
       logger.warn({ err }, "Intelligence /threats: upstream fetch and cache both failed — returning empty array");
@@ -400,7 +433,7 @@ router.get("/intelligence/threats", intelRateLimit, authMiddleware({ required: f
   } catch (err) { handleRouteError(res, err, "Failed to fetch threat data"); }
 });
 
-router.get("/intelligence/cves", intelRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/intelligence/cves", intelRateLimit, authMiddleware(), async (req, res) => {
   try {
     const severity = req.query.severity as string | undefined;
     const data = await getCached("cves", 600000, fetchNvdCves).catch((err) => {
@@ -412,7 +445,7 @@ router.get("/intelligence/cves", intelRateLimit, authMiddleware({ required: fals
   } catch (err) { handleRouteError(res, err, "Failed to fetch CVE data"); }
 });
 
-router.get("/intelligence/geopolitical", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/geopolitical", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const data = await getCached("geopolitical", 300000, fetchGdeltGeopolitical).catch((err) => {
       logger.warn({ err }, "Intelligence /geopolitical: upstream fetch and cache both failed — returning empty array");
@@ -422,7 +455,7 @@ router.get("/intelligence/geopolitical", intelRateLimit, authMiddleware({ requir
   } catch (err) { handleRouteError(res, err, "Failed to fetch geopolitical events"); }
 });
 
-router.get("/intelligence/maritime/vessels", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/maritime/vessels", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const data = await getCached("maritime-vessels", 60000, fetchLiveMaritimeVessels).catch((err) => {
       logger.warn({ err }, "Intelligence /maritime/vessels: upstream fetch and cache both failed — returning empty array");
@@ -432,7 +465,7 @@ router.get("/intelligence/maritime/vessels", intelRateLimit, authMiddleware({ re
   } catch (err) { handleRouteError(res, err, "Failed to fetch maritime data"); }
 });
 
-router.get("/intelligence/maritime/chokepoints", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/maritime/chokepoints", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     sendSuccess(res, {
       status: "NOT_CONFIGURED",
@@ -442,7 +475,7 @@ router.get("/intelligence/maritime/chokepoints", intelRateLimit, authMiddleware(
   } catch (err) { handleRouteError(res, err, "Failed to fetch chokepoint data"); }
 });
 
-router.get("/intelligence/maritime/weather", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/maritime/weather", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const data = await getCached("marine-weather", 600000, fetchOpenMeteoMarineWeather).catch((err) => {
       logger.warn({ err }, "Intelligence /maritime/weather: upstream fetch and cache both failed — returning empty array");
@@ -506,7 +539,7 @@ async function fetchAndEnrichSanctions(): Promise<SanctionVessel[]> {
   );
   return enriched;
 }
-router.get("/intelligence/maritime/sanctions", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/maritime/sanctions", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const enriched = await getCached("sanctions-enriched", 3600000, fetchAndEnrichSanctions).catch((err) => {
       logger.warn({ err }, "Intelligence /maritime/sanctions: upstream fetch and cache both failed — returning empty array");
@@ -516,7 +549,7 @@ router.get("/intelligence/maritime/sanctions", intelRateLimit, authMiddleware({ 
   } catch (err) { handleRouteError(res, err, "Failed to fetch sanctions data"); }
 });
 
-router.get("/intelligence/news", intelRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/intelligence/news", intelRateLimit, authMiddleware(), async (req, res) => {
   try {
     const category = req.query.category as string | undefined;
     const data = await getCached("news", 300000, fetchRssNews).catch((err) => {
@@ -528,7 +561,7 @@ router.get("/intelligence/news", intelRateLimit, authMiddleware({ required: fals
   } catch (err) { handleRouteError(res, err, "Failed to fetch news"); }
 });
 
-router.get("/intelligence/tech-trends", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/tech-trends", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     sendSuccess(res, {
       status: "NOT_CONFIGURED",
@@ -538,14 +571,14 @@ router.get("/intelligence/tech-trends", intelRateLimit, authMiddleware({ require
   } catch (err) { handleRouteError(res, err, "Failed to fetch tech trends"); }
 });
 
-router.get("/intelligence/anomalies", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/anomalies", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const data = await getCached("anomalies", 60000, async () => ([] as unknown[]));
     sendSuccess(res, data);
   } catch (err) { handleRouteError(res, err, "Failed to fetch anomalies"); }
 });
 
-router.get("/intelligence/ops-heatmap", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/ops-heatmap", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     sendSuccess(res, {
       status: "NOT_CONFIGURED",
@@ -555,7 +588,7 @@ router.get("/intelligence/ops-heatmap", intelRateLimit, authMiddleware({ require
   } catch (err) { handleRouteError(res, err, "Failed to fetch ops heatmap"); }
 });
 
-router.get("/intelligence/platform-stats", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/platform-stats", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     sendSuccess(res, {
       status: "NOT_CONFIGURED",
@@ -565,7 +598,7 @@ router.get("/intelligence/platform-stats", intelRateLimit, authMiddleware({ requ
   } catch (err) { handleRouteError(res, err, "Failed to fetch platform stats"); }
 });
 
-router.get("/intelligence/benchmarks", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/benchmarks", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     sendSuccess(res, {
       status: "NOT_CONFIGURED",
@@ -575,14 +608,14 @@ router.get("/intelligence/benchmarks", intelRateLimit, authMiddleware({ required
   } catch (err) { handleRouteError(res, err, "Failed to fetch benchmarks"); }
 });
 
-router.get("/intelligence/ecosystem-health", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/ecosystem-health", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const data = await getCached("ecosystem-health", 60000, async () => ([] as unknown[]));
     sendSuccess(res, data);
   } catch (err) { handleRouteError(res, err, "Failed to fetch ecosystem health"); }
 });
 
-router.get("/intelligence/cultural-calendar", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/cultural-calendar", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     sendSuccess(res, {
       status: "NOT_CONFIGURED",
@@ -592,7 +625,7 @@ router.get("/intelligence/cultural-calendar", intelRateLimit, authMiddleware({ r
   } catch (err) { handleRouteError(res, err, "Failed to fetch cultural calendar"); }
 });
 
-router.post("/intelligence/ai/summarize", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/summarize", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { text } = req.body;
     if (!text) { sendError(res, "Text is required", 400); return; }
@@ -601,7 +634,7 @@ router.post("/intelligence/ai/summarize", aiRateLimit, authMiddleware({ required
   } catch (err) { handleRouteError(res, err, "Failed to summarize text"); }
 });
 
-router.post("/intelligence/ai/sentiment", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/sentiment", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { text } = req.body;
     if (!text) { sendError(res, "Text is required", 400); return; }
@@ -610,7 +643,7 @@ router.post("/intelligence/ai/sentiment", aiRateLimit, authMiddleware({ required
   } catch (err) { handleRouteError(res, err, "Failed to analyze sentiment"); }
 });
 
-router.post("/intelligence/ai/ner", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/ner", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { text } = req.body;
     if (!text) { sendError(res, "Text is required", 400); return; }
@@ -619,7 +652,7 @@ router.post("/intelligence/ai/ner", aiRateLimit, authMiddleware({ required: fals
   } catch (err) { handleRouteError(res, err, "Failed to extract entities"); }
 });
 
-router.post("/intelligence/ai/classify", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/classify", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { text, labels } = req.body;
     if (!text || !labels) { sendError(res, "Text and labels are required", 400); return; }
@@ -628,7 +661,7 @@ router.post("/intelligence/ai/classify", aiRateLimit, authMiddleware({ required:
   } catch (err) { handleRouteError(res, err, "Failed to classify text"); }
 });
 
-router.post("/intelligence/ai/translate", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/translate", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { text, sourceLang, targetLang } = req.body;
     if (!text) { sendError(res, "Text is required", 400); return; }
@@ -637,7 +670,7 @@ router.post("/intelligence/ai/translate", aiRateLimit, authMiddleware({ required
   } catch (err) { handleRouteError(res, err, "Failed to translate text"); }
 });
 
-router.post("/intelligence/ai/generate-image", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/generate-image", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { prompt } = req.body;
     if (!prompt) { sendError(res, "Prompt is required", 400); return; }
@@ -646,7 +679,7 @@ router.post("/intelligence/ai/generate-image", aiRateLimit, authMiddleware({ req
   } catch (err) { handleRouteError(res, err, "Failed to generate image"); }
 });
 
-router.post("/intelligence/ai/chat", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/chat", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { sessionId, message, messages, systemPrompt, maxTokens } = req.body;
     const ownerId = req.user?.id;
@@ -695,7 +728,7 @@ router.delete("/intelligence/ai/chat/:sessionId", aiRateLimit, authMiddleware({ 
   } catch (err) { handleRouteError(res, err, "Failed to clear chat session"); }
 });
 
-router.post("/intelligence/ai/reason", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/reason", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { prompt, maxTokens, steps } = req.body;
     if (!prompt) { sendError(res, "Prompt is required", 400); return; }
@@ -704,7 +737,7 @@ router.post("/intelligence/ai/reason", aiRateLimit, authMiddleware({ required: f
   } catch (err) { handleRouteError(res, err, "Failed to generate reasoning response"); }
 });
 
-router.post("/intelligence/ai/transcribe", express.raw({ type: ["audio/*", "application/octet-stream"], limit: "25mb" }), aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/transcribe", express.raw({ type: ["audio/*", "application/octet-stream"], limit: "25mb" }), aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     if (!req.body || !Buffer.isBuffer(req.body) || req.body.length === 0) {
       sendError(res, "Audio data is required. Send raw audio bytes with Content-Type: audio/wav (or audio/mpeg, application/octet-stream). Max 25MB.", 400); return;
@@ -715,7 +748,7 @@ router.post("/intelligence/ai/transcribe", express.raw({ type: ["audio/*", "appl
   } catch (err) { handleRouteError(res, err, "Failed to transcribe audio"); }
 });
 
-router.post("/intelligence/ai/embed", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/embed", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { text } = req.body;
     if (!text) { sendError(res, "Text is required", 400); return; }
@@ -724,7 +757,7 @@ router.post("/intelligence/ai/embed", aiRateLimit, authMiddleware({ required: fa
   } catch (err) { handleRouteError(res, err, "Failed to generate embedding"); }
 });
 
-router.post("/intelligence/ai/semantic-search", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/semantic-search", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { query, documents, topK } = req.body;
     if (!query || !documents || !Array.isArray(documents)) {
@@ -735,7 +768,7 @@ router.post("/intelligence/ai/semantic-search", aiRateLimit, authMiddleware({ re
   } catch (err) { handleRouteError(res, err, "Failed to perform semantic search"); }
 });
 
-router.post("/intelligence/ai/analyze-document", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/analyze-document", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { text, classificationLabels } = req.body;
     if (!text) { sendError(res, "Text is required", 400); return; }
@@ -744,7 +777,7 @@ router.post("/intelligence/ai/analyze-document", aiRateLimit, authMiddleware({ r
   } catch (err) { handleRouteError(res, err, "Failed to analyze document"); }
 });
 
-router.get("/intelligence/ai/stream", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/intelligence/ai/stream", aiRateLimit, authMiddleware(), async (req, res) => {
   const prompt = (req.query.prompt as string) || "";
   if (!prompt) { sendError(res, "Prompt query parameter is required", 400); return; }
 
@@ -767,7 +800,7 @@ router.get("/intelligence/ai/stream", aiRateLimit, authMiddleware({ required: fa
   res.end();
 });
 
-router.get("/intelligence/ai/health", intelRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/intelligence/ai/health", intelRateLimit, authMiddleware(), async (req, res) => {
   try {
     const healthStatus = services.huggingface.getHealthStatus();
     const probe = (req.query as Record<string, string>).probe === "true";
@@ -780,7 +813,7 @@ router.get("/intelligence/ai/health", intelRateLimit, authMiddleware({ required:
   } catch (err) { handleRouteError(res, err, "Failed to get AI health status"); }
 });
 
-router.post("/intelligence/ai/chat/stream", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/chat/stream", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { messages, model, maxTokens } = req.body;
     if (!messages || !Array.isArray(messages)) { sendError(res, "Messages array is required", 400); return; }
@@ -812,7 +845,7 @@ router.post("/intelligence/ai/chat/stream", aiRateLimit, authMiddleware({ requir
   } catch (err) { handleRouteError(res, err, "Failed to stream chat completion"); }
 });
 
-router.post("/intelligence/ai/threat-briefing", aiRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.post("/intelligence/ai/threat-briefing", aiRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const threats = await getCached("threats", 300000, fetchOtxThreats);
     const topThreats = threats.slice(0, 5);
@@ -832,7 +865,7 @@ router.post("/intelligence/ai/threat-briefing", aiRateLimit, authMiddleware({ re
   } catch (err) { handleRouteError(res, err, "Failed to generate threat briefing"); }
 });
 
-router.post("/intelligence/ai/situation-report", aiRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.post("/intelligence/ai/situation-report", aiRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const [threats, cves, news] = await Promise.all([
       getCached("threats", 300000, fetchOtxThreats),
@@ -866,7 +899,7 @@ router.post("/intelligence/ai/situation-report", aiRateLimit, authMiddleware({ r
   } catch (err) { handleRouteError(res, err, "Failed to generate situation report"); }
 });
 
-router.post("/intelligence/ai/risk-prediction", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/risk-prediction", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { scenario } = req.body;
     const predictions = [
@@ -891,7 +924,7 @@ router.post("/intelligence/ai/risk-prediction", aiRateLimit, authMiddleware({ re
   } catch (err) { handleRouteError(res, err, "Failed to generate risk prediction"); }
 });
 
-router.post("/intelligence/ai/content-ideas", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/content-ideas", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { topic } = req.body;
     const classification = await services.huggingface.zeroShotClassification(
@@ -915,14 +948,14 @@ router.post("/intelligence/ai/content-ideas", aiRateLimit, authMiddleware({ requ
   } catch (err) { handleRouteError(res, err, "Failed to generate content ideas"); }
 });
 
-router.get("/intelligence/briefing", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/briefing", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const briefing = await getCached("briefing", 300000, computeIntelligenceBriefing);
     sendSuccess(res, briefing);
   } catch (err) { handleRouteError(res, err, "Failed to fetch intelligence briefing"); }
 });
 
-router.get("/intelligence/daily-digest", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/daily-digest", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const [threats, cves, news] = await Promise.all([
       getCached("threats", 300000, fetchOtxThreats),
@@ -960,21 +993,21 @@ router.get("/intelligence/daily-digest", intelRateLimit, authMiddleware({ requir
   } catch (err) { handleRouteError(res, err, "Failed to generate daily digest"); }
 });
 
-router.get("/intelligence/ai-models", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/ai-models", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const models = getAiModels();
     sendSuccess(res, models);
   } catch (err) { handleRouteError(res, err, "Failed to fetch AI models"); }
 });
 
-router.get("/intelligence/ai-models/summary", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/ai-models/summary", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const summary = getModelObservabilitySummary();
     sendSuccess(res, summary);
   } catch (err) { handleRouteError(res, err, "Failed to fetch AI model summary"); }
 });
 
-router.get("/intelligence/ai-models/:modelId", intelRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/intelligence/ai-models/:modelId", intelRateLimit, authMiddleware(), async (req, res) => {
   try {
     const model = getAiModelById(req.params.modelId as string);
     if (!model) { sendError(res, "Model not found", 404); return; }
@@ -982,14 +1015,14 @@ router.get("/intelligence/ai-models/:modelId", intelRateLimit, authMiddleware({ 
   } catch (err) { handleRouteError(res, err, "Failed to fetch AI model"); }
 });
 
-router.get("/intelligence/model-registry", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/model-registry", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const registry = getRegistrySummary();
     sendSuccess(res, registry);
   } catch (err) { handleRouteError(res, err, "Failed to fetch model registry"); }
 });
 
-router.get("/intelligence/data-flow", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/data-flow", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const flows = [
       { source: "AlienVault OTX", target: "Firestorm", type: "threat_feed", volume: 1247, status: "active" },
@@ -1026,7 +1059,7 @@ router.get("/intelligence/data-flow", intelRateLimit, authMiddleware({ required:
   } catch (err) { handleRouteError(res, err, "Failed to fetch data flow"); }
 });
 
-router.get("/intelligence/cisa-kev", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/cisa-kev", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const data = await getCached("cisa-kev-intel", 3600000, async () => {
       try {
@@ -1063,7 +1096,7 @@ router.get("/intelligence/cisa-kev", intelRateLimit, authMiddleware({ required: 
   } catch (err) { handleRouteError(res, err, "Failed to fetch CISA KEV data"); }
 });
 
-router.get("/intelligence/mitre-attack/correlation", intelRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/intelligence/mitre-attack/correlation", intelRateLimit, authMiddleware(), async (req, res) => {
   try {
     const cveId = req.query.cve as string;
     const correlations = [
@@ -1082,7 +1115,7 @@ router.get("/intelligence/mitre-attack/correlation", intelRateLimit, authMiddlew
   } catch (err) { handleRouteError(res, err, "Failed to fetch ATT&CK correlations"); }
 });
 
-router.get("/intelligence/ip-reputation", intelRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/intelligence/ip-reputation", intelRateLimit, authMiddleware(), async (req, res) => {
   try {
     const ipParam = req.query.ip as string;
     if (!ipParam) {
@@ -1098,7 +1131,7 @@ router.get("/intelligence/ip-reputation", intelRateLimit, authMiddleware({ requi
   } catch (err) { handleRouteError(res, err, "Failed to check IP reputation"); }
 });
 
-router.get("/intelligence/research-papers", intelRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/intelligence/research-papers", intelRateLimit, authMiddleware(), async (req, res) => {
   try {
     const query = (req.query.q as string) || "artificial intelligence security";
     const limit = Math.min(parseInt(req.query.limit as string) || 8, 15);
@@ -1114,7 +1147,7 @@ router.get("/intelligence/research-papers", intelRateLimit, authMiddleware({ req
   } catch (err) { handleRouteError(res, err, "Failed to fetch research papers"); }
 });
 
-router.get("/intelligence/semantic-scholar", intelRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/intelligence/semantic-scholar", intelRateLimit, authMiddleware(), async (req, res) => {
   try {
     const query = (req.query.q as string) || "machine learning";
     const data = await getCached(`semantic-scholar-${query}`, 1800000, async () => {
@@ -1156,7 +1189,7 @@ router.get("/intelligence/semantic-scholar", intelRateLimit, authMiddleware({ re
   } catch (err) { handleRouteError(res, err, "Failed to fetch Semantic Scholar data"); }
 });
 
-router.get("/intelligence/paperswithcode", intelRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/intelligence/paperswithcode", intelRateLimit, authMiddleware(), async (req, res) => {
   try {
     const task = (req.query.task as string) || "image-classification";
     const data = await getCached(`pwc-${task}`, 3600000, async () => {
@@ -1205,7 +1238,7 @@ router.get("/intelligence/paperswithcode", intelRateLimit, authMiddleware({ requ
   } catch (err) { handleRouteError(res, err, "Failed to fetch Papers With Code data"); }
 });
 
-router.get("/intelligence/huggingface-hub", intelRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/intelligence/huggingface-hub", intelRateLimit, authMiddleware(), async (req, res) => {
   try {
     const task = (req.query.task as string) || "text-classification";
     const limit = Math.min(parseInt(req.query.limit as string) || 8, 20);
@@ -1248,7 +1281,7 @@ router.get("/intelligence/huggingface-hub", intelRateLimit, authMiddleware({ req
   } catch (err) { handleRouteError(res, err, "Failed to fetch HuggingFace Hub data"); }
 });
 
-router.get("/intelligence/cross-app-correlation", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/cross-app-correlation", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const [vessels, cves] = await Promise.all([
       getCached("maritime-vessels", 60000, fetchLiveMaritimeVessels),
@@ -1306,7 +1339,7 @@ router.get("/intelligence/cross-app-correlation", intelRateLimit, authMiddleware
   } catch (err) { handleRouteError(res, err, "Failed to generate cross-app correlations"); }
 });
 
-router.get("/intelligence/unified-feed", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/unified-feed", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const [threats, cves, news, geo] = await Promise.all([
       getCached("threats", 300000, fetchOtxThreats),
@@ -1401,7 +1434,7 @@ const DOMAIN_AGENTS: Record<string, { name: string; systemPrompt: string; model:
   },
 };
 
-router.post("/intelligence/ai/domain-agent", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/domain-agent", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { agentId, messages, maxTokens = 2048, stream = false } = req.body as {
       agentId: string;
@@ -1497,7 +1530,7 @@ router.post("/intelligence/ai/domain-agent", aiRateLimit, authMiddleware({ requi
   } catch (err) { handleRouteError(res, err, "Domain agent inference failed"); }
 });
 
-router.post("/intelligence/ai/campaign-copy", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/campaign-copy", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { topic, tone = "professional", format = "full-campaign", brand } = req.body as {
       topic: string; tone?: string; format?: string; brand?: string;
@@ -1554,7 +1587,7 @@ Format as structured sections with clear headers.`;
   }
 });
 
-router.post("/intelligence/ai/risk-assessment", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/risk-assessment", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { context, frameworks = ["NIST CSF", "ISO 27001", "SOC 2"], dimension } = req.body as {
       context?: string; frameworks?: string[]; dimension?: string;
@@ -1597,7 +1630,7 @@ Use precise language with specific control references where applicable.`;
   } catch (err) { handleRouteError(res, err, "Risk assessment failed"); }
 });
 
-router.post("/intelligence/ai/advisory", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/advisory", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { messages, context } = req.body as {
       messages: Array<{ role: "user" | "assistant"; content: string }>;
@@ -1634,7 +1667,7 @@ router.post("/intelligence/ai/advisory", aiRateLimit, authMiddleware({ required:
   }
 });
 
-router.post("/intelligence/ai/ticket-triage", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/ticket-triage", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { subject, description, client, category } = req.body as {
       subject: string; description?: string; client?: string; category?: string;
@@ -1679,7 +1712,7 @@ Be concise and action-oriented.`;
   } catch (err) { handleRouteError(res, err, "Ticket triage failed"); }
 });
 
-router.post("/intelligence/ai/readiness-summary", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/readiness-summary", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { scores, topGaps } = req.body as { scores?: Record<string, number>; topGaps?: string[] };
 
@@ -1725,7 +1758,7 @@ Use professional board-level language. Be specific about numbers and timelines.`
   }
 });
 
-router.post("/intelligence/ai/dark-vessel-analysis", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/dark-vessel-analysis", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { vessel, aiGapHours, behaviorPatterns, lastKnownPosition } = req.body as {
       vessel?: string; aiGapHours?: number; behaviorPatterns?: string[]; lastKnownPosition?: string;
@@ -1770,7 +1803,7 @@ Use IMCO and OFAC screening terminology.`;
   } catch (err) { handleRouteError(res, err, "Dark vessel analysis failed"); }
 });
 
-router.post("/intelligence/ai/threat-triage", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/threat-triage", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { threat, cveIds, affectedSystems, severity } = req.body as {
       threat?: string; cveIds?: string[]; affectedSystems?: string[]; severity?: string;
@@ -1814,7 +1847,7 @@ Be precise, tactical, and time-sensitive.`;
   } catch (err) { handleRouteError(res, err, "Threat triage failed"); }
 });
 
-router.post("/intelligence/ai/maritime-intelligence", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/maritime-intelligence", aiRateLimit, authMiddleware(), async (req, res) => {
   try {
     const { query, context } = req.body as { query?: string; context?: string };
     if (!query || typeof query !== "string") { sendError(res, "Query is required and must be a string", 400); return; }

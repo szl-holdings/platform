@@ -808,6 +808,9 @@ class SimulationEngine extends EventEmitter {
       riskScore: 6.2,
       exposureUsd: nav * 0.65,
     });
+    if (this.portfolioHistory.length > 288) {
+      this.portfolioHistory = this.portfolioHistory.slice(-200);
+    }
     this.domainStats.szl.entities = this.holdings.size;
   }
 
@@ -969,6 +972,7 @@ class SimulationEngine extends EventEmitter {
       crossDomainTriggered: false,
     };
     this.vesselEvents.unshift(event);
+    if (this.vesselEvents.length > 500) this.vesselEvents.length = 500;
     this.domainStats.vessels.events++;
 
     if (Math.random() < params.aisToSecurityProbability) {
@@ -1007,6 +1011,7 @@ class SimulationEngine extends EventEmitter {
       impactUsd: sev === "high" ? Math.floor(Math.random() * 500000) : undefined,
     };
     this.vesselEvents.unshift(event);
+    if (this.vesselEvents.length > 500) this.vesselEvents.length = 500;
     this.domainStats.vessels.events++;
   }
 
@@ -1091,6 +1096,9 @@ class SimulationEngine extends EventEmitter {
       lastUpdated: new Date().toISOString(),
       progressPct: 5 + Math.random() * 25,
     });
+    if (this.threats.size > 500) {
+      this.threats.delete(this.threats.keys().next().value!);
+    }
     this.domainStats.aegis.events++;
   }
 
@@ -1111,6 +1119,7 @@ class SimulationEngine extends EventEmitter {
       status: "new",
       receivedAt: new Date().toISOString(),
     });
+    if (this.alerts.length > 500) this.alerts.length = 500;
     this.domainStats.aegis.events++;
   }
 
@@ -1179,6 +1188,7 @@ class SimulationEngine extends EventEmitter {
       receivedAt: new Date().toISOString(),
       loadPct,
     });
+    if (this.lyteSignals.length > 500) this.lyteSignals.length = 500;
     this.domainStats.lyte.events++;
   }
 
@@ -1195,6 +1205,9 @@ class SimulationEngine extends EventEmitter {
       financialImpactUsd: Math.floor(10000 + Math.random() * 90000),
     };
     this.lyteIncidents.set(id, incident);
+    if (this.lyteIncidents.size > 200) {
+      this.lyteIncidents.delete(this.lyteIncidents.keys().next().value!);
+    }
 
     const lyteSig: SimulatedSignal = {
       id: generateId("sig"),
@@ -1207,6 +1220,7 @@ class SimulationEngine extends EventEmitter {
       crossDomainTriggered: true,
     };
     this.lyteSignals.unshift(lyteSig);
+    if (this.lyteSignals.length > 500) this.lyteSignals.length = 500;
     this.domainStats.lyte.events++;
   }
 
@@ -1328,6 +1342,7 @@ class SimulationEngine extends EventEmitter {
       triggeredAt: new Date().toISOString(),
     };
     this.correlationEvents.unshift(correlationEvent);
+    if (this.correlationEvents.length > 500) this.correlationEvents = this.correlationEvents.slice(0, 500);
 
     const threat: SimulatedThreat = {
       id: generateId("thr"),
@@ -1345,6 +1360,9 @@ class SimulationEngine extends EventEmitter {
       correlatedVesselId: vessel.id,
     };
     this.threats.set(threat.id, threat);
+    if (this.threats.size > 500) {
+      this.threats.delete(this.threats.keys().next().value!);
+    }
 
     this.alerts.unshift({
       id: generateId("alt"),
@@ -1376,6 +1394,7 @@ class SimulationEngine extends EventEmitter {
       triggeredAt: new Date().toISOString(),
     };
     this.correlationEvents.unshift(correlationEvent);
+    if (this.correlationEvents.length > 500) this.correlationEvents = this.correlationEvents.slice(0, 500);
 
     const maritimeHolding = this.holdings.get("h-001");
     if (maritimeHolding) {
@@ -1406,6 +1425,7 @@ class SimulationEngine extends EventEmitter {
       triggeredAt: new Date().toISOString(),
     };
     this.correlationEvents.unshift(correlationEvent);
+    if (this.correlationEvents.length > 500) this.correlationEvents = this.correlationEvents.slice(0, 500);
 
     const lyteSig: SimulatedSignal = {
       id: generateId("sig"),
@@ -1418,6 +1438,7 @@ class SimulationEngine extends EventEmitter {
       crossDomainTriggered: true,
     };
     this.lyteSignals.unshift(lyteSig);
+    if (this.lyteSignals.length > 500) this.lyteSignals.length = 500;
     threat.correlatedLegalMatterId = correlationId;
 
     this.domainStats.lyte.events++;

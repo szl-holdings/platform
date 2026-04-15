@@ -1,4 +1,5 @@
 import { Router, type IRouter, type RequestHandler } from "express";
+import { LRUCache } from "lru-cache";
 import rateLimit from "express-rate-limit";
 import {
   db,
@@ -430,7 +431,7 @@ const lyteLiveLimit = rateLimit({
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
-const lyteCache = new Map<string, { data: unknown; expiry: number }>();
+const lyteCache = new LRUCache<string, { data: unknown; expiry: number }>({ max: 300 });
 function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
   const c = lyteCache.get(key);
   if (c && c.expiry > Date.now()) return Promise.resolve(c.data as T);

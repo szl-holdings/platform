@@ -1,4 +1,5 @@
 import { Router, type IRouter, type RequestHandler } from "express";
+import { LRUCache } from "lru-cache";
 import rateLimit from "express-rate-limit";
 import {
   db,
@@ -49,12 +50,18 @@ import {
 
 const router: IRouter = Router();
 
+const firestormCrudLimit = rateLimit({
+  windowMs: 15 * 60 * 1000, max: 200, standardHeaders: true, legacyHeaders: false,
+  message: { error: "Firestorm rate limit exceeded." },
+  validate: { xForwardedForHeader: false, ip: false },
+}) as unknown as RequestHandler;
+
 function getFirestormTenantId(req: import("express").Request): string | undefined {
   const user = (req as Record<string, unknown>).user as { orgs?: Array<{ orgId?: unknown }> } | undefined;
   return user?.orgs?.[0]?.orgId != null ? String(user.orgs[0].orgId) : undefined;
 }
 
-router.get("/firestorm/scenarios", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/scenarios", firestormCrudLimit, authMiddleware(), async (_req, res) => {
   try {
     const scenarios = await db.select().from(firestormScenariosTable).orderBy(desc(firestormScenariosTable.createdAt));
     sendSuccess(res, scenarios);
@@ -63,7 +70,7 @@ router.get("/firestorm/scenarios", authMiddleware({ required: false }), async (_
   }
 });
 
-router.get("/firestorm/scenarios/:id", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/scenarios/:id", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [scenario] = await db.select().from(firestormScenariosTable).where(eq(firestormScenariosTable.id, id));
@@ -109,7 +116,7 @@ router.delete("/firestorm/scenarios/:id", authMiddleware({ required: true }), as
   }
 });
 
-router.get("/firestorm/assessments", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/assessments", authMiddleware(), async (_req, res) => {
   try {
     const assessments = await db.select().from(firestormAssessmentsTable).orderBy(desc(firestormAssessmentsTable.createdAt));
     sendSuccess(res, assessments);
@@ -118,7 +125,7 @@ router.get("/firestorm/assessments", authMiddleware({ required: false }), async 
   }
 });
 
-router.get("/firestorm/assessments/:id", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/assessments/:id", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [assessment] = await db.select().from(firestormAssessmentsTable).where(eq(firestormAssessmentsTable.id, id));
@@ -162,7 +169,7 @@ router.delete("/firestorm/assessments/:id", authMiddleware({ required: true }), 
   }
 });
 
-router.get("/firestorm/simulations", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/simulations", authMiddleware(), async (_req, res) => {
   try {
     const runs = await db.select().from(firestormSimulationRunsTable).orderBy(desc(firestormSimulationRunsTable.createdAt));
     sendSuccess(res, runs);
@@ -195,7 +202,7 @@ router.post("/firestorm/simulations", authMiddleware({ required: true }), async 
   }
 });
 
-router.get("/firestorm/simulations/:id", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/simulations/:id", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [run] = await db.select().from(firestormSimulationRunsTable).where(eq(firestormSimulationRunsTable.id, id));
@@ -206,7 +213,7 @@ router.get("/firestorm/simulations/:id", authMiddleware({ required: false }), as
   }
 });
 
-router.get("/firestorm/findings", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/findings", authMiddleware(), async (req, res) => {
   try {
     const assessmentId = req.query.assessmentId ? parseInt(req.query.assessmentId as string, 10) : undefined;
     const query = assessmentId
@@ -219,7 +226,7 @@ router.get("/firestorm/findings", authMiddleware({ required: false }), async (re
   }
 });
 
-router.get("/firestorm/findings/:id", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/findings/:id", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [finding] = await db.select().from(firestormFindingsTable).where(eq(firestormFindingsTable.id, id));
@@ -274,7 +281,7 @@ router.put("/firestorm/findings/:id", authMiddleware({ required: true }), async 
   }
 });
 
-router.get("/firestorm/risk-scores", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/risk-scores", authMiddleware(), async (req, res) => {
   try {
     const assessmentId = req.query.assessmentId ? parseInt(req.query.assessmentId as string, 10) : undefined;
     const query = assessmentId
@@ -297,7 +304,7 @@ router.post("/firestorm/risk-scores", authMiddleware({ required: true }), async 
   }
 });
 
-router.get("/firestorm/reports", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/reports", authMiddleware(), async (_req, res) => {
   try {
     const assessments = await db.select().from(firestormAssessmentsTable).orderBy(desc(firestormAssessmentsTable.createdAt));
     const reports = await Promise.all(assessments.map(async (assessment) => {
@@ -331,7 +338,7 @@ router.get("/firestorm/reports", authMiddleware({ required: false }), async (_re
   }
 });
 
-router.get("/firestorm/reports/export-summary", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/reports/export-summary", authMiddleware(), async (_req, res) => {
   try {
     const findings = await db.select().from(firestormFindingsTable).orderBy(desc(firestormFindingsTable.createdAt));
     const bySeverity: Record<string, typeof findings> = { critical: [], high: [], medium: [], low: [] };
@@ -362,7 +369,7 @@ router.get("/firestorm/reports/export-summary", authMiddleware({ required: false
   }
 });
 
-router.get("/firestorm/reports/:assessmentId", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/reports/:assessmentId", authMiddleware(), async (req, res) => {
   try {
     const assessmentId = parseIdParam(req.params.assessmentId);
     const [assessment] = await db.select().from(firestormAssessmentsTable).where(eq(firestormAssessmentsTable.id, assessmentId));
@@ -398,7 +405,7 @@ router.get("/firestorm/reports/:assessmentId", authMiddleware({ required: false 
   }
 });
 
-router.get("/firestorm/incidents", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/incidents", authMiddleware(), async (_req, res) => {
   try {
     const incidents = await db.select().from(firestormIncidentsTable).orderBy(desc(firestormIncidentsTable.createdAt));
     sendSuccess(res, incidents);
@@ -407,7 +414,7 @@ router.get("/firestorm/incidents", authMiddleware({ required: false }), async (_
   }
 });
 
-router.get("/firestorm/incidents/:id", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/incidents/:id", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [incident] = await db.select().from(firestormIncidentsTable).where(eq(firestormIncidentsTable.id, id));
@@ -487,7 +494,7 @@ router.delete("/firestorm/incidents/:id", authMiddleware({ required: true }), as
   }
 });
 
-router.get("/firestorm/vulnerabilities", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/vulnerabilities", authMiddleware(), async (req, res) => {
   try {
     const severityFilter = req.query.severity as string | undefined;
     const statusFilter = req.query.status as string | undefined;
@@ -510,7 +517,7 @@ router.get("/firestorm/vulnerabilities", authMiddleware({ required: false }), as
   }
 });
 
-router.get("/firestorm/vulnerabilities/:id", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/vulnerabilities/:id", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [finding] = await db.select().from(firestormFindingsTable).where(eq(firestormFindingsTable.id, id));
@@ -613,7 +620,7 @@ async function ensureComplianceControlsSeeded(): Promise<void> {
 const VALID_COMPLIANCE_FRAMEWORKS = ["nist_csf", "fedramp", "fisma"] as const;
 type ComplianceFramework = typeof VALID_COMPLIANCE_FRAMEWORKS[number];
 
-router.get("/firestorm/compliance", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/compliance", authMiddleware(), async (req, res) => {
   try {
     await ensureComplianceControlsSeeded();
     const rawFramework = req.query.framework as string | undefined;
@@ -668,7 +675,7 @@ router.put("/firestorm/compliance/:controlId", authMiddleware({ required: true }
   }
 });
 
-router.get("/firestorm/vulnerability-inventory", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/vulnerability-inventory", authMiddleware(), async (req, res) => {
   try {
     const severityFilter = req.query.severity as string | undefined;
     const statusFilter = req.query.status as string | undefined;
@@ -718,7 +725,7 @@ router.get("/firestorm/vulnerability-inventory", authMiddleware({ required: fals
   }
 });
 
-router.get("/firestorm/alerts", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/alerts", authMiddleware(), async (req, res) => {
   try {
     const status = req.query.status as string | undefined;
     const query = status
@@ -760,7 +767,7 @@ router.put("/firestorm/alerts/:id", authMiddleware({ required: true }), async (r
   }
 });
 
-router.get("/firestorm/soc-dashboard", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/soc-dashboard", authMiddleware(), async (_req, res) => {
   try {
     const incidents = await db.select().from(firestormIncidentsTable);
     const alerts = await db.select().from(firestormAlertsTable);
@@ -823,7 +830,7 @@ router.get("/firestorm/soc-dashboard", authMiddleware({ required: false }), asyn
   }
 });
 
-router.get("/firestorm/cves", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/cves", authMiddleware(), async (req, res) => {
   try {
     const keyword = (req.query.keyword as string) || "";
     const resultsPerPage = 20;
@@ -886,7 +893,7 @@ const firestormLiveLimit = rateLimit({
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
-const fsCache = new Map<string, { data: unknown; expiry: number }>();
+const fsCache = new LRUCache<string, { data: unknown; expiry: number }>({ max: 300 });
 function getFsCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
   const c = fsCache.get(key);
   if (c && c.expiry > Date.now()) return Promise.resolve(c.data as T);
@@ -913,7 +920,7 @@ async function fetchFsJson(url: string, timeoutMs = 10000): Promise<unknown> {
 }
 
 
-router.get("/firestorm/live/mitre-attack", firestormLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/live/mitre-attack", firestormLiveLimit, authMiddleware(), async (req, res) => {
   try {
     const tactic = req.query.tactic as string;
     const techniques = await getFsCached("mitre-attack-live", 86400000, async () => {
@@ -933,7 +940,7 @@ router.get("/firestorm/live/mitre-attack", firestormLiveLimit, authMiddleware({ 
   } catch (err) { handleRouteError(res, err, "Failed to fetch MITRE ATT&CK data"); }
 });
 
-router.get("/firestorm/live/cisa-kev", firestormLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/live/cisa-kev", firestormLiveLimit, authMiddleware(), async (req, res) => {
   try {
     const ransomwareOnly = req.query.ransomware === "true";
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
@@ -951,7 +958,7 @@ router.get("/firestorm/live/cisa-kev", firestormLiveLimit, authMiddleware({ requ
   } catch (err) { handleRouteError(res, err, "Failed to fetch CISA KEV for Firestorm"); }
 });
 
-router.get("/firestorm/live/nvd-cves", firestormLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/live/nvd-cves", firestormLiveLimit, authMiddleware(), async (req, res) => {
   try {
     const severity = (req.query.severity as string)?.toUpperCase();
     const keyword = req.query.keyword as string;
@@ -977,7 +984,7 @@ router.get("/firestorm/live/nvd-cves", firestormLiveLimit, authMiddleware({ requ
   } catch (err) { handleRouteError(res, err, "Failed to fetch NVD CVEs for Firestorm"); }
 });
 
-router.get("/firestorm/live/threat-news", firestormLiveLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/live/threat-news", firestormLiveLimit, authMiddleware(), async (_req, res) => {
   try {
     const news = await getFsCached("firestorm-threat-news", 600000, async () => {
       try {
@@ -999,7 +1006,7 @@ router.get("/firestorm/live/threat-news", firestormLiveLimit, authMiddleware({ r
 });
 
 
-router.get("/firestorm/live/threat-indicators", firestormLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/live/threat-indicators", firestormLiveLimit, authMiddleware(), async (req, res) => {
   try {
     const type = req.query.type as string;
     const data = await getFsCached("firestorm-threat-indicators", 3600000, async () => {
@@ -1081,7 +1088,7 @@ async function fetchCertAdvisories(feed: typeof CERT_FEEDS[0]): Promise<{ adviso
   } catch { return { advisories: [], liveData: false }; }
 }
 
-router.get("/firestorm/live/cert-advisories", firestormLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/live/cert-advisories", firestormLiveLimit, authMiddleware(), async (req, res) => {
   try {
     const certId = req.query.cert as string;
     const feedsToFetch = certId ? CERT_FEEDS.filter(f => f.id === certId) : CERT_FEEDS;
@@ -1097,7 +1104,7 @@ router.get("/firestorm/live/cert-advisories", firestormLiveLimit, authMiddleware
   } catch (err) { handleRouteError(res, err, "Failed to fetch CERT advisories"); }
 });
 
-router.get("/firestorm/live/feed-status", firestormLiveLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/live/feed-status", firestormLiveLimit, authMiddleware(), async (_req, res) => {
   try {
     const feeds = [
       { id: "nvd-nist", name: "NIST NVD", description: "CVE Database", url: "https://nvd.nist.gov/", cacheTtlMinutes: 10 },
@@ -1142,7 +1149,7 @@ router.post("/firestorm/ingest/webhook", authMiddleware({ required: true }), asy
   } catch (err) { handleRouteError(res, err, "Failed to ingest webhook event"); }
 });
 
-router.get("/firestorm/assets", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/assets", authMiddleware(), async (req, res) => {
   try {
     const assets = await db.select().from(firestormAssetsTable).orderBy(desc(firestormAssetsTable.riskScore));
     sendSuccess(res, assets);
@@ -1151,7 +1158,7 @@ router.get("/firestorm/assets", authMiddleware({ required: false }), async (req,
   }
 });
 
-router.get("/firestorm/assets/:id", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/assets/:id", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [asset] = await db.select().from(firestormAssetsTable).where(eq(firestormAssetsTable.id, id));
@@ -1184,7 +1191,7 @@ router.put("/firestorm/assets/:id", authMiddleware({ required: true }), async (r
   }
 });
 
-router.get("/firestorm/workflow-actions", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/workflow-actions", authMiddleware(), async (req, res) => {
   try {
     const entityType = req.query.entityType as string | undefined;
     const entityId = req.query.entityId ? parseInt(req.query.entityId as string, 10) : undefined;
@@ -1228,7 +1235,7 @@ router.patch("/firestorm/workflow-actions/:id", authMiddleware({ required: true 
   }
 });
 
-router.get("/firestorm/hardening-controls", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/hardening-controls", authMiddleware(), async (req, res) => {
   try {
     const categoryFilter = req.query.category as string | undefined;
     const statusFilter = req.query.status as string | undefined;
@@ -1244,7 +1251,7 @@ router.get("/firestorm/hardening-controls", authMiddleware({ required: false }),
   }
 });
 
-router.get("/firestorm/hardening-controls/:id", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/hardening-controls/:id", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [control] = await db.select().from(firestormHardeningControlsTable).where(eq(firestormHardeningControlsTable.id, id));
@@ -1300,7 +1307,7 @@ router.put("/firestorm/hardening-controls/:id", authMiddleware({ required: true 
   }
 });
 
-router.get("/firestorm/hardening-summary", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/hardening-summary", authMiddleware(), async (_req, res) => {
   try {
     const controls = await db.select().from(firestormHardeningControlsTable);
     const implemented = controls.filter(c => c.status === "implemented").length;
@@ -1358,7 +1365,7 @@ router.post("/firestorm/ingest/syslog", authMiddleware({ required: true }), asyn
   } catch (err) { handleRouteError(res, err, "Failed to ingest syslog event"); }
 });
 
-router.get("/firestorm/cases", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/cases", authMiddleware(), async (req, res) => {
   try {
     const statusFilter = req.query.status as string | undefined;
     const priorityFilter = req.query.priority as string | undefined;
@@ -1372,7 +1379,7 @@ router.get("/firestorm/cases", authMiddleware({ required: false }), async (req, 
   } catch (err) { handleRouteError(res, err, "Failed to list cases"); }
 });
 
-router.get("/firestorm/cases/:id", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/cases/:id", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [c] = await db.select().from(firestormCasesTable).where(eq(firestormCasesTable.id, id));
@@ -1427,14 +1434,14 @@ router.patch("/firestorm/cases/:id", authMiddleware({ required: true }), async (
   } catch (err) { handleRouteError(res, err, "Failed to update case"); }
 });
 
-router.get("/firestorm/mitre-detections", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/mitre-detections", authMiddleware(), async (_req, res) => {
   try {
     const detections = await db.select().from(firestormMitreDetectionsTable).orderBy(desc(firestormMitreDetectionsTable.detectionCount));
     sendSuccess(res, detections);
   } catch (err) { handleRouteError(res, err, "Failed to list MITRE detections"); }
 });
 
-router.get("/firestorm/mitre-detections/:techniqueId", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/mitre-detections/:techniqueId", authMiddleware(), async (req, res) => {
   try {
     const techniqueId = String(req.params.techniqueId);
     const [detection] = await db.select().from(firestormMitreDetectionsTable).where(eq(firestormMitreDetectionsTable.techniqueId, techniqueId));
@@ -1488,7 +1495,7 @@ async function fetchThreatJson(url: string, timeoutMs = 10000, extraHeaders: Rec
   }
 }
 
-router.get("/firestorm/live/shodan-ip", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/live/shodan-ip", authMiddleware(), async (req, res) => {
   try {
     const ip = (req.query.ip as string)?.trim();
     if (!ip || !/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(ip)) {
@@ -1542,7 +1549,7 @@ router.get("/firestorm/live/shodan-ip", authMiddleware({ required: false }), asy
   } catch (err) { handleRouteError(res, err, "Failed to query Shodan InternetDB"); }
 });
 
-router.get("/firestorm/live/greynoise-ip", authMiddleware({ required: false }), async (req, res) => {
+router.get("/firestorm/live/greynoise-ip", authMiddleware(), async (req, res) => {
   try {
     const ip = (req.query.ip as string)?.trim();
     if (!ip || !/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(ip)) {
@@ -1597,7 +1604,7 @@ router.get("/firestorm/live/greynoise-ip", authMiddleware({ required: false }), 
   } catch (err) { handleRouteError(res, err, "Failed to query GreyNoise"); }
 });
 
-router.get("/firestorm/live/malware-bazaar", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/live/malware-bazaar", authMiddleware(), async (_req, res) => {
   try {
     const result = await getThreatCached("malware-bazaar-recent", 3600000, async () => {
       try {
@@ -1680,7 +1687,7 @@ router.get("/firestorm/live/malware-bazaar", authMiddleware({ required: false })
   } catch (err) { handleRouteError(res, err, "Failed to fetch MalwareBazaar data"); }
 });
 
-router.get("/firestorm/live/threat-aggregator", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/live/threat-aggregator", authMiddleware(), async (_req, res) => {
   try {
     const result = await getThreatCached("threat-aggregator", 3600000, async () => {
       try {

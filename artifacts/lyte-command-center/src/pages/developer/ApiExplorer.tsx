@@ -19,9 +19,9 @@ const ENDPOINTS: Endpoint[] = [
   { method: "GET", path: "/api/aegis/health", summary: "Aegis platform health — all modules", tag: "Security", auth: false },
   { method: "GET", path: "/api/aegis/threat-data", summary: "Threat intelligence data and analysis", tag: "Security", auth: true },
   { method: "GET", path: "/api/aegis/compliance", summary: "Compliance framework assessment", tag: "Security", auth: true },
-  { method: "GET", path: "/api/aegis/soc/alerts", summary: "SOC active alerts and incidents", tag: "Security", auth: true },
-  { method: "GET", path: "/api/aegis/ops/tickets", summary: "MSP ticket queue and SLA status", tag: "Security", auth: true },
-  { method: "GET", path: "/api/aegis/intel/models", summary: "Intelligence engine model registry", tag: "Security", auth: true },
+  { method: "GET", path: "/api/firestorm/alerts", summary: "SOC active alerts and incidents", tag: "Security", auth: true },
+  { method: "GET", path: "/api/msp/tickets", summary: "MSP ticket queue and SLA status", tag: "Security", auth: true },
+  { method: "GET", path: "/api/intelligence/model-registry", summary: "Intelligence engine model registry", tag: "Security", auth: true },
 
   { method: "GET", path: "/api/beacon/health", summary: "Beacon analytics health", tag: "Analytics", auth: false },
   { method: "GET", path: "/api/beacon/metrics", summary: "Decision analytics metrics", tag: "Analytics", auth: true },

@@ -12,6 +12,8 @@
  * not from client input. It is authoritative for the orgId written to filesTable.
  */
 
+import { LRUCache } from "lru-cache";
+
 const INTENT_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 export interface UploadIntent {
@@ -23,7 +25,7 @@ export interface UploadIntent {
   expiresAt: Date;
 }
 
-const store = new Map<string, UploadIntent>();
+const store = new LRUCache<string, UploadIntent>({ max: 2000 });
 
 /** Periodically evict expired intents so the map does not grow unboundedly. */
 function evictExpired(): void {

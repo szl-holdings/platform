@@ -26,7 +26,8 @@ import { seedDreamscapeData } from "./lib/seed-dreamscape";
 import { seedDosData } from "./lib/seed-dos";
 import { buildGraphQLMiddleware } from "./graphql/index.js";
 import { registerGraphQLHandler } from "./app.js";
-import { prewarmIntelligenceCache, scheduleIntelligenceRefresh } from "./routes/intelligence.js";
+import { prewarmIntelligenceCache, scheduleIntelligenceRefresh, scheduleIntelligenceCachePruning } from "./routes/intelligence.js";
+import { pingRedis } from "./lib/redis-client.js";
 import { registerAllPrismJobHandlers } from "./services/prism-job-handlers";
 import { startPrismJobPoller } from "./services/prism-queue";
 import { registerGenAITelemetryBridge } from "./lib/genai-telemetry-bridge.js";
@@ -128,10 +129,12 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     }).catch(err => logger.warn({ err }, "[analytics] Failed to load analytics-jobs for anomaly scan"));
   }, 6 * 60 * 60 * 1000);
   import("./routes/rmm").then(m => m.startSyncScheduler()).catch(err => logger.warn({ err }, "RMM sync scheduler start failed (non-fatal)"));
+  pingRedis().catch(err => logger.warn({ err }, "[redis] Startup ping failed (non-fatal)"));
   prewarmIntelligenceCache().catch(err => {
     logger.warn({ err }, "[intelligence-cache] Prewarm failed (non-fatal)");
   });
   scheduleIntelligenceRefresh();
+  scheduleIntelligenceCachePruning();
 
   import("@szl-holdings/ai-engine")
     .then(({ startCognitiveLearning }) => startCognitiveLearning())

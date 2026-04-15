@@ -2,159 +2,43 @@
   "version": "7",
   "dialect": "postgresql",
   "entries": [
-    {
-      "idx": 0,
-      "version": "7",
-      "when": 1774828392191,
-      "tag": "0000_wooden_proemial_gods",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1774877701115,
-      "tag": "0001_exotic_tony_stark",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1774900000000,
-      "tag": "0002_cms_schema_and_product_tables",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1774960000000,
-      "tag": "0003_terra_distress_pipeline",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1774965000000,
-      "tag": "0003_alloy_canonical_schema",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1774970000000,
-      "tag": "0004_capital_certification_readiness",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1774975000000,
-      "tag": "0004_platform_feature_flags_seed",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1774980000000,
-      "tag": "0004_terra_broker_schema",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1774985000000,
-      "tag": "0005_platform_ops_tables",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1774990000000,
-      "tag": "0006_firestorm_hardening_platform",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "7",
-      "when": 1774995000000,
-      "tag": "0007_azure_tenants_dataverse",
-      "breakpoints": true
-    },
-    {
-      "idx": 11,
-      "version": "7",
-      "when": 1775000000000,
-      "tag": "0008_lyte_dashboards",
-      "breakpoints": true
-    },
-    {
-      "idx": 12,
-      "version": "7",
-      "when": 1775005000000,
-      "tag": "0009_export_jobs",
-      "breakpoints": true
-    },
-    {
-      "idx": 13,
-      "version": "7",
-      "when": 1775010000000,
-      "tag": "0009_feedback_tables",
-      "breakpoints": true
-    },
-    {
-      "idx": 14,
-      "version": "7",
-      "when": 1775020000000,
-      "tag": "0010_org_invitations",
-      "breakpoints": true
-    },
-    {
-      "idx": 15,
-      "version": "7",
-      "when": 1775030000000,
-      "tag": "0011_org_members_unique_constraint",
-      "breakpoints": true
-    },
-    {
-      "idx": 16,
-      "version": "7",
-      "when": 1775035000000,
-      "tag": "0012_alloy_governance_policies",
-      "breakpoints": true
-    },
-    {
-      "idx": 17,
-      "version": "7",
-      "when": 1775040000000,
-      "tag": "0013_terra_action_items",
-      "breakpoints": true
-    },
-    {
-      "idx": 18,
-      "version": "7",
-      "when": 1775045000000,
-      "tag": "0014_firestorm_tradecraft_tables",
-      "breakpoints": true
-    },
-    {
-      "idx": 19,
-      "version": "7",
-      "when": 1775050000000,
-      "tag": "0015_prism_counsel_ny",
-      "breakpoints": true
-    },
-    {
-      "idx": 20,
-      "version": "7",
-      "when": 1775055000000,
-      "tag": "0016_outcome_graph_atlas_artifacts",
-      "breakpoints": true
-    },
-    {
-      "idx": 21,
-      "version": "7",
-      "when": 1775060000000,
-      "tag": "0017_simulation_persistence",
-      "breakpoints": true
-    }
+    { "idx": 0, "version": "7", "when": 1774828392191, "tag": "0000_wooden_proemial_gods", "breakpoints": true },
+    { "idx": 1, "version": "7", "when": 1774877701115, "tag": "0001_exotic_tony_stark", "breakpoints": true },
+    { "idx": 2, "version": "7", "when": 1774900000000, "tag": "0002_cms_schema_and_product_tables", "breakpoints": true },
+    { "idx": 3, "version": "7", "when": 1774960000000, "tag": "0003_terra_distress_pipeline", "breakpoints": true },
+    { "idx": 4, "version": "7", "when": 1774965000000, "tag": "0004_alloy_canonical_schema", "breakpoints": true },
+    { "idx": 5, "version": "7", "when": 1774970000000, "tag": "0005_capital_certification_readiness", "breakpoints": true },
+    { "idx": 6, "version": "7", "when": 1774975000000, "tag": "0006_platform_feature_flags_seed", "breakpoints": true },
+    { "idx": 7, "version": "7", "when": 1774980000000, "tag": "0007_terra_broker_schema", "breakpoints": true },
+    { "idx": 8, "version": "7", "when": 1774985000000, "tag": "0008_platform_ops_tables", "breakpoints": true },
+    { "idx": 9, "version": "7", "when": 1774990000000, "tag": "0009_firestorm_hardening_platform", "breakpoints": true },
+    { "idx": 10, "version": "7", "when": 1774995000000, "tag": "0010_azure_tenants_dataverse", "breakpoints": true },
+    { "idx": 11, "version": "7", "when": 1775000000000, "tag": "0011_lyte_dashboards", "breakpoints": true },
+    { "idx": 12, "version": "7", "when": 1775005000000, "tag": "0012_export_jobs", "breakpoints": true },
+    { "idx": 13, "version": "7", "when": 1775010000000, "tag": "0013_feedback_tables", "breakpoints": true },
+    { "idx": 14, "version": "7", "when": 1775020000000, "tag": "0014_org_invitations", "breakpoints": true },
+    { "idx": 15, "version": "7", "when": 1775030000000, "tag": "0015_org_members_unique_constraint", "breakpoints": true },
+    { "idx": 16, "version": "7", "when": 1775035000000, "tag": "0016_alloy_governance_policies", "breakpoints": true },
+    { "idx": 17, "version": "7", "when": 1775040000000, "tag": "0017_terra_action_items", "breakpoints": true },
+    { "idx": 18, "version": "7", "when": 1775045000000, "tag": "0018_firestorm_tradecraft_tables", "breakpoints": true },
+    { "idx": 19, "version": "7", "when": 1775050000000, "tag": "0019_prism_counsel_ny", "breakpoints": true },
+    { "idx": 20, "version": "7", "when": 1775055000000, "tag": "0020_outcome_graph_atlas_artifacts", "breakpoints": true },
+    { "idx": 21, "version": "7", "when": 1775060000000, "tag": "0021_simulation_persistence", "breakpoints": true },
+    { "idx": 22, "version": "7", "when": 1775065000000, "tag": "0022_consolidated_runtime_tables", "breakpoints": true },
+    { "idx": 23, "version": "7", "when": 1775070000000, "tag": "0023_push_infra_hardening", "breakpoints": true },
+    { "idx": 24, "version": "7", "when": 1775075000000, "tag": "0024_push_tokens_nullable_user", "breakpoints": true },
+    { "idx": 25, "version": "7", "when": 1775080000000, "tag": "0025_simulation_persistence", "breakpoints": true },
+    { "idx": 26, "version": "7", "when": 1775082000000, "tag": "0026_distribution_os_intelligence", "breakpoints": true },
+    { "idx": 27, "version": "7", "when": 1775085000000, "tag": "0027_durable_job_queue", "breakpoints": true },
+    { "idx": 28, "version": "7", "when": 1775090000000, "tag": "0028_knowledge_graph_vector_embeddings", "breakpoints": true },
+    { "idx": 29, "version": "7", "when": 1775095000000, "tag": "0029_align_embedding_dimensions", "breakpoints": true },
+    { "idx": 30, "version": "7", "when": 1775100000000, "tag": "0030_kg_tenant_scope_and_xdomain_constraint", "breakpoints": true },
+    { "idx": 31, "version": "7", "when": 1775105000000, "tag": "0031_kg_tenant_safe_unique_key", "breakpoints": true },
+    { "idx": 32, "version": "7", "when": 1775110000000, "tag": "0032_rag_chunk_embedding_provenance", "breakpoints": true },
+    { "idx": 33, "version": "7", "when": 1775115000000, "tag": "0033_analytics_engine", "breakpoints": true },
+    { "idx": 34, "version": "7", "when": 1775120000000, "tag": "0034_reports_pipeline", "breakpoints": true },
+    { "idx": 35, "version": "7", "when": 1775125000000, "tag": "0035_stream_data_sources", "breakpoints": true },
+    { "idx": 36, "version": "7", "when": 1775130000000, "tag": "0036_gdpr_contact_email_hash", "breakpoints": true },
+    { "idx": 37, "version": "7", "when": 1775135000000, "tag": "0037_multi_tenancy_partner_portal", "breakpoints": true }
   ]
 }

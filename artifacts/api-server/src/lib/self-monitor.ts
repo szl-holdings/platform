@@ -1,5 +1,6 @@
 import { db, lyteSignalsTable } from "@szl-holdings/db";
 import { lt, sql } from "drizzle-orm";
+import { LRUCache } from "lru-cache";
 import { publish, WS_CHANNELS } from "./websocket";
 import { logger } from "./logger";
 
@@ -31,7 +32,7 @@ interface HealthDetailedResponse {
 
 let monitorInterval: ReturnType<typeof setInterval> | null = null;
 
-const lastSignalAt = new Map<string, number>();
+const lastSignalAt = new LRUCache<string, number>({ max: 500 });
 
 function shouldEmitSignal(key: string): boolean {
   const now = Date.now();

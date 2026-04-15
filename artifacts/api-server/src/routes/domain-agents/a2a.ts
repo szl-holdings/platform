@@ -26,7 +26,7 @@ router.get("/a2a/health", (_req, res) => {
   res.json({ ok: true, protocol: "A2A", version: "1.0.0", timestamp: new Date().toISOString() });
 });
 
-router.post("/a2a/register", a2aRateLimit, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.post("/a2a/register", a2aRateLimit, authMiddleware(), async (req: Request, res: Response) => {
   const body = req.body as {
     agentId?: string;
     name?: string;
@@ -141,7 +141,7 @@ router.post("/a2a/discover", a2aRateLimit, async (req: Request, res: Response) =
   }
 });
 
-router.post("/a2a/delegate", a2aRateLimit, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.post("/a2a/delegate", a2aRateLimit, authMiddleware(), async (req: Request, res: Response) => {
   const body = req.body as {
     requestingAgentId?: string;
     targetAgentId?: string;
@@ -244,7 +244,7 @@ router.post("/a2a/heartbeat", a2aRateLimit, async (req: Request, res: Response) 
   }
 });
 
-router.post("/a2a/sync", authMiddleware({ required: false }), async (_req: Request, res: Response) => {
+router.post("/a2a/sync", authMiddleware(), async (_req: Request, res: Response) => {
   try {
     await a2aRegistry.syncFromAgentRegistry();
     const cards = await a2aRegistry.getAllCards();

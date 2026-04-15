@@ -1,4 +1,5 @@
 import { Router, type IRouter, type RequestHandler } from "express";
+import { LRUCache } from "lru-cache";
 import rateLimit from "express-rate-limit";
 import {
   db,
@@ -341,7 +342,7 @@ const vesselsLiveLimit = rateLimit({
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
-const vesCache = new Map<string, { data: unknown; expiry: number }>();
+const vesCache = new LRUCache<string, { data: unknown; expiry: number }>({ max: 300 });
 function getVesCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
   const c = vesCache.get(key);
   if (c && c.expiry > Date.now()) return Promise.resolve(c.data as T);

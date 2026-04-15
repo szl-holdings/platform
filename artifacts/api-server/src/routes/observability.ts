@@ -53,7 +53,7 @@ function buildDataSources(isAuthenticated: boolean) {
   return sources;
 }
 
-router.get("/observability/:appSlug", authMiddleware({ required: false }), (req, res) => {
+router.get("/observability/:appSlug", authMiddleware(), (req, res) => {
   const appSlug = String(req.params.appSlug);
   const config = getConfigBySlug(appSlug);
   const collector = collectors.get(appSlug);
@@ -63,16 +63,18 @@ router.get("/observability/:appSlug", authMiddleware({ required: false }), (req,
     return;
   }
 
-  res.setHeader("Cache-Control", "public, max-age=10, s-maxage=10");
+  res.setHeader("Cache-Control", "private, no-store");
 
   const snapshot = collector.getSnapshot();
-  const isAuthenticated = !!req.user || process.env.NODE_ENV !== "production";
 
   const lensMetadata = config.domainLensLabels ? {
     postureScoreName: config.domainLensLabels.postureScoreName,
     topSignalLabel: config.domainLensLabels.topSignalLabel,
     velocityTrendLabel: config.domainLensLabels.velocityTrendLabel,
   } : null;
+
+  const connectors = config.connectors || [];
+  const healthMatrix = services.getAppHealthMatrix(connectors);
 
   const response: Record<string, unknown> = {
     appSlug,
@@ -89,13 +91,8 @@ router.get("/observability/:appSlug", authMiddleware({ required: false }), (req,
     lensMetadata,
     metrics: snapshot.metrics,
     events: snapshot.events.slice(0, 20),
-    dataSources: buildDataSources(isAuthenticated),
-  };
-
-  if (isAuthenticated) {
-    const connectors = config.connectors || [];
-    const healthMatrix = services.getAppHealthMatrix(connectors);
-    response.integrations = {
+    dataSources: buildDataSources(true),
+    integrations: {
       total: healthMatrix.summary.total,
       live: healthMatrix.summary.liveConfigured,
       demo: healthMatrix.summary.mockedDemoMode,
@@ -104,23 +101,24 @@ router.get("/observability/:appSlug", authMiddleware({ required: false }), (req,
         name: s.name,
         status: s.status,
       })),
-    };
-    response.serverTelemetry = serverTelemetry.getSnapshot();
-    response.clientVitals = clientTelemetry.getAggregatedVitals(appSlug);
-  }
+    },
+    serverTelemetry: serverTelemetry.getSnapshot(),
+    clientVitals: clientTelemetry.getAggregatedVitals(appSlug),
+  };
 
   res.json(response);
 });
 
-router.get("/observability", authMiddleware({ required: false }), (req, res) => {
-  res.setHeader("Cache-Control", "public, max-age=15, s-maxage=15");
-  const isAuthenticated = !!req.user || process.env.NODE_ENV !== "production";
+router.get("/observability", authMiddleware(), (req, res) => {
+  res.setHeader("Cache-Control", "private, no-store");
 
   const allApps = ALL_CONFIGS.map((config) => {
     const collector = collectors.get(config.appSlug)!;
     const snapshot = collector.getSnapshot();
+    const connectors = config.connectors || [];
+    const healthMatrix = services.getAppHealthMatrix(connectors);
 
-    const appData: Record<string, unknown> = {
+    return {
       appSlug: config.appSlug,
       appName: config.appName,
       domain: config.domain,
@@ -133,38 +131,26 @@ router.get("/observability", authMiddleware({ required: false }), (req, res) => 
       velocityTrend: snapshot.velocityTrend,
       metrics: snapshot.metrics,
       events: snapshot.events.slice(0, 10),
-    };
-
-    if (isAuthenticated) {
-      const connectors = config.connectors || [];
-      const healthMatrix = services.getAppHealthMatrix(connectors);
-      appData.integrationHealth = {
+      integrationHealth: {
         live: healthMatrix.summary.liveConfigured,
         demo: healthMatrix.summary.mockedDemoMode,
         unhealthy: healthMatrix.summary.manualRequired,
-      };
-    }
-
-    return appData;
+      },
+    };
   });
 
   const portfolioScore = Math.round(
     allApps.reduce((s, a) => s + (a.overallScore as number), 0) / allApps.length
   );
 
-  const response: Record<string, unknown> = {
+  res.json({
     timestamp: new Date().toISOString(),
     portfolioScore,
     portfolioStatus: portfolioScore >= 80 ? "healthy" : portfolioScore >= 50 ? "degraded" : "critical",
     apps: allApps,
-    dataSources: buildDataSources(isAuthenticated),
-  };
-
-  if (isAuthenticated) {
-    response.serverTelemetry = serverTelemetry.getSnapshot();
-  }
-
-  res.json(response);
+    dataSources: buildDataSources(true),
+    serverTelemetry: serverTelemetry.getSnapshot(),
+  });
 });
 
 router.post("/observability/vitals", (req, res) => {

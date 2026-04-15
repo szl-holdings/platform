@@ -8,7 +8,7 @@ import { services } from "@szl-holdings/services";
 
 const router: IRouter = Router();
 
-router.get("/firestorm/live/threats", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/live/threats", authMiddleware(), async (_req, res) => {
   try {
     const [incidents, alerts] = await Promise.all([
       db.select().from(firestormIncidentsTable).orderBy(desc(firestormIncidentsTable.createdAt)).limit(20),
@@ -22,7 +22,7 @@ router.get("/firestorm/live/threats", authMiddleware({ required: false }), async
   } catch (err) { handleRouteError(res, err, "Failed to fetch live threats"); }
 });
 
-router.get("/firestorm/live/incidents", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/live/incidents", authMiddleware(), async (_req, res) => {
   try {
     const incidents = await db
       .select()
@@ -33,7 +33,7 @@ router.get("/firestorm/live/incidents", authMiddleware({ required: false }), asy
   } catch (err) { handleRouteError(res, err, "Failed to fetch live incidents"); }
 });
 
-router.get("/firestorm/live/threat-summary", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/live/threat-summary", authMiddleware(), async (_req, res) => {
   try {
     const [incidentStats, alertStats] = await Promise.all([
       db.select({ count: count() }).from(firestormIncidentsTable),
@@ -73,7 +73,7 @@ router.get("/firestorm/live/threat-summary", authMiddleware({ required: false })
   } catch (err) { handleRouteError(res, err, "Failed to fetch Firestorm threat summary"); }
 });
 
-router.get("/firestorm/live/compliance-summary", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/live/compliance-summary", authMiddleware(), async (_req, res) => {
   try {
     const controls = await db.select().from(firestormComplianceControlsTable);
     const total = controls.length;
@@ -98,7 +98,7 @@ router.get("/firestorm/live/compliance-summary", authMiddleware({ required: fals
   } catch (err) { handleRouteError(res, err, "Failed to fetch compliance summary"); }
 });
 
-router.get("/firestorm/live/asset-risk", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/live/asset-risk", authMiddleware(), async (_req, res) => {
   try {
     const assets = await db
       .select()
@@ -128,7 +128,7 @@ router.get("/firestorm/live/asset-risk", authMiddleware({ required: false }), as
   } catch (err) { handleRouteError(res, err, "Failed to fetch asset risk"); }
 });
 
-router.get("/firestorm/soar/playbooks", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/soar/playbooks", authMiddleware(), async (_req, res) => {
   try {
     const playbooks = [
       {
@@ -203,7 +203,7 @@ router.post("/firestorm/soar/execute", authMiddleware({ required: true }), requi
   } catch (err) { handleRouteError(res, err, "Failed to execute SOAR playbook"); }
 });
 
-router.get("/firestorm/stix/objects", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/stix/objects", authMiddleware(), async (_req, res) => {
   try {
     const stixObjects = [
       {
@@ -295,7 +295,7 @@ router.post("/firestorm/stix/export", authMiddleware({ required: true }), requir
   } catch (err) { handleRouteError(res, err, "Failed to export STIX bundle"); }
 });
 
-router.get("/firestorm/taxii/feeds", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/taxii/feeds", authMiddleware(), async (_req, res) => {
   try {
     const [collections, indicators, cisaKev] = await Promise.all([
       services.mispTaxii.getCollections(),
@@ -330,7 +330,7 @@ router.get("/firestorm/taxii/feeds", authMiddleware({ required: false }), async 
   } catch (err) { handleRouteError(res, err, "Failed to fetch TAXII feeds"); }
 });
 
-router.get("/firestorm/mitre/coverage", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/firestorm/mitre/coverage", authMiddleware(), async (_req, res) => {
   try {
     const coverage = [
       { tactic: "Initial Access", tacticId: "TA0001", techniques: 9, covered: 8, detected: 7 },

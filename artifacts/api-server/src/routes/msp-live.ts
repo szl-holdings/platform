@@ -1,10 +1,12 @@
 import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import os from "os";
+import { LRUCache } from "lru-cache";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { db, intelligenceCacheTable } from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
+import { redisGet, redisSet } from "../lib/redis-client.js";
 
 const router: IRouter = Router();
 
@@ -17,23 +19,34 @@ const mspLiveRateLimit = rateLimit({
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
-const mspMemCache = new Map<string, { data: unknown; expiresAt: number }>();
+const mspMemCache = new LRUCache<string, { data: unknown; expiresAt: number }>({ max: 200 });
 
 async function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
+  const now = Date.now();
   const mem = mspMemCache.get(key);
-  if (mem && mem.expiresAt > Date.now()) return mem.data as T;
-  const expiresAt = new Date(Date.now() + ttlMs);
-  const dbKey = `msp-${key}`;
+  if (mem && mem.expiresAt > now) return mem.data as T;
+
+  const redisKey = `msp-${key}`;
+  const cached = await redisGet<T>(redisKey);
+  if (cached !== null) {
+    mspMemCache.set(key, { data: cached, expiresAt: now + ttlMs });
+    return cached;
+  }
+
+  const expiresAt = new Date(now + ttlMs);
+  const dbKey = redisKey;
   try {
     const [row] = await db.select().from(intelligenceCacheTable).where(eq(intelligenceCacheTable.key, dbKey)).limit(1);
     if (row && new Date(row.expiresAt) > new Date()) {
       mspMemCache.set(key, { data: row.data, expiresAt: new Date(row.expiresAt).getTime() });
+      await redisSet(redisKey, row.data, new Date(row.expiresAt).getTime() - now);
       return row.data as T;
     }
   } catch { /* DB unavailable — fall through to fetch */ }
   try {
     const data = await fetcher();
     mspMemCache.set(key, { data, expiresAt: expiresAt.getTime() });
+    await redisSet(redisKey, data, ttlMs);
     await db.insert(intelligenceCacheTable).values({ key: dbKey, data: data as Record<string, unknown>, expiresAt, fetchedAt: new Date() })
       .onConflictDoUpdate({ target: intelligenceCacheTable.key, set: { data: data as Record<string, unknown>, expiresAt, fetchedAt: new Date() } })
       .catch(() => undefined);
@@ -67,7 +80,7 @@ const REFERENCE_CMMC_MATURITY = {
 };
 
 
-router.get("/msp/live/contracts", mspLiveRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/msp/live/contracts", mspLiveRateLimit, authMiddleware(), async (req, res) => {
   try {
     const fedramp = req.query.fedramp === "true";
     type ContractRecord = { id: string | number; agency: string; vendor: string; description: string; value: number; period: string; naicsCode: string; type: string; setAside: string; placeOfPerformance: string; fedrampRequired: boolean; cmmc: string };
@@ -111,7 +124,7 @@ router.get("/msp/live/contracts", mspLiveRateLimit, authMiddleware({ required: f
   } catch (err) { handleRouteError(res, err, "Failed to fetch federal contracts"); }
 });
 
-router.get("/msp/live/fedramp", mspLiveRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/msp/live/fedramp", mspLiveRateLimit, authMiddleware(), async (req, res) => {
   try {
     const impact = req.query.impact as string;
     const products = await getCached("msp-fedramp", 86400000, async () => {
@@ -161,7 +174,7 @@ router.get("/msp/live/fedramp", mspLiveRateLimit, authMiddleware({ required: fal
   } catch (err) { handleRouteError(res, err, "Failed to fetch FedRAMP products"); }
 });
 
-router.get("/msp/live/pipeline", mspLiveRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/msp/live/pipeline", mspLiveRateLimit, authMiddleware(), async (_req, res) => {
   try {
     sendSuccess(res, {
       source: "SAM.gov Contract Forecast + MSP Intelligence",
@@ -174,7 +187,7 @@ router.get("/msp/live/pipeline", mspLiveRateLimit, authMiddleware({ required: fa
   } catch (err) { handleRouteError(res, err, "Failed to fetch MSP contract pipeline"); }
 });
 
-router.get("/msp/live/health-metrics", mspLiveRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/msp/live/health-metrics", mspLiveRateLimit, authMiddleware(), async (_req, res) => {
   try {
     sendSuccess(res, {
       source: "ConnectWise PSA Live Integration",
@@ -214,7 +227,7 @@ function getCpuPercent(): number {
   return Math.round(100 - (idleDiff / totalDiff) * 100);
 }
 
-router.get("/msp/live/system-metrics", mspLiveRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/msp/live/system-metrics", mspLiveRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const cpuPercent = getCpuPercent();
     const totalMem = os.totalmem();

@@ -1,5 +1,6 @@
 import { sendEmail, hasEmailProviderConfigured, INTERNAL_EMAIL } from "./email";
 import { logger } from "./logger";
+import { LRUCache } from "lru-cache";
 import type { NotifSeverity } from "./domain-notifications";
 import { sendWebPushToAll } from "./web-push-sender";
 import { db, notificationRecipientsTable } from "@szl-holdings/db";
@@ -13,7 +14,7 @@ const RATE_LIMIT_MAX_PER_WINDOW: Record<NotifSeverity, number> = {
   info: 20,
 };
 
-const rateLimitBuckets = new Map<string, { count: number; windowStart: number }>();
+const rateLimitBuckets = new LRUCache<string, { count: number; windowStart: number }>({ max: 10000 });
 
 function isRateLimited(key: string, severity: NotifSeverity): boolean {
   const now = Date.now();

@@ -77,7 +77,7 @@ router.get("/domain-agents/agents/:agentType", (req, res) => {
   });
 });
 
-router.post("/domain-agents/:agentType/chat", agentChatLimit, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.post("/domain-agents/:agentType/chat", agentChatLimit, authMiddleware(), async (req: Request, res: Response) => {
   const agentType = req.params.agentType as string;
   if (!agentType || !isValidAgentType(agentType)) {
     sendError(res, `Invalid agent type: ${agentType}`, 400);

@@ -50,7 +50,7 @@ router.post("/doctrine/events", writeLimiter, async (req, res) => {
   }
 });
 
-router.get("/doctrine/events", readLimiter, authMiddleware({ required: false }), async (req, res) => {
+router.get("/doctrine/events", readLimiter, authMiddleware(), async (req, res) => {
   try {
     const limit = Math.min(Number(req.query.limit) || 50, 200);
     const layer = typeof req.query.layer === "string" ? req.query.layer : undefined;
