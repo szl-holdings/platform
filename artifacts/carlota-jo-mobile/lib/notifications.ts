@@ -14,31 +14,31 @@ Notifications.setNotificationHandler({
 export async function setupAndroidNotificationChannels(): Promise<void> {
   if (Platform.OS !== "android") return;
 
-  await Notifications.setNotificationChannelAsync("vessels-alerts", {
-    name: "Vessel Alerts",
-    importance: Notifications.AndroidImportance.MAX,
-    vibrationPattern: [0, 250, 250, 250],
-    lightColor: "#0EA5E9",
-    sound: "default",
-    bypassDnd: true,
-    description: "Critical vessel alerts requiring immediate attention",
-  });
-
-  await Notifications.setNotificationChannelAsync("vessels-compliance", {
-    name: "Compliance Warnings",
+  await Notifications.setNotificationChannelAsync("carlota-sessions", {
+    name: "Session Reminders",
     importance: Notifications.AndroidImportance.HIGH,
     vibrationPattern: [0, 250, 250, 250],
-    lightColor: "#0EA5E9",
+    lightColor: "#C9A84C",
     sound: "default",
-    description: "Compliance warnings and documentation issues",
+    description: "Session reminders and scheduling notifications",
   });
 
-  await Notifications.setNotificationChannelAsync("vessels-updates", {
-    name: "Fleet Updates",
+  await Notifications.setNotificationChannelAsync("carlota-documents", {
+    name: "Documents",
     importance: Notifications.AndroidImportance.DEFAULT,
-    vibrationPattern: [0, 100],
-    lightColor: "#0EA5E9",
-    description: "Port arrivals and general vessel status updates",
+    vibrationPattern: [0, 250],
+    lightColor: "#C9A84C",
+    sound: "default",
+    description: "New documents shared to your Vault",
+  });
+
+  await Notifications.setNotificationChannelAsync("carlota-messages", {
+    name: "Messages",
+    importance: Notifications.AndroidImportance.HIGH,
+    vibrationPattern: [0, 250, 250, 250],
+    lightColor: "#C9A84C",
+    sound: "default",
+    description: "Secure messages from your advisor",
   });
 }
 
@@ -52,10 +52,10 @@ function getApiBase(): string {
 async function getToken(): Promise<string | null> {
   try {
     if (typeof window !== "undefined" && window.localStorage) {
-      return window.localStorage.getItem("vessels_auth_token");
+      return window.localStorage.getItem("carlotajo_auth_token");
     }
     const { default: SecureStore } = await import("expo-secure-store");
-    return SecureStore.getItemAsync("vessels_auth_token");
+    return SecureStore.getItemAsync("carlotajo_auth_token");
   } catch {
     return null;
   }
@@ -115,21 +115,4 @@ export function addNotificationResponseListener(
   handler: (response: Notifications.NotificationResponse) => void
 ): Notifications.EventSubscription {
   return Notifications.addNotificationResponseReceivedListener(handler);
-}
-
-export async function scheduleLocalAlert(opts: {
-  title: string;
-  body: string;
-  data?: Record<string, unknown>;
-}): Promise<void> {
-  if (Platform.OS === "web") return;
-  await Notifications.scheduleNotificationAsync({
-    content: {
-      title: opts.title,
-      body: opts.body,
-      data: opts.data ?? {},
-      color: "#0ea5e9",
-    },
-    trigger: null,
-  });
 }

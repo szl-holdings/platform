@@ -14,35 +14,38 @@ Notifications.setNotificationHandler({
 export async function setupAndroidNotificationChannels(): Promise<void> {
   if (Platform.OS !== "android") return;
 
-  await Notifications.setNotificationChannelAsync("vessels-alerts", {
-    name: "Vessel Alerts",
-    importance: Notifications.AndroidImportance.MAX,
-    vibrationPattern: [0, 250, 250, 250],
-    lightColor: "#0EA5E9",
-    sound: "default",
-    bypassDnd: true,
-    description: "Critical vessel alerts requiring immediate attention",
-  });
-
-  await Notifications.setNotificationChannelAsync("vessels-compliance", {
-    name: "Compliance Warnings",
+  await Notifications.setNotificationChannelAsync("lyte-kpis", {
+    name: "KPI Alerts",
     importance: Notifications.AndroidImportance.HIGH,
     vibrationPattern: [0, 250, 250, 250],
-    lightColor: "#0EA5E9",
+    lightColor: "#00D4FF",
     sound: "default",
-    description: "Compliance warnings and documentation issues",
+    description: "KPI threshold breach alerts",
   });
 
-  await Notifications.setNotificationChannelAsync("vessels-updates", {
-    name: "Fleet Updates",
+  await Notifications.setNotificationChannelAsync("lyte-escalations", {
+    name: "Escalations",
+    importance: Notifications.AndroidImportance.MAX,
+    vibrationPattern: [0, 250, 250, 250, 250, 250],
+    lightColor: "#00D4FF",
+    sound: "default",
+    bypassDnd: true,
+    description: "Escalation requests requiring immediate action",
+  });
+
+  await Notifications.setNotificationChannelAsync("lyte-milestones", {
+    name: "Milestones",
     importance: Notifications.AndroidImportance.DEFAULT,
     vibrationPattern: [0, 100],
-    lightColor: "#0EA5E9",
-    description: "Port arrivals and general vessel status updates",
+    lightColor: "#00D4FF",
+    description: "Project milestone completion notifications",
   });
 }
 
 function getApiBase(): string {
+  if (process.env.EXPO_PUBLIC_API_URL) {
+    return process.env.EXPO_PUBLIC_API_URL;
+  }
   if (process.env.EXPO_PUBLIC_DOMAIN) {
     return `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`;
   }
@@ -52,10 +55,10 @@ function getApiBase(): string {
 async function getToken(): Promise<string | null> {
   try {
     if (typeof window !== "undefined" && window.localStorage) {
-      return window.localStorage.getItem("vessels_auth_token");
+      return window.localStorage.getItem("lyte_auth_token");
     }
     const { default: SecureStore } = await import("expo-secure-store");
-    return SecureStore.getItemAsync("vessels_auth_token");
+    return SecureStore.getItemAsync("lyte_auth_token");
   } catch {
     return null;
   }
@@ -115,21 +118,4 @@ export function addNotificationResponseListener(
   handler: (response: Notifications.NotificationResponse) => void
 ): Notifications.EventSubscription {
   return Notifications.addNotificationResponseReceivedListener(handler);
-}
-
-export async function scheduleLocalAlert(opts: {
-  title: string;
-  body: string;
-  data?: Record<string, unknown>;
-}): Promise<void> {
-  if (Platform.OS === "web") return;
-  await Notifications.scheduleNotificationAsync({
-    content: {
-      title: opts.title,
-      body: opts.body,
-      data: opts.data ?? {},
-      color: "#0ea5e9",
-    },
-    trigger: null,
-  });
 }

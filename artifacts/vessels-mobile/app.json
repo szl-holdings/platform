@@ -3,6 +3,7 @@
     "name": "Vessels",
     "slug": "vessels-mobile",
     "version": "1.0.0",
+    "description": "Vessels is the maritime fleet command platform for owners and operations teams. Track vessel positions, monitor compliance, receive port arrival notifications, and manage your full fleet — from anywhere at sea or shore.",
     "runtimeVersion": {
       "policy": "appVersion"
     },
@@ -23,6 +24,7 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Vessels uses your location to show nearby fleet activity.",
         "NSCameraUsageDescription": "Vessels uses your camera to scan vessel QR codes.",
+        "NSUserNotificationUsageDescription": "Vessels sends vessel alerts, compliance warnings, and port arrival notifications to keep your fleet operations on track.",
         "ITSAppUsesNonExemptEncryption": false
       },
       "privacyManifests": {
@@ -55,8 +57,10 @@
         "android.permission.INTERNET",
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.RECEIVE_BOOT_COMPLETED",
-        "android.permission.VIBRATE"
-      ]
+        "android.permission.VIBRATE",
+        "android.permission.POST_NOTIFICATIONS"
+      ],
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/images/icon.png"
@@ -76,7 +80,33 @@
         {
           "icon": "./assets/images/icon.png",
           "color": "#0ea5e9",
-          "sounds": []
+          "sounds": [],
+          "androidChannels": [
+            {
+              "name": "vessels-alerts",
+              "importance": 5,
+              "vibrationPattern": [0, 250, 250, 250],
+              "lightColor": "#FF0EA5E9",
+              "sound": "default",
+              "bypassDnd": true,
+              "description": "Critical vessel alerts requiring immediate attention"
+            },
+            {
+              "name": "vessels-compliance",
+              "importance": 4,
+              "vibrationPattern": [0, 250, 250, 250],
+              "lightColor": "#FF0EA5E9",
+              "sound": "default",
+              "description": "Compliance warnings and documentation issues"
+            },
+            {
+              "name": "vessels-updates",
+              "importance": 3,
+              "vibrationPattern": [0, 100],
+              "lightColor": "#FF0EA5E9",
+              "description": "Port arrivals and general vessel status updates"
+            }
+          ]
         }
       ]
     ],

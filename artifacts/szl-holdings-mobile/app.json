@@ -3,6 +3,7 @@
     "name": "SZL Holdings",
     "slug": "szl-holdings-mobile",
     "version": "1.0.0",
+    "description": "SZL Holdings Executive Command gives principals real-time visibility into portfolio performance, entity financials, investment pipelines, and strategic dashboards — secured with biometric authentication.",
     "runtimeVersion": {
       "policy": "appVersion"
     },
@@ -23,6 +24,7 @@
       "infoPlist": {
         "NSFaceIDUsageDescription": "SZL Holdings uses Face ID for secure principal access.",
         "NSCameraUsageDescription": "SZL Holdings uses your camera for document scanning.",
+        "NSUserNotificationUsageDescription": "SZL Holdings sends portfolio alerts, financial updates, and executive briefings.",
         "ITSAppUsesNonExemptEncryption": false
       },
       "privacyManifests": {
@@ -56,8 +58,10 @@
         "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.VIBRATE",
         "android.permission.USE_BIOMETRIC",
-        "android.permission.USE_FINGERPRINT"
-      ]
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.POST_NOTIFICATIONS"
+      ],
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/images/icon.png"

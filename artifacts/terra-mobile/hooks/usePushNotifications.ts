@@ -3,8 +3,10 @@ import { Platform } from "react-native";
 import { useState } from "react";
 import { configurePushNotificationHandler } from "@szl-holdings/mobile-shared/notifications";
 import { usePushNotificationsBase } from "@szl-holdings/mobile-shared/notifications";
+import { setupAndroidNotificationChannels } from "@/lib/notifications";
 
 configurePushNotificationHandler();
+setupAndroidNotificationChannels().catch(() => {});
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
   ? "https://" + process.env.EXPO_PUBLIC_DOMAIN + "/api"

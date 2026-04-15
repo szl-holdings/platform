@@ -3,6 +3,7 @@
     "name": "Stephen Lutar",
     "slug": "stephen-mobile",
     "version": "1.0.0",
+    "description": "A personal command center for Stephen Lutar. Stay connected with portfolio updates, schedule management, and real-time insights across all ventures — curated for the founder's workflow.",
     "runtimeVersion": {
       "policy": "appVersion"
     },
@@ -21,6 +22,7 @@
       "bundleIdentifier": "com.stephenlutar.founder.mobile",
       "buildNumber": "1",
       "infoPlist": {
+        "NSUserNotificationUsageDescription": "Stephen sends updates and reminders relevant to your portfolio and schedule.",
         "ITSAppUsesNonExemptEncryption": false
       },
       "privacyManifests": {
@@ -51,8 +53,10 @@
       },
       "permissions": [
         "android.permission.INTERNET",
-        "android.permission.VIBRATE"
-      ]
+        "android.permission.VIBRATE",
+        "android.permission.POST_NOTIFICATIONS"
+      ],
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/images/icon.png"
@@ -70,7 +74,8 @@
         "expo-notifications",
         {
           "icon": "./assets/images/icon.png",
-          "color": "#0a0a0a"
+          "color": "#ffffff",
+          "sounds": []
         }
       ]
     ],
@@ -83,7 +88,8 @@
         "projectId": "stephen-mobile"
       },
       "supportUrl": "https://stephenlutar.com/contact",
-      "privacyUrl": "https://stephenlutar.com/privacy"
+      "privacyUrl": "https://stephenlutar.com/privacy",
+      "termsUrl": "https://stephenlutar.com/terms"
     },
     "updates": {
       "enabled": false,

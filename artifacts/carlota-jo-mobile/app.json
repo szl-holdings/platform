@@ -3,6 +3,7 @@
     "name": "Carlota Jo",
     "slug": "carlota-jo-mobile",
     "version": "1.0.0",
+    "description": "Carlota Jo is a private client portal for Carlota Jo Consulting. Access personalized advisory sessions, review shared documents, and communicate securely with your advisor — all in one place.",
     "runtimeVersion": {
       "policy": "appVersion"
     },
@@ -22,6 +23,7 @@
       "buildNumber": "1",
       "infoPlist": {
         "NSCameraUsageDescription": "Carlota Jo uses your camera for document scanning.",
+        "NSUserNotificationUsageDescription": "Carlota Jo sends session reminders, document notifications, and secure messages from your advisor.",
         "ITSAppUsesNonExemptEncryption": false
       },
       "privacyManifests": {
@@ -53,8 +55,10 @@
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.RECEIVE_BOOT_COMPLETED",
-        "android.permission.VIBRATE"
-      ]
+        "android.permission.VIBRATE",
+        "android.permission.POST_NOTIFICATIONS"
+      ],
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/images/icon.png"
@@ -74,7 +78,33 @@
         {
           "icon": "./assets/images/icon.png",
           "color": "#c9a84c",
-          "sounds": []
+          "sounds": [],
+          "androidChannels": [
+            {
+              "name": "carlota-sessions",
+              "importance": 4,
+              "vibrationPattern": [0, 250, 250, 250],
+              "lightColor": "#FFC9A84C",
+              "sound": "default",
+              "description": "Session reminders and scheduling notifications"
+            },
+            {
+              "name": "carlota-documents",
+              "importance": 3,
+              "vibrationPattern": [0, 250],
+              "lightColor": "#FFC9A84C",
+              "sound": "default",
+              "description": "New documents shared to your Vault"
+            },
+            {
+              "name": "carlota-messages",
+              "importance": 4,
+              "vibrationPattern": [0, 250, 250, 250],
+              "lightColor": "#FFC9A84C",
+              "sound": "default",
+              "description": "Secure messages from your advisor"
+            }
+          ]
         }
       ]
     ],

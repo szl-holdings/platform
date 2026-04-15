@@ -82,6 +82,10 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     if (Platform.OS === "web") return;
     const setup = async () => {
       try {
+        const { setupAndroidNotificationChannels } = await import("@/lib/notifications");
+        await setupAndroidNotificationChannels();
+      } catch {}
+      try {
         const Notifications = await import("expo-notifications");
         Notifications.setNotificationHandler({
           handleNotification: async () => ({

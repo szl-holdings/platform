@@ -6,8 +6,10 @@ import {
   scheduleLocalNotification,
 } from "@szl-holdings/mobile-shared/notifications";
 import { usePushNotificationsBase } from "@szl-holdings/mobile-shared/notifications";
+import { setupAndroidNotificationChannels } from "@/lib/notifications";
 
 configurePushNotificationHandler();
+setupAndroidNotificationChannels().catch(() => {});
 
 export { registerForPushNotificationsAsync, scheduleLocalNotification };
 
