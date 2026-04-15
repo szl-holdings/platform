@@ -18,7 +18,7 @@ import {
   Play, LayoutDashboard, Ticket, Monitor, DollarSign, Wrench, Server,
   FlaskConical, Cpu, Cpu as CpuIcon, Network, Radio, Plus, Sun, Eye,
   Database, Trophy, Boxes, GitBranch, Link2, Flame, Menu, X, ChevronDown,
-  Hexagon, Zap, Briefcase, Globe, Sparkles, Crosshair, Scale
+  Hexagon, Zap, Briefcase, Globe, Sparkles, Crosshair, Scale, Settings
 } from "lucide-react";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { sentinelConfig } from "@szl-holdings/shared-ui/copilot-configs";
@@ -111,6 +111,7 @@ const MspDispatch = lazy(() => import("@/pages/msp/dispatch"));
 const MspRMM = lazy(() => import("@/pages/msp/rmm-console"));
 const MspMRR = lazy(() => import("@/pages/msp/mrr-dashboard"));
 const MspServiceDesk = lazy(() => import("@/pages/msp/service-desk"));
+const MspProviderSettings = lazy(() => import("@/pages/msp/provider-settings"));
 
 // ─── Intelligence Engine pages (from INCA) ────────────────────────────────────
 const IntelDashboard = lazy(() => import("@/pages/intel/dashboard"));
@@ -254,6 +255,7 @@ const opsNavItems = [
   { path: "/ops/revenue", label: "Revenue & Billing", icon: DollarSign },
   { path: "/ops/mrr", label: "MRR Dashboard", icon: TrendingUp },
   { path: "/ops/rmm", label: "RMM Console", icon: Server },
+  { path: "/ops/provider-settings", label: "Provider Settings", icon: Settings },
 ];
 
 const intelNavPrimary = [
@@ -670,6 +672,7 @@ function AppRouter() {
         <Route path="/ops/rmm">{() => <RoleGate requires={["operator", "admin"]} fallback={<AccessDenied />}><MspRMM /></RoleGate>}</Route>
         <Route path="/ops/mrr">{() => <RoleGate requires={["operator", "admin"]} fallback={<AccessDenied />}><MspMRR /></RoleGate>}</Route>
         <Route path="/ops/service-desk">{() => <RoleGate requires={["operator", "admin"]} fallback={<AccessDenied />}><MspServiceDesk /></RoleGate>}</Route>
+        <Route path="/ops/provider-settings">{() => <RoleGate requires={["admin"]} fallback={<AccessDenied />}><MspProviderSettings /></RoleGate>}</Route>
 
         {/* Intelligence Engine — requires security or admin role */}
         <Route path="/intel/dashboard">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><IntelDashboard /></RoleGate>}</Route>

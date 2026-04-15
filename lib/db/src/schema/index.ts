@@ -82,3 +82,4 @@ export * from "./agent_skills";
 export * from "./compliance";
 export * from "./vessels_trading";
 export * from "./marine_insurance";
+export * from "./msp_rmm";

@@ -137,6 +137,7 @@ import consciousnessRouter from "./consciousness";
 import ragKnowledgeRouter from "./rag-knowledge";
 import vesselsTradingRouter from "./vessels-trading";
 import vesselsInsuranceRouter from "./vessels-insurance";
+import rmmRouter from "./rmm";
 
 const router: IRouter = Router();
 
@@ -270,6 +271,8 @@ router.use("/vessels/trading", _readLimiter);
 router.use(vesselsTradingRouter);
 router.use("/vessels/insurance", _readLimiter);
 router.use(vesselsInsuranceRouter);
+router.use("/msp", _readLimiter);
+router.use("/msp", rmmRouter);
 
 router.use("/terra", _readLimiter);
 router.use(terraLiveRouter);

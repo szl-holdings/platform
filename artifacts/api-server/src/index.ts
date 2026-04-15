@@ -25,6 +25,7 @@ import { ensureOutcomeGraphTables } from "./lib/outcome-graph-migrations";
 import { ensureCognitiveLearningTables } from "./lib/cognitive-learning-migrations";
 import { ensureDistributionOsTables } from "./lib/distribution-os-migrations";
 import { ensureAlloySkillsTables } from "./lib/alloy-skills-migrations";
+import { ensureRmmTables } from "./lib/rmm-migrations";
 import "./lib/terra-nyc-ingestion";
 import { scheduleNycIngestionJob } from "./lib/terra-nyc-ingestion";
 import "./lib/terra-nyc-extended-ingestion";
@@ -113,6 +114,7 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
 
   scheduleNycIngestionJob();
   scheduleNycExtendedIngestionJob();
+  import("./routes/rmm").then(m => m.startSyncScheduler()).catch(err => logger.warn({ err }, "RMM sync scheduler start failed (non-fatal)"));
   prewarmIntelligenceCache().catch(err => {
     logger.warn({ err }, "[intelligence-cache] Prewarm failed (non-fatal)");
   });
@@ -124,6 +126,9 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
 
   ensureA2ATables()
     .catch(err => logger.warn({ err }, "[a2a] A2A table migration failed (non-fatal)"));
+
+  ensureRmmTables()
+    .catch(err => logger.warn({ err }, "[rmm] RMM table migration failed (non-fatal)"));
 
   ensureAlloyTables()
     .then(() => ensureAlloyGovernanceTables())

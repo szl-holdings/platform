@@ -71,6 +71,7 @@ export const mspDevicesTable = pgTable("msp_devices", {
   hostname: text("hostname").notNull(),
   clientId: integer("client_id").references(() => mspClientsTable.id, { onDelete: "set null" }),
   clientName: text("client_name"),
+  connectorId: integer("connector_id"),
   type: text("type", { enum: ["server", "workstation", "network", "printer", "mobile", "firewall"] }).notNull().default("workstation"),
   os: text("os"),
   ipAddress: text("ip_address"),
@@ -88,6 +89,7 @@ export const mspDevicesTable = pgTable("msp_devices", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (t) => [
   index("msp_devices_client_idx").on(t.clientId),
+  index("msp_devices_connector_idx").on(t.connectorId),
 ]);
 
 export const mspContractsTable = pgTable("msp_contracts", {
