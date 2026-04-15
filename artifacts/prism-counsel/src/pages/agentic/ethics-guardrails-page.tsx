@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Shield, Lock, AlertTriangle, CheckCircle, Users, Eye, XCircle, Clock, FileText, Brain, Activity, ChevronRight, Scale } from "lucide-react";
 
 const PRISM_GOLD = "#c8a96e";
@@ -64,9 +64,21 @@ const privColor = (p: string) => p === "public" ? "#22c55e" : p === "confidentia
 
 export default function EthicsGuardrailsPage() {
   const [tab, setTab] = useState<"conflicts" | "walls" | "ai-log">("conflicts");
+  const [conflicts, setConflicts] = useState(() => CONFLICTS.map(c => ({ ...c })));
+  const [walls, setWalls] = useState(() => WALLS.map(w => ({ ...w })));
+  const [resolutionLog, setResolutionLog] = useState<{ id: string; action: string; timestamp: string }[]>([]);
 
-  const activeWalls = WALLS.filter(w => w.status === "active").length;
-  const totalViolations = WALLS.reduce((s, w) => s + w.violations, 0);
+  const activeWalls = walls.filter(w => w.status === "active").length;
+  const totalViolations = walls.reduce((s, w) => s + w.violations, 0);
+
+  const handleResolveConflict = useCallback((id: string, resolution: "clear" | "conflict") => {
+    setConflicts(prev => prev.map(c => c.id === id ? { ...c, status: resolution } : c));
+    setResolutionLog(prev => [{ id, action: resolution === "clear" ? "Cleared" : "Escalated", timestamp: new Date().toLocaleTimeString() }, ...prev].slice(0, 10));
+  }, []);
+
+  const handleToggleWall = useCallback((id: string) => {
+    setWalls(prev => prev.map(w => w.id === id ? { ...w, status: w.status === "active" ? "expired" as const : "active" as const } : w));
+  }, []);
 
   return (
     <div className="min-h-screen" style={{ background: "#080c14" }}>
@@ -107,7 +119,21 @@ export default function EthicsGuardrailsPage() {
 
         {tab === "conflicts" && (
           <div className="space-y-3">
-            {CONFLICTS.map(c => (
+            {resolutionLog.length > 0 && (
+              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 mb-2">
+                <h4 className="text-[9px] uppercase tracking-wider text-white/25 font-semibold mb-2">Resolution Log</h4>
+                <div className="space-y-1">
+                  {resolutionLog.map((r, i) => (
+                    <div key={i} className="flex items-center gap-2 text-[9px]">
+                      <div className="h-1.5 w-1.5 rounded-full" style={{ background: r.action === "Cleared" ? "#22c55e" : "#ef4444" }} />
+                      <span className="text-white/30">{r.id}: {r.action}</span>
+                      <span className="text-white/15 font-mono ml-auto">{r.timestamp}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {conflicts.map(c => (
               <div key={c.id} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="h-3 w-3 rounded-full" style={{ background: conflictColor(c.status) }} />
@@ -139,6 +165,14 @@ export default function EthicsGuardrailsPage() {
                     ))}
                   </div>
                 )}
+                {c.status === "potential" && (
+                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/[0.04]">
+                    <button onClick={() => handleResolveConflict(c.id, "clear")} aria-label={`Clear conflict ${c.id}`}
+                      className="text-[9px] font-semibold rounded-lg px-3 py-1.5 hover:brightness-125 transition" style={{ background: "#22c55e20", color: "#22c55e" }}>Mark Clear</button>
+                    <button onClick={() => handleResolveConflict(c.id, "conflict")} aria-label={`Escalate conflict ${c.id}`}
+                      className="text-[9px] font-semibold rounded-lg px-3 py-1.5 hover:brightness-125 transition" style={{ background: "#ef444420", color: "#ef4444" }}>Escalate</button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -146,7 +180,7 @@ export default function EthicsGuardrailsPage() {
 
         {tab === "walls" && (
           <div className="space-y-3">
-            {WALLS.map(w => (
+            {walls.map(w => (
               <div key={w.id} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -156,9 +190,15 @@ export default function EthicsGuardrailsPage() {
                       <p className="text-[9px] text-white/25">{w.id} · Created {w.createdDate}</p>
                     </div>
                   </div>
-                  <span className="text-[9px] font-semibold rounded-full px-2.5 py-0.5" style={{ background: w.status === "active" ? PRISM_RED + "15" : "rgba(255,255,255,0.03)", color: w.status === "active" ? PRISM_RED : "rgba(255,255,255,0.25)" }}>
-                    {w.status}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => handleToggleWall(w.id)} aria-label={`${w.status === "active" ? "Deactivate" : "Activate"} wall ${w.id}`}
+                      className="text-[8px] font-semibold rounded px-2 py-1 transition hover:brightness-125" style={{ background: w.status === "active" ? "rgba(255,255,255,0.04)" : PRISM_RED + "20", color: w.status === "active" ? "rgba(255,255,255,0.3)" : PRISM_RED }}>
+                      {w.status === "active" ? "Deactivate" : "Activate"}
+                    </button>
+                    <span className="text-[9px] font-semibold rounded-full px-2.5 py-0.5" style={{ background: w.status === "active" ? PRISM_RED + "15" : "rgba(255,255,255,0.03)", color: w.status === "active" ? PRISM_RED : "rgba(255,255,255,0.25)" }}>
+                      {w.status}
+                    </span>
+                  </div>
                 </div>
                 <div className="rounded-lg bg-white/[0.015] border border-white/[0.04] p-3 mb-3">
                   <p className="text-[10px] text-white/45">{w.reason}</p>

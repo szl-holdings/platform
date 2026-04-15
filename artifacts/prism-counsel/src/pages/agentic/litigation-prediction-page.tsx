@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { TrendingUp, Scale, Target, BarChart3, Clock, DollarSign, Users, AlertTriangle, ChevronDown, Gavel, Brain, ArrowRight, Shield, Percent } from "lucide-react";
 
 const PRISM_GOLD = "#c8a96e";
@@ -101,6 +101,22 @@ const dirColor = (d: string) => d === "favorable" ? "#22c55e" : d === "unfavorab
 
 export default function LitigationPredictionPage() {
   const [selected, setSelected] = useState(CASES[0]);
+  const [scenarioAdjustment, setScenarioAdjustment] = useState(0);
+  const [strategyNotes, setStrategyNotes] = useState("");
+
+  const adjustedPrediction = useMemo(() => {
+    const base = selected.prediction;
+    const adj = scenarioAdjustment;
+    const winProb = Math.max(5, Math.min(95, base.plaintiffWinProb + adj));
+    const factor = 1 + (adj / 100);
+    return {
+      ...base,
+      plaintiffWinProb: winProb,
+      recommendedSettlement: Math.round(base.recommendedSettlement * factor),
+      settlementCostEstimate: Math.round(base.settlementCostEstimate * factor),
+      settlementRange: [Math.round(base.settlementRange[0] * factor), Math.round(base.settlementRange[1] * factor)] as [number, number],
+    };
+  }, [selected, scenarioAdjustment]);
 
   return (
     <div className="min-h-screen" style={{ background: "#080c14" }}>
@@ -135,10 +151,10 @@ export default function LitigationPredictionPage() {
 
               <div className="grid grid-cols-4 gap-4 mb-6">
                 {[
-                  { label: "Plaintiff Win Probability", value: `${selected.prediction.plaintiffWinProb}%`, icon: Target, color: selected.prediction.plaintiffWinProb > 60 ? "#ef4444" : "#22c55e" },
-                  { label: "Recommended Settlement", value: fmt(selected.prediction.recommendedSettlement), icon: DollarSign, color: PRISM_GOLD },
-                  { label: "Trial Cost Estimate", value: fmt(selected.prediction.trialCostEstimate), icon: Scale, color: PRISM_RED },
-                  { label: "Settlement Cost", value: fmt(selected.prediction.settlementCostEstimate), icon: BarChart3, color: PRISM_BLUE },
+                  { label: "Plaintiff Win Probability", value: `${adjustedPrediction.plaintiffWinProb}%`, icon: Target, color: adjustedPrediction.plaintiffWinProb > 60 ? "#ef4444" : "#22c55e" },
+                  { label: "Recommended Settlement", value: fmt(adjustedPrediction.recommendedSettlement), icon: DollarSign, color: PRISM_GOLD },
+                  { label: "Trial Cost Estimate", value: fmt(adjustedPrediction.trialCostEstimate), icon: Scale, color: PRISM_RED },
+                  { label: "Settlement Cost", value: fmt(adjustedPrediction.settlementCostEstimate), icon: BarChart3, color: PRISM_BLUE },
                 ].map(s => (
                   <div key={s.label} className="rounded-lg border border-white/[0.05] bg-white/[0.015] p-3">
                     <div className="flex items-center gap-1.5 mb-1.5">
@@ -154,9 +170,9 @@ export default function LitigationPredictionPage() {
                 <h4 className="text-[9px] uppercase tracking-wider text-white/25 mb-3">Settlement Range Distribution</h4>
                 <div className="relative h-10 rounded-lg overflow-hidden bg-white/[0.03]">
                   {(() => {
-                    const lo = selected.prediction.settlementRange[0];
-                    const hi = selected.prediction.settlementRange[1];
-                    const rec = selected.prediction.recommendedSettlement;
+                    const lo = adjustedPrediction.settlementRange[0];
+                    const hi = adjustedPrediction.settlementRange[1];
+                    const rec = adjustedPrediction.recommendedSettlement;
                     const max = hi * 1.3;
                     return (
                       <>
@@ -170,6 +186,28 @@ export default function LitigationPredictionPage() {
                   })()}
                 </div>
                 <div className="h-6" />
+              </div>
+
+              <div className="rounded-lg border border-white/[0.05] bg-white/[0.015] p-4 mb-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-[9px] uppercase tracking-wider text-white/25">Scenario Modeling</h4>
+                  {scenarioAdjustment !== 0 && (
+                    <button onClick={() => setScenarioAdjustment(0)} aria-label="Reset scenario" className="text-[8px] text-white/20 hover:text-white/35 transition">Reset</button>
+                  )}
+                </div>
+                <div className="flex items-center gap-4 mb-2">
+                  <label htmlFor="scenario-slider" className="text-[9px] text-white/30 whitespace-nowrap">Adjust Win Probability</label>
+                  <input id="scenario-slider" type="range" min={-30} max={30} value={scenarioAdjustment} onChange={e => setScenarioAdjustment(Number(e.target.value))}
+                    aria-label="Scenario win probability adjustment"
+                    className="flex-1 h-1 appearance-none rounded-full bg-white/[0.08] accent-[#c8a96e] cursor-pointer" />
+                  <span className="text-[10px] font-mono font-semibold w-10 text-right" style={{ color: scenarioAdjustment > 0 ? "#ef4444" : scenarioAdjustment < 0 ? "#22c55e" : "rgba(255,255,255,0.3)" }}>
+                    {scenarioAdjustment > 0 ? "+" : ""}{scenarioAdjustment}%
+                  </span>
+                </div>
+                <textarea value={strategyNotes} onChange={e => setStrategyNotes(e.target.value)}
+                  aria-label="Strategy notes"
+                  placeholder="Add strategy notes for this scenario..."
+                  className="w-full rounded-lg border border-white/[0.06] bg-white/[0.02] p-2.5 text-[10px] text-white/50 placeholder:text-white/15 focus:outline-none focus:border-white/[0.12] resize-none h-14" />
               </div>
 
               <div className="grid grid-cols-2 gap-4">

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Brain, Search, FileText, Link2, Layers, ChevronRight, Scale, Users, Tag, BookOpen, Lightbulb, MessageSquare, ArrowRight } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Brain, Search, FileText, Link2, Layers, ChevronRight, Scale, Users, Tag, BookOpen, Lightbulb, MessageSquare, ArrowRight, CheckCircle } from "lucide-react";
 
 const PRISM_GOLD = "#c8a96e";
 const PRISM_BLUE = "#4a8ab0";
@@ -48,6 +48,11 @@ export default function KnowledgeGraphPage() {
   const [selectedNode, setSelectedNode] = useState<KnowledgeNode | null>(null);
   const [activeQuery, setActiveQuery] = useState<NlQuery | null>(null);
   const [filterType, setFilterType] = useState<string>("all");
+
+  const queryResultNodes = useMemo(() => {
+    if (!activeQuery) return [];
+    return activeQuery.results.map(id => NODES.find(n => n.id === id)).filter((n): n is KnowledgeNode => !!n);
+  }, [activeQuery]);
 
   const filteredNodes = NODES.filter(n =>
     (filterType === "all" || n.type === filterType) &&
@@ -144,6 +149,37 @@ export default function KnowledgeGraphPage() {
                 ))}
               </div>
             </div>
+
+            {activeQuery && queryResultNodes.length > 0 && (
+              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <CheckCircle className="h-3.5 w-3.5" style={{ color: "#22c55e" }} />
+                  <h3 className="text-[10px] uppercase tracking-wider text-white/30 font-semibold">Query Results ({queryResultNodes.length})</h3>
+                  <button onClick={() => setActiveQuery(null)} aria-label="Clear query results" className="ml-auto text-[9px] text-white/25 hover:text-white/40 transition">Clear</button>
+                </div>
+                <p className="text-[10px] text-white/40 italic mb-3">"{activeQuery.query}"</p>
+                <div className="space-y-2">
+                  {queryResultNodes.map(n => {
+                    const Icon = typeIcon(n.type);
+                    return (
+                      <button key={n.id} onClick={() => setSelectedNode(n)} aria-label={`View result ${n.title}`}
+                        className="w-full text-left rounded-lg border border-white/[0.08] bg-white/[0.025] p-3 hover:bg-white/[0.04] transition">
+                        <div className="flex items-center gap-3">
+                          <div className="h-7 w-7 rounded-lg flex items-center justify-center" style={{ background: typeColor(n.type) + "15" }}>
+                            <Icon className="h-3.5 w-3.5" style={{ color: typeColor(n.type) }} />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-[11px] font-medium text-white">{n.title}</p>
+                            <p className="text-[9px] text-white/30 mt-0.5 line-clamp-2">{n.summary}</p>
+                          </div>
+                          <div className="text-[10px] font-semibold" style={{ color: "#22c55e" }}>{n.relevance}%</div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {selectedNode && (
               <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">

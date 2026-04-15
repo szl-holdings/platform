@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { FileText, Search, Shield, AlertTriangle, CheckCircle, Clock, Brain, BarChart3, Eye, XCircle, Filter, Layers, DollarSign, ArrowUpRight, Lock } from "lucide-react";
 
 const PRISM_GOLD = "#c8a96e";
@@ -70,6 +70,17 @@ const fmt = (n: number) => n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n
 
 export default function EDiscoveryPipelinePage() {
   const [selected, setSelected] = useState(DOCUMENT_SETS[0]);
+
+  const [privilegeDocs, setPrivilegeDocs] = useState([
+    { doc: "Email_20240112_Chen_Internal.msg", type: "Attorney-Client", confidence: 97, decision: null as "withhold" | "produce" | null },
+    { doc: "Memo_LegalStrategy_Q4.docx", type: "Work Product", confidence: 94, decision: null as "withhold" | "produce" | null },
+    { doc: "Teams_Chat_ChenParker_1128.html", type: "Attorney-Client", confidence: 88, decision: null as "withhold" | "produce" | null },
+    { doc: "Draft_Response_v3_Comments.docx", type: "Work Product", confidence: 92, decision: null as "withhold" | "produce" | null },
+  ]);
+
+  const handlePrivilegeDecision = useCallback((doc: string, decision: "withhold" | "produce") => {
+    setPrivilegeDocs(prev => prev.map(p => p.doc === doc ? { ...p, decision } : p));
+  }, []);
 
   const stageIndex = pipelineStages.indexOf(
     selected.status === "collecting" ? "Collection" :
@@ -256,19 +267,26 @@ export default function EDiscoveryPipelinePage() {
             <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
               <h3 className="text-[10px] uppercase tracking-wider text-white/30 font-semibold mb-3">Privilege Detection Log</h3>
               <div className="space-y-1.5">
-                {[
-                  { doc: "Email_20240112_Chen_Internal.msg", type: "Attorney-Client", confidence: 97 },
-                  { doc: "Memo_LegalStrategy_Q4.docx", type: "Work Product", confidence: 94 },
-                  { doc: "Teams_Chat_ChenParker_1128.html", type: "Attorney-Client", confidence: 88 },
-                  { doc: "Draft_Response_v3_Comments.docx", type: "Work Product", confidence: 92 },
-                ].map(p => (
-                  <div key={p.doc} className="flex items-center gap-2 rounded-lg bg-white/[0.015] border border-white/[0.04] px-2.5 py-2">
-                    <Lock className="h-3 w-3 flex-shrink-0" style={{ color: PRISM_RED }} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[9px] text-white/50 truncate">{p.doc}</p>
-                      <p className="text-[8px] text-white/20">{p.type}</p>
+                {privilegeDocs.map(p => (
+                  <div key={p.doc} className="rounded-lg bg-white/[0.015] border border-white/[0.04] px-2.5 py-2">
+                    <div className="flex items-center gap-2">
+                      <Lock className="h-3 w-3 flex-shrink-0" style={{ color: p.decision === "withhold" ? PRISM_RED : p.decision === "produce" ? "#22c55e" : PRISM_RED }} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[9px] text-white/50 truncate">{p.doc}</p>
+                        <p className="text-[8px] text-white/20">{p.type}</p>
+                      </div>
+                      <span className="text-[9px] font-semibold" style={{ color: PRISM_GOLD }}>{p.confidence}%</span>
                     </div>
-                    <span className="text-[9px] font-semibold" style={{ color: PRISM_GOLD }}>{p.confidence}%</span>
+                    {p.decision === null ? (
+                      <div className="flex items-center gap-1.5 mt-2">
+                        <button onClick={() => handlePrivilegeDecision(p.doc, "withhold")} aria-label={`Withhold ${p.doc}`}
+                          className="text-[8px] font-semibold rounded px-2 py-1 hover:brightness-125 transition" style={{ background: PRISM_RED + "20", color: PRISM_RED }}>Withhold</button>
+                        <button onClick={() => handlePrivilegeDecision(p.doc, "produce")} aria-label={`Produce ${p.doc}`}
+                          className="text-[8px] font-semibold rounded px-2 py-1 hover:brightness-125 transition" style={{ background: "#22c55e20", color: "#22c55e" }}>Produce</button>
+                      </div>
+                    ) : (
+                      <p className="text-[8px] mt-1.5 font-semibold uppercase tracking-wider" style={{ color: p.decision === "withhold" ? PRISM_RED : "#22c55e" }}>{p.decision}</p>
+                    )}
                   </div>
                 ))}
               </div>

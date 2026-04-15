@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { FileText, AlertTriangle, CheckCircle, XCircle, Eye, Clock, Brain, ChevronRight, ArrowUpRight, Shield, Zap, BarChart3, Edit3 } from "lucide-react";
 
 const PRISM_GOLD = "#c8a96e";
@@ -122,13 +122,29 @@ const statusLabel: Record<string, { text: string; color: string }> = {
 };
 
 export default function ContractLifecyclePage() {
-  const [selected, setSelected] = useState<Contract>(CONTRACTS[0]);
+  const [contracts, setContracts] = useState<Contract[]>(() => CONTRACTS.map(c => ({ ...c, deviations: c.deviations.map(d => ({ ...d })) })));
+  const [selectedId, setSelectedId] = useState(CONTRACTS[0].id);
   const [expandedClause, setExpandedClause] = useState<string | null>(null);
+  const [actionLog, setActionLog] = useState<{ contractId: string; clause: string; action: string; timestamp: string }[]>([]);
 
-  const totalDeviations = CONTRACTS.reduce((s, c) => s + c.deviations.length, 0);
-  const criticalDeviations = CONTRACTS.reduce((s, c) => s + c.deviations.filter(d => d.risk === "critical").length, 0);
-  const avgConfidence = Math.round(CONTRACTS.reduce((s, c) => s + c.agentConfidence, 0) / CONTRACTS.length);
-  const pendingContracts = CONTRACTS.filter(c => c.status === "review" || c.status === "negotiation").length;
+  const selected = useMemo(() => contracts.find(c => c.id === selectedId) ?? contracts[0], [contracts, selectedId]);
+
+  const handleRedlineAction = useCallback((contractId: string, clauseIdx: number, action: "accept" | "reject" | "modify") => {
+    setContracts(prev => prev.map(c => {
+      if (c.id !== contractId) return c;
+      const newDevs = c.deviations.map((d, i) => i === clauseIdx ? { ...d, accepted: action === "accept" ? true : action === "reject" ? false : d.accepted } : d);
+      const allResolved = newDevs.every(d => d.accepted !== undefined);
+      return { ...c, deviations: newDevs, status: allResolved ? "redlined" as const : c.status, agentConfidence: Math.min(99, c.agentConfidence + (action === "accept" ? 1 : 0)) };
+    }));
+    const clause = contracts.find(c => c.id === contractId)?.deviations[clauseIdx]?.clause ?? "";
+    setActionLog(prev => [{ contractId, clause, action, timestamp: new Date().toLocaleTimeString() }, ...prev].slice(0, 20));
+  }, [contracts]);
+
+  const totalDeviations = contracts.reduce((s, c) => s + c.deviations.length, 0);
+  const criticalDeviations = contracts.reduce((s, c) => s + c.deviations.filter(d => d.risk === "critical").length, 0);
+  const avgConfidence = Math.round(contracts.reduce((s, c) => s + c.agentConfidence, 0) / contracts.length);
+  const pendingContracts = contracts.filter(c => c.status === "review" || c.status === "negotiation").length;
+  const resolvedCount = contracts.reduce((s, c) => s + c.deviations.filter(d => d.accepted !== undefined).length, 0);
 
   return (
     <div className="min-h-screen" style={{ background: "#080c14" }}>
@@ -167,10 +183,10 @@ export default function ContractLifecyclePage() {
           <div className="col-span-4">
             <h3 className="text-[10px] uppercase tracking-wider text-white/30 font-semibold mb-3">Contract Queue</h3>
             <div className="space-y-2">
-              {CONTRACTS.map(c => {
+              {contracts.map(c => {
                 const st = statusLabel[c.status];
                 return (
-                  <button key={c.id} onClick={() => setSelected(c)} aria-label={`Select contract ${c.title}`}
+                  <button key={c.id} onClick={() => setSelectedId(c.id)} aria-label={`Select contract ${c.title}`}
                     className={`w-full text-left rounded-xl border p-4 transition ${selected.id === c.id ? "border-white/[0.12] bg-white/[0.04]" : "border-white/[0.05] bg-white/[0.015] hover:bg-white/[0.03]"}`}>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[10px] font-mono text-white/25">{c.id}</span>
@@ -278,9 +294,9 @@ export default function ContractLifecyclePage() {
                         </div>
                         {d.accepted === undefined && (
                           <div className="flex items-center gap-2 pt-1">
-                            <button className="text-[9px] font-semibold rounded-lg px-3 py-1.5" style={{ background: "#22c55e20", color: "#22c55e" }} aria-label={`Accept redline for ${d.clause}`}>Accept Redline</button>
-                            <button className="text-[9px] font-semibold rounded-lg px-3 py-1.5" style={{ background: "#ef444420", color: "#ef4444" }} aria-label={`Reject redline for ${d.clause}`}>Reject</button>
-                            <button className="text-[9px] font-semibold rounded-lg px-3 py-1.5 bg-white/[0.04] text-white/40" aria-label={`Modify redline for ${d.clause}`}>Modify</button>
+                            <button onClick={() => handleRedlineAction(selected.id, i, "accept")} className="text-[9px] font-semibold rounded-lg px-3 py-1.5 hover:brightness-125 transition" style={{ background: "#22c55e20", color: "#22c55e" }} aria-label={`Accept redline for ${d.clause}`}>Accept Redline</button>
+                            <button onClick={() => handleRedlineAction(selected.id, i, "reject")} className="text-[9px] font-semibold rounded-lg px-3 py-1.5 hover:brightness-125 transition" style={{ background: "#ef444420", color: "#ef4444" }} aria-label={`Reject redline for ${d.clause}`}>Reject</button>
+                            <button onClick={() => handleRedlineAction(selected.id, i, "modify")} className="text-[9px] font-semibold rounded-lg px-3 py-1.5 bg-white/[0.04] text-white/40 hover:bg-white/[0.06] transition" aria-label={`Modify redline for ${d.clause}`}>Modify</button>
                           </div>
                         )}
                       </div>
@@ -289,6 +305,21 @@ export default function ContractLifecyclePage() {
                 ))}
               </div>
             </div>
+
+            {actionLog.length > 0 && (
+              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 mb-4">
+                <h4 className="text-[10px] uppercase tracking-wider text-white/30 font-semibold mb-3">Action Log ({actionLog.length}) &mdash; {resolvedCount}/{totalDeviations} Resolved</h4>
+                <div className="space-y-1.5 max-h-32 overflow-y-auto">
+                  {actionLog.map((a, i) => (
+                    <div key={i} className="flex items-center gap-2 rounded-lg bg-white/[0.015] border border-white/[0.04] p-2">
+                      <div className="h-1.5 w-1.5 rounded-full" style={{ background: a.action === "accept" ? "#22c55e" : a.action === "reject" ? "#ef4444" : PRISM_GOLD }} />
+                      <span className="text-[9px] text-white/40 flex-1">{a.action.charAt(0).toUpperCase() + a.action.slice(1)} — {a.clause}</span>
+                      <span className="text-[8px] text-white/20 font-mono">{a.timestamp}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
               <h4 className="text-[10px] uppercase tracking-wider text-white/30 font-semibold mb-3">Version History</h4>
