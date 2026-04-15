@@ -116,6 +116,9 @@ const S32CopilotWorkbenchV2 = lazy(() => import("./pages/s32/copilot-workbench-v
 const S32PurviewBridge = lazy(() => import("./pages/s32/purview-bridge-page"));
 const S32MatterDeskV2 = lazy(() => import("./pages/s32/matter-desk-v2"));
 
+const CourtDataFeedPage = lazy(() => import("./pages/court-data-feed-page"));
+const PrivilegeEnginePage = lazy(() => import("./pages/privilege-engine-page"));
+const PrivilegeLogPage = lazy(() => import("./pages/privilege-log-page"));
 const SettlementPredictorPage = lazy(() => import("./pages/settlement-predictor-page"));
 const JudgeAnalyticsPage = lazy(() => import("./pages/judge-analytics-page"));
 const CounselScoutingPage = lazy(() => import("./pages/counsel-scouting-page"));
@@ -443,6 +446,16 @@ function PrismCounselRoutes() {
       </Route>
       <Route path="/prism-counsel/settlement-blockers-view">
         <Suspense fallback={<PageLoader />}><Wrap><S32SettlementBlockersView /></Wrap></Suspense>
+      </Route>
+
+      <Route path="/prism-counsel/court-data">
+        <Suspense fallback={<PageLoader />}><Wrap><CourtDataFeedPage /></Wrap></Suspense>
+      </Route>
+      <Route path="/prism-counsel/privilege-engine">
+        <Suspense fallback={<PageLoader />}><Wrap><PrivilegeEnginePage /></Wrap></Suspense>
+      </Route>
+      <Route path="/prism-counsel/privilege-log">
+        <Suspense fallback={<PageLoader />}><Wrap><PrivilegeLogPage /></Wrap></Suspense>
       </Route>
 
       <Route path="/prism-counsel/predict/settlement">

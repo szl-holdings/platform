@@ -7,6 +7,8 @@ import {
   pcAuditEventsTable,
   pcChangeEventsTable,
   pcMattersTable,
+  pcPrivilegeFlagsTable,
+  pcDocumentChunksTable,
 } from "@szl-holdings/db/schema";
 
 export class PilotExportService {
@@ -22,6 +24,44 @@ export class PilotExportService {
       .limit(1);
 
     if (!matter.length) throw new Error("Matter not found");
+
+    const m = matter[0];
+    if (m.privilegeFlag && !m.exportSafe) {
+      throw Object.assign(
+        new Error("Export blocked: this matter has unresolved privilege flags. Resolve all pending privilege reviews before exporting."),
+        { statusCode: 403 }
+      );
+    }
+
+    const unreviewedPrivilegedDocs = await db
+      .select({ id: pcDocumentChunksTable.id })
+      .from(pcDocumentChunksTable)
+      .where(
+        and(
+          eq(pcDocumentChunksTable.matterId, data.matterId),
+          eq(pcDocumentChunksTable.privilegeFlag, true),
+          eq(pcDocumentChunksTable.reviewState, "unreviewed"),
+        ),
+      )
+      .limit(1);
+    if (unreviewedPrivilegedDocs.length > 0) {
+      throw Object.assign(
+        new Error("Export blocked: matter contains privileged documents with unreviewed status. Complete privilege review for all flagged documents before exporting."),
+        { statusCode: 403 }
+      );
+    }
+
+    const pendingPrivilegeFlags = await db
+      .select({ id: pcPrivilegeFlagsTable.id })
+      .from(pcPrivilegeFlagsTable)
+      .where(eq(pcPrivilegeFlagsTable.matterId, data.matterId))
+      .limit(1);
+    if (pendingPrivilegeFlags.length > 0 && !m.exportSafe) {
+      throw Object.assign(
+        new Error("Export blocked: matter has outstanding privilege flags that require review. Resolve all privilege assertions before exporting."),
+        { statusCode: 403 }
+      );
+    }
 
     if (data.reviewItemId) {
       const review = await db.select().from(pcReviewItemsTable)
@@ -59,7 +99,7 @@ export class PilotExportService {
         proofChainRef,
         filePath,
       },
-    } as any);
+    });
 
     await db.insert(pcChangeEventsTable).values({
       orgId,
@@ -96,7 +136,7 @@ export class PilotExportService {
     const exp = await this.getExport(orgId, exportId);
     if (!exp) throw new Error("Export not found");
 
-    const accessLog = (exp.accessLog as any[]) || [];
+    const accessLog = (exp.accessLog as Array<Record<string, unknown>>) || [];
     accessLog.push({ action: "accessed", userId, timestamp: new Date().toISOString() });
 
     await db.update(pcWordExportsTable)
@@ -110,7 +150,7 @@ export class PilotExportService {
       action: "export_accessed",
       entityType: "word_export",
       details: { exportId, proofChainRef: exp.proofChainRef },
-    } as any);
+    });
   }
 
   async buildDocxContent(orgId: number, exportId: number) {

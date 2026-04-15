@@ -7,7 +7,7 @@ import {
   DollarSign, BarChart3, Zap, AlertTriangle, Building2, MapPin, Plug,
   Server, Radio, Gauge, Waves, Car, Move, ClipboardList, ClipboardCheck,
   ShieldAlert, XCircle, Archive, RefreshCw, Gavel, BookOpen, Star, Command,
-  X, ArrowRight, ChevronDown, ChevronUp, Menu
+  X, ArrowRight, ChevronDown, ChevronUp, Menu, Lock, Wifi
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -76,6 +76,14 @@ const NAV: NavSection[] = [
       { label: "Workbench", href: "/prism-counsel/copilot-workbench", icon: Brain },
       { label: "Insurer Intel", href: "/prism-counsel/insurer-intel", icon: Building2 },
       { label: "Venue Intel", href: "/prism-counsel/venue-intel", icon: MapPin },
+    ],
+  },
+  {
+    label: "Court & Privilege",
+    items: [
+      { label: "Court Data Feed", href: "/prism-counsel/court-data", icon: Wifi },
+      { label: "Privilege Engine", href: "/prism-counsel/privilege-engine", icon: Lock },
+      { label: "Privilege Log", href: "/prism-counsel/privilege-log", icon: Shield },
     ],
   },
   {

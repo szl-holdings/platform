@@ -1,4 +1,4 @@
-import type { Response, Request } from "express";
+import type { Response } from "express";
 import { randomUUID } from "crypto";
 import { InvalidIdError } from "../middlewares/auth";
 
@@ -85,6 +85,17 @@ export function handleRouteError(res: Response, err: unknown, fallbackMessage: s
   if (err && typeof err === "object" && "issues" in err) {
     sendBadRequest(res, "Invalid request data");
     return;
+  }
+  if (err != null && typeof err === "object" && "statusCode" in err) {
+    const statusCode = (err as { statusCode: unknown }).statusCode;
+    if (statusCode === 403) {
+      sendForbidden(res, (err instanceof Error ? err.message : null) ?? "Access denied");
+      return;
+    }
+    if (statusCode === 404) {
+      sendNotFound(res);
+      return;
+    }
   }
   sendError(res, fallbackMessage);
 }

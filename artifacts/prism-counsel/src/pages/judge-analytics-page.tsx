@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { Gavel, Clock, BarChart3, TrendingUp, Star, User, Target, AlertTriangle, ChevronRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Gavel, Clock, BarChart3, TrendingUp, Star, User, Target, AlertTriangle, ChevronRight, Search, Wifi, WifiOff } from "lucide-react";
+
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 
 const PRISM_GOLD = "#c8a96e";
 
@@ -131,6 +134,123 @@ function DangerMeter({ score }: { score: number }) {
   );
 }
 
+function LiveJudgeSearch() {
+  const [query, setQuery] = useState("");
+  const [submittedQuery, setSubmittedQuery] = useState("");
+
+  const { data, isFetching, isError } = useQuery({
+    queryKey: ["cl-judges", submittedQuery],
+    queryFn: async () => {
+      const params = new URLSearchParams({ q: submittedQuery, limit: "8" });
+      const res = await fetch(`${BASE}/api/prism-counsel/court/judges/search?${params}`, {
+        headers: { "x-requested-with": "XMLHttpRequest" },
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Judge search failed");
+      const json = await res.json();
+      return json.data ?? json;
+    },
+    enabled: submittedQuery.length >= 2,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  });
+
+  interface JudgeSearchResult {
+    id?: number;
+    resource_uri?: string;
+    name_full?: string;
+    name?: string;
+    court?: string;
+    date_dob?: string;
+    political_affiliation_str?: string;
+    aba_rating?: string;
+    absolute_url?: string;
+  }
+  const results: JudgeSearchResult[] = (data?.results ?? []) as JudgeSearchResult[];
+  const source: string = data?.source ?? "unknown";
+
+  return (
+    <div className="rounded-lg border border-white/[0.06] p-4 space-y-3" style={{ background: "#0c1220" }}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Search className="w-3.5 h-3.5 text-[#4a90b8]" />
+          <span className="text-[11px] font-semibold text-slate-300">Live Federal Judge Search</span>
+          {submittedQuery && (
+            source === "live" ? (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-[#5aa87a]/10 text-[#5aa87a] border border-[#5aa87a]/20">
+                <Wifi className="w-2.5 h-2.5" /> CourtListener LIVE
+              </span>
+            ) : source === "error" ? (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-[#c45a4a]/10 text-[#c45a4a] border border-[#c45a4a]/20">
+                <WifiOff className="w-2.5 h-2.5" /> UNAVAILABLE
+              </span>
+            ) : null
+          )}
+        </div>
+        <span className="text-[9px] text-slate-600">Powered by CourtListener — federal judicial profiles</span>
+      </div>
+      <form
+        className="flex gap-2"
+        onSubmit={e => { e.preventDefault(); if (query.trim().length >= 2) setSubmittedQuery(query.trim()); }}
+      >
+        <input
+          type="text"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder="Search judge name, court, or district..."
+          className="flex-1 px-3 py-1.5 rounded text-xs bg-white/[0.04] border border-white/[0.08] text-slate-300 placeholder:text-slate-600 focus:outline-none focus:border-[#4a90b8]/40"
+        />
+        <button
+          type="submit"
+          className="px-3 py-1.5 rounded text-[11px] font-medium bg-[#4a90b8]/10 border border-[#4a90b8]/20 text-[#4a90b8] hover:bg-[#4a90b8]/20 transition-colors"
+        >
+          {isFetching ? "Searching…" : "Search"}
+        </button>
+      </form>
+      {isError && (
+        <p className="text-[10px] text-[#c45a4a]">CourtListener unavailable — live search temporarily offline.</p>
+      )}
+      {results.length > 0 && (
+        <div className="grid gap-2">
+          {results.map((judge) => (
+            <div key={judge.id ?? judge.resource_uri} className="flex items-start justify-between rounded-md border border-white/[0.04] px-3 py-2 bg-white/[0.02]">
+              <div className="min-w-0 flex-1">
+                <div className="text-[11px] font-medium text-slate-200 truncate">{judge.name_full ?? judge.name ?? "Unknown"}</div>
+                <div className="text-[9px] text-slate-500 mt-0.5">
+                  {[judge.court, judge.date_dob ? `b. ${new Date(judge.date_dob).getFullYear()}` : null].filter(Boolean).join(" · ")}
+                </div>
+                {(judge.political_affiliation_str || judge.aba_rating) && (
+                  <div className="flex gap-2 mt-1">
+                    {judge.political_affiliation_str && (
+                      <span className="text-[9px] px-1 rounded bg-white/[0.04] text-slate-500">{judge.political_affiliation_str}</span>
+                    )}
+                    {judge.aba_rating && (
+                      <span className="text-[9px] px-1 rounded bg-white/[0.04] text-slate-500">ABA: {judge.aba_rating}</span>
+                    )}
+                  </div>
+                )}
+              </div>
+              {judge.absolute_url && (
+                <a
+                  href={judge.absolute_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 text-[#4a90b8] hover:text-[#5aa8d8] ml-2 mt-0.5"
+                >
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </a>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+      {submittedQuery && !isFetching && results.length === 0 && !isError && (
+        <p className="text-[10px] text-slate-600 text-center py-2">No judges found for "{submittedQuery}"</p>
+      )}
+    </div>
+  );
+}
+
 export default function JudgeAnalyticsPage() {
   const [selected, setSelected] = useState<JudgeProfile | null>(null);
 
@@ -146,6 +266,8 @@ export default function JudgeAnalyticsPage() {
         </div>
         <p className="text-xs text-slate-500">AI-modeled judge tendencies: ruling speed, motion grant rates, settlement pressure behavior, damage award patterns, and strategic orientation — the intelligence edge in venue selection</p>
       </div>
+
+      <LiveJudgeSearch />
 
       {/* Summary KPIs */}
       <div className="grid grid-cols-4 gap-3">
