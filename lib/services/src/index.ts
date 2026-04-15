@@ -1,5 +1,10 @@
-export { ServiceAdapter, type ServiceStatus, type ServiceHealthReport, type ConnectionTestResult } from "./base.js";
+export { ServiceAdapter, type ServiceStatus, type ServiceHealthReport, type ConnectionTestResult, type ResilientFetchOptions } from "./base.js";
 export { ServiceRegistry, type IntegrationHealthMatrix, services } from "./registry.js";
+export { NewRelicAdapter, type NewRelicApmMetrics, type NewRelicHost, type NewRelicAlertCondition } from "./adapters/new-relic.js";
+export { NvidiaDcgmAdapter, type DcgmGpuMetrics, type DcgmClusterSummary } from "./adapters/nvidia-dcgm.js";
+export { MispTaxiiAdapter, type TaxiiCollection, type StixIndicator, type TaxiiIngestionResult } from "./adapters/misp-taxii.js";
+export { CisaAdapter, type CisaKevEntry, type MitreAttackTechnique } from "./adapters/cisa.js";
+export { NVDAdapter, type NvdCve, type NvdSearchResult } from "./adapters/nvd.js";
 
 export {
   type ProviderMode,
@@ -102,11 +107,9 @@ export { ConfluenceAdapter, type ConfluencePage } from "./adapters/confluence.js
 export { HubSpotAdapter, type HubSpotContact, type HubSpotDeal } from "./adapters/hubspot.js";
 export { ElevenLabsAdapter, type ElevenLabsVoice, type TTSResult } from "./adapters/elevenlabs.js";
 export { FigmaAdapter, type FigmaFile, type FigmaProject } from "./adapters/figma.js";
-export { CisaAdapter, type CisaKevEntry, type MitreAttackTechnique } from "./adapters/cisa.js";
 export { ArxivAdapter, type ArxivPaper } from "./adapters/arxiv.js";
 export { AbuseIPDBAdapter, type IpReputationResult } from "./adapters/abuseipdb.js";
 export { NOAAAdapter } from "./adapters/noaa.js";
-export { NVDAdapter } from "./adapters/nvd.js";
 export { BLSAdapter } from "./adapters/bls.js";
 export { WorldBankAdapter } from "./adapters/worldbank.js";
 export { OpenMeteoAdapter } from "./adapters/openmeteo.js";

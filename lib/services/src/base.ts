@@ -18,6 +18,11 @@ export interface ServiceHealthReport {
   consecutiveFailures: number;
   retryState: "idle" | "retrying" | "failed";
   enabled: boolean;
+  circuitState: "closed" | "open" | "half-open";
+  latencyP50Ms: number | null;
+  latencyP95Ms: number | null;
+  latencyP99Ms: number | null;
+  totalRequests: number;
 }
 
 export interface ConnectionTestResult {
@@ -28,6 +33,29 @@ export interface ConnectionTestResult {
   responseTimeMs: number;
   message: string;
   error: string | null;
+}
+
+export interface ResilientFetchOptions {
+  timeoutMs?: number;
+  maxRetries?: number;
+  baseDelayMs?: number;
+  maxDelayMs?: number;
+  headers?: Record<string, string>;
+  method?: string;
+  body?: string;
+  acceptStatuses?: number[];
+}
+
+interface CircuitBreakerState {
+  state: "closed" | "open" | "half-open";
+  failureCount: number;
+  lastFailure: number;
+  nextProbeAt: number;
+}
+
+interface RateLimiterState {
+  tokens: number;
+  lastRefill: number;
 }
 
 export abstract class ServiceAdapter {
@@ -42,6 +70,24 @@ export abstract class ServiceAdapter {
   private _lastSuccessfulCheck: string | null = null;
   private _consecutiveFailures: number = 0;
   private _enabled: boolean = true;
+  private _latencies: number[] = [];
+  private _totalRequests: number = 0;
+
+  private _circuit: CircuitBreakerState = {
+    state: "closed",
+    failureCount: 0,
+    lastFailure: 0,
+    nextProbeAt: 0,
+  };
+
+  private _rateLimiter: RateLimiterState = {
+    tokens: 0,
+    lastRefill: 0,
+  };
+
+  protected circuitBreakerThreshold = 5;
+  protected circuitBreakerCooldownMs = 30_000;
+  protected rateLimitPerMinute = 60;
 
   get status(): ServiceStatus {
     const missing = this.missingEnvVars;
@@ -171,6 +217,128 @@ export abstract class ServiceAdapter {
     return;
   }
 
+  private _refillTokens(): void {
+    const now = Date.now();
+    if (this._rateLimiter.lastRefill === 0) {
+      this._rateLimiter.tokens = this.rateLimitPerMinute;
+      this._rateLimiter.lastRefill = now;
+      return;
+    }
+    const elapsed = now - this._rateLimiter.lastRefill;
+    const refill = Math.floor((elapsed / 60_000) * this.rateLimitPerMinute);
+    if (refill > 0) {
+      this._rateLimiter.tokens = Math.min(this.rateLimitPerMinute, this._rateLimiter.tokens + refill);
+      this._rateLimiter.lastRefill = now;
+    }
+  }
+
+  private _consumeToken(): boolean {
+    this._refillTokens();
+    if (this._rateLimiter.tokens <= 0) return false;
+    this._rateLimiter.tokens--;
+    return true;
+  }
+
+  private _recordCircuitSuccess(): void {
+    this._circuit.failureCount = 0;
+    this._circuit.state = "closed";
+  }
+
+  private _recordCircuitFailure(): void {
+    this._circuit.failureCount++;
+    this._circuit.lastFailure = Date.now();
+    if (this._circuit.failureCount >= this.circuitBreakerThreshold) {
+      this._circuit.state = "open";
+      this._circuit.nextProbeAt = Date.now() + this.circuitBreakerCooldownMs;
+    }
+  }
+
+  private _isCircuitOpen(): boolean {
+    if (this._circuit.state === "closed") return false;
+    if (this._circuit.state === "open" && Date.now() >= this._circuit.nextProbeAt) {
+      this._circuit.state = "half-open";
+      return false;
+    }
+    return this._circuit.state === "open";
+  }
+
+  private _recordLatency(ms: number): void {
+    this._latencies.push(ms);
+    if (this._latencies.length > 200) this._latencies.shift();
+    this._totalRequests++;
+  }
+
+  private _percentile(p: number): number | null {
+    if (this._latencies.length === 0) return null;
+    const sorted = [...this._latencies].sort((a, b) => a - b);
+    const idx = Math.ceil((p / 100) * sorted.length) - 1;
+    return sorted[Math.max(0, idx)];
+  }
+
+  protected async resilientFetch(url: string, opts: ResilientFetchOptions = {}): Promise<Response> {
+    const {
+      timeoutMs = 15_000,
+      maxRetries = 3,
+      baseDelayMs = 500,
+      maxDelayMs = 10_000,
+      headers = {},
+      method = "GET",
+      body,
+      acceptStatuses = [],
+    } = opts;
+
+    if (this._isCircuitOpen()) {
+      throw new Error(`Circuit breaker OPEN for ${this.name} — cooling down`);
+    }
+
+    if (!this._consumeToken()) {
+      throw new Error(`Rate limit exceeded for ${this.name} (${this.rateLimitPerMinute}/min)`);
+    }
+
+    let lastError: Error | null = null;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      if (attempt > 0) {
+        const jitter = Math.random() * 0.3 + 0.85;
+        const delay = Math.min(maxDelayMs, baseDelayMs * Math.pow(2, attempt - 1) * jitter);
+        await new Promise((r) => setTimeout(r, delay));
+        if (this._isCircuitOpen()) {
+          throw new Error(`Circuit breaker OPEN for ${this.name} — cooling down`);
+        }
+      }
+
+      const start = Date.now();
+      try {
+        const res = await fetch(url, {
+          method,
+          headers: { "User-Agent": `SZL-${this.name}/1.0`, ...headers },
+          body,
+          signal: AbortSignal.timeout(timeoutMs),
+        });
+
+        const elapsed = Date.now() - start;
+        this._recordLatency(elapsed);
+
+        if (res.ok || acceptStatuses.includes(res.status) || (res.status >= 400 && res.status < 500 && res.status !== 429)) {
+          this._recordCircuitSuccess();
+          return res;
+        }
+
+        if (res.status === 429) {
+          this._rateLimiter.tokens = 0;
+        }
+
+        lastError = new Error(`HTTP ${res.status} from ${this.name}`);
+      } catch (err) {
+        const elapsed = Date.now() - start;
+        this._recordLatency(elapsed);
+        lastError = err instanceof Error ? err : new Error(String(err));
+      }
+    }
+
+    this._recordCircuitFailure();
+    throw lastError ?? new Error(`All retries exhausted for ${this.name}`);
+  }
+
   getHealthReport(): ServiceHealthReport {
     return {
       name: this.name,
@@ -187,6 +355,11 @@ export abstract class ServiceAdapter {
       consecutiveFailures: this._consecutiveFailures,
       retryState: this.retryState,
       enabled: this._enabled,
+      circuitState: this._circuit.state,
+      latencyP50Ms: this._percentile(50),
+      latencyP95Ms: this._percentile(95),
+      latencyP99Ms: this._percentile(99),
+      totalRequests: this._totalRequests,
     };
   }
 }

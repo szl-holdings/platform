@@ -30,36 +30,73 @@ const DEMO_CISA_KEV: CisaKevEntry[] = [
   { cveID: "CVE-2024-3400", vendorProject: "Palo Alto Networks", product: "PAN-OS", vulnerabilityName: "Palo Alto Networks PAN-OS Command Injection Vulnerability", dateAdded: "2024-04-12", shortDescription: "Palo Alto Networks PAN-OS contains a command injection vulnerability in the GlobalProtect feature.", requiredAction: "Apply mitigations per vendor instructions.", dueDate: "2024-04-19", knownRansomwareCampaignUse: "Unknown", notes: "Critical zero-day under active exploitation" },
 ];
 
+interface CacheEntry<T> {
+  data: T;
+  fetchedAt: number;
+  etag: string | null;
+}
+
 export class CisaAdapter extends ServiceAdapter {
   readonly name = "cisa";
   readonly description = "CISA Known Exploited Vulnerabilities (KEV) and threat feeds — free public API, no key required";
   readonly requiredEnvVars: string[] = [];
 
+  protected rateLimitPerMinute = 10;
+
+  private _cache: CacheEntry<CisaKevEntry[]> | null = null;
+  private readonly _cacheTtlMs = 3_600_000;
+
   get supportsMockMode(): boolean { return true; }
   get status(): import("../base.js").ServiceStatus { return "LIVE_CONFIGURED"; }
 
   protected async performHealthCheck(): Promise<void> {
-    const res = await fetch("https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json", {
+    const res = await this.resilientFetch("https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json", {
       method: "HEAD",
-      headers: { "User-Agent": "SZL-CISA/1.0" },
+      maxRetries: 1,
+      timeoutMs: 10_000,
     });
     if (!res.ok) throw new Error(`CISA KEV returned ${res.status}`);
   }
 
+  private _isCacheValid(): boolean {
+    return this._cache !== null && (Date.now() - this._cache.fetchedAt) < this._cacheTtlMs;
+  }
+
   async getKnownExploitedVulnerabilities(limit = 20): Promise<CisaKevEntry[]> {
+    if (this._isCacheValid()) {
+      return this._cache!.data.slice(-limit).reverse();
+    }
+
     try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 12000);
-      const res = await fetch("https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json", {
-        signal: controller.signal,
-        headers: { "User-Agent": "SZL-CISA/1.0", Accept: "application/json" },
-      });
-      clearTimeout(timer);
+      const headers: Record<string, string> = {};
+      if (this._cache?.etag) {
+        headers["If-None-Match"] = this._cache.etag;
+      }
+
+      const res = await this.resilientFetch(
+        "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
+        { headers, timeoutMs: 15_000, acceptStatuses: [304] },
+      );
+
+      if (res.status === 304 && this._cache) {
+        this._cache.fetchedAt = Date.now();
+        return this._cache.data.slice(-limit).reverse();
+      }
+
       if (!res.ok) throw new Error(`CISA HTTP ${res.status}`);
+
       const data = await res.json() as { vulnerabilities?: CisaKevEntry[] };
       if (!data.vulnerabilities || !Array.isArray(data.vulnerabilities)) throw new Error("No KEV data");
+
+      this._cache = {
+        data: data.vulnerabilities,
+        fetchedAt: Date.now(),
+        etag: res.headers.get("etag"),
+      };
+
       return data.vulnerabilities.slice(-limit).reverse();
     } catch {
+      if (this._cache) return this._cache.data.slice(-limit).reverse();
       return [...DEMO_CISA_KEV];
     }
   }
@@ -78,5 +115,11 @@ export class CisaAdapter extends ServiceAdapter {
   async getHighPriorityKev(): Promise<CisaKevEntry[]> {
     const all = await this.getKnownExploitedVulnerabilities(50);
     return all.filter(v => v.knownRansomwareCampaignUse === "Known");
+  }
+
+  async getRecentlyAdded(days = 7): Promise<CisaKevEntry[]> {
+    const all = await this.getKnownExploitedVulnerabilities(200);
+    const cutoff = new Date(Date.now() - days * 86_400_000).toISOString().split("T")[0];
+    return all.filter(v => v.dateAdded >= cutoff);
   }
 }

@@ -631,4 +631,178 @@ router.get("/health/billing", async (_req, res) => {
   }
 });
 
+// ─── Service Registry Health Matrix (all adapters with circuit breaker + latency) ─
+
+router.get("/integrations/health", async (_req, res) => {
+  try {
+    const matrix = services.getHealthMatrix();
+    res.json(matrix);
+  } catch (err) {
+    logger.error({ err }, "Adapter health matrix failed");
+    res.status(500).json({ error: "Adapter health matrix failed" });
+  }
+});
+
+router.get("/integrations/health/test", async (_req, res) => {
+  try {
+    const results = await services.testAllConnections();
+    res.json({
+      testedAt: new Date().toISOString(),
+      total: results.length,
+      passed: results.filter((r) => r.success).length,
+      failed: results.filter((r) => !r.success).length,
+      results,
+    });
+  } catch (err) {
+    logger.error({ err }, "Connection test failed");
+    res.status(500).json({ error: "Connection test failed" });
+  }
+});
+
+router.get("/integrations/health/:name", async (req, res) => {
+  try {
+    const adapter = services.getAdapter(req.params.name);
+    if (!adapter) {
+      res.status(404).json({ error: `Adapter "${req.params.name}" not found` });
+      return;
+    }
+    const result = await adapter.runHealthCheck();
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: "Health check failed" });
+  }
+});
+
+// ─── New Relic APM Endpoints ─────────────────────────────────────────────────
+
+router.get("/integrations/new-relic/apm", async (req, res) => {
+  try {
+    const metrics = await services.newRelic.getApmMetrics(
+      req.query?.appName as string | undefined,
+    );
+    res.json({ status: services.newRelic.status, metrics });
+  } catch (err) {
+    logger.error({ err }, "New Relic APM fetch failed");
+    res.status(500).json({ error: "New Relic APM fetch failed" });
+  }
+});
+
+router.get("/integrations/new-relic/hosts", async (_req, res) => {
+  try {
+    const hosts = await services.newRelic.getInfraHosts();
+    res.json({ status: services.newRelic.status, hosts });
+  } catch (err) {
+    res.status(500).json({ error: "New Relic hosts fetch failed" });
+  }
+});
+
+router.get("/integrations/new-relic/alerts", async (_req, res) => {
+  try {
+    const alerts = await services.newRelic.getAlertConditions();
+    res.json({ status: services.newRelic.status, alerts });
+  } catch (err) {
+    res.status(500).json({ error: "New Relic alerts fetch failed" });
+  }
+});
+
+// ─── NVIDIA DCGM GPU Endpoints ──────────────────────────────────────────────
+
+router.get("/integrations/nvidia-dcgm/gpus", async (_req, res) => {
+  try {
+    const gpus = await services.nvidiaDcgm.getGpuMetrics();
+    res.json({ status: services.nvidiaDcgm.status, gpus });
+  } catch (err) {
+    logger.error({ err }, "DCGM GPU metrics fetch failed");
+    res.status(500).json({ error: "DCGM GPU metrics fetch failed" });
+  }
+});
+
+router.get("/integrations/nvidia-dcgm/cluster", async (_req, res) => {
+  try {
+    const summary = await services.nvidiaDcgm.getClusterSummary();
+    res.json({ status: services.nvidiaDcgm.status, summary });
+  } catch (err) {
+    res.status(500).json({ error: "DCGM cluster summary failed" });
+  }
+});
+
+// ─── MISP/TAXII Threat Intel Endpoints ──────────────────────────────────────
+
+router.get("/integrations/misp-taxii/collections", async (_req, res) => {
+  try {
+    const collections = await services.mispTaxii.getCollections();
+    res.json({ status: services.mispTaxii.status, collections });
+  } catch (err) {
+    logger.error({ err }, "TAXII collections fetch failed");
+    res.status(500).json({ error: "TAXII collections fetch failed" });
+  }
+});
+
+router.get("/integrations/misp-taxii/indicators", async (req, res) => {
+  try {
+    const collectionId = req.query.collectionId as string | undefined;
+    const addedAfter = req.query.addedAfter as string | undefined;
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
+    const result = await services.mispTaxii.pollIndicators(collectionId, addedAfter, limit);
+    res.json({ status: services.mispTaxii.status, ...result });
+  } catch (err) {
+    logger.error({ err }, "TAXII indicator poll failed");
+    res.status(500).json({ error: "TAXII indicator poll failed" });
+  }
+});
+
+// ─── CISA KEV Enhanced Endpoints ────────────────────────────────────────────
+
+router.get("/integrations/cisa/kev", async (req, res) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 20;
+    const vulns = await services.cisa.getKnownExploitedVulnerabilities(limit);
+    res.json({ status: services.cisa.status, count: vulns.length, vulnerabilities: vulns });
+  } catch (err) {
+    res.status(500).json({ error: "CISA KEV fetch failed" });
+  }
+});
+
+router.get("/integrations/cisa/kev/search", async (req, res) => {
+  try {
+    const q = (req.query.q as string) ?? "";
+    const results = await services.cisa.searchKev(q);
+    res.json({ query: q, count: results.length, vulnerabilities: results });
+  } catch (err) {
+    res.status(500).json({ error: "CISA KEV search failed" });
+  }
+});
+
+router.get("/integrations/cisa/kev/ransomware", async (_req, res) => {
+  try {
+    const vulns = await services.cisa.getHighPriorityKev();
+    res.json({ count: vulns.length, vulnerabilities: vulns });
+  } catch (err) {
+    res.status(500).json({ error: "CISA ransomware KEV fetch failed" });
+  }
+});
+
+// ─── NVD Enhanced Endpoints ─────────────────────────────────────────────────
+
+router.get("/integrations/nvd/cves", async (req, res) => {
+  try {
+    const keyword = req.query.keyword as string | undefined;
+    const severity = req.query.severity as string | undefined;
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 20;
+    const result = await services.nvd.searchCves({ keyword, severity, resultsPerPage: limit });
+    res.json({ status: services.nvd.status, ...result });
+  } catch (err) {
+    res.status(500).json({ error: "NVD CVE search failed" });
+  }
+});
+
+router.get("/integrations/nvd/cves/critical", async (_req, res) => {
+  try {
+    const result = await services.nvd.getCriticalCves();
+    res.json({ status: services.nvd.status, ...result });
+  } catch (err) {
+    res.status(500).json({ error: "NVD critical CVE fetch failed" });
+  }
+});
+
 export default router;

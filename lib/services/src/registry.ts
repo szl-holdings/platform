@@ -51,6 +51,9 @@ import { LinkedInAdapter } from "./adapters/linkedin.js";
 import { SecEdgarAdapter } from "./adapters/edgar.js";
 import { FredAdapter } from "./adapters/fred.js";
 import { MarketDataAdapter } from "./adapters/market-data.js";
+import { NewRelicAdapter } from "./adapters/new-relic.js";
+import { NvidiaDcgmAdapter } from "./adapters/nvidia-dcgm.js";
+import { MispTaxiiAdapter } from "./adapters/misp-taxii.js";
 
 export interface IntegrationHealthMatrix {
   timestamp: string;
@@ -116,6 +119,9 @@ export class ServiceRegistry {
   readonly secEdgar: SecEdgarAdapter;
   readonly fred: FredAdapter;
   readonly marketData: MarketDataAdapter;
+  readonly newRelic: NewRelicAdapter;
+  readonly nvidiaDcgm: NvidiaDcgmAdapter;
+  readonly mispTaxii: MispTaxiiAdapter;
 
   private readonly adapters: ServiceAdapter[];
 
@@ -172,6 +178,9 @@ export class ServiceRegistry {
     this.secEdgar = new SecEdgarAdapter();
     this.fred = new FredAdapter();
     this.marketData = new MarketDataAdapter();
+    this.newRelic = new NewRelicAdapter();
+    this.nvidiaDcgm = new NvidiaDcgmAdapter();
+    this.mispTaxii = new MispTaxiiAdapter();
 
     this.adapters = [
       this.ai,
@@ -226,6 +235,9 @@ export class ServiceRegistry {
       this.secEdgar,
       this.fred,
       this.marketData,
+      this.newRelic,
+      this.nvidiaDcgm,
+      this.mispTaxii,
     ];
   }
 
