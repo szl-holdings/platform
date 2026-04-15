@@ -20,7 +20,8 @@ import {
   Play, LayoutDashboard, Ticket, Monitor, DollarSign, Wrench, Server,
   FlaskConical, Cpu, Cpu as CpuIcon, Network, Radio, Plus, Sun, Eye,
   Database, Trophy, Boxes, GitBranch, Link2, Flame, Menu, X, ChevronDown,
-  Hexagon, Zap, Briefcase, Globe, Sparkles, Crosshair, Scale, Settings, Clock
+  Hexagon, Zap, Briefcase, Globe, Sparkles, Crosshair, Scale, Settings, Clock,
+  Cloud, Lock
 } from "lucide-react";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { sentinelConfig } from "@szl-holdings/shared-ui/copilot-configs";
@@ -194,6 +195,15 @@ const IntelligenceFusionGrid = lazy(() => import("@/pages/intelligence-fusion-gr
 const AegisBusinessSignalIntelligence = lazy(() => import("@/pages/business-signal-intelligence"));
 const AegisPredictiveIntelligence = lazy(() => import("@/pages/predictive-intelligence"));
 
+// ─── Extended Security Modules (Task 601) ────────────────────────────────────
+const ASMDashboard = lazy(() => import("@/pages/asm-dashboard"));
+const CSPMDashboard = lazy(() => import("@/pages/cspm-dashboard"));
+const ITDRDashboard = lazy(() => import("@/pages/itdr-dashboard"));
+const PhishSim = lazy(() => import("@/pages/phish-sim"));
+const ZeroTrustEngine = lazy(() => import("@/pages/zero-trust-engine"));
+const DLPDashboard = lazy(() => import("@/pages/dlp-dashboard"));
+const OTICSDashboard = lazy(() => import("@/pages/ot-ics-dashboard"));
+
 // ─── Agentic SOC & Autonomous Cyber Defense (Task 521) ───────────────────────
 const AgenticSOC = lazy(() => import("@/pages/agentic-soc"));
 const DeceptionGrid = lazy(() => import("@/pages/deception-grid"));
@@ -289,6 +299,17 @@ const phantomSentinelNav = [
   { path: "/phantom/tabletop", label: "Executive Tabletop", icon: FileText },
   { path: "/sentinel/behavioral", label: "SENTINEL Behavioral", icon: Eye },
   { path: "/threat-sim-report", label: "Simulation Reports", icon: FileText },
+];
+
+const extendedSecurityNav = [
+  { path: "/asm", label: "Attack Surface Management", icon: Globe },
+  { path: "/cspm", label: "Cloud Security Posture", icon: Cloud },
+  { path: "/itdr", label: "Identity Threat Detection", icon: Users },
+  { path: "/deception-grid", label: "Deception Grid", icon: Eye },
+  { path: "/phish-sim", label: "Security Awareness & Phish Sim", icon: Shield },
+  { path: "/zero-trust-engine", label: "Zero Trust Policy Engine", icon: Lock },
+  { path: "/dlp", label: "Data Loss Prevention", icon: Database },
+  { path: "/ot-ics", label: "OT / ICS Security", icon: Cpu },
 ];
 
 const agenticDefenseNav = [
@@ -537,6 +558,11 @@ function AegisSidebarContent({ location, onNavigate, collapsed, onToggleCollapse
         { id: "governance-review", label: "Governance Review", href: "/soc/governance", icon: <FileText className="w-3.5 h-3.5" /> },
         ...governanceNavItems.map(({ path, label, icon: Icon }) => ({ id: path + "-gov", label, href: path, icon: <Icon className="w-3 h-3" /> })),
       ],
+    },
+    {
+      id: "extended-security",
+      label: "ASM · CSPM · ITDR · DLP · OT/ICS",
+      items: extendedSecurityNav.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3.5 h-3.5" /> })),
     },
     {
       id: "agentic-defense",
@@ -907,6 +933,15 @@ function AppRouter() {
         <Route path="/business-signal-intelligence" component={AegisBusinessSignalIntelligence} />
         <Route path="/predictive-intelligence" component={AegisPredictiveIntelligence} />
         <Route path="/threat-cost-translator" component={ThreatCostTranslator} />
+
+        {/* Extended Security Modules (Task 601) */}
+        <Route path="/asm" component={ASMDashboard} />
+        <Route path="/cspm" component={CSPMDashboard} />
+        <Route path="/itdr" component={ITDRDashboard} />
+        <Route path="/phish-sim" component={PhishSim} />
+        <Route path="/zero-trust-engine" component={ZeroTrustEngine} />
+        <Route path="/dlp" component={DLPDashboard} />
+        <Route path="/ot-ics" component={OTICSDashboard} />
 
         {/* Agentic SOC & Autonomous Cyber Defense (Task 521) */}
         <Route path="/agentic-soc" component={AgenticSOC} />
