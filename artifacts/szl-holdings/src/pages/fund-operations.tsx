@@ -515,7 +515,12 @@ export default function FundOperationsPage() {
   const handleSeed = async () => {
     setSeeding(true);
     try {
-      await fetch("/api/fund-ops/seed", { method: "POST", headers: { "Content-Type": "application/json" } });
+      const res = await fetch("/api/fund-ops/seed", { method: "POST", headers: { "Content-Type": "application/json" } });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        alert(`Seed failed: ${body?.message ?? res.statusText}`);
+        return;
+      }
       reloadSummary();
       reloadFin();
       reloadCap();
@@ -523,6 +528,8 @@ export default function FundOperationsPage() {
       reloadCalls();
       reloadInvestors();
       reloadFormD();
+    } catch (err) {
+      alert(`Seed error: ${err instanceof Error ? err.message : "Unknown error"}`);
     } finally {
       setSeeding(false);
     }
@@ -536,7 +543,7 @@ export default function FundOperationsPage() {
     const cash = parseFloat(data.cashAndEquivalents || "0");
     const burn = opex > 0 ? opex : rev * 0.8;
 
-    await fetch("/api/fund-ops/portfolio-financials", {
+    const res = await fetch("/api/fund-ops/portfolio-financials", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -559,6 +566,11 @@ export default function FundOperationsPage() {
         runwayMonths: burn > 0 ? String(Math.round((cash / burn) * 10) / 10) : "0",
       }),
     });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      alert(`Submit failed: ${body?.message ?? res.statusText}`);
+      return;
+    }
     setShowEntry(false);
     reloadFin();
   };
