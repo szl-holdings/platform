@@ -131,6 +131,18 @@ const AegisPublicPage = lazy(() => import("@/pages/aegis-public"));
 const CarlotaJoPublicPage = lazy(() => import("@/pages/carlota-jo-public"));
 
 
+const NuroForgeDashboard = lazy(() => import("@/pages/nuro-forge/index"));
+const NuroForgeArena = lazy(() => import("@/pages/nuro-forge/arena"));
+const NuroForgeComposition = lazy(() => import("@/pages/nuro-forge/composition"));
+const NuroForgeGovernance = lazy(() => import("@/pages/nuro-forge/governance"));
+const NuroForgeFineTuning = lazy(() => import("@/pages/nuro-forge/fine-tuning"));
+const NuroForgeCost = lazy(() => import("@/pages/nuro-forge/cost"));
+const NuroForgeMultimodal = lazy(() => import("@/pages/nuro-forge/multimodal"));
+const NuroForgePrompts = lazy(() => import("@/pages/nuro-forge/prompts"));
+const NuroForgeObservatory = lazy(() => import("@/pages/nuro-forge/observatory"));
+const NuroForgeBlueprints = lazy(() => import("@/pages/nuro-forge/blueprints"));
+const NuroForgeSelfHealing = lazy(() => import("@/pages/nuro-forge/self-healing"));
+
 const PulsePage = lazy(() => import("@/pages/pulse"));
 const LinkInBioPage = lazy(() => import("@/pages/link-in-bio"));
 const NewsletterLandingPage = lazy(() => import("@/pages/newsletter-landing"));
@@ -774,6 +786,41 @@ function App() {
 
             <Route path="/venture-portfolio">
               <Suspense fallback={<PageLoader />}><VenturePortfolioPage /></Suspense>
+            </Route>
+
+            {/* ── Nuro Forge ── */}
+            <Route path="/nuro-forge">
+              <Suspense fallback={<PageLoader />}><NuroForgeDashboard /></Suspense>
+            </Route>
+            <Route path="/nuro-forge/arena">
+              <Suspense fallback={<PageLoader />}><NuroForgeArena /></Suspense>
+            </Route>
+            <Route path="/nuro-forge/composition">
+              <Suspense fallback={<PageLoader />}><NuroForgeComposition /></Suspense>
+            </Route>
+            <Route path="/nuro-forge/governance">
+              <Suspense fallback={<PageLoader />}><NuroForgeGovernance /></Suspense>
+            </Route>
+            <Route path="/nuro-forge/fine-tuning">
+              <Suspense fallback={<PageLoader />}><NuroForgeFineTuning /></Suspense>
+            </Route>
+            <Route path="/nuro-forge/cost">
+              <Suspense fallback={<PageLoader />}><NuroForgeCost /></Suspense>
+            </Route>
+            <Route path="/nuro-forge/multimodal">
+              <Suspense fallback={<PageLoader />}><NuroForgeMultimodal /></Suspense>
+            </Route>
+            <Route path="/nuro-forge/prompts">
+              <Suspense fallback={<PageLoader />}><NuroForgePrompts /></Suspense>
+            </Route>
+            <Route path="/nuro-forge/observatory">
+              <Suspense fallback={<PageLoader />}><NuroForgeObservatory /></Suspense>
+            </Route>
+            <Route path="/nuro-forge/blueprints">
+              <Suspense fallback={<PageLoader />}><NuroForgeBlueprints /></Suspense>
+            </Route>
+            <Route path="/nuro-forge/self-healing">
+              <Suspense fallback={<PageLoader />}><NuroForgeSelfHealing /></Suspense>
             </Route>
 
             {/* ── Legal / utility routes ── */}

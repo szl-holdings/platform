@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
 import { ReactNode, useState, useEffect } from "react";
-import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard, ArrowLeft, FileText, Brain, Layers, Home, BookOpen, Globe, Lock, Play, Star, DollarSign, Store, Code2 } from "lucide-react";
+import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard, ArrowLeft, FileText, Brain, Layers, Home, BookOpen, Globe, Lock, Play, Star, DollarSign, Store, Code2, Cpu, Scale, HeartPulse, BarChart3, Image, Package } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator } from "@szl-holdings/shared-ui";
 import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, useRegisterCommands, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 
@@ -57,6 +57,20 @@ const ENTERPRISE_NAV = [
   { href: "/alloy/pilot", label: "Pilot Onboarding", icon: Star, badge: "New" },
 ];
 
+const NURO_FORGE_NAV = [
+  { href: "/nuro-forge", label: "Nuro Forge", icon: Cpu, badge: "New" },
+  { href: "/nuro-forge/arena", label: "Tournament Arena", icon: Zap },
+  { href: "/nuro-forge/composition", label: "Model Composition", icon: GitBranch },
+  { href: "/nuro-forge/governance", label: "Governance & Safety", icon: Shield },
+  { href: "/nuro-forge/fine-tuning", label: "Fine-Tuning Engine", icon: Brain },
+  { href: "/nuro-forge/cost", label: "Cost Intelligence", icon: DollarSign },
+  { href: "/nuro-forge/multimodal", label: "Multimodal Hub", icon: Image },
+  { href: "/nuro-forge/prompts", label: "Prompt Studio", icon: Wand2 },
+  { href: "/nuro-forge/observatory", label: "Observatory", icon: BarChart3 },
+  { href: "/nuro-forge/blueprints", label: "Blueprints", icon: Package },
+  { href: "/nuro-forge/self-healing", label: "Self-Healing Infra", icon: HeartPulse },
+];
+
 const MCP_NAV = [
   { href: "/alloy/mcp-store", label: "MCP Marketplace", icon: Store, badge: "New" },
   { href: "/alloy/mcp-tools", label: "Custom Tool Creator", icon: Code2, badge: "New" },
@@ -88,6 +102,7 @@ const ALL_NAV_SECTIONS = [
   { items: CREATIVE_NAV, group: "Navigate" },
   { items: DOCS_NAV, group: "Navigate" },
   { items: INTELLIGENCE_NAV, group: "Navigate" },
+  { items: NURO_FORGE_NAV, group: "Navigate" },
   { items: ENTERPRISE_NAV, group: "Actions" },
   { items: MCP_NAV, group: "Actions" },
 ];
@@ -277,6 +292,11 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
 
             <div className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium" style={{ color: "rgba(255,255,255,0.25)" }}>Research & Creation</div>
             {INTELLIGENCE_NAV.map(item => (
+              <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
+            ))}
+
+            <div className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium" style={{ color: "rgba(212,160,84,0.6)" }}>Nuro Forge</div>
+            {NURO_FORGE_NAV.map(item => (
               <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
             ))}
 
