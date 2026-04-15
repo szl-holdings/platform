@@ -2,13 +2,13 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { toAlpha } from "@szl-holdings/shared-ui/utils";
 import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useCallback } from "react";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 import {
   Building2, LayoutDashboard, Eye, Activity,
   BarChart3, Users, FileText, CheckSquare,
   Bell, Menu, X, Briefcase, Map, Globe, TrendingUp, BookOpen,
-  Shield, Layers, Radio, Search, PieChart
+  Shield, Layers, Radio, Search, PieChart, PanelLeftClose, PanelLeftOpen
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui";
 import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
@@ -58,18 +58,12 @@ const NAV_SECTIONS: SidebarNavSection[] = [
     ],
   },
   {
-    id: "brokerage",
-    label: "Brokerage",
+    id: "operations",
+    label: "Operations",
     items: [
       { id: "deals", href: "/deals", label: "Deals", icon: <TrendingUp className="w-full h-full" /> },
       { id: "leads", href: "/leads", label: "Brokers", icon: <Users className="w-full h-full" /> },
       { id: "listings", href: "/listings", label: "Portfolio", icon: <Briefcase className="w-full h-full" /> },
-    ],
-  },
-  {
-    id: "operations",
-    label: "Operations",
-    items: [
       { id: "property-desk", href: "/property-desk", label: "Property Desk", icon: <Layers className="w-full h-full" /> },
       { id: "what-changed", href: "/what-changed", label: "What Changed", icon: <Radio className="w-full h-full" /> },
       { id: "diligence-prep", href: "/diligence-prep", label: "Diligence Prep", icon: <Search className="w-full h-full" /> },
@@ -78,8 +72,8 @@ const NAV_SECTIONS: SidebarNavSection[] = [
     ],
   },
   {
-    id: "reporting",
-    label: "Reporting",
+    id: "settings",
+    label: "Settings",
     items: [
       { id: "market-analytics", href: "/market-analytics", label: "Market Analytics", icon: <TrendingUp className="w-full h-full" /> },
       { id: "comparable-sales", href: "/comparable-sales", label: "Comparable Sales", icon: <BarChart3 className="w-full h-full" /> },
@@ -94,11 +88,26 @@ const NAV_SECTIONS: SidebarNavSection[] = [
 
 const API = "/api";
 
+const TERRA_COLLAPSE_KEY = "terra-sidebar-collapsed";
+
+function readCollapsed(): boolean {
+  try { return localStorage.getItem(TERRA_COLLAPSE_KEY) === "true"; } catch { return false; }
+}
+
 export function TerraLayout({ children }: { children: ReactNode }) {
   const [location, navigate] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(readCollapsed);
   const { status: wsStatus } = useRealtimeChannel("terra-signals");
   const { replay: replayOnboarding } = useOnboardingState("terra");
+
+  const toggleCollapsed = useCallback(() => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try { localStorage.setItem(TERRA_COLLAPSE_KEY, String(next)); } catch {}
+      return next;
+    });
+  }, []);
 
   const { data: apiHealth, isError: apiDown } = useQuery({
     queryKey: ["terra-api-health"],
@@ -212,13 +221,32 @@ export function TerraLayout({ children }: { children: ReactNode }) {
     </div>
   );
 
+  const collapseButton = (
+    <button
+      onClick={toggleCollapsed}
+      className="flex items-center justify-center p-1.5 rounded-lg transition-colors hover:bg-white/5"
+      style={{ color: toAlpha(TERRA_ACCENT, 0.5) }}
+      aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+    >
+      {sidebarCollapsed
+        ? <PanelLeftOpen className="w-4 h-4" />
+        : <PanelLeftClose className="w-4 h-4" />}
+    </button>
+  );
+
   const terraSidebar = (
     <SidebarNav
       sections={NAV_SECTIONS}
       currentPath={location}
       accentColor={TERRA_ACCENT}
-      header={sidebarHeader}
-      footer={sidebarFooter}
+      collapsed={sidebarCollapsed}
+      header={sidebarCollapsed ? collapseButton : sidebarHeader}
+      footer={sidebarCollapsed ? undefined : (
+        <div className="space-y-2">
+          {collapseButton}
+          {sidebarFooter}
+        </div>
+      )}
       onNavigate={(item) => { if (item.href) navigate(item.href); setSidebarOpen(false); }}
     />
   );
@@ -237,6 +265,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
         topbar={terraTopbar}
         mobileOpen={sidebarOpen}
         onMobileClose={() => setSidebarOpen(false)}
+        sidebarWidth={sidebarCollapsed ? "3.5rem" : "14rem"}
         theme={{ sidebarBg: SIDEBAR_BG, pageBg: colors.background.primary, headerBg: HEADER_BG }}
         accentColor={TERRA_ACCENT}
       >

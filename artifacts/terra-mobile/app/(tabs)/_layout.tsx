@@ -6,7 +6,7 @@ import { Tabs, router } from "expo-router";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { SymbolView } from "expo-symbols";
 import React, { useState } from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SpotlightFab, SpotlightModal, type SpotlightCommand } from "@szl-holdings/mobile-shared/components";
 import { useColors } from "@/hooks/useColors";
 
@@ -23,6 +23,19 @@ const terraCommands: SpotlightCommand[] = [
   { id: "action-scan", label: "Scan Property", description: "AI-powered property analysis", icon: "🔬", group: "Quick Actions", isQuickAction: true, keywords: ["analyze", "ai", "scan", "value"], action: () => router.push("/(tabs)/scanner") },
   { id: "cross-szl", label: "Open SZL Holdings", description: "Executive Command", icon: "◆", group: "Ecosystem", keywords: ["app", "switch"], action: () => Linking.openURL("szl-holdings://") },
 ];
+
+function ProfileButton({ color }: { color: string }) {
+  return (
+    <TouchableOpacity
+      onPress={() => router.push("/profile")}
+      style={{ marginRight: 12, padding: 4 }}
+      accessibilityLabel="Profile"
+      accessibilityRole="button"
+    >
+      <Feather name="user" size={22} color={color} />
+    </TouchableOpacity>
+  );
+}
 
 function NativeTabLayout() {
   return (
@@ -43,9 +56,9 @@ function NativeTabLayout() {
         <Icon sf={{ default: "bolt", selected: "bolt.fill" }} />
         <Label>Scanner</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="profile">
-        <Icon sf={{ default: "person", selected: "person.fill" }} />
-        <Label>Profile</Label>
+      <NativeTabs.Trigger name="agent-chat">
+        <Icon sf={{ default: "message", selected: "message.fill" }} />
+        <Label>AI</Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );
@@ -88,6 +101,10 @@ function ClassicTabLayout() {
         name="index"
         options={{
           title: "Map",
+          headerShown: true,
+          headerTransparent: true,
+          headerTitle: "",
+          headerRight: () => <ProfileButton color={colors.gold} />,
           tabBarIcon: ({ color }) =>
             isIOS ? (
               <SymbolView name="map" tintColor={color} size={22} />
@@ -109,18 +126,6 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen
-        name="pipeline"
-        options={{
-          title: "Pipeline",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="chart.line.uptrend.xyaxis" tintColor={color} size={22} />
-            ) : (
-              <Feather name="activity" size={20} color={color} />
-            ),
-        }}
-      />
-      <Tabs.Screen
         name="scanner"
         options={{
           title: "Scanner",
@@ -133,17 +138,31 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="pipeline"
         options={{
-          title: "Profile",
+          title: "Pipeline",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="person" tintColor={color} size={22} />
+              <SymbolView name="chart.line.uptrend.xyaxis" tintColor={color} size={22} />
             ) : (
-              <Feather name="user" size={20} color={color} />
+              <Feather name="activity" size={20} color={color} />
             ),
         }}
       />
+      <Tabs.Screen name="mcp-tools" options={{ href: null }} />
+      <Tabs.Screen
+        name="agent-chat"
+        options={{
+          title: "AI",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="message" tintColor={color} size={22} />
+            ) : (
+              <Feather name="message-circle" size={20} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen name="profile" options={{ href: null }} />
     </Tabs>
   );
 }

@@ -6,7 +6,7 @@ import { Tabs, router } from "expo-router";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { SymbolView } from "expo-symbols";
 import React, { useState } from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SpotlightFab, SpotlightModal, type SpotlightCommand } from "@szl-holdings/mobile-shared/components";
 import { LYTE_COLORS } from "@/constants/colors";
 
@@ -25,6 +25,24 @@ const lyteCommands: SpotlightCommand[] = [
   { id: "cross-vessels", label: "Open Vessels", description: "Maritime Command Intelligence", icon: "⚓", group: "Ecosystem", keywords: ["app", "switch"], action: () => Linking.openURL("vessels://") },
 ];
 
+function ProfileButton() {
+  const isIOS = Platform.OS === "ios";
+  return (
+    <TouchableOpacity
+      onPress={() => router.push("/profile")}
+      style={{ marginRight: 12, padding: 4 }}
+      accessibilityLabel="Profile"
+      accessibilityRole="button"
+    >
+      {isIOS ? (
+        <SymbolView name="person.circle" tintColor={LYTE_COLORS.electricBlue} size={24} />
+      ) : (
+        <Feather name="user" size={22} color={LYTE_COLORS.electricBlue} />
+      )}
+    </TouchableOpacity>
+  );
+}
+
 function NativeTabLayout() {
   return (
     <NativeTabs>
@@ -32,17 +50,17 @@ function NativeTabLayout() {
         <Icon sf={{ default: "gauge.medium", selected: "gauge.medium" }} />
         <Label>Dashboard</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="health">
-        <Icon sf={{ default: "heart.circle", selected: "heart.circle.fill" }} />
-        <Label>Health</Label>
+      <NativeTabs.Trigger name="signals">
+        <Icon sf={{ default: "waveform", selected: "waveform" }} />
+        <Label>Signals</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="alerts">
-        <Icon sf={{ default: "bell", selected: "bell.fill" }} />
-        <Label>Alerts</Label>
+      <NativeTabs.Trigger name="prism">
+        <Icon sf={{ default: "sparkles", selected: "sparkles" }} />
+        <Label>PRISM</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="board-mode">
-        <Icon sf={{ default: "eye", selected: "eye.fill" }} />
-        <Label>Board</Label>
+      <NativeTabs.Trigger name="agent-chat">
+        <Icon sf={{ default: "bubble.left.and.bubble.right", selected: "bubble.left.and.bubble.right.fill" }} />
+        <Label>AI</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
         <Icon sf={{ default: "person", selected: "person.fill" }} />
@@ -98,37 +116,45 @@ function ClassicTabLayout() {
       />
       <Tabs.Screen
         name="health"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="signals"
         options={{
-          title: "Health",
+          title: "Signals",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="heart.circle" tintColor={color} size={22} />
+              <SymbolView name="waveform" tintColor={color} size={22} />
             ) : (
-              <Feather name="heart" size={20} color={color} />
+              <MaterialCommunityIcons name="signal-variant" size={20} color={color} />
             ),
         }}
       />
       <Tabs.Screen
         name="alerts"
-        options={{
-          title: "Alerts",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="bell" tintColor={color} size={22} />
-            ) : (
-              <Feather name="bell" size={20} color={color} />
-            ),
-        }}
+        options={{ href: null }}
       />
       <Tabs.Screen
         name="board-mode"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="receipts"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="mcp-tools"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="agent-chat"
         options={{
-          title: "Board",
+          title: "AI",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="eye" tintColor={color} size={22} />
+              <SymbolView name="bubble.left.and.bubble.right.fill" tintColor={color} size={22} />
             ) : (
-              <Feather name="eye" size={20} color={color} />
+              <Feather name="message-circle" size={20} color={color} />
             ),
         }}
       />

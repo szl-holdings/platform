@@ -6,7 +6,7 @@ import { Redirect, Tabs, router } from "expo-router";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { SymbolView } from "expo-symbols";
 import React, { useState } from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SpotlightFab, SpotlightModal, type SpotlightCommand } from "@szl-holdings/mobile-shared/components";
 
 import { useAuth } from "@/context/AuthContext";
@@ -26,7 +26,25 @@ const aegisCommands: SpotlightCommand[] = [
   { id: "cross-vessels", label: "Open Vessels", description: "Maritime Command Intelligence", icon: "⚓", group: "Ecosystem", keywords: ["app", "switch"], action: () => Linking.openURL("vessels://") },
 ];
 
-function NativeTabLayout() {
+function ProfileButton({ color }: { color: string }) {
+  const isIOS = Platform.OS === "ios";
+  return (
+    <TouchableOpacity
+      onPress={() => router.push("/profile")}
+      style={{ marginRight: 12, padding: 4 }}
+      accessibilityLabel="Profile"
+      accessibilityRole="button"
+    >
+      {isIOS ? (
+        <SymbolView name="person.circle" tintColor={color} size={24} />
+      ) : (
+        <Feather name="user" size={22} color={color} />
+      )}
+    </TouchableOpacity>
+  );
+}
+
+function NativeTabLayout({ accentColor }: { accentColor: string }) {
   return (
     <NativeTabs>
       <NativeTabs.Trigger name="index">
@@ -39,15 +57,7 @@ function NativeTabLayout() {
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="agent-chat">
         <Icon sf={{ default: "bubble.left.and.bubble.right", selected: "bubble.left.and.bubble.right.fill" }} />
-        <Label>Agents</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="digest">
-        <Icon sf={{ default: "doc.text", selected: "doc.text.fill" }} />
-        <Label>Digest</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="profile">
-        <Icon sf={{ default: "person", selected: "person.fill" }} />
-        <Label>Profile</Label>
+        <Label>AI</Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );
@@ -89,6 +99,10 @@ function ClassicTabLayout() {
         name="index"
         options={{
           title: "Dashboard",
+          headerShown: true,
+          headerTransparent: true,
+          headerTitle: "",
+          headerRight: () => <ProfileButton color={colors.amber} />,
           tabBarIcon: ({ color }) =>
             isIOS ? (
               <SymbolView name="shield.fill" tintColor={color} size={22} />
@@ -112,7 +126,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="agent-chat"
         options={{
-          title: "Agents",
+          title: "AI",
           tabBarIcon: ({ color }) =>
             isIOS ? (
               <SymbolView name="bubble.left.and.bubble.right.fill" tintColor={color} size={22} />
@@ -122,28 +136,16 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen
+        name="agents"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
         name="digest"
-        options={{
-          title: "Digest",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="doc.text.fill" tintColor={color} size={22} />
-            ) : (
-              <Ionicons name="document-text-outline" size={20} color={color} />
-            ),
-        }}
+        options={{ href: null }}
       />
       <Tabs.Screen
         name="profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="person.fill" tintColor={color} size={22} />
-            ) : (
-              <Feather name="user" size={20} color={color} />
-            ),
-        }}
+        options={{ href: null }}
       />
     </Tabs>
   );
@@ -151,6 +153,7 @@ function ClassicTabLayout() {
 
 export default function TabLayout() {
   const { isAuthenticated, isLoading } = useAuth();
+  const colors = useColors();
   const [spotlightOpen, setSpotlightOpen] = useState(false);
 
   if (!isLoading && !isAuthenticated) {
@@ -159,7 +162,11 @@ export default function TabLayout() {
 
   return (
     <View style={{ flex: 1 }}>
-      {isLiquidGlassAvailable() ? <NativeTabLayout /> : <ClassicTabLayout />}
+      {isLiquidGlassAvailable() ? (
+        <NativeTabLayout accentColor={colors.amber} />
+      ) : (
+        <ClassicTabLayout />
+      )}
       <SpotlightFab
         onPress={() => setSpotlightOpen(true)}
         accentColor={AEGIS_ACCENT}

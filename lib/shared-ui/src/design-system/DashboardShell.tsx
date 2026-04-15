@@ -21,6 +21,7 @@ export interface DashboardShellProps {
   sidebarEvents?: Pick<React.HTMLAttributes<HTMLElement>, "onMouseEnter" | "onMouseLeave">;
   collapsible?: boolean;
   defaultCollapsed?: boolean;
+  collapseStorageKey?: string;
   accentColor?: string;
   theme?: DashboardShellTheme;
   mobileOpen?: boolean;
@@ -37,11 +38,32 @@ export function DashboardShell({
   sidebarEvents,
   collapsible = false,
   defaultCollapsed = false,
+  collapseStorageKey,
   theme,
   mobileOpen = false,
   onMobileClose,
 }: DashboardShellProps) {
-  const [collapsed, setCollapsed] = React.useState(defaultCollapsed);
+  const [collapsed, setCollapsed] = React.useState(() => {
+    if (collapsible && collapseStorageKey) {
+      try {
+        const stored = localStorage.getItem(collapseStorageKey);
+        if (stored !== null) return stored === "true";
+      } catch {}
+    }
+    return defaultCollapsed;
+  });
+
+  const toggleCollapsed = React.useCallback(() => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      if (collapsible && collapseStorageKey) {
+        try {
+          localStorage.setItem(collapseStorageKey, String(next));
+        } catch {}
+      }
+      return next;
+    });
+  }, [collapsible, collapseStorageKey]);
 
   const sidebarBg = theme?.sidebarBg ?? "#0a0c10";
   const headerBg = theme?.headerBg ?? toAlpha("#0a0c10", 0.92);
@@ -78,7 +100,7 @@ export function DashboardShell({
           >
             {collapsible && (
               <button
-                onClick={() => setCollapsed(!collapsed)}
+                onClick={toggleCollapsed}
                 className="self-end m-2 p-1.5 rounded-lg transition-colors hover:bg-white/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsla(210_60%_58%_/_0.4)]"
                 style={{ color: colors.text.muted }}
                 aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}

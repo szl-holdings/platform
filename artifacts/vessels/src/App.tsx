@@ -265,12 +265,15 @@ function RoleSelector({ expanded }: { expanded: boolean }) {
   );
 }
 
-function VesselsSidebarContent({ expanded, onMobileClose }: { expanded: boolean; onMobileClose?: () => void }) {
+const VESSELS_COLLAPSE_KEY = "vessels-sidebar-collapsed";
+
+function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { expanded: boolean; onMobileClose?: () => void; onToggleCollapse?: () => void }) {
   const [location, navigate] = useLocation();
 
   const primarySections: SidebarNavSection[] = [
     {
-      id: "primary",
+      id: "core",
+      label: "Core",
       items: primaryNavItems.map(({ path, label, icon: Icon }) => ({
         id: path,
         label,
@@ -279,24 +282,20 @@ function VesselsSidebarContent({ expanded, onMobileClose }: { expanded: boolean;
       })),
     },
     {
-      id: "predictive",
-      label: "Predictive Intelligence",
+      id: "intelligence",
+      label: "Intelligence",
       items: [
         { id: "disruption-forecast", label: "Disruption Forecast", href: "/disruption-forecast", icon: <Globe className="w-3.5 h-3.5" /> },
         { id: "dark-fleet-economics", label: "Dark Fleet Economics", href: "/dark-fleet-economics", icon: <Calculator className="w-3.5 h-3.5" /> },
-        { id: "voyage-pnl", label: "Voyage P&L Predictor", href: "/voyage-pnl", icon: <TrendingUp className="w-3.5 h-3.5" /> },
+        { id: "voyage-pnl-pred", label: "Voyage P&L Predictor", href: "/voyage-pnl", icon: <TrendingUp className="w-3.5 h-3.5" /> },
         { id: "trade-flow-heatmap", label: "Trade Flow Heatmap", href: "/trade-flow-heatmap", icon: <BarChart3 className="w-3.5 h-3.5" /> },
         { id: "intelligence-briefs", label: "Intelligence Briefs", href: "/intelligence-briefs", icon: <Zap className="w-3.5 h-3.5" /> },
-      ]
-    },
-    {
-      id: "trading",
-      label: "Commodity Trading",
-      items: [
         { id: "trading-desk", label: "Trading Desk", href: "/trading-desk", icon: <TrendingUp className="w-3.5 h-3.5" /> },
         { id: "commodity-flow", label: "Commodity Flow", href: "/commodity-flow", icon: <BarChart3 className="w-3.5 h-3.5" /> },
-        { id: "voyage-pnl", label: "Voyage P&L", href: "/voyage-pnl", icon: <DollarSign className="w-3.5 h-3.5" /> },
-      ]
+        ...legacyNavItems
+          .filter(({ path }) => ["/intelligence", "/agent-insights"].includes(path))
+          .map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3 h-3" /> })),
+      ],
     },
     {
       id: "operations",
@@ -307,26 +306,19 @@ function VesselsSidebarContent({ expanded, onMobileClose }: { expanded: boolean;
         { id: "exception-queue", label: "Exceptions", href: "/exception-queue", icon: <AlertTriangle className="w-3.5 h-3.5" /> },
         { id: "route-risk", label: "Route Risk", href: "/route-risk", icon: <Navigation className="w-3.5 h-3.5" /> },
         { id: "approval-review", label: "Review & Approval", href: "/approval-review", icon: <Shield className="w-3.5 h-3.5" /> },
-      ]
+        ...legacyNavItems
+          .filter(({ path }) => !["/intelligence", "/agent-insights"].includes(path))
+          .map(({ path, label, icon: Icon }) => ({ id: path + "-leg", label, href: path, icon: <Icon className="w-3 h-3" /> })),
+      ],
     },
     {
-      id: "admin",
-      label: "Admin",
+      id: "settings",
+      label: "Settings",
       items: adminNavItems.map(({ path, label, icon: Icon }) => ({
         id: path,
         label,
         href: path,
         icon: <Icon className="w-3.5 h-3.5" />,
-      })),
-    },
-    {
-      id: "legacy",
-      label: "More pages",
-      items: legacyNavItems.map(({ path, label, icon: Icon }) => ({
-        id: path,
-        label,
-        href: path,
-        icon: <Icon className="w-3 h-3" />,
       })),
     },
   ];
@@ -407,7 +399,32 @@ function VesselsSidebarContent({ expanded, onMobileClose }: { expanded: boolean;
           </div>
         </Link>
       }
-      footer={fleetStatusFooter}
+      footer={expanded ? (
+        <div className="space-y-3">
+          {fleetStatusFooter}
+          <button
+            onClick={onToggleCollapse}
+            className="flex items-center justify-center w-full py-1 text-[10px] rounded transition-colors hover:bg-white/5"
+            style={{ color: toAlpha(VESSELS_ACCENT, 0.4) }}
+            aria-label="Collapse sidebar"
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M8 2L5 6l3 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={onToggleCollapse}
+          className="flex items-center justify-center w-7 h-7 mx-auto rounded transition-colors hover:bg-white/5"
+          style={{ color: toAlpha(VESSELS_ACCENT, 0.4) }}
+          aria-label="Expand sidebar"
+        >
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <path d="M4 2l3 4-3 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+      )}
     />
   );
 }
@@ -542,7 +559,17 @@ const vesselsShortcuts: KeyboardShortcut[] = [
 function VesselsDashboard({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarHovered, setSidebarHovered] = useState(false);
-  const sidebarExpanded = sidebarHovered || sidebarOpen;
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try { return localStorage.getItem(VESSELS_COLLAPSE_KEY) === "true"; } catch { return false; }
+  });
+  const toggleSidebarCollapsed = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try { localStorage.setItem(VESSELS_COLLAPSE_KEY, String(next)); } catch {}
+      return next;
+    });
+  };
+  const sidebarExpanded = !sidebarCollapsed && (sidebarHovered || sidebarOpen);
   const { status: wsStatus } = useRealtimeChannel("vessel-positions");
   return (
     <PowerUserProvider shortcuts={vesselsShortcuts} appName="Vessels" accentColor={VESSELS_ACCENT}>
@@ -554,7 +581,7 @@ function VesselsDashboard({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpe
         <SandboxModeBanner />
         <DemoModeBanner />
         <SharedDashboardShell
-          sidebar={<VesselsSidebarContent expanded={sidebarExpanded} onMobileClose={() => setSidebarOpen(false)} />}
+          sidebar={<VesselsSidebarContent expanded={sidebarExpanded} onMobileClose={() => setSidebarOpen(false)} onToggleCollapse={toggleSidebarCollapsed} />}
           mobileOpen={sidebarOpen}
           onMobileClose={() => setSidebarOpen(false)}
           sidebarWidth={sidebarExpanded ? "13rem" : "3.5rem"}

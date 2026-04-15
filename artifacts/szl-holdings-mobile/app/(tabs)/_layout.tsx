@@ -42,13 +42,13 @@ function NativeTabLayout() {
         <Label>Investors</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="agent-chat">
-        <Icon sf={{ default: "bubble.left.and.bubble.right", selected: "bubble.left.and.bubble.right.fill" }} />
-        <Label>Agents</Label>
+        <Icon sf={{ default: "sparkles", selected: "sparkles" }} />
+        <Label>AI</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="profile">
-        <Icon sf={{ default: "person", selected: "person.fill" }} />
-        <Label>Profile</Label>
-      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="agents" options={{ href: null }} />
+      <NativeTabs.Trigger name="trust" options={{ href: null }} />
+      <NativeTabs.Trigger name="mcp-tools" options={{ href: null }} />
+      <NativeTabs.Trigger name="profile" options={{ href: null }} />
     </NativeTabs>
   );
 }
@@ -129,16 +129,28 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen
+        name="trust"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="mcp-tools"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
         name="agent-chat"
         options={{
-          title: "Agents",
+          title: "AI",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="bubble.left.and.bubble.right.fill" tintColor={color} size={22} />
+              <SymbolView name="sparkles" tintColor={color} size={22} />
             ) : (
               <Feather name="message-circle" size={20} color={color} />
             ),
         }}
+      />
+      <Tabs.Screen
+        name="agents"
+        options={{ href: null }}
       />
       <Tabs.Screen
         name="profile"

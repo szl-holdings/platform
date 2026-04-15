@@ -1,14 +1,32 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
-import { Redirect, Tabs } from "expo-router";
+import { Redirect, Tabs, router } from "expo-router";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { SymbolView } from "expo-symbols";
 import React from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
+
+function ProfileButton({ color }: { color: string }) {
+  const isIOS = Platform.OS === "ios";
+  return (
+    <TouchableOpacity
+      onPress={() => router.push("/profile")}
+      style={{ marginRight: 12, padding: 4 }}
+      accessibilityLabel="Profile"
+      accessibilityRole="button"
+    >
+      {isIOS ? (
+        <SymbolView name="person.circle" tintColor={color} size={24} />
+      ) : (
+        <Feather name="user" size={22} color={color} />
+      )}
+    </TouchableOpacity>
+  );
+}
 
 function NativeTabLayout() {
   return (
@@ -29,9 +47,9 @@ function NativeTabLayout() {
         <Icon sf={{ default: "message", selected: "message.fill" }} />
         <Label>Messages</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="profile">
-        <Icon sf={{ default: "person", selected: "person.fill" }} />
-        <Label>Profile</Label>
+      <NativeTabs.Trigger name="agent-chat">
+        <Icon sf={{ default: "sparkles", selected: "sparkles" }} />
+        <Label>Muse</Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );
@@ -80,6 +98,10 @@ function ClassicTabLayout() {
         name="index"
         options={{
           title: "Overview",
+          headerShown: true,
+          headerTransparent: true,
+          headerTitle: "",
+          headerRight: () => <ProfileButton color={colors.gold} />,
           tabBarIcon: ({ color }) =>
             isIOS ? (
               <SymbolView name="square.grid.2x2" tintColor={color} size={22} />
@@ -125,16 +147,24 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="mcp-tools"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="agent-chat"
         options={{
-          title: "Profile",
+          title: "Muse",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="person" tintColor={color} size={22} />
+              <SymbolView name="sparkles" tintColor={color} size={22} />
             ) : (
-              <Feather name="user" size={20} color={color} />
+              <Feather name="message-circle" size={20} color={color} />
             ),
         }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{ href: null }}
       />
     </Tabs>
   );

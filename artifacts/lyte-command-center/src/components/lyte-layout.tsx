@@ -87,7 +87,7 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: "Executive",
+    label: "Core",
     items: [
       { href: "/board-mode", label: "Board Mode", icon: LayoutDashboard },
       { href: "/blocker-board", label: "Blocker Board", icon: AlertTriangle },
@@ -99,38 +99,23 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: "PRISM",
+    label: "Intelligence",
     items: [
       { href: "/prism/pulse", label: "Pulse", icon: Heart },
       { href: "/prism/risk", label: "Risk", icon: AlertTriangle },
       { href: "/prism/intelligence", label: "Intelligence", icon: Brain },
       { href: "/prism/signals", label: "Signals Feed", icon: Radio },
       { href: "/prism/motion", label: "Motion", icon: Workflow },
-    ],
-  },
-  {
-    label: "Living Intelligence",
-    items: [
       { href: "/living-topology", label: "Living Topology", icon: Network },
       { href: "/gpu-observatory", label: "GPU & AI Observatory", icon: Cpu },
       { href: "/business-signals", label: "Business Signals", icon: DollarSign },
       { href: "/predictive-intelligence", label: "Predictive Intel", icon: TrendingUp },
-    ],
-  },
-  {
-    label: "Revenue & Self-Healing",
-    items: [
       { href: "/revenue-impact", label: "Revenue Impact", icon: DollarSign },
       { href: "/self-healing", label: "Self-Healing Ops", icon: RotateCcw },
       { href: "/failure-timeline", label: "Failure Timeline", icon: TrendingUp },
       { href: "/client-value", label: "Client Value", icon: Users },
       { href: "/ops-savings", label: "Ops Savings", icon: Calculator },
       { href: "/escalation-intelligence", label: "Escalation Intel", icon: Brain },
-    ],
-  },
-  {
-    label: "Clarity Engine",
-    items: [
       { href: "/outcome-loop", label: "Outcome Loop", icon: Activity },
       { href: "/defer-lane", label: "Defer Lane", icon: Gauge },
       { href: "/shadow-mode", label: "Shadow Mode", icon: Brain },
@@ -148,11 +133,6 @@ const NAV_GROUPS = [
       { href: "/ownership", label: "Ownership", icon: Users },
       { href: "/workflows", label: "Workflows", icon: Workflow },
       { href: "/readiness", label: "Readiness", icon: Shield },
-    ],
-  },
-  {
-    label: "Alloy Engine",
-    items: [
       { href: "/alloy/actions", label: "Action Queue", icon: Activity },
       { href: "/alloy/templates", label: "Templates", icon: Workflow },
       { href: "/alloy/gates", label: "Write-Back Gates", icon: CheckSquare },
@@ -241,7 +221,7 @@ function AdminSection({ location }: { location: string }) {
       <div className="mt-1 pt-1" style={{ borderTop: `1px solid ${BORDER.subtle}` }}>
         <button onClick={() => setOpen(true)} className="flex items-center gap-2 px-2.5 py-[5px] text-[10px] font-medium w-full transition-all hover:bg-white/[0.03]" style={{ color: TEXT.tertiary }}>
           <Settings className="w-3 h-3 shrink-0" />
-          <span>Admin</span>
+          <span>Settings</span>
           <ChevronDown className="w-2.5 h-2.5 ml-auto" />
         </button>
       </div>
@@ -250,7 +230,7 @@ function AdminSection({ location }: { location: string }) {
   return (
     <div className="mt-1 pt-1" style={{ borderTop: `1px solid ${BORDER.subtle}` }}>
       <button onClick={() => setOpen(false)} className="flex items-center gap-2 px-2.5 pb-1 w-full">
-        <span className="text-[8px] uppercase tracking-widest font-medium" style={{ color: TEXT.muted }}>Admin</span>
+        <span className="text-[8px] uppercase tracking-widest font-medium" style={{ color: TEXT.muted }}>Settings</span>
         <ChevronDown className="w-2.5 h-2.5 ml-auto rotate-180" style={{ color: TEXT.muted }} />
       </button>
       {ADMIN_NAV.map(item => {

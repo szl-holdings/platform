@@ -367,7 +367,13 @@ const MODULE_ACCENTS: Record<Module, string> = {
   intelligence: "#8b5cf6",
 };
 
-function AegisSidebarContent({ location, onNavigate }: { location: string; onNavigate?: (path: string) => void }) {
+const AEGIS_COLLAPSE_KEY = "aegis-sidebar-collapsed";
+
+function readAegisCollapsed() {
+  try { return localStorage.getItem(AEGIS_COLLAPSE_KEY) === "true"; } catch { return false; }
+}
+
+function AegisSidebarContent({ location, onNavigate, collapsed, onToggleCollapse }: { location: string; onNavigate?: (path: string) => void; collapsed?: boolean; onToggleCollapse?: () => void }) {
   const [activeModule, setActiveModule] = useState<Module>(deriveModule(location));
 
   useEffect(() => {
@@ -378,65 +384,57 @@ function AegisSidebarContent({ location, onNavigate }: { location: string; onNav
 
   const securitySections: SidebarNavSection[] = [
     {
-      id: "command-surfaces",
-      label: "Command Surfaces",
-      items: commandSurfacesNav.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3.5 h-3.5" /> })),
+      id: "core",
+      label: "Core",
+      items: [
+        ...commandSurfacesNav.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3.5 h-3.5" /> })),
+        ...securityNavPrimary.map(({ path, label, icon: Icon }) => ({ id: path + "-so", label, href: path, icon: <Icon className="w-3.5 h-3.5" /> })),
+      ],
     },
     {
-      id: "security-ops",
-      label: "Security Operations",
-      items: securityNavPrimary.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3.5 h-3.5" /> })),
+      id: "intelligence",
+      label: "Intelligence",
+      items: [
+        ...securityNavSecondary.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3 h-3" /> })),
+        ...livingIntelNav.map(({ path, label, icon: Icon }) => ({ id: path + "-li", label, href: path, icon: <Icon className="w-3.5 h-3.5" /> })),
+      ],
     },
     {
-      id: "soc-tools",
-      label: "SOC Tools",
-      items: securityNavSecondary.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3 h-3" /> })),
-    },
-    {
-      id: "soc-operations",
-      label: "SOC Operations",
+      id: "operations",
+      label: "Operations",
       items: [
         { id: "threat-desk", label: "Threat Desk", href: "/soc/threat-desk", icon: <Shield className="w-3.5 h-3.5" /> },
         { id: "what-changed", label: "What Changed", href: "/soc/what-changed", icon: <Activity className="w-3.5 h-3.5" /> },
         { id: "action-queue", label: "Action Queue", href: "/soc/action-queue", icon: <Zap className="w-3.5 h-3.5" /> },
         { id: "readiness", label: "Incident Readiness", href: "/soc/readiness", icon: <BarChart3 className="w-3.5 h-3.5" /> },
-        { id: "governance", label: "Governance Review", href: "/soc/governance", icon: <FileText className="w-3.5 h-3.5" /> },
+        { id: "governance-review", label: "Governance Review", href: "/soc/governance", icon: <FileText className="w-3.5 h-3.5" /> },
+        ...governanceNavItems.map(({ path, label, icon: Icon }) => ({ id: path + "-gov", label, href: path, icon: <Icon className="w-3 h-3" /> })),
       ],
     },
     {
-      id: "living-intel",
-      label: "Living Intelligence",
-      items: livingIntelNav.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3.5 h-3.5" /> })),
-    },
-    {
-      id: "governance",
-      label: "Governance & Reporting",
-      items: governanceNavItems.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3 h-3" /> })),
-    },
-    {
-      id: "compliance",
-      label: "Compliance & Readiness",
+      id: "settings",
+      label: "Settings",
       items: complianceNavItems.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3 h-3" /> })),
     },
   ];
 
   const operationsSections: SidebarNavSection[] = [
     {
-      id: "ops",
-      label: "Managed Operations",
+      id: "core",
+      label: "Core",
       items: opsNavItems.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3.5 h-3.5" /> })),
     },
   ];
 
   const intelligenceSections: SidebarNavSection[] = [
     {
-      id: "intel",
-      label: "Research & Intelligence",
+      id: "core",
+      label: "Core",
       items: intelNavPrimary.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3.5 h-3.5" /> })),
     },
     {
-      id: "cortex",
-      label: "Agentic Cortex",
+      id: "intelligence",
+      label: "Intelligence",
       items: intelCortexNav.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3 h-3" /> })),
     },
   ];
@@ -549,23 +547,44 @@ function AegisSidebarContent({ location, onNavigate }: { location: string; onNav
     </div>
   );
 
+  const collapseBtn = (
+    <button
+      onClick={onToggleCollapse}
+      className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors hover:bg-white/8 shrink-0"
+      style={{ color: toAlpha(moduleAccent, 0.5) }}
+      aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+    >
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+        {collapsed
+          ? <path d="M4 2l3 4-3 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          : <path d="M8 2L5 6l3 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />}
+      </svg>
+    </button>
+  );
+
   return (
     <SidebarNav
       sections={activeSections}
       currentPath={location}
       accentColor={moduleAccent}
+      collapsed={collapsed}
       onNavigate={(item) => { if (item.href) onNavigate?.(item.href); }}
       header={moduleTabHeader}
-      footer={statusWidget}
+      footer={collapsed ? collapseBtn : (
+        <div className="space-y-3">
+          {collapseBtn}
+          {statusWidget}
+        </div>
+      )}
     />
   );
 }
 
-function SidebarContent({ onNavigate, onReplayTour }: { onNavigate: (path: string) => void; onReplayTour?: () => void }) {
+function SidebarContent({ onNavigate, onReplayTour, collapsed, onToggleCollapse }: { onNavigate: (path: string) => void; onReplayTour?: () => void; collapsed?: boolean; onToggleCollapse?: () => void }) {
   const [location] = useLocation();
   return (
     <>
-      <AegisSidebarContent location={location} onNavigate={onNavigate} />
+      <AegisSidebarContent location={location} onNavigate={onNavigate} collapsed={collapsed} onToggleCollapse={onToggleCollapse} />
       <div className="shrink-0 px-4 py-3 space-y-2" style={{ borderTop: `1px solid ${toAlpha("#ffffff", 0.05)}`, background: toAlpha("#0A0D14", 0.98) }}>
         {AEGIS_ONBOARDING_CONFIG.checklist && (
           <div className="mb-1">
@@ -781,10 +800,19 @@ const MARKETING_ROUTES = ["/", "/home", "/demo", "/pulse"];
 
 function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(readAegisCollapsed);
   const { status: wsStatus } = useRealtimeChannel("aegis-incidents");
   const [location, navigate] = useLocation();
   const { replay: replayOnboarding } = useOnboardingState("aegis");
   const { isLoading, isAuthenticated, login } = useAuth();
+
+  const toggleSidebarCollapse = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try { localStorage.setItem(AEGIS_COLLAPSE_KEY, String(next)); } catch {}
+      return next;
+    });
+  };
 
   const params = new URLSearchParams(window.location.search);
   const demoMode = params.get("view") === "app" || params.get("demo") === "true";
@@ -842,9 +870,10 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
         <EcosystemNav currentAppId="aegis" currentAppName="Aegis — Unified Defense & Intelligence" accentColor={AEGIS_ACCENT} />
         <SandboxModeBanner />
         <SharedDashboardShell
-          sidebar={<SidebarContent onNavigate={(path) => { navigate(path); setSidebarOpen(false); }} onReplayTour={replayOnboarding} />}
+          sidebar={<SidebarContent onNavigate={(path) => { navigate(path); setSidebarOpen(false); }} onReplayTour={replayOnboarding} collapsed={sidebarCollapsed} onToggleCollapse={toggleSidebarCollapse} />}
           mobileOpen={sidebarOpen}
           onMobileClose={() => setSidebarOpen(false)}
+          sidebarWidth={sidebarCollapsed ? "3.5rem" : "14rem"}
           theme={{ sidebarBg: "#0A0D14", pageBg: "#0A0D14", headerBg: toAlpha("#0A0D14", 0.92) }}
           accentColor={AEGIS_ACCENT}
           topbar={

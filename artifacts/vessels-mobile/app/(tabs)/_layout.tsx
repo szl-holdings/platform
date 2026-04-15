@@ -6,7 +6,7 @@ import { Redirect, Tabs, router } from "expo-router";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { SymbolView } from "expo-symbols";
 import React, { useState } from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SpotlightFab, SpotlightModal, type SpotlightCommand } from "@szl-holdings/mobile-shared/components";
 
 import { useAuth } from "@/context/AuthContext";
@@ -27,6 +27,24 @@ const vesselsCommands: SpotlightCommand[] = [
   { id: "cross-lyte", label: "Open Lyte", description: "Business Observability Command", icon: "⚡", group: "Ecosystem", keywords: ["app", "switch"], action: () => Linking.openURL("lyte://") },
 ];
 
+function ProfileButton({ color }: { color: string }) {
+  const isIOS = Platform.OS === "ios";
+  return (
+    <TouchableOpacity
+      onPress={() => router.push("/profile")}
+      style={{ marginRight: 12, padding: 4 }}
+      accessibilityLabel="Profile"
+      accessibilityRole="button"
+    >
+      {isIOS ? (
+        <SymbolView name="person.circle" tintColor={color} size={24} />
+      ) : (
+        <Feather name="user" size={22} color={color} />
+      )}
+    </TouchableOpacity>
+  );
+}
+
 function NativeTabLayout() {
   return (
     <NativeTabs>
@@ -45,10 +63,6 @@ function NativeTabLayout() {
       <NativeTabs.Trigger name="agent-chat">
         <Icon sf={{ default: "bubble.left.and.bubble.right", selected: "bubble.left.and.bubble.right.fill" }} />
         <Label>Helmsman</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="profile">
-        <Icon sf={{ default: "person", selected: "person.fill" }} />
-        <Label>Profile</Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );
@@ -91,6 +105,10 @@ function ClassicTabLayout() {
         name="index"
         options={{
           title: "Map",
+          headerShown: true,
+          headerTransparent: true,
+          headerTitle: "",
+          headerRight: () => <ProfileButton color={colors.primary} />,
           tabBarIcon: ({ color }) =>
             isIOS ? (
               <SymbolView name="map" tintColor={color} size={22} />
@@ -137,15 +155,7 @@ function ClassicTabLayout() {
       />
       <Tabs.Screen
         name="profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="person" tintColor={color} size={22} />
-            ) : (
-              <Feather name="user" size={20} color={color} />
-            ),
-        }}
+        options={{ href: null }}
       />
     </Tabs>
   );
