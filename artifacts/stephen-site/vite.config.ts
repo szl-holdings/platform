@@ -9,7 +9,7 @@ process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
 const port = Number(process.env.VITE_PORT) || 5173;
 const proxyPort = Number(process.env.PROXY_PORT) || 5174;
-const basePath = process.env.BASE_PATH || "/stephen/";
+const basePath = process.env.BASE_PATH || "/stephen-site/";
 
 
   function healthCheckPlugin() {

@@ -7,6 +7,7 @@ import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
 const port = Number(process.env.VITE_PORT) || 22100;
+const proxyPort = Number(process.env.PROXY_PORT) || 22101;
 const basePath = process.env.BASE_PATH || "/imperium/";
 
 function healthCheckPlugin() {
@@ -30,11 +31,11 @@ function healthCheckPlugin() {
         upstream.on("error", () => { if (!res.headersSent) { res.writeHead(503); res.end("Upstream not ready"); } });
         req.pipe(upstream, { end: true });
       });
-      proxyServer.listen({ port: 9090, host: "0.0.0.0", reusePort: true }, () => {
-        console.log("[health-check] Proxy listening on port 9090 (reusePort)");
+      proxyServer.listen({ port: proxyPort, host: "0.0.0.0", reusePort: true }, () => {
+        console.log("[health-check] Proxy listening on port " + proxyPort + " (reusePort)");
       });
       proxyServer.on("error", (err: NodeJS.ErrnoException) => {
-        console.warn("[health-check] Port 9090 bind failed:", err.code);
+        console.warn("[health-check] Port " + proxyPort + " bind failed:", err.code);
       });
     },
   };

@@ -1,0 +1,26 @@
+kind = "mobile"
+previewPath = "/cortex-mobile/"
+title = "Cortex Mobile"
+version = "1.0.0"
+id = "artifacts/cortex-mobile"
+
+[[integratedSkills]]
+name = "expo"
+version = "1.0.0"
+
+[[services]]
+name = "expo"
+paths = [ "/cortex-mobile/" ]
+localPort = 9088
+
+[services.development]
+run = "pnpm --filter @workspace/cortex-mobile run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/cortex-mobile", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/cortex-mobile", "run", "serve" ]
+
+[services.env]
+EXPO_PORT = "8090"
+HEALTH_PORT = "9088"
+BASE_PATH = "/cortex-mobile/"
