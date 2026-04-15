@@ -74,6 +74,7 @@ async function registerTokenWithBackend(pushToken: string): Promise<void> {
       body: JSON.stringify({
         token: pushToken,
         platform: Platform.OS,
+        appId: "vessels-mobile",
       }),
     });
   } catch {

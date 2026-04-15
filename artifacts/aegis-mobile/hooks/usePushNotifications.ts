@@ -15,8 +15,12 @@ export { registerForPushNotificationsAsync, scheduleLocalNotification };
 
 async function registerTokenWithBackend(token: string): Promise<void> {
   try {
-    await apiPost("/api/firestorm/push-token", { token, platform: Platform.OS });
-    console.log("[Push] Token registered with backend");
+    await apiPost("/api/push-tokens", {
+      token,
+      platform: Platform.OS,
+      appId: "aegis-mobile",
+    });
+    console.log("[Push] Token registered with backend (aegis-mobile)");
   } catch (err) {
     console.warn("[Push] Failed to register token with backend:", err);
   }

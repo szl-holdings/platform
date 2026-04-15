@@ -26,6 +26,47 @@ const NotificationContext = createContext<NotificationContextValue>({
   sendLocalNotification: async () => {},
 });
 
+function getApiBase(): string {
+  if (process.env.EXPO_PUBLIC_DOMAIN) {
+    return `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`;
+  }
+  return "/api";
+}
+
+async function getAuthToken(): Promise<string | null> {
+  try {
+    if (Platform.OS === "web") {
+      return typeof window !== "undefined"
+        ? window.localStorage.getItem("lyte_session_token")
+        : null;
+    }
+    const SecureStore = await import("expo-secure-store");
+    return SecureStore.getItemAsync("lyte_session_token");
+  } catch {
+    return null;
+  }
+}
+
+async function registerPushTokenWithBackend(token: string): Promise<void> {
+  try {
+    const authToken = await getAuthToken();
+    if (!authToken) return;
+    await fetch(`${getApiBase()}/push-tokens`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+      body: JSON.stringify({
+        token,
+        platform: Platform.OS,
+        appId: "lyte-mobile",
+      }),
+    });
+  } catch {
+  }
+}
+
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
@@ -56,7 +97,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       if (granted) {
         try {
           const tokenData = await Notifications.getExpoPushTokenAsync();
-          setExpoPushToken(tokenData.data);
+          const token = tokenData.data;
+          setExpoPushToken(token);
+          await registerPushTokenWithBackend(token);
         } catch {
           setExpoPushToken(null);
         }
@@ -102,7 +145,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         if (granted) {
           try {
             const tokenData = await Notifications.getExpoPushTokenAsync();
-            setExpoPushToken(tokenData.data);
+            const token = tokenData.data;
+            setExpoPushToken(token);
+            await registerPushTokenWithBackend(token);
           } catch {}
           listenerRef.current = Notifications.addNotificationReceivedListener(() => {});
           responseListenerRef.current = Notifications.addNotificationResponseReceivedListener(() => {});

@@ -12,15 +12,36 @@ const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
   ? "https://" + process.env.EXPO_PUBLIC_DOMAIN + "/api"
   : "/api";
 
+const AUTH_TOKEN_KEY = "terra_auth_token";
+
+async function getAuthToken(): Promise<string | null> {
+  try {
+    if (Platform.OS === "web") {
+      return typeof window !== "undefined"
+        ? window.localStorage.getItem(AUTH_TOKEN_KEY)
+        : null;
+    }
+    const SecureStore = await import("expo-secure-store");
+    return SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
 async function registerTokenWithServer(token: string): Promise<void> {
   try {
-    await fetch(API_BASE + "/terra/push/register", {
+    const authToken = await getAuthToken();
+    if (!authToken) return;
+    await fetch(API_BASE + "/push-tokens", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
       body: JSON.stringify({
         token,
         platform: Platform.OS,
-        subscriptions: ["distress_alerts", "watchlist_updates", "lead_activity"],
+        appId: "terra-mobile",
       }),
     });
   } catch {

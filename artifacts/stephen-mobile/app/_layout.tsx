@@ -18,6 +18,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ErrorBoundary, NotificationProvider } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 if (process.env.EXPO_PUBLIC_DOMAIN) {
   setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
@@ -36,6 +37,8 @@ const queryClient = new QueryClient({
 });
 
 function RootLayoutNav() {
+  usePushNotifications(true);
+
   return (
     <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

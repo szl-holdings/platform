@@ -13,6 +13,7 @@ import { startSelfMonitoring, stopSelfMonitoring } from "./lib/self-monitor";
 import { agentScheduler, registerDefaultSchedules } from "./lib/agent-scheduler";
 import { knowledgeStore } from "./lib/knowledge-store";
 import { runMigrations } from "./lib/run-migrations";
+import { verifyPushReceipts, processScheduledNotifications } from "./lib/expo-push";
 import "./lib/terra-nyc-ingestion";
 import { scheduleNycIngestionJob } from "./lib/terra-nyc-ingestion";
 import "./lib/terra-nyc-extended-ingestion";
@@ -130,8 +131,6 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     startPlatformScheduledJobs();
     startEmbeddingWorker();
     // Non-fatal health check: log embedding model/schema compatibility at startup.
-    // This surfaces dimension mismatches early so operators can act before re-embed
-    // issues accumulate silently in the task queue.
     import("@szl-holdings/ai-engine/embedding-pipeline")
       .then(({ listEmbeddingProviders }) => {
         const providers = listEmbeddingProviders();
@@ -155,6 +154,19 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
         }
       })
       .catch(err => logger.warn({ err }, "[embedding-health] Startup compatibility check failed (non-fatal)"));
+
+    // Push notification background jobs (receipt verification + scheduled sends)
+    const RECEIPT_VERIFY_INTERVAL_MS = 5 * 60 * 1000;
+    const receiptVerifyInterval = setInterval(() => {
+      verifyPushReceipts().catch(err => logger.warn({ err }, "[push] Receipt verification error (non-fatal)"));
+    }, RECEIPT_VERIFY_INTERVAL_MS);
+    receiptVerifyInterval.unref();
+
+    const SCHEDULED_NOTIF_INTERVAL_MS = 60 * 1000;
+    const scheduledNotifInterval = setInterval(() => {
+      processScheduledNotifications().catch(err => logger.warn({ err }, "[push] Scheduled notification processing error (non-fatal)"));
+    }, SCHEDULED_NOTIF_INTERVAL_MS);
+    scheduledNotifInterval.unref();
 
     // Step 4: Seeds run after schema is 100% confirmed — fire concurrently, each non-fatal
     seedPlatformData().catch(err => {

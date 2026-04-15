@@ -15,7 +15,11 @@ export type NotificationTemplate =
   | "carlota_message"
   | "lyte_kpi_alert"
   | "lyte_escalation"
-  | "lyte_milestone";
+  | "lyte_milestone"
+  | "szl_portfolio_alert"
+  | "szl_investor_update"
+  | "stephen_content_published"
+  | "stephen_venture_update";
 
 export type TemplateVars = Record<string, string | number>;
 
@@ -154,6 +158,42 @@ export function buildPushMessage(template: NotificationTemplate, vars: TemplateV
         data: { screen: "/milestones", templateId: template, ...vars },
         sound: null,
         channelId: "lyte-milestones",
+      };
+
+    case "szl_portfolio_alert":
+      return {
+        title: `Portfolio Alert — ${vars.assetName ?? "Asset"}`,
+        body: `${vars.assetName ?? "An asset"} requires attention: ${vars.detail ?? "portfolio change detected"}.`,
+        data: { screen: "/portfolio", templateId: template, ...vars },
+        sound: "default",
+        channelId: "szl-portfolio",
+      };
+
+    case "szl_investor_update":
+      return {
+        title: `Investor Update`,
+        body: `${vars.updateTitle ?? "A new investor update"} is available: ${vars.summary ?? "review your holdings dashboard"}.`,
+        data: { screen: "/updates", templateId: template, ...vars },
+        sound: null,
+        channelId: "szl-updates",
+      };
+
+    case "stephen_content_published":
+      return {
+        title: `New Content Published`,
+        body: `${vars.contentTitle ?? "New content"} has been published${vars.category ? ` in ${vars.category}` : ""}.`,
+        data: { screen: vars.slug ? `/article/${vars.slug}` : "/", templateId: template, ...vars },
+        sound: null,
+        channelId: "stephen-content",
+      };
+
+    case "stephen_venture_update":
+      return {
+        title: `Venture Update — ${vars.ventureName ?? "Portfolio"}`,
+        body: `${vars.ventureName ?? "A venture"}: ${vars.update ?? "new update available"}.`,
+        data: { screen: vars.ventureSlug ? `/venture/${vars.ventureSlug}` : "/ventures", templateId: template, ...vars },
+        sound: "default",
+        channelId: "stephen-ventures",
       };
 
     default:

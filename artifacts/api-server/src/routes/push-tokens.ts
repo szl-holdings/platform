@@ -7,10 +7,14 @@ import { Expo } from "expo-server-sdk";
 
 const router: IRouter = Router();
 
-router.post("/push-tokens", authMiddleware(), async (req, res) => {
+// POST /push-tokens
+// Auth is optional — allows apps without user sessions (e.g. public portfolio
+// apps) to register device tokens with an appId. When authenticated the token
+// is linked to the user; otherwise userId is stored as null.
+router.post("/push-tokens", authMiddleware({ required: false }), async (req, res) => {
   try {
     const { token, platform, appId } = req.body;
-    const userId = req.user!.id;
+    const userId = req.user?.id ?? null;
 
     if (!token || typeof token !== "string") {
       sendBadRequest(res, "token is required");
@@ -31,10 +35,13 @@ router.post("/push-tokens", authMiddleware(), async (req, res) => {
       .where(eq(pushTokensTable.token, token));
 
     if (existing.length > 0) {
+      // Preserve existing authenticated userId — don't allow an unauthenticated
+      // (anonymous) request to take over a token that's already owned by a user.
+      const resolvedUserId = userId !== null ? userId : existing[0].userId;
       const [updated] = await db
         .update(pushTokensTable)
         .set({
-          userId,
+          userId: resolvedUserId,
           isActive: true,
           platform: resolvedPlatform,
           appId: appId ?? existing[0].appId,

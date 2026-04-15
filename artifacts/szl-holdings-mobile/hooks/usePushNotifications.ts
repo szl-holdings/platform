@@ -14,7 +14,7 @@ async function syncPushToken(pushToken: string): Promise<void> {
   const authToken = await getAuthToken();
   if (!authToken) return;
   try {
-    await fetch(`${getApiBase()}/api/holdings/push-token`, {
+    await fetch(`${getApiBase()}/api/push-tokens`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -23,6 +23,7 @@ async function syncPushToken(pushToken: string): Promise<void> {
       body: JSON.stringify({
         token: pushToken,
         platform: Platform.OS,
+        appId: "szl-holdings-mobile",
       }),
     });
   } catch {

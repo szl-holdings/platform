@@ -5,7 +5,7 @@ import { usersTable } from "./auth";
 
 export const pushTokensTable = pgTable("push_tokens", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  userId: integer("user_id").references(() => usersTable.id, { onDelete: "cascade" }),
   token: text("token").notNull().unique(),
   platform: text("platform", { enum: ["ios", "android", "web"] }).notNull().default("ios"),
   appId: text("app_id").notNull().default("carlota-jo-mobile"),
