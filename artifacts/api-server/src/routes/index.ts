@@ -150,6 +150,7 @@ import digitalTwinsRouter from "./digital-twins";
 import fusionRouter from "./fusion";
 import knowledgeGraphRouter from "./knowledge-graph";
 import mlPipelineRouter from "./ml-pipeline";
+import meteringRouter from "./metering";
 
 const router: IRouter = Router();
 
@@ -578,5 +579,9 @@ router.use(mlPipelineRouter);
 router.use("/analytics-engine", _readLimiter);
 router.use("/analytics-engine", _writeLimiter);
 router.use(analyticsEngineRouter);
+
+router.use("/metering", _readLimiter);
+router.use("/metering", _writeLimiter);
+router.use(meteringRouter);
 
 export default router;

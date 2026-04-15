@@ -97,3 +97,4 @@ export * from "./ml_pipeline";
 export * from "./analytics";
 export * from "./push_infra";
 export * from "./job_queue";
+export * from "./metering";
