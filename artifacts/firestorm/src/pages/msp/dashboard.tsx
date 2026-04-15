@@ -6,14 +6,7 @@ import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { toast } from "sonner";
 import { DataStateBadge } from "@szl-holdings/shared-ui";
 import { FirestormGraphQLPanel } from "@/components/graphql-data-panel";
-
-const API_BASE = "/api";
-async function apiFetch<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { credentials: "include" });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
-
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 interface DashboardMetrics {
   metrics: {

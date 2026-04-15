@@ -3,10 +3,9 @@ import { motion } from "framer-motion";
 import { Building2, MapPin, Search, TrendingUp, DollarSign, Users, Filter, BarChart3, RefreshCw, ChevronRight, Layers, ArrowRight, Badge } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { DataStateBadge } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
-const API_BASE = "/api";
-
 async function apiFetch(path: string) {
   const r = await fetch(`${API_BASE}${path}`, { headers: { Accept: "application/json" } });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);

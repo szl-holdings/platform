@@ -1,19 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import {
+import { apiFetch } from "@szl-holdings/shared-ui";
   Server, Database, HardDrive, Users, Zap, Activity, CheckCircle,
   AlertTriangle, WifiOff, RefreshCw, Clock, Shield, Cpu, BarChart3,
   FileText, AlertCircle, Package, GitBranch, Globe, Radio, Target,
   Lock, TrendingUp, X,
 } from "lucide-react";
 import { useState } from "react";
-
-const API_BASE = "/api";
-
-async function apiFetch<T>(path: string): Promise<T> {
-  const r = await fetch(`${API_BASE}${path}`, { credentials: "include" });
-  if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-  return r.json();
-}
 
 interface SystemHealth {
   timestamp: string;

@@ -9,8 +9,6 @@ import { useLocation } from "wouter";
 import { toast } from "sonner";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
-const API_BASE = "/api";
-
 type SortKey = "dom" | "price" | "showings" | "offerCount" | "riskScore";
 
 const typeLabels: Record<string, string> = {

@@ -11,15 +11,9 @@ import { toast } from "sonner";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { useMapboxToken } from "@/hooks/use-mapbox-token";
 import { Link } from "wouter";
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 const PropertyMap = lazy(() => import("@/components/property-map"));
-
-const API_BASE = "/api";
-async function apiFetch<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { credentials: "include" });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
 
 function formatCurrency(n: number) {
   if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;

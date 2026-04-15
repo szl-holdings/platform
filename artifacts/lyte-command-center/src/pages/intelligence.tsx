@@ -4,13 +4,7 @@ import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Brain, Activity, Globe, AlertTriangle, FileText, Radio, TrendingUp, Clock, Newspaper, Zap, Shield } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRealtimeChannel } from "@szl-holdings/shared-ui";
-
-const API_BASE = "/api";
-async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers: { "Content-Type": "application/json", ...options?.headers }, credentials: "include" });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 function AnimatedCounter({ value }: { value: number }) {
   const [display, setDisplay] = useState(0);

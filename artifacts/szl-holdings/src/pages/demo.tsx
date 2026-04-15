@@ -8,8 +8,6 @@ import { DataStateBadge } from "@/components/DataStateBadge";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { toast } from "sonner";
 
-const API_BASE = "/api";
-
 interface WorkflowStep {
   label: string;
   detail: string;

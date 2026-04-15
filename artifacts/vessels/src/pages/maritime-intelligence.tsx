@@ -3,13 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-u
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Ship, Anchor, Navigation, AlertTriangle, Cloud, ShieldAlert, Globe, Radio, Waves, Thermometer, Wind, Eye, MapPin, Languages, Loader2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-
-const API_BASE = "/api";
-async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers: { "Content-Type": "application/json", ...options?.headers }, credentials: "include" });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 function AnimatedCounter({ value }: { value: number }) {
   const [display, setDisplay] = useState(0);

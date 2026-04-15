@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-u
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
 import {
+import { apiFetch } from "@szl-holdings/shared-ui";
   Monitor, AlertTriangle, CheckCircle, RefreshCw, Shield, Package, Terminal, Cpu,
   HardDrive, MemoryStick, Activity, Play, RotateCcw, Zap, ChevronRight, X,
   Clock, Server, Wifi, WifiOff, Wrench, Eye, CheckSquare, XCircle,
@@ -10,8 +11,7 @@ import {
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-const API_BASE = "/api";
-async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, { credentials: "include", ...options });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();

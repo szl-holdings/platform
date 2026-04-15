@@ -4,13 +4,7 @@ import { cn } from "@szl-holdings/shared-ui/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { technicians as fallbackTechnicians, type Technician } from "@/data/mock-data";
-
-const API_BASE = "/api";
-async function apiFetch<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { credentials: "include" });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 interface ApiTechnician {
   id: number;

@@ -2,13 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Shield, AlertTriangle, Brain, Radio, Crosshair, Activity, Loader2, Zap, FileText } from "lucide-react";
 import { SeverityMeter, TypewriterText, AnomalySparkline } from "@szl-holdings/shared-ui/ai-components";
-
-const API_BASE = "/api";
-async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers: { "Content-Type": "application/json", ...options?.headers }, credentials: "include" });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 export default function ThreatIntelAI() {
   const { data: cves = [] } = useQuery({ queryKey: ["threat-cves"], queryFn: () => apiFetch<any[]>("/intelligence/cves") });

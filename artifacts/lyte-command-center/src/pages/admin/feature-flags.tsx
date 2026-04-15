@@ -1,12 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Flag, AlertTriangle, ToggleLeft, ToggleRight, Search } from "lucide-react";
 import { useState } from "react";
-
-async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
-  const r = await fetch(`/api${path}`, { headers: { "Content-Type": "application/json" }, ...opts });
-  if (!r.ok) throw new Error(`${r.status}`);
-  return r.json();
-}
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 interface FeatureFlag {
   key: string;

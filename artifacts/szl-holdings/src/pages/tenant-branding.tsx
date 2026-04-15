@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { m } from "framer-motion";
 import {
+import { apiFetch } from "@szl-holdings/shared-ui";
   Palette, Eye, EyeOff, Save, Loader2, ArrowLeft,
   Building2, Image, Mail, AlertCircle, CheckCircle2, Trash2,
 } from "lucide-react";

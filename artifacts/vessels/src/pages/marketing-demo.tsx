@@ -3,8 +3,6 @@ import { ChevronRight, Ship, AlertCircle } from "lucide-react";
 import { MarketingNav } from "@/components/MarketingNav";
 import { MarketingFooter } from "@/components/MarketingFooter";
 
-const API_BASE = "/api";
-
 export default function MarketingDemoPage() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);

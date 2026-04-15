@@ -1,15 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+import { apiFetch } from "@szl-holdings/shared-ui";
   DollarSign, CreditCard, TrendingUp, AlertCircle, CheckCircle,
   RefreshCw, ExternalLink, Users, Activity, XCircle, Clock
 } from "lucide-react";
-
-const API_BASE = "/api";
-async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const r = await fetch(`${API_BASE}${path}`, options);
-  if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-  return r.json();
-}
 
 interface StripeConfig {
   stripeConnected: boolean;

@@ -5,13 +5,7 @@ import { useEffect, useState, useCallback } from "react";
 import { doctrineEventBus } from "@szl-holdings/observability";
 import { DoctrineLayerBadge } from "@szl-holdings/shared-ui/doctrine-layer-badge";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
-
-const API_BASE = "/api";
-async function apiFetch<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { credentials: "include" });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 interface SystemMetrics {
   device: { id: string; hostname: string; platform: string; status: string };

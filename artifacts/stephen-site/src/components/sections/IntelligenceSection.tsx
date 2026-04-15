@@ -2,13 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { Activity, Cpu, Globe, MessageSquare, Send, Loader2, TrendingUp, Zap, Shield, Ship, Brain, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChatBubble } from "@szl-holdings/shared-ui/ai-components";
-
-const API_BASE = "/api";
-async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers: { "Content-Type": "application/json", ...options?.headers }, credentials: "include" });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: string }) {
   const [display, setDisplay] = useState(0);

@@ -3,8 +3,6 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 
 const BASE_URL = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
-const API_BASE = "/api";
-
 const inquiryTypes = [
   { value: "investment", label: "Investment" },
   { value: "partnership", label: "Partnership" },

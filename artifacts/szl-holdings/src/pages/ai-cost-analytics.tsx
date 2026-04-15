@@ -1,8 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { DollarSign, TrendingUp, Zap, Bot, AlertTriangle, CheckCircle, BarChart3, RefreshCw } from "lucide-react";
 
-const API_BASE = "/api";
-
 interface SpendRecord {
   workflowId: string;
   model: string;

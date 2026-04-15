@@ -6,13 +6,7 @@ import { Input } from "@szl-holdings/shared-ui/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
 import { Globe, Shield, AlertTriangle, Search, Radio, Brain, MapPin, Crosshair, Activity, FileText, Clock, TrendingUp, Zap } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-
-const API_BASE = "/api";
-async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers: { "Content-Type": "application/json", ...options?.headers }, credentials: "include" });
-  if (!res.ok) { const err = await res.json().catch(() => ({ error: "Request failed" })); throw new Error(err.error || `HTTP ${res.status}`); }
-  return res.json();
-}
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 const severityColors: Record<string, string> = {
   critical: "bg-red-500/10 text-red-400 border-red-500/20",

@@ -6,8 +6,6 @@ import { ArrowLeft } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
-const API_BASE = "/api";
-
 interface CmsPost {
   id: number;
   title: string;

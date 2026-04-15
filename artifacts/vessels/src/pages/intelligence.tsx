@@ -2,13 +2,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { Shield, AlertTriangle, Brain, Radio, Ship, Loader2, Navigation } from "lucide-react";
 import { NERHighlight, AnimatedGauge, SeverityMeter } from "@szl-holdings/shared-ui/ai-components";
-
-const API_BASE = "/api";
-async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers: { "Content-Type": "application/json", ...options?.headers }, credentials: "include" });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 export default function VesselsIntelligence() {
   const { data: sanctions } = useQuery({ queryKey: ["maritime-sanctions"], queryFn: () => apiFetch<any>("/intelligence/maritime/sanctions") });

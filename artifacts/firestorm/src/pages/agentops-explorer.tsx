@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Activity, GitBranch, Zap, Shield, AlertTriangle, CheckCircle, Clock, TrendingUp, TrendingDown, ChevronRight, ChevronDown, Eye, RefreshCw } from "lucide-react";
 
-const API_BASE = "/api";
 const ACCENT = "#ef4444";
 
 interface DecisionFork {

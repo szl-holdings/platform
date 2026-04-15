@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { Activity, Database, Zap, TrendingUp, Clock, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const API_BASE = "/api";
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 async function apiFetch(path: string) {
   const res = await fetch(`${API_BASE}${path}`, { credentials: "include" });

@@ -4,13 +4,7 @@ import { FileText, Calendar, AlertTriangle, CheckCircle2, Clock, DollarSign, Shi
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
-
-const API_BASE = "/api";
-async function apiFetch<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { credentials: "include" });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 interface Contract {
   id: number;

@@ -107,38 +107,48 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
   });
   scheduleIntelligenceRefresh();
 
-  runMigrations()
-    .then(() => ensurePlatformFlags())
-    .then(() => knowledgeStore.loadFromDb())
-    .then(() => {
-      import("@szl-holdings/ai-engine")
-        .then(({ startCognitiveLearning }) => startCognitiveLearning())
-        .catch(err => logger.warn({ err }, "[cognitive] Cognitive learning startup failed (non-fatal)"));
+  import("@szl-holdings/ai-engine")
+    .then(({ startCognitiveLearning }) => startCognitiveLearning())
+    .catch(err => logger.warn({ err }, "[cognitive] Cognitive learning startup failed (non-fatal)"));
 
-      registerDefaultSchedules();
-      seedPlatformData().catch(err => {
-        logger.warn({ err }, "[seed-platform] Seed failed (non-fatal)");
-      });
-      seedTerraDemo().catch(err => {
-        logger.warn({ err }, "[terra-seed] Terra demo seed failed (non-fatal)");
-      });
-      seedMspData().catch(err => {
-        logger.warn({ err }, "[msp-seed] MSP demo seed failed (non-fatal)");
-      });
-      seedDreamscapeData().catch(err => {
-        logger.warn({ err }, "[seed-dreamscape] Creative Workflows seed failed (non-fatal)");
-      });
-      seedDosData().catch(err => {
-        logger.warn({ err }, "[dos-seed] Distribution OS seed failed (non-fatal)");
-      });
-      startScheduledJobs();
-      startNamedScheduledJobs();
-      startPlatformScheduledJobs();
-    })
-    .catch(err => {
-      logger.fatal({ err }, "Schema bootstrap failed — cannot guarantee data integrity, shutting down");
-      process.exit(1);
+  try {
+    // Step 1: Run all migrations — single await, schema fully guaranteed before any seed executes
+    await runMigrations();
+    logger.info("[bootstrap] All migrations complete");
+
+    // Step 2: Platform flags and knowledge store depend on schema being ready
+    await ensurePlatformFlags();
+    await knowledgeStore.loadFromDb();
+    logger.info("[bootstrap] Platform flags and knowledge store loaded");
+
+    // Step 3: Register schedules (schema is ready)
+    registerDefaultSchedules();
+    startScheduledJobs();
+    startNamedScheduledJobs();
+    startPlatformScheduledJobs();
+
+    // Step 4: Seeds run after schema is 100% confirmed — fire concurrently, each non-fatal
+    seedPlatformData().catch(err => {
+      logger.warn({ err }, "[seed-platform] Seed failed (non-fatal)");
     });
+    seedTerraDemo().catch(err => {
+      logger.warn({ err }, "[terra-seed] Terra demo seed failed (non-fatal)");
+    });
+    seedMspData().catch(err => {
+      logger.warn({ err }, "[msp-seed] MSP demo seed failed (non-fatal)");
+    });
+    seedDreamscapeData().catch(err => {
+      logger.warn({ err }, "[seed-dreamscape] Creative Workflows seed failed (non-fatal)");
+    });
+    seedDosData().catch(err => {
+      logger.warn({ err }, "[dos-seed] Distribution OS seed failed (non-fatal)");
+    });
+
+    logger.info("[bootstrap] Bootstrap sequence complete — server fully ready");
+  } catch (err) {
+    logger.fatal({ err }, "Schema bootstrap failed — cannot guarantee data integrity, shutting down");
+    process.exit(1);
+  }
 
   const SHUTDOWN_TIMEOUT_MS = 10_000;
 

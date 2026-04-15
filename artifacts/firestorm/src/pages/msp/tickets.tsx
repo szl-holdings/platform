@@ -5,13 +5,7 @@ import { ExportButton } from "@szl-holdings/shared-ui/data-export";
 import { CommentThread, ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { toast } from "sonner";
-
-const API_BASE = "/api";
-async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { credentials: "include", ...options });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 interface TicketItem {
   id: number;

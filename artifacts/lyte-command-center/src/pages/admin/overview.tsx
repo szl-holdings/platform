@@ -1,12 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Server, Database, HardDrive, Users, Layers, Zap, Activity, CheckCircle, AlertTriangle, Clock } from "lucide-react";
-
-const API_BASE = "/api";
-async function apiFetch<T>(path: string): Promise<T> {
-  const r = await fetch(`${API_BASE}${path}`);
-  if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-  return r.json();
-}
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 interface AdminOverview {
   timestamp: string;

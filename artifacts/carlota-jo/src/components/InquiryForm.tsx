@@ -3,8 +3,6 @@ import { motion } from "framer-motion";
 import { ArrowRight, AlertCircle } from "lucide-react";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
-const API_BASE = "/api";
-
 export default function InquiryForm() {
   const [form, setForm] = useState({
     name: "",

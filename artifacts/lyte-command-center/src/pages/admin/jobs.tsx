@@ -1,13 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Play, Clock, CheckCircle, XCircle, AlertTriangle, RefreshCw, Zap, Calendar, RotateCcw } from "lucide-react";
 import { useState } from "react";
-
-const API_BASE = "/api";
-async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
-  const r = await fetch(`${API_BASE}${path}`, opts);
-  if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-  return r.json();
-}
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 interface JobRegistryEntry {
   type: string;

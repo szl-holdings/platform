@@ -2,12 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, XCircle, AlertTriangle, Clock, FileText, RefreshCw, Lock } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-
-async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
-  const r = await fetch(`/api${path}`, { headers: { "Content-Type": "application/json" }, ...opts });
-  if (!r.ok) throw new Error(`${r.status}`);
-  return r.json();
-}
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 interface Approval {
   id: number;

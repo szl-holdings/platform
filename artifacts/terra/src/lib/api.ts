@@ -1,16 +1,7 @@
-const API_BASE = "/api";
+import { apiFetch, graphqlRequest } from "@szl-holdings/shared-ui";
 
 export async function gqlFetch<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
-  const res = await fetch(`${API_BASE}/graphql`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ query, variables }),
-  });
-  if (!res.ok) throw new Error(`GraphQL request failed: HTTP ${res.status}`);
-  const json = await res.json() as { data?: T; errors?: { message: string }[] };
-  if (json.errors?.length) throw new Error(json.errors[0].message);
-  return json.data as T;
+  return graphqlRequest<T>(query, variables);
 }
 
 export interface GqlTerraActionItem {
@@ -27,23 +18,6 @@ export interface GqlTerraActionItem {
   resolvedAt: string | null;
   createdAt: string;
   updatedAt: string;
-}
-
-async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
-    },
-    credentials: "include",
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: "Request failed" }));
-    throw new Error(err.error || `HTTP ${res.status}`);
-  }
-  if (res.status === 204) return undefined as T;
-  return res.json();
 }
 
 export const api = {
