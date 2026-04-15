@@ -48,7 +48,21 @@ export default function GovernanceSafetyPage() {
   const [view, setView] = useState<"feed" | "policies">("feed");
 
   useEffect(() => {
-    const t = setInterval(() => setEvents(prev => [generateEvent(), ...prev].slice(0, 50)), 3000);
+    const models = ["Claude 4 Sonnet", "GPT-5.2", "Gemini 2.5 Pro", "Qwen3-8B", "Llama 4 Scout", "Mistral Large"];
+    const domains = ["Legal", "Maritime", "Cyber", "Financial", "Real Estate", "Advisory"];
+    const t = setInterval(() => {
+      const model = models[Math.floor(Math.random() * models.length)];
+      const domain = domains[Math.floor(Math.random() * domains.length)];
+      const serviceResult = evaluateGovernance(model, domain, `Output for ${domain}`);
+      const localEvent = generateEvent();
+      localEvent.model = serviceResult.model;
+      localEvent.domain = serviceResult.domain;
+      localEvent.type = serviceResult.type;
+      localEvent.severity = serviceResult.severity;
+      localEvent.score = serviceResult.score;
+      localEvent.detail = serviceResult.detail;
+      setEvents(prev => [localEvent, ...prev].slice(0, 50));
+    }, 3000);
     return () => clearInterval(t);
   }, []);
 

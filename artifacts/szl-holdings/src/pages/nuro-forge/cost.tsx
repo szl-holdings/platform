@@ -29,6 +29,14 @@ export default function CostIntelligencePage() {
   const totalRequests = costs.reduce((a, c) => a + c.requests, 0);
   const avgCostPerReq = totalSpend / totalRequests;
 
+  const optimalByDomain = [
+    { domain: "Legal", model: routeOptimalModel("Legal") },
+    { domain: "Maritime", model: routeOptimalModel("Maritime") },
+    { domain: "Cybersecurity", model: routeOptimalModel("Cybersecurity") },
+    { domain: "Financial", model: routeOptimalModel("Financial") },
+    { domain: "Real Estate", model: routeOptimalModel("Real Estate") },
+  ].filter(d => d.model);
+
   useEffect(() => {
     const t = setInterval(() => {
       setCosts(prev => prev.map(c => ({
@@ -119,6 +127,25 @@ export default function CostIntelligencePage() {
             </div>
           </m.div>
         </div>
+
+        {optimalByDomain.length > 0 && (
+          <m.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+            className="rounded-lg p-4 mt-5" style={{ background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.04)" }}>
+            <h2 className="text-[13px] font-semibold mb-4 flex items-center gap-2" style={{ color: "rgba(255,255,255,0.65)" }}>
+              <Zap className="w-4 h-4" style={{ color: "#06b6d4" }} />
+              Optimal Model Routing
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              {optimalByDomain.map(d => (
+                <div key={d.domain} className="rounded-md p-3 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.03)" }}>
+                  <div className="text-[10px] mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>{d.domain}</div>
+                  <div className="text-[11px] font-semibold" style={{ color: "#06b6d4" }}>{d.model!.name}</div>
+                  <div className="text-[9px] mt-0.5" style={{ color: "rgba(255,255,255,0.2)" }}>${d.model!.costPer1k.toFixed(2)}/1k</div>
+                </div>
+              ))}
+            </div>
+          </m.div>
+        )}
       </div>
     </div>
   );

@@ -1,46 +1,44 @@
 import { useState, useEffect, useCallback } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Trophy, Swords, ArrowRight, Crown, TrendingUp, TrendingDown, RotateCcw, Play, Check, X } from "lucide-react";
-import { getNuroForgeModels, runModelDuel, type NuroModel } from "@/lib/nuro-forge-service";
-
-type Model = NuroModel;
-
-interface DuelResult { challenger: string; defender: string; winner: string; criterion: string; score: string; timestamp: number; }
+import { nuroForgeService, getNuroForgeModels, type NuroModel, type DuelResult as ServiceDuelResult } from "@/lib/nuro-forge-service";
 
 export default function TournamentArenaPage() {
   const [models, setModels] = useState(() => getNuroForgeModels());
-  const [duels, setDuels] = useState<DuelResult[]>([]);
-  const [activeDuel, setActiveDuel] = useState<{ c: Model; d: Model; criterion: string; phase: "selecting" | "running" | "done"; winner?: string } | null>(null);
+  const [duels, setDuels] = useState<ServiceDuelResult[]>(() => nuroForgeService.getDuelHistory());
+  const [activeDuel, setActiveDuel] = useState<{ c: NuroModel; d: NuroModel; domain: string; phase: "running" | "done"; result?: ServiceDuelResult } | null>(null);
   const [totalDuels, setTotalDuels] = useState(2847);
   const [selectedView, setSelectedView] = useState<"leaderboard" | "history">("leaderboard");
 
-  const criteria = ["Accuracy", "Latency", "Cost-efficiency", "Safety", "Reasoning", "Summarization", "Code Generation", "Legal Analysis", "Maritime Intel"];
+  const domains = ["Legal", "Maritime", "Cybersecurity", "Financial", "Real Estate", "Advisory", "Research", "Operations"];
 
-  const runDuel = useCallback(() => {
-    const c = models[Math.floor(Math.random() * models.length)];
-    let d = models[Math.floor(Math.random() * models.length)];
-    while (d.id === c.id) d = models[Math.floor(Math.random() * models.length)];
-    const criterion = criteria[Math.floor(Math.random() * criteria.length)];
-    setActiveDuel({ c, d, criterion, phase: "running" });
+  const executeDuel = useCallback(() => {
+    const allModels = getNuroForgeModels();
+    const c = allModels[Math.floor(Math.random() * allModels.length)];
+    let d = allModels[Math.floor(Math.random() * allModels.length)];
+    while (d.id === c.id) d = allModels[Math.floor(Math.random() * allModels.length)];
+    const domain = domains[Math.floor(Math.random() * domains.length)];
+
+    setActiveDuel({ c, d, domain, phase: "running" });
 
     setTimeout(() => {
-      const winner = Math.random() > 0.5 ? c : d;
-      const score = `${(70 + Math.random() * 28).toFixed(1)}% vs ${(50 + Math.random() * 30).toFixed(1)}%`;
-      setActiveDuel({ c, d, criterion, phase: "done", winner: winner.id });
-      setDuels(prev => [{ challenger: c.name, defender: d.name, winner: winner.name, criterion, score, timestamp: Date.now() }, ...prev].slice(0, 20));
-      setModels(prev => prev.map(m => {
-        if (m.id === winner.id) return { ...m, elo: m.elo + Math.floor(Math.random() * 8 + 2), wins: m.wins + 1 };
-        if (m.id === (winner.id === c.id ? d.id : c.id)) return { ...m, elo: Math.max(1500, m.elo - Math.floor(Math.random() * 6 + 1)), losses: m.losses + 1 };
-        return m;
-      }).sort((a, b) => b.elo - a.elo));
+      const result = nuroForgeService.runDuel(c.id, d.id, domain);
+
+      nuroForgeService.evaluateGovernance(result.modelA, domain, `Duel output for ${domain}`);
+      nuroForgeService.evaluateGovernance(result.modelB, domain, `Duel output for ${domain}`);
+
+      const updatedModels = getNuroForgeModels();
+      setModels(updatedModels);
+      setDuels(nuroForgeService.getDuelHistory());
+      setActiveDuel({ c, d, domain, phase: "done", result });
       setTotalDuels(p => p + 1);
     }, 2000);
-  }, [models, criteria]);
+  }, [domains]);
 
   useEffect(() => {
-    const t = setInterval(runDuel, 8000);
+    const t = setInterval(executeDuel, 8000);
     return () => clearInterval(t);
-  }, [runDuel]);
+  }, [executeDuel]);
 
   const sorted = [...models].sort((a, b) => b.elo - a.elo);
 
@@ -57,7 +55,7 @@ export default function TournamentArenaPage() {
               <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>{totalDuels.toLocaleString()} duels completed · {models.length} models competing</p>
             </div>
           </div>
-          <button onClick={runDuel} className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-medium"
+          <button onClick={executeDuel} className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-medium"
             style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.2)" }}>
             <Swords className="w-3.5 h-3.5" /> Run Duel
           </button>
@@ -70,16 +68,16 @@ export default function TournamentArenaPage() {
               <div className="flex items-center justify-center gap-2 mb-4">
                 <Swords className="w-4 h-4" style={{ color: "#f59e0b" }} />
                 <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#f59e0b" }}>
-                  {activeDuel.phase === "running" ? "Duel in Progress" : "Duel Complete"} — {activeDuel.criterion}
+                  {activeDuel.phase === "running" ? "Duel in Progress" : "Duel Complete"} — {activeDuel.domain}
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex-1 text-center">
-                  <div className="text-sm font-bold" style={{ color: activeDuel.phase === "done" && activeDuel.winner === activeDuel.c.id ? "#10b981" : "rgba(255,255,255,0.7)" }}>
+                  <div className="text-sm font-bold" style={{ color: activeDuel.phase === "done" && activeDuel.result?.winner === activeDuel.c.name ? "#10b981" : "rgba(255,255,255,0.7)" }}>
                     {activeDuel.c.name}
                   </div>
                   <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>{activeDuel.c.provider} · Elo {activeDuel.c.elo}</div>
-                  {activeDuel.phase === "done" && activeDuel.winner === activeDuel.c.id && (
+                  {activeDuel.phase === "done" && activeDuel.result?.winner === activeDuel.c.name && (
                     <m.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full" style={{ background: "rgba(16,185,129,0.12)", color: "#10b981" }}>
                       <Crown className="w-3 h-3" /> <span className="text-[10px] font-bold">Winner</span>
                     </m.div>
@@ -95,17 +93,23 @@ export default function TournamentArenaPage() {
                   )}
                 </div>
                 <div className="flex-1 text-center">
-                  <div className="text-sm font-bold" style={{ color: activeDuel.phase === "done" && activeDuel.winner === activeDuel.d.id ? "#10b981" : "rgba(255,255,255,0.7)" }}>
+                  <div className="text-sm font-bold" style={{ color: activeDuel.phase === "done" && activeDuel.result?.winner === activeDuel.d.name ? "#10b981" : "rgba(255,255,255,0.7)" }}>
                     {activeDuel.d.name}
                   </div>
                   <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>{activeDuel.d.provider} · Elo {activeDuel.d.elo}</div>
-                  {activeDuel.phase === "done" && activeDuel.winner === activeDuel.d.id && (
+                  {activeDuel.phase === "done" && activeDuel.result?.winner === activeDuel.d.name && (
                     <m.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full" style={{ background: "rgba(16,185,129,0.12)", color: "#10b981" }}>
                       <Crown className="w-3 h-3" /> <span className="text-[10px] font-bold">Winner</span>
                     </m.div>
                   )}
                 </div>
               </div>
+              {activeDuel.phase === "done" && activeDuel.result && (
+                <div className="mt-3 flex justify-center gap-4 text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>
+                  <span>Score: {activeDuel.result.scoreA.toFixed(1)} vs {activeDuel.result.scoreB.toFixed(1)}</span>
+                  <span>Domain: {activeDuel.result.domain}</span>
+                </div>
+              )}
             </m.div>
           )}
         </AnimatePresence>
@@ -131,12 +135,14 @@ export default function TournamentArenaPage() {
                 className="grid grid-cols-[40px_1fr_80px_70px_70px_70px_80px_80px] gap-2 px-4 py-2.5 items-center"
                 style={{ background: i % 2 === 0 ? "rgba(255,255,255,0.01)" : "transparent", borderBottom: "1px solid rgba(255,255,255,0.02)" }}>
                 <span className="text-[12px] font-bold tabular-nums" style={{ color: i < 3 ? "#f59e0b" : "rgba(255,255,255,0.25)" }}>
-                  {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}
+                  {i === 0 ? "\u{1F947}" : i === 1 ? "\u{1F948}" : i === 2 ? "\u{1F949}" : `#${i + 1}`}
                 </span>
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full" style={{ background: model.color }} />
                   <span className="text-[11px] font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>{model.name}</span>
                   <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.2)" }}>{model.provider}</span>
+                  {model.status === "degraded" && <span className="text-[8px] px-1 py-0.5 rounded" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444" }}>degraded</span>}
+                  {model.status === "canary" && <span className="text-[8px] px-1 py-0.5 rounded" style={{ background: "rgba(245,158,11,0.1)", color: "#f59e0b" }}>canary</span>}
                 </div>
                 <span className="text-[12px] font-bold tabular-nums" style={{ color: model.color }}>{model.elo}</span>
                 <span className="text-[11px] tabular-nums" style={{ color: "#10b981" }}>{model.wins}</span>
@@ -154,13 +160,13 @@ export default function TournamentArenaPage() {
                 <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.3)" }}>No duels recorded yet. Click "Run Duel" to start.</p>
               </div>
             ) : duels.map((d, i) => (
-              <m.div key={i} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+              <m.div key={d.id} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
                 className="flex items-center gap-3 px-4 py-3 rounded-lg" style={{ background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.03)" }}>
-                <span className="text-[11px] font-semibold" style={{ color: d.winner === d.challenger ? "#10b981" : "rgba(255,255,255,0.5)" }}>{d.challenger}</span>
+                <span className="text-[11px] font-semibold" style={{ color: d.winner === d.modelA ? "#10b981" : "rgba(255,255,255,0.5)" }}>{d.modelA}</span>
                 <ArrowRight className="w-3 h-3" style={{ color: "rgba(255,255,255,0.15)" }} />
-                <span className="text-[11px] font-semibold" style={{ color: d.winner === d.defender ? "#10b981" : "rgba(255,255,255,0.5)" }}>{d.defender}</span>
-                <span className="text-[9px] px-1.5 py-0.5 rounded-full ml-auto" style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.3)" }}>{d.criterion}</span>
-                <span className="text-[10px] tabular-nums" style={{ color: "#f59e0b" }}>{d.score}</span>
+                <span className="text-[11px] font-semibold" style={{ color: d.winner === d.modelB ? "#10b981" : "rgba(255,255,255,0.5)" }}>{d.modelB}</span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full ml-auto" style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.3)" }}>{d.domain}</span>
+                <span className="text-[10px] tabular-nums" style={{ color: "#f59e0b" }}>{d.scoreA.toFixed(1)} vs {d.scoreB.toFixed(1)}</span>
               </m.div>
             ))}
           </div>

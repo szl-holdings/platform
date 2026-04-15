@@ -44,7 +44,32 @@ export default function SelfHealingInfraPage() {
   const [events, setEvents] = useState<HealthEvent[]>(() => Array.from({ length: 8 }, generateHealthEvent));
 
   useEffect(() => {
-    const t = setInterval(() => setEvents(prev => [generateHealthEvent(), ...prev].slice(0, 25)), 5000);
+    const t = setInterval(() => {
+      const event = generateHealthEvent();
+
+      if (event.type === "failover") {
+        const modelId = MODEL_HEALTH.find(m => m.model === event.model)?.model;
+        if (modelId) {
+          const result = triggerFailover(modelId.toLowerCase().replace(/\s+/g, "-").replace(/\+/g, "plus"));
+          event.detail = result.success ? `Auto-failover to ${result.failoverTarget}` : event.detail;
+          event.status = result.success ? "success" : "in-progress";
+        }
+      } else if (event.type === "canary") {
+        const modelId = MODEL_HEALTH.find(m => m.model === event.model)?.model;
+        if (modelId) {
+          const result = canaryDeploy(modelId.toLowerCase().replace(/\s+/g, "-").replace(/\+/g, "plus"), 5);
+          event.detail = result.status === "deployed" ? `Canary deployed to ${result.canaryPct}% traffic` : event.detail;
+        }
+      } else if (event.type === "rollback") {
+        const modelId = MODEL_HEALTH.find(m => m.model === event.model)?.model;
+        if (modelId) {
+          const result = rollbackModel(modelId.toLowerCase().replace(/\s+/g, "-").replace(/\+/g, "plus"));
+          event.detail = result.status === "rolled_back" ? `${result.model} rolled back successfully` : event.detail;
+        }
+      }
+
+      setEvents(prev => [event, ...prev].slice(0, 25));
+    }, 5000);
     return () => clearInterval(t);
   }, []);
 

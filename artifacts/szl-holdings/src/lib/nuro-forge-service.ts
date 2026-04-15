@@ -1,5 +1,3 @@
-import { api } from "./api";
-
 export interface NuroModel {
   id: string;
   name: string;
