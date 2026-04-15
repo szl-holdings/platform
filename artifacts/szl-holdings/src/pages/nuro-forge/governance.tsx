@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Shield, AlertTriangle, Check, X, Eye, FileText, Scale, Lock, Activity } from "lucide-react";
+import { evaluateGovernance } from "@/lib/nuro-forge-service";
 
 interface GovernanceEvent {
   id: string; model: string; domain: string; type: "bias" | "hallucination" | "toxicity" | "constitutional" | "pii";

@@ -1,31 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Trophy, Swords, ArrowRight, Crown, TrendingUp, TrendingDown, RotateCcw, Play, Check, X } from "lucide-react";
+import { getNuroForgeModels, runModelDuel, type NuroModel } from "@/lib/nuro-forge-service";
 
-interface Model {
-  id: string; name: string; provider: string; elo: number; wins: number; losses: number; draws: number; color: string;
-  specialties: string[]; avgLatency: number; costPer1k: number;
-}
-
-const MODELS: Model[] = [
-  { id: "claude-4", name: "Claude 4 Sonnet", provider: "Anthropic", elo: 1847, wins: 312, losses: 89, draws: 24, color: "#8b5cf6", specialties: ["Legal", "Analysis"], avgLatency: 1240, costPer1k: 3.00 },
-  { id: "gpt-5.2", name: "GPT-5.2", provider: "OpenAI", elo: 1823, wins: 298, losses: 102, draws: 31, color: "#10b981", specialties: ["General", "Code"], avgLatency: 980, costPer1k: 5.00 },
-  { id: "gemini-2.5", name: "Gemini 2.5 Pro", provider: "Google", elo: 1798, wins: 267, losses: 118, draws: 28, color: "#3b82f6", specialties: ["Multimodal", "Research"], avgLatency: 1100, costPer1k: 3.50 },
-  { id: "qwen3-8b", name: "Qwen3-8B", provider: "Alibaba", elo: 1756, wins: 245, losses: 134, draws: 19, color: "#06b6d4", specialties: ["Speed", "Maritime"], avgLatency: 142, costPer1k: 0.50 },
-  { id: "llama-4", name: "Llama 4 Scout", provider: "Meta", elo: 1734, wins: 231, losses: 148, draws: 22, color: "#f59e0b", specialties: ["Open-source", "Cyber"], avgLatency: 280, costPer1k: 0.20 },
-  { id: "mistral-lg", name: "Mistral Large", provider: "Mistral", elo: 1721, wins: 218, losses: 156, draws: 18, color: "#d4a054", specialties: ["European", "Finance"], avgLatency: 350, costPer1k: 0.80 },
-  { id: "deepseek-v3", name: "DeepSeek V3", provider: "DeepSeek", elo: 1698, wins: 204, losses: 167, draws: 15, color: "#ec4899", specialties: ["Reasoning", "Math"], avgLatency: 420, costPer1k: 0.30 },
-  { id: "command-r+", name: "Command R+", provider: "Cohere", elo: 1682, wins: 195, losses: 178, draws: 12, color: "#64748b", specialties: ["RAG", "Enterprise"], avgLatency: 560, costPer1k: 1.20 },
-  { id: "phi-4", name: "Phi-4 Mini", provider: "Microsoft", elo: 1654, wins: 183, losses: 192, draws: 10, color: "#0ea5e9", specialties: ["Edge", "Compact"], avgLatency: 95, costPer1k: 0.10 },
-  { id: "grok-3", name: "Grok 3", provider: "xAI", elo: 1641, wins: 176, losses: 198, draws: 14, color: "#a855f7", specialties: ["Real-time", "Social"], avgLatency: 780, costPer1k: 2.00 },
-  { id: "claude-3.5-h", name: "Claude 3.5 Haiku", provider: "Anthropic", elo: 1628, wins: 168, losses: 205, draws: 8, color: "#f472b6", specialties: ["Fast", "Concise"], avgLatency: 180, costPer1k: 0.25 },
-  { id: "nova-pro", name: "Nova Pro", provider: "Amazon", elo: 1612, wins: 162, losses: 214, draws: 11, color: "#f97316", specialties: ["AWS", "Integration"], avgLatency: 620, costPer1k: 1.50 },
-];
+type Model = NuroModel;
 
 interface DuelResult { challenger: string; defender: string; winner: string; criterion: string; score: string; timestamp: number; }
 
 export default function TournamentArenaPage() {
-  const [models, setModels] = useState(MODELS);
+  const [models, setModels] = useState(() => getNuroForgeModels());
   const [duels, setDuels] = useState<DuelResult[]>([]);
   const [activeDuel, setActiveDuel] = useState<{ c: Model; d: Model; criterion: string; phase: "selecting" | "running" | "done"; winner?: string } | null>(null);
   const [totalDuels, setTotalDuels] = useState(2847);

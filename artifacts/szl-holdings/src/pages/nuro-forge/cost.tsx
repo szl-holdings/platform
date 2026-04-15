@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { m } from "framer-motion";
 import { DollarSign, TrendingDown, Zap, BarChart3, ArrowRight, AlertTriangle } from "lucide-react";
+import { routeOptimalModel } from "@/lib/nuro-forge-service";
 
 const MODEL_COSTS = [
   { model: "Claude 4 Sonnet", provider: "Anthropic", requests: 45280, totalCost: 135.84, avgCost: 0.003, color: "#8b5cf6", trend: -12 },

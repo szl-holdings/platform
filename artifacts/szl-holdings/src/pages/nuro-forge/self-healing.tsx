@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { HeartPulse, Shield, RotateCcw, Check, AlertTriangle, ArrowRight, Activity, Zap, Clock } from "lucide-react";
+import { triggerFailover, canaryDeploy, promoteCanary, rollbackModel } from "@/lib/nuro-forge-service";
 
 interface HealthEvent {
   id: string; model: string; type: "failover" | "canary" | "rollback" | "swap" | "recovery";
