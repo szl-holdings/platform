@@ -109,7 +109,10 @@
     "./ai-status-bar": "./src/ai-status-bar.tsx",
     "./ai-insight-card": "./src/ai-insight-card.tsx",
     "./use-ai-agent": "./src/use-ai-agent.ts",
-    "./data-state-badge": "./src/data-state-badge.tsx"
+    "./data-state-badge": "./src/data-state-badge.tsx",
+    "./ambient-intelligence": "./src/ambient-intelligence.tsx",
+    "./energy-heartbeat": "./src/energy-heartbeat.tsx",
+    "./cross-domain-correlation": "./src/cross-domain-correlation.tsx"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.4",

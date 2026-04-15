@@ -9,7 +9,7 @@ import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
 const port = Number(process.env.VITE_PORT) || 23932;
-const basePath = process.env.BASE_PATH || "/aegis/";
+const basePath = process.env.BASE_PATH || "/firestorm/";
 
 
   function healthCheckPlugin() {

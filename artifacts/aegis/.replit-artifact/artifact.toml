@@ -29,4 +29,3 @@ kind = "web"
   [services.env]
   VITE_PORT = "23933"
   BASE_PATH = "/aegis/"
-  
