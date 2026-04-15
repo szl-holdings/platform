@@ -65,8 +65,10 @@
 | **Terra** | Real Estate Intelligence | Observe / Underwrite | Broker, Investor, Portfolio | Functional Alpha |
 | **Vessels** | Maritime Intelligence | Track / Analyze | Fleet Exec, Ops, Commercial | Functional Alpha |
 | **Carlota Jo** | Private Advisory | Advise | Founder, CMO, Executive | Functional Alpha |
+| **CORTEX** | Unified Mobile Command | Mobile Surface | All platform users (iOS/Android) | Functional Alpha |
+| **Command Portal** | Ecosystem Hub | Cross-domain Monitor | Founder, Platform Admin | Functional Alpha |
+| **IMPERIUM** | Cloud Sovereignty | Infrastructure | Enterprise, Platform Admin | Functional Alpha |
 | **SZL Holdings** | Corporate | Corporate | Investors, Partners, Enterprise | Public Beta Candidate |
-| **Stephen Lutar** | Founder Portfolio | Personal | Partners, Evaluators | Public Beta Candidate |
 
 **Readiness Label Definitions:**
 - **Concept** — Thesis and spec only, no working software
@@ -80,15 +82,17 @@
 
 ## Mobile Platform Coverage
 
-| Platform | Web | iOS/Android | Status |
-|----------|-----|-------------|--------|
-| Lyte | ✅ | ✅ Lyte Mobile | Functional Alpha |
-| Aegis | ✅ | ✅ Aegis Mobile | Functional Alpha |
-| Terra | ✅ | ✅ Terra Mobile | Functional Alpha |
-| Vessels | ✅ | ✅ Vessels Mobile | Functional Alpha |
-| Carlota Jo | ✅ | ✅ Carlota Jo Mobile | Functional Alpha |
-| SZL Holdings | ✅ | ✅ SZL Holdings Mobile | Functional Alpha |
-| Stephen Site | ✅ | ✅ Stephen Mobile | Functional Alpha |
+Mobile access is provided through **CORTEX** — the unified command mobile app (iOS/Android) that consolidates all domain platforms into a single authenticated experience.
+
+| Platform | Web | Mobile (via CORTEX) | Status |
+|----------|-----|---------------------|--------|
+| Lyte | ✅ | ✅ CORTEX | Functional Alpha |
+| Aegis | ✅ | ✅ CORTEX | Functional Alpha |
+| Terra | ✅ | ✅ CORTEX | Functional Alpha |
+| Vessels | ✅ | ✅ CORTEX | Functional Alpha |
+| Carlota Jo | ✅ | ✅ CORTEX | Functional Alpha |
+| SZL Holdings | ✅ | — | Public Beta Candidate |
+| Command Portal | ✅ | — | Functional Alpha |
 
 ---
 

@@ -96,12 +96,13 @@ The platform is a **pnpm monorepo** with TypeScript project references throughou
 │   ├── api-server/         # Express — all platform backends
 │   ├── szl-holdings/       # Corporate site
 │   ├── lyte-command-center/# Lyte — Business Observability
-│   ├── firestorm/          # Aegis — Defense & Intelligence
+│   ├── firestorm/          # Aegis — Unified Defense & Intelligence
 │   ├── terra/              # Terra — Real Estate Intelligence
 │   ├── vessels/            # Vessels — Maritime Intelligence
 │   ├── carlota-jo/         # Carlota Jo — Advisory web app
-│   ├── stephen-site/       # Founder authority site
-│   ├── [7 mobile apps]     # Expo/React Native (iOS/Android)
+│   ├── command/            # Ecosystem Command Portal
+│   ├── imperium/           # IMPERIUM — Cloud Sovereignty Engine
+│   ├── szl-holdings-mobile/# CORTEX — Unified Mobile Command (iOS/Android)
 │   └── mockup-sandbox/     # Component design preview server
 │
 ├── lib/                    # Shared TypeScript libraries

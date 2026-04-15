@@ -1,7 +1,7 @@
 # SZL Holdings — Platform Thesis
 
 **For:** Strategic investors and institutional evaluators  
-**Date:** Q1 2026
+**Date:** Q2 2026
 
 ---
 
@@ -55,6 +55,37 @@ The primary commercial entry point is **Lyte + Alloy** — business observabilit
 - **M**otion — Escalations, routing, approvals, interventions
 
 **Alloy** closes the loop: when Lyte surfaces a signal, Alloy routes the action. Workflow engine, human-in-the-loop approval gates, agent coordination, and immutable audit trail — the infrastructure that makes observability and accountability a single system.
+
+---
+
+## Current Platform — Product Lineup
+
+As of Q2 2026, the SZL Holdings platform consists of nine products built on a single shared architecture:
+
+| Product | Domain | Status |
+|---------|--------|--------|
+| **Lyte** | Business Observability — PRISM framework, signal timeline, action queue | Functional Alpha |
+| **Alloy** | Execution Fabric — workflow engine, approval gates, audit trail | Functional Alpha |
+| **Aegis** | Security & Defense — SOC command, SOAR, MITRE ATT&CK, INCA model governance | Functional Alpha |
+| **Vessels** | Maritime Intelligence — AIS fleet, sanctions screening, Helmsman agent | Functional Alpha |
+| **Terra** | Real Estate Intelligence — NYC distress pipeline, ownership graph, deal flow | Functional Alpha |
+| **Carlota Jo** | Premium Advisory — UHNW residential advisory, client portal | Live |
+| **CORTEX** | Unified Mobile Command — all domains in one iOS/Android app | Functional Alpha |
+| **Command Portal** | Ecosystem Hub — cross-domain signal aggregation and portfolio monitoring | Functional Alpha |
+| **IMPERIUM** | Cloud Sovereignty Engine — infrastructure governance and compliance | Functional Alpha |
+
+### Platform Scale Metrics
+
+| Metric | Current Value |
+|--------|--------------|
+| Deployable artifacts | 16 |
+| Database tables | 120+ (per-domain namespaced, all org-scoped) |
+| Shared TypeScript libraries | 20+ packages in `lib/` |
+| AI decision types (schema-validated) | 9 |
+| RBAC roles | 11 |
+| Supported notification channels | 4 (Slack, Teams, email, WebSocket push) |
+| PDF report templates | 8 (branded, server-side) |
+| CI gates on every PR | 5 (lint, typecheck, unit tests, dependency audit, build) |
 
 ---
 

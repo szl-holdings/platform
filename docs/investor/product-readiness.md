@@ -33,7 +33,7 @@
 | **Admin Diagnostics** | ✅ Real-time system health diagnostics page at /admin/diagnostics |
 | **Data State** | Seeded demo data — clearly labeled in UI |
 | **Auth** | OIDC PKCE + role-based access fully implemented |
-| **Mobile** | ✅ Lyte Mobile (Expo/React Native) |
+| **Mobile** | ✅ CORTEX — Unified Mobile Command (Expo/React Native) |
 | **What's Needed for GA** | Live connector data feeds, enterprise SSO, commercial billing activation |
 
 ### Alloy — Execution Fabric
@@ -56,7 +56,7 @@
 | **Feature Completeness** | Defense (SOC, MITRE ATT&CK, SOAR), Command (MSP ops), Intelligence (INCA, model registry, experiments) |
 | **AI Integration** | Sentinel agent, INCA model governance, ensemble evaluation |
 | **Data State** | Mix of seeded data and simulated threat scenarios |
-| **Mobile** | ✅ Aegis Mobile (Expo/React Native) |
+| **Mobile** | ✅ CORTEX — Unified Mobile Command (Expo/React Native) |
 | **What's Needed for GA** | Live SIEM connector, FedRAMP audit track, commercial billing |
 
 ### Terra — Real Estate Intelligence
@@ -67,7 +67,7 @@
 | **Core Architecture** | Production-grade |
 | **Feature Completeness** | NYC distress pipeline, ownership tracking, deal pipeline, property map |
 | **Live Data** | ✅ NYC Open Data API integration active |
-| **Mobile** | ✅ Terra Mobile (Expo/React Native) |
+| **Mobile** | ✅ CORTEX — Unified Mobile Command (Expo/React Native) |
 | **What's Needed for GA** | Expanded data coverage, broker workflow validation with real users, billing |
 
 ### Vessels — Maritime Intelligence
@@ -78,7 +78,7 @@
 | **Core Architecture** | Production-grade |
 | **Feature Completeness** | Fleet command, voyage economics, AIS telemetry, dark vessel detection, sanctions screening, Helmsman agent |
 | **Data State** | Simulated AIS data — labeled Demo in UI |
-| **Mobile** | ✅ Vessels Mobile (Expo/React Native) |
+| **Mobile** | ✅ CORTEX — Unified Mobile Command (Expo/React Native) |
 | **What's Needed for GA** | Live AIS data feed subscription, sanctions list API, billing activation |
 
 ### Carlota Jo — Private Advisory
@@ -89,7 +89,7 @@
 | **Core Architecture** | Production-grade |
 | **Feature Completeness** | Web platform + native mobile client, service catalog, inquiry workflow, brand positioning |
 | **Live Data** | N/A — advisory service, not data platform |
-| **Mobile** | ✅ Carlota Jo Mobile (Expo/React Native) |
+| **Mobile** | ✅ CORTEX — Unified Mobile Command (Expo/React Native) |
 | **What's Needed for GA** | Client intake flow activation, billing, domain configuration |
 
 ### SZL Holdings — Corporate Platform
@@ -100,13 +100,25 @@
 | **Feature Completeness** | Ecosystem overview, investor relations, trust center, admin control plane |
 | **What's Needed for GA** | Final domain configuration, investor data room |
 
-### Stephen Lutar — Founder Site
+### CORTEX — Unified Mobile Command
 
 | Dimension | Assessment |
 |-----------|-----------|
-| **Readiness Label** | Public Beta Candidate |
-| **Feature Completeness** | Portfolio, work showcase, technical frameworks, career command |
-| **What's Needed for GA** | Live domain, final content review |
+| **Readiness Label** | Functional Alpha |
+| **Core Architecture** | Production-grade — Expo, React Native, OIDC auth, cross-domain workspace routing |
+| **Feature Completeness** | Unified authentication, all domain workspaces (Lyte, Aegis, Vessels, Terra, Carlota Jo), push notifications, deep linking |
+| **Data State** | Seeded demo data — consistent with web platforms |
+| **What's Needed for GA** | App Store / Play Store submission, MDM distribution profile, live data feeds matching web platforms |
+
+### Command Portal — Ecosystem Hub
+
+| Dimension | Assessment |
+|-----------|-----------|
+| **Readiness Label** | Functional Alpha |
+| **Core Architecture** | Production-grade |
+| **Feature Completeness** | Cross-domain signal aggregation, portfolio health monitoring, ecosystem status view |
+| **Data State** | Seeded demo data |
+| **What's Needed for GA** | Live API signal wiring from all domain platforms |
 
 ---
 

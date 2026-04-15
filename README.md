@@ -2,6 +2,10 @@
 
 > [Live Demo](https://szlholdings.com) | [Security](./SECURITY.md) | [Architecture](./docs/architecture/system-overview.md) | [Investor Docs](./docs/investor/platform-thesis.md) | [Trust Center](./docs/trust/trust-center.md)
 
+[![CI](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml)
+[![E2E Tests](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/e2e.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/e2e.yml)
+[![Lighthouse CI](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/lighthouse.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/lighthouse.yml)
+[![CodeQL](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml)
 ![Status](https://img.shields.io/badge/status-active-brightgreen)
 ![License](https://img.shields.io/badge/license-proprietary-red)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
@@ -145,6 +149,14 @@ All 8 domain workspaces in a single Expo/React Native app. Biometric authenticat
 
 Real-time 8-domain dashboard with SSE updates, composite health scoring, per-domain drill-downs, global command bar (Cmd+K), executive briefing view, timeline with filter chips, and severity-based event classification.
 
+### CORTEX — Unified Mobile Command
+
+The consolidated mobile command surface for the SZL Holdings ecosystem. One app, full platform coverage — Lyte, Aegis, Vessels, Terra, and Carlota Jo accessible from a single authenticated session on iOS and Android.
+
+### Command Portal — Ecosystem Hub
+
+Cross-domain signal aggregation and ecosystem monitoring. Provides a unified view across all platform domains — operational health, signal volume, active alerts, and portfolio status in a single command surface.
+
 ---
 
 ## Screenshots
@@ -228,6 +240,10 @@ Auto-Execute (policy-approved)    Human Review Gate
 | `auth` | Authentication middleware and session management |
 | `db` | Database schema (644 tables), migrations, and query builders |
 
+**Infrastructure:** Azure (App Service, PostgreSQL Flexible, Key Vault, Redis, CDN). IaC via Bicep templates.
+
+**Scale:** 16 deployable artifacts, 120+ database tables, 8 web apps, 1 unified mobile app (CORTEX — all domains).
+
 ---
 
 ## Trust
@@ -287,6 +303,52 @@ See [Deployment Model](docs/trust/deployment-model.md)
 | **Technical Reviewer** | [Architecture](docs/architecture/system-overview.md) → [Data Flow](docs/architecture/data-flow.md) → [Trust Center](docs/trust/trust-center.md) |
 | **Enterprise Buyer** | [Trust Center](docs/trust/trust-center.md) → [Use Cases](docs/buyer/use-cases.md) → [Solution Brief](docs/buyer/solution-brief.md) |
 | **Design/Product** | [Platform Map](docs/architecture/platform-map.md) → [Solution Brief](docs/buyer/solution-brief.md) |
+
+---
+
+## Technical Due Diligence Guide
+
+For engineering reviewers conducting Series A technical diligence, here is a structured starting point:
+
+### Architecture & Code Quality
+
+- **Monorepo structure** — `pnpm` workspaces with TypeScript project references. All cross-app logic lives in `lib/`. Artifacts are isolated deployable units under `artifacts/`.
+- **Type safety** — Strict TypeScript throughout. Zod schemas validate all API boundaries. No `any` types without justification.
+- **API discipline** — OpenAPI 3.1 specification in `lib/api-spec/`. Generated React Query hooks in `lib/api-client-react/`. GraphQL via Apollo Server.
+- **Database** — Drizzle ORM, PostgreSQL, per-domain table namespacing, all queries org-scoped. Schema + migrations in `lib/db/`.
+- **CI gates** — Lint, typecheck, unit tests, dependency audit, secret scan, and full build on every PR. See [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+
+### Security Posture
+
+- OIDC/PKCE auth — no password storage. 11-role RBAC with org scoping on every route.
+- HMAC-signed WebSocket tickets (5-minute TTL). TLS 1.3 for all connections.
+- AI agents advisory-only — consequential actions require explicit human approval, enforced at workflow layer.
+- Immutable audit trail on every significant action. See [Security Policy](SECURITY.md) and [Trust Center](docs/trust/trust-center.md).
+
+### AI Governance
+
+- Multi-provider inference (OpenAI, Anthropic, Gemini) via `lib/ai-engine/` with schema-validated output types.
+- 9 validated decision types. Evidence-backed retrieval with confidence scores on all recommendations.
+- Policy-gated tool execution — advisory agents cannot execute without human confirmation.
+
+### Scalability & Infrastructure
+
+- Azure-ready IaC (Bicep templates in `infra/`). App Service, PostgreSQL Flexible Server, Key Vault, Redis, CDN.
+- Background job infrastructure for webhooks, reports, notifications, and health scans.
+- Multi-tenant architecture — `org_id` scoping at database layer prevents cross-tenant access.
+
+### Key Files for Reviewers
+
+| Area | File |
+|------|------|
+| System architecture | [docs/architecture/system-overview.md](docs/architecture/system-overview.md) |
+| Platform map | [docs/architecture/platform-map.md](docs/architecture/platform-map.md) |
+| Security policy | [SECURITY.md](SECURITY.md) |
+| Trust center | [docs/trust/trust-center.md](docs/trust/trust-center.md) |
+| Product readiness | [docs/investor/product-readiness.md](docs/investor/product-readiness.md) |
+| CI configuration | [.github/workflows/ci.yml](.github/workflows/ci.yml) |
+| Database schema | `lib/db/schema/` |
+| API specification | `lib/api-spec/` |
 
 ---
 

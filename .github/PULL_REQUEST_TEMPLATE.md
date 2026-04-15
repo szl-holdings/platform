@@ -33,13 +33,14 @@ _Which applications or libraries are affected?_
 
 - [ ] `api-server`
 - [ ] `lyte-command-center`
-- [ ] `firestorm` (Aegis)
+- [ ] `firestorm` (Aegis — Unified Defense & Intelligence)
 - [ ] `vessels`
 - [ ] `terra`
 - [ ] `carlota-jo`
 - [ ] `szl-holdings`
-- [ ] `stephen-site`
-- [ ] Mobile apps (`szl-holdings-mobile`, `aegis-mobile`, `vessels-mobile`, `lyte-mobile`, `carlota-jo-mobile`, `terra-mobile`, `stephen-mobile`)
+- [ ] `command` (Ecosystem Command Portal)
+- [ ] `imperium`
+- [ ] `szl-holdings-mobile` (CORTEX — Unified Mobile Command)
 - [ ] Shared library (`lib/`)
 - [ ] Infrastructure (`infra/`)
 - [ ] Documentation (`docs/`)

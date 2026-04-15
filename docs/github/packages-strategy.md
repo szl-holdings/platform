@@ -93,7 +93,8 @@ pnpm add @szl-holdings/shared-ui
 | Terra | `ghcr.io/szl-holdings/terra` | `artifacts/terra/Dockerfile` |
 | Aegis | `ghcr.io/szl-holdings/aegis` | `artifacts/firestorm/Dockerfile` |
 | Carlota Jo | `ghcr.io/szl-holdings/carlota-jo` | `artifacts/carlota-jo/Dockerfile` |
-| Stephen Site | `ghcr.io/szl-holdings/stephen-site` | `artifacts/stephen-site/Dockerfile` |
+| Command Portal | `ghcr.io/szl-holdings/command` | `artifacts/command/Dockerfile` |
+| IMPERIUM | `ghcr.io/szl-holdings/imperium` | `artifacts/imperium/Dockerfile` |
 
 ### Image Tagging Strategy
 
