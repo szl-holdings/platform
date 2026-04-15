@@ -59,7 +59,7 @@ export class NVDAdapter extends ServiceAdapter {
       },
     );
     if (!res.ok) throw new Error(`NVD HTTP ${res.status}`);
-    const json = await res.json() as any;
+    const json: { totalResults?: number } = await res.json();
     if (!json.totalResults && json.totalResults !== 0) throw new Error("NVD returned invalid response");
   }
 
@@ -116,9 +116,30 @@ export class NVDAdapter extends ServiceAdapter {
       }
 
       if (!res.ok) throw new Error(`NVD HTTP ${res.status}`);
-      const json = await res.json() as any;
 
-      const vulnerabilities: NvdCve[] = (json.vulnerabilities ?? []).map((v: any) => {
+      interface NvdDescription { lang?: string; value?: string }
+      interface NvdCvssMetric { cvssData?: { baseScore?: number; baseSeverity?: string; vectorString?: string }; exploitabilityScore?: number; impactScore?: number }
+      interface NvdWeakness { description?: NvdDescription[] }
+      interface NvdRawCve {
+        id?: string;
+        sourceIdentifier?: string;
+        published?: string;
+        lastModified?: string;
+        vulnStatus?: string;
+        descriptions?: NvdDescription[];
+        metrics?: { cvssMetricV31?: NvdCvssMetric[]; cvssMetricV30?: NvdCvssMetric[] };
+        weaknesses?: NvdWeakness[];
+        references?: Array<{ url?: string; source?: string }>;
+      }
+      interface NvdResponse {
+        totalResults?: number;
+        resultsPerPage?: number;
+        startIndex?: number;
+        vulnerabilities?: Array<{ cve?: NvdRawCve }>;
+      }
+      const json: NvdResponse = await res.json();
+
+      const vulnerabilities: NvdCve[] = (json.vulnerabilities ?? []).map((v) => {
         const cve = v.cve ?? {};
         const metrics = cve.metrics?.cvssMetricV31?.[0] ?? cve.metrics?.cvssMetricV30?.[0];
         return {
@@ -127,12 +148,12 @@ export class NVDAdapter extends ServiceAdapter {
           published: cve.published ?? "",
           lastModified: cve.lastModified ?? "",
           vulnStatus: cve.vulnStatus ?? "",
-          description: cve.descriptions?.find((d: any) => d.lang === "en")?.value ?? "",
+          description: cve.descriptions?.find((d) => d.lang === "en")?.value ?? "",
           cvssV3Score: metrics?.cvssData?.baseScore ?? null,
           cvssV3Severity: metrics?.cvssData?.baseSeverity ?? null,
           cvssVector: metrics?.cvssData?.vectorString ?? null,
-          weaknesses: (cve.weaknesses ?? []).flatMap((w: any) => w.description?.map((d: any) => d.value) ?? []),
-          references: (cve.references ?? []).map((r: any) => ({ url: r.url ?? "", source: r.source ?? "" })),
+          weaknesses: (cve.weaknesses ?? []).flatMap((w) => w.description?.map((d) => d.value) ?? []),
+          references: (cve.references ?? []).map((r) => ({ url: r.url ?? "", source: r.source ?? "" })),
           exploitabilityScore: metrics?.exploitabilityScore ?? null,
           impactScore: metrics?.impactScore ?? null,
         };

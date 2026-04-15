@@ -164,7 +164,8 @@ export class MispTaxiiAdapter extends ServiceAdapter {
       timeoutMs: 10_000,
     });
     if (!res.ok) throw new Error(`TAXII discovery HTTP ${res.status}`);
-    const json = await res.json() as any;
+    interface TaxiiDiscovery { title?: string; api_roots?: string[] }
+    const json: TaxiiDiscovery = await res.json();
     if (!json.title && !json.api_roots) throw new Error("Invalid TAXII discovery response");
 
     const roots: string[] = json.api_roots ?? [];
@@ -191,11 +192,19 @@ export class MispTaxiiAdapter extends ServiceAdapter {
       });
 
       if (!res.ok) return [...DEMO_COLLECTIONS];
-      const json = await res.json() as any;
+      interface RawCollection {
+        id?: string;
+        title?: string;
+        description?: string;
+        can_read?: boolean;
+        can_write?: boolean;
+        media_types?: string[];
+      }
+      const json: { collections?: RawCollection[] } = await res.json();
       const collections = json?.collections;
       if (!Array.isArray(collections)) return [...DEMO_COLLECTIONS];
 
-      return collections.map((c: any) => ({
+      return collections.map((c) => ({
         id: c.id ?? "",
         title: c.title ?? "Unknown",
         description: c.description ?? "",
@@ -251,14 +260,32 @@ export class MispTaxiiAdapter extends ServiceAdapter {
         };
       }
 
-      const bundle = await res.json() as any;
+      interface StixObject {
+        id?: string;
+        type?: string;
+        spec_version?: string;
+        created?: string;
+        modified?: string;
+        name?: string;
+        description?: string;
+        pattern?: string;
+        pattern_type?: string;
+        valid_from?: string;
+        valid_until?: string | null;
+        confidence?: number;
+        labels?: string[];
+        kill_chain_phases?: Array<{ phase_name?: string }>;
+        external_references?: Array<{ source_name?: string; url?: string }>;
+      }
+      interface StixBundle { id?: string; objects?: StixObject[] }
+      const bundle: StixBundle = await res.json();
       const objects = bundle?.objects ?? [];
 
       const indicators: StixIndicator[] = objects
-        .filter((o: any) => o.type === "indicator")
-        .map((o: any) => ({
+        .filter((o) => o.type === "indicator")
+        .map((o) => ({
           id: o.id ?? "",
-          type: o.type,
+          type: o.type ?? "indicator",
           specVersion: o.spec_version ?? "2.1",
           created: o.created ?? "",
           modified: o.modified ?? "",
@@ -270,8 +297,8 @@ export class MispTaxiiAdapter extends ServiceAdapter {
           validUntil: o.valid_until ?? null,
           confidence: o.confidence ?? 50,
           labels: o.labels ?? [],
-          killChainPhases: (o.kill_chain_phases ?? []).map((p: any) => p.phase_name ?? ""),
-          externalReferences: (o.external_references ?? []).map((r: any) => ({
+          killChainPhases: (o.kill_chain_phases ?? []).map((p) => p.phase_name ?? ""),
+          externalReferences: (o.external_references ?? []).map((r) => ({
             sourceName: r.source_name ?? "",
             url: r.url ?? "",
           })),

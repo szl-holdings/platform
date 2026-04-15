@@ -5,6 +5,7 @@ import { sql } from "drizzle-orm";
 import { getOtelConfig } from "@szl-holdings/observability";
 import { getEmailProviderStatus } from "../lib/email";
 import { isAzureAdConfigured } from "../lib/auth";
+import { authMiddleware } from "../middlewares/auth";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -633,7 +634,7 @@ router.get("/health/billing", async (_req, res) => {
 
 // ─── Service Registry Health Matrix (all adapters with circuit breaker + latency) ─
 
-router.get("/integrations/health", async (_req, res) => {
+router.get("/integrations/health", authMiddleware({ required: false }), async (_req, res) => {
   try {
     const matrix = services.getHealthMatrix();
     res.json(matrix);
@@ -643,7 +644,27 @@ router.get("/integrations/health", async (_req, res) => {
   }
 });
 
-router.get("/integrations/health/test", async (_req, res) => {
+router.get("/integrations/health/live", authMiddleware({ required: false }), async (_req, res) => {
+  try {
+    const results = await services.testAllConnections();
+    const matrix = services.getHealthMatrix();
+    res.json({
+      ...matrix,
+      liveCheck: {
+        testedAt: new Date().toISOString(),
+        total: results.length,
+        passed: results.filter((r) => r.success).length,
+        failed: results.filter((r) => !r.success).length,
+        results,
+      },
+    });
+  } catch (err) {
+    logger.error({ err }, "Live health check failed");
+    res.status(500).json({ error: "Live health check failed" });
+  }
+});
+
+router.get("/integrations/health/test", authMiddleware({ required: false }), async (_req, res) => {
   try {
     const results = await services.testAllConnections();
     res.json({
@@ -659,7 +680,7 @@ router.get("/integrations/health/test", async (_req, res) => {
   }
 });
 
-router.get("/integrations/health/:name", async (req, res) => {
+router.get("/integrations/health/:name", authMiddleware({ required: false }), async (req, res) => {
   try {
     const adapter = services.getAdapter(req.params.name);
     if (!adapter) {
@@ -675,7 +696,7 @@ router.get("/integrations/health/:name", async (req, res) => {
 
 // ─── New Relic APM Endpoints ─────────────────────────────────────────────────
 
-router.get("/integrations/new-relic/apm", async (req, res) => {
+router.get("/integrations/new-relic/apm", authMiddleware({ required: false }), async (req, res) => {
   try {
     const metrics = await services.newRelic.getApmMetrics(
       req.query?.appName as string | undefined,
@@ -687,7 +708,7 @@ router.get("/integrations/new-relic/apm", async (req, res) => {
   }
 });
 
-router.get("/integrations/new-relic/hosts", async (_req, res) => {
+router.get("/integrations/new-relic/hosts", authMiddleware({ required: false }), async (_req, res) => {
   try {
     const hosts = await services.newRelic.getInfraHosts();
     res.json({ status: services.newRelic.status, hosts });
@@ -696,7 +717,7 @@ router.get("/integrations/new-relic/hosts", async (_req, res) => {
   }
 });
 
-router.get("/integrations/new-relic/alerts", async (_req, res) => {
+router.get("/integrations/new-relic/alerts", authMiddleware({ required: false }), async (_req, res) => {
   try {
     const alerts = await services.newRelic.getAlertConditions();
     res.json({ status: services.newRelic.status, alerts });
@@ -707,7 +728,7 @@ router.get("/integrations/new-relic/alerts", async (_req, res) => {
 
 // ─── NVIDIA DCGM GPU Endpoints ──────────────────────────────────────────────
 
-router.get("/integrations/nvidia-dcgm/gpus", async (_req, res) => {
+router.get("/integrations/nvidia-dcgm/gpus", authMiddleware({ required: false }), async (_req, res) => {
   try {
     const gpus = await services.nvidiaDcgm.getGpuMetrics();
     res.json({ status: services.nvidiaDcgm.status, gpus });
@@ -717,7 +738,7 @@ router.get("/integrations/nvidia-dcgm/gpus", async (_req, res) => {
   }
 });
 
-router.get("/integrations/nvidia-dcgm/cluster", async (_req, res) => {
+router.get("/integrations/nvidia-dcgm/cluster", authMiddleware({ required: false }), async (_req, res) => {
   try {
     const summary = await services.nvidiaDcgm.getClusterSummary();
     res.json({ status: services.nvidiaDcgm.status, summary });
@@ -728,7 +749,7 @@ router.get("/integrations/nvidia-dcgm/cluster", async (_req, res) => {
 
 // ─── MISP/TAXII Threat Intel Endpoints ──────────────────────────────────────
 
-router.get("/integrations/misp-taxii/collections", async (_req, res) => {
+router.get("/integrations/misp-taxii/collections", authMiddleware({ required: false }), async (_req, res) => {
   try {
     const collections = await services.mispTaxii.getCollections();
     res.json({ status: services.mispTaxii.status, collections });
@@ -738,7 +759,7 @@ router.get("/integrations/misp-taxii/collections", async (_req, res) => {
   }
 });
 
-router.get("/integrations/misp-taxii/indicators", async (req, res) => {
+router.get("/integrations/misp-taxii/indicators", authMiddleware({ required: false }), async (req, res) => {
   try {
     const collectionId = req.query.collectionId as string | undefined;
     const addedAfter = req.query.addedAfter as string | undefined;
@@ -753,7 +774,7 @@ router.get("/integrations/misp-taxii/indicators", async (req, res) => {
 
 // ─── CISA KEV Enhanced Endpoints ────────────────────────────────────────────
 
-router.get("/integrations/cisa/kev", async (req, res) => {
+router.get("/integrations/cisa/kev", authMiddleware({ required: false }), async (req, res) => {
   try {
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 20;
     const vulns = await services.cisa.getKnownExploitedVulnerabilities(limit);
@@ -763,7 +784,7 @@ router.get("/integrations/cisa/kev", async (req, res) => {
   }
 });
 
-router.get("/integrations/cisa/kev/search", async (req, res) => {
+router.get("/integrations/cisa/kev/search", authMiddleware({ required: false }), async (req, res) => {
   try {
     const q = (req.query.q as string) ?? "";
     const results = await services.cisa.searchKev(q);
@@ -773,7 +794,7 @@ router.get("/integrations/cisa/kev/search", async (req, res) => {
   }
 });
 
-router.get("/integrations/cisa/kev/ransomware", async (_req, res) => {
+router.get("/integrations/cisa/kev/ransomware", authMiddleware({ required: false }), async (_req, res) => {
   try {
     const vulns = await services.cisa.getHighPriorityKev();
     res.json({ count: vulns.length, vulnerabilities: vulns });
@@ -784,7 +805,7 @@ router.get("/integrations/cisa/kev/ransomware", async (_req, res) => {
 
 // ─── NVD Enhanced Endpoints ─────────────────────────────────────────────────
 
-router.get("/integrations/nvd/cves", async (req, res) => {
+router.get("/integrations/nvd/cves", authMiddleware({ required: false }), async (req, res) => {
   try {
     const keyword = req.query.keyword as string | undefined;
     const severity = req.query.severity as string | undefined;
@@ -796,7 +817,7 @@ router.get("/integrations/nvd/cves", async (req, res) => {
   }
 });
 
-router.get("/integrations/nvd/cves/critical", async (_req, res) => {
+router.get("/integrations/nvd/cves/critical", authMiddleware({ required: false }), async (_req, res) => {
   try {
     const result = await services.nvd.getCriticalCves();
     res.json({ status: services.nvd.status, ...result });

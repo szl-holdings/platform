@@ -86,7 +86,7 @@ export class NewRelicAdapter extends ServiceAdapter {
       timeoutMs: 10_000,
     });
     if (!res.ok) throw new Error(`NerdGraph HTTP ${res.status}`);
-    const json = await res.json() as any;
+    const json: { errors?: Array<{ message: string }> } = await res.json();
     if (json.errors?.length) throw new Error(json.errors[0].message);
   }
 
@@ -109,19 +109,38 @@ export class NewRelicAdapter extends ServiceAdapter {
     });
 
     if (!res.ok) return { ...DEMO_APM };
-    const json = await res.json() as any;
+    const json: { data?: { actor?: { account?: { nrql?: { results?: Record<string, number>[] } } } } } = await res.json();
     const results = json?.data?.actor?.account?.nrql?.results?.[0];
     if (!results) return { ...DEMO_APM };
 
+    const hostRes = await this.resilientFetch("https://api.newrelic.com/graphql", {
+      method: "POST",
+      headers: { "API-Key": this.apiKey, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: `{ actor { account(id: ${this.accountId}) { nrql(query: "SELECT uniqueCount(hostname) as hostCount, uniqueCount(instanceName) as instanceCount FROM Transaction WHERE appName = '${safeAppName}' SINCE 5 minutes ago") { results } } } }`,
+      }),
+    }).catch(() => null);
+
+    let hostCount = DEMO_APM.hostCount;
+    let instanceCount = DEMO_APM.instanceCount;
+    if (hostRes?.ok) {
+      const hostJson: { data?: { actor?: { account?: { nrql?: { results?: Record<string, number>[] } } } } } = await hostRes.json();
+      const hr = hostJson?.data?.actor?.account?.nrql?.results?.[0];
+      if (hr) {
+        hostCount = hr.hostCount ?? hostCount;
+        instanceCount = hr.instanceCount ?? instanceCount;
+      }
+    }
+
     return {
-      applicationName: appName ?? "SZL-Platform-API",
+      applicationName: safeAppName,
       responseTimeMs: results.responseTimeMs ?? DEMO_APM.responseTimeMs,
       throughputRpm: results.throughputRpm ?? DEMO_APM.throughputRpm,
       errorRatePct: results.errorRatePct ?? DEMO_APM.errorRatePct,
       apdexScore: results.apdexScore ?? DEMO_APM.apdexScore,
       apdexTarget: 0.5,
-      hostCount: DEMO_APM.hostCount,
-      instanceCount: DEMO_APM.instanceCount,
+      hostCount,
+      instanceCount,
     };
   }
 
@@ -139,11 +158,23 @@ export class NewRelicAdapter extends ServiceAdapter {
     });
 
     if (!res.ok) return [...DEMO_HOSTS];
-    const json = await res.json() as any;
+    interface InfraHostResult {
+      facet?: string;
+      cpuPct?: number;
+      memoryUsedPct?: number;
+      diskUsedPct?: number;
+      networkReceiveBytesPerSec?: number;
+      networkTransmitBytesPerSec?: number;
+      fullestDiskPct?: number;
+    }
+    interface InfraResponse {
+      data?: { actor?: { account?: { nrql?: { results?: InfraHostResult[] } } } };
+    }
+    const json: InfraResponse = await res.json();
     const results = json?.data?.actor?.account?.nrql?.results;
     if (!Array.isArray(results) || results.length === 0) return [...DEMO_HOSTS];
 
-    return results.map((r: any) => ({
+    return results.map((r) => ({
       hostname: r.facet ?? "unknown",
       cpuPct: r.cpuPct ?? 0,
       memoryUsedPct: r.memoryUsedPct ?? 0,
@@ -161,24 +192,42 @@ export class NewRelicAdapter extends ServiceAdapter {
       method: "POST",
       headers: { "API-Key": this.apiKey, "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: `{ actor { account(id: ${this.accountId}) { alerts { nrqlConditionsSearch { nrqlConditions { id name enabled type policyId signal { aggregationWindow } } } } } } }`,
+        query: `{ actor { account(id: ${this.accountId}) { alerts { nrqlConditionsSearch { nrqlConditions { id name enabled type policyId terms { priority threshold } signal { aggregationWindow } } } } } } }`,
       }),
     });
 
     if (!res.ok) return [...DEMO_ALERTS];
-    const json = await res.json() as any;
+    interface NrqlCondition {
+      id: string;
+      name: string;
+      type: string;
+      enabled: boolean;
+      terms?: Array<{ priority: string; threshold: number }>;
+      signal?: { aggregationWindow: number };
+      nrql?: { query: string };
+    }
+    interface NrqlSearchResponse {
+      data?: { actor?: { account?: { alerts?: { nrqlConditionsSearch?: { nrqlConditions?: NrqlCondition[] } } } } };
+    }
+    const json: NrqlSearchResponse = await res.json();
     const conditions = json?.data?.actor?.account?.alerts?.nrqlConditionsSearch?.nrqlConditions;
     if (!Array.isArray(conditions) || conditions.length === 0) return [...DEMO_ALERTS];
 
-    return conditions.slice(0, 10).map((c: any) => ({
-      id: String(c.id),
-      name: c.name ?? "Unknown",
-      type: c.type ?? "nrql",
-      enabled: c.enabled ?? true,
-      severity: "WARNING" as const,
-      threshold: 0,
-      currentValue: null,
-      violating: false,
-    }));
+    return conditions.slice(0, 10).map((c) => {
+      const criticalTerm = c.terms?.find((t) => t.priority === "CRITICAL");
+      const warningTerm = c.terms?.find((t) => t.priority === "WARNING");
+      const primaryTerm = criticalTerm ?? warningTerm;
+
+      return {
+        id: String(c.id),
+        name: c.name ?? "Unknown",
+        type: c.type ?? "nrql",
+        enabled: c.enabled ?? true,
+        severity: (criticalTerm ? "CRITICAL" : "WARNING") as "CRITICAL" | "WARNING",
+        threshold: primaryTerm?.threshold ?? 0,
+        currentValue: null,
+        violating: false,
+      };
+    });
   }
 }
