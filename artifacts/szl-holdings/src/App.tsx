@@ -44,6 +44,8 @@ const PilotTerraPage = lazy(() => import("@/pages/pilot-terra"));
 const PilotVesselsPage = lazy(() => import("@/pages/pilot-vessels"));
 const PilotAegisPage = lazy(() => import("@/pages/pilot-aegis"));
 const NexusCommandPage = lazy(() => import("@/pages/nexus-command"));
+const NexusExplorerPage = lazy(() => import("@/pages/nexus-explorer"));
+const OracleBriefingPage = lazy(() => import("@/pages/oracle-briefing"));
 const KpiDashboardPage = lazy(() => import("@/pages/kpi-dashboard"));
 const AICostAnalyticsPage = lazy(() => import("@/pages/ai-cost-analytics"));
 const AdminPage = lazy(() => import("@/pages/admin"));
@@ -703,6 +705,12 @@ function App() {
             </Route>
 
             {/* ── Admin routes ── */}
+            <Route path="/nexus/explorer">
+              <RequireAuth><Suspense fallback={<PageLoader />}><NexusExplorerPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/nexus/oracle">
+              <RequireAuth><Suspense fallback={<PageLoader />}><OracleBriefingPage /></Suspense></RequireAuth>
+            </Route>
             <Route path="/nexus">
               <RequireAuth><Suspense fallback={<PageLoader />}><NexusCommandPage /></Suspense></RequireAuth>
             </Route>
