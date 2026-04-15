@@ -15,7 +15,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)
 ![Apps](https://img.shields.io/badge/apps-22-gold)
 ![API_Endpoints](https://img.shields.io/badge/API_endpoints-2%2C331-orange)
-![DB_Tables](https://img.shields.io/badge/DB_tables-644-purple)
+![DB_Tables](https://img.shields.io/badge/DB_tables-685-purple)
 
 > Lyte is the command surface. Alloy is the execution fabric. CORTEX is the unified mobile command center. Domain packs extend the same system into security, maritime, real estate, legal, and consulting.
 
@@ -32,9 +32,9 @@
 | Production Web Applications | 10 |
 | Native Mobile Apps (Expo) | 2 unified command centers |
 | Shared Libraries | 37 packages |
-| API Route Files | 167 backend services |
+| API Route Files | 172 backend services |
 | API Endpoints | 2,331 |
-| Database Tables | 644 |
+| Database Tables | 685 |
 | Source Files | 1,620 TypeScript files |
 | Lines of Code | 450,000+ |
 | UI Components | 252 web + 116 mobile screens |
@@ -316,7 +316,7 @@ Auto-Execute (policy-approved)    Human Review Gate
 | `shared-ui` | Design system tokens and shared components |
 | `api-spec` | OpenAPI specification and code generation |
 | `auth` | Authentication middleware and session management |
-| `db` | Database schema (644 tables), migrations, and query builders |
+| `db` | Database schema (685 tables), migrations, and query builders |
 
 **Infrastructure:** Azure (App Service, PostgreSQL Flexible, Key Vault, Redis, CDN). IaC via Bicep templates.
 
@@ -374,21 +374,73 @@ See [Deployment Model](docs/trust/deployment-model.md) · [Branch Protection & C
 
 ## Documentation Map
 
+### Canonical Technical Reference (root-level)
+
+| Document | Purpose |
+|----------|---------|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | System-level architecture overview — service topology, artifact map, shared libraries, data flow, infrastructure |
+| [API-SPEC.md](API-SPEC.md) | Catalogue of all API surfaces (REST routes, GraphQL, MCP tools) with auth requirements and example payloads |
+| [DATA-MODEL.md](DATA-MODEL.md) | Database schema overview — 685 tables, domain groupings, key relationships, Drizzle ORM conventions |
+| [PRODUCT-SURFACES.md](PRODUCT-SURFACES.md) | Map of every user-facing artifact with purpose, audience, and entry points |
+| [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md) | Consolidated ops runbook — monitoring, incident triage, failure modes, database operations |
+| [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) | Step-by-step deployment for staging and production (Replit, Azure, CI/CD) |
+| [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) | Role/route/permission mappings for all artifacts |
+| [ANALYTICS-EVENTS.md](ANALYTICS-EVENTS.md) | Canonical event reference — naming conventions, event registry, properties, funnels |
+
+### Architecture & Design
+
 | Area | Document |
 |------|----------|
-| System architecture | [system-overview.md](docs/architecture/system-overview.md) |
-| Platform map | [platform-map.md](docs/architecture/platform-map.md) |
-| Data flow | [data-flow.md](docs/architecture/data-flow.md) |
-| Trust center | [trust-center.md](docs/trust/trust-center.md) |
-| Security posture | [security-posture.md](docs/trust/security-posture.md) |
-| Deployment model | [deployment-model.md](docs/trust/deployment-model.md) |
-| Platform thesis | [platform-thesis.md](docs/investor/platform-thesis.md) |
-| Product readiness | [product-readiness.md](docs/investor/product-readiness.md) |
-| Investor overview | [investor-overview.md](docs/investor/investor-overview.md) |
-| Buyer use cases | [use-cases.md](docs/buyer/use-cases.md) |
-| Ops runbook | [ops-runbook.md](docs/ops-runbook.md) |
-| Release notes | [v0.1.0.md](docs/releases/v0.1.0.md) |
+| System architecture narrative | [docs/architecture.md](docs/architecture.md) |
+| System topology detail | [docs/architecture/system-overview.md](docs/architecture/system-overview.md) |
+| Platform map | [docs/architecture/platform-map.md](docs/architecture/platform-map.md) |
+| Data flow | [docs/architecture/data-flow.md](docs/architecture/data-flow.md) |
+
+### Trust & Security
+
+| Area | Document |
+|------|----------|
+| Trust center | [docs/trust/trust-center.md](docs/trust/trust-center.md) |
+| Security posture | [docs/trust/security-posture.md](docs/trust/security-posture.md) |
+| Access control policy | [docs/ACCESS_CONTROL.md](docs/ACCESS_CONTROL.md) |
+| Secrets policy | [docs/SECRETS_POLICY.md](docs/SECRETS_POLICY.md) |
+
+### Investor & Product
+
+| Area | Document |
+|------|----------|
+| Platform thesis | [docs/investor/platform-thesis.md](docs/investor/platform-thesis.md) |
+| Product readiness | [docs/investor/product-readiness.md](docs/investor/product-readiness.md) |
+| Investor overview | [docs/investor/investor-overview.md](docs/investor/investor-overview.md) |
+| Platform overview | [docs/PLATFORM_OVERVIEW.md](docs/PLATFORM_OVERVIEW.md) |
+| Product matrix | [docs/PRODUCT_MATRIX.md](docs/PRODUCT_MATRIX.md) |
+| Buyer use cases | [docs/buyer/use-cases.md](docs/buyer/use-cases.md) |
+| Deployment model | [docs/trust/deployment-model.md](docs/trust/deployment-model.md) |
+
+### Operations & Development
+
+| Area | Document |
+|------|----------|
+| Ops runbook (source) | [docs/ops-runbook.md](docs/ops-runbook.md) |
+| Replit operations | [REPLIT_OPERATIONS.md](REPLIT_OPERATIONS.md) |
+| Environment variable matrix | [ENV_MATRIX.md](ENV_MATRIX.md) |
+| Deployment readiness checklist | [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) |
+| Route inventory | [ROUTE_INVENTORY.md](ROUTE_INVENTORY.md) |
+| Analytics plan | [ANALYTICS_PLAN.md](ANALYTICS_PLAN.md) |
+| Disaster recovery | [docs/disaster-recovery.md](docs/disaster-recovery.md) |
+| Backup & recovery | [BACKUP_AND_RECOVERY.md](BACKUP_AND_RECOVERY.md) |
+
+### Process & Governance
+
+| Area | Document |
+|------|----------|
+| Release process | [RELEASE_PROCESS.md](RELEASE_PROCESS.md) |
+| Release checklist | [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) |
 | Changelog | [CHANGELOG.md](CHANGELOG.md) |
+| Release notes | [docs/releases/v0.1.0.md](docs/releases/v0.1.0.md) |
+| Incident response | [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) |
+| Security disclosure | [SECURITY.md](SECURITY.md) |
+| Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
 
 ---
 
@@ -438,14 +490,19 @@ For engineering reviewers conducting Series A technical diligence, here is a str
 
 | Area | File |
 |------|------|
-| System architecture | [docs/architecture/system-overview.md](docs/architecture/system-overview.md) |
+| System architecture (canonical) | [ARCHITECTURE.md](ARCHITECTURE.md) |
+| API surface catalogue (canonical) | [API-SPEC.md](API-SPEC.md) |
+| Data model (canonical) | [DATA-MODEL.md](DATA-MODEL.md) |
+| Access control matrix (canonical) | [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) |
+| Product surfaces (canonical) | [PRODUCT-SURFACES.md](PRODUCT-SURFACES.md) |
+| System architecture narrative | [docs/architecture/system-overview.md](docs/architecture/system-overview.md) |
 | Platform map | [docs/architecture/platform-map.md](docs/architecture/platform-map.md) |
 | Security policy | [SECURITY.md](SECURITY.md) |
 | Trust center | [docs/trust/trust-center.md](docs/trust/trust-center.md) |
 | Product readiness | [docs/investor/product-readiness.md](docs/investor/product-readiness.md) |
 | CI configuration | [.github/workflows/ci.yml](.github/workflows/ci.yml) |
-| Database schema | `lib/db/schema/` |
-| API specification | `lib/api-spec/` |
+| Database schema | `lib/db/src/schema/` |
+| API specification (OpenAPI) | `lib/api-spec/openapi.yaml` |
 
 ---
 
@@ -457,7 +514,7 @@ For engineering reviewers conducting Series A technical diligence, here is a str
 - 10 production web applications across 8 industry verticals
 - CORTEX unified mobile command center (all domains in one native app)
 - Command Portal with real-time SSE, executive briefing, global search
-- 644 database tables, 2,331 API endpoints, 37 shared libraries
+- 685 database tables, 2,331 API endpoints, 37 shared libraries
 - Full audit trail, approval chains, and AI governance
 
 **Phase 2 (active):** Azure production deployment, Stripe billing activation, enterprise SSO, OpenAPI developer portal.
