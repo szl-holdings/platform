@@ -3,7 +3,8 @@ import { motion as m } from "framer-motion";
 import {
   Brain, Eye, Heart, Target, Clock, MessageSquare, Compass,
   Activity, AlertTriangle, TrendingUp, TrendingDown, Minus,
-  Sparkles, Lightbulb, Zap, Moon, Radio, Shield, GitBranch
+  Sparkles, Lightbulb, Zap, Moon, Radio, Shield, GitBranch,
+  Users, Crosshair, Scale, Gauge, Layers
 } from "lucide-react";
 
 const API = "/api/nuro-mesh/consciousness";
@@ -102,6 +103,9 @@ interface SnapshotData {
     knownLimitations: string[];
     learningVelocity: number;
     selfNarrative: string;
+    theoryOfMind: Array<{ agentId: string; domain: string; queryInterpretation: string; beliefConfidence: number; divergenceFromConsensus: number; blindSpots: string[]; timestamp: string }>;
+    recentCounterfactuals: Array<{ scenarioId: string; originalRouting: string[]; alternativeRouting: string[]; predictedOutcomeDelta: number; reasoning: string; timestamp: string }>;
+    adversarialProbes: Array<{ probeId: string; edgeCaseQuery: string; targetDomain: string; blindSpotExposed: string; severity: string; timestamp: string }>;
   };
   workspace: {
     workingMemory: Array<{ id: string; content: string; source: string; priority: number }>;
@@ -109,6 +113,8 @@ interface SnapshotData {
     contextBudget: { used: number; total: number; utilization: number };
     sessionDepth: number;
     recentQueries: string[];
+    recentBroadcasts: Array<{ broadcastId: string; winners: Array<{ itemId: string; salienceScore: number; content: string }>; losers: Array<{ itemId: string; salienceScore: number; reason: string }>; broadcastedTo: string[]; timestamp: string }>;
+    attentionSchema: { reportId: string; allocationSummary: Record<string, number>; driftDetected: boolean; driftDescription: string | null; rebalanceRecommendation: string | null; timestamp: string } | null;
   };
   monologue: {
     recentThoughts: Array<{ entryId: string; type: string; thought: string; emotionalTone: string; confidence: number; timestamp: string }>;
@@ -116,6 +122,9 @@ interface SnapshotData {
     thoughtFrequency: number;
     reflectionDepth: number;
     totalEntries: number;
+    dialecticalTriples: Array<{ tripleId: string; topic: string; thesis: string; antithesis: string; synthesis: string; confidence: number; timestamp: string }>;
+    socraticChains: Array<{ chainId: string; originalClaim: string; questions: Array<{ question: string; answer: string; depth: number }>; conclusion: string; assumptionsExposed: string[]; timestamp: string }>;
+    perspectiveSimulations: Array<{ simulationId: string; topic: string; perspectives: Array<{ viewpoint: string; argument: string; priority: string }>; synthesis: string; timestamp: string }>;
   };
   goals: {
     activeGoals: Array<{ goalId: string; title: string; priority: string; progress: number; status: string }>;
@@ -123,11 +132,17 @@ interface SnapshotData {
     blockedGoals: Array<{ goalId: string; title: string }>;
     curiosityQueue: Array<{ signalId: string; topic: string; intensity: number; source: string }>;
     overallProgress: number;
+    intrinsicMotivation: { informationGain: number; competenceGrowth: number; noveltySeeking: number; overallDrive: number; timestamp: string };
+    goalInterferences: Array<{ interferenceId: string; goalA: string; goalB: string; interferenceType: string; severity: number; resolution: string }>;
+    metaGoals: Array<{ metaGoalId: string; title: string; metric: string; currentValue: number; targetValue: number; trend: string; timestamp: string }>;
   };
   emotions: {
     activeSignals: Array<{ signalId: string; emotion: string; intensity: number; trigger: string; effectiveIntensity: number }>;
     valence: { positive: number; negative: number; arousal: number; dominantEmotion: string; emotionalStability: number };
     moodTrajectory: string;
+    recentAppraisals: Array<{ appraisalId: string; novelty: number; intrinsicPleasantness: number; goalRelevance: number; copingPotential: number; normCompatibility: number; resultingEmotion: string; resultingIntensity: number; breakdown: string; timestamp: string }>;
+    activeRegulations: Array<{ strategyId: string; strategy: string; targetEmotion: string; effectiveness: number; timestamp: string }>;
+    recentForecasts: Array<{ forecastId: string; scenario: string; predictedEmotion: string; predictedIntensity: number; confidence: number; timestamp: string }>;
   };
   temporal: {
     currentTime: string;
@@ -328,6 +343,46 @@ function SelfModelPanel({ data }: { data: SnapshotData["selfModel"] }) {
           </div>
         )}
 
+        {data.theoryOfMind && data.theoryOfMind.length > 0 && (
+          <div className="space-y-1">
+            <div className="text-[10px] text-blue-400 font-medium flex items-center gap-1">
+              <Users className="w-3 h-3" /> Theory of Mind ({data.theoryOfMind.length})
+            </div>
+            <div className="max-h-24 overflow-y-auto space-y-1">
+              {data.theoryOfMind.slice(0, 5).map(belief => (
+                <div key={`${belief.agentId}-${belief.timestamp}`} className="text-[10px] px-2 py-1 bg-white/[0.02] rounded">
+                  <div className="flex items-center justify-between">
+                    <span className="text-red-50 font-medium">{belief.agentId}</span>
+                    <span className={`${belief.divergenceFromConsensus > 0.3 ? "text-amber-400" : "text-gray-500"}`}>
+                      {(belief.beliefConfidence * 100).toFixed(0)}% conf
+                    </span>
+                  </div>
+                  <div className="text-gray-500 truncate">{belief.queryInterpretation.slice(0, 60)}</div>
+                  {belief.divergenceFromConsensus > 0.3 && (
+                    <div className="text-amber-400/70 text-[9px]">Divergence: {(belief.divergenceFromConsensus * 100).toFixed(0)}%</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {data.recentCounterfactuals && data.recentCounterfactuals.length > 0 && (
+          <div className="space-y-1">
+            <div className="text-[10px] text-purple-400 font-medium flex items-center gap-1">
+              <Scale className="w-3 h-3" /> Counterfactuals
+            </div>
+            {data.recentCounterfactuals.slice(0, 2).map(cf => (
+              <div key={cf.scenarioId} className="text-[10px] px-2 py-0.5 bg-white/[0.02] rounded">
+                <span className={`${cf.predictedOutcomeDelta > 0 ? "text-emerald-400" : cf.predictedOutcomeDelta < -5 ? "text-red-400" : "text-gray-400"}`}>
+                  {cf.predictedOutcomeDelta > 0 ? "+" : ""}{cf.predictedOutcomeDelta.toFixed(1)}%
+                </span>
+                <span className="text-gray-500 ml-1">{cf.reasoning.slice(0, 60)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
         {data.knownLimitations.length > 0 && (
           <div className="space-y-1">
             <div className="text-[10px] text-gray-500 font-medium flex items-center gap-1">
@@ -384,8 +439,8 @@ function MonologuePanel({ data }: { data: SnapshotData["monologue"] }) {
         </div>
 
         {data.recentThoughts.length > 0 ? (
-          <div className="space-y-2 max-h-48 overflow-y-auto">
-            {data.recentThoughts.slice(0, 8).map(t => (
+          <div className="space-y-2 max-h-32 overflow-y-auto">
+            {data.recentThoughts.slice(0, 6).map(t => (
               <m.div
                 key={t.entryId}
                 initial={{ opacity: 0, x: -8 }}
@@ -402,6 +457,59 @@ function MonologuePanel({ data }: { data: SnapshotData["monologue"] }) {
           </div>
         ) : (
           <div className="text-xs text-gray-500 italic">No thoughts recorded yet</div>
+        )}
+
+        {data.dialecticalTriples && data.dialecticalTriples.length > 0 && (
+          <div className="space-y-1 mt-2">
+            <div className="text-[10px] text-purple-400 font-medium flex items-center gap-1">
+              <Layers className="w-3 h-3" /> Dialectical Reasoning ({data.dialecticalTriples.length})
+            </div>
+            <div className="max-h-24 overflow-y-auto space-y-1">
+              {data.dialecticalTriples.slice(0, 3).map(dt => (
+                <div key={dt.tripleId} className="text-[10px] px-2 py-1 bg-white/[0.02] rounded space-y-0.5">
+                  <div className="text-gray-400"><span className="text-blue-400">T:</span> {dt.thesis.slice(0, 60)}</div>
+                  <div className="text-gray-400"><span className="text-red-400/80">A:</span> {dt.antithesis.slice(0, 60)}</div>
+                  <div className="text-gray-400"><span className="text-purple-400">S:</span> {dt.synthesis.slice(0, 60)}</div>
+                  <div className="text-gray-600 text-[9px]">{(dt.confidence * 100).toFixed(0)}% conf</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {data.socraticChains && data.socraticChains.length > 0 && (
+          <div className="space-y-1 mt-1">
+            <div className="text-[10px] text-cyan-400 font-medium flex items-center gap-1">
+              <Crosshair className="w-3 h-3" /> Socratic Inquiry ({data.socraticChains.length})
+            </div>
+            {data.socraticChains.slice(0, 2).map(sc => (
+              <div key={sc.chainId} className="text-[10px] px-2 py-1 bg-white/[0.02] rounded">
+                <div className="text-gray-400 truncate">Claim: {sc.originalClaim.slice(0, 60)}</div>
+                <div className="text-cyan-400/70">{sc.questions.length} questions → {sc.conclusion.slice(0, 60)}</div>
+                {sc.assumptionsExposed.length > 0 && (
+                  <div className="text-amber-400/60 text-[9px]">Assumptions: {sc.assumptionsExposed.slice(0, 2).join("; ").slice(0, 80)}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {data.perspectiveSimulations && data.perspectiveSimulations.length > 0 && (
+          <div className="space-y-1 mt-1">
+            <div className="text-[10px] text-blue-400 font-medium flex items-center gap-1">
+              <Users className="w-3 h-3" /> Perspective Simulations ({data.perspectiveSimulations.length})
+            </div>
+            {data.perspectiveSimulations.slice(0, 2).map(ps => (
+              <div key={ps.simulationId} className="text-[10px] px-2 py-0.5 bg-white/[0.02] rounded">
+                <div className="flex gap-1 flex-wrap mb-0.5">
+                  {ps.perspectives.map((p, i) => (
+                    <span key={i} className="px-1 py-0.5 text-[9px] bg-blue-500/10 text-blue-400/70 rounded">{p.viewpoint}</span>
+                  ))}
+                </div>
+                <div className="text-gray-500 truncate">{ps.synthesis.slice(0, 80)}</div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </Card>
@@ -463,6 +571,58 @@ function EmotionalPanel({ data }: { data: SnapshotData["emotions"] }) {
             ))}
           </div>
         )}
+
+        {data.recentAppraisals && data.recentAppraisals.length > 0 && (
+          <div className="space-y-1">
+            <div className="text-[10px] text-amber-400 font-medium flex items-center gap-1">
+              <Gauge className="w-3 h-3" /> Scherer Appraisals ({data.recentAppraisals.length})
+            </div>
+            <div className="max-h-24 overflow-y-auto space-y-1">
+              {data.recentAppraisals.slice(0, 3).map(ap => (
+                <div key={ap.appraisalId} className="text-[10px] px-2 py-1 bg-white/[0.02] rounded">
+                  <div className="flex items-center justify-between mb-0.5">
+                    <span className="text-red-50 font-medium">{ap.resultingEmotion}</span>
+                    <span className="text-gray-500">{(ap.resultingIntensity * 100).toFixed(0)}%</span>
+                  </div>
+                  <div className="grid grid-cols-5 gap-1">
+                    <div className="text-center">
+                      <div className="text-[8px] text-gray-600">NOV</div>
+                      <MiniBar value={ap.novelty} color="bg-blue-500/50" />
+                    </div>
+                    <div className="text-center">
+                      <div className="text-[8px] text-gray-600">PLS</div>
+                      <MiniBar value={ap.intrinsicPleasantness} color="bg-emerald-500/50" />
+                    </div>
+                    <div className="text-center">
+                      <div className="text-[8px] text-gray-600">GOL</div>
+                      <MiniBar value={ap.goalRelevance} color="bg-amber-500/50" />
+                    </div>
+                    <div className="text-center">
+                      <div className="text-[8px] text-gray-600">COP</div>
+                      <MiniBar value={ap.copingPotential} color="bg-cyan-500/50" />
+                    </div>
+                    <div className="text-center">
+                      <div className="text-[8px] text-gray-600">NRM</div>
+                      <MiniBar value={ap.normCompatibility} color="bg-purple-500/50" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {data.activeRegulations && data.activeRegulations.length > 0 && (
+          <div className="space-y-1">
+            <div className="text-[10px] text-gray-500 font-medium">Emotion Regulation</div>
+            {data.activeRegulations.slice(0, 2).map(reg => (
+              <div key={reg.strategyId} className="text-[10px] px-2 py-0.5 bg-white/[0.02] rounded flex items-center justify-between">
+                <span className="text-red-50">{reg.strategy} → {reg.targetEmotion}</span>
+                <span className="text-gray-500">{(reg.effectiveness * 100).toFixed(0)}%</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </Card>
   );
@@ -516,6 +676,50 @@ function GoalPanel({ data }: { data: SnapshotData["goals"] }) {
                 <span className="text-gray-500">{g.progress}%</span>
               </div>
             ))}
+          </div>
+        )}
+
+        {data.intrinsicMotivation && (
+          <div className="space-y-1">
+            <div className="text-[10px] text-blue-400 font-medium flex items-center gap-1">
+              <Gauge className="w-3 h-3" /> Intrinsic Motivation
+            </div>
+            <div className="grid grid-cols-4 gap-1">
+              <div className="text-center">
+                <div className="text-[8px] text-gray-600">INFO</div>
+                <div className="text-[10px] text-red-50">{(data.intrinsicMotivation.informationGain * 100).toFixed(0)}%</div>
+              </div>
+              <div className="text-center">
+                <div className="text-[8px] text-gray-600">COMP</div>
+                <div className="text-[10px] text-red-50">{(data.intrinsicMotivation.competenceGrowth * 100).toFixed(0)}%</div>
+              </div>
+              <div className="text-center">
+                <div className="text-[8px] text-gray-600">NOV</div>
+                <div className="text-[10px] text-red-50">{(data.intrinsicMotivation.noveltySeeking * 100).toFixed(0)}%</div>
+              </div>
+              <div className="text-center">
+                <div className="text-[8px] text-gray-600">DRIVE</div>
+                <div className="text-[10px] font-bold text-blue-400">{(data.intrinsicMotivation.overallDrive * 100).toFixed(0)}%</div>
+              </div>
+            </div>
+            <MiniBar value={data.intrinsicMotivation.overallDrive} color="bg-blue-500/60" />
+          </div>
+        )}
+
+        {data.metaGoals && data.metaGoals.length > 0 && (
+          <div className="space-y-1">
+            <div className="text-[10px] text-cyan-400 font-medium">Meta-Goals ({data.metaGoals.length})</div>
+            <div className="max-h-20 overflow-y-auto space-y-1">
+              {data.metaGoals.slice(0, 4).map(mg => (
+                <div key={mg.metaGoalId} className="flex items-center justify-between text-[10px] px-2 py-0.5 bg-white/[0.02] rounded">
+                  <div className="flex items-center gap-1">
+                    <TrendIcon trend={mg.trend} />
+                    <span className="text-red-50">{mg.title.slice(0, 30)}</span>
+                  </div>
+                  <span className="text-gray-500">{mg.currentValue.toFixed(0)}/{mg.targetValue.toFixed(0)}</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -806,7 +1010,7 @@ function DreamPanel({ data }: { data: DreamState }) {
 
 function GWTBroadcastPanel({ data }: { data: SnapshotData["workspace"] }) {
   return (
-    <Card title="GWT Attention Schema" icon={Radio} accent="cyan">
+    <Card title="GWT Broadcast & Attention" icon={Radio} accent="cyan">
       <div className="space-y-2 text-xs">
         <div>
           <span className="text-gray-500">Context Window:</span>
@@ -814,23 +1018,57 @@ function GWTBroadcastPanel({ data }: { data: SnapshotData["workspace"] }) {
         </div>
         <MiniBar value={data.attentionFocus.contextWindowUsage} color="bg-cyan-500/60" />
 
-        {data.attentionFocus.activeDomains.length > 0 && (
-          <div>
-            <div className="text-[10px] text-gray-500 mb-1">Broadcast Domains</div>
-            <div className="flex gap-1 flex-wrap">
-              {data.attentionFocus.activeDomains.map(d => (
-                <span key={d} className="px-1.5 py-0.5 text-[9px] bg-cyan-500/15 text-cyan-400 border border-cyan-500/20 rounded">{d}</span>
+        {data.attentionSchema && (
+          <div className="space-y-1">
+            <div className="text-[10px] text-cyan-400 font-medium">Attention Schema</div>
+            {Object.entries(data.attentionSchema.allocationSummary).slice(0, 5).map(([key, val]) => (
+              <div key={key} className="flex items-center gap-2 text-[10px]">
+                <span className="text-red-50 w-16 truncate">{key}</span>
+                <div className="flex-1"><MiniBar value={val} color="bg-cyan-500/40" /></div>
+                <span className="text-gray-500 w-8 text-right">{(val * 100).toFixed(0)}%</span>
+              </div>
+            ))}
+            {data.attentionSchema.driftDetected && (
+              <div className="text-[9px] text-amber-400 flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3" /> {data.attentionSchema.driftDescription ?? "Drift detected"}
+              </div>
+            )}
+            {data.attentionSchema.rebalanceRecommendation && (
+              <div className="text-[9px] text-cyan-400/70">{data.attentionSchema.rebalanceRecommendation.slice(0, 80)}</div>
+            )}
+          </div>
+        )}
+
+        {data.recentBroadcasts && data.recentBroadcasts.length > 0 && (
+          <div className="space-y-1">
+            <div className="text-[10px] text-gray-500 font-medium">Recent Broadcasts ({data.recentBroadcasts.length})</div>
+            <div className="max-h-24 overflow-y-auto space-y-1">
+              {data.recentBroadcasts.slice(0, 3).map(b => (
+                <div key={b.broadcastId} className="text-[10px] px-2 py-1 bg-white/[0.02] rounded">
+                  <div className="flex gap-1 mb-0.5">
+                    {b.winners.slice(0, 2).map(w => (
+                      <span key={w.itemId} className="px-1 py-0.5 text-[9px] bg-emerald-500/10 text-emerald-400/80 rounded truncate max-w-[100px]">
+                        {w.content.slice(0, 30)}
+                      </span>
+                    ))}
+                  </div>
+                  {b.losers.length > 0 && (
+                    <div className="text-[9px] text-gray-600">
+                      {b.losers.length} items below threshold
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </div>
         )}
 
-        {data.recentQueries && data.recentQueries.length > 0 && (
+        {data.attentionFocus.activeDomains.length > 0 && (
           <div>
-            <div className="text-[10px] text-gray-500 mb-1">Recent Queries</div>
-            <div className="max-h-16 overflow-y-auto space-y-0.5">
-              {data.recentQueries.slice(-3).reverse().map((q, i) => (
-                <div key={i} className="text-[10px] text-gray-400 truncate">{q.slice(0, 60)}</div>
+            <div className="text-[10px] text-gray-500 mb-1">Active Domains</div>
+            <div className="flex gap-1 flex-wrap">
+              {data.attentionFocus.activeDomains.map(d => (
+                <span key={d} className="px-1.5 py-0.5 text-[9px] bg-cyan-500/15 text-cyan-400 border border-cyan-500/20 rounded">{d}</span>
               ))}
             </div>
           </div>

@@ -1546,14 +1546,29 @@ export class NuroMeshOrchestrator {
       }
     }
 
-    const hypotheses = metacognitiveMonitor.forkHypotheses(query, context.slice(0, 500));
-    if (hypotheses.length > 1) {
-      cognitiveWorkspace.addToWorkingMemory(
-        `[Multi-hypothesis] ${hypotheses.map(h => `${h.hypothesis.slice(0, 60)} (${h.confidence}%)`).join(" | ")}`,
-        "hypothesis_fork",
-        6,
-        ["metacognition"],
-      );
+    const uncertaintySignals = AGENT_REGISTRY.map(agent => {
+      const profile = preRoutingSelfModel.capabilities.find(c => c.agentId === agent.id);
+      if (!profile) return 0;
+      return metacognitiveMonitor.predictUncertainty({
+        agentId: agent.id, domain: agent.domain, queryComplexity: query.length,
+        agentSuccessRate: profile.successRate, agentAvgConfidence: profile.avgConfidence,
+        knowledgeGapDomains: preRoutingMetacog.currentAssessment?.knowledgeGaps ?? [],
+        queryLength: query.length, recentFailures: profile.recentTrend === "declining" ? 3 : 0,
+      }).predictedFailureProbability;
+    });
+    const maxUncertainty = Math.max(...uncertaintySignals, 0);
+    const lowCertainty = preRoutingMetacog.rollingCertainty < 0.5;
+
+    if (maxUncertainty > 0.5 || lowCertainty) {
+      const hypotheses = metacognitiveMonitor.forkHypotheses(query, context.slice(0, 500));
+      if (hypotheses.length > 1) {
+        cognitiveWorkspace.addToWorkingMemory(
+          `[Multi-hypothesis] ${hypotheses.map(h => `${h.hypothesis.slice(0, 60)} (${h.confidence}%)`).join(" | ")}`,
+          "hypothesis_fork",
+          6,
+          ["metacognition"],
+        );
+      }
     }
 
     const allDomains = [...new Set(AGENT_REGISTRY.map(a => a.domain))];
@@ -1694,13 +1709,24 @@ export class NuroMeshOrchestrator {
     });
 
     const queryTypeLower = query.toLowerCase();
-    const detectedQueryType =
-      queryTypeLower.includes("how") || queryTypeLower.includes("explain") ? "analytical" :
-      queryTypeLower.includes("status") || queryTypeLower.includes("check") || queryTypeLower.includes("monitor") ? "monitoring" :
-      queryTypeLower.includes("create") || queryTypeLower.includes("build") || queryTypeLower.includes("set up") ? "operational" :
-      queryTypeLower.includes("risk") || queryTypeLower.includes("threat") || queryTypeLower.includes("security") ? "security" :
-      queryTypeLower.includes("report") || queryTypeLower.includes("summary") || queryTypeLower.includes("overview") ? "reporting" :
-      "general";
+    const QUERY_TYPE_KEYWORDS_INLINE: Record<string, string[]> = {
+      security: ["threat", "vulnerability", "attack", "breach", "incident", "malware", "phishing", "cve", "risk"],
+      maritime: ["vessel", "ship", "port", "cargo", "fleet", "ais", "imo", "maritime"],
+      financial: ["fund", "investment", "revenue", "portfolio", "nav", "irr", "financial", "budget"],
+      legal: ["compliance", "regulation", "contract", "litigation", "statute", "legal", "lawsuit"],
+      realestate: ["property", "lease", "tenant", "building", "real estate", "cap rate", "noi"],
+      operational: ["infrastructure", "deployment", "performance", "latency", "uptime", "sla", "create", "build", "set up", "status", "check", "monitor"],
+      intelligence: ["analysis", "intelligence", "pattern", "trend", "forecast", "prediction", "how", "explain", "report", "summary", "overview"],
+    };
+    let detectedQueryType = "general";
+    let bestScore = 0;
+    for (const [qtype, keywords] of Object.entries(QUERY_TYPE_KEYWORDS_INLINE)) {
+      const score = keywords.filter(k => queryTypeLower.includes(k)).length;
+      if (score > bestScore) {
+        bestScore = score;
+        detectedQueryType = qtype;
+      }
+    }
 
     predictiveProcessing.recordOutcome({
       predictionId: prediction.predictionId,
