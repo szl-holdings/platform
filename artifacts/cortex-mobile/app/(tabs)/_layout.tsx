@@ -1,10 +1,14 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
+import type { ComponentProps } from "react";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { Redirect, Tabs, router } from "expo-router";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { SymbolView } from "expo-symbols";
 import React, { useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
+type SFIconName = ComponentProps<typeof SymbolView>["name"];
+type FeatherIconName = ComponentProps<typeof Feather>["name"];
 import { SpotlightFab, SpotlightModal, type SpotlightCommand } from "@szl-holdings/mobile-shared/components";
 import { useEcosystemTabBarScreenOptions } from "@szl-holdings/mobile-shared";
 
@@ -66,19 +70,19 @@ function NativeTabLayout() {
   return (
     <NativeTabs>
       <NativeTabs.Trigger name="index">
-        <Icon sf={{ default: tabs[0]?.sfIcon ?? "square.grid.2x2", selected: tabs[0]?.sfIconSelected ?? "square.grid.2x2.fill" } as any} />
+        <Icon sf={{ default: (tabs[0]?.sfIcon ?? "square.grid.2x2") as SFIconName, selected: (tabs[0]?.sfIconSelected ?? "square.grid.2x2.fill") as SFIconName }} />
         <Label>{tabs[0]?.label ?? "Command"}</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="signals">
-        <Icon sf={{ default: tabs[1]?.sfIcon ?? "bell", selected: tabs[1]?.sfIconSelected ?? "bell.fill" } as any} />
+        <Icon sf={{ default: (tabs[1]?.sfIcon ?? "bell") as SFIconName, selected: (tabs[1]?.sfIconSelected ?? "bell.fill") as SFIconName }} />
         <Label>{tabs[1]?.label ?? "Signals"}</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="feed">
-        <Icon sf={{ default: "brain.head.profile", selected: "brain.head.profile.fill" } as any} />
+        <Icon sf={{ default: "brain.head.profile" as SFIconName, selected: "brain.head.profile.fill" as SFIconName }} />
         <Label>Feed</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="copilot">
-        <Icon sf={{ default: "bubble.left.and.bubble.right", selected: "bubble.left.and.bubble.right.fill" } as any} />
+        <Icon sf={{ default: "bubble.left.and.bubble.right" as SFIconName, selected: "bubble.left.and.bubble.right.fill" as SFIconName }} />
         <Label>{tabs[2]?.label ?? "Copilot"}</Label>
       </NativeTabs.Trigger>
     </NativeTabs>
@@ -112,9 +116,9 @@ function ClassicTabLayout() {
           headerRight: () => <ProfileButton color={config.accentColor} />,
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name={(tabs[0]?.sfIconSelected ?? "square.grid.2x2.fill") as any} tintColor={color} size={22} />
+              <SymbolView name={(tabs[0]?.sfIconSelected ?? "square.grid.2x2.fill") as SFIconName} tintColor={color} size={22} />
             ) : (
-              <Feather name={(tabs[0]?.androidIcon as any) ?? "grid"} size={20} color={color} />
+              <Feather name={(tabs[0]?.androidIcon ?? "grid") as FeatherIconName} size={20} color={color} />
             ),
         }}
       />
@@ -124,9 +128,9 @@ function ClassicTabLayout() {
           title: tabs[1]?.label ?? "Signals",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name={(tabs[1]?.sfIconSelected ?? "bell.fill") as any} tintColor={color} size={22} />
+              <SymbolView name={(tabs[1]?.sfIconSelected ?? "bell.fill") as SFIconName} tintColor={color} size={22} />
             ) : (
-              <Feather name={(tabs[1]?.androidIcon as any) ?? "bell"} size={20} color={color} />
+              <Feather name={(tabs[1]?.androidIcon ?? "bell") as FeatherIconName} size={20} color={color} />
             ),
         }}
       />
