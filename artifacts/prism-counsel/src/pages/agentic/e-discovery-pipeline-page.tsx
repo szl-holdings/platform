@@ -81,7 +81,6 @@ export default function EDiscoveryPipelinePage() {
   const handlePrivilegeDecision = useCallback((doc: string, decision: "withhold" | "produce") => {
     setPrivilegeDocs(prev => prev.map(p => p.doc === doc ? { ...p, decision } : p));
   }, []);
-
   const stageIndex = pipelineStages.indexOf(
     selected.status === "collecting" ? "Collection" :
     selected.status === "processing" ? "Processing" :

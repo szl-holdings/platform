@@ -7,7 +7,8 @@ import {
   Database, Play, Activity, CheckSquare, Shield, Network, Heart,
   AlertTriangle, Brain, Radio, Workflow, Inbox, Search, UserCheck,
   ChevronRight, Gauge, BarChart3, LayoutDashboard, Download, Clapperboard, Power,
-  GitBranch, Send, Cpu, TrendingUp, DollarSign, RotateCcw, Calculator
+  GitBranch, Send, Cpu, TrendingUp, DollarSign, RotateCcw, Calculator,
+  Bot, Monitor, Building, BookOpen, Layers, Calendar, BellOff, Code
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, useSandboxMode, EnvironmentLabel, type OnboardingConfig } from "@szl-holdings/shared-ui";
 import { useDemoMode } from "@/lib/demo-mode";
@@ -119,6 +120,20 @@ const NAV_GROUPS = [
       { href: "/outcome-loop", label: "Outcome Loop", icon: Activity },
       { href: "/defer-lane", label: "Defer Lane", icon: Gauge },
       { href: "/shadow-mode", label: "Shadow Mode", icon: Brain },
+    ],
+  },
+  {
+    label: "Autonomous NOC",
+    items: [
+      { href: "/autonomous-noc", label: "Autonomous NOC", icon: Bot },
+      { href: "/noise-reduction", label: "Noise Reduction", icon: BellOff },
+      { href: "/knowledge-graph", label: "Knowledge Graph", icon: Network },
+      { href: "/runbook-studio", label: "Runbook Studio", icon: BookOpen },
+      { href: "/change-management", label: "Change Management", icon: Calendar },
+      { href: "/capacity-planning", label: "Capacity Planning", icon: Layers },
+      { href: "/dex", label: "DEX Scoring", icon: Monitor },
+      { href: "/msp-command", label: "MSP Command", icon: Building },
+      { href: "/dev-feedback", label: "Dev Feedback", icon: Code },
     ],
   },
   {

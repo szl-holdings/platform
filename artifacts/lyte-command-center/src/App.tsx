@@ -141,6 +141,17 @@ const ClientValue = lazy(() => import("@/pages/client-value"));
 const OpsSavings = lazy(() => import("@/pages/ops-savings"));
 const EscalationIntelligence = lazy(() => import("@/pages/escalation-intelligence"));
 
+// ─── Autonomous NOC & AIOps 2.0 ───────────────────────────────────────────────
+const AutonomousNOC = lazy(() => import("@/pages/autonomous-noc"));
+const DEXScoring = lazy(() => import("@/pages/dex-scoring"));
+const MSPCommand = lazy(() => import("@/pages/msp-command"));
+const RunbookStudio = lazy(() => import("@/pages/runbook-studio"));
+const CapacityPlanning = lazy(() => import("@/pages/capacity-planning"));
+const ChangeManagement = lazy(() => import("@/pages/change-management"));
+const NoiseReduction = lazy(() => import("@/pages/noise-reduction"));
+const KnowledgeGraph = lazy(() => import("@/pages/knowledge-graph"));
+const DevFeedback = lazy(() => import("@/pages/dev-feedback"));
+
 const ADMIN_ROLES = ["admin", "super_admin", "ops"];
 
 function AdminRoute({ component: Component }: { component: React.ComponentType }) {
@@ -257,6 +268,16 @@ function PrivateRouter() {
         <Route path="/client-value" component={ClientValue} />
         <Route path="/ops-savings" component={OpsSavings} />
         <Route path="/escalation-intelligence" component={EscalationIntelligence} />
+        {/* Autonomous NOC & AIOps 2.0 */}
+        <Route path="/autonomous-noc" component={AutonomousNOC} />
+        <Route path="/dex" component={DEXScoring} />
+        <Route path="/msp-command" component={MSPCommand} />
+        <Route path="/runbook-studio" component={RunbookStudio} />
+        <Route path="/capacity-planning" component={CapacityPlanning} />
+        <Route path="/change-management" component={ChangeManagement} />
+        <Route path="/noise-reduction" component={NoiseReduction} />
+        <Route path="/knowledge-graph" component={KnowledgeGraph} />
+        <Route path="/dev-feedback" component={DevFeedback} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>
@@ -292,6 +313,15 @@ const lyteCommands: CommandItem[] = [
   { id: "nav-client-value", label: "Client Value Dashboard", icon: "👥", group: "Revenue & Self-Healing", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/client-value"); } },
   { id: "nav-ops-savings", label: "Ops Savings Calculator", icon: "🧮", group: "Revenue & Self-Healing", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ops-savings"); } },
   { id: "nav-escalation-intel", label: "Escalation Intelligence", icon: "🧠", group: "Revenue & Self-Healing", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/escalation-intelligence"); } },
+  { id: "nav-autonomous-noc", label: "Autonomous NOC", icon: "🤖", group: "Autonomous NOC", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/autonomous-noc"); } },
+  { id: "nav-noise-reduction", label: "Noise Reduction & Alert Correlation", icon: "🔕", group: "Autonomous NOC", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/noise-reduction"); } },
+  { id: "nav-knowledge-graph", label: "Infrastructure Knowledge Graph", icon: "🕸️", group: "Autonomous NOC", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/knowledge-graph"); } },
+  { id: "nav-runbook-studio", label: "Runbook Automation Studio", icon: "📋", group: "Autonomous NOC", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/runbook-studio"); } },
+  { id: "nav-change-management", label: "Change Management Intelligence", icon: "📅", group: "Autonomous NOC", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/change-management"); } },
+  { id: "nav-capacity-planning", label: "Capacity Planning & Cost Optimization", icon: "📊", group: "Autonomous NOC", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/capacity-planning"); } },
+  { id: "nav-dex", label: "DEX Scoring", icon: "🖥️", group: "Autonomous NOC", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/dex"); } },
+  { id: "nav-msp-command", label: "Multi-Tenant MSP Command", icon: "🏢", group: "Autonomous NOC", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/msp-command"); } },
+  { id: "nav-dev-feedback", label: "Observability Dev Feedback", icon: "💻", group: "Autonomous NOC", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/dev-feedback"); } },
   ...createBaselineWebActions(
     (path) => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, path); },
     {
