@@ -52,6 +52,37 @@ export type {
 
 export { RAGPipeline, chunkText } from "./rag-pipeline.js";
 
+export {
+  EmbeddingPipeline,
+  embeddingPipeline,
+  getEmbedding,
+  type EmbeddingResult,
+  type BatchEmbeddingResult,
+  type EmbedOptions,
+  type BatchEmbedOptions,
+  type ProviderHealth,
+  type EmbeddingProviderType,
+} from "./embedding/provider.js";
+
+export {
+  getDomainModelConfig,
+  inferDomain,
+  getAllDomainConfigs,
+  RAG_DB_DIMENSIONS,
+  type EmbeddingDomain,
+  type DomainEmbeddingConfig,
+} from "./embedding/domain-config.js";
+
+export {
+  embeddingAnalytics,
+  type EmbeddingAnalyticsReport,
+} from "./embedding/analytics.js";
+
+export {
+  createEmbeddingAnalyticsRouter,
+  getEmbeddingAnalytics,
+} from "./embedding/analytics-endpoint.js";
+
 export { DomainAgentRunner, getOrCreateConversation, MAX_TOOL_ROUNDS, type ConversationMessage, type ChatInterface, type NativeToolCall, type StructuredCompletionResult } from "./domain-agent-runner.js";
 
 export { routeModel, getModelSlots, getRouteConfig, type RouteClass, type ModelSlot, type RouteResult } from "./providers/hf-router.js";

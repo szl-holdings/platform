@@ -1,4 +1,5 @@
 import type { RAGChunk } from "./types.js";
+import type { EmbedOptions } from "./embedding/index.js";
 
 function cosineSimilarity(a: number[], b: number[]): number {
   let dot = 0, magA = 0, magB = 0;
@@ -57,6 +58,30 @@ export class RAGPipeline {
       .filter(s => s.score > 0)
       .sort((a, b) => b.score - a.score);
     return scored.slice(0, topK).map(s => s.chunk);
+  }
+
+  async ingestAndEmbed(content: string, metadata?: Record<string, unknown>, options?: EmbedOptions & { chunkSize?: number }): Promise<RAGChunk[]> {
+    const { chunkSize, ...embedOptions } = options ?? {};
+    const newChunks = this.ingest(content, metadata, chunkSize);
+    const { embeddingPipeline } = await import("./embedding/index.js");
+    const batchResult = await embeddingPipeline.embedBatch(
+      newChunks.map(c => c.content),
+      { ...embedOptions, concurrency: 5 },
+    );
+    for (let i = 0; i < newChunks.length; i++) {
+      const res = batchResult.results[i];
+      if (res && !res.error) {
+        this.setEmbedding(newChunks[i]!.id, res.embedding);
+      }
+    }
+    return newChunks;
+  }
+
+  async embedAndRetrieve(query: string, topK = 5, options?: EmbedOptions): Promise<RAGChunk[]> {
+    const { getEmbedding } = await import("./embedding/index.js");
+    const embedding = await getEmbedding(query, options);
+    if (!embedding) return this.retrieveByKeyword(query, topK);
+    return this.retrieve(embedding, topK);
   }
 
   clear(): void {

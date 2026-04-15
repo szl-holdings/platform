@@ -104,14 +104,11 @@ export function createChunks(content: string, meta: ChunkMetadata, prefix = ""):
   });
 }
 
-export async function generateEmbedding(text: string): Promise<number[] | null> {
+export async function generateEmbedding(text: string, domain?: string): Promise<number[] | null> {
   try {
-    const { openai } = await import("@szl-holdings/integrations-openai-ai-server");
-    const response = await openai.embeddings.create({
-      model: "text-embedding-3-small",
-      input: text.slice(0, 8000),
-    });
-    return response.data[0]?.embedding ?? null;
+    const { getEmbedding, inferDomain } = await import("./embedding/index.js");
+    const embeddingDomain = domain ? inferDomain(domain) : undefined;
+    return await getEmbedding(text, embeddingDomain ? { domain: embeddingDomain } : undefined);
   } catch {
     return null;
   }
@@ -122,12 +119,24 @@ export async function ingestToVectorStore(content: string, meta: ChunkMetadata, 
 
   try {
     const { upsertChunksBatch } = await import("./rag-vector-store.js");
-    const chunksWithEmbeddings = await Promise.all(
-      chunks.map(async chunk => {
-        const embedding = await generateEmbedding(chunk.content);
-        return { ...chunk, embedding };
-      })
-    );
+    const { embeddingPipeline, inferDomain, RAG_DB_DIMENSIONS } = await import("./embedding/index.js");
+    const embeddingDomain = inferDomain(meta.domain);
+
+    const texts = chunks.map(c => c.content);
+    const batchResult = await embeddingPipeline.embedBatch(texts, { domain: embeddingDomain, concurrency: 5 });
+
+    const chunksWithEmbeddings = chunks.map((chunk, i) => {
+      const res = batchResult.results[i];
+      if (!res || res.error) return { ...chunk, embedding: null };
+      if (res.embedding.length !== RAG_DB_DIMENSIONS) {
+        console.warn(
+          `[rag-ingestion] Skipping embedding for chunk ${chunk.id}: ` +
+          `expected ${RAG_DB_DIMENSIONS} dimensions, got ${res.embedding.length} from ${res.provider}/${res.model}`,
+        );
+        return { ...chunk, embedding: null };
+      }
+      return { ...chunk, embedding: res.embedding };
+    });
     await upsertChunksBatch(chunksWithEmbeddings);
     return chunks;
   } catch (err) {

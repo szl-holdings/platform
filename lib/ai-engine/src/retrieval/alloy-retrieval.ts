@@ -1,5 +1,6 @@
 import type { EvidenceItem } from "../schemas/action-decision.js";
 import type { SensitivityLevel, RagSourceType } from "../types.js";
+import type { EmbedOptions } from "../embedding/index.js";
 
 export interface RetrievalChunk {
   id: string;
@@ -142,6 +143,28 @@ export class AlloyRetrievalEngine {
       totalIndexed: this.chunks.length,
       latencyMs: Date.now() - start,
     };
+  }
+
+  async ingestAndEmbed(content: string, source: string, sourceType: RetrievalChunk["sourceType"], metadata?: Record<string, unknown>, embedOptions?: EmbedOptions): Promise<RetrievalChunk[]> {
+    const newChunks = this.ingest(content, source, sourceType, metadata);
+    const { embeddingPipeline } = await import("../embedding/index.js");
+    const batchResult = await embeddingPipeline.embedBatch(
+      newChunks.map(c => c.content),
+      { ...embedOptions, concurrency: 5 },
+    );
+    for (let i = 0; i < newChunks.length; i++) {
+      const res = batchResult.results[i];
+      if (res && !res.error && newChunks[i]) {
+        this.setEmbedding(newChunks[i]!.id, res.embedding);
+      }
+    }
+    return newChunks;
+  }
+
+  async embedAndRetrieveHybrid(query: string, topK: number = 12, embedOptions?: EmbedOptions): Promise<RetrievalResult> {
+    const { getEmbedding } = await import("../embedding/index.js");
+    const queryEmbedding = await getEmbedding(query, embedOptions);
+    return this.retrieveHybrid(query, queryEmbedding, topK);
   }
 
   async retrieveFromDb(query: string, queryEmbedding: number[] | null, options: {
