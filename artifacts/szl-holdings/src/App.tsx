@@ -164,6 +164,15 @@ const DistOsEmbeds = lazy(() => import("@/pages/distribution-os/embeds-feeds"));
 const DistOsDeveloperApi = lazy(() => import("@/pages/distribution-os/developer-api"));
 const DistOsCrossAnalytics = lazy(() => import("@/pages/distribution-os/cross-platform-analytics"));
 const DistOsGrowth = lazy(() => import("@/pages/distribution-os/growth-engine"));
+const DistOsVirality = lazy(() => import("@/pages/distribution-os/predictive-virality"));
+const DistOsAudienceGenome = lazy(() => import("@/pages/distribution-os/audience-genome"));
+const DistOsAbTesting = lazy(() => import("@/pages/distribution-os/ab-testing"));
+const DistOsMonetization = lazy(() => import("@/pages/distribution-os/monetization-optimizer"));
+const DistOsSeoIntelligence = lazy(() => import("@/pages/distribution-os/seo-intelligence"));
+const DistOsTrendRadar = lazy(() => import("@/pages/distribution-os/trend-radar"));
+const DistOsAttribution = lazy(() => import("@/pages/distribution-os/content-attribution"));
+const DistOsSegments = lazy(() => import("@/pages/distribution-os/audience-segments"));
+const DistOsLifecycle = lazy(() => import("@/pages/distribution-os/lifecycle-intelligence"));
 
 const VenturePortfolioPage = lazy(() => import("@/pages/venture-portfolio"));
 
@@ -1049,6 +1058,33 @@ function App() {
             </Route>
             <Route path="/admin/distribution/growth">
               <RequireAuth><Suspense fallback={<PageLoader />}><DistOsGrowth /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/virality">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsVirality /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/audience-genome">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsAudienceGenome /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/ab-testing">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsAbTesting /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/monetization">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsMonetization /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/seo-intelligence">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsSeoIntelligence /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/trend-radar">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsTrendRadar /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/attribution">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsAttribution /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/segments">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsSegments /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/lifecycle">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsLifecycle /></Suspense></RequireAuth>
             </Route>
             <Route path="/admin/distribution">
               <RequireAuth><Suspense fallback={<PageLoader />}><DistOsDashboard /></Suspense></RequireAuth>

@@ -7,6 +7,7 @@ import {
   AlertCircle, ChevronRight, Globe, Link2, Target, Clock, CheckCircle2,
   Activity, RefreshCw, LineChart, ArrowUpRight, ArrowDownRight, Minus,
   Atom, Code2, Rss, Gift, Layers,
+  Flame, Dna, FlaskConical, DollarSign, Search, Radio, GitBranch, Shuffle, Recycle,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { RoleSelector, DataProvenance, ActionLoop } from "@szl-holdings/shared-ui";
@@ -60,6 +61,15 @@ const NAV_ITEMS = [
   { href: "/admin/distribution/reports", icon: LineChart, label: "Reports" },
   { href: "/admin/distribution/automations", icon: Zap, label: "Automations" },
   { href: "/admin/distribution/settings", icon: Settings, label: "Settings" },
+  { href: "/admin/distribution/virality", icon: Flame, label: "Virality Engine" },
+  { href: "/admin/distribution/audience-genome", icon: Dna, label: "Audience Genome" },
+  { href: "/admin/distribution/ab-testing", icon: FlaskConical, label: "A/B Testing" },
+  { href: "/admin/distribution/monetization", icon: DollarSign, label: "Monetization" },
+  { href: "/admin/distribution/seo-intelligence", icon: Search, label: "SEO Intelligence" },
+  { href: "/admin/distribution/trend-radar", icon: Radio, label: "Trend Radar" },
+  { href: "/admin/distribution/attribution", icon: GitBranch, label: "Attribution" },
+  { href: "/admin/distribution/segments", icon: Shuffle, label: "Segments" },
+  { href: "/admin/distribution/lifecycle", icon: Recycle, label: "Lifecycle" },
 ];
 
 export function DistributionOsLayout({ children, currentPath }: { children: React.ReactNode; currentPath: string }) {
