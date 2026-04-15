@@ -1,4 +1,5 @@
 import { ServiceAdapter } from "../base.js";
+import { Storage } from "@google-cloud/storage";
 
 export interface UploadResult {
   key: string;
@@ -16,85 +17,95 @@ export interface StoredFile {
   lastModified: string;
 }
 
-const MOCK_FILES: StoredFile[] = [
-  {
-    key: "documents/q1-report.pdf",
-    url: "https://storage.example.com/mock/documents/q1-report.pdf",
-    size: 245000,
-    contentType: "application/pdf",
-    lastModified: "2026-03-20T10:00:00Z",
-  },
-  {
-    key: "images/logo.png",
-    url: "https://storage.example.com/mock/images/logo.png",
-    size: 48000,
-    contentType: "image/png",
-    lastModified: "2026-02-15T08:30:00Z",
-  },
-];
+const REPLIT_SIDECAR_ENDPOINT = "http://127.0.0.1:1106";
+
+function createGCSClient(): Storage {
+  return new Storage({
+    credentials: {
+      audience: "replit",
+      subject_token_type: "access_token",
+      token_url: `${REPLIT_SIDECAR_ENDPOINT}/token`,
+      type: "external_account",
+      credential_source: {
+        url: `${REPLIT_SIDECAR_ENDPOINT}/credential`,
+        format: {
+          type: "json",
+          subject_token_field_name: "access_token",
+        },
+      },
+      universe_domain: "googleapis.com",
+    } as any,
+    projectId: "",
+  });
+}
 
 export class StorageAdapter extends ServiceAdapter {
   readonly name = "storage";
-  readonly description = "Cloud file storage (S3-compatible)";
-  readonly requiredEnvVars = [
-    "STORAGE_ACCESS_KEY",
-    "STORAGE_SECRET_KEY",
-    "STORAGE_BUCKET",
-  ];
+  readonly description = "Cloud file storage (GCS — Replit Object Storage)";
+  readonly requiredEnvVars = ["DEFAULT_OBJECT_STORAGE_BUCKET_ID"];
 
   protected async performHealthCheck(): Promise<void> {
-    const bucket = process.env["STORAGE_BUCKET"];
-    const endpoint = process.env["STORAGE_ENDPOINT"] || "https://s3.amazonaws.com";
-    const response = await fetch(`${endpoint}/${bucket}?max-keys=1`, {
-      method: "GET",
-      headers: {
-        "x-amz-content-sha256": "UNSIGNED-PAYLOAD",
-      },
-    });
-    if (!response.ok && response.status !== 403) throw new Error(`Storage returned ${response.status}`);
-    if (response.status === 403) throw new Error("Storage authentication failed");
+    const bucketId = process.env["DEFAULT_OBJECT_STORAGE_BUCKET_ID"];
+    if (!bucketId) {
+      throw new Error("DEFAULT_OBJECT_STORAGE_BUCKET_ID is not set");
+    }
+    const client = createGCSClient();
+    const [exists] = await client.bucket(bucketId).exists();
+    if (!exists) {
+      throw new Error(`GCS bucket '${bucketId}' does not exist or is inaccessible`);
+    }
   }
 
   async upload(
     key: string,
-    _data: Buffer | string,
+    data: Buffer | string,
     contentType: string,
   ): Promise<UploadResult> {
-    if (!this.isLive) {
-      const size = typeof _data === "string" ? Buffer.byteLength(_data) : _data.length;
+    const bucketId = process.env["DEFAULT_OBJECT_STORAGE_BUCKET_ID"];
+    const size = typeof data === "string" ? Buffer.byteLength(data) : data.length;
+
+    if (!this.isLive || !bucketId) {
       return {
         key,
-        url: `https://storage.example.com/mock/${key}`,
+        url: `https://storage.googleapis.com/${bucketId ?? "mock-bucket"}/${key}`,
         size,
         contentType,
-        mock: true,
+        mock: !bucketId,
       };
     }
 
-    const bucket = process.env["STORAGE_BUCKET"]!;
-    const endpoint = process.env["STORAGE_ENDPOINT"] ?? "https://s3.amazonaws.com";
-    const _accessKey = process.env["STORAGE_ACCESS_KEY"]!;
+    const client = createGCSClient();
+    const bucket = client.bucket(bucketId);
+    const file = bucket.file(key);
 
-    const url = `${endpoint}/${bucket}/${key}`;
-    const size = typeof _data === "string" ? Buffer.byteLength(_data) : _data.length;
+    const buffer = typeof data === "string" ? Buffer.from(data) : data;
+    await file.save(buffer, { contentType, resumable: false });
 
-    return {
-      key,
-      url,
-      size,
-      contentType,
-      mock: false,
-    };
+    const url = `https://storage.googleapis.com/${bucketId}/${key}`;
+    return { key, url, size, contentType, mock: false };
   }
 
   async listFiles(prefix?: string): Promise<StoredFile[]> {
-    if (!this.isLive) {
-      if (prefix) {
-        return MOCK_FILES.filter((f) => f.key.startsWith(prefix));
-      }
-      return [...MOCK_FILES];
+    const bucketId = process.env["DEFAULT_OBJECT_STORAGE_BUCKET_ID"];
+    if (!this.isLive || !bucketId) {
+      return [];
     }
 
-    return [...MOCK_FILES];
+    const client = createGCSClient();
+    const bucket = client.bucket(bucketId);
+    const [files] = await bucket.getFiles({ prefix });
+
+    return await Promise.all(
+      files.map(async (file) => {
+        const [meta] = await file.getMetadata();
+        return {
+          key: file.name,
+          url: `https://storage.googleapis.com/${bucketId}/${file.name}`,
+          size: parseInt(String(meta.size ?? "0"), 10),
+          contentType: String(meta.contentType ?? "application/octet-stream"),
+          lastModified: String(meta.updated ?? new Date().toISOString()),
+        };
+      }),
+    );
   }
 }

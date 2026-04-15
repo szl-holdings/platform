@@ -2835,6 +2835,10 @@ importers:
         version: 19.2.14
 
   lib/services:
+    dependencies:
+      '@google-cloud/storage':
+        specifier: ^7.19.0
+        version: 7.19.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'

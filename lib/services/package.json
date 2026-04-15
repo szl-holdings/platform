@@ -18,6 +18,9 @@
       "import": "./src/index.ts"
     }
   },
+  "dependencies": {
+    "@google-cloud/storage": "^7.19.0"
+  },
   "devDependencies": {
     "@types/node": "catalog:"
   }

@@ -1,0 +1,6 @@
+[
+  { "id": 1, "name": "Black Sea & Med Division", "region": "Black Sea / Eastern Mediterranean", "status": "active", "description": "Constanta-based operations covering Black Sea, Bosporus transit, and Eastern Mediterranean trade lanes including Danube river feeder services." },
+  { "id": 2, "name": "Trans-Pacific Fleet", "region": "Pacific Basin", "status": "active", "description": "Major container and bulk carrier operations on Asia-North America routes via great circle and southern routing." },
+  { "id": 3, "name": "Atlantic Tanker Group", "region": "North & South Atlantic", "status": "active", "description": "VLCC and Suezmax tanker operations on WAF-USEC, Caribbean, and transatlantic crude/product routes." },
+  { "id": 4, "name": "Arabian Gulf & Indian Ocean", "region": "AG / Indian Ocean / Red Sea", "status": "active", "description": "Middle East petroleum logistics covering AG loading ports, Suez Canal transit, and Indian subcontinent discharge." }
+]
