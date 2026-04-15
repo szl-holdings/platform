@@ -25,7 +25,23 @@ import { LYTE_COLORS } from "@/constants/colors";
 import { useColors } from "@/hooks/useColors";
 import { useLyte, Severity, LyteSignal } from "@/context/LyteContext";
 import { useLyteWebSocket } from "@/hooks/useLyteWebSocket";
-import { useFuzzySearch } from "@szl-holdings/mobile-shared";
+import { useFuzzySearch, useSSEStream } from "@szl-holdings/mobile-shared";
+
+function getApiBase(): string {
+  const domain =
+    typeof process !== "undefined" && process.env.EXPO_PUBLIC_DOMAIN;
+  if (domain) return `https://${domain}`;
+  return "";
+}
+
+interface StreamSignalEvent {
+  id: string;
+  type: string;
+  source: string;
+  severity?: string;
+  payload: Record<string, unknown>;
+  timestamp: string;
+}
 
 const PLATFORMS = ["All", "Aegis", "Vessels", "Terra", "SZL", "Lyte", "API"];
 const SEVERITIES = ["All", "Critical", "High", "Medium", "Low"] as const;
@@ -198,9 +214,33 @@ export default function SignalsScreen() {
   const [search, setSearch] = useState("");
   const [platFilter, setPlatFilter] = useState("All");
   const [sevFilter, setSevFilter] = useState<typeof SEVERITIES[number]>("All");
-  const [lastUpdatedAt] = useState<Date>(() => new Date());
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<Date>(() => new Date());
   const [acknowledged, setAcknowledged] = useState<Set<string>>(new Set());
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const [streamSignals, setStreamSignals] = useState<LyteSignal[]>([]);
+
+  const { status: sseStatus } = useSSEStream<StreamSignalEvent>({
+    url: `${getApiBase()}/api/stream/siem-events`,
+    onEvent: (_type, data) => {
+      if (!data?.id) return;
+      const severity = (data.severity as Severity | undefined) ?? "medium";
+      const newSignal: LyteSignal = {
+        id: `stream_${data.id}`,
+        source: data.source ?? "siem",
+        severity,
+        title: String(data.payload?.technique ?? data.type ?? "Unknown event"),
+        status: "new",
+        body: data.payload?.host ? `Host: ${String(data.payload.host)}` : undefined,
+        receivedAt: data.timestamp ?? new Date().toISOString(),
+      };
+      setStreamSignals(prev => {
+        const exists = prev.some(s => s.id === newSignal.id);
+        if (exists) return prev;
+        return [newSignal, ...prev].slice(0, 20);
+      });
+      setLastUpdatedAt(new Date());
+    },
+  });
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
@@ -221,7 +261,9 @@ export default function SignalsScreen() {
     setDismissed(prev => new Set([...prev, id]));
   }, []);
 
-  const baseSignals = signals.filter(s => !dismissed.has(s.id));
+  const baseSignals = [...streamSignals, ...signals]
+    .filter((s, i, arr) => arr.findIndex(x => x.id === s.id) === i)
+    .filter(s => !dismissed.has(s.id));
   const fuzzySignals = useFuzzySearch(baseSignals, search, s => [s.title, s.source, s.severity]);
   const filtered = fuzzySignals
     .filter(s => sevFilter === "All" || s.severity === sevFilter.toLowerCase())
@@ -246,14 +288,20 @@ export default function SignalsScreen() {
             <Text style={styles.eyebrow}>SIGNALS FEED</Text>
             <Text style={styles.headerTitle}>Live Signals</Text>
           </View>
-          <Text style={{ fontSize: 9, fontFamily: "Inter_400Regular", color: colors.textTertiary, marginTop: 6 }}>
-            {(() => {
-              const ms = Date.now() - lastUpdatedAt.getTime();
-              if (ms < 60000) return "Just now";
-              if (ms < 3600000) return `${Math.floor(ms / 60000)}m ago`;
-              return `${Math.floor(ms / 3600000)}h ago`;
-            })()}
-          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 5, marginTop: 6 }}>
+            <View style={{
+              width: 6, height: 6, borderRadius: 3,
+              backgroundColor: sseStatus === "connected" ? LYTE_COLORS.neonGreen : sseStatus === "reconnecting" ? "#f59e0b" : "#94a3b8",
+            }} />
+            <Text style={{ fontSize: 9, fontFamily: "Inter_400Regular", color: colors.textTertiary }}>
+              {sseStatus === "connected" ? "STREAM LIVE" : sseStatus === "reconnecting" ? "RECONNECTING" : (() => {
+                const ms = Date.now() - lastUpdatedAt.getTime();
+                if (ms < 60000) return "Just now";
+                if (ms < 3600000) return `${Math.floor(ms / 60000)}m ago`;
+                return `${Math.floor(ms / 3600000)}h ago`;
+              })()}
+            </Text>
+          </View>
         </View>
         <View style={styles.statsRow}>
           <Text style={styles.statText}>{filtered.length} signals</Text>

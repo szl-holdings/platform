@@ -13,6 +13,30 @@ import { VesselIcon, featherIcon } from "@/components/VesselIcon";
 import { useColors } from "@/hooks/useColors";
 import { api, type Vessel, CACHE_KEYS, cacheSet, cacheGetStale } from "@/lib/api";
 import { useVesselsWebSocket } from "@/hooks/useVesselsWebSocket";
+import { useSSEStream } from "@szl-holdings/mobile-shared";
+
+function getApiBase(): string {
+  const domain =
+    typeof process !== "undefined" && process.env.EXPO_PUBLIC_DOMAIN;
+  if (domain) return `https://${domain}`;
+  return "";
+}
+
+interface AISPositionPayload {
+  mmsi: string;
+  vessel: string;
+  lat: number;
+  lon: number;
+  speed: number;
+  course: number;
+  status: string;
+}
+
+interface StreamEvent {
+  type: string;
+  payload: AISPositionPayload;
+  timestamp: string;
+}
 
 const STATUS_COLORS: Record<string, string> = {
   at_sea: "#22c55e",
@@ -190,6 +214,23 @@ export default function FleetScreen() {
   const { wsStatus } = useVesselsWebSocket();
 
   const [lastFetchedAt, setLastFetchedAt] = useState<Date | null>(null);
+  const [livePositions, setLivePositions] = useState<Record<string, { speed: string; lat: number; lon: number }>>({});
+
+  const { status: sseStatus } = useSSEStream<StreamEvent>({
+    url: `${getApiBase()}/api/stream/ais-tracking`,
+    onEvent: (type, data) => {
+      if (type === "position_update" && data?.payload) {
+        const { vessel, speed, lat, lon } = data.payload;
+        if (vessel) {
+          setLivePositions(prev => ({
+            ...prev,
+            [vessel]: { speed: String(speed ?? 0), lat, lon },
+          }));
+          setLastFetchedAt(new Date());
+        }
+      }
+    },
+  });
 
   const { data: vessels = [], isLoading, refetch } = useQuery({
     queryKey: ["vessels-roster"],
@@ -211,6 +252,9 @@ export default function FleetScreen() {
   const filtered = fuzzyVessels.filter(v => {
     const matchStatus = statusFilter === "all" || v.status === statusFilter;
     return matchStatus;
+  }).map(v => {
+    const livePos = livePositions[v.name];
+    return livePos ? { ...v, speed: livePos.speed } : v;
   });
 
   const statusCounts = vessels.reduce<Record<string, number>>((acc, v) => {
@@ -239,15 +283,19 @@ export default function FleetScreen() {
           <Text style={[styles.title, { color: colors.text }]}>Fleet</Text>
           <Text style={[styles.sub, { color: colors.textFaint }]}>{filtered.length} of {vessels.length} vessels</Text>
         </View>
-        {vessels.length > 0 && (() => {
-          const isLive = lastFetchedAt != null && (Date.now() - lastFetchedAt.getTime()) < 3 * 60_000;
-          const minsAgo = lastFetchedAt ? Math.floor((Date.now() - lastFetchedAt.getTime()) / 60_000) : null;
-          const label = isLive ? "LIVE" : minsAgo != null ? `${minsAgo}m ago` : "CACHED";
-          const badgeColor = isLive ? colors.primary : "#94a3b8";
-          const badgeBg = isLive ? (colors.greenDim ?? `${colors.primary}15`) : "rgba(148,163,184,0.1)";
+        {(() => {
+          const isConnected = sseStatus === "connected";
+          const isReconnecting = sseStatus === "reconnecting";
+          const label = isConnected ? "AIS LIVE" : isReconnecting ? "RECONNECTING" : "OFFLINE";
+          const badgeColor = isConnected ? colors.primary : isReconnecting ? "#f59e0b" : "#94a3b8";
+          const badgeBg = isConnected
+            ? (colors.greenDim ?? `${colors.primary}15`)
+            : isReconnecting
+            ? "rgba(245,158,11,0.1)"
+            : "rgba(148,163,184,0.1)";
           return (
             <View style={[styles.offlineBadge, { backgroundColor: badgeBg, borderColor: `${badgeColor}40` }]}>
-              {isLive && <View style={[styles.offlineDot, { backgroundColor: badgeColor }]} />}
+              {(isConnected || isReconnecting) && <View style={[styles.offlineDot, { backgroundColor: badgeColor }]} />}
               <Text style={[styles.offlineBadgeText, { color: badgeColor }]}>{label}</Text>
             </View>
           );

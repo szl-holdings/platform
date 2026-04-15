@@ -30,6 +30,14 @@ import { useIncidentSubscription } from "@/hooks/useGraphQL";
 import { useAegisWebSocket } from "@/hooks/useAegisWebSocket";
 import { apiGet, apiPut } from "@/lib/apiClient";
 import { AUTH_TOKEN_KEY } from "@/context/AuthContext";
+import { useSSEStream } from "@szl-holdings/mobile-shared";
+
+function getApiBase(): string {
+  const domain =
+    typeof process !== "undefined" && process.env.EXPO_PUBLIC_DOMAIN;
+  if (domain) return `https://${domain}`;
+  return "";
+}
 
 interface Incident {
   id: number;
@@ -211,6 +219,13 @@ export default function IncidentsScreen() {
   useIncidentSubscription();
   useAegisWebSocket();
 
+  const { status: sseStatus } = useSSEStream({
+    url: `${getApiBase()}/api/stream/siem-events`,
+    onEvent: (_type, _data) => {
+      qc.invalidateQueries({ queryKey: ["aegis-incidents"] });
+    },
+  });
+
   const { data: incidents = [], refetch, isLoading } = useQuery<Incident[]>({
     queryKey: ["aegis-incidents"],
     queryFn: fetchIncidents,
@@ -383,9 +398,18 @@ export default function IncidentsScreen() {
         ) : (
           <>
             <Text style={[styles.headerTitle, { color: colors.foreground, fontFamily: "SpaceGrotesk_700Bold" }]}>Incidents</Text>
-            <View style={[styles.liveChip, { backgroundColor: colors.redDim, borderColor: colors.redBorder }]}>
-              <View style={[styles.liveDot, { backgroundColor: colors.red }]} />
-              <Text style={[styles.liveText, { color: colors.red }]}>REALTIME</Text>
+            <View style={[styles.liveChip, {
+              backgroundColor: sseStatus === "connected" ? colors.redDim : sseStatus === "reconnecting" ? colors.amberDim : colors.border,
+              borderColor: sseStatus === "connected" ? colors.redBorder : sseStatus === "reconnecting" ? colors.amber : colors.mutedForeground,
+            }]}>
+              <View style={[styles.liveDot, {
+                backgroundColor: sseStatus === "connected" ? colors.red : sseStatus === "reconnecting" ? colors.amber : colors.mutedForeground,
+              }]} />
+              <Text style={[styles.liveText, {
+                color: sseStatus === "connected" ? colors.red : sseStatus === "reconnecting" ? colors.amber : colors.mutedForeground,
+              }]}>
+                {sseStatus === "connected" ? "LIVE" : sseStatus === "reconnecting" ? "RECONNECTING" : "OFFLINE"}
+              </Text>
             </View>
           </>
         )}

@@ -4,6 +4,7 @@ import {
   ActivityIndicator, Platform, RefreshControl,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useEmbeddingSearch } from "@szl-holdings/mobile-shared";
 
 interface McpTool {
   name: string;
@@ -41,6 +42,7 @@ export default function McpToolsScreen() {
   const [result, setResult] = useState<McpResult | null>(null);
   const [serverStatus, setServerStatus] = useState<"checking" | "healthy" | "error">("checking");
   const [refreshing, setRefreshing] = useState(false);
+  const { search } = useEmbeddingSearch({ domain: "real_estate", limit: 5 });
 
   const checkHealth = useCallback(async () => {
     try {
@@ -71,8 +73,30 @@ export default function McpToolsScreen() {
     setRunning(true);
     setResult(null);
     const start = Date.now();
+
+    if (selected.name === "run_search") {
+      const query = params.query?.trim() ?? "";
+      if (!query) {
+        setResult({ tool: "run_search", content: "Please provide a search query.", isError: true, elapsed: 0 });
+        setRunning(false);
+        return;
+      }
+      try {
+        const results = await search(query);
+        const content = results.length > 0
+          ? results.map((r, i) => `[${i + 1}]${r.source ? ` (${r.source})` : ""}\n${r.content}\nScore: ${(r.score * 100).toFixed(1)}%`).join("\n\n---\n\n")
+          : "No results found.";
+        setResult({ tool: "run_search", content, isError: false, elapsed: Date.now() - start });
+      } catch (err) {
+        setResult({ tool: "run_search", content: err instanceof Error ? err.message : "Search failed", isError: true, elapsed: Date.now() - start });
+      }
+      setRunning(false);
+      return;
+    }
+
     try {
-      const res = await fetch("/api/mcp/tools/call", {
+      const base = process.env.EXPO_PUBLIC_API_BASE_URL ?? "";
+      const res = await fetch(`${base}/api/mcp/tools/call`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: selected.name, arguments: params }),
@@ -80,8 +104,8 @@ export default function McpToolsScreen() {
       const data = await res.json().catch(() => ({ content: "No response" }));
       const content = typeof data.content === "string" ? data.content : JSON.stringify(data.content ?? data, null, 2);
       setResult({ tool: selected.name, content, isError: !res.ok, elapsed: Date.now() - start });
-    } catch (e: any) {
-      setResult({ tool: selected.name, content: e?.message ?? "Network error", isError: true, elapsed: Date.now() - start });
+    } catch (err) {
+      setResult({ tool: selected.name, content: err instanceof Error ? err.message : "Network error", isError: true, elapsed: Date.now() - start });
     }
     setRunning(false);
   };

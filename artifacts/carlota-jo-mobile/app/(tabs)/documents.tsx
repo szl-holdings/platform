@@ -2,7 +2,7 @@ import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import * as LocalAuthentication from "expo-local-authentication";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import {
   ActivityIndicator,
   Platform,
@@ -19,9 +19,10 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useColors } from "@/hooks/useColors";
+import { useFileUpload } from "@szl-holdings/mobile-shared";
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
 
@@ -131,9 +132,48 @@ const gateStyles = StyleSheet.create({
 export default function DocumentsScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const qc = useQueryClient();
   const [filter, setFilter] = useState("All");
   const [refreshing, setRefreshing] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const { upload, status: uploadStatus, progress: uploadProgress, error: uploadError, reset: resetUpload } = useFileUpload({
+    apiBase: API_BASE,
+    context: "carlota-jo-vault",
+    onProgress: (p) => {
+      if (p === 100) {
+        setTimeout(() => {
+          qc.invalidateQueries({ queryKey: ["carlota-documents"] });
+          resetUpload();
+        }, 1000);
+      }
+    },
+  });
+
+  const handleUpload = useCallback(async (file: { uri: string; name: string; type: string; size?: number }) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await upload(file);
+    qc.invalidateQueries({ queryKey: ["carlota-documents"] });
+  }, [upload, qc]);
+
+  const triggerUpload = useCallback(() => {
+    if (Platform.OS === "web") {
+      fileInputRef.current?.click();
+    } else {
+      import("expo-document-picker").then(async ({ getDocumentAsync }) => {
+        const result = await getDocumentAsync({
+          type: "*/*",
+          copyToCacheDirectory: true,
+          multiple: false,
+        });
+        if (!result.canceled && result.assets[0]) {
+          const asset = result.assets[0];
+          handleUpload({ uri: asset.uri, name: asset.name, type: asset.mimeType ?? "application/octet-stream", size: asset.size });
+        }
+      }).catch(() => {});
+    }
+  }, [handleUpload]);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
@@ -196,6 +236,23 @@ export default function DocumentsScreen() {
         </Text>
         <Text style={[styles.title, { color: colors.cream }]}>Shared Materials</Text>
 
+        {Platform.OS === "web" && (
+          <input
+            ref={fileInputRef as React.RefObject<HTMLInputElement>}
+            type="file"
+            accept="*/*"
+            style={{ display: "none" }}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                const uri = URL.createObjectURL(file);
+                handleUpload({ uri, name: file.name, type: file.type, size: file.size });
+              }
+              if (fileInputRef.current) fileInputRef.current.value = "";
+            }}
+          />
+        )}
+
         {awaitingCount > 0 && (
           <View style={[styles.alertBanner, { borderColor: colors.goldBorder, backgroundColor: colors.goldDim }]}>
             <Feather name="bell" size={12} color={colors.gold} />
@@ -203,6 +260,35 @@ export default function DocumentsScreen() {
               {awaitingCount} document{awaitingCount > 1 ? "s" : ""} awaiting your review
             </Text>
           </View>
+        )}
+
+        <Pressable
+          onPress={triggerUpload}
+          disabled={uploadStatus === "uploading" || uploadStatus === "requesting" || uploadStatus === "registering"}
+          style={({ pressed }) => [
+            styles.uploadBtn,
+            { borderColor: colors.goldBorder, backgroundColor: colors.goldDim, opacity: pressed ? 0.7 : 1 },
+          ]}
+        >
+          <Feather name="upload" size={13} color={colors.gold} />
+          <Text style={[styles.uploadBtnText, { color: colors.gold }]}>
+            {uploadStatus === "uploading" ? `Uploading ${uploadProgress}%…`
+              : uploadStatus === "requesting" ? "Preparing upload…"
+              : uploadStatus === "registering" ? "Saving…"
+              : uploadStatus === "done" ? "Upload complete"
+              : "Upload Document"}
+          </Text>
+        </Pressable>
+
+        {(uploadStatus === "uploading" || uploadStatus === "requesting") && (
+          <View style={[styles.progressBar, { borderColor: colors.goldBorder }]}>
+            <View style={[styles.progressFill, { flex: Math.max(uploadProgress, 1), backgroundColor: colors.gold }]} />
+            <View style={{ flex: Math.max(100 - uploadProgress, 0) }} />
+          </View>
+        )}
+
+        {uploadError && (
+          <Text style={[styles.uploadError, { color: "#ef4444" }]}>{uploadError}</Text>
         )}
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow}>
@@ -440,6 +526,36 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: "Inter_300Light",
     textAlign: "center",
+    marginBottom: 8,
+  },
+  uploadBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 12,
+  },
+  uploadBtnText: {
+    fontSize: 10,
+    fontFamily: "Inter_500Medium",
+    letterSpacing: 1.5,
+    textTransform: "uppercase",
+  },
+  progressBar: {
+    height: 2,
+    borderTopWidth: 1,
+    marginBottom: 12,
+    overflow: "hidden",
+    flexDirection: "row",
+  },
+  progressFill: {
+    height: 2,
+  },
+  uploadError: {
+    fontSize: 10,
+    fontFamily: "Inter_400Regular",
     marginBottom: 8,
   },
 });

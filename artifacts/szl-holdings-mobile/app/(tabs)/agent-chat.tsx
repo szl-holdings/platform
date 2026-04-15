@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring } from "react-native-reanimated";
+import { useEmbeddingSearch } from "@szl-holdings/mobile-shared";
 
 const ACCENT = "#c9a84c";
 const BG = "#090810";
@@ -87,6 +88,8 @@ export default function AgentChatScreen() {
     pickerAnim.value = next ? 1 : 0;
   };
 
+  const { search, buildContextString } = useEmbeddingSearch({ domain: "executive", limit: 3 });
+
   const switchAgent = (agent: typeof AGENTS[0]) => {
     setSelectedAgent(agent);
     setShowAgentPicker(false);
@@ -105,10 +108,12 @@ export default function AgentChatScreen() {
     setMessages(prev => [...prev, { id: assistantId, role: "assistant", content: "", agentId: selectedAgent.id, agentName: selectedAgent.name, timestamp: Date.now(), streaming: true }]);
     try {
       const base = process.env.EXPO_PUBLIC_API_BASE_URL ?? "";
+      const contextResults = await search(userMsg.content);
+      const contextStr = buildContextString(contextResults);
       const res = await fetch(`${base}/api/nuro-mesh/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agentId: selectedAgent.id, message: userMsg.content, stream: false }),
+        body: JSON.stringify({ agentId: selectedAgent.id, message: userMsg.content, stream: false, context: contextStr || undefined }),
       });
       if (res.ok) {
         const data = await res.json();
