@@ -2,6 +2,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Router as WouterRouter, Switch, Route } from "wouter";
 import { Dashboard } from "./pages/dashboard";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
+import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
+import { commandConfig } from "@szl-holdings/shared-ui/copilot-configs";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,6 +22,7 @@ function App() {
           <Route path="/" component={Dashboard} />
         </Switch>
       </WouterRouter>
+      <AgentCopilot config={commandConfig} />
     </QueryClientProvider>
   );
 }

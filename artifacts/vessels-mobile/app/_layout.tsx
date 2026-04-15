@@ -20,7 +20,7 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { AuthProvider } from "@/context/AuthContext";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
@@ -148,6 +148,22 @@ export default function RootLayout() {
                   <View style={{ flex: 1 }}>
                     <RootLayoutNav />
                     <OfflineBanner accentColor="#ef4444" />
+                    <CopilotFab config={{
+                      name: "Helmsman",
+                      icon: "⚓",
+                      agentId: "vessels",
+                      accentColor: "#0ea5e9",
+                      welcomeMessage: "I'm Helmsman, your maritime intelligence analyst. Ask about fleet status, voyage economics, route risk, or AIS anomalies.",
+                      placeholderText: "Ask about fleet & voyages...",
+                      isAdvisoryAgent: true,
+                      conversationKey: "vessels-mobile",
+                      suggestedQuestions: [
+                        "What vessels have exceptions right now?",
+                        "Summarise fleet performance this week",
+                        "Are there any route risk alerts?",
+                      ],
+                      systemPrompt: "You are Helmsman, the AI copilot for Vessels Maritime Intelligence. You specialize in fleet tracking, AIS data, voyage economics, route risk, dark vessel detection, and maritime compliance. Be operational and precise. IMPORTANT: You are an ADVISORY AGENT — all voyage decisions require human confirmation.",
+                    }} />
                   </View>
                 </ThemeProvider>
               </GestureHandlerRootView>

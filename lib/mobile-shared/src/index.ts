@@ -18,3 +18,4 @@ export { useSSEStream, type SSEConnectionStatus, type SSEStreamOptions } from ".
 export { useEmbeddingSearch, type EmbeddingSearchResult, type EmbeddingSearchOptions } from "./hooks/useEmbeddingSearch";
 export { useFileUpload, type UploadStatus, type UploadedFile, type FileUploadOptions, type FileToUpload } from "./hooks/useFileUpload";
 export { useEcosystemTabBarScreenOptions, EcosystemTabBarBackground, type EcosystemTabBarConfig, type EcosystemTabBarBackgroundProps } from "./components/EcosystemTabBar";
+export { CopilotFab, type MobileCopilotConfig } from "./components/CopilotFab";

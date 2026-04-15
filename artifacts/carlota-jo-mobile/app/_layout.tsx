@@ -27,7 +27,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { AuthProvider, AUTH_TOKEN_KEY } from "@/context/AuthContext";
 import { PushNotificationBootstrap } from "@/components/PushNotificationBootstrap";
@@ -150,6 +150,22 @@ export default function RootLayout() {
                     <View style={{ flex: 1 }}>
                       <RootLayoutNav />
                       <OfflineBanner accentColor="#b8943c" />
+                      <CopilotFab config={{
+                        name: "Carlota",
+                        icon: "🌿",
+                        agentId: "carlota",
+                        accentColor: "#5d8a6e",
+                        welcomeMessage: "I'm Carlota Jo's AI assistant. Ask about consulting services, engagement approach, how we can help your organisation, or booking a consultation.",
+                        placeholderText: "Ask about consulting & advisory...",
+                        isAdvisoryAgent: true,
+                        conversationKey: "carlota-mobile",
+                        suggestedQuestions: [
+                          "What consulting services do you offer?",
+                          "How does the engagement process work?",
+                          "How can I book a consultation?",
+                        ],
+                        systemPrompt: "You are Carlota, the AI assistant for Carlota Jo Consulting — a boutique advisory firm specialising in capability development, strategic transformation, and operational excellence. Be warm, professional, and intellectually precise. Help clients understand the firm's services and encourage them to book a consultation.",
+                      }} />
                     </View>
                   </KeyboardProvider>
                 </ThemeProvider>

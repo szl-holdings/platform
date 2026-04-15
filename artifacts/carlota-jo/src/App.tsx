@@ -1,4 +1,6 @@
 import { lazy, Suspense, type ReactNode } from "react";
+import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
+import { carlotaJoConfig } from "@szl-holdings/shared-ui/copilot-configs";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { McpOverlay } from "@szl-holdings/mcp-client";
@@ -190,6 +192,7 @@ function App() {
             accentColor={CARLOTA_ACCENT}
           />
           <McpOverlay domain="carlota-jo" />
+          <AgentCopilot config={carlotaJoConfig} />
         </PowerUserProvider>
       </WouterRouter>
     </SandboxModeProvider>

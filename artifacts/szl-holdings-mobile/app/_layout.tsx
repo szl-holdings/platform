@@ -21,7 +21,7 @@ import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { AuthProvider } from "@/context/AuthContext";
 import { BiometricLockProvider } from "@/context/BiometricLockContext";
@@ -106,6 +106,22 @@ export default function RootLayout() {
                       <View style={{ flex: 1 }}>
                         <RootLayoutNav />
                         <OfflineBanner accentColor="#c8a96e" />
+                        <CopilotFab config={{
+                          name: "Navigator",
+                          icon: "◈",
+                          agentId: "szl",
+                          accentColor: "#c8a96e",
+                          welcomeMessage: "I'm Navigator, your executive intelligence analyst for SZL Holdings. Ask about portfolio performance, asset status, or cross-domain updates.",
+                          placeholderText: "Ask about portfolio & assets...",
+                          isAdvisoryAgent: true,
+                          conversationKey: "szl-mobile",
+                          suggestedQuestions: [
+                            "How is the portfolio performing this quarter?",
+                            "What matters need my attention today?",
+                            "Give me an executive briefing",
+                          ],
+                          systemPrompt: "You are Navigator, the AI executive analyst for SZL Holdings family office platform. You specialize in portfolio oversight, investment performance, governance, asset tracking across maritime, real estate, and technology holdings. Be authoritative and executive-level. IMPORTANT: You are an ADVISORY AGENT — all investment decisions require human confirmation.",
+                        }} />
                       </View>
                     </ThemeProvider>
                   </GestureHandlerRootView>

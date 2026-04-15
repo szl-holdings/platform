@@ -26,7 +26,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { BiometricLockScreen } from "@/components/BiometricLockScreen";
 import { AuthProvider } from "@/context/AuthContext";
@@ -149,6 +149,22 @@ export default function RootLayout() {
                       <View style={{ flex: 1 }}>
                         <AppShell />
                         <OfflineBanner accentColor="#ef4444" />
+                        <CopilotFab config={{
+                          name: "Sentinel",
+                          icon: "🛡",
+                          agentId: "aegis",
+                          accentColor: "#ef4444",
+                          welcomeMessage: "I'm Sentinel, your SOC intelligence analyst. Ask about threats, incidents, vulnerabilities, or compliance posture.",
+                          placeholderText: "Ask about threats & incidents...",
+                          isAdvisoryAgent: true,
+                          conversationKey: "aegis-mobile",
+                          suggestedQuestions: [
+                            "What are my top 3 active threats?",
+                            "Summarise incidents from the last 24 hours",
+                            "What vulnerabilities need immediate attention?",
+                          ],
+                          systemPrompt: "You are Sentinel, the AI copilot for Aegis Defense & Intelligence Command. You specialize in cybersecurity threat analysis, incident response, vulnerability assessment, MITRE ATT&CK, and security compliance. Be direct and operational. IMPORTANT: You are an ADVISORY AGENT — all security actions require human confirmation.",
+                        }} />
                       </View>
                     </KeyboardProvider>
                   </ThemeProvider>

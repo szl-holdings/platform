@@ -1,4 +1,6 @@
 import { lazy, Suspense, type ReactNode } from "react";
+import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
+import { navigatorConfig } from "@szl-holdings/shared-ui/copilot-configs";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
@@ -970,6 +972,7 @@ function App() {
       </LazyMotion>
       <Toaster />
       <McpOverlay domain="szl-holdings" />
+      <AgentCopilot config={navigatorConfig} />
       <CookieBanner privacyUrl="/legal/privacy" accentColor={SZL_ACCENT} />
     </QueryClientProvider>
     </DemoModeProvider>

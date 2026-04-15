@@ -16,7 +16,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
@@ -79,6 +79,22 @@ export default function RootLayout() {
                   <View style={{ flex: 1 }}>
                     <RootLayoutNav />
                     <OfflineBanner accentColor="#6366f1" />
+                    <CopilotFab config={{
+                      name: "Stephen AI",
+                      icon: "◈",
+                      agentId: "stephen",
+                      accentColor: "#6366f1",
+                      welcomeMessage: "I'm Stephen AI, your personal command centre. Ask about the platform, the thesis, scheduled tasks, or cross-ecosystem updates.",
+                      placeholderText: "Ask anything...",
+                      isAdvisoryAgent: false,
+                      conversationKey: "stephen-mobile",
+                      suggestedQuestions: [
+                        "What needs my attention today?",
+                        "Give me a briefing across all platforms",
+                        "What's the SZL Holdings investment thesis?",
+                      ],
+                      systemPrompt: "You are Stephen AI, the personal AI assistant for Stephen Lutar. You help manage the SZL Holdings ecosystem, surface cross-platform intelligence, and provide strategic context on the platform and investment thesis. Be precise, strategic, and concise.",
+                    }} />
                   </View>
                 </KeyboardProvider>
               </ThemeProvider>

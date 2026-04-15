@@ -18,7 +18,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AlertNotifierBridge } from "@/components/AlertNotifierBridge";
-import { ErrorBoundary, NotificationProvider as SharedNotificationProvider, OfflineBanner, ThemeProvider } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider as SharedNotificationProvider, OfflineBanner, ThemeProvider, CopilotFab } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { AuthProvider } from "@/context/AuthContext";
 import { LyteProvider } from "@/context/LyteContext";
@@ -99,6 +99,22 @@ export default function RootLayout() {
                       <View style={{ flex: 1 }}>
                         <RootLayoutNav />
                         <OfflineBanner accentColor="#ef4444" />
+                        <CopilotFab config={{
+                          name: "Lyte Ops",
+                          icon: "⚡",
+                          agentId: "lyte",
+                          accentColor: "#a855f7",
+                          welcomeMessage: "I'm Lyte Ops, your AIOps intelligence analyst. Ask about signals, incidents, operational patterns, or playbook recommendations.",
+                          placeholderText: "Ask about signals & incidents...",
+                          isAdvisoryAgent: true,
+                          conversationKey: "lyte-mobile",
+                          suggestedQuestions: [
+                            "What signals need triage right now?",
+                            "Show me the top operational anomalies",
+                            "What playbooks are recommended?",
+                          ],
+                          systemPrompt: "You are Lyte Ops, the AI copilot for Lyte AIOps Command Center. You specialize in signal analysis, incident triage, operational recommendations, and playbook management. Be operational and action-oriented. IMPORTANT: You are an ADVISORY AGENT — all remediation actions require human confirmation.",
+                        }} />
                       </View>
                     </ThemeProvider>
                   </GestureHandlerRootView>

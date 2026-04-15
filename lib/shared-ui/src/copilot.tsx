@@ -19,6 +19,7 @@ export interface CopilotConfig {
   voiceProfile?: VoiceProfile;
   agentId?: string;
   isAdvisoryAgent?: boolean;
+  conversationKey?: string;
 }
 
 interface ChatMessage {
@@ -317,7 +318,15 @@ function MessageExplainability({
 
 export function AgentCopilot({ config }: { config: CopilotConfig }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    if (config.conversationKey && typeof window !== "undefined") {
+      try {
+        const stored = window.localStorage.getItem(`copilot-hist-${config.conversationKey}`);
+        if (stored) return JSON.parse(stored) as ChatMessage[];
+      } catch { /* ignore */ }
+    }
+    return [];
+  });
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
@@ -352,6 +361,14 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
   useEffect(() => {
     scrollToBottom();
   }, [messages, streamingContent, scrollToBottom]);
+
+  useEffect(() => {
+    if (config.conversationKey && messages.length > 0 && typeof window !== "undefined") {
+      try {
+        window.localStorage.setItem(`copilot-hist-${config.conversationKey}`, JSON.stringify(messages.slice(-60)));
+      } catch { /* ignore */ }
+    }
+  }, [messages, config.conversationKey]);
 
   useEffect(() => {
     if (isOpen && !voiceMode && inputRef.current) {
@@ -418,10 +435,14 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
     abortRef.current = new AbortController();
 
     try {
-      const response = await fetch("/api/intelligence/ai/chat/stream", {
+      const copilotEndpoint = config.agentId ? "/api/copilot/chat" : "/api/intelligence/ai/chat/stream";
+      const copilotBody = config.agentId
+        ? { messages: apiMessages, agentId: config.agentId }
+        : { messages: apiMessages };
+      const response = await fetch(copilotEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: apiMessages }),
+        body: JSON.stringify(copilotBody),
         signal: abortRef.current.signal,
       });
 
@@ -478,10 +499,14 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
         setMessages([...newMessages, { role: "assistant", content: streamingContent || "Response cancelled.", id: `a-${Date.now()}` }]);
       } else {
         try {
-          const fallbackRes = await fetch("/api/intelligence/ai/chat", {
+          const fallbackEndpoint = config.agentId ? "/api/copilot/chat" : "/api/intelligence/ai/chat";
+          const fallbackBody = config.agentId
+            ? { messages: apiMessages, agentId: config.agentId, stream: false }
+            : { messages: apiMessages };
+          const fallbackRes = await fetch(fallbackEndpoint, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ messages: apiMessages }),
+            body: JSON.stringify(fallbackBody),
           });
           if (fallbackRes.ok) {
             const result = await fallbackRes.json() as { content: string };

@@ -1,4 +1,6 @@
 import { lazy, Suspense } from "react";
+import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
+import { prismConfig } from "@szl-holdings/shared-ui/copilot-configs";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider, useIsFetching } from "@tanstack/react-query";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
@@ -564,6 +566,7 @@ export function PrismCounselApp() {
           <WouterRouter>
             <PrismCounselRoutes />
             <Toaster />
+            <AgentCopilot config={prismConfig} />
           </WouterRouter>
         </DemoModeProvider>
       </LazyMotion>

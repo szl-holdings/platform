@@ -1,4 +1,6 @@
 import { lazy, Suspense } from "react";
+import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
+import { stephenAIConfig } from "@szl-holdings/shared-ui/copilot-configs";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@szl-holdings/shared-ui/ui/toaster";
@@ -131,6 +133,7 @@ function App() {
         </WouterRouter>
         <Toaster />
         <McpOverlay domain="stephen" />
+        <AgentCopilot config={stephenAIConfig} />
       </TooltipProvider>
     </QueryClientProvider>
     </PrismBusProvider>

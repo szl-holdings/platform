@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import copilotRouter from "./copilot";
 import mcpRouter from "./mcp";
 import { authLimiter, readLimiter, writeLimiter, SHORT_CACHE, MEDIUM_CACHE } from "../middlewares/rate-limiters";
 import analyticsEngineRouter from "./analytics-engine";
@@ -591,5 +592,8 @@ router.use(meteringRouter);
 
 router.use("/realtime", _readLimiter);
 router.use(realtimeRouter);
+
+router.use("/copilot", _writeLimiter);
+router.use(copilotRouter);
 
 export default router;

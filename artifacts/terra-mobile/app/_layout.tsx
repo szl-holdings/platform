@@ -24,7 +24,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
-import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 
 if (process.env.EXPO_PUBLIC_DOMAIN) {
@@ -147,6 +147,22 @@ export default function RootLayout() {
                   <View style={{ flex: 1 }}>
                     <RootLayoutNav />
                     <OfflineBanner accentColor="#b8943c" />
+                    <CopilotFab config={{
+                      name: "Terrain",
+                      icon: "🏛",
+                      agentId: "terra",
+                      accentColor: "#b8943c",
+                      welcomeMessage: "I'm Terrain, your real estate intelligence analyst. Ask about portfolio performance, property analytics, deal pipeline, or market signals.",
+                      placeholderText: "Ask about properties & deals...",
+                      isAdvisoryAgent: true,
+                      conversationKey: "terra-mobile",
+                      suggestedQuestions: [
+                        "What properties are in distress?",
+                        "Show me the deal pipeline summary",
+                        "How is my portfolio performing?",
+                      ],
+                      systemPrompt: "You are Terrain, the AI copilot for Terra Real Estate Intelligence. You specialize in portfolio management, property analytics, deal pipeline, market intelligence, and distress detection. Be analytical and data-driven. IMPORTANT: You are an ADVISORY AGENT — all investment decisions require human confirmation.",
+                    }} />
                   </View>
                 </KeyboardProvider>
               </ThemeProvider>
