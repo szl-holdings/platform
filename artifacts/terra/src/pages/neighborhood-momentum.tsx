@@ -5,6 +5,9 @@ import {
   Building2, DollarSign, Users, Activity, Layers, Info, Target, Zap, Eye
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { AmbientBar, type AmbientSignal } from "@szl-holdings/shared-ui/ambient-intelligence";
+import { EnergyPulse, type EnergyMetrics } from "@szl-holdings/shared-ui/energy-heartbeat";
+import { CorrelationFeed, type CrossDomainCorrelation } from "@szl-holdings/shared-ui/cross-domain-correlation";
 
 type Trajectory = "accelerating" | "gentrifying" | "stable" | "declining" | "distressed";
 
@@ -330,6 +333,14 @@ export default function NeighborhoodMomentum() {
     .filter(m => trajectoryFilter === "all" || m.trajectory === trajectoryFilter)
     .sort((a, b) => b.momentumScore - a.momentumScore);
 
+  const ambientSignals: AmbientSignal[] = [
+    { id: "sig-1", domain: "terra", title: "Momentum Surge", summary: "Neighborhood momentum score surged in 4 target markets", severity: "medium", score: 0.71, timestamp: Date.now() },
+  ];
+  const energyMetrics: EnergyMetrics = { apiCallsPerMinute: 92, wsMessagesPerMinute: 180, chartRendersPerMinute: 14, dataRefreshesPerMinute: 10, activeSubscriptions: 28, deferredUpdates: 3, totalBudget: 120, usedBudget: 62 };
+  const correlations: CrossDomainCorrelation[] = [
+    { id: "cor-2", title: "Port Congestion → Material Delays", description: "Port congestion signals from Vessels predict construction material delivery delays by 48 hours", domains: ["vessels", "terra"], confidence: 0.84, timestamp: Date.now(), signals: [{ domain: "vessels", event: "Shanghai port congestion +18%", severity: "medium" }, { domain: "terra", event: "Steel delivery delays in 3 projects", severity: "high" }], impact: "high" },
+  ];
+
   const summaryStats = {
     accelerating: NEIGHBORHOODS.filter(n => n.trajectory === "accelerating").length,
     gentrifying: NEIGHBORHOODS.filter(n => n.trajectory === "gentrifying").length,
@@ -341,6 +352,7 @@ export default function NeighborhoodMomentum() {
     <div className="flex h-full overflow-hidden">
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-shrink-0 p-6 border-b border-white/6">
+          <AmbientBar signals={ambientSignals} appDomain="terra" accentColor="#22c55e" compact />
           <div className="flex items-start justify-between gap-4">
             <div>
               <h1 className="text-xl font-bold text-white flex items-center gap-2">
@@ -401,6 +413,17 @@ export default function NeighborhoodMomentum() {
       {selected && (
         <DetailSidebar market={selected} onClose={() => setSelected(null)} />
       )}
+
+      <div className="absolute bottom-0 left-0 right-0 bg-[#060810]/95 border-t border-white/5 p-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="md:col-span-2">
+            <CorrelationFeed correlations={correlations} currentDomain="terra" accentColor="#22c55e" />
+          </div>
+          <div className="flex items-start justify-center">
+            <EnergyPulse metrics={energyMetrics} utilization={energyMetrics.usedBudget / energyMetrics.totalBudget} accentColor="#22c55e" />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
