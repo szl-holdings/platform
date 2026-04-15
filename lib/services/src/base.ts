@@ -332,6 +332,7 @@ export abstract class ServiceAdapter {
 
         if (res.ok || acceptStatuses.includes(res.status) || (res.status >= 400 && res.status < 500 && res.status !== 429)) {
           this._recordCircuitSuccess();
+          this.log("info", `OK`, { url: urlHost, status: res.status, latencyMs: elapsed, attempt });
           return res;
         }
 

@@ -810,7 +810,10 @@ router.get("/integrations/nvd/cves", authMiddleware({ required: false }), async 
     const keyword = req.query.keyword as string | undefined;
     const severity = req.query.severity as string | undefined;
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 20;
-    const result = await services.nvd.searchCves({ keyword, severity, resultsPerPage: limit });
+    const startIndex = req.query.startIndex ? parseInt(req.query.startIndex as string, 10) : undefined;
+    const lastModStartDate = req.query.lastModStartDate as string | undefined;
+    const lastModEndDate = req.query.lastModEndDate as string | undefined;
+    const result = await services.nvd.searchCves({ keyword, severity, resultsPerPage: limit, startIndex, lastModStartDate, lastModEndDate });
     res.json({ status: services.nvd.status, ...result });
   } catch (err) {
     res.status(500).json({ error: "NVD CVE search failed" });
