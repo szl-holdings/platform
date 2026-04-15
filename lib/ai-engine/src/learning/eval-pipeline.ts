@@ -115,7 +115,7 @@ export async function getEvalHistory(limit = 10): Promise<typeof evalRuns.$infer
 }
 
 async function buildDefaultExecutor(): Promise<Parameters<typeof runEvals>[0]> {
-  const { openai } = await import("@szl-holdings/integrations-openai-ai-server");
+  const { openai } = await import("../providers/openai/index.js");
   return async (input: string, _category: string) => {
     const start = Date.now();
     const result = await openai.chat.completions.create({

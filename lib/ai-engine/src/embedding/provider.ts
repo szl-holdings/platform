@@ -328,7 +328,7 @@ class ReplitAIProxyEmbeddingProvider extends BaseEmbeddingProvider {
     const start = Date.now();
 
     try {
-      const { openai } = await import("@szl-holdings/integrations-openai-ai-server");
+      const { openai } = await import("../providers/openai/index.js");
       const response = await openai.embeddings.create({
         model: targetModel,
         input: text.slice(0, 8000),

@@ -7,8 +7,8 @@ import { eq, asc, desc } from "drizzle-orm";
 import { services } from "@szl-holdings/services";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
-import { openai } from "@szl-holdings/integrations-openai-ai-server";
-import { anthropic } from "@szl-holdings/integrations-anthropic-ai";
+import { openai } from "@szl-holdings/ai-engine/providers/openai";
+import { anthropic } from "@szl-holdings/ai-engine/providers/anthropic";
 import { assertExternalUrl } from "../lib/ssrf-guard";
 
 const alloyChatRouter: IRouter = Router();

@@ -12,9 +12,6 @@
   "include": ["src"],
   "references": [
     { "path": "../db" },
-    { "path": "../services" },
-    { "path": "../integrations-anthropic-ai" },
-    { "path": "../integrations-openai-ai-server" },
-    { "path": "../integrations-gemini-ai" }
+    { "path": "../services" }
   ]
 }

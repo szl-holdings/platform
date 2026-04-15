@@ -2,7 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { pool } from "@szl-holdings/db";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
-import { openai } from "@szl-holdings/integrations-openai-ai-server";
+import { openai } from "@szl-holdings/ai-engine/providers/openai";
 
 const router: IRouter = Router();
 

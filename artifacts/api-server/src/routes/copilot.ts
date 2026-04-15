@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { openai } from "@szl-holdings/integrations-openai-ai-server";
-import { anthropic } from "@szl-holdings/integrations-anthropic-ai";
+import { openai } from "@szl-holdings/ai-engine/providers/openai";
+import { anthropic } from "@szl-holdings/ai-engine/providers/anthropic";
 import rateLimit from "express-rate-limit";
 import type { RequestHandler } from "express";
 

@@ -2,9 +2,9 @@ import { Router, type IRouter, type Request, type Response, type RequestHandler 
 import { db } from "@szl-holdings/db";
 import { agentMemoryFacts, agentUsageStats, agentToolCalls, advisoryFindings, orchestrationTelemetryTable, redTeamFindingsTable, predictivePrecomputeCacheTable, agentPromptEvolutionTable } from "@szl-holdings/db";
 import { eq, desc, and, gt, gte } from "drizzle-orm";
-import { openai } from "@szl-holdings/integrations-openai-ai-server";
-import { anthropic } from "@szl-holdings/integrations-anthropic-ai";
-import { ai as geminiAi } from "@szl-holdings/integrations-gemini-ai";
+import { openai } from "@szl-holdings/ai-engine/providers/openai";
+import { anthropic } from "@szl-holdings/ai-engine/providers/anthropic";
+import { ai as geminiAi } from "@szl-holdings/ai-engine/providers/gemini";
 import rateLimit from "express-rate-limit";
 
 const nueroMeshRouter: IRouter = Router();

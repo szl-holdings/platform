@@ -5,9 +5,9 @@ import { persistTelemetry } from "./innovation/telemetry-pipeline.js";
 import { runMultiHypothesisReasoning, isAmbiguousOrHighStakes } from "./innovation/multi-hypothesis.js";
 import { predictFollowUpQueries, triggerBackgroundPrecompute, checkPrecomputeCache } from "./innovation/predictive-precompute.js";
 import { runRedTeamProtocol } from "./innovation/red-team.js";
-import { openai } from "@szl-holdings/integrations-openai-ai-server";
-import { anthropic } from "@szl-holdings/integrations-anthropic-ai";
-import { ai as geminiAi } from "@szl-holdings/integrations-gemini-ai";
+import { openai } from "./providers/openai/index.js";
+import { anthropic } from "./providers/anthropic/index.js";
+import { ai as geminiAi } from "./providers/gemini/index.js";
 import type {
   AgentDefinition,
   DomainRoutingRule,

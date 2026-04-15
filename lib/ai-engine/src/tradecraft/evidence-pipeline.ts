@@ -113,7 +113,7 @@ function buildQueryEmbedding(query: string): number[] {
 
 async function generateNeuralEmbedding(text: string): Promise<number[] | null> {
   try {
-    const { openai } = await import("@szl-holdings/integrations-openai-ai-server");
+    const { openai } = await import("../providers/openai/index.js");
     const response = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: text.slice(0, 8000),

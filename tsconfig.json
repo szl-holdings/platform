@@ -25,15 +25,6 @@
       "path": "./lib/auth"
     },
     {
-      "path": "./lib/integrations-openai-ai-server"
-    },
-    {
-      "path": "./lib/integrations-anthropic-ai"
-    },
-    {
-      "path": "./lib/integrations-gemini-ai"
-    },
-    {
       "path": "./lib/replit-auth-web"
     },
     {

@@ -7,8 +7,8 @@
  * contradictory evidence, and failure modes.
  * Findings feed back into the learning system.
  */
-import { openai } from "@szl-holdings/integrations-openai-ai-server";
-import { anthropic } from "@szl-holdings/integrations-anthropic-ai";
+import { openai } from "../providers/openai/index.js";
+import { anthropic } from "../providers/anthropic/index.js";
 import type { AgentCallResult } from "../types.js";
 
 export interface RedTeamFinding {

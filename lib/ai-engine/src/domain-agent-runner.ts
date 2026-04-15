@@ -57,7 +57,7 @@ async function generateConversationSummary(
   agentId: string,
 ): Promise<string | null> {
   try {
-    const { openai } = await import("@szl-holdings/integrations-openai-ai-server");
+    const { openai } = await import("./providers/openai/index.js");
     const dialogue = messages
       .filter(m => m.role !== "system")
       .slice(-20)

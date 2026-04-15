@@ -197,7 +197,7 @@ router.post("/alloy/cognitive/evals/run", authMiddleware(), async (req: Request,
       sendForbidden(res, "Manual eval runs require elevated access");
       return;
     }
-    const { openai } = await import("@szl-holdings/integrations-openai-ai-server");
+    const { openai } = await import("@szl-holdings/ai-engine/providers/openai");
     const { runEvals, computeAgentCalibrations } = await import("@szl-holdings/ai-engine");
 
     const executor = async (input: string, _category: string) => {

@@ -7,7 +7,7 @@ import {
   advisoryAudit,
 } from "@szl-holdings/db";
 import { eq, desc, asc, and, avg, count } from "drizzle-orm";
-import { openai } from "@szl-holdings/integrations-openai-ai-server";
+import { openai } from "@szl-holdings/ai-engine/providers/openai";
 import multer from "multer";
 
 const trainingRouter: IRouter = Router();
@@ -249,7 +249,7 @@ trainingRouter.post("/agent-training/transcribe", upload.single("audio"), async 
       : mimeType.includes("wav") ? "wav"
       : "webm";
 
-    const { toFile } = await import("@szl-holdings/integrations-openai-ai-server");
+    const { toFile } = await import("@szl-holdings/ai-engine/providers/openai");
     const audioFile = await toFile(audioBuffer, `audio.${ext}`, { type: mimeType });
 
     const transcription = await openai.audio.transcriptions.create({

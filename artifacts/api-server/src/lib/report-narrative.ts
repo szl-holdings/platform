@@ -127,10 +127,10 @@ export async function generateReportNarrative(request: NarrativeRequest): Promis
   try {
     let aiModule: { default?: unknown } | null = null;
     try {
-      aiModule = await import("@szl-holdings/integrations-anthropic-ai") as { default?: unknown };
+      aiModule = await import("@szl-holdings/ai-engine/providers/anthropic") as { default?: unknown };
     } catch {
       try {
-        aiModule = await import("@szl-holdings/integrations-openai-ai-server") as { default?: unknown };
+        aiModule = await import("@szl-holdings/ai-engine/providers/openai") as { default?: unknown };
       } catch {
         logger.warn("No AI integration available for narrative generation, using fallback");
       }

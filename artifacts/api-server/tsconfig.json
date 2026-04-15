@@ -21,13 +21,7 @@
       "path": "../../lib/services"
     },
     {
-      "path": "../../lib/integrations-openai-ai-server"
-    },
-    {
-      "path": "../../lib/integrations-anthropic-ai"
-    },
-    {
-      "path": "../../lib/integrations-gemini-ai"
+      "path": "../../lib/ai-engine"
     },
     {
       "path": "../../lib/covenant-policy"

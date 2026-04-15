@@ -66,9 +66,6 @@ PACKAGES=(
   "lib/worldline"
   "lib/db"
   "lib/ai-engine"
-  "lib/integrations-anthropic-ai"
-  "lib/integrations-gemini-ai"
-  "lib/integrations-openai-ai-server"
 )
 
 echo "Step 1: Building all packages..."

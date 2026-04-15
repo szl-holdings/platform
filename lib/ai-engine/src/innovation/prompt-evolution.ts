@@ -6,7 +6,7 @@
  * Auto-applies low-risk refinements (narrowing existing expertise);
  * flags significant changes for human review.
  */
-import { openai } from "@szl-holdings/integrations-openai-ai-server";
+import { openai } from "../providers/openai/index.js";
 
 export interface PromptEvolutionProposal {
   agentId: string;

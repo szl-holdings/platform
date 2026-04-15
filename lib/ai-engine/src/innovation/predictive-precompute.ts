@@ -7,7 +7,7 @@
  * Caches results with a short TTL. When a matching query arrives,
  * serves the pre-computed result instantly and marks it as "pre-computed".
  */
-import { openai } from "@szl-holdings/integrations-openai-ai-server";
+import { openai } from "../providers/openai/index.js";
 import type { AgentCallResult } from "../types.js";
 
 const CACHE_TTL_MS = 15 * 60 * 1000;

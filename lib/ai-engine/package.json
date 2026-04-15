@@ -29,15 +29,26 @@
     "./domain-embedding-hooks": "./src/domain-embedding-hooks.ts",
     "./ml-pipeline": "./src/ml-pipeline/index.ts",
     "./ontology/ontology-engine": "./src/ontology/ontology-engine.ts",
-    "./ontology/graph-rag": "./src/ontology/graph-rag.ts"
+    "./ontology/graph-rag": "./src/ontology/graph-rag.ts",
+    "./providers/anthropic": "./src/providers/anthropic/index.ts",
+    "./providers/anthropic/batch": "./src/providers/anthropic/batch/index.ts",
+    "./providers/gemini": "./src/providers/gemini/index.ts",
+    "./providers/gemini/batch": "./src/providers/gemini/batch/index.ts",
+    "./providers/gemini/image": "./src/providers/gemini/image/index.ts",
+    "./providers/openai": "./src/providers/openai/index.ts",
+    "./providers/openai/batch": "./src/providers/openai/batch/index.ts",
+    "./providers/openai/image": "./src/providers/openai/image/index.ts",
+    "./providers/openai/audio": "./src/providers/openai/audio/index.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
+    "@google/genai": "^1.44.0",
     "@szl-holdings/db": "workspace:*",
-    "@szl-holdings/integrations-anthropic-ai": "workspace:*",
-    "@szl-holdings/integrations-gemini-ai": "workspace:*",
-    "@szl-holdings/integrations-openai-ai-server": "workspace:*",
     "@szl-holdings/services": "workspace:*",
     "drizzle-orm": "catalog:",
+    "openai": "^6.27.0",
+    "p-limit": "^7.3.0",
+    "p-retry": "^7.1.1",
     "pino": "^9"
   },
   "devDependencies": {

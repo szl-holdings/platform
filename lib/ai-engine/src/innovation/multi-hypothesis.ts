@@ -6,7 +6,7 @@
  * by similarity, ranks by evidence strength and cross-agent agreement, and
  * presents the top hypotheses with supporting and contradicting evidence.
  */
-import { openai } from "@szl-holdings/integrations-openai-ai-server";
+import { openai } from "../providers/openai/index.js";
 import type { AgentCallResult } from "../types.js";
 
 export interface Hypothesis {
