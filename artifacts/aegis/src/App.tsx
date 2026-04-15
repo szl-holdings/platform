@@ -1008,6 +1008,10 @@ const aegisCommands: CommandItem[] = [
   { id: "nav-models", label: "Models", icon: "⚙️", group: "Intelligence Engine", action: nav("/intel/models") },
   { id: "nav-predictions", label: "Predictions", icon: "📈", group: "Intelligence Engine", action: nav("/intel/predictions") },
   { id: "nav-intel-insights", label: "Intel Insights", icon: "💡", group: "Intelligence Engine", action: nav("/intel/insights") },
+  { id: "nav-legal", label: "Matter Overview", icon: "⚖️", group: "Legal Command", keywords: ["legal", "matter", "overview", "prism"], action: nav("/legal") },
+  { id: "nav-legal-matters", label: "Active Matters", icon: "📂", group: "Legal Command", keywords: ["legal", "matters", "cases", "active", "litigation"], action: nav("/legal") },
+  { id: "nav-legal-deadlines", label: "Deadline Risk Queue", icon: "⏰", group: "Legal Command", keywords: ["legal", "deadline", "risk", "queue", "calendar"], action: nav("/legal") },
+  { id: "nav-legal-ai", label: "AI Recommendations", icon: "🤖", group: "Legal Command", keywords: ["legal", "ai", "recommendations", "settlement", "prediction"], action: nav("/legal") },
   ...createBaselineWebActions(
     (path) => { window.location.href = BASE + path.replace(/^\//, ""); },
     {
@@ -1029,6 +1033,7 @@ const aegisShortcuts: KeyboardShortcut[] = [
   { key: "T", description: "Go to Threat Intel", category: "Security" },
   { key: "N", description: "Go to NOC Operations", category: "Operations" },
   { key: "E", description: "Go to Intelligence Dashboard", category: "Intelligence" },
+  { key: "L", description: "Go to Legal Overview", category: "Legal" },
 ];
 
 const MARKETING_ROUTES = ["/", "/home", "/demo", "/pulse"];

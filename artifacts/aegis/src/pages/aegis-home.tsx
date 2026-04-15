@@ -27,22 +27,6 @@ const workspaces = [
     ],
   },
   {
-    id: "legal",
-    name: "Legal",
-    subtitle: "Matter Intelligence",
-    color: "#d4a054",
-    icon: FileSearch,
-    href: "/legal",
-    capabilities: [
-      "Matter health dashboard with PRISM observability pillars",
-      "Deadline risk queue and calendar intelligence",
-      "Settlement predictor with low/mid/high range modeling",
-      "Privilege engine and attorney-client log",
-      "AI recommendations and exposure tracking",
-      "Compliance deadline management across jurisdictions",
-    ],
-  },
-  {
     id: "command",
     name: "Command",
     subtitle: "Managed Operations",
@@ -72,6 +56,22 @@ const workspaces = [
       "Chasqui Relay — intelligence routing",
       "Prediction models with confidence scoring",
       "Research-to-action pipeline",
+    ],
+  },
+  {
+    id: "legal",
+    name: "Legal",
+    subtitle: "Matter Intelligence",
+    color: "#d4a054",
+    icon: FileSearch,
+    href: "/legal",
+    capabilities: [
+      "Matter health dashboard with PRISM observability pillars",
+      "Deadline risk queue and calendar intelligence",
+      "Settlement predictor with low/mid/high range modeling",
+      "Privilege engine and attorney-client log",
+      "AI recommendations and exposure tracking",
+      "Compliance deadline management across jurisdictions",
     ],
   },
 ];
@@ -172,7 +172,7 @@ export default function AegisHomePage() {
 
         <Reveal delay={100}>
           <h1 className="text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold leading-[1.04] tracking-[-0.03em] text-white max-w-[900px]">
-            Three workspaces.
+            Four workspaces.
           </h1>
         </Reveal>
         <Reveal delay={200}>
@@ -184,8 +184,8 @@ export default function AegisHomePage() {
         <Reveal delay={300}>
           <p className="text-[17px] sm:text-[19px] leading-[1.75] text-white/30 max-w-[640px] mb-12">
             Aegis unifies security operations, managed services, and AI-driven intelligence
-            into a single console. Defense detects. Command operates. Labs reasons.
-            All three share one data context, one correlation engine, one operating model.
+            into a single console. Defense detects. Legal protects. Command operates. Labs reasons.
+            All four share one data context, one correlation engine, one operating model.
           </p>
         </Reveal>
 
@@ -228,7 +228,7 @@ export default function AegisHomePage() {
             <div className="max-w-[600px] mb-16">
               <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/15 mb-4">Architecture</p>
               <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold leading-[1.15] tracking-tight text-white mb-4">
-                One platform. Three operating surfaces.
+                One platform. Four operating surfaces.
               </h2>
               <p className="text-[16px] leading-[1.8] text-white/28">
                 Each workspace is a full operating environment for its domain. Together, they share
@@ -293,7 +293,7 @@ export default function AegisHomePage() {
               Cross-module intelligence in action
             </h2>
             <p className="text-[16px] leading-[1.8] text-white/28 mb-16 max-w-[560px]">
-              The real power of Aegis is convergence. When Defense, Command, and Labs share
+              The real power of Aegis is convergence. When Defense, Legal, Command, and Labs share
               one data layer, correlations emerge that siloed tools miss entirely.
             </p>
 
@@ -374,7 +374,7 @@ export default function AegisHomePage() {
           <div className="text-center mb-16">
             <p className="text-[10px] font-mono tracking-[0.3em] uppercase mb-3 text-red-400/50">Platform Walkthrough</p>
             <h2 className="text-[clamp(1.6rem,3vw,2.1rem)] font-bold text-white mb-3 tracking-tight">How Aegis works in practice</h2>
-            <p className="text-[14px] max-w-xl mx-auto text-white/25">From deployment to full command in under an hour. Three workspaces, one unified console.</p>
+            <p className="text-[14px] max-w-xl mx-auto text-white/25">From deployment to full command in under an hour. Four workspaces, one unified console.</p>
           </div>
           <div className="relative">
             <div className="hidden md:block absolute left-[39px] top-0 bottom-0 w-px bg-white/[0.03]" />
