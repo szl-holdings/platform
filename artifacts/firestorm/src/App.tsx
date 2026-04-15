@@ -133,6 +133,13 @@ const IntelInsights = lazy(() => import("@/pages/intel/insights"));
 const BreachCostPredictor = lazy(() => import("@/pages/breach-cost-predictor"));
 const PurpleTeam = lazy(() => import("@/pages/purple-team"));
 const APTEmulationPage = lazy(() => import("@/pages/apt-emulation"));
+
+// ─── PHANTOM & SENTINEL (Task 566) ───────────────────────────────────────────
+const PhantomWarRoom = lazy(() => import("@/pages/phantom-war-room"));
+const PhantomPurpleExercise = lazy(() => import("@/pages/phantom-purple-exercise"));
+const PhantomTabletop = lazy(() => import("@/pages/phantom-tabletop"));
+const SentinelBehavioral = lazy(() => import("@/pages/sentinel-behavioral"));
+const ThreatSimReport = lazy(() => import("@/pages/threat-sim-report"));
 const ZeroTrustScorecard = lazy(() => import("@/pages/zero-trust-scorecard"));
 const CyberInsuranceScore = lazy(() => import("@/pages/cyber-insurance-score"));
 const AttackPathViz = lazy(() => import("@/pages/attack-path-viz"));
@@ -205,6 +212,14 @@ const securityNavPrimary = [
   { path: "/simulation-panel", label: "Simulation Panel", icon: Play },
   { path: "/hardening-controls", label: "Hardening Controls", icon: SlidersHorizontal },
   { path: "/document-engine", label: "Document Engine", icon: FileText },
+];
+
+const phantomSentinelNav = [
+  { path: "/phantom/war-room", label: "PHANTOM War Room", icon: Crosshair },
+  { path: "/phantom/purple-exercise", label: "Purple Team Exercise", icon: Shield },
+  { path: "/phantom/tabletop", label: "Executive Tabletop", icon: FileText },
+  { path: "/sentinel/behavioral", label: "SENTINEL Behavioral", icon: Eye },
+  { path: "/threat-sim-report", label: "Simulation Reports", icon: FileText },
 ];
 
 const securityNavSecondary = [
@@ -428,8 +443,23 @@ function AegisSidebarContent({ location, onNavigate, collapsed, onToggleCollapse
       ],
     },
     {
-      id: "settings",
-      label: "Settings",
+      id: "phantom-sentinel",
+      label: "PHANTOM & SENTINEL",
+      items: phantomSentinelNav.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3.5 h-3.5" /> })),
+    },
+    {
+      id: "living-intel",
+      label: "Living Intelligence",
+      items: livingIntelNav.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3.5 h-3.5" /> })),
+    },
+    {
+      id: "governance",
+      label: "Governance & Reporting",
+      items: governanceNavItems.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3 h-3" /> })),
+    },
+    {
+      id: "compliance",
+      label: "Compliance & Readiness",
       items: complianceNavItems.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3 h-3" /> })),
     },
   ];
@@ -735,6 +765,13 @@ function AppRouter() {
         <Route path="/breach-cost" component={BreachCostPredictor} />
         <Route path="/purple-team" component={PurpleTeam} />
         <Route path="/apt-emulation" component={APTEmulationPage} />
+
+        {/* PHANTOM & SENTINEL */}
+        <Route path="/phantom/war-room" component={PhantomWarRoom} />
+        <Route path="/phantom/purple-exercise" component={PhantomPurpleExercise} />
+        <Route path="/phantom/tabletop" component={PhantomTabletop} />
+        <Route path="/sentinel/behavioral" component={SentinelBehavioral} />
+        <Route path="/threat-sim-report" component={ThreatSimReport} />
         <Route path="/zero-trust-scorecard" component={ZeroTrustScorecard} />
         <Route path="/cyber-insurance" component={CyberInsuranceScore} />
         <Route path="/attack-path" component={AttackPathViz} />

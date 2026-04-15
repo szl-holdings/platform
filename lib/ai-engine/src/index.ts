@@ -1,4 +1,16 @@
 export {
+  computeRiskAssessment,
+  buildBaseline,
+  batchRiskAssessment,
+} from "./sentinel/behavioral-analytics.js";
+export type {
+  AccessEvent,
+  BehavioralBaseline,
+  DetectedAnomaly,
+  RiskAssessment,
+} from "./sentinel/behavioral-analytics.js";
+
+export {
   NuroMeshOrchestrator,
   nuroMeshOrchestrator,
   AGENT_REGISTRY,
