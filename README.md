@@ -3,13 +3,10 @@
 > [Live Demo](https://szlholdings.com) | [Security](./SECURITY.md) | [Code of Conduct](./CODE_OF_CONDUCT.md) | [Architecture](./docs/architecture/system-overview.md) | [Investor Docs](./docs/investor/platform-thesis.md) | [Trust Center](./docs/trust/trust-center.md)
 
 [![CI](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml)
+[![E2E Tests](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/e2e.yml/badge.svg?branch=master)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/e2e.yml)
+[![Lighthouse CI](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/lighthouse.yml/badge.svg?branch=master)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/lighthouse.yml)
 [![CodeQL](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml/badge.svg?branch=master)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml)
 [![Security Audit](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml/badge.svg?branch=master)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml)
-
-[![CI](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml)
-[![E2E Tests](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/e2e.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/e2e.yml)
-[![Lighthouse CI](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/lighthouse.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/lighthouse.yml)
-[![CodeQL](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml)
 ![Status](https://img.shields.io/badge/status-active-brightgreen)
 ![License](https://img.shields.io/badge/license-proprietary-red)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
@@ -345,14 +342,33 @@ See [Trust Center](docs/trust/trust-center.md) · [Security Posture](docs/trust/
 
 ---
 
+## Local Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/szl-holdings/szl-holdings-platform.git
+cd szl-holdings-platform
+
+# Install all workspace dependencies
+pnpm install
+
+# Start all services (API + web apps)
+pnpm dev
+```
+
+Individual artifacts can be started with `pnpm --filter @workspace/<artifact-name> dev`. See each artifact's `README` or `package.json` for environment variable requirements.
+
+---
+
 ## Deployment
 
-| Environment | Purpose | Status |
-|-------------|---------|--------|
-| **Replit Workspace** | Active development, internal preview | Live — 13 workflows |
-| **Azure Production** | Customer-facing production deployment | Production-ready architecture |
+| Environment | Purpose | Trigger |
+|-------------|---------|---------|
+| **Replit Workspace** | Active development, internal preview | Always on |
+| **Staging** | Integration validation before production | Auto on push to `main` via `deploy-staging.yml` |
+| **Production** | Customer-facing deployment | On published release via `deploy-production.yml` |
 
-See [Deployment Model](docs/trust/deployment-model.md)
+See [Deployment Model](docs/trust/deployment-model.md) · [Branch Protection & CI/CD Settings](.github/BRANCH_PROTECTION.md)
 
 ---
 

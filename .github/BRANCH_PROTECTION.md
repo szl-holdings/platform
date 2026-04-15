@@ -1,33 +1,41 @@
 # Branch Protection & GitHub Settings
 
-This document describes the recommended GitHub repository settings to enforce the CI/CD pipeline.
+This is the definitive checklist of GitHub UI settings required to enforce the CI/CD pipeline, protect the default branch, and enable environment-based deployments. All settings are manual steps in the GitHub repository settings UI.
 
-## Required Branch Protection Rules for `main` / `master`
+---
 
-Navigate to **Settings → Branches → Add rule** (or update the existing ruleset) and configure the following for the default branch.
+## 1. Branch Protection Rules
 
-### Status Checks (Required to pass before merging)
+Navigate to **Settings → Branches → Add rule** (or update the existing ruleset) and configure the following for the default branch (`main` / `master`).
 
-Enable **"Require status checks to pass before merging"** and add these required checks:
+### Pull Request Requirements
+
+| Setting | Value |
+|---|---|
+| Require a pull request before merging | Enabled |
+| Required approvals | 1 |
+| Dismiss stale pull request approvals when new commits are pushed | Enabled |
+| Require review from Code Owners | Enabled (see `.github/CODEOWNERS`) |
+| Require approval of the most recent reviewable push | Enabled |
+| Require conversation resolution before merging | Enabled |
+
+### Required Status Checks
+
+Enable **"Require status checks to pass before merging"** and add the following checks. Require branches to be up to date before merging.
 
 | Status Check | Workflow | Description |
 |---|---|---|
 | `CI Gate` | `.github/workflows/ci.yml` | Aggregate gate — lint, typecheck, test, build |
-| `Lint` | `.github/workflows/ci.yml` | ESLint across all packages |
-| `Typecheck` | `.github/workflows/ci.yml` | TypeScript type checking |
-| `Test` | `.github/workflows/ci.yml` | Unit test suite |
-| `Build API` | `.github/workflows/ci.yml` | API server build |
-| `Build Web Apps` | `.github/workflows/ci.yml` | All web app builds |
 | `E2E Gate` | `.github/workflows/e2e.yml` | Aggregate E2E gate |
 | `Lighthouse Gate` | `.github/workflows/lighthouse.yml` | Performance score thresholds |
-| `dependency-review` | `.github/workflows/dependency-review.yml` | Vulnerability scan |
+| `dependency-review` | `.github/workflows/dependency-review.yml` | Vulnerability scan on dependency changes |
 | `analyze` | `.github/workflows/codeql.yml` | CodeQL security analysis |
 
-> **Tip:** The `CI Gate` and `E2E Gate` jobs are aggregate gates — requiring only these two (plus `Lighthouse Gate` and `dependency-review`) gives cleaner PR feedback while covering all required checks.
+> **Tip:** `CI Gate` and `E2E Gate` are aggregate jobs — requiring these two (plus `Lighthouse Gate` and `dependency-review`) gives clean PR feedback while covering all required checks underneath.
 
-### Score Thresholds (Lighthouse)
+### Lighthouse Score Thresholds
 
-The Lighthouse CI workflow enforces the following minimum scores:
+Configured in `.lighthouserc.json`:
 
 | Category | Minimum Score |
 |---|---|
@@ -36,67 +44,112 @@ The Lighthouse CI workflow enforces the following minimum scores:
 | Best Practices | 90 |
 | SEO | 90 |
 
-Configuration: `.lighthouserc.json`
+### Additional Branch Protections
 
-### Pull Request Requirements
+| Setting | Value |
+|---|---|
+| Require branches to be up to date before merging | Enabled |
+| Do not allow bypassing the above settings | Enabled (applies to admins too) |
+| Allow force pushes | Disabled |
+| Allow deletions | Disabled |
 
-- **Require a pull request before merging** — enabled
-- **Require approvals** — 1 (minimum)
-- **Dismiss stale pull request approvals when new commits are pushed** — enabled
-- **Require review from Code Owners** — recommended (see `.github/CODEOWNERS`)
-- **Required review thread resolution** — enabled
+---
 
-### Additional Protections
+## 2. Merge Settings
 
-- **Require branches to be up to date before merging** — enabled (ensures CI runs against the latest main)
-- **Require conversation resolution before merging** — enabled
-- **Do not allow bypassing the above settings** — enabled (apply to admins too)
-- **Allow force pushes** — disabled
-- **Allow deletions** — disabled
+Navigate to **Settings → General → Pull Requests**:
 
-## Secrets Required
+| Setting | Value |
+|---|---|
+| Allow merge commits | Disabled |
+| Allow squash merging | Enabled |
+| Allow rebase merging | Disabled |
+| Automatically delete head branches | Enabled |
 
-Set these in **Settings → Secrets and variables → Actions** and under **Settings → Environments → production**:
+---
 
-| Secret | Required | Description |
+## 3. Environments
+
+Navigate to **Settings → Environments** and create the following two environments.
+
+### `staging`
+
+| Setting | Value |
+|---|---|
+| Required reviewers | Optional — add for extra gate |
+| Deployment protection rules | Enabled |
+| Secrets | `REPLIT_STAGING_DEPLOY_TOKEN`, `REPLIT_STAGING_APP_ID` |
+
+The `deploy-staging.yml` workflow deploys to this environment automatically on every push to `main`.
+
+### `production`
+
+| Setting | Value |
+|---|---|
+| Required reviewers | Recommended — at least 1 |
+| Deployment protection rules | Enabled |
+| Secrets | `REPLIT_DEPLOY_TOKEN`, `REPLIT_APP_ID` |
+
+The `deploy-production.yml` workflow deploys to this environment on published releases or manual dispatch with confirmation.
+
+---
+
+## 4. Secrets
+
+Navigate to **Settings → Secrets and variables → Actions** and set the following repository-level secrets:
+
+| Secret | Used By | Description |
 |---|---|---|
-| `REPLIT_DEPLOY_TOKEN` | For auto-deploy | Replit personal access token or deploy token |
-| `REPLIT_APP_ID` | For auto-deploy | Replit app/repl ID to trigger deployment on |
+| `REPLIT_DEPLOY_TOKEN` | `deploy-production.yml` | Replit personal access or deploy token for production |
+| `REPLIT_APP_ID` | `deploy-production.yml` | Replit app/repl ID for production |
+| `REPLIT_STAGING_DEPLOY_TOKEN` | `deploy-staging.yml` | Replit personal access or deploy token for staging |
+| `REPLIT_STAGING_APP_ID` | `deploy-staging.yml` | Replit app/repl ID for staging |
 
-If these secrets are not set, the deploy workflow will skip gracefully with a warning.
+> Secrets scoped to an environment (staging / production) should be set under **Settings → Environments → [environment name] → Environment secrets** rather than at the repository level, for tighter access control.
 
-## Recommended Additional Settings
+---
 
-### General
-
-- **Merge button**: Allow **Squash merging** only (keeps a clean linear history)
-- **Automatically delete head branches** — enabled
-
-### Environments
-
-Create a `production` environment under **Settings → Environments** with:
-- Required reviewers (optional, for an extra gate before production deploy)
-- The `REPLIT_DEPLOY_TOKEN` and `REPLIT_APP_ID` secrets scoped to this environment
-- Deployment protection rules enabled
-
-## Release Workflow
-
-Releases are created automatically on every push to `main`:
-
-1. The release workflow determines the next semantic version based on commit message prefixes
-2. A Git tag is created (`vX.Y.Z`)
-3. A GitHub Release is published with an auto-generated changelog
-4. The deploy workflow is triggered by the `release.published` event
-
-**Commit message conventions:**
-- `feat: ...` → minor version bump
-- `feat!: ...` or `BREAKING CHANGE:` → major version bump
-- All other prefixes (`fix:`, `chore:`, `docs:`, etc.) → patch version bump
-
-## Dependabot
+## 5. Dependabot
 
 Dependabot is configured in `.github/dependabot.yml` to:
+
 - Update npm packages weekly (Monday, 09:00 ET)
 - Update GitHub Actions weekly (Monday, 09:00 ET)
 - Group related packages (React, Vite, testing, TypeScript, UI, database, TanStack)
 - Cap at 10 open npm PRs and 5 Actions PRs at a time
+
+To enable **Dependabot auto-merge** for patch-level updates (optional):
+
+1. Navigate to **Settings → Code security and analysis → Dependabot**
+2. Enable "Dependabot security updates" and "Dependabot version updates"
+3. Use a branch protection ruleset or GitHub Action to auto-approve and auto-merge patch PRs after CI passes
+
+---
+
+## 6. Release Workflow
+
+Releases are created automatically on every push to `main`:
+
+1. The `release.yml` workflow determines the next semantic version from commit message prefixes
+2. A Git tag is created (`vX.Y.Z`) and a GitHub Release is published
+3. Publishing the release triggers `deploy-production.yml` → production deployment
+
+**Commit message conventions:**
+
+| Prefix | Bump |
+|---|---|
+| `feat!:` or `BREAKING CHANGE:` | Major |
+| `feat:` | Minor |
+| `fix:`, `chore:`, `docs:`, etc. | Patch |
+
+### Staging → Production Promotion Flow
+
+```
+push to main
+    │
+    ├─► deploy-staging.yml  (auto) → staging environment
+    │
+    └─► release.yml (auto) → GitHub Release published
+                                     │
+                                     └─► deploy-production.yml → production environment
+```

@@ -53,7 +53,6 @@ The SZL Holdings platform is currently in active pre-commercial development. Sec
 ### In Scope
 
 - All platform web applications (Lyte, Aegis, Terra, Vessels, Carlota Jo, PRISM Counsel, IMPERIUM, Command Portal, SZL Holdings, Stephen Site)
-- All platform web applications (Lyte, Aegis, Terra, Vessels, Carlota Jo, SZL Holdings, Command Portal)
 - CORTEX unified mobile application (iOS/Android) (Expo / React Native)
 - The centralized API server
 - Authentication and session management (OIDC/PKCE, RBAC, SCIM 2.0)
