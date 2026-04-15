@@ -3,6 +3,7 @@ import { Redirect, Stack } from "expo-router";
 import { View, StyleSheet } from "react-native";
 import { useAuth } from "@/context/AuthContext";
 import { WorkspaceSwitcher } from "@/components/WorkspaceSwitcher";
+import { ScreenshotPolicyEnforcer } from "@/components/ScreenshotPolicyEnforcer";
 
 export default function ShellLayout() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -22,8 +23,11 @@ export default function ShellLayout() {
         <Stack.Screen name="advisory" />
         <Stack.Screen name="portfolio" />
         <Stack.Screen name="founder" />
+        <Stack.Screen name="quick-actions" options={{ animation: "slide_from_bottom" }} />
+        <Stack.Screen name="settings" options={{ animation: "slide_from_right" }} />
       </Stack>
       <WorkspaceSwitcher />
+      <ScreenshotPolicyEnforcer />
     </View>
   );
 }

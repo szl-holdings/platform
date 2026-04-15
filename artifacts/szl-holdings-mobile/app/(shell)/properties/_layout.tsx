@@ -9,6 +9,7 @@ export default function PropertiesLayout() {
       <Stack.Screen name="capture" />
       <Stack.Screen name="agent-chat" />
       <Stack.Screen name="mcp-tools" />
+      <Stack.Screen name="ar-viewer" options={{ animation: "fade" }} />
     </Stack>
   );
 }

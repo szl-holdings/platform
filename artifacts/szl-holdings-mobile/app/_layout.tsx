@@ -47,6 +47,7 @@ import { ErrorFallback } from "@/components/ErrorFallback";
 import { AuthProvider, AUTH_TOKEN_KEY } from "@/context/AuthContext";
 import { WorkspaceProvider } from "@/context/WorkspaceContext";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
+import { ScreenshotGuardProvider } from "@/context/ScreenshotGuardContext";
 
 if (process.env.EXPO_PUBLIC_DOMAIN) {
   setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
@@ -164,6 +165,7 @@ export default function RootLayout() {
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
               <WorkspaceProvider>
+                <ScreenshotGuardProvider>
                 <NotificationProvider apiBase={API_BASE} getAuthToken={getCortexAuthToken}>
                   <BiometricProvider
                     config={{
@@ -206,6 +208,7 @@ export default function RootLayout() {
                     </SyncEngineProvider>
                   </BiometricProvider>
                 </NotificationProvider>
+                </ScreenshotGuardProvider>
               </WorkspaceProvider>
             </AuthProvider>
           </QueryClientProvider>

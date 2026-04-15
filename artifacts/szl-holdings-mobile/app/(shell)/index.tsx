@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -17,6 +17,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useWorkspace, WORKSPACES, type WorkspaceDomain } from "@/context/WorkspaceContext";
 import { WorkspaceTrigger } from "@/components/WorkspaceSwitcher";
 import { useApiStatus } from "@szl-holdings/mobile-shared";
+import { VoiceCommandModal } from "@/components/VoiceCommandModal";
 
 const ACCENT = "#c9a84c";
 
@@ -147,6 +148,7 @@ export default function CommandFeedScreen() {
   const { user } = useAuth();
   const { setActiveWorkspace } = useWorkspace();
   const apiStatus = useApiStatus();
+  const [voiceVisible, setVoiceVisible] = useState(false);
 
   useEffect(() => {
     setActiveWorkspace("command");
@@ -186,10 +188,29 @@ export default function CommandFeedScreen() {
             </View>
           )}
         </View>
-        <TouchableOpacity onPress={() => refetch()} style={styles.refreshBtn}>
-          <Feather name="refresh-cw" size={18} color={colors.mutedForeground} />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity
+            onPress={() => setVoiceVisible(true)}
+            style={[styles.headerIconBtn, { backgroundColor: `${ACCENT}12`, borderColor: `${ACCENT}25` }]}
+          >
+            <Feather name="mic" size={16} color={ACCENT} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.navigate("/(shell)/quick-actions" as never)}
+            style={[styles.headerIconBtn, { borderColor: colors.border }]}
+          >
+            <Feather name="layers" size={16} color={colors.mutedForeground} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.navigate("/(shell)/settings" as never)}
+            style={[styles.headerIconBtn, { borderColor: colors.border }]}
+          >
+            <Feather name="settings" size={16} color={colors.mutedForeground} />
+          </TouchableOpacity>
+        </View>
       </View>
+
+      <VoiceCommandModal visible={voiceVisible} onClose={() => setVoiceVisible(false)} />
 
       <ScrollView
         style={styles.scroll}
@@ -296,6 +317,15 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   refreshBtn: { padding: 4 },
+  headerActions: { flexDirection: "row", alignItems: "center", gap: 6 },
+  headerIconBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   scroll: { flex: 1 },
   scrollContent: { padding: 16, gap: 8 },
   greeting: { marginBottom: 8 },

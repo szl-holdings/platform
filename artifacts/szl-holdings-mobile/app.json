@@ -23,7 +23,7 @@
       "buildNumber": "1",
       "infoPlist": {
         "NSFaceIDUsageDescription": "CORTEX uses Face ID for secure command access.",
-        "NSCameraUsageDescription": "CORTEX uses your camera for document scanning and property capture.",
+        "NSCameraUsageDescription": "CORTEX uses your camera for AR property intelligence overlays and document scanning.",
         "NSUserNotificationUsageDescription": "CORTEX sends cross-domain alerts, signals, and executive briefings.",
         "ITSAppUsesNonExemptEncryption": false
       },

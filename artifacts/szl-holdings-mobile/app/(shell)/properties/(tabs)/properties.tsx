@@ -264,7 +264,24 @@ export default function PropertiesTab() {
           <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>TERRA · DISTRESS ENGINE</Text>
           <Text style={[styles.title, { color: colors.cream }]}>Properties</Text>
         </View>
-        <View style={{ alignItems: "flex-end", gap: 3 }}>
+        <View style={{ alignItems: "flex-end", gap: 6 }}>
+          <Pressable
+            onPress={() => router.push("/(shell)/properties/ar-viewer" as never)}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 4,
+              paddingHorizontal: 10,
+              paddingVertical: 5,
+              borderRadius: 8,
+              backgroundColor: "rgba(201,168,76,0.1)",
+              borderWidth: 1,
+              borderColor: "rgba(201,168,76,0.25)",
+            }}
+          >
+            <Feather name="camera" size={12} color="#c9a84c" />
+            <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: "#c9a84c" }}>AR View</Text>
+          </Pressable>
           {isFromCache ? (
             <View style={{ flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, backgroundColor: "rgba(148,163,184,0.1)", borderWidth: 1, borderColor: "rgba(148,163,184,0.2)" }}>
               <Feather name="wifi-off" size={9} color="#94a3b8" />
