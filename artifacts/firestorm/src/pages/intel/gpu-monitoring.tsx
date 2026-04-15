@@ -258,35 +258,71 @@ export default function GPUMonitoring() {
     staleTime: 15_000,
   });
 
-  const liveGpus = liveGpuData?.gpus as Array<{
-    uuid: string; name: string; gpuUtilPct: number; memUsedMb: number;
-    memTotalMb: number; tempCelsius: number; powerWatts: number; fanSpeedPct: number;
-  }> | undefined;
+  interface DcgmGpu {
+    gpuIndex: number;
+    uuid: string;
+    modelName: string;
+    utilizationPct: number;
+    memoryUsedMb: number;
+    memoryTotalMb: number;
+    temperatureCelsius: number;
+    powerDrawWatts: number;
+    powerLimitWatts: number;
+    smClockMhz: number;
+    memClockMhz: number;
+    eccSingleBit: number;
+    eccDoubleBit: number;
+    pcieRxBytesPerSec: number;
+    pcieTxBytesPerSec: number;
+    fanSpeedPct: number;
+    throttleReasons: string[];
+  }
 
-  const liveNodes: GpuNode[] | undefined = liveGpus?.map((g, i) => ({
-    id: g.uuid ?? `gpu-${i}`,
-    hostname: g.name ?? `gpu-node-${i}`,
-    gpuModel: g.name ?? "NVIDIA GPU",
-    gpuUtilPct: g.gpuUtilPct ?? 0,
-    vramUsedGb: (g.memUsedMb ?? 0) / 1024,
-    vramTotalGb: (g.memTotalMb ?? 0) / 1024,
-    tempCelsius: g.tempCelsius ?? 0,
-    powerWatts: g.powerWatts ?? 0,
+  const liveGpus = liveGpuData?.gpus as DcgmGpu[] | undefined;
+
+  const liveNodes: GpuNode[] | undefined = liveGpus?.map((g) => ({
+    id: g.uuid ?? `gpu-${g.gpuIndex}`,
+    hostname: `gpu-node-${g.gpuIndex}`,
+    gpuModel: g.modelName ?? "NVIDIA GPU",
+    gpuUtilPct: g.utilizationPct ?? 0,
+    vramUsedGb: (g.memoryUsedMb ?? 0) / 1024,
+    vramTotalGb: (g.memoryTotalMb ?? 0) / 1024,
+    tempCelsius: g.temperatureCelsius ?? 0,
+    powerWatts: g.powerDrawWatts ?? 0,
     fanSpeedPct: g.fanSpeedPct ?? 0,
-    state: g.tempCelsius >= 85 ? "error" as const : g.tempCelsius >= 75 ? "throttle" as const : g.gpuUtilPct >= 90 ? "plateau" as const : "ramping" as const,
-    pcieThroughputGbps: 0,
+    state: g.temperatureCelsius >= 85 ? "error" as const : g.temperatureCelsius >= 75 ? "throttle" as const : g.utilizationPct >= 90 ? "plateau" as const : "ramping" as const,
+    pcieThroughputGbps: ((g.pcieRxBytesPerSec ?? 0) + (g.pcieTxBytesPerSec ?? 0)) / 1_000_000_000,
     nvlinkBandwidthGbps: 0,
     xidErrors: 0,
-    eccErrors: { singleBit: 0, doubleBit: 0 },
-    smClockMhz: 0,
-    memClockMhz: 0,
+    eccErrors: { singleBit: g.eccSingleBit ?? 0, doubleBit: g.eccDoubleBit ?? 0 },
+    smClockMhz: g.smClockMhz ?? 0,
+    memClockMhz: g.memClockMhz ?? 0,
     thermalHistory: [],
   }));
 
+  interface DcgmClusterSummary {
+    totalGpus: number;
+    activeGpus: number;
+    avgUtilization: number;
+    totalVramGb: number;
+    usedVramGb: number;
+    totalPowerKw: number;
+  }
+  const liveSummary = liveClusterData?.summary as DcgmClusterSummary | undefined;
+
   const nodes = liveNodes ?? clusterSnapshot.nodes;
   const queuedJobs = clusterSnapshot.queuedJobs;
-  const clusterHealth = liveClusterData?.summary?.clusterHealth ?? clusterSnapshot.clusterHealth;
   const isLive = !!liveGpus;
+
+  const derivedClusterHealth = (() => {
+    const src = liveNodes ?? clusterSnapshot.nodes;
+    const errorCount = src.filter((n) => n.state === "error").length;
+    const throttleCount = src.filter((n) => n.state === "throttle").length;
+    if (errorCount > 0) return "critical";
+    if (throttleCount > 0) return "degraded";
+    return "healthy";
+  })();
+  const clusterHealth = derivedClusterHealth;
 
   const healthColor = clusterHealth === "critical" ? "text-red-400" :
     clusterHealth === "degraded" ? "text-orange-400" : "text-emerald-400";
@@ -317,11 +353,11 @@ export default function GPUMonitoring() {
 
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { label: "Total GPUs", value: clusterSnapshot.totalGpus },
-          { label: "Active GPUs", value: clusterSnapshot.activeGpus },
-          { label: "Avg Util", value: `${clusterSnapshot.avgUtilization.toFixed(0)}%` },
-          { label: "VRAM Used", value: `${clusterSnapshot.usedVramGb.toFixed(0)}/${clusterSnapshot.totalVramGb}GB` },
-          { label: "Total Power", value: `${clusterSnapshot.totalPowerKw.toFixed(1)}kW` },
+          { label: "Total GPUs", value: liveSummary?.totalGpus ?? clusterSnapshot.totalGpus },
+          { label: "Active GPUs", value: liveSummary?.activeGpus ?? clusterSnapshot.activeGpus },
+          { label: "Avg Util", value: `${(liveSummary?.avgUtilization ?? clusterSnapshot.avgUtilization).toFixed(0)}%` },
+          { label: "VRAM Used", value: `${(liveSummary?.usedVramGb ?? clusterSnapshot.usedVramGb).toFixed(0)}/${(liveSummary?.totalVramGb ?? clusterSnapshot.totalVramGb).toFixed(0)}GB` },
+          { label: "Total Power", value: `${(liveSummary?.totalPowerKw ?? clusterSnapshot.totalPowerKw).toFixed(1)}kW` },
           { label: "Throughput", value: `${clusterSnapshot.totalThroughputKtps.toFixed(0)}K tok/s` },
         ].map(({ label, value }) => (
           <Card key={label}>
