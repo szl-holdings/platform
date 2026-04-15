@@ -1,12 +1,29 @@
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
-import { Tabs } from "expo-router";
+import * as Linking from "expo-linking";
+import { Tabs, router } from "expo-router";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { SymbolView } from "expo-symbols";
-import React from "react";
+import React, { useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
+import { SpotlightFab, SpotlightModal, type SpotlightCommand } from "@szl-holdings/mobile-shared/components";
 import { LYTE_COLORS } from "@/constants/colors";
+
+const LYTE_ACCENT = "#00d4ff";
+
+const lyteCommands: SpotlightCommand[] = [
+  { id: "nav-dashboard", label: "Dashboard", description: "Executive command overview", icon: "⚡", group: "Navigate", action: () => router.push("/(tabs)") },
+  { id: "nav-health", label: "Service Health", description: "System & service health status", icon: "💚", group: "Navigate", action: () => router.push("/(tabs)/health") },
+  { id: "nav-alerts", label: "Alerts", description: "Active alerts & notifications", icon: "🔔", group: "Navigate", action: () => router.push("/(tabs)/alerts") },
+  { id: "nav-board", label: "Board Mode", description: "Executive board view", icon: "👁", group: "Navigate", action: () => router.push("/(tabs)/board-mode") },
+  { id: "nav-profile", label: "Profile", description: "Account & settings", icon: "👤", group: "Navigate", action: () => router.push("/(tabs)/profile") },
+  { id: "action-blockers", label: "View Blockers", description: "See all active blockers", icon: "🚫", group: "Quick Actions", isQuickAction: true, keywords: ["block", "issue", "problem"], action: () => router.push("/(tabs)/alerts") },
+  { id: "action-approvals", label: "Open Approvals", description: "Review items waiting for approval", icon: "✅", group: "Quick Actions", isQuickAction: true, keywords: ["approve", "review", "sign off"], action: () => router.push("/(tabs)") },
+  { id: "action-digest", label: "Daily Digest", description: "AI-generated executive briefing", icon: "📋", group: "Quick Actions", isQuickAction: true, keywords: ["summary", "brief", "report"], action: () => router.push("/(tabs)") },
+  { id: "cross-aegis", label: "Open Aegis", description: "Unified Defense & Intelligence", icon: "🛡", group: "Ecosystem", keywords: ["app", "switch"], action: () => Linking.openURL("aegis://") },
+  { id: "cross-vessels", label: "Open Vessels", description: "Maritime Command Intelligence", icon: "⚓", group: "Ecosystem", keywords: ["app", "switch"], action: () => Linking.openURL("vessels://") },
+];
 
 function NativeTabLayout() {
   return (
@@ -132,8 +149,25 @@ function ClassicTabLayout() {
 }
 
 export default function TabLayout() {
-  if (isLiquidGlassAvailable()) {
-    return <NativeTabLayout />;
-  }
-  return <ClassicTabLayout />;
+  const [spotlightOpen, setSpotlightOpen] = useState(false);
+
+  return (
+    <View style={{ flex: 1 }}>
+      {isLiquidGlassAvailable() ? <NativeTabLayout /> : <ClassicTabLayout />}
+      <SpotlightFab
+        onPress={() => setSpotlightOpen(true)}
+        accentColor={LYTE_ACCENT}
+        bottom={100}
+        right={20}
+      />
+      <SpotlightModal
+        visible={spotlightOpen}
+        onClose={() => setSpotlightOpen(false)}
+        commands={lyteCommands}
+        appName="Lyte"
+        accentColor={LYTE_ACCENT}
+        placeholder="Search dashboards, alerts & actions..."
+      />
+    </View>
+  );
 }

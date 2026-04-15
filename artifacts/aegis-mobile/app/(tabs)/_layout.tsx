@@ -1,14 +1,30 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
-import { Redirect, Tabs } from "expo-router";
+import * as Linking from "expo-linking";
+import { Redirect, Tabs, router } from "expo-router";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { SymbolView } from "expo-symbols";
-import React from "react";
+import React, { useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
+import { SpotlightFab, SpotlightModal, type SpotlightCommand } from "@szl-holdings/mobile-shared/components";
 
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
+
+const AEGIS_ACCENT = "#f59e0b";
+
+const aegisCommands: SpotlightCommand[] = [
+  { id: "nav-dashboard", label: "Dashboard", description: "SOC overview & threat status", icon: "🛡", group: "Navigate", action: () => router.push("/(tabs)") },
+  { id: "nav-incidents", label: "Incidents", description: "Active security incidents", icon: "⚠️", group: "Navigate", action: () => router.push("/(tabs)/incidents") },
+  { id: "nav-agents", label: "Agent Chat", description: "AI security assistant", icon: "🤖", group: "Navigate", action: () => router.push("/(tabs)/agent-chat") },
+  { id: "nav-digest", label: "Digest", description: "Security briefings & summaries", icon: "📄", group: "Navigate", action: () => router.push("/(tabs)/digest") },
+  { id: "nav-profile", label: "Profile", description: "Account & settings", icon: "👤", group: "Navigate", action: () => router.push("/(tabs)/profile") },
+  { id: "action-new-incident", label: "New Incident", description: "Create a new security incident", icon: "🚨", group: "Quick Actions", isQuickAction: true, action: () => router.push("/(tabs)/incidents") },
+  { id: "action-mitre", label: "View MITRE ATT&CK", description: "Browse the attack framework matrix", icon: "🎯", group: "Quick Actions", isQuickAction: true, action: () => Linking.openURL("https://attack.mitre.org") },
+  { id: "cross-lyte", label: "Open Lyte", description: "Business Observability Command", icon: "⚡", group: "Ecosystem", keywords: ["app", "switch"], action: () => Linking.openURL("lyte://") },
+  { id: "cross-vessels", label: "Open Vessels", description: "Maritime Command Intelligence", icon: "⚓", group: "Ecosystem", keywords: ["app", "switch"], action: () => Linking.openURL("vessels://") },
+];
 
 function NativeTabLayout() {
   return (
@@ -135,13 +151,29 @@ function ClassicTabLayout() {
 
 export default function TabLayout() {
   const { isAuthenticated, isLoading } = useAuth();
+  const [spotlightOpen, setSpotlightOpen] = useState(false);
 
   if (!isLoading && !isAuthenticated) {
     return <Redirect href="/auth" />;
   }
 
-  if (isLiquidGlassAvailable()) {
-    return <NativeTabLayout />;
-  }
-  return <ClassicTabLayout />;
+  return (
+    <View style={{ flex: 1 }}>
+      {isLiquidGlassAvailable() ? <NativeTabLayout /> : <ClassicTabLayout />}
+      <SpotlightFab
+        onPress={() => setSpotlightOpen(true)}
+        accentColor={AEGIS_ACCENT}
+        bottom={100}
+        right={20}
+      />
+      <SpotlightModal
+        visible={spotlightOpen}
+        onClose={() => setSpotlightOpen(false)}
+        commands={aegisCommands}
+        appName="Aegis"
+        accentColor={AEGIS_ACCENT}
+        placeholder="Search incidents, alerts & screens..."
+      />
+    </View>
+  );
 }

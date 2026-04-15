@@ -1,13 +1,30 @@
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
-import { Redirect, Tabs } from "expo-router";
+import * as Linking from "expo-linking";
+import { Redirect, Tabs, router } from "expo-router";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { SymbolView } from "expo-symbols";
-import React from "react";
+import React, { useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
+import { SpotlightFab, SpotlightModal, type SpotlightCommand } from "@szl-holdings/mobile-shared/components";
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
+
+const SZL_ACCENT = "#c9a84c";
+
+const szlCommands: SpotlightCommand[] = [
+  { id: "nav-command", label: "Command", description: "Executive command overview", icon: "◆", group: "Navigate", action: () => router.push("/(tabs)") },
+  { id: "nav-portfolio", label: "Portfolio", description: "Holdings & venture performance", icon: "💼", group: "Navigate", action: () => router.push("/(tabs)/portfolio") },
+  { id: "nav-investors", label: "Investors", description: "Investor relations & reports", icon: "📈", group: "Navigate", action: () => router.push("/(tabs)/investor") },
+  { id: "nav-agents", label: "AI Agents", description: "SZL executive AI assistants", icon: "🤖", group: "Navigate", action: () => router.push("/(tabs)/agent-chat") },
+  { id: "nav-profile", label: "Profile", description: "Account & settings", icon: "👤", group: "Navigate", action: () => router.push("/(tabs)/profile") },
+  { id: "action-portfolio", label: "View Portfolio", description: "Check current portfolio performance", icon: "💰", group: "Quick Actions", isQuickAction: true, keywords: ["money", "invest", "return"], action: () => router.push("/(tabs)/portfolio") },
+  { id: "action-approvals", label: "Pending Approvals", description: "Items awaiting executive sign-off", icon: "✅", group: "Quick Actions", isQuickAction: true, keywords: ["approve", "review", "sign"], action: () => router.push("/(tabs)") },
+  { id: "action-reports", label: "Investor Reports", description: "Generate investor update", icon: "📊", group: "Quick Actions", isQuickAction: true, keywords: ["report", "update", "brief"], action: () => router.push("/(tabs)/investor") },
+  { id: "cross-lyte", label: "Open Lyte", description: "Business Observability Command", icon: "⚡", group: "Ecosystem", keywords: ["app", "switch"], action: () => Linking.openURL("lyte://") },
+  { id: "cross-aegis", label: "Open Aegis", description: "Unified Defense & Intelligence", icon: "🛡", group: "Ecosystem", keywords: ["app", "switch"], action: () => Linking.openURL("aegis://") },
+];
 
 function NativeTabLayout() {
   return (
@@ -141,13 +158,29 @@ function ClassicTabLayout() {
 
 export default function TabLayout() {
   const { isAuthenticated, isLoading } = useAuth();
+  const [spotlightOpen, setSpotlightOpen] = useState(false);
 
   if (!isLoading && !isAuthenticated) {
     return <Redirect href="/auth" />;
   }
 
-  if (isLiquidGlassAvailable()) {
-    return <NativeTabLayout />;
-  }
-  return <ClassicTabLayout />;
+  return (
+    <View style={{ flex: 1 }}>
+      {isLiquidGlassAvailable() ? <NativeTabLayout /> : <ClassicTabLayout />}
+      <SpotlightFab
+        onPress={() => setSpotlightOpen(true)}
+        accentColor={SZL_ACCENT}
+        bottom={100}
+        right={20}
+      />
+      <SpotlightModal
+        visible={spotlightOpen}
+        onClose={() => setSpotlightOpen(false)}
+        commands={szlCommands}
+        appName="SZL"
+        accentColor={SZL_ACCENT}
+        placeholder="Search portfolio, investors & more..."
+      />
+    </View>
+  );
 }

@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { typography } from "./tokens";
 
+/**
+ * Universal command item interface — shared contract for both web CommandPalette
+ * and mobile Spotlight (SpotlightCommand in @szl-holdings/mobile-shared).
+ */
 export interface CommandItem {
   id: string;
   label: string;
@@ -8,8 +12,10 @@ export interface CommandItem {
   icon?: string;
   group?: string;
   shortcut?: string;
-  action: () => void;
+  action: () => void | Promise<void>;
   keywords?: string[];
+  isSlashCommand?: boolean;
+  isQuickAction?: boolean;
 }
 
 export interface CommandGroup {
@@ -27,6 +33,24 @@ interface CommandPaletteProps {
   placeholder?: string;
 }
 
+const RECENT_KEY = "cmd_palette_recent_v2";
+const MAX_RECENT = 5;
+
+function getRecentIds(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]");
+  } catch {
+    return [];
+  }
+}
+
+function recordRecent(id: string) {
+  try {
+    const prev = getRecentIds().filter((x) => x !== id);
+    localStorage.setItem(RECENT_KEY, JSON.stringify([id, ...prev].slice(0, MAX_RECENT)));
+  } catch {}
+}
+
 function fuzzyMatch(query: string, text: string): boolean {
   if (!query) return true;
   const q = query.toLowerCase();
@@ -39,6 +63,8 @@ function fuzzyMatch(query: string, text: string): boolean {
   return qi === q.length;
 }
 
+const GROUP_ORDER = ["Recent", "Navigate", "Switch App", "Actions", "Slash Commands"];
+
 function groupCommands(commands: CommandItem[]): CommandGroup[] {
   const groups: Record<string, CommandItem[]> = {};
   for (const cmd of commands) {
@@ -46,7 +72,15 @@ function groupCommands(commands: CommandItem[]): CommandGroup[] {
     if (!groups[group]) groups[group] = [];
     groups[group].push(cmd);
   }
-  return Object.entries(groups).map(([id, cmds]) => ({ id, label: id, commands: cmds }));
+  const sorted = Object.entries(groups).sort(([a], [b]) => {
+    const ai = GROUP_ORDER.indexOf(a);
+    const bi = GROUP_ORDER.indexOf(b);
+    if (ai === -1 && bi === -1) return a.localeCompare(b);
+    if (ai === -1) return 1;
+    if (bi === -1) return -1;
+    return ai - bi;
+  });
+  return sorted.map(([id, cmds]) => ({ id, label: id, commands: cmds }));
 }
 
 export function CommandPalette({
@@ -55,19 +89,35 @@ export function CommandPalette({
   commands,
   appName,
   accentColor = "#8b7ac8",
-  placeholder = "Type a command or search...",
+  placeholder = "Type a command or / for slash commands...",
 }: CommandPaletteProps) {
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
+  const recentIds = open ? getRecentIds() : [];
+  const recentCommands: CommandItem[] = recentIds
+    .map((id) => commands.find((c) => c.id === id))
+    .filter(Boolean)
+    .map((c) => ({ ...c!, group: "Recent" })) as CommandItem[];
+
+  const isSlashMode = query.startsWith("/");
+
+  const slashQuery = isSlashMode ? query.slice(1) : query;
+
   const filtered = query.trim()
     ? commands.filter((cmd) => {
+        if (isSlashMode) {
+          if (!cmd.isSlashCommand) return false;
+          if (!slashQuery.trim()) return true;
+          const searchText = [cmd.label, cmd.description ?? "", ...(cmd.keywords ?? [])].join(" ");
+          return fuzzyMatch(slashQuery, searchText);
+        }
         const searchText = [cmd.label, cmd.description ?? "", ...(cmd.keywords ?? [])].join(" ");
         return fuzzyMatch(query, searchText);
       })
-    : commands;
+    : [...recentCommands, ...commands.filter((c) => !recentIds.includes(c.id))];
 
   const groups = groupCommands(filtered);
   const flatFiltered = groups.flatMap((g) => g.commands);
@@ -92,6 +142,7 @@ export function CommandPalette({
   const runSelected = useCallback(() => {
     const cmd = flatFiltered[selectedIndex];
     if (cmd) {
+      recordRecent(cmd.id);
       cmd.action();
       onClose();
     }
@@ -126,8 +177,6 @@ export function CommandPalette({
 
   if (!open) return null;
 
-  let flatIndex = 0;
-
   return (
     <div
       style={{
@@ -148,7 +197,7 @@ export function CommandPalette({
         style={{
           width: "580px",
           maxWidth: "calc(100vw - 32px)",
-          maxHeight: "520px",
+          maxHeight: "560px",
           display: "flex",
           flexDirection: "column",
           background: "rgba(10, 12, 20, 0.98)",
@@ -168,10 +217,14 @@ export function CommandPalette({
             borderBottom: "1px solid rgba(255,255,255,0.07)",
           }}
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, opacity: 0.5 }}>
-            <circle cx="7" cy="7" r="5" stroke="rgba(255,255,255,0.8)" strokeWidth="1.5" />
-            <line x1="11" y1="11" x2="14.5" y2="14.5" stroke="rgba(255,255,255,0.8)" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
+          {isSlashMode ? (
+            <span style={{ fontSize: "15px", flexShrink: 0, opacity: 0.6 }}>/</span>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, opacity: 0.5 }}>
+              <circle cx="7" cy="7" r="5" stroke="rgba(255,255,255,0.8)" strokeWidth="1.5" />
+              <line x1="11" y1="11" x2="14.5" y2="14.5" stroke="rgba(255,255,255,0.8)" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          )}
           <input
             ref={inputRef}
             value={query}
@@ -205,6 +258,23 @@ export function CommandPalette({
               {appName}
             </span>
           )}
+          {isSlashMode && (
+            <span
+              style={{
+                fontSize: "10px",
+                color: accentColor,
+                background: `${accentColor}15`,
+                border: `1px solid ${accentColor}30`,
+                borderRadius: "6px",
+                padding: "2px 8px",
+                fontWeight: 600,
+                letterSpacing: "0.5px",
+                flexShrink: 0,
+              }}
+            >
+              slash mode
+            </span>
+          )}
           <span
             style={{
               background: "rgba(255,255,255,0.08)",
@@ -223,10 +293,7 @@ export function CommandPalette({
           </span>
         </div>
 
-        <div
-          ref={listRef}
-          style={{ overflowY: "auto", flex: 1 }}
-        >
+        <div ref={listRef} style={{ overflowY: "auto", flex: 1 }}>
           {flatFiltered.length === 0 ? (
             <div
               style={{
@@ -246,7 +313,7 @@ export function CommandPalette({
                     padding: "10px 16px 4px",
                     fontSize: "10px",
                     fontWeight: 700,
-                    color: "rgba(255,255,255,0.3)",
+                    color: group.id === "Recent" ? accentColor + "80" : "rgba(255,255,255,0.3)",
                     letterSpacing: "1px",
                     textTransform: "uppercase",
                   }}
@@ -258,9 +325,9 @@ export function CommandPalette({
                   const currentFlatIndex = flatFiltered.indexOf(cmd);
                   return (
                     <div
-                      key={cmd.id}
+                      key={cmd.id + (group.id === "Recent" ? "_recent" : "")}
                       data-selected={isSelected ? "true" : "false"}
-                      onClick={() => { cmd.action(); onClose(); }}
+                      onClick={() => { recordRecent(cmd.id); cmd.action(); onClose(); }}
                       onMouseEnter={() => setSelectedIndex(currentFlatIndex)}
                       style={{
                         display: "flex",
@@ -306,6 +373,11 @@ export function CommandPalette({
                           </div>
                         )}
                       </div>
+                      {cmd.isSlashCommand && !isSlashMode && (
+                        <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.2)", fontFamily: typography.fontFamily.mono, flexShrink: 0 }}>
+                          {cmd.label.startsWith("/") ? cmd.label : `/${cmd.label}`}
+                        </span>
+                      )}
                       {cmd.shortcut && (
                         <span
                           style={{
@@ -342,7 +414,7 @@ export function CommandPalette({
           {[
             ["↑↓", "navigate"],
             ["↵", "run"],
-            ["?", "shortcuts"],
+            ["/", "slash cmds"],
             ["esc", "close"],
           ].map(([key, label]) => (
             <div key={key} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
@@ -394,4 +466,95 @@ export function useCommandPalette(commands: CommandItem[]) {
   }, []);
 
   return { open, setOpen };
+}
+
+export function useRegisterCommands(base: CommandItem[], extra: CommandItem[]): CommandItem[] {
+  const baseKey = base.map((c) => `${c.id}:${c.label}:${c.group ?? ""}:${c.description ?? ""}`).join("|");
+  const extraKey = extra.map((c) => `${c.id}:${c.label}:${c.group ?? ""}:${c.description ?? ""}`).join("|");
+  return React.useMemo(
+    () => [...base, ...extra.filter((e) => !base.some((b) => b.id === e.id))],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [baseKey, extraKey]
+  );
+}
+
+export function createBaselineWebActions(
+  navigate: (path: string) => void,
+  opts: {
+    settingsPath?: string;
+    profilePath?: string;
+    helpUrl?: string;
+    themeToggle?: { label?: string; action: () => void };
+  } = {}
+): CommandItem[] {
+  const { settingsPath = "/settings", profilePath = "/profile", helpUrl, themeToggle } = opts;
+  const items: CommandItem[] = [
+    {
+      id: "baseline-settings",
+      label: "Settings",
+      description: "Open application settings",
+      icon: "⚙",
+      group: "Actions",
+      keywords: ["settings", "preferences", "configuration"],
+      action: () => navigate(settingsPath),
+    },
+    {
+      id: "baseline-profile",
+      label: "Profile",
+      description: "View and edit your profile",
+      icon: "👤",
+      group: "Actions",
+      keywords: ["profile", "account", "user"],
+      action: () => navigate(profilePath),
+    },
+  ];
+  if (themeToggle) {
+    items.push({
+      id: "baseline-theme",
+      label: themeToggle.label ?? "Toggle Theme",
+      description: "Switch between light and dark color scheme",
+      icon: "◑",
+      group: "Actions",
+      keywords: ["theme", "dark", "light", "color", "scheme", "appearance"],
+      action: themeToggle.action,
+    });
+  }
+  if (helpUrl) {
+    items.push({
+      id: "baseline-help",
+      label: "Help & Documentation",
+      description: "Open documentation and support resources",
+      icon: "?",
+      group: "Actions",
+      keywords: ["help", "docs", "documentation", "support"],
+      action: () => window.open(helpUrl, "_blank"),
+    });
+  }
+  return items;
+}
+
+const ECOSYSTEM_APPS = [
+  { id: "szl-holdings", name: "SZL Holdings", path: "/", icon: "◆", description: "Premium Command Systems Ecosystem" },
+  { id: "alloy", name: "Alloy", path: "/alloy", icon: "⬡", description: "Execution Fabric & Orchestration Engine" },
+  { id: "lyte", name: "Lyte", path: "/lyte-command-center/", icon: "⚡", description: "Business Observability Command" },
+  { id: "aegis", name: "Aegis", path: "/firestorm/", icon: "🛡", description: "Unified Defense & Intelligence" },
+  { id: "vessels", name: "Vessels", path: "/vessels/", icon: "⚓", description: "Maritime Command Intelligence" },
+  { id: "terra", name: "Terra", path: "/terra/", icon: "⬢", description: "Real Estate Broker Command" },
+  { id: "prism-counsel", name: "PRISM Counsel", path: "/prism-counsel/", icon: "⚖", description: "Legal Matter Command" },
+  { id: "nexus", name: "Nexus", path: "/nexus/timeline", icon: "🔮", description: "Intelligence Fusion & Command" },
+  { id: "carlota-jo", name: "Carlota Jo", path: "/carlota-jo/", icon: "◈", description: "Client & Residence Support" },
+];
+
+export function getEcosystemSwitchCommands(currentAppId?: string): CommandItem[] {
+  return ECOSYSTEM_APPS
+    .filter((app) => app.id !== currentAppId)
+    .map((app) => ({
+      id: `switch-app-${app.id}`,
+      label: app.name,
+      description: app.description,
+      icon: app.icon,
+      group: "Switch App",
+      keywords: ["app", "switch", "navigate", "ecosystem", app.name.toLowerCase()],
+      action: () => { window.location.href = app.path; },
+    }));
 }

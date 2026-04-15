@@ -20,7 +20,7 @@ import { toAlpha } from "@szl-holdings/shared-ui/utils";
 import { AuthProvider, useAuth as useVesselsRoleAuth, roleLabels, type UserRole } from "@/contexts/auth-context";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { PrivateAppGuard, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui";
-import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
+import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
 import { DemoModeProvider, SandboxModeProvider, SandboxModeBanner } from "@szl-holdings/shared-ui";
 import { PackBanner } from "@/components/pack-banner";
@@ -519,8 +519,17 @@ const vesselsCommands: CommandItem[] = [
   { id: "nav-alerts", label: "Alerts", icon: "⚠️", group: "Navigation", keywords: ["alerts", "exceptions", "issues"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/dashboard/alerts"); } },
   { id: "nav-economics", label: "Voyage Economics", icon: "💰", group: "Navigation", keywords: ["economics", "revenue", "margin"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/economics"); } },
   { id: "nav-command", label: "Command Mode", icon: "🎯", group: "Navigation", keywords: ["command", "operational", "focused"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/command"); } },
-  { id: "app-lyte", label: "Switch to Lyte", icon: "⚡", group: "Switch App", description: "Business Observability", action: () => { window.location.href = "/lyte-command-center/"; } },
-  { id: "app-alloy", label: "Switch to Alloy", icon: "⬡", group: "Switch App", description: "Execution Fabric", action: () => { window.location.href = "/alloy"; } },
+  ...createBaselineWebActions(
+    (path) => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, path); },
+    {
+      helpUrl: "https://szlholdings.com/docs",
+      themeToggle: {
+        label: "Toggle Theme",
+        action: () => { document.documentElement.classList.toggle("light"); },
+      },
+    }
+  ),
+  ...getEcosystemSwitchCommands("vessels"),
 ];
 
 const vesselsShortcuts: KeyboardShortcut[] = [

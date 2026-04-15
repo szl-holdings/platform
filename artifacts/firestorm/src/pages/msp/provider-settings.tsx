@@ -2,18 +2,12 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
-import {
 import { apiFetch } from "@szl-holdings/shared-ui";
+import {
   Settings, Plus, RefreshCw, Trash2, CheckCircle, XCircle, Activity,
   AlertTriangle, Loader2, Wifi, ChevronDown, ChevronUp, X, Clock,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-
-): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { credentials: "include", ...options });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
 
 interface RmmProvider {
   id: number;

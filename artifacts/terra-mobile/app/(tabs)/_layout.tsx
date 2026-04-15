@@ -1,12 +1,28 @@
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
-import { Tabs } from "expo-router";
+import * as Linking from "expo-linking";
+import { Tabs, router } from "expo-router";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { SymbolView } from "expo-symbols";
-import React from "react";
+import React, { useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
+import { SpotlightFab, SpotlightModal, type SpotlightCommand } from "@szl-holdings/mobile-shared/components";
 import { useColors } from "@/hooks/useColors";
+
+const TERRA_ACCENT = "#c87941";
+
+const terraCommands: SpotlightCommand[] = [
+  { id: "nav-map", label: "Property Map", description: "Interactive real estate map", icon: "🗺", group: "Navigate", action: () => router.push("/(tabs)") },
+  { id: "nav-properties", label: "Properties", description: "All listings & property details", icon: "🏡", group: "Navigate", action: () => router.push("/(tabs)/properties") },
+  { id: "nav-pipeline", label: "Pipeline", description: "Deal pipeline & transaction status", icon: "📊", group: "Navigate", action: () => router.push("/(tabs)/pipeline") },
+  { id: "nav-scanner", label: "Scanner", description: "AI property scanner & analysis", icon: "⚡", group: "Navigate", action: () => router.push("/(tabs)/scanner") },
+  { id: "nav-profile", label: "Profile", description: "Account & settings", icon: "👤", group: "Navigate", action: () => router.push("/(tabs)/profile") },
+  { id: "action-search", label: "Search Property", description: "Find properties by address or MLS", icon: "🔍", group: "Quick Actions", isQuickAction: true, keywords: ["find", "lookup", "mls", "address"], action: () => router.push("/(tabs)/properties") },
+  { id: "action-new-deal", label: "New Deal", description: "Add a new transaction to pipeline", icon: "✍️", group: "Quick Actions", isQuickAction: true, keywords: ["add", "create", "transaction", "deal"], action: () => router.push("/(tabs)/pipeline") },
+  { id: "action-scan", label: "Scan Property", description: "AI-powered property analysis", icon: "🔬", group: "Quick Actions", isQuickAction: true, keywords: ["analyze", "ai", "scan", "value"], action: () => router.push("/(tabs)/scanner") },
+  { id: "cross-szl", label: "Open SZL Holdings", description: "Executive Command", icon: "◆", group: "Ecosystem", keywords: ["app", "switch"], action: () => Linking.openURL("szl-holdings://") },
+];
 
 function NativeTabLayout() {
   return (
@@ -133,8 +149,25 @@ function ClassicTabLayout() {
 }
 
 export default function TabLayout() {
-  if (isLiquidGlassAvailable()) {
-    return <NativeTabLayout />;
-  }
-  return <ClassicTabLayout />;
+  const [spotlightOpen, setSpotlightOpen] = useState(false);
+
+  return (
+    <View style={{ flex: 1 }}>
+      {isLiquidGlassAvailable() ? <NativeTabLayout /> : <ClassicTabLayout />}
+      <SpotlightFab
+        onPress={() => setSpotlightOpen(true)}
+        accentColor={TERRA_ACCENT}
+        bottom={100}
+        right={20}
+      />
+      <SpotlightModal
+        visible={spotlightOpen}
+        onClose={() => setSpotlightOpen(false)}
+        commands={terraCommands}
+        appName="Terra"
+        accentColor={TERRA_ACCENT}
+        placeholder="Search properties, deals & pipeline..."
+      />
+    </View>
+  );
 }

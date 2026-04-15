@@ -24,7 +24,7 @@ import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { sentinelConfig } from "@szl-holdings/shared-ui/copilot-configs";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { toAlpha } from "@szl-holdings/shared-ui/utils";
-import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
+import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
 import { PackBanner } from "@/components/pack-banner";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
@@ -754,9 +754,19 @@ const aegisCommands: CommandItem[] = [
   { id: "nav-models", label: "Models", icon: "⚙️", group: "Intelligence Engine", action: nav("/intel/models") },
   { id: "nav-predictions", label: "Predictions", icon: "📈", group: "Intelligence Engine", action: nav("/intel/predictions") },
   { id: "nav-intel-insights", label: "Intel Insights", icon: "💡", group: "Intelligence Engine", action: nav("/intel/insights") },
-  { id: "app-alloy", label: "Switch to Alloy", icon: "⬡", group: "Switch App", description: "Execution Fabric", action: () => { window.location.href = "/alloy/"; } },
-  { id: "app-lyte", label: "Switch to Lyte", icon: "⚡", group: "Switch App", description: "Command Center", action: () => { window.location.href = "/lyte-command-center/"; } },
-  { id: "app-vessels", label: "Switch to Vessels", icon: "⚓", group: "Switch App", description: "Maritime Intelligence", action: () => { window.location.href = "/vessels/"; } },
+  ...createBaselineWebActions(
+    (path) => { window.location.href = BASE + path.replace(/^\//, ""); },
+    {
+      settingsPath: "settings",
+      profilePath: "profile",
+      helpUrl: "https://szlholdings.com/docs",
+      themeToggle: {
+        label: "Toggle Theme",
+        action: () => { document.documentElement.classList.toggle("light"); },
+      },
+    }
+  ),
+  ...getEcosystemSwitchCommands("aegis"),
 ];
 
 const aegisShortcuts: KeyboardShortcut[] = [

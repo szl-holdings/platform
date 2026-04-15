@@ -8,7 +8,7 @@ import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { LyteLayout } from "@/components/lyte-layout";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { beaconConfig } from "@szl-holdings/shared-ui/copilot-configs";
-import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
+import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { Shield } from "lucide-react";
@@ -280,6 +280,17 @@ const lyteCommands: CommandItem[] = [
   { id: "nav-client-value", label: "Client Value Dashboard", icon: "👥", group: "Revenue & Self-Healing", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/client-value"); } },
   { id: "nav-ops-savings", label: "Ops Savings Calculator", icon: "🧮", group: "Revenue & Self-Healing", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ops-savings"); } },
   { id: "nav-escalation-intel", label: "Escalation Intelligence", icon: "🧠", group: "Revenue & Self-Healing", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/escalation-intelligence"); } },
+  ...createBaselineWebActions(
+    (path) => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, path); },
+    {
+      helpUrl: "https://szlholdings.com/docs",
+      themeToggle: {
+        label: "Toggle Theme",
+        action: () => { document.documentElement.classList.toggle("light"); },
+      },
+    }
+  ),
+  ...getEcosystemSwitchCommands("lyte"),
 ];
 
 const lyteShortcuts: KeyboardShortcut[] = [

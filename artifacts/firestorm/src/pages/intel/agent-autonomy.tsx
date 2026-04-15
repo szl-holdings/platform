@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import {
-import { apiFetch } from "@szl-holdings/shared-ui";
   Brain, Network, Zap, Activity, CheckCircle, AlertTriangle, XCircle,
   ArrowRight, ChevronDown, ChevronUp, RefreshCw, Database, Plug,
   TrendingUp, TrendingDown, Minus, Bot, Link2, BookOpen,

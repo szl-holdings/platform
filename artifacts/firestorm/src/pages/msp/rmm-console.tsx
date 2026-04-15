@@ -2,20 +2,14 @@ import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
-import {
 import { apiFetch } from "@szl-holdings/shared-ui";
+import {
   Monitor, AlertTriangle, CheckCircle, RefreshCw, Shield, Package, Terminal, Cpu,
   HardDrive, MemoryStick, Activity, Play, RotateCcw, Zap, ChevronRight, X,
   Clock, Server, Wifi, WifiOff, Wrench, Eye, CheckSquare, XCircle,
 } from "lucide-react";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-
-): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { credentials: "include", ...options });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
 
 interface Device {
   id: number;

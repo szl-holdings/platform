@@ -7,7 +7,7 @@ import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { beaconConfig } from "@szl-holdings/shared-ui/copilot-configs";
-import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
+import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
 import { TerraLayout } from "@/components/terra-layout";
 import { useAuth } from "@szl-holdings/replit-auth-web";
@@ -148,6 +148,17 @@ const terraCommands: CommandItem[] = [
   { id: "nav-listings", label: "Portfolio", icon: "□", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/listings"); } },
   { id: "nav-approvals", label: "Approvals", icon: "✓", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/transactions"); } },
   { id: "nav-admin", label: "Admin", icon: "⊙", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/broker-overview"); } },
+  ...createBaselineWebActions(
+    (path) => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, path); },
+    {
+      helpUrl: "https://szlholdings.com/docs",
+      themeToggle: {
+        label: "Toggle Theme",
+        action: () => { document.documentElement.classList.toggle("light"); },
+      },
+    }
+  ),
+  ...getEcosystemSwitchCommands("terra"),
 ];
 
 const terraShortcuts: KeyboardShortcut[] = [

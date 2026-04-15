@@ -1,10 +1,10 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard, ArrowLeft, FileText, Brain, Layers, Home, BookOpen, Globe, Lock, Play, Star, DollarSign, Store, Code2 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator } from "@szl-holdings/shared-ui";
-import { CommandBar, CommandBarTrigger, useCommandBar } from "./command-bar";
+import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, useRegisterCommands, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 
 const COMMAND_LOOP = [
   { phase: "DETECT", color: "#0ea5e9", active: false },
@@ -82,14 +82,124 @@ function NavItem({ href, label, icon: Icon, exact, badge, onClick }: {
   );
 }
 
+const ALL_NAV_SECTIONS = [
+  { items: NAV, group: "Navigate" },
+  { items: COMMAND_NAV, group: "Navigate" },
+  { items: CREATIVE_NAV, group: "Navigate" },
+  { items: DOCS_NAV, group: "Navigate" },
+  { items: INTELLIGENCE_NAV, group: "Navigate" },
+  { items: ENTERPRISE_NAV, group: "Actions" },
+  { items: MCP_NAV, group: "Actions" },
+];
+
+const ALLOY_SLASH_COMMANDS: CommandItem[] = [
+  { id: "slash-workflow", label: "/workflow", description: "Open Workflow Orchestration", icon: "⬡", group: "Slash Commands", isSlashCommand: true, keywords: ["workflow", "orchestration"], action: () => {} },
+  { id: "slash-approve", label: "/approve", description: "Open Approvals Queue", icon: "✓", group: "Slash Commands", isSlashCommand: true, keywords: ["approve", "governance", "review"], action: () => {} },
+  { id: "slash-signals", label: "/signals", description: "Open Signal Feed", icon: "📡", group: "Slash Commands", isSlashCommand: true, keywords: ["signals", "feed", "events"], action: () => {} },
+  { id: "slash-runs", label: "/runs", description: "Open Execution History", icon: "▶", group: "Slash Commands", isSlashCommand: true, keywords: ["runs", "history", "execution"], action: () => {} },
+  { id: "slash-analytics", label: "/analytics", description: "Open Automation Analytics", icon: "📊", group: "Slash Commands", isSlashCommand: true, keywords: ["analytics", "metrics", "data"], action: () => {} },
+  { id: "slash-decisions", label: "/decisions", description: "Open Decision Objects", icon: "🧠", group: "Slash Commands", isSlashCommand: true, keywords: ["decisions", "ai", "intelligence"], action: () => {} },
+  { id: "slash-skills", label: "/skills", description: "Open Skill Registry", icon: "◈", group: "Slash Commands", isSlashCommand: true, keywords: ["skills", "registry", "capabilities"], action: () => {} },
+  { id: "slash-operators", label: "/operators", description: "Open Operator Control Center", icon: "🛡", group: "Slash Commands", isSlashCommand: true, keywords: ["operator", "agents", "control"], action: () => {} },
+  { id: "slash-connectors", label: "/connectors", description: "Open Connector Mesh", icon: "🔗", group: "Slash Commands", isSlashCommand: true, keywords: ["connectors", "integrations", "mesh"], action: () => {} },
+  { id: "slash-docs", label: "/docs", description: "Open Document Engine", icon: "📄", group: "Slash Commands", isSlashCommand: true, keywords: ["docs", "documents", "files"], action: () => {} },
+  { id: "slash-home", label: "/home", description: "Workspace Home & Priority Dashboard", icon: "⚡", group: "Slash Commands", isSlashCommand: true, keywords: ["home", "workspace", "priority"], action: () => {} },
+];
+
+const SLASH_TO_NAV: Record<string, string> = {
+  "slash-workflow": "/alloy/workflows",
+  "slash-approve": "/alloy/governance",
+  "slash-signals": "/alloy/signals",
+  "slash-runs": "/alloy/runs",
+  "slash-analytics": "/alloy/analytics",
+  "slash-decisions": "/alloy/decisions",
+  "slash-skills": "/alloy/skills",
+  "slash-operators": "/alloy/operator",
+  "slash-connectors": "/alloy/connectors",
+  "slash-docs": "/alloy/documents",
+  "slash-home": "/alloy/home",
+};
+
+function buildAlloyCommands(navigate: (path: string) => void): CommandItem[] {
+  const cmds: CommandItem[] = [];
+  for (const { items, group } of ALL_NAV_SECTIONS) {
+    for (const item of items) {
+      cmds.push({
+        id: `alloy-nav-${item.href}`,
+        label: item.label,
+        icon: undefined,
+        group,
+        keywords: ["alloy", item.label.toLowerCase()],
+        action: () => navigate(item.href),
+      });
+    }
+  }
+  for (const slashCmd of ALLOY_SLASH_COMMANDS) {
+    const path = SLASH_TO_NAV[slashCmd.id];
+    cmds.push({ ...slashCmd, action: () => navigate(path) });
+  }
+  cmds.push(...getEcosystemSwitchCommands("alloy"));
+  return cmds;
+}
+
 export function AlloyLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { status: wsStatus } = useRealtimeChannel("workflow-runs");
-  const { isOpen: cmdOpen, open: openCmd, close: closeCmd } = useCommandBar();
+  const [, navigate] = useLocation();
+  const [workflowCmds, setWorkflowCmds] = useState<CommandItem[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadWorkflows() {
+      try {
+        const res = await fetch("/api/alloy/workflows?limit=20");
+        if (!res.ok) return;
+        const json = await res.json();
+        const list: Array<{ id: number; name: string; status: string }> =
+          Array.isArray(json) ? json : (json?.data ?? []);
+        if (!cancelled) {
+          setWorkflowCmds(
+            list.map((wf) => ({
+              id: `wf-${wf.id}`,
+              label: wf.name,
+              description: `Workflow · ${wf.status}`,
+              icon: "⬡",
+              group: "Workflows",
+              keywords: ["workflow", wf.name.toLowerCase(), wf.status],
+              action: () => { navigate("/alloy/workflows"); },
+            }))
+          );
+        }
+      } catch {
+      }
+    }
+    loadWorkflows();
+    return () => { cancelled = true; };
+  }, [navigate]);
+
+  const alloyNavCmds = buildAlloyCommands(navigate);
+  const alloyCommands = useRegisterCommands(
+    [...alloyNavCmds, ...workflowCmds],
+    createBaselineWebActions(navigate, {
+      helpUrl: "https://szlholdings.com/docs",
+      themeToggle: {
+        label: "Toggle Theme",
+        action: () => { document.documentElement.classList.toggle("light"); },
+      },
+    })
+  );
+  const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette(alloyCommands);
 
   return (
     <div className="flex h-full overflow-hidden">
-      <CommandBar isOpen={cmdOpen} onClose={closeCmd} />
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        commands={alloyCommands}
+        appName="Alloy"
+        accentColor="#4B8BDB"
+        placeholder="Navigate to any screen or / for slash commands..."
+      />
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/60 z-10 md:hidden"
@@ -242,7 +352,14 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             <span className="hidden sm:block" style={{ color: "#ef4444" }}>2 Failed</span>
           </div>
           <div className="flex items-center gap-3">
-            <CommandBarTrigger onClick={openCmd} />
+            <button
+              onClick={() => setPaletteOpen(true)}
+              className="flex items-center gap-2 px-2.5 py-1 rounded-lg hover:bg-white/5 transition-colors text-[10px] font-mono"
+              style={{ color: "rgba(255,255,255,0.35)", border: "1px solid rgba(255,255,255,0.08)" }}
+            >
+              <span>⌘K</span>
+              <span className="hidden sm:block">Command</span>
+            </button>
             <RealtimeStatusIndicator status={wsStatus} compact />
             <button className="relative p-1.5 rounded-lg hover:bg-white/5 transition-colors" style={{ color: "rgba(255,255,255,0.4)" }}>
               <Bell className="w-4 h-4" />

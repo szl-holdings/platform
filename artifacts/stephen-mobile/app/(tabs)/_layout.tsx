@@ -1,15 +1,30 @@
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
-import { Tabs } from "expo-router";
+import * as Linking from "expo-linking";
+import { Tabs, router } from "expo-router";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { SymbolView } from "expo-symbols";
-import React from "react";
+import React, { useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
+import { SpotlightFab, SpotlightModal, type SpotlightCommand } from "@szl-holdings/mobile-shared/components";
 
 const ACCENT = "#6366f1";
 const BG_DARK = "#0a0a0a";
 const BORDER = "rgba(255,255,255,0.06)";
+
+const stephenCommands: SpotlightCommand[] = [
+  { id: "nav-home", label: "Home", description: "Personal command overview", icon: "🏠", group: "Navigate", action: () => router.push("/(tabs)/home") },
+  { id: "nav-ventures", label: "Ventures", description: "Portfolio companies & investments", icon: "💼", group: "Navigate", action: () => router.push("/(tabs)/ventures") },
+  { id: "nav-articles", label: "Articles", description: "Written content & publications", icon: "📖", group: "Navigate", action: () => router.push("/(tabs)/articles") },
+  { id: "nav-tools", label: "Tools", description: "Productivity & utility tools", icon: "🛠", group: "Navigate", action: () => router.push("/(tabs)/tools") },
+  { id: "nav-profile", label: "Profile", description: "Account & settings", icon: "👤", group: "Navigate", action: () => router.push("/(tabs)/profile") },
+  { id: "action-ventures", label: "Browse Ventures", description: "View all portfolio companies", icon: "🚀", group: "Quick Actions", isQuickAction: true, keywords: ["portfolio", "startup", "invest", "company"], action: () => router.push("/(tabs)/ventures") },
+  { id: "action-articles", label: "Read Latest Article", description: "Jump to newest publication", icon: "✍️", group: "Quick Actions", isQuickAction: true, keywords: ["read", "write", "blog", "post"], action: () => router.push("/(tabs)/articles") },
+  { id: "action-tools", label: "Open Tools", description: "Access productivity utilities", icon: "⚙️", group: "Quick Actions", isQuickAction: true, keywords: ["utility", "productivity", "calculator"], action: () => router.push("/(tabs)/tools") },
+  { id: "cross-szl", label: "Open SZL Holdings", description: "Executive Command", icon: "◆", group: "Ecosystem", keywords: ["app", "switch"], action: () => Linking.openURL("szl-holdings://") },
+  { id: "cross-lyte", label: "Open Lyte", description: "Business Observability Command", icon: "⚡", group: "Ecosystem", keywords: ["app", "switch"], action: () => Linking.openURL("lyte://") },
+];
 
 function NativeTabLayout() {
   return (
@@ -134,8 +149,25 @@ function ClassicTabLayout() {
 }
 
 export default function TabLayout() {
-  if (isLiquidGlassAvailable()) {
-    return <NativeTabLayout />;
-  }
-  return <ClassicTabLayout />;
+  const [spotlightOpen, setSpotlightOpen] = useState(false);
+
+  return (
+    <View style={{ flex: 1 }}>
+      {isLiquidGlassAvailable() ? <NativeTabLayout /> : <ClassicTabLayout />}
+      <SpotlightFab
+        onPress={() => setSpotlightOpen(true)}
+        accentColor={ACCENT}
+        bottom={100}
+        right={20}
+      />
+      <SpotlightModal
+        visible={spotlightOpen}
+        onClose={() => setSpotlightOpen(false)}
+        commands={stephenCommands}
+        appName="Stephen"
+        accentColor={ACCENT}
+        placeholder="Search ventures, articles & tools..."
+      />
+    </View>
+  );
 }

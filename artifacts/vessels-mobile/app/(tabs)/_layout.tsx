@@ -1,14 +1,31 @@
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
-import { Redirect, Tabs } from "expo-router";
+import * as Linking from "expo-linking";
+import { Redirect, Tabs, router } from "expo-router";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { SymbolView } from "expo-symbols";
-import React from "react";
+import React, { useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
+import { SpotlightFab, SpotlightModal, type SpotlightCommand } from "@szl-holdings/mobile-shared/components";
 
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
+
+const VESSELS_ACCENT = "#38bdf8";
+
+const vesselsCommands: SpotlightCommand[] = [
+  { id: "nav-map", label: "Fleet Map", description: "Live vessel positions & AIS tracking", icon: "🗺", group: "Navigate", action: () => router.push("/(tabs)") },
+  { id: "nav-fleet", label: "Fleet", description: "Vessel list & status overview", icon: "⚓", group: "Navigate", action: () => router.push("/(tabs)/fleet") },
+  { id: "nav-alerts", label: "Alerts", description: "Fleet alerts & geofence violations", icon: "🔔", group: "Navigate", action: () => router.push("/(tabs)/alerts") },
+  { id: "nav-helmsman", label: "Helmsman AI", description: "Maritime AI assistant", icon: "🤖", group: "Navigate", action: () => router.push("/(tabs)/agent-chat") },
+  { id: "nav-profile", label: "Profile", description: "Account & settings", icon: "👤", group: "Navigate", action: () => router.push("/(tabs)/profile") },
+  { id: "action-search-vessel", label: "Search Vessel", description: "Search fleet by name or IMO", icon: "🔍", group: "Quick Actions", isQuickAction: true, action: () => router.push("/(tabs)/fleet") },
+  { id: "action-view-alerts", label: "View Active Alerts", description: "See all current fleet alerts", icon: "⚠️", group: "Quick Actions", isQuickAction: true, action: () => router.push("/(tabs)/alerts") },
+  { id: "action-distress", label: "Distress Signals", description: "Active distress beacons", icon: "🚨", group: "Quick Actions", isQuickAction: true, keywords: ["sos", "emergency", "mayday"], action: () => router.push("/(tabs)/alerts") },
+  { id: "cross-aegis", label: "Open Aegis", description: "Unified Defense & Intelligence", icon: "🛡", group: "Ecosystem", keywords: ["app", "switch"], action: () => Linking.openURL("aegis://") },
+  { id: "cross-lyte", label: "Open Lyte", description: "Business Observability Command", icon: "⚡", group: "Ecosystem", keywords: ["app", "switch"], action: () => Linking.openURL("lyte://") },
+];
 
 function NativeTabLayout() {
   return (
@@ -136,13 +153,29 @@ function ClassicTabLayout() {
 
 export default function TabLayout() {
   const { isAuthenticated, isLoading } = useAuth();
+  const [spotlightOpen, setSpotlightOpen] = useState(false);
 
   if (!isLoading && !isAuthenticated) {
     return <Redirect href="/auth" />;
   }
 
-  if (isLiquidGlassAvailable()) {
-    return <NativeTabLayout />;
-  }
-  return <ClassicTabLayout />;
+  return (
+    <View style={{ flex: 1 }}>
+      {isLiquidGlassAvailable() ? <NativeTabLayout /> : <ClassicTabLayout />}
+      <SpotlightFab
+        onPress={() => setSpotlightOpen(true)}
+        accentColor={VESSELS_ACCENT}
+        bottom={100}
+        right={20}
+      />
+      <SpotlightModal
+        visible={spotlightOpen}
+        onClose={() => setSpotlightOpen(false)}
+        commands={vesselsCommands}
+        appName="Vessels"
+        accentColor={VESSELS_ACCENT}
+        placeholder="Search fleet, vessels & alerts..."
+      />
+    </View>
+  );
 }

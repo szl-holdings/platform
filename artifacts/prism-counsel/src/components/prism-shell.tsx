@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import {
   Scale, LayoutDashboard, FolderOpen, TrendingUp, Clock, FileText, Users,
@@ -6,10 +6,11 @@ import {
   Sun, Eye, CheckSquare, Download, Brain, Globe, Activity, Layers, Link2,
   DollarSign, BarChart3, Zap, AlertTriangle, Building2, MapPin, Plug,
   Server, Radio, Gauge, Waves, Car, Move, ClipboardList, ClipboardCheck,
-  ShieldAlert, XCircle, Archive, RefreshCw, Gavel, BookOpen, Star, Command,
-  X, ArrowRight, ChevronDown, ChevronUp, Menu, Lock, Wifi
+  ShieldAlert, XCircle, Archive, RefreshCw, Gavel, BookOpen, Star,
+  ChevronDown, ChevronUp, Menu, Lock, Wifi
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, useRegisterCommands, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 
 const PRISM_GOLD = "#c8a96e";
 const PRISM_BLUE = "#4a8ab0";
@@ -218,98 +219,45 @@ function NavSectionGroup({ section, collapsed, location }: { section: NavSection
   );
 }
 
-interface CommandBarResult {
-  label: string;
-  href: string;
-  section: string;
-}
-
-function CommandBar({ onClose }: { onClose: () => void }) {
-  const [query, setQuery] = useState("");
-  const [, navigate] = useLocation();
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    inputRef.current?.focus();
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [onClose]);
-
-  const allItems = NAV.flatMap(s => s.items.map(i => ({ ...i, section: s.label })));
-  const results: CommandBarResult[] = query.trim().length > 0
-    ? allItems.filter(i => i.label.toLowerCase().includes(query.toLowerCase()) || i.section.toLowerCase().includes(query.toLowerCase()))
-    : allItems.slice(0, 8);
-
-  function go(href: string) {
-    navigate(href);
-    onClose();
+function buildStandalonePrismCommands(navigate: (path: string) => void): CommandItem[] {
+  const cmds: CommandItem[] = [];
+  for (const section of NAV) {
+    for (const item of section.items) {
+      cmds.push({
+        id: `prism-nav-${item.href}`,
+        label: item.label,
+        group: section.label,
+        icon: "⚖",
+        keywords: ["prism", "counsel", item.label.toLowerCase(), section.label.toLowerCase()],
+        action: () => navigate(item.href),
+      });
+    }
   }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-xl rounded-xl border border-white/[0.12] shadow-2xl overflow-hidden" style={{ background: "#0d1322" }}>
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.08]">
-          <Search className="w-4 h-4 text-[#c8a96e]" />
-          <input
-            ref={inputRef}
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter" && results[0]) go(results[0].href); }}
-            placeholder="Search Prism Counsel..."
-            className="flex-1 bg-transparent text-sm text-slate-200 placeholder:text-slate-600 outline-none"
-          />
-          <button onClick={onClose} className="text-slate-600 hover:text-slate-400 transition-colors">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-        <div className="max-h-80 overflow-y-auto py-1">
-          {results.map((r, i) => {
-            const Icon = allItems.find(a => a.href === r.href)?.icon || ArrowRight;
-            return (
-              <button
-                key={i}
-                onClick={() => go(r.href)}
-                className="w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-white/[0.04] transition-colors"
-              >
-                <Icon className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
-                <span className="text-sm text-slate-300 flex-1">{r.label}</span>
-                <span className="text-[10px] text-slate-600">{r.section}</span>
-              </button>
-            );
-          })}
-        </div>
-        <div className="px-4 py-2 border-t border-white/[0.06] flex items-center gap-4">
-          <span className="text-[10px] text-slate-600"><kbd className="px-1 py-0.5 bg-white/[0.06] rounded text-[9px] mr-1">↵</kbd> to select</span>
-          <span className="text-[10px] text-slate-600"><kbd className="px-1 py-0.5 bg-white/[0.06] rounded text-[9px] mr-1">Esc</kbd> to close</span>
-        </div>
-      </div>
-    </div>
-  );
+  cmds.push(...getEcosystemSwitchCommands("prism-counsel"));
+  return cmds;
 }
 
 export function PrismCounselShell({ children }: { children: React.ReactNode }) {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const [collapsed, setCollapsed] = useState(false);
-  const [commandOpen, setCommandOpen] = useState(false);
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setCommandOpen(o => !o);
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, []);
+  const prismNavCmds = buildStandalonePrismCommands(navigate);
+  const prismCommands = useRegisterCommands(
+    prismNavCmds,
+    createBaselineWebActions(navigate, {
+      settingsPath: "/prism-counsel/admin",
+      helpUrl: "https://szlholdings.com/docs",
+      themeToggle: {
+        label: "Toggle Theme",
+        action: () => { document.documentElement.classList.toggle("light"); },
+      },
+    })
+  );
+  const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette(prismCommands);
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: "#080c14", fontFamily: "'Inter', system-ui, sans-serif" }}>
-      {commandOpen && <CommandBar onClose={() => setCommandOpen(false)} />}
+      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} commands={prismCommands} placeholder="Search PRISM Counsel..." />
 
       <aside
         className={cn(
@@ -333,7 +281,7 @@ export function PrismCounselShell({ children }: { children: React.ReactNode }) {
         {!collapsed && (
           <div className="px-2 py-2 border-b border-white/[0.04]">
             <button
-              onClick={() => setCommandOpen(true)}
+              onClick={() => setPaletteOpen(true)}
               className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[5px] text-[10px] text-slate-600 hover:text-slate-400 transition-colors border border-white/[0.06] hover:border-white/[0.10] bg-white/[0.02]"
             >
               <Search className="w-3 h-3" />
@@ -386,7 +334,7 @@ export function PrismCounselShell({ children }: { children: React.ReactNode }) {
 
           <div className="ml-auto flex items-center gap-2">
             <button
-              onClick={() => setCommandOpen(true)}
+              onClick={() => setPaletteOpen(true)}
               className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] text-slate-500 hover:text-slate-300 hover:bg-white/[0.04] transition-colors border border-transparent hover:border-white/[0.06]"
             >
               <Search className="w-3 h-3" />

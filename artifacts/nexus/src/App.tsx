@@ -1,5 +1,6 @@
 import { useState, lazy, Suspense } from "react";
 import { Router, Route, Switch, useLocation } from "wouter";
+import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, useRegisterCommands, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { SettingsProvider } from "./lib/SettingsContext";
 import LivePulseStrip from "./components/LivePulseStrip";
 import Sidebar from "./components/Sidebar";
@@ -39,9 +40,39 @@ const PATH_TO_PAGE: Record<string, Page> = Object.fromEntries(
   Object.entries(PAGE_TO_PATH).map(([k, v]) => [v, k as Page])
 );
 
+function buildNexusNavCommands(navigate: (path: string) => void): CommandItem[] {
+  return [
+    { id: "nav-timeline", label: "Fusion Timeline", description: "Real-time intelligence event stream", icon: "⚡", group: "Navigate", action: () => navigate("/nexus/timeline") },
+    { id: "nav-canvas", label: "Entity Canvas", description: "Visual entity relationship mapping", icon: "🕸️", group: "Navigate", action: () => navigate("/nexus/canvas") },
+    { id: "nav-correlations", label: "Correlation Engine", description: "Pattern & anomaly detection", icon: "🔗", group: "Navigate", action: () => navigate("/nexus/correlations") },
+    { id: "nav-rooms", label: "Situation Rooms", description: "Collaborative command rooms", icon: "🏛️", group: "Navigate", action: () => navigate("/nexus/rooms") },
+    { id: "nav-actions", label: "Command Actions", description: "Execute intelligence commands", icon: "⚙️", group: "Navigate", action: () => navigate("/nexus/actions") },
+    { id: "nav-deal-autopilot", label: "Deal Autopilot", description: "Automated deal intelligence", icon: "🚀", group: "Navigate", action: () => navigate("/nexus/deal-autopilot") },
+    { id: "nav-swarm", label: "Agent Swarm", description: "Multi-agent coordination", icon: "🤖", group: "Navigate", action: () => navigate("/nexus/swarm") },
+    { id: "nav-ontology", label: "Ontology Graph", description: "Knowledge structure visualization", icon: "🌐", group: "Navigate", action: () => navigate("/nexus/ontology") },
+    { id: "nav-fusion-alerts", label: "Fusion Alerts", description: "Cross-signal alert management", icon: "🚨", group: "Navigate", action: () => navigate("/nexus/fusion-alerts") },
+    { id: "nav-multimodal", label: "Multimodal Gallery", description: "Multi-format data gallery", icon: "🎨", group: "Navigate", action: () => navigate("/nexus/multimodal") },
+    ...getEcosystemSwitchCommands("nexus"),
+  ];
+}
+
 function AppShell() {
   const [location, navigate] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const nexusNavCmds = buildNexusNavCommands(navigate);
+  const nexusCommands = useRegisterCommands(
+    nexusNavCmds,
+    createBaselineWebActions(navigate, {
+      settingsPath: "/nexus/settings",
+      helpUrl: "https://szlholdings.com/docs",
+      themeToggle: {
+        label: "Toggle Theme",
+        action: () => { document.documentElement.classList.toggle("light"); },
+      },
+    })
+  );
+  const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette(nexusCommands);
 
   const currentPage: Page = PATH_TO_PAGE[location] ?? "timeline";
 
@@ -51,6 +82,14 @@ function AppShell() {
 
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden">
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        commands={nexusCommands}
+        appName="Nexus"
+        accentColor="hsl(258, 80%, 62%)"
+        placeholder="Search intelligence, rooms & entities..."
+      />
       <LivePulseStrip />
       <AIStatusBar domain="nexus" accentColor="hsl(258, 80%, 62%)" />
       <div className="flex flex-1 overflow-hidden">

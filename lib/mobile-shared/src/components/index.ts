@@ -4,3 +4,4 @@ export { KeyboardAwareScrollViewCompat } from "./KeyboardAwareScrollViewCompat";
 export { EmptyState, type EmptyStateProps } from "./EmptyState";
 export { BrandedErrorFallback, type BrandedErrorFallbackProps, type ErrorFallbackMode } from "./ErrorFallback";
 export { NotificationBell, NotificationCenterModal, type NotificationBellProps, type NotificationCenterModalProps } from "./NotificationCenter";
+export { SpotlightModal, SpotlightFab, type SpotlightCommand } from "./Spotlight";
