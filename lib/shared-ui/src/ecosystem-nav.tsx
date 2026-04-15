@@ -120,7 +120,7 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     id: "aegis",
     name: "Aegis",
     subtitle: "Security · Defense & Intelligence Command",
-    path: "/firestorm/",
+    path: "/aegis/",
     accent: "#8b7ac8",
     icon: "⬡",
     description: "Unified Defense, Managed Operations & AI Intelligence",
@@ -153,13 +153,13 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     description: "Discreet Operational & Residence Support",
   },
   {
-    id: "stephen-site",
-    name: "Stephen Lutar",
-    subtitle: "Founder",
-    path: "/stephen/",
+    id: "szl-leadership",
+    name: "Leadership",
+    subtitle: "Founder · SZL Holdings",
+    path: "/leadership",
     accent: "#94a3b8",
     icon: "○",
-    description: "Systems, Visibility, and Execution",
+    description: "Stephen Lutar — Founder & Systems Architect",
   },
 ];
 

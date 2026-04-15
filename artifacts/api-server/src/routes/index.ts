@@ -236,6 +236,18 @@ router.use(lytePlatformRouter);
 router.use("/vessels/platform", _readLimiter);
 router.use(vesselsPlatformRouter);
 router.use(vesselsRouter);
+const FIRESTORM_SOC_PATHS = new Set([
+  "scenarios","assessments","simulations","findings","risk-scores","reports",
+  "incidents","compliance","alerts","vulnerabilities","live","soar","stix",
+  "taxii","mitre","mitre-detections","cves","command","assets","cases",
+  "workflow-actions","hardening-controls","hardening-summary","ingest",
+  "tradecraft","soc-dashboard",
+]);
+router.use((req: import("express").Request, _res: import("express").Response, next: import("express").NextFunction) => {
+  const m = req.url.match(/^\/aegis\/([\w-]+)/);
+  if (m && FIRESTORM_SOC_PATHS.has(m[1])) req.url = req.url.replace(/^\/aegis\//, "/firestorm/");
+  next();
+});
 router.use(aegisSocRouter);
 router.use(aegisSocLiveRouter);
 router.use("/monte-carlo", _readLimiter);

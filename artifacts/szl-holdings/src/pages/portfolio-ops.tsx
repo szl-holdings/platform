@@ -54,7 +54,7 @@ const apps: AppReadiness[] = [
     features: { shipped: 22, planned: 2 }, deployment: { region: "US-East", lastRelease: "Mar 29" }, confidence: "High",
   },
   {
-    name: "Firestorm", slug: "firestorm", icon: Shield, accent: "hsl(24,88%,52%)",
+    name: "Aegis", slug: "aegis", icon: Shield, accent: "hsl(24,88%,52%)",
     stage: "Live", maturity: 82, readinessScore: 86, owner: "Security Engineering", team: "Security",
     blockers: [], risks: ["Voice command interface in planning"],
     features: { shipped: 16, planned: 3 }, deployment: { region: "US-East", lastRelease: "Mar 25" }, confidence: "High",
@@ -84,7 +84,7 @@ const apps: AppReadiness[] = [
     features: { shipped: 11, planned: 2 }, deployment: { region: "US-East", lastRelease: "Mar 23" }, confidence: "High",
   },
   {
-    name: "Stephen Lutar", slug: "stephen-site", icon: Users, accent: "hsl(210,8%,56%)",
+    name: "SZL Leadership", slug: "szl-leadership", icon: Users, accent: "hsl(210,8%,56%)",
     stage: "Live", maturity: 84, readinessScore: 87, owner: "Stephen Lutar", team: "Brand",
     blockers: [], risks: [],
     features: { shipped: 9, planned: 1 }, deployment: { region: "US-East", lastRelease: "Mar 20" }, confidence: "High",

@@ -31,9 +31,9 @@ const lanes = [
   },
   {
     icon: ShieldCheck,
-    name: "Aegis / Firestorm",
+    name: "Aegis",
     type: "Expansion lane",
-    href: "/firestorm/",
+    href: "/aegis/",
     body: "A command surface for security, incident, and managed operations environments where observability and execution discipline matter.",
   },
   {

@@ -68,7 +68,7 @@ const VENTURES = [
     color: "hsl(232,68%,60%)",
     rgb: "99,102,241",
     Icon: Shield,
-    path: "/firestorm",
+    path: "/aegis/",
   },
   {
     name: "Terra",

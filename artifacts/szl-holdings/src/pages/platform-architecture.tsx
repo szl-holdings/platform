@@ -95,7 +95,7 @@ const PLATFORMS = [
     role: "Defense & Intelligence",
     description: "Unified security operations, managed services, and AI intelligence. SOC command, XDR, adversary emulation, MSP operations, and agentic cortex in one platform.",
     accent: "hsl(232,68%,60%)",
-    href: "/firestorm/",
+    href: "/aegis/",
     icon: Shield,
     loopSteps: ["detect", "interpret", "verify"],
   },

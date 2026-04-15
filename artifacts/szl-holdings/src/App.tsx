@@ -135,6 +135,9 @@ const AegisPublicPage = lazy(() => import("@/pages/aegis-public"));
 const CarlotaJoPublicPage = lazy(() => import("@/pages/carlota-jo-public"));
 
 
+const LeadershipPage = lazy(() => import("@/pages/leadership"));
+const ForgeHomePage = lazy(() => import("@/pages/forge-home"));
+
 const NuroForgeDashboard = lazy(() => import("@/pages/nuro-forge/index"));
 const NuroForgeArena = lazy(() => import("@/pages/nuro-forge/arena"));
 const NuroForgeComposition = lazy(() => import("@/pages/nuro-forge/composition"));
@@ -367,6 +370,17 @@ function App() {
             <Route path="/founder">
               <Suspense fallback={<PageLoader />}><FounderPage /></Suspense>
             </Route>
+            <Route path="/leadership">
+              <Suspense fallback={<PageLoader />}><LeadershipPage /></Suspense>
+            </Route>
+
+            {/* ── Forge — Authenticated admin portal ── */}
+            <Route path="/forge">
+              <RequireAuth><Suspense fallback={<PageLoader />}><ForgeHomePage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/forge/:rest*">
+              <RequireAuth><Suspense fallback={<PageLoader />}><ForgeHomePage /></Suspense></RequireAuth>
+            </Route>
 
             {/* ── Product pages — Lyte and Alloy (public marketing) ── */}
             <Route path="/products/lyte">
@@ -454,12 +468,12 @@ function App() {
               <Suspense fallback={<PageLoader />}><CarlotaJoPublicPage /></Suspense>
             </Route>
 
-            {/* ── PRISM Counsel — now a standalone artifact at /prism-counsel/ ── */}
+            {/* ── PRISM Counsel — merged into Aegis Legal workspace ── */}
             <Route path="/prism-counsel/:rest*">
-              {() => { window.location.href = "/prism-counsel/"; return null; }}
+              {() => { window.location.href = "/aegis/legal"; return null; }}
             </Route>
             <Route path="/prism-counsel">
-              {() => { window.location.href = "/prism-counsel/"; return null; }}
+              {() => { window.location.href = "/aegis/legal"; return null; }}
             </Route>
 
             {/* ── Trust Center ── */}
@@ -733,16 +747,16 @@ function App() {
               <ExternalRedirect to="/carlota-jo/services" />
             </Route>
             <Route path="/firestorm">
-              <ExternalRedirect to="/firestorm/" />
+              <ExternalRedirect to="/aegis/" />
             </Route>
             <Route path="/inca">
-              <ExternalRedirect to="/firestorm/intel/dashboard" />
+              <ExternalRedirect to="/aegis/intel/dashboard" />
             </Route>
             <Route path="/msp">
-              <ExternalRedirect to="/firestorm/ops/dashboard" />
+              <ExternalRedirect to="/aegis/ops/dashboard" />
             </Route>
             <Route path="/stephen">
-              <ExternalRedirect to="/stephen-site/" />
+              <ExternalRedirect to="/szl-holdings/leadership" />
             </Route>
             <Route path="/terra">
               <ExternalRedirect to="/terra/" />

@@ -54,7 +54,7 @@ const PLATFORM_DEFS = [
     label: "Unified Defense & Intelligence Command",
     copy: "Security operations, managed services, and AI intelligence in one unified platform. SOC command, XDR, MSP ops, and agentic cortex.",
     cta: "Enter Aegis",
-    href: "/firestorm/",
+    href: "/aegis/",
     accent: "hsl(232,68%,60%)",
     accentRgb: "99,102,241",
     accentBg: "hsla(232,68%,60%,0.05)",

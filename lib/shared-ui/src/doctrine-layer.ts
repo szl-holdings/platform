@@ -97,11 +97,11 @@ export const DOCTRINE_APP_MAP: DoctrineLayerConfig[] = [
     primaryRole: "Premium Service Brand",
   },
   {
-    appId: "stephen-site",
-    appName: "Stephen Lutar",
+    appId: "szl-leadership",
+    appName: "Leadership",
     layers: ["SIGNAL", "TRUST"],
-    description: "Founder identity and canonical narrative — one voice, one operating philosophy.",
-    primaryRole: "Founder",
+    description: "Founder identity and canonical narrative — Stephen Lutar's thesis, case studies, and ecosystem health, consolidated inside SZL Holdings.",
+    primaryRole: "Founder · SZL Holdings",
   },
   {
     appId: "aegis",
