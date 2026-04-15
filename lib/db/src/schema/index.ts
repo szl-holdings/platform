@@ -98,4 +98,5 @@ export * from "./analytics";
 export * from "./push_infra";
 export * from "./job_queue";
 export * from "./metering";
+export * from "./partner_portal";
 export * from "./reports";

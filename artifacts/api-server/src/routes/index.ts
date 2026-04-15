@@ -158,6 +158,7 @@ import mlPipelineRouter from "./ml-pipeline";
 import meteringRouter from "./metering";
 import realtimeRouter from "./realtime";
 import monteCarloRouter from "./monte-carlo";
+import partnerPortalRouter from "./partner-portal";
 
 const router: IRouter = Router();
 
@@ -605,5 +606,13 @@ router.use(copilotRouter);
 router.use(gdprRouter);
 
 router.use(privacyRouter);
+
+router.use("/partner", _writeLimiter);
+router.use("/partner", _readLimiter);
+router.use("/org-branding", _readLimiter);
+router.use("/orgs/:orgId/branding", _writeLimiter);
+router.use("/orgs/:orgId/custom-domains", _writeLimiter);
+router.use("/resolve-domain", _readLimiter);
+router.use(partnerPortalRouter);
 
 export default router;
