@@ -331,9 +331,20 @@ export abstract class ServiceAdapter {
         const elapsed = Date.now() - start;
         this._recordLatency(elapsed);
 
-        if (res.ok || acceptStatuses.includes(res.status) || (res.status >= 400 && res.status < 500 && res.status !== 429)) {
+        if (res.ok || acceptStatuses.includes(res.status)) {
           this._recordCircuitSuccess();
           this.log("info", `OK`, { url: urlHost, status: res.status, latencyMs: elapsed, attempt });
+          return res;
+        }
+
+        if (res.status >= 400 && res.status < 500 && res.status !== 429 && res.status !== 401 && res.status !== 403) {
+          this.log("info", `Client error (non-retryable)`, { url: urlHost, status: res.status, latencyMs: elapsed, attempt });
+          return res;
+        }
+
+        if (res.status === 401 || res.status === 403) {
+          this._recordCircuitFailure();
+          this.log("warn", `Auth failure — circuit notified`, { url: urlHost, status: res.status, attempt, latencyMs: elapsed });
           return res;
         }
 
