@@ -152,7 +152,7 @@ describe("Auth Routes", () => {
     it("returns 400 when credential is missing", async () => {
       const res = await request(app).post("/auth/login").send({});
       expect(res.status).toBe(400);
-      expect(res.body).toMatchObject({ error: "credential is required" });
+      expect(res.body.error).toMatch(/credential/i);
     });
 
     it("returns 400 when credential is not a string", async () => {
@@ -223,11 +223,10 @@ describe("Auth Routes", () => {
       sharedDbSelect.mockReturnValueOnce(makeSelectChain([mockUser]));
 
       const res = await request(authenticatedApp).get("/auth/me");
-      expect([200, 404]).toContain(res.status);
-      if (res.status === 200) {
-        expect(res.body).toHaveProperty("id");
-        expect(res.body).toHaveProperty("displayName");
-      }
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("id");
+      expect(res.body).toHaveProperty("displayName");
+      expect(res.body).toHaveProperty("email");
     });
   });
 

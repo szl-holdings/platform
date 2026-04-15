@@ -26,39 +26,54 @@ jobs:
         include:
           - app: szl-holdings
             filter: "@workspace/szl-holdings"
-            dist: artifacts/szl-holdings/dist
+            dist: artifacts/szl-holdings/dist/public
             port: 3000
             spec: szl-holdings.spec.ts
           - app: lyte-command-center
             filter: "@workspace/lyte-command-center"
-            dist: artifacts/lyte-command-center/dist
+            dist: artifacts/lyte-command-center/dist/public
             port: 3001
             spec: lyte.spec.ts
           - app: firestorm
             filter: "@workspace/firestorm"
-            dist: artifacts/firestorm/dist
+            dist: artifacts/firestorm/dist/public
             port: 3002
             spec: aegis.spec.ts
           - app: terra
             filter: "@workspace/terra"
-            dist: artifacts/terra/dist
+            dist: artifacts/terra/dist/public
             port: 3003
             spec: terra.spec.ts
           - app: vessels
             filter: "@workspace/vessels"
-            dist: artifacts/vessels/dist
+            dist: artifacts/vessels/dist/public
             port: 3004
             spec: vessels.spec.ts
           - app: carlota-jo
             filter: "@workspace/carlota-jo"
-            dist: artifacts/carlota-jo/dist
+            dist: artifacts/carlota-jo/dist/public
             port: 3005
             spec: carlota-jo.spec.ts
           - app: stephen-site
             filter: "@workspace/stephen-site"
-            dist: artifacts/stephen-site/dist
+            dist: artifacts/stephen-site/dist/public
             port: 3006
             spec: stephen-site.spec.ts
+          - app: command
+            filter: "@workspace/command"
+            dist: artifacts/command/dist/public
+            port: 3007
+            spec: command.spec.ts
+          - app: prism-counsel
+            filter: "@workspace/prism-counsel"
+            dist: artifacts/prism-counsel/dist/public
+            port: 3008
+            spec: prism-counsel.spec.ts
+          - app: imperium
+            filter: "@workspace/imperium"
+            dist: artifacts/imperium/dist/public
+            port: 3009
+            spec: imperium.spec.ts
     steps:
       - uses: actions/checkout@v4
 
@@ -75,6 +90,8 @@ jobs:
 
       - name: Build ${{ matrix.app }}
         run: pnpm --filter ${{ matrix.filter }} run build
+        env:
+          BASE_PATH: /
 
       - name: Serve ${{ matrix.app }} on port ${{ matrix.port }}
         run: |
@@ -95,6 +112,9 @@ jobs:
           VESSELS_BASE_PATH: /
           CARLOTA_BASE_PATH: /
           STEPHEN_BASE_PATH: /
+          COMMAND_BASE_PATH: /
+          PRISM_BASE_PATH: /
+          IMPERIUM_BASE_PATH: /
 
       - name: Upload HTML report
         uses: actions/upload-artifact@v4

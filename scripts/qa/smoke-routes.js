@@ -14,8 +14,10 @@
  *   node scripts/qa/smoke-routes.js --json      (emit JSON output)
  */
 
-const { readFileSync, existsSync } = require("fs");
-const { join } = require("path");
+import { readFileSync, existsSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 const TIMEOUT_MS = parseInt(process.env.SMOKE_TIMEOUT ?? "10000", 10);

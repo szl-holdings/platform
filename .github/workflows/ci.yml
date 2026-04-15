@@ -95,6 +95,9 @@ jobs:
       - run: pnpm --filter @workspace/vessels run build
       - run: pnpm --filter @workspace/carlota-jo run build
       - run: pnpm --filter @workspace/stephen-site run build
+      - run: pnpm --filter @workspace/command run build
+      - run: pnpm --filter @workspace/prism-counsel run build
+      - run: pnpm --filter @workspace/imperium run build
 
   ci-gate:
     name: CI Gate

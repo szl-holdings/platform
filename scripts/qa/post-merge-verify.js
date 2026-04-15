@@ -21,9 +21,11 @@
  *              (--strict mode is always enabled in post-merge verification)
  */
 
-const { spawnSync } = require("child_process");
-const { writeFileSync } = require("fs");
-const { resolve, join } = require("path");
+import { spawnSync } from "child_process";
+import { writeFileSync } from "fs";
+import { resolve, join, dirname } from "path";
+import { fileURLToPath } from "url";
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const BASE_URL = process.env.BASE_URL || "http://localhost:80";
 const API_BASE_URL = process.env.API_BASE_URL || process.env.BASE_URL || "http://localhost:5000";
