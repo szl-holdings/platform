@@ -26,11 +26,47 @@ export interface EmotionalValence {
   emotionalStability: number;
 }
 
+export interface SchererAppraisal {
+  appraisalId: string;
+  novelty: number;
+  intrinsicPleasantness: number;
+  goalRelevance: number;
+  copingPotential: number;
+  normCompatibility: number;
+  resultingEmotion: EmotionType;
+  resultingIntensity: number;
+  breakdown: string;
+  timestamp: string;
+}
+
+export interface EmotionRegulationStrategy {
+  strategyId: string;
+  type: "reappraisal" | "selective_attention" | "response_modulation";
+  trigger: string;
+  action: string;
+  effectivenessEstimate: number;
+  applied: boolean;
+  timestamp: string;
+}
+
+export interface AffectiveForecast {
+  forecastId: string;
+  decision: string;
+  predictedEmotion: EmotionType;
+  predictedIntensity: number;
+  predictedDuration: "brief" | "moderate" | "extended";
+  shouldProceed: boolean;
+  timestamp: string;
+}
+
 export interface EmotionalState {
   activeSignals: EmotionalSignal[];
   valence: EmotionalValence;
   moodTrajectory: "improving" | "stable" | "declining";
   emotionalHistory: Array<{ timestamp: string; valence: number; arousal: number }>;
+  recentAppraisals: SchererAppraisal[];
+  activeRegulations: EmotionRegulationStrategy[];
+  recentForecasts: AffectiveForecast[];
 }
 
 const EMOTION_VALENCE: Record<EmotionType, { positive: number; arousal: number }> = {
@@ -47,8 +83,14 @@ const EMOTION_VALENCE: Record<EmotionType, { positive: number; arousal: number }
 class EmotionalSignalEngine {
   private signals: EmotionalSignal[] = [];
   private history: Array<{ timestamp: string; valence: number; arousal: number }> = [];
+  private appraisals: SchererAppraisal[] = [];
+  private regulations: EmotionRegulationStrategy[] = [];
+  private forecasts: AffectiveForecast[] = [];
   private static readonly MAX_SIGNALS = 100;
   private static readonly MAX_HISTORY = 200;
+  private static readonly MAX_APPRAISALS = 30;
+  private static readonly MAX_REGULATIONS = 20;
+  private static readonly MAX_FORECASTS = 15;
 
   emit(emotion: EmotionType, intensity: number, trigger: string): EmotionalSignal {
     const signal: EmotionalSignal = {
@@ -75,6 +117,8 @@ class EmotionalSignalEngine {
     if (this.history.length > EmotionalSignalEngine.MAX_HISTORY) {
       this.history.splice(0, this.history.length - EmotionalSignalEngine.MAX_HISTORY);
     }
+
+    this.checkAndRegulate(valence);
 
     return signal;
   }
@@ -114,6 +158,162 @@ class EmotionalSignalEngine {
     }
 
     return emitted;
+  }
+
+  appraise(input: {
+    event: string;
+    novelty: number;
+    intrinsicPleasantness: number;
+    goalRelevance: number;
+    copingPotential: number;
+    normCompatibility: number;
+  }): SchererAppraisal {
+    let emotion: EmotionType;
+    let intensity: number;
+
+    if (input.novelty > 0.7 && input.goalRelevance > 0.5) {
+      emotion = input.copingPotential > 0.5 ? "curiosity" : "alertness";
+      intensity = (input.novelty + input.goalRelevance) / 2;
+    } else if (input.intrinsicPleasantness > 0.6 && input.copingPotential > 0.5) {
+      emotion = "satisfaction";
+      intensity = input.intrinsicPleasantness;
+    } else if (input.goalRelevance > 0.7 && input.copingPotential < 0.3) {
+      emotion = "frustration";
+      intensity = input.goalRelevance * (1 - input.copingPotential);
+    } else if (input.normCompatibility < 0.3) {
+      emotion = "caution";
+      intensity = 1 - input.normCompatibility;
+    } else if (input.goalRelevance > 0.5 && input.copingPotential > 0.6) {
+      emotion = "confidence";
+      intensity = (input.copingPotential + input.goalRelevance) / 2;
+    } else if (input.novelty < 0.2 && input.intrinsicPleasantness < 0.3) {
+      emotion = "uncertainty";
+      intensity = 0.4;
+    } else {
+      emotion = "caution";
+      intensity = 0.3;
+    }
+
+    intensity = Math.max(0, Math.min(1, intensity));
+
+    const breakdown = [
+      `Novelty: ${(input.novelty * 100).toFixed(0)}%`,
+      `Pleasantness: ${(input.intrinsicPleasantness * 100).toFixed(0)}%`,
+      `Goal relevance: ${(input.goalRelevance * 100).toFixed(0)}%`,
+      `Coping: ${(input.copingPotential * 100).toFixed(0)}%`,
+      `Norm compat: ${(input.normCompatibility * 100).toFixed(0)}%`,
+      `→ ${emotion} (${(intensity * 100).toFixed(0)}%)`,
+    ].join(" | ");
+
+    const appraisal: SchererAppraisal = {
+      appraisalId: `apr_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      novelty: input.novelty,
+      intrinsicPleasantness: input.intrinsicPleasantness,
+      goalRelevance: input.goalRelevance,
+      copingPotential: input.copingPotential,
+      normCompatibility: input.normCompatibility,
+      resultingEmotion: emotion,
+      resultingIntensity: intensity,
+      breakdown,
+      timestamp: new Date().toISOString(),
+    };
+
+    this.appraisals.push(appraisal);
+    if (this.appraisals.length > EmotionalSignalEngine.MAX_APPRAISALS) {
+      this.appraisals.splice(0, this.appraisals.length - EmotionalSignalEngine.MAX_APPRAISALS);
+    }
+
+    this.emit(emotion, intensity, `Appraisal: ${input.event.slice(0, 100)}`);
+
+    return appraisal;
+  }
+
+  forecastAffect(decision: string, expectedOutcome: {
+    confidence: number;
+    stakes: "low" | "medium" | "high";
+    novelty: number;
+  }): AffectiveForecast {
+    let predictedEmotion: EmotionType;
+    let predictedIntensity: number;
+
+    if (expectedOutcome.confidence > 70 && expectedOutcome.stakes !== "high") {
+      predictedEmotion = "satisfaction";
+      predictedIntensity = expectedOutcome.confidence / 100;
+    } else if (expectedOutcome.confidence < 40 && expectedOutcome.stakes === "high") {
+      predictedEmotion = "frustration";
+      predictedIntensity = (1 - expectedOutcome.confidence / 100) * 0.8;
+    } else if (expectedOutcome.novelty > 0.7) {
+      predictedEmotion = "curiosity";
+      predictedIntensity = expectedOutcome.novelty;
+    } else {
+      predictedEmotion = "caution";
+      predictedIntensity = 0.4;
+    }
+
+    const duration: AffectiveForecast["predictedDuration"] =
+      expectedOutcome.stakes === "high" ? "extended" :
+        expectedOutcome.stakes === "medium" ? "moderate" : "brief";
+
+    const shouldProceed = predictedEmotion !== "frustration" || predictedIntensity < 0.6;
+
+    const forecast: AffectiveForecast = {
+      forecastId: `forecast_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      decision: decision.slice(0, 200),
+      predictedEmotion,
+      predictedIntensity,
+      predictedDuration: duration,
+      shouldProceed,
+      timestamp: new Date().toISOString(),
+    };
+
+    this.forecasts.push(forecast);
+    if (this.forecasts.length > EmotionalSignalEngine.MAX_FORECASTS) {
+      this.forecasts.splice(0, this.forecasts.length - EmotionalSignalEngine.MAX_FORECASTS);
+    }
+
+    return forecast;
+  }
+
+  private checkAndRegulate(valence: EmotionalValence): void {
+    if (valence.arousal > 0.8 && valence.negative > 0.5) {
+      this.regulations.push({
+        strategyId: `reg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        type: "reappraisal",
+        trigger: `High arousal (${(valence.arousal * 100).toFixed(0)}%) with negative valence`,
+        action: "Reframe: high arousal indicates important signals, not system failure. Channel energy into thorough analysis.",
+        effectivenessEstimate: 0.7,
+        applied: true,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    if (valence.emotionalStability < 0.3) {
+      this.regulations.push({
+        strategyId: `reg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        type: "selective_attention",
+        trigger: `Low emotional stability (${(valence.emotionalStability * 100).toFixed(0)}%)`,
+        action: "Focus attention on highest-priority items only. Reduce breadth of processing to stabilize.",
+        effectivenessEstimate: 0.6,
+        applied: true,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    if (valence.negative > 0.7) {
+      this.regulations.push({
+        strategyId: `reg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        type: "response_modulation",
+        trigger: `High negative valence (${(valence.negative * 100).toFixed(0)}%)`,
+        action: "Moderate response intensity. Add extra verification steps before outputting.",
+        effectivenessEstimate: 0.65,
+        applied: true,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    if (this.regulations.length > EmotionalSignalEngine.MAX_REGULATIONS) {
+      this.regulations.splice(0, this.regulations.length - EmotionalSignalEngine.MAX_REGULATIONS);
+    }
   }
 
   computeValence(): EmotionalValence {
@@ -181,6 +381,9 @@ class EmotionalSignalEngine {
       valence,
       moodTrajectory: trajectory,
       emotionalHistory: this.history.slice(-30),
+      recentAppraisals: this.appraisals.slice(-5).reverse(),
+      activeRegulations: this.regulations.filter(r => r.applied).slice(-5).reverse(),
+      recentForecasts: this.forecasts.slice(-3).reverse(),
     };
   }
 
@@ -197,6 +400,10 @@ class EmotionalSignalEngine {
     const highArousal = this.signals.filter(s => s.effectiveIntensity > 0.6).slice(-3);
     if (highArousal.length > 0) {
       lines.push(`Active signals: ${highArousal.map(s => `${s.emotion}(${(s.effectiveIntensity * 100).toFixed(0)}%)`).join(", ")}`);
+    }
+
+    if (state.activeRegulations.length > 0) {
+      lines.push(`Regulation: ${state.activeRegulations[0]!.type} — ${state.activeRegulations[0]!.action.slice(0, 80)}`);
     }
 
     return lines.join("\n");

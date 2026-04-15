@@ -3,77 +3,149 @@ import { motion as m } from "framer-motion";
 import {
   Brain, Eye, Heart, Target, Clock, MessageSquare, Compass,
   Activity, AlertTriangle, TrendingUp, TrendingDown, Minus,
-  Sparkles, Lightbulb
+  Sparkles, Lightbulb, Zap, Moon, Radio, Shield, GitBranch
 } from "lucide-react";
 
-const ACCENT = "#ef4444";
 const API = "/api/nuro-mesh/consciousness";
 
-function useCSnapshot() {
-  return useQuery<{
-    metacognition: {
-      currentAssessment: {
-        certaintyLevel: string;
-        reasoningQuality: string;
-        cognitiveLoad: string;
-        confusionSignals: string[];
-        knowledgeGaps: string[];
-        calibrationDrift: number;
-        introspectionNotes: string;
-        shouldSeekClarification: boolean;
-        shouldDeferToHuman: boolean;
-        confidenceInConfidence: number;
-      } | null;
-      rollingCertainty: number;
-      rollingQuality: number;
-      confusionStreak: number;
-      totalAssessments: number;
-    };
-    selfModel: {
-      identity: { name: string; version: string; purpose: string; coreValues: string[]; operationalBoundaries: string[] };
-      capabilities: Array<{ agentId: string; domain: string; successRate: number; avgConfidence: number; totalInvocations: number; recentTrend: string }>;
-      overallHealth: string;
-      knownLimitations: string[];
-      learningVelocity: number;
-      selfNarrative: string;
-    };
-    workspace: {
-      workingMemory: Array<{ id: string; content: string; source: string; priority: number }>;
-      attentionFocus: { primaryTopic: string; activeDomains: string[]; contextWindowUsage: number };
-      contextBudget: { used: number; total: number; utilization: number };
-      sessionDepth: number;
-    };
-    monologue: {
-      recentThoughts: Array<{ entryId: string; type: string; thought: string; emotionalTone: string; confidence: number; timestamp: string }>;
-      dominantTone: string;
-      thoughtFrequency: number;
-      reflectionDepth: number;
-      totalEntries: number;
-    };
-    goals: {
-      activeGoals: Array<{ goalId: string; title: string; priority: string; progress: number; status: string }>;
-      completedGoals: number;
-      blockedGoals: Array<{ goalId: string; title: string }>;
-      curiosityQueue: Array<{ signalId: string; topic: string; intensity: number; source: string }>;
-      overallProgress: number;
-    };
-    emotions: {
-      activeSignals: Array<{ signalId: string; emotion: string; intensity: number; trigger: string; effectiveIntensity: number }>;
-      valence: { positive: number; negative: number; arousal: number; dominantEmotion: string; emotionalStability: number };
-      moodTrajectory: string;
-    };
-    temporal: {
-      currentTime: string;
-      sessionDuration: number;
-      orchestrationCount: number;
-      averageOrchestrationInterval: number;
-      timeOfDay: string;
-      dayOfWeek: string;
-      isBusinessHours: boolean;
-      uptimeMs: number;
-    };
+interface PredictiveState {
+  model: {
+    totalPredictions: number;
+    correctPredictions: number;
+    queryTypeDistribution: Record<string, number>;
+    domainAccessPatterns: Record<string, number>;
+    agentUsageFrequency: Record<string, number>;
+  };
+  recentPredictions: Array<{
+    predictionId: string;
+    predictedQueryType: string;
+    predictedDomains: string[];
+    confidence: number;
     timestamp: string;
-  }>({
+  }>;
+  recentErrors: Array<{
+    errorId: string;
+    errorMagnitude: number;
+    surpriseLevel: string;
+    learningSignal: string;
+    timestamp: string;
+  }>;
+  freeEnergy: {
+    currentFreeEnergy: number;
+    predictionAccuracy: number;
+    modelComplexity: number;
+    surpriseHistory: Array<{ timestamp: string; surprise: number }>;
+    worldModelAge: number;
+  };
+  routingPriors: Record<string, number>;
+}
+
+interface DreamState {
+  replayBuffer: Array<{
+    replayId: string;
+    orchestrationId: string;
+    query: string;
+    domains: string[];
+    outcome: string;
+    timestamp: string;
+  }>;
+  discoveredPatterns: Array<{
+    patternId: string;
+    description: string;
+    frequency: number;
+    domains: string[];
+    significance: string;
+    actionableInsight: string;
+    discoveredAt: string;
+  }>;
+  recentReports: Array<{
+    reportId: string;
+    cycleNumber: number;
+    replaysProcessed: number;
+    patternsDiscovered: Array<{ patternId: string; description: string; significance: string }>;
+    memoriesPruned: number;
+    insightsGenerated: string[];
+    selfModelUpdates: string[];
+    goalEngineUpdates: string[];
+    duration: number;
+    timestamp: string;
+  }>;
+  totalCycles: number;
+  isRunning: boolean;
+  lastCycleTimestamp: string | null;
+  nextScheduledCycle: string | null;
+}
+
+interface SnapshotData {
+  metacognition: {
+    currentAssessment: {
+      certaintyLevel: string;
+      reasoningQuality: string;
+      cognitiveLoad: string;
+      confusionSignals: string[];
+      knowledgeGaps: string[];
+      calibrationDrift: number;
+      introspectionNotes: string;
+      shouldSeekClarification: boolean;
+      shouldDeferToHuman: boolean;
+      confidenceInConfidence: number;
+    } | null;
+    rollingCertainty: number;
+    rollingQuality: number;
+    confusionStreak: number;
+    totalAssessments: number;
+  };
+  selfModel: {
+    identity: { name: string; version: string; purpose: string; coreValues: string[]; operationalBoundaries: string[] };
+    capabilities: Array<{ agentId: string; domain: string; successRate: number; avgConfidence: number; totalInvocations: number; recentTrend: string }>;
+    overallHealth: string;
+    knownLimitations: string[];
+    learningVelocity: number;
+    selfNarrative: string;
+  };
+  workspace: {
+    workingMemory: Array<{ id: string; content: string; source: string; priority: number }>;
+    attentionFocus: { primaryTopic: string; activeDomains: string[]; contextWindowUsage: number };
+    contextBudget: { used: number; total: number; utilization: number };
+    sessionDepth: number;
+    recentQueries: string[];
+  };
+  monologue: {
+    recentThoughts: Array<{ entryId: string; type: string; thought: string; emotionalTone: string; confidence: number; timestamp: string }>;
+    dominantTone: string;
+    thoughtFrequency: number;
+    reflectionDepth: number;
+    totalEntries: number;
+  };
+  goals: {
+    activeGoals: Array<{ goalId: string; title: string; priority: string; progress: number; status: string }>;
+    completedGoals: number;
+    blockedGoals: Array<{ goalId: string; title: string }>;
+    curiosityQueue: Array<{ signalId: string; topic: string; intensity: number; source: string }>;
+    overallProgress: number;
+  };
+  emotions: {
+    activeSignals: Array<{ signalId: string; emotion: string; intensity: number; trigger: string; effectiveIntensity: number }>;
+    valence: { positive: number; negative: number; arousal: number; dominantEmotion: string; emotionalStability: number };
+    moodTrajectory: string;
+  };
+  temporal: {
+    currentTime: string;
+    sessionDuration: number;
+    orchestrationCount: number;
+    averageOrchestrationInterval: number;
+    timeOfDay: string;
+    dayOfWeek: string;
+    isBusinessHours: boolean;
+    uptimeMs: number;
+  };
+  predictive: PredictiveState;
+  dream: DreamState;
+  timestamp: string;
+}
+
+function useCSnapshot() {
+  return useQuery<SnapshotData>({
     queryKey: ["consciousness-snapshot"],
     queryFn: async () => {
       const r = await fetch(`${API}/snapshot`);
@@ -84,17 +156,25 @@ function useCSnapshot() {
   });
 }
 
-function Card({ title, icon: Icon, children, className = "" }: { title: string; icon: React.ElementType; children: React.ReactNode; className?: string }) {
+function Card({ title, icon: Icon, children, className = "", accent = "red" }: { title: string; icon: React.ElementType; children: React.ReactNode; className?: string; accent?: string }) {
+  const accentMap: Record<string, { bg: string; text: string; border: string }> = {
+    red: { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-500/10" },
+    blue: { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/10" },
+    purple: { bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/10" },
+    amber: { bg: "bg-amber-500/10", text: "text-amber-400", border: "border-amber-500/10" },
+    cyan: { bg: "bg-cyan-500/10", text: "text-cyan-400", border: "border-cyan-500/10" },
+  };
+  const a = accentMap[accent] ?? accentMap.red!;
   return (
     <m.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className={`bg-[#0a0a14]/80 border border-red-500/10 rounded-xl p-5 ${className}`}
+      className={`bg-[#0a0a14]/80 border ${a.border} rounded-xl p-5 ${className}`}
     >
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-7 h-7 rounded-lg bg-red-500/10 flex items-center justify-center">
-          <Icon className="w-4 h-4 text-red-400" />
+        <div className={`w-7 h-7 rounded-lg ${a.bg} flex items-center justify-center`}>
+          <Icon className={`w-4 h-4 ${a.text}`} />
         </div>
         <h3 className="text-sm font-semibold text-red-50">{title}</h3>
       </div>
@@ -124,7 +204,16 @@ function TrendIcon({ trend }: { trend: string }) {
   return <Minus className="w-3 h-3 text-gray-500" />;
 }
 
-function MetacognitionPanel({ data }: { data: NonNullable<ReturnType<typeof useCSnapshot>["data"]>["metacognition"] }) {
+function MiniBar({ value, max = 1, color = "bg-red-500/60" }: { value: number; max?: number; color?: string }) {
+  const pct = Math.min(100, Math.max(0, (value / max) * 100));
+  return (
+    <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+      <div className={`h-full ${color} rounded-full transition-all duration-500`} style={{ width: `${pct}%` }} />
+    </div>
+  );
+}
+
+function MetacognitionPanel({ data }: { data: SnapshotData["metacognition"] }) {
   const a = data.currentAssessment;
   return (
     <Card title="Metacognition" icon={Brain}>
@@ -197,7 +286,7 @@ function MetacognitionPanel({ data }: { data: NonNullable<ReturnType<typeof useC
   );
 }
 
-function SelfModelPanel({ data }: { data: NonNullable<ReturnType<typeof useCSnapshot>["data"]>["selfModel"] }) {
+function SelfModelPanel({ data }: { data: SnapshotData["selfModel"] }) {
   const healthColors: Record<string, string> = {
     optimal: "text-emerald-400",
     good: "text-green-400",
@@ -205,7 +294,7 @@ function SelfModelPanel({ data }: { data: NonNullable<ReturnType<typeof useCSnap
     impaired: "text-red-400",
   };
   return (
-    <Card title="Self-Model" icon={Eye}>
+    <Card title="Self-Model & Theory of Mind" icon={Eye}>
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="text-xs text-gray-500">System Health</div>
@@ -231,11 +320,22 @@ function SelfModelPanel({ data }: { data: NonNullable<ReturnType<typeof useCSnap
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-gray-500">{(cap.successRate * 100).toFixed(0)}%</span>
-                    <span className="text-gray-600">×{cap.totalInvocations}</span>
+                    <span className="text-gray-600">x{cap.totalInvocations}</span>
                   </div>
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {data.knownLimitations.length > 0 && (
+          <div className="space-y-1">
+            <div className="text-[10px] text-gray-500 font-medium flex items-center gap-1">
+              <Shield className="w-3 h-3 text-amber-400/60" /> Known Limitations
+            </div>
+            {data.knownLimitations.slice(0, 3).map((l, i) => (
+              <div key={i} className="text-[10px] text-gray-500 pl-4">• {l.slice(0, 80)}</div>
+            ))}
           </div>
         )}
 
@@ -245,7 +345,7 @@ function SelfModelPanel({ data }: { data: NonNullable<ReturnType<typeof useCSnap
   );
 }
 
-function MonologuePanel({ data }: { data: NonNullable<ReturnType<typeof useCSnapshot>["data"]>["monologue"] }) {
+function MonologuePanel({ data }: { data: SnapshotData["monologue"] }) {
   const toneColors: Record<string, string> = {
     positive: "text-emerald-400",
     neutral: "text-gray-400",
@@ -253,19 +353,20 @@ function MonologuePanel({ data }: { data: NonNullable<ReturnType<typeof useCSnap
     mixed: "text-amber-400",
   };
   const typeIcons: Record<string, string> = {
-    pre_routing: "→",
-    post_routing: "←",
-    reflection: "◆",
+    pre_routing: "\u2192",
+    post_routing: "\u2190",
+    reflection: "\u25c6",
     doubt: "?",
     realization: "!",
-    strategy_shift: "⇄",
-    self_correction: "↻",
-    satisfaction: "✓",
-    frustration: "✗",
+    strategy_shift: "\u21c4",
+    self_correction: "\u21bb",
+    satisfaction: "\u2713",
+    frustration: "\u2717",
+    dialectical: "\u2261",
   };
 
   return (
-    <Card title="Inner Monologue" icon={MessageSquare} className="col-span-2">
+    <Card title="Inner Monologue & Dialectics" icon={MessageSquare} className="col-span-2">
       <div className="space-y-3">
         <div className="flex items-center gap-4 text-xs">
           <div>
@@ -291,7 +392,7 @@ function MonologuePanel({ data }: { data: NonNullable<ReturnType<typeof useCSnap
                 animate={{ opacity: 1, x: 0 }}
                 className="flex gap-2 text-[11px]"
               >
-                <span className="text-red-500/40 shrink-0 w-4 text-center">{typeIcons[t.type] ?? "○"}</span>
+                <span className="text-red-500/40 shrink-0 w-4 text-center">{typeIcons[t.type] ?? "\u25cb"}</span>
                 <div className="flex-1">
                   <span className={`${toneColors[t.emotionalTone] ?? "text-gray-400"}`}>{t.thought.slice(0, 300)}</span>
                   <span className="text-gray-600 ml-2">{t.confidence}%</span>
@@ -307,12 +408,12 @@ function MonologuePanel({ data }: { data: NonNullable<ReturnType<typeof useCSnap
   );
 }
 
-function EmotionalPanel({ data }: { data: NonNullable<ReturnType<typeof useCSnapshot>["data"]>["emotions"] }) {
+function EmotionalPanel({ data }: { data: SnapshotData["emotions"] }) {
   const v = data.valence;
   const trajectoryIcon = data.moodTrajectory === "improving" ? <TrendingUp className="w-3 h-3 text-emerald-400" /> : data.moodTrajectory === "declining" ? <TrendingDown className="w-3 h-3 text-red-400" /> : <Minus className="w-3 h-3 text-gray-500" />;
 
   return (
-    <Card title="Emotional State" icon={Heart}>
+    <Card title="Emotional Appraisal" icon={Heart}>
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div>
@@ -331,37 +432,43 @@ function EmotionalPanel({ data }: { data: NonNullable<ReturnType<typeof useCSnap
             <span className="text-emerald-400">Positive</span>
             <span className="text-gray-500">{(v.positive * 100).toFixed(0)}%</span>
           </div>
-          <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-            <div className="h-full bg-emerald-500/60 rounded-full" style={{ width: `${v.positive * 100}%` }} />
-          </div>
+          <MiniBar value={v.positive} color="bg-emerald-500/60" />
 
           <div className="flex justify-between text-[10px]">
             <span className="text-red-400">Negative</span>
             <span className="text-gray-500">{(v.negative * 100).toFixed(0)}%</span>
           </div>
-          <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-            <div className="h-full bg-red-500/60 rounded-full" style={{ width: `${v.negative * 100}%` }} />
-          </div>
+          <MiniBar value={v.negative} color="bg-red-500/60" />
 
           <div className="flex justify-between text-[10px]">
             <span className="text-blue-400">Arousal</span>
             <span className="text-gray-500">{(v.arousal * 100).toFixed(0)}%</span>
           </div>
-          <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-            <div className="h-full bg-blue-500/60 rounded-full" style={{ width: `${v.arousal * 100}%` }} />
-          </div>
+          <MiniBar value={v.arousal} color="bg-blue-500/60" />
         </div>
 
         <div className="flex items-center justify-between text-[10px]">
           <span className="text-gray-500">Stability</span>
           <span className="text-red-50">{(v.emotionalStability * 100).toFixed(0)}%</span>
         </div>
+
+        {data.activeSignals.length > 0 && (
+          <div className="space-y-1">
+            <div className="text-[10px] text-gray-500 font-medium">Active Signals</div>
+            {data.activeSignals.slice(0, 4).map(s => (
+              <div key={s.signalId} className="flex items-center justify-between text-[10px] px-2 py-0.5 bg-white/[0.02] rounded">
+                <span className="text-red-50">{s.emotion}</span>
+                <span className="text-gray-500">{(s.effectiveIntensity * 100).toFixed(0)}%</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </Card>
   );
 }
 
-function GoalPanel({ data }: { data: NonNullable<ReturnType<typeof useCSnapshot>["data"]>["goals"] }) {
+function GoalPanel({ data }: { data: SnapshotData["goals"] }) {
   const prioColors: Record<string, string> = {
     critical: "text-red-400",
     high: "text-orange-400",
@@ -371,7 +478,7 @@ function GoalPanel({ data }: { data: NonNullable<ReturnType<typeof useCSnapshot>
   };
 
   return (
-    <Card title="Goals & Curiosity" icon={Target}>
+    <Card title="Goals & Intrinsic Motivation" icon={Target}>
       <div className="space-y-3">
         <div className="grid grid-cols-3 gap-2 text-xs text-center">
           <div>
@@ -388,12 +495,22 @@ function GoalPanel({ data }: { data: NonNullable<ReturnType<typeof useCSnapshot>
           </div>
         </div>
 
+        {data.overallProgress > 0 && (
+          <div>
+            <div className="flex justify-between text-[10px] mb-1">
+              <span className="text-gray-500">Overall Progress</span>
+              <span className="text-red-50">{data.overallProgress}%</span>
+            </div>
+            <MiniBar value={data.overallProgress} max={100} color="bg-red-500/60" />
+          </div>
+        )}
+
         {data.activeGoals.length > 0 && (
           <div className="space-y-1 max-h-24 overflow-y-auto">
             {data.activeGoals.slice(0, 5).map(g => (
               <div key={g.goalId} className="flex items-center justify-between text-[10px] px-2 py-1 bg-white/[0.02] rounded">
                 <div className="flex items-center gap-1">
-                  <span className={prioColors[g.priority] ?? "text-gray-400"}>●</span>
+                  <span className={prioColors[g.priority] ?? "text-gray-400"}>{"\u25cf"}</span>
                   <span className="text-red-50">{g.title.slice(0, 40)}</span>
                 </div>
                 <span className="text-gray-500">{g.progress}%</span>
@@ -409,7 +526,7 @@ function GoalPanel({ data }: { data: NonNullable<ReturnType<typeof useCSnapshot>
             </div>
             {data.curiosityQueue.slice(0, 3).map(c => (
               <div key={c.signalId} className="text-[10px] text-gray-400 pl-4">
-                • {c.topic} ({(c.intensity * 100).toFixed(0)}%)
+                {"\u2022"} {c.topic} ({(c.intensity * 100).toFixed(0)}%)
               </div>
             ))}
           </div>
@@ -419,9 +536,9 @@ function GoalPanel({ data }: { data: NonNullable<ReturnType<typeof useCSnapshot>
   );
 }
 
-function TemporalPanel({ data }: { data: NonNullable<ReturnType<typeof useCSnapshot>["data"]>["temporal"] }) {
+function TemporalPanel({ data }: { data: SnapshotData["temporal"] }) {
   const uptimeHrs = (data.uptimeMs / 3600000).toFixed(1);
-  const avgIntervalMin = data.averageOrchestrationInterval > 0 ? (data.averageOrchestrationInterval / 60000).toFixed(1) : "—";
+  const avgIntervalMin = data.averageOrchestrationInterval > 0 ? (data.averageOrchestrationInterval / 60000).toFixed(1) : "\u2014";
 
   return (
     <Card title="Temporal Awareness" icon={Clock}>
@@ -455,9 +572,9 @@ function TemporalPanel({ data }: { data: NonNullable<ReturnType<typeof useCSnaps
   );
 }
 
-function WorkspacePanel({ data }: { data: NonNullable<ReturnType<typeof useCSnapshot>["data"]>["workspace"] }) {
+function WorkspacePanel({ data }: { data: SnapshotData["workspace"] }) {
   return (
-    <Card title="Cognitive Workspace" icon={Compass}>
+    <Card title="GWT Workspace" icon={Compass} accent="cyan">
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div>
@@ -471,6 +588,14 @@ function WorkspacePanel({ data }: { data: NonNullable<ReturnType<typeof useCSnap
         </div>
 
         <div>
+          <div className="flex justify-between text-[10px] mb-1">
+            <span className="text-gray-500">Context Budget</span>
+            <span className="text-cyan-400">{data.contextBudget.used}/{data.contextBudget.total}</span>
+          </div>
+          <MiniBar value={data.contextBudget.utilization} color="bg-cyan-500/60" />
+        </div>
+
+        <div>
           <div className="text-[10px] text-gray-500 mb-1">Attention Focus</div>
           <div className="text-[11px] text-red-50">
             Primary: {data.attentionFocus.primaryTopic}
@@ -478,7 +603,7 @@ function WorkspacePanel({ data }: { data: NonNullable<ReturnType<typeof useCSnap
           {data.attentionFocus.activeDomains.length > 0 && (
             <div className="flex gap-1 mt-1 flex-wrap">
               {data.attentionFocus.activeDomains.slice(0, 5).map(d => (
-                <span key={d} className="px-1.5 py-0.5 text-[9px] bg-red-500/10 text-red-400/70 rounded">{d}</span>
+                <span key={d} className="px-1.5 py-0.5 text-[9px] bg-cyan-500/10 text-cyan-400/70 rounded">{d}</span>
               ))}
             </div>
           )}
@@ -492,6 +617,220 @@ function WorkspacePanel({ data }: { data: NonNullable<ReturnType<typeof useCSnap
                 <div key={wm.id} className="text-[10px] text-gray-400 truncate">
                   [{wm.source}] {wm.content.slice(0, 80)}
                 </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function PredictivePanel({ data }: { data: PredictiveState }) {
+  const accuracy = data.model.totalPredictions > 0
+    ? ((data.model.correctPredictions / data.model.totalPredictions) * 100).toFixed(1)
+    : "0.0";
+  const fe = data.freeEnergy;
+
+  const topDomains = Object.entries(data.routingPriors)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 6);
+
+  const surpriseLevelColors: Record<string, string> = {
+    expected: "text-emerald-400",
+    mild_surprise: "text-amber-400",
+    strong_surprise: "text-orange-400",
+    anomalous: "text-red-400",
+  };
+
+  return (
+    <Card title="Predictive Processing" icon={Zap} accent="blue">
+      <div className="space-y-3">
+        <div className="grid grid-cols-3 gap-2 text-xs text-center">
+          <div>
+            <div className="text-lg font-bold text-blue-400">{accuracy}%</div>
+            <div className="text-[10px] text-gray-500">Accuracy</div>
+          </div>
+          <div>
+            <div className="text-lg font-bold text-red-50">{data.model.totalPredictions}</div>
+            <div className="text-[10px] text-gray-500">Predictions</div>
+          </div>
+          <div>
+            <div className="text-lg font-bold text-amber-400">{fe.currentFreeEnergy.toFixed(2)}</div>
+            <div className="text-[10px] text-gray-500">Free Energy</div>
+          </div>
+        </div>
+
+        <div>
+          <div className="flex justify-between text-[10px] mb-1">
+            <span className="text-gray-500">Model Complexity</span>
+            <span className="text-blue-400">{fe.modelComplexity} params</span>
+          </div>
+          <MiniBar value={fe.predictionAccuracy} color="bg-blue-500/60" />
+        </div>
+
+        {topDomains.length > 0 && (
+          <div>
+            <div className="text-[10px] text-gray-500 font-medium mb-1">Routing Priors</div>
+            <div className="space-y-1">
+              {topDomains.map(([domain, prior]) => (
+                <div key={domain} className="flex items-center gap-2 text-[10px]">
+                  <span className="text-red-50 w-20 truncate">{domain}</span>
+                  <div className="flex-1">
+                    <MiniBar value={prior} color="bg-blue-500/40" />
+                  </div>
+                  <span className="text-gray-500 w-8 text-right">{(prior * 100).toFixed(0)}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {data.recentErrors.length > 0 && (
+          <div>
+            <div className="text-[10px] text-gray-500 font-medium mb-1">Recent Prediction Errors</div>
+            <div className="max-h-20 overflow-y-auto space-y-1">
+              {data.recentErrors.slice(0, 4).map(e => (
+                <div key={e.errorId} className="text-[10px] px-2 py-0.5 bg-white/[0.02] rounded flex items-center justify-between">
+                  <span className={surpriseLevelColors[e.surpriseLevel] ?? "text-gray-400"}>
+                    {e.surpriseLevel.replace(/_/g, " ")}
+                  </span>
+                  <span className="text-gray-500">{(e.errorMagnitude * 100).toFixed(0)}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function DreamPanel({ data }: { data: DreamState }) {
+  const outcomeColors: Record<string, string> = {
+    positive: "text-emerald-400",
+    negative: "text-red-400",
+    neutral: "text-gray-400",
+  };
+
+  return (
+    <Card title="Dream Consolidation" icon={Moon} accent="purple">
+      <div className="space-y-3">
+        <div className="grid grid-cols-3 gap-2 text-xs text-center">
+          <div>
+            <div className="text-lg font-bold text-purple-400">{data.totalCycles}</div>
+            <div className="text-[10px] text-gray-500">Cycles</div>
+          </div>
+          <div>
+            <div className="text-lg font-bold text-red-50">{data.replayBuffer.length}</div>
+            <div className="text-[10px] text-gray-500">Replays</div>
+          </div>
+          <div>
+            <div className="text-lg font-bold text-amber-400">{data.discoveredPatterns.length}</div>
+            <div className="text-[10px] text-gray-500">Patterns</div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-gray-500">Status</span>
+          <span className={`px-2 py-0.5 rounded-full text-[9px] font-medium border ${data.isRunning ? "bg-purple-500/20 text-purple-400 border-purple-500/30" : "bg-gray-500/20 text-gray-400 border-gray-500/30"}`}>
+            {data.isRunning ? "DREAMING" : "AWAKE"}
+          </span>
+        </div>
+
+        {data.lastCycleTimestamp && (
+          <div className="text-[10px] text-gray-500">
+            Last cycle: {new Date(data.lastCycleTimestamp).toLocaleTimeString()}
+          </div>
+        )}
+
+        {data.discoveredPatterns.length > 0 && (
+          <div>
+            <div className="text-[10px] text-purple-400 font-medium flex items-center gap-1 mb-1">
+              <GitBranch className="w-3 h-3" /> Discovered Patterns
+            </div>
+            <div className="max-h-24 overflow-y-auto space-y-1">
+              {data.discoveredPatterns.slice(0, 5).map(p => {
+                const sigColors: Record<string, string> = { high: "text-red-400", medium: "text-amber-400", low: "text-gray-400" };
+                return (
+                  <div key={p.patternId} className="text-[10px] px-2 py-1 bg-white/[0.02] rounded">
+                    <div className="flex items-center justify-between">
+                      <span className="text-red-50 truncate max-w-[120px]">{p.description.slice(0, 50)}</span>
+                      <span className={sigColors[p.significance] ?? "text-gray-400"}>{p.significance}</span>
+                    </div>
+                    <div className="text-gray-500 truncate">{p.actionableInsight.slice(0, 80)}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {data.recentReports.length > 0 && (
+          <div>
+            <div className="text-[10px] text-gray-500 font-medium mb-1">Latest Report</div>
+            {(() => {
+              const r = data.recentReports[0]!;
+              return (
+                <div className="text-[10px] px-2 py-1 bg-white/[0.02] rounded space-y-0.5">
+                  <div className="flex justify-between text-gray-400">
+                    <span>Cycle #{r.cycleNumber}</span>
+                    <span>{r.replaysProcessed} replays, {r.patternsDiscovered.length} patterns, {r.memoriesPruned} pruned</span>
+                  </div>
+                  {r.insightsGenerated.slice(0, 2).map((insight, i) => (
+                    <div key={i} className="text-purple-400/70 truncate">{"\u2022"} {insight}</div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
+        {data.replayBuffer.length > 0 && (
+          <div>
+            <div className="text-[10px] text-gray-500 font-medium mb-1">Recent Replays</div>
+            <div className="max-h-16 overflow-y-auto space-y-0.5">
+              {data.replayBuffer.slice(-4).reverse().map(r => (
+                <div key={r.replayId} className="flex items-center justify-between text-[10px] px-2 py-0.5 bg-white/[0.01] rounded">
+                  <span className="text-gray-400 truncate max-w-[160px]">{r.query.slice(0, 40)}</span>
+                  <span className={outcomeColors[r.outcome] ?? "text-gray-400"}>{r.outcome}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function GWTBroadcastPanel({ data }: { data: SnapshotData["workspace"] }) {
+  return (
+    <Card title="GWT Attention Schema" icon={Radio} accent="cyan">
+      <div className="space-y-2 text-xs">
+        <div>
+          <span className="text-gray-500">Context Window:</span>
+          <span className="text-red-50 ml-1">{(data.attentionFocus.contextWindowUsage * 100).toFixed(0)}% used</span>
+        </div>
+        <MiniBar value={data.attentionFocus.contextWindowUsage} color="bg-cyan-500/60" />
+
+        {data.attentionFocus.activeDomains.length > 0 && (
+          <div>
+            <div className="text-[10px] text-gray-500 mb-1">Broadcast Domains</div>
+            <div className="flex gap-1 flex-wrap">
+              {data.attentionFocus.activeDomains.map(d => (
+                <span key={d} className="px-1.5 py-0.5 text-[9px] bg-cyan-500/15 text-cyan-400 border border-cyan-500/20 rounded">{d}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {data.recentQueries && data.recentQueries.length > 0 && (
+          <div>
+            <div className="text-[10px] text-gray-500 mb-1">Recent Queries</div>
+            <div className="max-h-16 overflow-y-auto space-y-0.5">
+              {data.recentQueries.slice(-3).reverse().map((q, i) => (
+                <div key={i} className="text-[10px] text-gray-400 truncate">{q.slice(0, 60)}</div>
               ))}
             </div>
           </div>
@@ -516,8 +855,8 @@ export default function ConsciousnessPage() {
             <Sparkles className="w-5 h-5 text-red-400" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-red-50">Consciousness Layer</h1>
-            <p className="text-xs text-gray-500">Metacognition, self-model, inner monologue & emotional state</p>
+            <h1 className="text-xl font-bold text-red-50">Consciousness Layer v2</h1>
+            <p className="text-xs text-gray-500">GWT, Predictive Processing, Dialectical Reasoning, Appraisal Theory, Dream Consolidation</p>
           </div>
         </div>
         {data?.timestamp && (
@@ -540,15 +879,27 @@ export default function ConsciousnessPage() {
       )}
 
       {data && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <MetacognitionPanel data={data.metacognition} />
-          <SelfModelPanel data={data.selfModel} />
-          <EmotionalPanel data={data.emotions} />
-          <MonologuePanel data={data.monologue} />
-          <GoalPanel data={data.goals} />
-          <div className="grid grid-rows-2 gap-4">
-            <TemporalPanel data={data.temporal} />
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <MetacognitionPanel data={data.metacognition} />
+            <SelfModelPanel data={data.selfModel} />
+            <EmotionalPanel data={data.emotions} />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <PredictivePanel data={data.predictive} />
+            <DreamPanel data={data.dream} />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <MonologuePanel data={data.monologue} />
+            <GoalPanel data={data.goals} />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <WorkspacePanel data={data.workspace} />
+            <GWTBroadcastPanel data={data.workspace} />
+            <TemporalPanel data={data.temporal} />
           </div>
         </div>
       )}

@@ -10,6 +10,34 @@ export interface AgentCapabilityProfile {
   lastUpdated: string;
 }
 
+export interface AgentBeliefModel {
+  agentId: string;
+  domain: string;
+  queryInterpretation: string;
+  beliefConfidence: number;
+  divergenceFromConsensus: number;
+  blindSpots: string[];
+  timestamp: string;
+}
+
+export interface CounterfactualScenario {
+  scenarioId: string;
+  originalRouting: string[];
+  alternativeRouting: string[];
+  predictedOutcomeDelta: number;
+  reasoning: string;
+  timestamp: string;
+}
+
+export interface AdversarialProbe {
+  probeId: string;
+  edgeCaseQuery: string;
+  targetDomain: string;
+  blindSpotExposed: string;
+  severity: "low" | "medium" | "high";
+  timestamp: string;
+}
+
 export interface SystemSelfModel {
   identity: SystemIdentity;
   capabilities: AgentCapabilityProfile[];
@@ -18,6 +46,9 @@ export interface SystemSelfModel {
   learningVelocity: number;
   selfNarrative: string;
   updatedAt: string;
+  theoryOfMind: AgentBeliefModel[];
+  recentCounterfactuals: CounterfactualScenario[];
+  adversarialProbes: AdversarialProbe[];
 }
 
 export interface SystemIdentity {
@@ -58,7 +89,13 @@ class SelfModelEngine {
     "Cannot verify external data sources independently",
   ];
   private learningVelocity = 0.5;
+  private beliefModels: Map<string, AgentBeliefModel> = new Map();
+  private counterfactuals: CounterfactualScenario[] = [];
+  private probes: AdversarialProbe[] = [];
   private static readonly VELOCITY_ALPHA = 0.1;
+  private static readonly MAX_BELIEFS = 50;
+  private static readonly MAX_COUNTERFACTUALS = 50;
+  private static readonly MAX_PROBES = 30;
 
   updateAgentProfile(
     agentId: string,
@@ -127,6 +164,161 @@ class SelfModelEngine {
     this.knownLimitations = this.knownLimitations.filter(l => l !== limitation);
   }
 
+  modelAgentBelief(input: {
+    agentId: string;
+    domain: string;
+    query: string;
+    agentResponse: string;
+    confidence: number;
+    allResponses: Array<{ agentId: string; confidence: number; response: string }>;
+  }): AgentBeliefModel {
+    const consensusConfidence = input.allResponses.length > 0
+      ? input.allResponses.reduce((s, r) => s + r.confidence, 0) / input.allResponses.length
+      : input.confidence;
+
+    const divergence = Math.abs(input.confidence - consensusConfidence) / 100;
+
+    const profile = this.capabilities.get(input.agentId);
+    const blindSpots: string[] = [];
+    if (profile) {
+      if (profile.weaknesses.length > 0) {
+        blindSpots.push(...profile.weaknesses.slice(0, 2));
+      }
+      if (profile.successRate < 0.6) {
+        blindSpots.push(`Low historical success rate (${(profile.successRate * 100).toFixed(0)}%)`);
+      }
+    }
+
+    if (input.agentResponse.length < 150 && input.confidence > 70) {
+      blindSpots.push("Overconfident on thin response — may be masking uncertainty");
+    }
+
+    const otherResponses = input.allResponses.filter(r => r.agentId !== input.agentId);
+    const mentionedTerms = new Set(input.agentResponse.toLowerCase().split(/\s+/).filter(w => w.length > 4));
+    for (const other of otherResponses) {
+      const otherTerms = other.response.toLowerCase().split(/\s+/).filter(w => w.length > 4);
+      const unique = otherTerms.filter(t => !mentionedTerms.has(t));
+      if (unique.length > otherTerms.length * 0.5) {
+        blindSpots.push(`May not see perspectives from ${other.agentId}'s domain`);
+        break;
+      }
+    }
+
+    const interpretation = input.agentResponse.slice(0, 200);
+
+    const belief: AgentBeliefModel = {
+      agentId: input.agentId,
+      domain: input.domain,
+      queryInterpretation: interpretation,
+      beliefConfidence: input.confidence,
+      divergenceFromConsensus: divergence,
+      blindSpots,
+      timestamp: new Date().toISOString(),
+    };
+
+    this.beliefModels.set(input.agentId, belief);
+    if (this.beliefModels.size > SelfModelEngine.MAX_BELIEFS) {
+      const oldest = [...this.beliefModels.entries()]
+        .sort((a, b) => new Date(a[1].timestamp).getTime() - new Date(b[1].timestamp).getTime());
+      for (let i = 0; i < oldest.length - SelfModelEngine.MAX_BELIEFS; i++) {
+        this.beliefModels.delete(oldest[i]![0]);
+      }
+    }
+
+    return belief;
+  }
+
+  runCounterfactual(input: {
+    originalRouting: string[];
+    originalConfidence: number;
+    alternativeRouting: string[];
+    queryDomains: string[];
+  }): CounterfactualScenario {
+    let predictedDelta = 0;
+    const reasoning: string[] = [];
+
+    for (const altAgent of input.alternativeRouting) {
+      const profile = this.capabilities.get(altAgent);
+      if (profile) {
+        const domainMatch = input.queryDomains.includes(profile.domain);
+        const successBonus = (profile.successRate - 0.5) * 20;
+        const domainBonus = domainMatch ? 10 : -5;
+        predictedDelta += successBonus + domainBonus;
+        reasoning.push(`${altAgent}: ${domainMatch ? "domain match" : "cross-domain"}, success ${(profile.successRate * 100).toFixed(0)}%`);
+      } else {
+        predictedDelta -= 5;
+        reasoning.push(`${altAgent}: no profile data — uncertain improvement`);
+      }
+    }
+
+    for (const origAgent of input.originalRouting) {
+      const profile = this.capabilities.get(origAgent);
+      if (profile) {
+        predictedDelta -= (profile.successRate - 0.5) * 20;
+      }
+    }
+
+    const scenario: CounterfactualScenario = {
+      scenarioId: `cf_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      originalRouting: input.originalRouting,
+      alternativeRouting: input.alternativeRouting,
+      predictedOutcomeDelta: Math.round(predictedDelta * 10) / 10,
+      reasoning: reasoning.join("; "),
+      timestamp: new Date().toISOString(),
+    };
+
+    this.counterfactuals.push(scenario);
+    if (this.counterfactuals.length > SelfModelEngine.MAX_COUNTERFACTUALS) {
+      this.counterfactuals.splice(0, this.counterfactuals.length - SelfModelEngine.MAX_COUNTERFACTUALS);
+    }
+
+    return scenario;
+  }
+
+  generateAdversarialProbes(domains: string[]): AdversarialProbe[] {
+    const probes: AdversarialProbe[] = [];
+    const profiles = Array.from(this.capabilities.values());
+
+    for (const domain of domains.slice(0, 5)) {
+      const domainProfiles = profiles.filter(p => p.domain === domain);
+      const weakProfiles = domainProfiles.filter(p => p.successRate < 0.6 || p.weaknesses.length > 0);
+
+      if (weakProfiles.length > 0) {
+        const target = weakProfiles[0]!;
+        probes.push({
+          probeId: `probe_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          edgeCaseQuery: `What happens when ${domain} data contradicts established patterns? Test with ambiguous multi-domain scenario.`,
+          targetDomain: domain,
+          blindSpotExposed: target.weaknesses[0] ?? `Low success rate in ${domain} (${(target.successRate * 100).toFixed(0)}%)`,
+          severity: target.successRate < 0.4 ? "high" : target.successRate < 0.6 ? "medium" : "low",
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      if (domainProfiles.length === 0) {
+        probes.push({
+          probeId: `probe_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          edgeCaseQuery: `No agents profiled for ${domain} — what happens with a complex ${domain} query?`,
+          targetDomain: domain,
+          blindSpotExposed: `No tracked agents for domain: ${domain}`,
+          severity: "high",
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
+
+    this.probes.push(...probes);
+    if (this.probes.length > SelfModelEngine.MAX_PROBES) {
+      this.probes.splice(0, this.probes.length - SelfModelEngine.MAX_PROBES);
+    }
+
+    return probes;
+  }
+
+  getTheoryOfMind(): AgentBeliefModel[] {
+    return Array.from(this.beliefModels.values());
+  }
+
   getSelfModel(): SystemSelfModel {
     const profiles = Array.from(this.capabilities.values());
     const avgSuccess = profiles.length > 0
@@ -153,6 +345,9 @@ class SelfModelEngine {
       learningVelocity: this.learningVelocity,
       selfNarrative: narrative,
       updatedAt: new Date().toISOString(),
+      theoryOfMind: Array.from(this.beliefModels.values()).slice(-10),
+      recentCounterfactuals: this.counterfactuals.slice(-5),
+      adversarialProbes: this.probes.slice(-5),
     };
   }
 
@@ -181,6 +376,13 @@ class SelfModelEngine {
     }
 
     parts.push(`System health: ${health}. Learning velocity: ${(this.learningVelocity * 100).toFixed(0)}%.`);
+
+    if (this.beliefModels.size > 0) {
+      const divergent = Array.from(this.beliefModels.values()).filter(b => b.divergenceFromConsensus > 0.3);
+      if (divergent.length > 0) {
+        parts.push(`Theory of Mind: ${divergent.length} agent(s) diverge significantly from consensus.`);
+      }
+    }
 
     return parts.join(" ");
   }
@@ -227,6 +429,13 @@ class SelfModelEngine {
 
     if (model.knownLimitations.length > 0) {
       lines.push(`Limitations: ${model.knownLimitations.length} known constraints active`);
+    }
+
+    if (model.theoryOfMind.length > 0) {
+      const divergent = model.theoryOfMind.filter(b => b.divergenceFromConsensus > 0.3);
+      if (divergent.length > 0) {
+        lines.push(`ToM: ${divergent.length} agent(s) with divergent beliefs`);
+      }
     }
 
     return lines.join("\n");

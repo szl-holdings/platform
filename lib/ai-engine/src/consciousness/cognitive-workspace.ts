@@ -18,6 +18,23 @@ export interface AttentionFocus {
   attentionDistribution: Record<string, number>;
 }
 
+export interface GWTBroadcast {
+  broadcastId: string;
+  winners: Array<{ itemId: string; salienceScore: number; content: string }>;
+  losers: Array<{ itemId: string; salienceScore: number; reason: string }>;
+  broadcastedTo: string[];
+  timestamp: string;
+}
+
+export interface AttentionSchemaReport {
+  reportId: string;
+  allocationSummary: Record<string, number>;
+  driftDetected: boolean;
+  driftDescription: string | null;
+  rebalanceRecommendation: string | null;
+  timestamp: string;
+}
+
 export interface CognitiveWorkspaceState {
   workingMemory: WorkingMemoryItem[];
   attentionFocus: AttentionFocus;
@@ -25,6 +42,8 @@ export interface CognitiveWorkspaceState {
   activeGoals: string[];
   recentQueries: string[];
   sessionDepth: number;
+  recentBroadcasts: GWTBroadcast[];
+  attentionSchema: AttentionSchemaReport | null;
 }
 
 const MAX_WORKING_MEMORY = 50;
@@ -38,6 +57,9 @@ class CognitiveWorkspace {
   private activeGoals: string[] = [];
   private sessionDepth = 0;
   private lastDecayAt = Date.now();
+  private broadcasts: GWTBroadcast[] = [];
+  private latestAttentionSchema: AttentionSchemaReport | null = null;
+  private static readonly MAX_BROADCASTS = 20;
 
   addToWorkingMemory(content: string, source: string, priority: number, tags: string[] = []): WorkingMemoryItem {
     const now = new Date().toISOString();
@@ -92,6 +114,132 @@ class CognitiveWorkspace {
     this.activeGoals = goals.slice(0, 10);
   }
 
+  gwtBroadcast(input: {
+    activeDomains: string[];
+    emotionalArousal: number;
+    urgencySignals: string[];
+  }): GWTBroadcast {
+    this.runDecay();
+
+    const scored = this.items.map(item => {
+      const recency = 1 - Math.min(1, (Date.now() - new Date(item.addedAt).getTime()) / (15 * 60 * 1000));
+      const domainRelevance = item.tags.some(t => input.activeDomains.includes(t)) ? 1 : 0;
+      const novelty = item.accessCount === 0 ? 1 : Math.max(0, 1 - item.accessCount * 0.15);
+      const emotionalWeight = input.emotionalArousal;
+      const urgencyBoost = input.urgencySignals.some(u =>
+        item.content.toLowerCase().includes(u.toLowerCase())
+      ) ? 0.3 : 0;
+
+      const salience =
+        item.priority / 10 * 0.25 +
+        recency * 0.2 +
+        domainRelevance * 0.2 +
+        novelty * 0.15 +
+        emotionalWeight * 0.1 +
+        urgencyBoost;
+
+      return { item, salience };
+    });
+
+    scored.sort((a, b) => b.salience - a.salience);
+
+    const threshold = 0.4;
+    const winners = scored
+      .filter(s => s.salience >= threshold)
+      .slice(0, 7)
+      .map(s => ({
+        itemId: s.item.id,
+        salienceScore: Math.round(s.salience * 1000) / 1000,
+        content: s.item.content.slice(0, 300),
+      }));
+
+    const losers = scored
+      .filter(s => s.salience < threshold)
+      .slice(0, 5)
+      .map(s => ({
+        itemId: s.item.id,
+        salienceScore: Math.round(s.salience * 1000) / 1000,
+        reason: s.salience < 0.2 ? "Below minimum salience" : "Lost competition to higher-priority items",
+      }));
+
+    for (const w of winners) {
+      const item = this.items.find(i => i.id === w.itemId);
+      if (item) {
+        item.lastAccessedAt = new Date().toISOString();
+        item.accessCount++;
+      }
+    }
+
+    const broadcast: GWTBroadcast = {
+      broadcastId: `gwt_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      winners,
+      losers,
+      broadcastedTo: input.activeDomains,
+      timestamp: new Date().toISOString(),
+    };
+
+    this.broadcasts.push(broadcast);
+    if (this.broadcasts.length > CognitiveWorkspace.MAX_BROADCASTS) {
+      this.broadcasts.splice(0, this.broadcasts.length - CognitiveWorkspace.MAX_BROADCASTS);
+    }
+
+    return broadcast;
+  }
+
+  buildGWTContext(broadcast: GWTBroadcast): string {
+    if (broadcast.winners.length === 0) return "";
+    const lines = [
+      `## Global Workspace Broadcast (${broadcast.winners.length} items reached conscious access)`,
+      ...broadcast.winners.map((w, i) =>
+        `${i + 1}. [salience ${w.salienceScore.toFixed(2)}] ${w.content.slice(0, 200)}`
+      ),
+    ];
+    return lines.join("\n");
+  }
+
+  reportAttentionSchema(queryDomains: string[]): AttentionSchemaReport {
+    const focus = this.computeAttentionFocus();
+    const allocation = focus.attentionDistribution;
+
+    let driftDetected = false;
+    let driftDescription: string | null = null;
+    let rebalanceRecommendation: string | null = null;
+
+    const queryDomainAttention = queryDomains.reduce((s, d) => s + (allocation[d] ?? 0), 0);
+    const nonQueryAttention = 1 - queryDomainAttention;
+
+    if (queryDomains.length > 0 && queryDomainAttention < 0.3 && Object.keys(allocation).length > 0) {
+      driftDetected = true;
+      const topAttention = Object.entries(allocation).sort((a, b) => b[1] - a[1])[0];
+      driftDescription = `Attention drift detected: ${(queryDomainAttention * 100).toFixed(0)}% on query domains (${queryDomains.join(", ")}), but ${(topAttention ? topAttention[1] * 100 : 0).toFixed(0)}% on ${topAttention?.[0] ?? "unknown"}`;
+      rebalanceRecommendation = `Rebalance: increase focus on ${queryDomains.join(", ")} by prioritizing relevant working memory items`;
+    }
+
+    if (Object.keys(allocation).length > 0) {
+      const values = Object.values(allocation);
+      const max = Math.max(...values);
+      const min = Math.min(...values);
+      if (max - min > 0.6) {
+        driftDetected = true;
+        const dominant = Object.entries(allocation).sort((a, b) => b[1] - a[1])[0]!;
+        driftDescription = `Attention heavily concentrated: ${(dominant[1] * 100).toFixed(0)}% on ${dominant[0]}`;
+        rebalanceRecommendation = rebalanceRecommendation ?? `Consider broadening attention — ${dominant[0]} is consuming disproportionate focus`;
+      }
+    }
+
+    const report: AttentionSchemaReport = {
+      reportId: `attn_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      allocationSummary: { ...allocation },
+      driftDetected,
+      driftDescription,
+      rebalanceRecommendation,
+      timestamp: new Date().toISOString(),
+    };
+
+    this.latestAttentionSchema = report;
+    return report;
+  }
+
   computeAttentionFocus(): AttentionFocus {
     const domainCounts: Record<string, number> = {};
     for (const item of this.items) {
@@ -135,6 +283,8 @@ class CognitiveWorkspace {
       activeGoals: [...this.activeGoals],
       recentQueries: [...this.queryHistory],
       sessionDepth: this.sessionDepth,
+      recentBroadcasts: this.broadcasts.slice(-5).reverse(),
+      attentionSchema: this.latestAttentionSchema,
     };
   }
 
@@ -150,6 +300,10 @@ class CognitiveWorkspace {
       `Attention: ${focus.primaryTopic} (${focus.activeDomains.slice(0, 3).join(", ")})`,
       `Context utilization: ${(focus.contextWindowUsage * 100).toFixed(0)}%`,
     ];
+
+    if (this.latestAttentionSchema?.driftDetected) {
+      lines.push(`⚠ ${this.latestAttentionSchema.driftDescription}`);
+    }
 
     if (topItems.length > 0) {
       lines.push(`Working memory (top ${topItems.length}):`);

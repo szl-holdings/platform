@@ -38,6 +38,8 @@ import { innerMonologue } from "./consciousness/inner-monologue.js";
 import { goalEngine } from "./consciousness/goal-engine.js";
 import { emotionalSignals } from "./consciousness/emotional-signals.js";
 import { temporalAwareness } from "./consciousness/temporal-awareness.js";
+import { predictiveProcessing } from "./consciousness/predictive-processing.js";
+import { dreamConsolidation } from "./consciousness/dream-consolidation.js";
 import { captureConsciousnessSnapshot, buildConsciousnessContext, setLlmIntrospector, type ConsciousnessSnapshot } from "./consciousness/index.js";
 
 setLlmIntrospector(async (prompt: string): Promise<string> => {
@@ -1502,6 +1504,21 @@ export class NuroMeshOrchestrator {
     ]);
     const context = ragContext ? `${sharedContext}\n\n${ragContext}` : sharedContext;
 
+    const recentQueries = cognitiveWorkspace.getState().recentQueries;
+    const prediction = predictiveProcessing.predict(recentQueries.length > 0 ? recentQueries : [query]);
+
+    const triggeredIntentions = temporalAwareness.checkProspectiveMemory(query);
+    if (triggeredIntentions.length > 0) {
+      for (const intent of triggeredIntentions) {
+        cognitiveWorkspace.addToWorkingMemory(
+          `[Prospective memory triggered] ${intent.description}: ${intent.action}`,
+          "prospective_memory",
+          7,
+          ["prospective"],
+        );
+      }
+    }
+
     const preRoutingMetacog = metacognitiveMonitor.getState();
     const preRoutingSelfModel = selfModelEngine.getSelfModel();
     const preRoutingEmotional = emotionalSignals.getState();
@@ -1571,6 +1588,14 @@ export class NuroMeshOrchestrator {
         }
       }
 
+      const routingPriors = predictiveProcessing.getRoutingPriors();
+      for (const score of routingScores) {
+        const prior = routingPriors[score.domain];
+        if (prior !== undefined && prior > 0.1) {
+          score.combinedScore = Math.min(1, score.combinedScore + prior * 0.05);
+        }
+      }
+
       routingScores.sort((a, b) => b.combinedScore - a.combinedScore);
 
       // A2A discovery-based routing — falls back to keyword rules if unavailable
@@ -1617,6 +1642,42 @@ export class NuroMeshOrchestrator {
 
     const routedDomains = targetAgents.map(a => a.domain);
 
+    const gwtBroadcast = cognitiveWorkspace.gwtBroadcast({
+      activeDomains: routedDomains,
+      emotionalArousal: preRoutingEmotional.valence.arousal,
+      urgencySignals: routedDomains.filter(d => ["security", "legal", "financial"].includes(d)),
+    });
+    const gwtContext = cognitiveWorkspace.buildGWTContext(gwtBroadcast);
+
+    cognitiveWorkspace.reportAttentionSchema(routedDomains);
+
+    const appraisal = emotionalSignals.appraise({
+      event: `Orchestration: "${query.slice(0, 80)}"`,
+      novelty: prediction.confidence < 50 ? 0.8 : 0.3,
+      intrinsicPleasantness: preRoutingEmotional.valence.positive,
+      goalRelevance: routedDomains.length > 1 ? 0.7 : 0.5,
+      copingPotential: preRoutingMetacog.rollingCertainty,
+      normCompatibility: preRoutingSelfModel.overallHealth === "optimal" ? 0.9 : preRoutingSelfModel.overallHealth === "good" ? 0.7 : 0.4,
+    });
+
+    for (const agent of targetAgents) {
+      selfModelEngine.modelAgentBelief({
+        agentId: agent.id,
+        domain: agent.domain,
+        query,
+        agentResponse: "",
+        confidence: 50,
+        allResponses: [],
+      });
+    }
+
+    predictiveProcessing.recordOutcome({
+      predictionId: prediction.predictionId,
+      actualQueryType: routedDomains[0] ?? "general",
+      actualDomains: routedDomains,
+      actualAgents: targetAgents.map(a => a.id),
+    });
+
     const consciousnessCtx = buildConsciousnessContext();
     if (consciousnessCtx) {
       cognitiveWorkspace.addToWorkingMemory(
@@ -1625,6 +1686,10 @@ export class NuroMeshOrchestrator {
         5,
         routedDomains,
       );
+    }
+
+    if (gwtContext) {
+      cognitiveWorkspace.addToWorkingMemory(gwtContext.slice(0, 400), "gwt_broadcast", 6, routedDomains);
     }
 
     behavioralTracer.recordFork(traceId, {
@@ -1848,6 +1913,21 @@ export class NuroMeshOrchestrator {
       ).join("\n")}\nAddress these conflicts explicitly in your synthesis — explain why the prevailing view is stronger and acknowledge the dissent.\n`;
     }
 
+    let dialecticalContext = "";
+    if (isHighStakes && agentResponses.length >= 2) {
+      const dialectic = innerMonologue.dialecticalReason({
+        topic: query.slice(0, 200),
+        agentResponses: agentResponses.map(r => ({
+          agentId: r.agentId,
+          response: r.response,
+          confidence: r.confidence,
+          domain: r.domain,
+        })),
+        context: baseContext.slice(0, 500),
+      });
+      dialecticalContext = `\n## Dialectical Reasoning\n**Thesis**: ${dialectic.thesis.slice(0, 200)}\n**Antithesis**: ${dialectic.antithesis.slice(0, 200)}\n**Synthesis**: ${dialectic.synthesis.slice(0, 300)}\n`;
+    }
+
     const aggregationPrompt = `${alloyAgent.systemPrompt}
 
 ## Query from User
@@ -1855,7 +1935,7 @@ ${query}
 
 ## Domain Agent Responses
 ${aggregationInput}
-${causalContext}${conflictContext}
+${causalContext}${conflictContext}${dialecticalContext}
 ${validation ? `## Sentinel Validation\nValidated: ${validation.validated}\nNotes: ${validation.validatorNotes}\n` : ""}
 
 Synthesize these domain expert responses into a unified, actionable answer. Prioritize higher-confidence responses. When causal chains are identified, connect the dots across domains and surface cascading implications. When agent conflicts exist, present the strongest position with a note on the dissenting view. Be direct and operational.`;
@@ -2157,6 +2237,19 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       selfModelEngine.recordLearningEvent(true);
     }
 
+    dreamConsolidation.addReplay({
+      orchestrationId,
+      query,
+      domains: routedDomains,
+      agentPerformance: agentResponses.map(r => ({
+        agentId: r.agentId,
+        confidence: r.confidence,
+        success: r.confidence >= 40 && !r.response.includes("[unavailable"),
+      })),
+      avgConfidence: averageConfidence,
+      validationPassed: validation?.validated ?? true,
+    });
+
     const consciousness = captureConsciousnessSnapshot();
 
     void persistConsciousnessState(orchestrationId, consciousness, averageConfidence, consciousnessTriggeredValidation).catch(() => {});
@@ -2192,6 +2285,8 @@ async function persistConsciousnessState(
     const emotionsJson = JSON.parse(JSON.stringify(snapshot.emotions));
     const goalsJson = JSON.parse(JSON.stringify(snapshot.goals));
     const temporalJson = JSON.parse(JSON.stringify(snapshot.temporal));
+    const predictiveJson = JSON.parse(JSON.stringify(snapshot.predictive));
+    const dreamJson = JSON.parse(JSON.stringify(snapshot.dream));
 
     await db.insert(consciousnessSnapshotsTable).values({
       orchestrationId,
@@ -2337,3 +2432,5 @@ async function persistConsciousnessState(
 export { checkPrecomputeCache };
 
 export const nuroMeshOrchestrator = new NuroMeshOrchestrator();
+
+dreamConsolidation.startScheduledCycles();

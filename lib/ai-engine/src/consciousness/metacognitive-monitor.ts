@@ -19,6 +19,36 @@ export interface MetacognitiveAssessment {
   confidenceInConfidence: number;
 }
 
+export interface PredictiveUncertainty {
+  predictionId: string;
+  agentId: string;
+  domain: string;
+  predictedFailureProbability: number;
+  queryComplexityScore: number;
+  agentTrackRecord: number;
+  knowledgeGapSignal: number;
+  hallucinationRisk: HallucinationRisk;
+  recommendation: "proceed" | "caution" | "multi_hypothesis" | "defer";
+  timestamp: string;
+}
+
+export interface HallucinationRisk {
+  overallScore: number;
+  sourceDiversityIndex: number;
+  claimGroundingRatio: number;
+  confidenceEvidenceMismatch: number;
+  flags: string[];
+}
+
+export interface MultiHypothesisBranch {
+  branchId: string;
+  hypothesis: string;
+  confidence: number;
+  evidenceSupport: number;
+  riskLevel: "low" | "medium" | "high";
+  status: "active" | "preferred" | "rejected";
+}
+
 export interface MetacognitiveState {
   currentAssessment: MetacognitiveAssessment | null;
   recentAssessments: MetacognitiveAssessment[];
@@ -26,6 +56,8 @@ export interface MetacognitiveState {
   rollingQuality: number;
   confusionStreak: number;
   totalAssessments: number;
+  predictiveUncertainties: PredictiveUncertainty[];
+  activeHypotheses: MultiHypothesisBranch[];
 }
 
 const CERTAINTY_SCORES: Record<CertaintyLevel, number> = {
@@ -157,8 +189,13 @@ class MetacognitiveMonitor {
   private rollingCertainty = 0.75;
   private rollingQuality = 0.75;
   private confusionStreak = 0;
+  private predictiveHistory: PredictiveUncertainty[] = [];
+  private hypotheses: MultiHypothesisBranch[] = [];
+  private predictionOutcomes: Array<{ predicted: number; actual: number }> = [];
   private static readonly MAX_HISTORY = 500;
   private static readonly EMA_ALPHA = 0.15;
+  private static readonly MAX_PREDICTIONS = 200;
+  private static readonly MAX_HYPOTHESES = 10;
 
   assess(input: {
     query: string;
@@ -255,6 +292,178 @@ class MetacognitiveMonitor {
     return assessment;
   }
 
+  predictUncertainty(input: {
+    agentId: string;
+    domain: string;
+    queryComplexity: number;
+    agentSuccessRate: number;
+    agentAvgConfidence: number;
+    knowledgeGapDomains: string[];
+    queryLength: number;
+    recentFailures: number;
+  }): PredictiveUncertainty {
+    const complexityFactor = Math.min(1, input.queryComplexity / 200);
+    const trackRecordFactor = 1 - input.agentSuccessRate;
+    const gapFactor = input.knowledgeGapDomains.includes(input.domain) ? 0.3 : 0;
+    const recentFailureFactor = Math.min(0.4, input.recentFailures * 0.1);
+    const confusionFactor = this.confusionStreak > 0 ? Math.min(0.2, this.confusionStreak * 0.05) : 0;
+
+    const failureProbability = Math.min(1, Math.max(0,
+      complexityFactor * 0.25 +
+      trackRecordFactor * 0.3 +
+      gapFactor +
+      recentFailureFactor +
+      confusionFactor
+    ));
+
+    const hallucinationRisk = this.computeHallucinationRisk(
+      input.agentAvgConfidence,
+      input.agentSuccessRate,
+      input.queryLength,
+      input.queryComplexity,
+    );
+
+    let recommendation: PredictiveUncertainty["recommendation"] = "proceed";
+    if (failureProbability > 0.7 || hallucinationRisk.overallScore > 0.7) {
+      recommendation = "defer";
+    } else if (failureProbability > 0.5 || hallucinationRisk.overallScore > 0.5) {
+      recommendation = "multi_hypothesis";
+    } else if (failureProbability > 0.3 || hallucinationRisk.overallScore > 0.3) {
+      recommendation = "caution";
+    }
+
+    const prediction: PredictiveUncertainty = {
+      predictionId: `pred_${Date.now()}_${randomUUID().slice(0, 6)}`,
+      agentId: input.agentId,
+      domain: input.domain,
+      predictedFailureProbability: failureProbability,
+      queryComplexityScore: complexityFactor,
+      agentTrackRecord: input.agentSuccessRate,
+      knowledgeGapSignal: gapFactor,
+      hallucinationRisk,
+      recommendation,
+      timestamp: new Date().toISOString(),
+    };
+
+    this.predictiveHistory.push(prediction);
+    if (this.predictiveHistory.length > MetacognitiveMonitor.MAX_PREDICTIONS) {
+      this.predictiveHistory.splice(0, this.predictiveHistory.length - MetacognitiveMonitor.MAX_PREDICTIONS);
+    }
+
+    return prediction;
+  }
+
+  private computeHallucinationRisk(
+    avgConfidence: number,
+    successRate: number,
+    queryLength: number,
+    complexity: number,
+  ): HallucinationRisk {
+    const confidenceEvidence = avgConfidence > 85 && successRate < 0.6 ? 0.8 : 0;
+    const sourceDiversity = Math.max(0, 1 - (successRate * 0.8 + (1 - this.rollingCertainty) * 0.2));
+    const claimGrounding = successRate > 0.7 ? 0.8 : successRate > 0.5 ? 0.5 : 0.2;
+    const lengthRisk = queryLength < 20 ? 0.2 : 0;
+    const complexityRisk = complexity > 150 ? 0.3 : complexity > 100 ? 0.15 : 0;
+
+    const flags: string[] = [];
+    if (confidenceEvidence > 0.5) flags.push("High confidence despite low success rate — potential confabulation");
+    if (sourceDiversity > 0.6) flags.push("Low source diversity — single-perspective risk");
+    if (claimGrounding < 0.4) flags.push("Weak claim grounding — insufficient evidence base");
+    if (lengthRisk > 0) flags.push("Very short query — ambiguity-driven hallucination risk");
+    if (complexityRisk > 0.2) flags.push("High query complexity — reasoning chain breakdown risk");
+
+    const overall = Math.min(1, Math.max(0,
+      confidenceEvidence * 0.25 +
+      (1 - claimGrounding) * 0.3 +
+      sourceDiversity * 0.2 +
+      lengthRisk +
+      complexityRisk
+    ));
+
+    return {
+      overallScore: overall,
+      sourceDiversityIndex: 1 - sourceDiversity,
+      claimGroundingRatio: claimGrounding,
+      confidenceEvidenceMismatch: confidenceEvidence,
+      flags,
+    };
+  }
+
+  recordPredictionOutcome(predictedFailure: number, actualSuccess: boolean): void {
+    this.predictionOutcomes.push({
+      predicted: predictedFailure,
+      actual: actualSuccess ? 0 : 1,
+    });
+    if (this.predictionOutcomes.length > 200) {
+      this.predictionOutcomes.splice(0, this.predictionOutcomes.length - 200);
+    }
+  }
+
+  getPredictiveAccuracy(): { accuracy: number; brierScore: number; sampleCount: number } {
+    if (this.predictionOutcomes.length < 5) {
+      return { accuracy: 0.5, brierScore: 0.25, sampleCount: this.predictionOutcomes.length };
+    }
+    let correct = 0;
+    let brierSum = 0;
+    for (const o of this.predictionOutcomes) {
+      const predictedBinary = o.predicted > 0.5 ? 1 : 0;
+      if (predictedBinary === o.actual) correct++;
+      brierSum += (o.predicted - o.actual) ** 2;
+    }
+    return {
+      accuracy: correct / this.predictionOutcomes.length,
+      brierScore: brierSum / this.predictionOutcomes.length,
+      sampleCount: this.predictionOutcomes.length,
+    };
+  }
+
+  forkHypotheses(query: string, context: string): MultiHypothesisBranch[] {
+    const interpretations = [
+      { focus: "literal", desc: `Direct interpretation: ${query.slice(0, 100)}` },
+      { focus: "intent", desc: `Underlying intent: What does the user actually need from "${query.slice(0, 60)}"?` },
+      { focus: "adversarial", desc: `Adversarial check: What if the premise of "${query.slice(0, 60)}" is flawed?` },
+    ];
+
+    this.hypotheses = interpretations.map((interp, i) => ({
+      branchId: `hyp_${Date.now()}_${i}`,
+      hypothesis: interp.desc,
+      confidence: i === 0 ? 70 : i === 1 ? 60 : 40,
+      evidenceSupport: i === 0 ? 0.7 : i === 1 ? 0.5 : 0.3,
+      riskLevel: i === 2 ? "high" as const : i === 1 ? "medium" as const : "low" as const,
+      status: i === 0 ? "preferred" as const : "active" as const,
+    }));
+
+    if (this.hypotheses.length > MetacognitiveMonitor.MAX_HYPOTHESES) {
+      this.hypotheses = this.hypotheses.slice(0, MetacognitiveMonitor.MAX_HYPOTHESES);
+    }
+
+    return [...this.hypotheses];
+  }
+
+  resolveHypotheses(
+    outcomes: Array<{ branchId: string; confidence: number; evidenceStrength: number }>,
+  ): MultiHypothesisBranch | null {
+    for (const outcome of outcomes) {
+      const h = this.hypotheses.find(x => x.branchId === outcome.branchId);
+      if (h) {
+        h.confidence = outcome.confidence;
+        h.evidenceSupport = outcome.evidenceStrength;
+      }
+    }
+
+    const sorted = [...this.hypotheses].sort((a, b) =>
+      (b.confidence * 0.6 + b.evidenceSupport * 100 * 0.4) -
+      (a.confidence * 0.6 + a.evidenceSupport * 100 * 0.4)
+    );
+
+    for (const h of this.hypotheses) h.status = "rejected";
+    if (sorted[0]) {
+      sorted[0].status = "preferred";
+      return sorted[0];
+    }
+    return null;
+  }
+
   getState(): MetacognitiveState {
     return {
       currentAssessment: this.assessments.length > 0 ? this.assessments[this.assessments.length - 1]! : null,
@@ -263,6 +472,8 @@ class MetacognitiveMonitor {
       rollingQuality: this.rollingQuality,
       confusionStreak: this.confusionStreak,
       totalAssessments: this.assessments.length,
+      predictiveUncertainties: this.predictiveHistory.slice(-10).reverse(),
+      activeHypotheses: [...this.hypotheses],
     };
   }
 
@@ -294,6 +505,15 @@ class MetacognitiveMonitor {
     }
     if (lastAssessment?.knowledgeGaps.some(g => g.toLowerCase().includes(agentDomain))) {
       adjustments.push("flag_domain_knowledge_gap");
+      riskLevel = "high";
+    }
+
+    const recentPredictions = this.predictiveHistory.filter(p => p.agentId === agentId).slice(-3);
+    const avgPredictedFailure = recentPredictions.length > 0
+      ? recentPredictions.reduce((s, p) => s + p.predictedFailureProbability, 0) / recentPredictions.length
+      : 0;
+    if (avgPredictedFailure > 0.5) {
+      adjustments.push("predictive_uncertainty_elevated");
       riskLevel = "high";
     }
 
@@ -343,6 +563,18 @@ class MetacognitiveMonitor {
     }
     if (current.shouldDeferToHuman) {
       lines.push(`→ Recommend deferring to human judgment (confusion streak: ${this.confusionStreak})`);
+    }
+
+    const predictiveAcc = this.getPredictiveAccuracy();
+    if (predictiveAcc.sampleCount >= 5) {
+      lines.push(`Predictive accuracy: ${(predictiveAcc.accuracy * 100).toFixed(0)}% (Brier: ${predictiveAcc.brierScore.toFixed(3)}, n=${predictiveAcc.sampleCount})`);
+    }
+
+    if (this.hypotheses.length > 0) {
+      const preferred = this.hypotheses.find(h => h.status === "preferred");
+      if (preferred) {
+        lines.push(`Active hypothesis: ${preferred.hypothesis.slice(0, 120)} (${preferred.confidence}%)`);
+      }
     }
 
     return lines.join("\n");

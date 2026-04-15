@@ -15,6 +15,39 @@ export interface TemporalPattern {
   predictedNext: string | null;
 }
 
+export interface ProspectiveMemoryItem {
+  intentionId: string;
+  description: string;
+  triggerCondition: string;
+  triggerType: "temporal" | "contextual" | "event";
+  scheduledFor: string | null;
+  contextCue: string | null;
+  status: "pending" | "triggered" | "expired" | "completed";
+  action: string;
+  createdAt: string;
+  expiresAt: string;
+}
+
+export interface TemporalDiscount {
+  discountId: string;
+  decision: string;
+  immediateValue: number;
+  delayedValue: number;
+  delayDays: number;
+  discountedValue: number;
+  recommendation: "take_immediate" | "wait_for_delayed" | "indifferent";
+  timestamp: string;
+}
+
+export interface EpisodicFutureSimulation {
+  simulationId: string;
+  scenario: string;
+  timeHorizon: "hours" | "days" | "weeks";
+  predictedOutcomes: Array<{ outcome: string; probability: number; impact: "positive" | "neutral" | "negative" }>;
+  strategicImplication: string;
+  timestamp: string;
+}
+
 export interface TemporalAwarenessState {
   currentTime: string;
   sessionDuration: number;
@@ -26,6 +59,9 @@ export interface TemporalAwarenessState {
   dayOfWeek: string;
   isBusinessHours: boolean;
   uptimeMs: number;
+  prospectiveMemory: ProspectiveMemoryItem[];
+  recentDiscounts: TemporalDiscount[];
+  futureSimulations: EpisodicFutureSimulation[];
 }
 
 function classifyTimeOfDay(hour: number): TemporalAwarenessState["timeOfDay"] {
@@ -56,10 +92,16 @@ class TemporalAwarenessEngine {
   private patterns: Map<string, TemporalPattern> = new Map();
   private orchestrationTimestamps: number[] = [];
   private agentEvolution: Map<string, AgentTemporalEvolution> = new Map();
+  private prospective: ProspectiveMemoryItem[] = [];
+  private discounts: TemporalDiscount[] = [];
+  private simulations: EpisodicFutureSimulation[] = [];
   private sessionStart = Date.now();
   private static readonly MAX_MARKERS = 500;
   private static readonly MAX_TIMESTAMPS = 1000;
   private static readonly MAX_EVOLUTION_SAMPLES = 100;
+  private static readonly MAX_PROSPECTIVE = 30;
+  private static readonly MAX_DISCOUNTS = 20;
+  private static readonly MAX_SIMULATIONS = 15;
 
   recordMarker(label: string, eventType: TemporalMarker["eventType"], metadata: Record<string, unknown> = {}): TemporalMarker {
     const marker: TemporalMarker = {
@@ -83,7 +125,180 @@ class TemporalAwarenessEngine {
     }
 
     this.detectPatterns();
+    this.checkProspectiveMemory();
     return marker;
+  }
+
+  scheduleIntention(input: {
+    description: string;
+    triggerType: ProspectiveMemoryItem["triggerType"];
+    scheduledFor?: string;
+    contextCue?: string;
+    action: string;
+    ttlHours?: number;
+  }): ProspectiveMemoryItem {
+    const ttl = (input.ttlHours ?? 24) * 3600 * 1000;
+    const item: ProspectiveMemoryItem = {
+      intentionId: `intent_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      description: input.description,
+      triggerCondition: input.triggerType === "temporal"
+        ? `At ${input.scheduledFor ?? "unspecified time"}`
+        : `When context matches: ${input.contextCue ?? "unspecified cue"}`,
+      triggerType: input.triggerType,
+      scheduledFor: input.scheduledFor ?? null,
+      contextCue: input.contextCue ?? null,
+      status: "pending",
+      action: input.action,
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + ttl).toISOString(),
+    };
+
+    this.prospective.push(item);
+    if (this.prospective.length > TemporalAwarenessEngine.MAX_PROSPECTIVE) {
+      this.prospective = this.prospective.filter(p => p.status === "pending").slice(-TemporalAwarenessEngine.MAX_PROSPECTIVE);
+    }
+
+    return item;
+  }
+
+  checkProspectiveMemory(contextQuery?: string): ProspectiveMemoryItem[] {
+    const now = new Date();
+    const triggered: ProspectiveMemoryItem[] = [];
+
+    for (const item of this.prospective) {
+      if (item.status !== "pending") continue;
+
+      if (new Date(item.expiresAt) < now) {
+        item.status = "expired";
+        continue;
+      }
+
+      if (item.triggerType === "temporal" && item.scheduledFor) {
+        if (new Date(item.scheduledFor) <= now) {
+          item.status = "triggered";
+          triggered.push(item);
+        }
+      }
+
+      if (item.triggerType === "contextual" && item.contextCue && contextQuery) {
+        const cueWords = item.contextCue.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+        const queryLower = contextQuery.toLowerCase();
+        const matchCount = cueWords.filter(w => queryLower.includes(w)).length;
+        if (matchCount >= Math.ceil(cueWords.length * 0.4) && cueWords.length > 0) {
+          item.status = "triggered";
+          triggered.push(item);
+        }
+      }
+    }
+
+    return triggered;
+  }
+
+  computeTemporalDiscount(input: {
+    decision: string;
+    immediateValue: number;
+    delayedValue: number;
+    delayDays: number;
+    discountRate?: number;
+  }): TemporalDiscount {
+    const k = input.discountRate ?? 0.05;
+    const discountedValue = input.delayedValue / (1 + k * input.delayDays);
+
+    let recommendation: TemporalDiscount["recommendation"];
+    if (discountedValue > input.immediateValue * 1.1) {
+      recommendation = "wait_for_delayed";
+    } else if (input.immediateValue > discountedValue * 1.1) {
+      recommendation = "take_immediate";
+    } else {
+      recommendation = "indifferent";
+    }
+
+    const discount: TemporalDiscount = {
+      discountId: `disc_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      decision: input.decision.slice(0, 200),
+      immediateValue: input.immediateValue,
+      delayedValue: input.delayedValue,
+      delayDays: input.delayDays,
+      discountedValue: Math.round(discountedValue * 100) / 100,
+      recommendation,
+      timestamp: new Date().toISOString(),
+    };
+
+    this.discounts.push(discount);
+    if (this.discounts.length > TemporalAwarenessEngine.MAX_DISCOUNTS) {
+      this.discounts.splice(0, this.discounts.length - TemporalAwarenessEngine.MAX_DISCOUNTS);
+    }
+
+    return discount;
+  }
+
+  simulateFuture(input: {
+    scenario: string;
+    timeHorizon: EpisodicFutureSimulation["timeHorizon"];
+    currentState: { confidence: number; conflictCount: number; agentHealth: string };
+  }): EpisodicFutureSimulation {
+    const outcomes: EpisodicFutureSimulation["predictedOutcomes"] = [];
+
+    if (input.currentState.confidence > 70) {
+      outcomes.push({
+        outcome: "Continued high performance with stable routing",
+        probability: 0.6,
+        impact: "positive",
+      });
+      outcomes.push({
+        outcome: "Gradual confidence drift without recalibration",
+        probability: 0.25,
+        impact: "negative",
+      });
+    } else {
+      outcomes.push({
+        outcome: "Performance recovery through learning adaptation",
+        probability: 0.4,
+        impact: "positive",
+      });
+      outcomes.push({
+        outcome: "Continued degradation requiring human intervention",
+        probability: 0.35,
+        impact: "negative",
+      });
+    }
+
+    if (input.currentState.conflictCount > 2) {
+      outcomes.push({
+        outcome: "Agent conflicts escalate to systematic disagreement",
+        probability: 0.3,
+        impact: "negative",
+      });
+    }
+
+    outcomes.push({
+      outcome: "Novel cross-domain insight emerges from current patterns",
+      probability: 0.15,
+      impact: "positive",
+    });
+
+    const bestOutcome = outcomes.find(o => o.impact === "positive" && o.probability > 0.3);
+    const worstOutcome = outcomes.find(o => o.impact === "negative" && o.probability > 0.3);
+
+    const strategicImplication = bestOutcome
+      ? `Best path: ${bestOutcome.outcome} (${(bestOutcome.probability * 100).toFixed(0)}%). ${worstOutcome ? `Watch for: ${worstOutcome.outcome}.` : ""}`
+      : "No high-probability positive outcome — consider strategy adjustment.";
+
+    const sim: EpisodicFutureSimulation = {
+      simulationId: `future_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      scenario: input.scenario.slice(0, 200),
+      timeHorizon: input.timeHorizon,
+      predictedOutcomes: outcomes,
+      strategicImplication,
+      timestamp: new Date().toISOString(),
+    };
+
+    this.simulations.push(sim);
+    if (this.simulations.length > TemporalAwarenessEngine.MAX_SIMULATIONS) {
+      this.simulations.splice(0, this.simulations.length - TemporalAwarenessEngine.MAX_SIMULATIONS);
+    }
+
+    return sim;
   }
 
   getAverageInterval(): number {
@@ -221,6 +436,9 @@ class TemporalAwarenessEngine {
       dayOfWeek: DAY_NAMES[now.getDay()]!,
       isBusinessHours: isBusinessHours(now),
       uptimeMs: Date.now() - this.sessionStart,
+      prospectiveMemory: this.prospective.filter(p => p.status === "pending").slice(-10),
+      recentDiscounts: this.discounts.slice(-5).reverse(),
+      futureSimulations: this.simulations.slice(-3).reverse(),
     };
   }
 
@@ -246,6 +464,11 @@ class TemporalAwarenessEngine {
 
     if (state.detectedPatterns.length > 0) {
       lines.push(`Patterns: ${state.detectedPatterns.map(p => p.description).join("; ")}`);
+    }
+
+    const pendingIntentions = state.prospectiveMemory;
+    if (pendingIntentions.length > 0) {
+      lines.push(`Prospective memory: ${pendingIntentions.length} pending intention(s)`);
     }
 
     return lines.join("\n");

@@ -8,6 +8,8 @@ import {
   goalEngine,
   emotionalSignals,
   temporalAwareness,
+  predictiveProcessing,
+  dreamConsolidation,
 } from "@szl-holdings/ai-engine";
 import { db } from "@szl-holdings/db";
 import {
@@ -69,6 +71,10 @@ router.get("/nuro-mesh/consciousness/goals", ...adminOnly, safeHandler("goals", 
 router.get("/nuro-mesh/consciousness/emotions", ...adminOnly, safeHandler("emotions", () => emotionalSignals.getState()));
 
 router.get("/nuro-mesh/consciousness/temporal", ...adminOnly, safeHandler("temporal", () => temporalAwareness.getState()));
+
+router.get("/nuro-mesh/consciousness/predictive", ...adminOnly, safeHandler("predictive", () => predictiveProcessing.getState()));
+
+router.get("/nuro-mesh/consciousness/dream", ...adminOnly, safeHandler("dream", () => dreamConsolidation.getState()));
 
 function safeLimit(raw: unknown, fallback: number, max: number): number {
   const parsed = parseInt(String(raw ?? fallback), 10);

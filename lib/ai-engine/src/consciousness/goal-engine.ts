@@ -28,6 +28,35 @@ export interface CuriositySignal {
   timestamp: string;
 }
 
+export interface IntrinsicMotivation {
+  informationGain: number;
+  competenceGrowth: number;
+  noveltySeeking: number;
+  overallDrive: number;
+  timestamp: string;
+}
+
+export interface GoalInterference {
+  interferenceId: string;
+  goalA: string;
+  goalB: string;
+  conflictType: "resource" | "temporal" | "logical" | "priority";
+  description: string;
+  severity: "low" | "medium" | "high";
+  resolution: string | null;
+  timestamp: string;
+}
+
+export interface MetaGoal {
+  metaGoalId: string;
+  title: string;
+  metric: string;
+  currentValue: number;
+  targetValue: number;
+  trend: "improving" | "stable" | "declining";
+  timestamp: string;
+}
+
 export interface GoalEngineState {
   activeGoals: CognitiveGoal[];
   completedGoals: number;
@@ -35,6 +64,9 @@ export interface GoalEngineState {
   curiosityQueue: CuriositySignal[];
   topPriority: CognitiveGoal | null;
   overallProgress: number;
+  intrinsicMotivation: IntrinsicMotivation;
+  goalInterferences: GoalInterference[];
+  metaGoals: MetaGoal[];
 }
 
 const PRIORITY_WEIGHTS: Record<GoalPriority, number> = {
@@ -49,8 +81,21 @@ class GoalFormationEngine {
   private goals: Map<string, CognitiveGoal> = new Map();
   private curiosityQueue: CuriositySignal[] = [];
   private completedCount = 0;
+  private interferences: GoalInterference[] = [];
+  private metaGoals: MetaGoal[] = [];
+  private motivation: IntrinsicMotivation = {
+    informationGain: 0.5,
+    competenceGrowth: 0.5,
+    noveltySeeking: 0.5,
+    overallDrive: 0.5,
+    timestamp: new Date().toISOString(),
+  };
+  private noveltyHistory: string[] = [];
   private static readonly MAX_ACTIVE_GOALS = 20;
   private static readonly MAX_CURIOSITY = 30;
+  private static readonly MAX_INTERFERENCES = 20;
+  private static readonly MAX_META_GOALS = 10;
+  private static readonly MOTIVATION_ALPHA = 0.1;
 
   createGoal(input: {
     title: string;
@@ -87,6 +132,7 @@ class GoalFormationEngine {
 
     this.goals.set(goal.goalId, goal);
     this.enforceCapacity();
+    this.detectInterferences();
     return goal;
   }
 
@@ -101,6 +147,7 @@ class GoalFormationEngine {
       goal.status = "completed";
       goal.completedAt = new Date().toISOString();
       this.completedCount++;
+      this.updateMotivation("competenceGrowth", 0.1);
     }
   }
 
@@ -143,6 +190,8 @@ class GoalFormationEngine {
       this.curiosityQueue = this.curiosityQueue.slice(0, GoalFormationEngine.MAX_CURIOSITY);
     }
 
+    this.updateMotivation("noveltySeeking", input.intensity * 0.05);
+
     return signal;
   }
 
@@ -159,6 +208,119 @@ class GoalFormationEngine {
       tags: [signal.source, signal.topic.split(" ")[0]?.toLowerCase() ?? "exploration"],
       successCriteria: `Knowledge gap resolved for: ${signal.topic}`,
     });
+  }
+
+  updateMotivation(dimension: "informationGain" | "competenceGrowth" | "noveltySeeking", delta: number): void {
+    const alpha = GoalFormationEngine.MOTIVATION_ALPHA;
+    this.motivation[dimension] = Math.max(0, Math.min(1,
+      this.motivation[dimension] * (1 - alpha) + (this.motivation[dimension] + delta) * alpha
+    ));
+    this.motivation.overallDrive = (
+      this.motivation.informationGain * 0.35 +
+      this.motivation.competenceGrowth * 0.35 +
+      this.motivation.noveltySeeking * 0.3
+    );
+    this.motivation.timestamp = new Date().toISOString();
+  }
+
+  recordInformationGain(queryDomains: string[], knowledgeGapsClosed: number): void {
+    const gain = Math.min(0.2, knowledgeGapsClosed * 0.05);
+    this.updateMotivation("informationGain", gain);
+
+    const novelKey = queryDomains.sort().join("+");
+    if (!this.noveltyHistory.includes(novelKey)) {
+      this.noveltyHistory.push(novelKey);
+      if (this.noveltyHistory.length > 100) this.noveltyHistory.shift();
+      this.updateMotivation("noveltySeeking", 0.05);
+    } else {
+      this.updateMotivation("noveltySeeking", -0.02);
+    }
+  }
+
+  private detectInterferences(): void {
+    const active = Array.from(this.goals.values()).filter(g => g.status === "active");
+    const newInterferences: GoalInterference[] = [];
+
+    for (let i = 0; i < active.length; i++) {
+      for (let j = i + 1; j < active.length; j++) {
+        const a = active[i]!;
+        const b = active[j]!;
+
+        if (a.priority === "critical" && b.priority === "critical") {
+          newInterferences.push({
+            interferenceId: `intrf_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+            goalA: a.goalId,
+            goalB: b.goalId,
+            conflictType: "resource",
+            description: `Both "${a.title.slice(0, 40)}" and "${b.title.slice(0, 40)}" are critical — resource contention likely.`,
+            severity: "high",
+            resolution: null,
+            timestamp: new Date().toISOString(),
+          });
+        }
+
+        const tagOverlap = a.tags.filter(t => b.tags.includes(t));
+        if (tagOverlap.length > 0 && PRIORITY_WEIGHTS[a.priority] !== PRIORITY_WEIGHTS[b.priority]) {
+          const diff = Math.abs(PRIORITY_WEIGHTS[a.priority] - PRIORITY_WEIGHTS[b.priority]);
+          if (diff >= 2) {
+            newInterferences.push({
+              interferenceId: `intrf_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+              goalA: a.goalId,
+              goalB: b.goalId,
+              conflictType: "priority",
+              description: `Goals share domain tags (${tagOverlap.join(", ")}) but have competing priorities (${a.priority} vs ${b.priority}).`,
+              severity: diff >= 3 ? "high" : "medium",
+              resolution: null,
+              timestamp: new Date().toISOString(),
+            });
+          }
+        }
+      }
+    }
+
+    this.interferences = newInterferences.slice(0, GoalFormationEngine.MAX_INTERFERENCES);
+  }
+
+  updateMetaGoals(): void {
+    const active = Array.from(this.goals.values()).filter(g => g.status === "active");
+    const completed = this.completedCount;
+    const totalCreated = this.goals.size;
+    const completionRate = totalCreated > 0 ? completed / totalCreated : 0;
+    const avgProgress = active.length > 0 ? active.reduce((s, g) => s + g.progress, 0) / active.length : 0;
+
+    this.metaGoals = [
+      {
+        metaGoalId: "meta_completion_rate",
+        title: "Goal Completion Rate",
+        metric: "completion_rate",
+        currentValue: completionRate,
+        targetValue: 0.7,
+        trend: completionRate > 0.5 ? "improving" : completionRate < 0.3 ? "declining" : "stable",
+        timestamp: new Date().toISOString(),
+      },
+      {
+        metaGoalId: "meta_curiosity_conversion",
+        title: "Curiosity → Goal Conversion",
+        metric: "curiosity_to_goal_ratio",
+        currentValue: this.curiosityQueue.length > 0 ? active.filter(g => g.curiosityDriven).length / this.curiosityQueue.length : 0,
+        targetValue: 0.3,
+        trend: "stable",
+        timestamp: new Date().toISOString(),
+      },
+      {
+        metaGoalId: "meta_interference_rate",
+        title: "Goal Interference Rate",
+        metric: "interference_count",
+        currentValue: this.interferences.length,
+        targetValue: 0,
+        trend: this.interferences.length > 3 ? "declining" : "stable",
+        timestamp: new Date().toISOString(),
+      },
+    ];
+
+    if (this.metaGoals.length > GoalFormationEngine.MAX_META_GOALS) {
+      this.metaGoals = this.metaGoals.slice(0, GoalFormationEngine.MAX_META_GOALS);
+    }
   }
 
   detectGoalsFromOrchestration(
@@ -193,6 +355,9 @@ class GoalFormationEngine {
         suggestedExploration: `Diagnose root cause of confusion: ${confusionSignals[0]}`,
       });
     }
+
+    this.recordInformationGain(domains, knowledgeGaps.length > 0 ? 0 : 1);
+    this.updateMetaGoals();
   }
 
   integratePatternDetectorAlerts(patterns: Array<{
@@ -287,6 +452,9 @@ class GoalFormationEngine {
       curiosityQueue: [...this.curiosityQueue],
       topPriority: this.getTopPriority(),
       overallProgress: totalProgress,
+      intrinsicMotivation: { ...this.motivation },
+      goalInterferences: [...this.interferences],
+      metaGoals: [...this.metaGoals],
     };
   }
 
@@ -304,6 +472,12 @@ class GoalFormationEngine {
     if (state.curiosityQueue.length > 0) {
       const top = state.curiosityQueue.slice(0, 3);
       lines.push(`Curiosity queue: ${top.map(c => `${c.topic} (${(c.intensity * 100).toFixed(0)}%)`).join(", ")}`);
+    }
+
+    lines.push(`Motivation: info=${(state.intrinsicMotivation.informationGain * 100).toFixed(0)}% comp=${(state.intrinsicMotivation.competenceGrowth * 100).toFixed(0)}% novel=${(state.intrinsicMotivation.noveltySeeking * 100).toFixed(0)}%`);
+
+    if (state.goalInterferences.length > 0) {
+      lines.push(`⚠ ${state.goalInterferences.length} goal interference(s) detected`);
     }
 
     return lines.join("\n");
