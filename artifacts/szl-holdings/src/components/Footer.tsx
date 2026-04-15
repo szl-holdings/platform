@@ -7,6 +7,7 @@ const nav = [
   { label: "Vessels", href: "/vessels/", external: true },
   { label: "Trust", href: "/trust", external: false },
   { label: "Status", href: "/status", external: false },
+  { label: "Leadership", href: "/leadership", external: false },
   { label: "Founder", href: "/founder", external: false },
   { label: "Contact", href: "/contact", external: false },
 ];

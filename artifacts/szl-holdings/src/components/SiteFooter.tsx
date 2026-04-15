@@ -50,6 +50,7 @@ const FOOTER_COLS = [
     heading: "Company",
     links: [
       { label: "About SZL Holdings", href: "/company" },
+      { label: "Leadership", href: "/leadership" },
       { label: "Founder", href: "/founder" },
       { label: "Design Partners", href: "/design-partner" },
       { label: "Contact", href: "/contact" },

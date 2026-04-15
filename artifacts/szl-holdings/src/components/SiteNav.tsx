@@ -76,6 +76,7 @@ const NAV_ITEMS = [
     children: [
       { label: "About SZL Holdings", href: "/company" },
       { label: "Operating Doctrine", href: "/operating-doctrine" },
+      { label: "Leadership", href: "/leadership" },
       { label: "Founder", href: "/founder" },
       { label: "Design Partners", href: "/design-partner" },
       { label: "Contact", href: "/contact" },
@@ -121,7 +122,9 @@ const NAV_LINKS_MOBILE = [
   { label: "Insights", href: "/insights", primary: false },
   { label: "Case Studies", href: "/case-studies", primary: false },
   { label: "Company", href: "/company", primary: false },
+  { label: "Leadership", href: "/leadership", primary: false },
   { label: "Founder", href: "/founder", primary: false },
+  { label: "Forge", href: "/forge", primary: false },
   { label: "Design Partners", href: "/design-partner", primary: false },
   { label: "Contact", href: "/contact", primary: false },
 ];

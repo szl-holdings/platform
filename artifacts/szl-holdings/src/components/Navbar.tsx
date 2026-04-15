@@ -11,6 +11,7 @@ const navLinks = [
   { label: "Vessels", href: "/vessels", external: "/vessels/" },
   { label: "Trust", href: "/trust" },
   { label: "Pulse", href: "/pulse" },
+  { label: "Leadership", href: "/leadership" },
   { label: "Founder", href: "/founder" },
   { label: "Contact", href: "/contact" },
 ];
