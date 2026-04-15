@@ -1,55 +1,83 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
-// Limit esbuild Go runtime threads to prevent OS thread exhaustion
-// when multiple Vite dev servers run simultaneously
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
-const port = Number(process.env.VITE_PORT) || 23932;
-const basePath = process.env.BASE_PATH || "/firestorm/";
+const vitePort = Number(process.env.VITE_PORT) || 23933;
+const basePath = process.env.BASE_PATH || "/aegis/";
 
+// Path-based routing table: url prefix → upstream Vite port
+const UPSTREAM_ROUTES: Array<{ prefix: string; port: number }> = [
+  { prefix: "/terra/", port: 21100 },
+  { prefix: "/carlota-jo/", port: 21200 },
+  { prefix: "/vessels/", port: 18485 },
+  { prefix: "/command/", port: 25200 },
+  { prefix: "/aegis/", port: vitePort },
+  { prefix: "/firestorm/", port: vitePort },
+];
 
-  function healthCheckPlugin() {
-    return {
-      name: "health-check",
-      apply: "serve",
-      async configureServer() {
-        const http = await import("http");
-        const proxyServer = http.createServer((req, res) => {
-          const url = req.url || "/";
-          if (url === "/" || url === "/health" || url === "/__health") {
-            res.writeHead(200, { "Content-Type": "text/plain" });
-            res.end("OK");
-            return;
-          }
-          const upstream = http.request(
-            { hostname: "127.0.0.1", port, path: url, method: req.method,
-              headers: { ...req.headers, host: "localhost:" + port } },
-            (upRes) => { res.writeHead(upRes.statusCode || 200, upRes.headers); upRes.pipe(res, { end: true }); }
-          );
-          upstream.on("error", () => { if (!res.headersSent) { res.writeHead(503); res.end("Upstream not ready"); } });
-          req.pipe(upstream, { end: true });
-        });
-        proxyServer.listen({ port: 9090, host: "0.0.0.0", reusePort: true }, () => {
-          console.log("[health-check] Proxy listening on port 9090 (reusePort)");
-        });
-        proxyServer.on("error", (err: NodeJS.ErrnoException) => {
-          console.warn("[health-check] Port 9090 bind failed:", err.code);
-        });
-      },
-    };
+function getUpstreamPort(url: string): number {
+  for (const route of UPSTREAM_ROUTES) {
+    if (url.startsWith(route.prefix)) return route.port;
   }
+  return vitePort; // default to aegis Vite
+}
 
-  export default defineConfig({
+function gatewayPlugin(): Plugin {
+  return {
+    name: "gateway-proxy",
+    apply: "serve",
+    async configureServer() {
+      const http = await import("http");
+      const proxyServer = http.createServer((req, res) => {
+        const url = req.url || "/";
+        if (url === "/" || url === "/health" || url === "/__health") {
+          res.writeHead(200, { "Content-Type": "text/plain" });
+          res.end("OK");
+          return;
+        }
+        const upstreamPort = getUpstreamPort(url);
+        const upstream = http.request(
+          {
+            hostname: "127.0.0.1",
+            port: upstreamPort,
+            path: url,
+            method: req.method,
+            headers: { ...req.headers, host: "localhost:" + upstreamPort },
+          },
+          (upRes) => {
+            res.writeHead(upRes.statusCode || 200, upRes.headers);
+            upRes.pipe(res, { end: true });
+          }
+        );
+        upstream.on("error", () => {
+          if (!res.headersSent) {
+            res.writeHead(503, { "Content-Type": "text/plain" });
+            res.end("App not ready on port " + upstreamPort);
+          }
+        });
+        req.pipe(upstream, { end: true });
+      });
+      proxyServer.listen({ port: 9090, host: "0.0.0.0", reusePort: true }, () => {
+        console.log("[gateway] Listening on port 9090 (reusePort) — routing /aegis/, /terra/, /carlota-jo/, /vessels/, /command/");
+      });
+      proxyServer.on("error", (err: NodeJS.ErrnoException) => {
+        console.warn("[gateway] Port 9090 bind failed:", err.code);
+      });
+    },
+  };
+}
+
+export default defineConfig({
   base: basePath,
   plugins: [
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
-    healthCheckPlugin(),
+    gatewayPlugin(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [
@@ -74,7 +102,7 @@ const basePath = process.env.BASE_PATH || "/firestorm/";
   root: path.resolve(import.meta.dirname),
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
-      sourcemap: "hidden",
+    sourcemap: "hidden",
     emptyOutDir: true,
     cssCodeSplit: true,
     rollupOptions: {
@@ -98,7 +126,7 @@ const basePath = process.env.BASE_PATH || "/firestorm/";
     holdUntilCrawlEnd: true,
   },
   server: {
-    port,
+    port: vitePort,
     strictPort: true,
     host: "0.0.0.0",
     allowedHosts: true,
@@ -109,7 +137,7 @@ const basePath = process.env.BASE_PATH || "/firestorm/";
     },
   },
   preview: {
-    port,
+    port: vitePort,
     host: "0.0.0.0",
     allowedHosts: true,
   },

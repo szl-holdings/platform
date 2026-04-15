@@ -12,7 +12,7 @@ version = "1.0.0"
 [[services]]
 name = "web"
 paths = [ "/vessels/" ]
-localPort = 18486
+localPort = 9090
 
 [services.development]
 run = "bash -c 'cd /home/runner/workspace/artifacts/vessels && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
@@ -28,5 +28,4 @@ to = "/index.html"
 
 [services.env]
 VITE_PORT = "18485"
-PROXY_PORT = "18486"
 BASE_PATH = "/vessels/"

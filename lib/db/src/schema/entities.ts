@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, jsonb, pgEnum, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uuid, jsonb, pgEnum, index, uniqueIndex } from "drizzle-orm/pg-core";
 
 export const entityTypeEnum = pgEnum("entity_type", [
   "person",
@@ -34,6 +34,7 @@ export const entitiesTable = pgTable(
     entityTypeIdx: index("entities_entity_type_idx").on(t.entityType),
     sourceAppIdx: index("entities_source_app_idx").on(t.sourceApp),
     externalIdIdx: index("entities_external_id_idx").on(t.externalId),
+    nameSourceAppUniq: uniqueIndex("entities_name_source_app_uniq").on(t.name, t.sourceApp),
   }),
 );
 

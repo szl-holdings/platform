@@ -9,15 +9,30 @@ import net from "net";
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
 const port = Number(process.env.VITE_PORT) || 25200;
-const proxyPort = Number(process.env.PROXY_PORT) || 25201;
 const basePath = process.env.BASE_PATH || "/command/";
 
 const API_SERVER_PORT = 8080;
 const apiServerDist = path.resolve(import.meta.dirname, "..", "api-server", "dist", "index.mjs");
 
-function healthCheckPlugin(): Plugin {
+const GATEWAY_ROUTES: Array<{ prefix: string; port: number }> = [
+  { prefix: "/terra/", port: 21100 },
+  { prefix: "/carlota-jo/", port: 21200 },
+  { prefix: "/vessels/", port: 18485 },
+  { prefix: "/command/", port: 25200 },
+  { prefix: "/aegis/", port: 23933 },
+  { prefix: "/firestorm/", port: 23933 },
+];
+
+function getGatewayUpstream(url: string, defaultPort: number): number {
+  for (const route of GATEWAY_ROUTES) {
+    if (url.startsWith(route.prefix)) return route.port;
+  }
+  return defaultPort;
+}
+
+function gatewayPlugin(): Plugin {
   return {
-    name: "health-check",
+    name: "gateway-proxy",
     apply: "serve",
     async configureServer() {
       const http = await import("http");
@@ -28,23 +43,22 @@ function healthCheckPlugin(): Plugin {
           res.end("OK");
           return;
         }
+        const upstreamPort = getGatewayUpstream(url, port);
         const upstream = http.request(
-          { hostname: "127.0.0.1", port, path: url, method: req.method,
-            headers: { ...req.headers, host: "localhost:" + port } },
+          { hostname: "127.0.0.1", port: upstreamPort, path: url, method: req.method,
+            headers: { ...req.headers, host: "localhost:" + upstreamPort } },
           (upRes) => { res.writeHead(upRes.statusCode || 200, upRes.headers); upRes.pipe(res, { end: true }); }
         );
-        upstream.on("error", () => { if (!res.headersSent) { res.writeHead(503); res.end("Upstream not ready"); } });
+        upstream.on("error", () => {
+          if (!res.headersSent) { res.writeHead(503, { "Content-Type": "text/plain" }); res.end("App not ready on port " + upstreamPort); }
+        });
         req.pipe(upstream, { end: true });
       });
-      await new Promise<void>((resolve) => {
-        proxyServer.listen({ port: proxyPort, host: "0.0.0.0" }, () => {
-          console.log("[health-check] Proxy listening on port " + proxyPort);
-          resolve();
-        });
-        proxyServer.on("error", (err: NodeJS.ErrnoException) => {
-          console.warn("[health-check] Proxy bind failed:", err.code);
-          resolve();
-        });
+      proxyServer.listen({ port: 9090, host: "0.0.0.0", reusePort: true }, () => {
+        console.log("[command/gateway] Port 9090 (reusePort) joined — serving /command/");
+      });
+      proxyServer.on("error", (err: NodeJS.ErrnoException) => {
+        console.warn("[command/gateway] Port 9090 bind:", err.code);
       });
     },
   };
@@ -111,7 +125,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
-    healthCheckPlugin(),
+    gatewayPlugin(),
     apiServerPlugin(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
@@ -159,7 +173,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    holdUntilCrawlEnd: true,
+    holdUntilCrawlEnd: false,
   },
   server: {
     port,

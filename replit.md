@@ -10,6 +10,26 @@ Ask before making major changes.
 Do not make changes to the folder `Z`.
 Do not make changes to the file `Y`.
 
+## Demo Assets
+A full investor showcase package lives in `demo-assets/`:
+- `screenshots/` — 9 high-quality app screenshots (szl-holdings, carlota-jo, terra, vessels, lyte, prism-counsel, stephen-site, command, firestorm-placeholder)
+- `linkedin-carousel.md` — 10-slide carousel design brief for Canva/Figma production
+- `linkedin-post-longform.md` — ~1,100-word long-form post targeting Series A investors
+- `linkedin-series.md` — 7-post series scheduled across 2-3 weeks
+- `README.md` — full ecosystem index and campaign instructions
+
+## Routing Architecture — Shared Gateway (April 2026)
+All sub-path web artifacts (aegis, terra, carlota-jo, vessels, command) share a single `localPort = 9090` via a distributed reusePort gateway pattern.
+
+**How it works:**
+- The `artifacts/aegis` Vite process starts first and binds port 9090 with `reusePort: true` (establishing the reusePort group that Replit monitors).
+- Each other sub-path app (terra, carlota-jo, vessels, command) also binds port 9090 with `reusePort: true` in their `configureServer` gateway plugin — this joins the existing reusePort group so Replit detects them as RUNNING.
+- Each app runs its own Vite instance on a separate internal port: aegis=23933, terra=21100, carlota-jo=21200, vessels=18485, command=25200.
+- The gateway proxy on each process is path-aware: `/terra/*` → 21100, `/carlota-jo/*` → 21200, `/vessels/*` → 18485, `/command/*` → 25200, `/aegis/*`+`/firestorm/*` → 23933.
+- The API server (port 8080) runs as a subprocess of the command Vite process via `apiServerPlugin()`. The standalone `artifacts/api-server: api` workflow is therefore expected to fail (port already in use).
+- `artifacts/szl-holdings` runs independently at `localPort = 21130` (previewPath="/", no gateway needed).
+
+**Key files:** Each app's `vite.config.ts` contains the `gatewayPlugin()` function and the routing table.
 ## System Architecture
 
 ### Core Technologies

@@ -4,56 +4,68 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
-// Limit esbuild Go runtime threads to prevent OS thread exhaustion
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
 const port = Number(process.env.VITE_PORT) || 21200;
-const proxyPort = Number(process.env.PROXY_PORT) || 21201;
 const basePath = process.env.BASE_PATH || "/carlota-jo/";
 
+const GATEWAY_ROUTES: Array<{ prefix: string; port: number }> = [
+  { prefix: "/terra/", port: 21100 },
+  { prefix: "/carlota-jo/", port: 21200 },
+  { prefix: "/vessels/", port: 18485 },
+  { prefix: "/command/", port: 25200 },
+  { prefix: "/aegis/", port: 23933 },
+  { prefix: "/firestorm/", port: 23933 },
+];
 
-  function healthCheckPlugin() {
-    return {
-      name: "health-check",
-      apply: "serve",
-      async configureServer() {
-        const http = await import("http");
-        const proxyServer = http.createServer((req, res) => {
-          const url = req.url || "/";
-          if (url === "/" || url === "/health" || url === "/__health") {
-            res.writeHead(200, { "Content-Type": "text/plain" });
-            res.end("OK");
-            return;
-          }
-          const upstream = http.request(
-            { hostname: "127.0.0.1", port, path: url, method: req.method,
-              headers: { ...req.headers, host: "localhost:" + port } },
-            (upRes) => { res.writeHead(upRes.statusCode || 200, upRes.headers); upRes.pipe(res, { end: true }); }
-          );
-          upstream.on("error", () => { if (!res.headersSent) { res.writeHead(503); res.end("Upstream not ready"); } });
-          req.pipe(upstream, { end: true });
-        });
-        await new Promise<void>((resolve) => {
-          proxyServer.listen({ port: proxyPort, host: "0.0.0.0" }, () => {
-            console.log("[health-check] Proxy listening on port " + proxyPort);
-            resolve();
-          });
-          proxyServer.on("error", (err: NodeJS.ErrnoException) => {
-            console.warn("[health-check] Proxy bind failed:", err.code);
-            resolve();
-          });
-        });
-      },
-    };
+function getGatewayUpstream(url: string, defaultPort: number): number {
+  for (const route of GATEWAY_ROUTES) {
+    if (url.startsWith(route.prefix)) return route.port;
   }
+  return defaultPort;
+}
 
-  export default defineConfig({
+function gatewayPlugin(): import("vite").Plugin {
+  return {
+    name: "gateway-proxy",
+    apply: "serve" as const,
+    async configureServer() {
+      const http = await import("http");
+      const proxyServer = http.createServer((req, res) => {
+        const url = req.url || "/";
+        if (url === "/" || url === "/health" || url === "/__health") {
+          res.writeHead(200, { "Content-Type": "text/plain" });
+          res.end("OK");
+          return;
+        }
+        const upstreamPort = getGatewayUpstream(url, port);
+        const upstream = http.request(
+          { hostname: "127.0.0.1", port: upstreamPort, path: url, method: req.method,
+            headers: { ...req.headers, host: "localhost:" + upstreamPort } },
+          (upRes) => { res.writeHead(upRes.statusCode || 200, upRes.headers); upRes.pipe(res, { end: true }); }
+        );
+        upstream.on("error", () => {
+          if (!res.headersSent) { res.writeHead(503, { "Content-Type": "text/plain" }); res.end("App not ready on port " + upstreamPort); }
+        });
+        req.pipe(upstream, { end: true });
+      });
+      proxyServer.listen({ port: 9090, host: "0.0.0.0", reusePort: true }, () => {
+        console.log("[carlota-jo/gateway] Port 9090 (reusePort) joined — serving /carlota-jo/");
+      });
+      proxyServer.on("error", (err: NodeJS.ErrnoException) => {
+        console.warn("[carlota-jo/gateway] Port 9090 bind:", err.code);
+      });
+    },
+  };
+}
+
+export default defineConfig({
   base: basePath,
   plugins: [
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
-    healthCheckPlugin(),
+    gatewayPlugin(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [
@@ -77,7 +89,7 @@ const basePath = process.env.BASE_PATH || "/carlota-jo/";
   root: path.resolve(import.meta.dirname),
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
-      sourcemap: "hidden",
+    sourcemap: "hidden",
     emptyOutDir: true,
     cssCodeSplit: true,
     rollupOptions: {
@@ -98,7 +110,7 @@ const basePath = process.env.BASE_PATH || "/carlota-jo/";
     },
   },
   optimizeDeps: {
-    holdUntilCrawlEnd: true,
+    holdUntilCrawlEnd: false,
   },
   server: {
     port,
