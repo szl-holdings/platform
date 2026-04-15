@@ -36,6 +36,14 @@ const SenateChamber = lazy(() => import("@/pages/senate-chamber"));
 const SupplyLines = lazy(() => import("@/pages/supply-lines"));
 const CenturionAI = lazy(() => import("@/pages/centurion-ai"));
 const IntelligenceBriefing = lazy(() => import("@/pages/intelligence-briefing"));
+const Wargaming = lazy(() => import("@/pages/wargaming"));
+const ResourceOptimizer = lazy(() => import("@/pages/resource-optimizer"));
+const Geospatial = lazy(() => import("@/pages/geospatial"));
+const Coalition = lazy(() => import("@/pages/coalition"));
+const AfterActionReview = lazy(() => import("@/pages/after-action-review"));
+const StrategicReserves = lazy(() => import("@/pages/strategic-reserves"));
+const DirectiveCascade = lazy(() => import("@/pages/directive-cascade"));
+const RiskMatrix = lazy(() => import("@/pages/risk-matrix"));
 
 const base = (import.meta.env.BASE_URL || "/imperium/").replace(/\/$/, "");
 
@@ -54,6 +62,14 @@ export default function App() {
               <Route path="/supply-lines" component={SupplyLines} />
               <Route path="/centurion" component={CenturionAI} />
               <Route path="/intelligence" component={IntelligenceBriefing} />
+              <Route path="/wargaming" component={Wargaming} />
+              <Route path="/resources" component={ResourceOptimizer} />
+              <Route path="/geospatial" component={Geospatial} />
+              <Route path="/coalition" component={Coalition} />
+              <Route path="/aar" component={AfterActionReview} />
+              <Route path="/reserves" component={StrategicReserves} />
+              <Route path="/directives" component={DirectiveCascade} />
+              <Route path="/risk-matrix" component={RiskMatrix} />
               <Route>
                 <div className="flex items-center justify-center h-64 text-slate-400 text-sm font-display tracking-widest">
                   PAGE NOT FOUND — RETURN TO IMPERIUM

@@ -12,7 +12,7 @@ version = "1.0.0"
 [[services]]
 name = "web"
 paths = [ "/imperium/" ]
-localPort = 3002
+localPort = 9090
 
 [services.development]
 run = "bash -c 'cd /home/runner/workspace/artifacts/imperium && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
@@ -27,5 +27,5 @@ from = "/*"
 to = "/index.html"
 
 [services.env]
-PORT = "3002"
+VITE_PORT = "22100"
 BASE_PATH = "/imperium/"

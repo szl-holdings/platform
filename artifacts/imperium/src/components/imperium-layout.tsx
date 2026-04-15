@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import {
   Globe2, Shield, BookOpen, Network, Cpu, Radio,
   ChevronRight, Activity, Crown, Menu, X,
-  Map
+  Map, Sword, Sliders, Package, Users, GitMerge, AlertTriangle
 } from "lucide-react";
 import { IMPERIUM_DATA, getThreatColor } from "@/lib/imperium-data";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,17 @@ const NAV_ITEMS = [
   { path: "/supply-lines", label: "SUPPLY LINES", sublabel: "Network Topology", icon: Network },
   { path: "/centurion", label: "CENTURION AI", sublabel: "Agent Profiles", icon: Cpu },
   { path: "/intelligence", label: "INTELLIGENCE", sublabel: "SIGINT Briefing", icon: Radio },
+];
+
+const STRATEGIC_NAV = [
+  { path: "/wargaming", label: "WARGAMING", sublabel: "Decision Theater", icon: Sword },
+  { path: "/resources", label: "RESOURCES", sublabel: "Allocation Optimizer", icon: Sliders },
+  { path: "/geospatial", label: "GEOSPATIAL", sublabel: "Intelligence Layers", icon: Globe2 },
+  { path: "/coalition", label: "COALITION", sublabel: "Stakeholder Manager", icon: Users },
+  { path: "/aar", label: "AFTER-ACTION", sublabel: "Review System", icon: BookOpen },
+  { path: "/reserves", label: "RESERVES", sublabel: "Strategic Reserve", icon: Package },
+  { path: "/directives", label: "DIRECTIVES", sublabel: "Cascade Engine", icon: GitMerge },
+  { path: "/risk-matrix", label: "RISK MATRIX", sublabel: "Interdependency Map", icon: AlertTriangle },
 ];
 
 function ThreatBadge({ level }: { level: string }) {
@@ -105,6 +116,49 @@ export function ImperiumLayout({ children }: { children: React.ReactNode }) {
                       {item.label}
                     </div>
                     <div className="text-[10px] text-slate-600 group-hover:text-slate-500 transition-colors leading-tight truncate">
+                      {item.sublabel}
+                    </div>
+                  </div>
+                  {isActive && (
+                    <ChevronRight className="w-3 h-3 ml-auto flex-shrink-0" style={{ color: "#c9a227" }} />
+                  )}
+                </a>
+              </Link>
+            );
+          })}
+
+          {/* Strategic Command section */}
+          <div className="px-4 pt-4 pb-1">
+            <div className="text-[9px] font-mono tracking-[0.2em] text-slate-600 uppercase border-t border-white/5 pt-3">
+              Strategic Command
+            </div>
+          </div>
+          {STRATEGIC_NAV.map((item) => {
+            const Icon = item.icon;
+            const isActive = location === item.path || (item.path !== "/" && location.startsWith(item.path));
+            return (
+              <Link key={item.path} href={item.path}>
+                <a
+                  onClick={() => setMobileOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-2 mx-2 rounded transition-all duration-200 group cursor-pointer",
+                    isActive
+                      ? "bg-gold/10 border border-gold/25"
+                      : "hover:bg-white/3 border border-transparent hover:border-white/5"
+                  )}
+                >
+                  <Icon
+                    className="w-3.5 h-3.5 flex-shrink-0 transition-colors"
+                    style={{ color: isActive ? "#c9a227" : "rgba(148,163,184,0.5)" }}
+                  />
+                  <div className="min-w-0">
+                    <div
+                      className="font-display text-[9px] tracking-[0.1em] font-semibold transition-colors leading-tight"
+                      style={{ color: isActive ? "#c9a227" : "rgba(226,215,180,0.6)" }}
+                    >
+                      {item.label}
+                    </div>
+                    <div className="text-[9px] text-slate-700 group-hover:text-slate-600 transition-colors leading-tight truncate">
                       {item.sublabel}
                     </div>
                   </div>
