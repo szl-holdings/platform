@@ -155,6 +155,34 @@ The platform consists of 13 interconnected applications sharing authentication a
 - **REST API** (`artifacts/api-server/src/routes/ml-pipeline.ts`): 40+ endpoints mounted at `/api/ml/*` covering: feature store CRUD, domain templates, dataset management, training runs, model registry with promotion, inference (single + batch), monitoring cycles, A/B test lifecycle, and SHAP explainability. All routes behind `authMiddleware`.
 - **DB Schema** (`lib/db/src/schema/ml_pipeline.ts`): 8 new tables — `ml_feature_definitions`, `ml_feature_values`, `ml_datasets`, `ml_training_runs`, `ml_model_versions`, `ml_predictions`, `ml_model_monitoring_snapshots`, `ml_ab_tests`. Full Drizzle schema with indexes, Zod insert schemas, and TypeScript types.
 
+## Monte Carlo Simulation & Scenario Analysis Engine (Task #560)
+- **`lib/monte-carlo/`** — new standalone workspace package `@szl-holdings/monte-carlo` with zero external dependencies:
+  - `distributions.ts` — 8 probability distributions: normal, log-normal, uniform, triangular, beta, Poisson, constant, custom. Stats: mean/median/stdDev/variance/P5–P99/skewness/kurtosis/CI95. Histogram (50 buckets) and CDF generation.
+  - `engine.ts` — configurable simulation runner (1,000–100,000 iterations), async batch execution with timeout, progress callbacks, valid-iteration tracking, constraint violation counting, Pearson correlation matrix across all inputs × outputs. `compareScenarios()` for side-by-side multi-scenario analysis.
+  - `sensitivity.ts` — tornado diagram engine: P10/P90 range analysis per input variable, impact percentage ranking, directionality classification, critical assumption identification, narrative generator ("Your outcome is 73% driven by X").
+  - `calibration.ts` — historical calibration: MAE/calibration score per output, parameter suggestion engine, backtesting framework (P10-P90 coverage rate, RMSE, hit rate).
+  - `scenarios.ts` — 7 domain-specific scenario templates (Vessels voyage cost, Terra IRR model, SZL fund exit MOIC, PRISM litigation outcome, Aegis cyber risk ALE, Nexus geopolitical cascade, Lyte capacity planning TCO). Variant library for base/bull/bear/black swan.
+  - `schema.ts` — `ScenarioDefinition` type with inputs, distributions, calculation logic, outputs, constraints, and metadata.
+- **`artifacts/api-server/src/lib/monte-carlo-service.ts`** — server-side job manager: in-memory job store, async simulation execution, per-output sensitivity post-processing, job lifecycle (pending → running → complete/error).
+- **`artifacts/api-server/src/routes/monte-carlo.ts`** — 9 REST endpoints under `/api/monte-carlo/`:
+  - `GET /scenarios` — list all domain scenarios with metadata
+  - `GET /scenarios/:id` — full scenario definition with input distributions and variant library
+  - `POST /simulate` — start async simulation job (returns jobId for polling)
+  - `GET /jobs` — list recent jobs with status/progress
+  - `GET /jobs/:id` — full job result including percentile stats, histograms, CDFs, and sensitivity reports
+  - `GET /jobs/:id/stream` — SSE endpoint streaming progress and final results in real-time
+  - `POST /compare` — side-by-side multi-scenario/multi-variant comparison for a given output metric
+  - `POST /calibrate` — run historical calibration check against a completed simulation job
+  - `POST /backtest` — P10-P90 coverage backtest against historical data
+- **`lib/shared-ui/src/monte-carlo-viz.tsx`** — 7 shared React visualization components (exported from shared-ui index):
+  - `ProbabilityDensityPlot` — SVG histogram with mean/median lines and 95% CI shading
+  - `CumulativeDistributionCurve` — S-curve with P10/P50/P90 callout points
+  - `TornadoDiagram` — horizontal bar chart ranked by impact %, colored by correlation direction
+  - `ScenarioComparisonMatrix` — tabular comparison across mean/P10/P50/P90/stdDev with best-case badge
+  - `ConfidenceBandChart` — layered CI bands (90% and 50%) with mean/median overlay
+  - `SimulationResultCard` — composite card combining headline stats + all three charts + tornado
+  - `SimulationProgressTracker` — animated progress bar with iteration count and ETA
+
 ## External Dependencies
 - **Database:** PostgreSQL
 - **Authentication:** Replit Auth

@@ -394,6 +394,9 @@ importers:
       '@szl-holdings/integrations-openai-ai-server':
         specifier: workspace:*
         version: link:../../lib/integrations-openai-ai-server
+      '@szl-holdings/monte-carlo':
+        specifier: workspace:*
+        version: link:../../lib/monte-carlo
       '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
@@ -2820,6 +2823,12 @@ importers:
       react-native-keyboard-controller:
         specifier: 1.18.5
         version: 1.18.5(react-native-reanimated@4.1.7(react-native-worklets@0.5.1(@babel/core@7.29.0)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0)
+
+  lib/monte-carlo:
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
 
   lib/object-storage-web:
     dependencies:

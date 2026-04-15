@@ -21,6 +21,7 @@
     "@react-pdf/renderer": "^4.3.2",
     "@swc/helpers": "^0.5.20",
     "@szl-holdings/ai-engine": "workspace:*",
+    "@szl-holdings/monte-carlo": "workspace:*",
     "@szl-holdings/api-zod": "workspace:*",
     "@szl-holdings/approvals": "workspace:*",
     "@szl-holdings/atlas-artifacts": "workspace:*",

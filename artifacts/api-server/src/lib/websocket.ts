@@ -105,6 +105,7 @@ export const SENSITIVE_CHANNELS = new Set([
   "vessels:fleet-positions",
   "terra-signals",
   "nexus:intelligence-feed",
+  "monte-carlo:progress",
 ]);
 
 export const PUBLIC_CHANNELS = new Set([
@@ -124,6 +125,7 @@ const CHANNEL_ALLOWED_ROLES: Record<string, Set<string>> = {
   "vessels:fleet-positions": new Set(["founder_admin", "platform_admin", "maritime_ops_user", "ops_manager", "operator"]),
   "terra-signals": new Set(["founder_admin", "platform_admin", "sales_delivery_user", "analyst", "ops_manager"]),
   "nexus:intelligence-feed": new Set(["founder_admin", "platform_admin", "analyst", "ops_manager"]),
+  "monte-carlo:progress": new Set(["founder_admin", "platform_admin", "super_admin", "admin", "operator", "analyst", "ops_manager"]),
 };
 
 const INTERNAL_TOKEN = process.env["ALLOY_INTERNAL_TOKEN"];
@@ -273,6 +275,7 @@ function drainBuffer(clientId: string, client: SubscribedClient): void {
 let totalPublished = 0;
 let totalConnections = 0;
 const publishedPerChannel = new Map<string, number>();
+const GLOBAL_ADMIN_ROLES = new Set(["founder_admin", "platform_admin"]);
 
 export function initWebSocket(server: Server): void {
   wss = new WebSocketServer({ server, path: "/ws" });
@@ -455,7 +458,15 @@ export function publish(channel: string, event: string, data: unknown, tenantId?
 
   for (const [clientId, client] of clients) {
     if (!client.channels.has(channel)) continue;
-    if (tenantId && client.tenantId && client.tenantId !== tenantId) continue;
+
+    if (tenantId != null) {
+      const isGlobalAdmin = client.tenantId === null && GLOBAL_ADMIN_ROLES.has(client.platformRole ?? "");
+      if (!isGlobalAdmin && client.tenantId !== tenantId) continue;
+    } else if (channel === "monte-carlo:progress") {
+      const isGlobalAdmin = GLOBAL_ADMIN_ROLES.has(client.platformRole ?? "");
+      if (!isGlobalAdmin) continue;
+    }
+
     sendToClient(clientId, client, payload);
     client.lastSeqByChannel.set(channel, seq);
   }
@@ -524,4 +535,5 @@ export const WS_CHANNELS = {
   LYTE_METRICS_STREAM: "lyte:metrics-stream",
   BOOKINGS: "bookings",
   NEXUS_INTELLIGENCE_FEED: "nexus:intelligence-feed",
+  MONTE_CARLO_PROGRESS: "monte-carlo:progress",
 } as const;

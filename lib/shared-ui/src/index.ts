@@ -184,3 +184,18 @@ export {
   type BreadcrumbItem,
   type RecentItem,
 } from "./ecosystem-nav";
+
+export {
+  ProbabilityDensityPlot,
+  CumulativeDistributionCurve,
+  TornadoDiagram,
+  ScenarioComparisonMatrix,
+  ConfidenceBandChart,
+  SimulationResultCard,
+  SimulationProgressTracker,
+  type HistogramBucket,
+  type CDFPoint,
+  type DistributionStats,
+  type TornadoEntry,
+  type ScenarioComparisonItem,
+} from "./monte-carlo-viz";

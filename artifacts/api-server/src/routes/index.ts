@@ -154,6 +154,7 @@ import knowledgeGraphRouter from "./knowledge-graph";
 import mlPipelineRouter from "./ml-pipeline";
 import meteringRouter from "./metering";
 import realtimeRouter from "./realtime";
+import monteCarloRouter from "./monte-carlo";
 
 const router: IRouter = Router();
 
@@ -238,6 +239,8 @@ router.use(vesselsRouter);
 router.use(aegisSocRouter);
 router.use(aegisSocLiveRouter);
 router.use(simulationRouter);
+router.use("/monte-carlo", _readLimiter);
+router.use(monteCarloRouter);
 
 router.use("/command", _readLimiter);
 router.use("/command", _writeLimiter);
