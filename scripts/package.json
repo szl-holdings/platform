@@ -11,6 +11,13 @@
     "seed:audit": "tsx ./seed-audit-logs.ts",
     "seed:pilot": "tsx ./seed-pilot-org.ts",
     "seed:pilot-data": "tsx ./seed-pilot-data.ts",
+    "seed:prism-counsel": "tsx ./seed-prism-counsel.ts",
+    "seed:holdings-fundops": "tsx ./seed-holdings-fundops.ts",
+    "seed:carlota-clients": "tsx ./seed-carlota-clients.ts",
+    "seed:governance": "tsx ./seed-governance.ts",
+    "seed:marine-extended": "tsx ./seed-marine-extended.ts",
+    "seed:agent-os": "tsx ./seed-agent-os.ts",
+    "seed:distribution-os": "tsx ./seed-distribution-os.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

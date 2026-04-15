@@ -27,4 +27,25 @@ pnpm --filter @workspace/scripts run seed:pilot || echo "[demo-seed] Pilot seed 
 echo "[demo-seed] Step 5: Pilot data"
 pnpm --filter @workspace/scripts run seed:pilot-data || echo "[demo-seed] Pilot data seed skipped"
 
-echo "[demo-seed] Demo seed pack complete."
+echo "[demo-seed] Step 6: Holdings ventures & Fund Ops financials"
+pnpm --filter @workspace/scripts run seed:holdings-fundops || echo "[demo-seed] Holdings/FundOps seed skipped (already seeded)"
+
+echo "[demo-seed] Step 7: PRISM Counsel matters, parties, offers & AI forecasts"
+pnpm --filter @workspace/scripts run seed:prism-counsel || echo "[demo-seed] PRISM Counsel seed skipped (already seeded)"
+
+echo "[demo-seed] Step 8: Carlota Jo services, client profiles & reservations"
+pnpm --filter @workspace/scripts run seed:carlota-clients || echo "[demo-seed] Carlota clients seed skipped (already seeded)"
+
+echo "[demo-seed] Step 9: Governance policies, cost budgets & compliance records"
+pnpm --filter @workspace/scripts run seed:governance || echo "[demo-seed] Governance seed skipped (already seeded)"
+
+echo "[demo-seed] Step 10: Marine insurance, commodity trading & fleet intelligence"
+pnpm --filter @workspace/scripts run seed:marine-extended || echo "[demo-seed] Marine extended seed skipped (already seeded)"
+
+echo "[demo-seed] Step 11: Agent OS, A2A registry, skill registry & fine-tuning"
+pnpm --filter @workspace/scripts run seed:agent-os || echo "[demo-seed] Agent OS seed skipped (already seeded)"
+
+echo "[demo-seed] Step 12: Distribution OS — editorial pillars, articles, newsletters, campaigns & leads"
+pnpm --filter @workspace/scripts run seed:distribution-os || echo "[demo-seed] Distribution OS seed skipped (already seeded)"
+
+echo "[demo-seed] All demo seed packs complete."

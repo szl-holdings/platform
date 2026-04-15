@@ -73,6 +73,7 @@ export * from "./approvals";
 export * from "./proof_chain";
 export * from "./worldline";
 export * from "./prism_counsel_purview";
+export * from "./prism_counsel_recovery";
 export * from "./distribution-os";
 export * from "./outcome_graph";
 export * from "./atlas_artifacts";
