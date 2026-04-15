@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Activity, AlertTriangle, CheckCircle, XCircle, RefreshCw, FileText, Database, Clock, BarChart3 } from "lucide-react";
+import { Activity, AlertTriangle, CheckCircle, XCircle, RefreshCw, FileText, Database, BarChart3 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 const API = import.meta.env.BASE_URL + "api";
@@ -8,33 +8,58 @@ function usePrismOpsHealth() {
   return useQuery({ queryKey: ["prism-ops-health"], queryFn: async () => { const r = await fetch(`${API}/prism-counsel/health`); return r.json(); }, staleTime: 30000 });
 }
 
-const DEMO_SOURCE_FRESHNESS = [
-  { source: "Microsoft Outlook (Insurer threads)", lastSync: "2026-04-03T09:45:00Z", status: "fresh", ageMinutes: 18, recordCount: 342 },
-  { source: "SharePoint — Matter Documents", lastSync: "2026-04-03T08:00:00Z", status: "fresh", ageMinutes: 105, recordCount: 1847 },
-  { source: "Worldline — Crash Signals", lastSync: "2026-04-03T10:10:00Z", status: "fresh", ageMinutes: 3, recordCount: 2341 },
-  { source: "Worldline — DFS Complaints", lastSync: "2026-04-03T10:00:00Z", status: "fresh", ageMinutes: 13, recordCount: 847 },
-  { source: "Azure Document Intelligence", lastSync: "2026-04-03T09:55:00Z", status: "fresh", ageMinutes: 18, recordCount: 156 },
-  { source: "NY Courts eCourts", lastSync: "2026-04-03T08:00:00Z", status: "stale", ageMinutes: 125, recordCount: 423 },
-  { source: "CMS MSP Recovery", lastSync: "2026-04-02T12:00:00Z", status: "stale", ageMinutes: 1330, recordCount: 89 },
-];
+function usePrismQualityFreshness() {
+  return useQuery({
+    queryKey: ["prism-quality-freshness"],
+    queryFn: async () => {
+      const r = await fetch(`${API}/prism-counsel/quality/freshness`, { credentials: "include" });
+      if (!r.ok) return { sources: [] };
+      return r.json();
+    },
+    staleTime: 60000,
+  });
+}
 
-const DEMO_EXPORT_FAILURES = [
-  { id: 1, exportType: "review_packet", matterId: 3, errorMessage: "Azure Blob connection timeout during PDF generation", failedAt: "2026-04-03T07:30:00Z", retryCount: 2, replayPath: "/admin/replays?jobType=export_generate" },
-  { id: 2, exportType: "demand_packet", matterId: 7, errorMessage: "Missing medical chronology section — document not yet extracted", failedAt: "2026-04-02T16:45:00Z", retryCount: 0, replayPath: "/admin/replays?jobType=document_extract" },
-];
+function usePrismExportFailures() {
+  return useQuery({
+    queryKey: ["prism-export-failures"],
+    queryFn: async () => {
+      const r = await fetch(`${API}/prism-counsel/quality/export-failures`, { credentials: "include" });
+      if (!r.ok) return { failures: [] };
+      return r.json();
+    },
+    staleTime: 60000,
+  });
+}
 
-const DEMO_BACKLOGS = [
-  { category: "Contradiction Flags (Low Confidence)", count: 4, oldest: "2026-04-01T10:00:00Z", color: "#c45a4a" },
-  { category: "Forecasts Requiring Attorney Review", count: 7, oldest: "2026-04-02T09:00:00Z", color: "#d4a054" },
-  { category: "Review Packets Awaiting Sign-Off", count: 12, oldest: "2026-03-31T14:00:00Z", color: "#d4a054" },
-  { category: "Extraction Jobs Pending Manual Review", count: 3, oldest: "2026-04-03T08:00:00Z", color: "#8b7ac8" },
-  { category: "Dead Letter Events Unresolved", count: 2, oldest: "2026-04-02T11:00:00Z", color: "#c45a4a" },
-];
+function usePrismReviewFailures() {
+  return useQuery({
+    queryKey: ["prism-review-failures"],
+    queryFn: async () => {
+      const r = await fetch(`${API}/prism-counsel/quality/review-failures`, { credentials: "include" });
+      if (!r.ok) return { failures: [] };
+      return r.json();
+    },
+    staleTime: 60000,
+  });
+}
 
-const REVIEW_PACKET_FAILURES = [
-  { id: 1, matterTitle: "Rodriguez v. National General", packetType: "chronology_packet", error: "Missing provider records for Q4 2025", failedAt: "2026-04-03T09:00:00Z", replayAvailable: true },
-  { id: 2, matterTitle: "Vasquez v. GEICO", packetType: "settlement_blocker_memo", error: "Lien status unresolved — cannot compute net settlement", failedAt: "2026-04-02T15:00:00Z", replayAvailable: true },
-];
+function usePrismBacklog() {
+  return useQuery({
+    queryKey: ["prism-backlog"],
+    queryFn: async () => {
+      const r = await fetch(`${API}/prism-counsel/quality/backlog`, { credentials: "include" });
+      if (!r.ok) return { items: [] };
+      return r.json();
+    },
+    staleTime: 60000,
+  });
+}
+
+type SourceFreshness = { source: string; lastSync: string; status: "fresh" | "stale" | "error"; ageMinutes: number; recordCount: number };
+type ExportFailure = { id: number; exportType: string; matterId: number; errorMessage: string; failedAt: string; retryCount: number; replayPath: string };
+type BacklogItem = { category: string; count: number; oldest: string; color: string };
+type ReviewPacketFailure = { id: number; matterTitle: string; packetType: string; error: string; failedAt: string; replayAvailable: boolean };
 
 function StatusDot({ status }: { status: "fresh" | "stale" | "error" }) {
   const colors: Record<string, string> = { fresh: "bg-[#4a90b8]", stale: "bg-[#d4a054]", error: "bg-[#c45a4a]" };
@@ -44,6 +69,15 @@ function StatusDot({ status }: { status: "fresh" | "stale" | "error" }) {
 export default function AdminQualityPage() {
   const [tab, setTab] = useState<"freshness" | "export-failures" | "review-failures" | "backlog">("freshness");
   const { data: healthData } = usePrismOpsHealth();
+  const { data: freshnessData } = usePrismQualityFreshness();
+  const { data: exportData } = usePrismExportFailures();
+  const { data: reviewData } = usePrismReviewFailures();
+  const { data: backlogData } = usePrismBacklog();
+
+  const sourceFreshness: SourceFreshness[] = Array.isArray(freshnessData?.sources) ? freshnessData.sources : [];
+  const exportFailures: ExportFailure[] = Array.isArray(exportData?.failures) ? exportData.failures : [];
+  const reviewFailures: ReviewPacketFailure[] = Array.isArray(reviewData?.failures) ? reviewData.failures : [];
+  const backlogItems: BacklogItem[] = Array.isArray(backlogData?.items) ? backlogData.items : [];
 
   const TABS = [
     { key: "freshness" as const, label: "Source Freshness", icon: Database },
@@ -52,10 +86,10 @@ export default function AdminQualityPage() {
     { key: "backlog" as const, label: "Contradiction & Low-Confidence Backlog", icon: BarChart3 },
   ];
 
-  const staleCount = DEMO_SOURCE_FRESHNESS.filter(s => s.status === "stale").length;
-  const exportFailCount = DEMO_EXPORT_FAILURES.length;
-  const reviewFailCount = REVIEW_PACKET_FAILURES.length;
-  const backlogTotal = DEMO_BACKLOGS.reduce((acc, b) => acc + b.count, 0);
+  const staleCount = sourceFreshness.filter(s => s.status === "stale").length;
+  const exportFailCount = exportFailures.length;
+  const reviewFailCount = reviewFailures.length;
+  const backlogTotal = backlogItems.reduce((acc, b) => acc + b.count, 0);
 
   return (
     <div className="p-6 max-w-[1100px] mx-auto space-y-5">
@@ -96,28 +130,35 @@ export default function AdminQualityPage() {
       {tab === "freshness" && (
         <div className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
           <h3 className="text-sm font-semibold text-slate-200 mb-3">Data Source Freshness</h3>
-          <div className="space-y-2">
-            {DEMO_SOURCE_FRESHNESS.map((s, i) => (
-              <div key={i} className="flex items-center gap-3 py-2 border-b border-white/[0.04] last:border-0">
-                <StatusDot status={s.status as "fresh" | "stale" | "error"} />
-                <div className="flex-1">
-                  <div className="text-xs text-slate-200">{s.source}</div>
-                  <div className="text-[9px] text-slate-500">{s.recordCount.toLocaleString()} records · Last sync: {new Date(s.lastSync).toLocaleString()}</div>
+          {sourceFreshness.length === 0 ? (
+            <div className="text-center py-8">
+              <CheckCircle className="w-6 h-6 mx-auto mb-2 text-[#4a90b8]/40" />
+              <p className="text-xs text-slate-500">No source freshness data — all systems nominal or no sources configured.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {sourceFreshness.map((s, i) => (
+                <div key={i} className="flex items-center gap-3 py-2 border-b border-white/[0.04] last:border-0">
+                  <StatusDot status={s.status} />
+                  <div className="flex-1">
+                    <div className="text-xs text-slate-200">{s.source}</div>
+                    <div className="text-[9px] text-slate-500">{s.recordCount.toLocaleString()} records · Last sync: {new Date(s.lastSync).toLocaleString()}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className={`text-xs font-mono ${s.status === "fresh" ? "text-[#4a90b8]" : "text-[#d4a054]"}`}>{s.ageMinutes < 60 ? `${s.ageMinutes}m ago` : `${Math.round(s.ageMinutes / 60)}h ago`}</div>
+                    <div className={`text-[9px] ${s.status === "fresh" ? "text-[#4a90b8]" : "text-[#d4a054]"}`}>{s.status}</div>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <div className={`text-xs font-mono ${s.status === "fresh" ? "text-[#4a90b8]" : "text-[#d4a054]"}`}>{s.ageMinutes < 60 ? `${s.ageMinutes}m ago` : `${Math.round(s.ageMinutes / 60)}h ago`}</div>
-                  <div className={`text-[9px] ${s.status === "fresh" ? "text-[#4a90b8]" : "text-[#d4a054]"}`}>{s.status}</div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       {tab === "export-failures" && (
         <div className="space-y-3">
-          {DEMO_EXPORT_FAILURES.length === 0 && <div className="text-center text-slate-500 py-8 text-sm">No export failures — all clear</div>}
-          {DEMO_EXPORT_FAILURES.map(f => (
+          {exportFailures.length === 0 && <div className="text-center text-slate-500 py-8 text-sm">No export failures — all clear</div>}
+          {exportFailures.map(f => (
             <div key={f.id} className="rounded-lg border border-[#c45a4a]/20 p-4" style={{ background: "#0c1220" }}>
               <div className="flex items-start justify-between mb-2">
                 <div>
@@ -140,7 +181,8 @@ export default function AdminQualityPage() {
 
       {tab === "review-failures" && (
         <div className="space-y-3">
-          {REVIEW_PACKET_FAILURES.map(f => (
+          {reviewFailures.length === 0 && <div className="text-center text-slate-500 py-8 text-sm">No review packet failures — all clear</div>}
+          {reviewFailures.map(f => (
             <div key={f.id} className="rounded-lg border border-[#d4a054]/20 p-4" style={{ background: "#0c1220" }}>
               <div className="flex items-start justify-between mb-2">
                 <div>
@@ -161,18 +203,25 @@ export default function AdminQualityPage() {
       {tab === "backlog" && (
         <div className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
           <h3 className="text-sm font-semibold text-slate-200 mb-3">Contradiction & Low-Confidence Backlog</h3>
-          <div className="space-y-3">
-            {DEMO_BACKLOGS.map((b, i) => (
-              <div key={i} className="flex items-center gap-3 py-3 border-b border-white/[0.04] last:border-0">
-                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: b.color }} />
-                <div className="flex-1">
-                  <div className="text-xs text-slate-200">{b.category}</div>
-                  <div className="text-[9px] text-slate-500">Oldest: {new Date(b.oldest).toLocaleDateString()}</div>
+          {backlogItems.length === 0 ? (
+            <div className="text-center py-8">
+              <CheckCircle className="w-6 h-6 mx-auto mb-2 text-[#4a90b8]/40" />
+              <p className="text-xs text-slate-500">No backlog items — all contradictions resolved.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {backlogItems.map((b, i) => (
+                <div key={i} className="flex items-center gap-3 py-3 border-b border-white/[0.04] last:border-0">
+                  <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: b.color }} />
+                  <div className="flex-1">
+                    <div className="text-xs text-slate-200">{b.category}</div>
+                    <div className="text-[9px] text-slate-500">Oldest: {new Date(b.oldest).toLocaleDateString()}</div>
+                  </div>
+                  <div className="text-xl font-semibold" style={{ color: b.color }}>{b.count}</div>
                 </div>
-                <div className="text-xl font-semibold" style={{ color: b.color }}>{b.count}</div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

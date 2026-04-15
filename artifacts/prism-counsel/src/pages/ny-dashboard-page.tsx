@@ -1,11 +1,16 @@
 import { Scale, Clock, AlertTriangle, DollarSign, MapPin, Building2, Shield, ArrowRight, Eye, FileCheck, TrendingUp } from "lucide-react";
 import { Link } from "wouter";
-import { DEMO_MATTERS } from "../data/demo-matters";
-import { WATCHLIST_ITEMS, NO_FAULT_CLAIMS, VENUE_PROFILES, INSURER_PROFILES, CLOCK_RULES, DEMAND_PACKETS } from "../data/demo-ny";
+import { usePrismMatters } from "../hooks/use-prism-api";
+import { VENUE_PROFILES, INSURER_PROFILES, CLOCK_RULES } from "../data/demo-ny";
 
 export default function NYDashboardPage() {
-  const nyMatters = DEMO_MATTERS.filter((m) => m.jurisdiction.includes("NY") || m.jurisdiction.includes("New York"));
-  const criticalWatchItems = WATCHLIST_ITEMS.filter((w) => w.riskLevel === "critical" || w.riskLevel === "high");
+  const mattersQ = usePrismMatters();
+  const allMatters = (Array.isArray(mattersQ.data) ? mattersQ.data : []) as Array<{ id: number; title: string; caseNumber: string; jurisdiction: string; healthScore: number; status: string; totalDamages?: number }>;
+  const nyMatters = allMatters.filter((m) => m.jurisdiction.includes("NY") || m.jurisdiction.includes("New York"));
+  const criticalWatchItems: Array<{ riskLevel: string; description: string; matterTitle: string; daysUntil: number | null }> = [];
+  const WATCHLIST_ITEMS = criticalWatchItems;
+  const NO_FAULT_CLAIMS: Array<{ id: number; claimNumber: string; carrier: string; status: string; totalBilled: number; totalPaid: number; totalDenied: number }> = [];
+  const DEMAND_PACKETS: Array<{ matterTitle: string; targetDate: string; status: string; readinessScore: number; missingItems: string[] }> = [];
 
   return (
     <div className="p-6 max-w-[1200px] mx-auto space-y-6">

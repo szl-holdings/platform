@@ -41,16 +41,6 @@ const DEMO_TENANTS: TenantSummary[] = [
   },
 ];
 
-const DEMO_RUNS_BY_DAY = [
-  { day: "Mon", runs: 124, failed: 8, awaiting_approval: 12 },
-  { day: "Tue", runs: 198, failed: 11, awaiting_approval: 19 },
-  { day: "Wed", runs: 176, failed: 6, awaiting_approval: 14 },
-  { day: "Thu", runs: 241, failed: 14, awaiting_approval: 22 },
-  { day: "Fri", runs: 312, failed: 9, awaiting_approval: 31 },
-  { day: "Sat", runs: 98, failed: 3, awaiting_approval: 5 },
-  { day: "Sun", runs: 72, failed: 1, awaiting_approval: 4 },
-];
-
 const MODEL_COLORS: Record<string, string> = {
   "claude-sonnet-4-6": "#8b5cf6",
   "gpt-5.2": "#4B8BDB",
@@ -255,43 +245,24 @@ export default function AdminAnalytics() {
       {tab === "overview" && (
         <div className="grid grid-cols-2 gap-4">
           <div className="rounded-xl border p-5" style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-sm font-semibold text-white">Agent Runs — 7 Days</div>
-              <span className="text-[9px] px-1.5 py-0.5 rounded font-mono border" style={{ color: "rgba(75,139,219,0.6)", borderColor: "rgba(75,139,219,0.2)", background: "rgba(75,139,219,0.04)" }}>
-                Demo Data
-              </span>
-            </div>
-            <div className="h-48">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={DEMO_RUNS_BY_DAY} margin={{ top: 0, right: 0, left: -20, bottom: 0 }} barSize={10}>
-                  <XAxis dataKey="day" tick={{ fontSize: 9, fill: "rgba(255,255,255,0.3)" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 9, fill: "rgba(255,255,255,0.3)" }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ background: "#0d1117", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, fontSize: 10 }} />
-                  <Bar dataKey="runs" name="Completed" fill="#4B8BDB" opacity={0.8} radius={[2, 2, 0, 0]} />
-                  <Bar dataKey="failed" name="Failed" fill="#ef4444" opacity={0.7} radius={[2, 2, 0, 0]} />
-                  <Bar dataKey="awaiting_approval" name="Awaiting Approval" fill="#8b5cf6" opacity={0.7} radius={[2, 2, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="text-sm font-semibold text-white mb-4">Agent Runs — 7 Days</div>
+            <div className="h-48 flex items-center justify-center">
+              <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>Per-day run history requires time-series aggregation API</span>
             </div>
           </div>
 
           <div className="rounded-xl border p-5" style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-sm font-semibold text-white">Budget Utilization by Tenant</div>
-              <span className="text-[9px] px-1.5 py-0.5 rounded font-mono border" style={{ color: "rgba(75,139,219,0.6)", borderColor: "rgba(75,139,219,0.2)", background: "rgba(75,139,219,0.04)" }}>
-                Demo Data
-              </span>
-            </div>
+            <div className="text-sm font-semibold text-white mb-4">Cost by Tenant (MTD)</div>
             <div className="space-y-4">
-              {DEMO_TENANTS.map(t => (
-                <div key={t.id}>
+              {(liveAnalytics?.tenantBreakdown ?? []).length === 0 ? (
+                <div className="text-center py-4 text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>No tenant cost data available</div>
+              ) : (liveAnalytics?.tenantBreakdown ?? []).map(t => (
+                <div key={t.orgId ?? 0}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-[11px] text-white">{t.name}</span>
-                    <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>
-                      {Math.round((t.costUsd / t.budgetUsd) * 100)}%
-                    </span>
+                    <span className="text-[11px] text-white">Org #{t.orgId ?? "—"}</span>
+                    <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>${t.totalCostMtdUsd.toFixed(2)}</span>
                   </div>
-                  <BudgetBar used={t.costUsd} total={t.budgetUsd} />
+                  <BudgetBar used={t.totalCostMtdUsd} total={Math.max(t.totalCostMtdUsd, 100)} />
                 </div>
               ))}
             </div>
@@ -358,8 +329,20 @@ export default function AdminAnalytics() {
 
       {tab === "tenants" && (
         <div className="space-y-3">
-          {DEMO_TENANTS.map(t => (
-            <TenantRow key={t.id} tenant={t} />
+          {(liveAnalytics?.tenantBreakdown ?? []).length === 0 ? (
+            <div className="rounded-xl border p-8 text-center" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)" }}>
+              <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>No tenant data available — usage events will populate this view</div>
+            </div>
+          ) : (liveAnalytics?.tenantBreakdown ?? []).map(t => (
+            <div key={t.orgId ?? 0} className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)" }}>
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-semibold text-white">Org #{t.orgId ?? "—"}</div>
+                <div className="flex gap-4 text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>
+                  <span>{t.eventCount} events</span>
+                  <span>${t.totalCostMtdUsd.toFixed(2)} MTD</span>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       )}

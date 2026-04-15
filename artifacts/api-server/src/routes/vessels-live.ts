@@ -3,11 +3,35 @@ import { LRUCache } from "lru-cache";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
-import { simulationEngine } from "../lib/simulation-engine.js";
-
-const DEMO_MODE = process.env["DEMO_MODE"] === "true" || process.env["DEMO_MODE"] === "1";
 
 const router: IRouter = Router();
+
+interface LiveVessel {
+  mmsi: string;
+  imo: string | null;
+  name: string;
+  type: string;
+  shipTypeCode: number;
+  lat: number;
+  lon: number;
+  speed: number;
+  course: number;
+  heading: number;
+  destination: string;
+  status: string;
+  navStatus: number;
+  flag: string;
+  length: number | null;
+  beam: number | null;
+  draft: number | null;
+  callsign: string | null;
+  timestamp: string;
+}
+
+interface AisGeoJsonFeature {
+  properties?: Record<string, unknown>;
+  geometry?: { coordinates?: number[] };
+}
 
 const vesLiveLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -75,22 +99,15 @@ const FLAG_MAP: Record<string, string> = {
   "352": "PA", "538": "MH", "636": "LR", "310": "BM", "378": "VG", "376": "TC",
 };
 
-const FALLBACK_AIS_VESSELS = [
-  { mmsi: "211234567", imo: "9876123", name: "ATLANTIC VOYAGER", type: "Cargo", shipTypCode: 70, lat: 51.52, lon: 1.35, speed: 12.4, course: 225, heading: 223, destination: "ROTTERDAM", status: "Under way using engine", navStatus: 0, flag: "DE", length: 225, beam: 32, draft: 11.2, timestamp: new Date(Date.now() - 120000).toISOString(), callsign: "DCAB3" },
-  { mmsi: "636092587", imo: "9654321", name: "PACIFIC GUARDIAN", type: "Tanker", shipTypeCode: 80, lat: 1.26, lon: 103.85, speed: 8.2, course: 315, heading: 312, destination: "SINGAPORE", status: "Under way using engine", navStatus: 0, flag: "LR", length: 330, beam: 58, draft: 14.5, timestamp: new Date(Date.now() - 180000).toISOString(), callsign: "A8KL9" },
-  { mmsi: "477234100", imo: "9234100", name: "STAR PHOENIX", type: "Container", shipTypeCode: 70, lat: 29.97, lon: 32.56, speed: 14.1, course: 340, heading: 338, destination: "PIRAEUS", status: "Under way using engine", navStatus: 0, flag: "HK", length: 366, beam: 51, draft: 13.8, timestamp: new Date(Date.now() - 90000).toISOString(), callsign: "VRBD7" },
-  { mmsi: "538006712", imo: "9006712", name: "OCEAN MERIDIAN", type: "Bulk Carrier", shipTypeCode: 70, lat: 26.07, lon: 56.27, speed: 10.8, course: 90, heading: 88, destination: "MUMBAI", status: "Under way using engine", navStatus: 0, flag: "MH", length: 292, beam: 45, draft: 12.1, timestamp: new Date(Date.now() - 150000).toISOString(), callsign: "V7ML4" },
-  { mmsi: "352456789", imo: "9456789", name: "LIBERTY WAVE", type: "Container", shipTypeCode: 70, lat: 9.0, lon: 79.55, speed: 16.2, course: 70, heading: 68, destination: "COLOMBO", status: "Under way using engine", navStatus: 0, flag: "PA", length: 400, beam: 59, draft: 15.2, timestamp: new Date(Date.now() - 60000).toISOString(), callsign: "3EJK2" },
-  { mmsi: "244123456", imo: "9123456", name: "NORTH SEA PIONEER", type: "Tanker", shipTypeCode: 80, lat: 57.7, lon: 1.8, speed: 6.5, course: 180, heading: 178, destination: "ABERDEEN", status: "Under way using engine", navStatus: 0, flag: "NL", length: 274, beam: 46, draft: 12.8, timestamp: new Date(Date.now() - 200000).toISOString(), callsign: "PBHE3" },
-];
 
-async function fetchDigitrafficAis(): Promise<{ vessels: typeof FALLBACK_AIS_VESSELS; source: string }> {
+async function fetchDigitrafficAis(): Promise<{ vessels: LiveVessel[]; source: string }> {
   try {
-    const data = await fetchJson("https://meri.digitraffic.fi/api/ais/v1/locations/latest?from=0&to=100", 10000) as any;
+    const raw = await fetchJson("https://meri.digitraffic.fi/api/ais/v1/locations/latest?from=0&to=100", 10000);
+    const data = raw as { features?: unknown[] };
     const features = data?.features;
     if (!Array.isArray(features) || features.length === 0) throw new Error("No AIS data");
 
-    const vessels = features.slice(0, 20).map((f: any, idx: number) => {
+    const vessels = (features as AisGeoJsonFeature[]).slice(0, 20).map((f, idx) => {
       const props = f.properties ?? {};
       const coords = f.geometry?.coordinates ?? [25.0, 60.0];
       const shipType = props.shipType ?? 0;
@@ -122,20 +139,21 @@ async function fetchDigitrafficAis(): Promise<{ vessels: typeof FALLBACK_AIS_VES
       };
     });
 
-    return { vessels: vessels as any, source: "live-digitraffic" };
+    return { vessels, source: "live-digitraffic" };
   } catch {
-    return { vessels: FALLBACK_AIS_VESSELS, source: "demo" };
+    return { vessels: [], source: "unavailable" };
   }
 }
 
-async function fetchBarentsWatchAis(): Promise<{ vessels: any[]; source: string }> {
+async function fetchBarentsWatchAis(): Promise<{ vessels: LiveVessel[]; source: string }> {
   try {
-    const data = await fetchJson(
+    const raw = await fetchJson(
       "https://www.barentswatch.no/bwapi/v2/latest/combined?Xabcd=positions&area=NOR",
       10000,
-    ) as any;
+    );
+    const data = raw as Record<string, unknown>[];
     if (!Array.isArray(data) || data.length === 0) throw new Error("No BarentsWatch data");
-    const vessels = data.slice(0, 15).map((v: any) => ({
+    const vessels: LiveVessel[] = data.slice(0, 15).map((v) => ({
       mmsi: String(v.mmsi ?? ""),
       imo: v.imo ? String(v.imo) : null,
       name: v.name?.trim() || `VESSEL-${v.mmsi}`,
@@ -159,7 +177,7 @@ async function fetchBarentsWatchAis(): Promise<{ vessels: any[]; source: string 
     }));
     return { vessels, source: "live-barentswatch" };
   } catch {
-    return { vessels: [], source: "demo" };
+    return { vessels: [], source: "unavailable" };
   }
 }
 
@@ -168,7 +186,7 @@ router.get("/vessels/live/ais", vesLiveLimit, authMiddleware({ required: false }
     const provider = (req.query.provider as string) ?? "digitraffic";
     const cacheKey = `ais-${provider}`;
 
-    const result = await getCached<any>(cacheKey, 5 * 60 * 1000, async () => {
+    const result = await getCached<LiveVessel[]>(cacheKey, 5 * 60 * 1000, async () => {
       const fetched = provider === "barentswatch" ? await fetchBarentsWatchAis() : await fetchDigitrafficAis();
       return { data: fetched.vessels, source: fetched.source };
     });
@@ -176,10 +194,10 @@ router.get("/vessels/live/ais", vesLiveLimit, authMiddleware({ required: false }
     sendSuccess(res, {
       source: provider === "barentswatch" ? "BarentsWatch AIS (Norwegian Coastal Administration)" : "Digitraffic AIS (Finnish Transport Infrastructure Agency)",
       url: provider === "barentswatch" ? "https://www.barentswatch.no/bwapi/" : "https://meri.digitraffic.fi/",
-      count: (result.data as any[]).length,
+      count: Array.isArray(result.data) ? result.data.length : 0,
       vessels: result.data,
       dataSource: result.source,
-      liveData: !result.source.includes("demo"),
+      liveData: result.source === "live-digitraffic" || result.source === "live-barentswatch",
       cacheAgeSeconds: result.cacheAge,
       isStale: result.isStale,
       providers: ["digitraffic", "barentswatch"],
@@ -196,26 +214,26 @@ router.get("/vessels/live/ais/combined", vesLiveLimit, authMiddleware({ required
         fetchBarentsWatchAis(),
       ]);
 
-      const dtVessels = digitraffic.status === "fulfilled" ? digitraffic.value.vessels : FALLBACK_AIS_VESSELS;
+      const dtVessels = digitraffic.status === "fulfilled" ? digitraffic.value.vessels : [];
       const bwVessels = barentswatch.status === "fulfilled" ? barentswatch.value.vessels : [];
-      const dtSource = digitraffic.status === "fulfilled" ? digitraffic.value.source : "demo";
-      const bwSource = barentswatch.status === "fulfilled" ? barentswatch.value.source : "demo";
+      const dtSource = digitraffic.status === "fulfilled" ? digitraffic.value.source : "unavailable";
+      const bwSource = barentswatch.status === "fulfilled" ? barentswatch.value.source : "unavailable";
 
-      const mmsiSeen = new Set(dtVessels.map((v: any) => v.mmsi));
-      const combined = [...dtVessels, ...bwVessels.filter((v: any) => !mmsiSeen.has(v.mmsi))];
+      const mmsiSeen = new Set(dtVessels.map((v) => v.mmsi));
+      const combined = [...dtVessels, ...bwVessels.filter((v) => !mmsiSeen.has(v.mmsi))];
 
       return {
         data: combined,
-        source: dtSource !== "demo" || bwSource !== "demo" ? "live" : "demo",
+        source: dtSource === "live-digitraffic" || bwSource === "live-barentswatch" ? "live" : "unavailable",
       };
     });
 
     sendSuccess(res, {
       source: "Combined AIS Feed — Digitraffic + BarentsWatch",
-      count: (result.data as any[]).length,
+      count: Array.isArray(result.data) ? result.data.length : 0,
       vessels: result.data,
       dataSource: result.source,
-      liveData: !result.source.includes("demo"),
+      liveData: result.source === "live",
       cacheAgeSeconds: result.cacheAge,
       isStale: result.isStale,
       fetchedAt: new Date().toISOString(),
@@ -231,7 +249,7 @@ router.get("/vessels/live/vessel-details/:mmsi", vesLiveLimit, authMiddleware({ 
         const data = await fetchJson(
           `https://meri.digitraffic.fi/api/ais/v1/vessels/${mmsi}`,
           8000,
-        ) as any;
+        ) as Record<string, unknown> & { dimensions?: Record<string, number> };
 
         if (!data?.mmsi) throw new Error("No vessel data");
 
@@ -257,8 +275,7 @@ router.get("/vessels/live/vessel-details/:mmsi", vesLiveLimit, authMiddleware({ 
           source: "live-digitraffic",
         };
       } catch {
-        const demo = FALLBACK_AIS_VESSELS.find(v => v.mmsi === mmsi) ?? FALLBACK_AIS_VESSELS[0];
-        return { data: demo, source: "demo" };
+        return { data: null, source: "unavailable" };
       }
     });
 
@@ -267,7 +284,7 @@ router.get("/vessels/live/vessel-details/:mmsi", vesLiveLimit, authMiddleware({ 
       mmsi,
       vessel: result.data,
       dataSource: result.source,
-      liveData: result.source !== "demo",
+      liveData: result.source !== "unavailable",
       cacheAgeSeconds: result.cacheAge,
       fetchedAt: new Date().toISOString(),
     });
@@ -278,18 +295,18 @@ router.get("/vessels/live/weather", vesLiveLimit, authMiddleware({ required: fal
   try {
     const lat = parseFloat(req.query.lat as string) || 60.0;
     const lon = parseFloat(req.query.lon as string) || 25.0;
-    const result = await getCached<any>(`weather-marine-${lat.toFixed(2)}-${lon.toFixed(2)}`, 15 * 60 * 1000, async () => {
+    const result = await getCached<Record<string, unknown>>(`weather-marine-${lat.toFixed(2)}-${lon.toFixed(2)}`, 15 * 60 * 1000, async () => {
       try {
         const raw = await fetchJson(
           `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height,wave_direction,wave_period,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction&current=wave_height,wind_wave_height,swell_wave_height,wave_direction,wave_period&timezone=UTC&forecast_days=3`,
           8000,
-        ) as any;
+        ) as Record<string, unknown> & { current?: Record<string, number> };
         if (!raw?.current) throw new Error("No marine weather data");
 
         const windRaw = await fetchJson(
           `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=wind_speed_10m,wind_direction_10m,temperature_2m,precipitation&timezone=UTC`,
           6000,
-        ) as any;
+        ) as Record<string, unknown> & { current?: Record<string, number> };
 
         const windSpeed = Math.round(windRaw?.current?.wind_speed_10m ?? 0);
         const windDir = windRaw?.current?.wind_direction_10m ?? 0;
@@ -329,10 +346,11 @@ router.get("/vessels/live/weather", vesLiveLimit, authMiddleware({ required: fal
         return {
           data: {
             location: { lat, lon },
-            current: { waveHeight: 1.8, windWaveHeight: 1.2, swellWaveHeight: 1.4, windSpeed: 15, windDirectionName: "NW", beaufortScale: 4, condition: "Moderate seas", warnings: [] },
+            current: null,
             forecast3h: [],
+            available: false,
           },
-          source: "demo",
+          source: "unavailable",
         };
       }
     });
@@ -342,7 +360,7 @@ router.get("/vessels/live/weather", vesLiveLimit, authMiddleware({ required: fal
       url: "https://marine-api.open-meteo.com/",
       ...result.data,
       dataSource: result.source,
-      liveData: result.source !== "demo",
+      liveData: result.source !== "unavailable",
       cacheAgeSeconds: result.cacheAge,
       isStale: result.isStale,
       fetchedAt: new Date().toISOString(),
@@ -363,10 +381,10 @@ router.get("/vessels/live/fleet-summary", vesLiveLimit, authMiddleware({ require
         const bwVessels = bw.status === "fulfilled" ? bw.value.vessels : [];
         const allVessels = [...dtVessels, ...bwVessels];
 
-        const underway = allVessels.filter((v: any) => v.navStatus === 0).length;
-        const anchored = allVessels.filter((v: any) => v.navStatus === 1).length;
-        const moored = allVessels.filter((v: any) => v.navStatus === 5).length;
-        const avgSpeed = allVessels.filter((v: any) => v.speed > 0).reduce((s: number, v: any) => s + v.speed, 0) / Math.max(1, allVessels.filter((v: any) => v.speed > 0).length);
+        const underway = allVessels.filter((v) => v.navStatus === 0).length;
+        const anchored = allVessels.filter((v) => v.navStatus === 1).length;
+        const moored = allVessels.filter((v) => v.navStatus === 5).length;
+        const avgSpeed = allVessels.filter((v) => v.speed > 0).reduce((s, v) => s + v.speed, 0) / Math.max(1, allVessels.filter((v) => v.speed > 0).length);
 
         return {
           data: {
@@ -379,59 +397,36 @@ router.get("/vessels/live/fleet-summary", vesLiveLimit, authMiddleware({ require
             anchoredCount: anchored,
             mooredCount: moored,
             avgSpeedKnots: +avgSpeed.toFixed(1),
-            typeBreakdown: allVessels.reduce((acc: Record<string, number>, v: any) => {
+            typeBreakdown: allVessels.reduce((acc: Record<string, number>, v) => {
               const t = v.type || "Unknown";
               acc[t] = (acc[t] ?? 0) + 1;
               return acc;
             }, {}),
             liveData: dtVessels.length > 0 || bwVessels.length > 0,
           },
-          source: dtVessels.length > 0 ? "live" : "demo",
+          source: dtVessels.length > 0 ? "live" : "unavailable",
         };
       } catch {
         return {
           data: {
             source: "Vessels Maritime Intelligence",
-            status: "operational",
-            totalVesselsTracked: 847,
-            underwayCount: 412,
-            anchoredCount: 89,
-            mooredCount: 156,
-            avgSpeedKnots: 11.4,
-            typeBreakdown: { Cargo: 312, Tanker: 156, Container: 203, "Bulk Carrier": 176 },
+            status: "unavailable",
+            totalVesselsTracked: 0,
+            underwayCount: 0,
+            anchoredCount: 0,
+            mooredCount: 0,
+            avgSpeedKnots: 0,
+            typeBreakdown: {},
             liveData: false,
           },
-          source: "demo",
+          source: "unavailable",
         };
       }
     });
 
-    let simSummary: Record<string, any> = {};
-    if (DEMO_MODE) {
-      try {
-        const simVessels = simulationEngine.getVessels();
-        const simEvents = simulationEngine.getVesselEvents(10);
-        const darkVessels = simEvents.filter(e => e.type === "ais_dark");
-        const criticalEvents = simEvents.filter(e => e.severity === "critical" || e.severity === "high");
-        const totalImpact = simEvents.reduce((s, e) => s + (e.impactUsd ?? 0), 0);
-
-        simSummary = {
-          simulationActive: true,
-          simulationVessels: simVessels.length,
-          simulationVesselsUnderway: simVessels.filter(v => v.status === "at_sea").length,
-          simulationVesselsAnchored: simVessels.filter(v => v.status === "anchored").length,
-          simulationDarkVessels: darkVessels.length,
-          simulationCriticalEvents: criticalEvents.length,
-          simulationFinancialImpactUSD: +totalImpact.toFixed(2),
-          simulationLastTick: new Date().toISOString(),
-          crossDomainAlerts: simulationEngine.getCorrelationEvents(5),
-        };
-      } catch { /* non-fatal */ }
-    }
-
     sendSuccess(res, {
       ...result.data,
-      ...simSummary,
+      simulationActive: false,
       cacheAgeSeconds: result.cacheAge,
       isStale: result.isStale,
       fetchedAt: new Date().toISOString(),

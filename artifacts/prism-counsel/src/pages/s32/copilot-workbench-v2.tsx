@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Brain, Sparkles, Send, Loader2, FileText, TrendingUp, MessageSquare, AlertTriangle, CheckSquare, Search, Package, Shield, ChevronDown, X } from "lucide-react";
 import { useCopilotSessions, useCopilotHistory, useCopilotCreateSession, useCopilotSendMessage } from "../../hooks/use-prism-s31";
-import { DEMO_MATTERS } from "../../data/demo-matters";
+import { usePrismMatters } from "../../hooks/use-prism-api";
 
 const ACTION_CARDS = [
   {
@@ -153,8 +153,10 @@ const DEMO_RESPONSES: Record<string, string> = {
 };
 
 export default function CopilotWorkbenchV2() {
+  const mattersQ = usePrismMatters();
+  const matters = (Array.isArray(mattersQ.data) ? mattersQ.data : []) as Array<{ id: number; title: string; caseNumber: string; status: string }>;
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
-  const [selectedMatter, setSelectedMatter] = useState<number>(1);
+  const [selectedMatter, setSelectedMatter] = useState<number>(0);
   const [input, setInput] = useState("");
   const [demoMessages, setDemoMessages] = useState<{ role: string; content: string; action?: string }[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
@@ -199,7 +201,7 @@ export default function CopilotWorkbenchV2() {
     setSelectedAction(null);
   };
 
-  const matter = DEMO_MATTERS.find(m => m.id === selectedMatter) || DEMO_MATTERS[0];
+  const matter = matters.find(m => m.id === selectedMatter) || matters[0] || null;
 
   return (
     <div className="flex h-full">
@@ -219,11 +221,13 @@ export default function CopilotWorkbenchV2() {
             onChange={e => setSelectedMatter(Number(e.target.value))}
             className="w-full bg-white/[0.04] border border-white/[0.08] rounded px-2 py-1.5 text-[11px] text-slate-300 focus:outline-none focus:border-white/[0.15]"
           >
-            {DEMO_MATTERS.map(m => (
+            {matters.length === 0 ? (
+              <option value={0}>No matters loaded</option>
+            ) : matters.map(m => (
               <option key={m.id} value={m.id}>{m.title.split(" v. ")[0]}</option>
             ))}
           </select>
-          <div className="mt-1 text-[9px] text-slate-600">{matter.caseNumber} · {matter.status.replace("_", " ")}</div>
+          <div className="mt-1 text-[9px] text-slate-600">{matter ? `${matter.caseNumber} · ${matter.status.replace("_", " ")}` : "Connect matter data"}</div>
         </div>
 
         <div className="flex-1 p-2 overflow-y-auto">

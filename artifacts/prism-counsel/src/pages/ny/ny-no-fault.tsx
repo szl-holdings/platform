@@ -1,8 +1,7 @@
 import { FileText, AlertTriangle, CheckCircle, Clock } from "lucide-react";
-import { NY_DEMO_MATTERS } from "../../data/ny-demo-matters";
 
 export default function NyNoFaultPage() {
-  const noFaultMatters = NY_DEMO_MATTERS.filter(m => m.noFaultClaims.length > 0);
+  const noFaultMatters: Array<{ id: number; title: string; matterType: string; noFaultClaims: Array<{ claimant: string; carrier: string; dateOfLoss: string; noticeStatus: string; arbitrationStatus: string; totalBilled: number; totalPaid: number; totalDenied: number; evidenceLockRisk: number }>; verificationRequests: Array<{ type: string; requestedBy: string; suspensionTrigger: boolean; status: string; dueDate: string }>; denials: Array<{ type: string; amountDenied: number; appealStatus: string; reason: string; deniedBy: string; deniedAt: string }> }> = [];
 
   return (
     <div className="p-6 max-w-[1200px] mx-auto space-y-5">
@@ -96,12 +95,13 @@ export default function NyNoFaultPage() {
         </div>
       ))}
 
-      {NY_DEMO_MATTERS.filter(m => m.noFaultClaims.length === 0).map(m => (
-        <div key={m.id} className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
-          <div className="text-xs text-slate-400">{m.title.split(" (")[0]}</div>
-          <div className="text-[10px] text-slate-600 mt-1">No no-fault claims — {m.matterType.replace("_", " ")} matter</div>
+      {noFaultMatters.length === 0 && (
+        <div className="rounded-lg border border-white/[0.06] p-8 text-center" style={{ background: "#0c1220" }}>
+          <FileText className="w-8 h-8 text-slate-600 mx-auto mb-3" />
+          <p className="text-sm text-slate-400">No no-fault matter data</p>
+          <p className="text-xs text-slate-600 mt-1">Connect NY matter data with no-fault claims to populate this view.</p>
         </div>
-      ))}
+      )}
     </div>
   );
 }

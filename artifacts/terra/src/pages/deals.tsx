@@ -321,19 +321,7 @@ interface Exchange1031 {
   qi: string;
 }
 
-const DEMO_EXCHANGES: Exchange1031[] = [
-  {
-    relinquishedProperty: "422 Flatbush Ave, Brooklyn",
-    saleDate: "2026-03-01",
-    salePrice: 7400000,
-    identificationDeadline: "2026-04-15",
-    exchangeDeadline: "2026-08-28",
-    identifiedProperties: ["211 Liberty Ave, East NY", "1847 Myrtle Ave, Bushwick", "392 Nostrand Ave, Crown Heights"],
-    status: "identification",
-    daysRemaining: 0,
-    qi: "IPX 1031",
-  },
-];
+const DEMO_EXCHANGES: Exchange1031[] = [];
 
 function DiligencePanel() {
   const [checked, setChecked] = useState<Set<string>>(new Set(["title-search", "appraisal"]));

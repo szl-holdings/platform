@@ -24,32 +24,6 @@ function formatDuration(ms: number | null) {
   return `${m}m ${Math.round((ms % 60000) / 1000)}s`;
 }
 
-const DEMO_STATE = {
-  pendingApprovals: [
-    { id: 1, label: "Contract Renewal — Acme Corp", role: "legal", age: "2h ago", urgent: true },
-    { id: 2, label: "Vendor Risk Assessment — CloudOps Inc", role: "compliance", age: "4h ago", urgent: false },
-    { id: 3, label: "Invoice Approval — $48,200 — AWS", role: "finance", age: "1d ago", urgent: false },
-  ],
-  activeRuns: [
-    { id: 101, name: "Client Onboarding — Enterprise Tier", state: "running", progress: 62, model: "claude-sonnet-4-6", cost: 0.24, latency: 1840 },
-    { id: 102, name: "SOC 2 Evidence Collection", state: "running", progress: 35, model: "gpt-5.2", cost: 0.18, latency: 2100 },
-    { id: 103, name: "Contract Renewal Pipeline", state: "waiting_approval", progress: 80, model: "claude-sonnet-4-6", cost: 0.31, latency: 1650 },
-  ],
-  recentArtifacts: [
-    { id: 201, title: "Q2 Board Report — Draft", type: "report", status: "pending_review", createdAt: new Date(Date.now() - 3600000).toISOString() },
-    { id: 202, title: "Vendor Risk Summary — CloudOps", type: "report", status: "published", createdAt: new Date(Date.now() - 7200000).toISOString() },
-    { id: 203, title: "Client Onboarding Brief — Acme", type: "brief", status: "published", createdAt: new Date(Date.now() - 14400000).toISOString() },
-  ],
-  unresolvedSignals: [
-    { id: 301, source: "aegis", severity: "critical", title: "CVE-2025-1234 in API gateway — CVSS 9.1", receivedAt: new Date(Date.now() - 300000).toISOString() },
-    { id: 302, source: "lyte", severity: "high", title: "INC-7821 unresolved after 2h SLA breach", receivedAt: new Date(Date.now() - 600000).toISOString() },
-    { id: 303, source: "vessels", severity: "high", title: "Dark vessel — 18h AIS gap", receivedAt: new Date(Date.now() - 900000).toISOString() },
-  ],
-  decisions: [
-    { id: 401, title: "Approve contract renewal for Acme Corp ($2.4M)", status: "approval_required", confidence: 92, agent: "Contract Agent" },
-    { id: 402, title: "Escalate vendor risk to CISO", status: "propose_only", confidence: 78, agent: "Risk Agent" },
-  ],
-};
 
 const SEVERITY_COLORS: Record<string, string> = {
   critical: "#ef4444", high: "#f97316", medium: "#f59e0b", low: "#10b981", info: "#6b7280",
@@ -161,10 +135,23 @@ export default function WorkspaceHome() {
     refetchInterval: 30000,
   });
 
-  const pendingApprovals = (approvals && approvals.length > 0) ? approvals : DEMO_STATE.pendingApprovals;
-  const activeRuns = (runsData && runsData.length > 0) ? runsData : DEMO_STATE.activeRuns;
-  const criticalSignals = (signals && signals.length > 0) ? signals : DEMO_STATE.unresolvedSignals;
-  const pendingDecisions = (decisions && decisions.length > 0) ? decisions : DEMO_STATE.decisions;
+  const { data: recentArtifactsData } = useQuery({
+    queryKey: ["alloyRecentArtifacts"],
+    queryFn: async () => {
+      try {
+        const r = await apiFetch<{ data: Array<{ id: number; title: string; status: string; createdAt: string; artifactType?: string }> }>("/alloy/artifacts?limit=6");
+        return r?.data ?? [];
+      } catch { return []; }
+    },
+    staleTime: 60000,
+  });
+
+  const recentArtifacts = recentArtifactsData ?? [];
+
+  const pendingApprovals = approvals ?? [];
+  const activeRuns = runsData ?? [];
+  const criticalSignals = signals ?? [];
+  const pendingDecisions = decisions ?? [];
 
   const pendingCount = pendingApprovals.length;
   const runCount = activeRuns.length;
@@ -328,7 +315,9 @@ export default function WorkspaceHome() {
         onClick={() => navigate("/alloy/documents")}
       >
         <div className="grid md:grid-cols-3 gap-2">
-          {DEMO_STATE.recentArtifacts.map(a => (
+          {recentArtifacts.length === 0 ? (
+            <div className="text-center py-4 text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>No artifacts yet</div>
+          ) : recentArtifacts.map(a => (
             <div key={a.id} className="p-2.5 rounded-lg border" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.01)" }}>
               <div className="text-[11px] font-medium text-white truncate mb-1">{a.title}</div>
               <div className="flex items-center gap-2 text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>

@@ -7,7 +7,7 @@ import {
   Scale, ChevronRight, ExternalLink, Wifi, WifiOff, Loader2,
   ShieldAlert, Layers, XCircle, RefreshCw, CheckCircle
 } from "lucide-react";
-import { DEMO_MATTERS, PILLAR_LABELS, PILLAR_DESCRIPTIONS } from "../data/demo-matters";
+import { PILLAR_LABELS, PILLAR_DESCRIPTIONS } from "../data/demo-matters";
 import { usePrismMatterDetail, usePrismMatterDeadlines, usePrismMatterParties, usePrismMatterComms } from "../hooks/use-prism-api";
 
 const TABS = [
@@ -46,7 +46,6 @@ export default function MatterDetailPage({ id }: { id: number }) {
   const deadlinesQ = usePrismMatterDeadlines(id);
   const commsQ = usePrismMatterComms(id);
 
-  const demoMatter = DEMO_MATTERS.find(m => m.id === id);
   const liveMatter = detailQ.data;
   const isLive = !!liveMatter && !detailQ.isError;
 
@@ -78,7 +77,7 @@ export default function MatterDetailPage({ id }: { id: number }) {
     deadlines: (deadlinesQ.data ?? []).map(d => ({ title: d.title, type: d.deadlineType, date: d.dueDate, priority: d.priority, status: d.status })),
     readinessScores: {} as Record<string, number>,
     recommendations: [] as any[],
-  } : demoMatter;
+  } : undefined;
 
   if (!matter) {
     return (

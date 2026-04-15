@@ -69,10 +69,8 @@ function workspacePlugin(packageMap) {
   return {
     name: "workspace-resolver",
     setup(build) {
-      // Resolve @workspace/* prefixed imports
+      // Resolve @workspace/* and @szl-holdings/* prefixed imports
       build.onResolve({ filter: /^@workspace\// }, (args) => resolveFromMap(args.path));
-      // Also resolve @szl-holdings/* packages that live in lib/ and may not be
-      // symlinked in node_modules (e.g. @szl-holdings/crdt-sync)
       build.onResolve({ filter: /^@szl-holdings\// }, (args) => resolveFromMap(args.path));
     },
   };

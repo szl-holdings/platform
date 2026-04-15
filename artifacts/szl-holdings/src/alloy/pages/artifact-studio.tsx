@@ -76,36 +76,7 @@ const TEMPLATES: Record<ArtifactType, string> = {
   "action-tracker": "# Action Tracker — [Project/Initiative]\n\n**Last Updated:** [Date] | **Owner:** [Name]\n\n## Active Actions\n\n| # | Action | Owner | Priority | Due Date | Status | Notes |\n|---|--------|-------|----------|----------|--------|---------|\n| 1 | | | High | | In Progress | |\n| 2 | | | Medium | | Pending | |\n\n## Completed Actions\n\n| # | Action | Owner | Completed | Outcome |\n|---|--------|-------|-----------|-------|\n| | | | | |\n\n## Blocked / Escalated\n\n| # | Action | Blocked By | Escalated To |\n|---|--------|------------|--------------|",
 };
 
-const DEMO_ARTIFACTS: StudioArtifact[] = [
-  {
-    id: "art-1",
-    title: "Q1 2026 Market Intelligence Brief",
-    type: "brief",
-    status: "review",
-    content: TEMPLATES.brief.replace("[Topic]", "Q1 2026 Market Overview").replace("[Date]", "April 2, 2026").replace("[Author]", "Alloy Research Engine"),
-    format: "markdown",
-    versions: [
-      { version: 1, content: "Initial draft", savedAt: new Date(Date.now() - 3600000 * 3).toISOString(), summary: "Initial generation" },
-      { version: 2, content: "Revised draft", savedAt: new Date(Date.now() - 3600000).toISOString(), summary: "Added competitor data" },
-    ],
-    createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
-    updatedAt: new Date(Date.now() - 3600000).toISOString(),
-    linkedEvidence: ["Market Intelligence Research Space", "Competitor Analysis Q1"],
-  },
-  {
-    id: "art-2",
-    title: "AI Infrastructure Investment Proposal",
-    type: "proposal",
-    status: "draft",
-    content: TEMPLATES.proposal.replace("[Project Name]", "AI Infrastructure Investment"),
-    format: "markdown",
-    versions: [
-      { version: 1, content: "Initial draft", savedAt: new Date(Date.now() - 86400000).toISOString(), summary: "Initial generation" },
-    ],
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - 86400000).toISOString(),
-  },
-];
+const DEMO_ARTIFACTS: StudioArtifact[] = [];
 
 const statusColors: Record<ArtifactStatus, string> = {
   draft: "border-slate-500/20 text-slate-400",
@@ -125,7 +96,7 @@ const statusIcons: Record<ArtifactStatus, React.ComponentType<{ className?: stri
 
 export default function ArtifactStudio() {
   const [artifacts, setArtifacts] = React.useState<StudioArtifact[]>(DEMO_ARTIFACTS);
-  const [activeId, setActiveId] = React.useState<string>("art-1");
+  const [activeId, setActiveId] = React.useState<string | null>(null);
   const [isCreating, setIsCreating] = React.useState(false);
   const [createType, setCreateType] = React.useState<ArtifactType>("brief");
   const [createTitle, setCreateTitle] = React.useState("");

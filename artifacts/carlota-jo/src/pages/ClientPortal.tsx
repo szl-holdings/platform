@@ -338,20 +338,6 @@ export function ClientPortalOverview() {
   );
 }
 
-const DEMO_DOCUMENTS = [
-  { id: 1, name: "Service plan & scope agreement", createdAt: "2026-03-08", status: "Signed", category: "Governance", fileSize: "2.1 MB", fileUrl: null },
-  { id: 2, name: "Mayfair Residence — operational assessment", createdAt: "2026-03-05", status: "Reviewed", category: "Operations", fileSize: "4.7 MB", fileUrl: null },
-  { id: 3, name: "Household staff overview & rotas", createdAt: "2026-03-03", status: "Reviewed", category: "Staffing", fileSize: "1.2 MB", fileUrl: null },
-  { id: 4, name: "Vendor register — Mayfair (Q1 2026)", createdAt: "2026-03-14", status: "Awaiting review", category: "Vendors", fileSize: "890 KB", fileUrl: null },
-  { id: 5, name: "Oxfordshire Estate — condition report", createdAt: "2026-03-20", status: "Awaiting review", category: "Operations", fileSize: "6.3 MB", fileUrl: null },
-  { id: 6, name: "Recommended vendor replacements — rationale", createdAt: "2026-03-28", status: "Awaiting review", category: "Vendors", fileSize: "1.8 MB", fileUrl: null },
-  { id: 7, name: "Monthly operations summary — March 2026", createdAt: "2026-03-31", status: "New", category: "Reporting", fileSize: "980 KB", fileUrl: null },
-  { id: 8, name: "NDA & confidentiality agreement", createdAt: "2026-02-20", status: "Signed", category: "Governance", fileSize: "340 KB", fileUrl: null },
-  { id: 9, name: "Onboarding checklist — progress", createdAt: "2026-03-15", status: "Reviewed", category: "Operations", fileSize: "560 KB", fileUrl: null },
-  { id: 10, name: "Security & access protocol — Mayfair", createdAt: "2026-03-10", status: "Reviewed", category: "Staffing", fileSize: "420 KB", fileUrl: null },
-  { id: 11, name: "Emergency contacts & escalation guide", createdAt: "2026-03-08", status: "Reviewed", category: "Governance", fileSize: "280 KB", fileUrl: null },
-];
-
 type DocRow = { id: number; name?: string; title?: string; createdAt: string; status?: string; category?: string; visibility?: string; fileSize?: string; fileUrl?: string | null };
 
 export function ClientPortalDocuments() {
@@ -362,7 +348,7 @@ export function ClientPortalDocuments() {
   const [uploadError, setUploadError] = useState("");
   const [uploadSuccess, setUploadSuccess] = useState("");
 
-  const { data: documents, isDemo, reload } = usePortalData<DocRow[]>("/api/portal/documents", DEMO_DOCUMENTS);
+  const { data: documents, isDemo, reload } = usePortalData<DocRow[]>("/api/portal/documents", []);
   const typedDocs: DocRow[] = documents;
   const categories: string[] = ["all", ...Array.from(new Set(typedDocs.map((d: DocRow) => d.category ?? "Other")))];
   const filtered = filter === "all" ? typedDocs : typedDocs.filter((d: DocRow) => (d.category ?? "Other") === filter);
@@ -525,22 +511,11 @@ export function ClientPortalDocuments() {
   );
 }
 
-const DEMO_UPDATES = [
-  { id: 1, title: "March operations summary delivered", body: "The March summary has been shared in your Document Vault. It covers: vendor performance across Mayfair, progress on the Oxfordshire condition report, and the staff rota adjustments discussed on the 22nd. Please review ahead of our April 7 session.", tag: "Monthly Report", isNew: true, createdAt: "2026-03-31" },
-  { id: 2, title: "Vendor register update — replacement recommendations", body: "Following the operational assessment, I have prepared a list of recommended vendor changes for Mayfair, with rationale and replacement options for each. Three vendors are flagged as priority replacements. Document is in the vault for your review.", tag: "Action Required", isNew: true, createdAt: "2026-03-28" },
-  { id: 3, title: "Oxfordshire condition report complete", body: "The estate condition report has been completed following last week's visit. Overall condition is good. Four maintenance items are flagged for attention before the summer opening, two of which are recommended as urgent. Report now available in Documents.", tag: "Deliverable", isNew: false, createdAt: "2026-03-20" },
-  { id: 4, title: "Vendor register — Mayfair Q1 ready", body: "Full vendor register for the Mayfair residence is now complete. 22 active vendors across 14 categories. 4 vendors flagged for contract review. Register has been uploaded for your records.", tag: "Deliverable", isNew: false, createdAt: "2026-03-14" },
-  { id: 5, title: "Service plan finalised and signed", body: "The service plan has been signed by both parties. Onboarding begins Monday 10 March. First week will focus on Mayfair: household introduction, vendor confirmation, and security protocol walkthrough.", tag: "Milestone", isNew: false, createdAt: "2026-03-08" },
-  { id: 6, title: "Mayfair operational assessment complete", body: "Completed the three-day operational assessment. Spoke with all household staff, reviewed vendor contracts, and walked every system in the property. Key findings will inform the service plan, which will be ready by Thursday.", tag: "Assessment", isNew: false, createdAt: "2026-03-05" },
-  { id: 7, title: "Needs assessment visit confirmed", body: "Assessment visit scheduled for Monday 3 March through Wednesday 5 March. Access arrangements confirmed with your house manager. NDA has been signed and returned.", tag: "Milestone", isNew: false, createdAt: "2026-02-22" },
-  { id: 8, title: "Discovery call completed", body: "It was a pleasure speaking with you. Confirmed understanding of the household scope, the Oxfordshire estate, and your priorities for the engagement. Service plan preparation will begin following the needs assessment visit.", tag: "Milestone", isNew: false, createdAt: "2026-02-15" },
-];
-
 type UpdateRow = { id: number; title?: string; subject?: string; body?: string; content?: string; summary?: string; bodyRichtext?: string; tag?: string; category?: string; isNew?: boolean; isRead?: boolean; createdAt: string };
 
 export function ClientPortalUpdates() {
   const [location] = useLocation();
-  const { data: updates, isDemo } = usePortalData<UpdateRow[]>("/api/portal/updates", DEMO_UPDATES);
+  const { data: updates, isDemo } = usePortalData<UpdateRow[]>("/api/portal/updates", []);
 
   return (
     <PortalShell currentPath={location}>
@@ -597,13 +572,6 @@ export function ClientPortalUpdates() {
   );
 }
 
-const DEMO_MESSAGES = [
-  { id: 1, senderName: "Carlota Jo", fromRosa: true, body: "Good morning — the March summary is now in your Documents. I've flagged the Oxfordshire items clearly, and the vendor replacement recommendations are in a separate document so you can review them at your convenience. Looking forward to our April 7 session.", createdAt: "2026-03-31" },
-  { id: 2, senderName: "You", fromRosa: false, body: "Thank you for the update on the Oxfordshire visit. Are the two urgent maintenance items something you can arrange directly, or do you need my authorisation first? Happy for you to proceed if it's within the agreed threshold.", createdAt: "2026-03-29" },
-  { id: 3, senderName: "Carlota Jo", fromRosa: true, body: "Both items are within the agreed £5,000 threshold, so I can proceed directly. I'll confirm the specialist and arrange access. I'll include the quotes and confirmation in the March summary so you have a full record.", createdAt: "2026-03-29" },
-  { id: 4, senderName: "Carlota Jo", fromRosa: true, body: "Just returned from Oxfordshire. The estate is in generally good condition — no surprises from the winter. I've identified four maintenance items for the summer opening, two of which I'd recommend addressing before the end of April. Condition report will be ready by the 25th.", createdAt: "2026-03-22" },
-];
-
 type MessageRow = { id: number; senderName?: string; senderUserId?: number; fromRosa?: boolean; body?: string; content?: string; bodyRichtext?: string; subject?: string; direction?: string; createdAt: string };
 
 export function ClientPortalMessages() {
@@ -612,7 +580,7 @@ export function ClientPortalMessages() {
   const [sending, setSending] = useState(false);
   const [sentError, setSentError] = useState("");
 
-  const { data: messages, isDemo, reload: loadMessages } = usePortalData<MessageRow[]>("/api/portal/messages", DEMO_MESSAGES);
+  const { data: messages, isDemo, reload: loadMessages } = usePortalData<MessageRow[]>("/api/portal/messages", []);
 
   const handleSend = async () => {
     if (!newMsg.trim() || isDemo) return;

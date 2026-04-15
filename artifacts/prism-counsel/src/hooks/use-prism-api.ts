@@ -40,6 +40,15 @@ export function usePrismMatterDetail(matterId: number | null) {
   });
 }
 
+export function usePrismDeadlines() {
+  return useQuery({
+    queryKey: ["prism-deadlines"],
+    queryFn: () => prismFetch<PrismDeadline[]>("/prism-counsel/deadlines"),
+    staleTime: 30_000,
+    retry: 1,
+  });
+}
+
 export function usePrismMatterDeadlines(matterId: number | null) {
   return useQuery({
     queryKey: ["prism-matter-deadlines", matterId],

@@ -11,11 +11,7 @@ const MODES = [
   { id: "ops", label: "Ops", icon: Settings, description: "Connector health, sync lag, system diagnostics" },
 ] as const;
 
-const DEMO_MESSAGES = [
-  { role: "system", content: "You are the PRISM Counsel Matter Assistant." },
-  { role: "user", content: "What changed on Rodriguez v. National General in the last 7 days?" },
-  { role: "assistant", content: `## Matter Changes — Last 7 Days\n\n**Rodriguez v. National General** (Case #2024-CV-1847)\n\n### Pressure Shifts\n- **Insurer pressure** rose from 0.52 → 0.58 (+6%) — carrier response lag now exceeds 21 days\n- **Settlement pressure** stable at 0.62 — mediation approaching April 22\n- **Evidence pressure** fell from 0.60 → 0.52 — 2 documents processed from extraction queue\n\n### Key Events\n1. **Mar 28** — Reserve increase notification detected in carrier correspondence\n2. **Mar 30** — IME report received from Dr. Whitmore (orthopedic)\n3. **Apr 1** — Discovery deadline extension granted (new cutoff: May 15)\n\n### Missing Artifacts\n- Outstanding medical records from 2 providers\n- Lost wage verification incomplete\n- No mediation memo drafted\n\n### Recommended Actions\n1. Follow up on outstanding medical records (2 providers)\n2. Complete lost wage verification before demand finalization\n3. Draft mediation memo — mediation in 19 days\n\n*Sources: Matter Twin snapshot, Pressure Graph, Communication logs*\n*Confidence: 0.82 | Proof Chain: #PC-2847*` },
-];
+type ChatMessage = { role: string; content: string };
 
 const RECOVERY_ACTION_CARDS = [
   {
@@ -42,7 +38,7 @@ export default function CopilotWorkbenchPage() {
   const [activeMode, setActiveMode] = useState<string>("matter");
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [input, setInput] = useState("");
-  const [demoMessages, setDemoMessages] = useState(DEMO_MESSAGES);
+  const [demoMessages, setDemoMessages] = useState<ChatMessage[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const { data: sessionsData } = useCopilotSessions();

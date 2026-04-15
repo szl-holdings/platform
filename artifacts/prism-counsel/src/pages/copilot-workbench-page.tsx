@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { MessageSquare, Mail, FileText, Users, FolderOpen, Calendar, Shield, CheckCircle2, AlertCircle, AlertTriangle, Send, Lock, RefreshCw, Sparkles, Eye, Download, Tag, ChevronDown, ChevronRight, ArrowRight } from "lucide-react";
+import { usePrismMatters } from "../hooks/use-prism-api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -49,11 +50,8 @@ const DRAFT_STATE_LABELS: Record<DraftState, { label: string; color: string }> =
   final: { label: "Final", color: "#8b7ac8" },
 };
 
-const DEMO_MATTERS = [
-  { id: 1, title: "Rodriguez v. National General Insurance", caseNumber: "2025-CV-04821" },
-  { id: 2, title: "Thompson v. Westfield Mall Holdings", caseNumber: "2025-CV-07293" },
-  { id: 3, title: "Meridian Holdings v. Atlantic Casualty", caseNumber: "2025-CV-11047" },
-];
+type MatterOption = { id: number; title: string; caseNumber: string };
+const DEMO_MATTERS: MatterOption[] = [];
 
 interface GeneratedDraft {
   id: string;
@@ -83,7 +81,9 @@ async function apiFetch(path: string, opts?: RequestInit) {
   return json.data ?? json;
 }
 
-function generateDraftContent(draftType: string, matter: typeof DEMO_MATTERS[0]): string {
+function generateDraftContent(draftType: string, matter: MatterOption | undefined): string {
+  if (!matter) return `[No matter selected — please select a matter to generate draft content]`;
+
   const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
   const templates: Record<string, string> = {
@@ -329,7 +329,7 @@ function WordModule({ matterId, matterTitle }: { matterId?: number; matterTitle?
     setShowContent(false);
 
     try {
-      const matter = DEMO_MATTERS.find(m => m.id === matterId) ?? DEMO_MATTERS[0];
+      const matter = DEMO_MATTERS.find(m => m.id === matterId);
       const draftType = DRAFT_TYPES.find(t => t.id === selectedType)!;
 
       const result = await apiFetch("/copilot/generate-draft", {
@@ -338,8 +338,8 @@ function WordModule({ matterId, matterTitle }: { matterId?: number; matterTitle?
           draftType: selectedType,
           matterId,
           groundingContext: {
-            matterTitle: matter.title,
-            caseNumber: matter.caseNumber,
+            matterTitle: matter?.title ?? "",
+            caseNumber: matter?.caseNumber ?? "",
           },
         }),
       });
@@ -362,14 +362,14 @@ function WordModule({ matterId, matterTitle }: { matterId?: number; matterTitle?
       };
       setGeneratedDraft(draft);
     } catch {
-      const matter = DEMO_MATTERS.find(m => m.id === matterId) ?? DEMO_MATTERS[0];
+      const matter = DEMO_MATTERS.find(m => m.id === matterId);
       const draftType = DRAFT_TYPES.find(t => t.id === selectedType)!;
       setGeneratedDraft({
         id: `draft_${Date.now()}`,
         matterId,
-        matterTitle: matterTitle ?? matter.title,
+        matterTitle: matterTitle ?? matter?.title ?? "Unknown Matter",
         draftType: selectedType,
-        title: `${draftType.label} — ${matter.title.split(" v.")[0]}`,
+        title: `${draftType.label} — ${matter?.title?.split(" v.")[0] ?? "Matter"}`,
         content: generateDraftContent(selectedType, matter),
         state: "ai_draft",
         groundingScore: 0.72,
@@ -729,10 +729,13 @@ function DraftsModule({ matterId }: { matterId?: number }) {
 }
 
 export default function CopilotWorkbenchPage() {
+  const mattersQ = usePrismMatters();
+  const liveMatters = (Array.isArray(mattersQ.data) ? mattersQ.data : []) as MatterOption[];
+  const allMatters = liveMatters.length > 0 ? liveMatters : DEMO_MATTERS;
   const [activeModule, setActiveModule] = useState<Module>("word");
-  const [matterId, setMatterId] = useState<number | undefined>(1);
+  const [matterId, setMatterId] = useState<number | undefined>(undefined);
 
-  const selectedMatter = DEMO_MATTERS.find(m => m.id === matterId);
+  const selectedMatter = allMatters.find(m => m.id === matterId);
 
   function renderModule() {
     switch (activeModule) {
@@ -764,7 +767,9 @@ export default function CopilotWorkbenchPage() {
             className="px-2 py-1 rounded text-[11px] bg-white/[0.04] border border-white/[0.08] text-slate-300 focus:outline-none"
           >
             <option value="" style={{ background: "#0c1220" }}>Select matter…</option>
-            {DEMO_MATTERS.map(m => (
+            {allMatters.length === 0 ? (
+              <option value="" style={{ background: "#0c1220" }}>No matters available</option>
+            ) : allMatters.map(m => (
               <option key={m.id} value={m.id} style={{ background: "#0c1220" }}>{m.title}</option>
             ))}
           </select>

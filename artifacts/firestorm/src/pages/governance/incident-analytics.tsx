@@ -47,47 +47,9 @@ function MetricCard({ label, value, unit, sub, trend, icon: Icon, color = "#f59e
   );
 }
 
-const MTTD_DATA = [
-  { week: "W-6", mttd: 42, mttr: 310 },
-  { week: "W-5", mttd: 38, mttr: 285 },
-  { week: "W-4", mttd: 35, mttr: 262 },
-  { week: "W-3", mttd: 31, mttr: 240 },
-  { week: "W-2", mttd: 29, mttr: 218 },
-  { week: "W-1", mttd: 24, mttr: 195 },
-  { week: "Now", mttd: 21, mttr: 178 },
-];
-
-const ESCALATION_DATA = [
-  { week: "W-6", escalated: 8, total: 18, rate: 44 },
-  { week: "W-5", escalated: 7, total: 20, rate: 35 },
-  { week: "W-4", escalated: 9, total: 22, rate: 41 },
-  { week: "W-3", escalated: 6, total: 19, rate: 32 },
-  { week: "W-2", escalated: 5, total: 21, rate: 24 },
-  { week: "W-1", escalated: 4, total: 17, rate: 24 },
-  { week: "Now", escalated: 3, total: 14, rate: 21 },
-];
-
-const APPROVAL_DELAY_DATA = [
-  { severity: "Critical", avgDelayMin: 18, slaMin: 30 },
-  { severity: "High", avgDelayMin: 47, slaMin: 60 },
-  { severity: "Medium", avgDelayMin: 112, slaMin: 240 },
-  { severity: "Low", avgDelayMin: 480, slaMin: 1440 },
-];
-
-const ANALYST_WORKLOAD = [
-  { analyst: "J. Chen", active: 5, closed: 23, escalated: 2, avgMttr: 165 },
-  { analyst: "L. Kim", active: 3, closed: 31, escalated: 1, avgMttr: 148 },
-  { analyst: "M. Walsh", active: 7, closed: 18, escalated: 4, avgMttr: 210 },
-  { analyst: "R. Patel", active: 4, closed: 27, escalated: 2, avgMttr: 172 },
-  { analyst: "S. Torres", active: 2, closed: 15, escalated: 0, avgMttr: 135 },
-];
-
-const RESOLUTION_BY_SEVERITY = [
-  { name: "Critical", value: 12, color: "#ef4444" },
-  { name: "High", value: 28, color: "#f97316" },
-  { name: "Medium", value: 45, color: "#f59e0b" },
-  { name: "Low", value: 15, color: "#3b82f6" },
-];
+const MTTD_DATA: Array<{ week: string; mttd: number; mttr: number }> = [];
+const ESCALATION_DATA: Array<{ week: string; escalated: number; total: number; rate: number }> = [];
+const APPROVAL_DELAY_DATA: Array<{ severity: string; avgDelayMin: number; slaMin: number }> = [];
 
 export default function IncidentAnalyticsPage() {
   const { data: incidents } = useQuery<Incident[]>({ queryKey: ["incidents"], queryFn: () => api.incidents.list() });
@@ -97,6 +59,28 @@ export default function IncidentAnalyticsPage() {
   const criticalFindings = findings?.filter(f => f.severity === "critical" && f.status !== "mitigated").length ?? 0;
   const totalIncidents = incidents?.length ?? 0;
   const resolutionRate = totalIncidents > 0 ? Math.round((closedIncidents.length / totalIncidents) * 100) : 0;
+
+  const resolutionBySeverity = [
+    { name: "Critical", value: incidents?.filter(i => i.severity === "critical").length ?? 0, color: "#ef4444" },
+    { name: "High", value: incidents?.filter(i => i.severity === "high").length ?? 0, color: "#f97316" },
+    { name: "Medium", value: incidents?.filter(i => i.severity === "medium").length ?? 0, color: "#f59e0b" },
+    { name: "Low", value: incidents?.filter(i => i.severity === "low").length ?? 0, color: "#3b82f6" },
+  ].filter(s => s.value > 0);
+
+  const analystWorkload = (() => {
+    const map = new Map<string, { active: number; closed: number; escalated: number }>();
+    for (const inc of incidents ?? []) {
+      const name = inc.assignedAnalyst ?? "Unassigned";
+      if (!map.has(name)) map.set(name, { active: 0, closed: 0, escalated: 0 });
+      const entry = map.get(name)!;
+      if (inc.status === "closed") entry.closed++;
+      else entry.active++;
+      if (inc.severity === "critical" || inc.severity === "high") entry.escalated++;
+    }
+    return Array.from(map.entries()).map(([analyst, data]) => ({ analyst, ...data }));
+  })();
+
+  void criticalFindings;
 
   return (
     <div className="min-h-screen bg-[#07090d] text-white p-6">
@@ -108,13 +92,11 @@ export default function IncidentAnalyticsPage() {
         <p className="text-xs text-[#8b9ab0] font-mono -mt-6">MTTD · MTTR · Escalation rate · Approval delay · Resolution rate · Analyst workload</p>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <MetricCard label="Mean Time to Detect" value="21" unit="min" sub="Pilot demo data" trend="up" icon={Clock} color="#22c55e" />
-          <MetricCard label="Mean Time to Respond" value="178" unit="min" sub="Pilot demo data" trend="up" icon={Target} color="#22c55e" />
+          <MetricCard label="Mean Time to Detect" value={totalIncidents > 0 ? "—" : "—"} unit="" sub={totalIncidents > 0 ? "Requires timestamp telemetry" : "No incidents recorded"} trend="flat" icon={Clock} color="#6b7280" />
+          <MetricCard label="Mean Time to Respond" value={totalIncidents > 0 ? "—" : "—"} unit="" sub={totalIncidents > 0 ? "Requires resolution timestamps" : "No incidents recorded"} trend="flat" icon={Target} color="#6b7280" />
           <MetricCard label="Active Incidents" value={activeIncidents.length} unit="" sub={`${totalIncidents} total in system`} trend="flat" icon={AlertTriangle} color="#f59e0b" />
           <MetricCard label="Resolution Rate" value={`${resolutionRate}%`} sub={`${closedIncidents.length} of ${totalIncidents} closed`} trend="up" icon={CheckCircle2} color="#22c55e" />
         </div>
-
-        <DemoDataBanner label="MTTD/MTTR trends, escalation rates, approval delay, analyst workload" />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-[#0d1117] border border-[#1e2a3a] rounded-xl p-5">
@@ -171,60 +153,71 @@ export default function IncidentAnalyticsPage() {
           </div>
 
           <div className="bg-[#0d1117] border border-[#1e2a3a] rounded-xl p-5">
-            <h3 className="text-xs text-[#8b9ab0] uppercase tracking-widest font-mono mb-4">Resolution by Severity</h3>
-            <div className="flex items-center gap-6">
-              <ResponsiveContainer width={140} height={140}>
-                <PieChart>
-                  <Pie data={RESOLUTION_BY_SEVERITY} dataKey="value" cx="50%" cy="50%" innerRadius={40} outerRadius={65}>
-                    {RESOLUTION_BY_SEVERITY.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="space-y-2 flex-1">
-                {RESOLUTION_BY_SEVERITY.map(s => (
-                  <div key={s.name} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }} />
-                      <span className="text-xs text-[#8b9ab0]">{s.name}</span>
-                    </div>
-                    <span className="text-xs text-white font-mono">{s.value}%</span>
-                  </div>
-                ))}
+            <h3 className="text-xs text-[#8b9ab0] uppercase tracking-widest font-mono mb-4">Incidents by Severity</h3>
+            {resolutionBySeverity.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 gap-2">
+                <BarChart3 size={24} className="text-[#1e2a3a]" />
+                <p className="text-xs text-[#8b9ab0] font-mono">No incident data</p>
               </div>
-            </div>
+            ) : (
+              <div className="flex items-center gap-6">
+                <ResponsiveContainer width={140} height={140}>
+                  <PieChart>
+                    <Pie data={resolutionBySeverity} dataKey="value" cx="50%" cy="50%" innerRadius={40} outerRadius={65}>
+                      {resolutionBySeverity.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="space-y-2 flex-1">
+                  {resolutionBySeverity.map(s => (
+                    <div key={s.name} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+                        <span className="text-xs text-[#8b9ab0]">{s.name}</span>
+                      </div>
+                      <span className="text-xs text-white font-mono">{s.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="bg-[#0d1117] border border-[#1e2a3a] rounded-xl p-5">
           <h3 className="text-xs text-[#8b9ab0] uppercase tracking-widest font-mono mb-4">Analyst Workload</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs font-mono">
-              <thead>
-                <tr className="border-b border-[#1e2a3a]">
-                  {["Analyst", "Active Cases", "Closed (30d)", "Escalated", "Avg MTTR"].map(h => (
-                    <th key={h} className="text-left text-[#8b9ab0] pb-3 pr-6 font-normal uppercase tracking-widest">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#0d1117]">
-                {ANALYST_WORKLOAD.map(a => (
-                  <tr key={a.analyst} className="hover:bg-[#0a0f16] transition-colors">
-                    <td className="py-3 pr-6 text-white">{a.analyst}</td>
-                    <td className="py-3 pr-6">
-                      <span className={`px-2 py-0.5 rounded text-xs font-bold ${a.active >= 6 ? "bg-red-500/20 text-red-400" : a.active >= 4 ? "bg-amber-500/20 text-amber-400" : "bg-green-500/20 text-green-400"}`}>{a.active}</span>
-                    </td>
-                    <td className="py-3 pr-6 text-[#8b9ab0]">{a.closed}</td>
-                    <td className="py-3 pr-6">
-                      <span className={a.escalated > 2 ? "text-red-400" : "text-[#8b9ab0]"}>{a.escalated}</span>
-                    </td>
-                    <td className="py-3 pr-6">
-                      <span className={a.avgMttr > 200 ? "text-red-400" : a.avgMttr > 160 ? "text-amber-400" : "text-green-400"}>{a.avgMttr}min</span>
-                    </td>
+          {analystWorkload.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 gap-2">
+              <Users size={24} className="text-[#1e2a3a]" />
+              <p className="text-xs text-[#8b9ab0] font-mono">No incidents with assigned analysts</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs font-mono">
+                <thead>
+                  <tr className="border-b border-[#1e2a3a]">
+                    {["Analyst", "Active Cases", "Closed", "Critical/High"].map(h => (
+                      <th key={h} className="text-left text-[#8b9ab0] pb-3 pr-6 font-normal uppercase tracking-widest">{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-[#0d1117]">
+                  {analystWorkload.map(a => (
+                    <tr key={a.analyst} className="hover:bg-[#0a0f16] transition-colors">
+                      <td className="py-3 pr-6 text-white">{a.analyst}</td>
+                      <td className="py-3 pr-6">
+                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${a.active >= 6 ? "bg-red-500/20 text-red-400" : a.active >= 4 ? "bg-amber-500/20 text-amber-400" : "bg-green-500/20 text-green-400"}`}>{a.active}</span>
+                      </td>
+                      <td className="py-3 pr-6 text-[#8b9ab0]">{a.closed}</td>
+                      <td className="py-3 pr-6">
+                        <span className={a.escalated > 2 ? "text-red-400" : "text-[#8b9ab0]"}>{a.escalated}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,10 +1,7 @@
 import { Activity, TrendingUp, Clock, DollarSign } from "lucide-react";
-import { NY_DEMO_MATTERS } from "../../data/ny-demo-matters";
 
 export default function NyMediationPage() {
-  const allMediations = NY_DEMO_MATTERS.flatMap(m =>
-    m.mediationEvents.map(e => ({ ...e, matter: m }))
-  );
+  const allMediations: Array<{ mediatorName: string; status: string; sessionType: string; scheduledAt: string | null; preReadinessScore: number; conversionProbability: number; openingDemand?: number; openingOffer?: number; matter: { title: string; forecasts: Array<{ type: string; nextBestAction: string }> } }> = [];
 
   const MEDIATION_CHECKLIST = [
     "Demand readiness score ≥ 70",

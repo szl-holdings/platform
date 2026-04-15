@@ -23,34 +23,6 @@ function formatDuration(ms: number | null) {
   return `${Math.floor(ms / 60000)}m ${Math.round((ms % 60000) / 1000)}s`;
 }
 
-const DEMO_STATE = {
-  agentHealth: [
-    { id: "agent-1", name: "Contract Intelligence", domain: "contracts", status: "running", queueDepth: 3, successRate: 97.4, avgLatencyMs: 1840, lastRunAt: new Date(Date.now() - 120000).toISOString(), cost24h: 4.82, threshold: { timeMs: 60000, costUsd: 10 }, violations: 0 },
-    { id: "agent-2", name: "Risk Assessment", domain: "compliance", status: "idle", queueDepth: 1, successRate: 94.2, avgLatencyMs: 2100, lastRunAt: new Date(Date.now() - 900000).toISOString(), cost24h: 2.14, threshold: { timeMs: 120000, costUsd: 15 }, violations: 0 },
-    { id: "agent-3", name: "Finance Processing", domain: "finance", status: "running", queueDepth: 5, successRate: 99.1, avgLatencyMs: 820, lastRunAt: new Date(Date.now() - 30000).toISOString(), cost24h: 1.47, threshold: { timeMs: 30000, costUsd: 5 }, violations: 0 },
-    { id: "agent-4", name: "Governance Sentinel", domain: "governance", status: "running", queueDepth: 0, successRate: 100, avgLatencyMs: 450, lastRunAt: new Date(Date.now() - 60000).toISOString(), cost24h: 0.89, threshold: { timeMs: 30000, costUsd: 5 }, violations: 0 },
-    { id: "agent-5", name: "Data Pipeline Monitor", domain: "data", status: "failed", queueDepth: 12, successRate: 71.3, avgLatencyMs: 8400, lastRunAt: new Date(Date.now() - 3600000).toISOString(), cost24h: 8.91, threshold: { timeMs: 60000, costUsd: 10 }, violations: 3 },
-    { id: "agent-6", name: "Browser Task Agent", domain: "browsing", status: "idle", queueDepth: 0, successRate: 88.5, avgLatencyMs: 4200, lastRunAt: new Date(Date.now() - 7200000).toISOString(), cost24h: 0.34, threshold: { timeMs: 120000, costUsd: 20 }, violations: 0 },
-  ],
-  executionQueue: {
-    running: 14, queued: 8, waitingApproval: 3, failed: 2, totalToday: 247,
-  },
-  policyViolations: [
-    { id: 1, agentId: "agent-5", agentName: "Data Pipeline Monitor", action: "export_data", reason: "Target jurisdiction not in allowlist", blockedAt: new Date(Date.now() - 1800000).toISOString(), severity: "high" },
-    { id: 2, agentId: "agent-5", agentName: "Data Pipeline Monitor", action: "admin_override", reason: "Escalation level exceeds agent permissions", blockedAt: new Date(Date.now() - 3600000).toISOString(), severity: "critical" },
-    { id: 3, agentId: "agent-5", agentName: "Data Pipeline Monitor", action: "bulk_delete", reason: "Bulk delete requires explicit human approval", blockedAt: new Date(Date.now() - 5400000).toISOString(), severity: "high" },
-  ],
-  approvalBottlenecks: [
-    { id: 1, label: "Contract Renewal — Acme Corp", waitingMs: 7200000, role: "legal" },
-    { id: 2, label: "Invoice $48,200 — AWS", waitingMs: 14400000, role: "finance" },
-    { id: 3, label: "Vendor Risk — CloudOps", waitingMs: 18000000, role: "compliance" },
-  ],
-  providerHealth: [
-    { provider: "Anthropic Claude", model: "claude-sonnet-4-6", status: "healthy", avgLatencyMs: 1840, errorRate: 0.2, cost24h: 12.4 },
-    { provider: "OpenAI", model: "gpt-5.2", status: "healthy", avgLatencyMs: 2100, errorRate: 0.4, cost24h: 8.7 },
-    { provider: "Gemini", model: "gemini-3.1-pro", status: "degraded", avgLatencyMs: 5400, errorRate: 3.1, cost24h: 2.1 },
-  ],
-};
 
 const STATUS_CONFIG: Record<string, { color: string; bg: string; border: string; label: string; icon: React.ReactNode; pulse?: boolean }> = {
   running: { color: "#4B8BDB", bg: "rgba(75,139,219,0.08)", border: "rgba(75,139,219,0.2)", label: "Running", icon: <Activity className="w-3 h-3" />, pulse: true },
@@ -144,11 +116,35 @@ export default function OperatorControlCenter() {
     refetchInterval: 15000,
   });
 
-  const queueData = (factoryFloor as any)?.globalCounts ?? DEMO_STATE.executionQueue;
-  const agentHealth = DEMO_STATE.agentHealth;
-  const violations = DEMO_STATE.policyViolations;
-  const bottlenecks = DEMO_STATE.approvalBottlenecks;
-  const providers = DEMO_STATE.providerHealth;
+  const { data: violationsData } = useQuery({
+    queryKey: ["alloyPolicyViolations"],
+    queryFn: async () => {
+      try { return await apiFetch<{ violations: typeof violations }>("/alloy/policy-violations"); } catch { return null; }
+    },
+    refetchInterval: 15000,
+  });
+
+  const { data: bottlenecksData } = useQuery({
+    queryKey: ["alloyApprovalBottlenecks"],
+    queryFn: async () => {
+      try { return await apiFetch<{ bottlenecks: typeof bottlenecks }>("/alloy/approval-bottlenecks"); } catch { return null; }
+    },
+    refetchInterval: 15000,
+  });
+
+  const { data: providersData } = useQuery({
+    queryKey: ["alloyProviderHealth"],
+    queryFn: async () => {
+      try { return await apiFetch<{ providers: typeof providers }>("/alloy/provider-health"); } catch { return null; }
+    },
+    refetchInterval: 30000,
+  });
+
+  const queueData = (factoryFloor as any)?.globalCounts ?? { running: 0, queued: 0, waitingApproval: 0, failed: 0, totalToday: 0 };
+  const agentHealth = (agentStats as any)?.agents ?? [];
+  const violations = (violationsData as any)?.violations ?? [];
+  const bottlenecks = (bottlenecksData as any)?.bottlenecks ?? [];
+  const providers = (providersData as any)?.providers ?? [];
 
   const failedAgents = agentHealth.filter(a => a.status === "failed").length;
   const totalViolations = violations.length;

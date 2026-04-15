@@ -1,5 +1,7 @@
-import { useState } from "react";
-import { TrendingUp, Scale, Target, BarChart3, Info, FileText } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { TrendingUp, Scale, Target, BarChart3, Info, FileText, Loader2 } from "lucide-react";
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 const PRISM_GOLD = "#c8a96e";
 const PRISM_BLUE = "#4a8ab0";
@@ -15,11 +17,54 @@ interface CaseScenario {
   injuryGrade: string;
 }
 
-const SAMPLE_CASES: CaseScenario[] = [
-  { id: "1", title: "Martinez v. Pinnacle Freight LLC", type: "Commercial Auto", jurisdiction: "SDNY", damagesClaimed: 1_200_000, caseAge: 18, phase: "Discovery", injuryGrade: "Moderate" },
-  { id: "2", title: "Chen v. Harbor Point Insurance", type: "Bad Faith", jurisdiction: "EDNY", damagesClaimed: 850_000, caseAge: 9, phase: "Pre-suit", injuryGrade: "Low" },
-  { id: "3", title: "Okonkwo v. Metropolitan Transit", type: "Premises Liability", jurisdiction: "SDNY", damagesClaimed: 3_500_000, caseAge: 34, phase: "Mediation", injuryGrade: "Severe" },
-];
+const MATTER_TYPE_MAP: Record<string, string> = {
+  auto_injury: "Commercial Auto",
+  premises_liability: "Premises Liability",
+  insurance_coverage: "Bad Faith",
+  medical_malpractice: "Personal Injury",
+  product_liability: "Products Liability",
+  wrongful_death: "Personal Injury",
+  workers_comp: "Personal Injury",
+  no_fault: "Commercial Auto",
+  other: "Personal Injury",
+};
+
+const STATUS_TO_PHASE: Record<string, string> = {
+  intake: "Pre-suit",
+  investigation: "Pre-suit",
+  discovery: "Discovery",
+  pre_trial: "Pre-Trial",
+  trial: "Trial",
+  settlement: "Mediation",
+  closed: "Pre-Trial",
+  archived: "Pre-Trial",
+};
+
+interface MatterApiItem {
+  id: string | number;
+  title?: string;
+  matterType?: string;
+  jurisdiction?: string;
+  damagesClaimed?: number | string;
+  filingDate?: string;
+  status?: string;
+  injuryGrade?: string;
+}
+
+function matterToCaseScenario(m: MatterApiItem): CaseScenario {
+  const filingMs = m.filingDate ? new Date(m.filingDate).getTime() : Date.now();
+  const caseAge = Math.max(1, Math.round((Date.now() - filingMs) / (30 * 24 * 3600 * 1000)));
+  return {
+    id: String(m.id),
+    title: m.title ?? "Untitled Matter",
+    type: MATTER_TYPE_MAP[m.matterType] ?? "Personal Injury",
+    jurisdiction: m.jurisdiction ?? "SDNY",
+    damagesClaimed: Number(m.totalDamages ?? 0),
+    caseAge,
+    phase: STATUS_TO_PHASE[m.status] ?? "Pre-suit",
+    injuryGrade: "Moderate",
+  };
+}
 
 interface ModelFactor {
   factor: string;
@@ -204,30 +249,8 @@ export function buildModel(c: CaseScenario): ModelOutput {
   return { bands, factors, compositeScore, modelConfidence };
 }
 
-/* ── Comparable case library ─────────────────────────────────────────────────── */
-
-const ALL_COMPARABLES = [
-  { title: "Lopez v. Armada Trucking", type: "Commercial Auto", jurisdiction: "SDNY", claimed: 1_100_000, settled: 460_000, verdict: null, duration: 22 },
-  { title: "Reyes v. Harbor Industrial", type: "Commercial Auto", jurisdiction: "SDNY", claimed: 1_500_000, settled: 580_000, verdict: null, duration: 28 },
-  { title: "Moore v. Transit Express LLC", type: "Commercial Auto", jurisdiction: "EDNY", claimed: 980_000, settled: null, verdict: 640_000, duration: 31 },
-  { title: "Park v. Regional Transit Auth.", type: "Premises Liability", jurisdiction: "EDNY", claimed: 2_800_000, settled: null, verdict: 1_650_000, duration: 41 },
-  { title: "Johnson v. Metro Housing LLC", type: "Premises Liability", jurisdiction: "EDNY", claimed: 3_200_000, settled: null, verdict: 2_100_000, duration: 45 },
-  { title: "Torres v. Greenpoint Properties", type: "Premises Liability", jurisdiction: "SDNY", claimed: 1_800_000, settled: 820_000, verdict: null, duration: 26 },
-  { title: "Williams v. Cross River Ins.", type: "Bad Faith", jurisdiction: "SDNY", claimed: 900_000, settled: 340_000, verdict: null, duration: 14 },
-  { title: "Grant v. Continental Mutual", type: "Bad Faith", jurisdiction: "EDNY", claimed: 1_200_000, settled: null, verdict: 780_000, duration: 38 },
-  { title: "Freeman v. Pacific Coverage", type: "Bad Faith", jurisdiction: "SDNY", claimed: 750_000, settled: 280_000, verdict: null, duration: 19 },
-];
-
-function rankComparables(c: CaseScenario) {
-  return ALL_COMPARABLES
-    .map(comp => {
-      const typeMatch = comp.type === c.type ? 2 : 0;
-      const jurisMatch = comp.jurisdiction === c.jurisdiction ? 1 : 0;
-      const sizeClose = Math.abs(comp.claimed - c.damagesClaimed) / c.damagesClaimed < 0.5 ? 1 : 0;
-      return { ...comp, relevance: typeMatch + jurisMatch + sizeClose };
-    })
-    .sort((a, b) => b.relevance - a.relevance)
-    .slice(0, 5);
+function rankComparables(_c: CaseScenario) {
+  return [] as { title: string; type: string; jurisdiction: string; claimed: number; settled: number | null; verdict: number | null; duration: number; relevance: number }[];
 }
 
 function fmt(n: number) {
@@ -265,7 +288,46 @@ function DistributionChart({ bands }: { bands: DistributionBand[] }) {
 }
 
 export default function SettlementPredictorPage() {
-  const [selectedCase, setSelectedCase] = useState(SAMPLE_CASES[0]!);
+  const { data: mattersResponse, isLoading } = useQuery({
+    queryKey: ["prism-matters-predictor"],
+    queryFn: () => apiFetch<{ items: MatterApiItem[] }>("/prism-counsel/matters?limit=12"),
+  });
+
+  const cases: CaseScenario[] = (mattersResponse?.items ?? []).map(matterToCaseScenario);
+
+  const [selectedCase, setSelectedCase] = useState<CaseScenario | null>(null);
+
+  useEffect(() => {
+    if (cases.length > 0 && !selectedCase) {
+      setSelectedCase(cases[0]!);
+    }
+  }, [cases.length]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64 gap-2 text-slate-500">
+        <Loader2 className="w-4 h-4 animate-spin" />
+        <span className="text-sm">Loading matters…</span>
+      </div>
+    );
+  }
+
+  if (cases.length === 0 || !selectedCase) {
+    return (
+      <div className="p-6 max-w-[1100px] mx-auto">
+        <div className="flex items-center gap-2 mb-4">
+          <TrendingUp className="w-5 h-5" style={{ color: PRISM_GOLD }} />
+          <h1 className="text-lg font-semibold text-slate-100">Settlement Range Predictor</h1>
+        </div>
+        <div className="rounded-lg border border-white/[0.06] p-10 text-center" style={{ background: "#0c1220" }}>
+          <FileText className="w-8 h-8 text-slate-600 mx-auto mb-3" />
+          <div className="text-sm text-slate-400 mb-1">No active matters found</div>
+          <div className="text-xs text-slate-600">Add matters via the Matter Management section to run settlement predictions.</div>
+        </div>
+      </div>
+    );
+  }
+
   const { bands, factors, compositeScore, modelConfidence } = buildModel(selectedCase);
   const peakBand = bands.find(b => b.peak)!;
   const midpoint = (peakBand.low + peakBand.high) / 2;
@@ -288,7 +350,7 @@ export default function SettlementPredictorPage() {
       <div className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
         <div className="text-[10px] font-medium text-slate-500 uppercase tracking-wider mb-3">Select Active Matter</div>
         <div className="grid grid-cols-3 gap-3">
-          {SAMPLE_CASES.map((c) => (
+          {cases.map((c) => (
             <button
               key={c.id}
               onClick={() => setSelectedCase(c)}
@@ -383,51 +445,53 @@ export default function SettlementPredictorPage() {
       </div>
 
       {/* Comparable Cases — ranked by type + jurisdiction match */}
-      <div className="rounded-lg border border-white/[0.06] p-5" style={{ background: "#0c1220" }}>
-        <div className="flex items-center gap-2 mb-4">
-          <FileText className="w-4 h-4 text-slate-500" />
-          <div className="text-xs font-semibold text-slate-200">Comparable Outcomes</div>
-          <span className="text-[9px] text-slate-600">— ranked by case type & jurisdiction match to {selectedCase.type} / {selectedCase.jurisdiction}</span>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-[10px]">
-            <thead>
-              <tr className="border-b border-white/[0.04]">
-                {["Case", "Type", "Venue", "Claimed", "Outcome", "Duration", "Match"].map(h => (
-                  <th key={h} className="text-left py-2 pr-4 text-[9px] font-medium text-slate-500 uppercase tracking-wider">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {comparables.map((c, i) => (
-                <tr key={i} className={`border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors ${c.relevance === 3 ? "bg-[#c8a96e]/[0.02]" : ""}`}>
-                  <td className="py-2 pr-4 text-slate-300 font-medium">{c.title}</td>
-                  <td className="py-2 pr-4 text-slate-500">{c.type}</td>
-                  <td className="py-2 pr-4 text-slate-500">{c.jurisdiction}</td>
-                  <td className="py-2 pr-4 font-mono text-slate-400">{fmt(c.claimed)}</td>
-                  <td className="py-2 pr-4">
-                    {c.settled ? (
-                      <span className="font-mono text-[#4a90b8]">{fmt(c.settled)} settled</span>
-                    ) : (
-                      <span className="font-mono text-[#c45a4a]">{fmt(c.verdict!)} verdict</span>
-                    )}
-                  </td>
-                  <td className="py-2 pr-4 font-mono text-slate-500">{c.duration}mo</td>
-                  <td className="py-2">
-                    <span className={`px-1.5 py-0.5 rounded text-[8px] font-medium border ${
-                      c.relevance >= 3 ? "bg-[#c8a96e]/10 text-[#c8a96e] border-[#c8a96e]/20" :
-                      c.relevance >= 2 ? "bg-[#4a90b8]/10 text-[#4a90b8] border-[#4a90b8]/20" :
-                      "bg-white/[0.04] text-slate-500 border-white/[0.06]"
-                    }`}>
-                      {c.relevance >= 3 ? "STRONG" : c.relevance >= 2 ? "GOOD" : "PARTIAL"}
-                    </span>
-                  </td>
+      {comparables.length > 0 && (
+        <div className="rounded-lg border border-white/[0.06] p-5" style={{ background: "#0c1220" }}>
+          <div className="flex items-center gap-2 mb-4">
+            <FileText className="w-4 h-4 text-slate-500" />
+            <div className="text-xs font-semibold text-slate-200">Comparable Outcomes</div>
+            <span className="text-[9px] text-slate-600">— ranked by case type & jurisdiction match to {selectedCase.type} / {selectedCase.jurisdiction}</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-[10px]">
+              <thead>
+                <tr className="border-b border-white/[0.04]">
+                  {["Case", "Type", "Venue", "Claimed", "Outcome", "Duration", "Match"].map(h => (
+                    <th key={h} className="text-left py-2 pr-4 text-[9px] font-medium text-slate-500 uppercase tracking-wider">{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {comparables.map((c, i) => (
+                  <tr key={i} className={`border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors ${c.relevance === 3 ? "bg-[#c8a96e]/[0.02]" : ""}`}>
+                    <td className="py-2 pr-4 text-slate-300 font-medium">{c.title}</td>
+                    <td className="py-2 pr-4 text-slate-500">{c.type}</td>
+                    <td className="py-2 pr-4 text-slate-500">{c.jurisdiction}</td>
+                    <td className="py-2 pr-4 font-mono text-slate-400">{fmt(c.claimed)}</td>
+                    <td className="py-2 pr-4">
+                      {c.settled ? (
+                        <span className="font-mono text-[#4a90b8]">{fmt(c.settled)} settled</span>
+                      ) : (
+                        <span className="font-mono text-[#c45a4a]">{fmt(c.verdict!)} verdict</span>
+                      )}
+                    </td>
+                    <td className="py-2 pr-4 font-mono text-slate-500">{c.duration}mo</td>
+                    <td className="py-2">
+                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-medium border ${
+                        c.relevance >= 3 ? "bg-[#c8a96e]/10 text-[#c8a96e] border-[#c8a96e]/20" :
+                        c.relevance >= 2 ? "bg-[#4a90b8]/10 text-[#4a90b8] border-[#4a90b8]/20" :
+                        "bg-white/[0.04] text-slate-500 border-white/[0.06]"
+                      }`}>
+                        {c.relevance >= 3 ? "STRONG" : c.relevance >= 2 ? "GOOD" : "PARTIAL"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

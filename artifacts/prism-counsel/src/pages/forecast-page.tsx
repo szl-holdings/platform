@@ -1,6 +1,5 @@
 import { TrendingUp, ArrowUpRight, ArrowDownRight, Minus, Wifi, WifiOff, Loader2 } from "lucide-react";
 import { Link } from "wouter";
-import { DEMO_MATTERS } from "../data/demo-matters";
 import { usePrismMatters } from "../hooks/use-prism-api";
 
 export default function ForecastPage() {
@@ -20,7 +19,7 @@ export default function ForecastPage() {
         totalDamages: 0,
         offers: [] as { type: string; amount: number; source: string; date: string }[],
       }))
-    : DEMO_MATTERS;
+    : [];
 
   return (
     <div className="p-6 max-w-[1200px] mx-auto space-y-5">

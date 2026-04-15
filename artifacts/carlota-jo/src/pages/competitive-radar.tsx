@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
-import { Radar, RefreshCw, TrendingUp, TrendingDown, Minus, AlertCircle, Sparkles, Clock, ExternalLink, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { Radar, TrendingUp, TrendingDown, Minus, AlertCircle, Sparkles, Clock, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
@@ -25,31 +25,8 @@ type IntelBrief = {
   recommendation: string;
 };
 
-const SAMPLE_COMPETITORS = [
-  { name: "Sequoia Advisory", share: 34, trend: "up", score: 72 },
-  { name: "Meridian Strategy", share: 22, trend: "stable", score: 58 },
-  { name: "Vantage Partners", share: 18, trend: "down", score: 49 },
-  { name: "Crestline Consulting", share: 14, trend: "up", score: 63 },
-  { name: "Apex Advisory Group", share: 12, trend: "down", score: 41 },
-];
-
-const MARKET_TREND_DATA = [
-  { month: "Oct", you: 52, market: 48 },
-  { month: "Nov", you: 55, market: 50 },
-  { month: "Dec", you: 54, market: 53 },
-  { month: "Jan", you: 59, market: 55 },
-  { month: "Feb", you: 63, market: 57 },
-  { month: "Mar", you: 68, market: 58 },
-  { month: "Apr", you: 71, market: 60 },
-];
-
-const STATIC_SIGNALS: CompetitorSignal[] = [
-  { competitor: "Sequoia Advisory", event: "Series B fundraise — $24M", impact: "high", direction: "threat", date: "Apr 8, 2026", detail: "Announced expansion into SMB segment with AI-augmented delivery. Directly overlaps with your mid-market offering." },
-  { competitor: "Meridian Strategy", event: "Partnership with Gartner", impact: "medium", direction: "threat", date: "Apr 2, 2026", detail: "Co-branded research distribution agreement. Strengthens credibility positioning but adds no service delivery capability." },
-  { competitor: "Vantage Partners", event: "Key principal departure", impact: "medium", direction: "opportunity", date: "Mar 28, 2026", detail: "Head of Strategy practice departed to join a PE-backed roll-up. Client base may be in play — 6 known accounts." },
-  { competitor: "Crestline Consulting", event: "New AI advisory product launch", impact: "high", direction: "threat", date: "Mar 21, 2026", detail: "Launched 'Crestline Intelligence' — AI-augmented strategy tool targeting same ICP. Priced at $1,200/month." },
-  { competitor: "Apex Advisory Group", event: "Office closure — London", impact: "low", direction: "opportunity", date: "Mar 15, 2026", detail: "Closed London office citing cost pressure. May create white space in UK enterprise accounts." },
-];
+type CompetitorEntry = { name: string; share: number; trend: string; score: number };
+type MarketTrendPoint = { month: string; you: number; market: number };
 
 function TrendIcon({ trend }: { trend: string }) {
   if (trend === "up") return <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />;
@@ -75,6 +52,8 @@ function DirectionBadge({ direction }: { direction: "threat" | "opportunity" | "
   return <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${styles[direction]}`}>{direction}</span>;
 }
 
+const API = import.meta.env.BASE_URL + "api";
+
 export default function CompetitiveRadar() {
   usePageMeta({
     title: "Competitive Intelligence Radar | Carlota Jo",
@@ -82,14 +61,50 @@ export default function CompetitiveRadar() {
     canonical: "https://szlholdings.com/carlota-jo/competitive-radar",
   });
 
-  const [loading, setLoading] = useState(false);
   const [brief, setBrief] = useState<IntelBrief | null>(null);
   const [expandedSignal, setExpandedSignal] = useState<number | null>(null);
-  const [competitors, setCompetitors] = useState(SAMPLE_COMPETITORS);
-  const [signals] = useState<CompetitorSignal[]>(STATIC_SIGNALS);
-  const [lastUpdated] = useState(new Date());
+  const [competitors, setCompetitors] = useState<CompetitorEntry[]>([]);
+  const [signals, setSignals] = useState<CompetitorSignal[]>([]);
+  const [marketTrend, setMarketTrend] = useState<MarketTrendPoint[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
   const [generatingBrief, setGeneratingBrief] = useState(false);
-  const [companyContext, setCompanyContext] = useState({ name: "Your Company", industry: "Management Consulting" });
+  const [companyContext] = useState({ name: "Carlota Jo Consulting", industry: "Management Consulting" });
+
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+      try {
+        const [signalsRes, newsRes] = await Promise.allSettled([
+          fetch(`${API}/intelligence/signals?domain=carlota&limit=20`, { credentials: "include" }),
+          fetch(`${API}/carlota/live/strategic-news`, { credentials: "include" }),
+        ]);
+
+        if (signalsRes.status === "fulfilled" && signalsRes.value.ok) {
+          const json = await signalsRes.value.json();
+          const raw: CompetitorSignal[] = Array.isArray(json.signals) ? json.signals : Array.isArray(json.data) ? json.data : [];
+          setSignals(raw);
+        }
+
+        if (newsRes.status === "fulfilled" && newsRes.value.ok) {
+          const json = await newsRes.value.json();
+          const items: { source?: string; headline?: string; summary?: string; publishedAt?: string }[] = Array.isArray(json.articles) ? json.articles : [];
+          const derived: CompetitorEntry[] = items.slice(0, 5).map((item, i) => ({
+            name: item.source ?? `Source ${i + 1}`,
+            share: 0,
+            trend: "flat",
+            score: 50,
+          }));
+          if (derived.length > 0) setCompetitors(derived);
+        }
+      } catch {
+      } finally {
+        setLastUpdated(new Date());
+        setLoading(false);
+      }
+    }
+    void loadData();
+  }, []);
 
   const generateWeeklyBrief = async () => {
     setGeneratingBrief(true);
@@ -102,13 +117,13 @@ export default function CompetitiveRadar() {
   "recommendation": "Concrete, specific action recommendation based on this week's intelligence"
 }
 
-Context: ${companyContext.name} operates in ${companyContext.industry}. Key competitors: ${competitors.map(c => c.name).join(", ")}.
+Context: ${companyContext.name} operates in ${companyContext.industry}. Key competitors: ${competitors.map(c => c.name).join(", ") || "Not yet tracked"}.
 
-Recent signals: ${signals.map(s => `${s.competitor}: ${s.event} (${s.direction})`).join("; ")}.
+Recent signals: ${signals.map(s => `${s.competitor}: ${s.event} (${s.direction})`).join("; ") || "No signals available"}.
 
 Return ONLY valid JSON, no markdown.`;
 
-      const res = await fetch("/api/intelligence/ai/advisory", {
+      const res = await fetch(`${API}/intelligence/ai/advisory`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -143,24 +158,10 @@ Return ONLY valid JSON, no markdown.`;
       const parsed = JSON.parse(fullContent);
       setBrief({ ...parsed, signals });
     } catch {
-      setBrief({
-        headline: "Sequoia Advisory's $24M raise signals mid-market AI disruption",
-        summary: "This week's most significant competitive development is Sequoia Advisory's growth-stage fundraise with explicit intent to deploy AI-augmented delivery into the mid-market — your primary ICP. Simultaneously, Crestline Intelligence launched a productised AI strategy tool at $1,200/month, representing the first direct 'product vs. service' competitive threat in this space.",
-        signals,
-        marketShift: "The market is bifurcating: well-capitalised incumbents are productising strategy delivery via AI, while boutiques without technology differentiation face margin compression and commoditisation pressure.",
-        recommendation: "Accelerate your AI-native advisory positioning and consider a flagship 'Intelligence Subscription' product at $2,000–3,000/month to pre-empt Crestline's positioning while leveraging your relationship advantage.",
-      });
+      setBrief(null);
     } finally {
       setGeneratingBrief(false);
     }
-  };
-
-  const simulateRefresh = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setCompetitors(prev => prev.map(c => ({ ...c, score: Math.min(100, Math.max(20, c.score + Math.floor(Math.random() * 7) - 3)) })));
-      setLoading(false);
-    }, 1200);
   };
 
   return (
@@ -178,9 +179,6 @@ Return ONLY valid JSON, no markdown.`;
           </p>
         </div>
         <div className="flex gap-2">
-          <button onClick={simulateRefresh} disabled={loading} className="text-xs px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors flex items-center gap-1.5">
-            <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} />Refresh
-          </button>
           <button onClick={generateWeeklyBrief} disabled={generatingBrief} className="text-xs px-4 py-1.5 rounded-lg text-white flex items-center gap-1.5 hover:opacity-90 transition-opacity disabled:opacity-60" style={{ background: GOLD }}>
             {generatingBrief ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
             {generatingBrief ? "Generating…" : "Generate Weekly Brief"}
@@ -188,12 +186,19 @@ Return ONLY valid JSON, no markdown.`;
         </div>
       </div>
 
+      {loading && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Loading intelligence data…
+        </div>
+      )}
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: "Signals This Week", value: "5", sub: "3 threats · 2 opportunities", color: "text-foreground" },
-          { label: "High-Impact Events", value: "2", sub: "Require immediate attention", color: "text-red-600" },
-          { label: "Competitive Index", value: "71", sub: "↑ 3pts from last week", color: "text-foreground" },
-          { label: "Whitespace Score", value: "68%", sub: "Market opportunity uncontested", color: "text-emerald-600" },
+          { label: "Signals This Week", value: signals.length > 0 ? String(signals.length) : "—", sub: signals.length > 0 ? `${signals.filter(s => s.direction === "threat").length} threats · ${signals.filter(s => s.direction === "opportunity").length} opportunities` : "No signals loaded", color: "text-foreground" },
+          { label: "High-Impact Events", value: signals.length > 0 ? String(signals.filter(s => s.impact === "high").length) : "—", sub: signals.filter(s => s.impact === "high").length > 0 ? "Require immediate attention" : "No high-impact signals", color: signals.filter(s => s.impact === "high").length > 0 ? "text-red-600" : "text-foreground" },
+          { label: "Tracked Competitors", value: competitors.length > 0 ? String(competitors.length) : "—", sub: competitors.length > 0 ? `${competitors.filter(c => c.trend === "up").length} trending up` : "No competitors tracked", color: "text-foreground" },
+          { label: "Data Sources", value: !loading && (signals.length > 0 || competitors.length > 0) ? "Live" : "—", sub: !loading && (signals.length > 0 || competitors.length > 0) ? "Connected" : loading ? "Loading…" : "No data available", color: !loading && (signals.length > 0 || competitors.length > 0) ? "text-emerald-600" : "text-foreground" },
         ].map((stat, i) => (
           <Card key={i}>
             <CardContent className="pt-4">
@@ -235,7 +240,13 @@ Return ONLY valid JSON, no markdown.`;
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm">Competitive Signals Feed</CardTitle></CardHeader>
             <CardContent className="space-y-2">
-              {signals.map((signal, i) => (
+              {signals.length === 0 ? (
+                <div className="py-8 text-center">
+                  <AlertCircle className="w-6 h-6 mx-auto mb-2 text-muted-foreground/40" />
+                  <p className="text-xs text-muted-foreground">No competitive signals available.</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Connect intelligence feeds to populate live signals.</p>
+                </div>
+              ) : signals.map((signal, i) => (
                 <div key={i} className="border border-border rounded-lg overflow-hidden">
                   <button
                     onClick={() => setExpandedSignal(expandedSignal === i ? null : i)}
@@ -269,16 +280,22 @@ Return ONLY valid JSON, no markdown.`;
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm">Competitive Index — 7-Month Trend</CardTitle></CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={MARKET_TREND_DATA}>
-                  <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} domain={[40, 80]} />
-                  <Tooltip contentStyle={{ fontSize: 11 }} />
-                  <Legend wrapperStyle={{ fontSize: 11 }} />
-                  <Line type="monotone" dataKey="you" stroke={GOLD} strokeWidth={2} dot={false} name="Your Position" />
-                  <Line type="monotone" dataKey="market" stroke="var(--color-stone-400)" strokeWidth={2} dot={false} name="Market Average" strokeDasharray="4 2" />
-                </LineChart>
-              </ResponsiveContainer>
+              {marketTrend.length === 0 ? (
+                <div className="h-[200px] flex items-center justify-center">
+                  <p className="text-xs text-muted-foreground">No trend data available</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={200}>
+                  <LineChart data={marketTrend}>
+                    <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 11 }} domain={[40, 80]} />
+                    <Tooltip contentStyle={{ fontSize: 11 }} />
+                    <Legend wrapperStyle={{ fontSize: 11 }} />
+                    <Line type="monotone" dataKey="you" stroke={GOLD} strokeWidth={2} dot={false} name="Your Position" />
+                    <Line type="monotone" dataKey="market" stroke="var(--color-stone-400)" strokeWidth={2} dot={false} name="Market Average" strokeDasharray="4 2" />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -287,7 +304,9 @@ Return ONLY valid JSON, no markdown.`;
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm">Competitor Ranking</CardTitle></CardHeader>
             <CardContent className="space-y-3">
-              {competitors.sort((a, b) => b.score - a.score).map((c, i) => (
+              {competitors.length === 0 ? (
+                <p className="text-xs text-muted-foreground py-4 text-center">No competitor data available</p>
+              ) : competitors.sort((a, b) => b.score - a.score).map((c, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <span className="text-xs text-muted-foreground w-4 shrink-0">{i + 1}</span>
                   <div className="flex-1 min-w-0">

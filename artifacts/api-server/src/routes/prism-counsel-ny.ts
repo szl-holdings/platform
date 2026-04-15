@@ -40,7 +40,6 @@ import {
 } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { runAllForecasts, runSingleForecast, type ForecastType } from "../lib/ny-forecast-engine";
-import { seedNyDemoData } from "../lib/ny-demo-seed";
 
 const router: IRouter = Router();
 
@@ -66,21 +65,6 @@ async function assertMatterAccess(matterId: number, orgId: number, res: Response
 /* ── Health ── */
 router.get("/prism-counsel/ny/health", (_req, res) => {
   res.json({ service: "prism-counsel-ny", status: "ok", timestamp: new Date().toISOString() });
-});
-
-/* ── Seed (admin only) ── */
-router.post("/prism-counsel/ny/seed", authMiddleware(), async (req, res) => {
-  try {
-    const user = req.user;
-    if (!user?.roles.includes("super_admin") && !user?.roles.includes("admin")) {
-      return sendForbidden(res, "Admin access required");
-    }
-    const orgId = getAuthOrgId(req) ?? 1;
-    await seedNyDemoData(orgId);
-    sendSuccess(res, { message: "NY demo data seeded successfully", orgId });
-  } catch (err) {
-    handleRouteError(res, err, "POST /prism-counsel/ny/seed");
-  }
 });
 
 /* ── Clock Rules ── */

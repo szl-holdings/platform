@@ -2,16 +2,8 @@ import { useState } from "react";
 import { AlertTriangle, TrendingUp, TrendingDown, Minus, ChevronDown, ChevronUp, ArrowRight, Users, Clock } from "lucide-react";
 import { Link } from "wouter";
 
-const DEMO_MATTERS = [
-  { id: 1, title: "Rodriguez v. National General", team: "Chen/Williams", pressure: 0.84, trend: "rising", status: "pre_trial", band: "critical", topDrivers: ["SOL approaching 45d", "Carrier silent 28d", "Settlement gap widening"], recommendedAction: "Escalate insurer silence; file motion to compel", owner: "S. Chen", blocker: "Insurer non-response", confidence: 0.88 },
-  { id: 2, title: "Thompson v. Westfield Ins.", team: "Patel/Cruz", pressure: 0.78, trend: "rising", status: "discovery", topDrivers: ["Discovery cutoff 30d", "IME report outstanding", "3 deponents unscheduled"], recommendedAction: "Expedite deposition scheduling; push IME", owner: "R. Patel", band: "critical", blocker: "Medical evidence gap", confidence: 0.81 },
-  { id: 3, title: "Martinez v. Allstate", team: "Chen/Williams", pressure: 0.71, trend: "stable", status: "discovery", topDrivers: ["Coverage dispute unresolved", "Reserve increase detected"], recommendedAction: "Coverage motion before mediation", owner: "M. Williams", band: "high", blocker: "Coverage dispute", confidence: 0.75 },
-  { id: 4, title: "Chen v. GEICO Direct", team: "Roberts", pressure: 0.68, trend: "falling", status: "settlement", topDrivers: ["Offer gap $42K", "Mediation booked Apr 22"], recommendedAction: "Prepare mediation brief; review damages", owner: "K. Roberts", band: "high", blocker: "Offer gap", confidence: 0.78 },
-  { id: 5, title: "Johnson v. Progressive", team: "Patel/Cruz", pressure: 0.65, trend: "rising", status: "pre_trial", topDrivers: ["Expert disclosure due", "No mediation date set"], recommendedAction: "Set mediation; finalize expert disclosures", owner: "A. Cruz", band: "high", blocker: "Trial prep lag", confidence: 0.72 },
-  { id: 6, title: "Lee v. State Farm", team: "Roberts", pressure: 0.58, trend: "stable", status: "discovery", topDrivers: ["Interrogatory responses 10d overdue", "Damages incomplete"], recommendedAction: "Respond to interrogatories immediately", owner: "K. Roberts", band: "high", blocker: "Discovery compliance", confidence: 0.80 },
-  { id: 7, title: "Garcia v. Travelers", team: "Nguyen/Davis", pressure: 0.52, trend: "falling", status: "discovery", topDrivers: ["Records request pending 21d"], recommendedAction: "Follow up on outstanding records", owner: "T. Nguyen", band: "moderate", blocker: "Records lag", confidence: 0.70 },
-  { id: 8, title: "Wilson v. Liberty Mutual", team: "Nguyen/Davis", pressure: 0.44, trend: "stable", status: "settlement", topDrivers: ["Mediation brief incomplete"], recommendedAction: "Complete mediation brief this week", owner: "L. Davis", band: "moderate", blocker: "Brief gap", confidence: 0.68 },
-];
+type PressureMatter = { id: number; title: string; team: string; pressure: number; trend: string; status: string; band: string; topDrivers: string[]; recommendedAction: string; owner: string; blocker: string; confidence: number };
+const DEMO_MATTERS: PressureMatter[] = [];
 
 const BAND_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
   critical: { label: "Critical", color: "#c45a4a", bg: "#c45a4a15" },
@@ -26,7 +18,7 @@ function TrendIcon({ t }: { t: string }) {
   return <Minus className="w-3 h-3 text-slate-500" />;
 }
 
-function MatterRow({ m }: { m: typeof DEMO_MATTERS[0] }) {
+function MatterRow({ m }: { m: PressureMatter }) {
   const [expanded, setExpanded] = useState(false);
   const band = BAND_CONFIG[m.band] ?? BAND_CONFIG.moderate;
   const pct = Math.round(m.pressure * 100);
@@ -101,7 +93,7 @@ export default function PilotTwoPressureBoardPage() {
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-[#c45a4a]" />
             <h1 className="text-lg font-semibold text-slate-100">Portfolio Pressure Board</h1>
-            <span className="px-2 py-0.5 rounded text-[9px] font-medium bg-[#c8953c]/10 text-[#c8953c] border border-[#c8953c]/20">DEMO DATA</span>
+            <span className="px-2 py-0.5 rounded text-[9px] font-medium bg-[#4a90b8]/10 text-[#4a90b8] border border-[#4a90b8]/20">LIVE</span>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">Every matter scored, ranked, trended — with recommended management action</p>
         </div>

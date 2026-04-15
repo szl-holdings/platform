@@ -12,23 +12,8 @@ const SOURCE_COLORS: Record<string, string> = {
   county_demographic: "#8b7ac8", court_venue: "#d4a054", lien_recovery: "#c45a4a", internal_firm: "#4a90b8",
 };
 
-const DEMO_SOURCES = [
-  { id: 1, name: "NY DFS Complaints", sourceClass: "regulatory_insurance", status: "active", totalSignals: 847, lastFetchAt: "2026-04-03T10:00:00Z", lastFetchStatus: "success", description: "NY DFS insurance complaint data" },
-  { id: 2, name: "NYC Open Data Crashes", sourceClass: "crash_incident", status: "active", totalSignals: 2341, lastFetchAt: "2026-04-03T09:30:00Z", lastFetchStatus: "success", description: "NYPD motor vehicle crash data" },
-  { id: 3, name: "NWS Weather Alerts", sourceClass: "weather_environmental", status: "active", totalSignals: 156, lastFetchAt: "2026-04-03T10:15:00Z", lastFetchStatus: "success", description: "National Weather Service active alerts for NY" },
-  { id: 4, name: "NWS Observations NYC", sourceClass: "weather_environmental", status: "active", totalSignals: 365, lastFetchAt: "2026-04-03T10:00:00Z", lastFetchStatus: "success", description: "NWS latest weather observations" },
-  { id: 5, name: "Census ACS County Data", sourceClass: "county_demographic", status: "active", totalSignals: 62, lastFetchAt: "2026-04-02T08:00:00Z", lastFetchStatus: "success", description: "Census county-level demographics" },
-  { id: 6, name: "NY Courts eCourts", sourceClass: "court_venue", status: "active", totalSignals: 423, lastFetchAt: "2026-04-03T08:00:00Z", lastFetchStatus: "success", description: "NY State court system data" },
-  { id: 7, name: "CMS MSP Recovery", sourceClass: "lien_recovery", status: "active", totalSignals: 89, lastFetchAt: "2026-04-02T12:00:00Z", lastFetchStatus: "success", description: "CMS Medicare Secondary Payer recovery" },
-];
-
-const DEMO_SIGNALS = [
-  { id: 1, sourceClass: "crash_incident", title: "Multi-vehicle collision — Belt Pkwy, Brooklyn", summary: "3-vehicle rear-end collision with injuries, NYPD report filed", freshnessScore: 0.95, provenanceScore: 0.9, legalUsefulnessScore: 0.85, jurisdiction: "NY", county: "Kings", createdAt: "2026-04-03T08:14:00Z" },
-  { id: 2, sourceClass: "regulatory_insurance", title: "DFS complaint: Claim denial — National General", summary: "PIP claim denied for pre-existing condition, complaint filed with DFS", freshnessScore: 0.88, provenanceScore: 0.9, legalUsefulnessScore: 0.92, jurisdiction: "NY", county: "New York", createdAt: "2026-04-02T15:30:00Z" },
-  { id: 3, sourceClass: "weather_environmental", title: "Winter Weather Advisory — Northern NY", summary: "6-8 inches snow expected, travel hazards anticipated", freshnessScore: 0.97, provenanceScore: 0.95, legalUsefulnessScore: 0.55, jurisdiction: "NY", county: "Albany", createdAt: "2026-04-03T06:00:00Z" },
-  { id: 4, sourceClass: "court_venue", title: "Kings County Supreme — Scheduling update", summary: "Trial calendar adjustments for April 2026 term", freshnessScore: 0.85, provenanceScore: 0.88, legalUsefulnessScore: 0.90, jurisdiction: "NY", county: "Kings", createdAt: "2026-04-01T14:00:00Z" },
-  { id: 5, sourceClass: "lien_recovery", title: "CMS conditional payment notice", summary: "Medicare lien identified for claimant — $12,847 conditional payments", freshnessScore: 0.78, provenanceScore: 0.92, legalUsefulnessScore: 0.88, jurisdiction: "NY", county: null, createdAt: "2026-03-30T10:00:00Z" },
-];
+const DEMO_SOURCES: any[] = [];
+const DEMO_SIGNALS: any[] = [];
 
 export default function WorldlineDashboard() {
   const { data: sourcesData } = useWorldlineSources();

@@ -58,33 +58,7 @@ const APPROVAL_CLASSES: { id: ApprovalClass; label: string; color: string; bg: s
   { id: "admin_only", label: "Admin Only", color: "#ef4444", bg: "rgba(239,68,68,0.08)", border: "rgba(239,68,68,0.2)", icon: <Shield className="w-3.5 h-3.5" />, description: "Restricted to admin-level users" },
 ];
 
-const DEMO_TOOLS: CustomTool[] = [
-  {
-    id: "t1",
-    name: "Fetch Customer Data",
-    slug: "fetch-customer-data",
-    description: "Retrieves customer record and recent activity from CRM API",
-    executionType: "api_call",
-    approvalClass: "auto",
-    inputFields: [
-      { key: "customerId", type: "string", description: "Customer ID", required: true },
-    ],
-    outputFields: [
-      { key: "name", type: "string", description: "Customer name", required: true },
-      { key: "tier", type: "string", description: "Customer tier", required: false },
-    ],
-    config: {
-      httpMethod: "GET",
-      url: "https://crm.internal/api/customers/{{customerId}}",
-      headers: '{"Authorization": "Bearer {{API_KEY}}"}',
-    },
-    versions: [
-      { version: 1, createdAt: new Date(Date.now() - 86400000 * 3).toISOString(), changes: "Initial version" },
-      { version: 2, createdAt: new Date(Date.now() - 86400000).toISOString(), changes: "Added tier field to output" },
-    ],
-    isPublished: true,
-  },
-];
+const DEMO_TOOLS: CustomTool[] = [];
 
 const defaultTool = (): Omit<CustomTool, "id"> => ({
   name: "",

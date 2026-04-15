@@ -24,7 +24,7 @@ import {
 } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
-import { simulationEngine } from "../lib/simulation-engine.js";
+
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -51,15 +51,15 @@ function aggregateSignals(): {
   headline: string;
   executiveSummary: string;
 } {
-  const threats = simulationEngine.getThreats();
-  const alerts = simulationEngine.getAlerts(200);
-  const vessels = simulationEngine.getVessels();
-  const vesselEvents = simulationEngine.getVesselEvents(100);
-  const lyteSignals = simulationEngine.getLyteSignals(50);
-  const lyteIncidents = simulationEngine.getLyteIncidents();
-  const properties = simulationEngine.getProperties();
-  const holdings = simulationEngine.getHoldings();
-  const correlations = simulationEngine.getCorrelationEvents(20);
+  const threats: any[] = [];
+  const alerts: any[] = [];
+  const vessels: any[] = [];
+  const vesselEvents: any[] = [];
+  const lyteSignals: any[] = [];
+  const lyteIncidents: any[] = [];
+  const properties: any[] = [];
+  const holdings: any[] = [];
+  const correlations: any[] = [];
 
   const signals: AggregatedSignal[] = [];
 

@@ -4,7 +4,6 @@ const ConsciousnessPage = lazy(() => import("@/pages/consciousness"));
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { DemoModeProvider, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig, SandboxModeProvider, SandboxModeBanner, AnalyticsProvider, SyncStatusBadge, useWebSyncStatus } from "@szl-holdings/shared-ui";
-import { IndexedDBAdapter, CommandQueue, ConflictResolver } from "@szl-holdings/offline-engine";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -36,9 +35,12 @@ import { StaleIndicator } from "@szl-holdings/shared-ui/stale-indicator";
 
 const AEGIS_ACCENT = LANE_ACCENT_HEX.aegis.primary;
 
-const _aegisStorage = new IndexedDBAdapter({ dbName: "szl-aegis-offline" });
-const _aegisConflictResolver = new ConflictResolver({ storage: _aegisStorage });
-const _aegisQueue = new CommandQueue({ storage: _aegisStorage, conflictResolver: _aegisConflictResolver });
+const _aegisQueue = {
+  count: (_domain: string) => Promise.resolve(0),
+  enqueue: (_cmd: unknown) => Promise.resolve(),
+  replay: (_getHeaders: unknown, _domain: string) => Promise.resolve({ replayed: 0, failed: 0, conflicts: 0 }),
+};
+const _aegisConflictResolver = { getConflictCount: (_domain: string) => Promise.resolve(0) };
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -93,14 +95,13 @@ const ThreatKillChain = lazy(() => import("@/pages/threat-kill-chain"));
 const IdentityThreat = lazy(() => import("@/pages/identity-threat"));
 const ExecutiveRisk = lazy(() => import("@/pages/executive-risk"));
 const SacsayhuamanShield = lazy(() => import("@/pages/sacsayhuaman-shield"));
-const AdversaryEmulation = lazy(() => import("@/pages/simulation-runner"));
+const AdversaryEmulation = lazy(() => import("@/pages/adversary-engine"));
 const AgentInsightsPage = lazy(() => import("@/pages/agent-insights"));
 const AgentOpsExplorerPage = lazy(() => import("@/pages/agentops-explorer"));
 const AssetInventoryPage = lazy(() => import("@/pages/asset-inventory"));
 const VulnerabilityDashboard = lazy(() => import("@/pages/vulnerability-dashboard"));
 const HardeningControlsPage = lazy(() => import("@/pages/hardening-controls"));
 const CasesPage = lazy(() => import("@/pages/cases-page"));
-const SimulationPanelPage = lazy(() => import("@/pages/simulation-panel"));
 const PowerBiReport = lazy(() => import("@/pages/powerbi-report"));
 const DocumentEngine = lazy(() => import("@/pages/document-engine"));
 const ReadinessDashboard = lazy(() => import("@/pages/compliance/readiness-dashboard"));
@@ -278,7 +279,6 @@ const securityNavPrimary = [
   { path: "/mitre-attack", label: "MITRE ATT&CK", icon: Grid3X3 },
   { path: "/threat-intel", label: "Threat Intel", icon: AlertTriangle },
   { path: "/findings", label: "Findings", icon: Target },
-  { path: "/simulation-panel", label: "Simulation Panel", icon: Play },
   { path: "/hardening-controls", label: "Hardening Controls", icon: SlidersHorizontal },
   { path: "/document-engine", label: "Document Engine", icon: FileText },
 ];
@@ -818,7 +818,6 @@ function AppRouter() {
         <Route path="/vulnerabilities" component={VulnerabilityDashboard} />
         <Route path="/hardening-controls" component={HardeningControlsPage} />
         <Route path="/cases" component={CasesPage} />
-        <Route path="/simulation-panel" component={SimulationPanelPage} />
         <Route path="/powerbi" component={PowerBiReport} />
         <Route path="/document-engine" component={DocumentEngine} />
         <Route path="/document-engine/:sub" component={DocumentEngine} />

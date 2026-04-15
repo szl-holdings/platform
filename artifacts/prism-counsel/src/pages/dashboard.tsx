@@ -1,6 +1,6 @@
 import { Scale, AlertTriangle, Clock, TrendingUp, DollarSign, ShieldCheck, FileText, ArrowRight, ChevronRight, Wifi, WifiOff } from "lucide-react";
 import { Link } from "wouter";
-import { DEMO_MATTERS, PILLAR_LABELS } from "../data/demo-matters";
+import { PILLAR_LABELS } from "../data/demo-matters";
 import { usePrismDashboard, usePrismMatters } from "../hooks/use-prism-api";
 
 function PillarBar({ label, score, max = 100 }: { label: string; score: number; max?: number }) {
@@ -65,31 +65,19 @@ export default function PrismCounselDashboard() {
   const liveMatters = mattersQ.data;
   const hasLiveMatters = Array.isArray(liveMatters) && liveMatters.length > 0;
 
-  const matters = hasLiveMatters ? liveMatters : DEMO_MATTERS;
-
-  const activeCount = isLive ? (dashQ.data!.matters?.active_matters ?? matters.length) : matters.length;
+  const activeCount = isLive ? (dashQ.data!.matters?.active_matters ?? (hasLiveMatters ? liveMatters.length : 0)) : 0;
   const totalExposure = isLive
     ? `$${(Number(dashQ.data!.matters?.total_exposure || 0) / 1_000_000).toFixed(1)}M`
-    : "$2.6M";
+    : "$0";
   const deadlineCount = isLive ? (dashQ.data!.deadlines?.total_pending ?? 0) : 0;
   const upcoming14d = isLive ? (dashQ.data!.deadlines?.upcoming_14d ?? 0) : 0;
-  const pendingApprovals = isLive ? (dashQ.data!.approvals?.pending_approvals ?? 0) : 3;
+  const pendingApprovals = isLive ? (dashQ.data!.approvals?.pending_approvals ?? 0) : 0;
 
-  const allDeadlines = DEMO_MATTERS.flatMap(m =>
-    (m.deadlines || []).map(d => ({ ...d, matterTitle: m.title }))
-  ).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const allDeadlines: Array<{ title: string; date: string; priority: string; matterTitle: string }> = [];
+  const criticalRecs: Array<{ title: string; description: string; priority: string; matterTitle: string }> = [];
 
-  const allRecs = DEMO_MATTERS.flatMap(m =>
-    (m.recommendations || []).map(r => ({ ...r, matterTitle: m.title, matterId: m.id }))
-  );
-
-  const criticalRecs = allRecs.filter(r => r.priority === "critical" || r.priority === "high");
-
-  const displayDeadlineCount = isLive ? deadlineCount : allDeadlines.length;
-  const displayUpcoming = isLive ? upcoming14d : allDeadlines.filter(d => {
-    const dl = Math.ceil((new Date(d.date).getTime() - Date.now()) / 86400000);
-    return dl <= 14;
-  }).length;
+  const displayDeadlineCount = deadlineCount;
+  const displayUpcoming = upcoming14d;
 
   return (
     <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
@@ -111,10 +99,10 @@ export default function PrismCounselDashboard() {
       </div>
 
       <div className="grid grid-cols-4 gap-3">
-        <KpiCard label="Active Matters" value={String(activeCount)} sub={hasLiveMatters ? `${liveMatters.filter(m => m.status === "discovery").length} in discovery` : "2 in discovery · 1 pre-trial"} icon={FolderOpen} accent="#d4a054" />
+        <KpiCard label="Active Matters" value={String(activeCount)} sub={hasLiveMatters ? `${liveMatters.filter(m => m.status === "discovery").length} in discovery` : "No matters loaded"} icon={FolderOpen} accent="#d4a054" />
         <KpiCard label="Total Exposure" value={totalExposure} sub="Across all active matters" icon={DollarSign} accent="#c8953c" />
         <KpiCard label="Upcoming Deadlines" value={String(displayDeadlineCount)} sub={`${displayUpcoming} within 14 days`} icon={Clock} accent="#c45a4a" />
-        <KpiCard label="Pending Approvals" value={String(pendingApprovals)} sub={isLive ? "from approval queue" : "1 demand send · 2 filings"} icon={ShieldCheck} accent="#4a90b8" />
+        <KpiCard label="Pending Approvals" value={String(pendingApprovals)} sub={isLive ? "from approval queue" : "No approvals"} icon={ShieldCheck} accent="#4a90b8" />
       </div>
 
       <div className="grid grid-cols-3 gap-4">
@@ -137,7 +125,7 @@ export default function PrismCounselDashboard() {
                 healthScore: m.healthScore ?? 0,
                 status: m.status,
                 readinessScores: {} as Record<string, number>,
-              })) : DEMO_MATTERS).map(m => (
+              })) : []).map(m => (
                 <Link key={m.id} href={`/prism-counsel/matters/${m.id}`}>
                   <div className="rounded border border-white/[0.04] p-3 hover:border-white/[0.10] transition-colors cursor-pointer" style={{ background: "#080c14" }}>
                     <div className="flex items-center justify-between mb-2">
@@ -213,27 +201,20 @@ export default function PrismCounselDashboard() {
           <div className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
             <h2 className="text-sm font-semibold text-slate-200 mb-3">Settlement Forecast</h2>
             <div className="space-y-3">
-              {DEMO_MATTERS.map(m => (
+              {!hasLiveMatters && (
+                <div className="py-6 text-center">
+                  <p className="text-[10px] text-slate-600">Connect matter data to see settlement forecasts</p>
+                </div>
+              )}
+              {hasLiveMatters && liveMatters.map(m => (
                 <div key={m.id} className="py-2 border-b border-white/[0.04] last:border-0">
                   <div className="text-[11px] text-slate-400 mb-1 truncate">{m.title.split(" v. ")[0]}</div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-slate-500">${(m.settlementLow / 1000).toFixed(0)}K</span>
+                    <span className="text-xs font-mono text-slate-500">${(Number(m.settlementLow ?? 0) / 1000).toFixed(0)}K</span>
                     <div className="flex-1 h-2 bg-white/[0.06] rounded-full relative">
-                      <div
-                        className="absolute h-full rounded-full"
-                        style={{
-                          left: `${(m.settlementLow / m.settlementHigh) * 50}%`,
-                          right: "0%",
-                          background: "linear-gradient(90deg, #d4a054, #4a90b8)",
-                          opacity: 0.6,
-                        }}
-                      />
-                      <div
-                        className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white border border-slate-600"
-                        style={{ left: `${((m.settlementMid - m.settlementLow) / (m.settlementHigh - m.settlementLow)) * 100}%` }}
-                      />
+                      <div className="absolute h-full rounded-full" style={{ left: "0%", right: "0%", background: "linear-gradient(90deg, #d4a054, #4a90b8)", opacity: 0.3 }} />
                     </div>
-                    <span className="text-xs font-mono text-slate-500">${(m.settlementHigh / 1000).toFixed(0)}K</span>
+                    <span className="text-xs font-mono text-slate-500">${(Number(m.settlementHigh ?? 0) / 1000).toFixed(0)}K</span>
                   </div>
                 </div>
               ))}
@@ -245,9 +226,10 @@ export default function PrismCounselDashboard() {
             <p className="text-[10px] text-slate-500 mb-3">Six observability pillars across all matters</p>
             <div className="space-y-2">
               {Object.entries(PILLAR_LABELS).map(([key, label]) => {
-                const avg = Math.round(
-                  DEMO_MATTERS.reduce((sum, m) => sum + (m.readinessScores[key as keyof typeof m.readinessScores] || 0), 0) / DEMO_MATTERS.length
-                );
+                const scores = hasLiveMatters
+                  ? liveMatters.map(m => (m.readinessScores as Record<string, number>)?.[key] ?? 0)
+                  : [];
+                const avg = scores.length > 0 ? Math.round(scores.reduce((s, v) => s + v, 0) / scores.length) : 0;
                 return <PillarBar key={key} label={label} score={avg} />;
               })}
             </div>

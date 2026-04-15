@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 import { load as yamlLoad } from "js-yaml";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
-import { agentEventBus } from "@szl-holdings/workflow-engine";
+import { agentEventBus } from "../lib/event-bus";
 import {
   getKernelAuditTrail,
   verifyAuditChainIntegrity,
@@ -14,7 +14,7 @@ import {
 } from "@szl-holdings/ai-engine";
 import { orchestrate, getOrchestratorCapabilities } from "../lib/multi-agent-orchestrator";
 import { listPipelines, executePipeline, getPipelineConfig, executeComposedPipeline } from "../lib/intelligence-pipelines";
-import { simulationEngine } from "../lib/simulation-engine.js";
+
 import { inferenceTelemetry } from "../lib/inference-telemetry";
 import { insertDecision, listDecisions, updateDecisionStatus, getDecision } from "../lib/alloy-decision-store";
 import type { AlloyDecisionEvidenceRef, RiskLevel } from "@szl-holdings/ai-engine";
@@ -390,52 +390,7 @@ router.post("/control-tower/sense/emit", requireRole("super_admin", "ops", "exec
 
 router.get("/control-tower/sense/domain-snapshot", (_req: Request, res: Response) => {
   try {
-    const threats = simulationEngine.getThreats().slice(0, 10);
-    const alerts = simulationEngine.getAlerts(20);
-    const vessels = simulationEngine.getVessels().slice(0, 10);
-    const lyteSignals = simulationEngine.getLyteSignals(20);
-    const lyteIncidents = simulationEngine.getLyteIncidents();
-
-    const signals = [
-      ...threats.map(t => ({
-        id: `sim-threat-${t.id}`, domain: "firestorm", type: "threat_identified",
-        title: t.title, severity: t.severity,
-        confidence: t.confidence, timestamp: t.detectedAt, payload: t,
-      })),
-      ...alerts.slice(0, 5).map(a => ({
-        id: `sim-alert-${a.id}`, domain: "firestorm", type: "alert_raised",
-        title: a.title, severity: a.severity,
-        confidence: 0.9, timestamp: a.receivedAt, payload: a,
-      })),
-      ...vessels
-        .filter(v => v.status === "ais_dark" || v.financialExposureUsd > 5_000_000)
-        .map(v => ({
-          id: `sim-vessel-${v.id}`, domain: "vessels",
-          type: v.status === "ais_dark" ? "dark_vessel_detected" : "anomaly_detected",
-          title: `${v.name} — ${v.status === "ais_dark" ? "AIS Dark" : "High Financial Exposure"}`,
-          severity: v.financialExposureUsd > 8_000_000 ? "critical" : v.status === "ais_dark" ? "high" : "medium",
-          confidence: 0.85, timestamp: v.lastUpdated,
-          payload: { vesselId: v.id, name: v.name, flag: v.flag, financialExposureUsd: v.financialExposureUsd, status: v.status },
-        })),
-      ...lyteSignals
-        .filter(s => s.severity === "critical" || s.severity === "high")
-        .slice(0, 5)
-        .map(s => ({
-          id: `sim-signal-${s.id}`, domain: "lyte", type: "metric_spike",
-          title: s.title, severity: s.severity,
-          confidence: 0.92, timestamp: s.receivedAt,
-          payload: { signalId: s.id, source: s.source, sourceType: s.sourceType, loadPct: s.loadPct, crossDomain: s.crossDomainTriggered },
-        })),
-      ...lyteIncidents
-        .filter(i => i.status === "open" || i.status === "investigating")
-        .slice(0, 3)
-        .map(i => ({
-          id: `sim-incident-${i.id}`, domain: "lyte", type: "incident_open",
-          title: i.title, severity: i.severity,
-          confidence: 0.95, timestamp: i.createdAt,
-          payload: { incidentId: i.id, assignee: i.assignee, status: i.status, financialImpactUsd: i.financialImpactUsd },
-        })),
-    ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    const signals: any[] = [];
 
     sendSuccess(res, {
       layer: "sense", signals, totalSignals: signals.length,

@@ -26,40 +26,15 @@ const STATE_ORDER = [
   "reviewed", "ready_for_settlement_handling", "resolved", "archived",
 ];
 
-const DEMO_BY_STATE: Record<string, { count: number; totalAsserted: number; blockers: number }> = {
-  awaiting_response: { count: 8, totalAsserted: 182000, blockers: 5 },
-  documentation_requested: { count: 4, totalAsserted: 76500, blockers: 3 },
-  dispute_flagged: { count: 3, totalAsserted: 44200, blockers: 3 },
-  amount_pending: { count: 6, totalAsserted: 127400, blockers: 2 },
-  identified: { count: 5, totalAsserted: 93000, blockers: 1 },
-  amount_known: { count: 7, totalAsserted: 168000, blockers: 0 },
-  reviewed: { count: 3, totalAsserted: 41000, blockers: 0 },
-  ready_for_settlement_handling: { count: 2, totalAsserted: 28000, blockers: 0 },
-  suspected: { count: 2, totalAsserted: 0, blockers: 0 },
-  resolved: { count: 11, totalAsserted: 220000, blockers: 0 },
-};
+type StateEntry = { count: number; totalAsserted: number; blockers: number };
+type StaleEntry = { id: number; lienHolder: string; matter: string; category: string; daysStale: number; assertedAmount: number; state: string };
+type SlaBreachEntry = { id: number; lienHolder: string; matter: string; slaType: string; daysBeyond: number; assignee: string };
+type CategoryEntry = { category: string; count: number; totalAsserted: number; blockingCount: number; avgDaysOpen: number };
 
-const DEMO_STALE = [
-  { id: 1, lienHolder: "Florida Medicaid AHCA", matter: "Rodriguez v. National General", category: "Medicaid", daysStale: 47, assertedAmount: 22300, state: "awaiting_response" },
-  { id: 2, lienHolder: "CMS Medicare — MSP Division", matter: "Chen v. Tampa General", category: "Medicare/MSP", daysStale: 38, assertedAmount: 41200, state: "amount_pending" },
-  { id: 3, lienHolder: "Aetna Health (ERISA)", matter: "Williams v. Broward County", category: "Private Health", daysStale: 31, assertedAmount: 15800, state: "documentation_requested" },
-];
-
-const DEMO_SLA_BREACHES = [
-  { id: 1, lienHolder: "AHCA Medicaid", matter: "Rodriguez v. National General", slaType: "Response follow-up", daysBeyond: 25, assignee: "Paralegal" },
-  { id: 2, lienHolder: "CMS MSP", matter: "Chen v. Tampa General", slaType: "Documentation request", daysBeyond: 14, assignee: "Paralegal" },
-  { id: 3, lienHolder: "Jackson Memorial", matter: "Rodriguez v. National General", slaType: "Dispute response", daysBeyond: 8, assignee: "Attorney" },
-];
-
-const DEMO_BY_CATEGORY = [
-  { category: "Medicare / MSP", count: 4, totalAsserted: 87000, blockingCount: 2, avgDaysOpen: 41 },
-  { category: "Medicaid", count: 7, totalAsserted: 134500, blockingCount: 4, avgDaysOpen: 38 },
-  { category: "Private Health / ERISA", count: 6, totalAsserted: 92000, blockingCount: 3, avgDaysOpen: 22 },
-  { category: "Provider Lien", count: 8, totalAsserted: 68400, blockingCount: 1, avgDaysOpen: 15 },
-  { category: "Hospital Lien", count: 5, totalAsserted: 44200, blockingCount: 2, avgDaysOpen: 19 },
-  { category: "Workers' Comp", count: 2, totalAsserted: 31000, blockingCount: 1, avgDaysOpen: 55 },
-  { category: "Statutory Recovery", count: 3, totalAsserted: 0, blockingCount: 0, avgDaysOpen: 8 },
-];
+const DEMO_BY_STATE: Record<string, StateEntry> = {};
+const DEMO_STALE: StaleEntry[] = [];
+const DEMO_SLA_BREACHES: SlaBreachEntry[] = [];
+const DEMO_BY_CATEGORY: CategoryEntry[] = [];
 
 export default function AdminRecoveryPage() {
   const [activeTab, setActiveTab] = useState<"backlog" | "stale" | "sla" | "categories">("backlog");

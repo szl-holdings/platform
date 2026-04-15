@@ -23,7 +23,7 @@ import {
 } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
-import { simulationEngine } from "../lib/simulation-engine.js";
+
 
 const router: IRouter = Router();
 
@@ -66,9 +66,9 @@ router.get(
           ),
       ]);
 
-      const vessels = simulationEngine.getVessels();
-      const holdings = simulationEngine.getHoldings();
-      const properties = simulationEngine.getProperties();
+      const vessels: any[] = [];
+      const holdings: any[] = [];
+      const properties: any[] = [];
 
       const maritimeRevenue = vessels.reduce(
         (acc: number, v: any) => acc + (v.financialExposureUsd ?? 0),

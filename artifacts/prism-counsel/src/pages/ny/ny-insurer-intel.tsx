@@ -1,8 +1,7 @@
 import { Building2, Clock, TrendingUp, AlertTriangle } from "lucide-react";
-import { NY_DEMO_MATTERS } from "../../data/ny-demo-matters";
 
 export default function NyInsurerIntelPage() {
-  const insurers = NY_DEMO_MATTERS.map(m => ({ ...m.insurerProfile, matterTitle: m.title, matter: m }));
+  const insurers: Array<{ carrierName: string; claimOffice: string; reservingStyle: string; mediationBehavior: string; averageResponseDays: number; litigationTolerance: string; denialPattern: string; matterTitle: string; matter: { reserveMovements: Array<{ movementType: string; reserveAmount: number; priorReserve?: number; inferredSignal: string; reserveDate: string }>; communicationWindows: Array<{ partyRole: string; daysSilent: number; silenceRisk: string; outstandingItems: string[] }> } }> = [];
 
   const BEHAVIOR_PATTERNS = [
     { carrier: "Progressive Insurance", claimOffice: "Long Island City, NY", patterns: ["EUO scheduling as suspension tactic", "Peer review denials at 60–90 day mark", "Reserve moved upward when litigation risk confirmed", "IME-focused defense strategy for high BI cases"], style: "conservative", mediationBehavior: "strategic" },

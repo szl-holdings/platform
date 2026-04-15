@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { Search, Filter, ArrowRight, Wifi, WifiOff, Loader2 } from "lucide-react";
-import { DEMO_MATTERS } from "../data/demo-matters";
 import { usePrismMatters } from "../hooks/use-prism-api";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -52,7 +51,7 @@ export default function MattersListPage() {
         readinessScores: {} as Record<string, number>,
         recommendations: [] as any[],
       }))
-    : DEMO_MATTERS;
+    : [];
 
   const filtered = allMatters.filter(m => {
     if (search && !m.title.toLowerCase().includes(search.toLowerCase()) && !m.caseNumber?.toLowerCase().includes(search.toLowerCase())) return false;

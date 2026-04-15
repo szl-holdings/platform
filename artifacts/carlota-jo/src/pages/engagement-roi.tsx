@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
-import { DollarSign, TrendingUp, Shield, CheckCircle, PlusCircle, Trash2, BarChart2, Award, Loader2, Sparkles } from "lucide-react";
+import { DollarSign, TrendingUp, Shield, CheckCircle, BarChart2, Award, Loader2, Sparkles } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from "recharts";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 const GOLD = "var(--color-gold)";
 
@@ -29,34 +29,6 @@ type Engagement = {
   recommendations: Recommendation[];
 };
 
-const SAMPLE_ENGAGEMENTS: Engagement[] = [
-  {
-    id: "eng-001",
-    client: "Luminary Brands",
-    engagement: "Go-to-Market Strategy Redesign",
-    startDate: "January 2026",
-    fee: 84000,
-    recommendations: [
-      { id: "r1", title: "Reposition pricing architecture to value-based model", category: "revenue", status: "implemented", revenueInfluenced: 1240000, costsAvoided: 0, risksMitigated: 0, confidence: 88, implementedDate: "Feb 2026" },
-      { id: "r2", title: "Exit underperforming retail channel (3 accounts)", category: "cost", status: "implemented", revenueInfluenced: 0, costsAvoided: 320000, risksMitigated: 0, confidence: 94, implementedDate: "Mar 2026" },
-      { id: "r3", title: "Consolidate vendor contracts — renegotiate 6 suppliers", category: "cost", status: "in-progress", revenueInfluenced: 0, costsAvoided: 180000, risksMitigated: 0, confidence: 76 },
-      { id: "r4", title: "Establish regulatory compliance framework for EU expansion", category: "risk", status: "implemented", revenueInfluenced: 0, costsAvoided: 0, risksMitigated: 800000, confidence: 91, implementedDate: "Feb 2026" },
-    ],
-  },
-  {
-    id: "eng-002",
-    client: "Oasis Wellness",
-    engagement: "Brand Strategy & Market Entry",
-    startDate: "October 2025",
-    fee: 120000,
-    recommendations: [
-      { id: "r5", title: "Launch DTC channel with subscription model", category: "revenue", status: "implemented", revenueInfluenced: 2200000, costsAvoided: 0, risksMitigated: 0, confidence: 85, implementedDate: "Jan 2026" },
-      { id: "r6", title: "Terminate agency retainer — bring content in-house", category: "cost", status: "implemented", revenueInfluenced: 0, costsAvoided: 240000, risksMitigated: 0, confidence: 92, implementedDate: "Nov 2025" },
-      { id: "r7", title: "Implement customer data platform for retention", category: "revenue", status: "in-progress", revenueInfluenced: 680000, costsAvoided: 0, risksMitigated: 0, confidence: 72 },
-    ],
-  },
-];
-
 const CATEGORY_COLORS: Record<string, string> = {
   revenue: "#22c55e",
   cost: "#3b82f6",
@@ -69,6 +41,8 @@ const STATUS_STYLES: Record<string, string> = {
   pending: "bg-stone-50 text-stone-600 border-stone-200",
 };
 
+const API = import.meta.env.BASE_URL + "api";
+
 export default function EngagementROI() {
   usePageMeta({
     title: "Engagement ROI Tracker | Carlota Jo",
@@ -76,10 +50,58 @@ export default function EngagementROI() {
     canonical: "https://szlholdings.com/carlota-jo/engagement-roi",
   });
 
-  const [engagements] = useState<Engagement[]>(SAMPLE_ENGAGEMENTS);
-  const [selectedEngagement, setSelectedEngagement] = useState<Engagement>(SAMPLE_ENGAGEMENTS[0]);
+  const [engagements, setEngagements] = useState<Engagement[]>([]);
+  const [selectedEngagement, setSelectedEngagement] = useState<Engagement | null>(null);
   const [generatingInsight, setGeneratingInsight] = useState(false);
   const [aiInsight, setAiInsight] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadEngagements() {
+      setLoading(true);
+      try {
+        const res = await fetch(`${API}/booking/reservations`, { credentials: "include" });
+        if (res.ok) {
+          const json = await res.json();
+          const raw: { id?: string | number; client?: string; notes?: string; startDate?: string; totalAmount?: number }[] =
+            Array.isArray(json.reservations) ? json.reservations : Array.isArray(json.data) ? json.data : [];
+          const mapped: Engagement[] = raw.map(r => ({
+            id: String(r.id ?? Math.random()),
+            client: r.client ?? "Unknown Client",
+            engagement: r.notes ?? "Consulting Engagement",
+            startDate: r.startDate ?? new Date().toISOString().slice(0, 10),
+            fee: r.totalAmount ?? 0,
+            recommendations: [],
+          }));
+          setEngagements(mapped);
+          if (mapped.length > 0) setSelectedEngagement(mapped[0]);
+        }
+      } catch {
+      } finally {
+        setLoading(false);
+      }
+    }
+    void loadEngagements();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="p-10 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+        <Loader2 className="w-4 h-4 animate-spin" />
+        Loading engagement data…
+      </div>
+    );
+  }
+
+  if (!selectedEngagement) {
+    return (
+      <div className="p-10 text-center">
+        <BarChart2 className="w-8 h-8 mx-auto mb-3 text-muted-foreground/40" />
+        <p className="text-sm text-stone-500">No engagement data connected.</p>
+        <p className="text-xs text-stone-600 mt-1">Connect engagement records to track ROI across recommendations.</p>
+      </div>
+    );
+  }
 
   const recs = selectedEngagement.recommendations;
   const totalRevenue = recs.reduce((s, r) => s + r.revenueInfluenced, 0);
@@ -98,12 +120,12 @@ export default function EngagementROI() {
   const generateInsight = async () => {
     setGeneratingInsight(true);
     try {
-      const res = await fetch("/api/intelligence/ai/advisory", {
+      const res = await fetch(`${API}/intelligence/ai/advisory`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          messages: [{ role: "user", content: `Provide a 2-3 sentence executive ROI insight for this consulting engagement. Client: ${selectedEngagement.client}. Engagement: ${selectedEngagement.engagement}. Fee: $${selectedEngagement.fee.toLocaleString()}. Total measured impact: $${totalImpact.toLocaleString()}. ROI: ${roi}%. Implemented ${implemented} of ${recs.length} recommendations. Revenue influenced: $${totalRevenue.toLocaleString()}. Costs avoided: $${totalCost.toLocaleString()}. Risks mitigated: $${totalRisk.toLocaleString()}. Be specific and quantitative. Do not use bullet points or headers — just 2-3 flowing sentences.` }],
+          messages: [{ role: "user", content: `Provide a 2-3 sentence executive ROI insight for this consulting engagement. Client: ${selectedEngagement.client}. Engagement: ${selectedEngagement.engagement}. Fee: $${selectedEngagement.fee.toLocaleString()}. Total measured impact: $${totalImpact.toLocaleString()}. ROI: ${roi}%. Implemented ${implemented} of ${recs.length} recommendations. Be specific and quantitative. Do not use bullet points or headers — just 2-3 flowing sentences.` }],
           context: "Engagement ROI tracker — Carlota Jo",
         }),
       });
@@ -125,7 +147,7 @@ export default function EngagementROI() {
       }
       setAiInsight(fullContent);
     } catch {
-      setAiInsight(`The ${selectedEngagement.engagement} engagement for ${selectedEngagement.client} has delivered ${roi}% ROI against a $${selectedEngagement.fee.toLocaleString()} investment — $${totalImpact.toLocaleString()} in total measured business impact across ${implemented} implemented recommendations. The highest-leverage outcome was the revenue repositioning, which generated the majority of the financial return within the first 90 days of implementation.`);
+      setAiInsight(null);
     } finally {
       setGeneratingInsight(false);
     }
@@ -160,8 +182,8 @@ export default function EngagementROI() {
           { label: "Consulting Investment", value: `$${(selectedEngagement.fee / 1000).toFixed(0)}K`, icon: DollarSign, color: "text-foreground" },
           { label: "Total Measured Impact", value: `$${(totalImpact / 1000).toFixed(0)}K`, icon: TrendingUp, color: "text-emerald-600" },
           { label: "Engagement ROI", value: `${roi}%`, icon: Award, color: "text-foreground" },
-          { label: "Recommendations", value: `${implemented}/${recs.length}`, icon: CheckCircle, color: "text-foreground" },
-          { label: "Avg. Confidence", value: `${Math.round(recs.reduce((s, r) => s + r.confidence, 0) / recs.length)}%`, icon: Shield, color: "text-foreground" },
+          { label: "Recommendations", value: recs.length > 0 ? `${implemented}/${recs.length}` : "—", icon: CheckCircle, color: "text-foreground" },
+          { label: "Avg. Confidence", value: recs.length > 0 ? `${Math.round(recs.reduce((s, r) => s + r.confidence, 0) / recs.length)}%` : "—", icon: Shield, color: "text-foreground" },
         ].map((stat, i) => (
           <Card key={i}>
             <CardContent className="pt-4">
@@ -202,7 +224,11 @@ export default function EngagementROI() {
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
-              {recs.map(rec => (
+              {recs.length === 0 ? (
+                <div className="py-8 text-center">
+                  <p className="text-xs text-muted-foreground">No recommendations recorded for this engagement.</p>
+                </div>
+              ) : recs.map(rec => (
                 <div key={rec.id} className="p-3 rounded-lg border border-border">
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div className="flex-1">

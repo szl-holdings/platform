@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Sun, BookOpen, MessageSquare, Building2, AlertTriangle, CheckSquare, ChevronRight, ArrowLeft, Clock, FileText, Zap, TrendingUp, CheckCircle, Shield } from "lucide-react";
 import { Link } from "wouter";
-import { DEMO_MATTERS } from "../../data/demo-matters";
 
 const WORKFLOWS = [
   {

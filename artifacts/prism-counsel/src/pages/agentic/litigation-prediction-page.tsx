@@ -176,7 +176,7 @@ export default function LitigationPredictionPage() {
                     const max = hi * 1.3;
                     return (
                       <>
-                        <div className="absolute top-0 bottom-0 rounded-lg" style={{ left: `${(lo / max) * 100}%`, width: `${\((hi - lo) / max) * 100}%`, background: `linear-gradient(90deg, ${PRISM_BLUE}30, ${PRISM_GOLD}30)` }} />
+                        <div className="absolute top-0 bottom-0 rounded-lg" style={{ left: `${(lo / max) * 100}%`, width: `${((hi - lo) / max) * 100}%`, background: `linear-gradient(90deg, ${PRISM_BLUE}30, ${PRISM_GOLD}30)` }} />
                         <div className="absolute top-0 bottom-0 w-0.5" style={{ left: `${(rec / max) * 100}%`, background: PRISM_GOLD }} />
                         <div className="absolute top-full mt-1 text-[8px] font-mono" style={{ left: `${(lo / max) * 100}%`, color: PRISM_BLUE }}>{fmt(lo)}</div>
                         <div className="absolute text-[8px] font-mono font-bold" style={{ left: `${(rec / max) * 100}%`, top: "-14px", color: PRISM_GOLD, transform: "translateX(-50%)" }}>{fmt(rec)}</div>

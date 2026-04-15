@@ -90,7 +90,6 @@ import backupRouter from "./backup";
 import demoRequestsRouter from "./demo-requests";
 import contactRouter from "./contact";
 import aegisSocLiveRouter from "./firestorm-live";
-import simulationRouter from "./simulation";
 import commandRouter from "./command";
 import firestormCommandRouter from "./firestorm-command-surfaces";
 import publicStatusRouter from "./public-status";
@@ -238,7 +237,6 @@ router.use(vesselsPlatformRouter);
 router.use(vesselsRouter);
 router.use(aegisSocRouter);
 router.use(aegisSocLiveRouter);
-router.use(simulationRouter);
 router.use("/monte-carlo", _readLimiter);
 router.use(monteCarloRouter);
 

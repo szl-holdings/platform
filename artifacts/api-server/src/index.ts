@@ -20,10 +20,8 @@ import "./lib/terra-nyc-extended-ingestion";
 import { scheduleNycExtendedIngestionJob } from "./lib/terra-nyc-extended-ingestion";
 import { seedPlatformData } from "./lib/seed-platform";
 import { initializeOpenTelemetry } from "@szl-holdings/observability";
-import { seedTerraDemo } from "./lib/terra-seed";
 import { seedMspData } from "./lib/seed-msp";
 import { seedDreamscapeData } from "./lib/seed-dreamscape";
-import { seedDosData } from "./lib/seed-dos";
 import { buildGraphQLMiddleware } from "./graphql/index.js";
 import { registerGraphQLHandler } from "./app.js";
 import { prewarmIntelligenceCache, scheduleIntelligenceRefresh, scheduleIntelligenceCachePruning } from "./routes/intelligence.js";
@@ -207,19 +205,12 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     seedPlatformData().catch(err => {
       logger.warn({ err }, "[seed-platform] Seed failed (non-fatal)");
     });
-    seedTerraDemo().catch(err => {
-      logger.warn({ err }, "[terra-seed] Terra demo seed failed (non-fatal)");
-    });
     seedMspData().catch(err => {
       logger.warn({ err }, "[msp-seed] MSP demo seed failed (non-fatal)");
     });
     seedDreamscapeData().catch(err => {
       logger.warn({ err }, "[seed-dreamscape] Creative Workflows seed failed (non-fatal)");
     });
-    seedDosData().catch(err => {
-      logger.warn({ err }, "[dos-seed] Distribution OS seed failed (non-fatal)");
-    });
-
     initIngestionFramework().catch(err => {
       logger.warn({ err }, "[ingestion] Framework init failed (non-fatal)");
     });

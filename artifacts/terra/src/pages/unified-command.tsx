@@ -7,6 +7,50 @@ import {
   GitBranch, Package, Navigation
 } from "lucide-react";
 
+interface LyteAction {
+  priority?: string;
+  valueAtRisk?: number | string;
+  title?: string;
+  name?: string;
+  category?: string;
+  actionType?: string;
+}
+
+interface VesselEvent {
+  severity?: string;
+  consequenceImpactCents?: number | string;
+  financialImpact?: number | string;
+  title?: string;
+  name?: string;
+  eventType?: string;
+  type?: string;
+}
+
+interface TerraSignal {
+  signalType?: string;
+  type?: string;
+  status?: string;
+  estimatedValue?: number | string;
+  severity?: string;
+  title?: string;
+  name?: string;
+}
+
+interface Recommendation {
+  id: string;
+  domain: string;
+  priority: string;
+  text: string;
+}
+
+interface WorkflowRun {
+  id: string;
+  name: string;
+  domain: string;
+  status: string;
+  completedAt: string | null;
+}
+
 const DOMAIN_LINKS = [
   { id: "lyte", label: "Lyte", description: "Business Observability", color: "#06b6d4", href: "/lyte-command-center/", icon: Zap },
   { id: "vessels", label: "Vessels", description: "Maritime Command", color: "#3b82f6", href: "/vessels/", icon: Ship },
@@ -14,52 +58,6 @@ const DOMAIN_LINKS = [
   { id: "alloy", label: "Alloy", description: "Intelligence Engine", color: "#60a5fa", href: "/alloy/", icon: GitBranch },
 ];
 
-const DEMO_UNIFIED = {
-  lyte: {
-    openActions: 8,
-    escalated: 2,
-    valueAtRisk: 6390000,
-    topActions: [
-      { title: "Northgate Contract — Legal Review Stalled", priority: "urgent", category: "approval_latency", valueAtRisk: 840000 },
-      { title: "Q2 Revenue Forecast — 18% Drift Detected", priority: "urgent", category: "forecast_drift", valueAtRisk: 2100000 },
-      { title: "Enterprise Deal Status Conflict — $1.2M", priority: "high", category: "status_conflict", valueAtRisk: 1200000 },
-    ],
-  },
-  vessels: {
-    criticalEvents: 3,
-    openExceptions: 5,
-    consequenceImpact: 1035000,
-    topEvents: [
-      { title: "ETA Drift — 34h delay on Atlantic Pioneer", severity: "critical", type: "eta_drift", impact: 420000 },
-      { title: "Severe Weather — Typhoon Track Intersecting Route", severity: "critical", type: "weather_pressure", impact: 280000 },
-      { title: "Route Deviation — Pacific Guardian off optimal lane", severity: "warning", type: "route_deviation", impact: 24000 },
-    ],
-  },
-  terra: {
-    activeListings: 34,
-    stalledDeals: 5,
-    pipelineValue: 12800000,
-    topSignals: [
-      { title: "3 leads uncontacted for 72h+ — SLA breach imminent", severity: "critical", type: "lead_routing", impact: 180000 },
-      { title: "Distress cluster detected — 4 pre-foreclosures in Westside", severity: "high", type: "distress_engine", impact: 280000 },
-      { title: "MLS listing 2024-8847 — price reduction recommended", severity: "warning", type: "pricing", impact: 42000 },
-    ],
-  },
-  workflows: {
-    recentRuns: [
-      { id: "wf-001", name: "Northgate Contract Escalation", status: "completed", domain: "lyte", completedAt: new Date(Date.now() - 30 * 60000).toISOString() },
-      { id: "wf-002", name: "Atlantic Pioneer ETA Alert", status: "in_progress", domain: "vessels", completedAt: null },
-      { id: "wf-003", name: "Distress Property Valuation", status: "completed", domain: "terra", completedAt: new Date(Date.now() - 2 * 3600000).toISOString() },
-      { id: "wf-004", name: "Q2 Forecast Drift Analysis", status: "completed", domain: "lyte", completedAt: new Date(Date.now() - 4 * 3600000).toISOString() },
-    ],
-  },
-  recommendations: [
-    { id: "rec-001", domain: "terra", priority: "critical", text: "Contact 3 unresponsive leads before auto-reassignment. $180K pipeline value at risk." },
-    { id: "rec-002", domain: "lyte", priority: "urgent", text: "Escalate Northgate contract to VP Legal. SLA 48h past breach. $840K ARR at risk." },
-    { id: "rec-003", domain: "vessels", priority: "high", text: "Reroute Atlantic Pioneer — weather system will cause 34h delay. Alloy route intervention recommended." },
-    { id: "rec-004", domain: "lyte", priority: "high", text: "Close 47 stale pipeline opportunities. Forecast distortion is masking $890K in dead weight." },
-  ],
-};
 
 const DOMAIN_COLORS: Record<string, string> = {
   lyte: "text-amber-400",
@@ -94,23 +92,63 @@ function formatTimeSince(isoDate: string | null): string {
 export default function UnifiedCommandDashboard() {
   const { data: rawLyteActions } = useQuery({
     queryKey: ["unified-lyte-actions"],
-    queryFn: () => apiFetch<any[]>("/lyte/actions?state=new"),
+    queryFn: () => apiFetch<LyteAction[]>("/lyte/actions?state=new"),
     placeholderData: [],
   });
 
   const { data: rawVesselEvents } = useQuery({
     queryKey: ["unified-vessel-events"],
-    queryFn: () => apiFetch<any[]>("/vessels/events?status=open"),
+    queryFn: () => apiFetch<VesselEvent[]>("/vessels/events?status=open"),
     placeholderData: [],
   });
 
   const { data: rawTerraSignals } = useQuery({
     queryKey: ["unified-terra-signals"],
-    queryFn: () => apiFetch<any[]>("/terra/signals"),
+    queryFn: () => apiFetch<TerraSignal[]>("/terra/signals"),
     placeholderData: [],
   });
 
-  const data = DEMO_UNIFIED;
+  const lyteActions: LyteAction[] = rawLyteActions ?? [];
+  const vesselEvents: VesselEvent[] = rawVesselEvents ?? [];
+  const terraSignals: TerraSignal[] = rawTerraSignals ?? [];
+
+  const data = {
+    lyte: {
+      openActions: lyteActions.length,
+      escalated: lyteActions.filter((a) => a.priority === "critical" || a.priority === "urgent").length,
+      valueAtRisk: lyteActions.reduce((sum, a) => sum + (Number(a.valueAtRisk) || 0), 0),
+      topActions: lyteActions.slice(0, 3).map((a) => ({
+        title: a.title ?? a.name ?? "Untitled action",
+        priority: a.priority ?? "medium",
+        category: a.category ?? a.actionType ?? "",
+        valueAtRisk: Number(a.valueAtRisk) || 0,
+      })),
+    },
+    vessels: {
+      criticalEvents: vesselEvents.filter((e) => e.severity === "critical").length,
+      openExceptions: vesselEvents.length,
+      consequenceImpact: vesselEvents.reduce((sum, e) => sum + (Number(e.consequenceImpactCents ?? e.financialImpact ?? 0) / 100), 0),
+      topEvents: vesselEvents.slice(0, 3).map((e) => ({
+        title: e.title ?? e.name ?? "Untitled event",
+        severity: e.severity ?? "warning",
+        type: e.eventType ?? e.type ?? "",
+        impact: Number(e.consequenceImpactCents ?? 0) / 100,
+      })),
+    },
+    terra: {
+      activeListings: terraSignals.filter((s) => s.signalType === "listing" || s.type === "listing").length,
+      stalledDeals: terraSignals.filter((s) => s.signalType === "stall" || s.status === "stalled").length,
+      pipelineValue: terraSignals.reduce((sum, s) => sum + (Number(s.estimatedValue ?? 0)), 0),
+      topSignals: terraSignals.slice(0, 3).map((s) => ({
+        title: s.title ?? s.name ?? "Untitled signal",
+        severity: s.severity ?? "warning",
+        type: s.signalType ?? s.type ?? "",
+        impact: Number(s.estimatedValue ?? 0),
+      })),
+    },
+    workflows: { recentRuns: [] as WorkflowRun[] },
+    recommendations: [] as Recommendation[],
+  };
 
   return (
     <div className="flex flex-col gap-6 p-6 min-h-full">

@@ -174,28 +174,8 @@ function preseedCache<T>(key: string, data: T, ttlMs: number): void {
   }
 }
 
-preseedCache<ThreatItem[]>("threats", [
-  { id: "DEMO-1", type: "apt", name: "Storm-0558 Phishing Campaign", severity: "critical", source: "SZL Intel (demo)", country: "CN", targetSector: "Government", description: "Advanced persistent threat targeting government and defense email infrastructure via forged authentication tokens.", lat: 39.9, lon: 116.4, timestamp: new Date(Date.now() - 3600000).toISOString(), indicators: 42 },
-  { id: "DEMO-2", type: "malware", name: "BlackCat Ransomware Variant", severity: "high", source: "SZL Intel (demo)", country: "RU", targetSector: "Critical Infrastructure", description: "New ransomware variant targeting OT/ICS environments with double-extortion model and 72-hour payment demands.", lat: 55.7, lon: 37.6, timestamp: new Date(Date.now() - 7200000).toISOString(), indicators: 28 },
-  { id: "DEMO-3", type: "apt", name: "Lazarus Group — Financial Sector", severity: "high", source: "SZL Intel (demo)", country: "KP", targetSector: "Financial Services", description: "State-sponsored group targeting SWIFT network participants and cryptocurrency exchanges.", lat: 39.0, lon: 125.7, timestamp: new Date(Date.now() - 10800000).toISOString(), indicators: 67 },
-  { id: "DEMO-4", type: "malware", name: "PlugX RAT Distribution", severity: "medium", source: "SZL Intel (demo)", country: "CN", targetSector: "Manufacturing", description: "Remote access trojan distributed via spear-phishing targeting supply chain vendors.", lat: 31.2, lon: 121.5, timestamp: new Date(Date.now() - 14400000).toISOString(), indicators: 15 },
-], 300000);
-
-preseedCache<GeoEvent[]>("geopolitical", [
-  { id: "GEO-DEMO-1", title: "Sanctions Package Extended — Russia Energy Sector", region: "Russia", severity: "high", category: "sanctions", timestamp: new Date(Date.now() - 1800000).toISOString(), source: "SZL Intel (demo)", impact: "EU extends energy sanctions — additional 47 entities listed under Russia SDN" },
-  { id: "GEO-DEMO-2", title: "South China Sea Patrol Incident — Taiwan Strait", region: "CN", severity: "critical", category: "military", timestamp: new Date(Date.now() - 3600000).toISOString(), source: "SZL Intel (demo)", impact: "PLAN naval exercises reported within 12nm — maritime routing advisories issued" },
-  { id: "GEO-DEMO-3", title: "Critical Infrastructure Cyber Directive — CISA Advisory", region: "US", severity: "high", category: "cyber_operations", timestamp: new Date(Date.now() - 5400000).toISOString(), source: "SZL Intel (demo)", impact: "CISA AA24 advisory — water treatment and energy sector vulnerabilities actively exploited" },
-  { id: "GEO-DEMO-4", title: "Red Sea Shipping Rerouting — Suez Disruption", region: "YE", severity: "high", category: "infrastructure", timestamp: new Date(Date.now() - 7200000).toISOString(), source: "SZL Intel (demo)", impact: "Houthi drone activity forces 85% of container traffic to Cape of Good Hope routing" },
-  { id: "GEO-DEMO-5", title: "G7 AI Governance Framework — Export Controls Update", region: "Global", severity: "medium", category: "regulatory", timestamp: new Date(Date.now() - 9000000).toISOString(), source: "SZL Intel (demo)", impact: "G7 nations align on semiconductor and AI model export licensing requirements" },
-], 600000);
-
-preseedCache<MaritimeVessel[]>("maritime-vessels", [
-  { mmsi: "636091402", name: "NORDIC CROWN", type: "Container", lat: 51.9, lon: 4.1, speed: 12.4, course: 270, heading: 268, destination: "Rotterdam", status: "Under way using engine", flag: "LR", length: 294, timestamp: new Date().toISOString() },
-  { mmsi: "477213600", name: "OCEAN PIONEER", type: "Tanker", lat: 25.1, lon: 56.3, speed: 8.7, course: 315, heading: 312, destination: "Abu Dhabi", status: "Under way using engine", flag: "HK", length: 330, timestamp: new Date().toISOString() },
-  { mmsi: "563087700", name: "BERGE SUMMIT", type: "Bulk Carrier", lat: 1.3, lon: 104.0, speed: 14.1, course: 90, heading: 88, destination: "Singapore", status: "Under way using engine", flag: "SG", length: 289, timestamp: new Date().toISOString() },
-  { mmsi: "257026500", name: "SOLVIKEN", type: "Cargo", lat: 58.9, lon: 5.7, speed: 11.2, course: 180, heading: 182, destination: "Stavanger", status: "Under way using engine", flag: "NO", length: 180, timestamp: new Date().toISOString() },
-  { mmsi: "548531000", name: "PACIFIC EXPLORER", type: "Container", lat: 22.3, lon: 114.2, speed: 16.8, course: 45, heading: 44, destination: "Hong Kong", status: "Under way using engine", flag: "MH", length: 368, timestamp: new Date().toISOString() },
-], 120000);
+// Hardcoded demo preseed data removed — the real fetchers (OTX AlienVault, GDELT, Digitraffic AIS)
+// will populate the cache on first call. No simulation data is injected at startup.
 
 const intelRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -1025,37 +1005,23 @@ router.get("/intelligence/model-registry", intelRateLimit, authMiddleware(), asy
 router.get("/intelligence/data-flow", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const flows = [
-      { source: "AlienVault OTX", target: "Firestorm", type: "threat_feed", volume: 1247, status: "active" },
-      { source: "CISA KEV", target: "Firestorm", type: "mandatory_patch_feed", volume: 1000, status: "active" },
-      { source: "NVD", target: "Firestorm", type: "cve_feed", volume: 89, status: "active" },
-      { source: "MITRE ATT&CK", target: "Firestorm", type: "ttp_feed", volume: 743, status: "active" },
-      { source: "AbuseIPDB", target: "Firestorm", type: "ip_reputation", volume: 234, status: "active" },
-      { source: "AIS Network", target: "Vessels", type: "position_data", volume: 23400, status: "active" },
-      { source: "NOAA Marine Buoys", target: "Vessels", type: "weather_data", volume: 456, status: "active" },
-      { source: "OFAC/UN", target: "Vessels", type: "sanctions_list", volume: 34, status: "active" },
-      { source: "Open-Meteo", target: "Vessels", type: "marine_forecast", volume: 312, status: "active" },
-      { source: "GDELT", target: "Vessels", type: "geopolitical_events", volume: 89, status: "active" },
-      { source: "arXiv", target: "INCA", type: "research_papers", volume: 567, status: "active" },
-      { source: "Semantic Scholar", target: "INCA", type: "citation_graph", volume: 234, status: "active" },
-      { source: "PapersWithCode", target: "INCA", type: "benchmark_data", volume: 145, status: "active" },
-      { source: "HuggingFace Hub", target: "INCA", type: "model_discovery", volume: 891, status: "active" },
-      { source: "Census Bureau", target: "Terra", type: "demographics", volume: 234, status: "active" },
-      { source: "BLS", target: "Terra", type: "employment_data", volume: 89, status: "active" },
-      { source: "FEMA Risk Index", target: "Terra", type: "property_risk", volume: 456, status: "active" },
-      { source: "SEC EDGAR", target: "Terra", type: "reit_filings", volume: 123, status: "active" },
-      { source: "USAspending.gov", target: "MSP", type: "contract_pipeline", volume: 189, status: "active" },
-      { source: "FedRAMP", target: "MSP", type: "authorized_products", volume: 67, status: "active" },
-      { source: "FedRAMP", target: "Readiness", type: "compliance_products", volume: 67, status: "active" },
-      { source: "NIST CSF", target: "Readiness", type: "control_framework", volume: 108, status: "active" },
-      { source: "RSS Feeds", target: "Lyte Command", type: "news_feed", volume: 567, status: "active" },
-      { source: "HuggingFace", target: "All Apps", type: "ai_inference", volume: 2341, status: "active" },
-      { source: "OpenAI Proxy", target: "All Apps", type: "chat_completion", volume: 891, status: "active" },
-      { source: "Firestorm", target: "Admin Panel", type: "threat_aggregate", volume: 456, status: "active" },
-      { source: "Vessels", target: "Admin Panel", type: "maritime_aggregate", volume: 234, status: "active" },
-      { source: "Lyte Command", target: "Admin Panel", type: "signal_aggregate", volume: 789, status: "active" },
-      { source: "All Apps", target: "Stephen Site", type: "health_metrics", volume: 120, status: "active" },
+      { source: "AlienVault OTX", target: "Firestorm", type: "threat_feed", url: "https://otx.alienvault.com/", status: "active" },
+      { source: "CISA KEV", target: "Firestorm", type: "mandatory_patch_feed", url: "https://www.cisa.gov/known-exploited-vulnerabilities-catalog", status: "active" },
+      { source: "NVD", target: "Firestorm", type: "cve_feed", url: "https://nvd.nist.gov/", status: "active" },
+      { source: "MITRE ATT&CK", target: "Firestorm", type: "ttp_feed", url: "https://attack.mitre.org/", status: "active" },
+      { source: "AbuseIPDB", target: "Firestorm", type: "ip_reputation", url: "https://www.abuseipdb.com/", status: "active" },
+      { source: "Digitraffic AIS", target: "Vessels", type: "position_data", url: "https://meri.digitraffic.fi/", status: "active" },
+      { source: "BarentsWatch AIS", target: "Vessels", type: "position_data", url: "https://www.barentswatch.no/bwapi/", status: "active" },
+      { source: "Open-Meteo Marine", target: "Vessels", type: "marine_forecast", url: "https://marine-api.open-meteo.com/", status: "active" },
+      { source: "arXiv", target: "INCA", type: "research_papers", url: "https://arxiv.org/", status: "active" },
+      { source: "Semantic Scholar", target: "INCA", type: "citation_graph", url: "https://api.semanticscholar.org/", status: "active" },
+      { source: "GDELT", target: "Intelligence", type: "geopolitical_events", url: "https://api.gdeltproject.org/", status: "active" },
+      { source: "Census Bureau", target: "Terra", type: "demographics", url: "https://data.census.gov/", status: "active" },
+      { source: "SEC EDGAR", target: "Terra", type: "reit_filings", url: "https://www.sec.gov/cgi-bin/browse-edgar", status: "active" },
+      { source: "USAspending.gov", target: "MSP", type: "contract_pipeline", url: "https://api.usaspending.gov/", status: "active" },
+      { source: "FedRAMP", target: "MSP", type: "authorized_products", url: "https://marketplace.fedramp.gov/", status: "active" },
     ];
-    sendSuccess(res, flows);
+    sendSuccess(res, { flows, note: "Integration architecture map — live external API endpoints", fetchedAt: new Date().toISOString() });
   } catch (err) { handleRouteError(res, err, "Failed to fetch data flow"); }
 });
 
@@ -1096,20 +1062,14 @@ router.get("/intelligence/cisa-kev", intelRateLimit, authMiddleware(), async (_r
   } catch (err) { handleRouteError(res, err, "Failed to fetch CISA KEV data"); }
 });
 
-router.get("/intelligence/mitre-attack/correlation", intelRateLimit, authMiddleware(), async (req, res) => {
+router.get("/intelligence/mitre-attack/correlation", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
-    const cveId = req.query.cve as string;
-    const correlations = [
-      { cveId: "CVE-2023-23397", techniques: [{ id: "T1566.001", name: "Spearphishing Attachment", tactic: "Initial Access" }, { id: "T1078", name: "Valid Accounts", tactic: "Defense Evasion" }], campaigns: ["APT28 (Fancy Bear)", "Sandworm"], confidence: 0.94 },
-      { cveId: "CVE-2021-44228", techniques: [{ id: "T1190", name: "Exploit Public-Facing Application", tactic: "Initial Access" }, { id: "T1059.001", name: "PowerShell", tactic: "Execution" }], campaigns: ["Multiple APT Groups", "Ransomware Operations"], confidence: 0.98 },
-      { cveId: "CVE-2024-3400", techniques: [{ id: "T1190", name: "Exploit Public-Facing Application", tactic: "Initial Access" }, { id: "T1071.001", name: "Web Protocols", tactic: "Command and Control" }], campaigns: ["UNC4876", "Threat Actor Unknown"], confidence: 0.91 },
-    ];
-    const result = cveId ? correlations.filter(c => c.cveId === cveId) : correlations;
     sendSuccess(res, {
       source: "MITRE ATT&CK + NVD CVE Correlation Engine",
-      count: result.length,
-      correlations: result,
-      methodology: "CVE-to-TTP mapping using MITRE ATT&CK knowledge base v14.1",
+      count: 0,
+      correlations: [],
+      note: "CVE-to-TTP correlation requires a live MITRE ATT&CK STIX/TAXII feed. Configure the ATT&CK connector to enable this endpoint.",
+      reference: "https://attack.mitre.org/resources/attack-data-and-tools/",
       generatedAt: new Date().toISOString(),
     });
   } catch (err) { handleRouteError(res, err, "Failed to fetch ATT&CK correlations"); }
@@ -1171,11 +1131,7 @@ router.get("/intelligence/semantic-scholar", intelRateLimit, authMiddleware(), a
           pdfUrl: p.openAccessPdf?.url ?? null,
         }));
       } catch {
-        return [
-          { paperId: "demo1", title: "Attention Is All You Need", authors: ["Vaswani et al."], year: 2017, citationCount: 98420, abstract: "The dominant sequence transduction models are based on complex recurrent or convolutional neural networks. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms.", openAccess: true, pdfUrl: "https://arxiv.org/pdf/1706.03762" },
-          { paperId: "demo2", title: "BERT: Pre-training of Deep Bidirectional Transformers", authors: ["Devlin et al."], year: 2018, citationCount: 71234, abstract: "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers.", openAccess: true, pdfUrl: "https://arxiv.org/pdf/1810.04805" },
-          { paperId: "demo3", title: "Language Models are Few-Shot Learners (GPT-3)", authors: ["Brown et al."], year: 2020, citationCount: 43892, abstract: "We train GPT-3, an autoregressive language model with 175 billion parameters, 10x more than any previous non-sparse language model.", openAccess: true, pdfUrl: "https://arxiv.org/pdf/2005.14165" },
-        ];
+        return [];
       }
     });
     sendSuccess(res, {
@@ -1283,56 +1239,11 @@ router.get("/intelligence/huggingface-hub", intelRateLimit, authMiddleware(), as
 
 router.get("/intelligence/cross-app-correlation", intelRateLimit, authMiddleware(), async (_req, res) => {
   try {
-    const [vessels, cves] = await Promise.all([
-      getCached("maritime-vessels", 60000, fetchLiveMaritimeVessels),
-      getCached("cves", 600000, fetchNvdCves),
-    ]);
-    const correlations = [
-      {
-        type: "maritime_sanctions_security",
-        title: "Sanctioned vessel operators linked to APT infrastructure",
-        description: "3 vessels flagged in OFAC SDN list share IP infrastructure with known APT command-and-control servers. Maritime sanctions enforcement may be compromised by cyber operations.",
-        confidence: 0.72,
-        severity: "high",
-        affectedApps: ["Vessels", "Firestorm"],
-        data: { sanctionedVessels: 3, sharedInfrastructure: 2, linkedCampaigns: ["APT10", "Lazarus Group"] },
-        generatedAt: new Date().toISOString(),
-      },
-      {
-        type: "research_security",
-        title: "AI vulnerabilities in recently published research",
-        description: "Recent arXiv papers on adversarial AI attacks align with CVEs affecting deployed AI inference systems. Research-to-exploit timeline estimated at 6-8 months.",
-        confidence: 0.64,
-        severity: "medium",
-        affectedApps: ["INCA", "Firestorm"],
-        data: { relatedPapers: 4, affectedCves: 2, exploitTimeline: "6-8 months" },
-        generatedAt: new Date().toISOString(),
-      },
-      {
-        type: "real_estate_risk",
-        title: "Climate risk patterns align with active vulnerability exposure",
-        description: "FEMA flood risk zones overlapping with data center density create cascading infrastructure risk. Flood-zone data centers host systems with unpatched CVEs.",
-        confidence: 0.58,
-        severity: "medium",
-        affectedApps: ["Terra", "Firestorm"],
-        data: { affectedMarkets: ["Miami", "Houston", "New Orleans"], datacentersAtRisk: 12, unpatcedCves: cves.filter(c => c.severity === "CRITICAL").length },
-        generatedAt: new Date().toISOString(),
-      },
-      {
-        type: "government_contract_security",
-        title: "Federal contractors with CMMC gaps also have critical CVEs",
-        description: "Cross-referencing USAspending federal IT contracts with NVD CVE data shows 4 major contractors have unpatched critical CVEs in contracted systems.",
-        confidence: 0.67,
-        severity: "high",
-        affectedApps: ["MSP", "Readiness", "Firestorm"],
-        data: { contractorsAffected: 4, totalContractValue: 23400000000, criticalCves: 7 },
-        generatedAt: new Date().toISOString(),
-      },
-    ];
     sendSuccess(res, {
       source: "SZL Cross-App Intelligence Correlation Engine",
-      count: correlations.length,
-      correlations,
+      count: 0,
+      correlations: [],
+      note: "Cross-domain correlation requires real-time data from all connected feeds. No correlations have been generated yet.",
       methodology: "Real-time correlation of maritime, security, research, real estate, and government data streams",
       generatedAt: new Date().toISOString(),
     });

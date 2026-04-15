@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch, DataStateBadge } from "@szl-holdings/shared-ui";
 import {
@@ -20,21 +20,6 @@ interface UsageEvent {
   metadata?: Record<string, unknown>;
 }
 
-const DEMO_USAGE_TREND = [
-  { day: "Mon", agent_run: 124, skill: 380, artifact: 28, browser: 15, cost: 48.2 },
-  { day: "Tue", agent_run: 198, skill: 610, artifact: 42, browser: 22, cost: 74.6 },
-  { day: "Wed", agent_run: 176, skill: 524, artifact: 38, browser: 18, cost: 66.4 },
-  { day: "Thu", agent_run: 241, skill: 712, artifact: 55, browser: 31, cost: 92.8 },
-  { day: "Fri", agent_run: 312, skill: 944, artifact: 71, browser: 40, cost: 118.4 },
-  { day: "Sat", agent_run: 98, skill: 294, artifact: 19, browser: 9, cost: 38.2 },
-  { day: "Sun", agent_run: 72, skill: 214, artifact: 14, browser: 7, cost: 27.6 },
-];
-
-const DEMO_TIER_THRESHOLDS = [
-  { name: "Starter", agentRuns: 500, skills: 1500, costUsd: 50 },
-  { name: "Professional", agentRuns: 2000, skills: 6000, costUsd: 250 },
-  { name: "Enterprise", agentRuns: 10000, skills: 30000, costUsd: 1000 },
-];
 
 const CURRENT_USAGE = {
   agentRuns: { used: 1221, limit: 2000, tier: "Professional" },
@@ -113,6 +98,20 @@ export default function UsageMetering() {
 
   const isDemo = !liveEvents;
 
+  const usageTrendData = useMemo(() => {
+    if (!liveEvents || liveEvents.length === 0) return [];
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const map: Record<string, { day: string; agent_run: number; artifact: number; browser: number }> = {};
+    liveEvents.forEach(e => {
+      const day = dayNames[new Date(e.createdAt).getDay()];
+      if (!map[day]) map[day] = { day, agent_run: 0, artifact: 0, browser: 0 };
+      if (e.eventType === "agent_run") map[day].agent_run += e.quantity;
+      if (e.eventType === "artifact_generated") map[day].artifact += e.quantity;
+      if (e.eventType === "browser_task") map[day].browser += e.quantity;
+    });
+    return Object.values(map);
+  }, [liveEvents]);
+
   // Derive live KPIs from real events when available
   const liveCostMtdUsd = isDemo ? CURRENT_USAGE.costMtd.used
     : liveEvents.reduce((s, e) => s + e.costCents, 0) / 100;
@@ -190,7 +189,7 @@ export default function UsageMetering() {
             <div className="text-sm font-semibold text-white mb-4">Usage by Event Type — 7 Days</div>
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={DEMO_USAGE_TREND} margin={{ top: 0, right: 0, left: -20, bottom: 0 }} barSize={8}>
+                <BarChart data={usageTrendData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }} barSize={8}>
                   <XAxis dataKey="day" tick={{ fontSize: 9, fill: "rgba(255,255,255,0.3)" }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 9, fill: "rgba(255,255,255,0.3)" }} axisLine={false} tickLine={false} />
                   <Tooltip contentStyle={{ background: "#0d1117", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, fontSize: 10 }} />
@@ -290,38 +289,6 @@ export default function UsageMetering() {
 
       {tab === "tiers" && (
         <div className="space-y-3">
-          {DEMO_TIER_THRESHOLDS.map(tier => {
-            const isCurrent = tier.name === CURRENT_USAGE.agentRuns.tier;
-            return (
-              <div key={tier.name} className="rounded-xl border p-4"
-                style={{
-                  borderColor: isCurrent ? "rgba(16,185,129,0.25)" : "rgba(255,255,255,0.06)",
-                  background: isCurrent ? "rgba(16,185,129,0.04)" : "rgba(255,255,255,0.01)",
-                }}>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-sm font-bold text-white">{tier.name}</span>
-                  {isCurrent && (
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-widest"
-                      style={{ color: "#10b981", background: "rgba(16,185,129,0.15)" }}>Current</span>
-                  )}
-                </div>
-                <div className="grid grid-cols-3 gap-3 text-[11px]">
-                  <div>
-                    <div style={{ color: "rgba(255,255,255,0.3)" }}>Agent Runs / mo</div>
-                    <div className="font-semibold text-white">{tier.agentRuns.toLocaleString()}</div>
-                  </div>
-                  <div>
-                    <div style={{ color: "rgba(255,255,255,0.3)" }}>Skill Invocations / mo</div>
-                    <div className="font-semibold text-white">{tier.skills.toLocaleString()}</div>
-                  </div>
-                  <div>
-                    <div style={{ color: "rgba(255,255,255,0.3)" }}>Cost Budget / mo</div>
-                    <div className="font-semibold text-white">${tier.costUsd}</div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
           <div className="rounded-xl border p-4 flex items-center gap-3"
             style={{ borderColor: "rgba(75,139,219,0.15)", background: "rgba(75,139,219,0.04)" }}>
             <DollarSign className="w-4 h-4 shrink-0" style={{ color: "#4B8BDB" }} />

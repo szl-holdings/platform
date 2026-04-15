@@ -79,134 +79,7 @@ const CreateCalendarSchema = z.object({
   metadata: z.record(z.unknown()).optional(),
 });
 
-function mockCompliancePosture() {
-  return {
-    overallRiskScore: 78,
-    regBiScore: 82,
-    archivalScore: 91,
-    supervisionScore: 65,
-    openSupervisionItems: 4,
-    criticalItems: 1,
-    overdueCalendarItems: 2,
-    pendingSuitabilityReviews: 3,
-    trend: "+2.1 vs last month",
-    lastUpdated: new Date().toISOString(),
-  };
-}
-
-function mockCalendarEvents() {
-  const now = new Date();
-  return [
-    {
-      id: "cal-001",
-      eventType: "form_adv",
-      title: "Form ADV Annual Amendment",
-      description: "Annual update to Form ADV Parts 1, 2A, and 2B",
-      dueAt: new Date(now.getFullYear(), 3, 30).toISOString(),
-      status: "upcoming",
-      regulatoryBody: "SEC",
-      filingReference: "IA-ADV-2026",
-      assignedToName: "Chief Compliance Officer",
-    },
-    {
-      id: "cal-002",
-      eventType: "form_crs",
-      title: "Form CRS Annual Review",
-      description: "Annual review and update of Client Relationship Summary",
-      dueAt: new Date(now.getFullYear(), 5, 30).toISOString(),
-      status: "upcoming",
-      regulatoryBody: "SEC",
-      assignedToName: "Compliance Team",
-    },
-    {
-      id: "cal-003",
-      eventType: "exam_prep",
-      title: "SEC Examination Prep — Q2 2026",
-      description: "Prepare documentation and conduct mock exam readiness review",
-      dueAt: new Date(now.getFullYear(), 5, 15).toISOString(),
-      status: "in_progress",
-      regulatoryBody: "SEC",
-      assignedToName: "Compliance Director",
-    },
-    {
-      id: "cal-004",
-      eventType: "annual_review",
-      title: "Annual Compliance Program Review",
-      description: "Comprehensive review of all compliance policies, procedures, and controls per Rule 206(4)-7",
-      dueAt: new Date(now.getFullYear(), 11, 31).toISOString(),
-      status: "upcoming",
-      regulatoryBody: "SEC/FINRA",
-      assignedToName: "CCO",
-    },
-    {
-      id: "cal-005",
-      eventType: "reg_bi_audit",
-      title: "Reg BI Suitability Audit — Q1 2026",
-      description: "Review Q1 recommendations for Regulation Best Interest compliance",
-      dueAt: new Date(now.getFullYear(), 3, 15).toISOString(),
-      status: "overdue",
-      regulatoryBody: "SEC",
-      assignedToName: "Supervisory Principal",
-    },
-  ];
-}
-
-function mockSupervisionItems() {
-  return [
-    {
-      id: "sup-001",
-      category: "suitability_review",
-      priority: "high",
-      status: "open",
-      title: "Reg BI Suitability — High-Concentration Bond Recommendation",
-      description: "Client portfolio shows 78% allocation to a single bond issuer. Reg BI suitability documentation required.",
-      assignedToName: "Senior Supervisor",
-      riskScore: 82,
-      dueAt: new Date(Date.now() + 3 * 86400000).toISOString(),
-      createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
-      relatedEntities: [{ type: "client", id: "client-441", name: "Meridian Capital" }],
-    },
-    {
-      id: "sup-002",
-      category: "communications_review",
-      priority: "medium",
-      status: "in_review",
-      title: "Outside Communication Review — Financial Media Appearance",
-      description: "Advisor scheduled external media appearance discussing market outlook. Pre-approval required.",
-      assignedToName: "Compliance Officer",
-      riskScore: 45,
-      dueAt: new Date(Date.now() + 7 * 86400000).toISOString(),
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-      relatedEntities: [],
-    },
-    {
-      id: "sup-003",
-      category: "reg_bi_violation",
-      priority: "critical",
-      status: "escalated",
-      title: "Potential Reg BI Conflict — Proprietary Product Recommendation",
-      description: "Recommendation analysis flags potential conflict: advisor recommended proprietary fund with higher compensation structure without documented client-specific rationale.",
-      assignedToName: "Chief Compliance Officer",
-      riskScore: 94,
-      dueAt: new Date(Date.now() + 86400000).toISOString(),
-      createdAt: new Date(Date.now() - 4 * 86400000).toISOString(),
-      relatedEntities: [{ type: "recommendation", id: "rec-882", name: "Proprietary Alpha Fund" }],
-    },
-    {
-      id: "sup-004",
-      category: "exception_report",
-      priority: "low",
-      status: "open",
-      title: "Best Execution Exception — Municipal Bond Trade",
-      description: "Trade executed at 12bps above best available quote. Exception documentation required for supervisory file.",
-      assignedToName: "Trading Supervisor",
-      riskScore: 28,
-      dueAt: new Date(Date.now() + 14 * 86400000).toISOString(),
-      createdAt: new Date().toISOString(),
-      relatedEntities: [],
-    },
-  ];
-}
+// All mock compliance data functions removed — data is sourced exclusively from PostgreSQL.
 
 router.get("/compliance/posture", authMiddleware(), async (req, res) => {
   try {
@@ -230,7 +103,19 @@ router.get("/compliance/posture", authMiddleware(), async (req, res) => {
         source: "live",
       });
     } else {
-      sendSuccess(res, { ...mockCompliancePosture(), source: "demo" });
+      sendSuccess(res, {
+        overallRiskScore: null,
+        regBiScore: null,
+        archivalScore: null,
+        supervisionScore: null,
+        openSupervisionItems: 0,
+        criticalItems: 0,
+        overdueCalendarItems: 0,
+        pendingSuitabilityReviews: 0,
+        lastUpdated: null,
+        source: "empty",
+        message: "No compliance score recorded yet. Use POST /compliance/supervision and /compliance/calendar to add records.",
+      });
     }
   } catch (err) {
     handleRouteError(res, err, "Failed to fetch compliance posture");
@@ -255,19 +140,7 @@ router.get("/compliance/suitability", authMiddleware(), async (req, res) => {
       .limit(lim)
       .offset(off);
 
-    if (rows.length === 0) {
-      return sendSuccess(res, {
-        count: 3,
-        dataMode: "demo",
-        items: [
-          { id: "suit-001", clientName: "James Holden", advisorName: "Maria Torres", recommendationType: "security", recommendationSummary: "Recommend TIPS ladder for inflation protection", status: "approved", createdAt: new Date(Date.now() - 5 * 86400000).toISOString() },
-          { id: "suit-002", clientName: "Sarah Mitchell", advisorName: "Carlos Rivera", recommendationType: "annuity", recommendationSummary: "Recommend variable annuity for retirement income", status: "pending_review", createdAt: new Date(Date.now() - 2 * 86400000).toISOString() },
-          { id: "suit-003", clientName: "Patricia Vance", advisorName: "Maria Torres", recommendationType: "rollover", recommendationSummary: "401k rollover to IRA for investment flexibility", status: "draft", createdAt: new Date().toISOString() },
-        ],
-      });
-    }
-
-    sendSuccess(res, { count: rows.length, dataMode: "live", items: rows });
+    sendSuccess(res, { count: rows.length, dataMode: rows.length > 0 ? "live" : "empty", items: rows });
   } catch (err) {
     handleRouteError(res, err, "Failed to fetch suitability records");
   }
@@ -286,9 +159,9 @@ router.post("/compliance/suitability", authMiddleware({ required: true }), async
     const [inserted] = await db.insert(complianceSuitabilityTable).values({
       ...body,
       recommendationId,
-      clientProfile: body.clientProfile as any,
-      financialSituation: (body.financialSituation ?? {}) as any,
-      conflicts: (body.conflicts ?? {}) as any,
+      clientProfile: body.clientProfile as Record<string, unknown>,
+      financialSituation: (body.financialSituation ?? {}) as Record<string, unknown>,
+      conflicts: (body.conflicts ?? {}) as Record<string, unknown>,
     }).returning();
 
     sendCreated(res, { recommendationId, record: inserted });
@@ -347,12 +220,9 @@ router.get("/compliance/archival", authMiddleware(), async (req, res) => {
 
     sendSuccess(res, {
       count: rows.length,
-      dataMode: rows.length > 0 ? "live" : "demo",
+      dataMode: rows.length > 0 ? "live" : "empty",
       totalArchived: rows.length,
-      items: rows.length > 0 ? rows : [
-        { entryId: "arch-001", communicationType: "email", subject: "Portfolio Review Discussion", participants: [{ id: "adv-1", name: "Maria Torres", role: "advisor" }, { id: "cli-1", name: "James Holden", role: "client" }], contentHash: "sha256:abc123", retentionPolicy: "rule_17a4_3year", retentionExpiresAt: new Date(Date.now() + 3 * 365 * 86400000).toISOString(), archivedAt: new Date(Date.now() - 86400000).toISOString() },
-        { entryId: "arch-002", communicationType: "trade_confirmation", subject: "TIPS Ladder Execution Confirmation", participants: [{ id: "adv-1", name: "Maria Torres", role: "advisor" }], contentHash: "sha256:def456", retentionPolicy: "rule_17a4_3year", retentionExpiresAt: new Date(Date.now() + 3 * 365 * 86400000).toISOString(), archivedAt: new Date().toISOString() },
-      ],
+      items: rows,
     });
   } catch (err) {
     handleRouteError(res, err, "Failed to fetch archival records");
@@ -389,14 +259,14 @@ router.post("/compliance/archival", authMiddleware({ required: true }), async (r
       prevHash,
       contentHash,
       communicationType: body.communicationType,
-      participants: body.participants as any,
+      participants: body.participants as string[],
       subject: body.subject ?? null,
       contentSummary: body.contentSummary ?? null,
       contentRef: body.contentRef ?? null,
       retentionPolicy: body.retentionPolicy ?? "rule_17a4_3year",
       retentionExpiresAt,
       isImmutable: true,
-      metadata: (body.metadata ?? {}) as any,
+      metadata: (body.metadata ?? {}) as Record<string, unknown>,
     }).returning();
 
     sendCreated(res, { entryId, contentHash, prevHash, record: inserted });
@@ -425,9 +295,9 @@ router.get("/compliance/supervision", authMiddleware(), async (req, res) => {
       .offset(off);
 
     sendSuccess(res, {
-      count: rows.length > 0 ? rows.length : mockSupervisionItems().length,
-      dataMode: rows.length > 0 ? "live" : "demo",
-      items: rows.length > 0 ? rows : mockSupervisionItems(),
+      count: rows.length,
+      dataMode: rows.length > 0 ? "live" : "empty",
+      items: rows,
     });
   } catch (err) {
     handleRouteError(res, err, "Failed to fetch supervision queue");
@@ -454,11 +324,11 @@ router.post("/compliance/supervision", authMiddleware({ required: true }), async
       assignedToName: body.assignedToName ?? null,
       submittedById: body.submittedById ?? null,
       submittedByName: body.submittedByName ?? null,
-      relatedEntities: (body.relatedEntities ?? []) as any,
+      relatedEntities: (body.relatedEntities ?? []) as string[],
       riskScore: body.riskScore ? String(body.riskScore) : null,
       dueAt: body.dueAt ? new Date(body.dueAt) : null,
       escalationLevel: 0,
-      auditTrail: [{ action: "created", timestamp: new Date().toISOString(), actor: body.submittedByName ?? "system" }] as any,
+      auditTrail: [{ action: "created", timestamp: new Date().toISOString(), actor: body.submittedByName ?? "system" }] as Record<string, unknown>[],
     }).returning();
 
     sendCreated(res, { itemId, record: inserted });
@@ -541,9 +411,9 @@ router.get("/compliance/calendar", authMiddleware(), async (req, res) => {
       .limit(100);
 
     sendSuccess(res, {
-      count: rows.length > 0 ? rows.length : mockCalendarEvents().length,
-      dataMode: rows.length > 0 ? "live" : "demo",
-      events: rows.length > 0 ? rows : mockCalendarEvents(),
+      count: rows.length,
+      dataMode: rows.length > 0 ? "live" : "empty",
+      events: rows,
     });
   } catch (err) {
     handleRouteError(res, err, "Failed to fetch compliance calendar");
@@ -573,7 +443,7 @@ router.post("/compliance/calendar", authMiddleware({ required: true }), async (r
       filingReference: body.filingReference ?? null,
       notes: body.notes ?? null,
       recurrence: body.recurrence ?? "none",
-      metadata: (body.metadata ?? {}) as any,
+      metadata: (body.metadata ?? {}) as Record<string, unknown>,
     }).returning();
 
     sendCreated(res, { eventId, record: inserted });
@@ -585,9 +455,11 @@ router.post("/compliance/calendar", authMiddleware({ required: true }), async (r
 router.get("/compliance/market-context", authMiddleware(), async (_req, res) => {
   try {
     const { services } = await import("@szl-holdings/services");
+    const fredService = services.fred as unknown as { getEconomicSnapshot?: () => Promise<unknown> };
+    const marketService = services.market_data as unknown as { getMarketIndices?: () => Promise<unknown> };
     const [fredSnap, marketIndices] = await Promise.allSettled([
-      services.fred?.getEconomicSnapshot ? (services as any).fred.getEconomicSnapshot() : Promise.resolve(null),
-      services.market_data?.getMarketIndices ? (services as any).market_data.getMarketIndices() : Promise.resolve(null),
+      fredService?.getEconomicSnapshot ? fredService.getEconomicSnapshot() : Promise.resolve(null),
+      marketService?.getMarketIndices ? marketService.getMarketIndices() : Promise.resolve(null),
     ]);
 
     sendSuccess(res, {
@@ -610,47 +482,9 @@ router.get("/compliance/market-context", authMiddleware(), async (_req, res) => 
 router.get("/compliance/intelligence-fusion", authMiddleware(), async (_req, res) => {
   try {
     sendSuccess(res, {
-      insights: [
-        {
-          id: "fusion-001",
-          type: "suitability_alert",
-          severity: "high",
-          title: "Cap Rate Drift — Reg BI Suitability Review Required",
-          description: "Current 10Y Treasury at 4.38% implies cap rate floor of ~5.25%. Pending deal at 4.8% cap rate is 45bps below market. Reg BI requires updated suitability documentation for affected clients.",
-          dealId: "deal-terra-882",
-          crmAccountId: "0015f00000AbCdEf",
-          crmAccountName: "Meridian Capital Group",
-          marketData: { treasuryRate: 4.38, impliedCapRateFloor: 5.25, dealCapRate: 4.80, drift: -0.45 },
-          action: "Route to supervision queue: reg_bi_violation",
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: "fusion-002",
-          type: "concentration_risk",
-          severity: "medium",
-          title: "Portfolio Concentration Risk — CRM Pipeline Flag",
-          description: "Arcturus Industrial Holdings pipeline opportunity (Fleet Intelligence Suite, $540K) would bring total sector exposure to 68% of AUM. Best Interest obligation requires disclosure.",
-          dealId: null,
-          crmAccountId: "0015f00000XyZwVu",
-          crmAccountName: "Arcturus Industrial Holdings",
-          marketData: { currentSectorExposure: 0.68, threshold: 0.50 },
-          action: "Flag for communications review",
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: "fusion-003",
-          type: "market_opportunity",
-          severity: "info",
-          title: "Rate Environment — Favorable CMBS Refinancing Window",
-          description: "Current 30Y mortgage rate at 6.82%. Life Co spreads tightening for institutional CRE. Comparable transaction data shows 12% increase in bridge-to-perm conversions.",
-          dealId: null,
-          crmAccountId: null,
-          crmAccountName: null,
-          marketData: { mortgageRate: 6.82, lifeCoSpread: 185, bridgeConversionTrend: "+12%" },
-          action: "Surface to deal originators",
-          createdAt: new Date().toISOString(),
-        },
-      ],
+      insights: [],
+      dataMode: "empty",
+      message: "No intelligence fusion insights yet. Insights are generated when supervision queue items and suitability alerts are cross-referenced with live market data.",
       generatedAt: new Date().toISOString(),
     });
   } catch (err) {

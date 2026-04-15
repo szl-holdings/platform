@@ -455,7 +455,7 @@ export default function PolicyManager() {
 
   const isDemo = !apiPolicies || apiPolicies.length === 0;
   const policies = isDemo ? DEMO_POLICIES : apiPolicies;
-  const incidents = apiIncidents !== null && apiIncidents !== undefined ? apiIncidents : DEMO_INCIDENTS;
+  const incidents = apiIncidents ?? [];
   const incidentsAreDemo = !apiIncidents;
 
   const filtered = useMemo(() => {

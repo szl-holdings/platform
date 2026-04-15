@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { BookOpen, FileText, AlertTriangle, CheckCircle, ChevronRight, Download, Clock, TrendingUp, MessageSquare, Shield, Users, Briefcase, ArrowRight, XCircle, Building2 } from "lucide-react";
 import { Link } from "wouter";
-import { DEMO_MATTERS } from "../../data/demo-matters";
+import { usePrismMatters } from "../../hooks/use-prism-api";
 
 const PREP_FLOWS = [
   {
@@ -83,8 +83,10 @@ const DEMAND_PREP_DATA = {
 };
 
 export default function PrepModePage() {
+  const mattersQ = usePrismMatters();
+  const matters = (Array.isArray(mattersQ.data) ? mattersQ.data : []) as Array<{ id: number; title: string; caseNumber: string; status: string; jurisdiction: string; healthScore: number; deadlines?: Array<{ date: string }> }>;
   const [activeFlow, setActiveFlow] = useState<string | null>(null);
-  const [activeMatter, setActiveMatter] = useState<number>(1);
+  const [activeMatter, setActiveMatter] = useState<number>(0);
 
   if (activeFlow === "demand") {
     return <DemandPrepFlow onBack={() => setActiveFlow(null)} />;
@@ -137,7 +139,8 @@ export default function PrepModePage() {
       <div className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
         <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">Prep Windows — What's Available</h3>
         <div className="space-y-2">
-          {DEMO_MATTERS.map(m => {
+          {matters.length === 0 && <div className="py-6 text-center text-[10px] text-slate-600 col-span-2">Connect matter data to see prep windows.</div>}
+          {matters.map(m => {
             const daysToNextEvent = Math.min(...(m.deadlines || []).map(d => Math.ceil((new Date(d.date).getTime() - Date.now()) / 86400000)).filter(d => d > 0));
             const readiness = m.healthScore;
             return (
@@ -280,7 +283,9 @@ function DemandPrepFlow({ onBack }: { onBack: () => void }) {
 }
 
 function MediationPrepFlow({ onBack }: { onBack: () => void }) {
-  const m = DEMO_MATTERS[2];
+  const mattersQ = usePrismMatters();
+  const matters = (Array.isArray(mattersQ.data) ? mattersQ.data : []) as Array<{ id: number; title: string; caseNumber: string; status: string }>;
+  const m = matters.find(x => x.status === "mediation" || x.status === "settlement") ?? matters[0] ?? null;
 
   return (
     <div className="max-w-4xl mx-auto space-y-5">
@@ -291,19 +296,20 @@ function MediationPrepFlow({ onBack }: { onBack: () => void }) {
         <div>
           <div className="flex items-center gap-2">
             <MessageSquare className="w-4 h-4 text-[#4a90b8]" />
-            <h1 className="text-base font-semibold text-slate-100">Mediation Prep — {m.title.split(" v. ")[0]}</h1>
+            <h1 className="text-base font-semibold text-slate-100">Mediation Prep{m ? ` — ${m.title.split(" v. ")[0]}` : ""}</h1>
           </div>
-          <p className="text-[10px] text-slate-500 font-mono">{m.caseNumber} · Mediation: 19 days</p>
+          {m && <p className="text-[10px] text-slate-500 font-mono">{m.caseNumber}</p>}
         </div>
       </div>
+      {!m && <div className="p-6 text-center text-xs text-slate-500">No mediation-stage matters found. Add matters with mediation status to use this flow.</div>}
 
-      <div className="grid grid-cols-3 gap-3">
-        <MetricCard label="Settlement Range" value={`$${(m.settlementLow/1000).toFixed(0)}K – $${(m.settlementHigh/1000).toFixed(0)}K`} sub={`Mid: $${(m.settlementMid/1000).toFixed(0)}K`} color="#d4a054" />
-        <MetricCard label="Matter Readiness" value={`${m.healthScore}%`} sub="Health score across 6 pillars" color={m.healthScore >= 70 ? "#4a90b8" : "#d4a054"} />
-        <MetricCard label="Days to Mediation" value="19" sub="April 22, 2026" color="#c45a4a" />
-      </div>
+      {m && <div className="grid grid-cols-3 gap-3">
+        <MetricCard label="Matter Readiness" value={`${m.healthScore ?? "–"}%`} sub="Health score across 6 pillars" color={(m.healthScore ?? 0) >= 70 ? "#4a90b8" : "#d4a054"} />
+        <MetricCard label="Case Number" value={m.caseNumber} sub={m.status.replace(/_/g, " ")} color="#4a90b8" />
+        <MetricCard label="Days to Mediation" value="–" sub="Connect deadline data" color="#c45a4a" />
+      </div>}
 
-      <div className="grid grid-cols-2 gap-4">
+      {m && <div className="grid grid-cols-2 gap-4">
         <PrepCard title="Liability Summary" icon={<Shield className="w-3.5 h-3.5 text-[#4a90b8]" />} count={null} status="good">
           <div className="space-y-2 text-[11px]">
             <div><span className="text-slate-500">Incident:</span> <span className="text-slate-300">Rear-end collision, Queens Blvd — clear liability</span></div>
@@ -345,7 +351,7 @@ function MediationPrepFlow({ onBack }: { onBack: () => void }) {
             </div>
           ))}
         </PrepCard>
-      </div>
+      </div>}
     </div>
   );
 }

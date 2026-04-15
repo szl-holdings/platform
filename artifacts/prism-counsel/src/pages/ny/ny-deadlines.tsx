@@ -1,5 +1,4 @@
 import { Clock, AlertTriangle, CheckCircle, ShieldOff } from "lucide-react";
-import { NY_DEMO_MATTERS } from "../../data/ny-demo-matters";
 
 const STATUS_CONFIG = {
   breached: { color: "#c45a4a", label: "BREACHED" },
@@ -9,9 +8,7 @@ const STATUS_CONFIG = {
 };
 
 export default function NyDeadlinesPage() {
-  const allClocks = NY_DEMO_MATTERS.flatMap(m =>
-    m.clocks.map(c => ({ ...c, matterTitle: m.title, matterId: m.id }))
-  ).sort((a, b) => a.daysRemaining - b.daysRemaining);
+  const allClocks: Array<{ label: string; status: keyof typeof STATUS_CONFIG; daysRemaining: number; startedAt: string; deadlineAt: string; ruleRef: string; matterTitle: string; matterId: number }> = [];
 
   const NY_RULES = [
     { rule: "11 NYCRR § 65-3.3", description: "No-fault notice of claim — must be filed within 30 days of accident", consequence: "Late notice grounds for disclaimer" },
@@ -29,7 +26,7 @@ export default function NyDeadlinesPage() {
           <Clock className="w-5 h-5 text-[#d4a054]" />
           <h1 className="text-lg font-semibold text-slate-100">NY Statutory Clock Monitor</h1>
         </div>
-        <p className="text-xs text-slate-500">{allClocks.length} clocks across {NY_DEMO_MATTERS.length} NY matters · breaches tracked in real time</p>
+        <p className="text-xs text-slate-500">{allClocks.length > 0 ? `${allClocks.length} statutory clocks tracked` : "Connect NY matter data to track statutory clocks"}</p>
       </div>
 
       <div className="space-y-2">

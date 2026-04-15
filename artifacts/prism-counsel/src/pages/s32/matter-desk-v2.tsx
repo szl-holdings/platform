@@ -6,7 +6,7 @@ import {
   ChevronRight, CheckCircle, Building2, Globe, Download, Brain,
   HelpCircle, Zap, Users
 } from "lucide-react";
-import { DEMO_MATTERS, PILLAR_LABELS } from "../../data/demo-matters";
+import { PILLAR_LABELS } from "../../data/demo-matters";
 import { useMatterDesk, usePilotForecasts } from "../../hooks/use-prism-pilot";
 
 const TABS = [
@@ -23,38 +23,6 @@ const TABS = [
   { key: "audit", label: "Audit", icon: Shield },
 ];
 
-const DEMO_DESK_DATA = {
-  matter: { id: 1, title: "Rodriguez v. National General Insurance", caseNumber: "2025-CV-04821", status: "discovery", jurisdiction: "Miami-Dade County, FL", healthScore: 72 },
-  lastChanges: [
-    { type: "carrier_communication", title: "Reserve increase received", summary: "National General raised reserves from $15K to $28K — signals carrier is reassessing exposure", severity: "info", createdAt: new Date(Date.now() - 3600000).toISOString() },
-    { type: "new_record", title: "Medical evaluation arrived", summary: "Independent orthopedic evaluation from Dr. Whitmore — findings consistent with treating physician", severity: "info", createdAt: new Date(Date.now() - 7200000).toISOString() },
-    { type: "pressure_shift", title: "Carrier pressure increased", summary: "Carrier response lag now exceeds 21 days — above firm threshold. Settlement pressure rising.", severity: "warning", createdAt: new Date(Date.now() - 10800000).toISOString() },
-    { type: "forecast_update", title: "Settlement probability improved", summary: "Likelihood of settlement before trial increased following reserve increase", severity: "info", createdAt: new Date(Date.now() - 14400000).toISOString() },
-  ],
-  worldContext: [
-    { source: "Court data", signal: "Miami-Dade courts running 3-month trial delay — settlement window favorable", type: "venue" },
-    { source: "Insurer behavior", signal: "National General increased reserves on 3 similar matters this quarter", type: "insurer" },
-  ],
-  missingEvidence: [
-    { item: "Lost wage verification", severity: "high", action: "Follow up with employer — Acme Corp HR" },
-    { item: "Records from Dr. Perez (spine specialist)", severity: "high", action: "Resend records request via certified mail" },
-    { item: "Property damage appraisal", severity: "medium", action: "Request from claims adjuster" },
-  ],
-  pressureDimensions: [
-    { label: "Deadline pressure", score: 65, movement: "rising", driver: "Interrogatory deadline in 2 days" },
-    { label: "Carrier pressure", score: 58, movement: "rising", driver: "Response lag exceeds 21 days" },
-    { label: "Evidence pressure", score: 52, movement: "falling", driver: "IME received and processed" },
-    { label: "Settlement pressure", score: 62, movement: "rising", driver: "Mediation in 19 days" },
-    { label: "Coverage pressure", score: 35, movement: "stable", driver: "Policy limits confirmed" },
-    { label: "Lien pressure", score: 28, movement: "stable", driver: "No active liens" },
-  ],
-  recommendedActions: [
-    { title: "Finalize interrogatory responses", description: "2-day deadline. 80% complete. Review and submit for sign-off.", impact: 0.95, minutes: 20 },
-    { title: "Update demand based on reserve increase", description: "Reserve increase signals softening. Revise demand strategy.", impact: 0.88, minutes: 15 },
-    { title: "Start mediation memo", description: "Mediation in 19 days. No memo drafted. Begin now.", impact: 0.85, minutes: 30 },
-    { title: "Re-issue records request — Dr. Perez", description: "21 days outstanding. Send certified follow-up.", impact: 0.72, minutes: 5 },
-  ],
-};
 
 export default function MatterDeskV2() {
   const params = useParams<{ id: string }>();
@@ -62,11 +30,23 @@ export default function MatterDeskV2() {
   const [activeTab, setActiveTab] = useState("overview");
   const [showExplainer, setShowExplainer] = useState(false);
 
-  const { data } = useMatterDesk(matterId);
-  const demoMatter = DEMO_MATTERS.find(m => m.id === matterId) || DEMO_MATTERS[0];
-  const desk = data ?? DEMO_DESK_DATA;
-  const m = desk.matter;
-  const isDemo = !data;
+  const { data, isLoading } = useMatterDesk(matterId);
+  const desk = data;
+  const m = desk?.matter;
+  const isDemo = false;
+
+  if (isLoading) {
+    return <div className="p-8 text-center text-sm text-slate-400">Loading matter…</div>;
+  }
+
+  if (!m) {
+    return (
+      <div className="p-8 text-center">
+        <p className="text-sm text-slate-400">Matter not found</p>
+        <Link href="/prism-counsel/matters"><span className="text-[#d4a054] text-xs cursor-pointer">Back to matters</span></Link>
+      </div>
+    );
+  }
 
   const healthColor = (m.healthScore ?? 0) >= 70 ? "#4a90b8" : (m.healthScore ?? 0) >= 50 ? "#d4a054" : "#c45a4a";
 
@@ -140,17 +120,17 @@ export default function MatterDeskV2() {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {activeTab === "overview" && <OverviewTab desk={desk} matter={demoMatter} />}
+        {activeTab === "overview" && <OverviewTab desk={desk} matter={desk?.matter} />}
         {activeTab === "what-changed" && <WhatChangedTab desk={desk} />}
-        {activeTab === "timeline" && <TimelineTab matter={demoMatter} />}
-        {activeTab === "evidence" && <EvidenceTab desk={desk} matter={demoMatter} />}
-        {activeTab === "deadlines" && <DeadlinesTab matter={demoMatter} />}
-        {activeTab === "money" && <MoneyTab matter={demoMatter} />}
+        {activeTab === "timeline" && <TimelineTab matter={desk?.matter} />}
+        {activeTab === "evidence" && <EvidenceTab desk={desk} matter={desk?.matter} />}
+        {activeTab === "deadlines" && <DeadlinesTab matter={desk?.matter} />}
+        {activeTab === "money" && <MoneyTab matter={desk?.matter} />}
         {activeTab === "pressure" && <PressureTab desk={desk} />}
-        {activeTab === "forecast" && <ForecastTab matter={demoMatter} />}
+        {activeTab === "forecast" && <ForecastTab matter={desk?.matter} />}
         {activeTab === "review" && <ReviewTab matterId={matterId} />}
         {activeTab === "signoff" && <SignOffTab matterId={matterId} />}
-        {activeTab === "audit" && <AuditTab matter={demoMatter} />}
+        {activeTab === "audit" && <AuditTab matter={desk?.matter} />}
       </div>
     </div>
   );

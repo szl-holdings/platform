@@ -62,29 +62,7 @@ const ACTION_ICONS: Record<string, React.ComponentType<{ className?: string }>> 
   submit: Zap,
 };
 
-const DEMO_TASK: BrowserTask = {
-  id: "task-demo-1",
-  name: "Company Intelligence Scrape — TechCorp Inc",
-  startUrl: "https://techcorp.example.com",
-  objective: "Extract company description, founding year, team size, and recent news headlines from the company website",
-  status: "completed",
-  startedAt: new Date(Date.now() - 180000).toISOString(),
-  completedAt: new Date(Date.now() - 5000).toISOString(),
-  durationMs: 175000,
-  actions: [
-    { id: "a1", type: "navigate", url: "https://techcorp.example.com", timestamp: new Date(Date.now() - 180000).toISOString(), durationMs: 1200, status: "done", screenshotAfter: "screenshot-1" },
-    { id: "a2", type: "screenshot", target: "full-page", timestamp: new Date(Date.now() - 178800).toISOString(), durationMs: 300, status: "done", screenshotAfter: "screenshot-2" },
-    { id: "a3", type: "extract", target: ".hero-description", value: "company description text", timestamp: new Date(Date.now() - 178500).toISOString(), durationMs: 150, status: "done", extractedData: { companyDescription: "TechCorp is a leading provider of enterprise software solutions..." } },
-    { id: "a4", type: "navigate", url: "https://techcorp.example.com/about", timestamp: new Date(Date.now() - 177000).toISOString(), durationMs: 1100, status: "done" },
-    { id: "a5", type: "extract", target: "article.news-item", value: "recent news", timestamp: new Date(Date.now() - 175800).toISOString(), durationMs: 200, status: "done", extractedData: { newsItems: ["TechCorp raises $50M Series C", "New partnership with GlobalCorp announced", "Q4 2025 earnings beat expectations"] } },
-    { id: "a6", type: "screenshot", target: "viewport", timestamp: new Date(Date.now() - 175500).toISOString(), durationMs: 250, status: "done", screenshotAfter: "screenshot-3" },
-  ],
-};
-
-const DEMO_ALLOWLIST: AllowlistEntry[] = [
-  { id: "al1", pattern: "*.techcorp.example.com", scope: "read", createdAt: new Date(Date.now() - 86400000).toISOString() },
-  { id: "al2", pattern: "news.example.com/api/*", scope: "read", createdAt: new Date(Date.now() - 86400000 * 3).toISOString() },
-];
+const DEMO_ALLOWLIST: AllowlistEntry[] = [];
 
 function ScreenshotPlaceholder({ label }: { label: string }) {
   return (
@@ -96,8 +74,8 @@ function ScreenshotPlaceholder({ label }: { label: string }) {
 }
 
 export default function BrowserOperator() {
-  const [tasks, setTasks] = React.useState<BrowserTask[]>([DEMO_TASK]);
-  const [activeTaskId, setActiveTaskId] = React.useState<string>("task-demo-1");
+  const [tasks, setTasks] = React.useState<BrowserTask[]>([]);
+  const [activeTaskId, setActiveTaskId] = React.useState<string | null>(null);
   const [isCreating, setIsCreating] = React.useState(false);
   const [newUrl, setNewUrl] = React.useState("");
   const [newObjective, setNewObjective] = React.useState("");

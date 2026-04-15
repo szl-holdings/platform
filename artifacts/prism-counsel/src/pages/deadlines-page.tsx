@@ -1,30 +1,85 @@
 import { Clock, AlertTriangle, Wifi, WifiOff, Loader2 } from "lucide-react";
 import { Link } from "wouter";
-import { DEMO_MATTERS } from "../data/demo-matters";
-import { usePrismMatters } from "../hooks/use-prism-api";
+import { usePrismMatters, usePrismDeadlines } from "../hooks/use-prism-api";
 
 export default function DeadlinesPage() {
   const mattersQ = usePrismMatters();
-  const isLive = Array.isArray(mattersQ.data) && mattersQ.data.length > 0;
+  const deadlinesQ = usePrismDeadlines();
+  const isLive = !mattersQ.isLoading && !deadlinesQ.isLoading;
+  const hasData = Array.isArray(mattersQ.data) && mattersQ.data.length > 0;
 
-  const allDeadlines = DEMO_MATTERS.flatMap(m =>
-    (m.deadlines || []).map(d => ({ ...d, matterTitle: m.title, matterId: m.id, caseNumber: m.caseNumber }))
-  ).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const allDeadlines = (() => {
+    if (Array.isArray(deadlinesQ.data) && deadlinesQ.data.length > 0) {
+      return (deadlinesQ.data as Array<{ id: number; title: string; dueDate: string; deadlineType: string; priority: string; matterId: number; matterTitle?: string; caseNumber?: string }>)
+        .map(d => ({
+          title: d.title,
+          date: d.dueDate,
+          type: d.deadlineType ?? "deadline",
+          priority: d.priority ?? "medium",
+          matterId: d.matterId,
+          matterTitle: d.matterTitle ?? `Matter #${d.matterId}`,
+          caseNumber: d.caseNumber ?? "",
+        }))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    }
+    if (Array.isArray(mattersQ.data)) {
+      return (mattersQ.data as Array<{ id: number; title: string; caseNumber?: string; deadlines?: Array<{ title: string; dueDate: string; deadlineType?: string; priority?: string }> }>)
+        .flatMap(m =>
+          (m.deadlines ?? []).map(d => ({
+            title: d.title,
+            date: d.dueDate,
+            type: d.deadlineType ?? "deadline",
+            priority: d.priority ?? "medium",
+            matterId: m.id,
+            matterTitle: m.title,
+            caseNumber: m.caseNumber ?? "",
+          }))
+        )
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    }
+    return [];
+  })();
 
   return (
     <div className="p-6 max-w-[1000px] mx-auto space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold text-slate-100">Deadlines</h1>
-          <p className="text-xs text-slate-500 mt-0.5">{allDeadlines.length} deadlines across all active matters</p>
+          <p className="text-xs text-slate-500 mt-0.5">
+            {mattersQ.isLoading || deadlinesQ.isLoading
+              ? "Loading…"
+              : hasData
+              ? `${allDeadlines.length} deadlines across all active matters`
+              : "No matters loaded — add matters to track deadlines"}
+          </p>
         </div>
         <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium ${
-          isLive ? "bg-[#4a90b8]/10 text-[#4a90b8] border border-[#4a90b8]/20" : "bg-slate-500/10 text-slate-500 border border-white/[0.06]"
+          mattersQ.isLoading || deadlinesQ.isLoading
+            ? "bg-slate-500/10 text-slate-500 border border-white/[0.06]"
+            : hasData
+            ? "bg-[#4a90b8]/10 text-[#4a90b8] border border-[#4a90b8]/20"
+            : "bg-slate-500/10 text-slate-500 border border-white/[0.06]"
         }`}>
-          {mattersQ.isLoading ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : isLive ? <Wifi className="w-2.5 h-2.5" /> : <WifiOff className="w-2.5 h-2.5" />}
-          {mattersQ.isLoading ? "LOADING" : isLive ? "LIVE" : "DEMO"}
+          {mattersQ.isLoading || deadlinesQ.isLoading ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : hasData ? <Wifi className="w-2.5 h-2.5" /> : <WifiOff className="w-2.5 h-2.5" />}
+          {mattersQ.isLoading || deadlinesQ.isLoading ? "LOADING" : hasData ? "LIVE" : "NO DATA"}
         </span>
       </div>
+
+      {isLive && !hasData && (
+        <div className="rounded-lg border border-white/[0.06] p-8 text-center" style={{ background: "#0c1220" }}>
+          <Clock className="w-8 h-8 text-slate-600 mx-auto mb-3" />
+          <p className="text-sm text-slate-400">No matters found</p>
+          <p className="text-xs text-slate-600 mt-1">Add matters in the Matters section to start tracking deadlines.</p>
+        </div>
+      )}
+
+      {isLive && hasData && allDeadlines.length === 0 && (
+        <div className="rounded-lg border border-white/[0.06] p-8 text-center" style={{ background: "#0c1220" }}>
+          <Clock className="w-8 h-8 text-slate-600 mx-auto mb-3" />
+          <p className="text-sm text-slate-400">No deadlines recorded</p>
+          <p className="text-xs text-slate-600 mt-1">Deadlines will appear here once added to matters.</p>
+        </div>
+      )}
 
       <div className="space-y-2">
         {allDeadlines.map((d, i) => {

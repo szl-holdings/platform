@@ -26,7 +26,7 @@ export const ENV_CONFIG = {
   isStaging: isStaging(),
 
   alloy: {
-    enableDemoSeeder: !isProduction(),
+    enableDemoSeeder: false,
     enableWebhookSignatureVerification: isProduction(),
     maxBatchSize: parseInt(process.env.ALLOY_MAX_BATCH_SIZE ?? "100", 10),
     workflowAutoRun: process.env.ALLOY_WORKFLOW_AUTO_RUN !== "false",

@@ -1,5 +1,4 @@
 import { MapPin, TrendingUp, Scale } from "lucide-react";
-import { NY_DEMO_MATTERS } from "../../data/ny-demo-matters";
 
 const VENUE_DATABASE = [
   {
@@ -80,7 +79,7 @@ const VENUE_DATABASE = [
 ];
 
 export default function NyVenueIntelPage() {
-  const activeVenues = NY_DEMO_MATTERS.map(m => m.venueProfile);
+  const activeVenues: Array<{ courtName: string; velocityScore: number; averageCycleMonths: number; medianVerdictAuto: number; medianVerdictPremises: number; plaintiffFriendliness: string; typicalPart: string; adrAvailability: string; conferenceRules: string; filingExpectations: string }> = [];
 
   return (
     <div className="p-6 max-w-[1300px] mx-auto space-y-5">
@@ -94,55 +93,25 @@ export default function NyVenueIntelPage() {
 
       <div className="space-y-3">
         <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Active Matter Venues</div>
-        {NY_DEMO_MATTERS.map(m => {
-          const vp = m.venueProfile;
-          return (
-            <div key={m.id} className="rounded-lg border border-[#d4a054]/20 p-4" style={{ background: "#0c1220" }}>
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <div className="text-xs font-semibold text-slate-200">{vp.courtName}</div>
-                  <div className="text-[10px] text-slate-500">{m.title.split(" (")[0]} · Part: {vp.typicalPart}</div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div
-                    className="w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold"
-                    style={{ background: vp.velocityScore >= 65 ? "#4a90b820" : "#d4a05420", color: vp.velocityScore >= 65 ? "#4a90b8" : "#d4a054" }}
-                  >
-                    {vp.velocityScore}
-                  </div>
-                  <div>
-                    <div className="text-[9px] text-slate-500">Velocity</div>
-                    <div className="text-[9px] text-slate-600">Score</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-4 gap-4 mb-2">
-                <div>
-                  <div className="text-[10px] text-slate-500 mb-0.5">Avg Cycle</div>
-                  <div className="text-sm font-mono text-slate-200">{vp.averageCycleMonths}mo</div>
-                </div>
-                <div>
-                  <div className="text-[10px] text-slate-500 mb-0.5">Plaintiff Friendly</div>
-                  <div className="text-sm font-medium" style={{
-                    color: vp.plaintiffFriendliness === "very_high" ? "#c45a4a" :
-                    vp.plaintiffFriendliness === "high" ? "#d4a054" : "#4a90b8"
-                  }}>
-                    {vp.plaintiffFriendliness.replace("_", " ").toUpperCase()}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[10px] text-slate-500 mb-0.5">ADR</div>
-                  <div className="text-sm font-medium text-[#4a90b8]">{vp.adrAvailability.toUpperCase()}</div>
-                </div>
-                <div>
-                  <div className="text-[10px] text-slate-500 mb-0.5">County</div>
-                  <div className="text-sm text-slate-200">{vp.county}</div>
+        {activeVenues.length === 0 ? (
+          <div className="rounded-lg border border-white/[0.06] p-6 text-center" style={{ background: "#0c1220" }}>
+            <MapPin className="w-6 h-6 text-slate-600 mx-auto mb-2" />
+            <p className="text-xs text-slate-500">No active matter venues</p>
+            <p className="text-[10px] text-slate-600 mt-1">Connect NY matters with venue assignments to populate this view.</p>
+          </div>
+        ) : activeVenues.map((vp, i) => (
+          <div key={i} className="rounded-lg border border-[#d4a054]/20 p-4" style={{ background: "#0c1220" }}>
+            <div className="flex items-start justify-between mb-3">
+              <div className="text-xs font-semibold text-slate-200">{vp.courtName}</div>
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold"
+                  style={{ background: vp.velocityScore >= 65 ? "#4a90b820" : "#d4a05420", color: vp.velocityScore >= 65 ? "#4a90b8" : "#d4a054" }}>
+                  {vp.velocityScore}
                 </div>
               </div>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
 
       <div className="space-y-3">

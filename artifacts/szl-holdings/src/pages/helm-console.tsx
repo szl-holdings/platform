@@ -55,14 +55,6 @@ const HANDOFF_CONTRACTS = [
   { from: "Holdings", to: "ATLAS", trigger: "Investor event triggered", action: "Artifact package generation", color: "hsl(38,90%,52%)" },
 ];
 
-const DEMO_RECENT_SIGNALS = [
-  { id: "sig-001", from: "Lyte", to: "FORGE", type: "Priority escalation", time: "2m ago", severity: "high", status: "routed" },
-  { id: "sig-002", from: "Aegis", to: "COVENANT", type: "Threat containment", time: "7m ago", severity: "critical", status: "executed" },
-  { id: "sig-003", from: "Vessels", to: "FORGE", type: "Route anomaly", time: "14m ago", severity: "medium", status: "executed" },
-  { id: "sig-004", from: "Terra", to: "Carlota Jo", type: "Blocker advisory", time: "31m ago", severity: "medium", status: "executed" },
-  { id: "sig-005", from: "Holdings", to: "ATLAS", type: "Investor brief", time: "1h ago", severity: "low", status: "executed" },
-  { id: "sig-006", from: "Lyte", to: "FORGE", type: "SLO breach", time: "2h ago", severity: "high", status: "executed" },
-];
 
 const SEVERITY_COLOR: Record<string, string> = {
   critical: "hsl(0,72%,58%)",
@@ -472,30 +464,13 @@ export default function HelmConsolePage() {
             {/* ─── Cross-App: Signal Feed ─── */}
             {activeTab === "signals" && (
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "auto 1fr 1fr 1fr 1fr auto", gap: "1rem", padding: "0.5rem 1rem", fontSize: "11px", color: TEXT.tertiary, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                  <div>Severity</div><div>Signal Type</div><div>From</div><div>To</div><div>Time</div><div>Status</div>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "3rem 1rem", gap: "0.75rem", background: BG.elevated, border: `1px solid ${BORDER.muted}`, borderRadius: "12px" }}>
+                  <Activity size={28} style={{ color: TEXT.tertiary }} />
+                  <div style={{ fontSize: "13px", color: TEXT.secondary, fontWeight: 600 }}>No signals yet</div>
+                  <div style={{ fontSize: "11px", color: TEXT.tertiary, textAlign: "center", maxWidth: "320px" }}>
+                    Cross-app signals will appear here as the PRISM BUS routes events between domain apps. Connect domain apps to begin receiving live signals.
+                  </div>
                 </div>
-                {DEMO_RECENT_SIGNALS.map((signal, i) => (
-                  <m.div
-                    key={signal.id}
-                    custom={i}
-                    variants={fadeUp}
-                    initial="hidden"
-                    animate="show"
-                    style={{ background: BG.elevated, border: `1px solid ${BORDER.muted}`, borderRadius: "8px", padding: "0.75rem 1rem", display: "grid", gridTemplateColumns: "auto 1fr 1fr 1fr 1fr auto", alignItems: "center", gap: "1rem" }}
-                  >
-                    <Circle size={7} fill={SEVERITY_COLOR[signal.severity]} style={{ color: SEVERITY_COLOR[signal.severity] }} />
-                    <div style={{ fontSize: "13px", fontWeight: 600, color: TEXT.primary }}>{signal.type}</div>
-                    <div style={{ fontSize: "13px", color: TEXT.secondary }}>{signal.from}</div>
-                    <div style={{ fontSize: "13px", color: TEXT.secondary }}>{signal.to}</div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", fontSize: "12px", color: TEXT.tertiary }}>
-                      <Clock size={11} />{signal.time}
-                    </div>
-                    <div style={{ padding: "2px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: 600, background: signal.status === "executed" ? "hsl(142,52%,48%)22" : "hsl(192,72%,48%)22", color: signal.status === "executed" ? "hsl(142,52%,48%)" : "hsl(192,72%,48%)" }}>
-                      {signal.status}
-                    </div>
-                  </m.div>
-                ))}
               </div>
             )}
 
