@@ -160,6 +160,18 @@ const IntelligenceFusionGrid = lazy(() => import("@/pages/intelligence-fusion-gr
 const AegisBusinessSignalIntelligence = lazy(() => import("@/pages/business-signal-intelligence"));
 const AegisPredictiveIntelligence = lazy(() => import("@/pages/predictive-intelligence"));
 
+// ─── Agentic SOC & Autonomous Cyber Defense (Task 521) ───────────────────────
+const AgenticSOC = lazy(() => import("@/pages/agentic-soc"));
+const DeceptionGrid = lazy(() => import("@/pages/deception-grid"));
+const MTDEngine = lazy(() => import("@/pages/mtd-engine"));
+const DigitalTwin = lazy(() => import("@/pages/digital-twin"));
+const HuntAgents = lazy(() => import("@/pages/hunt-agents"));
+const ComplianceEvidence = lazy(() => import("@/pages/compliance-evidence"));
+const VulnLifecycle = lazy(() => import("@/pages/vuln-lifecycle"));
+const CyberInsuranceIntel = lazy(() => import("@/pages/cyber-insurance-intel"));
+const SOARBuilder = lazy(() => import("@/pages/soar-builder"));
+const AdversaryEngine = lazy(() => import("@/pages/adversary-engine"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -232,6 +244,19 @@ const phantomSentinelNav = [
   { path: "/phantom/tabletop", label: "Executive Tabletop", icon: FileText },
   { path: "/sentinel/behavioral", label: "SENTINEL Behavioral", icon: Eye },
   { path: "/threat-sim-report", label: "Simulation Reports", icon: FileText },
+];
+
+const agenticDefenseNav = [
+  { path: "/agentic-soc", label: "Agentic SOC", icon: BrainIcon },
+  { path: "/deception-grid", label: "Deception Grid", icon: Eye },
+  { path: "/mtd-engine", label: "Moving Target Defense", icon: Zap },
+  { path: "/digital-twin", label: "Cyber Digital Twin", icon: Layers },
+  { path: "/hunt-agents", label: "Threat Hunt Agents", icon: Search },
+  { path: "/compliance-evidence", label: "Compliance Evidence", icon: ClipboardCheck },
+  { path: "/vuln-lifecycle", label: "Vuln Lifecycle", icon: Bug },
+  { path: "/cyber-insurance-intel", label: "Cyber Insurance Intel", icon: DollarSign },
+  { path: "/soar-builder", label: "SOAR Builder", icon: Zap },
+  { path: "/adversary-engine", label: "Adversary Emulation Engine", icon: Target },
 ];
 
 const securityNavSecondary = [
@@ -453,6 +478,11 @@ function AegisSidebarContent({ location, onNavigate, collapsed, onToggleCollapse
         { id: "governance-review", label: "Governance Review", href: "/soc/governance", icon: <FileText className="w-3.5 h-3.5" /> },
         ...governanceNavItems.map(({ path, label, icon: Icon }) => ({ id: path + "-gov", label, href: path, icon: <Icon className="w-3 h-3" /> })),
       ],
+    },
+    {
+      id: "agentic-defense",
+      label: "Agentic Defense",
+      items: agenticDefenseNav.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3.5 h-3.5" /> })),
     },
     {
       id: "phantom-sentinel",
@@ -800,6 +830,18 @@ function AppRouter() {
         <Route path="/intelligence-fusion-grid" component={IntelligenceFusionGrid} />
         <Route path="/business-signal-intelligence" component={AegisBusinessSignalIntelligence} />
         <Route path="/predictive-intelligence" component={AegisPredictiveIntelligence} />
+
+        {/* Agentic SOC & Autonomous Cyber Defense (Task 521) */}
+        <Route path="/agentic-soc" component={AgenticSOC} />
+        <Route path="/deception-grid" component={DeceptionGrid} />
+        <Route path="/mtd-engine" component={MTDEngine} />
+        <Route path="/digital-twin" component={DigitalTwin} />
+        <Route path="/hunt-agents" component={HuntAgents} />
+        <Route path="/compliance-evidence" component={ComplianceEvidence} />
+        <Route path="/vuln-lifecycle" component={VulnLifecycle} />
+        <Route path="/cyber-insurance-intel" component={CyberInsuranceIntel} />
+        <Route path="/soar-builder" component={SOARBuilder} />
+        <Route path="/adversary-engine" component={AdversaryEngine} />
 
         <Route>
           <div className="flex items-center justify-center h-full">

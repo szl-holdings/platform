@@ -464,7 +464,7 @@ export default function FundOperationsPage() {
   const { data: rawLpReports, reload: reloadLp } = useApiFetch<LpReport[]>("/fund-ops/lp-reports?limit=20");
   const { data: rawCapCalls, reload: reloadCalls } = useApiFetch<CapitalCall[]>("/fund-ops/capital-calls?limit=20");
   const { data: rawInvestors, reload: reloadInvestors } = useApiFetch<AccreditedInvestor[]>("/fund-ops/accredited-investors?limit=50");
-  const { data: rawFormD, reload: reloadFormD } = useApiFetch<FormDFiling[]>("/fund-ops/form-d-filings?limit=10");
+  const { data: rawFormD, reload: reloadFormD } = useApiFetch<FormDFiling[]>("/fund-ops/form-d-filings?limit=20");
   const { data: rawLpAccounts } = useApiFetch<LpCapitalAccount[]>("/fund-ops/lp-capital-accounts");
 
   const nav = summary?.fundAdmin.latestNav;
