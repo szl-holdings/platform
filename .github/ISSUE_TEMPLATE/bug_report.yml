@@ -1,0 +1,130 @@
+name: Bug Report
+description: Report a defect or unexpected behavior in the SZL Holdings platform
+title: "[BUG] "
+labels:
+  - bug
+assignees:
+  - stephenlutar2-hash
+body:
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected Platform / Component
+      description: Which platform or component exhibits this behavior?
+      multiple: true
+      options:
+        - Lyte — Business Observability
+        - Aegis — Defense & Intelligence
+        - Terra — Real Estate Intelligence
+        - Vessels — Maritime Intelligence
+        - PRISM Counsel — Legal Command
+        - Carlota Jo — Advisory
+        - IMPERIUM — Cloud Sovereignty
+        - Command Portal — Ecosystem Hub
+        - SZL Holdings — Corporate
+        - CORTEX — Mobile Command (Expo)
+        - Stephen Lutar — Founder Site
+        - API Server
+        - Shared Library / Infrastructure
+        - CI/CD & GitHub Actions
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is the impact of this bug?
+      options:
+        - Critical — System down or data loss
+        - High — Major feature broken, no workaround
+        - Medium — Feature degraded, workaround exists
+        - Low — Minor cosmetic or edge-case issue
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the Bug
+      description: A clear and concise description of what the bug is.
+      placeholder: What happened? What did you see?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Navigate to ...
+        2. Click on ...
+        3. Observe that ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should have happened?
+      placeholder: I expected to see ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: Instead, I saw ...
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser / OS
+      description: "e.g., Chrome 122 on macOS 14"
+      placeholder: Chrome 122 / macOS 14
+    validations:
+      required: false
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Deployment Environment
+      options:
+        - Replit Dev (local preview)
+        - Replit Published (production)
+        - Azure / Cloud
+        - Unknown
+    validations:
+      required: false
+
+  - type: input
+    id: user-role
+    attributes:
+      label: User Role at Time of Issue
+      description: "e.g., admin, operator, analyst, guest"
+      placeholder: admin
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Screenshots / Logs
+      description: If applicable, add screenshots or paste log excerpts here.
+      placeholder: Paste logs or drag-and-drop screenshots here.
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other context about the problem (related issues, recent changes, etc.).
+    validations:
+      required: false

@@ -1,29 +1,68 @@
-* @stephenlutar2-hash
+# CODEOWNERS
+#
+# SZL Holdings Platform — Code Ownership Declaration
+# Each line maps a path pattern to its owner(s).
+# Owners are required reviewers for pull requests touching those paths.
+#
+# Syntax: pattern  @owner
+# Reference: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
-artifacts/api-server/ @stephenlutar2-hash
-artifacts/szl-holdings/ @stephenlutar2-hash
-artifacts/lyte-command-center/ @stephenlutar2-hash
-artifacts/firestorm/ @stephenlutar2-hash
-artifacts/terra/ @stephenlutar2-hash
-artifacts/vessels/ @stephenlutar2-hash
-artifacts/carlota-jo/ @stephenlutar2-hash
-artifacts/prism-counsel/ @stephenlutar2-hash
-artifacts/imperium/ @stephenlutar2-hash
-artifacts/command/ @stephenlutar2-hash
-artifacts/stephen-site/ @stephenlutar2-hash
+# Default owner — all files not matched by a more specific rule
+*  @stephenlutar2-hash
 
-artifacts/*-mobile/ @stephenlutar2-hash
+# ── Core shared libraries ──────────────────────────────────────────────────────
+/lib/  @stephenlutar2-hash
+/lib/db/  @stephenlutar2-hash
+/lib/auth/  @stephenlutar2-hash
+/lib/audit/  @stephenlutar2-hash
+/lib/ai-engine/  @stephenlutar2-hash
+/lib/shared-ui/  @stephenlutar2-hash
+/lib/api-spec/  @stephenlutar2-hash
 
-lib/ @stephenlutar2-hash
+# ── API Server ────────────────────────────────────────────────────────────────
+/artifacts/api-server/  @stephenlutar2-hash
 
-lib/ai-engine/ @stephenlutar2-hash
-lib/db/ @stephenlutar2-hash
-lib/shared-ui/ @stephenlutar2-hash
+# ── Web Applications ──────────────────────────────────────────────────────────
+/artifacts/szl-holdings/  @stephenlutar2-hash
+/artifacts/lyte-command-center/  @stephenlutar2-hash
+/artifacts/firestorm/  @stephenlutar2-hash
+/artifacts/aegis/  @stephenlutar2-hash
+/artifacts/terra/  @stephenlutar2-hash
+/artifacts/vessels/  @stephenlutar2-hash
+/artifacts/carlota-jo/  @stephenlutar2-hash
+/artifacts/prism-counsel/  @stephenlutar2-hash
+/artifacts/imperium/  @stephenlutar2-hash
+/artifacts/command/  @stephenlutar2-hash
+/artifacts/stephen-site/  @stephenlutar2-hash
+/artifacts/nexus/  @stephenlutar2-hash
+/artifacts/forge/  @stephenlutar2-hash
+/artifacts/partner-portal/  @stephenlutar2-hash
+/artifacts/inca-lab/  @stephenlutar2-hash
+/artifacts/mockup-sandbox/  @stephenlutar2-hash
 
-.github/ @stephenlutar2-hash
-docs/ @stephenlutar2-hash
-infra/ @stephenlutar2-hash
+# ── Mobile Applications ───────────────────────────────────────────────────────
+/artifacts/szl-holdings-mobile/  @stephenlutar2-hash
+/artifacts/cortex-mobile/  @stephenlutar2-hash
+/artifacts/aegis-mobile/  @stephenlutar2-hash
+/artifacts/alloy-mobile/  @stephenlutar2-hash
+/artifacts/lyte-mobile/  @stephenlutar2-hash
+/artifacts/terra-mobile/  @stephenlutar2-hash
+/artifacts/vessels-mobile/  @stephenlutar2-hash
+/artifacts/carlota-jo-mobile/  @stephenlutar2-hash
+/artifacts/stephen-mobile/  @stephenlutar2-hash
 
-SECURITY.md @stephenlutar2-hash
-CODE_OF_CONDUCT.md @stephenlutar2-hash
-LICENSE.md @stephenlutar2-hash
+# ── Infrastructure & CI/CD ───────────────────────────────────────────────────
+/infra/  @stephenlutar2-hash
+/.github/  @stephenlutar2-hash
+/.github/workflows/  @stephenlutar2-hash
+
+# ── Documentation ────────────────────────────────────────────────────────────
+/docs/  @stephenlutar2-hash
+README.md  @stephenlutar2-hash
+CHANGELOG.md  @stephenlutar2-hash
+
+# ── Security-sensitive files ──────────────────────────────────────────────────
+SECURITY.md  @stephenlutar2-hash
+CODE_OF_CONDUCT.md  @stephenlutar2-hash
+LICENSE.md  @stephenlutar2-hash
+.env.example  @stephenlutar2-hash

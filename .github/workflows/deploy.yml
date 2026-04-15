@@ -1,99 +1,33 @@
-name: Deploy
+name: Deploy (Deprecated)
+# DEPRECATED — this workflow has been superseded by:
+#   deploy-staging.yml  — auto-deploys to staging on push to main
+#   deploy-production.yml — deploys to production via release or manual approval
+#
+# This file is kept only for historical reference and will not execute any deployment.
+# DO NOT re-enable triggers here; use the split workflows instead.
 
 on:
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
-      environment:
-        description: 'Target environment'
+      confirm_deprecated:
+        description: 'This workflow is deprecated. Use deploy-staging.yml or deploy-production.yml instead.'
         required: true
-        default: 'production'
+        default: 'cancel'
         type: choice
         options:
-          - production
-      ref:
-        description: 'Git ref to deploy (branch, tag, or SHA)'
-        required: false
-        default: ''
+          - cancel
 
 permissions:
   contents: read
 
 jobs:
-  deploy:
-    name: Deploy to ${{ inputs.environment || 'production' }}
+  deprecated-notice:
+    name: Workflow Deprecated
     runs-on: ubuntu-latest
-    environment: production
-    permissions:
-      contents: read
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.ref || github.ref }}
-
-      - name: Determine release info
+      - name: Notice
         run: |
-          if [[ "${{ github.event_name }}" == "release" ]]; then
-            echo "Triggered by release: ${{ github.event.release.tag_name }}"
-            echo "Release URL: ${{ github.event.release.html_url }}"
-          else
-            echo "Triggered manually for environment: ${{ inputs.environment }}"
-            echo "Ref: ${{ inputs.ref || github.ref }}"
-          fi
-
-      - name: Verify deployment configuration
-        id: verify
-        run: |
-          if [ -z "${{ secrets.REPLIT_DEPLOY_TOKEN }}" ]; then
-            echo "::warning::REPLIT_DEPLOY_TOKEN not configured — deployment skipped"
-            echo "Configure this secret in Settings → Environments → production"
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "Deployment configuration verified"
-            echo "skip=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Trigger Replit deployment
-        if: steps.verify.outputs.skip != 'true'
-        run: |
-          echo "Triggering Replit deployment..."
-          REPLIT_APP_ID="${{ secrets.REPLIT_APP_ID }}"
-          REPLIT_DEPLOY_TOKEN="${{ secrets.REPLIT_DEPLOY_TOKEN }}"
-
-          if [ -n "$REPLIT_APP_ID" ] && [ -n "$REPLIT_DEPLOY_TOKEN" ]; then
-            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
-              -X POST \
-              -H "Authorization: Bearer $REPLIT_DEPLOY_TOKEN" \
-              -H "Content-Type: application/json" \
-              "https://replit.com/api/v1/repls/$REPLIT_APP_ID/deployments" \
-              2>/dev/null || echo "000")
-
-            if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 300 ]; then
-              echo "Deployment triggered successfully (HTTP $RESPONSE)"
-            elif [ "$RESPONSE" = "000" ]; then
-              echo "::warning::Could not reach Replit API — deployment may need to be triggered manually"
-            else
-              echo "::error::Replit deployment API returned HTTP $RESPONSE"
-              exit 1
-            fi
-          else
-            echo "::warning::REPLIT_APP_ID not configured — deployment skipped"
-            echo "To enable automated deployment, set REPLIT_APP_ID in Settings → Environments → production"
-          fi
-
-      - name: Deployment summary
-        if: always()
-        run: |
-          echo "## Deployment Summary" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          if [[ "${{ github.event_name }}" == "release" ]]; then
-            echo "- **Trigger:** Release ${{ github.event.release.tag_name }}" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "- **Trigger:** Manual dispatch" >> "$GITHUB_STEP_SUMMARY"
-          fi
-          echo "- **Environment:** production" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Ref:** ${{ inputs.ref || github.ref }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Actor:** ${{ github.actor }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "To deploy manually: push to Replit workspace or use Replit's built-in deploy." >> "$GITHUB_STEP_SUMMARY"
+          echo "::error::This workflow (deploy.yml) is deprecated and has been replaced."
+          echo "::notice::For staging deployment: deploy-staging.yml triggers automatically on push to main."
+          echo "::notice::For production deployment: use deploy-production.yml (manual dispatch or via published release)."
+          exit 1
