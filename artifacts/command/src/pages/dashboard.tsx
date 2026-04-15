@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { Header } from "../components/header";
 import { EcosystemPulse } from "../components/ecosystem-pulse";
 import { DomainGrid } from "../components/domain-grid";
@@ -7,8 +8,38 @@ import { IntelligencePanel } from "../components/intelligence-panel";
 import { CommandActions } from "../components/command-actions";
 import { CommandBar } from "../components/command-bar";
 import { OpsCenterGrid } from "../components/ops-center-grid";
+import { FusionBar } from "../components/fusion-bar";
+import { AmbientSignalRanker } from "../components/ambient-signal-ranker";
+import { CorrelationMapViz } from "../components/correlation-map-viz";
+import { SignalChainsPanel } from "../components/signal-chains-panel";
 import { useEcosystemData } from "../hooks/use-ecosystem-data";
 import { MorningBriefingCard, DEMO_BRIEFING_HISTORY } from "@szl-holdings/shared-ui";
+import { GitBranch, Zap, Map } from "lucide-react";
+
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+function SectionNav() {
+  return (
+    <nav className="flex items-center gap-2 flex-wrap">
+      <Link
+        href={`${BASE}/strategy/correlation-map`}
+        className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg transition-opacity hover:opacity-80"
+        style={{ backgroundColor: "var(--color-bg-elevated)", border: "1px solid var(--color-surface-border)", color: "var(--color-fg-muted)" }}
+      >
+        <Map className="w-3 h-3" />
+        Correlation Map
+      </Link>
+      <Link
+        href={`${BASE}/strategy/signal-chains`}
+        className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg transition-opacity hover:opacity-80"
+        style={{ backgroundColor: "var(--color-bg-elevated)", border: "1px solid var(--color-surface-border)", color: "var(--color-fg-muted)" }}
+      >
+        <Zap className="w-3 h-3" />
+        Signal Chains
+      </Link>
+    </nav>
+  );
+}
 
 export function Dashboard() {
   const { data, dataUpdatedAt, sseConnected } = useEcosystemData();
@@ -41,6 +72,11 @@ export function Dashboard() {
       <CommandBar open={searchOpen} onClose={() => setSearchOpen(false)} />
 
       <main className="flex-1 p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto w-full flex flex-col gap-8">
+        <div className="flex flex-col gap-3">
+          <FusionBar />
+          <SectionNav />
+        </div>
+
         <EcosystemPulse
           domains={data.domains}
           compositeScore={data.compositeScore}
@@ -50,6 +86,8 @@ export function Dashboard() {
         <DomainGrid domains={data.domains} />
 
         <OpsCenterGrid />
+
+        <AmbientSignalRanker />
 
         <MorningBriefingCard
           briefing={DEMO_BRIEFING_HISTORY[0]}
@@ -64,6 +102,50 @@ export function Dashboard() {
           <div className="lg:col-span-1 h-[600px] lg:h-auto">
             <Timeline events={data.timeline} />
           </div>
+        </div>
+
+        <div
+          className="rounded-xl overflow-hidden"
+          style={{ backgroundColor: "var(--color-bg-elevated)", border: "1px solid var(--color-surface-border)", padding: "24px" }}
+        >
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <GitBranch className="w-4 h-4" style={{ color: "#8b7ac8" }} />
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-fg-muted)" }}>
+                Correlation Map Preview
+              </span>
+            </div>
+            <Link
+              href={`${BASE}/strategy/correlation-map`}
+              className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded"
+              style={{ color: "#8b7ac8", backgroundColor: "color-mix(in srgb, #8b7ac8 10%, transparent)", border: "1px solid color-mix(in srgb, #8b7ac8 25%, transparent)" }}
+            >
+              Full View →
+            </Link>
+          </div>
+          <CorrelationMapViz />
+        </div>
+
+        <div
+          className="rounded-xl overflow-hidden"
+          style={{ backgroundColor: "var(--color-bg-elevated)", border: "1px solid var(--color-surface-border)", padding: "24px" }}
+        >
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4" style={{ color: "#8b7ac8" }} />
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-fg-muted)" }}>
+                Active Signal Chains
+              </span>
+            </div>
+            <Link
+              href={`${BASE}/strategy/signal-chains`}
+              className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded"
+              style={{ color: "#8b7ac8", backgroundColor: "color-mix(in srgb, #8b7ac8 10%, transparent)", border: "1px solid color-mix(in srgb, #8b7ac8 25%, transparent)" }}
+            >
+              Full View →
+            </Link>
+          </div>
+          <SignalChainsPanel />
         </div>
       </main>
     </div>

@@ -171,6 +171,9 @@ import auditChainRouter from "./audit-chain";
 import revenueIntelligenceRouter from "./revenue-intelligence";
 import multiplayerSessionsRouter from "./multiplayer-sessions";
 import { autopilotRouter } from "./autopilot";
+import signalChainsRouter from "./signal-chains";
+import crossDomainQueryRouter from "./cross-domain-query";
+import correlationMapRouter from "./correlation-map";
 
 const router: IRouter = Router();
 
@@ -663,5 +666,15 @@ router.use(multiplayerSessionsRouter);
 
 router.use("/autopilot", _readLimiter);
 router.use(autopilotRouter);
+
+router.use("/signal-chains", _readLimiter);
+router.use("/signal-chains", _writeLimiter);
+router.use(signalChainsRouter);
+
+router.use("/cross-domain-query", _writeLimiter);
+router.use(crossDomainQueryRouter);
+
+router.use("/correlation-map", _readLimiter);
+router.use(correlationMapRouter);
 
 export default router;

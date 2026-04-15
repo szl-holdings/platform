@@ -13,6 +13,8 @@ import { UnifiedLayout, type WorkspaceMode } from "./components/unified-layout";
 import { DemoModeProvider } from "@lyte/lib/demo-mode";
 
 const BASE = import.meta.env.BASE_URL;
+const CorrelationMapPage = lazy(() => import("./pages/correlation-map").then((m) => ({ default: m.CorrelationMapPage })));
+const SignalChainsPage = lazy(() => import("./pages/signal-chains").then((m) => ({ default: m.SignalChainsPage })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -191,6 +193,8 @@ function AppShell() {
               <Route path="/strategy/executive-briefing" component={() => <ExecutiveBriefingPage />} />
               <Route path="/strategy/simulation" component={() => <SimulationPage />} />
               <Route path="/strategy/briefing" component={() => <BriefingHistoryPage />} />
+              <Route path="/strategy/correlation-map" component={() => <CorrelationMapPage />} />
+              <Route path="/strategy/signal-chains" component={() => <SignalChainsPage />} />
 
               <Route path="/operations" component={() => <ExecutiveCommand />} />
               <Route path="/operations/pulse" component={() => <LytePulse />} />

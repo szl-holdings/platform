@@ -166,6 +166,39 @@ export default function CommandFeedScreen() {
 
   const criticalCount = signals.filter((s) => s.severity === "critical").length;
 
+  const { data: briefingData } = useQuery({
+    queryKey: ["morning-brief"],
+    queryFn: async () => {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      try {
+        const res = await fetch(`${getApiBase()}/api/briefing/today`, { headers });
+        if (!res.ok) return null;
+        const body = await res.json();
+        return body.data ?? body ?? null;
+      } catch {
+        return null;
+      }
+    },
+    staleTime: 300000,
+    refetchInterval: 600000,
+  });
+
+  const brief = briefingData ?? {
+    headline: "3 critical signals across 2 domains require immediate attention",
+    executiveSummary: "As of today UTC, the SZL ecosystem is operating at DEGRADED status. 3 intelligence signals identified across 4 domains. APT-41 campaign and Shanghai port delay are the highest-priority items.",
+    overallHealth: "degraded",
+    criticalCount: 3,
+    highCount: 5,
+    totalAlerts: 8,
+    signals: [
+      { domain: "firestorm", level: "critical", title: "APT-41 Lateral Movement", summary: "Nation-state threat actor active across 3 subsidiaries. Legal hold triggered.", count: 1 },
+      { domain: "vessels", level: "high", title: "Shanghai Port Delay +32h", summary: "12 Terra properties and 8 PRISM contracts flagged via signal chain.", count: 2 },
+      { domain: "szl-holdings", level: "medium", title: "Market Volatility Index 0.72", summary: "Portfolio rebalance signal chain triggered across Terra, Vessels, and fund ops.", count: 5 },
+    ],
+  };
+
+  const healthColor = brief.overallHealth === "critical" ? colors.red : brief.overallHealth === "degraded" ? colors.amber : colors.green;
+
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       <View
@@ -231,6 +264,52 @@ export default function CommandFeedScreen() {
             </Text>
           </View>
         )}
+
+        <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>MORNING BRIEF</Text>
+        <View style={[styles.briefCard, { backgroundColor: colors.card, borderColor: healthColor + "40" }]}>
+          <View style={styles.briefHeader}>
+            <View style={[styles.briefHealthBadge, { backgroundColor: healthColor + "20", borderColor: healthColor + "40" }]}>
+              <Text style={[styles.briefHealthText, { color: healthColor }]}>
+                {(brief.overallHealth ?? "nominal").toUpperCase()}
+              </Text>
+            </View>
+            <Text style={[styles.briefDate, { color: colors.mutedForeground }]}>
+              {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+            </Text>
+          </View>
+          <Text style={[styles.briefHeadline, { color: colors.foreground }]} numberOfLines={3}>
+            {brief.headline}
+          </Text>
+          <Text style={[styles.briefSummary, { color: colors.mutedForeground }]} numberOfLines={3}>
+            {brief.executiveSummary}
+          </Text>
+          <View style={styles.briefStats}>
+            <View style={[styles.briefStat, { backgroundColor: colors.red + "15", borderColor: colors.red + "30" }]}>
+              <Text style={[styles.briefStatNum, { color: colors.red }]}>{brief.criticalCount ?? 0}</Text>
+              <Text style={[styles.briefStatLabel, { color: colors.mutedForeground }]}>Critical</Text>
+            </View>
+            <View style={[styles.briefStat, { backgroundColor: colors.amber + "15", borderColor: colors.amber + "30" }]}>
+              <Text style={[styles.briefStatNum, { color: colors.amber }]}>{brief.highCount ?? 0}</Text>
+              <Text style={[styles.briefStatLabel, { color: colors.mutedForeground }]}>High</Text>
+            </View>
+            <View style={[styles.briefStat, { backgroundColor: colors.border, borderColor: colors.border }]}>
+              <Text style={[styles.briefStatNum, { color: colors.foreground }]}>{brief.totalAlerts ?? 0}</Text>
+              <Text style={[styles.briefStatLabel, { color: colors.mutedForeground }]}>Total</Text>
+            </View>
+          </View>
+          {Array.isArray(brief.signals) && brief.signals.slice(0, 3).map((sig: any, i: number) => {
+            const sigColor = sig.level === "critical" ? colors.red : sig.level === "high" ? colors.amber : colors.blue;
+            return (
+              <View key={i} style={[styles.briefSignalRow, { borderTopColor: colors.border }]}>
+                <View style={[styles.sevDot, { backgroundColor: sigColor }]} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.briefSignalTitle, { color: colors.foreground }]} numberOfLines={1}>{sig.title}</Text>
+                  <Text style={[styles.briefSignalSummary, { color: colors.mutedForeground }]} numberOfLines={2}>{sig.summary}</Text>
+                </View>
+              </View>
+            );
+          })}
+        </View>
 
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>DOMAINS</Text>
         {summaries.length === 0 ? (
@@ -415,4 +494,46 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     textAlign: "center",
   },
+  briefCard: {
+    borderRadius: 14,
+    borderWidth: 1,
+    padding: 16,
+    gap: 10,
+    marginBottom: 4,
+  },
+  briefHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  briefHealthBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+  },
+  briefHealthText: { fontSize: 10, fontFamily: "Inter_600SemiBold", letterSpacing: 1 },
+  briefDate: { fontSize: 11, fontFamily: "Inter_400Regular" },
+  briefHeadline: { fontSize: 14, fontFamily: "Inter_600SemiBold", lineHeight: 20 },
+  briefSummary: { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 18 },
+  briefStats: { flexDirection: "row", gap: 8 },
+  briefStat: {
+    flex: 1,
+    alignItems: "center",
+    padding: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    gap: 2,
+  },
+  briefStatNum: { fontSize: 18, fontFamily: "Inter_600SemiBold" },
+  briefStatLabel: { fontSize: 10, fontFamily: "Inter_400Regular" },
+  briefSignalRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+  },
+  briefSignalTitle: { fontSize: 12, fontFamily: "Inter_500Medium" },
+  briefSignalSummary: { fontSize: 11, fontFamily: "Inter_400Regular", marginTop: 2 },
 });
