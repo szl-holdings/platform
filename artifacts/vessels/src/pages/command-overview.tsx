@@ -39,17 +39,26 @@ function StatCard({ label, value, sub, accent, icon: Icon, trend, pulse }: {
   icon: React.ElementType; trend?: "up" | "down" | "neutral"; pulse?: boolean;
 }) {
   return (
-    <div className={cn("bg-[#0a1628]/80 border rounded-xl p-4 flex flex-col gap-2 hover:border-sky-500/20 transition-all", accent)}>
+    <div className={cn("relative rounded-xl p-4 flex flex-col gap-2 transition-all overflow-hidden", accent)}
+      style={{ background: "rgba(10,22,40,0.85)" }}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = ""; }}
+    >
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg, rgba(56,189,248,0.6), transparent)" }} />
       <div className="flex items-start justify-between">
-        <Icon className="w-4 h-4 text-sky-400/60 shrink-0 mt-0.5" />
-        {trend === "up" && <TrendingUp className="w-3 h-3 text-emerald-400" />}
-        {trend === "down" && <TrendingDown className="w-3 h-3 text-red-400" />}
-        {trend === "neutral" && <Minus className="w-3 h-3 text-sky-400/40" />}
+        <div style={{ width: "26px", height: "26px", borderRadius: "6px", background: "rgba(56,189,248,0.1)", border: "1px solid rgba(56,189,248,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Icon className="w-3.5 h-3.5 text-sky-400/80 shrink-0" />
+        </div>
+        <div>
+          {trend === "up" && <TrendingUp className="w-3 h-3 text-emerald-400" />}
+          {trend === "down" && <TrendingDown className="w-3 h-3 text-red-400" />}
+          {trend === "neutral" && <Minus className="w-3 h-3 text-sky-400/40" />}
+        </div>
       </div>
       <div>
-        <p className={cn("text-2xl font-bold font-display leading-none", pulse && "animate-pulse")}>{value}</p>
+        <p className={cn("text-2xl font-bold font-display leading-none text-sky-100", pulse && "animate-pulse")}>{value}</p>
         <p className="text-[10px] text-sky-400/50 uppercase tracking-wider mt-1">{label}</p>
-        {sub && <p className="text-[10px] text-sky-400/40 mt-0.5">{sub}</p>}
+        {sub && <p className="text-[10px] text-sky-400/35 mt-0.5">{sub}</p>}
       </div>
     </div>
   );

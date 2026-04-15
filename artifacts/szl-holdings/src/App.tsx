@@ -43,6 +43,7 @@ const PilotPrismCounselPage = lazy(() => import("@/pages/pilot-prism-counsel"));
 const PilotTerraPage = lazy(() => import("@/pages/pilot-terra"));
 const PilotVesselsPage = lazy(() => import("@/pages/pilot-vessels"));
 const PilotAegisPage = lazy(() => import("@/pages/pilot-aegis"));
+const NexusCommandPage = lazy(() => import("@/pages/nexus-command"));
 const KpiDashboardPage = lazy(() => import("@/pages/kpi-dashboard"));
 const AICostAnalyticsPage = lazy(() => import("@/pages/ai-cost-analytics"));
 const AdminPage = lazy(() => import("@/pages/admin"));
@@ -702,6 +703,9 @@ function App() {
             </Route>
 
             {/* ── Admin routes ── */}
+            <Route path="/nexus">
+              <RequireAuth><Suspense fallback={<PageLoader />}><NexusCommandPage /></Suspense></RequireAuth>
+            </Route>
             <Route path="/kpis">
               <RequireAuth><Suspense fallback={<PageLoader />}><KpiDashboardPage /></Suspense></RequireAuth>
             </Route>

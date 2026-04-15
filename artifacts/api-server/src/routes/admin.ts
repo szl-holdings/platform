@@ -478,6 +478,34 @@ adminRouter.put("/admin/connectors/:name/enable", (req, res) => {
   res.json({ name: adapter.name, enabled, status: adapter.getHealthReport().status });
 });
 
+adminRouter.get("/admin/provisioning", (_req, res) => {
+  const matrix = services.getHealthMatrix();
+  const entries = matrix.services.map((s) => {
+    const docs = PROVISIONING_DOCS[s.name] ?? null;
+    return {
+      name: s.name,
+      description: s.description ?? null,
+      category: getCategoryForService(s.name),
+      status: s.status,
+      isLive: s.status === "LIVE_CONFIGURED",
+      requiredEnvVars: s.requiredEnvVars ?? [],
+      missingEnvVars: (s.requiredEnvVars ?? []).filter((v) => !process.env[v]),
+      signup: docs?.signup ?? null,
+      docsUrl: docs?.docsUrl ?? null,
+      notes: docs?.notes ?? null,
+    };
+  });
+  const configured = entries.filter((e) => e.isLive).length;
+  const unconfigured = entries.filter((e) => !e.isLive && e.requiredEnvVars.length > 0).length;
+  res.json({
+    total: entries.length,
+    configured,
+    unconfigured,
+    noKeyRequired: entries.filter((e) => !e.isLive && e.requiredEnvVars.length === 0).length,
+    adapters: entries,
+  });
+});
+
 adminRouter.post("/admin/connectors/:name/sync", async (req, res) => {
   const adapter = services.getAdapter(req.params["name"]!);
   if (!adapter) {
@@ -959,9 +987,38 @@ function getCategoryForService(name: string): string {
     elevenlabs: "AI & ML",
     ai: "AI & ML",
     figma: "Design",
+    "marine-traffic": "Maritime",
+    "vessel-finder": "Maritime",
+    zillow: "Real Estate",
+    corelogic: "Real Estate",
+    redfin: "Real Estate",
+    pacer: "Legal",
+    "court-listener": "Legal",
+    virustotal: "Threat Intel",
+    shodan: "Threat Intel",
+    "alien-vault-otx": "Threat Intel",
+    "alpha-vantage": "Finance",
+    "dun-bradstreet": "Business Intel",
+    crunchbase: "Business Intel",
   };
   return categories[name] ?? "Other";
 }
+
+const PROVISIONING_DOCS: Record<string, { signup: string; docsUrl: string; notes?: string }> = {
+  "marine-traffic": { signup: "https://www.marinetraffic.com/en/p/api-services", docsUrl: "https://www.marinetraffic.com/en/ais-api-services", notes: "Requires commercial API plan" },
+  "vessel-finder": { signup: "https://api.vesselfinder.com/", docsUrl: "https://api.vesselfinder.com/docs", notes: "Free tier available for development" },
+  zillow: { signup: "https://www.zillow.com/howzillow/zillowgroup/tech/", docsUrl: "https://bridgeinteractive.github.io/zillow-swagger/", notes: "Contact Zillow Bridge API team for access" },
+  corelogic: { signup: "https://developer.corelogic.com/", docsUrl: "https://developer.corelogic.com/documentation", notes: "Enterprise only — requires sales approval" },
+  redfin: { signup: "https://www.redfin.com/news/data-center/", docsUrl: "https://redfin.com/stingray/api/gis-csv", notes: "Limited public API; contact for commercial use" },
+  pacer: { signup: "https://pacer.uscourts.gov/register-account", docsUrl: "https://pacer.uscourts.gov/file-case/developer-resources", notes: "US federal court account required" },
+  "court-listener": { signup: "https://www.courtlistener.com/sign-in/?next=/", docsUrl: "https://www.courtlistener.com/help/api/rest/", notes: "Free non-commercial tier available" },
+  virustotal: { signup: "https://www.virustotal.com/gui/join-us", docsUrl: "https://developers.virustotal.com/reference", notes: "Free tier: 4 lookups/min, 500/day" },
+  shodan: { signup: "https://account.shodan.io/register", docsUrl: "https://developer.shodan.io/api", notes: "Membership required for full scanning" },
+  "alien-vault-otx": { signup: "https://otx.alienvault.com/", docsUrl: "https://otx.alienvault.com/api", notes: "Free; requires OTX account" },
+  "alpha-vantage": { signup: "https://www.alphavantage.co/support/#api-key", docsUrl: "https://www.alphavantage.co/documentation/", notes: "Free tier: 25 requests/day" },
+  "dun-bradstreet": { signup: "https://developer.dnb.com/", docsUrl: "https://developer.dnb.com/docs", notes: "Requires commercial contract for production" },
+  crunchbase: { signup: "https://data.crunchbase.com/docs/getting-started", docsUrl: "https://data.crunchbase.com/reference", notes: "Free trial available; basic/pro/enterprise tiers" },
+};
 
 adminRouter.get("/admin/workflow-runs", async (req, res) => {
   const domain = req.query["domain"] as string | undefined;

@@ -1,5 +1,7 @@
-import { useState } from "react";
-import { MessageSquare, Send, Scale, FileText, Clock, AlertTriangle, Sparkles } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { MessageSquare, Send, Scale, FileText, Clock, AlertTriangle, Sparkles, Shield, CheckCircle2 } from "lucide-react";
+
+const ACCENT = "#d4a054";
 
 const SUGGESTED_QUERIES = [
   { icon: FileText, label: "Summarize insurer correspondence for Rodriguez matter", category: "Summary" },
@@ -41,47 +43,121 @@ Offer trajectory is positive (111% increase over 3 months). The IME scheduling s
 
 *Sources: Matter communications log, offer trail, deadline calendar*
 *Confidence: High (3/3 communications verified against source records)*`,
+    confidence: 94,
+    sources: 3,
   },
 ];
 
+function TypingIndicator() {
+  return (
+    <div style={{ display: "flex", gap: "4px", padding: "14px 16px", alignItems: "center" }}>
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          style={{
+            width: "6px", height: "6px", borderRadius: "50%",
+            background: ACCENT,
+            animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite`,
+            opacity: 0.7,
+          }}
+        />
+      ))}
+      <style>{`@keyframes bounce { 0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)} }`}</style>
+    </div>
+  );
+}
+
+function ConfidenceBar({ confidence }: { confidence: number }) {
+  const color = confidence >= 90 ? "#10b981" : confidence >= 70 ? "#f59e0b" : "#ef4444";
+  return (
+    <div style={{ marginTop: "0.75rem", padding: "0.5rem 0.625rem", borderRadius: "6px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+        <span style={{ fontSize: "9px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#64748b" }}>Confidence</span>
+        <span style={{ fontSize: "11px", fontWeight: 700, color }}>{confidence}%</span>
+      </div>
+      <div style={{ height: "3px", background: "rgba(255,255,255,0.05)", borderRadius: "2px", overflow: "hidden" }}>
+        <div style={{ width: `${confidence}%`, height: "100%", background: `linear-gradient(90deg, ${color}80, ${color})`, borderRadius: "2px" }} />
+      </div>
+    </div>
+  );
+}
+
 export default function CopilotPage() {
-  const [messages, setMessages] = useState(DEMO_CONVERSATION);
+  const [messages, setMessages] = useState(DEMO_CONVERSATION as typeof DEMO_CONVERSATION);
   const [input, setInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isTyping]);
+
+  const handleSend = () => {
+    if (!input.trim()) return;
+    const userMsg = { role: "user" as const, content: input };
+    setMessages((prev) => [...prev, userMsg]);
+    setInput("");
+    setIsTyping(true);
+    setTimeout(() => {
+      setIsTyping(false);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant" as const,
+          content: "I'm analyzing the matter record for relevant data. In a live environment, this response would be grounded in your case management system with full source citations.",
+          confidence: 72,
+          sources: 0,
+        },
+      ]);
+    }, 1800);
+  };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="border-b border-white/[0.06] px-6 py-3">
-        <div className="flex items-center gap-2">
-          <MessageSquare className="w-4 h-4 text-[#d4a054]" />
-          <h1 className="text-sm font-semibold text-slate-200">PRISM Copilot</h1>
-          <span className="px-2 py-0.5 rounded text-[9px] font-medium bg-[#d4a054]/10 text-[#d4a054] border border-[#d4a054]/20">
-            ALPHA
-          </span>
+    <div className="flex flex-col h-full" style={{ background: "#070b14" }}>
+      <div style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", padding: "0.75rem 1.5rem", background: "rgba(255,255,255,0.02)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <div style={{ width: "28px", height: "28px", borderRadius: "7px", background: `${ACCENT}15`, border: `1px solid ${ACCENT}25`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <MessageSquare size={13} style={{ color: ACCENT }} />
+            </div>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <h1 style={{ fontSize: "13px", fontWeight: 700, color: "#e2e8f0" }}>PRISM Copilot</h1>
+                <span style={{ padding: "2px 7px", borderRadius: "4px", fontSize: "9px", fontWeight: 700, background: `${ACCENT}12`, color: ACCENT, border: `1px solid ${ACCENT}22`, letterSpacing: "0.05em" }}>ALPHA</span>
+              </div>
+              <p style={{ fontSize: "10px", color: "#475569", marginTop: "1px" }}>Source-grounded matter intelligence — every assertion traceable to evidence</p>
+            </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "9px", color: "#10b981", fontWeight: 600, letterSpacing: "0.08em" }}>
+            <Shield size={10} />
+            VERIFIED SOURCES
+          </div>
         </div>
-        <p className="text-[10px] text-slate-500 mt-0.5">Source-grounded matter intelligence — every assertion traceable to evidence</p>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <div style={{ flex: 1, overflowY: "auto", padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
         {messages.length === 0 && (
-          <div className="space-y-4">
-            <div className="text-center py-8">
-              <Scale className="w-8 h-8 text-[#d4a054]/30 mx-auto mb-3" />
-              <h2 className="text-sm text-slate-300 mb-1">Ask about your matters</h2>
-              <p className="text-[10px] text-slate-500">Copilot answers are grounded in matter data with source citations</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <div style={{ textAlign: "center", padding: "2rem 1rem" }}>
+              <Scale size={32} style={{ color: `${ACCENT}50`, margin: "0 auto 0.75rem" }} />
+              <h2 style={{ fontSize: "13px", color: "#cbd5e1", marginBottom: "0.375rem", fontWeight: 600 }}>Ask about your matters</h2>
+              <p style={{ fontSize: "10px", color: "#475569" }}>Copilot answers are grounded in matter data with source citations</p>
             </div>
-            <div className="grid grid-cols-2 gap-2 max-w-2xl mx-auto">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", maxWidth: "640px", margin: "0 auto", width: "100%" }}>
               {SUGGESTED_QUERIES.map((q, i) => {
                 const Icon = q.icon;
                 return (
                   <button
                     key={i}
-                    className="flex items-start gap-2 p-3 rounded-lg border border-white/[0.06] text-left hover:border-white/[0.12] transition-colors"
-                    style={{ background: "#0c1220" }}
+                    onClick={() => setInput(q.label)}
+                    style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", padding: "0.75rem", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.06)", textAlign: "left", background: "#0c1220", cursor: "pointer", transition: "border-color 0.18s" }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = `${ACCENT}30`; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.06)"; }}
                   >
-                    <Icon className="w-3.5 h-3.5 text-[#d4a054] mt-0.5 flex-shrink-0" />
+                    <Icon size={12} style={{ color: ACCENT, marginTop: "2px", flexShrink: 0 }} />
                     <div>
-                      <div className="text-[10px] text-[#d4a054] uppercase mb-0.5">{q.category}</div>
-                      <div className="text-[11px] text-slate-300">{q.label}</div>
+                      <div style={{ fontSize: "9px", color: ACCENT, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "2px", fontWeight: 600 }}>{q.category}</div>
+                      <div style={{ fontSize: "11px", color: "#94a3b8", lineHeight: 1.5 }}>{q.label}</div>
                     </div>
                   </button>
                 );
@@ -91,48 +167,88 @@ export default function CopilotPage() {
         )}
 
         {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div
-              className={`max-w-2xl rounded-lg p-4 ${
-                msg.role === "user"
-                  ? "bg-[#d4a054]/10 border border-[#d4a054]/20"
-                  : "border border-white/[0.06]"
-              }`}
-              style={msg.role === "assistant" ? { background: "#0c1220" } : undefined}
-            >
-              <div className="text-xs text-slate-200 whitespace-pre-wrap leading-relaxed">
+          <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}>
+            <div style={{
+              maxWidth: "640px",
+              borderRadius: "12px",
+              padding: "0.875rem 1rem",
+              background: msg.role === "user" ? `${ACCENT}12` : "#0c1220",
+              border: msg.role === "user" ? `1px solid ${ACCENT}22` : "1px solid rgba(255,255,255,0.06)",
+              position: "relative",
+            }}>
+              {msg.role === "assistant" && (
+                <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "0.5rem" }}>
+                  <Sparkles size={10} style={{ color: ACCENT }} />
+                  <span style={{ fontSize: "9px", fontWeight: 600, color: ACCENT, letterSpacing: "0.08em", textTransform: "uppercase" }}>PRISM Copilot</span>
+                  {(msg as any).sources > 0 && (
+                    <span style={{ marginLeft: "0.25rem", fontSize: "9px", color: "#10b981", display: "flex", alignItems: "center", gap: "3px" }}>
+                      <CheckCircle2 size={9} /> {(msg as any).sources} sources verified
+                    </span>
+                  )}
+                </div>
+              )}
+              <div style={{ fontSize: "12px", color: "#e2e8f0", whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
                 {msg.content.split("\n").map((line, li) => {
                   if (line.startsWith("**") && line.endsWith("**")) {
-                    return <div key={li} className="font-semibold text-slate-100 mt-2 first:mt-0">{line.replace(/\*\*/g, "")}</div>;
+                    return <div key={li} style={{ fontWeight: 700, color: "#f1f5f9", marginTop: li > 0 ? "0.5rem" : 0 }}>{line.replace(/\*\*/g, "")}</div>;
                   }
                   if (line.startsWith("*") && line.endsWith("*")) {
-                    return <div key={li} className="text-[10px] text-slate-500 italic">{line.replace(/\*/g, "")}</div>;
+                    return <div key={li} style={{ fontSize: "10px", color: "#64748b", fontStyle: "italic", marginTop: "0.25rem" }}>{line.replace(/\*/g, "")}</div>;
                   }
                   if (line.match(/^\d+\./)) {
-                    return <div key={li} className="ml-2 mt-1">{line}</div>;
+                    return <div key={li} style={{ marginLeft: "0.5rem", marginTop: "0.25rem" }}>{line}</div>;
                   }
                   return <div key={li}>{line}</div>;
                 })}
               </div>
+              {msg.role === "assistant" && (msg as any).confidence !== undefined && (
+                <ConfidenceBar confidence={(msg as any).confidence} />
+              )}
             </div>
           </div>
         ))}
+
+        {isTyping && (
+          <div style={{ display: "flex", justifyContent: "flex-start" }}>
+            <div style={{ borderRadius: "12px", background: "#0c1220", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <TypingIndicator />
+            </div>
+          </div>
+        )}
+        <div ref={bottomRef} />
       </div>
 
-      <div className="border-t border-white/[0.06] p-4">
-        <div className="flex items-center gap-2 max-w-3xl mx-auto">
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "1rem 1.5rem", background: "rgba(0,0,0,0.2)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", maxWidth: "768px", margin: "0 auto" }}>
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
             placeholder="Ask about a matter, deadline, or evidence..."
-            className="flex-1 px-4 py-2.5 rounded-lg text-xs bg-white/[0.04] border border-white/[0.08] text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-[#d4a054]/40"
+            style={{
+              flex: 1, padding: "0.625rem 1rem", borderRadius: "10px", fontSize: "12px",
+              background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+              color: "#e2e8f0", outline: "none", transition: "border-color 0.18s",
+            }}
+            onFocus={(e) => { (e.currentTarget as HTMLElement).style.borderColor = `${ACCENT}40`; }}
+            onBlur={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)"; }}
           />
-          <button className="p-2.5 rounded-lg bg-[#d4a054]/10 border border-[#d4a054]/20 text-[#d4a054] hover:bg-[#d4a054]/20 transition-colors">
-            <Send className="w-4 h-4" />
+          <button
+            onClick={handleSend}
+            disabled={!input.trim()}
+            style={{
+              padding: "0.625rem 0.75rem", borderRadius: "10px", background: `${ACCENT}15`, border: `1px solid ${ACCENT}25`,
+              color: ACCENT, cursor: input.trim() ? "pointer" : "not-allowed", transition: "all 0.18s",
+              opacity: input.trim() ? 1 : 0.4,
+            }}
+            onMouseEnter={(e) => { if (input.trim()) (e.currentTarget as HTMLElement).style.background = `${ACCENT}25`; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = `${ACCENT}15`; }}
+          >
+            <Send size={15} />
           </button>
         </div>
-        <p className="text-[9px] text-slate-600 text-center mt-2">
+        <p style={{ fontSize: "9px", color: "#334155", textAlign: "center", marginTop: "0.5rem" }}>
           Copilot outputs are AI-generated and require attorney review. All assertions include source citations. Not legal advice.
         </p>
       </div>

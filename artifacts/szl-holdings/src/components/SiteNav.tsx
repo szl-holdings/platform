@@ -8,6 +8,12 @@ import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 
 const NAV_ITEMS = [
   {
+    label: "Nexus",
+    href: "/nexus",
+    highlight: true,
+    children: null,
+  },
+  {
     label: "Platform",
     href: "/platform",
     highlight: false,
@@ -78,11 +84,12 @@ const NAV_ITEMS = [
     label: "Demo",
     href: "/demo",
     children: null,
-    highlight: true,
+    highlight: false,
   },
 ];
 
 const NAV_LINKS_MOBILE = [
+  { label: "Nexus Command", href: "/nexus", primary: true },
   { label: "Demo", href: "/demo", primary: true },
   { label: "Platform Overview", href: "/platform", primary: false },
   { label: "Lyte", href: "/lyte", primary: false },

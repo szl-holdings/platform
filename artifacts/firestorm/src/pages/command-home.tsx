@@ -246,9 +246,10 @@ export default function CommandHome() {
     <div className="flex flex-col h-full min-h-screen" style={{ backgroundColor: DS.page, color: "#e2e8f0" }}>
 
       {/* Topbar */}
-      <div className="flex items-center justify-between px-6 py-3 border-b" style={{ borderColor: DS.border }}>
+      <div className="flex items-center justify-between px-6 py-3 border-b relative overflow-hidden" style={{ borderColor: DS.border }}>
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, ${postureScore >= 80 ? "#10b981" : postureScore >= 60 ? "#f59e0b" : "#ef4444"}40, transparent 60%)` }} />
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg,rgba(59,130,246,0.2),rgba(139,92,246,0.15))" }}>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg,rgba(59,130,246,0.25),rgba(139,92,246,0.18))", border: "1px solid rgba(59,130,246,0.2)" }}>
             <Hexagon className="w-3.5 h-3.5 text-blue-400" />
           </div>
           <div>
@@ -265,6 +266,31 @@ export default function CommandHome() {
           </div>
           <LiveClock />
         </div>
+      </div>
+
+      {/* Threat level strip */}
+      <div style={{ padding: "0.5rem 1.5rem", borderBottom: `1px solid ${DS.border}`, display: "flex", alignItems: "center", gap: "1.5rem", overflow: "hidden", background: "rgba(0,0,0,0.3)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexShrink: 0 }}>
+          <Radio className="w-3 h-3 text-red-400 animate-pulse" />
+          <span className="text-[9px] font-mono uppercase tracking-[0.15em]" style={{ color: DS.text.tertiary }}>Threat Feed</span>
+        </div>
+        <div style={{ flex: 1, overflow: "hidden", position: "relative" }}>
+          <div style={{ display: "flex", gap: "3rem", animation: "scroll-left 30s linear infinite", whiteSpace: "nowrap" }}>
+            {[
+              { tag: "CRITICAL", msg: "APT29 lateral movement — DC-PROD-03 quarantine pending", color: "#ef4444" },
+              { tag: "HIGH", msg: "Outbound C2 beacon detected — blocked at perimeter", color: "#f97316" },
+              { tag: "HIGH", msg: "S3 exfil pattern — 3 buckets flagged for review", color: "#f97316" },
+              { tag: "MEDIUM", msg: "Brute force campaign — 847 attempts in 2h window", color: "#eab308" },
+              { tag: "INFO", msg: "Threat intel updated — 14 new IOCs added to block list", color: "#3b82f6" },
+            ].map((item, i) => (
+              <span key={i} style={{ fontSize: "10px", color: DS.text.secondary, flexShrink: 0 }}>
+                <span style={{ color: item.color, fontWeight: 700, marginRight: "6px", fontFamily: "monospace" }}>[{item.tag}]</span>
+                {item.msg}
+              </span>
+            ))}
+          </div>
+        </div>
+        <style>{`@keyframes scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }`}</style>
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">

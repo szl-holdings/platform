@@ -54,6 +54,19 @@ import { MarketDataAdapter } from "./adapters/market-data.js";
 import { NewRelicAdapter } from "./adapters/new-relic.js";
 import { NvidiaDcgmAdapter } from "./adapters/nvidia-dcgm.js";
 import { MispTaxiiAdapter } from "./adapters/misp-taxii.js";
+import { MarineTrafficAdapter } from "./adapters/marine-traffic.js";
+import { VesselFinderAdapter } from "./adapters/vesselfinder.js";
+import { ZillowAdapter } from "./adapters/zillow.js";
+import { CoreLogicAdapter } from "./adapters/corelogic.js";
+import { RedfinAdapter } from "./adapters/redfin.js";
+import { PACERAdapter } from "./adapters/pacer.js";
+import { CourtListenerAdapter } from "./adapters/courtlistener.js";
+import { VirusTotalAdapter } from "./adapters/virustotal.js";
+import { ShodanAdapter } from "./adapters/shodan.js";
+import { AlienVaultOTXAdapter } from "./adapters/alienvault-otx.js";
+import { AlphaVantageAdapter } from "./adapters/alpha-vantage.js";
+import { DunBradstreetAdapter } from "./adapters/dun-bradstreet.js";
+import { CrunchbaseAdapter } from "./adapters/crunchbase.js";
 
 export interface IntegrationHealthMatrix {
   timestamp: string;
@@ -122,6 +135,19 @@ export class ServiceRegistry {
   readonly newRelic: NewRelicAdapter;
   readonly nvidiaDcgm: NvidiaDcgmAdapter;
   readonly mispTaxii: MispTaxiiAdapter;
+  readonly marineTraffic: MarineTrafficAdapter;
+  readonly vesselFinder: VesselFinderAdapter;
+  readonly zillow: ZillowAdapter;
+  readonly corelogic: CoreLogicAdapter;
+  readonly redfin: RedfinAdapter;
+  readonly pacer: PACERAdapter;
+  readonly courtListener: CourtListenerAdapter;
+  readonly virusTotal: VirusTotalAdapter;
+  readonly shodan: ShodanAdapter;
+  readonly alienVaultOTX: AlienVaultOTXAdapter;
+  readonly alphaVantage: AlphaVantageAdapter;
+  readonly dunBradstreet: DunBradstreetAdapter;
+  readonly crunchbase: CrunchbaseAdapter;
 
   private readonly adapters: ServiceAdapter[];
 
@@ -181,6 +207,19 @@ export class ServiceRegistry {
     this.newRelic = new NewRelicAdapter();
     this.nvidiaDcgm = new NvidiaDcgmAdapter();
     this.mispTaxii = new MispTaxiiAdapter();
+    this.marineTraffic = new MarineTrafficAdapter();
+    this.vesselFinder = new VesselFinderAdapter();
+    this.zillow = new ZillowAdapter();
+    this.corelogic = new CoreLogicAdapter();
+    this.redfin = new RedfinAdapter();
+    this.pacer = new PACERAdapter();
+    this.courtListener = new CourtListenerAdapter();
+    this.virusTotal = new VirusTotalAdapter();
+    this.shodan = new ShodanAdapter();
+    this.alienVaultOTX = new AlienVaultOTXAdapter();
+    this.alphaVantage = new AlphaVantageAdapter();
+    this.dunBradstreet = new DunBradstreetAdapter();
+    this.crunchbase = new CrunchbaseAdapter();
 
     this.adapters = [
       this.ai,
@@ -238,6 +277,19 @@ export class ServiceRegistry {
       this.newRelic,
       this.nvidiaDcgm,
       this.mispTaxii,
+      this.marineTraffic,
+      this.vesselFinder,
+      this.zillow,
+      this.corelogic,
+      this.redfin,
+      this.pacer,
+      this.courtListener,
+      this.virusTotal,
+      this.shodan,
+      this.alienVaultOTX,
+      this.alphaVantage,
+      this.dunBradstreet,
+      this.crunchbase,
     ];
   }
 

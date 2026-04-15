@@ -286,17 +286,51 @@ export default function ActionCenter() {
 
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: "Total Actions", value: isLoading ? "—" : actions.length, color: "text-white" },
-          { label: "Open", value: isLoading ? "—" : openCount, color: "text-[#d4a054]" },
-          { label: "In Progress", value: isLoading ? "—" : inProgressCount, color: "text-cyan-400" },
-          { label: "Value Protected", value: isLoading ? "—" : formatCurrency(totalProtected), color: "text-[#6b8f71]" },
+          { label: "Total Actions", value: isLoading ? "—" : actions.length, color: "text-white", accent: "rgba(255,255,255,0.1)" },
+          { label: "Open", value: isLoading ? "—" : openCount, color: "text-[#d4a054]", accent: "rgba(212,160,84,0.1)" },
+          { label: "In Progress", value: isLoading ? "—" : inProgressCount, color: "text-cyan-400", accent: "rgba(34,211,238,0.1)" },
+          { label: "Value Protected", value: isLoading ? "—" : formatCurrency(totalProtected), color: "text-[#6b8f71]", accent: "rgba(107,143,113,0.1)" },
         ].map(stat => (
-          <div key={stat.label} className="rounded-xl p-4 border border-white/5 bg-white/[0.02]">
+          <div key={stat.label} className="rounded-xl p-4 border border-white/5 relative overflow-hidden" style={{ background: stat.accent }}>
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: `linear-gradient(90deg, ${stat.accent.replace("0.1", "0.6")}, transparent)` }} />
             <div className="text-[11px] text-slate-400 mb-1">{stat.label}</div>
             <div className={cn("font-display font-bold text-xl", stat.color)}>{stat.value}</div>
           </div>
         ))}
       </div>
+
+      {!isLoading && actions.length > 0 && (
+        <div className="rounded-xl border border-white/5 bg-white/[0.015] p-4">
+          <div className="text-[10px] text-slate-500 uppercase tracking-widest font-mono mb-3">Priority Distribution</div>
+          <div className="flex gap-1 h-2 rounded-full overflow-hidden">
+            {[
+              { count: immediate.length, color: "#c45a4a", label: "Immediate" },
+              { count: today.length, color: "#c8953c", label: "Today" },
+              { count: thisWeek.length, color: "#d4a054", label: "This Week" },
+              { count: nextWeek.length, color: "#4a90b8", label: "Next Week" },
+            ].filter(b => b.count > 0).map((band) => (
+              <div
+                key={band.label}
+                style={{ flex: band.count, background: band.color, opacity: 0.75, transition: "flex 0.4s ease", borderRadius: "2px" }}
+                title={`${band.label}: ${band.count}`}
+              />
+            ))}
+          </div>
+          <div className="flex gap-4 mt-2">
+            {[
+              { count: immediate.length, color: "#c45a4a", label: "Immediate" },
+              { count: today.length, color: "#c8953c", label: "Today" },
+              { count: thisWeek.length, color: "#d4a054", label: "This Week" },
+              { count: nextWeek.length, color: "#4a90b8", label: "Next Week" },
+            ].map((band) => (
+              <div key={band.label} className="flex items-center gap-1.5">
+                <div style={{ width: "6px", height: "6px", borderRadius: "2px", background: band.color }} />
+                <span style={{ fontSize: "10px", color: "#64748b" }}>{band.label} <span style={{ color: band.color, fontWeight: 700 }}>{band.count}</span></span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {isLoading ? (
         <div className="space-y-3">

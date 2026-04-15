@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Link } from "wouter";
-import { Download, Loader2 } from "lucide-react";
+import { Download, Loader2, CheckCircle2 } from "lucide-react";
 
 const milestones = [
   {
@@ -111,6 +111,7 @@ export default function CareerCommand() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="max-w-4xl mx-auto px-6 lg:px-12 pt-28 pb-24">
+
         <div className="mb-14">
           <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-primary/60 mb-3">Career Command</p>
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Builder dashboard</h1>
@@ -122,6 +123,8 @@ export default function CareerCommand() {
             disabled={downloading}
             className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-md text-[12px] font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ background: "hsla(0,0%,100%,0.06)", border: "1px solid hsla(0,0%,100%,0.1)", color: "hsl(0,0%,72%)" }}
+            onMouseEnter={(e) => { if (!downloading) (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.09)"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.06)"; }}
           >
             {downloading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
             {downloading ? "Generating..." : "Download Resume PDF"}
@@ -129,25 +132,37 @@ export default function CareerCommand() {
           {downloadError && <p className="mt-2 text-[11px] text-destructive/80">{downloadError}</p>}
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-16">
-          {stats.map((stat) => (
-            <div key={stat.label} className="border border-white/6 rounded-lg p-5">
-              <div className="text-2xl font-serif font-normal text-primary mb-1">{stat.value}</div>
-              <div className="text-[11px] text-muted-foreground/50 uppercase tracking-[0.12em]">{stat.label}</div>
-            </div>
-          ))}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-16">
+          {stats.map((stat, i) => {
+            const accents = ["hsl(214,80%,65%)", "hsl(190,90%,55%)", "hsl(88,45%,48%)", "hsl(38,72%,58%)", "hsl(232,68%,60%)", "hsl(38,55%,58%)"];
+            const accent = accents[i % accents.length];
+            return (
+              <div key={stat.label} style={{
+                borderRadius: "12px", padding: "1rem",
+                background: `radial-gradient(ellipse at top left, ${accent}08, rgba(255,255,255,0.02))`,
+                border: `1px solid ${accent}18`,
+                position: "relative", overflow: "hidden",
+              }}>
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: `linear-gradient(90deg, ${accent}60, transparent)` }} />
+                <div style={{ fontSize: "1.5rem", fontWeight: 700, color: accent, letterSpacing: "-0.04em", lineHeight: 1, marginBottom: "0.375rem" }}>{stat.value}</div>
+                <div className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.12em]">{stat.label}</div>
+              </div>
+            );
+          })}
         </div>
 
         <div className="mb-16">
           <h2 className="text-[12px] font-semibold text-muted-foreground/50 uppercase tracking-[0.15em] mb-7">Platforms built</h2>
-          <div className="space-y-px">
+          <div className="space-y-0">
             {platforms.map((platform) => (
-              <div key={platform.name} className="border-t border-white/5 py-5 flex items-start gap-4">
-                <div className="w-2 h-2 rounded-full mt-1.5 shrink-0" style={{ background: platform.color, boxShadow: `0 0 6px ${platform.color}60` }} />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-1">
+              <div key={platform.name} style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "1.25rem 0", display: "flex", alignItems: "flex-start", gap: "1rem", transition: "background 0.18s" }}>
+                <div style={{ width: "10px", height: "10px", borderRadius: "50%", marginTop: "5px", flexShrink: 0, background: platform.color, boxShadow: `0 0 8px ${platform.color}50` }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.25rem" }}>
                     <span className="text-[15px] font-semibold text-foreground">{platform.name}</span>
-                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">{platform.status}</span>
+                    <span style={{ fontSize: "10px", fontWeight: 600, padding: "2px 8px", borderRadius: "20px", background: "rgba(16,185,129,0.1)", color: "#10b981", border: "1px solid rgba(16,185,129,0.2)", display: "flex", alignItems: "center", gap: "3px" }}>
+                      <CheckCircle2 size={9} /> {platform.status}
+                    </span>
                   </div>
                   <p className="text-[13px] text-muted-foreground leading-relaxed">{platform.desc}</p>
                 </div>
@@ -158,13 +173,14 @@ export default function CareerCommand() {
 
         <div className="mb-16">
           <h2 className="text-[12px] font-semibold text-muted-foreground/50 uppercase tracking-[0.15em] mb-7">Technology stack</h2>
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-2 gap-3">
             {techStack.map((layer) => (
-              <div key={layer.layer} className="border border-white/6 rounded-lg p-4">
+              <div key={layer.layer} style={{ borderRadius: "12px", border: "1px solid rgba(255,255,255,0.06)", padding: "1rem", background: "rgba(255,255,255,0.015)", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: "2px", background: "linear-gradient(180deg, rgba(255,255,255,0.12), transparent)" }} />
                 <h3 className="text-[11px] font-semibold text-primary/50 uppercase tracking-[0.12em] mb-3">{layer.layer}</h3>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {layer.items.map((item) => (
-                    <span key={item} className="text-[11px] px-2.5 py-1 rounded-full bg-white/5 text-white/50 border border-white/8">
+                    <span key={item} style={{ fontSize: "10.5px", padding: "3px 9px", borderRadius: "20px", background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.07)" }}>
                       {item}
                     </span>
                   ))}
@@ -175,27 +191,34 @@ export default function CareerCommand() {
         </div>
 
         <div className="mb-16">
-          <h2 className="text-[12px] font-semibold text-muted-foreground/50 uppercase tracking-[0.15em] mb-7">Key milestones</h2>
+          <h2 className="text-[12px] font-semibold text-muted-foreground/50 uppercase tracking-[0.15em] mb-8">Key milestones</h2>
           <div className="relative">
-            <div className="absolute left-[7px] top-0 bottom-0 w-px bg-white/5" />
+            <div style={{ position: "absolute", left: "6px", top: "6px", bottom: "6px", width: "1px", background: "linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%)" }} />
             <div className="space-y-0">
               {milestones.map((milestone, i) => (
-                <div key={i} className="relative pl-8 pb-8 last:pb-0">
-                  <div className={`absolute left-0 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-background flex items-center justify-center ${milestone.highlight ? "bg-primary" : "bg-white/15"}`}>
-                    {milestone.highlight && <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
+                <div key={i} style={{ position: "relative", paddingLeft: "2rem", paddingBottom: "2rem" }}>
+                  <div style={{
+                    position: "absolute", left: 0, top: "4px",
+                    width: "13px", height: "13px", borderRadius: "50%",
+                    background: milestone.highlight ? "hsl(214,80%,55%)" : "rgba(255,255,255,0.1)",
+                    border: `2px solid ${milestone.highlight ? "hsl(214,80%,45%)" : "rgba(255,255,255,0.06)"}`,
+                    boxShadow: milestone.highlight ? "0 0 10px hsla(214,80%,55%,0.4)" : "none",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    {milestone.highlight && <div style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#fff" }} />}
                   </div>
-                  <div className="flex items-center gap-3 mb-1.5">
-                    <span className="text-[10px] font-mono text-primary/60">{milestone.year}</span>
-                    <span className={`text-[14px] font-semibold ${milestone.highlight ? "text-foreground" : "text-foreground/80"}`}>{milestone.event}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.375rem" }}>
+                    <span style={{ fontSize: "10px", fontFamily: "monospace", color: "hsl(214,80%,60%)", fontWeight: 600 }}>{milestone.year}</span>
+                    <span style={{ fontSize: "14px", fontWeight: milestone.highlight ? 700 : 600, color: milestone.highlight ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.7)" }}>{milestone.event}</span>
                   </div>
-                  <p className="text-[13px] text-muted-foreground leading-relaxed">{milestone.detail}</p>
+                  <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.38)", lineHeight: 1.65 }}>{milestone.detail}</p>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="border-t border-white/5 pt-10 flex items-center justify-between">
+        <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "2.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Link href="/work" className="text-[13px] font-medium text-primary hover:text-primary/80 transition-colors">
             See case studies →
           </Link>
