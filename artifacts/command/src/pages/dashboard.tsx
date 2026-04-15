@@ -6,6 +6,7 @@ import { Timeline } from "../components/timeline";
 import { IntelligencePanel } from "../components/intelligence-panel";
 import { CommandActions } from "../components/command-actions";
 import { CommandBar } from "../components/command-bar";
+import { OpsCenterGrid } from "../components/ops-center-grid";
 import { useEcosystemData } from "../hooks/use-ecosystem-data";
 import { MorningBriefingCard, DEMO_BRIEFING_HISTORY } from "@szl-holdings/shared-ui";
 
@@ -47,6 +48,8 @@ export function Dashboard() {
         />
 
         <DomainGrid domains={data.domains} />
+
+        <OpsCenterGrid />
 
         <MorningBriefingCard
           briefing={DEMO_BRIEFING_HISTORY[0]}
