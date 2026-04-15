@@ -1,7 +1,7 @@
 # SZL Holdings Platform
 
 ## Overview
-The SZL Holdings Platform is a pnpm monorepo that develops **Lyte**, a business observability platform, powered by **Alloy**, its execution fabric and audit layer. The project encompasses five product platforms (Lyte, Vessels, Aegis, Terra, Carlota Jo), a parent company site (SZL Holdings), and a founder identity site (Stephen Lutar). The core vision is to establish Lyte + Alloy as the commercial foundation for an expanding ecosystem, leveraging a shared PostgreSQL database, a unified authentication system, and a command-grade design system. The platform aims to provide advanced observability, governed execution, and intelligent automation capabilities across various business domains, with a strong emphasis on verifiable outcomes and operational readiness.
+The SZL Holdings Platform is a pnpm monorepo housing a governed operational intelligence platform across 8 industry verticals. The ecosystem includes 10 production web apps (React + Vite), 2 unified mobile command centers (Expo/React Native), 1 API server (Express 5 + PostgreSQL 16), 37 shared libraries, 644 database tables, 2,331 API endpoints, and 450,000+ lines of TypeScript. Products span business observability (Lyte), defense intelligence (Aegis/Firestorm), maritime fleet command (Vessels), real estate intelligence (Terra), legal matter command (PRISM Counsel), premium advisory (Carlota Jo), cloud sovereignty (IMPERIUM), and unified mobile command (CORTEX). The ecosystem is connected by PRISM Bus (cross-domain event bus), Forge Runtime (agent execution engine), and Alloy (workflow orchestration with approval gates and audit trail).
 
 ## User Preferences
 I prefer detailed explanations.
@@ -16,7 +16,7 @@ Do not make changes to the file `Y`.
 The platform is built as a pnpm monorepo utilizing Node.js 24 and TypeScript 5.9.
 - **Frontend:** React, Vite, TanStack React Query, Wouter, Tailwind CSS, Framer Motion, Lucide React, Recharts. Internationalization is handled by `react-i18next` with RTL support.
 - **Backend:** Express 5, Drizzle ORM, Zod validation, pino logging.
-- **Database:** PostgreSQL with Drizzle ORM (over 120 tables) managing multiple schemas including CMS, product, client portal, and organization membership.
+- **Database:** PostgreSQL 16 with Drizzle ORM (644 tables across 110+ schema files) managing defense, maritime, real estate, legal, consulting, fintech, and operations domains.
 - **Authentication:** Replit Auth (OIDC/PKCE), session-based with cookie+Bearer token, 7-role RBAC.
 - **API Codegen:** Orval from OpenAPI specification.
 - **Bundling:** esbuild (CJS) and Vite.
