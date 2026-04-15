@@ -9,8 +9,11 @@ import { sendSuccess, sendCreated, sendNotFound, handleRouteError, sendBadReques
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { renderEntityDataToPdfBuffer, renderDocumentToPdfBuffer } from "../lib/pdf-renderer";
 import type { BlockNode } from "../lib/pdf-renderer-types";
+import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
+import { setObjectAclPolicy } from "../lib/objectAcl";
 
 const router: IRouter = Router();
+const objectStorageService = new ObjectStorageService();
 
 // ─── Access control helpers ───────────────────────────────────────────────────
 
@@ -971,14 +974,40 @@ async function processJobAsync(job: typeof pdfJobsTable.$inferSelect) {
     });
 
     const outputFilename = `doc-${job.templateId}-${job.entityId}-${job.id}.pdf`;
-    const outputUrl = `/api/documents/pdf-output/${outputFilename}`;
 
-    // Store PDF as base64 in entityData for retrieval without a filesystem/object storage
-    const updatedEntityData = {
+    // outputUrl always points to the auth-gated pdf-output endpoint.
+    // _storageKey in entityData tells that endpoint where to read the PDF bytes (GCS vs base64).
+    const outputUrl = `/api/documents/pdf-output/${outputFilename}`;
+    let storageKey: string | undefined;
+
+    // Try to upload PDF to object storage; fall back to base64 in DB if storage unavailable
+    try {
+      const subPath = `pdfs/${outputFilename}`;
+      storageKey = await objectStorageService.uploadBuffer(pdfBuffer, subPath, "application/pdf");
+
+      // Set ACL policy on the uploaded PDF object: private, owned by the requesting user.
+      try {
+        const pdfObjectFile = await objectStorageService.getObjectEntityFile(storageKey);
+        await setObjectAclPolicy(pdfObjectFile, {
+          owner: job.requestedById !== null ? String(job.requestedById) : "system",
+          visibility: "private",
+        });
+      } catch (aclErr) {
+        console.warn("[pdf-batch] Failed to set ACL on PDF object:", aclErr instanceof Error ? aclErr.message : aclErr);
+      }
+    } catch (storageErr) {
+      console.warn("[pdf-batch] Object storage upload failed, falling back to base64:", storageErr instanceof Error ? storageErr.message : storageErr);
+    }
+
+    const updatedEntityData: Record<string, unknown> = {
       ...(job.entityData as object || {}),
-      _pdfBase64: pdfBuffer.toString("base64"),
       _pdfSize: pdfBuffer.length,
     };
+    if (storageKey) {
+      updatedEntityData._storageKey = storageKey;
+    } else {
+      updatedEntityData._pdfBase64 = pdfBuffer.toString("base64");
+    }
 
     await db.update(pdfJobsTable).set({
       status: "completed",
@@ -1051,7 +1080,23 @@ router.get("/documents/pdf-output/:filename", authMiddleware(), async (req, res)
     }
 
     const entityData = (job.entityData || {}) as Record<string, unknown>;
+    const storageKey = entityData._storageKey as string | undefined;
     const pdfBase64 = entityData._pdfBase64 as string | undefined;
+
+    if (storageKey) {
+      // Serve from object storage
+      try {
+        const pdfBuffer = await objectStorageService.downloadObjectToBuffer(storageKey);
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+        res.setHeader("Content-Length", pdfBuffer.length);
+        res.send(pdfBuffer);
+        return;
+      } catch (err) {
+        if (err instanceof ObjectNotFoundError) return sendNotFound(res, "PDF output not found in storage");
+        throw err;
+      }
+    }
 
     if (!pdfBase64) return sendNotFound(res, "PDF output not ready");
 
@@ -1093,10 +1138,20 @@ router.get("/documents/batch-pdf/:batchId/zip", authMiddleware(), async (req, re
 
     for (const job of jobs) {
       const entityData = (job.entityData || {}) as Record<string, unknown>;
+      const storageKey = entityData._storageKey as string | undefined;
       const pdfBase64 = entityData._pdfBase64 as string | undefined;
-      if (!pdfBase64) continue;
       const filename = job.outputFilename || `doc-${job.id}.pdf`;
-      zip.file(filename, Buffer.from(pdfBase64, "base64"));
+
+      if (storageKey) {
+        try {
+          const pdfBuffer = await objectStorageService.downloadObjectToBuffer(storageKey);
+          zip.file(filename, pdfBuffer);
+        } catch {
+          continue;
+        }
+      } else if (pdfBase64) {
+        zip.file(filename, Buffer.from(pdfBase64, "base64"));
+      }
     }
 
     const zipBuffer = await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });

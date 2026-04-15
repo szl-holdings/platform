@@ -20,6 +20,7 @@ import auditRouter from "./audit";
 import billingRouter from "./billing";
 import featureFlagsRouter from "./feature-flags";
 import filesRouter from "./files";
+import storageRouter from "./storage";
 import stephenRouter from "./stephen";
 import vesselsRouter from "./vessels";
 import aegisSocRouter from "./firestorm";
@@ -176,6 +177,9 @@ router.use("/notifications", _writeLimiter);
 router.use("/feature-flags", _writeLimiter);
 router.use("/projects", _writeLimiter);
 router.use("/files", _writeLimiter);
+router.use("/storage/uploads", _writeLimiter);
+router.use("/storage", _readLimiter);
+router.use(storageRouter);
 
 router.use("/vessels", _readLimiter);
 router.use("/intelligence", _readLimiter);

@@ -53,6 +53,9 @@
     },
     {
       "path": "./lib/observability"
+    },
+    {
+      "path": "./lib/object-storage-web"
     }
   ]
 }

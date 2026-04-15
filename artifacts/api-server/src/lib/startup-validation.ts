@@ -38,7 +38,9 @@ const ENV_SPECS: EnvVarSpec[] = [
   { key: "ANTHROPIC_API_KEY", required: false, description: "Anthropic API key for Claude model access", sensitive: true, group: "integrations" },
   { key: "ELEVENLABS_API_KEY", required: false, description: "ElevenLabs API key for voice asset generation", sensitive: true, group: "integrations" },
 
-  { key: "REPLIT_OBJECT_STORAGE_BUCKET_ID", required: false, description: "Replit object storage bucket ID for file uploads", group: "storage" },
+  { key: "DEFAULT_OBJECT_STORAGE_BUCKET_ID", required: false, description: "Replit GCS object storage bucket ID (set by App Storage provisioning)", group: "storage" },
+  { key: "PUBLIC_OBJECT_SEARCH_PATHS", required: false, description: "Comma-separated GCS paths for public asset serving (set by App Storage provisioning)", group: "storage" },
+  { key: "PRIVATE_OBJECT_DIR", required: false, description: "GCS path prefix for private object uploads (set by App Storage provisioning)", group: "storage" },
   { key: "REPLIT_DEV_DOMAIN", required: false, description: "Replit development domain for proxy-aware redirects", group: "runtime" },
 ];
 

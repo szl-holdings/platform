@@ -35,6 +35,18 @@ Each platform has a distinct visual identity:
 - **PRISM Counsel:** A standalone artifact focusing on legal matter observability with specialized data products and an NY insurance observability layer.
 - **SZL Distribution OS:** A content publishing and distribution platform with a dedicated admin panel and public-facing content.
 
+### Object Storage (GCS / App Storage)
+The platform uses Replit's GCS-backed object storage (App Storage) for all file uploads and generated documents.
+
+- **Bucket:** Provisioned via `setupObjectStorage()` — bucket ID stored in `DEFAULT_OBJECT_STORAGE_BUCKET_ID`.
+- **Env vars:** `PRIVATE_OBJECT_DIR` (private uploads), `PUBLIC_OBJECT_SEARCH_PATHS` (public assets).
+- **Server library:** `artifacts/api-server/src/lib/objectStorage.ts` — `ObjectStorageService` (GCS wrapper with presigned URL generation and direct buffer uploads), `objectAcl.ts` (ACL policy framework).
+- **Storage routes:** `artifacts/api-server/src/routes/storage.ts` — `POST /api/storage/uploads/request-url` (presigned upload URL), `GET /api/storage/objects/*` (private objects), `GET /api/storage/public-objects/*` (public assets).
+- **File registration:** `POST /api/files` registers a file record in `filesTable` after a presigned URL upload completes, storing `storageKey` (objectPath) and `storageUrl` (`/api/storage` + objectPath).
+- **PDF pipeline:** Batch PDF jobs (`pdfJobsTable`) upload generated PDFs to GCS via `ObjectStorageService.uploadBuffer()` and serve via `/api/storage/objects/pdfs/*`. Falls back to base64-in-DB if storage is unavailable.
+- **Client library:** `lib/object-storage-web` (`@workspace/object-storage-web`) — `ObjectUploader` (Uppy v5 modal) and `useUpload` hook for web app file upload UIs.
+- **ACL policies:** Private objects protected by ACL metadata; public assets served unconditionally.
+
 ### API Layers
 - **REST API:** Modular Express routes using Zod and Drizzle, located in `artifacts/api-server`. Includes robust security features.
 - **GraphQL API:** A unified API mounted at `/api/graphql` using Apollo Server v5 and `graphql-ws` for subscriptions, with 9 domain modules.

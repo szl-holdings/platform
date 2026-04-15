@@ -74,7 +74,9 @@
   "pnpm": {
     "overrides": {
       "@types/react": "catalog:",
-      "@types/react-dom": "catalog:"
+      "@types/react-dom": "catalog:",
+      "react": "$react",
+      "react-dom": "$react-dom"
     }
   }
 }
