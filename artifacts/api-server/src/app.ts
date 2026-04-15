@@ -195,8 +195,8 @@ app.get("/api/health", async (_req: Request, res: Response) => {
   let queueStatus: "ok" | "backpressure" | "unavailable" = "unavailable";
   let queueDepth = 0;
   try {
-    const { jobQueue } = await import("./lib/job-queue.js");
-    const stats = jobQueue.getStats();
+    const { durableJobQueue } = await import("@szl-holdings/workflow-engine");
+    const stats = await durableJobQueue.getStats();
     queueDepth = stats.pending + stats.running;
     queueStatus = queueDepth > 50 ? "backpressure" : "ok";
   } catch { /* job queue may not be initialized yet */ }
@@ -297,8 +297,8 @@ app.get("/api/health/detailed", async (req: Request, res: Response) => {
   }
 
   try {
-    const { jobQueue } = await import("./lib/job-queue.js");
-    const stats = jobQueue.getStats();
+    const { durableJobQueue } = await import("@szl-holdings/workflow-engine");
+    const stats = await durableJobQueue.getStats();
     const queueDepth = stats.pending + stats.running;
     checks["job_queue"] = {
       status: queueDepth > 50 ? "backpressure" : "ok",

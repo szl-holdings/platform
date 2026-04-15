@@ -3,10 +3,9 @@ import app from "./app";
 import { logger } from "./lib/logger";
 import { failFastOnInvalidConfig } from "./lib/startup-validation";
 import { initWebSocket } from "./lib/websocket";
-import { jobQueue, startScheduledJobs } from "./lib/job-queue";
-import { startNamedScheduledJobs } from "./lib/scheduled-jobs";
+import { jobQueue } from "./lib/job-queue";
+import { startDurableQueue, startDurableScheduler, durableJobQueue, durableScheduler } from "./lib/durable-init";
 import "./lib/platform-jobs";
-import { startPlatformScheduledJobs } from "./lib/platform-jobs";
 import { ensurePlatformFlags } from "./lib/platform-flags";
 import { startDomainNotificationGenerators, stopDomainNotificationGenerators } from "./lib/domain-notifications";
 import { startSelfMonitoring, stopSelfMonitoring } from "./lib/self-monitor";
@@ -102,8 +101,6 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
 
   logger.info({ port, host: "0.0.0.0" }, "Server listening");
 
-  scheduleNycIngestionJob();
-  scheduleNycExtendedIngestionJob();
   import("./routes/rmm").then(m => m.startSyncScheduler()).catch(err => logger.warn({ err }, "RMM sync scheduler start failed (non-fatal)"));
   prewarmIntelligenceCache().catch(err => {
     logger.warn({ err }, "[intelligence-cache] Prewarm failed (non-fatal)");
@@ -124,11 +121,9 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     await knowledgeStore.loadFromDb();
     logger.info("[bootstrap] Platform flags and knowledge store loaded");
 
-    // Step 3: Register schedules (schema is ready)
-    registerDefaultSchedules();
-    startScheduledJobs();
-    startNamedScheduledJobs();
-    startPlatformScheduledJobs();
+    // Step 3: Start durable (PostgreSQL-backed) job queue
+    await startDurableQueue();
+
     startEmbeddingWorker();
     // Non-fatal health check: log embedding model/schema compatibility at startup.
     import("@szl-holdings/ai-engine/embedding-pipeline")
@@ -167,6 +162,14 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
       processScheduledNotifications().catch(err => logger.warn({ err }, "[push] Scheduled notification processing error (non-fatal)"));
     }, SCHEDULED_NOTIF_INTERVAL_MS);
     scheduledNotifInterval.unref();
+
+    // Step 3b: Register all job handlers and agent schedules BEFORE starting the scheduler.
+    // This ensures no durable job is dequeued before its handler exists (prevents dead-lettering
+    // on startup when the scheduler fires previously-due agent cron schedules from the DB).
+    await registerDefaultSchedules();
+
+    // Step 3c: Start the scheduler AFTER all handlers are registered
+    await startDurableScheduler();
 
     // Step 4: Seeds run after schema is 100% confirmed — fire concurrently, each non-fatal
     seedPlatformData().catch(err => {
@@ -230,6 +233,14 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
       logger.info("Job queue flushed");
     } catch (err) {
       logger.warn({ err }, "Error flushing job queue");
+    }
+
+    try {
+      durableScheduler.stop();
+      await durableJobQueue.shutdown();
+      logger.info("Durable job queue flushed");
+    } catch (err) {
+      logger.warn({ err }, "Error flushing durable job queue");
     }
 
     try {

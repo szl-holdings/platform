@@ -5,11 +5,10 @@ export {
   type AgentRunRecord,
 } from "@szl-holdings/workflow-engine";
 
-import { agentScheduler } from "@szl-holdings/workflow-engine";
+import { agentScheduler, agentExecutionRuntime, durableScheduler, seedDefaultSchedules } from "@szl-holdings/workflow-engine";
 import { logger } from "./logger";
 
 const BASE_URL = `http://localhost:${process.env["PORT"] || 3000}`;
-const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
 
 function getInternalHeaders(): Record<string, string> {
   const headers: Record<string, string> = { Accept: "application/json" };
@@ -55,7 +54,15 @@ function safeSerialize(data: unknown, maxLen: number): string {
   }
 }
 
-export function registerDefaultSchedules() {
+function intervalToCron(intervalMs: number): string {
+  const minutes = Math.round(intervalMs / 60_000);
+  if (minutes < 60) return `*/${minutes} * * * *`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `0 */${hours} * * *`;
+  return `0 0 * * *`;
+}
+
+export async function registerDefaultSchedules(): Promise<void> {
   const schedules = [
     {
       agentId: "vessels-autonomous",
@@ -142,7 +149,7 @@ export function registerDefaultSchedules() {
       agentId: "nexus-autonomous",
       name: "Nexus Cross-Domain Fusion Monitor",
       domain: "global" as const,
-      intervalMs: SIX_HOURS_MS,
+      intervalMs: 6 * 60 * 60 * 1000,
       enabled: true,
       taskDescription: "Fuse signals across all intelligence domains, surface cross-domain patterns and situational awareness",
       systemPrompt: `You are an autonomous cross-domain fusion intelligence agent. Analyze signals from maritime, cyber, real estate, and financial domains to surface emergent cross-domain patterns, risks, and opportunities. Be specific and actionable.`,
@@ -172,12 +179,52 @@ export function registerDefaultSchedules() {
     },
   ];
 
+  const durableScheduleEntries = [];
   for (const schedule of schedules) {
     agentScheduler.register(schedule);
+
+    const jobType = `agent_run_${schedule.agentId.replace(/-/g, "_")}`;
+    const cronExpression = intervalToCron(schedule.intervalMs);
+    const capturedAgentId = schedule.agentId;
+    const capturedDomain = schedule.domain;
+
+    agentExecutionRuntime.registerAgent(
+      {
+        agentId: capturedAgentId,
+        name: schedule.name,
+        domain: capturedDomain,
+        jobType,
+        queue: "agents",
+        maxRetries: 0,
+      },
+      async (_job, ctx) => {
+        await agentScheduler.runAgent(capturedAgentId);
+        await ctx.saveState({
+          lastRunAt: new Date().toISOString(),
+          runCount: ctx.runCount + 1,
+          agentId: capturedAgentId,
+        });
+      },
+    );
+
+    durableScheduleEntries.push({
+      name: `agent_schedule_${schedule.agentId.replace(/-/g, "_")}`,
+      jobType,
+      cronExpression,
+      payload: { agentId: schedule.agentId },
+      queue: "agents",
+      maxRetries: 0,
+    });
   }
 
-  agentScheduler.start();
-  logger.info({ agentCount: schedules.length }, "Default agent schedules registered and started");
+  agentScheduler.startDurableMode();
+
+  try {
+    await seedDefaultSchedules(durableScheduleEntries);
+    logger.info({ agentCount: schedules.length }, "Default agent schedules registered and started");
+  } catch (err) {
+    logger.warn({ err }, "Agent durable schedule seeding failed (non-fatal)");
+  }
 }
 
 logger.info("Agent scheduler initialized");

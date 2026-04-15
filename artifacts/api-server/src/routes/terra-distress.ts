@@ -11,7 +11,7 @@ import {
   getIngestionStats,
 } from "../lib/terra-distress-service";
 import { ingestCsvBuffer } from "../lib/terra-csv-ingestion";
-import { jobQueue } from "../lib/job-queue";
+import { durableJobQueue } from "@szl-holdings/workflow-engine";
 import { NYC_INGESTION_JOB_TYPE } from "../lib/terra-nyc-ingestion";
 import { NYC_EXTENDED_INGESTION_JOB_TYPE, type NycExtendedIngestionJobPayload } from "../lib/terra-nyc-extended-ingestion";
 
@@ -289,7 +289,7 @@ router.post(
 
       await auditLog("nyc_open_data_pull_triggered", "terra_distress", undefined, { sources }, req.user?.id);
 
-      const job = await jobQueue.enqueue(NYC_INGESTION_JOB_TYPE, { sources });
+      const job = await durableJobQueue.enqueue(NYC_INGESTION_JOB_TYPE, { sources });
 
       sendSuccess(res, {
         message: "NYC Open Data ingestion job enqueued",
@@ -324,7 +324,7 @@ router.post(
 
       await auditLog("nyc_extended_pull_triggered", "terra_distress", undefined, { sources }, req.user?.id);
 
-      const job = await jobQueue.enqueue(NYC_EXTENDED_INGESTION_JOB_TYPE, { sources });
+      const job = await durableJobQueue.enqueue(NYC_EXTENDED_INGESTION_JOB_TYPE, { sources });
 
       sendSuccess(res, {
         message: "NYC Extended Open Data ingestion job enqueued",

@@ -37,3 +37,28 @@ export {
   type WorkflowTransition,
   type WorkflowContext,
 } from "./workflow-state-machine.js";
+export {
+  DurableJobQueue,
+  durableJobQueue,
+  JobChain,
+  type DurableJob,
+  type DurableJobOptions,
+  type JobPriority,
+  type JobExecutionContext,
+  type QueueConfig,
+  type JobChainStep,
+  type JobStatus as DurableJobStatus,
+} from "./durable-job-queue.js";
+export {
+  DurableScheduler,
+  durableScheduler,
+  seedDefaultSchedules,
+  type ScheduleDefinition,
+} from "./durable-scheduler.js";
+export {
+  AgentExecutionRuntime,
+  agentExecutionRuntime,
+  type AgentExecutionConfig,
+  type AgentRunContext,
+  type AgentState,
+} from "./agent-execution-runtime.js";

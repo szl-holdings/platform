@@ -155,6 +155,18 @@ export class AgentScheduler {
     logger.info({ agentCount: this.schedules.size }, "Agent scheduler started");
   }
 
+  startDurableMode() {
+    if (this.isRunning) return;
+    this.isRunning = true;
+    this.cleanupTimer = setInterval(() => {
+      this.pruneOldDbRecords().catch(err => {
+        logger.warn({ err }, "Agent scheduler: DB cleanup failed");
+      });
+    }, DB_CLEANUP_INTERVAL_MS);
+    this.cleanupTimer.unref();
+    logger.info({ agentCount: this.schedules.size }, "Agent scheduler started in durable mode");
+  }
+
   stop() {
     for (const timer of this.timers.values()) {
       clearInterval(timer);

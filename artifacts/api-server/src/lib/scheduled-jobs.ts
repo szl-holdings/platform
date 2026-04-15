@@ -1,5 +1,5 @@
 import { logger } from "./logger";
-import { jobQueue, JOB_TYPES } from "./job-queue";
+import { durableJobQueue } from "@szl-holdings/workflow-engine";
 import { serverTelemetry } from "@szl-holdings/observability";
 
 export const NAMED_JOB_TYPES = {
@@ -68,7 +68,7 @@ async function enqueueNamedJob(type: NamedJobType, payload: Record<string, unkno
   if (!entry) return;
   updateRegistry(type, { lastStatus: "running", lastRunAt: Date.now() });
   try {
-    const job = await jobQueue.enqueue(type, payload, { maxRetries: 2 });
+    const job = await durableJobQueue.enqueue(type, payload, { maxRetries: 2 });
     updateRegistry(type, { runCount: (entry.runCount || 0) + 1 });
     return job;
   } catch (err) {
@@ -78,7 +78,7 @@ async function enqueueNamedJob(type: NamedJobType, payload: Record<string, unkno
   }
 }
 
-jobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
+durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
   const start = Date.now();
   logger.info({ jobId: job.id }, "daily_lyte_digest: aggregating Lyte signal digest");
   const payload = job.payload as { date?: string };
@@ -89,7 +89,7 @@ jobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
   logger.info({ jobId: job.id, date }, "daily_lyte_digest: complete");
 });
 
-jobQueue.register(NAMED_JOB_TYPES.DAILY_READINESS_DIGEST, async (job) => {
+durableJobQueue.register(NAMED_JOB_TYPES.DAILY_READINESS_DIGEST, async (job) => {
   const start = Date.now();
   logger.info({ jobId: job.id }, "daily_readiness_digest: compiling readiness status");
   await new Promise(r => setTimeout(r, 70));
@@ -98,7 +98,7 @@ jobQueue.register(NAMED_JOB_TYPES.DAILY_READINESS_DIGEST, async (job) => {
   logger.info({ jobId: job.id }, "daily_readiness_digest: complete");
 });
 
-jobQueue.register(NAMED_JOB_TYPES.DAILY_EXCEPTION_SUMMARY, async (job) => {
+durableJobQueue.register(NAMED_JOB_TYPES.DAILY_EXCEPTION_SUMMARY, async (job) => {
   const start = Date.now();
   logger.info({ jobId: job.id }, "daily_exception_summary: aggregating exceptions");
   await new Promise(r => setTimeout(r, 90));
@@ -107,7 +107,7 @@ jobQueue.register(NAMED_JOB_TYPES.DAILY_EXCEPTION_SUMMARY, async (job) => {
   logger.info({ jobId: job.id }, "daily_exception_summary: complete");
 });
 
-jobQueue.register(NAMED_JOB_TYPES.DAILY_ARTIFACT_CLEANUP, async (job) => {
+durableJobQueue.register(NAMED_JOB_TYPES.DAILY_ARTIFACT_CLEANUP, async (job) => {
   const start = Date.now();
   logger.info({ jobId: job.id }, "daily_artifact_cleanup: pruning expired artifacts");
   await new Promise(r => setTimeout(r, 120));
@@ -116,7 +116,7 @@ jobQueue.register(NAMED_JOB_TYPES.DAILY_ARTIFACT_CLEANUP, async (job) => {
   logger.info({ jobId: job.id }, "daily_artifact_cleanup: complete");
 });
 
-jobQueue.register(NAMED_JOB_TYPES.DAILY_FEATURE_FLAG_SYNC, async (job) => {
+durableJobQueue.register(NAMED_JOB_TYPES.DAILY_FEATURE_FLAG_SYNC, async (job) => {
   const start = Date.now();
   logger.info({ jobId: job.id }, "daily_feature_flag_sync: syncing flag state");
   await new Promise(r => setTimeout(r, 50));
@@ -128,7 +128,7 @@ jobQueue.register(NAMED_JOB_TYPES.DAILY_FEATURE_FLAG_SYNC, async (job) => {
 // Daily Document Batch Generation — processes all pending PDF jobs across the document engine.
 // Scans for documents with status "approved" that have no completed PDF export,
 // creates a scheduled batch, and enqueues them for rendering.
-jobQueue.register(NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, async (job) => {
+durableJobQueue.register(NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, async (job) => {
   const { db, documentsTable, pdfBatchesTable, pdfJobsTable } = await import("@szl-holdings/db");
   const { eq } = await import("drizzle-orm");
   const { randomUUID } = await import("crypto");
@@ -193,7 +193,7 @@ jobQueue.register(NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, async (job) => {
   }
 });
 
-jobQueue.register(NAMED_JOB_TYPES.HOURLY_SIGNAL_NORMALIZATION, async (job) => {
+durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_SIGNAL_NORMALIZATION, async (job) => {
   const start = Date.now();
   logger.info({ jobId: job.id }, "hourly_signal_normalization: normalizing signals");
   await new Promise(r => setTimeout(r, 60));
@@ -202,7 +202,7 @@ jobQueue.register(NAMED_JOB_TYPES.HOURLY_SIGNAL_NORMALIZATION, async (job) => {
   logger.info({ jobId: job.id }, "hourly_signal_normalization: complete");
 });
 
-jobQueue.register(NAMED_JOB_TYPES.HOURLY_STALE_ACTION_SCAN, async (job) => {
+durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_STALE_ACTION_SCAN, async (job) => {
   const start = Date.now();
   logger.info({ jobId: job.id }, "hourly_stale_action_scan: scanning for stale actions");
   await new Promise(r => setTimeout(r, 55));
@@ -211,7 +211,7 @@ jobQueue.register(NAMED_JOB_TYPES.HOURLY_STALE_ACTION_SCAN, async (job) => {
   logger.info({ jobId: job.id }, "hourly_stale_action_scan: complete");
 });
 
-jobQueue.register(NAMED_JOB_TYPES.HOURLY_VESSEL_ETA_REFRESH, async (job) => {
+durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_VESSEL_ETA_REFRESH, async (job) => {
   const start = Date.now();
   logger.info({ jobId: job.id }, "hourly_vessel_eta_refresh: refreshing vessel ETAs");
   await new Promise(r => setTimeout(r, 75));
@@ -220,7 +220,7 @@ jobQueue.register(NAMED_JOB_TYPES.HOURLY_VESSEL_ETA_REFRESH, async (job) => {
   logger.info({ jobId: job.id }, "hourly_vessel_eta_refresh: complete");
 });
 
-jobQueue.register(NAMED_JOB_TYPES.HOURLY_ROUTE_PRESSURE_SCAN, async (job) => {
+durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_ROUTE_PRESSURE_SCAN, async (job) => {
   const start = Date.now();
   logger.info({ jobId: job.id }, "hourly_route_pressure_scan: scanning corridor pressure");
   await new Promise(r => setTimeout(r, 65));
@@ -229,7 +229,7 @@ jobQueue.register(NAMED_JOB_TYPES.HOURLY_ROUTE_PRESSURE_SCAN, async (job) => {
   logger.info({ jobId: job.id }, "hourly_route_pressure_scan: complete");
 });
 
-jobQueue.register(NAMED_JOB_TYPES.HOURLY_TERRA_INQUIRY_DIGEST, async (job) => {
+durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_TERRA_INQUIRY_DIGEST, async (job) => {
   const start = Date.now();
   logger.info({ jobId: job.id }, "hourly_terra_inquiry_digest: processing inquiries");
   await new Promise(r => setTimeout(r, 45));
@@ -238,7 +238,7 @@ jobQueue.register(NAMED_JOB_TYPES.HOURLY_TERRA_INQUIRY_DIGEST, async (job) => {
   logger.info({ jobId: job.id }, "hourly_terra_inquiry_digest: complete");
 });
 
-jobQueue.register(NAMED_JOB_TYPES.WORKFLOW_RETRY_JOB, async (job) => {
+durableJobQueue.register(NAMED_JOB_TYPES.WORKFLOW_RETRY_JOB, async (job) => {
   const start = Date.now();
   const { workflowId } = job.payload as { workflowId?: string };
   logger.info({ jobId: job.id, workflowId }, "workflow_retry_job: retrying failed workflow");
@@ -248,7 +248,7 @@ jobQueue.register(NAMED_JOB_TYPES.WORKFLOW_RETRY_JOB, async (job) => {
   logger.info({ jobId: job.id, workflowId }, "workflow_retry_job: complete");
 });
 
-jobQueue.register(NAMED_JOB_TYPES.ARTIFACT_GENERATION_JOB, async (job) => {
+durableJobQueue.register(NAMED_JOB_TYPES.ARTIFACT_GENERATION_JOB, async (job) => {
   const start = Date.now();
   const { artifactType, sourceId } = job.payload as { artifactType?: string; sourceId?: string };
   logger.info({ jobId: job.id, artifactType, sourceId }, "artifact_generation_job: generating artifact");
@@ -258,7 +258,7 @@ jobQueue.register(NAMED_JOB_TYPES.ARTIFACT_GENERATION_JOB, async (job) => {
   logger.info({ jobId: job.id, artifactType }, "artifact_generation_job: complete");
 });
 
-jobQueue.register(NAMED_JOB_TYPES.ROUTE_ECONOMICS_RECOMPUTE_JOB, async (job) => {
+durableJobQueue.register(NAMED_JOB_TYPES.ROUTE_ECONOMICS_RECOMPUTE_JOB, async (job) => {
   const start = Date.now();
   const { voyageId, vesselId } = job.payload as { voyageId?: string; vesselId?: string };
   logger.info({ jobId: job.id, voyageId, vesselId }, "route_economics_recompute_job: recomputing route economics");
@@ -268,7 +268,7 @@ jobQueue.register(NAMED_JOB_TYPES.ROUTE_ECONOMICS_RECOMPUTE_JOB, async (job) => 
   logger.info({ jobId: job.id, voyageId }, "route_economics_recompute_job: complete");
 });
 
-jobQueue.register(NAMED_JOB_TYPES.READINESS_SCORE_RECOMPUTE_JOB, async (job) => {
+durableJobQueue.register(NAMED_JOB_TYPES.READINESS_SCORE_RECOMPUTE_JOB, async (job) => {
   const start = Date.now();
   const { programId } = job.payload as { programId?: string };
   logger.info({ jobId: job.id, programId }, "readiness_score_recompute_job: recomputing readiness scores");
@@ -278,79 +278,12 @@ jobQueue.register(NAMED_JOB_TYPES.READINESS_SCORE_RECOMPUTE_JOB, async (job) => 
   logger.info({ jobId: job.id, programId }, "readiness_score_recompute_job: complete");
 });
 
-const HOUR_MS = 60 * 60 * 1000;
-const DAY_MS = 24 * HOUR_MS;
-
 let namedJobsStarted = false;
 
 export function startNamedScheduledJobs() {
   if (namedJobsStarted) return;
   namedJobsStarted = true;
-
-  const dailyJobs: NamedJobType[] = [
-    NAMED_JOB_TYPES.DAILY_LYTE_DIGEST,
-    NAMED_JOB_TYPES.DAILY_READINESS_DIGEST,
-    NAMED_JOB_TYPES.DAILY_EXCEPTION_SUMMARY,
-    NAMED_JOB_TYPES.DAILY_ARTIFACT_CLEANUP,
-    NAMED_JOB_TYPES.DAILY_FEATURE_FLAG_SYNC,
-    NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH,
-  ];
-
-  const hourlyJobs: NamedJobType[] = [
-    NAMED_JOB_TYPES.HOURLY_SIGNAL_NORMALIZATION,
-    NAMED_JOB_TYPES.HOURLY_STALE_ACTION_SCAN,
-    NAMED_JOB_TYPES.HOURLY_VESSEL_ETA_REFRESH,
-    NAMED_JOB_TYPES.HOURLY_ROUTE_PRESSURE_SCAN,
-    NAMED_JOB_TYPES.HOURLY_TERRA_INQUIRY_DIGEST,
-  ];
-
-  const now = new Date();
-  const next0800 = new Date(now);
-  next0800.setUTCHours(8, 0, 0, 0);
-  if (next0800 <= now) next0800.setUTCDate(next0800.getUTCDate() + 1);
-  const msUntilDaily = next0800.getTime() - now.getTime();
-
-  setTimeout(async () => {
-    for (const type of dailyJobs) {
-      try { await enqueueNamedJob(type); } catch (err) { logger.warn({ err, type }, "Failed to enqueue daily job"); }
-      await new Promise(r => setTimeout(r, 500));
-    }
-    setInterval(async () => {
-      for (const type of dailyJobs) {
-        try { await enqueueNamedJob(type); } catch (err) { logger.warn({ err, type }, "Failed to enqueue daily job"); }
-        await new Promise(r => setTimeout(r, 500));
-      }
-    }, DAY_MS);
-  }, msUntilDaily);
-
-  const nextHour = new Date(now);
-  nextHour.setMinutes(0, 0, 0);
-  nextHour.setHours(nextHour.getHours() + 1);
-  const msUntilHourly = nextHour.getTime() - now.getTime();
-
-  setTimeout(async () => {
-    for (const type of hourlyJobs) {
-      try { await enqueueNamedJob(type); } catch (err) { logger.warn({ err, type }, "Failed to enqueue hourly job"); }
-      await new Promise(r => setTimeout(r, 300));
-    }
-    setInterval(async () => {
-      for (const type of hourlyJobs) {
-        try { await enqueueNamedJob(type); } catch (err) { logger.warn({ err, type }, "Failed to enqueue hourly job"); }
-        await new Promise(r => setTimeout(r, 300));
-      }
-    }, HOUR_MS);
-  }, msUntilHourly);
-
-  const allEntries = Array.from(jobRegistry.values());
-  for (const entry of allEntries) {
-    if (entry.schedule === "daily") {
-      entry.nextRunAt = next0800.getTime();
-    } else if (entry.schedule === "hourly") {
-      entry.nextRunAt = nextHour.getTime();
-    }
-  }
-
-  logger.info({ dailyCount: dailyJobs.length, hourlyCount: hourlyJobs.length }, "Named scheduled jobs initialized");
+  logger.info("Named scheduled jobs now managed by durable cron scheduler — in-memory timers disabled");
 }
 
 export function getJobRegistry(): JobScheduleEntry[] {

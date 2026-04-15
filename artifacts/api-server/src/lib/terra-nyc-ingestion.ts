@@ -1,5 +1,5 @@
 import { logger } from "./logger";
-import { jobQueue } from "./job-queue";
+import { durableJobQueue } from "@szl-holdings/workflow-engine";
 import { db } from "@szl-holdings/db";
 import { auditLogsTable } from "@szl-holdings/db";
 import {
@@ -660,7 +660,7 @@ export type NycIngestionJobPayload = {
 
 export const NYC_INGESTION_JOB_TYPE = "terra_nyc_ingestion";
 
-jobQueue.register<NycIngestionJobPayload>(NYC_INGESTION_JOB_TYPE, async (job) => {
+durableJobQueue.register<NycIngestionJobPayload>(NYC_INGESTION_JOB_TYPE, async (job) => {
   const { sources } = job.payload;
   logger.info({ jobId: job.id, sources }, "Starting NYC open data ingestion job");
 
@@ -773,7 +773,12 @@ jobQueue.register<NycIngestionJobPayload>(NYC_INGESTION_JOB_TYPE, async (job) =>
   }
 });
 
-export function scheduleNycIngestionJob(
+/**
+ * @deprecated NYC Open Data ingestion is now scheduled via the durable DB cron scheduler
+ * (schedule name "nyc_ingestion_6h", 0 *\/6 * * *). This function is no longer called
+ * and will be removed in a future cleanup. Do not re-export or re-invoke.
+ */
+function scheduleNycIngestionJob(
   sources: Array<"acris" | "acris_master" | "foreclosure_filings" | "dof_liens" | "hpd_violations"> = [
     "acris",
     "acris_master",
@@ -790,8 +795,8 @@ export function scheduleNycIngestionJob(
   logger.info({ intervalMs, sources }, "Scheduling NYC Open Data ingestion job");
 
   const runJob = () => {
-    jobQueue
-      .enqueue<NycIngestionJobPayload>(NYC_INGESTION_JOB_TYPE, { sources })
+    durableJobQueue
+      .enqueue(NYC_INGESTION_JOB_TYPE, { sources } as NycIngestionJobPayload)
       .catch(err => logger.error({ err }, "Failed to enqueue NYC ingestion job"));
   };
 

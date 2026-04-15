@@ -18,7 +18,8 @@ import {
 import { eq, desc, sql, and } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
-import { jobQueue, JOB_TYPES } from "../lib/job-queue";
+import { JOB_TYPES } from "../lib/job-queue";
+import { durableJobQueue } from "@szl-holdings/workflow-engine";
 
 const router: IRouter = Router();
 const auth = [authMiddleware(), requireRole("ops", "exec", "admin")];
@@ -556,7 +557,7 @@ router.post("/capital/generate-lender-packet/:id", ...auth, async (req, res) => 
     const id = parseIdParam(req.params.id);
     const [packet] = await db.select().from(lenderPacketsTable).where(eq(lenderPacketsTable.id, id));
     if (!packet) { sendNotFound(res, "Lender packet"); return; }
-    const job = await jobQueue.enqueue(
+    const job = await durableJobQueue.enqueue(
       JOB_TYPES.LENDER_PACKET_GENERATE,
       { packetId: id, lenderType: packet.lenderType, title: packet.title },
       { maxRetries: 2 },
@@ -573,7 +574,7 @@ router.post("/capital/generate-investor-packet/:id", ...auth, async (req, res) =
     const id = parseIdParam(req.params.id);
     const [packet] = await db.select().from(investorPacketsTable).where(eq(investorPacketsTable.id, id));
     if (!packet) { sendNotFound(res, "Investor packet"); return; }
-    const job = await jobQueue.enqueue(
+    const job = await durableJobQueue.enqueue(
       JOB_TYPES.INVESTOR_PACKET_GENERATE,
       { packetId: id, investorType: packet.investorType, title: packet.title },
       { maxRetries: 2 },

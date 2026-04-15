@@ -16,7 +16,7 @@ import {
 } from "@szl-holdings/db";
 import { eq, desc } from "drizzle-orm";
 import { logger } from "./logger";
-import { jobQueue } from "./job-queue";
+import { durableJobQueue } from "@szl-holdings/workflow-engine";
 
 // ─── Job Types for Alloy Workflow Engine ──────────────────────────────────────
 
@@ -375,12 +375,10 @@ export async function completeWorkflowRun(
       correlationId: options.correlationId,
     });
 
-    setTimeout(() => {
-      jobQueue.enqueue(ALLOY_JOB_TYPES.RETRY_WORKFLOW, {
-        workflowId: run.workflowId,
-        retryAttempt: retryCount + 1,
-      }).catch(err => logger.error({ err }, "Failed to enqueue retry job"));
-    }, delayMs);
+    await durableJobQueue.enqueue(ALLOY_JOB_TYPES.RETRY_WORKFLOW, {
+      workflowId: run.workflowId,
+      retryAttempt: retryCount + 1,
+    }, { scheduledAt: new Date(Date.now() + delayMs) });
   } else {
     await db.update(alloyWorkflows)
       .set({
@@ -461,14 +459,11 @@ export async function requestApproval(
     notes: options.reason,
   });
 
-  const reviewDeadlineMs = expiresAt.getTime() - Date.now();
-  setTimeout(() => {
-    jobQueue.enqueue(ALLOY_JOB_TYPES.SCHEDULED_REVIEW, {
-      approvalId: approval.id,
-      workflowId,
-      type: "expiry_check",
-    }).catch(err => logger.error({ err }, "Failed to schedule approval expiry check"));
-  }, reviewDeadlineMs);
+  await durableJobQueue.enqueue(ALLOY_JOB_TYPES.SCHEDULED_REVIEW, {
+    approvalId: approval.id,
+    workflowId,
+    type: "expiry_check",
+  }, { scheduledAt: expiresAt });
 }
 
 export async function reviewApproval(
@@ -517,7 +512,7 @@ export async function reviewApproval(
   });
 
   if (decision === "approved") {
-    await jobQueue.enqueue(ALLOY_JOB_TYPES.RUN_WORKFLOW, {
+    await durableJobQueue.enqueue(ALLOY_JOB_TYPES.RUN_WORKFLOW, {
       workflowId: approval.workflowId,
       actorUserId: options.reviewerUserId,
     });
@@ -577,7 +572,7 @@ export async function generateArtifact(params: {
 
 // ─── Register Alloy Job Handlers ──────────────────────────────────────────────
 
-jobQueue.register(ALLOY_JOB_TYPES.PROCESS_SIGNAL, async (job) => {
+durableJobQueue.register(ALLOY_JOB_TYPES.PROCESS_SIGNAL, async (job) => {
   const { signalId, workflowType, priority, actorUserId } = job.payload as {
     signalId: number;
     workflowType?: InsertAlloyWorkflow["type"];
@@ -588,7 +583,7 @@ jobQueue.register(ALLOY_JOB_TYPES.PROCESS_SIGNAL, async (job) => {
   await processSignalIntoWorkflow(signalId, { workflowType, priority, actorUserId, correlationId: job.id });
 });
 
-jobQueue.register(ALLOY_JOB_TYPES.RUN_WORKFLOW, async (job) => {
+durableJobQueue.register(ALLOY_JOB_TYPES.RUN_WORKFLOW, async (job) => {
   const { workflowId, actorUserId } = job.payload as { workflowId: number; actorUserId?: number };
   logger.info({ jobId: job.id, workflowId }, "Running workflow");
   const run = await startWorkflowRun(workflowId, { actorUserId, correlationId: job.id });
@@ -633,7 +628,7 @@ jobQueue.register(ALLOY_JOB_TYPES.RUN_WORKFLOW, async (job) => {
   }
 });
 
-jobQueue.register(ALLOY_JOB_TYPES.RETRY_WORKFLOW, async (job) => {
+durableJobQueue.register(ALLOY_JOB_TYPES.RETRY_WORKFLOW, async (job) => {
   const { workflowId, retryAttempt, actorUserId } = job.payload as {
     workflowId: number;
     retryAttempt: number;
@@ -652,16 +647,16 @@ jobQueue.register(ALLOY_JOB_TYPES.RETRY_WORKFLOW, async (job) => {
     return;
   }
 
-  await jobQueue.enqueue(ALLOY_JOB_TYPES.RUN_WORKFLOW, { workflowId, actorUserId });
+  await durableJobQueue.enqueue(ALLOY_JOB_TYPES.RUN_WORKFLOW, { workflowId, actorUserId });
 });
 
-jobQueue.register(ALLOY_JOB_TYPES.GENERATE_ARTIFACT, async (job) => {
+durableJobQueue.register(ALLOY_JOB_TYPES.GENERATE_ARTIFACT, async (job) => {
   const params = job.payload as Parameters<typeof generateArtifact>[0];
   logger.info({ jobId: job.id, type: params.type, domain: params.domain }, "Generating artifact");
   await generateArtifact({ ...params, correlationId: job.id });
 });
 
-jobQueue.register(ALLOY_JOB_TYPES.SCHEDULED_REVIEW, async (job) => {
+durableJobQueue.register(ALLOY_JOB_TYPES.SCHEDULED_REVIEW, async (job) => {
   const { approvalId, workflowId, type } = job.payload as {
     approvalId: number;
     workflowId: number;

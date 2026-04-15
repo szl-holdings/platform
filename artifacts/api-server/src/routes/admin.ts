@@ -11,7 +11,7 @@ import { seedLyteObservability } from "../lib/lyte-observability-seed";
 import { desc, sql, ilike, or, eq, and, inArray, gte, lte } from "drizzle-orm";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { serverTelemetry } from "@szl-holdings/observability";
-import { jobQueue } from "../lib/job-queue";
+import { durableJobQueue } from "@szl-holdings/workflow-engine";
 import { logActivity } from "../lib/activity-logger";
 import { isFlagEnabled } from "../lib/platform-flags";
 
@@ -1040,18 +1040,18 @@ adminRouter.get("/admin/workflow-runs", async (req, res) => {
       .orderBy(desc(platformJobRunsTable.createdAt))
       .limit(limit);
 
-    const jobRuns = jobQueue.getRecentJobs(50).map((j) => ({
+    const jobRuns = (await durableJobQueue.getRecentJobs(50)).map((j) => ({
       id: j.id,
       runId: j.id,
       workflowType: j.type,
       status: j.status as "running" | "completed" | "failed" | "pending",
       domain: j.type.split("_")[0] ?? "platform",
-      startedAt: j.startedAt ? new Date(j.startedAt) : null,
-      completedAt: j.completedAt ? new Date(j.completedAt) : null,
-      durationMs: j.startedAt && j.completedAt ? j.completedAt - j.startedAt : null,
+      startedAt: j.startedAt ?? null,
+      completedAt: j.completedAt ?? null,
+      durationMs: j.startedAt && j.completedAt ? j.completedAt.getTime() - j.startedAt.getTime() : null,
       triggeredBy: "scheduler",
       triggeredByUserId: null,
-      retries: j.retries,
+      retries: j.retryCount,
       error: j.error ?? null,
       payload: null,
       result: null,
@@ -1059,7 +1059,7 @@ adminRouter.get("/admin/workflow-runs", async (req, res) => {
       workflowRunId: j.id,
       signalId: null,
       artifactId: null,
-      createdAt: new Date(j.createdAt),
+      createdAt: j.createdAt,
     }));
 
     const filteredJobRuns = jobRuns.filter((j) => {
@@ -1101,7 +1101,7 @@ adminRouter.get("/admin/workflow-runs/:id", async (req, res) => {
       return;
     }
 
-    const jobRun = jobQueue.getRecentJobs(200).find((j) => j.id === id);
+    const jobRun = (await durableJobQueue.getRecentJobs(200)).find((j) => j.id === id);
     if (jobRun) {
       res.json(jobRun);
       return;
@@ -1250,8 +1250,7 @@ adminRouter.post("/admin/artifact-approvals/:id/reject", async (req, res) => {
 
 adminRouter.get("/admin/health-dashboard", async (_req, res) => {
   const snapshot = serverTelemetry.getSnapshot();
-  const jobStats = jobQueue.getStats();
-  const recentJobs = jobQueue.getRecentJobs(20);
+  const [jobStats, recentJobs] = await Promise.all([durableJobQueue.getStats(), durableJobQueue.getRecentJobs(20)]);
   const activeAlerts = serverTelemetry.getActiveAlerts();
 
   let dbLatencyMs = 0;
@@ -1273,7 +1272,7 @@ adminRouter.get("/admin/health-dashboard", async (_req, res) => {
     p99Latency: snapshot.p99Latency,
     throughputPerHour: snapshot.throughputPerHour,
     authFailures: snapshot.authFailures ?? 0,
-    retryCount: recentJobs.reduce((sum, j) => sum + j.retries, 0),
+    retryCount: recentJobs.reduce((sum, j) => sum + j.retryCount, 0),
     workflowFailureRate: jobStats.failed > 0
       ? Math.round((jobStats.failed / Math.max(jobStats.failed + jobStats.completed, 1)) * 100)
       : 0,

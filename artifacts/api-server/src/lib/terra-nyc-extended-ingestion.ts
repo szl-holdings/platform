@@ -1,5 +1,5 @@
 import { logger } from "./logger";
-import { jobQueue } from "./job-queue";
+import { durableJobQueue } from "@szl-holdings/workflow-engine";
 import { db } from "@szl-holdings/db";
 import { auditLogsTable } from "@szl-holdings/db";
 import {
@@ -592,7 +592,7 @@ export type NycExtendedIngestionJobPayload = {
 
 export const NYC_EXTENDED_INGESTION_JOB_TYPE = "terra_nyc_extended_ingestion";
 
-jobQueue.register<NycExtendedIngestionJobPayload>(NYC_EXTENDED_INGESTION_JOB_TYPE, async (job) => {
+durableJobQueue.register<NycExtendedIngestionJobPayload>(NYC_EXTENDED_INGESTION_JOB_TYPE, async (job) => {
   const { sources } = job.payload;
   logger.info({ jobId: job.id, sources }, "Starting NYC extended open data ingestion job");
 
@@ -669,7 +669,12 @@ jobQueue.register<NycExtendedIngestionJobPayload>(NYC_EXTENDED_INGESTION_JOB_TYP
   }
 });
 
-export function scheduleNycExtendedIngestionJob(
+/**
+ * @deprecated NYC extended ingestion is now scheduled via the durable DB cron scheduler
+ * (schedule name "nyc_extended_ingestion_8h", 0 *\/8 * * *). This function is no longer
+ * called and will be removed in a future cleanup. Do not re-export or re-invoke.
+ */
+function scheduleNycExtendedIngestionJob(
   sources: NycExtendedIngestionJobPayload["sources"] = [
     "rolling_sales",
     "tax_lien_sale_list",
@@ -688,8 +693,8 @@ export function scheduleNycExtendedIngestionJob(
   logger.info({ intervalMs, sources }, "Scheduling NYC Open Data extended ingestion job");
 
   const runJob = () => {
-    jobQueue
-      .enqueue<NycExtendedIngestionJobPayload>(NYC_EXTENDED_INGESTION_JOB_TYPE, { sources })
+    durableJobQueue
+      .enqueue(NYC_EXTENDED_INGESTION_JOB_TYPE, { sources } as NycExtendedIngestionJobPayload)
       .catch(err => logger.error({ err }, "Failed to enqueue NYC extended ingestion job"));
   };
 

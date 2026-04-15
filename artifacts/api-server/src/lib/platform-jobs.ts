@@ -1,5 +1,6 @@
 import { logger } from "./logger";
-import { jobQueue, JOB_TYPES } from "./job-queue";
+import { JOB_TYPES } from "./job-queue";
+import { durableJobQueue } from "@szl-holdings/workflow-engine";
 import { serverTelemetry } from "@szl-holdings/observability";
 import { db, pool, platformJobRunsTable } from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
@@ -108,7 +109,7 @@ function buildJobContext(job: { id: string; type: string; payload: unknown }): J
   };
 }
 
-jobQueue.register(PLATFORM_JOB_TYPES.LYTE_DIGEST, async (job) => {
+durableJobQueue.register(PLATFORM_JOB_TYPES.LYTE_DIGEST, async (job) => {
   const ctx = buildJobContext(job);
   const { workspaceId, period = "daily" } = ctx.payload as { workspaceId?: number; period?: string };
   const domain = DOMAIN_MAP[job.type]!;
@@ -152,7 +153,7 @@ jobQueue.register(PLATFORM_JOB_TYPES.LYTE_DIGEST, async (job) => {
   logger.info({ jobId: job.id, correlationId: ctx.correlationId, ...result }, "lyte_digest: complete");
 });
 
-jobQueue.register(PLATFORM_JOB_TYPES.READINESS_DIGEST, async (job) => {
+durableJobQueue.register(PLATFORM_JOB_TYPES.READINESS_DIGEST, async (job) => {
   const ctx = buildJobContext(job);
   const { programId } = ctx.payload as { programId?: number };
   const domain = DOMAIN_MAP[job.type]!;
@@ -193,7 +194,7 @@ jobQueue.register(PLATFORM_JOB_TYPES.READINESS_DIGEST, async (job) => {
   logger.info({ jobId: job.id, correlationId: ctx.correlationId, blockerCount, avgScore }, "readiness_digest: complete");
 });
 
-jobQueue.register(PLATFORM_JOB_TYPES.EXCEPTION_SUMMARY, async (job) => {
+durableJobQueue.register(PLATFORM_JOB_TYPES.EXCEPTION_SUMMARY, async (job) => {
   const ctx = buildJobContext(job);
   const { domain: payloadDomain } = ctx.payload as { domain?: string };
   const domain = payloadDomain ?? DOMAIN_MAP[job.type] ?? "platform";
@@ -215,7 +216,7 @@ jobQueue.register(PLATFORM_JOB_TYPES.EXCEPTION_SUMMARY, async (job) => {
   logger.info({ jobId: job.id, correlationId: ctx.correlationId, exceptionCount, domain }, "exception_summary: complete");
 });
 
-jobQueue.register(PLATFORM_JOB_TYPES.ARTIFACT_CLEANUP, async (job) => {
+durableJobQueue.register(PLATFORM_JOB_TYPES.ARTIFACT_CLEANUP, async (job) => {
   const ctx = buildJobContext(job);
   const { olderThanDays = 30, dryRun = true } = ctx.payload as { olderThanDays?: number; dryRun?: boolean };
   const domain = DOMAIN_MAP[job.type]!;
@@ -252,7 +253,7 @@ jobQueue.register(PLATFORM_JOB_TYPES.ARTIFACT_CLEANUP, async (job) => {
   logger.info({ jobId: job.id, correlationId: ctx.correlationId, dryRun, cleanedCount, failedCount }, "artifact_cleanup: complete");
 });
 
-jobQueue.register(PLATFORM_JOB_TYPES.FEATURE_FLAG_SYNC, async (job) => {
+durableJobQueue.register(PLATFORM_JOB_TYPES.FEATURE_FLAG_SYNC, async (job) => {
   const ctx = buildJobContext(job);
   const domain = DOMAIN_MAP[job.type]!;
   logger.info({ jobId: job.id, correlationId: ctx.correlationId }, "feature_flag_sync: starting");
@@ -283,7 +284,7 @@ jobQueue.register(PLATFORM_JOB_TYPES.FEATURE_FLAG_SYNC, async (job) => {
   logger.info({ jobId: job.id, correlationId: ctx.correlationId, flagCount }, "feature_flag_sync: complete");
 });
 
-jobQueue.register(PLATFORM_JOB_TYPES.SIGNAL_NORMALIZATION, async (job) => {
+durableJobQueue.register(PLATFORM_JOB_TYPES.SIGNAL_NORMALIZATION, async (job) => {
   const ctx = buildJobContext(job);
   const { workspaceId } = ctx.payload as { workspaceId?: number };
   const domain = DOMAIN_MAP[job.type]!;
@@ -320,7 +321,7 @@ jobQueue.register(PLATFORM_JOB_TYPES.SIGNAL_NORMALIZATION, async (job) => {
   logger.info({ jobId: job.id, correlationId: ctx.correlationId, normalizedCount }, "signal_normalization: complete");
 });
 
-jobQueue.register(PLATFORM_JOB_TYPES.STALE_ACTION_SCAN, async (job) => {
+durableJobQueue.register(PLATFORM_JOB_TYPES.STALE_ACTION_SCAN, async (job) => {
   const ctx = buildJobContext(job);
   const { staleAfterHours = 72 } = ctx.payload as { staleAfterHours?: number };
   const domain = DOMAIN_MAP[job.type]!;
@@ -366,7 +367,7 @@ jobQueue.register(PLATFORM_JOB_TYPES.STALE_ACTION_SCAN, async (job) => {
   logger.info({ jobId: job.id, correlationId: ctx.correlationId, staleCount }, "stale_action_scan: complete");
 });
 
-jobQueue.register(PLATFORM_JOB_TYPES.VESSEL_ETA_REFRESH, async (job) => {
+durableJobQueue.register(PLATFORM_JOB_TYPES.VESSEL_ETA_REFRESH, async (job) => {
   const ctx = buildJobContext(job);
   const { fleetId } = ctx.payload as { fleetId?: number };
   const domain = DOMAIN_MAP[job.type]!;
@@ -403,7 +404,7 @@ jobQueue.register(PLATFORM_JOB_TYPES.VESSEL_ETA_REFRESH, async (job) => {
   logger.info({ jobId: job.id, correlationId: ctx.correlationId, vesselCount }, "vessel_eta_refresh: complete");
 });
 
-jobQueue.register(PLATFORM_JOB_TYPES.ROUTE_PRESSURE_SCAN, async (job) => {
+durableJobQueue.register(PLATFORM_JOB_TYPES.ROUTE_PRESSURE_SCAN, async (job) => {
   const ctx = buildJobContext(job);
   const { region } = ctx.payload as { region?: string };
   const domain = DOMAIN_MAP[job.type]!;
@@ -451,7 +452,7 @@ jobQueue.register(PLATFORM_JOB_TYPES.ROUTE_PRESSURE_SCAN, async (job) => {
   logger.info({ jobId: job.id, correlationId: ctx.correlationId, routeCount, highPressureCount }, "route_pressure_scan: complete");
 });
 
-jobQueue.register(PLATFORM_JOB_TYPES.WORKFLOW_RETRY, async (job) => {
+durableJobQueue.register(PLATFORM_JOB_TYPES.WORKFLOW_RETRY, async (job) => {
   const ctx = buildJobContext(job);
   const { workflowRunId: targetRunId, reason } = ctx.payload as { workflowRunId: string; reason?: string };
   if (!targetRunId) throw new Error("workflowRunId is required for workflow_retry");
@@ -472,7 +473,7 @@ jobQueue.register(PLATFORM_JOB_TYPES.WORKFLOW_RETRY, async (job) => {
   logger.info({ jobId: job.id, correlationId: ctx.correlationId, targetRunId }, "workflow_retry: complete");
 });
 
-jobQueue.register(PLATFORM_JOB_TYPES.ARTIFACT_GENERATION, async (job) => {
+durableJobQueue.register(PLATFORM_JOB_TYPES.ARTIFACT_GENERATION, async (job) => {
   const ctx = buildJobContext(job);
   const { artifactType, artifactId, requestedBy } = ctx.payload as {
     artifactType: string;
@@ -512,7 +513,7 @@ jobQueue.register(PLATFORM_JOB_TYPES.ARTIFACT_GENERATION, async (job) => {
   logger.info({ jobId: job.id, correlationId: ctx.correlationId, artifactType, generatedSize }, "artifact_generation: complete");
 });
 
-jobQueue.register(PLATFORM_JOB_TYPES.ROUTE_ECONOMICS_RECOMPUTE, async (job) => {
+durableJobQueue.register(PLATFORM_JOB_TYPES.ROUTE_ECONOMICS_RECOMPUTE, async (job) => {
   const ctx = buildJobContext(job);
   const { routeId } = ctx.payload as { routeId?: number };
   const domain = DOMAIN_MAP[job.type]!;
@@ -532,7 +533,7 @@ jobQueue.register(PLATFORM_JOB_TYPES.ROUTE_ECONOMICS_RECOMPUTE, async (job) => {
   logger.info({ jobId: job.id, correlationId: ctx.correlationId, routeId }, "route_economics_recompute: complete");
 });
 
-jobQueue.register(PLATFORM_JOB_TYPES.READINESS_SCORE_RECOMPUTE, async (job) => {
+durableJobQueue.register(PLATFORM_JOB_TYPES.READINESS_SCORE_RECOMPUTE, async (job) => {
   const ctx = buildJobContext(job);
   const { programId, dimensionId } = ctx.payload as { programId?: number; dimensionId?: number };
   const domain = DOMAIN_MAP[job.type]!;
@@ -552,7 +553,7 @@ jobQueue.register(PLATFORM_JOB_TYPES.READINESS_SCORE_RECOMPUTE, async (job) => {
   logger.info({ jobId: job.id, correlationId: ctx.correlationId, programId, dimensionId }, "readiness_score_recompute: complete");
 });
 
-jobQueue.register(PLATFORM_JOB_TYPES.SALESFORCE_OPPORTUNITY_SYNC, async (job) => {
+durableJobQueue.register(PLATFORM_JOB_TYPES.SALESFORCE_OPPORTUNITY_SYNC, async (job) => {
   const ctx = buildJobContext(job);
   const domain = DOMAIN_MAP[job.type]!;
   logger.info({ jobId: job.id, correlationId: ctx.correlationId }, "hourly_salesforce_opportunity_sync: starting");
@@ -625,7 +626,7 @@ jobQueue.register(PLATFORM_JOB_TYPES.SALESFORCE_OPPORTUNITY_SYNC, async (job) =>
   logger.info({ jobId: job.id, correlationId: ctx.correlationId, opportunitiesScanned, signalsIngested }, "hourly_salesforce_opportunity_sync: complete");
 });
 
-jobQueue.register(PLATFORM_JOB_TYPES.JIRA_SPRINT_HEALTH_SCAN, async (job) => {
+durableJobQueue.register(PLATFORM_JOB_TYPES.JIRA_SPRINT_HEALTH_SCAN, async (job) => {
   const ctx = buildJobContext(job);
   const domain = DOMAIN_MAP[job.type]!;
   logger.info({ jobId: job.id, correlationId: ctx.correlationId }, "hourly_jira_sprint_health_scan: starting");
@@ -718,45 +719,5 @@ let platformScheduledJobsStarted = false;
 export function startPlatformScheduledJobs(): void {
   if (platformScheduledJobsStarted) return;
   platformScheduledJobsStarted = true;
-
-  const HOUR_MS = 60 * 60 * 1000;
-  const DAY_MS = 24 * HOUR_MS;
-
-  const now = new Date();
-  const nextDailyDigest = new Date(now);
-  nextDailyDigest.setUTCHours(7, 0, 0, 0);
-  if (nextDailyDigest <= now) nextDailyDigest.setUTCDate(nextDailyDigest.getUTCDate() + 1);
-  const msUntilDailyDigest = nextDailyDigest.getTime() - now.getTime();
-
-  setTimeout(async () => {
-    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.LYTE_DIGEST, { period: "daily" }, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue lyte_digest"); }
-    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.READINESS_DIGEST, {}, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue readiness_digest"); }
-    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.EXCEPTION_SUMMARY, { domain: "platform" }, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue exception_summary"); }
-    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.ARTIFACT_CLEANUP, { olderThanDays: 30, dryRun: false }, { maxRetries: 1 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue artifact_cleanup"); }
-    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.FEATURE_FLAG_SYNC, {}, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue feature_flag_sync"); }
-
-    setInterval(async () => {
-      try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.LYTE_DIGEST, { period: "daily" }, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue lyte_digest"); }
-      try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.READINESS_DIGEST, {}, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue readiness_digest"); }
-      try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.EXCEPTION_SUMMARY, { domain: "platform" }, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue exception_summary"); }
-      try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.ARTIFACT_CLEANUP, { olderThanDays: 30, dryRun: false }, { maxRetries: 1 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue artifact_cleanup"); }
-      try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.FEATURE_FLAG_SYNC, {}, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue feature_flag_sync"); }
-    }, DAY_MS);
-  }, msUntilDailyDigest);
-
-  setInterval(async () => {
-    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.SIGNAL_NORMALIZATION, {}, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue signal_normalization"); }
-    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.STALE_ACTION_SCAN, { staleAfterHours: 72 }, { maxRetries: 1 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue stale_action_scan"); }
-    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.VESSEL_ETA_REFRESH, {}, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue vessel_eta_refresh"); }
-    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.ROUTE_PRESSURE_SCAN, {}, { maxRetries: 1 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue route_pressure_scan"); }
-    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.SALESFORCE_OPPORTUNITY_SYNC, {}, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue hourly_salesforce_opportunity_sync"); }
-    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.JIRA_SPRINT_HEALTH_SCAN, {}, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue hourly_jira_sprint_health_scan"); }
-  }, HOUR_MS);
-
-  setTimeout(async () => {
-    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.FEATURE_FLAG_SYNC, {}, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue initial feature_flag_sync"); }
-    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.SIGNAL_NORMALIZATION, {}, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue initial signal_normalization"); }
-  }, 60_000);
-
-  logger.info("Platform scheduled jobs initialized: daily digests (24h), hourly scans (1h), initial boot jobs (60s)");
+  logger.info("Platform scheduled jobs now managed by durable cron scheduler — in-memory timers disabled");
 }
