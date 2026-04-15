@@ -7,57 +7,6 @@ import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
-async function ensureTables(): Promise<void> {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS alloy_meetings (
-      id TEXT PRIMARY KEY,
-      title TEXT NOT NULL,
-      meeting_date TIMESTAMP,
-      duration_minutes INTEGER,
-      attendees JSONB DEFAULT '[]',
-      transcript TEXT,
-      recording_url TEXT,
-      structured_notes JSONB DEFAULT '{}',
-      decisions JSONB DEFAULT '[]',
-      action_items JSONB DEFAULT '[]',
-      follow_up_draft TEXT,
-      summary TEXT,
-      status TEXT NOT NULL DEFAULT 'processing',
-      context_compiled JSONB DEFAULT '{}',
-      workflow_ids JSONB DEFAULT '[]',
-      metadata JSONB DEFAULT '{}',
-      created_by INTEGER,
-      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-    );
-    CREATE TABLE IF NOT EXISTS alloy_meeting_action_items (
-      id TEXT PRIMARY KEY,
-      meeting_id TEXT NOT NULL REFERENCES alloy_meetings(id) ON DELETE CASCADE,
-      title TEXT NOT NULL,
-      description TEXT,
-      assignee TEXT,
-      assignee_email TEXT,
-      due_date TEXT,
-      priority TEXT NOT NULL DEFAULT 'medium',
-      status TEXT NOT NULL DEFAULT 'open',
-      alloy_task_id TEXT,
-      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-    );
-    CREATE TABLE IF NOT EXISTS alloy_meeting_decisions (
-      id TEXT PRIMARY KEY,
-      meeting_id TEXT NOT NULL REFERENCES alloy_meetings(id) ON DELETE CASCADE,
-      title TEXT NOT NULL,
-      description TEXT,
-      decided_by TEXT,
-      impact TEXT,
-      rationale TEXT,
-      created_at TIMESTAMP NOT NULL DEFAULT NOW()
-    );
-  `);
-}
-
-ensureTables().catch((err) => logger.warn({ err }, "alloy-meetings: table init failed"));
 
 interface ExtractedMeetingData {
   summary: string;

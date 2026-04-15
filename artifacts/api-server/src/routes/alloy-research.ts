@@ -6,42 +6,6 @@ import { openai } from "@szl-holdings/integrations-openai-ai-server";
 
 const router: IRouter = Router();
 
-async function ensureResearchTables(): Promise<void> {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS alloy_research_spaces (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      query TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'idle',
-      findings JSONB NOT NULL DEFAULT '[]',
-      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      last_run_at TIMESTAMP,
-      metadata JSONB DEFAULT '{}'
-    );
-    CREATE TABLE IF NOT EXISTS alloy_browser_tasks (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      start_url TEXT NOT NULL,
-      objective TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'idle',
-      actions JSONB NOT NULL DEFAULT '[]',
-      planned_actions JSONB,
-      error TEXT,
-      duration_ms INTEGER,
-      started_at TIMESTAMP,
-      completed_at TIMESTAMP,
-      metadata JSONB DEFAULT '{}'
-    );
-    CREATE TABLE IF NOT EXISTS alloy_url_allowlist (
-      id TEXT PRIMARY KEY,
-      pattern TEXT NOT NULL,
-      scope TEXT NOT NULL DEFAULT 'read',
-      created_at TIMESTAMP NOT NULL DEFAULT NOW()
-    );
-  `);
-}
-
-ensureResearchTables().catch(() => {});
 
 function classifySourceTrust(sourceType: string): number {
   const trustMap: Record<string, number> = {

@@ -12,20 +12,7 @@ import { startDomainNotificationGenerators, stopDomainNotificationGenerators } f
 import { startSelfMonitoring, stopSelfMonitoring } from "./lib/self-monitor";
 import { agentScheduler, registerDefaultSchedules } from "./lib/agent-scheduler";
 import { knowledgeStore } from "./lib/knowledge-store";
-import { ensureAlloyTables } from "./lib/alloy-migrations";
-import { ensureAlloyGovernanceTables } from "./lib/alloy-governance-migrations";
-import { ensureA2ATables } from "./lib/a2a-migrations";
-import { ensurePlatformOpsTables } from "./lib/platform-ops-migrations";
-import { ensureLyteDashboardsTable } from "./lib/lyte-dashboard-migrations";
-import { ensureExportJobsTable } from "./lib/export-migrations";
-import { ensureFeedbackTables } from "./lib/feedback-migrations";
-import { ensureTerraActionItemsTable } from "./lib/terra-action-items-migration";
-import { ensureTradecraftTables } from "./lib/tradecraft-migrations";
-import { ensureOutcomeGraphTables } from "./lib/outcome-graph-migrations";
-import { ensureCognitiveLearningTables } from "./lib/cognitive-learning-migrations";
-import { ensureDistributionOsTables } from "./lib/distribution-os-migrations";
-import { ensureAlloySkillsTables } from "./lib/alloy-skills-migrations";
-import { ensureRmmTables } from "./lib/rmm-migrations";
+import { runMigrations } from "./lib/run-migrations";
 import "./lib/terra-nyc-ingestion";
 import { scheduleNycIngestionJob } from "./lib/terra-nyc-ingestion";
 import "./lib/terra-nyc-extended-ingestion";
@@ -120,31 +107,14 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
   });
   scheduleIntelligenceRefresh();
 
-  import("@szl-holdings/ai-engine")
-    .then(({ startCognitiveLearning }) => startCognitiveLearning())
-    .catch(err => logger.warn({ err }, "[cognitive] Cognitive learning startup failed (non-fatal)"));
-
-  ensureA2ATables()
-    .catch(err => logger.warn({ err }, "[a2a] A2A table migration failed (non-fatal)"));
-
-  ensureRmmTables()
-    .catch(err => logger.warn({ err }, "[rmm] RMM table migration failed (non-fatal)"));
-
-  ensureAlloyTables()
-    .then(() => ensureAlloyGovernanceTables())
-    .then(() => ensurePlatformOpsTables())
-    .then(() => ensureLyteDashboardsTable())
-    .then(() => ensureExportJobsTable())
-    .then(() => ensureFeedbackTables())
-    .then(() => ensureTerraActionItemsTable())
-    .then(() => ensureTradecraftTables())
-    .then(() => ensureOutcomeGraphTables())
-    .then(() => ensureCognitiveLearningTables())
-    .then(() => ensureDistributionOsTables())
-    .then(() => ensureAlloySkillsTables())
+  runMigrations()
     .then(() => ensurePlatformFlags())
     .then(() => knowledgeStore.loadFromDb())
     .then(() => {
+      import("@szl-holdings/ai-engine")
+        .then(({ startCognitiveLearning }) => startCognitiveLearning())
+        .catch(err => logger.warn({ err }, "[cognitive] Cognitive learning startup failed (non-fatal)"));
+
       registerDefaultSchedules();
       seedPlatformData().catch(err => {
         logger.warn({ err }, "[seed-platform] Seed failed (non-fatal)");

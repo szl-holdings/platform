@@ -3,6 +3,8 @@ import {
   sendSuccess,
   sendCreated,
   sendBadRequest,
+  sendNotFound,
+  sendForbidden,
   handleRouteError,
 } from "../lib/api-response";
 import { authMiddleware, requireRole } from "../middlewares/auth";
@@ -23,8 +25,35 @@ import type {
   CovenantResource,
 } from "@szl-holdings/covenant-policy";
 import type { PrismRole, PrismDomain } from "@szl-holdings/prism-bus";
+import { db, covenantSimulationRuns, policySimScenarios } from "@szl-holdings/db";
+import { and, desc, eq } from "drizzle-orm";
+import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
+
+covenantEngine.registerSimulateHook((request, decision, explanation) => {
+  db.insert(covenantSimulationRuns).values({
+    requestId: decision.requestId,
+    subjectRoles: decision.subject.roles as string[],
+    subjectUserId: decision.subject.userId ?? null,
+    subjectTenantId: decision.subject.tenantId ?? null,
+    resourceType: decision.resource.type,
+    resourceId: decision.resource.id ?? null,
+    resourceDomain: decision.resource.domain ?? null,
+    action: decision.action,
+    effect: decision.effect,
+    allowed: decision.allowed ? 1 : 0,
+    matchedPolicies: decision.matchedPolicies,
+    deniedBy: decision.deniedBy ?? null,
+    reason: decision.reason ?? null,
+    explanation,
+    context: request.context ?? null,
+    evaluatedAt: decision.evaluatedAt,
+    durationMs: decision.durationMs,
+  }).catch(err => {
+    logger.warn({ err }, "[covenant-engine] Failed to persist simulation run (non-fatal)");
+  });
+});
 
 router.get("/covenant/status", authMiddleware(), async (_req: Request, res: Response) => {
   try {
@@ -299,6 +328,163 @@ router.get("/covenant/high-risk-actions", authMiddleware(), async (_req: Request
     sendSuccess(res, { highRiskActions: actions, count: actions.length });
   } catch (err) {
     handleRouteError(res, err, "COVENANT high-risk-actions");
+  }
+});
+
+router.get("/covenant/simulation-history", authMiddleware(), requireRole("admin", "super_admin"), async (_req: Request, res: Response) => {
+  try {
+    const runs = await db.select().from(covenantSimulationRuns).orderBy(desc(covenantSimulationRuns.createdAt)).limit(100);
+    sendSuccess(res, { runs, count: runs.length });
+  } catch (err) {
+    handleRouteError(res, err, "COVENANT simulation-history");
+  }
+});
+
+router.get("/covenant/scenarios", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const orgId = req.user?.orgs?.[0]?.orgId ?? null;
+    const isAdmin = req.user?.roles?.includes("admin") || req.user?.roles?.includes("super_admin");
+    if (!orgId && !isAdmin) {
+      sendSuccess(res, { scenarios: [], count: 0 });
+      return;
+    }
+    const scenarios = isAdmin && !orgId
+      ? await db.select().from(policySimScenarios).orderBy(desc(policySimScenarios.updatedAt))
+      : await db.select().from(policySimScenarios).where(eq(policySimScenarios.orgId, orgId!)).orderBy(desc(policySimScenarios.updatedAt));
+    sendSuccess(res, { scenarios, count: scenarios.length });
+  } catch (err) {
+    handleRouteError(res, err, "COVENANT scenarios list");
+  }
+});
+
+router.post("/covenant/scenarios", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const { name, description, subject, resource, action, context } = req.body as {
+      name?: string;
+      description?: string;
+      subject?: Partial<CovenantSubject>;
+      resource?: Partial<CovenantResource>;
+      action?: string;
+      context?: Record<string, unknown>;
+    };
+
+    if (!name || !subject?.roles || !resource?.type || !action) {
+      sendBadRequest(res, "name, subject.roles, resource.type, and action are required");
+      return;
+    }
+
+    const orgId = req.user?.orgs?.[0]?.orgId ?? null;
+    const createdBy = req.user?.id?.toString() ?? null;
+
+    const { decision, explanation } = covenantEngine.simulate({
+      subject: {
+        roles: subject.roles as PrismRole[],
+        userId: subject.userId ?? null,
+        tenantId: subject.tenantId ?? null,
+        attributes: subject.attributes,
+      },
+      resource: {
+        type: resource.type,
+        id: resource.id ?? null,
+        domain: resource.domain as PrismDomain ?? null,
+        actionClass: resource.actionClass ?? null,
+        attributes: resource.attributes,
+      },
+      action: action as CovenantPermission,
+      context,
+    });
+
+    const [scenario] = await db.insert(policySimScenarios).values({
+      name,
+      description: description ?? null,
+      subjectRoles: subject.roles as string[],
+      subjectUserId: subject.userId ?? null,
+      subjectTenantId: subject.tenantId ?? null,
+      resourceType: resource.type,
+      resourceId: resource.id ?? null,
+      resourceDomain: resource.domain ?? null,
+      action,
+      context: context ?? null,
+      lastResult: { decision, explanation } as unknown as Record<string, unknown>,
+      lastRunAt: new Date(),
+      runCount: 1,
+      createdBy,
+      orgId,
+    }).returning();
+
+    sendCreated(res, { scenario, decision, explanation, ui: formatDecisionForUI(decision) });
+  } catch (err) {
+    handleRouteError(res, err, "COVENANT scenarios create");
+  }
+});
+
+router.get("/covenant/scenarios/:id", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(String(req.params["id"] ?? "0"), 10);
+    const orgId = req.user?.orgs?.[0]?.orgId ?? null;
+    const isAdmin = req.user?.roles?.includes("admin") || req.user?.roles?.includes("super_admin");
+    if (!isAdmin && !orgId) { sendForbidden(res, "Organization context required"); return; }
+    const [scenario] = isAdmin
+      ? await db.select().from(policySimScenarios).where(eq(policySimScenarios.id, id))
+      : await db.select().from(policySimScenarios).where(and(eq(policySimScenarios.id, id), eq(policySimScenarios.orgId, orgId!)));
+    if (!scenario) { sendNotFound(res, "Scenario"); return; }
+    sendSuccess(res, scenario);
+  } catch (err) {
+    handleRouteError(res, err, "COVENANT scenarios get");
+  }
+});
+
+router.post("/covenant/scenarios/:id/run", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(String(req.params["id"] ?? "0"), 10);
+    const orgId = req.user?.orgs?.[0]?.orgId ?? null;
+    const isAdmin = req.user?.roles?.includes("admin") || req.user?.roles?.includes("super_admin");
+    if (!isAdmin && !orgId) { sendForbidden(res, "Organization context required"); return; }
+    const [scenario] = isAdmin
+      ? await db.select().from(policySimScenarios).where(eq(policySimScenarios.id, id))
+      : await db.select().from(policySimScenarios).where(and(eq(policySimScenarios.id, id), eq(policySimScenarios.orgId, orgId!)));
+    if (!scenario) { sendNotFound(res, "Scenario"); return; }
+
+    const { decision, explanation } = covenantEngine.simulate({
+      subject: {
+        roles: scenario.subjectRoles as PrismRole[],
+        userId: scenario.subjectUserId ?? null,
+        tenantId: scenario.subjectTenantId ?? null,
+      },
+      resource: {
+        type: scenario.resourceType,
+        id: scenario.resourceId ?? null,
+        domain: scenario.resourceDomain as PrismDomain ?? null,
+      },
+      action: scenario.action as CovenantPermission,
+      context: scenario.context as Record<string, unknown> | undefined,
+    });
+
+    const [updated] = await db.update(policySimScenarios).set({
+      lastResult: { decision, explanation } as unknown as Record<string, unknown>,
+      lastRunAt: new Date(),
+      runCount: (scenario.runCount ?? 0) + 1,
+      updatedAt: new Date(),
+    }).where(eq(policySimScenarios.id, id)).returning();
+
+    sendSuccess(res, { scenario: updated, decision, explanation, ui: formatDecisionForUI(decision) });
+  } catch (err) {
+    handleRouteError(res, err, "COVENANT scenarios run");
+  }
+});
+
+router.delete("/covenant/scenarios/:id", authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(String(req.params["id"] ?? "0"), 10);
+    const orgId = req.user?.orgs?.[0]?.orgId ?? null;
+    const isAdmin = req.user?.roles?.includes("admin") || req.user?.roles?.includes("super_admin");
+    const [deleted] = isAdmin
+      ? await db.delete(policySimScenarios).where(eq(policySimScenarios.id, id)).returning()
+      : await db.delete(policySimScenarios).where(and(eq(policySimScenarios.id, id), eq(policySimScenarios.orgId, orgId!))).returning();
+    if (!deleted) { sendNotFound(res, "Scenario"); return; }
+    sendSuccess(res, { deleted: true });
+  } catch (err) {
+    handleRouteError(res, err, "COVENANT scenarios delete");
   }
 });
 

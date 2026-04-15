@@ -4,7 +4,6 @@ import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendError, sendNotFound, sendBadRequest } from "../lib/api-response";
 import type { AuthenticatedUser } from "../middlewares/auth";
 import {
-  ensureDecisionTables,
   insertDecision,
   updateDecisionStatus,
   listDecisions,
@@ -54,7 +53,6 @@ const router = Router();
 const auditLog: Array<Record<string, unknown>> = [];
 const MAX_AUDIT_LOG = 500;
 
-ensureDecisionTables().catch(err => logger.warn({ err }, "ensureDecisionTables failed (non-fatal)"));
 
 function writeAudit(entry: Record<string, unknown>): void {
   auditLog.unshift({ ...entry, timestamp: new Date().toISOString() });

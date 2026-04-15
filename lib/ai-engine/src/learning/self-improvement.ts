@@ -28,55 +28,8 @@ export interface SelfReflectionOutput {
   computedAt: string;
 }
 
-const BOOTSTRAP_SQL = `
-CREATE TABLE IF NOT EXISTS agent_performance_snapshots (
-  id SERIAL PRIMARY KEY,
-  agent_id TEXT NOT NULL,
-  period TEXT NOT NULL,
-  total_decisions INTEGER NOT NULL DEFAULT 0,
-  accepted_decisions INTEGER NOT NULL DEFAULT 0,
-  rejected_decisions INTEGER NOT NULL DEFAULT 0,
-  overridden_decisions INTEGER NOT NULL DEFAULT 0,
-  avg_confidence REAL NOT NULL DEFAULT 0.5,
-  calibration_bias REAL NOT NULL DEFAULT 0,
-  accuracy_score REAL NOT NULL DEFAULT 0.5,
-  confidence_trend TEXT NOT NULL DEFAULT 'stable',
-  flagged_for_review BOOLEAN NOT NULL DEFAULT false,
-  review_reason TEXT,
-  computed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS agent_self_reflections (
-  id SERIAL PRIMARY KEY,
-  agent_id TEXT NOT NULL,
-  reflection_period TEXT NOT NULL,
-  key_observations JSONB NOT NULL DEFAULT '[]',
-  adjustment_recommendations JSONB NOT NULL DEFAULT '[]',
-  confidence_adjustment REAL NOT NULL DEFAULT 0,
-  should_request_human_review BOOLEAN NOT NULL DEFAULT false,
-  human_review_reason TEXT,
-  performance_score REAL NOT NULL DEFAULT 0.5,
-  computed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS agent_perf_snapshots_agent_idx ON agent_performance_snapshots(agent_id);
-CREATE INDEX IF NOT EXISTS agent_self_reflections_agent_idx ON agent_self_reflections(agent_id);
-`;
-
-let bootstrapped = false;
-
-async function ensureTables(): Promise<void> {
-  if (bootstrapped) return;
-  try {
-    await pool.query(BOOTSTRAP_SQL);
-    bootstrapped = true;
-  } catch (err) {
-    console.warn("[self-improvement] Table bootstrap failed (non-fatal):", err);
-  }
-}
 
 export async function computeAgentPerformanceSnapshot(agentId: string): Promise<AgentPerformanceSnapshot> {
-  await ensureTables();
 
   try {
     const period = new Date().toISOString().slice(0, 7);
@@ -168,7 +121,6 @@ export async function computeAgentPerformanceSnapshot(agentId: string): Promise<
 }
 
 export async function runSelfReflection(agentId: string): Promise<SelfReflectionOutput> {
-  await ensureTables();
   const snapshot = await computeAgentPerformanceSnapshot(agentId);
 
   const observations: string[] = [];
@@ -232,7 +184,6 @@ export async function runSelfReflection(agentId: string): Promise<SelfReflection
 }
 
 export async function getAgentSelfReflectionHistory(agentId: string, limit = 10): Promise<SelfReflectionOutput[]> {
-  await ensureTables();
   try {
     const result = await pool.query(`
       SELECT * FROM agent_self_reflections WHERE agent_id = $1 ORDER BY computed_at DESC LIMIT $2
@@ -255,7 +206,6 @@ export async function getAgentSelfReflectionHistory(agentId: string, limit = 10)
 }
 
 export async function getAllAgentPerformanceSnapshots(): Promise<AgentPerformanceSnapshot[]> {
-  await ensureTables();
   try {
     const result = await pool.query(`
       SELECT DISTINCT ON (agent_id) * FROM agent_performance_snapshots ORDER BY agent_id, computed_at DESC

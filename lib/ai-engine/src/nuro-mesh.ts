@@ -1419,8 +1419,7 @@ async function rehydrateSelfModelFromDb(): Promise<void> {
 
 async function getRagContext(query: string): Promise<string> {
   try {
-    const { hybridSearch, ensureRagTables } = await import("./rag-vector-store.js");
-    await ensureRagTables();
+    const { hybridSearch } = await import("./rag-vector-store.js");
 
     let queryEmbedding: number[] | null = null;
     try {

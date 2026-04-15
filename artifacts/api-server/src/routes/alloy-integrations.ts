@@ -9,61 +9,6 @@ import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
-async function ensureTables(): Promise<void> {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS alloy_integration_connections (
-      id TEXT PRIMARY KEY,
-      integration_type TEXT NOT NULL,
-      integration_name TEXT NOT NULL,
-      display_name TEXT,
-      tenant_id TEXT,
-      auth_type TEXT NOT NULL DEFAULT 'webhook',
-      status TEXT NOT NULL DEFAULT 'pending',
-      is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
-      scope JSONB DEFAULT '[]',
-      approval_class TEXT NOT NULL DEFAULT 'standard',
-      config JSONB DEFAULT '{}',
-      rate_limit_rpm INTEGER DEFAULT 60,
-      rate_limit_rph INTEGER DEFAULT 1000,
-      failure_count INTEGER DEFAULT 0,
-      last_failure_at TIMESTAMP,
-      last_success_at TIMESTAMP,
-      metadata JSONB DEFAULT '{}',
-      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-    );
-    CREATE TABLE IF NOT EXISTS alloy_integration_events (
-      id TEXT PRIMARY KEY,
-      connection_id TEXT NOT NULL,
-      integration_type TEXT NOT NULL,
-      event_type TEXT NOT NULL,
-      direction TEXT NOT NULL DEFAULT 'inbound',
-      payload JSONB,
-      status TEXT NOT NULL DEFAULT 'received',
-      error_message TEXT,
-      processed_at TIMESTAMP,
-      created_at TIMESTAMP NOT NULL DEFAULT NOW()
-    );
-    CREATE TABLE IF NOT EXISTS alloy_webhook_endpoints (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      description TEXT,
-      secret TEXT NOT NULL,
-      is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
-      allowed_events JSONB DEFAULT '["*"]',
-      target_skill TEXT,
-      target_workflow_type TEXT,
-      headers_to_capture JSONB DEFAULT '[]',
-      metadata JSONB DEFAULT '{}',
-      event_count INTEGER DEFAULT 0,
-      last_received_at TIMESTAMP,
-      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-    );
-  `);
-}
-
-ensureTables().catch((err) => logger.warn({ err }, "alloy-integrations: table init failed"));
 
 const INTEGRATION_REGISTRY = [
   {

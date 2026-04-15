@@ -1,6 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import {
-  ensureRagTables,
   getKnowledgeBaseStats,
   hybridSearch,
   deleteChunksByObjectId,
@@ -32,16 +31,8 @@ function getAllowedSensitivity(req: Request): SensitivityLevel {
   return reqIdx >= 0 && reqIdx <= maxIdx ? requested : maxAllowed;
 }
 
-let tablesReady = false;
-async function ensureTables() {
-  if (tablesReady) return;
-  await ensureRagTables();
-  tablesReady = true;
-}
-
 ragKnowledgeRouter.get("/rag/status", authMiddleware, async (_req: Request, res: Response) => {
   try {
-    await ensureTables();
     const stats = await getKnowledgeBaseStats();
     sendSuccess(res, {
       status: "operational",
@@ -54,7 +45,6 @@ ragKnowledgeRouter.get("/rag/status", authMiddleware, async (_req: Request, res:
 
 ragKnowledgeRouter.get("/rag/search", authMiddleware, async (req: Request, res: Response) => {
   try {
-    await ensureTables();
     const { q, topK = "8", domains, sourceTypes } = req.query;
 
     if (!q || typeof q !== "string" || q.trim().length < 2) {
@@ -107,7 +97,6 @@ ragKnowledgeRouter.get("/rag/search", authMiddleware, async (req: Request, res: 
 
 ragKnowledgeRouter.post("/rag/ingest/document", authMiddleware, async (req: Request, res: Response) => {
   try {
-    await ensureTables();
     const { id, title, content, domain, sensitivityLevel, source, metadata } = req.body;
 
     if (!title || !content) {
@@ -138,7 +127,6 @@ ragKnowledgeRouter.post("/rag/ingest/document", authMiddleware, async (req: Requ
 
 ragKnowledgeRouter.post("/rag/ingest/decision", authMiddleware, async (req: Request, res: Response) => {
   try {
-    await ensureTables();
     const { decisionId, recommendedAction, rationaleSummary, riskLevel, confidence, rawInput, rawOutput, createdAt } = req.body;
 
     if (!decisionId || !recommendedAction) {
@@ -164,7 +152,6 @@ ragKnowledgeRouter.post("/rag/ingest/decision", authMiddleware, async (req: Requ
 
 ragKnowledgeRouter.post("/rag/ingest/incident", authMiddleware, async (req: Request, res: Response) => {
   try {
-    await ensureTables();
     const { id, title, description, severity, status, attackTechnique, notes, detectedAt } = req.body;
 
     if (!id || !title) {
@@ -190,7 +177,6 @@ ragKnowledgeRouter.post("/rag/ingest/incident", authMiddleware, async (req: Requ
 
 ragKnowledgeRouter.post("/rag/ingest/knowledge", authMiddleware, async (req: Request, res: Response) => {
   try {
-    await ensureTables();
     const { entryId, type, domain, sourceAgent, title, summary, confidence, tags, timestamp } = req.body;
 
     if (!entryId || !title || !summary) {
@@ -229,7 +215,6 @@ ragKnowledgeRouter.delete("/rag/chunks/:objectId", authMiddleware, requireRole("
 
 ragKnowledgeRouter.post("/rag/reindex", authMiddleware, requireRole("admin"), async (req: Request, res: Response) => {
   try {
-    await ensureTables();
     logger.info("Full RAG reindex triggered");
 
     setImmediate(async () => {

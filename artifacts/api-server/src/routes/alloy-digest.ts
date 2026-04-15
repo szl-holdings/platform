@@ -9,32 +9,6 @@ import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
-async function ensureTables(): Promise<void> {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS alloy_daily_digests (
-      id TEXT PRIMARY KEY,
-      digest_date DATE NOT NULL DEFAULT CURRENT_DATE,
-      role_scope TEXT NOT NULL DEFAULT 'executive',
-      user_id INTEGER,
-      content JSONB NOT NULL DEFAULT '{}',
-      markdown_content TEXT,
-      key_decisions JSONB DEFAULT '[]',
-      pending_approvals JSONB DEFAULT '[]',
-      workflow_summary JSONB DEFAULT '{}',
-      signals_summary JSONB DEFAULT '{}',
-      metrics JSONB DEFAULT '{}',
-      suggested_priorities JSONB DEFAULT '[]',
-      delivery_channels JSONB DEFAULT '["in_app"]',
-      delivered_at JSONB DEFAULT '{}',
-      status TEXT NOT NULL DEFAULT 'draft',
-      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      UNIQUE(digest_date, role_scope, user_id)
-    );
-  `);
-}
-
-ensureTables().catch((err) => logger.warn({ err }, "alloy-digest: table init failed"));
 
 interface DigestContent {
   keyDecisions: Array<{ id: string; workflow: string; decision: string; impact: string; time: string }>;

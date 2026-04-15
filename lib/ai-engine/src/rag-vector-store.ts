@@ -25,62 +25,11 @@ export interface RagSearchResult extends RagChunk {
 
 const SENSITIVITY_ORDER: SensitivityLevel[] = ["public", "internal", "confidential", "restricted"];
 
-let _bootstrapped = false;
-
-const BOOTSTRAP_SQL = `
-CREATE EXTENSION IF NOT EXISTS vector;
-
-CREATE TABLE IF NOT EXISTS rag_knowledge_chunks (
-  id TEXT PRIMARY KEY,
-  content TEXT NOT NULL,
-  source TEXT NOT NULL,
-  source_type TEXT NOT NULL,
-  domain TEXT NOT NULL DEFAULT 'general',
-  sensitivity_level TEXT NOT NULL DEFAULT 'internal',
-  object_id TEXT,
-  chunk_index INTEGER NOT NULL DEFAULT 0,
-  chunk_hash TEXT NOT NULL,
-  metadata JSONB NOT NULL DEFAULT '{}',
-  embedding vector(1536),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS rag_chunks_source_type_idx ON rag_knowledge_chunks(source_type);
-CREATE INDEX IF NOT EXISTS rag_chunks_domain_idx ON rag_knowledge_chunks(domain);
-CREATE INDEX IF NOT EXISTS rag_chunks_sensitivity_idx ON rag_knowledge_chunks(sensitivity_level);
-CREATE INDEX IF NOT EXISTS rag_chunks_object_id_idx ON rag_knowledge_chunks(object_id);
-CREATE INDEX IF NOT EXISTS rag_chunks_created_idx ON rag_knowledge_chunks(created_at);
-
-DO $$ BEGIN
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name = 'rag_knowledge_chunks' AND column_name = 'embedding'
-    AND udt_name = 'vector'
-  ) THEN
-    CREATE INDEX IF NOT EXISTS rag_chunks_embedding_hnsw_idx
-      ON rag_knowledge_chunks USING hnsw (embedding vector_cosine_ops)
-      WITH (m = 16, ef_construction = 64);
-  END IF;
-END $$;
-`;
-
 async function getPool() {
   const { pool } = await import("@szl-holdings/db");
   return pool;
 }
 
-export async function ensureRagTables(): Promise<void> {
-  if (_bootstrapped) return;
-  try {
-    const pool = await getPool();
-    await pool.query(BOOTSTRAP_SQL);
-    _bootstrapped = true;
-    console.log("[rag-vector-store] RAG knowledge chunks table and pgvector index ensured");
-  } catch (err) {
-    console.warn("[rag-vector-store] RAG table bootstrap failed (non-fatal):", err);
-  }
-}
 
 function toVectorLiteral(embedding: number[]): string {
   return `[${embedding.join(",")}]`;

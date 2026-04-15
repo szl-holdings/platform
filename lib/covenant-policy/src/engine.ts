@@ -76,10 +76,21 @@ const HIGH_RISK_ACTIONS = new Set([
   "modify_audit_log",
 ]);
 
+export type SimulateHook = (
+  request: CovenantRequest,
+  decision: CovenantDecision,
+  explanation: string[]
+) => void;
+
 export class CovenantPolicyEngine {
   private policies: Map<string, CovenantPolicy> = new Map();
   private decisionLog: CovenantDecision[] = [];
   private readonly MAX_DECISION_LOG = 1000;
+  private simulateHooks: SimulateHook[] = [];
+
+  registerSimulateHook(hook: SimulateHook): void {
+    this.simulateHooks.push(hook);
+  }
 
   register(policy: CovenantPolicy): void {
     this.policies.set(policy.id, policy);
@@ -187,6 +198,10 @@ export class CovenantPolicyEngine {
       explanation.push(`Matched policies: ${decision.matchedPolicies.join(", ")}`);
     } else {
       explanation.push("No policies matched — default deny applied");
+    }
+
+    for (const hook of this.simulateHooks) {
+      try { hook(request, decision, explanation); } catch { /* non-fatal */ }
     }
 
     return { decision, explanation };

@@ -9,31 +9,6 @@ import { publicSubmitLimiter } from "../middlewares/rate-limiters";
 
 const router: IRouter = Router();
 
-async function ensureContactTable(): Promise<void> {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS platform_contact_requests (
-      id SERIAL PRIMARY KEY,
-      type TEXT NOT NULL DEFAULT 'general',
-      app TEXT NOT NULL DEFAULT 'unknown',
-      name TEXT NOT NULL,
-      email TEXT NOT NULL,
-      company TEXT,
-      role TEXT,
-      message TEXT,
-      metadata JSONB,
-      status TEXT NOT NULL DEFAULT 'new',
-      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-    );
-    CREATE INDEX IF NOT EXISTS idx_contact_requests_app ON platform_contact_requests(app);
-    CREATE INDEX IF NOT EXISTS idx_contact_requests_status ON platform_contact_requests(status);
-    CREATE INDEX IF NOT EXISTS idx_contact_requests_created ON platform_contact_requests(created_at DESC);
-  `);
-}
-
-ensureContactTable().catch((err) => {
-  logger.warn({ err }, "Failed to ensure contact_requests table");
-});
 
 router.post("/contact/submit", publicSubmitLimiter, validateBody(contactSubmitSchema), async (req: Request, res: Response) => {
   try {

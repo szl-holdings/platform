@@ -8,50 +8,6 @@ import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
-async function ensureTables(): Promise<void> {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS alloy_email_triage (
-      id TEXT PRIMARY KEY,
-      subject TEXT NOT NULL,
-      sender_email TEXT NOT NULL,
-      sender_name TEXT,
-      recipient_email TEXT,
-      body_text TEXT,
-      body_html TEXT,
-      priority TEXT NOT NULL DEFAULT 'medium',
-      category TEXT NOT NULL DEFAULT 'general',
-      status TEXT NOT NULL DEFAULT 'pending',
-      ai_summary TEXT,
-      ai_intent TEXT,
-      ai_priority_score INTEGER DEFAULT 50,
-      auto_draft TEXT,
-      draft_approved BOOLEAN DEFAULT FALSE,
-      routed_to_workflow TEXT,
-      routed_at TIMESTAMP,
-      labels JSONB DEFAULT '[]',
-      alloy_signal_id TEXT,
-      metadata JSONB DEFAULT '{}',
-      received_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      processed_at TIMESTAMP,
-      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-    );
-    CREATE TABLE IF NOT EXISTS alloy_email_rules (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      description TEXT,
-      is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
-      conditions JSONB NOT NULL DEFAULT '[]',
-      action TEXT NOT NULL,
-      action_params JSONB DEFAULT '{}',
-      priority INTEGER NOT NULL DEFAULT 50,
-      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-    );
-  `);
-}
-
-ensureTables().catch((err) => logger.warn({ err }, "alloy-email: table init failed"));
 
 const EMAIL_INGEST_SECRET = process.env.ALLOY_EMAIL_INGEST_SECRET;
 

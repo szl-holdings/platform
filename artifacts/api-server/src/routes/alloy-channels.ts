@@ -8,61 +8,6 @@ import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
-async function ensureTables(): Promise<void> {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS alloy_channel_configs (
-      id TEXT PRIMARY KEY,
-      channel_type TEXT NOT NULL DEFAULT 'slack',
-      channel_id TEXT NOT NULL,
-      channel_name TEXT,
-      workspace_id TEXT,
-      trust_level TEXT NOT NULL DEFAULT 'standard',
-      allowed_skills JSONB DEFAULT '[]',
-      approval_class TEXT NOT NULL DEFAULT 'standard',
-      is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
-      metadata JSONB DEFAULT '{}',
-      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      UNIQUE(channel_type, channel_id)
-    );
-    CREATE TABLE IF NOT EXISTS alloy_channel_audit (
-      id TEXT PRIMARY KEY,
-      channel_type TEXT NOT NULL,
-      channel_id TEXT NOT NULL,
-      channel_name TEXT,
-      user_id TEXT,
-      user_name TEXT,
-      message TEXT,
-      skill_invoked TEXT,
-      workflow_id TEXT,
-      approval_status TEXT,
-      outcome TEXT,
-      outcome_detail TEXT,
-      trust_level TEXT,
-      created_at TIMESTAMP NOT NULL DEFAULT NOW()
-    );
-    CREATE TABLE IF NOT EXISTS alloy_pending_approvals_chat (
-      id TEXT PRIMARY KEY,
-      channel_type TEXT NOT NULL,
-      channel_id TEXT NOT NULL,
-      message_ts TEXT,
-      workflow_id TEXT,
-      approval_id TEXT,
-      requester_user_id TEXT,
-      requester_name TEXT,
-      action_description TEXT,
-      approval_class TEXT NOT NULL DEFAULT 'standard',
-      status TEXT NOT NULL DEFAULT 'pending',
-      reviewed_by TEXT,
-      review_note TEXT,
-      expires_at TIMESTAMP,
-      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-    );
-  `);
-}
-
-ensureTables().catch((err) => logger.warn({ err }, "alloy-channels: table init failed"));
 
 const SLACK_SIGNING_SECRET = process.env.SLACK_SIGNING_SECRET;
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN;

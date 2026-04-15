@@ -1,5 +1,4 @@
 export {
-  ensureRagTables,
   upsertChunk,
   upsertChunksBatch,
   semanticSearch,

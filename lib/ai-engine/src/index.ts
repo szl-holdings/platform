@@ -83,7 +83,6 @@ export { ALLOY_TOOL_DEFINITIONS, executeToolCall, checkToolPolicy, isHighRiskToo
 export { AlloyRetrievalEngine, alloyRetrieval, type RetrievalChunk, type RetrievalResult, type ScoredChunk, type RerankResult } from "./retrieval/alloy-retrieval.js";
 
 export {
-  ensureRagTables,
   upsertChunk,
   upsertChunksBatch,
   semanticSearch,
@@ -192,11 +191,9 @@ export async function startCognitiveLearning(): Promise<void> {
   const { evidencePipeline } = await import("./tradecraft/evidence-pipeline.js");
   const { caseMemory } = await import("./tradecraft/case-memory.js");
   const { startScheduledEvals: _startScheduledEvals } = await import("./learning/eval-pipeline.js");
-  const { ensureRagTables: _ensureRagTables } = await import("./rag-vector-store.js");
   await Promise.all([
     evidencePipeline.hydrateFromDb(),
     caseMemory.hydrateFromDb(),
-    _ensureRagTables(),
   ]);
   await _startScheduledEvals();
 }

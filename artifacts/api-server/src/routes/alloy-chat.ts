@@ -29,43 +29,6 @@ const aiLimit = rateLimit({
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
-// ─── Ensure KB / advisory / comparison tables exist ───────────────────────────
-
-async function ensureTables(): Promise<void> {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS alloy_chat_kb_documents (
-      id TEXT PRIMARY KEY,
-      title TEXT NOT NULL,
-      source_type TEXT NOT NULL,
-      source_url TEXT,
-      content TEXT NOT NULL,
-      chunk_index INTEGER NOT NULL DEFAULT 0,
-      total_chunks INTEGER NOT NULL DEFAULT 1,
-      embedding TEXT,
-      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-    );
-    CREATE TABLE IF NOT EXISTS alloy_chat_advisories (
-      id TEXT PRIMARY KEY,
-      category TEXT NOT NULL,
-      title TEXT NOT NULL,
-      content TEXT NOT NULL,
-      severity TEXT NOT NULL DEFAULT 'info',
-      is_read BOOLEAN NOT NULL DEFAULT FALSE,
-      metadata JSONB,
-      generated_at TIMESTAMP NOT NULL DEFAULT NOW()
-    );
-    CREATE TABLE IF NOT EXISTS alloy_chat_comparisons (
-      id TEXT PRIMARY KEY,
-      prompt TEXT NOT NULL,
-      results JSONB NOT NULL,
-      ratings JSONB,
-      created_at TIMESTAMP NOT NULL DEFAULT NOW()
-    );
-  `);
-}
-
-ensureTables().catch(() => {});
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

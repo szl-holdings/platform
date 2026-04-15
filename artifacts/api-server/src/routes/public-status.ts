@@ -13,55 +13,6 @@ const SERVICES = [
   { id: "ai", name: "AI/Agent Layer", description: "Inference, agents & AI pipeline" },
 ];
 
-async function ensureStatusTables(): Promise<void> {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS platform_status_checks (
-      id SERIAL PRIMARY KEY,
-      service_id TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'operational',
-      latency_ms INTEGER,
-      checked_at TIMESTAMP NOT NULL DEFAULT NOW()
-    );
-    CREATE INDEX IF NOT EXISTS idx_status_checks_service ON platform_status_checks(service_id);
-    CREATE INDEX IF NOT EXISTS idx_status_checks_checked ON platform_status_checks(checked_at DESC);
-
-    CREATE TABLE IF NOT EXISTS platform_incidents (
-      id SERIAL PRIMARY KEY,
-      title TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'investigating',
-      severity TEXT NOT NULL DEFAULT 'minor',
-      affected_services TEXT[] NOT NULL DEFAULT '{}',
-      description TEXT NOT NULL,
-      resolved_at TIMESTAMP,
-      posted_by TEXT,
-      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-    );
-    CREATE INDEX IF NOT EXISTS idx_incidents_created ON platform_incidents(created_at DESC);
-    CREATE INDEX IF NOT EXISTS idx_incidents_status ON platform_incidents(status);
-
-    CREATE TABLE IF NOT EXISTS platform_incident_updates (
-      id SERIAL PRIMARY KEY,
-      incident_id INTEGER NOT NULL REFERENCES platform_incidents(id) ON DELETE CASCADE,
-      message TEXT NOT NULL,
-      status TEXT NOT NULL,
-      created_at TIMESTAMP NOT NULL DEFAULT NOW()
-    );
-    CREATE INDEX IF NOT EXISTS idx_incident_updates_incident ON platform_incident_updates(incident_id);
-
-    CREATE TABLE IF NOT EXISTS platform_status_subscriptions (
-      id SERIAL PRIMARY KEY,
-      email TEXT NOT NULL UNIQUE,
-      subscribed_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      active BOOLEAN NOT NULL DEFAULT TRUE
-    );
-    CREATE INDEX IF NOT EXISTS idx_status_subs_email ON platform_status_subscriptions(email);
-  `);
-}
-
-ensureStatusTables().catch((err) => {
-  logger.error({ error: err.message }, "Failed to create status tables");
-});
 
 async function recordHealthCheck(): Promise<void> {
   try {

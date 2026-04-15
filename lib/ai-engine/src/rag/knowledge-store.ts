@@ -22,37 +22,8 @@ export interface RetrievalResult {
   snippet: string;
 }
 
-const BOOTSTRAP_SQL = `
-CREATE TABLE IF NOT EXISTS rag_knowledge_documents (
-  doc_id TEXT PRIMARY KEY,
-  title TEXT NOT NULL,
-  content TEXT NOT NULL,
-  domain TEXT NOT NULL DEFAULT 'general',
-  source_type TEXT NOT NULL DEFAULT 'document',
-  tags JSONB NOT NULL DEFAULT '[]',
-  importance INTEGER NOT NULL DEFAULT 5,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS rag_docs_domain_idx ON rag_knowledge_documents(domain);
-CREATE INDEX IF NOT EXISTS rag_docs_source_type_idx ON rag_knowledge_documents(source_type);
-`;
-
-let bootstrapped = false;
-
-async function ensureTables(): Promise<void> {
-  if (bootstrapped) return;
-  try {
-    await pool.query(BOOTSTRAP_SQL);
-    bootstrapped = true;
-  } catch (err) {
-    console.warn("[rag-knowledge-store] Bootstrap failed (non-fatal):", err);
-  }
-}
 
 export async function ingestDocument(doc: Omit<KnowledgeDocument, "createdAt" | "updatedAt">): Promise<void> {
-  await ensureTables();
   try {
     await pool.query(`
       INSERT INTO rag_knowledge_documents (doc_id, title, content, domain, source_type, tags, importance, created_at, updated_at)
@@ -88,7 +59,6 @@ export async function retrieveRelevantContext(
   query: string,
   options: { domain?: string; limit?: number; minRelevance?: number } = {},
 ): Promise<RetrievalResult[]> {
-  await ensureTables();
 
   const limit = options.limit ?? 5;
   const minRelevance = options.minRelevance ?? 0.1;
@@ -197,7 +167,6 @@ export async function getKnowledgeStoreStats(): Promise<{
   byDomain: Record<string, number>;
   bySourceType: Record<string, number>;
 }> {
-  await ensureTables();
   try {
     const [totalResult, domainResult, sourceResult] = await Promise.all([
       pool.query("SELECT COUNT(*)::int as total FROM rag_knowledge_documents"),
@@ -226,7 +195,6 @@ export async function getKnowledgeStoreStats(): Promise<{
 }
 
 export async function autoIngestFromDecisionStore(): Promise<number> {
-  await ensureTables();
   try {
     const result = await pool.query(`
       SELECT decision_id, recommended_action, rationale_summary, risk_level, model_route, created_at

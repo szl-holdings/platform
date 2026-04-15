@@ -9,30 +9,6 @@ import multer from "multer";
 const router: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
 
-async function ensureTables(): Promise<void> {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS alloy_voice_notes (
-      id TEXT PRIMARY KEY,
-      title TEXT,
-      transcription TEXT,
-      ai_summary TEXT,
-      detected_intent TEXT,
-      converted_to TEXT,
-      converted_id TEXT,
-      duration_seconds REAL,
-      language TEXT DEFAULT 'en',
-      audio_size_bytes INTEGER,
-      audio_mime_type TEXT,
-      status TEXT NOT NULL DEFAULT 'processing',
-      metadata JSONB DEFAULT '{}',
-      created_by INTEGER,
-      created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-    );
-  `);
-}
-
-ensureTables().catch((err) => logger.warn({ err }, "alloy-voice: table init failed"));
 
 type IntentType = "task" | "research" | "note" | "reminder" | "meeting_note" | "action" | "unknown";
 
