@@ -15,7 +15,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./react": "./src/react/index.ts",
-    "./configs": "./src/configs/index.ts"
+    "./configs": "./src/configs/index.ts",
+    "./analytics": "./src/analytics/index.ts"
   },
   "peerDependencies": {
     "react": ">=18"

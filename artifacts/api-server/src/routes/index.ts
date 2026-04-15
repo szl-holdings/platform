@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import mcpRouter from "./mcp";
 import { authLimiter, readLimiter, writeLimiter, SHORT_CACHE, MEDIUM_CACHE } from "../middlewares/rate-limiters";
+import analyticsEngineRouter from "./analytics-engine";
 const _authLimiter = authLimiter;
 const _readLimiter = readLimiter;
 const _writeLimiter = writeLimiter;
@@ -573,5 +574,9 @@ router.use("/knowledge", knowledgeGraphRouter);
 router.use("/ml", _readLimiter);
 router.use("/ml", _writeLimiter);
 router.use(mlPipelineRouter);
+
+router.use("/analytics-engine", _readLimiter);
+router.use("/analytics-engine", _writeLimiter);
+router.use(analyticsEngineRouter);
 
 export default router;

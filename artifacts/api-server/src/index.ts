@@ -33,6 +33,7 @@ import "./lib/cross-app-notification-relay.js";
 import { providerHealth } from "./lib/provider-health";
 import { startEmbeddingWorker, stopEmbeddingWorker, getWorkerStatus } from "./lib/embedding-worker";
 import { initIngestionFramework } from "./lib/ingestion-framework";
+import { registerAnalyticsJobHandlers } from "./lib/analytics-jobs";
 
 failFastOnInvalidConfig();
 
@@ -73,6 +74,7 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
 
   providerHealth.startActiveProbes();
   registerAllPrismJobHandlers();
+  registerAnalyticsJobHandlers();
   const prismPoller = startPrismJobPoller(5000);
 
   const memoryMonitor = setInterval(() => {
@@ -101,6 +103,23 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
 
   logger.info({ port, host: "0.0.0.0" }, "Server listening");
 
+  // Schedule analytics aggregation every hour
+  setInterval(() => {
+    import("./lib/analytics-jobs.js").then(({ runMetricsAggregation }) => {
+      runMetricsAggregation({ lookbackHours: 2 }).catch(err => {
+        logger.warn({ err }, "[analytics] Hourly metrics aggregation failed (non-fatal)");
+      });
+    }).catch(err => logger.warn({ err }, "[analytics] Failed to load analytics-jobs for scheduling"));
+  }, 60 * 60 * 1000);
+
+  // Schedule anomaly scan every 6 hours
+  setInterval(() => {
+    import("./lib/analytics-jobs.js").then(({ runAnomalyScan }) => {
+      runAnomalyScan({ lookbackDays: 14 }).catch(err => {
+        logger.warn({ err }, "[analytics] Anomaly scan failed (non-fatal)");
+      });
+    }).catch(err => logger.warn({ err }, "[analytics] Failed to load analytics-jobs for anomaly scan"));
+  }, 6 * 60 * 60 * 1000);
   import("./routes/rmm").then(m => m.startSyncScheduler()).catch(err => logger.warn({ err }, "RMM sync scheduler start failed (non-fatal)"));
   prewarmIntelligenceCache().catch(err => {
     logger.warn({ err }, "[intelligence-cache] Prewarm failed (non-fatal)");

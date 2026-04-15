@@ -207,4 +207,7 @@ export const JOB_TYPES = {
   INVESTOR_PACKET_GENERATE: "investor_packet_generate_job",
   HOURLY_MLS_LISTING_SYNC: "hourly_mls_listing_sync",
   DAILY_COMMERCIAL_DATA_REFRESH: "daily_commercial_data_refresh",
+  METRICS_AGGREGATION: "metrics_aggregation",
+  ANOMALY_SCAN: "anomaly_scan",
+  ANALYTICS_EXPORT: "analytics_export",
 } as const;

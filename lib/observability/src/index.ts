@@ -19,6 +19,7 @@ export type {
   PredictiveSignal,
   LivingMeshEvent,
 } from "./living-mesh.js";
+export * from "./analytics/index.js";
 export type {
   GenAISpanKind,
   GenAISpanStatus,

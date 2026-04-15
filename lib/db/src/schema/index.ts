@@ -94,5 +94,6 @@ export * from "./simulation";
 export * from "./knowledge_graph";
 export * from "./stream_sources";
 export * from "./ml_pipeline";
+export * from "./analytics";
 export * from "./push_infra";
 export * from "./job_queue";
