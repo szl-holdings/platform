@@ -124,6 +124,110 @@ function GeographicConcentration({ assets }: { assets: { neighborhood: string }[
   );
 }
 
+interface StressScenario {
+  id: string;
+  name: string;
+  description: string;
+  capRateShift: number;
+  vacancyShift: number;
+  rentGrowth: number;
+  interestRateShift: number;
+  noiImpact: number;
+  valuationImpact: number;
+  severity: "mild" | "moderate" | "severe";
+}
+
+const STRESS_SCENARIOS: StressScenario[] = [
+  { id: "base", name: "Base Case", description: "Current market conditions maintained. No significant macro shifts.", capRateShift: 0, vacancyShift: 0, rentGrowth: 2.5, interestRateShift: 0, noiImpact: 0, valuationImpact: 0, severity: "mild" },
+  { id: "recession", name: "Mild Recession", description: "GDP contraction 1-2%. Unemployment rises to 5.5%. Credit tightening. Flight to quality.", capRateShift: 0.75, vacancyShift: 3.0, rentGrowth: -0.5, interestRateShift: -0.5, noiImpact: -8, valuationImpact: -12, severity: "moderate" },
+  { id: "rate-shock", name: "Rate Shock (+200bps)", description: "Fed raises rates aggressively. Refinancing costs spike. Cap rate expansion across all asset classes.", capRateShift: 1.5, vacancyShift: 1.0, rentGrowth: 1.0, interestRateShift: 2.0, noiImpact: -3, valuationImpact: -18, severity: "severe" },
+  { id: "stagflation", name: "Stagflation", description: "High inflation with stagnant growth. Operating costs surge. Tenant credit deterioration.", capRateShift: 0.5, vacancyShift: 4.0, rentGrowth: -1.5, interestRateShift: 1.0, noiImpact: -15, valuationImpact: -22, severity: "severe" },
+  { id: "tech-bust", name: "Tech Employment Bust", description: "Major tech layoffs. Office/flex space demand collapses. Sublease market floods.", capRateShift: 1.0, vacancyShift: 6.0, rentGrowth: -3.0, interestRateShift: -1.0, noiImpact: -12, valuationImpact: -16, severity: "severe" },
+  { id: "recovery", name: "Strong Recovery", description: "GDP growth 3%+. Low unemployment. Rent growth accelerates. Capital inflows.", capRateShift: -0.5, vacancyShift: -2.0, rentGrowth: 4.5, interestRateShift: 0.25, noiImpact: 8, valuationImpact: 12, severity: "mild" },
+];
+
+function StressTestPanel({ portfolio }: { portfolio: typeof PORTFOLIO }) {
+  const [activeScenario, setActiveScenario] = useState("base");
+  const scenario = STRESS_SCENARIOS.find(s => s.id === activeScenario)!;
+  const totalValue = portfolio.reduce((s, a) => s + a.value, 0);
+  const totalNoi = portfolio.reduce((s, a) => s + a.noi, 0);
+  const stressedValue = totalValue * (1 + scenario.valuationImpact / 100);
+  const stressedNoi = totalNoi * (1 + scenario.noiImpact / 100);
+  const portfolioVar95 = totalValue * 0.18;
+
+  return (
+    <div>
+      <p className="text-xs text-white/30 uppercase tracking-wider font-medium mb-3">Economic Stress Testing</p>
+      <div className="grid grid-cols-3 gap-2 mb-4">
+        {STRESS_SCENARIOS.map(s => (
+          <button key={s.id} onClick={() => setActiveScenario(s.id)}
+            className={cn("text-left p-3 rounded-xl border transition-all text-[10px]",
+              s.id === activeScenario ? "border-[#40856a]/40 bg-[#40856a]/8" : "border-white/6 bg-white/2 hover:border-white/10"
+            )}>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <span className="font-semibold text-white text-xs">{s.name}</span>
+              <span className={cn("px-1 py-0.5 rounded text-[8px] font-bold uppercase",
+                s.severity === "mild" ? "bg-emerald-500/10 text-emerald-400" : s.severity === "moderate" ? "bg-amber-500/10 text-amber-400" : "bg-red-500/10 text-red-400"
+              )}>{s.severity}</span>
+            </div>
+            <span className="text-white/30">{s.description.slice(0, 60)}...</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-4 gap-3 mb-4">
+        <div className="bg-[#0f1115] border border-white/6 rounded-xl p-3">
+          <p className="text-[9px] text-white/30 uppercase">Stressed AUM</p>
+          <p className="text-lg font-bold text-white">{formatCurrency(stressedValue, true)}</p>
+          <p className={cn("text-[10px] font-semibold", scenario.valuationImpact >= 0 ? "text-emerald-400" : "text-red-400")}>
+            {scenario.valuationImpact >= 0 ? "+" : ""}{scenario.valuationImpact}%
+          </p>
+        </div>
+        <div className="bg-[#0f1115] border border-white/6 rounded-xl p-3">
+          <p className="text-[9px] text-white/30 uppercase">Stressed NOI</p>
+          <p className="text-lg font-bold text-white">{formatCurrency(stressedNoi, true)}</p>
+          <p className={cn("text-[10px] font-semibold", scenario.noiImpact >= 0 ? "text-emerald-400" : "text-red-400")}>
+            {scenario.noiImpact >= 0 ? "+" : ""}{scenario.noiImpact}%
+          </p>
+        </div>
+        <div className="bg-[#0f1115] border border-white/6 rounded-xl p-3">
+          <p className="text-[9px] text-white/30 uppercase">Cap Rate Shift</p>
+          <p className="text-lg font-bold text-white">{scenario.capRateShift >= 0 ? "+" : ""}{scenario.capRateShift.toFixed(2)}%</p>
+          <p className="text-[10px] text-white/30">Vacancy: {scenario.vacancyShift >= 0 ? "+" : ""}{scenario.vacancyShift}%</p>
+        </div>
+        <div className="bg-[#0f1115] border border-white/6 rounded-xl p-3">
+          <p className="text-[9px] text-white/30 uppercase">Portfolio VaR (95%)</p>
+          <p className="text-lg font-bold text-red-400">{formatCurrency(portfolioVar95 * (1 + Math.abs(scenario.valuationImpact) / 100 * 0.5), true)}</p>
+          <p className="text-[10px] text-white/30">Max 12mo loss</p>
+        </div>
+      </div>
+
+      <div className="bg-white/2 border border-white/6 rounded-xl p-4">
+        <p className="text-[9px] text-white/30 uppercase tracking-wider mb-2">Asset Vulnerability Ranking</p>
+        <div className="space-y-1.5">
+          {portfolio.map(a => {
+            const assetStressedValue = a.value * (1 + scenario.valuationImpact / 100 * (a.climateRisk === "high" ? 1.3 : a.climateRisk === "medium" ? 1.1 : 1.0));
+            const loss = a.value - assetStressedValue;
+            const lossPct = (loss / a.value) * 100;
+            return (
+              <div key={a.id} className="flex items-center gap-3 px-3 py-2 bg-white/2 border border-white/5 rounded-lg">
+                <span className="text-xs text-white/60 flex-1">{a.address}</span>
+                <span className="text-[10px] text-white/30 w-20 text-right">{formatCurrency(a.value, true)}</span>
+                <span className={cn("text-[10px] font-bold w-20 text-right", lossPct > 0 ? "text-red-400" : "text-emerald-400")}>
+                  {lossPct > 0 ? "-" : "+"}{Math.abs(lossPct).toFixed(1)}%
+                </span>
+                <span className={cn("text-[10px] font-bold w-24 text-right", loss > 0 ? "text-red-400" : "text-emerald-400")}>
+                  {loss > 0 ? "-" : "+"}{formatCurrency(Math.abs(loss), true)}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function PortfolioScenario() {
   const [selectedCandidate, setSelectedCandidate] = useState<string | null>(null);
   const [equityContribution, setEquityContribution] = useState(25);
@@ -300,6 +404,20 @@ export default function PortfolioScenario() {
               </div>
             </div>
           </div>
+
+          <StressTestPanel portfolio={candidate ? [...PORTFOLIO, {
+            id: candidate.id,
+            address: candidate.address,
+            neighborhood: candidate.neighborhood,
+            type: candidate.type,
+            value: candidate.arv,
+            noi: candidate.projectedNoi * (rehabMultiplier > 1.2 ? 0.95 : 1.0),
+            ltv: candidate.ltv,
+            irr: candidate.projectedIrr,
+            cashOnCash: candidate.projectedCashOnCash,
+            capRate: candidate.projectedCapRate,
+            climateRisk: candidate.climateRisk,
+          }] : PORTFOLIO} />
 
           <div>
             <p className="text-xs text-white/30 uppercase tracking-wider font-medium mb-3">Current Portfolio</p>

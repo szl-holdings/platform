@@ -8,7 +8,8 @@ import {
   Building2, LayoutDashboard, Eye, Activity,
   BarChart3, Users, FileText, CheckSquare,
   Bell, Menu, X, Briefcase, Map, Globe, TrendingUp, BookOpen,
-  Shield, Layers, Radio, Search, PieChart, PanelLeftClose, PanelLeftOpen
+  Shield, Layers, Radio, Search, PieChart, PanelLeftClose, PanelLeftOpen,
+  Camera, Hammer, Box, DollarSign, Scale, Ruler, FileSearch
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui";
 import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
@@ -55,6 +56,19 @@ const NAV_SECTIONS: SidebarNavSection[] = [
     items: [
       { id: "pipeline", href: "/pipeline", label: "Pipeline", icon: <Activity className="w-full h-full" /> },
       { id: "investor-mode", href: "/investor-mode", label: "Ownership", icon: <Globe className="w-full h-full" /> },
+    ],
+  },
+  {
+    id: "spatial",
+    label: "Spatial Intelligence",
+    items: [
+      { id: "computer-vision", href: "/computer-vision", label: "Computer Vision", icon: <Camera className="w-full h-full" /> },
+      { id: "avm-engine", href: "/avm-engine", label: "AVM Engine", icon: <DollarSign className="w-full h-full" /> },
+      { id: "zoning-intelligence", href: "/zoning-intelligence", label: "Zoning Intel", icon: <Scale className="w-full h-full" /> },
+      { id: "rent-roll", href: "/rent-roll", label: "Rent Roll", icon: <FileSearch className="w-full h-full" /> },
+      { id: "title-intelligence", href: "/title-intelligence", label: "Title & Lien", icon: <Shield className="w-full h-full" /> },
+      { id: "construction-cost", href: "/construction-cost", label: "Construction Cost", icon: <Hammer className="w-full h-full" /> },
+      { id: "spatial-walkthrough", href: "/spatial-walkthrough", label: "Spatial Walkthrough", icon: <Box className="w-full h-full" /> },
     ],
   },
   {

@@ -210,7 +210,7 @@ function AddDealModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
       <div className="w-full max-w-md bg-terra-bg-secondary rounded-2xl border border-terra-border shadow-2xl p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-display font-bold text-lg text-terra-text">Add Deal</h2>
-          <button onClick={onClose} className="text-terra-text-muted hover:text-terra-text"><X className="w-5 h-5" /></button>
+          <button onClick={onClose} className="text-terra-text-muted hover:text-terra-text" aria-label="Close panel"><X className="w-5 h-5" /></button>
         </div>
         <form onSubmit={submit} className="space-y-4">
           <div>
@@ -293,10 +293,129 @@ function AddDealModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
   );
 }
 
+const DILIGENCE_CHECKLIST = [
+  { id: "title-search", label: "Title Search & Commitment", category: "Legal" },
+  { id: "survey", label: "ALTA Survey", category: "Legal" },
+  { id: "zoning-letter", label: "Zoning Compliance Letter", category: "Legal" },
+  { id: "env-phase1", label: "Phase I Environmental", category: "Environmental" },
+  { id: "env-phase2", label: "Phase II Environmental (if req'd)", category: "Environmental" },
+  { id: "appraisal", label: "Third-Party Appraisal", category: "Financial" },
+  { id: "pca", label: "Property Condition Assessment", category: "Physical" },
+  { id: "rent-roll-verify", label: "Rent Roll Verification", category: "Financial" },
+  { id: "estoppels", label: "Tenant Estoppel Certificates", category: "Legal" },
+  { id: "insurance", label: "Insurance Review & Quote", category: "Financial" },
+  { id: "structural", label: "Structural Inspection", category: "Physical" },
+  { id: "utility-audit", label: "Utility Audit & HVAC", category: "Physical" },
+];
+
+interface Exchange1031 {
+  relinquishedProperty: string;
+  saleDate: string;
+  salePrice: number;
+  identificationDeadline: string;
+  exchangeDeadline: string;
+  identifiedProperties: string[];
+  status: "identification" | "exchange" | "completed" | "failed";
+  daysRemaining: number;
+  qi: string;
+}
+
+const DEMO_EXCHANGES: Exchange1031[] = [
+  {
+    relinquishedProperty: "422 Flatbush Ave, Brooklyn",
+    saleDate: "2026-03-01",
+    salePrice: 7400000,
+    identificationDeadline: "2026-04-15",
+    exchangeDeadline: "2026-08-28",
+    identifiedProperties: ["211 Liberty Ave, East NY", "1847 Myrtle Ave, Bushwick", "392 Nostrand Ave, Crown Heights"],
+    status: "identification",
+    daysRemaining: 0,
+    qi: "IPX 1031",
+  },
+];
+
+function DiligencePanel() {
+  const [checked, setChecked] = useState<Set<string>>(new Set(["title-search", "appraisal"]));
+  const toggle = (id: string) => setChecked(prev => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
+  const pct = Math.round((checked.size / DILIGENCE_CHECKLIST.length) * 100);
+  const categories = [...new Set(DILIGENCE_CHECKLIST.map(c => c.category))];
+  return (
+    <div className="rounded-xl border border-terra-border bg-terra-surface/50 p-4">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-xs font-display font-bold text-terra-text">Diligence Checklist</h3>
+        <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full",
+          pct === 100 ? "bg-emerald-500/10 text-emerald-400" : pct > 50 ? "bg-amber-500/10 text-amber-400" : "bg-rose-500/10 text-rose-400"
+        )}>{pct}% complete</span>
+      </div>
+      <div className="w-full h-1.5 bg-terra-border/50 rounded-full mb-3">
+        <div className="h-1.5 rounded-full bg-terra-primary transition-all" style={{ width: `${pct}%` }} />
+      </div>
+      {categories.map(cat => (
+        <div key={cat} className="mb-2">
+          <p className="text-[9px] font-semibold text-terra-text-muted uppercase tracking-wider mb-1">{cat}</p>
+          {DILIGENCE_CHECKLIST.filter(c => c.category === cat).map(item => (
+            <label key={item.id} className="flex items-center gap-2 py-1 cursor-pointer group">
+              <input type="checkbox" checked={checked.has(item.id)} onChange={() => toggle(item.id)} className="accent-[#40856a] w-3 h-3" />
+              <span className={cn("text-xs transition", checked.has(item.id) ? "text-terra-text-muted line-through" : "text-terra-text")}>{item.label}</span>
+            </label>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Exchange1031Panel() {
+  const ex = DEMO_EXCHANGES[0];
+  const now = new Date();
+  const idDays = Math.max(0, Math.ceil((new Date(ex.identificationDeadline).getTime() - now.getTime()) / 86400000));
+  const exDays = Math.max(0, Math.ceil((new Date(ex.exchangeDeadline).getTime() - now.getTime()) / 86400000));
+  return (
+    <div className="rounded-xl border border-terra-border bg-terra-surface/50 p-4">
+      <h3 className="text-xs font-display font-bold text-terra-text mb-3">1031 Exchange Tracker</h3>
+      <div className="space-y-3">
+        <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 uppercase">{ex.status}</span>
+            <span className="text-[10px] text-terra-text-muted ml-auto">QI: {ex.qi}</span>
+          </div>
+          <p className="text-xs font-semibold text-terra-text">{ex.relinquishedProperty}</p>
+          <p className="text-[10px] text-terra-text-muted">Sold {ex.saleDate} for {formatCurrency(ex.salePrice)}</p>
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            <div className="rounded bg-terra-surface px-2 py-1.5">
+              <p className="text-[9px] text-terra-text-muted">45-Day ID Deadline</p>
+              <p className={cn("text-xs font-bold", idDays < 10 ? "text-rose-400" : "text-terra-text")}>{ex.identificationDeadline}</p>
+              <p className="text-[9px] text-amber-400">{idDays}d remaining</p>
+            </div>
+            <div className="rounded bg-terra-surface px-2 py-1.5">
+              <p className="text-[9px] text-terra-text-muted">180-Day Exchange</p>
+              <p className="text-xs font-bold text-terra-text">{ex.exchangeDeadline}</p>
+              <p className="text-[9px] text-terra-text-muted">{exDays}d remaining</p>
+            </div>
+          </div>
+          <div className="mt-2">
+            <p className="text-[9px] text-terra-text-muted uppercase tracking-wider mb-1">Identified Replacement Properties</p>
+            {ex.identifiedProperties.map((p, i) => (
+              <div key={i} className="flex items-center gap-1.5 text-[10px] text-terra-text py-0.5">
+                <span className="text-terra-primary">#{i + 1}</span> {p}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DealsPage() {
   const qc = useQueryClient();
   const [view, setView] = useState<"kanban" | "table">("kanban");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showPanel, setShowPanel] = useState<"diligence" | "1031" | null>(null);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["terra-deals"],
@@ -360,6 +479,14 @@ export default function DealsPage() {
             <button onClick={() => refetch()} className="p-2 rounded-lg border border-terra-border bg-terra-surface text-terra-text-muted hover:text-terra-text transition-colors">
               <RefreshCw className="w-4 h-4" />
             </button>
+            <button onClick={() => setShowPanel(showPanel === "diligence" ? null : "diligence")}
+              className={cn("px-3 py-2 rounded-lg border text-xs font-semibold transition", showPanel === "diligence" ? "bg-terra-primary/10 border-terra-primary/30 text-terra-primary" : "border-terra-border bg-terra-surface text-terra-text-muted")}>
+              Diligence
+            </button>
+            <button onClick={() => setShowPanel(showPanel === "1031" ? null : "1031")}
+              className={cn("px-3 py-2 rounded-lg border text-xs font-semibold transition", showPanel === "1031" ? "bg-amber-500/10 border-amber-500/30 text-amber-400" : "border-terra-border bg-terra-surface text-terra-text-muted")}>
+              1031
+            </button>
             <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-terra-primary text-white text-sm font-semibold hover:bg-terra-primary/90 transition-colors">
               <Plus className="w-4 h-4" /> Add Deal
             </button>
@@ -381,6 +508,9 @@ export default function DealsPage() {
           </div>
         ))}
       </div>
+
+      {showPanel === "diligence" && <DiligencePanel />}
+      {showPanel === "1031" && <Exchange1031Panel />}
 
       {isLoading && (
         <div className="overflow-x-auto pb-4">

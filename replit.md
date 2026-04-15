@@ -29,7 +29,7 @@ Each platform has a distinct visual identity:
 - **SZL Holdings:** Platinum/silver/graphite, incorporating the Alloy module.
 - **Lyte:** Burnished amber, focused on business observability.
 - **Vessels:** Deep ocean blue, for maritime command intelligence.
-- **Terra:** Obsidian/graphite/deep forest, for real-estate portfolio intelligence.
+- **Terra:** Obsidian/graphite/deep forest, for real-estate portfolio intelligence. Features spatial computing, computer vision, and generative AI property analysis — includes Computer Vision (property photo analysis, condition scoring), Zoning Intelligence (generative zoning code analysis, massing models), AVM Engine (multi-approach automated valuation with ML comparables), Rent Roll (AI lease abstraction, rent comp analysis), Title Intelligence (chain-of-title, lien detection), Construction Cost (real-time estimation, Monte Carlo timelines), Spatial Walkthrough (3D property exploration, renovation viz), Deal Lifecycle (diligence checklists, 1031 exchange tracking), and Portfolio Stress Testing (6 economic scenarios, portfolio VaR).
 - **Carlota Jo:** Warm ivory/brushed gold, for UHNW residential advisory.
 - **Aegis:** Navy/amber/red, for unified defense and intelligence.
 - **PRISM Counsel:** A standalone artifact focusing on legal matter observability with specialized data products and an NY insurance observability layer.

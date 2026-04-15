@@ -76,6 +76,13 @@ const NeighborhoodMomentum = lazy(() => import("@/pages/neighborhood-momentum"))
 const SellerMotivation = lazy(() => import("@/pages/seller-motivation"));
 const PortfolioScenario = lazy(() => import("@/pages/portfolio-scenario"));
 const ClimateRiskEnhanced = lazy(() => import("@/pages/climate-risk-enhanced"));
+const ComputerVision = lazy(() => import("@/pages/computer-vision"));
+const ZoningIntelligence = lazy(() => import("@/pages/zoning-intelligence"));
+const AvmEngine = lazy(() => import("@/pages/avm-engine"));
+const RentRoll = lazy(() => import("@/pages/rent-roll"));
+const TitleIntelligence = lazy(() => import("@/pages/title-intelligence"));
+const ConstructionCost = lazy(() => import("@/pages/construction-cost"));
+const SpatialWalkthrough = lazy(() => import("@/pages/spatial-walkthrough"));
 
 function PageLoader() {
   return (
@@ -143,6 +150,13 @@ function PrivateRouter() {
         <Route path="/seller-motivation" component={SellerMotivation} />
         <Route path="/portfolio-scenario" component={PortfolioScenario} />
         <Route path="/climate-risk-enhanced" component={ClimateRiskEnhanced} />
+        <Route path="/computer-vision" component={ComputerVision} />
+        <Route path="/zoning-intelligence" component={ZoningIntelligence} />
+        <Route path="/avm-engine" component={AvmEngine} />
+        <Route path="/rent-roll" component={RentRoll} />
+        <Route path="/title-intelligence" component={TitleIntelligence} />
+        <Route path="/construction-cost" component={ConstructionCost} />
+        <Route path="/spatial-walkthrough" component={SpatialWalkthrough} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
