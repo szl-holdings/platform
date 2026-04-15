@@ -347,6 +347,23 @@ adminRouter.get("/admin/system-health", async (_req, res) => {
     }
   }
 
+  // Intelligence feed health checks
+  try {
+    const { getFeedHealthSummary } = await import("../lib/intelligence-feeds-init");
+    const feedHealthList = await getFeedHealthSummary();
+    for (const feed of feedHealthList) {
+      checks.push({
+        name: feed.feedName,
+        category: "Intelligence Feeds",
+        status: feed.status === "healthy" ? "healthy" : feed.status === "down" ? "down" : "degraded",
+        latencyMs: feed.avgPollDurationMs > 0 ? feed.avgPollDurationMs : null,
+        details: `${feed.entitiesIngested} entities ingested, ${feed.consecutiveFailures} consecutive failures, last success: ${feed.lastSuccessAt ?? "never"}`,
+      });
+    }
+  } catch {
+    // Non-fatal — feed health is additive only
+  }
+
   const overallStatus = checks.some((c) => c.status === "down") ? "down" : checks.some((c) => c.status === "degraded") ? "degraded" : "healthy";
 
   res.json({

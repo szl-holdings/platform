@@ -211,6 +211,7 @@ A new `/fund` route section adds the industry's first agentic fund operations pl
 
 All pages are auth-gated via `<RequireAuth>`. A "Fund Intel" dropdown menu was added to the main site navigation.
 
+<<<<<<< HEAD
 ## Mobile Fleet Stabilization (Task #529)
 - **lib/mobile-shared** (`@szl-holdings/mobile-shared`) — shared infrastructure for all 7 Expo mobile apps:
   - **BiometricProvider** + **BiometricLockScreen** — parameterized FaceID/TouchID with auto-lock after configurable timeout, SecureStore-backed preferences
@@ -225,6 +226,50 @@ All pages are auth-gated via `<RequireAuth>`. A "Fund Intel" dropdown menu was a
 - Push notification infrastructure standardized across all 7 apps via shared hooks
 - Query persistence (AsyncStorage) added to stephen-mobile (previously missing)
 - vessels-mobile crash fixed (EXPO_NO_TELEMETRY=1 + --clear flags)
+=======
+## Nuro Mesh Graph Intelligence (Task #541)
+
+Production-grade graph capabilities and OSINT feed integration extending the Nuro Mesh AI engine:
+
+### `lib/intelligence-feeds` — OSINT Feed Package (`@szl-holdings/intelligence-feeds`)
+- **`src/feed-adapter.ts`** — `BaseFeedAdapter` base class: rate limiting (token bucket), deduplication (SHA-256 content hash, 24h TTL), retry with exponential backoff, health tracking. `NormalizedFeedPayload` — standard output type for all adapters.
+- **`src/adapters/ais.ts`** — `AISFeedAdapter`: polls MarineTraffic REST API (v8/exportvessel) or AISHub public feed. Normalizes to Vessel + Port entities with `located_at` relationships. Computes per-vessel risk score from IMO presence, flag state, destination anomalies.
+- **`src/adapters/stix-taxii.ts`** — `STIXTAXIIFeedAdapter`: TAXII 2.1 server + AlienVault OTX + public MISP OSINT fallback. Ingests indicators, threat-actors, campaigns, malware, attack-patterns. Maps STIX relationships to ontology types.
+- **`src/adapters/sanctions.ts`** — `SanctionsFeedAdapter`: parallel polling of OFAC SDN JSON, EU Consolidated List, UN Security Council XML. Normalizes to Person/Organization/Vessel entities tagged `sanctioned` with `sanctioned_by` relationships. Risk score 0.95 for all designated entities.
+- **`src/adapters/legal-records.ts`** — `LegalRecordsFeedAdapter`: CourtListener REST API v3, configurable search queries via `LEGAL_FEED_SEARCH_QUERIES` env. Ingests federal dockets + parties + courts. Case severity scoring by nature of suit.
+- **`src/fusion-engine.ts`** — `FusionEngine`: 6 convergence detectors (`sanction_plus_maritime`, `sanction_plus_legal`, `threat_actor_plus_target`, `vessel_dark_shipping_plus_sanction`, `multi_domain_convergence`, `ownership_chain_risk`). Emits `FusionAlert` objects to registered callbacks. Singleton exported as `fusionEngine`.
+- **`src/feed-scheduler.ts`** — `FeedScheduler`: per-feed polling with backpressure detection, configurable concurrency, health logging. `setEntityIngestionFn()` wires payloads to ontology engine upsert pipeline. Singleton exported as `feedScheduler`.
+
+### Enhanced Ontology Engine (`lib/ai-engine/src/ontology/ontology-engine.ts`)
+New graph algorithms added:
+- **`shortestPath(from, to, maxHops)`** — Recursive CTE-based BFS over `entity_relationships` (PostgreSQL `WITH RECURSIVE`), falls back to in-memory BFS. Returns path entities + edges + total weight.
+- **`communityDetection(maxIter, domain?, limit?)`** — Label propagation algorithm over entity adjacency matrix. Returns community map with member entities.
+- **`computeInfluenceScores(entityIds?, limit?)`** — Weighted in/out-degree centrality (in-edges weighted 1.5×, strength-weighted). Returns ranked influence scores.
+- **`temporalGraphAnalysis(entityId, maxHops, minWeight)`** — Recency-weighted edge scoring (1h → 1.0, 1y → 0.3 decay). Returns temporal edge list + monthly cluster analysis.
+- **`extractSubgraph(centerId, maxDepth, maxNodes, minRiskScore, minConfidence)`** — Neighborhood extraction for GraphRAG context injection. Returns SubgraphExtraction with weighted, temporally-scored edges.
+
+### Enhanced GraphRAG (`lib/ai-engine/src/ontology/graph-rag.ts`)
+- Weighted multi-hop traversal: `combinedScore = vectorScore × 0.5 + graphRelevance × 0.35 + temporalWeight × 0.15`
+- `computeGraphRelevance()`: hop decay (0.65^hop) × strength multiplier × significance multiplier × temporal decay × confidence × risk boost
+- `serializeSubgraphForPrompt()`: serializes subgraph to structured prompt-injectable text (entities ranked by risk, top-10 weighted relationships)
+- Subgraph extraction integration: extracts and includes in `GraphRAGResult.subgraph`
+- Risk-score filtered traversal (`riskFilterEnabled` flag)
+
+### Graph Context Injection in Nuro Mesh (`lib/ai-engine/src/nuro-mesh.ts`)
+In `callAgent()`, before prompt assembly: queries ontology for entities matching the query, extracts 2-hop subgraph, serializes via `serializeSubgraphForPrompt()`, injects as `### Graph Context` section. Best-effort (fully wrapped in try/catch).
+
+### API Server Wiring (`artifacts/api-server/src/lib/intelligence-feeds-init.ts`)
+- `startIntelligenceFeeds()`: registers all 4 feed adapters, sets entity ingestion function (upsertEntity + createRelationship with externalId → UUID resolution), starts feed scheduler.
+- Called non-fatally at API server startup; `stopIntelligenceFeeds()` called on SIGTERM/SIGINT.
+
+### Environment Variables (new)
+- `MARINETRAFFIC_API_KEY` / `AIS_API_KEY` / `AISHUB_USERNAME` — AIS feed authentication
+- `TAXII_SERVER_URL` / `TAXII_API_KEY` / `TAXII_COLLECTION` — Private TAXII server
+- `MISP_URL` / `OTX_API_KEY` — MISP/OTX threat intel feeds
+- `COURTLISTENER_API_TOKEN` — CourtListener API token (optional, increases rate limits)
+- `LEGAL_FEED_SEARCH_QUERIES` — JSON array of search terms for legal records feed
+- `AIS_FEED_ENABLED` / `STIX_FEED_ENABLED` / `SANCTIONS_FEED_ENABLED` / `LEGAL_FEED_ENABLED` — Feed on/off toggles (default: all enabled)
+>>>>>>> 4cb15093 (feat(#541): Nuro Mesh graph intelligence + production OSINT feeds)
 
 ## External Dependencies
 - **Database:** PostgreSQL

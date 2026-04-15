@@ -1,0 +1,24 @@
+{
+  "name": "@szl-holdings/intelligence-feeds",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./feed-adapter": "./src/feed-adapter.ts",
+    "./fusion-engine": "./src/fusion-engine.ts",
+    "./feed-scheduler": "./src/feed-scheduler.ts",
+    "./adapters/ais": "./src/adapters/ais.ts",
+    "./adapters/stix-taxii": "./src/adapters/stix-taxii.ts",
+    "./adapters/sanctions": "./src/adapters/sanctions.ts",
+    "./adapters/legal-records": "./src/adapters/legal-records.ts"
+  },
+  "dependencies": {
+    "@szl-holdings/db": "workspace:*",
+    "@szl-holdings/ai-engine": "workspace:*",
+    "drizzle-orm": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  }
+}

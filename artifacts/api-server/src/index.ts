@@ -36,6 +36,7 @@ import { startEmbeddingWorker, stopEmbeddingWorker, getWorkerStatus } from "./li
 import { initIngestionFramework } from "./lib/ingestion-framework";
 import { registerAnalyticsJobHandlers } from "./lib/analytics-jobs";
 import { initializeAlloyDomainEventSubscriptions } from "./lib/domain-events/alloy-wiring.js";
+import { startIntelligenceFeeds, stopIntelligenceFeeds } from "./lib/intelligence-feeds-init";
 
 failFastOnInvalidConfig();
 
@@ -134,6 +135,8 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
   import("@szl-holdings/ai-engine")
     .then(({ startCognitiveLearning }) => startCognitiveLearning())
     .catch(err => logger.warn({ err }, "[cognitive] Cognitive learning startup failed (non-fatal)"));
+
+  startIntelligenceFeeds().catch(err => logger.warn({ err }, "[feeds] Intelligence feeds startup failed (non-fatal)"));
 
   try {
     // Step 1: Run all migrations — single await, schema fully guaranteed before any seed executes
@@ -249,6 +252,7 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     stopSelfMonitoring();
     stopPrismBusBridge();
     stopEmbeddingWorker();
+    await stopIntelligenceFeeds();
     providerHealth.stopActiveProbes();
     agentScheduler.stop();
     clearInterval(prismPoller);

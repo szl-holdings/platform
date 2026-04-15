@@ -397,6 +397,9 @@ importers:
       '@szl-holdings/integrations-openai-ai-server':
         specifier: workspace:*
         version: link:../../lib/integrations-openai-ai-server
+      '@szl-holdings/intelligence-feeds':
+        specifier: workspace:*
+        version: link:../../lib/intelligence-feeds
       '@szl-holdings/monte-carlo':
         specifier: workspace:*
         version: link:../../lib/monte-carlo
@@ -2856,6 +2859,22 @@ importers:
       p-retry:
         specifier: ^7.1.1
         version: 7.1.1
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+
+  lib/intelligence-feeds:
+    dependencies:
+      '@szl-holdings/ai-engine':
+        specifier: workspace:*
+        version: link:../ai-engine
+      '@szl-holdings/db':
+        specifier: workspace:*
+        version: link:../db
+      drizzle-orm:
+        specifier: 'catalog:'
+        version: 0.45.1(@types/pg@8.18.0)(pg@8.20.0)
     devDependencies:
       '@types/node':
         specifier: 'catalog:'

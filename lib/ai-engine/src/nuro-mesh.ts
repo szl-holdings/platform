@@ -41,6 +41,8 @@ import { temporalAwareness } from "./consciousness/temporal-awareness.js";
 import { predictiveProcessing } from "./consciousness/predictive-processing.js";
 import { dreamConsolidation } from "./consciousness/dream-consolidation.js";
 import { captureConsciousnessSnapshot, buildConsciousnessContext, setLlmIntrospector, type ConsciousnessSnapshot } from "./consciousness/index.js";
+import { ontologyEngine } from "./ontology/ontology-engine.js";
+import { serializeSubgraphForPrompt } from "./ontology/graph-rag.js";
 
 setLlmIntrospector(async (prompt: string): Promise<string> => {
   try {
@@ -651,7 +653,28 @@ export async function callAgent(
 
   const focusedContext = cognitiveWorkspace.buildFocusedContext(context, agent.domain, contextBudget);
 
-  const fullPrompt = `${agent.systemPrompt}${learningSection}${consciousnessDirective}\n\n${focusedContext}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with a confidence score (0-100) on a new line in format: CONFIDENCE: [score]`;
+  let graphContextSection = "";
+  try {
+    const graphResults = await ontologyEngine.searchEntities(
+      query.slice(0, 100),
+      undefined,
+      4,
+    );
+    if (graphResults.length > 0) {
+      const topEntity = graphResults[0]!;
+      const subgraph = await ontologyEngine.extractSubgraph(topEntity.id, 2, 15, 0.0, 0.2);
+      if (subgraph.entities.length > 1) {
+        const serialized = serializeSubgraphForPrompt(subgraph);
+        if (serialized.length > 0) {
+          graphContextSection = `\n\n${serialized}`;
+        }
+      }
+    }
+  } catch {
+    // Graph context injection is best-effort — do not fail the agent call
+  }
+
+  const fullPrompt = `${agent.systemPrompt}${learningSection}${consciousnessDirective}${graphContextSection}\n\n${focusedContext}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with a confidence score (0-100) on a new line in format: CONFIDENCE: [score]`;
 
   let forkId: string | undefined;
 
@@ -667,7 +690,7 @@ export async function callAgent(
       tokensUsed = (result.usage.input_tokens + result.usage.output_tokens);
       success = true;
     } else if (agent.preferredProvider === "openai") {
-      const systemWithLearning = `${agent.systemPrompt}${learningSection}${consciousnessDirective}\n\n${focusedContext}`;
+      const systemWithLearning = `${agent.systemPrompt}${learningSection}${consciousnessDirective}${graphContextSection}`;
       const result = await openai.chat.completions.create({
         model: actualModel,
         max_completion_tokens: 2048,

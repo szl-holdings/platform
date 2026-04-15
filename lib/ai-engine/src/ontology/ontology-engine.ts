@@ -6,6 +6,13 @@
  * Relationships: owns, operates, litigates, threatens, located_at, connected_to,
  *                sanctioned_by, employed_by, directs, invests_in
  *
+ * Graph algorithms (Postgres recursive CTE-based):
+ * - shortestPath: BFS over entity_relationships via recursive CTE
+ * - communityDetection: label propagation over adjacency
+ * - influenceScore: pagerank-inspired weighted traversal
+ * - temporalGraphAnalysis: recency-weighted edge scoring
+ * - extractSubgraph: neighborhood extraction for GraphRAG context
+ *
  * Supports multi-hop traversal for cross-domain reasoning.
  */
 
@@ -15,6 +22,7 @@ import {
   entityRelationshipsTable,
 } from "@szl-holdings/db";
 import { eq, and, inArray, sql, or } from "drizzle-orm";
+import { pool } from "@szl-holdings/db";
 
 export type OntologyEntityType =
   | "person"
@@ -107,6 +115,68 @@ export interface GraphQueryResult {
   queryDurationMs: number;
 }
 
+export interface ShortestPathResult {
+  path: OntologyEntity[];
+  hops: number;
+  edges: OntologyRelationship[];
+  totalWeight: number;
+  found: boolean;
+}
+
+export interface CommunityMember {
+  entityId: string;
+  entityName: string;
+  entityType: OntologyEntityType;
+  domain: string;
+  communityId: string;
+  iterations: number;
+}
+
+export interface CommunityDetectionResult {
+  communities: Map<string, CommunityMember[]>;
+  totalEntities: number;
+  totalCommunities: number;
+  largestCommunitySize: number;
+  durationMs: number;
+}
+
+export interface InfluenceScoreResult {
+  entityId: string;
+  entityName: string;
+  influenceScore: number;
+  inDegree: number;
+  outDegree: number;
+  weightedDegree: number;
+  rank: number;
+}
+
+export interface TemporalEdge {
+  relationshipId: string;
+  fromEntityId: string;
+  toEntityId: string;
+  type: RelationshipType;
+  createdAt: string;
+  ageMs: number;
+  temporalWeight: number;
+  strength: OntologyRelationship["strength"];
+}
+
+export interface SubgraphExtraction {
+  centerEntityId: string;
+  entities: OntologyEntity[];
+  relationships: OntologyRelationship[];
+  edges: Array<{
+    from: string;
+    to: string;
+    type: RelationshipType;
+    weight: number;
+    temporalWeight: number;
+    confidenceScore: number;
+  }>;
+  maxDepth: number;
+  extractedAt: string;
+}
+
 function mapEntityType(dbType: string): OntologyEntityType {
   const mapping: Record<string, OntologyEntityType> = {
     person: "person",
@@ -159,6 +229,23 @@ function buildEvidenceDescription(relType: RelationshipType, from: string, to: s
     exposes: `${from} creates material exposure for ${to}`,
   };
   return templates[relType] ?? `${from} is related to ${to}`;
+}
+
+function strengthToWeight(strength: string | null): number {
+  if (strength === "strong") return 1.0;
+  if (strength === "weak") return 0.3;
+  return 0.6;
+}
+
+function computeTemporalWeight(createdAt: string): number {
+  const ageMs = Date.now() - new Date(createdAt).getTime();
+  const ageHours = ageMs / (1000 * 60 * 60);
+  if (ageHours < 1) return 1.0;
+  if (ageHours < 24) return 0.95;
+  if (ageHours < 168) return 0.85;
+  if (ageHours < 720) return 0.7;
+  if (ageHours < 8760) return 0.5;
+  return 0.3;
 }
 
 export class OntologyEngine {
@@ -397,6 +484,456 @@ export class OntologyEngine {
       totalNodes: nodes.length,
       evidenceChain,
       crossDomainConnections,
+    };
+  }
+
+  /**
+   * Shortest path between two entities using recursive CTE-based BFS.
+   * Falls back to in-memory BFS if the DB query fails.
+   */
+  async shortestPath(
+    fromEntityId: string,
+    toEntityId: string,
+    maxHops = 6,
+  ): Promise<ShortestPathResult> {
+    try {
+      const result = await pool.query<{
+        path_ids: string[];
+        hop_count: number;
+      }>(`
+        WITH RECURSIVE graph_bfs AS (
+          SELECT
+            $1::uuid AS origin_id,
+            $2::uuid AS target_id,
+            ARRAY[$1::uuid] AS path,
+            0 AS depth
+          UNION ALL
+          SELECT
+            bfs.origin_id,
+            bfs.target_id,
+            bfs.path || r.to_entity_id,
+            bfs.depth + 1
+          FROM graph_bfs bfs
+          JOIN entity_relationships r ON r.from_entity_id = bfs.path[array_length(bfs.path, 1)]
+          WHERE bfs.depth < $3
+            AND NOT (r.to_entity_id = ANY(bfs.path))
+        )
+        SELECT path AS path_ids, depth AS hop_count
+        FROM graph_bfs
+        WHERE path[array_length(path, 1)] = target_id
+        ORDER BY hop_count ASC
+        LIMIT 1
+      `, [fromEntityId, toEntityId, maxHops]);
+
+      if (result.rows.length > 0) {
+        const row = result.rows[0]!;
+        const pathIds = row.path_ids;
+        const entities: OntologyEntity[] = [];
+        const edges: OntologyRelationship[] = [];
+
+        for (const entityId of pathIds) {
+          const entity = await this.getEntity(entityId);
+          if (entity) entities.push(entity);
+        }
+
+        for (let i = 0; i < pathIds.length - 1; i++) {
+          const [fromId, toId] = [pathIds[i]!, pathIds[i + 1]!];
+          const relRows = await db
+            .select()
+            .from(entityRelationshipsTable)
+            .where(and(
+              eq(entityRelationshipsTable.fromEntityId, fromId),
+              eq(entityRelationshipsTable.toEntityId, toId),
+            ))
+            .limit(1);
+
+          if (relRows[0]) {
+            edges.push({
+              id: relRows[0].id,
+              fromEntityId: fromId,
+              toEntityId: toId,
+              type: relRows[0].relationshipType as RelationshipType,
+              strength: mapRelationshipStrength(relRows[0].strength),
+              metadata: (relRows[0].metadata as Record<string, unknown>) ?? {},
+              createdAt: relRows[0].createdAt.toISOString(),
+            });
+          }
+        }
+
+        return {
+          path: entities,
+          hops: row.hop_count,
+          edges,
+          totalWeight: edges.reduce((s, e) => s + strengthToWeight(e.strength), 0),
+          found: true,
+        };
+      }
+    } catch (err) {
+      console.warn("[OntologyEngine] Recursive CTE shortest path failed, falling back:", err instanceof Error ? err.message : err);
+    }
+
+    return this.shortestPathInMemory(fromEntityId, toEntityId, maxHops);
+  }
+
+  private async shortestPathInMemory(
+    fromEntityId: string,
+    toEntityId: string,
+    maxHops: number,
+  ): Promise<ShortestPathResult> {
+    const queue: Array<{ id: string; path: string[] }> = [{ id: fromEntityId, path: [fromEntityId] }];
+    const visited = new Set<string>([fromEntityId]);
+
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      if (current.path.length - 1 >= maxHops) continue;
+
+      const rels = await db
+        .select()
+        .from(entityRelationshipsTable)
+        .where(or(
+          eq(entityRelationshipsTable.fromEntityId, current.id),
+          eq(entityRelationshipsTable.toEntityId, current.id),
+        ))
+        .limit(50);
+
+      for (const rel of rels) {
+        const nextId = rel.fromEntityId === current.id ? rel.toEntityId : rel.fromEntityId;
+        if (visited.has(nextId)) continue;
+
+        const newPath = [...current.path, nextId];
+        if (nextId === toEntityId) {
+          const entities: OntologyEntity[] = [];
+          for (const id of newPath) {
+            const e = await this.getEntity(id);
+            if (e) entities.push(e);
+          }
+          return { path: entities, hops: newPath.length - 1, edges: [], totalWeight: 0, found: true };
+        }
+
+        visited.add(nextId);
+        queue.push({ id: nextId, path: newPath });
+      }
+    }
+
+    return { path: [], hops: 0, edges: [], totalWeight: 0, found: false };
+  }
+
+  /**
+   * Community detection via label propagation over the entity graph.
+   * Each entity inherits the majority label from its neighbors.
+   */
+  async communityDetection(
+    maxIterations = 10,
+    domainFilter?: string,
+    limit = 500,
+  ): Promise<CommunityDetectionResult> {
+    const start = Date.now();
+
+    const entityRows = await db
+      .select({ id: entitiesTable.id, name: entitiesTable.name, entityType: entitiesTable.entityType, sourceApp: entitiesTable.sourceApp })
+      .from(entitiesTable)
+      .where(domainFilter ? eq(entitiesTable.sourceApp, domainFilter) : sql`TRUE`)
+      .limit(limit);
+
+    if (entityRows.length === 0) {
+      return { communities: new Map(), totalEntities: 0, totalCommunities: 0, largestCommunitySize: 0, durationMs: Date.now() - start };
+    }
+
+    const entityIds = entityRows.map(e => e.id);
+    const labels = new Map<string, string>(entityRows.map(e => [e.id, e.id]));
+
+    const relRows = await db
+      .select({ fromEntityId: entityRelationshipsTable.fromEntityId, toEntityId: entityRelationshipsTable.toEntityId })
+      .from(entityRelationshipsTable)
+      .where(and(
+        inArray(entityRelationshipsTable.fromEntityId, entityIds),
+        inArray(entityRelationshipsTable.toEntityId, entityIds),
+      ))
+      .limit(5000);
+
+    const adjacency = new Map<string, string[]>();
+    for (const rel of relRows) {
+      if (!adjacency.has(rel.fromEntityId)) adjacency.set(rel.fromEntityId, []);
+      if (!adjacency.has(rel.toEntityId)) adjacency.set(rel.toEntityId, []);
+      adjacency.get(rel.fromEntityId)!.push(rel.toEntityId);
+      adjacency.get(rel.toEntityId)!.push(rel.fromEntityId);
+    }
+
+    let iterations = 0;
+    for (let iter = 0; iter < maxIterations; iter++) {
+      iterations++;
+      let changed = false;
+      const shuffled = [...entityIds].sort(() => Math.random() - 0.5);
+
+      for (const entityId of shuffled) {
+        const neighbors = adjacency.get(entityId) ?? [];
+        if (neighbors.length === 0) continue;
+
+        const labelCounts = new Map<string, number>();
+        for (const neighborId of neighbors) {
+          const label = labels.get(neighborId) ?? neighborId;
+          labelCounts.set(label, (labelCounts.get(label) ?? 0) + 1);
+        }
+
+        const dominantLabel = [...labelCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+        if (dominantLabel && dominantLabel !== labels.get(entityId)) {
+          labels.set(entityId, dominantLabel);
+          changed = true;
+        }
+      }
+
+      if (!changed) break;
+    }
+
+    const communities = new Map<string, CommunityMember[]>();
+    for (const row of entityRows) {
+      const communityId = labels.get(row.id) ?? row.id;
+      if (!communities.has(communityId)) communities.set(communityId, []);
+      communities.get(communityId)!.push({
+        entityId: row.id,
+        entityName: row.name,
+        entityType: mapEntityType(row.entityType),
+        domain: row.sourceApp,
+        communityId,
+        iterations,
+      });
+    }
+
+    const sizes = [...communities.values()].map(m => m.length);
+    return {
+      communities,
+      totalEntities: entityRows.length,
+      totalCommunities: communities.size,
+      largestCommunitySize: Math.max(0, ...sizes),
+      durationMs: Date.now() - start,
+    };
+  }
+
+  /**
+   * Influence scoring — PageRank-inspired weighted degree centrality.
+   * Uses in-degree, out-degree, and strength-weighted edges.
+   */
+  async computeInfluenceScores(
+    entityIds?: string[],
+    limit = 100,
+  ): Promise<InfluenceScoreResult[]> {
+    let targetIds = entityIds;
+    if (!targetIds || targetIds.length === 0) {
+      const rows = await db.select({ id: entitiesTable.id }).from(entitiesTable).limit(limit);
+      targetIds = rows.map(r => r.id);
+    }
+
+    if (targetIds.length === 0) return [];
+
+    const relRows = await db
+      .select({
+        fromEntityId: entityRelationshipsTable.fromEntityId,
+        toEntityId: entityRelationshipsTable.toEntityId,
+        strength: entityRelationshipsTable.strength,
+        relationshipType: entityRelationshipsTable.relationshipType,
+      })
+      .from(entityRelationshipsTable)
+      .where(or(
+        inArray(entityRelationshipsTable.fromEntityId, targetIds),
+        inArray(entityRelationshipsTable.toEntityId, targetIds),
+      ))
+      .limit(10000);
+
+    const inDegree = new Map<string, number>();
+    const outDegree = new Map<string, number>();
+    const weightedDegree = new Map<string, number>();
+
+    for (const id of targetIds) {
+      inDegree.set(id, 0);
+      outDegree.set(id, 0);
+      weightedDegree.set(id, 0);
+    }
+
+    for (const rel of relRows) {
+      const w = strengthToWeight(rel.strength);
+      if (targetIds.includes(rel.fromEntityId)) {
+        outDegree.set(rel.fromEntityId, (outDegree.get(rel.fromEntityId) ?? 0) + 1);
+        weightedDegree.set(rel.fromEntityId, (weightedDegree.get(rel.fromEntityId) ?? 0) + w);
+      }
+      if (targetIds.includes(rel.toEntityId)) {
+        inDegree.set(rel.toEntityId, (inDegree.get(rel.toEntityId) ?? 0) + 1);
+        weightedDegree.set(rel.toEntityId, (weightedDegree.get(rel.toEntityId) ?? 0) + w * 1.5);
+      }
+    }
+
+    const entityRows = await db
+      .select({ id: entitiesTable.id, name: entitiesTable.name })
+      .from(entitiesTable)
+      .where(inArray(entitiesTable.id, targetIds));
+
+    const nameMap = new Map(entityRows.map(e => [e.id, e.name]));
+
+    const maxWeighted = Math.max(1, ...targetIds.map(id => weightedDegree.get(id) ?? 0));
+    const results: InfluenceScoreResult[] = targetIds.map(id => ({
+      entityId: id,
+      entityName: nameMap.get(id) ?? id,
+      influenceScore: (weightedDegree.get(id) ?? 0) / maxWeighted,
+      inDegree: inDegree.get(id) ?? 0,
+      outDegree: outDegree.get(id) ?? 0,
+      weightedDegree: weightedDegree.get(id) ?? 0,
+      rank: 0,
+    })).sort((a, b) => b.influenceScore - a.influenceScore);
+
+    results.forEach((r, idx) => { r.rank = idx + 1; });
+    return results;
+  }
+
+  /**
+   * Temporal graph analysis — score relationships by recency.
+   * Recent edges weighted higher; decayed edges marked as stale.
+   */
+  async temporalGraphAnalysis(
+    entityId: string,
+    maxHops = 2,
+    minTemporalWeight = 0.3,
+  ): Promise<{
+    entity: OntologyEntity | null;
+    temporalEdges: TemporalEdge[];
+    recentActivity: string;
+    temporalClusters: Array<{ period: string; edgeCount: number; avgWeight: number }>;
+  }> {
+    const entity = await this.getEntity(entityId);
+
+    const relRows = await db
+      .select()
+      .from(entityRelationshipsTable)
+      .where(or(
+        eq(entityRelationshipsTable.fromEntityId, entityId),
+        eq(entityRelationshipsTable.toEntityId, entityId),
+      ))
+      .limit(200);
+
+    const now = Date.now();
+    const temporalEdges: TemporalEdge[] = relRows
+      .map(rel => {
+        const ageMs = now - rel.createdAt.getTime();
+        const temporalWeight = computeTemporalWeight(rel.createdAt.toISOString());
+        return {
+          relationshipId: rel.id,
+          fromEntityId: rel.fromEntityId,
+          toEntityId: rel.toEntityId,
+          type: rel.relationshipType as RelationshipType,
+          createdAt: rel.createdAt.toISOString(),
+          ageMs,
+          temporalWeight,
+          strength: mapRelationshipStrength(rel.strength),
+        };
+      })
+      .filter(e => e.temporalWeight >= minTemporalWeight)
+      .sort((a, b) => b.temporalWeight - a.temporalWeight);
+
+    const buckets = new Map<string, { edgeCount: number; totalWeight: number }>();
+    for (const edge of temporalEdges) {
+      const date = new Date(edge.createdAt);
+      const period = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      const bucket = buckets.get(period) ?? { edgeCount: 0, totalWeight: 0 };
+      bucket.edgeCount++;
+      bucket.totalWeight += edge.temporalWeight;
+      buckets.set(period, bucket);
+    }
+
+    const temporalClusters = [...buckets.entries()]
+      .map(([period, b]) => ({ period, edgeCount: b.edgeCount, avgWeight: b.totalWeight / b.edgeCount }))
+      .sort((a, b) => b.period.localeCompare(a.period))
+      .slice(0, 12);
+
+    const recentEdges = temporalEdges.filter(e => e.ageMs < 7 * 24 * 60 * 60 * 1000);
+    const recentActivity = recentEdges.length > 0
+      ? `${recentEdges.length} relationship(s) in the last 7 days (avg temporal weight: ${(recentEdges.reduce((s, e) => s + e.temporalWeight, 0) / recentEdges.length).toFixed(2)})`
+      : "No recent relationship activity in the last 7 days";
+
+    return { entity, temporalEdges, recentActivity, temporalClusters };
+  }
+
+  /**
+   * Extract a subgraph around a center entity for GraphRAG context injection.
+   * Applies temporal decay and confidence weighting to edges.
+   */
+  async extractSubgraph(
+    centerEntityId: string,
+    maxDepth = 3,
+    maxNodes = 30,
+    minRiskScore = 0.0,
+    minConfidence = 0.3,
+  ): Promise<SubgraphExtraction> {
+    const visitedIds = new Set<string>([centerEntityId]);
+    const entityMap = new Map<string, OntologyEntity>();
+    const edgeList: SubgraphExtraction["edges"] = [];
+    let frontier = [centerEntityId];
+
+    const center = await this.getEntity(centerEntityId);
+    if (center) entityMap.set(center.id, center);
+
+    for (let depth = 1; depth <= maxDepth && entityMap.size < maxNodes; depth++) {
+      if (frontier.length === 0) break;
+
+      const relRows = await db
+        .select()
+        .from(entityRelationshipsTable)
+        .where(or(
+          inArray(entityRelationshipsTable.fromEntityId, frontier),
+          inArray(entityRelationshipsTable.toEntityId, frontier),
+        ))
+        .limit(maxNodes * 3);
+
+      const nextFrontier: string[] = [];
+
+      for (const rel of relRows) {
+        const neighborId = frontier.includes(rel.fromEntityId) ? rel.toEntityId : rel.fromEntityId;
+        if (visitedIds.has(neighborId)) continue;
+        if (entityMap.size >= maxNodes) break;
+
+        visitedIds.add(neighborId);
+
+        const neighbor = await this.getEntity(neighborId);
+        if (!neighbor) continue;
+        if (neighbor.riskScore !== undefined && neighbor.riskScore < minRiskScore) continue;
+
+        entityMap.set(neighborId, neighbor);
+        nextFrontier.push(neighborId);
+
+        const strengthW = strengthToWeight(rel.strength);
+        const temporalW = computeTemporalWeight(rel.createdAt.toISOString());
+        const meta = (rel.metadata as Record<string, unknown>) ?? {};
+        const confScore = typeof meta.confidence === "number" ? meta.confidence : 0.7;
+
+        if (confScore < minConfidence) continue;
+
+        edgeList.push({
+          from: rel.fromEntityId,
+          to: rel.toEntityId,
+          type: rel.relationshipType as RelationshipType,
+          weight: strengthW,
+          temporalWeight: temporalW,
+          confidenceScore: confScore,
+        });
+      }
+
+      frontier = nextFrontier;
+    }
+
+    const rels: OntologyRelationship[] = edgeList.map((e, idx) => ({
+      id: `subgraph-edge-${idx}`,
+      fromEntityId: e.from,
+      toEntityId: e.to,
+      type: e.type,
+      strength: e.weight > 0.7 ? "strong" : e.weight > 0.4 ? "moderate" : "weak",
+      metadata: { temporalWeight: e.temporalWeight, confidenceScore: e.confidenceScore },
+      createdAt: new Date().toISOString(),
+    }));
+
+    return {
+      centerEntityId,
+      entities: [...entityMap.values()],
+      relationships: rels,
+      edges: edgeList,
+      maxDepth,
+      extractedAt: new Date().toISOString(),
     };
   }
 

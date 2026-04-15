@@ -27,7 +27,9 @@
     "./knowledge-graph": "./src/knowledge-graph.ts",
     "./semantic-search": "./src/semantic-search.ts",
     "./domain-embedding-hooks": "./src/domain-embedding-hooks.ts",
-    "./ml-pipeline": "./src/ml-pipeline/index.ts"
+    "./ml-pipeline": "./src/ml-pipeline/index.ts",
+    "./ontology/ontology-engine": "./src/ontology/ontology-engine.ts",
+    "./ontology/graph-rag": "./src/ontology/graph-rag.ts"
   },
   "dependencies": {
     "@szl-holdings/db": "workspace:*",

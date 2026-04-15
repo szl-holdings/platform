@@ -74,7 +74,8 @@
     "react": "catalog:",
     "swagger-ui-express": "^5.0.1",
     "ws": "^8.20.0",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@szl-holdings/intelligence-feeds": "workspace:*"
   },
   "devDependencies": {
     "@types/compression": "^1.8.1",

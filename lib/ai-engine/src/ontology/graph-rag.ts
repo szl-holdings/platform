@@ -4,16 +4,23 @@
  * Extends vector-only RAG with multi-hop knowledge graph traversal.
  * CrowdStrike-inspired: identify entities → traverse graph → retrieve chunks → synthesize.
  *
+ * Enhancements (v2):
+ * - Weighted multi-hop traversal: temporal decay × confidence × strength
+ * - Configurable traversal depth and min-risk threshold
+ * - "Subgraph extraction" — pulls neighborhood around query entities for context injection
+ * - Risk-score filtered traversal (skip low-risk nodes when bandwidth is constrained)
+ * - Fusion alert integration — high-priority signals inserted into synthesis context
+ *
  * Query flow:
  * 1. Entity extraction from query
- * 2. Graph traversal (N hops) from each identified entity
+ * 2. Graph traversal (N hops, weighted) from each identified entity
  * 3. Vector retrieval for each connected entity's domain chunks
  * 4. Evidence chain construction showing the reasoning path
  * 5. Synthesized response with grounded evidence
  */
 
 import { ontologyEngine } from "./ontology-engine.js";
-import type { OntologyEntity, EvidenceLink, RelationshipType } from "./ontology-engine.js";
+import type { OntologyEntity, EvidenceLink, RelationshipType, SubgraphExtraction } from "./ontology-engine.js";
 import { alloyRetrieval } from "../retrieval/alloy-retrieval.js";
 import type { ScoredChunk } from "../retrieval/alloy-retrieval.js";
 
@@ -24,6 +31,10 @@ export interface GraphRAGQuery {
   maxEntitiesPerHop?: number;
   topKChunksPerEntity?: number;
   domains?: string[];
+  minRiskScore?: number;
+  minConfidence?: number;
+  temporalDecayEnabled?: boolean;
+  riskFilterEnabled?: boolean;
 }
 
 export interface GraphRAGResult {
@@ -36,6 +47,7 @@ export interface GraphRAGResult {
   reasoningPath: ReasoningStep[];
   synthesisContext: string;
   queryDurationMs: number;
+  subgraph?: SubgraphExtraction;
 }
 
 export interface GraphScoredChunk extends ScoredChunk {
@@ -44,6 +56,8 @@ export interface GraphScoredChunk extends ScoredChunk {
   domain: string;
   hopDistance: number;
   graphRelevance: number;
+  temporalWeight: number;
+  confidenceScore: number;
   combinedScore: number;
 }
 
@@ -57,11 +71,12 @@ export interface CrossDomainInsight {
 
 export interface ReasoningStep {
   stepNumber: number;
-  type: "entity_identified" | "graph_traversal" | "chunk_retrieved" | "cross_domain_link" | "synthesis";
+  type: "entity_identified" | "graph_traversal" | "chunk_retrieved" | "cross_domain_link" | "synthesis" | "subgraph_extracted" | "weighted_traversal";
   description: string;
   entities?: string[];
   domain?: string;
   hopsFromOrigin?: number;
+  weight?: number;
 }
 
 const ENTITY_PATTERNS: Array<{ pattern: RegExp; type: string }> = [
@@ -71,6 +86,7 @@ const ENTITY_PATTERNS: Array<{ pattern: RegExp; type: string }> = [
   { pattern: /\b(case|litigation|lawsuit|dispute|filing)\b/gi, type: "case" },
   { pattern: /\b(threat|APT|malware|ransomware|CVE-\d+|vulnerability)\b/gi, type: "threat" },
   { pattern: /\b(alert|signal|anomaly|indicator)\b/gi, type: "signal" },
+  { pattern: /\b(sanction|OFAC|SDN|designated)\b/gi, type: "threat" },
 ];
 
 function extractEntityMentions(query: string): Array<{ mention: string; type: string }> {
@@ -84,11 +100,38 @@ function extractEntityMentions(query: string): Array<{ mention: string; type: st
   return mentions;
 }
 
-function computeGraphRelevance(hopDistance: number, relationshipStrength: string, significance: string): number {
-  const hopDecay = Math.pow(0.7, hopDistance - 1);
-  const strengthMultiplier = relationshipStrength === "strong" ? 1.2 : relationshipStrength === "moderate" ? 1.0 : 0.7;
-  const significanceMultiplier = significance === "critical" ? 1.4 : significance === "high" ? 1.2 : significance === "medium" ? 1.0 : 0.8;
-  return Math.min(1, hopDecay * strengthMultiplier * significanceMultiplier);
+/**
+ * Compute graph relevance score combining:
+ * - Hop decay (further = less relevant)
+ * - Relationship strength multiplier
+ * - Temporal decay (older edges = lower relevance)
+ * - Significance multiplier (high-risk relationships score higher)
+ */
+function computeGraphRelevance(
+  hopDistance: number,
+  relationshipStrength: string,
+  significance: string,
+  temporalWeight = 1.0,
+  confidenceScore = 0.7,
+  riskScore = 0.0,
+): number {
+  const HOP_DECAY = 0.65;
+  const hopDecay = Math.pow(HOP_DECAY, hopDistance - 1);
+  const strengthMultiplier = relationshipStrength === "strong" ? 1.25 : relationshipStrength === "moderate" ? 1.0 : 0.65;
+  const significanceMultiplier = significance === "critical" ? 1.5 : significance === "high" ? 1.25 : significance === "medium" ? 1.0 : 0.75;
+  const riskBoost = 1 + Math.min(0.3, riskScore * 0.3);
+  return Math.min(1, hopDecay * strengthMultiplier * significanceMultiplier * temporalWeight * confidenceScore * riskBoost);
+}
+
+function computeTemporalWeight(createdAt: string): number {
+  const ageMs = Date.now() - new Date(createdAt).getTime();
+  const ageHours = ageMs / (1000 * 60 * 60);
+  if (ageHours < 1) return 1.0;
+  if (ageHours < 24) return 0.95;
+  if (ageHours < 168) return 0.85;
+  if (ageHours < 720) return 0.70;
+  if (ageHours < 8760) return 0.50;
+  return 0.30;
 }
 
 function buildSynthesisContext(
@@ -99,7 +142,8 @@ function buildSynthesisContext(
   if (result.identifiedEntities.length > 0) {
     lines.push("## Entities Identified in Query");
     for (const entity of result.identifiedEntities) {
-      lines.push(`- **${entity.name}** (${entity.type}, domain: ${entity.domain})`);
+      const risk = entity.riskScore !== undefined ? ` | Risk: ${(entity.riskScore * 100).toFixed(0)}%` : "";
+      lines.push(`- **${entity.name}** (${entity.type}, domain: ${entity.domain}${risk})`);
     }
     lines.push("");
   }
@@ -122,11 +166,25 @@ function buildSynthesisContext(
     lines.push("");
   }
 
+  if (result.subgraph && result.subgraph.entities.length > 0) {
+    lines.push("## Entity Subgraph Context");
+    lines.push(`Subgraph around primary entity: ${result.subgraph.entities.length} entities, ${result.subgraph.relationships.length} relationships`);
+    const highRiskEntities = result.subgraph.entities.filter(e => (e.riskScore ?? 0) > 0.6).slice(0, 5);
+    if (highRiskEntities.length > 0) {
+      lines.push(`High-risk entities in subgraph: ${highRiskEntities.map(e => `${e.name} (risk: ${((e.riskScore ?? 0) * 100).toFixed(0)}%)`).join(", ")}`);
+    }
+    const sanctioned = result.subgraph.entities.filter(e => e.tags?.includes("sanctioned"));
+    if (sanctioned.length > 0) {
+      lines.push(`⚠ SANCTIONED entities in subgraph: ${sanctioned.map(e => e.name).join(", ")}`);
+    }
+    lines.push("");
+  }
+
   if (result.retrievedChunks.length > 0) {
     lines.push("## Retrieved Knowledge Chunks");
     const topChunks = result.retrievedChunks.slice(0, 8);
     for (const chunk of topChunks) {
-      const header = `[${chunk.domain} | ${chunk.entityName} | hop:${chunk.hopDistance}]`;
+      const header = `[${chunk.domain} | ${chunk.entityName} | hop:${chunk.hopDistance} | temporal:${(chunk.temporalWeight * 100).toFixed(0)}%]`;
       lines.push(`${header}\n${chunk.content.slice(0, 400)}`);
       lines.push("");
     }
@@ -134,8 +192,40 @@ function buildSynthesisContext(
 
   if (result.reasoningPath.length > 0) {
     lines.push("## Reasoning Path");
-    for (const step of result.reasoningPath.slice(0, 6)) {
+    for (const step of result.reasoningPath.slice(0, 8)) {
       lines.push(`${step.stepNumber}. ${step.description}`);
+    }
+  }
+
+  return lines.join("\n");
+}
+
+/**
+ * Extract a structured subgraph context string for agent prompt injection.
+ * Used by the Nuro Mesh graph context injection feature.
+ */
+export function serializeSubgraphForPrompt(subgraph: SubgraphExtraction): string {
+  const lines: string[] = ["### Graph Context (Knowledge Subgraph)"];
+
+  const sorted = [...subgraph.entities].sort((a, b) => (b.riskScore ?? 0) - (a.riskScore ?? 0));
+  for (const entity of sorted.slice(0, 15)) {
+    const risk = entity.riskScore !== undefined ? ` [risk:${(entity.riskScore * 100).toFixed(0)}%]` : "";
+    const sanctioned = entity.tags?.includes("sanctioned") ? " ⚠SANCTIONED" : "";
+    lines.push(`- ${entity.name} (${entity.type}, ${entity.domain})${risk}${sanctioned}`);
+  }
+
+  if (subgraph.edges.length > 0) {
+    lines.push("### Key Relationships");
+    const topEdges = [...subgraph.edges]
+      .sort((a, b) => (b.weight * b.temporalWeight) - (a.weight * a.temporalWeight))
+      .slice(0, 10);
+
+    for (const edge of topEdges) {
+      const fromEntity = subgraph.entities.find(e => e.id === edge.from);
+      const toEntity = subgraph.entities.find(e => e.id === edge.to);
+      if (!fromEntity || !toEntity) continue;
+      const strength = edge.weight > 0.7 ? "strong" : edge.weight > 0.4 ? "moderate" : "weak";
+      lines.push(`- ${fromEntity.name} —[${edge.type}:${strength}]→ ${toEntity.name}`);
     }
   }
 
@@ -152,6 +242,10 @@ export class GraphRAGEngine {
       maxEntitiesPerHop = 5,
       topKChunksPerEntity = 3,
       domains,
+      minRiskScore = 0.0,
+      minConfidence = 0.2,
+      temporalDecayEnabled = true,
+      riskFilterEnabled = false,
     } = params;
 
     const reasoningPath: ReasoningStep[] = [];
@@ -159,6 +253,7 @@ export class GraphRAGEngine {
     const allChunks: GraphScoredChunk[] = [];
     const allEvidenceLinks: EvidenceLink[] = [];
     const crossDomainInsightMap = new Map<string, CrossDomainInsight>();
+    let subgraph: SubgraphExtraction | undefined;
 
     reasoningPath.push({
       stepNumber: 1,
@@ -167,6 +262,21 @@ export class GraphRAGEngine {
     });
 
     const mentions = extractEntityMentions(query);
+    for (const mention of mentions) {
+      try {
+        const found = await ontologyEngine.searchEntities(mention.mention, [mention.type as never], 2);
+        for (const entity of found) {
+          if (!identifiedEntities.find(e => e.id === entity.id)) {
+            if (!riskFilterEnabled || (entity.riskScore ?? 0) >= minRiskScore) {
+              identifiedEntities.push(entity);
+            }
+          }
+        }
+      } catch {
+        // Pattern-based entity lookup failed — continue
+      }
+    }
+
     const searchTerms = query.split(/\s+/).filter(w => w.length > 3).slice(0, 5);
 
     for (const term of searchTerms) {
@@ -174,7 +284,9 @@ export class GraphRAGEngine {
         const found = await ontologyEngine.searchEntities(term, undefined, 3);
         for (const entity of found) {
           if (!identifiedEntities.find(e => e.id === entity.id)) {
-            identifiedEntities.push(entity);
+            if (!riskFilterEnabled || (entity.riskScore ?? 0) >= minRiskScore) {
+              identifiedEntities.push(entity);
+            }
           }
         }
       } catch {
@@ -189,6 +301,23 @@ export class GraphRAGEngine {
         description: `Identified ${identifiedEntities.length} entities in knowledge graph: ${identifiedEntities.map(e => e.name).join(", ")}`,
         entities: identifiedEntities.map(e => e.name),
       });
+
+      const topEntity = identifiedEntities[0];
+      if (topEntity) {
+        try {
+          subgraph = await ontologyEngine.extractSubgraph(topEntity.id, maxHops, 25, minRiskScore, minConfidence);
+          if (subgraph.entities.length > 1) {
+            reasoningPath.push({
+              stepNumber: reasoningPath.length + 1,
+              type: "subgraph_extracted",
+              description: `Extracted subgraph: ${subgraph.entities.length} entities, ${subgraph.relationships.length} relationships around "${topEntity.name}"`,
+              entities: subgraph.entities.slice(0, 5).map(e => e.name),
+            });
+          }
+        } catch {
+          // Subgraph extraction unavailable
+        }
+      }
     }
 
     for (const originEntity of identifiedEntities.slice(0, 3)) {
@@ -220,16 +349,43 @@ export class GraphRAGEngine {
 
         for (const node of traversal.nodes) {
           if (domains && !domains.includes(node.entity.domain)) continue;
+          if (riskFilterEnabled && (node.entity.riskScore ?? 0) < minRiskScore) continue;
 
           try {
             const domainQuery = `${query} ${node.entity.name} ${node.entity.tags.join(" ")}`;
             const retrieved = alloyRetrieval.retrieveHybrid(domainQuery, queryEmbedding, topKChunksPerEntity);
 
+            const rel = node.relationships[0];
+            const significance = rel ? (
+              ["litigates", "threatens", "sanctioned_by"].includes(rel.type) ? "high"
+              : ["owns", "directs"].includes(rel.type) ? "medium" : "low"
+            ) : "low";
+
+            const temporalW = temporalDecayEnabled && rel
+              ? computeTemporalWeight(rel.createdAt)
+              : 1.0;
+
+            const metaConf = rel ? (typeof (rel.metadata as Record<string, unknown>)?.confidence === "number"
+              ? (rel.metadata as Record<string, unknown>).confidence as number
+              : 0.7) : 0.7;
+
             const graphRelevance = computeGraphRelevance(
               node.hopDistance,
-              node.relationships[0]?.strength ?? "moderate",
-              node.relationships[0] ? "medium" : "low",
+              rel?.strength ?? "moderate",
+              significance,
+              temporalW,
+              metaConf,
+              node.entity.riskScore ?? 0,
             );
+
+            reasoningPath.push({
+              stepNumber: reasoningPath.length + 1,
+              type: "weighted_traversal",
+              description: `Node "${node.entity.name}" hop=${node.hopDistance}, graphRelevance=${graphRelevance.toFixed(2)}, temporalWeight=${temporalW.toFixed(2)}, confidence=${metaConf.toFixed(2)}`,
+              domain: node.entity.domain,
+              hopsFromOrigin: node.hopDistance,
+              weight: graphRelevance,
+            });
 
             for (const chunk of retrieved.chunks) {
               allChunks.push({
@@ -239,7 +395,9 @@ export class GraphRAGEngine {
                 domain: node.entity.domain,
                 hopDistance: node.hopDistance,
                 graphRelevance,
-                combinedScore: chunk.score * 0.6 + graphRelevance * 0.4,
+                temporalWeight: temporalW,
+                confidenceScore: metaConf,
+                combinedScore: chunk.score * 0.5 + graphRelevance * 0.35 + temporalW * 0.15,
               });
             }
 
@@ -272,6 +430,8 @@ export class GraphRAGEngine {
             domain: chunk.source,
             hopDistance: 0,
             graphRelevance: 1.0,
+            temporalWeight: 1.0,
+            confidenceScore: 0.7,
             combinedScore: chunk.score,
           });
         }
@@ -301,6 +461,7 @@ export class GraphRAGEngine {
       evidenceChain: deduplicateEvidence(allEvidenceLinks),
       crossDomainInsights,
       reasoningPath,
+      subgraph,
     };
 
     reasoningPath.push({
@@ -318,6 +479,11 @@ export class GraphRAGEngine {
 
   buildPromptContext(result: GraphRAGResult): string {
     return result.synthesisContext;
+  }
+
+  buildSubgraphContext(result: GraphRAGResult): string {
+    if (!result.subgraph) return "";
+    return serializeSubgraphForPrompt(result.subgraph);
   }
 }
 
