@@ -7,12 +7,14 @@ artifacts/firestorm/ @stephenlutar2-hash
 artifacts/terra/ @stephenlutar2-hash
 artifacts/vessels/ @stephenlutar2-hash
 artifacts/carlota-jo/ @stephenlutar2-hash
+artifacts/prism-counsel/ @stephenlutar2-hash
+artifacts/imperium/ @stephenlutar2-hash
+artifacts/command/ @stephenlutar2-hash
 artifacts/stephen-site/ @stephenlutar2-hash
 
 artifacts/*-mobile/ @stephenlutar2-hash
 
 lib/ @stephenlutar2-hash
-packages/ @stephenlutar2-hash
 
 lib/ai-engine/ @stephenlutar2-hash
 lib/db/ @stephenlutar2-hash
@@ -20,3 +22,8 @@ lib/shared-ui/ @stephenlutar2-hash
 
 .github/ @stephenlutar2-hash
 docs/ @stephenlutar2-hash
+infra/ @stephenlutar2-hash
+
+SECURITY.md @stephenlutar2-hash
+CODE_OF_CONDUCT.md @stephenlutar2-hash
+LICENSE.md @stephenlutar2-hash

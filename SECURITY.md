@@ -19,7 +19,7 @@ The SZL Holdings platform is currently in active pre-commercial development. Sec
 
 ### Responsible Disclosure Process
 
-1. **Email:** Send a detailed report to [security@stephenl.dev](mailto:security@stephenl.dev)
+1. **Email:** Send a detailed report to [security@szlholdings.com](mailto:security@szlholdings.com)
 2. **Subject line:** `[SECURITY] Brief description of the vulnerability`
 3. **Include in your report:**
    - Platform / component affected (Lyte, Aegis, Vessels, Terra, API server, etc.)
@@ -52,14 +52,16 @@ The SZL Holdings platform is currently in active pre-commercial development. Sec
 
 ### In Scope
 
+- All platform web applications (Lyte, Aegis, Terra, Vessels, Carlota Jo, PRISM Counsel, IMPERIUM, Command Portal, SZL Holdings, Stephen Site)
 - All platform web applications (Lyte, Aegis, Terra, Vessels, Carlota Jo, SZL Holdings, Command Portal)
-- CORTEX unified mobile application (iOS/Android)
+- CORTEX unified mobile application (iOS/Android) (Expo / React Native)
 - The centralized API server
-- Authentication and session management
-- WebSocket connection security
+- Authentication and session management (OIDC/PKCE, RBAC, SCIM 2.0)
+- WebSocket and SSE connection security
 - AI agent execution boundaries and human-in-the-loop enforcement
-- Data access control (RBAC implementation)
-- Exposed API endpoints
+- Data access control (11-role RBAC implementation)
+- Multi-tenant isolation (org_id scoping)
+- Exposed API endpoints (2,331 routes)
 
 ### Out of Scope
 
@@ -114,7 +116,7 @@ We appreciate responsible security research. Researchers who report valid vulner
 
 ## Security Contact
 
-**Email:** security@stephenl.dev  
+**Email:** security@szlholdings.com  
 **PGP:** Not yet configured — plain email is acceptable  
 **Response SLA:** 48 hours for initial acknowledgement
 

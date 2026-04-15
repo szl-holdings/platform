@@ -1,6 +1,10 @@
 # SZL Holdings Platform
 
-> [Live Demo](https://szlholdings.com) | [Security](./SECURITY.md) | [Architecture](./docs/architecture/system-overview.md) | [Investor Docs](./docs/investor/platform-thesis.md) | [Trust Center](./docs/trust/trust-center.md)
+> [Live Demo](https://szlholdings.com) | [Security](./SECURITY.md) | [Code of Conduct](./CODE_OF_CONDUCT.md) | [Architecture](./docs/architecture/system-overview.md) | [Investor Docs](./docs/investor/platform-thesis.md) | [Trust Center](./docs/trust/trust-center.md)
+
+[![CI](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml/badge.svg?branch=master)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml)
+[![Security Audit](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml/badge.svg?branch=master)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml)
 
 [![CI](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml)
 [![E2E Tests](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/e2e.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/e2e.yml)
@@ -12,7 +16,7 @@
 ![Node](https://img.shields.io/badge/Node-20.x-green)
 ![React](https://img.shields.io/badge/React-19-61DAFB)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)
-![Apps](https://img.shields.io/badge/apps-25-gold)
+![Apps](https://img.shields.io/badge/apps-22-gold)
 ![API_Endpoints](https://img.shields.io/badge/API_endpoints-2%2C331-orange)
 ![DB_Tables](https://img.shields.io/badge/DB_tables-644-purple)
 

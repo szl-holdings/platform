@@ -37,10 +37,14 @@ _Which applications or libraries are affected?_
 - [ ] `vessels`
 - [ ] `terra`
 - [ ] `carlota-jo`
+- [ ] `prism-counsel`
+- [ ] `imperium`
+- [ ] `command` (Command Portal)
 - [ ] `szl-holdings`
 - [ ] `command` (Ecosystem Command Portal)
 - [ ] `imperium`
 - [ ] `szl-holdings-mobile` (CORTEX — Unified Mobile Command)
+- [ ] `stephen-site`
 - [ ] Shared library (`lib/`)
 - [ ] Infrastructure (`infra/`)
 - [ ] Documentation (`docs/`)

@@ -12,19 +12,26 @@ This is the **SZL Holdings Platform** — a pnpm monorepo hosted on Replit.
 
 ## Frontend apps (`artifacts/`)
 
-9 web applications (React 19 + Vite 7 + Tailwind CSS 4):
+10 web applications (React 19 + Vite 7 + Tailwind CSS 4):
 
 | App | Package |
 |-----|---------|
-| Admin Control Plane | `@workspace/admin-panel` |
-| Project List | `@workspace/project-list` |
-| Stephen Lutar | `@workspace/stephen-site` |
-| Vessels Maritime Intelligence | `@workspace/vessels` |
-| Firestorm Security Simulation | `@workspace/firestorm` |
+| SZL Holdings Dashboard | `@workspace/szl-holdings` |
 | Lyte Command Center | `@workspace/lyte-command-center` |
-| Readiness Report | `@workspace/readiness-report` |
-| Dreamscape Creative Engine | `@workspace/dreamscape` |
-| Component Preview Server | `@workspace/mockup-sandbox` |
+| Aegis (Firestorm) | `@workspace/firestorm` |
+| Vessels Maritime Intelligence | `@workspace/vessels` |
+| Terra Real Estate Intelligence | `@workspace/terra` |
+| PRISM Counsel Legal Command | `@workspace/prism-counsel` |
+| Carlota Jo Advisory | `@workspace/carlota-jo` |
+| IMPERIUM Cloud Sovereignty | `@workspace/imperium` |
+| Command Portal | `@workspace/command` |
+| Stephen Lutar | `@workspace/stephen-site` |
+
+1 mobile application (Expo SDK 53 / React Native):
+
+| App | Package |
+|-----|---------|
+| CORTEX Mobile Command | `@workspace/szl-holdings-mobile` |
 
 All frontends use:
 - Radix UI primitives with shadcn/ui component patterns
@@ -44,12 +51,13 @@ All frontends use:
 
 | Library | Purpose |
 |---------|---------|
-| `@workspace/db` | Drizzle ORM schema and database client |
+| `@workspace/db` | Drizzle ORM schema (644 tables) and database client |
+| `@workspace/ai-engine` | AI orchestration — model routing, safety rails, telemetry |
 | `@workspace/api-client-react` | Generated React Query hooks from OpenAPI spec |
 | `@workspace/api-zod` | Zod schemas for API request/response validation |
 | `@workspace/api-spec` | OpenAPI specification and code generation |
 | `@workspace/services` | Shared business logic services |
-| `@workspace/shared-ui` | Reusable React UI components |
+| `@workspace/shared-ui` | Reusable React UI components and design tokens |
 | `@workspace/config` | Shared configuration constants |
 | `@workspace/shared-types` | Shared TypeScript type definitions |
 | `@workspace/utils` | General utility functions |

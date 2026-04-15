@@ -14,11 +14,14 @@ _Which platform or component exhibits this behavior?_
 - [ ] Aegis — Defense & Intelligence
 - [ ] Terra — Real Estate Intelligence
 - [ ] Vessels — Maritime Intelligence
+- [ ] PRISM Counsel — Legal Command
 - [ ] Carlota Jo — Advisory
+- [ ] IMPERIUM — Cloud Sovereignty
+- [ ] Command Portal — Ecosystem Hub
 - [ ] SZL Holdings — Corporate
 - [ ] Stephen Lutar — Founder Site
+- [ ] CORTEX — Mobile Command (Expo)
 - [ ] API Server
-- [ ] Mobile App (specify which)
 - [ ] Shared Library / Infrastructure
 
 ---

@@ -14,7 +14,11 @@ _Which platform or component would this feature affect?_
 - [ ] Aegis — Defense & Intelligence
 - [ ] Terra — Real Estate Intelligence
 - [ ] Vessels — Maritime Intelligence
+- [ ] PRISM Counsel — Legal Command
 - [ ] Carlota Jo — Advisory
+- [ ] IMPERIUM — Cloud Sovereignty
+- [ ] Command Portal — Ecosystem Hub
+- [ ] CORTEX — Mobile Command
 - [ ] SZL Holdings — Corporate
 - [ ] API Server / Shared Infrastructure
 - [ ] New platform / vertical

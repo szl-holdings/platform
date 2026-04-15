@@ -1,8 +1,10 @@
 # Contributing to SZL Holdings Platform
 
-→ [Platform Repo](https://github.com/szl-holdings/szl-holdings-platform) | [Security](./SECURITY.md) | [Architecture](./docs/architecture/system-overview.md) | [Contact](https://szlholdings.com)
+> [Platform Repo](https://github.com/szl-holdings/szl-holdings-platform) | [Security](./SECURITY.md) | [Code of Conduct](./CODE_OF_CONDUCT.md) | [Architecture](./docs/architecture/system-overview.md) | [Contact](https://szlholdings.com)
 
 The SZL Holdings platform is a **proprietary, founder-led software ecosystem**. This repository is a public mirror for evaluation, transparency, and technical review purposes — not an open-source project accepting community contributions.
+
+All participants in SZL Holdings spaces are expected to follow our [Code of Conduct](./CODE_OF_CONDUCT.md).
 
 ---
 
