@@ -1,0 +1,172 @@
+name: Release
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      version_bump:
+        description: 'Version bump type (overrides auto-detection from commit messages)'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine next version
+        id: version
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "Latest tag: $LATEST_TAG"
+
+          # Parse version components
+          VERSION=${LATEST_TAG#v}
+          MAJOR=$(echo "$VERSION" | cut -d. -f1)
+          MINOR=$(echo "$VERSION" | cut -d. -f2)
+          PATCH=$(echo "$VERSION" | cut -d. -f3)
+
+          # Manual dispatch: respect explicit version_bump input when not 'auto'
+          MANUAL_BUMP="${{ inputs.version_bump }}"
+
+          if [ -n "$MANUAL_BUMP" ] && [ "$MANUAL_BUMP" != "auto" ] && [ "$MANUAL_BUMP" != "" ]; then
+            BUMP_TYPE="$MANUAL_BUMP"
+          else
+            # Auto-detect from commit messages since last tag
+            if [ "$LATEST_TAG" = "v0.0.0" ]; then
+              COMMITS=$(git log --pretty=format:"%s" --max-count=50)
+            else
+              COMMITS=$(git log "$LATEST_TAG"..HEAD --pretty=format:"%s" 2>/dev/null || echo "")
+            fi
+
+            if echo "$COMMITS" | grep -qiE "^(feat|feature)(\(.*\))?!:|BREAKING CHANGE"; then
+              BUMP_TYPE="major"
+            elif echo "$COMMITS" | grep -qiE "^(feat|feature)(\(.*\))?:"; then
+              BUMP_TYPE="minor"
+            else
+              BUMP_TYPE="patch"
+            fi
+          fi
+
+          case "$BUMP_TYPE" in
+            major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH + 1)) ;;
+          esac
+
+          NEXT_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "next_version=$NEXT_VERSION" >> "$GITHUB_OUTPUT"
+          echo "bump_type=$BUMP_TYPE" >> "$GITHUB_OUTPUT"
+          echo "latest_tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
+          echo "Next version: $NEXT_VERSION ($BUMP_TYPE bump)"
+
+      - name: Check for duplicate release
+        id: check_release
+        run: |
+          LATEST_TAG="${{ steps.version.outputs.latest_tag }}"
+          if [ "$LATEST_TAG" != "v0.0.0" ]; then
+            TAG_COMMIT=$(git rev-list -n 1 "$LATEST_TAG" 2>/dev/null || echo "")
+            HEAD_COMMIT=$(git rev-parse HEAD)
+            if [ "$TAG_COMMIT" = "$HEAD_COMMIT" ]; then
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              echo "Latest tag already points to HEAD ($LATEST_TAG) — skipping duplicate release"
+            else
+              echo "skip=false" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate changelog
+        if: steps.check_release.outputs.skip != 'true'
+        id: changelog
+        run: |
+          LATEST_TAG="${{ steps.version.outputs.latest_tag }}"
+          NEXT_VERSION="${{ steps.version.outputs.next_version }}"
+
+          {
+            echo "## $NEXT_VERSION — $(date +'%Y-%m-%d')"
+            echo ""
+          } > RELEASE_NOTES.md
+
+          if [ "$LATEST_TAG" = "v0.0.0" ]; then
+            COMMITS=$(git log --pretty=format:"- %s (%h)" --max-count=50)
+          else
+            COMMITS=$(git log "$LATEST_TAG"..HEAD --pretty=format:"- %s (%h)" 2>/dev/null)
+          fi
+
+          if [ -z "$COMMITS" ]; then
+            echo "- Maintenance release" >> RELEASE_NOTES.md
+          else
+            FEATURES=$(echo "$COMMITS" | grep -iE "^- (feat|feature)" || true)
+            FIXES=$(echo "$COMMITS" | grep -iE "^- fix" || true)
+            CHORES=$(echo "$COMMITS" | grep -ivE "^- (feat|feature|fix)" || true)
+
+            if [ -n "$FEATURES" ]; then
+              echo "### Features" >> RELEASE_NOTES.md
+              echo "$FEATURES" >> RELEASE_NOTES.md
+              echo "" >> RELEASE_NOTES.md
+            fi
+            if [ -n "$FIXES" ]; then
+              echo "### Bug Fixes" >> RELEASE_NOTES.md
+              echo "$FIXES" >> RELEASE_NOTES.md
+              echo "" >> RELEASE_NOTES.md
+            fi
+            if [ -n "$CHORES" ]; then
+              echo "### Other Changes" >> RELEASE_NOTES.md
+              echo "$CHORES" >> RELEASE_NOTES.md
+            fi
+          fi
+
+          echo "Generated release notes:"
+          cat RELEASE_NOTES.md
+
+      - name: Create tag
+        if: steps.check_release.outputs.skip != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "${{ steps.version.outputs.next_version }}"
+          git push origin "${{ steps.version.outputs.next_version }}"
+
+      # Pinned to SHA — update after verifying new releases at github.com/softprops/action-gh-release/releases
+      - name: Create GitHub Release
+        if: steps.check_release.outputs.skip != 'true'
+        uses: softprops/action-gh-release@c062e08bd532815e2082a7e09ce9571a6d1f0e80
+        with:
+          tag_name: ${{ steps.version.outputs.next_version }}
+          name: ${{ steps.version.outputs.next_version }}
+          body_path: RELEASE_NOTES.md
+          generate_release_notes: true
+          make_latest: true
+
+      - name: Release summary
+        if: always()
+        run: |
+          echo "## Release Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.check_release.outputs.skip }}" = "true" ]; then
+            echo "- **Status:** Skipped (no new commits since ${{ steps.version.outputs.latest_tag }})" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- **Version:** ${{ steps.version.outputs.next_version }}" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Bump type:** ${{ steps.version.outputs.bump_type }}" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Previous tag:** ${{ steps.version.outputs.latest_tag }}" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Trigger:** ${{ github.event_name }}" >> "$GITHUB_STEP_SUMMARY"
+          fi

@@ -81,4 +81,3 @@ playwright-report/
 # Database dumps
 *.dump
 *.pgdump
-.github/workflows/
