@@ -20,8 +20,13 @@
     "./timeline": "./src/timeline.ts"
   },
   "dependencies": {
+    "@szl-holdings/db": "workspace:*",
+    "@szl-holdings/observability": "workspace:*",
     "@szl-holdings/prism-bus": "workspace:*",
-    "@szl-holdings/workflow-engine": "workspace:*"
+    "@szl-holdings/services": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "pino": "^9",
+    "pino-pretty": "^13"
   },
   "devDependencies": {
     "@types/node": "catalog:"

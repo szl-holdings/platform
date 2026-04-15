@@ -11,7 +11,7 @@ export default defineConfig({
       "@workspace/services": resolve(__dirname, "lib/services/src/index.ts"),
       "@workspace/config": resolve(__dirname, "lib/config/src/index.ts"),
       "@workspace/audit": resolve(__dirname, "lib/audit/src/index.ts"),
-      "@workspace/workflow-engine": resolve(__dirname, "lib/workflow-engine/src/index.ts"),
+      "@workspace/forge-runtime": resolve(__dirname, "lib/forge-runtime/src/index.ts"),
       "@workspace/ai-engine": resolve(__dirname, "lib/ai-engine/src/index.ts"),
       "@workspace/replit-auth-web": resolve(__dirname, "lib/replit-auth-web/src/index.ts"),
       "@workspace/shared-ui": resolve(__dirname, "lib/shared-ui/src/index.ts"),

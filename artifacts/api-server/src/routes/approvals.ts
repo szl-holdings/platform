@@ -41,7 +41,7 @@ router.post("/approvals", authMiddleware(), async (req: Request, res: Response) 
       return;
     }
 
-    const { createApprovalRequest } = await import("@szl-holdings/approvals");
+    const { createApprovalRequest } = await import("@szl-holdings/covenant-policy");
     const user = req.user;
     const orgId = user?.orgs?.[0]?.orgId ?? null;
 
@@ -78,7 +78,7 @@ router.get("/approvals", authMiddleware(), requireRole("super_admin", "admin", "
     const isAdmin = user?.roles?.some(r => ["super_admin", "admin"].includes(r)) ?? false;
     const orgId = isAdmin ? undefined : (user?.orgs?.[0]?.orgId ?? undefined);
 
-    const { listPendingApprovals } = await import("@szl-holdings/approvals");
+    const { listPendingApprovals } = await import("@szl-holdings/covenant-policy");
     const results = await listPendingApprovals({
       orgId,
       limit,
@@ -95,7 +95,7 @@ router.get("/approvals/:id", authMiddleware(), async (req: Request, res: Respons
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid approval ID"); return; }
 
-    const { getApprovalById } = await import("@szl-holdings/approvals");
+    const { getApprovalById } = await import("@szl-holdings/covenant-policy");
     const approval = await getApprovalById(id);
 
     if (!approval) { sendNotFound(res, "Approval"); return; }
@@ -117,7 +117,7 @@ router.post("/approvals/:id/review", authMiddleware(), requireRole("super_admin"
       return;
     }
 
-    const { reviewApproval } = await import("@szl-holdings/approvals");
+    const { reviewApproval } = await import("@szl-holdings/covenant-policy");
     const updated = await reviewApproval({
       approvalId: id,
       actorId: req.user?.id ?? null,
@@ -145,7 +145,7 @@ router.post("/approvals/:id/escalate", authMiddleware(), requireRole("super_admi
       return;
     }
 
-    const { escalateApproval } = await import("@szl-holdings/approvals");
+    const { escalateApproval } = await import("@szl-holdings/covenant-policy");
     const updated = await escalateApproval({
       approvalId: id,
       actorId: req.user?.id ?? null,
@@ -170,7 +170,7 @@ router.post("/approvals/:id/comment", authMiddleware(), async (req: Request, res
     const { body, isInternal } = req.body as { body?: string; isInternal?: boolean };
     if (!body) { sendBadRequest(res, "body is required"); return; }
 
-    const { addApprovalComment, getApprovalById } = await import("@szl-holdings/approvals");
+    const { addApprovalComment, getApprovalById } = await import("@szl-holdings/covenant-policy");
     const approval = await getApprovalById(id);
     if (!approval) { sendNotFound(res, "Approval"); return; }
 
@@ -194,7 +194,7 @@ router.get("/approvals/:id/audit-trail", authMiddleware(), requireRole("super_ad
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid approval ID"); return; }
 
-    const { getApprovalAuditTrail, getApprovalById } = await import("@szl-holdings/approvals");
+    const { getApprovalAuditTrail, getApprovalById } = await import("@szl-holdings/covenant-policy");
     const approval = await getApprovalById(id);
     if (!approval) { sendNotFound(res, "Approval"); return; }
 
@@ -209,7 +209,7 @@ router.get("/approvals/by-resource/:resourceType/:resourceId", authMiddleware(),
   try {
     const { resourceType, resourceId } = req.params as { resourceType: string; resourceId: string };
 
-    const { listApprovalsByResource } = await import("@szl-holdings/approvals");
+    const { listApprovalsByResource } = await import("@szl-holdings/covenant-policy");
     const results = await listApprovalsByResource(resourceType, resourceId);
     sendSuccess(res, results);
   } catch (err) {

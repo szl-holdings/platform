@@ -32,12 +32,23 @@ export {
   createApprovalRequest,
   reviewApproval,
   escalateApproval,
+  addApprovalComment,
+  getApprovalById,
+  listApprovalsByResource,
   listPendingApprovals,
   getApprovalAuditTrail,
+  getApprovalComments,
   expireStaleApprovals,
-} from "@szl-holdings/approvals";
+} from "./approvals.js";
 
-export type { ApprovalRequest, ApprovalStatus } from "@szl-holdings/approvals";
+export type {
+  ApprovalRequest,
+  ApprovalStatus,
+  CreateApprovalParams,
+  ReviewApprovalParams,
+  EscalateApprovalParams,
+  AddApprovalCommentParams,
+} from "./approvals.js";
 
 export {
   createAuthService,

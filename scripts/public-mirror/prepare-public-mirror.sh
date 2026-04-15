@@ -97,7 +97,6 @@ EXCLUDE_DIRS=(
   "test-results"
   "attached_assets"
   "social-content"
-  "spfx-webparts"
   ".local"
   ".cache"
   ".canvas"

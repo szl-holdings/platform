@@ -30,7 +30,10 @@
       "path": "../../lib/integrations-gemini-ai"
     },
     {
-      "path": "../../lib/approvals"
+      "path": "../../lib/covenant-policy"
+    },
+    {
+      "path": "../../lib/forge-runtime"
     },
     {
       "path": "../../lib/proof-chain"

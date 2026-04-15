@@ -16,7 +16,7 @@ import {
 } from "@szl-holdings/db";
 import { eq, desc } from "drizzle-orm";
 import { logger } from "./logger";
-import { durableJobQueue } from "@szl-holdings/workflow-engine";
+import { durableJobQueue } from "@szl-holdings/forge-runtime";
 
 // ─── Job Types for Alloy Workflow Engine ──────────────────────────────────────
 

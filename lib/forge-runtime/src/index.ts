@@ -27,32 +27,75 @@ export type {
 
 export { ForgeRuntime, forgeRuntime } from "./runtime.js";
 
+export { AgentEventBus, agentEventBus } from "./event-bus.js";
+export type { AgentEventType, AgentEvent } from "./event-bus.js";
+
+export { logger } from "./logger.js";
+
 export {
-  AgentEventBus,
-  agentEventBus,
+  KnowledgeStore,
+  knowledgeStore,
+  createKnowledgeEntry,
+  persistAgentRun,
+} from "./knowledge-store.js";
+export type {
+  KnowledgeEntryType,
+  KnowledgeDomain,
+  KnowledgeEntry,
+  KnowledgeQuery,
+} from "./knowledge-store.js";
+
+export {
   InProcessJobQueue,
   jobQueue,
   JOB_TYPES,
+} from "./job-queue.js";
+export type { Job, JobStatus, WsPublishFn } from "./job-queue.js";
+
+export {
   AgentScheduler,
   agentScheduler,
-  WorkflowStateMachine,
-  KnowledgeStore,
-  knowledgeStore,
-} from "@szl-holdings/workflow-engine";
+} from "./agent-scheduler.js";
+export type { AgentSchedule, AgentRunRecord } from "./agent-scheduler.js";
 
+export {
+  WorkflowStateMachine,
+} from "./workflow-state-machine.js";
 export type {
-  AgentEventType,
-  AgentEvent,
-  Job,
-  JobStatus,
-  WsPublishFn,
-  AgentSchedule,
-  AgentRunRecord,
   WorkflowStatus,
   WorkflowTransition,
   WorkflowContext,
-  KnowledgeEntry,
-  KnowledgeEntryType,
-  KnowledgeDomain,
-  KnowledgeQuery,
-} from "@szl-holdings/workflow-engine";
+} from "./workflow-state-machine.js";
+
+export {
+  DurableJobQueue,
+  durableJobQueue,
+  JobChain,
+} from "./durable-job-queue.js";
+export type {
+  DurableJob,
+  DurableJobOptions,
+  JobPriority,
+  JobExecutionContext,
+  QueueConfig,
+  JobChainStep,
+  JobStatus as DurableJobStatus,
+} from "./durable-job-queue.js";
+
+export {
+  DurableScheduler,
+  durableScheduler,
+  seedDefaultSchedules,
+  getNextRunTime,
+} from "./durable-scheduler.js";
+export type { ScheduleDefinition } from "./durable-scheduler.js";
+
+export {
+  AgentExecutionRuntime,
+  agentExecutionRuntime,
+} from "./agent-execution-runtime.js";
+export type {
+  AgentExecutionConfig,
+  AgentRunContext,
+  AgentState,
+} from "./agent-execution-runtime.js";

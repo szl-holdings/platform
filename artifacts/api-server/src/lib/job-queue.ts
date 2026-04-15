@@ -5,7 +5,7 @@ export {
   type Job,
   type JobStatus,
   type WsPublishFn,
-} from "@szl-holdings/workflow-engine";
+} from "@szl-holdings/forge-runtime";
 
 let scheduledJobsStarted = false;
 

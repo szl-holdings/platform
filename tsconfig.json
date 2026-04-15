@@ -40,7 +40,7 @@
       "path": "./lib/data-connectors"
     },
     {
-      "path": "./lib/workflow-engine"
+      "path": "./lib/forge-runtime"
     },
     {
       "path": "./lib/audit"

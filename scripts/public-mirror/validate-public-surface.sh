@@ -21,7 +21,7 @@ check_excluded() {
 EXCLUDED_DIRS=(
   ".archive" ".git-rewrite" "backups" "exports" "scratch"
   "temp" "tmp" "test-results" "attached_assets" "social-content"
-  "spfx-webparts" ".local" ".cache" ".canvas" ".cursor"
+  ".local" ".cache" ".canvas" ".cursor"
 )
 
 echo "--- Checking excluded directories (recursive) ---"

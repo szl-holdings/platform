@@ -14,7 +14,6 @@
 /lib/  @stephenlutar2-hash
 /lib/db/  @stephenlutar2-hash
 /lib/auth/  @stephenlutar2-hash
-/lib/workflow-engine/  @stephenlutar2-hash
 /lib/audit/  @stephenlutar2-hash
 
 # API server

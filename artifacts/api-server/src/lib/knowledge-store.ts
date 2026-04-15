@@ -7,7 +7,7 @@ export {
   type KnowledgeDomain,
   type KnowledgeEntry,
   type KnowledgeQuery,
-} from "@szl-holdings/workflow-engine";
+} from "@szl-holdings/forge-runtime";
 
 import { logger } from "./logger";
 logger.info("Knowledge store initialized");

@@ -198,7 +198,7 @@ app.get("/api/health", async (_req: Request, res: Response) => {
   let queueStatus: "ok" | "backpressure" | "unavailable" = "unavailable";
   let queueDepth = 0;
   try {
-    const { durableJobQueue } = await import("@szl-holdings/workflow-engine");
+    const { durableJobQueue } = await import("@szl-holdings/forge-runtime");
     const stats = await durableJobQueue.getStats();
     queueDepth = stats.pending + stats.running;
     queueStatus = queueDepth > 50 ? "backpressure" : "ok";
@@ -300,7 +300,7 @@ app.get("/api/health/detailed", async (req: Request, res: Response) => {
   }
 
   try {
-    const { durableJobQueue } = await import("@szl-holdings/workflow-engine");
+    const { durableJobQueue } = await import("@szl-holdings/forge-runtime");
     const stats = await durableJobQueue.getStats();
     const queueDepth = stats.pending + stats.running;
     checks["job_queue"] = {

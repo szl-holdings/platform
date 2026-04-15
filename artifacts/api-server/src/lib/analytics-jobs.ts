@@ -21,7 +21,7 @@ import {
 } from "@szl-holdings/observability/analytics";
 import { logger } from "./logger";
 import { jobQueue } from "./job-queue";
-import { JOB_TYPES } from "@szl-holdings/workflow-engine";
+import { JOB_TYPES } from "@szl-holdings/forge-runtime";
 
 // ---------------------------------------------------------------------------
 // METRICS_AGGREGATION job

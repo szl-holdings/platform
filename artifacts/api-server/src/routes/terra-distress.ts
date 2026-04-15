@@ -11,7 +11,7 @@ import {
   getIngestionStats,
 } from "../lib/terra-distress-service";
 import { ingestCsvBuffer } from "../lib/terra-csv-ingestion";
-import { durableJobQueue } from "@szl-holdings/workflow-engine";
+import { durableJobQueue } from "@szl-holdings/forge-runtime";
 import { NYC_INGESTION_JOB_TYPE } from "../lib/terra-nyc-ingestion";
 import { NYC_EXTENDED_INGESTION_JOB_TYPE, type NycExtendedIngestionJobPayload } from "../lib/terra-nyc-extended-ingestion";
 

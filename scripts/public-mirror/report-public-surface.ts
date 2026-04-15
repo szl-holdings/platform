@@ -58,7 +58,6 @@ const ROOT_DIR_CLASSIFICATIONS: Record<string, ContentClass> = {
   "test-results": { label: "test-results/", category: "excluded", reason: "CI/test output — operational noise" },
   attached_assets: { label: "attached_assets/", category: "excluded", reason: "Raw user-uploaded files — unsorted" },
   "social-content": { label: "social-content/", category: "excluded", reason: "Draft social media content" },
-  "spfx-webparts": { label: "spfx-webparts/", category: "excluded", reason: "Internal SharePoint tooling" },
   ".local": { label: ".local/", category: "excluded", reason: "Replit agent workspace state" },
   ".cache": { label: ".cache/", category: "excluded", reason: "Build cache — transient" },
   node_modules: { label: "node_modules/", category: "excluded", reason: "Dependencies — install via pnpm install" },

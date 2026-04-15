@@ -1,6 +1,6 @@
 import { logger } from "./logger";
 import { JOB_TYPES } from "./job-queue";
-import { durableJobQueue } from "@szl-holdings/workflow-engine";
+import { durableJobQueue } from "@szl-holdings/forge-runtime";
 import { serverTelemetry } from "@szl-holdings/observability";
 import { db, pool, platformJobRunsTable } from "@szl-holdings/db";
 import { eq } from "drizzle-orm";

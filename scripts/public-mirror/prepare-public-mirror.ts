@@ -71,7 +71,6 @@ const EXCLUDE_DIR_NAMES = new Set([
   "test-results",
   "attached_assets",
   "social-content",
-  "spfx-webparts",
   ".local",
   ".cache",
   ".canvas",
@@ -237,7 +236,6 @@ function writeExclusionReport(stagingDir: string): void {
     let reason = "Policy exclusion";
     if (excluded.includes("backups")) reason = "Database backups — security risk";
     else if (excluded.includes("social-content")) reason = "Draft social content — not public-ready";
-    else if (excluded.includes("spfx-webparts")) reason = "Internal tooling";
     else if (excluded.includes("attached_assets")) reason = "Unsorted user uploads";
     else if (excluded.includes(".local")) reason = "Replit agent workspace";
     else if (excluded.includes("test-results")) reason = "CI/test output";

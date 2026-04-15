@@ -1,5 +1,5 @@
 import { logger } from "./logger";
-import { durableJobQueue } from "@szl-holdings/workflow-engine";
+import { durableJobQueue } from "@szl-holdings/forge-runtime";
 import { serverTelemetry } from "@szl-holdings/observability";
 
 export const NAMED_JOB_TYPES = {

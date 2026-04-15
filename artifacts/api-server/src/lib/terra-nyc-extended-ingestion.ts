@@ -1,5 +1,5 @@
 import { logger } from "./logger";
-import { durableJobQueue } from "@szl-holdings/workflow-engine";
+import { durableJobQueue } from "@szl-holdings/forge-runtime";
 import { db } from "@szl-holdings/db";
 import { auditLogsTable } from "@szl-holdings/db";
 import {

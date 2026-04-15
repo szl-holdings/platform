@@ -6,7 +6,7 @@ import { getJobRegistry, NAMED_JOB_TYPES } from "../lib/scheduled-jobs";
 import { PLATFORM_JOB_TYPES } from "../lib/platform-jobs";
 import { logActivity } from "../lib/activity-logger";
 import { durableJobQueue, durableScheduler } from "../lib/durable-init";
-import { type DurableJobStatus } from "@szl-holdings/workflow-engine";
+import { type DurableJobStatus } from "@szl-holdings/forge-runtime";
 
 const router: IRouter = Router();
 

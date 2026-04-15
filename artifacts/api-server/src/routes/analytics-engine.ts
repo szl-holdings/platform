@@ -24,7 +24,7 @@ import {
   getFileExtension,
 } from "@szl-holdings/observability/analytics";
 import { jobQueue } from "../lib/job-queue";
-import { JOB_TYPES } from "@szl-holdings/workflow-engine";
+import { JOB_TYPES } from "@szl-holdings/forge-runtime";
 
 const analyticsEngineRouter = Router();
 

@@ -13,7 +13,7 @@ COPY lib/services/package.json ./lib/services/
 COPY lib/analytics/package.json ./lib/analytics/
 COPY lib/api-client-react/package.json ./lib/api-client-react/
 COPY lib/api-zod/package.json ./lib/api-zod/
-COPY lib/approvals/package.json ./lib/approvals/
+COPY lib/covenant-policy/package.json ./lib/covenant-policy/
 COPY lib/audit/package.json ./lib/audit/
 COPY lib/auth/package.json ./lib/auth/
 COPY lib/data-connectors/package.json ./lib/data-connectors/
@@ -23,7 +23,7 @@ COPY lib/mcp-client/package.json ./lib/mcp-client/
 COPY lib/observability/package.json ./lib/observability/
 COPY lib/proof-chain/package.json ./lib/proof-chain/
 COPY lib/replit-auth-web/package.json ./lib/replit-auth-web/
-COPY lib/workflow-engine/package.json ./lib/workflow-engine/
+COPY lib/forge-runtime/package.json ./lib/forge-runtime/
 COPY lib/worldline/package.json ./lib/worldline/
 COPY lib/integrations-anthropic-ai/package.json ./lib/integrations-anthropic-ai/
 COPY lib/integrations-gemini-ai/package.json ./lib/integrations-gemini-ai/

@@ -105,12 +105,12 @@ type GQLContext = {
 export const approvalsResolvers = {
   Query: {
     approvalRequest: async (_: unknown, args: { id: string }) => {
-      const { getApprovalById } = await import("@szl-holdings/approvals");
+      const { getApprovalById } = await import("@szl-holdings/covenant-policy");
       return getApprovalById(parseIntId(args.id));
     },
 
     approvalRequests: async (_: unknown, args: { status?: string; orgId?: number; limit?: number }, ctx: GQLContext) => {
-      const { listPendingApprovals } = await import("@szl-holdings/approvals");
+      const { listPendingApprovals } = await import("@szl-holdings/covenant-policy");
       const user = ctx?.req?.user;
       const isAdminUser = user?.roles?.some(r => ["super_admin", "admin"].includes(r)) ?? false;
       const orgId = args.orgId ?? (isAdminUser ? undefined : user?.orgs?.[0]?.orgId ?? undefined);
@@ -118,17 +118,17 @@ export const approvalsResolvers = {
     },
 
     approvalsByResource: async (_: unknown, args: { resourceType: string; resourceId: string }) => {
-      const { listApprovalsByResource } = await import("@szl-holdings/approvals");
+      const { listApprovalsByResource } = await import("@szl-holdings/covenant-policy");
       return listApprovalsByResource(args.resourceType, args.resourceId);
     },
 
     approvalAuditTrail: async (_: unknown, args: { approvalId: string }) => {
-      const { getApprovalAuditTrail } = await import("@szl-holdings/approvals");
+      const { getApprovalAuditTrail } = await import("@szl-holdings/covenant-policy");
       return getApprovalAuditTrail(parseIntId(args.approvalId));
     },
 
     approvalComments: async (_: unknown, args: { approvalId: string }) => {
-      const { getApprovalComments } = await import("@szl-holdings/approvals");
+      const { getApprovalComments } = await import("@szl-holdings/covenant-policy");
       return getApprovalComments(parseIntId(args.approvalId));
     },
   },
@@ -149,7 +149,7 @@ export const approvalsResolvers = {
       },
       ctx: GQLContext,
     ) => {
-      const { createApprovalRequest } = await import("@szl-holdings/approvals");
+      const { createApprovalRequest } = await import("@szl-holdings/covenant-policy");
       const user = ctx?.req?.user;
       return createApprovalRequest({
         orgId: user?.orgs?.[0]?.orgId ?? null,
@@ -176,7 +176,7 @@ export const approvalsResolvers = {
       args: { id: string; decision: string; note?: string },
       ctx: GQLContext,
     ) => {
-      const { reviewApproval } = await import("@szl-holdings/approvals");
+      const { reviewApproval } = await import("@szl-holdings/covenant-policy");
       const user = ctx?.req?.user;
       return reviewApproval({
         approvalId: parseIntId(args.id),
@@ -194,7 +194,7 @@ export const approvalsResolvers = {
       args: { id: string; reason: string; escalatedToId?: number },
       ctx: GQLContext,
     ) => {
-      const { escalateApproval } = await import("@szl-holdings/approvals");
+      const { escalateApproval } = await import("@szl-holdings/covenant-policy");
       const user = ctx?.req?.user;
       return escalateApproval({
         approvalId: parseIntId(args.id),
@@ -212,7 +212,7 @@ export const approvalsResolvers = {
       args: { approvalId: string; body: string; isInternal?: boolean },
       ctx: GQLContext,
     ) => {
-      const { addApprovalComment, getApprovalById } = await import("@szl-holdings/approvals");
+      const { addApprovalComment, getApprovalById } = await import("@szl-holdings/covenant-policy");
       const user = ctx?.req?.user;
       const approval = await getApprovalById(parseIntId(args.approvalId));
       if (!approval) throw new Error("Approval not found");

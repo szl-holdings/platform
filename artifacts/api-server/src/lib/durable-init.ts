@@ -1,6 +1,6 @@
 import { logger } from "./logger";
-import { durableJobQueue, type ScheduleDefinition } from "@szl-holdings/workflow-engine";
-import { durableScheduler, seedDefaultSchedules } from "@szl-holdings/workflow-engine";
+import { durableJobQueue, type ScheduleDefinition } from "@szl-holdings/forge-runtime";
+import { durableScheduler, seedDefaultSchedules } from "@szl-holdings/forge-runtime";
 import { publish, WS_CHANNELS } from "./websocket";
 import { serverTelemetry } from "@szl-holdings/observability";
 import { JOB_TYPES } from "./job-queue";

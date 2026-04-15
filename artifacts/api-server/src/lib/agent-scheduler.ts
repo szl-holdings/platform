@@ -3,9 +3,9 @@ export {
   agentScheduler,
   type AgentSchedule,
   type AgentRunRecord,
-} from "@szl-holdings/workflow-engine";
+} from "@szl-holdings/forge-runtime";
 
-import { agentScheduler, agentExecutionRuntime, durableScheduler, seedDefaultSchedules } from "@szl-holdings/workflow-engine";
+import { agentScheduler, agentExecutionRuntime, durableScheduler, seedDefaultSchedules } from "@szl-holdings/forge-runtime";
 import { logger } from "./logger";
 
 const BASE_URL = `http://localhost:${process.env["PORT"] || 3000}`;

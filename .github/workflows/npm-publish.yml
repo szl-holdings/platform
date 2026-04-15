@@ -48,9 +48,9 @@ jobs:
           VERSION=${{ steps.version.outputs.VERSION }}
           for pkg in \
             lib/shared-ui lib/observability lib/config lib/services lib/api-spec \
-            lib/analytics lib/api-client-react lib/api-zod lib/approvals lib/audit \
+            lib/analytics lib/api-client-react lib/api-zod lib/covenant-policy lib/audit \
             lib/auth lib/data-connectors lib/graphql-client lib/i18n lib/mcp-client \
-            lib/proof-chain lib/replit-auth-web lib/workflow-engine lib/worldline \
+            lib/proof-chain lib/replit-auth-web lib/forge-runtime lib/worldline \
             lib/db lib/ai-engine \
             lib/integrations-anthropic-ai lib/integrations-gemini-ai lib/integrations-openai-ai-server; do
             if [ -f "$pkg/package.json" ]; then
@@ -64,9 +64,9 @@ jobs:
           FAILED_PKGS=""
           for pkg in \
             lib/shared-ui lib/observability lib/config lib/services lib/api-spec \
-            lib/analytics lib/api-client-react lib/api-zod lib/approvals lib/audit \
+            lib/analytics lib/api-client-react lib/api-zod lib/covenant-policy lib/audit \
             lib/auth lib/data-connectors lib/graphql-client lib/i18n lib/mcp-client \
-            lib/proof-chain lib/replit-auth-web lib/workflow-engine lib/worldline \
+            lib/proof-chain lib/replit-auth-web lib/forge-runtime lib/worldline \
             lib/db lib/ai-engine \
             lib/integrations-anthropic-ai lib/integrations-gemini-ai lib/integrations-openai-ai-server; do
             if [ -f "$pkg/package.json" ]; then

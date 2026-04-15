@@ -1,10 +1,3 @@
-/**
- * @deprecated This package is superseded by `@szl-holdings/covenant-policy` which wraps
- * and extends these approvals APIs with COVENANT POLICY ENGINE governance.
- * Existing imports continue to work (backward-compatible). Migrate new code to:
- *   import { createApprovalRequest, reviewApproval } from "@szl-holdings/covenant-policy";
- */
-
 import {
   db,
   approvalRequestsTable,

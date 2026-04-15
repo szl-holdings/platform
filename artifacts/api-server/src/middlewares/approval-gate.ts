@@ -3,7 +3,7 @@
  *
  * Enforces that material mutations — exports, external sends, write-backs,
  * and consequential AI actions — require an explicit approval record before
- * execution. Integrates with the @szl-holdings/approvals primitive.
+ * execution. Integrates with the @szl-holdings/covenant-policy primitive.
  *
  * Usage:
  *   router.post("/risky-action", authMiddleware(), requireApproval({ actionClass: "ai_action" }), handler)
@@ -151,7 +151,7 @@ export function validateApprovalStatus() {
     }
 
     try {
-      const { getApprovalById } = await import("@szl-holdings/approvals");
+      const { getApprovalById } = await import("@szl-holdings/covenant-policy");
       const approval = await getApprovalById(approvalId);
 
       if (!approval) {

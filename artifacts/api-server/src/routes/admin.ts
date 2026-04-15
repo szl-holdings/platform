@@ -11,7 +11,7 @@ import { seedLyteObservability } from "../lib/lyte-observability-seed";
 import { desc, sql, ilike, or, eq, and, inArray, gte, lte } from "drizzle-orm";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { serverTelemetry } from "@szl-holdings/observability";
-import { durableJobQueue } from "@szl-holdings/workflow-engine";
+import { durableJobQueue } from "@szl-holdings/forge-runtime";
 import { logActivity } from "../lib/activity-logger";
 import { isFlagEnabled } from "../lib/platform-flags";
 
