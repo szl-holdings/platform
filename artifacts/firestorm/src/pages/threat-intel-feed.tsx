@@ -328,22 +328,56 @@ export default function ThreatIntelFeed() {
   const taxiiIndicators = taxiiData?.indicators ?? [];
   const taxiiSource = taxiiData?.source as string | undefined;
 
+  const IOC_TYPE_MAP: Record<string, StixIoc["type"]> = {
+    "ipv4-addr": "ipv4-addr",
+    "domain-name": "domain-name",
+    "url": "url",
+    "email-addr": "email-addr",
+    "file:hashes.MD5": "file:hashes.MD5",
+    "file:hashes.SHA-256": "file:hashes.SHA-256",
+    "autonomous-system": "autonomous-system",
+    "malicious-activity": "ipv4-addr",
+    "indicator": "domain-name",
+  };
+
+  const KILL_CHAIN_MAP: Record<string, StixIoc["killChainPhase"]> = {
+    reconnaissance: "reconnaissance",
+    weaponization: "weaponization",
+    delivery: "delivery",
+    exploitation: "exploitation",
+    installation: "installation",
+    "command-and-control": "command-and-control",
+    "actions-on-objectives": "actions-on-objectives",
+  };
+
+  const taxiiSource_: FeedSource = {
+    name: "MISP/TAXII",
+    type: "misp",
+    confidence: 75,
+    lastIngested: Date.now(),
+    iocCount: taxiiIndicators.length,
+    staleness: "fresh",
+    ingestRatePerHour: taxiiIndicators.length,
+    status: "active",
+  };
+
   const liveIocs: StixIoc[] = taxiiIndicators.length > 0
     ? taxiiIndicators.map((ind: { id: string; name: string; description: string; pattern: string; patternType: string; confidence: number; labels: string[]; validFrom: string; killChainPhases: string[] }) => ({
         id: ind.id,
-        type: (ind.labels?.[0] ?? "indicator") as StixIoc["type"],
+        type: IOC_TYPE_MAP[ind.labels?.[0] ?? ""] ?? "domain-name",
         value: ind.pattern ?? "",
-        name: ind.name ?? "",
-        description: ind.description ?? "",
+        description: ind.description || ind.name || "",
         confidence: ind.confidence ?? 50,
         tlp: "AMBER" as const,
-        severity: ind.confidence >= 80 ? "critical" as const : ind.confidence >= 60 ? "high" as const : "medium" as const,
-        firstSeen: new Date(ind.validFrom).getTime(),
+        severity: (ind.confidence >= 80 ? "critical" : ind.confidence >= 60 ? "high" : "medium") as StixIoc["severity"],
+        firstSeen: new Date(ind.validFrom).getTime() || Date.now(),
         lastSeen: Date.now(),
-        source: "TAXII Feed",
+        sources: [taxiiSource_],
         tags: ind.labels ?? [],
-        killChainPhase: ind.killChainPhases?.[0] ?? "exploitation",
-        relatedCampaign: undefined,
+        killChainPhase: KILL_CHAIN_MAP[ind.killChainPhases?.[0] ?? ""] ?? "exploitation",
+        aptCampaign: undefined,
+        mitreAttack: [],
+        relatedIocs: [],
       }))
     : [];
 
