@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
 export type RealtimeConnectionStatus = "connected" | "reconnecting" | "offline";
+export type RealtimeTransport = "websocket" | "sse";
 
 export interface RealtimeChannelMessage<T = unknown> {
   channel: string;
   event: string;
   data: T;
   timestamp: number;
+  seq?: number;
 }
 
 export interface UseRealtimeChannelOptions {
@@ -15,6 +17,10 @@ export interface UseRealtimeChannelOptions {
   maxReconnectDelayMs?: number;
   token?: string;
   apiBaseUrl?: string;
+  enableSseFallback?: boolean;
+  displayName?: string;
+  onConnect?: (transport: RealtimeTransport) => void;
+  onDisconnect?: () => void;
 }
 
 export interface UseRealtimeChannelResult<T = unknown> {
@@ -22,27 +28,38 @@ export interface UseRealtimeChannelResult<T = unknown> {
   lastMessage: RealtimeChannelMessage<T> | null;
   status: RealtimeConnectionStatus;
   isConnected: boolean;
+  transport: RealtimeTransport | null;
+  lastSeq: number;
   clearMessages: () => void;
 }
 
 const DEFAULT_MAX_ATTEMPTS = 10;
 const DEFAULT_BASE_DELAY_MS = 1_500;
 const DEFAULT_MAX_DELAY_MS = 30_000;
-const MAX_MESSAGES = 100;
+const MAX_MESSAGES = 200;
 
 const SENSITIVE_CHANNELS = new Set([
   "aegis-incidents",
+  "aegis:alert-feed",
   "workflow-runs",
   "bookings",
   "lyte-metrics",
+  "lyte:metrics-stream",
   "vessel-positions",
+  "vessels:fleet-positions",
   "terra-signals",
+  "nexus:intelligence-feed",
 ]);
 
 function getWebSocketUrl(): string {
   if (typeof window === "undefined") return "";
   const proto = window.location.protocol === "https:" ? "wss" : "ws";
   return `${proto}://${window.location.host}/ws`;
+}
+
+function getSseUrl(channel: string, apiBaseUrl: string): string {
+  const base = apiBaseUrl.endsWith("/") ? apiBaseUrl.slice(0, -1) : apiBaseUrl;
+  return `${base}/realtime/sse?channel=${encodeURIComponent(channel)}`;
 }
 
 async function fetchWsTicket(apiBaseUrl: string): Promise<string | undefined> {
@@ -71,54 +88,138 @@ export function useRealtimeChannel<T = unknown>(
     maxReconnectDelayMs = DEFAULT_MAX_DELAY_MS,
     token: optionToken,
     apiBaseUrl = "/api",
+    enableSseFallback = true,
+    displayName,
+    onConnect,
+    onDisconnect,
   } = options;
 
   const [messages, setMessages] = useState<RealtimeChannelMessage<T>[]>([]);
   const [status, setStatus] = useState<RealtimeConnectionStatus>("offline");
+  const [transport, setTransport] = useState<RealtimeTransport | null>(null);
+  const [lastSeq, setLastSeq] = useState(0);
+
   const wsRef = useRef<WebSocket | null>(null);
+  const sseRef = useRef<EventSource | null>(null);
   const attemptsRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mountedRef = useRef(true);
   const channelRef = useRef(channel);
   const tokenRef = useRef<string | undefined>(optionToken);
-  const subscribedRef = useRef(false);
+  const lastSeqRef = useRef(0);
+  const wsFailedRef = useRef(false);
+  const onConnectRef = useRef(onConnect);
+  const onDisconnectRef = useRef(onDisconnect);
 
-  useEffect(() => {
-    channelRef.current = channel;
-  }, [channel]);
-
-  useEffect(() => {
-    tokenRef.current = optionToken;
-  }, [optionToken]);
+  useEffect(() => { onConnectRef.current = onConnect; }, [onConnect]);
+  useEffect(() => { onDisconnectRef.current = onDisconnect; }, [onDisconnect]);
+  useEffect(() => { channelRef.current = channel; }, [channel]);
+  useEffect(() => { tokenRef.current = optionToken; }, [optionToken]);
 
   const isSensitive = SENSITIVE_CHANNELS.has(channel);
 
+  const pushMessage = useCallback((msg: RealtimeChannelMessage<T>) => {
+    if (msg.seq !== undefined && msg.seq > lastSeqRef.current) {
+      lastSeqRef.current = msg.seq;
+      setLastSeq(msg.seq);
+    }
+    setMessages((prev) => {
+      const next = [...prev, msg];
+      return next.length > MAX_MESSAGES ? next.slice(-MAX_MESSAGES) : next;
+    });
+  }, []);
 
-  function connect() {
+  const clearMessages = useCallback(() => setMessages([]), []);
+
+  const connectSse = useCallback(() => {
+    if (!mountedRef.current) return;
+    if (typeof EventSource === "undefined") return;
+
+    const url = getSseUrl(channelRef.current, apiBaseUrl);
+    const evtSource = new EventSource(url, { withCredentials: true });
+    sseRef.current = evtSource;
+
+    evtSource.addEventListener("connected", () => {
+      if (!mountedRef.current) return;
+      attemptsRef.current = 0;
+      setStatus("connected");
+      setTransport("sse");
+      onConnectRef.current?.("sse");
+    });
+
+    evtSource.onmessage = (ev) => {
+      if (!mountedRef.current) return;
+      try {
+        const raw = JSON.parse(ev.data as string) as {
+          channel: string;
+          event: string;
+          data: T;
+          timestamp: number;
+          seq?: number;
+        };
+        if (raw.channel === channelRef.current) {
+          pushMessage(raw);
+        }
+      } catch { /* ignore parse errors */ }
+    };
+
+    evtSource.onerror = () => {
+      if (!mountedRef.current) return;
+      setStatus("reconnecting");
+      evtSource.close();
+      sseRef.current = null;
+      const delay = Math.min(
+        baseReconnectDelayMs * Math.pow(1.5, attemptsRef.current),
+        maxReconnectDelayMs,
+      );
+      attemptsRef.current++;
+      if (attemptsRef.current < maxReconnectAttempts) {
+        timerRef.current = setTimeout(() => {
+          if (mountedRef.current) connectSse();
+        }, delay);
+      } else {
+        setStatus("offline");
+        onDisconnectRef.current?.();
+      }
+    };
+  }, [apiBaseUrl, baseReconnectDelayMs, maxReconnectDelayMs, maxReconnectAttempts, pushMessage]);
+
+  const connectWs = useCallback(() => {
     if (!mountedRef.current) return;
     if (attemptsRef.current >= maxReconnectAttempts) {
-      setStatus("offline");
+      if (enableSseFallback && !wsFailedRef.current) {
+        wsFailedRef.current = true;
+        attemptsRef.current = 0;
+        connectSse();
+      } else {
+        setStatus("offline");
+        onDisconnectRef.current?.();
+      }
       return;
     }
 
     const url = getWebSocketUrl();
-    if (!url) return;
+    if (!url) {
+      if (enableSseFallback) connectSse();
+      return;
+    }
 
     try {
       const ws = new WebSocket(url);
       wsRef.current = ws;
-      subscribedRef.current = false;
 
       ws.onopen = () => {
         if (!mountedRef.current) { ws.close(); return; }
 
         const sendSubscribe = (tok?: string) => {
-          const subscribeMsg: Record<string, unknown> = {
+          const msg: Record<string, unknown> = {
             type: "subscribe",
             channel: channelRef.current,
+            sinceSeq: lastSeqRef.current,
           };
-          if (tok) subscribeMsg.token = tok;
-          ws.send(JSON.stringify(subscribeMsg));
+          if (tok) msg.token = tok;
+          if (displayName) msg.displayName = displayName;
+          ws.send(JSON.stringify(msg));
         };
 
         if (isSensitive && apiBaseUrl) {
@@ -133,123 +234,135 @@ export function useRealtimeChannel<T = unknown>(
         }
       };
 
-      ws.onmessage = (event) => {
+      ws.onmessage = (ev) => {
         if (!mountedRef.current) return;
         try {
-          const msg = JSON.parse(event.data as string) as {
+          const parsed = JSON.parse(ev.data as string) as {
             type: string;
             channel?: string;
             event?: string;
             data?: T;
             timestamp?: number;
+            seq?: number;
+            missedMessages?: RealtimeChannelMessage<T>[];
+            messages?: RealtimeChannelMessage<T>[];
             code?: string;
-            message?: string;
           };
 
-          if (msg.type === "ping") {
-            ws.send(JSON.stringify({ type: "pong", timestamp: Date.now() }));
-            return;
-          }
+          if (parsed.type === "connected") return;
 
-          if (msg.type === "subscribed" && msg.channel === channelRef.current) {
-            subscribedRef.current = true;
+          if (parsed.type === "subscribed") {
             attemptsRef.current = 0;
             setStatus("connected");
-            return;
-          }
-
-          if (msg.type === "error") {
-            if (msg.code === "unauthorized") {
-              tokenRef.current = undefined;
-              ws.onclose = null;
-              ws.close();
-              wsRef.current = null;
-              subscribedRef.current = false;
-              setStatus("reconnecting");
-              const delay = Math.min(
-                baseReconnectDelayMs * 2 ** attemptsRef.current,
-                maxReconnectDelayMs,
-              );
-              attemptsRef.current++;
-              timerRef.current = setTimeout(() => {
-                if (mountedRef.current) connect();
-              }, delay);
+            setTransport("websocket");
+            onConnectRef.current?.("websocket");
+            if (parsed.missedMessages?.length) {
+              for (const m of parsed.missedMessages) {
+                pushMessage(m as RealtimeChannelMessage<T>);
+              }
             }
             return;
           }
 
-          if (
-            msg.type === "message" &&
-            msg.channel === channelRef.current &&
-            msg.event
-          ) {
-            const channelMsg: RealtimeChannelMessage<T> = {
-              channel: msg.channel,
-              event: msg.event,
-              data: msg.data as T,
-              timestamp: msg.timestamp ?? Date.now(),
-            };
-            setMessages((prev) => [channelMsg, ...prev].slice(0, MAX_MESSAGES));
+          if (parsed.type === "catchup_response" && parsed.messages) {
+            for (const m of parsed.messages) {
+              pushMessage(m as RealtimeChannelMessage<T>);
+            }
+            return;
           }
-        } catch {
-        }
+
+          if (parsed.type === "message" && parsed.channel === channelRef.current) {
+            pushMessage({
+              channel: parsed.channel,
+              event: parsed.event ?? "message",
+              data: parsed.data as T,
+              timestamp: parsed.timestamp ?? Date.now(),
+              seq: parsed.seq,
+            });
+            return;
+          }
+
+          if (parsed.type === "ping") {
+            ws.send(JSON.stringify({ type: "pong", timestamp: Date.now() }));
+          }
+
+          if (parsed.type === "error" && parsed.code === "unauthorized") {
+            tokenRef.current = undefined;
+          }
+        } catch { /* ignore */ }
       };
 
       ws.onclose = () => {
         if (!mountedRef.current) return;
-        wsRef.current = null;
-        subscribedRef.current = false;
         setStatus("reconnecting");
+        onDisconnectRef.current?.();
         const delay = Math.min(
-          baseReconnectDelayMs * 2 ** attemptsRef.current,
+          baseReconnectDelayMs * Math.pow(1.5, attemptsRef.current),
           maxReconnectDelayMs,
         );
         attemptsRef.current++;
         timerRef.current = setTimeout(() => {
-          if (mountedRef.current) connect();
+          if (mountedRef.current) connectWs();
         }, delay);
       };
 
       ws.onerror = () => {
-        ws.close();
+        if (!mountedRef.current) return;
+        setStatus("reconnecting");
       };
     } catch {
-      setStatus("offline");
+      const delay = Math.min(
+        baseReconnectDelayMs * Math.pow(1.5, attemptsRef.current),
+        maxReconnectDelayMs,
+      );
+      attemptsRef.current++;
+      timerRef.current = setTimeout(() => {
+        if (mountedRef.current) connectWs();
+      }, delay);
     }
-  }
+  }, [
+    maxReconnectAttempts,
+    baseReconnectDelayMs,
+    maxReconnectDelayMs,
+    isSensitive,
+    apiBaseUrl,
+    displayName,
+    enableSseFallback,
+    connectSse,
+    pushMessage,
+  ]);
 
   useEffect(() => {
     mountedRef.current = true;
-    connect();
+    wsFailedRef.current = false;
+    attemptsRef.current = 0;
+    lastSeqRef.current = 0;
+
+    connectWs();
+
     return () => {
       mountedRef.current = false;
       if (timerRef.current) clearTimeout(timerRef.current);
       if (wsRef.current) {
         wsRef.current.onclose = null;
+        wsRef.current.onerror = null;
         wsRef.current.close();
         wsRef.current = null;
       }
+      if (sseRef.current) {
+        sseRef.current.close();
+        sseRef.current = null;
+      }
     };
-  }, []);
-
-  useEffect(() => {
-    if (wsRef.current?.readyState === WebSocket.OPEN && subscribedRef.current) {
-      const tok = tokenRef.current;
-      const subscribeMsg: Record<string, unknown> = { type: "subscribe", channel };
-      if (tok) subscribeMsg.token = tok;
-      wsRef.current.send(JSON.stringify(subscribeMsg));
-      subscribedRef.current = false;
-    }
-  }, [channel]);
-
-  const clearMessages = useCallback(() => setMessages([]), []);
-  const lastMessage = messages[0] ?? null;
+  }, [channel, connectWs]);
 
   return {
     messages,
-    lastMessage,
+    lastMessage: messages[messages.length - 1] ?? null,
     status,
     isConnected: status === "connected",
+    transport,
+    lastSeq,
     clearMessages,
   };
 }

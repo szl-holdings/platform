@@ -151,6 +151,7 @@ import fusionRouter from "./fusion";
 import knowledgeGraphRouter from "./knowledge-graph";
 import mlPipelineRouter from "./ml-pipeline";
 import meteringRouter from "./metering";
+import realtimeRouter from "./realtime";
 
 const router: IRouter = Router();
 
@@ -583,5 +584,8 @@ router.use(analyticsEngineRouter);
 router.use("/metering", _readLimiter);
 router.use("/metering", _writeLimiter);
 router.use(meteringRouter);
+
+router.use("/realtime", _readLimiter);
+router.use(realtimeRouter);
 
 export default router;

@@ -3,6 +3,7 @@ import app from "./app";
 import { logger } from "./lib/logger";
 import { failFastOnInvalidConfig } from "./lib/startup-validation";
 import { initWebSocket } from "./lib/websocket";
+import { startPrismBusBridge, stopPrismBusBridge } from "./lib/prism-bus-bridge";
 import { jobQueue } from "./lib/job-queue";
 import { startDurableQueue, startDurableScheduler, durableJobQueue, durableScheduler } from "./lib/durable-init";
 import "./lib/platform-jobs";
@@ -69,6 +70,7 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     });
 
   initWebSocket(server);
+  startPrismBusBridge();
   startDomainNotificationGenerators();
   startSelfMonitoring();
 
@@ -242,6 +244,7 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
 
     stopDomainNotificationGenerators();
     stopSelfMonitoring();
+    stopPrismBusBridge();
     stopEmbeddingWorker();
     providerHealth.stopActiveProbes();
     agentScheduler.stop();

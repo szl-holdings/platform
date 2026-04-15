@@ -10,6 +10,7 @@ export { OfflineBanner } from "./components/OfflineBanner";
 export { NotificationHub, type NotificationItem, type NotificationFetcher } from "./components/NotificationHub";
 export { useApiStatus, type ApiStatusResult } from "./hooks/useApiStatus";
 export { useWebSocket, type WsStatus, type WebSocketOptions, type WebSocketResult } from "./hooks/useWebSocket";
+export { useRealtimeChannel, type RealtimeConnectionStatus, type RealtimeChannelMessage, type UseRealtimeChannelOptions, type UseRealtimeChannelResult } from "./hooks/useRealtimeChannel";
 export { useFuzzySearch } from "./hooks/useFuzzySearch";
 export { useOfflineQueue, type QueuedMutation } from "./hooks/useOfflineQueue";
 export { ThemeProvider, useTheme, type ThemeMode, type ResolvedTheme } from "./context/ThemeContext";
