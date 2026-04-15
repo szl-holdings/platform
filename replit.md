@@ -183,6 +183,23 @@ The platform consists of 13 interconnected applications sharing authentication a
   - `SimulationResultCard` — composite card combining headline stats + all three charts + tornado
   - `SimulationProgressTracker` — animated progress bar with iteration count and ETA
 
+## Fund Intelligence Command (Task #526)
+A new `/fund` route section adds the industry's first agentic fund operations platform with 11 new pages under `artifacts/szl-holdings/src/pages/fund/`:
+
+- **`/fund`** (`fund/index.tsx`) — Hub page with fund-level metrics (AUM, IRR, TVPI, DPI), all 10 module cards, recent agent activity feed, and action-required alerts.
+- **`/fund/deal-scoring`** — AI Deal Flow Scoring Engine: 5 simulated deals with conviction scores (0–100), radar chart analysis across 6 dimensions (team/market/product/traction/competitive/financials), strengths/risks breakdown, and one-click memo generation.
+- **`/fund/lp-reports`** — Autonomous LP Report Generation: ILPA-compliant quarterly reports for 23 LPs with IRR/TVPI/DPI/MOIC metrics, AI narrative commentary, PDF export, and one-click delivery.
+- **`/fund/portfolio-intelligence`** — Portfolio Financial Intelligence: health scoring for 6 portfolio companies, real-time ARR/burn/runway/NRR monitoring, signal detection (positive/warning/critical), and cohort benchmarking vs. stage medians.
+- **`/fund/cap-table`** — Cap Table & Waterfall Engine: full FDSO tracking across 5 share classes and 9 holders, pie chart visualization, waterfall distribution at configurable exit valuations ($10M–$250M), and pro-forma round modeling with dilution analysis.
+- **`/fund/exit-modeling`** — Monte Carlo Exit Modeling: 2,000-scenario simulation per company, P10/P50/P90 distribution histograms, portfolio-level bear/base/bull comparison, and optimal exit window recommendations.
+- **`/fund/treasury`** — Treasury & Cash Management: real-time cash position tracking, capital call history and scheduling, AI cash flow forecasting for 6 months, and distribution tracking.
+- **`/fund/compliance`** — SEC & Regulatory Compliance: Form D, Form PF, Form ADV preparation with AI draft status, 8 compliance tests (ASC 820, AML/KYC, leverage, co-investment policy), and a regulatory calendar.
+- **`/fund/lp-crm`** — LP Communication Intelligence: investor CRM with sentiment scores, re-up probability, interaction history, AI-generated meeting prep talking points.
+- **`/fund/benchmarking`** — Fund Benchmarking Engine: Cambridge Associates peer comparison across Net IRR/TVPI/DPI, performance radar, vintage year IRR comparison, attribution by portfolio company, and PME (Public Market Equivalent) vs. S&P 500/Nasdaq.
+- **`/fund/co-invest`** — Co-Investment & SPV Management: 4 active SPVs with entity details, co-investor tracking (11 co-investors), waterfall structures, document status tracking, and SPV formation doc generation.
+
+All pages are auth-gated via `<RequireAuth>`. A "Fund Intel" dropdown menu was added to the main site navigation.
+
 ## External Dependencies
 - **Database:** PostgreSQL
 - **Authentication:** Replit Auth

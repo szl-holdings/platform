@@ -81,6 +81,24 @@ const NAV_ITEMS = [
     ],
   },
   {
+    label: "Fund Intel",
+    href: "/fund",
+    highlight: false,
+    children: [
+      { label: "Fund Intelligence Hub", href: "/fund" },
+      { label: "AI Deal Scoring", href: "/fund/deal-scoring" },
+      { label: "LP Report Generation", href: "/fund/lp-reports" },
+      { label: "Portfolio Intelligence", href: "/fund/portfolio-intelligence" },
+      { label: "Cap Table & Waterfall", href: "/fund/cap-table" },
+      { label: "Exit Modeling", href: "/fund/exit-modeling" },
+      { label: "Treasury & Cash Mgmt", href: "/fund/treasury" },
+      { label: "SEC & Compliance", href: "/fund/compliance" },
+      { label: "LP Communication", href: "/fund/lp-crm" },
+      { label: "Fund Benchmarking", href: "/fund/benchmarking" },
+      { label: "Co-Investment & SPVs", href: "/fund/co-invest" },
+    ],
+  },
+  {
     label: "Demo",
     href: "/demo",
     children: null,
@@ -90,6 +108,7 @@ const NAV_ITEMS = [
 
 const NAV_LINKS_MOBILE = [
   { label: "Nexus Command", href: "/nexus", primary: true },
+  { label: "Fund Intelligence", href: "/fund", primary: true },
   { label: "Demo", href: "/demo", primary: true },
   { label: "Platform Overview", href: "/platform", primary: false },
   { label: "Lyte", href: "/lyte", primary: false },

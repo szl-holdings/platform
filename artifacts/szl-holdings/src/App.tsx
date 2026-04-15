@@ -166,6 +166,19 @@ const DistOsCrossAnalytics = lazy(() => import("@/pages/distribution-os/cross-pl
 const DistOsGrowth = lazy(() => import("@/pages/distribution-os/growth-engine"));
 
 const VenturePortfolioPage = lazy(() => import("@/pages/venture-portfolio"));
+
+const FundIntelHubPage = lazy(() => import("@/pages/fund/index"));
+const FundDealScoringPage = lazy(() => import("@/pages/fund/deal-scoring"));
+const FundLpReportsPage = lazy(() => import("@/pages/fund/lp-reports"));
+const FundPortfolioIntelPage = lazy(() => import("@/pages/fund/portfolio-intelligence"));
+const FundCapTablePage = lazy(() => import("@/pages/fund/cap-table"));
+const FundExitModelingPage = lazy(() => import("@/pages/fund/exit-modeling"));
+const FundTreasuryPage = lazy(() => import("@/pages/fund/treasury"));
+const FundCompliancePage = lazy(() => import("@/pages/fund/compliance"));
+const FundLpCrmPage = lazy(() => import("@/pages/fund/lp-crm"));
+const FundBenchmarkingPage = lazy(() => import("@/pages/fund/benchmarking"));
+const FundCoInvestPage = lazy(() => import("@/pages/fund/co-invest"));
+
 const VentureIntelHubPage = lazy(() => import("@/pages/venture-intel-hub"));
 const VentureIntelHealthRadarPage = lazy(() => import("@/pages/venture-intel/health-radar"));
 const VentureIntelCapitalOptimizerPage = lazy(() => import("@/pages/venture-intel/capital-optimizer"));
@@ -782,6 +795,41 @@ function App() {
             </Route>
             <Route path="/fund-operations">
               <RequireAuth><Suspense fallback={<PageLoader />}><FundOperationsPage /></Suspense></RequireAuth>
+            </Route>
+
+            {/* ── Fund Intelligence Command ── */}
+            <Route path="/fund">
+              <RequireAuth><Suspense fallback={<PageLoader />}><FundIntelHubPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/fund/deal-scoring">
+              <RequireAuth><Suspense fallback={<PageLoader />}><FundDealScoringPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/fund/lp-reports">
+              <RequireAuth><Suspense fallback={<PageLoader />}><FundLpReportsPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/fund/portfolio-intelligence">
+              <RequireAuth><Suspense fallback={<PageLoader />}><FundPortfolioIntelPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/fund/cap-table">
+              <RequireAuth><Suspense fallback={<PageLoader />}><FundCapTablePage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/fund/exit-modeling">
+              <RequireAuth><Suspense fallback={<PageLoader />}><FundExitModelingPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/fund/treasury">
+              <RequireAuth><Suspense fallback={<PageLoader />}><FundTreasuryPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/fund/compliance">
+              <RequireAuth><Suspense fallback={<PageLoader />}><FundCompliancePage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/fund/lp-crm">
+              <RequireAuth><Suspense fallback={<PageLoader />}><FundLpCrmPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/fund/benchmarking">
+              <RequireAuth><Suspense fallback={<PageLoader />}><FundBenchmarkingPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/fund/co-invest">
+              <RequireAuth><Suspense fallback={<PageLoader />}><FundCoInvestPage /></Suspense></RequireAuth>
             </Route>
 
             <Route path="/venture-portfolio">
