@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Platform,
   Pressable,
@@ -13,8 +13,13 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Reanimated, { useSharedValue, useAnimatedStyle, withSpring, runOnJS } from "react-native-reanimated";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useColors } from "@/hooks/useColors";
 import { useQuery } from "@tanstack/react-query";
+import { usePropertyAlertsWebSocket } from "@/hooks/usePropertyAlertsWebSocket";
+import { useFuzzySearch } from "@szl-holdings/mobile-shared";
+import { cacheSet, cacheGetStale, CACHE_KEYS } from "@/lib/cache";
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
   ? "https://" + process.env.EXPO_PUBLIC_DOMAIN + "/api"
@@ -61,20 +66,61 @@ const COMP_DATA: Record<string, Array<{ address: string; salePrice: number; days
   ],
 };
 
-function PropertyCard({ property, onPress }: { property: DistressProperty; onPress: () => void }) {
+const SWIPE_THRESHOLD = 80;
+const SWIPE_FULL = 110;
+
+function PropertyCard({ property, onPress, flagged, onFlag }: {
+  property: DistressProperty;
+  onPress: () => void;
+  flagged: boolean;
+  onFlag: (id: string) => void;
+}) {
   const colors = useColors();
   const typeColor = TYPE_COLORS[property.distressType] ?? colors.gold;
   const scoreColor = property.opportunityScore >= 80 ? colors.emerald : property.opportunityScore >= 60 ? colors.amber : colors.rose;
   const [showComps, setShowComps] = useState(false);
   const comps = COMP_DATA[property.id] ?? [];
+  const translateX = useSharedValue(0);
+  const [showFlagHint, setShowFlagHint] = useState(false);
 
   const avgComp = comps.length > 0
     ? comps.reduce((s, c) => s + c.salePrice, 0) / comps.length
     : null;
   const vsAvg = avgComp ? ((property.estimatedValue - avgComp) / avgComp * 100).toFixed(1) : null;
 
+  const handleFlag = useCallback(() => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    onFlag(property.id);
+  }, [property.id, onFlag]);
+
+  const panGesture = Gesture.Pan()
+    .onUpdate((e) => {
+      translateX.value = e.translationX;
+      runOnJS(setShowFlagHint)(e.translationX > SWIPE_THRESHOLD);
+    })
+    .onEnd((e) => {
+      if (e.translationX > SWIPE_FULL) {
+        runOnJS(handleFlag)();
+      }
+      translateX.value = withSpring(0, { damping: 15 });
+      runOnJS(setShowFlagHint)(false);
+    });
+
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
+
   return (
-    <View style={[styles.propertyCard, { borderColor: colors.border, backgroundColor: "rgba(255,255,255,0.02)" }]}>
+    <View style={{ position: "relative", borderRadius: 12, overflow: "hidden", marginBottom: 8 }}>
+      <View style={[styles.swipeReveal, { backgroundColor: showFlagHint ? (colors.amber ?? "#b8943c") + "15" : "transparent" }]}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Feather name="flag" size={16} color={colors.amber ?? "#b8943c"} />
+          <Text style={{ fontSize: 12, fontWeight: "600", color: colors.amber ?? "#b8943c" }}>Flag</Text>
+        </View>
+      </View>
+      <GestureDetector gesture={panGesture}>
+        <Reanimated.View style={[animStyle]}>
+          <View style={[styles.propertyCard, { borderColor: flagged ? (colors.amber + "50" ?? "#b8943c50") : colors.border, backgroundColor: flagged ? (colors.amber ?? "#b8943c") + "06" : "rgba(255,255,255,0.02)" }]}>
       <Pressable
         onPress={() => { Haptics.selectionAsync(); onPress(); }}
       >
@@ -136,6 +182,9 @@ function PropertyCard({ property, onPress }: { property: DistressProperty; onPre
           )}
         </View>
       )}
+          </View>
+        </Reanimated.View>
+      </GestureDetector>
     </View>
   );
 }
@@ -143,6 +192,7 @@ function PropertyCard({ property, onPress }: { property: DistressProperty; onPre
 export default function PropertiesTab() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  usePropertyAlertsWebSocket();
   const [search, setSearch] = useState("");
   const [selectedBorough, setSelectedBorough] = useState("All");
   const [selectedType, setSelectedType] = useState("All");
@@ -150,6 +200,16 @@ export default function PropertiesTab() {
   const [minScore, setMinScore] = useState(0);
   const [lastFetchedAt, setLastFetchedAt] = useState<Date | null>(null);
   const [isFromCache, setIsFromCache] = useState(false);
+  const [flaggedIds, setFlaggedIds] = useState<Set<string>>(new Set());
+
+  const handleFlag = useCallback((id: string) => {
+    setFlaggedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
@@ -167,23 +227,28 @@ export default function PropertiesTab() {
         const json = await res.json();
         setLastFetchedAt(new Date());
         setIsFromCache(false);
-        return json.data ?? json;
+        const result = json.data ?? json;
+        if (selectedBorough === "All" && selectedType === "All" && !search) {
+          await cacheSet(CACHE_KEYS.properties, result);
+        }
+        return result;
       } catch {
         setIsFromCache(true);
-        return null;
+        const cached = await cacheGetStale<{ properties?: unknown[] }>(CACHE_KEYS.properties);
+        return cached ?? null;
       }
     },
     retry: 1,
   });
 
   const apiProperties: DistressProperty[] = data?.properties ?? [];
-  const displayProperties = apiProperties
+  const fuzzyProperties = useFuzzySearch(apiProperties, search, p => [p.address, p.ownerName ?? "", p.distressType ?? "", p.borough ?? ""]);
+  const displayProperties = fuzzyProperties
     .filter(p => {
-      const matchSearch = !search || p.address.toLowerCase().includes(search.toLowerCase()) || p.ownerName?.toLowerCase().includes(search.toLowerCase());
       const matchBorough = selectedBorough === "All" || p.borough === selectedBorough;
       const matchType = selectedType === "All" || p.distressType === selectedType;
       const matchScore = p.opportunityScore >= minScore;
-      return matchSearch && matchBorough && matchType && matchScore;
+      return matchBorough && matchType && matchScore;
     });
 
   const handleRefresh = async () => {
@@ -300,6 +365,8 @@ export default function PropertiesTab() {
           <PropertyCard
             key={p.id}
             property={p}
+            flagged={flaggedIds.has(p.id)}
+            onFlag={handleFlag}
             onPress={() => router.push({ pathname: "/property/[id]", params: { id: p.id } })}
           />
         ))}
@@ -330,7 +397,8 @@ const styles = StyleSheet.create({
   resultsMode: { fontSize: 10, fontFamily: "Inter_500Medium" },
   list: { flex: 1 },
   listContent: { paddingHorizontal: 20, paddingTop: 6 },
-  propertyCard: { borderRadius: 12, borderWidth: 1, padding: 14, marginBottom: 8 },
+  swipeReveal: { position: "absolute", inset: 0, flexDirection: "row", alignItems: "center", paddingHorizontal: 16, borderRadius: 12 },
+  propertyCard: { borderRadius: 12, borderWidth: 1, padding: 14 },
   cardHeader: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 },
   cardLeft: { flex: 1, marginRight: 10 },
   cardAddress: { fontSize: 13, fontFamily: "Inter_500Medium", marginBottom: 3 },

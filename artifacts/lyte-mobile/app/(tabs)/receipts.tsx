@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import {
   Platform,
   Pressable,
@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LYTE_COLORS } from "@/constants/colors";
+import { useColors } from "@/hooks/useColors";
 
 interface EvidenceItem {
   source: string;
@@ -117,34 +118,28 @@ const EVIDENCE_COLORS: Record<string, string> = {
   external: LYTE_COLORS.neonGreen,
 };
 
-function ScoreBar({ label, value, color }: { label: string; value: number; color: string }) {
+type StylesType = ReturnType<typeof makeStyles>;
+
+function ScoreBar({ label, value, color, styles }: { label: string; value: number; color: string; styles: StylesType }) {
   return (
-    <View style={barStyles.row}>
-      <Text style={barStyles.label}>{label}</Text>
-      <View style={barStyles.track}>
-        <View style={[barStyles.fill, { width: `${value}%` as `${number}%`, backgroundColor: color }]} />
+    <View style={styles.barRow}>
+      <Text style={styles.barLabel}>{label}</Text>
+      <View style={styles.barTrack}>
+        <View style={[styles.barFill, { width: `${value}%` as `${number}%`, backgroundColor: color }]} />
       </View>
-      <Text style={[barStyles.value, { color }]}>{value}</Text>
+      <Text style={[styles.barValue, { color }]}>{value}</Text>
     </View>
   );
 }
 
-const barStyles = StyleSheet.create({
-  row: { marginBottom: 8 },
-  label: { fontSize: 9, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textMuted, marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 },
-  track: { height: 4, backgroundColor: "rgba(255,255,255,0.05)", borderRadius: 2, overflow: "hidden", marginBottom: 2 },
-  fill: { height: "100%", borderRadius: 2 },
-  value: { fontSize: 9, fontFamily: "Inter_500Medium" },
-});
-
-function ReceiptCard({ receipt }: { receipt: Receipt }) {
+function ReceiptCard({ receipt, styles, colors }: { receipt: Receipt; styles: StylesType; colors: ReturnType<typeof useColors> }) {
   const [expanded, setExpanded] = useState(false);
   const sevColor = SEV_COLORS[receipt.severity] ?? LYTE_COLORS.medium;
   const confColor = receipt.confidence === "high" ? LYTE_COLORS.neonGreen : receipt.confidence === "medium" ? LYTE_COLORS.high : LYTE_COLORS.critical;
 
   return (
     <Pressable onPress={() => { Haptics.selectionAsync(); setExpanded(e => !e); }}>
-      <View style={[styles.card, { borderColor: expanded ? `${sevColor}30` : LYTE_COLORS.border }]}>
+      <View style={[styles.card, { borderColor: expanded ? `${sevColor}30` : colors.border }]}>
         <View style={styles.cardHeader}>
           <View style={[styles.rankBox, { backgroundColor: `${sevColor}12` }]}>
             <Text style={[styles.rankText, { color: sevColor }]}>#{receipt.rank}</Text>
@@ -165,7 +160,7 @@ function ReceiptCard({ receipt }: { receipt: Receipt }) {
             <Text style={[styles.scoreText, { color: LYTE_COLORS.medium }]}>{receipt.finalScore}</Text>
             <Text style={styles.scoreMax}>/100</Text>
             <View style={[styles.confDot, { backgroundColor: confColor }]} />
-            <Feather name={expanded ? "chevron-up" : "chevron-down"} size={12} color={LYTE_COLORS.textTertiary} />
+            <Feather name={expanded ? "chevron-up" : "chevron-down"} size={12} color={colors.textTertiary} />
           </View>
         </View>
 
@@ -175,9 +170,9 @@ function ReceiptCard({ receipt }: { receipt: Receipt }) {
 
             <View style={styles.scoreSection}>
               <Text style={styles.sectionLabel}>Scoring Factors</Text>
-              <ScoreBar label="Actionability" value={receipt.actionability} color={LYTE_COLORS.medium} />
-              <ScoreBar label="Owner Confidence" value={receipt.ownerConfidence} color="#8b7ac8" />
-              <ScoreBar label="Evidence Strength" value={receipt.evidenceStrength} color="#38bdf8" />
+              <ScoreBar label="Actionability" value={receipt.actionability} color={LYTE_COLORS.medium} styles={styles} />
+              <ScoreBar label="Owner Confidence" value={receipt.ownerConfidence} color="#8b7ac8" styles={styles} />
+              <ScoreBar label="Evidence Strength" value={receipt.evidenceStrength} color="#38bdf8" styles={styles} />
             </View>
 
             <View style={styles.evidenceSection}>
@@ -189,7 +184,7 @@ function ReceiptCard({ receipt }: { receipt: Receipt }) {
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 2 }}>
                       <Text style={styles.evSource}>{ev.source}</Text>
                       <View style={[styles.evTypeBadge, { backgroundColor: `${EVIDENCE_COLORS[ev.type] ?? "#fff"}14` }]}>
-                        <Text style={[styles.evType, { color: EVIDENCE_COLORS[ev.type] ?? LYTE_COLORS.textMuted }]}>{ev.type}</Text>
+                        <Text style={[styles.evType, { color: EVIDENCE_COLORS[ev.type] ?? colors.textMuted }]}>{ev.type}</Text>
                       </View>
                     </View>
                     <Text style={styles.evDetail}>{ev.detail}</Text>
@@ -213,6 +208,8 @@ function ReceiptCard({ receipt }: { receipt: Receipt }) {
 
 export default function ReceiptsScreen() {
   const insets = useSafeAreaInsets();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [refreshing, setRefreshing] = useState(false);
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
@@ -225,7 +222,7 @@ export default function ReceiptsScreen() {
   }, []);
 
   return (
-    <View style={[styles.container, { backgroundColor: LYTE_COLORS.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient
         colors={["rgba(139,122,200,0.06)", "transparent"]}
         style={[styles.headerGradient, { height: topPad + 120 }]}
@@ -247,7 +244,7 @@ export default function ReceiptsScreen() {
         </View>
 
         <View style={styles.explainer}>
-          <Feather name="file-text" size={14} color={LYTE_COLORS.textTertiary} />
+          <Feather name="file-text" size={14} color={colors.textTertiary} />
           <Text style={styles.explainerText}>
             Every ranked priority has a receipt. Receipts show scoring factors, evidence sources and weights, and the alternatives that were rejected.
           </Text>
@@ -255,7 +252,7 @@ export default function ReceiptsScreen() {
 
         <View style={styles.cardList}>
           {RECEIPTS.map(r => (
-            <ReceiptCard key={r.id} receipt={r} />
+            <ReceiptCard key={r.id} receipt={r} styles={styles} colors={colors} />
           ))}
         </View>
       </ScrollView>
@@ -263,46 +260,53 @@ export default function ReceiptsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  headerGradient: { position: "absolute", top: 0, left: 0, right: 0 },
-  scroll: { flex: 1 },
-  header: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 },
-  eyebrow: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: "#8b7ac8", marginBottom: 4 },
-  headerTitle: { fontSize: 26, fontFamily: "Inter_600SemiBold", color: LYTE_COLORS.textPrimary, marginBottom: 2 },
-  headerSub: { fontSize: 11, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary },
-  explainer: { backgroundColor: LYTE_COLORS.surfaceElevated, borderRadius: 10, padding: 12, marginBottom: 16, borderWidth: 1, borderColor: LYTE_COLORS.border, flexDirection: "row", gap: 10, alignItems: "flex-start" },
-  explainerText: { flex: 1, fontSize: 10, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textTertiary, lineHeight: 16 },
-  cardList: { gap: 10 },
-  card: { borderRadius: 12, borderWidth: 1, backgroundColor: LYTE_COLORS.surface, overflow: "hidden" },
-  cardHeader: { flexDirection: "row", alignItems: "flex-start", padding: 14, gap: 10 },
-  rankBox: { width: 28, height: 28, borderRadius: 8, alignItems: "center", justifyContent: "center", flexShrink: 0 },
-  rankText: { fontSize: 11, fontFamily: "Inter_700Bold" },
-  cardMain: { flex: 1, gap: 6 },
-  cardMeta: { flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" },
-  packBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  packText: { fontSize: 8, fontFamily: "Inter_600SemiBold", letterSpacing: 0.5, textTransform: "uppercase" },
-  sevBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  sevText: { fontSize: 8, fontFamily: "Inter_600SemiBold", textTransform: "uppercase", letterSpacing: 0.5 },
-  idText: { fontSize: 8, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textMuted },
-  priorityText: { fontSize: 12, fontFamily: "Inter_500Medium", color: LYTE_COLORS.textPrimary, lineHeight: 17 },
-  cardRight: { alignItems: "flex-end", gap: 3 },
-  scoreText: { fontSize: 16, fontFamily: "Inter_700Bold", fontVariant: ["tabular-nums"] },
-  scoreMax: { fontSize: 8, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textMuted },
-  confDot: { width: 6, height: 6, borderRadius: 3 },
-  cardDetail: { paddingHorizontal: 14, paddingBottom: 14, borderTopWidth: 1, borderTopColor: LYTE_COLORS.border, paddingTop: 12, gap: 16 },
-  summaryText: { fontSize: 11, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary, lineHeight: 17 },
-  scoreSection: { backgroundColor: LYTE_COLORS.surfaceElevated, borderRadius: 10, padding: 12 },
-  sectionLabel: { fontSize: 8, fontFamily: "Inter_500Medium", color: LYTE_COLORS.textMuted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 },
-  evidenceSection: { gap: 8 },
-  evidenceItem: { flexDirection: "row", alignItems: "flex-start", gap: 10, backgroundColor: LYTE_COLORS.surfaceElevated, borderRadius: 8, padding: 10 },
-  evDot: { width: 6, height: 6, borderRadius: 3, marginTop: 4, flexShrink: 0 },
-  evSource: { fontSize: 10, fontFamily: "Inter_500Medium", color: LYTE_COLORS.textPrimary },
-  evTypeBadge: { paddingHorizontal: 5, paddingVertical: 2, borderRadius: 4 },
-  evType: { fontSize: 8, fontFamily: "Inter_400Regular", textTransform: "capitalize" },
-  evDetail: { fontSize: 9, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary, lineHeight: 14 },
-  evWeight: { fontSize: 9, fontFamily: "Inter_500Medium", color: LYTE_COLORS.textMuted, flexShrink: 0 },
-  confSection: { flexDirection: "row", alignItems: "center", gap: 6 },
-  confText: { fontSize: 10, fontFamily: "Inter_500Medium", textTransform: "capitalize" },
-  confReason: { fontSize: 10, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary, flex: 1 },
-});
+function makeStyles(c: ReturnType<typeof useColors>) {
+  return StyleSheet.create({
+    container: { flex: 1 },
+    headerGradient: { position: "absolute", top: 0, left: 0, right: 0 },
+    scroll: { flex: 1 },
+    header: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 },
+    eyebrow: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: "#8b7ac8", marginBottom: 4 },
+    headerTitle: { fontSize: 26, fontFamily: "Inter_600SemiBold", color: c.textPrimary, marginBottom: 2 },
+    headerSub: { fontSize: 11, fontFamily: "Inter_400Regular", color: c.textSecondary },
+    explainer: { backgroundColor: c.surfaceElevated, borderRadius: 10, padding: 12, marginBottom: 16, borderWidth: 1, borderColor: c.border, flexDirection: "row", gap: 10, alignItems: "flex-start" },
+    explainerText: { flex: 1, fontSize: 10, fontFamily: "Inter_400Regular", color: c.textTertiary, lineHeight: 16 },
+    cardList: { gap: 10 },
+    card: { borderRadius: 12, borderWidth: 1, backgroundColor: c.surface, overflow: "hidden" },
+    cardHeader: { flexDirection: "row", alignItems: "flex-start", padding: 14, gap: 10 },
+    rankBox: { width: 28, height: 28, borderRadius: 8, alignItems: "center", justifyContent: "center", flexShrink: 0 },
+    rankText: { fontSize: 11, fontFamily: "Inter_700Bold" },
+    cardMain: { flex: 1, gap: 6 },
+    cardMeta: { flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" },
+    packBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+    packText: { fontSize: 8, fontFamily: "Inter_600SemiBold", letterSpacing: 0.5, textTransform: "uppercase" },
+    sevBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+    sevText: { fontSize: 8, fontFamily: "Inter_600SemiBold", textTransform: "uppercase", letterSpacing: 0.5 },
+    idText: { fontSize: 8, fontFamily: "Inter_400Regular", color: c.textMuted },
+    priorityText: { fontSize: 12, fontFamily: "Inter_500Medium", color: c.textPrimary, lineHeight: 17 },
+    cardRight: { alignItems: "flex-end", gap: 3 },
+    scoreText: { fontSize: 16, fontFamily: "Inter_700Bold", fontVariant: ["tabular-nums"] },
+    scoreMax: { fontSize: 8, fontFamily: "Inter_400Regular", color: c.textMuted },
+    confDot: { width: 6, height: 6, borderRadius: 3 },
+    cardDetail: { paddingHorizontal: 14, paddingBottom: 14, borderTopWidth: 1, borderTopColor: c.border, paddingTop: 12, gap: 16 },
+    summaryText: { fontSize: 11, fontFamily: "Inter_400Regular", color: c.textSecondary, lineHeight: 17 },
+    scoreSection: { backgroundColor: c.surfaceElevated, borderRadius: 10, padding: 12 },
+    sectionLabel: { fontSize: 8, fontFamily: "Inter_500Medium", color: c.textMuted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 },
+    evidenceSection: { gap: 8 },
+    evidenceItem: { flexDirection: "row", alignItems: "flex-start", gap: 10, backgroundColor: c.surfaceElevated, borderRadius: 8, padding: 10 },
+    evDot: { width: 6, height: 6, borderRadius: 3, marginTop: 4, flexShrink: 0 },
+    evSource: { fontSize: 10, fontFamily: "Inter_500Medium", color: c.textPrimary },
+    evTypeBadge: { paddingHorizontal: 5, paddingVertical: 2, borderRadius: 4 },
+    evType: { fontSize: 8, fontFamily: "Inter_400Regular", textTransform: "capitalize" },
+    evDetail: { fontSize: 9, fontFamily: "Inter_400Regular", color: c.textSecondary, lineHeight: 14 },
+    evWeight: { fontSize: 9, fontFamily: "Inter_500Medium", color: c.textMuted, flexShrink: 0 },
+    confSection: { flexDirection: "row", alignItems: "center", gap: 6 },
+    confText: { fontSize: 10, fontFamily: "Inter_500Medium", textTransform: "capitalize" },
+    confReason: { fontSize: 10, fontFamily: "Inter_400Regular", color: c.textSecondary, flex: 1 },
+    barRow: { marginBottom: 8 },
+    barLabel: { fontSize: 9, fontFamily: "Inter_400Regular", color: c.textMuted, marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 },
+    barTrack: { height: 4, backgroundColor: "rgba(255,255,255,0.05)", borderRadius: 2, overflow: "hidden", marginBottom: 2 },
+    barFill: { height: "100%", borderRadius: 2 },
+    barValue: { fontSize: 9, fontFamily: "Inter_500Medium" },
+  });
+}

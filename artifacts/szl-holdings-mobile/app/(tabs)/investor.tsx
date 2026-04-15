@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Platform,
   Alert,
   Linking,
+  ActivityIndicator,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -16,6 +17,7 @@ import * as WebBrowser from "expo-web-browser";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { promptBiometric, useBiometricLock } from "@/context/BiometricLockContext";
 
 const QUARTERLY_LETTERS = [
   {
@@ -96,9 +98,24 @@ function getApiBase(): string {
 export default function InvestorScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { biometricEnabled } = useBiometricLock();
+  const [biometricUnlocked, setBiometricUnlocked] = useState(false);
+  const [biometricChecking, setBiometricChecking] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [expandedLetter, setExpandedLetter] = useState<string | null>(null);
   const [loadingDoc, setLoadingDoc] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!biometricEnabled || Platform.OS === "web") {
+      setBiometricUnlocked(true);
+      setBiometricChecking(false);
+      return;
+    }
+    promptBiometric("Authenticate to view Investor Relations").then((ok) => {
+      setBiometricUnlocked(ok);
+      setBiometricChecking(false);
+    });
+  }, [biometricEnabled]);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
@@ -170,6 +187,40 @@ export default function InvestorScreen() {
       ]
     );
   }, []);
+
+  if (biometricChecking) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background, alignItems: "center", justifyContent: "center" }]}>
+        <ActivityIndicator color="#c9a84c" size="large" />
+      </View>
+    );
+  }
+
+  if (biometricEnabled && !biometricUnlocked) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background, alignItems: "center", justifyContent: "center", gap: 16 }]}>
+        <Feather name="lock" size={36} color="#c9a84c" />
+        <Text style={{ fontFamily: "Inter_600SemiBold", color: colors.textPrimary, fontSize: 18 }}>
+          Authentication Required
+        </Text>
+        <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 13, textAlign: "center", maxWidth: 260 }}>
+          Biometric authentication is required to view investor relations.
+        </Text>
+        <Pressable
+          style={{ backgroundColor: "#c9a84c", paddingHorizontal: 24, paddingVertical: 12, borderRadius: 10, marginTop: 8 }}
+          onPress={() => {
+            setBiometricChecking(true);
+            promptBiometric("Authenticate to view Investor Relations").then((ok) => {
+              setBiometricUnlocked(ok);
+              setBiometricChecking(false);
+            });
+          }}
+        >
+          <Text style={{ fontFamily: "Inter_600SemiBold", color: "#090810", fontSize: 14 }}>Authenticate</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>

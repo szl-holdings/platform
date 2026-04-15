@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { useState, useCallback } from "react";
+import { useFuzzySearch } from "@szl-holdings/mobile-shared";
 import {
   View, Text, StyleSheet, TouchableOpacity, FlatList,
   TextInput, RefreshControl, ActivityIndicator, ScrollView,
@@ -11,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { VesselIcon, featherIcon } from "@/components/VesselIcon";
 import { useColors } from "@/hooks/useColors";
 import { api, type Vessel, CACHE_KEYS, cacheSet, cacheGetStale } from "@/lib/api";
+import { useVesselsWebSocket } from "@/hooks/useVesselsWebSocket";
 
 const STATUS_COLORS: Record<string, string> = {
   at_sea: "#22c55e",
@@ -185,6 +187,7 @@ export default function FleetScreen() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [refreshing, setRefreshing] = useState(false);
+  const { wsStatus } = useVesselsWebSocket();
 
   const [lastFetchedAt, setLastFetchedAt] = useState<Date | null>(null);
 
@@ -204,13 +207,10 @@ export default function FleetScreen() {
     refetchInterval: 120_000,
   });
 
-  const filtered = vessels.filter(v => {
+  const fuzzyVessels = useFuzzySearch(vessels, search, v => [v.name, v.imo || "", v.flag || "", v.status || ""]);
+  const filtered = fuzzyVessels.filter(v => {
     const matchStatus = statusFilter === "all" || v.status === statusFilter;
-    const matchSearch = !search.trim() ||
-      v.name.toLowerCase().includes(search.toLowerCase()) ||
-      (v.imo || "").toLowerCase().includes(search.toLowerCase()) ||
-      (v.flag || "").toLowerCase().includes(search.toLowerCase());
-    return matchStatus && matchSearch;
+    return matchStatus;
   });
 
   const statusCounts = vessels.reduce<Record<string, number>>((acc, v) => {

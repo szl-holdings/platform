@@ -1,7 +1,7 @@
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { type ComponentProps, useState, useCallback } from "react";
+import React, { type ComponentProps, useState, useCallback, useMemo } from "react";
 import {
   Platform,
   Pressable,
@@ -16,6 +16,7 @@ import {
 import Svg, { Circle } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LYTE_COLORS } from "@/constants/colors";
+import { useColors } from "@/hooks/useColors";
 import { useLyte } from "@/context/LyteContext";
 
 type FeatherName = ComponentProps<typeof Feather>["name"];
@@ -54,12 +55,26 @@ function RingScore({ score, color, size = 56 }: { score: number; color: string; 
   );
 }
 
-function DimensionCard({ dim, onPress, expanded }: { dim: PrismDimension; onPress: () => void; expanded: boolean }) {
-  const trendColor = dim.trend === "up" ? LYTE_COLORS.neonGreen : dim.trend === "down" ? LYTE_COLORS.critical : LYTE_COLORS.textSecondary;
+type StylesType = ReturnType<typeof makeStyles>;
+
+function DimensionCard({
+  dim,
+  onPress,
+  expanded,
+  styles,
+  colors,
+}: {
+  dim: PrismDimension;
+  onPress: () => void;
+  expanded: boolean;
+  styles: StylesType;
+  colors: ReturnType<typeof useColors>;
+}) {
+  const trendColor = dim.trend === "up" ? LYTE_COLORS.neonGreen : dim.trend === "down" ? LYTE_COLORS.critical : colors.textSecondary;
 
   return (
     <Pressable onPress={() => { Haptics.selectionAsync(); onPress(); }}>
-      <View style={[styles.dimCard, { borderColor: expanded ? `${dim.color}30` : LYTE_COLORS.border }]}>
+      <View style={[styles.dimCard, { borderColor: expanded ? `${dim.color}30` : colors.border }]}>
         <View style={styles.dimHeader}>
           <View style={[styles.dimIcon, { backgroundColor: `${dim.color}12` }]}>
             <MaterialCommunityIcons name={dim.icon} size={20} color={dim.color} />
@@ -85,7 +100,7 @@ function DimensionCard({ dim, onPress, expanded }: { dim: PrismDimension; onPres
               {dim.metrics.map((m, i) => (
                 <View key={i} style={styles.dimMetric}>
                   <Text style={styles.dimMetricLabel}>{m.label}</Text>
-                  <Text style={[styles.dimMetricValue, { color: m.color ?? LYTE_COLORS.textPrimary }]}>{m.value}</Text>
+                  <Text style={[styles.dimMetricValue, { color: m.color ?? colors.textPrimary }]}>{m.value}</Text>
                 </View>
               ))}
             </View>
@@ -98,6 +113,8 @@ function DimensionCard({ dim, onPress, expanded }: { dim: PrismDimension; onPres
 
 export default function PrismScreen() {
   const insets = useSafeAreaInsets();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { signals, actions, platforms, criticalCount, reload } = useLyte();
   const [expanded, setExpanded] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -215,7 +232,7 @@ export default function PrismScreen() {
   const overallScore = Math.round((pulseScore + riskScore + Math.min(intelScore, 100) + signalsScore + motionScore) / 5);
 
   return (
-    <View style={[styles.container, { backgroundColor: LYTE_COLORS.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient
         colors={["rgba(167,139,250,0.06)", "transparent"]}
         style={[styles.headerGradient, { height: topPad + 140 }]}
@@ -265,6 +282,8 @@ export default function PrismScreen() {
               dim={dim}
               expanded={expanded === dim.key}
               onPress={() => setExpanded(expanded === dim.key ? null : dim.key)}
+              styles={styles}
+              colors={colors}
             />
           ))}
         </View>
@@ -273,37 +292,39 @@ export default function PrismScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  headerGradient: { position: "absolute", top: 0, left: 0, right: 0 },
-  scroll: { flex: 1 },
-  header: { marginBottom: 20 },
-  eyebrow: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: "#a78bfa", marginBottom: 4 },
-  headerTitle: { fontSize: 28, fontFamily: "Inter_600SemiBold", color: LYTE_COLORS.textPrimary, marginBottom: 2 },
-  headerSub: { fontSize: 11, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary, letterSpacing: 1 },
-  overallCard: { flexDirection: "row", alignItems: "center", gap: 16, backgroundColor: LYTE_COLORS.surface, borderRadius: 16, borderWidth: 1, borderColor: "rgba(167,139,250,0.12)", padding: 16, marginBottom: 24 },
-  overallLeft: { alignItems: "center", justifyContent: "center", position: "relative" },
-  overallScore: { position: "absolute", fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#a78bfa" },
-  overallLabel: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: LYTE_COLORS.textPrimary, marginBottom: 4 },
-  overallDesc: { fontSize: 11, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary, lineHeight: 16, marginBottom: 8 },
-  statusBadge: { alignSelf: "flex-start", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, borderWidth: 1 },
-  statusText: { fontSize: 9, fontFamily: "Inter_600SemiBold", letterSpacing: 1 },
-  sectionLabel: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: LYTE_COLORS.textTertiary, marginBottom: 10 },
-  dimList: { gap: 8 },
-  dimCard: { backgroundColor: LYTE_COLORS.surface, borderRadius: 14, borderWidth: 1, overflow: "hidden" },
-  dimHeader: { flexDirection: "row", alignItems: "center", padding: 14, gap: 12 },
-  dimIcon: { width: 40, height: 40, borderRadius: 10, alignItems: "center", justifyContent: "center" },
-  dimInfo: { flex: 1 },
-  dimTopRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 2 },
-  dimKey: { fontSize: 9, fontFamily: "Inter_600SemiBold", letterSpacing: 1.5 },
-  dimLabel: { fontSize: 13, fontFamily: "Inter_500Medium", color: LYTE_COLORS.textPrimary, marginBottom: 2 },
-  dimDesc: { fontSize: 10, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary, lineHeight: 14 },
-  dimScore: { alignItems: "center", justifyContent: "center", position: "relative" },
-  dimScoreText: { position: "absolute", fontSize: 11, fontFamily: "Inter_600SemiBold" },
-  dimDetail: { borderTopWidth: 1, borderTopColor: LYTE_COLORS.border, padding: 14 },
-  dimDetailText: { fontSize: 12, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary, lineHeight: 18, marginBottom: 12 },
-  dimMetrics: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  dimMetric: { minWidth: "45%", gap: 2 },
-  dimMetricLabel: { fontSize: 9, fontFamily: "Inter_500Medium", color: LYTE_COLORS.textTertiary, letterSpacing: 1 },
-  dimMetricValue: { fontSize: 16, fontFamily: "Inter_600SemiBold" },
-});
+function makeStyles(c: ReturnType<typeof useColors>) {
+  return StyleSheet.create({
+    container: { flex: 1 },
+    headerGradient: { position: "absolute", top: 0, left: 0, right: 0 },
+    scroll: { flex: 1 },
+    header: { marginBottom: 20 },
+    eyebrow: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: "#a78bfa", marginBottom: 4 },
+    headerTitle: { fontSize: 28, fontFamily: "Inter_600SemiBold", color: c.textPrimary, marginBottom: 2 },
+    headerSub: { fontSize: 11, fontFamily: "Inter_400Regular", color: c.textSecondary, letterSpacing: 1 },
+    overallCard: { flexDirection: "row", alignItems: "center", gap: 16, backgroundColor: c.surface, borderRadius: 16, borderWidth: 1, borderColor: "rgba(167,139,250,0.12)", padding: 16, marginBottom: 24 },
+    overallLeft: { alignItems: "center", justifyContent: "center", position: "relative" },
+    overallScore: { position: "absolute", fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#a78bfa" },
+    overallLabel: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: c.textPrimary, marginBottom: 4 },
+    overallDesc: { fontSize: 11, fontFamily: "Inter_400Regular", color: c.textSecondary, lineHeight: 16, marginBottom: 8 },
+    statusBadge: { alignSelf: "flex-start", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, borderWidth: 1 },
+    statusText: { fontSize: 9, fontFamily: "Inter_600SemiBold", letterSpacing: 1 },
+    sectionLabel: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: c.textTertiary, marginBottom: 10 },
+    dimList: { gap: 8 },
+    dimCard: { backgroundColor: c.surface, borderRadius: 14, borderWidth: 1, overflow: "hidden" },
+    dimHeader: { flexDirection: "row", alignItems: "center", padding: 14, gap: 12 },
+    dimIcon: { width: 40, height: 40, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+    dimInfo: { flex: 1 },
+    dimTopRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 2 },
+    dimKey: { fontSize: 9, fontFamily: "Inter_600SemiBold", letterSpacing: 1.5 },
+    dimLabel: { fontSize: 13, fontFamily: "Inter_500Medium", color: c.textPrimary, marginBottom: 2 },
+    dimDesc: { fontSize: 10, fontFamily: "Inter_400Regular", color: c.textSecondary, lineHeight: 14 },
+    dimScore: { alignItems: "center", justifyContent: "center", position: "relative" },
+    dimScoreText: { position: "absolute", fontSize: 11, fontFamily: "Inter_600SemiBold" },
+    dimDetail: { borderTopWidth: 1, borderTopColor: c.border, padding: 14 },
+    dimDetailText: { fontSize: 12, fontFamily: "Inter_400Regular", color: c.textSecondary, lineHeight: 18, marginBottom: 12 },
+    dimMetrics: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+    dimMetric: { minWidth: "45%", gap: 2 },
+    dimMetricLabel: { fontSize: 9, fontFamily: "Inter_500Medium", color: c.textTertiary, letterSpacing: 1 },
+    dimMetricValue: { fontSize: 16, fontFamily: "Inter_600SemiBold" },
+  });
+}

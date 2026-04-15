@@ -10,11 +10,12 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
 import React, { useEffect } from "react";
+import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AlertNotifierBridge } from "@/components/AlertNotifierBridge";
-import { ErrorBoundary, NotificationProvider as SharedNotificationProvider } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider as SharedNotificationProvider, OfflineBanner, ThemeProvider } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { AuthProvider } from "@/context/AuthContext";
 import { LyteProvider } from "@/context/LyteContext";
@@ -78,7 +79,12 @@ export default function RootLayout() {
                 <LyteProvider>
                   <AlertNotifierBridge />
                   <GestureHandlerRootView style={{ flex: 1 }}>
-                    <RootLayoutNav />
+                    <ThemeProvider defaultMode="dark" storageKey="lyte-theme-mode">
+                      <View style={{ flex: 1 }}>
+                        <RootLayoutNav />
+                        <OfflineBanner accentColor="#ef4444" />
+                      </View>
+                    </ThemeProvider>
                   </GestureHandlerRootView>
                 </LyteProvider>
               </SharedNotificationProvider>

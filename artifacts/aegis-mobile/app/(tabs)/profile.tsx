@@ -13,9 +13,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
 import * as Haptics from "expo-haptics";
+import { router, type Href } from "expo-router";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
 import { useBiometric } from "@/context/BiometricContext";
+import { useTheme, NotificationHub } from "@szl-holdings/mobile-shared";
 
 export default function ProfileScreen() {
   const colors = useColors();
@@ -23,6 +25,8 @@ export default function ProfileScreen() {
   const { user, logout } = useAuth();
   const { isEnabled, isAvailable, enableBiometric, disableBiometric } = useBiometric();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const { mode, toggle } = useTheme();
+  const themeLabel = mode === "dark" ? "Dark" : mode === "light" ? "Light" : "System";
 
   const handleToggleBiometric = async (value: boolean) => {
     if (value) {
@@ -74,8 +78,58 @@ export default function ProfileScreen() {
       contentContainerStyle={{ paddingBottom: bottomInsets + 100 }}
       showsVerticalScrollIndicator={false}
     >
-      <View style={[styles.header, { paddingTop: topInsets + 16, borderBottomColor: colors.border }]}>
+      <View style={[styles.header, { paddingTop: topInsets + 16, borderBottomColor: colors.border, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }]}>
         <Text style={[styles.headerTitle, { color: colors.foreground, fontFamily: "SpaceGrotesk_700Bold" }]}>Profile</Text>
+        <NotificationHub
+          fetchers={[
+            {
+              domain: "aegis",
+              label: "Aegis",
+              color: colors.amber,
+              fetch: async () => {
+                try {
+                  const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+                  const res = await fetch(`${base}/api/aegis/notifications`);
+                  if (!res.ok) return [];
+                  return res.json();
+                } catch { return []; }
+              },
+            },
+            {
+              domain: "lyte",
+              label: "Lyte",
+              color: "#00d4ff",
+              fetch: async () => {
+                try {
+                  const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+                  const res = await fetch(`${base}/api/lyte/notifications`);
+                  if (!res.ok) return [];
+                  return res.json();
+                } catch { return []; }
+              },
+            },
+            {
+              domain: "vessels",
+              label: "Vessels",
+              color: "#0ea5e9",
+              fetch: async () => {
+                try {
+                  const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+                  const res = await fetch(`${base}/api/vessels/notifications`);
+                  if (!res.ok) return [];
+                  return res.json();
+                } catch { return []; }
+              },
+            },
+          ]}
+          accentColor={colors.amber}
+          backgroundColor={colors.background}
+          surfaceColor={colors.navyLight}
+          textColor={colors.foreground}
+          dimColor={colors.mutedForeground}
+          borderColor={colors.border}
+          onDeepLink={(link) => router.push(link as Href)}
+        />
       </View>
 
       <View style={styles.avatarSection}>
@@ -147,6 +201,28 @@ export default function ProfileScreen() {
             thumbColor={notificationsEnabled ? colors.blue : colors.mutedForeground}
           />
         </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={[styles.sectionLabel, { color: colors.mutedForeground, fontFamily: "Inter_500Medium" }]}>DISPLAY</Text>
+        <TouchableOpacity
+          style={[styles.settingRow, { backgroundColor: colors.navyLight, borderColor: colors.border }]}
+          onPress={() => { Haptics.selectionAsync(); toggle(); }}
+          activeOpacity={0.7}
+        >
+          <View style={styles.settingLeft}>
+            <View style={[styles.settingIcon, { backgroundColor: colors.blueDim }]}>
+              <Ionicons name="moon" size={18} color={colors.blue} />
+            </View>
+            <View>
+              <Text style={[styles.settingTitle, { color: colors.foreground, fontFamily: "Inter_500Medium" }]}>Display Theme</Text>
+              <Text style={[styles.settingDesc, { color: colors.mutedForeground, fontFamily: "Inter_400Regular" }]}>
+                {themeLabel} · Tap to cycle
+              </Text>
+            </View>
+          </View>
+          <Ionicons name="chevron-forward" size={16} color={colors.mutedForeground} />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.section}>

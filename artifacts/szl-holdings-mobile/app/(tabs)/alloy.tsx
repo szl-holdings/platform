@@ -19,6 +19,7 @@ import { useColors } from "@/hooks/useColors";
 import { SkeletonLoader } from "@szl-holdings/mobile-shared";
 import { useAlloyWebSocket } from "@/hooks/useAlloyWebSocket";
 import { apiFetch as sharedApiFetch } from "@/lib/apiClient";
+import { promptBiometric } from "@/context/BiometricLockContext";
 
 type FeatherIconName = React.ComponentProps<typeof Feather>["name"];
 
@@ -272,7 +273,12 @@ export default function AlloyScreen() {
   }, [refetchRuns, refetchApprovals]);
 
   const handleDecide = useCallback(
-    (id: number, decision: string) => {
+    async (id: number, decision: string) => {
+      const ok = await promptBiometric("Authenticate to submit workflow decision");
+      if (!ok) {
+        Alert.alert("Authentication Required", "Biometric authentication is required to approve or reject workflow actions.");
+        return;
+      }
       setDecidingId(id);
       decideApproval.mutate(
         { id, decision },

@@ -149,3 +149,18 @@ export function BiometricProvider({ children }: { children: ReactNode }) {
 export function useBiometric(): BiometricContextValue {
   return useContext(BiometricContext);
 }
+
+export async function promptBiometric(reason: string): Promise<boolean> {
+  if (Platform.OS === "web") return true;
+  try {
+    const result = await LocalAuthentication.authenticateAsync({
+      promptMessage: reason,
+      fallbackLabel: "Use passcode",
+      cancelLabel: "Cancel",
+      disableDeviceFallback: false,
+    });
+    return result.success;
+  } catch {
+    return false;
+  }
+}

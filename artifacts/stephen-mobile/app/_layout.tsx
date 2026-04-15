@@ -11,11 +11,12 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
 import React, { useEffect } from "react";
+import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary, NotificationProvider } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
@@ -73,9 +74,14 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <NotificationProvider apiBase="" enabled={false}>
             <GestureHandlerRootView style={{ flex: 1 }}>
-              <KeyboardProvider>
-                <RootLayoutNav />
-              </KeyboardProvider>
+              <ThemeProvider defaultMode="system" storageKey="stephen-theme-mode">
+                <KeyboardProvider>
+                  <View style={{ flex: 1 }}>
+                    <RootLayoutNav />
+                    <OfflineBanner accentColor="#6366f1" />
+                  </View>
+                </KeyboardProvider>
+              </ThemeProvider>
             </GestureHandlerRootView>
           </NotificationProvider>
         </QueryClientProvider>

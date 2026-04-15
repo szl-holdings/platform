@@ -1,6 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
+import { router, type Href } from "expo-router";
 import React, { useState } from "react";
 import type { ComponentProps } from "react";
 import {
@@ -16,6 +17,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
+import { useTheme, NotificationHub, type NotificationFetcher } from "@szl-holdings/mobile-shared";
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
   ? "https://" + process.env.EXPO_PUBLIC_DOMAIN + "/api"
@@ -81,6 +83,8 @@ export default function ProfileTab() {
   const insets = useSafeAreaInsets();
   const { user, signOut } = useAuth();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const { mode, toggle } = useTheme();
+  const themeLabel = mode === "dark" ? "Dark" : mode === "light" ? "Light" : "System";
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
@@ -111,7 +115,59 @@ export default function ProfileTab() {
       />
 
       <View style={[styles.header, { paddingTop: topPad + 12 }]}>
-        <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>TERRA · PROFILE</Text>
+        <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" }}>
+          <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>TERRA · PROFILE</Text>
+          <NotificationHub
+            fetchers={[
+              {
+                domain: "terra",
+                label: "Terra",
+                color: colors.gold,
+                fetch: async () => {
+                  try {
+                    const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+                    const res = await fetch(`${base}/api/terra/notifications`);
+                    if (!res.ok) return [];
+                    return res.json();
+                  } catch { return []; }
+                },
+              },
+              {
+                domain: "lyte",
+                label: "Lyte",
+                color: "#00d4ff",
+                fetch: async () => {
+                  try {
+                    const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+                    const res = await fetch(`${base}/api/lyte/notifications`);
+                    if (!res.ok) return [];
+                    return res.json();
+                  } catch { return []; }
+                },
+              },
+              {
+                domain: "aegis",
+                label: "Aegis",
+                color: "#f59e0b",
+                fetch: async () => {
+                  try {
+                    const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+                    const res = await fetch(`${base}/api/aegis/notifications`);
+                    if (!res.ok) return [];
+                    return res.json();
+                  } catch { return []; }
+                },
+              },
+            ]}
+            accentColor={colors.gold}
+            backgroundColor={colors.background}
+            surfaceColor={colors.surface}
+            textColor={colors.cream}
+            dimColor={colors.mutedForeground}
+            borderColor={colors.border}
+            onDeepLink={(link) => router.push(link as Href)}
+          />
+        </View>
         <View style={styles.profileRow}>
           <View style={[styles.avatar, { backgroundColor: colors.goldDim, borderColor: colors.goldBorder }]}>
             <Text style={[styles.avatarText, { color: colors.gold }]}>{initials}</Text>
@@ -153,6 +209,7 @@ export default function ProfileTab() {
           <SettingRow icon="map-pin" label="Default Borough" value="Manhattan" onPress={() => Haptics.selectionAsync()} />
           <SettingRow icon="sliders" label="Min Opportunity Score" value="60+" onPress={() => Haptics.selectionAsync()} />
           <SettingRow icon="refresh-cw" label="Data Refresh Rate" value="5 min" onPress={() => Haptics.selectionAsync()} />
+          <SettingRow icon="moon" label="Display Theme" value={themeLabel} onPress={() => { Haptics.selectionAsync(); toggle(); }} />
         </View>
       </View>
 

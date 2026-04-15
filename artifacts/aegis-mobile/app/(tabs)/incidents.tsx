@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { useFuzzySearch, useOfflineQueue } from "@szl-holdings/mobile-shared";
+import { cacheSet, cacheGetStale, CACHE_KEYS } from "@/lib/cache";
+import { promptBiometric } from "@/context/BiometricContext";
 import {
   View,
   Text,
@@ -24,7 +27,9 @@ import Animated, {
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { useColors } from "@/hooks/useColors";
 import { useIncidentSubscription } from "@/hooks/useGraphQL";
+import { useAegisWebSocket } from "@/hooks/useAegisWebSocket";
 import { apiGet, apiPut } from "@/lib/apiClient";
+import { AUTH_TOKEN_KEY } from "@/context/AuthContext";
 
 interface Incident {
   id: number;
@@ -41,7 +46,15 @@ interface Incident {
 type IncidentUpdate = Partial<Pick<Incident, "status" | "severity" | "assignedAnalyst">>;
 
 async function fetchIncidents(): Promise<Incident[]> {
-  return apiGet<Incident[]>("/api/firestorm/incidents");
+  try {
+    const data = await apiGet<Incident[]>("/api/firestorm/incidents");
+    await cacheSet(CACHE_KEYS.incidents, data);
+    return data;
+  } catch (err) {
+    const cached = await cacheGetStale<Incident[]>(CACHE_KEYS.incidents);
+    if (cached) return cached;
+    throw err;
+  }
 }
 
 async function updateIncident(id: number, data: IncidentUpdate): Promise<Incident> {
@@ -196,15 +209,39 @@ export default function IncidentsScreen() {
   const [bulkMode, setBulkMode] = useState(false);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   useIncidentSubscription();
+  useAegisWebSocket();
 
   const { data: incidents = [], refetch, isLoading } = useQuery<Incident[]>({
     queryKey: ["aegis-incidents"],
     queryFn: fetchIncidents,
   });
 
+  const { enqueue: enqueueOffline } = useOfflineQueue({
+    domain: "aegis",
+    getToken: async () => {
+      try {
+        if (typeof window !== "undefined" && window.localStorage) {
+          return window.localStorage.getItem(AUTH_TOKEN_KEY);
+        }
+        const SecureStore = (await import("expo-secure-store")).default;
+        return SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+      } catch {
+        return null;
+      }
+    },
+  });
+
   const updateMut = useMutation({
     mutationFn: ({ id, data }: { id: number; data: IncidentUpdate }) => updateIncident(id, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["aegis-incidents"] }),
+    onError: (_err, { id, data }) => {
+      const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+      enqueueOffline({
+        method: "PUT",
+        url: `${base}/api/firestorm/incidents/${id}`,
+        body: data,
+      });
+    },
   });
 
   const onRefresh = async () => {
@@ -222,7 +259,9 @@ export default function IncidentsScreen() {
     }
   };
 
-  const handleEscalate = (id: number) => {
+  const handleEscalate = async (id: number) => {
+    const ok = await promptBiometric("Authenticate to escalate incident to critical");
+    if (!ok) return;
     Alert.alert("Escalate Incident", "Escalate this incident to critical priority?", [
       { text: "Cancel", style: "cancel" },
       {
@@ -250,7 +289,9 @@ export default function IncidentsScreen() {
     );
   };
 
-  const handleDismiss = (id: number) => {
+  const handleDismiss = async (id: number) => {
+    const ok = await promptBiometric("Authenticate to close incident");
+    if (!ok) return;
     Alert.alert("Dismiss Incident", "Mark this incident as closed?", [
       { text: "Cancel", style: "cancel" },
       {
@@ -317,10 +358,10 @@ export default function IncidentsScreen() {
     );
   };
 
-  const filtered = incidents.filter((i) => {
-    const matchSearch = !search || i.title?.toLowerCase().includes(search.toLowerCase());
+  const fuzzyIncidents = useFuzzySearch(incidents, search, i => [i.title ?? "", i.severity ?? "", i.status ?? ""]);
+  const filtered = fuzzyIncidents.filter((i) => {
     const matchSev = severityFilter === "all" || i.severity === severityFilter;
-    return matchSearch && matchSev;
+    return matchSev;
   });
 
   const topInsets = insets.top + (Platform.OS === "web" ? 67 : 0);

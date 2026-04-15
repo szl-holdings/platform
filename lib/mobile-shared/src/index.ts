@@ -6,4 +6,10 @@ export { BrandedErrorFallback, type BrandedErrorFallbackProps, type ErrorFallbac
 export { NotificationBell, NotificationCenterModal, type NotificationBellProps, type NotificationCenterModalProps } from "./components/NotificationCenter";
 export { NotificationProvider, useNotifications, type AppNotification, type NotificationProviderConfig, type NotificationProviderProps } from "./context/NotificationContext";
 export { SpotlightModal, SpotlightFab, type SpotlightCommand } from "./components/Spotlight";
+export { OfflineBanner } from "./components/OfflineBanner";
+export { NotificationHub, type NotificationItem, type NotificationFetcher } from "./components/NotificationHub";
 export { useApiStatus, type ApiStatusResult } from "./hooks/useApiStatus";
+export { useWebSocket, type WsStatus, type WebSocketOptions, type WebSocketResult } from "./hooks/useWebSocket";
+export { useFuzzySearch } from "./hooks/useFuzzySearch";
+export { useOfflineQueue, type QueuedMutation } from "./hooks/useOfflineQueue";
+export { ThemeProvider, useTheme, type ThemeMode, type ResolvedTheme } from "./context/ThemeContext";

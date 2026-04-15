@@ -8,7 +8,7 @@ import {
 import { setBaseUrl, setAuthTokenGetter } from "@szl-holdings/api-client-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as SecureStore from "expo-secure-store";
-import { Platform } from "react-native";
+import { Platform, View } from "react-native";
 import { AUTH_TOKEN_KEY } from "@/context/AuthContext";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -17,7 +17,7 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary, NotificationProvider } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { AuthProvider } from "@/context/AuthContext";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
@@ -128,7 +128,12 @@ export default function RootLayout() {
           <AuthProvider>
             <NotificationProvider apiBase={VESSELS_API_BASE} getAuthToken={getVesselsAuthToken}>
               <GestureHandlerRootView style={{ flex: 1 }}>
-                <RootLayoutNav />
+                <ThemeProvider defaultMode="dark" storageKey="vessels-theme-mode">
+                  <View style={{ flex: 1 }}>
+                    <RootLayoutNav />
+                    <OfflineBanner accentColor="#ef4444" />
+                  </View>
+                </ThemeProvider>
               </GestureHandlerRootView>
             </NotificationProvider>
           </AuthProvider>

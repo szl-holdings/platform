@@ -14,7 +14,7 @@ import {
 import { setBaseUrl, setAuthTokenGetter } from "@szl-holdings/api-client-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as SecureStore from "expo-secure-store";
-import { Platform } from "react-native";
+import { Platform, View } from "react-native";
 import { AUTH_TOKEN_KEY, useAuth } from "@/context/AuthContext";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -24,7 +24,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary, NotificationProvider } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { AuthProvider, AUTH_TOKEN_KEY } from "@/context/AuthContext";
 import { PushNotificationBootstrap } from "@/components/PushNotificationBootstrap";
@@ -129,9 +129,14 @@ export default function RootLayout() {
             <CJNotificationProvider>
               <PushNotificationBootstrap />
               <GestureHandlerRootView style={{ flex: 1 }}>
-                <KeyboardProvider>
-                  <RootLayoutNav />
-                </KeyboardProvider>
+                <ThemeProvider defaultMode="dark" storageKey="carlota-theme-mode">
+                  <KeyboardProvider>
+                    <View style={{ flex: 1 }}>
+                      <RootLayoutNav />
+                      <OfflineBanner accentColor="#b8943c" />
+                    </View>
+                  </KeyboardProvider>
+                </ThemeProvider>
               </GestureHandlerRootView>
             </CJNotificationProvider>
           </AuthProvider>

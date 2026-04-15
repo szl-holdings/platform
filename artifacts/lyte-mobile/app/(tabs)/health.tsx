@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useCallback, useState, useEffect, useRef } from "react";
+import React, { useCallback, useState, useEffect, useRef, useMemo } from "react";
 import {
   Platform,
   Pressable,
@@ -15,6 +15,7 @@ import {
 import Svg, { Circle, Polyline } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LYTE_COLORS } from "@/constants/colors";
+import { useColors } from "@/hooks/useColors";
 import { useLyte, PlatformHealth } from "@/context/LyteContext";
 
 function getStatusColor(status: PlatformHealth["status"]) {
@@ -36,7 +37,18 @@ const ON_CALL_SCHEDULE: Array<{ name: string; role: string; shift: string; color
 
 const RUNBOOKS: Array<{ id: string; title: string; category: string; steps: number }> = [];
 
-function OnCallCard() {
+type MainStyles = ReturnType<typeof makeStyles>;
+type OnCallStylesType = ReturnType<typeof makeOnCallStyles>;
+
+function OnCallCard({
+  styles,
+  colors,
+  onCallStyles,
+}: {
+  styles: MainStyles;
+  colors: ReturnType<typeof useColors>;
+  onCallStyles: OnCallStylesType;
+}) {
   const [runbookExpanded, setRunbookExpanded] = useState(false);
   const [pagedPersons, setPagedPersons] = useState<Set<string>>(new Set());
   const [activeRunbook, setActiveRunbook] = useState<string | null>(null);
@@ -86,7 +98,7 @@ function OnCallCard() {
   };
 
   return (
-    <View style={[onCallStyles.card, { backgroundColor: LYTE_COLORS.surface, borderColor: LYTE_COLORS.border }]}>
+    <View style={[onCallStyles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={onCallStyles.header}>
         <View style={[onCallStyles.dot, { backgroundColor: LYTE_COLORS.neonGreen }]} />
         <Text style={onCallStyles.title}>On-Call Now</Text>
@@ -95,14 +107,14 @@ function OnCallCard() {
 
       {ON_CALL_SCHEDULE.length === 0 ? (
         <View style={{ paddingVertical: 12, alignItems: "center" }}>
-          <Text style={{ color: LYTE_COLORS.textTertiary, fontSize: 11, fontFamily: "Inter_400Regular" }}>
+          <Text style={{ color: colors.textTertiary, fontSize: 11, fontFamily: "Inter_400Regular" }}>
             On-call schedule not configured
           </Text>
         </View>
       ) : ON_CALL_SCHEDULE.map((person) => {
         const paged = pagedPersons.has(person.name);
         return (
-          <View key={person.name} style={[onCallStyles.personRow, { borderColor: LYTE_COLORS.border }]}>
+          <View key={person.name} style={[onCallStyles.personRow, { borderColor: colors.border }]}>
             <View style={[onCallStyles.avatar, { backgroundColor: `${person.color}18`, borderColor: `${person.color}30` }]}>
               <Text style={[onCallStyles.avatarText, { color: person.color }]}>{person.initials}</Text>
             </View>
@@ -135,9 +147,9 @@ function OnCallCard() {
         onPress={() => { Haptics.selectionAsync(); setRunbookExpanded(e => !e); }}
         style={onCallStyles.runbookToggle}
       >
-        <Feather name="book-open" size={11} color={LYTE_COLORS.textSecondary} />
+        <Feather name="book-open" size={11} color={colors.textSecondary} />
         <Text style={onCallStyles.runbookToggleText}>Quick Runbooks ({RUNBOOKS.length})</Text>
-        <Feather name={runbookExpanded ? "chevron-up" : "chevron-down"} size={11} color={LYTE_COLORS.textTertiary} />
+        <Feather name={runbookExpanded ? "chevron-up" : "chevron-down"} size={11} color={colors.textTertiary} />
       </Pressable>
 
       {runbookExpanded && (
@@ -150,7 +162,7 @@ function OnCallCard() {
                 key={rb.id}
                 onPress={() => handleRunbook(rb)}
                 disabled={isActive || isDone}
-                style={[onCallStyles.runbookRow, { borderColor: LYTE_COLORS.border, opacity: isActive ? 0.7 : 1 }]}
+                style={[onCallStyles.runbookRow, { borderColor: colors.border, opacity: isActive ? 0.7 : 1 }]}
               >
                 <View style={[onCallStyles.runbookIcon, { backgroundColor: isDone ? `${LYTE_COLORS.neonGreen}10` : `${LYTE_COLORS.electricBlue}10` }]}>
                   <Feather
@@ -165,7 +177,7 @@ function OnCallCard() {
                     {rb.category} · {rb.steps} steps{isActive ? " · Running…" : isDone ? " · Completed" : ""}
                   </Text>
                 </View>
-                {!isDone && !isActive && <Feather name="chevron-right" size={12} color={LYTE_COLORS.textTertiary} />}
+                {!isDone && !isActive && <Feather name="chevron-right" size={12} color={colors.textTertiary} />}
               </Pressable>
             );
           })}
@@ -174,30 +186,6 @@ function OnCallCard() {
     </View>
   );
 }
-
-const onCallStyles = StyleSheet.create({
-  card: { borderRadius: 12, borderWidth: 1, padding: 14, marginBottom: 16 },
-  header: { flexDirection: "row", alignItems: "center", gap: 7, marginBottom: 12 },
-  dot: { width: 8, height: 8, borderRadius: 4, shadowColor: LYTE_COLORS.neonGreen, shadowOpacity: 0.8, shadowRadius: 4, shadowOffset: { width: 0, height: 0 } },
-  title: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: LYTE_COLORS.textPrimary, flex: 1 },
-  shift: { fontSize: 10, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textTertiary },
-  personRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 8, borderTopWidth: 1 },
-  avatar: { width: 32, height: 32, borderRadius: 16, borderWidth: 1, alignItems: "center", justifyContent: "center" },
-  avatarText: { fontSize: 10, fontFamily: "Inter_600SemiBold" },
-  personInfo: { flex: 1 },
-  personName: { fontSize: 12, fontFamily: "Inter_500Medium", color: LYTE_COLORS.textPrimary },
-  personRole: { fontSize: 10, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary },
-  primaryBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, borderWidth: 1 },
-  primaryText: { fontSize: 8, fontFamily: "Inter_600SemiBold", letterSpacing: 0.5 },
-  pageBtn: { width: 28, height: 28, borderRadius: 14, borderWidth: 1, alignItems: "center", justifyContent: "center" },
-  runbookToggle: { flexDirection: "row", alignItems: "center", gap: 6, paddingTop: 10, marginTop: 2 },
-  runbookToggleText: { flex: 1, fontSize: 10, fontFamily: "Inter_500Medium", color: LYTE_COLORS.textSecondary },
-  runbooks: { marginTop: 8, gap: 6 },
-  runbookRow: { flexDirection: "row", alignItems: "center", gap: 8, padding: 10, borderRadius: 8, borderWidth: 1, backgroundColor: LYTE_COLORS.surfaceElevated },
-  runbookIcon: { width: 24, height: 24, borderRadius: 6, alignItems: "center", justifyContent: "center" },
-  runbookTitle: { fontSize: 11, fontFamily: "Inter_500Medium", color: LYTE_COLORS.textPrimary },
-  runbookMeta: { fontSize: 9, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textTertiary },
-});
 
 function MetricSparkline({ data, color, width = 60, height = 24 }: { data: number[]; color: string; width?: number; height?: number }) {
   if (data.length < 2) return null;
@@ -249,7 +237,15 @@ function RingChart({ pct, color, size = 60 }: { pct: number; color: string; size
   );
 }
 
-function PlatformCard({ platform }: { platform: PlatformHealth }) {
+function PlatformCard({
+  platform,
+  styles,
+  colors,
+}: {
+  platform: PlatformHealth;
+  styles: MainStyles;
+  colors: ReturnType<typeof useColors>;
+}) {
   const [expanded, setExpanded] = useState(false);
   const statusColor = getStatusColor(platform.status);
   const uptimeSparkline = useRef(generateSparkline(platform.uptime, 12, 0.02)).current;
@@ -258,7 +254,7 @@ function PlatformCard({ platform }: { platform: PlatformHealth }) {
 
   return (
     <Pressable onPress={() => { Haptics.selectionAsync(); setExpanded(e => !e); }}>
-      <View style={[styles.platformCard, { borderColor: platform.status === "degraded" ? LYTE_COLORS.highLight : LYTE_COLORS.border }]}>
+      <View style={[styles.platformCard, { borderColor: platform.status === "degraded" ? LYTE_COLORS.highLight : colors.border }]}>
         <View style={styles.platformHeader}>
           <View style={[styles.statusDot, { backgroundColor: statusColor, shadowColor: statusColor, shadowOpacity: platform.status === "healthy" ? 0.6 : 0, shadowRadius: 4 }]} />
           <View style={styles.platformInfo}>
@@ -284,7 +280,7 @@ function PlatformCard({ platform }: { platform: PlatformHealth }) {
               </View>
               <View style={styles.detailItem}>
                 <Text style={styles.detailLabel}>P95 LATENCY</Text>
-                <Text style={[styles.detailValue, { color: platform.p95Latency > 400 ? LYTE_COLORS.high : LYTE_COLORS.textPrimary }]}>{platform.p95Latency}ms</Text>
+                <Text style={[styles.detailValue, { color: platform.p95Latency > 400 ? LYTE_COLORS.high : colors.textPrimary }]}>{platform.p95Latency}ms</Text>
               </View>
               <View style={styles.detailItem}>
                 <Text style={styles.detailLabel}>ALERTS</Text>
@@ -318,6 +314,9 @@ function PlatformCard({ platform }: { platform: PlatformHealth }) {
 
 export default function HealthScreen() {
   const insets = useSafeAreaInsets();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const onCallStyles = useMemo(() => makeOnCallStyles(colors), [colors]);
   const { platforms, reload, isLoading, lastErrors } = useLyte();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -341,7 +340,7 @@ export default function HealthScreen() {
   const overallColor = getStatusColor(overallStatus as PlatformHealth["status"]);
 
   return (
-    <View style={[styles.container, { backgroundColor: LYTE_COLORS.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient
         colors={["rgba(0,255,136,0.04)", "transparent"]}
         style={[styles.headerGradient, { height: topPad + 120 }]}
@@ -389,7 +388,7 @@ export default function HealthScreen() {
         </View>
 
         <Text style={styles.sectionLabel}>ON-CALL SCHEDULE</Text>
-        <OnCallCard />
+        <OnCallCard styles={styles} colors={colors} onCallStyles={onCallStyles} />
 
         <Text style={styles.sectionLabel}>ALL PLATFORMS</Text>
         {isLoading ? (
@@ -399,19 +398,19 @@ export default function HealthScreen() {
             ))}
           </View>
         ) : lastErrors.some(e => e.endpoint.includes("/api/lyte/health")) ? (
-          <View style={{ alignItems: "center", padding: 24, gap: 8, backgroundColor: LYTE_COLORS.surface, borderRadius: 12, borderWidth: 1, borderColor: LYTE_COLORS.border }}>
-            <Feather name="wifi-off" size={24} color={LYTE_COLORS.textTertiary} />
-            <Text style={{ color: LYTE_COLORS.textSecondary, fontSize: 13, fontFamily: "Inter_500Medium" }}>Health data unavailable</Text>
-            <Text style={{ color: LYTE_COLORS.textTertiary, fontSize: 11, fontFamily: "Inter_400Regular" }}>Cannot reach API server. Pull to retry.</Text>
+          <View style={{ alignItems: "center", padding: 24, gap: 8, backgroundColor: colors.surface, borderRadius: 12, borderWidth: 1, borderColor: colors.border }}>
+            <Feather name="wifi-off" size={24} color={colors.textTertiary} />
+            <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: "Inter_500Medium" }}>Health data unavailable</Text>
+            <Text style={{ color: colors.textTertiary, fontSize: 11, fontFamily: "Inter_400Regular" }}>Cannot reach API server. Pull to retry.</Text>
           </View>
         ) : platforms.length === 0 ? (
-          <View style={{ alignItems: "center", padding: 24, gap: 8, backgroundColor: LYTE_COLORS.surface, borderRadius: 12, borderWidth: 1, borderColor: LYTE_COLORS.border }}>
-            <Feather name="server" size={24} color={LYTE_COLORS.textTertiary} />
-            <Text style={{ color: LYTE_COLORS.textSecondary, fontSize: 13, fontFamily: "Inter_500Medium" }}>No platforms configured</Text>
+          <View style={{ alignItems: "center", padding: 24, gap: 8, backgroundColor: colors.surface, borderRadius: 12, borderWidth: 1, borderColor: colors.border }}>
+            <Feather name="server" size={24} color={colors.textTertiary} />
+            <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: "Inter_500Medium" }}>No platforms configured</Text>
           </View>
         ) : (
           <View style={styles.platformList}>
-            {platforms.map(p => <PlatformCard key={p.slug} platform={p} />)}
+            {platforms.map(p => <PlatformCard key={p.slug} platform={p} styles={styles} colors={colors} />)}
           </View>
         )}
       </ScrollView>
@@ -419,42 +418,70 @@ export default function HealthScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  headerGradient: { position: "absolute", top: 0, left: 0, right: 0 },
-  scroll: { flex: 1 },
-  header: { marginBottom: 20 },
-  eyebrow: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: LYTE_COLORS.neonGreen, marginBottom: 4 },
-  headerTitle: { fontSize: 28, fontFamily: "Inter_600SemiBold", color: LYTE_COLORS.textPrimary },
-  overallCard: { flexDirection: "row", gap: 16, alignItems: "center", backgroundColor: LYTE_COLORS.surface, borderRadius: 16, borderWidth: 1, borderColor: LYTE_COLORS.border, padding: 16, marginBottom: 24 },
-  overallLeft: { position: "relative", alignItems: "center", justifyContent: "center" },
-  overallPct: { position: "absolute", fontSize: 11, fontFamily: "Inter_600SemiBold" },
-  overallStats: { flex: 1, gap: 10 },
-  overallStat: {},
-  overallStatValue: { fontSize: 22, fontFamily: "Inter_600SemiBold", color: LYTE_COLORS.textPrimary },
-  overallStatLabel: { fontSize: 10, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary },
-  overallRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
-  statusPill: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10, backgroundColor: LYTE_COLORS.surfaceElevated },
-  statusPillText: { fontSize: 10, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary },
-  statusDot: { width: 6, height: 6, borderRadius: 3, shadowOffset: { width: 0, height: 0 } },
-  sectionLabel: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: LYTE_COLORS.textTertiary, marginBottom: 10 },
-  platformList: { gap: 8 },
-  platformCard: { backgroundColor: LYTE_COLORS.surface, borderRadius: 12, borderWidth: 1, overflow: "hidden" },
-  platformHeader: { flexDirection: "row", alignItems: "center", padding: 14, gap: 10 },
-  platformInfo: { flex: 1 },
-  platformName: { fontSize: 13, fontFamily: "Inter_500Medium", color: LYTE_COLORS.textPrimary, marginBottom: 2 },
-  platformStatus: { fontSize: 10, fontFamily: "Inter_400Regular" },
-  platformMetrics: { alignItems: "flex-end" },
-  metricValue: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: LYTE_COLORS.textPrimary },
-  metricLabel: { fontSize: 9, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textTertiary },
-  ringWrap: { alignItems: "center", justifyContent: "center", position: "relative" },
-  ringLabel: { position: "absolute", fontSize: 9, fontFamily: "Inter_600SemiBold" },
-  platformDetail: { borderTopWidth: 1, borderTopColor: LYTE_COLORS.border, padding: 12 },
-  detailRow: { flexDirection: "row", gap: 8 },
-  detailItem: { flex: 1, alignItems: "center" },
-  detailLabel: { fontSize: 8, fontFamily: "Inter_500Medium", color: LYTE_COLORS.textTertiary, letterSpacing: 1, marginBottom: 4 },
-  detailValue: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
-  sparklineRow: { flexDirection: "row", gap: 8, marginTop: 12, paddingTop: 10, borderTopWidth: 1, borderTopColor: LYTE_COLORS.border },
-  sparklineItem: { flex: 1, alignItems: "center", gap: 4 },
-  sparklineLabel: { fontSize: 7, fontFamily: "Inter_500Medium", color: LYTE_COLORS.textTertiary, letterSpacing: 0.8 },
-});
+function makeStyles(c: ReturnType<typeof useColors>) {
+  return StyleSheet.create({
+    container: { flex: 1 },
+    headerGradient: { position: "absolute", top: 0, left: 0, right: 0 },
+    scroll: { flex: 1 },
+    header: { marginBottom: 20 },
+    eyebrow: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: LYTE_COLORS.neonGreen, marginBottom: 4 },
+    headerTitle: { fontSize: 28, fontFamily: "Inter_600SemiBold", color: c.textPrimary },
+    overallCard: { flexDirection: "row", gap: 16, alignItems: "center", backgroundColor: c.surface, borderRadius: 16, borderWidth: 1, borderColor: c.border, padding: 16, marginBottom: 24 },
+    overallLeft: { position: "relative", alignItems: "center", justifyContent: "center" },
+    overallPct: { position: "absolute", fontSize: 11, fontFamily: "Inter_600SemiBold" },
+    overallStats: { flex: 1, gap: 10 },
+    overallStat: {},
+    overallStatValue: { fontSize: 22, fontFamily: "Inter_600SemiBold", color: c.textPrimary },
+    overallStatLabel: { fontSize: 10, fontFamily: "Inter_400Regular", color: c.textSecondary },
+    overallRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+    statusPill: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10, backgroundColor: c.surfaceElevated },
+    statusPillText: { fontSize: 10, fontFamily: "Inter_400Regular", color: c.textSecondary },
+    statusDot: { width: 6, height: 6, borderRadius: 3, shadowOffset: { width: 0, height: 0 } },
+    sectionLabel: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: c.textTertiary, marginBottom: 10 },
+    platformList: { gap: 8 },
+    platformCard: { backgroundColor: c.surface, borderRadius: 12, borderWidth: 1, overflow: "hidden" },
+    platformHeader: { flexDirection: "row", alignItems: "center", padding: 14, gap: 10 },
+    platformInfo: { flex: 1 },
+    platformName: { fontSize: 13, fontFamily: "Inter_500Medium", color: c.textPrimary, marginBottom: 2 },
+    platformStatus: { fontSize: 10, fontFamily: "Inter_400Regular" },
+    platformMetrics: { alignItems: "flex-end" },
+    metricValue: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: c.textPrimary },
+    metricLabel: { fontSize: 9, fontFamily: "Inter_400Regular", color: c.textTertiary },
+    ringWrap: { alignItems: "center", justifyContent: "center", position: "relative" },
+    ringLabel: { position: "absolute", fontSize: 9, fontFamily: "Inter_600SemiBold" },
+    platformDetail: { borderTopWidth: 1, borderTopColor: c.border, padding: 12 },
+    detailRow: { flexDirection: "row", gap: 8 },
+    detailItem: { flex: 1, alignItems: "center" },
+    detailLabel: { fontSize: 8, fontFamily: "Inter_500Medium", color: c.textTertiary, letterSpacing: 1, marginBottom: 4 },
+    detailValue: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+    sparklineRow: { flexDirection: "row", gap: 8, marginTop: 12, paddingTop: 10, borderTopWidth: 1, borderTopColor: c.border },
+    sparklineItem: { flex: 1, alignItems: "center", gap: 4 },
+    sparklineLabel: { fontSize: 7, fontFamily: "Inter_500Medium", color: c.textTertiary, letterSpacing: 0.8 },
+  });
+}
+
+function makeOnCallStyles(c: ReturnType<typeof useColors>) {
+  return StyleSheet.create({
+    card: { borderRadius: 12, borderWidth: 1, padding: 14, marginBottom: 16 },
+    header: { flexDirection: "row", alignItems: "center", gap: 7, marginBottom: 12 },
+    dot: { width: 8, height: 8, borderRadius: 4, shadowColor: LYTE_COLORS.neonGreen, shadowOpacity: 0.8, shadowRadius: 4, shadowOffset: { width: 0, height: 0 } },
+    title: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: c.textPrimary, flex: 1 },
+    shift: { fontSize: 10, fontFamily: "Inter_400Regular", color: c.textTertiary },
+    personRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 8, borderTopWidth: 1 },
+    avatar: { width: 32, height: 32, borderRadius: 16, borderWidth: 1, alignItems: "center", justifyContent: "center" },
+    avatarText: { fontSize: 10, fontFamily: "Inter_600SemiBold" },
+    personInfo: { flex: 1 },
+    personName: { fontSize: 12, fontFamily: "Inter_500Medium", color: c.textPrimary },
+    personRole: { fontSize: 10, fontFamily: "Inter_400Regular", color: c.textSecondary },
+    primaryBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, borderWidth: 1 },
+    primaryText: { fontSize: 8, fontFamily: "Inter_600SemiBold", letterSpacing: 0.5 },
+    pageBtn: { width: 28, height: 28, borderRadius: 14, borderWidth: 1, alignItems: "center", justifyContent: "center" },
+    runbookToggle: { flexDirection: "row", alignItems: "center", gap: 6, paddingTop: 10, marginTop: 2 },
+    runbookToggleText: { flex: 1, fontSize: 10, fontFamily: "Inter_500Medium", color: c.textSecondary },
+    runbooks: { marginTop: 8, gap: 6 },
+    runbookRow: { flexDirection: "row", alignItems: "center", gap: 8, padding: 10, borderRadius: 8, borderWidth: 1, backgroundColor: c.surfaceElevated },
+    runbookIcon: { width: 24, height: 24, borderRadius: 6, alignItems: "center", justifyContent: "center" },
+    runbookTitle: { fontSize: 11, fontFamily: "Inter_500Medium", color: c.textPrimary },
+    runbookMeta: { fontSize: 9, fontFamily: "Inter_400Regular", color: c.textTertiary },
+  });
+}

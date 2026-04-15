@@ -8,7 +8,7 @@ import {
 import { setBaseUrl, setAuthTokenGetter } from "@szl-holdings/api-client-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as SecureStore from "expo-secure-store";
-import { Platform } from "react-native";
+import { Platform, View } from "react-native";
 import { AUTH_TOKEN_KEY } from "@/context/AuthContext";
 import { Redirect, Slot, Stack, usePathname } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -21,7 +21,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
-import { ErrorBoundary, NotificationProvider } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 
 if (process.env.EXPO_PUBLIC_DOMAIN) {
@@ -126,9 +126,14 @@ export default function RootLayout() {
         <AuthProvider>
           <NotificationProvider apiBase={TERRA_API_BASE} getAuthToken={getTerraAuthToken}>
             <GestureHandlerRootView style={{ flex: 1 }}>
-              <KeyboardProvider>
-                <RootLayoutNav />
-              </KeyboardProvider>
+              <ThemeProvider defaultMode="dark" storageKey="terra-theme-mode">
+                <KeyboardProvider>
+                  <View style={{ flex: 1 }}>
+                    <RootLayoutNav />
+                    <OfflineBanner accentColor="#b8943c" />
+                  </View>
+                </KeyboardProvider>
+              </ThemeProvider>
             </GestureHandlerRootView>
           </NotificationProvider>
         </AuthProvider>

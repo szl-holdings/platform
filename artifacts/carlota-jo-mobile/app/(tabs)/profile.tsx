@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
+import { router, type Href } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
+import { useTheme, NotificationHub, type NotificationFetcher } from "@szl-holdings/mobile-shared";
 
 const SESSION_HISTORY = [
   { id: 1, title: "Discovery Call", date: "Feb 15, 2026", duration: "45 min" },
@@ -107,6 +108,8 @@ export default function ProfileScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user, logout } = useAuth();
+  const { mode, toggle } = useTheme();
+  const themeLabel = mode === "dark" ? "Dark" : mode === "light" ? "Light" : "System";
 
   const displayName = user?.displayName ?? "Client";
   const email = user?.email ?? "";
@@ -155,9 +158,61 @@ export default function ProfileScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>
-          CLIENT PROFILE
-        </Text>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+          <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>
+            CLIENT PROFILE
+          </Text>
+          <NotificationHub
+            fetchers={[
+              {
+                domain: "carlota",
+                label: "Carlota Jo",
+                color: colors.gold,
+                fetch: async () => {
+                  try {
+                    const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+                    const res = await fetch(`${base}/api/carlota/notifications`);
+                    if (!res.ok) return [];
+                    return res.json();
+                  } catch { return []; }
+                },
+              },
+              {
+                domain: "terra",
+                label: "Terra",
+                color: "#b8943c",
+                fetch: async () => {
+                  try {
+                    const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+                    const res = await fetch(`${base}/api/terra/notifications`);
+                    if (!res.ok) return [];
+                    return res.json();
+                  } catch { return []; }
+                },
+              },
+              {
+                domain: "lyte",
+                label: "Lyte",
+                color: "#00d4ff",
+                fetch: async () => {
+                  try {
+                    const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+                    const res = await fetch(`${base}/api/lyte/notifications`);
+                    if (!res.ok) return [];
+                    return res.json();
+                  } catch { return []; }
+                },
+              },
+            ]}
+            accentColor={colors.gold}
+            backgroundColor={colors.background}
+            surfaceColor={colors.surface}
+            textColor={colors.cream}
+            dimColor={colors.goldSubtle}
+            borderColor={colors.creamFaint}
+            onDeepLink={(link) => router.push(link as Href)}
+          />
+        </View>
 
         <View style={styles.profileCard}>
           <View style={[styles.monogram, { borderColor: colors.goldBorder }]}>
@@ -224,6 +279,20 @@ export default function ProfileScreen() {
               </View>
             </Pressable>
           ))}
+        </View>
+
+        <View style={[styles.section, { borderTopColor: colors.creamFaint }]}>
+          <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>
+            DISPLAY
+          </Text>
+          <View style={[styles.settingsGroup, { borderColor: colors.creamFaint }]}>
+            <SettingRow
+              icon="moon"
+              label="Display Theme"
+              value={themeLabel}
+              onPress={() => { Haptics.selectionAsync(); toggle(); }}
+            />
+          </View>
         </View>
 
         <View style={[styles.section, { borderTopColor: colors.creamFaint }]}>

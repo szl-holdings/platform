@@ -1,3 +1,4 @@
+import { router, type Href } from "expo-router";
 import React, { useState, useCallback } from "react";
 import {
   View,
@@ -16,6 +17,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
 import { useBiometricLock } from "@/context/BiometricLockContext";
+import { useTheme, NotificationHub, type NotificationFetcher } from "@szl-holdings/mobile-shared";
 import { usePushNotifications, registerForPushNotificationsAsync } from "@/hooks/usePushNotifications";
 
 type FeatherIconName = React.ComponentProps<typeof Feather>["name"];
@@ -143,6 +145,8 @@ export default function ProfileScreen() {
   const { biometricEnabled, setBiometricPreference } = useBiometricLock();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [alertsEnabled, setAlertsEnabled] = useState(true);
+  const { mode, toggle } = useTheme();
+  const themeLabel = mode === "dark" ? "Dark" : mode === "light" ? "Light" : "System";
 
   usePushNotifications(notificationsEnabled);
 
@@ -220,9 +224,61 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>
-            PROFILE & TRUST CENTER
-          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+            <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>
+              PROFILE & TRUST CENTER
+            </Text>
+            <NotificationHub
+              fetchers={[
+                {
+                  domain: "szl",
+                  label: "SZL",
+                  color: colors.gold,
+                  fetch: async () => {
+                    try {
+                      const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+                      const res = await fetch(`${base}/api/holdings/notifications`);
+                      if (!res.ok) return [];
+                      return res.json();
+                    } catch { return []; }
+                  },
+                },
+                {
+                  domain: "aegis",
+                  label: "Aegis",
+                  color: "#f59e0b",
+                  fetch: async () => {
+                    try {
+                      const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+                      const res = await fetch(`${base}/api/aegis/notifications`);
+                      if (!res.ok) return [];
+                      return res.json();
+                    } catch { return []; }
+                  },
+                },
+                {
+                  domain: "lyte",
+                  label: "Lyte",
+                  color: "#00d4ff",
+                  fetch: async () => {
+                    try {
+                      const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+                      const res = await fetch(`${base}/api/lyte/notifications`);
+                      if (!res.ok) return [];
+                      return res.json();
+                    } catch { return []; }
+                  },
+                },
+              ]}
+              accentColor={colors.gold}
+              backgroundColor={colors.background}
+              surfaceColor={colors.surface}
+              textColor={colors.cream}
+              dimColor={colors.mutedForeground}
+              borderColor={colors.borderSubtle}
+              onDeepLink={(link) => router.push(link as Href)}
+            />
+          </View>
 
           <View style={styles.userCard}>
             <View style={[styles.avatar, { backgroundColor: colors.goldDim, borderColor: colors.goldBorder }]}>
@@ -307,6 +363,21 @@ export default function ProfileScreen() {
                 thumbColor={alertsEnabled ? "#ef4444" : "rgba(240,238,255,0.4)"}
               />
             </View>
+            <Pressable
+              style={[styles.settingRow, { borderBottomWidth: 0 }]}
+              onPress={() => { Haptics.selectionAsync(); toggle(); }}
+            >
+              <View style={[styles.settingIcon, { backgroundColor: "rgba(201,168,76,0.08)" }]}>
+                <Feather name="moon" size={14} color={colors.gold} />
+              </View>
+              <View style={styles.settingContent}>
+                <Text style={[styles.settingLabel, { color: colors.cream }]}>Display Theme</Text>
+                <Text style={[styles.settingDesc, { color: colors.mutedForeground }]}>
+                  {themeLabel} · Tap to cycle
+                </Text>
+              </View>
+              <Feather name="chevron-right" size={14} color={colors.mutedForeground} />
+            </Pressable>
           </View>
         </View>
 

@@ -38,4 +38,44 @@ export const LYTE_COLORS = {
   transparent: "transparent",
 };
 
+export const LYTE_COLORS_LIGHT: typeof LYTE_COLORS = {
+  background: "#F0FBFF",
+  surface: "#FFFFFF",
+  surfaceElevated: "#EAF7FD",
+  border: "rgba(0,160,194,0.12)",
+  borderStrong: "rgba(0,160,194,0.22)",
+
+  electricBlue: "#0085A1",
+  electricBlueLight: "rgba(0,133,161,0.12)",
+  electricBlueDim: "rgba(0,133,161,0.07)",
+  electricBlueBright: "#0099BB",
+
+  neonGreen: "#00A855",
+  neonGreenLight: "rgba(0,168,85,0.12)",
+  neonGreenDim: "rgba(0,168,85,0.07)",
+
+  critical: "#C9183A",
+  criticalLight: "rgba(201,24,58,0.12)",
+  criticalDim: "rgba(201,24,58,0.07)",
+
+  high: "#C45210",
+  highLight: "rgba(196,82,16,0.12)",
+  highDim: "rgba(196,82,16,0.07)",
+
+  medium: "#AA8800",
+  mediumLight: "rgba(170,136,0,0.12)",
+  mediumDim: "rgba(170,136,0,0.07)",
+
+  low: "#556070",
+  lowLight: "rgba(85,96,112,0.12)",
+
+  textPrimary: "rgba(7,12,20,0.92)",
+  textSecondary: "rgba(7,12,20,0.55)",
+  textTertiary: "rgba(7,12,20,0.35)",
+  textMuted: "rgba(7,12,20,0.18)",
+
+  white: "#ffffff",
+  transparent: "transparent",
+};
+
 export type LyteColors = typeof LYTE_COLORS;

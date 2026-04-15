@@ -14,10 +14,11 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
 import React, { useEffect } from "react";
+import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary, NotificationProvider } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { AuthProvider } from "@/context/AuthContext";
 import { BiometricLockProvider } from "@/context/BiometricLockContext";
@@ -85,7 +86,12 @@ export default function RootLayout() {
               <NotificationProvider apiBase={SZL_API_BASE} getAuthToken={getAuthToken}>
                 <BiometricLockProvider>
                   <GestureHandlerRootView style={{ flex: 1 }}>
-                    <RootLayoutNav />
+                    <ThemeProvider defaultMode="dark" storageKey="szl-theme-mode">
+                      <View style={{ flex: 1 }}>
+                        <RootLayoutNav />
+                        <OfflineBanner accentColor="#c8a96e" />
+                      </View>
+                    </ThemeProvider>
                   </GestureHandlerRootView>
                 </BiometricLockProvider>
               </NotificationProvider>

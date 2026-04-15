@@ -2,7 +2,7 @@ import { Feather } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import {
   Platform,
   Pressable,
@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LYTE_COLORS } from "@/constants/colors";
+import { useColors } from "@/hooks/useColors";
 
 type FeatherName = ComponentProps<typeof Feather>["name"];
 
@@ -139,7 +140,23 @@ const ASKS: BoardItem[] = [
   },
 ];
 
-function BoardItemCard({ item, type, expanded, onPress }: { item: BoardItem; type: BoardSection; expanded: boolean; onPress: () => void }) {
+type StylesType = ReturnType<typeof makeStyles>;
+
+function BoardItemCard({
+  item,
+  type,
+  expanded,
+  onPress,
+  styles,
+  colors,
+}: {
+  item: BoardItem;
+  type: BoardSection;
+  expanded: boolean;
+  onPress: () => void;
+  styles: StylesType;
+  colors: ReturnType<typeof useColors>;
+}) {
   const urgencyColor = item.urgency === "Immediate" || item.urgency === "Critical" || item.urgency === "Now"
     ? LYTE_COLORS.critical
     : item.urgency === "Today" || item.urgency === "High"
@@ -150,7 +167,7 @@ function BoardItemCard({ item, type, expanded, onPress }: { item: BoardItem; typ
 
   return (
     <Pressable onPress={() => { Haptics.selectionAsync(); onPress(); }}>
-      <View style={[styles.itemCard, { borderColor: expanded ? `${typeColor}30` : LYTE_COLORS.border }]}>
+      <View style={[styles.itemCard, { borderColor: expanded ? `${typeColor}30` : colors.border }]}>
         <View style={styles.itemHeader}>
           <View style={styles.itemLeft}>
             <View style={styles.itemMeta}>
@@ -167,7 +184,7 @@ function BoardItemCard({ item, type, expanded, onPress }: { item: BoardItem; typ
           <View style={styles.itemRight}>
             <Text style={[styles.itemImpact, { color: LYTE_COLORS.high }]}>{item.impact}</Text>
             <Text style={styles.itemOwner}>{item.owner}</Text>
-            <Feather name={expanded ? "chevron-up" : "chevron-down"} size={14} color={LYTE_COLORS.textTertiary} />
+            <Feather name={expanded ? "chevron-up" : "chevron-down"} size={14} color={colors.textTertiary} />
           </View>
         </View>
         {expanded && (
@@ -180,7 +197,23 @@ function BoardItemCard({ item, type, expanded, onPress }: { item: BoardItem; typ
   );
 }
 
-function SectionBlock({ title, items, type, color, icon }: { title: string; items: BoardItem[]; type: BoardSection; color: string; icon: FeatherName }) {
+function SectionBlock({
+  title,
+  items,
+  type,
+  color,
+  icon,
+  styles,
+  colors,
+}: {
+  title: string;
+  items: BoardItem[];
+  type: BoardSection;
+  color: string;
+  icon: FeatherName;
+  styles: StylesType;
+  colors: ReturnType<typeof useColors>;
+}) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   return (
@@ -201,6 +234,8 @@ function SectionBlock({ title, items, type, color, icon }: { title: string; item
           type={type}
           expanded={expandedId === item.id}
           onPress={() => setExpandedId(expandedId === item.id ? null : item.id)}
+          styles={styles}
+          colors={colors}
         />
       ))}
     </View>
@@ -209,6 +244,8 @@ function SectionBlock({ title, items, type, color, icon }: { title: string; item
 
 export default function BoardModeScreen() {
   const insets = useSafeAreaInsets();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [refreshing, setRefreshing] = useState(false);
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
@@ -221,7 +258,7 @@ export default function BoardModeScreen() {
   }, []);
 
   return (
-    <View style={[styles.container, { backgroundColor: LYTE_COLORS.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient
         colors={["rgba(212,160,84,0.06)", "transparent"]}
         style={[styles.headerGradient, { height: topPad + 120 }]}
@@ -250,46 +287,48 @@ export default function BoardModeScreen() {
           <Text style={styles.dividerNoteText}>Everything below is the highest-value action in the system. Nothing below this line requires your attention today.</Text>
         </View>
 
-        <SectionBlock title="3 Decisions Required" items={DECISIONS} type="decisions" color={LYTE_COLORS.medium} icon="target" />
-        <SectionBlock title="3 Risks On Your Radar" items={RISKS} type="risks" color={LYTE_COLORS.critical} icon="alert-triangle" />
-        <SectionBlock title="3 Asks From the System" items={ASKS} type="asks" color="#8b7ac8" icon="help-circle" />
+        <SectionBlock title="3 Decisions Required" items={DECISIONS} type="decisions" color={LYTE_COLORS.medium} icon="target" styles={styles} colors={colors} />
+        <SectionBlock title="3 Risks On Your Radar" items={RISKS} type="risks" color={LYTE_COLORS.critical} icon="alert-triangle" styles={styles} colors={colors} />
+        <SectionBlock title="3 Asks From the System" items={ASKS} type="asks" color="#8b7ac8" icon="help-circle" styles={styles} colors={colors} />
       </ScrollView>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  headerGradient: { position: "absolute", top: 0, left: 0, right: 0 },
-  scroll: { flex: 1 },
-  header: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14, gap: 12 },
-  eyebrow: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: LYTE_COLORS.medium, marginBottom: 4 },
-  headerTitle: { fontSize: 26, fontFamily: "Inter_600SemiBold", color: LYTE_COLORS.textPrimary, marginBottom: 2 },
-  headerSub: { fontSize: 11, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary },
-  atRisk: { borderRadius: 10, paddingVertical: 8, paddingHorizontal: 12, borderWidth: 1, alignItems: "center" },
-  atRiskValue: { fontSize: 15, fontFamily: "Inter_700Bold", fontVariant: ["tabular-nums"] },
-  atRiskLabel: { fontSize: 9, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textMuted, letterSpacing: 1 },
-  dividerNote: { backgroundColor: LYTE_COLORS.surfaceElevated, borderRadius: 10, padding: 12, marginBottom: 20, borderWidth: 1, borderColor: LYTE_COLORS.border },
-  dividerNoteText: { fontSize: 10, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textTertiary, lineHeight: 16 },
-  section: { marginBottom: 24, gap: 8 },
-  sectionHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 4 },
-  sectionIconBox: { width: 26, height: 26, borderRadius: 8, alignItems: "center", justifyContent: "center" },
-  sectionTitle: { fontSize: 11, fontFamily: "Inter_600SemiBold", letterSpacing: 1, textTransform: "uppercase", flex: 1 },
-  sectionCount: { width: 22, height: 22, borderRadius: 11, alignItems: "center", justifyContent: "center" },
-  sectionCountText: { fontSize: 10, fontFamily: "Inter_700Bold" },
-  itemCard: { borderRadius: 12, borderWidth: 1, backgroundColor: LYTE_COLORS.surface, overflow: "hidden" },
-  itemHeader: { flexDirection: "row", alignItems: "flex-start", padding: 14, gap: 10 },
-  itemLeft: { flex: 1, gap: 6 },
-  itemMeta: { flexDirection: "row", alignItems: "center", gap: 6 },
-  packBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  packText: { fontSize: 8, fontFamily: "Inter_600SemiBold", letterSpacing: 0.5, textTransform: "uppercase" },
-  urgencyBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  urgencyText: { fontSize: 8, fontFamily: "Inter_600SemiBold", letterSpacing: 0.5 },
-  itemTitle: { fontSize: 13, fontFamily: "Inter_500Medium", color: LYTE_COLORS.textPrimary, lineHeight: 18 },
-  itemSub: { fontSize: 10, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary },
-  itemRight: { alignItems: "flex-end", gap: 4 },
-  itemImpact: { fontSize: 12, fontFamily: "Inter_700Bold", fontVariant: ["tabular-nums"] },
-  itemOwner: { fontSize: 9, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textTertiary },
-  itemDetail: { paddingHorizontal: 14, paddingBottom: 14, borderTopWidth: 1, borderTopColor: LYTE_COLORS.border, paddingTop: 10 },
-  itemDetailText: { fontSize: 11, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary, lineHeight: 17 },
-});
+function makeStyles(c: ReturnType<typeof useColors>) {
+  return StyleSheet.create({
+    container: { flex: 1 },
+    headerGradient: { position: "absolute", top: 0, left: 0, right: 0 },
+    scroll: { flex: 1 },
+    header: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14, gap: 12 },
+    eyebrow: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: LYTE_COLORS.medium, marginBottom: 4 },
+    headerTitle: { fontSize: 26, fontFamily: "Inter_600SemiBold", color: c.textPrimary, marginBottom: 2 },
+    headerSub: { fontSize: 11, fontFamily: "Inter_400Regular", color: c.textSecondary },
+    atRisk: { borderRadius: 10, paddingVertical: 8, paddingHorizontal: 12, borderWidth: 1, alignItems: "center" },
+    atRiskValue: { fontSize: 15, fontFamily: "Inter_700Bold", fontVariant: ["tabular-nums"] },
+    atRiskLabel: { fontSize: 9, fontFamily: "Inter_400Regular", color: c.textMuted, letterSpacing: 1 },
+    dividerNote: { backgroundColor: c.surfaceElevated, borderRadius: 10, padding: 12, marginBottom: 20, borderWidth: 1, borderColor: c.border },
+    dividerNoteText: { fontSize: 10, fontFamily: "Inter_400Regular", color: c.textTertiary, lineHeight: 16 },
+    section: { marginBottom: 24, gap: 8 },
+    sectionHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 4 },
+    sectionIconBox: { width: 26, height: 26, borderRadius: 8, alignItems: "center", justifyContent: "center" },
+    sectionTitle: { fontSize: 11, fontFamily: "Inter_600SemiBold", letterSpacing: 1, textTransform: "uppercase", flex: 1 },
+    sectionCount: { width: 22, height: 22, borderRadius: 11, alignItems: "center", justifyContent: "center" },
+    sectionCountText: { fontSize: 10, fontFamily: "Inter_700Bold" },
+    itemCard: { borderRadius: 12, borderWidth: 1, backgroundColor: c.surface, overflow: "hidden" },
+    itemHeader: { flexDirection: "row", alignItems: "flex-start", padding: 14, gap: 10 },
+    itemLeft: { flex: 1, gap: 6 },
+    itemMeta: { flexDirection: "row", alignItems: "center", gap: 6 },
+    packBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+    packText: { fontSize: 8, fontFamily: "Inter_600SemiBold", letterSpacing: 0.5, textTransform: "uppercase" },
+    urgencyBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+    urgencyText: { fontSize: 8, fontFamily: "Inter_600SemiBold", letterSpacing: 0.5 },
+    itemTitle: { fontSize: 13, fontFamily: "Inter_500Medium", color: c.textPrimary, lineHeight: 18 },
+    itemSub: { fontSize: 10, fontFamily: "Inter_400Regular", color: c.textSecondary },
+    itemRight: { alignItems: "flex-end", gap: 4 },
+    itemImpact: { fontSize: 12, fontFamily: "Inter_700Bold", fontVariant: ["tabular-nums"] },
+    itemOwner: { fontSize: 9, fontFamily: "Inter_400Regular", color: c.textTertiary },
+    itemDetail: { paddingHorizontal: 14, paddingBottom: 14, borderTopWidth: 1, borderTopColor: c.border, paddingTop: 10 },
+    itemDetailText: { fontSize: 11, fontFamily: "Inter_400Regular", color: c.textSecondary, lineHeight: 17 },
+  });
+}

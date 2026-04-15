@@ -3,9 +3,11 @@ import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router, type Href } from "expo-router";
 import { VesselIcon, featherIcon } from "@/components/VesselIcon";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme, NotificationHub } from "@szl-holdings/mobile-shared";
 
 function InfoRow({ icon, label, value }: { icon: string; label: string; value: string }) {
   const colors = useColors();
@@ -35,6 +37,8 @@ function SectionCard({ title, children }: { title: string; children: React.React
 export default function ProfileScreen() {
   const colors = useColors();
   const { user, logout } = useAuth();
+  const { mode, toggle } = useTheme();
+  const themeLabel = mode === "dark" ? "Dark" : mode === "light" ? "Light" : "System";
 
   const handleLogout = () => {
     Alert.alert(
@@ -53,8 +57,58 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]} edges={["top"]}>
-      <View style={[styles.header, { borderBottomColor: colors.border }]}>
+      <View style={[styles.header, { borderBottomColor: colors.border, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }]}>
         <Text style={[styles.title, { color: colors.text }]}>Profile</Text>
+        <NotificationHub
+          fetchers={[
+            {
+              domain: "vessels",
+              label: "Vessels",
+              color: colors.primary,
+              fetch: async () => {
+                try {
+                  const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+                  const res = await fetch(`${base}/api/vessels/notifications`);
+                  if (!res.ok) return [];
+                  return res.json();
+                } catch { return []; }
+              },
+            },
+            {
+              domain: "aegis",
+              label: "Aegis",
+              color: "#f59e0b",
+              fetch: async () => {
+                try {
+                  const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+                  const res = await fetch(`${base}/api/aegis/notifications`);
+                  if (!res.ok) return [];
+                  return res.json();
+                } catch { return []; }
+              },
+            },
+            {
+              domain: "lyte",
+              label: "Lyte",
+              color: "#00d4ff",
+              fetch: async () => {
+                try {
+                  const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+                  const res = await fetch(`${base}/api/lyte/notifications`);
+                  if (!res.ok) return [];
+                  return res.json();
+                } catch { return []; }
+              },
+            },
+          ]}
+          accentColor={colors.primary}
+          backgroundColor={colors.bg}
+          surfaceColor={colors.card}
+          textColor={colors.text}
+          dimColor={colors.textFaint}
+          borderColor={colors.border}
+          onDeepLink={(link) => router.push(link as Href)}
+        />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
@@ -132,6 +186,22 @@ export default function ProfileScreen() {
               <Text style={[styles.capStatusText, { color: colors.green }]}>Enabled</Text>
             </View>
           </View>
+        </SectionCard>
+
+        <SectionCard title="DISPLAY">
+          <TouchableOpacity
+            onPress={() => toggle()}
+            style={[styles.infoRow, { borderBottomColor: colors.border }]}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.infoIcon, { backgroundColor: colors.primaryDim }]}>
+              <VesselIcon name="moon" size={13} color={colors.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.infoLabel, { color: colors.textFaint }]}>DISPLAY THEME</Text>
+              <Text style={[styles.infoValue, { color: colors.text }]}>{themeLabel} · Tap to cycle</Text>
+            </View>
+          </TouchableOpacity>
         </SectionCard>
 
         <TouchableOpacity

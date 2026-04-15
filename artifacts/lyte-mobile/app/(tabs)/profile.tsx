@@ -1,7 +1,8 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { type ComponentProps, useEffect, useState, useCallback } from "react";
+import { router, type Href } from "expo-router";
+import React, { type ComponentProps, useCallback, useMemo } from "react";
 
 import {
   Alert,
@@ -15,8 +16,10 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LYTE_COLORS } from "@/constants/colors";
+import { useColors } from "@/hooks/useColors";
 import { useLyte } from "@/context/LyteContext";
 import { useNotifications } from "@/context/NotificationContext";
+import { useTheme, NotificationHub } from "@szl-holdings/mobile-shared";
 
 type FeatherName = ComponentProps<typeof Feather>["name"];
 
@@ -31,7 +34,17 @@ interface SettingRow {
   color?: string;
 }
 
-function SettingItem({ item }: { item: SettingRow }) {
+type StylesType = ReturnType<typeof makeStyles>;
+
+function SettingItem({
+  item,
+  styles,
+  colors,
+}: {
+  item: SettingRow;
+  styles: StylesType;
+  colors: ReturnType<typeof useColors>;
+}) {
   return (
     <Pressable
       onPress={() => { Haptics.selectionAsync(); item.onPress?.(); }}
@@ -45,13 +58,13 @@ function SettingItem({ item }: { item: SettingRow }) {
         <Switch
           value={item.toggleValue}
           onValueChange={v => { Haptics.selectionAsync(); item.onToggle?.(v); }}
-          trackColor={{ false: LYTE_COLORS.surfaceElevated, true: `${LYTE_COLORS.electricBlue}60` }}
-          thumbColor={item.toggleValue ? LYTE_COLORS.electricBlue : LYTE_COLORS.textTertiary}
+          trackColor={{ false: colors.surfaceElevated, true: `${LYTE_COLORS.electricBlue}60` }}
+          thumbColor={item.toggleValue ? LYTE_COLORS.electricBlue : colors.textTertiary}
         />
       ) : item.value ? (
         <Text style={styles.settingValue}>{item.value}</Text>
       ) : (
-        <Feather name="chevron-right" size={14} color={LYTE_COLORS.textTertiary} />
+        <Feather name="chevron-right" size={14} color={colors.textTertiary} />
       )}
     </Pressable>
   );
@@ -59,8 +72,13 @@ function SettingItem({ item }: { item: SettingRow }) {
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { signals, actions, criticalCount } = useLyte();
   const { permissionGranted, requestPermission, preferences, setPreferences } = useNotifications();
+  const { mode, toggle } = useTheme();
+
+  const themeLabel = mode === "dark" ? "Dark" : mode === "light" ? "Light" : "System";
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
@@ -133,6 +151,13 @@ export default function ProfileScreen() {
       color: LYTE_COLORS.neonGreen,
       onToggle: () => {},
     },
+    {
+      icon: "moon",
+      label: "Display Theme",
+      value: themeLabel,
+      color: LYTE_COLORS.electricBlue,
+      onPress: toggle,
+    },
   ];
 
   const accountSettings: SettingRow[] = [
@@ -140,19 +165,19 @@ export default function ProfileScreen() {
       icon: "user",
       label: "Display Name",
       value: "On-Call Engineer",
-      color: LYTE_COLORS.textSecondary,
+      color: colors.textSecondary,
     },
     {
       icon: "shield",
       label: "Role",
       value: "Operator",
-      color: LYTE_COLORS.textSecondary,
+      color: colors.textSecondary,
     },
     {
       icon: "globe",
       label: "API Environment",
       value: process.env.EXPO_PUBLIC_DOMAIN ? "Production" : "Local",
-      color: LYTE_COLORS.textSecondary,
+      color: colors.textSecondary,
     },
   ];
 
@@ -161,7 +186,7 @@ export default function ProfileScreen() {
   const actionsDone = actions.filter(a => a.state === "resolved").length;
 
   return (
-    <View style={[styles.container, { backgroundColor: LYTE_COLORS.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient
         colors={["rgba(0,212,255,0.04)", "transparent"]}
         style={[styles.headerGradient, { height: topPad + 160 }]}
@@ -171,8 +196,62 @@ export default function ProfileScreen() {
         contentContainerStyle={{ paddingTop: topPad + 16, paddingBottom: bottomPad, paddingHorizontal: 16 }}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.eyebrow}>PROFILE</Text>
-        <Text style={styles.headerTitle}>Settings</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+          <View>
+            <Text style={styles.eyebrow}>PROFILE</Text>
+            <Text style={styles.headerTitle}>Settings</Text>
+          </View>
+          <NotificationHub
+            fetchers={[
+              {
+                domain: "lyte",
+                label: "Lyte",
+                color: LYTE_COLORS.electricBlue,
+                fetch: async () => {
+                  try {
+                    const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+                    const res = await fetch(`${base}/api/lyte/notifications`);
+                    if (!res.ok) return [];
+                    return res.json();
+                  } catch { return []; }
+                },
+              },
+              {
+                domain: "aegis",
+                label: "Aegis",
+                color: "#f59e0b",
+                fetch: async () => {
+                  try {
+                    const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+                    const res = await fetch(`${base}/api/aegis/notifications`);
+                    if (!res.ok) return [];
+                    return res.json();
+                  } catch { return []; }
+                },
+              },
+              {
+                domain: "vessels",
+                label: "Vessels",
+                color: "#0ea5e9",
+                fetch: async () => {
+                  try {
+                    const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+                    const res = await fetch(`${base}/api/vessels/notifications`);
+                    if (!res.ok) return [];
+                    return res.json();
+                  } catch { return []; }
+                },
+              },
+            ]}
+            accentColor={LYTE_COLORS.electricBlue}
+            backgroundColor={colors.background}
+            surfaceColor={colors.surfaceElevated}
+            textColor={colors.textPrimary}
+            dimColor={colors.textSecondary}
+            borderColor="rgba(255,255,255,0.08)"
+            onDeepLink={(link) => router.push(link as Href)}
+          />
+        </View>
 
         <View style={styles.avatarCard}>
           <View style={styles.avatar}>
@@ -220,7 +299,7 @@ export default function ProfileScreen() {
           {notificationSettings.map((item, i) => (
             <View key={item.label}>
               {i > 0 && <View style={styles.divider} />}
-              <SettingItem item={item} />
+              <SettingItem item={item} styles={styles} colors={colors} />
             </View>
           ))}
         </View>
@@ -230,7 +309,7 @@ export default function ProfileScreen() {
           {displaySettings.map((item, i) => (
             <View key={item.label}>
               {i > 0 && <View style={styles.divider} />}
-              <SettingItem item={item} />
+              <SettingItem item={item} styles={styles} colors={colors} />
             </View>
           ))}
         </View>
@@ -240,7 +319,7 @@ export default function ProfileScreen() {
           {accountSettings.map((item, i) => (
             <View key={item.label}>
               {i > 0 && <View style={styles.divider} />}
-              <SettingItem item={item} />
+              <SettingItem item={item} styles={styles} colors={colors} />
             </View>
           ))}
         </View>
@@ -254,33 +333,35 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  headerGradient: { position: "absolute", top: 0, left: 0, right: 0 },
-  scroll: { flex: 1 },
-  eyebrow: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: LYTE_COLORS.electricBlue, marginBottom: 4 },
-  headerTitle: { fontSize: 28, fontFamily: "Inter_600SemiBold", color: LYTE_COLORS.textPrimary, marginBottom: 20 },
-  avatarCard: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: LYTE_COLORS.surface, borderRadius: 16, borderWidth: 1, borderColor: LYTE_COLORS.border, padding: 16, marginBottom: 16 },
-  avatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: LYTE_COLORS.electricBlueDim, borderWidth: 1, borderColor: LYTE_COLORS.electricBlueLight, alignItems: "center", justifyContent: "center" },
-  avatarName: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: LYTE_COLORS.textPrimary, marginBottom: 2 },
-  avatarRole: { fontSize: 11, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary },
-  notifBanner: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 4 },
-  notifBannerText: { fontSize: 10, fontFamily: "Inter_500Medium", color: LYTE_COLORS.high },
-  statusPill: { marginLeft: "auto", flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12, borderWidth: 1 },
-  statusDot: { width: 6, height: 6, borderRadius: 3 },
-  statusText: { fontSize: 10, fontFamily: "Inter_500Medium" },
-  statsRow: { flexDirection: "row", gap: 8, marginBottom: 24 },
-  statCard: { flex: 1, backgroundColor: LYTE_COLORS.surface, borderRadius: 10, borderWidth: 1, borderColor: LYTE_COLORS.border, padding: 12, alignItems: "center" },
-  statValue: { fontSize: 22, fontFamily: "Inter_600SemiBold", marginBottom: 2 },
-  statLabel: { fontSize: 9, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textTertiary },
-  sectionLabel: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: LYTE_COLORS.textTertiary, marginBottom: 8 },
-  settingGroup: { backgroundColor: LYTE_COLORS.surface, borderRadius: 14, borderWidth: 1, borderColor: LYTE_COLORS.border, marginBottom: 24, overflow: "hidden" },
-  settingRow: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14 },
-  settingIcon: { width: 32, height: 32, borderRadius: 8, alignItems: "center", justifyContent: "center" },
-  settingLabel: { flex: 1, fontSize: 13, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textPrimary },
-  settingValue: { fontSize: 12, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary },
-  divider: { height: 1, backgroundColor: LYTE_COLORS.border, marginLeft: 58 },
-  footer: { alignItems: "center", paddingTop: 8 },
-  footerText: { fontSize: 11, fontFamily: "Inter_500Medium", color: LYTE_COLORS.textTertiary },
-  footerSub: { fontSize: 10, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textMuted, marginTop: 2 },
-});
+function makeStyles(c: ReturnType<typeof useColors>) {
+  return StyleSheet.create({
+    container: { flex: 1 },
+    headerGradient: { position: "absolute", top: 0, left: 0, right: 0 },
+    scroll: { flex: 1 },
+    eyebrow: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: LYTE_COLORS.electricBlue, marginBottom: 4 },
+    headerTitle: { fontSize: 28, fontFamily: "Inter_600SemiBold", color: c.textPrimary, marginBottom: 20 },
+    avatarCard: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: c.surface, borderRadius: 16, borderWidth: 1, borderColor: c.border, padding: 16, marginBottom: 16 },
+    avatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: LYTE_COLORS.electricBlueDim, borderWidth: 1, borderColor: LYTE_COLORS.electricBlueLight, alignItems: "center", justifyContent: "center" },
+    avatarName: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: c.textPrimary, marginBottom: 2 },
+    avatarRole: { fontSize: 11, fontFamily: "Inter_400Regular", color: c.textSecondary },
+    notifBanner: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 4 },
+    notifBannerText: { fontSize: 10, fontFamily: "Inter_500Medium", color: LYTE_COLORS.high },
+    statusPill: { marginLeft: "auto", flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12, borderWidth: 1 },
+    statusDot: { width: 6, height: 6, borderRadius: 3 },
+    statusText: { fontSize: 10, fontFamily: "Inter_500Medium" },
+    statsRow: { flexDirection: "row", gap: 8, marginBottom: 24 },
+    statCard: { flex: 1, backgroundColor: c.surface, borderRadius: 10, borderWidth: 1, borderColor: c.border, padding: 12, alignItems: "center" },
+    statValue: { fontSize: 22, fontFamily: "Inter_600SemiBold", marginBottom: 2 },
+    statLabel: { fontSize: 9, fontFamily: "Inter_400Regular", color: c.textTertiary },
+    sectionLabel: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: c.textTertiary, marginBottom: 8 },
+    settingGroup: { backgroundColor: c.surface, borderRadius: 14, borderWidth: 1, borderColor: c.border, marginBottom: 24, overflow: "hidden" },
+    settingRow: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14 },
+    settingIcon: { width: 32, height: 32, borderRadius: 8, alignItems: "center", justifyContent: "center" },
+    settingLabel: { flex: 1, fontSize: 13, fontFamily: "Inter_400Regular", color: c.textPrimary },
+    settingValue: { fontSize: 12, fontFamily: "Inter_400Regular", color: c.textSecondary },
+    divider: { height: 1, backgroundColor: c.border, marginLeft: 58 },
+    footer: { alignItems: "center", paddingTop: 8 },
+    footerText: { fontSize: 11, fontFamily: "Inter_500Medium", color: c.textTertiary },
+    footerSub: { fontSize: 10, fontFamily: "Inter_400Regular", color: c.textMuted, marginTop: 2 },
+  });
+}

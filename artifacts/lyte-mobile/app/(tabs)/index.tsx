@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useCallback, useState, useRef, useEffect } from "react";
+import React, { useCallback, useState, useRef, useEffect, useMemo } from "react";
 import {
   Animated,
   Platform,
@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LYTE_COLORS } from "@/constants/colors";
+import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
 import { useLyte, Severity, LyteSignal, LyteAction } from "@/context/LyteContext";
 
@@ -57,18 +58,24 @@ interface InboxCard {
   actionId?: number;
 }
 
+type StylesType = ReturnType<typeof makeStyles>;
+
 function InboxCardView({
   card,
   onAcknowledge,
   onInvestigate,
   onEscalate,
   onResolve,
+  styles,
+  colors,
 }: {
   card: InboxCard;
   onAcknowledge: () => void;
   onInvestigate: () => void;
   onEscalate: () => void;
   onResolve: () => void;
+  styles: StylesType;
+  colors: ReturnType<typeof useColors>;
 }) {
   const sev = getSeverityConfig(card.severity);
   const scale = useRef(new Animated.Value(1)).current;
@@ -100,7 +107,7 @@ function InboxCardView({
             ]}
           />
           <View style={styles.cardMain}>
-            <Text style={[styles.cardTitle, { color: LYTE_COLORS.textPrimary }]} numberOfLines={2}>
+            <Text style={[styles.cardTitle, { color: colors.textPrimary }]} numberOfLines={2}>
               {card.title}
             </Text>
             <View style={styles.cardMeta}>
@@ -229,6 +236,8 @@ async function checkSystemStatus(headers: Record<string, string>): Promise<strin
 
 export default function InboxScreen() {
   const insets = useSafeAreaInsets();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { buildHeaders } = useAuth();
   const { signals, actions, criticalCount, activeAlertCount, reload } = useLyte();
   const [refreshing, setRefreshing] = useState(false);
@@ -327,7 +336,7 @@ export default function InboxScreen() {
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: LYTE_COLORS.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient
         colors={["rgba(0,212,255,0.04)", "transparent"]}
         style={[styles.headerGradient, { height: topPad + 100 }]}
@@ -398,7 +407,7 @@ export default function InboxScreen() {
               style={styles.shakeAction}
               onPress={() => { Haptics.selectionAsync(); dismissShake(); }}
             >
-              <Feather name="x" size={16} color={LYTE_COLORS.textSecondary} />
+              <Feather name="x" size={16} color={colors.textSecondary} />
               <Text style={styles.shakeActionText}>Dismiss</Text>
             </Pressable>
           </View>
@@ -458,6 +467,8 @@ export default function InboxScreen() {
               <InboxCardView
                 key={card.id}
                 card={card}
+                styles={styles}
+                colors={colors}
                 onAcknowledge={() => {
                   const headers = buildHeaders();
                   if (card.signalId) {
@@ -499,50 +510,52 @@ export default function InboxScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  headerGradient: { position: "absolute", top: 0, left: 0, right: 0 },
-  scroll: { flex: 1 },
-  header: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 20 },
-  eyebrow: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: LYTE_COLORS.electricBlue, marginBottom: 4 },
-  headerTitle: { fontSize: 28, fontFamily: "Inter_600SemiBold", color: LYTE_COLORS.textPrimary },
-  headerBadges: { gap: 6, alignItems: "flex-end" },
-  badge: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20, borderWidth: 1 },
-  badgeDot: { width: 6, height: 6, borderRadius: 3 },
-  badgeText: { fontSize: 10, fontFamily: "Inter_500Medium" },
-  cardList: { gap: 8 },
-  card: { borderRadius: 12, borderWidth: 1, backgroundColor: LYTE_COLORS.surface, overflow: "hidden" },
-  cardHeader: { flexDirection: "row", alignItems: "flex-start", padding: 14, gap: 10 },
-  sevDot: { width: 8, height: 8, borderRadius: 4, marginTop: 5, shadowOffset: { width: 0, height: 0 } },
-  cardMain: { flex: 1, gap: 6 },
-  cardTitle: { fontSize: 13, fontFamily: "Inter_500Medium", lineHeight: 18 },
-  cardMeta: { flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" },
-  sevBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, borderWidth: 1 },
-  sevText: { fontSize: 8, fontFamily: "Inter_600SemiBold", letterSpacing: 0.5 },
-  metaDot: { color: LYTE_COLORS.textMuted, fontSize: 10 },
-  metaText: { fontSize: 10, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary },
-  cardTime: { fontSize: 10, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textTertiary },
-  cardActions: { flexDirection: "row", gap: 6, padding: 12, borderTopWidth: 1, borderTopColor: LYTE_COLORS.border },
-  actionBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5, paddingVertical: 8, borderRadius: 8, borderWidth: 1 },
-  actionText: { fontSize: 11, fontFamily: "Inter_500Medium" },
-  emptyState: { alignItems: "center", paddingTop: 80 },
-  emptyIcon: { fontSize: 40, marginBottom: 12 },
-  emptyTitle: { fontSize: 18, fontFamily: "Inter_600SemiBold", color: LYTE_COLORS.textPrimary, marginBottom: 6 },
-  emptyText: { fontSize: 13, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary },
-  shakeMenu: {
-    position: "absolute",
-    left: 16,
-    right: 16,
-    zIndex: 100,
-    backgroundColor: LYTE_COLORS.surfaceElevated,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: LYTE_COLORS.electricBlueLight,
-    padding: 16,
-  },
-  shakeTitle: { fontSize: 11, fontFamily: "Inter_500Medium", color: LYTE_COLORS.electricBlue, letterSpacing: 2, textTransform: "uppercase", marginBottom: 6 },
-  shakeStatusText: { fontSize: 11, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary, marginBottom: 10 },
-  shakeActions: { flexDirection: "row", gap: 6, flexWrap: "wrap" },
-  shakeAction: { flex: 1, minWidth: 56, alignItems: "center", gap: 5, paddingVertical: 10, borderRadius: 8, backgroundColor: LYTE_COLORS.electricBlueDim },
-  shakeActionText: { fontSize: 9, fontFamily: "Inter_500Medium", color: LYTE_COLORS.textSecondary },
-});
+function makeStyles(c: ReturnType<typeof useColors>) {
+  return StyleSheet.create({
+    container: { flex: 1 },
+    headerGradient: { position: "absolute", top: 0, left: 0, right: 0 },
+    scroll: { flex: 1 },
+    header: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 20 },
+    eyebrow: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: LYTE_COLORS.electricBlue, marginBottom: 4 },
+    headerTitle: { fontSize: 28, fontFamily: "Inter_600SemiBold", color: c.textPrimary },
+    headerBadges: { gap: 6, alignItems: "flex-end" },
+    badge: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20, borderWidth: 1 },
+    badgeDot: { width: 6, height: 6, borderRadius: 3 },
+    badgeText: { fontSize: 10, fontFamily: "Inter_500Medium" },
+    cardList: { gap: 8 },
+    card: { borderRadius: 12, borderWidth: 1, backgroundColor: c.surface, overflow: "hidden" },
+    cardHeader: { flexDirection: "row", alignItems: "flex-start", padding: 14, gap: 10 },
+    sevDot: { width: 8, height: 8, borderRadius: 4, marginTop: 5, shadowOffset: { width: 0, height: 0 } },
+    cardMain: { flex: 1, gap: 6 },
+    cardTitle: { fontSize: 13, fontFamily: "Inter_500Medium", lineHeight: 18 },
+    cardMeta: { flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" },
+    sevBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, borderWidth: 1 },
+    sevText: { fontSize: 8, fontFamily: "Inter_600SemiBold", letterSpacing: 0.5 },
+    metaDot: { color: c.textMuted, fontSize: 10 },
+    metaText: { fontSize: 10, fontFamily: "Inter_400Regular", color: c.textSecondary },
+    cardTime: { fontSize: 10, fontFamily: "Inter_400Regular", color: c.textTertiary },
+    cardActions: { flexDirection: "row", gap: 6, padding: 12, borderTopWidth: 1, borderTopColor: c.border },
+    actionBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5, paddingVertical: 8, borderRadius: 8, borderWidth: 1 },
+    actionText: { fontSize: 11, fontFamily: "Inter_500Medium" },
+    emptyState: { alignItems: "center", paddingTop: 80 },
+    emptyIcon: { fontSize: 40, marginBottom: 12 },
+    emptyTitle: { fontSize: 18, fontFamily: "Inter_600SemiBold", color: c.textPrimary, marginBottom: 6 },
+    emptyText: { fontSize: 13, fontFamily: "Inter_400Regular", color: c.textSecondary },
+    shakeMenu: {
+      position: "absolute",
+      left: 16,
+      right: 16,
+      zIndex: 100,
+      backgroundColor: c.surfaceElevated,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: LYTE_COLORS.electricBlueLight,
+      padding: 16,
+    },
+    shakeTitle: { fontSize: 11, fontFamily: "Inter_500Medium", color: LYTE_COLORS.electricBlue, letterSpacing: 2, textTransform: "uppercase", marginBottom: 6 },
+    shakeStatusText: { fontSize: 11, fontFamily: "Inter_400Regular", color: c.textSecondary, marginBottom: 10 },
+    shakeActions: { flexDirection: "row", gap: 6, flexWrap: "wrap" },
+    shakeAction: { flex: 1, minWidth: 56, alignItems: "center", gap: 5, paddingVertical: 10, borderRadius: 8, backgroundColor: LYTE_COLORS.electricBlueDim },
+    shakeActionText: { fontSize: 9, fontFamily: "Inter_500Medium", color: c.textSecondary },
+  });
+}

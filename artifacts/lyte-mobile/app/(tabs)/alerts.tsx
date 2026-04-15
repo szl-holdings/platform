@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useMemo } from "react";
 import {
   Platform,
   Pressable,
@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LYTE_COLORS } from "@/constants/colors";
+import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
 import { useLyte, LyteAction } from "@/context/LyteContext";
 
@@ -56,14 +57,18 @@ async function updateAction(
   }
 }
 
+type StylesType = ReturnType<typeof makeStyles>;
+
 function AlertCard({
   action,
   onUpdate,
   authHeaders,
+  styles,
 }: {
   action: LyteAction;
   onUpdate: (state: string) => void;
   authHeaders: Record<string, string>;
+  styles: StylesType;
 }) {
   const color = getPriorityColor(action.priority ?? action.urgency);
   const [loading, setLoading] = useState<string | null>(null);
@@ -113,7 +118,7 @@ function AlertCard({
       <View style={styles.alertMeta}>
         {action.assignedTo && (
           <View style={styles.assignee}>
-            <Feather name="user" size={10} color={LYTE_COLORS.textTertiary} />
+            <Feather name="user" size={10} color={styles.assigneeText.color as string} />
             <Text style={styles.assigneeText}>{action.assignedTo}</Text>
           </View>
         )}
@@ -165,6 +170,8 @@ const ON_CALL_SCHEDULE: Array<{ name: string; role: string; window: string; stat
 
 export default function AlertsScreen() {
   const insets = useSafeAreaInsets();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { buildHeaders } = useAuth();
   const { actions, reload } = useLyte();
   const [refreshing, setRefreshing] = useState(false);
@@ -191,7 +198,7 @@ export default function AlertsScreen() {
   }, [reload]);
 
   return (
-    <View style={[styles.container, { backgroundColor: LYTE_COLORS.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient
         colors={["rgba(255,59,92,0.04)", "transparent"]}
         style={[styles.headerGradient, { height: topPad + 120 }]}
@@ -217,7 +224,7 @@ export default function AlertsScreen() {
             <Text style={styles.summaryLabel}>High</Text>
           </View>
           <View style={styles.summaryCard}>
-            <Text style={[styles.summaryValue, { color: LYTE_COLORS.textPrimary }]}>{activeActions.length}</Text>
+            <Text style={[styles.summaryValue, { color: colors.textPrimary }]}>{activeActions.length}</Text>
             <Text style={styles.summaryLabel}>Total Active</Text>
           </View>
           <View style={styles.summaryCard}>
@@ -229,13 +236,13 @@ export default function AlertsScreen() {
         <Text style={styles.sectionLabel}>ON-CALL SCHEDULE</Text>
         <View style={styles.onCallList}>
           {ON_CALL_SCHEDULE.length === 0 ? (
-            <View style={[styles.onCallCard, { borderColor: LYTE_COLORS.border }]}>
-              <Text style={{ color: LYTE_COLORS.textTertiary, fontSize: 11, fontFamily: "Inter_400Regular" }}>
+            <View style={[styles.onCallCard, { borderColor: colors.border }]}>
+              <Text style={{ color: colors.textTertiary, fontSize: 11, fontFamily: "Inter_400Regular" }}>
                 On-call schedule not configured
               </Text>
             </View>
           ) : ON_CALL_SCHEDULE.map((person, i) => (
-            <View key={i} style={[styles.onCallCard, { borderColor: person.status === "active" ? LYTE_COLORS.neonGreenLight : LYTE_COLORS.border }]}>
+            <View key={i} style={[styles.onCallCard, { borderColor: person.status === "active" ? LYTE_COLORS.neonGreenLight : colors.border }]}>
               <View style={[styles.onCallDot, {
                 backgroundColor: person.status === "active" ? LYTE_COLORS.neonGreen : person.status === "standby" ? LYTE_COLORS.medium : LYTE_COLORS.low
               }]} />
@@ -244,9 +251,9 @@ export default function AlertsScreen() {
                 <Text style={styles.onCallRole}>{person.role} · {person.window}</Text>
               </View>
               <View style={[styles.onCallStatus, {
-                backgroundColor: person.status === "active" ? LYTE_COLORS.neonGreenDim : LYTE_COLORS.surfaceElevated
+                backgroundColor: person.status === "active" ? LYTE_COLORS.neonGreenDim : colors.surfaceElevated
               }]}>
-                <Text style={[styles.onCallStatusText, { color: person.status === "active" ? LYTE_COLORS.neonGreen : LYTE_COLORS.textTertiary }]}>
+                <Text style={[styles.onCallStatusText, { color: person.status === "active" ? LYTE_COLORS.neonGreen : colors.textTertiary }]}>
                   {person.status}
                 </Text>
               </View>
@@ -271,6 +278,7 @@ export default function AlertsScreen() {
                 onUpdate={(state) => {
                   setLocalOverrides(prev => ({ ...prev, [a.id]: state }));
                 }}
+                styles={styles}
               />
             ))}
           </View>
@@ -280,50 +288,52 @@ export default function AlertsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  headerGradient: { position: "absolute", top: 0, left: 0, right: 0 },
-  scroll: { flex: 1 },
-  header: { marginBottom: 20 },
-  eyebrow: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: LYTE_COLORS.critical, marginBottom: 4 },
-  headerTitle: { fontSize: 28, fontFamily: "Inter_600SemiBold", color: LYTE_COLORS.textPrimary },
-  summaryRow: { flexDirection: "row", gap: 8, marginBottom: 24 },
-  summaryCard: { flex: 1, backgroundColor: LYTE_COLORS.surface, borderRadius: 10, borderWidth: 1, borderColor: LYTE_COLORS.border, padding: 12, alignItems: "center" },
-  summaryValue: { fontSize: 22, fontFamily: "Inter_600SemiBold", marginBottom: 2 },
-  summaryLabel: { fontSize: 9, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textTertiary, letterSpacing: 0.5 },
-  sectionLabel: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: LYTE_COLORS.textTertiary, marginBottom: 10 },
-  onCallList: { gap: 6, marginBottom: 24 },
-  onCallCard: { flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: LYTE_COLORS.surface, borderRadius: 10, borderWidth: 1, padding: 12 },
-  onCallDot: { width: 8, height: 8, borderRadius: 4 },
-  onCallName: { fontSize: 13, fontFamily: "Inter_500Medium", color: LYTE_COLORS.textPrimary, marginBottom: 2 },
-  onCallRole: { fontSize: 10, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary },
-  onCallStatus: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
-  onCallStatusText: { fontSize: 9, fontFamily: "Inter_500Medium" },
-  alertList: { gap: 8 },
-  alertCard: { backgroundColor: LYTE_COLORS.surface, borderRadius: 12, borderWidth: 1, borderColor: LYTE_COLORS.border, padding: 14, gap: 8 },
-  alertTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  priorityBadge: { paddingHorizontal: 7, paddingVertical: 3, borderRadius: 4, borderWidth: 1 },
-  priorityText: { fontSize: 8, fontFamily: "Inter_600SemiBold", letterSpacing: 0.5 },
-  alertTime: { fontSize: 10, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textTertiary },
-  alertTitle: { fontSize: 13, fontFamily: "Inter_500Medium", color: LYTE_COLORS.textPrimary, lineHeight: 18 },
-  alertDesc: { fontSize: 11, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary, lineHeight: 16 },
-  alertMeta: { flexDirection: "row", alignItems: "center", gap: 8 },
-  assignee: { flexDirection: "row", alignItems: "center", gap: 4 },
-  assigneeText: { fontSize: 10, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textTertiary },
-  stateBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  stateText: { fontSize: 9, fontFamily: "Inter_500Medium" },
-  alertActions: { flexDirection: "row", gap: 6, marginTop: 4 },
-  actionBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4, paddingVertical: 7, borderRadius: 8, borderWidth: 1 },
-  actionText: { fontSize: 10, fontFamily: "Inter_500Medium" },
-  timelineSection: { borderTopWidth: 1, borderTopColor: LYTE_COLORS.border, paddingTop: 8, gap: 8 },
-  timelineHeader: { fontSize: 8, fontFamily: "Inter_500Medium", color: LYTE_COLORS.textTertiary, letterSpacing: 1.5 },
-  timelineRow: { flexDirection: "row", gap: 8, alignItems: "flex-start" },
-  timelineDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: LYTE_COLORS.electricBlue, marginTop: 4 },
-  timelineActor: { fontSize: 11, fontFamily: "Inter_500Medium", color: LYTE_COLORS.textPrimary },
-  timelineNotes: { fontSize: 10, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary },
-  timelineTime: { fontSize: 9, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textTertiary },
-  empty: { paddingTop: 40, alignItems: "center" },
-  emptyIcon: { fontSize: 32, marginBottom: 10 },
-  emptyTitle: { fontSize: 16, fontFamily: "Inter_500Medium", color: LYTE_COLORS.textPrimary, marginBottom: 4 },
-  emptyText: { fontSize: 12, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textSecondary },
-});
+function makeStyles(c: ReturnType<typeof useColors>) {
+  return StyleSheet.create({
+    container: { flex: 1 },
+    headerGradient: { position: "absolute", top: 0, left: 0, right: 0 },
+    scroll: { flex: 1 },
+    header: { marginBottom: 20 },
+    eyebrow: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: LYTE_COLORS.critical, marginBottom: 4 },
+    headerTitle: { fontSize: 28, fontFamily: "Inter_600SemiBold", color: c.textPrimary },
+    summaryRow: { flexDirection: "row", gap: 8, marginBottom: 24 },
+    summaryCard: { flex: 1, backgroundColor: c.surface, borderRadius: 10, borderWidth: 1, borderColor: c.border, padding: 12, alignItems: "center" },
+    summaryValue: { fontSize: 22, fontFamily: "Inter_600SemiBold", marginBottom: 2 },
+    summaryLabel: { fontSize: 9, fontFamily: "Inter_400Regular", color: c.textTertiary, letterSpacing: 0.5 },
+    sectionLabel: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, color: c.textTertiary, marginBottom: 10 },
+    onCallList: { gap: 6, marginBottom: 24 },
+    onCallCard: { flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: c.surface, borderRadius: 10, borderWidth: 1, padding: 12 },
+    onCallDot: { width: 8, height: 8, borderRadius: 4 },
+    onCallName: { fontSize: 13, fontFamily: "Inter_500Medium", color: c.textPrimary, marginBottom: 2 },
+    onCallRole: { fontSize: 10, fontFamily: "Inter_400Regular", color: c.textSecondary },
+    onCallStatus: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+    onCallStatusText: { fontSize: 9, fontFamily: "Inter_500Medium" },
+    alertList: { gap: 8 },
+    alertCard: { backgroundColor: c.surface, borderRadius: 12, borderWidth: 1, borderColor: c.border, padding: 14, gap: 8 },
+    alertTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+    priorityBadge: { paddingHorizontal: 7, paddingVertical: 3, borderRadius: 4, borderWidth: 1 },
+    priorityText: { fontSize: 8, fontFamily: "Inter_600SemiBold", letterSpacing: 0.5 },
+    alertTime: { fontSize: 10, fontFamily: "Inter_400Regular", color: c.textTertiary },
+    alertTitle: { fontSize: 13, fontFamily: "Inter_500Medium", color: c.textPrimary, lineHeight: 18 },
+    alertDesc: { fontSize: 11, fontFamily: "Inter_400Regular", color: c.textSecondary, lineHeight: 16 },
+    alertMeta: { flexDirection: "row", alignItems: "center", gap: 8 },
+    assignee: { flexDirection: "row", alignItems: "center", gap: 4 },
+    assigneeText: { fontSize: 10, fontFamily: "Inter_400Regular", color: c.textTertiary },
+    stateBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+    stateText: { fontSize: 9, fontFamily: "Inter_500Medium" },
+    alertActions: { flexDirection: "row", gap: 6, marginTop: 4 },
+    actionBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4, paddingVertical: 7, borderRadius: 8, borderWidth: 1 },
+    actionText: { fontSize: 10, fontFamily: "Inter_500Medium" },
+    timelineSection: { borderTopWidth: 1, borderTopColor: c.border, paddingTop: 8, gap: 8 },
+    timelineHeader: { fontSize: 8, fontFamily: "Inter_500Medium", color: c.textTertiary, letterSpacing: 1.5 },
+    timelineRow: { flexDirection: "row", gap: 8, alignItems: "flex-start" },
+    timelineDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: LYTE_COLORS.electricBlue, marginTop: 4 },
+    timelineActor: { fontSize: 11, fontFamily: "Inter_500Medium", color: c.textPrimary },
+    timelineNotes: { fontSize: 10, fontFamily: "Inter_400Regular", color: c.textSecondary },
+    timelineTime: { fontSize: 9, fontFamily: "Inter_400Regular", color: c.textTertiary },
+    empty: { paddingTop: 40, alignItems: "center" },
+    emptyIcon: { fontSize: 32, marginBottom: 10 },
+    emptyTitle: { fontSize: 16, fontFamily: "Inter_500Medium", color: c.textPrimary, marginBottom: 4 },
+    emptyText: { fontSize: 12, fontFamily: "Inter_400Regular", color: c.textSecondary },
+  });
+}

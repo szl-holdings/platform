@@ -13,7 +13,7 @@ import {
 import { setBaseUrl, setAuthTokenGetter } from "@szl-holdings/api-client-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as SecureStore from "expo-secure-store";
-import { Platform } from "react-native";
+import { Platform, View } from "react-native";
 import { AUTH_TOKEN_KEY } from "@/context/AuthContext";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -23,7 +23,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary, NotificationProvider } from "@szl-holdings/mobile-shared";
+import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import { BiometricLockScreen } from "@/components/BiometricLockScreen";
 import { AuthProvider } from "@/context/AuthContext";
@@ -128,9 +128,14 @@ export default function RootLayout() {
             <NotificationProvider apiBase={AEGIS_API_BASE} getAuthToken={getAegisAuthToken}>
               <BiometricProvider>
                 <GestureHandlerRootView style={{ flex: 1 }}>
-                  <KeyboardProvider>
-                    <AppShell />
-                  </KeyboardProvider>
+                  <ThemeProvider defaultMode="dark" storageKey="aegis-theme-mode">
+                    <KeyboardProvider>
+                      <View style={{ flex: 1 }}>
+                        <AppShell />
+                        <OfflineBanner accentColor="#ef4444" />
+                      </View>
+                    </KeyboardProvider>
+                  </ThemeProvider>
                 </GestureHandlerRootView>
               </BiometricProvider>
             </NotificationProvider>

@@ -1,5 +1,7 @@
+import { useTheme } from "@szl-holdings/mobile-shared";
 import colors from "@/constants/colors";
 
 export function useColors() {
-  return { ...colors.dark, radius: colors.radius };
+  const { isDark } = useTheme();
+  return { ...(isDark ? colors.dark : colors.light), radius: colors.radius };
 }

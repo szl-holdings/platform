@@ -32,7 +32,7 @@ const BiometricLockContext = createContext<BiometricLockContextValue>({
   setBiometricPreference: async () => {},
 });
 
-async function promptBiometric(reason: string): Promise<boolean> {
+export async function promptBiometric(reason: string): Promise<boolean> {
   if (Platform.OS === "web") return true;
   const result = await LocalAuthentication.authenticateAsync({
     promptMessage: reason,
