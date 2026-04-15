@@ -31,6 +31,10 @@ const colors = {
     blueDim: "rgba(59,130,246,0.10)",
     surface: "#0D1018",
     surfaceElevated: "#141820",
+    violet: "#8b5cf6",
+    cream: "#E8DCC8",
+    creamDim: "rgba(232,220,200,0.45)",
+    borderSubtle: "rgba(232,234,240,0.06)",
   },
   light: {
     background: "#F8F9FB",
@@ -64,6 +68,10 @@ const colors = {
     blueDim: "rgba(37,99,235,0.10)",
     surface: "#FFFFFF",
     surfaceElevated: "#F8F9FB",
+    violet: "#7C3AED",
+    cream: "#5B4328",
+    creamDim: "rgba(91,67,40,0.55)",
+    borderSubtle: "rgba(17,24,39,0.06)",
   },
   radius: 8,
 };

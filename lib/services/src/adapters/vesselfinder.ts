@@ -78,7 +78,7 @@ export class VesselFinderAdapter extends ServiceAdapter {
       lon: Number(ais["LONGITUDE"] ?? 0), speed: Number(ais["SPEED"] ?? 0),
       course: Number(ais["COURSE"] ?? 0), heading: Number(ais["HEADING"] ?? 511),
       status: statusNum, statusText: STATUS_TEXTS[statusNum] ?? "Unknown",
-      flag: String(ais["FLAG"] ?? ""), shipType: Number(ais["TYPE"] ?? 0),
+      flag: String(ais["FLAG"] ?? ""), shipType: String(ais["TYPE"] ?? ""),
       typeText: String(ais["TYPENAME"] ?? ""), destination: String(ais["DESTINATION"] ?? ""),
       eta: String(ais["ETA"] ?? ""), received: String(ais["TIMESTAMP"] ?? ""),
     };

@@ -1,4 +1,4 @@
-export type ProviderMode = "mock" | "live";
+export type ProviderMode = "mock" | "live" | "seed";
 
 export interface DataProvider<T> {
   mode: ProviderMode;

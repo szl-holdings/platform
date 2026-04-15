@@ -18,7 +18,7 @@ import { persistQueryClient } from "@tanstack/query-persist-client-core";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { Platform, View } from "react-native";
-import { AUTH_TOKEN_KEY, useAuth } from "@/context/AuthContext";
+import { AUTH_TOKEN_KEY, AuthProvider, useAuth } from "@/context/AuthContext";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
@@ -29,7 +29,6 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab, setUploadAuthTokenGetter } from "@szl-holdings/mobile-shared";
 import { ErrorFallback } from "@/components/ErrorFallback";
-import { AuthProvider, AUTH_TOKEN_KEY } from "@/context/AuthContext";
 import { PushNotificationBootstrap } from "@/components/PushNotificationBootstrap";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 

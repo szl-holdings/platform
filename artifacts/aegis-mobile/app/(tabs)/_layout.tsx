@@ -22,9 +22,9 @@ const aegisCommands: SpotlightCommand[] = [
   { id: "nav-digest", label: "Digest", description: "Security briefings & summaries", icon: "📄", group: "Navigate", action: () => router.push("/(tabs)/digest") },
   { id: "nav-profile", label: "Profile", description: "Account & settings", icon: "👤", group: "Navigate", action: () => router.push("/(tabs)/profile") },
   { id: "action-new-incident", label: "New Incident", description: "Create a new security incident", icon: "🚨", group: "Quick Actions", isQuickAction: true, action: () => router.push("/(tabs)/incidents") },
-  { id: "action-mitre", label: "View MITRE ATT&CK", description: "Browse the attack framework matrix", icon: "🎯", group: "Quick Actions", isQuickAction: true, action: () => Linking.openURL("https://attack.mitre.org") },
-  { id: "cross-lyte", label: "Open Lyte", description: "Business Observability Command", icon: "⚡", group: "Ecosystem", keywords: ["app", "switch"], action: () => Linking.openURL("lyte://") },
-  { id: "cross-vessels", label: "Open Vessels", description: "Maritime Command Intelligence", icon: "⚓", group: "Ecosystem", keywords: ["app", "switch"], action: () => Linking.openURL("vessels://") },
+  { id: "action-mitre", label: "View MITRE ATT&CK", description: "Browse the attack framework matrix", icon: "🎯", group: "Quick Actions", isQuickAction: true, action: () => { void Linking.openURL("https://attack.mitre.org"); } },
+  { id: "cross-lyte", label: "Open Lyte", description: "Business Observability Command", icon: "⚡", group: "Ecosystem", keywords: ["app", "switch"], action: () => { void Linking.openURL("lyte://"); } },
+  { id: "cross-vessels", label: "Open Vessels", description: "Maritime Command Intelligence", icon: "⚓", group: "Ecosystem", keywords: ["app", "switch"], action: () => { void Linking.openURL("vessels://"); } },
 ];
 
 function ProfileButton({ color }: { color: string }) {

@@ -527,7 +527,7 @@ export function createBaselineWebActions(
       icon: "?",
       group: "Actions",
       keywords: ["help", "docs", "documentation", "support"],
-      action: () => window.open(helpUrl, "_blank"),
+      action: () => { window.open(helpUrl, "_blank"); },
     });
   }
   return items;

@@ -1,4 +1,8 @@
-export * from "./analytics/index";
+export { TimeSeriesChart, type TimeSeriesChartProps } from "./analytics/index";
+export { FunnelChart, type FunnelChartProps } from "./analytics/index";
+export { CohortMatrix, type CohortMatrixProps } from "./analytics/index";
+export { AnomalyFeed, type AnomalyFeedProps } from "./analytics/index";
+export { MetricsDashboard, MetricSummaryRow, type MetricsDashboardProps, type MetricSummaryRowProps, type DashboardWidgetConfig, type DashboardWidgetType } from "./analytics/index";
 export * from "./pulse";
 export * from "./tokens";
 export * from "./animations";

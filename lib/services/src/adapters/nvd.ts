@@ -152,7 +152,7 @@ export class NVDAdapter extends ServiceAdapter {
           cvssV3Score: metrics?.cvssData?.baseScore ?? null,
           cvssV3Severity: metrics?.cvssData?.baseSeverity ?? null,
           cvssVector: metrics?.cvssData?.vectorString ?? null,
-          weaknesses: (cve.weaknesses ?? []).flatMap((w) => w.description?.map((d) => d.value) ?? []),
+          weaknesses: (cve.weaknesses ?? []).flatMap((w) => w.description?.map((d) => d.value).filter((v): v is string => v != null) ?? []),
           references: (cve.references ?? []).map((r) => ({ url: r.url ?? "", source: r.source ?? "" })),
           exploitabilityScore: metrics?.exploitabilityScore ?? null,
           impactScore: metrics?.impactScore ?? null,

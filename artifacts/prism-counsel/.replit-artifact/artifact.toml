@@ -1,31 +1,32 @@
 kind = "web"
-previewPath = "/prism-counsel/"
-title = "PRISM Counsel — Legal Matter Command"
-version = "1.0.0"
-id = "artifacts/prism-counsel"
-router = "path"
+  previewPath = "/prism-counsel/"
+  title = "PRISM Counsel — Legal Matter Command"
+  version = "1.0.0"
+  id = "artifacts/prism-counsel"
+  router = "path"
 
-[[integratedSkills]]
-name = "react-vite"
-version = "1.0.0"
+  [[integratedSkills]]
+  name = "react-vite"
+  version = "1.0.0"
 
-[[services]]
-name = "web"
-paths = [ "/prism-counsel/" ]
-localPort = 26500
+  [[services]]
+  name = "web"
+  paths = [ "/prism-counsel/" ]
+  localPort = 26500
 
-[services.development]
-run = "pnpm --filter @workspace/prism-counsel run dev"
+  [services.development]
+  run = "bash -c 'cd /home/runner/workspace/artifacts/prism-counsel && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
 
-[services.production]
-build = [ "pnpm", "--filter", "@workspace/prism-counsel", "run", "build" ]
-publicDir = "artifacts/prism-counsel/dist/public"
-serve = "static"
+  [services.production]
+  build = [ "pnpm", "--filter", "@workspace/prism-counsel", "run", "build" ]
+  publicDir = "artifacts/prism-counsel/dist/public"
+  serve = "static"
 
-[[services.production.rewrites]]
-from = "/*"
-to = "/index.html"
+  [[services.production.rewrites]]
+  from = "/*"
+  to = "/index.html"
 
-[services.env]
-PORT = "26500"
-BASE_PATH = "/prism-counsel/"
+  [services.env]
+  PORT = "26500"
+  BASE_PATH = "/prism-counsel/"
+  

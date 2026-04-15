@@ -256,7 +256,6 @@ export function useFileUpload(options: FileUploadOptions = {}) {
             );
           }
         }
-
         updateProgress(88);
         setStatus("registering");
 

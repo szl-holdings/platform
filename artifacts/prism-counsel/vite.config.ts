@@ -54,12 +54,31 @@ function buildWorkspaceAliases(): AliasEntry[] {
 
 const workspaceAliases = buildWorkspaceAliases();
 
-export default defineConfig({
+
+  function healthCheckPlugin() {
+    return {
+      name: "health-check",
+      apply: "serve",
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          if (req.url === "/" || req.url === "") {
+            res.writeHead(200, { "Content-Type": "text/plain" });
+            res.end("ok");
+            return;
+          }
+          next();
+        });
+      },
+    };
+  }
+
+  export default defineConfig({
   base: basePath,
   plugins: [
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
+    healthCheckPlugin(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [

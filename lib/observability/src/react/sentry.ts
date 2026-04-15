@@ -28,7 +28,7 @@ export function initSentry(config: SentryConfig) {
   if (isSentryInitialized() || typeof window === "undefined") return;
   markSentryInitialized();
 
-  const env = import.meta.env;
+  const env = (import.meta as unknown as { env?: Record<string, string> }).env ?? {};
   const dsn = config.dsn || env.VITE_SENTRY_DSN;
   if (!dsn) {
     console.debug("[Sentry] DSN not configured — error tracking disabled.");

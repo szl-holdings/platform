@@ -134,7 +134,7 @@ export class FredAdapter extends ServiceAdapter {
     params: { limit?: number; sortOrder?: "asc" | "desc"; observationStart?: string } = {}
   ): Promise<FredObservation[]> {
     if (this.isDemoMode) {
-      const snap = MOCK_ECONOMIC_SNAPSHOT as Record<string, FredObservation | null | string>;
+      const snap = MOCK_ECONOMIC_SNAPSHOT as unknown as Record<string, FredObservation | null | string>;
       const key = Object.entries(KEY_SERIES).find(([, v]) => v.id === seriesId)?.[0];
       const obs = key ? (snap[key] as FredObservation | null) : null;
       return obs ? [obs] : [];
