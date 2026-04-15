@@ -1,5 +1,6 @@
 import { logger } from "./logger";
 import { MetricTimeSeriesSimulator, ThreatFeedSimulator, seededRng } from "@szl-holdings/observability";
+import { simulationEngine } from "./simulation-engine.js";
 
 const DEMO_MODE = process.env["DEMO_MODE"] === "true" || process.env["DEMO_MODE"] === "1";
 
@@ -292,4 +293,50 @@ export const demoFirestormSignals: DemoSignal[] = (() => {
 
 if (DEMO_MODE) {
   logger.info({ signalCount: demoLyteSignals.length, actionCount: demoLyteActions.length, workflowCount: demoLyteWorkflows.length, vesselEventCount: demoVesselEvents.length, inquiryCount: demoTerraInquiries.length, firestormSignalCount: demoFirestormSignals.length }, "Demo mode: seed data loaded");
+}
+
+// ---------------------------------------------------------------------------
+// Simulation-aware data accessors
+//
+// These functions return time-evolving data from the simulation engine when
+// DEMO_MODE is active, blended with the static seed data above.
+// ---------------------------------------------------------------------------
+
+export function getLyteSignals(): DemoSignal[] {
+  if (!DEMO_MODE) return demoLyteSignals;
+  try {
+    const simSignals = simulationEngine.getLyteSignals(20).map((s, i) => ({
+      id: 9000 + i,
+      source: s.source,
+      sourceType: s.sourceType,
+      severity: s.severity as DemoSignal["severity"],
+      title: s.title,
+      status: s.status as DemoSignal["status"],
+      receivedAt: s.receivedAt,
+      domain: "lyte" as const,
+    }));
+    return [...simSignals, ...demoLyteSignals].slice(0, 30);
+  } catch {
+    return demoLyteSignals;
+  }
+}
+
+export function getVesselEvents(): DemoVesselEvent[] {
+  if (!DEMO_MODE) return demoVesselEvents;
+  try {
+    const simEvents = simulationEngine.getVesselEvents(15).map((e, i) => ({
+      id: `SIM-VEV-${String(i + 1).padStart(3, "0")}`,
+      vesselId: 0,
+      vesselName: e.vesselName,
+      type: (e.type === "ais_dark" ? "exception" : e.type) as DemoVesselEvent["type"],
+      severity: e.severity as DemoVesselEvent["severity"],
+      title: e.title,
+      description: e.description,
+      timestamp: e.timestamp,
+      impactUSD: e.impactUsd,
+    }));
+    return [...simEvents, ...demoVesselEvents].slice(0, 20);
+  } catch {
+    return demoVesselEvents;
+  }
 }

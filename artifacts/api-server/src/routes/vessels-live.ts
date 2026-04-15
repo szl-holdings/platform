@@ -2,6 +2,9 @@ import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
+import { simulationEngine } from "../lib/simulation-engine.js";
+
+const DEMO_MODE = process.env["DEMO_MODE"] === "true" || process.env["DEMO_MODE"] === "1";
 
 const router: IRouter = Router();
 
@@ -402,8 +405,32 @@ router.get("/vessels/live/fleet-summary", vesLiveLimit, authMiddleware({ require
       }
     });
 
+    let simSummary: Record<string, any> = {};
+    if (DEMO_MODE) {
+      try {
+        const simVessels = simulationEngine.getVessels();
+        const simEvents = simulationEngine.getVesselEvents(10);
+        const darkVessels = simEvents.filter(e => e.type === "ais_dark");
+        const criticalEvents = simEvents.filter(e => e.severity === "critical" || e.severity === "high");
+        const totalImpact = simEvents.reduce((s, e) => s + (e.impactUsd ?? 0), 0);
+
+        simSummary = {
+          simulationActive: true,
+          simulationVessels: simVessels.length,
+          simulationVesselsUnderway: simVessels.filter(v => v.status === "at_sea").length,
+          simulationVesselsAnchored: simVessels.filter(v => v.status === "anchored").length,
+          simulationDarkVessels: darkVessels.length,
+          simulationCriticalEvents: criticalEvents.length,
+          simulationFinancialImpactUSD: +totalImpact.toFixed(2),
+          simulationLastTick: new Date().toISOString(),
+          crossDomainAlerts: simulationEngine.getCorrelationEvents(5),
+        };
+      } catch { /* non-fatal */ }
+    }
+
     sendSuccess(res, {
       ...result.data,
+      ...simSummary,
       cacheAgeSeconds: result.cacheAge,
       isStale: result.isStale,
       fetchedAt: new Date().toISOString(),

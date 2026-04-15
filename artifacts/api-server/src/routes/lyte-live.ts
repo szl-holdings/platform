@@ -4,6 +4,9 @@ import { authMiddleware } from "../middlewares/auth";
 import { db } from "@szl-holdings/db";
 import { sql } from "drizzle-orm";
 import os from "os";
+import { simulationEngine } from "../lib/simulation-engine.js";
+
+const DEMO_MODE = process.env["DEMO_MODE"] === "true" || process.env["DEMO_MODE"] === "1";
 
 const router: IRouter = Router();
 
@@ -403,12 +406,31 @@ router.get("/lyte/live/incidents", authMiddleware({ required: false }), async (_
       });
     }
 
+    if (DEMO_MODE) {
+      try {
+        const simIncidents = simulationEngine.getLyteSignals(8)
+          .filter(s => s.severity === "critical" || s.severity === "high")
+          .map((s, i) => ({
+            id: `sim-${i}-${Date.now()}`,
+            severity: s.severity,
+            type: s.sourceType,
+            title: s.title,
+            description: `Simulation: ${s.source} detected anomaly at ${new Date(s.receivedAt).toLocaleTimeString()}`,
+            detectedAt: s.receivedAt,
+            status: s.status === "new" ? "active" : s.status,
+            source: "simulation-engine",
+          }));
+        incidents.push(...simIncidents);
+      } catch { /* fallback to process-only incidents */ }
+    }
+
     sendSuccess(res, {
-      source: "Lyte Self-Monitoring — Process Introspection",
+      source: DEMO_MODE ? "Lyte Command Center — Simulation Engine + Process Telemetry" : "Lyte Self-Monitoring — Process Introspection",
       incidents,
       count: incidents.length,
       allClear: incidents.filter(i => i.status === "active").length === 0,
       liveData: true,
+      simulationActive: DEMO_MODE,
       fetchedAt: new Date().toISOString(),
     });
   } catch (err) { handleRouteError(res, err, "Failed to fetch live incidents"); }
