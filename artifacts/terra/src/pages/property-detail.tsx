@@ -609,6 +609,54 @@ export default function PropertyDetailPage() {
             </motion.div>
           </div>
 
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}
+            className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)" }}>
+            <div className="flex items-center gap-2 mb-4">
+              <FileText className="w-4 h-4" style={{ color: "#b8943c" }} />
+              <h3 className="font-bold text-white text-sm">Lease Abstraction</h3>
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ color: "#b8943c", background: "rgba(184,148,60,0.08)", border: "1px solid rgba(184,148,60,0.2)" }}>AI-Extracted</span>
+              <Link href="/lease-abstraction" className="ml-auto text-[10px] flex items-center gap-1" style={{ color: "rgba(255,255,255,0.3)" }}>
+                Full Module <Activity className="w-3 h-3" />
+              </Link>
+            </div>
+            {propertyTenants.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-[10px]">
+                  <thead>
+                    <tr>
+                      {["Tenant", "Suite", "Base Rent/Mo", "Lease Expiry", "Escalation", "AI Confidence"].map(h => (
+                        <th key={h} className="text-left pb-2 font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.2)" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {propertyTenants.map((tenant, i) => {
+                      const mockConfidence = 88 + (i * 4 % 12);
+                      const mockEscalation = ["3% annual", "2.5% annual", "CPI capped 3%"][i % 3];
+                      const confColor = mockConfidence >= 90 ? "#40856a" : "#b8943c";
+                      return (
+                        <tr key={tenant.id} className="border-t" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+                          <td className="py-2 font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>{tenant.name}</td>
+                          <td className="py-2" style={{ color: "rgba(255,255,255,0.4)" }}>{tenant.unit}</td>
+                          <td className="py-2 font-mono font-bold" style={{ color: "#b8943c" }}>{formatCurrency(tenant.monthlyRent)}</td>
+                          <td className="py-2" style={{ color: new Date(tenant.leaseEnd) < new Date(Date.now() + 365 * 86400000) ? "#f59e0b" : "rgba(255,255,255,0.4)" }}>
+                            {new Date(tenant.leaseEnd).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                          </td>
+                          <td className="py-2" style={{ color: "rgba(255,255,255,0.4)" }}>{mockEscalation}</td>
+                          <td className="py-2">
+                            <span className="font-mono font-bold" style={{ color: confColor }}>{mockConfidence}%</span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-sm text-center py-4" style={{ color: "rgba(255,255,255,0.3)" }}>No lease documents abstracted — upload via Lease Abstraction module</p>
+            )}
+          </motion.div>
+
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
             className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <CommentThread entityType="property" entityId={property.id} title="Property Discussion" collapsible={false} />

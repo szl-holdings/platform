@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Building2, TrendingUp, TrendingDown, DollarSign, BarChart3, Activity, AlertTriangle, MapPin, ChevronRight, Layers, ArrowRight, Target, Percent } from "lucide-react";
-import { cn } from "@szl-holdings/shared-ui/utils";
+import { Link } from "wouter";
+import { Building2, TrendingUp, TrendingDown, DollarSign, BarChart3, Activity, AlertTriangle, Layers, ArrowRight, Target, Percent } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell } from "recharts";
 
 interface PropertyAsset {
@@ -213,6 +213,38 @@ export default function PortfolioDashboardPage() {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+
+          {/* Construction Monitor */}
+          <div className="rounded-xl border p-3" style={{ borderColor: "rgba(200,160,96,0.1)", background: "rgba(200,160,96,0.02)" }}>
+            <div className="flex items-center gap-1.5 mb-3">
+              <Target className="w-3 h-3" style={{ color: "#c8a060" }} />
+              <h3 className="text-[10px] font-bold" style={{ color: "#f4e8d0" }}>Construction Monitor</h3>
+              <span className="px-1.5 py-0.5 rounded text-[8px] font-semibold" style={{ color: "#34d399", background: "rgba(52,211,153,0.1)" }}>2 On Track</span>
+              <Link href="/construction-monitor" className="ml-auto text-[8px] flex items-center gap-0.5" style={{ color: "rgba(200,160,96,0.4)" }}>
+                View all <ArrowRight className="w-2.5 h-2.5" />
+              </Link>
+            </div>
+            <div className="space-y-2.5">
+              {[
+                { name: "The Meridian — Roof", budget: "$1.2M", spent: 78, status: "on-track", color: "#34d399" },
+                { name: "Navy Industrial — HVAC", budget: "$3.4M", spent: 45, status: "on-track", color: "#34d399" },
+                { name: "Corsair Plaza — Lobby", budget: "$840K", spent: 92, status: "at-risk", color: "#f59e0b" },
+              ].map(proj => (
+                <div key={proj.name}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[9px]" style={{ color: "rgba(244,232,208,0.6)" }}>{proj.name}</span>
+                    <span className="text-[8px] font-mono" style={{ color: "rgba(200,160,96,0.4)" }}>{proj.budget}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }}>
+                      <div className="h-full rounded-full" style={{ width: `${proj.spent}%`, background: proj.color }} />
+                    </div>
+                    <span className="text-[8px] font-mono w-7 text-right" style={{ color: proj.color }}>{proj.spent}%</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 

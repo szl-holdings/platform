@@ -83,6 +83,13 @@ const RentRoll = lazy(() => import("@/pages/rent-roll"));
 const TitleIntelligence = lazy(() => import("@/pages/title-intelligence"));
 const ConstructionCost = lazy(() => import("@/pages/construction-cost"));
 const SpatialWalkthrough = lazy(() => import("@/pages/spatial-walkthrough"));
+const LeaseAbstraction = lazy(() => import("@/pages/lease-abstraction"));
+const ProForma = lazy(() => import("@/pages/pro-forma"));
+const Exchange1031 = lazy(() => import("@/pages/exchange-1031"));
+const TaxAppeal = lazy(() => import("@/pages/tax-appeal"));
+const WaterfallCalculator = lazy(() => import("@/pages/waterfall-calculator"));
+const ConstructionMonitor = lazy(() => import("@/pages/construction-monitor"));
+const TenantScreening = lazy(() => import("@/pages/tenant-screening"));
 
 function PageLoader() {
   return (
@@ -157,6 +164,13 @@ function PrivateRouter() {
         <Route path="/title-intelligence" component={TitleIntelligence} />
         <Route path="/construction-cost" component={ConstructionCost} />
         <Route path="/spatial-walkthrough" component={SpatialWalkthrough} />
+        <Route path="/lease-abstraction" component={LeaseAbstraction} />
+        <Route path="/pro-forma" component={ProForma} />
+        <Route path="/exchange-1031" component={Exchange1031} />
+        <Route path="/tax-appeal" component={TaxAppeal} />
+        <Route path="/waterfall-calculator" component={WaterfallCalculator} />
+        <Route path="/construction-monitor" component={ConstructionMonitor} />
+        <Route path="/tenant-screening" component={TenantScreening} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

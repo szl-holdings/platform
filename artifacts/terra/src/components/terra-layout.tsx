@@ -9,7 +9,8 @@ import {
   BarChart3, Users, FileText, CheckSquare,
   Bell, Menu, X, Briefcase, Map, Globe, TrendingUp, BookOpen,
   Shield, Layers, Radio, Search, PieChart, PanelLeftClose, PanelLeftOpen,
-  Camera, Hammer, Box, DollarSign, Scale, Ruler, FileSearch
+  Camera, Hammer, Box, DollarSign, Scale, Ruler, FileSearch,
+  ClipboardList, TrendingDown, RefreshCw, Calculator, Percent, UserCheck, HardHat
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui";
 import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
@@ -65,10 +66,23 @@ const NAV_SECTIONS: SidebarNavSection[] = [
       { id: "computer-vision", href: "/computer-vision", label: "Computer Vision", icon: <Camera className="w-full h-full" /> },
       { id: "avm-engine", href: "/avm-engine", label: "AVM Engine", icon: <DollarSign className="w-full h-full" /> },
       { id: "zoning-intelligence", href: "/zoning-intelligence", label: "Zoning Intel", icon: <Scale className="w-full h-full" /> },
-      { id: "rent-roll", href: "/rent-roll", label: "Rent Roll", icon: <FileSearch className="w-full h-full" /> },
       { id: "title-intelligence", href: "/title-intelligence", label: "Title & Lien", icon: <Shield className="w-full h-full" /> },
       { id: "construction-cost", href: "/construction-cost", label: "Construction Cost", icon: <Hammer className="w-full h-full" /> },
       { id: "spatial-walkthrough", href: "/spatial-walkthrough", label: "Spatial Walkthrough", icon: <Box className="w-full h-full" /> },
+    ],
+  },
+  {
+    id: "operating-suite",
+    label: "Operating Suite",
+    items: [
+      { id: "lease-abstraction", href: "/lease-abstraction", label: "Lease Abstraction", icon: <ClipboardList className="w-full h-full" /> },
+      { id: "rent-roll", href: "/rent-roll", label: "Rent Roll", icon: <FileSearch className="w-full h-full" /> },
+      { id: "pro-forma", href: "/pro-forma", label: "Pro Forma Builder", icon: <Calculator className="w-full h-full" /> },
+      { id: "exchange-1031", href: "/exchange-1031", label: "1031 Exchange", icon: <RefreshCw className="w-full h-full" /> },
+      { id: "tax-appeal", href: "/tax-appeal", label: "Tax Appeal", icon: <TrendingDown className="w-full h-full" /> },
+      { id: "waterfall-calculator", href: "/waterfall-calculator", label: "Waterfall Calc", icon: <Layers className="w-full h-full" /> },
+      { id: "construction-monitor", href: "/construction-monitor", label: "Construction Monitor", icon: <HardHat className="w-full h-full" /> },
+      { id: "tenant-screening", href: "/tenant-screening", label: "Tenant Screening", icon: <UserCheck className="w-full h-full" /> },
     ],
   },
   {
