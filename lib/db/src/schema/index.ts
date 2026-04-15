@@ -103,3 +103,6 @@ export * from "./partner_portal";
 export * from "./reports";
 export * from "./change_events";
 export * from "./web_push";
+export * from "./audit_chain_events";
+export * from "./daily_briefings";
+export * from "./multiplayer_sessions";

@@ -113,6 +113,7 @@ const FinancialCompliancePage = lazy(() => import("@/pages/compliance/financial-
 const SoarPlaybooks = lazy(() => import("@/pages/soar-playbooks"));
 const StixTaxii = lazy(() => import("@/pages/stix-taxii"));
 const TradecraftEnginePage = lazy(() => import("@/pages/tradecraft-engine"));
+const AuditChainPage = lazy(() => import("@/pages/audit-chain"));
 
 // ─── CITADEL Crisis Command ───────────────────────────────────────────────────
 const CitadelWarRoom = lazy(() => import("@/pages/citadel-war-room"));
@@ -809,6 +810,7 @@ function AppRouter() {
         <Route path="/cr/vendor-risk" component={VendorRisk} />
         <Route path="/cr/milestones" component={MilestonesTrends} />
         <Route path="/cr/ai-insights" component={ReadinessAIInsights} />
+        <Route path="/audit-chain" component={AuditChainPage} />
         <Route path="/sacsayhuaman-shield" component={SacsayhuamanShield} />
         <Route path="/adversary-emulation" component={AdversaryEmulation} />
         <Route path="/agent-insights" component={AgentInsightsPage} />

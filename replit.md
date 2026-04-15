@@ -212,7 +212,6 @@ A new `/fund` route section adds the industry's first agentic fund operations pl
 
 All pages are auth-gated via `<RequireAuth>`. A "Fund Intel" dropdown menu was added to the main site navigation.
 
-<<<<<<< HEAD
 ## Mobile Fleet Stabilization (Task #529)
 - **lib/mobile-shared** (`@szl-holdings/mobile-shared`) — shared infrastructure for all 7 Expo mobile apps:
   - **BiometricProvider** + **BiometricLockScreen** — parameterized FaceID/TouchID with auto-lock after configurable timeout, SecureStore-backed preferences
@@ -227,7 +226,7 @@ All pages are auth-gated via `<RequireAuth>`. A "Fund Intel" dropdown menu was a
 - Push notification infrastructure standardized across all 7 apps via shared hooks
 - Query persistence (AsyncStorage) added to stephen-mobile (previously missing)
 - vessels-mobile crash fixed (EXPO_NO_TELEMETRY=1 + --clear flags)
-=======
+
 ## Nuro Mesh Graph Intelligence (Task #541)
 
 Production-grade graph capabilities and OSINT feed integration extending the Nuro Mesh AI engine:
@@ -270,7 +269,47 @@ In `callAgent()`, before prompt assembly: queries ontology for entities matching
 - `COURTLISTENER_API_TOKEN` — CourtListener API token (optional, increases rate limits)
 - `LEGAL_FEED_SEARCH_QUERIES` — JSON array of search terms for legal records feed
 - `AIS_FEED_ENABLED` / `STIX_FEED_ENABLED` / `SANCTIONS_FEED_ENABLED` / `LEGAL_FEED_ENABLED` — Feed on/off toggles (default: all enabled)
->>>>>>> 4cb15093 (feat(#541): Nuro Mesh graph intelligence + production OSINT feeds)
+
+## Strategic Ecosystem Gap Fill (Task #578)
+
+Seven new capabilities wired end-to-end with real backend services (not UI mockups):
+
+### 1. CORTEX Voice (`lib/shared-ui/src/cortex-voice.tsx`)
+- `defaultQueryHandler` now calls real `/api/cortex/query` endpoint (Nuro Mesh AI orchestrator)
+- Falls back gracefully to client-side response if API returns non-OK
+
+### 2. Morning Briefing Engine (`artifacts/api-server/src/routes/briefing.ts`)
+- `GET /api/briefing/today` — aggregates live domain signals (vessels AIS, terra distress properties, lyte health scores, portfolio NAV) into executive briefing; persists to `daily_briefings` table
+- `GET /api/briefing/history` — returns last 30 briefings from DB
+- DB table: `daily_briefings` (id, org_id, briefing_date, headline, executive_summary, signals JSONB, domain_scores JSONB, total_alerts, critical_count, high_count, overall_health, generated_at, is_published)
+
+### 3. Revenue Intelligence Fusion (`artifacts/api-server/src/routes/revenue-intelligence.ts`)
+- `GET /api/revenue-intelligence/summary` — aggregates live revenue streams: Stripe MRR, vessel voyage revenue (AIS + simulationEngine day-rate calculation), real estate portfolio value (Terra distress properties), SZL Holdings investment portfolio NAV
+- Returns real-time `portfolioNav`, `totalRevenue90d`, `totalMrr` per stream
+- DB table: `revenue_events` (id, org_id, stream_id, domain, amount, currency, event_type, event_date, metadata JSONB)
+
+### 4. What-If Simulation Engine (`artifacts/api-server/src/routes/simulation.ts`)
+- `POST /api/simulation/what-if` — accepts `variables` map (oil-price, interest-rate, threat-level, market-conditions, fx-usd deltas) and runs impact through `simulationEngine.run()` across all domains
+- Returns delta impacts per domain, overall health score, top risks
+
+### 5. Compliance & Audit Provenance Chain (`artifacts/api-server/src/routes/audit-chain.ts`)
+- `GET /api/audit-chain/events` — returns paginated audit events with SHA-256 hash chain from `audit_chain_events` table
+- `POST /api/audit-chain/verify` — verifies hash chain integrity across a range of events
+- DB table: `audit_chain_events` (id, org_id, event_type, actor_id, actor_display_name, resource_type, resource_id, action, payload JSONB, prev_hash, event_hash, created_at)
+
+### 6. White-Label Client Portals (`artifacts/api-server/src/routes/partner.ts`)
+- `GET /api/partner/portals` — returns partner portal configurations for the authenticated org
+- `POST /api/partner/portals` — creates new white-label portal entry
+- Frontend `portal-admin.tsx` calls real API with `DEMO_PORTALS` fallback for unauthenticated state
+
+### 7. Multiplayer Command Sessions (`artifacts/api-server/src/routes/multiplayer-sessions.ts`)
+- `GET /api/sessions/command` — lists active command sessions
+- `GET /api/sessions/command/:sessionId` — returns session details + participants + comments
+- `POST /api/sessions/command` — creates new session; broadcasts via WebSocket `publish()`
+- `POST /api/sessions/command/:sessionId/join` — join session
+- `POST /api/sessions/command/:sessionId/comment` — post comment to session
+- `MultiplayerSessionBanner` polls `/api/sessions/command/:sessionId` every 15 seconds
+- DB tables: `command_sessions`, `command_session_comments`
 
 ## Platform Hardening (Task #530)
 - **CI/CD Pipelines**: Full GitHub Actions suite — ci.yml (lint, typecheck, test, build), deploy.yml (Replit), e2e.yml (Playwright matrix), lighthouse.yml, release.yml (auto-versioning), security.yml (SBOM + audit), codeql.yml, dependency-review.yml, container-publish.yml, npm-publish.yml, prism-counsel-ci.yml (Azure)

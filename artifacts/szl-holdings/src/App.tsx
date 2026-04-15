@@ -146,6 +146,7 @@ const NuroForgeObservatory = lazy(() => import("@/pages/nuro-forge/observatory")
 const NuroForgeBlueprints = lazy(() => import("@/pages/nuro-forge/blueprints"));
 const NuroForgeSelfHealing = lazy(() => import("@/pages/nuro-forge/self-healing"));
 
+const RevenueFusionPage = lazy(() => import("@/pages/revenue-fusion"));
 const PulsePage = lazy(() => import("@/pages/pulse"));
 const LinkInBioPage = lazy(() => import("@/pages/link-in-bio"));
 const NewsletterLandingPage = lazy(() => import("@/pages/newsletter-landing"));
@@ -575,6 +576,9 @@ function App() {
             </Route>
             <Route path="/portfolio">
               <Suspense fallback={<PageLoader />}><PortfolioPage /></Suspense>
+            </Route>
+            <Route path="/financials">
+              <Suspense fallback={<PageLoader />}><RevenueFusionPage /></Suspense>
             </Route>
 
             {/* ── Venture Intelligence Portal ── */}

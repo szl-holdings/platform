@@ -166,6 +166,11 @@ import webPushSubscriptionsRouter from "./web-push-subscriptions";
 import notificationRecipientsRouter from "./notification-recipients";
 import imperiumRouter from "./imperium";
 import innovationEngineRouter from "./innovation-engine";
+import cortexRouter from "./cortex";
+import briefingRouter from "./briefing";
+import auditChainRouter from "./audit-chain";
+import revenueIntelligenceRouter from "./revenue-intelligence";
+import multiplayerSessionsRouter from "./multiplayer-sessions";
 
 const router: IRouter = Router();
 
@@ -642,5 +647,23 @@ router.use(imperiumRouter);
 
 router.use("/innovation-engine", _readLimiter);
 router.use("/innovation-engine", innovationEngineRouter);
+
+router.use("/cortex", _writeLimiter);
+router.use(cortexRouter);
+
+router.use("/briefing", _readLimiter);
+router.use("/briefing", _writeLimiter);
+router.use(briefingRouter);
+
+router.use("/audit-chain", _readLimiter);
+router.use("/audit-chain", _writeLimiter);
+router.use(auditChainRouter);
+
+router.use("/revenue-intelligence", _readLimiter);
+router.use(revenueIntelligenceRouter);
+
+router.use("/sessions/command", _readLimiter);
+router.use("/sessions/command", _writeLimiter);
+router.use(multiplayerSessionsRouter);
 
 export default router;

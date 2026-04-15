@@ -5,6 +5,7 @@ import { Timeline } from "../components/timeline";
 import { IntelligencePanel } from "../components/intelligence-panel";
 import { CommandActions } from "../components/command-actions";
 import { useEcosystemData } from "../hooks/use-ecosystem-data";
+import { MorningBriefingCard, DEMO_BRIEFING_HISTORY } from "@szl-holdings/shared-ui";
 
 export function Dashboard() {
   const { data, dataUpdatedAt } = useEcosystemData();
@@ -37,6 +38,11 @@ export function Dashboard() {
         />
 
         <DomainGrid domains={data.domains} />
+
+        <MorningBriefingCard
+          briefing={DEMO_BRIEFING_HISTORY[0]}
+          accentColor="#8b7ac8"
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 flex flex-col gap-8">

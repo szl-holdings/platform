@@ -279,3 +279,29 @@ export {
   type CrossDomainCorrelation,
   type CorrelationFeedProps,
 } from "./cross-domain-correlation";
+
+export {
+  CortexVoice,
+  CortexVoiceTrigger,
+  useCortexVoice,
+  type CortexVoiceProps,
+  type CortexIntent,
+  type CortexResult,
+} from "./cortex-voice";
+
+export {
+  MorningBriefingCard,
+  BriefingHistory,
+  DEMO_BRIEFING_HISTORY,
+  type DailyBriefing,
+  type BriefingSignal,
+} from "./morning-briefing";
+
+export {
+  SessionPresenceBar,
+  EntityCommentThread,
+  MultiplayerSessionBanner,
+  type SessionParticipant,
+  type SessionComment,
+  type MultiplayerSessionProps,
+} from "./multiplayer-session";

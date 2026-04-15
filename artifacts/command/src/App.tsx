@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Router as WouterRouter, Switch, Route, useLocation } from "wouter";
 import { Dashboard } from "./pages/dashboard";
@@ -11,6 +12,10 @@ import { MarketingSignup } from "./pages/marketing/signup";
 import { MarketingOnboarding } from "./pages/marketing/onboarding";
 import { MarketingStatus } from "./pages/marketing/status";
 import { MarketingVerifyEmail } from "./pages/marketing/verify-email";
+import { CortexVoice, CortexVoiceTrigger, useCortexVoice, MultiplayerSessionBanner } from "@szl-holdings/shared-ui";
+
+const SimulationPage = lazy(() => import("./pages/simulation"));
+const BriefingHistoryPage = lazy(() => import("./pages/briefing-history"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,13 +28,35 @@ const BASE = import.meta.env.BASE_URL;
 function AppShell() {
   const [location] = useLocation();
   const isMarketing = location.startsWith("/marketing");
+  const { open: cortexOpen, setOpen: setCortexOpen } = useCortexVoice();
+
   return (
     <>
       {!isMarketing && (
-        <EcosystemNav currentAppId="command" currentAppName="Ecosystem Command" accentColor="#8b7ac8" />
+        <>
+          <MultiplayerSessionBanner
+            sessionId="cmd-main"
+            currentUserName="You"
+            accentColor="#8b7ac8"
+          />
+          <EcosystemNav
+            currentAppId="command"
+            currentAppName="Ecosystem Command"
+            accentColor="#8b7ac8"
+          />
+          <div style={{ position: "fixed", bottom: "24px", right: "24px", zIndex: 9990 }}>
+            <CortexVoiceTrigger accentColor="#8b7ac8" onClick={() => setCortexOpen(true)} />
+          </div>
+        </>
       )}
       <Switch>
         <Route path="/" component={Dashboard} />
+        <Route path="/simulation">
+          {() => <Suspense fallback={null}><SimulationPage /></Suspense>}
+        </Route>
+        <Route path="/briefing">
+          {() => <Suspense fallback={null}><BriefingHistoryPage /></Suspense>}
+        </Route>
         <Route path="/marketing" component={MarketingHome} />
         <Route path="/marketing/apps/:id" component={MarketingAppPage} />
         <Route path="/marketing/pricing" component={MarketingPricing} />
@@ -38,6 +65,12 @@ function AppShell() {
         <Route path="/marketing/status" component={MarketingStatus} />
         <Route path="/marketing/verify-email" component={MarketingVerifyEmail} />
       </Switch>
+      <CortexVoice
+        open={cortexOpen}
+        onClose={() => setCortexOpen(false)}
+        accentColor="#8b7ac8"
+        appName="Command Portal"
+      />
     </>
   );
 }
