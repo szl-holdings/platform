@@ -47,6 +47,7 @@ import terraRouter from "./terra";
 import terraDistressRouter from "./terra-distress";
 import terraBrokerRouter from "./terra-broker";
 import exportsRouter from "./exports";
+import reportsRouter from "./reports";
 import aegisOpsLiveRouter from "./msp-live";
 import aegisOpsRouter from "./msp";
 import terraLiveRouter from "./terra-live";
@@ -416,6 +417,9 @@ router.use(backupRouter);
 router.use("/exports", writeLimiter);
 router.use("/exports", tenantScope({ required: false }));
 router.use(exportsRouter);
+
+router.use("/reports", readLimiter);
+router.use(reportsRouter);
 
 router.use("/public", publicStatusRouter);
 router.use("/admin/status", writeLimiter);

@@ -18,6 +18,7 @@ export const NAMED_JOB_TYPES = {
   ARTIFACT_GENERATION_JOB: "artifact_generation_job",
   ROUTE_ECONOMICS_RECOMPUTE_JOB: "route_economics_recompute_job",
   READINESS_SCORE_RECOMPUTE_JOB: "readiness_score_recompute_job",
+  HOURLY_SCHEDULED_REPORTS: "hourly_scheduled_reports",
 } as const;
 
 export type NamedJobType = typeof NAMED_JOB_TYPES[keyof typeof NAMED_JOB_TYPES];
@@ -57,6 +58,7 @@ registerEntry({ type: NAMED_JOB_TYPES.ARTIFACT_GENERATION_JOB, name: "Artifact G
 registerEntry({ type: NAMED_JOB_TYPES.ROUTE_ECONOMICS_RECOMPUTE_JOB, name: "Route Economics Recompute", description: "Recomputes voyage economics for a specified route or vessel, applying current fuel price, port cost, and charter rate data.", schedule: "on_demand", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.READINESS_SCORE_RECOMPUTE_JOB, name: "Readiness Score Recompute", description: "Recomputes readiness dimension scores for a specified program using the latest evidence and dimension weights.", schedule: "on_demand", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, name: "Daily Document Batch Generation", description: "Generates PDF exports for all approved documents pending batch processing across Terra, Aegis, Carlota Jo, Vessels, and Alloy. Archives completed PDFs and notifies document owners.", schedule: "daily", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.HOURLY_SCHEDULED_REPORTS, name: "Hourly Scheduled Reports Runner", description: "Executes all due report schedules across all 7 domains (SZL Holdings, Carlota Jo, Aegis, Terra, Vessels, Lyte, PRISM). Generates PDFs, applies auto-approve rules, and distributes to configured recipients.", schedule: "hourly", enabled: true });
 
 function updateRegistry(type: NamedJobType, update: Partial<JobScheduleEntry>) {
   const entry = jobRegistry.get(type);
@@ -277,6 +279,105 @@ durableJobQueue.register(NAMED_JOB_TYPES.READINESS_SCORE_RECOMPUTE_JOB, async (j
   updateRegistry(NAMED_JOB_TYPES.READINESS_SCORE_RECOMPUTE_JOB, { lastStatus: "completed", lastDurationMs: Date.now() - start });
   logger.info({ jobId: job.id, programId }, "readiness_score_recompute_job: complete");
 });
+
+
+durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_SCHEDULED_REPORTS, async (job) => {
+  const start = Date.now();
+  logger.info({ jobId: job.id }, "hourly_scheduled_reports: running due report schedules");
+  try {
+    const { db } = await import("@szl-holdings/db");
+    const { reportSchedulesTable, reportTemplatesTable } = await import("@szl-holdings/db");
+    const { eq, and, lte, isNull, or } = await import("drizzle-orm");
+    const { reportStore } = await import("./report-store");
+
+    const now = new Date();
+    const dueSchedules = await db
+      .select()
+      .from(reportSchedulesTable)
+      .where(
+        and(
+          eq(reportSchedulesTable.isActive, true),
+          or(
+            isNull(reportSchedulesTable.nextRunAt),
+            lte(reportSchedulesTable.nextRunAt, now)
+          )
+        )
+      )
+      .limit(20);
+
+    logger.info({ jobId: job.id, dueCount: dueSchedules.length }, "hourly_scheduled_reports: processing due schedules");
+
+    let generated = 0;
+    let failed = 0;
+
+    for (const schedule of dueSchedules) {
+      try {
+        const templates = await db
+          .select()
+          .from(reportTemplatesTable)
+          .where(eq(reportTemplatesTable.templateId, schedule.templateId))
+          .limit(1);
+
+        const template = templates[0];
+        if (!template) { failed++; continue; }
+
+        const dataConfig = (schedule.dataConfig as Record<string, unknown>) || {};
+        await reportStore.createReportGeneration({
+          templateId: schedule.templateId,
+          title: `${schedule.name} — ${now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
+          domain: schedule.domain as never,
+          reportType: template.reportType,
+          brandTheme: (template.brandTheme as never) || "szl",
+          dataSnapshot: { ...dataConfig, scheduledRunId: schedule.scheduleId, generatedAt: now.toISOString() },
+          snapshotAt: now,
+          scheduledRunId: schedule.scheduleId,
+          status: schedule.autoApprove ? "approved" : "draft",
+        });
+
+        const nextRun = new Date(now);
+        if (schedule.frequency === "daily") nextRun.setDate(nextRun.getDate() + 1);
+        else if (schedule.frequency === "weekly") nextRun.setDate(nextRun.getDate() + 7);
+        else if (schedule.frequency === "monthly") nextRun.setMonth(nextRun.getMonth() + 1);
+        else if (schedule.frequency === "quarterly") nextRun.setMonth(nextRun.getMonth() + 3);
+        else nextRun.setDate(nextRun.getDate() + 365);
+
+        await db
+          .update(reportSchedulesTable)
+          .set({
+            lastRunAt: now,
+            nextRunAt: nextRun,
+            lastStatus: "completed",
+            runCount: (schedule.runCount || 0) + 1,
+            updatedAt: now,
+          })
+          .where(eq(reportSchedulesTable.scheduleId, schedule.scheduleId));
+
+        generated++;
+      } catch (err) {
+        logger.warn({ err, scheduleId: schedule.scheduleId }, "hourly_scheduled_reports: schedule run failed");
+        await db
+          .update(reportSchedulesTable)
+          .set({ lastStatus: "failed", failCount: (schedule.failCount || 0) + 1, updatedAt: new Date() })
+          .where(eq(reportSchedulesTable.scheduleId, schedule.scheduleId));
+        failed++;
+      }
+    }
+
+    serverTelemetry.recordBusinessEvent({
+      type: "hourly_scheduled_reports_completed",
+      domain: "szl-reports",
+      durationMs: Date.now() - start,
+      success: true,
+      metadata: { generated, failed, total: dueSchedules.length },
+    });
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_SCHEDULED_REPORTS, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+    logger.info({ jobId: job.id, generated, failed }, "hourly_scheduled_reports: complete");
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, "hourly_scheduled_reports: fatal error");
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_SCHEDULED_REPORTS, { lastStatus: "failed", lastDurationMs: Date.now() - start });
+  }
+});
+
 
 let namedJobsStarted = false;
 
