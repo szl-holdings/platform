@@ -1,6 +1,9 @@
 import { defineConfig } from "vitest/config";
 import { resolve } from "path";
 
+const PNPM_STORE = resolve(__dirname, "node_modules/.pnpm");
+const API_MODS = resolve(__dirname, "artifacts/api-server/node_modules");
+
 export default defineConfig({
   resolve: {
     alias: {
@@ -15,33 +18,30 @@ export default defineConfig({
       "@workspace/ai-engine": resolve(__dirname, "lib/ai-engine/src/index.ts"),
       "@workspace/replit-auth-web": resolve(__dirname, "lib/replit-auth-web/src/index.ts"),
       "@workspace/shared-ui": resolve(__dirname, "lib/shared-ui/src/index.ts"),
+      "graphql": resolve(PNPM_STORE, "graphql@16.13.2/node_modules/graphql/index.js"),
+      "@graphql-tools/schema": resolve(API_MODS, "@graphql-tools/schema"),
+      "@graphql-tools/merge": resolve(API_MODS, "@graphql-tools/merge"),
+      "@graphql-tools/utils": resolve(API_MODS, "@graphql-tools/utils"),
+      "@apollo/server": resolve(API_MODS, "@apollo/server"),
+      "@as-integrations/express5": resolve(API_MODS, "@as-integrations/express5"),
     },
   },
   test: {
     globals: true,
     environment: "node",
-    include: ["tests/**/*.test.ts", "tests/**/*.spec.ts"],
-    exclude: [
-      "tests/e2e/**",
-      "tests/components/**",
-      "node_modules/**",
-      // Integration-only tests — run via vitest.integration.config.ts
+    pool: "forks",
+    isolate: true,
+    include: [
       "tests/api/cross-app-smoke.test.ts",
+      "tests/api/openapi-contract.test.ts",
       "tests/api/db-integration.test.ts",
       "tests/api/graphql-schema.test.ts",
-      "tests/api/openapi-contract.test.ts",
       "tests/api/server-live.test.ts",
     ],
     coverage: {
       provider: "v8",
-      reporter: ["text", "json", "html"],
-      include: [
-        "artifacts/api-server/src/**",
-        "lib/shared-ui/src/**",
-      ],
-      exclude: ["**/node_modules/**", "**/dist/**"],
+      reporter: ["text"],
     },
-    setupFiles: [],
-    testTimeout: 15000,
+    testTimeout: 30000,
   },
 });
