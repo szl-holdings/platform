@@ -533,5 +533,26 @@ export {
   type FusionCortexStats,
 } from "./fusion/fusion-cortex.js";
 
+export {
+  PatternLibrary,
+  patternLibrary,
+  type CorrelationPattern,
+  type PatternFeedback,
+  type PatternEvidence,
+  type PatternCategory,
+  type PatternStatus,
+} from "./fusion/pattern-library.js";
+
+export {
+  PredictiveCascadeEngine,
+  predictiveCascadeEngine,
+  type CascadeTree,
+  type CascadeNode,
+  type CascadeHorizon,
+  type CascadeImpactLevel,
+  type PredictiveAlert,
+  type DomainKey,
+} from "./fusion/predictive-cascade.js";
+
 // ML Pipeline Infrastructure
 export * from "./ml-pipeline/index.js";

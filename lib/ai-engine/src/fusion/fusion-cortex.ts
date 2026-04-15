@@ -13,6 +13,10 @@
 
 import { ontologyEngine } from "../ontology/ontology-engine.js";
 import type { OntologyEntity, CrossDomainConnection } from "../ontology/ontology-engine.js";
+import { patternLibrary } from "./pattern-library.js";
+import { predictiveCascadeEngine } from "./predictive-cascade.js";
+
+const MIN_CONFIDENCE_TO_FIRE = 0.30;
 
 export type FusionAlertSeverity = "low" | "medium" | "high" | "critical";
 export type FusionAlertCategory =
@@ -41,6 +45,7 @@ export interface FusionAlert {
   expiresAt: string;
   status: "active" | "acknowledged" | "resolved" | "escalated";
   tags: string[];
+  patternId?: string;
 }
 
 export interface FusionEvidenceItem {
@@ -52,6 +57,7 @@ export interface FusionEvidenceItem {
 }
 
 export interface FusionPattern {
+  libraryId: string;
   name: string;
   description: string;
   requiredDomains: string[];
@@ -96,6 +102,7 @@ function computeExpiryTime(severity: FusionAlertSeverity): string {
 
 const FUSION_PATTERNS: FusionPattern[] = [
   {
+    libraryId: "pat-001",
     name: "Litigation-Financial Stress Correlation",
     description: "Vessel/property owner has active litigation AND financial metrics are deteriorating",
     requiredDomains: ["legal", "financial"],
@@ -133,6 +140,7 @@ const FUSION_PATTERNS: FusionPattern[] = [
     },
   },
   {
+    libraryId: "pat-002",
     name: "Maritime-Security Sanctions Escalation",
     description: "Vessel in sanctioned waters while security posture is degraded",
     requiredDomains: ["maritime", "security"],
@@ -174,6 +182,7 @@ const FUSION_PATTERNS: FusionPattern[] = [
     },
   },
   {
+    libraryId: "pat-003",
     name: "Property-Legal-Financial Tri-Domain Risk",
     description: "Real estate asset with simultaneous legal dispute and financial deterioration",
     requiredDomains: ["real_estate", "legal", "financial"],
@@ -216,6 +225,7 @@ const FUSION_PATTERNS: FusionPattern[] = [
     },
   },
   {
+    libraryId: "pat-004",
     name: "Entity Ownership Chain Anomaly",
     description: "Multiple-hop ownership chain connecting sanctioned entity to active SZL operations",
     requiredDomains: ["maritime", "legal", "financial"],
@@ -290,13 +300,45 @@ export class FusionCortex {
 
       for (const pattern of FUSION_PATTERNS) {
         try {
+          // Self-learning feedback loop: consult pattern library before firing detector.
+          // Analyst feedback adjusts confidenceScore and may degrade/suppress patterns
+          // so future scans skip or down-score detectors that generated false positives.
+          const libPattern = patternLibrary.getById(pattern.libraryId);
+          if (libPattern) {
+            if (libPattern.status === "suppressed") continue;
+            if (libPattern.status === "degraded" && libPattern.confidenceScore < MIN_CONFIDENCE_TO_FIRE) continue;
+          }
+
           const alert = pattern.detector(crossDomainConnections, entities);
           if (alert) {
+            // Apply library-adjusted confidence — feedback learning directly modifies
+            // the confidence value carried by fired alerts (the operational tuning).
+            if (libPattern) {
+              alert.confidence = libPattern.confidenceScore;
+            }
+
             const deduped = !this.alerts.some(a => a.category === alert.category && a.affectedDomains.join() === alert.affectedDomains.join() && Date.now() - new Date(a.generatedAt).getTime() < 60 * 60 * 1000);
             if (deduped) {
+              alert.patternId = pattern.libraryId;
               newAlerts.push(alert);
               this.alerts.unshift(alert);
               this.alertSubscribers.forEach(sub => sub(alert));
+              patternLibrary.recordHit(pattern.libraryId, alert.id);
+
+              if ((alert.severity === "high" || alert.severity === "critical") && alert.affectedDomains.length >= 2) {
+                const rootDomain = alert.affectedDomains[0] as import("./predictive-cascade.js").DomainKey;
+                const validDomains: import("./predictive-cascade.js").DomainKey[] = ["vessels","firestorm","terra","prism-counsel","szl-holdings","lyte"];
+                if (validDomains.includes(rootDomain)) {
+                  predictiveCascadeEngine.generatePredictiveAlert(
+                    `Cascade risk from: ${alert.title}`,
+                    rootDomain,
+                    alert.summary.slice(0, 120),
+                    alert.confidence * 0.85,
+                    "30d",
+                    [...alert.tags, "auto-cascade"],
+                  );
+                }
+              }
             }
           }
         } catch {

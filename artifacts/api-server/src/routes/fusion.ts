@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth";
 import { sendBadRequest, sendError } from "../lib/api-response";
-import { fusionCortex } from "@szl-holdings/ai-engine";
-import type { FusionAlertSeverity, FusionAlertCategory } from "@szl-holdings/ai-engine";
+import { fusionCortex, patternLibrary, predictiveCascadeEngine } from "@szl-holdings/ai-engine";
+import type { FusionAlertSeverity, FusionAlertCategory, DomainKey, CascadeHorizon } from "@szl-holdings/ai-engine";
 
 const router = Router();
 
@@ -67,6 +67,7 @@ router.post("/fusion/alerts/inject", authMiddleware, async (req, res) => {
 
 router.post("/fusion/demo/seed", authMiddleware, async (_req, res) => {
   fusionCortex.seedDemoAlerts();
+  predictiveCascadeEngine.seedDemoAlerts();
   res.json({ success: true, message: "Demo fusion alerts seeded", alerts: fusionCortex.getAlerts({ limit: 10 }) });
 });
 
@@ -79,6 +80,133 @@ router.post("/fusion/start-continuous", authMiddleware, async (req, res) => {
 router.post("/fusion/stop-continuous", authMiddleware, async (_req, res) => {
   fusionCortex.stopContinuousScan();
   res.json({ success: true, message: "Fusion Cortex continuous scan stopped" });
+});
+
+router.get("/fusion/patterns", authMiddleware, async (req, res) => {
+  const patterns = patternLibrary.getAll();
+  const stats = patternLibrary.getLibraryStats();
+  res.json({ success: true, patterns, stats });
+});
+
+router.get("/fusion/patterns/:id", authMiddleware, async (req, res) => {
+  const pattern = patternLibrary.getById(req.params.id);
+  if (!pattern) return sendError(res, 404, "Pattern not found");
+  res.json({ success: true, pattern });
+});
+
+router.post("/fusion/patterns/:id/feedback", authMiddleware, async (req, res) => {
+  try {
+    const { alertId, relevance, rating, notes, reviewedBy } = req.body;
+    if (!alertId || !relevance || !rating) return sendBadRequest(res, "alertId, relevance, and rating are required");
+
+    const feedback = patternLibrary.submitFeedback({
+      patternId: req.params.id,
+      alertId,
+      relevance,
+      rating: Number(rating),
+      notes,
+      reviewedBy,
+    });
+
+    if (!feedback) return sendError(res, 404, "Pattern not found");
+    res.json({ success: true, feedback, updatedPattern: patternLibrary.getById(req.params.id) });
+  } catch (err) {
+    res.status(500).json({ success: false, error: "Failed to submit feedback" });
+  }
+});
+
+router.post("/fusion/alerts/:alertId/feedback", authMiddleware, async (req, res) => {
+  try {
+    const { patternId, relevance, rating, notes, reviewedBy } = req.body;
+    if (!relevance || !rating) return sendBadRequest(res, "relevance and rating are required");
+
+    const effectivePatternId = patternId ?? fusionCortex.getAlerts({ limit: 500 }).find(a => a.id === req.params.alertId)?.patternId;
+
+    if (effectivePatternId) {
+      const feedback = patternLibrary.submitFeedback({
+        patternId: effectivePatternId,
+        alertId: req.params.alertId,
+        relevance,
+        rating: Number(rating),
+        notes,
+        reviewedBy,
+      });
+      if (feedback) {
+        return res.json({ success: true, feedback, patternUpdated: true });
+      }
+    }
+
+    res.json({ success: true, feedback: { alertId: req.params.alertId, relevance, rating: Number(rating), notes, reviewedBy, reviewedAt: new Date().toISOString() }, patternUpdated: false });
+  } catch (err) {
+    res.status(500).json({ success: false, error: "Failed to submit feedback" });
+  }
+});
+
+router.post("/fusion/patterns/custom", authMiddleware, async (req, res) => {
+  try {
+    const { name, description, category, requiredDomains, evidenceTypes, tags } = req.body;
+    if (!name || !description || !category || !requiredDomains) {
+      return sendBadRequest(res, "name, description, category, and requiredDomains are required");
+    }
+    const pattern = patternLibrary.addCustomPattern({ name, description, category, requiredDomains, evidenceTypes: evidenceTypes ?? [], tags });
+    res.json({ success: true, pattern });
+  } catch (err) {
+    res.status(500).json({ success: false, error: "Failed to create pattern" });
+  }
+});
+
+router.get("/fusion/predictive/alerts", authMiddleware, async (req, res) => {
+  const status = req.query.status ? String(req.query.status).split(",") as Array<"active" | "monitoring" | "resolved"> : undefined;
+  const severity = req.query.severity ? String(req.query.severity).split(",") as Array<"low" | "medium" | "high" | "critical"> : undefined;
+  const domains = req.query.domains ? String(req.query.domains).split(",") as DomainKey[] : undefined;
+  const limit = Math.min(parseInt(String(req.query.limit ?? "50")), 100);
+
+  const alerts = predictiveCascadeEngine.getAlerts({ status, severity, domains, limit });
+  res.json({ success: true, alerts, total: alerts.length });
+});
+
+router.post("/fusion/predictive/project", authMiddleware, async (req, res) => {
+  try {
+    const { rootDomain, rootSignal, rootProbability, horizon = "30d" } = req.body;
+    if (!rootDomain || !rootSignal || rootProbability === undefined) {
+      return sendBadRequest(res, "rootDomain, rootSignal, and rootProbability are required");
+    }
+    const tree = predictiveCascadeEngine.projectCascade(
+      rootDomain as DomainKey,
+      rootSignal,
+      Number(rootProbability),
+      horizon as CascadeHorizon,
+    );
+    res.json({ success: true, tree });
+  } catch (err) {
+    res.status(500).json({ success: false, error: "Cascade projection failed" });
+  }
+});
+
+router.post("/fusion/predictive/generate", authMiddleware, async (req, res) => {
+  try {
+    const { title, triggerDomain, triggerSignal, confidence, horizon = "30d", tags = [] } = req.body;
+    if (!title || !triggerDomain || !triggerSignal || confidence === undefined) {
+      return sendBadRequest(res, "title, triggerDomain, triggerSignal, and confidence are required");
+    }
+    const alert = predictiveCascadeEngine.generatePredictiveAlert(
+      title,
+      triggerDomain as DomainKey,
+      triggerSignal,
+      Number(confidence),
+      horizon as CascadeHorizon,
+      tags,
+    );
+    res.json({ success: true, alert });
+  } catch (err) {
+    res.status(500).json({ success: false, error: "Failed to generate predictive alert" });
+  }
+});
+
+router.post("/fusion/predictive/alerts/:id/resolve", authMiddleware, async (req, res) => {
+  const ok = predictiveCascadeEngine.resolveAlert(req.params.id);
+  if (!ok) return sendError(res, 404, "Predictive alert not found");
+  res.json({ success: true, message: "Predictive alert resolved" });
 });
 
 export default router;

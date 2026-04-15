@@ -48,6 +48,8 @@ const PilotVesselsPage = lazy(() => import("@/pages/pilot-vessels"));
 const PilotAegisPage = lazy(() => import("@/pages/pilot-aegis"));
 const NexusCommandPage = lazy(() => import("@/pages/nexus-command"));
 const NexusExplorerPage = lazy(() => import("@/pages/nexus-explorer"));
+const IntelligenceFabricPage = lazy(() => import("@/pages/intelligence-fabric"));
+const AnalystWorkspacePage = lazy(() => import("@/pages/analyst-workspace"));
 const OracleBriefingPage = lazy(() => import("@/pages/oracle-briefing"));
 const KpiDashboardPage = lazy(() => import("@/pages/kpi-dashboard"));
 const ReportsHubPage = lazy(() => import("@/pages/reports-hub"));
@@ -751,6 +753,14 @@ function App() {
             </Route>
             <Route path="/reports">
               <RequireAuth><Suspense fallback={<PageLoader />}><ReportsHubPage /></Suspense></RequireAuth>
+            </Route>
+
+            {/* ── Intelligence Fabric ── */}
+            <Route path="/intelligence/fabric">
+              <RequireAuth><Suspense fallback={<PageLoader />}><IntelligenceFabricPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/intelligence/analyst">
+              <RequireAuth><Suspense fallback={<PageLoader />}><AnalystWorkspacePage /></Suspense></RequireAuth>
             </Route>
 
             {/* ── Admin routes ── */}
