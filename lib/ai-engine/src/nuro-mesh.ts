@@ -1536,12 +1536,12 @@ export class NuroMeshOrchestrator {
         queryLength: query.length,
         recentFailures: profile.recentTrend === "declining" ? 3 : 0,
       });
-      if (uncertainty.failureProbability > 0.7) {
+      if (uncertainty.predictedFailureProbability > 0.7) {
         innerMonologue.addThought(
           "doubt",
-          `Pre-routing uncertainty: ${agent.name} (${agent.domain}) failure probability ${(uncertainty.failureProbability * 100).toFixed(0)}% — ${uncertainty.mitigations.slice(0, 2).join("; ")}`,
+          `Pre-routing uncertainty: ${agent.name} (${agent.domain}) failure probability ${(uncertainty.predictedFailureProbability * 100).toFixed(0)}% — recommendation: ${uncertainty.recommendation}`,
           "cautious",
-          Math.round((1 - uncertainty.failureProbability) * 100),
+          Math.round((1 - uncertainty.predictedFailureProbability) * 100),
         );
       }
     }
@@ -2281,12 +2281,12 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
           alternativeRouting: alternativeAgents,
           queryDomains: routedDomains,
         });
-        if (counterfactual.shouldRevisit) {
+        if (Math.abs(counterfactual.predictedOutcomeDelta) > 5) {
           innerMonologue.addThought(
             "reflection",
-            `Counterfactual analysis: alternative routing [${alternativeAgents.join(", ")}] predicted delta ${counterfactual.predictedConfidenceDelta > 0 ? "+" : ""}${counterfactual.predictedConfidenceDelta.toFixed(0)}%. ${counterfactual.reasoning.slice(0, 150)}`,
-            counterfactual.predictedConfidenceDelta > 5 ? "cautious" : "neutral",
-            Math.round(averageConfidence + counterfactual.predictedConfidenceDelta),
+            `Counterfactual analysis: alternative routing [${alternativeAgents.join(", ")}] predicted delta ${counterfactual.predictedOutcomeDelta > 0 ? "+" : ""}${counterfactual.predictedOutcomeDelta.toFixed(1)}%. ${counterfactual.reasoning.slice(0, 150)}`,
+            counterfactual.predictedOutcomeDelta > 5 ? "cautious" : "neutral",
+            Math.round(averageConfidence + counterfactual.predictedOutcomeDelta),
           );
         }
       }
@@ -2308,9 +2308,9 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
         synthesis.slice(0, 200),
         agentResponses.map(r => `${r.agentName}: ${r.response.slice(0, 100)}`).join("; "),
       );
-      if (socratic.depth > 1) {
+      if (socratic.questions.length > 1) {
         cognitiveWorkspace.addToWorkingMemory(
-          `[Socratic] Q: ${socratic.rootQuestion.slice(0, 80)} → Conclusion: ${socratic.conclusion.slice(0, 100)}`,
+          `[Socratic] Q: ${socratic.questions[0]?.question.slice(0, 80) ?? "?"} → Conclusion: ${socratic.conclusion.slice(0, 100)}`,
           "socratic_inquiry",
           5,
           routedDomains,
@@ -2323,7 +2323,7 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       );
       if (perspectives.perspectives.length > 1) {
         cognitiveWorkspace.addToWorkingMemory(
-          `[Perspective sim] ${perspectives.perspectives.map(p => `${p.perspective}: ${p.assessment.slice(0, 60)}`).join(" | ")} → ${perspectives.recommendation.slice(0, 100)}`,
+          `[Perspective sim] ${perspectives.perspectives.map(p => `${p.viewpoint}: ${p.argument.slice(0, 60)}`).join(" | ")} → ${perspectives.synthesis.slice(0, 100)}`,
           "perspective_simulation",
           4,
           routedDomains,
@@ -2332,31 +2332,30 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
     }
 
     const discount = temporalAwareness.computeTemporalDiscount({
+      decision: `Routing for "${query.slice(0, 60)}" across ${routedDomains.join(", ")}`,
       immediateValue: averageConfidence,
-      futureValue: averageConfidence * 1.2,
-      delayMs: 3600000,
-      domain: routedDomains[0] ?? "general",
-      urgency: isHighStakes ? 0.9 : 0.5,
+      delayedValue: averageConfidence * 1.2,
+      delayDays: 1,
     });
-    if (discount.recommendation === "wait" || discount.recommendation === "gather_more_info") {
+    if (discount.recommendation === "wait_for_delayed") {
       innerMonologue.addThought(
         "reflection",
-        `Temporal discount suggests ${discount.recommendation}: immediate ${discount.discountedImmediate.toFixed(0)} vs future ${discount.discountedFuture.toFixed(0)}. ${discount.reasoning}`,
+        `Temporal discount suggests waiting: immediate ${averageConfidence.toFixed(0)} vs discounted future ${discount.discountedValue.toFixed(0)}.`,
         "cautious",
-        Math.round(discount.discountedImmediate),
+        Math.round(discount.discountedValue),
       );
     }
 
     if (isHighStakes) {
       const futureSim = temporalAwareness.simulateFuture({
-        currentState: `Query: "${query.slice(0, 80)}" — Confidence: ${averageConfidence}%, Domains: ${routedDomains.join(", ")}`,
-        timeHorizon: "medium_term",
-        domains: routedDomains,
+        scenario: `Query: "${query.slice(0, 80)}" — Confidence: ${averageConfidence}%, Domains: ${routedDomains.join(", ")}`,
+        timeHorizon: "days",
+        currentState: { confidence: averageConfidence, conflictCount: 0, agentHealth: preRoutingSelfModel.overallHealth },
       });
       if (futureSim.predictedOutcomes.some(o => o.probability > 0.5 && o.impact === "negative")) {
         innerMonologue.addThought(
           "doubt",
-          `Episodic future sim: negative outcome predicted — ${futureSim.predictedOutcomes.filter(o => o.impact === "negative").map(o => o.scenario.slice(0, 60)).join("; ")}`,
+          `Episodic future sim: negative outcome predicted — ${futureSim.predictedOutcomes.filter(o => o.impact === "negative").map(o => o.outcome.slice(0, 60)).join("; ")}`,
           "cautious",
           40,
         );
@@ -2443,9 +2442,6 @@ async function persistConsciousnessState(
     const emotionsJson = JSON.parse(JSON.stringify(snapshot.emotions));
     const goalsJson = JSON.parse(JSON.stringify(snapshot.goals));
     const temporalJson = JSON.parse(JSON.stringify(snapshot.temporal));
-    const predictiveJson = JSON.parse(JSON.stringify(snapshot.predictive));
-    const dreamJson = JSON.parse(JSON.stringify(snapshot.dream));
-
     await db.insert(consciousnessSnapshotsTable).values({
       orchestrationId,
       metacognition: metacogJson,
