@@ -32,6 +32,21 @@ export interface EcosystemNotification {
   read?: boolean;
 }
 
+export interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+export interface RecentItem {
+  id: string;
+  label: string;
+  description?: string;
+  href: string;
+  appId: string;
+  appName: string;
+  timestamp: number;
+}
+
 export interface EcosystemNavProps {
   currentAppId: string;
   currentAppName: string;
@@ -41,6 +56,36 @@ export interface EcosystemNavProps {
   onSearch?: (query: string) => void;
   userName?: string;
   userRole?: string;
+  breadcrumbs?: BreadcrumbItem[];
+}
+
+const RECENT_ITEMS_KEY = "szl-ecosystem-recent-items";
+
+export function trackRecentItem(item: Omit<RecentItem, "timestamp">): void {
+  try {
+    const existing: RecentItem[] = JSON.parse(localStorage.getItem(RECENT_ITEMS_KEY) || "[]");
+    const filtered = existing.filter((i) => i.id !== item.id);
+    const updated = [{ ...item, timestamp: Date.now() }, ...filtered].slice(0, 20);
+    localStorage.setItem(RECENT_ITEMS_KEY, JSON.stringify(updated));
+  } catch {
+    // ignore
+  }
+}
+
+function getRecentItems(): RecentItem[] {
+  try {
+    return JSON.parse(localStorage.getItem(RECENT_ITEMS_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function useRecentItems() {
+  const [items, setItems] = useState<RecentItem[]>([]);
+  useEffect(() => {
+    setItems(getRecentItems());
+  }, []);
+  return items;
 }
 
 const ECOSYSTEM_APPS: EcosystemApp[] = [
@@ -310,12 +355,75 @@ function DoctrineLayerSection({
   );
 }
 
+function RecentItemsList({ items }: { items: RecentItem[] }) {
+  if (items.length === 0) return null;
+  const recent = items.slice(0, 5);
+  return (
+    <div style={{ marginTop: "10px", paddingTop: "10px", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+      <div
+        style={{
+          fontSize: "9px",
+          fontWeight: 700,
+          letterSpacing: "0.08em",
+          color: "rgba(255,255,255,0.3)",
+          textTransform: "uppercase",
+          marginBottom: "6px",
+          fontFamily: "'Geist Mono', monospace",
+        }}
+      >
+        Recent
+      </div>
+      {recent.map((item) => {
+        const app = ECOSYSTEM_APPS.find((a) => a.id === item.appId);
+        return (
+          <a
+            key={item.id}
+            href={item.href}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "5px 6px",
+              borderRadius: "6px",
+              textDecoration: "none",
+              transition: "background 0.15s",
+            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+          >
+            <span style={{ fontSize: "12px", flexShrink: 0, opacity: 0.7 }}>{app?.icon ?? "○"}</span>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div
+                style={{
+                  fontSize: "11px",
+                  color: "rgba(255,255,255,0.7)",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  fontWeight: 500,
+                }}
+              >
+                {item.label}
+              </div>
+              <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)", marginTop: "1px" }}>
+                {item.appName}
+              </div>
+            </div>
+          </a>
+        );
+      })}
+    </div>
+  );
+}
+
 function AppSwitcherPanel({
   currentAppId,
   onClose,
+  recentItems,
 }: {
   currentAppId: string;
   onClose: () => void;
+  recentItems: RecentItem[];
 }) {
   const [viewMode, setViewMode] = useState<"layer" | "grid">("layer");
 
@@ -424,6 +532,8 @@ function AppSwitcherPanel({
           ))}
         </div>
       )}
+
+      <RecentItemsList items={recentItems} />
 
       <div
         style={{
@@ -1031,10 +1141,12 @@ export function EcosystemNav({
   onSearch,
   userName: userNameProp,
   userRole: userRoleProp,
+  breadcrumbs,
 }: EcosystemNavProps) {
   const { user, isAuthenticated, login, logout } = useAuth();
   const appData = ECOSYSTEM_APPS.find((a) => a.id === currentAppId);
   const notificationCenter = useNotificationCenter(appData?.name ?? currentAppName);
+  const recentItems = useRecentItems();
 
   const [showAppSwitcher, setShowAppSwitcher] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -1176,6 +1288,60 @@ export function EcosystemNav({
           </span>
           <DoctrineNavBadge appId={currentAppId} />
         </div>
+
+        {breadcrumbs && breadcrumbs.length > 0 && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              marginLeft: "8px",
+              flexShrink: 1,
+              minWidth: 0,
+              overflow: "hidden",
+            }}
+          >
+            <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.2)" }}>›</span>
+            {breadcrumbs.map((crumb, i) => (
+              <React.Fragment key={i}>
+                {crumb.href ? (
+                  <a
+                    href={crumb.href}
+                    style={{
+                      fontSize: "12px",
+                      color: i === breadcrumbs.length - 1 ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.35)",
+                      textDecoration: "none",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      maxWidth: "120px",
+                    }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.8)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = i === breadcrumbs.length - 1 ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.35)"; }}
+                  >
+                    {crumb.label}
+                  </a>
+                ) : (
+                  <span
+                    style={{
+                      fontSize: "12px",
+                      color: i === breadcrumbs.length - 1 ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.35)",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      maxWidth: "120px",
+                    }}
+                  >
+                    {crumb.label}
+                  </span>
+                )}
+                {i < breadcrumbs.length - 1 && (
+                  <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.2)" }}>›</span>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        )}
 
         <div style={{ flex: 1 }} />
 
@@ -1342,6 +1508,7 @@ export function EcosystemNav({
               <AppSwitcherPanel
                 currentAppId={currentAppId}
                 onClose={() => setShowAppSwitcher(false)}
+                recentItems={recentItems}
               />
             )}
           </div>

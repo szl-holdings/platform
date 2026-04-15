@@ -8,6 +8,7 @@ import { SymbolView } from "expo-symbols";
 import React, { useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { SpotlightFab, SpotlightModal, type SpotlightCommand } from "@szl-holdings/mobile-shared/components";
+import { useEcosystemTabBarScreenOptions } from "@szl-holdings/mobile-shared";
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
 
@@ -56,42 +57,15 @@ function NativeTabLayout() {
 function ClassicTabLayout() {
   const colors = useColors();
   const isIOS = Platform.OS === "ios";
-  const isWeb = Platform.OS === "web";
+  const tabBarScreenOptions = useEcosystemTabBarScreenOptions({
+    accentColor: colors.gold,
+    inactiveColor: "rgba(240,238,255,0.2)",
+    backgroundColor: "#090810",
+    borderColor: "rgba(201,168,76,0.1)",
+  });
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: colors.gold,
-        tabBarInactiveTintColor: "rgba(240,238,255,0.2)",
-        tabBarStyle: {
-          position: "absolute",
-          backgroundColor: isIOS ? "transparent" : "#090810",
-          borderTopWidth: 1,
-          borderTopColor: "rgba(201,168,76,0.1)",
-          elevation: 0,
-          ...(isWeb ? { height: 84 } : {}),
-        },
-        tabBarBackground: () =>
-          isIOS ? (
-            <BlurView
-              intensity={80}
-              tint="dark"
-              style={StyleSheet.absoluteFill}
-            />
-          ) : isWeb ? (
-            <View
-              style={[StyleSheet.absoluteFill, { backgroundColor: "#090810" }]}
-            />
-          ) : null,
-        tabBarLabelStyle: {
-          fontSize: 9,
-          fontFamily: "Inter_500Medium",
-          letterSpacing: 1,
-          textTransform: "uppercase",
-        },
-      }}
-    >
+    <Tabs screenOptions={tabBarScreenOptions}>
       <Tabs.Screen
         name="index"
         options={{

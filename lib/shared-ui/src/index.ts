@@ -171,3 +171,14 @@ export {
   type NodeDetailPanelProps,
   type GraphStatsCardProps,
 } from "./knowledge-graph-viz";
+
+export {
+  EcosystemNav,
+  useEcosystemNotifications,
+  trackRecentItem,
+  type EcosystemApp,
+  type EcosystemNotification,
+  type EcosystemNavProps,
+  type BreadcrumbItem,
+  type RecentItem,
+} from "./ecosystem-nav";

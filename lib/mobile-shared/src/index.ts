@@ -16,3 +16,4 @@ export { ThemeProvider, useTheme, type ThemeMode, type ResolvedTheme } from "./c
 export { useSSEStream, type SSEConnectionStatus, type SSEStreamOptions } from "./hooks/useSSEStream";
 export { useEmbeddingSearch, type EmbeddingSearchResult, type EmbeddingSearchOptions } from "./hooks/useEmbeddingSearch";
 export { useFileUpload, type UploadStatus, type UploadedFile, type FileUploadOptions, type FileToUpload } from "./hooks/useFileUpload";
+export { useEcosystemTabBarScreenOptions, EcosystemTabBarBackground, type EcosystemTabBarConfig, type EcosystemTabBarBackgroundProps } from "./components/EcosystemTabBar";

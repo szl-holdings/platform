@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, useRegisterCommands, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
+import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 
 const PRISM_GOLD = "#c8a96e";
 const PRISM_BLUE = "#4a8ab0";
@@ -256,8 +257,10 @@ export function PrismCounselShell({ children }: { children: React.ReactNode }) {
   const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette(prismCommands);
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: "#080c14", fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="flex flex-col h-screen overflow-hidden" style={{ background: "#080c14", fontFamily: "'Inter', system-ui, sans-serif" }}>
+      <EcosystemNav currentAppId="prism-counsel" currentAppName="PRISM Counsel" accentColor="#c8a96e" />
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} commands={prismCommands} placeholder="Search PRISM Counsel..." />
+      <div className="flex flex-1 overflow-hidden">
 
       <aside
         className={cn(
@@ -357,6 +360,7 @@ export function PrismCounselShell({ children }: { children: React.ReactNode }) {
         <main className="flex-1 overflow-y-auto" style={{ background: "#080c14" }}>
           {children}
         </main>
+      </div>
       </div>
     </div>
   );

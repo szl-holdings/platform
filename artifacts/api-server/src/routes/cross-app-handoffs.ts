@@ -262,4 +262,53 @@ router.get("/cross-app/family/health", authMiddleware(), (_req: Request, res: Re
   }
 });
 
+interface RecentItem {
+  id: string;
+  label: string;
+  description?: string;
+  href: string;
+  appId: string;
+  appName: string;
+  timestamp: number;
+}
+
+const recentItemsByUser = new Map<string, RecentItem[]>();
+
+router.get("/cross-app/recent-items", (req: Request, res: Response) => {
+  try {
+    const userId = (req.headers["x-user-id"] as string) || "anonymous";
+    const items = recentItemsByUser.get(userId) || [];
+    sendSuccess(res, items.slice(0, 20));
+  } catch (err) {
+    handleRouteError(res, err, "get recent items");
+  }
+});
+
+router.post("/cross-app/recent-items", (req: Request, res: Response) => {
+  try {
+    const userId = (req.headers["x-user-id"] as string) || "anonymous";
+    const item = req.body as Omit<RecentItem, "timestamp">;
+    if (!item.id || !item.href || !item.appId) {
+      return sendBadRequest(res, "Missing required fields: id, href, appId");
+    }
+    const existing = recentItemsByUser.get(userId) || [];
+    const filtered = existing.filter((i) => i.id !== item.id);
+    const updated = [{ ...item, timestamp: Date.now() }, ...filtered].slice(0, 20);
+    recentItemsByUser.set(userId, updated);
+    sendCreated(res, updated[0]);
+  } catch (err) {
+    handleRouteError(res, err, "track recent item");
+  }
+});
+
+router.delete("/cross-app/recent-items", (req: Request, res: Response) => {
+  try {
+    const userId = (req.headers["x-user-id"] as string) || "anonymous";
+    recentItemsByUser.delete(userId);
+    sendSuccess(res, { cleared: true });
+  } catch (err) {
+    handleRouteError(res, err, "clear recent items");
+  }
+});
+
 export default router;

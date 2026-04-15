@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Router as WouterRouter, Switch, Route } from "wouter";
 import { Dashboard } from "./pages/dashboard";
+import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -14,6 +15,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={BASE.replace(/\/$/, "")}>
+        <EcosystemNav currentAppId="command" currentAppName="Ecosystem Command" accentColor="#8b7ac8" />
         <Switch>
           <Route path="/" component={Dashboard} />
         </Switch>

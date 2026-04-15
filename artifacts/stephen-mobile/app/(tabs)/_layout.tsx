@@ -8,6 +8,7 @@ import { SymbolView } from "expo-symbols";
 import React, { useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { SpotlightFab, SpotlightModal, type SpotlightCommand } from "@szl-holdings/mobile-shared/components";
+import { useEcosystemTabBarScreenOptions } from "@szl-holdings/mobile-shared";
 
 const ACCENT = "#6366f1";
 const BG_DARK = "#0a0a0a";
@@ -55,35 +56,15 @@ function NativeTabLayout() {
 
 function ClassicTabLayout() {
   const isIOS = Platform.OS === "ios";
-  const isWeb = Platform.OS === "web";
+  const tabBarScreenOptions = useEcosystemTabBarScreenOptions({
+    accentColor: ACCENT,
+    inactiveColor: "rgba(255,255,255,0.25)",
+    backgroundColor: BG_DARK,
+    borderColor: BORDER,
+  });
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: ACCENT,
-        tabBarInactiveTintColor: "rgba(255,255,255,0.25)",
-        tabBarStyle: {
-          position: "absolute",
-          backgroundColor: isIOS ? "transparent" : BG_DARK,
-          borderTopWidth: 1,
-          borderTopColor: BORDER,
-          elevation: 0,
-          ...(isWeb ? { height: 84 } : {}),
-        },
-        tabBarBackground: () =>
-          isIOS ? (
-            <BlurView intensity={80} tint="dark" style={StyleSheet.absoluteFill} />
-          ) : isWeb ? (
-            <View style={[StyleSheet.absoluteFill, { backgroundColor: BG_DARK }]} />
-          ) : null,
-        tabBarLabelStyle: {
-          fontSize: 9,
-          fontFamily: "Inter_500Medium",
-          letterSpacing: 0.5,
-        },
-      }}
-    >
+    <Tabs screenOptions={tabBarScreenOptions}>
       <Tabs.Screen
         name="home"
         options={{

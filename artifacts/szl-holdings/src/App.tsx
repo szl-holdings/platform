@@ -7,6 +7,7 @@ import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { AlloyLayout } from "@/alloy/components/alloy-layout";
+import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 
@@ -290,6 +291,7 @@ function App() {
       <LazyMotion features={domMax} strict>
         <StatusBanner config={SZL_STATUS_CONFIG} dismissible />
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <EcosystemNav currentAppId="szl-holdings" currentAppName="SZL Holdings" accentColor={SZL_ACCENT} />
           <Switch>
             {/* ── Public marketing routes ── */}
             <Route path="/">
