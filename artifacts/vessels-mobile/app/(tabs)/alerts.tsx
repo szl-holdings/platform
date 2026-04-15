@@ -4,7 +4,7 @@ import {
   RefreshControl, ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { VesselIcon, featherIcon } from "@/components/VesselIcon";
 import { useColors } from "@/hooks/useColors";
 import { api, type FleetException, CACHE_KEYS, cacheSet, cacheGetStale } from "@/lib/api";
@@ -43,7 +43,7 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-function AlertCard({ alert }: { alert: FleetException }) {
+function AlertCard({ alert, onAcknowledge, isAcknowledging }: { alert: FleetException; onAcknowledge?: (id: number) => void; isAcknowledging?: boolean }) {
   const colors = useColors();
   const sc = SEVERITY_COLORS[alert.severity] || colors.textFaint;
   const iconName = featherIcon(EXCEPTION_ICON_MAP[alert.exceptionType] ?? "alert-circle");
@@ -89,7 +89,18 @@ function AlertCard({ alert }: { alert: FleetException }) {
             </View>
           )}
         </View>
-        <Text style={[styles.timeText, { color: colors.textFaint }]}>{timeAgo(alert.detectedAt)}</Text>
+        <View style={styles.cardFooterRight}>
+          <Text style={[styles.timeText, { color: colors.textFaint }]}>{timeAgo(alert.detectedAt)}</Text>
+          {onAcknowledge && (
+            <TouchableOpacity
+              onPress={() => onAcknowledge(alert.id)}
+              disabled={isAcknowledging}
+              style={[styles.ackBtn, { borderColor: `${sc}40`, opacity: isAcknowledging ? 0.5 : 1 }]}
+            >
+              <Text style={[styles.ackText, { color: sc }]}>{isAcknowledging ? "…" : "ACK"}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -101,6 +112,28 @@ export default function AlertsScreen() {
   const [severityFilter, setSeverityFilter] = useState("all");
   const [refreshing, setRefreshing] = useState(false);
   const [cachedAlerts, setCachedAlerts] = useState<FleetException[]>([]);
+
+  const acknowledgeAlert = useMutation({
+    mutationFn: async (id: number) => {
+      const base = process.env.EXPO_PUBLIC_DOMAIN
+        ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
+        : "/api";
+      const res = await fetch(`${base}/vessels/exceptions/${id}/acknowledge`, { method: "POST" });
+      if (!res.ok) throw new Error("Acknowledge failed");
+    },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["fleet-exceptions-mobile"] });
+      const prev = queryClient.getQueryData<FleetException[]>(["fleet-exceptions-mobile"]);
+      queryClient.setQueryData<FleetException[]>(["fleet-exceptions-mobile"], old =>
+        (old ?? []).filter(a => a.id !== id)
+      );
+      return { prev };
+    },
+    onError: (_err, _id, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(["fleet-exceptions-mobile"], ctx.prev);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["fleet-exceptions-mobile"] }),
+  });
 
   const { data: alerts = [], isLoading, refetch } = useQuery({
     queryKey: ["fleet-exceptions-mobile"],
@@ -223,7 +256,13 @@ export default function AlertsScreen() {
           contentContainerStyle={styles.listContent}
           ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
-          renderItem={({ item }) => <AlertCard alert={item} />}
+          renderItem={({ item }) => (
+            <AlertCard
+              alert={item}
+              onAcknowledge={(id) => acknowledgeAlert.mutate(id)}
+              isAcknowledging={acknowledgeAlert.isPending && acknowledgeAlert.variables === item.id}
+            />
+          )}
           ListEmptyComponent={
             <View style={styles.emptyState}>
               <VesselIcon name="check-circle" size={32} color={colors.green} />
@@ -270,12 +309,15 @@ const styles = StyleSheet.create({
   vesselText: { fontSize: 11, fontFamily: "Inter_400Regular" },
   cardDesc: { fontSize: 12, lineHeight: 16, marginBottom: 10, fontFamily: "Inter_400Regular" },
   cardFooter: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  cardFooterLeft: { flexDirection: "row", gap: 6, flexWrap: "wrap" },
+  cardFooterLeft: { flexDirection: "row", gap: 6, flexWrap: "wrap", flex: 1 },
+  cardFooterRight: { flexDirection: "row", alignItems: "center", gap: 8, marginLeft: 8 },
   typePill: { paddingHorizontal: 7, paddingVertical: 3, borderRadius: 8, borderWidth: 1 },
   typeText: { fontSize: 9, fontFamily: "Inter_500Medium" },
   impactPill: { paddingHorizontal: 7, paddingVertical: 3, borderRadius: 8 },
   impactText: { fontSize: 9, fontWeight: "600" as const, fontFamily: "Inter_600SemiBold" },
   timeText: { fontSize: 10, fontFamily: "Inter_400Regular" },
+  ackBtn: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, borderWidth: 1 },
+  ackText: { fontSize: 9, fontWeight: "700" as const, fontFamily: "Inter_700Bold", letterSpacing: 0.5 },
   loadingState: { flex: 1, justifyContent: "center", alignItems: "center" },
   emptyState: { alignItems: "center", paddingVertical: 60, gap: 8 },
   emptyTitle: { fontSize: 16, fontWeight: "600" as const, fontFamily: "Inter_600SemiBold" },

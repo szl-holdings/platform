@@ -53,7 +53,7 @@ async function updateAction(
     body: JSON.stringify({ state }),
   });
   if (!res.ok) {
-    console.warn(`[Alerts] Action update failed for id=${id}: HTTP ${res.status}`);
+    throw new Error(`Action update failed for id=${id}: HTTP ${res.status}`);
   }
 }
 
@@ -62,11 +62,13 @@ type StylesType = ReturnType<typeof makeStyles>;
 function AlertCard({
   action,
   onUpdate,
+  onRollback,
   authHeaders,
   styles,
 }: {
   action: LyteAction;
   onUpdate: (state: string) => void;
+  onRollback: (prevState: string) => void;
   authHeaders: Record<string, string>;
   styles: StylesType;
 }) {
@@ -75,10 +77,17 @@ function AlertCard({
 
   const handleAction = async (state: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const prevState = action.state;
     setLoading(state);
-    await updateAction(action.id, state, authHeaders);
     onUpdate(state);
-    setLoading(null);
+    try {
+      await updateAction(action.id, state, authHeaders);
+    } catch {
+      onRollback(prevState);
+      Alert.alert("Error", "Could not update alert. Please try again.");
+    } finally {
+      setLoading(null);
+    }
   };
 
   const handleSnooze = () => {
@@ -279,6 +288,9 @@ export default function AlertsScreen() {
                   setLocalOverrides(prev => ({ ...prev, [a.id]: state }));
                 }}
                 styles={styles}
+                onRollback={(prevState) => {
+                  setLocalOverrides(prev => ({ ...prev, [a.id]: prevState }));
+                }}
               />
             ))}
           </View>

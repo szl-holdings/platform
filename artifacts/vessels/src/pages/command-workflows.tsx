@@ -127,11 +127,21 @@ export default function CommandWorkflowsPage() {
   const acknowledgeEvent = useMutation({
     mutationFn: ({ id }: { id: number }) =>
       apiFetch(`/vessels/events/${id}`, { method: "PATCH", body: JSON.stringify({ status: "acknowledged" }) }),
-    onSuccess: () => {
-      toast.success("Event acknowledged");
-      queryClient.invalidateQueries({ queryKey: ["vessel-events"] });
+    onMutate: async ({ id }) => {
+      await queryClient.cancelQueries({ queryKey: ["vessel-events"] });
+      const prev = queryClient.getQueriesData({ queryKey: ["vessel-events"] });
+      queryClient.setQueriesData({ queryKey: ["vessel-events"] }, (old: unknown) => {
+        if (!Array.isArray(old)) return old;
+        return old.map((e: Record<string, unknown>) => e.id === id ? { ...e, status: "acknowledged" } : e);
+      });
+      return { prev };
     },
-    onError: () => toast.error("Failed to acknowledge event"),
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) ctx.prev.forEach(([key, data]) => queryClient.setQueryData(key, data));
+      toast.error("Failed to acknowledge event");
+    },
+    onSuccess: () => toast.success("Event acknowledged"),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["vessel-events"] }),
   });
 
   const createWorkflow = useMutation({

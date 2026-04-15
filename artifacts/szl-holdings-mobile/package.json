@@ -15,10 +15,11 @@
     "@expo/cli": "54.0.23",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-async-storage/async-storage": "2.2.0",
+    "@szl-holdings/api-client-react": "workspace:*",
+    "@szl-holdings/mobile-shared": "workspace:*",
     "@tanstack/react-query": "catalog:",
     "@types/react": "~19.1.10",
     "@types/react-dom": "~19.1.7",
-    "@szl-holdings/api-client-react": "workspace:*",
     "babel-plugin-react-compiler": "^19.0.0-beta-e993439-20250117",
     "expo": "~54.0.27",
     "expo-auth-session": "~7.0.10",
@@ -48,12 +49,14 @@
     "react-native-svg": "15.12.1",
     "react-native-web": "^0.21.0",
     "typescript": "~5.9.2",
-    "zod": "catalog:",
-    "@szl-holdings/mobile-shared": "workspace:*"
+    "zod": "catalog:"
   },
   "dependencies": {
+    "@szl-holdings/prism-bus": "workspace:*",
+    "@tanstack/query-async-storage-persister": "^5.99.0",
+    "@tanstack/query-persist-client-core": "^5.99.0",
+    "@tanstack/query-sync-storage-persister": "^5.99.0",
     "graphql": "^16.13.2",
-    "urql": "^5.0.1",
-    "@szl-holdings/prism-bus": "workspace:*"
+    "urql": "^5.0.1"
   }
 }

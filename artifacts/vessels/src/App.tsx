@@ -1,6 +1,8 @@
 import { lazy, Suspense, useState } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import { persistQueryClient } from "@tanstack/query-persist-client-core";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
@@ -27,6 +29,7 @@ import { PackBanner } from "@szl-holdings/shared-ui";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 import { SidebarNav, type SidebarNavSection } from "@szl-holdings/shared-ui/design-system";
 import { DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
+import { StaleIndicator } from "@szl-holdings/shared-ui/stale-indicator";
 
 const VESSELS_ACCENT = LANE_ACCENT_HEX.vessels.primaryLight;
 
@@ -140,6 +143,15 @@ const TradingDeskPage = lazy(() => import("@/pages/trading-desk"));
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
 });
+
+if (typeof window !== "undefined") {
+  persistQueryClient({
+    queryClient,
+    persister: createSyncStoragePersister({ storage: window.localStorage, key: "vessels-web-rq-cache" }),
+    maxAge: 1000 * 60 * 60,
+    buster: "v1",
+  });
+}
 
 const primaryNavItems = [
   { path: "/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -675,6 +687,7 @@ function App() {
     <SandboxModeProvider>
       <DemoModeProvider>
         <QueryClientProvider client={queryClient}>
+          <StaleIndicator accentColor={VESSELS_ACCENT} />
           <AuthProvider>
             <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
               <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />

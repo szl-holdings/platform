@@ -286,8 +286,25 @@ export default function IncidentsPage() {
   });
 
   const updateMut = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => api.incidents.update(id, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["incidents"] }); toast.success("Incident updated"); },
+    mutationFn: ({ id, data }: { id: number; data: Record<string, unknown> }) => api.incidents.update(id, data),
+    onMutate: async ({ id, data }) => {
+      await qc.cancelQueries({ queryKey: ["incidents"] });
+      const prev = qc.getQueryData(["incidents"]);
+      qc.setQueryData(["incidents"], (old: unknown) => {
+        if (!old || typeof old !== "object") return old;
+        const asObj = old as Record<string, unknown>;
+        const list = Array.isArray(asObj.incidents) ? asObj.incidents : Array.isArray(old) ? (old as Record<string, unknown>[]) : [];
+        const updated = list.map((i: Record<string, unknown>) => i.id === id ? { ...i, ...data } : i);
+        return Array.isArray(old) ? updated : { ...asObj, incidents: updated };
+      });
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev !== undefined) qc.setQueryData(["incidents"], ctx.prev);
+      toast.error("Failed to update incident");
+    },
+    onSuccess: () => toast.success("Incident updated"),
+    onSettled: () => qc.invalidateQueries({ queryKey: ["incidents"] }),
   });
 
   const deleteMut = useMutation({

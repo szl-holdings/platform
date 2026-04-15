@@ -30,6 +30,8 @@
   },
   "dependencies": {
     "@szl-holdings/shared-ui": "workspace:*",
+    "@tanstack/query-persist-client-core": "^5.99.0",
+    "@tanstack/query-sync-storage-persister": "^5.99.0",
     "clsx": "catalog:"
   }
 }

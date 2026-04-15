@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRealtimeChannel } from "@szl-holdings/shared-ui";
 import { Activity, AlertTriangle, RefreshCw, Plus, X } from "lucide-react";
 import { RiskBadge, StageBadge, DealHealthCard, ProbabilityBar, formatCurrency, AgentAvatar } from "@/components/brokerage-ui";
@@ -16,6 +16,15 @@ function fetchJson(path: string) {
 async function postJson(path: string, body: unknown) {
   const r = await fetch(`${API}${path}`, {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  return r.json();
+}
+
+async function patchJson(path: string, body: unknown) {
+  const r = await fetch(`${API}${path}`, {
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
@@ -68,9 +77,11 @@ const STAGE_LABELS: Record<string, string> = {
   "lost": "Lost",
 };
 
-function DealCard({ deal }: { deal: ApiDeal }) {
+function DealCard({ deal, onAdvance }: { deal: ApiDeal; onAdvance?: (id: string, stage: string) => void }) {
   const bottleneck = deal.daysInStage > 21 && !["closed", "lost"].includes(deal.stage);
   const score = deal.probability;
+  const stageIdx = STAGES.indexOf(deal.stage as typeof STAGES[number]);
+  const nextStage = stageIdx >= 0 && stageIdx < STAGES.length - 3 ? STAGES[stageIdx + 1] : null;
 
   return (
     <div className={cn(
@@ -127,6 +138,15 @@ function DealCard({ deal }: { deal: ApiDeal }) {
         <div className="mt-2 text-[10px] text-terra-text-muted truncate">
           <span className="text-terra-primary">→</span> {deal.nextAction}
         </div>
+      )}
+
+      {nextStage && onAdvance && (
+        <button
+          onClick={() => onAdvance(deal.id, nextStage)}
+          className="mt-2 w-full text-[10px] font-semibold text-terra-primary border border-terra-primary/30 rounded-lg py-1 hover:bg-terra-primary/10 transition-colors"
+        >
+          Advance → {STAGE_LABELS[nextStage]}
+        </button>
       )}
     </div>
   );
@@ -284,6 +304,27 @@ export default function DealsPage() {
     staleTime: 30000,
   });
 
+  const advanceStageMut = useMutation({
+    mutationFn: ({ id, stage }: { id: string; stage: string }) =>
+      patchJson(`/terra/pipeline/deals/${id}/stage`, { stage }),
+    onMutate: async ({ id, stage }) => {
+      await qc.cancelQueries({ queryKey: ["terra-deals"] });
+      const prev = qc.getQueryData(["terra-deals"]);
+      qc.setQueryData(["terra-deals"], (old: { deals?: ApiDeal[] } | undefined) => {
+        if (!old?.deals) return old;
+        return {
+          ...old,
+          deals: old.deals.map((d) => d.id === id ? { ...d, stage, daysInStage: 0 } : d),
+        };
+      });
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev !== undefined) qc.setQueryData(["terra-deals"], ctx.prev);
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["terra-deals"] }),
+  });
+
   const { lastMessage: wsTerraMsg } = useRealtimeChannel("terra-signals");
   useEffect(() => {
     if (!wsTerraMsg) return;
@@ -377,7 +418,13 @@ export default function DealsPage() {
                     <span className="text-[10px] text-terra-text-muted">({stageDeals.length})</span>
                   </div>
                   <div className="space-y-3">
-                    {stageDeals.map(deal => <DealCard key={deal.id} deal={deal} />)}
+                    {stageDeals.map(deal => (
+                      <DealCard
+                        key={deal.id}
+                        deal={deal}
+                        onAdvance={(id, stage) => advanceStageMut.mutate({ id, stage })}
+                      />
+                    ))}
                     {stageDeals.length === 0 && (
                       <div className="rounded-xl border border-dashed border-terra-border p-4 text-center">
                         <p className="text-xs text-terra-text-muted">No deals</p>

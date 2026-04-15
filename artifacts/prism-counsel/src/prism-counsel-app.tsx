@@ -1,6 +1,8 @@
 import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useIsFetching } from "@tanstack/react-query";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import { persistQueryClient } from "@tanstack/query-persist-client-core";
 import { LazyMotion, domMax } from "framer-motion";
 import { DemoModeProvider } from "@szl-holdings/shared-ui";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
@@ -11,6 +13,15 @@ const queryClient = new QueryClient({
     queries: { refetchOnWindowFocus: false, retry: false, staleTime: 5 * 60 * 1000 },
   },
 });
+
+if (typeof window !== "undefined") {
+  persistQueryClient({
+    queryClient,
+    persister: createSyncStoragePersister({ storage: window.localStorage, key: "prism-counsel-rq-cache" }),
+    maxAge: 1000 * 60 * 60,
+    buster: "v1",
+  });
+}
 
 function PageLoader() {
   return (
@@ -533,9 +544,21 @@ function PrismCounselRoutes() {
   );
 }
 
+function PrismStaleBar() {
+  const isFetching = useIsFetching();
+  if (!isFetching) return null;
+  return (
+    <div style={{ position: "fixed", top: 0, left: 0, right: 0, height: 2, zIndex: 9999, overflow: "hidden", pointerEvents: "none" }}>
+      <div style={{ height: "100%", width: "33%", background: "#c8a96e", opacity: 0.8, animation: "prism-slide 1.4s ease-in-out infinite", borderRadius: 9999 }} />
+      <style>{`@keyframes prism-slide { 0% { transform: translateX(-100%); } 50% { transform: translateX(200%); } 100% { transform: translateX(400%); } }`}</style>
+    </div>
+  );
+}
+
 export function PrismCounselApp() {
   return (
     <QueryClientProvider client={queryClient}>
+      <PrismStaleBar />
       <LazyMotion features={domMax}>
         <DemoModeProvider>
           <WouterRouter>

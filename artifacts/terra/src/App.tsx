@@ -5,11 +5,14 @@ import { SandboxModeProvider, SandboxModeBanner, AnalyticsProvider } from "@szl-
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import { persistQueryClient } from "@tanstack/query-persist-client-core";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { beaconConfig } from "@szl-holdings/shared-ui/copilot-configs";
 import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
 import { TerraLayout } from "@/components/terra-layout";
+import { StaleIndicator } from "@szl-holdings/shared-ui/stale-indicator";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
@@ -19,6 +22,15 @@ const TERRA_ACCENT = LANE_ACCENT_HEX.terra.primary;
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60_000, retry: 1 } },
 });
+
+if (typeof window !== "undefined") {
+  persistQueryClient({
+    queryClient,
+    persister: createSyncStoragePersister({ storage: window.localStorage, key: "terra-web-rq-cache" }),
+    maxAge: 1000 * 60 * 60,
+    buster: "v1",
+  });
+}
 
 const TerraPulse = lazy(() => import("@/pages/pulse"));
 const TerraAtlasArtifactsPage = lazy(() => import("@/pages/atlas-artifacts"));
@@ -242,6 +254,7 @@ function App() {
     <PrismBusProvider domain="terra">
     <SandboxModeProvider>
       <QueryClientProvider client={queryClient}>
+        <StaleIndicator accentColor={TERRA_ACCENT} />
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
           <AgentCopilot config={beaconConfig} />

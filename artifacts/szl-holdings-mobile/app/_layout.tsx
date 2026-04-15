@@ -7,6 +7,9 @@ import {
 } from "@expo-google-fonts/inter";
 import { setBaseUrl, setAuthTokenGetter } from "@szl-holdings/api-client-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
+import { persistQueryClient } from "@tanstack/query-persist-client-core";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getAuthToken } from "@/lib/apiClient";
 import { getGraphQLClient } from "@/lib/graphqlClient";
 import { Provider as UrqlProvider } from "urql";
@@ -43,6 +46,19 @@ const queryClient = new QueryClient({
       staleTime: 30000,
     },
   },
+});
+
+const persister = createAsyncStoragePersister({
+  storage: AsyncStorage,
+  key: "szl-holdings-rq-cache",
+  throttleTime: 3000,
+});
+
+persistQueryClient({
+  queryClient,
+  persister,
+  maxAge: 1000 * 60 * 60 * 24,
+  buster: "v1",
 });
 
 function RootLayoutNav() {

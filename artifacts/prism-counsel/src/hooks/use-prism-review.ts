@@ -132,6 +132,28 @@ export function useMaxUnblockItem() {
   });
 }
 
+function makeOptimisticStatusUpdate(qc: ReturnType<typeof useQueryClient>, id: number, status: string) {
+  return async () => {
+    await qc.cancelQueries({ queryKey: ["review-desk"] });
+    const snapshots = qc.getQueriesData({ queryKey: ["review-desk"] });
+    qc.setQueriesData({ queryKey: ["review-desk"] }, (old: any) => {
+      if (!old) return old;
+      if (Array.isArray(old)) {
+        return old.map((item: any) => item.id === id ? { ...item, status } : item);
+      }
+      if (old.items && Array.isArray(old.items)) {
+        return { ...old, items: old.items.map((item: any) => item.id === id ? { ...item, status } : item) };
+      }
+      return old;
+    });
+    return { snapshots };
+  };
+}
+
+function rollbackSnapshots(qc: ReturnType<typeof useQueryClient>, snapshots: Array<[readonly unknown[], unknown]> | undefined) {
+  if (snapshots) snapshots.forEach(([key, data]) => qc.setQueryData(key, data));
+}
+
 export function useReviewAction() {
   const qc = useQueryClient();
   const invalidate = () => {
@@ -141,19 +163,25 @@ export function useReviewAction() {
   const approve = useMutation({
     mutationFn: ({ id, actorId, notes }: { id: number; actorId?: number; notes?: string }) =>
       api(`/items/${id}/actions/approve`, { method: "POST", body: JSON.stringify({ actorId, notes }) }),
-    onSuccess: invalidate,
+    onMutate: ({ id }) => makeOptimisticStatusUpdate(qc, id, "approved")(),
+    onError: (_err, _vars, ctx) => { rollbackSnapshots(qc, ctx?.snapshots); },
+    onSettled: invalidate,
   });
 
   const reject = useMutation({
     mutationFn: ({ id, actorId, reason }: { id: number; actorId?: number; reason?: string }) =>
       api(`/items/${id}/actions/reject`, { method: "POST", body: JSON.stringify({ actorId, reason }) }),
-    onSuccess: invalidate,
+    onMutate: ({ id }) => makeOptimisticStatusUpdate(qc, id, "rejected")(),
+    onError: (_err, _vars, ctx) => { rollbackSnapshots(qc, ctx?.snapshots); },
+    onSettled: invalidate,
   });
 
   const revise = useMutation({
     mutationFn: ({ id, actorId, notes }: { id: number; actorId?: number; notes?: string }) =>
       api(`/items/${id}/actions/revise`, { method: "POST", body: JSON.stringify({ actorId, notes }) }),
-    onSuccess: invalidate,
+    onMutate: ({ id }) => makeOptimisticStatusUpdate(qc, id, "revision_requested")(),
+    onError: (_err, _vars, ctx) => { rollbackSnapshots(qc, ctx?.snapshots); },
+    onSettled: invalidate,
   });
 
   const escalate = useMutation({

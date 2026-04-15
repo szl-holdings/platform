@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useColors } from "@/hooks/useColors";
 
 const API_URL = `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
@@ -54,7 +55,16 @@ function formatDate(dateStr: string): { day: string; date: string; month: string
   };
 }
 
-const UPCOMING_SESSIONS = [
+type SessionItem = {
+  id: number;
+  title: string;
+  date: string;
+  time: string;
+  location?: string;
+  status: string;
+};
+
+const UPCOMING_SESSIONS: SessionItem[] = [
   {
     id: 1,
     title: "Q2 Review Session",
@@ -76,11 +86,75 @@ const UPCOMING_SESSIONS = [
 export default function SessionsScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const qc = useQueryClient();
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [selectedService, setSelectedService] = useState("");
-  const [submitting, setSubmitting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  const apiBase = process.env.EXPO_PUBLIC_DOMAIN
+    ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
+    : "/api";
+
+  const { data: sessions = UPCOMING_SESSIONS } = useQuery<SessionItem[]>({
+    queryKey: ["carlota-sessions"],
+    queryFn: async () => {
+      const res = await fetch(`${apiBase}/carlota-jo/booking/reservations`);
+      if (!res.ok) return UPCOMING_SESSIONS;
+      const json = await res.json();
+      const rows: SessionItem[] = json.data ?? [];
+      return rows.length > 0 ? rows : UPCOMING_SESSIONS;
+    },
+    initialData: UPCOMING_SESSIONS,
+    staleTime: 30_000,
+  });
+
+  const bookSession = useMutation({
+    mutationFn: async ({ service, date, time }: { service: string; date: string; time: string }) => {
+      const res = await fetch(`${apiBase}/carlota-jo/booking/reservations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ service, date, time, clientName: "Client" }),
+      });
+      if (!res.ok) throw new Error("Booking failed");
+      return res.json();
+    },
+    onMutate: async ({ service, date, time }) => {
+      await qc.cancelQueries({ queryKey: ["carlota-sessions"] });
+      const prev = qc.getQueryData<SessionItem[]>(["carlota-sessions"]);
+      const optimistic: SessionItem = {
+        id: Date.now(),
+        title: service.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+        date,
+        time,
+        status: "Pending confirmation",
+      };
+      qc.setQueryData<SessionItem[]>(["carlota-sessions"], (old) => [
+        ...(old ?? []),
+        optimistic,
+      ]);
+      return { prev };
+    },
+    onSuccess: () => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert(
+        "Session Requested",
+        `Your consultation request has been submitted.\n\nRosa will confirm within 24 hours.`,
+        [{ text: "Done", onPress: () => {
+          setSelectedDate("");
+          setSelectedTime("");
+          setSelectedService("");
+        }}]
+      );
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev !== undefined) {
+        qc.setQueryData<SessionItem[]>(["carlota-sessions"], ctx.prev);
+      }
+      Alert.alert("Error", "Unable to submit. Please try again.");
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["carlota-sessions"] }),
+  });
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
@@ -94,31 +168,13 @@ export default function SessionsScreen() {
     setRefreshing(false);
   }, []);
 
-  const handleBookSession = async () => {
+  const handleBookSession = () => {
     if (!selectedDate || !selectedTime || !selectedService) {
       Alert.alert("Incomplete", "Please select a service, date, and time.");
       return;
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setSubmitting(true);
-
-    try {
-      await new Promise((r) => setTimeout(r, 1500));
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert(
-        "Session Requested",
-        `Your consultation request has been submitted.\n\nRosa will confirm within 24 hours.`,
-        [{ text: "Done", onPress: () => {
-          setSelectedDate("");
-          setSelectedTime("");
-          setSelectedService("");
-        }}]
-      );
-    } catch {
-      Alert.alert("Error", "Unable to submit. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
+    bookSession.mutate({ service: selectedService, date: selectedDate, time: selectedTime });
   };
 
   return (
@@ -148,12 +204,12 @@ export default function SessionsScreen() {
           Schedule a{"\n"}Consultation
         </Text>
 
-        {UPCOMING_SESSIONS.length > 0 && (
+        {sessions.length > 0 && (
           <View style={styles.section}>
             <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>
               UPCOMING
             </Text>
-            {UPCOMING_SESSIONS.map((session) => (
+            {sessions.map((session) => (
               <Pressable key={session.id}>
                 <View
                   style={[styles.sessionCard, { borderColor: colors.goldBorder }]}
@@ -359,7 +415,7 @@ export default function SessionsScreen() {
 
         <Pressable
           onPress={handleBookSession}
-          disabled={submitting || !selectedDate || !selectedTime || !selectedService}
+          disabled={bookSession.isPending || !selectedDate || !selectedTime || !selectedService}
           style={({ pressed }) => [
             styles.submitBtn,
             {
@@ -371,7 +427,7 @@ export default function SessionsScreen() {
             },
           ]}
         >
-          {submitting ? (
+          {bookSession.isPending ? (
             <ActivityIndicator color={colors.inkDeep} size="small" />
           ) : (
             <Text

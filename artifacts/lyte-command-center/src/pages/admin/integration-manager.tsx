@@ -131,6 +131,23 @@ export default function IntegrationManager() {
   const toggleMutation = useMutation({
     mutationFn: ({ name, enabled }: { name: string; enabled: boolean }) =>
       apiFetch(`/admin/connectors/${name}/enable`, { method: "PUT", body: JSON.stringify({ enabled }) }),
+    onMutate: async ({ name, enabled }) => {
+      await qc.cancelQueries({ queryKey: ["admin-connectors"] });
+      const prev = qc.getQueryData<{ connectors: Connector[]; summary: object }>(["admin-connectors"]);
+      qc.setQueryData<{ connectors: Connector[]; summary: object }>(["admin-connectors"], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          connectors: old.connectors.map((c) =>
+            c.name === name ? { ...c, syncEnabled: enabled } : c
+          ),
+        };
+      });
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev !== undefined) qc.setQueryData(["admin-connectors"], ctx.prev);
+    },
     onSettled: () => qc.invalidateQueries({ queryKey: ["admin-connectors"] }),
   });
 

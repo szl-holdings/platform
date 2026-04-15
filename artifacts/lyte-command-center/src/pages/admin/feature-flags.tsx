@@ -34,7 +34,18 @@ export default function FeatureFlags() {
   const toggleMutation = useMutation({
     mutationFn: ({ key, enabled }: { key: string; enabled: boolean }) =>
       apiFetch(`/admin/feature-flags/${key}`, { method: "PUT", body: JSON.stringify({ enabled }) }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["feature-flags"] }),
+    onMutate: async ({ key, enabled }) => {
+      await qc.cancelQueries({ queryKey: ["feature-flags"] });
+      const prev = qc.getQueryData<{ flags: FeatureFlag[] }>(["feature-flags"]);
+      qc.setQueryData<{ flags: FeatureFlag[] }>(["feature-flags"], old =>
+        old ? { ...old, flags: old.flags.map(f => f.key === key ? { ...f, enabled } : f) } : old
+      );
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["feature-flags"], ctx.prev);
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["feature-flags"] }),
   });
 
   const flags = data?.flags ?? [];

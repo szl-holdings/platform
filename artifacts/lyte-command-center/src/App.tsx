@@ -1,11 +1,14 @@
 import React, { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import { persistQueryClient } from "@tanstack/query-persist-client-core";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { SandboxModeProvider, SandboxModeBanner, CookieBanner, StatusBanner, AnalyticsProvider } from "@szl-holdings/shared-ui";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { LyteLayout } from "@/components/lyte-layout";
+import { StaleIndicator } from "@szl-holdings/shared-ui/stale-indicator";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { beaconConfig } from "@szl-holdings/shared-ui/copilot-configs";
 import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
@@ -26,6 +29,15 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+if (typeof window !== "undefined") {
+  persistQueryClient({
+    queryClient,
+    persister: createSyncStoragePersister({ storage: window.localStorage, key: "lyte-web-rq-cache" }),
+    maxAge: 1000 * 60 * 60,
+    buster: "v1",
+  });
+}
 
 function PageLoader() {
   return (
@@ -376,6 +388,7 @@ function App() {
     <PrismBusProvider domain="lyte">
     <SandboxModeProvider>
       <QueryClientProvider client={queryClient}>
+        <StaleIndicator accentColor={LYTE_ACCENT} />
         <DemoModeProvider>
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
             <StatusBanner config={LYTE_STATUS_CONFIG} />

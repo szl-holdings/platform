@@ -19,8 +19,8 @@ catalogs:
       specifier: ^4.1.14
       version: 4.2.1
     '@tanstack/react-query':
-      specifier: 5.90.21
-      version: 5.90.21
+      specifier: 5.99.0
+      version: 5.99.0
     '@types/node':
       specifier: ^25.3.3
       version: 25.3.5
@@ -171,6 +171,15 @@ importers:
       '@szl-holdings/prism-bus':
         specifier: workspace:*
         version: link:../../lib/prism-bus
+      '@tanstack/query-async-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-persist-client-core':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-sync-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
     devDependencies:
       '@babel/core':
         specifier: ^7.25.2
@@ -204,7 +213,7 @@ importers:
         version: link:../../lib/mobile-shared
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.90.21(react@19.1.0)
+        version: 5.99.0(react@19.1.0)
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14
@@ -624,6 +633,15 @@ importers:
       '@szl-holdings/prism-bus':
         specifier: workspace:*
         version: link:../../lib/prism-bus
+      '@tanstack/query-async-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-persist-client-core':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-sync-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
       expo-device:
         specifier: ~8.0.10
         version: 8.0.10(expo@54.0.33)
@@ -666,7 +684,7 @@ importers:
         version: link:../../lib/mobile-shared
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.90.21(react@19.1.0)
+        version: 5.99.0(react@19.1.0)
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14
@@ -819,7 +837,7 @@ importers:
         version: 4.2.1(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.90.21(react@19.1.0)
+        version: 5.99.0(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -880,6 +898,12 @@ importers:
       '@szl-holdings/services':
         specifier: workspace:*
         version: link:../../lib/services
+      '@tanstack/query-persist-client-core':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-sync-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
     devDependencies:
       '@replit/vite-plugin-cartographer':
         specifier: 'catalog:'
@@ -913,7 +937,7 @@ importers:
         version: 4.2.1(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.90.21(react@19.1.0)
+        version: 5.99.0(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -986,6 +1010,12 @@ importers:
       '@szl-holdings/services':
         specifier: workspace:*
         version: link:../../lib/services
+      '@tanstack/query-persist-client-core':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-sync-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
     devDependencies:
       '@replit/vite-plugin-cartographer':
         specifier: 'catalog:'
@@ -1013,7 +1043,7 @@ importers:
         version: 4.2.1(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.90.21(react@19.1.0)
+        version: 5.99.0(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -1062,6 +1092,15 @@ importers:
       '@szl-holdings/prism-bus':
         specifier: workspace:*
         version: link:../../lib/prism-bus
+      '@tanstack/query-async-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-persist-client-core':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-sync-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
     devDependencies:
       '@babel/core':
         specifier: ^7.25.2
@@ -1092,7 +1131,7 @@ importers:
         version: link:../../lib/mobile-shared
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.90.21(react@19.1.0)
+        version: 5.99.0(react@19.1.0)
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14
@@ -1387,6 +1426,12 @@ importers:
       '@szl-holdings/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui
+      '@tanstack/query-persist-client-core':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-sync-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
       clsx:
         specifier: 'catalog:'
         version: 2.1.1
@@ -1405,7 +1450,7 @@ importers:
         version: 4.2.1(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.90.21(react@19.1.0)
+        version: 5.99.0(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -1478,7 +1523,7 @@ importers:
         version: link:../../lib/mobile-shared
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.90.21(react@19.1.0)
+        version: 5.99.0(react@19.1.0)
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14
@@ -1638,7 +1683,7 @@ importers:
         version: 4.2.1(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.90.21(react@19.1.0)
+        version: 5.99.0(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -1741,7 +1786,7 @@ importers:
         version: 4.2.1(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.90.21(react@19.1.0)
+        version: 5.99.0(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -1787,6 +1832,15 @@ importers:
       '@szl-holdings/prism-bus':
         specifier: workspace:*
         version: link:../../lib/prism-bus
+      '@tanstack/query-async-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-persist-client-core':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-sync-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
       graphql:
         specifier: ^16.13.2
         version: 16.13.2
@@ -1817,7 +1871,7 @@ importers:
         version: link:../../lib/mobile-shared
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.90.21(react@19.1.0)
+        version: 5.99.0(react@19.1.0)
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14
@@ -1923,6 +1977,12 @@ importers:
       '@szl-holdings/prism-bus':
         specifier: workspace:*
         version: link:../../lib/prism-bus
+      '@tanstack/query-persist-client-core':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-sync-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
       '@types/mapbox-gl':
         specifier: ^3.5.0
         version: 3.5.0
@@ -1959,7 +2019,7 @@ importers:
         version: 4.2.1(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.90.21(react@19.1.0)
+        version: 5.99.0(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -2011,6 +2071,15 @@ importers:
       '@szl-holdings/prism-bus':
         specifier: workspace:*
         version: link:../../lib/prism-bus
+      '@tanstack/query-async-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-persist-client-core':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-sync-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
       expo-device:
         specifier: ~8.0.10
         version: 8.0.10(expo@54.0.33)
@@ -2050,7 +2119,7 @@ importers:
         version: link:../../lib/mobile-shared
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.90.21(react@19.1.0)
+        version: 5.99.0(react@19.1.0)
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14
@@ -2189,6 +2258,12 @@ importers:
       '@szl-holdings/services':
         specifier: workspace:*
         version: link:../../lib/services
+      '@tanstack/query-persist-client-core':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-sync-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
       '@types/mapbox-gl':
         specifier: ^3.5.0
         version: 3.5.0
@@ -2225,7 +2300,7 @@ importers:
         version: 4.2.1(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.90.21(react@19.1.0)
+        version: 5.99.0(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -2274,6 +2349,15 @@ importers:
       '@szl-holdings/prism-bus':
         specifier: workspace:*
         version: link:../../lib/prism-bus
+      '@tanstack/query-async-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-persist-client-core':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-sync-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
     devDependencies:
       '@babel/core':
         specifier: ^7.25.2
@@ -2304,7 +2388,7 @@ importers:
         version: link:../../lib/mobile-shared
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.90.21(react@19.1.0)
+        version: 5.99.0(react@19.1.0)
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14
@@ -2458,7 +2542,7 @@ importers:
     dependencies:
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.90.21(react@19.1.0)
+        version: 5.99.0(react@19.1.0)
 
   lib/api-spec:
     devDependencies:
@@ -2682,7 +2766,7 @@ importers:
     dependencies:
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.90.21(react@19.1.0)
+        version: 5.99.0(react@19.1.0)
       lucide-react:
         specifier: 'catalog:'
         version: 0.545.0(react@19.1.0)
@@ -2695,10 +2779,20 @@ importers:
         version: 19.2.14
 
   lib/mobile-shared:
+    dependencies:
+      '@tanstack/query-async-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-persist-client-core':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-sync-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
     devDependencies:
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.90.21(react@19.1.0)
+        version: 5.99.0(react@19.1.0)
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14
@@ -2942,9 +3036,15 @@ importers:
       '@szl-holdings/replit-auth-web':
         specifier: workspace:*
         version: link:../replit-auth-web
+      '@tanstack/query-persist-client-core':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-sync-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.90.21(react@19.1.0)
+        version: 5.99.0(react@19.1.0)
       '@udecode/plate-common':
         specifier: ^42.0.0
         version: 42.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -5911,11 +6011,20 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7
 
-  '@tanstack/query-core@5.90.20':
-    resolution: {integrity: sha512-OMD2HLpNouXEfZJWcKeVKUgQ5n+n3A2JFmBaScpNDUqSrQSjiveC7dKMe53uJUg1nDG16ttFPz2xfilz6i2uVg==}
+  '@tanstack/query-async-storage-persister@5.99.0':
+    resolution: {integrity: sha512-RUG++yZf8RoRK1Yz83WHHYJ6EF8DqKIF/UNNUUDEw/cY9SLKhAeEd4a0+kDzNRdb4RGXXeF5UIuzoEFJ7elLwQ==}
 
-  '@tanstack/react-query@5.90.21':
-    resolution: {integrity: sha512-0Lu6y5t+tvlTJMTO7oh5NSpJfpg/5D41LlThfepTixPYkJ0sE2Jj0m0f6yYqujBwIXlId87e234+MxG3D3g7kg==}
+  '@tanstack/query-core@5.99.0':
+    resolution: {integrity: sha512-3Jv3WQG0BCcH7G+7lf/bP8QyBfJOXeY+T08Rin3GZ1bshvwlbPt7NrDHMEzGdKIOmOzvIQmxjk28YEQX60k7pQ==}
+
+  '@tanstack/query-persist-client-core@5.99.0':
+    resolution: {integrity: sha512-FzXoxqGYa+ozGNGBIPHJT06rJD4geiHGbVXNS8K7cwN34te64LXlO5Ep+roQYvZjXJFNrLa4W48DIYITpMxzuA==}
+
+  '@tanstack/query-sync-storage-persister@5.99.0':
+    resolution: {integrity: sha512-Q7xJ+AiesEEB8ZKGrsv7qJfhyr0eT1Z+84TZxQspGZZnJziOalcLUOLGgHOxPaEQGGcxqM1NbrgGYO/WpnTjeQ==}
+
+  '@tanstack/react-query@5.99.0':
+    resolution: {integrity: sha512-OY2bCqPemT1LlqJ8Y2CUau4KELnIhhG9Ol3ZndPbdnB095pRbPo1cHuXTndg8iIwtoHTgwZjyaDnQ0xD0mYwAw==}
     peerDependencies:
       react: 19.1.0
 
@@ -14559,11 +14668,25 @@ snapshots:
       tailwindcss: 4.2.1
       vite: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
-  '@tanstack/query-core@5.90.20': {}
-
-  '@tanstack/react-query@5.90.21(react@19.1.0)':
+  '@tanstack/query-async-storage-persister@5.99.0':
     dependencies:
-      '@tanstack/query-core': 5.90.20
+      '@tanstack/query-core': 5.99.0
+      '@tanstack/query-persist-client-core': 5.99.0
+
+  '@tanstack/query-core@5.99.0': {}
+
+  '@tanstack/query-persist-client-core@5.99.0':
+    dependencies:
+      '@tanstack/query-core': 5.99.0
+
+  '@tanstack/query-sync-storage-persister@5.99.0':
+    dependencies:
+      '@tanstack/query-core': 5.99.0
+      '@tanstack/query-persist-client-core': 5.99.0
+
+  '@tanstack/react-query@5.99.0(react@19.1.0)':
+    dependencies:
+      '@tanstack/query-core': 5.99.0
       react: 19.1.0
 
   '@testing-library/dom@10.4.1':

@@ -14,7 +14,8 @@ import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useOptimisticMutation } from "@szl-holdings/mobile-shared/hooks";
 import { useColors } from "@/hooks/useColors";
 import { SkeletonLoader } from "@szl-holdings/mobile-shared";
 import { useAlloyWebSocket } from "@/hooks/useAlloyWebSocket";
@@ -66,15 +67,24 @@ function useApprovals() {
 
 function useDecideApproval() {
   const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ id, decision }: { id: number; decision: string }) => {
+  return useOptimisticMutation<unknown, Error, { id: number; decision: string }>({
+    queryKey: ["szl-alloy-approvals-pending"],
+    updater: (old, variables) => {
+      if (!old) return old;
+      const list = Array.isArray(old) ? old : (old as { data?: Approval[] }).data;
+      if (!Array.isArray(list)) return old;
+      const updated = list.map((a: Approval) =>
+        a.id === variables.id ? { ...a, status: variables.decision } : a
+      );
+      return Array.isArray(old) ? updated : { ...(old as object), data: updated };
+    },
+    mutationFn: async ({ id, decision }) => {
       return sharedApiFetch(`/api/alloy/approvals/${id}/decide`, {
         method: "POST",
         body: JSON.stringify({ decision }),
       });
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["szl-alloy-approvals-pending"] });
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ["szl-alloy-runs"] });
     },
   });
@@ -217,7 +227,6 @@ export default function AlloyScreen() {
   const [tab, setTab] = useState<"runs" | "approvals">("runs");
   const qc = useQueryClient();
   const decideApproval = useDecideApproval();
-  const [decidingId, setDecidingId] = useState<number | null>(null);
   const [recentlyUpdatedIds, setRecentlyUpdatedIds] = useState<Set<number>>(new Set());
 
   const { data: runsData, isLoading: runsLoading, isError: runsError, refetch: refetchRuns } = useRuns();
@@ -279,11 +288,10 @@ export default function AlloyScreen() {
         Alert.alert("Authentication Required", "Biometric authentication is required to approve or reject workflow actions.");
         return;
       }
-      setDecidingId(id);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       decideApproval.mutate(
         { id, decision },
         {
-          onSettled: () => setDecidingId(null),
           onError: () => {
             Alert.alert("Error", "Could not record decision. Please try again.");
           },
@@ -460,7 +468,7 @@ export default function AlloyScreen() {
                   key={approval.id}
                   approval={approval}
                   onDecide={handleDecide}
-                  isDeciding={decidingId === approval.id}
+                  isDeciding={decideApproval.isPending && decideApproval.variables?.id === approval.id}
                 />
               ))
             )}

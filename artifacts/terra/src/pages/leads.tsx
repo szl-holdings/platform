@@ -273,7 +273,21 @@ export default function LeadsPage() {
 
   const convertToDeal = useMutation({
     mutationFn: (leadId: string) => postJson("/terra/convert/lead-to-deal", { leadId }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["terra-leads"] }); },
+    onMutate: async (leadId) => {
+      await qc.cancelQueries({ queryKey: ["terra-leads"] });
+      const prev = qc.getQueryData(["terra-leads"]);
+      qc.setQueryData(["terra-leads"], (old: unknown) => {
+        if (!old || typeof old !== "object") return old;
+        const asObj = old as { leads?: Record<string, unknown>[] };
+        if (!Array.isArray(asObj.leads)) return old;
+        return { ...asObj, leads: asObj.leads.map((l) => l.id === leadId ? { ...l, stage: "converting" } : l) };
+      });
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["terra-leads"], ctx.prev);
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["terra-leads"] }),
   });
 
   const leads: ApiLead[] = data?.leads ?? [];

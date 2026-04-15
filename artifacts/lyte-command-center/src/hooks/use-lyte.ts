@@ -23,7 +23,21 @@ export function useUpdateSignal() {
       }
       return await api.signals.update(id, { status });
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["signals"] }),
+    onMutate: async ({ id, status }) => {
+      await queryClient.cancelQueries({ queryKey: ["signals"] });
+      const previous = queryClient.getQueriesData({ queryKey: ["signals"] });
+      queryClient.setQueriesData({ queryKey: ["signals"] }, (old: unknown) => {
+        if (!Array.isArray(old)) return old;
+        return old.map((s: Record<string, unknown>) => s.id === id ? { ...s, status } : s);
+      });
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        context.previous.forEach(([key, data]) => queryClient.setQueryData(key, data));
+      }
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["signals"] }),
   });
 }
 
@@ -61,7 +75,21 @@ export function useUpdateIncident() {
       }
       return await api.incidents.update(id, data);
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["incidents"] }),
+    onMutate: async ({ id, ...data }) => {
+      await queryClient.cancelQueries({ queryKey: ["incidents"] });
+      const previous = queryClient.getQueriesData({ queryKey: ["incidents"] });
+      queryClient.setQueriesData({ queryKey: ["incidents"] }, (old: unknown) => {
+        if (!Array.isArray(old)) return old;
+        return old.map((i: Record<string, unknown>) => i.id === id ? { ...i, ...data } : i);
+      });
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        context.previous.forEach(([key, data]) => queryClient.setQueryData(key, data));
+      }
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["incidents"] }),
   });
 }
 

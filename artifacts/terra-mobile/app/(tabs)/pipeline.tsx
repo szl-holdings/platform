@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
   ? "https://" + process.env.EXPO_PUBLIC_DOMAIN + "/api"
@@ -112,6 +112,8 @@ export default function PipelineTab() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
 
+  const qc = useQueryClient();
+
   const { data, isError: leadsError, refetch } = useQuery({
     queryKey: ["terra-pipeline"],
     queryFn: async () => {
@@ -151,13 +153,29 @@ export default function PipelineTab() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stage, notes: note || undefined, updatedAt: new Date().toISOString() }),
       });
+      if (!res.ok) throw new Error("Update failed");
       return res.ok;
     },
+    onMutate: async ({ id, stage }) => {
+      await qc.cancelQueries({ queryKey: ["terra-pipeline"] });
+      const prev = qc.getQueryData(["terra-pipeline"]);
+      qc.setQueryData(["terra-pipeline"], (old: any) => {
+        if (!old) return old;
+        const leads = old.leads ?? old;
+        const updated = leads.map((l: any) => l.id === id ? { ...l, stage } : l);
+        return Array.isArray(old) ? updated : { ...old, leads: updated };
+      });
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["terra-pipeline"], ctx.prev);
+      Alert.alert("Error", "Could not update pipeline stage. Please try again.");
+    },
     onSuccess: () => {
-      refetch();
       setShowEditModal(false);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["terra-pipeline"] }),
   });
 
   const handleRefresh = async () => {

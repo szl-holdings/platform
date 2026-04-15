@@ -8,7 +8,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import * as Haptics from "expo-haptics";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useOptimisticMutation } from "@szl-holdings/mobile-shared/hooks";
 import { useColors } from "@/hooks/useColors";
 import { apiFetch } from "@/lib/apiClient";
 import { GestureHandlerRootView, Swipeable } from "react-native-gesture-handler";
@@ -80,14 +81,15 @@ export default function WorkflowDetailScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [refreshing, setRefreshing] = useState(false);
-  const [decidingId, setDecidingId] = useState<number | null>(null);
   const qc = useQueryClient();
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom + 16;
 
+  const runQueryKey = ["alloy-run-detail", id];
+
   const { data: run, isLoading, isError, refetch } = useQuery<WorkflowRunDetail>({
-    queryKey: ["alloy-run-detail", id],
+    queryKey: runQueryKey,
     queryFn: async () => {
       const res = await apiFetch(`/api/alloy/runs/${id}`);
       if (!res.ok) throw new Error("Failed to load run");
@@ -98,8 +100,19 @@ export default function WorkflowDetailScreen() {
     refetchInterval: 15000,
   });
 
-  const decideApproval = useMutation({
-    mutationFn: async ({ approvalId, decision, note }: { approvalId: number; decision: "approved" | "rejected"; note?: string }) => {
+  const decideApproval = useOptimisticMutation<unknown, Error, { approvalId: number; decision: "approved" | "rejected"; note?: string }>({
+    queryKey: runQueryKey,
+    updater: (old, variables) => {
+      if (!old || typeof old !== "object") return old;
+      const run = old as WorkflowRunDetail;
+      return {
+        ...run,
+        approvals: (run.approvals ?? []).map((a) =>
+          a.id === variables.approvalId ? { ...a, status: variables.decision } : a
+        ),
+      };
+    },
+    mutationFn: async ({ approvalId, decision, note }) => {
       const body: { decision: string; note?: string } = { decision };
       if (note) body.note = note;
       const res = await apiFetch(`/api/alloy/approvals/${approvalId}/decide`, {
@@ -109,8 +122,8 @@ export default function WorkflowDetailScreen() {
       if (!res.ok) throw new Error("Failed to decide");
       return res.json();
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["alloy-run-detail", id] });
+    onError: () => Alert.alert("Error", "Could not record decision. Try again."),
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ["alloy-approvals-pending"] });
       qc.invalidateQueries({ queryKey: ["alloy-runs"] });
     },
@@ -125,11 +138,7 @@ export default function WorkflowDetailScreen() {
 
   const handleDecide = useCallback((approvalId: number, decision: "approved" | "rejected", note?: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setDecidingId(approvalId);
-    decideApproval.mutate({ approvalId, decision, note }, {
-      onSettled: () => setDecidingId(null),
-      onError: () => Alert.alert("Error", "Could not record decision. Try again."),
-    });
+    decideApproval.mutate({ approvalId, decision, note });
   }, [decideApproval]);
 
   if (isLoading) {
@@ -218,7 +227,7 @@ export default function WorkflowDetailScreen() {
                 key={approval.id}
                 approval={approval}
                 colors={colors}
-                deciding={decidingId === approval.id}
+                deciding={decideApproval.isPending && decideApproval.variables?.approvalId === approval.id}
                 onDecide={handleDecide}
               />
             ))}
@@ -287,7 +296,7 @@ function SwipeableApproval({
 
   return (
     <Swipeable renderRightActions={renderRightActions} renderLeftActions={renderLeftActions} overshootFriction={8}>
-      <View style={[styles.approvalCard, { backgroundColor: colors.card, borderColor: "rgba(139,92,246,0.2)" }]}>
+      <View style={[styles.approvalCard, { backgroundColor: colors.card, borderColor: deciding ? "rgba(139,92,246,0.5)" : "rgba(139,92,246,0.2)" }]}>
         <View style={styles.approvalTop}>
           <View style={[styles.approvalBadge, { backgroundColor: "rgba(245,158,11,0.1)" }]}>
             <Feather name="clock" size={11} color="#f59e0b" />
