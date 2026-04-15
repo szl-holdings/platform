@@ -5,6 +5,7 @@ import { Link, useLocation } from "wouter";
 import { analytics } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { UserButton } from "@szl-holdings/shared-ui/UserButton";
+import { useAuth } from "@szl-holdings/replit-auth-web";
 
 const NAV_ITEMS = [
   {
@@ -124,7 +125,6 @@ const NAV_LINKS_MOBILE = [
   { label: "Company", href: "/company", primary: false },
   { label: "Leadership", href: "/leadership", primary: false },
   { label: "Founder", href: "/founder", primary: false },
-  { label: "Forge", href: "/forge", primary: false },
   { label: "Design Partners", href: "/design-partner", primary: false },
   { label: "Contact", href: "/contact", primary: false },
 ];
@@ -134,6 +134,7 @@ export function SiteNav() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [location] = useLocation();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -313,6 +314,30 @@ export function SiteNav() {
                   </Link>
                 );
               })}
+              {isAuthenticated && (
+                <Link
+                  href="/forge"
+                  onClick={() => handleNavClick("Forge", "/forge")}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    fontSize: "0.8125rem",
+                    fontWeight: 500,
+                    color: location.startsWith("/forge") ? "var(--color-szl-accent)" : "var(--color-szl-text-secondary)",
+                    textDecoration: "none",
+                    padding: "0.375rem 0.625rem",
+                    borderRadius: "0.375rem",
+                    transition: "color 0.18s ease, background 0.18s ease",
+                    borderLeft: "1px solid var(--color-szl-border)",
+                    marginLeft: "0.25rem",
+                    paddingLeft: "0.75rem",
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-accent)"; (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.04)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = location.startsWith("/forge") ? "var(--color-szl-accent)" : "var(--color-szl-text-secondary)"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                >
+                  Forge
+                </Link>
+              )}
               <UserButton />
             </div>
 
@@ -376,6 +401,29 @@ export function SiteNav() {
                     {link.label}
                   </Link>
                 ))}
+                {isAuthenticated && (
+                  <>
+                    <div style={{ height: "1px", background: "var(--color-szl-border)", margin: "0.5rem 0.75rem" }} />
+                    <Link
+                      href="/forge"
+                      onClick={() => handleNavClick("Forge", "/forge")}
+                      style={{
+                        padding: "0.5rem 0.75rem",
+                        fontSize: "0.875rem",
+                        fontWeight: 500,
+                        color: "var(--color-szl-accent)",
+                        textDecoration: "none",
+                        borderRadius: "0.375rem",
+                        transition: "color 0.18s ease, background 0.18s ease",
+                        display: "block",
+                      }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.04)"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-accent)"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                    >
+                      Forge
+                    </Link>
+                  </>
+                )}
               </div>
             </m.div>
           )}
