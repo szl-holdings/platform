@@ -1,1 +1,0 @@
-maritime,fleet tracking,AIS,vessel tracking,shipping,port intelligence,maritime logistics,fleet management,voyage tracking,cargo

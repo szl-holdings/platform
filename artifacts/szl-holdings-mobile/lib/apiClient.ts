@@ -58,3 +58,39 @@ export async function apiFetchRaw(
   if (token) headers["Authorization"] = `Bearer ${token}`;
   return fetch(`${getApiBase()}${path}`, { ...init, headers });
 }
+
+export async function apiGet<T>(path: string): Promise<T> {
+  return apiFetch<T>(path, { method: "GET" });
+}
+
+export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
+  return apiFetch<T>(path, {
+    method: "POST",
+    body: body ? JSON.stringify(body) : undefined,
+  });
+}
+
+export async function apiPut<T>(path: string, body?: unknown): Promise<T> {
+  return apiFetch<T>(path, {
+    method: "PUT",
+    body: body ? JSON.stringify(body) : undefined,
+  });
+}
+
+export async function apiDelete<T>(path: string): Promise<T> {
+  return apiFetch<T>(path, { method: "DELETE" });
+}
+
+export async function graphqlRequest<T>(
+  query: string,
+  variables?: Record<string, unknown>
+): Promise<T> {
+  const result = await apiFetch<{ data?: T; errors?: unknown[] }>("/api/graphql", {
+    method: "POST",
+    body: JSON.stringify({ query, variables }),
+  });
+  if (result.errors?.length) {
+    throw new Error(`GraphQL error: ${JSON.stringify(result.errors[0])}`);
+  }
+  return result.data as T;
+}

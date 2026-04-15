@@ -13,7 +13,7 @@ import { Platform } from "react-native";
 
 WebBrowser.maybeCompleteAuthSession();
 
-export const AUTH_TOKEN_KEY = "szl_auth_token";
+export const AUTH_TOKEN_KEY = "cortex_auth_token";
 const ISSUER_URL = process.env.EXPO_PUBLIC_ISSUER_URL ?? "https://replit.com/oidc";
 
 export interface AuthUser {

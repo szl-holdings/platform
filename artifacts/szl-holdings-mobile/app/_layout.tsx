@@ -5,53 +5,87 @@ import {
   Inter_600SemiBold,
   useFonts,
 } from "@expo-google-fonts/inter";
+import {
+  SpaceGrotesk_500Medium,
+  SpaceGrotesk_600SemiBold,
+  SpaceGrotesk_700Bold,
+  useFonts as useSpaceFonts,
+} from "@expo-google-fonts/space-grotesk";
 import { setBaseUrl, setAuthTokenGetter } from "@szl-holdings/api-client-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import { persistQueryClient } from "@tanstack/query-persist-client-core";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getAuthToken } from "@/lib/apiClient";
-import { getGraphQLClient } from "@/lib/graphqlClient";
-import { Provider as UrqlProvider } from "urql";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
 import React, { useEffect } from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import * as SecureStore from "expo-secure-store";
 
-import { ErrorBoundary, NotificationProvider, OfflineBanner, ThemeProvider, CopilotFab, setUploadAuthTokenGetter, SyncEngineProvider, SyncStatusBanner, ConflictResolutionModal } from "@szl-holdings/mobile-shared";
+import {
+  ErrorBoundary,
+  NotificationProvider,
+  OfflineBanner,
+  ThemeProvider,
+  setUploadAuthTokenGetter,
+  BiometricProvider,
+  BiometricLockScreen,
+  useBiometric,
+  SyncEngineProvider,
+  SyncStatusBanner,
+  ConflictResolutionModal,
+  CopilotFab,
+} from "@szl-holdings/mobile-shared";
+import {
+  configurePushNotificationHandler,
+  usePushNotificationsBase,
+} from "@szl-holdings/mobile-shared/notifications";
 import { ErrorFallback } from "@/components/ErrorFallback";
-import { AuthProvider } from "@/context/AuthContext";
-import { BiometricLockProvider } from "@/context/BiometricLockContext";
+import { AuthProvider, AUTH_TOKEN_KEY } from "@/context/AuthContext";
+import { WorkspaceProvider } from "@/context/WorkspaceContext";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 
 if (process.env.EXPO_PUBLIC_DOMAIN) {
   setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
 }
-setAuthTokenGetter(() => getAuthToken());
-setUploadAuthTokenGetter(() => getAuthToken());
+
+async function getCortexAuthToken(): Promise<string | null> {
+  try {
+    if (Platform.OS === "web") {
+      return typeof window !== "undefined"
+        ? window.localStorage.getItem(AUTH_TOKEN_KEY)
+        : null;
+    }
+    return SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+setAuthTokenGetter(getCortexAuthToken);
+setUploadAuthTokenGetter(getCortexAuthToken);
+
+configurePushNotificationHandler();
 
 SplashScreen.preventAutoHideAsync();
 SystemUI.setBackgroundColorAsync("#090810");
 
-const SZL_API_BASE = process.env.EXPO_PUBLIC_DOMAIN
+const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
   : "/api";
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: {
-      retry: 1,
-      staleTime: 30000,
-    },
+    queries: { retry: 1, staleTime: 30000 },
   },
 });
 
 const persister = createAsyncStoragePersister({
   storage: AsyncStorage,
-  key: "szl-holdings-rq-cache",
+  key: "cortex-rq-cache",
   throttleTime: 3000,
 });
 
@@ -62,28 +96,58 @@ persistQueryClient({
   buster: "v1",
 });
 
-function RootLayoutNav() {
+function AppShell() {
+  const { isLocked, isEnabled } = useBiometric();
+
+  usePushNotificationsBase({
+    onTokenAcquired: async (token) => {
+      console.log("[CORTEX Push] token:", token.substring(0, 20) + "...");
+    },
+    onNotificationReceived: (notification) => {
+      const data = notification.request.content.data as Record<string, unknown>;
+      if (data?.domain) {
+        queryClient.invalidateQueries({ queryKey: [`${data.domain}-signals`] });
+      }
+    },
+  });
+
+  if (isEnabled && isLocked) {
+    return (
+      <BiometricLockScreen
+        config={{
+          appName: "CORTEX",
+          subtitle: "Authenticate to access Unified Command",
+          accentColor: "#c9a84c",
+          backgroundColor: "#090810",
+        }}
+      />
+    );
+  }
+
   return (
     <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="(shell)" options={{ headerShown: false }} />
       <Stack.Screen name="auth" options={{ headerShown: false, animation: "slide_from_bottom" }} />
-      <Stack.Screen name="portfolio/[id]" options={{ headerShown: false, animation: "slide_from_right" }} />
-      <Stack.Screen name="alloy" options={{ headerShown: false, animation: "slide_from_right" }} />
-      <Stack.Screen name="trust" options={{ headerShown: false, animation: "slide_from_right" }} />
-      <Stack.Screen name="agents" options={{ headerShown: false, animation: "slide_from_right" }} />
-      <Stack.Screen name="mcp-tools" options={{ headerShown: false, animation: "slide_from_right" }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );
 }
 
 export default function RootLayout() {
-  const [fontsLoaded, fontError] = useFonts({
+  const [interFontsLoaded, interFontError] = useFonts({
     Inter_300Light,
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
   });
+  const [spaceFontsLoaded, spaceFontError] = useSpaceFonts({
+    SpaceGrotesk_500Medium,
+    SpaceGrotesk_600SemiBold,
+    SpaceGrotesk_700Bold,
+  });
+
+  const fontsLoaded = interFontsLoaded && spaceFontsLoaded;
+  const fontError = interFontError || spaceFontError;
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
@@ -94,49 +158,59 @@ export default function RootLayout() {
   if (!fontsLoaded && !fontError) return null;
 
   return (
-    <PrismBusProvider domain="szl-holdings">
-    <SafeAreaProvider>
-      <ErrorBoundary FallbackComponent={ErrorFallback}>
-        <QueryClientProvider client={queryClient}>
-          <UrqlProvider value={getGraphQLClient()}>
+    <PrismBusProvider domain="cortex">
+      <SafeAreaProvider>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <QueryClientProvider client={queryClient}>
             <AuthProvider>
-              <NotificationProvider apiBase={SZL_API_BASE} getAuthToken={getAuthToken}>
-                <BiometricLockProvider>
-                  <SyncEngineProvider domain="szl-holdings" getToken={getAuthToken}>
-                  <GestureHandlerRootView style={{ flex: 1 }}>
-                    <ThemeProvider defaultMode="dark" storageKey="szl-theme-mode">
-                      <View style={{ flex: 1 }}>
-                        <RootLayoutNav />
-                        <OfflineBanner accentColor="#c8a96e" />
-                        <SyncStatusBanner accentColor="#c8a96e" />
-                        <ConflictResolutionModal accentColor="#c8a96e" />
-                        <CopilotFab config={{
-                          name: "Navigator",
-                          icon: "◈",
-                          agentId: "szl",
-                          accentColor: "#c8a96e",
-                          welcomeMessage: "I'm Navigator, your executive intelligence analyst for SZL Holdings. Ask about portfolio performance, asset status, or cross-domain updates.",
-                          placeholderText: "Ask about portfolio & assets...",
-                          isAdvisoryAgent: true,
-                          conversationKey: "szl-mobile",
-                          suggestedQuestions: [
-                            "How is the portfolio performing this quarter?",
-                            "What matters need my attention today?",
-                            "Give me an executive briefing",
-                          ],
-                          systemPrompt: "You are Navigator, the AI executive analyst for SZL Holdings family office platform. You specialize in portfolio oversight, investment performance, governance, asset tracking across maritime, real estate, and technology holdings. Be authoritative and executive-level. IMPORTANT: You are an ADVISORY AGENT — all investment decisions require human confirmation.",
-                        }} />
-                      </View>
-                    </ThemeProvider>
-                  </GestureHandlerRootView>
-                  </SyncEngineProvider>
-                </BiometricLockProvider>
-              </NotificationProvider>
+              <WorkspaceProvider>
+                <NotificationProvider apiBase={API_BASE} getAuthToken={getCortexAuthToken}>
+                  <BiometricProvider
+                    config={{
+                      storagePrefix: "cortex",
+                      appName: "CORTEX",
+                      promptMessage: "Authenticate to access Unified Command",
+                    }}
+                  >
+                    <SyncEngineProvider domain="cortex" getToken={getCortexAuthToken}>
+                      <GestureHandlerRootView style={{ flex: 1 }}>
+                        <ThemeProvider defaultMode="dark" storageKey="cortex-theme-mode">
+                          <View style={{ flex: 1 }}>
+                            <AppShell />
+                            <OfflineBanner accentColor="#c9a84c" />
+                            <SyncStatusBanner accentColor="#c9a84c" />
+                            <ConflictResolutionModal accentColor="#c9a84c" />
+                            <CopilotFab
+                              config={{
+                                name: "Navigator",
+                                icon: "⬡",
+                                agentId: "cortex",
+                                accentColor: "#c9a84c",
+                                welcomeMessage:
+                                  "I'm Navigator, your unified command intelligence. Ask me about any domain — defense, fleet, properties, operations, advisory, or portfolio.",
+                                placeholderText: "Ask anything across domains...",
+                                isAdvisoryAgent: true,
+                                conversationKey: "cortex-mobile",
+                                suggestedQuestions: [
+                                  "Give me a cross-domain briefing",
+                                  "What needs my attention today?",
+                                  "Show me active critical signals",
+                                ],
+                                systemPrompt:
+                                  "You are Navigator, the unified AI command intelligence for CORTEX — the SZL Holdings executive command app. You have visibility across all domains: Defense (Aegis), Fleet (Vessels), Properties (Terra), Operations (Lyte), Advisory (Carlota Jo), and Portfolio (SZL Holdings). Be strategic, executive-level, and concise. IMPORTANT: You are an ADVISORY AGENT — all decisions require human confirmation.",
+                              }}
+                            />
+                          </View>
+                        </ThemeProvider>
+                      </GestureHandlerRootView>
+                    </SyncEngineProvider>
+                  </BiometricProvider>
+                </NotificationProvider>
+              </WorkspaceProvider>
             </AuthProvider>
-          </UrqlProvider>
-        </QueryClientProvider>
-      </ErrorBoundary>
-    </SafeAreaProvider>
+          </QueryClientProvider>
+        </ErrorBoundary>
+      </SafeAreaProvider>
     </PrismBusProvider>
   );
 }

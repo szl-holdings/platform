@@ -1,9 +1,0 @@
-Version 1.0.0 — Initial Release
-
-• Real-time AIS fleet tracking with interactive maritime charts
-• Port intelligence with berth availability and congestion data
-• Vessel operations: specs, crew, cargo, and voyage documents
-• Route monitoring with waypoint and deviation alerts
-• Weather overlays and NAVTEX integration
-• Charter and cargo manifest tracking
-• 24/7 push alerts for fleet events and incidents

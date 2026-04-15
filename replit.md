@@ -212,6 +212,36 @@ A new `/fund` route section adds the industry's first agentic fund operations pl
 
 All pages are auth-gated via `<RequireAuth>`. A "Fund Intel" dropdown menu was added to the main site navigation.
 
+## CORTEX Unified Mobile Command (Task #548)
+
+All 7 domain mobile apps consolidated into a single **CORTEX** Expo app at `artifacts/szl-holdings-mobile/` (artifact ID: `artifacts/szl-holdings-mobile`). The 6 former standalone mobile apps (aegis-mobile, vessels-mobile, terra-mobile, lyte-mobile, carlota-jo-mobile, stephen-mobile) have been removed.
+
+### CORTEX Architecture
+- **Command Feed** (`app/(shell)/index.tsx`): Cross-domain situational awareness home screen with live signals and per-domain health cards.
+- **Shell Layout** (`app/(shell)/_layout.tsx`): Root authenticated shell housing the WorkspaceSwitcher drawer overlay and all workspace Stack routes.
+- **WorkspaceContext** (`context/WorkspaceContext.tsx`): Active workspace state, badge counts, drawer open/close. 8 domains: command, defense, fleet, properties, operations, advisory, portfolio, founder.
+- **WorkspaceSwitcher** (`components/WorkspaceSwitcher.tsx`): Animated spring-driven slide-in drawer + WorkspaceTrigger floating button (adapts accent color per workspace).
+- **Workspace routes**: `app/(shell)/[defense|fleet|properties|operations|advisory|portfolio|founder]/` — each has a Stack layout and `(tabs)/_layout.tsx` with tab bars adapted to the domain.
+- **Unified Auth**: Single `cortex_auth_token` key (changed from `szl_auth_token`) in SecureStore, shared across all workspace screens via unified `AuthContext`.
+- **Unified BiometricProvider**: Single `BiometricProvider` + `BiometricLockScreen` from `@szl-holdings/mobile-shared` wrapping the entire app.
+- **Shared lib**: `lib/cache.ts` (AsyncStorage cache with `cacheSet`/`cacheGetStale`/`CACHE_KEYS`), `lib/apiClient.ts` (apiGet/apiPost/apiPut/apiDelete/graphqlRequest), `lib/fleet/api.ts` + `lib/fleet/websocket.ts` (vessels-specific), `lib/notifications.ts` (scheduleLocalAlert).
+- **Operations workspace**: Wraps with `LyteProvider` + `LyteNotificationContext` for the Operations (Lyte) domain.
+- **CortexRQ cache**: TanStack Query persisted to AsyncStorage with key `cortex-rq-cache` (was `szl-holdings-rq-cache`).
+- **Cross-domain Navigator AI**: CopilotFab with cortex agent and ecosystem-wide system prompt.
+- **SpaceGrotesk fonts**: Added to root layout alongside Inter for the unified CORTEX brand.
+
+### Workspace Domains
+| Domain | Accent | Screens |
+|--------|--------|---------|
+| Command Feed | `#c9a84c` | Cross-domain signal feed, domain health cards |
+| Defense (Aegis) | `#ef4444` | SOC, incidents, findings, MITRE, digest, Sentinel AI |
+| Fleet (Vessels) | `#0ea5e9` | Map, fleet list, alerts, economics, Helmsman AI |
+| Properties (Terra) | `#c87941` | Map, listings, pipeline, scanner, Terrain AI |
+| Operations (Lyte) | `#a855f7` | Signal inbox, alerts, health, board-mode, Lyte AI |
+| Advisory (Carlota Jo) | `#10b981` | Home, documents, messages, sessions, Advisory AI |
+| Portfolio (SZL) | `#c9a84c` | Command, portfolio, investors, alloy, trust, Navigator AI |
+| Founder (Stephen) | `#6366f1` | Home, articles, ventures, tools, profile |
+
 ## Mobile Fleet Stabilization (Task #529)
 - **lib/mobile-shared** (`@szl-holdings/mobile-shared`) — shared infrastructure for all 7 Expo mobile apps:
   - **BiometricProvider** + **BiometricLockScreen** — parameterized FaceID/TouchID with auto-lock after configurable timeout, SecureStore-backed preferences

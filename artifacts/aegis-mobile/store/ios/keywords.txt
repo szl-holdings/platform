@@ -1,1 +1,0 @@
-cybersecurity,SOC,threat intelligence,incident response,SIEM,security operations,network security,enterprise security,MSSP,vulnerability management

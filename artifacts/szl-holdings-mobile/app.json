@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "SZL Holdings",
+    "name": "CORTEX",
     "slug": "szl-holdings-mobile",
-    "version": "1.0.0",
-    "description": "SZL Holdings Executive Command gives principals real-time visibility into portfolio performance, entity financials, investment pipelines, and strategic dashboards — secured with biometric authentication.",
+    "version": "2.0.0",
+    "description": "CORTEX Unified Command — The SZL Holdings ecosystem command app. Defense, Fleet, Properties, Operations, Advisory, Portfolio, and Founder workspaces in a single secured command surface.",
     "runtimeVersion": {
       "policy": "appVersion"
     },
@@ -22,9 +22,9 @@
       "bundleIdentifier": "com.szlholdings.executive.mobile",
       "buildNumber": "1",
       "infoPlist": {
-        "NSFaceIDUsageDescription": "SZL Holdings uses Face ID for secure principal access.",
-        "NSCameraUsageDescription": "SZL Holdings uses your camera for document scanning.",
-        "NSUserNotificationUsageDescription": "SZL Holdings sends portfolio alerts, financial updates, and executive briefings.",
+        "NSFaceIDUsageDescription": "CORTEX uses Face ID for secure command access.",
+        "NSCameraUsageDescription": "CORTEX uses your camera for document scanning and property capture.",
+        "NSUserNotificationUsageDescription": "CORTEX sends cross-domain alerts, signals, and executive briefings.",
         "ITSAppUsesNonExemptEncryption": false
       },
       "privacyManifests": {
@@ -78,7 +78,7 @@
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "Allow SZL Holdings to use Face ID for secure access."
+          "faceIDPermission": "Allow CORTEX to use Face ID for secure command access."
         }
       ],
       [
