@@ -153,38 +153,59 @@ export class MispTaxiiAdapter extends ServiceAdapter {
     };
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  private _discoveredApiRoot: string | null = null;
+
+  private async discoverApiRoot(): Promise<string> {
+    if (this._discoveredApiRoot) return this._discoveredApiRoot;
+
     const res = await this.resilientFetch(`${this.serverUrl}/taxii2/`, {
       headers: this.authHeaders,
       maxRetries: 1,
       timeoutMs: 10_000,
     });
-    if (!res.ok) throw new Error(`TAXII server HTTP ${res.status}`);
+    if (!res.ok) throw new Error(`TAXII discovery HTTP ${res.status}`);
     const json = await res.json() as any;
     if (!json.title && !json.api_roots) throw new Error("Invalid TAXII discovery response");
+
+    const roots: string[] = json.api_roots ?? [];
+    if (roots.length > 0) {
+      const root = roots[0].replace(/\/$/, "");
+      this._discoveredApiRoot = root.startsWith("http") ? root : `${this.serverUrl}/${root.replace(/^\//, "")}`;
+    } else {
+      this._discoveredApiRoot = `${this.serverUrl}/taxii2`;
+    }
+    return this._discoveredApiRoot;
+  }
+
+  protected async performHealthCheck(): Promise<void> {
+    await this.discoverApiRoot();
   }
 
   async getCollections(apiRoot?: string): Promise<TaxiiCollection[]> {
     if (!this.isLive) return [...DEMO_COLLECTIONS];
 
-    const root = apiRoot ?? "api1";
-    const res = await this.resilientFetch(`${this.serverUrl}/${root}/collections/`, {
-      headers: this.authHeaders,
-    });
+    try {
+      const root = apiRoot ? `${this.serverUrl}/${apiRoot.replace(/^\//, "")}` : await this.discoverApiRoot();
+      const res = await this.resilientFetch(`${root}/collections/`, {
+        headers: this.authHeaders,
+      });
 
-    if (!res.ok) return [...DEMO_COLLECTIONS];
-    const json = await res.json() as any;
-    const collections = json?.collections;
-    if (!Array.isArray(collections)) return [...DEMO_COLLECTIONS];
+      if (!res.ok) return [...DEMO_COLLECTIONS];
+      const json = await res.json() as any;
+      const collections = json?.collections;
+      if (!Array.isArray(collections)) return [...DEMO_COLLECTIONS];
 
-    return collections.map((c: any) => ({
-      id: c.id ?? "",
-      title: c.title ?? "Unknown",
-      description: c.description ?? "",
-      canRead: c.can_read ?? true,
-      canWrite: c.can_write ?? false,
-      mediaTypes: c.media_types ?? ["application/stix+json;version=2.1"],
-    }));
+      return collections.map((c: any) => ({
+        id: c.id ?? "",
+        title: c.title ?? "Unknown",
+        description: c.description ?? "",
+        canRead: c.can_read ?? true,
+        canWrite: c.can_write ?? false,
+        mediaTypes: c.media_types ?? ["application/stix+json;version=2.1"],
+      }));
+    } catch {
+      return [...DEMO_COLLECTIONS];
+    }
   }
 
   async pollIndicators(collectionId?: string, addedAfter?: string, limit = 50): Promise<TaxiiIngestionResult> {
@@ -200,18 +221,64 @@ export class MispTaxiiAdapter extends ServiceAdapter {
     }
 
     const colId = collectionId ?? "default";
-    const root = "api1";
-    let url = `${this.serverUrl}/${root}/collections/${colId}/objects/?type=indicator&limit=${limit}`;
-    if (addedAfter) url += `&added_after=${addedAfter}`;
+    try {
+      const root = await this.discoverApiRoot();
+      let url = `${root}/collections/${colId}/objects/?type=indicator&limit=${limit}`;
+      if (addedAfter) url += `&added_after=${addedAfter}`;
 
-    const res = await this.resilientFetch(url, {
-      headers: {
-        ...this.authHeaders,
-        Accept: "application/stix+json;version=2.1",
-      },
-    });
+      const res = await this.resilientFetch(url, {
+        headers: {
+          ...this.authHeaders,
+          Accept: "application/stix+json;version=2.1",
+        },
+      });
 
-    if (!res.ok) {
+      if (!res.ok) {
+        return {
+          collectionId: colId,
+          collectionTitle: "Unknown",
+          objectsIngested: DEMO_INDICATORS.length,
+          indicators: [...DEMO_INDICATORS],
+          lastPolled: new Date().toISOString(),
+          source: "demo",
+        };
+      }
+
+      const bundle = await res.json() as any;
+      const objects = bundle?.objects ?? [];
+
+      const indicators: StixIndicator[] = objects
+        .filter((o: any) => o.type === "indicator")
+        .map((o: any) => ({
+          id: o.id ?? "",
+          type: o.type,
+          specVersion: o.spec_version ?? "2.1",
+          created: o.created ?? "",
+          modified: o.modified ?? "",
+          name: o.name ?? "",
+          description: o.description ?? "",
+          pattern: o.pattern ?? "",
+          patternType: o.pattern_type ?? "stix",
+          validFrom: o.valid_from ?? "",
+          validUntil: o.valid_until ?? null,
+          confidence: o.confidence ?? 50,
+          labels: o.labels ?? [],
+          killChainPhases: (o.kill_chain_phases ?? []).map((p: any) => p.phase_name ?? ""),
+          externalReferences: (o.external_references ?? []).map((r: any) => ({
+            sourceName: r.source_name ?? "",
+            url: r.url ?? "",
+          })),
+        }));
+
+      return {
+        collectionId: colId,
+        collectionTitle: bundle?.id ?? colId,
+        objectsIngested: indicators.length,
+        indicators,
+        lastPolled: new Date().toISOString(),
+        source: "live",
+      };
+    } catch {
       return {
         collectionId: colId,
         collectionTitle: "Unknown",
@@ -221,40 +288,5 @@ export class MispTaxiiAdapter extends ServiceAdapter {
         source: "demo",
       };
     }
-
-    const bundle = await res.json() as any;
-    const objects = bundle?.objects ?? [];
-
-    const indicators: StixIndicator[] = objects
-      .filter((o: any) => o.type === "indicator")
-      .map((o: any) => ({
-        id: o.id ?? "",
-        type: o.type,
-        specVersion: o.spec_version ?? "2.1",
-        created: o.created ?? "",
-        modified: o.modified ?? "",
-        name: o.name ?? "",
-        description: o.description ?? "",
-        pattern: o.pattern ?? "",
-        patternType: o.pattern_type ?? "stix",
-        validFrom: o.valid_from ?? "",
-        validUntil: o.valid_until ?? null,
-        confidence: o.confidence ?? 50,
-        labels: o.labels ?? [],
-        killChainPhases: (o.kill_chain_phases ?? []).map((p: any) => p.phase_name ?? ""),
-        externalReferences: (o.external_references ?? []).map((r: any) => ({
-          sourceName: r.source_name ?? "",
-          url: r.url ?? "",
-        })),
-      }));
-
-    return {
-      collectionId: colId,
-      collectionTitle: bundle?.id ?? colId,
-      objectsIngested: indicators.length,
-      indicators,
-      lastPolled: new Date().toISOString(),
-      source: "live",
-    };
   }
 }
