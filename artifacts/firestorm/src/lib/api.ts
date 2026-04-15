@@ -124,6 +124,15 @@ export const api = {
     certAdvisories: (certId?: string) =>
       apiFetch<any>(`/firestorm/live/cert-advisories${certId ? `?cert=${certId}` : ""}`),
     feedStatus: () => apiFetch<any>("/firestorm/live/feed-status"),
+    gpuMetrics: () => apiFetch<any>("/integrations/nvidia-dcgm/gpus"),
+    gpuCluster: () => apiFetch<any>("/integrations/nvidia-dcgm/cluster"),
+    taxiiCollections: () => apiFetch<any>("/integrations/misp-taxii/collections"),
+    taxiiIndicators: (collectionId?: string, limit?: number) => {
+      const params = new URLSearchParams();
+      if (collectionId) params.set("collectionId", collectionId);
+      if (limit) params.set("limit", String(limit));
+      return apiFetch<any>(`/integrations/misp-taxii/indicators${params.toString() ? `?${params}` : ""}`);
+    },
   },
   hardeningControls: {
     list: (params?: { category?: string; status?: string }) => {

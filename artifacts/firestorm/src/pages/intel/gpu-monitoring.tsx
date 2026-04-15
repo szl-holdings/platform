@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import {
@@ -11,6 +12,7 @@ import {
 } from "recharts";
 import { InfraSimulator, MetricTimeSeriesSimulator } from "@szl-holdings/observability";
 import type { GpuNode, QueuedJob } from "@szl-holdings/observability";
+import { api } from "@/lib/api";
 
 const infraSim = new InfraSimulator(0x9ef4a2b8);
 const metricSim = new MetricTimeSeriesSimulator(0xdeadbeef);
@@ -242,7 +244,49 @@ function QueuedJobRow({ job, rank }: { job: QueuedJob; rank: number }) {
 }
 
 export default function GPUMonitoring() {
-  const { nodes, queuedJobs, clusterHealth } = clusterSnapshot;
+  const { data: liveGpuData } = useQuery({
+    queryKey: ["dcgm-gpus"],
+    queryFn: () => api.live.gpuMetrics(),
+    refetchInterval: 30_000,
+    staleTime: 15_000,
+  });
+
+  const { data: liveClusterData } = useQuery({
+    queryKey: ["dcgm-cluster"],
+    queryFn: () => api.live.gpuCluster(),
+    refetchInterval: 30_000,
+    staleTime: 15_000,
+  });
+
+  const liveGpus = liveGpuData?.gpus as Array<{
+    uuid: string; name: string; gpuUtilPct: number; memUsedMb: number;
+    memTotalMb: number; tempCelsius: number; powerWatts: number; fanSpeedPct: number;
+  }> | undefined;
+
+  const liveNodes: GpuNode[] | undefined = liveGpus?.map((g, i) => ({
+    id: g.uuid ?? `gpu-${i}`,
+    hostname: g.name ?? `gpu-node-${i}`,
+    gpuModel: g.name ?? "NVIDIA GPU",
+    gpuUtilPct: g.gpuUtilPct ?? 0,
+    vramUsedGb: (g.memUsedMb ?? 0) / 1024,
+    vramTotalGb: (g.memTotalMb ?? 0) / 1024,
+    tempCelsius: g.tempCelsius ?? 0,
+    powerWatts: g.powerWatts ?? 0,
+    fanSpeedPct: g.fanSpeedPct ?? 0,
+    state: g.tempCelsius >= 85 ? "error" as const : g.tempCelsius >= 75 ? "throttle" as const : g.gpuUtilPct >= 90 ? "plateau" as const : "ramping" as const,
+    pcieThroughputGbps: 0,
+    nvlinkBandwidthGbps: 0,
+    xidErrors: 0,
+    eccErrors: { singleBit: 0, doubleBit: 0 },
+    smClockMhz: 0,
+    memClockMhz: 0,
+    thermalHistory: [],
+  }));
+
+  const nodes = liveNodes ?? clusterSnapshot.nodes;
+  const queuedJobs = clusterSnapshot.queuedJobs;
+  const clusterHealth = liveClusterData?.summary?.clusterHealth ?? clusterSnapshot.clusterHealth;
+  const isLive = !!liveGpus;
 
   const healthColor = clusterHealth === "critical" ? "text-red-400" :
     clusterHealth === "degraded" ? "text-orange-400" : "text-emerald-400";
@@ -260,6 +304,10 @@ export default function GPUMonitoring() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Badge variant="outline" className={`text-xs ${isLive ? "text-cyan-400 border-cyan-500/30" : "text-slate-400 border-slate-500/30"}`}>
+            {isLive ? <Cpu className="w-3 h-3 mr-1 inline" /> : <Database className="w-3 h-3 mr-1 inline" />}
+            {isLive ? "DCGM Live" : "Simulated"}
+          </Badge>
           <Badge variant="outline" className={`${healthColor} text-xs capitalize`}>
             {clusterHealth === "healthy" ? <CheckCircle className="w-3 h-3 mr-1 inline" /> : <AlertTriangle className="w-3 h-3 mr-1 inline" />}
             Cluster {clusterHealth}

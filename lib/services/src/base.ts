@@ -280,6 +280,7 @@ export abstract class ServiceAdapter {
     if (typeof console !== "undefined") {
       if (level === "error") console.error(`[${this.name}] ${msg}`, JSON.stringify(entry));
       else if (level === "warn") console.warn(`[${this.name}] ${msg}`, JSON.stringify(entry));
+      else console.log(`[${this.name}] ${msg}`, JSON.stringify(entry));
     }
   }
 

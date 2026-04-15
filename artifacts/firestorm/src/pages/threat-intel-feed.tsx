@@ -318,6 +318,38 @@ export default function ThreatIntelFeed() {
     refetchInterval: 3600000,
   });
 
+  const { data: taxiiData, refetch: refetchTaxii } = useQuery({
+    queryKey: ["live-taxii-indicators"],
+    queryFn: () => api.live.taxiiIndicators(undefined, 50),
+    staleTime: 300_000,
+    refetchInterval: 300_000,
+  });
+
+  const taxiiIndicators = taxiiData?.indicators ?? [];
+  const taxiiSource = taxiiData?.source as string | undefined;
+
+  const liveIocs: StixIoc[] = taxiiIndicators.length > 0
+    ? taxiiIndicators.map((ind: { id: string; name: string; description: string; pattern: string; patternType: string; confidence: number; labels: string[]; validFrom: string; killChainPhases: string[] }) => ({
+        id: ind.id,
+        type: (ind.labels?.[0] ?? "indicator") as StixIoc["type"],
+        value: ind.pattern ?? "",
+        name: ind.name ?? "",
+        description: ind.description ?? "",
+        confidence: ind.confidence ?? 50,
+        tlp: "AMBER" as const,
+        severity: ind.confidence >= 80 ? "critical" as const : ind.confidence >= 60 ? "high" as const : "medium" as const,
+        firstSeen: new Date(ind.validFrom).getTime(),
+        lastSeen: Date.now(),
+        source: "TAXII Feed",
+        tags: ind.labels ?? [],
+        killChainPhase: ind.killChainPhases?.[0] ?? "exploitation",
+        relatedCampaign: undefined,
+      }))
+    : [];
+
+  const displayIocs = liveIocs.length > 0 ? liveIocs : simIocs;
+  const iocSource = taxiiSource === "live" ? "TAXII Live" : liveIocs.length > 0 ? "TAXII Demo" : "Simulator";
+
   const cves = cveData?.vulnerabilities ?? [];
   const kevVulns = kevData?.vulnerabilities ?? [];
   const newsItems = newsData?.news ?? [];
@@ -325,7 +357,7 @@ export default function ThreatIntelFeed() {
   const allCertAdvisories = certFeeds.flatMap((f: any) => f.advisories ?? []);
 
   const isLive = (cveData?.fetchedAt != null && cves.length > 0) ||
-    (kevData?.liveFeed === true) || (newsData?.liveData === true) || (certData?.liveFeeds > 0);
+    (kevData?.liveFeed === true) || (newsData?.liveData === true) || (certData?.liveFeeds > 0) || taxiiSource === "live";
 
   const isLoading = activeTab === "cves" ? cveLoading : activeTab === "kev" ? kevLoading :
     activeTab === "certs" ? certLoading : activeTab === "news" ? newsLoading : false;
@@ -335,6 +367,7 @@ export default function ThreatIntelFeed() {
     else if (activeTab === "kev") refetchKev();
     else if (activeTab === "certs") refetchCerts();
     else if (activeTab === "news") refetchNews();
+    else if (activeTab === "iocs") refetchTaxii();
   };
 
   const AiTriagePanel = ({ id }: { id: string }) => {
@@ -458,11 +491,11 @@ export default function ThreatIntelFeed() {
       {activeTab === "iocs" && (
         <div className="space-y-3">
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
-            <span>{simIocs.length} IOCs · sorted by confidence</span>
+            <span>{displayIocs.length} IOCs · sorted by confidence</span>
             <span>·</span>
-            <span>Sources: MISP, OTX, Recorded Future, GreyNoise, Abuse.ch</span>
+            <span>Source: {iocSource}</span>
           </div>
-          {simIocs
+          {displayIocs
             .sort((a, b) => b.confidence - a.confidence)
             .map(ioc => (
               <IocCard key={ioc.id} ioc={ioc} />
