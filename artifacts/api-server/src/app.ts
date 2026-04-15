@@ -18,6 +18,7 @@ import { telemetryMiddleware } from "./middlewares/telemetry";
 import { authMiddleware } from "./middlewares/authMiddleware";
 import { csrfMiddleware } from "./middlewares/csrf";
 import { sessionRefreshPolicy } from "./middlewares/session-policy";
+import { apiVersionMiddleware } from "./middlewares/api-version";
 import { etagMiddleware } from "./middlewares/optimistic-concurrency";
 
 const app: Express = express();
@@ -30,6 +31,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 app.use(correlationMiddleware);
+app.use(apiVersionMiddleware);
 
 app.use(helmet({
   contentSecurityPolicy: isProduction ? {
@@ -104,8 +106,8 @@ app.use(cors({
   origin: corsOriginFn,
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "X-Correlation-Id", "X-CSRF-Token"],
-  exposedHeaders: ["X-Correlation-Id"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "X-Correlation-Id", "X-CSRF-Token", "X-Api-Version"],
+  exposedHeaders: ["X-Correlation-Id", "X-Api-Version", "X-Api-Versions-Supported", "Deprecation", "Sunset", "X-Api-Deprecated", "X-Api-Deprecation-Notice"],
   maxAge: 86400,
 }));
 

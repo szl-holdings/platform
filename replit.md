@@ -271,6 +271,17 @@ In `callAgent()`, before prompt assembly: queries ontology for entities matching
 - `AIS_FEED_ENABLED` / `STIX_FEED_ENABLED` / `SANCTIONS_FEED_ENABLED` / `LEGAL_FEED_ENABLED` — Feed on/off toggles (default: all enabled)
 >>>>>>> 4cb15093 (feat(#541): Nuro Mesh graph intelligence + production OSINT feeds)
 
+## Platform Hardening (Task #530)
+- **CI/CD Pipelines**: Full GitHub Actions suite — ci.yml (lint, typecheck, test, build), deploy.yml (Replit), e2e.yml (Playwright matrix), lighthouse.yml, release.yml (auto-versioning), security.yml (SBOM + audit), codeql.yml, dependency-review.yml, container-publish.yml, npm-publish.yml, prism-counsel-ci.yml (Azure)
+- **Dependabot**: `.github/dependabot.yml` configured for all package ecosystems
+- **Unit Tests**: `tests/unit/config/` (17 tests for @szl-holdings/config), `tests/unit/observability/` (7 tests for telemetry collectors)
+- **APM**: `lib/observability/` (ServerTelemetryCollector, ClientTelemetryCollector, GenAI telemetry, OpenTelemetry, Sentry, Living Mesh), `artifacts/api-server/src/routes/apm.ts` (latency/spans/snapshot endpoints), `artifacts/api-server/src/lib/self-monitor.ts` (auto-alerting)
+- **Disaster Recovery**: `artifacts/api-server/src/lib/backup-service.ts` (pg_dump, manifest, retention), `artifacts/api-server/src/routes/backup.ts` (status/run/export-tenant)
+- **Feature Flags**: `artifacts/api-server/src/lib/platform-flags.ts` (18 platform flags, per-user/org/role overrides, percentage rollouts, evaluation context), `artifacts/api-server/src/routes/feature-flags.ts` (full CRUD + evaluate API), `artifacts/api-server/src/middlewares/feature-flag.ts` (route gating)
+- **API Versioning**: `artifacts/api-server/src/middlewares/api-version.ts` — X-Api-Version header, deprecation/sunset headers, requireMinVersion middleware, supported versions: 2025-01-01 (deprecated), 2026-04-15 (current)
+- **Rate Limiting**: `artifacts/api-server/src/middlewares/rate-limiters.ts` (express-rate-limit: global/read/write/public/GDPR), `artifacts/api-server/src/middlewares/sliding-window-limiter.ts` (PostgreSQL-backed atomic per-user/per-endpoint limits)
+- **Multi-Environment**: `artifacts/api-server/src/lib/env-config.ts` (dev/staging/prod detection, per-env feature toggles)
+
 ## External Dependencies
 - **Database:** PostgreSQL
 - **Authentication:** Replit Auth
