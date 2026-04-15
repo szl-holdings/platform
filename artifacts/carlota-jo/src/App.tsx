@@ -56,6 +56,11 @@ const EngagementROI = lazy(() => import("@/pages/engagement-roi"));
 const ScenarioSimulator = lazy(() => import("@/pages/scenario-simulator"));
 const ClientHealth = lazy(() => import("@/pages/client-health"));
 const ProposalGenerator = lazy(() => import("@/pages/proposal-generator"));
+const ConsultingOS = lazy(() => import("@/pages/consulting-os"));
+const KnowledgeGraph = lazy(() => import("@/pages/knowledge-graph"));
+const RevenueIntelligence = lazy(() => import("@/pages/revenue-intelligence"));
+const WorkshopPlatform = lazy(() => import("@/pages/workshop-platform"));
+const ExpertNetwork = lazy(() => import("@/pages/expert-network"));
 
 function PageLoader() {
   return (
@@ -144,6 +149,11 @@ function Router() {
         <Route path="/scenario-simulator" component={ScenarioSimulator} />
         <Route path="/client-health" component={ClientHealth} />
         <Route path="/proposal-generator" component={ProposalGenerator} />
+        <Route path="/consulting-os" component={ConsultingOS} />
+        <Route path="/knowledge-graph" component={KnowledgeGraph} />
+        <Route path="/revenue-intelligence" component={RevenueIntelligence} />
+        <Route path="/workshop-platform" component={WorkshopPlatform} />
+        <Route path="/expert-network" component={ExpertNetwork} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
@@ -163,6 +173,11 @@ const carlotaCommands: CommandItem[] = [
   { id: "nav-simulator", label: "Strategy Scenario Simulator", icon: "⚗️", group: "AI Platform", keywords: ["scenario", "what-if", "simulate", "model"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/scenario-simulator"); } },
   { id: "nav-health", label: "Client Health Score", icon: "❤️", group: "AI Platform", keywords: ["health", "client", "score", "risk"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/client-health"); } },
   { id: "nav-proposal", label: "Proposal Auto-Generator", icon: "📄", group: "AI Platform", keywords: ["proposal", "generate", "prospect", "pitch"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/proposal-generator"); } },
+  { id: "nav-os", label: "Consulting OS Dashboard", icon: "🖥️", group: "AI Platform", keywords: ["dashboard", "os", "platform", "overview"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/consulting-os"); } },
+  { id: "nav-knowledge", label: "Knowledge Graph & IP Library", icon: "🕸️", group: "AI Platform", keywords: ["knowledge", "graph", "ip", "library", "frameworks"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/knowledge-graph"); } },
+  { id: "nav-revenue", label: "Revenue Intelligence & Pipeline", icon: "💹", group: "AI Platform", keywords: ["revenue", "pipeline", "deals", "forecast"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/revenue-intelligence"); } },
+  { id: "nav-workshop", label: "Workshop & Training Platform", icon: "🎓", group: "AI Platform", keywords: ["workshop", "training", "agenda", "session"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/workshop-platform"); } },
+  { id: "nav-experts", label: "Expert Network & Team Assembly", icon: "👥", group: "AI Platform", keywords: ["experts", "team", "assembly", "network", "skills"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/expert-network"); } },
   { id: "app-szl", label: "SZL Holdings", icon: "🏛️", group: "Switch App", description: "Portfolio", action: () => { window.location.href = "/"; } },
 ];
 
