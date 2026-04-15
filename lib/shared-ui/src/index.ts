@@ -305,3 +305,5 @@ export {
   type SessionComment,
   type MultiplayerSessionProps,
 } from "./multiplayer-session";
+
+export { MicroFeedbackWidget, type MicroFeedbackWidgetProps, type FeedbackPayload, type FeedbackSentiment } from "./micro-feedback-widget";

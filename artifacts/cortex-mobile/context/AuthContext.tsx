@@ -38,6 +38,16 @@ function getApiBaseUrl(): string {
   return "";
 }
 
+async function clearStoredToken(): Promise<void> {
+  try {
+    if (Platform.OS === "web") {
+      if (typeof window !== "undefined") window.localStorage.removeItem(AUTH_TOKEN_KEY);
+    } else {
+      await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+    }
+  } catch {}
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,23 +60,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const fetchUser = useCallback(async (token: string) => {
-    try {
-      const res = await fetch(`${getApiBaseUrl()}/api/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
-      if (!res.ok) throw new Error("Failed");
-      const data = await res.json();
-      setUser({ id: data.id ?? "1", displayName: data.displayName ?? data.name ?? "User", email: data.email ?? null, avatarUrl: data.avatarUrl ?? data.profileImageUrl ?? null, roles: data.roles ?? [] });
-    } catch {
+    const res = await fetch(`${getApiBaseUrl()}/api/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) {
+      await clearStoredToken();
       setUser(null);
+      throw new Error(`Profile fetch failed: ${res.status}`);
     }
+    const data = await res.json();
+    setUser({
+      id: data.id,
+      displayName: data.displayName ?? data.name ?? null,
+      email: data.email ?? null,
+      avatarUrl: data.avatarUrl ?? data.profileImageUrl ?? null,
+      roles: Array.isArray(data.roles) ? data.roles : [],
+    });
   }, []);
 
   useEffect(() => {
     (async () => {
       try {
-        const token = Platform.OS === "web" ? (typeof window !== "undefined" ? window.localStorage.getItem(AUTH_TOKEN_KEY) : null) : await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
-        if (token) { await fetchUser(token); }
-      } catch {}
-      setIsLoading(false);
+        const token = Platform.OS === "web"
+          ? (typeof window !== "undefined" ? window.localStorage.getItem(AUTH_TOKEN_KEY) : null)
+          : await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+        if (token) {
+          await fetchUser(token);
+        }
+      } catch {
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
     })();
   }, [fetchUser]);
 
@@ -74,22 +97,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (response?.type === "success" && response.params?.code && discovery) {
       (async () => {
         try {
-          const tokenRes = await AuthSession.exchangeCodeAsync({ clientId: "cortex-mobile", code: response.params.code, redirectUri, extraParams: { code_verifier: request?.codeVerifier ?? "" } }, discovery);
+          const tokenRes = await AuthSession.exchangeCodeAsync(
+            { clientId: "cortex-mobile", code: response.params.code, redirectUri, extraParams: { code_verifier: request?.codeVerifier ?? "" } },
+            discovery
+          );
           const token = tokenRes.accessToken;
-          if (Platform.OS === "web") { if (typeof window !== "undefined") window.localStorage.setItem(AUTH_TOKEN_KEY, token); } else { await SecureStore.setItemAsync(AUTH_TOKEN_KEY, token); }
+          if (Platform.OS === "web") {
+            if (typeof window !== "undefined") window.localStorage.setItem(AUTH_TOKEN_KEY, token);
+          } else {
+            await SecureStore.setItemAsync(AUTH_TOKEN_KEY, token);
+          }
           await fetchUser(token);
-        } catch { console.warn("[Auth] Token exchange failed"); }
+        } catch {
+          setUser(null);
+        }
       })();
     }
   }, [response, discovery, request, redirectUri, fetchUser]);
 
   const login = useCallback(async () => {
-    if (request) { await promptAsync(); } else { console.warn("[Auth] Auth request not ready"); }
+    if (!request) {
+      throw new Error("Auth request not ready — discovery may still be loading");
+    }
+    await promptAsync();
   }, [request, promptAsync]);
 
   const logout = useCallback(async () => {
     setUser(null);
-    if (Platform.OS === "web") { if (typeof window !== "undefined") window.localStorage.removeItem(AUTH_TOKEN_KEY); } else { await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY); }
+    await clearStoredToken();
   }, []);
 
   return (

@@ -106,6 +106,7 @@ const CompanyPage = lazy(() => import("@/pages/company"));
 const FounderPage = lazy(() => import("@/pages/founder"));
 const NotFoundPage = lazy(() => import("@/pages/not-found"));
 const EcosystemPage = lazy(() => import("@/pages/ecosystem"));
+const AutopilotPage = lazy(() => import("@/pages/autopilot"));
 const CaseStudiesPage = lazy(() => import("@/pages/case-studies"));
 const InsightsPage = lazy(() => import("@/pages/insights"));
 const InsightsArticlePage = lazy(() => import("@/pages/insights-article"));
@@ -971,6 +972,9 @@ function App() {
             </Route>
             <Route path="/ecosystem">
               <Suspense fallback={<PageLoader />}><EcosystemPage /></Suspense>
+            </Route>
+            <Route path="/autopilot">
+              <Suspense fallback={<PageLoader />}><AutopilotPage /></Suspense>
             </Route>
             <Route path="/founder-legacy">
               <Redirect to="/investors/founder" />

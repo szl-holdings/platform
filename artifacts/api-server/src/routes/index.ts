@@ -170,6 +170,7 @@ import briefingRouter from "./briefing";
 import auditChainRouter from "./audit-chain";
 import revenueIntelligenceRouter from "./revenue-intelligence";
 import multiplayerSessionsRouter from "./multiplayer-sessions";
+import { autopilotRouter } from "./autopilot";
 
 const router: IRouter = Router();
 
@@ -647,5 +648,8 @@ router.use(revenueIntelligenceRouter);
 router.use("/sessions/command", _readLimiter);
 router.use("/sessions/command", _writeLimiter);
 router.use(multiplayerSessionsRouter);
+
+router.use("/autopilot", _readLimiter);
+router.use(autopilotRouter);
 
 export default router;
