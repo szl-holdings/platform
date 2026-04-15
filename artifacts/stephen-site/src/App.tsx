@@ -40,6 +40,14 @@ const ThesisTracker = lazy(() => import("@/pages/thesis-tracker"));
 const InfluenceMetrics = lazy(() => import("@/pages/influence-metrics"));
 const NetworkGraph = lazy(() => import("@/pages/network-graph"));
 
+// Creator Economy OS
+const MediaRelations = lazy(() => import("@/pages/media-relations"));
+const RevenueIntelligence = lazy(() => import("@/pages/revenue-intelligence"));
+const ContentCalendar = lazy(() => import("@/pages/content-calendar"));
+const DigitalProducts = lazy(() => import("@/pages/digital-products"));
+const BrandHealth = lazy(() => import("@/pages/brand-health"));
+const MonetizationAI = lazy(() => import("@/pages/monetization-ai"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -101,6 +109,15 @@ function Router() {
         <Route path="/thesis-tracker" component={ThesisTracker} />
         <Route path="/influence" component={InfluenceMetrics} />
         <Route path="/network" component={NetworkGraph} />
+
+        {/* Creator Economy OS */}
+        <Route path="/media" component={MediaRelations} />
+        <Route path="/revenue" component={RevenueIntelligence} />
+        <Route path="/content-calendar" component={ContentCalendar} />
+        <Route path="/products" component={DigitalProducts} />
+        <Route path="/brand-health" component={BrandHealth} />
+        <Route path="/monetization" component={MonetizationAI} />
+
         <Route path="/case-studies">
           <Redirect to="/work" />
         </Route>
