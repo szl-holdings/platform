@@ -165,17 +165,94 @@ Cross-domain signal aggregation and ecosystem monitoring. Provides a unified vie
 
 ## Screenshots
 
-| SZL Holdings Dashboard | Aegis SOC Command |
-|---|---|
-| ![SZL Holdings](docs/media/screenshots/szl-holdings-home.jpg) | ![Aegis](docs/media/screenshots/aegis-soc-dashboard.jpg) |
+### Platform Command Surface
 
-| Vessels Maritime | Terra Real Estate |
+| SZL Holdings — Observe · Understand · Decide · Execute | Lyte Command Center — PRISM Framework |
 |---|---|
-| ![Vessels](docs/media/screenshots/vessels-dashboard.jpg) | ![Terra](docs/media/screenshots/terra-marketing.jpg) |
+| ![SZL Holdings](screenshots/web-apps/szl-holdings-hero.jpg) | ![Lyte Command](screenshots/web-apps/lyte-command-center-hero.jpg) |
+| *Unified SZL Holdings command surface — business observability with explainable execution* | *PRISM framework: People, Revenue, Infrastructure, Security, Market — signal timeline and priority action queue* |
 
-| Lyte Command Center | Stephen Lutar |
+| Lyte Executive Action Queue | Lyte + Alloy — Signal-to-Action |
 |---|---|
-| ![Lyte](docs/media/screenshots/lyte-marketing.jpg) | ![Stephen](docs/media/screenshots/stephen-site.jpg) |
+| ![Lyte Executive](screenshots/web-apps/lyte-executive-command.jpg) | ![Alloy Actions](screenshots/web-apps/lyte-alloy-actions.jpg) |
+| *Executive command with approval chains, owner attribution, and audit trail* | *Signal normalization → workflow orchestration → human-in-the-loop approval gates* |
+
+---
+
+### Aegis — Security & Defense Intelligence (157 components)
+
+| SOC Command Center | Web Security Dashboard |
+|---|---|
+| ![Aegis SOC](screenshots/web-apps/aegis-soc-dashboard.jpg) | ![Aegis Hero](screenshots/web-apps/aegis-hero.jpg) |
+| *MITRE ATT&CK v14 mapping, SOAR playbooks, STIX/TAXII threat intel, XDR console, Sentinel AI agent* | *Unified security posture across endpoints, network, cloud, and OT/ICS environments* |
+
+| Aegis Mobile — Field Security Command | Aegis Firestorm — Defense Intelligence |
+|---|---|
+| ![Aegis Mobile](screenshots/mobile-apps/aegis-mobile-home.jpg) | ![Aegis Firestorm](screenshots/web-apps/aegis-firestorm-hero.jpg) |
+| *Full SOC capability in one authenticated mobile session — iOS and Android* | *Firestorm defense intelligence with cross-domain threat correlation and sanctions screening* |
+
+---
+
+### Vessels — Maritime Fleet Intelligence (83 components)
+
+| Fleet Command — AIS Telemetry | Fleet Map — Route Anomaly Detection |
+|---|---|
+| ![Vessels Fleet Command](screenshots/web-apps/vessels-fleet-command.jpg) | ![Vessels Fleet](screenshots/web-apps/vessels-fleet.jpg) |
+| *Real-time AIS tracking, dark vessel detection, voyage economics, commodity trading* | *Route anomaly detection, sanctions screening, and marine insurance in one command surface* |
+
+| Vessels Mobile — Field Fleet Tracking | Vessels Platform |
+|---|---|
+| ![Vessels Mobile](screenshots/mobile-apps/vessels-mobile-fleet.jpg) | ![Vessels](screenshots/web-apps/vessels-hero.jpg) |
+| *Fleet command from the field — AIS, anomalies, sanctions, and voyage data on iOS/Android* | *Helmsman AI agent for maritime intelligence with human-approved action execution* |
+
+---
+
+### Terra — Real Estate Intelligence (77 components)
+
+| Property Intelligence Dashboard | Deal Pipeline |
+|---|---|
+| ![Terra Dashboard](screenshots/web-apps/terra-dashboard.jpg) | ![Terra Pipeline](screenshots/web-apps/terra-pipeline.jpg) |
+| *NYC distress property pipeline, ownership entity graph, MLS ingestion, lead scoring* | *Broker workflow, deal pipeline, transaction tracking, and market signal intelligence* |
+
+| Terra Hero | Terra Mobile |
+|---|---|
+| ![Terra Hero](screenshots/web-apps/terra-hero.jpg) | ![Terra Mobile](screenshots/mobile-apps/terra-mobile-home.jpg) |
+| *Public data sources feeding real-time distress signals and ownership graph* | *Full real estate intelligence from mobile — property search, pipeline, and market signals* |
+
+---
+
+### PRISM Counsel — Legal Matter Command (127 components)
+
+| Matter Management | Legal Platform |
+|---|---|
+| ![PRISM Counsel](screenshots/web-apps/prism-counsel-hero.jpg) | ![PRISM Counsel Demo](screenshots/web-apps/prism-counsel-demo.jpg) |
+| *Court filing integration, multi-jurisdictional compliance, recovery tracking, approval chains* | *120+ legal database tables across 10 schema modules — cross-domain intelligence from defense and maritime* |
+
+---
+
+### Command Portal — Ecosystem Intelligence Hub
+
+![Command Portal](demo-assets/screenshots/command-hero.jpg)
+*Real-time 8-domain dashboard with SSE updates, composite health scoring, global Cmd+K search, executive briefing view, and per-domain drill-downs.*
+
+---
+
+### Carlota Jo — Premium Advisory (60 components)
+
+| Client Operations | Advisory Dashboard |
+|---|---|
+| ![Carlota Jo](screenshots/web-apps/carlota-jo-hero.jpg) | ![Carlota Jo Operator](screenshots/web-apps/carlota-jo-operator.jpg) |
+| *White-glove UHNW advisory — private intake, client portal, service catalog, document delivery* | *Operator view: client messaging, booking, reservation management, inquiry tracking* |
+
+---
+
+### CORTEX — Unified Mobile Command (116 screens)
+
+All 8 domain workspaces in a single Expo/React Native app with biometric authentication, workspace-adaptive AI copilot, and cross-domain badge counts.
+
+| Aegis Mobile | Vessels Mobile | Terra Mobile |
+|---|---|---|
+| ![Aegis Mobile](screenshots/mobile-apps/aegis-mobile-home.jpg) | ![Vessels Mobile](screenshots/mobile-apps/vessels-mobile-home.jpg) | ![Terra Mobile](screenshots/mobile-apps/terra-mobile-home.jpg) |
 
 ---
 

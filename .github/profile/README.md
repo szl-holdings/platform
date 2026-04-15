@@ -47,51 +47,142 @@ SZL Holdings builds the **governed operational intelligence layer** — the plat
 
 ---
 
-## Product Portfolio
+## Platform Overview
 
-<table>
-  <tr>
-    <td align="center" width="33%"><a href="https://github.com/szl-holdings/szl-holdings-platform"><img src="https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/master/docs/media/screenshots/szl-holdings-hero.jpg" width="280" alt="SZL Holdings" /></a><br><strong>SZL Holdings</strong><br><sub>Corporate Platform & Investor Intelligence</sub></td>
-    <td align="center" width="33%"><a href="https://github.com/szl-holdings/szl-holdings-platform"><img src="https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/master/docs/media/screenshots/aegis-hero.jpg" width="280" alt="Aegis" /></a><br><strong>Aegis</strong><br><sub>Cybersecurity & Defense Intelligence</sub></td>
-    <td align="center" width="33%"><a href="https://github.com/szl-holdings/szl-holdings-platform"><img src="https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/master/docs/media/screenshots/vessels-hero.jpg" width="280" alt="Vessels" /></a><br><strong>Vessels</strong><br><sub>Maritime Fleet Command & Intelligence</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><a href="https://github.com/szl-holdings/szl-holdings-platform"><img src="https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/master/docs/media/screenshots/terra-hero.jpg" width="280" alt="Terra" /></a><br><strong>Terra</strong><br><sub>Real Estate Property Intelligence</sub></td>
-    <td align="center"><a href="https://github.com/szl-holdings/szl-holdings-platform"><img src="https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/master/docs/media/screenshots/lyte-hero.jpg" width="280" alt="Lyte" /></a><br><strong>Lyte</strong><br><sub>Business Observability & PRISM Framework</sub></td>
-    <td align="center"><a href="https://github.com/szl-holdings/szl-holdings-platform"><img src="https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/master/docs/media/screenshots/prism-counsel-hero.jpg" width="280" alt="PRISM Counsel" /></a><br><strong>PRISM Counsel</strong><br><sub>Legal Matter Command & Case Intelligence</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><a href="https://github.com/szl-holdings/szl-holdings-platform"><img src="https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/master/docs/media/screenshots/carlota-jo-hero.jpg" width="280" alt="Carlota Jo" /></a><br><strong>Carlota Jo</strong><br><sub>Private Advisory & AI Concierge</sub></td>
-    <td align="center"><a href="https://github.com/szl-holdings/szl-holdings-platform"><img src="https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/master/docs/media/screenshots/stephen-lutar-hero.jpg" width="280" alt="Stephen Lutar" /></a><br><strong>Stephen Lutar</strong><br><sub>Founder Portfolio & Public Presence</sub></td>
-    <td align="center"><a href="https://github.com/szl-holdings/szl-holdings-platform"><strong>IMPERIUM</strong></a><br><sub>Cloud Sovereignty Engine</sub><br><br><a href="https://github.com/szl-holdings/szl-holdings-platform"><strong>Command Portal</strong></a><br><sub>Ecosystem Intelligence Hub</sub></td>
-  </tr>
-</table>
+```
+SZL Holdings Platform
+├── Lyte         Business observability — PRISM framework surfaces risk, drift, and friction before they compound
+├── Alloy        Execution fabric — signal normalization, workflow orchestration, human-in-the-loop gates
+│
+├── Aegis        Unified defense & security intelligence command (SOC + SOAR + threat intel)
+├── Vessels      Maritime fleet command, AIS tracking, sanctions screening, voyage economics
+├── Terra        Real estate intelligence — distress signals, ownership graph, deal pipeline
+├── PRISM Counsel Legal matter command — court filings, multi-jurisdictional compliance, recovery tracking
+├── Carlota Jo   Premium advisory operations for UHNW clients
+├── IMPERIUM     Cloud sovereignty — multi-tenant infrastructure control plane
+│
+├── CORTEX       Unified mobile command — all 8 domain workspaces in one native app
+└── Command Portal Cross-domain ecosystem hub — real-time SSE, executive briefing, global Cmd+K search
+```
+
+**Lyte + Alloy** form the core platform. The vertical platforms (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM) run on this shared foundation and share intelligence through the PRISM Bus — a cross-domain event system that makes every new vertical make the whole platform smarter.
+
+---
+
+## What Sets Us Apart
+
+Most enterprise platforms observe. SZL Holdings **acts** — under governance, with full attribution.
+
+### The PRISM Framework
+A unified signal classification layer — **P**eople, **R**evenue, **I**nfrastructure, **S**ecurity, **M**arket — that normalizes signals from any vertical into a single traceable decision flow. Not a dashboard. An operating system for business observability.
+
+### Cross-Domain Intelligence Fusion
+Vessels anomaly + Aegis threat + PRISM Counsel legal exposure = a single compound risk signal. No other platform in our category connects maritime, security, legal, and business intelligence into one correlated model. The PRISM Bus event system ensures every domain enriches every other.
+
+### Human-in-the-Loop AI Governance
+Advisory agents cannot execute consequential actions without explicit human confirmation — enforced at the Alloy workflow layer, not as an option. Every AI recommendation includes source citations, confidence scores, and retrieval provenance. The governance is structural, not policy-based.
+
+### Immutable Audit Trail
+Every action, approval, and AI recommendation generates an append-only audit event via `proof-chain`, cryptographically attributed to an actor with full decision provenance. Built for regulated industries from day one.
+
+### Signal-to-Outcome Traceability
+From the raw signal that triggered an alert, through the routing logic that assigned it, through the human approval that authorized action, to the executed outcome — every step is logged, linked, and replayable. Zero black-box decisions.
+
+### Compounding Architecture
+Each new vertical doesn't just add surface area — it makes the whole platform more intelligent. A maritime anomaly enriches a threat intelligence profile. A legal filing surfaces a distress property signal. A financial irregularity triggers a compliance workflow. This is **compounding moat architecture**.
+
+### Unified Mobile Command (CORTEX)
+All 8 domain workspaces in a single Expo/React Native app. Biometric auth, cross-domain badge counts, workspace-adaptive AI copilot, and a unified command feed. Operators in the field have full platform coverage from one authenticated session on iOS or Android.
+
+---
+
+## Product Gallery
+
+### SZL Holdings — Command Surface
+| Platform Hero | Ecosystem Architecture |
+|---|---|
+| ![SZL Holdings](./assets/screenshots/szl-holdings-dashboard-fresh.jpg) | ![SZL Holdings Ecosystem](./assets/screenshots/szl-holdings-ecosystem-fresh.jpg) |
+
+*Business observability with explainable execution — Observe, Understand, Decide, Execute. One holding company. One architecture. Six platforms. Everything compounds.*
+
+---
+
+### Aegis — Security & Defense Intelligence
+| Landing — Four Workspaces, One Intelligence Layer | SOC Command Center |
+|---|---|
+| ![Aegis Home](./assets/screenshots/aegis-home-fresh.jpg) | ![Aegis SOC](./assets/screenshots/aegis-soc-dashboard.jpg) |
+| *Aegis unifies defense, legal, command, and labs workspaces on a shared correlation engine* | *MITRE ATT&CK v14 mapping, SOAR playbooks, STIX/TAXII threat intel, XDR console, Sentinel AI agent* |
+
+---
+
+### Vessels — Maritime Fleet Intelligence
+| Fleet Command | Mobile Fleet Tracking |
+|---|---|
+| ![Vessels Fleet](./assets/screenshots/vessels-fleet-command.jpg) | ![Vessels Mobile](./assets/screenshots/vessels-mobile-fleet.jpg) |
+
+*AIS telemetry, sanctions screening, dark vessel detection, voyage economics, commodity trading, and marine insurance — all in one command surface. Helmsman AI agent. 83 components.*
+
+---
+
+### Terra — Real Estate Intelligence
+| Property Intelligence | Mobile Property View |
+|---|---|
+| ![Terra Dashboard](./assets/screenshots/terra-dashboard.jpg) | ![Terra Mobile](./assets/screenshots/terra-mobile-home.jpg) |
+
+*NYC distress property pipeline, ownership entity graph, deal pipeline, MLS ingestion, broker workflow, and market signal intelligence. 77 components.*
+
+---
+
+### Lyte — Business Observability
+| Command Center | Executive Action Queue |
+|---|---|
+| ![Lyte Command](./assets/screenshots/lyte-command-center-hero.jpg) | ![Lyte Executive](./assets/screenshots/lyte-executive-command.jpg) |
+
+*PRISM framework — People, Revenue, Infrastructure, Security, Market. Signal timeline, correlation engine, priority action queue, and AIOps. 142 components.*
+
+---
+
+### PRISM Counsel — Legal Matter Command
+![PRISM Counsel](./assets/screenshots/prism-counsel-hero.jpg)
+*Full matter management with court filing integration, multi-jurisdictional support, recovery tracking, and approval chains. 127 components. Rivals standalone LegalTech platforms with cross-domain intelligence from defense and maritime verticals.*
+
+---
+
+### Command Portal — Ecosystem Intelligence Hub
+![Command Portal](./assets/screenshots/command-hero.jpg)
+*Real-time 8-domain dashboard with SSE updates, composite health scoring, global Cmd+K search, and executive briefing view. The cross-domain nerve center of the platform.*
+
+---
+
+### Carlota Jo — Premium Advisory
+![Carlota Jo](./assets/screenshots/carlota-jo-hero.jpg)
+*White-glove advisory operations for UHNW clients. Private intake, client portal, service catalog, booking, document delivery, and client messaging. 60 components.*
 
 ---
 
 ## Architecture
 
 ```
-                    External Signals (integrations, telemetry, intelligence feeds)
-                                          |
-                                          v
-                              Signal Normalization (Alloy)
-                                          |
-                                          v
-                         Context Engine (correlation, attribution, scoring)
-                                          |
-                                          v
-                           Routing (priority, role assignment, domain)
-                                     /              \
-                                    v                v
-                        Auto-Execute             Human Review Gate
-                       (policy-approved)              |
-                                    \                /
-                                     v              v
-                               Action Execution
-                                          |
-                                          v
-                          Immutable Audit Trail (proof-chain)
+                External Signals (integrations, telemetry, intelligence feeds)
+                                      |
+                                      v
+                          Signal Normalization (Alloy)
+                                      |
+                                      v
+                     Context Engine (correlation, attribution, scoring)
+                                      |
+                                      v
+                       Routing (priority, role assignment, domain)
+                                 /              \
+                                v                v
+                    Auto-Execute             Human Review Gate
+                   (policy-approved)              |
+                                \                /
+                                 v              v
+                           Action Execution
+                                      |
+                                      v
+                      Immutable Audit Trail (proof-chain)
 ```
 
 ### Technology
@@ -123,6 +214,14 @@ SZL Holdings builds the **governed operational intelligence layer** — the plat
 
 ---
 
+## Flagship Repository
+
+→ **[szl-holdings/szl-holdings-platform](https://github.com/szl-holdings/szl-holdings-platform)**
+
+The canonical platform monorepo. 10 production web apps, 2 mobile command centers, 37 shared libraries, 644 database tables, 2,331 API endpoints. TypeScript throughout.
+
+---
+
 ## For Investors & Evaluators
 
 | Resource | Link |
@@ -141,6 +240,9 @@ SZL Holdings builds the **governed operational intelligence layer** — the plat
 
 **Stephen Lutar** — Founder & CEO
 
-[szlholdings.com](https://szlholdings.com) · [LinkedIn](https://linkedin.com/in/stephen-l-279315240) · inquiries@szlholdings.com
+**Website:** [szlholdings.com](https://szlholdings.com)
+**LinkedIn:** [linkedin.com/in/stephen-l-279315240](https://linkedin.com/in/stephen-l-279315240)
+**Enterprise & Design Partner:** [inquiries@szlholdings.com](mailto:inquiries@szlholdings.com)
+**Investment Conversations:** [stephen@szlholdings.com](mailto:stephen@szlholdings.com)
 
 Open to design partner conversations, enterprise evaluation, and investment introductions.
