@@ -1523,6 +1523,39 @@ export class NuroMeshOrchestrator {
     const preRoutingSelfModel = selfModelEngine.getSelfModel();
     const preRoutingEmotional = emotionalSignals.getState();
 
+    for (const agent of AGENT_REGISTRY) {
+      const profile = preRoutingSelfModel.capabilities.find(c => c.agentId === agent.id);
+      if (!profile) continue;
+      const uncertainty = metacognitiveMonitor.predictUncertainty({
+        agentId: agent.id,
+        domain: agent.domain,
+        queryComplexity: query.length,
+        agentSuccessRate: profile.successRate,
+        agentAvgConfidence: profile.avgConfidence,
+        knowledgeGapDomains: preRoutingMetacog.currentAssessment?.knowledgeGaps ?? [],
+        queryLength: query.length,
+        recentFailures: profile.recentTrend === "declining" ? 3 : 0,
+      });
+      if (uncertainty.failureProbability > 0.7) {
+        innerMonologue.addThought(
+          "doubt",
+          `Pre-routing uncertainty: ${agent.name} (${agent.domain}) failure probability ${(uncertainty.failureProbability * 100).toFixed(0)}% — ${uncertainty.mitigations.slice(0, 2).join("; ")}`,
+          "cautious",
+          Math.round((1 - uncertainty.failureProbability) * 100),
+        );
+      }
+    }
+
+    const hypotheses = metacognitiveMonitor.forkHypotheses(query, context.slice(0, 500));
+    if (hypotheses.length > 1) {
+      cognitiveWorkspace.addToWorkingMemory(
+        `[Multi-hypothesis] ${hypotheses.map(h => `${h.hypothesis.slice(0, 60)} (${h.confidence}%)`).join(" | ")}`,
+        "hypothesis_fork",
+        6,
+        ["metacognition"],
+      );
+    }
+
     const allDomains = [...new Set(AGENT_REGISTRY.map(a => a.domain))];
     const introspection = await innerMonologue.llmIntrospect({
       query,
@@ -1660,20 +1693,18 @@ export class NuroMeshOrchestrator {
       normCompatibility: preRoutingSelfModel.overallHealth === "optimal" ? 0.9 : preRoutingSelfModel.overallHealth === "good" ? 0.7 : 0.4,
     });
 
-    for (const agent of targetAgents) {
-      selfModelEngine.modelAgentBelief({
-        agentId: agent.id,
-        domain: agent.domain,
-        query,
-        agentResponse: "",
-        confidence: 50,
-        allResponses: [],
-      });
-    }
+    const queryTypeLower = query.toLowerCase();
+    const detectedQueryType =
+      queryTypeLower.includes("how") || queryTypeLower.includes("explain") ? "analytical" :
+      queryTypeLower.includes("status") || queryTypeLower.includes("check") || queryTypeLower.includes("monitor") ? "monitoring" :
+      queryTypeLower.includes("create") || queryTypeLower.includes("build") || queryTypeLower.includes("set up") ? "operational" :
+      queryTypeLower.includes("risk") || queryTypeLower.includes("threat") || queryTypeLower.includes("security") ? "security" :
+      queryTypeLower.includes("report") || queryTypeLower.includes("summary") || queryTypeLower.includes("overview") ? "reporting" :
+      "general";
 
     predictiveProcessing.recordOutcome({
       predictionId: prediction.predictionId,
-      actualQueryType: routedDomains[0] ?? "general",
+      actualQueryType: detectedQueryType,
       actualDomains: routedDomains,
       actualAgents: targetAgents.map(a => a.id),
     });
@@ -2237,6 +2268,117 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       selfModelEngine.recordLearningEvent(true);
     }
 
+    if (isHighStakes && agentResponses.length >= 2) {
+      const actualAgentIds = agentResponses.map(r => r.agentId);
+      const alternativeAgents = AGENT_REGISTRY
+        .filter(a => !actualAgentIds.includes(a.id) && a.id !== "alloy")
+        .slice(0, 3)
+        .map(a => a.id);
+      if (alternativeAgents.length > 0) {
+        const counterfactual = selfModelEngine.runCounterfactual({
+          originalRouting: actualAgentIds,
+          originalConfidence: averageConfidence,
+          alternativeRouting: alternativeAgents,
+          queryDomains: routedDomains,
+        });
+        if (counterfactual.shouldRevisit) {
+          innerMonologue.addThought(
+            "reflection",
+            `Counterfactual analysis: alternative routing [${alternativeAgents.join(", ")}] predicted delta ${counterfactual.predictedConfidenceDelta > 0 ? "+" : ""}${counterfactual.predictedConfidenceDelta.toFixed(0)}%. ${counterfactual.reasoning.slice(0, 150)}`,
+            counterfactual.predictedConfidenceDelta > 5 ? "cautious" : "neutral",
+            Math.round(averageConfidence + counterfactual.predictedConfidenceDelta),
+          );
+        }
+      }
+
+      const probes = selfModelEngine.generateAdversarialProbes(routedDomains);
+      for (const probe of probes.slice(0, 2)) {
+        if (probe.severity === "high") {
+          selfModelEngine.addLimitation(`adversarial: ${probe.blindSpotExposed.slice(0, 100)}`);
+          goalEngine.detectGoalsFromOrchestration(
+            probe.edgeCaseQuery,
+            [probe.targetDomain],
+            [probe.blindSpotExposed],
+            [],
+          );
+        }
+      }
+
+      const socratic = innerMonologue.socraticSelfQuestion(
+        synthesis.slice(0, 200),
+        agentResponses.map(r => `${r.agentName}: ${r.response.slice(0, 100)}`).join("; "),
+      );
+      if (socratic.depth > 1) {
+        cognitiveWorkspace.addToWorkingMemory(
+          `[Socratic] Q: ${socratic.rootQuestion.slice(0, 80)} → Conclusion: ${socratic.conclusion.slice(0, 100)}`,
+          "socratic_inquiry",
+          5,
+          routedDomains,
+        );
+      }
+
+      const perspectives = innerMonologue.simulatePerspectives(
+        query.slice(0, 100),
+        synthesis.slice(0, 300),
+      );
+      if (perspectives.perspectives.length > 1) {
+        cognitiveWorkspace.addToWorkingMemory(
+          `[Perspective sim] ${perspectives.perspectives.map(p => `${p.perspective}: ${p.assessment.slice(0, 60)}`).join(" | ")} → ${perspectives.recommendation.slice(0, 100)}`,
+          "perspective_simulation",
+          4,
+          routedDomains,
+        );
+      }
+    }
+
+    const discount = temporalAwareness.computeTemporalDiscount({
+      immediateValue: averageConfidence,
+      futureValue: averageConfidence * 1.2,
+      delayMs: 3600000,
+      domain: routedDomains[0] ?? "general",
+      urgency: isHighStakes ? 0.9 : 0.5,
+    });
+    if (discount.recommendation === "wait" || discount.recommendation === "gather_more_info") {
+      innerMonologue.addThought(
+        "reflection",
+        `Temporal discount suggests ${discount.recommendation}: immediate ${discount.discountedImmediate.toFixed(0)} vs future ${discount.discountedFuture.toFixed(0)}. ${discount.reasoning}`,
+        "cautious",
+        Math.round(discount.discountedImmediate),
+      );
+    }
+
+    if (isHighStakes) {
+      const futureSim = temporalAwareness.simulateFuture({
+        currentState: `Query: "${query.slice(0, 80)}" — Confidence: ${averageConfidence}%, Domains: ${routedDomains.join(", ")}`,
+        timeHorizon: "medium_term",
+        domains: routedDomains,
+      });
+      if (futureSim.predictedOutcomes.some(o => o.probability > 0.5 && o.impact === "negative")) {
+        innerMonologue.addThought(
+          "doubt",
+          `Episodic future sim: negative outcome predicted — ${futureSim.predictedOutcomes.filter(o => o.impact === "negative").map(o => o.scenario.slice(0, 60)).join("; ")}`,
+          "cautious",
+          40,
+        );
+      }
+    }
+
+    for (const r of agentResponses) {
+      selfModelEngine.modelAgentBelief({
+        agentId: r.agentId,
+        domain: r.domain,
+        query,
+        agentResponse: r.response.slice(0, 300),
+        confidence: r.confidence,
+        allResponses: agentResponses.map(ar => ({
+          agentId: ar.agentId,
+          domain: ar.domain,
+          confidence: ar.confidence,
+          response: ar.response.slice(0, 200),
+        })),
+      });
+    }
+
     dreamConsolidation.addReplay({
       orchestrationId,
       query,
@@ -2249,6 +2391,22 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       avgConfidence: averageConfidence,
       validationPassed: validation?.validated ?? true,
     });
+
+    const dreamState = dreamConsolidation.getState();
+    if (dreamState.recentReports.length > 0) {
+      const latestReport = dreamState.recentReports[0]!;
+      for (const update of latestReport.selfModelUpdates) {
+        selfModelEngine.addLimitation(`dream-insight: ${update.slice(0, 100)}`);
+      }
+      for (const update of latestReport.goalEngineUpdates) {
+        goalEngine.detectGoalsFromOrchestration(
+          update,
+          routedDomains,
+          [],
+          [],
+        );
+      }
+    }
 
     const consciousness = captureConsciousnessSnapshot();
 
