@@ -141,7 +141,7 @@ interface SnapshotData {
     valence: { positive: number; negative: number; arousal: number; dominantEmotion: string; emotionalStability: number };
     moodTrajectory: string;
     recentAppraisals: Array<{ appraisalId: string; novelty: number; intrinsicPleasantness: number; goalRelevance: number; copingPotential: number; normCompatibility: number; resultingEmotion: string; resultingIntensity: number; breakdown: string; timestamp: string }>;
-    activeRegulations: Array<{ strategyId: string; strategy: string; targetEmotion: string; effectiveness: number; timestamp: string }>;
+    activeRegulations: Array<{ strategyId: string; type: string; trigger: string; action: string; effectivenessEstimate: number; applied: boolean; timestamp: string }>;
     recentForecasts: Array<{ forecastId: string; scenario: string; predictedEmotion: string; predictedIntensity: number; confidence: number; timestamp: string }>;
   };
   temporal: {
@@ -617,8 +617,8 @@ function EmotionalPanel({ data }: { data: SnapshotData["emotions"] }) {
             <div className="text-[10px] text-gray-500 font-medium">Emotion Regulation</div>
             {data.activeRegulations.slice(0, 2).map(reg => (
               <div key={reg.strategyId} className="text-[10px] px-2 py-0.5 bg-white/[0.02] rounded flex items-center justify-between">
-                <span className="text-red-50">{reg.strategy} → {reg.targetEmotion}</span>
-                <span className="text-gray-500">{(reg.effectiveness * 100).toFixed(0)}%</span>
+                <span className="text-red-50">{reg.type}: {reg.action.slice(0, 40)}</span>
+                <span className="text-gray-500">{(reg.effectivenessEstimate * 100).toFixed(0)}%</span>
               </div>
             ))}
           </div>

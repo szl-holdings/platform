@@ -1559,11 +1559,12 @@ export class NuroMeshOrchestrator {
     const maxUncertainty = Math.max(...uncertaintySignals, 0);
     const lowCertainty = preRoutingMetacog.rollingCertainty < 0.5;
 
+    let activeHypotheses: import("./consciousness/metacognitive-monitor.js").MultiHypothesisBranch[] = [];
     if (maxUncertainty > 0.5 || lowCertainty) {
-      const hypotheses = metacognitiveMonitor.forkHypotheses(query, context.slice(0, 500));
-      if (hypotheses.length > 1) {
+      activeHypotheses = metacognitiveMonitor.forkHypotheses(query, context.slice(0, 500));
+      if (activeHypotheses.length > 1) {
         cognitiveWorkspace.addToWorkingMemory(
-          `[Multi-hypothesis] ${hypotheses.map(h => `${h.hypothesis.slice(0, 60)} (${h.confidence}%)`).join(" | ")}`,
+          `[Multi-hypothesis branching] ${activeHypotheses.map(h => `${h.hypothesis.slice(0, 60)} (${h.confidence}%)`).join(" | ")}`,
           "hypothesis_fork",
           6,
           ["metacognition"],
@@ -1793,11 +1794,15 @@ export class NuroMeshOrchestrator {
     const goldenContext = trajectoryStore.getGoldenRunsContext(2);
     const baseContext = goldenContext ? `${context}\n\n${goldenContext}` : context;
 
+    const hypothesisFraming = activeHypotheses.length >= 2
+      ? `\n\n## Active Hypothesis\nThe system is exploring the following interpretation: "${activeHypotheses[0]!.hypothesis}". Evaluate with this framing in mind.\n`
+      : "";
+
     const agentResponses = await Promise.all(
       targetAgents.map(async agent => {
         const agentContext = await getSharedContext(agent.id);
 
-        let enrichedContext = goldenContext ? `${agentContext}\n\n${goldenContext}` : agentContext;
+        let enrichedContext = goldenContext ? `${agentContext}\n\n${goldenContext}${hypothesisFraming}` : `${agentContext}${hypothesisFraming}`;
         const preTurnConsultations: AgentConsultationResult[] = [];
 
         if (options.enableConsultations !== false && agent.collaboratesWith && agent.collaboratesWith.length > 0) {
@@ -1892,20 +1897,78 @@ export class NuroMeshOrchestrator {
       }),
     );
 
+    if (activeHypotheses.length >= 2) {
+      const primaryAvgConfidence = agentResponses.reduce((s, r) => s + r.confidence, 0) / Math.max(1, agentResponses.length);
+
+      const altHypothesis = activeHypotheses[1]!;
+      const altFraming = `\n\n## Alternative Hypothesis\nThe system is exploring an alternative interpretation: "${altHypothesis.hypothesis}". Evaluate with this reframing in mind.\n`;
+      const altBranchAgents = targetAgents.slice(0, 2);
+
+      const altBranchResponses = await Promise.all(
+        altBranchAgents.map(async agent => {
+          const agentCtx = await getSharedContext(agent.id);
+          const altContext = goldenContext
+            ? `${agentCtx}\n\n${goldenContext}${altFraming}`
+            : `${agentCtx}${altFraming}`;
+          return callAgent(agent, query, altContext, {
+            orgId: options.orgId ?? null,
+            action: options.action ?? "orchestrate",
+            callerUserId: options.callerUserId ?? null,
+            callerRoles: options.callerRoles ?? [],
+            workflowId,
+            traceId,
+          });
+        }),
+      );
+
+      const altAvgConfidence = altBranchResponses.reduce((s, r) => s + r.confidence, 0) / Math.max(1, altBranchResponses.length);
+
+      const resolved = metacognitiveMonitor.resolveHypotheses([
+        { branchId: activeHypotheses[0]!.branchId, confidence: primaryAvgConfidence, evidenceStrength: primaryAvgConfidence / 100 },
+        { branchId: altHypothesis.branchId, confidence: altAvgConfidence, evidenceStrength: altAvgConfidence / 100 },
+      ]);
+
+      if (resolved && resolved.branchId === altHypothesis.branchId && altAvgConfidence > primaryAvgConfidence + 5) {
+        innerMonologue.addThought(
+          "realization",
+          `Hypothesis branching: Alternative interpretation "${altHypothesis.hypothesis.slice(0, 80)}" outperformed primary (${altAvgConfidence.toFixed(0)}% vs ${primaryAvgConfidence.toFixed(0)}%). Adopting alternative branch results.`,
+          "positive",
+          Math.round(altAvgConfidence),
+        );
+        for (let i = 0; i < altBranchAgents.length && i < agentResponses.length; i++) {
+          agentResponses[i] = altBranchResponses[i]!;
+        }
+      } else {
+        innerMonologue.addThought(
+          "reflection",
+          `Hypothesis branching: Primary interpretation "${activeHypotheses[0]!.hypothesis.slice(0, 80)}" retained (${primaryAvgConfidence.toFixed(0)}% vs alt ${altAvgConfidence.toFixed(0)}%).`,
+          "neutral",
+          Math.round(primaryAvgConfidence),
+        );
+      }
+
+      cognitiveWorkspace.addToWorkingMemory(
+        `[Hypothesis resolved] Winner: "${(resolved?.hypothesis ?? activeHypotheses[0]!.hypothesis).slice(0, 60)}" — Primary: ${primaryAvgConfidence.toFixed(0)}%, Alt: ${altAvgConfidence.toFixed(0)}%`,
+        "hypothesis_resolution",
+        7,
+        routedDomains,
+      );
+    }
+
     behavioralTracer.recordFork(traceId, {
       parentForkId: null,
       forkType: "routing",
       agentId: "alloy",
       agentName: "Alloy",
       domain: "orchestration",
-      inputContext: `Routing query to ${targetAgents.length} agents`,
-      decision: `Routed to: ${targetAgents.map(a => a.name).join(", ")}`,
+      inputContext: `Routing query to ${targetAgents.length} agents${activeHypotheses.length >= 2 ? " (multi-hypothesis branching)" : ""}`,
+      decision: `Routed to: ${targetAgents.map(a => a.name).join(", ")}${activeHypotheses.length >= 2 ? ` — ${activeHypotheses.length} hypotheses evaluated` : ""}`,
       output: `${agentResponses.filter(r => r.confidence > 0).length}/${agentResponses.length} agents responded successfully`,
       alternatives: [],
       confidence: Math.round(agentResponses.reduce((s, r) => s + r.confidence, 0) / Math.max(1, agentResponses.length)),
       latencyMs: Date.now() - orchestrationStartTime,
       tokensUsed: agentResponses.reduce((s, r) => s + (r.tokensUsed ?? 0), 0),
-      metadata: { agentCount: targetAgents.length, workflowId },
+      metadata: { agentCount: targetAgents.length, workflowId, hypothesisCount: activeHypotheses.length },
     });
 
     const emotionalState = emotionalSignals.getState();
