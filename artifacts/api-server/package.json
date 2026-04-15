@@ -57,7 +57,7 @@
     "drizzle-orm": "catalog:",
     "expo-server-sdk": "^6.1.0",
     "express": "^5",
-    "express-rate-limit": "^8.3.1",
+    "express-rate-limit": "^8.3.2",
     "google-auth-library": "^10.6.2",
     "graphql": "^16.13.2",
     "graphql-depth-limit": "^1.1.0",
