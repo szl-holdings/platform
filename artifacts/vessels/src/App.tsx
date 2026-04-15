@@ -12,7 +12,7 @@ import {
   Ship, AlertTriangle, Activity, LayoutDashboard, WifiOff,
   BarChart3, ChevronDown, User, ChevronRight, DollarSign, Wrench,
   MapPin, Radio, List, Globe, Navigation, EyeOff, ShieldAlert, Shield, Anchor, Brain, Menu, FileText,
-  TrendingUp, Calculator, Zap
+  TrendingUp, Calculator, Zap, Cpu, Leaf, Waves, Fuel
 } from "lucide-react";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
@@ -139,6 +139,15 @@ const VoyagePnLPage = lazy(() => import("@/pages/voyage-pnl"));
 const TradeFlowHeatmapPage = lazy(() => import("@/pages/trade-flow-heatmap"));
 const IntelligenceBriefsPage = lazy(() => import("@/pages/intelligence-briefs"));
 const TradingDeskPage = lazy(() => import("@/pages/trading-desk"));
+const DigitalTwinPage = lazy(() => import("@/pages/digital-twin"));
+const AutonomousRoutingPage = lazy(() => import("@/pages/autonomous-routing"));
+const PredictiveMaintenancePage = lazy(() => import("@/pages/predictive-maintenance"));
+const BlockchainBoLPage = lazy(() => import("@/pages/blockchain-bol"));
+const DecarbonizationPage = lazy(() => import("@/pages/decarbonization"));
+const PortTwinPage = lazy(() => import("@/pages/port-twin"));
+const PiracySanctionsPage = lazy(() => import("@/pages/piracy-sanctions"));
+const WeatherRoutingPage = lazy(() => import("@/pages/weather-routing"));
+const BunkeringPage = lazy(() => import("@/pages/bunkering"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -292,6 +301,21 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
         href: path,
         icon: <Icon className="w-3.5 h-3.5" />,
       })),
+    },
+    {
+      id: "digital-twin-platform",
+      label: "Digital Twin Platform",
+      items: [
+        { id: "digital-twin", label: "Vessel Digital Twin", href: "/digital-twin", icon: <Cpu className="w-3.5 h-3.5" /> },
+        { id: "autonomous-routing", label: "Autonomous Routing", href: "/autonomous-routing", icon: <Navigation className="w-3.5 h-3.5" /> },
+        { id: "predictive-maintenance-ml", label: "Predictive Maintenance", href: "/predictive-maintenance-ml", icon: <Wrench className="w-3.5 h-3.5" /> },
+        { id: "blockchain-bol", label: "Blockchain BoL", href: "/blockchain-bol", icon: <Shield className="w-3.5 h-3.5" /> },
+        { id: "decarbonization", label: "Decarbonization", href: "/decarbonization", icon: <Leaf className="w-3.5 h-3.5" /> },
+        { id: "port-twin", label: "Port Digital Twin", href: "/port-twin", icon: <Anchor className="w-3.5 h-3.5" /> },
+        { id: "piracy-sanctions", label: "Piracy & Sanctions", href: "/piracy-sanctions", icon: <ShieldAlert className="w-3.5 h-3.5" /> },
+        { id: "weather-routing", label: "Weather Routing", href: "/weather-routing", icon: <Waves className="w-3.5 h-3.5" /> },
+        { id: "bunkering", label: "Bunkering Intelligence", href: "/bunkering", icon: <Fuel className="w-3.5 h-3.5" /> },
+      ],
     },
     {
       id: "intelligence",
@@ -531,6 +555,15 @@ function DashboardRouter() {
         <Route path="/trade-flow-heatmap" component={TradeFlowHeatmapPage} />
         <Route path="/intelligence-briefs" component={IntelligenceBriefsPage} />
         <Route path="/trading-desk" component={TradingDeskPage} />
+        <Route path="/digital-twin" component={DigitalTwinPage} />
+        <Route path="/autonomous-routing" component={AutonomousRoutingPage} />
+        <Route path="/predictive-maintenance-ml" component={PredictiveMaintenancePage} />
+        <Route path="/blockchain-bol" component={BlockchainBoLPage} />
+        <Route path="/decarbonization" component={DecarbonizationPage} />
+        <Route path="/port-twin" component={PortTwinPage} />
+        <Route path="/piracy-sanctions" component={PiracySanctionsPage} />
+        <Route path="/weather-routing" component={WeatherRoutingPage} />
+        <Route path="/bunkering" component={BunkeringPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-sky-400/40">Page not found</p>
@@ -648,7 +681,12 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     location.startsWith("/approval-review") ||
     location.startsWith("/disruption-forecast") || location.startsWith("/dark-fleet-economics") ||
     location.startsWith("/voyage-pnl") || location.startsWith("/trade-flow-heatmap") ||
-    location.startsWith("/intelligence-briefs");
+    location.startsWith("/intelligence-briefs") ||
+    location.startsWith("/digital-twin") || location.startsWith("/autonomous-routing") ||
+    location.startsWith("/predictive-maintenance-ml") || location.startsWith("/blockchain-bol") ||
+    location.startsWith("/decarbonization") || location.startsWith("/port-twin") ||
+    location.startsWith("/piracy-sanctions") || location.startsWith("/weather-routing") ||
+    location.startsWith("/bunkering");
 
   if (isDashboard) {
     return (
