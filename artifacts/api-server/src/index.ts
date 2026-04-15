@@ -31,6 +31,7 @@ import { startPrismJobPoller } from "./services/prism-queue";
 import { registerGenAITelemetryBridge } from "./lib/genai-telemetry-bridge.js";
 import "./lib/cross-app-notification-relay.js";
 import { providerHealth } from "./lib/provider-health";
+import { startEmbeddingWorker, stopEmbeddingWorker, getWorkerStatus } from "./lib/embedding-worker";
 
 failFastOnInvalidConfig();
 
@@ -126,6 +127,33 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     startScheduledJobs();
     startNamedScheduledJobs();
     startPlatformScheduledJobs();
+    startEmbeddingWorker();
+    // Non-fatal health check: log embedding model/schema compatibility at startup.
+    // This surfaces dimension mismatches early so operators can act before re-embed
+    // issues accumulate silently in the task queue.
+    import("@szl-holdings/ai-engine/embedding-pipeline")
+      .then(({ listEmbeddingProviders }) => {
+        const providers = listEmbeddingProviders();
+        const modelId = process.env["HF_EMBED_MODEL"] ?? "BAAI/bge-m3";
+        const current = providers.find(p => p.id === modelId) ?? providers[0];
+        const status = getWorkerStatus();
+        logger.info({
+          workerRunning: status.running,
+          pollIntervalMs: status.pollIntervalMs,
+          modelId: current?.id,
+          schemaDimension: current?.schemaDimension,
+          schemaCompatible: current?.schemaCompatible,
+          normalisationApplied: current?.normalisationApplied,
+          totalProviders: providers.length,
+        }, "[embedding-health] Embedding worker started — model/schema compatibility report");
+        if (current && !current.schemaCompatible) {
+          logger.warn({
+            model: current.id,
+            schemaDimension: current.schemaDimension,
+          }, "[embedding-health] Active model dimension does not match VECTOR_DIM — vectors will be normalised at write time");
+        }
+      })
+      .catch(err => logger.warn({ err }, "[embedding-health] Startup compatibility check failed (non-fatal)"));
 
     // Step 4: Seeds run after schema is 100% confirmed — fire concurrently, each non-fatal
     seedPlatformData().catch(err => {
@@ -175,6 +203,7 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
 
     stopDomainNotificationGenerators();
     stopSelfMonitoring();
+    stopEmbeddingWorker();
     providerHealth.stopActiveProbes();
     agentScheduler.stop();
     clearInterval(prismPoller);

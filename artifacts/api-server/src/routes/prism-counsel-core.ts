@@ -14,6 +14,7 @@ import {
 import { eq, desc, sql, and } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendForbidden, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
+import { ingestPrismMatter } from "@szl-holdings/ai-engine/domain-embedding-hooks";
 
 const router: IRouter = Router();
 
@@ -146,6 +147,10 @@ router.post("/prism-counsel/matters", authMiddleware(), async (req, res) => {
       notes: body.notes ? String(body.notes) : undefined,
       createdBy: req.user?.id,
     } as any).returning();
+    // Fire-and-forget: ingest into knowledge graph + schedule embedding
+    setImmediate(() => {
+      void ingestPrismMatter({ id: matter.id, orgId: matter.orgId, title: matter.title, matterType: matter.matterType, jurisdiction: matter.jurisdiction ?? undefined, notes: matter.notes ?? undefined, status: matter.status }, String(matter.orgId)).catch((e: unknown) => console.error("[prism-counsel] ingestPrismMatter failed:", e));
+    });
     sendSuccess(res, matter, 201);
   } catch (err) {
     handleRouteError(res, err, "POST /prism-counsel/matters");
@@ -163,6 +168,10 @@ router.patch("/prism-counsel/matters/:id", authMiddleware(), async (req, res) =>
     const [updated] = await db.update(pcMattersTable)
       .set({ ...patch, updatedBy: req.user?.id, updatedAt: new Date() })
       .where(eq(pcMattersTable.id, matterId)).returning();
+    // Fire-and-forget: re-index updated matter in knowledge graph
+    setImmediate(() => {
+      void ingestPrismMatter({ id: updated.id, orgId: updated.orgId, title: updated.title, matterType: updated.matterType, jurisdiction: updated.jurisdiction ?? undefined, notes: updated.notes ?? undefined, status: updated.status }, String(updated.orgId)).catch((e: unknown) => console.error("[prism-counsel] ingestPrismMatter failed:", e));
+    });
     sendSuccess(res, updated);
   } catch (err) {
     handleRouteError(res, err, "PATCH /prism-counsel/matters/:id");

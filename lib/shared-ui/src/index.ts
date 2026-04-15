@@ -150,3 +150,23 @@ export {
   type StatusConfig,
 } from "./operational-primitives";
 export { DigitalTwinCard, type TwinCardProps, type TwinAlert, type PredictedState } from "./digital-twin-card";
+export {
+  KnowledgeGraphViz,
+  HierarchicalGraphViz,
+  TimelineGraphViz,
+  UnifiedKnowledgeGraphViz,
+  GraphLegend,
+  NodeDetailPanel,
+  GraphStatsCard,
+  type GraphVizNode,
+  type GraphVizEdge,
+  type KnowledgeGraphData,
+  type KnowledgeGraphVizProps,
+  type HierarchicalGraphVizProps,
+  type TimelineGraphVizProps,
+  type UnifiedKnowledgeGraphVizProps,
+  type GraphLayout,
+  type GraphLegendProps,
+  type NodeDetailPanelProps,
+  type GraphStatsCardProps,
+} from "./knowledge-graph-viz";

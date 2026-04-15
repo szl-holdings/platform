@@ -40,8 +40,18 @@ import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { queryEvidenceIndex, ingestDecisionToEvidenceIndex } from "../lib/tradecraft-evidence-store";
 import { validateAndBuildDecision, type DecisionObjectType } from "@szl-holdings/ai-engine";
 import { broadcastWs, pubsub, FIRESTORM_EVENTS } from "../lib/pubsub-bridge.js";
+import {
+  ingestFirestormFinding,
+  ingestFirestormScenario,
+  ingestFirestormAlert,
+} from "@szl-holdings/ai-engine/domain-embedding-hooks";
 
 const router: IRouter = Router();
+
+function getFirestormTenantId(req: import("express").Request): string | undefined {
+  const user = (req as Record<string, unknown>).user as { orgs?: Array<{ orgId?: unknown }> } | undefined;
+  return user?.orgs?.[0]?.orgId != null ? String(user.orgs[0].orgId) : undefined;
+}
 
 router.get("/firestorm/scenarios", authMiddleware({ required: false }), async (_req, res) => {
   try {
@@ -67,6 +77,7 @@ router.post("/firestorm/scenarios", authMiddleware({ required: true }), async (r
   try {
     const data = insertFirestormScenarioSchema.parse(req.body);
     const [scenario] = await db.insert(firestormScenariosTable).values(data).returning();
+    void ingestFirestormScenario(scenario, getFirestormTenantId(req));
     sendCreated(res, scenario);
   } catch (err) {
     handleRouteError(res, err, "Failed to create scenario");
@@ -79,6 +90,7 @@ router.put("/firestorm/scenarios/:id", authMiddleware({ required: true }), async
     const data = insertFirestormScenarioSchema.partial().parse(req.body);
     const [scenario] = await db.update(firestormScenariosTable).set({ ...data, updatedAt: new Date() }).where(eq(firestormScenariosTable.id, id)).returning();
     if (!scenario) { sendNotFound(res, "Scenario"); return; }
+    void ingestFirestormScenario(scenario, getFirestormTenantId(req));
     sendSuccess(res, scenario);
   } catch (err) {
     handleRouteError(res, err, "Failed to update scenario");
@@ -240,6 +252,7 @@ router.post("/firestorm/findings", authMiddleware({ required: true }), async (re
     const initAuditEntry = { action: "Finding created", user: "Operator", at: new Date().toISOString() };
     const [finding] = await db.insert(firestormFindingsTable).values({ ...data, auditTrail: [initAuditEntry] }).returning();
     broadcastWs("aegis-incidents", "finding-created", { id: finding.id, severity: finding.severity, status: finding.status });
+    void ingestFirestormFinding(finding, getFirestormTenantId(req));
     sendCreated(res, finding);
   } catch (err) {
     handleRouteError(res, err, "Failed to create finding");
@@ -253,6 +266,7 @@ router.put("/firestorm/findings/:id", authMiddleware({ required: true }), async 
     const [finding] = await db.update(firestormFindingsTable).set({ ...data, updatedAt: new Date() }).where(eq(firestormFindingsTable.id, id)).returning();
     if (!finding) { sendNotFound(res, "Finding"); return; }
     broadcastWs("aegis-incidents", "finding-updated", { id: finding.id, severity: finding.severity, status: finding.status });
+    void ingestFirestormFinding(finding, getFirestormTenantId(req));
     sendSuccess(res, finding);
   } catch (err) {
     handleRouteError(res, err, "Failed to update finding");
@@ -719,6 +733,7 @@ router.post("/firestorm/alerts", authMiddleware({ required: true }), async (req,
     const data = insertFirestormAlertSchema.parse(req.body);
     const [alert] = await db.insert(firestormAlertsTable).values(data).returning();
     broadcastWs("aegis-incidents", "alert-created", { id: alert.id, severity: alert.severity, status: alert.status, title: alert.title });
+    void ingestFirestormAlert(alert, getFirestormTenantId(req));
     sendCreated(res, alert);
   } catch (err) {
     handleRouteError(res, err, "Failed to create alert");
@@ -735,6 +750,7 @@ router.put("/firestorm/alerts/:id", authMiddleware({ required: true }), async (r
     const [alert] = await db.update(firestormAlertsTable).set(updates).where(eq(firestormAlertsTable.id, id)).returning();
     if (!alert) { sendNotFound(res, "Alert"); return; }
     broadcastWs("aegis-incidents", "alert-updated", { id: alert.id, severity: alert.severity, status: alert.status, title: alert.title });
+    void ingestFirestormAlert(alert, getFirestormTenantId(req));
     sendSuccess(res, alert);
   } catch (err) {
     handleRouteError(res, err, "Failed to update alert");

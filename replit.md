@@ -108,6 +108,19 @@ The platform consists of 13 interconnected applications sharing authentication a
 - All 7 mobile apps already had correct package versions: expo-notifications ~0.32.16, @types/react ~19.1.10, @types/react-dom ~19.1.7.
 - SZL Holdings web app confirmed loading cleanly with no unexpected browser console errors.
 
+## Knowledge Graph & Vector Embedding Infrastructure (Task #559)
+- **pgvector extension** used for vector similarity search — `rag_knowledge_chunks` table has `vector(1536)` column with IVFFlat index (100 lists)
+- **4 new DB tables**: `kg_entities`, `kg_relationships`, `kg_cross_domain_links`, `embedding_tasks` with IVFFlat vector index on entities
+- **1 new DB table**: `embedding_model_registry` — pre-seeded with BGE-M3, all-MiniLM-L6-v2, text-embedding-3-small/large
+- **Migration**: `lib/db/drizzle/0019_knowledge_graph_vector_embeddings.sql`
+- **`lib/ai-engine/src/embedding-pipeline.ts`** — multi-provider embedding (HuggingFace, OpenAI), batch processing, async task queue, `toVectorLiteral()`, `cosineSimilarity()`
+- **`lib/ai-engine/src/knowledge-graph.ts`** — entity/relationship CRUD, multi-hop traversal (BFS), recursive CTE path finding, label-propagation community detection, centrality scoring, semantic entity search, cross-domain link detection
+- **`lib/ai-engine/src/semantic-search.ts`** — unified hybrid search (vector + full-text + RRF scoring), `buildVectorRAGContext()` with citation tracking
+- **`lib/ai-engine/src/rag/knowledge-store.ts`** — upgraded from keyword-only to vector-first retrieval with full-text fallback; auto-ingest now also embeds into `rag_knowledge_chunks`
+- **`artifacts/api-server/src/routes/knowledge-graph.ts`** — 14 REST endpoints under `/api/knowledge/*`: search, rag-context, graph/:id, graph/:id/paths/:id, entities, relationships, communities, centrality, entities/search, cross-domain, stats, embedding-models, embed/generate, embed/schedule, embed/batch
+- **`lib/shared-ui/src/knowledge-graph-viz.tsx`** — `KnowledgeGraphViz` (force-directed SVG with pan/zoom/drag), `GraphLegend`, `NodeDetailPanel`, `GraphStatsCard`
+- Package exports added: `@szl-holdings/ai-engine/embedding-pipeline`, `@szl-holdings/ai-engine/knowledge-graph`, `@szl-holdings/ai-engine/semantic-search`
+
 ## External Dependencies
 - **Database:** PostgreSQL
 - **Authentication:** Replit Auth

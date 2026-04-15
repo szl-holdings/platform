@@ -144,6 +144,7 @@ import rmmRouter from "./rmm";
 import ontologyRouter from "./ontology";
 import digitalTwinsRouter from "./digital-twins";
 import fusionRouter from "./fusion";
+import knowledgeGraphRouter from "./knowledge-graph";
 
 const router: IRouter = Router();
 
@@ -557,5 +558,9 @@ router.use(digitalTwinsRouter);
 router.use("/fusion", _readLimiter);
 router.use("/fusion", _writeLimiter);
 router.use(fusionRouter);
+
+router.use("/knowledge", _readLimiter);
+router.use("/knowledge", _writeLimiter);
+router.use("/knowledge", knowledgeGraphRouter);
 
 export default router;

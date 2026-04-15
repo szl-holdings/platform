@@ -11,6 +11,7 @@ import {
 import { eq, sql, desc, and, or, ilike } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
+import { ingestAegisIncident } from "@szl-holdings/ai-engine/domain-embedding-hooks";
 
 const router: IRouter = Router();
 const auth = authMiddleware({ required: false });
@@ -205,6 +206,14 @@ router.post("/msp/tickets", auth, async (req, res) => {
       slaStatus: "on-track",
     }).returning();
 
+    if (ticket) {
+      const _tid = req.user?.orgs[0]?.orgId != null ? String(req.user.orgs[0].orgId) : undefined;
+      // Fail-closed: skip knowledge graph ingestion when no tenant context is available.
+      // This route has optional auth; ingesting without a tenant would create globally visible artifacts.
+      if (_tid) {
+        void ingestAegisIncident({ id: ticket.id, title: ticket.subject, incidentType: ticket.category ?? "General", severity: ticket.priority ?? "medium", description: ticket.description ?? undefined }, _tid).catch((e: unknown) => console.error("[msp] ingestAegisIncident failed:", e));
+      }
+    }
     sendCreated(res, { ticket });
   } catch (err) {
     handleRouteError(res, err, "Failed to create ticket");
@@ -230,6 +239,11 @@ router.patch("/msp/tickets/:id", auth, async (req, res) => {
 
     const [ticket] = await db.update(mspTicketsTable).set(updates).where(eq(mspTicketsTable.id, id)).returning();
     if (!ticket) return sendNotFound(res, "Ticket");
+    const _tid2 = req.user?.orgs[0]?.orgId != null ? String(req.user.orgs[0].orgId) : undefined;
+    // Fail-closed: skip ingestion without tenant context.
+    if (_tid2) {
+      void ingestAegisIncident({ id: ticket.id, title: ticket.subject, incidentType: ticket.category ?? "General", severity: ticket.priority ?? "medium", description: ticket.description ?? undefined }, _tid2).catch((e: unknown) => console.error("[msp] ingestAegisIncident update failed:", e));
+    }
     sendSuccess(res, { ticket });
   } catch (err) {
     handleRouteError(res, err, "Failed to update ticket");

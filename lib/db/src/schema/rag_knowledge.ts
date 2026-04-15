@@ -2,7 +2,7 @@ import { customType, pgTable, text, integer, jsonb, timestamp, index } from "dri
 
 const vector = customType<{ data: string; driverData: string; config: { dimensions: number } }>({
   dataType(config) {
-    return `vector(${config?.dimensions ?? 1536})`;
+    return `vector(${config?.dimensions ?? 1024})`;
   },
 });
 
@@ -19,7 +19,9 @@ export const ragKnowledgeChunks = pgTable(
     chunkIndex: integer("chunk_index").notNull().default(0),
     chunkHash: text("chunk_hash").notNull(),
     metadata: jsonb("metadata").notNull().default({}),
-    embedding: vector("embedding", { dimensions: 1536 }),
+    embedding: vector("embedding", { dimensions: 1024 }),
+    embeddingModel: text("embedding_model"),
+    embeddingAt: timestamp("embedding_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },

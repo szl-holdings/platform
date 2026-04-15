@@ -91,3 +91,4 @@ export * from "./rag_knowledge";
 export * from "./self_improvement";
 export * from "./rag_knowledge_documents";
 export * from "./simulation";
+export * from "./knowledge_graph";

@@ -15,6 +15,7 @@ import {
 import { eq, and, desc, ilike, or, sql, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { scoreDistressProperty } from "../lib/terra-ai-scoring";
+import { ingestTerraProperty } from "@szl-holdings/ai-engine/domain-embedding-hooks";
 
 const CreateLeadSchema = z.object({
   firstName: z.string().min(1, "firstName is required"),
@@ -457,6 +458,10 @@ router.post("/terra/pipeline/deals", authMiddleware({ required: true }), async (
     broadcastWs("terra-signals", "deal-created", { id: externalId, stage: deal.stage, address: deal.address });
     if (inserted[0]) void pubsub.publish(TERRA_EVENTS.DEAL_UPDATED, { terraDealUpdated: inserted[0] });
 
+    if (inserted[0] && body.address) {
+      const _tid = req.user?.orgs[0]?.orgId != null ? String(req.user.orgs[0].orgId) : undefined;
+      void ingestTerraProperty({ id: inserted[0].id, address: body.address, city: (body as Record<string, unknown>).borough as string ?? (body as Record<string, unknown>).county as string ?? "", state: "NY", zipCode: (body as Record<string, unknown>).zipCode as string | undefined, propertyType: body.type, ownerName: body.ownerName ?? undefined, currentValue: body.price ? Number(body.price) : undefined }, _tid).catch((e: unknown) => console.error("[terra-crm] ingestTerraProperty failed:", e));
+    }
     sendSuccess(res, { id: externalId, deal: inserted[0] });
   } catch (err) { handleRouteError(res, err, "Failed to create deal"); }
 });

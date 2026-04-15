@@ -16,6 +16,7 @@ import { eq, desc, sql } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam, denyIfReadOnly, requireRole } from "../middlewares/auth";
 import { broadcastWs } from "../lib/pubsub-bridge.js";
+import { ingestLyteSystem } from "@szl-holdings/ai-engine/domain-embedding-hooks";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -34,6 +35,11 @@ router.get("/lyte/workspaces", authMiddleware(), async (req, res) => {
 router.post("/lyte/workspaces", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const [row] = await db.insert(lyteWorkspacesTable).values(req.body).returning();
+    if (row) {
+      const r = row as Record<string, unknown>;
+      const _tid = req.user?.orgs[0]?.orgId != null ? String(req.user.orgs[0].orgId) : undefined;
+      void ingestLyteSystem({ id: r.id as string | number, name: r.name as string, systemType: (r.type as string) ?? "workspace", description: r.description as string | undefined, health: r.status as string | undefined, orgId: r.orgId as number | undefined }, _tid).catch((e: unknown) => console.error("[lyte] ingestLyteSystem failed:", e));
+    }
     sendSuccess(res, row, 201);
   } catch (err) {
     handleRouteError(res, err, "Failed to create workspace");
