@@ -1554,6 +1554,16 @@ export const RequestUploadUrlBody = zod.object({
   name: zod.string().min(1).describe('Original file name.'),
   size: zod.number().min(1).describe('File size in bytes.'),
   contentType: zod.string().min(1).describe('MIME type of the file.'),
+  domain: zod
+    .string()
+    .optional()
+    .describe(
+      'Product domain for file type allowlist enforcement\n(e.g. \"prism\", \"terra\", \"vessels\", \"aegis\", \"lyte\", \"szl\", \"carlota-jo\").\nOmit or use \"default\" for the global allowlist.\n',
+    ),
+  orgId: zod
+    .number()
+    .optional()
+    .describe('Org ID for quota enforcement. Required when uploading on behalf of an org.'),
 });
 
 export const RequestUploadUrlResponse = zod.object({
@@ -1568,6 +1578,16 @@ export const RequestUploadUrlResponse = zod.object({
       name: zod.string().min(1).describe('Original file name.'),
       size: zod.number().min(1).describe('File size in bytes.'),
       contentType: zod.string().min(1).describe('MIME type of the file.'),
+      domain: zod
+        .string()
+        .optional()
+        .describe(
+          'Product domain for file type allowlist enforcement\n(e.g. \"prism\", \"terra\", \"vessels\", \"aegis\", \"lyte\", \"szl\", \"carlota-jo\").\nOmit or use \"default\" for the global allowlist.\n',
+        ),
+      orgId: zod
+        .number()
+        .optional()
+        .describe('Org ID for quota enforcement. Required when uploading on behalf of an org.'),
     })
     .optional(),
 });

@@ -7,22 +7,27 @@ import {
 import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
 import { ObjectPermission, getObjectAclPolicy } from "../lib/objectAcl";
 import { authMiddleware } from "../middlewares/auth";
+import type { AuthenticatedUser } from "../middlewares/auth";
 import { recordUploadIntent } from "../lib/uploadIntentStore";
+import { validateFileType } from "../lib/fileTypeAllowlist";
+import { checkOrgStorageQuota } from "../lib/storageQuota";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
 
-interface AuthUser { id: number; role: string; email?: string; displayName?: string }
-type AuthRequest = Request & { user?: AuthUser };
+type AuthRequest = Request & { user?: AuthenticatedUser };
 
 /**
  * POST /storage/uploads/request-url
  *
- * Request a presigned URL for file upload.
- * Requires authentication — only logged-in users may upload.
- * The client sends JSON metadata (name, size, contentType) — NOT the file.
- * Then uploads the file directly to the returned presigned URL.
- * After upload completes, call POST /api/files to register the file record and set ACL.
+ * Issues a presigned GCS URL for direct client upload. Enforces:
+ * - Org membership: if orgId is supplied, it must be in the user's verified session membership.
+ *   Defaults to the user's first org if none supplied.
+ * - File type allowlist: contentType and size are validated against the domain's allowlist.
+ * - Org quota: current org storage usage + requested size must not exceed the org limit.
+ *
+ * The resolved org context and domain are bound to the upload intent so POST /files can
+ * enforce them at finalization without trusting the client again.
  */
 router.post("/storage/uploads/request-url", authMiddleware(), async (req: Request, res: Response) => {
   const parsed = RequestUploadUrlBody.safeParse(req.body);
@@ -32,14 +37,58 @@ router.post("/storage/uploads/request-url", authMiddleware(), async (req: Reques
   }
 
   try {
-    const { name, size, contentType } = parsed.data;
-    const userId = ((req as unknown as AuthRequest).user as AuthUser).id;
+    const { name, size, contentType, domain, orgId: requestedOrgId } = parsed.data;
+    const authedReq = req as AuthRequest;
+    const userId = authedReq.user!.id;
+    const userOrgs = authedReq.user?.orgs ?? [];
+
+    // Resolve org context server-side from the authenticated session.
+    // Client-supplied orgId is validated against verified membership — prevents quota bypass.
+    let resolvedOrgId: number | null = null;
+
+    if (requestedOrgId !== undefined && requestedOrgId !== null) {
+      const membership = userOrgs.find((o) => o.orgId === requestedOrgId);
+      if (!membership) {
+        res.status(403).json({
+          error: "Forbidden",
+          message: `You are not a member of org ${requestedOrgId}.`,
+        });
+        return;
+      }
+      resolvedOrgId = membership.orgId;
+    } else if (userOrgs.length > 0) {
+      resolvedOrgId = userOrgs[0].orgId;
+    }
+
+    const typeCheck = validateFileType(contentType, size, domain ?? null);
+    if (!typeCheck.allowed) {
+      res.status(400).json({
+        error: "File type not allowed",
+        message: typeCheck.reason,
+        domain: domain ?? "default",
+        contentType,
+      });
+      return;
+    }
+
+    const quotaCheck = await checkOrgStorageQuota(resolvedOrgId, size);
+    if (!quotaCheck.allowed) {
+      res.status(413).json({
+        error: "Storage quota exceeded",
+        message: quotaCheck.reason,
+        currentUsageBytes: quotaCheck.currentUsageBytes,
+        quotaBytes: quotaCheck.quotaBytes,
+        remainingBytes: quotaCheck.remainingBytes,
+      });
+      return;
+    }
 
     const uploadURL = await objectStorageService.getObjectEntityUploadURL();
     const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
 
-    // Record server-issued upload intent so POST /api/files can verify ownership
-    recordUploadIntent(objectPath, userId);
+    // Bind resolvedOrgId and domain to the intent — POST /files reads these at finalization
+    // to enforce the same org context without trusting any further client input.
+    recordUploadIntent(objectPath, userId, resolvedOrgId, domain ?? null);
 
     res.json(
       RequestUploadUrlResponse.parse({
@@ -56,10 +105,7 @@ router.post("/storage/uploads/request-url", authMiddleware(), async (req: Reques
 
 /**
  * GET /storage/public-objects/*
- *
- * Serve public assets from PUBLIC_OBJECT_SEARCH_PATHS.
- * These are unconditionally public — no authentication or ACL checks.
- * IMPORTANT: Always provide this endpoint when object storage is set up.
+ * Serves assets from PUBLIC_OBJECT_SEARCH_PATHS — unconditionally public, no auth.
  */
 router.get("/storage/public-objects/*filePath", async (req: Request, res: Response) => {
   try {
@@ -72,13 +118,10 @@ router.get("/storage/public-objects/*filePath", async (req: Request, res: Respon
     }
 
     const response = await objectStorageService.downloadObject(file);
-
     res.status(response.status);
     response.headers.forEach((value, key) => res.setHeader(key, value));
-
     if (response.body) {
-      const nodeStream = Readable.fromWeb(response.body as ReadableStream<Uint8Array>);
-      nodeStream.pipe(res);
+      Readable.fromWeb(response.body as ReadableStream<Uint8Array>).pipe(res);
     } else {
       res.end();
     }
@@ -90,15 +133,12 @@ router.get("/storage/public-objects/*filePath", async (req: Request, res: Respon
 
 /**
  * GET /storage/objects/*
- *
- * Serve private object entities from PRIVATE_OBJECT_DIR.
- * Requires authentication. Access is controlled by the ACL policy stored on the object.
+ * Serves private object entities from PRIVATE_OBJECT_DIR. Requires auth.
  *
  * ACL rules:
- * - If no ACL policy on the object: only admin/editor roles may access.
- * - If ACL visibility is "public": any authenticated user may access.
- * - If ACL visibility is "private": the owner (matched by userId) OR admin/editor role may access.
- * - If ACL has group rules: checked against the requestedPermission.
+ * - No ACL on object: only admin/super_admin/editor may access.
+ * - ACL visibility "public": any authenticated user may read.
+ * - ACL visibility "private": owner (by userId) or privileged role; group rules checked if neither.
  */
 router.get("/storage/objects/*path", authMiddleware(), async (req: Request, res: Response) => {
   const authedReq = req as AuthRequest;
@@ -110,25 +150,19 @@ router.get("/storage/objects/*path", authMiddleware(), async (req: Request, res:
     const objectFile = await objectStorageService.getObjectEntityFile(objectPath);
 
     const userId = authedReq.user?.id;
-    const role = authedReq.user?.role ?? "viewer";
-    const isPrivileged = role === "admin" || role === "editor";
+    const userRoles = authedReq.user?.roles ?? [];
+    const isPrivileged = userRoles.some((r) => r === "admin" || r === "super_admin" || r === "editor");
 
     const aclPolicy = await getObjectAclPolicy(objectFile);
 
     if (!aclPolicy) {
-      // No ACL policy: deny unless admin/editor (treat as private by default)
       if (!isPrivileged) {
         res.status(403).json({ error: "Forbidden: no access policy on this object" });
         return;
       }
-    } else if (aclPolicy.visibility === "public") {
-      // Public visibility: any authenticated user can read
-    } else {
-      // Private: check owner or privileged role
-      const ownerId = aclPolicy.owner;
-      const isOwner = userId !== undefined && String(userId) === ownerId;
+    } else if (aclPolicy.visibility !== "public") {
+      const isOwner = userId !== undefined && String(userId) === aclPolicy.owner;
       if (!isOwner && !isPrivileged) {
-        // Also check group-based ACL rules
         const canAccess = await objectStorageService.canAccessObjectEntity({
           userId: userId !== undefined ? String(userId) : undefined,
           objectFile,
@@ -142,13 +176,10 @@ router.get("/storage/objects/*path", authMiddleware(), async (req: Request, res:
     }
 
     const response = await objectStorageService.downloadObject(objectFile);
-
     res.status(response.status);
     response.headers.forEach((value, key) => res.setHeader(key, value));
-
     if (response.body) {
-      const nodeStream = Readable.fromWeb(response.body as ReadableStream<Uint8Array>);
-      nodeStream.pipe(res);
+      Readable.fromWeb(response.body as ReadableStream<Uint8Array>).pipe(res);
     } else {
       res.end();
     }

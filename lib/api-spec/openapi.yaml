@@ -1886,6 +1886,15 @@ components:
           type: string
           minLength: 1
           description: MIME type of the file.
+        domain:
+          type: string
+          description: |
+            Product domain for file type allowlist enforcement
+            (e.g. "prism", "terra", "vessels", "aegis", "lyte", "szl", "carlota-jo").
+            Omit or use "default" for the global allowlist.
+        orgId:
+          type: integer
+          description: Org ID for quota enforcement. Required when uploading on behalf of an org.
     UploadUrlResponse:
       type: object
       required: [uploadURL, objectPath]

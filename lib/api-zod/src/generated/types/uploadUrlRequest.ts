@@ -22,4 +22,11 @@ export interface UploadUrlRequest {
    * @minLength 1
    */
   contentType: string;
+  /** Product domain for file type allowlist enforcement
+(e.g. "prism", "terra", "vessels", "aegis", "lyte", "szl", "carlota-jo").
+Omit or use "default" for the global allowlist.
+ */
+  domain?: string;
+  /** Org ID for quota enforcement. Required when uploading on behalf of an org. */
+  orgId?: number;
 }
