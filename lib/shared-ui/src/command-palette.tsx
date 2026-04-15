@@ -536,7 +536,7 @@ export function createBaselineWebActions(
 const ECOSYSTEM_APPS = [
   { id: "szl-holdings", name: "SZL Holdings", path: "/", icon: "◆", description: "Premium Command Systems Ecosystem" },
   { id: "alloy", name: "Alloy", path: "/alloy", icon: "⬡", description: "Execution Fabric & Orchestration Engine" },
-  { id: "lyte", name: "Lyte", path: "/lyte-command-center/", icon: "⚡", description: "Business Observability Command" },
+  { id: "lyte", name: "Lyte", path: "/command/operations/", icon: "⚡", description: "Business Observability Command" },
   { id: "aegis", name: "Aegis", path: "/firestorm/", icon: "🛡", description: "Unified Defense & Intelligence" },
   { id: "vessels", name: "Vessels", path: "/vessels/", icon: "⚓", description: "Maritime Command Intelligence" },
   { id: "terra", name: "Terra", path: "/terra/", icon: "⬢", description: "Real Estate Broker Command" },

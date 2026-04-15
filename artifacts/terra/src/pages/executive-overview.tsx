@@ -24,7 +24,7 @@ function KpiCard({ label, value, trend, unit, description }: { label: string; va
 function CommandLoopPanel({ activePhase }: { activePhase: string }) {
   const phases = [
     { phase: "DETECT", color: "#0ea5e9", current: activePhase === "DETECT" },
-    { phase: "INTERPRET", color: "#f59e0b", current: false, link: "/lyte-command-center/" },
+    { phase: "INTERPRET", color: "#f59e0b", current: false, link: "/command/operations/" },
     { phase: "DECIDE", color: "#8b5cf6", current: false, link: "/alloy/" },
     { phase: "EXECUTE", color: "#4B8BDB", current: false, link: "/alloy/" },
     { phase: "VERIFY", color: "#10b981", current: activePhase === "VERIFY" },
@@ -141,7 +141,7 @@ export default function ExecutiveOverview() {
               <span className="text-sm font-semibold text-white">Aging Approvals</span>
               <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: "rgba(249,115,22,0.15)", color: "#f97316" }}>{pendingApprovals.length}</span>
             </div>
-            <a href="/lyte-command-center/" className="text-xs hover:text-white transition-colors" style={{ color: "#f59e0b" }}>Open in Lyte →</a>
+            <a href="/command/operations/" className="text-xs hover:text-white transition-colors" style={{ color: "#f59e0b" }}>Open in Lyte →</a>
           </div>
           <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
             {pendingApprovals.map(a => (

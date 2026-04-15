@@ -533,7 +533,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             </div>
             <div className="flex items-center gap-4">
               {[
-                { name: "Lyte", href: "/lyte-command-center/" },
+                { name: "Lyte", href: "/command/operations/" },
                 { name: "Vessels", href: "/vessels/" },
                 { name: "Aegis", href: "/firestorm/" },
                 { name: "Carlota Jo", href: "/carlota-jo/" },

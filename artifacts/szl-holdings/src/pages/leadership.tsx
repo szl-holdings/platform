@@ -51,7 +51,7 @@ const CASE_STUDIES = [
     product: "Lyte",
     outcome: "The operations intelligence layer: surfacing what's about to break before it does — across revenue, ops, and customer signals — in a single command surface with governed execution.",
     accent: "#d4a054",
-    href: "/lyte-command-center/",
+    href: "/command/operations/",
   },
 ];
 

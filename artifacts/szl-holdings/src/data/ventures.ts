@@ -115,7 +115,7 @@ export const ventures: Venture[] = [
     ],
     nextMilestone: "AI-native anomaly forecast layer (Q2 2026)",
     path: "/ventures/lyte",
-    externalPath: "/lyte-command-center/",
+    externalPath: "/command/operations/",
   },
   {
     id: "vessels",

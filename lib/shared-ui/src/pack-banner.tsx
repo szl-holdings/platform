@@ -87,7 +87,7 @@ export function PackBanner({
         <Zap className="w-2.5 h-2.5" style={{ color: "rgba(255,255,255,0.20)" }} />
         <span className="text-[8px] font-mono" style={{ color: "rgba(255,255,255,0.20)" }}>
           Powered by{" "}
-          <a href="/lyte-command-center/" className="transition-opacity hover:opacity-80" style={{ color: "rgba(255,255,255,0.40)", textDecoration: "underline" }}>
+          <a href="/command/operations/" className="transition-opacity hover:opacity-80" style={{ color: "rgba(255,255,255,0.40)", textDecoration: "underline" }}>
             Lyte
           </a>
           {" "}+{" "}

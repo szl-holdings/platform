@@ -130,6 +130,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "src"),
+      "@lyte": path.resolve(import.meta.dirname, "src/operations"),
+      "@imp": path.resolve(import.meta.dirname, "src/infrastructure"),
     },
     dedupe: ["react", "react-dom"],
   },

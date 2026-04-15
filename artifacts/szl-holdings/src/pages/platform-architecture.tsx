@@ -77,7 +77,7 @@ const PLATFORMS = [
     role: "Business Observability",
     description: "Role-based visibility into risk, latency, ownership gaps, and workflow friction. Executive, operations, and delivery views that surface problems before they hit execution.",
     accent: "hsl(190,90%,55%)",
-    href: "/lyte-command-center/",
+    href: "/command/operations/",
     icon: Eye,
     loopSteps: ["detect", "decide", "verify"],
   },

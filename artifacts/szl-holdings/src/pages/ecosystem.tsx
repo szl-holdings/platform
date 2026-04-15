@@ -31,7 +31,7 @@ const FLAGSHIP: Platform[] = [
     role: "Business Observability Platform",
     description: "Role-based visibility into risk, latency, ownership gaps, and workflow friction. Executive, operations, and delivery views — before problems hit execution.",
     accent: "hsl(192,80%,48%)",
-    href: "/lyte-command-center/",
+    href: "/command/operations/",
     icon: Activity,
     serves: "Executives, operations leads, delivery managers",
     capabilities: ["KPI command", "Risk observability", "Workflow telemetry", "Role-based views"],

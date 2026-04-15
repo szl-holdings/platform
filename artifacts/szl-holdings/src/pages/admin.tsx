@@ -2988,7 +2988,7 @@ export default function AdminPage() {
                   {[
                     { icon: "🛡️", label: "Security Posture Report", app: "Aegis", path: "/firestorm/powerbi", color: "#3b82f6", desc: "Real-time security posture metrics, incident trends, and compliance scores." },
                     { icon: "🏢", label: "Portfolio Analytics Report", app: "Terra", path: "/terra/powerbi", color: "#10b981", desc: "Property-level analytics including NOI, occupancy, IRR, and distress signals." },
-                    { icon: "⚡", label: "Operational KPIs Report", app: "Lyte", path: "/lyte-command-center/powerbi", color: "#f59e0b", desc: "Business observability KPIs including SLA performance and PRISM health scores." },
+                    { icon: "⚡", label: "Operational KPIs Report", app: "Lyte", path: "/command/operations/powerbi", color: "#f59e0b", desc: "Business observability KPIs including SLA performance and PRISM health scores." },
                   ].map(r => (
                     <div key={r.label} className="bg-card border border-border rounded-xl p-4 flex items-start gap-4">
                       <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style={{ background: r.color + "22" }}>

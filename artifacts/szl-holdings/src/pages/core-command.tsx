@@ -88,7 +88,7 @@ const SEVERITY_BG: Record<string, string> = {
 
 const platformLinks = [
   { name: "Terra", role: "OBSERVE", subtitle: "Property Intelligence", href: "/terra/", icon: Building, color: "#4d7c0f" },
-  { name: "Lyte", role: "INTERPRET", subtitle: "Business Observability", href: "/lyte-command-center/", icon: Zap, color: "#f59e0b" },
+  { name: "Lyte", role: "INTERPRET", subtitle: "Business Observability", href: "/command/operations/", icon: Zap, color: "#f59e0b" },
   { name: "Alloy Creative", role: "CREATE", subtitle: "Creative Workflows", href: "/alloy/creative", icon: Brain, color: "#ec4899" },
   { name: "Alloy", role: "EXECUTE", subtitle: "Execution Fabric", href: "/alloy/", icon: Layers, color: "#6366f1" },
   { name: "Aegis", role: "DEFEND", subtitle: "Defense & Intelligence", href: "/firestorm/", icon: Shield, color: "#6366f1" },

@@ -122,7 +122,7 @@
     "description": "Business observability platform that detects operational risk, surfaces ownership gaps, and routes human action before business damage occurs. Built on the PRISM framework — Pulse, Risk, Intelligence, Signals, Motion.",
     "status": "Live",
     "category": "Business Observability",
-    "link": "/lyte-command-center/",
+    "link": "/command/operations/",
     "icon": "Zap",
     "color": "#f59e0b",
     "metrics": [

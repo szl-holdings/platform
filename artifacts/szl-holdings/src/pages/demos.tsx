@@ -15,7 +15,7 @@ const DEMOS = [
     color: "hsl(191,92%,44%)",
     colorMuted: "hsla(191,92%,44%,0.08)",
     colorBorder: "hsla(191,92%,44%,0.20)",
-    href: "/lyte-command-center/",
+    href: "/command/operations/",
     cta: "Open Lyte",
   },
   {

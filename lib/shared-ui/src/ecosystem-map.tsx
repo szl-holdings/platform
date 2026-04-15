@@ -30,7 +30,7 @@ const ECOSYSTEM_NODES: EcosystemNode[] = [
     icon: "⚡",
     layer: 0,
     accent: "#22d3ee",
-    path: "/lyte-command-center/",
+    path: "/command/operations/",
     subtitle: "AIOps Command",
     description: "AI-driven incident orchestration & workflow automation",
     angle: 90,

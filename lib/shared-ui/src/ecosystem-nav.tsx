@@ -111,7 +111,7 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     id: "lyte",
     name: "Lyte",
     subtitle: "Platform · Business Observability",
-    path: "/lyte-command-center/",
+    path: "/command/operations/",
     accent: "#22d3ee",
     icon: "⚡",
     description: "Business Observability Command Platform",
@@ -1068,7 +1068,7 @@ function getDomainSearchResults(q: string): SearchResult[] {
   const results: SearchResult[] = [];
   const searchableContent = [
     { keywords: ["fleet", "vessel", "ship", "port", "maritime", "route", "anchor"], app: "Vessels", icon: "🚢", accent: "#4a90b8", href: "/vessels/", items: ["Fleet Dashboard", "Port Analytics", "Route Planning", "Risk Scoring", "Dark Vessel Detection"] },
-    { keywords: ["signal", "workflow", "observability", "playbook", "ops", "anomaly", "business", "escalation"], app: "Lyte", icon: "⚡", accent: "#d4a054", href: "/lyte-command-center/", items: ["Command Inbox", "Approvals Center", "Ownership Map", "Escalation Center", "Intervention Workspace"] },
+    { keywords: ["signal", "workflow", "observability", "playbook", "ops", "anomaly", "business", "escalation"], app: "Lyte", icon: "⚡", accent: "#d4a054", href: "/command/operations/", items: ["Command Inbox", "Approvals Center", "Ownership Map", "Escalation Center", "Intervention Workspace"] },
     { keywords: ["alloy", "automation", "connector", "workflow", "orchestration", "execution", "run"], app: "Alloy", icon: "⬡", accent: "#60a5fa", href: "/alloy/", items: ["Execution Runs", "Workflow Orchestration", "Connector Mesh", "Governance", "Automation Analytics"] },
     { keywords: ["brand", "consulting", "advisory", "discreet", "residence", "estate", "private"], app: "Carlota Jo", icon: "◈", accent: "#d4b896", href: "/carlota-jo/", items: ["Services", "Approach", "Private Inquiry"] },
   ];

@@ -128,7 +128,7 @@ const REPORTS: Array<{
     id: "operational_kpis",
     name: "Operational KPIs Report",
     app: "Lyte",
-    appPath: "/lyte-command-center/powerbi",
+    appPath: "/command/operations/powerbi",
     description: "Business observability KPIs including SLA performance, escalation rates, and PRISM health scores.",
     color: "#f59e0b",
     icon: "⚡",

@@ -7,7 +7,7 @@ import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 const navLinks = [
   { label: "Ecosystem", href: "/ecosystem" },
   { label: "Alloy", href: "/alloy", external: "/alloy/" },
-  { label: "Lyte", href: "/lyte", external: "/lyte-command-center/" },
+  { label: "Lyte", href: "/lyte", external: "/command/operations/" },
   { label: "Vessels", href: "/vessels", external: "/vessels/" },
   { label: "Trust", href: "/trust" },
   { label: "Pulse", href: "/pulse" },

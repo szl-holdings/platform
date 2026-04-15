@@ -9,7 +9,7 @@ const core = [
     name: "Lyte",
     type: "Business Observability Platform",
     stage: "Core now",
-    href: "/lyte-command-center/",
+    href: "/command/operations/",
     body: "The market-facing software wedge: execution visibility, risk surfacing, ownership clarity, and next action in one command surface.",
   },
   {

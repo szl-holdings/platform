@@ -313,7 +313,7 @@ export default function OperatingDoctrinePage() {
                 <p className="text-white/55">Explore the commercial wedge and the full portfolio map.</p>
               </div>
               <div className="flex flex-wrap gap-3">
-                <a href="/lyte-command-center/" className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-80" style={{ background: ACCENT, color: "#070a10" }}>
+                <a href="/command/operations/" className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-80" style={{ background: ACCENT, color: "#070a10" }}>
                   Explore Lyte <ArrowRight className="h-4 w-4" />
                 </a>
                 <Link href="/ventures" className="inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:border-white/30">

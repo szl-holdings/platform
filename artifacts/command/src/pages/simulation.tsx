@@ -188,7 +188,7 @@ export default function SimulationPage() {
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "var(--color-bg-primary, #080a12)", color: "var(--color-fg-primary, rgba(255,255,255,0.9))", fontFamily: "system-ui, sans-serif" }}>
-      <EcosystemNav currentAppId="command" currentAppName="Ecosystem Command" accentColor={ACCENT} />
+      <EcosystemNav currentAppId="command" currentAppName="Unified Command" accentColor={ACCENT} />
 
       <main style={{ maxWidth: "1400px", margin: "0 auto", padding: "32px 24px" }}>
         {/* Header */}

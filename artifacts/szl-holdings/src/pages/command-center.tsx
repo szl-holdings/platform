@@ -66,7 +66,7 @@ const apps = [
     status: "live",
     icon: Zap,
     accent: "#f59e0b",
-    path: "/lyte-command-center/",
+    path: "/command/operations/",
     obsSlug: "lyte",
     description: "Centralized AIOps and MLOps platform for signal detection, incident orchestration, model governance, and autonomous remediation.",
     features: ["Signals", "Incidents", "Playbooks", "Administration"],

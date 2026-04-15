@@ -63,7 +63,7 @@ export const baseDomainData: DomainData[] = [
     ],
     alerts: { count: 0, severity: "low" },
     sparkline: [87,88,89,88,87,88,89,90,89,88,87,88,89,88,87,88,89,88,87,88,89,88,87,88],
-    link: "/lyte-command-center/",
+    link: "/command/operations/",
   },
   {
     id: "prism",

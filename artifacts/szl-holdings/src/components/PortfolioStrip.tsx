@@ -16,7 +16,7 @@ const ventures = [
     tagline: "Business observability and operational intelligence.",
     category: "Observability Platform",
     status: "Live",
-    href: "/lyte-command-center/",
+    href: "/command/operations/",
     accent: "hsl(192,70%,46%)",
     accentMuted: "hsla(192,70%,46%,0.10)",
   },

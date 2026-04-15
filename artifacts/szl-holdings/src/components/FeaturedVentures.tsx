@@ -7,7 +7,7 @@ const featured = [
     category: "Business Observability",
     description: "Enterprise-grade platform for operational observability, risk detection, and accountability. Signal cards surface anomalies with action ownership and consequence framing.",
     capabilities: ["KPI drift detection", "Workflow friction analysis", "Role-based insight rail", "Executive dashboards"],
-    href: "/lyte-command-center/",
+    href: "/command/operations/",
     accent: "hsl(192,70%,46%)",
     accentMuted: "hsla(192,70%,46%,0.08)",
     status: "Live",

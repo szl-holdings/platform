@@ -345,7 +345,7 @@ export default function AegisMarketingHome() {
                 {[
                   { name: "SZL Holdings", href: "/szl-holdings/" },
                   { name: "Vessels", href: "/vessels/" },
-                  { name: "Lyte", href: "/lyte-command-center/" },
+                  { name: "Lyte", href: "/command/operations/" },
                   { name: "Terra", href: "/terra/" },
                   { name: "Carlota Jo", href: "/carlota-jo/" },
                 ].map(l => (

@@ -52,7 +52,7 @@ interface WorkflowRun {
 }
 
 const DOMAIN_LINKS = [
-  { id: "lyte", label: "Lyte", description: "Business Observability", color: "#06b6d4", href: "/lyte-command-center/", icon: Zap },
+  { id: "lyte", label: "Lyte", description: "Business Observability", color: "#06b6d4", href: "/command/operations/", icon: Zap },
   { id: "vessels", label: "Vessels", description: "Maritime Command", color: "#3b82f6", href: "/vessels/", icon: Ship },
   { id: "terra", label: "Terra", description: "Broker Platform", color: "#a07848", href: "/terra/", icon: Navigation },
   { id: "alloy", label: "Alloy", description: "Intelligence Engine", color: "#60a5fa", href: "/alloy/", icon: GitBranch },
@@ -186,7 +186,7 @@ export default function UnifiedCommandDashboard() {
         <div
           className="rounded-xl border p-4 cursor-pointer hover:opacity-90 transition-all"
           style={{ borderColor: "#f59e0b40", background: "#f59e0b08" }}
-          onClick={() => window.location.href = "/lyte-command-center/"}
+          onClick={() => window.location.href = "/command/operations/"}
         >
           <div className="flex items-center gap-2 mb-3">
             <Zap className="w-4 h-4 text-amber-400" />
@@ -341,7 +341,7 @@ export default function UnifiedCommandDashboard() {
             <div className="text-[10px] text-slate-500 mb-2 font-medium uppercase tracking-wider">Quick Actions</div>
             <div className="flex flex-wrap gap-1.5">
               {[
-                { label: "View Lyte Action Queue", href: "/lyte-command-center/action-queue" },
+                { label: "View Lyte Action Queue", href: "/command/operations/action-queue" },
                 { label: "Vessels Exceptions", href: "/vessels/exceptions" },
                 { label: "Terra Listings", href: "/terra/listings" },
                 { label: "Alloy Workflows", href: "/alloy/" },

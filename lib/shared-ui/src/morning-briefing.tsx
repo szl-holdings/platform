@@ -92,7 +92,7 @@ function generateDemoBriefing(date: Date): DailyBriefing {
         metric: "p95: 340ms",
         trend: "down",
         severity: "medium",
-        href: "/lyte-command-center/",
+        href: "/command/operations/",
       },
     ],
   };

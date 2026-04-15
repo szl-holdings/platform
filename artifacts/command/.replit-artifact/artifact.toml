@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/command/"
-title = "Ecosystem Command Portal"
+title = "Unified Command"
 version = "1.0.0"
 id = "artifacts/command"
 router = "path"

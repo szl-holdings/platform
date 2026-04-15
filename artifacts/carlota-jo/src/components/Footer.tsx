@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 
 const ecosystemLinks = [
   { label: "SZL Holdings", href: "/" },
-  { label: "Lyte", href: "/lyte-command-center/" },
+  { label: "Lyte", href: "/command/operations/" },
   { label: "Vessels", href: "/vessels/" },
   { label: "Aegis", href: "/firestorm/" },
   { label: "Terra", href: "/terra/" },

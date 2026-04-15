@@ -14,7 +14,7 @@ const proofs = [
     desc: "Signals surfaced, owners identified, value at risk quantified across business operations.",
     accent: "hsl(192, 80%, 48%)",
     accentRgb: "6, 182, 212",
-    href: "/lyte-command-center/",
+    href: "/command/operations/",
     status: "Live",
   },
   {
@@ -41,7 +41,7 @@ const proofs = [
     desc: "Lyte Readiness is a first-class module within Lyte for execution tracking and maturity scoring.",
     accent: "hsl(192, 80%, 48%)",
     accentRgb: "6, 182, 212",
-    href: "/lyte-command-center/",
+    href: "/command/operations/",
     status: "Live",
   },
 ];

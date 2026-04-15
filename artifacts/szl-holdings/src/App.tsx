@@ -394,10 +394,10 @@ function App() {
               <Suspense fallback={<PageLoader />}><LytePage /></Suspense>
             </Route>
             <Route path="/lyte/demo">
-              <ExternalRedirect to="/lyte-command-center/?view=app" />
+              <ExternalRedirect to="/command/operations/?view=app" />
             </Route>
             <Route path="/lyte/app">
-              <ExternalRedirect to="/lyte-command-center/" />
+              <ExternalRedirect to="/command/operations/" />
             </Route>
             <Route path="/platform/alloy">
               <Suspense fallback={<PageLoader />}><AlloyPublicPage /></Suspense>
