@@ -19,6 +19,7 @@ import { z } from "zod";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, parseIdParam, canAccessOrgRecord } from "../middlewares/auth";
 import { isFlagEnabled } from "../lib/platform-flags";
+import { services } from "@szl-holdings/services";
 
 const router: IRouter = Router();
 
@@ -456,12 +457,33 @@ router.get("/lyte/platform/dashboard/executive", authMiddleware({ required: fals
 router.get("/lyte/platform/dashboard/operations", authMiddleware({ required: false }), async (req, res) => {
   try {
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+    const apmPromise = services.newRelic.getApmMetrics().catch(() => null);
+    const hostsPromise = services.newRelic.getInfraHosts().catch(() => []);
     const [signals, actions, readinessItems] = await Promise.all([
       db.select().from(platformSignalsTable).where(and(eq(platformSignalsTable.orgId, orgId))).orderBy(desc(platformSignalsTable.receivedAt)).limit(100),
       db.select().from(actionsTable).where(and(eq(actionsTable.orgId, orgId), eq(actionsTable.product, LYTE_PRODUCT))).orderBy(desc(actionsTable.createdAt)).limit(100),
       db.select().from(readinessItemsTable).where(and(eq(readinessItemsTable.orgId, orgId), eq(readinessItemsTable.product, LYTE_PRODUCT))).limit(50),
     ]);
-    sendSuccess(res, buildOperationsDashboard(signals, actions, readinessItems));
+    const [apm, hosts] = await Promise.all([apmPromise, hostsPromise]);
+    const dashboard = buildOperationsDashboard(signals, actions, readinessItems);
+    sendSuccess(res, {
+      ...dashboard,
+      apm: apm ? {
+        status: services.newRelic.status,
+        responseTimeMs: apm.responseTimeMs,
+        throughputRpm: apm.throughputRpm,
+        errorRatePct: apm.errorRatePct,
+        apdexScore: apm.apdexScore,
+        hostCount: apm.hostCount,
+        instanceCount: apm.instanceCount,
+      } : null,
+      infraHosts: hosts.slice(0, 5).map((h) => ({
+        hostname: h.hostname,
+        cpuPct: h.cpuPct,
+        memoryUsedPct: h.memoryUsedPct,
+        diskUsedPct: h.diskUsedPct,
+      })),
+    });
   } catch (err) { handleRouteError(res, err, "Failed to build operations dashboard"); }
 });
 

@@ -220,9 +220,16 @@ export class MispTaxiiAdapter extends ServiceAdapter {
       };
     }
 
-    const colId = collectionId ?? "default";
+    let colId = collectionId;
     try {
       const root = await this.discoverApiRoot();
+
+      if (!colId) {
+        const cols = await this.getCollections();
+        const readable = cols.find((c) => c.canRead);
+        colId = readable?.id ?? "default";
+      }
+
       let url = `${root}/collections/${colId}/objects/?type=indicator&limit=${limit}`;
       if (addedAfter) url += `&added_after=${addedAfter}`;
 
@@ -280,7 +287,7 @@ export class MispTaxiiAdapter extends ServiceAdapter {
       };
     } catch {
       return {
-        collectionId: colId,
+        collectionId: colId ?? "col-001",
         collectionTitle: "Unknown",
         objectsIngested: DEMO_INDICATORS.length,
         indicators: [...DEMO_INDICATORS],

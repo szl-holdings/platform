@@ -4,6 +4,7 @@ import { desc, eq, and, gte, count, sql } from "drizzle-orm";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { logger } from "../lib/logger";
+import { services } from "@szl-holdings/services";
 
 const router: IRouter = Router();
 
@@ -296,16 +297,36 @@ router.post("/firestorm/stix/export", authMiddleware({ required: true }), requir
 
 router.get("/firestorm/taxii/feeds", authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const feeds = [
-      { id: "feed-fsisac", name: "FS-ISAC Financial", url: "taxii.fs-isac.net", type: "TAXII 2.1", status: "active", records: 32841, lastSync: new Date(Date.now() - 15 * 60 * 1000).toISOString() },
-      { id: "feed-dibisac", name: "DIB-ISAC Defense", url: "taxii.dib-isac.gov", type: "TAXII 2.1", status: "active", records: 18491, lastSync: new Date(Date.now() - 22 * 60 * 1000).toISOString() },
-      { id: "feed-cisa", name: "CISA AIS", url: "taxii.cisa.gov/taxii2", type: "TAXII 2.1", status: "active", records: 8429, lastSync: new Date(Date.now() - 30 * 60 * 1000).toISOString() },
-      { id: "feed-misp", name: "MISP Community", url: "misp.threat.feeds", type: "MISP", status: "active", records: 84291, lastSync: new Date(Date.now() - 2 * 60 * 1000).toISOString() },
+    const [collections, indicators, cisaKev] = await Promise.all([
+      services.mispTaxii.getCollections(),
+      services.mispTaxii.pollIndicators(),
+      services.cisa.getKnownExploitedVulnerabilities(10),
+    ]);
+
+    const feeds = collections.map((c) => ({
+      id: c.id,
+      name: c.title,
+      url: process.env["TAXII_SERVER_URL"] ?? "misp.threat.feeds",
+      type: "TAXII 2.1",
+      status: c.canRead ? "active" : "inactive",
+      records: indicators.objectsIngested,
+      lastSync: indicators.lastPolled,
+    }));
+
+    feeds.push(
       { id: "feed-otx", name: "AlienVault OTX", url: "otx.alienvault.com", type: "OTX", status: "active", records: 248341, lastSync: new Date(Date.now() - 5 * 60 * 1000).toISOString() },
       { id: "feed-mandiant", name: "Mandiant Advantage", url: "advantage.mandiant.com", type: "Commercial", status: "active", records: 6182, lastSync: new Date(Date.now() - 60 * 60 * 1000).toISOString() },
-    ];
+    );
 
-    sendSuccess(res, { feeds, sharingPartners: 6, totalObjects: 398575, fetchedAt: new Date().toISOString() });
+    sendSuccess(res, {
+      feeds,
+      sharingPartners: feeds.length,
+      totalObjects: indicators.objectsIngested + cisaKev.length,
+      recentIndicators: indicators.indicators.slice(0, 5),
+      cisaKevCount: cisaKev.length,
+      adapterStatus: services.mispTaxii.status,
+      fetchedAt: new Date().toISOString(),
+    });
   } catch (err) { handleRouteError(res, err, "Failed to fetch TAXII feeds"); }
 });
 

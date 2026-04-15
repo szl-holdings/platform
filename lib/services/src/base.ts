@@ -275,6 +275,14 @@ export abstract class ServiceAdapter {
     return sorted[Math.max(0, idx)];
   }
 
+  protected log(level: "info" | "warn" | "error", msg: string, data?: Record<string, unknown>): void {
+    const entry = { adapter: this.name, circuit: this._circuit.state, ...data };
+    if (typeof console !== "undefined") {
+      if (level === "error") console.error(`[${this.name}] ${msg}`, JSON.stringify(entry));
+      else if (level === "warn") console.warn(`[${this.name}] ${msg}`, JSON.stringify(entry));
+    }
+  }
+
   protected async resilientFetch(url: string, opts: ResilientFetchOptions = {}): Promise<Response> {
     const {
       timeoutMs = 15_000,
@@ -287,11 +295,15 @@ export abstract class ServiceAdapter {
       acceptStatuses = [],
     } = opts;
 
+    const urlHost = (() => { try { return new URL(url).host; } catch { return url; } })();
+
     if (this._isCircuitOpen()) {
+      this.log("warn", `Circuit breaker OPEN — request blocked`, { url: urlHost });
       throw new Error(`Circuit breaker OPEN for ${this.name} — cooling down`);
     }
 
     if (!this._consumeToken()) {
+      this.log("warn", `Rate limit exceeded`, { url: urlHost, limit: this.rateLimitPerMinute });
       throw new Error(`Rate limit exceeded for ${this.name} (${this.rateLimitPerMinute}/min)`);
     }
 
@@ -325,6 +337,9 @@ export abstract class ServiceAdapter {
 
         if (res.status === 429) {
           this._rateLimiter.tokens = 0;
+          this.log("warn", `Rate limited by upstream`, { url: urlHost, status: 429, attempt, latencyMs: elapsed });
+        } else {
+          this.log("warn", `HTTP ${res.status} — will retry`, { url: urlHost, status: res.status, attempt, latencyMs: elapsed });
         }
 
         lastError = new Error(`HTTP ${res.status} from ${this.name}`);
@@ -332,10 +347,12 @@ export abstract class ServiceAdapter {
         const elapsed = Date.now() - start;
         this._recordLatency(elapsed);
         lastError = err instanceof Error ? err : new Error(String(err));
+        this.log("error", `Request failed`, { url: urlHost, attempt, latencyMs: elapsed, error: lastError.message });
       }
     }
 
     this._recordCircuitFailure();
+    this.log("error", `All retries exhausted — circuit failure recorded`, { url: urlHost, circuitFailures: this._circuit.failureCount });
     throw lastError ?? new Error(`All retries exhausted for ${this.name}`);
   }
 
