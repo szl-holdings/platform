@@ -26,7 +26,8 @@
     "./embedding-pipeline": "./src/embedding-pipeline.ts",
     "./knowledge-graph": "./src/knowledge-graph.ts",
     "./semantic-search": "./src/semantic-search.ts",
-    "./domain-embedding-hooks": "./src/domain-embedding-hooks.ts"
+    "./domain-embedding-hooks": "./src/domain-embedding-hooks.ts",
+    "./ml-pipeline": "./src/ml-pipeline/index.ts"
   },
   "dependencies": {
     "@szl-holdings/db": "workspace:*",

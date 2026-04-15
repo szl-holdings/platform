@@ -489,3 +489,6 @@ export {
   type FusionScanResult,
   type FusionCortexStats,
 } from "./fusion/fusion-cortex.js";
+
+// ML Pipeline Infrastructure
+export * from "./ml-pipeline/index.js";

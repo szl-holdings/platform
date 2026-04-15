@@ -145,6 +145,7 @@ import ontologyRouter from "./ontology";
 import digitalTwinsRouter from "./digital-twins";
 import fusionRouter from "./fusion";
 import knowledgeGraphRouter from "./knowledge-graph";
+import mlPipelineRouter from "./ml-pipeline";
 
 const router: IRouter = Router();
 
@@ -562,5 +563,9 @@ router.use(fusionRouter);
 router.use("/knowledge", _readLimiter);
 router.use("/knowledge", _writeLimiter);
 router.use("/knowledge", knowledgeGraphRouter);
+
+router.use("/ml", _readLimiter);
+router.use("/ml", _writeLimiter);
+router.use(mlPipelineRouter);
 
 export default router;

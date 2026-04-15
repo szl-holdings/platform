@@ -93,3 +93,4 @@ export * from "./rag_knowledge_documents";
 export * from "./simulation";
 export * from "./knowledge_graph";
 export * from "./stream_sources";
+export * from "./ml_pipeline";
