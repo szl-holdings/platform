@@ -85,6 +85,14 @@ type AccreditedInvestor = {
   verifiedAt: string | null; verificationExpiresAt: string | null;
 };
 
+type LpCapitalAccount = {
+  id: number; lpId: number; lpName: string | null; lpType: string | null;
+  commitmentCents: number; calledCents: number; uncalledCents: number;
+  distributionsCents: number; currentNavCents: number; ownershipPct: string | null;
+  managementFeesPaidCents: number; carriedInterestPaidCents: number;
+  vintage: string | null; notes: string | null;
+};
+
 type CapitalCall = {
   id: number; callNumber: number; callDate: string; dueDate: string;
   totalAmountCents: number; fundedAmountCents: number; status: string; purpose: string;
@@ -457,6 +465,7 @@ export default function FundOperationsPage() {
   const { data: rawCapCalls, reload: reloadCalls } = useApiFetch<CapitalCall[]>("/fund-ops/capital-calls?limit=20");
   const { data: rawInvestors, reload: reloadInvestors } = useApiFetch<AccreditedInvestor[]>("/fund-ops/accredited-investors?limit=50");
   const { data: rawFormD, reload: reloadFormD } = useApiFetch<FormDFiling[]>("/fund-ops/form-d-filings?limit=10");
+  const { data: rawLpAccounts } = useApiFetch<LpCapitalAccount[]>("/fund-ops/lp-capital-accounts");
 
   const nav = summary?.fundAdmin.latestNav;
   const financials: PortfolioFinancial[] = Array.isArray(rawFinancials) ? rawFinancials : [];
@@ -464,6 +473,7 @@ export default function FundOperationsPage() {
   const capCalls: CapitalCall[] = Array.isArray(rawCapCalls) ? rawCapCalls : [];
   const investors: AccreditedInvestor[] = Array.isArray(rawInvestors) ? rawInvestors : [];
   const formDFilings: FormDFiling[] = Array.isArray(rawFormD) ? rawFormD : [];
+  const lpAccounts: LpCapitalAccount[] = Array.isArray(rawLpAccounts) ? rawLpAccounts : [];
 
   const totalRevenue = financials.reduce((s, f) => s + parseFloat(f.revenue ?? "0"), 0);
 
@@ -702,7 +712,7 @@ ${report.disclaimers ? `<div class="disclaimer">${esc(report.disclaimers)}</div>
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  {financials.length === 0 && (
+                  {financials.length === 0 && import.meta.env.MODE !== "production" && (
                     <button onClick={handleSeed} disabled={seeding}
                       className="flex items-center gap-2 rounded-xl border border-[#d4a054]/30 bg-[#d4a054]/10 px-4 py-2 text-xs font-semibold text-[#d4a054] transition hover:bg-[#d4a054]/20 disabled:opacity-50">
                       {seeding ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Layers className="h-3.5 w-3.5" />}
@@ -1252,6 +1262,57 @@ ${report.disclaimers ? `<div class="disclaimer">${esc(report.disclaimers)}</div>
                       </div>
                     </div>
                   </div>
+
+                  {lpAccounts.length > 0 && (
+                    <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 mb-8">
+                      <h3 className="text-sm font-semibold text-white mb-4">LP Commitment & Distribution Ledger</h3>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left text-xs">
+                          <thead>
+                            <tr className="border-b border-white/[0.06]">
+                              <th className="pb-2 pr-4 font-semibold text-white/40 uppercase tracking-wider" style={{ fontSize: "10px" }}>LP Name</th>
+                              <th className="pb-2 pr-4 font-semibold text-white/40 uppercase tracking-wider text-right" style={{ fontSize: "10px" }}>Commitment</th>
+                              <th className="pb-2 pr-4 font-semibold text-white/40 uppercase tracking-wider text-right" style={{ fontSize: "10px" }}>Called</th>
+                              <th className="pb-2 pr-4 font-semibold text-white/40 uppercase tracking-wider text-right" style={{ fontSize: "10px" }}>Uncalled</th>
+                              <th className="pb-2 pr-4 font-semibold text-white/40 uppercase tracking-wider text-right" style={{ fontSize: "10px" }}>Distributions</th>
+                              <th className="pb-2 pr-4 font-semibold text-white/40 uppercase tracking-wider text-right" style={{ fontSize: "10px" }}>NAV</th>
+                              <th className="pb-2 pr-4 font-semibold text-white/40 uppercase tracking-wider text-right" style={{ fontSize: "10px" }}>Ownership</th>
+                              <th className="pb-2 font-semibold text-white/40 uppercase tracking-wider" style={{ fontSize: "10px" }}>Vintage</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {lpAccounts.map(lp => (
+                              <tr key={lp.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
+                                <td className="py-2.5 pr-4">
+                                  <div className="text-sm font-medium text-white">{lp.lpName ?? "Unknown LP"}</div>
+                                  <div className="text-[10px] text-white/30 capitalize">{lp.lpType?.replace(/_/g, " ") ?? ""}</div>
+                                </td>
+                                <td className="py-2.5 pr-4 text-right text-sm text-white">{fmt(lp.commitmentCents / 100)}</td>
+                                <td className="py-2.5 pr-4 text-right text-sm text-white">{fmt(lp.calledCents / 100)}</td>
+                                <td className="py-2.5 pr-4 text-right text-sm text-white/50">{fmt(lp.uncalledCents / 100)}</td>
+                                <td className="py-2.5 pr-4 text-right text-sm" style={{ color: "#6aaa72" }}>{fmt(lp.distributionsCents / 100)}</td>
+                                <td className="py-2.5 pr-4 text-right text-sm text-white">{fmt(lp.currentNavCents / 100)}</td>
+                                <td className="py-2.5 pr-4 text-right text-sm text-white/60">{lp.ownershipPct ? `${parseFloat(lp.ownershipPct).toFixed(2)}%` : "—"}</td>
+                                <td className="py-2.5 text-sm text-white/40">{lp.vintage ?? "—"}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                          <tfoot>
+                            <tr className="border-t border-white/[0.08]">
+                              <td className="pt-2.5 pr-4 text-sm font-semibold text-white">Totals</td>
+                              <td className="pt-2.5 pr-4 text-right text-sm font-semibold text-white">{fmt(lpAccounts.reduce((s, a) => s + a.commitmentCents, 0) / 100)}</td>
+                              <td className="pt-2.5 pr-4 text-right text-sm font-semibold text-white">{fmt(lpAccounts.reduce((s, a) => s + a.calledCents, 0) / 100)}</td>
+                              <td className="pt-2.5 pr-4 text-right text-sm text-white/50">{fmt(lpAccounts.reduce((s, a) => s + a.uncalledCents, 0) / 100)}</td>
+                              <td className="pt-2.5 pr-4 text-right text-sm font-semibold" style={{ color: "#6aaa72" }}>{fmt(lpAccounts.reduce((s, a) => s + a.distributionsCents, 0) / 100)}</td>
+                              <td className="pt-2.5 pr-4 text-right text-sm font-semibold text-white">{fmt(lpAccounts.reduce((s, a) => s + a.currentNavCents, 0) / 100)}</td>
+                              <td className="pt-2.5 pr-4" />
+                              <td className="pt-2.5" />
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                    </div>
+                  )}
 
                   {(summary?.compliance.totalInvestors ?? 0) > 0 && (
                     <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 mb-8">

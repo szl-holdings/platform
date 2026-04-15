@@ -618,7 +618,26 @@ router.patch("/fund-ops/capital-call-lines/:id", ...auth, async (req, res) => {
 
 router.get("/fund-ops/lp-capital-accounts", ...auth, async (req, res) => {
   try {
-    const rows = await db.select().from(fundLpCapitalAccountsTable).orderBy(desc(fundLpCapitalAccountsTable.commitmentCents));
+    const rows = await db
+      .select({
+        id: fundLpCapitalAccountsTable.id,
+        lpId: fundLpCapitalAccountsTable.lpId,
+        lpName: fundAccreditedInvestorsTable.lpName,
+        lpType: fundAccreditedInvestorsTable.lpType,
+        commitmentCents: fundLpCapitalAccountsTable.commitmentCents,
+        calledCents: fundLpCapitalAccountsTable.calledCents,
+        uncalledCents: fundLpCapitalAccountsTable.uncalledCents,
+        distributionsCents: fundLpCapitalAccountsTable.distributionsCents,
+        currentNavCents: fundLpCapitalAccountsTable.currentNavCents,
+        ownershipPct: fundLpCapitalAccountsTable.ownershipPct,
+        managementFeesPaidCents: fundLpCapitalAccountsTable.managementFeesPaidCents,
+        carriedInterestPaidCents: fundLpCapitalAccountsTable.carriedInterestPaidCents,
+        vintage: fundLpCapitalAccountsTable.vintage,
+        notes: fundLpCapitalAccountsTable.notes,
+      })
+      .from(fundLpCapitalAccountsTable)
+      .leftJoin(fundAccreditedInvestorsTable, eq(fundLpCapitalAccountsTable.lpId, fundAccreditedInvestorsTable.id))
+      .orderBy(desc(fundLpCapitalAccountsTable.commitmentCents));
     sendSuccess(res, rows);
   } catch (err) {
     handleRouteError(res, err, "Failed to list LP capital accounts");
@@ -780,6 +799,13 @@ router.get("/fund-ops/summary", ...auth, async (req, res) => {
 
 router.post("/fund-ops/seed", ...auth, async (req, res) => {
   try {
+    const env = process.env.NODE_ENV ?? "development";
+    const demoFlag = process.env.DEMO_MODE === "true";
+    if (env === "production" && !demoFlag) {
+      sendSuccess(res, { seeded: false, message: "Seed endpoint disabled in production" }, 403);
+      return;
+    }
+
     const [{ cnt }] = await db.select({ cnt: sql<number>`count(*)::int` }).from(fundPortfolioFinancialsTable);
     if (cnt > 0) {
       sendSuccess(res, { seeded: false, message: "Data already exists" });
