@@ -1,19 +1,10 @@
-const CACHE_VERSION = "aegis-v1";
+const CACHE_VERSION = "szl-v1";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const API_CACHE = `${CACHE_VERSION}-api`;
-const DASHBOARD_CACHE = `${CACHE_VERSION}-dashboard`;
-
-const DASHBOARD_API_PATTERNS = [
-  /\/api\/(firestorm|aegis)\/(incidents|alerts|assets|findings|cases)/,
-];
 
 function isStaticAsset(url) {
   return /\.(js|css|woff2?|png|jpg|jpeg|svg|ico|webp|json)$/.test(url)
     && !url.includes("/api/");
-}
-
-function isDashboardApi(url) {
-  return DASHBOARD_API_PATTERNS.some((p) => p.test(url));
 }
 
 function isApiRequest(url) {
@@ -25,7 +16,6 @@ self.addEventListener("install", (event) => {
     Promise.all([
       caches.open(STATIC_CACHE),
       caches.open(API_CACHE),
-      caches.open(DASHBOARD_CACHE),
     ]).then(() => self.skipWaiting())
   );
 });
@@ -45,15 +35,23 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("message", (event) => {
-  if (event.data?.type === "SKIP_WAITING") {
-    self.skipWaiting();
-  }
+  if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
   if (event.data?.type === "CLEAR_CACHE") {
     caches.keys().then((keys) => keys.forEach((k) => caches.delete(k)));
   }
-  if (event.data?.type === "CLEAR_API_CACHE") {
-    caches.delete(API_CACHE);
-    caches.delete(DASHBOARD_CACHE);
+});
+
+self.addEventListener("fetch", (event) => {
+  const { request } = event;
+  if (request.method !== "GET") return;
+  const url = request.url;
+  if (isStaticAsset(url)) {
+    event.respondWith(cacheFirst(request, STATIC_CACHE));
+    return;
+  }
+  if (isApiRequest(url)) {
+    event.respondWith(networkFirst(request, API_CACHE));
+    return;
   }
 });
 
@@ -61,12 +59,12 @@ self.addEventListener("push", (event) => {
   if (!event.data) return;
   let payload;
   try { payload = event.data.json(); } catch { return; }
-  const title = payload.title || "Aegis — Defense & Intelligence";
+  const title = payload.title || "SZL Holdings";
   const options = {
     body: payload.body || "",
     icon: payload.icon || "/favicon.svg",
     badge: payload.badge || "/favicon.svg",
-    tag: payload.tag || "aegis-alert",
+    tag: payload.tag || "szl-alert",
     data: payload.data || {},
     requireInteraction: true,
   };
@@ -75,7 +73,7 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const actionUrl = event.notification.data?.actionUrl || "/firestorm/";
+  const actionUrl = event.notification.data?.actionUrl || "/";
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
@@ -88,28 +86,6 @@ self.addEventListener("notificationclick", (event) => {
       return clients.openWindow(actionUrl);
     })
   );
-});
-
-self.addEventListener("fetch", (event) => {
-  const { request } = event;
-  if (request.method !== "GET") return;
-
-  const url = request.url;
-
-  if (isStaticAsset(url)) {
-    event.respondWith(cacheFirst(request, STATIC_CACHE));
-    return;
-  }
-
-  if (isDashboardApi(url)) {
-    event.respondWith(networkFirst(request, DASHBOARD_CACHE));
-    return;
-  }
-
-  if (isApiRequest(url)) {
-    event.respondWith(networkFirst(request, API_CACHE));
-    return;
-  }
 });
 
 async function cacheFirst(request, cacheName) {
@@ -136,7 +112,7 @@ async function networkFirst(request, cacheName) {
     if (cached) return cached;
     return new Response(
       JSON.stringify({ error: "offline", cached: false }),
-      { status: 503, headers: { "Content-Type": "application/json", "X-Offline": "true" } }
+      { status: 503, headers: { "Content-Type": "application/json" } }
     );
   }
 }

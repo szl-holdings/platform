@@ -44,6 +44,39 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+self.addEventListener("push", (event) => {
+  if (!event.data) return;
+  let payload;
+  try { payload = event.data.json(); } catch { return; }
+  const title = payload.title || "Vessels Maritime Intelligence";
+  const options = {
+    body: payload.body || "",
+    icon: payload.icon || "/favicon.svg",
+    badge: payload.badge || "/favicon.svg",
+    tag: payload.tag || "vessels-alert",
+    data: payload.data || {},
+    requireInteraction: true,
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const actionUrl = event.notification.data?.actionUrl || "/vessels/";
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if ("focus" in client) {
+          client.focus();
+          if ("navigate" in client) client.navigate(actionUrl);
+          return;
+        }
+      }
+      return clients.openWindow(actionUrl);
+    })
+  );
+});
+
 self.addEventListener("message", (event) => {
   if (event.data?.type === "SKIP_WAITING") {
     self.skipWaiting();

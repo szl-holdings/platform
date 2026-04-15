@@ -161,6 +161,8 @@ import monteCarloRouter from "./monte-carlo";
 import partnerPortalRouter from "./partner-portal";
 import deltaSyncRouter from "./delta-sync";
 import changesRouter from "./changes";
+import webPushSubscriptionsRouter from "./web-push-subscriptions";
+import notificationRecipientsRouter from "./notification-recipients";
 
 const router: IRouter = Router();
 
@@ -622,5 +624,11 @@ router.use("/vessels/sync", _readLimiter);
 router.use("/alloy/sync", _readLimiter);
 router.use(deltaSyncRouter);
 router.use(changesRouter);
+
+router.use("/web-push", _writeLimiter);
+router.use(webPushSubscriptionsRouter);
+
+router.use("/notification-recipients", _writeLimiter);
+router.use(notificationRecipientsRouter);
 
 export default router;

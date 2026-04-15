@@ -1,6 +1,10 @@
 import { sendEmail, hasEmailProviderConfigured, INTERNAL_EMAIL } from "./email";
 import { logger } from "./logger";
 import type { NotifSeverity } from "./domain-notifications";
+import { sendWebPushToAll } from "./web-push-sender";
+import { db, notificationRecipientsTable } from "@szl-holdings/db";
+import { eq } from "drizzle-orm";
+import { TwilioAdapter } from "@szl-holdings/services";
 
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX_PER_WINDOW: Record<NotifSeverity, number> = {
@@ -44,6 +48,8 @@ const SEVERITY_COLOR: Record<NotifSeverity, string> = {
   warning: "FFA500",
   info: "0078D4",
 };
+
+const twilioAdapter = new TwilioAdapter();
 
 async function postToSlack(text: string): Promise<void> {
   if (SLACK_WEBHOOK_URL) {
@@ -112,6 +118,92 @@ async function postToTeams(title: string, text: string, color: string): Promise<
   }
 }
 
+async function dispatchWebPush(params: AlertDispatchParams): Promise<void> {
+  try {
+    const { appName, title, message, severity, actionUrl } = params;
+    const severityLabel = severity === "critical" ? "🚨 CRITICAL" : severity === "warning" ? "⚠️ WARNING" : "ℹ️ INFO";
+    const result = await sendWebPushToAll({
+      title: `${severityLabel}: ${appName}`,
+      body: `${title} — ${message}`,
+      tag: `alert-${appName}-${severity}`,
+      actionUrl: actionUrl ?? "/",
+      data: { appName, severity, actionUrl },
+    });
+    if (result.sent > 0) {
+      logger.info({ sent: result.sent, failed: result.failed }, "[web-push] Alert dispatched");
+    }
+  } catch (err) {
+    logger.warn({ err }, "[web-push] Alert dispatch error");
+  }
+}
+
+async function getActiveRecipients(): Promise<typeof notificationRecipientsTable.$inferSelect[]> {
+  try {
+    return await db
+      .select()
+      .from(notificationRecipientsTable)
+      .where(eq(notificationRecipientsTable.isActive, true));
+  } catch (err) {
+    logger.warn({ err }, "[notification-dispatch] Failed to query recipients");
+    return [];
+  }
+}
+
+async function dispatchSMS(params: AlertDispatchParams): Promise<void> {
+  const recipients = await getActiveRecipients();
+  const smsRecipients = recipients.filter((r) => r.smsEnabled);
+  if (smsRecipients.length === 0) return;
+
+  const { appName, title, message, severity } = params;
+  const severityTag = severity.toUpperCase();
+  const smsBody = `[SZL ${severityTag}] ${appName}: ${title}\n${message}`.slice(0, 1600);
+
+  const results = await Promise.allSettled(
+    smsRecipients.map((r) => twilioAdapter.sendSMS(r.phoneNumber, smsBody))
+  );
+
+  let sent = 0;
+  let failed = 0;
+  for (const result of results) {
+    if (result.status === "fulfilled" && result.value.sent) {
+      sent++;
+    } else {
+      failed++;
+      if (result.status === "rejected") {
+        logger.warn({ err: result.reason }, "[sms] Failed to send SMS alert");
+      }
+    }
+  }
+  logger.info({ sent, failed, total: smsRecipients.length }, "[sms] Alert SMS dispatch complete");
+}
+
+async function dispatchVoice(params: AlertDispatchParams): Promise<void> {
+  const recipients = await getActiveRecipients();
+  const voiceRecipients = recipients.filter((r) => r.voiceEnabled);
+  if (voiceRecipients.length === 0) return;
+
+  const { appName, title, message } = params;
+  const ttsMessage = `Critical alert from S Z L Holdings. Application: ${appName}. ${title}. ${message}. This is a critical automated alert. Please acknowledge immediately.`;
+
+  const results = await Promise.allSettled(
+    voiceRecipients.map((r) => twilioAdapter.makeVoiceCall(r.phoneNumber, ttsMessage))
+  );
+
+  let initiated = 0;
+  let failed = 0;
+  for (const result of results) {
+    if (result.status === "fulfilled" && result.value.initiated) {
+      initiated++;
+    } else {
+      failed++;
+      if (result.status === "rejected") {
+        logger.warn({ err: result.reason }, "[voice] Failed to initiate voice call alert");
+      }
+    }
+  }
+  logger.info({ initiated, failed, total: voiceRecipients.length }, "[voice] Alert voice call dispatch complete");
+}
+
 export interface AlertDispatchParams {
   appName: string;
   title: string;
@@ -123,6 +215,9 @@ export interface AlertDispatchParams {
 const SEVERITY_THRESHOLD_SLACK: NotifSeverity[] = ["critical", "warning"];
 const SEVERITY_THRESHOLD_TEAMS: NotifSeverity[] = ["critical", "warning"];
 const SEVERITY_THRESHOLD_EMAIL: NotifSeverity[] = ["critical"];
+const SEVERITY_THRESHOLD_WEB_PUSH: NotifSeverity[] = ["critical", "warning"];
+const SEVERITY_THRESHOLD_SMS: NotifSeverity[] = ["critical", "warning"];
+const SEVERITY_THRESHOLD_VOICE: NotifSeverity[] = ["critical"];
 
 export async function dispatchExternalAlert(params: AlertDispatchParams): Promise<void> {
   const { appName, title, message, severity, actionUrl } = params;
@@ -181,6 +276,18 @@ ${actionUrl ? `<p><a href="${process.env.VITE_APP_URL || ""}${actionUrl}">View i
         }
       })
     );
+  }
+
+  if (SEVERITY_THRESHOLD_WEB_PUSH.includes(severity)) {
+    dispatchJobs.push(dispatchWebPush(params));
+  }
+
+  if (SEVERITY_THRESHOLD_SMS.includes(severity)) {
+    dispatchJobs.push(dispatchSMS(params));
+  }
+
+  if (SEVERITY_THRESHOLD_VOICE.includes(severity)) {
+    dispatchJobs.push(dispatchVoice(params));
   }
 
   if (dispatchJobs.length > 0) {

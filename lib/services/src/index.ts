@@ -89,7 +89,7 @@ export {
   type SlackChannelInfo,
   type SlackAlertRouting,
 } from "./adapters/slack.js";
-export { TwilioAdapter, type SMSResult } from "./adapters/twilio.js";
+export { TwilioAdapter, type SMSResult, type VoiceCallResult } from "./adapters/twilio.js";
 export { GoogleAdapter, type GoogleAuthStatus } from "./adapters/google.js";
 export { NotionAdapter, type NotionPage, type NotionDatabase } from "./adapters/notion.js";
 export { StorageAdapter, type UploadResult, type StoredFile } from "./adapters/storage.js";

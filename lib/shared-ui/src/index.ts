@@ -230,3 +230,11 @@ export {
 export { MergeNotification, type MergeNotificationProps } from "./merge-notification";
 
 export { CrdtEntityPanel, type CrdtEntityPanelProps } from "./crdt-entity-panel";
+export {
+  registerWebPush,
+  unregisterWebPush,
+  checkWebPushSupport,
+  registerServiceWorker,
+  getVapidPublicKey,
+  type WebPushRegistrationOptions,
+} from "./web-push-registration";
