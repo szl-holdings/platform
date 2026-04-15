@@ -4,7 +4,7 @@ import {
   ActivityIndicator, Platform, RefreshControl,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 
 interface McpTool {
   name: string;
@@ -31,11 +31,12 @@ const BUILT_IN_TOOLS: McpTool[] = [
 const ACCENT = "#6366f1";
 const BG = "#0a0a0a";
 const BORDER = "rgba(255,255,255,0.06)";
+const TEXT = "#e8e8f0";
+const TEXT_DIM = "rgba(255,255,255,0.45)";
 
-export default function McpToolsScreen() {
+export default function ToolsScreen() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
-  const [tools, setTools] = useState<McpTool[]>(BUILT_IN_TOOLS);
+  const [tools] = useState<McpTool[]>(BUILT_IN_TOOLS);
   const [selected, setSelected] = useState<McpTool | null>(null);
   const [params, setParams] = useState<Record<string, string>>({});
   const [running, setRunning] = useState(false);
@@ -86,51 +87,59 @@ export default function McpToolsScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
+      <LinearGradient
+        colors={["rgba(99,102,241,0.08)", "transparent"]}
+        style={styles.headerGradient}
+        pointerEvents="none"
+      />
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={styles.backText}>← Back</Text>
-        </TouchableOpacity>
         <View style={{ flex: 1 }}>
-          <Text style={styles.headerTitle}>MCP Tools</Text>
+          <Text style={styles.headerTitle}>Tools</Text>
           <Text style={styles.headerSub}>Model Context Protocol · Stephen</Text>
         </View>
         <View style={[styles.statusBadge, { borderColor: statusColor + "30" }]}>
           <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
           <Text style={[styles.statusText, { color: statusColor }]}>
-            {serverStatus === "healthy" ? "Online" : serverStatus === "error" ? "Offline" : "..."}
+            {serverStatus === "checking" ? "Checking" : serverStatus === "healthy" ? "Online" : "Offline"}
           </Text>
         </View>
       </View>
       <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+        style={styles.scroll}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={ACCENT} />}
       >
-        <Text style={styles.sectionLabel}>Available Tools ({tools.length})</Text>
-        {tools.map(tool => (
-          <TouchableOpacity
-            key={tool.name}
-            onPress={() => { setSelected(tool); setParams({}); setResult(null); }}
-            style={[styles.toolRow, selected?.name === tool.name && { backgroundColor: ACCENT + "15", borderLeftColor: ACCENT }]}
-            activeOpacity={0.7}
-          >
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.toolName, selected?.name === tool.name && { color: ACCENT }]}>{tool.name}</Text>
-              <Text style={styles.toolDesc} numberOfLines={2}>{tool.description}</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+        <Text style={styles.sectionLabel}>Available Tools</Text>
+        {tools.map((tool) => {
+          const isSelected = selected?.name === tool.name;
+          return (
+            <TouchableOpacity
+              key={tool.name}
+              style={[styles.toolRow, isSelected && { borderLeftColor: ACCENT }]}
+              onPress={() => {
+                if (isSelected) { setSelected(null); setResult(null); setParams({}); }
+                else { setSelected(tool); setResult(null); setParams({}); }
+              }}
+              activeOpacity={0.75}
+            >
+              <View style={{ flex: 1 }}>
+                <Text style={styles.toolName}>{tool.name}</Text>
+                <Text style={styles.toolDesc}>{tool.description}</Text>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
         {selected && (
           <View style={styles.callSection}>
-            <Text style={styles.callTitle}>{selected.name}</Text>
+            <Text style={styles.callTitle}>{`> ${selected.name}`}</Text>
             {hasParams && Object.entries(selected.inputSchema!.properties!).map(([key, schema]) => (
-              <View key={key} style={{ marginBottom: 8 }}>
-                <Text style={styles.paramLabel}>{schema.description ?? key}</Text>
+              <View key={key} style={{ marginBottom: 10 }}>
+                <Text style={styles.paramLabel}>{key}</Text>
                 <TextInput
                   value={params[key] ?? ""}
-                  onChangeText={val => setParams(p => ({ ...p, [key]: val }))}
-                  placeholder={key}
+                  onChangeText={(v) => setParams((p) => ({ ...p, [key]: v }))}
+                  placeholder={schema.description ?? key}
                   placeholderTextColor="rgba(255,255,255,0.2)"
                   style={styles.input}
                 />
@@ -156,21 +165,21 @@ export default function McpToolsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: BG },
-  header: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: BORDER },
-  backBtn: { paddingRight: 6 },
-  backText: { color: "#6366f1", fontSize: 13, fontWeight: "600" },
-  headerTitle: { color: "#fff", fontSize: 16, fontWeight: "700" },
-  headerSub: { color: "rgba(255,255,255,0.35)", fontSize: 10, marginTop: 1 },
+  headerGradient: { ...StyleSheet.absoluteFillObject, height: 200 },
+  header: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: BORDER },
+  headerTitle: { fontSize: 28, fontWeight: "700", color: TEXT, fontFamily: Platform.OS === "ios" ? "System" : "Inter_700Bold" },
+  headerSub: { color: TEXT_DIM, fontSize: 10, marginTop: 2 },
   statusBadge: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20, borderWidth: 1 },
   statusDot: { width: 5, height: 5, borderRadius: 3 },
   statusText: { fontSize: 10, fontWeight: "600" },
-  sectionLabel: { fontSize: 9, fontWeight: "700", color: "rgba(255,255,255,0.25)", letterSpacing: 1.2, textTransform: "uppercase", paddingHorizontal: 16, paddingTop: 16, paddingBottom: 6 },
-  toolRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: BORDER, borderLeftWidth: 2, borderLeftColor: "transparent" },
+  scroll: { flex: 1 },
+  sectionLabel: { fontSize: 9, fontWeight: "700", color: TEXT_DIM, letterSpacing: 1.2, textTransform: "uppercase", paddingHorizontal: 20, paddingTop: 16, paddingBottom: 6 },
+  toolRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 20, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: BORDER, borderLeftWidth: 2, borderLeftColor: "transparent" },
   toolName: { fontSize: 12, fontWeight: "600", color: "rgba(255,255,255,0.75)", fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace", marginBottom: 2 },
-  toolDesc: { fontSize: 10, color: "rgba(255,255,255,0.35)", lineHeight: 14 },
+  toolDesc: { fontSize: 10, color: TEXT_DIM, lineHeight: 14 },
   callSection: { margin: 12, borderRadius: 12, padding: 14, backgroundColor: "rgba(25,25,35,0.95)", borderWidth: 1, borderColor: BORDER },
   callTitle: { fontSize: 12, fontWeight: "700", color: ACCENT, fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace", marginBottom: 10 },
-  paramLabel: { fontSize: 9, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", marginBottom: 4 },
+  paramLabel: { fontSize: 9, color: TEXT_DIM, textTransform: "uppercase", marginBottom: 4 },
   input: { backgroundColor: "rgba(255,255,255,0.04)", borderWidth: 1, borderColor: "rgba(255,255,255,0.08)", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, fontSize: 12, color: "rgba(255,255,255,0.7)" },
   callButton: { backgroundColor: ACCENT, borderRadius: 10, paddingVertical: 12, alignItems: "center", marginTop: 10 },
   callButtonText: { color: "#fff", fontSize: 13, fontWeight: "700" },

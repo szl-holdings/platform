@@ -79,6 +79,8 @@ function RootLayoutNav() {
         <Stack.Screen name="auth" options={{ headerShown: false, animation: "slide_from_bottom" }} />
         <Stack.Screen name="property/[id]" options={{ headerShown: false, animation: "slide_from_right" }} />
         <Stack.Screen name="capture" options={{ headerShown: false, animation: "slide_from_bottom" }} />
+        <Stack.Screen name="agent-chat" options={{ headerShown: false, animation: "slide_from_right" }} />
+        <Stack.Screen name="mcp-tools" options={{ headerShown: false, animation: "slide_from_right" }} />
         <Stack.Screen name="+not-found" />
       </Stack>
     </AuthGuard>

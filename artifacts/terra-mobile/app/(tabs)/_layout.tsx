@@ -1,11 +1,41 @@
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
+import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { Tabs } from "expo-router";
+import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
+import { SymbolView } from "expo-symbols";
 import React from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { useColors } from "@/hooks/useColors";
 
-export default function TabLayout() {
+function NativeTabLayout() {
+  return (
+    <NativeTabs>
+      <NativeTabs.Trigger name="index">
+        <Icon sf={{ default: "map", selected: "map.fill" }} />
+        <Label>Map</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="properties">
+        <Icon sf={{ default: "list.bullet", selected: "list.bullet" }} />
+        <Label>Properties</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="pipeline">
+        <Icon sf={{ default: "chart.line.uptrend.xyaxis", selected: "chart.line.uptrend.xyaxis.circle.fill" }} />
+        <Label>Pipeline</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="scanner">
+        <Icon sf={{ default: "bolt", selected: "bolt.fill" }} />
+        <Label>Scanner</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="profile">
+        <Icon sf={{ default: "person", selected: "person.fill" }} />
+        <Label>Profile</Label>
+      </NativeTabs.Trigger>
+    </NativeTabs>
+  );
+}
+
+function ClassicTabLayout() {
   const colors = useColors();
   const isIOS = Platform.OS === "ios";
   const isWeb = Platform.OS === "web";
@@ -38,13 +68,73 @@ export default function TabLayout() {
         },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: "Map", tabBarIcon: ({ color }) => <Feather name="map" size={20} color={color} /> }} />
-      <Tabs.Screen name="properties" options={{ title: "Properties", tabBarIcon: ({ color }) => <Feather name="list" size={20} color={color} /> }} />
-      <Tabs.Screen name="scanner" options={{ title: "Scanner", tabBarIcon: ({ color }) => <Feather name="zap" size={20} color={color} /> }} />
-      <Tabs.Screen name="pipeline" options={{ title: "Pipeline", tabBarIcon: ({ color }) => <Feather name="activity" size={20} color={color} /> }} />
-      <Tabs.Screen name="mcp-tools" options={{ href: null }} />
-      <Tabs.Screen name="agent-chat" options={{ title: "Agents", tabBarIcon: ({ color }) => <Feather name="message-circle" size={20} color={color} /> }} />
-      <Tabs.Screen name="profile" options={{ title: "Profile", tabBarIcon: ({ color }) => <Feather name="user" size={20} color={color} /> }} />
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: "Map",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="map" tintColor={color} size={22} />
+            ) : (
+              <Feather name="map" size={20} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="properties"
+        options={{
+          title: "Properties",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="list.bullet" tintColor={color} size={22} />
+            ) : (
+              <Feather name="list" size={20} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="pipeline"
+        options={{
+          title: "Pipeline",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="chart.line.uptrend.xyaxis" tintColor={color} size={22} />
+            ) : (
+              <Feather name="activity" size={20} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="scanner"
+        options={{
+          title: "Scanner",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="bolt" tintColor={color} size={22} />
+            ) : (
+              <Feather name="zap" size={20} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="person" tintColor={color} size={22} />
+            ) : (
+              <Feather name="user" size={20} color={color} />
+            ),
+        }}
+      />
     </Tabs>
   );
+}
+
+export default function TabLayout() {
+  if (isLiquidGlassAvailable()) {
+    return <NativeTabLayout />;
+  }
+  return <ClassicTabLayout />;
 }

@@ -62,6 +62,8 @@ function RootLayoutNav() {
     <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="auth" options={{ headerShown: false, animation: "slide_from_bottom" }} />
+      <Stack.Screen name="agent-chat" options={{ headerShown: false, animation: "slide_from_right" }} />
+      <Stack.Screen name="mcp-tools" options={{ headerShown: false, animation: "slide_from_right" }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );

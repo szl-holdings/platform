@@ -5,7 +5,7 @@ import { Redirect, Tabs } from "expo-router";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { SymbolView } from "expo-symbols";
 import React from "react";
-import { Platform, StyleSheet, View, useColorScheme } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
@@ -29,10 +29,6 @@ function NativeTabLayout() {
         <Icon sf={{ default: "message", selected: "message.fill" }} />
         <Label>Messages</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="agent-chat">
-        <Icon sf={{ default: "sparkles", selected: "sparkles" }} />
-        <Label>Muse AI</Label>
-      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
         <Icon sf={{ default: "person", selected: "person.fill" }} />
         <Label>Profile</Label>
@@ -43,7 +39,6 @@ function NativeTabLayout() {
 
 function ClassicTabLayout() {
   const colors = useColors();
-  const isDark = true;
   const isIOS = Platform.OS === "ios";
   const isWeb = Platform.OS === "web";
 
@@ -124,22 +119,6 @@ function ClassicTabLayout() {
           tabBarIcon: ({ color }) =>
             isIOS ? (
               <SymbolView name="message" tintColor={color} size={22} />
-            ) : (
-              <Feather name="message-circle" size={20} color={color} />
-            ),
-        }}
-      />
-      <Tabs.Screen
-        name="mcp-tools"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="agent-chat"
-        options={{
-          title: "Muse AI",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="sparkles" tintColor={color} size={22} />
             ) : (
               <Feather name="message-circle" size={20} color={color} />
             ),

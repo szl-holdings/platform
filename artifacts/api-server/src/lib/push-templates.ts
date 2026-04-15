@@ -115,7 +115,7 @@ export function buildPushMessage(template: NotificationTemplate, vars: TemplateV
       return {
         title: `New Document Available`,
         body: `${vars.documentName ?? "A new document"} has been shared with you in your Vault.`,
-        data: { screen: "/vault", templateId: template, ...vars },
+        data: { screen: "/documents", templateId: template, ...vars },
         sound: "default",
         channelId: "carlota-documents",
       };

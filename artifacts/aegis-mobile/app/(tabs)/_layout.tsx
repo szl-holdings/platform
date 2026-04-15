@@ -21,21 +21,13 @@ function NativeTabLayout() {
         <Icon sf={{ default: "exclamationmark.triangle", selected: "exclamationmark.triangle.fill" }} />
         <Label>Incidents</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="approvals">
-        <Icon sf={{ default: "checkmark.seal", selected: "checkmark.seal.fill" }} />
-        <Label>Approvals</Label>
+      <NativeTabs.Trigger name="agent-chat">
+        <Icon sf={{ default: "bubble.left.and.bubble.right", selected: "bubble.left.and.bubble.right.fill" }} />
+        <Label>Agents</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="digest">
         <Icon sf={{ default: "doc.text", selected: "doc.text.fill" }} />
         <Label>Digest</Label>
-      </NativeTabs.Trigger>
-            <NativeTabs.Trigger name="agent-chat">
-        <Icon sf={{ default: "bubble.left.and.bubble.right", selected: "bubble.left.and.bubble.right.fill" }} />
-        <Label>Agents</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="agents">
-        <Icon sf={{ default: "network", selected: "network" }} />
-        <Label>Mesh</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
         <Icon sf={{ default: "person", selected: "person.fill" }} />
@@ -102,42 +94,6 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen
-        name="approvals"
-        options={{
-          title: "Approvals",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="checkmark.seal.fill" tintColor={color} size={22} />
-            ) : (
-              <Ionicons name="checkmark-circle-outline" size={20} color={color} />
-            ),
-        }}
-      />
-      <Tabs.Screen
-        name="digest"
-        options={{
-          title: "Digest",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="doc.text.fill" tintColor={color} size={22} />
-            ) : (
-              <Ionicons name="document-text-outline" size={20} color={color} />
-            ),
-        }}
-      />
-      <Tabs.Screen
-        name="findings"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="mitre"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="mcp-tools"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
         name="agent-chat"
         options={{
           title: "Agents",
@@ -150,14 +106,14 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen
-        name="agents"
+        name="digest"
         options={{
-          title: "Mesh",
+          title: "Digest",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="network" tintColor={color} size={22} />
+              <SymbolView name="doc.text.fill" tintColor={color} size={22} />
             ) : (
-              <Feather name="share-2" size={20} color={color} />
+              <Ionicons name="document-text-outline" size={20} color={color} />
             ),
         }}
       />

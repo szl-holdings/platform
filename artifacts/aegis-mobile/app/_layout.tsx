@@ -71,6 +71,11 @@ function AppShell() {
       <Stack.Screen name="auth" options={{ headerShown: false, animation: "slide_from_bottom" }} />
       <Stack.Screen name="incident/[id]" options={{ headerShown: false, animation: "slide_from_right" }} />
       <Stack.Screen name="finding/[id]" options={{ headerShown: false, animation: "slide_from_right" }} />
+      <Stack.Screen name="approvals" options={{ headerShown: false, animation: "slide_from_right" }} />
+      <Stack.Screen name="findings" options={{ headerShown: false, animation: "slide_from_right" }} />
+      <Stack.Screen name="mitre" options={{ headerShown: false, animation: "slide_from_right" }} />
+      <Stack.Screen name="mcp-tools" options={{ headerShown: false, animation: "slide_from_right" }} />
+      <Stack.Screen name="agents" options={{ headerShown: false, animation: "slide_from_right" }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );

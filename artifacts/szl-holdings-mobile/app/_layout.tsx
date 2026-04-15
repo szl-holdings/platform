@@ -46,6 +46,10 @@ function RootLayoutNav() {
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="auth" options={{ headerShown: false, animation: "slide_from_bottom" }} />
       <Stack.Screen name="portfolio/[id]" options={{ headerShown: false, animation: "slide_from_right" }} />
+      <Stack.Screen name="alloy" options={{ headerShown: false, animation: "slide_from_right" }} />
+      <Stack.Screen name="trust" options={{ headerShown: false, animation: "slide_from_right" }} />
+      <Stack.Screen name="agents" options={{ headerShown: false, animation: "slide_from_right" }} />
+      <Stack.Screen name="mcp-tools" options={{ headerShown: false, animation: "slide_from_right" }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );

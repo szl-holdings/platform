@@ -1,32 +1,34 @@
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
-import { Redirect, Tabs } from "expo-router";
+import { Tabs } from "expo-router";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { SymbolView } from "expo-symbols";
 import React from "react";
 import { Platform, StyleSheet, View } from "react-native";
-import { useAuth } from "@/context/AuthContext";
-import { useColors } from "@/hooks/useColors";
+
+const ACCENT = "#6366f1";
+const BG_DARK = "#0a0a0a";
+const BORDER = "rgba(255,255,255,0.06)";
 
 function NativeTabLayout() {
   return (
     <NativeTabs>
-      <NativeTabs.Trigger name="index">
-        <Icon sf={{ default: "gauge.medium", selected: "gauge.medium" }} />
-        <Label>Command</Label>
+      <NativeTabs.Trigger name="home">
+        <Icon sf={{ default: "house", selected: "house.fill" }} />
+        <Label>Home</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="portfolio">
+      <NativeTabs.Trigger name="ventures">
         <Icon sf={{ default: "briefcase", selected: "briefcase.fill" }} />
-        <Label>Portfolio</Label>
+        <Label>Ventures</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="investor">
-        <Icon sf={{ default: "chart.line.uptrend.xyaxis", selected: "chart.line.uptrend.xyaxis.circle.fill" }} />
-        <Label>Investors</Label>
+      <NativeTabs.Trigger name="articles">
+        <Icon sf={{ default: "doc.text", selected: "doc.text.fill" }} />
+        <Label>Articles</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="agent-chat">
-        <Icon sf={{ default: "bubble.left.and.bubble.right", selected: "bubble.left.and.bubble.right.fill" }} />
-        <Label>Agents</Label>
+      <NativeTabs.Trigger name="tools">
+        <Icon sf={{ default: "terminal", selected: "terminal.fill" }} />
+        <Label>Tools</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
         <Icon sf={{ default: "person", selected: "person.fill" }} />
@@ -37,7 +39,6 @@ function NativeTabLayout() {
 }
 
 function ClassicTabLayout() {
-  const colors = useColors();
   const isIOS = Platform.OS === "ios";
   const isWeb = Platform.OS === "web";
 
@@ -45,52 +46,45 @@ function ClassicTabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.gold,
-        tabBarInactiveTintColor: "rgba(240,238,255,0.2)",
+        tabBarActiveTintColor: ACCENT,
+        tabBarInactiveTintColor: "rgba(255,255,255,0.25)",
         tabBarStyle: {
           position: "absolute",
-          backgroundColor: isIOS ? "transparent" : "#090810",
+          backgroundColor: isIOS ? "transparent" : BG_DARK,
           borderTopWidth: 1,
-          borderTopColor: "rgba(201,168,76,0.1)",
+          borderTopColor: BORDER,
           elevation: 0,
           ...(isWeb ? { height: 84 } : {}),
         },
         tabBarBackground: () =>
           isIOS ? (
-            <BlurView
-              intensity={80}
-              tint="dark"
-              style={StyleSheet.absoluteFill}
-            />
+            <BlurView intensity={80} tint="dark" style={StyleSheet.absoluteFill} />
           ) : isWeb ? (
-            <View
-              style={[StyleSheet.absoluteFill, { backgroundColor: "#090810" }]}
-            />
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: BG_DARK }]} />
           ) : null,
         tabBarLabelStyle: {
           fontSize: 9,
           fontFamily: "Inter_500Medium",
-          letterSpacing: 1,
-          textTransform: "uppercase",
+          letterSpacing: 0.5,
         },
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
-          title: "Command",
+          title: "Home",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="gauge.medium" tintColor={color} size={22} />
+              <SymbolView name="house.fill" tintColor={color} size={22} />
             ) : (
-              <Feather name="activity" size={20} color={color} />
+              <Feather name="home" size={20} color={color} />
             ),
         }}
       />
       <Tabs.Screen
-        name="portfolio"
+        name="ventures"
         options={{
-          title: "Portfolio",
+          title: "Ventures",
           tabBarIcon: ({ color }) =>
             isIOS ? (
               <SymbolView name="briefcase" tintColor={color} size={22} />
@@ -100,26 +94,26 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen
-        name="investor"
+        name="articles"
         options={{
-          title: "Investors",
+          title: "Articles",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="chart.line.uptrend.xyaxis" tintColor={color} size={22} />
+              <SymbolView name="doc.text" tintColor={color} size={22} />
             ) : (
-              <Feather name="trending-up" size={20} color={color} />
+              <Feather name="book-open" size={20} color={color} />
             ),
         }}
       />
       <Tabs.Screen
-        name="agent-chat"
+        name="tools"
         options={{
-          title: "Agents",
+          title: "Tools",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="bubble.left.and.bubble.right.fill" tintColor={color} size={22} />
+              <SymbolView name="terminal" tintColor={color} size={22} />
             ) : (
-              <Feather name="message-circle" size={20} color={color} />
+              <Feather name="cpu" size={20} color={color} />
             ),
         }}
       />
@@ -140,12 +134,6 @@ function ClassicTabLayout() {
 }
 
 export default function TabLayout() {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (!isLoading && !isAuthenticated) {
-    return <Redirect href="/auth" />;
-  }
-
   if (isLiquidGlassAvailable()) {
     return <NativeTabLayout />;
   }

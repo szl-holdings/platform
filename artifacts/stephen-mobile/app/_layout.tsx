@@ -38,7 +38,7 @@ const queryClient = new QueryClient({
 function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="article/[slug]" options={{ headerShown: false, animation: "slide_from_right" }} />
       <Stack.Screen name="venture/[slug]" options={{ headerShown: false, animation: "slide_from_right" }} />
       <Stack.Screen name="mcp-tools" options={{ headerShown: false, animation: "slide_from_right" }} />

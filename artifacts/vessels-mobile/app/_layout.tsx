@@ -59,6 +59,8 @@ function RootLayoutNav() {
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="vessel/[id]" options={{ headerShown: false, animation: "slide_from_right" }} />
       <Stack.Screen name="auth" options={{ headerShown: false, animation: "slide_from_bottom" }} />
+      <Stack.Screen name="economics" options={{ headerShown: false, animation: "slide_from_right" }} />
+      <Stack.Screen name="mcp-tools" options={{ headerShown: false, animation: "slide_from_right" }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );

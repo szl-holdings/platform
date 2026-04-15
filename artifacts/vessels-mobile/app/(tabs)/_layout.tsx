@@ -25,10 +25,6 @@ function NativeTabLayout() {
         <Icon sf={{ default: "bell", selected: "bell.fill" }} />
         <Label>Alerts</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="economics">
-        <Icon sf={{ default: "chart.line.uptrend.xyaxis", selected: "chart.line.uptrend.xyaxis.circle.fill" }} />
-        <Label>Economics</Label>
-      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="agent-chat">
         <Icon sf={{ default: "bubble.left.and.bubble.right", selected: "bubble.left.and.bubble.right.fill" }} />
         <Label>Helmsman</Label>
@@ -109,22 +105,6 @@ function ClassicTabLayout() {
               <Feather name="bell" size={20} color={color} />
             ),
         }}
-      />
-      <Tabs.Screen
-        name="economics"
-        options={{
-          title: "Economics",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="chart.line.uptrend.xyaxis" tintColor={color} size={22} />
-            ) : (
-              <Feather name="trending-up" size={20} color={color} />
-            ),
-        }}
-      />
-      <Tabs.Screen
-        name="mcp-tools"
-        options={{ href: null }}
       />
       <Tabs.Screen
         name="agent-chat"

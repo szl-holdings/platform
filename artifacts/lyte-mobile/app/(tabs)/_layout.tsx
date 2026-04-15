@@ -1,4 +1,4 @@
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { Tabs } from "expo-router";
@@ -12,36 +12,20 @@ function NativeTabLayout() {
   return (
     <NativeTabs>
       <NativeTabs.Trigger name="index">
-        <Icon sf={{ default: "tray", selected: "tray.fill" }} />
-        <Label>Inbox</Label>
+        <Icon sf={{ default: "gauge.medium", selected: "gauge.medium" }} />
+        <Label>Dashboard</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="health">
         <Icon sf={{ default: "heart.circle", selected: "heart.circle.fill" }} />
         <Label>Health</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="signals">
-        <Icon sf={{ default: "waveform", selected: "waveform" }} />
-        <Label>Signals</Label>
-      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="alerts">
         <Icon sf={{ default: "bell", selected: "bell.fill" }} />
         <Label>Alerts</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="prism">
-        <Icon sf={{ default: "sparkles", selected: "sparkles" }} />
-        <Label>PRISM</Label>
-      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="board-mode">
         <Icon sf={{ default: "eye", selected: "eye.fill" }} />
         <Label>Board</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="receipts">
-        <Icon sf={{ default: "doc.text", selected: "doc.text.fill" }} />
-        <Label>Receipts</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="agent-chat">
-        <Icon sf={{ default: "bubble.left.and.bubble.right", selected: "bubble.left.and.bubble.right.fill" }} />
-        <Label>AIOps AI</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
         <Icon sf={{ default: "person", selected: "person.fill" }} />
@@ -86,12 +70,12 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Inbox",
+          title: "Dashboard",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="tray" tintColor={color} size={22} />
+              <SymbolView name="gauge.medium" tintColor={color} size={22} />
             ) : (
-              <Feather name="inbox" size={20} color={color} />
+              <Feather name="activity" size={20} color={color} />
             ),
         }}
       />
@@ -103,19 +87,7 @@ function ClassicTabLayout() {
             isIOS ? (
               <SymbolView name="heart.circle" tintColor={color} size={22} />
             ) : (
-              <Feather name="activity" size={20} color={color} />
-            ),
-        }}
-      />
-      <Tabs.Screen
-        name="signals"
-        options={{
-          title: "Signals",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="waveform" tintColor={color} size={22} />
-            ) : (
-              <MaterialCommunityIcons name="signal-variant" size={20} color={color} />
+              <Feather name="heart" size={20} color={color} />
             ),
         }}
       />
@@ -132,18 +104,6 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen
-        name="prism"
-        options={{
-          title: "PRISM",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="sparkles" tintColor={color} size={22} />
-            ) : (
-              <MaterialCommunityIcons name="diamond-outline" size={20} color={color} />
-            ),
-        }}
-      />
-      <Tabs.Screen
         name="board-mode"
         options={{
           title: "Board",
@@ -152,34 +112,6 @@ function ClassicTabLayout() {
               <SymbolView name="eye" tintColor={color} size={22} />
             ) : (
               <Feather name="eye" size={20} color={color} />
-            ),
-        }}
-      />
-      <Tabs.Screen
-        name="receipts"
-        options={{
-          title: "Receipts",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="doc.text" tintColor={color} size={22} />
-            ) : (
-              <Feather name="file-text" size={20} color={color} />
-            ),
-        }}
-      />
-      <Tabs.Screen
-        name="mcp-tools"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="agent-chat"
-        options={{
-          title: "AIOps AI",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="bubble.left.and.bubble.right.fill" tintColor={color} size={22} />
-            ) : (
-              <Feather name="message-circle" size={20} color={color} />
             ),
         }}
       />
