@@ -7,13 +7,15 @@ export interface GraphQLDataSection<T = Record<string, unknown>> {
 }
 
 export interface GraphQLDataPanelProps {
+  title?: string;
   accentColor?: string;
   loading?: boolean;
-  sections: GraphQLDataSection<any>[];
+  sections: ReadonlyArray<GraphQLDataSection<unknown>>;
   className?: string;
 }
 
 export function GraphQLDataPanel({
+  title = "GraphQL Live Data",
   accentColor = "rgb(96, 165, 250)",
   loading = false,
   sections,
@@ -37,7 +39,7 @@ export function GraphQLDataPanel({
           style={{ backgroundColor: accentColor }}
         />
         <span className="text-xs font-medium text-zinc-400 uppercase tracking-widest">
-          GraphQL Live Data
+          {title}
         </span>
       </div>
       {sections.map(
