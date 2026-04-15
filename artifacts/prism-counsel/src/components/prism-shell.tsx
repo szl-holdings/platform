@@ -81,6 +81,21 @@ const NAV: NavSection[] = [
     ],
   },
   {
+    label: "Agentic Legal Ops",
+    items: [
+      { label: "Contract Lifecycle", href: "/prism-counsel/agentic/contracts", icon: FileText },
+      { label: "Litigation Prediction", href: "/prism-counsel/agentic/litigation-prediction", icon: TrendingUp },
+      { label: "E-Discovery Pipeline", href: "/prism-counsel/agentic/e-discovery", icon: Search },
+      { label: "Legal Spend Intel", href: "/prism-counsel/agentic/legal-spend", icon: DollarSign },
+      { label: "Regulatory Radar", href: "/prism-counsel/agentic/regulatory-radar", icon: Radio },
+      { label: "Court Filing & Docket", href: "/prism-counsel/agentic/court-filing", icon: Gavel },
+      { label: "Knowledge Graph", href: "/prism-counsel/agentic/knowledge-graph", icon: Brain },
+      { label: "Legal Project Mgmt", href: "/prism-counsel/agentic/project-mgmt", icon: Layers },
+      { label: "Client Intelligence", href: "/prism-counsel/agentic/client-intel", icon: Building2 },
+      { label: "Ethics Guardrails", href: "/prism-counsel/agentic/ethics", icon: Lock },
+    ],
+  },
+  {
     label: "Court & Privilege",
     items: [
       { label: "Court Data Feed", href: "/prism-counsel/court-data", icon: Wifi },

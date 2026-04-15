@@ -139,6 +139,17 @@ const LitigationCostPage = lazy(() => import("./pages/litigation-cost-page"));
 const CaseStrengthPage = lazy(() => import("./pages/case-strength-page"));
 const InsuranceOptimizerPage = lazy(() => import("./pages/insurance-optimizer-page"));
 
+const AgenticContractLifecycle = lazy(() => import("./pages/agentic/contract-lifecycle-page"));
+const AgenticLitigationPrediction = lazy(() => import("./pages/agentic/litigation-prediction-page"));
+const AgenticEDiscovery = lazy(() => import("./pages/agentic/e-discovery-pipeline-page"));
+const AgenticLegalSpend = lazy(() => import("./pages/agentic/legal-spend-page"));
+const AgenticRegulatoryRadar = lazy(() => import("./pages/agentic/regulatory-radar-page"));
+const AgenticCourtFiling = lazy(() => import("./pages/agentic/court-filing-page"));
+const AgenticKnowledgeGraph = lazy(() => import("./pages/agentic/knowledge-graph-page"));
+const AgenticLegalProjectMgmt = lazy(() => import("./pages/agentic/legal-project-mgmt-page"));
+const AgenticClientIntelligence = lazy(() => import("./pages/agentic/client-intelligence-page"));
+const AgenticEthicsGuardrails = lazy(() => import("./pages/agentic/ethics-guardrails-page"));
+
 const NyOverview = lazy(() => import("./pages/ny/ny-overview"));
 const NyDashboard = lazy(() => import("./pages/ny/ny-dashboard"));
 const NyWatchlist = lazy(() => import("./pages/ny/ny-watchlist"));
@@ -459,6 +470,37 @@ function PrismCounselRoutes() {
       </Route>
       <Route path="/prism-counsel/settlement-blockers-view">
         <Suspense fallback={<PageLoader />}><Wrap><S32SettlementBlockersView /></Wrap></Suspense>
+      </Route>
+
+      <Route path="/prism-counsel/agentic/contracts">
+        <Suspense fallback={<PageLoader />}><Wrap><AgenticContractLifecycle /></Wrap></Suspense>
+      </Route>
+      <Route path="/prism-counsel/agentic/litigation-prediction">
+        <Suspense fallback={<PageLoader />}><Wrap><AgenticLitigationPrediction /></Wrap></Suspense>
+      </Route>
+      <Route path="/prism-counsel/agentic/e-discovery">
+        <Suspense fallback={<PageLoader />}><Wrap><AgenticEDiscovery /></Wrap></Suspense>
+      </Route>
+      <Route path="/prism-counsel/agentic/legal-spend">
+        <Suspense fallback={<PageLoader />}><Wrap><AgenticLegalSpend /></Wrap></Suspense>
+      </Route>
+      <Route path="/prism-counsel/agentic/regulatory-radar">
+        <Suspense fallback={<PageLoader />}><Wrap><AgenticRegulatoryRadar /></Wrap></Suspense>
+      </Route>
+      <Route path="/prism-counsel/agentic/court-filing">
+        <Suspense fallback={<PageLoader />}><Wrap><AgenticCourtFiling /></Wrap></Suspense>
+      </Route>
+      <Route path="/prism-counsel/agentic/knowledge-graph">
+        <Suspense fallback={<PageLoader />}><Wrap><AgenticKnowledgeGraph /></Wrap></Suspense>
+      </Route>
+      <Route path="/prism-counsel/agentic/project-mgmt">
+        <Suspense fallback={<PageLoader />}><Wrap><AgenticLegalProjectMgmt /></Wrap></Suspense>
+      </Route>
+      <Route path="/prism-counsel/agentic/client-intel">
+        <Suspense fallback={<PageLoader />}><Wrap><AgenticClientIntelligence /></Wrap></Suspense>
+      </Route>
+      <Route path="/prism-counsel/agentic/ethics">
+        <Suspense fallback={<PageLoader />}><Wrap><AgenticEthicsGuardrails /></Wrap></Suspense>
       </Route>
 
       <Route path="/prism-counsel/court-data">
