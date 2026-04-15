@@ -11,7 +11,7 @@ import { cn } from "@szl-holdings/shared-ui/utils";
 import { CommandModeSurface, type CommandModeSignal, useRealtimeChannel } from "@szl-holdings/shared-ui";
 import { useVessels, useFleetExceptions, useVoyages, useMaintenance } from "@/hooks/use-vessels-data";
 import { useQueryClient } from "@tanstack/react-query";
-import { PackBanner } from "@/components/pack-banner";
+import { PackBanner } from "@szl-holdings/shared-ui";
 
 const statusConfig: Record<string, { label: string; color: string; dot: string }> = {
   at_sea: { label: "At Sea", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", dot: "bg-emerald-400" },

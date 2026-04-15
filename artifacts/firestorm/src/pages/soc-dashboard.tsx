@@ -11,7 +11,7 @@ import {
   GitBranch, Lock, Search, ListChecks, UserCheck, Grid,
   DollarSign, ArrowUpRight,
 } from "lucide-react";
-import { PackBanner } from "@/components/pack-banner";
+import { PackBanner } from "@szl-holdings/shared-ui";
 import { ThreatFeedSimulator } from "@szl-holdings/observability";
 
 const _threatSim = new ThreatFeedSimulator(0xfeed1337);

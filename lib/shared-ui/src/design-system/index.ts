@@ -27,5 +27,6 @@ export * from "./EvidenceDrawer";
 export * from "./ChartContainer";
 export * from "./ExportPanel";
 export * from "./ApprovalStack";
+export * from "./GraphQLDataPanel";
 export { EmptyState } from "../EmptyState";
 export type { EmptyStateProps } from "../EmptyState";

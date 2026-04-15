@@ -13,7 +13,7 @@ import { brokerageSummary, brokerageDeals, riskSignals, agents } from "@/data/br
 import { RiskBadge, StageBadge, formatCurrency, AgentAvatar } from "@/components/brokerage-ui";
 import { properties } from "@/data/portfolio";
 import { useMapboxToken } from "@/hooks/use-mapbox-token";
-import { PackBanner } from "@/components/pack-banner";
+import { PackBanner } from "@szl-holdings/shared-ui";
 
 const PropertyMap = lazy(() => import("@/components/property-map"));
 
