@@ -113,7 +113,8 @@
     "./data-state-badge": "./src/data-state-badge.tsx",
     "./ambient-intelligence": "./src/ambient-intelligence.tsx",
     "./energy-heartbeat": "./src/energy-heartbeat.tsx",
-    "./cross-domain-correlation": "./src/cross-domain-correlation.tsx"
+    "./cross-domain-correlation": "./src/cross-domain-correlation.tsx",
+    "./settings-shell": "./src/settings-shell.tsx"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.4",

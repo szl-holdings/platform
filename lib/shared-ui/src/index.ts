@@ -340,3 +340,4 @@ export {
   type WhatIfResult,
   type WhatIfCascade,
 } from "./cortex-what-if";
+export * from "./settings-shell";

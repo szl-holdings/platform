@@ -155,6 +155,7 @@ const MspRMM = lazy(() => import("@/pages/msp/rmm-console"));
 const MspMRR = lazy(() => import("@/pages/msp/mrr-dashboard"));
 const MspServiceDesk = lazy(() => import("@/pages/msp/service-desk"));
 const MspProviderSettings = lazy(() => import("@/pages/msp/provider-settings"));
+const AegisUnifiedSettings = lazy(() => import("@/pages/settings/unified-settings"));
 
 // ─── Intelligence Engine pages (from INCA) ────────────────────────────────────
 const IntelDashboard = lazy(() => import("@/pages/intel/dashboard"));
@@ -892,6 +893,7 @@ function AppRouter() {
         <Route path="/ops/mrr">{() => <RoleGate requires={["operator", "admin"]} fallback={<AccessDenied />}><MspMRR /></RoleGate>}</Route>
         <Route path="/ops/service-desk">{() => <RoleGate requires={["operator", "admin"]} fallback={<AccessDenied />}><MspServiceDesk /></RoleGate>}</Route>
         <Route path="/ops/provider-settings">{() => <RoleGate requires={["admin"]} fallback={<AccessDenied />}><MspProviderSettings /></RoleGate>}</Route>
+        <Route path="/ops/settings">{() => <RoleGate requires={["admin"]} fallback={<AccessDenied />}><AegisUnifiedSettings /></RoleGate>}</Route>
 
         {/* Intelligence Engine — requires security or admin role */}
         <Route path="/intel/dashboard">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><IntelDashboard /></RoleGate>}</Route>

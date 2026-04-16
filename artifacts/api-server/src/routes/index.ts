@@ -175,6 +175,8 @@ import { autopilotRouter } from "./autopilot";
 import signalChainsRouter from "./signal-chains";
 import crossDomainQueryRouter from "./cross-domain-query";
 import correlationMapRouter from "./correlation-map";
+import unifiedSettingsRouter from "./unified-settings";
+import tenantHealthRouter from "./tenant-health";
 
 const router: IRouter = Router();
 
@@ -679,5 +681,13 @@ router.use(crossDomainQueryRouter);
 
 router.use("/correlation-map", _readLimiter);
 router.use(correlationMapRouter);
+
+router.use("/settings", _readLimiter);
+router.use("/settings", _writeLimiter);
+router.use(unifiedSettingsRouter);
+
+router.use("/tenant-health", _readLimiter);
+router.use("/tenant-health", _writeLimiter);
+router.use(tenantHealthRouter);
 
 export default router;

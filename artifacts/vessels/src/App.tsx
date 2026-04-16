@@ -188,6 +188,7 @@ const CrewTrackerPage = lazy(() => import("@/pages/crew-tracker"));
 const BunkerOptimizerPage = lazy(() => import("@/pages/bunker-optimizer"));
 const PscInspectorPage = lazy(() => import("@/pages/psc-inspector"));
 const InsurancePanelPage = lazy(() => import("@/pages/insurance-panel"));
+const VesselsSettingsPage = lazy(() => import("@/pages/settings"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -547,15 +548,7 @@ function DashboardRouter() {
             </div>
           </div>
         </Route>
-        <Route path="/dashboard/settings">
-          <div className="p-6 max-w-xl mx-auto space-y-4">
-            <h1 className="font-display text-xl font-bold text-sky-50">Settings</h1>
-            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-5">
-              <p className="text-sm font-medium text-sky-100 mb-1">Organisation settings</p>
-              <p className="text-xs text-sky-400/40">Configure fleet parameters, API integrations, and user preferences.</p>
-            </div>
-          </div>
-        </Route>
+        <Route path="/dashboard/settings" component={VesselsSettingsPage} />
         <Route path="/dashboard/team">
           <div className="p-6 max-w-xl mx-auto space-y-4">
             <h1 className="font-display text-xl font-bold text-sky-50">Team</h1>

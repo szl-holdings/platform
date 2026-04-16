@@ -58,6 +58,8 @@ const ReportsHubPage = lazy(() => import("@/pages/reports-hub"));
 const ReportBuilderPage = lazy(() => import("@/pages/report-builder"));
 const AICostAnalyticsPage = lazy(() => import("@/pages/ai-cost-analytics"));
 const AdminPage = lazy(() => import("@/pages/admin"));
+const TenantHealthScorecardsPage = lazy(() => import("@/pages/tenant-health-scorecards"));
+const UnifiedSettingsPage = lazy(() => import("@/pages/unified-settings-page"));
 const OpsPage = lazy(() => import("@/pages/ops"));
 const AzureTenantOnboardingPage = lazy(() => import("@/pages/azure-tenant-onboarding"));
 const AzureTenantDashboardPage = lazy(() => import("@/pages/azure-tenant-dashboard"));
@@ -848,6 +850,12 @@ function App() {
             </Route>
             <Route path="/admin/capital-arsenal">
               <RequireAuth><Suspense fallback={<PageLoader />}><CapitalArsenalPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/tenant-health">
+              <RequireAuth><Suspense fallback={<PageLoader />}><TenantHealthScorecardsPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/platform-settings">
+              <RequireAuth><Suspense fallback={<PageLoader />}><UnifiedSettingsPage /></Suspense></RequireAuth>
             </Route>
             <Route path="/admin">
               <RequireAuth><Suspense fallback={<PageLoader />}><AdminPage /></Suspense></RequireAuth>
