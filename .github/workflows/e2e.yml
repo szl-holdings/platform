@@ -29,6 +29,13 @@ jobs:
             dist: artifacts/szl-holdings/dist/public
             port: 3000
             spec: szl-holdings.spec.ts
+          # forge.spec.ts runs against the SZL Holdings build — Nuro Forge is
+          # embedded at /nuro-forge within the SZL Holdings app (no standalone artifact).
+          - app: forge
+            filter: "@workspace/szl-holdings"
+            dist: artifacts/szl-holdings/dist/public
+            port: 3000
+            spec: forge.spec.ts
           - app: aegis
             filter: "@workspace/aegis"
             dist: artifacts/aegis/dist/public
@@ -54,6 +61,14 @@ jobs:
             dist: artifacts/command/dist/public
             port: 3005
             spec: command.spec.ts
+          # Specs excluded from this matrix (no standalone CI build artifact):
+          #   - imperium.spec.ts  → IMPERIUM has no registered CI artifact; spec self-skips
+          #   - lyte.spec.ts      → Lyte is embedded in SZL Holdings routes; spec self-skips
+          #   - prism-counsel.spec.ts → PRISM Counsel has no standalone CI artifact; spec self-skips
+          #   - stephen-site.spec.ts  → Personal site; no CI artifact; spec self-skips
+          # All excluded specs use appAvailable guards and call testInfo.skip() when
+          # the target path is unavailable — they will not cause false failures.
+          # See docs/TESTING_MATRIX.md §4b for the full exclusion rationale.
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 

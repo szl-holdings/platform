@@ -193,13 +193,35 @@ node scripts/qa/check-demo-seed.js
 
 ---
 
+## E2E Test Coverage
+
+The platform has a fully operational Playwright E2E test suite with 12 spec files across all flagship products:
+
+- `szl-holdings.spec.ts` — SZL Holdings Dashboard
+- `forge.spec.ts` — Nuro Forge (AI platform, embedded within SZL Holdings)
+- `aegis.spec.ts` — Aegis Defense & Intelligence
+- `terra.spec.ts` — Terra Real Estate Intelligence
+- `vessels.spec.ts` — Vessels Maritime Intelligence
+- `carlota-jo.spec.ts` — Carlota Jo Consulting
+- `command.spec.ts` — Unified Command
+- `imperium.spec.ts` — IMPERIUM (self-skips if artifact not running)
+- `lyte.spec.ts` — Lyte Command Center (self-skips if artifact not running)
+- `prism-counsel.spec.ts` — PRISM Counsel (self-skips if artifact not running)
+- `stephen-site.spec.ts` — Stephen Lutar site (self-skips if artifact not running)
+- `a11y.spec.ts` — Accessibility (axe-core, SZL Holdings)
+
+CI runs szl-holdings, forge, aegis, terra, vessels, carlota-jo, command, and a11y specs automatically. The remaining specs (imperium, lyte, prism-counsel, stephen-site) have no standalone CI build artifact and are explicitly excluded with documented rationale — see `docs/TESTING_MATRIX.md §4b`.
+
+---
+
 ## Known QA Gaps (Backlog)
 
-- [ ] End-to-end (E2E) test suite with Playwright (playwright.config.ts exists but tests not written)
-- [ ] Automated performance regression testing
-- [ ] Cross-browser automated testing
-- [ ] API endpoint contract testing
-- [ ] Mobile-specific accessibility testing
+- [ ] No auth E2E flow test (login/logout Playwright session) — auth covered at unit/middleware level
+- [ ] No mutation API E2E coverage for Forge, PRISM — POST/mutation paths rely on unit + integration tests
+- [ ] No mobile E2E coverage for CORTEX (Expo app — Playwright cannot target React Native)
+- [ ] No cross-browser E2E (only Chromium in CI for speed)
+- [ ] Automated performance regression testing (Lighthouse is manual only)
+- [ ] IMPERIUM, Lyte, PRISM, Stephen E2E not in CI — no standalone CI artifact registered
 
 ---
 

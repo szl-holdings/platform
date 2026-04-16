@@ -16,22 +16,33 @@ function resolveChromiumPath(): string | undefined {
 
 const chromiumPath = resolveChromiumPath();
 
+const isCI = !!process.env.CI;
+
 export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: false,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  forbidOnly: isCI,
+  retries: isCI ? 2 : 0,
   workers: 1,
-  reporter: [
-    ["list"],
-    ["html", { open: "never", outputFolder: "playwright-report" }],
-    ["junit", { outputFile: "playwright-report/results.xml" }],
-  ],
+  reporter: isCI
+    ? [
+        ["list"],
+        ["github"],
+        ["html", { open: "never", outputFolder: "playwright-report" }],
+        ["junit", { outputFile: "playwright-report/results.xml" }],
+      ]
+    : [
+        ["list"],
+        ["html", { open: "never", outputFolder: "playwright-report" }],
+        ["junit", { outputFile: "playwright-report/results.xml" }],
+      ],
   use: {
     baseURL: BASE_URL,
-    trace: "retain-on-failure",
+    // In CI: capture trace on first retry so flaky-test analysis has full context.
+    // Locally: only retain traces on failures to keep disk usage low.
+    trace: isCI ? "on-first-retry" : "retain-on-failure",
     screenshot: "only-on-failure",
-    video: "retain-on-failure",
+    video: isCI ? "on-first-retry" : "retain-on-failure",
     actionTimeout: 10000,
     navigationTimeout: 30000,
   },

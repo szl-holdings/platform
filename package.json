@@ -44,7 +44,10 @@
     "qa:verify:skip-e2e": "node scripts/qa/post-merge-verify.js --skip-e2e",
     "security:audit": "node scripts/qa/generate-sbom.js",
     "security:audit:fix": "pnpm update --latest",
-    "security:sbom": "node scripts/qa/generate-sbom.js"
+    "security:sbom": "node scripts/qa/generate-sbom.js",
+    "smoke:product-mode": "node scripts/qa/smoke-product-mode.js",
+    "readiness:gate": "pnpm run typecheck && pnpm run test && pnpm run qa:routes && pnpm run audit:mocks && pnpm run audit:deps && pnpm run audit:copy && pnpm run smoke:product-mode && pnpm -r --if-present run build",
+    "audit:series-a": "pnpm run typecheck && pnpm run test && pnpm run audit:mocks && pnpm run audit:routes && pnpm run audit:deps && pnpm run audit:copy && pnpm run security:audit && pnpm run smoke:product-mode && pnpm -r --if-present run build"
   },
   "private": true,
   "packageManager": "pnpm@10.26.1",
