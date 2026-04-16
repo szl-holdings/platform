@@ -40,7 +40,7 @@ Full enterprise deployment is defined in `/infra/` using Azure Bicep templates. 
 
 | Component | Resource | Purpose |
 |-----------|----------|---------|
-| Compute | Azure App Service (Linux, Node.js 20 LTS) | API server and static serving |
+| Compute | Azure App Service (Linux, Node.js 22 LTS) | API server and static serving |
 | Database | PostgreSQL Flexible Server (General Purpose) | Primary data store with automated backups |
 | Secrets | Azure Key Vault | Centralized credential management |
 | Cache | Azure Cache for Redis | Session store, real-time cache |

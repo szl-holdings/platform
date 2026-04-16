@@ -32,10 +32,7 @@
 | `artifacts/aegis` | `/aegis/` | `artifacts/aegis: web` | Assigned by platform |
 | `artifacts/carlota-jo` | `/carlota-jo/` | `artifacts/carlota-jo: web` | Assigned by platform |
 | `artifacts/command` | `/command/` | `artifacts/command: web` | Assigned by platform |
-| `artifacts/firestorm` | `/firestorm/` | `artifacts/firestorm: web` | Assigned by platform |
 | `artifacts/mockup-sandbox` | `/__mockup` | `artifacts/mockup-sandbox: Component Preview Server` | Port 21130 → External 3001 |
-| `artifacts/prism-counsel` | `/prism-counsel/` | `artifacts/prism-counsel: web` | Assigned by platform |
-| `artifacts/stephen-site` | `/stephen-site/` | `artifacts/stephen-site: web` | **Deprecated** — should be deregistered |
 | `artifacts/szl-holdings-mobile` | `/szl-holdings-mobile/` | `artifacts/szl-holdings-mobile: expo` | Expo dev server |
 | `artifacts/terra` | `/terra/` | `artifacts/terra: web` | Assigned by platform |
 | `artifacts/vessels` | `/vessels/` | `artifacts/vessels: web` | Assigned by platform |
@@ -76,7 +73,7 @@
 | `.github/workflows/security.yml` | Security scanning | Active |
 | `.github/workflows/lighthouse.yml` | Lighthouse performance/accessibility audit | Active |
 | `.github/workflows/e2e.yml` | End-to-end test runner | Defined — no active E2E suite yet |
-| `.github/workflows/prism-counsel-ci.yml` | Prism Counsel specific CI | Active |
+| `.github/workflows/prism-counsel-ci.yml` | Prism Counsel CI (artifact deprecated — workflow may be removed) | Inactive |
 
 ### 2.3 Publishing Workflows (Placeholder / Scaffolded)
 
@@ -99,8 +96,8 @@
 | `build` | `pnpm -r --if-present run build` | Builds all packages with `package.json#scripts.build` |
 | `ci-gate` | Gate job — requires all above | Blocks merge on failure |
 
-**Node.js version in CI:** 20 (vs. production runtime Node.js 24 — **mismatch; should align in Phase 2**)
-**pnpm version in CI:** 9 (vs. runtime pnpm 10 — **mismatch; should align in Phase 2**)
+**Node.js version in CI:** 22 (updated in Phase 2; Replit dev environment uses Node.js 24 — platform constraint)
+**pnpm version in CI:** 10 (updated in Phase 2)
 
 ---
 
@@ -119,8 +116,15 @@
 | `postgres` | `postgres:16-alpine` | Local PostgreSQL for Docker dev |
 | `api-server` | Built from `artifacts/api-server/Dockerfile` | API server container |
 
-**Known Dockerfiles:**
-- `artifacts/stephen-site/Dockerfile` — deprecated artifact; Dockerfile is orphaned
+**Active Dockerfiles (Phase 2 canonical):**
+- `artifacts/api-server/Dockerfile` — API server container
+- `artifacts/aegis/Dockerfile` — Aegis security command (formerly firestorm)
+- `artifacts/szl-holdings/Dockerfile`, `artifacts/vessels/Dockerfile`, `artifacts/terra/Dockerfile`, `artifacts/carlota-jo/Dockerfile`, `artifacts/command/Dockerfile`
+
+**Removed Dockerfiles (Phase 2 cleanup):**
+- `artifacts/firestorm/` — archived; superseded by `artifacts/aegis`
+- `artifacts/stephen-site/` — deprecated; source removed, marker only
+- `artifacts/prism-counsel/` — deprecated; source removed, marker only
 
 ### 3.3 Azure Container Registry
 
@@ -182,14 +186,13 @@ The deploy workflows reference `container-publish.yml` but Docker image publishi
 | 1 | `api-server` | Replit | All apps depend on this |
 | 2 | `szl-holdings` | Replit | Primary corporate/investor surface |
 | 3 | `carlota-jo` | Replit | GA-ready; advisory with live integrations |
-| 4 | `aegis` + `firestorm` | Replit | Security command — investor narrative |
+| 4 | `aegis` | Replit | Security command — investor narrative |
 | 5 | `vessels` | Replit | Maritime intelligence — high-value demo |
 | 6 | `terra` | Replit | Real estate — live NYC data pipeline |
-| 7 | `prism-counsel` | Replit | Legal matter management |
-| 8 | `command` | Replit | Unified Command Portal |
-| 9 | `szl-holdings-mobile` | Expo/TestFlight | Mobile command |
+| 7 | `command` | Replit | Unified Command Portal |
+| 8 | `szl-holdings-mobile` | Expo/TestFlight | Mobile command |
 | — | `mockup-sandbox` | Replit | Internal design tool only |
-| — | `stephen-site` | **Deregister** | Deprecated |
+| — | `firestorm`, `prism-counsel`, `stephen-site` | **Archived/Deprecated** | Source removed — marker files only |
 
 ---
 

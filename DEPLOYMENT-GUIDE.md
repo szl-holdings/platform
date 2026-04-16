@@ -33,7 +33,7 @@ Each artifact has a dedicated workflow managed through the Replit interface. Cri
 |----------|----------------|
 | `artifacts/api-server: api` | **Yes** — all frontends depend on this |
 | `artifacts/szl-holdings: web` | No, but serves as primary landing |
-| `artifacts/firestorm: web` | No |
+| `artifacts/aegis: web` | No |
 | `artifacts/vessels: web` | No |
 
 Always start the API server workflow before any frontend workflow.
@@ -81,7 +81,7 @@ Full production infrastructure is defined in `/infra/` using Azure Bicep templat
 
 | Resource | Configuration |
 |----------|--------------|
-| **App Service** | Node.js 20 LTS, Linux, P2v3 (autoscale) |
+| **App Service** | Node.js 22 LTS, Linux, P2v3 (autoscale) |
 | **PostgreSQL Flexible Server** | General Purpose tier, 4 vCores, automated backups |
 | **Azure Key Vault** | Centralized secrets management; referenced by App Service |
 | **Redis Cache** | Session store and real-time cache (C1 Standard) |

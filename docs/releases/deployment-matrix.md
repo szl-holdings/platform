@@ -67,18 +67,20 @@ All web apps are React + Vite SPA artifacts.
 | Artifact | Preview Path | Build Output | API Dependency |
 |----------|-------------|-------------|----------------|
 | SZL Holdings (homepage) | `/` | `dist/` | None (mostly static) |
-| Lyte Command Center | `/lyte-command-center/` | `dist/` | API Server required |
-| Aegis (Firestorm) | `/firestorm/` | `dist/` | API Server required |
+| Aegis | `/aegis/` | `dist/` | API Server required |
 | Terra | `/terra/` | `dist/` | API Server required |
 | Vessels | `/vessels/` | `dist/` | API Server required |
 | Carlota Jo | `/carlota-jo/` | `dist/` | API Server required |
-| Stephen Site | `/stephen/` | `dist/` | API Server (partial) |
+| Command | `/command/` | `dist/` | API Server required |
+| ~~Firestorm~~ | ~~`/firestorm/`~~ | — | **Archived** — superseded by Aegis |
+| ~~Prism Counsel~~ | ~~`/prism-counsel/`~~ | — | **Deprecated** — consolidated into Aegis |
+| ~~Stephen Site~~ | ~~`/stephen/`~~ | — | **Deprecated** — consolidated into szl-holdings |
 
 ### API Server
 
 | Item | Detail |
 |------|--------|
-| Runtime | Node.js 20.x |
+| Runtime | Node.js 22.x |
 | Framework | Express + TypeScript |
 | Port | `$PORT` (Replit-injected) |
 | Health endpoints | `/api/health`, `/api/health/live`, `/api/health/ready`, `/api/health/detailed` |
@@ -94,7 +96,6 @@ All web apps are React + Vite SPA artifacts.
 | Terra Mobile | `com.szlholdings.terra` | `production` | Enabled |
 | SZL Holdings Mobile | `com.szlholdings.szl` | `production` | Enabled |
 | Carlota Jo Mobile | `com.szlholdings.carlotajo` | `production` | Enabled |
-| Stephen Mobile | `com.szlholdings.stephen` | `production` | Enabled |
 
 ---
 

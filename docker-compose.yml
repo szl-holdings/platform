@@ -76,20 +76,6 @@ services:
       - api-server
     restart: unless-stopped
 
-  lyte-command-center:
-    build:
-      context: .
-      dockerfile: artifacts/lyte-command-center/Dockerfile
-    image: ghcr.io/szl-holdings/lyte-command-center:local
-    container_name: szl-lyte
-    environment:
-      <<: *common-env
-    ports:
-      - "4001:8080"
-    depends_on:
-      - api-server
-    restart: unless-stopped
-
   vessels:
     build:
       context: .
@@ -121,7 +107,7 @@ services:
   aegis:
     build:
       context: .
-      dockerfile: artifacts/firestorm/Dockerfile
+      dockerfile: artifacts/aegis/Dockerfile
     image: ghcr.io/szl-holdings/aegis:local
     container_name: szl-aegis
     environment:
@@ -144,18 +130,6 @@ services:
       - "4005:8080"
     depends_on:
       - api-server
-    restart: unless-stopped
-
-  stephen-site:
-    build:
-      context: .
-      dockerfile: artifacts/stephen-site/Dockerfile
-    image: ghcr.io/szl-holdings/stephen-site:local
-    container_name: szl-stephen-site
-    environment:
-      <<: *common-env
-    ports:
-      - "4006:8080"
     restart: unless-stopped
 
 volumes:

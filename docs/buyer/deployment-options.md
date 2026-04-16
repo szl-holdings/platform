@@ -38,7 +38,7 @@ Full Azure infrastructure is defined in `/infra/` using Bicep templates.
 
 | Component | Azure Resource |
 |-----------|---------------|
-| Compute | App Service (Linux, Node.js 20 LTS, autoscale) |
+| Compute | App Service (Linux, Node.js 22 LTS, autoscale) |
 | Database | PostgreSQL Flexible Server (General Purpose, automated backups) |
 | Secrets | Azure Key Vault |
 | Session / Cache | Azure Cache for Redis |
@@ -79,7 +79,7 @@ pnpm --filter @workspace/api-server build
 
 SZL Holdings can support on-premises deployments for organizations with specific requirements (financial services, healthcare, government). This requires:
 
-- Node.js 20+ runtime environment
+- Node.js 22+ runtime environment
 - PostgreSQL 15+ database
 - Network configuration for inter-service communication
 - Custom deployment and operational support agreement

@@ -10,16 +10,16 @@
 
 | Component | Canonical Version | Source of Truth |
 |---|---|---|
-| **Node.js** | **24 LTS (v24.x)** | `.replit` → `modules = ["nodejs-24"]`; verified runtime: `v24.13.0` |
+| **Node.js** | **22 LTS** | Dockerfiles (`node:22-alpine`); CI (`node-version: '22'`); `engines` in `package.json`. Replit dev env uses Node 24 (platform constraint — acceptable gap, compatible) |
 | **pnpm** | **10.x (10.26.1)** | Verified: `pnpm --version` output |
 | **PostgreSQL** | **16** | `.replit` → `modules = ["postgresql-16"]` |
 | **TypeScript** | **5.x** | `pnpm-workspace.yaml` catalog; enforced via `tsconfig` |
 | **NixOS channel** | **stable-25_05** | `.replit` → `[nix] channel = "stable-25_05"` |
 | **Replit Nix extras** | See `replit.nix` | Chromium, OpenGL, X11 libraries for Playwright |
 
-### CI/CD Runtime Gap (Must Fix in Phase 2)
+### CI/CD Runtime (Phase 2 Complete)
 
-> ⚠️ **Current CI uses Node.js 20 and pnpm 9** (`.github/workflows/ci.yml`). The production runtime is Node.js 24 and pnpm 10. This version mismatch can mask build failures that only appear in production. Phase 2 must align CI to `node-version: '24'` and `pnpm version: 10`.
+> ✅ Phase 2 complete — CI now uses Node.js 22 and pnpm 10. Dockerfiles use node:22-alpine. The Replit dev environment uses Node.js 24 (platform-managed, acceptable gap — Node 24 is compatible). `engines` field enforced in root `package.json`.
 
 ---
 
@@ -93,12 +93,13 @@ API server additionally supports: `pnpm seed:terra`, `pnpm seed:ecosystem`
 /
 ├── artifacts/          # Deployable applications (web + mobile)
 │   ├── api-server/     # Central Express API (all backend routes)
-│   ├── aegis/          # Security command (Aegis/Firestorm unified)
+│   ├── aegis/          # Security command (Unified Defense & Intelligence)
 │   ├── carlota-jo/     # Private advisory
 │   ├── command/        # Unified Command Portal (CORTEX hub)
-│   ├── firestorm/      # Security simulation (Aegis workspace)
+│   ├── firestorm/      # ARCHIVED — superseded by aegis (marker file only)
 │   ├── mockup-sandbox/ # Internal design tool
-│   ├── prism-counsel/  # Legal matter management
+│   ├── prism-counsel/  # DEPRECATED — consolidated into aegis (marker file only)
+│   ├── stephen-site/   # DEPRECATED — consolidated into szl-holdings (marker file only)
 │   ├── szl-holdings/   # Corporate platform + Lyte
 │   ├── szl-holdings-mobile/ # Mobile app (Expo)
 │   ├── terra/          # Real estate intelligence

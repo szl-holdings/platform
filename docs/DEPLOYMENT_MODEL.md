@@ -41,9 +41,7 @@ The Replit workspace is the **primary deployment surface** for all active demos,
 | `aegis` | `/aegis/` | Assigned |
 | `carlota-jo` | `/carlota-jo/` | Assigned |
 | `command` | `/command/` | Assigned |
-| `firestorm` | `/firestorm/` | Assigned |
 | `mockup-sandbox` | `/__mockup` | 21130 |
-| `prism-counsel` | `/prism-counsel/` | Assigned |
 | `szl-holdings-mobile` | `/szl-holdings-mobile/` | Expo |
 | `terra` | `/terra/` | Assigned |
 | `vessels` | `/vessels/` | Assigned |
@@ -52,11 +50,11 @@ The Replit workspace is the **primary deployment surface** for all active demos,
 
 | Classification | Artifacts |
 |---|---|
-| **Public** (investor/customer facing) | `szl-holdings`, `carlota-jo`, `aegis`, `firestorm`, `vessels`, `terra` |
-| **Internal** (platform operations) | `api-server`, `command`, `prism-counsel` |
+| **Public** (investor/customer facing) | `szl-holdings`, `carlota-jo`, `aegis`, `vessels`, `terra` |
+| **Internal** (platform operations) | `api-server`, `command` |
 | **Mobile** | `szl-holdings-mobile` |
 | **Tooling** (dev-only) | `mockup-sandbox` |
-| **Deprecated** (pending removal) | `stephen-site` |
+| **Archived/Deprecated** (marker files only) | `firestorm` (→ aegis), `prism-counsel` (→ aegis), `stephen-site` (→ szl-holdings) |
 
 ### Health Check
 
@@ -105,7 +103,7 @@ All four jobs must pass before a merge proceeds:
 3. `test` — Unit/integration tests
 4. `build` — All packages build
 
-**CI uses Node.js 20 and pnpm 9 — must be updated to Node.js 24 and pnpm 10 in Phase 2.**
+CI uses Node.js 22 and pnpm 10 (updated in Phase 2). Replit dev environment runs Node.js 24 (platform constraint).
 
 ### Staging Deploy (Defined, Inactive)
 

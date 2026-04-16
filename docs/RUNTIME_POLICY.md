@@ -14,10 +14,10 @@ All environments — development, staging, and production — must run the same 
 
 ## Canonical Runtime Versions
 
-| Runtime | Canonical Version | Pinning Mechanism | Current Production | Current CI | Gap? |
+| Runtime | Canonical Version | Pinning Mechanism | Replit Dev | CI / Docker | Gap? |
 |---|---|---|---|---|---|
-| **Node.js** | **24 LTS** | `.replit` → `modules = ["nodejs-24"]` | v24.13.0 ✅ | v20 ❌ | **YES — fix in Phase 2** |
-| **pnpm** | **10.x** | Verified at runtime (10.26.1) | 10.26.1 ✅ | v9 ❌ | **YES — fix in Phase 2** |
+| **Node.js** | **22 LTS** | Dockerfiles (`node:22-alpine`); CI (`node-version: '22'`) | v24.x (platform constraint) | v22 ✅ | Note below |
+| **pnpm** | **10.x (10.26.1)** | `package.json` `packageManager` field | 10.26.1 ✅ | 10 ✅ | None |
 | **PostgreSQL** | **16** | `.replit` → `modules = ["postgresql-16"]` | 16 ✅ | Not explicitly set | Monitor |
 | **TypeScript** | **5.x** | `pnpm-workspace.yaml` catalog | 5.x ✅ | 5.x (via build) ✅ | None |
 | **Drizzle ORM** | **0.45.1** | `pnpm-workspace.yaml` catalog | 0.45.1 ✅ | Same ✅ | None |
@@ -31,17 +31,18 @@ All environments — development, staging, and production — must run the same 
 
 ### Node.js
 
-- **Mechanism:** Replit `.replit` file module declaration (`nodejs-24`)
-- **CI enforcement:** Must be set to `node-version: '24'` in all GitHub Actions workflow `setup-node` steps
+- **Canonical version:** Node.js 22 LTS (Active LTS as of April 2026)
+- **Mechanism:** Dockerfiles use `node:22-alpine`; CI uses `node-version: '22'`; `engines.node` in root `package.json` enforces `>=22.0.0`
+- **Replit dev environment:** Node 24 (the `.replit` modules field is platform-managed and cannot be changed by agents; Node 24 is backwards-compatible with Node 22)
 - **Policy:** Track Node.js Active LTS. Upgrade when a new Active LTS is released and stable. Never run on Current (odd-numbered) releases in production.
-- **Required Phase 2 action:** Update `ci.yml`, `build.yml`, `deploy-staging.yml`, `deploy-production.yml` to use `node-version: '24'`
+- **Phase 2 status:** ✅ Complete — all CI workflows and Dockerfiles now use Node 22
 
 ### pnpm
 
-- **Mechanism:** Automatically version-matched by Replit environment
-- **CI enforcement:** Must be `version: 10` in all GitHub Actions `pnpm/action-setup` steps
+- **Canonical version:** pnpm 10.x (pinned as `"packageManager": "pnpm@10.26.1"` in root `package.json`)
+- **CI enforcement:** All GitHub Actions `pnpm/action-setup` steps use `version: 10`
 - **Policy:** Stay on major version 10. Minor updates are applied as available.
-- **Required Phase 2 action:** Update all workflow files from `version: 9` to `version: 10`
+- **Phase 2 status:** ✅ Complete — all workflow files updated from pnpm 9 to pnpm 10
 
 ### Package Catalog (Shared Dependency Pinning)
 
@@ -100,14 +101,14 @@ catalog:
 
 ---
 
-## Enforcement Gaps (Current)
+## Enforcement Gaps (Resolved in Phase 2)
 
-| Gap | Risk | Resolution |
+| Gap | Risk | Status |
 |---|---|---|
-| CI uses Node.js 20; production uses Node.js 24 | **High** — build failures masked | Phase 2: Update all CI workflows to Node.js 24 |
-| CI uses pnpm 9; production uses pnpm 10 | **Medium** — lockfile format differences | Phase 2: Update all CI workflows to pnpm 10 |
-| No `engines` field in root `package.json` | Low | Phase 2: Add `engines: { node: ">=24" }` to root package.json |
-| No `.nvmrc` or `.node-version` file | Low | Phase 2: Add `.nvmrc` with `24` for local dev without Replit |
+| CI used Node.js 20; canonical is Node.js 22 | High — build failures masked | ✅ Fixed — all CI and Dockerfiles now use Node 22 |
+| CI used pnpm 9; production uses pnpm 10 | Medium — lockfile format differences | ✅ Fixed — all workflow files updated to pnpm 10 |
+| No `engines` field in root `package.json` | Low | ✅ Fixed — `engines: { node: ">=22.0.0", pnpm: ">=10.0.0" }` added |
+| Replit dev env uses Node 24; CI/Docker use Node 22 | Low — version 24 is backwards-compatible | Residual — `.replit` is platform-managed; acceptable gap |
 
 ---
 

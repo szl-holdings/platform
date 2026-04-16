@@ -3,3 +3,34 @@
 
 # No need to store the pnpm store twice.
 .local
+
+# Replit internal caches
+.cache/
+.canvas/
+.cursor/
+.config/
+
+# Transient runtime output
+nohup.out
+*.out
+
+# Archive & staging directories — internal only, not for deploy
+.archive/
+.mirror-staging-test/
+
+# User-pasted payload dumps — never deploy
+attached_assets/
+
+# Backup & export directories — internal only
+backups/
+exports/
+
+# Test output
+playwright-report/
+test-results/
+coverage/
+
+# Development artifacts — deprecated apps archived
+artifacts/stephen-site/
+artifacts/prism-counsel/
+artifacts/firestorm/

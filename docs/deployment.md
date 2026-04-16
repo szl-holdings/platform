@@ -40,7 +40,7 @@ Full Azure infrastructure is defined in `/infra/` using Bicep templates.
 
 ### Resources
 
-- **App Service** — Node.js 20 LTS, Linux, autoscale
+- **App Service** — Node.js 22 LTS, Linux, autoscale
 - **PostgreSQL Flexible Server** — General Purpose tier, automated backups
 - **Key Vault** — Centralized secrets management
 - **Redis Cache** — Session store, real-time cache

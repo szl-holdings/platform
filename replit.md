@@ -55,7 +55,7 @@ All sub-path web artifacts (aegis, terra, carlota-jo, vessels, command) share a 
 ## System Architecture
 
 ### Technology Stack
-The platform is built as a pnpm monorepo using Node.js 24 and TypeScript 5.9.
+The platform is built as a pnpm monorepo using TypeScript 5.9. The Replit dev environment uses Node.js 24; CI and Docker use Node.js 22 LTS (canonical). pnpm 10.26.1 is pinned in the root `package.json` `packageManager` field.
 - **Frontend:** React 19, Vite, TanStack React Query, Wouter, Tailwind CSS v4, Framer Motion, Lucide React, Recharts
 - **Backend:** Express 5, Drizzle ORM, Zod validation, pino logging
 - **Database:** PostgreSQL 16 with Drizzle ORM managing 685 tables across 112 schema files
@@ -111,15 +111,17 @@ A comprehensive audit of the entire monorepo was completed as part of Series A C
 - `docs/audit/mock-stub-placeholder-register.md` — Every mock, stub, and placeholder with location and status
 - `docs/audit/archive-or-delete-plan.md` — Disposition plan for all non-production paths
 - `docs/PLATFORM_CANONICAL.md` — Canonical runtime (Node.js 24, pnpm 10, PostgreSQL 16), build commands, monorepo structure
-- `docs/RUNTIME_POLICY.md` — Version policy, CI gap (CI uses Node 20/pnpm 9; must align to Node 24/pnpm 10 in Phase 2)
+- `docs/RUNTIME_POLICY.md` — Version policy; Phase 2 resolved — CI now uses Node 22 + pnpm 10 (see Phase 2 findings below)
 - `docs/DEPLOYMENT_MODEL.md` — Replit (primary), Azure (secondary/enterprise), GitHub Actions (CI/CD)
 - `docs/APP_STATUS.md` — Every artifact with GA/Beta/Partial/Internal/Deprecated/Concept status
 
-**Key findings:**
-- CI/CD version mismatch: CI uses Node.js 20 + pnpm 9; production uses Node.js 24 + pnpm 10 — Phase 2 action
-- 3 artifact dirs should be removed: `stephen-site` (deprecated), `lyte-command-center` (orphaned), `imperium` (skeleton)
-- 3 legacy env vars to remove: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY` (superseded by `AI_INTEGRATIONS_*` proxy vars)
-- `lib/approvals` has no `package.json` — investigate in Phase 2
+**Key findings (Phase 2 status):**
+- CI/CD version mismatch: ✅ Resolved — CI now uses Node.js 22 + pnpm 10; Dockerfiles use node:22-alpine; `engines` field enforced in root package.json
+- Deprecated artifact directories: ✅ Resolved — `stephen-site` and `prism-counsel` source removed and deregistered; `firestorm` (superseded by `aegis`) archived and deregistered
+- Artifact duplicate registration: ✅ Resolved — `artifacts/firestorm` duplicate removed; `artifacts/aegis` is now the sole Aegis registration
+- Transient files: ✅ Resolved — `.gitignore` and `.replitignore` updated to exclude `nohup.out`, `.mirror-staging-test/`, `attached_assets/`, and other noise
+- 3 legacy env vars to remove: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY` (superseded by `AI_INTEGRATIONS_*` proxy vars) — deferred to future task
+- `lib/approvals` has no `package.json` — deferred to future task
 
 ## Series A Cleanup — Phase 4: Product Positioning, Architecture Specs & Launch Readiness (April 2026)
 
@@ -165,13 +167,12 @@ All Vite-based web apps use a **shared routing proxy** pattern on port 9090 (the
 
 The routing table embedded in every app's `vite.config.ts`:
 - `/aegis/` → port 23933
-- `/firestorm/` → port 23931
 - `/carlota-jo/` → port 21200
 - `/command/` → port 25200
 - `/terra/` → port 25100
 - `/vessels/` → port 18485
 
-All 6 artifact.toml files use `localPort = 9090`. The Replit workflow health check detects port 9090 as open (whichever app started first contributes). This is necessary because `.replit` port registration cannot be modified by the agent, and only port 9090 (plus 8080 for the API server and 21130 for szl-holdings) are registered.
+All 5 active sub-path artifact.toml files use `localPort = 9090`. The Replit workflow health check detects port 9090 as open (whichever app started first contributes). This is necessary because `.replit` port registration cannot be modified by the agent, and only port 9090 (plus 8080 for the API server and 21130 for szl-holdings) are registered.
 
 **Limitation:** HMR (Hot Module Replacement) WebSocket connections fail because the shared HTTP proxy does not handle WebSocket upgrades. Developers must manually refresh the browser after code changes.
 
