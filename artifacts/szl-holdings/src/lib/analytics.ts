@@ -27,7 +27,13 @@ type EventName =
   | "ecosystem_node_click"
   | "portfolio_filter"
   | "insights_article_click"
-  | "nav_link_click";
+  | "nav_link_click"
+  | "trust_center_viewed"
+  | "design_partner_interest"
+  | "diligence_requested"
+  | "domain_pack_viewed"
+  | "audience_path_click"
+  | "newsletter_signup";
 
 interface EventProperties {
   site?: string;
@@ -85,8 +91,8 @@ export const analytics = {
   formSubmit: (formKey: string, page: string, site = "szl-holdings") =>
     track("form_submit", { form_key: formKey, page, site }),
 
-  demoRequest: (site = "vessels") =>
-    track("demo_request", { site }),
+  demoRequest: (source = "unknown", site = "szl-holdings") =>
+    track("demo_request", { site, source }),
 
   accessRequest: (site = "inca") =>
     track("access_request", { site }),
@@ -115,8 +121,8 @@ export const analytics = {
   caseStudyView: (contentSlug: string, site = "szl-holdings") =>
     track("case_study_view", { content_slug: contentSlug, site }),
 
-  heroCTAClick: (ctaLabel: string) =>
-    track("hero_cta_click", { cta_label: ctaLabel, site: "szl-holdings" }),
+  heroCTAClick: (ctaLabel: string, section = "hero") =>
+    track("hero_cta_click", { cta_label: ctaLabel, section, site: "szl-holdings" }),
 
   ventureCardClick: (ventureId: string, ventureName: string) =>
     track("venture_card_click", { venture_id: ventureId, venture_name: ventureName }),
@@ -147,4 +153,22 @@ export const analytics = {
 
   navLinkClick: (label: string, href: string) =>
     track("nav_link_click", { label, href }),
+
+  trustCenterView: (source: string, page = "/") =>
+    track("trust_center_viewed", { source, page, site: "szl-holdings" }),
+
+  designPartnerInterest: (source: string, page = "/") =>
+    track("design_partner_interest", { source, page, site: "szl-holdings" }),
+
+  diligenceRequested: (source: string, page = "/") =>
+    track("diligence_requested", { source, page, site: "szl-holdings" }),
+
+  domainPackViewed: (packSlug: string, page = "/") =>
+    track("domain_pack_viewed", { product_key: packSlug, page, site: "szl-holdings" }),
+
+  audiencePathClick: (pathLabel: string, destination: string) =>
+    track("audience_path_click", { cta_label: pathLabel, page: destination, site: "szl-holdings" }),
+
+  newsletterSignup: (source: string, site = "szl-holdings") =>
+    track("newsletter_signup", { source, site }),
 };

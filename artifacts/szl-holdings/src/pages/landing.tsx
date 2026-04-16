@@ -29,6 +29,7 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { analytics } from "@/lib/analytics";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -74,7 +75,7 @@ const PLATFORM_LAYERS = [
       { name: "Vessels", note: "Maritime — fleet command, AIS, sanctions, voyage economics" },
       { name: "Terra", note: "Real estate — distress signals, deal pipeline, ownership graph" },
       { name: "PRISM Counsel", note: "Legal — matter command, deadline tracking, governed demand" },
-      { name: "Carlota Jo", note: "Advisory — discreet intake, managed delivery, audit-grade" },
+      { name: "Carlota Jo", note: "Advisory — discreet intake, managed delivery, governed delivery" },
       { name: "IMPERIUM", note: "Cloud sovereignty — multi-cloud governance, policy enforcement" },
     ],
     accent: "hsl(260,60%,65%)",
@@ -142,10 +143,10 @@ const DOMAIN_PACKS = [
     icon: BriefcaseBusiness,
     slug: "PRISM Counsel",
     category: "Legal Intelligence",
-    desc: "Matter twins, deadline tracking, and governed demand workflows for litigation teams. AI-assisted legal operations with approval gates and Proof Chain.",
+    desc: "Matter twins, deadline tracking, and governed demand workflows for litigation teams. Governed legal operations with approval gates and Proof Chain.",
     color: "hsl(260,60%,65%)",
     href: "/solutions/prism-counsel",
-    capabilities: ["Matter lifecycle command", "Deadline tracking", "AI-assisted review", "Immutable audit trail"],
+    capabilities: ["Matter lifecycle command", "Deadline tracking", "Evidence-assisted review", "Immutable audit trail"],
   },
   {
     icon: Shield,
@@ -200,6 +201,7 @@ function NewsletterSection() {
       }
       setStatus("success");
       setEmail("");
+      analytics.newsletterSignup("homepage-newsletter");
     } catch (err) {
       setStatus("error");
       setErrorMsg(err instanceof Error ? err.message : "Something went wrong. Please try again.");
@@ -405,9 +407,9 @@ export default function HomePage() {
               {/* Platform hierarchy quick-read */}
               <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "2.5rem", alignItems: "center" }}>
                 {[
-                  { label: "Lyte", note: "flagship command", color: "hsl(192,72%,48%)" },
+                  { label: "SZL Holdings", note: "governed platform", color: "hsl(38,72%,58%)" },
                   { label: "Alloy", note: "execution fabric", color: "hsl(215,72%,58%)" },
-                  { label: "CORTEX", note: "mobile command", color: "hsl(175,70%,46%)" },
+                  { label: "Lyte", note: "flagship command", color: "hsl(192,72%,48%)" },
                   { label: "Aegis · Vessels · Terra · PRISM Counsel · Carlota Jo · IMPERIUM", note: "domain packs", color: "hsl(260,60%,65%)" },
                 ].map((item, i) => (
                   <div key={item.label} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
@@ -435,6 +437,7 @@ export default function HomePage() {
                 <Link
                   href="/demo"
                   aria-label="Request a product demo"
+                  onClick={() => { analytics.heroCTAClick("request-demo", "hero"); analytics.demoRequest("hero"); }}
                   style={{
                     display: "inline-flex", alignItems: "center", gap: "0.5rem",
                     padding: "0.75rem 1.5rem",
@@ -453,6 +456,7 @@ export default function HomePage() {
                 </Link>
                 <Link
                   href="/platform"
+                  onClick={() => analytics.heroCTAClick("explore-platform", "hero")}
                   style={{
                     display: "inline-flex", alignItems: "center", gap: "0.5rem",
                     padding: "0.75rem 1.5rem",
@@ -471,6 +475,7 @@ export default function HomePage() {
                 </Link>
                 <Link
                   href="/design-partner"
+                  onClick={() => analytics.designPartnerInterest("hero")}
                   style={{
                     display: "inline-flex", alignItems: "center", gap: "0.5rem",
                     padding: "0.75rem 1.5rem",
@@ -518,6 +523,7 @@ export default function HomePage() {
               </div>
               <Link
                 href="/trust"
+                onClick={() => analytics.trustCenterView("trust-strip", "/")}
                 style={{
                   display: "inline-flex", alignItems: "center", gap: "0.375rem",
                   fontSize: "0.75rem", fontWeight: 600,
@@ -596,6 +602,7 @@ export default function HomePage() {
                   >
                     <Link
                       href={path.href}
+                      onClick={() => analytics.audiencePathClick(path.label, path.href)}
                       style={{ display: "block", textDecoration: "none" }}
                       aria-label={`${path.label} — ${path.desc}`}
                     >
@@ -910,7 +917,7 @@ export default function HomePage() {
                     whileInView="show"
                     viewport={{ once: true }}
                   >
-                    <Link href={pack.href} style={{ display: "block", textDecoration: "none" }} aria-label={`${pack.slug} — ${pack.category}`}>
+                    <Link href={pack.href} onClick={() => analytics.domainPackViewed(pack.slug, "/")} style={{ display: "block", textDecoration: "none" }} aria-label={`${pack.slug} — ${pack.category}`}>
                       <div
                         style={{
                           padding: "1.75rem",
@@ -1108,6 +1115,7 @@ export default function HomePage() {
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
                   <Link
                     href="/trust"
+                    onClick={() => analytics.trustCenterView("trust-section", "/")}
                     style={{
                       display: "inline-flex", alignItems: "center", gap: "0.375rem",
                       fontSize: "0.875rem", fontWeight: 600,
@@ -1125,6 +1133,7 @@ export default function HomePage() {
                   </Link>
                   <Link
                     href="/trust/ai"
+                    onClick={() => analytics.trustCenterView("trust-ai-governance", "/")}
                     style={{
                       display: "inline-flex", alignItems: "center", gap: "0.375rem",
                       fontSize: "0.875rem", fontWeight: 500,
@@ -1403,6 +1412,7 @@ export default function HomePage() {
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", minWidth: "200px" }}>
                 <Link
                   href="/demo"
+                  onClick={() => { analytics.heroCTAClick("request-demo", "bottom-cta"); analytics.demoRequest("bottom-cta"); }}
                   style={{
                     display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
                     padding: "0.75rem 1.5rem",
@@ -1421,6 +1431,7 @@ export default function HomePage() {
                 </Link>
                 <Link
                   href="/design-partner"
+                  onClick={() => analytics.designPartnerInterest("bottom-cta")}
                   style={{
                     display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
                     padding: "0.75rem 1.5rem",
@@ -1439,6 +1450,7 @@ export default function HomePage() {
                 </Link>
                 <Link
                   href="/contact"
+                  onClick={() => analytics.diligenceRequested("bottom-cta")}
                   style={{
                     display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
                     padding: "0.75rem 1.5rem",

@@ -1,9 +1,11 @@
+import { useEffect } from "react";
 import { m } from "framer-motion";
 import { Link } from "wouter";
 import { ShieldCheck, Lock, Brain, Download, Settings, CheckSquare, ArrowRight, Layers, Database, Eye, Briefcase, Code2, UserCheck, BarChart2 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { analytics } from "@/lib/analytics";
 
 const DILIGENCE_PATHS = [
   {
@@ -158,6 +160,10 @@ export default function TrustPage() {
     description: "Security, governance, AI policy, approvals, exports, operations and architecture — documented for buyer and investor diligence.",
     canonical: "https://szlholdings.com/trust",
   });
+
+  useEffect(() => {
+    analytics.trustCenterView("page-mount", "/trust");
+  }, []);
 
   return (
     <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>

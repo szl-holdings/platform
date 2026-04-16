@@ -1,52 +1,72 @@
 # Funnel Map
 
-Generated: 2026-04-15
+Generated: 2026-04-16 (updated)
 
 ## Primary Conversion Funnel
 
 ```
 Organic/Referral Traffic
   └─> Landing Page (/, /platform, /lyte)
-       └─> Product Exploration (/architecture, /trust, /docs)
-            └─> Social Proof (/case-studies, /company)
-                 └─> Demo Request (/demo)
-                      └─> Contact/Schedule (/contact)
-                           └─> Registration (/auth/register)
-                                └─> First Login
-                                     └─> Active User
+       └─> Product Understanding (/architecture, /how-it-works, /docs)
+            └─> Trust Validation (/trust, /trust/security, /trust/ai, /trust/governance)
+                 └─> Demo Request (/demo)                           [understand → trust → request demo]
+                      └─> Design Partner Path (/design-partner)    [design partner journey]
+                           └─> Diligence (/contact, /investor)     [request diligence]
+                                └─> Registration (/auth/register)
+                                     └─> First Login
+                                          └─> Active User
 ```
 
-## Key Conversion Points
+## Buyer Journey Steps
 
-| Stage | Page | CTA | Tracking Event |
-|-------|------|-----|---------------|
-| Awareness | Homepage | "Request a demo" | `demo_cta_clicked` |
-| Interest | Platform | "Explore the platform" | `platform_explored` |
-| Consideration | Trust Center | "View security details" | `trust_center_viewed` |
-| Intent | Demo | "Schedule demo" | `demo_request_submitted` |
-| Decision | Packages | "Get started" | `plan_selected` |
-| Action | Contact | "Submit" | `contact_form_submitted` |
+| Step | Description | Page | CTA | Event |
+|------|-------------|------|-----|-------|
+| 1. Understand | Grasp governed execution value prop | `/` hero | "Explore the platform" | `hero_cta_click` (explore-platform) |
+| 2. Trust | Validate security, governance, AI model | `/trust` | Trust Center / AI governance | `trust_center_viewed` |
+| 3. Request Demo | High-intent signal | `/demo` | "Request a demo" | `demo_request` + `hero_cta_click` (request-demo) |
+| 4. Request Diligence | Enterprise security / legal review | `/contact` | "Enterprise diligence" | `diligence_requested` |
+| 5. Design Partner | Co-design path for target operators | `/design-partner` | "Become a design partner" | `design_partner_interest` |
+
+## Key Conversion Events (Instrumented)
+
+| Event | Trigger | Source |
+|-------|---------|--------|
+| `hero_cta_click` | Any hero CTA click | landing.tsx hero section, bottom CTA section |
+| `demo_request` | Demo CTA click | hero, bottom-cta |
+| `trust_center_viewed` | Trust link clicks + /trust page mount | trust-strip, trust-section, trust-ai-governance, page-mount |
+| `design_partner_interest` | Design partner CTA | hero, bottom-cta, design-partner section |
+| `diligence_requested` | Enterprise diligence link | bottom-cta |
+| `domain_pack_viewed` | Domain pack card click | domain packs section |
+| `audience_path_click` | Audience path card | audience paths section |
+| `newsletter_signup` | Newsletter form submit | homepage-newsletter |
+| `nav_link_click` | Any nav link | SiteNav (already instrumented) |
 
 ## Secondary Funnels
 
-### Fund Intelligence Funnel
-```
-/fund → /fund/deal-scoring → /fund/portfolio-intelligence → Demo Request
-```
-
 ### Trust/Compliance Funnel
 ```
-/trust → /trust/security → /trust/governance → Contact
+/trust → /trust/security → /trust/governance → /trust/ai → Contact
 ```
 
-### Developer Funnel
+### Developer/Technical Funnel
 ```
-/docs → /docs/architecture → /developers → API Key Request
+/docs → /architecture → /docs/proof-chain → /docs/control-plane → Demo Request
 ```
 
-## Funnel Optimization Notes
+### Domain Pack Funnels
+```
+Domain packs section card click → /solutions/<pack> → Demo Request
+```
 
-1. **Homepage CTA**: Currently has "Request a demo", "Explore the platform", and "Platform Pulse" — clear hierarchy
-2. **Navigation flow**: Company > Leadership provides founder credibility before demo request
-3. **Trust signals**: Trust center and security pages build confidence for enterprise buyers
-4. **Missing**: No pricing page creates friction — add /packages or /pricing with clear tiers
+### Investor Funnel
+```
+/investor → /investor/data-room → /investor/architecture → Contact
+```
+
+## Navigation Trust Discoverability
+
+Trust Center is surfaced in:
+- Main nav "Trust" dropdown (Trust Center, Security, AI Governance, Proof Chain, Compliance Architecture)
+- Hero trust strip ("Full Trust Center" link with `trust_center_viewed` tracking)
+- Platform section 8 "Trust & Governance" with "Trust Center" and "AI governance model" CTAs
+- Mobile nav under "Trust & Company" section
