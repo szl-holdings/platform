@@ -47,11 +47,16 @@ function getChecklistKey(appId: string) {
 export function useOnboardingState(appId: string) {
   const key = getOnboardingKey(appId);
 
+  const isDemoMode = typeof window !== "undefined" &&
+    (new URLSearchParams(window.location.search).get("demo") === "true" ||
+     new URLSearchParams(window.location.search).get("view") === "app");
+
   const [state, setState] = React.useState<{
     completed: boolean;
     currentStep: number;
     active: boolean;
   }>(() => {
+    if (isDemoMode) return { completed: true, currentStep: 0, active: false };
     try {
       const stored = localStorage.getItem(key);
       if (stored) {
