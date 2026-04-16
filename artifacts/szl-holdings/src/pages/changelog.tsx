@@ -113,8 +113,8 @@ export default function Changelog() {
   }>>([]);
 
   useEffect(() => {
-    apiFetch("/changelog")
-      .then((data: any) => setApiEntries(data.entries ?? []))
+    apiFetch<{ entries?: typeof apiEntries }>("/changelog")
+      .then((data) => setApiEntries(data.entries ?? []))
       .catch(() => {});
   }, []);
 
