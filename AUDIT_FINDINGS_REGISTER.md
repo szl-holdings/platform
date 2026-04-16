@@ -1,0 +1,171 @@
+# SZL Holdings — Audit Findings Register
+
+**Last updated:** 2026-04-16 (Phase 0–1 Audit)
+**Owner:** Platform Engineering
+**Scope:** Full SZL Holdings monorepo — all apps, libraries, routes, secrets, CI/CD, and docs
+
+This register catalogs every finding from the Phase 0–1 operational audit. It is the canonical findings reference. For the gap register with full remediation tracking, see `docs/audit/series-a-gap-register.md`. For known gaps with persona views, see `KNOWN-GAPS.md`.
+
+---
+
+## Finding ID Legend
+
+| Prefix | Category |
+|---|---|
+| `SEC-` | Security / credentials |
+| `ARCH-` | Architecture / design |
+| `API-` | API server / routes |
+| `DB-` | Database / schema |
+| `CI-` | CI/CD / workflows |
+| `OBS-` | Observability / monitoring |
+| `DATA-` | Data modes / mocks / stubs |
+| `DOC-` | Documentation |
+| `OPS-` | Operational hygiene |
+| `QUAL-` | Quality / testing |
+
+---
+
+## Severity Definitions
+
+| Severity | Definition |
+|---|---|
+| **P0 — Critical** | Active security risk or data exposure — fix immediately |
+| **P1 — High** | Must resolve before first paying tenant or general launch |
+| **P2 — Medium** | Should resolve before broad go-to-market |
+| **P3 — Low** | Quality improvement; no blocking impact |
+| **INFO** | Tracked for awareness — no action urgency |
+
+---
+
+## Summary Table
+
+| Finding ID | Category | Severity | Location | Impact | Fix Status | Manual Review Needed | Blocking |
+|---|---|---|---|---|---|---|---|
+| SEC-001 | Credentials | P0 | `artifacts/szl-holdings-mobile/` | Placeholder credentials confirmed safe | ✅ Resolved | No | No |
+| SEC-002 | Credentials | P1 | Mobile credential files / Firebase | Potential active credential exposure in git history | ⚠️ Open — manual action | **Yes** — rotate Firebase/Google credentials | Yes (LB-001) |
+| SEC-003 | Credentials | P0 | `.gitignore` | All credential patterns now gitignored | ✅ Resolved | No | No |
+| SEC-004 | Auth | P0 | `middlewares/auth.ts` | Timing attack vector on internal token compare | ✅ Resolved | No | No |
+| SEC-005 | Tenant Isolation | P0 | `lib/ai-engine` / `lib/db` | Cross-tenant RAG data leakage possible | ✅ Resolved | No | No |
+| SEC-006 | Input Validation | P0 | API routes (high-risk) | Unvalidated inputs on auth/payment/admin routes | ✅ Resolved (high-risk routes) | No | No |
+| SEC-007 | SSRF | P1 | `routes/webhooks.ts` | SSRF via malicious webhook URLs | ⚠️ Open | No | Conditional (LC-004) |
+| SEC-008 | File Upload | P2 | `routes/files.ts` / `lib/virusScan.ts` | Malware upload risk — no AV scanning | ⚠️ Open — KG020c | No | No |
+| SEC-009 | MFA | P1 | Auth system | Single-factor only — enterprise risk | ⚠️ Planned (enterprise tier) | No | Conditional (LC-005) |
+| SEC-010 | PII Encryption | P2 | DB schema (PII columns) | PII columns not field-encrypted | ⚠️ Open — KG020d | No | No |
+| SEC-011 | Secret Scanning CI | P2 | `.github/workflows/` | No automated CI secret detection | ⚠️ Open — GAP-002 | No | Conditional (LC-001) |
+| ARCH-001 | Session Store | P2 | API server sessions | Sessions lost on restart; no horizontal scale | ⚠️ Open — GAP-003 | No | No |
+| ARCH-002 | CORS Config | P1 | `.replit` production env | CORS errors when custom domain goes live | ⚠️ Open — GAP-004 | No | Yes (before DNS cutover) |
+| ARCH-003 | In-Memory Sessions | P2 | API server | Duplicate of ARCH-001 — in-memory only | ⚠️ Open | No | No |
+| API-001 | Zod Coverage | P2 | API routes (21% covered) | Unvalidated inputs on low-traffic routes | ⚠️ Open — GAP-001 | No | No |
+| API-002 | Route Auth Matrix | P2 | API routes | Auth coverage gaps undetectable without manual audit | ⚠️ Open — GAP-002 | No | No |
+| API-003 | Integration Test Stub | P3 | `routes/alloy-integrations.ts:345` | "Test not implemented" for some connector types | ⚠️ Open | No | No |
+| API-004 | Stub: Virus Scan | P2 | `artifacts/api-server/src/lib/virusScan.ts` | No malware scanning on uploaded files | ⚠️ Open — KG020c | No | No |
+| API-005 | Rate Limit (marketing) | P2 | Public marketing routes | Public pages susceptible to crawling/DDoS | ⚠️ Open — GAP-007 | No | No |
+| DB-001 | Tenant ID — RAG chunks | P0 | `rag_knowledge_chunks` table | Cross-tenant AI data exposure | ✅ Resolved | No | No |
+| DB-002 | Broken Seed Script | P2 | `scripts/seed-prism-counsel.ts` | Dev environment setup failure for PRISM recovery tables | ⚠️ Open — TD-002 | No | No |
+| CI-001 | GitHub Action SHA pins | P1 | All 13 workflows | Supply chain risk from mutable action tags | ✅ Resolved | No | No |
+| CI-002 | CodeQL SAST | P1 | `.github/workflows/codeql.yml` | SAST coverage gap — static analysis not fully configured | ✅ Workflow exists — config pending | **Yes** — verify CodeQL config | Conditional (LC-002) |
+| CI-003 | Dependency Review | P1 | `.github/workflows/dependency-review.yml` | Vulnerable dependency PRs may not be blocked | ✅ Workflow exists — config pending | **Yes** — verify dependency-review config | Conditional (LC-003) |
+| CI-004 | CI pnpm/Node version inconsistency | P3 | `ci.yml` integration-test job | Integration tests run in different environment than unit tests | ⚠️ Open — GAP-009 | No | No |
+| CI-005 | container-publish stale entry | P3 | `container-publish.yml` | Container publish would fail on archived artifact | ✅ Resolved | No | No |
+| OBS-001 | OTEL Exporter | P1 | API server / observability | No production tracing — blind to performance/errors | ⚠️ Open — KG009 | No | Yes (LB-006) |
+| OBS-002 | Sentry / Error Tracking | P1 | Not configured | Silent failures in production | ⚠️ Open — KG028 | No | Yes (LB-003) |
+| OBS-003 | Uptime Monitoring | P1 | External — none configured | No alerting on service downtime | ⚠️ Open — KG027 | No | Yes (LB-002) |
+| OBS-004 | Log Aggregation | P2 | Production only | Logs lost after server restart; no searchable history | ⚠️ Open — GAP-014 | No | No |
+| OBS-005 | SLI/SLO Definitions | P2 | None defined | No reliability targets or alerting thresholds | ⚠️ Open — KG023 | No | No |
+| DATA-001 | Hardcoded Autopilot Stats | P2 | `artifacts/szl-holdings` | Fake metrics shown as live intelligence | ⚠️ Open | No | No |
+| DATA-002 | Hardcoded Client Scores | P2 | Forge client module in `artifacts/szl-holdings` | Hardcoded satisfaction scores misleading in live context | ⚠️ Open | No | No |
+| DATA-003 | Simulated AIS Positions | P2 | `routes/vessels-live.ts` | Vessel positions are seeded — not live AIS | ⚠️ Open | No | No |
+| DATA-004 | CISO Dashboard not wired | P2 | `artifacts/aegis` | 8 security module KPIs not aggregated | ⚠️ Open | No | No |
+| DATA-005 | Aegis new security modules | P2 | `artifacts/aegis/src/pages/` | UI built; not connected to case management APIs | ⚠️ Open | No | No |
+| DATA-006 | Vessels commercial modules | P2 | `artifacts/vessels/src/pages/` | 3 new modules (insurance, trading, platform) not DB-connected | ⚠️ Open | No | No |
+| DATA-007 | CORTEX badge counts | P2 | `artifacts/command` | Cross-domain badge counts not wired to live API | ⚠️ Open | No | No |
+| DATA-008 | Command Overview KPIs | P2 | `artifacts/command` | New module KPIs not yet wired | ⚠️ Open | No | No |
+| DATA-009 | Stripe demo/test mode | P1 | Billing routes | No revenue collectible — test mode only | ⚠️ Open — GAP-005 | No | Yes (before first revenue) |
+| DOC-001 | TRUST_CENTER_INDEX.md model ref | P2 | `docs/trust/trust-center.md` (~line 94) | Incorrect AI model reference misleads external reviewers | ⚠️ Re-opened — TD-004 | **Yes** — editorial review before external trust center share | Before external review |
+| DOC-002 | Domain-specific mobile apps listed but unregistered | P2 | `PRODUCT-SURFACES.md` | Product narrative claims unbuilt surfaces | ⚠️ Open — TD-006 | **Yes** — product roadmap decision needed | Before external product eval |
+| DOC-003 | Stale Azure deployment refs | P3 | Several docs | Confusing deployment narrative (Azure vs Replit) | ⚠️ Partially resolved — GAP-010 | No | No |
+| DOC-004 | PRISM naming inconsistency | P3 | Internal docs | Two naming conventions in use | ⚠️ Open — TD-001 | No | No |
+| OPS-001 | Archived artifacts not cleaned up | P3 | `artifacts/` (5 deprecated dirs) | Dev confusion; pressure on 15-artifact limit | ⚠️ Open — GAP-012 | No | No |
+| OPS-002 | cortex-mobile unregistered artifact | P3 | `artifacts/cortex-mobile` | Active dev without artifact registration | ⚠️ Open — GAP-011 | No | No |
+| OPS-003 | PUBLIC_APP_URL using replit.app domain | INFO | `.replit` production env | OG tags/emails reference wrong domain post-launch | ⚠️ Update before DNS cutover — GAP-015 | No | No |
+| OPS-004 | No CODEOWNERS | P1 | Repo root | No mandatory review ownership on critical paths | ⚠️ Open — KG013 | No | No |
+| OPS-005 | No security.txt | P2 | Public domain | No responsible disclosure channel for external researchers | ⚠️ Open — VD1 | No | No |
+| OPS-006 | No Lighthouse CI performance guard | P2 | CI | Performance regressions uncaught on merge | ⚠️ Open — KG019 | No | No |
+| OPS-007 | Large vendor bundle sizes (1–1.7 MB) | P2 | All web artifacts | Slow initial load for users | ⚠️ Open — KG024 | No | No |
+| OPS-008 | Android keystore not EAS-managed | P2 | Mobile ops / signing | SPOF — keystore loss would block app releases | ⚠️ Open — GAP-003 | **Yes** — verify backup status | No |
+| QUAL-001 | E2E test coverage sparse | P2 | `playwright.config.ts` | Write-path regressions may not be caught | ⚠️ Open — GAP-013 | No | No |
+| QUAL-002 | No Lighthouse performance CI | P2 | CI (duplicate of OPS-006) | Performance regressions uncaught on merge | ⚠️ Open — KG019 | No | No |
+| QUAL-003 | No accessibility audit | P2 | All web artifacts | WCAG compliance unknown — enterprise risk | ⚠️ Open — KG025 | No | No |
+
+---
+
+## Resolved Findings (April 2026)
+
+| Finding ID | Resolution |
+|---|---|
+| SEC-001 | Mobile credential files confirmed as placeholder-only; `.gitignore` patterns hardened |
+| SEC-003 | `.gitignore` updated with comprehensive credential patterns |
+| SEC-004 | Internal token comparison replaced with `crypto.timingSafeEqual` |
+| SEC-005 | `tenant_id` added to `rag_knowledge_chunks`; retrieval engine enforces per-tenant filtering; `totalIndexed` is tenant-scoped |
+| SEC-006 | Zod validation applied to all high-risk write routes (auth, forms, payments, governance, admin) |
+| CI-001 | All 13 GitHub Actions workflows pinned to commit SHAs |
+| CI-005 | `lyte-command-center` entry removed from `container-publish.yml` build matrix |
+| DB-001 | Migration `0001_add_tenant_id_to_rag_knowledge_chunks.sql` applied; index + strict predicates enforced |
+
+---
+
+## Open Findings — Detailed Notes
+
+### SEC-002 — Firebase / Google Credentials Manual Rotation Required
+**Severity:** P1 (High) | **Status:** Open | **Blocking:** Yes (LB-001)
+- Mobile credential files (`google-services.json`, `GoogleService-Info.plist`) currently contain `PLACEHOLDER_*` values.
+- Any previously committed real values (if they existed in git history) require manual rotation at Firebase Console and Google Cloud Console.
+- Action: Rotate as a precaution before first production tenant access.
+- Owner: Founder / Infrastructure
+
+### SEC-007 — Webhook SSRF Validation Absent
+**Severity:** P1 | **Status:** Open | **Blocking:** Conditional (LC-004)
+- Webhook delivery URLs are not validated against an SSRF host allowlist.
+- Risk: Malicious webhook URLs could trigger internal metadata requests.
+- Fix: Add URL validation / host allowlist in `routes/webhooks.ts`.
+
+### API-001 — Zod Input Validation at 21%
+**Severity:** P2 | **Status:** Open
+- Only 21 of ~170 route files apply Zod input validation.
+- All DB queries use parameterized Drizzle ORM (no raw SQL) — partial mitigation.
+- High-risk routes (auth, payments, admin) are covered.
+- Target: ≥80% coverage by Q2 2026.
+
+### API-003 — "Test not implemented" in Integration Connector
+**Severity:** P3 | **Status:** Open
+- `artifacts/api-server/src/routes/alloy-integrations.ts:345` returns hardcoded `{ connected: false, message: "Test not implemented for this integration type" }` for unsupported integration types.
+- Not a security issue; affects test connectivity UI for some integration types.
+
+### API-004 — Virus Scan is a Stub
+**Severity:** P2 | **Status:** Open (KG020c)
+- `artifacts/api-server/src/lib/virusScan.ts` is explicitly a stub: "Virus scan stub — pipeline placeholder for future AV integration."
+- No malware scanning occurs on uploaded files.
+- Fix: Integrate ClamAV or cloud AV on object storage upload path.
+
+### OBS-001 — OTEL Exporter Not Configured for Production
+**Severity:** P1 | **Status:** Open | **Blocking:** Yes (LB-006)
+- OpenTelemetry is instrumented but no OTLP endpoint is configured.
+- Configure `OTEL_EXPORTER_OTLP_ENDPOINT` before first production deploy.
+
+### DATA-001/002 — Hardcoded Autopilot Stats and Client Satisfaction
+**Severity:** P2 | **Status:** Open
+- Autopilot header (genome score, job count) hardcoded in `artifacts/szl-holdings`.
+- Forge client satisfaction scores hardcoded.
+- Both need live API wiring.
+
+### DOC-001 — TRUST_CENTER_INDEX.md Stale AI Model Reference
+**Severity:** P2 | **Status:** Re-opened (TD-004)
+- `docs/trust/trust-center.md` §Model Transparency still reads "Current primary model: HuggingFace Inference (Qwen3-8B)".
+- Correct to reflect multi-provider stack (OpenAI, Anthropic, Gemini).
+- Must fix before external trust center review.
+
+---
+
+*Related: `KNOWN-GAPS.md` · `OUT_OF_SCOPE_REGISTER.md` · `docs/audit/series-a-gap-register.md` · `SECURITY-CHECKLIST.md`*
+
+*Last audited: 2026-04-16*

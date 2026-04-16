@@ -189,6 +189,8 @@ Every commit and pull request runs:
 
 ---
 
-*See also: [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) · [KNOWN-GAPS.md](KNOWN-GAPS.md) · [docs/trust/security-posture.md](docs/trust/security-posture.md)*
+*See also: [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) · [KNOWN-GAPS.md](KNOWN-GAPS.md) · [ENVIRONMENT_VARIABLES.md](ENVIRONMENT_VARIABLES.md) · [AUDIT_FINDINGS_REGISTER.md](AUDIT_FINDINGS_REGISTER.md) · [docs/trust/security-posture.md](docs/trust/security-posture.md)*
+
+*Phase 0–1 audit (2026-04-16): No hardcoded credentials found in source — all 175 env vars use `process.env.*` references. Audit confirmed via grep scan of all artifacts, lib, and packages directories. Session secret hygiene verified (SESSION_TTL_MS default = 7 days per env-config.ts). See FULL_SYSTEM_INVENTORY.md Appendix A for reproducible verification commands.*
 
 *Last verified against code on 2026-04-16*

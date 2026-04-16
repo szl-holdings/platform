@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-04-16 (rev 5)  
+**Last updated:** 2026-04-16 (rev 6)  
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -111,20 +111,21 @@ Operational gaps, process health, test coverage, observability, team ownership.
 |----|-----|------|--------|-------|
 | GAP-002 | No CI/CD automated secret scanning | Security | Leaked keys risk | Add `gitleaks` to CI |
 | GAP-003 | Android keystore not in EAS | Mobile Ops | SPOF risk | Upload to EAS and backup in Vault |
-| KG018 | 80+ env vars — no formal schema | Ops | Onboarding friction | Generate docs from `startup-config.ts` |
-| KG020c | No virus scanning on uploads | Security | Malware risk | Integrate scanning on object storage |
+| KG018 | 80+ env vars — no formal schema | Ops | Onboarding friction | ✅ Resolved Apr-2026 — ENVIRONMENT_VARIABLES.md created with full schema |
+| KG020c | No virus scanning on uploads | Security | Malware risk | `lib/virusScan.ts` is an explicit stub — integrate ClamAV or cloud AV |
 | KG020d | No field-level encryption for PII | Privacy | Compliance risk | Evaluate encryption for PII columns |
 | KG021 | No rate-limit on inquiries | DDoS | Abuse risk | Add `express-rate-limit` |
 | KG023 | SLI/SLO definitions absent | Reliability | No targets | Define SLIs for latency/uptime |
 | KG024 | Large vendor bundle sizes | Performance | Slow load | Code-split heavy components |
 | VD1 | No `security.txt` | Compliance | No disclosure channel | Publish `/.well-known/security.txt` |
-| GAP-004 | No `.env.example` in all artifacts | Ops | Dev friction | Add `.env.example` to each artifact |
+| GAP-004 | No `.env.example` in all artifacts | Ops | Dev friction | ✅ Resolved Apr-2026 — `.env.example` expanded to 175 variables covering all documented env vars in `ENVIRONMENT_VARIABLES.md` |
 | TD-001 | PRISM framework naming inconsistency | Tech Debt | Internal confusion | Pulse/Risk/Intel vs People/Revenue/Infra |
 | TD-002 | Broken seed scripts (PRISM Counsel) | Tech Debt | Dev friction | Fix recovery table seed scripts |
 | TD-003 | DEMO_GUIDE.md said "five primitives" throughout | Doc Accuracy | ✅ Resolved Apr-2026 | Corrected to six primitives (Event Fabric is the 6th) |
 | TD-004 | TRUST_CENTER_INDEX.md cited HuggingFace/Qwen3-8B as AI model | Doc Accuracy | ⚠️ Re-opened Apr-2026 | Gap register marked resolved but TRUST_CENTER_INDEX.md § Model Transparency (line ~94) still reads "Current primary model: HuggingFace Inference (Qwen3-8B)". File needs to be corrected to reflect multi-provider stack (OpenAI, Anthropic, Gemini). Must fix before external trust center review. |
 | TD-005 | SECURITY.md role list showed 6 of 11 platform roles | Doc Accuracy | ✅ Resolved Apr-2026 | Corrected to full 11-role hierarchy with reference to ACCESS-CONTROL-MATRIX.md |
 | TD-006 | PRODUCT-SURFACES.md lists domain-specific mobile apps (aegis-mobile, vessels-mobile, terra-mobile, lyte-mobile) that are not registered artifacts | Doc Accuracy | ⚠️ Open — verify artifact registration status before first external eval |
+| KG029 | Integration connector test stub in alloy-integrations | API / Quality | Minor UX gap | `routes/alloy-integrations.ts:345` returns hardcoded "Test not implemented for this integration type" for unsupported integrations — implement per-type test logic or document which types are testable |
 | RD-001 | SOC 2 Type II / FedRAMP readiness | Compliance | Sales blocker | Post-revenue roadmap items |
 | RD-002 | Horizontal scaling / Load testing | Infra | Scale risk | Validate Azure autoscale under load |
 
@@ -136,30 +137,51 @@ Operational gaps, process health, test coverage, observability, team ownership.
 |----------|-------|----------|------|
 | P0 — Critical / High | 11 | 10 | 1 |
 | P1 — High | 9 | 0 | 9 |
-| P2 — Medium / Low | 22 | 2 | 20 |
-| **Total** | **42** | **12** | **30** |
+| P2 — Medium / Low | 24 | 4 | 20 |
+| **Total** | **44** | **14** | **30** |
 
-> **April 2026 Phase 0 audit note:** TD-004 (TRUST_CENTER_INDEX.md model reference) was previously marked resolved but the underlying file still contains the stale HuggingFace/Qwen3-8B reference — re-opened. TD-003 remains resolved. Net change: +1 open gap. See LAUNCH_BLOCKERS.md for the full pre-launch blocker register.
+> **April 2026 Phase 0–1 audit note:** Full operational audit (Phases 0–1) completed. Deliverables produced: FULL_SYSTEM_INVENTORY.md, AUDIT_FINDINGS_REGISTER.md, OUT_OF_SCOPE_REGISTER.md, ENVIRONMENT_VARIABLES.md, updated .env.example. KG018 (env var schema) resolved by ENVIRONMENT_VARIABLES.md. GAP-004 (.env.example) resolved by comprehensive update. KG029 (alloy-integrations test stub) newly cataloged. TD-004 remains re-opened. No new P0/P1 security findings discovered. No hardcoded credentials found in source. All GitHub Actions workflows remain SHA-pinned. Net P2 change: +2 gaps added, +2 resolved. See LAUNCH_BLOCKERS.md for the full pre-launch blocker register.
 
 ---
 
 ## Related Documents
 
-- `LAUNCH_BLOCKERS.md` — authoritative list of items that block public launch (created Apr 2026)
-- `PUBLIC_LAUNCH_READINESS.md` — launch bar definitions across 10 dimensions (created Apr 2026)
-- `GO_NO_GO_CHECKLIST.md` — final launch decision checklist (created Apr 2026)
-- `OPERATIONAL_READINESS_SCORECARD.md` — red/yellow/green readiness scorecard (created Apr 2026)
-- `EXECUTIVE_LAUNCH_SUMMARY.md` — launch readiness summary for leadership and investors (created Apr 2026)
+### Phase 0–1 Audit Deliverables (created Apr 2026)
+- `FULL_SYSTEM_INVENTORY.md` — exhaustive catalog of all apps, packages, routes, schemas, integrations, scripts, CI, docs
+- `AUDIT_FINDINGS_REGISTER.md` — all findings with ID, category, severity, location, impact, fix status, manual review needed, blocking status
+- `OUT_OF_SCOPE_REGISTER.md` — all deferred/out-of-scope items with disposition guidance
+- `ENVIRONMENT_VARIABLES.md` — complete env var reference (~150 documented vars) with required/optional status, defaults verified against source
+- `.env.example` — updated developer template with 175 variables, one-to-one with ENVIRONMENT_VARIABLES.md
+
+### Launch Readiness Documents (created Apr 2026)
+- `LAUNCH_BLOCKERS.md` — authoritative list of items that block public launch
+- `PUBLIC_LAUNCH_READINESS.md` — launch bar definitions across 10 dimensions
+- `GO_NO_GO_CHECKLIST.md` — final launch decision checklist
+- `OPERATIONAL_READINESS_SCORECARD.md` — red/yellow/green readiness scorecard
+- `EXECUTIVE_LAUNCH_SUMMARY.md` — launch readiness summary for leadership and investors
+
+### Security and Credential Documents
 - `SECURITY-CHECKLIST.md` — full control inventory and credential hygiene
 - `SECRETS_SETUP.md` — instructions for handling secrets and credentials
+
+### Implementation References
 - `lib/db/migrations/0001_add_tenant_id_to_rag_knowledge_chunks.sql` — DB migration for tenant isolation
 - `artifacts/api-server/src/lib/validation.ts` — `validateBody` / `validateQuery` / `validateParams` helpers
 - `lib/ai-engine/src/retrieval/alloy-retrieval.ts` — tenant-scoped retrieval implementation
+
+### Audit Archive
+- `docs/audit/series-a-full-audit.md` — authoritative series A full audit
+- `docs/audit/series-a-gap-register.md` — detailed gap register with GAP-001 through GAP-015
+- `docs/audit/series-a-out-of-scope-register.md` — series A out-of-scope register
+- `docs/audit/mock-stub-placeholder-register.md` — complete mock/stub/placeholder inventory
+- `docs/audit/omega-audit-findings.md` — Omega Phase 0 baseline findings
 
 ---
 
 ## Incident Log
 
-- **2026-04-16:** Phase 0 launch readiness audit completed. All committed mobile credential files confirmed as placeholders — no active key material detected. Manual rotation of Firebase/Google credentials required as precautionary measure (GAP-001 / LB-001). TD-004 re-opened: TRUST_CENTER_INDEX.md model reference not corrected despite being marked resolved. Full audit findings documented in LAUNCH_BLOCKERS.md, PUBLIC_LAUNCH_READINESS.md, GO_NO_GO_CHECKLIST.md, OPERATIONAL_READINESS_SCORECARD.md, and EXECUTIVE_LAUNCH_SUMMARY.md.
+- **2026-04-16 (Phase 0–1 Operational Audit):** Full exhaustive inventory and repo/secret hygiene audit completed. No hardcoded credentials found in source — all secrets use `process.env.*`. All 13 GitHub Actions workflows confirmed SHA-pinned. New deliverables created: FULL_SYSTEM_INVENTORY.md (complete platform catalog — 15 artifacts, 40 lib dirs, 18 packages, 225 route files, 13 CI workflows, scripted verification appendix), AUDIT_FINDINGS_REGISTER.md (51 findings with Impact and Manual Review Needed columns), OUT_OF_SCOPE_REGISTER.md (20 deferred items), ENVIRONMENT_VARIABLES.md (~150 vars documented with source-verified defaults), .env.example expanded to 175 vars. KG018 and GAP-004 resolved by new docs. KG029 (alloy-integrations test stub) newly cataloged. virusScan.ts confirmed as explicit stub (KG020c). SESSION_TTL_MS default corrected to 604800000 (7 days) per env-config.ts. KNOWN-GAPS.md updated (rev 6).
+
+- **2026-04-16 (Phase 0 Launch Readiness):** Phase 0 launch readiness audit completed. All committed mobile credential files confirmed as placeholders — no active key material detected. Manual rotation of Firebase/Google credentials required as precautionary measure (GAP-001 / LB-001). TD-004 re-opened: TRUST_CENTER_INDEX.md model reference not corrected despite being marked resolved. Full audit findings documented in LAUNCH_BLOCKERS.md, PUBLIC_LAUNCH_READINESS.md, GO_NO_GO_CHECKLIST.md, OPERATIONAL_READINESS_SCORECARD.md, and EXECUTIVE_LAUNCH_SUMMARY.md.
 
 ---

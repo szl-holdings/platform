@@ -94,9 +94,11 @@ Used only for `eas submit` to the Play Store.
 
 ## 6. Environment Variables (API keys, backend URLs)
 
-- Copy `.env.example` (if present) to `.env` in the relevant artifact directory.
+- Copy `.env.example` to `.env` at the repo root (the file is comprehensive — 175 variables).
 - Fill in values from the team secrets store.
 - `.env` files are gitignored. Never commit filled-in `.env` files.
+- See `ENVIRONMENT_VARIABLES.md` for the full canonical reference with descriptions, required/optional status, and source-verified defaults.
+- See `AUDIT_FINDINGS_REGISTER.md` for active security findings related to secret hygiene.
 
 ---
 
