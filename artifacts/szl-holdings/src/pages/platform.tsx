@@ -80,8 +80,9 @@ const HOW_IT_WORKS = [
 export default function PlatformPage() {
   usePageMeta({
     title: "Platform — SZL Holdings",
-    description: "One operating layer for business observability and execution accountability. Lyte surfaces risk. Alloy routes action and verifies follow-through.",
+    description: "The SZL Holdings platform: Lyte observability, Alloy execution fabric, and domain packs for security, maritime, real estate, and legal operations. One governance infrastructure. Every high-consequence domain.",
     canonical: "https://szlholdings.com/platform",
+    ogImage: "https://szlholdings.com/og/og-platform.jpg",
   });
 
   return (
@@ -89,55 +90,87 @@ export default function PlatformPage() {
       <SiteNav />
       <main id="main-content" role="main">
 
-        <section style={{
-          paddingTop: "clamp(7rem,12vw,10rem)",
-          paddingBottom: "clamp(4rem,7vw,5rem)",
-          borderBottom: "1px solid hsla(0,0%,100%,0.05)",
-        }}>
+        <section
+          aria-label="Platform overview"
+          style={{
+            paddingTop: "clamp(7rem,12vw,10rem)",
+            paddingBottom: "clamp(4rem,7vw,5rem)",
+            borderBottom: "1px solid hsla(0,0%,100%,0.05)",
+          }}
+        >
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
             <m.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
             >
-              <span style={{
-                display: "inline-block",
-                fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase",
-                color: "hsl(210,5%,42%)", marginBottom: "1.5rem",
-              }}>
-                Platform
-              </span>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
+                <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)" }}>
+                  SZL Holdings
+                </span>
+                <span style={{ color: "hsla(0,0%,100%,0.18)", fontSize: "0.875rem" }} aria-hidden="true">·</span>
+                <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(192,72%,48%)" }}>
+                  Platform
+                </span>
+              </div>
               <h1 style={{
                 fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 700, letterSpacing: "-0.025em",
-                lineHeight: 1.08, color: "hsl(38,12%,94%)", marginBottom: "1.25rem", maxWidth: "36rem",
+                lineHeight: 1.08, color: "hsl(38,12%,94%)", marginBottom: "1.25rem", maxWidth: "28rem",
               }}>
-                One operating layer for business observability and execution accountability.
+                One governance infrastructure. Every high-consequence domain.
               </h1>
               <p style={{
                 fontSize: "1.0625rem", color: "hsl(210,5%,60%)", lineHeight: 1.65,
-                maxWidth: "38rem", marginBottom: "2rem",
+                maxWidth: "44rem", marginBottom: "1rem",
               }}>
-                Most organizations have dashboards that show what happened. Lyte + Alloy gives you the layer that catches what's about to break — and routes the action to fix it before it does.
+                The SZL Holdings platform is organized in three architectural layers: command surfaces where operators work, an execution fabric that governs every action, and domain packs that bring purpose-built intelligence to specific industries.
               </p>
-              <Link
-                href="/design-partners"
-                style={{
-                  display: "inline-flex", alignItems: "center", gap: "6px",
-                  padding: "0.625rem 1.25rem", background: "hsl(210,8%,88%)",
-                  color: "hsl(210,12%,6%)", borderRadius: "4px",
-                  fontSize: "13px", fontWeight: 600, textDecoration: "none",
-                  transition: "background 0.2s ease",
-                }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(38,15%,96%)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(210,8%,88%)"; }}
-              >
-                Request a design partner conversation <ArrowRight size={13} strokeWidth={2.5} />
-              </Link>
+              <p style={{
+                fontSize: "0.9375rem", color: "hsl(210,5%,50%)", lineHeight: 1.65,
+                maxWidth: "44rem", marginBottom: "2rem",
+              }}>
+                Every layer shares one governance model, one audit trail, and one authentication model. Adding a new domain pack does not require rebuilding infrastructure — it inherits it.
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+                <Link
+                  href="/demo"
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: "6px",
+                    padding: "0.625rem 1.25rem", background: "hsl(192,72%,48%)",
+                    color: "hsl(210,12%,6%)", borderRadius: "4px",
+                    fontSize: "13px", fontWeight: 600, textDecoration: "none",
+                    transition: "background 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,54%)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,48%)"; }}
+                >
+                  Request a demo <ArrowRight size={13} strokeWidth={2.5} aria-hidden="true" />
+                </Link>
+                <Link
+                  href="/design-partner"
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: "6px",
+                    padding: "0.625rem 1.25rem", background: "transparent",
+                    color: "hsl(210,5%,60%)",
+                    border: "1px solid hsla(0,0%,100%,0.12)",
+                    borderRadius: "4px",
+                    fontSize: "13px", fontWeight: 600, textDecoration: "none",
+                    transition: "border-color 0.2s ease, color 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.25)"; (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,90%)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.12)"; (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,60%)"; }}
+                >
+                  Design partner conversation <ArrowRight size={13} strokeWidth={2.5} aria-hidden="true" />
+                </Link>
+              </div>
             </m.div>
           </div>
         </section>
 
-        <section style={{ padding: "clamp(4rem,7vw,6rem) 0", borderBottom: "1px solid hsla(0,0%,100%,0.04)" }}>
+        <section
+          aria-label="Core platform layers"
+          style={{ padding: "clamp(4rem,7vw,6rem) 0", borderBottom: "1px solid hsla(0,0%,100%,0.04)" }}
+        >
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
             <m.p
               initial={{ opacity: 0, y: 12 }}
@@ -146,7 +179,7 @@ export default function PlatformPage() {
               transition={{ duration: 0.5 }}
               style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "2.5rem" }}
             >
-              The Two Layers
+              Command surfaces — Alloy + Lyte
             </m.p>
             <div className="grid md:grid-cols-2 gap-6">
               {LAYERS.map((layer, i) => {

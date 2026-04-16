@@ -16,9 +16,10 @@ const CAPABILITIES = [
 
 export default function SolutionsAegisPage() {
   usePageMeta({
-    title: "Aegis — Defense & Intelligence · SZL Holdings",
-    description: "Aegis extends Lyte + Alloy into defense & intelligence — SOC command, XDR, managed security operations with governed action and audit-grade execution.",
+    title: "Aegis — Security & Defense Intelligence · SZL Holdings",
+    description: "SOC command, MITRE ATT&CK mapping, SOAR playbooks, AI triage with human approval gates. Aegis is the security & defense domain pack — built on the same governance infrastructure as every SZL product.",
     canonical: "https://szlholdings.com/solutions/aegis",
+    ogImage: "https://szlholdings.com/og/og-aegis.jpg",
   });
 
   return (

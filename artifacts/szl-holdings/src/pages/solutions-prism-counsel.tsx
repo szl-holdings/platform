@@ -1,6 +1,7 @@
 import { Scale, Eye, Shield, TrendingUp, DollarSign, FileCheck, MessageSquare, ArrowRight, CheckCircle, Cpu, Building2, MapPin, Clock, AlertTriangle, Lock, Server } from "lucide-react";
 import { Link } from "wouter";
 import { SiteNav } from "@/components/SiteNav";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const PILLARS = [
   { icon: Eye, name: "Posture", desc: "Liability, coverage, venue, and opposing counsel posture assessment. Insurer behavior profiling and adjuster pattern intelligence." },
@@ -12,6 +13,13 @@ const PILLARS = [
 ];
 
 export default function SolutionsPrismCounselPage() {
+  usePageMeta({
+    title: "PRISM Counsel — Legal Intelligence · SZL Holdings",
+    description: "AI-assisted legal operations with approval gates, proof chain, and immutable audit trail. PRISM Counsel is the legal intelligence domain pack — built on the same governance infrastructure as every SZL product.",
+    canonical: "https://szlholdings.com/solutions/prism-counsel",
+    ogImage: "https://szlholdings.com/og/og-prism-counsel.jpg",
+  });
+
   return (
     <div className="min-h-screen" style={{ background: "#080c14" }}>
       <SiteNav />

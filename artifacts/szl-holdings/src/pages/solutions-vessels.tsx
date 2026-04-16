@@ -17,8 +17,9 @@ const CAPABILITIES = [
 export default function SolutionsVesselsPage() {
   usePageMeta({
     title: "Vessels — Maritime Intelligence · SZL Holdings",
-    description: "Vessels extends Lyte + Alloy into maritime — fleet visibility, voyage performance, and operational exception management for complex maritime operations.",
+    description: "Fleet command, AIS telemetry, sanctions screening, dark vessel detection, exception-based workflows. Vessels is the maritime domain pack — built on the same governance infrastructure as every SZL product.",
     canonical: "https://szlholdings.com/solutions/vessels",
+    ogImage: "https://szlholdings.com/og/og-vessels.jpg",
   });
 
   return (

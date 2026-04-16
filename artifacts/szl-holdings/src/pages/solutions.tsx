@@ -59,7 +59,8 @@ const SOLUTIONS = [
 export default function SolutionsPage() {
   usePageMeta({
     title: "Solutions — SZL Holdings",
-    description: "Vertical domain packs that extend the Lyte + Alloy operating platform into defense & intelligence, maritime, real estate, and executive advisory.",
+    description: "Governed operational intelligence for security, maritime, real estate, and professional services. Domain packs extend the SZL Holdings platform with purpose-built intelligence for each domain.",
+    ogImage: "https://szlholdings.com/og/og-solutions.jpg",
     canonical: "https://szlholdings.com/solutions",
   });
 

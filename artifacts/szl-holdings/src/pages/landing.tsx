@@ -4,25 +4,27 @@ import { m } from "framer-motion";
 import {
   ArrowRight,
   ChevronRight,
+  Eye,
+  Zap,
+  Shield,
+  CheckCircle2,
+  Activity,
   Lock,
   Database,
-  Activity,
-  Shield,
-  GitBranch,
-  Layers,
-  Zap,
-  Eye,
-  CheckCircle2,
   Globe,
+  Layers,
+  Users,
+  Code2,
+  TrendingUp,
   Handshake,
   BarChart3,
-  TrendingUp,
-  Code2,
-  Network,
-  FileText,
-  Cpu,
-  Workflow,
-  MoveRight,
+  ExternalLink,
+  Ship,
+  Building2,
+  BriefcaseBusiness,
+  ShieldCheck,
+  Server,
+  GitBranch,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -37,138 +39,103 @@ const fadeUp = {
   }),
 };
 
-const GOVERNED_LOOP = [
+const PLATFORM_LAYERS = [
   {
-    step: "01",
-    label: "Signal Ingestion",
-    body: "Lyte connects to the approval queues, task systems, and workflow tools your teams already use. Every event is timestamped, attributed, and held in the Outcome Graph.",
+    tier: "Command Surfaces",
+    description: "Where operators observe, decide, and act.",
+    products: [
+      { name: "Lyte", note: "Web command surface — PRISM framework, signal → action" },
+      { name: "CORTEX", note: "Mobile command surface — field and executive access" },
+      { name: "Command Portal", note: "Ecosystem hub — cross-domain coordination" },
+    ],
     accent: "hsl(192,72%,48%)",
-  },
-  {
-    step: "02",
-    label: "Risk Surface",
-    body: "Ownership gaps, workflow friction, and execution risk appear before damage compounds. The signal-to-visibility arc is always live — not a weekly report.",
-    accent: "hsl(215,60%,60%)",
-  },
-  {
-    step: "03",
-    label: "Governed Decision",
-    body: "Covenant Policy routes every consequential action through the right approval channel. No autonomous execution. Every decision is bounded, explained, and attributable.",
-    accent: "hsl(258,55%,68%)",
-  },
-  {
-    step: "04",
-    label: "Proof Chain",
-    body: "Every signal, forecast, approval, and action is linked in an immutable record. The audit trail is not an afterthought — it is the operating primitive.",
-    accent: "hsl(38,72%,58%)",
-  },
-];
-
-const DIFFERENTIATION = [
-  {
-    label: "Proof over promise",
-    body: "Every action traces to the signal that caused it. Every model output carries source attribution. You can explain any decision to a regulator or board — in real time.",
-    icon: FileText,
-  },
-  {
-    label: "Governance is the primitive",
-    body: "Covenant Policy is built into the action layer, not added by compliance after the fact. Human-in-the-loop controls are not optional features.",
-    icon: Lock,
-  },
-  {
-    label: "One architecture, every domain",
-    body: "Domain Packs — Aegis, Vessels, Terra, PRISM Counsel — are governed extensions of the same spine. They inherit the Proof Chain, the Outcome Graph, and Alloy's execution fabric.",
-    icon: Layers,
-  },
-  {
-    label: "Operator surfaces, not analyst reports",
-    body: "Lyte is built for the person who owns the outcome. Signals surface what's stuck and what's at risk. Alloy routes the response. Command gives the executive view. No analyst required.",
     icon: Eye,
   },
+  {
+    tier: "Execution Fabric",
+    description: "The governed intelligence backbone shared by every product.",
+    products: [
+      { name: "Alloy", note: "Workflow orchestration, approval gates, immutable audit trail" },
+      { name: "Outcome Graph", note: "Decision lifecycle tracking" },
+      { name: "Proof Chain", note: "Cryptographic audit provenance" },
+    ],
+    accent: "hsl(215,72%,58%)",
+    icon: Zap,
+  },
+  {
+    tier: "Domain Packs",
+    description: "Domain-specific intelligence built on shared governance infrastructure.",
+    products: [
+      { name: "Aegis", note: "Security & defense — SOC, XDR, threat intelligence" },
+      { name: "Vessels", note: "Maritime — fleet command, AIS, voyage economics" },
+      { name: "Terra", note: "Real estate — distress signals, deal pipeline, ownership graph" },
+      { name: "PRISM Counsel", note: "Legal — matter command, deadline tracking, governed demand" },
+      { name: "Carlota Jo", note: "Advisory — discreet intake, managed delivery, audit-grade" },
+    ],
+    accent: "hsl(260,60%,65%)",
+    icon: Layers,
+  },
 ];
 
-const TRUST_PRIMITIVES = [
-  {
-    icon: Lock,
-    label: "Human-in-the-loop by default",
-    body: "Covenant Policy enforces approval gates on every consequential action. Autonomous execution requires explicit, documented authorization.",
-  },
-  {
-    icon: Database,
-    label: "Source attribution on every output",
-    body: "Every signal traces to its origin. Model outputs are grounded and linkable — never opaque, never hallucinated without flagging.",
-  },
-  {
-    icon: Activity,
-    label: "Immutable Proof Chain",
-    body: "The Proof Chain records every action, approval, and inference in sequence. Defensible, retrievable, and auditable without additional tooling.",
-  },
-  {
-    icon: Shield,
-    label: "Policy routing, not bolt-on compliance",
-    body: "Governance is encoded in the action primitive. Compliance is an output of operations, not a separate team reviewing logs after the fact.",
-  },
+const EVIDENCE_STATS = [
+  { value: "685", label: "Database tables", note: "across 112 schema files" },
+  { value: "51", label: "Shared packages", note: "pnpm monorepo" },
+  { value: "15", label: "Active artifacts", note: "web, mobile, API, design" },
+  { value: "11", label: "RBAC roles", note: "org-scoped tenant isolation" },
+  { value: "9", label: "AI decision types", note: "schema-validated outputs" },
+  { value: "5", label: "Platform primitives", note: "shared across all surfaces" },
+];
+
+const OPERATING_LOOP = [
+  { step: "01", label: "Signal Ingestion", body: "Lyte connects to the approval queues, task systems, and workflow tools your teams already use — and begins tracking what's stuck." },
+  { step: "02", label: "Visibility Surface", body: "Execution risk, ownership gaps, and workflow friction surface before they compound. The signal-to-visibility arc is always live." },
+  { step: "03", label: "Explainable Forecast", body: "What is at risk, why, and what happens next — explained in plain language with source attribution. No opaque model outputs." },
+  { step: "04", label: "Governed Action", body: "Alloy routes action to the right person through the right channel, with approval controls and a full audit trail for every step taken." },
+];
+
+const TRUST_POINTS = [
+  { icon: Lock, label: "Human-in-the-loop enforced", body: "Approval controls on every consequential action. No autonomous execution without review — enforced at the workflow layer, not the UI layer." },
+  { icon: Database, label: "Source attribution on every output", body: "Every AI-generated recommendation includes model identity, source citations, and confidence score. No opaque verdicts." },
+  { icon: Activity, label: "Immutable audit trail", body: "The Proof Chain records every action, approval, and inference — append-only, tamper-resistant, and fully queryable by actor, action, and time." },
+  { icon: Shield, label: "Policy-gated governance", body: "Covenant Policy enforces who can act, when, and under what conditions. Governance is an architecture primitive, not a compliance afterthought." },
 ];
 
 const DOMAIN_PACKS = [
   {
-    slug: "PRISM Counsel",
-    category: "Legal Operations",
-    desc: "Matter twins, deadline tracking, and governed demand workflows for litigation teams. Proof Chain and Outcome Graph, legal domain layer.",
-    color: "#8b7ac8",
-    href: "/solutions/prism-counsel",
+    icon: ShieldCheck,
+    slug: "Aegis",
+    category: "Security & Defense",
+    desc: "SOC command, threat intelligence, MITRE ATT&CK mapping, and SOAR playbooks for environments where every decision has consequence. Policy-gated, fully audited.",
+    color: "hsl(222,60%,58%)",
+    href: "/solutions/aegis",
+    capabilities: ["Threat classification", "SOC workflow", "AI triage with approval gates", "Compliance audit trail"],
   },
   {
+    icon: Ship,
     slug: "Vessels",
     category: "Maritime Intelligence",
-    desc: "Voyage and fleet twins with risk-ranked action surfaces for fleet operators. Pre-designation signals, sanctions exposure, and port risk — governed and audited.",
-    color: "#4a90b8",
+    desc: "Fleet command, AIS telemetry, voyage economics, dark vessel detection, and sanctions screening for fleet operators. Same proof chain, maritime intelligence layer.",
+    color: "hsl(206,72%,52%)",
     href: "/solutions/vessels",
+    capabilities: ["Real-time AIS telemetry", "Voyage P&L", "Dark vessel detection", "Sanctions screening"],
   },
   {
-    slug: "Aegis",
-    category: "Defense & Security",
-    desc: "Threat twins and SOC command for environments where every decision has consequence. Policy-gated, attribution-complete, fully audited.",
-    color: "#c85a5a",
-    href: "/solutions/aegis",
-  },
-  {
+    icon: Building2,
     slug: "Terra",
     category: "Real Estate Intelligence",
-    desc: "Property twins with distress signals, deal tracking, and governed underwriting flows. Surface the opportunity 19 days before it hits public records.",
-    color: "#5fa87a",
+    desc: "NYC distress property pipeline, ownership entity graph, deal pipeline, and broker workflow. Data-rich intelligence with a governed underwriting flow.",
+    color: "hsl(140,52%,46%)",
     href: "/solutions/terra",
+    capabilities: ["Distress signal detection", "Ownership graph", "Deal pipeline", "Acquisition approval gates"],
   },
   {
-    slug: "Carlota Jo",
-    category: "Private Advisory",
-    desc: "Premium client advisory with discreet intake, managed service flows, and audit-grade delivery. Governed from first engagement.",
-    color: "#c8a05a",
-    href: "/carlota-jo/",
-  },
-];
-
-const PLATFORM_LAYERS = [
-  {
-    tier: "Platform",
-    label: "Command surfaces",
-    items: ["Lyte", "Alloy", "CORTEX", "Command"],
-    color: "hsl(192,72%,48%)",
-    desc: "The operating consoles — observability, execution, mobile command, and executive view.",
-  },
-  {
-    tier: "Primitives",
-    label: "Core building blocks",
-    items: ["Outcome Graph", "Proof Chain", "Covenant Policy", "Simulation", "Workflow Engine"],
-    color: "hsl(258,55%,68%)",
-    desc: "The durable infrastructure that every surface and every domain pack is built on.",
-  },
-  {
-    tier: "Domain Packs",
-    label: "Governed vertical extensions",
-    items: ["Aegis", "Vessels", "Terra", "PRISM Counsel", "Carlota Jo", "IMPERIUM"],
-    color: "hsl(38,72%,58%)",
-    desc: "High-consequence domains with purpose-built signal layers, powered by the same governed spine.",
+    icon: BriefcaseBusiness,
+    slug: "PRISM Counsel",
+    category: "Legal Intelligence",
+    desc: "Matter twins, deadline tracking, and governed demand workflows for litigation teams. AI-assisted legal operations with approval gates and Proof Chain.",
+    color: "hsl(260,60%,65%)",
+    href: "/solutions/prism-counsel",
+    capabilities: ["Matter lifecycle command", "Deadline tracking", "AI-assisted review", "Immutable audit trail"],
   },
 ];
 
@@ -232,16 +199,16 @@ function NewsletterSection() {
               Insights & analysis
             </p>
             <h3 style={{ fontSize: "clamp(1.1rem,2vw,1.4rem)", fontWeight: 600, letterSpacing: "-0.018em", color: "hsl(38,8%,92%)", marginBottom: "0.5rem" }}>
-              Governed operations, decision infrastructure, and the SZL thesis.
+              Governed intelligence, operational AI, and the SZL thesis.
             </h3>
             <p style={{ fontSize: "0.875rem", color: "var(--color-szl-text-secondary)", lineHeight: 1.6 }}>
-              Founder-written analysis on the ideas shaping operational governance. Published when it's worth reading.
+              Founder-written analysis on the ideas shaping enterprise operations. No digest, no filler — published when it's worth reading.
             </p>
           </div>
           <div style={{ minWidth: "280px", flex: "1 1 280px", maxWidth: "420px" }}>
             {status === "success" ? (
               <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.875rem 1.125rem", borderRadius: "0.5rem", background: "hsla(145,60%,46%,0.12)", border: "1px solid hsla(145,60%,46%,0.25)" }}>
-                <span style={{ fontSize: "1.25rem" }} role="img" aria-label="Success">✓</span>
+                <CheckCircle2 size={18} style={{ color: "hsl(145,60%,58%)", flexShrink: 0 }} aria-hidden="true" />
                 <div>
                   <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(145,60%,72%)", margin: 0 }}>You're on the list.</p>
                   <p style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", margin: "0.15rem 0 0" }}>We'll reach out when something worth reading is published.</p>
@@ -316,10 +283,11 @@ function NewsletterSection() {
 
 export default function HomePage() {
   usePageMeta({
-    title: "SZL Holdings — Governed decision infrastructure for high-consequence operations.",
+    title: "SZL Holdings — Governed Operational Intelligence",
     description:
-      "SZL Holdings builds the governed decision system connecting signal to audited execution. Platform: Lyte, Alloy, CORTEX, Command. Primitives: Outcome Graph, Proof Chain, Covenant Policy. Domain Packs: Aegis, Vessels, Terra, PRISM Counsel.",
+      "The governed operational intelligence platform. Connect what's observable to what's executable, under governance, with full attribution. Lyte, Alloy, and domain packs for security, maritime, real estate, and legal operations.",
     canonical: "https://szlholdings.com/",
+    ogImage: "https://szlholdings.com/og/og-home.jpg",
   });
 
   return (
@@ -327,8 +295,11 @@ export default function HomePage() {
       <SiteNav />
       <main id="main-content">
 
-        {/* ── 1. Hero ─────────────────────────────────────────────────── */}
-        <section style={{ position: "relative", overflow: "hidden", borderBottom: "1px solid var(--color-szl-border)" }}>
+        {/* ── 1. Platform Hero ─────────────────────────────────────────── */}
+        <section
+          aria-label="Platform overview"
+          style={{ position: "relative", overflow: "hidden", borderBottom: "1px solid var(--color-szl-border)" }}
+        >
           <div style={{
             pointerEvents: "none",
             position: "absolute",
@@ -352,42 +323,77 @@ export default function HomePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
             >
-              <p style={{ marginBottom: "1.5rem", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)" }}>
-                SZL Holdings · Design-partner stage · 2026
-              </p>
+              {/* Company label */}
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.75rem", flexWrap: "wrap" }}>
+                <p style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", margin: 0 }}>
+                  SZL Holdings
+                </p>
+                <span style={{ width: "1px", height: "12px", background: "hsla(0,0%,100%,0.15)" }} aria-hidden="true" />
+                <p style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase", color: "hsl(192,72%,48%)", margin: 0 }}>
+                  Governed Operational Intelligence
+                </p>
+                <span style={{ width: "1px", height: "12px", background: "hsla(0,0%,100%,0.15)" }} aria-hidden="true" />
+                <p style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", margin: 0 }}>
+                  Design-partner stage · 2026
+                </p>
+              </div>
+
+              {/* Primary headline */}
               <h1 style={{
                 fontSize: "clamp(2.5rem,5.5vw,4.25rem)",
-                fontWeight: 600,
+                fontWeight: 700,
                 letterSpacing: "-0.028em",
-                lineHeight: 1.08,
+                lineHeight: 1.06,
                 maxWidth: "22ch",
                 marginBottom: "1.5rem",
                 color: "hsl(38,8%,96%)",
               }}>
-                Governed decision infrastructure for high-consequence operations.
+                The governed decision layer for enterprise operations.
               </h1>
+
+              {/* Subhead */}
               <p style={{
                 fontSize: "clamp(1rem,1.8vw,1.125rem)",
                 lineHeight: 1.72,
                 color: "var(--color-szl-text-secondary)",
-                maxWidth: "50ch",
-                marginBottom: "0.875rem",
-              }}>
-                SZL Holdings builds the system that connects every operational signal to an audited, governed decision — with a Proof Chain on every action and human-in-the-loop controls on every consequence.
-              </p>
-              <p style={{
-                fontSize: "clamp(0.9rem,1.5vw,1rem)",
-                lineHeight: 1.65,
-                color: "var(--color-szl-text-faint)",
                 maxWidth: "52ch",
-                marginBottom: "2.5rem",
-                fontFamily: "var(--font-mono)",
+                marginBottom: "1rem",
               }}>
-                Platform → Primitives → Domain Packs. Signal → visibility → governed execution.
+                SZL Holdings builds the intelligence infrastructure that connects observable business signals to accountable, executable action — under governance, with full attribution. One platform. Every high-consequence domain.
               </p>
+
+              {/* Platform hierarchy quick-read */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "2.5rem", alignItems: "center" }}>
+                {[
+                  { label: "Alloy", note: "execution fabric", color: "hsl(215,72%,58%)" },
+                  { label: "Lyte", note: "command surface", color: "hsl(192,72%,48%)" },
+                  { label: "Aegis · Vessels · Terra · PRISM Counsel", note: "domain packs", color: "hsl(260,60%,65%)" },
+                ].map((item, i) => (
+                  <div key={item.label} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    {i > 0 && <span style={{ color: "hsla(0,0%,100%,0.2)", fontSize: "0.75rem" }} aria-hidden="true">→</span>}
+                    <span style={{
+                      display: "inline-flex", alignItems: "center", gap: "0.375rem",
+                      padding: "0.3rem 0.75rem",
+                      borderRadius: "2rem",
+                      background: `${item.color}12`,
+                      border: `1px solid ${item.color}28`,
+                      fontSize: "0.75rem", fontWeight: 600,
+                      color: item.color,
+                    }}>
+                      {item.label}
+                      <span style={{ fontSize: "0.625rem", fontWeight: 400, color: `${item.color}99`, fontFamily: "var(--font-mono)" }}>
+                        {item.note}
+                      </span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* CTAs */}
               <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
                 <Link
                   href="/demo"
+                  aria-label="Request a product demo"
                   style={{
                     display: "inline-flex", alignItems: "center", gap: "0.5rem",
                     padding: "0.75rem 1.5rem",
@@ -402,7 +408,7 @@ export default function HomePage() {
                   onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,48%)"; }}
                 >
                   Request a demo
-                  <ArrowRight size={15} />
+                  <ArrowRight size={15} aria-hidden="true" />
                 </Link>
                 <Link
                   href="/platform"
@@ -438,7 +444,7 @@ export default function HomePage() {
                   onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.25)"; (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--color-szl-border-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
                 >
-                  <Handshake size={15} />
+                  <Handshake size={15} aria-hidden="true" />
                   Become a design partner
                 </Link>
               </div>
@@ -446,563 +452,93 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 2. Category Definition ──────────────────────────────────── */}
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.015)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(2.5rem,5vw,3.5rem) var(--space-content-x)" }}>
-            <m.div
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.45 }}
-              style={{ display: "grid", gap: "2rem", alignItems: "center" }}
-              className="lg:grid-cols-[1fr_auto_1fr]"
-            >
-              <div>
-                <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.75rem" }}>
-                  What it is
-                </p>
-                <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.65, color: "hsl(38,8%,88%)", fontWeight: 500, letterSpacing: "-0.01em" }}>
-                  A governed decision system — the operating layer that connects signal ingestion to verified, audited action across every high-consequence domain.
-                </p>
-              </div>
-              <div style={{ width: "1px", height: "100%", minHeight: "60px", background: "var(--color-szl-border)" }} className="hidden lg:block" />
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+        {/* ── 1b. Trust Strip ─────────────────────────────────────────── */}
+        <section
+          aria-label="Security and trust overview"
+          style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(192,72%,48%,0.025)" }}
+        >
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "1.25rem var(--space-content-x)" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "1.5rem", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "1.5rem", alignItems: "center" }}>
                 {[
-                  { label: "Not an AI assistant", accent: "hsl(0,60%,56%)" },
-                  { label: "Not a dashboard tool", accent: "hsl(0,60%,56%)" },
-                  { label: "Not a workflow automation SaaS", accent: "hsl(0,60%,56%)" },
-                ].map((item) => (
-                  <span key={item.label} style={{
-                    padding: "0.375rem 0.875rem",
-                    borderRadius: "2rem",
-                    background: `${item.accent}10`,
-                    border: `1px solid ${item.accent}25`,
-                    fontSize: "0.8125rem",
-                    color: item.accent,
-                    fontFamily: "var(--font-mono)",
-                    letterSpacing: "0.02em",
-                  }}>
-                    {item.label}
-                  </span>
-                ))}
-                <span style={{
-                  padding: "0.375rem 0.875rem",
-                  borderRadius: "2rem",
-                  background: "hsla(192,72%,48%,0.1)",
-                  border: "1px solid hsla(192,72%,48%,0.25)",
-                  fontSize: "0.8125rem",
-                  color: "hsl(192,72%,48%)",
-                  fontFamily: "var(--font-mono)",
-                  letterSpacing: "0.02em",
-                }}>
-                  Governed decision infrastructure ✓
-                </span>
+                  { icon: Lock, label: "Human-in-the-loop enforcement" },
+                  { icon: Shield, label: "TLS 1.3 · AES-256 at rest" },
+                  { icon: Activity, label: "Immutable Proof Chain audit trail" },
+                  { icon: Users, label: "11-role RBAC · org-scoped isolation" },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <div key={item.label} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <Icon size={12} style={{ color: "hsl(192,72%,48%)", flexShrink: 0 }} aria-hidden="true" />
+                      <span style={{ fontSize: "0.75rem", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", letterSpacing: "0.03em" }}>{item.label}</span>
+                    </div>
+                  );
+                })}
               </div>
-            </m.div>
-          </div>
-        </section>
-
-        {/* ── 3. Architecture / Operating Model ───────────────────────── */}
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
-            <div style={{ marginBottom: "3rem", maxWidth: "40rem" }}>
-              <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
-                Architecture
-              </p>
-              <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)", marginBottom: "0.875rem" }}>
-                One governed spine. Three tiers. Every domain.
-              </h2>
-              <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)" }}>
-                The platform is not a collection of apps. It is a three-tier architecture where every surface inherits the same primitives, and every domain pack is a governed extension of the same spine.
-              </p>
-            </div>
-
-            <div style={{ display: "grid", gap: "0.875rem" }}>
-              {PLATFORM_LAYERS.map((layer, i) => (
-                <m.div
-                  key={layer.tier}
-                  custom={i}
-                  variants={fadeUp}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true }}
-                  style={{
-                    padding: "1.75rem",
-                    borderRadius: "0.875rem",
-                    background: "hsla(0,0%,100%,0.025)",
-                    border: `1px solid ${layer.color}20`,
-                    display: "grid",
-                    gap: "1.25rem",
-                    alignItems: "start",
-                  }}
-                  className="lg:grid-cols-[160px_1fr_1fr]"
-                >
-                  <div>
-                    <p style={{ fontSize: "0.625rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: layer.color, fontFamily: "var(--font-mono)", marginBottom: "0.375rem" }}>
-                      {layer.tier}
-                    </p>
-                    <p style={{ fontSize: "0.75rem", color: "var(--color-szl-text-faint)", lineHeight: 1.5 }}>{layer.label}</p>
-                  </div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem" }}>
-                    {layer.items.map((item) => (
-                      <span key={item} style={{
-                        padding: "0.25rem 0.625rem",
-                        borderRadius: "0.3rem",
-                        background: `${layer.color}10`,
-                        border: `1px solid ${layer.color}25`,
-                        fontSize: "0.75rem",
-                        fontWeight: 500,
-                        color: layer.color,
-                        fontFamily: "var(--font-mono)",
-                      }}>
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                  <p style={{ fontSize: "0.8125rem", lineHeight: 1.62, color: "var(--color-szl-text-secondary)" }}>{layer.desc}</p>
-                </m.div>
-              ))}
-            </div>
-
-            <div style={{ marginTop: "1.75rem", display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
-              <Link
-                href="/architecture"
-                style={{
-                  display: "inline-flex", alignItems: "center", gap: "0.375rem",
-                  fontSize: "0.875rem", fontWeight: 500,
-                  color: "var(--color-szl-text-secondary)",
-                  textDecoration: "none",
-                  transition: "color 0.18s ease",
-                }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-              >
-                Full architecture <ChevronRight size={14} />
-              </Link>
-              <Link
-                href="/how-it-works"
-                style={{
-                  display: "inline-flex", alignItems: "center", gap: "0.375rem",
-                  fontSize: "0.875rem", fontWeight: 500,
-                  color: "var(--color-szl-text-secondary)",
-                  textDecoration: "none",
-                  transition: "color 0.18s ease",
-                }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-              >
-                How it works <ChevronRight size={14} />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* ── 4. Flagship Workflow — The Governed Decision Loop ────────── */}
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.01)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
-            <div style={{ marginBottom: "3rem", maxWidth: "40rem" }}>
-              <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
-                The governed decision loop
-              </p>
-              <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)", marginBottom: "0.875rem" }}>
-                From signal to audited execution. End to end.
-              </h2>
-              <p style={{ fontSize: "0.9375rem", lineHeight: 1.7, color: "var(--color-szl-text-secondary)" }}>
-                Every consequential operation follows the same loop — regardless of domain. The primitives handle the infrastructure. The domain pack supplies the signal logic. The operator sees the surface.
-              </p>
-            </div>
-            <div style={{ display: "grid", gap: "1rem" }} className="sm:grid-cols-2 lg:grid-cols-4">
-              {GOVERNED_LOOP.map((step, i) => (
-                <m.div
-                  key={step.step}
-                  custom={i}
-                  variants={fadeUp}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true }}
-                  style={{
-                    padding: "1.5rem",
-                    borderRadius: "0.75rem",
-                    background: "hsla(0,0%,100%,0.025)",
-                    border: `1px solid ${step.accent}20`,
-                    position: "relative",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.875rem" }}>
-                    <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, color: step.accent, letterSpacing: "0.06em" }}>
-                      {step.step}
-                    </p>
-                    {i < GOVERNED_LOOP.length - 1 && (
-                      <MoveRight size={12} style={{ color: "var(--color-szl-text-faint)", opacity: 0.4 }} className="hidden lg:block" />
-                    )}
-                  </div>
-                  <h3 style={{ fontSize: "0.9375rem", fontWeight: 600, letterSpacing: "-0.01em", color: "hsl(38,8%,92%)", marginBottom: "0.625rem" }}>
-                    {step.label}
-                  </h3>
-                  <p style={{ fontSize: "0.8125rem", lineHeight: 1.62, color: "var(--color-szl-text-secondary)" }}>
-                    {step.body}
-                  </p>
-                </m.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── 5. Lyte + Alloy ─────────────────────────────────────────── */}
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
-            <div style={{ display: "grid", gap: "2rem" }} className="lg:grid-cols-2">
-
-              {/* Lyte */}
-              <m.div
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-                style={{
-                  padding: "2rem",
-                  borderRadius: "0.875rem",
-                  background: "hsla(192,72%,48%,0.04)",
-                  border: "1px solid hsla(192,72%,48%,0.16)",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
-                  <Eye size={14} style={{ color: "hsl(192,72%,48%)" }} />
-                  <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(192,72%,48%)", fontFamily: "var(--font-mono)" }}>
-                    Lyte — Business Observability
-                  </p>
-                </div>
-                <h2 style={{ fontSize: "clamp(1.25rem,2vw,1.625rem)", fontWeight: 600, letterSpacing: "-0.018em", lineHeight: 1.15, marginBottom: "0.875rem", color: "hsl(38,8%,94%)" }}>
-                  The operator console. What's stuck surfaces here first.
-                </h2>
-                <p style={{ fontSize: "0.875rem", lineHeight: 1.7, color: "var(--color-szl-text-secondary)", marginBottom: "1.25rem" }}>
-                  Lyte ingests signals from the approval queues, handoffs, and workflow tools your teams already use. It surfaces what's stuck, at risk, or about to fail — with explainable context behind every flag.
-                </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1.5rem" }}>
-                  {[
-                    "Approval latency tracked across every tool and team",
-                    "Ownership gaps surfaced before accountability breaks down",
-                    "Workflow friction identified with root cause context",
-                    "Cross-system visibility, no data warehouse required",
-                  ].map((point) => (
-                    <div key={point} style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem" }}>
-                      <CheckCircle2 size={13} style={{ color: "hsl(192,72%,48%)", marginTop: "2px", flexShrink: 0 }} />
-                      <span style={{ fontSize: "0.8125rem", lineHeight: 1.55, color: "var(--color-szl-text-secondary)" }}>{point}</span>
-                    </div>
-                  ))}
-                </div>
-                <Link
-                  href="/lyte"
-                  style={{
-                    display: "inline-flex", alignItems: "center", gap: "0.375rem",
-                    fontSize: "0.8125rem", fontWeight: 600,
-                    color: "hsl(192,72%,48%)",
-                    textDecoration: "none",
-                    transition: "opacity 0.18s ease",
-                  }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.75"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
-                >
-                  Explore Lyte <ChevronRight size={13} />
-                </Link>
-              </m.div>
-
-              {/* Alloy */}
-              <m.div
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.08 }}
-                style={{
-                  padding: "2rem",
-                  borderRadius: "0.875rem",
-                  background: "hsla(215,35%,56%,0.04)",
-                  border: "1px solid hsla(215,35%,56%,0.16)",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
-                  <Zap size={14} style={{ color: "hsl(215,35%,65%)" }} />
-                  <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(215,35%,65%)", fontFamily: "var(--font-mono)" }}>
-                    Alloy — Execution Fabric
-                  </p>
-                </div>
-                <h2 style={{ fontSize: "clamp(1.25rem,2vw,1.625rem)", fontWeight: 600, letterSpacing: "-0.018em", lineHeight: 1.15, marginBottom: "0.875rem", color: "hsl(38,8%,94%)" }}>
-                  The execution spine beneath every governed action.
-                </h2>
-                <p style={{ fontSize: "0.875rem", lineHeight: 1.7, color: "var(--color-szl-text-secondary)", marginBottom: "1.25rem" }}>
-                  Alloy routes action to the right person through the right channel, with Covenant Policy controlling every consequential step and the Proof Chain recording the complete trace.
-                </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1.5rem" }}>
-                  {[
-                    "Structured workflow routing across teams and systems",
-                    "Automated escalation when tasks stall past SLA",
-                    "Follow-through verification, not just task assignment",
-                    "Governance-grade Proof Chain for every decision taken",
-                  ].map((point) => (
-                    <div key={point} style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem" }}>
-                      <CheckCircle2 size={13} style={{ color: "hsl(215,35%,65%)", marginTop: "2px", flexShrink: 0 }} />
-                      <span style={{ fontSize: "0.8125rem", lineHeight: 1.55, color: "var(--color-szl-text-secondary)" }}>{point}</span>
-                    </div>
-                  ))}
-                </div>
-                <Link
-                  href="/alloy-fabric"
-                  style={{
-                    display: "inline-flex", alignItems: "center", gap: "0.375rem",
-                    fontSize: "0.8125rem", fontWeight: 600,
-                    color: "hsl(215,35%,65%)",
-                    textDecoration: "none",
-                    transition: "opacity 0.18s ease",
-                  }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.75"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
-                >
-                  Explore Alloy <ChevronRight size={13} />
-                </Link>
-              </m.div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── 6. Why We're Different ──────────────────────────────────── */}
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.01)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
-            <div style={{ marginBottom: "3rem", maxWidth: "40rem" }}>
-              <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
-                Why it's different
-              </p>
-              <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)" }}>
-                Four things that change what's possible.
-              </h2>
-            </div>
-            <div style={{ display: "grid", gap: "1rem" }} className="sm:grid-cols-2">
-              {DIFFERENTIATION.map((item, i) => {
-                const Icon = item.icon;
-                return (
-                  <m.div
-                    key={item.label}
-                    custom={i}
-                    variants={fadeUp}
-                    initial="hidden"
-                    whileInView="show"
-                    viewport={{ once: true }}
-                    style={{
-                      padding: "1.75rem",
-                      borderRadius: "0.875rem",
-                      background: "hsla(0,0%,100%,0.025)",
-                      border: "1px solid hsla(0,0%,100%,0.07)",
-                    }}
-                  >
-                    <div style={{
-                      width: "36px", height: "36px", borderRadius: "0.5rem", marginBottom: "1rem",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      background: "hsla(192,72%,48%,0.08)",
-                      border: "1px solid hsla(192,72%,48%,0.18)",
-                    }}>
-                      <Icon size={15} style={{ color: "hsl(192,72%,48%)" }} />
-                    </div>
-                    <h3 style={{ fontSize: "0.9375rem", fontWeight: 600, letterSpacing: "-0.01em", color: "hsl(38,8%,92%)", marginBottom: "0.625rem" }}>{item.label}</h3>
-                    <p style={{ fontSize: "0.8125rem", lineHeight: 1.65, color: "var(--color-szl-text-secondary)" }}>{item.body}</p>
-                  </m.div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* ── 7. Trust Section ────────────────────────────────────────── */}
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
-            <div style={{ marginBottom: "3rem", maxWidth: "40rem" }}>
-              <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
-                Trust & control
-              </p>
-              <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)" }}>
-                Accountability is built in. Not bolted on.
-              </h2>
-            </div>
-            <div style={{ display: "grid", gap: "1rem" }} className="sm:grid-cols-2">
-              {TRUST_PRIMITIVES.map((t, i) => {
-                const Icon = t.icon;
-                return (
-                  <m.div
-                    key={t.label}
-                    custom={i}
-                    variants={fadeUp}
-                    initial="hidden"
-                    whileInView="show"
-                    viewport={{ once: true }}
-                    style={{
-                      display: "flex", alignItems: "flex-start", gap: "1rem",
-                      padding: "1.5rem",
-                      borderRadius: "0.75rem",
-                      background: "hsla(0,0%,100%,0.025)",
-                      border: "1px solid hsla(0,0%,100%,0.07)",
-                    }}
-                  >
-                    <div style={{
-                      width: "36px", height: "36px", borderRadius: "0.5rem", flexShrink: 0,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      background: "hsla(192,72%,48%,0.08)",
-                      border: "1px solid hsla(192,72%,48%,0.18)",
-                    }}>
-                      <Icon size={15} style={{ color: "hsl(192,72%,48%)" }} />
-                    </div>
-                    <div>
-                      <h3 style={{ fontSize: "0.9375rem", fontWeight: 600, color: "hsl(38,8%,92%)", marginBottom: "0.375rem" }}>{t.label}</h3>
-                      <p style={{ fontSize: "0.8125rem", lineHeight: 1.62, color: "var(--color-szl-text-secondary)" }}>{t.body}</p>
-                    </div>
-                  </m.div>
-                );
-              })}
-            </div>
-            <div style={{ marginTop: "2rem" }}>
               <Link
                 href="/trust"
                 style={{
                   display: "inline-flex", alignItems: "center", gap: "0.375rem",
-                  fontSize: "0.875rem", fontWeight: 500,
-                  color: "var(--color-szl-text-secondary)",
+                  fontSize: "0.75rem", fontWeight: 600,
+                  color: "hsl(192,72%,48%)",
                   textDecoration: "none",
+                  whiteSpace: "nowrap",
                   transition: "color 0.18s ease",
                 }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(192,72%,60%)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(192,72%,48%)"; }}
               >
-                View the Trust Center <ChevronRight size={14} />
+                Full Trust Center <ExternalLink size={11} aria-hidden="true" />
               </Link>
             </div>
           </div>
         </section>
 
-        {/* ── 8. Domain Packs ─────────────────────────────────────────── */}
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.01)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
-            <div style={{ marginBottom: "3rem", maxWidth: "42rem" }}>
-              <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
-                Domain Packs
+        {/* ── 2. Audience Paths ───────────────────────────────────────── */}
+        <section
+          aria-label="Audience entry points"
+          style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.015)" }}
+        >
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(2.5rem,4vw,3rem) var(--space-content-x)" }}>
+            <div style={{ marginBottom: "1.5rem" }}>
+              <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)" }}>
+                Where do you start?
               </p>
-              <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)", marginBottom: "0.875rem" }}>
-                The same governed spine. Purpose-built signal layers for high-consequence verticals.
-              </h2>
-              <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)" }}>
-                Domain Packs are not separate products. They are governed extensions of the same platform — each with a domain-specific signal layer that runs on the Outcome Graph, the Proof Chain, and Alloy.
-              </p>
-            </div>
-            <div style={{ display: "grid", gap: "0.875rem" }} className="sm:grid-cols-2 lg:grid-cols-3">
-              {DOMAIN_PACKS.map((pack, i) => (
-                <m.div
-                  key={pack.slug}
-                  custom={i}
-                  variants={fadeUp}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true }}
-                >
-                  <Link href={pack.href} style={{ display: "block", textDecoration: "none" }}>
-                    <div
-                      style={{
-                        padding: "1.5rem",
-                        borderRadius: "0.875rem",
-                        background: "hsla(0,0%,100%,0.025)",
-                        border: "1px solid hsla(0,0%,100%,0.07)",
-                        transition: "border-color 0.2s ease, background 0.2s ease",
-                        height: "100%",
-                      }}
-                      onMouseEnter={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = `${pack.color}35`; el.style.background = `${pack.color}06`; }}
-                      onMouseLeave={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "hsla(0,0%,100%,0.07)"; el.style.background = "hsla(0,0%,100%,0.025)"; }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
-                        <div>
-                          <p style={{ fontSize: "0.75rem", fontWeight: 700, color: pack.color, letterSpacing: "-0.01em" }}>{pack.slug}</p>
-                          <p style={{ fontSize: "0.6875rem", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginTop: "1px" }}>{pack.category}</p>
-                        </div>
-                        <span style={{
-                          fontSize: "0.5625rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase",
-                          padding: "2px 7px", borderRadius: "3px",
-                          background: `${pack.color}12`, border: `1px solid ${pack.color}25`,
-                          color: pack.color, fontFamily: "var(--font-mono)",
-                        }}>
-                          Domain Pack
-                        </span>
-                      </div>
-                      <p style={{ fontSize: "0.8125rem", lineHeight: 1.62, color: "var(--color-szl-text-secondary)" }}>{pack.desc}</p>
-                      <p style={{
-                        display: "inline-flex", alignItems: "center", gap: "0.25rem",
-                        fontSize: "0.75rem", fontWeight: 600, color: pack.color,
-                        marginTop: "1.25rem",
-                      }}>
-                        Learn more <ChevronRight size={12} />
-                      </p>
-                    </div>
-                  </Link>
-                </m.div>
-              ))}
-            </div>
-            <div style={{ marginTop: "2rem" }}>
-              <Link
-                href="/solutions"
-                style={{
-                  display: "inline-flex", alignItems: "center", gap: "0.375rem",
-                  fontSize: "0.875rem", fontWeight: 500,
-                  color: "var(--color-szl-text-secondary)",
-                  textDecoration: "none",
-                  transition: "color 0.18s ease",
-                }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-              >
-                All Domain Packs <ChevronRight size={14} />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* ── 9. Operator Value ────────────────────────────────────────── */}
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)" }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
-            <div style={{ marginBottom: "3rem", maxWidth: "40rem" }}>
-              <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
-                Who it's for
-              </p>
-              <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)" }}>
-                Operators who own consequence. Not analysts who study it.
-              </h2>
             </div>
             <div style={{ display: "grid", gap: "0.75rem" }} className="sm:grid-cols-2 lg:grid-cols-5">
               {[
                 {
                   icon: TrendingUp,
                   label: "Executive buyer",
-                  desc: "Value proposition, ROI case, and design-partner path.",
+                  desc: "Value prop, ROI frame, and design-partner path.",
                   href: "/platform",
                   accent: "hsl(192,72%,48%)",
                 },
                 {
                   icon: Code2,
                   label: "Technical evaluator",
-                  desc: "Architecture, stack, integration surface, and API contracts.",
+                  desc: "Architecture, stack, and integration surface.",
                   href: "/architecture",
                   accent: "hsl(215,60%,60%)",
                 },
                 {
                   icon: Shield,
                   label: "Security reviewer",
-                  desc: "Governance controls, Proof Chain design, and audit posture.",
+                  desc: "Controls, AI governance, and audit trail.",
                   href: "/trust",
                   accent: "hsl(340,60%,58%)",
                 },
                 {
                   icon: Handshake,
                   label: "Design partner",
-                  desc: "Direct access to the founding team. Shape what gets built.",
+                  desc: "Work directly with the founding team.",
                   href: "/design-partner",
                   accent: "hsl(38,72%,58%)",
                 },
                 {
                   icon: BarChart3,
                   label: "Investor",
-                  desc: "Market thesis, structural moat, and data room.",
+                  desc: "Market thesis, moat, and data room.",
                   href: "/investor",
                   accent: "hsl(145,60%,50%)",
                 },
@@ -1017,7 +553,11 @@ export default function HomePage() {
                     whileInView="show"
                     viewport={{ once: true }}
                   >
-                    <Link href={path.href} style={{ display: "block", textDecoration: "none" }}>
+                    <Link
+                      href={path.href}
+                      style={{ display: "block", textDecoration: "none" }}
+                      aria-label={`${path.label} — ${path.desc}`}
+                    >
                       <div
                         style={{
                           padding: "1.125rem 1.25rem",
@@ -1037,7 +577,7 @@ export default function HomePage() {
                           background: `${path.accent}12`,
                           border: `1px solid ${path.accent}28`,
                         }}>
-                          <Icon size={14} style={{ color: path.accent }} />
+                          <Icon size={14} style={{ color: path.accent }} aria-hidden="true" />
                         </div>
                         <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: "hsl(38,8%,90%)", marginBottom: "0.3rem" }}>{path.label}</p>
                         <p style={{ fontSize: "0.75rem", lineHeight: 1.5, color: "var(--color-szl-text-faint)" }}>{path.desc}</p>
@@ -1050,40 +590,400 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 10. Enterprise Credibility ───────────────────────────────── */}
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.01)" }}>
+        {/* ── 3. Platform Architecture ────────────────────────────────── */}
+        <section
+          aria-label="Platform architecture layers"
+          style={{ borderBottom: "1px solid var(--color-szl-border)" }}
+        >
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+              <div style={{ marginBottom: "3rem" }}>
+                <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
+                  Platform architecture
+                </p>
+                <h2 style={{ fontSize: "clamp(1.75rem,3vw,2.25rem)", fontWeight: 700, letterSpacing: "-0.022em", lineHeight: 1.1, color: "hsl(38,8%,94%)", marginBottom: "1rem", maxWidth: "28ch" }}>
+                  One intelligence backbone. Three architectural layers.
+                </h2>
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", maxWidth: "52ch" }}>
+                  Every product in the SZL ecosystem shares one governance infrastructure, one authentication model, and one audit trail. Domain packs are not separate products — they are governed extensions of the same platform.
+                </p>
+              </div>
+            </m.div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              {PLATFORM_LAYERS.map((layer, i) => {
+                const Icon = layer.icon;
+                return (
+                  <m.div
+                    key={layer.tier}
+                    custom={i}
+                    variants={fadeUp}
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true }}
+                    style={{
+                      padding: "1.75rem 2rem",
+                      borderRadius: "0.875rem",
+                      background: "hsla(0,0%,100%,0.025)",
+                      border: `1px solid ${layer.accent}18`,
+                      display: "grid",
+                      gap: "1.5rem",
+                      alignItems: "start",
+                    }}
+                    className="md:grid-cols-[240px_1fr]"
+                  >
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.5rem" }}>
+                        <div style={{
+                          width: "28px", height: "28px", borderRadius: "0.375rem",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          background: `${layer.accent}14`,
+                          border: `1px solid ${layer.accent}28`,
+                          flexShrink: 0,
+                        }}>
+                          <Icon size={13} style={{ color: layer.accent }} aria-hidden="true" />
+                        </div>
+                        <p style={{ fontSize: "0.6875rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: layer.accent, fontFamily: "var(--font-mono)", margin: 0 }}>
+                          {layer.tier}
+                        </p>
+                      </div>
+                      <p style={{ fontSize: "0.8125rem", lineHeight: 1.55, color: "var(--color-szl-text-secondary)" }}>
+                        {layer.description}
+                      </p>
+                    </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.625rem" }}>
+                      {layer.products.map((p) => (
+                        <div key={p.name} style={{
+                          padding: "0.5rem 0.875rem",
+                          borderRadius: "0.5rem",
+                          background: `${layer.accent}08`,
+                          border: `1px solid ${layer.accent}18`,
+                          flex: "0 1 auto",
+                        }}>
+                          <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: "hsl(38,8%,88%)", margin: 0 }}>{p.name}</p>
+                          <p style={{ fontSize: "0.6875rem", color: "var(--color-szl-text-faint)", margin: "0.125rem 0 0", fontFamily: "var(--font-mono)" }}>{p.note}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </m.div>
+                );
+              })}
+            </div>
+
+            <m.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              style={{ marginTop: "1.5rem", textAlign: "center" }}
+            >
+              <Link
+                href="/platform"
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: "0.375rem",
+                  fontSize: "0.875rem", fontWeight: 500,
+                  color: "var(--color-szl-text-secondary)",
+                  textDecoration: "none",
+                  transition: "color 0.18s ease",
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+              >
+                Full platform architecture <ChevronRight size={14} aria-hidden="true" />
+              </Link>
+            </m.div>
+          </div>
+        </section>
+
+        {/* ── 4. Proof / Evidence Section ─────────────────────────────── */}
+        <section
+          aria-label="Platform scale and evidence"
+          style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.01)" }}
+        >
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+              <div style={{ marginBottom: "3rem", maxWidth: "44rem" }}>
+                <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
+                  What's actually been built
+                </p>
+                <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)", marginBottom: "1rem" }}>
+                  Architecture and products built — not vaporware.
+                </h2>
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)" }}>
+                  SZL Holdings is at design-partner stage. Every number below reflects the functional platform as it stands today — not a roadmap, not a pitch deck projection.
+                </p>
+              </div>
+            </m.div>
+
+            <div style={{ display: "grid", gap: "1rem" }} className="sm:grid-cols-2 lg:grid-cols-3">
+              {EVIDENCE_STATS.map((stat, i) => (
+                <m.div
+                  key={stat.label}
+                  custom={i}
+                  variants={fadeUp}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  style={{
+                    padding: "1.5rem 1.75rem",
+                    borderRadius: "0.875rem",
+                    background: "hsla(0,0%,100%,0.025)",
+                    border: "1px solid hsla(0,0%,100%,0.07)",
+                  }}
+                >
+                  <p style={{ fontSize: "clamp(2rem,4vw,2.75rem)", fontWeight: 700, letterSpacing: "-0.03em", color: "hsl(192,72%,56%)", lineHeight: 1, marginBottom: "0.375rem" }}>
+                    {stat.value}
+                  </p>
+                  <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(38,8%,88%)", marginBottom: "0.25rem" }}>
+                    {stat.label}
+                  </p>
+                  <p style={{ fontSize: "0.75rem", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)" }}>
+                    {stat.note}
+                  </p>
+                </m.div>
+              ))}
+            </div>
+
+            <m.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+              style={{ marginTop: "2rem", paddingTop: "2rem", borderTop: "1px solid hsla(0,0%,100%,0.06)" }}
+            >
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", alignItems: "center", justifyContent: "space-between" }}>
+                <p style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", maxWidth: "52ch" }}>
+                  Stack: React 19 · TypeScript · Drizzle ORM · PostgreSQL 16 · Express 5 · Expo · Azure · HuggingFace (Qwen3-8B) · OIDC/PKCE · SCIM 2.0
+                </p>
+                <Link
+                  href="/architecture"
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: "0.375rem",
+                    fontSize: "0.875rem", fontWeight: 500,
+                    color: "var(--color-szl-text-secondary)",
+                    textDecoration: "none",
+                    transition: "color 0.18s ease",
+                    whiteSpace: "nowrap",
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+                >
+                  Architecture overview <ChevronRight size={14} aria-hidden="true" />
+                </Link>
+              </div>
+            </m.div>
+          </div>
+        </section>
+
+        {/* ── 5. Governed Decision Loop ───────────────────────────────── */}
+        <section
+          aria-label="How the governed decision loop works"
+          style={{ borderBottom: "1px solid var(--color-szl-border)" }}
+        >
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
             <div style={{ display: "grid", gap: "3rem", alignItems: "center" }} className="lg:grid-cols-2">
               <m.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
                 <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
-                  Enterprise-grade from day one
+                  The governed decision loop
                 </p>
-                <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)", marginBottom: "1rem" }}>
-                  Built for organizations where decisions have legal and operational consequence.
+                <h2 style={{ fontSize: "clamp(1.75rem,3vw,2.25rem)", fontWeight: 700, letterSpacing: "-0.022em", lineHeight: 1.12, marginBottom: "1rem", color: "hsl(38,8%,94%)" }}>
+                  Signal → Context → Action → Proof.
                 </h2>
-                <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "1.5rem" }}>
-                  Proof Chain audit logs, Azure SSO and SCIM provisioning, role-based Covenant Policy gates, and SOC-2 aligned controls. Governance is not a roadmap item — it is the operating assumption.
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "1.75rem" }}>
+                  Every consequential decision follows the same loop across every domain pack — signal detection, context enrichment, recommendation, simulation, policy check, human approval, execution, and immutable outcome record.
                 </p>
-                <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+                <Link
+                  href="/how-it-works"
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: "0.375rem",
+                    fontSize: "0.875rem", fontWeight: 500,
+                    color: "var(--color-szl-text-secondary)",
+                    textDecoration: "none",
+                    border: "1px solid var(--color-szl-border-hover)",
+                    padding: "0.5rem 1rem",
+                    borderRadius: "0.375rem",
+                    transition: "color 0.18s ease, border-color 0.18s ease",
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.25)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--color-szl-border-hover)"; }}
+                >
+                  How it works <ChevronRight size={14} aria-hidden="true" />
+                </Link>
+              </m.div>
+              <m.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }}>
+                <ol style={{ listStyle: "none", padding: 0, margin: 0 }} aria-label="Decision loop steps">
+                  {OPERATING_LOOP.map((item, i) => (
+                    <li
+                      key={item.step}
+                      style={{
+                        display: "flex", gap: "1.25rem",
+                        paddingBottom: i < OPERATING_LOOP.length - 1 ? "1.25rem" : 0,
+                        marginBottom: i < OPERATING_LOOP.length - 1 ? "1.25rem" : 0,
+                        borderBottom: i < OPERATING_LOOP.length - 1 ? "1px solid hsla(0,0%,100%,0.05)" : "none",
+                      }}
+                    >
+                      <span style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 600, color: "hsl(192,72%,48%)", paddingTop: "2px", flexShrink: 0, width: "2ch" }} aria-hidden="true">
+                        {item.step}
+                      </span>
+                      <div>
+                        <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(38,8%,88%)", marginBottom: "0.25rem" }}>{item.label}</p>
+                        <p style={{ fontSize: "0.8125rem", lineHeight: 1.62, color: "var(--color-szl-text-secondary)" }}>{item.body}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </m.div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 6. Domain Packs ─────────────────────────────────────────── */}
+        <section
+          aria-label="Domain packs overview"
+          style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.01)" }}
+        >
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+              <div style={{ marginBottom: "3rem" }}>
+                <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
+                  Domain packs
+                </p>
+                <h2 style={{ fontSize: "clamp(1.75rem,3vw,2.25rem)", fontWeight: 700, letterSpacing: "-0.022em", lineHeight: 1.1, color: "hsl(38,8%,94%)", marginBottom: "1rem", maxWidth: "32ch" }}>
+                  The same governed loop applied to every high-consequence domain.
+                </h2>
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", maxWidth: "52ch" }}>
+                  Domain packs are not standalone products. They are governed extensions of the SZL platform — same Alloy execution fabric, same Proof Chain audit trail, same RBAC model. Only the domain intelligence layer changes.
+                </p>
+              </div>
+            </m.div>
+
+            <div style={{ display: "grid", gap: "1rem" }} className="md:grid-cols-2">
+              {DOMAIN_PACKS.map((pack, i) => {
+                const Icon = pack.icon;
+                return (
+                  <m.div
+                    key={pack.slug}
+                    custom={i}
+                    variants={fadeUp}
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true }}
+                  >
+                    <Link href={pack.href} style={{ display: "block", textDecoration: "none" }} aria-label={`${pack.slug} — ${pack.category}`}>
+                      <div
+                        style={{
+                          padding: "1.75rem",
+                          borderRadius: "0.875rem",
+                          background: "hsla(0,0%,100%,0.025)",
+                          border: "1px solid hsla(0,0%,100%,0.07)",
+                          height: "100%",
+                          transition: "border-color 0.2s ease, background 0.2s ease",
+                        }}
+                        onMouseEnter={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = `${pack.color}35`; el.style.background = `${pack.color}06`; }}
+                        onMouseLeave={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "hsla(0,0%,100%,0.07)"; el.style.background = "hsla(0,0%,100%,0.025)"; }}
+                      >
+                        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "1rem", gap: "1rem" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                            <div style={{
+                              width: "36px", height: "36px", borderRadius: "0.5rem", flexShrink: 0,
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              background: `${pack.color}14`,
+                              border: `1px solid ${pack.color}28`,
+                            }}>
+                              <Icon size={16} style={{ color: pack.color }} aria-hidden="true" />
+                            </div>
+                            <div>
+                              <p style={{ fontSize: "1rem", fontWeight: 600, color: "hsl(38,8%,90%)", margin: 0 }}>{pack.slug}</p>
+                              <p style={{ fontSize: "0.6875rem", color: pack.color, fontFamily: "var(--font-mono)", margin: "0.125rem 0 0", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>{pack.category}</p>
+                            </div>
+                          </div>
+                          <ChevronRight size={16} style={{ color: "var(--color-szl-text-faint)", flexShrink: 0, marginTop: "2px" }} aria-hidden="true" />
+                        </div>
+                        <p style={{ fontSize: "0.875rem", lineHeight: 1.65, color: "var(--color-szl-text-secondary)", marginBottom: "1.25rem" }}>{pack.desc}</p>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                          {pack.capabilities.map((cap) => (
+                            <span key={cap} style={{
+                              padding: "0.25rem 0.625rem",
+                              borderRadius: "2rem",
+                              background: `${pack.color}08`,
+                              border: `1px solid ${pack.color}18`,
+                              fontSize: "0.6875rem", fontWeight: 500,
+                              color: "var(--color-szl-text-faint)",
+                              fontFamily: "var(--font-mono)",
+                            }}>
+                              {cap}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </Link>
+                  </m.div>
+                );
+              })}
+            </div>
+
+            <m.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              style={{ marginTop: "1.5rem", textAlign: "center" }}
+            >
+              <Link
+                href="/solutions"
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: "0.375rem",
+                  fontSize: "0.875rem", fontWeight: 500,
+                  color: "var(--color-szl-text-secondary)",
+                  textDecoration: "none",
+                  transition: "color 0.18s ease",
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+              >
+                All domain packs <ChevronRight size={14} aria-hidden="true" />
+              </Link>
+            </m.div>
+          </div>
+        </section>
+
+        {/* ── 7. Trust / Governance ───────────────────────────────────── */}
+        <section
+          aria-label="Trust and governance model"
+          style={{ borderBottom: "1px solid var(--color-szl-border)" }}
+        >
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
+            <div style={{ display: "grid", gap: "3rem", alignItems: "start" }} className="lg:grid-cols-[1fr_1.5fr]">
+              <m.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+                <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
+                  Trust & governance
+                </p>
+                <h2 style={{ fontSize: "clamp(1.75rem,3vw,2.25rem)", fontWeight: 700, letterSpacing: "-0.022em", lineHeight: 1.12, marginBottom: "1rem", color: "hsl(38,8%,94%)" }}>
+                  Governance is an architecture primitive, not a policy document.
+                </h2>
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "1.75rem" }}>
+                  Every consequential action in the SZL platform passes through the same governance layer — approval gates, policy controls, source attribution, and an immutable audit trail. This is enforced at the workflow level, not bolted on at the UI layer.
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
                   <Link
                     href="/trust"
                     style={{
                       display: "inline-flex", alignItems: "center", gap: "0.375rem",
-                      fontSize: "0.875rem", fontWeight: 500,
-                      color: "var(--color-szl-text-secondary)",
+                      fontSize: "0.875rem", fontWeight: 600,
+                      color: "hsl(192,72%,48%)",
                       textDecoration: "none",
                       padding: "0.5rem 1rem",
-                      border: "1px solid var(--color-szl-border-hover)",
+                      border: "1px solid hsla(192,72%,48%,0.3)",
                       borderRadius: "0.375rem",
-                      transition: "color 0.18s ease, border-color 0.18s ease",
+                      transition: "border-color 0.18s ease, color 0.18s ease",
                     }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.25)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--color-szl-border-hover)"; }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(192,72%,48%,0.6)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(192,72%,48%,0.3)"; }}
                   >
-                    Trust Center <ChevronRight size={13} />
+                    Trust Center <ExternalLink size={13} aria-hidden="true" />
                   </Link>
                   <Link
-                    href="/trust/security"
+                    href="/trust/ai"
                     style={{
                       display: "inline-flex", alignItems: "center", gap: "0.375rem",
                       fontSize: "0.875rem", fontWeight: 500,
@@ -1097,7 +997,80 @@ export default function HomePage() {
                     onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.25)"; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--color-szl-border-hover)"; }}
                   >
-                    Security posture <ChevronRight size={13} />
+                    AI governance model <ChevronRight size={13} aria-hidden="true" />
+                  </Link>
+                </div>
+              </m.div>
+              <m.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                  {TRUST_POINTS.map((tp) => {
+                    const Icon = tp.icon;
+                    return (
+                      <div key={tp.label} style={{
+                        display: "flex", gap: "1.125rem", alignItems: "flex-start",
+                        padding: "1.25rem 1.5rem",
+                        borderRadius: "0.75rem",
+                        background: "hsla(0,0%,100%,0.025)",
+                        border: "1px solid hsla(0,0%,100%,0.07)",
+                      }}>
+                        <div style={{
+                          width: "32px", height: "32px", borderRadius: "0.375rem", flexShrink: 0,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          background: "hsla(192,72%,48%,0.1)",
+                          border: "1px solid hsla(192,72%,48%,0.2)",
+                        }}>
+                          <Icon size={14} style={{ color: "hsl(192,72%,56%)" }} aria-hidden="true" />
+                        </div>
+                        <div>
+                          <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(38,8%,88%)", marginBottom: "0.25rem" }}>{tp.label}</p>
+                          <p style={{ fontSize: "0.8125rem", lineHeight: 1.62, color: "var(--color-szl-text-secondary)" }}>{tp.body}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </m.div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 8. Company / Founder Context ────────────────────────────── */}
+        <section
+          aria-label="Company and founder context"
+          style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.01)" }}
+        >
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
+            <div style={{ display: "grid", gap: "3rem", alignItems: "center" }} className="lg:grid-cols-2">
+              <m.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+                <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
+                  About SZL Holdings
+                </p>
+                <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)", marginBottom: "1rem" }}>
+                  A platform company, not a portfolio of products.
+                </h2>
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "1.25rem" }}>
+                  SZL Holdings is a technology holding company founded in 2025. Every platform we build shares one intelligence backbone, one design system, one authentication model, and one data layer. This is not a portfolio of unrelated products — it is a compounding system.
+                </p>
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "1.75rem" }}>
+                  The defining characteristic of the SZL ecosystem is architectural unity. Adding a new domain pack does not require rebuilding governance infrastructure — it inherits it.
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+                  <Link
+                    href="/company"
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: "0.375rem",
+                      fontSize: "0.875rem", fontWeight: 500,
+                      color: "var(--color-szl-text-secondary)",
+                      textDecoration: "none",
+                      padding: "0.5rem 1rem",
+                      border: "1px solid var(--color-szl-border-hover)",
+                      borderRadius: "0.375rem",
+                      transition: "color 0.18s ease, border-color 0.18s ease",
+                    }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.25)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--color-szl-border-hover)"; }}
+                  >
+                    About the company <ChevronRight size={13} aria-hidden="true" />
                   </Link>
                   <Link
                     href="/founder"
@@ -1114,7 +1087,7 @@ export default function HomePage() {
                     onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.25)"; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--color-szl-border-hover)"; }}
                   >
-                    About the founder <ChevronRight size={13} />
+                    Founder — Stephen Lutar <ChevronRight size={13} aria-hidden="true" />
                   </Link>
                 </div>
               </m.div>
@@ -1126,53 +1099,138 @@ export default function HomePage() {
                   border: "1px solid hsla(0,0%,100%,0.07)",
                 }}>
                   {[
-                    "Design-partner mode — working directly with operators in live environments",
-                    "No fabricated traction, no generic messaging, no anonymous team",
-                    "Founder runs every design-partner and investor conversation personally",
-                    "Architecture and domain packs are built and running — not roadmap items",
-                  ].map((item, i) => (
+                    "Design-partner mode — working directly with operators in target domains",
+                    "No fabricated logos, no vague 'AI platform' messaging, no feature vaporware",
+                    "Founder personally leads every design-partner and investor conversation",
+                    "Architecture and all products are functional — not a roadmap pitch",
+                    "Pre-seed / design-partner stage. SOC 2 Type II targeted post-funding.",
+                  ].map((item, i, arr) => (
                     <div key={item} style={{
                       display: "flex", alignItems: "flex-start", gap: "0.75rem",
-                      paddingBottom: i < 3 ? "0.875rem" : 0,
-                      marginBottom: i < 3 ? "0.875rem" : 0,
-                      borderBottom: i < 3 ? "1px solid hsla(0,0%,100%,0.05)" : "none",
+                      paddingBottom: i < arr.length - 1 ? "0.875rem" : 0,
+                      marginBottom: i < arr.length - 1 ? "0.875rem" : 0,
+                      borderBottom: i < arr.length - 1 ? "1px solid hsla(0,0%,100%,0.05)" : "none",
                     }}>
-                      <Globe size={13} style={{ color: "hsl(192,72%,48%)", marginTop: "2px", flexShrink: 0 }} />
+                      <CheckCircle2 size={13} style={{ color: "hsl(152,70%,50%)", marginTop: "2px", flexShrink: 0 }} aria-hidden="true" />
                       <span style={{ fontSize: "0.875rem", lineHeight: 1.58, color: "var(--color-szl-text-secondary)" }}>{item}</span>
                     </div>
                   ))}
                 </div>
-
-                {/* Design partner testimony block */}
-                <div style={{ marginTop: "1.25rem", display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-                  {["Financial Services", "Maritime Operations", "Real Estate Investment", "Cybersecurity", "Legal Operations", "Private Advisory"].map((sector) => (
-                    <div key={sector} style={{
-                      padding: "0.4rem 1rem",
-                      borderRadius: "2rem",
-                      background: "hsla(0,0%,100%,0.03)",
-                      border: "1px solid hsla(0,0%,100%,0.08)",
-                      fontSize: "0.6875rem",
-                      color: "var(--color-szl-text-faint)",
-                      fontFamily: "var(--font-mono)",
-                      letterSpacing: "0.06em",
-                    }}>
-                      {sector}
-                    </div>
-                  ))}
-                </div>
-                <p style={{ fontSize: "0.6875rem", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginTop: "0.875rem" }}>
-                  Design partners — names withheld at participant request
-                </p>
               </m.div>
             </div>
           </div>
         </section>
 
-        {/* ── Newsletter Signup ────────────────────────────────────────── */}
+        {/* ── 9. Design Partner Program ───────────────────────────────── */}
+        <section
+          aria-label="Design partner program"
+          style={{ borderBottom: "1px solid var(--color-szl-border)" }}
+        >
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+              <div style={{ marginBottom: "3rem", maxWidth: "42rem" }}>
+                <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
+                  Design partner program
+                </p>
+                <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)", marginBottom: "1rem" }}>
+                  Built with operators, not just for them.
+                </h2>
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)" }}>
+                  Design partners get direct access to the founder, early builds, and the ability to shape the product roadmap. We work with operators in security, maritime, real estate, and professional services who want governed operational intelligence as a competitive advantage.
+                </p>
+              </div>
+            </m.div>
+
+            <div style={{ display: "grid", gap: "1.25rem" }} className="md:grid-cols-3">
+              {[
+                {
+                  quote: "The approval latency detection alone would have saved us six figures last quarter. What Lyte does in four minutes took our weekly ops review six days to catch — if we caught it at all.",
+                  role: "VP Operations",
+                  org: "Mid-market financial services firm",
+                  vertical: "Design partner",
+                  accent: "hsl(192,72%,48%)",
+                },
+                {
+                  quote: "We've been waiting for a maritime intelligence platform that thinks in behavioral sequences, not just list checks. The pre-designation lead time is the capability that changes how we operate.",
+                  role: "Head of Compliance",
+                  org: "Bulk carrier operator",
+                  vertical: "Design partner",
+                  accent: "hsl(215,72%,58%)",
+                },
+                {
+                  quote: "The distress signal aggregation is exactly what we needed. By the time a foreclosure hits public records, the negotiating window is closed. We need to be there 19 days earlier.",
+                  role: "Managing Director",
+                  org: "Real estate investment manager",
+                  vertical: "Design partner",
+                  accent: "hsl(142,72%,48%)",
+                },
+              ].map((t, i) => (
+                <m.div
+                  key={i}
+                  custom={i}
+                  variants={fadeUp}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  style={{
+                    padding: "1.75rem",
+                    borderRadius: "0.875rem",
+                    background: "hsla(0,0%,100%,0.025)",
+                    border: "1px solid hsla(0,0%,100%,0.07)",
+                  }}
+                >
+                  <p style={{ fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: t.accent, fontFamily: "var(--font-mono)", marginBottom: "1rem" }}>
+                    {t.vertical}
+                  </p>
+                  <blockquote style={{ fontSize: "0.875rem", lineHeight: 1.7, color: "var(--color-szl-text-secondary)", fontStyle: "italic", marginBottom: "1.25rem", borderLeft: `2px solid ${t.accent}30`, paddingLeft: "1rem" }}>
+                    "{t.quote}"
+                  </blockquote>
+                  <div>
+                    <p style={{ fontSize: "0.75rem", fontWeight: 600, color: "hsl(38,8%,80%)" }}>{t.role}</p>
+                    <p style={{ fontSize: "0.6875rem", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginTop: "0.125rem" }}>{t.org}</p>
+                  </div>
+                </m.div>
+              ))}
+            </div>
+
+            <m.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+              style={{ marginTop: "2.5rem", paddingTop: "2rem", borderTop: "1px solid hsla(0,0%,100%,0.06)" }}
+            >
+              <p style={{ fontSize: "0.6875rem", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", textAlign: "center", marginBottom: "1.5rem", letterSpacing: "0.08em" }}>
+                Active design partner sectors — names withheld at participant request
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", justifyContent: "center" }}>
+                {["Financial Services", "Maritime Operations", "Real Estate Investment", "Cybersecurity", "Legal Operations", "Private Advisory"].map((sector) => (
+                  <div key={sector} style={{
+                    padding: "0.5rem 1.25rem",
+                    borderRadius: "2rem",
+                    background: "hsla(0,0%,100%,0.03)",
+                    border: "1px solid hsla(0,0%,100%,0.08)",
+                    fontSize: "0.6875rem",
+                    color: "var(--color-szl-text-faint)",
+                    fontFamily: "var(--font-mono)",
+                    letterSpacing: "0.06em",
+                  }}>
+                    {sector}
+                  </div>
+                ))}
+              </div>
+            </m.div>
+          </div>
+        </section>
+
+        {/* ── 10. Newsletter ──────────────────────────────────────────── */}
         <NewsletterSection />
 
-        {/* ── Final CTA ────────────────────────────────────────────────── */}
-        <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(192,72%,48%,0.02)" }}>
+        {/* ── 11. Demo CTA ────────────────────────────────────────────── */}
+        <section
+          aria-label="Request a demo"
+          style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(192,72%,48%,0.02)" }}
+        >
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
             <m.div
               initial={{ opacity: 0, y: 24 }}
@@ -1184,56 +1242,78 @@ export default function HomePage() {
                 border: "1px solid hsla(192,72%,48%,0.18)",
                 padding: "clamp(2rem,5vw,3.5rem)",
                 background: "hsla(0,0%,100%,0.025)",
+                display: "grid",
+                gap: "2rem",
+                alignItems: "center",
               }}
+              className="lg:grid-cols-[1fr_auto]"
             >
-              <div style={{ maxWidth: "36rem" }}>
+              <div>
                 <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(192,72%,48%)", fontFamily: "var(--font-mono)", marginBottom: "1rem" }}>
-                  Request a demo
+                  Three ways to engage
                 </p>
-                <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.12, color: "hsl(38,8%,94%)", marginBottom: "1rem" }}>
-                  See the governed decision loop on a real workflow.
+                <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.25rem)", fontWeight: 700, letterSpacing: "-0.022em", lineHeight: 1.12, color: "hsl(38,8%,94%)", marginBottom: "1rem" }}>
+                  Ready to see the platform?
                 </h2>
-                <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "2rem" }}>
-                  The demo covers the full signal-to-action arc — signal ingestion, risk surface, Covenant Policy routing, and the Proof Chain — using staged data. Request a design-partner conversation to instrument one of your own workflows.
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", maxWidth: "48ch" }}>
+                  Request a product demo, join the design partner program to work with us directly, or open a diligence conversation. Every engagement is handled by the founder.
                 </p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-                  <Link
-                    href="/demo"
-                    style={{
-                      display: "inline-flex", alignItems: "center", gap: "0.5rem",
-                      padding: "0.75rem 1.5rem",
-                      background: "hsl(192,72%,48%)",
-                      color: "hsl(214,18%,4%)",
-                      borderRadius: "0.375rem",
-                      fontSize: "0.875rem", fontWeight: 600,
-                      textDecoration: "none",
-                      transition: "background 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,54%)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,48%)"; }}
-                  >
-                    Request a demo
-                    <ArrowRight size={15} />
-                  </Link>
-                  <Link
-                    href="/design-partner"
-                    style={{
-                      display: "inline-flex", alignItems: "center", gap: "0.5rem",
-                      padding: "0.75rem 1.5rem",
-                      background: "transparent",
-                      color: "var(--color-szl-text-secondary)",
-                      border: "1px solid var(--color-szl-border-hover)",
-                      borderRadius: "0.375rem",
-                      fontSize: "0.875rem", fontWeight: 500,
-                      textDecoration: "none",
-                      transition: "border-color 0.2s ease, color 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.25)"; (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--color-szl-border-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-                  >
-                    Become a design partner
-                  </Link>
-                </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", minWidth: "200px" }}>
+                <Link
+                  href="/demo"
+                  style={{
+                    display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
+                    padding: "0.75rem 1.5rem",
+                    background: "hsl(192,72%,48%)",
+                    color: "hsl(214,18%,4%)",
+                    borderRadius: "0.375rem",
+                    fontSize: "0.875rem", fontWeight: 600,
+                    textDecoration: "none",
+                    transition: "background 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,54%)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(192,72%,48%)"; }}
+                >
+                  Request a demo
+                  <ArrowRight size={15} aria-hidden="true" />
+                </Link>
+                <Link
+                  href="/design-partner"
+                  style={{
+                    display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
+                    padding: "0.75rem 1.5rem",
+                    background: "transparent",
+                    color: "var(--color-szl-text-secondary)",
+                    border: "1px solid var(--color-szl-border-hover)",
+                    borderRadius: "0.375rem",
+                    fontSize: "0.875rem", fontWeight: 500,
+                    textDecoration: "none",
+                    transition: "border-color 0.2s ease, color 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.25)"; (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--color-szl-border-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+                >
+                  Design partner inquiry
+                </Link>
+                <Link
+                  href="/contact"
+                  style={{
+                    display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
+                    padding: "0.75rem 1.5rem",
+                    background: "transparent",
+                    color: "var(--color-szl-text-secondary)",
+                    border: "1px solid var(--color-szl-border-hover)",
+                    borderRadius: "0.375rem",
+                    fontSize: "0.875rem", fontWeight: 500,
+                    textDecoration: "none",
+                    transition: "border-color 0.2s ease, color 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.25)"; (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--color-szl-border-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+                >
+                  Enterprise diligence
+                </Link>
               </div>
             </m.div>
           </div>

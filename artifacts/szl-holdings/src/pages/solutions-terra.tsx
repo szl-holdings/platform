@@ -17,8 +17,9 @@ const CAPABILITIES = [
 export default function SolutionsTerraPage() {
   usePageMeta({
     title: "Terra — Real Estate Intelligence · SZL Holdings",
-    description: "Terra extends Lyte + Alloy into real estate — distress tracking, deal pipeline command, and market signal monitoring for real estate operators and investors.",
+    description: "NYC distress property pipeline, ownership entity graph, deal pipeline, broker workflow. Terra is the real estate intelligence domain pack — built on the same governance infrastructure as every SZL product.",
     canonical: "https://szlholdings.com/solutions/terra",
+    ogImage: "https://szlholdings.com/og/og-terra.jpg",
   });
 
   return (
