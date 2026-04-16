@@ -125,7 +125,6 @@ const NAV_LINKS_MOBILE = [
   { label: "Company", href: "/company", primary: false },
   { label: "Leadership", href: "/leadership", primary: false },
   { label: "Founder", href: "/founder", primary: false },
-  { label: "Forge", href: "/forge", primary: false },
   { label: "Design Partners", href: "/design-partner", primary: false },
   { label: "Contact", href: "/contact", primary: false },
 ];
