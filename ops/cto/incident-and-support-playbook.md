@@ -211,7 +211,7 @@ If queue is backing up (> 100 pending):
 # Test login flow returns something useful
 curl -sf -X POST https://szlholdings.com/api/auth/login \
   -H 'Content-Type: application/json' \
-  -d '{"email":"smoke@szlholdings.com","password":"SmokeTe$t2026!"}' \
+  -d "$(jq -n --arg e "$SMOKE_TEST_EMAIL" --arg p "$SMOKE_TEST_PASSWORD" '{email:$e,password:$p}')" \
   | jq '{status: .status, error: .error}'
 
 # Check auth error rate

@@ -118,3 +118,14 @@ These values ARE in `.replit [userenv.shared]` and are safe to be there (public 
 | **TOTAL** | **31** | **13** | **2** | **0** | **13** |
 
 **Status:** OAUTH_STATE_SECRET and VAPID_PRIVATE_KEY have been removed from `.replit` shared config. Mobile credential files converted to `.example` placeholders with real files blocked by `.gitignore`. No secrets found in source code. Unknown items are external service keys that may not yet be configured (Stripe, SendGrid, etc.) — not leaks.
+
+---
+
+## Credential Documentation Policy
+
+**No plaintext credential values — including example passwords — belong in any documentation, runbook, or operational guide.**
+
+- All credential references in docs must use environment variable placeholders (e.g. `$SMOKE_TEST_PASSWORD`, `$SESSION_SECRET`).
+- Passwords, tokens, and secrets used in example commands must be injected via environment variables at runtime, never hardcoded in the command itself.
+- When docs describe *how* to generate a credential, provide the generation command only (e.g. `openssl rand -hex 32`) — never a pre-generated example value.
+- Smoke test / demo account credentials must be stored in Replit Secrets and referenced by variable name only.

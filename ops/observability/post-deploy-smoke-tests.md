@@ -21,9 +21,12 @@ done
 
 ### 3. Auth Flow
 ```bash
+# Set SMOKE_TEST_EMAIL and SMOKE_TEST_PASSWORD in Replit Secrets before running
+PAYLOAD=$(jq -n --arg email "$SMOKE_TEST_EMAIL" --arg password "$SMOKE_TEST_PASSWORD" \
+  '{email: $email, password: $password}')
 curl -sf -X POST https://$DOMAIN/api/auth/login \
   -H 'Content-Type: application/json' \
-  -d '{"email":"smoke@test.com","password":"SmokeTe$t2026!"}' \
+  -d "$PAYLOAD" \
   | jq '.data.token' | grep -q 'null' && echo "WARN: login returned null token"
 ```
 
