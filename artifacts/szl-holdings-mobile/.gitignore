@@ -4,3 +4,17 @@
 
 expo-env.d.ts
 # @end expo-cli
+
+# Firebase credentials — replace with real files from Firebase Console, never commit
+google-services.json
+GoogleService-Info.plist
+
+# Google Play service account key — replace with real key, never commit
+google-play-service-account.json
+
+# EAS local credentials cache
+.expo/credentials.json
+
+# Local environment overrides
+.env.local
+.env.*.local
