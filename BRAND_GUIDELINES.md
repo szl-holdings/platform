@@ -33,13 +33,13 @@ Product names:
 
 ## Brand Positioning
 
-**Tagline:** "Governed Operational Intelligence"
+**Tagline:** "Governed Decision Infrastructure"
 
 **Brand promise:** Enterprise operators get clarity on what is happening, what to do next, who is responsible, and whether the action is safe — all in one governed decision surface.
 
-**Category definition:** SZL Holdings is a governed operational intelligence platform. Not a dashboard, not an AI copilot, not a workflow tool. The governed decision layer that connects signal detection to action execution — under governance, with full attribution.
+**Category definition:** SZL Holdings builds governed decision infrastructure. Not a dashboard, not an AI copilot, not a workflow tool. The structural layer between signal detection and action execution — with governance, attribution, and outcome tracking on every decision.
 
-**Core narrative:** Every consequential decision follows the same governed loop — Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome. This loop runs across all domain packs on shared governance infrastructure.
+**Core narrative:** Every consequential decision follows one canonical loop — Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning. Nine steps. Every domain. The governance does not change.
 
 ---
 

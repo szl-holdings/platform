@@ -1,7 +1,7 @@
 # SZL Holdings Platform
 
 ## Overview
-The SZL Holdings Platform is a **governed operational intelligence platform** designed to connect observable data with executable actions under strict governance and full attribution. It is a pnpm monorepo encompassing web and mobile applications, an API, a design system, and a development sandbox. The platform's core architecture revolves around a nine-step governed loop: Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome. This loop is powered by five platform primitives: Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, and Workflow Engine.
+The SZL Holdings Platform is **governed decision infrastructure** — the structural layer between signal detection and action execution that enforces governance, attribution, and outcome tracking on every consequential decision. It is a pnpm monorepo encompassing web and mobile applications, an API, a design system, and a development sandbox. The platform's core architecture revolves around one canonical nine-step loop: Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning. This loop is powered by six platform primitives: Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, and Event Fabric.
 
 ## User Preferences
 I prefer detailed explanations.

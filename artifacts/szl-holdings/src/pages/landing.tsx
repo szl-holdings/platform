@@ -92,10 +92,15 @@ const EVIDENCE_STATS = [
 ];
 
 const OPERATING_LOOP = [
-  { step: "01", label: "Signal surfaces in Lyte", body: "A risk indicator, anomaly, or threshold breach is detected and normalized by the Event Fabric. It appears in Lyte's signal timeline with domain context, severity, and correlation ID." },
-  { step: "02", label: "AI recommends — with evidence", body: "An AI agent analyzes the signal and proposes an action. The recommendation surfaces in Lyte's action queue with source citations, confidence score, and a full provenance record." },
-  { step: "03", label: "Simulation shows the range", body: "For high-stakes decisions, the Decision Simulation engine runs before the recommendation is presented. Operators see expected outcomes, confidence intervals, and the variables that matter most." },
-  { step: "04", label: "Governed approval, then execution", body: "Covenant Policy checks who can approve and what conditions apply. The operator reviews in Lyte or CORTEX and decides. Alloy executes the approved action and the Proof Chain records the complete trail." },
+  { step: "01", label: "Signal", body: "A risk indicator, anomaly, or threshold breach is detected and normalized by the Event Fabric. Domain context, severity, and correlation ID attached." },
+  { step: "02", label: "Context", body: "Cross-domain enrichment via PRISM Bus. A sanctions alert from Vessels triggers a legal flag in PRISM Counsel, a risk entry in Lyte." },
+  { step: "03", label: "Recommendation", body: "An AI agent proposes an action with source citations, confidence score, and full provenance metadata. No opaque verdicts." },
+  { step: "04", label: "Simulation", body: "The Monte Carlo engine models risk and uncertainty. Operators see expected outcomes, confidence intervals, and the variables that matter most." },
+  { step: "05", label: "Policy", body: "Covenant Policy checks who can approve and what conditions apply. Governance enforced at the platform layer, not the UI." },
+  { step: "06", label: "Execution", body: "Alloy orchestrates the approved action as a durable, multi-step process with checkpoint recovery and agent coordination." },
+  { step: "07", label: "Proof", body: "The Proof Chain records the complete trail: signal, recommendation, simulation, policy decision, approval, execution. Immutable and queryable." },
+  { step: "08", label: "Outcome", body: "The Outcome Graph records the real-world result. Was the action effective? This data calibrates future AI confidence scores." },
+  { step: "09", label: "Learning", body: "Historical outcomes feed back into simulation models and agent confidence calibration. The platform improves with every governed decision." },
 ];
 
 const TRUST_POINTS = [
@@ -306,9 +311,9 @@ function NewsletterSection() {
 
 export default function HomePage() {
   usePageMeta({
-    title: "SZL Holdings — Governed Operational Intelligence",
+    title: "SZL Holdings — Governed Decision Infrastructure",
     description:
-      "The governed operational intelligence platform. Connect what's observable to what's executable, under governance, with full attribution. Lyte, Alloy, and domain packs for security, maritime, real estate, and legal operations.",
+      "Governed decision infrastructure for enterprise operations. The structural layer between signal detection and action execution — with governance, attribution, and outcome tracking on every decision. Lyte, Alloy, and domain packs for security, maritime, real estate, and legal.",
     canonical: "https://szlholdings.com/",
     ogImage: "https://szlholdings.com/og/og-home.jpg",
   });
@@ -353,7 +358,7 @@ export default function HomePage() {
                 </p>
                 <span style={{ width: "1px", height: "12px", background: "hsla(0,0%,100%,0.15)" }} aria-hidden="true" />
                 <p style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase", color: "hsl(192,72%,48%)", margin: 0 }}>
-                  Governed Operational Intelligence
+                  Governed Decision Infrastructure
                 </p>
                 <span style={{ width: "1px", height: "12px", background: "hsla(0,0%,100%,0.15)" }} aria-hidden="true" />
                 <p style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", margin: 0 }}>
@@ -367,11 +372,11 @@ export default function HomePage() {
                 fontWeight: 700,
                 letterSpacing: "-0.028em",
                 lineHeight: 1.06,
-                maxWidth: "22ch",
+                maxWidth: "24ch",
                 marginBottom: "1.5rem",
                 color: "hsl(38,8%,96%)",
               }}>
-                The governed decision layer for enterprise operations.
+                Every satisfying decision follows a loop. We built the infrastructure for it.
               </h1>
 
               {/* Category definition */}
@@ -383,7 +388,7 @@ export default function HomePage() {
                 marginBottom: "1rem",
                 lineHeight: 1.5,
               }}>
-                Governed Operational Intelligence — connect what is observable to what is executable, under governance, with full attribution.
+                Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning
               </p>
 
               {/* Subhead */}
@@ -394,7 +399,7 @@ export default function HomePage() {
                 maxWidth: "52ch",
                 marginBottom: "1rem",
               }}>
-                Not a dashboard. Not an AI copilot. The governed decision layer that connects signal detection to action execution — with approval gates, simulation, and an immutable audit trail on every decision that matters.
+                Governed decision infrastructure for enterprise operations. Not a dashboard. Not an AI copilot. The structural layer between signal detection and action execution — with governance, attribution, and outcome tracking on every decision that matters.
               </p>
 
               {/* Platform hierarchy quick-read */}
@@ -823,10 +828,10 @@ export default function HomePage() {
                   The governed decision loop
                 </p>
                 <h2 style={{ fontSize: "clamp(1.75rem,3vw,2.25rem)", fontWeight: 700, letterSpacing: "-0.022em", lineHeight: 1.12, marginBottom: "1rem", color: "hsl(38,8%,94%)" }}>
-                  The Lyte workflow — how a signal becomes a governed action.
+                  Nine steps. One governed loop. Every domain.
                 </h2>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "1.75rem" }}>
-                  Every consequential decision follows the same governed loop in Lyte — signal detection via the Event Fabric, AI recommendation with provenance, Decision Simulation, Covenant Policy check, human approval, and Proof Chain recording. The domain changes. The governance does not.
+                  Every consequential decision follows the same canonical loop — signal detection, cross-domain context, AI recommendation with provenance, risk simulation, policy enforcement, governed execution, proof recording, outcome tracking, and learning. The domain changes. The governance does not.
                 </p>
                 <Link
                   href="/how-it-works"
@@ -983,7 +988,107 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 7. Trust / Governance ───────────────────────────────────── */}
+        {/* ── 7. Why Different ────────────────────────────────────────── */}
+        <section
+          aria-label="Why governed decision infrastructure is different"
+          style={{ borderBottom: "1px solid var(--color-szl-border)" }}
+        >
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+              <div style={{ marginBottom: "3rem" }}>
+                <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
+                  Why this is different
+                </p>
+                <h2 style={{ fontSize: "clamp(1.75rem,3vw,2.25rem)", fontWeight: 700, letterSpacing: "-0.022em", lineHeight: 1.1, color: "hsl(38,8%,94%)", marginBottom: "1rem", maxWidth: "32ch" }}>
+                  Dashboards show what happened. Copilots suggest what to do. Neither governs the decision.
+                </h2>
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", maxWidth: "52ch" }}>
+                  Enterprise operations have an accountability gap between signal detection and action execution. The gap grows with every AI tool added. This platform closes it structurally.
+                </p>
+              </div>
+            </m.div>
+
+            <div style={{ display: "grid", gap: "1rem" }} className="md:grid-cols-3">
+              {[
+                {
+                  category: "Dashboards",
+                  examples: "Datadog, Grafana, New Relic",
+                  what: "Show what happened. Monitor signals. Trigger alerts.",
+                  gap: "No decision governance. No approval gates. No outcome tracking. The gap between alert and action is informal.",
+                  accent: "hsl(215,60%,55%)",
+                },
+                {
+                  category: "AI Copilots",
+                  examples: "ChatGPT, Copilot, AI assistants",
+                  what: "Generate recommendations. Summarize data. Draft outputs.",
+                  gap: "No provenance. No policy enforcement. No confidence calibration. Recommendations without accountability.",
+                  accent: "hsl(260,60%,60%)",
+                },
+                {
+                  category: "Workflow Tools",
+                  examples: "Zapier, Camunda, n8n",
+                  what: "Automate sequences. Connect systems. Execute triggers.",
+                  gap: "No governance layer. No simulation. No audit trail on the decision. Execution without attribution.",
+                  accent: "hsl(340,52%,55%)",
+                },
+              ].map((col, i) => (
+                <m.div
+                  key={col.category}
+                  custom={i}
+                  variants={fadeUp}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  style={{
+                    padding: "1.75rem",
+                    borderRadius: "0.875rem",
+                    background: "hsla(0,0%,100%,0.025)",
+                    border: "1px solid hsla(0,0%,100%,0.07)",
+                  }}
+                >
+                  <p style={{ fontSize: "0.625rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: col.accent, fontFamily: "var(--font-mono)", marginBottom: "0.75rem" }}>
+                    {col.category}
+                  </p>
+                  <p style={{ fontSize: "0.6875rem", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "1rem" }}>
+                    {col.examples}
+                  </p>
+                  <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: "hsl(38,8%,88%)", marginBottom: "0.375rem" }}>
+                    What they do
+                  </p>
+                  <p style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "var(--color-szl-text-secondary)", marginBottom: "1rem" }}>
+                    {col.what}
+                  </p>
+                  <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: "hsl(0,72%,68%)", marginBottom: "0.375rem" }}>
+                    What they miss
+                  </p>
+                  <p style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "var(--color-szl-text-secondary)" }}>
+                    {col.gap}
+                  </p>
+                </m.div>
+              ))}
+            </div>
+
+            <m.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              style={{
+                marginTop: "2rem",
+                padding: "1.25rem 1.75rem",
+                borderRadius: "0.75rem",
+                background: "hsla(192,72%,48%,0.04)",
+                border: "1px solid hsla(192,72%,48%,0.12)",
+              }}
+            >
+              <p style={{ fontSize: "0.875rem", lineHeight: 1.65, color: "var(--color-szl-text-secondary)" }}>
+                <span style={{ fontWeight: 600, color: "hsl(192,72%,56%)" }}>SZL Holdings</span> governs the decision — not just the signal, the model, or the workflow step. The nine-step loop connects signal to outcome with policy gates, simulation, attribution, and proof at every transition. This is a structural difference, not a feature difference.
+              </p>
+            </m.div>
+          </div>
+        </section>
+
+        {/* ── 8. Trust / Governance ───────────────────────────────────── */}
         <section
           aria-label="Trust and governance model"
           style={{ borderBottom: "1px solid var(--color-szl-border)" }}

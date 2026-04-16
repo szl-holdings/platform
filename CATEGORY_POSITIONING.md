@@ -6,22 +6,22 @@
 
 ## The Category SZL Creates
 
-**Governed Operational Intelligence.**
+**Governed Decision Infrastructure.**
 
-A new class of enterprise software that connects what is observable to what is executable — under governance, with full attribution.
+A new class of enterprise software — the structural layer between signal detection and action execution that enforces governance, attribution, and outcome tracking on every consequential decision.
 
 Not a dashboard. Not an AI copilot. Not a workflow tool.
 
-The governed decision layer that sits between signal detection and action execution, ensuring every consequential decision has a signal source, a routing path, a simulation result, an approval gate, and an immutable audit trail.
+The governed decision infrastructure that ensures every consequential decision has a signal source, cross-domain context, a simulation result, a policy gate, an immutable audit trail, and a recorded outcome. Nine steps, one canonical loop, every domain.
 
 ---
 
 ## What This Platform Is
 
-SZL Holdings is a governed operational intelligence platform. It ingests signals from across an organization's operational surface — security events, fleet telemetry, property data, legal filings, financial metrics — and routes them through a structured decision pipeline:
+SZL Holdings builds governed decision infrastructure. It ingests signals from across an organization's operational surface — security events, fleet telemetry, property data, legal filings, financial metrics — and routes them through a structured decision pipeline:
 
 ```
-Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome
+Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning
 ```
 
 Every step in this pipeline is instrumented. Every decision is attributed to an actor. Every AI recommendation carries source citations and confidence scores. Every consequential action requires human confirmation before execution.
@@ -146,7 +146,7 @@ This means a new domain pack can be stood up without rebuilding governance. The 
 
 ## One-Sentence Positioning
 
-> SZL Holdings is the governed operational intelligence layer that connects business signals to accountable action — under governance, with full attribution and an immutable audit trail.
+> SZL Holdings builds governed decision infrastructure — the structural layer between signal detection and action execution that enforces governance, attribution, and outcome tracking on every consequential decision.
 
 ---
 
@@ -154,6 +154,7 @@ This means a new domain pack can be stood up without rebuilding governance. The 
 
 | Document | Path |
 |----------|------|
+| Market positioning | [MARKET_POSITIONING.md](MARKET_POSITIONING.md) |
 | Platform primitives | [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) |
 | System overview | [SYSTEM-OVERVIEW.md](SYSTEM-OVERVIEW.md) |
 | Proof and policy model | [PROOF_AND_POLICY_MODEL.md](PROOF_AND_POLICY_MODEL.md) |
