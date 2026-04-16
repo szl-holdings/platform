@@ -96,6 +96,9 @@ const AdminDataRetentionPage = lazy(() => import("@/pages/admin-data-retention")
 // New platform-repositioning pages
 const DecisioningCommandPage = lazy(() => import("@/pages/decisioning-command"));
 const LytePage = lazy(() => import("@/pages/lyte-page"));
+const SignalFusionPage = lazy(() => import("@/pages/signal-fusion"));
+const DecisionSchemaLibraryPage = lazy(() => import("@/pages/decision-schema-library"));
+const GovernancePosturePage = lazy(() => import("@/pages/governance-posture"));
 const AlloyPublicPage = lazy(() => import("@/pages/alloy-page"));
 const SolutionsPage = lazy(() => import("@/pages/solutions"));
 const SolutionsAegisPage = lazy(() => import("@/pages/solutions-aegis"));
@@ -429,6 +432,18 @@ function App() {
             </Route>
             <Route path="/lyte">
               <Suspense fallback={<PageLoader />}><LytePage /></Suspense>
+            </Route>
+            <Route path="/lyte/decision-theater">
+              <Suspense fallback={<PageLoader />}><DecisioningCommandPage /></Suspense>
+            </Route>
+            <Route path="/lyte/signal-fusion">
+              <Suspense fallback={<PageLoader />}><SignalFusionPage /></Suspense>
+            </Route>
+            <Route path="/lyte/decision-schemas">
+              <Suspense fallback={<PageLoader />}><DecisionSchemaLibraryPage /></Suspense>
+            </Route>
+            <Route path="/lyte/governance-posture">
+              <Suspense fallback={<PageLoader />}><GovernancePosturePage /></Suspense>
             </Route>
             <Route path="/lyte/use-cases">
               <Suspense fallback={<PageLoader />}><LytePage /></Suspense>
