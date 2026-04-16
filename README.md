@@ -22,45 +22,46 @@ Every step is instrumented. Every decision is attributed. Every AI recommendatio
 
 ---
 
-## Platform Architecture
+## Platform Hierarchy
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  COMMAND SURFACES                                                    │
-│                                                                      │
-│  Lyte              Command Portal        CORTEX                     │
-│  Operator command   Ecosystem overview    Unified mobile command    │
-│  PRISM framework    8-domain dashboard    All domains, one app      │
+│  SZL HOLDINGS                                                        │
+│  The governed operational intelligence layer                         │
+├─────────────────────────────────────────────────────────────────────┤
+│  Lyte                 — Flagship command surface (PRISM framework)   │
+│  Alloy                — Execution fabric (workflows, approvals, audit)│
+│  CORTEX               — Unified mobile command (iOS + Android)       │
 ├─────────────────────────────────────────────────────────────────────┤
 │  DOMAIN PACKS                                                        │
 │                                                                      │
-│  Aegis         Vessels       Terra        Carlota Jo               │
-│  Security &    Maritime      Real Estate  Premium                  │
-│  Defense       Intelligence  Intelligence Advisory                 │
+│  Aegis     Vessels     Terra     PRISM Counsel  Carlota Jo  IMPERIUM │
+│  Security  Maritime   Real Est  Legal Matter   Premium     Cloud    │
+│  & Defense Intelligence Intel  Command        Advisory    Sov.     │
 ├─────────────────────────────────────────────────────────────────────┤
 │  GOVERNANCE INFRASTRUCTURE                                           │
 │                                                                      │
-│  Outcome Graph  ·  Proof Chain  ·  Covenant Policy  ·  Monte Carlo  │
-│  Workflow Engine  ·  PRISM Bus  ·  AI Engine  ·  RBAC + Auth        │
+│  Outcome Graph  ·  Proof Chain  ·  Covenant Policy                  │
+│  Decision Simulation  ·  Workflow Engine  ·  Event Fabric           │
 ├─────────────────────────────────────────────────────────────────────┤
 │  DATA LAYER                                                          │
 │                                                                      │
-│  PostgreSQL 16 (Drizzle ORM)  ·  569 tables  ·  116 schema files   │
+│  PostgreSQL 16 (Drizzle ORM)  ·  700+ tables  ·  116 schema files  │
 │  External feeds: AIS, STIX/TAXII, sanctions, court records          │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-**Lyte** is the command surface — where operators observe signals, review recommendations, and make decisions.
+**Lyte** is the flagship command surface — where operators observe signals, review AI recommendations, run simulations, and make governed decisions.
 
 **Alloy** is the execution fabric — where workflows are orchestrated, approvals are enforced, and audit trails are generated.
 
-**Domain packs** extend the same governance infrastructure into domain-specific intelligence: security (Aegis), maritime (Vessels), real estate (Terra), and advisory (Carlota Jo).
-
 **CORTEX** provides unified mobile command across all domains in a single native app.
+
+**Domain packs** extend the same governance infrastructure into domain-specific intelligence: security (Aegis), maritime (Vessels), real estate (Terra), legal (PRISM Counsel), advisory (Carlota Jo), and cloud sovereignty (IMPERIUM).
 
 ---
 
-## Five Platform Primitives
+## Six Platform Primitives
 
 What makes this structurally different from dashboards, copilots, and workflow tools:
 
@@ -69,10 +70,27 @@ What makes this structurally different from dashboards, copilots, and workflow t
 | **Outcome Graph** | Tracks the full lifecycle: recommendation → decision → outcome | Closed-loop learning — the platform knows which recommendations led to which results |
 | **Proof Chain** | Immutable, verifiable audit trail for every significant action | Compliance teams can reconstruct any decision chain. AI outputs carry provenance. |
 | **Covenant Policy** | Defines what agents and users can do, with what approval requirements | Human-in-the-loop is enforced at the policy layer — AI cannot bypass it |
-| **Monte Carlo** | Probabilistic simulation before action — confidence intervals and sensitivity analysis | Operators see not just "what should we do" but "what could happen if we do it" |
+| **Decision Simulation** | Probabilistic simulation before action — confidence intervals and sensitivity analysis | Operators see not just "what should we do" but "what could happen if we do it" |
 | **Workflow Engine** | Durable multi-step process orchestration with agent coordination | Complex decisions are tracked, governed, and recoverable — not opaque one-shots |
+| **Event Fabric** | Cross-domain signal backbone — normalizes, routes, and correlates events | A sanctions hit in Vessels can surface a legal risk flag in PRISM Counsel automatically |
 
 See [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) for the full specification of each primitive.
+
+---
+
+## Flagship Workflow: Lyte Signal-to-Action
+
+The core loop that runs in every domain, visible in Lyte:
+
+1. **Signal arrives** — a risk indicator, anomaly, or threshold breach is detected and normalized by the Event Fabric
+2. **Context is added** — an AI agent analyzes the signal, attaches source citations, confidence score, and proof chain entry
+3. **Simulation runs** — the Decision Simulation engine models possible outcomes before the recommendation surfaces
+4. **Recommendation appears** — Lyte's action queue surfaces the recommendation with evidence, confidence band, and simulation results
+5. **Policy is checked** — Covenant Policy determines whether human approval is required and from whom
+6. **Operator reviews and decides** — in Lyte (web) or CORTEX (mobile), the operator approves, rejects, or overrides
+7. **Action executes** — the Workflow Engine runs the action as a governed, durable process
+8. **Proof is recorded** — the Proof Chain captures the full trail: signal → recommendation → approval → execution → outcome
+9. **Outcome is tracked** — the Outcome Graph records the result and feeds it back into agent calibration
 
 ---
 
@@ -80,16 +98,17 @@ See [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) for the full specification 
 
 | Product | Domain | Purpose | Status |
 |---------|--------|---------|--------|
+| **Lyte** | Flagship command | Governed command surface — PRISM framework, signal-to-action, approvals | Active — `/lyte-command-center/` |
+| **Alloy** | Execution fabric | Workflow orchestration, approval gates, immutable audit trail | Active — shared infrastructure |
+| **CORTEX** | Mobile command | All domain workspaces, biometric auth, offline sync | Alpha prep |
 | **Aegis** | Security & defense | SOC command, 8 advanced security modules, SOAR playbooks, threat intelligence | Active — `/firestorm/` |
 | **Vessels** | Maritime intelligence | Fleet tracking, S&P, demurrage, freight, voyage P&L | Active — `/vessels/` |
 | **Terra** | Real estate intelligence | Distress pipeline, ownership graph, deal workflow, AI analysis | Active — `/terra/` |
-| **Carlota Jo** | Premium advisory | UHNW advisory operations — client portal, service catalog, booking | Active — `/carlota-jo/` |
-| **Command** | Unified ops | Operator command surface, AIOps, portfolio oversight (merged Lyte + IMPERIUM) | Active — `/command/` |
-| **SZL Holdings** | Portfolio command | Fund intelligence, Nexus, Forge, Distribution OS, CORTEX web | Active — `/` |
-| **CORTEX Mobile** | Unified mobile | All 8 domain workspaces, biometric auth, offline sync, voice commands | Alpha prep |
-| ~~Lyte~~ | ~~Governed command~~ | Merged into Command | Deprecated |
-| ~~PRISM Counsel~~ | ~~Legal command~~ | Deprecated — see `artifacts/prism-counsel/DEPRECATED.md` | Deprecated |
-| ~~IMPERIUM~~ | ~~Cloud sovereignty~~ | Merged into Command — see `artifacts/imperium/DEPRECATED.md` | Deprecated |
+| **PRISM Counsel** | Legal matter command | Agentic matter management, court filings, recovery operations | Legal module integrated into Aegis |
+| **Carlota Jo** | Premium advisory | UHNW advisory operations — client portal, service catalog, booking | Live — `/carlota-jo/` |
+| **IMPERIUM** | Cloud sovereignty | Multi-cloud governance, policy enforcement, cloud estate visibility | In development |
+| **Command Portal** | Ecosystem hub | Cross-domain real-time dashboard, 8-domain SSE, executive briefing | Active — `/command/` |
+| **SZL Holdings** | Corporate platform | Investor portal, trust center, ecosystem overview | Active — `/` |
 
 ---
 
@@ -119,12 +138,12 @@ See [Trust Center](docs/trust/trust-center.md) · [Security](SECURITY.md) · [Pr
 | Frontend | React 19, Vite, Tailwind CSS v4, Framer Motion, Recharts |
 | Mobile | Expo / React Native, NativeWind |
 | Backend | Express 5, Node.js |
-| Database | PostgreSQL 16, Drizzle ORM (569 tables, 116 schema files) |
+| Database | PostgreSQL 16, Drizzle ORM (700+ tables, 116 schema files) |
 | AI | OpenAI, Anthropic, Gemini — multi-provider with fallback. 9 schema-validated decision types |
 | Auth | OIDC/PKCE, 11-role RBAC, SCIM 2.0, Azure AD multi-tenant SSO |
 | Real-time | WebSocket (signed tickets), SSE, push notifications |
-| Event system | PRISM Bus (cross-domain), Forge Runtime (agent execution) |
-| Monorepo | pnpm workspaces — 51 packages |
+| Event system | Event Fabric / Prism Bus (cross-domain), Forge Runtime (agent execution) |
+| Monorepo | pnpm workspaces — 40+ packages |
 
 ---
 
@@ -157,7 +176,7 @@ See [Deployment Model](docs/trust/deployment-model.md) · [Branch Protection & C
 
 ### Canonical Diligence Documents
 
-These top-level documents are the canonical reference for Series A diligence, enterprise evaluation, and technical review. They consolidate and cross-link content from the full `/docs/` suite.
+These top-level documents are the canonical reference for Series A diligence, enterprise evaluation, and technical review.
 
 | Document | Purpose |
 |----------|---------|
@@ -170,16 +189,13 @@ These top-level documents are the canonical reference for Series A diligence, en
 | [SECURITY-CHECKLIST.md](SECURITY-CHECKLIST.md) | Security controls checklist mapped to actual implementation |
 | [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) | Deployment procedures for Replit and Azure |
 | [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md) | Operational procedures, failure modes, incident response |
-| [ANALYTICS-EVENTS.md](ANALYTICS-EVENTS.md) | Analytics event taxonomy, funnel definitions, privacy rules |
 | [KNOWN-GAPS.md](KNOWN-GAPS.md) | Honest assessment of tech debt, gaps, and planned improvements |
-
-### Full Documentation Suite (`/docs/`)
 
 ### Platform Narrative
 | Document | Purpose |
 |----------|---------|
-| [CATEGORY_POSITIONING.md](CATEGORY_POSITIONING.md) | What "governed operational intelligence" means and why it matters |
-| [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) | The five core abstractions that define the platform |
+| [CATEGORY_POSITIONING.md](CATEGORY_POSITIONING.md) | What "governed operational intelligence" means, why it matters, and the domain-pack extensibility model |
+| [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) | The six core abstractions that define the platform |
 | [PROOF_AND_POLICY_MODEL.md](PROOF_AND_POLICY_MODEL.md) | How trust is recorded and enforced |
 | [DECISION_SIMULATION.md](DECISION_SIMULATION.md) | Monte Carlo simulation across domains |
 
@@ -195,24 +211,16 @@ These top-level documents are the canonical reference for Series A diligence, en
 ### Product
 | Document | Purpose |
 |----------|---------|
-| [PRODUCT-SURFACES.md](PRODUCT-SURFACES.md) | Every user-facing artifact with purpose and audience |
+| [PRODUCT-SURFACES.md](PRODUCT-SURFACES.md) | Every user-facing artifact with purpose, taxonomy, and audience |
 | [PRODUCT_SURFACE_MAP.md](PRODUCT_SURFACE_MAP.md) | Which primitives power which surfaces |
 | [NAVIGATION_STRATEGY.md](NAVIGATION_STRATEGY.md) | Information architecture and navigation model |
 | [DEMO_GUIDE.md](DEMO_GUIDE.md) | How to run demos for different audiences |
 | [ROUTE_INVENTORY.md](ROUTE_INVENTORY.md) | Complete route inventory with classification |
 
-### Operations
-| Document | Purpose |
-|----------|---------|
-| [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md) | Monitoring, incident triage, failure modes |
-| [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) | Staging and production deployment |
-| [SECURITY.md](SECURITY.md) | Security policy and responsible disclosure |
-| [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) | Incident handling procedures |
-
 ### Brand & Company
 | Document | Purpose |
 |----------|---------|
-| [BRAND_GUIDELINES.md](BRAND_GUIDELINES.md) | Visual identity, voice, and standards |
+| [BRAND_GUIDELINES.md](BRAND_GUIDELINES.md) | Visual identity, voice, and terminology standards |
 | [COMPANY_FACT_SHEET.md](COMPANY_FACT_SHEET.md) | One-page company summary |
 | [PRESS_KIT.md](PRESS_KIT.md) | Media-ready overview and boilerplate |
 | [TRUST_CENTER_INDEX.md](TRUST_CENTER_INDEX.md) | Index for all trust documentation |
@@ -244,19 +252,15 @@ These top-level documents are the canonical reference for Series A diligence, en
 | Backup & recovery (canonical) | [ops/infra/recovery-and-backup-model.md](ops/infra/recovery-and-backup-model.md) |
 | Launch readiness scorecard | [ops/frontier/launch-readiness-scorecard.md](ops/frontier/launch-readiness-scorecard.md) |
 | Mobile release readiness | [ops/mobile/flagship-release-readiness.md](ops/mobile/flagship-release-readiness.md) |
-| Route inventory | [ROUTE_INVENTORY.md](ROUTE_INVENTORY.md) |
-| Analytics plan | [ANALYTICS_PLAN.md](ANALYTICS_PLAN.md) |
 
 ### Process & Governance
 | Area | Document |
 |------|----------|
 | Release process | [RELEASE_PROCESS.md](RELEASE_PROCESS.md) |
 | Release checklist | [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) |
-| Release notes | [docs/releases/v0.1.0.md](docs/releases/v0.1.0.md) |
 | Changelog | [CHANGELOG.md](CHANGELOG.md) |
-| Incident response | [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) |
-| Security disclosure | [SECURITY.md](SECURITY.md) |
 | Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Security disclosure | [SECURITY.md](SECURITY.md) |
 
 ---
 

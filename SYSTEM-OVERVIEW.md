@@ -9,9 +9,11 @@
 
 ## What SZL Holdings Builds
 
-SZL Holdings is a technology holding company that builds and operates a unified ecosystem of command-grade software platforms. Each platform addresses a specific domain where operational clarity, decision speed, and execution accountability determine outcomes.
+SZL Holdings builds the governed operational intelligence layer for enterprise operators — connecting what is observable to what is executable, under governance, with full attribution.
 
-The defining characteristic of the SZL ecosystem is **architectural unity**. Every platform shares one intelligence backbone, one design system, one authentication model, and one data layer. This is not a portfolio of unrelated products — it is a compounding system where shared investment multiplies in value with each new platform added.
+The platform is organized in a clear hierarchy: SZL Holdings (platform) → Lyte (flagship command surface) → Alloy (execution fabric) → CORTEX (mobile command) → Domain packs (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM).
+
+The defining characteristic of the platform is **architectural unity**. Every domain pack shares one governance infrastructure, one design system, one authentication model, and one data layer. This is not a portfolio of separate startups — it is a compounding system where shared investment in governance multiplies in value with each new domain added.
 
 ---
 
@@ -53,24 +55,24 @@ The platform provides the infrastructure for this loop. Domain packs provide the
 ├─────────────────────────────────────────────────────────────────────────┤
 │  DOMAIN PACKS                                                            │
 │                                                                          │
-│  Aegis          Vessels        Terra         PRISM Counsel   Carlota Jo │
+│  Aegis     Vessels    Terra    PRISM Counsel  Carlota Jo   IMPERIUM     │
 │  Security &     Maritime       Real Estate   Legal Matter    Premium    │
 │  Defense        Intelligence   Intelligence  Command         Advisory   │
 │  Intelligence                                                            │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  GOVERNANCE INFRASTRUCTURE (shared by all domains)                      │
 │                                                                          │
-│  Outcome Graph  │  Proof Chain  │  Covenant Policy  │  Monte Carlo      │
-│  Decision        │  Immutable    │  Permission &     │  Risk             │
-│  lifecycle       │  audit trail  │  approval gates   │  simulation       │
-│                                                                          │
-│  Workflow Engine  │  PRISM Bus  │  AI Engine  │  RBAC + Auth            │
-│  Process          │  Cross-domain│  Model      │  11-role hierarchy      │
-│  orchestration    │  event bus   │  orchestration│  Org-scoped isolation  │
+│  Outcome Graph   │  Proof Chain    │  Covenant Policy  │  Decision Sim.   │
+│  Decision         │  Immutable      │  Permission &     │  Risk             │
+│  lifecycle        │  audit trail    │  approval gates   │  simulation       │
+│                                                                            │
+│  Workflow Engine  │  Event Fabric   │  AI Engine  │  RBAC + Auth          │
+│  Process          │  Cross-domain   │  Model      │  11-role hierarchy    │
+│  orchestration    │  signal bus     │  orchestration│ Org-scoped isolation │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  DATA LAYER                                                              │
 │                                                                          │
-│  PostgreSQL 16 (Drizzle ORM)  │  685 tables  │  112 schema files       │
+│  PostgreSQL 16 (Drizzle ORM)  │  700+ tables  │  116 schema files       │
 │  External feeds (AIS, STIX, sanctions, court records, market data)      │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
@@ -115,19 +117,19 @@ The platform provides the infrastructure for this loop. Domain packs provide the
 
 ## Platform Summary
 
-| Platform | What It Does | Who Uses It |
-|----------|-------------|-------------|
-| **Lyte** | Makes every operational surface visible and actionable through the PRISM framework | Operations leads, CFOs, PMOs |
-| **Aegis** | Unified cybersecurity command — threat detection, SOC operations, AI-assisted triage | CISOs, SOC analysts, MSPs |
-| **Vessels** | Real-time maritime fleet command — AIS tracking, sanctions screening, voyage economics | Fleet executives, operations, compliance |
-| **Terra** | NYC property intelligence — distressed asset detection, ownership mapping, deal pipeline | Brokers, investors, portfolio teams |
-| **PRISM Counsel** | Agentic legal matter management — court filings, document review, recovery operations | Legal partners, case managers |
-| **Carlota Jo** | Premium advisory platform — client portal, service delivery, advisory engagement | Founders, executives, UHNW clients |
-| **IMPERIUM** | Cloud sovereignty and infrastructure control for enterprises | Enterprise infrastructure owners |
-| **Command Portal** | Ecosystem intelligence hub — cross-domain real-time monitoring | Platform admin, ecosystem operators |
-| **CORTEX** | Unified mobile command — all 8 domain workspaces on iOS/Android | All platform users on mobile |
-| **SZL Holdings** | Corporate presence — investor portal, trust center, ecosystem overview | Investors, enterprise evaluators |
-| **Alloy** | Execution fabric — shared workflow engine, approval gates, audit trail | All platforms (internal infrastructure) |
+| Product | Layer | What It Does | Who Uses It |
+|---------|-------|-------------|-------------|
+| **Lyte** | Flagship command | PRISM framework command surface — signal timeline, action queue, approvals, AI recommendations | Operations leads, CFOs, PMOs, SREs |
+| **Alloy** | Execution fabric | Workflow orchestration, approval gates, immutable audit trail — the governance backbone | All platforms (shared infrastructure) |
+| **CORTEX** | Mobile command | Unified mobile command — all domain workspaces on iOS/Android with biometric auth | All platform users on mobile |
+| **Aegis** | Domain pack | Unified cybersecurity command — threat detection, SOC operations, AI-assisted triage | CISOs, SOC analysts, MSPs |
+| **Vessels** | Domain pack | Real-time maritime fleet command — AIS tracking, sanctions screening, voyage economics | Fleet executives, operations, compliance |
+| **Terra** | Domain pack | NYC property intelligence — distressed asset detection, ownership mapping, deal pipeline | Brokers, investors, portfolio teams |
+| **PRISM Counsel** | Domain pack (legal module integrated into Aegis) | Agentic legal matter management — court filings, document review, recovery operations | Legal partners, case managers |
+| **Carlota Jo** | Domain pack | Premium advisory platform — client portal, service delivery, advisory engagement | Founders, executives, UHNW clients |
+| **IMPERIUM** | Domain pack (in dev) | Cloud sovereignty — multi-cloud governance, policy enforcement, cloud estate visibility | CIOs, infrastructure leads, cloud governance teams |
+| **Command Portal** | Ecosystem hub | Cross-domain real-time dashboard — 8-domain SSE, executive briefing, global command bar | Platform admin, ecosystem operators |
+| **SZL Holdings** | Corporate platform | Investor portal, trust center, ecosystem overview | Investors, enterprise evaluators |
 
 ---
 
@@ -146,7 +148,7 @@ Signals arrive from external integrations, internal events, or scheduled data fe
 | Carlota Jo | Client inquiry forms, booking events, document delivery triggers |
 | Lyte | Cross-domain operational metrics, approval queue changes, SLA breach signals |
 
-Signals are normalized by PRISM Bus (`@szl-holdings/prism-bus`) into a common event format with domain, severity, correlation ID, and timestamp.
+Signals are normalized by the Event Fabric (`@szl-holdings/prism-bus`) into a common event format with domain, severity, correlation ID, and timestamp.
 
 ### Step 2: Context and Correlation
 
@@ -233,9 +235,9 @@ Every consequential operation in the SZL ecosystem follows this path, regardless
                      ▼                  ▼
 ┌─────────────────────────┐  ┌─────────────────────────────────────────┐
 │  PostgreSQL 16           │  │  External Services                      │
-│  685 tables (Drizzle)    │  │  AI: OpenAI, Anthropic, Gemini          │
+│  700+ tables (Drizzle)    │  │  AI: OpenAI, Anthropic, Gemini          │
 │  Org-scoped isolation    │  │  Payments: Stripe                       │
-│  112 schema files        │  │  Email: Resend / SendGrid / SMTP        │
+│  116 schema files        │  │  Email: Resend / SendGrid / SMTP        │
 │                          │  │  Intel: AIS, STIX/TAXII, sanctions      │
 │                          │  │  Maps: Mapbox, Google Maps              │
 │                          │  │  Legal: CourtListener                   │
@@ -291,7 +293,7 @@ All AI agents are **advisory only** — they surface intelligence and recommenda
 | Database | PostgreSQL 16, Drizzle ORM |
 | AI | OpenAI, Anthropic, Gemini (multi-provider with fallback) |
 | Auth | OIDC/PKCE, 11-role RBAC, SCIM 2.0 |
-| Monorepo | pnpm workspaces, 51 packages |
+| Monorepo | pnpm workspaces, 40+ packages |
 | Real-time | WebSocket, SSE, push notifications |
 | Event system | PRISM Bus (cross-domain), Forge Runtime (agent execution) |
 
@@ -305,7 +307,7 @@ All AI agents are **advisory only** — they surface intelligence and recommenda
 | Native Mobile Apps | CORTEX (unified) + 5 domain-specific |
 | Shared Libraries | 37 packages |
 | API Endpoints | 2,331 |
-| Database Tables | 685 |
+| Database Tables | 700+ |
 | Source Files | 1,620 TypeScript files |
 | Lines of Code | 450,000+ |
 | UI Components | 252 web + 116 mobile screens |

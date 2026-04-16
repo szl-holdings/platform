@@ -1,18 +1,18 @@
 # Platform Primitives — SZL Holdings
 
-**Version:** 1.0 · **Last updated:** April 2026
-**Source of truth for:** the five core abstractions that define the governed decision platform
+**Version:** 2.0 · **Last updated:** April 2026
+**Source of truth for:** the six core abstractions that define the governed decision platform
 
 ---
 
 ## Overview
 
-The SZL Holdings platform is built on five core primitives. These are not features — they are the structural abstractions that make the platform fundamentally different from dashboards, copilots, and workflow tools.
+The SZL Holdings platform is built on six core primitives. These are not features — they are the structural abstractions that make the platform fundamentally different from dashboards, copilots, and workflow tools.
 
-Every product surface in the ecosystem (Lyte, Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, Command Portal, CORTEX) is built on top of these same five primitives. Domain packs add domain-specific intelligence; the primitives provide the governance infrastructure.
+Every product surface in the ecosystem (Lyte, Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, Command Portal, CORTEX) is built on top of these same six primitives. Domain packs add domain-specific intelligence; the primitives provide the governance infrastructure.
 
 ```
-Signal arrives
+Signal arrives (via Event Fabric)
     │
     ▼
 ┌─────────────────┐     ┌─────────────────┐
@@ -54,6 +54,14 @@ Without outcome tracking, AI systems are open-loop — they make recommendations
 - **Confidence calibration** — adjusting agent confidence scores based on historical accuracy
 - **Agent performance benchmarking** — comparing agents by their outcome-adjusted accuracy
 
+### What Users See
+
+Operators in Lyte and CORTEX see a live action queue annotated with historical acceptance rates and agent performance scores. After a decision resolves, the outcome is surfaced back in the same interface — closing the loop visibly.
+
+### What Admins See
+
+Platform administrators can query aggregate acceptance rates, achievement rates, and override frequencies per agent, per domain, and per role. This data feeds the agent governance dashboard.
+
 ### Key Operations
 
 | Operation | Purpose |
@@ -86,6 +94,14 @@ The Proof Chain generates a verifiable, immutable audit trail for every signific
 Enterprise buyers in regulated industries need to answer: *Who approved this? Based on what evidence? When? And can we prove it?*
 
 The Proof Chain makes every decision reconstructable. Compliance officers, regulators, and auditors can trace any action back through its full provenance — from the signal that triggered it, to the agent that recommended it, to the human who approved it, to the outcome it produced.
+
+### What Users See
+
+Operators see a provenance ribbon on every AI-generated recommendation — model identity, source citations, confidence score, and review status. No opaque outputs. Approved content shows a "cleared" badge; retracted content is blocked from export automatically.
+
+### What Admins See
+
+Compliance administrators can query the full proof chain for any content item, reconstruct complete decision chains, and export audit reports scoped by actor, action type, time range, and domain.
 
 ### Key Operations
 
@@ -144,6 +160,14 @@ When an AI agent recommends a consequential action — closing a matter, sanctio
 
 This is structural governance. The AI cannot bypass it. The UI cannot skip it. The API enforces it.
 
+### What Users See
+
+Operators see approval requests appear in their queue — annotated with policy rationale, evidence, simulation results, and the role authorized to approve. The approval decision itself becomes part of the immutable proof chain.
+
+### What Admins See
+
+Policy administrators can define and modify covenant templates, set role-specific approval thresholds, configure auto-execution conditions for low-risk action classes, and audit historical policy decisions by action type and outcome.
+
 ### Key Operations
 
 | Operation | Purpose |
@@ -171,7 +195,7 @@ This is structural governance. The AI cannot bypass it. The UI cannot skip it. T
 
 ---
 
-## 4. Monte Carlo Engine
+## 4. Decision Simulation (Monte Carlo Engine)
 
 **Library:** `@szl-holdings/monte-carlo` · **Source:** `lib/monte-carlo/`
 
@@ -184,6 +208,14 @@ The Monte Carlo engine runs probabilistic simulations to model risk and uncertai
 Operators making consequential decisions need more than a recommendation. They need to understand the range of possible outcomes and which variables matter most.
 
 The Monte Carlo engine transforms "the AI thinks we should do X" into "if we do X, the expected outcome is Y with a 90% confidence interval of [A, B], and the variables that matter most are Z1, Z2, and Z3."
+
+### What Users See
+
+Before high-stakes decisions, operators see a simulation result panel inline with the recommendation — expected outcome, confidence band, and a tornado chart showing which inputs drive the most uncertainty. Not a black box. The model and its assumptions are always visible.
+
+### What Admins See
+
+Domain administrators can configure scenario libraries, adjust distribution parameters, and review calibration history — how well past simulations predicted actual outcomes, fed back from the Outcome Graph.
 
 ### Key Operations
 
@@ -222,7 +254,7 @@ Supports: Normal, LogNormal, Uniform, Triangular, PERT, Discrete, Custom empiric
 
 ### What It Does
 
-The Workflow Engine orchestrates multi-step operational processes with durable state, agent coordination, event-driven triggers, and checkpoint recovery. It is the runtime that makes the other four primitives work together in practice.
+The Workflow Engine orchestrates multi-step operational processes with durable state, agent coordination, event-driven triggers, and checkpoint recovery. It is the runtime that makes the other primitives work together in practice.
 
 ### Why It Matters
 
@@ -233,6 +265,14 @@ The Workflow Engine ensures these multi-step processes are:
 - **Observable** — every step is logged
 - **Governed** — policy checks at each transition
 - **Attributable** — actor identity attached to every state change
+
+### What Users See
+
+Operators see workflow state in Lyte's action queue and Alloy's Factory Floor — which step each process is at, which approvals are pending, and the full step history. Completed workflows show the final audit trail.
+
+### What Admins See
+
+Platform administrators can inspect all active, completed, and failed workflows across the ecosystem. Durable jobs can be retried, reassigned, or cancelled from the admin panel. All state changes are audit-logged.
 
 ### Key Operations
 
@@ -253,12 +293,67 @@ The Workflow Engine ensures these multi-step processes are:
 
 ---
 
+## 6. Event Fabric (Prism Bus)
+
+**Library:** `@szl-holdings/prism-bus` · **Source:** `lib/prism-bus/`
+
+### What It Does
+
+The Event Fabric is the cross-domain signal backbone of the platform. PRISM Bus normalizes events from all domain sources into a common format, routes them to the correct handlers, and enables cross-domain correlation — so a signal in one domain can trigger intelligence in another.
+
+### Why It Matters
+
+Enterprise operations generate signals across disconnected silos. Without a shared event fabric, a sanctions hit in Vessels cannot surface as a legal risk flag in PRISM Counsel. A CVE alert in Aegis cannot trigger a vendor review in Lyte.
+
+The Event Fabric makes the platform's cross-domain intelligence possible. Domain packs are not isolated — they share a common signal layer that enables correlation, routing, and unified response.
+
+### What Users See
+
+Cross-domain signals surface in Lyte's command feed and CORTEX's unified notification layer. Operators see correlated events — a sanctions alert that triggered a case, a threat intelligence hit that triggered a policy escalation — without switching between tools.
+
+### What Admins See
+
+Platform administrators can inspect event routing tables, subscription registries, and cross-domain correlation logs. Event throughput, delivery latency, and error rates are surfaced in the observability dashboard.
+
+### Key Operations
+
+| Operation | Purpose |
+|-----------|---------|
+| `publish()` | Emits a typed event to the bus with domain, severity, correlation ID, and tenant scope |
+| `subscribe()` | Registers a handler for specific event types and domains |
+| `unsubscribe()` | Removes a subscription |
+| `publishAndWait()` | Emits an event and waits for acknowledgment |
+| `getActiveSubscriptions()` | Lists all active subscriptions for monitoring |
+
+### Event Types
+
+| Event Type | When It Fires |
+|-----------|--------------|
+| `domain_signal` | A domain-specific intelligence signal is detected |
+| `cross_domain_correlation` | A signal in one domain is correlated to another |
+| `workflow_triggered` | A workflow is started in response to a signal |
+| `approval_requested` | A governed action requires human approval |
+| `approval_decided` | An approval is granted or denied |
+| `policy_decision` | Covenant Policy evaluates a permission request |
+| `execution_started` | A governed action begins executing |
+| `execution_completed` | A governed action completes |
+
+### How It Connects
+
+- Receives signals from all domain pack integrations (AIS, STIX/TAXII, court records, market data)
+- Feeds into `workflow-engine` to trigger decision processes
+- Enables `covenant-policy` to receive cross-domain context
+- Crosses domain boundaries so `outcome-graph` can track multi-domain decision chains
+- Surfaced in the Command Portal's real-time 8-domain dashboard via SSE
+
+---
+
 ## The Core Loop
 
-All five primitives work together in a single governed decision loop:
+All six primitives work together in a single governed decision loop:
 
 ```
-1. Signal arrives (via PRISM Bus or external integration)
+1. Signal arrives (via Event Fabric / Prism Bus)
        │
 2. Workflow Engine starts a decision process
        │

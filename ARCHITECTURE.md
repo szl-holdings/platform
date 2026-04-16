@@ -8,9 +8,11 @@
 
 ## Architectural Thesis
 
-SZL Holdings is a **pnpm monorepo** hosting a unified ecosystem of platforms across multiple operational domains. Every platform shares one API server, one PostgreSQL database, one design system, and one authentication model. Domain-specific surfaces (maritime, security, real estate, legal) extend this shared core — they do not replace it.
+SZL Holdings is a **pnpm monorepo** hosting the governed operational intelligence platform and its domain extensions. Every surface shares one API server, one PostgreSQL database, one design system, and one authentication model. Domain packs extend this shared governance core — they do not replace it.
 
-The defining architectural commitment: **business observability and execution accountability as a unified system**. Signals surface across domains; actions route through a single governed execution fabric (Alloy); every consequential decision generates an immutable audit event.
+The platform hierarchy: SZL Holdings (platform) → Lyte (flagship command surface) → Alloy (execution fabric) → CORTEX (mobile command) → Domain packs.
+
+The defining architectural commitment: **governed decision execution as a platform primitive**. Signals surface across domains via the Event Fabric; actions route through Alloy; every consequential decision generates an immutable Proof Chain entry.
 
 ---
 
@@ -18,24 +20,31 @@ The defining architectural commitment: **business observability and execution ac
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│  ADVISE                                                          │
-│  Carlota Jo — Private Advisory                                   │
-│  Principal advisory grounded in platform intelligence            │
+│  PLATFORM                                                        │
+│  SZL Holdings — Governed Operational Intelligence                │
+│  The governed decision layer for consequential operations        │
 ├──────────────────────────────────────────────────────────────────┤
-│  EXECUTE                                                         │
-│  Alloy — Execution Fabric                                        │
-│  Workflow engine · Audit trail · Agent coordination              │
-│  Human-in-the-loop gates for consequential actions               │
+│  COMMAND SURFACES                                                │
+│  Lyte (flagship)    CORTEX (mobile)    Command Portal (hub)      │
+│  PRISM framework    iOS + Android      8-domain SSE dashboard    │
+│  Signal → action    All domains        Cross-domain oversight    │
 ├──────────────────────────────────────────────────────────────────┤
-│  OBSERVE · DECIDE · ACT                                          │
-│  Lyte            Aegis           Terra          Vessels          │
-│  Business        Defense &       Real Estate    Maritime         │
-│  Observability   Intelligence    Intelligence   Intelligence     │
-│  PRISM FW        MITRE/SOAR      NYC Distress   AIS Telemetry    │
+│  EXECUTION FABRIC                                                │
+│  Alloy — Workflow orchestration · Approval gates · Audit trail   │
+│  Human-in-the-loop enforcement for all consequential actions     │
+├──────────────────────────────────────────────────────────────────┤
+│  DOMAIN PACKS                                                    │
+│  Aegis       Vessels        Terra           PRISM Counsel        │
+│  Security &  Maritime       Real Estate     Legal Matter         │
+│  Defense     Intelligence   Intelligence    Command              │
+│                                                                  │
+│  Carlota Jo — Premium Advisory   IMPERIUM — Cloud Sovereignty    │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-Additional surfaces: **PRISM Counsel** (legal), **IMPERIUM** (cloud sovereignty), **Command Portal** (ecosystem hub), **CORTEX** (unified mobile), **SZL Holdings** (corporate/investor).
+All surfaces share six governance primitives: Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, and Event Fabric (Prism Bus).
+
+Additional supporting surfaces: **Command Portal** (ecosystem hub), **SZL Holdings** (corporate/investor portal).
 
 ---
 
@@ -152,14 +161,14 @@ Confirmed Action + Full Audit Trail
 │   ├── vessels/            # Vessels — Maritime Intelligence
 │   ├── carlota-jo/         # Carlota Jo — Advisory
 │   ├── command/            # Command Portal — Ecosystem Hub
-│   ├── imperium/           # IMPERIUM — Cloud Sovereignty
+│   ├── imperium/           # IMPERIUM — Cloud Sovereignty (in development)
 │   ├── szl-holdings-mobile/# CORTEX — Unified Mobile Command
 │   ├── prism-counsel/      # PRISM Counsel — Legal Command
 │   ├── stephen-site/       # Stephen Lutar — Founder site
 │   └── mockup-sandbox/     # Component design preview (internal)
 │
 ├── lib/                    # 37 shared TypeScript packages
-│   ├── db/                 # Drizzle schema (644 tables), migrations, seed
+│   ├── db/                 # Drizzle schema (700+ tables), migrations, seed
 │   ├── shared-ui/          # Cross-app React component library
 │   ├── auth/               # OIDC authentication, session management
 │   ├── services/           # Business logic adapters

@@ -41,36 +41,41 @@ const fadeUp = {
 
 const PLATFORM_LAYERS = [
   {
-    tier: "Command Surfaces",
-    description: "Where operators observe, decide, and act.",
+    tier: "Flagship Command",
+    description: "Lyte is the primary operator command surface — the PRISM framework, signal timeline, action queue, and governed approval flow.",
     products: [
-      { name: "Lyte", note: "Web command surface — PRISM framework, signal → action" },
-      { name: "CORTEX", note: "Mobile command surface — field and executive access" },
-      { name: "Command Portal", note: "Ecosystem hub — cross-domain coordination" },
+      { name: "Lyte", note: "Flagship web command — PRISM framework, signal → action, approvals" },
+      { name: "CORTEX", note: "Mobile command — all domains, biometric auth, iOS + Android" },
+      { name: "Command Portal", note: "Ecosystem hub — 8-domain SSE dashboard, cross-domain oversight" },
     ],
     accent: "hsl(192,72%,48%)",
     icon: Eye,
   },
   {
-    tier: "Execution Fabric",
-    description: "The governed intelligence backbone shared by every product.",
+    tier: "Execution Fabric + Primitives",
+    description: "The governed intelligence backbone shared by every surface — six structural primitives enforced at the platform layer.",
     products: [
       { name: "Alloy", note: "Workflow orchestration, approval gates, immutable audit trail" },
-      { name: "Outcome Graph", note: "Decision lifecycle tracking" },
-      { name: "Proof Chain", note: "Cryptographic audit provenance" },
+      { name: "Outcome Graph", note: "Decision lifecycle — recommendation → decision → outcome" },
+      { name: "Proof Chain", note: "Immutable audit trail with AI provenance" },
+      { name: "Covenant Policy", note: "Human-in-the-loop enforcement at the policy layer" },
+      { name: "Decision Simulation", note: "Probabilistic risk modeling before action" },
+      { name: "Workflow Engine", note: "Durable multi-step process orchestration with agent coordination" },
+      { name: "Event Fabric", note: "Cross-domain signal backbone — normalizes and routes events" },
     ],
     accent: "hsl(215,72%,58%)",
     icon: Zap,
   },
   {
     tier: "Domain Packs",
-    description: "Domain-specific intelligence built on shared governance infrastructure.",
+    description: "Domain-specific intelligence built on shared governance infrastructure — not separate products.",
     products: [
-      { name: "Aegis", note: "Security & defense — SOC, XDR, threat intelligence" },
-      { name: "Vessels", note: "Maritime — fleet command, AIS, voyage economics" },
+      { name: "Aegis", note: "Security & defense — SOC, XDR, MITRE ATT&CK, threat intelligence" },
+      { name: "Vessels", note: "Maritime — fleet command, AIS, sanctions, voyage economics" },
       { name: "Terra", note: "Real estate — distress signals, deal pipeline, ownership graph" },
       { name: "PRISM Counsel", note: "Legal — matter command, deadline tracking, governed demand" },
       { name: "Carlota Jo", note: "Advisory — discreet intake, managed delivery, audit-grade" },
+      { name: "IMPERIUM", note: "Cloud sovereignty — multi-cloud governance, policy enforcement" },
     ],
     accent: "hsl(260,60%,65%)",
     icon: Layers,
@@ -78,19 +83,19 @@ const PLATFORM_LAYERS = [
 ];
 
 const EVIDENCE_STATS = [
-  { value: "685", label: "Database tables", note: "across 112 schema files" },
-  { value: "51", label: "Shared packages", note: "pnpm monorepo" },
+  { value: "700+", label: "Database tables", note: "across 116 schema files" },
+  { value: "40+", label: "Shared packages", note: "pnpm monorepo" },
   { value: "15", label: "Active artifacts", note: "web, mobile, API, design" },
   { value: "11", label: "RBAC roles", note: "org-scoped tenant isolation" },
   { value: "9", label: "AI decision types", note: "schema-validated outputs" },
-  { value: "5", label: "Platform primitives", note: "shared across all surfaces" },
+  { value: "6", label: "Platform primitives", note: "shared across all surfaces" },
 ];
 
 const OPERATING_LOOP = [
-  { step: "01", label: "Signal Ingestion", body: "Lyte connects to the approval queues, task systems, and workflow tools your teams already use — and begins tracking what's stuck." },
-  { step: "02", label: "Visibility Surface", body: "Execution risk, ownership gaps, and workflow friction surface before they compound. The signal-to-visibility arc is always live." },
-  { step: "03", label: "Explainable Forecast", body: "What is at risk, why, and what happens next — explained in plain language with source attribution. No opaque model outputs." },
-  { step: "04", label: "Governed Action", body: "Alloy routes action to the right person through the right channel, with approval controls and a full audit trail for every step taken." },
+  { step: "01", label: "Signal surfaces in Lyte", body: "A risk indicator, anomaly, or threshold breach is detected and normalized by the Event Fabric. It appears in Lyte's signal timeline with domain context, severity, and correlation ID." },
+  { step: "02", label: "AI recommends — with evidence", body: "An AI agent analyzes the signal and proposes an action. The recommendation surfaces in Lyte's action queue with source citations, confidence score, and a full provenance record." },
+  { step: "03", label: "Simulation shows the range", body: "For high-stakes decisions, the Decision Simulation engine runs before the recommendation is presented. Operators see expected outcomes, confidence intervals, and the variables that matter most." },
+  { step: "04", label: "Governed approval, then execution", body: "Covenant Policy checks who can approve and what conditions apply. The operator reviews in Lyte or CORTEX and decides. Alloy executes the approved action and the Proof Chain records the complete trail." },
 ];
 
 const TRUST_POINTS = [
@@ -136,6 +141,24 @@ const DOMAIN_PACKS = [
     color: "hsl(260,60%,65%)",
     href: "/solutions/prism-counsel",
     capabilities: ["Matter lifecycle command", "Deadline tracking", "AI-assisted review", "Immutable audit trail"],
+  },
+  {
+    icon: Shield,
+    slug: "Carlota Jo",
+    category: "Premium Advisory",
+    desc: "Discreet client intake, managed service delivery, and advisory operations for UHNW principals. Governance-grade document handling and audit trail.",
+    color: "hsl(340,52%,58%)",
+    href: "/solutions/carlota-jo",
+    capabilities: ["Client intake & onboarding", "Service catalog", "Secure document delivery", "Advisory audit trail"],
+  },
+  {
+    icon: Eye,
+    slug: "IMPERIUM",
+    category: "Cloud Sovereignty",
+    desc: "Multi-cloud governance, policy enforcement, and cloud estate visibility — the same governance primitives applied to infrastructure control and compliance.",
+    color: "hsl(25,72%,52%)",
+    href: "/solutions/imperium",
+    capabilities: ["Cloud policy enforcement", "Multi-cloud visibility", "Configuration drift detection", "Infrastructure audit trail"],
   },
 ];
 
@@ -351,6 +374,18 @@ export default function HomePage() {
                 The governed decision layer for enterprise operations.
               </h1>
 
+              {/* Category definition */}
+              <p style={{
+                fontSize: "0.8125rem",
+                fontFamily: "var(--font-mono)",
+                letterSpacing: "0.03em",
+                color: "hsl(192,72%,52%)",
+                marginBottom: "1rem",
+                lineHeight: 1.5,
+              }}>
+                Governed Operational Intelligence — connect what is observable to what is executable, under governance, with full attribution.
+              </p>
+
               {/* Subhead */}
               <p style={{
                 fontSize: "clamp(1rem,1.8vw,1.125rem)",
@@ -359,15 +394,16 @@ export default function HomePage() {
                 maxWidth: "52ch",
                 marginBottom: "1rem",
               }}>
-                SZL Holdings builds the intelligence infrastructure that connects observable business signals to accountable, executable action — under governance, with full attribution. One platform. Every high-consequence domain.
+                Not a dashboard. Not an AI copilot. The governed decision layer that connects signal detection to action execution — with approval gates, simulation, and an immutable audit trail on every decision that matters.
               </p>
 
               {/* Platform hierarchy quick-read */}
               <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "2.5rem", alignItems: "center" }}>
                 {[
+                  { label: "Lyte", note: "flagship command", color: "hsl(192,72%,48%)" },
                   { label: "Alloy", note: "execution fabric", color: "hsl(215,72%,58%)" },
-                  { label: "Lyte", note: "command surface", color: "hsl(192,72%,48%)" },
-                  { label: "Aegis · Vessels · Terra · PRISM Counsel", note: "domain packs", color: "hsl(260,60%,65%)" },
+                  { label: "CORTEX", note: "mobile command", color: "hsl(175,70%,46%)" },
+                  { label: "Aegis · Vessels · Terra · PRISM Counsel · Carlota Jo · IMPERIUM", note: "domain packs", color: "hsl(260,60%,65%)" },
                 ].map((item, i) => (
                   <div key={item.label} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                     {i > 0 && <span style={{ color: "hsla(0,0%,100%,0.2)", fontSize: "0.75rem" }} aria-hidden="true">→</span>}
@@ -602,10 +638,10 @@ export default function HomePage() {
                   Platform architecture
                 </p>
                 <h2 style={{ fontSize: "clamp(1.75rem,3vw,2.25rem)", fontWeight: 700, letterSpacing: "-0.022em", lineHeight: 1.1, color: "hsl(38,8%,94%)", marginBottom: "1rem", maxWidth: "28ch" }}>
-                  One intelligence backbone. Three architectural layers.
+                  One platform. Six shared primitives. Every high-consequence domain.
                 </h2>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", maxWidth: "52ch" }}>
-                  Every product in the SZL ecosystem shares one governance infrastructure, one authentication model, and one audit trail. Domain packs are not separate products — they are governed extensions of the same platform.
+                  Lyte is the flagship command surface. Alloy is the execution fabric. CORTEX delivers both on mobile. Domain packs extend the same governance infrastructure into security, maritime, real estate, legal, and advisory — without rebuilding the governance layer.
                 </p>
               </div>
             </m.div>
@@ -753,7 +789,7 @@ export default function HomePage() {
             >
               <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", alignItems: "center", justifyContent: "space-between" }}>
                 <p style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", maxWidth: "52ch" }}>
-                  Stack: React 19 · TypeScript · Drizzle ORM · PostgreSQL 16 · Express 5 · Expo · Azure · HuggingFace (Qwen3-8B) · OIDC/PKCE · SCIM 2.0
+                  Stack: React 19 · TypeScript · Drizzle ORM · PostgreSQL 16 · Express 5 · Expo · Azure · OpenAI · Anthropic · Gemini · OIDC/PKCE · SCIM 2.0
                 </p>
                 <Link
                   href="/architecture"
@@ -787,10 +823,10 @@ export default function HomePage() {
                   The governed decision loop
                 </p>
                 <h2 style={{ fontSize: "clamp(1.75rem,3vw,2.25rem)", fontWeight: 700, letterSpacing: "-0.022em", lineHeight: 1.12, marginBottom: "1rem", color: "hsl(38,8%,94%)" }}>
-                  Signal → Context → Action → Proof.
+                  The Lyte workflow — how a signal becomes a governed action.
                 </h2>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "1.75rem" }}>
-                  Every consequential decision follows the same loop across every domain pack — signal detection, context enrichment, recommendation, simulation, policy check, human approval, execution, and immutable outcome record.
+                  Every consequential decision follows the same governed loop in Lyte — signal detection via the Event Fabric, AI recommendation with provenance, Decision Simulation, Covenant Policy check, human approval, and Proof Chain recording. The domain changes. The governance does not.
                 </p>
                 <Link
                   href="/how-it-works"
@@ -1046,13 +1082,13 @@ export default function HomePage() {
                   About SZL Holdings
                 </p>
                 <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)", marginBottom: "1rem" }}>
-                  A platform company, not a portfolio of products.
+                  One governed platform. Not a portfolio of products.
                 </h2>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "1.25rem" }}>
-                  SZL Holdings is a technology holding company founded in 2025. Every platform we build shares one intelligence backbone, one design system, one authentication model, and one data layer. This is not a portfolio of unrelated products — it is a compounding system.
+                  SZL Holdings is a governed operational intelligence platform founded in 2025. Every surface — Lyte, CORTEX, Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo — shares one governance infrastructure, one design system, one authentication model, and one data layer.
                 </p>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "1.75rem" }}>
-                  The defining characteristic of the SZL ecosystem is architectural unity. Adding a new domain pack does not require rebuilding governance infrastructure — it inherits it.
+                  Adding a new domain pack does not require rebuilding governance. It inherits Alloy, all six platform primitives, CORTEX mobile access, and shared RBAC — automatically.
                 </p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
                   <Link

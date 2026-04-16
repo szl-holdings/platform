@@ -3,8 +3,27 @@
 **Version:** 2.0 · **Date:** April 2026
 **Audience:** Engineers, product managers, investors, enterprise evaluators
 
-> Every user-facing surface in the SZL ecosystem — command surfaces, domain packs, mobile, and corporate — with purpose, audience, entry point, and key dependencies.
+> Every user-facing surface in the SZL ecosystem — command surfaces, domain packs, mobile, and corporate — with purpose, taxonomy, audience, and key dependencies.
 > For the product surface-to-primitive mapping see [PRODUCT_SURFACE_MAP.md](PRODUCT_SURFACE_MAP.md). For the category narrative see [CATEGORY_POSITIONING.md](CATEGORY_POSITIONING.md).
+
+---
+
+## Surface Taxonomy
+
+Understanding what each type of surface is — and is not — is essential to understanding the platform.
+
+| Type | What It Is | Examples |
+|------|-----------|---------|
+| **Platform** | The governed decision layer itself — the brand, the thesis, the shared governance infrastructure | SZL Holdings |
+| **Flagship command surface** | The primary operator interface for signal-to-action — where governance is exercised | Lyte |
+| **Execution fabric** | The governance backbone — workflows, approvals, audit trail — shared by all surfaces | Alloy |
+| **Mobile command layer** | Unified mobile access to all domain workspaces and the governance layer | CORTEX |
+| **Ecosystem hub** | Cross-domain real-time overview for platform administrators and ecosystem operators | Command Portal |
+| **Domain pack** | Domain-specific intelligence extension built on the shared governance infrastructure | Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM |
+| **Corporate platform** | Investor portal, trust center, and ecosystem overview — not an operator tool | SZL Holdings (web) |
+| **Platform primitive** | A structural abstraction shared by all surfaces — not a product | Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, Event Fabric |
+
+A domain pack is not a standalone product. It contributes domain-specific signal sources, analysis models, and action vocabulary to the platform. It inherits all six primitives, Alloy governance, CORTEX mobile access, and shared RBAC automatically.
 
 ---
 
@@ -12,27 +31,33 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
+│  PLATFORM                                                       │
+│  SZL Holdings — Governed Operational Intelligence               │
+├─────────────────────────────────────────────────────────────────┤
 │  COMMAND SURFACES                                               │
-│  Lyte — Operator Command    Command Portal — Ecosystem Hub     │
-│  CORTEX — Unified Mobile    SZL Holdings — Corporate           │
+│  Lyte (flagship)   Command Portal (hub)   CORTEX (mobile)      │
+│  PRISM framework   8-domain SSE dash      All domains, one app │
+├─────────────────────────────────────────────────────────────────┤
+│  EXECUTION FABRIC                                               │
+│  Alloy — Workflow orchestration · Approval gates · Audit trail  │
 ├─────────────────────────────────────────────────────────────────┤
 │  DOMAIN PACKS                                                   │
 │  Aegis         Vessels       Terra        PRISM Counsel        │
 │  Security &    Maritime      Real Estate  Legal Matter         │
 │  Defense       Intelligence  Intelligence Command              │
-│  Carlota Jo — Premium Advisory    IMPERIUM — Cloud Sovereignty │
+│  Carlota Jo — Premium Advisory   IMPERIUM — Cloud Sovereignty  │
 ├─────────────────────────────────────────────────────────────────┤
 │  GOVERNANCE INFRASTRUCTURE (shared by all surfaces)            │
-│  Outcome Graph · Proof Chain · Covenant Policy · Monte Carlo   │
-│  Workflow Engine · PRISM Bus · AI Engine · RBAC + Auth         │
-│  Alloy — Execution Fabric (workflows, approvals, audit trail)  │
+│  Outcome Graph · Proof Chain · Covenant Policy                 │
+│  Decision Simulation · Workflow Engine · Event Fabric          │
+│  AI Engine · RBAC + Auth                                       │
 ├─────────────────────────────────────────────────────────────────┤
 │  DATA LAYER                                                     │
 │  PostgreSQL 16 (Drizzle) · External feeds · AI providers       │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-All surfaces share the same five platform primitives — see [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) for the full specification.
+All surfaces share six platform primitives — see [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) for the full specification.
 
 ---
 
@@ -172,25 +197,6 @@ All surfaces share the same five platform primitives — see [PLATFORM_PRIMITIVE
 
 ---
 
-### IMPERIUM — Cloud Sovereignty Engine
-
-| Attribute | Detail |
-|-----------|--------|
-| **Artifact** | `artifacts/imperium` |
-| **Preview Path** | `/imperium/` |
-| **Status** | Functional alpha |
-| **Components** | 11 web components |
-| **Audience** | Executive leadership, strategic planners, enterprise infrastructure owners, operations directors |
-| **Problem solved** | Organizations need sovereign control over their cloud infrastructure with executive-grade visibility |
-| **Core capability** | Strategic command and intelligence briefing platform — executive decision-support (Legatus Console), organizational asset visualization (Imperium Map), governance interface (Senate Chamber), AI tactical insights (Centurion AI), multi-tenant Azure provisioning |
-| **Key modules** | Legatus Console (executive decision support), Imperium Map (asset visualization), Senate Chamber (governance), Centurion AI (tactical insights), multi-tenant Azure provisioning |
-| **Stack** | React 19, Vite, `@szl-holdings/ai-engine`, `@szl-holdings/shared-ui` |
-| **Key dependencies** | `@szl-holdings/ai-engine`, `@szl-holdings/shared-ui` |
-| **Primitives used** | Covenant Policy |
-| **Strategic role** | Cloud sovereignty domain pack — infrastructure control plane, tenant provisioning, cost budget governance, compliance monitoring |
-
----
-
 ### Command Portal — Ecosystem Intelligence Hub
 
 | Attribute | Detail |
@@ -266,7 +272,7 @@ All surfaces share the same five platform primitives — see [PLATFORM_PRIMITIVE
 | **Platform** | iOS + Android (Expo / React Native) |
 | **Audience** | Executives, investors, SZL ecosystem operators, all platform users requiring mobile access |
 | **Core Capability** | All 8 domain workspaces in one Expo/React Native app — biometric authentication, workspace switcher with cross-domain badge counts, unified command feed, workspace-adaptive AI copilot, SpotlightFab quick actions |
-| **Domains** | Lyte, Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, Command, SZL Holdings |
+| **Domains** | Lyte, Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM, Command, SZL Holdings |
 | **Stack** | Expo, React Native, NativeWind, `@szl-holdings/mobile-shared`, `@szl-holdings/shared-ui`, `@szl-holdings/ai-engine`, `@szl-holdings/offline-engine` |
 | **Screens** | 116 mobile screens |
 | **API** | `EXPO_PUBLIC_API_URL` (points to `/api/`) |

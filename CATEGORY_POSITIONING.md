@@ -1,10 +1,10 @@
 # Category Positioning — SZL Holdings
 
-**Version:** 1.0 · **Last updated:** April 2026
+**Version:** 2.0 · **Last updated:** April 2026
 
 ---
 
-## The Category
+## The Category SZL Creates
 
 **Governed Operational Intelligence.**
 
@@ -12,7 +12,7 @@ A new class of enterprise software that connects what is observable to what is e
 
 Not a dashboard. Not an AI copilot. Not a workflow tool.
 
-The governed decision layer that sits between signal detection and action execution, ensuring every consequential decision has a signal source, a routing path, an approval gate, and an audit trail.
+The governed decision layer that sits between signal detection and action execution, ensuring every consequential decision has a signal source, a routing path, a simulation result, an approval gate, and an immutable audit trail.
 
 ---
 
@@ -26,13 +26,15 @@ Signal → Context → Recommendation → Simulation → Policy → Approval →
 
 Every step in this pipeline is instrumented. Every decision is attributed to an actor. Every AI recommendation carries source citations and confidence scores. Every consequential action requires human confirmation before execution.
 
-The platform is composed of three layers:
+The platform is organized in a clear hierarchy:
 
-1. **Lyte** — the command surface. Where operators observe signals, review recommendations, and make decisions.
-2. **Alloy** — the execution fabric. Where workflows are orchestrated, approvals are enforced, and audit trails are generated.
-3. **Domain Packs** — domain-specific intelligence modules (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo) that extend the same governance infrastructure into specific operational domains.
-
-CORTEX provides unified mobile command across all domains.
+| Layer | Product | Role |
+|-------|---------|------|
+| **Platform** | SZL Holdings | The governed decision layer — shared governance infrastructure |
+| **Flagship command** | Lyte | The operator command surface — PRISM framework, signal-to-action |
+| **Execution fabric** | Alloy | The governance backbone — workflow orchestration, approval gates, audit trail |
+| **Mobile command** | CORTEX | Unified mobile command — all domains, one app |
+| **Domain packs** | Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM | Domain-specific intelligence on shared governance infrastructure |
 
 ---
 
@@ -73,13 +75,13 @@ AI copilots add recommendation volume without adding governance.
 | Executes on user's behalf | Requires explicit approval before consequential action |
 | No audit trail | Immutable proof chain with actor attribution |
 | No outcome tracking | Closed-loop feedback: recommendation → decision → outcome |
-| Single-domain | Cross-domain signal correlation |
+| Single-domain | Cross-domain signal correlation via Event Fabric |
 
 The difference is structural, not cosmetic. Governance is enforced at the platform layer (Alloy), not bolted on as an afterthought.
 
 ---
 
-## The Five Platform Primitives
+## The Six Platform Primitives
 
 What makes this platform structurally different from dashboards, copilots, and workflow tools:
 
@@ -88,10 +90,32 @@ What makes this platform structurally different from dashboards, copilots, and w
 | **Outcome Graph** | Tracks the full lifecycle of a recommendation: agent → decision → outcome | Enables closed-loop learning. The platform gets smarter because it knows which recommendations led to which results. |
 | **Proof Chain** | Generates an immutable, verifiable audit trail for every significant action | Compliance teams and regulators can reconstruct any decision chain. AI outputs carry provenance metadata. |
 | **Covenant Policy** | Defines what agents and users can do, under what conditions, with what approval requirements | Human-in-the-loop is not a UI pattern — it is an enforced policy gate that AI cannot bypass. |
-| **Monte Carlo Engine** | Runs probabilistic simulations to model risk and uncertainty before action | Operators see not just "what should we do" but "what could happen if we do it" — with confidence intervals. |
+| **Decision Simulation** | Runs probabilistic simulations to model risk and uncertainty before action | Operators see not just "what should we do" but "what could happen if we do it" — with confidence intervals. |
 | **Workflow Engine** | Orchestrates multi-step processes with durable state, agent coordination, and event-driven triggers | Complex operational decisions are broken into trackable steps, not executed as opaque one-shots. |
+| **Event Fabric** | Cross-domain signal backbone — normalizes, routes, and correlates events across all domain packs | Cross-domain intelligence is possible only because signals from maritime, security, legal, and real estate share a common event layer. |
 
 See [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) for the full technical specification.
+
+---
+
+## The Domain-Pack Extensibility Model
+
+Domain packs extend the platform's governance infrastructure into specific operational domains. They are not separate products — they are governed extensions of the same shared layer.
+
+A domain pack contributes:
+1. **Signal sources** — domain-specific data feeds (AIS telemetry, STIX/TAXII, court records, property records)
+2. **Analysis models** — domain-specific AI agents and scoring engines (Helmsman, Sentinel, etc.)
+3. **Action vocabulary** — domain-specific actions (sanction a vessel, escalate a threat, approve a deal)
+4. **UI surface** — domain-specific screens built on the shared design system
+
+A domain pack inherits from the platform:
+- All six primitives (Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, Event Fabric)
+- Shared RBAC and tenant isolation
+- Alloy execution fabric (approval gates, audit trail)
+- CORTEX mobile command layer
+- API server and shared database
+
+This means a new domain pack can be stood up without rebuilding governance. The infrastructure is already there.
 
 ---
 
@@ -105,7 +129,7 @@ See [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) for the full technical spec
 | Audit trail | Immutable proof chain | Log retention | None | Execution logs |
 | AI governance | Policy-gated, advisory-only | Not applicable | None | None |
 | Outcome tracking | Closed-loop (recommendation → decision → outcome) | None | None | None |
-| Cross-domain intelligence | 6 domain packs on shared governance infrastructure | Per-domain | Single conversation | Per-workflow |
+| Cross-domain intelligence | 6 domain packs on shared governance infrastructure (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM) | Per-domain | Single conversation | Per-workflow |
 | Simulation | Monte Carlo with sensitivity analysis | None | None | None |
 
 ---

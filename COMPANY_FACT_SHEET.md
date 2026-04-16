@@ -20,7 +20,7 @@
 
 ## The Problem
 
-Enterprise operations have a **accountability gap**:
+Enterprise operations have an **accountability gap**:
 - Dashboards show what happened — not what to do next
 - Alerts show what's wrong — not who is responsible
 - AI tools add recommendation volume without governance
@@ -36,39 +36,55 @@ The platform is not a dashboard. It is a **decision surface** with built-in acco
 
 ---
 
-## Platform Structure
+## Platform Hierarchy
 
-**Command surfaces:** Lyte (web) · CORTEX (mobile) · Command Portal (ecosystem hub)
+| Layer | Product | Role |
+|-------|---------|------|
+| **Platform** | SZL Holdings | Governed decision layer — shared governance infrastructure |
+| **Flagship command** | Lyte | Operator command surface — PRISM framework, signal-to-action |
+| **Execution fabric** | Alloy | Governance backbone — workflow orchestration, approval gates, audit trail |
+| **Mobile command** | CORTEX | Unified mobile command — all domains, iOS and Android |
+| **Domain packs** | Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM | Domain-specific intelligence on shared governance infrastructure |
 
-**Execution fabric:** Alloy — workflow orchestration, approval gates, immutable audit trail
+---
 
-**Domain packs:**
+## Domain Packs
 
 | Domain Pack | Domain | Status |
 |-------------|--------|--------|
 | **Aegis** | Security & Defense | Functional alpha |
 | **Vessels** | Maritime Intelligence | Functional alpha |
 | **Terra** | Real Estate Intelligence | Functional alpha |
+| **PRISM Counsel** | Legal Matter Command | Integrated into Aegis |
 | **Carlota Jo** | Premium Advisory | Live |
-| **IMPERIUM** | Cloud Sovereignty | Merged into Command Portal |
+| **IMPERIUM** | Cloud Sovereignty | In development |
 
-**Five platform primitives** (shared by all surfaces):
-- **Outcome Graph** — decision lifecycle tracking
-- **Proof Chain** — immutable audit trail with provenance
-- **Covenant Policy** — permission and human-in-the-loop approval gates
-- **Monte Carlo** — probabilistic risk simulation
-- **Workflow Engine** — durable process orchestration
+---
+
+## Six Platform Primitives
+
+Shared by all surfaces — the structural difference from dashboards, copilots, and workflow tools:
+
+| Primitive | What It Does |
+|-----------|-------------|
+| **Outcome Graph** | Decision lifecycle tracking — recommendation → decision → outcome |
+| **Proof Chain** | Immutable audit trail with provenance for every AI output and action |
+| **Covenant Policy** | Permission and human-in-the-loop approval gates enforced at the platform layer |
+| **Decision Simulation** | Probabilistic risk simulation before consequential action |
+| **Workflow Engine** | Durable multi-step process orchestration with agent coordination |
+| **Event Fabric** | Cross-domain signal backbone — normalizes, routes, and correlates signals across all domain packs |
 
 ---
 
 ## Platform Scale
 
 - **10 canonical artifacts** (7 web domain apps, 1 API, 2 mobile) + 1 internal dev sandbox
-- **561 database tables** across 112 schema files (Drizzle ORM)
-- **48 shared packages** in pnpm monorepo
+- **700+ database tables** across 116 schema files (Drizzle ORM)
+- **40+ shared packages** in pnpm monorepo
 - **11-role RBAC** with org-scoped tenant isolation
 - **9 schema-validated AI decision types**
 - **Immutable audit trail** across all products via Proof Chain
+- **6 platform primitives** shared by all surfaces
 
 ---
 
@@ -78,12 +94,12 @@ The platform is not a dashboard. It is a **decision surface** with built-in acco
 |-------|-----------|
 | **Frontend** | React 19, Vite, TypeScript, Tailwind CSS v4 |
 | **Backend** | Node.js, Express 5, PostgreSQL 16, Drizzle ORM |
-| **AI** | HuggingFace Inference (Qwen3-8B), evidence-backed hybrid retrieval |
+| **AI** | OpenAI, Anthropic, Gemini (multi-provider with fallback), evidence-backed hybrid retrieval |
 | **Auth** | OIDC/PKCE, 11-role RBAC, SCIM 2.0, Azure AD SSO |
 | **Mobile** | Expo / React Native |
 | **Infrastructure** | Azure (App Service, PostgreSQL Flexible, Key Vault, Redis, CDN) |
 | **IaC** | Azure Bicep |
-| **Monorepo** | pnpm workspace |
+| **Monorepo** | pnpm workspace — 40+ packages, 700+ DB tables |
 
 ---
 
@@ -95,7 +111,8 @@ The platform is not a dashboard. It is a **decision surface** with built-in acco
 | Human-in-the-loop | Enforced at governance layer | Optional or absent | Absent |
 | Audit trail | Immutable, append-only | Partial or none | None |
 | AI governance | Advisory only, policy-gated | Not applicable | Absent |
-| Domain depth | Domain-specific intelligence packs | Generic | Generic |
+| Cross-domain intelligence | Event Fabric correlates signals across 6 domain packs | Generic | Generic |
+| Outcome tracking | Closed-loop feedback loop | None | None |
 
 ---
 

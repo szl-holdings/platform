@@ -11,14 +11,23 @@
 - **Correct:** SZL Holdings
 - **Incorrect:** SZL holdings, szl holdings, S.Z.L. Holdings, SZL-Holdings
 
+### Product Hierarchy
+
+The platform hierarchy is strict. Use this order when describing the system:
+
+**SZL Holdings** (platform) → **Lyte** (flagship command) → **Alloy** (execution fabric) → **CORTEX** (mobile command) → **Domain packs** (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM)
+
 Product names:
-- **Lyte** (not LYTE, Lyte Command Center in full)
-- **Alloy** (not ALLOY, Alloy Fabric in full)
-- **Aegis** (not AEGIS)
-- **Vessels** (not VESSELS)
-- **Terra** (not TERRA)
-- **PRISM Counsel** (PRISM is an acronym — always all-caps)
-- **Carlota Jo** (two words, capital J)
+- **Lyte** — the flagship operator command surface (not LYTE, not "Command Portal")
+- **Alloy** — the execution fabric (not ALLOY)
+- **CORTEX** — the unified mobile command layer (always all-caps)
+- **Command Portal** — the ecosystem overview hub (distinct from Lyte)
+- **Aegis** — security & defense domain pack (not AEGIS)
+- **Vessels** — maritime domain pack (not VESSELS)
+- **Terra** — real estate domain pack (not TERRA)
+- **PRISM Counsel** — legal domain pack (PRISM is an acronym — always all-caps)
+- **Carlota Jo** — advisory domain pack (two words, capital J)
+- **IMPERIUM** — cloud sovereignty domain pack (all caps; functionality currently integrated into Command Portal)
 
 ---
 
@@ -32,20 +41,62 @@ Product names:
 
 **Core narrative:** Every consequential decision follows the same governed loop — Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome. This loop runs across all domain packs on shared governance infrastructure.
 
-**Terminology:**
-- Use "domain pack" (not "vertical," "product," or "app") when referring to Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM
-- Use "command surface" (not "dashboard" or "app") for Lyte and CORTEX
-- Use "execution fabric" (not "backend" or "workflow tool") for Alloy
-- Use "platform primitives" (not "features") for Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine
-- Use "governed decision loop" (not "pipeline" or "workflow") for the core signal-to-outcome flow
+---
 
-**Voice:**
+## Terminology Dictionary
+
+Use consistent terminology across all docs, copy, and UI. Deviations create confusion and dilute the narrative.
+
+| Canonical term | Use instead of |
+|---------------|---------------|
+| **Domain pack** | "vertical," "product," "app," "module," "solution" |
+| **Command surface** | "dashboard," "app," "tool" — for Lyte and CORTEX |
+| **Flagship command** | "main product," "lead product" — always refers to Lyte |
+| **Execution fabric** | "backend," "workflow tool," "engine" — always refers to Alloy |
+| **Platform primitives** | "features," "capabilities," "components" — for the six core abstractions |
+| **Governed decision loop** | "pipeline," "workflow," "process" — for the Signal-to-Outcome arc |
+| **Event Fabric** | "event bus," "message queue," "pub/sub" — refers to Prism Bus |
+| **Mobile command** | "mobile app," "iOS app" — refers to CORTEX |
+| **Design partner** | "beta customer," "early customer," "pilot user" |
+| **Advisory-only AI** | Never describe AI as "autonomous" or "agentic" without noting the approval gate |
+
+### Do not use
+
+- "AI-powered" without noting the governance model
+- "Leverage" or "synergize"
+- "Revolutionize" or "disrupt"
+- "Platform" to refer to individual domain packs (a domain pack is not a platform — SZL Holdings is the platform)
+- "Dashboard" to describe Lyte or CORTEX
+- "Tool" to describe Alloy
+
+---
+
+## The Six Platform Primitives (Canonical Names)
+
+Always use the canonical name and never abbreviate or rename:
+
+| Canonical name | Do not call it |
+|---------------|----------------|
+| **Outcome Graph** | "outcome tracker," "feedback loop," "decision log" |
+| **Proof Chain** | "audit log," "audit trail," "provenance log" |
+| **Covenant Policy** | "policy engine," "permissions," "approval rules" |
+| **Decision Simulation** | "Monte Carlo," "risk model," "forecast engine" |
+| **Workflow Engine** | "Alloy engine," "job queue," "process orchestrator" |
+| **Event Fabric** | "Prism Bus," "event bus," "signal router" |
+
+In external copy, "Proof Chain" and "Covenant Policy" are the most distinctive names — use them with brief explanations on first reference. "Decision Simulation" is the user-facing name for the Monte Carlo engine; "Monte Carlo" is acceptable in technical documentation.
+
+---
+
+## Voice
+
 - Direct. No filler language.
 - Confident without being arrogant.
 - Technical when speaking to technical audiences; operational when speaking to operators.
 - Never sensationalist about AI — always pair AI capability with governance commitment.
 
-**Tone:**
+## Tone
+
 - Professional and precise
 - Outcome-oriented (what it does, not what it is)
 - Minimal jargon — when jargon is used, it is explained
@@ -175,6 +226,8 @@ Example: *Proof Chain ensures every AI-generated recommendation carries full pro
 - Don't use stock imagery of people in marketing materials (illustration and UI screenshots preferred)
 - Don't describe the platform as "AI-powered" without noting the governance model — this creates trust risk
 - Don't claim enterprise certifications (SOC 2, ISO 27001) that haven't been achieved
+- Don't call Lyte "deprecated" — Lyte is the flagship command surface
+- Don't describe domain packs as standalone products or separate startups
 
 ---
 
