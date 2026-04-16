@@ -57,6 +57,7 @@ attached_assets/
 
 # Noisy directories — quarantine from public mirror
 .archive/
+.mirror-staging-test/
 .git-rewrite/
 backups/
 exports/
@@ -65,6 +66,10 @@ temp/
 *.bak
 *.backup
 *.sql.gz
+
+# Transient runtime output
+nohup.out
+*.out
 
 # Internal / non-public content
 social-content/
