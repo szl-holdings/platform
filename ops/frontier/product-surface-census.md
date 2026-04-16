@@ -11,7 +11,7 @@ Purpose: Complete inventory of all user-facing surfaces — real vs. aspirationa
 
 | Metric | Value |
 |--------|-------|
-| Source files | 375 ts/tsx |
+| Source files | 402 ts/tsx |
 | Pages/routes | 251 |
 | Classification | CANONICAL |
 | Functionality | Marketing, trust center, docs, fund intelligence, founder profile, Nexus command, developer portal |
@@ -23,7 +23,7 @@ Purpose: Complete inventory of all user-facing surfaces — real vs. aspirationa
 
 | Metric | Value |
 |--------|-------|
-| Source files | 389 ts/tsx |
+| Source files | 395 ts/tsx |
 | Route files | 172 |
 | Lines of code | 82,610+ |
 | Classification | CANONICAL |
@@ -37,40 +37,40 @@ Purpose: Complete inventory of all user-facing surfaces — real vs. aspirationa
 
 | Metric | Value |
 |--------|-------|
-| Source files | 166 ts/tsx |
+| Source files | 166 ts/tsx (165 src/ + 1 vite.config.ts) |
 | Pages/routes | 158 |
 | Classification | CANONICAL |
 | Functionality | SOC command, MITRE ATT&CK mapping, SOAR playbooks, XDR console, Sentinel AI |
 | Backend-connected | Partially — threat intel feeds in demo/stub mode; core SOC UI real |
 | Notes | Full app at /aegis/; firestorm artifact archived (code removed, superseded by aegis) |
 
-### 5. Terra — Real Estate Intelligence (`artifacts/terra`)
+### 4. Terra — Real Estate Intelligence (`artifacts/terra`)
 
 | Metric | Value |
 |--------|-------|
-| Source files | 88 ts/tsx |
+| Source files | 92 ts/tsx |
 | Pages/routes | 73 |
 | Classification | CANONICAL |
 | Functionality | NYC distress pipeline, ownership entity graph, deal pipeline, MLS ingestion, broker workflow |
 | Backend-connected | Yes — API routes exist; some data sources in demo mode |
 | DB tables | 17 (per README) |
 
-### 6. Vessels — Maritime Intelligence (`artifacts/vessels`)
+### 5. Vessels — Maritime Intelligence (`artifacts/vessels`)
 
 | Metric | Value |
 |--------|-------|
-| Source files | 103 ts/tsx |
+| Source files | 103 ts/tsx (102 src/ + 1 vite.config.ts) |
 | Pages/routes | 84 |
 | Classification | CANONICAL |
 | Functionality | AIS fleet tracking, sanctions screening, voyage economics, dark vessel detection, commodity trading |
 | Backend-connected | Partially — AIS feed is demo; commercial modules wired to DB |
 | DB tables | 30+ (per README) |
 
-### 7. Carlota Jo — Premium Advisory (`artifacts/carlota-jo`)
+### 6. Carlota Jo — Premium Advisory (`artifacts/carlota-jo`)
 
 | Metric | Value |
 |--------|-------|
-| Source files | 70 ts/tsx |
+| Source files | 70 ts/tsx (69 src/ + 1 vite.config.ts) |
 | Pages/routes | 49 |
 | Classification | CANONICAL |
 | Functionality | Client management, service catalog, booking, document delivery, messaging |
@@ -78,17 +78,17 @@ Purpose: Complete inventory of all user-facing surfaces — real vs. aspirationa
 | DB tables | 10 (per README) |
 | README status | Listed as "Live" |
 
-### 8. Command — Unified Operations (`artifacts/command`)
+### 7. Command — Unified Operations (`artifacts/command`)
 
 | Metric | Value |
 |--------|-------|
-| Source files | 222 ts/tsx |
+| Source files | 223 ts/tsx |
 | Pages/routes | 172 |
 | Classification | CANONICAL |
 | Functionality | Strategy, operations, infrastructure command — absorbs Lyte + Imperium |
 | Backend-connected | Yes — SSE real-time, signal timeline, approval queues |
 
-### 9. SZL Holdings Mobile (`artifacts/szl-holdings-mobile`)
+### 8. SZL Holdings Mobile (`artifacts/szl-holdings-mobile`)
 
 | Metric | Value |
 |--------|-------|
@@ -99,7 +99,7 @@ Purpose: Complete inventory of all user-facing surfaces — real vs. aspirationa
 | iOS credential | PLACEHOLDER (.example tracked; real file in .gitignore) |
 | Release readiness | Alpha — not yet on TestFlight/Play Store |
 
-### 10. CORTEX Mobile (`artifacts/cortex-mobile`)
+### 9. CORTEX Mobile (`artifacts/cortex-mobile`)
 
 | Metric | Value |
 |--------|-------|

@@ -23,13 +23,13 @@ Authority: Phase 0 Truth Audit — verified against live repo
 
 | Artifact | Dir | Src Files | Classification | Disposition |
 |----------|-----|-----------|----------------|-------------|
-| szl-holdings | `artifacts/szl-holdings` | 375 | CANONICAL-NOW | Keep — primary public flagship |
-| api-server | `artifacts/api-server` | 389 | CANONICAL-NOW | Keep — sole backend |
+| szl-holdings | `artifacts/szl-holdings` | 402 | CANONICAL-NOW | Keep — primary public flagship |
+| api-server | `artifacts/api-server` | 395 | CANONICAL-NOW | Keep — sole backend |
 | aegis | `artifacts/aegis` | 166 | CANONICAL-NOW | Keep — defense & security UI |
-| terra | `artifacts/terra` | 88 | CANONICAL-NOW | Keep — real estate intelligence |
+| terra | `artifacts/terra` | 92 | CANONICAL-NOW | Keep — real estate intelligence |
 | vessels | `artifacts/vessels` | 103 | CANONICAL-NOW | Keep — maritime intelligence |
 | carlota-jo | `artifacts/carlota-jo` | 70 | CANONICAL-NOW | Keep — advisory consulting |
-| command | `artifacts/command` | 222 | CANONICAL-NOW | Keep — unified ops command (absorbed Lyte + IMPERIUM) |
+| command | `artifacts/command` | 223 | CANONICAL-NOW | Keep — unified ops command (absorbed Lyte + IMPERIUM) |
 | firestorm | `artifacts/firestorm` | 0 | ARCHIVE | Code removed; ARCHIVED.md; superseded by aegis |
 | lyte-command-center | `artifacts/lyte-command-center` | 1 | ARCHIVE | Code removed; DEPRECATED.md; merged into command |
 | imperium | `artifacts/imperium` | 0 | ARCHIVE | Code removed; DEPRECATED.md; merged into command |
@@ -127,7 +127,7 @@ README was updated as part of Task #893. Current accuracy:
 |-------|--------|-------|
 | DB tables: 561 | CLOSE | Actual: 569 (8 tables added since last count) |
 | Schema files: 112 | CLOSE | Actual: 116 |
-| Packages: 51 | CLOSE | Actual: 53 dirs (35 lib + 17 artifact + 1 packages) |
+| Packages: 51 | CLOSE | Actual: 49 dirs (34 lib + 15 artifact) |
 | Products table | ACCURATE | Deprecated apps correctly marked |
 | Node 24 | ACCURATE | Matches .replit modules |
 | CORTEX Mobile: "Alpha prep" | MISLEADING | Only 2 src files — scaffold, not alpha |

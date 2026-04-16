@@ -8,33 +8,33 @@ Generated: 2026-04-16 (updated)
 
 ```
 szl-holdings-platform/
-├── artifacts/                    # 17 dirs (7 canonical web, 1 mobile, 1 internal, 5 archived, 1 shell)
-│   ├── api-server/               # CANONICAL — Express API (389 src files)
-│   ├── szl-holdings/             # CANONICAL — Flagship web (375 src files)
-│   ├── aegis/                    # CANONICAL — Defense & security UI (166 src files)
-│   ├── terra/                    # CANONICAL — Real estate intelligence (88 src files)
-│   ├── vessels/                  # CANONICAL — Maritime intelligence (103 src files)
-│   ├── carlota-jo/               # CANONICAL — Advisory consulting (70 src files)
-│   ├── command/                  # CANONICAL — Unified ops command (222 src files)
-│   ├── szl-holdings-mobile/      # CANONICAL MOBILE — Primary Expo app (167 src files)
-│   ├── cortex-mobile/            # SHELL — Expo scaffold only (2 src files)
+├── artifacts/                    # 15 dirs (7 canonical web, 1 mobile, 1 internal, 5 archived, 1 shell)
+│   ├── api-server/               # CANONICAL — Express API (395 ts/tsx)
+│   ├── szl-holdings/             # CANONICAL — Flagship web (402 ts/tsx)
+│   ├── aegis/                    # CANONICAL — Defense & security UI (166 ts/tsx)
+│   ├── terra/                    # CANONICAL — Real estate intelligence (92 ts/tsx)
+│   ├── vessels/                  # CANONICAL — Maritime intelligence (103 ts/tsx)
+│   ├── carlota-jo/               # CANONICAL — Advisory consulting (70 ts/tsx)
+│   ├── command/                  # CANONICAL — Unified ops command (223 ts/tsx)
+│   ├── szl-holdings-mobile/      # CANONICAL MOBILE — Primary Expo app (167 ts/tsx)
+│   ├── cortex-mobile/            # SHELL — Expo scaffold only (2 ts/tsx)
 │   ├── firestorm/                # ARCHIVE — ARCHIVED.md; code removed; superseded by aegis
 │   ├── lyte-command-center/      # ARCHIVE — DEPRECATED.md; merged into command
 │   ├── imperium/                 # ARCHIVE — DEPRECATED.md; merged into command
 │   ├── prism-counsel/            # ARCHIVE — DEPRECATED.md; deprecated task #579
 │   ├── stephen-site/             # ARCHIVE — DEPRECATED.md; content moved to /founder
-│   └── mockup-sandbox/           # INTERNAL — UI prototyping only (5 src files)
+│   └── mockup-sandbox/           # INTERNAL — UI prototyping only (5 ts/tsx)
 │
-├── lib/                          # 35 shared libraries (2 empty shells)
+├── lib/                          # 34 shared libraries (2 minimal shells)
 │   ├── HIGH ACTIVITY (100+ files)
-│   │   ├── ai-engine/            # AI orchestration (129 ts)
-│   │   ├── api-zod/              # Zod validation (154 ts)
-│   │   ├── shared-ui/            # Design system (205 ts)
-│   │   ├── services/             # Business services (99 ts)
-│   │   └── db/                   # Database schemas (113 ts)
+│   │   ├── ai-engine/            # AI orchestration (258 ts)
+│   │   ├── api-zod/              # Zod validation (308 ts)
+│   │   ├── shared-ui/            # Design system (358 ts)
+│   │   ├── services/             # Business services (211 ts)
+│   │   └── db/                   # Database schemas (211 ts)
 │   │
 │   ├── MEDIUM ACTIVITY (10–99 files)
-│   │   ├── observability/        # Telemetry (44 ts)
+│   │   ├── observability/        # Telemetry (75 ts)
 │   │   ├── mobile-shared/        # Mobile components (45 ts)
 │   │   ├── graphql-client/       # GraphQL (13 ts)
 │   │   ├── forge-runtime/        # Agent engine (14 ts)
@@ -47,26 +47,26 @@ szl-holdings-platform/
 │   │   ├── mcp-client/           # Model Context Protocol (7 ts)
 │   │   ├── covenant-policy/      # Policy engine (5 ts)
 │   │   ├── pulse-evals/          # Evaluations (5 ts)
-│   │   ├── receipt-graph/        # Receipt tracking (4 ts)
-│   │   ├── api-client-react/     # React API client (4 ts)
+│   │   ├── receipt-graph/        # Receipt tracking (8 ts)
+│   │   ├── api-client-react/     # React API client (8 ts)
 │   │   ├── crdt-sync/            # CRDT (3 ts)
-│   │   ├── analytics/            # Analytics wrapper (3 ts)
+│   │   ├── analytics/            # Analytics wrapper (6 ts)
 │   │   ├── object-storage-web/   # Object storage (3 ts)
-│   │   ├── replit-auth-web/      # Replit auth (3 ts)
+│   │   ├── replit-auth-web/      # Replit auth (5 ts)
 │   │   ├── i18n/                 # Internationalization (3 ts)
-│   │   ├── audit/                # Audit wrapper (2 ts)
-│   │   ├── auth/                 # Auth middleware (1 ts)
-│   │   ├── config/               # Config (1 ts)
-│   │   ├── data-connectors/      # Connectors (1 ts)
+│   │   ├── audit/                # Audit wrapper (4 ts)
+│   │   ├── auth/                 # Auth middleware (2 ts)
+│   │   ├── config/               # Config (2 ts)
+│   │   ├── data-connectors/      # Connectors (2 ts)
+│   │   ├── worldline/            # Signal routing (2 ts)
+│   │   ├── workflow-engine/      # Workflow (8 ts)
 │   │   ├── outcome-graph/        # Outcome modeling (1 ts)
 │   │   ├── proof-chain/          # Audit chain (1 ts)
-│   │   ├── worldline/            # Signal routing (1 ts)
-│   │   ├── workflow-engine/      # Workflow (1 ts)
 │   │   └── atlas-artifacts/      # Artifacts (1 ts)
 │   │
-│   └── SHELLS (no source code)
-│       ├── api-spec/             # Empty package — no src or index.ts
-│       └── approvals/            # Empty package — no src or index.ts
+│   └── MINIMAL SHELLS (1 file each)
+│       ├── api-spec/             # Minimal spec package
+│       └── approvals/            # Minimal approvals package
 │
 ├── ops/                          # Operations documentation
 │   ├── frontier/                 # Topology & truth audit (this series)
