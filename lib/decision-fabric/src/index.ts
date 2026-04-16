@@ -15,6 +15,10 @@
  */
 
 export * from "./correlation";
+export type {
+  TemporalProximityOptions,
+  TemporallyCorrelatedEvent,
+} from "./correlation";
 export * from "./decision-records";
 export * from "./workflow-360";
 export * from "./entity-investigation";

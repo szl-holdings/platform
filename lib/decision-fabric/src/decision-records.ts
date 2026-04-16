@@ -19,14 +19,43 @@ import {
   type FabricSimulationSnapshot,
 } from "@szl-holdings/db";
 import { and, desc, eq } from "drizzle-orm";
+import { linkEvent } from "./correlation";
 
 export type { DecisionRecord, PolicyVersion, FabricSimulationSnapshot };
 export type SimulationSnapshot = FabricSimulationSnapshot;
 
 export interface RecordDecisionParams extends Omit<InsertDecisionRecord, "id"> {}
 
+/**
+ * Persist a decision record. If the caller supplies a `correlationId` and/or
+ * `workflowRunId`, the fabric automatically emits a corresponding
+ * `decision_record` correlation link so Workflow 360 / Entity Investigation
+ * timelines surface the decision without callers having to remember to call
+ * `linkEvent` separately.
+ *
+ * The auto-emit is best-effort: a link-emit failure is logged but does not
+ * roll back the decision insert, since the decision record is the canonical
+ * artifact and the correlation index is a derived view.
+ */
 export async function recordDecision(params: RecordDecisionParams): Promise<DecisionRecord> {
   const [row] = await db.insert(decisionRecordsTable).values(params).returning();
+  if (row.correlationId || row.workflowRunId) {
+    try {
+      await linkEvent({
+        correlationId: row.correlationId ?? `decision:${row.id}`,
+        primitive: "decision_record",
+        primitiveId: String(row.id),
+        orgId: row.orgId,
+        entityType: row.entityType ?? null,
+        entityId: row.entityId ?? null,
+        workflowRunId: row.workflowRunId ?? null,
+        domain: row.domain,
+        metadata: { title: row.title, status: row.status },
+      });
+    } catch {
+      // Derived index; intentional best-effort.
+    }
+  }
   return row;
 }
 

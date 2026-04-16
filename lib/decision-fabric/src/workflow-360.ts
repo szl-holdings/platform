@@ -25,7 +25,14 @@ export interface Workflow360TimelineEntry {
 
 export interface Workflow360View {
   workflowRunId: string;
+  /**
+   * The most-recent decision record for the workflow run, kept for
+   * backwards compatibility. New consumers should use `decisionRecords`
+   * which lists every decision in chronological order.
+   */
   decisionRecord: DecisionRecord | null;
+  /** All decision records associated with this workflow run, oldest-first. */
+  decisionRecords: DecisionRecord[];
   totalEvents: number;
   primitivesTouched: CorrelationLink["primitive"][];
   timeline: Workflow360TimelineEntry[];
@@ -45,19 +52,20 @@ export async function getWorkflow360(
     limit: options.limit ?? 500,
   });
 
-  const drConditions: any[] = [eq(decisionRecordsTable.workflowRunId, workflowRunId)];
+  const drConditions = [eq(decisionRecordsTable.workflowRunId, workflowRunId)];
   if (options.orgId != null) drConditions.push(eq(decisionRecordsTable.orgId, options.orgId));
-  const [decision] = await db
+  const decisionRows = await db
     .select()
     .from(decisionRecordsTable)
     .where(and(...drConditions))
-    .limit(1);
+    .orderBy(decisionRecordsTable.createdAt);
 
   const primitives = Array.from(new Set(events.map((e) => e.primitive)));
 
   return {
     workflowRunId,
-    decisionRecord: decision ?? null,
+    decisionRecord: decisionRows[decisionRows.length - 1] ?? null,
+    decisionRecords: decisionRows,
     totalEvents: events.length,
     primitivesTouched: primitives,
     timeline: events.map((e) => ({

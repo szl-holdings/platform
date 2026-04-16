@@ -18,7 +18,7 @@ import {
   type CorrelationLink,
   type InsertCorrelationLink,
 } from "@szl-holdings/db";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, gte, lte } from "drizzle-orm";
 
 export type Primitive = InsertCorrelationLink["primitive"];
 export type FabricDomain = InsertCorrelationLink["domain"];
@@ -90,6 +90,63 @@ export async function getEventsForWorkflowRun(
     .where(and(...conditions))
     .orderBy(correlationLinksTable.occurredAt)
     .limit(options.limit ?? 500);
+}
+
+/**
+ * Temporal proximity correlation.
+ *
+ * When primitives emit events without a shared `correlationId` (legacy
+ * code paths, third-party webhooks, side-effects from background jobs),
+ * the fabric still needs to reconstruct what happened together. This
+ * helper finds every primitive event for a given (entityType, entityId)
+ * within ±`windowSeconds` of an anchor timestamp and groups them by
+ * primitive — answering "what else was happening to this entity right
+ * around when X occurred?" without requiring an explicit correlation id.
+ *
+ * The strategy is intentionally conservative: it relies on the index
+ * already maintained on (entity_type, entity_id, occurred_at) and only
+ * matches on entity reference + a bounded time window. Domain may be
+ * passed as an additional filter to keep cross-domain noise out.
+ */
+export interface TemporalProximityOptions {
+  orgId?: number | null;
+  domain?: FabricDomain;
+  windowSeconds?: number;
+  limit?: number;
+}
+
+export interface TemporallyCorrelatedEvent extends CorrelationLink {
+  /** Absolute distance from the anchor timestamp in milliseconds. */
+  deltaMs: number;
+}
+
+export async function findTemporallyCorrelatedEvents(
+  entityType: string,
+  entityId: string,
+  anchorAt: Date,
+  options: TemporalProximityOptions = {},
+): Promise<TemporallyCorrelatedEvent[]> {
+  const windowMs = (options.windowSeconds ?? 300) * 1000;
+  const lower = new Date(anchorAt.getTime() - windowMs);
+  const upper = new Date(anchorAt.getTime() + windowMs);
+  const conditions = [
+    eq(correlationLinksTable.entityType, entityType),
+    eq(correlationLinksTable.entityId, entityId),
+    gte(correlationLinksTable.occurredAt, lower),
+    lte(correlationLinksTable.occurredAt, upper),
+  ];
+  if (options.orgId != null) conditions.push(eq(correlationLinksTable.orgId, options.orgId));
+  if (options.domain) conditions.push(eq(correlationLinksTable.domain, options.domain));
+  const rows = await db
+    .select()
+    .from(correlationLinksTable)
+    .where(and(...conditions))
+    .orderBy(correlationLinksTable.occurredAt)
+    .limit(options.limit ?? 200);
+  return rows.map((r) => ({
+    ...r,
+    deltaMs: Math.abs(r.occurredAt.getTime() - anchorAt.getTime()),
+  }));
 }
 
 /** Fetch every event linked to an entity across primitives. */
