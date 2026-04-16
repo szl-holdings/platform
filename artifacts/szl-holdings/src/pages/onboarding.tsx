@@ -7,6 +7,7 @@ import {
   Loader2, AlertCircle, ChevronRight,
 } from "lucide-react";
 import { apiFetch } from "@szl-holdings/shared-ui";
+import { markActivationEvent } from "@szl-holdings/shared-ui/onboarding";
 
 const API = "/api";
 
@@ -126,6 +127,7 @@ export default function OnboardingPage({ orgSlug: initialOrgSlug }: { orgSlug?: 
       setSentInvites((prev) => [...prev, inviteEmail]);
       setInviteEmail("");
       setError(null);
+      markActivationEvent("teamMemberInvited");
     },
     onError: (err: Error) => setError(err.message),
   });

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "wouter";
+import { useState, useCallback } from "react";
+import { Link, useLocation } from "wouter";
 import { Header } from "../components/header";
 import { EcosystemPulse } from "../components/ecosystem-pulse";
 import { DomainGrid } from "../components/domain-grid";
@@ -14,6 +14,8 @@ import { CorrelationMapViz } from "../components/correlation-map-viz";
 import { SignalChainsPanel } from "../components/signal-chains-panel";
 import { useEcosystemData } from "../hooks/use-ecosystem-data";
 import { MorningBriefingCard, DEMO_BRIEFING_HISTORY } from "@szl-holdings/shared-ui";
+import { ActivationBanner, useActivationState } from "@szl-holdings/shared-ui/onboarding";
+import type { ActivationStep } from "@szl-holdings/shared-ui/onboarding";
 import { GitBranch, Zap, Map } from "lucide-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -44,6 +46,52 @@ function SectionNav() {
 export function Dashboard() {
   const { data, dataUpdatedAt, sseConnected } = useEcosystemData();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [, navigate] = useLocation();
+
+  const activation = useActivationState({
+    apiBaseUrl: `${BASE}/api`,
+    pollIntervalMs: 60_000,
+  });
+
+  const activationSteps: ActivationStep[] = [
+    {
+      id: "connect-signal",
+      label: "Connect a signal source",
+      description: "Link Slack, Jira, or another source to start receiving live signals",
+      completed: activation.signalSourceConnected,
+      href: `${BASE}/settings/integrations`,
+    },
+    {
+      id: "deploy-workflow",
+      label: "Deploy your first workflow",
+      description: "Choose a template and launch it through Alloy",
+      completed: activation.workflowDeployed,
+      href: `${BASE}/alloy/factory-floor`,
+    },
+    {
+      id: "triage-action",
+      label: "Triage your first action",
+      description: "Review and approve a pending decision in the action queue",
+      completed: activation.actionTriaged,
+      href: `${BASE}/operations/action-queue`,
+    },
+    {
+      id: "invite-team",
+      label: "Invite a team member",
+      description: "Bring your team into the platform",
+      completed: activation.teamMemberInvited,
+      href: `${BASE}/settings/team`,
+    },
+  ];
+
+  const handleNavigate = useCallback(
+    (href: string) => {
+      const base = BASE.replace(/\/$/, "");
+      const path = href.startsWith(base) ? href.slice(base.length) || "/" : href;
+      navigate(path);
+    },
+    [navigate],
+  );
 
   if (!data) {
     return (
@@ -75,6 +123,15 @@ export function Dashboard() {
         <div className="flex flex-col gap-3">
           <FusionBar />
           <SectionNav />
+          {!activation.isLoading && (
+            <ActivationBanner
+              steps={activationSteps}
+              accentColor="#8b7ac8"
+              storageKey="command_activation_banner"
+              variant="banner"
+              onNavigate={handleNavigate}
+            />
+          )}
         </div>
 
         <EcosystemPulse

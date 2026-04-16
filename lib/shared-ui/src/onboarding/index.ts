@@ -4,3 +4,22 @@ export { OnboardingChecklist, type ChecklistItem, type OnboardingChecklistProps 
 export { HelpTip, type HelpTipProps } from "./help-tip";
 export { ChangelogPage, type ChangelogEntry } from "./changelog-page";
 export { useOnboardingAnalytics } from "./use-onboarding-analytics";
+export {
+  ActivationBanner,
+  SetupAlert,
+  type ActivationStep,
+  type ActivationBannerProps,
+  type SetupAlertProps,
+} from "./ActivationBanner";
+export {
+  PaywallGate,
+  TrialBanner,
+  type PaywallGateProps,
+  type TrialBannerProps,
+} from "./PaywallGate";
+export {
+  useActivationState,
+  markActivationEvent,
+  type ActivationState,
+  type ActivationStateOptions,
+} from "./use-activation-state";

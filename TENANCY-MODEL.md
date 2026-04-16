@@ -67,7 +67,7 @@ Cross-tenant data access is **architecturally prevented**:
 
 1. User signs up via OIDC flow
 2. System creates a new `org` record with default plan
-3. User is assigned `org_owner` role in the new org
+3. User is assigned `owner` role in the new org
 4. Default configuration (feature flags, plan limits) applied
 5. Onboarding wizard guides initial setup
 

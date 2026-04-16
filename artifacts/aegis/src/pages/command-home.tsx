@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { LiveClock } from "@szl-holdings/shared-ui";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -10,7 +10,11 @@ import {
   ClipboardCheck, BarChart3, RefreshCw, Hexagon, ShieldCheck, FileText,
   Radio,
 } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
+import { ActivationBanner, useActivationState } from "@szl-holdings/shared-ui/onboarding";
+import type { ActivationStep } from "@szl-holdings/shared-ui/onboarding";
+
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 
 const DS = {
   page: "#070A10",
@@ -193,6 +197,48 @@ export default function CommandHome() {
   const { data: alerts = [] } = useQuery<AegisAlert[]>({ queryKey: ["aegis-alerts"], queryFn: () => api.alerts.list() });
   const { data: decisionsData, isSuccess: decisionsLoaded } = useQuery<DecisionsPayload>({ queryKey: ["command-decisions"], queryFn: () => api.command.decisions(), retry: false });
   const { data: playbooksData, isSuccess: playbooksLoaded } = useQuery<PlaybooksPayload>({ queryKey: ["command-playbooks"], queryFn: () => api.command.playbooks(), retry: false });
+  const [, navigate] = useLocation();
+
+  const activation = useActivationState({ apiBaseUrl: `${BASE}/api`, pollIntervalMs: 60_000 });
+
+  const handleNavigate = useCallback(
+    (href: string) => {
+      const base = BASE.replace(/\/$/, "");
+      navigate(href.startsWith(base) ? href.slice(base.length) || "/" : href);
+    },
+    [navigate],
+  );
+
+  const activationSteps: ActivationStep[] = [
+    {
+      id: "connect-feeds",
+      label: "Connect a threat feed",
+      description: "Link SIEM, EDR, or threat intelligence sources to Aegis",
+      completed: activation.signalSourceConnected,
+      href: `${BASE}/settings/integrations`,
+    },
+    {
+      id: "deploy-playbook",
+      label: "Deploy an incident playbook",
+      description: "Activate automated response workflows for your threat landscape",
+      completed: activation.workflowDeployed,
+      href: `${BASE}/soc`,
+    },
+    {
+      id: "review-decision",
+      label: "Review a security decision",
+      description: "Approve or reject a pending action in the decision console",
+      completed: activation.actionTriaged,
+      href: `${BASE}/decision-console`,
+    },
+    {
+      id: "invite-analyst",
+      label: "Invite a security analyst",
+      description: "Add team members to collaborate on incident response",
+      completed: activation.teamMemberInvited,
+      href: `${BASE}/settings/team`,
+    },
+  ];
 
   const activeIncidents = incidents.filter(i => i.status !== "closed");
   const criticalIncidents = activeIncidents.filter(i => i.severity === "critical");
@@ -262,6 +308,19 @@ export default function CommandHome() {
           <LiveClock className="font-mono tabular-nums text-[10px]" style={{ color: DS.text.muted }} />
         </div>
       </div>
+
+      {/* Activation banner */}
+      {!activation.isLoading && (
+        <div style={{ padding: "0.5rem 1.5rem", borderBottom: `1px solid ${DS.border}` }}>
+          <ActivationBanner
+            steps={activationSteps}
+            accentColor="#3b82f6"
+            storageKey="aegis_activation_banner"
+            variant="banner"
+            onNavigate={handleNavigate}
+          />
+        </div>
+      )}
 
       {/* Threat level strip */}
       <div style={{ padding: "0.5rem 1.5rem", borderBottom: `1px solid ${DS.border}`, display: "flex", alignItems: "center", gap: "1.5rem", overflow: "hidden", background: "rgba(0,0,0,0.3)" }}>

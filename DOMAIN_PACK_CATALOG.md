@@ -58,7 +58,7 @@ Every pack contributes the following components:
 
 **Scenario library:** `AEGIS_CYBER_RISK` (expected loss given current controls), `AEGIS_RESPONSE_TIME_DECAY` (impact of delayed response).
 
-**RBAC mapping:** `security_analyst`, `analyst`, `operator`, `org_admin`.
+**RBAC mapping:** `security_analyst`, `analyst`, `operator`, `admin`.
 
 **Surfaces:** `/aegis` web app, Command Portal Aegis tile, CORTEX security feed.
 
@@ -118,7 +118,7 @@ Every pack contributes the following components:
 
 **Scenario library:** `PRISM_SETTLEMENT_RANGE` (likely settlement under case strength + jurisdiction).
 
-**RBAC mapping:** `analyst`, `operator`, `approver`, `org_admin`.
+**RBAC mapping:** `analyst`, `operator`, `approver`, `admin`.
 
 **Surfaces:** `/prism-counsel` web app.
 
@@ -138,7 +138,7 @@ Every pack contributes the following components:
 
 **Scenario library:** None pack-specific yet (scheduled FY27).
 
-**RBAC mapping:** `viewer` (client), `operator`, `org_admin`.
+**RBAC mapping:** `viewer` (client), `operator`, `admin`.
 
 **Surfaces:** `/carlota-jo` public + client portal.
 

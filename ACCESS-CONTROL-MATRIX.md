@@ -131,7 +131,7 @@ Admin routes (`/admin`) are protected by `adminGuard` (`artifacts/api-server/src
 | `/prism-counsel/*` (app routes) | PRIVATE | `analyst` | Matter management app |
 | `/alloy/*` | PRIVATE | `operator` | Alloy workflow app |
 | `/investors/*` | PRIVATE | `viewer` | NDA-gated investor hub |
-| `/investors/data-room` | PRIVATE | `org_admin` | Highly restricted |
+| `/investors/data-room` | PRIVATE | `admin` | Highly restricted |
 | `/admin` | INTERNAL | `super_admin` + PIN | CMS admin panel (PIN-gated) |
 | `/kpi-dashboard`, `/ops/*` | INTERNAL | `super_admin` | Internal operations |
 | `/ownership-os` | INTERNAL | `super_admin` | Internal tool |
@@ -147,7 +147,7 @@ Admin routes (`/admin`) are protected by `adminGuard` (`artifacts/api-server/src
 | Action queue (read) | PRIVATE | `analyst` |
 | Action queue (approve/reject) | PRIVATE | `approver` |
 | Workflow management | PRIVATE | `operator` |
-| AIOps admin | PRIVATE | `org_admin` |
+| AIOps admin | PRIVATE | `admin` |
 
 ---
 
@@ -164,7 +164,7 @@ Admin routes (`/admin`) are protected by `adminGuard` (`artifacts/api-server/src
 | Deception grid management | PRIVATE | `security_analyst` |
 | INCA / Intelligence Labs | PRIVATE | `security_analyst` |
 | Managed services (Command workspace) | PRIVATE | `operator` |
-| Admin functions | PRIVATE | `org_admin` |
+| Admin functions | PRIVATE | `admin` |
 
 ---
 
@@ -208,7 +208,7 @@ Admin routes (`/admin`) are protected by `adminGuard` (`artifacts/api-server/src
 | Recovery operations | PRIVATE | `operator` |
 | Court filings | PRIVATE | `operator` |
 | Approval chains | PRIVATE | `approver` |
-| Admin health | PRIVATE | `org_admin` |
+| Admin health | PRIVATE | `admin` |
 | No-Fault module | PRIVATE | `analyst` |
 
 ---
@@ -221,7 +221,7 @@ Admin routes (`/admin`) are protected by `adminGuard` (`artifacts/api-server/src
 | Client portal | PRIVATE | `viewer` (client role) |
 | Operator view | PRIVATE | `operator` |
 | Booking management | PRIVATE | `operator` |
-| Admin functions | PRIVATE | `org_admin` |
+| Admin functions | PRIVATE | `admin` |
 
 ---
 
@@ -261,7 +261,7 @@ Admin routes (`/admin`) are protected by `adminGuard` (`artifacts/api-server/src
 | `/api/ai/ops/evaluators/stats` (read) | PRIVATE | `admin` — platform-global data |
 | `/api/intelligence/*` | PRIVATE | `analyst` |
 | `/api/storage/*` | PRIVATE | `analyst` |
-| `/api/billing/*` | PRIVATE | `org_owner` |
+| `/api/billing/*` | PRIVATE | `owner` |
 | `/api/billing/webhook` | PUBLIC | Stripe signature |
 | `/api/admin/*` | INTERNAL | `super_admin` |
 | `/api/notifications/*` | PRIVATE | `operator` |

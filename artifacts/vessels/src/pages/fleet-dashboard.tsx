@@ -6,14 +6,16 @@ import { dataProvider } from "@/data/data-provider";
 import { VesselsGraphQLPanel } from "@/components/graphql-data-panel";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Ship, Globe, MapPin, X, ChevronRight, Radio, Shield, Clock, AlertTriangle, Eye, EyeOff, Anchor, TrendingUp, Package, BarChart3 } from "lucide-react";
 import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { ExportButton } from "@szl-holdings/shared-ui/data-export";
 import { ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 import { DataProvenance, ActionLoop, RoleSelector } from "@szl-holdings/shared-ui";
 import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
+import { ActivationBanner, useActivationState } from "@szl-holdings/shared-ui/onboarding";
+import type { ActivationStep } from "@szl-holdings/shared-ui/onboarding";
 
 const statusColors: Record<string, string> = {
   at_sea: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -656,11 +658,55 @@ function RouteForecastPanel() {
 
 type IntelTab = "behavioral" | "dark" | "sanctions" | "cargo" | "congestion" | "documents" | "routes";
 
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+
 export default function FleetDashboard() {
   const { data: kpis } = useQuery({ queryKey: ["fleet-kpis"], queryFn: () => dataProvider.getFleetKPIs() });
   const { roster } = useRoster();
   const { fleetExceptions } = useFleetExceptions({ status: "active" });
   const { data: liveDashboard } = useQuery({ queryKey: ["vessels-dashboard"], queryFn: () => api.dashboard(), refetchInterval: 60_000 });
+  const [, navigate] = useLocation();
+
+  const activation = useActivationState({ apiBaseUrl: `${BASE}/api`, pollIntervalMs: 60_000 });
+
+  const handleNavigate = useCallback(
+    (href: string) => {
+      const base = BASE.replace(/\/$/, "");
+      navigate(href.startsWith(base) ? href.slice(base.length) || "/" : href);
+    },
+    [navigate],
+  );
+
+  const activationSteps: ActivationStep[] = [
+    {
+      id: "add-vessels",
+      label: "Add vessels to your roster",
+      description: "Import your fleet via IMO numbers, CSV, or AIS provider integration",
+      completed: roster.length > 0,
+      href: `${BASE}/fleet/roster`,
+    },
+    {
+      id: "connect-ais",
+      label: "Connect an AIS data source",
+      description: "Link a maritime data provider for live position tracking",
+      completed: activation.signalSourceConnected,
+      href: `${BASE}/settings/integrations`,
+    },
+    {
+      id: "configure-alerts",
+      label: "Configure alert thresholds",
+      description: "Set sanctions screening, dark vessel, and deviation alert rules",
+      completed: activation.workflowDeployed,
+      href: `${BASE}/alerts`,
+    },
+    {
+      id: "invite-team",
+      label: "Invite your operations team",
+      description: "Bring fleet operators and analysts into the platform",
+      completed: activation.teamMemberInvited,
+      href: `${BASE}/settings/team`,
+    },
+  ];
 
   const [selectedVessel, setSelectedVessel] = useState<RosterVessel | null>(null);
   const [intelTab, setIntelTab] = useState<IntelTab>("behavioral");
@@ -768,6 +814,18 @@ export default function FleetDashboard() {
               } as DataProvenanceInfo}
             />
           </div>
+
+          {!activation.isLoading && (
+            <div className="mx-3 mt-2">
+              <ActivationBanner
+                steps={activationSteps}
+                accentColor="#0ea5e9"
+                storageKey="vessels_activation_banner"
+                variant="banner"
+                onNavigate={handleNavigate}
+              />
+            </div>
+          )}
 
           {activeRole === "executive" && (
             <div className="mx-3 mt-2 rounded-xl border p-3" style={{ borderColor: "rgba(14,165,233,0.15)", background: "rgba(14,165,233,0.04)" }}>

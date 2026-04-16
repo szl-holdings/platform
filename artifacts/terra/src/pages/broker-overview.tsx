@@ -1,10 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
+import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import {
   TrendingUp, Users, Flame, BookmarkIcon, Handshake, BarChart3,
   CheckCircle, Target, MapPin, Award, Activity
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { ActivationBanner, useActivationState } from "@szl-holdings/shared-ui/onboarding";
+import type { ActivationStep } from "@szl-holdings/shared-ui/onboarding";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API = "/api";
@@ -79,6 +83,41 @@ const SCORE_TEXT_COLORS: Record<string, string> = {
 
 export default function BrokerOverviewPage() {
   const { data, isLoading, error } = useOverview();
+  const [, navigate] = useLocation();
+
+  const activation = useActivationState({ apiBaseUrl: `${BASE}/api`, pollIntervalMs: 60_000 });
+
+  const handleNavigate = useCallback(
+    (href: string) => {
+      const base = BASE.replace(/\/$/, "");
+      navigate(href.startsWith(base) ? href.slice(base.length) || "/" : href);
+    },
+    [navigate],
+  );
+
+  const activationSteps: ActivationStep[] = [
+    {
+      id: "connect-terra-data",
+      label: "Connect a property data source",
+      description: "Import MLS, public records, or distress lists to power the intelligence engine",
+      completed: activation.signalSourceConnected,
+      href: `${BASE}/settings/integrations`,
+    },
+    {
+      id: "configure-alerts",
+      label: "Configure distress alerts",
+      description: "Set thresholds for AVM variance, tax delinquency, and pre-foreclosure signals",
+      completed: activation.workflowDeployed,
+      href: `${BASE}/alerts`,
+    },
+    {
+      id: "invite-team",
+      label: "Invite a broker or analyst",
+      description: "Bring your team into Terra to collaborate on deal flow",
+      completed: activation.teamMemberInvited,
+      href: `${BASE}/settings/team`,
+    },
+  ];
 
   const metrics = data?.metrics ?? {};
   const topBoroughs: Array<{ borough: string; count: number; avgScore: number }> = data?.topBoroughs ?? [];
@@ -102,6 +141,16 @@ export default function BrokerOverviewPage() {
           </div>
         </div>
       </motion.div>
+
+      {!activation.isLoading && (
+        <ActivationBanner
+          steps={activationSteps}
+          accentColor="#3d8a5e"
+          storageKey="terra_activation_banner"
+          variant="banner"
+          onNavigate={handleNavigate}
+        />
+      )}
 
       {isLoading ? (
         <div className="space-y-4">
