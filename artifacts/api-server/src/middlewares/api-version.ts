@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import { sendError } from "../lib/api-response";
 
 const CURRENT_VERSION = "2026-04-15";
 const SUPPORTED_VERSIONS = ["2025-01-01", "2026-04-15"] as const;
@@ -21,12 +22,13 @@ export function apiVersionMiddleware(req: Request, res: Response, next: NextFunc
   const requestedVersion = req.headers["x-api-version"] as string | undefined;
 
   if (requestedVersion && !SUPPORTED_VERSIONS.includes(requestedVersion as ApiVersion)) {
-    res.status(400).json({
-      error: "Unsupported API version",
-      message: `API version '${requestedVersion}' is not supported. Supported versions: ${SUPPORTED_VERSIONS.join(", ")}`,
-      currentVersion: CURRENT_VERSION,
-      supportedVersions: SUPPORTED_VERSIONS,
-    });
+    sendError(
+      res,
+      `API version '${requestedVersion}' is not supported. Supported: ${SUPPORTED_VERSIONS.join(", ")}`,
+      400,
+      "UNSUPPORTED_API_VERSION",
+      { currentVersion: CURRENT_VERSION, supportedVersions: SUPPORTED_VERSIONS },
+    );
     return;
   }
 
@@ -59,12 +61,13 @@ export function requireMinVersion(minVersion: ApiVersion) {
     const minIdx = SUPPORTED_VERSIONS.indexOf(minVersion);
 
     if (clientIdx < minIdx) {
-      res.status(400).json({
-        error: "Version not supported",
-        message: `This endpoint requires API version ${minVersion} or later. You requested ${clientVersion}.`,
-        currentVersion: CURRENT_VERSION,
-        supportedVersions: SUPPORTED_VERSIONS,
-      });
+      sendError(
+        res,
+        `This endpoint requires API version ${minVersion} or later. You requested ${clientVersion}.`,
+        400,
+        "UNSUPPORTED_API_VERSION",
+        { currentVersion: CURRENT_VERSION, supportedVersions: SUPPORTED_VERSIONS },
+      );
       return;
     }
     next();

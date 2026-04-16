@@ -1,6 +1,7 @@
 import { type Request, type Response, type NextFunction } from "express";
 import { randomBytes } from "crypto";
 import { logger } from "../lib/logger";
+import { sendError } from "../lib/api-response";
 
 const CSRF_COOKIE = "csrf_token";
 const CSRF_HEADER = "x-csrf-token";
@@ -14,6 +15,10 @@ const EXEMPT_PATHS = new Set([
   "/api/health/live",
   "/api/health/ready",
   "/api/health/detailed",
+  "/api/ready",
+  "/api/version",
+  "/api/openapi",
+  "/api/openapi.json",
   "/api/csrf-token",
   "/api/auth/login",
   "/api/auth/login-password",
@@ -91,13 +96,13 @@ export function csrfMiddleware(req: Request, res: Response, next: NextFunction):
     const contentType = req.headers["content-type"] ?? "";
     if (!contentType.startsWith("application/json")) {
       logger.warn({ path: req.path, method: req.method, contentType }, "GraphQL request rejected: requires Content-Type: application/json");
-      res.status(415).json({ error: "Unsupported Media Type", message: "GraphQL requests must use Content-Type: application/json." });
+      sendError(res, "GraphQL requests must use Content-Type: application/json.", 415, "UNSUPPORTED_MEDIA_TYPE");
       return;
     }
     const customHeader = req.headers["x-requested-with"] ?? req.headers["x-csrf-token"] ?? req.headers["x-apollo-operation-name"];
     if (!customHeader) {
       logger.warn({ path: req.path, method: req.method }, "GraphQL request rejected: missing required custom header");
-      res.status(403).json({ error: "Forbidden", message: "GraphQL requests must include X-Requested-With, X-CSRF-Token, or X-Apollo-Operation-Name header." });
+      sendError(res, "GraphQL requests must include X-Requested-With, X-CSRF-Token, or X-Apollo-Operation-Name header.", 403, "CSRF_MISSING_HEADER");
       return;
     }
     return next();
@@ -108,13 +113,13 @@ export function csrfMiddleware(req: Request, res: Response, next: NextFunction):
 
   if (!cookieToken || !headerToken) {
     logger.warn({ path: req.path, method: req.method }, "CSRF token missing");
-    res.status(403).json({ error: "Forbidden", message: "CSRF token missing." });
+    sendError(res, "CSRF token missing. Fetch a token from GET /api/csrf-token and include it as X-CSRF-Token header.", 403, "CSRF_TOKEN_MISSING");
     return;
   }
 
   if (!timingSafeEqual(cookieToken, headerToken)) {
     logger.warn({ path: req.path, method: req.method }, "CSRF token mismatch");
-    res.status(403).json({ error: "Forbidden", message: "CSRF token mismatch." });
+    sendError(res, "CSRF token mismatch.", 403, "CSRF_TOKEN_MISMATCH");
     return;
   }
 

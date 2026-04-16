@@ -261,7 +261,7 @@ app.get("/api/health/live", (_req: Request, res: Response) => {
   res.status(200).json({ status: "ok" });
 });
 
-app.get("/api/health/ready", async (_req: Request, res: Response) => {
+async function handleReadiness(_req: Request, res: Response) {
   const dbUrl = process.env.DATABASE_URL;
   let dbStatus = "not_configured";
 
@@ -290,7 +290,10 @@ app.get("/api/health/ready", async (_req: Request, res: Response) => {
       uptime: process.uptime(),
     },
   });
-});
+}
+
+app.get("/api/ready", handleReadiness);
+app.get("/api/health/ready", handleReadiness);
 
 app.get("/api/health/detailed", async (req: Request, res: Response) => {
   if (isProduction) {
@@ -380,20 +383,47 @@ app.get("/api/health/detailed", async (req: Request, res: Response) => {
   });
 });
 
+let _swaggerDocument: Record<string, unknown> | null = null;
+
 try {
   const specPath = join(__dirname, "../../../lib/api-spec/openapi.yaml");
   const specContent = readFileSync(specPath, "utf-8");
-  const swaggerDocument = parse(specContent) as Record<string, unknown>;
-  app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
+  _swaggerDocument = parse(specContent) as Record<string, unknown>;
+  app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(_swaggerDocument, {
     customSiteTitle: "SZL Holdings API Docs",
     swaggerOptions: { persistAuthorization: true },
   }));
   app.get("/api/docs.json", (_req: Request, res: Response) => {
-    res.json(swaggerDocument);
+    res.json(_swaggerDocument);
+  });
+  app.get("/api/openapi", (_req: Request, res: Response) => {
+    res.json(_swaggerDocument);
+  });
+  app.get("/api/openapi.json", (_req: Request, res: Response) => {
+    res.json(_swaggerDocument);
   });
 } catch (err) {
   logger.warn({ err }, "Failed to load OpenAPI spec — /api/docs will be unavailable");
 }
+
+app.get("/api/version", (_req: Request, res: Response) => {
+  res.json({
+    version: process.env.npm_package_version ?? "0.0.0",
+    apiVersion: "2026-04-15",
+    supportedApiVersions: ["2025-01-01", "2026-04-15"],
+    deprecatedApiVersions: ["2025-01-01"],
+    sunsetDates: { "2025-01-01": "2027-01-01" },
+    environment: process.env.NODE_ENV ?? "development",
+    build: {
+      commitSha: process.env.COMMIT_SHA ?? null,
+      builtAt: process.env.BUILD_TIMESTAMP ?? null,
+      nodeVersion: process.version,
+    },
+    docs: "/api/docs",
+    openapi: "/api/openapi",
+    health: "/api/health",
+  });
+});
 
 app.get("/api/csrf-token", (req: Request, res: Response) => {
   let token = req.cookies?.["csrf_token"] as string | undefined;

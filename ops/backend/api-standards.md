@@ -68,13 +68,14 @@ Generated: 2026-04-15
 
 ## Rate Limits
 
-| Scope | Limit | Window |
-|-------|-------|--------|
-| Global | 200 requests | 15 minutes |
-| Auth endpoints | 10 requests | 15 minutes (sliding) |
-| Read operations | 100 requests | 1 minute |
-| Write operations | 30 requests | 1 minute |
-| AI/billing mutations | 5 requests | 1 minute + idempotency |
+| Scope | Limit | Window | Notes |
+|-------|-------|--------|-------|
+| Global | 200 requests | 15 minutes | Per IP via express-rate-limit; health endpoints excluded |
+| Auth endpoints | 5 requests | 1 minute (sliding) | Per IP, POST only, strict (fail-closed) |
+| Read operations | 100 requests | 1 minute (sliding) | Per authenticated user, fail-open |
+| Write operations | 60 requests | 1 minute (sliding) | Per authenticated user, fail-closed |
+| Public submissions | 5 requests | 1 hour | Per IP for contact/demo endpoints |
+| AI/billing mutations | — | — | Idempotency enforced; subject to write limits |
 
 ## Authentication
 

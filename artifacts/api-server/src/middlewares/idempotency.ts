@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { createHash } from "crypto";
 import { LRUCache } from "lru-cache";
 import { logger } from "../lib/logger";
+import { sendError } from "../lib/api-response";
 
 interface IdempotencyRecord {
   key: string;
@@ -53,22 +54,12 @@ export function idempotencyMiddleware(req: Request, res: Response, next: NextFun
   const idempotencyKey = req.headers["x-idempotency-key"] as string | undefined;
 
   if (!idempotencyKey) {
-    res.status(400).json({
-      error: "Idempotency Key Required",
-      message: "X-Idempotency-Key header is required for this mutation endpoint",
-      statusCode: 400,
-      code: "IDEMPOTENCY_KEY_REQUIRED",
-    });
+    sendError(res, "X-Idempotency-Key header is required for this mutation endpoint", 400, "IDEMPOTENCY_KEY_REQUIRED");
     return;
   }
 
   if (typeof idempotencyKey !== "string" || idempotencyKey.length < 8 || idempotencyKey.length > 128) {
-    res.status(400).json({
-      error: "Invalid Idempotency Key",
-      message: "X-Idempotency-Key must be a string between 8 and 128 characters",
-      statusCode: 400,
-      code: "INVALID_IDEMPOTENCY_KEY",
-    });
+    sendError(res, "X-Idempotency-Key must be a string between 8 and 128 characters", 400, "INVALID_IDEMPOTENCY_KEY");
     return;
   }
 
@@ -78,12 +69,7 @@ export function idempotencyMiddleware(req: Request, res: Response, next: NextFun
 
   if (existing) {
     if (existing.bodyFingerprint !== requestFingerprint) {
-      res.status(409).json({
-        error: "Idempotency Body Mismatch",
-        message: "The idempotency key was used with a different request body. Use a new key for a different request.",
-        statusCode: 409,
-        code: "IDEMPOTENCY_BODY_MISMATCH",
-      });
+      sendError(res, "The idempotency key was used with a different request body. Use a new key for a different request.", 409, "IDEMPOTENCY_BODY_MISMATCH");
       return;
     }
 
@@ -127,12 +113,7 @@ export function optionalIdempotencyMiddleware(req: Request, res: Response, next:
   }
 
   if (idempotencyKey.length < 8 || idempotencyKey.length > 128) {
-    res.status(400).json({
-      error: "Invalid Idempotency Key",
-      message: "X-Idempotency-Key must be a string between 8 and 128 characters",
-      statusCode: 400,
-      code: "INVALID_IDEMPOTENCY_KEY",
-    });
+    sendError(res, "X-Idempotency-Key must be a string between 8 and 128 characters", 400, "INVALID_IDEMPOTENCY_KEY");
     return;
   }
 
@@ -142,12 +123,7 @@ export function optionalIdempotencyMiddleware(req: Request, res: Response, next:
 
   if (existing) {
     if (existing.bodyFingerprint !== requestFingerprint) {
-      res.status(409).json({
-        error: "Idempotency Body Mismatch",
-        message: "The idempotency key was used with a different request body. Use a new key for a different request.",
-        statusCode: 409,
-        code: "IDEMPOTENCY_BODY_MISMATCH",
-      });
+      sendError(res, "The idempotency key was used with a different request body. Use a new key for a different request.", 409, "IDEMPOTENCY_BODY_MISMATCH");
       return;
     }
 

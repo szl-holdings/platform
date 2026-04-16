@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { getSessionToken, getSessionUser } from "../lib/auth";
+import { sendUnauthorized, sendForbidden, sendError } from "../lib/api-response";
 import type { RoleName } from "@szl-holdings/db";
 import { logger } from "../lib/logger";
 
@@ -34,26 +35,26 @@ export function adminGuard(req: Request, res: Response, next: NextFunction): voi
 
   const token = getSessionToken(req);
   if (!token) {
-    res.status(401).json({ error: "Admin access requires authentication" });
+    sendUnauthorized(res, "Admin access requires authentication");
     return;
   }
 
   getSessionUser(token).then(user => {
     if (!user) {
-      res.status(401).json({ error: "Invalid or expired session" });
+      sendUnauthorized(res, "Invalid or expired session");
       return;
     }
 
     const hasAdminRole = user.roles.some(r => ADMIN_ROLES.includes(r as RoleName));
     if (!hasAdminRole) {
       logger.warn({ userId: user.id, roles: user.roles }, "Admin route access denied — insufficient role");
-      res.status(403).json({ error: "Admin access requires elevated role" });
+      sendForbidden(res, "Admin access requires elevated role");
       return;
     }
 
     next();
   }).catch(err => {
     logger.error({ err }, "Admin guard error");
-    res.status(500).json({ error: "Authentication error" });
+    sendError(res, "Authentication error", 500, "INTERNAL_ERROR");
   });
 }

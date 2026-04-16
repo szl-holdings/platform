@@ -30,12 +30,17 @@
 
 import type { Request, Response, NextFunction } from "express";
 import { serverTelemetry } from "@szl-holdings/observability";
+import { sendUnauthorized } from "../lib/api-response";
 
 const PUBLIC_EXACT_PATHS = new Set([
   "/api/contact",
   "/api/demo-requests",
   "/api/csrf-token",
   "/api/docs.json",
+  "/api/openapi",
+  "/api/openapi.json",
+  "/api/version",
+  "/api/ready",
   "/api/stream/webhook-siem",
   "/api/stream/ais-nmea",
   "/api/stream/siem-events",
@@ -91,8 +96,5 @@ export function globalAuthEnforcer(
   }
 
   serverTelemetry.recordAuthFailure();
-  res.status(401).json({
-    error: "Authentication required",
-    message: "This endpoint requires a valid session. Please log in.",
-  });
+  sendUnauthorized(res, "This endpoint requires a valid session. Please log in.");
 }

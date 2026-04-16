@@ -25,6 +25,7 @@
 import type { Request, Response, NextFunction, RequestHandler } from "express";
 import { pool } from "@szl-holdings/db";
 import { logger } from "../lib/logger";
+import { sendError } from "../lib/api-response";
 
 interface SlidingWindowOptions {
   windowMs: number;
@@ -87,7 +88,7 @@ export function createSlidingWindowLimiter(opts: SlidingWindowOptions): RequestH
 
     if (!client) {
       if (failOpen) return next();
-      return res.status(503).json({ error: "Rate limiting service temporarily unavailable. Please retry shortly." });
+      return (sendError(res, "Rate limiting service temporarily unavailable. Please retry shortly.", 503, "SERVICE_UNAVAILABLE"), undefined);
     }
 
     try {
@@ -118,7 +119,10 @@ export function createSlidingWindowLimiter(opts: SlidingWindowOptions): RequestH
       if (count >= max) {
         await client.query("COMMIT");
         res.setHeader("Retry-After", Math.ceil(windowMs / 1000));
-        res.status(429).json(messageBody);
+        const errorMessage = typeof messageBody === "object" && messageBody !== null && "error" in (messageBody as object)
+          ? String((messageBody as Record<string, unknown>)["error"])
+          : String(messageBody);
+        sendError(res, errorMessage, 429, "RATE_LIMITED");
         return;
       }
 
@@ -140,7 +144,7 @@ export function createSlidingWindowLimiter(opts: SlidingWindowOptions): RequestH
       if (failOpen) {
         next();
       } else {
-        res.status(503).json({ error: "Rate limiting service temporarily unavailable. Please retry shortly." });
+        sendError(res, "Rate limiting service temporarily unavailable. Please retry shortly.", 503, "SERVICE_UNAVAILABLE");
       }
     } finally {
       client.release();

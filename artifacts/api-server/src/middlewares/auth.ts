@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { timingSafeEqual } from "crypto";
+import { sendUnauthorized, sendForbidden, sendError } from "../lib/api-response";
 import { db, usersTable, sessionsTable, userRolesTable, rolesTable, orgMembersTable, organizationsTable } from "@szl-holdings/db";
 import { eq, and, gt } from "drizzle-orm";
 import type { RoleName } from "@szl-holdings/db";
@@ -130,7 +131,7 @@ export function authMiddleware(options: { required?: boolean } = {}) {
 
       if (!user && required) {
         serverTelemetry.recordAuthFailure();
-        res.status(401).json({ error: "Authentication required" });
+        sendUnauthorized(res);
         return;
       }
 
@@ -138,7 +139,7 @@ export function authMiddleware(options: { required?: boolean } = {}) {
       next();
     } catch (err) {
       logger.error({ err }, "Auth middleware error");
-      res.status(500).json({ error: "Authentication error" });
+      sendError(res, "Authentication error", 500, "INTERNAL_ERROR");
     }
   };
 }
@@ -146,7 +147,7 @@ export function authMiddleware(options: { required?: boolean } = {}) {
 export function requireRole(...allowedRoles: RoleName[]) {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
-      res.status(401).json({ error: "Authentication required" });
+      sendUnauthorized(res);
       return;
     }
 
@@ -163,7 +164,7 @@ export function requireRole(...allowedRoles: RoleName[]) {
 
     const hasRole = allowedRoles.some((role) => userGrantedRoles.has(role));
     if (!hasRole) {
-      res.status(403).json({ error: "Insufficient permissions" });
+      sendForbidden(res, "Insufficient permissions");
       return;
     }
 
@@ -174,7 +175,7 @@ export function requireRole(...allowedRoles: RoleName[]) {
 export function requireAnyAuth() {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
-      res.status(401).json({ error: "Authentication required" });
+      sendUnauthorized(res);
       return;
     }
     next();
@@ -190,15 +191,12 @@ export function requireAnyAuth() {
 export function denyIfReadOnly() {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
-      res.status(401).json({ error: "Authentication required" });
+      sendUnauthorized(res);
       return;
     }
     if (isReadOnlyRole(req.user.roles)) {
       const canonical = toCanonicalRole(req.user.roles);
-      res.status(403).json({
-        error: "Read-only access — write operations are not permitted for your role",
-        canonicalRole: canonical,
-      });
+      sendForbidden(res, `Read-only access — write operations are not permitted for role: ${canonical ?? "unknown"}`);
       return;
     }
     next();
@@ -224,7 +222,7 @@ export function requireOrgMembership(orgSlug: string, minRole: "owner" | "admin"
 
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
-      res.status(401).json({ error: "Authentication required" });
+      sendUnauthorized(res);
       return;
     }
 
@@ -235,12 +233,12 @@ export function requireOrgMembership(orgSlug: string, minRole: "owner" | "admin"
 
     const membership = req.user.orgs.find((o) => o.orgSlug === orgSlug);
     if (!membership) {
-      res.status(403).json({ error: "Not a member of this organization" });
+      sendForbidden(res, "Not a member of this organization");
       return;
     }
 
     if ((roleHierarchy[membership.role] ?? 0) < (roleHierarchy[minRole] ?? 0)) {
-      res.status(403).json({ error: "Insufficient organization role" });
+      sendForbidden(res, "Insufficient organization role");
       return;
     }
 
