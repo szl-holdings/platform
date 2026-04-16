@@ -38,6 +38,9 @@ This checklist maps security controls to their actual implementation in the code
 | V1-V8 | Zod `validateBody` applied to all write routes | ✅ Done | Applied to Dreamscape, Certification, Governance, CMS, Alloy, etc. |
 | L1-L2 | Structured Pino logger used; `console.*` removed | ✅ Done | `lib/logger.ts` used across all production route/lib files |
 | L5 | Audit log table populated on privileged mutations | ✅ Done | Certification, alloy governance, and admin routes write audit rows |
+| L6 | AI guardrail trigger visibility via structured log | ✅ Done | `event: guardrail.triggered` emitted from `routes/ai-engine.ts`; see [GUARDRAILS_MODEL.md](GUARDRAILS_MODEL.md) |
+| L7 | AI trace capture with tenant-scoped observability | ✅ Done | `lib/ai-engine/src/evals/trace-capture.ts` + `routes/ai-ops-dashboard.ts`; see [AI_RUNTIME_OBSERVABILITY.md](AI_RUNTIME_OBSERVABILITY.md) |
+| L8 | Agent Gateway tool calls audited + rate-limited | ✅ Done | `routes/mcp.ts` — per-tool RBAC + `logActivity()`; see [AGENT_GATEWAY_STRATEGY.md](AGENT_GATEWAY_STRATEGY.md) |
 
 ### Network & External Security
 | # | Control | Status | Evidence |

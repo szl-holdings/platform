@@ -417,4 +417,105 @@ router.get(
   },
 );
 
+// ---------------------------------------------------------------------------
+// Human feedback capture (thumbs up/down + free text) for AI traces.
+// Feedback is stored in memory (per-process) and emitted as a structured log
+// so downstream sinks (analytics, eval pipeline) can consume it as ground-truth
+// signal. Consumers can later point an external sink at this surface.
+// ---------------------------------------------------------------------------
+
+type FeedbackSentiment = "up" | "down";
+
+interface TraceFeedback {
+  feedbackId: string;
+  traceId: string;
+  orgId: number | null;
+  userId: number | null;
+  sentiment: FeedbackSentiment;
+  correction?: string;
+  comment?: string;
+  recordedAt: string;
+}
+
+const feedbackStore: TraceFeedback[] = [];
+const MAX_FEEDBACK = 5000;
+
+router.post(
+  "/ai/ops/traces/:id/feedback",
+  authMiddleware({ required: true }),
+  (req, res) => {
+    try {
+      const traceId = String(req.params.id ?? "").trim();
+      if (!traceId) {
+        sendBadRequest(res, "trace id required");
+        return;
+      }
+      const trace = getTrace(traceId);
+      if (!trace) {
+        sendNotFound(res, "trace not found");
+        return;
+      }
+      if (!canAccessOrgResource(req.user, trace.orgId ?? null)) {
+        sendForbidden(res, "Trace belongs to another tenant");
+        return;
+      }
+      const body = req.body ?? {};
+      const sentiment = body.sentiment;
+      if (sentiment !== "up" && sentiment !== "down") {
+        sendBadRequest(res, "sentiment must be 'up' or 'down'");
+        return;
+      }
+      const correction = typeof body.correction === "string" ? body.correction.slice(0, 2000) : undefined;
+      const comment = typeof body.comment === "string" ? body.comment.slice(0, 2000) : undefined;
+
+      const entry: TraceFeedback = {
+        feedbackId: `fb-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        traceId,
+        orgId: trace.orgId ?? null,
+        userId: req.user?.id ?? null,
+        sentiment,
+        correction,
+        comment,
+        recordedAt: new Date().toISOString(),
+      };
+      feedbackStore.unshift(entry);
+      if (feedbackStore.length > MAX_FEEDBACK) feedbackStore.length = MAX_FEEDBACK;
+
+      if (sentiment === "down") {
+        updateTraceStatus(traceId, "flagged");
+      }
+
+      sendSuccess(res, { feedback: entry });
+    } catch (err) {
+      handleRouteError(res, err, "POST /ai/ops/traces/:id/feedback");
+    }
+  },
+);
+
+router.get(
+  "/ai/ops/traces/:id/feedback",
+  authMiddleware({ required: true }),
+  requireRole("analyst", "operator", "admin", "super_admin"),
+  (req, res) => {
+    try {
+      const traceId = String(req.params.id ?? "").trim();
+      const trace = getTrace(traceId);
+      if (!trace) {
+        sendNotFound(res, "trace not found");
+        return;
+      }
+      if (!canAccessOrgResource(req.user, trace.orgId ?? null)) {
+        sendForbidden(res, "Trace belongs to another tenant");
+        return;
+      }
+      const items = feedbackStore.filter(f => f.traceId === traceId);
+      const up = items.filter(i => i.sentiment === "up").length;
+      const down = items.filter(i => i.sentiment === "down").length;
+      sendSuccess(res, { items, summary: { up, down, total: items.length } });
+    } catch (err) {
+      handleRouteError(res, err, "GET /ai/ops/traces/:id/feedback");
+    }
+  },
+);
+
 export default router;

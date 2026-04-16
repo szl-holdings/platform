@@ -78,6 +78,29 @@ function writeAudit(entry: Record<string, unknown>): void {
   }).catch(() => {});
 }
 
+function logGuardrailIfTriggered(trace: AITrace, source: "auto_capture" | "eval_failed" | "override"): void {
+  if (!trace.requiresReview && source === "auto_capture") return;
+  logger.info(
+    {
+      event: "guardrail.triggered",
+      traceId: trace.traceId,
+      orgId: trace.orgId ?? null,
+      domain: trace.domain,
+      model: trace.model,
+      modelProvider: trace.modelProvider,
+      recommendationType: trace.recommendationType,
+      confidence: trace.confidence,
+      riskLevel: trace.riskLevel ?? null,
+      costEstimateUsd: trace.costEstimateUsd,
+      latencyMs: trace.latencyMs,
+      rule: source,
+      reason: trace.reviewReason ?? source,
+      action: "enqueue_for_review",
+    },
+    "AI guardrail triggered",
+  );
+}
+
 async function runAndPersistEval(trace: AITrace, ctx: DomainEvalContext): Promise<void> {
   try {
     const results = await runEvaluatorHooksForTrace(trace, ctx);
@@ -90,6 +113,7 @@ async function runAndPersistEval(trace: AITrace, ctx: DomainEvalContext): Promis
       updateTraceStatus(trace.traceId, "flagged", avgScore, false);
       if (!trace.requiresReview) {
         enqueueForReview({ trace, overrideReason: "eval_failed" });
+        logGuardrailIfTriggered({ ...trace, reviewReason: `eval_failed (score ${avgScore.toFixed(2)})` }, "eval_failed");
       }
     }
   } catch {
@@ -176,6 +200,7 @@ router.post("/ai/respond", async (req, res) => {
     });
     const respondCtx: DomainEvalContext = { domain: "alloy" };
     autoEnqueueTrace(respondTrace);
+    logGuardrailIfTriggered(respondTrace, "auto_capture");
     runAndPersistEval(respondTrace, respondCtx);
 
     res.json({
@@ -245,6 +270,7 @@ router.post("/ai/triage", async (req, res) => {
     });
     const triageCtx: DomainEvalContext = { domain: "alloy" };
     autoEnqueueTrace(trace);
+    logGuardrailIfTriggered(trace, "auto_capture");
     runAndPersistEval(trace, triageCtx);
 
     res.json({ decision: result, model: completion.model, latencyMs: completion.latencyMs });
@@ -350,6 +376,7 @@ Consider constraints: ${constraints?.join("; ") || "none specified"}`,
     });
     const planCtx: DomainEvalContext = { domain: "alloy" };
     autoEnqueueTrace(planTrace);
+    logGuardrailIfTriggered(planTrace, "auto_capture");
     runAndPersistEval(planTrace, planCtx);
 
     res.json({ plan: result, model: completion.model, latencyMs: completion.latencyMs });

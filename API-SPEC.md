@@ -210,6 +210,8 @@ Provides visibility into AI system cost, latency, quality, and human review oper
 | `/api/ai/ops/review-queue/:reviewId/claim` | PATCH | Required (`analyst+`) | Claim a review item for in-progress review |
 | `/api/ai/ops/evaluators` | GET | Required (`admin+`) | Registered evaluator hooks inventory (platform-global; admin only) |
 | `/api/ai/ops/evaluators/stats` | GET | Required (`admin+`) | Aggregated evaluator hook pass rates and run counts (platform-global; admin only) |
+| `/api/ai/ops/traces/:traceId/feedback` | POST | Required (any role) | Record human feedback on a trace. Body: `{ sentiment: "up" \| "down", correction?: string, comment?: string }`. `down` marks the trace `flagged` |
+| `/api/ai/ops/traces/:traceId/feedback` | GET | Required (`analyst+`) | List feedback entries + summary for a trace |
 
 **Trace schema fields:** `traceId`, `model`, `modelProvider`, `domain`, `recommendationType`, `promptHash`, `promptTokens`, `completionTokens`, `latencyMs`, `costEstimateUsd`, `confidence`, `riskLevel`, `requiresReview`, `reviewReason`, `evalScore`, `evalPassed`, `status`, `capturedAt`.
 
