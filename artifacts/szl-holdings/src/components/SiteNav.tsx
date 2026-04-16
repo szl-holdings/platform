@@ -13,11 +13,24 @@ const NAV_ITEMS = [
     href: "/platform",
     highlight: false,
     children: [
-      { label: "Platform Overview", href: "/platform", note: "SZL Holdings stack" },
-      { label: "Alloy — Execution Fabric", href: "/alloy-fabric", note: "Intelligence backbone" },
-      { label: "Lyte — Business Observability", href: "/lyte", note: "Operator command layer" },
-      { label: "Architecture", href: "/architecture", note: "Eight-layer stack" },
-      { label: "How It Works", href: "/how-it-works", note: "Signal → action loop" },
+      { label: "Platform Overview", href: "/platform", note: "The governed decision system" },
+      { label: "Lyte", href: "/lyte", note: "Business observability" },
+      { label: "Alloy", href: "/alloy-fabric", note: "Execution fabric" },
+      { label: "CORTEX", href: "https://cortex.szlholdings.com", note: "Mobile command" },
+      { label: "Command", href: "/command/", note: "Unified executive view" },
+    ],
+  },
+  {
+    label: "Primitives",
+    href: "/architecture",
+    highlight: false,
+    children: [
+      { label: "Architecture Overview", href: "/architecture", note: "Three-tier design" },
+      { label: "Outcome Graph", href: "/docs/architecture", note: "Signal & state fabric" },
+      { label: "Proof Chain", href: "/docs/proof-chain", note: "Immutable audit record" },
+      { label: "Covenant Policy", href: "/docs/control-plane", note: "Governance layer" },
+      { label: "Simulation", href: "/docs/architecture", note: "Decision modeling" },
+      { label: "Workflow Engine", href: "/how-it-works", note: "Governed action routing" },
     ],
   },
   {
@@ -25,12 +38,13 @@ const NAV_ITEMS = [
     href: "/solutions",
     highlight: false,
     children: [
-      { label: "Domain Packs Overview", href: "/solutions", note: "Governed extensions" },
-      { label: "PRISM Counsel", href: "/solutions/prism-counsel", note: "Legal observability" },
+      { label: "Domain Packs Overview", href: "/solutions", note: "Governed vertical extensions" },
+      { label: "Aegis", href: "/solutions/aegis", note: "Defense & security" },
       { label: "Vessels", href: "/solutions/vessels", note: "Maritime intelligence" },
-      { label: "Aegis", href: "/solutions/aegis", note: "Security & defense" },
       { label: "Terra", href: "/solutions/terra", note: "Real estate intelligence" },
+      { label: "PRISM Counsel", href: "/solutions/prism-counsel", note: "Legal operations" },
       { label: "Carlota Jo", href: "/carlota-jo/", note: "Private advisory" },
+      { label: "IMPERIUM", href: "/command/", note: "Infrastructure command" },
     ],
   },
   {
@@ -39,11 +53,10 @@ const NAV_ITEMS = [
     highlight: false,
     children: [
       { label: "Trust Center", href: "/trust", note: "Full diligence index" },
-      { label: "Diligence Paths →", href: "/trust#evaluators", note: "Find your path" },
       { label: "Security", href: "/trust/security", note: "Controls & posture" },
       { label: "AI Governance", href: "/trust/ai", note: "Model accountability" },
-      { label: "Compliance Architecture", href: "/trust/governance", note: "Policy & audit" },
       { label: "Proof Chain", href: "/docs/proof-chain", note: "Audit trail design" },
+      { label: "Compliance Architecture", href: "/trust/governance", note: "Policy & audit" },
     ],
   },
   {
@@ -67,9 +80,8 @@ const NAV_ITEMS = [
       { label: "Insights & Analysis", href: "/insights", note: "" },
       { label: "Documentation", href: "/docs", note: "" },
       { label: "FAQ", href: "/faq", note: "" },
-      { label: "ROI Calculator", href: "/roi", note: "" },
-      { label: "Public Roadmap", href: "/roadmap", note: "" },
       { label: "Case Studies", href: "/case-studies", note: "" },
+      { label: "Public Roadmap", href: "/roadmap", note: "" },
     ],
   },
   {
@@ -84,24 +96,28 @@ const NAV_LINKS_MOBILE = [
   { label: "Request a Demo", href: "/demo", primary: true },
   { label: "Design Partners", href: "/design-partner", primary: true },
   { label: "Investor Relations", href: "/investor", primary: true },
+  { label: "— Platform —", href: "/platform", primary: false, section: true },
   { label: "Platform Overview", href: "/platform", primary: false },
-  { label: "Lyte — Observability", href: "/lyte", primary: false },
-  { label: "Alloy — Execution Fabric", href: "/alloy-fabric", primary: false },
+  { label: "Lyte", href: "/lyte", primary: false },
+  { label: "Alloy", href: "/alloy-fabric", primary: false },
+  { label: "Command", href: "/command/", primary: false },
+  { label: "— Primitives —", href: "/architecture", primary: false, section: true },
   { label: "Architecture", href: "/architecture", primary: false },
-  { label: "Domain Packs", href: "/solutions", primary: false },
-  { label: "PRISM Counsel", href: "/solutions/prism-counsel", primary: false },
-  { label: "Vessels", href: "/solutions/vessels", primary: false },
+  { label: "Proof Chain", href: "/docs/proof-chain", primary: false },
+  { label: "Covenant Policy", href: "/docs/control-plane", primary: false },
+  { label: "— Domain Packs —", href: "/solutions", primary: false, section: true },
+  { label: "Domain Packs Overview", href: "/solutions", primary: false },
   { label: "Aegis", href: "/solutions/aegis", primary: false },
+  { label: "Vessels", href: "/solutions/vessels", primary: false },
   { label: "Terra", href: "/solutions/terra", primary: false },
+  { label: "PRISM Counsel", href: "/solutions/prism-counsel", primary: false },
+  { label: "Carlota Jo", href: "/carlota-jo/", primary: false },
+  { label: "— Trust & Company —", href: "/trust", primary: false, section: true },
   { label: "Trust Center", href: "/trust", primary: false },
   { label: "Security", href: "/trust/security", primary: false },
-  { label: "AI Governance", href: "/trust/ai", primary: false },
   { label: "Documentation", href: "/docs", primary: false },
   { label: "Insights", href: "/insights", primary: false },
-  { label: "Case Studies", href: "/case-studies", primary: false },
-  { label: "About the Company", href: "/company", primary: false },
-  { label: "Leadership", href: "/leadership", primary: false },
-  { label: "Founder", href: "/founder", primary: false },
+  { label: "About SZL Holdings", href: "/company", primary: false },
   { label: "Contact", href: "/contact", primary: false },
 ];
 
@@ -230,7 +246,7 @@ export function SiteNav() {
                               top: "calc(100% + 4px)",
                               left: "50%",
                               transform: "translateX(-50%)",
-                              minWidth: "220px",
+                              minWidth: "230px",
                               background: "hsl(214,16%,6%)",
                               border: "1px solid var(--color-szl-border-hover)",
                               borderRadius: "0.625rem",
@@ -241,7 +257,7 @@ export function SiteNav() {
                           >
                             {item.children!.map((child) => (
                               <Link
-                                key={child.href}
+                                key={child.href + child.label}
                                 href={child.href}
                                 onClick={() => { handleNavClick(child.label, child.href); setOpenDropdown(null); }}
                                 style={{
@@ -359,31 +375,49 @@ export function SiteNav() {
                 borderBottom: "1px solid var(--color-szl-border)",
               }}
             >
-              <div style={{ padding: "1.25rem var(--space-content-x) 1.5rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-                {NAV_LINKS_MOBILE.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => handleNavClick(link.label, link.href)}
-                    style={{
-                      padding: link.primary ? "0.625rem 0.75rem" : "0.5rem 0.75rem",
-                      fontSize: link.primary ? "0.9375rem" : "0.875rem",
-                      fontWeight: link.primary ? 600 : 500,
-                      color: link.primary ? "var(--color-szl-accent)" : "var(--color-szl-text-secondary)",
-                      textDecoration: "none",
-                      borderRadius: "0.375rem",
-                      transition: "color 0.18s ease, background 0.18s ease",
-                      display: "block",
-                      borderBottom: link.primary ? "1px solid var(--color-szl-border)" : "none",
-                      marginBottom: link.primary ? "0.5rem" : 0,
-                      paddingBottom: link.primary ? "1rem" : undefined,
-                    }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; if (!link.primary) (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.04)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = link.primary ? "var(--color-szl-accent)" : "var(--color-szl-text-secondary)"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+              <div style={{ padding: "1.25rem var(--space-content-x) 1.5rem", display: "flex", flexDirection: "column", gap: "0.125rem" }}>
+                {NAV_LINKS_MOBILE.map((link, idx) => {
+                  if ((link as { section?: boolean }).section) {
+                    return (
+                      <p key={link.href + idx} style={{
+                        padding: "0.75rem 0.75rem 0.25rem",
+                        fontSize: "0.5625rem",
+                        fontWeight: 700,
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        color: "var(--color-szl-text-faint)",
+                        fontFamily: "var(--font-mono)",
+                        marginTop: "0.5rem",
+                      }}>
+                        {link.label.replace(/^—\s*/, "").replace(/\s*—$/, "")}
+                      </p>
+                    );
+                  }
+                  return (
+                    <Link
+                      key={link.href + idx}
+                      href={link.href}
+                      onClick={() => handleNavClick(link.label, link.href)}
+                      style={{
+                        padding: link.primary ? "0.625rem 0.75rem" : "0.4rem 0.75rem",
+                        fontSize: link.primary ? "0.9375rem" : "0.875rem",
+                        fontWeight: link.primary ? 600 : 500,
+                        color: link.primary ? "var(--color-szl-accent)" : "var(--color-szl-text-secondary)",
+                        textDecoration: "none",
+                        borderRadius: "0.375rem",
+                        transition: "color 0.18s ease, background 0.18s ease",
+                        display: "block",
+                        borderBottom: link.primary ? "1px solid var(--color-szl-border)" : "none",
+                        marginBottom: link.primary ? "0.5rem" : 0,
+                        paddingBottom: link.primary ? "1rem" : undefined,
+                      }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; if (!link.primary) (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.04)"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = link.primary ? "var(--color-szl-accent)" : "var(--color-szl-text-secondary)"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                    >
+                      {link.label}
+                    </Link>
+                  );
+                })}
                 {isAuthenticated && (
                   <>
                     <div style={{ height: "1px", background: "var(--color-szl-border)", margin: "0.5rem 0.75rem" }} />

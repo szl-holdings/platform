@@ -6,7 +6,7 @@ import {
   Flag, FileText, Database, Play, CheckSquare, Download, GitBranch, Send,
   TrendingUp, DollarSign, RotateCcw, Calculator, Bot, Monitor, Building,
   BellOff, Code, Target, Phone, Calendar, Layers, Map, Crown, ChevronRight,
-  Menu, X, BarChart3, Clapperboard, Power, Bell
+  Menu, X, BarChart3, Clapperboard, Power, Bell, Lock, GitCommit, Sigma
 } from "lucide-react";
 import { MultiplayerSessionBanner, EcosystemNav } from "@szl-holdings/shared-ui";
 
@@ -19,57 +19,121 @@ const ACCENT: Record<WorkspaceMode, string> = {
 };
 
 const WORKSPACE_TABS: { mode: WorkspaceMode; label: string; icon: typeof LayoutDashboard; sublabel: string }[] = [
-  { mode: "strategy", label: "Strategy", sublabel: "Ecosystem Intelligence", icon: Globe2 },
-  { mode: "operations", label: "Operations", sublabel: "AIOps & Observability", icon: Zap },
-  { mode: "infrastructure", label: "Infrastructure", sublabel: "Cloud Sovereignty", icon: Shield },
+  { mode: "strategy", label: "Strategy", sublabel: "Governed Decision Loop", icon: Globe2 },
+  { mode: "operations", label: "Operations", sublabel: "Lyte — AIOps", icon: Zap },
+  { mode: "infrastructure", label: "Infrastructure", sublabel: "IMPERIUM", icon: Shield },
 ];
 
-const STRATEGY_NAV = [
-  { href: "/strategy", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/strategy/simulation", label: "What-If Simulation", icon: Activity },
-  { href: "/strategy/executive-briefing", label: "Executive Briefing", icon: FileText },
-  { href: "/strategy/briefing", label: "Briefing History", icon: BarChart3 },
+type NavGroup = { section: string; items: { href: string; label: string; icon: typeof LayoutDashboard }[] };
+
+const STRATEGY_NAV: NavGroup[] = [
+  {
+    section: "Command",
+    items: [
+      { href: "/strategy", label: "Governed Decision Loop", icon: LayoutDashboard },
+      { href: "/strategy/executive-briefing", label: "Executive Briefing", icon: FileText },
+      { href: "/strategy/briefing", label: "Briefing History", icon: BarChart3 },
+    ],
+  },
+  {
+    section: "Primitives",
+    items: [
+      { href: "/strategy/simulation", label: "Simulation", icon: Activity },
+      { href: "/strategy/correlation-map", label: "Outcome Graph", icon: Network },
+      { href: "/strategy/signal-chains", label: "Signal Chains", icon: GitCommit },
+    ],
+  },
 ];
 
-const OPERATIONS_NAV = [
-  { href: "/operations", label: "Exec Command", icon: LayoutDashboard },
-  { href: "/operations/prism/pulse", label: "Pulse", icon: Heart },
-  { href: "/operations/prism/risk", label: "Risk", icon: AlertTriangle },
-  { href: "/operations/prism/intelligence", label: "Intelligence", icon: Brain },
-  { href: "/operations/prism/signals", label: "Signals Feed", icon: Radio },
-  { href: "/operations/prism/motion", label: "Motion", icon: Workflow },
-  { href: "/operations/blocker-board", label: "Blocker Board", icon: AlertTriangle },
-  { href: "/operations/digest", label: "Digest Center", icon: FileText },
-  { href: "/operations/approvals", label: "Approvals", icon: CheckSquare },
-  { href: "/operations/trust-audit", label: "Trust & Audit", icon: Shield },
-  { href: "/operations/autonomous-noc", label: "Autonomous NOC", icon: Bot },
-  { href: "/operations/runbook-studio", label: "Runbook Studio", icon: BookOpen },
-  { href: "/operations/knowledge-graph", label: "Knowledge Graph", icon: Network },
-  { href: "/operations/dex", label: "DEX Scoring", icon: Monitor },
-  { href: "/operations/self-healing", label: "Self-Healing", icon: RotateCcw },
-  { href: "/operations/alloy/canvas", label: "Alloy Workflow Canvas", icon: Workflow },
-  { href: "/operations/alloy/actions", label: "Alloy Action Queue", icon: Activity },
-  { href: "/operations/alloy/intelligence", label: "Alloy Intelligence", icon: Brain },
-  { href: "/operations/alloy/governance", label: "Governance", icon: Shield },
-  { href: "/operations/slo", label: "SLO / SLI Management", icon: Target },
-  { href: "/operations/finops", label: "FinOps & Cloud Cost", icon: DollarSign },
-  { href: "/operations/tracing", label: "Distributed Tracing", icon: GitBranch },
-  { href: "/operations/logs", label: "Log Analytics", icon: Database },
-  { href: "/operations/on-call", label: "On-Call Management", icon: Phone },
-  { href: "/operations/inbox", label: "Inbox", icon: Inbox },
-  { href: "/operations/ownership", label: "Ownership Map", icon: Users },
-  { href: "/operations/noise-reduction", label: "Noise Reduction", icon: BellOff },
+const OPERATIONS_NAV: NavGroup[] = [
+  {
+    section: "Governed Decision Loop",
+    items: [
+      { href: "/operations", label: "Executive Command", icon: LayoutDashboard },
+      { href: "/operations/prism/pulse", label: "Pulse", icon: Heart },
+      { href: "/operations/prism/signals", label: "Signal Feed", icon: Radio },
+      { href: "/operations/blocker-board", label: "Blocker Board", icon: AlertTriangle },
+      { href: "/operations/approvals", label: "Approvals", icon: CheckSquare },
+      { href: "/operations/trust-audit", label: "Proof Chain Audit", icon: Shield },
+      { href: "/operations/inbox", label: "Command Inbox", icon: Inbox },
+    ],
+  },
+  {
+    section: "Alloy — Execution",
+    items: [
+      { href: "/operations/alloy/canvas", label: "Workflow Canvas", icon: Workflow },
+      { href: "/operations/alloy/actions", label: "Action Queue", icon: Activity },
+      { href: "/operations/alloy/governance", label: "Covenant Policy", icon: Lock },
+      { href: "/operations/alloy/intelligence", label: "Intelligence", icon: Brain },
+      { href: "/operations/alloy/traces", label: "Execution Traces", icon: GitBranch },
+      { href: "/operations/ownership", label: "Ownership Map", icon: Users },
+    ],
+  },
+  {
+    section: "Observability",
+    items: [
+      { href: "/operations/autonomous-noc", label: "Autonomous NOC", icon: Bot },
+      { href: "/operations/slo", label: "SLO Management", icon: Target },
+      { href: "/operations/metrics", label: "Metrics", icon: BarChart3 },
+      { href: "/operations/logs", label: "Log Analytics", icon: Database },
+      { href: "/operations/tracing", label: "Distributed Tracing", icon: GitBranch },
+      { href: "/operations/topology", label: "Service Topology", icon: Network },
+      { href: "/operations/self-healing", label: "Self-Healing", icon: RotateCcw },
+    ],
+  },
+  {
+    section: "Operations",
+    items: [
+      { href: "/operations/digest", label: "Digest Center", icon: FileText },
+      { href: "/operations/finops", label: "FinOps", icon: DollarSign },
+      { href: "/operations/on-call", label: "On-Call", icon: Phone },
+      { href: "/operations/runbook-studio", label: "Runbook Studio", icon: BookOpen },
+      { href: "/operations/noise-reduction", label: "Noise Reduction", icon: BellOff },
+    ],
+  },
 ];
 
-const INFRASTRUCTURE_NAV = [
-  { href: "/infrastructure", label: "Executive Console", icon: Crown },
-  { href: "/infrastructure/imperium-map", label: "Resource Map", icon: Map },
-  { href: "/infrastructure/praetorian", label: "Security Perimeter", icon: Shield },
-  { href: "/infrastructure/senate", label: "Governance Board", icon: BookOpen },
-  { href: "/infrastructure/supply-lines", label: "Network Topology", icon: Network },
-  { href: "/infrastructure/centurion", label: "AI Operations", icon: Cpu },
-  { href: "/infrastructure/intelligence", label: "Intelligence Briefing", icon: Radio },
+const INFRASTRUCTURE_NAV: NavGroup[] = [
+  {
+    section: "IMPERIUM Command",
+    items: [
+      { href: "/infrastructure", label: "Executive Console", icon: Crown },
+      { href: "/infrastructure/intelligence", label: "Intelligence Briefing", icon: Radio },
+      { href: "/infrastructure/imperium-map", label: "Resource Map", icon: Map },
+    ],
+  },
+  {
+    section: "Security & Governance",
+    items: [
+      { href: "/infrastructure/praetorian", label: "Security Perimeter", icon: Shield },
+      { href: "/infrastructure/senate", label: "Governance Board", icon: BookOpen },
+      { href: "/infrastructure/centurion", label: "AI Operations", icon: Cpu },
+    ],
+  },
+  {
+    section: "Network",
+    items: [
+      { href: "/infrastructure/supply-lines", label: "Network Topology", icon: Network },
+    ],
+  },
 ];
+
+function SectionHeader({ label }: { label: string }) {
+  return (
+    <div style={{
+      padding: "0.5rem 0.625rem 0.25rem",
+      fontSize: "7px",
+      fontWeight: 700,
+      letterSpacing: "0.14em",
+      textTransform: "uppercase",
+      color: "rgba(255,255,255,0.2)",
+      fontFamily: "monospace",
+      marginTop: "0.5rem",
+    }}>
+      {label}
+    </div>
+  );
+}
 
 function NavItem({ href, label, icon: Icon, isActive, accent }: {
   href: string; label: string; icon: typeof LayoutDashboard; isActive: boolean; accent: string;
@@ -126,7 +190,7 @@ export function UnifiedLayout({ children, mode, onModeChange }: {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const accent = ACCENT[mode];
 
-  const navItems = mode === "strategy" ? STRATEGY_NAV
+  const navGroups = mode === "strategy" ? STRATEGY_NAV
     : mode === "operations" ? OPERATIONS_NAV
     : INFRASTRUCTURE_NAV;
 
@@ -151,38 +215,46 @@ export function UnifiedLayout({ children, mode, onModeChange }: {
             </div>
             <div>
               <div className="text-[11px] font-bold tracking-wide leading-none" style={{ color: "rgba(255,255,255,0.9)" }}>COMMAND</div>
-              <div className="text-[7px] uppercase tracking-[0.15em] mt-px" style={{ color: `${accent}70` }}>Unified Operations</div>
+              <div className="text-[7px] uppercase tracking-[0.15em] mt-px" style={{ color: `${accent}70` }}>Unified Command</div>
             </div>
           </div>
         </div>
 
         <WorkspaceSwitcher mode={mode} onModeChange={(m) => { onModeChange(m); setSidebarOpen(false); }} />
 
-        <nav className="flex-1 min-h-0 px-1.5 py-2 overflow-y-auto flex flex-col gap-px">
-          {navItems.map((item) => {
-            const isActive = item.href === `/${mode}` || item.href === `/strategy`
-              ? location === item.href || location === "/" && item.href === "/strategy"
-              : location.startsWith(item.href);
-            return (
-              <NavItem
-                key={item.href}
-                href={item.href}
-                label={item.label}
-                icon={item.icon}
-                isActive={isActive}
-                accent={accent}
-              />
-            );
-          })}
+        <nav className="flex-1 min-h-0 px-1.5 py-1 overflow-y-auto flex flex-col">
+          {navGroups.map((group) => (
+            <div key={group.section}>
+              <SectionHeader label={group.section} />
+              {group.items.map((item) => {
+                const isActive = item.href === "/strategy" || item.href === "/operations" || item.href === "/infrastructure"
+                  ? location === item.href || (location === "/" && item.href === "/strategy")
+                  : location.startsWith(item.href) && item.href !== "/operations" && item.href !== "/strategy" && item.href !== "/infrastructure"
+                    ? true
+                    : location === item.href;
+                return (
+                  <NavItem
+                    key={item.href}
+                    href={item.href}
+                    label={item.label}
+                    icon={item.icon}
+                    isActive={isActive}
+                    accent={accent}
+                  />
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
         <div className="px-3 py-2 border-t" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-          <div className="text-[7px] uppercase tracking-widest font-mono mb-1.5" style={{ color: "rgba(255,255,255,0.2)" }}>SZL Holdings</div>
+          <div className="text-[7px] uppercase tracking-widest font-mono mb-1.5" style={{ color: "rgba(255,255,255,0.2)" }}>Domain Packs</div>
           <div className="flex gap-1 flex-wrap">
             {[
               { label: "AEGIS", href: "/aegis/", color: "#ef4444" },
               { label: "TERRA", href: "/terra/", color: "#22c55e" },
               { label: "VESSELS", href: "/vessels/", color: "#0ea5e9" },
+              { label: "PRISM", href: "/prism-counsel/", color: "#8b7ac8" },
             ].map((p) => (
               <a key={p.label} href={p.href} className="text-[7px] px-1 py-px rounded font-mono hover:opacity-80" style={{ color: p.color, background: `${p.color}10`, border: `1px solid ${p.color}18` }}>
                 {p.label}
@@ -204,7 +276,7 @@ export function UnifiedLayout({ children, mode, onModeChange }: {
             </button>
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: accent }} />
             <span className="text-[11px] font-mono font-semibold" style={{ color: accent }}>
-              {WORKSPACE_TABS.find((t) => t.mode === mode)?.label} Mode
+              {WORKSPACE_TABS.find((t) => t.mode === mode)?.label}
             </span>
             <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>
               · {WORKSPACE_TABS.find((t) => t.mode === mode)?.sublabel}
