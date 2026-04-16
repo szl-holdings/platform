@@ -1,0 +1,35 @@
+{
+  "name": "@szl-holdings/evals-core",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Evaluation framework — benchmarks agent behavior over time comparing prompts, models, tools, policies, and orchestration strategies",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./runner": {
+      "types": "./dist/runner.d.ts",
+      "import": "./src/runner.ts"
+    },
+    "./metrics": {
+      "types": "./dist/metrics.d.ts",
+      "import": "./src/metrics.ts"
+    },
+    "./regression": {
+      "types": "./dist/regression.d.ts",
+      "import": "./src/regression.ts"
+    },
+    "./compare": {
+      "types": "./dist/compare.d.ts",
+      "import": "./src/compare.ts"
+    }
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  }
+}

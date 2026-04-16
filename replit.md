@@ -133,6 +133,24 @@ See `NAVIGATION_STRATEGY.md`, `PRODUCT_SURFACE_MAP.md`, `ROUTE_INVENTORY.md` for
 -   `SECRETS_SETUP.md` — Mobile credential provisioning guide
 -   `RELEASE_CHECKLIST.md` — Pre-release checklist
 
+## Replay, Eval & Trust Infrastructure
+
+Three interlinked capabilities for measuring, replaying, and improving agent behavior:
+
+| Package | Name | Purpose |
+|---------|------|---------|
+| `packages/replay-core` | `@szl-holdings/replay-core` | Incident/flow capture, sanitized snapshot generation, PII redaction, scenario registry, workflow/agent replay against historical context |
+| `packages/evals-core` | `@szl-holdings/evals-core` | Evaluation runner, precision/recall, usefulness, policy compliance, operator override rate, cost/latency metrics, regression detection, strategy comparison |
+
+UI surfaces (Command app):
+- **Replay Lab** — `/operations/alloy/replay-lab` — Browse captured scenarios, replay, compare outcomes
+- **Eval Lab** — `/operations/alloy/eval-lab` — Run eval suites, view benchmarks, track regressions
+- **Trust Console** — `/operations/alloy/trust-console` — Production trust dashboard with all metrics
+
+Seeded scenarios: `aegis-soc-threat-triage-v1` (3 snapshots, ground truth), `vessels-voyage-pnl-optimization-v1` (1 snapshot)
+
+Framework docs: `docs/ai/agent-evaluation-framework.md`
+
 ## ATLAS Enterprise State Model
 
 Three canonical packages define the shared entity vocabulary across all domain packs:

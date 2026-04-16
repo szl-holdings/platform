@@ -73,6 +73,9 @@ const AlloyAgentHandoffs = lazy(() => import("@lyte/pages/alloy-agent-handoffs")
 const AlloyTrustReceipts = lazy(() => import("@lyte/pages/alloy-trust-receipts"));
 const AlloyIntegrationHealth = lazy(() => import("@lyte/pages/alloy-integration-health"));
 const AlloyGraphCompiler = lazy(() => import("@lyte/pages/alloy-graph-compiler"));
+const ReplayLab = lazy(() => import("./pages/replay-lab"));
+const EvalLab = lazy(() => import("./pages/eval-lab"));
+const TrustConsole = lazy(() => import("./pages/trust-console"));
 const ApprovalsCenter = lazy(() => import("@lyte/pages/approvals-center"));
 const CommandInbox = lazy(() => import("@lyte/pages/command-inbox"));
 const OwnershipMap = lazy(() => import("@lyte/pages/ownership-map-new"));
@@ -258,6 +261,9 @@ function AppShell() {
               <Route path="/operations/alloy/receipts" component={() => <AlloyTrustReceipts />} />
               <Route path="/operations/alloy/integrations" component={() => <AlloyIntegrationHealth />} />
               <Route path="/operations/alloy/compiler" component={() => <AlloyGraphCompiler />} />
+              <Route path="/operations/alloy/replay-lab" component={() => <ReplayLab />} />
+              <Route path="/operations/alloy/eval-lab" component={() => <EvalLab />} />
+              <Route path="/operations/alloy/trust-console" component={() => <TrustConsole />} />
 
               <Route path="/infrastructure" component={() => <LegatusConsole />} />
               <Route path="/infrastructure/legatus" component={() => <LegatusConsole />} />
