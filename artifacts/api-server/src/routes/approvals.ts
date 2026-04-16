@@ -243,15 +243,18 @@ router.post("/audit-log/policy-appeal", authMiddleware(), async (req: Request, r
     const user = req.user;
     const orgId = user?.orgs?.[0]?.orgId ?? null;
 
-    logger.info("policy.appeal.recorded", {
-      requestId,
-      action,
-      justificationLength: justification?.length ?? 0,
-      actorId: user?.id ?? null,
-      actorRole: user?.roles?.[0] ?? null,
-      orgId,
-      correlationId: (req as unknown as { correlationId?: string }).correlationId,
-    });
+    logger.info(
+      {
+        requestId,
+        action,
+        justificationLength: justification?.length ?? 0,
+        actorId: user?.id ?? null,
+        actorRole: user?.roles?.[0] ?? null,
+        orgId,
+        correlationId: (req as unknown as { correlationId?: string }).correlationId,
+      },
+      "policy.appeal.recorded",
+    );
 
     sendCreated(res, {
       requestId,
