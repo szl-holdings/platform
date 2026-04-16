@@ -45,7 +45,7 @@ GET /api/health/ready    → readiness probe (database connectivity)
 GET /api/health/detailed → authenticated detailed diagnostics
 ```
 
-## Platform Artifacts (11 total)
+## Platform Artifacts
 
 | Artifact              | Path              | Type            | Purpose                              |
 | --------------------- | ----------------- | --------------- | ------------------------------------ |

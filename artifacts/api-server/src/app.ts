@@ -210,7 +210,23 @@ app.get("/api/health", async (_req: Request, res: Response) => {
     queueStatus = queueDepth > 50 ? "backpressure" : "ok";
   } catch { /* job queue may not be initialized yet */ }
 
-  const overallStatus = dbStatus === "degraded" ? "degraded" : "healthy";
+  const hasSessionSecret = !!process.env.SESSION_SECRET;
+  const authOk = hasSessionSecret ? "ok" : "degraded";
+  const overallStatus = dbStatus === "degraded" || authOk === "degraded" ? "degraded" : "healthy";
+
+  const platformApps = [
+    { slug: "szl-holdings", name: "SZL Holdings Dashboard", type: "command_surface" },
+    { slug: "command", name: "Unified Command", type: "command_surface" },
+    { slug: "aegis", name: "Aegis — Defense & Intelligence", type: "domain_pack" },
+    { slug: "terra", name: "Terra — Real Estate Intelligence", type: "domain_pack" },
+    { slug: "vessels", name: "Vessels — Maritime Intelligence", type: "domain_pack" },
+    { slug: "prism-counsel", name: "PRISM Counsel — Legal Intelligence", type: "domain_pack" },
+    { slug: "carlota-jo", name: "Carlota Jo Consulting", type: "domain_pack" },
+    { slug: "firestorm", name: "Aegis Firestorm — Cybersecurity", type: "domain_pack" },
+    { slug: "stephen-site", name: "Stephen Site — Portfolio", type: "supporting" },
+    { slug: "szl-holdings-mobile", name: "CORTEX — Mobile Command", type: "mobile" },
+    { slug: "api-server", name: "API Server", type: "backend" },
+  ];
 
   res.status(overallStatus === "healthy" ? 200 : 503).json({
     status: overallStatus,
@@ -231,8 +247,12 @@ app.get("/api/health", async (_req: Request, res: Response) => {
       database: { status: dbStatus, latencyMs: dbLatencyMs },
       job_queue: { status: queueStatus, depth: queueDepth },
       storage: { status: "ok", mode: process.env.OBJECT_STORAGE_BUCKET_ID ? "cloud" : "local" },
-      auth: { status: process.env.SESSION_SECRET ? "ok" : "degraded", mode: process.env.SESSION_SECRET ? "configured" : "missing_secret" },
+      auth: { status: authOk, mode: hasSessionSecret ? "configured" : "missing_secret" },
       ai: { status: "ok", mode: (process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || process.env.OPENAI_API_KEY) ? "live" : "mock" },
+    },
+    platform: {
+      apps: platformApps,
+      totalApps: platformApps.length,
     },
   });
 });
