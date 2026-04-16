@@ -128,7 +128,7 @@ router.get("/alloy/policies", authMiddleware(), async (req, res) => {
 
 router.get("/alloy/policies/:id", authMiddleware(), async (req, res) => {
   try {
-    const id = parseInt(String(req.params.id));
+    const id = parseInt(String(req.params.id as string));
     if (isNaN(id)) return sendBadRequest(res, "Invalid policy ID");
     const user = req.user as AuthenticatedUser | undefined;
 
@@ -197,7 +197,7 @@ router.post("/alloy/policies", authMiddleware(), requireRole("admin"), async (re
 
 router.patch("/alloy/policies/:id", authMiddleware(), requireRole("admin"), validateBody(updatePolicySchema), async (req, res) => {
   try {
-    const id = parseInt(String(req.params.id));
+    const id = parseInt(String(req.params.id as string));
     if (isNaN(id)) return sendBadRequest(res, "Invalid policy ID");
     const user = req.user as AuthenticatedUser | undefined;
     if (!user) return sendForbidden(res, "Authentication required");
@@ -219,7 +219,7 @@ router.patch("/alloy/policies/:id", authMiddleware(), requireRole("admin"), vali
     const updates: Partial<typeof alloyPoliciesTable.$inferInsert> = {};
     if (body.name !== undefined) updates.name = body.name;
     if (body.description !== undefined) updates.description = body.description;
-    if (body.status !== undefined) updates.status = body.status;
+    if (body.status !== undefined) updates.status = body.status as any;
     if (body.rules !== undefined) updates.rules = body.rules as Record<string, unknown>;
     updates.updatedAt = new Date();
 
@@ -247,7 +247,7 @@ router.patch("/alloy/policies/:id", authMiddleware(), requireRole("admin"), vali
 
 router.delete("/alloy/policies/:id", authMiddleware(), requireRole("admin"), async (req, res) => {
   try {
-    const id = parseInt(String(req.params.id));
+    const id = parseInt(String(req.params.id as string));
     if (isNaN(id)) return sendBadRequest(res, "Invalid policy ID");
     const user = req.user as AuthenticatedUser | undefined;
     if (!user) return sendForbidden(res, "Authentication required");
@@ -287,7 +287,7 @@ router.delete("/alloy/policies/:id", authMiddleware(), requireRole("admin"), asy
 // Apply a compliance template to a tenant (clone it with orgId set)
 router.post("/alloy/policies/:id/apply", authMiddleware(), requireRole("admin"), async (req, res) => {
   try {
-    const id = parseInt(String(req.params.id));
+    const id = parseInt(String(req.params.id as string));
     if (isNaN(id)) return sendBadRequest(res, "Invalid template policy ID");
     const orgId = parseInt(req.body.orgId);
     if (isNaN(orgId)) return sendBadRequest(res, "orgId is required");
@@ -402,7 +402,7 @@ router.post("/alloy/governance/incidents", authMiddleware(), async (req, res) =>
 
 router.patch("/alloy/governance/incidents/:id/resolve", authMiddleware(), async (req, res) => {
   try {
-    const id = parseInt(String(req.params.id));
+    const id = parseInt(String(req.params.id as string));
     if (isNaN(id)) return sendBadRequest(res, "Invalid incident ID");
     const user = req.user as AuthenticatedUser | undefined;
     if (!user) return sendForbidden(res, "Authentication required");

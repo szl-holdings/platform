@@ -473,7 +473,6 @@ export function useRegisterCommands(base: CommandItem[], extra: CommandItem[]): 
   const extraKey = extra.map((c) => `${c.id}:${c.label}:${c.group ?? ""}:${c.description ?? ""}`).join("|");
   return React.useMemo(
     () => [...base, ...extra.filter((e) => !base.some((b) => b.id === e.id))],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [baseKey, extraKey]
   );
 }

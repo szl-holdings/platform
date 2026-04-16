@@ -69,7 +69,7 @@ router.get("/healthz", async (_req, res) => {
 
 router.get("/health", async (req, res) => {
   req.url = "/healthz";
-  router.handle(req, res, () => {});
+  (router as any).handle(req, res, () => {});
 });
 
 export default router;

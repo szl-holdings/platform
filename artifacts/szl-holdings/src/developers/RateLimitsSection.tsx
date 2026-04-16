@@ -4,6 +4,8 @@ import { GQL_QUERY_VESSELS, GQL_QUERY_PROJECTS, GQL_MUTATION_SIGNAL, WEBHOOK_EVE
 
 export function RateLimitsSection() {
   return (
+          <section>
+            <SectionHeader
               id="rate-limits"
               title="Rate Limits"
               subtitle="The API enforces per-tier rate limits to ensure platform stability. Limits are applied per IP address for unauthenticated requests, and per user/API key for authenticated requests."
@@ -89,8 +91,5 @@ Retry-After: 47
               (±20%) to prevent synchronized retry storms.
             </Callout>
           </section>
-
-          {/* ── Error Codes ── */}
-          <section>
   );
 }

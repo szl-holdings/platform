@@ -195,7 +195,7 @@ analyticsEngineRouter.post("/analytics-engine/metrics", async (req: Request, res
 
 analyticsEngineRouter.get("/analytics-engine/metrics/:metricId/query", async (req: Request, res: Response) => {
   try {
-    const { metricId } = req.params;
+    const { metricId } = req.params as Record<string, string>;
     const { range = "7d", granularity: granularityParam, from: fromParam, to: toParam } = req.query as {
       range?: string;
       granularity?: string;
@@ -376,7 +376,7 @@ analyticsEngineRouter.post("/analytics-engine/funnels", async (req: Request, res
 
 analyticsEngineRouter.get("/analytics-engine/funnels/:funnelId", async (req: Request, res: Response) => {
   try {
-    const { funnelId } = req.params;
+    const { funnelId } = req.params as Record<string, string>;
     const { range = "7d" } = req.query as { range?: string };
 
     const [definition] = await db.select().from(analyticsFunnelDefinitionsTable)
@@ -558,7 +558,7 @@ analyticsEngineRouter.get("/analytics-engine/anomalies", async (req: Request, re
 
 analyticsEngineRouter.patch("/analytics-engine/anomalies/:anomalyId/resolve", async (req: Request, res: Response) => {
   try {
-    const { anomalyId } = req.params;
+    const { anomalyId } = req.params as Record<string, string>;
     await db.update(analyticsAnomaliesTable)
       .set({ isResolved: true, resolvedAt: new Date() })
       .where(eq(analyticsAnomaliesTable.anomalyId, anomalyId!));
@@ -571,7 +571,7 @@ analyticsEngineRouter.patch("/analytics-engine/anomalies/:anomalyId/resolve", as
 
 analyticsEngineRouter.patch("/analytics-engine/anomalies/:anomalyId/suppress", async (req: Request, res: Response) => {
   try {
-    const { anomalyId } = req.params;
+    const { anomalyId } = req.params as Record<string, string>;
     await db.update(analyticsAnomaliesTable)
       .set({ isSuppressed: true })
       .where(eq(analyticsAnomaliesTable.anomalyId, anomalyId!));
@@ -627,7 +627,7 @@ analyticsEngineRouter.post("/analytics-engine/dashboards", async (req: Request, 
 
 analyticsEngineRouter.get("/analytics-engine/dashboards/:dashboardId", async (req: Request, res: Response) => {
   try {
-    const { dashboardId } = req.params;
+    const { dashboardId } = req.params as Record<string, string>;
     const [dashboard] = await db.select().from(analyticsDashboardsTable)
       .where(eq(analyticsDashboardsTable.dashboardId, dashboardId!))
       .limit(1);
@@ -705,7 +705,7 @@ analyticsEngineRouter.post("/analytics-engine/export", async (req: Request, res:
 
 analyticsEngineRouter.get("/analytics-engine/export/:exportId", async (req: Request, res: Response) => {
   try {
-    const { exportId } = req.params;
+    const { exportId } = req.params as Record<string, string>;
     const [job] = await db.select().from(analyticsExportJobsTable)
       .where(eq(analyticsExportJobsTable.exportId, exportId!))
       .limit(1);
@@ -724,7 +724,7 @@ analyticsEngineRouter.get("/analytics-engine/export/:exportId", async (req: Requ
 
 analyticsEngineRouter.get("/analytics-engine/export/:exportId/download", async (req: Request, res: Response) => {
   try {
-    const { exportId } = req.params;
+    const { exportId } = req.params as Record<string, string>;
     const { token } = req.query as { token?: string };
 
     const [job] = await db.select().from(analyticsExportJobsTable)

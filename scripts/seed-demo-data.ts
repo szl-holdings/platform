@@ -5,6 +5,7 @@ import {
   lyteActionsTable,
   lyteSavedViewsTable,
   lyteReadinessItemsTable,
+  vesselsTable,
   vesselsEventsTable,
   vesselsCommandWorkflowsTable,
 } from "@szl-holdings/db";
@@ -89,34 +90,31 @@ async function seedFirestorm() {
   console.log("[seed] Seeding firestorm workflow actions...");
   const wfActions = await db.insert(firestormWorkflowActionsTable).values([
     {
-      assetId: assets[0].id,
-      actionType: "patch",
+      entityType: "asset",
+      entityId: assets[0].id,
+      actionType: "remediate",
       status: "in_progress",
-      priority: "critical",
       assignedTo: "Platform Engineering",
-      title: "Patch auth bypass vulnerability in Payment API v3",
-      description: "CVE-2024-4451 exploits improper JWT validation. Apply patch 3.2.2 in maintenance window.",
-      workflowRef: "alloy-wf-001",
+      notes: "CVE-2024-4451 exploits improper JWT validation. Apply patch 3.2.2 in maintenance window.",
+      triggeredBy: "alloy-wf-001",
     },
     {
-      assetId: assets[2].id,
-      actionType: "patch",
+      entityType: "asset",
+      entityId: assets[2].id,
+      actionType: "remediate",
       status: "pending",
-      priority: "high",
       assignedTo: "IT Infrastructure",
-      title: "Apply CVE-2024-3891 patch to VPN gateway",
-      description: "Remote code execution vulnerability in Cisco ASA firmware. Patch available, reboot required.",
-      workflowRef: "alloy-wf-002",
+      notes: "Remote code execution vulnerability in Cisco ASA firmware. Patch available, reboot required.",
+      triggeredBy: "alloy-wf-002",
     },
     {
-      assetId: assets[1].id,
-      actionType: "investigate",
+      entityType: "asset",
+      entityId: assets[1].id,
+      actionType: "acknowledge",
       status: "completed",
-      priority: "high",
       assignedTo: "Security Team",
-      title: "Investigate session fixation risk on Auth Service",
-      description: "Review session token generation and rotation policies. Implement secure session ID regeneration.",
-      workflowRef: "alloy-wf-003",
+      notes: "Review session token generation and rotation policies. Implement secure session ID regeneration.",
+      triggeredBy: "alloy-wf-003",
     },
   ]).returning();
 
@@ -305,7 +303,14 @@ async function seedLyte() {
 }
 
 async function seedVessels() {
-  const vesselIds = [1, 2, 3, 4];
+  console.log("[seed] Seeding vessels roster...");
+  const vessels = await db.insert(vesselsTable).values([
+    { name: "Atlantic Pioneer", vesselType: "cargo", flag: "MT", status: "at_sea" },
+    { name: "Pacific Guardian", vesselType: "container", flag: "PA", status: "at_sea" },
+    { name: "Nordic Crest", vesselType: "bulk", flag: "NO", status: "in_port" },
+    { name: "Singapore Star", vesselType: "tanker", flag: "SG", status: "anchored" },
+  ]).returning();
+  const vesselIds = vessels.map((v) => v.id);
 
   console.log("[seed] Seeding vessel events...");
   const events = await db.insert(vesselsEventsTable).values([

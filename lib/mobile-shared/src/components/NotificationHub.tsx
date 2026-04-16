@@ -102,7 +102,6 @@ export function NotificationHub({
         new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
     // allQueries reference is stable between renders (useQueries memoizes the array)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allQueries]);
 
   const filteredItems = useMemo(() => {

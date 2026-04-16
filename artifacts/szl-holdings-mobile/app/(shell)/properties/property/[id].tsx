@@ -342,7 +342,7 @@ export default function PropertyDetail() {
             ].map(photo => (
               <Pressable
                 key={photo.label}
-                onPress={() => { Haptics.selectionAsync(); router.push("/capture"); }}
+                onPress={() => { Haptics.selectionAsync(); router.push("/capture" as any); }}
                 style={[styles.photoPlaceholder, { backgroundColor: colors.surface, borderColor: colors.border }]}
               >
                 <Feather name={photo.icon} size={20} color={colors.mutedForeground} />
@@ -402,7 +402,7 @@ export default function PropertyDetail() {
             <Text style={[styles.actionGridText, { color: colors.rose }]}>{createLeadMutation.isSuccess ? 'Lead Created' : 'Create Lead'}</Text>
           </Pressable>
           <Pressable
-            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); router.push('/capture'); }}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); router.push('/capture' as any); }}
             style={[styles.actionGridBtn, { borderColor: colors.border, backgroundColor: 'rgba(255,255,255,0.02)' }]}
           >
             <Feather name="camera" size={16} color={colors.mutedForeground} />

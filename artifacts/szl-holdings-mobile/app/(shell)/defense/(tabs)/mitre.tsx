@@ -347,7 +347,7 @@ export default function MitreScreen() {
                   style={[styles.relatedRow, { backgroundColor: colors.navySurface, borderColor: colors.border }]}
                   onPress={() => {
                     setSelectedTech(null);
-                    router.push(`/incident/${inc.id}`);
+                    router.push(`/incident/${ inc.id }` as any);
                   }}
                 >
                   <View style={[styles.relatedSevDot, { backgroundColor: sevColor }]} />

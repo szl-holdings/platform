@@ -3,8 +3,8 @@ import { CodeBlock, LanguageTabs, SectionHeader, SubSectionHeader, Callout, Inli
 
 export function AuthSection() {
   return (
-          {/* ── Authentication ── */}
           <section>
+          {/* ── Authentication ── */}
             <SectionHeader
               id="authentication"
               title="Authentication"
@@ -224,8 +224,5 @@ Supported operations:
   - Pagination: ?startIndex=1&count=100`}
             />
           </section>
-
-          {/* ── REST API ── */}
-          <section>
   );
 }

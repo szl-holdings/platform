@@ -123,7 +123,7 @@ router.get("/vessels/trading/instruments", tradingLimit, authMiddleware({ requir
 
 router.get("/vessels/trading/instruments/:id", tradingLimit, authMiddleware({ required: false }), (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const instruments = getCached("instruments", 30 * 1000, getLiveInstruments);
     const inst = instruments.find(i => i.id === id);
     if (!inst) { res.status(404).json({ error: "Instrument not found" }); return; }
@@ -227,7 +227,7 @@ router.post("/vessels/trading/orders", tradingLimit, authMiddleware({ required: 
 
 router.delete("/vessels/trading/orders/:id", tradingLimit, authMiddleware({ required: false }), (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const idx = sessionOrders.findIndex(o => o.id === id);
     const demoIdx = DEMO_ORDERS.findIndex(o => o.id === id);
     if (idx >= 0) {
@@ -332,7 +332,7 @@ router.get("/vessels/trading/pnl", tradingLimit, authMiddleware({ required: fals
 
 router.get("/vessels/trading/market-depth/:symbol", tradingLimit, authMiddleware({ required: false }), (req, res) => {
   try {
-    const { symbol } = req.params;
+    const { symbol } = req.params as Record<string, string>;
     const instruments = getCached("instruments", 30 * 1000, getLiveInstruments);
     const inst = instruments.find(i => i.symbol === symbol.toUpperCase());
     if (!inst) { res.status(404).json({ error: "Instrument not found" }); return; }

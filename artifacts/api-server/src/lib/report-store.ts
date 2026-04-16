@@ -489,3 +489,20 @@ export async function getReportStats() {
 
   return { ...stats, byDomain: domainStats };
 }
+
+export const reportStore = {
+  createReportGeneration,
+  getReportGeneration,
+  listReportGenerations,
+  updateReportStatus,
+  createReportTemplate,
+  getReportTemplate,
+  listReportTemplates,
+  updateReportTemplate,
+  getReportPdfBuffer,
+  getReportVersionHistory,
+  createApprovalRequest,
+  reviewApproval,
+  getApprovalForReport,
+  createDistribution,
+};

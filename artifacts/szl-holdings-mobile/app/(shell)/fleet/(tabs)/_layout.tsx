@@ -41,9 +41,9 @@ function NativeTabLayout() {
         <Icon sf={{ default: "bubble.left.and.bubble.right", selected: "bubble.left.and.bubble.right.fill" }} />
         <Label>Helmsman</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="economics" options={{ href: null }} />
-      <NativeTabs.Trigger name="mcp-tools" options={{ href: null }} />
-      <NativeTabs.Trigger name="profile" options={{ href: null }} />
+      <NativeTabs.Trigger name="economics" options={{  href: null } as any} />
+      <NativeTabs.Trigger name="mcp-tools" options={{  href: null } as any} />
+      <NativeTabs.Trigger name="profile" options={{  href: null } as any} />
     </NativeTabs>
   );
 }
@@ -100,9 +100,9 @@ function ClassicTabLayout() {
             isIOS ? <SymbolView name="bubble.left.and.bubble.right.fill" tintColor={color} size={22} /> : <Feather name="message-circle" size={20} color={color} />,
         }}
       />
-      <Tabs.Screen name="economics" options={{ href: null }} />
-      <Tabs.Screen name="mcp-tools" options={{ href: null }} />
-      <Tabs.Screen name="profile" options={{ href: null }} />
+      <Tabs.Screen name="economics" options={{  href: null } as any} />
+      <Tabs.Screen name="mcp-tools" options={{  href: null } as any} />
+      <Tabs.Screen name="profile" options={{  href: null } as any} />
     </Tabs>
   );
 }

@@ -158,7 +158,7 @@ router.post("/jobs/enqueue", authMiddleware(), requireRole("ops", "admin"), asyn
 });
 
 router.post("/jobs/trigger/:type", authMiddleware(), requireRole("ops"), async (req, res) => {
-  const { type } = req.params;
+  const { type } = req.params as Record<string, string>;
   const ON_DEMAND_TYPES = new Set<string>([
     NAMED_JOB_TYPES.WORKFLOW_RETRY_JOB,
     NAMED_JOB_TYPES.ARTIFACT_GENERATION_JOB,

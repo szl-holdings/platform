@@ -56,14 +56,14 @@ function MiniBarChart({ data, maxVal }: { data: number[]; maxVal: number }) {
 function VoyageCard({ voyage }: { voyage: VoyageEconomics }) {
   const colors = useColors();
   const [expanded, setExpanded] = useState(false);
-  const sc = STATUS_COLORS[voyage.status] || colors.textFaint;
-  const revenue = parseFloat(voyage.grossRevenue || "0");
-  const costs = parseFloat(voyage.totalCostsUsd || "0");
-  const margin = parseFloat(voyage.netMarginUsd || "0");
-  const marginPct = parseFloat(voyage.marginPct || "0") * 100;
-  const tce = parseFloat(voyage.tcePerDay || "0");
-  const fuel = parseFloat(voyage.fuelCostUsd || "0");
-  const port = parseFloat(voyage.portCostsUsd || "0");
+  const sc = STATUS_COLORS[voyage.status ?? ""] || colors.textFaint;
+  const revenue = (voyage.grossRevenue ?? 0);
+  const costs = (voyage.totalCostsUsd ?? 0);
+  const margin = (voyage.netMarginUsd ?? 0);
+  const marginPct = (voyage.marginPct ?? 0) * 100;
+  const tce = (voyage.tcePerDay ?? 0);
+  const fuel = (voyage.fuelCostUsd ?? 0);
+  const port = (voyage.portCostsUsd ?? 0);
   const isPositive = margin >= 0;
 
   return (
@@ -75,15 +75,15 @@ function VoyageCard({ voyage }: { voyage: VoyageEconomics }) {
       <View style={styles.voyHeader}>
         <View style={{ flex: 1 }}>
           <Text style={[styles.voyRef, { color: colors.text }]} numberOfLines={1}>
-            {voyage.voyageRef || `Voyage #${voyage.id}`}
+            {voyage.voyageRef || `Voyage #${voyage.voyageId}`}
           </Text>
           <Text style={[styles.voyRoute, { color: colors.textDim }]} numberOfLines={1}>
-            {voyage.originPort || "—"} → {voyage.destinationPort || "—"}
+            {voyage.originPort || "—"} → {voyage.destination || "—"}
           </Text>
         </View>
         <View style={{ alignItems: "flex-end" }}>
           <View style={[styles.statusPill, { backgroundColor: `${sc}15`, borderColor: `${sc}30` }]}>
-            <Text style={[styles.statusText, { color: sc }]}>{voyage.status.replace("_", " ")}</Text>
+            <Text style={[styles.statusText, { color: sc }]}>{(voyage.status ?? "").replace("_", " ")}</Text>
           </View>
           <Text style={[styles.voyRevenue, { color: colors.text }]}>{revenue > 0 ? fmt(revenue) : "—"}</Text>
         </View>
@@ -156,10 +156,10 @@ export default function EconomicsScreen() {
     queryFn: async () => {
       try {
         const data = await api.voyageEconomics();
-        await cacheSet(CACHE_KEYS.economics, data);
+        await cacheSet(CACHE_KEYS.ECONOMICS, data);
         return data;
       } catch {
-        return (await cacheGetStale<VoyageEconomics[]>(CACHE_KEYS.economics)) ?? [];
+        return (await cacheGetStale<VoyageEconomics[]>(CACHE_KEYS.ECONOMICS)) ?? [];
       }
     },
     staleTime: 60_000,
@@ -175,26 +175,26 @@ export default function EconomicsScreen() {
   const filtered = statusFilter === "all" ? voyages : voyages.filter(v => v.status === statusFilter);
   const sorted = [...filtered].sort((a, b) => {
     const getVal = (v: VoyageEconomics) => {
-      if (sortBy === "margin") return parseFloat(v.netMarginUsd || "0");
-      if (sortBy === "tce") return parseFloat(v.tcePerDay || "0");
-      return parseFloat(v.grossRevenue || "0");
+      if (sortBy === "margin") return (v.netMarginUsd ?? 0);
+      if (sortBy === "tce") return (v.tcePerDay ?? 0);
+      return (v.grossRevenue ?? 0);
     };
     return getVal(b) - getVal(a);
   });
 
-  const totalRevenue = voyages.reduce((s, v) => s + parseFloat(v.grossRevenue || "0"), 0);
-  const totalMargin = voyages.reduce((s, v) => s + parseFloat(v.netMarginUsd || "0"), 0);
-  const tceVoyages = voyages.filter(v => parseFloat(v.tcePerDay || "0") > 0);
+  const totalRevenue = voyages.reduce((s, v) => s + (v.grossRevenue ?? 0), 0);
+  const totalMargin = voyages.reduce((s, v) => s + (v.netMarginUsd ?? 0), 0);
+  const tceVoyages = voyages.filter(v => (v.tcePerDay ?? 0) > 0);
   const avgTce = tceVoyages.length > 0
-    ? tceVoyages.reduce((s, v) => s + parseFloat(v.tcePerDay || "0"), 0) / tceVoyages.length
+    ? tceVoyages.reduce((s, v) => s + (v.tcePerDay ?? 0), 0) / tceVoyages.length
     : 0;
-  const totalFuel = voyages.reduce((s, v) => s + parseFloat(v.fuelCostUsd || "0"), 0);
+  const totalFuel = voyages.reduce((s, v) => s + (v.fuelCostUsd ?? 0), 0);
 
-  const revenueData = analytics?.revenueByMonth?.slice(-8).map(m => m.revenue) ?? [];
+  const revenueData = (analytics?.revenueByMonth as Array<{revenue: number}>)?.slice(-8)?.map(m => m.revenue) ?? [];
   const maxRev = Math.max(...revenueData, 1);
 
   const statusCounts = voyages.reduce<Record<string, number>>((acc, v) => {
-    acc[v.status] = (acc[v.status] || 0) + 1;
+    acc[v.status ?? 'unknown'] = (acc[v.status ?? 'unknown'] || 0) + 1;
     return acc;
   }, {});
 
@@ -237,7 +237,7 @@ export default function EconomicsScreen() {
                     <View style={[styles.legendDot, { backgroundColor: colors.primary }]} />
                     <Text style={[styles.legendText, { color: colors.textFaint }]}>Revenue</Text>
                   </View>
-                  <Text style={[styles.legendText, { color: colors.textFaint }]}>{analytics?.revenueByMonth?.length} months</Text>
+                  <Text style={[styles.legendText, { color: colors.textFaint }]}>{(analytics?.revenueByMonth as Array<unknown>)?.length} months</Text>
                 </View>
               </View>
             )}

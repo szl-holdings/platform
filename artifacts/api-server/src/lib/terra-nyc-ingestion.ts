@@ -778,7 +778,7 @@ durableJobQueue.register<NycIngestionJobPayload>(NYC_INGESTION_JOB_TYPE, async (
  * (schedule name "nyc_ingestion_6h", 0 *\/6 * * *). This function is no longer called
  * and will be removed in a future cleanup. Do not re-export or re-invoke.
  */
-function scheduleNycIngestionJob(
+export function scheduleNycIngestionJob(
   sources: Array<"acris" | "acris_master" | "foreclosure_filings" | "dof_liens" | "hpd_violations"> = [
     "acris",
     "acris_master",

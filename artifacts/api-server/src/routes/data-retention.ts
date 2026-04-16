@@ -159,7 +159,7 @@ router.put("/data-retention/policies", validateBody(upsertPolicySchema), async (
 router.post("/data-retention/policies/:policyId/run", async (req: Request, res: Response) => {
   try {
     const user = req.user as AuthenticatedUser;
-    const policyId = parseInt(req.params["policyId"]!);
+    const policyId = parseInt(req.params["policyId"] as string);
 
     if (isNaN(policyId)) {
       res.status(400).json({ error: "Invalid policy ID" });

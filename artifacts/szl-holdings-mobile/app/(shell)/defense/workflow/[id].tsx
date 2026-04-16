@@ -11,7 +11,7 @@ import * as Haptics from "expo-haptics";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useOptimisticMutation } from "@szl-holdings/mobile-shared/hooks";
 import { useColors } from "@/hooks/useColors";
-import { apiFetch } from "@/lib/apiClient";
+import { apiFetch, apiFetchRaw } from "@/lib/apiClient";
 import { GestureHandlerRootView, Swipeable } from "react-native-gesture-handler";
 import type { FeatherIconName } from "@/types/feather-icons";
 
@@ -91,7 +91,7 @@ export default function WorkflowDetailScreen() {
   const { data: run, isLoading, isError, refetch } = useQuery<WorkflowRunDetail>({
     queryKey: runQueryKey,
     queryFn: async () => {
-      const res = await apiFetch(`/api/alloy/runs/${id}`);
+      const res = await apiFetchRaw(`/api/alloy/runs/${id}`);
       if (!res.ok) throw new Error("Failed to load run");
       const json = await res.json() as { data?: WorkflowRunDetail } | WorkflowRunDetail;
       return (json as { data?: WorkflowRunDetail }).data ?? json as WorkflowRunDetail;
@@ -115,7 +115,7 @@ export default function WorkflowDetailScreen() {
     mutationFn: async ({ approvalId, decision, note }) => {
       const body: { decision: string; note?: string } = { decision };
       if (note) body.note = note;
-      const res = await apiFetch(`/api/alloy/approvals/${approvalId}/decide`, {
+      const res = await apiFetchRaw(`/api/alloy/approvals/${approvalId}/decide`, {
         method: "POST",
         body: JSON.stringify(body),
       });

@@ -107,10 +107,10 @@ export default function CaptureScreen() {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         quality: 0.8,
       });
-      if (!result.canceled && result.assets[0]) {
+      if (!result.canceled && result.assets![0]) {
         const gps = await getLocation();
         setPhotos(prev => [...prev, {
-          uri: result.assets[0].uri,
+          uri: result.assets![0].uri,
           lat: gps?.lat,
           lng: gps?.lng,
           timestamp: new Date().toLocaleTimeString(),
@@ -127,13 +127,13 @@ export default function CaptureScreen() {
       quality: 0.8,
       exif: true,
     });
-    if (!result.canceled && result.assets[0]) {
+    if (!result.canceled && result.assets![0]) {
       const gps = await getLocation();
-      const asset = result.assets[0];
+      const asset = result.assets![0];
       setPhotos(prev => [...prev, {
         uri: asset.uri,
-        lat: asset.exif?.GPSLatitude ?? gps?.lat,
-        lng: asset.exif?.GPSLongitude ?? gps?.lng,
+        lat: (asset.exif?.GPSLatitude as number | undefined) ?? gps?.lat,
+        lng: (asset.exif?.GPSLongitude as number | undefined) ?? gps?.lng,
         timestamp: new Date().toLocaleTimeString(),
       }]);
     }

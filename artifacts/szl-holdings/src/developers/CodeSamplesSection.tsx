@@ -3,6 +3,8 @@ import { CodeBlock, LanguageTabs, SectionHeader, SubSectionHeader, Callout, Inli
 
 export function CodeSamplesSection() {
   return (
+          <section>
+            <SectionHeader
               id="code-samples"
               title="Code Samples"
               subtitle="Common operations in JavaScript (Node.js), Python, and cURL."
@@ -322,8 +324,5 @@ print(f"Signal {result['signalId']} — {result['workflowsTriggered']} workflows
               ]}
             />
           </section>
-
-          {/* ── Rate Limits ── */}
-          <section>
   );
 }

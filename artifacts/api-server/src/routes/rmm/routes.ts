@@ -294,7 +294,7 @@ router.post("/rmm/providers/:id/sync", authWrite, roleOperator, async (req, res)
 
     let upserted = 0;
     for (const dev of devices) {
-      const d = dev as Record<string, unknown>;
+      const d = dev as unknown as Record<string, unknown>;
       const hostname = String(d.hostname ?? d.systemName ?? d.name ?? `device-${d.id}`);
       const deviceId = String(d.id ?? d.deviceId ?? "");
       const ipAddress = String(d.ipAddress ?? d.lastIp ?? d.publicIP ?? "");

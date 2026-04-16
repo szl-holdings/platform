@@ -163,11 +163,11 @@ export default function VesselDetailScreen() {
     queryKey: ["vessel-detail", vesselId],
     queryFn: async () => {
       try {
-        const detail = await api.vesselDetail(vesselId);
-        await cacheSet(CACHE_KEYS.vesselDetail(vesselId), detail);
+        const detail = await (api as any).vesselDetail(vesselId);
+        await cacheSet(CACHE_KEYS.VESSELS, detail);
         return detail;
       } catch {
-        const cached = await cacheGetStale<VesselDetail>(CACHE_KEYS.vesselDetail(vesselId));
+        const cached = await cacheGetStale<VesselDetail>(CACHE_KEYS.VESSELS);
         if (cached) return cached;
         throw new Error("No vessel data available offline");
       }

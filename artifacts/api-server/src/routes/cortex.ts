@@ -215,7 +215,7 @@ router.get(
 
       const stats = fusionCortex.getStats();
 
-      const callerOrgIdsArr = callerOrgIds(req as Record<string, unknown>);
+      const callerOrgIdsArr = callerOrgIds(req as unknown as Record<string, unknown>);
       const existingDrafts = await db
         .select({ alertId: cortexActionDraftsTable.alertId })
         .from(cortexActionDraftsTable)
@@ -250,9 +250,9 @@ router.get(
         stats: {
           total: stats.totalAlerts,
           active: stats.activeAlerts,
-          critical: stats.criticalAlerts,
-          high: stats.highAlerts,
-          domainsAffected: stats.domainsWithAlerts,
+          critical: stats.alertsBySeverity["critical"],
+          high: stats.alertsBySeverity["high"],
+          domainsAffected: stats.topAffectedDomains,
         },
       });
     } catch (err) {
@@ -288,8 +288,8 @@ router.get(
         .filter((e, i, arr) => arr.findIndex((x) => x.id === e.id) === i)
         .filter((e) => (e.riskScore ?? 0) >= minRisk)
         .filter((e) => {
-          if (!cutoffTime || !e.lastSeen) return true;
-          return new Date(e.lastSeen).getTime() >= cutoffTime;
+          if (!cutoffTime || !e.lastUpdated) return true;
+          return new Date(e.lastUpdated).getTime() >= cutoffTime;
         })
         .slice(0, limit);
 
@@ -301,7 +301,7 @@ router.get(
         riskScore: e.riskScore ?? 0,
         tags: e.tags ?? [],
         metadata: e.metadata,
-        lastSeen: e.lastSeen,
+        lastSeen: e.lastUpdated,
       }));
 
       const entityIds = new Set(rawEntities.map((e) => e.id));
@@ -310,7 +310,8 @@ router.get(
       for (const entity of rawEntities.slice(0, 20)) {
         try {
           const connections = await ontologyEngine.getEntityConnections(entity.id);
-          for (const conn of connections) {
+          const allConns = [...connections.outgoing.map((c) => c.rel), ...connections.incoming.map((c) => c.rel)];
+          for (const conn of allConns) {
             if (entityIds.has(conn.fromEntityId) && entityIds.has(conn.toEntityId)) {
               edgesRaw.push({ source: conn.fromEntityId, target: conn.toEntityId, type: conn.type, strength: conn.strength });
             }
@@ -375,8 +376,8 @@ router.get(
       }
 
       const overallHealth =
-        stats.criticalAlerts > 0 ? "critical" :
-        stats.highAlerts > 3 ? "degraded" :
+        stats.alertsBySeverity["critical"] > 0 ? "critical" :
+        stats.alertsBySeverity["high"] > 3 ? "degraded" :
         stats.activeAlerts > 10 ? "elevated" : "nominal";
 
       const topSignals = alerts
@@ -392,14 +393,14 @@ router.get(
           timestamp: a.generatedAt,
         }));
 
-      const headline = stats.criticalAlerts > 0
-        ? `${stats.criticalAlerts} critical cross-domain alert${stats.criticalAlerts > 1 ? "s" : ""} require immediate attention across ${stats.domainsWithAlerts.length} domain${stats.domainsWithAlerts.length > 1 ? "s" : ""}`
+      const headline = stats.alertsBySeverity["critical"] > 0
+        ? `${stats.alertsBySeverity["critical"]} critical cross-domain alert${stats.alertsBySeverity["critical"] > 1 ? "s" : ""} require immediate attention across ${stats.topAffectedDomains.length} domain${stats.topAffectedDomains.length > 1 ? "s" : ""}`
         : stats.activeAlerts > 5
-        ? `${stats.activeAlerts} active intelligence signals across ${stats.domainsWithAlerts.length} operating domains — ${overallHealth === "elevated" ? "elevated operational tempo" : "nominal posture"}`
+        ? `${stats.activeAlerts} active intelligence signals across ${stats.topAffectedDomains.length} operating domains — ${overallHealth === "elevated" ? "elevated operational tempo" : "nominal posture"}`
         : "All operating domains nominal — no critical intelligence signals at this time";
 
       const executiveSummary = `CORTEX Intelligence Summary for ${today}:\n\n` +
-        `${stats.activeAlerts} active signals (${stats.criticalAlerts} critical, ${stats.highAlerts} high) detected across ${stats.domainsWithAlerts.length} domains. ` +
+        `${stats.activeAlerts} active signals (${stats.alertsBySeverity["critical"]} critical, ${stats.alertsBySeverity["high"]} high) detected across ${stats.topAffectedDomains.length} domains. ` +
         `Overall portfolio posture: ${overallHealth.toUpperCase()}. ` +
         (topSignals.length > 0 ? `Top signals: ${topSignals.map((s) => s.title).slice(0, 3).join("; ")}. ` : "No critical signals active. ") +
         `CORTEX entity graph covers ${(await ontologyEngine.getGraphStats().catch(() => ({ totalEntities: 0 }))).totalEntities} entities across all connected domains.`;
@@ -411,8 +412,8 @@ router.get(
         signals: topSignals,
         domainScores,
         totalAlerts: stats.activeAlerts,
-        criticalCount: stats.criticalAlerts,
-        highCount: stats.highAlerts,
+        criticalCount: stats.alertsBySeverity["critical"],
+        highCount: stats.alertsBySeverity["high"],
         overallHealth,
         isPublished: true,
       }).returning();
@@ -676,7 +677,7 @@ router.get(
     try {
       const statusFilter = req.query.status ? String(req.query.status) : undefined;
       const domainFilter = req.query.domain ? String(req.query.domain) : undefined;
-      const orgIds = callerOrgIds(req as Record<string, unknown>);
+      const orgIds = callerOrgIds(req as unknown as Record<string, unknown>);
 
       const whereClauses = [];
       if (orgIds.length > 0) {
@@ -744,8 +745,8 @@ router.post(
     }
 
     try {
-      const orgId = callerOrgId(req as Record<string, unknown>);
-      const orgIds = callerOrgIds(req as Record<string, unknown>);
+      const orgId = callerOrgId(req as unknown as Record<string, unknown>);
+      const orgIds = callerOrgIds(req as unknown as Record<string, unknown>);
 
       const dupWhere = orgIds.length > 0
         ? and(eq(cortexActionDraftsTable.alertId, String(alertId)), eq(cortexActionDraftsTable.status, "pending"), inArray(cortexActionDraftsTable.orgId, orgIds))
@@ -765,7 +766,7 @@ router.post(
             : eq(cortexActionDraftsTable.alertId, String(alertId)));
 
         sendSuccess(res, {
-          drafts: existingFull.map((d) => ({ id: d.draftUuid, ...d })),
+          drafts: existingFull.map((d) => ({ ...d, id: d.draftUuid })),
           message: "Drafts already exist for this alert",
           generated: 0,
         });
@@ -795,7 +796,7 @@ router.post(
       logger.info({ alertId, count: inserted.length }, "[CORTEX] Action drafts generated and persisted");
 
       sendSuccess(res, {
-        drafts: inserted.map((d) => ({ id: d.draftUuid, ...d })),
+        drafts: inserted.map((d) => ({ ...d, id: d.draftUuid })),
         message: `${inserted.length} autonomous action drafts generated and persisted for human approval`,
         generated: inserted.length,
       });
@@ -811,13 +812,13 @@ router.post(
   perUserWriteSlidingLimiter,
   async (req, res) => {
     try {
-      const caller = callerEmail(req as Record<string, unknown>);
-      const orgIds = callerOrgIds(req as Record<string, unknown>);
+      const caller = callerEmail(req as unknown as Record<string, unknown>);
+      const orgIds = callerOrgIds(req as unknown as Record<string, unknown>);
       const now = new Date();
 
       const approveWhere = orgIds.length > 0
-        ? and(eq(cortexActionDraftsTable.draftUuid, req.params.id), inArray(cortexActionDraftsTable.orgId, orgIds))
-        : eq(cortexActionDraftsTable.draftUuid, req.params.id);
+        ? and(eq(cortexActionDraftsTable.draftUuid, req.params.i as string), inArray(cortexActionDraftsTable.orgId, orgIds))
+        : eq(cortexActionDraftsTable.draftUuid, req.params.i as string);
 
       const [updated] = await db
         .update(cortexActionDraftsTable)
@@ -852,7 +853,7 @@ router.post(
       logger.info({ draftId: updated.draftUuid, type: updated.draftType, domain: updated.domain, approvedBy: caller }, "[CORTEX] Action draft approved");
 
       sendSuccess(res, {
-        draft: { id: updated.draftUuid, ...updated },
+        draft: { ...updated, id: updated.draftUuid },
         message: "Action draft approved and queued for execution",
       });
     } catch (err) {
@@ -867,12 +868,12 @@ router.post(
   perUserWriteSlidingLimiter,
   async (req, res) => {
     try {
-      const caller = callerEmail(req as Record<string, unknown>);
-      const orgIds = callerOrgIds(req as Record<string, unknown>);
+      const caller = callerEmail(req as unknown as Record<string, unknown>);
+      const orgIds = callerOrgIds(req as unknown as Record<string, unknown>);
 
       const dismissWhere = orgIds.length > 0
-        ? and(eq(cortexActionDraftsTable.draftUuid, req.params.id), inArray(cortexActionDraftsTable.orgId, orgIds))
-        : eq(cortexActionDraftsTable.draftUuid, req.params.id);
+        ? and(eq(cortexActionDraftsTable.draftUuid, req.params.i as string), inArray(cortexActionDraftsTable.orgId, orgIds))
+        : eq(cortexActionDraftsTable.draftUuid, req.params.i as string);
 
       const [updated] = await db
         .update(cortexActionDraftsTable)
@@ -888,7 +889,7 @@ router.post(
       logger.info({ draftId: updated.draftUuid, type: updated.draftType }, "[CORTEX] Action draft dismissed");
 
       sendSuccess(res, {
-        draft: { id: updated.draftUuid, ...updated },
+        draft: { ...updated, id: updated.draftUuid },
         message: "Action draft dismissed",
       });
     } catch (err) {

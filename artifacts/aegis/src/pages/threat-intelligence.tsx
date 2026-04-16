@@ -92,22 +92,6 @@ function ThreatMapCanvas({ threats }: { threats: any[] }) {
 
   return <canvas ref={canvasRef} className="w-full h-full rounded-lg" style={{ minHeight: 300 }} />;
 }
-: { value: number }) {
-  const [display, setDisplay] = useState(0);
-  useEffect(() => {
-    let cancelled = false;
-    const start = performance.now();
-    const step = (now: number) => {
-      if (cancelled) return;
-      const p = Math.min((now - start) / 1000, 1);
-      setDisplay(Math.round(value * (1 - Math.pow(1 - p, 3))));
-      if (p < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-    return () => { cancelled = true; };
-  }, [value]);
-  return <>{display}</>;
-}
 
 export default function ThreatIntelligence() {
   const { data: threats = [] } = useQuery({ queryKey: ["intel-threats"], queryFn: () => apiFetch<any[]>("/intelligence/threats"), refetchInterval: 30000 });

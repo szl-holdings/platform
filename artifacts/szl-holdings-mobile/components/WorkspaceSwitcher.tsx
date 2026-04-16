@@ -41,7 +41,7 @@ export function WorkspaceSwitcher() {
     ]).start();
   }, [drawerOpen, slideAnim, backdropAnim]);
 
-  if (!drawerOpen && slideAnim.__getValue() === -DRAWER_W) return null;
+  if (!drawerOpen && (slideAnim as any)._value === -DRAWER_W) return null;
 
   const handleSelect = (ws: typeof WORKSPACES[number]) => {
     setActiveWorkspace(ws.id as WorkspaceDomain);

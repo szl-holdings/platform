@@ -42,12 +42,12 @@ function NativeTabLayout() {
         <Icon sf={{ default: "bubble.left.and.bubble.right", selected: "bubble.left.and.bubble.right.fill" }} />
         <Label>Lyte AI</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="signals" options={{ href: null }} />
-      <NativeTabs.Trigger name="board-mode" options={{ href: null }} />
-      <NativeTabs.Trigger name="receipts" options={{ href: null }} />
-      <NativeTabs.Trigger name="prism" options={{ href: null }} />
-      <NativeTabs.Trigger name="mcp-tools" options={{ href: null }} />
-      <NativeTabs.Trigger name="profile" options={{ href: null }} />
+      <NativeTabs.Trigger name="signals" options={{  href: null } as any} />
+      <NativeTabs.Trigger name="board-mode" options={{  href: null } as any} />
+      <NativeTabs.Trigger name="receipts" options={{  href: null } as any} />
+      <NativeTabs.Trigger name="prism" options={{  href: null } as any} />
+      <NativeTabs.Trigger name="mcp-tools" options={{  href: null } as any} />
+      <NativeTabs.Trigger name="profile" options={{  href: null } as any} />
     </NativeTabs>
   );
 }
@@ -104,12 +104,12 @@ function ClassicTabLayout() {
             isIOS ? <SymbolView name="bubble.left.and.bubble.right.fill" tintColor={color} size={22} /> : <Feather name="message-circle" size={20} color={color} />,
         }}
       />
-      <Tabs.Screen name="signals" options={{ href: null }} />
-      <Tabs.Screen name="board-mode" options={{ href: null }} />
-      <Tabs.Screen name="receipts" options={{ href: null }} />
-      <Tabs.Screen name="prism" options={{ href: null }} />
-      <Tabs.Screen name="mcp-tools" options={{ href: null }} />
-      <Tabs.Screen name="profile" options={{ href: null }} />
+      <Tabs.Screen name="signals" options={{  href: null } as any} />
+      <Tabs.Screen name="board-mode" options={{  href: null } as any} />
+      <Tabs.Screen name="receipts" options={{  href: null } as any} />
+      <Tabs.Screen name="prism" options={{  href: null } as any} />
+      <Tabs.Screen name="mcp-tools" options={{  href: null } as any} />
+      <Tabs.Screen name="profile" options={{  href: null } as any} />
     </Tabs>
   );
 }

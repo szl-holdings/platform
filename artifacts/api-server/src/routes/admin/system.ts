@@ -380,7 +380,7 @@ export function register(router: IRouter): void {
   });
 
   router.get("/admin/workflow-runs/:id", async (req, res) => {
-    const { id } = req.params;
+    const { id } = req.params as Record<string, string>;
     try {
       const dbRun = await db.select().from(platformJobRunsTable).where(eq(platformJobRunsTable.runId, id!)).limit(1);
       if (dbRun.length > 0) { res.json(dbRun[0]); return; }
@@ -402,7 +402,7 @@ export function register(router: IRouter): void {
       if (status) conditions.push(eq(artifactApprovalsTable.status, status as "pending" | "approved" | "rejected" | "expired"));
       if (domain) conditions.push(eq(artifactApprovalsTable.domain, domain));
       const approvals = await db.select().from(artifactApprovalsTable).where(conditions.length > 0 ? and(...conditions) : undefined).orderBy(desc(artifactApprovalsTable.requestedAt)).limit(100);
-      const pendingCount = await db.select({ count: sql<number>`COUNT(*)::int` }).from(artifactApprovalsTable).where(eq(artifactApprovalsTable.status, "pending")).then((rows) => rows[0]?.count ?? 0);
+      const pendingCount = await db.select({ count: sql<number>`COUNT(*)::int` }).from(artifactApprovalsTable).where(eq(artifactApprovalsTable.status, "pending" as any)).then((rows) => rows[0]?.count ?? 0);
       res.json({ timestamp: new Date().toISOString(), approvals, total: approvals.length, pendingCount, summary: { pending: approvals.filter((a) => a.status === "pending").length, approved: approvals.filter((a) => a.status === "approved").length, rejected: approvals.filter((a) => a.status === "rejected").length, expired: approvals.filter((a) => a.status === "expired").length } });
     } catch (err) {
       sendError(res, "Failed to fetch artifact approvals", 500, "INTERNAL_ERROR");
@@ -412,7 +412,7 @@ export function register(router: IRouter): void {
   router.post("/admin/artifact-approvals/:id/approve", async (req, res) => {
     const approvalsEnabled = await isFlagEnabled("alloy_artifact_approvals_enabled");
     if (!approvalsEnabled) { sendForbidden(res, "Feature not available: alloy_artifact_approvals_enabled"); return; }
-    const { id } = req.params;
+    const { id } = req.params as Record<string, string>;
     try {
       const approval = await db.select().from(artifactApprovalsTable).where(eq(artifactApprovalsTable.approvalId, id!)).limit(1).then((rows) => rows[0]);
       if (!approval) { sendNotFound(res, "Artifact approval"); return; }
@@ -429,7 +429,7 @@ export function register(router: IRouter): void {
   router.post("/admin/artifact-approvals/:id/reject", validateBody(reasonSchema), async (req, res) => {
     const approvalsEnabled = await isFlagEnabled("alloy_artifact_approvals_enabled");
     if (!approvalsEnabled) { sendForbidden(res, "Feature not available: alloy_artifact_approvals_enabled"); return; }
-    const { id } = req.params;
+    const { id } = req.params as Record<string, string>;
     const { reason } = req.body as z.infer<typeof reasonSchema>;
     try {
       const approval = await db.select().from(artifactApprovalsTable).where(eq(artifactApprovalsTable.approvalId, id!)).limit(1).then((rows) => rows[0]);
@@ -459,13 +459,13 @@ export function register(router: IRouter): void {
       dbStatus = "degraded";
     }
     const technicalMetrics = { requestCount: snapshot.requestCount, errorRate: snapshot.errorRate, p50Latency: snapshot.p50Latency, p95Latency: snapshot.p95Latency, p99Latency: snapshot.p99Latency, throughputPerHour: snapshot.throughputPerHour, authFailures: snapshot.authFailures ?? 0, retryCount: recentJobs.reduce((sum, j) => sum + j.retryCount, 0), workflowFailureRate: jobStats.failed > 0 ? Math.round((jobStats.failed / Math.max(jobStats.failed + jobStats.completed, 1)) * 100) : 0, dbLatencyMs, dbStatus };
-    const productMetrics = { signalCountBySeverity: (snapshot.businessEvents as Record<string, number>) ?? {}, unresolvedActionCount: 0, jobFailures: snapshot.jobFailures, workflowCompletions: snapshot.workflowCompletions, artifactGenerationSuccess: 0, artifactGenerationFailed: 0, pendingApprovals: await db.select({ count: sql<number>`COUNT(*)::int` }).from(artifactApprovalsTable).where(eq(artifactApprovalsTable.status, "pending")).then((rows) => rows[0]?.count ?? 0) };
+    const productMetrics = { signalCountBySeverity: (snapshot.businessEvents as Record<string, number>) ?? {}, unresolvedActionCount: 0, jobFailures: snapshot.jobFailures, workflowCompletions: snapshot.workflowCompletions, artifactGenerationSuccess: 0, artifactGenerationFailed: 0, pendingApprovals: await db.select({ count: sql<number>`COUNT(*)::int` }).from(artifactApprovalsTable).where(eq(artifactApprovalsTable.status, "pending" as any)).then((rows) => rows[0]?.count ?? 0) };
     const eventsByType = snapshot.businessEvents as Record<string, number>;
     if (eventsByType) {
       productMetrics.artifactGenerationSuccess = eventsByType["artifact_generation_completed"] ?? 0;
       productMetrics.artifactGenerationFailed = snapshot.jobFailures ?? 0;
     }
-    res.json({ timestamp: new Date().toISOString(), technical: technicalMetrics, product: productMetrics, jobs: { ...jobStats, recentFailures: recentJobs.filter((j) => j.status === "failed").map((j) => ({ id: j.id, type: j.type, error: j.error, retries: j.retries, completedAt: j.completedAt ? new Date(j.completedAt).toISOString() : null })) }, alerts: { active: activeAlerts.length, items: activeAlerts.slice(0, 10) }, uptime: process.uptime() });
+    res.json({ timestamp: new Date().toISOString(), technical: technicalMetrics, product: productMetrics, jobs: { ...jobStats, recentFailures: recentJobs.filter((j) => j.status === "failed").map((j) => ({ id: j.id, type: j.type, error: j.error, retries: (j as any).retryCount ?? 0, completedAt: j.completedAt ? new Date(j.completedAt).toISOString() : null })) }, alerts: { active: activeAlerts.length, items: activeAlerts.slice(0, 10) }, uptime: process.uptime() });
   });
 
   router.get("/admin/push-tokens/stats", async (_req, res) => {
@@ -489,7 +489,7 @@ export function register(router: IRouter): void {
       const { buildPushMessage } = await import("../../lib/push-templates.js");
       let payload;
       if (template) {
-        payload = buildPushMessage(template, vars ?? {});
+        payload = buildPushMessage(template as any, (vars ?? {}) as any);
       } else {
         if (!title || !body) { sendBadRequest(res, "title and body are required"); return; }
         payload = { title, body, data: data ?? {}, sound: "default" as const };

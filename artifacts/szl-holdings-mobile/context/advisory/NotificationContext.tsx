@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useCallback, useEffect, useState, type ReactNode } from "react";
 import { Platform } from "react-native";
-import { useAuth } from "./AuthContext";
+import { useAuth } from '../AuthContext';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`

@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import { useState } from "react";
 import {
   Radio, Brain, Activity, Scale, CheckSquare, Play, Shield, Target,

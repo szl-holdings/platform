@@ -6,7 +6,7 @@ import type { FusionAlertSeverity, FusionAlertCategory, DomainKey, CascadeHorizo
 
 const router = Router();
 
-router.get("/fusion/alerts", authMiddleware, async (req, res) => {
+router.get("/fusion/alerts", authMiddleware(), async (req, res) => {
   const severity = req.query.severity ? String(req.query.severity).split(",") as FusionAlertSeverity[] : undefined;
   const categories = req.query.categories ? String(req.query.categories).split(",") as FusionAlertCategory[] : undefined;
   const domains = req.query.domains ? String(req.query.domains).split(",") : undefined;
@@ -17,12 +17,12 @@ router.get("/fusion/alerts", authMiddleware, async (req, res) => {
   res.json({ success: true, alerts, total: alerts.length });
 });
 
-router.get("/fusion/stats", authMiddleware, async (_req, res) => {
+router.get("/fusion/stats", authMiddleware(), async (_req, res) => {
   const stats = fusionCortex.getStats();
   res.json({ success: true, stats });
 });
 
-router.post("/fusion/scan", authMiddleware, async (_req, res) => {
+router.post("/fusion/scan", authMiddleware(), async (_req, res) => {
   try {
     const result = await fusionCortex.scan();
     res.json({ success: true, result });
@@ -31,19 +31,19 @@ router.post("/fusion/scan", authMiddleware, async (_req, res) => {
   }
 });
 
-router.post("/fusion/alerts/:id/acknowledge", authMiddleware, async (req, res) => {
-  const ok = fusionCortex.acknowledgeAlert(req.params.id);
-  if (!ok) return sendError(res, 404, "Alert not found");
+router.post("/fusion/alerts/:id/acknowledge", authMiddleware(), async (req, res) => {
+  const ok = fusionCortex.acknowledgeAlert(req.params.id as string);
+  if (!ok) return sendError(res, "Alert not found", 404);
   res.json({ success: true, message: "Alert acknowledged" });
 });
 
-router.post("/fusion/alerts/:id/resolve", authMiddleware, async (req, res) => {
-  const ok = fusionCortex.resolveAlert(req.params.id);
-  if (!ok) return sendError(res, 404, "Alert not found");
+router.post("/fusion/alerts/:id/resolve", authMiddleware(), async (req, res) => {
+  const ok = fusionCortex.resolveAlert(req.params.id as string);
+  if (!ok) return sendError(res, "Alert not found", 404);
   res.json({ success: true, message: "Alert resolved" });
 });
 
-router.post("/fusion/alerts/inject", authMiddleware, async (req, res) => {
+router.post("/fusion/alerts/inject", authMiddleware(), async (req, res) => {
   try {
     const { title, summary, severity, category, affectedDomains, affectedEntities, evidenceChain, recommendedActions, tags = [], advisoryContext } = req.body;
     if (!title || !summary || !severity || !category) return sendBadRequest(res, "title, summary, severity, and category are required");
@@ -65,42 +65,42 @@ router.post("/fusion/alerts/inject", authMiddleware, async (req, res) => {
   }
 });
 
-router.post("/fusion/demo/seed", authMiddleware, async (_req, res) => {
+router.post("/fusion/demo/seed", authMiddleware(), async (_req, res) => {
   fusionCortex.seedDemoAlerts();
   predictiveCascadeEngine.seedDemoAlerts();
   res.json({ success: true, message: "Demo fusion alerts seeded", alerts: fusionCortex.getAlerts({ limit: 10 }) });
 });
 
-router.post("/fusion/start-continuous", authMiddleware, async (req, res) => {
+router.post("/fusion/start-continuous", authMiddleware(), async (req, res) => {
   const intervalMs = parseInt(String(req.query.intervalMs ?? "300000"));
   fusionCortex.startContinuousScan(intervalMs);
   res.json({ success: true, message: "Fusion Cortex continuous scan started", intervalMs });
 });
 
-router.post("/fusion/stop-continuous", authMiddleware, async (_req, res) => {
+router.post("/fusion/stop-continuous", authMiddleware(), async (_req, res) => {
   fusionCortex.stopContinuousScan();
   res.json({ success: true, message: "Fusion Cortex continuous scan stopped" });
 });
 
-router.get("/fusion/patterns", authMiddleware, async (req, res) => {
+router.get("/fusion/patterns", authMiddleware(), async (req, res) => {
   const patterns = patternLibrary.getAll();
   const stats = patternLibrary.getLibraryStats();
   res.json({ success: true, patterns, stats });
 });
 
-router.get("/fusion/patterns/:id", authMiddleware, async (req, res) => {
-  const pattern = patternLibrary.getById(req.params.id);
-  if (!pattern) return sendError(res, 404, "Pattern not found");
+router.get("/fusion/patterns/:id", authMiddleware(), async (req, res) => {
+  const pattern = patternLibrary.getById(req.params.id as string);
+  if (!pattern) return sendError(res, "Pattern not found", 404);
   res.json({ success: true, pattern });
 });
 
-router.post("/fusion/patterns/:id/feedback", authMiddleware, async (req, res) => {
+router.post("/fusion/patterns/:id/feedback", authMiddleware(), async (req, res) => {
   try {
     const { alertId, relevance, rating, notes, reviewedBy } = req.body;
     if (!alertId || !relevance || !rating) return sendBadRequest(res, "alertId, relevance, and rating are required");
 
     const feedback = patternLibrary.submitFeedback({
-      patternId: req.params.id,
+      patternId: req.params.id as string,
       alertId,
       relevance,
       rating: Number(rating),
@@ -108,24 +108,24 @@ router.post("/fusion/patterns/:id/feedback", authMiddleware, async (req, res) =>
       reviewedBy,
     });
 
-    if (!feedback) return sendError(res, 404, "Pattern not found");
-    res.json({ success: true, feedback, updatedPattern: patternLibrary.getById(req.params.id) });
+    if (!feedback) return sendError(res, "Pattern not found", 404);
+    res.json({ success: true, feedback, updatedPattern: patternLibrary.getById(req.params.id as string) });
   } catch (err) {
     res.status(500).json({ success: false, error: "Failed to submit feedback" });
   }
 });
 
-router.post("/fusion/alerts/:alertId/feedback", authMiddleware, async (req, res) => {
+router.post("/fusion/alerts/:alertId/feedback", authMiddleware(), async (req, res) => {
   try {
     const { patternId, relevance, rating, notes, reviewedBy } = req.body;
     if (!relevance || !rating) return sendBadRequest(res, "relevance and rating are required");
 
-    const effectivePatternId = patternId ?? fusionCortex.getAlerts({ limit: 500 }).find(a => a.id === req.params.alertId)?.patternId;
+    const effectivePatternId = patternId ?? fusionCortex.getAlerts({ limit: 500 }).find(a => a.id === req.params.alertId as string)?.patternId;
 
     if (effectivePatternId) {
       const feedback = patternLibrary.submitFeedback({
         patternId: effectivePatternId,
-        alertId: req.params.alertId,
+        alertId: req.params.alertId as string,
         relevance,
         rating: Number(rating),
         notes,
@@ -136,13 +136,13 @@ router.post("/fusion/alerts/:alertId/feedback", authMiddleware, async (req, res)
       }
     }
 
-    res.json({ success: true, feedback: { alertId: req.params.alertId, relevance, rating: Number(rating), notes, reviewedBy, reviewedAt: new Date().toISOString() }, patternUpdated: false });
+    res.json({ success: true, feedback: { alertId: req.params.alertId as string, relevance, rating: Number(rating), notes, reviewedBy, reviewedAt: new Date().toISOString() }, patternUpdated: false });
   } catch (err) {
     res.status(500).json({ success: false, error: "Failed to submit feedback" });
   }
 });
 
-router.post("/fusion/patterns/custom", authMiddleware, async (req, res) => {
+router.post("/fusion/patterns/custom", authMiddleware(), async (req, res) => {
   try {
     const { name, description, category, requiredDomains, evidenceTypes, tags } = req.body;
     if (!name || !description || !category || !requiredDomains) {
@@ -155,7 +155,7 @@ router.post("/fusion/patterns/custom", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/fusion/predictive/alerts", authMiddleware, async (req, res) => {
+router.get("/fusion/predictive/alerts", authMiddleware(), async (req, res) => {
   const status = req.query.status ? String(req.query.status).split(",") as Array<"active" | "monitoring" | "resolved"> : undefined;
   const severity = req.query.severity ? String(req.query.severity).split(",") as Array<"low" | "medium" | "high" | "critical"> : undefined;
   const domains = req.query.domains ? String(req.query.domains).split(",") as DomainKey[] : undefined;
@@ -165,7 +165,7 @@ router.get("/fusion/predictive/alerts", authMiddleware, async (req, res) => {
   res.json({ success: true, alerts, total: alerts.length });
 });
 
-router.post("/fusion/predictive/project", authMiddleware, async (req, res) => {
+router.post("/fusion/predictive/project", authMiddleware(), async (req, res) => {
   try {
     const { rootDomain, rootSignal, rootProbability, horizon = "30d" } = req.body;
     if (!rootDomain || !rootSignal || rootProbability === undefined) {
@@ -183,7 +183,7 @@ router.post("/fusion/predictive/project", authMiddleware, async (req, res) => {
   }
 });
 
-router.post("/fusion/predictive/generate", authMiddleware, async (req, res) => {
+router.post("/fusion/predictive/generate", authMiddleware(), async (req, res) => {
   try {
     const { title, triggerDomain, triggerSignal, confidence, horizon = "30d", tags = [] } = req.body;
     if (!title || !triggerDomain || !triggerSignal || confidence === undefined) {
@@ -203,9 +203,9 @@ router.post("/fusion/predictive/generate", authMiddleware, async (req, res) => {
   }
 });
 
-router.post("/fusion/predictive/alerts/:id/resolve", authMiddleware, async (req, res) => {
-  const ok = predictiveCascadeEngine.resolveAlert(req.params.id);
-  if (!ok) return sendError(res, 404, "Predictive alert not found");
+router.post("/fusion/predictive/alerts/:id/resolve", authMiddleware(), async (req, res) => {
+  const ok = predictiveCascadeEngine.resolveAlert(req.params.id as string);
+  if (!ok) return sendError(res, "Predictive alert not found", 404);
   res.json({ success: true, message: "Predictive alert resolved" });
 });
 

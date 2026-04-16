@@ -674,7 +674,7 @@ durableJobQueue.register<NycExtendedIngestionJobPayload>(NYC_EXTENDED_INGESTION_
  * (schedule name "nyc_extended_ingestion_8h", 0 *\/8 * * *). This function is no longer
  * called and will be removed in a future cleanup. Do not re-export or re-invoke.
  */
-function scheduleNycExtendedIngestionJob(
+export function scheduleNycExtendedIngestionJob(
   sources: NycExtendedIngestionJobPayload["sources"] = [
     "rolling_sales",
     "tax_lien_sale_list",

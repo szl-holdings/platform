@@ -183,7 +183,7 @@ router.post("/nuro-mesh/cost/budget", (req: Request, res: Response) => {
 
 router.get("/nuro-mesh/memory/stats/:agentId", (req: Request, res: Response) => {
   const stats = rlMemoryManager.getMemoryStats(req.params.agentId as string);
-  const opLog = rlMemoryManager.getOperationLog().filter(l => l.agentId === req.params.agentId).slice(-20);
+  const opLog = rlMemoryManager.getOperationLog().filter((l: Record<string, unknown>) => l.agentId === req.params.agentId).slice(-20);
   res.json({ agentId: req.params.agentId, ...stats, recentOperations: opLog });
 });
 

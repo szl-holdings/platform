@@ -4,6 +4,8 @@ import { GQL_QUERY_VESSELS, GQL_QUERY_PROJECTS, GQL_MUTATION_SIGNAL, WEBHOOK_EVE
 
 export function ErrorsSection() {
   return (
+          <section>
+            <SectionHeader
               id="errors"
               title="Error Codes"
               subtitle="All errors follow a consistent structure with an HTTP status code, human-readable message, and machine-readable code field."
@@ -132,8 +134,5 @@ export function ErrorsSection() {
               </table>
             </div>
           </section>
-
-          {/* ── Versioning ── */}
-          <section>
   );
 }

@@ -5,18 +5,6 @@ import { MarketingFooter } from "@/components/MarketingFooter";
 import { ContactModal, AnimatedCounter} from "@szl-holdings/shared-ui";
 import { motion as m, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-: { value: number; suffix?: string; prefix?: string }) {
-  const [display, setDisplay] = useState(0);
-  useEffect(() => {
-    const ctrl = animate(0, value, {
-      duration: 2,
-      ease: [0.22, 1, 0.36, 1],
-      onUpdate: (v) => setDisplay(Math.round(v)),
-    });
-    return () => ctrl.stop();
-  }, [value]);
-  return <>{prefix}{display}{suffix}</>;
-}
 
 function OceanCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);

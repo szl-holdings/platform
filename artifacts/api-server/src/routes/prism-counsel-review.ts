@@ -543,7 +543,6 @@ router.post("/review-desk/items/:id/transition", async (req: Request, res: Respo
 
 router.post("/review-desk/items/:id/approve", async (req: Request, res: Response) => {
   req.body.toState = "approved";
-  req.params.id = req.params.id;
   return void ((router as any).handle?.(req, res, () => {}) ?? res.status(500).json({ error: "Route error" }));
 });
 

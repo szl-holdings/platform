@@ -12,7 +12,7 @@ export default function AuthScreen() {
   const insets = useSafeAreaInsets();
 
   if (isAuthenticated) {
-    return <Redirect href="/(tabs)" />;
+    return <Redirect href={"/(shell)" as any} />;
   }
 
   return (

@@ -24,10 +24,10 @@ export function apiVersionMiddleware(req: Request, res: Response, next: NextFunc
   if (requestedVersion && !SUPPORTED_VERSIONS.includes(requestedVersion as ApiVersion)) {
     sendError(
       res,
-      `API version '${requestedVersion}' is not supported. Supported: ${SUPPORTED_VERSIONS.join(", ")}`,
+      "Unsupported API version",
       400,
       "UNSUPPORTED_API_VERSION",
-      { currentVersion: CURRENT_VERSION, supportedVersions: SUPPORTED_VERSIONS },
+      { requestedVersion, currentVersion: CURRENT_VERSION, supportedVersions: SUPPORTED_VERSIONS },
     );
     return;
   }
@@ -63,10 +63,10 @@ export function requireMinVersion(minVersion: ApiVersion) {
     if (clientIdx < minIdx) {
       sendError(
         res,
-        `This endpoint requires API version ${minVersion} or later. You requested ${clientVersion}.`,
+        "Version not supported",
         400,
         "UNSUPPORTED_API_VERSION",
-        { currentVersion: CURRENT_VERSION, supportedVersions: SUPPORTED_VERSIONS },
+        { minVersion, clientVersion, currentVersion: CURRENT_VERSION, supportedVersions: SUPPORTED_VERSIONS },
       );
       return;
     }

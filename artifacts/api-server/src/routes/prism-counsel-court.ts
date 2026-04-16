@@ -192,7 +192,7 @@ router.get("/court/dockets/search", authMiddleware(), courtListenerLimiter, asyn
 
 router.get("/court/dockets/:id", authMiddleware(), courtListenerLimiter, async (req, res) => {
   try {
-    const docketId = parseInt(String(req.params.id), 10);
+    const docketId = parseInt(String(req.params.id as string), 10);
     if (isNaN(docketId)) return sendBadRequest(res, "Invalid docket ID");
     const result = await courtListener.getDocket(docketId);
     sendSuccess(res, result);
@@ -232,7 +232,7 @@ router.get("/court/judges/search", authMiddleware(), courtListenerLimiter, async
 router.post("/court/matters/:matterId/link-docket", authMiddleware(), validateBody(docketLinkSchema), async (req, res) => {
   try {
     if (!hasAttorneyRole(req)) return sendForbidden(res, "Attorney role required");
-    const matterId = parseInt(String(req.params.matterId), 10);
+    const matterId = parseInt(String(req.params.matterId as string), 10);
     if (isNaN(matterId)) return sendBadRequest(res, "Invalid matter ID");
     const { docketEntryId: docketId } = req.body as z.infer<typeof docketLinkSchema>;
     const { courtId, caseNumber } = req.body as { courtId?: string; caseNumber?: string };
@@ -277,7 +277,7 @@ router.post("/court/matters/:matterId/link-docket", authMiddleware(), validateBo
 router.get("/court/matters/:matterId/linked-dockets", authMiddleware(), async (req, res) => {
   try {
     if (!hasAttorneyRole(req)) return sendForbidden(res, "Attorney role required");
-    const matterId = parseInt(String(req.params.matterId), 10);
+    const matterId = parseInt(String(req.params.matterId as string), 10);
     if (isNaN(matterId)) return sendBadRequest(res, "Invalid matter ID");
     const orgId = getOrgId(req);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
@@ -346,7 +346,7 @@ router.get("/privilege/log", authMiddleware(), async (req, res) => {
 router.get("/privilege/log/:matterId/production", authMiddleware(), async (req, res) => {
   try {
     if (!hasAttorneyRole(req)) return sendForbidden(res, "Attorney role required");
-    const matterId = parseInt(String(req.params.matterId), 10);
+    const matterId = parseInt(String(req.params.matterId as string), 10);
     if (isNaN(matterId)) return sendBadRequest(res, "Invalid matter ID");
     const orgId = getOrgId(req);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
@@ -424,17 +424,17 @@ router.post("/privilege/tag", authMiddleware(), validateBody(privilegeTagSchema)
 
     const orgId = getOrgId(req);
     const actorId = req.user?.id as number | undefined;
-    if (!await assertMatterAccess(parseInt(matterId, 10), orgId, res)) return;
+    if (!await assertMatterAccess(matterId, orgId, res)) return;
 
     const result = await privilegeEngine.tagEntity({
-      matterId: parseInt(matterId, 10),
+      matterId: matterId as unknown as string,
       orgId,
       entityType,
-      entityId: parseInt(String(entityId), 10),
+      entityId: parseInt(String(entityId), 10) as unknown as string,
       flagType: privilegeType,
       taggedBy: actorId,
       meta: { title, documentType, date, author, recipients, subject },
-    });
+    } as any);
 
     sendSuccess(res, result);
   } catch (err) {
@@ -448,7 +448,7 @@ router.post("/privilege/review/:tagId/resolve", authMiddleware(), validateBody(p
   try {
     if (!hasAttorneyRole(req)) return sendForbidden(res, "Attorney role required");
 
-    const tagId = parseInt(String(req.params.tagId), 10);
+    const tagId = parseInt(String(req.params.tagId as string), 10);
     if (isNaN(tagId)) return sendBadRequest(res, "Invalid tag ID");
     const { decision } = req.body as z.infer<typeof privilegeResolveSchema>;
 
@@ -469,7 +469,7 @@ router.post("/privilege/clawback/:tagId", authMiddleware(), validateBody(privile
   try {
     if (!hasAttorneyRole(req)) return sendForbidden(res, "Attorney role required");
 
-    const tagId = parseInt(String(req.params.tagId), 10);
+    const tagId = parseInt(String(req.params.tagId as string), 10);
     if (isNaN(tagId)) return sendBadRequest(res, "Invalid tag ID");
     const { reason } = req.body as z.infer<typeof privilegeClawbackSchema>;
 
@@ -491,7 +491,7 @@ router.post("/privilege/export-check", authMiddleware(), validateBody(privilegeE
     if (!hasAttorneyRole(req)) return sendForbidden(res, "Attorney role required");
     const { items } = req.body as z.infer<typeof privilegeExportCheckSchema>;
     const orgId = getOrgId(req);
-    const result = await privilegeEngine.filterForExport(items, orgId);
+    const result = await privilegeEngine.filterForExport(items as any, orgId);
     sendSuccess(res, result);
   } catch (err) {
     handleRouteError(res, err, "Export check failed");
@@ -508,7 +508,7 @@ router.post("/copilot/generate-draft", authMiddleware(), validateBody(draftGener
 
     const orgId = getOrgId(req);
     const actorId = req.user?.id as number | undefined;
-    const matterIdInt = matterId ? parseInt(matterId, 10) : undefined;
+    const matterIdInt = matterId ? parseInt(String(matterId), 10) : undefined;
 
     if (matterIdInt && !await assertMatterAccess(matterIdInt, orgId, res)) return;
 
@@ -584,7 +584,7 @@ router.post("/copilot/drafts/:draftId/advance", authMiddleware(), validateBody(d
   try {
     if (!hasAttorneyRole(req)) return sendForbidden(res, "Attorney role required");
 
-    const draftId = String(req.params.draftId);
+    const draftId = String(req.params.draftId as string);
     const { toState, matterId } = req.body as z.infer<typeof draftAdvanceSchema>;
 
     const NEXT_VALID_STATE: Record<string, string> = {
@@ -599,7 +599,7 @@ router.post("/copilot/drafts/:draftId/advance", authMiddleware(), validateBody(d
 
     const orgId = getOrgId(req);
     const actorId = req.user?.id as number | undefined;
-    const matterIdInt = parseInt(matterId, 10);
+    const matterIdInt = parseInt(String(matterId), 10);
     if (isNaN(matterIdInt)) return sendBadRequest(res, "Invalid matterId");
     if (!await assertMatterAccess(matterIdInt, orgId, res)) return;
 

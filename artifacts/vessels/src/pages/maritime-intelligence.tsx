@@ -4,22 +4,6 @@ import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Ship, Anchor, Navigation, AlertTriangle, Cloud, ShieldAlert, Globe, Radio, Waves, Thermometer, Wind, Eye, MapPin, Languages, Loader2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { apiFetch, AnimatedCounter} from "@szl-holdings/shared-ui";
-: { value: number }) {
-  const [display, setDisplay] = useState(0);
-  useEffect(() => {
-    let cancelled = false;
-    const start = performance.now();
-    const step = (now: number) => {
-      if (cancelled) return;
-      const p = Math.min((now - start) / 1000, 1);
-      setDisplay(Math.round(value * (1 - Math.pow(1 - p, 3))));
-      if (p < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-    return () => { cancelled = true; };
-  }, [value]);
-  return <>{display}</>;
-}
 
 interface MapVessel { lat?: number; lon?: number; latitude?: number; longitude?: number; name?: string; mmsi?: string; course?: number; }
 interface MapChokepoint { lat?: number; lon?: number; name?: string; riskLevel?: string; status?: string; vesselCount?: number; dailyTransits?: number; oilFlowMbpd?: number; }

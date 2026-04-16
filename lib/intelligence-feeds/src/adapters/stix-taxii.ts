@@ -136,7 +136,7 @@ export class STIXTAXIIFeedAdapter extends BaseFeedAdapter {
       if (this.taxiiServer) {
         const res = await fetch(`${this.taxiiServer}/taxii/`, {
           method: "GET",
-          headers: { Accept: "application/taxii+json;version=2.1", ...(this.taxiiApiKey ? { Authorization: `Bearer ${this.taxiiApiKey}` } : {}) },
+          headers: { Accept: "application/taxii+json;version=2.1", ...(this.otxApiKey ? { Authorization: `Bearer ${this.otxApiKey}` } : {}) },
           signal: controller.signal,
         });
         if (!res.ok) throw new Error(`TAXII server responded ${res.status}`);

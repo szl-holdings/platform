@@ -138,7 +138,7 @@ router.get("/prism-counsel/matters/:id", authMiddleware(), async (req, res) => {
   try {
     const orgId = requireAuth(req, res);
     if (!orgId) return;
-    const matterId = parseIdParam(req.params.id);
+    const matterId = parseIdParam(req.params.id as string);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
     const [matter] = await db.select().from(pcMattersTable).where(eq(pcMattersTable.id, matterId));
     sendSuccess(res, matter);
@@ -177,11 +177,11 @@ router.patch("/prism-counsel/matters/:id", authMiddleware(), validateBody(matter
   try {
     const orgId = requireAuth(req, res);
     if (!orgId) return;
-    const matterId = parseIdParam(req.params.id);
+    const matterId = parseIdParam(req.params.id as string);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
     const patch = req.body as z.infer<typeof matterPatchSchema>;
     const [updated] = await db.update(pcMattersTable)
-      .set({ ...patch, updatedBy: req.user?.id, updatedAt: new Date() })
+      .set({ ...patch, updatedBy: req.user?.id, updatedAt: new Date() } as any)
       .where(eq(pcMattersTable.id, matterId)).returning();
     // Fire-and-forget: re-index updated matter in knowledge graph
     setImmediate(() => {
@@ -198,7 +198,7 @@ router.get("/prism-counsel/matters/:id/twin", authMiddleware(), async (req, res)
   try {
     const orgId = requireAuth(req, res);
     if (!orgId) return;
-    const matterId = parseIdParam(req.params.id);
+    const matterId = parseIdParam(req.params.id as string);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
 
     const [matter] = await db.select().from(pcMattersTable).where(eq(pcMattersTable.id, matterId));
@@ -231,7 +231,7 @@ router.get("/prism-counsel/matters/:id/pressure", authMiddleware(), async (req, 
   try {
     const orgId = requireAuth(req, res);
     if (!orgId) return;
-    const matterId = parseIdParam(req.params.id);
+    const matterId = parseIdParam(req.params.id as string);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
 
     let dimensions: unknown[] = [];
@@ -253,7 +253,7 @@ router.get("/prism-counsel/matters/:id/proof-chain", authMiddleware(), async (re
   try {
     const orgId = requireAuth(req, res);
     if (!orgId) return;
-    const matterId = parseIdParam(req.params.id);
+    const matterId = parseIdParam(req.params.id as string);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
 
     let entries: unknown[] = [];
@@ -275,7 +275,7 @@ router.get("/prism-counsel/matters/:id/forecast-diffs", authMiddleware(), async 
   try {
     const orgId = requireAuth(req, res);
     if (!orgId) return;
-    const matterId = parseIdParam(req.params.id);
+    const matterId = parseIdParam(req.params.id as string);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
 
     let diffs: unknown[] = [];
@@ -337,7 +337,7 @@ router.get("/prism-counsel/matters/:id/copilot-drafts", authMiddleware(), async 
   try {
     const orgId = requireAuth(req, res);
     if (!orgId) return;
-    const matterId = parseIdParam(req.params.id);
+    const matterId = parseIdParam(req.params.id as string);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
 
     let drafts: unknown[] = [];
@@ -380,7 +380,7 @@ router.post("/prism-counsel/approvals/:id/approve", authMiddleware(), async (req
   try {
     const orgId = requireAuth(req, res);
     if (!orgId) return;
-    const requestId = parseIdParam(req.params.id);
+    const requestId = parseIdParam(req.params.id as string);
     const user = req.user;
     const [updated] = await db.update(pcApprovalRequestsTable)
       .set({ status: "approved", approvedBy: user?.id, resolvedAt: new Date() })
@@ -407,7 +407,7 @@ router.post("/prism-counsel/approvals/:id/reject", authMiddleware(), async (req,
   try {
     const orgId = requireAuth(req, res);
     if (!orgId) return;
-    const requestId = parseIdParam(req.params.id);
+    const requestId = parseIdParam(req.params.id as string);
     const user = req.user;
     const [updated] = await db.update(pcApprovalRequestsTable)
       .set({ status: "rejected", approvedBy: user?.id, resolvedAt: new Date() })
@@ -455,7 +455,7 @@ router.get("/prism-counsel/admin/dashboards/:type", authMiddleware(), async (req
   try {
     const orgId = requireAuth(req, res);
     if (!orgId) return;
-    const dashType = req.params.type;
+    const dashType = req.params.type as string;
 
     let snapshot: unknown = null;
     try {
@@ -535,7 +535,7 @@ router.get("/prism-counsel/matters/:id/contradictions", authMiddleware(), async 
   try {
     const orgId = requireAuth(req, res);
     if (!orgId) return;
-    const matterId = parseIdParam(req.params.id);
+    const matterId = parseIdParam(req.params.id as string);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
 
     let contradictions: unknown[] = [];
@@ -597,7 +597,7 @@ router.get("/prism-counsel/matters/:id/audit-packets", authMiddleware(), async (
   try {
     const orgId = requireAuth(req, res);
     if (!orgId) return;
-    const matterId = parseIdParam(req.params.id);
+    const matterId = parseIdParam(req.params.id as string);
     if (!await assertMatterAccess(matterId, orgId, res)) return;
 
     let packets: unknown[] = [];

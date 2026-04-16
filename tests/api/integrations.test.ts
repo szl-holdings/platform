@@ -61,6 +61,56 @@ vi.mock("../../artifacts/api-server/src/lib/logger", () => ({
   },
 }));
 
+vi.mock("@szl-holdings/db", () => ({
+  db: {
+    select: vi.fn(() => ({
+      from: vi.fn(() => ({
+        where: vi.fn(() => Promise.resolve([])),
+        innerJoin: vi.fn(() => ({ where: vi.fn(() => Promise.resolve([])) })),
+      })),
+    })),
+    insert: vi.fn(() => ({
+      values: vi.fn(() => ({
+        returning: vi.fn(() => Promise.resolve([{ id: 1 }])),
+      })),
+    })),
+  },
+  alloySignals: { id: "id", source: "source", sourceType: "sourceType", severity: "severity", title: "title", summary: "summary", domain: "domain", status: "status", metadata: "metadata" },
+  connectorsTable: { id: "id", type: "type", name: "name", config: "config" },
+}));
+
+vi.mock("@szl-holdings/services", () => ({
+  services: {
+    salesforce: {
+      getHealthReport: vi.fn(() => ({ status: "healthy", adapter: "salesforce", lastCheck: new Date().toISOString() })),
+      testConnection: vi.fn(() => Promise.resolve({ connected: true, latencyMs: 10 })),
+      runHealthCheck: vi.fn(() => Promise.resolve({ status: "healthy" })),
+      queryAccounts: vi.fn(() => Promise.resolve([])),
+      queryOpportunities: vi.fn(() => Promise.resolve([])),
+      queryCases: vi.fn(() => Promise.resolve([])),
+      queryLeads: vi.fn(() => Promise.resolve([])),
+      executeSOQL: vi.fn(() => Promise.resolve({ records: [], totalSize: 0 })),
+      getPipelineHealth: vi.fn(() => Promise.resolve({ stages: [] })),
+      ingestSignals: vi.fn(() => Promise.resolve([])),
+      createTask: vi.fn(() => Promise.resolve({ id: "task-1" })),
+      createCase: vi.fn(() => Promise.resolve({ id: "case-1" })),
+      sync: vi.fn(() => Promise.resolve({ synced: 0, timestamp: new Date().toISOString() })),
+    },
+    jira: {
+      getHealthReport: vi.fn(() => ({ status: "healthy", adapter: "jira", lastCheck: new Date().toISOString() })),
+      testConnection: vi.fn(() => Promise.resolve({ connected: true, latencyMs: 10 })),
+      runHealthCheck: vi.fn(() => Promise.resolve({ status: "healthy" })),
+      listProjects: vi.fn(() => Promise.resolve([])),
+      searchIssues: vi.fn(() => Promise.resolve([])),
+      getActiveSprints: vi.fn(() => Promise.resolve([])),
+      getSprintHealth: vi.fn(() => Promise.resolve([])),
+      ingestSignals: vi.fn(() => Promise.resolve([])),
+      createIssue: vi.fn(() => Promise.resolve({ id: "jira-1", key: "TEST-1" })),
+      sync: vi.fn(() => Promise.resolve({ synced: 0, projects: 0, issues: 0, timestamp: new Date().toISOString() })),
+    },
+  },
+}));
+
 function buildAuthenticatedApp(roles: string[] = ["ops", "super_admin"]) {
   const app = createTestApp();
   app.use((req: unknown, _res: unknown, next: () => void) => {

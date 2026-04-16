@@ -111,7 +111,7 @@ async function buildFirestormStorage(): Promise<FirestormStoragePort> {
       } catch { return null; }
     },
     async updateIncident(id, data) {
-      const rows = await db.update(firestormIncidentsTable).set(data).where(eq(firestormIncidentsTable.id, id)).returning();
+      const rows = await db.update(firestormIncidentsTable).set(data as any).where(eq(firestormIncidentsTable.id, id)).returning();
       const incident = rows[0];
       pubsub.publish(FIRESTORM_EVENTS.INCIDENT_UPDATED, { firestormIncidentUpdated: incident });
       publish(WS_CHANNELS.AEGIS_INCIDENTS, "incident-updated", { id: incident.id, status: incident.status, severity: (incident as any).severity });

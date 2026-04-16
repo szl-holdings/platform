@@ -195,7 +195,7 @@ export default function ProfileScreen() {
             activeOpacity={0.7}
           >
             <View style={[styles.infoIcon, { backgroundColor: colors.primaryDim }]}>
-              <VesselIcon name="moon" size={13} color={colors.primary} />
+              <VesselIcon name={"moon-star" as any} size={13} color={colors.primary} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={[styles.infoLabel, { color: colors.textFaint }]}>DISPLAY THEME</Text>

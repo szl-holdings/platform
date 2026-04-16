@@ -272,7 +272,7 @@ export default function ObservabilityPage() {
                 <Tooltip contentStyle={{ background: BG.elevated, border: `1px solid ${BORDER.muted}`, fontSize: 10 }} />
                 <Bar dataKey="errRate" radius={[2, 2, 0, 0]}>
                   {burnRates.map((b) => (
-                    <Cell key={b.svc} fill={b.color} />
+                    <Cell key={b.service} fill={b.color} />
                   ))}
                 </Bar>
               </BarChart>

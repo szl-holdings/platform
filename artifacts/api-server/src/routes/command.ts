@@ -204,9 +204,10 @@ function getCarlotaJoData(): { score: number; status: string; alertCount: number
     activeClients > 12 ? "High client load" :
     "Engagements on track";
 
-  const sparkline = Array.from({ length: 24 }, (_, i) =>
-    clamp(score + Math.round((((seed + i) * 6364136223846793005 + 1442695040888963407) % 13) - 6), 55, 99)
-  );
+  const sparkline = Array.from({ length: 24 }, (_, i) => {
+    // eslint-disable-next-line no-loss-of-precision
+    return clamp(score + Math.round((((seed + i) * 6364136223846793005 + 1442695040888963407) % 13) - 6), 55, 99);
+  });
 
   return { score, status, alertCount: deliverablesdue, sparkline, activeClients, pipelineUsd, deliverablesdue };
 }
@@ -230,9 +231,10 @@ function getStephenData(): { score: number; status: string; alertCount: number; 
     meetingsToday > 4 ? "Heavy meeting day" :
     "Personal ops nominal";
 
-  const sparkline = Array.from({ length: 24 }, (_, i) =>
-    clamp(score + Math.round((((seed + i + 7) * 6364136223846793005 + 1442695040888963407) % 11) - 5), 45, 99)
-  );
+  const sparkline = Array.from({ length: 24 }, (_, i) => {
+    // eslint-disable-next-line no-loss-of-precision
+    return clamp(score + Math.round((((seed + i + 7) * 6364136223846793005 + 1442695040888963407) % 11) - 5), 45, 99);
+  });
 
   return { score, status, alertCount: overdueTasks, sparkline, meetingsToday, prioritiesComplete, prioritiesTotal };
 }

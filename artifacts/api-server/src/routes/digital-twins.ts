@@ -17,25 +17,25 @@ const simulateSchema = z.object({
 
 const router = Router();
 
-router.get("/digital-twins", authMiddleware, async (_req, res) => {
+router.get("/digital-twins", authMiddleware(), async (_req, res) => {
   const twins = twinRegistry.list();
   res.json({ success: true, twins, total: twins.length });
 });
 
-router.get("/digital-twins/:twinId", authMiddleware, async (req, res) => {
-  const twin = twinRegistry.get(req.params.twinId);
-  if (!twin) return sendError(res, 404, "Twin not found");
+router.get("/digital-twins/:twinId", authMiddleware(), async (req, res) => {
+  const twin = twinRegistry.get(req.params.twinId as string);
+  if (!twin) return sendError(res, "Twin not found", 404);
   res.json({ success: true, twin });
 });
 
-router.get("/digital-twins/entity/:entityId", authMiddleware, async (req, res) => {
-  const twin = twinRegistry.getByEntity(req.params.entityId);
-  if (!twin) return sendError(res, 404, "No twin registered for this entity");
+router.get("/digital-twins/entity/:entityId", authMiddleware(), async (req, res) => {
+  const twin = twinRegistry.getByEntity(req.params.entityId as string);
+  if (!twin) return sendError(res, "No twin registered for this entity", 404);
   res.json({ success: true, twin });
 });
 
-router.get("/digital-twins/type/:type", authMiddleware, async (req, res) => {
-  const type = req.params.type as "vessel" | "property" | "posture";
+router.get("/digital-twins/type/:type", authMiddleware(), async (req, res) => {
+  const type = req.params.type as string as "vessel" | "property" | "posture";
   if (!["vessel", "property", "posture"].includes(type)) return sendBadRequest(res, "Invalid twin type");
   const twins = twinRegistry.getByType(type);
   res.json({ success: true, twins });
@@ -75,16 +75,16 @@ router.post("/digital-twins/:twinId/simulate", authMiddleware(), validateBody(si
   try {
     const { scenario } = req.body as z.infer<typeof simulateSchema>;
 
-    const twin = twinRegistry.get(req.params.twinId);
-    if (!twin) return sendError(res, 404, "Twin not found");
+    const twin = twinRegistry.get(req.params.twinId as string);
+    if (!twin) return sendError(res, "Twin not found", 404);
 
     let result;
     if (twin.twinType === "vessel") {
-      result = await vesselTwin.simulate(req.params.twinId, scenario);
+      result = await vesselTwin.simulate(req.params.twinId as string, scenario as any);
     } else if (twin.twinType === "property") {
-      result = await propertyTwin.simulate(req.params.twinId, scenario);
+      result = await propertyTwin.simulate(req.params.twinId as string, scenario as any);
     } else if (twin.twinType === "posture") {
-      result = await postureTwin.simulate(req.params.twinId, scenario);
+      result = await postureTwin.simulate(req.params.twinId as string, scenario as any);
     } else {
       return sendBadRequest(res, "Unknown twin type");
     }
@@ -98,8 +98,8 @@ router.post("/digital-twins/:twinId/simulate", authMiddleware(), validateBody(si
 
 router.patch("/digital-twins/:twinId", authMiddleware(), async (req, res) => {
   try {
-    const updated = twinRegistry.update(req.params.twinId, req.body);
-    if (!updated) return sendError(res, 404, "Twin not found");
+    const updated = twinRegistry.update(req.params.twinId as string, req.body);
+    if (!updated) return sendError(res, "Twin not found", 404);
     res.json({ success: true, twin: updated });
   } catch (err) {
     res.status(500).json({ success: false, error: "Failed to update twin" });

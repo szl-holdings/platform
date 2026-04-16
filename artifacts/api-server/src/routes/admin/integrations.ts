@@ -85,7 +85,7 @@ export function register(router: IRouter): void {
   });
 
   router.put("/admin/connectors/:name/enable", validateBody(enabledSchema), (req, res) => {
-    const adapter = services.getAdapter(req.params["name"]!);
+    const adapter = services.getAdapter(req.params["name"] as string);
     if (!adapter) { sendNotFound(res, "Connector"); return; }
     const { enabled } = req.body as z.infer<typeof enabledSchema>;
     adapter.setEnabled(enabled);

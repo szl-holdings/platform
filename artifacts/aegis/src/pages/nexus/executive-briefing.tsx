@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { FileText, Globe, Shield, TrendingUp, AlertTriangle, Clock, Eye, Zap, CheckCircle, Download, Users, BarChart3 } from "lucide-react";
+import { FileText, Globe, Shield, TrendingUp, AlertTriangle, Clock, Eye, Zap, CheckCircle, Download, Users, BarChart3, ChevronRight } from "lucide-react";
 
 const ACCENT = "#f59e0b";
 const RED = "#ef4444";

@@ -743,7 +743,7 @@ durableJobQueue.register(PLATFORM_JOB_TYPES.NOTIFICATION_DISPATCH, async (job) =
     "[notification-dispatch] Processing channel dispatch job",
   );
 
-  return { dispatched: true, channel: payload.channel, notificationId: payload.notificationId };
+  logger.info({ channel: payload.channel, notificationId: payload.notificationId }, "[notification-dispatch] Job complete");
 });
 
 durableJobQueue.register(PLATFORM_JOB_TYPES.NOTIFICATION_DIGEST, async (job) => {
@@ -765,7 +765,7 @@ durableJobQueue.register(PLATFORM_JOB_TYPES.NOTIFICATION_DIGEST, async (job) => 
 
   if (unreadByUser.length === 0) {
     logger.info("[notification-digest] No unread notifications to digest");
-    return { digestsSent: 0 };
+    return;
   }
 
   let digestsSent = 0;
@@ -786,5 +786,5 @@ durableJobQueue.register(PLATFORM_JOB_TYPES.NOTIFICATION_DIGEST, async (job) => 
   }
 
   logger.info({ digestsSent, periodHours: hours }, "[notification-digest] Digest run complete");
-  return { digestsSent };
+  logger.info({ digestsSent, periodHours: hours }, "[notification-digest] Digest complete");
 });

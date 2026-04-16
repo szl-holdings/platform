@@ -37,29 +37,6 @@ function getScoreBg(score: number) {
   if (score < 70) return "bg-orange-500/10";
   return "bg-red-500/10";
 }
-: { value: number }) {
-  const [display, setDisplay] = useState(0);
-  const ref = useRef<number>(0);
-  useEffect(() => {
-    const start = ref.current;
-    const diff = value - start;
-    if (diff === 0) return;
-    let cancelled = false;
-    const startTime = performance.now();
-    const step = (now: number) => {
-      if (cancelled) return;
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / 1000, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplay(Math.round(start + diff * eased));
-      if (progress < 1) requestAnimationFrame(step);
-      else ref.current = value;
-    };
-    requestAnimationFrame(step);
-    return () => { cancelled = true; };
-  }, [value]);
-  return <>{display}</>;
-}
 
 function AnimatedProgress({ value, className }: { value: number; className?: string }) {
   const [current, setCurrent] = useState(0);

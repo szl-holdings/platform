@@ -109,7 +109,7 @@ export default function ArticlesScreen() {
               key={article.id}
               activeOpacity={0.85}
               style={[styles.articleRow, i === articles.length - 1 && styles.lastRow]}
-              onPress={() => router.push({ pathname: "/article/[slug]", params: { slug: article.slug } })}
+              onPress={() => router.push({ pathname: "/article/[slug]", params: { slug: article.slug } } as any)}
             >
               <View style={styles.articleContent}>
                 <Text style={styles.articleTitle} numberOfLines={2}>

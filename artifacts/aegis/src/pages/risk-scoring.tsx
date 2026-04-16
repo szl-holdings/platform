@@ -57,29 +57,6 @@ const categoryLabels: Record<string, string> = {
   physical: "Physical Security",
   compliance: "Compliance",
 };
-: { value: number; decimals?: number; duration?: number }) {
-  const [display, setDisplay] = useState(0);
-  const ref = useRef<number>(0);
-  useEffect(() => {
-    const start = ref.current;
-    const diff = value - start;
-    if (Math.abs(diff) < 0.01) return;
-    let cancelled = false;
-    const startTime = performance.now();
-    const step = (now: number) => {
-      if (cancelled) return;
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplay(start + diff * eased);
-      if (progress < 1) requestAnimationFrame(step);
-      else ref.current = value;
-    };
-    requestAnimationFrame(step);
-    return () => { cancelled = true; };
-  }, [value, duration]);
-  return <>{display.toFixed(decimals)}</>;
-}
 
 function AnimatedProgress({ value, className }: { value: number; className?: string }) {
   const [current, setCurrent] = useState(0);

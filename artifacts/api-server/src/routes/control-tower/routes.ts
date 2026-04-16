@@ -17,6 +17,7 @@ import { listPipelines, executePipeline, getPipelineConfig, executeComposedPipel
 
 import { inferenceTelemetry } from "../../lib/inference-telemetry";
 import { insertDecision, listDecisions, updateDecisionStatus, getDecision } from "../../lib/alloy-decision-store";
+import { createAlloyDecision } from "@szl-holdings/ai-engine";
 import type { AlloyDecisionEvidenceRef, RiskLevel } from "@szl-holdings/ai-engine";
 import { logger } from "../../lib/logger";
 import { randomUUID } from "crypto";
@@ -608,7 +609,7 @@ router.post("/control-tower/decide/orchestrate", requireRole("super_admin", "ops
 // Approve + execute a previously queued high-risk orchestration (operator role required)
 router.post("/control-tower/decide/approve/:id", requireRole("super_admin", "ops", "exec"), async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as Record<string, string>;
     const { approvedBy, domains } = req.body as { approvedBy?: string; domains?: string[] };
 
     const decision = await getDecision(id, null, true);
@@ -640,7 +641,7 @@ router.post("/control-tower/decide/approve/:id", requireRole("super_admin", "ops
 
     await updateDecisionStatus(id, {
       status: "executed",
-      executionOutcome: result.status === "completed" ? "success" : "partial",
+      executionOutcome: result.status === "completed" ? "executed" : "failed",
       executedAt: new Date().toISOString(),
     }, null, true);
 
@@ -663,7 +664,7 @@ router.post("/control-tower/decide/approve/:id", requireRole("super_admin", "ops
 
 router.patch("/control-tower/decide/journal/:id", requireRole("super_admin", "ops", "exec"), async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as Record<string, string>;
     const { outcome } = req.body as { outcome?: "accepted" | "rejected" | "overridden" };
     if (!outcome) {
       res.status(400).json({ error: "outcome is required" });
@@ -701,9 +702,9 @@ router.get("/control-tower/act/pipelines", (_req: Request, res: Response) => {
 
 router.get("/control-tower/act/pipelines/:id", (req: Request, res: Response) => {
   try {
-    const config = getPipelineConfig(req.params.id);
+    const config = getPipelineConfig(req.params.i as string);
     if (!config) {
-      res.status(404).json({ error: `Pipeline not found: ${req.params.id}` });
+      res.status(404).json({ error: `Pipeline not found: ${req.params.i as string}` });
       return;
     }
     sendSuccess(res, { layer: "act", pipeline: config });
@@ -715,7 +716,7 @@ router.get("/control-tower/act/pipelines/:id", (req: Request, res: Response) => 
 // Pipeline execution — governance pre-flight before running
 router.post("/control-tower/act/pipelines/:id/run", requireRole("super_admin", "ops", "exec"), async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as Record<string, string>;
     const { input, agentId } = req.body as { input?: string; agentId?: string };
     if (!input) {
       res.status(400).json({ error: "input is required" });
@@ -1222,7 +1223,7 @@ router.post("/control-tower/evolve/propose", requireRole("super_admin", "ops", "
 
 router.patch("/control-tower/evolve/propose/:proposalId", requireRole("super_admin", "ops", "exec"), (req: Request, res: Response) => {
   try {
-    const { proposalId } = req.params;
+    const { proposalId } = req.params as Record<string, string>;
     const { status } = req.body as { status?: "applied" | "rejected" };
     if (!status) {
       res.status(400).json({ error: "status is required" });

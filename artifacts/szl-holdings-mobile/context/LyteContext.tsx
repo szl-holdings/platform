@@ -230,7 +230,7 @@ export function LyteProvider({ children }: { children: React.ReactNode }) {
 
     if (signalsResult.error) {
       errors.push(signalsResult.error);
-      const cached = await cacheGetStale<LyteSignal[]>(CACHE_KEYS.signals);
+      const cached = await cacheGetStale<LyteSignal[]>(CACHE_KEYS.SIGNALS);
       if (cached && cached.length > 0) setSignals(cached);
     } else if (signalsResult.data !== null) {
       const val = signalsResult.data;
@@ -241,7 +241,7 @@ export function LyteProvider({ children }: { children: React.ReactNode }) {
         : [];
       const normalized = normalizeSignals(raw);
       setSignals(normalized);
-      cacheSet(CACHE_KEYS.signals, normalized);
+      cacheSet(CACHE_KEYS.SIGNALS, normalized);
     }
 
     if (incidentsResult.error) {
@@ -334,9 +334,9 @@ export function LyteProvider({ children }: { children: React.ReactNode }) {
       ws.onopen = () => {
         setIsConnected(true);
         const authMsg = buildWsAuthMessage();
-        if (authMsg) ws.send(authMsg);
+        if (authMsg) ws.send(JSON.stringify(authMsg));
       };
-      ws.onclose = (event) => {
+      ws.onclose = (event: any) => {
         setIsConnected(false);
         if (event.code !== 1000) {
           reconnectTimer = setTimeout(connectWebSocket, 5000);

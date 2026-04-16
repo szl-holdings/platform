@@ -15,6 +15,7 @@ interface NotificationContextValue {
   setPreferences: React.Dispatch<React.SetStateAction<NotificationPreferences>>;
   requestPermission: () => Promise<boolean>;
   sendLocalNotification: (title: string, body: string) => Promise<void>;
+  refresh: () => void;
 }
 
 const NotificationContext = createContext<NotificationContextValue>({
@@ -24,6 +25,7 @@ const NotificationContext = createContext<NotificationContextValue>({
   setPreferences: () => {},
   requestPermission: async () => false,
   sendLocalNotification: async () => {},
+  refresh: () => {},
 });
 
 function getApiBase(): string {
@@ -162,7 +164,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }, []);
 
   return (
-    <NotificationContext.Provider value={{ permissionGranted, expoPushToken, preferences, setPreferences, requestPermission, sendLocalNotification }}>
+    <NotificationContext.Provider value={{ permissionGranted, expoPushToken, preferences, setPreferences, requestPermission, sendLocalNotification, refresh: () => {} }}>
       {children}
     </NotificationContext.Provider>
   );

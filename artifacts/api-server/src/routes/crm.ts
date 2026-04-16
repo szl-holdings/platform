@@ -10,7 +10,7 @@ const router: IRouter = Router();
 
 router.get("/salesforce/opportunities", authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const sfAdapter = (services as Record<string, unknown>)["salesforce"] as { getOpportunities?: () => Promise<{ records?: Record<string, unknown>[] }> } | undefined;
+    const sfAdapter = (services as unknown as Record<string, unknown>)["salesforce"] as { getOpportunities?: () => Promise<{ records?: Record<string, unknown>[] }> } | undefined;
     if (sfAdapter?.getOpportunities) {
       const data = await sfAdapter.getOpportunities();
       if (data?.records?.length) {
@@ -37,7 +37,7 @@ router.get("/salesforce/opportunities", authMiddleware({ required: false }), asy
 
 router.get("/salesforce/accounts", authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const sfAdapter = (services as Record<string, unknown>)["salesforce"] as { getAccounts?: () => Promise<{ records?: unknown[] }> } | undefined;
+    const sfAdapter = (services as unknown as Record<string, unknown>)["salesforce"] as { getAccounts?: () => Promise<{ records?: unknown[] }> } | undefined;
     if (sfAdapter?.getAccounts) {
       const data = await sfAdapter.getAccounts();
       if (data?.records?.length) return sendSuccess(res, data.records);
@@ -50,7 +50,7 @@ router.get("/salesforce/accounts", authMiddleware({ required: false }), async (_
 
 router.get("/salesforce/leads", authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const sfAdapter = (services as Record<string, unknown>)["salesforce"] as { getLeads?: () => Promise<{ records?: unknown[] }> } | undefined;
+    const sfAdapter = (services as unknown as Record<string, unknown>)["salesforce"] as { getLeads?: () => Promise<{ records?: unknown[] }> } | undefined;
     if (sfAdapter?.getLeads) {
       const data = await sfAdapter.getLeads();
       if (data?.records?.length) return sendSuccess(res, data.records);
@@ -63,7 +63,7 @@ router.get("/salesforce/leads", authMiddleware({ required: false }), async (_req
 
 router.get("/hubspot/deals", authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const hubSpotAdapter = (services as Record<string, unknown>)["hubspot"] as { getDeals?: () => Promise<{ results?: Record<string, unknown>[] }> } | undefined;
+    const hubSpotAdapter = (services as unknown as Record<string, unknown>)["hubspot"] as { getDeals?: () => Promise<{ results?: Record<string, unknown>[] }> } | undefined;
     if (hubSpotAdapter?.getDeals) {
       const data = await hubSpotAdapter.getDeals();
       if (data?.results?.length) {
@@ -84,7 +84,7 @@ router.get("/hubspot/deals", authMiddleware({ required: false }), async (_req, r
 
 router.get("/hubspot/contacts", authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const hubSpotAdapter = (services as Record<string, unknown>)["hubspot"] as { getContacts?: () => Promise<{ results?: unknown[] }> } | undefined;
+    const hubSpotAdapter = (services as unknown as Record<string, unknown>)["hubspot"] as { getContacts?: () => Promise<{ results?: unknown[] }> } | undefined;
     if (hubSpotAdapter?.getContacts) {
       const data = await hubSpotAdapter.getContacts();
       if (data?.results?.length) return sendSuccess(res, { count: data.results.length, contacts: data.results });
@@ -97,7 +97,7 @@ router.get("/hubspot/contacts", authMiddleware({ required: false }), async (_req
 
 router.get("/dynamics/opportunities", authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const dynAdapter = (services as Record<string, unknown>)["dynamics365"] as { getOpportunities?: () => Promise<{ value?: Record<string, unknown>[] }> } | undefined;
+    const dynAdapter = (services as unknown as Record<string, unknown>)["dynamics365"] as { getOpportunities?: () => Promise<{ value?: Record<string, unknown>[] }> } | undefined;
     if (dynAdapter?.getOpportunities) {
       const data = await dynAdapter.getOpportunities();
       if (data?.value?.length) {
@@ -135,7 +135,7 @@ router.post("/crm/sync/:crmType", authMiddleware({ required: true }), async (req
         const [conn] = await db
           .select()
           .from(connectorsTable)
-          .where(and(eq(connectorsTable.connectorType, type as Parameters<typeof eq>[1]), eq(connectorsTable.isActive, true)))
+          .where(and(eq(connectorsTable.type, type as any), eq(connectorsTable.isEnabled, true)))
           .limit(1);
 
         if (conn) {

@@ -17,6 +17,7 @@ import {
   type SzlSignal,
   type SzlPort,
 } from "@szl-holdings/db";
+import { eq } from "drizzle-orm";
 
 async function seedCanonical() {
   console.log("Seeding SZL canonical data...");
@@ -49,13 +50,14 @@ async function seedCanonical() {
   console.log(`  ✓ ${portRows.length} ports`);
 
   // ─── DEMO ORG (if not exists) ──────────────────────────────────────────────
-  const [demoOrg] = await db.insert(organizationsTable).values({
+  const [insertedOrg] = await db.insert(organizationsTable).values({
     name: "SZL Holdings Demo",
     slug: "szl-demo",
     orgType: "demo",
     status: "active",
     plan: "enterprise",
   }).onConflictDoNothing().returning();
+  const demoOrg = insertedOrg ?? (await db.select().from(organizationsTable).where(eq(organizationsTable.slug, "szl-demo")))[0];
   const orgId = demoOrg?.id ?? 1;
 
   // ─── VESSELS ──────────────────────────────────────────────────────────────

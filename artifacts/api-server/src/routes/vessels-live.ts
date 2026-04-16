@@ -29,7 +29,7 @@ interface LiveVessel {
 }
 
 interface AisGeoJsonFeature {
-  properties?: Record<string, unknown>;
+  properties?: Record<string, any>;
   geometry?: { coordinates?: number[] };
 }
 
@@ -151,7 +151,7 @@ async function fetchBarentsWatchAis(): Promise<{ vessels: LiveVessel[]; source: 
       "https://www.barentswatch.no/bwapi/v2/latest/combined?Xabcd=positions&area=NOR",
       10000,
     );
-    const data = raw as Record<string, unknown>[];
+    const data = raw as Record<string, any>[];
     if (!Array.isArray(data) || data.length === 0) throw new Error("No BarentsWatch data");
     const vessels: LiveVessel[] = data.slice(0, 15).map((v) => ({
       mmsi: String(v.mmsi ?? ""),
@@ -249,7 +249,7 @@ router.get("/vessels/live/vessel-details/:mmsi", vesLiveLimit, authMiddleware({ 
         const data = await fetchJson(
           `https://meri.digitraffic.fi/api/ais/v1/vessels/${mmsi}`,
           8000,
-        ) as Record<string, unknown> & { dimensions?: Record<string, number> };
+        ) as Record<string, any> & { dimensions?: Record<string, any> };
 
         if (!data?.mmsi) throw new Error("No vessel data");
 
@@ -300,13 +300,13 @@ router.get("/vessels/live/weather", vesLiveLimit, authMiddleware({ required: fal
         const raw = await fetchJson(
           `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height,wave_direction,wave_period,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction&current=wave_height,wind_wave_height,swell_wave_height,wave_direction,wave_period&timezone=UTC&forecast_days=3`,
           8000,
-        ) as Record<string, unknown> & { current?: Record<string, number> };
+        ) as Record<string, any> & { current?: Record<string, any>; hourly?: Record<string, any[]> };
         if (!raw?.current) throw new Error("No marine weather data");
 
         const windRaw = await fetchJson(
           `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=wind_speed_10m,wind_direction_10m,temperature_2m,precipitation&timezone=UTC`,
           6000,
-        ) as Record<string, unknown> & { current?: Record<string, number> };
+        ) as Record<string, any> & { current?: Record<string, any>; hourly?: Record<string, any[]> };
 
         const windSpeed = Math.round(windRaw?.current?.wind_speed_10m ?? 0);
         const windDir = windRaw?.current?.wind_direction_10m ?? 0;
@@ -335,9 +335,9 @@ router.get("/vessels/live/weather", vesLiveLimit, authMiddleware({ required: fal
             },
             forecast3h: raw.hourly?.time?.slice(0, 24).map((t: string, i: number) => ({
               time: t,
-              waveHeight: raw.hourly.wave_height?.[i] ?? null,
-              swellHeight: raw.hourly.swell_wave_height?.[i] ?? null,
-              wavePeriod: raw.hourly.wave_period?.[i] ?? null,
+              waveHeight: raw.hourly?.wave_height?.[i] ?? null,
+              swellHeight: raw.hourly?.swell_wave_height?.[i] ?? null,
+              wavePeriod: raw.hourly?.wave_period?.[i] ?? null,
             })) ?? [],
           },
           source: "live-open-meteo",

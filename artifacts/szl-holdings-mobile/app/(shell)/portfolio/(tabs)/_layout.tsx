@@ -41,11 +41,11 @@ function NativeTabLayout() {
         <Icon sf={{ default: "sparkles", selected: "sparkles" }} />
         <Label>AI</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="agents" options={{ href: null }} />
-      <NativeTabs.Trigger name="trust" options={{ href: null }} />
-      <NativeTabs.Trigger name="alloy" options={{ href: null }} />
-      <NativeTabs.Trigger name="mcp-tools" options={{ href: null }} />
-      <NativeTabs.Trigger name="profile" options={{ href: null }} />
+      <NativeTabs.Trigger name="agents" options={{  href: null } as any} />
+      <NativeTabs.Trigger name="trust" options={{  href: null } as any} />
+      <NativeTabs.Trigger name="alloy" options={{  href: null } as any} />
+      <NativeTabs.Trigger name="mcp-tools" options={{  href: null } as any} />
+      <NativeTabs.Trigger name="profile" options={{  href: null } as any} />
     </NativeTabs>
   );
 }
@@ -102,11 +102,11 @@ function ClassicTabLayout() {
             isIOS ? <SymbolView name="sparkles" tintColor={color} size={22} /> : <Feather name="cpu" size={20} color={color} />,
         }}
       />
-      <Tabs.Screen name="agents" options={{ href: null }} />
-      <Tabs.Screen name="trust" options={{ href: null }} />
-      <Tabs.Screen name="alloy" options={{ href: null }} />
-      <Tabs.Screen name="mcp-tools" options={{ href: null }} />
-      <Tabs.Screen name="profile" options={{ href: null }} />
+      <Tabs.Screen name="agents" options={{  href: null } as any} />
+      <Tabs.Screen name="trust" options={{  href: null } as any} />
+      <Tabs.Screen name="alloy" options={{  href: null } as any} />
+      <Tabs.Screen name="mcp-tools" options={{  href: null } as any} />
+      <Tabs.Screen name="profile" options={{  href: null } as any} />
     </Tabs>
   );
 }

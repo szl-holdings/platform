@@ -640,7 +640,7 @@ router.post("/ai/decision", authMiddleware({ required: true }), async (req, res)
       rawInput: rawInput ?? null,
     });
 
-    await insertDecision(decision, orgId);
+    await insertDecision(decision as any, orgId);
 
     writeAudit({
       endpoint: "decision/create",

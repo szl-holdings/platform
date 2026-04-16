@@ -11,7 +11,7 @@ const basePath = process.env.BASE_PATH || "/mockup-sandbox/";
 function healthCheckPlugin() {
   return {
     name: "health-check",
-    apply: "serve",
+    apply: "serve" as const,
     async configureServer() {
       const http = await import("http");
       const proxyServer = http.createServer((req, res) => {

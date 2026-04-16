@@ -62,7 +62,7 @@ export class DeltaSyncClient {
     since?: number,
     cursor?: string
   ): Promise<DeltaSyncResponse<T>> {
-    const watermark = since !== undefined ? { lastSyncedAt: since } : await this.getWatermark(domain);
+    const watermark: { lastSyncedAt: number; cursor?: string } = since !== undefined ? { lastSyncedAt: since } : await this.getWatermark(domain);
     const headers = await this.getHeaders();
 
     const params = new URLSearchParams({

@@ -40,6 +40,21 @@
     },
     {
       "path": "../../lib/pulse-evals"
+    },
+    {
+      "path": "../../lib/intelligence-feeds"
+    },
+    {
+      "path": "../../lib/observability"
+    },
+    {
+      "path": "../../lib/audit"
+    },
+    {
+      "path": "../../lib/config"
+    },
+    {
+      "path": "../../lib/auth"
     }
   ]
 }

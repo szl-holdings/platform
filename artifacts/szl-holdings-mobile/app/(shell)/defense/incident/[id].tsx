@@ -16,7 +16,7 @@ import { Ionicons, Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import * as LocalAuthentication from "expo-local-authentication";
 import { useColors } from "@/hooks/useColors";
-import { apiFetch } from "@/lib/apiClient";
+import { apiFetch, apiFetchRaw } from "@/lib/apiClient";
 import { useSyncEngine } from "@szl-holdings/mobile-shared";
 
 interface IncidentDetail {
@@ -42,7 +42,7 @@ async function fetchIncidentWithETag(
   id: string,
   onETag: (etag: string) => void
 ): Promise<IncidentDetail> {
-  const res = await apiFetch(`/api/firestorm/incidents/${id}`);
+  const res = await apiFetchRaw(`/api/firestorm/incidents/${id}`);
   if (!res.ok) throw new Error(`GET /api/firestorm/incidents/${id} failed: ${res.status}`);
   const etag = res.headers.get("etag");
   if (etag) onETag(etag);
@@ -123,7 +123,7 @@ export default function IncidentDetailScreen() {
         return {} as IncidentDetail;
       }
 
-      const res = await apiFetch(path, {
+      const res = await apiFetchRaw(path, {
         method: "PUT",
         body: JSON.stringify(data),
         headers: { "X-Idempotency-Key": idempotencyKey, ...concurrencyHeaders },

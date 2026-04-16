@@ -120,7 +120,7 @@ function PropertyCard({ property, onPress, flagged, onFlag }: {
       </View>
       <GestureDetector gesture={panGesture}>
         <Reanimated.View style={[animStyle]}>
-          <View style={[styles.propertyCard, { borderColor: flagged ? (colors.amber + "50" ?? "#b8943c50") : colors.border, backgroundColor: flagged ? (colors.amber ?? "#b8943c") + "06" : "rgba(255,255,255,0.02)" }]}>
+          <View style={[styles.propertyCard, { borderColor: flagged ? ((colors.amber ?? "#b8943c") + "50") : colors.border, backgroundColor: flagged ? (colors.amber ?? "#b8943c") + "06" : "rgba(255,255,255,0.02)" }]}>
       <Pressable
         onPress={() => { Haptics.selectionAsync(); onPress(); }}
       >
@@ -229,12 +229,12 @@ export default function PropertiesTab() {
         setIsFromCache(false);
         const result = json.data ?? json;
         if (selectedBorough === "All" && selectedType === "All" && !search) {
-          await cacheSet(CACHE_KEYS.properties, result);
+          await cacheSet(CACHE_KEYS.PROPERTIES, result);
         }
         return result;
       } catch {
         setIsFromCache(true);
-        const cached = await cacheGetStale<{ properties?: unknown[] }>(CACHE_KEYS.properties);
+        const cached = await cacheGetStale<{ properties?: unknown[] }>(CACHE_KEYS.PROPERTIES);
         return cached ?? null;
       }
     },
@@ -384,7 +384,7 @@ export default function PropertiesTab() {
             property={p}
             flagged={flaggedIds.has(p.id)}
             onFlag={handleFlag}
-            onPress={() => router.push({ pathname: "/property/[id]", params: { id: p.id } })}
+            onPress={() => router.push({ pathname: "/property/[id]" as any, params: { id: p.id } })}
           />
         ))}
         {displayProperties.length === 0 && (

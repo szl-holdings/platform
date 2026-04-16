@@ -101,7 +101,6 @@ export function useSSEStream<T = unknown>({
     };
 
     xhr.send();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url, cleanup]);
 
   const scheduleReconnect = useCallback(() => {

@@ -34,7 +34,7 @@ function NativeTabLayout() {
         <Label>Articles</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="ventures">
-        <Icon sf={{ default: "rocket", selected: "rocket.fill" }} />
+        <Icon sf={{ default: "arrow.up" as any, selected: "arrow.up.circle.fill" as any }} />
         <Label>Ventures</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="tools">
@@ -90,7 +90,7 @@ function ClassicTabLayout() {
         options={{
           title: "Ventures",
           tabBarIcon: ({ color }) =>
-            isIOS ? <SymbolView name="rocket.fill" tintColor={color} size={22} /> : <Feather name="zap" size={20} color={color} />,
+            isIOS ? <SymbolView name="arrow.up.circle.fill" tintColor={color} size={22} /> : <Feather name="zap" size={20} color={color} />,
         }}
       />
       <Tabs.Screen

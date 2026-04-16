@@ -19,6 +19,7 @@ const ISSUER_URL = process.env.EXPO_PUBLIC_ISSUER_URL ?? "https://replit.com/oid
 export interface AuthUser {
   id: string;
   displayName: string | null;
+  username?: string | null;
   email: string | null;
   avatarUrl: string | null;
   roles: string[];
@@ -28,16 +29,26 @@ interface AuthContextValue {
   user: AuthUser | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isReady: boolean;
   login: () => Promise<void>;
   logout: () => Promise<void>;
+  signOut: () => Promise<void>;
+  buildHeaders: (extra?: Record<string, string>) => Record<string, string>;
+  buildWsAuthMessage: () => { type: string; token: string };
+  signals?: unknown[];
 }
 
 export const AuthContext = createContext<AuthContextValue>({
   user: null,
   isLoading: true,
   isAuthenticated: false,
+  isReady: false,
   login: async () => {},
   logout: async () => {},
+  signOut: async () => {},
+  buildHeaders: (extra) => ({ "Content-Type": "application/json", ...extra }),
+  buildWsAuthMessage: () => ({ type: "auth", token: "" }),
+  signals: [],
 });
 
 function getApiBaseUrl(): string {
@@ -207,8 +218,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         isLoading,
         isAuthenticated: !!user,
+        isReady: !isLoading,
         login,
         logout,
+        signOut: logout,
+        buildHeaders: (extra?: Record<string, string>) => {
+          const token = user ? (user as { token?: string }).token : null;
+          const headers: Record<string, string> = { "Content-Type": "application/json", ...extra };
+          if (token) headers["Authorization"] = `Bearer ${token}`;
+          return headers;
+        },
+        buildWsAuthMessage: () => {
+          const token = user ? (user as { token?: string }).token ?? "" : "";
+          return { type: "auth", token };
+        },
+        signals: [],
       }}
     >
       {children}

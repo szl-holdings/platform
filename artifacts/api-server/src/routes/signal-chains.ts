@@ -269,12 +269,12 @@ router.get(
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
   (req, res) => {
-    const chain = chainState.get(req.params.id);
+    const chain = chainState.get(req.params.id as string);
     if (!chain) {
       res.status(404).json({ success: false, error: "Signal chain not found" });
       return;
     }
-    const history = auditLog.filter((e) => e.chainId === req.params.id).slice(-10).reverse();
+    const history = auditLog.filter((e) => e.chainId === req.params.id as string).slice(-10).reverse();
     res.json({ success: true, chain, history });
   }
 );
@@ -284,7 +284,7 @@ router.post(
   authMiddleware({ required: false }),
   perUserWriteSlidingLimiter,
   async (req, res) => {
-    const chain = chainState.get(req.params.id);
+    const chain = chainState.get(req.params.id as string);
     if (!chain) {
       res.status(404).json({ success: false, error: "Signal chain not found" });
       return;
@@ -303,7 +303,7 @@ router.post(
     try {
       await logActivity({
         action: "signal_chain.triggered",
-        resourceType: "signal_chain",
+        resource: "signal_chain",
         resourceId: chain.id,
         metadata: {
           chainName: chain.name,
@@ -341,7 +341,7 @@ router.post(
       try {
         await logActivity({
           action: "signal_chain.auto_evaluated",
-          resourceType: "signal_chain",
+          resource: "signal_chain",
           resourceId: chain.id,
           metadata: {
             chainName: chain.name,

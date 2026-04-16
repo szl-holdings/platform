@@ -39,15 +39,15 @@ function NativeTabLayout() {
         <Label>Messages</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="sessions">
-        <Icon sf={{ default: "calendar", selected: "calendar.fill" }} />
+        <Icon sf={{ default: "calendar", selected: "calendar.badge" as any }} />
         <Label>Sessions</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="agent-chat">
         <Icon sf={{ default: "bubble.left.and.bubble.right", selected: "bubble.left.and.bubble.right.fill" }} />
         <Label>AI</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="mcp-tools" options={{ href: null }} />
-      <NativeTabs.Trigger name="profile" options={{ href: null }} />
+      <NativeTabs.Trigger name="mcp-tools" options={{  href: null } as any} />
+      <NativeTabs.Trigger name="profile" options={{  href: null } as any} />
     </NativeTabs>
   );
 }
@@ -112,8 +112,8 @@ function ClassicTabLayout() {
             isIOS ? <SymbolView name="bubble.left.and.bubble.right.fill" tintColor={color} size={22} /> : <Feather name="message-circle" size={20} color={color} />,
         }}
       />
-      <Tabs.Screen name="mcp-tools" options={{ href: null }} />
-      <Tabs.Screen name="profile" options={{ href: null }} />
+      <Tabs.Screen name="mcp-tools" options={{  href: null } as any} />
+      <Tabs.Screen name="profile" options={{  href: null } as any} />
     </Tabs>
   );
 }

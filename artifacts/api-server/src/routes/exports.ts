@@ -14,7 +14,7 @@ import { authMiddleware, requireRole } from "../middlewares/auth";
 import { isFlagEnabled } from "../lib/platform-flags";
 import { runExport, getExportByToken, listExportHistory } from "../lib/export-service";
 import type { ExportColumn } from "../lib/export-service";
-import { handleRouteError, sendSuccess, sendError, sendBadRequest } from "../lib/api-response";
+import { handleRouteError, sendSuccess, sendError, sendBadRequest, sendNotFound } from "../lib/api-response";
 
 interface AuthUser { id: number; role: string; email?: string; displayName?: string }
 type ExtendedRequest = Request & { user?: AuthUser }
@@ -168,7 +168,7 @@ router.post("/exports/aegis-incidents", authMiddleware(), requireRole("admin", "
     const conditions = [];
     if (dateFrom) conditions.push(gte(firestormFindingsTable.createdAt, new Date(dateFrom)));
     if (dateTo) conditions.push(lte(firestormFindingsTable.createdAt, new Date(dateTo)));
-    if (status && status !== "all") conditions.push(eq(firestormFindingsTable.status, status));
+    if (status && status !== "all") conditions.push(eq(firestormFindingsTable.status, status as any));
     if (search) conditions.push(or(ilike(firestormFindingsTable.title, `%${search}%`), ilike(firestormFindingsTable.category, `%${search}%`))!);
     const rows = await db.select().from(firestormFindingsTable)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
@@ -223,7 +223,7 @@ router.post("/exports/vessels", authMiddleware(), requireRole("admin", "ops", "c
     const conditions = [];
     if (dateFrom) conditions.push(gte(vesselsTable.createdAt, new Date(dateFrom)));
     if (dateTo) conditions.push(lte(vesselsTable.createdAt, new Date(dateTo)));
-    if (status && status !== "all") conditions.push(eq(vesselsTable.status, status));
+    if (status && status !== "all") conditions.push(eq(vesselsTable.status, status as any));
     if (search) conditions.push(or(ilike(vesselsTable.name, `%${search}%`), ilike(vesselsTable.mmsi, `%${search}%`), ilike(vesselsTable.flag, `%${search}%`))!);
     const rows = await db.select().from(vesselsTable)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
@@ -281,7 +281,7 @@ router.post("/exports/terra-deals", authMiddleware(), requireRole("admin", "ops"
     const conditions = [];
     if (dateFrom) conditions.push(gte(terraDealsTable.createdAt, new Date(dateFrom)));
     if (dateTo) conditions.push(lte(terraDealsTable.createdAt, new Date(dateTo)));
-    if (status && status !== "all") conditions.push(eq(terraDealsTable.stage, status));
+    if (status && status !== "all") conditions.push(eq(terraDealsTable.stage, status as any));
     if (search) conditions.push(or(ilike(terraDealsTable.address, `%${search}%`), ilike(terraDealsTable.ownerName, `%${search}%`))!);
     const rows = await db.select().from(terraDealsTable)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
@@ -341,7 +341,7 @@ router.post("/exports/lyte-signals", authMiddleware(), requireRole("admin", "ops
     const conditions = [];
     if (dateFrom) conditions.push(gte(lyteSignalsTable.createdAt, new Date(dateFrom)));
     if (dateTo) conditions.push(lte(lyteSignalsTable.createdAt, new Date(dateTo)));
-    if (status && status !== "all") conditions.push(eq(lyteSignalsTable.status, status));
+    if (status && status !== "all") conditions.push(eq(lyteSignalsTable.status, status as any));
     if (search) conditions.push(or(ilike(lyteSignalsTable.title, `%${search}%`), ilike(lyteSignalsTable.source, `%${search}%`))!);
     const rows = await db.select().from(lyteSignalsTable)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
@@ -396,7 +396,7 @@ router.post("/exports/msp-tickets", authMiddleware(), requireRole("admin", "ops"
     const conditions = [];
     if (dateFrom) conditions.push(gte(mspTicketsTable.createdAt, new Date(dateFrom)));
     if (dateTo) conditions.push(lte(mspTicketsTable.createdAt, new Date(dateTo)));
-    if (status && status !== "all") conditions.push(eq(mspTicketsTable.status, status));
+    if (status && status !== "all") conditions.push(eq(mspTicketsTable.status, status as any));
     if (search) conditions.push(or(ilike(mspTicketsTable.subject, `%${search}%`), ilike(mspTicketsTable.category, `%${search}%`))!);
     const rows = await db.select().from(mspTicketsTable)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
@@ -617,12 +617,12 @@ router.get("/exports/preview", authMiddleware(), requireRole("admin", "ops", "co
         const w = and(
           from ? gte(vesselsTable.createdAt, from) : undefined,
           to ? lte(vesselsTable.createdAt, to) : undefined,
-          status ? eq(vesselsTable.status, status) : undefined,
+          status ? eq(vesselsTable.status, status as any) : undefined,
           search ? or(ilike(vesselsTable.name, `%${search}%`), ilike(vesselsTable.mmsi, `%${search}%`))! : undefined,
         );
         rows = (await db.select({
           id: vesselsTable.id, name: vesselsTable.name, mmsi: vesselsTable.mmsi,
-          imo: vesselsTable.imo, type: vesselsTable.type, flag: vesselsTable.flag,
+          imo: vesselsTable.imo, type: vesselsTable.vesselType, flag: vesselsTable.flag,
           status: vesselsTable.status, createdAt: vesselsTable.createdAt,
         }).from(vesselsTable).where(w).orderBy(desc(vesselsTable.createdAt)).limit(limit)) as Record<string, unknown>[];
         break;
@@ -631,7 +631,7 @@ router.get("/exports/preview", authMiddleware(), requireRole("admin", "ops", "co
         const w = and(
           from ? gte(terraDealsTable.createdAt, from) : undefined,
           to ? lte(terraDealsTable.createdAt, to) : undefined,
-          status ? eq(terraDealsTable.stage, status) : undefined,
+          status ? eq(terraDealsTable.stage, status as any) : undefined,
           search ? or(ilike(terraDealsTable.address, `%${search}%`), ilike(terraDealsTable.ownerName, `%${search}%`))! : undefined,
         );
         rows = (await db.select({
@@ -645,7 +645,7 @@ router.get("/exports/preview", authMiddleware(), requireRole("admin", "ops", "co
         const w = and(
           from ? gte(lyteSignalsTable.createdAt, from) : undefined,
           to ? lte(lyteSignalsTable.createdAt, to) : undefined,
-          status ? eq(lyteSignalsTable.status, status) : undefined,
+          status ? eq(lyteSignalsTable.status, status as any) : undefined,
           search ? or(ilike(lyteSignalsTable.title, `%${search}%`), ilike(lyteSignalsTable.source, `%${search}%`))! : undefined,
         );
         rows = (await db.select({
@@ -659,7 +659,7 @@ router.get("/exports/preview", authMiddleware(), requireRole("admin", "ops", "co
         const w = and(
           from ? gte(firestormFindingsTable.createdAt, from) : undefined,
           to ? lte(firestormFindingsTable.createdAt, to) : undefined,
-          status ? eq(firestormFindingsTable.status, status) : undefined,
+          status ? eq(firestormFindingsTable.status, status as any) : undefined,
           search ? or(ilike(firestormFindingsTable.title, `%${search}%`), ilike(firestormFindingsTable.category, `%${search}%`))! : undefined,
         );
         rows = (await db.select({
@@ -673,7 +673,7 @@ router.get("/exports/preview", authMiddleware(), requireRole("admin", "ops", "co
         const w = and(
           from ? gte(mspTicketsTable.createdAt, from) : undefined,
           to ? lte(mspTicketsTable.createdAt, to) : undefined,
-          status ? eq(mspTicketsTable.status, status) : undefined,
+          status ? eq(mspTicketsTable.status, status as any) : undefined,
           search ? or(ilike(mspTicketsTable.subject, `%${search}%`), ilike(mspTicketsTable.category, `%${search}%`))! : undefined,
         );
         rows = (await db.select({
@@ -688,7 +688,7 @@ router.get("/exports/preview", authMiddleware(), requireRole("admin", "ops", "co
         const w = and(
           from ? gte(meteringEventsTable.occurredAt, from) : undefined,
           to ? lte(meteringEventsTable.occurredAt, to) : undefined,
-          numericOrgId ? eq(meteringEventsTable.orgId, String(numericOrgId)) : undefined,
+          numericOrgId ? eq(meteringEventsTable.orgId, String(numericOrgId) as any) : undefined,
         );
         rows = (await db.select({
           id: meteringEventsTable.id, orgId: meteringEventsTable.orgId,

@@ -3,6 +3,8 @@ import { CodeBlock, LanguageTabs, SectionHeader, SubSectionHeader, Callout, Inli
 
 export function RestApiSection() {
   return (
+          <section>
+            <SectionHeader
               id="rest-api"
               title="REST API"
               badge="OpenAPI 3.1.0"
@@ -199,8 +201,5 @@ export function RestApiSection() {
               </a>
             </div>
           </section>
-
-          {/* ── GraphQL ── */}
-          <section>
   );
 }

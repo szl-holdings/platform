@@ -56,10 +56,10 @@ type IncidentUpdate = Partial<Pick<Incident, "status" | "severity" | "assignedAn
 async function fetchIncidents(): Promise<Incident[]> {
   try {
     const data = await apiGet<Incident[]>("/api/firestorm/incidents");
-    await cacheSet(CACHE_KEYS.incidents, data);
+    await cacheSet(CACHE_KEYS.INCIDENTS, data);
     return data;
   } catch (err) {
-    const cached = await cacheGetStale<Incident[]>(CACHE_KEYS.incidents);
+    const cached = await cacheGetStale<Incident[]>(CACHE_KEYS.INCIDENTS);
     if (cached) return cached;
     throw err;
   }
@@ -498,7 +498,7 @@ export default function IncidentsScreen() {
               onEscalate={handleEscalate}
               onAssign={handleAssign}
               onDismiss={handleDismiss}
-              onPress={(inc) => router.push(`/incident/${inc.id}`)}
+              onPress={(inc) => router.push(`/incident/${ inc.id }` as any)}
               onLongPress={handleLongPress}
               colors={colors}
             />

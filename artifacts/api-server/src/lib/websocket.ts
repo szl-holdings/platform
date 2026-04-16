@@ -410,8 +410,8 @@ export function initWebSocket(server: Server): void {
           const missed = getMessagesSince(msg.channel, msg.sinceSeq, 100);
           ws.send(JSON.stringify({ type: "catchup_response", channel: msg.channel, messages: missed }));
 
-        } else if (msg.type === "crdt:subscribe" && (msg as { room?: string }).room) {
-          const room = (msg as { room: string }).room;
+        } else if (msg.type === "crdt:subscribe" && (msg as unknown as { room?: string }).room) {
+          const room = (msg as unknown as { room: string }).room;
           client.crdtRooms.add(room);
           addCrdtRoom(clientId, room);
           if (!client.channels.has(CRDT_SYNC_CHANNEL)) {
@@ -420,8 +420,8 @@ export function initWebSocket(server: Server): void {
           ws.send(JSON.stringify({ type: "crdt:subscribed", room, timestamp: Date.now() }));
           logger.debug({ clientId, room }, "[crdt] Client subscribed to CRDT room");
 
-        } else if (msg.type === "crdt:unsubscribe" && (msg as { room?: string }).room) {
-          const room = (msg as { room: string }).room;
+        } else if (msg.type === "crdt:unsubscribe" && (msg as unknown as { room?: string }).room) {
+          const room = (msg as unknown as { room: string }).room;
           client.crdtRooms.delete(room);
           const roomSet = crdtRoomClients.get(room);
           if (roomSet) {

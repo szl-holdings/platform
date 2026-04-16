@@ -39,7 +39,7 @@ interface SlidingWindowOptions {
 
 let tableEnsured = false;
 
-async function ensureTable(client: import("pg").PoolClient): Promise<void> {
+async function ensureTable(client: any): Promise<void> {
   if (tableEnsured) return;
   await client.query(`
     CREATE TABLE IF NOT EXISTS rate_limit_log (

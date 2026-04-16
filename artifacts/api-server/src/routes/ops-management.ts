@@ -371,12 +371,12 @@ router.post("/ops/incidents", validateBody(createIncidentSchema), async (req, re
     const result = await pool.query<{ id: number }>(
       `INSERT INTO platform_incidents (title, status, severity, affected_services, description, assignee, posted_by)
        VALUES ($1, 'open', $2, $3, $4, $5, $6) RETURNING id`,
-      [title, severity, affectedServices, description, assignee ?? null, user?.name ?? user?.email ?? "System"]
+      [title, severity, affectedServices, description, assignee ?? null, user?.displayName ?? user?.email ?? "System"]
     );
     const id = result.rows[0]!.id;
     await pool.query(
       `INSERT INTO platform_incident_updates (incident_id, message, status, author) VALUES ($1, $2, 'open', $3)`,
-      [id, `Incident opened: ${description}`, user?.name ?? "System"]
+      [id, `Incident opened: ${description}`, user?.displayName ?? "System"]
     );
     res.json({ ok: true, id });
   } catch (err) {
@@ -386,7 +386,7 @@ router.post("/ops/incidents", validateBody(createIncidentSchema), async (req, re
 });
 
 router.get("/ops/incidents/:id", async (req, res) => {
-  const id = parseInt(req.params["id"]!);
+  const id = parseInt(req.params["id"] as string);
   try {
     const [incResult, updatesResult] = await Promise.all([
       pool.query(`SELECT * FROM platform_incidents WHERE id = $1`, [id]),
@@ -410,10 +410,10 @@ const updateIncidentSchema = z.object({
 });
 
 router.patch("/ops/incidents/:id", validateBody(updateIncidentSchema), async (req, res) => {
-  const id = parseInt(req.params["id"]!);
+  const id = parseInt(req.params["id"] as string);
   const { status, message, assignee, postmortem, severity, affectedServices } = req.body as z.infer<typeof updateIncidentSchema>;
   const user = req.user;
-  const actor = user?.name ?? user?.email ?? "System";
+  const actor = user?.displayName ?? user?.email ?? "System";
   try {
     // Fetch current incident to validate state transitions
     const current = await pool.query(`SELECT status, assignee FROM platform_incidents WHERE id = $1`, [id]);
@@ -486,7 +486,7 @@ router.patch("/ops/incidents/:id", validateBody(updateIncidentSchema), async (re
 });
 
 router.delete("/ops/incidents/:id", async (req, res) => {
-  const id = parseInt(req.params["id"]!);
+  const id = parseInt(req.params["id"] as string);
   try {
     await pool.query(`DELETE FROM platform_incidents WHERE id = $1`, [id]);
     res.json({ ok: true });
@@ -538,7 +538,7 @@ router.post("/ops/alert-rules", validateBody(alertRuleSchema), async (req, res) 
 });
 
 router.patch("/ops/alert-rules/:id", async (req, res) => {
-  const id = parseInt(req.params["id"]!);
+  const id = parseInt(req.params["id"] as string);
   const b = req.body as Partial<z.infer<typeof alertRuleSchema>>;
   try {
     const sets: string[] = ["updated_at = NOW()"];
@@ -564,7 +564,7 @@ router.patch("/ops/alert-rules/:id", async (req, res) => {
 });
 
 router.delete("/ops/alert-rules/:id", async (req, res) => {
-  const id = parseInt(req.params["id"]!);
+  const id = parseInt(req.params["id"] as string);
   try {
     await pool.query(`DELETE FROM platform_alert_rules WHERE id = $1`, [id]);
     res.json({ ok: true });
@@ -589,12 +589,12 @@ router.get("/ops/alert-events", async (req, res) => {
 });
 
 router.post("/ops/alert-events/:id/acknowledge", async (req, res) => {
-  const id = parseInt(req.params["id"]!);
+  const id = parseInt(req.params["id"] as string);
   const user = req.user;
   try {
     await pool.query(
       `UPDATE platform_alert_events SET acknowledged_at = NOW(), acknowledged_by = $1, status = 'acknowledged' WHERE id = $2`,
-      [user?.name ?? "System", id]
+      [user?.displayName ?? "System", id]
     );
     res.json({ ok: true });
   } catch (err) {
@@ -747,7 +747,7 @@ router.get("/ops/runbooks", async (req, res) => {
 });
 
 router.get("/ops/runbooks/:id", async (req, res) => {
-  const id = parseInt(req.params["id"]!);
+  const id = parseInt(req.params["id"] as string);
   try {
     const result = await pool.query(`SELECT * FROM platform_runbooks WHERE id = $1`, [id]);
     if (!result.rows[0]) { res.status(404).json({ error: "Runbook not found" }); return; }
@@ -777,7 +777,7 @@ router.post("/ops/runbooks", validateBody(runbookSchema), async (req, res) => {
     const result = await pool.query<{ id: number }>(
       `INSERT INTO platform_runbooks (title, description, category, content, tags, alert_rule_ids, incident_categories, affected_services, severity, author)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id`,
-      [b.title, b.description ?? null, b.category, b.content, b.tags, b.alertRuleIds, b.incidentCategories, b.affectedServices, b.severity, b.author ?? user?.name ?? "System"]
+      [b.title, b.description ?? null, b.category, b.content, b.tags, b.alertRuleIds, b.incidentCategories, b.affectedServices, b.severity, b.author ?? user?.displayName ?? "System"]
     );
     res.json({ ok: true, id: result.rows[0]!.id });
   } catch (err) {
@@ -786,7 +786,7 @@ router.post("/ops/runbooks", validateBody(runbookSchema), async (req, res) => {
 });
 
 router.patch("/ops/runbooks/:id", async (req, res) => {
-  const id = parseInt(req.params["id"]!);
+  const id = parseInt(req.params["id"] as string);
   const b = req.body as Partial<z.infer<typeof runbookSchema>> & { isActive?: boolean };
   try {
     const sets: string[] = ["updated_at = NOW()", "version = version + 1"];
@@ -811,7 +811,7 @@ router.patch("/ops/runbooks/:id", async (req, res) => {
 });
 
 router.delete("/ops/runbooks/:id", async (req, res) => {
-  const id = parseInt(req.params["id"]!);
+  const id = parseInt(req.params["id"] as string);
   try {
     await pool.query(`DELETE FROM platform_runbooks WHERE id = $1`, [id]);
     res.json({ ok: true });
@@ -889,7 +889,7 @@ router.post("/ops/service-deps", async (req, res) => {
 });
 
 router.delete("/ops/service-deps/:id", async (req, res) => {
-  const id = parseInt(req.params["id"]!);
+  const id = parseInt(req.params["id"] as string);
   try {
     await pool.query(`DELETE FROM platform_service_deps WHERE id = $1`, [id]);
     res.json({ ok: true });

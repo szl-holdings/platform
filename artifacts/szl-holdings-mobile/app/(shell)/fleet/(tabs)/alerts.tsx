@@ -44,7 +44,7 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-function AlertCard({ alert, onAcknowledge, isAcknowledging }: { alert: FleetException; onAcknowledge?: (id: number) => void; isAcknowledging?: boolean }) {
+function AlertCard({ alert, onAcknowledge, isAcknowledging }: { alert: FleetException; onAcknowledge?: (id: string) => void; isAcknowledging?: boolean }) {
   const colors = useColors();
   const sc = SEVERITY_COLORS[alert.severity] || colors.textFaint;
   const iconName = featherIcon(EXCEPTION_ICON_MAP[alert.exceptionType] ?? "alert-circle");
@@ -91,7 +91,7 @@ function AlertCard({ alert, onAcknowledge, isAcknowledging }: { alert: FleetExce
           )}
         </View>
         <View style={styles.cardFooterRight}>
-          <Text style={[styles.timeText, { color: colors.textFaint }]}>{timeAgo(alert.detectedAt)}</Text>
+          <Text style={[styles.timeText, { color: colors.textFaint }]}>{timeAgo(alert.detectedAt ?? "")}</Text>
           {onAcknowledge && (
             <TouchableOpacity
               onPress={() => onAcknowledge(alert.id)}
@@ -117,7 +117,7 @@ export default function AlertsScreen() {
   const syncEngine = useSyncEngine();
 
   const acknowledgeAlert = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       const base = process.env.EXPO_PUBLIC_DOMAIN
         ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
         : "/api";
@@ -143,7 +143,7 @@ export default function AlertsScreen() {
       await queryClient.cancelQueries({ queryKey: ["fleet-exceptions-mobile"] });
       const prev = queryClient.getQueryData<FleetException[]>(["fleet-exceptions-mobile"]);
       queryClient.setQueryData<FleetException[]>(["fleet-exceptions-mobile"], old =>
-        (old ?? []).filter(a => a.id !== id)
+        (old ?? []).filter(a => String(a.id) !== String(id))
       );
       return { prev };
     },
@@ -161,11 +161,11 @@ export default function AlertsScreen() {
     queryKey: ["fleet-exceptions-mobile"],
     queryFn: async () => {
       try {
-        const data = await api.exceptions({ status: "active" });
-        await cacheSet(CACHE_KEYS.alerts, data);
+        const data = await api.getExceptions();
+        await cacheSet(CACHE_KEYS.ALERTS, data);
         return data;
       } catch {
-        return (await cacheGetStale<FleetException[]>(CACHE_KEYS.alerts)) ?? [];
+        return (await cacheGetStale<FleetException[]>(CACHE_KEYS.ALERTS)) ?? [];
       }
     },
     staleTime: 30_000,
@@ -173,7 +173,7 @@ export default function AlertsScreen() {
   });
 
   useEffect(() => {
-    cacheGetStale<FleetException[]>(CACHE_KEYS.alerts).then(d => { if (d) setCachedAlerts(d); });
+    cacheGetStale<FleetException[]>(CACHE_KEYS.ALERTS).then(d => { if (d) setCachedAlerts(d); });
   }, []);
 
   useEffect(() => {

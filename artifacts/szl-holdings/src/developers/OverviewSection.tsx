@@ -3,8 +3,8 @@ import { CodeBlock, LanguageTabs, SectionHeader, SubSectionHeader, Callout, Inli
 
 export function OverviewSection({ scrollTo }: { scrollTo: (id: string) => void }) {
   return (
-          {/* ── Overview ── */}
           <section>
+          {/* ── Overview ── */}
             <SectionHeader
               id="overview"
               title="Platform API Overview"

@@ -72,7 +72,6 @@ export function usePushNotifications(): PushNotificationState {
       requestPermission();
     }
   // requestPermission is stable (useCallback with no deps), so this is safe
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   // Shared base manages listeners; registration is handled manually via requestPermission

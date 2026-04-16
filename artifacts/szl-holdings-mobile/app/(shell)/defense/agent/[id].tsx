@@ -10,7 +10,7 @@ import { useLocalSearchParams, router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { useQuery } from "@tanstack/react-query";
 import { useColors } from "@/hooks/useColors";
-import { apiFetch } from "@/lib/apiClient";
+import { apiFetch, apiFetchRaw } from "@/lib/apiClient";
 
 interface AgentDetail {
   id: string | number;
@@ -72,7 +72,7 @@ export default function AgentDetailScreen() {
   const { data: agent, isLoading: agentLoading, isError: agentError, refetch: refetchAgent } = useQuery<AgentDetail>({
     queryKey: ["alloy-agent", id],
     queryFn: async () => {
-      const res = await apiFetch(`/api/alloy/agents/${id}`);
+      const res = await apiFetchRaw(`/api/alloy/agents/${id}`);
       if (!res.ok) throw new Error("Failed to load agent");
       const json = await res.json() as { data?: AgentDetail } | AgentDetail;
       return (json as { data?: AgentDetail }).data ?? json as AgentDetail;
@@ -84,7 +84,7 @@ export default function AgentDetailScreen() {
   const { data: runs, isLoading: runsLoading, refetch: refetchRuns } = useQuery<AgentRun[]>({
     queryKey: ["alloy-agent-runs", id],
     queryFn: async () => {
-      const res = await apiFetch(`/api/alloy/agents/${id}/runs?limit=10`);
+      const res = await apiFetchRaw(`/api/alloy/agents/${id}/runs?limit=10`);
       if (!res.ok) throw new Error("Failed to load runs");
       const json = await res.json() as { data?: AgentRun[] } | AgentRun[];
       return Array.isArray(json) ? json : ((json as { data?: AgentRun[] }).data ?? []);

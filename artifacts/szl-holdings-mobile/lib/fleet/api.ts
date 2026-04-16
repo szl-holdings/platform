@@ -8,6 +8,12 @@ export const CACHE_KEYS = {
   ALERTS: "fleet_cache_alerts",
   VOYAGE_ECONOMICS: "fleet_cache_voyage_economics",
   POSITIONS: "fleet_cache_positions",
+  ECONOMICS: "fleet_cache_economics",
+  FLEET: "fleet_cache_fleet",
+  INCIDENTS: "fleet_cache_incidents",
+  FINDINGS: "fleet_cache_findings",
+  SIGNALS: "fleet_cache_signals",
+  EXCEPTIONS: "fleet_cache_exceptions",
 } as const;
 
 export interface Vessel {
@@ -20,6 +26,8 @@ export interface Vessel {
   status: "underway" | "anchored" | "moored" | "drifting" | "unknown";
   lat: number;
   lon: number;
+  latitude?: string;
+  longitude?: string;
   speed: number;
   course: number;
   heading?: number;
@@ -37,6 +45,7 @@ export interface FleetException {
   vesselId: string;
   vesselName: string;
   type: "speed" | "route_deviation" | "zone_entry" | "communication_loss" | "ais_gap" | "weather" | "other";
+  exceptionType: "speed" | "route_deviation" | "zone_entry" | "communication_loss" | "ais_gap" | "weather" | "other";
   severity: "critical" | "high" | "medium" | "low";
   title: string;
   description: string;
@@ -45,6 +54,8 @@ export interface FleetException {
   createdAt: string;
   resolvedAt?: string;
   status: "active" | "acknowledged" | "resolved";
+  estimatedImpactUsd?: string;
+  detectedAt?: string;
 }
 
 export interface VesselDetail extends Vessel {
@@ -63,10 +74,13 @@ export interface VesselDetail extends Vessel {
 }
 
 export interface VoyageEconomics {
+  id?: string;
   vesselId: string;
   vesselName: string;
   voyageId: string;
+  voyageRef?: string;
   origin: string;
+  originPort?: string;
   destination: string;
   departureDate: string;
   estimatedArrival: string;
@@ -74,10 +88,18 @@ export interface VoyageEconomics {
   cargoTons: number;
   freightRate: number;
   estimatedRevenue: number;
+  grossRevenue?: number;
   estimatedCosts: number;
+  totalCostsUsd?: number;
   estimatedProfit: number;
+  netMarginUsd?: number;
+  marginPct?: number;
+  tcePerDay?: number;
+  fuelCostUsd?: number;
+  portCostsUsd?: number;
   fuelConsumption: number;
   distanceNm: number;
+  status?: string;
 }
 
 async function getHeaders(token?: string | null): Promise<Record<string, string>> {
@@ -112,6 +134,20 @@ export const api = {
     const headers = await getHeaders(token);
     const res = await fetch(`${getApiBase()}/api/vessels/${vesselId}/economics`, { headers });
     if (!res.ok) throw new Error("Failed to fetch voyage economics");
+    return res.json();
+  },
+
+  async voyageEconomics(token?: string | null): Promise<VoyageEconomics[]> {
+    const headers = await getHeaders(token);
+    const res = await fetch(`${getApiBase()}/api/vessels/economics`, { headers });
+    if (!res.ok) throw new Error("Failed to fetch voyage economics");
+    return res.json();
+  },
+
+  async economicsAnalytics(token?: string | null): Promise<Record<string, unknown>> {
+    const headers = await getHeaders(token);
+    const res = await fetch(`${getApiBase()}/api/vessels/economics/analytics`, { headers });
+    if (!res.ok) throw new Error("Failed to fetch economics analytics");
     return res.json();
   },
 

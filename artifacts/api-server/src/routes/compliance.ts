@@ -126,8 +126,8 @@ router.get("/compliance/suitability", authMiddleware(), async (req, res) => {
   try {
     const { status, advisorId, limit, offset } = req.query;
     const conditions = [];
-    if (status) conditions.push(eq(complianceSuitabilityTable.status, status as string));
-    if (advisorId) conditions.push(eq(complianceSuitabilityTable.advisorId, advisorId as string));
+    if (status) conditions.push(eq(complianceSuitabilityTable.status, status as any));
+    if (advisorId) conditions.push(eq(complianceSuitabilityTable.advisorId, advisorId as any));
 
     const lim = Math.min(Number(limit ?? 50), 200);
     const off = Number(offset ?? 0);
@@ -205,7 +205,7 @@ router.get("/compliance/archival", authMiddleware(), async (req, res) => {
   try {
     const { type, limit, offset } = req.query;
     const conditions = [];
-    if (type) conditions.push(eq(complianceArchivalTable.communicationType, type as string));
+    if (type) conditions.push(eq(complianceArchivalTable.communicationType, type as any));
 
     const lim = Math.min(Number(limit ?? 50), 200);
     const off = Number(offset ?? 0);
@@ -259,7 +259,7 @@ router.post("/compliance/archival", authMiddleware({ required: true }), async (r
       prevHash,
       contentHash,
       communicationType: body.communicationType,
-      participants: body.participants as string[],
+      participants: body.participants as unknown as string[],
       subject: body.subject ?? null,
       contentSummary: body.contentSummary ?? null,
       contentRef: body.contentRef ?? null,
@@ -279,9 +279,9 @@ router.get("/compliance/supervision", authMiddleware(), async (req, res) => {
   try {
     const { status, priority, category, limit, offset } = req.query;
     const conditions = [];
-    if (status) conditions.push(eq(complianceSupervisionQueueTable.status, status as string));
-    if (priority) conditions.push(eq(complianceSupervisionQueueTable.priority, priority as string));
-    if (category) conditions.push(eq(complianceSupervisionQueueTable.category, category as string));
+    if (status) conditions.push(eq(complianceSupervisionQueueTable.status, status as any));
+    if (priority) conditions.push(eq(complianceSupervisionQueueTable.priority, priority as any));
+    if (category) conditions.push(eq(complianceSupervisionQueueTable.category, category as any));
 
     const lim = Math.min(Number(limit ?? 50), 200);
     const off = Number(offset ?? 0);
@@ -324,7 +324,7 @@ router.post("/compliance/supervision", authMiddleware({ required: true }), async
       assignedToName: body.assignedToName ?? null,
       submittedById: body.submittedById ?? null,
       submittedByName: body.submittedByName ?? null,
-      relatedEntities: (body.relatedEntities ?? []) as string[],
+      relatedEntities: (body.relatedEntities ?? []) as unknown as string[],
       riskScore: body.riskScore ? String(body.riskScore) : null,
       dueAt: body.dueAt ? new Date(body.dueAt) : null,
       escalationLevel: 0,
@@ -398,8 +398,8 @@ router.get("/compliance/calendar", authMiddleware(), async (req, res) => {
   try {
     const { status, eventType, from, to } = req.query;
     const conditions = [];
-    if (status) conditions.push(eq(complianceCalendarTable.status, status as string));
-    if (eventType) conditions.push(eq(complianceCalendarTable.eventType, eventType as string));
+    if (status) conditions.push(eq(complianceCalendarTable.status, status as any));
+    if (eventType) conditions.push(eq(complianceCalendarTable.eventType, eventType as any));
     if (from) conditions.push(gte(complianceCalendarTable.dueAt, new Date(from as string)));
     if (to) conditions.push(lte(complianceCalendarTable.dueAt, new Date(to as string)));
 
@@ -456,7 +456,7 @@ router.get("/compliance/market-context", authMiddleware(), async (_req, res) => 
   try {
     const { services } = await import("@szl-holdings/services");
     const fredService = services.fred as unknown as { getEconomicSnapshot?: () => Promise<unknown> };
-    const marketService = services.market_data as unknown as { getMarketIndices?: () => Promise<unknown> };
+    const marketService = (services as any).marketData as unknown as { getMarketIndices?: () => Promise<unknown> };
     const [fredSnap, marketIndices] = await Promise.allSettled([
       fredService?.getEconomicSnapshot ? fredService.getEconomicSnapshot() : Promise.resolve(null),
       marketService?.getMarketIndices ? marketService.getMarketIndices() : Promise.resolve(null),

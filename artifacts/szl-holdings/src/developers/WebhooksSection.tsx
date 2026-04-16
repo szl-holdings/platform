@@ -4,6 +4,8 @@ import { GQL_QUERY_VESSELS, GQL_QUERY_PROJECTS, GQL_MUTATION_SIGNAL, WEBHOOK_EVE
 
 export function WebhooksSection() {
   return (
+          <section>
+            <SectionHeader
               id="webhooks"
               title="Webhooks"
               subtitle="Subscribe to platform events and receive real-time HTTPS notifications to your endpoint."
@@ -184,8 +186,5 @@ def handle_webhook():
               />
             </div>
           </section>
-
-          {/* ── Code Samples ── */}
-          <section>
   );
 }

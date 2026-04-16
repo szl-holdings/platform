@@ -50,6 +50,27 @@
     },
     {
       "path": "./lib/prism-bus"
+    },
+    {
+      "path": "./lib/covenant-policy"
+    },
+    {
+      "path": "./lib/crdt-sync"
+    },
+    {
+      "path": "./lib/proof-chain"
+    },
+    {
+      "path": "./lib/worldline"
+    },
+    {
+      "path": "./lib/receipt-graph"
+    },
+    {
+      "path": "./lib/pulse-evals"
+    },
+    {
+      "path": "./lib/intelligence-feeds"
     }
   ]
 }

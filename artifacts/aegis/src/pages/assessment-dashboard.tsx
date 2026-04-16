@@ -21,29 +21,6 @@ const statusColors: Record<string, string> = {
   completed: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   archived: "bg-blue-500/10 text-blue-400 border-blue-500/20",
 };
-: { value: number; duration?: number }) {
-  const [display, setDisplay] = useState(0);
-  const ref = useRef<number>(0);
-  useEffect(() => {
-    const start = ref.current;
-    const diff = value - start;
-    if (diff === 0) return;
-    let cancelled = false;
-    const startTime = performance.now();
-    const step = (now: number) => {
-      if (cancelled) return;
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplay(Math.round(start + diff * eased));
-      if (progress < 1) requestAnimationFrame(step);
-      else ref.current = value;
-    };
-    requestAnimationFrame(step);
-    return () => { cancelled = true; };
-  }, [value, duration]);
-  return <>{display}</>;
-}
 
 function AnimatedProgress({ value, className }: { value: number; className?: string }) {
   const [current, setCurrent] = useState(0);

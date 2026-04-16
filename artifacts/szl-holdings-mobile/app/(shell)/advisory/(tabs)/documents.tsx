@@ -167,8 +167,8 @@ export default function DocumentsScreen() {
           copyToCacheDirectory: true,
           multiple: false,
         });
-        if (!result.canceled && result.assets[0]) {
-          handleUpload(fromDocumentPickerResult(result.assets[0]));
+        if (!result.canceled && result.assets![0]) {
+          handleUpload(fromDocumentPickerResult(result.assets![0]));
         }
       }).catch(() => {});
     }

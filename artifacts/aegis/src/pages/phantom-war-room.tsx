@@ -29,7 +29,7 @@ interface AttackStep {
   technique: string;
   description: string;
   asset: string;
-  severity: "critical" | "high" | "medium";
+  severity: "critical" | "high" | "medium" | "low";
   detected: boolean;
   elapsed: number;
 }

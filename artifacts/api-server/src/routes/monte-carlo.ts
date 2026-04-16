@@ -85,7 +85,7 @@ router.get("/monte-carlo/scenarios", authMiddleware({ required: false }), (_req,
 
 router.get("/monte-carlo/scenarios/:id", authMiddleware({ required: false }), (req, res) => {
   try {
-    const id = decodeURIComponent(req.params.id ?? "");
+    const id = decodeURIComponent(req.params.id as string ?? "");
     const scenario = getScenario(id);
     if (!scenario) { sendNotFound(res, "Scenario"); return; }
     const variants = getVariants(id);
@@ -193,7 +193,7 @@ router.get("/monte-carlo/jobs", authMiddleware(), (req, res) => {
 
 router.get("/monte-carlo/jobs/:id", authMiddleware(), (req, res) => {
   try {
-    const job = getJob(req.params.id ?? "");
+    const job = getJob(req.params.id as string ?? "");
     if (!job) { sendNotFound(res, "Job"); return; }
     if (!canAccessJob(job, req)) { res.status(403).json({ error: "Forbidden" }); return; }
 
@@ -235,7 +235,7 @@ router.get("/monte-carlo/jobs/:id", authMiddleware(), (req, res) => {
 });
 
 router.get("/monte-carlo/jobs/:id/stream", authMiddleware(), (req, res: Response) => {
-  const job = getJob(req.params.id ?? "");
+  const job = getJob(req.params.id as string ?? "");
   if (!job) { res.status(404).json({ error: "Job not found" }); return; }
 
   const requestingUserId = req.user ? String(req.user.id) : null;

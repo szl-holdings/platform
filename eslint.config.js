@@ -252,6 +252,8 @@ module.exports = [
       'docs/',
       'eslint.config.js',
       'lib/services/connectors/',
+      'playwright-report/',
+      'test-results/',
     ],
   },
   {

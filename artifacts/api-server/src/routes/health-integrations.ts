@@ -683,9 +683,9 @@ router.get("/integrations/health/test", authMiddleware(), async (_req, res) => {
 
 router.get("/integrations/health/:name", authMiddleware(), async (req, res) => {
   try {
-    const adapter = services.getAdapter(req.params.name);
+    const adapter = services.getAdapter(req.params.name as string);
     if (!adapter) {
-      res.status(404).json({ error: `Adapter "${req.params.name}" not found` });
+      res.status(404).json({ error: `Adapter "${req.params.name as string}" not found` });
       return;
     }
     const result = await adapter.runHealthCheck();

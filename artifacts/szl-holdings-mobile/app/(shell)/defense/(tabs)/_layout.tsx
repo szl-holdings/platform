@@ -45,12 +45,12 @@ function NativeTabLayout() {
         <Icon sf={{ default: "doc.text", selected: "doc.text.fill" }} />
         <Label>Digest</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="agents" options={{ href: null }} />
-      <NativeTabs.Trigger name="approvals" options={{ href: null }} />
-      <NativeTabs.Trigger name="findings" options={{ href: null }} />
-      <NativeTabs.Trigger name="mitre" options={{ href: null }} />
-      <NativeTabs.Trigger name="mcp-tools" options={{ href: null }} />
-      <NativeTabs.Trigger name="profile" options={{ href: null }} />
+      <NativeTabs.Trigger name="agents" options={{  href: null } as any} />
+      <NativeTabs.Trigger name="approvals" options={{  href: null } as any} />
+      <NativeTabs.Trigger name="findings" options={{  href: null } as any} />
+      <NativeTabs.Trigger name="mitre" options={{  href: null } as any} />
+      <NativeTabs.Trigger name="mcp-tools" options={{  href: null } as any} />
+      <NativeTabs.Trigger name="profile" options={{  href: null } as any} />
     </NativeTabs>
   );
 }
@@ -107,12 +107,12 @@ function ClassicTabLayout() {
             isIOS ? <SymbolView name="doc.text.fill" tintColor={color} size={22} /> : <Feather name="file-text" size={20} color={color} />,
         }}
       />
-      <Tabs.Screen name="agents" options={{ href: null }} />
-      <Tabs.Screen name="approvals" options={{ href: null }} />
-      <Tabs.Screen name="findings" options={{ href: null }} />
-      <Tabs.Screen name="mitre" options={{ href: null }} />
-      <Tabs.Screen name="mcp-tools" options={{ href: null }} />
-      <Tabs.Screen name="profile" options={{ href: null }} />
+      <Tabs.Screen name="agents" options={{  href: null } as any} />
+      <Tabs.Screen name="approvals" options={{  href: null } as any} />
+      <Tabs.Screen name="findings" options={{  href: null } as any} />
+      <Tabs.Screen name="mitre" options={{  href: null } as any} />
+      <Tabs.Screen name="mcp-tools" options={{  href: null } as any} />
+      <Tabs.Screen name="profile" options={{  href: null } as any} />
     </Tabs>
   );
 }

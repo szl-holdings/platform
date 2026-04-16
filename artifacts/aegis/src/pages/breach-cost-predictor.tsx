@@ -371,7 +371,7 @@ export default function BreachCostPredictor() {
               />
               <Bar dataKey="total" radius={[3, 3, 0, 0]}>
                 {EXPOSURE_HISTORY.map((e, idx) => (
-                  <Cell key={e.year} fill={idx === EXPOSURE_HISTORY.length - 1 ? "#ef4444" : "#3b82f6"} fillOpacity={idx === EXPOSURE_HISTORY.length - 1 ? 0.8 : 0.4} />
+                  <Cell key={e.month} fill={idx === EXPOSURE_HISTORY.length - 1 ? "#ef4444" : "#3b82f6"} fillOpacity={idx === EXPOSURE_HISTORY.length - 1 ? 0.8 : 0.4} />
                 ))}
               </Bar>
             </BarChart>

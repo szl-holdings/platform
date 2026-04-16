@@ -34,7 +34,7 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import { useQuery } from "@tanstack/react-query";
 import { useColors } from "@/hooks/useColors";
-import { SectionNav, Section } from "@/components/SectionNav";
+import { SectionNav, Section } from "@/components/founder/SectionNav";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -495,12 +495,12 @@ export default function HomeScreen() {
 
   const handleVentureDetail = (slug: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push({ pathname: "/venture/[slug]", params: { slug } });
+    router.push({ pathname: "/venture/[slug]", params: { slug } } as any);
   };
 
   const handleArticleDetail = (slug: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push({ pathname: "/article/[slug]", params: { slug } });
+    router.push({ pathname: "/article/[slug]", params: { slug } } as any);
   };
 
   const handleContactSubmit = async () => {

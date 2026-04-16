@@ -288,7 +288,7 @@ export class LegalRecordsFeedAdapter extends BaseFeedAdapter {
         relationships.push({
           fromExternalId: caseExternalId,
           toExternalId: prismEntityExternalId,
-          type: "related_to",
+          type: "connected_to",
           strength: "strong",
           metadata: {
             linkType: "court_case_to_prism_matter",

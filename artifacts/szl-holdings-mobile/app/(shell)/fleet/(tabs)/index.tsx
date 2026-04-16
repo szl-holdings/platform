@@ -77,9 +77,9 @@ function WorldMapCanvas({
   onFlyToHandled,
 }: {
   vessels: Vessel[];
-  selectedId: number | null;
+  selectedId: string | null;
   onSelectVessel: (v: Vessel) => void;
-  livePositions: Map<number, VesselPositionUpdate>;
+  livePositions: Map<string, VesselPositionUpdate>;
   routeHistory: RoutePoint[];
   flyToVessel: Vessel | null;
   onFlyToHandled: () => void;
@@ -105,8 +105,8 @@ function WorldMapCanvas({
   useEffect(() => {
     if (!flyToVessel) return;
     const pos = livePositions.get(flyToVessel.id);
-    const lat = pos ? parseFloat(pos.latitude) : parseFloat(flyToVessel.latitude ?? "0");
-    const lon = pos ? parseFloat(pos.longitude) : parseFloat(flyToVessel.longitude ?? "0");
+    const lat = pos ? parseFloat(pos.latitude ?? "0") : parseFloat(flyToVessel.latitude ?? "0");
+    const lon = pos ? parseFloat(pos.longitude ?? "0") : parseFloat(flyToVessel.longitude ?? "0");
     if (isNaN(lat) || isNaN(lon)) {
       runOnJS(onFlyToHandled)();
       return;
@@ -166,8 +166,8 @@ function WorldMapCanvas({
 
     for (const v of vessels) {
       const pos = livePositions.get(v.id);
-      const lat = pos ? parseFloat(pos.latitude) : parseFloat(v.latitude ?? "0");
-      const lon = pos ? parseFloat(pos.longitude) : parseFloat(v.longitude ?? "0");
+      const lat = pos ? parseFloat(pos.latitude ?? "0") : parseFloat(v.latitude ?? "0");
+      const lon = pos ? parseFloat(pos.longitude ?? "0") : parseFloat(v.longitude ?? "0");
       if (isNaN(lat) || isNaN(lon)) continue;
       const { x, y } = latLonToXY(lat, lon);
       const dist = Math.sqrt((x - svgX) ** 2 + (y - svgY) ** 2);
@@ -200,8 +200,8 @@ function WorldMapCanvas({
 
   const mappable = vessels.filter(v => {
     const pos = livePositions.get(v.id);
-    const lat = pos ? parseFloat(pos.latitude) : (v.latitude ? parseFloat(v.latitude) : null);
-    const lon = pos ? parseFloat(pos.longitude) : (v.longitude ? parseFloat(v.longitude) : null);
+    const lat = pos ? parseFloat(pos.latitude ?? "0") : (v.latitude ? parseFloat(v.latitude ?? "0") : null);
+    const lon = pos ? parseFloat(pos.longitude ?? "0") : (v.longitude ? parseFloat(v.longitude ?? "0") : null);
     return lat !== null && lon !== null && !isNaN(lat) && !isNaN(lon);
   });
 
@@ -241,15 +241,15 @@ function WorldMapCanvas({
 
               {mappable.map(v => {
                 const pos = livePositions.get(v.id);
-                const lat = pos ? parseFloat(pos.latitude) : parseFloat(v.latitude ?? "0");
-                const lon = pos ? parseFloat(pos.longitude) : parseFloat(v.longitude ?? "0");
+                const lat = pos ? parseFloat(pos.latitude ?? "0") : parseFloat(v.latitude ?? "0");
+                const lon = pos ? parseFloat(pos.longitude ?? "0") : parseFloat(v.longitude ?? "0");
                 const { x, y } = latLonToXY(lat, lon);
                 const color = STATUS_COLORS[v.status] || colors.textFaint;
                 const isSelected = selectedId === v.id;
-                const isUnderway = v.status === "at_sea";
-                const spd = pos ? parseFloat(pos.speed) : (v.speed ? parseFloat(v.speed) : 0);
+                const isUnderway = v.status === "underway";
+                const spd = pos ? Number(pos.speed) : (v.speed ? Number(v.speed) : 0);
                 const hdg = pos ? pos.heading : (v.heading ?? 0);
-                const radians = (hdg - 90) * (Math.PI / 180);
+                const radians = ((hdg ?? 0) - 90) * (Math.PI / 180);
                 const trailLen = Math.min(spd * 3, 20);
                 const tx = x - Math.cos(radians) * trailLen;
                 const ty = y - Math.sin(radians) * trailLen;
@@ -270,7 +270,7 @@ function WorldMapCanvas({
                       <Circle cx={x} cy={y} r={16} fill="transparent" stroke={color} strokeWidth={0.8} strokeOpacity={0.4} />
                     )}
                     <Circle cx={x} cy={y} r={isSelected ? 5 : 4} fill={color} />
-                    {(v.activeExceptions ?? 0) > 0 && (
+                    {((v as any).activeExceptions ?? 0) > 0 && (
                       <Circle cx={x + 5} cy={y - 5} r={3} fill="#ef4444" />
                     )}
                   </G>
@@ -316,7 +316,7 @@ function VesselCallout({ vessel, onPress, livePosition }: {
   const colors = useColors();
   const sc = STATUS_COLORS[vessel.status] || colors.textFaint;
   const sl = STATUS_LABELS[vessel.status] || vessel.status;
-  const spd = livePosition ? parseFloat(livePosition.speed) : (vessel.speed ? parseFloat(vessel.speed) : null);
+  const spd = livePosition ? Number(livePosition.speed) : (vessel.speed ? Number(vessel.speed) : null);
   const dest = vessel.destination;
 
   return (
@@ -395,21 +395,21 @@ export default function FleetMapScreen() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [refreshing, setRefreshing] = useState(false);
   const [wsConnected, setWsConnected] = useState(false);
-  const livePositions = useRef(new Map<number, VesselPositionUpdate>()).current;
+  const livePositions = useRef(new Map<string, VesselPositionUpdate>()).current;
   const [positionVersion, setPositionVersion] = useState(0);
   const [routeHistory, setRouteHistory] = useState<RoutePoint[]>([]);
   const [flyToVessel, setFlyToVessel] = useState<Vessel | null>(null);
-  const selectedIdRef = useRef<number | null>(null);
+  const selectedIdRef = useRef<string | null>(null);
 
   const { data: vessels = [], isLoading, refetch } = useQuery({
     queryKey: ["vessels-roster-map"],
     queryFn: async () => {
       try {
-        const data = await api.roster();
-        await cacheSet(CACHE_KEYS.fleet, data);
+        const data = await api.getVessels();
+        await cacheSet(CACHE_KEYS.VESSELS, data);
         return data;
       } catch (e) {
-        return (await cacheGetStale<Vessel[]>(CACHE_KEYS.fleet)) ?? [];
+        return (await cacheGetStale<Vessel[]>(CACHE_KEYS.VESSELS)) ?? [];
       }
     },
     staleTime: 60_000,
@@ -418,7 +418,7 @@ export default function FleetMapScreen() {
 
   const { data: summary } = useQuery({
     queryKey: ["live-fleet-summary"],
-    queryFn: () => api.liveFleetSummary(),
+    queryFn: () => (api as any).liveFleetSummary(),
     staleTime: 60_000,
     refetchInterval: 120_000,
   });
@@ -431,8 +431,8 @@ export default function FleetMapScreen() {
       livePositions.set(upd.vesselId, upd);
       setPositionVersion(v => v + 1);
       if (upd.vesselId === selectedIdRef.current) {
-        const lat = parseFloat(upd.latitude);
-        const lon = parseFloat(upd.longitude);
+        const lat = parseFloat(upd.latitude ?? "0");
+        const lon = parseFloat(upd.longitude ?? "0");
         if (!isNaN(lat) && !isNaN(lon)) {
           setRouteHistory(prev => {
             const next = [...prev, { lat, lon }];
@@ -550,7 +550,7 @@ export default function FleetMapScreen() {
             <VesselCallout
               vessel={selectedVessel}
               livePosition={livePositions.get(selectedVessel.id)}
-              onPress={() => router.push(`/vessel/${selectedVessel.id}`)}
+              onPress={() => router.push(`/vessel/${ selectedVessel.id }` as any)}
             />
           </View>
         )}
@@ -576,7 +576,7 @@ export default function FleetMapScreen() {
               const sc = STATUS_COLORS[v.status] || colors.textFaint;
               const sl = STATUS_LABELS[v.status] || v.status;
               const pos = livePositions.get(v.id);
-              const spd = pos ? parseFloat(pos.speed) : (v.speed ? parseFloat(v.speed) : null);
+              const spd = pos ? Number(pos.speed) : (v.speed ? Number(v.speed) : null);
               return (
                 <TouchableOpacity
                   key={v.id}
@@ -601,9 +601,9 @@ export default function FleetMapScreen() {
                       <Text style={[styles.listCardSpeed, { color: colors.textFaint }]}>{spd.toFixed(1)} kn</Text>
                     )}
                     {pos && <View style={[styles.liveSmDot, { backgroundColor: colors.green }]} />}
-                    {(v.activeExceptions ?? 0) > 0 && (
+                    {((v as any).activeExceptions ?? 0) > 0 && (
                       <View style={[styles.excBadge, { backgroundColor: colors.redDim }]}>
-                        <Text style={[styles.excText, { color: colors.red }]}>{v.activeExceptions}</Text>
+                        <Text style={[styles.excText, { color: colors.red }]}>{(v as any).activeExceptions}</Text>
                       </View>
                     )}
                   </View>

@@ -204,7 +204,7 @@ export default function FindingsScreen() {
                 style={[styles.findingCard, { backgroundColor: colors.navyLight, borderColor: isCrit ? colors.redBorder : colors.border }]}
                 onPress={() => {
                   Haptics.selectionAsync();
-                  router.push(`/finding/${finding.id}`);
+                  router.push(`/finding/${ finding.id }` as any);
                 }}
               >
                 <View style={[styles.sevBar, { backgroundColor: sevColor }]} />

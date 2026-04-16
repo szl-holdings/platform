@@ -143,7 +143,7 @@ router.get("/matters", authMiddleware(), async (req, res) => {
 router.get("/matters/:matterId", authMiddleware(), async (req, res) => {
   try {
     const orgId = getOrgId(req);
-    const matterId = parseIdParam(req.params.matterId);
+    const matterId = parseIdParam(req.params.matterId as string);
     if (!matterId) return sendBadRequest(res, "Invalid matter ID");
 
     const [matter] = await db.select().from(pcMattersTable)
@@ -180,7 +180,7 @@ router.post("/matters", authMiddleware(), validateBody(createMatterSchema), asyn
       filingDate: filingDate ? new Date(filingDate) : null,
       createdBy: req.user?.id,
       updatedBy: req.user?.id,
-    }).returning();
+    } as any).returning();
 
     await db.insert(pcAuditEventsTable).values({
       orgId, matterId: matter.id, actorId: req.user?.id ?? null,
@@ -195,7 +195,7 @@ router.post("/matters", authMiddleware(), validateBody(createMatterSchema), asyn
 router.patch("/matters/:matterId", authMiddleware(), async (req, res) => {
   try {
     const orgId = getOrgId(req);
-    const matterId = parseIdParam(req.params.matterId);
+    const matterId = parseIdParam(req.params.matterId as string);
     if (!matterId) return sendBadRequest(res, "Invalid matter ID");
 
     const [existing] = await db.select().from(pcMattersTable)
@@ -222,7 +222,7 @@ router.patch("/matters/:matterId", authMiddleware(), async (req, res) => {
 
 router.get("/matters/:matterId/parties", authMiddleware(), async (req, res) => {
   try {
-    const matterId = parseIdParam(req.params.matterId);
+    const matterId = parseIdParam(req.params.matterId as string);
     if (!matterId) return sendBadRequest(res, "Invalid matter ID");
     const parties = await db.select().from(pcPartiesTable).where(eq(pcPartiesTable.matterId, matterId));
     sendSuccess(res, { parties });
@@ -231,19 +231,19 @@ router.get("/matters/:matterId/parties", authMiddleware(), async (req, res) => {
 
 router.post("/matters/:matterId/parties", authMiddleware(), validateBody(addPartySchema), async (req, res) => {
   try {
-    const matterId = parseIdParam(req.params.matterId);
+    const matterId = parseIdParam(req.params.matterId as string);
     if (!matterId) return sendBadRequest(res, "Invalid matter ID");
     const { role, name, email, phone } = req.body as z.infer<typeof addPartySchema>;
     const { organization } = req.body as { organization?: string };
 
-    const [party] = await db.insert(pcPartiesTable).values({ matterId, role, name, organization, email, phone }).returning();
+    const [party] = await db.insert(pcPartiesTable).values({ matterId, role, name, organization, email, phone } as any).returning();
     sendSuccess(res, { party }, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create party"); }
 });
 
 router.get("/matters/:matterId/deadlines", authMiddleware(), async (req, res) => {
   try {
-    const matterId = parseIdParam(req.params.matterId);
+    const matterId = parseIdParam(req.params.matterId as string);
     if (!matterId) return sendBadRequest(res, "Invalid matter ID");
     const deadlines = await db.select().from(pcDeadlinesTable).where(eq(pcDeadlinesTable.matterId, matterId)).orderBy(pcDeadlinesTable.dueDate);
     sendSuccess(res, { deadlines });
@@ -252,7 +252,7 @@ router.get("/matters/:matterId/deadlines", authMiddleware(), async (req, res) =>
 
 router.post("/matters/:matterId/deadlines", authMiddleware(), validateBody(addDeadlineSchema), async (req, res) => {
   try {
-    const matterId = parseIdParam(req.params.matterId);
+    const matterId = parseIdParam(req.params.matterId as string);
     if (!matterId) return sendBadRequest(res, "Invalid matter ID");
     const { title, dueDate, priority } = req.body as z.infer<typeof addDeadlineSchema>;
     const { deadlineType } = req.body as { deadlineType?: string };
@@ -260,7 +260,7 @@ router.post("/matters/:matterId/deadlines", authMiddleware(), validateBody(addDe
     const [deadline] = await db.insert(pcDeadlinesTable).values({
       matterId, title, deadlineType: deadlineType ?? "other",
       dueDate: new Date(dueDate), priority: priority ?? "medium",
-    }).returning();
+    } as any).returning();
 
     await enqueuePrismJob(getOrgId(req), PRISM_JOB_TYPES.DEADLINE_EVALUATE, { matterId, deadlineId: deadline.id });
 
@@ -270,7 +270,7 @@ router.post("/matters/:matterId/deadlines", authMiddleware(), validateBody(addDe
 
 router.get("/matters/:matterId/communications", authMiddleware(), async (req, res) => {
   try {
-    const matterId = parseIdParam(req.params.matterId);
+    const matterId = parseIdParam(req.params.matterId as string);
     if (!matterId) return sendBadRequest(res, "Invalid matter ID");
     const comms = await db.select().from(pcCommunicationsTable).where(eq(pcCommunicationsTable.matterId, matterId)).orderBy(desc(pcCommunicationsTable.sentAt));
     sendSuccess(res, { communications: comms });
@@ -280,7 +280,7 @@ router.get("/matters/:matterId/communications", authMiddleware(), async (req, re
 router.get("/matters/:matterId/documents", authMiddleware(), async (req, res) => {
   try {
     const orgId = getOrgId(req);
-    const matterId = parseIdParam(req.params.matterId);
+    const matterId = parseIdParam(req.params.matterId as string);
     if (!matterId) return sendBadRequest(res, "Invalid matter ID");
     const docs = await getDocumentsForMatter(matterId, orgId);
     sendSuccess(res, { documents: docs });
@@ -289,7 +289,7 @@ router.get("/matters/:matterId/documents", authMiddleware(), async (req, res) =>
 
 router.get("/matters/:matterId/discovery", authMiddleware(), async (req, res) => {
   try {
-    const matterId = parseIdParam(req.params.matterId);
+    const matterId = parseIdParam(req.params.matterId as string);
     if (!matterId) return sendBadRequest(res, "Invalid matter ID");
     const discovery = await db.select().from(pcDiscoveryTable).where(eq(pcDiscoveryTable.matterId, matterId)).orderBy(desc(pcDiscoveryTable.createdAt));
     sendSuccess(res, { discovery });
@@ -298,7 +298,7 @@ router.get("/matters/:matterId/discovery", authMiddleware(), async (req, res) =>
 
 router.get("/matters/:matterId/witnesses", authMiddleware(), async (req, res) => {
   try {
-    const matterId = parseIdParam(req.params.matterId);
+    const matterId = parseIdParam(req.params.matterId as string);
     if (!matterId) return sendBadRequest(res, "Invalid matter ID");
     const witnesses = await db.select().from(pcWitnessesTable).where(eq(pcWitnessesTable.matterId, matterId));
     sendSuccess(res, { witnesses });
@@ -336,7 +336,7 @@ router.post("/approvals", authMiddleware(), validateBody(createApprovalSchema), 
       matterId, requestType, title, description,
       sourceBasis: sourceBasis ?? null,
       requestedBy: req.user?.id ?? null,
-    }).returning();
+    } as any).returning();
 
     await db.insert(pcAuditEventsTable).values({
       orgId, matterId, actorId: req.user?.id ?? null,
@@ -355,7 +355,7 @@ router.post("/approvals", authMiddleware(), validateBody(createApprovalSchema), 
 router.patch("/approvals/:approvalId/resolve", authMiddleware(), async (req, res) => {
   try {
     const orgId = getOrgId(req);
-    const approvalId = parseIdParam(req.params.approvalId);
+    const approvalId = parseIdParam(req.params.approvalId as string);
     if (!approvalId) return sendBadRequest(res, "Invalid approval ID");
     const { decision } = req.body;
     if (!decision || !["approved", "rejected"].includes(decision)) return sendBadRequest(res, "decision must be 'approved' or 'rejected'");
@@ -387,7 +387,7 @@ router.post("/exports", authMiddleware(), validateBody(createExportSchema), asyn
       orgId, matterId: matterId ?? null, exportType, format,
       exportedBy: req.user?.id ?? null,
       status: "pending",
-    }).returning();
+    } as any).returning();
 
     await enqueuePrismJob(orgId, PRISM_JOB_TYPES.EXPORT_GENERATE, {
       exportId: exp.id, matterId, exportType, format,
@@ -414,7 +414,7 @@ router.get("/connectors", authMiddleware(), async (req, res) => {
 router.post("/connectors/:accountId/sync", authMiddleware(), async (req, res) => {
   try {
     const orgId = getOrgId(req);
-    const accountId = parseIdParam(req.params.accountId);
+    const accountId = parseIdParam(req.params.accountId as string);
     if (!accountId) return sendBadRequest(res, "Invalid account ID");
     const syncRunId = await triggerSync(accountId, orgId, { actorId: req.user?.id });
     sendSuccess(res, { syncRunId }, 201);
@@ -423,7 +423,7 @@ router.post("/connectors/:accountId/sync", authMiddleware(), async (req, res) =>
 
 router.get("/connectors/:accountId/history", authMiddleware(), async (req, res) => {
   try {
-    const accountId = parseIdParam(req.params.accountId);
+    const accountId = parseIdParam(req.params.accountId as string);
     if (!accountId) return sendBadRequest(res, "Invalid account ID");
     const history = await getConnectorSyncHistory(accountId);
     sendSuccess(res, { history });
@@ -453,7 +453,7 @@ router.get("/jobs/dead-letter", authMiddleware(), async (req, res) => {
 
 router.post("/jobs/dead-letter/:eventId/replay", authMiddleware(), async (req, res) => {
   try {
-    const eventId = parseIdParam(req.params.eventId);
+    const eventId = parseIdParam(req.params.eventId as string);
     if (!eventId) return sendBadRequest(res, "Invalid event ID");
     const newJobId = await replayDeadLetterEvent(eventId, req.user?.id ?? 0);
     sendSuccess(res, { newJobId }, 201);

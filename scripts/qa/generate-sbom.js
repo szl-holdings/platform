@@ -49,7 +49,7 @@ function parseLockfile() {
 
   // Match quoted package@version entries in the packages section
   // Handles both scoped (@scope/pkg@ver) and unscoped (pkg@ver) packages
-  const pkgRegex = /^  '((?:@[^@'\n]+\/)?[^@'\n]+)@([^'()\n]+)/gm;
+  const pkgRegex = /^ {2}'((?:@[^@'\n]+\/)?[^@'\n]+)@([^'()\n]+)/gm;
   let match;
   while ((match = pkgRegex.exec(inPackagesSection)) !== null) {
     const name = match[1].trim();

@@ -137,7 +137,7 @@ function ComparisonTable() {
                 <td className="py-2 text-muted-foreground">{project?.name}</td>
                 <td className="py-2 text-right font-mono text-foreground">{last.accuracy.toFixed(1)}%</td>
                 <td className="py-2 text-right font-mono text-foreground">{last.loss.toFixed(3)}</td>
-                <td className="py-2 text-right font-mono text-foreground">{last.valAccuracy.toFixed(1)}%</td>
+                <td className="py-2 text-right font-mono text-foreground">{last.valAccuracy != null ? last.valAccuracy.toFixed(1) : "—"}%</td>
                 <td className="py-2 text-right font-mono text-muted-foreground">{exp.metrics.length}</td>
                 <td className="py-2 text-right font-mono text-muted-foreground">{exp.duration}</td>
               </tr>
@@ -181,7 +181,7 @@ export default function Experiments() {
               Project: proj?.name || "",
               Status: e.status,
               Accuracy: last ? `${last.accuracy.toFixed(1)}%` : "",
-              "Val Accuracy": last ? `${last.valAccuracy.toFixed(1)}%` : "",
+              "Val Accuracy": last && last.valAccuracy != null ? `${last.valAccuracy.toFixed(1)}%` : "",
               Loss: last ? last.loss.toFixed(3) : "",
               Epochs: e.metrics.length,
               Duration: e.duration || "",

@@ -21,29 +21,6 @@ function getScoreColor(score: number) {
   if (score < 70) return "text-orange-400";
   return "text-red-400";
 }
-: { value: number }) {
-  const [display, setDisplay] = useState(0);
-  const ref = useRef<number>(0);
-  useEffect(() => {
-    const start = ref.current;
-    const diff = value - start;
-    if (diff === 0) return;
-    let cancelled = false;
-    const startTime = performance.now();
-    const step = (now: number) => {
-      if (cancelled) return;
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / 1000, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplay(Math.round(start + diff * eased));
-      if (progress < 1) requestAnimationFrame(step);
-      else ref.current = value;
-    };
-    requestAnimationFrame(step);
-    return () => { cancelled = true; };
-  }, [value]);
-  return <>{display}</>;
-}
 
 export default function ReportsPage() {
   const { data: assessments = [] } = useQuery({ queryKey: ["assessments"], queryFn: api.assessments.list });

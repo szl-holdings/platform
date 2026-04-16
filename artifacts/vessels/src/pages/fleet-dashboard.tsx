@@ -35,7 +35,7 @@ function getRiskBadge(score: number) {
   if (score >= 31) return { label: "Medium", color: "text-amber-400 bg-amber-400/10 border-amber-400/20" };
   return { label: "Low", color: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" };
 }
-: { value: number; duration?: number }) {
+function AnimatedCounter({ value, duration = 800 }: { value: number; duration?: number }) {
   const [display, setDisplay] = useState(0);
   const ref = useRef<number>(0);
   useEffect(() => {

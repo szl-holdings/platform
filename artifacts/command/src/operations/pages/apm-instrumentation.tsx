@@ -3,13 +3,6 @@ import { Activity, Database, Zap, TrendingUp, Clock, AlertTriangle } from "lucid
 import { cn } from "@lyte/lib/utils";
 import { apiFetch } from "@szl-holdings/shared-ui";
 
-async function apiFetch(path: string) {
-  const res = await fetch(`${API_BASE}${path}`, { credentials: "include" });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const body = await res.json();
-  return body.data ?? body;
-}
-
 interface RouteBreakdown {
   route: string;
   avgTotal: number;
@@ -101,7 +94,7 @@ export default function ApmInstrumentationPage() {
   const load = async () => {
     try {
       setError(null);
-      const data = await apiFetch("/apm/snapshot");
+      const data = await apiFetch<ApmSnapshot>("/apm/snapshot");
       setSnapshot(data);
       setLastRefresh(new Date());
     } catch (err: unknown) {

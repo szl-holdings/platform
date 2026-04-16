@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Activity, GitBranch, Zap, Shield, AlertTriangle, CheckCircle, Clock, TrendingUp, TrendingDown, ChevronRight, ChevronDown, Eye, RefreshCw } from "lucide-react";
 
 const ACCENT = "#ef4444";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const API_BASE: string = (import.meta as any).env?.VITE_API_BASE ?? "";
 
 interface DecisionFork {
   forkId: string;

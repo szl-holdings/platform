@@ -4,6 +4,8 @@ import { GQL_QUERY_VESSELS, GQL_QUERY_PROJECTS, GQL_MUTATION_SIGNAL, WEBHOOK_EVE
 
 export function GraphQLSection() {
   return (
+          <section>
+            <SectionHeader
               id="graphql"
               title="GraphQL"
               badge="schema v1"
@@ -159,8 +161,5 @@ export function GraphQLSection() {
               code={GQL_MUTATION_SIGNAL}
             />
           </section>
-
-          {/* ── Webhooks ── */}
-          <section>
   );
 }

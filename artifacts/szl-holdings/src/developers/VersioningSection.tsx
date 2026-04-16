@@ -3,6 +3,8 @@ import { CodeBlock, LanguageTabs, SectionHeader, SubSectionHeader, Callout, Inli
 
 export function VersioningSection() {
   return (
+          <section>
+            <SectionHeader
               id="versioning"
               title="Versioning Strategy"
               subtitle="The DreamStack API uses a stable-first, additive-change philosophy. Breaking changes require advance notice and a migration path."
@@ -129,10 +131,5 @@ X-API-Warn: "This endpoint is deprecated. Migrate to /api/v2/vessels by 2027-02-
               </div>
             </div>
           </section>
-
-        </main>
-      </div>
-
-      <SiteFooter />
   );
 }

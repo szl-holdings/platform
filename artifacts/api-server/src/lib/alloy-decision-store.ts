@@ -3,7 +3,7 @@ import { logger } from "./logger";
 import type { AlloyDecision } from "@szl-holdings/ai-engine";
 
 
-export async function insertDecision(decision: AlloyDecision, orgId?: number | null): Promise<void> {
+export async function insertDecision(decision: Partial<AlloyDecision> & Record<string, unknown>, orgId?: number | null): Promise<void> {
   await pool.query(
     `INSERT INTO alloy_ai_decisions (
       decision_id, org_id, workflow_id, signal_ids, recommended_action, rationale_summary,

@@ -1,4 +1,4 @@
-import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { usePushNotifications } from "@/hooks/advisory/usePushNotifications";
 import { useEffect } from "react";
 import { useNotifications } from "@/context/NotificationContext";
 

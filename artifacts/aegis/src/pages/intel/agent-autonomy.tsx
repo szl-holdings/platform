@@ -503,6 +503,7 @@ function RagActivityMonitor({ ragData }: { ragData: Record<string, unknown> | nu
 type SelfEventType = "strategy_adjusted" | "performance_flagged" | "human_review_requested" | "confidence_recalibrated" | "skill_adopted" | "fallback_triggered";
 
 interface SelfEvent {
+  id?: string;
   agentId: string;
   eventType: SelfEventType;
   detail: string;

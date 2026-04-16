@@ -22,14 +22,16 @@ import * as SecureStore from "expo-secure-store";
 
 export const BIOMETRIC_PREF_KEY = "szl_biometric_enabled";
 
-interface BiometricLockContextValue {
+export interface BiometricLockContextValue {
   biometricEnabled: boolean;
   setBiometricPreference: (enabled: boolean) => Promise<void>;
+  unlock: () => Promise<boolean>;
 }
 
 const BiometricLockContext = createContext<BiometricLockContextValue>({
   biometricEnabled: false,
   setBiometricPreference: async () => {},
+  unlock: async () => false,
 });
 
 export async function promptBiometric(reason: string): Promise<boolean> {
@@ -141,7 +143,7 @@ export function BiometricLockProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <BiometricLockContext.Provider value={{ biometricEnabled, setBiometricPreference }}>
+    <BiometricLockContext.Provider value={{ biometricEnabled, setBiometricPreference, unlock: async () => { handleUnlock(); return false; } }}>
       {children}
       {locked && <LockScreen onUnlock={handleUnlock} />}
     </BiometricLockContext.Provider>

@@ -58,7 +58,7 @@ const firestormCrudLimit = rateLimit({
 }) as unknown as RequestHandler;
 
 function getFirestormTenantId(req: import("express").Request): string | undefined {
-  const user = (req as Record<string, unknown>).user as { orgs?: Array<{ orgId?: unknown }> } | undefined;
+  const user = (req as unknown as Record<string, unknown>).user as { orgs?: Array<{ orgId?: unknown }> } | undefined;
   return user?.orgs?.[0]?.orgId != null ? String(user.orgs[0].orgId) : undefined;
 }
 
@@ -73,7 +73,7 @@ router.get("/firestorm/scenarios", firestormCrudLimit, authMiddleware(), async (
 
 router.get("/firestorm/scenarios/:id", authMiddleware(), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const [scenario] = await db.select().from(firestormScenariosTable).where(eq(firestormScenariosTable.id, id));
     if (!scenario) { sendNotFound(res, "Scenario"); return; }
     sendSuccess(res, scenario);
@@ -95,7 +95,7 @@ router.post("/firestorm/scenarios", authMiddleware({ required: true }), async (r
 
 router.put("/firestorm/scenarios/:id", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const data = insertFirestormScenarioSchema.partial().parse(req.body);
     const [scenario] = await db.update(firestormScenariosTable).set({ ...data, updatedAt: new Date() }).where(eq(firestormScenariosTable.id, id)).returning();
     if (!scenario) { sendNotFound(res, "Scenario"); return; }
@@ -108,7 +108,7 @@ router.put("/firestorm/scenarios/:id", authMiddleware({ required: true }), async
 
 router.delete("/firestorm/scenarios/:id", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const [scenario] = await db.delete(firestormScenariosTable).where(eq(firestormScenariosTable.id, id)).returning();
     if (!scenario) { sendNotFound(res, "Scenario"); return; }
     sendNoContent(res);
@@ -128,7 +128,7 @@ router.get("/firestorm/assessments", authMiddleware(), async (_req, res) => {
 
 router.get("/firestorm/assessments/:id", authMiddleware(), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const [assessment] = await db.select().from(firestormAssessmentsTable).where(eq(firestormAssessmentsTable.id, id));
     if (!assessment) { sendNotFound(res, "Assessment"); return; }
     sendSuccess(res, assessment);
@@ -149,7 +149,7 @@ router.post("/firestorm/assessments", authMiddleware({ required: true }), async 
 
 router.put("/firestorm/assessments/:id", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const data = insertFirestormAssessmentSchema.partial().parse(req.body);
     const [assessment] = await db.update(firestormAssessmentsTable).set({ ...data, updatedAt: new Date() }).where(eq(firestormAssessmentsTable.id, id)).returning();
     if (!assessment) { sendNotFound(res, "Assessment"); return; }
@@ -161,7 +161,7 @@ router.put("/firestorm/assessments/:id", authMiddleware({ required: true }), asy
 
 router.delete("/firestorm/assessments/:id", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const [assessment] = await db.delete(firestormAssessmentsTable).where(eq(firestormAssessmentsTable.id, id)).returning();
     if (!assessment) { sendNotFound(res, "Assessment"); return; }
     sendNoContent(res);
@@ -205,7 +205,7 @@ router.post("/firestorm/simulations", authMiddleware({ required: true }), async 
 
 router.get("/firestorm/simulations/:id", authMiddleware(), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const [run] = await db.select().from(firestormSimulationRunsTable).where(eq(firestormSimulationRunsTable.id, id));
     if (!run) { sendNotFound(res, "Simulation Run"); return; }
     sendSuccess(res, run);
@@ -229,7 +229,7 @@ router.get("/firestorm/findings", authMiddleware(), async (req, res) => {
 
 router.get("/firestorm/findings/:id", authMiddleware(), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const [finding] = await db.select().from(firestormFindingsTable).where(eq(firestormFindingsTable.id, id));
     if (!finding) { sendNotFound(res, "Finding"); return; }
     sendSuccess(res, finding);
@@ -270,7 +270,7 @@ router.post("/firestorm/findings", authMiddleware({ required: true }), async (re
 
 router.put("/firestorm/findings/:id", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const data = insertFirestormFindingSchema.partial().parse(req.body);
     const [finding] = await db.update(firestormFindingsTable).set({ ...data, updatedAt: new Date() }).where(eq(firestormFindingsTable.id, id)).returning();
     if (!finding) { sendNotFound(res, "Finding"); return; }
@@ -372,7 +372,7 @@ router.get("/firestorm/reports/export-summary", authMiddleware(), async (_req, r
 
 router.get("/firestorm/reports/:assessmentId", authMiddleware(), async (req, res) => {
   try {
-    const assessmentId = parseIdParam(req.params.assessmentId);
+    const assessmentId = parseIdParam(req.params.assessmentId as string);
     const [assessment] = await db.select().from(firestormAssessmentsTable).where(eq(firestormAssessmentsTable.id, assessmentId));
     if (!assessment) { sendNotFound(res, "Assessment"); return; }
 
@@ -417,7 +417,7 @@ router.get("/firestorm/incidents", authMiddleware(), async (_req, res) => {
 
 router.get("/firestorm/incidents/:id", authMiddleware(), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const [incident] = await db.select().from(firestormIncidentsTable).where(eq(firestormIncidentsTable.id, id));
     if (!incident) { sendNotFound(res, "Incident"); return; }
     sendSuccess(res, incident);
@@ -440,7 +440,7 @@ router.post("/firestorm/incidents", authMiddleware({ required: true }), async (r
 
 router.put("/firestorm/incidents/:id", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const data = insertFirestormIncidentSchema.partial().parse(req.body);
 
     const [current] = await db.select().from(firestormIncidentsTable).where(eq(firestormIncidentsTable.id, id));
@@ -486,7 +486,7 @@ router.put("/firestorm/incidents/:id", authMiddleware({ required: true }), async
 
 router.delete("/firestorm/incidents/:id", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const [incident] = await db.delete(firestormIncidentsTable).where(eq(firestormIncidentsTable.id, id)).returning();
     if (!incident) { sendNotFound(res, "Incident"); return; }
     sendNoContent(res);
@@ -520,7 +520,7 @@ router.get("/firestorm/vulnerabilities", authMiddleware(), async (req, res) => {
 
 router.get("/firestorm/vulnerabilities/:id", authMiddleware(), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const [finding] = await db.select().from(firestormFindingsTable).where(eq(firestormFindingsTable.id, id));
     if (!finding) { sendNotFound(res, "Vulnerability"); return; }
     sendSuccess(res, {
@@ -535,7 +535,7 @@ router.get("/firestorm/vulnerabilities/:id", authMiddleware(), async (req, res) 
 
 router.put("/firestorm/vulnerabilities/:id", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const { status, remediationOwner, dueDate, recommendedAction, recommendation } = req.body as {
       status?: string;
       remediationOwner?: string;
@@ -753,7 +753,7 @@ router.post("/firestorm/alerts", authMiddleware({ required: true }), async (req,
 
 router.put("/firestorm/alerts/:id", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const data = insertFirestormAlertSchema.partial().parse(req.body);
     const updates: any = { ...data };
     if (data.status === "acknowledged") updates.acknowledgedAt = new Date();
@@ -1161,7 +1161,7 @@ router.get("/firestorm/assets", authMiddleware(), async (req, res) => {
 
 router.get("/firestorm/assets/:id", authMiddleware(), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const [asset] = await db.select().from(firestormAssetsTable).where(eq(firestormAssetsTable.id, id));
     if (!asset) { sendNotFound(res, "Asset"); return; }
     sendSuccess(res, asset);
@@ -1182,7 +1182,7 @@ router.post("/firestorm/assets", authMiddleware({ required: true }), async (req,
 
 router.put("/firestorm/assets/:id", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const data = insertFirestormAssetSchema.partial().parse(req.body);
     const [asset] = await db.update(firestormAssetsTable).set({ ...data, updatedAt: new Date() }).where(eq(firestormAssetsTable.id, id)).returning();
     if (!asset) { sendNotFound(res, "Asset"); return; }
@@ -1221,7 +1221,7 @@ router.post("/firestorm/workflow-actions", authMiddleware({ required: true }), a
 
 router.patch("/firestorm/workflow-actions/:id", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const { status, notes, assignedTo, completedAt } = req.body;
     const updateData: Record<string, unknown> = { updatedAt: new Date() };
     if (status) updateData.status = status;
@@ -1254,7 +1254,7 @@ router.get("/firestorm/hardening-controls", authMiddleware(), async (req, res) =
 
 router.get("/firestorm/hardening-controls/:id", authMiddleware(), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const [control] = await db.select().from(firestormHardeningControlsTable).where(eq(firestormHardeningControlsTable.id, id));
     if (!control) { sendNotFound(res, "Hardening control"); return; }
     sendSuccess(res, control);
@@ -1265,7 +1265,7 @@ router.get("/firestorm/hardening-controls/:id", authMiddleware(), async (req, re
 
 router.put("/firestorm/hardening-controls/:id", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const { status, owner, recommendedAction, dueDate, notes } = req.body as {
       status?: string;
       owner?: string;
@@ -1382,7 +1382,7 @@ router.get("/firestorm/cases", authMiddleware(), async (req, res) => {
 
 router.get("/firestorm/cases/:id", authMiddleware(), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const [c] = await db.select().from(firestormCasesTable).where(eq(firestormCasesTable.id, id));
     if (!c) { sendNotFound(res, "Case"); return; }
     sendSuccess(res, c);
@@ -1399,7 +1399,7 @@ router.post("/firestorm/cases", authMiddleware({ required: true }), async (req, 
 
 router.patch("/firestorm/cases/:id", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const id = parseIdParam(req.params.id);
+    const id = parseIdParam(req.params.id as string);
     const { status, priority, assignedAnalyst, note, evidenceItem } = req.body;
     const [current] = await db.select().from(firestormCasesTable).where(eq(firestormCasesTable.id, id));
     if (!current) { sendNotFound(res, "Case"); return; }
@@ -1444,7 +1444,7 @@ router.get("/firestorm/mitre-detections", authMiddleware(), async (_req, res) =>
 
 router.get("/firestorm/mitre-detections/:techniqueId", authMiddleware(), async (req, res) => {
   try {
-    const techniqueId = String(req.params.techniqueId);
+    const techniqueId = String(req.params.techniqueId as string);
     const [detection] = await db.select().from(firestormMitreDetectionsTable).where(eq(firestormMitreDetectionsTable.techniqueId, techniqueId));
     if (!detection) { sendNotFound(res, "MITRE detection"); return; }
     const relatedIncidents = detection.relatedIncidentIds?.length
@@ -1456,6 +1456,7 @@ router.get("/firestorm/mitre-detections/:techniqueId", authMiddleware(), async (
 
 router.post("/firestorm/seed", authMiddleware({ required: true }), async (_req, res) => {
   try {
+    // @ts-ignore
     const { seedAegis } = await import("../scripts/seed-aegis.js");
     const result = await seedAegis();
     sendSuccess(res, { message: "Aegis data seeded successfully", result });
@@ -1902,7 +1903,7 @@ router.get("/firestorm/tradecraft/decisions/:objectId", authMiddleware({ require
   try {
     const [decision] = await db.select().from(firestormTradecraftDecisionsTable)
       .where(and(
-        sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId}`,
+        sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId as string}`,
         eq(firestormTradecraftDecisionsTable.tenantId, "default"),
       ));
     if (!decision) { sendNotFound(res, "Tradecraft Decision"); return; }
@@ -2068,7 +2069,7 @@ router.put("/firestorm/tradecraft/decisions/:objectId", authMiddleware({ require
         const [decision] = await db.update(firestormTradecraftDecisionsTable)
           .set({ approvedBy: reviewerName, approvedAt: new Date(), rejectedBy: null, rejectedAt: null, rejectionReason: null, updatedAt: new Date() })
           .where(and(
-            sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId}`,
+            sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId as string}`,
             eq(firestormTradecraftDecisionsTable.tenantId, decisionTenant),
           ))
           .returning();
@@ -2081,7 +2082,7 @@ router.put("/firestorm/tradecraft/decisions/:objectId", authMiddleware({ require
       const [decision] = await db.update(firestormTradecraftDecisionsTable)
         .set({ rejectedBy: reviewerName, rejectedAt: new Date(), approvedBy: null, approvedAt: null, rejectionReason, updatedAt: new Date() })
         .where(and(
-          sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId}`,
+          sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId as string}`,
           eq(firestormTradecraftDecisionsTable.tenantId, decisionTenant),
         ))
         .returning();
@@ -2097,7 +2098,7 @@ router.put("/firestorm/tradecraft/decisions/:objectId", authMiddleware({ require
     const [decision] = await db.update(firestormTradecraftDecisionsTable)
       .set({ ...allowedUpdates, updatedAt: new Date() })
       .where(and(
-        sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId}`,
+        sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId as string}`,
         eq(firestormTradecraftDecisionsTable.tenantId, "default"),
       ))
       .returning();
@@ -2109,7 +2110,7 @@ router.put("/firestorm/tradecraft/decisions/:objectId", authMiddleware({ require
 router.get("/firestorm/tradecraft/case-memory/:caseId", authMiddleware({ required: true }), async (req, res) => {
   try {
     const [memory] = await db.select().from(firestormCaseMemoryTable)
-      .where(sql`${firestormCaseMemoryTable.caseId} = ${req.params.caseId}`);
+      .where(sql`${firestormCaseMemoryTable.caseId} = ${req.params.caseId as string}`);
     if (!memory) { sendNotFound(res, "Case Memory"); return; }
     sendSuccess(res, memory);
   } catch (err) { handleRouteError(res, err, "Failed to get case memory"); }
@@ -2176,7 +2177,7 @@ router.put("/firestorm/tradecraft/case-memory/:caseId", authMiddleware({ require
 
     const [memory] = await db.update(firestormCaseMemoryTable)
       .set(update)
-      .where(sql`${firestormCaseMemoryTable.caseId} = ${req.params.caseId}`)
+      .where(sql`${firestormCaseMemoryTable.caseId} = ${req.params.caseId as string}`)
       .returning();
     if (!memory) { sendNotFound(res, "Case Memory"); return; }
     sendSuccess(res, memory);
@@ -2262,7 +2263,7 @@ router.put("/firestorm/tradecraft/notebook/:noteId", authMiddleware({ required: 
     const data = insertFirestormAnalystNotebookSchema.partial().parse(body);
     const [note] = await db.update(firestormAnalystNotebookTable)
       .set({ ...data, updatedAt: new Date() })
-      .where(sql`${firestormAnalystNotebookTable.noteId} = ${req.params.noteId}`)
+      .where(sql`${firestormAnalystNotebookTable.noteId} = ${req.params.noteId as string}`)
       .returning();
     if (!note) { sendNotFound(res, "Analyst Note"); return; }
     sendSuccess(res, note);
@@ -2272,7 +2273,7 @@ router.put("/firestorm/tradecraft/notebook/:noteId", authMiddleware({ required: 
 router.delete("/firestorm/tradecraft/notebook/:noteId", authMiddleware({ required: true }), async (req, res) => {
   try {
     const [note] = await db.delete(firestormAnalystNotebookTable)
-      .where(sql`${firestormAnalystNotebookTable.noteId} = ${req.params.noteId}`)
+      .where(sql`${firestormAnalystNotebookTable.noteId} = ${req.params.noteId as string}`)
       .returning();
     if (!note) { sendNotFound(res, "Analyst Note"); return; }
     sendNoContent(res);

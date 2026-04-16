@@ -331,9 +331,6 @@ durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_SCHEDULED_REPORTS, async (job) =
           reportType: template.reportType,
           brandTheme: (template.brandTheme as never) || "szl",
           dataSnapshot: { ...dataConfig, scheduledRunId: schedule.scheduleId, generatedAt: now.toISOString() },
-          snapshotAt: now,
-          scheduledRunId: schedule.scheduleId,
-          status: schedule.autoApprove ? "approved" : "draft",
         });
 
         const nextRun = new Date(now);

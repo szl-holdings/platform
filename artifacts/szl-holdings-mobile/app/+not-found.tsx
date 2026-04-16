@@ -5,7 +5,7 @@ export default function NotFound() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Not Found</Text>
-      <Link href="/(tabs)" style={styles.link}>
+      <Link href={"/(shell)" as any} style={styles.link}>
         <Text style={styles.linkText}>Go Home</Text>
       </Link>
     </View>

@@ -20,6 +20,7 @@ export interface VoiceResultCard {
 }
 
 const DOMAIN_KEYWORDS: Record<WorkspaceDomain, string[]> = {
+  intelligence: ["intelligence", "fusion", "cross-domain", "combined", "correlation"],
   command: ["command", "status", "overview", "all", "cross", "ecosystem", "briefing"],
   defense: ["threat", "security", "defense", "attack", "vulnerability", "aegis", "incident", "soc"],
   fleet: ["vessel", "fleet", "ship", "maritime", "cargo", "port", "voyage", "anchor"],
@@ -54,6 +55,10 @@ function generateResponse(query: string, domain: WorkspaceDomain): { response: s
         { id: "2", label: "Critical Alerts", value: "2", trend: "up", severity: "critical" },
         { id: "3", label: "Domains Online", value: "7/7", trend: "neutral" },
       ],
+    },
+    intelligence: {
+      response: "Intelligence fusion engine provides cross-domain signal correlation.",
+      cards: [],
     },
     defense: {
       response: "Defense posture elevated. 1 active incident, 3 critical CVEs pending patch validation.",

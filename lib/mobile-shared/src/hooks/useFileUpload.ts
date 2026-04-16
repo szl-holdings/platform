@@ -225,7 +225,7 @@ export function useFileUpload(options: FileUploadOptions = {}) {
             {
               httpMethod: "PUT",
               headers: { "Content-Type": file.type },
-              uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
+              uploadType: (FileSystem as any).FileSystemUploadType?.BINARY_CONTENT ?? 1,
             },
             (uploadProgress: { totalBytesSent: number; totalBytesExpectedToSend: number }) => {
               const { totalBytesExpectedToSend, totalBytesSent } =

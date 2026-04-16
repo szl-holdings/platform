@@ -124,7 +124,7 @@ async function buildHoldingsStorage(): Promise<HoldingsStoragePort> {
       } catch { return []; }
     },
     async createInquiry(data) {
-      const rows = await db.insert(holdingsInquiriesTable).values(data).returning();
+      const rows = await db.insert(holdingsInquiriesTable).values(data as any).returning();
       return rows[0];
     },
   };

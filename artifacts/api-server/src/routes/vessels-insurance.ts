@@ -225,7 +225,7 @@ router.post("/vessels/insurance/quotes", insLimit, authMiddleware({ required: fa
 
 router.post("/vessels/insurance/quotes/:id/bind", insLimit, authMiddleware({ required: false }), (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const allQuotes = [...demoQuotes, ...sessionQuotes];
     const quote = allQuotes.find(q => q.id === id);
     if (!quote) { res.status(404).json({ error: "Quote not found" }); return; }
@@ -272,7 +272,7 @@ router.get("/vessels/insurance/policies", insLimit, authMiddleware({ required: f
 
 router.get("/vessels/insurance/policies/:id", insLimit, authMiddleware({ required: false }), (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const all = [...demoPolicies, ...sessionPolicies];
     const policy = all.find(p => p.id === id);
     if (!policy) { res.status(404).json({ error: "Policy not found" }); return; }
@@ -329,7 +329,7 @@ router.post("/vessels/insurance/claims", insLimit, authMiddleware({ required: fa
 
 router.put("/vessels/insurance/claims/:id/status", insLimit, authMiddleware({ required: false }), (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const { status, adjustorNotes, approvedAmountUsd, settledAmountUsd } = req.body;
     const allClaims = [...demoClaims, ...sessionClaims];
     const claim = allClaims.find(c => c.id === id);

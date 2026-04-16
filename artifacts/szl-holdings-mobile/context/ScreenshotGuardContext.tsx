@@ -5,6 +5,7 @@ import type { WorkspaceDomain } from "@/context/WorkspaceContext";
 const STORAGE_KEY = "cortex_screenshot_policies";
 
 const DEFAULT_POLICIES: Record<WorkspaceDomain, boolean> = {
+  intelligence: false,
   command: false,
   defense: true,
   fleet: false,

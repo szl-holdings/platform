@@ -22,7 +22,7 @@ export async function scheduleLocalAlert(options: LocalAlertOptions): Promise<st
       },
       trigger:
         Platform.OS === "ios"
-          ? { seconds: options.seconds ?? 1, repeats: false }
+          ? { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: options.seconds ?? 1, repeats: false }
           : null,
     });
     return id;
@@ -34,6 +34,27 @@ export async function scheduleLocalAlert(options: LocalAlertOptions): Promise<st
 export async function cancelAllAlerts(): Promise<void> {
   try {
     await Notifications.cancelAllScheduledNotificationsAsync();
+  } catch {
+  }
+}
+
+export async function setupAndroidNotificationChannels(): Promise<void> {
+  if (Platform.OS !== "android") return;
+  try {
+    const Notifications = await import("expo-notifications");
+    await Notifications.setNotificationChannelAsync("default", {
+      name: "Default",
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: "#38BDF8",
+    });
+    await Notifications.setNotificationChannelAsync("critical-alerts", {
+      name: "Critical Alerts",
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250, 250, 250],
+      lightColor: "#EF4444",
+      bypassDnd: true,
+    });
   } catch {
   }
 }

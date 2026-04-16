@@ -167,7 +167,7 @@ async function computeForOrg(orgId: number): Promise<typeof tenantHealthScorecar
     .from(quotaViolationsTable)
     .where(and(
       eq(quotaViolationsTable.orgId, orgId),
-      gte(quotaViolationsTable.createdAt, start),
+      gte(quotaViolationsTable.occurredAt, start),
     ));
   const supportTicketVolume = violationRow?.total ?? 0;
 
@@ -178,7 +178,7 @@ async function computeForOrg(orgId: number): Promise<typeof tenantHealthScorecar
     .where(and(
       eq(quotaViolationsTable.orgId, orgId),
       eq(quotaViolationsTable.violationType, "hard"),
-      gte(quotaViolationsTable.createdAt, start),
+      gte(quotaViolationsTable.occurredAt, start),
     ));
   const hardCount = hardViolations?.total ?? 0;
   const slaAdherencePct = sessionCount > 0
@@ -440,7 +440,7 @@ router.get(
   authMiddleware(),
   async (req: Request, res: Response) => {
     try {
-      const orgId = parseIdParam(req.params.orgId);
+      const orgId = parseIdParam(req.params.orgId as string);
       if (!assertTenantAccess(req, res, orgId)) return;
 
       const { start } = periodBounds();
@@ -476,7 +476,7 @@ router.post(
   requireRole(...ADMIN_ROLES),
   async (req: Request, res: Response) => {
     try {
-      const orgId = parseIdParam(req.params.orgId);
+      const orgId = parseIdParam(req.params.orgId as string);
       const scorecard = await computeForOrg(orgId);
       sendSuccess(res, scorecard);
     } catch (err) {

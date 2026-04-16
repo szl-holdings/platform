@@ -165,7 +165,7 @@ export default function VenturesScreen() {
                   <View style={styles.cardActions}>
                     <TouchableOpacity
                       style={[styles.btn, { borderColor: v.color + "40" }]}
-                      onPress={() => router.push({ pathname: "/venture/[slug]", params: { slug: v.slug } })}
+                      onPress={() => router.push({ pathname: "/venture/[slug]", params: { slug: v.slug } } as any)}
                       activeOpacity={0.75}
                     >
                       <Text style={[styles.btnText, { color: v.color }]}>Details</Text>

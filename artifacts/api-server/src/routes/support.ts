@@ -22,7 +22,7 @@ function isSuperAdmin(user: AuthenticatedUser): boolean {
 }
 
 function isGlobalAdmin(user: AuthenticatedUser): boolean {
-  return user.roles.includes("admin") || user.roles.includes("founder_admin");
+  return user.roles.includes("admin") || user.roles.includes("founder_admin" as import("@szl-holdings/db").RoleName);
 }
 
 const TICKET_CATEGORIES = ["billing", "technical", "account", "feature_request", "security", "data_privacy", "other"] as const;
@@ -215,7 +215,7 @@ router.get("/support/tickets", authMiddleware(), async (req: Request, res: Respo
 router.get("/support/tickets/:id", authMiddleware(), async (req: Request, res: Response) => {
   try {
     const user = req.user as AuthenticatedUser;
-    const ticketId = parseInt(req.params["id"]!);
+    const ticketId = parseInt(req.params["id"] as string);
     if (isNaN(ticketId)) {
       res.status(400).json({ error: "Invalid ticket ID" });
       return;
@@ -266,7 +266,7 @@ router.get("/support/tickets/:id", authMiddleware(), async (req: Request, res: R
 router.post("/support/tickets/:id/comments", authMiddleware(), validateBody(addCommentSchema), async (req: Request, res: Response) => {
   try {
     const user = req.user as AuthenticatedUser;
-    const ticketId = parseInt(req.params["id"]!);
+    const ticketId = parseInt(req.params["id"] as string);
     if (isNaN(ticketId)) {
       res.status(400).json({ error: "Invalid ticket ID" });
       return;
@@ -318,7 +318,7 @@ router.post("/support/tickets/:id/comments", authMiddleware(), validateBody(addC
 router.patch("/support/tickets/:id/status", authMiddleware(), requireRole("admin"), validateBody(updateStatusSchema), async (req: Request, res: Response) => {
   try {
     const user = req.user as AuthenticatedUser;
-    const ticketId = parseInt(req.params["id"]!);
+    const ticketId = parseInt(req.params["id"] as string);
     if (isNaN(ticketId)) {
       res.status(400).json({ error: "Invalid ticket ID" });
       return;

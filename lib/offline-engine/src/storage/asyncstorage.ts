@@ -12,6 +12,7 @@ type AsyncStorageInterface = {
 
 async function getStorage(): Promise<AsyncStorageInterface | null> {
   try {
+    // @ts-ignore - optional react-native dependency
     const mod = await import("@react-native-async-storage/async-storage");
     return mod.default as AsyncStorageInterface;
   } catch {
