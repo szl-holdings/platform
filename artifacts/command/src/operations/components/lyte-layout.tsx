@@ -9,7 +9,7 @@ import {
   ChevronRight, Gauge, BarChart3, LayoutDashboard, Download, Clapperboard, Power,
   GitBranch, Send, Cpu, TrendingUp, DollarSign, RotateCcw, Calculator,
   Bot, Monitor, Building, BookOpen, Layers, Calendar, BellOff, Code,
-  Target, Globe, Phone
+  Target, Globe, Phone, Scale
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, useSandboxMode, EnvironmentLabel, type OnboardingConfig } from "@szl-holdings/shared-ui";
 import { useDemoMode } from "@lyte/lib/demo-mode";
@@ -94,6 +94,7 @@ const NAV_GROUPS = [
       { href: "/board-mode", label: "Board Mode", icon: LayoutDashboard },
       { href: "/blocker-board", label: "Blocker Board", icon: AlertTriangle },
       { href: "/bottleneck-heatmap", label: "Bottleneck Heatmap", icon: BarChart3 },
+      { href: "/governed-decision-loop", label: "Decision Loop", icon: Scale },
       { href: "/decision-receipts", label: "Decision Receipts", icon: FileText },
       { href: "/digest", label: "Digest Center", icon: FileText },
       { href: "/approvals", label: "Approvals", icon: CheckSquare },

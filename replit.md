@@ -12,6 +12,8 @@ The SZL Holdings Platform is a **governed operational intelligence platform** �
 - **Monte Carlo** (`lib/monte-carlo/`) — probabilistic risk simulation before action
 - **Workflow Engine** (`lib/workflow-engine/`) — durable process orchestration
 
+**Flagship UX:** The Governed Decision Loop page (`/operations/governed-decision-loop`) renders the full 9-step canonical loop as a walkthrough, using reusable panels: ProofProvenancePanel, MonteCarloSimPanel, PolicyGatePanel, OutcomePanel, and GovernedDecisionSummary card. Components live in `artifacts/command/src/operations/components/governed-decision/`.
+
 **Command surfaces:** Lyte (web command), CORTEX (mobile command), Command Portal (ecosystem hub)
 **Execution fabric:** Alloy (workflow orchestration, approval gates, audit trail)
 **Domain packs:** Aegis (security), Vessels (maritime), Terra (real estate), PRISM Counsel (legal), Carlota Jo (advisory), IMPERIUM (cloud sovereignty)
