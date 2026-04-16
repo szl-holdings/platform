@@ -1,5 +1,6 @@
 {pkgs}: {
   deps = [
+    pkgs.imagemagick
     pkgs.chromium
     pkgs.libglvnd
     pkgs.virtualgl
