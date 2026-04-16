@@ -1,5 +1,6 @@
 import { useState, ReactNode } from "react";
 import { useLocation, Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import {
   LayoutDashboard, Globe2, Activity, Zap, Shield, Network, Cpu, BookOpen,
   Radio, Brain, Heart, AlertTriangle, Workflow, Inbox, Settings, Users,
@@ -181,27 +182,72 @@ function WorkspaceSwitcher({ mode, onModeChange }: { mode: WorkspaceMode; onMode
   );
 }
 
+type EnvKind = "live" | "pilot" | "demo" | "seeded" | "simulated";
+
+function resolveEnvironment(): EnvKind {
+  const override = (import.meta.env.VITE_DEPLOY_ENV as string | undefined)?.toLowerCase();
+  if (override && ["live", "pilot", "demo", "seeded", "simulated"].includes(override)) {
+    return override as EnvKind;
+  }
+  return import.meta.env.PROD ? "live" : "demo";
+}
+
+interface HealthSummary {
+  summary?: { total?: number; liveConfigured?: number; mockedDemoMode?: number; manualRequired?: number };
+}
+
 function HeaderStatusPills() {
   const { mode: persona } = useDemoMode();
   const personaColors = MODE_COLORS[persona];
+  const environment = resolveEnvironment();
+
+  const { data: health, isError: healthError, isLoading: healthLoading } = useQuery<HealthSummary>({
+    queryKey: ["unified-layout-svc-health"],
+    queryFn: () =>
+      fetch("/api/services/health/app/command")
+        .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))),
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+    retry: 1,
+  });
+
+  const summary = health?.summary;
+  const unhealthy = summary?.manualRequired ?? 0;
+  const mocked = summary?.mockedDemoMode ?? 0;
+
+  let svc: { color: string; bg: string; border: string; label: string; title: string };
+  if (healthLoading) {
+    svc = { color: "#7c8a9a", bg: "rgba(124,138,154,0.08)", border: "rgba(124,138,154,0.2)", label: "SVC …", title: "Checking command-plane health" };
+  } else if (healthError) {
+    svc = { color: "#7c8a9a", bg: "rgba(124,138,154,0.08)", border: "rgba(124,138,154,0.2)", label: "SVC ?", title: "Health endpoint unreachable" };
+  } else if (unhealthy > 0) {
+    svc = { color: "#c45a4a", bg: "rgba(196,90,74,0.08)", border: "rgba(196,90,74,0.22)", label: `SVC ${unhealthy}!`, title: `${unhealthy} service(s) require manual attention` };
+  } else if (mocked > 0) {
+    svc = { color: "#c8953c", bg: "rgba(200,149,60,0.08)", border: "rgba(200,149,60,0.22)", label: `SVC MOCK`, title: `${mocked} service(s) running in demo/mock mode` };
+  } else {
+    svc = { color: "#6b8f71", bg: "rgba(107,143,113,0.08)", border: "rgba(107,143,113,0.2)", label: "SVC OK", title: "All command-plane services healthy" };
+  }
+
   return (
-    <div className="hidden md:flex items-center gap-1.5">
-      <EnvironmentLabel environment="demo" />
+    <div className="hidden md:flex items-center gap-1.5" data-testid="header-status-pills">
+      <EnvironmentLabel environment={environment} />
       <span
         className="flex items-center gap-1 text-[8px] font-mono font-semibold tracking-wider px-2 py-0.5 rounded"
         style={{ color: personaColors.text, background: personaColors.bg, border: `1px solid ${personaColors.border}` }}
         title={`Persona view: ${MODE_LABELS[persona]}`}
+        data-testid="header-persona-pill"
       >
         <span style={{ fontSize: "10px" }}>{MODE_ICONS[persona]}</span>
         {MODE_LABELS[persona].toUpperCase()}
       </span>
       <span
         className="flex items-center gap-1 text-[8px] font-mono font-semibold tracking-wider px-2 py-0.5 rounded"
-        style={{ color: "#6b8f71", background: "rgba(107,143,113,0.08)", border: "1px solid rgba(107,143,113,0.2)" }}
-        title="All command-plane services healthy"
+        style={{ color: svc.color, background: svc.bg, border: `1px solid ${svc.border}` }}
+        title={svc.title}
+        data-testid="header-svc-pill"
       >
-        <span className="w-1 h-1 rounded-full" style={{ background: "#6b8f71" }} />
-        SVC OK
+        <span className="w-1 h-1 rounded-full" style={{ background: svc.color }} />
+        {svc.label}
       </span>
     </div>
   );
