@@ -99,6 +99,7 @@ const NAV_LINKS_MOBILE = [
   { label: "Platform Overview", href: "/platform", primary: false },
   { label: "Lyte", href: "/lyte", primary: false },
   { label: "Alloy", href: "/alloy-fabric", primary: false },
+  { label: "CORTEX", href: "https://cortex.szlholdings.com", primary: false },
   { label: "Command Portal", href: "/command/", primary: false },
   { label: "— Primitives —", href: "/architecture", primary: false, section: true },
   { label: "Architecture", href: "/architecture", primary: false },
@@ -392,26 +393,39 @@ export function SiteNav() {
                       </p>
                     );
                   }
+                  const isExtLink = link.href.startsWith("http");
+                  const mobileStyle = {
+                    padding: link.primary ? "0.625rem 0.75rem" : "0.4rem 0.75rem",
+                    fontSize: link.primary ? "0.9375rem" : "0.875rem",
+                    fontWeight: link.primary ? 600 : 500,
+                    color: link.primary ? "var(--color-szl-accent)" : "var(--color-szl-text-secondary)",
+                    textDecoration: "none" as const,
+                    borderRadius: "0.375rem",
+                    transition: "color 0.18s ease, background 0.18s ease",
+                    display: "block",
+                    borderBottom: link.primary ? "1px solid var(--color-szl-border)" : "none",
+                    marginBottom: link.primary ? "0.5rem" : 0,
+                    paddingBottom: link.primary ? "1rem" : undefined,
+                  };
+                  const mEnter = (e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; if (!link.primary) (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.04)"; };
+                  const mLeave = (e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.color = link.primary ? "var(--color-szl-accent)" : "var(--color-szl-text-secondary)"; (e.currentTarget as HTMLElement).style.background = "transparent"; };
+
+                  if (isExtLink) {
+                    return (
+                      <a key={link.href + idx} href={link.href} target="_blank" rel="noopener noreferrer" style={mobileStyle} onMouseEnter={mEnter} onMouseLeave={mLeave}>
+                        {link.label}
+                      </a>
+                    );
+                  }
+
                   return (
                     <Link
                       key={link.href + idx}
                       href={link.href}
                       onClick={() => handleNavClick(link.label, link.href)}
-                      style={{
-                        padding: link.primary ? "0.625rem 0.75rem" : "0.4rem 0.75rem",
-                        fontSize: link.primary ? "0.9375rem" : "0.875rem",
-                        fontWeight: link.primary ? 600 : 500,
-                        color: link.primary ? "var(--color-szl-accent)" : "var(--color-szl-text-secondary)",
-                        textDecoration: "none",
-                        borderRadius: "0.375rem",
-                        transition: "color 0.18s ease, background 0.18s ease",
-                        display: "block",
-                        borderBottom: link.primary ? "1px solid var(--color-szl-border)" : "none",
-                        marginBottom: link.primary ? "0.5rem" : 0,
-                        paddingBottom: link.primary ? "1rem" : undefined,
-                      }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; if (!link.primary) (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.04)"; }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = link.primary ? "var(--color-szl-accent)" : "var(--color-szl-text-secondary)"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                      style={mobileStyle}
+                      onMouseEnter={mEnter}
+                      onMouseLeave={mLeave}
                     >
                       {link.label}
                     </Link>
