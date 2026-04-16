@@ -80,6 +80,26 @@ Premium, SZL-branded dark-first design system (except Carlota Jo luxury light-mo
 ### Object Storage
 Replit's GCS-backed object storage (App Storage) handles file uploads and generated documents, secured by ACL metadata and accessible via presigned URLs.
 
+## Dev Server Port Architecture
+
+All Vite-based web apps use a **shared routing proxy** pattern on port 9090 (the only port registered in `.replit` for web apps, mapped to external port 3000). Each app's `vite.config.ts` includes a `sharedProxyPlugin` that:
+
+1. Binds an HTTP proxy to port 9090 with `reusePort: true` (Linux socket sharing)
+2. Routes incoming requests to the correct Vite dev server by URL path prefix
+3. Returns HTTP 200 for health-check paths (`/`, `/health`, `/__health`)
+
+The routing table embedded in every app's `vite.config.ts`:
+- `/aegis/` → port 23933
+- `/firestorm/` → port 23931
+- `/carlota-jo/` → port 21200
+- `/command/` → port 25200
+- `/terra/` → port 25100
+- `/vessels/` → port 18485
+
+All 6 artifact.toml files use `localPort = 9090`. The Replit workflow health check detects port 9090 as open (whichever app started first contributes). This is necessary because `.replit` port registration cannot be modified by the agent, and only port 9090 (plus 8080 for the API server and 21130 for szl-holdings) are registered.
+
+**Limitation:** HMR (Hot Module Replacement) WebSocket connections fail because the shared HTTP proxy does not handle WebSocket upgrades. Developers must manually refresh the browser after code changes.
+
 ## External Dependencies
 - **Database:** PostgreSQL 16
 - **Authentication:** Replit Auth (OIDC/PKCE)

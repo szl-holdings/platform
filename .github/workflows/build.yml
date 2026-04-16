@@ -26,9 +26,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @workspace/api-server run build
       - run: pnpm --filter @workspace/szl-holdings run build
-      - run: pnpm --filter @workspace/lyte-command-center run build
+      - run: pnpm --filter @workspace/command run build
+      - run: pnpm --filter @workspace/aegis run build
       - run: pnpm --filter @workspace/firestorm run build
       - run: pnpm --filter @workspace/terra run build
       - run: pnpm --filter @workspace/vessels run build
       - run: pnpm --filter @workspace/carlota-jo run build
-      - run: pnpm --filter @workspace/stephen-site run build

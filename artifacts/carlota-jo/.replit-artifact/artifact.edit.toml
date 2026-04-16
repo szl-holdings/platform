@@ -1,0 +1,32 @@
+kind = "web"
+previewPath = "/carlota-jo/"
+title = "Carlota Jo Consulting"
+version = "1.0.0"
+id = "artifacts/carlota-jo"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/carlota-jo/" ]
+localPort = 21201
+
+[services.development]
+run = "bash -c 'cd /home/runner/workspace/artifacts/carlota-jo && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/carlota-jo", "run", "build" ]
+publicDir = "artifacts/carlota-jo/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+VITE_PORT = "21200"
+PROXY_PORT = "21201"
+BASE_PATH = "/carlota-jo/"

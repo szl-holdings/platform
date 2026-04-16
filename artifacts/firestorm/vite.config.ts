@@ -6,8 +6,8 @@ import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
-const vitePort = Number(process.env.VITE_PORT) || 21200;
-const basePath = process.env.BASE_PATH || "/carlota-jo/";
+const vitePort = Number(process.env.VITE_PORT) || 23931;
+const basePath = process.env.BASE_PATH || "/firestorm/";
 
 const PROXY_ROUTES = [
   { prefix: "/aegis/", port: 23933 },
@@ -65,6 +65,7 @@ function sharedProxyPlugin() {
     },
   };
 }
+
 export default defineConfig({
   base: basePath,
   plugins: [
@@ -89,6 +90,12 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "src"),
+      "@assets": path.resolve(
+        import.meta.dirname,
+        "..",
+        "..",
+        "attached_assets"
+      ),
     },
     dedupe: ["react", "react-dom"],
   },
@@ -117,7 +124,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    holdUntilCrawlEnd: false,
+    holdUntilCrawlEnd: true,
   },
   server: {
     port: vitePort,

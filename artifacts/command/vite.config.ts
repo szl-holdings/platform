@@ -8,31 +8,30 @@ import net from "net";
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
-const port = Number(process.env.VITE_PORT) || 25200;
+const vitePort = Number(process.env.VITE_PORT) || 25200;
 const basePath = process.env.BASE_PATH || "/command/";
 
 const API_SERVER_PORT = 8080;
-const apiServerDist = path.resolve(import.meta.dirname, "..", "api-server", "dist", "index.mjs");
+const apiServerDist = path.resolve(
+  import.meta.dirname,
+  "..",
+  "api-server",
+  "dist",
+  "index.mjs"
+);
 
-const GATEWAY_ROUTES: Array<{ prefix: string; port: number }> = [
-  { prefix: "/terra/", port: 21100 },
-  { prefix: "/carlota-jo/", port: 21200 },
-  { prefix: "/vessels/", port: 18485 },
-  { prefix: "/command/", port: 25200 },
+const PROXY_ROUTES = [
   { prefix: "/aegis/", port: 23933 },
-  { prefix: "/firestorm/", port: 23933 },
+  { prefix: "/firestorm/", port: 23931 },
+  { prefix: "/carlota-jo/", port: 21200 },
+  { prefix: "/command/", port: 25200 },
+  { prefix: "/terra/", port: 25100 },
+  { prefix: "/vessels/", port: 18485 },
 ];
 
-function getGatewayUpstream(url: string, defaultPort: number): number {
-  for (const route of GATEWAY_ROUTES) {
-    if (url.startsWith(route.prefix)) return route.port;
-  }
-  return defaultPort;
-}
-
-function gatewayPlugin(): Plugin {
+function sharedProxyPlugin(): Plugin {
   return {
-    name: "gateway-proxy",
+    name: "shared-proxy",
     apply: "serve",
     async configureServer() {
       const http = await import("http");
@@ -43,22 +42,39 @@ function gatewayPlugin(): Plugin {
           res.end("OK");
           return;
         }
-        const upstreamPort = getGatewayUpstream(url, port);
+
+        const normalizedUrl = url.endsWith("/") ? url : url + "/";
+        const route = PROXY_ROUTES.find((r) => normalizedUrl.startsWith(r.prefix));
+        const targetPort = route ? route.port : vitePort;
+
         const upstream = http.request(
-          { hostname: "127.0.0.1", port: upstreamPort, path: url, method: req.method,
-            headers: { ...req.headers, host: "localhost:" + upstreamPort } },
-          (upRes) => { res.writeHead(upRes.statusCode || 200, upRes.headers); upRes.pipe(res, { end: true }); }
+          {
+            hostname: "127.0.0.1",
+            port: targetPort,
+            path: url,
+            method: req.method,
+            headers: { ...req.headers, host: "localhost:" + targetPort },
+          },
+          (upRes) => {
+            res.writeHead(upRes.statusCode || 200, upRes.headers);
+            upRes.pipe(res, { end: true });
+          }
         );
         upstream.on("error", () => {
-          if (!res.headersSent) { res.writeHead(503, { "Content-Type": "text/plain" }); res.end("App not ready on port " + upstreamPort); }
+          if (!res.headersSent) {
+            res.writeHead(503, { "Content-Type": "text/plain" });
+            res.end("App not ready on port " + targetPort);
+          }
         });
         req.pipe(upstream, { end: true });
       });
+
       proxyServer.listen({ port: 9090, host: "0.0.0.0", reusePort: true }, () => {
-        console.log("[command/gateway] Port 9090 (reusePort) joined — serving /command/");
+        console.log("[command/shared-proxy] Port 9090 (reusePort) joined — serving /command/");
       });
+
       proxyServer.on("error", (err: NodeJS.ErrnoException) => {
-        console.warn("[command/gateway] Port 9090 bind:", err.code);
+        console.warn("[command/shared-proxy] Port 9090 bind:", err.code);
       });
     },
   };
@@ -68,7 +84,10 @@ function isPortInUse(port: number): Promise<boolean> {
   return new Promise((resolve) => {
     const srv = net.createServer();
     srv.once("error", () => resolve(true));
-    srv.once("listening", () => { srv.close(); resolve(false); });
+    srv.once("listening", () => {
+      srv.close();
+      resolve(false);
+    });
     srv.listen(port, "0.0.0.0");
   });
 }
@@ -84,22 +103,23 @@ function apiServerPlugin(): Plugin {
 
       const alreadyRunning = await isPortInUse(API_SERVER_PORT);
       if (alreadyRunning) {
-        console.log(`[api-server-dev] Port ${API_SERVER_PORT} already in use — skipping embedded api-server`);
+        console.log(
+          `[api-server-dev] Port ${API_SERVER_PORT} already in use — skipping embedded api-server`
+        );
         return;
       }
 
-      child = spawn(
-        "node",
-        ["--max-old-space-size=512", apiServerDist],
-        {
-          env: { ...process.env, PORT: String(API_SERVER_PORT) },
-          stdio: "inherit",
-          detached: false,
-        }
-      );
+      child = spawn("node", ["--max-old-space-size=512", apiServerDist], {
+        env: { ...process.env, PORT: String(API_SERVER_PORT) },
+        stdio: "inherit",
+        detached: false,
+      });
 
       child.on("error", (err) => {
-        console.error("[api-server-dev] Failed to start api-server:", err.message);
+        console.error(
+          "[api-server-dev] Failed to start api-server:",
+          err.message
+        );
       });
 
       child.on("exit", (code) => {
@@ -125,7 +145,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
-    gatewayPlugin(),
+    sharedProxyPlugin(),
     apiServerPlugin(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
@@ -133,10 +153,10 @@ export default defineConfig({
           await import("@replit/vite-plugin-cartographer").then((m) =>
             m.cartographer({
               root: path.resolve(import.meta.dirname, ".."),
-            }),
+            })
           ),
           await import("@replit/vite-plugin-dev-banner").then((m) =>
-            m.devBanner(),
+            m.devBanner()
           ),
         ]
       : []),
@@ -159,7 +179,8 @@ export default defineConfig({
       output: {
         manualChunks(id): string | undefined {
           if (id.includes("node_modules")) {
-            if (id.includes("recharts") || id.includes("d3-")) return "vendor-charts";
+            if (id.includes("recharts") || id.includes("d3-"))
+              return "vendor-charts";
             if (id.includes("framer-motion")) return "vendor-motion";
             if (id.includes("@radix-ui")) return "vendor-radix";
             if (id.includes("@tanstack")) return "vendor-tanstack";
@@ -176,7 +197,7 @@ export default defineConfig({
     holdUntilCrawlEnd: false,
   },
   server: {
-    port,
+    port: vitePort,
     strictPort: true,
     host: "0.0.0.0",
     allowedHosts: true,
@@ -194,7 +215,7 @@ export default defineConfig({
     },
   },
   preview: {
-    port,
+    port: vitePort,
     host: "0.0.0.0",
     allowedHosts: true,
   },
