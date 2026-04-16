@@ -91,7 +91,7 @@
 
 **Closed-loop learning:** The Outcome Graph records the result of every governed decision. This data calibrates future AI confidence scores and Monte Carlo simulations — ensuring the AI gets more accurate with real outcomes, not just more frequent.
 
-**Model transparency:** Current primary model: HuggingFace Inference (Qwen3-8B). Multi-provider fallback: OpenAI → Anthropic → Gemini. Model selection is always disclosed in the Proof Chain entry.
+**Model transparency:** Multi-provider AI stack — OpenAI, Anthropic (Claude), and Google Gemini, accessed via Replit AI proxy. No single "primary" model; model selection is agent-type-specific and context-dependent. The active model provider and version are always disclosed in the Proof Chain entry for every AI-generated recommendation.
 
 ---
 

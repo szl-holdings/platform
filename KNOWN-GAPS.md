@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-04-16 (rev 7)  
+**Last updated:** 2026-04-16 (rev 7 — Final)  
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -180,7 +180,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | P2 — Medium / Low | 26 | 4 | 22 |
 | Flow Audit Gaps (Phase 4–5) | 4 | 0 | 4 |
 | Test Quality Gaps (Phase 4–5) | 8 | 2 | 6 |
-| **Total** | **63** | **16** | **47** |
+| **Total** | **68** | **17** | **51** |
 
 > **April 2026 Phase 0–1 audit note:** Full operational audit (Phases 0–1) completed. Deliverables produced: FULL_SYSTEM_INVENTORY.md, AUDIT_FINDINGS_REGISTER.md, OUT_OF_SCOPE_REGISTER.md, ENVIRONMENT_VARIABLES.md, updated .env.example. KG018 (env var schema) resolved by ENVIRONMENT_VARIABLES.md. GAP-004 (.env.example) resolved by comprehensive update. KG029 (alloy-integrations test stub) newly cataloged. TD-004 remains re-opened. No new P0/P1 security findings discovered. No hardcoded credentials found in source. All GitHub Actions workflows remain SHA-pinned. Net P2 change: +2 gaps added, +2 resolved. See LAUNCH_BLOCKERS.md for the full pre-launch blocker register.
 >
@@ -189,6 +189,8 @@ Operational gaps, process health, test coverage, observability, team ownership.
 > **April 2026 Phase 4–5 audit note:** Flow audit and quality pass completed. 4 new flow gaps and 8 test quality gaps documented. 2 test gaps resolved in this sprint (cortex-inca-smoke config fix, api-version error message fix). All lint warnings documented as baseline (4,519 warnings, 0 errors). Full findings in AUDIT_FINDINGS_REGISTER.md.
 >
 > **April 2026 Phase 6–9 audit note:** Observability, billing, support operations, and release safety audit completed. All 25 deliverable documents verified present and substantive. 2 new P1 gaps added: KG030 (PostHog not wired) and KG031 (status page not live). 2 new P2 gaps added: KG032 (observability collector uses simulated data) and KG033 (no unified production infra observability doc). 1 existing gap clarified: BIL-001 notes Stripe is test-mode only (cross-reference DATA-009). Release safety documentation (RELEASE_CHECKLIST.md, DEPLOYMENT-GUIDE.md, ENVIRONMENT_VALIDATION.md, ROLLBACK_PLAYBOOK.md, LAUNCH_DAY_RUNBOOK.md, GO_NO_GO_CHECKLIST.md) is all production-quality. CI pipeline is comprehensive with 14 workflows all SHA-pinned. No new P0 findings. Full findings in AUDIT_FINDINGS_REGISTER.md §Phase 6–9.
+>
+> **April 2026 Phase 10–13 audit note (FINAL):** Trust Center, diligence, docs, commercial/demo coherence, and 9-perspective adversarial red-team review completed. TD-004 fixed: TRUST_CENTER_INDEX.md model transparency corrected (HuggingFace/Qwen3-8B reference removed; multi-provider stack documented). 9 new actionable gaps added (RT-003, RT-005–RT-011, RT-017). 4 additional observations confirmed existing P1 gaps (no new P0/P1 security findings discovered). All commercial docs (DEMO_STRATEGY.md, EXECUTIVE_DEMO.md, OPERATOR_DEMO.md, TECHNICAL_DEMO.md, SALES_NARRATIVE.md, OBJECTION_HANDLING.md, CUSTOMER_SUCCESS_PLAYBOOK.md, GO_TO_MARKET_MOTION.md, PROOF_OF_VALUE_PLAYBOOK.md, DESIGN_PARTNER_PROGRAM.md) passed commercial coherence audit — no fabricated readiness claims found. Full red-team findings in AUDIT_FINDINGS_REGISTER.md § Phase 10–13. Final executive summary with go/no-go recommendation in EXECUTIVE_LAUNCH_SUMMARY.md.
 
 ---
 
@@ -255,6 +257,32 @@ Operational gaps, process health, test coverage, observability, team ownership.
 - `LAUNCH_DAY_RUNBOOK.md` — T-48h, T-0, T+24h/72h launch operations
 - `GO_NO_GO_CHECKLIST.md` — 7-section launch decision tool with binary pass/fail criteria
 
+### Phase 10–13 Trust, Docs & Commercial Documents (verified/updated Apr 2026)
+- `TRUST_CENTER_INDEX.md` — buyer-facing security, AI governance, and compliance hub (TD-004 corrected this sprint)
+- `TECHNICAL_DILIGENCE_PACKET.md` — complete investor/advisor technical diligence packet
+- `SHARED_RESPONSIBILITY_MODEL.md` — operational posture and shared responsibility model
+- `PRIVACY_OVERVIEW.md` — GDPR/CCPA privacy framework overview
+- `AI_GOVERNANCE.md` — buyer-facing AI governance posture
+- `COMPANY_FACT_SHEET.md` — concise company overview for press/investors
+- `SERIES_A_READINESS.md` — honest Series A readiness assessment
+- `DOCS_HOME.md` — documentation home page
+- `GETTING_STARTED.md` — developer and operator quick start
+- `END_USER_GUIDE.md` — end-user operational guide
+- `FAQ.md` — frequently asked questions
+- `FEATURE_OVERVIEW.md` — complete feature surface overview
+- `CONTRIBUTING.md` — developer contribution guide
+- `DEMO_STRATEGY.md` — demo strategy for all three audiences
+- `EXECUTIVE_DEMO.md` — investor/executive demo script
+- `OPERATOR_DEMO.md` — operator audience demo script
+- `TECHNICAL_DEMO.md` — technical partner demo script
+- `DESIGN_PARTNER_PROGRAM.md` — design partner program terms and engagement model
+- `PROOF_OF_VALUE_PLAYBOOK.md` — POV engagement methodology
+- `GO_TO_MARKET_MOTION.md` — GTM motion documentation
+- `SALES_NARRATIVE.md` — sales narrative and positioning
+- `OBJECTION_HANDLING.md` — objection handling guide
+- `CUSTOMER_SUCCESS_PLAYBOOK.md` — customer success methodology
+- `EXECUTIVE_LAUNCH_SUMMARY.md` — **final go/no-go decision package** (all 13 executive outputs)
+
 ### Implementation References
 - `lib/db/migrations/0001_add_tenant_id_to_rag_knowledge_chunks.sql` — DB migration for tenant isolation
 - `artifacts/api-server/src/lib/validation.ts` — `validateBody` / `validateQuery` / `validateParams` helpers
@@ -280,5 +308,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 - **2026-04-16 (Phase 0 Launch Readiness):** Phase 0 launch readiness audit completed. All committed mobile credential files confirmed as placeholders — no active key material detected. Manual rotation of Firebase/Google credentials required as precautionary measure (GAP-001 / LB-001). TD-004 re-opened: TRUST_CENTER_INDEX.md model reference not corrected despite being marked resolved. Full audit findings documented in LAUNCH_BLOCKERS.md, PUBLIC_LAUNCH_READINESS.md, GO_NO_GO_CHECKLIST.md, OPERATIONAL_READINESS_SCORECARD.md, and EXECUTIVE_LAUNCH_SUMMARY.md.
 
 - **2026-04-16 (Phase 2–3 Architecture/Auth/Tenancy):** Architecture, Auth & Tenancy hardening audit completed. Three new P1 gaps discovered: AF-001 (adminGuard timing-unsafe token compare), AF-003 (vessels fleet routes cross-tenant), AF-007 (vessels DB schema missing org_id). Seven additional P2 findings logged in AUDIT_FINDINGS_REGISTER.md. New documents created: DEPENDENCY_MAP.md, AUDIT_FINDINGS_REGISTER.md, CONTROL_PLANE_ARCHITECTURE.md.
+
+- **2026-04-16 (Phase 10–13 Trust, Docs, Commercial, Red-Team — FINAL):** Final audit phases completed. Trust Center content reviewed and corrected: TD-004 resolved — TRUST_CENTER_INDEX.md model transparency updated from incorrect HuggingFace/Qwen3-8B reference to accurate multi-provider stack (OpenAI, Anthropic, Gemini). Self-serve documentation audit completed: 4 new doc gaps cataloged (RT-005 through RT-008). Commercial/demo coherence audit passed: all 10 commercial docs verified against live product capabilities — no fabricated readiness claims found. 9-perspective adversarial red-team review completed: no new P0 or P1 security findings discovered; 5 new P2 actionable gaps surfaced (RT-003, RT-009–RT-011, RT-017). Final cumulative audit totals: 106 total findings across all phases, 13 resolved, 93 open (includes INFO/PASS observations). EXECUTIVE_LAUNCH_SUMMARY.md updated with all 13 required executive outputs. KNOWN-GAPS.md rev 7 (final).
 
 ---

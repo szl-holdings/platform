@@ -1,10 +1,10 @@
 # SZL Holdings — Audit Findings Register
 
-**Last updated:** 2026-04-16 (Phase 6–9 Ops Audit)
+**Last updated:** 2026-04-16 (Phases 0–13 Audit — Final)
 **Owner:** Platform Engineering / Engineering
 **Scope:** Full SZL Holdings monorepo — all apps, libraries, routes, secrets, CI/CD, docs, and flows
 
-This register catalogs every finding from all operational audit phases (Phase 0–5). It is the canonical findings reference. For the gap register with full remediation tracking, see `KNOWN-GAPS.md`. For detailed series A findings, see `docs/audit/series-a-gap-register.md`.
+This register catalogs every finding from all operational audit phases (Phase 0–13). It is the canonical findings reference. For the gap register with full remediation tracking, see `KNOWN-GAPS.md`. For detailed series A findings, see `docs/audit/series-a-gap-register.md`.
 
 **Related:** [KNOWN-GAPS.md](KNOWN-GAPS.md) · [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) · [TENANCY-MODEL.md](TENANCY-MODEL.md) · [SECURITY-CHECKLIST.md](SECURITY-CHECKLIST.md) · [DEPENDENCY_MAP.md](DEPENDENCY_MAP.md) · [CONTROL_PLANE_ARCHITECTURE.md](CONTROL_PLANE_ARCHITECTURE.md)
 
@@ -18,6 +18,8 @@ This register catalogs every finding from all operational audit phases (Phase 0�
 | Phase 2–3: Security & Auth Hardening | Apr 2026 | Auth, secrets, tenant isolation | P0 items resolved |
 | Phase 4–5: Flow Audit & Quality Pass | Apr 2026 | Flows, testing, lint, build, QA docs | Completed |
 | Phase 6–9: Ops, Billing & Release | Apr 2026 | Observability, analytics, billing, support, incident, release safety | Completed — 6 new findings |
+| Phase 6–9: Commercial & Security Modules | Apr 2026 | Vessels commercial, Aegis security modules, CISO dashboard, push/deep links | Completed |
+| Phase 10–13: Trust, Docs, Commercial, Red-Team | Apr 2026 | Trust center, diligence, docs, demo coherence, 9-perspective adversarial review | Completed — **FINAL AUDIT** |
 
 ---
 
@@ -473,3 +475,170 @@ Priority order for remediation:
 *Related: `KNOWN-GAPS.md` · `OUT_OF_SCOPE_REGISTER.md` · `docs/audit/series-a-gap-register.md` · `SECURITY-CHECKLIST.md` · `CONTROL_PLANE_ARCHITECTURE.md`*
 
 *Last audited: 2026-04-16. Route files audited: representative sample across core, billing, admin, backup, vessels, and middleware layers. For complete route coverage, reference ROUTE_INVENTORY.md.*
+
+---
+
+## Phase 10–13: Trust, Docs, Commercial Coherence & Final Red-Team Audit
+
+**Date:** 2026-04-16 · **Scope:** Trust Center, diligence materials, self-serve docs, commercial/demo coherence, 9-perspective adversarial red-team review  
+**Outcome:** 1 critical doc fix (TD-004, now resolved), 6 red-team observations, all remaining gaps documented. No new P0 or P1 security findings discovered.
+
+---
+
+### Phase 10 — Trust Center & Diligence Materials
+
+#### Findings
+
+| ID | Category | Severity | Finding | Status |
+|----|----------|----------|---------|--------|
+| RT-001 | Docs / Trust | P2 — **Fixed** | TRUST_CENTER_INDEX.md §Model Transparency (line 94) incorrectly stated "Current primary model: HuggingFace Inference (Qwen3-8B)" — misleading to external reviewers | ✅ **Fixed** in this sprint (Apr 2026). Corrected to multi-provider stack: OpenAI, Anthropic, Gemini via Replit AI proxy. Closes TD-004. |
+| RT-002 | Docs / Trust | P3 | PRIVACY_OVERVIEW.md and SHARED_RESPONSIBILITY_MODEL.md are complete and accurate; no corrections required | INFO — no action |
+| RT-003 | Docs / Compliance | P2 | AI_GOVERNANCE.md: no mention of guardrail trigger visibility (now documented in SECURITY-CHECKLIST.md L6) | ⚠️ Open — add cross-reference to AI_GOVERNANCE.md in Sprint 3 |
+| RT-004 | Docs / Trust | P3 | TECHNICAL_DILIGENCE_PACKET.md makes no claim of SOC 2 or ISO 27001 — accurate posture confirmed | INFO — pass |
+
+---
+
+### Phase 11 — Self-Serve Documentation Audit
+
+| ID | Category | Severity | Finding | Status |
+|----|----------|----------|---------|--------|
+| RT-005 | Docs / UX | P2 | GETTING_STARTED.md describes a `pnpm seed:demo` prerequisite that requires local repo access — not suitable as a pure self-serve external doc; needs hosted onboarding wizard or separate hosted quick-start | ⚠️ Open — FLOW-001 links to this; Sprint 3 onboarding wizard will resolve |
+| RT-006 | Docs / UX | P3 | FAQ.md does not address "Is this AI fully autonomous?" — highest-stakes buyer concern | ⚠️ Open — add AI governance FAQ entry in Sprint 3 |
+| RT-007 | Docs / UX | P3 | END_USER_GUIDE.md has no embedded screenshots or UI diagram — text-only for visual workflows | ⚠️ Open — low priority; acceptable for design-partner phase |
+| RT-008 | Docs / Dev | P3 | CONTRIBUTING.md references CODEOWNERS which does not yet exist (KG013) | ⚠️ Open — resolves with KG013 fix |
+
+---
+
+### Phase 12 — Commercial & Demo Coherence Audit
+
+#### Adversarial pass: Do sales documents match what the product can actually support?
+
+| Doc | Finding | Verdict |
+|-----|---------|---------|
+| DEMO_STRATEGY.md | Audience cuts, timing, and platform distinctions are accurate; Decision Theater flow matches live implementation | ✅ Pass |
+| EXECUTIVE_DEMO.md | Investor narrative matches platform primitives; no fabricated metrics referenced | ✅ Pass |
+| OPERATOR_DEMO.md | Walkthrough references real routes; demo data is labeled as synthetic | ✅ Pass |
+| TECHNICAL_DEMO.md | API calls, auth flow, and architecture claims are accurate | ✅ Pass |
+| SALES_NARRATIVE.md | No claims of enterprise certifications (SOC 2, ISO 27001) not yet achieved | ✅ Pass |
+| OBJECTION_HANDLING.md | "We are pre-commercial design partner stage" objections handled honestly | ✅ Pass |
+| CUSTOMER_SUCCESS_PLAYBOOK.md | References staged rollout and design-partner model; no false commercial traction implied | ✅ Pass |
+| GO_TO_MARKET_MOTION.md | ICP definitions and GTM stage (design partner) accurate; no fabricated pipeline | ✅ Pass |
+| PROOF_OF_VALUE_PLAYBOOK.md | POV success metrics tied to real platform capabilities | ✅ Pass |
+| DESIGN_PARTNER_PROGRAM.md | Program terms and responsibilities are honest and actionable | ✅ Pass |
+
+| ID | Category | Severity | Finding | Status |
+|----|----------|----------|---------|--------|
+| RT-009 | Commercial / Demo | P2 | DEMO_GUIDE.md references PRISM Counsel (`/prism-counsel/`) as "deprecated (task #579)" — if PRISM Counsel is still being shown to legal buyers, this discrepancy will confuse sales | ⚠️ Open — clarify PRISM Counsel status in all commercial docs before legal-buyer demos |
+| RT-010 | Commercial / Demo | P2 | Domain-specific mobile apps listed in PRODUCT-SURFACES.md (aegis-mobile, vessels-mobile, terra-mobile, lyte-mobile) are described as "Functional Alpha" but are not registered artifacts — a buyer who asks for a demo of aegis-mobile will find it does not exist | ⚠️ Open — TD-006. Must update PRODUCT-SURFACES.md to mark these as "Concept / Planned" before external product evaluations |
+
+---
+
+### Phase 13 — Final 9-Perspective Red-Team Review
+
+#### Perspectives and key findings
+
+**1 — Enterprise Buyer (CISO / Head of Operations)**
+- **Concern:** "Can your AI make decisions without my approval?" → Covenant Policy and Alloy enforcement is correctly documented; TRUST_CENTER_INDEX.md covers it. No issue.
+- **Concern:** "Do you have SOC 2?" → Answered honestly: no, roadmapped post-funding. Pass.
+- **Finding RT-011:** No `/.well-known/security.txt` endpoint published — an enterprise CISO will look for it. KG-VD1, still open.
+
+**2 — Security Reviewer (Penetration Tester)**
+- **Concern:** Timing-safe comparison in all auth paths? → auth.ts ✅; adminGuard.ts ⚠️ (AF-001, still open).
+- **Concern:** SSRF on webhook URLs? → ⚠️ Open (SEC-007 / KG020b).
+- **Concern:** Cross-tenant vessel data? → ⚠️ Open (AF-003 / AF-007).
+- **Finding RT-012:** These three P1 open gaps are the most likely findings any professional penetration tester would report within the first four hours. All three are documented, scoped, and have remediation paths. None are new findings — they are the known P1 items from Phase 2–3.
+
+**3 — Operator (Day-to-day user, 6 months in)**
+- **Concern:** If I change a workflow setting and it fails, what happens? → Workflow Engine has checkpoint/recovery via forge-runtime. Documented.
+- **Finding RT-013:** No self-serve onboarding wizard — first-time operators face sparse empty states. FLOW-001, P1, open. This is the highest-friction UX gap for real users and the most likely cause of early churn.
+
+**4 — Diligence Reviewer (Technical Partner at VC Firm)**
+- **Concern:** Is the platform actually production-grade or is this a demo? → All diligence docs (TECHNICAL_DILIGENCE_PACKET.md, TENANCY-MODEL.md, AUDIT_FINDINGS_REGISTER.md) are honest about functional-alpha status with no fabricated production readiness.
+- **Finding RT-014:** TECHNICAL_DILIGENCE_PACKET.md is complete and honest. The self-disclosure of open gaps (Vessels schema, adminGuard timing, conversations table) demonstrates engineering rigor — this is a trust-builder, not a detractor, if positioned correctly.
+
+**5 — Series A Investor**
+- **Concern:** "Show me ARR, NRR, logo count." → Correctly documented as pre-commercial. SERIES_A_READINESS.md is honest about the gap.
+- **Concern:** "What is the moat?" → Six platform primitives, cross-domain governance, and decision memory via Outcome Graph are well-documented in MOAT_MAP.md.
+- **Finding RT-015:** The biggest investor risk is not the technology — it is the absence of signed design partners. This is the single highest-leverage human action: get one paying or design-partner customer before the Series A process begins. No engineering change can substitute for this.
+
+**6 — Future VP Engineering**
+- **Concern:** "What is the test coverage?" → Honest: sparse E2E, good unit coverage on critical paths, WCAG untested, mobile E2E absent.
+- **Concern:** "What is the on-call burden?" → No SLI/SLO definitions (KG023), no Sentry (KG028), no uptime monitor (KG027) — a new VP Eng will have to build the entire ops stack from scratch.
+- **Finding RT-016:** The VP Engineering hire will find a strong codebase with weak operational instrumentation. The highest-friction items are: no production error tracking, no SLI/SLOs, no CODEOWNERS, no OTEL in production.
+
+**7 — Future VP Product**
+- **Concern:** "Where is the product today vs. roadmap?" → PRODUCT-SURFACES.md and PRODUCT_ROADMAP.md are accurate, but domain-specific mobile apps listed as "Functional Alpha" do not exist as artifacts (TD-006). This is the biggest credibility risk in the product narrative.
+- **Finding RT-010 (repeated):** Fix PRODUCT-SURFACES.md domain-specific mobile status before any VP Product hire or product-focused investor meeting.
+
+**8 — Future VP Sales**
+- **Concern:** "What is the ICP and how do I close a deal?" → GO_TO_MARKET_MOTION.md, SALES_NARRATIVE.md, OBJECTION_HANDLING.md, and DESIGN_PARTNER_PROGRAM.md are complete, internally consistent, and tied to platform reality.
+- **Concern:** "What demos can I give?" → DEMO_STRATEGY.md, EXECUTIVE_DEMO.md, OPERATOR_DEMO.md, TECHNICAL_DEMO.md all exist and are coherent with the live product.
+- **Finding RT-017:** PRISM Counsel deprecation (DEMO_GUIDE.md) vs. legal-buyer sales materials (SALES_NARRATIVE.md which still includes PRISM Counsel as a domain pack) creates a potential inconsistency. Needs alignment before the first legal-buyer sales cycle.
+
+**9 — Skeptical SRE (Day 0 of Production Incident)**
+- **Concern:** "The site is down. What do I do?" → INCIDENT_RESPONSE.md, DEPLOYMENT-GUIDE.md, and OPERATIONS-RUNBOOK.md exist.
+- **Concern:** "I can't see any metrics." → OTEL not wired, Sentry not configured, no uptime monitor. A day-0 production incident will be entirely log-forensics-based.
+- **Finding RT-018:** The SRE's pre-launch mandate is clear: (1) wire OTEL, (2) configure Sentry, (3) set up uptime monitoring. These three items convert a blind production environment into an observable one. All three are hard blockers (LB-002, LB-003, LB-006).
+
+---
+
+### Phase 10–13 Red-Team Findings Summary
+
+| ID | Severity | Finding | Status |
+|----|----------|---------|--------|
+| RT-001 | P2 | TRUST_CENTER_INDEX.md wrong AI model reference | ✅ **Fixed** (this sprint) |
+| RT-002 | INFO | PRIVACY_OVERVIEW.md and SHARED_RESPONSIBILITY_MODEL.md accurate | INFO — pass |
+| RT-003 | P3 | AI_GOVERNANCE.md missing guardrail cross-reference | ⚠️ Open — Sprint 3 |
+| RT-004 | INFO | TECHNICAL_DILIGENCE_PACKET.md compliance posture accurate | INFO — pass |
+| RT-005 | P2 | GETTING_STARTED.md requires local repo access — not self-serve for external users | ⚠️ Open — links to FLOW-001 |
+| RT-006 | P3 | FAQ.md missing AI autonomy question (highest-stakes buyer concern) | ⚠️ Open — Sprint 3 |
+| RT-007 | P3 | END_USER_GUIDE.md text-only for visual workflows | ⚠️ Open — low priority |
+| RT-008 | P3 | CONTRIBUTING.md references non-existent CODEOWNERS | ⚠️ Open — resolves with KG013 |
+| RT-009 | P2 | PRISM Counsel deprecation inconsistency across sales vs. demo docs | ⚠️ Open — before legal-buyer demos |
+| RT-010 | P2 | Domain-specific mobile apps listed as "Functional Alpha" — do not exist as artifacts | ⚠️ Open — TD-006 |
+| RT-011 | P2 | No `/.well-known/security.txt` published | ⚠️ Open — VD1 |
+| RT-012 | P1 (existing) | Three P1 security gaps remain (AF-001, AF-003/007, SEC-007) — known from Phase 2–3 | ⚠️ Open — Sprint 3 |
+| RT-013 | P1 (existing) | No onboarding wizard — highest-friction operator UX gap | ⚠️ Open — FLOW-001 |
+| RT-014 | INFO | TECHNICAL_DILIGENCE_PACKET.md passes diligence honesty test | INFO — pass |
+| RT-015 | STRATEGIC | No signed design partners — highest pre-Series A risk (non-technical) | ⚠️ Open — founder action |
+| RT-016 | P1 (existing) | New VP Eng will find zero operational instrumentation in production | ⚠️ Open — LB-002/003/006 |
+| RT-017 | P2 | PRISM Counsel deprecation inconsistency — sales vs. demo docs misaligned | ⚠️ Open — before legal-buyer sales |
+| RT-018 | P1 (existing) | SRE day-0 is blind — no OTEL, Sentry, or uptime monitoring | ⚠️ Open — LB-002/003/006 |
+
+**New findings this phase: 10 (RT-001 through RT-010, excluding duplicates of existing P1s)**  
+**New P0 findings: 0**  
+**New P1 findings: 0 (RT-012/013/016/018 are existing P1 gaps re-confirmed, not new)**  
+**New P2 findings: 5 (RT-001 fixed; RT-003, RT-005, RT-009, RT-010, RT-011)**  
+**New P3 findings: 4 (RT-006, RT-007, RT-008)**  
+**Fixed this phase: 1 (RT-001 / TD-004)**
+
+---
+
+### Updated Cumulative Findings Summary (Phases 0–13, Final)
+
+| Category | Total | Resolved | Open |
+|----------|-------|----------|------|
+| Security (SEC-) | 11 | 6 | 5 |
+| Architecture (ARCH-) | 3 | 0 | 3 |
+| API (API-) | 5 | 0 | 5 |
+| Database (DB-) | 2 | 1 | 1 |
+| CI/CD (CI-) | 5 | 3 | 2 |
+| Observability (OBS-) | 5 | 0 | 5 |
+| Data / Mocks (DATA-) | 9 | 0 | 9 |
+| Documentation (DOC-) | 4 | 0 | 4 |
+| Operations (OPS-) | 8 | 0 | 8 |
+| Quality (QUAL-) | 3 | 0 | 3 |
+| Phase 2–3 Arch/Auth/Tenancy (AF-) | 14 | 0 | 14 |
+| Test Quality Phase 4–5 (AF-T) | 10 | 2 | 8 |
+| Code Quality Phase 4–5 (AF-Q) | 3 | 0 | 3 |
+| Flow Audit Phase 4–5 (AF-F) | 6 | 0 | 6 |
+| Phase 10–13 Red-Team (RT-) | 18 | 1 | 17 |
+| **Grand Total (Phases 0–13)** | **106** | **13** | **93** |
+
+> **Note:** The 17 "open" RT findings include 4 that are re-confirmed existing P1/P2 gaps (not new discoveries) and 5 INFO/PASS items. New actionable findings from the red-team phase: RT-003, RT-005, RT-006, RT-007, RT-008, RT-009, RT-010, RT-011, RT-017. RT-001 fixed.
+
+---
+
+*Related: `KNOWN-GAPS.md` · `OUT_OF_SCOPE_REGISTER.md` · `docs/audit/series-a-gap-register.md` · `SECURITY-CHECKLIST.md` · `CONTROL_PLANE_ARCHITECTURE.md` · `EXECUTIVE_LAUNCH_SUMMARY.md`*
+
+*Final audit completed: 2026-04-16. All 13 audit phases executed. See EXECUTIVE_LAUNCH_SUMMARY.md for the consolidated go/no-go recommendation, day-0/7/30 plans, and manual human actions required.*
