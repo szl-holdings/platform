@@ -165,3 +165,20 @@ Open the Trust Center URL.
 | Sales narrative | [SALES_NARRATIVE.md](SALES_NARRATIVE.md) |
 | Objection handling | [OBJECTION_HANDLING.md](OBJECTION_HANDLING.md) |
 | Buyer personas | [BUYER_PERSONAS.md](BUYER_PERSONAS.md) |
+| Proof and policy model | [PROOF_AND_POLICY_MODEL.md](PROOF_AND_POLICY_MODEL.md) |
+| Decision simulation | [DECISION_SIMULATION.md](DECISION_SIMULATION.md) |
+| Trust Center | [TRUST_CENTER_INDEX.md](TRUST_CENTER_INDEX.md) |
+
+---
+
+## Trust & Provenance Walkthrough (Executive Track)
+
+When executives ask *"How do I know the AI is right?"* or *"What happens if policy blocks something critical?"*, drive this sequence:
+
+1. **Open `/trust-provenance`** in Aegis (or Terra / Vessels for domain-specific flows).
+2. **Tab 1 — Proof Chains:** every AI-generated item shows source class, model/provider/version, confidence score, reviewer state, and export-safety state. Call out that blocked content cannot be exported.
+3. **Tab 2 — Policy Results:** show an Allow, a Deny (with matched rule + "what needs to change"), and an Escalate. Click *Appeal* on a Deny to record a justification — this POSTs (CSRF-protected, authenticated) to `/api/audit-log/policy-appeal`, which emits a structured `policy.appeal.recorded` log entry tying the action to the signed-in actor, role, org, and correlation id.
+4. **Tab 3 — Audit Trail:** filter to `human_override` to show that reviewer overrides in the approvals workflow are permanent, hashed, and actor-attributed.
+5. **Tab 4 — Decision Cockpit:** pick one scenario (Best / Base / Worst), show sensitivity drivers and cost-of-waiting, then switch to *Predicted vs Actual* to prove calibration over time.
+
+The core talking point: **nothing ships without a named human owner, and every override is a record, not a conversation.**

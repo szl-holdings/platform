@@ -217,4 +217,51 @@ router.get("/approvals/by-resource/:resourceType/:resourceId", authMiddleware(),
   }
 });
 
+router.post("/audit-log/policy-appeal", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const { requestId, action, justification } = req.body as {
+      requestId?: string;
+      action?: string;
+      justification?: string;
+    };
+
+    if (!requestId || !action) {
+      sendBadRequest(res, "requestId and action are required");
+      return;
+    }
+
+    if (!["escalate", "appeal"].includes(action)) {
+      sendBadRequest(res, "action must be one of: escalate, appeal");
+      return;
+    }
+
+    if (action === "appeal" && (!justification || justification.trim().length < 8)) {
+      sendBadRequest(res, "justification is required for an appeal (min 8 chars)");
+      return;
+    }
+
+    const user = req.user;
+    const orgId = user?.orgs?.[0]?.orgId ?? null;
+
+    logger.info("policy.appeal.recorded", {
+      requestId,
+      action,
+      justificationLength: justification?.length ?? 0,
+      actorId: user?.id ?? null,
+      actorRole: user?.roles?.[0] ?? null,
+      orgId,
+      correlationId: (req as unknown as { correlationId?: string }).correlationId,
+    });
+
+    sendCreated(res, {
+      requestId,
+      action,
+      recordedAt: new Date().toISOString(),
+      actorId: user?.id ?? null,
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to record policy appeal");
+  }
+});
+
 export default router;

@@ -155,3 +155,19 @@ Note their answer. That is the proof-of-value scope ask.
 | Domain pack catalog | [DOMAIN_PACK_CATALOG.md](DOMAIN_PACK_CATALOG.md) |
 | Proof of value playbook | [PROOF_OF_VALUE_PLAYBOOK.md](PROOF_OF_VALUE_PLAYBOOK.md) |
 | Buyer personas | [BUYER_PERSONAS.md](BUYER_PERSONAS.md) |
+| Proof and policy model | [PROOF_AND_POLICY_MODEL.md](PROOF_AND_POLICY_MODEL.md) |
+| Decision simulation | [DECISION_SIMULATION.md](DECISION_SIMULATION.md) |
+| Trust Center | [TRUST_CENTER_INDEX.md](TRUST_CENTER_INDEX.md) |
+
+---
+
+## Trust & Provenance Walkthrough (Operator Track)
+
+Operators live inside decisions every day. The `/trust-provenance` surface is where they prove their work and where they override the system when reality demands it.
+
+1. **Proof Chains tab** — operators click a row to see the drawer view of the full `ProofPanel`: source, model + version, confidence, reviewer state, and export-safety. Use this when compliance asks *"why did you act on this?"*
+2. **Policy Results tab** — for a blocked action, the operator sees the matched rule, the escalation target, and the *"what needs to change"* guidance. If the operator disagrees, they click **Appeal**, enter a justification (minimum 8 characters, enforced server-side), and submit. The UI POSTs to `/api/audit-log/policy-appeal` (CSRF-protected, authenticated) which emits a structured `policy.appeal.recorded` log entry carrying the actor id, role, org, correlation id, requestId, and justification length. For approvals that map to real `approval_requests` rows, the downstream reviewer action (`POST /api/approvals/:id/review` with `decision: "revised"` and a `note`) is what materializes the `human_override` row in the persisted audit trail.
+3. **Audit Trail tab** — filter by `human_override` to see every reviewer action that took the system off-script (from the approvals audit trail), with the full reason and hash-chained tamper-evidence.
+4. **Decision Cockpit tab** — before committing to a recommendation, run the scenario grid. Capture the chosen scenario in the approval payload so the approver sees the same simulation the operator did. Review *Predicted vs Actual* weekly to calibrate confidence.
+
+**Operator rule of thumb:** if you would not want your override read aloud in a post-incident review, do not submit it. The system records everything, and that is the point.

@@ -282,3 +282,34 @@ From [KNOWN-GAPS.md](KNOWN-GAPS.md):
 | Trust Center | [TRUST_CENTER_INDEX.md](TRUST_CENTER_INDEX.md) |
 | Decision simulation | [DECISION_SIMULATION.md](DECISION_SIMULATION.md) |
 | AI evaluation strategy | `AI_EVALUATION_STRATEGY.md` |
+| Executive demo — trust walkthrough | [EXECUTIVE_DEMO.md](EXECUTIVE_DEMO.md) |
+| Operator demo — override flow | [OPERATOR_DEMO.md](OPERATOR_DEMO.md) |
+| Product surfaces — trust-provenance route | [PRODUCT-SURFACES.md](PRODUCT-SURFACES.md) |
+
+---
+
+## Where governance shows up in product
+
+AI governance is not a document — it is a set of routes and components that
+buyers and operators can see and exercise directly.
+
+- **`/trust-provenance` route** (Aegis, Terra, Vessels) — 4-tab surface
+  showing proof chains, policy results, audit trail, and the decision cockpit.
+  See [PRODUCT-SURFACES.md](PRODUCT-SURFACES.md#trust--provenance-surface).
+- **Proof attribution** — every AI-generated item carries `sourceClass`,
+  `modelProvider`, `modelVersion`, `confidenceScore`, `reviewState`, and
+  `exportSafetyState`. Enforced through the `ProofPanel` primitive.
+- **Policy appeal with audit** — operators who disagree with a policy denial
+  submit a justification (≥ 8 chars) via `POST /api/audit-log/policy-appeal`
+  (CSRF-protected, authenticated). The endpoint emits a structured
+  `policy.appeal.recorded` log line with actor, role, org, correlation id,
+  `requestId`, and `justificationLength`. When the underlying request maps to
+  a real approval, the authoritative `human_override` entry is written by the
+  reviewer flow (`POST /api/approvals/:id/review` with `decision: "revised"`),
+  which persists to the approvals audit trail.
+- **Simulation-informed approvals** — approval payloads should embed the
+  chosen `SimulationScenario` and a `ProofPanelData` snapshot so approvers
+  review the same evidence and scenario ranges the requester saw.
+- **Predicted vs Actual calibration** — the Decision Cockpit's *outcome* tab
+  shows how prior simulations compared to reality, so reviewers can challenge
+  over-confident models before they fire again.

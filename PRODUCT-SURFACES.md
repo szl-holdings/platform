@@ -405,3 +405,56 @@ it.
 
 All routes require an authenticated session. Org isolation is enforced from
 the user session at the route layer, not optional in the library.
+
+---
+
+## Trust & Provenance Surface
+
+Every domain pack exposes a dedicated `/trust-provenance` route that surfaces
+proof, policy, audit, and simulation primitives in a single 4-tab workspace.
+
+| Artifact | Route | Focus |
+|----------|-------|-------|
+| Aegis | `/trust-provenance` | Security ops: threat assessments, SIEM evidence, response policy |
+| Terra | `/trust-provenance` | Real estate: deal scenarios, tax appeals, property provenance |
+| Vessels | `/trust-provenance` | Maritime: voyage risk, AIS anomalies, vessel provenance |
+
+Each tab is backed by a shared primitive from `@szl-holdings/shared-ui`:
+
+- **Proof Chains** → `ProofPanel` (source class, model/provider/version, confidence,
+  reviewer state, export-safety state, derivation lineage, contradiction markers).
+- **Policy Results** → `PolicyResult` (Allow/Deny/Escalate, matched rules,
+  what-needs-to-change guidance, approval history, **Appeal** flow that POSTs to
+  `/api/audit-log/policy-appeal`).
+- **Audit Trail** → `AdminAuditTrail` (searchable timeline with actor attribution,
+  risk tagging, and immutable hash display; `human_override` action type sourced
+  from the approvals audit trail and equivalent persisted audit tables).
+- **Decision Cockpit** → `SimulationCockpit` (best/base/worst scenarios,
+  Monte Carlo ranges, sensitivity drivers, cost-of-waiting, Predicted vs Actual).
+
+### Policy Appeal endpoint
+
+- **Route:** `POST /api/audit-log/policy-appeal`.
+- **Auth:** any authenticated user; CSRF-protected (requires `X-CSRF-Token`
+  matching the `csrf_token` cookie).
+- **Body:** `{ requestId: string, action: "escalate" | "appeal", justification?: string }`.
+- **Validation:** for `action: "appeal"`, `justification` must be ≥ 8 characters.
+- **Response:** `{ requestId, action, recordedAt, actorId }`.
+- **Observability:** emits a structured `policy.appeal.recorded` log line with
+  actor id, role, org, correlation id, `requestId`, `action`, and
+  `justificationLength`. The `requestId` is treated as an opaque,
+  caller-supplied identifier — this endpoint does not cross-validate it against
+  an approvals row. For appeals that must persist to the tamper-evident audit
+  trail, route them through `POST /api/approvals/:id/review` with
+  `decision: "revised"` and a `note`, which writes an authoritative
+  `human_override` entry in the approvals audit log.
+
+### Approval flow integration
+
+Approval records created via `POST /api/approvals` accept a free-form `payload`.
+Callers should include the chosen `SimulationScenario` and a snapshot of
+`ProofPanelData` so that approvers see the same simulation and evidence the
+requester did. The existing `POST /api/approvals/:id/review` endpoint records
+the approver's decision with `decision`, `note`, `actorId`, and
+`serviceAttribution`, producing the end-to-end trace visible in the Audit Trail
+tab.
