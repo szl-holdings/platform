@@ -692,6 +692,7 @@ router.use("/tenant-health", _writeLimiter);
 router.use(tenantHealthRouter);
 
 router.use("/changelog", _readLimiter);
+router.use("/changelog", _writeLimiter);
 router.use(changelogRouter);
 
 export default router;
