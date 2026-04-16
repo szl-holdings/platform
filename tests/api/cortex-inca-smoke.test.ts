@@ -100,6 +100,15 @@ vi.mock("../../artifacts/api-server/src/middlewares/optimistic-concurrency", () 
   validateIfMatch: (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
 
+vi.mock("../../artifacts/api-server/src/middlewares/sliding-window-limiter", () => {
+  const passthrough = (_req: unknown, _res: unknown, next: () => void) => next();
+  return {
+    perUserApiSlidingLimiter: passthrough,
+    perUserWriteSlidingLimiter: passthrough,
+    perUserReadSlidingLimiter: passthrough,
+  };
+});
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function buildAuthApp(roles: string[] = ["admin", "ops", "exec", "super_admin"]) {
@@ -118,25 +127,47 @@ function buildAuthApp(roles: string[] = ["admin", "ops", "exec", "super_admin"])
 }
 
 const testInsertedBriefingIds: number[] = [];
+let seededBriefingId: number | null = null;
+
+beforeAll(async () => {
+  try {
+    const { db, dailyBriefingsTable } = await import("../../lib/db/src/index");
+    const { eq } = await import("drizzle-orm");
+    const today = new Date().toISOString().slice(0, 10);
+    const existing = await db.select().from(dailyBriefingsTable).where(eq(dailyBriefingsTable.briefingDate, today)).limit(1);
+    if (existing.length === 0) {
+      const [row] = await db.insert(dailyBriefingsTable).values({
+        briefingDate: today,
+        headline: "Test briefing seeded by smoke tests",
+        executiveSummary: "Auto-seeded summary for smoke test determinism",
+        signals: [],
+        domainScores: {},
+        totalAlerts: 0,
+        criticalCount: 0,
+        highCount: 0,
+        overallHealth: "nominal",
+        isPublished: true,
+      }).returning();
+      seededBriefingId = row.id;
+    }
+  } catch (e) {
+    console.warn("[cortex-smoke] beforeAll seed failed:", e instanceof Error ? e.message : e);
+  }
+}, 10000);
 
 afterAll(async () => {
   try {
-    const { db } = await import("@szl-holdings/db");
+    const { db, pool } = await import("../../lib/db/src/index");
     const { sql } = await import("drizzle-orm");
-    if (testInsertedBriefingIds.length > 0) {
-      const idList = testInsertedBriefingIds.join(", ");
-      await db.execute(sql.raw(`DELETE FROM daily_briefings WHERE id IN (${idList})`));
+    const idsToDelete = [...testInsertedBriefingIds];
+    if (seededBriefingId != null) idsToDelete.push(seededBriefingId);
+    if (idsToDelete.length > 0) {
+      await db.execute(sql.raw(`DELETE FROM daily_briefings WHERE id IN (${idsToDelete.join(", ")})`));
     }
-  } catch (err) {
-    console.warn("[cortex-smoke] afterAll cleanup failed:", err instanceof Error ? err.message : err);
-  }
-  try {
-    const dbModule = await import("@szl-holdings/db");
-    if (dbModule.pool && typeof (dbModule.pool as { end?: () => Promise<void> }).end === "function") {
-      await (dbModule.pool as { end: () => Promise<void> }).end();
+    if (pool && typeof pool.end === "function") {
+      await pool.end();
     }
   } catch {
-    // pool may already be closed
   }
 });
 
@@ -246,10 +277,6 @@ describe("Domain: CORTEX Intelligence", () => {
     const router = (await import("../../artifacts/api-server/src/routes/cortex")).default;
     app.use(router);
     const res = await request(app).get("/cortex/briefing/today");
-    if (res.status === 500) {
-      expect(res.body).toHaveProperty("error");
-      return;
-    }
     expect(res.status).toBe(200);
     const body = res.body?.data ?? res.body;
     expect(body).toHaveProperty("briefing");
