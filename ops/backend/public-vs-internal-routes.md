@@ -22,7 +22,9 @@ CORS enforcement lives in `app.ts` (`corsOriginFn`). In production, `CORS_ORIGIN
 
 ## Public routes (unauthenticated)
 
-These are intentionally callable without credentials. Each one is rate-limited by the global limiter (200 req / 15 min per IP) and, where applicable, by the route-specific limiter.
+These are intentionally callable without credentials. Each one is rate-limited by the global limiter (200 req / 15 min per IP) and, where applicable, by the route-specific limiter. The authoritative allowlist lives in `artifacts/api-server/src/middlewares/global-auth-enforcer.ts` — this table mirrors it.
+
+### Platform / probe surfaces
 
 | Method | Path | Purpose | Notes |
 |--------|------|---------|-------|
@@ -35,10 +37,36 @@ These are intentionally callable without credentials. Each one is rate-limited b
 | `GET` | `/api/openapi`, `/api/openapi.json`, `/api/docs.json` | OpenAPI spec (JSON) | Served from `lib/api-spec/openapi.yaml` |
 | `GET` | `/api/docs` | Swagger UI | Browsable API explorer |
 | `GET` | `/api/csrf-token` | Issue CSRF cookie + token | Required before mutating calls from browsers |
-| `POST` | `/api/auth/*` | Login / OIDC callback / logout | Strict rate limit (5 req / min per IP) |
-| `POST` | `/api/contact`, `/api/demo-request` | Public submissions | Public-submission rate limit (5 req / hr per IP) |
 
-Operational rule: do **not** add a new public route without (a) writing it into this table, (b) adding a route-specific rate limit, and (c) adding it to the OpenAPI spec.
+### Auth & identity
+
+| Method | Path | Purpose | Notes |
+|--------|------|---------|-------|
+| `*` | `/api/auth/*` | Login / logout / session bootstrap | Strict rate limit (5 req / min per IP) |
+| `*` | `/api/oidc/*` | OIDC callbacks (Replit, Azure AD) | Discovery-driven; no app session yet at callback time |
+
+### Public submissions & content
+
+| Method | Path | Purpose | Notes |
+|--------|------|---------|-------|
+| `POST` | `/api/contact` | Marketing contact form | Public-submission rate limit (5 req / hr per IP) |
+| `POST` | `/api/demo-requests` | Demo signup form | Public-submission rate limit (5 req / hr per IP) |
+| `*` | `/api/public/*` | Public marketing/status content | Read-only, anonymous |
+
+### Service-token authenticated (not session/OIDC)
+
+These routes are publicly *reachable* but every request is verified by a per-route credential (HMAC signature, bearer token, or stream auth token). No platform session or OIDC principal is required, so the OIDC enforcer treats them as "public" and delegates auth to the route handler.
+
+| Method | Path | Auth mechanism | Purpose |
+|--------|------|----------------|---------|
+| `*` | `/api/webhooks/*` | HMAC signature in route handler | Inbound webhooks from third-party systems |
+| `*` | `/api/scim/*` | SCIM bearer token (`scimTokensTable`, RFC 7643/7644) | SCIM 2.0 user/group provisioning |
+| `*` | `/api/stream/webhook/*`, `/api/stream/webhook-siem`, `/api/stream/ais-nmea` | Source token (streamed-ingestion `authToken`) | High-volume webhook ingestion |
+| `GET` | `/api/stream/siem-events`, `/api/stream/market-data`, `/api/stream/ais-tracking`, `/api/stream/status` | Read-only SSE feeds | Live dashboards (auth handled at subscription gate) |
+| `GET` | `/api/federation/agents`, `/api/federation/agents/*`, `/api/federation/health` | A2A discovery (per A2A spec) | Agent-to-agent federation discovery |
+| `*` | `/api/v1/*` | DOS public API key (`X-Api-Key` validated by `dos-api-key-auth`) | DOS Public API surface |
+
+Operational rule: do **not** add a new public route without (a) writing it into the appropriate table above, (b) adding it to the allowlist in `global-auth-enforcer.ts` with a comment explaining why session auth is bypassed, (c) adding the route-specific rate limit and/or service-token verification, and (d) adding it to the OpenAPI spec (or, for service-token surfaces, to the integration-specific spec).
 
 ---
 
