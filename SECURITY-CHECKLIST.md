@@ -167,17 +167,22 @@ Every commit and pull request runs:
 
 ## Remaining Gaps (see KNOWN-GAPS.md for full detail)
 
-
-| Gap ID | Description | Severity | ETA |
-|--------|-------------|----------|-----|
-| GAP-001 | Manual rotation of Firebase/Google keys needed | High | Immediate |
-| KG009 | OTEL exporter not wired for production | P1 | Pre-deploy |
-| KG011 | CodeQL scanning not configured in CI | P1 | Sprint 3 |
-| KG012 | Dependency review not configured in CI | P1 | Sprint 3 |
-| KG020b | Webhook delivery URL SSRF validation absent | P1 | Sprint 3 |
-| KG020c | No virus scanning on uploaded files | P2 | Sprint 4 |
+| Gap ID | Description | Severity | ETA | Launch Impact |
+|--------|-------------|----------|-----|---------------|
+| GAP-001 | Manual rotation of Firebase/Google keys needed | High | Immediate | 🔴 Hard blocker (LB-001) |
+| KG009 | OTEL exporter not wired for production | P1 | Pre-deploy | 🔴 Hard blocker (LB-006) |
+| KG026 | MFA not implemented | P1 | Enterprise tier launch | 🟡 Conditional (LC-005) |
+| KG027 | External uptime monitoring absent | P1 | Pre-deploy | 🔴 Hard blocker (LB-002) |
+| KG028 | Sentry / error tracking not in production | P1 | Pre-deploy | 🔴 Hard blocker (LB-003) |
+| KG011 | CodeQL scanning not configured in CI | P1 | Sprint 3 | 🟡 Conditional (LC-002) |
+| KG012 | Dependency review not configured in CI | P1 | Sprint 3 | 🟡 Conditional (LC-003) |
+| KG020b | Webhook delivery URL SSRF validation absent | P1 | Sprint 3 | 🟡 Conditional (LC-004) |
+| KG020c | No virus scanning on uploaded files | P2 | Sprint 4 | 🟢 Not blocking |
+| GAP-002 | No CI/CD automated secret scanning | Med | Sprint 3 | 🟡 Conditional (LC-001) |
 
 > **All P0 items are resolved.** DB-level tenant isolation, timing-safe auth, Zod validation on all high-risk write routes, structured Pino logging in all production paths. Mobile secrets transition to template-based management is complete. See `KNOWN-GAPS.md` for full resolution log.
+
+> **For launch decision:** See [LAUNCH_BLOCKERS.md](LAUNCH_BLOCKERS.md) for the definitive list of hard blockers and conditional items. See [GO_NO_GO_CHECKLIST.md](GO_NO_GO_CHECKLIST.md) for the final launch sign-off framework.
 
 ---
 

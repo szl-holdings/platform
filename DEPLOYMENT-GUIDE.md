@@ -156,6 +156,26 @@ Enterprise deployments use per-tenant configuration stored in the database:
 
 ---
 
+## Hard Blocker Pre-Deploy Verification
+
+Before executing any production deployment for public or design-partner launch, verify all hard blockers from [LAUNCH_BLOCKERS.md](LAUNCH_BLOCKERS.md) are resolved. This is a mandatory pre-step, not optional:
+
+| Blocker | Verification Step | Status |
+|---------|-----------------|--------|
+| **LB-001** Firebase/Google credential rotation | Run `git log --all --full-history -- '**/google-services.json'` — clean. Rotation confirmed by Founder. | ☐ |
+| **LB-002** External uptime monitoring live | Verify monitor is active and alerting on `GET /api/health` from external service | ☐ |
+| **LB-003** Error tracking configured | Confirm Sentry (or equivalent) is receiving events in production; `SENTRY_DSN` set | ☐ |
+| **LB-004** Production DB separate from dev | Confirm `DATABASE_URL` in production differs from development; no seed data present | ☐ |
+| **LB-005** Production secrets independent | Confirm `SESSION_SECRET`, `SECRET_ENCRYPTION_KEY`, `ADMIN_PIN`, `CORS_ORIGINS` are production-specific | ☐ |
+| **LB-006** OTEL exporter wired | Confirm `OTEL_EXPORTER_OTLP_ENDPOINT` set; at least one trace visible in observability backend | ☐ |
+| **LB-007** Legal review complete | Confirm Privacy Policy, ToS, and design-partner agreements reviewed and approved by counsel | ☐ |
+
+**Do not proceed to the deployment steps below until all seven boxes are checked.**
+
+For full blocker details, resolution guidance, and the formal sign-off table, see [LAUNCH_BLOCKERS.md](LAUNCH_BLOCKERS.md).
+
+---
+
 ## Pre-Deployment Checklist
 
 Complete this checklist before every production deployment. Full version: [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md).
@@ -321,8 +341,13 @@ The `scripts/post-merge.sh` script runs automatically after task branch merges:
 
 | Document | Path |
 |----------|------|
+| **Launch blockers (authoritative)** | `LAUNCH_BLOCKERS.md` |
+| **Go/No-Go checklist** | `GO_NO_GO_CHECKLIST.md` |
+| **Operational readiness scorecard** | `OPERATIONAL_READINESS_SCORECARD.md` |
+| **Public launch readiness framework** | `PUBLIC_LAUNCH_READINESS.md` |
+| **Executive launch summary** | `EXECUTIVE_LAUNCH_SUMMARY.md` |
 | Source deployment notes | `docs/deployment.md` |
-| Deployment readiness checklist | `DEPLOYMENT_READINESS.md` |
+| Deployment readiness checklist (deprecated) | `DEPLOYMENT_READINESS.md` |
 | Environment variable matrix | `ENV_MATRIX.md` |
 | Operations runbook | `OPERATIONS-RUNBOOK.md` |
 | Rollback runbook | `infra/runbooks/RUNBOOK_ROLLBACK.md` |

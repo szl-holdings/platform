@@ -122,7 +122,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | TD-001 | PRISM framework naming inconsistency | Tech Debt | Internal confusion | Pulse/Risk/Intel vs People/Revenue/Infra |
 | TD-002 | Broken seed scripts (PRISM Counsel) | Tech Debt | Dev friction | Fix recovery table seed scripts |
 | TD-003 | DEMO_GUIDE.md said "five primitives" throughout | Doc Accuracy | ✅ Resolved Apr-2026 | Corrected to six primitives (Event Fabric is the 6th) |
-| TD-004 | TRUST_CENTER_INDEX.md cited HuggingFace/Qwen3-8B as AI model | Doc Accuracy | ✅ Resolved Apr-2026 | Corrected to multi-provider stack (OpenAI, Anthropic, Gemini) |
+| TD-004 | TRUST_CENTER_INDEX.md cited HuggingFace/Qwen3-8B as AI model | Doc Accuracy | ⚠️ Re-opened Apr-2026 | Gap register marked resolved but TRUST_CENTER_INDEX.md § Model Transparency (line ~94) still reads "Current primary model: HuggingFace Inference (Qwen3-8B)". File needs to be corrected to reflect multi-provider stack (OpenAI, Anthropic, Gemini). Must fix before external trust center review. |
 | TD-005 | SECURITY.md role list showed 6 of 11 platform roles | Doc Accuracy | ✅ Resolved Apr-2026 | Corrected to full 11-role hierarchy with reference to ACCESS-CONTROL-MATRIX.md |
 | TD-006 | PRODUCT-SURFACES.md lists domain-specific mobile apps (aegis-mobile, vessels-mobile, terra-mobile, lyte-mobile) that are not registered artifacts | Doc Accuracy | ⚠️ Open — verify artifact registration status before first external eval |
 | RD-001 | SOC 2 Type II / FedRAMP readiness | Compliance | Sales blocker | Post-revenue roadmap items |
@@ -136,13 +136,20 @@ Operational gaps, process health, test coverage, observability, team ownership.
 |----------|-------|----------|------|
 | P0 — Critical / High | 11 | 10 | 1 |
 | P1 — High | 9 | 0 | 9 |
-| P2 — Medium / Low | 21 | 3 | 18 |
-| **Total** | **41** | **13** | **28** |
+| P2 — Medium / Low | 22 | 2 | 20 |
+| **Total** | **42** | **12** | **30** |
+
+> **April 2026 Phase 0 audit note:** TD-004 (TRUST_CENTER_INDEX.md model reference) was previously marked resolved but the underlying file still contains the stale HuggingFace/Qwen3-8B reference — re-opened. TD-003 remains resolved. Net change: +1 open gap. See LAUNCH_BLOCKERS.md for the full pre-launch blocker register.
 
 ---
 
 ## Related Documents
 
+- `LAUNCH_BLOCKERS.md` — authoritative list of items that block public launch (created Apr 2026)
+- `PUBLIC_LAUNCH_READINESS.md` — launch bar definitions across 10 dimensions (created Apr 2026)
+- `GO_NO_GO_CHECKLIST.md` — final launch decision checklist (created Apr 2026)
+- `OPERATIONAL_READINESS_SCORECARD.md` — red/yellow/green readiness scorecard (created Apr 2026)
+- `EXECUTIVE_LAUNCH_SUMMARY.md` — launch readiness summary for leadership and investors (created Apr 2026)
 - `SECURITY-CHECKLIST.md` — full control inventory and credential hygiene
 - `SECRETS_SETUP.md` — instructions for handling secrets and credentials
 - `lib/db/migrations/0001_add_tenant_id_to_rag_knowledge_chunks.sql` — DB migration for tenant isolation
@@ -153,6 +160,6 @@ Operational gaps, process health, test coverage, observability, team ownership.
 
 ## Incident Log
 
-- **2026-04-16:** Phase 0 audit confirmed all committed mobile credential files are placeholders. No active leak detected.
+- **2026-04-16:** Phase 0 launch readiness audit completed. All committed mobile credential files confirmed as placeholders — no active key material detected. Manual rotation of Firebase/Google credentials required as precautionary measure (GAP-001 / LB-001). TD-004 re-opened: TRUST_CENTER_INDEX.md model reference not corrected despite being marked resolved. Full audit findings documented in LAUNCH_BLOCKERS.md, PUBLIC_LAUNCH_READINESS.md, GO_NO_GO_CHECKLIST.md, OPERATIONAL_READINESS_SCORECARD.md, and EXECUTIVE_LAUNCH_SUMMARY.md.
 
 ---
