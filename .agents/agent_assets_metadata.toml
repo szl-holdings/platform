@@ -113,3 +113,9 @@ id = "PnFNWIPVC-2yCmO79atDQ"
 uri = "file://project-export.zip"
 type = "unspecified"
 title = "Full Project Source Code Export"
+
+[[outputs]]
+id = "AiQzVw9q_1uNXvQUdIykF"
+uri = "file://.local/generated-docs/SZL-Holdings-Executive-Brief.pdf"
+type = "pdf"
+title = "SZL Holdings — Executive Platform Brief (April 2026)"
