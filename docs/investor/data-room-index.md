@@ -95,7 +95,7 @@ This index lists all materials available in the SZL Holdings investor data room.
 |----------|----------|-------------|
 | Executive Overview | `docs/buyer/executive-overview.md` | C-suite oriented platform overview |
 | Solution Brief | `docs/buyer/solution-brief.md` | Problem-solution narrative |
-| Use Cases | `docs/buyer/use-cases.md` | Domain-specific use cases per vertical |
+| Use Cases | `docs/buyer/use-cases.md` | Domain-specific use cases per domain pack |
 | Deployment Options | `docs/buyer/deployment-options.md` | Deployment and configuration options |
 | Security Summary | `docs/buyer/security-summary.md` | Buyer-facing security summary |
 

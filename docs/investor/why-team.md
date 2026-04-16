@@ -59,6 +59,6 @@ As the company moves toward revenue activation and first commercial contracts, t
 
 Stephen Lutar is a systems builder with a conviction that the most important software problems are architecture problems — not feature problems. The SZL platform reflects that conviction.
 
-He is not building a product company that happens to have a platform. He is building a platform that enables a portfolio of products to compound in value with each new vertical.
+He is not building a product company that happens to have a platform. He is building a platform that enables a portfolio of domain packs to compound in value with each new domain.
 
 The vision is explicit in the architecture. The architecture is visible in the repository.

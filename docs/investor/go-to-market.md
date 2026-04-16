@@ -13,7 +13,7 @@ The go-to-market strategy is deliberate and sequential. We are not attempting to
 1. **Universal problem** — Every organization with more than 50 people has the accountability gap that Lyte solves. Decisions running without attribution, AI recommendations without governance, signals without routes to action.
 2. **Quantifiable ROI** — Approval latency reduction, escalation speed, decision traceability — these are metrics customers can measure. The governed decision loop creates a verifiable audit trail that also satisfies compliance requirements.
 3. **Shortest path to SaaS revenue** — Lyte's per-seat model can be activated faster than enterprise contracts for domain packs.
-4. **Domain pack entry point** — A Lyte customer is a prospect for every domain pack. The governance infrastructure is already in place; the domain pack adds vertical intelligence.
+4. **Domain pack entry point** — A Lyte customer is a prospect for every domain pack. The governance infrastructure is already in place; the domain pack adds domain-specific intelligence.
 
 ---
 
@@ -81,7 +81,7 @@ The GitHub repository, LinkedIn presence, and szlholdings.com serve as the prima
 
 ### Phase 3: Ecosystem Leverage
 
-Each platform vertical opens a distinct sales motion. Vessels opens maritime trade show and maritime broker networks. Aegis opens security conference and MSP partner channel. Terra opens NYC commercial real estate network.
+Each domain pack opens a distinct sales motion. Vessels opens maritime trade show and maritime broker networks. Aegis opens security conference and MSP partner channel. Terra opens NYC commercial real estate network.
 
 ---
 

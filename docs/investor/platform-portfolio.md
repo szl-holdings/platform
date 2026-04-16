@@ -77,7 +77,7 @@ Enterprise cybersecurity and managed services command. Three unified workspaces 
 - INCA model governance — experiment tracking, ensemble evaluation
 - MSP Command: managed services operations for security providers
 
-**Strategic position:** Defense vertical with a distinct MSP revenue path through the Command module.
+**Strategic position:** Defense domain pack with a distinct MSP revenue path through the Command module.
 
 ---
 
@@ -103,7 +103,7 @@ Property intelligence for NYC brokers, investors, and portfolio teams.
 - Deal pipeline management via Alloy
 - Market signal intelligence
 
-**Strategic position:** Real estate vertical with a live data pipeline. Demonstrates the platform's ability to aggregate public data into actionable commercial intelligence.
+**Strategic position:** Real estate domain pack with a live data pipeline. Demonstrates the platform's ability to aggregate public data into actionable commercial intelligence.
 
 ---
 
@@ -140,7 +140,7 @@ Principal-led advisory on brand strategy, operations, and executive engagement.
 - Web platform: service catalog, luxury brand positioning, inquiry workflow
 - Native mobile client (Expo/React Native): client engagement, discreet communication
 - Advisory grounded in platform intelligence — not intuition-only
-- Demonstrates the advisory model that every platform vertical can eventually support
+- Demonstrates the advisory model that every domain pack can eventually support
 
 **Strategic position:** Demonstrates the Advise layer of the ecosystem. Revenue model is advisory retainer — different from the SaaS platforms, but validates the full stack.
 
@@ -160,4 +160,4 @@ The compounding value of this portfolio:
 | `@workspace/ai-engine` | Multi-LLM inference layer built once | All platforms |
 | Azure Bicep IaC | One infrastructure template family | All enterprise deployments |
 
-The marginal cost of adding a new platform vertical to this ecosystem is dramatically lower than building a standalone product — because the infrastructure investment has already been made.
+The marginal cost of adding a new domain pack to this ecosystem is dramatically lower than building a standalone product — because the governance infrastructure investment has already been made.

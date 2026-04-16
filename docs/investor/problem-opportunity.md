@@ -16,7 +16,7 @@ This is not a data problem. Organizations have more data than they can use. It i
 
 ---
 
-## How It Manifests by Vertical
+## How It Manifests by Domain
 
 ### Business Operations (Lyte)
 
