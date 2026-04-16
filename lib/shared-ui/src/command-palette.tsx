@@ -483,20 +483,36 @@ export function createBaselineWebActions(
   opts: {
     settingsPath?: string;
     profilePath?: string;
+    notificationsPath?: string;
     helpUrl?: string;
     themeToggle?: { label?: string; action: () => void };
   } = {}
 ): CommandItem[] {
-  const { settingsPath = "/settings", profilePath = "/profile", helpUrl, themeToggle } = opts;
+  const {
+    settingsPath = "/admin/platform-settings",
+    profilePath = "/admin/platform-settings",
+    notificationsPath = "/notifications",
+    helpUrl,
+    themeToggle,
+  } = opts;
   const items: CommandItem[] = [
     {
       id: "baseline-settings",
-      label: "Settings",
-      description: "Open application settings",
+      label: "Account Settings",
+      description: "Manage your profile, security, and preferences",
       icon: "⚙",
       group: "Actions",
-      keywords: ["settings", "preferences", "configuration"],
-      action: () => navigate(settingsPath),
+      keywords: ["settings", "preferences", "configuration", "account", "profile"],
+      action: () => { window.location.href = settingsPath; },
+    },
+    {
+      id: "baseline-notifications",
+      label: "Notifications",
+      description: "View all platform notifications across workspaces",
+      icon: "🔔",
+      group: "Actions",
+      keywords: ["notifications", "alerts", "inbox", "messages"],
+      action: () => { window.location.href = notificationsPath; },
     },
     {
       id: "baseline-profile",
@@ -505,7 +521,7 @@ export function createBaselineWebActions(
       icon: "👤",
       group: "Actions",
       keywords: ["profile", "account", "user"],
-      action: () => navigate(profilePath),
+      action: () => { window.location.href = profilePath; },
     },
   ];
   if (themeToggle) {
@@ -537,7 +553,7 @@ const ECOSYSTEM_APPS = [
   { id: "szl-holdings", name: "SZL Holdings", path: "/", icon: "◆", description: "Premium Command Systems Ecosystem" },
   { id: "alloy", name: "Alloy", path: "/alloy", icon: "⬡", description: "Execution Fabric & Orchestration Engine" },
   { id: "lyte", name: "Lyte", path: "/command/operations/", icon: "⚡", description: "Business Observability Command" },
-  { id: "aegis", name: "Aegis", path: "/firestorm/", icon: "🛡", description: "Unified Defense & Intelligence" },
+  { id: "aegis", name: "Aegis", path: "/aegis/", icon: "🛡", description: "Unified Defense & Intelligence" },
   { id: "vessels", name: "Vessels", path: "/vessels/", icon: "⚓", description: "Maritime Command Intelligence" },
   { id: "terra", name: "Terra", path: "/terra/", icon: "⬢", description: "Real Estate Broker Command" },
   { id: "nexus", name: "Nexus", path: "/nexus/timeline", icon: "🔮", description: "Intelligence Fusion & Command" },

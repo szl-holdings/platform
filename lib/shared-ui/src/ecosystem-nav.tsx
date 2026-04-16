@@ -678,7 +678,7 @@ function NotificationsPanel({
           </button>
         </div>
       </div>
-      <div style={{ maxHeight: "400px", overflowY: "auto" }}>
+      <div style={{ maxHeight: "380px", overflowY: "auto" }}>
         {recent.length === 0 ? (
           <div
             style={{
@@ -776,6 +776,33 @@ function NotificationsPanel({
             </div>
           ))
         )}
+      </div>
+      <div
+        style={{
+          padding: "10px 16px",
+          borderTop: "1px solid rgba(255,255,255,0.07)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <a
+          href="/notifications"
+          style={{
+            fontSize: "11px",
+            color: "rgba(255,255,255,0.4)",
+            textDecoration: "none",
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+            transition: "color 0.15s",
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.75)"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.4)"; }}
+          onClick={onClose}
+        >
+          View all notifications →
+        </a>
       </div>
     </div>
   );
@@ -1150,12 +1177,15 @@ export function EcosystemNav({
   const [showAppSwitcher, setShowAppSwitcher] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const appSwitcherRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   useClickOutside(appSwitcherRef, () => setShowAppSwitcher(false));
   useClickOutside(notificationsRef, () => setShowNotifications(false));
+  useClickOutside(userMenuRef, () => setShowUserMenu(false));
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -1513,58 +1543,151 @@ export function EcosystemNav({
           </div>
 
           {isAuthenticated && user ? (
-            <button
-              onClick={logout}
-              title={`Signed in as ${user.displayName || user.name || user.username || "User"} — click to sign out`}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "4px 10px 4px 6px",
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.09)",
-                borderRadius: "8px",
-                cursor: "pointer",
-                transition: "background 0.15s",
-              }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.09)"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
-            >
-              {user.avatarUrl ? (
-                <img
-                  src={user.avatarUrl}
-                  alt=""
-                  style={{ width: "24px", height: "24px", borderRadius: "6px", objectFit: "cover", flexShrink: 0, border: `1px solid ${accentColor}50` }}
-                />
-              ) : (
+            <div ref={userMenuRef} style={{ position: "relative" }}>
+              <button
+                onClick={() => {
+                  setShowUserMenu(!showUserMenu);
+                  setShowNotifications(false);
+                  setShowAppSwitcher(false);
+                }}
+                title={`Signed in as ${user.displayName || user.name || user.username || "User"}`}
+                aria-expanded={showUserMenu}
+                aria-haspopup="menu"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "4px 10px 4px 6px",
+                  background: showUserMenu ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.09)",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  transition: "background 0.15s",
+                }}
+                onMouseEnter={(e) => { if (!showUserMenu) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.09)"; }}
+                onMouseLeave={(e) => { if (!showUserMenu) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
+              >
+                {user.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt=""
+                    style={{ width: "24px", height: "24px", borderRadius: "6px", objectFit: "cover", flexShrink: 0, border: `1px solid ${accentColor}50` }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: "24px",
+                      height: "24px",
+                      borderRadius: "6px",
+                      background: `${accentColor}30`,
+                      border: `1px solid ${accentColor}50`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      color: accentColor,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {(user.displayName || user.name || user.username || "U").charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div style={{ display: "none" }} className="eco-nav-user-info">
+                  <div style={{ fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.8)", lineHeight: 1.2 }}>
+                    {user.displayName || user.name || user.username || "User"}
+                  </div>
+                  <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>
+                    {user.roles && user.roles.length > 0 ? user.roles[0] : userRoleProp || "Member"}
+                  </div>
+                </div>
+              </button>
+              {showUserMenu && (
                 <div
+                  role="menu"
                   style={{
-                    width: "24px",
-                    height: "24px",
-                    borderRadius: "6px",
-                    background: `${accentColor}30`,
-                    border: `1px solid ${accentColor}50`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "12px",
-                    fontWeight: 600,
-                    color: accentColor,
-                    flexShrink: 0,
+                    position: "absolute",
+                    top: "calc(100% + 8px)",
+                    right: 0,
+                    width: "200px",
+                    background: "rgba(10, 12, 20, 0.97)",
+                    backdropFilter: "blur(20px)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: "12px",
+                    padding: "6px",
+                    boxShadow: "0 16px 48px rgba(0,0,0,0.6)",
+                    zIndex: 9999,
                   }}
                 >
-                  {(user.displayName || user.name || user.username || "U").charAt(0).toUpperCase()}
+                  <div
+                    style={{
+                      padding: "8px 10px 10px",
+                      borderBottom: "1px solid rgba(255,255,255,0.07)",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    <div style={{ fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.85)" }}>
+                      {user.displayName || user.name || user.username || "User"}
+                    </div>
+                    <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)", marginTop: "2px" }}>
+                      {user.roles && user.roles.length > 0 ? user.roles[0] : userRoleProp || "Member"}
+                    </div>
+                  </div>
+                  {[
+                    { label: "Account Settings", icon: "⚙", href: "/admin/platform-settings" },
+                    { label: "Notifications", icon: "🔔", href: "/notifications" },
+                  ].map((item) => (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      role="menuitem"
+                      onClick={() => setShowUserMenu(false)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        padding: "8px 10px",
+                        borderRadius: "7px",
+                        textDecoration: "none",
+                        color: "rgba(255,255,255,0.7)",
+                        fontSize: "12px",
+                        transition: "background 0.12s",
+                      }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.07)"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                    >
+                      <span style={{ fontSize: "14px", width: "18px", textAlign: "center" }}>{item.icon}</span>
+                      {item.label}
+                    </a>
+                  ))}
+                  <div style={{ height: "1px", background: "rgba(255,255,255,0.07)", margin: "4px 0" }} />
+                  <button
+                    onClick={() => { setShowUserMenu(false); logout(); }}
+                    role="menuitem"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "8px 10px",
+                      borderRadius: "7px",
+                      width: "100%",
+                      textAlign: "left",
+                      background: "none",
+                      border: "none",
+                      color: "rgba(255,80,80,0.7)",
+                      fontSize: "12px",
+                      cursor: "pointer",
+                      transition: "background 0.12s",
+                    }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,80,80,0.08)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                  >
+                    <span style={{ fontSize: "14px", width: "18px", textAlign: "center" }}>→</span>
+                    Sign Out
+                  </button>
                 </div>
               )}
-              <div style={{ display: "none" }} className="eco-nav-user-info">
-                <div style={{ fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.8)", lineHeight: 1.2 }}>
-                  {user.displayName || user.name || user.username || "User"}
-                </div>
-                <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>
-                  {user.roles && user.roles.length > 0 ? user.roles[0] : userRoleProp || "Member"}
-                </div>
-              </div>
-            </button>
+            </div>
           ) : (
             <button
               onClick={login}

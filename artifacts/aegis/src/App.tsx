@@ -1017,8 +1017,9 @@ const aegisCommands: CommandItem[] = [
   ...createBaselineWebActions(
     (path) => { window.location.href = BASE + path.replace(/^\//, ""); },
     {
-      settingsPath: "settings",
-      profilePath: "profile",
+      settingsPath: "/admin/platform-settings",
+      profilePath: "/admin/platform-settings",
+      notificationsPath: "/notifications",
       helpUrl: "https://szlholdings.com/docs",
       themeToggle: {
         label: "Toggle Theme",

@@ -63,6 +63,7 @@ const AICostAnalyticsPage = lazy(() => import("@/pages/ai-cost-analytics"));
 const AdminPage = lazy(() => import("@/pages/admin"));
 const TenantHealthScorecardsPage = lazy(() => import("@/pages/tenant-health-scorecards"));
 const UnifiedSettingsPage = lazy(() => import("@/pages/unified-settings-page"));
+const NotificationsInboxPage = lazy(() => import("@/pages/notifications-inbox"));
 const AdminCommandCenterPage = lazy(() => import("@/pages/admin-command-center"));
 const OpsPage = lazy(() => import("@/pages/ops"));
 const AzureTenantOnboardingPage = lazy(() => import("@/pages/azure-tenant-onboarding"));
@@ -1246,6 +1247,9 @@ function App() {
 
             <Route path="/onboarding/:orgSlug">
               {(params) => <Suspense fallback={<PageLoader />}><OnboardingPage orgSlug={params.orgSlug} /></Suspense>}
+            </Route>
+            <Route path="/notifications">
+              <RequireAuth><Suspense fallback={<PageLoader />}><NotificationsInboxPage /></Suspense></RequireAuth>
             </Route>
             <Route path="/onboarding">
               <Suspense fallback={<PageLoader />}><OnboardingPage /></Suspense>

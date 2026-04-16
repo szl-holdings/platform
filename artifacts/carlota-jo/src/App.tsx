@@ -200,6 +200,8 @@ const carlotaCommands: CommandItem[] = [
   { id: "nav-benchmarks", label: "Benchmark Database", icon: "📈", group: "AI Platform", keywords: ["benchmark", "industry", "data", "metrics", "comparison"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/benchmark-database"); } },
   { id: "nav-deliverables", label: "Deliverable Approval Workflow", icon: "✅", group: "AI Platform", keywords: ["deliverable", "approval", "review", "version", "sign-off"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/deliverable-workflow"); } },
   { id: "nav-profitability", label: "Engagement Profitability Analytics", icon: "💰", group: "AI Platform", keywords: ["profitability", "margin", "p&l", "write-off", "scope creep"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/profitability-analytics"); } },
+  { id: "baseline-settings", label: "Account Settings", icon: "⚙", group: "Actions", keywords: ["settings", "preferences", "account", "profile"], action: () => { window.location.href = "/admin/platform-settings"; } },
+  { id: "baseline-notifications", label: "Notifications", icon: "🔔", group: "Actions", keywords: ["notifications", "alerts", "inbox"], action: () => { window.location.href = "/notifications"; } },
   { id: "app-szl", label: "SZL Holdings", icon: "🏛️", group: "Switch App", description: "Portfolio", action: () => { window.location.href = "/"; } },
 ];
 

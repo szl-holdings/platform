@@ -6,7 +6,7 @@ import {
   Search, Shield, Brain, Zap, Ship, Building, Palette, Activity, Globe, BarChart3,
   Laptop, Grid, List, ArrowUpRight, GitBranch, Map, TrendingUp, Radio, CheckCircle2,
   Clock, Layers, Cpu, Users, ArrowRight, ExternalLink, Wifi, WifiOff, AlertTriangle,
-  ChevronRight, Circle, Star, Rocket, Eye, Target, RefreshCw,
+  ChevronRight, Circle, Star, Rocket, Eye, Target, RefreshCw, Bell,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
@@ -603,12 +603,12 @@ export default function CommandCenter() {
               </h3>
               <div className="space-y-1">
                 {[
+                  { label: "Notifications", href: "/notifications", icon: Bell },
+                  { label: "Account Settings", href: "/admin/platform-settings", icon: Users },
                   { label: "Investor Relations", href: "/ir", icon: TrendingUp },
                   { label: "Insights & Research", href: "/insights", icon: Eye },
                   { label: "Roadmap", href: "/roadmap", icon: Map },
                   { label: "Changelog", href: "/changelog", icon: GitBranch },
-                  { label: "Observability", href: "/observability", icon: Activity },
-                  { label: "Analytics", href: "/analytics", icon: BarChart3 },
                   { label: "Admin", href: "/admin", icon: Cpu },
                 ].map(({ label, href, icon: Icon }) => (
                   <Link key={href} href={href} className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-muted/50 transition-colors group">

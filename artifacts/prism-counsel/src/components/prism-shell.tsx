@@ -261,7 +261,8 @@ export function PrismCounselShell({ children }: { children: React.ReactNode }) {
   const prismCommands = useRegisterCommands(
     prismNavCmds,
     createBaselineWebActions(navigate, {
-      settingsPath: "/prism-counsel/admin",
+      settingsPath: "/admin/platform-settings",
+      notificationsPath: "/notifications",
       helpUrl: "https://szlholdings.com/docs",
       themeToggle: {
         label: "Toggle Theme",
