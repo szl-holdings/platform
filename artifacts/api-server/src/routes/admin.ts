@@ -7,8 +7,9 @@ import {
   usersTable, rolesTable, userRolesTable, auditEventsTable, featureFlagsTable, webhookEventsTable,
   platformJobRunsTable, artifactApprovalsTable, exportJobsTable,
 } from "@szl-holdings/db";
+import { organizationsTable, orgMembersTable, contactSubmissionsTable, leadStatusTable, featureFlagOverridesTable } from "@szl-holdings/db";
 import { seedLyteObservability } from "../lib/lyte-observability-seed";
-import { desc, sql, ilike, or, eq, and, inArray, gte, lte } from "drizzle-orm";
+import { desc, sql, ilike, or, eq, and, inArray, gte, lte, notInArray, isNull } from "drizzle-orm";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { serverTelemetry } from "@szl-holdings/observability";
 import { durableJobQueue } from "@szl-holdings/forge-runtime";
@@ -34,6 +35,13 @@ const broadcastSchema = z.object({
   vars: z.record(z.unknown()).optional(),
 });
 const impersonateEndSchema = z.object({ impersonationToken: z.string().min(1) });
+const createTenantSchema = z.object({ name: z.string().min(1).max(200), slug: z.string().min(1).max(100).regex(/^[a-z0-9-]+$/, "slug must be lowercase alphanumeric with hyphens") });
+const suspendTenantSchema = z.object({ suspended: z.boolean() });
+const deactivateUserSchema = z.object({ active: z.boolean() });
+const userRoleSchema = z.object({ roleId: z.number().int().positive(), action: z.enum(["add", "remove"]) });
+const supportQueueStatusSchema = z.object({ status: z.enum(["new", "contacted", "qualified", "closed", "lost"]), notes: z.string().max(5000).optional(), ownerUserId: z.number().int().positive().optional() });
+const flagOverrideSchema = z.object({ entityType: z.enum(["user", "org", "role"]), entityId: z.string().min(1).max(200), isEnabled: z.boolean() });
+const rolloutSchema = z.object({ rolloutPercentage: z.number().min(0).max(100) });
 
 const adminRouter: IRouter = Router();
 
@@ -650,6 +658,7 @@ adminRouter.get("/admin/audit-log", async (req, res) => {
     const dateFrom = req.query["dateFrom"] as string | undefined;
     const dateTo = req.query["dateTo"] as string | undefined;
     const userFilter = req.query["user"] as string | undefined;
+    const orgIdParam = req.query["orgId"] as string | undefined;
     const limitParam = parseInt(req.query["limit"] as string ?? "50", 10);
     const limit = Math.min(isNaN(limitParam) ? 50 : limitParam, 200);
 
@@ -675,6 +684,21 @@ adminRouter.get("/admin/audit-log", async (req, res) => {
           ilike(usersTable.displayName, `%${userFilter}%`),
         )!,
       );
+    }
+    if (orgIdParam) {
+      const orgId = parseInt(orgIdParam, 10);
+      if (!isNaN(orgId)) {
+        const orgMembers = await db
+          .select({ userId: orgMembersTable.userId })
+          .from(orgMembersTable)
+          .where(eq(orgMembersTable.orgId, orgId));
+        const orgUserIds = orgMembers.map((m) => m.userId).filter(Boolean) as number[];
+        if (orgUserIds.length > 0) {
+          conditions.push(inArray(auditEventsTable.userId, orgUserIds));
+        } else {
+          conditions.push(sql`false`);
+        }
+      }
     }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -706,7 +730,7 @@ adminRouter.get("/admin/audit-log", async (req, res) => {
       target: r.entityType + (r.entityId ? `/${r.entityId}` : ""),
       result: "success",
       timestamp: r.createdAt.toISOString(),
-      details: r.newValues ? JSON.stringify(r.newValues).slice(0, 120) : null,
+      details: r.newValues ? JSON.stringify(r.newValues) : (r.oldValues ? JSON.stringify({ removed: r.oldValues }) : null),
       ipAddress: r.ipAddress,
     }));
 
@@ -1508,6 +1532,382 @@ adminRouter.delete("/admin/sessions/:userId", requireRole("admin"), validateBody
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Failed to terminate sessions";
     sendError(res, message, 500, "INTERNAL_ERROR");
+  }
+});
+
+// ─── Tenant (Organization) Management ────────────────────────────────────────
+
+adminRouter.get("/admin/orgs", async (_req, res) => {
+  try {
+    const orgs = await db.select().from(organizationsTable).orderBy(desc(organizationsTable.createdAt));
+    const orgIds = orgs.map((o) => o.id);
+
+    const memberCounts = orgIds.length > 0
+      ? await db
+          .select({ orgId: orgMembersTable.orgId, count: sql<number>`COUNT(*)::int` })
+          .from(orgMembersTable)
+          .where(inArray(orgMembersTable.orgId, orgIds))
+          .groupBy(orgMembersTable.orgId)
+      : [];
+
+    const subRows = orgIds.length > 0
+      ? await db
+          .select({ orgId: subscriptionsTable.orgId, status: subscriptionsTable.status, planId: subscriptionsTable.planId })
+          .from(subscriptionsTable)
+          .where(inArray(subscriptionsTable.orgId, orgIds))
+      : [];
+
+    const memberMap = new Map(memberCounts.map((r) => [r.orgId, r.count]));
+    const subMap = new Map(subRows.map((r) => [r.orgId, r]));
+
+    const tenants = orgs.map((o) => ({
+      id: o.id,
+      slug: o.slug,
+      name: o.name,
+      isActive: o.isActive,
+      memberCount: memberMap.get(o.id) ?? 0,
+      subscription: subMap.get(o.id) ?? null,
+      createdAt: o.createdAt.toISOString(),
+      updatedAt: o.updatedAt?.toISOString() ?? null,
+    }));
+
+    res.json({ tenants, total: tenants.length });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch tenants" });
+  }
+});
+
+adminRouter.post("/admin/orgs", validateBody(createTenantSchema), async (req, res) => {
+  try {
+    const { name, slug } = req.body as { name: string; slug: string };
+    const existing = await db.select({ id: organizationsTable.id }).from(organizationsTable).where(eq(organizationsTable.slug, slug)).limit(1);
+    if (existing.length > 0) { res.status(409).json({ error: "An organization with this slug already exists" }); return; }
+    const [org] = await db.insert(organizationsTable).values({ name, slug, isActive: true }).returning();
+    res.status(201).json(org);
+  } catch {
+    res.status(500).json({ error: "Failed to create tenant" });
+  }
+});
+
+adminRouter.patch("/admin/orgs/:id/suspend", validateBody(suspendTenantSchema), async (req, res) => {
+  try {
+    const id = parseInt(req.params["id"]!, 10);
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid org id" }); return; }
+    const { suspended } = req.body as { suspended: boolean };
+    const [updated] = await db
+      .update(organizationsTable)
+      .set({ isActive: !suspended })
+      .where(eq(organizationsTable.id, id))
+      .returning();
+    if (!updated) {
+      res.status(404).json({ error: "Tenant not found" });
+      return;
+    }
+    res.json({ id: updated.id, isActive: updated.isActive });
+  } catch {
+    res.status(500).json({ error: "Failed to update tenant" });
+  }
+});
+
+adminRouter.patch("/admin/users/:id/deactivate", validateBody(deactivateUserSchema), async (req, res) => {
+  try {
+    const id = parseInt(req.params["id"]!, 10);
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid user id" }); return; }
+    const { active } = req.body as { active: boolean };
+    const [updated] = await db
+      .update(usersTable)
+      .set({ isActive: active })
+      .where(eq(usersTable.id, id))
+      .returning({ id: usersTable.id, isActive: usersTable.isActive, email: usersTable.email });
+    if (!updated) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+    res.json(updated);
+  } catch {
+    res.status(500).json({ error: "Failed to update user status" });
+  }
+});
+
+adminRouter.get("/admin/users/:id/detail", async (req, res) => {
+  try {
+    const id = parseInt(req.params["id"]!, 10);
+    const [user] = await db
+      .select({ id: usersTable.id, email: usersTable.email, displayName: usersTable.displayName, avatarUrl: usersTable.avatarUrl, isActive: usersTable.isActive, lastLoginAt: usersTable.lastLoginAt, createdAt: usersTable.createdAt })
+      .from(usersTable)
+      .where(eq(usersTable.id, id));
+    if (!user) { res.status(404).json({ error: "User not found" }); return; }
+
+    const roleRows = await db
+      .select({ id: rolesTable.id, name: rolesTable.name })
+      .from(userRolesTable)
+      .innerJoin(rolesTable, eq(userRolesTable.roleId, rolesTable.id))
+      .where(eq(userRolesTable.userId, id));
+
+    const orgRows = await db
+      .select({ id: organizationsTable.id, name: organizationsTable.name, slug: organizationsTable.slug, role: orgMembersTable.role })
+      .from(orgMembersTable)
+      .innerJoin(organizationsTable, eq(orgMembersTable.orgId, organizationsTable.id))
+      .where(eq(orgMembersTable.userId, id));
+
+    res.json({ ...user, roles: roleRows, organizations: orgRows });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch user detail" });
+  }
+});
+
+adminRouter.patch("/admin/users/:id/role", validateBody(userRoleSchema), async (req, res) => {
+  try {
+    const userId = parseInt(req.params["id"]!, 10);
+    if (isNaN(userId)) { res.status(400).json({ error: "Invalid user id" }); return; }
+    const { roleId, action } = req.body as { roleId: number; action: "add" | "remove" };
+    if (action === "remove") {
+      await db.delete(userRolesTable).where(and(eq(userRolesTable.userId, userId), eq(userRolesTable.roleId, roleId)));
+    } else {
+      await db.insert(userRolesTable).values({ userId, roleId }).onConflictDoNothing();
+    }
+    res.json({ success: true });
+  } catch {
+    res.status(500).json({ error: "Failed to update user role" });
+  }
+});
+
+adminRouter.get("/admin/roles", async (_req, res) => {
+  try {
+    const roles = await db.select({ id: rolesTable.id, name: rolesTable.name, description: rolesTable.description }).from(rolesTable).orderBy(rolesTable.name);
+    res.json({ roles });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch roles" });
+  }
+});
+
+adminRouter.get("/admin/orgs/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params["id"]!, 10);
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid org id" }); return; }
+    const [org] = await db.select().from(organizationsTable).where(eq(organizationsTable.id, id));
+    if (!org) { res.status(404).json({ error: "Tenant not found" }); return; }
+
+    const [memberCount, sub, usageSummary] = await Promise.all([
+      db.select({ count: sql<number>`COUNT(*)::int` }).from(orgMembersTable).where(eq(orgMembersTable.orgId, id)).then(r => r[0]?.count ?? 0),
+      db.select().from(subscriptionsTable).where(eq(subscriptionsTable.orgId, id)).limit(1).then(r => r[0] ?? null),
+      db.select({ featureKey: usageEventsTable.featureKey, total: sql<number>`SUM(${usageEventsTable.quantity})::int` })
+        .from(usageEventsTable).where(eq(usageEventsTable.orgId, id)).groupBy(usageEventsTable.featureKey),
+    ]);
+
+    const members = await db
+      .select({ id: usersTable.id, email: usersTable.email, displayName: usersTable.displayName, role: orgMembersTable.role, joinedAt: orgMembersTable.joinedAt })
+      .from(orgMembersTable)
+      .innerJoin(usersTable, eq(orgMembersTable.userId, usersTable.id))
+      .where(eq(orgMembersTable.orgId, id))
+      .limit(20);
+
+    res.json({ tenant: { ...org, memberCount }, members, subscription: sub, usage: usageSummary });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch tenant detail" });
+  }
+});
+
+// ─── Support Queue (Contact Submissions) ─────────────────────────────────────
+
+adminRouter.get("/admin/support-queue", async (req, res) => {
+  try {
+    const search = req.query["search"] as string | undefined;
+    const statusFilter = req.query["status"] as string | undefined;
+    const limitParam = parseInt(req.query["limit"] as string ?? "50", 10);
+    const limit = Math.min(isNaN(limitParam) ? 50 : limitParam, 200);
+
+    const conditions = [];
+    if (search) {
+      conditions.push(
+        or(
+          ilike(contactSubmissionsTable.fullName, `%${search}%`),
+          ilike(contactSubmissionsTable.email, `%${search}%`),
+          ilike(contactSubmissionsTable.message, `%${search}%`),
+        )!,
+      );
+    }
+
+    const rows = await db
+      .select({
+        id: contactSubmissionsTable.id,
+        formKey: contactSubmissionsTable.formKey,
+        fullName: contactSubmissionsTable.fullName,
+        email: contactSubmissionsTable.email,
+        company: contactSubmissionsTable.company,
+        message: contactSubmissionsTable.message,
+        createdAt: contactSubmissionsTable.createdAt,
+        status: leadStatusTable.status,
+        ownerUserId: leadStatusTable.ownerUserId,
+        notes: leadStatusTable.notes,
+        leadStatusId: leadStatusTable.id,
+      })
+      .from(contactSubmissionsTable)
+      .leftJoin(leadStatusTable, eq(leadStatusTable.contactSubmissionId, contactSubmissionsTable.id))
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(
+        sql`CASE COALESCE(${leadStatusTable.status}, 'new') WHEN 'new' THEN 0 WHEN 'contacted' THEN 1 WHEN 'qualified' THEN 2 WHEN 'closed' THEN 3 WHEN 'lost' THEN 4 ELSE 5 END`,
+        desc(contactSubmissionsTable.createdAt),
+      )
+      .limit(limit);
+
+    const tickets = rows.map(r => ({ ...r, status: r.status ?? "new" }));
+    const filtered = statusFilter ? tickets.filter(t => t.status === statusFilter) : tickets;
+
+    res.json({ tickets: filtered, total: filtered.length });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch support queue" });
+  }
+});
+
+adminRouter.post("/admin/support-queue/:id/status", validateBody(supportQueueStatusSchema), async (req, res) => {
+  try {
+    const id = parseInt(req.params["id"]!, 10);
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid ticket id" }); return; }
+    const { status, notes, ownerUserId } = req.body as { status: "new" | "contacted" | "qualified" | "closed" | "lost"; notes?: string; ownerUserId?: number };
+
+    const resolvedStatus = status;
+
+    const existing = await db.select().from(leadStatusTable).where(eq(leadStatusTable.contactSubmissionId, id)).limit(1);
+    if (existing.length > 0) {
+      await db.update(leadStatusTable).set({ status: resolvedStatus, notes: notes ?? existing[0].notes, ownerUserId: ownerUserId ?? existing[0].ownerUserId, updatedAt: new Date() }).where(eq(leadStatusTable.contactSubmissionId, id));
+    } else {
+      await db.insert(leadStatusTable).values({ contactSubmissionId: id, status: resolvedStatus, notes: notes ?? null, ownerUserId: ownerUserId ?? null });
+    }
+
+    res.json({ success: true, status });
+  } catch {
+    res.status(500).json({ error: "Failed to update ticket status" });
+  }
+});
+
+// ─── Feature Flag Overrides ────────────────────────────────────────────────────
+
+adminRouter.get("/admin/feature-flags/:key/overrides", async (req, res) => {
+  try {
+    const key = req.params["key"]!;
+    const [flag] = await db.select({ id: featureFlagsTable.id }).from(featureFlagsTable).where(eq(featureFlagsTable.key, key)).limit(1);
+    if (!flag) { res.status(404).json({ error: "Flag not found" }); return; }
+    const overrides = await db.select().from(featureFlagOverridesTable).where(eq(featureFlagOverridesTable.flagId, flag.id)).orderBy(featureFlagOverridesTable.entityType);
+    res.json({ overrides });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch flag overrides" });
+  }
+});
+
+adminRouter.post("/admin/feature-flags/:key/overrides", validateBody(flagOverrideSchema), async (req, res) => {
+  try {
+    const key = req.params["key"]!;
+    const [flag] = await db.select({ id: featureFlagsTable.id }).from(featureFlagsTable).where(eq(featureFlagsTable.key, key)).limit(1);
+    if (!flag) { res.status(404).json({ error: "Flag not found" }); return; }
+    const { entityType, entityId, isEnabled } = req.body as { entityType: "user" | "org" | "role"; entityId: string; isEnabled: boolean };
+    const [override] = await db.insert(featureFlagOverridesTable).values({ flagId: flag.id, entityType, entityId, isEnabled }).returning();
+    res.status(201).json(override);
+  } catch {
+    res.status(500).json({ error: "Failed to create flag override" });
+  }
+});
+
+adminRouter.delete("/admin/feature-flags/:key/overrides/:overrideId", async (req, res) => {
+  try {
+    const key = req.params["key"]!;
+    const overrideId = parseInt(req.params["overrideId"]!, 10);
+    const [flag] = await db.select({ id: featureFlagsTable.id }).from(featureFlagsTable).where(eq(featureFlagsTable.key, key)).limit(1);
+    if (!flag) { res.status(404).json({ error: "Flag not found" }); return; }
+    const deleted = await db
+      .delete(featureFlagOverridesTable)
+      .where(and(eq(featureFlagOverridesTable.id, overrideId), eq(featureFlagOverridesTable.flagId, flag.id)))
+      .returning({ id: featureFlagOverridesTable.id });
+    if (deleted.length === 0) { res.status(404).json({ error: "Override not found for this flag" }); return; }
+    res.json({ success: true });
+  } catch {
+    res.status(500).json({ error: "Failed to delete flag override" });
+  }
+});
+
+adminRouter.put("/admin/feature-flags/:key/rollout", validateBody(rolloutSchema), async (req, res) => {
+  try {
+    const key = req.params["key"]!;
+    const { rolloutPercentage } = req.body as { rolloutPercentage: number };
+    const pct = Math.min(100, Math.max(0, Math.round(rolloutPercentage)));
+    const [updated] = await db.update(featureFlagsTable).set({ rolloutPercentage: pct, updatedAt: new Date() }).where(eq(featureFlagsTable.key, key)).returning({ key: featureFlagsTable.key, rolloutPercentage: featureFlagsTable.rolloutPercentage });
+    if (!updated) { res.status(404).json({ error: "Flag not found" }); return; }
+    res.json(updated);
+  } catch {
+    res.status(500).json({ error: "Failed to update flag rollout" });
+  }
+});
+
+adminRouter.get("/admin/analytics", async (_req, res) => {
+  try {
+    const [userCountResult, activeUserResult, orgCountResult] = await Promise.all([
+      pool.query("SELECT COUNT(*)::int as count FROM users"),
+      pool.query("SELECT COUNT(*)::int as count FROM users WHERE is_active = true"),
+      pool.query("SELECT COUNT(*)::int as count FROM organizations WHERE is_active = true"),
+    ]);
+
+    const [auditCount, flagCount, submissionCount] = await Promise.all([
+      db.select({ count: sql<number>`COUNT(*)::int` }).from(auditEventsTable).then((r) => r[0]?.count ?? 0),
+      db.select({ count: sql<number>`COUNT(*)::int` }).from(featureFlagsTable).where(eq(featureFlagsTable.isEnabled, true)).then((r) => r[0]?.count ?? 0),
+      db
+        .select({ count: sql<number>`COUNT(*)::int` })
+        .from(contactSubmissionsTable)
+        .leftJoin(leadStatusTable, eq(leadStatusTable.contactSubmissionId, contactSubmissionsTable.id))
+        .where(
+          or(
+            isNull(leadStatusTable.status),
+            notInArray(leadStatusTable.status, ["closed", "lost"]),
+          )!,
+        )
+        .then((r) => r[0]?.count ?? 0),
+    ]);
+
+    const topTenants = await db
+      .select({ orgId: usageEventsTable.orgId, total: sql<number>`SUM(${usageEventsTable.quantity})::int` })
+      .from(usageEventsTable)
+      .groupBy(usageEventsTable.orgId)
+      .orderBy(desc(sql`SUM(${usageEventsTable.quantity})`))
+      .limit(5);
+
+    const topTenantIds = topTenants.map(t => t.orgId).filter(Boolean) as number[];
+    const topTenantNames = topTenantIds.length > 0
+      ? await db.select({ id: organizationsTable.id, name: organizationsTable.name }).from(organizationsTable).where(inArray(organizationsTable.id, topTenantIds))
+      : [];
+    const nameMap = new Map(topTenantNames.map(o => [o.id, o.name]));
+
+    const billingConfig = await getBillingConfig();
+
+    const snapshot = serverTelemetry.getSnapshot();
+
+    res.json({
+      timestamp: new Date().toISOString(),
+      platform: {
+        totalUsers: userCountResult.rows[0]?.count ?? 0,
+        activeUsers: activeUserResult.rows[0]?.count ?? 0,
+        totalTenants: orgCountResult.rows[0]?.count ?? 0,
+        activeFlags: flagCount,
+        totalAuditEvents: auditCount,
+        openSupportTickets: submissionCount,
+      },
+      topTenants: topTenants.map(t => ({ orgId: t.orgId, name: t.orgId ? (nameMap.get(t.orgId) ?? `Org ${t.orgId}`) : "Unassigned", totalUsage: t.total })),
+      billing: {
+        plan: billingConfig.plan,
+        status: billingConfig.status,
+        monthlyAmount: billingConfig.monthlyAmount,
+        currency: billingConfig.currency,
+        seats: typeof billingConfig.seats === "object" && billingConfig.seats !== null ? (billingConfig.seats as { total?: number }).total ?? 0 : (billingConfig.seats as unknown as number) ?? 0,
+      },
+      api: {
+        requestCount: snapshot.requestCount,
+        errorRate: snapshot.errorRate,
+        p95Latency: snapshot.p95Latency,
+        throughputPerHour: snapshot.throughputPerHour,
+        authFailures: snapshot.authFailures ?? 0,
+      },
+      uptime: process.uptime(),
+    });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch analytics" });
   }
 });
 

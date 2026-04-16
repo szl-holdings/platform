@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 
-export type AppRole = "admin" | "investor" | "security" | "operator" | "viewer";
+export type AppRole = "admin" | "super_admin" | "investor" | "security" | "operator" | "viewer" | "ops" | "analyst" | "exec";
 
 export interface UserRoles {
   roles: AppRole[];
@@ -35,7 +35,7 @@ export function useRole(): UserRoles & { isLoading: boolean } {
     queryKey: ["user-roles"],
     queryFn: async () => {
       const apiBase = "/api";
-      const res = await fetch(`${apiBase}/auth/roles`, {
+      const res = await fetch(`${apiBase}/auth/my-roles`, {
         credentials: "include",
       });
       if (!res.ok) return [];

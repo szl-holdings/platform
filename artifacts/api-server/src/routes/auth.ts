@@ -194,6 +194,10 @@ router.delete("/auth/sessions/:id", authMiddleware(), async (req, res) => {
   }
 });
 
+router.get("/auth/my-roles", authMiddleware(), async (req, res) => {
+  res.json({ roles: req.user!.roles ?? [] });
+});
+
 router.get("/auth/roles", authMiddleware(), requireRole("ops", "analyst"), async (_req, res) => {
   try {
     const roles = await db.select().from(rolesTable).orderBy(rolesTable.name);

@@ -4,7 +4,7 @@ import { navigatorConfig } from "@szl-holdings/shared-ui/copilot-configs";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
-import { DemoModeProvider, SandboxModeProvider, CookieBanner, StatusBanner, AnalyticsProvider, type StatusBannerConfig } from "@szl-holdings/shared-ui";
+import { DemoModeProvider, SandboxModeProvider, CookieBanner, StatusBanner, AnalyticsProvider, type StatusBannerConfig, useRole } from "@szl-holdings/shared-ui";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { useAuth } from "@szl-holdings/replit-auth-web";
@@ -60,6 +60,7 @@ const AICostAnalyticsPage = lazy(() => import("@/pages/ai-cost-analytics"));
 const AdminPage = lazy(() => import("@/pages/admin"));
 const TenantHealthScorecardsPage = lazy(() => import("@/pages/tenant-health-scorecards"));
 const UnifiedSettingsPage = lazy(() => import("@/pages/unified-settings-page"));
+const AdminCommandCenterPage = lazy(() => import("@/pages/admin-command-center"));
 const OpsPage = lazy(() => import("@/pages/ops"));
 const AzureTenantOnboardingPage = lazy(() => import("@/pages/azure-tenant-onboarding"));
 const AzureTenantDashboardPage = lazy(() => import("@/pages/azure-tenant-dashboard"));
@@ -289,6 +290,23 @@ function RequireAuth({ children }: { children: ReactNode }) {
           >
             Sign In
           </button>
+        </div>
+      </div>
+    );
+  }
+  return <>{children}</>;
+}
+
+function RequireAdmin({ children }: { children: ReactNode }) {
+  const { isAdmin, roles, isLoading } = useRole();
+  if (isLoading) return <PageLoader />;
+  const hasAccess = isAdmin || roles.includes("super_admin");
+  if (!hasAccess) {
+    return (
+      <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ textAlign: "center", maxWidth: "400px", padding: "2rem" }}>
+          <h2 style={{ color: "hsl(38,8%,92%)", fontSize: "1.5rem", marginBottom: "0.5rem" }}>Access Restricted</h2>
+          <p style={{ color: "hsl(214,7%,55%)" }}>Admin or Super Admin role required to access this area.</p>
         </div>
       </div>
     );
@@ -871,6 +889,9 @@ function App() {
             </Route>
             <Route path="/admin/data-retention">
               <RequireAuth><Suspense fallback={<PageLoader />}><AdminDataRetentionPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/command-center">
+              <RequireAuth><RequireAdmin><Suspense fallback={<PageLoader />}><AdminCommandCenterPage /></Suspense></RequireAdmin></RequireAuth>
             </Route>
             <Route path="/admin">
               <RequireAuth><Suspense fallback={<PageLoader />}><AdminPage /></Suspense></RequireAuth>
