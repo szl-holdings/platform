@@ -14,7 +14,7 @@ to deliver Phase K honestly.
 
 | Requirement | Status | Source of Truth |
 |-------------|--------|-----------------|
-| One canonical mobile beta path is clearly identified | Done | `mobile-disposition.md` — flagship is `artifacts/szl-holdings-mobile` (CORTEX, 167 src files, full `app.json` + `eas.json`) |
+| One canonical mobile beta path is clearly identified | Done | `mobile-disposition.md` — flagship is `artifacts/szl-holdings-mobile` (CORTEX; full `app.json` + `eas.json`; organized around `app/`, `components/`, `hooks/`, `lib/`, `context/`, `server/`; ~180 `.ts`/`.tsx` files outside `node_modules`) |
 | Non-canonical mobile path is clearly downgraded in docs and positioning | Done | `artifacts/cortex-mobile/DEFERRED.md` (in-tree marker) + `mobile-disposition.md` + `ops/frontier/disposition-matrix.md` (classified `SHELL`) |
 | Mobile credential needs and manual console steps are isolated and documented | Done | `eas-and-store-secrets-matrix.md`, `testflight-play-internal-runbook.md`, `artifacts/szl-holdings-mobile/SETUP.md` |
 | Mobile story aligns with platform — governed command surface, not a standalone app | Done | `flagship-release-readiness.md` (positions CORTEX as unified-command surface across 8 domains) and `mobile-series-a-pass.md` (Section "CORTEX Mobile — Current State") |

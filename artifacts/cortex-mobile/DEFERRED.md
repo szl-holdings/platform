@@ -13,8 +13,11 @@ for TestFlight, Play Internal, and App Store / Google Play release.
 - iOS bundle / Android package: `com.szlholdings.executive.mobile`
 - Full Expo configuration, EAS profiles, push notifications, biometric auth,
   offline sync, and `@szl-holdings/mobile-shared` consumption.
-- 167 source files across `src/`, with a complete app shell, eight domain
-  workspaces, secure storage, and shared mobile primitives.
+- Organized around `app/`, `components/`, `hooks/`, `lib/`, `context/`,
+  `constants/`, and `server/` (no `src/` directory) with a complete app
+  shell, eight domain workspaces, secure storage, and shared mobile
+  primitives. Approximately 180 `.ts` / `.tsx` files outside
+  `node_modules`.
 
 ## What this directory actually contains
 
