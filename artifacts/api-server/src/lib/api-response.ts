@@ -5,14 +5,15 @@ import { InvalidIdError } from "../middlewares/auth";
 export interface ApiError {
   error: string;
   code?: string;
-  correlationId?: string;
+  requestId?: string;
   details?: unknown;
 }
 
-function getOrCreateCorrelationId(res: Response): string {
-  const existing = res.getHeader("X-Correlation-ID") as string | undefined;
+function getOrCreateRequestId(res: Response): string {
+  const existing = (res.getHeader("X-Request-ID") ?? res.getHeader("X-Correlation-ID")) as string | undefined;
   if (existing) return existing;
   const id = randomUUID();
+  res.setHeader("X-Request-ID", id);
   res.setHeader("X-Correlation-ID", id);
   return id;
 }
@@ -34,8 +35,8 @@ export function sendNoContent(res: Response) {
 }
 
 export function sendError(res: Response, error: string, status = 500, code?: string, details?: unknown) {
-  const correlationId = getOrCreateCorrelationId(res);
-  const body: ApiError = { error, correlationId };
+  const requestId = getOrCreateRequestId(res);
+  const body: ApiError = { error, requestId };
   if (code) body.code = code;
   if (details) body.details = details;
   res.status(status).json(body);
@@ -65,9 +66,8 @@ export function sendMutationCreated<T>(res: Response, data: T): void {
   sendMutation(res, data, 201);
 }
 
-export function sendMutationError(res: Response, error: string, status = 500, code?: string): void {
-  const correlationId = getOrCreateCorrelationId(res);
-  res.status(status).json({ success: false, data: null, error, code, correlationId });
+export function sendMutationError(res: Response, error: string, status = 500, code?: string, details?: unknown): void {
+  sendError(res, error, status, code ?? "MUTATION_ERROR", details);
 }
 
 export function parsePagination(query: Record<string, unknown>) {

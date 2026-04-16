@@ -17,6 +17,7 @@ import { authMiddleware } from "../middlewares/auth";
 import { writeLimiter } from "../middlewares/rate-limiters";
 import { logger } from "../lib/logger";
 import { validateBody } from "../lib/validation";
+import { sendError, sendUnauthorized, sendNotFound, sendForbidden, sendBadRequest, handleRouteError } from "../lib/api-response";
 import type { Request, Response } from "express";
 
 const router = Router();
@@ -62,7 +63,7 @@ async function resolveOrgAndCheckAdminRole(
 ): Promise<{ id: number; name: string } | null> {
   const user = req.user;
   if (!user) {
-    res.status(401).json({ error: "Authentication required" });
+    sendUnauthorized(res, "Authentication required");
     return null;
   }
 
@@ -73,7 +74,7 @@ async function resolveOrgAndCheckAdminRole(
     .limit(1);
 
   if (!org) {
-    res.status(404).json({ error: "Organization not found" });
+    sendNotFound(res, "Organization");
     return null;
   }
 
@@ -82,12 +83,12 @@ async function resolveOrgAndCheckAdminRole(
 
   const membership = user.orgs.find((o) => o.orgSlug === orgSlug);
   if (!membership) {
-    res.status(403).json({ error: "Not a member of this organization" });
+    sendForbidden(res, "Not a member of this organization");
     return null;
   }
 
   if ((ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY["admin"]) {
-    res.status(403).json({ error: "Insufficient organization role — admin or owner required" });
+    sendForbidden(res, "Insufficient organization role — admin or owner required");
     return null;
   }
 
@@ -121,7 +122,7 @@ router.post(
         .limit(1);
 
       if (existing.length > 0) {
-        res.status(409).json({ error: "A pending invitation already exists for this email" });
+        sendError(res, "A pending invitation already exists for this email", 409, "CONFLICT");
         return;
       }
 
@@ -158,8 +159,7 @@ router.post(
         inviteUrl: `/accept-invite?token=${token}`,
       });
     } catch (err) {
-      logger.error({ err }, "Failed to create invitation");
-      res.status(500).json({ error: "Failed to create invitation" });
+      handleRouteError(res, err, "Failed to create invitation");
     }
   },
 );
@@ -168,7 +168,7 @@ router.get("/orgs/accept-invite", async (req, res) => {
   try {
     const token = req.query["token"];
     if (!token || typeof token !== "string") {
-      res.status(400).json({ error: "Invitation token is required" });
+      sendBadRequest(res, "Invitation token is required");
       return;
     }
 
@@ -186,17 +186,17 @@ router.get("/orgs/accept-invite", async (req, res) => {
       .limit(1);
 
     if (!invitation) {
-      res.status(404).json({ error: "Invitation not found" });
+      sendNotFound(res, "Invitation");
       return;
     }
 
     if (invitation.status === "accepted") {
-      res.status(410).json({ error: "This invitation has already been used" });
+      sendError(res, "This invitation has already been used", 410, "GONE");
       return;
     }
 
     if (invitation.status === "revoked") {
-      res.status(410).json({ error: "This invitation has been revoked" });
+      sendError(res, "This invitation has been revoked", 410, "GONE");
       return;
     }
 
@@ -207,7 +207,7 @@ router.get("/orgs/accept-invite", async (req, res) => {
           .set({ status: "expired" })
           .where(eq(orgInvitationsTable.id, invitation.id));
       }
-      res.status(410).json({ error: "This invitation has expired" });
+      sendError(res, "This invitation has expired", 410, "GONE");
       return;
     }
 
@@ -225,8 +225,7 @@ router.get("/orgs/accept-invite", async (req, res) => {
       expiresAt: invitation.expiresAt,
     });
   } catch (err) {
-    logger.error({ err }, "Failed to validate invitation");
-    res.status(500).json({ error: "Failed to validate invitation" });
+    handleRouteError(res, err, "Failed to validate invitation");
   }
 });
 
@@ -238,7 +237,7 @@ router.post(
       const { token } = req.body as { token?: string };
 
       if (!token || typeof token !== "string") {
-        res.status(400).json({ error: "Invitation token is required" });
+        sendBadRequest(res, "Invitation token is required");
         return;
       }
 
@@ -249,17 +248,17 @@ router.post(
         .limit(1);
 
       if (!invitation) {
-        res.status(404).json({ error: "Invitation not found" });
+        sendNotFound(res, "Invitation");
         return;
       }
 
       if (invitation.status === "accepted") {
-        res.status(410).json({ error: "This invitation has already been used" });
+        sendError(res, "This invitation has already been used", 410, "GONE");
         return;
       }
 
       if (invitation.status !== "pending" || invitation.expiresAt < new Date()) {
-        res.status(410).json({ error: "This invitation is no longer valid" });
+        sendError(res, "This invitation is no longer valid", 410, "GONE");
         return;
       }
 
@@ -273,7 +272,7 @@ router.post(
           ipAddress: req.ip,
           newValues: { reason: "email_mismatch", invitedEmail: invitation.email },
         });
-        res.status(403).json({ error: "This invitation was not issued to your account" });
+        sendForbidden(res, "This invitation was not issued to your account");
         return;
       }
 
@@ -342,8 +341,7 @@ router.post(
         role: invitation.role,
       });
     } catch (err) {
-      logger.error({ err }, "Failed to accept invitation");
-      res.status(500).json({ error: "Failed to accept invitation" });
+      handleRouteError(res, err, "Failed to accept invitation");
     }
   },
 );
@@ -358,7 +356,7 @@ router.delete(
       const id = parseInt(invitationId, 10);
 
       if (isNaN(id)) {
-        res.status(400).json({ error: "Invalid invitation ID" });
+        sendBadRequest(res, "Invalid invitation ID");
         return;
       }
 
@@ -372,17 +370,17 @@ router.delete(
         .limit(1);
 
       if (!invitation) {
-        res.status(404).json({ error: "Invitation not found" });
+        sendNotFound(res, "Invitation");
         return;
       }
 
       if (invitation.orgId !== org.id) {
-        res.status(403).json({ error: "Invitation does not belong to this organization" });
+        sendForbidden(res, "Invitation does not belong to this organization");
         return;
       }
 
       if (invitation.status !== "pending") {
-        res.status(409).json({ error: "Only pending invitations can be revoked" });
+        sendError(res, "Only pending invitations can be revoked", 409, "CONFLICT");
         return;
       }
 
@@ -402,8 +400,7 @@ router.delete(
 
       res.status(200).json({ message: "Invitation revoked" });
     } catch (err) {
-      logger.error({ err }, "Failed to revoke invitation");
-      res.status(500).json({ error: "Failed to revoke invitation" });
+      handleRouteError(res, err, "Failed to revoke invitation");
     }
   },
 );
@@ -437,8 +434,7 @@ router.get(
 
       res.status(200).json({ invitations });
     } catch (err) {
-      logger.error({ err }, "Failed to list invitations");
-      res.status(500).json({ error: "Failed to list invitations" });
+      handleRouteError(res, err, "Failed to list invitations");
     }
   },
 );

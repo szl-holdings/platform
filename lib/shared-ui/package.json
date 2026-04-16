@@ -101,6 +101,7 @@
     "./ui/tooltip": "./src/ui/tooltip.tsx",
     "./WelcomeOverlay": "./src/WelcomeOverlay.tsx",
     "./EmptyState": "./src/EmptyState.tsx",
+    "./page-data-skeleton": "./src/page-data-skeleton.tsx",
     "./EcosystemTour": "./src/EcosystemTour.tsx",
     "./agent-insights-widget": "./src/agent-insights-widget.tsx",
     "./core-observability-data": "./src/core-observability-data.ts",

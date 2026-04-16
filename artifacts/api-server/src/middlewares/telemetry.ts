@@ -48,6 +48,7 @@ export function telemetryMiddleware(req: Request, res: Response, next: NextFunct
       statusCode: res.statusCode,
       responseTime: totalMs,
       timestamp: Date.now(),
+      requestId: req.correlationId,
       correlationId: req.correlationId,
     });
 
@@ -61,6 +62,7 @@ export function telemetryMiddleware(req: Request, res: Response, next: NextFunct
         externalApiMs,
         serializationMs,
         timestamp: Date.now(),
+        requestId: req.correlationId,
         correlationId: req.correlationId,
       });
 

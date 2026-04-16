@@ -1,10 +1,10 @@
 import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import crypto from "crypto";
-import { z } from "zod";
-import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
-import { validateBody } from "../lib/validation";
+import { sendSuccess, sendBadRequest, sendNotFound, sendForbidden, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole } from "../middlewares/auth";
+import { logActivity } from "../lib/activity-logger";
+import { validateBody, tenantCreateSchema, tenantStatusSchema } from "../lib/validation";
 import { db } from "@szl-holdings/db";
 import {
   azureTenantsTable,
@@ -48,21 +48,6 @@ function buildMultiTenantLoginUrl(azureTenantId: string, redirectUri: string): s
   const encodedRedirect = encodeURIComponent(redirectUri);
   return `https://login.microsoftonline.com/${azureTenantId}/oauth2/v2.0/authorize?client_id=${appClientId}&response_type=code&redirect_uri=${encodedRedirect}&scope=openid+email+profile+offline_access+User.Read`;
 }
-
-const createTenantSchema = z.object({
-  azureTenantId: z.string().min(1).max(100),
-  displayName: z.string().min(1).max(200),
-  domain: z.string().max(200).optional(),
-  organizationId: z.union([z.number().int().positive(), z.string().regex(/^\d+$/)]).optional(),
-  config: z.record(z.unknown()).optional(),
-});
-
-const updateTenantStatusSchema = z.object({
-  status: z.enum(["pending", "active", "suspended"]).optional(),
-  adminConsentGranted: z.enum(["pending", "granted", "revoked"]).optional(),
-}).refine(d => d.status !== undefined || d.adminConsentGranted !== undefined, {
-  message: "status or adminConsentGranted is required",
-});
 
 const updateProvisioningConfigSchema = z.object({
   autoProvisionUsers: z.boolean().optional(),
@@ -143,20 +128,12 @@ router.post(
   tenantRateLimit,
   authMiddleware(),
   requireRole("admin"),
-  validateBody(createTenantSchema),
+  validateBody(tenantCreateSchema),
   async (req: Request, res: Response) => {
     try {
-      const body = req.body ?? {};
-      if (!body.azureTenantId || typeof body.azureTenantId !== "string") {
-        sendBadRequest(res, "azureTenantId is required");
-        return;
-      }
-      if (!body.displayName || typeof body.displayName !== "string") {
-        sendBadRequest(res, "displayName is required");
-        return;
-      }
+      const { azureTenantId: rawAzureTenantId, displayName, domain, organizationId, config } = req.body;
 
-      const azureTenantId = body.azureTenantId.trim().toLowerCase();
+      const azureTenantId = rawAzureTenantId.trim().toLowerCase();
 
       const existing = await db
         .select()
@@ -165,18 +142,18 @@ router.post(
         .limit(1);
 
       if (existing.length > 0) {
-        res.status(409).json({ error: "Tenant already provisioned", tenant: existing[0] });
+        sendError(res, "Tenant already provisioned", 409, "CONFLICT");
         return;
       }
 
       const newTenant: InsertAzureTenant = {
         azureTenantId,
-        displayName: body.displayName.trim(),
-        domain: body.domain ? String(body.domain).trim() : null,
+        displayName: displayName.trim(),
+        domain: domain ? String(domain).trim() : null,
         status: "pending",
         adminConsentGranted: "pending",
-        organizationId: body.organizationId ? Number(body.organizationId) : null,
-        config: body.config ?? {},
+        organizationId: organizationId ? Number(organizationId) : null,
+        config: config ?? {},
         provisionedByUserId: req.user?.id ? String(req.user.id) : null,
       };
 
@@ -184,6 +161,8 @@ router.post(
         .insert(azureTenantsTable)
         .values(newTenant)
         .returning();
+
+      await logActivity(req, "create", "tenant", String(created.id), `Tenant provisioned: ${displayName} (${azureTenantId})`).catch(() => {});
 
       const origin = `${req.headers["x-forwarded-proto"] ?? "https"}://${req.headers["x-forwarded-host"] ?? req.headers.host}`;
       const redirectUri = `${origin}/api/azure-ad/callback`;
@@ -226,7 +205,7 @@ router.get(
         .limit(1);
 
       if (!tenant) {
-        res.status(404).json({ error: "Tenant not found" });
+        sendNotFound(res, "Tenant");
         return;
       }
 
@@ -267,7 +246,7 @@ router.patch(
   tenantRateLimit,
   authMiddleware(),
   requireRole("admin"),
-  validateBody(updateTenantStatusSchema),
+  validateBody(tenantStatusSchema),
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
@@ -309,9 +288,13 @@ router.patch(
         .returning();
 
       if (!updated) {
-        res.status(404).json({ error: "Tenant not found" });
+        sendNotFound(res, "Tenant");
         return;
       }
+
+      await logActivity(req, "update", "tenant", String(updated.id),
+        `Tenant status updated: ${updated.displayName} → status=${updated.status ?? "unchanged"}, consent=${updated.adminConsentGranted ?? "unchanged"}`
+      ).catch(() => {});
 
       sendSuccess(res, { tenant: updated, message: "Tenant status updated" });
     } catch (err) {
@@ -344,7 +327,7 @@ router.patch(
         .select({ config: azureTenantsTable.config })
         .from(azureTenantsTable)
         .where(eq(azureTenantsTable.id, id));
-      if (!existing) { res.status(404).json({ error: "Tenant not found" }); return; }
+      if (!existing) { sendNotFound(res, "Tenant"); return; }
 
       const mergedConfig = { ...(existing.config as Record<string, unknown> ?? {}), provisioning: provisioningConfig };
       const [updated] = await db
@@ -379,9 +362,11 @@ router.delete(
         .returning();
 
       if (!deleted) {
-        res.status(404).json({ error: "Tenant not found" });
+        sendNotFound(res, "Tenant");
         return;
       }
+
+      await logActivity(req, "delete", "tenant", String(id), `Tenant deleted: ${deleted.displayName} (${deleted.azureTenantId})`).catch(() => {});
 
       sendSuccess(res, { message: "Tenant deleted", deleted });
     } catch (err) {
@@ -410,7 +395,7 @@ router.get(
         .limit(1);
 
       if (!tenant) {
-        res.status(404).json({ error: "Tenant not found" });
+        sendNotFound(res, "Tenant");
         return;
       }
 
@@ -453,7 +438,7 @@ router.post(
         .limit(1);
 
       if (!tenant) {
-        res.status(404).json({ error: "Tenant not found" });
+        sendNotFound(res, "Tenant");
         return;
       }
 
@@ -563,7 +548,7 @@ router.get(
         .limit(1);
 
       if (!tenant) {
-        res.status(404).json({ error: "Tenant not found" });
+        sendNotFound(res, "Tenant");
         return;
       }
 
@@ -620,7 +605,7 @@ router.post(
         .limit(1);
 
       if (!tenant) {
-        res.status(404).json({ error: "Tenant not found" });
+        sendNotFound(res, "Tenant");
         return;
       }
 
@@ -636,7 +621,7 @@ router.post(
         .limit(1);
 
       if (!connection) {
-        res.status(404).json({ error: "Connection not found for this tenant" });
+        sendNotFound(res, "Connection");
         return;
       }
 
@@ -690,7 +675,7 @@ router.post(
         .limit(1);
 
       if (!tenant) {
-        res.status(404).json({ error: "Tenant not found" });
+        sendNotFound(res, "Tenant");
         return;
       }
 
@@ -706,7 +691,7 @@ router.post(
         .limit(1);
 
       if (!connection) {
-        res.status(404).json({ error: "Connection not found for this tenant" });
+        sendNotFound(res, "Connection");
         return;
       }
 
@@ -772,7 +757,7 @@ router.get(
         .limit(1);
 
       if (!tenant) {
-        res.status(404).json({ error: "Tenant not found" });
+        sendNotFound(res, "Tenant");
         return;
       }
 
@@ -788,7 +773,7 @@ router.get(
         .limit(1);
 
       if (!connection) {
-        res.status(404).json({ error: "Connection not found for this tenant" });
+        sendNotFound(res, "Connection");
         return;
       }
 
@@ -849,7 +834,7 @@ router.post(
         .limit(1);
 
       if (!tenant || !tenant.organizationId) {
-        res.status(404).json({ error: "Tenant not found or not linked to an organization" });
+        sendNotFound(res, "Tenant");
         return;
       }
 
@@ -865,7 +850,7 @@ router.post(
         .limit(1);
 
       if (!member) {
-        res.status(404).json({ error: "User is not a member of this tenant's organization" });
+        sendNotFound(res, "User membership");
         return;
       }
 
@@ -916,7 +901,7 @@ router.post(
         .limit(1);
 
       if (!tenant || !tenant.organizationId) {
-        res.status(404).json({ error: "Tenant not found or not linked to an organization" });
+        sendNotFound(res, "Tenant");
         return;
       }
 
@@ -998,7 +983,7 @@ router.patch(
         .limit(1);
 
       if (!tenant) {
-        res.status(404).json({ error: "Tenant not found" });
+        sendNotFound(res, "Tenant");
         return;
       }
 
@@ -1358,7 +1343,7 @@ router.post(
     try {
       const reportKey = String(req.body?.reportKey ?? "").trim();
       if (!reportKey) {
-        res.status(400).json({ error: "reportKey is required. Raw reportId values are not accepted." });
+        sendBadRequest(res, "reportKey is required. Raw reportId values are not accepted.");
         return;
       }
 
@@ -1400,7 +1385,7 @@ router.post(
           entityId: reportKey,
           payloadJson: { reportKey, reason: "no_active_tenant_for_user" },
         }).catch(() => {});
-        res.status(403).json({ error: "No active Azure tenant associated with your account. Access denied." });
+        sendForbidden(res, "No active Azure tenant associated with your account.");
         return;
       }
 
@@ -1412,7 +1397,7 @@ router.post(
         cfg = await loadPbiConfig();
       }
       if (!cfg?.tenantId || !cfg?.clientId || !cfg?.clientSecret) {
-        res.status(400).json({ error: "Power BI is not configured for this tenant. Contact your administrator." });
+        sendBadRequest(res, "Power BI is not configured for this tenant. Contact your administrator.");
         return;
       }
 
@@ -1425,7 +1410,7 @@ router.post(
           entityId: reportKey,
           payloadJson: { reportKey, azureTenantId: resolvedAzureTenantId, reason: "unknown_report_key" },
         }).catch(() => {});
-        res.status(400).json({ error: `Unknown reportKey '${reportKey}'. Configure it in Admin → Power BI.` });
+        sendBadRequest(res, `Unknown reportKey '${reportKey}'. Configure it in Admin → Power BI.`);
         return;
       }
 
@@ -1455,7 +1440,7 @@ router.post(
           entityId: reportKey,
           payloadJson: { reportKey, azureTenantId: resolvedAzureTenantId, reason: "azure_token_failure" },
         }).catch(() => {});
-        res.status(502).json({ error: `Failed to acquire Azure AD token: ${(errJson as { error_description?: string }).error_description ?? tokenRes.status}` });
+        sendError(res, `Failed to acquire Azure AD token: ${(errJson as { error_description?: string }).error_description ?? tokenRes.status}`, 502, "UPSTREAM_ERROR");
         return;
       }
 
@@ -1493,7 +1478,7 @@ router.post(
           entityId: reportKey,
           payloadJson: { reportKey, azureTenantId: resolvedAzureTenantId, reason: "embed_token_failure", detail: JSON.stringify(errJson) },
         }).catch(() => {});
-        res.status(502).json({ error: `Failed to generate embed token: ${JSON.stringify(errJson)}` });
+        sendError(res, `Failed to generate embed token: ${JSON.stringify(errJson)}`, 502, "UPSTREAM_ERROR");
         return;
       }
 
@@ -1534,7 +1519,7 @@ router.post(
       if (isNaN(id)) { sendBadRequest(res, "Invalid tenant ID"); return; }
 
       const [tenant] = await db.select().from(azureTenantsTable).where(eq(azureTenantsTable.id, id)).limit(1);
-      if (!tenant) { res.status(404).json({ error: "Tenant not found" }); return; }
+      if (!tenant) { sendNotFound(res, "Tenant"); return; }
 
       const label = String(req.body?.label ?? "default").trim().slice(0, 64);
       const expiresInDays = req.body?.expiresInDays ? parseInt(req.body.expiresInDays, 10) : null;
@@ -1588,7 +1573,7 @@ router.get(
       if (isNaN(id)) { sendBadRequest(res, "Invalid tenant ID"); return; }
 
       const [tenant] = await db.select().from(azureTenantsTable).where(eq(azureTenantsTable.id, id)).limit(1);
-      if (!tenant) { res.status(404).json({ error: "Tenant not found" }); return; }
+      if (!tenant) { sendNotFound(res, "Tenant"); return; }
 
       const tokens = await db
         .select({
@@ -1633,7 +1618,7 @@ router.delete(
         .where(and(eq(scimTokensTable.id, tokenId), eq(scimTokensTable.tenantId, id)))
         .limit(1);
 
-      if (!token) { res.status(404).json({ error: "Token not found" }); return; }
+      if (!token) { sendNotFound(res, "Token"); return; }
 
       await db.update(scimTokensTable).set({ isActive: false, updatedAt: new Date() }).where(eq(scimTokensTable.id, tokenId));
 
@@ -1657,7 +1642,7 @@ router.get(
       if (isNaN(id)) { sendBadRequest(res, "Invalid tenant ID"); return; }
 
       const [tenant] = await db.select().from(azureTenantsTable).where(eq(azureTenantsTable.id, id)).limit(1);
-      if (!tenant) { res.status(404).json({ error: "Tenant not found" }); return; }
+      if (!tenant) { sendNotFound(res, "Tenant"); return; }
 
       const provisionedUsers = await db
         .select({
@@ -1766,7 +1751,7 @@ router.post(
       if (isNaN(id)) { sendBadRequest(res, "Invalid tenant ID"); return; }
 
       const [tenant] = await db.select().from(azureTenantsTable).where(eq(azureTenantsTable.id, id)).limit(1);
-      if (!tenant) { res.status(404).json({ error: "Tenant not found" }); return; }
+      if (!tenant) { sendNotFound(res, "Tenant"); return; }
 
       const provisionedUsers = await db
         .select({
@@ -1821,7 +1806,7 @@ router.get(
       if (isNaN(id)) { sendBadRequest(res, "Invalid tenant ID"); return; }
 
       const [tenant] = await db.select().from(azureTenantsTable).where(eq(azureTenantsTable.id, id)).limit(1);
-      if (!tenant) { res.status(404).json({ error: "Tenant not found" }); return; }
+      if (!tenant) { sendNotFound(res, "Tenant"); return; }
 
       const [branding] = await db.select().from(tenantBrandingTable).where(eq(tenantBrandingTable.tenantId, id)).limit(1);
 
@@ -1843,7 +1828,7 @@ router.put(
       if (isNaN(id)) { sendBadRequest(res, "Invalid tenant ID"); return; }
 
       const [tenant] = await db.select().from(azureTenantsTable).where(eq(azureTenantsTable.id, id)).limit(1);
-      if (!tenant) { res.status(404).json({ error: "Tenant not found" }); return; }
+      if (!tenant) { sendNotFound(res, "Tenant"); return; }
 
       const body = req.body ?? {};
 

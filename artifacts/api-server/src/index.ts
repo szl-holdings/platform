@@ -216,6 +216,67 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     });
 
     logger.info("[bootstrap] Bootstrap sequence complete — server fully ready");
+
+    const startupMatrix = await (async () => {
+      try {
+        const { services: svc } = await import("@szl-holdings/services");
+        return svc.getHealthMatrix?.() ?? { summary: { total: 0, liveConfigured: 0, mockedDemoMode: 0 }, services: [] };
+      } catch {
+        return { summary: { total: 0, liveConfigured: 0, mockedDemoMode: 0 }, services: [] };
+      }
+    })();
+
+    const enabledFeatures: string[] = [];
+    if (process.env.STRIPE_SECRET_KEY) enabledFeatures.push("stripe-payments");
+    if (process.env.AZURE_AD_CLIENT_ID) enabledFeatures.push("azure-sso");
+    if (process.env.SENDGRID_API_KEY || process.env.RESEND_API_KEY) enabledFeatures.push("email");
+    if (process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY) enabledFeatures.push("ai-engine");
+    if (process.env.REDIS_URL || process.env.REDIS_HOST) enabledFeatures.push("redis");
+    if (process.env.S3_BUCKET || process.env.OBJECT_STORE_BUCKET) enabledFeatures.push("object-storage");
+    if (process.env.OTLP_ENDPOINT || process.env.OTEL_EXPORTER_OTLP_ENDPOINT) enabledFeatures.push("opentelemetry");
+    if (process.env.AZURE_APP_INSIGHTS_CONNECTION_STRING) enabledFeatures.push("azure-monitor");
+    if (process.env.NEW_RELIC_LICENSE_KEY) enabledFeatures.push("new-relic");
+    if (process.env.EXPO_ACCESS_TOKEN) enabledFeatures.push("expo-push");
+
+    const routeCount = (() => {
+      interface RouterLayer {
+        route?: unknown;
+        handle?: { stack?: RouterLayer[] };
+      }
+      let count = 0;
+      function countLayer(layer: RouterLayer) {
+        if (layer.route) {
+          count += 1;
+        } else if (layer.handle?.stack) {
+          layer.handle.stack.forEach(countLayer);
+        }
+      }
+      try {
+        const router = (app as unknown as { _router?: { stack?: RouterLayer[] } })._router;
+        router?.stack?.forEach(countLayer);
+      } catch { /* non-fatal */ }
+      return count;
+    })();
+
+    logger.info({
+      event: "server_startup",
+      port,
+      environment: process.env.NODE_ENV ?? "development",
+      nodeVersion: process.version,
+      enabledFeatures,
+      featureCount: enabledFeatures.length,
+      connectors: {
+        total: startupMatrix.summary.total,
+        live: startupMatrix.summary.liveConfigured,
+        demo: startupMatrix.summary.mockedDemoMode,
+      },
+      services: {
+        database: "postgresql",
+        jobQueue: "durable-postgresql",
+        websocket: "ws",
+      },
+      routeCount,
+    }, "[startup] API server fully ready — configuration summary");
   } catch (err) {
     logger.fatal({ err }, "Schema bootstrap failed — cannot guarantee data integrity, shutting down");
     process.exit(1);

@@ -1,17 +1,18 @@
 import { Router, type IRouter } from "express";
 import { db, featureFlagsTable, featureFlagOverridesTable, orgMembersTable } from "@szl-holdings/db";
 import { eq, desc } from "drizzle-orm";
-import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendError, handleRouteError } from "../lib/api-response";
+import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { logActivity } from "../lib/activity-logger";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { evaluateFlag, evaluateFlags, isFlagEnabled, PLATFORM_FLAGS, type PlatformFlagKey, type FlagEvaluationContext } from "../lib/platform-flags";
 
 const router: IRouter = Router();
 
-router.get("/feature-flags", authMiddleware(), async (_req, res) => {
+router.get("/feature-flags", authMiddleware(), async (req, res) => {
   try {
-    const flags = await db.select().from(featureFlagsTable).orderBy(featureFlagsTable.key);
-    sendSuccess(res, flags);
+    const { limit, offset, page } = parsePagination(req.query as Record<string, unknown>);
+    const flags = await db.select().from(featureFlagsTable).orderBy(featureFlagsTable.key).limit(limit).offset(offset);
+    sendSuccess(res, flags, 200, { page, limit, offset });
   } catch (err) {
     handleRouteError(res, err, "Failed to list feature flags");
   }

@@ -5,6 +5,7 @@ import { desc, eq, sql, and, gte, lt } from "drizzle-orm";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import type { Request, Response } from "express";
 import { feedbackNpsSchema, feedbackContextualSchema, validateBody } from "../lib/validation";
+import { handleRouteError } from "../lib/api-response";
 import { z } from "zod";
 
 const feedbackRouter: IRouter = Router();
@@ -40,8 +41,7 @@ feedbackRouter.post("/feedback/nps", validateBody(feedbackNpsSchema), async (req
 
     res.status(201).json({ success: true, id: entry.id });
   } catch (err) {
-    logger.error({ err }, "POST /feedback/nps error:");
-    res.status(500).json({ error: "Failed to submit NPS feedback" });
+    handleRouteError(res, err, "Failed to submit NPS feedback");
   }
 });
 
@@ -65,8 +65,7 @@ feedbackRouter.post("/feedback/contextual", validateBody(feedbackContextualSchem
 
     res.status(201).json({ success: true, id: entry.id });
   } catch (err) {
-    logger.error({ err }, "POST /feedback/contextual error:");
-    res.status(500).json({ error: "Failed to submit contextual feedback" });
+    handleRouteError(res, err, "Failed to submit contextual feedback");
   }
 });
 
@@ -90,8 +89,7 @@ feedbackRouter.post("/feedback/dismiss", validateBody(dismissSchema), async (req
 
     res.json({ success: true });
   } catch (err) {
-    logger.error({ err }, "POST /feedback/dismiss error:");
-    res.status(500).json({ error: "Failed to dismiss survey" });
+    handleRouteError(res, err, "Failed to dismiss survey");
   }
 });
 
@@ -135,8 +133,7 @@ feedbackRouter.get("/feedback/nps-eligibility", async (req: Request, res: Respon
 
     res.json({ eligible: true });
   } catch (err) {
-    logger.error({ err }, "GET /feedback/nps-eligibility error:");
-    res.status(500).json({ error: "Failed to check NPS eligibility" });
+    handleRouteError(res, err, "Failed to check NPS eligibility");
   }
 });
 
@@ -249,8 +246,7 @@ feedbackRouter.get("/admin/feedback/analytics", async (_req: Request, res: Respo
       recentComments,
     });
   } catch (err) {
-    logger.error({ err }, "GET /admin/feedback/analytics error:");
-    res.status(500).json({ error: "Failed to load feedback analytics" });
+    handleRouteError(res, err, "Failed to load feedback analytics");
   }
 });
 
@@ -292,8 +288,7 @@ feedbackRouter.get("/admin/feedback/list", async (req: Request, res: Response) =
       },
     });
   } catch (err) {
-    logger.error({ err }, "GET /admin/feedback/list error:");
-    res.status(500).json({ error: "Failed to list feedback" });
+    handleRouteError(res, err, "Failed to list feedback");
   }
 });
 

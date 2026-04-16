@@ -33,6 +33,7 @@ export { EcosystemMap, ECOSYSTEM_NODES, LAYER_CONFIG, CONNECTION_PAIRS, type Eco
 export { CompanyKPIDashboard, DEMO_COMPANY_KPIS, type CompanyKPI, type CompanyKPIDashboardProps } from "./company-kpi-dashboard";
 export { DataStateBadge, DataStateBanner, type DataState } from "./data-state-badge";
 export { EmptyState, type EmptyStateProps } from "./EmptyState";
+export { PageDataSkeleton, InlineDataSkeleton } from "./page-data-skeleton";
 export { useRealtimeChannel, type RealtimeConnectionStatus, type RealtimeTransport, type RealtimeChannelMessage, type UseRealtimeChannelOptions, type UseRealtimeChannelResult } from "./use-realtime-channel";
 export { usePresence, useRealtimePresence, type PresenceUser, type PresenceState, type UsePresenceOptions, type UsePresenceResult } from "./use-presence";
 export { RealtimeStatusIndicator } from "./realtime-status-indicator";

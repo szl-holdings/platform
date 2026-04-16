@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { CrdtEntityPanel } from "@szl-holdings/shared-ui";
+import { CrdtEntityPanel, EmptyState } from "@szl-holdings/shared-ui";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRealtimeChannel } from "@szl-holdings/shared-ui";
 import { Activity, AlertTriangle, RefreshCw, Plus, X } from "lucide-react";
@@ -523,6 +523,14 @@ export default function DealsPage() {
             ))}
           </div>
         </div>
+      )}
+
+      {showEmptyState && (
+        <EmptyState
+          headline="No deals in pipeline"
+          description="Add your first deal to start tracking your real estate pipeline."
+          accentColor="#3a7ad4"
+        />
       )}
 
       {!isLoading && deals.length > 0 && view === "kanban" && (

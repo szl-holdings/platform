@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { type AppObservabilityState, type LensId, LENSES } from "@szl-holdings/observability";
 import { ALL_CONFIGS } from "@szl-holdings/observability/configs";
+import { PageDataSkeleton } from "@szl-holdings/shared-ui";
 
 const LENS_ICONS: Record<string, string> = {
   signal: "◎",
@@ -181,14 +182,7 @@ export default function PortfolioObservability() {
   const lensIds: LensId[] = ["signal", "impact", "anticipation", "topology", "posture", "velocity"];
 
   if (appStates.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin" />
-          <span className="text-sm text-slate-500 animate-pulse">Loading portfolio intelligence...</span>
-        </div>
-      </div>
-    );
+    return <PageDataSkeleton rows={6} accentColor="#6366f1" />;
   }
 
   return (

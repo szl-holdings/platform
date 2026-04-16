@@ -40,7 +40,7 @@ function getUserEmail(req: Request): string | null {
 async function checkExportEnabled(res: Response): Promise<boolean> {
   const enabled = await isFlagEnabled("advanced_export_enabled");
   if (!enabled) {
-    res.status(403).json({ error: "Advanced export is not enabled", feature: "advanced_export_enabled" });
+    sendError(res, "Advanced export is not enabled", 403, "FEATURE_DISABLED", { feature: "advanced_export_enabled" });
     return false;
   }
   return true;
@@ -391,17 +391,17 @@ router.get("/exports/download/:token", async (req: Request, res: Response) => {
 
     const job = await getExportByToken(token);
     if (!job) {
-      res.status(404).json({ error: "Export not found or token invalid" });
+      sendNotFound(res, "Export");
       return;
     }
 
     if (job.status !== "completed") {
-      res.status(409).json({ error: `Export is not ready — status: ${job.status}` });
+      sendError(res, `Export is not ready — status: ${job.status}`, 409, "EXPORT_NOT_READY");
       return;
     }
 
     if (job.expiresAt && job.expiresAt < new Date()) {
-      res.status(410).json({ error: "Export download link has expired" });
+      sendError(res, "Export download link has expired", 410, "EXPORT_EXPIRED");
       return;
     }
 

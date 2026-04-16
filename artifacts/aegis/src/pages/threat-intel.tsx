@@ -2,12 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Shield, AlertTriangle, Brain, Radio, Crosshair, Activity, Loader2, Zap, FileText } from "lucide-react";
 import { SeverityMeter, TypewriterText, AnomalySparkline } from "@szl-holdings/shared-ui/ai-components";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch, PageDataSkeleton, EmptyState } from "@szl-holdings/shared-ui";
 
 export default function ThreatIntelAI() {
-  const { data: cves = [] } = useQuery({ queryKey: ["threat-cves"], queryFn: () => apiFetch<any[]>("/intelligence/cves") });
-  const { data: threats = [] } = useQuery({ queryKey: ["threat-data"], queryFn: () => apiFetch<any[]>("/intelligence/threats") });
-  const { data: anomalies = [] } = useQuery({ queryKey: ["threat-anomalies"], queryFn: () => apiFetch<any[]>("/intelligence/anomalies") });
+  const { data: cves = [], isLoading: cvesLoading } = useQuery({ queryKey: ["threat-cves"], queryFn: () => apiFetch<any[]>("/intelligence/cves") });
+  const { data: threats = [], isLoading: threatsLoading } = useQuery({ queryKey: ["threat-data"], queryFn: () => apiFetch<any[]>("/intelligence/threats") });
+  const { data: anomalies = [], isLoading: anomaliesLoading } = useQuery({ queryKey: ["threat-anomalies"], queryFn: () => apiFetch<any[]>("/intelligence/anomalies") });
+  const isLoading = cvesLoading || threatsLoading || anomaliesLoading;
 
   const [briefingText, setBriefingText] = useState("");
   const [briefingDone, setBriefingDone] = useState(false);
@@ -28,6 +29,8 @@ export default function ThreatIntelAI() {
 
   const criticalCves = cves.filter((c: any) => c.severity === "CRITICAL");
   const highCves = cves.filter((c: any) => c.severity === "HIGH");
+
+  if (isLoading) return <PageDataSkeleton rows={6} accentColor="#ef4444" />;
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">

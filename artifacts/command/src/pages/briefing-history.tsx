@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
-import { BriefingHistory, MorningBriefingCard, DEMO_BRIEFING_HISTORY } from "@szl-holdings/shared-ui";
+import { BriefingHistory, MorningBriefingCard, DEMO_BRIEFING_HISTORY, PageDataSkeleton } from "@szl-holdings/shared-ui";
 
 const ACCENT = "#8b7ac8";
 
@@ -85,7 +85,7 @@ export default function BriefingHistoryPage() {
         </div>
 
         {loading ? (
-          <div style={{ textAlign: "center", padding: "64px", color: "rgba(255,255,255,0.3)", fontSize: "13px" }}>Loading briefings…</div>
+          <PageDataSkeleton variant="list" showHeader rows={5} className="opacity-40" />
         ) : (
           <>
             {todayBriefing && (

@@ -2,6 +2,7 @@ import { useListProjects, Project } from "@szl-holdings/api-client-react";
 import { useState } from "react";
 import { BarChart3, Filter, Grid3X3, TrendingUp, Eye, ArrowUp, ArrowDown, Search, Layers, Zap, RefreshCw, AlertCircle, Clock } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { PageDataSkeleton } from "@szl-holdings/shared-ui";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 const healthDimensions = ["Performance", "Security", "Reliability", "Scalability", "Maintainability"];
@@ -94,8 +95,10 @@ export default function SpectrumAnalytics() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
+      <div className="min-h-screen bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <PageDataSkeleton variant="dashboard" showHeader showStats rows={4} />
+        </div>
       </div>
     );
   }

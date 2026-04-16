@@ -17,6 +17,7 @@ import { logger } from "../lib/logger";
 import { isFlagEnabled } from "../lib/platform-flags";
 import { z } from "zod";
 import { validateBody } from "../lib/validation";
+import { sendError, sendNotFound, sendForbidden, sendBadRequest } from "../lib/api-response";
 
 const enabledSchema = z.object({ enabled: z.boolean() });
 const createUserSchema = z.object({
@@ -460,7 +461,7 @@ adminRouter.get("/admin/billing/settings", async (_req, res) => {
       usageSummary: usageResult,
     });
   } catch (err) {
-    res.status(500).json({ error: "Failed to load billing settings" });
+    sendError(res, "Failed to load billing settings", 500, "INTERNAL_ERROR");
   }
 });
 
@@ -483,7 +484,7 @@ adminRouter.get("/admin/connectors", (_req, res) => {
 adminRouter.post("/admin/connectors/:name/test", async (req, res) => {
   const result = await services.testConnection(req.params["name"]!);
   if (!result) {
-    res.status(404).json({ error: "Connector not found" });
+    sendNotFound(res, "Connector");
     return;
   }
   integrationActivityLog.unshift({
@@ -503,7 +504,7 @@ adminRouter.post("/admin/connectors/:name/test", async (req, res) => {
 adminRouter.put("/admin/connectors/:name/enable", validateBody(enabledSchema), (req, res) => {
   const adapter = services.getAdapter(req.params["name"]!);
   if (!adapter) {
-    res.status(404).json({ error: "Connector not found" });
+    sendNotFound(res, "Connector");
     return;
   }
   const { enabled } = req.body as z.infer<typeof enabledSchema>;
@@ -553,7 +554,7 @@ adminRouter.get("/admin/provisioning", (_req, res) => {
 adminRouter.post("/admin/connectors/:name/sync", async (req, res) => {
   const adapter = services.getAdapter(req.params["name"]!);
   if (!adapter) {
-    res.status(404).json({ error: "Connector not found" });
+    sendNotFound(res, "Connector");
     return;
   }
   const syncResult = {
@@ -620,7 +621,7 @@ adminRouter.get("/admin/users", async (_req, res) => {
 
     res.json({ users: enriched, total: enriched.length });
   } catch {
-    res.status(500).json({ error: "Failed to fetch users" });
+    sendError(res, "Failed to fetch users", 500, "INTERNAL_ERROR");
   }
 });
 
@@ -640,7 +641,7 @@ adminRouter.post("/admin/users", validateBody(createUserSchema), (req, res) => {
 adminRouter.get("/admin/audit-log", async (req, res) => {
   const enabled = await isFlagEnabled("internal_audit_console_enabled");
   if (!enabled) {
-    res.status(403).json({ error: "Feature not available", feature: "internal_audit_console_enabled", fallback: { entries: [], total: 0 } });
+    sendForbidden(res, "Feature not available: internal_audit_console_enabled");
     return;
   }
   try {
@@ -711,7 +712,7 @@ adminRouter.get("/admin/audit-log", async (req, res) => {
 
     res.json({ logs, total: logs.length });
   } catch {
-    res.status(500).json({ error: "Failed to fetch audit log" });
+    sendError(res, "Failed to fetch audit log", 500, "INTERNAL_ERROR");
   }
 });
 
@@ -751,7 +752,7 @@ adminRouter.get("/admin/export-history", async (req, res) => {
 
     res.json({ exports: rows, total: count, page, limit });
   } catch {
-    res.status(500).json({ error: "Failed to fetch export history" });
+    sendError(res, "Failed to fetch export history", 500, "INTERNAL_ERROR");
   }
 });
 
@@ -771,7 +772,7 @@ adminRouter.get("/admin/feature-flags", async (_req, res) => {
     }));
     res.json({ flags });
   } catch {
-    res.status(500).json({ error: "Failed to fetch feature flags" });
+    sendError(res, "Failed to fetch feature flags", 500, "INTERNAL_ERROR");
   }
 });
 
@@ -785,12 +786,13 @@ adminRouter.put("/admin/feature-flags/:key", validateBody(enabledSchema), async 
       .where(eq(featureFlagsTable.key, key))
       .returning();
     if (!updated) {
-      res.status(404).json({ error: "Flag not found" });
+      sendNotFound(res, "Feature flag");
       return;
     }
+    await logActivity(req, "update", "feature_flag", String(updated.id), `Admin toggled flag: ${key}=${enabled}`).catch(() => {});
     res.json({ key: updated.key, name: updated.name, enabled: updated.isEnabled, updatedAt: updated.updatedAt.toISOString() });
   } catch {
-    res.status(500).json({ error: "Failed to update feature flag" });
+    sendError(res, "Failed to update feature flag", 500, "INTERNAL_ERROR");
   }
 });
 
@@ -863,7 +865,7 @@ adminRouter.get("/admin/webhooks", async (req, res) => {
     }));
     res.json({ events, total: events.length });
   } catch {
-    res.status(500).json({ error: "Failed to fetch webhook events" });
+    sendError(res, "Failed to fetch webhook events", 500, "INTERNAL_ERROR");
   }
 });
 
@@ -914,7 +916,7 @@ adminRouter.post("/admin/seed", async (_req, res) => {
     });
   } catch (err: any) {
     logger.error({ err }, "[admin/seed] Error");
-    res.status(500).json({ success: false, error: err?.message ?? "Seed failed" });
+    sendError(res, err?.message ?? "Seed failed", 500, "SEED_ERROR");
   }
 });
 
@@ -929,7 +931,7 @@ adminRouter.post("/admin/seed/reset", async (_req, res) => {
     });
   } catch (err: any) {
     logger.error({ err }, "[admin/seed/reset] Error");
-    res.status(500).json({ success: false, error: err?.message ?? "Reset failed" });
+    sendError(res, err?.message ?? "Reset failed", 500, "SEED_ERROR");
   }
 });
 
@@ -1128,7 +1130,7 @@ adminRouter.get("/admin/workflow-runs", async (req, res) => {
 
     res.json({ timestamp: new Date().toISOString(), runs, summary });
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch workflow runs" });
+    sendError(res, "Failed to fetch workflow runs", 500, "INTERNAL_ERROR");
   }
 });
 
@@ -1153,16 +1155,16 @@ adminRouter.get("/admin/workflow-runs/:id", async (req, res) => {
       return;
     }
 
-    res.status(404).json({ error: "Workflow run not found" });
+    sendNotFound(res, "Workflow run");
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch workflow run" });
+    sendError(res, "Failed to fetch workflow run", 500, "INTERNAL_ERROR");
   }
 });
 
 adminRouter.get("/admin/artifact-approvals", async (req, res) => {
   const approvalsEnabled = await isFlagEnabled("alloy_artifact_approvals_enabled");
   if (!approvalsEnabled) {
-    res.status(403).json({ error: "Feature not available", feature: "alloy_artifact_approvals_enabled", fallback: { approvals: [], total: 0, pendingCount: 0 } });
+    sendForbidden(res, "Feature not available: alloy_artifact_approvals_enabled");
     return;
   }
   const status = req.query["status"] as string | undefined;
@@ -1199,14 +1201,14 @@ adminRouter.get("/admin/artifact-approvals", async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch artifact approvals" });
+    sendError(res, "Failed to fetch artifact approvals", 500, "INTERNAL_ERROR");
   }
 });
 
 adminRouter.post("/admin/artifact-approvals/:id/approve", async (req, res) => {
   const approvalsEnabled = await isFlagEnabled("alloy_artifact_approvals_enabled");
   if (!approvalsEnabled) {
-    res.status(403).json({ error: "Feature not available", feature: "alloy_artifact_approvals_enabled" });
+    sendForbidden(res, "Feature not available: alloy_artifact_approvals_enabled");
     return;
   }
   const { id } = req.params;
@@ -1219,11 +1221,11 @@ adminRouter.post("/admin/artifact-approvals/:id/approve", async (req, res) => {
       .then((rows) => rows[0]);
 
     if (!approval) {
-      res.status(404).json({ error: "Artifact approval not found" });
+      sendNotFound(res, "Artifact approval");
       return;
     }
     if (approval.status !== "pending") {
-      res.status(400).json({ error: `Approval is already ${approval.status}` });
+      sendBadRequest(res, `Approval is already ${approval.status}`);
       return;
     }
 
@@ -1243,14 +1245,14 @@ adminRouter.post("/admin/artifact-approvals/:id/approve", async (req, res) => {
     await logActivity(req, "approve_artifact", "artifact_approval", id!, `Approved artifact: ${approval.artifactId}`);
     res.json({ success: true, approval: updated });
   } catch (err) {
-    res.status(500).json({ error: "Failed to approve artifact" });
+    sendError(res, "Failed to approve artifact", 500, "INTERNAL_ERROR");
   }
 });
 
 adminRouter.post("/admin/artifact-approvals/:id/reject", validateBody(reasonSchema), async (req, res) => {
   const approvalsEnabled = await isFlagEnabled("alloy_artifact_approvals_enabled");
   if (!approvalsEnabled) {
-    res.status(403).json({ error: "Feature not available", feature: "alloy_artifact_approvals_enabled" });
+    sendForbidden(res, "Feature not available: alloy_artifact_approvals_enabled");
     return;
   }
   const { id } = req.params;
@@ -1265,11 +1267,11 @@ adminRouter.post("/admin/artifact-approvals/:id/reject", validateBody(reasonSche
       .then((rows) => rows[0]);
 
     if (!approval) {
-      res.status(404).json({ error: "Artifact approval not found" });
+      sendNotFound(res, "Artifact approval");
       return;
     }
     if (approval.status !== "pending") {
-      res.status(400).json({ error: `Approval is already ${approval.status}` });
+      sendBadRequest(res, `Approval is already ${approval.status}`);
       return;
     }
 
@@ -1290,7 +1292,7 @@ adminRouter.post("/admin/artifact-approvals/:id/reject", validateBody(reasonSche
     await logActivity(req, "reject_artifact", "artifact_approval", id!, `Rejected artifact: ${approval.artifactId}${reason ? ` (${reason})` : ""}`);
     res.json({ success: true, approval: updated });
   } catch (err) {
-    res.status(500).json({ error: "Failed to reject artifact" });
+    sendError(res, "Failed to reject artifact", 500, "INTERNAL_ERROR");
   }
 });
 
@@ -1393,7 +1395,7 @@ adminRouter.get("/admin/push-tokens/stats", async (_req, res) => {
       byApp,
     });
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch push token stats" });
+    sendError(res, "Failed to fetch push token stats", 500, "INTERNAL_ERROR");
   }
 });
 
@@ -1408,7 +1410,7 @@ adminRouter.post("/admin/push-notifications/broadcast", validateBody(broadcastSc
       payload = buildPushMessage(template, vars ?? {});
     } else {
       if (!title || !body) {
-        res.status(400).json({ error: "title and body are required" });
+        sendBadRequest(res, "title and body are required");
         return;
       }
       payload = { title, body, data: data ?? {}, sound: "default" as const };
@@ -1417,7 +1419,7 @@ adminRouter.post("/admin/push-notifications/broadcast", validateBody(broadcastSc
     const result = await sendPushBroadcast(payload);
     res.json({ success: true, sent: result.sent, failed: result.failed });
   } catch (err) {
-    res.status(500).json({ error: "Failed to send broadcast push notification" });
+    sendError(res, "Failed to send broadcast push notification", 500, "INTERNAL_ERROR");
   }
 });
 
@@ -1443,7 +1445,7 @@ adminRouter.post("/admin/impersonate/:userId", requireRole("admin"), validateBod
     const { startImpersonation } = await import("../middlewares/session-policy");
     const targetUserId = parseInt(req.params["userId"] as string, 10);
     if (isNaN(targetUserId) || targetUserId < 1) {
-      res.status(400).json({ error: "Invalid user ID" });
+      sendBadRequest(res, "Invalid user ID");
       return;
     }
     const { reason } = req.body as z.infer<typeof reasonSchema>;
@@ -1461,7 +1463,7 @@ adminRouter.post("/admin/impersonate/:userId", requireRole("admin"), validateBod
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Failed to start impersonation";
-    res.status(403).json({ error: message });
+    sendForbidden(res, message);
   }
 });
 
@@ -1478,8 +1480,11 @@ adminRouter.post("/admin/impersonate/end", requireRole("admin"), validateBody(im
     res.status(200).json({ message: "Impersonation session ended" });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Failed to end impersonation";
-    const status = message.includes("Not authorized") ? 403 : 400;
-    res.status(status).json({ error: message });
+    if (message.includes("Not authorized")) {
+      sendForbidden(res, message);
+    } else {
+      sendBadRequest(res, message);
+    }
   }
 });
 
@@ -1488,7 +1493,7 @@ adminRouter.delete("/admin/sessions/:userId", requireRole("admin"), validateBody
     const { forceTerminateUserSessions } = await import("../middlewares/session-policy");
     const targetUserId = parseInt(req.params["userId"] as string, 10);
     if (isNaN(targetUserId) || targetUserId < 1) {
-      res.status(400).json({ error: "Invalid user ID" });
+      sendBadRequest(res, "Invalid user ID");
       return;
     }
     const { reason } = req.body as z.infer<typeof reasonSchema>;
@@ -1502,7 +1507,7 @@ adminRouter.delete("/admin/sessions/:userId", requireRole("admin"), validateBody
     res.status(200).json({ deletedCount: result.deletedCount, message: "Sessions terminated" });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Failed to terminate sessions";
-    res.status(500).json({ error: message });
+    sendError(res, message, 500, "INTERNAL_ERROR");
   }
 });
 

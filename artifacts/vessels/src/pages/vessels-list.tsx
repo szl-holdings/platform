@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { useRoster } from "@/hooks/use-vessels-data";
 import { type RosterVessel } from "@/lib/api";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { PageDataSkeleton, EmptyState } from "@szl-holdings/shared-ui";
 import { Ship, ChevronRight, AlertTriangle, Search, RefreshCw, MapPin, Clock, TrendingUp } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
@@ -190,20 +191,18 @@ export default function VesselsListPage() {
         </div>
       </div>
 
-      {isLoading && (
-        <div className="flex items-center justify-center py-12">
-          <RefreshCw className="w-4 h-4 text-sky-400/40 animate-spin mr-2" />
-          <span className="text-xs text-sky-400/40">Loading fleet data...</span>
-        </div>
-      )}
+      {isLoading && <PageDataSkeleton rows={8} accentColor="#38bdf8" />}
 
       <div className="space-y-2">
         {filtered.map(v => <RosterRow key={v.id} v={v} />)}
         {!isLoading && filtered.length === 0 && (
-          <div className="text-center py-12 text-sky-400/30 text-xs">
-            <AlertTriangle className="w-5 h-5 mx-auto mb-2 opacity-40" />
-            No vessels match your filters
-          </div>
+          <EmptyState
+            icon={Ship}
+            headline="No vessels match your filters"
+            description="Try adjusting your search or status filters to see more vessels."
+            compact
+            accentColor="#38bdf8"
+          />
         )}
       </div>
     </div>

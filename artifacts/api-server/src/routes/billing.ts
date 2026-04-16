@@ -1,52 +1,13 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { db, billingPlansTable, subscriptionsTable, invoicesTable, organizationsTable, revenueEventsTable } from "@szl-holdings/db";
 import { eq, desc, or } from "drizzle-orm";
-import { sendSuccess, sendNotFound, sendError, sendBadRequest, handleRouteError } from "../lib/api-response";
+import { sendSuccess, sendNotFound, sendError, sendBadRequest, sendForbidden, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { services } from "@szl-holdings/services";
 import { logger } from "../lib/logger";
 import { isFlagEnabled } from "../lib/platform-flags";
+import { validateBody, billingCheckoutSchema, billingCustomerPortalSchema, billingCommandSubscribeSchema, stripeCheckoutSchema, planSubscribeSchema, cancelSubscriptionSchema, updateSubscriptionSchema } from "../lib/validation";
 import { z } from "zod";
-import { validateBody } from "../lib/validation";
-
-const checkoutSchema = z.object({
-  priceId: z.string().min(1),
-  mode: z.enum(["subscription", "payment"]).optional(),
-  successUrl: z.string().url(),
-  cancelUrl: z.string().url(),
-  customerEmail: z.string().email().optional(),
-});
-
-const customerPortalSchema = z.object({
-  customerId: z.string().min(1),
-  returnUrl: z.string().url(),
-});
-
-const cancelSubscriptionSchema = z.object({
-  subscriptionId: z.string().min(1),
-  cancelImmediately: z.boolean().optional(),
-});
-
-const updateSubscriptionSchema = z.object({
-  subscriptionId: z.string().min(1),
-  newPriceId: z.string().min(1),
-});
-
-const stripeCheckoutSchema = z.object({
-  tierId: z.string().min(1),
-  tierName: z.string().optional(),
-  service: z.string().optional(),
-  email: z.string().email().optional(),
-  successUrl: z.string().url(),
-  cancelUrl: z.string().url(),
-});
-
-const planSubscribeSchema = z.object({
-  planId: z.string().min(1),
-  email: z.string().email().optional(),
-  successUrl: z.string().url(),
-  cancelUrl: z.string().url(),
-});
 
 const router: IRouter = Router();
 
@@ -73,19 +34,21 @@ router.get("/billing/plans/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/billing/subscriptions", authMiddleware(), requireRole("ops", "analyst"), async (_req, res) => {
+router.get("/billing/subscriptions", authMiddleware(), requireRole("ops", "analyst"), async (req, res) => {
   try {
-    const subs = await db.select().from(subscriptionsTable).orderBy(desc(subscriptionsTable.createdAt));
-    sendSuccess(res, subs);
+    const { limit, offset, page } = parsePagination(req.query as Record<string, unknown>);
+    const subs = await db.select().from(subscriptionsTable).orderBy(desc(subscriptionsTable.createdAt)).limit(limit).offset(offset);
+    sendSuccess(res, subs, 200, { page, limit, offset });
   } catch (err) {
     handleRouteError(res, err, "Failed to list subscriptions");
   }
 });
 
-router.get("/billing/invoices", authMiddleware(), requireRole("ops", "analyst"), async (_req, res) => {
+router.get("/billing/invoices", authMiddleware(), requireRole("ops", "analyst"), async (req, res) => {
   try {
-    const invs = await db.select().from(invoicesTable).orderBy(desc(invoicesTable.createdAt));
-    sendSuccess(res, invs);
+    const { limit, offset, page } = parsePagination(req.query as Record<string, unknown>);
+    const invs = await db.select().from(invoicesTable).orderBy(desc(invoicesTable.createdAt)).limit(limit).offset(offset);
+    sendSuccess(res, invs, 200, { page, limit, offset });
   } catch (err) {
     handleRouteError(res, err, "Failed to list invoices");
   }
@@ -100,9 +63,9 @@ router.get("/billing/products", async (_req, res) => {
   }
 });
 
-router.post("/billing/checkout", validateBody(checkoutSchema), async (req: Request, res: Response) => {
+router.post("/billing/checkout", validateBody(billingCheckoutSchema), async (req: Request, res: Response) => {
   try {
-    const { priceId, mode, successUrl, cancelUrl, customerEmail } = req.body as z.infer<typeof checkoutSchema>;
+    const { priceId, mode, successUrl, cancelUrl, customerEmail } = req.body as z.infer<typeof billingCheckoutSchema>;
 
     let customerId: string | undefined;
     if (customerEmail) {
@@ -162,15 +125,14 @@ router.get("/billing/subscription-status", async (req: Request, res: Response) =
   }
 });
 
-router.post("/billing/customer-portal", validateBody(customerPortalSchema), async (req: Request, res: Response) => {
+router.post("/billing/customer-portal", validateBody(billingCustomerPortalSchema), async (req: Request, res: Response) => {
   const portalEnabled = await isFlagEnabled("pilot_customer_portal_enabled");
   if (!portalEnabled) {
-    res.status(403).json({ error: "Feature not available", feature: "pilot_customer_portal_enabled", fallback: { url: null } });
+    sendForbidden(res, "Feature not available: pilot_customer_portal_enabled");
     return;
   }
   try {
-    const { customerId, returnUrl } = req.body as z.infer<typeof customerPortalSchema>;
-
+    const { customerId, returnUrl } = req.body as z.infer<typeof billingCustomerPortalSchema>;
     const session = await services.stripe.createCustomerPortalSession(customerId, returnUrl);
     sendSuccess(res, { url: session.url });
   } catch (err) {
@@ -262,7 +224,7 @@ router.post("/billing/webhooks", async (req: Request, res: Response) => {
 
     if (!verified || !event) {
       logger.warn("Webhook signature verification failed");
-      res.status(400).json({ error: "Invalid webhook signature" });
+      sendBadRequest(res, "Invalid webhook signature");
       return;
     }
 
@@ -437,7 +399,7 @@ router.post("/billing/webhooks", async (req: Request, res: Response) => {
     res.json({ received: true });
   } catch (err) {
     logger.error({ err }, "Webhook processing error");
-    res.status(500).json({ error: "Webhook processing failed" });
+    sendError(res, "Webhook processing failed", 500, "WEBHOOK_ERROR");
   }
 });
 
@@ -453,7 +415,7 @@ router.post("/stripe/checkout", validateBody(stripeCheckoutSchema), async (req: 
 
     const priceId = tierPricing[tierId];
     if (!priceId) {
-      res.status(400).json({ error: `No Stripe price configured for tier "${tierId}". Set the corresponding STRIPE_PRICE_* environment variable.` });
+      sendBadRequest(res, `No Stripe price configured for tier "${tierId}". Set the corresponding STRIPE_PRICE_* environment variable.`);
       return;
     }
 
@@ -493,9 +455,9 @@ router.get("/billing/command/plans", (_req, res) => {
   sendSuccess(res, plans);
 });
 
-router.post("/billing/command/subscribe", validateBody(planSubscribeSchema), async (req: Request, res: Response) => {
+router.post("/billing/command/subscribe", validateBody(billingCommandSubscribeSchema), async (req: Request, res: Response) => {
   try {
-    const { planId, email, successUrl, cancelUrl } = req.body as z.infer<typeof planSubscribeSchema>;
+    const { planId, email, successUrl, cancelUrl } = req.body as z.infer<typeof billingCommandSubscribeSchema>;
 
     const plan = COMMAND_PLANS[planId as keyof typeof COMMAND_PLANS];
     if (!plan) {

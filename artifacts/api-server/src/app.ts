@@ -12,6 +12,7 @@ import { dirname, join } from "path";
 import { randomBytes } from "crypto";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { sendError, sendNotFound, sendUnauthorized } from "./lib/api-response";
 import { correlationMiddleware } from "./middlewares/correlation";
 import { globalLimiter } from "./middlewares/rate-limiters";
 import { telemetryMiddleware } from "./middlewares/telemetry";
@@ -107,8 +108,8 @@ app.use(cors({
   origin: corsOriginFn,
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "X-Correlation-Id", "X-CSRF-Token", "X-Api-Version"],
-  exposedHeaders: ["X-Correlation-Id", "X-Api-Version", "X-Api-Versions-Supported", "Deprecation", "Sunset", "X-Api-Deprecated", "X-Api-Deprecation-Notice"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "X-Correlation-Id", "X-Request-Id", "X-CSRF-Token", "X-Api-Version"],
+  exposedHeaders: ["X-Correlation-Id", "X-Request-Id", "X-Api-Version", "X-Api-Versions-Supported", "Deprecation", "Sunset", "X-Api-Deprecated", "X-Api-Deprecation-Notice"],
   maxAge: 86400,
 }));
 
@@ -285,7 +286,7 @@ app.get("/api/health/detailed", async (req: Request, res: Response) => {
       }
     }
     if (!hasInternalAccess && !req.isAuthenticated()) {
-      res.status(401).json({ error: "Authentication required", message: "Detailed health information is restricted." });
+      sendUnauthorized(res, "Detailed health information is restricted to authenticated users");
       return;
     }
   }
@@ -405,16 +406,12 @@ app.use("/api/graphql", (req: Request, res: Response, next: import("express").Ne
   if (_graphqlHandler) {
     _graphqlHandler(req, res, next);
   } else {
-    res.status(503).json({ error: "GraphQL not ready", message: "GraphQL is still initializing" });
+    sendError(res, "GraphQL is still initializing", 503, "SERVICE_UNAVAILABLE");
   }
 });
 
 app.use((_req: Request, res: Response) => {
-  res.status(404).json({
-    error: "Not Found",
-    message: "The requested resource does not exist.",
-    statusCode: 404,
-  });
+  sendNotFound(res, "The requested resource");
 });
 
 interface HttpError extends Error {
@@ -435,13 +432,9 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     logger.warn({ err, statusCode }, "Client error");
   }
 
-  res.status(statusCode).json({
-    error: isServerError ? "Internal Server Error" : err.message,
-    message: isServerError
-      ? "An unexpected error occurred. Please try again later."
-      : err.message,
-    statusCode,
-  });
+  const errorMessage = isServerError ? "Internal Server Error" : err.message;
+  const errorCode = isServerError ? "INTERNAL_ERROR" : "CLIENT_ERROR";
+  sendError(res, errorMessage, statusCode, errorCode);
 });
 
 export default app;

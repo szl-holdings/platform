@@ -1,9 +1,11 @@
 import { Router, type IRouter } from "express";
 import { db, notificationsTable, notificationPreferencesTable } from "@szl-holdings/db";
 import { eq, desc, and, isNull } from "drizzle-orm";
-import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendError, handleRouteError } from "../lib/api-response";
+import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { publish, WS_CHANNELS } from "../lib/websocket";
+import { validateBody, createNotificationSchema } from "../lib/validation";
+import { z } from "zod";
 
 const router: IRouter = Router();
 
@@ -17,47 +19,29 @@ router.get("/notifications", authMiddleware({ required: false }), async (req, re
       return;
     }
     const userId = req.user.id;
+    const { limit, offset, page } = parsePagination(req.query as Record<string, unknown>);
     const notifications = await db
       .select()
       .from(notificationsTable)
       .where(eq(notificationsTable.userId, userId))
-      .orderBy(desc(notificationsTable.createdAt));
-    sendSuccess(res, notifications);
+      .orderBy(desc(notificationsTable.createdAt))
+      .limit(limit)
+      .offset(offset);
+    sendSuccess(res, notifications, 200, { page, limit, offset });
   } catch (err) {
     handleRouteError(res, err, "Failed to list notifications");
   }
 });
 
-router.post("/notifications", authMiddleware(), requireRole("ops"), async (req, res) => {
+router.post("/notifications", authMiddleware(), requireRole("ops"), validateBody(createNotificationSchema), async (req, res) => {
   try {
-    const { userId, type, channel, title, message, actionUrl } = req.body;
-    if (!userId || typeof userId !== "number") {
-      sendBadRequest(res, "userId is required and must be a number");
-      return;
-    }
-    if (!type || !validTypes.includes(type)) {
-      sendBadRequest(res, `type must be one of: ${validTypes.join(", ")}`);
-      return;
-    }
-    if (!title || typeof title !== "string" || title.trim().length === 0) {
-      sendBadRequest(res, "title is required and must be a non-empty string");
-      return;
-    }
-    if (!message || typeof message !== "string" || message.trim().length === 0) {
-      sendBadRequest(res, "message is required and must be a non-empty string");
-      return;
-    }
-    if (channel && !validChannels.includes(channel)) {
-      sendBadRequest(res, `channel must be one of: ${validChannels.join(", ")}`);
-      return;
-    }
-    const channelValue = channel && validChannels.includes(channel) ? (channel as (typeof validChannels)[number]) : "in_app" as const;
+    const { userId, type, channel, title, message, actionUrl } = req.body as z.infer<typeof createNotificationSchema>;
     const [notification] = await db.insert(notificationsTable).values({
       userId,
-      type: type as (typeof validTypes)[number],
-      channel: channelValue,
-      title: title.trim(),
-      message: message.trim(),
+      type,
+      channel,
+      title,
+      message,
       actionUrl: actionUrl ?? null,
     }).returning();
 

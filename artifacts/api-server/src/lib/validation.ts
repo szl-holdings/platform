@@ -107,6 +107,81 @@ export const notificationUpdateSchema = z.object({
   isRead: z.boolean(),
 });
 
+export const createNotificationSchema = z.object({
+  userId: z.number().int().positive(),
+  type: z.enum(["info", "warning", "error", "success", "action_required"]),
+  channel: z.enum(["in_app", "email", "sms", "slack"]).default("in_app"),
+  title: z.string().min(1, "title is required").max(500).trim(),
+  message: z.string().min(1, "message is required").max(2000).trim(),
+  actionUrl: z.string().url().max(2048).optional().nullable(),
+});
+
+export const billingCheckoutSchema = z.object({
+  priceId: z.string().min(1, "priceId is required"),
+  mode: z.enum(["subscription", "payment"]).default("subscription"),
+  successUrl: z.string().url("successUrl must be a valid URL"),
+  cancelUrl: z.string().url("cancelUrl must be a valid URL"),
+  customerEmail: z.string().email().max(320).toLowerCase().optional(),
+});
+
+export const billingCustomerPortalSchema = z.object({
+  customerId: z.string().min(1, "customerId is required"),
+  returnUrl: z.string().url("returnUrl must be a valid URL"),
+});
+
+export const billingCommandSubscribeSchema = z.object({
+  planId: z.string().min(1, "planId is required"),
+  email: z.string().email().max(320).toLowerCase().optional(),
+  successUrl: z.string().url("successUrl must be a valid URL"),
+  cancelUrl: z.string().url("cancelUrl must be a valid URL"),
+});
+
+export const stripeCheckoutSchema = z.object({
+  tierId: z.string().min(1, "tierId is required"),
+  tierName: z.string().max(200).optional(),
+  service: z.string().max(200).optional(),
+  email: z.string().email().max(320).toLowerCase().optional(),
+  successUrl: z.string().url("successUrl must be a valid URL"),
+  cancelUrl: z.string().url("cancelUrl must be a valid URL"),
+});
+
+export const planSubscribeSchema = z.object({
+  planId: z.string().min(1, "planId is required"),
+  email: z.string().email().max(320).toLowerCase().optional(),
+  successUrl: z.string().url("successUrl must be a valid URL"),
+  cancelUrl: z.string().url("cancelUrl must be a valid URL"),
+});
+
+export const cancelSubscriptionSchema = z.object({
+  subscriptionId: z.string().min(1, "subscriptionId is required"),
+  cancelImmediately: z.boolean().default(false),
+});
+
+export const updateSubscriptionSchema = z.object({
+  subscriptionId: z.string().min(1, "subscriptionId is required"),
+  newPriceId: z.string().min(1, "newPriceId is required"),
+});
+
+export const loginPasswordSchema = z.object({
+  email: z.string().email("Valid email is required").max(320).trim().toLowerCase(),
+  password: z.string().min(1, "password is required"),
+});
+
+export const tenantCreateSchema = z.object({
+  azureTenantId: z.string().min(1, "azureTenantId is required").max(128).trim(),
+  displayName: z.string().min(1, "displayName is required").max(200).trim(),
+  domain: z.string().max(253).optional(),
+  organizationId: z.number().int().positive().optional(),
+  config: z.record(z.unknown()).optional(),
+});
+
+export const tenantStatusSchema = z.object({
+  status: z.enum(["pending", "active", "suspended"]).optional(),
+  adminConsentGranted: z.enum(["pending", "granted", "revoked"]).optional(),
+}).refine(data => data.status || data.adminConsentGranted, {
+  message: "status or adminConsentGranted is required",
+});
+
 export const featureFlagSchema = z.object({
   key: z.string().min(1).max(100).regex(/^[a-z0-9_-]+$/i),
   enabled: z.boolean(),

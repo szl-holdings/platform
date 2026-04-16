@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { DataStateBadge } from "@/components/DataStateBadge";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { Lock, TrendingUp, Ship, Layers, Eye, Shield, Sparkles, BarChart3, ArrowUpRight, RefreshCw, Activity, Zap } from "lucide-react";
+import { PageDataSkeleton } from "@szl-holdings/shared-ui";
 
 interface KpiData {
   checkedAt: string;
@@ -303,11 +304,8 @@ export default function KpiDashboardPage() {
 
               <AnimatePresence>
                 {loading && (
-                  <m.div
-                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "300px" }}
-                  >
-                    <div style={{ width: "20px", height: "20px", border: "2px solid hsla(0,0%,100%,0.08)", borderTopColor: "hsl(214,80%,60%)", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+                  <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    <PageDataSkeleton rows={6} accentColor="hsl(214,80%,60%)" />
                   </m.div>
                 )}
               </AnimatePresence>

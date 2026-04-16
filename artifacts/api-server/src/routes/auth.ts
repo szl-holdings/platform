@@ -3,13 +3,13 @@ import { db, usersTable, sessionsTable, rolesTable, userRolesTable, toCanonicalR
 import { eq, desc, and } from "drizzle-orm";
 import { randomBytes, pbkdf2Sync, timingSafeEqual } from "crypto";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
-import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendForbidden, sendError, handleRouteError } from "../lib/api-response";
+import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendForbidden, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { logActivity } from "../lib/activity-logger";
 import { createAuthService } from "@szl-holdings/auth";
 import { issueWsTicket } from "../lib/websocket.js";
 import { getSessionToken, getSessionUser } from "../lib/auth";
 import { z } from "zod";
-import { validateBody } from "../lib/validation";
+import { validateBody, loginPasswordSchema } from "../lib/validation";
 
 const router: IRouter = Router();
 const authService = createAuthService();
@@ -191,8 +191,9 @@ router.get("/auth/roles", authMiddleware(), requireRole("ops", "analyst"), async
   }
 });
 
-router.get("/auth/users", authMiddleware(), requireRole("ops"), async (_req, res) => {
+router.get("/auth/users", authMiddleware(), requireRole("ops"), async (req, res) => {
   try {
+    const { limit, offset, page } = parsePagination(req.query as Record<string, unknown>);
     const users = await db.select({
       id: usersTable.id,
       displayName: usersTable.displayName,
@@ -200,8 +201,8 @@ router.get("/auth/users", authMiddleware(), requireRole("ops"), async (_req, res
       avatarUrl: usersTable.avatarUrl,
       isActive: usersTable.isActive,
       createdAt: usersTable.createdAt,
-    }).from(usersTable).orderBy(desc(usersTable.createdAt));
-    sendSuccess(res, users);
+    }).from(usersTable).orderBy(desc(usersTable.createdAt)).limit(limit).offset(offset);
+    sendSuccess(res, users, 200, { page, limit, offset });
   } catch (err) {
     handleRouteError(res, err, "Failed to list users");
   }
@@ -374,13 +375,9 @@ router.get("/auth/verify-email", async (req, res) => {
   }
 });
 
-router.post("/auth/login-password", async (req, res) => {
+router.post("/auth/login-password", validateBody(loginPasswordSchema), async (req, res) => {
   try {
-    const { email, password } = req.body as { email?: string; password?: string };
-    if (!email || !password) {
-      sendBadRequest(res, "email and password are required");
-      return;
-    }
+    const { email, password } = req.body as z.infer<typeof loginPasswordSchema>;
 
     const [user] = await db
       .select()
