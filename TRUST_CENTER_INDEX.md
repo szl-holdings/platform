@@ -137,11 +137,16 @@ SCIM 2.0 is implemented for automated user lifecycle management:
 | [docs/ENVIRONMENT_SEPARATION.md](docs/ENVIRONMENT_SEPARATION.md) | Dev/staging/production isolation |
 | [docs/DEPENDENCY_POLICY.md](docs/DEPENDENCY_POLICY.md) | Package management and vetting policy |
 
+### Shared Responsibility
+
+See [SHARED_RESPONSIBILITY_MODEL.md](SHARED_RESPONSIBILITY_MODEL.md) for the clear delineation of what SZL Holdings is responsible for versus what the customer organization is responsible for, covering infrastructure, identity, access control, data, AI governance, and compliance.
+
 ### Data Privacy
 
 - **GDPR:** Privacy framework in place. Data subject rights requests: support@szlholdings.com
 - **CCPA:** Privacy framework in place. California resident requests honored within 45 days
 - **Data residency:** Primary US (Azure East US 2). EU deployment available via contract
+- See [PRIVACY_OVERVIEW.md](PRIVACY_OVERVIEW.md) for a full privacy overview covering data collection, rights requests, sub-processors, AI and privacy, and breach notification.
 
 ---
 
@@ -149,12 +154,18 @@ SCIM 2.0 is implemented for automated user lifecycle management:
 
 | Document | Summary |
 |----------|---------|
-| [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md) | Operational procedures, failure modes, escalation paths |
-| [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) | Full incident handling procedures |
-| [INCIDENT_SEVERITY_MATRIX.md](INCIDENT_SEVERITY_MATRIX.md) | Incident classification: P0–P3 with response targets |
-| [BACKUP_AND_RECOVERY.md](BACKUP_AND_RECOVERY.md) | Backup strategy — RPO 1 hour, RTO 4 hours |
+| [SUPPORT_OPERATIONS.md](SUPPORT_OPERATIONS.md) | Support channels, tiers, triage workflow, SLAs, escalation path, and response templates |
+| [INCIDENT_COMMAND_PLAYBOOK.md](INCIDENT_COMMAND_PLAYBOOK.md) | Full incident command lifecycle: detection, declaration, response, communication, post-mortem |
+| [SEVERITY_MODEL.md](SEVERITY_MODEL.md) | P0–P3 severity definitions, response targets, escalation, and classification decision tree |
+| [CUSTOMER_ESCALATION_MATRIX.md](CUSTOMER_ESCALATION_MATRIX.md) | Escalation paths by issue type: outage, breach, access issue, feature request, billing |
+| [STATUSPAGE_PLAN.md](STATUSPAGE_PLAN.md) | Status page implementation plan, component monitoring, incident update templates |
+| [RUNBOOK_COMMON_FAILURES.md](RUNBOOK_COMMON_FAILURES.md) | Step-by-step runbooks for 10 common failure scenarios |
+| [SUPPORT_HANDOFF_GUIDE.md](SUPPORT_HANDOFF_GUIDE.md) | Incident Commander transfer, support ticket handoff, end-of-day procedures |
+| [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) | Incident handling procedures (legacy reference) |
+| [INCIDENT_SEVERITY_MATRIX.md](INCIDENT_SEVERITY_MATRIX.md) | Incident classification matrix (legacy reference; superseded by SEVERITY_MODEL.md) |
 | [BACKUP-RESTORE.md](BACKUP-RESTORE.md) | Buyer-facing backup & restore commitments — RPO/RTO targets, restore drill cadence, data residency |
 | [ops/infra/recovery-and-backup-model.md](ops/infra/recovery-and-backup-model.md) | Backup model detail |
+| [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md) | Operational procedures and failure modes |
 | [docs/trust/deployment-model.md](docs/trust/deployment-model.md) | Infrastructure and deployment approach |
 
 ### Operational Commitments
@@ -222,6 +233,9 @@ For enterprise evaluators completing a formal security or technical review:
 | Document | Purpose |
 |----------|---------|
 | [TECHNICAL_DILIGENCE_PACKET.md](TECHNICAL_DILIGENCE_PACKET.md) | Single-document technical diligence reference — architecture, tenancy, governance, AI, observability, known gaps |
+| [SECURITY_QUESTIONNAIRE_PACK.md](SECURITY_QUESTIONNAIRE_PACK.md) | Pre-answered responses to common enterprise security questionnaire topics |
+| [SHARED_RESPONSIBILITY_MODEL.md](SHARED_RESPONSIBILITY_MODEL.md) | Platform vs customer responsibility across infrastructure, identity, data, AI, and compliance |
+| [PRIVACY_OVERVIEW.md](PRIVACY_OVERVIEW.md) | Privacy framework: data collection, rights, sub-processors, AI handling, breach notification |
 | [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) | Full RBAC and permission documentation |
 | [SECURITY-CHECKLIST.md](SECURITY-CHECKLIST.md) | Security controls mapped to implementation |
 | [KNOWN-GAPS.md](KNOWN-GAPS.md) | Transparent gap register with severity and remediation status |
