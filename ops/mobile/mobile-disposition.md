@@ -1,7 +1,7 @@
 # Mobile Disposition — SZL Holdings Platform
 
-Generated: 2026-04-16
-Authority: Phase 2-3 Product Topology & Portfolio Rationalization
+Updated: 2026-04-16
+Authority: Phase 12 Mobile Release Readiness
 
 ---
 
@@ -9,86 +9,109 @@ Authority: Phase 2-3 Product Topology & Portfolio Rationalization
 
 | Role | App | Rationale |
 |------|-----|-----------|
-| **Flagship Mobile** | `cortex-mobile` | Full 8-domain unified command; deepest feature set; biometric auth; cross-domain signals |
-| **Secondary Warm Path** | `szl-holdings-mobile` | Holdings companion; ship after CORTEX reaches TestFlight; shares mobile-shared lib |
-| **Archive** | All stub mobile dirs (deleted in Phase 1) | aegis-mobile, alloy-mobile, carlota-jo-mobile, lyte-mobile, stephen-mobile, terra-mobile, vessels-mobile |
+| **Flagship Mobile** | `artifacts/szl-holdings-mobile` | Full CORTEX app; complete `app.json`, `eas.json`, all Expo deps; named "CORTEX" in app config |
+| **Deferred Scaffold** | `artifacts/cortex-mobile` | Partial route scaffold only; no `package.json`, no `app.json`; deferred |
 
 ---
 
-## Flagship: CORTEX Mobile (`artifacts/cortex-mobile`)
+## Flagship: CORTEX (`artifacts/szl-holdings-mobile`)
 
 ### Designation Rationale
 
-CORTEX is the correct flagship mobile app because:
+`artifacts/szl-holdings-mobile` is the CORTEX app. Evidence:
 
-1. **Scope breadth** — It is the only mobile app designed to span all 8 business domains (Aegis, Vessels, Terra, Carlota Jo, Command, Lyte, IMPERIUM, SZL Holdings). No other mobile app offers this coverage.
-2. **Feature depth** — Biometric auth (Face ID / Touch ID), PIN with SHA-256 lockout, voice commands, push notifications, offline sync via `lib/offline-engine`, cross-domain badge counts.
-3. **Strategic fit** — CORTEX is the mobile expression of the "governed operational intelligence" platform story. A single app that surfaces all domain intelligence is a stronger investor narrative than domain-specific companion apps.
-4. **Backend integration** — Connects to `api-server` via the same REST/WebSocket/SSE paths used by web surfaces. Shares `lib/mobile-shared` with `szl-holdings-mobile`.
-5. **Release readiness** — EAS configuration is in place; has the most complete pre-release checklist of any mobile artifact. Credential files need production values before TestFlight submission (see `ops/mobile/eas-secrets-matrix.md`).
+1. **`app.json` name field**: `"name": "CORTEX"` — explicit app identity.
+2. **Complete configuration**: Full `app.json`, `eas.json`, `package.json`; all Expo plugins,
+   permissions, and push notification config are present.
+3. **Bundle ID**: `com.szlholdings.executive.mobile` registered across iOS and Android.
+4. **EAS profiles**: development / preview / production build profiles configured in `eas.json`.
+5. **Full feature set**: Biometric auth, push notifications, secure storage, New Architecture,
+   GraphQL via urql, offline-capable query persistence, camera, screen capture prevention.
+6. **Shared library**: Consumes `@szl-holdings/mobile-shared` (`lib/mobile-shared`) for
+   shared push hooks, error boundary, skeleton loader, and offline banner.
 
 ### Release Path
 
 | Stage | Target | Blockers |
 |-------|--------|---------|
-| Internal Alpha | TestFlight + Play Internal Testing | Production Firebase credentials; push token backend registration |
-| Beta | TestFlight External | Deep linking; physical device auth flow testing; screen capture prevention |
-| Production | App Store + Google Play | Store listing assets (see `ops/mobile/store-assets-checklist.md`) |
+| Alpha | TestFlight + Play Internal | EAS project UUID; Firebase credentials; push token backend |
+| Beta | TestFlight External | Physical device test; screen capture prevention; Sentry |
+| Production | App Store + Google Play | Store listing assets; Apple/Google account credentials |
 
 ### Bundle ID
 
-`com.szlholdings.cortex`
+`com.szlholdings.executive.mobile`
 
 ---
 
-## Secondary Warm Path: SZL Holdings Mobile (`artifacts/szl-holdings-mobile`)
+## Deferred: `artifacts/cortex-mobile`
 
-### Designation Rationale
+### Current State
 
-`szl-holdings-mobile` is a validated secondary path because:
+`artifacts/cortex-mobile` contains:
+- `app/auth/` — route files for auth flow
+- `app/workspace/` — route files for workspace views
+- `node_modules/` — Expo toolchain installed via workspace
+- `expo-env.d.ts` — Expo type declarations
 
-1. **Real code exists** — Full Expo app structure, not an empty stub.
-2. **Defined audience** — Holdings-specific companion for investors and portfolio stakeholders.
-3. **Shared infrastructure** — Uses `lib/mobile-shared` already proven with CORTEX, reducing incremental build cost.
-4. **Credential state** — Both `google-services.json` and `GoogleService-Info.plist` contain confirmed placeholder credentials; these must be replaced with production Firebase values before any build.
+It has **no `package.json`**, **no `app.json`**, and **no `eas.json`**. It cannot be built
+or run as a standalone app in its current state.
 
-### Deferral Condition
+### Disposition
 
-Ship only after CORTEX achieves stable TestFlight distribution and the first external beta is underway. Estimated trigger: CORTEX beta launch (Phase 4).
+Deferred. The route files here represent a possible future architecture where domain workspaces
+live in a separate route directory. Two paths exist:
+
+1. **Consolidate into szl-holdings-mobile** — Move the route files under the flagship app's
+   `app/` directory structure. Clean, simple, one build target.
+2. **Promote to standalone app** — Add `package.json`, `app.json`, and EAS config; wire to
+   the same `lib/mobile-shared` and `api-server` endpoints as the flagship.
+
+**Recommended path**: Consolidate into `szl-holdings-mobile` (Option 1). The CORTEX app
+already covers all 8 workspaces. A separate scaffold adds build complexity without user-facing
+benefit. Revisit only if a compelling architectural need emerges post-Alpha.
+
+**Resume trigger**: After CORTEX Alpha ships and the team has validated the workspace
+navigation model on real devices.
 
 ---
 
-## Archive: Deprecated Mobile Stubs
+## Shared Library: `lib/mobile-shared`
 
-All of the following were empty directories with no `package.json` — deleted in Phase 1:
+`@szl-holdings/mobile-shared` is the centralized shared library for all SZL Holdings mobile
+development. It provides:
 
-| Directory | Status |
-|-----------|--------|
-| `artifacts/aegis-mobile` | Deleted — empty stub |
-| `artifacts/alloy-mobile` | Deleted — empty stub |
-| `artifacts/carlota-jo-mobile` | Deleted — empty stub |
-| `artifacts/lyte-mobile` | Deleted — empty stub |
-| `artifacts/stephen-mobile` | Deleted — empty stub |
-| `artifacts/terra-mobile` | Deleted — empty stub |
-| `artifacts/vessels-mobile` | Deleted — empty stub |
+- `ErrorBoundary` component
+- `SkeletonLoader` component
+- `KeyboardAwareScrollViewCompat` component
+- `useApiStatus` hook
+- Push notification registration and handler utilities (`/notifications` subpath)
 
-Domain-specific mobile functionality is covered by CORTEX workspaces, not separate apps. This is the correct architectural decision: one app, domain-specific workspaces.
+Both `szl-holdings-mobile` and any future mobile app should consume `lib/mobile-shared`
+rather than duplicating these primitives. See `lib/mobile-shared/README.md` for import patterns.
 
 ---
 
 ## Mobile Architecture Principles
 
-1. **One app, not many.** CORTEX is the mobile platform. Domain packs add workspaces to CORTEX, not standalone apps.
-2. **Shared lib, not forked code.** `lib/mobile-shared` provides the SyncEngine, OfflineBanner, and common components. Both CORTEX and the SZL Holdings mobile app consume it.
-3. **Credentials must be real before builds.** Firebase placeholder values in `szl-holdings-mobile` will cause silent failures. `ops/mobile/eas-secrets-matrix.md` tracks the full credential matrix.
-4. **EAS, not local builds.** All production builds go through Expo Application Services. Local builds are for simulator only.
-5. **Backend parity.** Mobile surfaces consume the same `api-server` endpoints as web surfaces. No mobile-specific API is created unless there is a measurable performance or capability reason.
+1. **One app, not many.** CORTEX is the mobile platform. Domain workspaces are navigation
+   targets within CORTEX, not separate apps.
+2. **Shared lib, not forked code.** `lib/mobile-shared` provides common primitives. All mobile
+   apps consume it.
+3. **Credentials must be real before builds.** Firebase placeholder files in
+   `szl-holdings-mobile` will cause build failures. `ops/mobile/eas-and-store-secrets-matrix.md`
+   tracks the full credential matrix.
+4. **EAS, not local builds.** All production builds go through EAS. Local builds are for
+   simulator only.
+5. **Backend parity.** Mobile surfaces consume the same `api-server` endpoints as web surfaces.
 
 ---
 
 ## Related Files
 
-- `ops/mobile/flagship-mobile-release-plan.md` — Detailed CORTEX pre-release checklist
-- `ops/mobile/eas-secrets-matrix.md` — Firebase and EAS credential status
-- `ops/mobile/store-assets-checklist.md` — App Store / Play Store asset requirements
-- `ops/mobile/testflight-play-internal-runbook.md` — Submission runbooks
+- `ops/mobile/flagship-release-readiness.md` — CORTEX pre-release checklist and go/no-go gate
+- `ops/mobile/eas-and-store-secrets-matrix.md` — EAS profiles and credential inventory
+- `ops/mobile/push-notification-setup.md` — Push notification architecture and credential dependencies
+- `ops/mobile/store-asset-inventory.md` — App Store and Play Store asset requirements
+- `ops/mobile/reviewer-notes-and-test-accounts.md` — Test accounts and App Review notes
+- `ops/mobile/testflight-play-internal-runbook.md` — Step-by-step submission runbook

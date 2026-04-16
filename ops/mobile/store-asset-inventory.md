@@ -9,9 +9,9 @@ Updated: 2026-04-16
 | App Name (iOS) | CORTEX — Unified Command |
 | Subtitle (iOS) | SZL Holdings Command Center |
 | App Name (Android) | CORTEX — Unified Command |
-| Bundle ID (iOS) | `com.szlholdings.cortex` |
-| Package Name (Android) | `com.szlholdings.cortex` |
-| Version | 1.0.0 |
+| Bundle ID (iOS) | `com.szlholdings.executive.mobile` |
+| Package Name (Android) | `com.szlholdings.executive.mobile` |
+| Version | 2.0.0 |
 | Category (iOS) | Business |
 | Category (Android) | Business |
 | Age Rating | 4+ (iOS) / Everyone (Android) |
@@ -26,9 +26,9 @@ Updated: 2026-04-16
 
 | Asset | Spec | Status | Notes |
 |-------|------|--------|-------|
-| iOS App Icon | 1024×1024 PNG, no alpha, no rounded corners | Needed | Export from Figma at 1x |
-| Android App Icon | 512×512 PNG | Needed | Same source as iOS, resized |
-| Adaptive Icon (Android) | Foreground + background layers | Needed | For Android 8+ adaptive icons |
+| iOS App Icon | 1024×1024 PNG, no alpha, no rounded corners | Configured | `./assets/images/icon.png` in app.json |
+| Android App Icon | 512×512 PNG | Configured | Same file used for adaptive icon foreground |
+| Adaptive Icon (Android) | Foreground + background layers | Configured | Foreground: `icon.png`, bg: `#090810` |
 
 **Design Direction**: Dark background, SZL brand blue (#1E40AF) with a neural-grid motif and CORTEX wordmark. Mirror the web CORTEX header aesthetic.
 

@@ -95,16 +95,16 @@
     },
     "extra": {
       "eas": {
-        "projectId": "szl-holdings-mobile"
+        "projectId": "FILL_IN_EAS_PROJECT_UUID"
       },
       "supportUrl": "https://szlholdings.com/support",
       "privacyUrl": "https://szlholdings.com/privacy",
       "termsUrl": "https://szlholdings.com/terms"
     },
     "updates": {
-      "enabled": true,
+      "enabled": false,
       "fallbackToCacheTimeout": 0,
-      "url": "https://u.expo.dev/szl-holdings-mobile",
+      "url": "https://u.expo.dev/FILL_IN_EAS_PROJECT_UUID",
       "checkAutomatically": "ON_LOAD",
       "requestHeaders": {
         "expo-channel-name": "production"
