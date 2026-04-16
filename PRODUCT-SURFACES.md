@@ -1,6 +1,6 @@
 # Product Surfaces — SZL Holdings Platform
 
-**Version:** 2.0 · **Last updated:** April 2026
+**Version:** 2.0 · **Date:** April 2026
 **Audience:** Engineers, product managers, investors, enterprise evaluators
 
 > Every user-facing surface in the SZL ecosystem — command surfaces, domain packs, mobile, and corporate — with purpose, audience, entry point, and key dependencies.
@@ -36,59 +36,59 @@ All surfaces share the same five platform primitives — see [PLATFORM_PRIMITIVE
 
 ---
 
+## Status Definitions
+
+| Label | Meaning |
+|-------|---------|
+| **Concept** | Thesis and spec only, no working software |
+| **Prototype** | Core flows working, not hardened |
+| **Functional Alpha** | Full feature set, seeded/demo data, not commercially deployed |
+| **Internal Beta** | In use by real users internally |
+| **Public Beta Candidate** | Ready for limited public exposure |
+| **Generally Available** | Commercially deployed with paying customers |
+
+---
+
 ## Web Applications
 
-### Lyte Command Center
+**Related:** [ARCHITECTURE.md](ARCHITECTURE.md) · [SYSTEM-OVERVIEW.md](SYSTEM-OVERVIEW.md) · [API-SPEC.md](API-SPEC.md) · [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md)
+
+### Lyte — Business Observability
 
 | Attribute | Detail |
 |-----------|--------|
 | **Artifact** | `artifacts/lyte-command-center` |
-| **Preview path** | `/lyte-command-center/` |
+| **Preview Path** | `/lyte-command-center/` |
 | **Status** | Functional alpha |
-| **Components** | 142 |
-| **Audience** | Operations leads, CTOs, SRE/DevOps teams, PMOs, CFOs |
-| **Problem solved** | Organizations cannot see across their operational systems in real time — risks surface too late, signals are siloed |
-| **Core capability** | PRISM framework (Pulse / Risk / Intelligence / Signals / Motion), Autonomous NOC, AI-driven alert correlation, self-healing orchestration, revenue impact mapping |
+| **Components** | 142 web components |
+| **Audience** | Operations leads, CFOs, PMOs, executive teams, CTOs, SRE/DevOps teams |
+| **Problem solved** | Organizations cannot see across their operational systems in real time — signals are siloed, risks surface too late, manual correlation dominates |
+| **Core capability** | PRISM framework (Pulse/Risk/Intelligence/Signals/Motion), Autonomous NOC, AI-driven alert correlation, self-healing orchestration, revenue impact mapping, approval latency detection, signal-to-action lifecycle with full audit trail |
 | **Key modules** | PRISM dashboard, signal timeline, action queue, approval chains, AIOps, APM, MSP/RMM tooling, ML pipeline management, cost governance |
+| **Stack** | React 19, Vite, `@szl-holdings/ai-engine`, `@szl-holdings/forge-runtime`, `@szl-holdings/observability`, `@szl-holdings/prism-bus`, `@szl-holdings/shared-ui` |
 | **Key dependencies** | `@szl-holdings/ai-engine`, `@szl-holdings/forge-runtime`, `@szl-holdings/observability`, `@szl-holdings/prism-bus`, `@szl-holdings/shared-ui` |
 | **Primitives used** | All 5 — Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine |
-| **Strategic role** | Operating wedge — primary command surface for the governed decision loop. Entry point to all domain packs |
+| **Strategic role** | Operating wedge and flagship platform. Primary command surface for the governed decision loop. Entry point to all domain packs. Primary commercial entry point for the SZL ecosystem |
 
 ---
 
-### Aegis — Unified Defense & Intelligence Command
+### Aegis / Firestorm — Unified Defense & Intelligence
 
 | Attribute | Detail |
 |-----------|--------|
-| **Artifact** | `artifacts/firestorm` |
-| **Preview path** | `/firestorm/` |
+| **Artifact** | `artifacts/firestorm` (primary) + `artifacts/aegis` |
+| **Preview Path** | `/firestorm/` |
 | **Status** | Functional alpha |
-| **Components** | 157 |
+| **Components** | 157 web components |
 | **Audience** | CISOs, SOC analysts, managed security providers (MSPs), compliance officers |
-| **Problem solved** | Security and intelligence operations are fragmented across disconnected tools |
+| **Problem solved** | Security and intelligence operations are fragmented across disconnected tools — threat detection, managed ops, and AI research each require separate context |
 | **Core capability** | Three unified workspaces sharing one intelligence layer: Defense (SOC operations and threat response), Command (managed services operations), Intelligence (AI research and model governance) |
 | **Key modules** | MITRE ATT&CK v14 detection, SOAR playbook engine, STIX/TAXII protocol, XDR console, Sentinel AI agent, INCA analytics, Citadel crisis war room, deception grids, vulnerability management, dark vessel detection |
+| **Stack** | React 19, Vite, `@szl-holdings/ai-engine`, `@szl-holdings/intelligence-feeds`, `@szl-holdings/forge-runtime`, `@szl-holdings/proof-chain`, `@szl-holdings/shared-ui` |
 | **Key dependencies** | `@szl-holdings/ai-engine`, `@szl-holdings/intelligence-feeds`, `@szl-holdings/forge-runtime`, `@szl-holdings/proof-chain`, `@szl-holdings/shared-ui` |
+| **DB Tables** | 22 tables covering the full security lifecycle |
 | **Primitives used** | Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine |
 | **Strategic role** | Security & defense domain pack. MSP Command module creates managed services revenue path. FedRAMP readiness track |
-
----
-
-### Terra — Real Estate Intelligence
-
-| Attribute | Detail |
-|-----------|--------|
-| **Artifact** | `artifacts/terra` |
-| **Preview path** | `/terra/` |
-| **Status** | Functional alpha |
-| **Components** | 77 |
-| **Audience** | NYC brokers, real estate investors, portfolio managers |
-| **Problem solved** | Distressed property intelligence is fragmented across public records, manual research, and disconnected tools |
-| **Core capability** | Live NYC distress data pipeline (multiple public data sources), AI distress scoring, ownership entity graph, deal pipeline management, broker workflow integration |
-| **Key modules** | Distress property map, ownership graph, deal pipeline, MLS listing ingestion, commercial analytics, lead scoring, market signal intelligence, broker CRM |
-| **Key dependencies** | `@szl-holdings/db`, `@szl-holdings/intelligence-feeds`, `@szl-holdings/monte-carlo`, `@szl-holdings/shared-ui` |
-| **Primitives used** | Outcome Graph, Monte Carlo |
-| **Strategic role** | Real estate domain pack. Foundation for national expansion beyond NYC |
 
 ---
 
@@ -97,16 +97,38 @@ All surfaces share the same five platform primitives — see [PLATFORM_PRIMITIVE
 | Attribute | Detail |
 |-----------|--------|
 | **Artifact** | `artifacts/vessels` |
-| **Preview path** | `/vessels/` |
+| **Preview Path** | `/vessels/` |
 | **Status** | Functional alpha |
-| **Components** | 83 |
 | **Audience** | Fleet executives, maritime operations teams, commercial directors, compliance officers, insurers |
 | **Problem solved** | Fleet operators lack real-time visibility into vessel behavior, voyage economics, and compliance risk |
-| **Core capability** | AIS telemetry integration, voyage economics modeling, dark vessel detection, sanctions screening, route intelligence, exception center with consequence modeling |
+| **Core capability** | AIS telemetry integration, voyage economics modeling, dark vessel detection, sanctions screening (OFAC/UN/EU/UK), route intelligence, exception center with consequence modeling, Helmsman AI agent |
 | **Key modules** | Fleet map (Mapbox), vessel digital twin, voyage P&L, dark vessel alerts, sanctions screening, exception center, commodity trading, marine insurance, Helmsman AI agent |
+| **Stack** | React 19, Vite, `@szl-holdings/intelligence-feeds`, `@szl-holdings/worldline`, `@szl-holdings/shared-ui`, `@szl-holdings/db` |
 | **Key dependencies** | `@szl-holdings/db`, `@szl-holdings/intelligence-feeds`, `@szl-holdings/worldline`, `@szl-holdings/shared-ui` |
+| **Components** | 83 web components |
+| **DB Tables** | 30+ tables |
 | **Primitives used** | Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine |
 | **Strategic role** | Maritime domain pack. High-stakes buyer profile: enterprise, government, insurance |
+
+---
+
+### Terra — Real Estate Intelligence
+
+| Attribute | Detail |
+|-----------|--------|
+| **Artifact** | `artifacts/terra` |
+| **Preview Path** | `/terra/` |
+| **Status** | Functional alpha |
+| **Components** | 77 web components |
+| **Audience** | NYC brokers, real estate investors, portfolio managers |
+| **Problem solved** | Distressed property intelligence is fragmented across public records, manual research, and disconnected tools |
+| **Core capability** | Live NYC distress data pipeline (HPD, DOF, DOB, ACRIS, ECB), AI distress scoring, ownership entity graph, deal pipeline management, broker workflow integration, MLS listing ingestion |
+| **Key modules** | Distress property map, ownership graph, deal pipeline, MLS listing ingestion, commercial analytics, lead scoring, market signal intelligence, broker CRM |
+| **Stack** | React 19, Vite, `@szl-holdings/monte-carlo`, `@szl-holdings/intelligence-feeds`, `@szl-holdings/shared-ui`, `@szl-holdings/db` |
+| **Key dependencies** | `@szl-holdings/db`, `@szl-holdings/intelligence-feeds`, `@szl-holdings/monte-carlo`, `@szl-holdings/shared-ui` |
+| **DB Tables** | 17 tables |
+| **Primitives used** | Outcome Graph, Monte Carlo |
+| **Strategic role** | Real estate domain pack. Foundation for national expansion beyond NYC |
 
 ---
 
@@ -115,33 +137,36 @@ All surfaces share the same five platform primitives — see [PLATFORM_PRIMITIVE
 | Attribute | Detail |
 |-----------|--------|
 | **Artifact** | `artifacts/prism-counsel` |
-| **Preview path** | `/prism-counsel/` |
+| **Preview Path** | `/prism-counsel/` |
 | **Status** | Functional alpha |
-| **Components** | 127 |
 | **Audience** | Legal partners, case managers, discovery analysts, recovery specialists |
 | **Problem solved** | High-stakes litigation and recovery operations require cross-domain intelligence that standalone LegalTech platforms lack |
-| **Core capability** | Agentic legal operating system — Matter Twin case management, AI-assisted document review, court filing integration, recovery ops, NY No-Fault module |
+| **Core capability** | Agentic legal operating system — Matter Twin case management, AI-assisted document review, court filing integration, recovery ops, NY No-Fault module, pressure/friction boards |
 | **Key modules** | Matter management, court filing integration (NY courts), document review, multi-jurisdictional support, recovery tracking (liens, settlements), proof chain audit, pressure/friction boards, copilot workbench, No-Fault module |
+| **Stack** | React 19, Vite, `@szl-holdings/ai-engine`, `@szl-holdings/proof-chain`, `@szl-holdings/receipt-graph`, `@szl-holdings/covenant-policy`, `@szl-holdings/shared-ui` |
 | **Key dependencies** | `@szl-holdings/ai-engine`, `@szl-holdings/proof-chain`, `@szl-holdings/receipt-graph`, `@szl-holdings/covenant-policy`, `@szl-holdings/shared-ui` |
-| **Database** | 120+ tables across 10 schema modules |
+| **Components** | 127 web components |
+| **DB Tables** | 120+ tables across 10 schema modules |
 | **Primitives used** | All 5 — Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine |
 | **Strategic role** | Legal domain pack with cross-domain intelligence from defense, maritime, and financial domains |
 
 ---
 
-### Carlota Jo Consulting
+### Carlota Jo — Private Advisory
 
 | Attribute | Detail |
 |-----------|--------|
 | **Artifact** | `artifacts/carlota-jo` |
-| **Preview path** | `/carlota-jo/` |
-| **Status** | Live |
-| **Components** | 60 |
+| **Preview Path** | `/carlota-jo/` |
+| **Status** | Live (web) |
 | **Audience** | Founders, executives, UHNW clients seeking brand and operational strategy |
 | **Problem solved** | Premium advisory is disconnected from operational reality — advice is intuition-based rather than intelligence-informed |
-| **Core capability** | White-glove advisory operations — strategic diagnostic engine, secure client portal, scenario simulator, booking and reservation system |
+| **Core capability** | White-glove advisory operations — strategic diagnostic engine, secure client portal, scenario simulator, booking and reservation system, document delivery, client messaging, inquiry tracking |
 | **Key modules** | Client profile management, service catalog, booking system, document delivery, secure messaging, inquiry intake, reservation management |
+| **Stack** | React 19, Vite, `@szl-holdings/ai-engine`, `@szl-holdings/shared-ui`, `@szl-holdings/db` |
 | **Key dependencies** | `@szl-holdings/ai-engine`, `@szl-holdings/shared-ui`, `@szl-holdings/db` |
+| **Components** | 60 web components |
+| **DB Tables** | 10 tables |
 | **Primitives used** | Proof Chain, Covenant Policy |
 | **Strategic role** | Advisory domain pack. Live, client-facing. Demonstrates principal-led advisory grounded in platform intelligence |
 
@@ -152,12 +177,14 @@ All surfaces share the same five platform primitives — see [PLATFORM_PRIMITIVE
 | Attribute | Detail |
 |-----------|--------|
 | **Artifact** | `artifacts/imperium` |
-| **Preview path** | `/imperium/` |
+| **Preview Path** | `/imperium/` |
 | **Status** | Functional alpha |
-| **Components** | 11 |
-| **Audience** | Executive leadership, strategic planners, operations directors |
+| **Components** | 11 web components |
+| **Audience** | Executive leadership, strategic planners, enterprise infrastructure owners, operations directors |
 | **Problem solved** | Organizations need sovereign control over their cloud infrastructure with executive-grade visibility |
-| **Core capability** | Strategic command and intelligence briefing platform — executive decision-support (Legatus Console), organizational asset visualization (Imperium Map), governance interface (Senate Chamber), AI tactical insights (Centurion AI) |
+| **Core capability** | Strategic command and intelligence briefing platform — executive decision-support (Legatus Console), organizational asset visualization (Imperium Map), governance interface (Senate Chamber), AI tactical insights (Centurion AI), multi-tenant Azure provisioning |
+| **Key modules** | Legatus Console (executive decision support), Imperium Map (asset visualization), Senate Chamber (governance), Centurion AI (tactical insights), multi-tenant Azure provisioning |
+| **Stack** | React 19, Vite, `@szl-holdings/ai-engine`, `@szl-holdings/shared-ui` |
 | **Key dependencies** | `@szl-holdings/ai-engine`, `@szl-holdings/shared-ui` |
 | **Primitives used** | Covenant Policy |
 | **Strategic role** | Cloud sovereignty domain pack — infrastructure control plane, tenant provisioning, cost budget governance, compliance monitoring |
@@ -169,30 +196,31 @@ All surfaces share the same five platform primitives — see [PLATFORM_PRIMITIVE
 | Attribute | Detail |
 |-----------|--------|
 | **Artifact** | `artifacts/command` |
-| **Preview path** | `/command/` |
+| **Preview Path** | `/command/` |
 | **Status** | Functional alpha |
-| **Components** | 24 |
-| **Audience** | Internal administrators, ecosystem operators, prospective clients |
-| **Problem solved** | No single surface provides cross-domain operational health and signal aggregation across the full SZL ecosystem |
-| **Core capability** | Real-time 8-domain dashboard (SSE), composite health scoring, per-domain drill-downs, global command bar (Cmd+K), executive briefing view, timeline with filter chips, Cortex Voice AI assistant |
-| **Key dependencies** | `@szl-holdings/shared-ui`, `@szl-holdings/prism-bus` |
-| **Strategic role** | Central portal for ecosystem-wide management, cross-platform orchestration, and enterprise marketing demos |
+| **Audience** | Internal administrators, ecosystem operators, prospective clients, founder, platform admin |
+| **Problem Solved** | No single surface provides cross-domain operational health and signal aggregation across the full SZL ecosystem |
+| **Core Capability** | Real-time 8-domain dashboard (SSE), composite health scoring, per-domain drill-downs, global command bar (Cmd+K), executive briefing view, timeline with filter chips, Cortex Voice AI assistant, event timeline |
+| **Key Modules** | 8-domain real-time dashboard (SSE), composite health scoring, global Cmd+K search, executive briefing, per-domain drill-downs, event timeline |
+| **Stack** | React 19, Vite, `@szl-holdings/shared-ui`, `@szl-holdings/prism-bus` |
+| **Components** | 24 components |
+| **Strategic Role** | Central portal for ecosystem-wide management, cross-platform orchestration, and enterprise marketing demos |
 
 ---
 
-### SZL Holdings Dashboard
+### SZL Holdings — Corporate Platform
 
 | Attribute | Detail |
 |-----------|--------|
 | **Artifact** | `artifacts/szl-holdings` |
-| **Preview path** | `/` |
-| **Status** | Live |
-| **Audience** | Investors, fund managers, venture partners, design partners, enterprise evaluators |
-| **Problem solved** | The ecosystem needs a coherent corporate presence presenting the platform hierarchy, trust posture, and investor narrative |
-| **Core capability** | Investor and venture intelligence platform — portfolio health radar, cap table management, fund operations, LP reporting, trust center, developer portal |
-| **Key modules** | Landing page, platform product pages, trust center, investor hub (NDA-gated data room), admin CMS, PRISM Counsel integration, Alloy workflow integration |
-| **Key dependencies** | `@szl-holdings/db`, `@szl-holdings/shared-ui`, `@szl-holdings/api-zod`, `@szl-holdings/prism-bus` |
-| **Strategic role** | Top of the brand hierarchy. Primary destination for investor and enterprise evaluation |
+| **Preview Path** | `/` |
+| **Status** | Public Beta Candidate |
+| **Audience** | Investors, fund managers, venture partners, design partners, enterprise evaluators, strategic partners |
+| **Problem Solved** | The ecosystem needs a coherent corporate presence presenting the platform hierarchy, trust posture, and investor narrative |
+| **Core Capability** | Investor and venture intelligence platform — portfolio health radar, cap table management, fund operations, LP reporting, trust center, developer portal, PRISM Counsel integration, Alloy workflow surface |
+| **Key Modules** | Landing page, platform product pages, trust center, investor hub (NDA-gated data room), admin CMS, PRISM Counsel integration, Alloy workflow integration |
+| **Stack** | React 19, Vite, Tailwind CSS, `@szl-holdings/shared-ui`, `@szl-holdings/db`, `@szl-holdings/api-zod`, `@szl-holdings/prism-bus` |
+| **Strategic Role** | Top of the brand hierarchy. Primary destination for investor and enterprise evaluation |
 
 ---
 
@@ -201,13 +229,14 @@ All surfaces share the same five platform primitives — see [PLATFORM_PRIMITIVE
 | Attribute | Detail |
 |-----------|--------|
 | **Artifact** | `artifacts/stephen-site` |
-| **Preview path** | `/stephen-site/` |
+| **Preview Path** | `/stephen-site/` |
 | **Status** | Live |
-| **Components** | 58 |
 | **Audience** | Prospective partners, employers, clients, collaborators |
-| **Core capability** | Research impact tracking, media relations, audience intelligence, digital product storefront, work showcase |
-| **Key dependencies** | `@szl-holdings/shared-ui` |
-| **Strategic role** | Founder positioning and personal brand — independent from SZL Holdings corporate identity |
+| **Core Capability** | Research impact tracking, media relations, audience intelligence, digital product storefront, work showcase |
+| **Key Modules** | Professional portfolio, research showcase, media relations |
+| **Stack** | React 19, Vite, `@szl-holdings/shared-ui` |
+| **Components** | 58 components |
+| **Strategic Role** | Founder positioning and personal brand — independent from SZL Holdings corporate identity |
 
 ---
 
@@ -216,37 +245,52 @@ All surfaces share the same five platform primitives — see [PLATFORM_PRIMITIVE
 | Attribute | Detail |
 |-----------|--------|
 | **Artifact** | `artifacts/api-server` |
-| **Preview path** | `/api/` |
+| **Preview Path** | `/api/` |
 | **Status** | Live (internal service) |
 | **Audience** | All web and mobile frontends — not user-facing |
-| **Core capability** | Centralized Express 5 API server. Handles all authentication, business logic, data access, AI orchestration, WebSocket connections, and billing for the entire ecosystem |
-| **Key dependencies** | `@szl-holdings/db`, `@szl-holdings/auth`, `@szl-holdings/ai-engine`, `@szl-holdings/forge-runtime`, `@szl-holdings/observability`, `@szl-holdings/services` |
-| **Entry point** | `GET /api/health` (public), `GET /api/docs` (Swagger UI), `POST /api/auth/login` |
+| **Core Capability** | Centralized Express 5 API server. Handles all authentication, business logic, data access, AI orchestration, WebSocket connections, and billing for the entire ecosystem |
+| **Stack** | Node.js 20, Express 5, TypeScript, `@szl-holdings/db`, `@szl-holdings/auth`, `@szl-holdings/ai-engine`, `@szl-holdings/forge-runtime`, `@szl-holdings/observability`, `@szl-holdings/services` |
+| **Entry Point** | `GET /api/health` (public), `GET /api/docs` (Swagger UI), `POST /api/auth/login` |
 
 ---
 
-## Mobile Applications
+## Mobile Surfaces
 
-### CORTEX — Unified Mobile Command (szl-holdings-mobile)
+### CORTEX — Unified Mobile Command
 
 | Attribute | Detail |
 |-----------|--------|
 | **Artifact** | `artifacts/szl-holdings-mobile` |
-| **Preview path** | `/szl-holdings-mobile/` (Expo tunnel) |
+| **Preview Path** | `/szl-holdings-mobile/` (Expo tunnel) |
 | **Status** | Functional alpha |
-| **Screens** | 116 |
-| **Audience** | Executives, investors, SZL ecosystem operators |
-| **Core capability** | All 8 domain workspaces in one Expo/React Native app — biometric authentication, workspace switcher with cross-domain badge counts, unified command feed, workspace-adaptive AI copilot, SpotlightFab for quick actions |
+| **Platform** | iOS + Android (Expo / React Native) |
+| **Audience** | Executives, investors, SZL ecosystem operators, all platform users requiring mobile access |
+| **Core Capability** | All 8 domain workspaces in one Expo/React Native app — biometric authentication, workspace switcher with cross-domain badge counts, unified command feed, workspace-adaptive AI copilot, SpotlightFab quick actions |
 | **Domains** | Lyte, Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, Command, SZL Holdings |
-| **Key dependencies** | `@szl-holdings/mobile-shared`, `@szl-holdings/shared-ui`, `@szl-holdings/ai-engine` |
+| **Stack** | Expo, React Native, NativeWind, `@szl-holdings/mobile-shared`, `@szl-holdings/shared-ui`, `@szl-holdings/ai-engine`, `@szl-holdings/offline-engine` |
+| **Screens** | 116 mobile screens |
 | **API** | `EXPO_PUBLIC_API_URL` (points to `/api/`) |
+
+---
+
+### Domain-Specific Mobile Apps
+
+| App | Artifact | Domain | Status |
+|-----|----------|--------|--------|
+| Aegis Mobile — SOC Command | `artifacts/aegis-mobile` | Security | Functional Alpha |
+| Vessels Mobile — Fleet Command | `artifacts/vessels-mobile` | Maritime | Functional Alpha |
+| Terra Mobile — Field Intelligence | `artifacts/terra-mobile` | Real Estate | Functional Alpha |
+| Lyte Mobile — AIOps Command | `artifacts/lyte-mobile` | Business Ops | Functional Alpha |
+| Carlota Jo Mobile — Client App | `artifacts/carlota-jo-mobile` | Advisory | Live |
+
+---
 
 ### CORTEX Mobile (cortex-mobile)
 
 | Attribute | Detail |
 |-----------|--------|
 | **Artifact** | `artifacts/cortex-mobile` |
-| **Preview path** | `/cortex-mobile/` |
+| **Preview Path** | `/cortex-mobile/` |
 | **Status** | Work in progress |
 | **Purpose** | Next-generation CORTEX mobile experience (separate from szl-holdings-mobile) |
 
@@ -259,7 +303,7 @@ All surfaces share the same five platform primitives — see [PLATFORM_PRIMITIVE
 | Attribute | Detail |
 |-----------|--------|
 | **Artifact** | `artifacts/mockup-sandbox` |
-| **Preview path** | `/__mockup` |
+| **Preview Path** | `/__mockup` |
 | **Audience** | Internal — design and frontend engineers only |
 | **Purpose** | Design sandbox for iterating on `@szl-holdings/shared-ui` components in isolation |
 
@@ -273,43 +317,7 @@ The following directories exist under `artifacts/` but are not yet deployed arti
 |-----------|-------|
 | `artifacts/partner-portal` | In-progress partner/channel portal |
 | `artifacts/alloy-mobile` | Mobile companion for Alloy |
-| `artifacts/forge` | Internal forge/build tooling workspace |
-| `artifacts/nexus` | Internal nexus integration/platform workspace |
-| `artifacts/inca-lab` | Intelligence and analytics lab (Aegis research) |
 
 ---
 
-## Entry Points Summary
-
-| Surface | URL Pattern | Auth Required |
-|---------|-------------|---------------|
-| SZL Holdings | `/` | No (public pages) / Yes (app routes) |
-| Lyte Command Center | `/lyte-command-center/` | Yes |
-| Aegis / Firestorm | `/firestorm/` | Yes |
-| Terra | `/terra/` | Yes |
-| Vessels | `/vessels/` | Yes |
-| PRISM Counsel | `/prism-counsel/` | Yes |
-| Carlota Jo | `/carlota-jo/` | No (public) / Yes (portal) |
-| IMPERIUM | `/imperium/` | Yes |
-| Command Portal | `/command/` | Yes |
-| Stephen Site | `/stephen-site/` | No |
-| API Server | `/api/` | Varies per endpoint |
-| CORTEX Mobile | Expo tunnel URL | Yes (biometric) |
-| Swagger Docs | `/api/docs` | No (development) |
-
-See `ROUTE_INVENTORY.md` for the complete per-artifact route inventory with PUBLIC/PRIVATE/INTERNAL classification.
-
----
-
-## Related Documents
-
-| Document | Path |
-|----------|------|
-| Product surface map | [PRODUCT_SURFACE_MAP.md](PRODUCT_SURFACE_MAP.md) |
-| Platform primitives | [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) |
-| Category positioning | [CATEGORY_POSITIONING.md](CATEGORY_POSITIONING.md) |
-| Navigation strategy | [NAVIGATION_STRATEGY.md](NAVIGATION_STRATEGY.md) |
-| Route inventory | [ROUTE_INVENTORY.md](ROUTE_INVENTORY.md) |
-| Architecture | [ARCHITECTURE.md](ARCHITECTURE.md) |
-| API specification | [API-SPEC.md](API-SPEC.md) |
-| Access control | [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) |
+*Last verified against code on 2026-04-16*

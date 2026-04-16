@@ -1,9 +1,11 @@
 # Access Control Matrix — SZL Holdings Platform
 
-**Version:** 1.0 · **Last updated:** April 2026
+**Version:** 1.0 · **Date:** April 2026
 **Audience:** Engineers, security reviewers, compliance officers, enterprise evaluators
 
 > This document consolidates and expands `docs/ACCESS_CONTROL.md` with per-artifact and per-route role/permission mappings. The source policy document remains at `docs/ACCESS_CONTROL.md`. See `ROUTE_INVENTORY.md` for the complete route inventory.
+
+**Related:** [SECURITY-CHECKLIST.md](SECURITY-CHECKLIST.md) · [API-SPEC.md](API-SPEC.md) · [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ---
 
@@ -11,7 +13,7 @@
 
 The SZL Holdings platform uses **Role-Based Access Control (RBAC)** with **organization-scoped tenant isolation**.
 
-- Every user belongs to one or more **organizations**
+- Every user belongs to one or more **organizations (orgs)**
 - Every user has a **role** within each org
 - All database queries are scoped by `org_id` — cross-tenant access is architecturally prevented
 - All API routes outside the explicit public allowlist require authentication (deny-by-default)
@@ -19,39 +21,78 @@ The SZL Holdings platform uses **Role-Based Access Control (RBAC)** with **organ
 - Route-level `authMiddleware({ required: true })` and `requireRole(...)` add further role-based enforcement beyond the global gate
 - Public routes are limited to: `/api/health*`, `/api/auth/*`, `/api/oidc/*`, `/api/public/*`, `/api/webhooks/*`, `/api/scim/*`, `/api/stream/webhook/*`, `/api/v1/*`, `/api/docs/*`, `/api/csrf-token`, and a small set of exact-path exceptions (see `global-auth-enforcer.ts`)
 
+Source: `docs/ACCESS_CONTROL.md` · `lib/auth/` · `artifacts/api-server/src/middlewares/`
+
 ---
 
 ## Authentication
 
 **Primary:** OpenID Connect (OIDC) with PKCE flow via Replit Auth (development) and Azure AD (production).
 
+**Fallback:** Email/password authentication via `POST /api/auth/login-password`. Passwords hashed with PBKDF2 (SHA-512, 100,000 iterations, 64-byte key) stored in `users.password_hash`.
+
 **Session management:**
-- Server-side sessions stored in PostgreSQL
-- Session lifetime: 7 days maximum, 24 hours idle
-- Sessions invalidated on explicit logout
-- Opaque `sid` cookie (not signed by cookie-parser; session validity checked via DB lookup)
-- CSRF tokens (double-submit pattern) on all state-changing requests
-- WebSocket tickets: HMAC-signed, 5-minute TTL, signed with `SESSION_SECRET`
+- Server-side sessions stored in PostgreSQL `sessions` table; the `sid` cookie contains only an opaque random token
+- Session cookie: `sid`, HttpOnly, Secure (unconditionally), SameSite=Lax
+- Session lifetime: **OIDC sessions** — 7-day TTL; **credential login sessions** — 30-day TTL
+- Sessions invalidated on explicit logout (GET /api/logout or DELETE /api/auth/sessions/current). No automatic revocation on role change.
+- CSRF double-submit tokens on most state-changing requests (exemptions exist — see CSRF section)
+- WebSocket tickets: HMAC-signed, 5-minute TTL, signed with `SESSION_SECRET`, per-channel role-based ACL
 
 ---
 
-## Role Hierarchy
+## Role Systems
 
-11 roles ordered from most to least privileged:
+The platform uses two parallel role systems that serve different purposes, both defined in `lib/db/src/schema/auth.ts` and `lib/db/src/schema/organizations.ts`.
 
-| Role | Scope | Description |
-|------|-------|-------------|
-| `super_admin` | Platform | Full platform access; SZL Holdings internal only. Must be granted via database. |
-| `org_admin` | Organization | Full org management, user provisioning |
-| `org_owner` | Organization | Org ownership transfer, billing management |
-| `compliance_officer` | Organization | Audit trail access, compliance reports |
-| `security_analyst` | Organization | Security posture, threat intelligence (Aegis) |
-| `operator` | Organization | Standard operator: dashboards, signals, workflows |
-| `approver` | Organization | Can approve actions in the Alloy approval queue |
-| `analyst` | Organization | Read-only access to dashboards and signals |
-| `viewer` | Organization | Read-only access to specific permitted surfaces |
-| `auditor` | Organization | Audit trail and compliance reports only |
-| `demo` | Organization | Demo org access (synthetic data only) |
+### Platform Roles (`users.platform_role`)
+
+Set on each user account. Controls platform-level access:
+
+| Role | Description |
+|------|-------------|
+| `founder_admin` | Full platform access — SZL Holdings founder only |
+| `platform_admin` | Platform-level administration |
+| `operator` | Standard platform operator |
+| `ops_manager` | Operations management |
+| `analyst` | Read-only analytical access |
+| `executive_viewer` | Executive-level read-only access |
+| `sales_delivery_user` | Sales and delivery operations |
+| `maritime_ops_user` | Maritime-specific operations |
+| `service_coordinator` | Service coordination |
+| `pilot_customer_user` | Pilot / early-access customer |
+| `anonymous_visitor` | No platform access |
+
+### Organization Membership Role (`org_members.role`)
+
+Controls access within a specific organization context:
+
+| Role | Description |
+|------|-------------|
+| `owner` | Org ownership — billing, org transfer |
+| `admin` | Full org management, user provisioning |
+| `member` | Standard org member: dashboards, workflows |
+| `viewer` | Read-only access to org surfaces |
+
+### CMS / Content Roles (`organization_memberships.role`)
+
+Used for content management access within the SZL Holdings corporate platform:
+
+| Role | Hierarchy Level | Description |
+|------|----------------|-------------|
+| `super_admin` | 5 | Platform-level super admin |
+| `admin` | 4 | Full admin including content |
+| `editor` | 3 | Content editing |
+| `member` | 2 | Authenticated org member |
+| `client` | 2 | Client-level access |
+| `authenticated` | 1 | Any authenticated user |
+| `public` | 0 | No authentication required |
+
+### Extended Roles Table (`roles.name`)
+
+A separate `roles` table supports granular role assignment via `user_roles` join. Roles include: `super_admin`, `admin`, `editor`, `member`, `client`, `authenticated`, `exec`, `ops`, `compliance`, `maintenance`, `analyst`, `viewer`, `operator`, `seller`, `client_viewer`, `creative_user`.
+
+**Default org membership role on invitation:** `member`
 
 ---
 
@@ -60,9 +101,16 @@ The SZL Holdings platform uses **Role-Based Access Control (RBAC)** with **organ
 | Classification | Auth Required | Role Restriction |
 |---------------|--------------|-----------------|
 | `PUBLIC` | No | None |
-| `DEMO` | Optional | `demo` role or authenticated user |
-| `PRIVATE` | Yes | Org member (any authenticated role) |
-| `INTERNAL` | Yes | `super_admin` or designated internal role |
+| `DEMO` | Optional | Any authenticated user |
+| `PRIVATE` | Yes | Org member (any org membership role) |
+| `INTERNAL` | Yes | `super_admin`, `ops`, or `exec` role (from `roles` table) via `adminGuard` middleware |
+
+Admin routes (`/admin`) are protected by `adminGuard` (`artifacts/api-server/src/middlewares/admin-guard.ts`). In `routes/index.ts`, only `/admin` is mounted with `adminGuard`. There is no separate `/ops` route group mounted with `adminGuard`.
+
+`adminGuard` requires:
+1. Valid authentication session
+2. User has `super_admin`, `ops`, or `exec` role assigned in the `roles` table via `user_roles` join
+3. **OR** the request carries a valid `x-internal-token` header matching `ALLOY_INTERNAL_TOKEN` env var (server-to-server only)
 
 ---
 
@@ -213,6 +261,56 @@ The SZL Holdings platform uses **Role-Based Access Control (RBAC)** with **organ
 
 ---
 
+## Permission Matrix
+
+Authorization maps **org membership role** (the primary enforced role in route handlers) to resource actions. Platform roles (`founder_admin`, `platform_admin`) have full access to everything.
+
+| Resource / Action | Platform Admin (founder_admin / platform_admin) | org: owner | org: admin | org: member | org: viewer |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **Platform Admin** |
+| Platform-level user mgmt | ✅ | — | — | — | — |
+| Tenant provisioning | ✅ | — | — | — | — |
+| Database backup | ✅ | — | — | — | — |
+| **Org Administration** |
+| Invite / remove org users | ✅ | ✅ | ✅ | — | — |
+| Set org member roles | ✅ | ✅ | ✅ | — | — |
+| Org settings | ✅ | ✅ | ✅ | — | — |
+| Billing management | ✅ | ✅ | — | — | — |
+| **Audit & Compliance** |
+| Read audit trail | ✅ | ✅ | ✅ | — | — |
+| Export compliance reports | ✅ | ✅ | ✅ | — | — |
+| View security posture | ✅ | ✅ | ✅ | ✅ | — |
+| **Alloy Workflow Engine** |
+| Create / manage workflows | ✅ | ✅ | ✅ | ✅ | — |
+| Approve / reject actions | ✅ | ✅ | ✅ | — | — |
+| View workflow queue | ✅ | ✅ | ✅ | ✅ | 👁 |
+| **Aegis / Security** |
+| Create / update incidents | ✅ | ✅ | ✅ | ✅ | — |
+| Manage playbooks | ✅ | ✅ | ✅ | — | — |
+| View threat intel | ✅ | ✅ | ✅ | ✅ | 👁 |
+| View incidents | ✅ | ✅ | ✅ | ✅ | 👁 |
+| **Vessels / Maritime** |
+| Manage fleet registry | ✅ | ✅ | ✅ | ✅ | — |
+| View positions + voyages | ✅ | ✅ | ✅ | ✅ | 👁 |
+| **Terra / Real Estate** |
+| Create / update deals | ✅ | ✅ | ✅ | ✅ | — |
+| View property intelligence | ✅ | ✅ | ✅ | ✅ | 👁 |
+| **PRISM Counsel / Legal** |
+| Create / manage matters | ✅ | ✅ | ✅ | ✅ | — |
+| Document review | ✅ | ✅ | ✅ | ✅ | — |
+| **AI Agent Tools** |
+| Invoke AI analysis | ✅ | ✅ | ✅ | ✅ | — |
+| AI agent configuration | ✅ | ✅ | — | — | — |
+| **Storage** |
+| Upload files | ✅ | ✅ | ✅ | ✅ | — |
+| Delete files | ✅ | ✅ | ✅ | — | — |
+
+**Legend:** ✅ Full access · 👁 Read-only · — No access
+
+*Note: Fine-grained permission enforcement is implemented per route handler. This matrix represents the general authorization intent; consult individual route files in `artifacts/api-server/src/routes/` for exact checks.*
+
+---
+
 ## Multi-Tenancy Isolation
 
 Cross-tenant access is **architecturally prevented** at four layers:
@@ -238,29 +336,35 @@ Domain routes (Alloy, Firestorm, Terra, Vessels) enforce org scope internally wi
 | Internal health token | `X-Internal-Token: $ALLOY_INTERNAL_TOKEN` (≥ 32 chars) | Logged |
 | Service role key | `SERVICE_ROLE_KEY` for machine-to-machine calls | All calls logged |
 
+**Admin PIN:** The `/admin` CMS panel requires a PIN verification on top of session authentication. The PIN is stored as a hashed value.
+
+**Super admin access:** Limited to SZL Holdings internal team. Cannot be granted through the UI — must be written directly to the database. All `super_admin` actions are logged in the immutable audit trail.
+
+**Service role key:** Machine-to-machine internal calls use `SERVICE_ROLE_KEY`. This key bypasses user-facing role checks but is logged and audited.
+
 ---
 
 ## WebSocket Access Control
 
 Real-time WebSocket channels use:
 - HMAC-signed connection tickets with 5-minute TTL (signed with `SESSION_SECRET`)
-- Channel names include `org_id` for tenant isolation
+- Channel names include `org_id` prefix for isolation
 - Per-channel ACL enforced at connection time
 - Tickets revoked on session expiry or `SESSION_SECRET` rotation
 
 ---
 
-## SCIM Provisioning (Enterprise)
+## Enterprise Provisioning (SCIM 2.0)
 
-Enterprise deployments support SCIM 2.0 for automated user provisioning:
-- Azure AD integration for SSO + user sync
+Enterprise deployments support SCIM 2.0 for automated user lifecycle management:
+- Azure AD integration for SSO + automated user provisioning
 - Role mapping from Azure AD groups to platform roles
 - Automated deprovisioning on user offboarding
 - Audit log entry for every provisioning action
 
 ---
 
-## Access Reviews
+## Access Review Schedule
 
 | Review | Frequency |
 |--------|-----------|
@@ -276,11 +380,12 @@ Enterprise deployments support SCIM 2.0 for automated user provisioning:
 
 This access control model supports:
 
-| Standard | Controls |
-|----------|---------|
-| SOC 2 Type II | CC6.1 – CC6.8: Logical access controls |
-| ISO 27001 | A.9: Access control |
-| GDPR | Article 25: Data protection by design |
+| Framework | Controls Addressed |
+|-----------|-------------------|
+| SOC 2 Type II | CC6.1–CC6.8 (Logical access controls) |
+| ISO 27001 | A.9 (Access control) |
+| GDPR | Article 25 (Data protection by design and by default) |
+| HIPAA (planned) | § 164.312 (Technical safeguards) |
 
 ---
 
@@ -308,3 +413,9 @@ Audit entries include: timestamp, actor (user ID + org), action, affected resour
 | API specification | `API-SPEC.md` |
 | Secrets policy | `docs/SECRETS_POLICY.md` |
 | Trust center | `docs/trust/trust-center.md` |
+
+*See also: [docs/ACCESS_CONTROL.md](docs/ACCESS_CONTROL.md) · [SECURITY-CHECKLIST.md](SECURITY-CHECKLIST.md) · [API-SPEC.md](API-SPEC.md)*
+
+---
+
+*Last verified against source code: 2026-04-15. Re-verify against `artifacts/api-server/src/`, `lib/db/src/schema/`, and `lib/auth/src/` after significant code changes.*

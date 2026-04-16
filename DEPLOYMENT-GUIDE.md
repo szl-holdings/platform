@@ -1,150 +1,96 @@
 # Deployment Guide — SZL Holdings Platform
 
-**Version:** 1.0 · **Last updated:** April 2026
-**Audience:** Engineers, DevOps, release managers
+**Date:** April 2026 | **Audience:** Engineers, operators, enterprise evaluators
 
-> This guide consolidates `docs/deployment.md`, `DEPLOYMENT_READINESS.md`, `.github/workflows/deploy-staging.yml`, and `.github/workflows/deploy-production.yml` into one canonical deployment reference.
-
----
-
-## Deployment Environments
-
-| Environment | Platform | Purpose | Trigger |
-|-------------|----------|---------|---------|
-| **Development** | Replit workspace | Active development, feature branches, live previews | Automatic (always running) |
-| **Staging** | Replit (published) | Pre-production validation, demo environment | Push to `main` / `master` |
-| **Production** | Azure App Service | Customer-facing, multi-tenant | GitHub Release published or manual dispatch |
+**Related:** [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md) · [SECURITY-CHECKLIST.md](SECURITY-CHECKLIST.md) · [KNOWN-GAPS.md](KNOWN-GAPS.md)
 
 ---
 
-## Pre-Deployment Checklist
+## Overview
 
-Before deploying to staging or production, complete the following:
+SZL Holdings operates a two-environment deployment model:
 
-### Environment & Secrets
-
-- [ ] `DATABASE_URL` set for target environment (production string, not dev)
-- [ ] `SESSION_SECRET` set — strong random string (≥ 32 characters, never reused across environments)
-- [ ] `SECRET_ENCRYPTION_KEY` set for production (primary encryption key for `lib/crypto.ts`)
-- [ ] `ADMIN_PIN` set — unique per environment
-- [ ] `CORS_ORIGINS` configured — must match frontend domain(s) exactly
-- [ ] All third-party API keys validated and active (Stripe, OpenAI, Mapbox, etc.)
-- [ ] Azure Key Vault configured with all secrets (production only)
-- [ ] No secrets committed to source control — verify with `git status`
-
-### Application
-
-- [ ] All migrations applied: `pnpm --filter @szl-holdings/db run db:migrate`
-- [ ] Production database backup taken before deployment
-- [ ] Demo data NOT present in production
-- [ ] `pnpm build` passes with no errors
-- [ ] `pnpm typecheck` passes with no errors
-- [ ] `pnpm lint` passes with no errors
-- [ ] Health check endpoint responds: `GET /api/health`
-
-### Content & Trust
-
-- [ ] No placeholder text ("Lorem ipsum", "TODO", "COMING SOON") visible on public routes
-- [ ] Legal pages present: `/legal/privacy`, `/legal/terms`, `/accessibility`
-- [ ] Trust Center accessible at `/trust-center`
-- [ ] Contact forms tested and verified
-
-### Monitoring
-
-- [ ] Azure Application Insights configured (production)
-- [ ] Uptime monitoring configured for critical routes
-- [ ] On-call contact designated
-
-See `DEPLOYMENT_READINESS.md` for the full checklist with sign-off fields.
+| Environment | Platform | Purpose | Status |
+|-------------|----------|---------|--------|
+| Development / Staging | Replit | Active development, internal preview, investor demo | Live — 10+ workflows |
+| Production | Azure App Service | Enterprise customer-facing, multi-tenant | Architecture ready; not yet live |
 
 ---
 
-## Staging Deployment
+## Replit Environment (Development / Staging)
 
-### Automated (GitHub Actions)
+### How It Works
 
-Staging deployment triggers automatically on every push to `main` or `master`.
+The Replit workspace is a pnpm monorepo where each artifact is a separate service bound to a unique `$PORT` assigned by Replit. Services are exposed via path-based proxy routing (not direct localhost access).
 
-**Workflow:** `.github/workflows/deploy-staging.yml`
+**Preview URL pattern:** `https://$REPLIT_DEV_DOMAIN/<artifact-preview-path>/`
 
-```
-Push to main/master
-    │
-    ▼
-Verify REPLIT_STAGING_DEPLOY_TOKEN (GitHub secret)
-    │
-    ├── Token absent → Skip (warning in workflow summary)
-    │
-    └── Token present → POST to Replit deployment API
-            REPLIT_STAGING_APP_ID + REPLIT_STAGING_DEPLOY_TOKEN
-```
+### Starting Services
 
-**Required GitHub secrets (Settings → Environments → staging):**
-- `REPLIT_STAGING_APP_ID` — Replit App ID for the staging deployment
-- `REPLIT_STAGING_DEPLOY_TOKEN` — Replit deploy token for staging
+Each artifact has a dedicated workflow managed through the Replit interface. Critical workflows:
 
-If these secrets are not configured, the staging workflow logs a warning and skips deployment — it does **not** fail the CI run.
+| Workflow | Must Run First? |
+|----------|----------------|
+| `artifacts/api-server: api` | **Yes** — all frontends depend on this |
+| `artifacts/szl-holdings: web` | No, but serves as primary landing |
+| `artifacts/firestorm: web` | No |
+| `artifacts/vessels: web` | No |
 
-### Manual (Replit)
+Always start the API server workflow before any frontend workflow.
 
-1. Open the Replit workspace
-2. Use the Replit deployment panel to publish
-3. Replit automatically:
-   - Provisions HTTPS/TLS
-   - Manages PostgreSQL connection
-   - Applies environment secrets
-   - Performs zero-downtime deploy
+### Publishing (Staging Deployment)
 
-### Post-Staging Verification
+Publishing via Replit creates an autoscaled deployment with:
+- Automatic HTTPS/TLS
+- Managed PostgreSQL
+- Environment secret management
+- Health check monitoring
+- Zero-downtime deploys (rolling restart)
 
 ```bash
-curl https://<staging-domain>/api/health
-curl https://<staging-domain>/api/health/ready
+# Build all artifacts before publishing
+pnpm -r build
+
+# API server build (primary)
+pnpm --filter @workspace/api-server build
+
+# Publish via Replit UI or CLI
 ```
 
-Run `pnpm qa:site` against the staging URL for automated validation.
+### Environment Variables in Replit
+
+All secrets are managed via Replit Secrets (not `.env` files):
+
+1. Open the Replit Secrets panel
+2. Add variable name and value
+3. Restart affected workflows after adding secrets
+
+**Minimum required secrets:**
+- `DATABASE_URL` — auto-provisioned by Replit
+- `SESSION_SECRET` — strong random string, 32+ characters
+- `SECRET_ENCRYPTION_KEY` — separate from `SESSION_SECRET`
+- `ADMIN_PIN` — for CMS admin access
 
 ---
 
-## Production Deployment
+## Azure Production Deployment
 
-### Automated (GitHub Release)
+Full production infrastructure is defined in `/infra/` using Azure Bicep templates.
 
-Production deployment triggers automatically when a GitHub Release is published.
+### Infrastructure Components
 
-**Workflow:** `.github/workflows/deploy-production.yml`
+| Resource | Configuration |
+|----------|--------------|
+| **App Service** | Node.js 20 LTS, Linux, P2v3 (autoscale) |
+| **PostgreSQL Flexible Server** | General Purpose tier, 4 vCores, automated backups |
+| **Azure Key Vault** | Centralized secrets management; referenced by App Service |
+| **Redis Cache** | Session store and real-time cache (C1 Standard) |
+| **CDN / Front Door** | Static asset delivery, SSL termination |
+| **Application Insights** | APM, distributed tracing, log analytics |
 
-```
-GitHub Release published
-    │
-    ▼
-Deploy to production environment
-    │
-    ├── Verify REPLIT_DEPLOY_TOKEN
-    │
-    └── POST to Replit production deployment API
-            REPLIT_APP_ID + REPLIT_DEPLOY_TOKEN
-```
+### Deployment Steps
 
-### Manual Dispatch
-
-Production can also be deployed via manual `workflow_dispatch`:
-
-1. Go to GitHub Actions → "Deploy — Production"
-2. Click "Run workflow"
-3. Enter the ref (tag, branch, or SHA) to deploy
-4. Type `deploy` in the confirmation field (required)
-5. Click "Run workflow"
-
-**Required GitHub secrets (Settings → Environments → production):**
-- `REPLIT_APP_ID` — Replit App ID for production
-- `REPLIT_DEPLOY_TOKEN` — Replit deploy token for production
-
-### Azure Production Deployment
-
-For enterprise Azure deployments, the infrastructure is defined in `/infra/` using Bicep templates.
-
-#### Step 1: Deploy Infrastructure
+#### 1. Deploy Infrastructure
 
 ```bash
 az deployment group create \
@@ -153,167 +99,165 @@ az deployment group create \
   --parameters @infra/parameters.json
 ```
 
-**Azure resources provisioned:**
-- App Service (Node.js 20 LTS, Linux, autoscale)
-- PostgreSQL Flexible Server (General Purpose tier, automated backups)
-- Key Vault (centralized secrets management)
-- Redis Cache (session store, real-time cache)
-- CDN (static asset delivery via Azure Front Door)
-- Application Insights (APM, distributed tracing, log analytics)
-
-#### Step 2: Configure Secrets in Key Vault
+#### 2. Configure Secrets in Key Vault
 
 ```bash
-az keyvault secret set --vault-name szl-keyvault --name DATABASE-URL --value "postgresql://..."
-az keyvault secret set --vault-name szl-keyvault --name SESSION-SECRET --value "..."
-az keyvault secret set --vault-name szl-keyvault --name SECRET-ENCRYPTION-KEY --value "..."
-az keyvault secret set --vault-name szl-keyvault --name STRIPE-SECRET-KEY --value "..."
-az keyvault secret set --vault-name szl-keyvault --name OPENAI-API-KEY --value "..."
-# ... all secrets from ENV_MATRIX.md
+az keyvault secret set --vault-name szl-keyvault \
+  --name DATABASE-URL --value "postgresql://..."
+
+az keyvault secret set --vault-name szl-keyvault \
+  --name SESSION-SECRET --value "$(openssl rand -hex 32)"
+
+az keyvault secret set --vault-name szl-keyvault \
+  --name SECRET-ENCRYPTION-KEY --value "$(openssl rand -hex 32)"
+
+az keyvault secret set --vault-name szl-keyvault \
+  --name STRIPE-SECRET-KEY --value "sk_live_..."
 ```
 
-#### Step 3: Build and Deploy API Server
+#### 3. Build and Deploy API Server
 
 ```bash
 pnpm --filter @workspace/api-server build
-az webapp deploy --resource-group szl-production --name szl-api --src-path dist/
+
+az webapp deploy \
+  --resource-group szl-production \
+  --name szl-api \
+  --src-path artifacts/api-server/dist.zip
 ```
 
-#### Step 4: Build and Deploy Frontend Artifacts
+#### 4. Deploy Frontend Artifacts
 
 ```bash
 pnpm -r build
-# Deploy static assets to Azure CDN / Blob Storage
-az storage blob upload-batch \
-  --destination '$web' \
-  --source artifacts/szl-holdings/dist \
-  --account-name szlstatic
+
+# Deploy static assets to CDN / Azure Blob Storage
+# No deploy script exists in the repository — this step is handled via CI/CD pipeline
+# (e.g., GitHub Actions or Azure DevOps) using the build output in each artifact's dist/ folder
 ```
+
+#### 5. Run Database Migrations
+
+```bash
+# Against production DB — run from CI/CD context
+DATABASE_URL="$PROD_DATABASE_URL" pnpm --filter artifacts/api-server db:migrate
+```
+
+**Always take a database backup before running migrations in production.**
+
+### Multi-Tenant Configuration
+
+Enterprise deployments use per-tenant configuration stored in the database:
+
+- Tenant-scoped configuration encrypted in Key Vault
+- Azure AD integration for SSO + SCIM 2.0 user sync
+- Tenant provisioning wizard (4-step onboarding)
+- Per-tenant billing via Stripe
 
 ---
 
-## Environment Configuration
+## Pre-Deployment Checklist
 
-### Critical Variables for All Environments
+Complete this checklist before every production deployment. Full version: [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md).
 
-| Variable | Description | Secret |
-|----------|-------------|--------|
-| `DATABASE_URL` | PostgreSQL connection string | Yes |
-| `SESSION_SECRET` | HMAC key for WebSocket tickets; fallback encryption key | Yes |
-| `SECRET_ENCRYPTION_KEY` | Primary encryption key (`lib/crypto.ts`) | Yes |
-| `NODE_ENV` | `development` / `production` | No |
-| `PORT` | Server port (auto-assigned by Replit) | No |
-| `CORS_ORIGINS` | Comma-separated allowed origins — required in production | No |
+### Environment & Secrets
+- [ ] `DATABASE_URL` points to the correct production connection string
+- [ ] `SESSION_SECRET` is environment-specific (32+ chars, not shared with dev)
+- [ ] `SECRET_ENCRYPTION_KEY` set independently from `SESSION_SECRET`
+- [ ] `CORS_ORIGINS` set to production allowed origins
+- [ ] `ADMIN_PIN` set (hashed at rest)
+- [ ] All third-party API keys valid (Stripe, Mapbox, etc.)
+- [ ] No secrets in committed code (`git log` clean)
 
-See `ENV_MATRIX.md` for the complete environment variable reference.
+### Database
+- [ ] All migrations applied and verified in staging before production
+- [ ] Migration is backwards-compatible
+- [ ] Production database backup taken before migration
+- [ ] Demo/seed data NOT present in production
 
-### Environment-Specific Configuration
+### Code Quality
+- [ ] `pnpm test` passes
+- [ ] `pnpm typecheck` passes
+- [ ] `pnpm lint` passes
+- [ ] `pnpm build` succeeds for all artifacts
 
-**Development (Replit):**
-```
-NODE_ENV=development
-LOG_LEVEL=debug
-# All secrets managed via Replit Secrets panel
-```
+### Security
+- [ ] No new unvalidated user inputs
+- [ ] CSRF tokens on all state-changing endpoints
+- [ ] Authentication required on all private routes
+- [ ] Admin/internal routes not in public navigation
 
-**Staging (Replit published):**
-```
-NODE_ENV=production
-APP_ENV=staging
-LOG_LEVEL=info
-CORS_ORIGINS=https://<staging-domain>
-```
-
-**Production (Azure):**
-```
-NODE_ENV=production
-APP_ENV=production
-LOG_LEVEL=warn
-# All secrets managed via Azure Key Vault
-APPLICATIONINSIGHTS_CONNECTION_STRING=<from Key Vault>
-REDIS_CONNECTION_STRING=<from Key Vault>
-```
+### Post-Deploy Verification
+- [ ] `GET /api/health` returns 200
+- [ ] Authentication flow works end-to-end
+- [ ] Contact/demo forms submit successfully
+- [ ] No JavaScript errors in browser console
+- [ ] Monitor error rate and latency for 30 minutes post-deploy
 
 ---
 
 ## Database Management
 
-### Schema Changes
-
 ```bash
-# Development — push schema changes (no migration file, destructive)
-pnpm --filter @szl-holdings/db run db:push
+# Push schema changes (development)
+pnpm --filter db push
 
-# Development — force push (reset + apply)
+# Force reset + push (development only — destroys data)
 yes '' | pnpm --filter db push --force
 
-# Staging / Production — generate and apply migrations (safe)
-pnpm --filter @szl-holdings/db run db:generate
-pnpm --filter @szl-holdings/db run db:migrate
+# Run migrations (production)
+pnpm --filter artifacts/api-server db:migrate
+
+# Seed demo data (development / staging)
+pnpm seed:demo
 ```
-
-### Seeding
-
-```bash
-# Seed demo data (development only)
-pnpm --filter scripts run seed
-```
-
-**Never seed demo data into staging or production.**
-
-### Multi-Tenant Configuration (Azure)
-
-Enterprise deployments use per-tenant configuration stored in the `azure_tenants` table:
-- Tenant-scoped Power BI workspace config (encrypted)
-- Per-tenant embed token issuance with Row-Level Security
-- Azure AD integration for SSO
-- Tenant provisioning wizard (4-step onboarding)
 
 ---
 
-## Health Checks & Post-Deploy Verification
+## Health Checks
 
-After any deployment, verify:
+| Endpoint | Type | Use |
+|----------|------|-----|
+| `GET /api/health` | Public liveness | Load balancer health check |
+| `GET /api/health/detailed` | Authenticated system status | Monitoring dashboards, on-call checks |
 
-```bash
-# Liveness check
-curl https://<domain>/api/health/live
-
-# Readiness check (database connectivity)
-curl https://<domain>/api/health/ready
-
-# Full health status
-curl https://<domain>/api/health
-
-# Detailed diagnostics (requires auth or internal token)
-curl -H "X-Internal-Token: $ALLOY_INTERNAL_TOKEN" https://<domain>/api/health/detailed
-```
-
-**Verification checklist:**
-- [ ] Landing page loads correctly
-- [ ] `GET /api/health` returns `200 healthy`
-- [ ] Authentication flow works end-to-end
-- [ ] Contact form submission succeeds
-- [ ] No JavaScript errors in browser console
-- [ ] Mobile view renders correctly
+Detailed health includes: database pool metrics, queue depth, AI provider reachability, error rate, P95 latency.
 
 ---
 
-## Rollback
+## CI/CD Pipeline
+
+The workspace uses a post-merge setup script (`scripts/post-merge.sh`) that runs automatically after task branch merges:
+
+1. `pnpm install` — Install / sync dependencies
+2. `pnpm --filter db push` — Push schema changes to development DB
+3. Build integrity check
+
+**CI gates (run on every commit):**
+- `pnpm audit --audit-level high` — blocks on vulnerable dependencies
+- Secret pattern scan — blocks if credentials detected in source
+- `pnpm typecheck` — blocks on type errors
+- `pnpm lint` — blocks on lint errors
+- `pnpm -r build` — blocks on build failures
+
+---
+
+## Rollback Procedures
 
 ### Replit Rollback
 
-Replit creates automatic checkpoints. If a deployment breaks something:
-1. Open the Replit checkpoint panel
-2. Select the last known-good checkpoint
-3. Restore to that checkpoint
+Replit maintains a checkpoint system. To rollback:
+1. Open Replit checkpoint history
+2. Select last known good checkpoint
+3. Restore and restart workflows
+4. Verify `GET /api/health` returns 200
 
 ### Azure Rollback
 
-Azure App Service deployment slots support blue/green swap:
+Azure deployment slots enable blue/green swap:
 
 ```bash
-# Swap staging slot back to production
+# Swap deployment slots (swap staging → production)
 az webapp deployment slot swap \
   --resource-group szl-production \
   --name szl-api \
@@ -321,20 +265,39 @@ az webapp deployment slot swap \
   --target-slot production
 ```
 
-### Database Rollback
+Full rollback procedures: `infra/runbooks/RUNBOOK_ROLLBACK.md`
 
-```bash
-# Stop traffic first, then restore from backup
-psql "$DATABASE_URL" -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
-gunzip -c backups/daily_<timestamp>.sql.gz | psql "$DATABASE_URL"
-pnpm --filter @szl-holdings/db run db:migrate  # Re-apply to current version
-```
+### Rollback Decision Criteria
 
-See `infra/runbooks/RUNBOOK_ROLLBACK.md` for the full rollback playbook. Rollback should complete in < 15 minutes.
+Rollback immediately (before investigation) if:
+- A deployment happened in the last 2 hours and caused the issue
+- Data integrity is at risk
+- Fix would take more than 1 hour
 
 ---
 
-## CI/CD Pipeline
+## Mobile Deployment (CORTEX / Expo)
+
+Mobile apps are built via Expo Application Services (EAS).
+
+```bash
+# Local build (development)
+cd artifacts/szl-holdings-mobile
+npx expo start
+
+# EAS production build (iOS / Android)
+eas build --platform all --profile production
+
+# EAS submit to App Store / Play Store
+eas submit --platform all
+```
+
+**Note:** EAS Build configuration (`eas.json`) and automated distribution pipeline are not yet configured — tracked in [KNOWN-GAPS.md](KNOWN-GAPS.md).
+
+---
+
+*See also: [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md) · [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) · [docs/deployment.md](docs/deployment.md)*
+---
 
 ### GitHub Actions Workflows
 
@@ -366,3 +329,9 @@ The `scripts/post-merge.sh` script runs automatically after task branch merges:
 | Secrets runbook | `infra/runbooks/RUNBOOK_SECRETS.md` |
 | Disaster recovery | `docs/disaster-recovery.md` |
 | Production readiness | `docs/production-readiness.md` |
+
+---
+
+*See also: [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md) · [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) · [docs/deployment.md](docs/deployment.md)*
+
+*Last verified against source code: 2026-04-15*

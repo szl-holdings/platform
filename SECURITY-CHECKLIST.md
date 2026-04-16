@@ -1,8 +1,12 @@
 # SZL Holdings — Security Checklist (API & Credentials)
 
-**Last updated:** 2026-04-16  
-**Audience:** Engineering, DevOps, Technical Advisors  
-**Scope:** API Server (Express/Node.js) and Repository Credential Hygiene
+**Last updated:** 2026-04-16
+**Audience:** Enterprise architects, Series A technical advisors, security reviewers, compliance officers
+**Scope:** `artifacts/api-server` — multi-tenant Express/Node.js API
+
+**Related:** [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) · [KNOWN-GAPS.md](KNOWN-GAPS.md) · [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md)
+
+This checklist maps security controls to their actual implementation in the codebase. Controls are marked with their current status. Source references point to specific locations in the codebase where controls are enforced. See [KNOWN-GAPS.md](KNOWN-GAPS.md) for gap detail.
 
 ---
 
@@ -80,7 +84,90 @@ If a credential is accidentally committed:
 
 ---
 
-## Remaining Gaps (Summary)
+## File Upload & Data Integrity
+
+| # | Control | Status | Evidence |
+|---|---------|--------|----------|
+| F1 | File upload metadata validated via Zod schema (`fileUploadMetaSchema`) | ✅ Done | `lib/validation.ts` — filename, mimeType, size constraints |
+| F2 | File size limit enforced (`max 100 MB`) | ✅ Done | `fileUploadMetaSchema.size.max(100 * 1024 * 1024)` |
+| F3 | Virus / malware scanning on uploaded files | ⚠️ Missing | No antivirus scanning on object storage uploads — tracked as KG020c |
+| F4 | Content-Type validated against MIME allowlist | ⚠️ Partial | `mimeType` field validated but no server-side extension/content sniffing block |
+
+---
+
+## Encryption
+
+| # | Control | Status | Evidence |
+|---|---------|--------|----------|
+| E1 | Data at rest: DB encryption | ✅ Done | Replit-managed PostgreSQL with encryption at rest by default |
+| E2 | Data in transit: TLS | ✅ Done | All external traffic via HTTPS; Replit platform enforces TLS |
+| E3 | Field-level encryption for connector credentials | ✅ Done | `CONNECTOR_ENCRYPTION_KEY` used to encrypt stored OAuth tokens and API keys |
+| E4 | End-to-end field-level encryption for PII fields | ⚠️ Open | No field-level encryption on PII columns (e.g. contact email, user profile) beyond DB-level — tracked as KG020d |
+
+---
+
+## Dependency Security & CI Gates
+
+| # | Control | Status | Evidence |
+|---|---------|--------|----------|
+| CI1 | CodeQL static analysis configured in CI | ⚠️ Missing | Not configured — KG011 |
+| CI2 | Automated dependency vulnerability review on PRs | ⚠️ Missing | `dependency-review-action` not added — KG012 |
+| CI3 | `pnpm audit` / `npm audit` run in CI | ⚠️ Missing | No automated audit step in pipeline |
+| CI4 | `CODEOWNERS` file defining mandatory review ownership | ⚠️ Missing | Not configured — KG013 |
+
+---
+
+## Vulnerability Disclosure
+
+| # | Control | Status | Evidence |
+|---|---------|--------|----------|
+| VD1 | `security.txt` / responsible disclosure policy published | ⚠️ Missing | No `/.well-known/security.txt` endpoint; no public disclosure policy |
+| VD2 | Internal security reporting process defined | ⚠️ Open | No documented process for internal security issue triage |
+
+**Do not open a public GitHub issue for security vulnerabilities.**
+
+- **Email:** security@szlholdings.com
+- **Response SLA:** 48-hour initial acknowledgement
+- See [SECURITY.md](SECURITY.md) for full responsible disclosure process
+
+---
+
+## Zero-Trust & Service Mesh
+
+| # | Control | Status | Evidence |
+|---|---------|--------|----------|
+| ZT1 | Internal service-to-service calls authenticated via `ALLOY_INTERNAL_TOKEN` | ✅ Done | All internal endpoints check `checkInternalToken()` with timing-safe compare |
+| ZT2 | Platform mTLS on external preview/proxy | ✅ Done | Replit proxy uses mTLS for dev domain; HTTPS enforced for all artifacts |
+| ZT3 | Inter-service calls do not trust ambient credentials without explicit token | ✅ Done | Each service call includes explicit Bearer or X-Alloy-Token header |
+| ZT4 | Service mesh / mTLS between microservices | ⚠️ N/A | Single-process monolith; no separate service mesh needed at current scale |
+
+---
+
+## Data & Storage
+
+| # | Control | Status | Evidence |
+|---|---------|--------|----------|
+| D1 | All DB queries use parameterized statements (Drizzle ORM) | ✅ Done | No raw SQL string interpolation |
+| D2 | Object storage objects are private by default | ✅ Done | `routes/documents.ts` — explicit ACL set |
+| D3 | Soft deletes used where data integrity matters | ✅ Done | Certification programs use `isActive: false`; firestorm uses soft-delete patterns |
+
+---
+
+## CI Security Gates
+
+Every commit and pull request runs:
+
+| Gate | Tool | Policy |
+|------|------|--------|
+| TypeScript typecheck | `tsc --noEmit` | Block on type errors |
+| Lint | ESLint | Block on errors |
+| Build validation | `pnpm -r build` | Block on any build failure |
+
+---
+
+## Remaining Gaps (see KNOWN-GAPS.md for full detail)
+
+
 | Gap ID | Description | Severity | ETA |
 |--------|-------------|----------|-----|
 | GAP-001 | Manual rotation of Firebase/Google keys needed | High | Immediate |
@@ -90,4 +177,10 @@ If a credential is accidentally committed:
 | KG020b | Webhook delivery URL SSRF validation absent | P1 | Sprint 3 |
 | KG020c | No virus scanning on uploaded files | P2 | Sprint 4 |
 
-> **Core security hardening complete.** All P0 items (tenant isolation, auth, input validation) are resolved. Mobile secrets transition to template-based management is complete. See `KNOWN-GAPS.md` for full detail.
+> **All P0 items are resolved.** DB-level tenant isolation, timing-safe auth, Zod validation on all high-risk write routes, structured Pino logging in all production paths. Mobile secrets transition to template-based management is complete. See `KNOWN-GAPS.md` for full resolution log.
+
+---
+
+*See also: [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) · [KNOWN-GAPS.md](KNOWN-GAPS.md) · [docs/trust/security-posture.md](docs/trust/security-posture.md)*
+
+*Last verified against code on 2026-04-16*

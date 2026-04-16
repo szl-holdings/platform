@@ -1,415 +1,360 @@
 # Operations Runbook — SZL Holdings Platform
 
-**Version:** 2.0 · **Last updated:** April 2026
-**Audience:** Engineers, operators, on-call responders
-**Scope:** Internal operations reference — not user-facing documentation
+**Version:** 2.0 | **Date:** April 2026 | **Audience:** Engineers, operators, on-call responders
 
-> This runbook consolidates `docs/ops-runbook.md` and `REPLIT_OPERATIONS.md` into one canonical on-call reference. For deployment procedures see `DEPLOYMENT-GUIDE.md`. For environment variables see `ENV_MATRIX.md`.
+**Related:** [ARCHITECTURE.md](ARCHITECTURE.md) · [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) · [KNOWN-GAPS.md](KNOWN-GAPS.md)
 
 ---
 
 ## Table of Contents
 
-1. [On-Call Triage Sequence](#1-on-call-triage-sequence)
-2. [Health Endpoints](#2-health-endpoints)
-3. [Workflow Management (Replit)](#3-workflow-management-replit)
-4. [Common Failure Modes & Recovery](#4-common-failure-modes--recovery)
-5. [Database Operations](#5-database-operations)
-6. [Code Quality & Build](#6-code-quality--build)
-7. [Monitoring & Observability](#7-monitoring--observability)
-8. [Incident Severity](#8-incident-severity)
+1. [Environment Overview](#1-environment-overview)
+2. [Workflow Management (Replit)](#2-workflow-management-replit)
+3. [Environment Variables](#3-environment-variables)
+4. [Database Operations](#4-database-operations)
+5. [Health & Monitoring](#5-health--monitoring)
+6. [Common Failure Modes & Recovery](#6-common-failure-modes--recovery)
+7. [Incident Response](#7-incident-response)
+8. [Code Quality Commands](#8-code-quality-commands)
+9. [Release Operations](#9-release-operations)
 
 ---
 
-## 1. On-Call Triage Sequence
+## 1. Environment Overview
 
-When something is broken and you don't know where to start, follow this sequence:
+The SZL Holdings platform runs as a **pnpm monorepo** on Replit (development / staging) with Azure as the production target.
 
-1. **Is the API alive?** → `GET /api/health/live` — if 503 or unreachable → [FM-2: API Crash](#fm-2-api-server-crash--not-starting)
-2. **Is the database reachable?** → `GET /api/health/ready` — if 503 → [FM-1: Database](#fm-1-database-unreachable)
-3. **Are subsystems degraded?** → `GET /api/health` — check `services` object for `degraded`, `missing_secret`, or `not_configured` states
-4. **Is it a build/startup failure?** → Check workflow logs in Replit for `Error:` on startup → [FM-3: Build Failure](#fm-3-build-failure-typescript--vite)
-5. **Is it an auth issue?** → Users can't log in or get 401s everywhere → [FM-4: Auth Broken](#fm-4-authentication-broken)
-6. **Is it a specific feature?**
-   - AI broken → [FM-5: AI](#fm-5-ai-features-not-working)
-   - File uploads failing → [FM-8: Storage](#fm-8-object-storage--file-uploads-failing)
-   - Mobile can't connect → [FM-7: Mobile](#fm-7-mobile-app-cannot-connect-to-api)
-   - CORS errors → [FM-10: CORS](#fm-10-cors-errors-in-production)
-   - Schema out of sync → [FM-9: Migrations](#fm-9-database-schema-out-of-sync)
-   - Job queue backpressure → [FM-6: Queue](#fm-6-job-queue-backpressure)
+| Environment | Platform | Purpose |
+|-------------|----------|---------|
+| Development | Replit workspace | Active development, feature work, internal preview |
+| Staging / Demo | Replit (published) | Pre-production validation, investor demo |
+| Production | Azure App Service | Enterprise customer-facing (target architecture, not yet live) |
 
----
+**Monorepo layout:**
 
-## 2. Health Endpoints
-
-| Endpoint | Auth Required | Purpose |
-|----------|--------------|---------|
-| `GET /api/health/live` | None | Liveness probe — returns 200 if process is running |
-| `GET /api/health/ready` | None | Readiness probe — checks database connectivity |
-| `GET /api/health` | None | Full system health (DB, job queue, memory, auth, AI, storage) |
-| `GET /api/health/detailed` | Session or `X-Internal-Token` header | Full diagnostics — DB pool, queue depth, telemetry, p95 latency |
-
-**Health response statuses:**
-- `healthy` (HTTP 200) — all systems nominal
-- `warning` (HTTP 200) — degraded performance but serving requests
-- `degraded` (HTTP 503) — critical subsystem unreachable
-
-**Health response example:**
-```json
-{
-  "status": "healthy",
-  "services": {
-    "database": { "status": "healthy" },
-    "auth": { "status": "configured" },
-    "ai": { "status": "configured" },
-    "storage": { "status": "configured" },
-    "job_queue": { "status": "healthy", "details": { "pending": 0, "running": 2 } }
-  },
-  "timestamp": "2026-04-15T12:00:00Z"
-}
+```
+/
+├── artifacts/          # Deployable apps — web + mobile
+├── lib/                # 37 shared TypeScript packages
+├── scripts/            # QA, seeding, backup, migration scripts
+├── infra/              # Azure Bicep IaC templates
+├── packages/           # Marketplace integrations
+└── docs/               # Full documentation suite
 ```
 
-**Queue backpressure threshold:** depth > 50 triggers `backpressure` status.
-
 ---
 
-## 3. Workflow Management (Replit)
+## 2. Workflow Management (Replit)
 
-### Available Workflows
+Each artifact has a dedicated Replit workflow. Workflows are managed through the Replit interface.
 
-| Workflow | Surface | Notes |
-|----------|---------|-------|
-| `artifacts/szl-holdings: web` | SZL Holdings (Corporate) | Independent on port 21130, previewPath `/` |
-| `artifacts/aegis: web` | Aegis (Defense & Intelligence) | Shared gateway on port 9090, previewPath `/aegis/` |
-| `artifacts/terra: web` | Terra (Real Estate) | Shared gateway on port 9090, previewPath `/terra/` |
-| `artifacts/carlota-jo: web` | Carlota Jo (Advisory) | Shared gateway on port 9090, previewPath `/carlota-jo/` |
-| `artifacts/vessels: web` | Vessels (Maritime) | Shared gateway on port 9090, previewPath `/vessels/` |
-| `artifacts/command: web` | Command Portal | Shared gateway on port 9090, previewPath `/command/`. API server runs as subprocess. |
-| `artifacts/prism-counsel: web` | PRISM Counsel (Legal) | Shared gateway on port 9090 |
-| `artifacts/stephen-site: web` | Stephen Lutar (Founder) | Shared gateway on port 9090 |
-| `artifacts/szl-holdings-mobile: expo` | CORTEX Mobile | Expo tunnel |
-| `artifacts/mockup-sandbox: Component Preview Server` | Design sandbox | Internal only |
+| Workflow | Service | Preview Path | Notes |
+|----------|---------|--------------|-------|
+| `artifacts/szl-holdings: web` | SZL Holdings corporate site | `/` | Independent on port 21130 |
+| `artifacts/api-server: api` | Centralized API server | `/api/` | Runs as subprocess of Command Vite process |
+| `artifacts/firestorm: web` | Aegis / Firestorm | `/firestorm/` | Shared gateway on port 9090 |
+| `artifacts/vessels: web` | Vessels Maritime | `/vessels/` | Shared gateway on port 9090 |
+| `artifacts/terra: web` | Terra Real Estate | `/terra/` | Shared gateway on port 9090 |
+| `artifacts/carlota-jo: web` | Carlota Jo Advisory | `/carlota-jo/` | Shared gateway on port 9090 |
+| `artifacts/command: web` | Command Portal | `/command/` | Shared gateway on port 9090 |
+| `artifacts/szl-holdings-mobile: expo` | CORTEX mobile | Expo tunnel | |
+| `artifacts/mockup-sandbox: Component Preview Server` | Design sandbox | `/__mockup` | Internal only |
 
 The `artifacts/api-server: api` workflow is registered but the API server runs as a subprocess of the Command Vite process. The standalone workflow will fail with port conflict — this is expected.
 
 ### When to Restart a Workflow
-
 - Code changes require a server restart
-- Environment variable changes applied (Replit Secrets update)
-- Dependencies installed or updated
-- Workflow crashed or became unresponsive
-- Database migrations applied
+- Environment variable changes were applied
+- Dependencies were installed or updated
+- A workflow has crashed or become unresponsive
 
 ### Port Configuration
-
-All services bind to `$PORT` (assigned automatically by Replit per artifact). **Never hardcode a port number.**
+**Critical:** All services must bind to `$PORT`. Never hardcode port numbers.
 
 ```typescript
+// Vite config pattern
 server: {
   port: parseInt(process.env.PORT || "3000"),
   host: "0.0.0.0",
-  allowedHosts: true,
+  allowedHosts: true,  // Required for Replit proxy iframe
 }
 ```
 
-### Preview Debugging (Blank Pane)
+---
 
-1. Is the workflow running? Check workflow status.
-2. Did the server start successfully? Check workflow logs.
-3. Is `PORT` set correctly? Server must bind to `$PORT`.
-4. Vite: is `server.allowedHosts: true` set?
+## 3. Environment Variables
+
+Secrets are managed via **Replit Secrets** (development) and **Azure Key Vault** (production). Never commit secrets to source control.
+
+### Critical — Required for All Environments
+
+| Variable | Description | Production Notes |
+|----------|-------------|-----------------|
+| `DATABASE_URL` | PostgreSQL connection string | Provisioned automatically by Replit |
+| `SECRET_ENCRYPTION_KEY` | Primary encryption key for `lib/crypto.ts` | Set in production; falls back to `SESSION_SECRET` if absent |
+| `SESSION_SECRET` | Fallback encryption key + HMAC key for WebSocket tickets | Required in production; if unset, WS tickets use ephemeral per-process key (not production-safe) |
+| `NODE_ENV` | Runtime environment (`development` / `production`) | Set automatically in Replit deploys |
+| `PORT` | Server port | Assigned automatically per artifact by Replit |
+
+### Authentication & Security
+
+| Variable | Description |
+|----------|-------------|
+| `ISSUER_URL` | OIDC issuer URL (default: `https://replit.com/oidc`) |
+| `REPL_ID` | Replit deployment ID — used as OIDC client ID. Provided automatically |
+| `OAUTH_STATE_SECRET` | Signs OAuth state parameters |
+| `SERVICE_ROLE_KEY` | Internal machine-to-machine service key |
+| `ALLOY_INTERNAL_TOKEN` | Admin token for AlloyChat and `/api/health/detailed` access (must be 32+ chars) |
+| `CORS_ORIGINS` | Comma-separated allowed CORS origins. **Must be set in production** |
+| `ADMIN_PIN` | Admin panel PIN (hashed at rest). Required for `/admin` CMS access |
+| `DEMO_MODE` | `true` mocks external services and disables destructive operations |
+
+### Database Pool Tuning
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DB_POOL_MIN` | `2` | Minimum connections |
+| `DB_POOL_MAX` | `10` | Maximum connections |
+| `DB_CONNECT_TIMEOUT_MS` | `5000` | Connection acquisition timeout |
+| `DB_IDLE_TIMEOUT_MS` | `30000` | Idle connection release timeout |
+| `DB_STATEMENT_TIMEOUT_MS` | `10000` | Per-statement execution timeout |
+| `SLOW_QUERY_THRESHOLD_MS` | `500` | Slow query logging threshold |
+
+### AI Integrations
+
+| Variable | Description |
+|----------|-------------|
+| `AI_INTEGRATIONS_OPENAI_API_KEY` | OpenAI API key (Replit AI proxy) |
+| `AI_INTEGRATIONS_OPENAI_BASE_URL` | OpenAI base URL (Replit proxy in dev) |
+| `OPENAI_API_KEY` | Direct OpenAI key (fallback) |
+| `AI_INTEGRATIONS_ANTHROPIC_API_KEY` | Anthropic API key (Replit AI proxy) |
+| `AI_INTEGRATIONS_GEMINI_API_KEY` | Gemini API key (Replit AI proxy) |
+
+### Mobile
+
+| Variable | Description |
+|----------|-------------|
+| `EXPO_PUBLIC_API_URL` | API server base URL for Expo apps |
+| `REPLIT_EXPO_DEV_DOMAIN` | Expo tunnel domain for mobile preview |
+| `REPLIT_DEV_DOMAIN` | Replit dev proxy domain — used for API + WebSocket URL construction |
+
+---
+
+## 4. Database Operations
+
+The workspace uses a Replit-managed PostgreSQL database in development. Azure PostgreSQL Flexible Server in production.
+
+### Schema Management
+
+```bash
+# Push schema changes (development — uses Drizzle push, no migration files)
+pnpm --filter db push
+
+# Force push (reset + apply — destroys data, only for dev)
+yes '' | pnpm --filter db push --force
+
+# Run migrations (production — uses migration files)
+pnpm --filter artifacts/api-server db:migrate
+```
+
+### Seeding
+
+```bash
+# Seed all demo data
+pnpm seed:demo
+
+# Seed specific domain data
+pnpm --filter scripts run seed:vessels
+pnpm --filter scripts run seed:terra
+pnpm --filter scripts run seed:aegis
+```
+
+### Direct Access (Development)
+
+```bash
+psql $DATABASE_URL
+```
+
+**Never run destructive operations against production.** The production connection string differs from development.
+
+---
+
+## 5. Health & Monitoring
+
+### Health Endpoints
+
+| Endpoint | Auth | Returns |
+|----------|------|---------|
+| `GET /api/health` | Public | DB-checked liveness — returns `200 {"status":"healthy"}` if DB is reachable, `503 {"status":"degraded"}` otherwise |
+| `GET /api/health/detailed` | Internal token (`X-Internal-Token: $ALLOY_INTERNAL_TOKEN`) or authenticated session (production only; unauthenticated in development) | Full system status: DB connectivity + connection pool metrics, job queue depth (pending/running/completed/failed), telemetry snapshot (P95 latency, error rate, active alerts). Returns `503` if any check is `degraded`. |
+
+**Health check for production monitoring:**
+
+```bash
+curl https://api.szlholdings.com/api/health
+```
+
+### Self-Monitoring
+
+The API server runs `lib/self-monitor.ts` which polls `/api/health/detailed` every 5 minutes. Alerts fire when:
+- Error rate exceeds 5%
+- P95 latency exceeds 2 seconds
+- Database becomes unreachable
+- Job queue depth exceeds 50
+
+### AI Provider Health
+
+Active health probes check OpenAI, Anthropic, and Gemini reachability every 2 minutes. Failures are logged and can trigger Slack alerts.
+
+### Notification Rate Limiting
+
+| Severity | Max per minute | Behavior when exceeded |
+|----------|---------------|----------------------|
+| Critical | 5 | Suppressed with warning log |
+| Warning | 10 | Suppressed with warning log |
+| Info | 20 | Suppressed with warning log |
+
+---
+
+## 6. Common Failure Modes & Recovery
+
+### Blank Preview Pane
+
+1. Is the workflow running? Check workflow status panel.
+2. Did the server start? Check workflow logs for startup errors.
+3. Is `PORT` set? Server must bind to `$PORT`.
+4. Is `server.allowedHosts: true` set in Vite config? (Required for Replit proxy)
 5. Restart the workflow.
 
----
+### Database Connection Failures
 
-## 4. Common Failure Modes & Recovery
+1. Verify `DATABASE_URL` is set in Replit Secrets.
+2. Check Replit PostgreSQL database is online.
+3. Run `pnpm --filter artifacts/api-server db:migrate` to ensure migrations are current.
+4. Check `DB_POOL_MAX` — may be exhausted under load.
 
-### FM-1: Database Unreachable
+### TypeScript Errors After Merge
 
-**Symptoms:** `GET /api/health/ready` returns 503. All data reads/writes fail.
+1. Run `pnpm typecheck` to identify affected packages.
+2. Rebuild affected library packages first: `pnpm --filter './lib/**' build`.
+3. Check `tsconfig.json` project references for the affected package.
 
-**Likely causes:**
-- `DATABASE_URL` is not set or incorrect
-- Replit's managed PostgreSQL is temporarily unavailable
-- Connection pool exhausted (connection leak or high traffic)
+### Expo Mobile Not Loading
 
-**Recovery:**
-1. Check `services.database.status` via `GET /api/health`
-2. Verify `DATABASE_URL` in Replit Secrets
-3. Check Replit's database status page for platform incidents
-4. If pool exhaustion: restart the API server workflow (resets connection pool)
-5. For connection leaks: check `GET /api/health/detailed` — `total=N idle=N waiting=N`. If `waiting` is high and `idle` is 0, pool is exhausted.
+1. Expo apps use a separate tunnel URL (not the Replit proxy).
+2. Check the Expo workflow logs for the tunnel URL.
+3. Ensure `EXPO_PUBLIC_API_URL` is set and points to the API server.
+4. Check `REPLIT_EXPO_DEV_DOMAIN` is set.
 
-**Emergency restore from backup:**
-```bash
-psql "$DATABASE_URL" -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
-gunzip -c backups/daily_<timestamp>.sql.gz | psql "$DATABASE_URL"
-```
-See `docs/disaster-recovery.md` for the full restore playbook.
+### Session / Auth Issues
 
----
+1. Verify `SESSION_SECRET` is set in Replit Secrets (must be 32+ chars).
+2. Verify `ISSUER_URL` points to the correct OIDC provider.
+3. Check that `CORS_ORIGINS` includes the client origin (production).
+4. Inspect session records in DB: `SELECT * FROM sessions WHERE expires_at > NOW() LIMIT 10;`
 
-### FM-2: API Server Crash / Not Starting
+### WebSocket Ticket Failures
 
-**Symptoms:** All frontends show network errors. `/api/health/live` is unreachable.
-
-**Likely causes:**
-- Syntax or runtime error introduced during a recent change
-- Missing required environment variable causing crash on startup
-- Port conflict
-
-**Recovery:**
-1. Check workflow logs via the Replit workflow panel
-2. Look for `Error:` or `Cannot find module` at startup
-3. If missing env var: set it in Replit Secrets, restart workflow
-4. If code error: revert the most recent change or fix and restart
-5. Restart the workflow — the API server has no in-memory state that cannot be reconstructed
-
-**Quick check:** `/api/health` reports `services.auth.status: "missing_secret"` when `SESSION_SECRET` is absent.
+1. `SESSION_SECRET` must be set — if absent, tickets use an ephemeral per-process key (reconnects on restart).
+2. Check that ticket TTL (5 minutes) has not expired before WebSocket connection.
+3. Verify channel ACL is configured correctly for the org.
 
 ---
 
-### FM-3: Build Failure (TypeScript / Vite)
+## 7. Incident Response
 
-**Symptoms:** A web artifact workflow fails to start after changes. Vite dev server exits immediately.
+See [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) for full procedures.
 
-**Likely causes:**
-- TypeScript type error in a shared library (changes to `lib/` affect all consumers)
-- Import path error (wrong package name or missing export)
-- Version mismatch between shared library and artifact
+### Severity Quick Reference
 
-**Recovery:**
-```bash
-pnpm typecheck                                        # All type errors across monorepo
-pnpm --filter <artifact-name> run typecheck           # Specific artifact
-pnpm --filter @szl-holdings/<lib-name> run build      # Rebuild a shared library
-pnpm run typecheck:libs                               # tsc --build in dependency order
-```
+| Severity | Description | Response Time |
+|----------|-------------|---------------|
+| SEV1 | Complete outage, data breach | Immediate (< 15 min) |
+| SEV2 | Major feature broken, significant degradation | < 1 hour |
+| SEV3 | Minor feature broken, partial degradation | < 4 hours |
+| SEV4 | Cosmetic, low-impact | Next business day |
 
-If missing export: check `exports` field in the library's `package.json`.
+### Rollback Decision Rule
 
----
+If a deployment happened in the last 2 hours → **rollback first, investigate second.**
 
-### FM-4: Authentication Broken
+**Rollback steps (Replit):**
+1. Use Replit checkpoint system to revert to the last known good checkpoint.
+2. Restart all affected workflows.
+3. Verify `/api/health` returns 200.
+4. Monitor for 30 minutes post-rollback.
 
-**Symptoms:** Login redirects fail, `/api/auth/me` returns 401, or sessions expire immediately.
+**Azure rollback:**
+- Azure deployment slots provide blue/green swap.
+- See `infra/runbooks/RUNBOOK_ROLLBACK.md` for full Azure rollback procedure.
 
-**Likely causes:**
-- `SESSION_SECRET` missing, rotated, or different between restarts
-- `ISSUER_URL` incorrect (OIDC issuer mismatch)
-- `CORS_ORIGINS` misconfigured, blocking cookie sending
-- Session cookie `sameSite` or `secure` flags incompatible with deployment domain
+### Security Incident Escalation
 
-**Recovery:**
-1. Verify `SESSION_SECRET` is set in Replit Secrets and unchanged
-2. Verify `ISSUER_URL` is `https://replit.com/oidc` (default) or correct provider URL
-3. In production: verify `CORS_ORIGINS` includes frontend domain(s) exactly
-4. Check `GET /api/health` — `services.auth.status` should be `"configured"`
-
-**Note:** Rotating `SESSION_SECRET` does NOT invalidate existing DB-backed sessions, but immediately invalidates all in-flight WebSocket tickets. To force all users to re-authenticate, delete all rows from the `sessions` table.
+1. Immediately notify stephen@szlholdings.com
+2. Preserve all logs — do not delete or overwrite anything
+3. Do not patch without legal review for potential data exposure
+4. Rotate credentials if exposure is confirmed
 
 ---
 
-### FM-5: AI Features Not Working
-
-**Symptoms:** AI recommendations, copilot features, or agent responses return errors. Console shows `AI not configured` or 500s from `/api/ai`.
-
-**Recovery:**
-1. Check `GET /api/health` — `services.ai.status` should be `"configured"`
-2. If `"not_configured"`: set `AI_INTEGRATIONS_OPENAI_API_KEY` and `AI_INTEGRATIONS_OPENAI_BASE_URL` in Replit Secrets
-3. If configured but failing: test the provider connection directly from the API server console
-4. Anthropic and Gemini are optional fallbacks — ensure OpenAI is configured first
-5. `AI_EXECUTION_MODE=propose_only` is the intended default — AI surfaces recommendations but does not execute autonomously
-
----
-
-### FM-6: Job Queue Backpressure
-
-**Symptoms:** `/api/health` shows `services.job_queue.status: "backpressure"`. Background jobs are slow or stuck.
-
-**Recovery:**
-1. Check `/api/health/detailed` — `job_queue.details` shows `pending=N running=N completed=N failed=N`
-2. If `failed` is increasing: a job type is crashing — check API server logs for execution errors
-3. If `running` is high but `completed` not increasing: workers stuck — restart API server to reset worker threads
-4. Fix database first if DB is slow (FM-1) — job queue performance is tied to DB latency
-5. Reduce `ALLOY_MAX_BATCH_SIZE` temporarily if a specific batch job is flooding the queue
-
----
-
-### FM-7: Mobile App Cannot Connect to API
-
-**Symptoms:** Mobile app shows "Network Error". All API calls fail.
-
-**Recovery:**
-1. Confirm API server is running (`GET /api/health/live` returns 200)
-2. Verify `EXPO_PUBLIC_API_URL` matches the Replit dev domain or production URL
-3. In development: confirm `EXPO_PUBLIC_DOMAIN` matches `$REPLIT_DEV_DOMAIN`
-4. For WebSocket failures: confirm `SESSION_SECRET` is set (unset causes ephemeral per-process key — tickets invalid after restart)
-5. Rebuild and restart the Expo development server after changing environment variables
-
----
-
-### FM-8: Object Storage / File Uploads Failing
-
-**Symptoms:** File uploads return errors. Documents or media are not persisting.
-
-**Recovery:**
-1. Check `GET /api/health` — `services.storage.status` will be `"demo"` if `OBJECT_STORAGE_BUCKET_ID` is not set
-2. For development: demo mode is acceptable — uploads fall back gracefully
-3. For production: ensure `OBJECT_STORAGE_BUCKET_ID` is set. Replit App Storage provisioning sets `DEFAULT_OBJECT_STORAGE_BUCKET_ID`, `PUBLIC_OBJECT_SEARCH_PATHS`, and `PRIVATE_OBJECT_DIR`
-4. For Azure production: set `AZURE_STORAGE_CONNECTION_STRING` in Key Vault
-
----
-
-### FM-9: Database Schema Out of Sync
-
-**Symptoms:** API returns 500 errors with `column "X" does not exist` or `relation "Y" does not exist` in logs.
-
-**Recovery:**
-```bash
-# Check for pending migration files
-ls -lt lib/db/drizzle/
-
-# Apply migrations
-pnpm --filter @szl-holdings/db run db:migrate
-
-# Development only (destructive — never use on production)
-pnpm --filter @szl-holdings/db run db:push
-```
-
-If schema is corrupted: restore from most recent backup (FM-1 restore procedure) and re-apply migrations.
-
----
-
-### FM-10: CORS Errors in Production
-
-**Symptoms:** Browser console shows `CORS policy: No 'Access-Control-Allow-Origin' header`. Authenticated requests fail.
-
-**Recovery:**
-1. Set `CORS_ORIGINS` in Replit Secrets to comma-separated allowed origins: `https://myapp.replit.app,https://myapp.com`
-2. Wildcard patterns supported: `https://*.replit.app`
-3. Restart the API server workflow after updating secrets
-4. Verify: `curl -H "Origin: https://your-frontend.com" -I https://your-api/api/health` — check for `Access-Control-Allow-Origin` in response
-
----
-
-## 5. Database Operations
+## 8. Code Quality Commands
 
 ```bash
-# Run migrations (development)
-pnpm --filter @szl-holdings/db run db:push
+pnpm lint          # ESLint across all packages
+pnpm typecheck     # TypeScript type checking
+pnpm test          # Unit and integration tests
+pnpm build         # Full production build (all artifacts)
 
-# Run migrations (production-safe)
-pnpm --filter @szl-holdings/db run db:migrate
-
-# Seed demo data (development only)
-pnpm --filter scripts run seed
-
-# Access database directly
-psql $DATABASE_URL
-
-# Manual health check
-node -e "const {db} = require('@szl-holdings/db'); db.execute('SELECT 1').then(console.log)"
-```
-
-**Never run destructive database operations against production.** The production database connection string differs from development.
-
----
-
-## 6. Code Quality & Build
-
-```bash
-pnpm lint              # ESLint across all packages
-pnpm typecheck         # TypeScript type checking
-pnpm test              # Unit and integration tests
-pnpm build             # Full production build
-pnpm run typecheck:libs # Build shared libraries in dependency order
-```
-
-### QA Scripts
-
-```bash
+# QA scripts
 node scripts/qa/smoke-routes.js     # Route smoke tests
 node scripts/qa/check-links.js      # Broken link detection
 node scripts/qa/check-metadata.js   # Meta tag validation
 node scripts/qa/check-a11y.js       # Accessibility baseline
+
+# Screenshots
+pnpm capture:screens                # Regenerate all screenshots
 ```
 
-### Post-Merge Automation
+---
 
-The `scripts/post-merge.sh` script runs automatically after task branch merges:
+## 9. Release Operations
+
+See [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) for full pre-release checklist.
+
+### Quick Reference
+
+```bash
+# 1. Prepare release
+pnpm release:prep          # Updates CHANGELOG and version
+
+# 2. Run RELEASE_CHECKLIST.md manually
+
+# 3. Deploy (Azure)
+az deployment group create \
+  --resource-group szl-production \
+  --template-file infra/main.bicep \
+  --parameters @infra/parameters.json
+
+# 4. Post-deploy verification
+curl https://api.szlholdings.com/api/health
+pnpm qa:site --url https://szlholdings.com
+
+# 5. Generate release notes
+pnpm release:notes
+```
+
+### Post-Merge Setup
+
+After every task branch merge, the post-merge script runs automatically:
+
 1. `pnpm install` — Install dependencies
-2. `pnpm --filter db push` — Push database schema
-3. Verify build integrity
+2. `pnpm --filter db push` — Push schema changes
+3. Build integrity verification
 
 ---
 
-## 7. Monitoring & Observability
-
-### Telemetry
-
-The `@szl-holdings/observability` library tracks:
-- p95 request latency
-- Error rates (> 10% triggers `elevated_errors` in detailed health report)
-- DB pool utilization
-- Job queue depth
-
-### Logging
-
-All logs are structured JSON via Pino. Log level is configurable via `LOG_LEVEL` env var.
-
-| Level | Use |
-|-------|-----|
-| `fatal` | Process-stopping errors |
-| `error` | Handled errors with impact |
-| `warn` | Degraded operation, non-fatal |
-| `info` | Key operational events (default) |
-| `debug` | Detailed request/response info |
-| `trace` | Full SQL query logging |
-
-### Azure Production Monitoring
-
-- **Application Insights** — APM, distributed tracing, log analytics (`APPLICATIONINSIGHTS_CONNECTION_STRING`)
-- **Alert thresholds** — Error rate, response time, CPU/memory
-- **Uptime monitoring** — `/api/health` endpoint monitored via Azure Monitor
+*See also: [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) · [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) · [docs/ops-runbook.md](docs/ops-runbook.md) · [REPLIT_OPERATIONS.md](REPLIT_OPERATIONS.md) · [ARCHITECTURE.md](ARCHITECTURE.md) · [KNOWN-GAPS.md](KNOWN-GAPS.md) · [ENV_MATRIX.md](ENV_MATRIX.md) · [BACKUP_AND_RECOVERY.md](BACKUP_AND_RECOVERY.md)*
 
 ---
 
-## 8. Incident Severity
-
-| Severity | Definition | Response Time | Examples |
-|----------|-----------|---------------|---------|
-| SEV-1 | Complete service outage, data loss risk | Immediate | Database down, API crash, auth broken for all users |
-| SEV-2 | Major feature broken, partial outage | < 1 hour | AI not working, specific platform unavailable |
-| SEV-3 | Degraded performance, minor feature broken | < 4 hours | Slow queries, upload failures, CORS warnings |
-| SEV-4 | Cosmetic or low-impact issue | Next business day | UI glitch, minor content issue |
-
-See `INCIDENT_RESPONSE.md` for the full incident response process and `INCIDENT_SEVERITY_MATRIX.md` for detailed criteria.
-
----
-
-## Maintenance & Drift Risk
-
-| Area | Drift risk | How to verify |
-|------|-----------|---------------|
-| Environment variables | High | Compare `ENV_MATRIX.md` against `startup-validation.ts` `ENV_SPECS` array |
-| Stripe price IDs | High | Compare against `artifacts/api-server/src/routes/billing.ts` |
-| Artifact registry | Medium | Run `ls artifacts/` and compare to workflow list |
-| Shared library list | Low | Run `ls lib/` and compare to `ARCHITECTURE.md` |
-
-**Last audited:** April 2026
-
----
-
-## Related Documents
-
-| Document | Path |
-|----------|------|
-| Detailed ops runbook (source) | `docs/ops-runbook.md` |
-| Replit operations guide (source) | `REPLIT_OPERATIONS.md` |
-| Environment variable matrix | `ENV_MATRIX.md` |
-| Deployment guide | `DEPLOYMENT-GUIDE.md` |
-| Disaster recovery | `docs/disaster-recovery.md` |
-| Backup & recovery | `BACKUP_AND_RECOVERY.md` |
-| Incident response | `INCIDENT_RESPONSE.md` |
-| Secrets policy | `docs/SECRETS_POLICY.md` |
+*Last verified against source code: 2026-04-15*

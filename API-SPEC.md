@@ -1,453 +1,328 @@
 # API Specification — SZL Holdings Platform
 
-**Version:** 1.0 · **Last updated:** April 2026
-**Audience:** Engineers, integration partners, enterprise evaluators
+**Date:** April 2026 | **Audience:** Technical advisors, integration engineers, enterprise evaluators
 
-> The live, machine-readable OpenAPI specification is served at `/api/docs` (Swagger UI) and maintained in `lib/api-spec/openapi.yaml`. This document is the narrative catalogue — use the live spec for code generation and precise schema details.
-
----
-
-## Overview
-
-All SZL Holdings platform backends are served through a single centralized Express 5 API server (`artifacts/api-server`). There are 172 route files exposing approximately 2,331 endpoints.
-
-**Base URL (development):** `https://$REPLIT_DEV_DOMAIN/api`
-**Base URL (production):** `https://<domain>/api`
+**Related:** [ARCHITECTURE.md](ARCHITECTURE.md) · [DATA-MODEL.md](DATA-MODEL.md) · [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md)
 
 ---
 
-## Authentication
+## API Overview
 
-All authenticated endpoints require a valid session established via the auth flow below.
+The SZL Holdings platform exposes a single centralized API server (`artifacts/api-server`) that backs all web and mobile frontends.
 
-### Session Auth (Web)
-
-Two auth route files serve different authentication flows:
-
-**`auth.ts`** — Password / session auth (mounted at `/api`):
-```
-POST /api/auth/login           — Username/email + password login
-POST /api/auth/login-password  — Alternative email + password endpoint
-POST /api/auth/register        — New user registration
-GET  /api/auth/verify-email    — Email verification callback
-GET  /api/auth/me              — Current session user
-GET  /api/auth/providers       — Available auth providers
-POST /api/auth/sessions        — Create session
-DELETE /api/auth/sessions/current  — Logout (invalidate current session)
-DELETE /api/auth/sessions/:id  — Invalidate specific session
-GET  /api/auth/roles           — Available roles (operator/analyst required)
-GET  /api/auth/users           — User list (ops role required)
-POST /api/auth/ws-ticket       — Issue HMAC-signed WebSocket ticket
-```
-
-**`oidc-auth.ts`** — OIDC/PKCE flow (mounted at `/api`):
-```
-GET  /api/login                — Initiate OIDC login (Replit Auth / Azure AD)
-GET  /api/callback             — OIDC authorization code callback
-GET  /api/logout               — OIDC logout + session invalidation
-GET  /api/auth/user            — OIDC session user info
-GET  /api/azure-ad/login       — Azure AD SSO initiation
-GET  /api/azure-ad/callback    — Azure AD SSO callback
-POST /api/mobile-auth/token-exchange — Exchange OIDC code for mobile session
-POST /api/mobile-auth/logout   — Mobile session logout
-```
-
-Session token is returned as an opaque `sid` cookie. All state-changing requests require a `csrf_token` cookie (double-submit CSRF pattern).
-
-### WebSocket Auth
-
-```
-POST /api/auth/ws-ticket       — Issue a 5-minute HMAC-signed WebSocket ticket
-```
-
-Include the ticket as a query parameter when upgrading to WebSocket.
-
-### Mobile / Bearer Auth
-
-Mobile apps may use `Authorization: Bearer <token>` header in place of the `sid` cookie.
+| Metric | Value |
+|--------|-------|
+| Total endpoints | ~2,300+ (across all route files; exact count varies with schema generation) |
+| Route files | 140+ TypeScript route files in `artifacts/api-server/src/routes/` |
+| Spec format | OpenAPI 3.1 (served at `/api/docs`) |
+| JSON spec | `/api/docs.json` |
+| GraphQL | Apollo Server at `/api/graphql` |
+| Protocol | REST/JSON primary; GraphQL for complex queries |
+| Authentication | Session cookie (`sid`) or `Authorization: Bearer` token |
 
 ---
 
-## Global Middleware
+## Base URL
 
-Applied to every request in this order:
+| Environment | Base URL |
+|-------------|----------|
+| Development (Replit) | `https://$REPLIT_DEV_DOMAIN/api` |
+| Production (Azure) | `https://api.szlholdings.com/api` |
 
-| Middleware | Purpose |
-|-----------|---------|
-| `correlationMiddleware` | Assigns `X-Correlation-Id` to every request |
-| `apiVersionMiddleware` | Reads `X-API-Version` header |
-| `helmet` | Security headers (CSP, HSTS, etc.) |
-| `CORS` | `CORS_ORIGINS` env var controls allowed origins |
-| `compression` | gzip response compression |
-| `globalLimiter` | Rate limiting (configurable via env) |
-| `telemetryMiddleware` | Request telemetry and latency tracking |
-| `pinoHttp` | Structured request logging |
-| `cookieParser` | Cookie parsing |
-| `JSON / urlencoded body` | Request body parsing |
-| `CSRF` | Double-submit CSRF token validation |
-| `authMiddleware` | Session hydrator — populates `req.user` (does NOT reject unauthenticated) |
-| `sessionRefreshPolicy` | Extends session TTL on activity |
-| `etagMiddleware` | Optimistic concurrency (`/api` prefix only; health/docs excluded) |
+All REST routes are prefixed with `/api`.
+
+---
+
+## Authentication Model
+
+### Session Authentication (Web)
+
+The platform has two distinct session flows with different token delivery mechanisms:
+
+**OIDC (Primary — cookie-based):** `GET /api/login` → redirect to Replit Auth or Azure AD → `GET /api/callback` completes the flow and calls `setSessionCookie()`, setting an `sid` HttpOnly cookie (Secure, SameSite=Lax). Session TTL: **7 days** (`SESSION_TTL` in `artifacts/api-server/src/lib/auth.ts`). Azure AD alternate: `GET /api/azure-ad/login` → `GET /api/azure-ad/callback`.
+
+**Credential (Fallback — bearer token):** `POST /api/auth/login` (Zod-validated credential) and `POST /api/auth/login-password` (PBKDF2 email/password) both create a session record and return the session token **in the JSON response body** — they do NOT call `setSessionCookie()`. Session TTL: **30 days** (hardcoded in `artifacts/api-server/src/routes/auth.ts`). The client stores this token and sends it as `Authorization: Bearer <token>` in subsequent requests.
+
+**Common to both flows:**
+- Session record stored in PostgreSQL `sessions` table
+- Global `authMiddleware` accepts both `sid` cookie and `Authorization: Bearer <token>`; populates `req.user` if session is valid
+- Route-level `requireAuth()` enforces authentication and role checks per-route
+
+### Token Authentication (Mobile / API)
+
+Mobile clients and machine-to-machine callers use `Authorization: Bearer <token>` instead of the `sid` cookie. The token is the same opaque session token stored in PostgreSQL.
+
+### WebSocket Authentication
+
+WebSocket connections use short-lived HMAC-signed tickets:
+
+1. Client calls `POST /api/auth/ws-ticket` with valid session
+2. Server issues a ticket signed with `SESSION_SECRET`, TTL: 5 minutes
+3. Client presents ticket on WebSocket handshake
+4. Per-channel role-based ACL enforced at subscription time via `CHANNEL_ALLOWED_ROLES`. Channel names are static strings (e.g., `aegis-incidents`, `lyte-metrics`) — not org_id-namespaced. `tenantId` from the ticket is tracked per-client. Tickets are self-contained 5-minute tokens with no central revocation on session expiry.
+
+### CSRF Protection
+
+Most state-changing requests (POST, PUT, PATCH, DELETE) require a CSRF token via double-submit pattern. The CSRF token is available at `GET /api/csrf-token`. The following paths use different CSRF protection or are exempt:
+- **`/api/graphql`**: Not exempt — uses a dedicated protection scheme requiring `Content-Type: application/json` plus at least one of: `X-Requested-With`, `X-CSRF-Token`, or `X-Apollo-Operation-Name` header.
+- **`/api/ai/*` routes**: Fully exempt.
+- **Webhook receivers** (`/api/webhooks/*`, `/api/billing/webhooks`, `/api/alloy/channels/slack/webhook`, etc.): Exempt (verified via provider signatures instead).
+- **Billing checkout/portal paths**: Exempt.
+- **Observability/telemetry ingest, MCP routes, auth handshake endpoints**: Exempt.
+
+See `artifacts/api-server/src/middlewares/csrf.ts` `EXEMPT_PATHS` and `isExempt()` for the full list.
 
 ---
 
 ## Route Groups
 
-### Auth (`/api/auth`, `/api/login`, `/api/callback`)
+### Auth (`/api/auth` and OIDC top-level)
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `GET` | `/api/login` | Public | Initiate OIDC login (Replit Auth / Azure AD) |
-| `GET` | `/api/callback` | Public | OIDC authorization code callback |
-| `GET` | `/api/logout` | Session | OIDC logout + session invalidation |
-| `GET` | `/api/auth/user` | Session | OIDC session user info |
-| `POST` | `/api/auth/login` | Public | Username/password login |
-| `POST` | `/api/auth/login-password` | Public | Alternative email/password endpoint |
-| `POST` | `/api/auth/register` | Public | New user registration |
-| `GET` | `/api/auth/verify-email` | Public | Email verification callback |
-| `GET` | `/api/auth/me` | Session | Current session user info |
-| `GET` | `/api/auth/providers` | Public | Available auth providers |
-| `POST` | `/api/auth/sessions` | Session | Create/extend session |
-| `DELETE` | `/api/auth/sessions/current` | Session | Invalidate current session |
-| `DELETE` | `/api/auth/sessions/:id` | Session | Invalidate specific session |
-| `POST` | `/api/auth/ws-ticket` | Session | Issue HMAC-signed WebSocket ticket |
-| `GET` | `/api/azure-ad/login` | Public | Azure AD SSO initiation |
-| `GET` | `/api/azure-ad/callback` | Public | Azure AD SSO callback |
-| `POST` | `/api/mobile-auth/token-exchange` | Public | Exchange OIDC code for mobile session |
-| `POST` | `/api/mobile-auth/logout` | Session | Mobile session logout |
+**OIDC flow routes** (redirect-based, mounted at `/api` root — see `artifacts/api-server/src/routes/oidc-auth.ts`):
 
-### Health (`/api/health`)
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/login` | GET | Public | OIDC login initiation (Replit Auth) — redirects to identity provider |
+| `/api/callback` | GET | Public | OIDC callback handler — completes token exchange |
+| `/api/logout` | GET | Public | OIDC logout — clears session and cookie |
+| `/api/azure-ad/login` | GET | Public | Azure AD OIDC initiation |
+| `/api/azure-ad/callback` | GET | Public | Azure AD callback |
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `GET` | `/api/health/live` | Public | Liveness probe |
-| `GET` | `/api/health/ready` | Public | Readiness probe (DB check) |
-| `GET` | `/api/health` | Public | Full system health |
-| `GET` | `/api/health/detailed` | Session or `X-Internal-Token` | DB pool, queue depth, telemetry, p95 latency |
+**Credential and session routes** (mounted at `/api/auth` — see `artifacts/api-server/src/routes/auth.ts`):
 
-**Health response example:**
-```json
-{
-  "status": "healthy",
-  "services": {
-    "database": { "status": "healthy" },
-    "auth": { "status": "configured" },
-    "ai": { "status": "configured" },
-    "storage": { "status": "configured" },
-    "job_queue": { "status": "healthy" }
-  },
-  "timestamp": "2026-04-15T12:00:00Z"
-}
-```
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/auth/login` | POST | Public | Credential-based login (Zod-validated) |
+| `/api/auth/login-password` | POST | Public | Email/password login with PBKDF2 verification |
+| `/api/auth/register` | POST | Public | Email/password registration |
+| `/api/auth/verify-email` | GET | Public | Email verification via token |
+| `/api/auth/me` | GET | Required | Current user + roles |
+| `/api/auth/sessions` | POST | Required | Create additional session |
+| `/api/auth/sessions/current` | DELETE | Required | Logout / invalidate current session |
+| `/api/auth/sessions/:id` | DELETE | Required | Invalidate specific session by ID |
+| `/api/auth/ws-ticket` | POST | Required | Issue HMAC-signed WebSocket ticket |
+| `/api/auth/user` | GET | Public | Current OIDC user info |
+| `/api/auth/providers` | GET | Public | List configured auth providers |
+| `/api/csrf-token` | GET | Public | Get CSRF token |
 
-### Alloy — Execution Fabric (`/api/alloy`)
+---
 
-Workflow orchestration, approval chains, audit trail, and agent coordination.
+### Alloy — Workflow Engine (`/api/alloy`)
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `GET` | `/api/alloy/workflows` | Session | List workflow definitions |
-| `POST` | `/api/alloy/workflows` | Session + operator | Create workflow |
-| `GET` | `/api/alloy/workflows/:id` | Session | Get workflow detail |
-| `POST` | `/api/alloy/workflows/:id/run` | Session + operator | Trigger workflow run |
-| `GET` | `/api/alloy/runs` | Session | List workflow runs |
-| `GET` | `/api/alloy/runs/:id` | Session | Get run detail + audit trail |
-| `GET` | `/api/alloy/approvals` | Session | List pending approvals |
-| `POST` | `/api/alloy/approvals/:id/approve` | Session + approver | Approve action |
-| `POST` | `/api/alloy/approvals/:id/reject` | Session + approver | Reject action |
-| `GET` | `/api/alloy/audit` | Session | Query audit trail |
-| `GET` | `/api/alloy/agents` | Session | List registered agents |
-| `POST` | `/api/alloy/chat` | Session | Alloy AI chat |
+| Endpoint Group | Auth | Description |
+|---------------|------|-------------|
+| `/api/alloy/workflows` | Required | CRUD for workflow instances |
+| `/api/alloy/workflows/:id/approve` | Required | Approve a workflow action |
+| `/api/alloy/workflows/:id/reject` | Required | Reject a workflow action |
+| `/api/alloy/actions` | Required | Action history and audit |
+| `/api/alloy/agents` | Required | AI agent registry and status |
+| `/api/alloy/audit` | Required | Full audit trail access |
 
-Additional sub-routes under `/api/alloy`:
-`/alloy-channels`, `/alloy-cognitive-learning`, `/alloy-digest`, `/alloy-email`, `/alloy-governance`, `/alloy-integrations`, `/alloy-meetings`, `/alloy-research`, `/alloy-skills`, `/alloy-voice`, `/autopilot`
+---
 
-### Aegis / Firestorm — Security Operations (`/api/firestorm`)
+### Aegis / Firestorm — Security (`/api/firestorm`)
 
-SOC operations, threat intelligence, incident management.
+| Endpoint Group | Auth | Description |
+|---------------|------|-------------|
+| `/api/firestorm/incidents` | Required | SOC incident management |
+| `/api/firestorm/findings` | Required | Threat finding CRUD |
+| `/api/firestorm/playbooks` | Required | SOAR playbook management |
+| `/api/firestorm/threat-intel` | Required | Threat intelligence feeds |
+| `/api/firestorm/cves` | Required | CVE database access |
+| `/api/firestorm/mitre` | Required | MITRE ATT&CK mapping |
+| `/api/firestorm/assets` | Required | Asset inventory |
+| `/api/firestorm/compliance` | Required (compliance_officer+) | Compliance reports |
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `GET` | `/api/firestorm/threats` | Session + analyst | List active threats |
-| `GET` | `/api/firestorm/incidents` | Session + analyst | List security incidents |
-| `POST` | `/api/firestorm/incidents` | Session + operator | Create incident |
-| `GET` | `/api/firestorm/incidents/:id` | Session + analyst | Get incident detail |
-| `POST` | `/api/firestorm/incidents/:id/respond` | Session + operator | Record response action |
-| `GET` | `/api/firestorm/playbooks` | Session + analyst | List SOAR playbooks |
-| `POST` | `/api/firestorm/playbooks/:id/run` | Session + operator | Execute playbook |
-| `GET` | `/api/firestorm/intel` | Session + security_analyst | Threat intelligence feed |
-| `GET` | `/api/firestorm/mitre` | Session | MITRE ATT&CK coverage |
-| `GET` | `/api/firestorm/vulnerabilities` | Session + analyst | Vulnerability list |
+---
 
-### Terra — Real Estate Intelligence (`/api/terra`)
+### Vessels — Maritime (`/api/vessels`)
 
-Property intelligence, ownership graph, deal pipeline.
+| Endpoint Group | Auth | Description |
+|---------------|------|-------------|
+| `/api/vessels` | Required | Fleet registry CRUD |
+| `/api/vessels/:id/positions` | Required | AIS position history |
+| `/api/vessels/:id/voyages` | Required | Voyage history and economics |
+| `/api/vessels/sanctions` | Required | Sanctions screening results |
+| `/api/vessels/dark-activity` | Required | Dark period detection events |
+| `/api/vessels/port-calls` | Required | Port call history |
+| `/api/vessels/trading` | Required | Commodity trading (fills, positions) |
+| `/api/vessels/insurance` | Required | Marine insurance records |
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `GET` | `/api/terra/properties` | Session | List properties |
-| `GET` | `/api/terra/properties/:id` | Session | Property detail + distress signals |
-| `GET` | `/api/terra/distress` | Session | Active distress pipeline |
-| `GET` | `/api/terra/ownership` | Session | Ownership entity graph |
-| `GET` | `/api/terra/deals` | Session | Deal pipeline |
-| `POST` | `/api/terra/deals` | Session + operator | Create deal |
-| `GET` | `/api/terra/deals/:id` | Session | Deal detail |
-| `PUT` | `/api/terra/deals/:id` | Session + operator | Update deal |
-| `GET` | `/api/terra/market-signals` | Session | Market signal feed |
-| `GET` | `/api/terra/contacts` | Session | Contact CRM |
+---
 
-### Vessels — Maritime Intelligence (`/api/vessels`)
+### Terra — Real Estate (`/api/terra`)
 
-Fleet tracking, voyage economics, sanctions screening, AIS telemetry.
+| Endpoint Group | Auth | Description |
+|---------------|------|-------------|
+| `/api/terra/properties` | Required | Property search and CRUD |
+| `/api/terra/properties/:id/distress` | Required | Distress signal history |
+| `/api/terra/deals` | Required | Deal pipeline management |
+| `/api/terra/owners` | Required | Ownership entity graph |
+| `/api/terra/market` | Required | Market signal aggregation |
+| `/api/terra/contacts` | Required | Broker/investor CRM |
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `GET` | `/api/vessels/fleet` | Session | Fleet overview |
-| `GET` | `/api/vessels/vessels` | Session | List vessels |
-| `GET` | `/api/vessels/vessels/:id` | Session | Vessel digital twin |
-| `GET` | `/api/vessels/ais` | Session | Real-time AIS positions |
-| `GET` | `/api/vessels/voyages` | Session | Voyage list |
-| `GET` | `/api/vessels/voyages/:id` | Session | Voyage P&L, route, timeline |
-| `GET` | `/api/vessels/anomalies` | Session | Dark vessel / route anomalies |
-| `GET` | `/api/vessels/sanctions` | Session | Sanctions screening results |
-| `GET` | `/api/vessels/exceptions` | Session | Exception center |
-| `POST` | `/api/vessels/exceptions/:id/respond` | Session + operator | Record exception response |
+---
 
-### PRISM Counsel — Legal Matter Command (`/api/prism-counsel`)
+### PRISM Counsel — Legal (`/api/prism-counsel`)
 
-Full legal matter management, court filings, recovery tracking.
+| Endpoint Group | Auth | Description |
+|---------------|------|-------------|
+| `/api/prism-counsel/matters` | Required | Matter management CRUD |
+| `/api/prism-counsel/parties` | Required | Parties and representation |
+| `/api/prism-counsel/documents` | Required | Document management |
+| `/api/prism-counsel/filings` | Required | Court filing records |
+| `/api/prism-counsel/timeline` | Required | Case timeline events |
+| `/api/prism-counsel/recovery` | Required | Recovery and lien tracking |
+| `/api/prism-counsel/no-fault` | Required | NY No-Fault module |
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `GET` | `/api/prism-counsel/matters` | Session | List matters |
-| `POST` | `/api/prism-counsel/matters` | Session + operator | Create matter |
-| `GET` | `/api/prism-counsel/matters/:id` | Session | Matter detail |
-| `GET` | `/api/prism-counsel/matters/:id/timeline` | Session | Matter timeline |
-| `GET` | `/api/prism-counsel/matters/:id/documents` | Session | Matter documents |
-| `GET` | `/api/prism-counsel/recovery` | Session | Recovery operations |
-| `GET` | `/api/prism-counsel/deadlines` | Session | Deadline calendar |
-| `GET` | `/api/prism-counsel/no-fault` | Session | NY No-Fault module |
-| `GET` | `/api/prism-counsel/playbooks` | Session | Legal playbooks |
+---
 
-### AI Tool Execution (`/api/ai`)
+### AI Tools (`/api/ai`)
 
-AI inference routing across OpenAI, Anthropic, and Gemini. Source: `artifacts/api-server/src/routes/ai-engine.ts`.
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/ai/chat` | POST | Required | AI inference (multi-provider) |
+| `/api/ai/analyze` | POST | Required | Document/signal analysis |
+| `/api/ai/recommend` | POST | Required | Recommendation generation |
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `GET` | `/api/ai/health` | Session | AI engine health check |
-| `GET` | `/api/ai/models` | Session | Available model list |
-| `POST` | `/api/ai/respond` | Session | General AI inference/chat completion |
-| `POST` | `/api/ai/triage` | Session | Triage and classify input |
-| `POST` | `/api/ai/extract` | Session | Structured data extraction |
-| `POST` | `/api/ai/plan` | Session | AI task planning |
-| `POST` | `/api/ai/retrieve` | Session | RAG / retrieval-augmented query |
-| `GET` | `/api/ai/tools` | Session | List registered AI tools |
-| `POST` | `/api/ai/tools/preview` | Session | Preview tool execution (dry-run) |
-| `POST` | `/api/ai/tools/execute` | Session | Execute registered AI tool |
-| `GET` | `/api/ai/audit` | Session | AI usage audit log |
-| `POST` | `/api/ai/evals/run` | Session | Run evaluation against golden set |
-| `GET` | `/api/ai/evals/golden-set` | Session | Retrieve evaluation golden set |
-| `POST` | `/api/ai/retrieval/ingest` | Session | Ingest document into vector store |
-| `GET` | `/api/ai/decision` | Session | List AI decision records |
-| `POST` | `/api/ai/decision` | Session | Create AI decision record |
-| `GET` | `/api/ai/decision/:id` | Session | Get AI decision by ID |
-| `GET` | `/api/ai/approval-matrix` | Session | Current AI approval matrix |
+AI endpoints return recommendations with model version logged to the audit trail. Confidence scores and reasoning context are included where implemented, but are not uniformly enforced across all AI endpoints (see KNOWN-GAPS.md). AI endpoints do not execute consequential actions directly — outputs are routed through the Alloy workflow gate for human approval.
+
+---
 
 ### Intelligence Feeds (`/api/intelligence`)
 
-External data source adapters.
+| Endpoint Group | Auth | Description |
+|---------------|------|-------------|
+| `/api/intelligence/stix` | Required | STIX/TAXII threat data |
+| `/api/intelligence/ais` | Required | AIS telemetry feeds |
+| `/api/intelligence/sanctions` | Required | Sanctions list sync |
+| `/api/intelligence/legal` | Required | Legal record feeds (CourtListener) |
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `GET` | `/api/intelligence/feeds` | Session + analyst | Available feed list |
-| `GET` | `/api/intelligence/stix` | Session + security_analyst | STIX/TAXII threat objects |
-| `GET` | `/api/intelligence/ais` | Session | AIS vessel positions |
-| `GET` | `/api/intelligence/sanctions` | Session | Sanctions list query |
-| `GET` | `/api/intelligence/legal` | Session | Legal record feeds |
+---
+
+### Storage (`/api/storage`)
+
+| Endpoint Group | Auth | Description |
+|---------------|------|-------------|
+| `/api/storage/uploads/request-url` | Required | POST — generate signed upload URL (object storage) |
+| `/api/storage/objects/*path` | Required | GET — retrieve protected object by path |
+| `/api/storage/public-objects/*path` | Public | GET — retrieve public object by path |
+| `/api/files` | Required | GET — list files; POST — create file record |
+| `/api/files/:id` | Required | GET — get file; DELETE — delete file |
+| `/api/assets` | Required | GET — list assets |
+
+---
 
 ### Billing (`/api/billing`)
 
-Stripe billing operations.
+| Endpoint Group | Auth | Description |
+|---------------|------|-------------|
+| `/api/billing/checkout` | Required | Stripe checkout session creation |
+| `/api/billing/subscriptions` | Required | Subscription management |
+| `/api/billing/customer-portal` | Required | Stripe Customer Portal redirect |
+| `/api/billing/webhooks` | Public (Stripe signature verified) | Stripe webhook receiver |
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `GET` | `/api/billing/subscription` | Session | Current subscription |
-| `POST` | `/api/billing/checkout` | Session | Create Stripe Checkout session |
-| `POST` | `/api/billing/portal` | Session | Create Customer Portal session |
-| `GET` | `/api/billing/invoices` | Session | Invoice history |
-| `POST` | `/api/billing/webhook` | Public (Stripe sig) | Stripe webhook handler |
-
-### Object Storage (`/api/storage`)
-
-File upload and retrieval.
-
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `POST` | `/api/storage/upload` | Session | Upload file |
-| `GET` | `/api/storage/files` | Session | List org files |
-| `GET` | `/api/storage/files/:id` | Session | Get file metadata |
-| `DELETE` | `/api/storage/files/:id` | Session + operator | Delete file |
+---
 
 ### Admin (`/api/admin`)
 
-Guarded with `super_admin` role or admin PIN.
+Admin routes are protected by `adminGuard` middleware (`artifacts/api-server/src/middlewares/admin-guard.ts`). Access requires **one** of:
+- An authenticated session where the user has `super_admin`, `ops`, or `exec` assigned in the `roles` table (via `user_roles` join)
+- A valid `x-internal-token` header matching `ALLOY_INTERNAL_TOKEN` env var (server-to-server use only)
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `GET` | `/api/admin/tenants` | super_admin | List tenants |
-| `POST` | `/api/admin/tenants` | super_admin | Provision tenant |
-| `POST` | `/api/admin/backup` | super_admin | Trigger DB backup |
-| `GET` | `/api/admin/audit` | super_admin | Platform-wide audit log |
+There is **no PIN gate** in `adminGuard`.
 
-### Notifications (`/api/notifications`)
-
-Push notification management.
-
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `POST` | `/api/notifications/subscribe` | Session | Register push subscription |
-| `POST` | `/api/notifications/send` | Session + operator | Send notification |
-| `GET` | `/api/notifications/history` | Session | Notification history |
-
-### Additional Route Groups
-
-The following route groups exist with standard CRUD and query endpoints:
-
-`/api/analytics`, `/api/analytics-engine`, `/api/apm`, `/api/approvals`, `/api/atlas-artifacts`,
-`/api/audit-chain`, `/api/autopilot`, `/api/backup`, `/api/booking`, `/api/briefing`,
-`/api/capital-readiness`, `/api/carlota-jo`, `/api/certification-readiness`, `/api/changes`,
-`/api/cms`, `/api/command`, `/api/comments`, `/api/compliance`, `/api/connectors`,
-`/api/documents`, `/api/export`, `/api/feature-flags`, `/api/feedback`,
-`/api/files`, `/api/graphql`, `/api/imperium`, `/api/lyte`, `/api/orgs`,
-`/api/search`, `/api/settings`, `/api/users`, `/api/webhooks`
+| Endpoint Group | Auth | Description |
+|---------------|------|-------------|
+| `/api/admin/tenants` | adminGuard | Tenant provisioning |
+| `/api/admin/backup` | adminGuard | Database backup operations |
+| `/api/admin/users` | adminGuard | Platform-level user management |
 
 ---
 
-## GraphQL Endpoint
+### Health (`/api/health`)
 
-**Endpoint:** `POST /api/graphql`
+Implemented in `artifacts/api-server/src/app.ts`. All four health endpoints are public-accessible.
 
-Apollo Server is mounted at `/api/graphql`. The schema covers query and mutation operations across platform domains.
-
-**Introspection:** Enabled in development. Disabled in production.
-
-**Authentication:** Same session cookie / Bearer token as REST endpoints.
-
-**Explorer:** Available at `/api/graphql` in development (Apollo Sandbox).
-
----
-
-## MCP (Model Context Protocol)
-
-The platform implements a full MCP server at `/api/mcp` (JSON-RPC 2.0 style). Source: `artifacts/api-server/src/routes/mcp.ts`.
-
-### MCP Endpoints
-
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `POST` | `/api/mcp` | Session | JSON-RPC 2.0 tool invocation |
-| `GET` | `/api/mcp/sse` | Session | Server-Sent Events (streaming) |
-| `GET` | `/api/mcp/tools` | Session | List registered tools |
-| `GET` | `/api/mcp/resources` | Session | List registered resources |
-| `GET` | `/api/mcp/prompts` | Session | List registered prompts |
-| `GET` | `/api/mcp/health` | Session | MCP server health |
-
-### Registered Tools
-
-| Tool Name | Purpose |
-|-----------|---------|
-| `vessels_fleet_status` | Vessels fleet status query |
-| `vessels_weather_risk` | Vessels route weather risk assessment |
-| `firestorm_threat_scan` | Aegis threat intelligence scan |
-| `firestorm_compliance_check` | Aegis compliance check |
-| `terra_property_search` | Terra property search |
-| `terra_market_signals` | Terra market signals query |
-| `lyte_health_check` | Lyte platform health check |
-| `lyte_executive_summary` | Lyte executive summary generation |
-| `inca_experiment_status` | INCA model experiment status |
-| `alloy_launch_workflow` | Alloy workflow trigger |
-| `alloy_workflow_status` | Alloy workflow run status |
-| `alloy_create_artifact` | Alloy artifact creation |
-| `alloy_research` | Alloy research mode query |
-| `alloy_decision_status` | Alloy decision record status |
-| `alloy_approve_decision` | Alloy decision approval |
-| `alloy_skill_list` | List registered agent skills |
-| `alloy_skill_invoke` | Invoke a registered agent skill |
-| `connector_hub_discover` | Connector Hub integration discovery |
-| `connector_hub_execute` | Execute a connector action |
-| `connector_hub_health` | Connector Hub health check |
-| `query_holdings_ecosystem` | SZL Holdings ecosystem query |
-| `query_audit_log` | Audit log query |
-| `query_notifications` | Notifications query |
-
-### Registered Prompts
-
-| Prompt Name | Purpose |
-|------------|---------|
-| `research_brief` | Multi-domain research brief generation |
-| `threat_assessment` | Security threat assessment |
-| `property_analysis` | Real estate property analysis |
-| `fleet_report` | Maritime fleet report generation |
-| `executive_digest` | Cross-domain executive digest |
+| Endpoint | Auth | Description |
+|----------|------|-------------|
+| `/api/health` | Public | Checks DB connectivity and connection count. Returns `200 OK` if healthy, `503` if degraded. |
+| `/api/health/live` | Public | Always returns `200 OK` with `{status: "ok"}` — process liveness only, no DB check. |
+| `/api/health/ready` | Public | Checks DB connectivity. Returns `200` if DB reachable, `503` if not. |
+| `/api/health/detailed` | **Production only:** session auth or `x-internal-token` header. **Development:** no auth enforced. | Full system status: DB connectivity + pool stats, job queue depth (pending/running/failed), telemetry (P95 latency, error rate, active alerts). Returns `503` if any check is `degraded`. |
 
 ---
 
 ## Rate Limiting
 
-| Tier | Limit | Scope |
-|------|-------|-------|
-| Global | Configurable via `RATE_LIMIT_*` env vars | Per IP |
-| Auth routes | Stricter limit | Per IP |
-| AI routes | Token-based limit | Per session |
+Rate limiting is applied at two levels:
+
+| Level | Configuration | Policy |
+|-------|---------------|--------|
+| Global | `globalLimiter` middleware | Applied to all routes |
+| Auth routes | Stricter per-IP limits | `POST /api/auth/*` endpoints |
+| AI routes | Per-user token budget | `POST /api/ai/*` endpoints |
+
+Specific limits are environment-configured. Clients that exceed limits receive `429 Too Many Requests` with a `Retry-After` header.
 
 ---
 
-## Error Format
+## OpenAPI Specification
 
-All errors follow a consistent JSON envelope:
+The full machine-readable spec is maintained in `lib/api-spec/openapi.yaml` (OpenAPI 3.1). It is served at `/api/docs` as Swagger UI and can be fetched as JSON at `/api/docs.json`.
+
+The spec is the authoritative source for:
+- Request/response schemas (Zod validation is used in many handlers; several high-traffic routes lack Zod validation — see KNOWN-GAPS.md)
+- Authentication requirements per endpoint
+- Error response codes and shapes
+
+---
+
+## GraphQL Endpoint
+
+Apollo Server is mounted at `/api/graphql`. It is used for complex cross-domain queries that would require multiple REST round-trips. Schema introspection is disabled in production (`!isProduction` flag in `artifacts/api-server/src/graphql/index.ts`).
+
+GraphQL context is populated with `req.user` via the global `authMiddleware`. Authentication (identity verification) is enforced before GraphQL resolvers execute by `globalAuthEnforcer` (`artifacts/api-server/src/middlewares/global-auth-enforcer.ts`), which applies deny-by-default to all `/api/*` routes not on the public allowlist. `/api/graphql` is not on the public allowlist. Individual resolvers are still responsible for **authorization** checks (which data a user may access), but unauthenticated requests are rejected at the middleware layer before reaching resolvers.
+
+---
+
+## Error Response Format
+
+Error responses from `sendError` (`artifacts/api-server/src/lib/api-response.ts`) follow this shape:
 
 ```json
 {
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Human-readable description",
-    "details": {},
-    "correlationId": "req-abc123"
-  }
+  "error": "Descriptive error message",
+  "correlationId": "uuid-correlation-id",
+  "code": "ERROR_CODE",
+  "details": {}
 }
 ```
 
-Common HTTP status codes:
-- `400` — Validation error (Zod)
-- `401` — Unauthenticated
-- `403` — Insufficient role
-- `404` — Resource not found
-- `409` — Conflict (ETag mismatch)
-- `429` — Rate limited
-- `500` — Internal server error
+- `error` — human-readable error string (always present)
+- `correlationId` — request correlation ID (always present, maps to structured logs)
+- `code` — machine-readable error code (optional, e.g. `NOT_FOUND`, `BAD_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`)
+- `details` — additional context (optional)
+
+HTTP status is set via the response status code, not a field in the body. Some route handlers return bespoke error shapes outside of `sendError`; the above applies to the majority of routes.
 
 ---
 
-## OpenAPI & Code Generation
+## Versioning
 
-The full OpenAPI spec is in `lib/api-spec/openapi.yaml` and served live at `/api/docs`.
+The API uses date-based versioning via the `X-Api-Version` request header, implemented in `artifacts/api-server/src/middlewares/api-version.ts`.
 
-Zod validation schemas are maintained in `@szl-holdings/api-zod` and derived from the OpenAPI spec:
+| Version | Status | Sunset |
+|---------|--------|--------|
+| `2026-04-15` | Current | — |
+| `2025-01-01` | Deprecated | `2027-01-01` |
 
-```bash
-pnpm --filter @workspace/api-spec run codegen
-```
+If `X-Api-Version` is not provided, the server defaults to the current version. Unsupported versions receive `400 Bad Request`. The response always includes `X-Api-Version` and `X-Api-Versions-Supported` headers.
 
 ---
 
-## Related Documents
+*See also: [DATA-MODEL.md](DATA-MODEL.md) · [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) · [ROUTE_INVENTORY.md](ROUTE_INVENTORY.md)*
 
-| Document | Path |
-|----------|------|
-| Live OpenAPI spec | `/api/docs` |
-| OpenAPI source | `lib/api-spec/openapi.yaml` |
-| Zod schemas | `lib/api-zod/` |
-| Route inventory (frontend) | `ROUTE_INVENTORY.md` |
-| Access control | `ACCESS-CONTROL-MATRIX.md` |
-| Architecture | `ARCHITECTURE.md` |
+---
+
+*Last verified against source code: 2026-04-15. Re-verify against `artifacts/api-server/src/`, `lib/db/src/schema/`, and `lib/auth/src/` after significant code changes.*

@@ -99,6 +99,9 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | KG012 | Dependency review not in CI | Supply Chain | Vulnerable deps risk | Add `dependency-review-action` to PRs | DevOps |
 | KG013 | No `CODEOWNERS` file | Process | No review ownership | Create `CODEOWNERS` mapping | Eng Lead |
 | KG020b | Webhook URLs not SSRF validated | Security / SSRF | SSRF risk | Add URL validation / host allowlist | Security Lead |
+| KG026 | MFA not implemented | Security | Auth risk | Planned for enterprise tier launch | Security |
+| KG027 | External uptime monitoring absent | Ops | Visibility gap | Configure before first enterprise pilot | Platform |
+| KG028 | Sentry / error tracking not in prod | Observability | Debugging delay | Add Sentry DSN to production | Platform |
 
 ---
 
@@ -116,6 +119,10 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | KG024 | Large vendor bundle sizes | Performance | Slow load | Code-split heavy components |
 | VD1 | No `security.txt` | Compliance | No disclosure channel | Publish `/.well-known/security.txt` |
 | GAP-004 | No `.env.example` in all artifacts | Ops | Dev friction | Add `.env.example` to each artifact |
+| TD-001 | PRISM framework naming inconsistency | Tech Debt | Internal confusion | Pulse/Risk/Intel vs People/Revenue/Infra |
+| TD-002 | Broken seed scripts (PRISM Counsel) | Tech Debt | Dev friction | Fix recovery table seed scripts |
+| RD-001 | SOC 2 Type II / FedRAMP readiness | Compliance | Sales blocker | Post-revenue roadmap items |
+| RD-002 | Horizontal scaling / Load testing | Infra | Scale risk | Validate Azure autoscale under load |
 
 ---
 
@@ -124,9 +131,9 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | Severity | Total | Resolved | Open |
 |----------|-------|----------|------|
 | P0 — Critical / High | 11 | 10 | 1 |
-| P1 — High | 6 | 0 | 6 |
-| P2 — Medium / Low | 13 | 0 | 13 |
-| **Total** | **30** | **10** | **20** |
+| P1 — High | 9 | 0 | 9 |
+| P2 — Medium / Low | 17 | 0 | 17 |
+| **Total** | **37** | **10** | **27** |
 
 ---
 
@@ -143,3 +150,5 @@ Operational gaps, process health, test coverage, observability, team ownership.
 ## Incident Log
 
 - **2026-04-16:** Phase 0 audit confirmed all committed mobile credential files are placeholders. No active leak detected.
+
+---

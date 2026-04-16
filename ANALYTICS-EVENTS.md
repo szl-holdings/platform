@@ -1,262 +1,35 @@
 # Analytics Events — SZL Holdings Platform
 
-**Version:** 1.0 · **Last updated:** April 2026
+**Date:** April 2026 | **Audience:** Product, engineering, growth, and data teams
 
-> This is the canonical analytics reference, merging `ANALYTICS_PLAN.md` and `EVENT_TAXONOMY.md` into one document. The source files remain in place.
+**Related:** [PRODUCT-SURFACES.md](PRODUCT-SURFACES.md) · [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md)
 
 ---
 
-## Analytics Stack
+## Overview
+
+This document defines the canonical analytics event taxonomy for the SZL Holdings platform. It consolidates and extends the existing `EVENT_TAXONOMY.md` with implementation context, tool configuration, and funnel definitions.
+
+**Source files:** `EVENT_TAXONOMY.md` · `ANALYTICS_PLAN.md`
+
+---
+
+## Analytics Tools
 
 | Tool | Purpose | Status |
 |------|---------|--------|
-| Google Analytics 4 | Page views, user sessions, traffic attribution | Configured |
-| PostHog | Event tracking, funnels, session recordings | Planned |
+| Google Analytics 4 | Page views, sessions, traffic attribution | Configured |
+| PostHog | Custom event tracking, funnels, session recordings | Planned |
 
-**Configuration:**
-- `VITE_GA_MEASUREMENT_ID` — Google Analytics 4 Measurement ID
+**Environment variables:**
+- `VITE_GA_MEASUREMENT_ID` — Google Analytics Measurement ID
 - `VITE_POSTHOG_KEY` — PostHog project key
-
----
-
-## Analytics Objectives
-
-1. **Lead quality** — Which pages and CTAs drive qualified demo requests
-2. **Trust engagement** — Trust Center and security documentation visits
-3. **Product interest** — Which product pages and verticals attract the most engagement
-4. **Demo conversion** — Full funnel from visit → demo request → qualified pipeline
-5. **Content performance** — Highest-performing documentation and blog content
-
----
-
-## Key Business Metrics
-
-| Metric | Definition | Target |
-|--------|-----------|--------|
-| Demo requests | Submissions of the demo request form | Track trend |
-| Contact form submissions | Any `/contact` form submission | Track trend |
-| Trust Center visits | Unique sessions on `/trust-center` and `/trust/*` | Track trend |
-| Investor page visits | Sessions on `/investors/*` | Track trend |
-| Design partner inquiries | Submissions tagged `design_partner` | Track count |
 
 ---
 
 ## Naming Convention
 
-Events follow the pattern: `{object}_{action}` — all lowercase with underscores, descriptive but concise (max 3 words), consistent across all products and pages.
-
----
-
-## Event Registry
-
-### Navigation & Engagement
-
-| Event Name | Trigger | Properties | Priority |
-|-----------|---------|-----------|---------|
-| `page_viewed` | Page load / route change | `page_path`, `page_title`, `referrer` | High |
-| `section_scrolled` | User scrolls into a named section | `section_id`, `page_path` | Medium |
-| `scroll_depth_reached` | User scrolls to 25%, 50%, 75%, 100% | `depth_pct`, `page_path` | Medium |
-| `external_link_clicked` | Click on an external link | `link_url`, `link_label`, `page_path` | Low |
-
----
-
-### CTA Events
-
-| Event Name | Trigger | Properties | Priority |
-|-----------|---------|-----------|---------|
-| `cta_clicked` | Any CTA button or link click | `cta_label`, `cta_variant`, `cta_location`, `page_path` | **Critical** |
-| `demo_requested` | Demo request form submitted | `product`, `form_key`, `source_page` | **Critical** |
-| `design_partner_cta` | Design partner CTA specifically | `cta_location`, `page_path` | High |
-| `contact_form_started` | User focuses on any form field | `form_key`, `page_path` | Medium |
-| `contact_submitted` | Any contact form successfully submitted | `form_key`, `inquiry_type`, `page_path` | **Critical** |
-
-**`cta_location` Values:**
-
-| Value | Context |
-|-------|---------|
-| `hero` | Page hero section |
-| `nav` | Navigation bar |
-| `footer` | Page footer |
-| `section_[name]` | Named mid-page section |
-| `trust_banner` | Trust/security callout |
-| `pricing_card` | Pricing section card |
-| `product_feature` | Feature card or callout |
-
----
-
-### Product Page Events
-
-| Event Name | Trigger | Properties | Priority |
-|-----------|---------|-----------|---------|
-| `product_page_viewed` | Product/solution page load | `product`, `page_variant` | High |
-| `product_feature_viewed` | Feature section scrolled into view | `product`, `feature_name` | Medium |
-| `product_demo_cta` | "Demo" or "Try" CTA on product page | `product`, `cta_location` | High |
-| `solution_trust_visited` | User visits a solution trust page | `product` | High |
-
-**`product` Values:**
-
-| Value | Product |
-|-------|---------|
-| `lyte` | Lyte Command Center |
-| `alloy` | Alloy Execution Fabric |
-| `aegis` | Aegis / Firestorm |
-| `vessels` | Vessels Maritime |
-| `terra` | Terra Real Estate |
-| `prism_counsel` | PRISM Counsel |
-| `carlota_jo` | Carlota Jo Advisory |
-| `imperium` | IMPERIUM |
-| `command` | Command Portal |
-
----
-
-### Trust Center Events
-
-| Event Name | Trigger | Properties | Priority |
-|-----------|---------|-----------|---------|
-| `trust_center_visited` | User lands on `/trust-center` | `referrer_page`, `referrer_type` | High |
-| `trust_section_viewed` | User views a specific trust section | `trust_section`, `time_spent_sec` | High |
-| `trust_cta_clicked` | CTA from trust page | `trust_section`, `cta_label` | High |
-| `trust_doc_downloaded` | A trust document is downloaded | `doc_name`, `trust_section` | Medium |
-
-**`trust_section` Values:**
-
-| Value | Section |
-|-------|---------|
-| `security` | Security posture |
-| `governance` | Governance model |
-| `architecture` | Technical architecture |
-| `ai_governance` | AI governance |
-| `approvals` | Approval framework |
-| `operations` | Operational trust |
-| `exports` | Data exports |
-
----
-
-### Documentation Events
-
-| Event Name | Trigger | Properties | Priority |
-|-----------|---------|-----------|---------|
-| `docs_page_viewed` | Any `/docs/*` page | `doc_section`, `doc_page` | Medium |
-| `docs_search_performed` | User searches docs | `query`, `results_count` | Medium |
-| `api_docs_visited` | OpenAPI / developer docs visited | `endpoint_viewed` | Low |
-| `github_link_clicked` | GitHub repo link from docs | `link_location` | Low |
-
----
-
-### Investor Events
-
-| Event Name | Trigger | Properties | Priority |
-|-----------|---------|-----------|---------|
-| `investor_page_viewed` | Any `/investors/*` page | `investor_section` | High |
-| `investor_cta_clicked` | Investment inquiry CTA | `cta_location` | High |
-| `data_room_accessed` | `/investors/data-room` visit | — | **Critical** |
-
----
-
-### Demo & Pipeline Events
-
-| Event Name | Trigger | Properties | Priority |
-|-----------|---------|-----------|---------|
-| `demo_flow_started` | User clicks into a demo experience | `product`, `demo_type`, `source_cta` | **Critical** |
-| `demo_completed` | User completes a demo flow | `product`, `demo_type`, `duration_sec` | **Critical** |
-| `pilot_inquiry_submitted` | Pilot/design partner form submitted | `product`, `company_type` | **Critical** |
-
----
-
-## Properties Reference
-
-| Property | Type | Description | Example Values |
-|----------|------|-------------|---------------|
-| `page_path` | string | URL path of current page | `/lyte`, `/trust/security` |
-| `page_title` | string | Page title | `Lyte — Business Observability` |
-| `referrer` | string | Previous page path | `/`, `/lyte` |
-| `product` | string | Product name | `lyte`, `vessels`, `aegis` |
-| `cta_label` | string | Text on the CTA | `Request Demo`, `Explore Lyte` |
-| `cta_variant` | string | Visual variant | `primary`, `secondary`, `ghost` |
-| `cta_location` | string | Where on page | `hero`, `nav`, `pricing_card` |
-| `form_key` | string | Form identifier | `szl_contact`, `demo_request` |
-| `inquiry_type` | string | Inquiry category | `enterprise`, `demo`, `partnership` |
-| `trust_section` | string | Trust page section | `security`, `governance` |
-| `doc_section` | string | Docs section | `architecture`, `control-plane` |
-| `investor_section` | string | Investor page section | `overview`, `data-room`, `roadmap` |
-| `time_spent_sec` | number | Time in seconds | `45` |
-| `depth_pct` | number | Scroll depth % | `25`, `50`, `75`, `100` |
-| `demo_type` | string | Demo type | `live`, `recorded`, `interactive` |
-| `company_type` | string | Company classification | `enterprise`, `smb`, `government` |
-
----
-
-## Per-Product Tracking Guide
-
-### Lyte (`/lyte`)
-- Time on page
-- CTA: "Request Lyte Demo" clicks
-- Scroll depth (do users reach the feature breakdown?)
-- `/lyte/use-cases` visits
-
-### Alloy (`/alloy-fabric`)
-- Time on page
-- CTA: "Explore Alloy" clicks
-- `/docs/control-plane` visits from this page
-
-### Solutions Pages (`/solutions/*`)
-- Which vertical is most visited
-- Trust page visits from solutions pages (interest → trust review conversion)
-- CTA clicks per vertical
-
-### Trust Center (`/trust-center`, `/trust/*`)
-- Time on page per trust section
-- Which trust topics are most-read (security, governance, AI, operations)
-- Exit rate (do users leave, or continue to a CTA?)
-- Trust → demo request funnel conversion
-
-### Docs (`/docs/*`)
-- Most-read documentation sections
-- Time on page
-- Return visits (are docs users returning?)
-
----
-
-## Demo Request Funnel
-
-```
-Landing Page Visit
-        │
-        ▼
-Product Page Visit (Lyte / Solutions / etc.)
-        │
-        ▼
-Trust Center or Docs Visit (qualification stage)
-        │
-        ▼
-CTA Click (demo request / contact)
-        │
-        ▼
-Form Submission → demo_requested event fires
-        │
-        ▼
-[Offline: qualification call]
-```
-
-Track each step as a named funnel step in PostHog.
-
----
-
-## Reporting Cadence
-
-| Report | Frequency | Audience |
-|--------|-----------|---------|
-| Demo request volume | Weekly | Founder |
-| Top pages and CTAs | Monthly | Product + Marketing |
-| Trust Center engagement | Monthly | Product |
-| Funnel conversion rates | Monthly | Founder + Sales |
-| Full analytics review | Quarterly | All |
-
----
-
-## Implementation
-
-Events should be fired using a wrapper function:
+All events follow `{object}_{action}` pattern — lowercase with underscores, max 3 words.
 
 ```typescript
 trackEvent('cta_clicked', {
@@ -266,30 +39,178 @@ trackEvent('cta_clicked', {
 });
 ```
 
-The wrapper handles:
-- Null-checking analytics availability
-- Batching for performance
-- Consent gate check
-- Development mode logging (no real events fired in dev)
+The `trackEvent` wrapper handles: consent gate check, null-checking, dev-mode suppression, and batching.
+
+---
+
+## Event Registry
+
+### Navigation & Engagement
+
+| Event | Trigger | Properties | Priority |
+|-------|---------|-----------|---------|
+| `page_viewed` | Page load / route change | `page_path`, `page_title`, `referrer` | High |
+| `section_scrolled` | User scrolls into named section | `section_id`, `page_path` | Medium |
+| `scroll_depth_reached` | User hits 25% / 50% / 75% / 100% scroll | `depth_pct`, `page_path` | Medium |
+| `external_link_clicked` | Click on external link | `link_url`, `link_label`, `page_path` | Low |
+
+---
+
+### CTA Events
+
+| Event | Trigger | Properties | Priority |
+|-------|---------|-----------|---------|
+| `cta_clicked` | Any CTA button or link | `cta_label`, `cta_variant`, `cta_location`, `page_path` | **Critical** |
+| `demo_requested` | Demo request form submitted | `product`, `form_key`, `source_page` | **Critical** |
+| `design_partner_cta` | Design partner CTA clicked | `cta_location`, `page_path` | High |
+| `contact_form_started` | User focuses on any form field | `form_key`, `page_path` | Medium |
+| `contact_submitted` | Contact form successfully submitted | `form_key`, `inquiry_type`, `page_path` | **Critical** |
+
+**`cta_location` values:** `hero` · `nav` · `footer` · `section_[name]` · `trust_banner` · `pricing_card` · `product_feature`
+
+---
+
+### Product Page Events
+
+| Event | Trigger | Properties | Priority |
+|-------|---------|-----------|---------|
+| `product_page_viewed` | Product/solution page load | `product`, `page_variant` | High |
+| `product_feature_viewed` | Feature section scrolled into view | `product`, `feature_name` | Medium |
+| `product_demo_cta` | "Demo" or "Try" CTA on product page | `product`, `cta_location` | High |
+| `solution_trust_visited` | User visits a solution trust page | `product` | High |
+
+**`product` values:** `lyte` · `alloy` · `aegis` · `vessels` · `terra` · `prism_counsel` · `carlota_jo` · `imperium` · `cortex` · `command_portal`
+
+---
+
+### Trust Center Events
+
+| Event | Trigger | Properties | Priority |
+|-------|---------|-----------|---------|
+| `trust_center_visited` | User lands on `/trust-center` | `referrer_page`, `referrer_type` | High |
+| `trust_section_viewed` | User views a specific trust section | `trust_section`, `time_spent_sec` | High |
+| `trust_cta_clicked` | CTA from trust page | `trust_section`, `cta_label` | High |
+| `trust_doc_downloaded` | Trust document downloaded | `doc_name`, `trust_section` | Medium |
+
+**`trust_section` values:** `security` · `governance` · `architecture` · `ai_governance` · `approvals` · `operations` · `exports`
+
+---
+
+### Documentation Events
+
+| Event | Trigger | Properties | Priority |
+|-------|---------|-----------|---------|
+| `docs_page_viewed` | Any `/docs/*` page | `doc_section`, `doc_page` | Medium |
+| `docs_search_performed` | User searches docs | `query`, `results_count` | Medium |
+| `api_docs_visited` | OpenAPI / developer docs | `endpoint_viewed` | Low |
+| `github_link_clicked` | GitHub repo link from docs | `link_location` | Low |
+
+---
+
+### Investor Events
+
+| Event | Trigger | Properties | Priority |
+|-------|---------|-----------|---------|
+| `investor_page_viewed` | Any `/investors/*` page | `investor_section` | High |
+| `investor_cta_clicked` | Investment inquiry CTA clicked | `cta_location` | High |
+| `data_room_accessed` | `/investors/data-room` visit | — | **Critical** |
+
+---
+
+### Demo & Pipeline Events
+
+| Event | Trigger | Properties | Priority |
+|-------|---------|-----------|---------|
+| `demo_flow_started` | User enters a demo experience | `product`, `demo_type`, `source_cta` | **Critical** |
+| `demo_completed` | User completes a demo flow | `product`, `demo_type`, `duration_sec` | **Critical** |
+| `pilot_inquiry_submitted` | Pilot / design partner form submitted | `product`, `company_type` | **Critical** |
+
+---
+
+## Properties Reference
+
+| Property | Type | Description | Example Values |
+|----------|------|-------------|---------------|
+| `page_path` | string | URL path of current page | `/lyte`, `/trust/security` |
+| `page_title` | string | Page `<title>` | `Lyte — Business Observability` |
+| `referrer` | string | Previous page path | `/`, `/lyte` |
+| `product` | string | Product identifier | `lyte`, `vessels`, `aegis` |
+| `cta_label` | string | Text on the CTA | `Request Demo`, `Explore Lyte` |
+| `cta_location` | string | Position on page | `hero`, `nav`, `pricing_card` |
+| `form_key` | string | Form identifier | `szl_contact`, `demo_request` |
+| `trust_section` | string | Trust page section | `security`, `governance` |
+| `doc_section` | string | Docs section | `architecture`, `control-plane` |
+| `time_spent_sec` | number | Time in seconds | `45` |
+| `depth_pct` | number | Scroll depth % | `25`, `50`, `75`, `100` |
+| `company_type` | string | Type of company | `enterprise`, `smb`, `startup` |
+| `demo_type` | string | Demo flow type | `product_walkthrough`, `live_demo` |
+
+---
+
+## Key Business Metrics
+
+| Metric | Definition | Reporting Frequency |
+|--------|-----------|---------------------|
+| Demo requests | `demo_requested` event count | Weekly (Founder) |
+| Contact form submissions | `contact_submitted` event count | Weekly |
+| Trust Center visits | Unique sessions on `/trust-center`, `/trust/*` | Monthly |
+| Investor page visits | Sessions on `/investors/*` | Monthly |
+| Design partner inquiries | `pilot_inquiry_submitted` with `company_type = 'design_partner'` | Monthly |
+| Data room accesses | `data_room_accessed` event count | Monthly (Founder, restricted) |
+| CTA click-through rate | `cta_clicked` count / `page_viewed` count | Monthly |
+| Demo conversion funnel | Step drop-off from `demo_flow_started` → `demo_completed` | Monthly |
+
+---
+
+## Demo Request Funnel
+
+```
+Landing Page Visit (page_viewed)
+        │
+        ▼
+Product Page Visit (product_page_viewed)
+        │
+        ▼
+Trust Center / Docs Visit (trust_center_visited / docs_page_viewed)
+        │
+        ▼
+CTA Click (cta_clicked / product_demo_cta)
+        │
+        ▼
+Form Submission (demo_requested)
+        │
+        ▼
+[Offline: qualification call → pilot inquiry → closed deal]
+```
+
+Track each step as a named funnel in PostHog to measure step-to-step conversion.
 
 ---
 
 ## Privacy Rules
 
-1. **No PII.** Never send names, emails, IP addresses, or other personally identifiable information in event properties.
-2. **No session IDs.** Do not pass internal session or user IDs to third-party analytics tools.
-3. **Aggregate only.** Analytics should provide aggregate behavior insights, not individual user tracking.
-4. **Consent first.** Analytics events only fire after user consent (where required by applicable privacy law).
-5. **Data retention.** GA4 data retention set to 14 months. PostHog per configuration.
-6. **Data residency.** Verify GA4 and PostHog data residency meets applicable privacy requirements.
+1. **No PII.** Never include names, emails, IP addresses, or phone numbers in event properties.
+2. **No internal IDs.** Do not pass session IDs or user database IDs to third-party analytics tools.
+3. **Consent first.** Analytics events only fire after user consent where required by applicable privacy law (GDPR, CCPA).
+4. **Aggregate only.** Analytics provides behavior insights at aggregate level, not individual user tracking.
+5. **Data retention.** GA4 retention set to 14 months. PostHog per project configuration.
 
 ---
 
-## Related Documents
+## Reporting Cadence
 
-| Document | Path |
-|----------|------|
-| Analytics plan (source) | `ANALYTICS_PLAN.md` |
-| Event taxonomy (source) | `EVENT_TAXONOMY.md` |
-| Route inventory | `ROUTE_INVENTORY.md` |
-| Product surfaces | `PRODUCT-SURFACES.md` |
+| Report | Frequency | Audience |
+|--------|-----------|---------|
+| Demo request volume | Weekly | Founder |
+| Top pages and CTAs | Monthly | Product + Growth |
+| Trust Center engagement | Monthly | Product |
+| Funnel conversion rates | Monthly | Founder + Sales |
+| Full analytics review | Quarterly | All stakeholders |
+
+---
+
+*See also: [EVENT_TAXONOMY.md](EVENT_TAXONOMY.md) · [ANALYTICS_PLAN.md](ANALYTICS_PLAN.md) · [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md)*
+
+---
+
+*Last verified against source code: 2026-04-15. Re-verify against `artifacts/api-server/src/`, `lib/db/src/schema/`, and `lib/auth/src/` after significant code changes.*

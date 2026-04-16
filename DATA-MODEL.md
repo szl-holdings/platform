@@ -328,3 +328,282 @@ See `docs/disaster-recovery.md` for the full restore playbook and `BACKUP_AND_RE
 | Backup strategy | `BACKUP_AND_RECOVERY.md` |
 | Schema audit | `docs/schema-audit-2025-04.md` |
 | Architecture | `ARCHITECTURE.md` |
+**Date:** April 2026 | **Audience:** Technical advisors, engineers, enterprise evaluators
+
+**Related:** [ARCHITECTURE.md](ARCHITECTURE.md) · [API-SPEC.md](API-SPEC.md) · [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md)
+
+---
+
+## Overview
+
+The SZL Holdings platform uses a single **PostgreSQL 16+** database managed via **Drizzle ORM**. The schema contains 644 tables organized into 10 domain namespaces. Each domain prefix provides logical isolation; all tables live in a single PostgreSQL database (not separate databases or schemas).
+
+Schema source of truth: `lib/db/` — Drizzle schema files, migrations, and seed data.
+
+---
+
+## Schema Domain Map
+
+| Domain | Prefix | Approximate Table Count | Description |
+|--------|--------|------------------------|-------------|
+| Core / Auth | (no prefix) | ~20 | Users, organizations, sessions, roles, org members |
+| Alloy | `alloy_*` | ~15 | Workflows, actions, agents, approvals, audit routing |
+| Lyte | `lyte_*` | ~10 | PRISM signals, scores, business metrics |
+| Aegis / Firestorm | `aegis_*` | ~22 | Incidents, findings, playbooks, threat intel, CVEs |
+| Vessels | `vessels_*` | ~30 | Vessels, voyages, positions, port calls, sanctions, trading |
+| Terra | `terra_*` | ~17 | Properties, distress signals, ownership, deals, MLS |
+| PRISM Counsel | `prism_counsel_*` | ~120 | Matters, parties, filings, documents, recovery, no-fault |
+| Carlota Jo | `carlota_*` | ~10 | Clients, services, bookings, messages, reservations |
+| Platform | `platform_*` | ~10 | Products, feature flags, tenant config |
+| Audit | `audit_*` | ~5 | Immutable event log (append-only) |
+
+---
+
+## Core Shared Entities
+
+These entities appear across multiple platforms and form the backbone of the data model.
+
+### Organization
+
+The tenant unit. All user data and operational data is scoped to an organization. Defined in `lib/db/src/schema/organizations.ts`.
+
+```
+organizations
+├── id              SERIAL (PK, integer)
+├── name            TEXT NOT NULL
+├── slug            TEXT UNIQUE NOT NULL
+├── logo_url        TEXT
+├── domain          TEXT
+├── org_type        TEXT
+├── status          TEXT        (active, inactive, suspended)
+├── plan            TEXT        (free, starter, professional, enterprise)
+├── billing_customer_id TEXT
+├── is_active       BOOLEAN
+├── created_at      TIMESTAMPTZ
+└── updated_at      TIMESTAMPTZ
+
+org_members
+├── id              SERIAL (PK)
+├── org_id          INTEGER (FK → organizations)
+├── user_id         INTEGER (FK → users)
+├── role            TEXT        (owner, admin, member, viewer)
+└── joined_at       TIMESTAMPTZ
+
+organization_memberships (CMS / content management roles)
+├── id              SERIAL (PK)
+├── organization_id INTEGER (FK → organizations)
+├── user_id         INTEGER (FK → users)
+├── role            TEXT        (public, authenticated, member, client, editor, admin, super_admin)
+├── status          TEXT        (active, invited, suspended)
+├── created_at      TIMESTAMPTZ
+└── updated_at      TIMESTAMPTZ
+```
+
+### User
+
+Platform users. Defined in `lib/db/src/schema/auth.ts`.
+
+```
+users
+├── id              SERIAL (PK, integer)
+├── replit_id       TEXT UNIQUE     (OIDC subject identifier)
+├── email           TEXT UNIQUE
+├── display_name    TEXT NOT NULL
+├── avatar_url      TEXT
+├── bio             TEXT
+├── platform_role   TEXT        (anonymous_visitor, founder_admin, platform_admin,
+│                               operator, analyst, executive_viewer, ops_manager,
+│                               sales_delivery_user, maritime_ops_user,
+│                               service_coordinator, pilot_customer_user)
+├── team            TEXT
+├── password_hash   TEXT        (PBKDF2:salt:hash — set only for email/password users)
+├── email_verified_at TIMESTAMPTZ
+├── is_active       BOOLEAN
+├── last_login_at   TIMESTAMPTZ
+├── created_at      TIMESTAMPTZ
+└── updated_at      TIMESTAMPTZ
+
+user_roles (join table to roles)
+├── id              SERIAL (PK)
+├── user_id         INTEGER (FK → users)
+└── role_id         INTEGER (FK → roles)
+
+roles
+├── id              SERIAL (PK)
+├── name            TEXT UNIQUE (super_admin, admin, editor, member, client,
+│                               authenticated, exec, ops, compliance, maintenance,
+│                               analyst, viewer, operator, seller, client_viewer,
+│                               creative_user)
+└── description     TEXT
+```
+
+### Session
+
+Server-side sessions. The `sid` cookie contains an opaque token that maps to a `sessions` record. Defined in `lib/db/src/schema/auth.ts`.
+
+```
+sessions
+├── id              SERIAL (PK)
+├── token           TEXT UNIQUE (opaque random identifier — stored in sid cookie)
+├── user_id         INTEGER (FK → users)
+├── expires_at      TIMESTAMPTZ
+├── ip_address      TEXT        (stored before hashing for operational logs)
+├── user_agent      TEXT
+└── created_at      TIMESTAMPTZ
+```
+
+### Audit Event
+
+Append-only log. Defined in `lib/db/src/schema/audit_logs.ts`. Source of truth for the actual column shape — not `audit_events`.
+
+```
+audit_logs
+├── id              SERIAL (PK)
+├── organization_id INTEGER | NULL (FK → organizations, ON DELETE SET NULL)
+├── site_id         INTEGER | NULL
+├── actor_user_id   INTEGER | NULL (FK → users, ON DELETE SET NULL)
+├── action_type     TEXT NOT NULL  (structured action string)
+├── entity_type     TEXT NOT NULL  (type of entity acted upon)
+├── entity_id       TEXT | NULL    (identifier of the entity)
+├── payload_json    JSONB | NULL   (before/after state or action context)
+└── created_at      TIMESTAMPTZ NOT NULL
+```
+
+---
+
+## Domain Entity Models
+
+The following describes the logical entity structure for each domain. All primary keys in the live schema use `SERIAL` (auto-incrementing integer), not UUID — foreign key references are integer IDs. Schema source files are in `lib/db/src/schema/`. Domain-specific exact column definitions should be verified against the respective schema file.
+
+### Alloy — Execution Fabric
+
+The canonical workflow and approval infrastructure. Schema: `lib/db/src/schema/canonical.ts` (workflows, actions, signals).
+
+```
+workflows (canonical.ts: workflowsTable)
+├── id              SERIAL (PK)
+├── org_id          INTEGER (FK → organizations)
+├── title           TEXT
+├── type            TEXT        (source domain / action type)
+├── priority        TEXT        (critical, high, medium, low)
+├── status          TEXT        (pending, in_progress, completed, cancelled, blocked)
+├── assigned_to     INTEGER (FK → users | NULL)
+├── due_at          TIMESTAMPTZ
+├── metadata        JSONB
+└── created_at      TIMESTAMPTZ
+
+actions (canonical.ts: actionsTable)
+├── id              SERIAL (PK)
+├── org_id          INTEGER (FK → organizations)
+├── signal_id       INTEGER (FK → platform_signals | NULL)
+├── product         TEXT        (which domain/platform)
+├── action_type     TEXT        (investigation, remediation, escalation, approval, notification, playbook, manual)
+├── status          TEXT        (pending, in_progress, completed, deferred, cancelled, blocked)
+├── priority        TEXT        (critical, high, medium, low)
+├── assigned_to     INTEGER (FK → users | NULL)
+├── due_at          TIMESTAMPTZ
+├── metadata        JSONB
+└── created_at      TIMESTAMPTZ
+
+platform_signals (canonical.ts: platformSignalsTable)
+├── id              SERIAL (PK)
+├── org_id          INTEGER (FK → organizations)
+├── source          TEXT
+├── source_type     TEXT        (connector, webhook, api, manual, scheduled, monitoring)
+├── severity        TEXT        (critical, high, medium, low, info)
+├── title           TEXT
+├── status          TEXT        (new, processing, processed, failed, ignored)
+├── normalized_score NUMERIC
+├── value_at_risk   NUMERIC
+├── metadata        JSONB
+└── received_at     TIMESTAMPTZ
+```
+
+### Aegis — Security Domain
+
+Schema: `lib/db/src/schema/firestorm.ts`. Tables use `SERIAL` PKs and `INTEGER` FKs.
+
+Key entity groups:
+- **Incidents** (`aegis_incidents`): id, org_id, title, severity, status, mitre_techniques, affected_assets, created_at, resolved_at
+- **Findings** (`aegis_findings`): id, org_id, incident_id, source, confidence, raw_data, normalized_at
+- **Playbooks** (`aegis_playbooks`): id, org_id, name, trigger_type, steps (JSONB), last_triggered
+- 22 total tables covering the full security lifecycle
+
+### Vessels — Maritime Domain
+
+Schema: `lib/db/src/schema/vessels.ts`, `vessels_trading.ts`, `vessels_intelligence.ts`, `marine_insurance.ts`. Tables use `SERIAL` PKs.
+
+Key entity groups:
+- **Vessels**: id, org_id, mmsi (unique), imo, name, flag, vessel_type, gross_tonnage, status
+- **Positions**: id, vessel_id, latitude, longitude, speed, heading, recorded_at, source
+- **Voyages**: id, vessel_id, origin_port, destination_port, departure_at, arrival_at, cargo_type, fuel_cost, estimated_revenue, sanctions_clear
+- 30+ total tables
+
+### Terra — Real Estate Domain
+
+Schema: `lib/db/src/schema/terra.ts`. Tables use `SERIAL` PKs.
+
+Key entity groups:
+- **Properties**: id, org_id, address, borough, bbl (NYC Borough-Block-Lot), distress_score, ownership_type, last_data_sync, metadata
+- **Distress signals**: id, property_id, signal_type, severity, recorded_date, source
+- **Deals**: id, org_id, property_id, status (lead → underwriting → loi → contract → closed/dead), assigned_to, target_price
+- 17 total tables
+
+### PRISM Counsel — Legal Domain
+
+Schema: `lib/db/src/schema/prism_counsel.ts` + 9 additional schema modules. Tables use `SERIAL` PKs.
+
+Key entity groups:
+- **Matters**: id, org_id, case_number, jurisdiction, matter_type, status, lead_attorney, opposing_party, court, filing_date
+- 120+ additional tables covering: parties, documents, filings, timeline events, recovery tracking, no-fault claims, liens, settlements, discovery items, playbooks, deadlines, court calendar
+
+### Carlota Jo — Advisory Domain
+
+Schema: `lib/db/src/schema/carlota_jo.ts`. Tables use `SERIAL` PKs.
+
+Key entity groups:
+- **Clients**: id, org_id, name, email, profile (JSONB), created_at
+- **Bookings**: id, client_id, service_id, scheduled_at, status (pending/confirmed/completed/cancelled), notes
+- 10 total tables
+
+---
+
+## Cross-Domain Entity Relationships
+
+```
+organizations ──── org_members ──── users
+   (id: INTEGER)                  (id: INTEGER)
+       │                               │
+       │ (org_id = INTEGER FK)         │ (actor: INTEGER FK)
+       ▼                               ▼
+   actions ──────────────────── audit_logs
+   platform_signals                    │
+       │                               │
+       │ (product + entity references) │
+       ├──► firestorm incidents         │
+       ├──► vessels data                │
+       ├──► terra properties            │
+       └──► prism_counsel matters       │
+                                       │
+                               (immutable record)
+```
+
+All domain entities reference `org_id` (integer FK) for tenant isolation. Significant mutations produce audit log entries.
+
+---
+
+## Data Integrity Rules
+
+- **Tenant isolation:** Org-scoped tables include an `org_id` foreign key. Isolation is enforced per-route-handler via Drizzle ORM query builders. The `tenantScope` middleware is applied to selected route groups (`/audit`, `/jobs`, `/comments`, `/documents`, `/exports`, `/orgs`). Other route groups (including `/firestorm`, `/vessels`, `/terra`) enforce org scoping within individual route handlers — not via shared middleware. Isolation correctness depends on per-handler implementation discipline. See KNOWN-GAPS.md.
+- **Audit immutability:** Audit log tables are append-only. No `UPDATE` or `DELETE` operations are issued on these tables from the application layer.
+- **Session integrity:** Sessions expire at `expires_at`. The `authMiddleware` rejects requests with expired sessions before route handlers run.
+- **Referential integrity:** Foreign keys are enforced at the database level (Drizzle ORM generates `REFERENCES` constraints with `ON DELETE CASCADE` or `ON DELETE SET NULL` as appropriate per entity).
+- **Note on soft deletes:** Some domain tables include `deleted_at` nullable timestamps for soft deletion; this is not universal across all 644 tables. Verify per-table patterns in `lib/db/src/schema/` before relying on soft-delete semantics.
+
+---
+
+*See also: [docs/architecture/data-flow.md](docs/architecture/data-flow.md) · [API-SPEC.md](API-SPEC.md)*
+
+---
+
+*Last verified against source code: 2026-04-15. Re-verify against `artifacts/api-server/src/`, `lib/db/src/schema/`, and `lib/auth/src/` after significant code changes.*

@@ -141,7 +141,39 @@ See [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) for staging and production deploy
 
 ---
 
+## Deployment
+
+| Environment | Purpose | Trigger |
+|-------------|---------|---------|
+| **Replit Workspace** | Active development, internal preview | Always on |
+| **Staging** | Integration validation before production | Auto on push to `main` via `deploy-staging.yml` |
+| **Production** | Customer-facing deployment | On published release via `deploy-production.yml` |
+
+See [Deployment Model](docs/trust/deployment-model.md) · [Branch Protection & CI/CD Settings](.github/BRANCH_PROTECTION.md)
+
+---
+
 ## Documentation
+
+### Canonical Diligence Documents
+
+These top-level documents are the canonical reference for Series A diligence, enterprise evaluation, and technical review. They consolidate and cross-link content from the full `/docs/` suite.
+
+| Document | Purpose |
+|----------|---------|
+| [SYSTEM-OVERVIEW.md](SYSTEM-OVERVIEW.md) | High-level platform overview for non-technical stakeholders |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture: topology, stack, monorepo structure, design principles |
+| [PRODUCT-SURFACES.md](PRODUCT-SURFACES.md) | All product surfaces with status, audience, tech stack |
+| [DATA-MODEL.md](DATA-MODEL.md) | Entity-relationship overview of the core database schema |
+| [API-SPEC.md](API-SPEC.md) | API surface: route inventory, auth model, rate limiting |
+| [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) | Role-permission matrix mapped to implementation |
+| [SECURITY-CHECKLIST.md](SECURITY-CHECKLIST.md) | Security controls checklist mapped to actual implementation |
+| [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) | Deployment procedures for Replit and Azure |
+| [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md) | Operational procedures, failure modes, incident response |
+| [ANALYTICS-EVENTS.md](ANALYTICS-EVENTS.md) | Analytics event taxonomy, funnel definitions, privacy rules |
+| [KNOWN-GAPS.md](KNOWN-GAPS.md) | Honest assessment of tech debt, gaps, and planned improvements |
+
+### Full Documentation Suite (`/docs/`)
 
 ### Platform Narrative
 | Document | Purpose |
@@ -192,6 +224,38 @@ See [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) for staging and production deploy
 | [docs/investor/investor-overview.md](docs/investor/investor-overview.md) | Company overview for investors |
 | [docs/investor/product-readiness.md](docs/investor/product-readiness.md) | Honest product status assessment |
 | [docs/investor/go-to-market.md](docs/investor/go-to-market.md) | GTM strategy and sequencing |
+
+### Trust & Security
+| Area | Document |
+|------|----------|
+| Trust center | [docs/trust/trust-center.md](docs/trust/trust-center.md) |
+| Security posture | [docs/trust/security-posture.md](docs/trust/security-posture.md) |
+| Access control policy | [docs/ACCESS_CONTROL.md](docs/ACCESS_CONTROL.md) |
+| Secrets policy | [docs/SECRETS_POLICY.md](docs/SECRETS_POLICY.md) |
+| Deployment model | [docs/trust/deployment-model.md](docs/trust/deployment-model.md) |
+
+### Operations & Development
+| Area | Document |
+|------|----------|
+| Ops runbook (source) | [docs/ops-runbook.md](docs/ops-runbook.md) |
+| Replit operations | [REPLIT_OPERATIONS.md](REPLIT_OPERATIONS.md) |
+| Environment variable matrix | [ENV_MATRIX.md](ENV_MATRIX.md) |
+| Deployment readiness checklist | [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) |
+| Route inventory | [ROUTE_INVENTORY.md](ROUTE_INVENTORY.md) |
+| Analytics plan | [ANALYTICS_PLAN.md](ANALYTICS_PLAN.md) |
+| Disaster recovery | [docs/disaster-recovery.md](docs/disaster-recovery.md) |
+| Backup & recovery | [BACKUP_AND_RECOVERY.md](BACKUP_AND_RECOVERY.md) |
+
+### Process & Governance
+| Area | Document |
+|------|----------|
+| Release process | [RELEASE_PROCESS.md](RELEASE_PROCESS.md) |
+| Release checklist | [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) |
+| Release notes | [docs/releases/v0.1.0.md](docs/releases/v0.1.0.md) |
+| Changelog | [CHANGELOG.md](CHANGELOG.md) |
+| Incident response | [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) |
+| Security disclosure | [SECURITY.md](SECURITY.md) |
+| Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
 
 ---
 

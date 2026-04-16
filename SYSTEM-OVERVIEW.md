@@ -1,7 +1,31 @@
 # System Overview — SZL Holdings Platform
 
 **Version:** 1.0 · **Last updated:** April 2026
-**Source of truth for:** technical architecture organized around the governed decision loop
+**Audience:** Non-technical stakeholders, investors, strategic partners, technical advisors
+
+**Related:** [ARCHITECTURE.md](ARCHITECTURE.md) · [PRODUCT-SURFACES.md](PRODUCT-SURFACES.md) · [KNOWN-GAPS.md](KNOWN-GAPS.md)
+
+---
+
+## What SZL Holdings Builds
+
+SZL Holdings is a technology holding company that builds and operates a unified ecosystem of command-grade software platforms. Each platform addresses a specific domain where operational clarity, decision speed, and execution accountability determine outcomes.
+
+The defining characteristic of the SZL ecosystem is **architectural unity**. Every platform shares one intelligence backbone, one design system, one authentication model, and one data layer. This is not a portfolio of unrelated products — it is a compounding system where shared investment multiplies in value with each new platform added.
+
+---
+
+## The Problem Being Solved
+
+Enterprise operations have an accountability gap:
+
+- **Dashboards** show what happened.
+- **Alerts** show what is wrong.
+- **Neither** tells operators what to do next, who is responsible, or whether the recommended action is safe to execute.
+
+AI tools compound the problem: they add recommendation volume without adding governance. Operators end up with more data, more noise, and more untracked decisions running in parallel.
+
+SZL Holdings builds the **governed operational intelligence layer** — the platform that connects what is observable to what is executable, under governance, with full attribution.
 
 ---
 
@@ -50,6 +74,60 @@ The platform provides the infrastructure for this loop. Domain packs provide the
 │  External feeds (AIS, STIX, sanctions, court records, market data)      │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## The Platform Ecosystem
+
+```
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                          SZL HOLDINGS ECOSYSTEM                              │
+│                                                                              │
+│  OBSERVE · DECIDE · ACT                                                      │
+│  ┌────────────┐  ┌────────────┐  ┌────────────┐  ┌────────────┐             │
+│  │    LYTE    │  │   AEGIS    │  │   TERRA    │  │  VESSELS   │             │
+│  │  Business  │  │  Security  │  │  Real Est. │  │  Maritime  │             │
+│  │Observability│  │& Defense  │  │Intelligence│  │Intelligence│             │
+│  └────────────┘  └────────────┘  └────────────┘  └────────────┘             │
+│                                                                              │
+│  ┌────────────┐  ┌────────────┐                                              │
+│  │   PRISM    │  │  CARLOTA   │                                              │
+│  │  COUNSEL   │  │    JO      │                                              │
+│  │   Legal    │  │  Advisory  │                                              │
+│  └────────────┘  └────────────┘                                              │
+│                                                                              │
+│  EXECUTE                                                                     │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │  ALLOY — Execution Fabric                                            │   │
+│  │  Signal routing · Workflow orchestration · Approval gates            │   │
+│  │  Human-in-the-loop controls · Immutable audit trail                  │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  COMMAND SURFACES                                                            │
+│  ┌──────────────────────────────┐  ┌────────────────────────────────────┐   │
+│  │  CORTEX — Unified Mobile     │  │  Command Portal — Ecosystem Hub    │   │
+│  │  All domains · iOS/Android   │  │  8-domain real-time dashboard      │   │
+│  └──────────────────────────────┘  └────────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Platform Summary
+
+| Platform | What It Does | Who Uses It |
+|----------|-------------|-------------|
+| **Lyte** | Makes every operational surface visible and actionable through the PRISM framework | Operations leads, CFOs, PMOs |
+| **Aegis** | Unified cybersecurity command — threat detection, SOC operations, AI-assisted triage | CISOs, SOC analysts, MSPs |
+| **Vessels** | Real-time maritime fleet command — AIS tracking, sanctions screening, voyage economics | Fleet executives, operations, compliance |
+| **Terra** | NYC property intelligence — distressed asset detection, ownership mapping, deal pipeline | Brokers, investors, portfolio teams |
+| **PRISM Counsel** | Agentic legal matter management — court filings, document review, recovery operations | Legal partners, case managers |
+| **Carlota Jo** | Premium advisory platform — client portal, service delivery, advisory engagement | Founders, executives, UHNW clients |
+| **IMPERIUM** | Cloud sovereignty and infrastructure control for enterprises | Enterprise infrastructure owners |
+| **Command Portal** | Ecosystem intelligence hub — cross-domain real-time monitoring | Platform admin, ecosystem operators |
+| **CORTEX** | Unified mobile command — all 8 domain workspaces on iOS/Android | All platform users on mobile |
+| **SZL Holdings** | Corporate presence — investor portal, trust center, ecosystem overview | Investors, enterprise evaluators |
+| **Alloy** | Execution fabric — shared workflow engine, approval gates, audit trail | All platforms (internal infrastructure) |
 
 ---
 
@@ -109,6 +187,19 @@ The Proof Chain (`@szl-holdings/proof-chain`) records the complete audit trail: 
 ### Step 9: Outcome Tracking
 
 The Outcome Graph (`@szl-holdings/outcome-graph`) records the real-world result. Was the recommendation accepted? Did the action achieve its intended outcome? This data feeds back into agent confidence calibration and Monte Carlo model tuning.
+
+---
+
+## How a Signal Becomes an Action (Summary)
+
+Every consequential operation in the SZL ecosystem follows this path, regardless of domain:
+
+1. **Signal surfaces** — a risk indicator, anomaly, or threshold breach is detected
+2. **Context is added** — AI agents analyze the signal, attach reasoning and confidence scores
+3. **Recommendation is routed** — Alloy routes the recommendation to the right operator
+4. **Human reviews and approves** — in `controlled` mode (the default), the operator confirms or rejects the recommendation before execution. Alloy also supports `full` and `automated` workflow modes where execution proceeds without a manual approval step.
+5. **Action executes** — the confirmed action runs
+6. **Audit event is created** — an immutable record captures the full chain: signal → recommendation → approval → action
 
 ---
 
@@ -206,6 +297,27 @@ All AI agents are **advisory only** — they surface intelligence and recommenda
 
 ---
 
+## Scale
+
+| Metric | Value |
+|--------|-------|
+| Production Web Applications | 10 |
+| Native Mobile Apps | CORTEX (unified) + 5 domain-specific |
+| Shared Libraries | 37 packages |
+| API Endpoints | 2,331 |
+| Database Tables | 685 |
+| Source Files | 1,620 TypeScript files |
+| Lines of Code | 450,000+ |
+| UI Components | 252 web + 116 mobile screens |
+
+---
+
+## Current Status
+
+All platforms are at **Functional Alpha** status — full feature sets with seeded/demo data, not yet commercially deployed. Carlota Jo (web and mobile) is live. SZL Holdings corporate site is a Public Beta Candidate. The platform is pre-commercial; no paying customers exist as of April 2026.
+
+---
+
 ## Related Documents
 
 | Document | Path |
@@ -217,3 +329,15 @@ All AI agents are **advisory only** — they surface intelligence and recommenda
 | API specification | [API-SPEC.md](API-SPEC.md) |
 | Data model | [DATA-MODEL.md](DATA-MODEL.md) |
 | Access control | [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) |
+
+---
+
+## Contact
+
+- **Email:** inquiries@szlholdings.com
+- **Security:** security@szlholdings.com
+- **Website:** szlholdings.com
+
+---
+
+*Last verified against code on 2026-04-16*
