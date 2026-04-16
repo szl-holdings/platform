@@ -199,3 +199,53 @@ Quick reference:
 - **pnpm only** — The workspace enforces pnpm. Using npm or yarn directly will fail.
 - **Node.js version** — Managed by Replit/Nix. Check `.replit` for the configured runtime.
 - **No Docker** — The Replit environment does not support Docker containers. Use Nix packages for system dependencies.
+
+---
+
+## ATLAS Spatial Runtime Operations
+
+### Feature Flags
+
+Five ATLAS feature flags are registered in the platform flag system. They are managed through the admin UI or database and take effect immediately without restart:
+
+| Flag | Default | Notes |
+|------|---------|-------|
+| `ENABLE_ATLAS_SPATIAL_RUNTIME` | On | Master kill switch |
+| `ENABLE_OPENUSD_EXPORTS` | Off | OpenUSD stub export |
+| `ENABLE_NIM_PROVIDER` | Off | Requires NIM_API_BASE_URL + NIM_API_KEY |
+| `ENABLE_SCENARIO_FORGE` | On | AI branch generation |
+| `ENABLE_EXECUTIVE_SAFE_MODE` | Off | Board presentation mode |
+
+### Seed & QA Commands
+
+```bash
+pnpm seed:atlas              # Seed all 4 canonical demo scenes
+pnpm seed:atlas:aegis        # Aegis ransomware scene only
+pnpm seed:atlas:vessels      # Vessels sanctions scene only
+pnpm seed:atlas:terra        # Terra distress scene only
+pnpm seed:atlas:counsel      # Prism Counsel matter scene only
+pnpm qa:atlas                # Verify seed completeness (requires DATABASE_URL)
+pnpm test:atlas              # Run all ATLAS unit and integration tests
+```
+
+### Fallback Behavior
+
+- If `ENABLE_ATLAS_SPATIAL_RUNTIME` is off, all ATLAS routes return `503` — no data loss
+- If the AI engine is unavailable, Scenario Forge degrades to manual branch creation only
+- If `ENABLE_NIM_PROVIDER` is on but NIM is unreachable, falls back to standard AI engine
+- Snapshot compaction failures log an alert; scene state served from most recent successful snapshot
+- Proof chain write failures log an alert; scene operations proceed and are flagged for reconciliation
+
+### Demo vs. Production Isolation
+
+Demo scenes are identified by `metadata.demo: true` in the database and are always seeded under `orgId: 1` (demo org). Demo data is never served from production scene state.
+
+### Snapshot Compaction Policy (Documented, Not Yet Automated)
+
+| Resolution | Retention |
+|-----------|-----------|
+| Full-resolution | 72 hours |
+| Hourly checkpoints | 30 days |
+| Monthly aggregates | Indefinite |
+
+See `docs/architecture/atlas-spatial-runtime.md` for full operational detail.

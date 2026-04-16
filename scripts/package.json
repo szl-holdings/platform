@@ -18,6 +18,11 @@
     "seed:marine-extended": "tsx ./seed-marine-extended.ts",
     "seed:agent-os": "tsx ./seed-agent-os.ts",
     "seed:distribution-os": "tsx ./seed-distribution-os.ts",
+    "seed:atlas": "tsx ./seed-atlas.ts",
+    "seed:atlas:aegis": "tsx ./seed-atlas.ts aegis",
+    "seed:atlas:vessels": "tsx ./seed-atlas.ts vessels",
+    "seed:atlas:terra": "tsx ./seed-atlas.ts terra",
+    "seed:atlas:counsel": "tsx ./seed-atlas.ts counsel",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

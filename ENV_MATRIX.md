@@ -174,3 +174,21 @@ See [docs/SECRETS_POLICY.md](docs/SECRETS_POLICY.md) for the full secrets policy
 4. Update this document
 5. Add to `.env.example` with a placeholder value and description
 6. Update [docs/SECRETS_POLICY.md](docs/SECRETS_POLICY.md) if the variable has special handling requirements
+
+---
+
+## ATLAS Spatial Runtime Environment Variables
+
+The following environment variables control ATLAS feature flags and integrations. All flags are also manageable through the admin UI without environment variable changes.
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `ENABLE_ATLAS_SPATIAL_RUNTIME` | No | Feature flag default (on) | Overrides the `ENABLE_ATLAS_SPATIAL_RUNTIME` platform flag. Set to `"false"` to disable all ATLAS routes globally. |
+| `ENABLE_OPENUSD_EXPORTS` | No | Feature flag default (off) | Overrides the `ENABLE_OPENUSD_EXPORTS` platform flag. Safe to enable — stub output always available. |
+| `ENABLE_NIM_PROVIDER` | No | Feature flag default (off) | Overrides the `ENABLE_NIM_PROVIDER` platform flag. |
+| `NIM_API_BASE_URL` | Conditional | — | Required when `ENABLE_NIM_PROVIDER` is active. NVIDIA NIM endpoint base URL. |
+| `NIM_API_KEY` | Conditional | — | Required when `ENABLE_NIM_PROVIDER` is active. NIM API key. Store in Replit Secrets. |
+| `ENABLE_SCENARIO_FORGE` | No | Feature flag default (on) | Overrides the `ENABLE_SCENARIO_FORGE` platform flag. |
+| `ENABLE_EXECUTIVE_SAFE_MODE` | No | Feature flag default (off) | Overrides the `ENABLE_EXECUTIVE_SAFE_MODE` platform flag. Set to `"true"` for board/investor demos. |
+
+**Note:** Feature flags set via environment variables override database values. This is intentional for emergency shutoff scenarios. Remove the environment variable to revert control to the database/admin UI.

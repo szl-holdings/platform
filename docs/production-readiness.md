@@ -333,3 +333,41 @@ GET /api/health → HTTP 200
 | `pnpm audit:design-system` | PASS | No blocking design token violations |
 | `pnpm audit:broken-links` | PASS | All lazy imports resolve to existing files |
 | `pnpm health:check` | PASS | API health endpoints responding |
+
+---
+
+## ATLAS Spatial Runtime — Production Readiness
+
+### Readiness Status: Functional Alpha
+
+| Dimension | Status | Notes |
+|-----------|--------|-------|
+| Export adapters | ✅ Implemented | JSON snapshot, branch package, proof bundle, OpenUSD manifest stub |
+| Feature flags | ✅ Registered | 5 flags in platform-flags.ts |
+| Demo seed data | ✅ Ready | 4 canonical demo scenes, `pnpm seed:atlas` |
+| Unit tests | ✅ Passing | 48+ tests across 5 test files |
+| Integration tests | ✅ Passing | All 4 export adapters + 4 domain scenarios |
+| Documentation | ✅ Complete | Architecture, buyer, trust, investor, demo docs |
+| OpenUSD / NIM integration | 🔧 Stub only | Roadmap item — requires NVIDIA USD SDK + NIM endpoint |
+| Snapshot compaction automation | 🔧 Documented | Policy defined, implementation is a future ops item |
+| Route handlers for export APIs | 🔧 Not implemented | Out of scope — adapters ready for route integration |
+
+### Commands
+
+```bash
+pnpm seed:atlas       # Seed all 4 canonical demo scenes
+pnpm qa:atlas         # Verify seed completeness
+pnpm test:atlas       # Run all ATLAS tests
+```
+
+### Proof-Chain Retention Policy
+
+Proof chain entries for ATLAS are retained for the lifetime of the organization record and are never purged. This includes: scene snapshots, drift Guard critical entries (score ≥ 0.75), branch proposals, approval decisions, and export records.
+
+### Snapshot Compaction Policy (Documented, Not Yet Automated)
+
+Full-resolution snapshots are retained for 72 hours, hourly checkpoints for 30 days, and monthly aggregates indefinitely. Intra-hour changes beyond 72 hours are not individually recoverable — this is by design to prevent unbounded storage growth.
+
+### Demo vs. Production Isolation
+
+Demo mode is controlled by `DEMO_MODE=true` or `NODE_ENV !== "production"`. In demo mode, scene state is served from the seeded snapshot store. Demo scenes carry `metadata.demo: true` and are always seeded under the demo organization. Production scenes can never be confused with demo scenes.

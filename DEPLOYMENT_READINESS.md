@@ -147,3 +147,43 @@ After deploying, verify:
 | Legal review | Counsel | |
 | Security review | Security | |
 | Go-live approval | Stephen Lutar | |
+
+---
+
+## ATLAS Spatial Runtime Deployment Checklist
+
+Before going live with ATLAS functionality, verify the following:
+
+### Pre-Deployment
+
+- [ ] `pnpm seed:atlas` run successfully on target environment
+- [ ] `pnpm qa:atlas` passes all 4 scene checks
+- [ ] `pnpm test:atlas` passes all 48+ tests
+- [ ] Feature flags reviewed and set appropriately:
+  - [ ] `ENABLE_ATLAS_SPATIAL_RUNTIME` — confirm intent (default: on)
+  - [ ] `ENABLE_SCENARIO_FORGE` — confirm AI engine is available
+  - [ ] `ENABLE_OPENUSD_EXPORTS` — confirm off unless USD output is needed
+  - [ ] `ENABLE_NIM_PROVIDER` — confirm off unless NIM is configured
+  - [ ] `ENABLE_EXECUTIVE_SAFE_MODE` — confirm appropriate for audience
+
+### NIM Integration (When Enabling)
+
+- [ ] `NIM_API_BASE_URL` set in Replit Secrets
+- [ ] `NIM_API_KEY` set in Replit Secrets
+- [ ] NIM endpoint health check passes
+- [ ] `ENABLE_NIM_PROVIDER` flag enabled in admin UI
+
+### Demo Mode Verification
+
+- [ ] Demo org (orgId: 1) exists in database
+- [ ] All 4 canonical demo scenes present in `atlas_artifacts` table with `metadata.demo: true`
+- [ ] `DEMO_MODE=true` set if environment is a demo/investor instance
+- [ ] Executive Safe Mode configured appropriately for audience
+
+### Proof Chain Verification
+
+- [ ] Proof chain service responding to health check
+- [ ] Write test: create a test scene snapshot, verify proof chain entry created
+- [ ] Confirm retention policy aligns with organizational compliance requirements
+
+See `docs/architecture/atlas-spatial-runtime.md` for full architecture detail.

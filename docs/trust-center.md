@@ -152,3 +152,36 @@ Enterprise access requests and compliance documentation: available on request.
 ---
 
 *SZL Holdings does not claim SOC 2 certification or any formal regulatory compliance status at this time. This document describes our engineering and operational practices as they stand today.*
+
+---
+
+## ATLAS Spatial Runtime — Trust & Data Controls
+
+### What ATLAS Stores
+
+ATLAS maintains scene state in the `atlas_artifacts` database table. Each scene record contains operational state derived from signals already present in the SZL platform — no new data collection beyond what the platform already holds.
+
+### AI Output Governance
+
+Every AI-generated ATLAS output (branch proposal, outcome projection) carries:
+- Model identity and version
+- Confidence score (0.0–1.0), surfaced in UI and export bundles
+- Service attribution and correlation ID
+- Proof chain ID linking to the immutable audit record
+
+**Human-in-the-loop is enforced.** No branch is executed without explicit human approval via the Alloy approval gate. The approval record is written to the proof chain before any action is dispatched.
+
+### Data Retention
+
+| Data Type | Retention |
+|-----------|-----------|
+| Full-resolution scene snapshots | 72 hours |
+| Hourly compacted checkpoints | 30 days |
+| Proof chain entries and approvals | Lifetime of org record |
+| Drift Guard critical entries (≥0.75) | Lifetime of org record |
+
+### Demo vs. Production Isolation
+
+Demo scenes are identified by `metadata.demo: true` and seeded under the demo organization. Production scenes cannot be confused with demo data.
+
+See [ATLAS Trust Controls](trust/atlas-spatial-runtime-controls.md) for the full trust framework.

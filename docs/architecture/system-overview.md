@@ -189,3 +189,48 @@ The architectural leverage of the SZL ecosystem comes from shared infrastructure
 - *[Platform Map](platform-map.md) — Visual topology of the ecosystem*
 - *[Data Flow](data-flow.md) — Entity model and cross-domain signal flow*
 - *[Trust Center](../trust/trust-center.md) — Security posture and AI governance*
+
+---
+
+## ATLAS Spatial Runtime Layer
+
+The ATLAS Spatial Runtime is an additional platform layer that adds **scene memory, worldline branching, drift detection, and proof-chain-integrated export** to all domain verticals.
+
+### Core Services
+
+| Service | Purpose |
+|---------|---------|
+| **Scene Memory Router** | Composes typed scene state from domain signals; snapshot compaction with 72h/30d/indefinite retention tiers |
+| **Worldline (Branch Store)** | Maintains directed acyclic graph of scene branches with delta state, outcome projections, and approval lineage |
+| **Drift Guard** | Computes drift score (0.0–1.0) vs. baseline; raises alerts and proof chain entries at critical thresholds |
+| **Scenario Forge** | AI-assisted what-if branch generation with Monte Carlo outcome simulation |
+| **Replay Engine** | Reconstructs scene state at any past timestamp from the snapshot compaction store |
+
+### Export Adapters (`lib/scene-export`)
+
+| Adapter | Format | Use Case |
+|---------|--------|---------|
+| `JsonSnapshotAdapter` | JSON | API delivery, debugging, programmatic integration |
+| `BranchPackageAdapter` | JSON | Approval workflow delivery, branch comparison |
+| `ProofBundleAdapter` | JSON | Compliance export, legal hold, regulatory submission |
+| `OpenUSDManifestAdapter` | USDA text | Future Omniverse staging (stub — roadmap) |
+
+### Feature Flags
+
+| Flag | Default | Purpose |
+|------|---------|---------|
+| `ENABLE_ATLAS_SPATIAL_RUNTIME` | On | Master kill switch |
+| `ENABLE_SCENARIO_FORGE` | On | AI branch generation |
+| `ENABLE_OPENUSD_EXPORTS` | Off | OpenUSD stub export |
+| `ENABLE_NIM_PROVIDER` | Off | NVIDIA NIM inference |
+| `ENABLE_EXECUTIVE_SAFE_MODE` | Off | Board presentation mode |
+
+### Domain Coverage
+
+ATLAS canonical demo paths are seeded for all four domain verticals:
+- **Aegis (security):** Ransomware branch comparison — isolation vs. monitor-contain
+- **Vessels (maritime):** Sanctions/weather reroute — Cape of Good Hope alternative
+- **Terra (real_estate):** Property distress stress test — 3-scenario IRR projection
+- **Prism Counsel (general):** Matter pressure & settlement — accelerated settlement path
+
+*See [ATLAS Architecture](architecture/atlas-spatial-runtime.md) for the full system design.*

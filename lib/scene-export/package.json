@@ -1,0 +1,20 @@
+{
+  "name": "@szl-holdings/scene-export",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@szl-holdings/atlas-artifacts": "workspace:*",
+    "@szl-holdings/db": "workspace:*",
+    "@szl-holdings/proof-chain": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  }
+}

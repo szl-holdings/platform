@@ -33,7 +33,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
-    include: ["tests/**/*.test.ts", "tests/**/*.spec.ts"],
+    include: ["tests/**/*.test.ts", "tests/**/*.spec.ts", "lib/scene-export/src/__tests__/**/*.test.ts"],
     exclude: [
       "tests/e2e/**",
       "tests/components/**",

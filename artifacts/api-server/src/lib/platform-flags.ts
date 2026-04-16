@@ -115,6 +115,41 @@ export const PLATFORM_FLAGS = [
     isEnabled: true,
     rolloutPercentage: 100,
   },
+  {
+    key: "ENABLE_ATLAS_SPATIAL_RUNTIME",
+    name: "ATLAS — Spatial Runtime",
+    description: "Enables the ATLAS Spatial Runtime layer: scene memory, digital twin composition, worldline branching, and drift guard across all domain packs. When disabled, ATLAS API routes return 503 with a maintenance notice. Safe to disable without data loss — scene state is retained in the database.",
+    isEnabled: true,
+    rolloutPercentage: 100,
+  },
+  {
+    key: "ENABLE_OPENUSD_EXPORTS",
+    name: "ATLAS — OpenUSD Exports",
+    description: "Enables the OpenUSD manifest export adapter for ATLAS scene snapshots. Currently exports a typed stub (.usda text format). Full binary .usdc output and Omniverse Nucleus staging require NVIDIA USD SDK integration. Safe to enable — stub output is always available.",
+    isEnabled: false,
+    rolloutPercentage: 0,
+  },
+  {
+    key: "ENABLE_NIM_PROVIDER",
+    name: "ATLAS — NIM Inference Provider",
+    description: "Routes ATLAS spatial inference tasks (anomaly detection on the scene graph, drift root-cause analysis) through a NVIDIA NIM endpoint instead of the standard AI engine. Requires NIM_API_BASE_URL and NIM_API_KEY environment variables. Fallback to standard AI engine when disabled.",
+    isEnabled: false,
+    rolloutPercentage: 0,
+  },
+  {
+    key: "ENABLE_SCENARIO_FORGE",
+    name: "ATLAS — Scenario Forge",
+    description: "Enables the Scenario Forge engine: AI-generated what-if branch proposals, Monte Carlo outcome simulation, and approval-gated branch execution. When disabled, branching UI is read-only and pre-seeded branches are still viewable.",
+    isEnabled: true,
+    rolloutPercentage: 100,
+  },
+  {
+    key: "ENABLE_EXECUTIVE_SAFE_MODE",
+    name: "ATLAS — Executive Safe Mode",
+    description: "When enabled, restricts ATLAS outputs to executive-safe summaries: hides raw drift scores, suppresses low-confidence projections below the 0.6 threshold, and collapses technical simulation details. Designed for board presentations and investor demos. Does not affect underlying data.",
+    isEnabled: false,
+    rolloutPercentage: 0,
+  },
 ] as const;
 
 export type PlatformFlagKey = typeof PLATFORM_FLAGS[number]["key"];
