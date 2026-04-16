@@ -28,6 +28,7 @@ export default function SolutionsPrismCounselPage() {
         <div className="flex items-center gap-2 mb-4">
           <Scale className="w-6 h-6 text-[#d4a054]" />
           <span className="text-[11px] font-medium text-[#d4a054] uppercase tracking-widest">PRISM Counsel</span>
+          <span style={{ display: "inline-flex", alignItems: "center", padding: "0.125rem 0.5rem", borderRadius: "0.25rem", background: "rgba(212,160,84,0.12)", border: "1px solid rgba(212,160,84,0.25)", fontFamily: "var(--font-mono, monospace)", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#d4a054" }}>Beta</span>
         </div>
         <h1 className="text-4xl font-bold text-slate-100 leading-tight mb-4">
           Legal Business Observability.<br />

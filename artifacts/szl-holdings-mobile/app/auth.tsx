@@ -29,7 +29,7 @@ export default function AuthScreen() {
           </View>
           <Text style={[styles.companyName, { color: colors.cream }]}>SZL Holdings</Text>
           <Text style={[styles.tagline, { color: colors.mutedForeground }]}>
-            Executive Command Center
+            Mobile Command · SZL Platform
           </Text>
         </View>
 
@@ -37,10 +37,10 @@ export default function AuthScreen() {
 
         <View style={styles.features}>
           {[
-            "Portfolio performance at a glance",
+            "Unified signals across all domain packs",
+            "Governed approvals — confirm from anywhere",
             "Alloy workflow orchestration",
-            "Investor relations & documents",
-            "Trust center & compliance",
+            "Full audit trail — every action attributed",
           ].map((f) => (
             <View key={f} style={styles.featureRow}>
               <View style={[styles.featureDot, { backgroundColor: colors.gold }]} />

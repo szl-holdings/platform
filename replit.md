@@ -16,7 +16,7 @@ The SZL Holdings Platform is a **governed operational intelligence platform** �
 
 **Command surfaces:** Lyte (web command), CORTEX (mobile command), Command Portal (ecosystem hub)
 **Execution fabric:** Alloy (workflow orchestration, approval gates, audit trail)
-**Domain packs:** Aegis (security), Vessels (maritime), Terra (real estate), PRISM Counsel (legal), Carlota Jo (advisory), IMPERIUM (cloud sovereignty)
+**Domain packs:** Aegis (security · Beta), Vessels (maritime · Beta), Terra (real estate · Beta), PRISM Counsel (legal · Beta), Carlota Jo (advisory · Beta)
 **Cross-domain:** PRISM Bus (event bus), Forge Runtime (agent execution), AI Engine (multi-provider with fallback)
 
 ## User Preferences
@@ -120,6 +120,40 @@ A comprehensive audit of the entire monorepo was completed as part of Series A C
 - 3 artifact dirs should be removed: `stephen-site` (deprecated), `lyte-command-center` (orphaned), `imperium` (skeleton)
 - 3 legacy env vars to remove: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY` (superseded by `AI_INTEGRATIONS_*` proxy vars)
 - `lib/approvals` has no `package.json` — investigate in Phase 2
+
+## Series A Cleanup — Phase 4: Product Positioning, Architecture Specs & Launch Readiness (April 2026)
+
+Twenty documentation files produced to tighten the external product surface and make the platform investor-grade:
+
+**Product Positioning (3 docs):**
+- `docs/PRODUCT_MODE_POSITIONING.md` — Platform thesis: governed operational intelligence, not dashboard or generic agent company
+- `docs/PLATFORM_MESSAGE_ARCHITECTURE.md` — Naming hierarchy (Lyte → Alloy → domain packs), messaging rules, CORTEX alignment
+- `docs/GA_BETA_INTERNAL_STATUS.md` — Every surface classified with demo-safety assessment
+
+**Architecture Specifications (5 docs):**
+- `docs/STATE_MODEL.md` — Canonical entity model: Actor, Signal, Inference, Policy, Action, Approval, Outcome
+- `docs/DECISION_LEDGER.md` — Full provenance chain spec: signal → inference → policy → action → approval → execution → result
+- `docs/AGENT_EVAL_AND_REPLAY.md` — Eval runs, replay runs, version comparison, correctness dimensions, promotion gate
+- `docs/BUSINESS_JOURNEY_MODEL.md` — Business process observability tying technical signals to revenue/risk/friction impact
+- `docs/DOMAIN_PACK_STANDARD.md` — Required components and constraints for vertical domain pack development
+
+**Observability Specs (3 docs):**
+- `docs/OBSERVABILITY_SPEC.md` — OpenTelemetry-aligned trace/span/attribute conventions with correlation ID propagation rules
+- `docs/EVENT_SCHEMA.md` — Canonical business and technical event schema with full event type registry
+- `docs/SLOS_AND_ALERTS.md` — SLO definitions (platform + business), alerting tiers, error budget policy
+
+**Launch Readiness (6 docs):**
+- `docs/LAUNCH_READINESS_SCORECARD.md` — 8-dimension scored assessment with before/after (Q4 2025 vs Q2 2026): overall 2.0 → 3.9
+- `docs/PRODUCTION_READINESS_CHECKLIST.md` — Step-by-step blocking/recommended checklist for production deploy
+- `docs/ONCALL_AND_INCIDENT_MODEL.md` — On-call rotation, incident severity, response procedures, post-mortem template
+- `docs/ROLLBACK_AND_CANARY_PLAN.md` — Code/DB/config/AI model rollback procedures; canary via phased tenant activation
+- `docs/EXECUTIVE_DEMO_SCRIPT.md` — 45-minute structured investor demo with setup checklist, act-by-act script, Q&A guide
+- `docs/TECHNICAL_DUE_DILIGENCE_PACKET.md` — Architecture, security, data model, AI governance, operational readiness for investors
+
+**Executive Summaries (3 docs):**
+- `docs/FOUNDER_EXEC_SUMMARY.md` — Founder narrative: what was built, why, what the Series A funds, the thesis
+- `docs/TOP_20_FIXES_COMPLETED.md` — Top 20 engineering and product improvements from Series A cleanup phases
+- `docs/OPEN_RISKS_AND_NEXT_10.md` — 10 open risks + 10 highest-impact next priorities with effort estimates
 
 ## Dev Server Port Architecture
 

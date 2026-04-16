@@ -44,7 +44,10 @@ export default function SolutionsAegisPage() {
                 </div>
                 <div>
                   <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-aegis)", opacity: 0.8 }}>Defense & Intelligence</p>
-                  <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 600, letterSpacing: "-0.028em", lineHeight: 1.08 }}>Aegis</h1>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                    <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 600, letterSpacing: "-0.028em", lineHeight: 1.08 }}>Aegis</h1>
+                    <span style={{ display: "inline-flex", alignItems: "center", padding: "0.125rem 0.5rem", borderRadius: "0.25rem", background: "hsla(222,60%,50%,0.12)", border: "1px solid hsla(222,60%,50%,0.25)", fontFamily: "var(--font-mono)", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-aegis)", alignSelf: "flex-start", marginTop: "0.5rem" }}>Beta</span>
+                  </div>
                 </div>
               </div>
               <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "52ch", marginBottom: "2.25rem" }}>
