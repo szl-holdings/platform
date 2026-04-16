@@ -84,6 +84,24 @@ uri = "file://artifacts/vessels-mobile/assets/images/splash-icon.png"
 type = "image"
 title = "vessels splash screen"
 
+[[generated]]
+id = "t3l3sKPszW121puf1n3pO"
+uri = "file://.local/deliverables/substack-week-1/post-1-thursday/hero.png"
+type = "image"
+title = "post1-manifesto-hero"
+
+[[generated]]
+id = "UV_gA0Tp1GsZ41RgB4NGK"
+uri = "file://.local/deliverables/substack-week-1/post-2-monday/hero.png"
+type = "image"
+title = "post2-aegis-hero"
+
+[[generated]]
+id = "KpK3DuSdH1g9y1tax_9QH"
+uri = "file://.local/deliverables/substack-week-1/post-3-sunday/hero.png"
+type = "image"
+title = "post3-fullstack-convergence-hero"
+
 [[outputs]]
 id = "I_ORUhKS2b7MEVDwDdGWJ"
 uri = "file://social-content/banners/linkedin-7-lenses-banner.png"
@@ -137,3 +155,9 @@ id = "uoV-wgFnavinxmSKQI3iJ"
 uri = "file://deliverables/SZL-Newsletter-Screenshots.zip"
 type = "unspecified"
 title = "SZL Newsletter Screenshots — mockups + references"
+
+[[outputs]]
+id = "MnKJY6i-AXmOeXBWj8SoH"
+uri = "file://.local/deliverables/substack-week-1.zip"
+type = "unspecified"
+title = "The Operator — Substack Week 1 Launch Pack"
