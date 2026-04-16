@@ -136,3 +136,31 @@ An investor or diligence engineer reviewing this repo can verify:
 - [ ] `.github/workflows/ci.yml` — CI/CD gate with real checks
 - [ ] `lib/observability` — telemetry infrastructure in code
 - [ ] `ops/benchmark/` — this set of documents
+
+---
+
+## Competitive Repo Quality Benchmarks
+
+### Stripe (Open-Source SDKs)
+- Immaculate README with quickstart
+- Comprehensive API reference linked from repo
+- Every release has detailed changelog with migration guides
+- Clean, consistent code style across all packages
+- Active issue management with labeled triage
+
+### Vercel (Next.js, Turbo)
+- Professional README with badges (build status, coverage, npm version)
+- Well-organized monorepo with turborepo orchestration
+- Clear contribution guidelines with PR templates
+- Active community engagement with responsive maintainers
+- Release process documented and automated
+
+### SZL Quality Bar
+The SZL repo should be at Stripe SDK quality for investor inspection:
+- Every directory has a clear purpose documented in its package.json description
+- Every lib package has a README explaining what it does and why it exists
+- No orphaned code, abandoned experiments, or dead feature flags
+- CI is green on main at all times (no broken-window tolerance)
+- Documentation is current — stale docs are worse than no docs
+- Commit messages follow conventional format (feat/fix/docs/refactor)
+- Release notes are substantive and investor-readable

@@ -1,7 +1,7 @@
 # Observability — Visible Surface Inventory
 
 Generated: 2026-04-16
-Phase: H — Observability & Release Control
+Updated: 2026-04-16 (Competitive benchmark additions)
 
 ---
 
@@ -88,6 +88,52 @@ These belong in operator tooling (Grafana, Honeycomb), not the business command 
 
 ---
 
+## Competitive Benchmark Additions
+
+### Vercel: Deployment-Centric Observability
+- Every deployment has a visible log stream
+- Build time, function execution time, cold start metrics visible
+- Analytics dashboard shows traffic, errors, performance
+- Alerts on deployment failure, not just runtime errors
+
+### Cloudflare: Zone-Level Analytics
+- Per-zone request volume, cache hit ratio, threat score
+- Worker analytics (invocations, errors, duration)
+- Real-time logs with severity filtering
+- Anomaly detection with automatic alerts
+
+### Stripe: API Health Dashboard
+- API status page with real-time incident reporting
+- Webhook delivery success rate
+- Payment success/failure rates
+- Integration health (broken webhooks, expired certificates)
+
+### SZL Governance Observability (Target Layer)
+
+Beyond infrastructure observability, SZL should surface **governance health** metrics:
+
+| Metric | Description | Target |
+|--------|-------------|--------|
+| Signal-to-decision time | Average time through the full loop | < 30 min (critical) |
+| Simulation coverage | % of decisions with Monte Carlo | > 90% |
+| Policy gate pass rate | % approved on first attempt | 70-85% |
+| Proof chain coverage | % of decisions with proof records | > 95% |
+| Outcome loop closure | % of decisions with outcome records | > 80% |
+| Agent confidence accuracy | Brier score: stated confidence vs. outcomes | > 0.75 |
+
+### Operator-Facing Alerts (Target)
+
+| Alert Type | Trigger | Channel |
+|-----------|---------|---------|
+| Signal surge | 3x normal volume in any domain | Push + banner |
+| Policy escalation | Decision denied, requires executive | Push + email |
+| Outcome variance | > 30% variance between predicted/actual | In-app |
+| System degradation | API latency P95 > 2s or error rate > 2% | Push + PagerDuty |
+| Proof gap | Decision without proof record | In-app alert |
+| Agent underperformance | Acceptance rate < 50% | Weekly digest |
+
+---
+
 ## Status
 
 | Item | Status |
@@ -101,3 +147,4 @@ These belong in operator tooling (Grafana, Honeycomb), not the business command 
 | Service status panel in Command | Live |
 | OTEL external export | Planned (see otel-plan.md) |
 | External metrics endpoint | Planned |
+| Governance health metrics | Planned (benchmark spec above) |
