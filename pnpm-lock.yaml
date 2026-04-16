@@ -1376,6 +1376,8 @@ importers:
         specifier: ^3.3.5
         version: 3.9.0(react@19.1.0)
 
+  lib/action-engine: {}
+
   lib/ai-engine:
     dependencies:
       '@anthropic-ai/sdk':
@@ -1565,6 +1567,8 @@ importers:
       drizzle-kit:
         specifier: ^0.31.9
         version: 0.31.9
+
+  lib/decision-engine: {}
 
   lib/decision-fabric:
     dependencies:
@@ -1797,6 +1801,8 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
+
+  lib/policy-engine: {}
 
   lib/prism-bus:
     dependencies:

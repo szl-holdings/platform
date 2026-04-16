@@ -4,24 +4,25 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
-// Limit esbuild Go runtime threads to prevent OS thread exhaustion
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
-const port = Number(process.env.VITE_PORT) || 5100;
+const vitePort = Number(process.env.VITE_PORT) || 3101;
 const basePath = process.env.BASE_PATH || "/carlota-jo/";
 
-const SHARED_PROXY_PORT = 5000;
-const VITE_ROUTES: Record<string, number> = {
-  "carlota-jo": 5100,
-  "command": 6001,
-  "terra": 6801,
-  "vessels": 8001,
-  "firestorm": 8009,
-};
+const SHARED_PROXY_PORT = 9090;
 
-function universalProxyPlugin() {
+const PROXY_ROUTES = [
+  { prefix: "/aegis/", port: 23933 },
+  { prefix: "/firestorm/", port: 23931 },
+  { prefix: "/carlota-jo/", port: 3101 },
+  { prefix: "/command/", port: 3102 },
+  { prefix: "/terra/", port: 6099 },
+  { prefix: "/vessels/", port: 6899 },
+];
+
+function sharedProxyPlugin() {
   return {
-    name: "universal-proxy",
+    name: "shared-proxy",
     apply: "serve" as const,
     async configureServer() {
       const http = await import("http");
@@ -32,33 +33,36 @@ function universalProxyPlugin() {
           res.end("OK");
           return;
         }
-        const appPrefix = url.split("/")[1] || "";
-        const targetPort = VITE_ROUTES[appPrefix] ?? port;
+        const normalizedUrl = url.endsWith("/") ? url : url + "/";
+        const route = PROXY_ROUTES.find((r) => normalizedUrl.startsWith(r.prefix));
+        const targetPort = route ? route.port : vitePort;
         const upstream = http.request(
           { hostname: "127.0.0.1", port: targetPort, path: url, method: req.method,
             headers: { ...req.headers, host: "localhost:" + targetPort } },
           (upRes) => { res.writeHead(upRes.statusCode || 200, upRes.headers); upRes.pipe(res, { end: true }); }
         );
-        upstream.on("error", () => { if (!res.headersSent) { res.writeHead(503); res.end("Upstream not ready"); } });
+        upstream.on("error", () => {
+          if (!res.headersSent) { res.writeHead(503, { "Content-Type": "text/plain" }); res.end("Upstream not ready on port " + targetPort); }
+        });
         req.pipe(upstream, { end: true });
       });
       proxyServer.listen({ port: SHARED_PROXY_PORT, host: "0.0.0.0", reusePort: true }, () => {
-        console.log("[universal-proxy] Listening on port " + SHARED_PROXY_PORT);
+        console.log("[shared-proxy] Listening on port " + SHARED_PROXY_PORT + " (reusePort)");
       });
       proxyServer.on("error", (err: NodeJS.ErrnoException) => {
-        console.warn("[universal-proxy] Bind failed:", err.code);
+        console.warn("[shared-proxy] Bind error:", err.code);
       });
     },
   };
 }
 
-  export default defineConfig({
+export default defineConfig({
   base: basePath,
   plugins: [
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
-    universalProxyPlugin(),
+    sharedProxyPlugin(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [
@@ -82,7 +86,7 @@ function universalProxyPlugin() {
   root: path.resolve(import.meta.dirname),
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
-      sourcemap: "hidden",
+    sourcemap: "hidden",
     emptyOutDir: true,
     cssCodeSplit: true,
     rollupOptions: {
@@ -107,7 +111,7 @@ function universalProxyPlugin() {
     holdUntilCrawlEnd: true,
   },
   server: {
-    port: port,
+    port: vitePort,
     strictPort: true,
     host: "0.0.0.0",
     allowedHosts: true,
@@ -118,7 +122,7 @@ function universalProxyPlugin() {
     },
   },
   preview: {
-    port: port,
+    port: vitePort,
     host: "0.0.0.0",
     allowedHosts: true,
   },

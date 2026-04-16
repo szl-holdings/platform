@@ -12,10 +12,10 @@ const basePath = process.env.BASE_PATH || "/aegis/";
 const PROXY_ROUTES = [
   { prefix: "/aegis/", port: 23933 },
   { prefix: "/firestorm/", port: 23931 },
-  { prefix: "/carlota-jo/", port: 21200 },
-  { prefix: "/command/", port: 25200 },
-  { prefix: "/terra/", port: 25100 },
-  { prefix: "/vessels/", port: 18485 },
+  { prefix: "/carlota-jo/", port: 3101 },
+  { prefix: "/command/", port: 3102 },
+  { prefix: "/terra/", port: 6099 },
+  { prefix: "/vessels/", port: 6899 },
 ];
 
 function sharedProxyPlugin(): Plugin {

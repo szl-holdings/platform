@@ -8,10 +8,21 @@ import net from "net";
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
-const port = Number(process.env.VITE_PORT) || 6001;
+const vitePort = Number(process.env.VITE_PORT) || 3102;
 const basePath = process.env.BASE_PATH || "/command/";
 
+const SHARED_PROXY_PORT = 9090;
 const API_SERVER_PORT = 8080;
+
+const PROXY_ROUTES = [
+  { prefix: "/aegis/", port: 23933 },
+  { prefix: "/firestorm/", port: 23931 },
+  { prefix: "/carlota-jo/", port: 3101 },
+  { prefix: "/command/", port: 3102 },
+  { prefix: "/terra/", port: 6099 },
+  { prefix: "/vessels/", port: 6899 },
+];
+
 const apiServerDist = path.resolve(
   import.meta.dirname,
   "..",
@@ -20,18 +31,9 @@ const apiServerDist = path.resolve(
   "index.mjs"
 );
 
-const SHARED_PROXY_PORT = 5000;
-const VITE_ROUTES: Record<string, number> = {
-  "carlota-jo": 5100,
-  "command": 6001,
-  "terra": 6801,
-  "vessels": 8001,
-  "firestorm": 8009,
-};
-
-function universalProxyPlugin(): Plugin {
+function sharedProxyPlugin(): Plugin {
   return {
-    name: "universal-proxy",
+    name: "shared-proxy",
     apply: "serve",
     async configureServer() {
       const http = await import("http");
@@ -42,28 +44,30 @@ function universalProxyPlugin(): Plugin {
           res.end("OK");
           return;
         }
-        const appPrefix = url.split("/")[1] || "";
-        const targetPort = VITE_ROUTES[appPrefix] ?? port;
+        const normalizedUrl = url.endsWith("/") ? url : url + "/";
+        const route = PROXY_ROUTES.find((r) => normalizedUrl.startsWith(r.prefix));
+        const targetPort = route ? route.port : vitePort;
         const upstream = http.request(
           { hostname: "127.0.0.1", port: targetPort, path: url, method: req.method,
             headers: { ...req.headers, host: "localhost:" + targetPort } },
           (upRes) => { res.writeHead(upRes.statusCode || 200, upRes.headers); upRes.pipe(res, { end: true }); }
         );
-        upstream.on("error", () => { if (!res.headersSent) { res.writeHead(503); res.end("Upstream not ready"); } });
+        upstream.on("error", () => {
+          if (!res.headersSent) { res.writeHead(503, { "Content-Type": "text/plain" }); res.end("Upstream not ready on port " + targetPort); }
+        });
         req.pipe(upstream, { end: true });
       });
       proxyServer.listen({ port: SHARED_PROXY_PORT, host: "0.0.0.0", reusePort: true }, () => {
-        console.log("[universal-proxy] Listening on port " + SHARED_PROXY_PORT);
+        console.log("[shared-proxy] Listening on port " + SHARED_PROXY_PORT + " (reusePort)");
       });
-
       proxyServer.on("error", (err: NodeJS.ErrnoException) => {
-        console.warn("[universal-proxy] Bind failed:", err.code);
+        console.warn("[shared-proxy] Bind error:", err.code);
       });
     },
   };
 }
 
-function isPortInUse(port: number): Promise<boolean> {
+function isPortInUse(p: number): Promise<boolean> {
   return new Promise((resolve) => {
     const srv = net.createServer();
     srv.once("error", () => resolve(true));
@@ -71,7 +75,7 @@ function isPortInUse(port: number): Promise<boolean> {
       srv.close();
       resolve(false);
     });
-    srv.listen(port, "0.0.0.0");
+    srv.listen(p, "0.0.0.0");
   });
 }
 
@@ -104,10 +108,7 @@ function apiServerPlugin(): Plugin {
       });
 
       child.on("error", (err) => {
-        console.error(
-          "[api-server-dev] Failed to start api-server:",
-          err.message
-        );
+        console.error("[api-server-dev] Failed to start api-server:", err.message);
       });
 
       child.on("exit", (code) => {
@@ -133,7 +134,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
-    universalProxyPlugin(),
+    sharedProxyPlugin(),
     apiServerPlugin(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
@@ -185,7 +186,7 @@ export default defineConfig({
     holdUntilCrawlEnd: true,
   },
   server: {
-    port: port,
+    port: vitePort,
     strictPort: true,
     host: "0.0.0.0",
     allowedHosts: true,
@@ -203,7 +204,7 @@ export default defineConfig({
     },
   },
   preview: {
-    port: port,
+    port: vitePort,
     host: "0.0.0.0",
     allowedHosts: true,
   },
