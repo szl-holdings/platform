@@ -7,80 +7,90 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 
 const LAYERS = [
   {
-    name: "Lyte",
-    tagline: "Business Observability",
+    name: "Lyte + Command",
+    tagline: "Governed Command Surface",
     accent: "hsl(190,90%,55%)",
     accentRgb: "14,201,224",
     icon: Eye,
-    description: "Lyte ingests signals from the workflows, approvals, and handoffs that run your business — the ones that usually break between systems. It surfaces what's stuck, what's at risk, and what's about to fail before the damage compounds.",
+    description: "The operator command surface for governed decisions. Signal timeline, action queue, approval flow, and AI recommendations — with source citations, confidence scores, and full provenance on every output. Where operators observe, decide, and approve.",
     capabilities: [
-      "Approval latency tracking across tools",
-      "Ownership gaps and accountability signals",
-      "Workflow friction before it hits execution",
-      "Cross-system visibility without a data warehouse",
+      "Signal-to-action pipeline with nine-step governance",
+      "AI recommendations with source attribution and confidence scores",
+      "Approval queue with policy-enforced human-in-the-loop",
+      "Cross-domain visibility via Event Fabric correlation",
     ],
   },
   {
     name: "Alloy",
-    tagline: "Execution Orchestration",
+    tagline: "Execution Fabric",
     accent: "hsl(214,80%,65%)",
     accentRgb: "92,155,228",
     icon: Zap,
-    description: "Alloy routes action and verifies follow-through. When Lyte surfaces a signal, Alloy decides what happens next — assigning ownership, triggering the right step, escalating when nothing moves. Then it confirms the action actually completed.",
+    description: "The governance backbone beneath every surface. Alloy orchestrates multi-step workflows, enforces approval gates, records immutable audit trails, and coordinates agent execution — with durable state and checkpoint recovery.",
     capabilities: [
-      "Structured workflow routing across teams",
-      "Automated escalation when tasks stall",
-      "Follow-through verification, not just task assignment",
-      "Audit trail for every decision and action",
+      "Workflow orchestration with durable state and recovery",
+      "Policy-gated approval enforcement at the platform layer",
+      "Immutable Proof Chain audit trail for every action",
+      "Monte Carlo risk simulation before consequential decisions",
     ],
   },
 ];
 
 const EXPANSION_VERTICALS = [
   {
-    name: "Terra",
-    domain: "Real estate intelligence — distress tracking, deal pipeline, market data.",
-    accent: "hsl(88,42%,44%)",
+    name: "Aegis",
+    domain: "Security & defense — SOC command, threat intelligence, MITRE ATT&CK, governed response.",
+    accent: "hsl(222,60%,58%)",
   },
   {
     name: "Vessels",
-    domain: "Maritime command — fleet visibility, voyage performance, operational exceptions.",
+    domain: "Maritime intelligence — fleet command, AIS telemetry, sanctions screening, voyage economics.",
     accent: "hsl(205,85%,55%)",
   },
   {
-    name: "Aegis",
-    domain: "Defense & intelligence — SOC command, XDR, managed operations.",
-    accent: "hsl(232,68%,60%)",
+    name: "Terra",
+    domain: "Real estate intelligence — distress pipeline, ownership graph, governed deal workflow.",
+    accent: "hsl(140,52%,46%)",
+  },
+  {
+    name: "PRISM Counsel",
+    domain: "Legal intelligence — matter command, deadline tracking, governed demand workflows.",
+    accent: "hsl(260,60%,65%)",
   },
   {
     name: "Carlota Jo",
-    domain: "Private advisory — high-trust operational support for high-consequence decisions.",
+    domain: "Premium advisory — discreet intake, governed delivery, audit-grade document handling.",
     accent: "hsl(38,55%,58%)",
+  },
+  {
+    name: "IMPERIUM",
+    domain: "Cloud sovereignty — multi-cloud governance, policy enforcement, infrastructure audit.",
+    accent: "hsl(25,72%,52%)",
   },
 ];
 
 const HOW_IT_WORKS = [
   {
     step: "01",
-    heading: "Surface the signal",
-    body: "Lyte connects to the tools your team already uses — task systems, approval queues, communication layers — and begins identifying where workflows stall, where ownership is unclear, and where risk is accumulating.",
+    heading: "Signal → Context → Recommendation",
+    body: "Signals arrive from domain-specific sources — AIS telemetry, threat feeds, court filings, market data. The Event Fabric normalizes and correlates them across domains. An AI agent analyzes the signal and proposes an action with source citations, confidence score, and provenance metadata.",
   },
   {
     step: "02",
-    heading: "Route the action",
-    body: "When a signal crosses a threshold, Alloy routes the right task to the right person through the right channel. No ambiguity about who owns it. No need to manually translate a dashboard into action.",
+    heading: "Simulation → Policy → Execution",
+    body: "For high-stakes decisions, the Monte Carlo engine models risk and uncertainty before the recommendation surfaces. Covenant Policy checks who can approve and what conditions apply. Alloy orchestrates the approved action as a governed, durable workflow.",
   },
   {
     step: "03",
-    heading: "Verify the outcome",
-    body: "Alloy doesn't close the loop at assignment. It tracks whether the action was completed, escalates if it wasn't, and records the full chain — signal, decision, action, confirmation — for accountability.",
+    heading: "Proof → Outcome → Learning",
+    body: "The Proof Chain records the complete trail: signal, recommendation, simulation, policy decision, approval, execution. The Outcome Graph tracks the real-world result. Historical outcomes feed back into simulation models and AI confidence calibration.",
   },
 ];
 
 export default function PlatformPage() {
   usePageMeta({
     title: "Platform — SZL Holdings",
-    description: "The SZL Holdings platform: Lyte observability, Alloy execution fabric, and domain packs for security, maritime, real estate, and legal operations. One governance infrastructure. Every high-consequence domain.",
+    description: "Governed decision infrastructure: Command operator surface, Alloy execution fabric, and six domain packs — Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM. One governance loop. Every high-consequence domain.",
     canonical: "https://szlholdings.com/platform",
     ogImage: "https://szlholdings.com/og/og-platform.jpg",
   });
@@ -179,7 +189,7 @@ export default function PlatformPage() {
               transition={{ duration: 0.5 }}
               style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "2.5rem" }}
             >
-              Command surfaces — Alloy + Lyte
+              Governed command surfaces
             </m.p>
             <div className="grid md:grid-cols-2 gap-6">
               {LAYERS.map((layer, i) => {
@@ -278,13 +288,13 @@ export default function PlatformPage() {
               style={{ marginBottom: "2rem" }}
             >
               <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.75rem" }}>
-                Where the architecture generalizes
+                Domain packs — governed extensions
               </p>
               <p style={{ fontSize: "0.9375rem", color: "hsl(210,5%,58%)", lineHeight: 1.65, maxWidth: "36rem" }}>
-                The same observability and execution accountability architecture that powers Lyte + Alloy is being extended to purpose-built verticals. These are the domains where the architecture compounds.
+                Domain packs are not standalone products. They are governed extensions of the same platform — same Alloy execution fabric, same Proof Chain, same Covenant Policy, same RBAC model. Only the domain intelligence layer changes.
               </p>
             </m.div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {EXPANSION_VERTICALS.map((v, i) => (
                 <m.div
                   key={v.name}

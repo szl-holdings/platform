@@ -98,15 +98,15 @@ The core loop that runs in every domain, visible in Lyte:
 
 | Product | Domain | Purpose | Status |
 |---------|--------|---------|--------|
-| **Lyte** | Flagship command | Governed command surface — PRISM framework, signal-to-action, approvals | Active — `/lyte-command-center/` |
+| **Lyte** | Flagship command | Governed command surface — PRISM framework, signal-to-action, approvals | Active — integrated into Command (`/command/`) |
 | **Alloy** | Execution fabric | Workflow orchestration, approval gates, immutable audit trail | Active — shared infrastructure |
-| **CORTEX** | Mobile command | All domain workspaces, biometric auth, offline sync | Alpha prep |
-| **Aegis** | Security & defense | SOC command, 8 advanced security modules, SOAR playbooks, threat intelligence | Active — `/firestorm/` |
+| **CORTEX** | Mobile command | All domain workspaces, biometric auth, offline sync | Alpha — `/szl-holdings-mobile/` |
+| **Aegis** | Security & defense | SOC command, 8 advanced security modules, SOAR playbooks, threat intelligence | Active — `/aegis/` |
 | **Vessels** | Maritime intelligence | Fleet tracking, S&P, demurrage, freight, voyage P&L | Active — `/vessels/` |
 | **Terra** | Real estate intelligence | Distress pipeline, ownership graph, deal workflow, AI analysis | Active — `/terra/` |
-| **PRISM Counsel** | Legal matter command | Agentic matter management, court filings, recovery operations | Legal module integrated into Aegis |
+| **PRISM Counsel** | Legal matter command | Agentic matter management, court filings, recovery operations | Governed extension — legal module |
 | **Carlota Jo** | Premium advisory | UHNW advisory operations — client portal, service catalog, booking | Live — `/carlota-jo/` |
-| **IMPERIUM** | Cloud sovereignty | Multi-cloud governance, policy enforcement, cloud estate visibility | In development |
+| **IMPERIUM** | Cloud sovereignty | Multi-cloud governance, policy enforcement, cloud estate visibility | Governed extension — integrated into Command |
 | **Command Portal** | Ecosystem hub | Cross-domain real-time dashboard, 8-domain SSE, executive briefing | Active — `/command/` |
 | **SZL Holdings** | Corporate platform | Investor portal, trust center, ecosystem overview | Active — `/` |
 

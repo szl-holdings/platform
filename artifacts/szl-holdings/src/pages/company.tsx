@@ -7,51 +7,52 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 
 const PRODUCT_HIERARCHY = [
   {
-    name: "Lyte",
-    role: "Commercial wedge",
+    name: "Command + Lyte",
+    role: "Governed command surface",
     color: "hsl(192,72%,48%)",
-    desc: "The operator console. Business observability that surfaces what's stuck, at risk, and about to break — with explainable context behind every flag. This is the product organizations adopt first.",
-    href: "/lyte",
+    desc: "The operator command surface. Signal timeline, action queue, approval flow, and AI recommendations — with source citations, confidence scores, and full provenance. Where operators observe signals, review recommendations, run simulations, and make governed decisions.",
+    href: "/command",
   },
   {
     name: "Alloy",
     role: "Execution fabric",
     color: "hsl(215,35%,65%)",
-    desc: "The workflow orchestration and audit layer beneath everything. Alloy routes action, verifies follow-through, and records the complete chain for governance review. Every vertical pack runs on Alloy.",
-    href: "/alloy-fabric",
+    desc: "The governance backbone beneath every surface. Workflow orchestration, approval gates, immutable Proof Chain audit trail, and Monte Carlo risk simulation. Every domain pack runs on Alloy. Every decision is governed, attributed, and traceable.",
+    href: "/platform",
   },
 ];
 
 const EXPANSION_LANES = [
-  { name: "PRISM Counsel", domain: "Legal observability", color: "#8b7ac8", status: "Design partner stage" },
-  { name: "Vessels", domain: "Maritime intelligence", color: "#4a90b8", status: "Design partner stage" },
-  { name: "Aegis", domain: "Security & defense", color: "#c85a5a", status: "Design partner stage" },
-  { name: "Terra", domain: "Real estate intelligence", color: "#5fa87a", status: "Design partner stage" },
-  { name: "Carlota Jo", domain: "Private advisory", color: "#c8a05a", status: "Active" },
+  { name: "Aegis", domain: "Security & defense", color: "#6b7ec8", status: "Active" },
+  { name: "Vessels", domain: "Maritime intelligence", color: "#4a90b8", status: "Active" },
+  { name: "Terra", domain: "Real estate intelligence", color: "#5fa87a", status: "Active" },
+  { name: "PRISM Counsel", domain: "Legal intelligence", color: "#8b7ac8", status: "Governed extension" },
+  { name: "Carlota Jo", domain: "Premium advisory", color: "#c8a05a", status: "Live" },
+  { name: "IMPERIUM", domain: "Cloud sovereignty", color: "#c87a4a", status: "Governed extension" },
 ];
 
 const GO_TO_MARKET = [
   {
     phase: "Phase 1",
-    label: "Lyte design partners",
-    desc: "Working directly with operators to instrument one painful workflow. Proving the signal-to-action arc works before scaling the go-to-market.",
+    label: "Design partners",
+    desc: "Working directly with operators in high-consequence domains. Proving the governed decision loop — signal to outcome — on one real operational workflow before scaling.",
   },
   {
     phase: "Phase 2",
     label: "Paid pilots",
-    desc: "Structured commercial pilots for organizations where execution latency has a quantifiable cost. Lyte + Alloy as the entry point.",
+    desc: "Structured commercial deployments where decision accountability has measurable ROI. Command + Alloy as the entry point, with domain packs extending into specific verticals.",
   },
   {
     phase: "Phase 3",
-    label: "Vertical expansion",
-    desc: "The architecture generalizes. Each expansion lane (PRISM Counsel, Vessels, Aegis, Terra, Carlota Jo) inherits the same Alloy spine and adds domain-specific signal packs and twin models.",
+    label: "Platform expansion",
+    desc: "Every domain pack inherits the same six platform primitives. Adding a new domain does not require rebuilding governance — the Outcome Graph, Proof Chain, Covenant Policy, and Monte Carlo engine are shared infrastructure.",
   },
 ];
 
 export default function CompanyPage() {
   usePageMeta({
     title: "Company — SZL Holdings",
-    description: "SZL Holdings builds Lyte and Alloy — one intelligence and action architecture with distinct vertical operating systems. About the company, product hierarchy, and go-to-market approach.",
+    description: "SZL Holdings builds governed decision infrastructure — the structural layer between signal detection and action execution. About the company, platform hierarchy, and go-to-market approach.",
     canonical: "https://szlholdings.com/company",
   });
 
@@ -81,10 +82,10 @@ export default function CompanyPage() {
                 </div>
               </div>
               <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 600, letterSpacing: "-0.026em", lineHeight: 1.1, maxWidth: "22ch", marginBottom: "1.5rem", color: "hsl(38,8%,96%)" }}>
-                One architecture. One founder. Disciplined company-building.
+                One governed decision loop. Every high-consequence domain.
               </h1>
               <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", maxWidth: "48ch" }}>
-                SZL Holdings is building the intelligence and action architecture for industries where execution latency, fragmented signal, and audit requirements make governed automation essential.
+                SZL Holdings builds governed decision infrastructure — the structural layer between signal detection and action execution, with governance, attribution, and outcome tracking on every consequential decision.
               </p>
             </m.div>
           </div>
@@ -99,13 +100,13 @@ export default function CompanyPage() {
                   What we build
                 </p>
                 <h2 style={{ fontSize: "clamp(1.25rem,2.5vw,1.875rem)", fontWeight: 600, letterSpacing: "-0.018em", lineHeight: 1.15, marginBottom: "1rem", color: "hsl(38,8%,94%)" }}>
-                  Lyte is the commercial wedge. Alloy is the execution fabric beneath it.
+                  Command is the operator surface. Alloy is the execution fabric beneath it.
                 </h2>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "1rem" }}>
-                  Most organizations have dashboards that show what happened and AI tools that generate suggestions. What they lack is the layer that catches what's about to break and routes the right action to the right person with an auditable trail.
+                  Most organizations have dashboards that show what happened and AI tools that generate suggestions. What they lack is the governed layer that routes signals to decisions, enforces approval gates, and tracks outcomes — with attribution at every step.
                 </p>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)" }}>
-                  Lyte is that layer. Alloy is the operating fabric beneath it that makes execution governed, verifiable, and audit-grade. Together, they form the operating spine that every vertical pack runs on.
+                  Command is the operator surface — where signals arrive, recommendations are reviewed, and decisions are made. Alloy is the execution fabric beneath it — workflow orchestration, policy enforcement, and immutable audit trail. Together, they form the governed decision loop that every domain pack inherits.
                 </p>
               </div>
               <div>
@@ -113,10 +114,10 @@ export default function CompanyPage() {
                   Operating spine
                 </p>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "1rem" }}>
-                  The architecture is not a collection of integrations or a platform-of-platforms. It is a layered design where each component has a single responsibility: signal, visibility, forecast, and governed action.
+                  The architecture is built on six shared primitives — not a collection of integrations or a platform-of-platforms. Each primitive has a single structural responsibility in the governed decision loop.
                 </p>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)" }}>
-                  Worldline captures the event fabric. Proof Chain provides the immutable audit trace. Model Mesh governs AI inference. The GraphQL Control Plane provides a unified API surface. Every vertical pack inherits all of it.
+                  The Event Fabric normalizes and correlates cross-domain signals. Proof Chain provides the immutable audit trail. Covenant Policy enforces approval gates. The Monte Carlo engine simulates risk before action. The Outcome Graph closes the loop with outcome tracking and AI calibration. Every domain pack inherits all six.
                 </p>
               </div>
             </div>
@@ -161,7 +162,7 @@ export default function CompanyPage() {
               ))}
             </div>
             <p style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", marginBottom: "1rem" }}>
-              Expansion lanes — on the same Alloy spine
+              Domain packs — governed extensions
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.625rem" }}>
               {EXPANSION_LANES.map((lane) => (
@@ -211,24 +212,24 @@ export default function CompanyPage() {
           </div>
         </section>
 
-        {/* Why Lyte first */}
+        {/* Why governed decisions */}
         <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "clamp(3.5rem,7vw,5.5rem) 0", background: "hsla(0,0%,100%,0.01)" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <div style={{ maxWidth: "52rem" }}>
               <p style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", marginBottom: "1rem" }}>
-                Why Lyte first
+                Why governed decisions
               </p>
               <h2 style={{ fontSize: "clamp(1.25rem,2.5vw,1.875rem)", fontWeight: 600, letterSpacing: "-0.018em", lineHeight: 1.15, marginBottom: "1.25rem", color: "hsl(38,8%,94%)" }}>
-                The problem is universal. The entry point is specific.
+                AI adds recommendations. Governance adds accountability.
               </h2>
               <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "1rem" }}>
-                Every organization has the same problem: execution breaks down between systems. Approvals stall. Ownership is unclear. Workflows go untracked. The damage compounds before anyone notices.
+                Every organization adopting AI faces the same structural gap: more recommendations, more automation, more decisions running in parallel — with no governed way to track who approved what, based on what evidence, with what outcome.
               </p>
               <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "1rem" }}>
-                Lyte is the entry point because it addresses this problem in a way that is immediately visible and measurable. There is no data warehouse project, no re-platforming, no 18-month implementation. Operators see value in the first session.
+                The governed decision loop addresses this gap structurally — signal detection, AI recommendation with provenance, risk simulation, policy enforcement, proof recording, and outcome tracking. One loop. Every domain.
               </p>
               <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)" }}>
-                Once Lyte is in place, Alloy is the natural extension — closing the loop from visibility to action. And once Alloy is in place, the vertical packs become the domain-specific deployments of the same spine.
+                Once the governed loop is in place, domain packs extend it into specific verticals. The governance infrastructure is shared. The domain intelligence layer changes. Adding a new domain does not require rebuilding governance.
               </p>
             </div>
           </div>
