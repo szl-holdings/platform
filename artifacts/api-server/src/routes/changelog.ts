@@ -54,9 +54,10 @@ changelogRouter.post("/changelog", async (req: Request, res: Response) => {
       return;
     }
 
-    const validCategories = ["feature", "improvement", "bugfix", "security", "breaking"] as const;
-    const resolvedCategory = validCategories.includes(category as any)
-      ? (category as (typeof validCategories)[number])
+    type ChangelogCategory = "feature" | "improvement" | "bugfix" | "security" | "breaking";
+    const validCategories: ReadonlySet<string> = new Set(["feature", "improvement", "bugfix", "security", "breaking"]);
+    const resolvedCategory: ChangelogCategory = category && validCategories.has(category)
+      ? (category as ChangelogCategory)
       : "feature";
 
     const [entry] = await db
