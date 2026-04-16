@@ -133,7 +133,7 @@ const STATUS_ITEMS = [
   { label: "Database", status: "operational", latency: "12ms" },
   { label: "Auth Service", status: "operational", latency: "38ms" },
   { label: "SZL Holdings Web", status: "operational", latency: "120ms" },
-  { label: "Lyte Command Center", status: "operational", latency: "95ms" },
+  { label: "Command", status: "operational", latency: "95ms" },
   { label: "Carlota Jo", status: "operational", latency: "88ms" },
 ];
 

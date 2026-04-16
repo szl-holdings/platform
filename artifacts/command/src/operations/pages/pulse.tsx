@@ -133,7 +133,7 @@ export default function LytePulse() {
           { label: "Actions", value: "47", color: "#ec4899" },
         ]} title="AIOps Architecture" /></div>
         <div className="text-center py-4 mt-4">
-          <p className="text-[9px] uppercase tracking-[0.25em]" style={{ color: "rgba(255,255,255,0.08)" }}>Lyte Command Center — AIOps Pulse</p>
+          <p className="text-[9px] uppercase tracking-[0.25em]" style={{ color: "rgba(255,255,255,0.08)" }}>Command — AIOps Pulse</p>
         </div>
       </div>
     </div>

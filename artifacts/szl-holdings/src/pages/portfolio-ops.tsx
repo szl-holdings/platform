@@ -42,7 +42,7 @@ const apps: AppReadiness[] = [
     features: { shipped: 31, planned: 5 }, deployment: { region: "US-East", lastRelease: "Mar 27" }, confidence: "High",
   },
   {
-    name: "Lyte", slug: "lyte-command-center", icon: Activity, accent: "hsl(192,80%,48%)",
+    name: "Lyte", slug: "command", icon: Activity, accent: "hsl(192,80%,48%)",
     stage: "Live", maturity: 85, readinessScore: 88, owner: "Observability Team", team: "Ops",
     blockers: [], risks: ["Advanced analytics export in development"],
     features: { shipped: 18, planned: 4 }, deployment: { region: "US-East", lastRelease: "Mar 26" }, confidence: "High",

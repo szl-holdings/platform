@@ -176,7 +176,7 @@ const domainConfigs: DomainNotifConfig[] = [
         title: "P1 Incident Triggered",
         message: `Production service degradation detected — ${["API latency spike", "Database connection pool exhausted", "CDN edge failure"][Math.floor(Math.random() * 3)]}`,
         severity: "critical" as NotifSeverity,
-        actionUrl: "/lyte-command-center/incidents",
+        actionUrl: "/command/operations/inbox",
       }),
       () => ({
         appId: "lyte",
@@ -184,7 +184,7 @@ const domainConfigs: DomainNotifConfig[] = [
         title: "SLO Burn Rate Alert",
         message: `Error budget for ${["checkout-service", "auth-api", "payment-gateway"][Math.floor(Math.random() * 3)]} at ${60 + Math.floor(Math.random() * 35)}% — accelerated consumption detected`,
         severity: "warning" as NotifSeverity,
-        actionUrl: "/lyte-command-center/slo-tracking",
+        actionUrl: "/command/operations/prism/pulse",
       }),
       () => ({
         appId: "lyte",
@@ -192,7 +192,7 @@ const domainConfigs: DomainNotifConfig[] = [
         title: "Anomaly Detected",
         message: "ML model flagged unusual traffic pattern — 3.4σ deviation from baseline",
         severity: "warning" as NotifSeverity,
-        actionUrl: "/lyte-command-center/anomaly-detection",
+        actionUrl: "/command/operations/prism/signals",
       }),
       () => ({
         appId: "lyte",
@@ -200,7 +200,7 @@ const domainConfigs: DomainNotifConfig[] = [
         title: "On-Call Escalation",
         message: `Incident #${1000 + Math.floor(Math.random() * 900)} auto-escalated after 15min without acknowledgment`,
         severity: "critical" as NotifSeverity,
-        actionUrl: "/lyte-command-center/incidents",
+        actionUrl: "/command/operations/inbox",
       }),
     ],
   },

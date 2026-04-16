@@ -59,7 +59,7 @@ export function SenseLayer() {
                 onChange={e => setDomainFilter(e.target.value)}
               >
                 <option value="">All Domains</option>
-                {["firestorm", "vessels", "terra", "lyte", "prism", "alloy", "orchestration"].map(d => (
+                {["aegis", "vessels", "terra", "lyte", "prism", "alloy", "orchestration"].map(d => (
                   <option key={d} value={d}>{d}</option>
                 ))}
               </select>

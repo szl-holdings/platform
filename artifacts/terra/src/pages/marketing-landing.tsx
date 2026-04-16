@@ -535,7 +535,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
               {[
                 { name: "Lyte", href: "/command/operations/" },
                 { name: "Vessels", href: "/vessels/" },
-                { name: "Aegis", href: "/firestorm/" },
+                { name: "Aegis", href: "/aegis/" },
                 { name: "Carlota Jo", href: "/carlota-jo/" },
                 { name: "SZL", href: "/szl-holdings/" },
               ].map(l => (

@@ -228,6 +228,10 @@ These top-level documents are the canonical reference for Series A diligence, en
 ### Investor
 | Document | Purpose |
 |----------|---------|
+| [INVESTOR_NARRATIVE.md](INVESTOR_NARRATIVE.md) | Governed decision infrastructure thesis — why now, why this architecture compounds |
+| [MOAT_MAP.md](MOAT_MAP.md) | Eight structural moats with codebase evidence |
+| [PRODUCT_ROADMAP.md](PRODUCT_ROADMAP.md) | 30-day and 90-day priorities |
+| [TECHNICAL_DILIGENCE_PACKET.md](TECHNICAL_DILIGENCE_PACKET.md) | Single-document technical diligence reference for Series A review |
 | [docs/investor/platform-thesis.md](docs/investor/platform-thesis.md) | Category thesis and investment case |
 | [docs/investor/investor-overview.md](docs/investor/investor-overview.md) | Company overview for investors |
 | [docs/investor/product-readiness.md](docs/investor/product-readiness.md) | Honest product status assessment |

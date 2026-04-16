@@ -447,7 +447,7 @@ async function buildSnapshot() {
         ],
         alerts: { count: lyte.alertCount, severity: lyte.alertCount > 0 ? "medium" : "low" },
         sparkline: null,
-        link: "/lyte-command-center/",
+        link: "/command/operations/",
       },
       {
         id: "prism",

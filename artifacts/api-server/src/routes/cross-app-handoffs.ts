@@ -35,7 +35,7 @@ const HANDOFF_DEFINITIONS: Record<HandoffContractType, Omit<HandoffContract, "id
     type: "lyte_priority_to_forge",
     sourceDomain: "lyte",
     targetDomain: "global",
-    sourceApp: "Lyte Command Center",
+    sourceApp: "Command",
     targetApp: "FORGE RUNTIME",
     triggerCondition: "Priority signal detected with severity >= high",
     governedAction: "FORGE creates governed execution workflow with human-in-the-loop approval gate",
@@ -225,7 +225,7 @@ router.get("/cross-app/family/health", authMiddleware(), (_req: Request, res: Re
     const prismStats = prismBus.getStats();
 
     const appHealth = [
-      { app: "Lyte Command Center", domain: "lyte", status: "active", handoffTarget: "FORGE RUNTIME" },
+      { app: "Command", domain: "lyte", status: "active", handoffTarget: "FORGE RUNTIME" },
       { app: "Aegis SOC", domain: "aegis", status: "active", handoffTarget: "COVENANT" },
       { app: "Vessels Maritime", domain: "vessels", status: "active", handoffTarget: "FORGE RUNTIME" },
       { app: "Terra Real Estate", domain: "terra", status: "active", handoffTarget: "Carlota Jo" },

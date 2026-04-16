@@ -118,8 +118,8 @@ router.get("/holdings/kpis", authMiddleware(), async (_req, res) => {
         terra: { distressProperties: terraDistress, activeDeals: terraDeals, href: "/terra/" },
         vessels: { trackedVessels: vessels, fleets: fleets, href: "/vessels/" },
         alloy: { workflowRuns: workflowRuns, activeWorkflows: workflows, href: "/alloy/" },
-        lyte: { incidents: lyteIncidents, href: "/lyte-command-center/" },
-        aegis: { incidents: firestormIncidents, findings: firestormFindings, href: "/firestorm/" },
+        lyte: { incidents: lyteIncidents, href: "/command/operations/" },
+        aegis: { incidents: firestormIncidents, findings: firestormFindings, href: "/aegis/" },
         carlotaJo: { inquiries: carlotaInquiries, href: "/carlota-jo/" },
       },
       aggregate: {

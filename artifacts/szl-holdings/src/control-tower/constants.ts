@@ -23,7 +23,7 @@ export const SEVERITY_COLORS: Record<string, string> = {
 };
 
 export const DOMAIN_COLORS: Record<string, string> = {
-  firestorm: "text-red-400",
+  aegis: "text-red-400",
   vessels: "text-sky-400",
   terra: "text-green-400",
   lyte: "text-amber-400",

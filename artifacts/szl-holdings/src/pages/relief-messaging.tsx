@@ -21,8 +21,8 @@ const RELIEFS = [
     relief: "Stop finding out last.",
     body: "Every workflow, approval queue, and ownership gap in your operation becomes legible before it turns into a crisis. Lyte instruments your existing systems — not a new one — and surfaces what's stuck, who owns it, and what's at risk.",
     color: "hsl(192,72%,48%)",
-    product: "Lyte Command Center",
-    cta: "/lyte",
+    product: "Command",
+    cta: "/command/operations",
   },
   {
     icon: AlertTriangle,

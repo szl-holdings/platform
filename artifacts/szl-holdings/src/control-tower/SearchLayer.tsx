@@ -23,7 +23,7 @@ export function SearchLayer() {
   const results = ((searchData?.data as Record<string, unknown>)?.results as unknown[]) ?? [];
   const domainsSearched = ((searchData?.data as Record<string, unknown>)?.domainsSearched as unknown[]) ?? [];
   const latency = (searchData?.data as Record<string, unknown>)?.searchLatencyMs as number | undefined;
-  const DOMAINS = ["firestorm", "vessels", "terra", "lyte", "prism", "alloy"];
+  const DOMAINS = ["aegis", "vessels", "terra", "lyte", "prism", "alloy"];
 
   return (
     <div className="space-y-4">

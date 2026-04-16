@@ -309,7 +309,7 @@ export default function LandingPage() {
         onClose={() => setDemoOpen(false)}
         type="demo"
         app="lyte"
-        subtitle="Lyte Command Center"
+        subtitle="Command"
       />
     </div>
   );

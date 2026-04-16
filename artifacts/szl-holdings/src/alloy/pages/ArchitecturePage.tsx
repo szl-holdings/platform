@@ -69,10 +69,10 @@ const LAYERS = [
 
 const PRODUCT_INTEGRATIONS = [
   {
-    name: "Lyte Command Center",
+    name: "Command",
     icon: "⚡",
     accent: "#f59e0b",
-    description: "Lyte feeds service health streams, alert data, and operational metrics into Alloy. Alloy returns structured insights, prioritised incidents, and recommended actions.",
+    description: "Command feeds service health streams, alert data, and operational metrics into Alloy. Alloy returns structured insights, prioritised incidents, and recommended actions.",
     dataIn: ["Service health metrics", "Alert feeds", "Performance data", "Incident history"],
     dataOut: ["Structured insight briefs", "Prioritised alerts", "Recommended responses", "Trend analysis"],
   },

@@ -93,11 +93,11 @@ async function createSignal(params: {
     publish(WS_CHANNELS.NOTIFICATIONS, "new_signal", {
       id: `signal-${signal.id}-${Date.now()}`,
       appId: "lyte",
-      appName: "Lyte Command Center",
+      appName: "Command",
       title: params.title,
       message: params.body,
       severity: params.severity === "critical" ? "critical" : params.severity === "high" ? "warning" : "info",
-      actionUrl: "/lyte-command-center/signals",
+      actionUrl: "/command/operations/prism/signals",
       isRead: false,
       createdAt: new Date().toISOString(),
       type: params.severity === "critical" ? "error" : params.severity === "high" ? "warning" : "info",

@@ -29,7 +29,7 @@ const RELIEF_TIERS = [
     icon: BarChart3,
     reliefStatement: "Every approval queue, workflow bottleneck, and ownership gap becomes visible before it compounds into a crisis.",
     what: "Your ops surface — instrumented and legible.",
-    apps: ["Lyte Command Center"],
+    apps: ["Command"],
     includes: [
       "PRISM signal ingestion on your live systems",
       "Approval latency tracking & owner attribution",

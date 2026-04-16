@@ -28,7 +28,7 @@ const ACCENT = { green: "#6b8f71", amber: "hsl(38,90%,52%)", red: "#c45a4a", blu
 
 // ── Cross-app data constants ─────────────────────────────────────────────────
 const APPS = [
-  { key: "lyte", name: "Lyte", full: "Lyte Command Center", domain: "lyte", desc: "AIOps & workflow observability", color: "hsl(192,72%,48%)", handoffTo: "FORGE RUNTIME", handoffType: "lyte_priority_to_forge", icon: Activity },
+  { key: "lyte", name: "Lyte", full: "Command", domain: "lyte", desc: "AIOps & workflow observability", color: "hsl(192,72%,48%)", handoffTo: "FORGE RUNTIME", handoffType: "lyte_priority_to_forge", icon: Activity },
   { key: "aegis", name: "Aegis", full: "Aegis SOC", domain: "aegis", desc: "Unified defense & threat intelligence", color: "hsl(0,72%,58%)", handoffTo: "COVENANT", handoffType: "aegis_threat_to_covenant", icon: Shield },
   { key: "vessels", name: "Vessels", full: "Vessels Maritime", domain: "vessels", desc: "Fleet intelligence & voyage analytics", color: "hsl(220,72%,58%)", handoffTo: "FORGE RUNTIME", handoffType: "vessels_voyage_to_forge", icon: Globe },
   { key: "terra", name: "Terra", full: "Terra Real Estate", domain: "terra", desc: "Property intelligence & deal analytics", color: "hsl(142,52%,48%)", handoffTo: "Carlota Jo", handoffType: "terra_blocker_to_carlota", icon: Layers },
