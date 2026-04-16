@@ -92,7 +92,7 @@ All surfaces share six platform primitives — see [PLATFORM_PRIMITIVES.md](PLAT
 | **Key modules** | PRISM dashboard, signal timeline, action queue, approval chains, AIOps, APM, MSP/RMM tooling, ML pipeline management, cost governance |
 | **Stack** | React 19, Vite, `@szl-holdings/ai-engine`, `@szl-holdings/forge-runtime`, `@szl-holdings/observability`, `@szl-holdings/prism-bus`, `@szl-holdings/shared-ui` |
 | **Key dependencies** | `@szl-holdings/ai-engine`, `@szl-holdings/forge-runtime`, `@szl-holdings/observability`, `@szl-holdings/prism-bus`, `@szl-holdings/shared-ui` |
-| **Primitives used** | All 5 — Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine |
+| **Primitives used** | All 6 — Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, Event Fabric |
 | **Strategic role** | Operating wedge and flagship platform. Primary command surface for the governed decision loop. Entry point to all domain packs. Primary commercial entry point for the SZL ecosystem |
 
 ---
@@ -172,7 +172,7 @@ All surfaces share six platform primitives — see [PLATFORM_PRIMITIVES.md](PLAT
 | **Key dependencies** | `@szl-holdings/ai-engine`, `@szl-holdings/proof-chain`, `@szl-holdings/receipt-graph`, `@szl-holdings/covenant-policy`, `@szl-holdings/shared-ui` |
 | **Components** | 127 web components |
 | **DB Tables** | 120+ tables across 10 schema modules |
-| **Primitives used** | All 5 — Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine |
+| **Primitives used** | All 6 — Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, Event Fabric |
 | **Strategic role** | Legal domain pack with cross-domain intelligence from defense, maritime, and financial domains |
 
 ---

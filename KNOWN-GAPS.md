@@ -121,6 +121,10 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | GAP-004 | No `.env.example` in all artifacts | Ops | Dev friction | Add `.env.example` to each artifact |
 | TD-001 | PRISM framework naming inconsistency | Tech Debt | Internal confusion | Pulse/Risk/Intel vs People/Revenue/Infra |
 | TD-002 | Broken seed scripts (PRISM Counsel) | Tech Debt | Dev friction | Fix recovery table seed scripts |
+| TD-003 | DEMO_GUIDE.md said "five primitives" throughout | Doc Accuracy | ✅ Resolved Apr-2026 | Corrected to six primitives (Event Fabric is the 6th) |
+| TD-004 | TRUST_CENTER_INDEX.md cited HuggingFace/Qwen3-8B as AI model | Doc Accuracy | ✅ Resolved Apr-2026 | Corrected to multi-provider stack (OpenAI, Anthropic, Gemini) |
+| TD-005 | SECURITY.md role list showed 6 of 11 platform roles | Doc Accuracy | ✅ Resolved Apr-2026 | Corrected to full 11-role hierarchy with reference to ACCESS-CONTROL-MATRIX.md |
+| TD-006 | PRODUCT-SURFACES.md lists domain-specific mobile apps (aegis-mobile, vessels-mobile, terra-mobile, lyte-mobile) that are not registered artifacts | Doc Accuracy | ⚠️ Open — verify artifact registration status before first external eval |
 | RD-001 | SOC 2 Type II / FedRAMP readiness | Compliance | Sales blocker | Post-revenue roadmap items |
 | RD-002 | Horizontal scaling / Load testing | Infra | Scale risk | Validate Azure autoscale under load |
 
@@ -132,8 +136,8 @@ Operational gaps, process health, test coverage, observability, team ownership.
 |----------|-------|----------|------|
 | P0 — Critical / High | 11 | 10 | 1 |
 | P1 — High | 9 | 0 | 9 |
-| P2 — Medium / Low | 17 | 0 | 17 |
-| **Total** | **37** | **10** | **27** |
+| P2 — Medium / Low | 21 | 3 | 18 |
+| **Total** | **41** | **13** | **28** |
 
 ---
 

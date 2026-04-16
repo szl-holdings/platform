@@ -87,7 +87,7 @@ See [PROOF_AND_POLICY_MODEL.md](PROOF_AND_POLICY_MODEL.md) for component usage a
 | Evidence attribution | All AI recommendations include source citations and confidence scores |
 | Human-in-the-loop | Enforced at the Alloy workflow layer for all policy-controlled actions |
 | Audit trail | All AI-assisted decisions generate immutable audit events |
-| Model transparency | HuggingFace Inference (Qwen3-8B primary); model selection disclosed |
+| Model transparency | Multi-provider (OpenAI, Anthropic, Gemini via Replit AI proxy); model ID and version logged per output |
 
 See [docs/trust/trust-center.md](docs/trust/trust-center.md) for the full AI governance section.
 

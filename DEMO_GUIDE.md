@@ -63,11 +63,12 @@ Demo data is seeded via `pnpm seed:demo` and uses realistic but entirely synthet
 
 **Goal:** Establish platform credibility, demonstrate governance differentiation, show domain pack breadth.
 
-**Core narrative:** "This is a governed decision platform. Every domain pack runs the same governed loop. The five platform primitives — Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine — are shared infrastructure, not per-product features."
+**Core narrative:** "This is a governed decision platform. Every domain pack runs the same governed loop. The six platform primitives — Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, Event Fabric — are shared infrastructure, not per-product features."
 
 1. **Start:** `szlholdings.com` — company overview (1 min)
-2. **Platform thesis:** `/platform` or `/investors/overview` — governed decision loop, five primitives (3 min)
+2. **Platform thesis:** `/platform` or `/investors/overview` — governed decision loop, six platform primitives (3 min)
 3. **Decision Theater:** `/core` → Decision Theater tab — walk through the 9-step loop using the cross-domain threat scenario (5 min)
+4. **Lyte walkthrough:** Signal timeline → PRISM dashboard → Action queue → Approval gate (5 min)
 4. **Alloy governance:** Workflow engine → Covenant Policy in action → Proof Chain audit trail (3 min)
 5. **Trust:** `/trust-center` — security posture, AI governance model (2 min)
 6. **Domain packs:** Brief overview of Aegis/Vessels/Terra as domain extensions on shared infrastructure (3 min)
@@ -164,13 +165,13 @@ Key talking points:
 - "Every recommendation has a source, confidence score, and approval gate — enforced by Covenant Policy"
 - "The Proof Chain makes every decision reconstructable — signal to outcome"
 - "Monte Carlo shows operators not just what to do, but what could happen if they do it"
-- "The same five primitives power every domain pack — shared governance, domain-specific intelligence"
+- "The same six primitives power every domain pack — shared governance, domain-specific intelligence"
 
 ---
 
 ## Flagship Loop — Step-by-Step Walkthrough
 
-The Governed Decision Loop (`/command/operations/governed-decision-loop`) is the canonical demo of the entire governed intelligence platform. It shows a real scenario — a fleet ETA compliance gap — traversing all nine steps of the decision loop powered by the five platform primitives.
+The Governed Decision Loop (`/command/operations/governed-decision-loop`) is the canonical demo of the entire governed intelligence platform. It shows a real scenario — a fleet ETA compliance gap — traversing all nine steps of the decision loop powered by the six platform primitives.
 
 **Scenario:** Three vessels (M/V Meridian, M/V Catalyst, M/V Horizon) are outside SLA threshold. The system surfaces a $2.1M risk signal, generates a reroute recommendation, simulates outcomes, gates on policy, routes to human approval, executes, seals proof, and records the outcome.
 
@@ -233,7 +234,7 @@ The Governed Decision Loop (`/command/operations/governed-decision-loop`) is the
 ### Flagship Loop — Key Talking Points
 
 - "This is a single decision. Everything you just saw — signal to outcome — is the governed decision loop. Every decision on this platform runs through this loop."
-- "The five primitives are invisible to operators. They experience it as: a signal appears, a recommendation is there, it's already been vetted, I approve, it executes, I can see exactly what happened."
+- "The six primitives are invisible to operators. They experience it as: a signal appears, a recommendation is there, it's already been vetted, I approve, it executes, I can see exactly what happened."
 - "This isn't a demo feature. The same Covenant Policy engine, the same Proof Chain, the same Monte Carlo engine powers Aegis, Vessels, and Terra. Domain-specific intelligence, shared governance."
 - "The loop closes. Outcomes feed back in. The system learns. After 50 similar decisions, the recommendation confidence for this pattern will be in the 90s."
 
