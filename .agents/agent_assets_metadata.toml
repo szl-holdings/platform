@@ -197,3 +197,9 @@ id = "9EVq2wPr7lL0HtbXXEs6d"
 uri = "file://output/szl-substack-profile-kit.zip"
 type = "unspecified"
 title = "SZL Substack Profile Kit (profile + banners)"
+
+[[outputs]]
+id = "-aCqoY2873He6M2Wt5Pa8"
+uri = "file://output/szl-x-launch-kit.zip"
+type = "unspecified"
+title = "SZL Holdings — X Launch Kit"
