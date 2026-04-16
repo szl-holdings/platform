@@ -131,6 +131,39 @@ Operational gaps, process health, test coverage, observability, team ownership.
 
 ---
 
+### Phase 4–5: Flow & Testing Gaps (added Apr-2026)
+
+#### Flow Audit Gaps
+
+| ID | Gap | Area | Severity | Status |
+|----|-----|------|----------|--------|
+| FLOW-001 | No new-user guided onboarding wizard — FIRST_10_MINUTES.md describes ideal state; actual UI has sparse empty states | Onboarding | P1 | ⚠️ Open |
+| FLOW-002 | Live billing integration not fully wired for all billing flows | Billing | P1 | ⚠️ Open — Sprint 3 |
+| FLOW-003 | No SLA enforcement automation in support intake flow | Support Ops | P2 | ⚠️ Open — Sprint 4 |
+| FLOW-004 | No escalation path for timed-out approvals | Approvals | P2 | ⚠️ Open — Sprint 4 |
+
+#### Test Quality Gaps
+
+| ID | Gap | Area | Severity | Status |
+|----|-----|------|----------|--------|
+| TG-001 | No tests for billing event flows | Quality | P1 | ⚠️ Open — Sprint 3 |
+| TG-002 | No tests for webhook delivery | Quality | P1 | ⚠️ Open — Sprint 3 |
+| TG-003 | Admin-only route tests incomplete | Quality | P1 | ⚠️ Open — Sprint 3 |
+| TG-004 | Approval escalation not tested | Quality | P1 | ⚠️ Open — Sprint 3 |
+| TG-005 | Object storage tenant isolation not tested | Quality / Security | P2 | ⚠️ Open — Sprint 4 |
+| TG-006 | GraphQL resolver tenant scoping partial | Quality / Security | P2 | ⚠️ Open — Sprint 4 |
+| TG-007 | No automated E2E tests for mobile (Expo / CORTEX) | Quality | P2 | ⚠️ Open — Sprint 4 |
+| TG-008 | Systematic WCAG accessibility testing absent (KG025) | Quality / Compliance | P2 | ⚠️ Open — Sprint 4 |
+
+#### Test Fixes (resolved in Phase 4–5 audit)
+
+| ID | Fix | Status |
+|----|-----|--------|
+| AF-T001 | `cortex-inca-smoke.test.ts` excluded from unit test config (requires live DB — belongs in integration only) | ✅ Fixed Apr-2026 |
+| AF-T002 | `api-version.ts` error messages updated to match test contract — 4 previously failing tests now pass | ✅ Fixed Apr-2026 |
+
+---
+
 ## Disposition Summary
 
 | Severity | Total | Resolved | Open |
@@ -138,9 +171,13 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | P0 — Critical / High | 11 | 10 | 1 |
 | P1 — High | 9 | 0 | 9 |
 | P2 — Medium / Low | 24 | 4 | 20 |
-| **Total** | **44** | **14** | **30** |
+| Flow Audit Gaps (Phase 4–5) | 4 | 0 | 4 |
+| Test Quality Gaps (Phase 4–5) | 8 | 2 | 6 |
+| **Total** | **56** | **16** | **40** |
 
 > **April 2026 Phase 0–1 audit note:** Full operational audit (Phases 0–1) completed. Deliverables produced: FULL_SYSTEM_INVENTORY.md, AUDIT_FINDINGS_REGISTER.md, OUT_OF_SCOPE_REGISTER.md, ENVIRONMENT_VARIABLES.md, updated .env.example. KG018 (env var schema) resolved by ENVIRONMENT_VARIABLES.md. GAP-004 (.env.example) resolved by comprehensive update. KG029 (alloy-integrations test stub) newly cataloged. TD-004 remains re-opened. No new P0/P1 security findings discovered. No hardcoded credentials found in source. All GitHub Actions workflows remain SHA-pinned. Net P2 change: +2 gaps added, +2 resolved. See LAUNCH_BLOCKERS.md for the full pre-launch blocker register.
+>
+> **April 2026 Phase 4–5 audit note:** Flow audit and quality pass completed. 4 new flow gaps and 8 test quality gaps documented. 2 test gaps resolved in this sprint (cortex-inca-smoke config fix, api-version error message fix). All lint warnings documented as baseline (4,519 warnings, 0 errors). Full findings in AUDIT_FINDINGS_REGISTER.md.
 
 ---
 
@@ -164,6 +201,13 @@ Operational gaps, process health, test coverage, observability, team ownership.
 - `SECURITY-CHECKLIST.md` — full control inventory and credential hygiene
 - `SECRETS_SETUP.md` — instructions for handling secrets and credentials
 
+### Phase 4–5 QA Documents (created Apr 2026)
+- `FLOW_AUDIT_MATRIX.md` — per-flow audit state across all user and admin flows
+- `TEST_STRATEGY.md` — testing philosophy, coverage targets, and gap plan
+- `SMOKE_TEST_PLAN.md` — minimum smoke suite for every deployment
+- `REGRESSION_RISK_REGISTER.md` — high-risk logic requiring regression coverage
+- `QA_SIGNOFF_CHECKLIST.md` — release gate checklist
+
 ### Implementation References
 - `lib/db/migrations/0001_add_tenant_id_to_rag_knowledge_chunks.sql` — DB migration for tenant isolation
 - `artifacts/api-server/src/lib/validation.ts` — `validateBody` / `validateQuery` / `validateParams` helpers
@@ -179,6 +223,8 @@ Operational gaps, process health, test coverage, observability, team ownership.
 ---
 
 ## Incident Log
+
+- **2026-04-16 (Phase 4–5 Flow & Quality Audit):** Flow audit and quality pass completed. All major user/admin flows documented in FLOW_AUDIT_MATRIX.md. 4 new flow gaps (FLOW-001–004) and 8 test quality gaps (TG-001–008) added to register. 2 test defects fixed: cortex-inca-smoke excluded from unit config; api-version error messages corrected (4 failing tests now pass). Lint baseline documented: 4,519 warnings, 0 errors. Full findings in AUDIT_FINDINGS_REGISTER.md. New QA docs created: TEST_STRATEGY.md, SMOKE_TEST_PLAN.md, REGRESSION_RISK_REGISTER.md, QA_SIGNOFF_CHECKLIST.md.
 
 - **2026-04-16 (Phase 0–1 Operational Audit):** Full exhaustive inventory and repo/secret hygiene audit completed. No hardcoded credentials found in source — all secrets use `process.env.*`. All 13 GitHub Actions workflows confirmed SHA-pinned. New deliverables created: FULL_SYSTEM_INVENTORY.md (complete platform catalog — 15 artifacts, 40 lib dirs, 18 packages, 225 route files, 13 CI workflows, scripted verification appendix), AUDIT_FINDINGS_REGISTER.md (51 findings with Impact and Manual Review Needed columns), OUT_OF_SCOPE_REGISTER.md (20 deferred items), ENVIRONMENT_VARIABLES.md (~150 vars documented with source-verified defaults), .env.example expanded to 175 vars. KG018 and GAP-004 resolved by new docs. KG029 (alloy-integrations test stub) newly cataloged. virusScan.ts confirmed as explicit stub (KG020c). SESSION_TTL_MS default corrected to 604800000 (7 days) per env-config.ts. KNOWN-GAPS.md updated (rev 6).
 

@@ -1,10 +1,20 @@
 # SZL Holdings — Audit Findings Register
 
-**Last updated:** 2026-04-16 (Phase 0–1 Audit)
-**Owner:** Platform Engineering
-**Scope:** Full SZL Holdings monorepo — all apps, libraries, routes, secrets, CI/CD, and docs
+**Last updated:** 2026-04-16 (Phase 0–1 + Phase 4–5 Audit)
+**Owner:** Platform Engineering / Engineering
+**Scope:** Full SZL Holdings monorepo — all apps, libraries, routes, secrets, CI/CD, docs, and flows
 
-This register catalogs every finding from the Phase 0–1 operational audit. It is the canonical findings reference. For the gap register with full remediation tracking, see `docs/audit/series-a-gap-register.md`. For known gaps with persona views, see `KNOWN-GAPS.md`.
+This register catalogs every finding from all operational audit phases. It is the canonical findings reference. For the gap register with full remediation tracking, see `KNOWN-GAPS.md`. For detailed series A findings, see `docs/audit/series-a-gap-register.md`.
+
+---
+
+## Audit History
+
+| Audit | Date | Phases | Outcome |
+|-------|------|--------|---------|
+| Phase 0–1: Inventory & Architecture | Apr 2026 | Code inventory, route audit, auth audit, secret hygiene, env vars | Completed |
+| Phase 2–3: Security & Auth Hardening | Apr 2026 | Auth, secrets, tenant isolation | P0 items resolved |
+| Phase 4–5: Flow Audit & Quality Pass | Apr 2026 | Flows, testing, lint, build, QA docs | Completed |
 
 ---
 
@@ -22,6 +32,8 @@ This register catalogs every finding from the Phase 0–1 operational audit. It 
 | `DOC-` | Documentation |
 | `OPS-` | Operational hygiene |
 | `QUAL-` | Quality / testing |
+| `AF-T-` | Test quality (Phase 4–5) |
+| `AF-F-` | Flow audit (Phase 4–5) |
 
 ---
 
@@ -37,7 +49,7 @@ This register catalogs every finding from the Phase 0–1 operational audit. It 
 
 ---
 
-## Summary Table
+## Phase 0–1 Summary Table
 
 | Finding ID | Category | Severity | Location | Impact | Fix Status | Manual Review Needed | Blocking |
 |---|---|---|---|---|---|---|---|
@@ -99,7 +111,7 @@ This register catalogs every finding from the Phase 0–1 operational audit. It 
 
 ---
 
-## Resolved Findings (April 2026)
+## Phase 0–1 Resolved Findings
 
 | Finding ID | Resolution |
 |---|---|
@@ -114,7 +126,7 @@ This register catalogs every finding from the Phase 0–1 operational audit. It 
 
 ---
 
-## Open Findings — Detailed Notes
+## Phase 0–1 Open Findings — Detailed Notes
 
 ### SEC-002 — Firebase / Google Credentials Manual Rotation Required
 **Severity:** P1 (High) | **Status:** Open | **Blocking:** Yes (LB-001)
@@ -166,6 +178,73 @@ This register catalogs every finding from the Phase 0–1 operational audit. It 
 
 ---
 
-*Related: `KNOWN-GAPS.md` · `OUT_OF_SCOPE_REGISTER.md` · `docs/audit/series-a-gap-register.md` · `SECURITY-CHECKLIST.md`*
+## Phase 4–5 Findings
+
+### Test Quality Findings
+
+| ID | Finding | Severity | Status | Resolution |
+|----|---------|----------|--------|------------|
+| AF-T001 | `cortex-inca-smoke.test.ts` included in unit test config despite requiring live DB | Medium | ✅ Fixed | Excluded from `vitest.config.ts` (Apr 2026) |
+| AF-T002 | `api-version.ts` error messages did not match test expectations — 4 tests failing | Medium | ✅ Fixed | Error messages updated to match test contract (Apr 2026) |
+| AF-T003 | No tests for billing event flows | P1 | ⚠️ Open | Sprint 3 (TG-001) |
+| AF-T004 | No tests for webhook delivery | P1 | ⚠️ Open | Sprint 3 (TG-002) |
+| AF-T005 | Admin-only route tests incomplete | P1 | ⚠️ Open | Sprint 3 (TG-003) |
+| AF-T006 | Approval escalation not tested | P1 | ⚠️ Open | Sprint 3 (TG-004) |
+| AF-T007 | No automated E2E test suite for mobile (Expo) | P2 | ⚠️ Open | Sprint 4 (TG-007) |
+| AF-T008 | Policy engine, proof chain, forge runtime have no dedicated tests | P1 | ⚠️ Open | Sprint 4 (RR-007, RR-008, RR-011) |
+| AF-T009 | WebSocket tenant isolation not tested | P1 | ⚠️ Open | Sprint 4 (RR-016) |
+| AF-T010 | No automated WCAG/a11y regression | P2 | ⚠️ Open | Sprint 4 (KG025) |
+
+### Code Quality Findings
+
+| ID | Finding | Severity | Status | Notes |
+|----|---------|----------|--------|-------|
+| AF-Q001 | 4,519 lint warnings across the monorepo (no errors) | Low | ⚠️ Accepted baseline | All warnings; 0 errors |
+| AF-Q002 | Unused variables in `shared-ui`, `worldline`, and several scripts | Low | ⚠️ Open | No functional impact |
+| AF-Q003 | `console.log` calls in `web-push-registration.ts` | Low | ⚠️ Open | Replace with structured logger |
+
+### Flow Audit Findings
+
+| ID | Finding | Severity | Status |
+|----|---------|----------|--------|
+| AF-F001 | No new-user guided onboarding wizard — actual UI has sparse empty states | P1 | ⚠️ Open (FLOW-001) |
+| AF-F002 | Live billing integration not fully wired for all billing flows | P1 | ⚠️ Open (FLOW-002) |
+| AF-F003 | No SLA enforcement automation in support intake | P2 | ⚠️ Open (FLOW-003) |
+| AF-F004 | No escalation path for timed-out approvals | P2 | ⚠️ Open (FLOW-004) |
+| AF-F005 | PRISM Counsel seed scripts broken (recovery tables) | Medium | ⚠️ Open (TD-002) |
+| AF-F006 | Some domain packs use mock/demo data in UI | Medium | ⚠️ Open |
+
+---
+
+## Cumulative Findings Summary
+
+| Category | Total | Resolved | Open |
+|----------|-------|----------|------|
+| Security (SEC-) | 11 | 6 | 5 |
+| Architecture (ARCH-) | 3 | 0 | 3 |
+| API (API-) | 5 | 0 | 5 |
+| Database (DB-) | 2 | 1 | 1 |
+| CI/CD (CI-) | 5 | 3 | 2 |
+| Observability (OBS-) | 5 | 0 | 5 |
+| Data / Mocks (DATA-) | 9 | 0 | 9 |
+| Documentation (DOC-) | 4 | 0 | 4 |
+| Operations (OPS-) | 8 | 0 | 8 |
+| Quality (QUAL-) | 3 | 0 | 3 |
+| Test Quality Phase 4–5 (AF-T) | 10 | 2 | 8 |
+| Code Quality Phase 4–5 (AF-Q) | 3 | 0 | 3 |
+| Flow Audit Phase 4–5 (AF-F) | 6 | 0 | 6 |
+| **Total** | **74** | **12** | **62** |
+
+---
+
+## Priority Next Actions
+
+1. **Sprint 3 (Immediate):** SEC-007 (SSRF), CI-002 (CodeQL), CI-003 (dep-review), AF-T003–T005 (billing/webhook/admin tests), OBS-001 (OTEL), OBS-002 (Sentry), OPS-004 (CODEOWNERS)
+2. **Sprint 4:** AF-T007–T009 (mobile E2E, policy/proof tests, WebSocket isolation), OBS-005 (SLO), OPS-006 (Lighthouse), DOC-001 (TRUST_CENTER_INDEX fix)
+3. **Pre-launch blockers:** See LAUNCH_BLOCKERS.md for the authoritative list
+
+---
+
+*Related: `KNOWN-GAPS.md` · `OUT_OF_SCOPE_REGISTER.md` · `docs/audit/series-a-gap-register.md` · `SECURITY-CHECKLIST.md` · `TEST_STRATEGY.md` · `FLOW_AUDIT_MATRIX.md`*
 
 *Last audited: 2026-04-16*

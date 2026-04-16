@@ -43,6 +43,7 @@ export default defineConfig({
       "tests/api/graphql-schema.test.ts",
       "tests/api/openapi-contract.test.ts",
       "tests/api/server-live.test.ts",
+      "tests/api/cortex-inca-smoke.test.ts",
     ],
     coverage: {
       provider: "v8",
