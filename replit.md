@@ -1,7 +1,21 @@
 # SZL Holdings Platform
 
 ## Overview
-The SZL Holdings Platform is a pnpm monorepo encompassing an operational intelligence platform across 8 industry verticals. It includes 10 production web apps (React + Vite), 2 unified mobile command centers (Expo/React Native), 1 API server (Express 5 + PostgreSQL 16), 37 shared libraries, 644 database tables, 2,331 API endpoints, and over 450,000 lines of TypeScript. Key products deliver business observability, defense intelligence, maritime fleet command, real estate intelligence, legal matter command, premium advisory, cloud sovereignty, and unified mobile command. The ecosystem is interconnected by PRISM Bus (cross-domain event bus), Forge Runtime (agent execution engine), and Alloy (workflow orchestration with approval gates and audit trails). The platform aims to provide a comprehensive, governed, and intelligent ecosystem for various business and defense applications.
+The SZL Holdings Platform is a **governed operational intelligence platform** — connecting what is observable to what is executable, under governance, with full attribution. It is a pnpm monorepo with 15 active artifacts (10 web, 2 mobile, 1 API, 1 design system, 1 dev sandbox), 51 shared packages, 685 database tables, 2,331 API endpoints, and over 450,000 lines of TypeScript.
+
+**Core architecture:** Every consequential decision follows the same governed loop — Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome.
+
+**Five platform primitives** power this loop across all surfaces:
+- **Outcome Graph** (`lib/outcome-graph/`) — decision lifecycle tracking (recommendation → decision → outcome)
+- **Proof Chain** (`lib/proof-chain/`) — immutable audit trail with provenance
+- **Covenant Policy** (`lib/covenant-policy/`) — permission and human-in-the-loop approval gates
+- **Monte Carlo** (`lib/monte-carlo/`) — probabilistic risk simulation before action
+- **Workflow Engine** (`lib/workflow-engine/`) — durable process orchestration
+
+**Command surfaces:** Lyte (web command), CORTEX (mobile command), Command Portal (ecosystem hub)
+**Execution fabric:** Alloy (workflow orchestration, approval gates, audit trail)
+**Domain packs:** Aegis (security), Vessels (maritime), Terra (real estate), PRISM Counsel (legal), Carlota Jo (advisory), IMPERIUM (cloud sovereignty)
+**Cross-domain:** PRISM Bus (event bus), Forge Runtime (agent execution), AI Engine (multi-provider with fallback)
 
 ## User Preferences
 I prefer detailed explanations.
@@ -73,7 +87,7 @@ The platform comprises 13 interconnected applications sharing authentication and
 - **Offline-First & Edge Infrastructure (`@szl-holdings/offline-engine`):** Universal offline-first data layer with storage abstraction, command queue, conflict resolution, delta-sync client, and Service Worker infrastructure.
 - **Email Delivery:** Triple-failover email chain (SendGrid → Resend → SMTP nodemailer).
 - **Alloy Platform Core:** Orchestration engine with canonical shared data model, ingestion, normalization, and workflow orchestration.
-- **CORTEX Unified Mobile Command:** Single Expo app (`artifacts/szl-holdings-mobile`) consolidating all vertical mobile apps into a unified command surface with a Workspace Switcher, adaptive tab navigation, and cross-domain Navigator AI.
+- **CORTEX Unified Mobile Command:** Single Expo app (`artifacts/szl-holdings-mobile`) consolidating all domain pack mobile experiences into a unified command surface with a Workspace Switcher, adaptive tab navigation, and cross-domain Navigator AI.
 - **Nuro Mesh Graph Intelligence:** Production-grade graph capabilities and OSINT feed integration extending the Nuro Mesh AI engine, including new feed adapters, enhanced ontology engine with graph algorithms, and GraphRAG for context injection.
 - **Strategic Ecosystem Gap Fill:** Seven new end-to-end capabilities: CORTEX Voice, Morning Briefing Engine, Revenue Intelligence Fusion, What-If Simulation Engine, Compliance & Audit Provenance Chain, White-Label Client Portals, and Multiplayer Command Sessions.
 - **Platform Hardening:** Includes CI/CD pipelines (GitHub Actions), Dependabot, unit tests, APM, disaster recovery, feature flags, API versioning, rate limiting, and multi-environment configuration.

@@ -6,14 +6,14 @@
 
 ## Entry Strategy
 
-The go-to-market strategy is deliberate and sequential. We are not attempting to sell five products simultaneously. The commercial wedge is **Lyte** — business observability for operations-led organizations — with Alloy as the embedded execution layer that customers don't buy separately but cannot operate without.
+The go-to-market strategy is deliberate and sequential. We are not attempting to sell six domain packs simultaneously. The commercial wedge is **Lyte** — the governed command surface for operations-led organizations — with Alloy as the embedded execution fabric that enforces the governed decision loop. Domain packs (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM) expand the platform into domain-specific intelligence on the same governance infrastructure.
 
 ### Why Lyte First
 
-1. **Universal problem** — Every organization with more than 50 people has the signal-coherence problem that Lyte solves. It is not a vertical-specific product.
-2. **Quantifiable ROI** — Approval latency reduction, escalation speed, operational health scoring — these are metrics customers can measure.
-3. **Shortest path to SaaS revenue** — Lyte's per-seat model can be activated faster than enterprise contracts for Vessels or Aegis.
-4. **Ecosystem entry point** — A Lyte customer is a prospect for Alloy (immediately embedded), Aegis (if they have security needs), and other verticals.
+1. **Universal problem** — Every organization with more than 50 people has the accountability gap that Lyte solves. Decisions running without attribution, AI recommendations without governance, signals without routes to action.
+2. **Quantifiable ROI** — Approval latency reduction, escalation speed, decision traceability — these are metrics customers can measure. The governed decision loop creates a verifiable audit trail that also satisfies compliance requirements.
+3. **Shortest path to SaaS revenue** — Lyte's per-seat model can be activated faster than enterprise contracts for domain packs.
+4. **Domain pack entry point** — A Lyte customer is a prospect for every domain pack. The governance infrastructure is already in place; the domain pack adds vertical intelligence.
 
 ---
 
@@ -89,19 +89,23 @@ Each platform vertical opens a distinct sales motion. Vessels opens maritime tra
 
 ### Lyte vs. BI Tools (Tableau, Power BI, Looker)
 
-BI tools answer "what happened." Lyte answers "what is happening, why, and what should we do." This is not a BI tool — it is an operational command center.
+BI tools answer "what happened." Lyte answers "what is happening, what should we do, and can we prove the decision chain?" The five platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine) create structural accountability that BI tools do not attempt.
+
+### Lyte vs. AI Copilots (ChatGPT, Copilot, Glean)
+
+Copilots add recommendation volume without governance. Lyte enforces the governed decision loop — every AI recommendation carries provenance (Proof Chain), requires approval (Covenant Policy), includes simulation context (Monte Carlo), and tracks outcomes (Outcome Graph). The governance is structural, not a UI pattern.
 
 ### Lyte vs. AIOps Platforms (PagerDuty, Opsgenie)
 
-AIOps platforms optimize infrastructure and DevOps signals. Lyte operates on business signals — approvals, operational workflows, organizational health, human execution accountability.
+AIOps platforms optimize infrastructure and DevOps signals. Lyte operates on business signals — approvals, operational workflows, organizational health, human execution accountability — with governance infrastructure that AIOps platforms do not provide.
 
 ### Aegis vs. SIEM / SOAR (Splunk, IBM QRadar, Palo Alto XSOAR)
 
-Aegis is not a SIEM replacement. It is the operational command layer built on top of SIEM output — designed for the CISO who needs clarity and decision support, not more raw data.
+Aegis is a domain pack built on governed infrastructure. It adds Covenant Policy approval gates, Proof Chain audit trails, and Monte Carlo risk simulation to security operations — capabilities that standalone SIEM/SOAR tools do not provide.
 
 ### Vessels vs. Maritime Software (AMOS, Shipnet, Veson)
 
-Traditional maritime software is operational management (maintenance schedules, crewing, port agency). Vessels is intelligence — fleet observability, anomaly detection, commercial risk. Different buyer, different purpose, potentially complementary.
+Traditional maritime software is operational management (maintenance schedules, crewing, port agency). Vessels is a domain pack — fleet intelligence with Monte Carlo voyage simulation, Covenant Policy sanctions response governance, and Proof Chain audit trails. Different buyer, different purpose, potentially complementary.
 
 ---
 

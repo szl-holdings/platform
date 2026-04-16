@@ -14,13 +14,15 @@ The company was founded by **Stephen Lutar** and is currently in the design part
 
 ## Key Messages
 
-1. **"Not a dashboard — a decision surface."** Lyte shows operators what to do next, who is responsible, and whether the action is safe to execute. Dashboards show what happened.
+1. **"Not a dashboard — a governed decision surface."** Lyte shows operators what to do next, who is responsible, and whether the action is safe to execute. Dashboards show what happened.
 
-2. **"AI without governance is noise."** AI tools add recommendation volume without accountability. SZL Holdings enforces human approval gates on all consequential AI-assisted actions.
+2. **"AI without governance is noise."** AI tools add recommendation volume without accountability. SZL Holdings enforces human approval gates on all consequential AI-assisted actions via Covenant Policy.
 
-3. **"Every decision has a signal, a route, and an audit trail."** The Alloy execution fabric creates a full chain of custody from signal detection to action completion.
+3. **"Every decision has a signal, a route, a proof, and an outcome."** The governed decision loop creates a full chain of custody: Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome.
 
-4. **"The accountability gap is the next enterprise problem."** As AI permeates operations, the question shifts from "what is the AI recommending?" to "who approved it and what happened?"
+4. **"The accountability gap is the next enterprise problem."** As AI permeates operations, the question shifts from "what is the AI recommending?" to "who approved it, based on what evidence, and what happened?"
+
+5. **"Five primitives, not features."** The platform is structurally different — Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, and Workflow Engine are architectural primitives that run across every domain pack, not add-on features.
 
 ---
 
@@ -37,37 +39,51 @@ Building the governed operational intelligence platform for enterprise operators
 
 ## Products (For Coverage)
 
-### Lyte — Business Observability Command Surface
+### Lyte — Governed Command Surface
 
 The PRISM framework (People, Revenue, Infrastructure, Security, Market) in a single command surface. Signal timeline, priority action queue, and execution accountability.
 
 ### Alloy — Execution Fabric
 
-Signal normalization, workflow orchestration, approval controls, human-in-the-loop gates, and immutable audit trail. The governance layer that makes AI-assisted operations durable and accountable.
+Workflow orchestration, approval gates, and immutable audit trail. The governance layer that enforces the governed decision loop — connecting every signal to an accountable action with full attribution.
+
+### Five Platform Primitives
+
+**Outcome Graph:** Tracks the full decision lifecycle — recommendation → decision → outcome — enabling closed-loop AI learning.
+
+**Proof Chain:** Immutable audit trail with provenance for every action, including AI-generated content with model identity and source citations.
+
+**Covenant Policy:** Permission and approval gates that enforce human-in-the-loop governance. AI cannot bypass it.
+
+**Monte Carlo:** Probabilistic simulation before action — confidence intervals, sensitivity analysis, scenario comparison.
+
+**Workflow Engine:** Durable multi-step process orchestration with agent coordination and checkpoint recovery.
 
 ### Domain Packs
 
-**Aegis:** Security and defense intelligence. SOC command, MITRE ATT&CK mapping, SOAR playbooks.
+**Aegis:** Security and defense domain pack. SOC command, MITRE ATT&CK mapping, SOAR playbooks.
 
-**Vessels:** Maritime intelligence. Fleet command, AIS telemetry, sanctions screening, dark vessel detection.
+**Vessels:** Maritime domain pack. Fleet command, AIS telemetry, sanctions screening, dark vessel detection.
 
-**Terra:** Real estate intelligence. NYC distress pipeline, ownership graph, deal workflow.
+**Terra:** Real estate domain pack. NYC distress pipeline, ownership graph, deal workflow.
 
-**PRISM Counsel:** Legal intelligence. Matter management, AI triage with approval gates, proof chain audit trail.
+**PRISM Counsel:** Legal domain pack. Matter management, AI triage with approval gates, proof chain audit trail.
+
+**Carlota Jo:** Premium advisory domain pack. Client portal, service catalog, booking system.
 
 ---
 
 ## Boilerplate
 
 **Short (50 words):**
-SZL Holdings builds the governed operational intelligence layer for enterprise operators. The Lyte command surface and Alloy execution fabric connect business signals to accountable action under governance — with human approval gates, AI attribution, and an immutable audit trail. Domain packs extend the platform into security, maritime, real estate, and legal.
+SZL Holdings builds the governed operational intelligence platform for enterprise operators. The Lyte command surface, Alloy execution fabric, and five platform primitives connect business signals to accountable action — with human approval gates, AI attribution, and an immutable Proof Chain. Domain packs extend governance into security, maritime, real estate, and legal.
 
 **Long (150 words):**
-SZL Holdings is building the governed operational intelligence layer that enterprise operators have been missing. As AI tools flood the market with recommendations, the accountability gap grows: decisions made without attribution, AI outputs without governance, signals without routes to action.
+SZL Holdings is building the governed operational intelligence platform that enterprise operators have been missing. As AI tools flood the market with recommendations, the accountability gap grows: decisions made without attribution, AI outputs without governance, signals without routes to action.
 
-SZL Holdings addresses this with two core products. Lyte is the command surface — a structured decision environment built on the PRISM framework (People, Revenue, Infrastructure, Security, Market) that surfaces signals, routes decisions, and tracks accountability. Alloy is the execution fabric — workflow orchestration, human-in-the-loop approval gates, and an immutable audit trail that makes every AI-assisted decision durable and attributable.
+SZL Holdings addresses this with a governed decision loop — Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome — powered by five platform primitives: Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, and Workflow Engine. Lyte is the command surface where operators observe, decide, and act. Alloy is the execution fabric that enforces governance on every step.
 
-Domain packs extend the same platform into vertical intelligence: Aegis for security operations, Vessels for maritime command, Terra for real estate intelligence, and PRISM Counsel for legal operations. Founded by Stephen Lutar, SZL Holdings is currently in the design partner phase.
+Domain packs extend the same governance infrastructure into domain-specific intelligence: Aegis for security, Vessels for maritime, Terra for real estate, PRISM Counsel for legal, and Carlota Jo for premium advisory. Founded by Stephen Lutar, SZL Holdings is currently in the design partner phase.
 
 ---
 

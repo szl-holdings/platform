@@ -36,28 +36,40 @@ The platform is not a dashboard. It is a **decision surface** with built-in acco
 
 ---
 
-## Products
+## Platform Structure
 
-| Product | Category | Status |
-|---------|----------|--------|
-| **Lyte** | Business Observability | Functional alpha |
-| **Alloy** | Execution Fabric | Functional alpha |
-| **Aegis** | Security & Defense Intelligence | Functional alpha |
+**Command surfaces:** Lyte (web) · CORTEX (mobile) · Command Portal (ecosystem hub)
+
+**Execution fabric:** Alloy — workflow orchestration, approval gates, immutable audit trail
+
+**Domain packs:**
+
+| Domain Pack | Domain | Status |
+|-------------|--------|--------|
+| **Aegis** | Security & Defense | Functional alpha |
 | **Vessels** | Maritime Intelligence | Functional alpha |
 | **Terra** | Real Estate Intelligence | Functional alpha |
-| **PRISM Counsel** | Legal Intelligence | Functional alpha |
+| **PRISM Counsel** | Legal Matter Command | Functional alpha |
 | **Carlota Jo** | Premium Advisory | Live |
+| **IMPERIUM** | Cloud Sovereignty | Functional alpha |
+
+**Five platform primitives** (shared by all surfaces):
+- **Outcome Graph** — decision lifecycle tracking
+- **Proof Chain** — immutable audit trail with provenance
+- **Covenant Policy** — permission and human-in-the-loop approval gates
+- **Monte Carlo** — probabilistic risk simulation
+- **Workflow Engine** — durable process orchestration
 
 ---
 
 ## Platform Scale
 
-- **16 deployable artifacts** (7 web apps, 7 mobile apps, 1 API server, 1 design system)
-- **120+ database tables** with full Drizzle ORM schema
-- **40+ integration connectors** (operational stubs)
+- **15 active artifacts** (10 web, 2 mobile, 1 API, 1 design system, 1 dev sandbox)
+- **685 database tables** across 112 schema files (Drizzle ORM)
+- **51 shared packages** in pnpm monorepo
 - **11-role RBAC** with org-scoped tenant isolation
 - **9 schema-validated AI decision types**
-- **Immutable audit trail** across all products
+- **Immutable audit trail** across all products via Proof Chain
 
 ---
 
@@ -84,7 +96,7 @@ The platform is not a dashboard. It is a **decision surface** with built-in acco
 | Human-in-the-loop | Enforced at governance layer | Optional or absent | Absent |
 | Audit trail | Immutable, append-only | Partial or none | None |
 | AI governance | Advisory only, policy-gated | Not applicable | Absent |
-| Domain depth | Vertical-specific intelligence packs | Generic | Generic |
+| Domain depth | Domain-specific intelligence packs | Generic | Generic |
 
 ---
 
@@ -92,7 +104,7 @@ The platform is not a dashboard. It is a **decision surface** with built-in acco
 
 **Primary buyers:** Mid-market and enterprise operators in security, maritime, real estate, and professional services.
 
-**Entry motion:** Design partner program — 3-6 design partners in the target vertical provide feedback and co-design the product in exchange for early access and preferred pricing.
+**Entry motion:** Design partner program — 3-6 design partners per domain who co-design the product in exchange for early access and preferred pricing.
 
 **Revenue model:** SaaS subscription (per seat + platform fee). Domain packs priced separately. Carlota Jo advisory billed as service retainer.
 

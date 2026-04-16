@@ -1,6 +1,8 @@
 # Demo Guide — SZL Holdings Platform
 
-> Instructions for running product demos, what to show to which audiences, and how to manage demo state.
+> Instructions for running demos of the governed operational intelligence platform, what to show to which audiences, and how to manage demo state.
+>
+> The core demo narrative: every consequential decision follows the same governed loop — Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome. Domain packs add domain-specific intelligence; the governance is shared.
 
 ---
 
@@ -54,14 +56,16 @@ Demo data is seeded via `pnpm seed:demo` and uses realistic but entirely synthet
 
 ### Investor Demo (~20 minutes)
 
-**Goal:** Establish platform credibility, demonstrate breadth and depth, show governance differentiation.
+**Goal:** Establish platform credibility, demonstrate governance differentiation, show domain pack breadth.
+
+**Core narrative:** "This is a governed decision platform. Every domain pack runs the same governed loop. The five platform primitives — Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine — are shared infrastructure, not per-product features."
 
 1. **Start:** `szlholdings.com` — company overview (1 min)
-2. **Platform thesis:** `/platform` or `/investors/overview` (3 min)
+2. **Platform thesis:** `/platform` or `/investors/overview` — governed decision loop, five primitives (3 min)
 3. **Lyte walkthrough:** Signal timeline → PRISM dashboard → Action queue → Approval gate (5 min)
-4. **Alloy governance:** Workflow engine → Human-in-the-loop → Audit trail (3 min)
-5. **Trust:** `/trust-center` — security posture, governance model (2 min)
-6. **Domain packs:** Brief overview of Aegis/Vessels/Terra as vertical extensions (3 min)
+4. **Alloy governance:** Workflow engine → Covenant Policy in action → Proof Chain audit trail (3 min)
+5. **Trust:** `/trust-center` — security posture, AI governance model (2 min)
+6. **Domain packs:** Brief overview of Aegis/Vessels/Terra as domain extensions on shared infrastructure (3 min)
 7. **Close:** Roadmap, revenue model, design partner opportunity (3 min)
 
 **What NOT to show:** Internal admin routes, investor data room (unless invited), unfinished sprint routes.
@@ -70,7 +74,7 @@ Demo data is seeded via `pnpm seed:demo` and uses realistic but entirely synthet
 
 ### Enterprise Buyer Demo (~30 minutes)
 
-**Goal:** Demonstrate operational fit for their vertical, show trust and compliance posture.
+**Goal:** Demonstrate operational fit for their domain, show trust and compliance posture.
 
 **For legal/professional services buyers (PRISM Counsel):**
 1. Landing `/solutions/prism-counsel` (2 min)
@@ -101,7 +105,7 @@ Demo data is seeded via `pnpm seed:demo` and uses realistic but entirely synthet
 **Goal:** Deep product exploration, feedback capture, co-design opportunity.
 
 1. Full platform walkthrough (15 min)
-2. Focus on their specific vertical in depth (15 min)
+2. Focus on their specific domain pack in depth (15 min)
 3. Show admin/configuration surfaces (appropriate routes only) (5 min)
 4. Discuss customization and white-labeling options (5 min)
 5. Roadmap and design partner agreement (5 min)
@@ -121,9 +125,11 @@ Recommended sequence for Lyte Command Center:
 6. **Ownership Map** — accountability graph
 
 Key talking points:
-- "Not a dashboard — it's a decision surface"
-- "Every recommendation has a source, confidence score, and approval gate"
-- "Audit trail is immutable — every action is attributed"
+- "Not a dashboard — it's a governed decision surface"
+- "Every recommendation has a source, confidence score, and approval gate — enforced by Covenant Policy"
+- "The Proof Chain makes every decision reconstructable — signal to outcome"
+- "Monte Carlo shows operators not just what to do, but what could happen if they do it"
+- "The same five primitives power every domain pack — shared governance, domain-specific intelligence"
 
 ---
 

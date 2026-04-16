@@ -1,10 +1,10 @@
 # Product Surfaces — SZL Holdings Platform
 
-**Version:** 1.0 · **Last updated:** April 2026
+**Version:** 2.0 · **Last updated:** April 2026
 **Audience:** Engineers, product managers, investors, enterprise evaluators
 
-> Every user-facing surface in the SZL ecosystem — web apps, mobile apps, portals — with purpose, audience, entry point, and key dependencies.
-> For the product marketing narrative see `docs/PLATFORM_OVERVIEW.md` and `docs/PRODUCT_MATRIX.md`.
+> Every user-facing surface in the SZL ecosystem — command surfaces, domain packs, mobile, and corporate — with purpose, audience, entry point, and key dependencies.
+> For the product surface-to-primitive mapping see [PRODUCT_SURFACE_MAP.md](PRODUCT_SURFACE_MAP.md). For the category narrative see [CATEGORY_POSITIONING.md](CATEGORY_POSITIONING.md).
 
 ---
 
@@ -12,25 +12,27 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  ADVISE                                                         │
-│  Carlota Jo — Private Advisory · PRISM Counsel — Legal          │
+│  COMMAND SURFACES                                               │
+│  Lyte — Operator Command    Command Portal — Ecosystem Hub     │
+│  CORTEX — Unified Mobile    SZL Holdings — Corporate           │
 ├─────────────────────────────────────────────────────────────────┤
-│  EXECUTE                                                        │
-│  Alloy — Execution Fabric (embedded in API server)             │
-│  Workflow engine · Audit trail · Agent coordination             │
+│  DOMAIN PACKS                                                   │
+│  Aegis         Vessels       Terra        PRISM Counsel        │
+│  Security &    Maritime      Real Estate  Legal Matter         │
+│  Defense       Intelligence  Intelligence Command              │
+│  Carlota Jo — Premium Advisory    IMPERIUM — Cloud Sovereignty │
 ├─────────────────────────────────────────────────────────────────┤
-│  OBSERVE · DECIDE · ACT                                         │
-│  Lyte           Aegis          Terra         Vessels            │
-│  Business       Defense &      Real Estate   Maritime           │
-│  Observability  Intelligence   Intelligence  Intelligence       │
+│  GOVERNANCE INFRASTRUCTURE (shared by all surfaces)            │
+│  Outcome Graph · Proof Chain · Covenant Policy · Monte Carlo   │
+│  Workflow Engine · PRISM Bus · AI Engine · RBAC + Auth         │
+│  Alloy — Execution Fabric (workflows, approvals, audit trail)  │
 ├─────────────────────────────────────────────────────────────────┤
-│  COMMAND                                                        │
-│  IMPERIUM · Command Portal · SZL Holdings · Stephen Site        │
-├─────────────────────────────────────────────────────────────────┤
-│  MOBILE                                                         │
-│  CORTEX — Unified Mobile Command (all 8 domain workspaces)     │
+│  DATA LAYER                                                     │
+│  PostgreSQL 16 (Drizzle) · External feeds · AI providers       │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+All surfaces share the same five platform primitives — see [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) for the full specification.
 
 ---
 
@@ -49,7 +51,8 @@
 | **Core capability** | PRISM framework (Pulse / Risk / Intelligence / Signals / Motion), Autonomous NOC, AI-driven alert correlation, self-healing orchestration, revenue impact mapping |
 | **Key modules** | PRISM dashboard, signal timeline, action queue, approval chains, AIOps, APM, MSP/RMM tooling, ML pipeline management, cost governance |
 | **Key dependencies** | `@szl-holdings/ai-engine`, `@szl-holdings/forge-runtime`, `@szl-holdings/observability`, `@szl-holdings/prism-bus`, `@szl-holdings/shared-ui` |
-| **Strategic role** | Operating wedge — flagship platform. Primary commercial entry point for the SZL ecosystem |
+| **Primitives used** | All 5 — Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine |
+| **Strategic role** | Operating wedge — primary command surface for the governed decision loop. Entry point to all domain packs |
 
 ---
 
@@ -66,7 +69,8 @@
 | **Core capability** | Three unified workspaces sharing one intelligence layer: Defense (SOC operations and threat response), Command (managed services operations), Intelligence (AI research and model governance) |
 | **Key modules** | MITRE ATT&CK v14 detection, SOAR playbook engine, STIX/TAXII protocol, XDR console, Sentinel AI agent, INCA analytics, Citadel crisis war room, deception grids, vulnerability management, dark vessel detection |
 | **Key dependencies** | `@szl-holdings/ai-engine`, `@szl-holdings/intelligence-feeds`, `@szl-holdings/forge-runtime`, `@szl-holdings/proof-chain`, `@szl-holdings/shared-ui` |
-| **Strategic role** | Defense and intelligence vertical. MSP Command module creates managed services revenue path. FedRAMP readiness track |
+| **Primitives used** | Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine |
+| **Strategic role** | Security & defense domain pack. MSP Command module creates managed services revenue path. FedRAMP readiness track |
 
 ---
 
@@ -83,7 +87,8 @@
 | **Core capability** | Live NYC distress data pipeline (multiple public data sources), AI distress scoring, ownership entity graph, deal pipeline management, broker workflow integration |
 | **Key modules** | Distress property map, ownership graph, deal pipeline, MLS listing ingestion, commercial analytics, lead scoring, market signal intelligence, broker CRM |
 | **Key dependencies** | `@szl-holdings/db`, `@szl-holdings/intelligence-feeds`, `@szl-holdings/monte-carlo`, `@szl-holdings/shared-ui` |
-| **Strategic role** | Real estate vertical. Foundation for national expansion beyond NYC |
+| **Primitives used** | Outcome Graph, Monte Carlo |
+| **Strategic role** | Real estate domain pack. Foundation for national expansion beyond NYC |
 
 ---
 
@@ -100,7 +105,8 @@
 | **Core capability** | AIS telemetry integration, voyage economics modeling, dark vessel detection, sanctions screening, route intelligence, exception center with consequence modeling |
 | **Key modules** | Fleet map (Mapbox), vessel digital twin, voyage P&L, dark vessel alerts, sanctions screening, exception center, commodity trading, marine insurance, Helmsman AI agent |
 | **Key dependencies** | `@szl-holdings/db`, `@szl-holdings/intelligence-feeds`, `@szl-holdings/worldline`, `@szl-holdings/shared-ui` |
-| **Strategic role** | Maritime vertical. High-stakes buyer profile: enterprise, government, insurance |
+| **Primitives used** | Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine |
+| **Strategic role** | Maritime domain pack. High-stakes buyer profile: enterprise, government, insurance |
 
 ---
 
@@ -118,7 +124,8 @@
 | **Key modules** | Matter management, court filing integration (NY courts), document review, multi-jurisdictional support, recovery tracking (liens, settlements), proof chain audit, pressure/friction boards, copilot workbench, No-Fault module |
 | **Key dependencies** | `@szl-holdings/ai-engine`, `@szl-holdings/proof-chain`, `@szl-holdings/receipt-graph`, `@szl-holdings/covenant-policy`, `@szl-holdings/shared-ui` |
 | **Database** | 120+ tables across 10 schema modules |
-| **Strategic role** | Legal vertical with cross-domain intelligence from defense, maritime, and financial verticals |
+| **Primitives used** | All 5 — Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine |
+| **Strategic role** | Legal domain pack with cross-domain intelligence from defense, maritime, and financial domains |
 
 ---
 
@@ -135,7 +142,8 @@
 | **Core capability** | White-glove advisory operations — strategic diagnostic engine, secure client portal, scenario simulator, booking and reservation system |
 | **Key modules** | Client profile management, service catalog, booking system, document delivery, secure messaging, inquiry intake, reservation management |
 | **Key dependencies** | `@szl-holdings/ai-engine`, `@szl-holdings/shared-ui`, `@szl-holdings/db` |
-| **Strategic role** | Advisory layer of the SZL ecosystem. Live, client-facing. Demonstrates principal-led advisory grounded in platform intelligence |
+| **Primitives used** | Proof Chain, Covenant Policy |
+| **Strategic role** | Advisory domain pack. Live, client-facing. Demonstrates principal-led advisory grounded in platform intelligence |
 
 ---
 
@@ -151,7 +159,8 @@
 | **Problem solved** | Organizations need sovereign control over their cloud infrastructure with executive-grade visibility |
 | **Core capability** | Strategic command and intelligence briefing platform — executive decision-support (Legatus Console), organizational asset visualization (Imperium Map), governance interface (Senate Chamber), AI tactical insights (Centurion AI) |
 | **Key dependencies** | `@szl-holdings/ai-engine`, `@szl-holdings/shared-ui` |
-| **Strategic role** | Enterprise cloud sovereignty — infrastructure control plane, tenant provisioning, cost budget governance, compliance monitoring |
+| **Primitives used** | Covenant Policy |
+| **Strategic role** | Cloud sovereignty domain pack — infrastructure control plane, tenant provisioning, cost budget governance, compliance monitoring |
 
 ---
 
@@ -296,9 +305,11 @@ See `ROUTE_INVENTORY.md` for the complete per-artifact route inventory with PUBL
 
 | Document | Path |
 |----------|------|
-| Platform narrative | `docs/PLATFORM_OVERVIEW.md` |
-| Product matrix | `docs/PRODUCT_MATRIX.md` |
-| Route inventory | `ROUTE_INVENTORY.md` |
-| Architecture | `ARCHITECTURE.md` |
-| API specification | `API-SPEC.md` |
-| Access control | `ACCESS-CONTROL-MATRIX.md` |
+| Product surface map | [PRODUCT_SURFACE_MAP.md](PRODUCT_SURFACE_MAP.md) |
+| Platform primitives | [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) |
+| Category positioning | [CATEGORY_POSITIONING.md](CATEGORY_POSITIONING.md) |
+| Navigation strategy | [NAVIGATION_STRATEGY.md](NAVIGATION_STRATEGY.md) |
+| Route inventory | [ROUTE_INVENTORY.md](ROUTE_INVENTORY.md) |
+| Architecture | [ARCHITECTURE.md](ARCHITECTURE.md) |
+| API specification | [API-SPEC.md](API-SPEC.md) |
+| Access control | [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) |

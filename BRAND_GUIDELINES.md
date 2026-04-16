@@ -26,18 +26,30 @@ Product names:
 
 **Tagline:** "Governed Operational Intelligence"
 
-**Brand promise:** Enterprise operators get clarity on what is happening, what to do next, who is responsible, and whether the action is safe — all in one accountable surface.
+**Brand promise:** Enterprise operators get clarity on what is happening, what to do next, who is responsible, and whether the action is safe — all in one governed decision surface.
+
+**Category definition:** SZL Holdings is a governed operational intelligence platform. Not a dashboard, not an AI copilot, not a workflow tool. The governed decision layer that connects signal detection to action execution — under governance, with full attribution.
+
+**Core narrative:** Every consequential decision follows the same governed loop — Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome. This loop runs across all domain packs on shared governance infrastructure.
+
+**Terminology:**
+- Use "domain pack" (not "vertical," "product," or "app") when referring to Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM
+- Use "command surface" (not "dashboard" or "app") for Lyte and CORTEX
+- Use "execution fabric" (not "backend" or "workflow tool") for Alloy
+- Use "platform primitives" (not "features") for Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine
+- Use "governed decision loop" (not "pipeline" or "workflow") for the core signal-to-outcome flow
 
 **Voice:**
 - Direct. No filler language.
 - Confident without being arrogant.
 - Technical when speaking to technical audiences; operational when speaking to operators.
-- Never sensationalist about AI.
+- Never sensationalist about AI — always pair AI capability with governance commitment.
 
 **Tone:**
 - Professional and precise
 - Outcome-oriented (what it does, not what it is)
 - Minimal jargon — when jargon is used, it is explained
+- Governance-forward — lead with accountability, not automation
 
 ---
 
@@ -137,12 +149,22 @@ Use consistent status language:
 ### One-liner format
 `[Product] is the [category] for [audience] that [core benefit].`
 
-Example: *Lyte is the business observability command surface for enterprise operators that connects signals to accountable action.*
+Example: *Lyte is the governed command surface for enterprise operators that connects signals to accountable action.*
+
+### Domain pack description format
+`[Domain Pack] is the [domain] domain pack — [what it does for whom]. Built on the same governance infrastructure as every SZL product.`
+
+Example: *Vessels is the maritime domain pack — fleet command, AIS telemetry, sanctions screening, and dark vessel detection for fleet operators. Built on the same governance infrastructure as every SZL product.*
 
 ### Feature description format
 `[Feature name] — [What it does]. [Why it matters].`
 
 Example: *Signal Timeline — A chronological feed of all correlated business signals with attribution. See what changed, when, and what triggered it.*
+
+### Primitive reference format
+When referencing platform primitives in product copy, use the pattern: "[Primitive name] ensures [what it guarantees]."
+
+Example: *Proof Chain ensures every AI-generated recommendation carries full provenance — model identity, source citations, and confidence score — before it reaches an operator.*
 
 ---
 
@@ -156,5 +178,14 @@ Example: *Signal Timeline — A chronological feed of all correlated business si
 
 ---
 
+## Related Documents
+
+| Document | Path |
+|----------|------|
+| Category positioning | [CATEGORY_POSITIONING.md](CATEGORY_POSITIONING.md) |
+| Platform primitives | [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) |
+| Press kit | [PRESS_KIT.md](PRESS_KIT.md) |
+| Company fact sheet | [COMPANY_FACT_SHEET.md](COMPANY_FACT_SHEET.md) |
+
 *Brand questions: [inquiries@szlholdings.com](mailto:inquiries@szlholdings.com)*
-*Last updated: 2026-04-03*
+*Last updated: April 2026*

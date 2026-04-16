@@ -6,13 +6,13 @@
 
 ## The Problem
 
-Organizations operating at any meaningful scale face the same structural difficulty: too many systems, too few connections.
+Organizations operating at any meaningful scale face the same structural difficulty: an **accountability gap** between signal detection and action execution.
 
-They have monitoring tools that see infrastructure but not business impact. Analytics platforms that surface trends but not causes. Workflow tools that execute tasks but don't understand the signals that triggered them. Advisory relationships that are largely disconnected from operational reality.
+They have dashboards that show what happened — not what to do next. Alerts that show what's wrong — not who is responsible. AI tools that add recommendation volume — without governance, attribution, or outcome tracking. Decisions run in parallel with no audit trail connecting a signal to the decision it triggered to the outcome it produced.
 
-The result is a permanent state of reactive management. Decisions are made on partial information. Problems are identified after they compound. The people responsible for outcomes spend most of their time synthesizing fragmented signals manually — a skilled, expensive, exhausting task that produces answers too slowly to be fully useful.
+The result is a permanent state of ungoverned decision-making. Operators receive more recommendations, more alerts, more data — but no structured way to evaluate, approve, track, and prove their decisions. When something goes wrong, no one can reconstruct the decision chain.
 
-This is not a data problem. Organizations have more data than they can use. It is a **connection problem**: the gap between what the system knows and what the people running it understand well enough to act on.
+This is not a data problem. Organizations have more data than they can use. It is a **governance problem**: the gap between what the system recommends and what the organization can accountably execute.
 
 ---
 
@@ -51,13 +51,13 @@ This is not a data problem. Organizations have more data than they can use. It i
 
 ## The Opportunity
 
-The Business Observability market is an emerging category without a dominant player. Point solutions are abundant. Platform solutions that span Observe → Decide → Execute → Advise are not.
+The Governed Operational Intelligence market is an emerging category without a dominant player. Point solutions are abundant. Platform solutions that provide the full governed decision loop — Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome — do not exist.
 
 **Market size estimates (indicative):**
 
 | Segment | SAM (Indicative) | Key Players (Point Solutions) |
 |---------|-----------------|-------------------------------|
-| Business Observability / AIOps | $8–12B growing to $30B+ by 2030 | PagerDuty, Datadog (infra), Splunk (security) |
+| Governed Operational Intelligence | $8–12B growing to $30B+ by 2030 | PagerDuty, Datadog (infra), Splunk (security) |
 | Maritime Intelligence | $2–4B | Veson, AMOS, specialized data providers |
 | Real Estate Intelligence | $3–5B (NYC alone is $500M+ TAM) | CoStar, Crexi, scattered data providers |
 | Security Operations (SOC tooling) | $15–20B | IBM QRadar, Palo Alto XSOAR, Splunk SIEM |
@@ -74,4 +74,6 @@ The Business Observability market is an emerging category without a dominant pla
 
 **AI timing.** The enabling technology for this category (capable LLMs with traceable reasoning) only became reliable enough for enterprise use in 2023–2024. The companies that built before this threshold built with inferior AI engines. The companies entering now have the right enabling technology available.
 
-SZL Holdings is entering at the right architectural moment with the right platform design.
+**Governance demand.** Enterprise tolerance for AI black boxes is declining. Regulatory pressure (EU AI Act, SEC AI disclosure, NIST AI RMF) is pushing demand toward AI systems with structural governance — explainability, audit trails, human-in-the-loop enforcement. The five platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine) address this demand architecturally, not cosmetically.
+
+SZL Holdings is entering at the right architectural moment with the right governance design.

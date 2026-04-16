@@ -13,21 +13,23 @@ SZL Holdings is building the platform that makes that possible. We are doing it 
 
 ---
 
-## The Category: Business Observability
+## The Category: Governed Operational Intelligence
 
-Business Observability is the emerging category at the intersection of operational intelligence, AI-assisted reasoning, and structured action.
+Governed Operational Intelligence is the emerging category at the intersection of operational signal detection, AI-assisted reasoning, and structured action execution — under governance, with full attribution.
 
 It is distinct from:
 
-**Business Intelligence (BI):** BI answers "what happened?" Business Observability answers "what is happening, why, and what should we do?"
+**Business Intelligence (BI):** BI answers "what happened?" Governed Operational Intelligence answers "what is happening, what should we do, and can we prove the decision chain?"
 
-**AIOps / MLOps:** These optimize specific technical systems. Business Observability spans the full operational layer — commercial, logistics, security, people, and financial systems.
+**AI Copilots:** Copilots add recommendation volume without governance. This platform enforces human approval gates (Covenant Policy), tracks decision outcomes (Outcome Graph), and records immutable audit trails (Proof Chain).
 
-**ERP / Workflow Platforms:** These execute processes. Business Observability surfaces the signals that should inform whether and how those processes run.
+**AIOps / MLOps:** These optimize specific technical systems. Governed Operational Intelligence spans the full operational layer — commercial, logistics, security, people, and financial systems — with structural governance.
 
-The market does not yet have a dominant platform in this category. The tools that come closest — Datadog (infrastructure observability), Splunk (security intelligence), Palantir (government analytics) — serve specific verticals without the cross-domain architecture that Business Observability requires.
+**ERP / Workflow Platforms:** These execute processes. Governed Operational Intelligence surfaces the signals that should inform whether and how those processes run, adds simulation (Monte Carlo) before action, and records the full decision chain.
 
-SZL Holdings is building this architecture from the ground up, in verticals where the cost of poor observability is quantifiably high.
+The market does not yet have a dominant platform in this category. The tools that come closest — Datadog (infrastructure observability), Splunk (security intelligence), Palantir (government analytics) — serve specific verticals without the cross-domain governance architecture that this category requires.
+
+SZL Holdings is building this architecture from the ground up, in verticals where the cost of ungoverned decisions is quantifiably high.
 
 ---
 
@@ -43,48 +45,78 @@ Three forces have converged to make this architecture feasible and valuable:
 
 ---
 
+## The Governed Decision Loop
+
+Every consequential decision in the platform follows the same loop:
+
+```
+Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome
+```
+
+This loop is powered by five **platform primitives** — architectural abstractions shared by every product surface:
+
+| Primitive | What It Does |
+|-----------|-------------|
+| **Outcome Graph** | Tracks the full decision lifecycle: recommendation → decision → outcome. Enables closed-loop AI learning. |
+| **Proof Chain** | Immutable audit trail with provenance for every action. AI outputs carry model identity, source citations, and confidence scores. |
+| **Covenant Policy** | Permission and approval gates. Human-in-the-loop is enforced at the policy layer — AI cannot bypass it. |
+| **Monte Carlo** | Probabilistic simulation before action — confidence intervals, sensitivity analysis, scenario comparison. |
+| **Workflow Engine** | Durable multi-step process orchestration with agent coordination and checkpoint recovery. |
+
+These are not features. They are the structural abstractions that make the platform fundamentally different from dashboards, copilots, and workflow tools.
+
 ## The Operating Wedge: Lyte + Alloy
 
-The primary commercial entry point is **Lyte + Alloy** — business observability and execution accountability delivered as a unified system.
+The primary commercial entry point is **Lyte + Alloy** — the command surface and execution fabric delivered as a unified governed system.
 
-**Lyte** makes every operational surface visible, contextual, and actionable through the PRISM framework:
+**Lyte** is the command surface — where operators observe signals, review recommendations, and make decisions. Built on the PRISM framework:
 - **P**ulse — Business health and operating heartbeat
 - **R**isk — Approvals, churn, delays, ownership gaps
 - **I**ntelligence — Modeled reasoning with confidence scores
 - **S**ignals — Anomalies, changes, event spikes, workflow drift
 - **M**otion — Escalations, routing, approvals, interventions
 
-**Alloy** closes the loop: when Lyte surfaces a signal, Alloy routes the action. Workflow engine, human-in-the-loop approval gates, agent coordination, and immutable audit trail — the infrastructure that makes observability and accountability a single system.
+**Alloy** is the execution fabric — when Lyte surfaces a signal, Alloy enforces the governed loop: Workflow Engine orchestrates the process, Covenant Policy checks permission, Monte Carlo simulates risk, Proof Chain records the trail, and Outcome Graph tracks the result.
 
 ---
 
-## Current Platform — Product Lineup
+## Current Platform
 
-As of Q2 2026, the SZL Holdings platform consists of nine products built on a single shared architecture:
+As of Q2 2026, the SZL Holdings platform consists of command surfaces, an execution fabric, and six domain packs — all sharing the same five platform primitives:
 
-| Product | Domain | Status |
-|---------|--------|--------|
-| **Lyte** | Business Observability — PRISM framework, signal timeline, action queue | Functional Alpha |
-| **Alloy** | Execution Fabric — workflow engine, approval gates, audit trail | Functional Alpha |
-| **Aegis** | Security & Defense — SOC command, SOAR, MITRE ATT&CK, INCA model governance | Functional Alpha |
+**Command surfaces:**
+| Surface | Purpose | Status |
+|---------|---------|--------|
+| **Lyte** | Operator command surface — PRISM framework, signal timeline, action queue, approval chains | Functional Alpha |
+| **CORTEX** | Unified mobile command — all domains in one iOS/Android app | Functional Alpha |
+| **Command Portal** | Ecosystem hub — cross-domain 8-domain dashboard | Functional Alpha |
+
+**Execution fabric:**
+| Surface | Purpose | Status |
+|---------|---------|--------|
+| **Alloy** | Workflow orchestration, approval gates, immutable audit trail | Functional Alpha |
+
+**Domain packs:**
+| Domain Pack | Domain | Status |
+|-------------|--------|--------|
+| **Aegis** | Security & Defense — SOC command, SOAR, MITRE ATT&CK | Functional Alpha |
 | **Vessels** | Maritime Intelligence — AIS fleet, sanctions screening, Helmsman agent | Functional Alpha |
 | **Terra** | Real Estate Intelligence — NYC distress pipeline, ownership graph, deal flow | Functional Alpha |
-| **Carlota Jo** | Premium Advisory — UHNW residential advisory, client portal | Live |
-| **CORTEX** | Unified Mobile Command — all domains in one iOS/Android app | Functional Alpha |
-| **Command Portal** | Ecosystem Hub — cross-domain signal aggregation and portfolio monitoring | Functional Alpha |
-| **IMPERIUM** | Cloud Sovereignty Engine — infrastructure governance and compliance | Functional Alpha |
+| **PRISM Counsel** | Legal Matter Command — matter management, AI triage, proof chain audit | Functional Alpha |
+| **Carlota Jo** | Premium Advisory — UHNW advisory, client portal | Live |
+| **IMPERIUM** | Cloud Sovereignty — infrastructure governance and compliance | Functional Alpha |
 
 ### Platform Scale Metrics
 
 | Metric | Current Value |
 |--------|--------------|
-| Deployable artifacts | 16 |
-| Database tables | 120+ (per-domain namespaced, all org-scoped) |
-| Shared TypeScript libraries | 20+ packages in `lib/` |
+| Active artifacts | 15 |
+| Database tables | 685 across 112 schema files (per-domain namespaced, all org-scoped) |
+| Shared TypeScript packages | 51 in pnpm monorepo |
+| Platform primitives | 5 (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine) |
 | AI decision types (schema-validated) | 9 |
 | RBAC roles | 11 |
 | Supported notification channels | 4 (Slack, Teams, email, WebSocket push) |
-| PDF report templates | 8 (branded, server-side) |
 | CI gates on every PR | 5 (lint, typecheck, unit tests, dependency audit, build) |
 
 ---
@@ -95,30 +127,30 @@ The SZL platform was not designed as a collection of independent products. It wa
 
 **Phase 1:** Build the core architecture and prove it in Lyte. Establish the PRISM framework as a defensible analytical model.
 
-**Phase 2:** Add domain verticals that share the same architecture. Each new vertical (Aegis, Terra, Vessels) demonstrates the compounding leverage — new product, not new infrastructure investment.
+**Phase 2:** Add domain packs that share the same architecture. Each new domain pack (Aegis, Terra, Vessels) demonstrates the compounding leverage — new intelligence, not new infrastructure investment.
 
 **Phase 3:** Cross-domain intelligence. Connect the entity model and event schema across the platform so signals in one domain inform reasoning in another. A vessel delay that creates cargo exposure surfaces as a commercial risk signal. A security incident affecting operations infrastructure propagates to the operational decision layer.
 
-**Phase 4:** Platform generalization. The Observe → Understand → Execute → Advise model is generalisable. The same architecture that serves maritime logistics can serve healthcare operations, financial services risk, or government infrastructure. Each new vertical needs a domain-specific Observe layer; the rest is shared.
+**Phase 4:** Platform generalization. The governed decision loop is generalisable. The same architecture that serves maritime logistics can serve healthcare operations, financial services risk, or government infrastructure. Each new domain pack needs domain-specific signal sources; the governance infrastructure is shared.
 
 ---
 
 ## Defensibility
 
-SZL Holdings is building infrastructure. The defensibility comes from six structural advantages:
+SZL Holdings is building governance infrastructure. The defensibility comes from six structural advantages:
 
-1. **Shared design system** — Every product reaches production quality faster, and every user who learns one platform is partially oriented on all of them.
+1. **Five platform primitives** — Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, and Workflow Engine are not features that can be added to a competitor's product. They are architectural abstractions that shape the entire data model and execution layer. Replicating them requires rebuilding from the foundation.
 
-2. **Shared event model** — Signals across the ecosystem conform to a common schema. This is the prerequisite for cross-domain intelligence. It took investment to build; it cannot be replicated quickly.
+2. **Shared event model (PRISM Bus)** — Signals across the ecosystem conform to a common schema with cross-domain correlation. This is the prerequisite for multi-domain intelligence. It took investment to build; it cannot be replicated quickly.
 
-3. **Alloy — the execution fabric** — The connective tissue of the platform. Agents are coordinated under a governance framework that maintains accountability across the network.
+3. **Alloy — the execution fabric** — The connective tissue of the platform. Agents are coordinated under the Covenant Policy governance framework that maintains accountability across the network.
 
-4. **Entity graph** — The platform maintains a traceable entity model: vessels, incidents, signals, recommendations, actions, and actors are all connected. Causality is structured into the data model.
+4. **Closed-loop learning (Outcome Graph)** — The platform records not just what was recommended but what was decided and what happened. This creates a calibration flywheel: more decisions → better simulations → more accurate recommendations.
 
-5. **Explainability and human-in-the-loop architecture** — The AI governance model is a structural feature. Advisory agents cannot execute consequential actions without human confirmation. This is enforced at the workflow level.
+5. **Structural governance (Covenant Policy + Proof Chain)** — Human-in-the-loop is not a UI pattern. It is an enforced policy gate that AI cannot bypass, paired with an immutable audit trail. This is increasingly a procurement requirement.
 
-6. **Multi-lane applicability** — The four-layer architecture applies across verticals without rebuilding from scratch.
+6. **Domain pack leverage** — Each new domain pack shares the governance infrastructure and adds domain-specific signal sources and action vocabularies. New domain intelligence, not new infrastructure.
 
 ---
 
-*See also: [Product Readiness](product-readiness.md) · [Go-to-Market](go-to-market.md) · [Investor Overview](investor-overview.md)*
+*See also: [Product Readiness](product-readiness.md) · [Go-to-Market](go-to-market.md) · [Investor Overview](investor-overview.md) · [Platform Primitives](../../PLATFORM_PRIMITIVES.md) · [Category Positioning](../../CATEGORY_POSITIONING.md)*

@@ -14,9 +14,9 @@
 | **Type** | Technology holding company |
 | **Stage** | Pre-revenue — Functional Alpha across all platforms |
 | **Founder** | Stephen Lutar |
-| **Model** | Unified platform ecosystem — shared infrastructure across domain verticals |
-| **Primary Vertical** | Business Observability (Lyte) |
-| **Adjacent Verticals** | Defense Intelligence (Aegis), Real Estate (Terra), Maritime (Vessels), Advisory (Carlota Jo) |
+| **Model** | Governed decision platform — five primitives shared across domain packs |
+| **Primary Surface** | Governed Operational Intelligence (Lyte command surface + Alloy execution fabric) |
+| **Domain Packs** | Security (Aegis), Maritime (Vessels), Real Estate (Terra), Legal (PRISM Counsel), Advisory (Carlota Jo), Cloud (IMPERIUM) |
 | **Revenue Model** | SaaS subscriptions, usage-based billing, enterprise contracts |
 | **Primary Markets** | Enterprise and mid-market operations, security, maritime, real estate |
 
@@ -24,17 +24,17 @@
 
 ## Investment Thesis
 
-SZL Holdings is building the infrastructure for **Business Observability** — the category that answers not just "what happened?" but "what is happening, why, and what should we do?" This is a structurally distinct category from BI, AIOps, and ERP platforms.
+SZL Holdings is building the infrastructure for **Governed Operational Intelligence** — a governed decision layer that connects what is observable to what is executable, under governance, with full attribution. This is a structurally distinct category from dashboards, AI copilots, and workflow tools.
 
-The architecture is unique: five domain verticals sharing one intelligence backbone, one execution fabric, one design system, and one data layer. This is not a portfolio play — it is a compounding system. Every new vertical adds domain-specific signal ingestion; the rest of the infrastructure (Alloy, shared-ui, auth, audit, AI engine) does not need to be rebuilt.
+The architecture is unique: five platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine) shared by every product surface. Domain packs (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM) add domain-specific intelligence on shared governance infrastructure. This is not a portfolio play — it is a compounding system. Every new domain pack adds domain-specific signal sources; the governance infrastructure does not need to be rebuilt.
 
 ---
 
 ## Why Now
 
 - AI quality has crossed the inference threshold — LLMs can now reason across complex operational data reliably enough to surface meaningful recommendations, not just correlate fields
-- Enterprise tolerance for AI black boxes is declining — regulatory pressure is pushing demand toward explainable, auditable, human-in-the-loop AI systems
-- The Business Observability category is emerging but has no dominant platform — the architectural moment to establish category leadership is now
+- Enterprise tolerance for AI black boxes is declining — regulatory pressure is pushing demand toward explainable, auditable, human-in-the-loop AI systems. Covenant Policy and Proof Chain address this structurally.
+- The Governed Operational Intelligence category is emerging but has no dominant platform — the architectural moment to establish category leadership is now
 
 ---
 
@@ -42,9 +42,10 @@ The architecture is unique: five domain verticals sharing one intelligence backb
 
 As of Q1 2026, SZL Holdings has:
 
-- **16 deployable artifacts** — 7 web apps, 7 mobile apps (Expo/React Native), 1 API server, 1 design system
-- **Production-grade shared infrastructure** — database schema, auth, audit trail, real-time layer, AI engine, workflow engine
-- **5 domain platforms** fully implemented with seeded/demo data and role-aware dashboards
+- **15 active artifacts** — 10 web apps, 2 mobile apps (Expo/React Native), 1 API server, 1 design system, 1 dev sandbox
+- **Five platform primitives** — Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine — shared by all surfaces
+- **6 domain packs** fully implemented with seeded/demo data and role-aware dashboards
+- **685 database tables** across 112 schema files, 51 shared packages
 - **Azure Bicep IaC** — enterprise deployment architecture ready
 - **Stripe billing infrastructure** — built and pending activation
 - **OpenAPI 3.1 specification** — full API documentation
@@ -96,12 +97,13 @@ The documentation in this repository presents the platform honestly. Platform re
 
 ## Recommended Evaluation Path
 
-1. **Review `README.md`** — Ecosystem overview and platform hierarchy
-2. **Review `/docs/architecture/`** — System architecture, platform map, data flow
-3. **Review `/docs/trust/`** — Security posture, AI governance, deployment model
-4. **Review `/docs/investor/product-readiness.md`** — Honest readiness labels per platform
-5. **Review `/docs/investor/go-to-market.md`** — Commercial entry points and target buyers
-6. **Request live demo access** — Via inquiries@szlholdings.com
+1. **Review `README.md`** — Platform thesis, five primitives, governed decision loop
+2. **Review `CATEGORY_POSITIONING.md`** — What "governed operational intelligence" means and why it matters
+3. **Review `PLATFORM_PRIMITIVES.md`** — The five architectural abstractions that define the platform
+4. **Review `/docs/trust/`** — Security posture, AI governance, deployment model
+5. **Review `/docs/investor/product-readiness.md`** — Honest readiness labels per product
+6. **Review `/docs/investor/go-to-market.md`** — Commercial entry points and target buyers
+7. **Request live demo access** — Via inquiries@szlholdings.com
 
 ---
 

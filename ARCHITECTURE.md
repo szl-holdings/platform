@@ -11,14 +11,29 @@
 
 SZL Holdings is a **governed operational intelligence layer** — the platform that connects what is observable to what is executable, under governance, with full attribution.
 
-The core operating wedge is **Lyte + Alloy**. Lyte delivers business observability. Alloy delivers execution accountability. Domain packs (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM) share the same data layer, execution fabric, and AI engine, extending the system into vertical markets without rebuilding infrastructure.
+The platform is organized around a single principle: **every consequential decision follows the same governed loop**, regardless of which domain it originates in. The core loop is:
+
+```
+Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome
+```
+
+**Lyte** is the command surface — where operators observe, decide, and act. **Alloy** is the execution fabric — where workflows are orchestrated, approvals are enforced, and audit trails are generated. **Domain packs** (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM) share the same data layer, execution fabric, and AI engine, extending the system into specific operational domains without rebuilding infrastructure.
+
+Five **platform primitives** power the governed decision loop across all domains:
+- **Outcome Graph** — decision lifecycle tracking (recommendation → decision → outcome)
+- **Proof Chain** — immutable, verifiable audit trail with provenance
+- **Covenant Policy** — permission and approval gates (human-in-the-loop enforcement)
+- **Monte Carlo** — probabilistic risk simulation before action
+- **Workflow Engine** — durable process orchestration with checkpoint recovery
+
+See [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) for the full specification.
 
 **Four design principles govern every architectural decision:**
 
 1. **Explicit over implicit.** Platform state — data freshness, demo mode, model version, agent confidence — is always visible.
-2. **Advisory before autonomous.** AI outputs are recommendations with reasoning. Execution requires human confirmation. This is architectural, enforced at the Alloy workflow layer.
-3. **Traceability as a feature.** Every significant event is logged with attribution and context via the immutable audit trail.
-4. **Shared infrastructure, domain-specific surfaces.** The architecture is shared. Domain expertise is built into each platform's surface layer only.
+2. **Advisory before autonomous.** AI outputs are recommendations with reasoning. Execution requires human confirmation. This is architectural, enforced at the Alloy workflow layer via Covenant Policy.
+3. **Traceability as a feature.** Every significant event generates an immutable Proof Chain entry with actor attribution and evidence references.
+4. **Shared infrastructure, domain-specific surfaces.** The governance primitives are shared. Domain expertise is built into each domain pack's surface layer only.
 
 ---
 
