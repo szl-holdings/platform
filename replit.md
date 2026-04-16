@@ -100,6 +100,27 @@ Premium, SZL-branded dark-first design system (except Carlota Jo luxury light-mo
 ### Object Storage
 Replit's GCS-backed object storage (App Storage) handles file uploads and generated documents, secured by ACL metadata and accessible via presigned URLs.
 
+## Platform Audit & Canonical Docs (April 2026)
+
+A comprehensive audit of the entire monorepo was completed as part of Series A Cleanup — Phase 1. The following documents are now authoritative:
+
+- `docs/audit/platform-inventory.md` — All 15 artifacts, 34 libs, 217 total route .ts files (170 top-level non-index + 35 subdirectory non-index across 12 groups = 205 non-index total), workflows, tests, integrations, duplicates
+- `docs/audit/app-maturity-matrix.md` — Every artifact classified: GA, Beta, Partial, Internal, Deprecated, Skeleton
+- `docs/audit/env-canonical-map.md` — All 156 env vars (codebase-wide scan) mapped to owner, tier, and current state
+- `docs/audit/deploy-surface-map.md` — Replit (primary), GitHub Actions (CI), Docker (local), Azure (secondary/enterprise)
+- `docs/audit/mock-stub-placeholder-register.md` — Every mock, stub, and placeholder with location and status
+- `docs/audit/archive-or-delete-plan.md` — Disposition plan for all non-production paths
+- `docs/PLATFORM_CANONICAL.md` — Canonical runtime (Node.js 24, pnpm 10, PostgreSQL 16), build commands, monorepo structure
+- `docs/RUNTIME_POLICY.md` — Version policy, CI gap (CI uses Node 20/pnpm 9; must align to Node 24/pnpm 10 in Phase 2)
+- `docs/DEPLOYMENT_MODEL.md` — Replit (primary), Azure (secondary/enterprise), GitHub Actions (CI/CD)
+- `docs/APP_STATUS.md` — Every artifact with GA/Beta/Partial/Internal/Deprecated/Concept status
+
+**Key findings:**
+- CI/CD version mismatch: CI uses Node.js 20 + pnpm 9; production uses Node.js 24 + pnpm 10 — Phase 2 action
+- 3 artifact dirs should be removed: `stephen-site` (deprecated), `lyte-command-center` (orphaned), `imperium` (skeleton)
+- 3 legacy env vars to remove: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY` (superseded by `AI_INTEGRATIONS_*` proxy vars)
+- `lib/approvals` has no `package.json` — investigate in Phase 2
+
 ## Dev Server Port Architecture
 
 All Vite-based web apps use a **shared routing proxy** pattern on port 9090 (the only port registered in `.replit` for web apps, mapped to external port 3000). Each app's `vite.config.ts` includes a `sharedProxyPlugin` that:
