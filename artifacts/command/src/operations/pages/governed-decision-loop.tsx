@@ -3,7 +3,7 @@ import { useState } from "react";
 import {
   Radio, Brain, Activity, Scale, CheckSquare, Play, Shield, Target,
   ChevronRight, ChevronLeft, ArrowRight, Zap, Clock, AlertTriangle,
-  CheckCircle, FileText, Cpu, Eye, BarChart3
+  CheckCircle, FileText, Cpu, Eye, BarChart3, FlaskConical, BookOpen
 } from "lucide-react";
 import { ProofProvenancePanel, type ProofEntry } from "../components/governed-decision/proof-provenance-panel";
 import { MonteCarloSimPanel, type SimulationScenario, type SensitivityDriver } from "../components/governed-decision/monte-carlo-panel";
@@ -304,7 +304,12 @@ function SignalStep() {
       </div>
 
       <div className="rounded-xl p-4" style={{ background: BG.surface, border: `1px solid ${BORDER.muted}` }}>
-        <div className="text-[9px] font-bold uppercase tracking-widest mb-2" style={{ color: TEXT.muted }}>Evidence</div>
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-[9px] font-bold uppercase tracking-widest" style={{ color: TEXT.muted }}>Evidence Rail</div>
+          <span className="text-[7px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(212,160,84,0.06)", border: "1px solid rgba(212,160,84,0.14)", color: "rgba(212,160,84,0.5)" }}>
+            synthetic
+          </span>
+        </div>
         <div className="space-y-1.5">
           {DEMO_SIGNAL.evidence.map((ev, i) => (
             <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${BORDER.subtle}` }}>
@@ -392,7 +397,12 @@ function RecommendationStep() {
           </div>
         </div>
 
-        <div className="text-[9px] font-bold uppercase tracking-widest mb-2" style={{ color: TEXT.muted }}>Reasoning Chain</div>
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-[9px] font-bold uppercase tracking-widest" style={{ color: TEXT.muted }}>Reasoning Chain</div>
+          <span className="text-[7px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(212,160,84,0.06)", border: "1px solid rgba(212,160,84,0.14)", color: "rgba(212,160,84,0.5)" }}>
+            synthetic
+          </span>
+        </div>
         <div className="space-y-1.5">
           {DEMO_RECOMMENDATION.reasoning.map((r, i) => (
             <div key={i} className="flex items-start gap-2 px-3 py-2 rounded-lg" style={{ background: "rgba(139,122,200,0.03)", border: `1px solid rgba(139,122,200,0.08)` }}>
@@ -448,8 +458,19 @@ function ExecutionStep() {
     <div className="rounded-xl overflow-hidden" style={{ background: BG.surface, border: `1px solid ${BORDER.muted}` }}>
       <div className="flex items-center gap-2 px-5 py-3" style={{ borderBottom: `1px solid ${BORDER.subtle}` }}>
         <Play className="w-4 h-4" style={{ color: "#6366f1" }} />
-        <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#6366f1" }}>Workflow Execution</span>
-        <span className="ml-auto text-[9px] font-bold px-2 py-0.5 rounded" style={{ background: "rgba(107,143,113,0.12)", color: "#6b8f71" }}>COMPLETED</span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#6366f1" }}>Workflow Execution</span>
+            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", color: "#6366f1" }}>
+              Action Receipt
+            </span>
+          </div>
+          <div className="text-[9px] font-mono mt-0.5" style={{ color: TEXT.muted }}>Governed execution log — every step authorized, timed, and recorded</div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-[7px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(212,160,84,0.06)", border: "1px solid rgba(212,160,84,0.12)", color: "rgba(212,160,84,0.5)" }}>synthetic</span>
+          <span className="text-[9px] font-bold px-2 py-0.5 rounded" style={{ background: "rgba(107,143,113,0.12)", color: "#6b8f71" }}>COMPLETED</span>
+        </div>
       </div>
       <div className="p-5">
         <div className="space-y-3">
@@ -502,6 +523,79 @@ function OutcomeStep() {
   return <OutcomePanel outcome={DEMO_OUTCOME} />;
 }
 
+const DEMO_ROUTE_STEPS_5MIN = [
+  { step: 1, label: "Signal", href: "#", time: "0:00" },
+  { step: 5, label: "Policy Gate", href: "#", time: "1:30" },
+  { step: 6, label: "Approval", href: "#", time: "2:15" },
+  { step: 8, label: "Proof Chain", href: "#", time: "3:15" },
+  { step: 9, label: "Outcome", href: "#", time: "4:00" },
+];
+
+function DemoScenarioBar({ activeStep, onStepClick }: { activeStep: number; onStepClick: (i: number) => void }) {
+  const [showGuide, setShowGuide] = useState(false);
+  return (
+    <div
+      className="rounded-xl p-3 mb-1"
+      style={{ background: "rgba(212,160,84,0.04)", border: "1px solid rgba(212,160,84,0.12)" }}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <FlaskConical className="w-3.5 h-3.5 shrink-0" style={{ color: "#d4a054" }} />
+          <span className="text-[9px] font-mono font-bold uppercase tracking-widest" style={{ color: "#d4a054" }}>Demo Scenario</span>
+          <span className="text-[9px] font-mono" style={{ color: "rgba(212,160,84,0.55)" }}>·</span>
+          <span className="text-[9px] font-mono" style={{ color: "rgba(212,160,84,0.7)" }}>Vessels — Maritime Fleet Command</span>
+          <span
+            className="text-[8px] px-1.5 py-0.5 rounded font-mono"
+            style={{ background: "rgba(212,160,84,0.08)", border: "1px solid rgba(212,160,84,0.18)", color: "rgba(212,160,84,0.7)" }}
+          >
+            Synthetic data
+          </span>
+        </div>
+        <button
+          onClick={() => setShowGuide(v => !v)}
+          className="flex items-center gap-1 text-[8px] font-mono hover:opacity-80 transition-opacity"
+          style={{ color: "rgba(212,160,84,0.5)" }}
+        >
+          <BookOpen className="w-3 h-3" />
+          {showGuide ? "Hide" : "5-min route"}
+        </button>
+      </div>
+
+      {showGuide && (
+        <div className="mt-3 pt-3" style={{ borderTop: "1px solid rgba(212,160,84,0.1)" }}>
+          <div className="text-[8px] font-mono uppercase tracking-widest mb-2" style={{ color: "rgba(212,160,84,0.5)" }}>
+            5-Minute Demo Route — key beats
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            {DEMO_ROUTE_STEPS_5MIN.map((r, i) => (
+              <div key={r.step} className="flex items-center gap-1.5">
+                <button
+                  onClick={() => onStepClick(r.step - 1)}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-medium transition-all hover:opacity-80"
+                  style={{
+                    background: activeStep === r.step - 1 ? "rgba(212,160,84,0.15)" : "rgba(212,160,84,0.05)",
+                    border: `1px solid ${activeStep === r.step - 1 ? "rgba(212,160,84,0.35)" : "rgba(212,160,84,0.1)"}`,
+                    color: activeStep === r.step - 1 ? "#d4a054" : "rgba(212,160,84,0.6)",
+                  }}
+                >
+                  <span className="font-mono text-[8px]" style={{ color: "rgba(212,160,84,0.45)" }}>{r.time}</span>
+                  {r.label}
+                </button>
+                {i < DEMO_ROUTE_STEPS_5MIN.length - 1 && (
+                  <ArrowRight className="w-2.5 h-2.5 shrink-0" style={{ color: "rgba(212,160,84,0.2)" }} />
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="mt-2 text-[8px] font-mono" style={{ color: "rgba(212,160,84,0.35)" }}>
+            Click any step to jump · Full 15-min route: ops/market/demo-route-final.md
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 const STEP_COMPONENTS: Record<string, () => JSX.Element> = {
   signal: SignalStep,
   context: ContextStep,
@@ -521,6 +615,8 @@ export default function GovernedDecisionLoop() {
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-5">
+      <DemoScenarioBar activeStep={activeStep} onStepClick={setActiveStep} />
+
       <div>
         <div className="flex items-center gap-2 mb-1">
           <BarChart3 className="w-4 h-4" style={{ color: ACCENT }} />

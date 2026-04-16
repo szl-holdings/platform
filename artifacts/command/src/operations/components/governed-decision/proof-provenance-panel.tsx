@@ -1,6 +1,6 @@
 import {
   Shield, Eye, GitBranch, CheckCircle, Clock, AlertTriangle,
-  ChevronDown, ChevronRight, Cpu, FileText, Link2
+  ChevronDown, ChevronRight, Cpu, FileText, Link2, FlaskConical
 } from "lucide-react";
 import { useState } from "react";
 
@@ -94,8 +94,21 @@ export function ProofProvenancePanel({ entries, compact }: ProofProvenancePanelP
     <div className="rounded-xl overflow-hidden" style={{ background: BG.surface, border: `1px solid ${BORDER.muted}` }}>
       <div className="flex items-center gap-2 px-5 py-3" style={{ borderBottom: `1px solid ${BORDER.subtle}` }}>
         <Shield className="w-4 h-4" style={{ color: "#d4a054" }} />
-        <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#d4a054" }}>Proof Chain — Provenance Lineage</span>
-        <span className="ml-auto text-[10px] font-mono" style={{ color: TEXT.tertiary }}>{entries.length} record{entries.length !== 1 ? "s" : ""}</span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#d4a054" }}>Proof Chain</span>
+            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(212,160,84,0.08)", border: "1px solid rgba(212,160,84,0.2)", color: "#d4a054" }}>
+              Decision Receipt
+            </span>
+          </div>
+          <div className="text-[9px] font-mono mt-0.5" style={{ color: TEXT.muted }}>Immutable provenance — source, model, confidence, reviewer, lineage</div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="flex items-center gap-1 text-[7px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(212,160,84,0.06)", border: "1px solid rgba(212,160,84,0.12)", color: "rgba(212,160,84,0.5)" }}>
+            <FlaskConical className="w-2.5 h-2.5" />synthetic
+          </span>
+          <span className="text-[10px] font-mono" style={{ color: TEXT.tertiary }}>{entries.length} record{entries.length !== 1 ? "s" : ""}</span>
+        </div>
       </div>
 
       <div className="divide-y" style={{ borderColor: BORDER.subtle }}>

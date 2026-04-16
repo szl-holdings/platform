@@ -7,7 +7,8 @@ import {
   Flag, FileText, Database, Play, CheckSquare, Download, GitBranch, Send,
   TrendingUp, DollarSign, RotateCcw, Calculator, Bot, Monitor, Building,
   BellOff, Code, Target, Phone, Calendar, Layers, Map, Crown, ChevronRight,
-  Menu, X, BarChart3, Clapperboard, Power, Bell, Lock, GitCommit, Sigma
+  Menu, X, BarChart3, Clapperboard, Power, Bell, Lock, GitCommit, Sigma,
+  FlaskConical
 } from "lucide-react";
 import { MultiplayerSessionBanner, EcosystemNav, EnvironmentLabel, useDemoMode, MODE_LABELS, MODE_COLORS, MODE_ICONS } from "@szl-holdings/shared-ui";
 
@@ -260,6 +261,39 @@ function HeaderStatusPills() {
   );
 }
 
+function DemoEnvironmentBanner({ environment }: { environment: string }) {
+  const [dismissed, setDismissed] = useState(false);
+  const isDemo = environment === "demo" || environment === "simulated";
+  if (!isDemo || dismissed) return null;
+  return (
+    <div
+      className="flex items-center justify-between gap-2 px-4 py-1.5 shrink-0"
+      style={{
+        background: "linear-gradient(90deg, rgba(212,160,84,0.08) 0%, rgba(212,160,84,0.04) 100%)",
+        borderBottom: "1px solid rgba(212,160,84,0.14)",
+      }}
+    >
+      <div className="flex items-center gap-2.5">
+        <FlaskConical className="w-3 h-3 shrink-0" style={{ color: "#d4a054" }} />
+        <span className="text-[9px] font-mono font-bold uppercase tracking-widest" style={{ color: "#d4a054" }}>
+          Demo Mode
+        </span>
+        <span className="hidden sm:inline text-[9px] font-mono" style={{ color: "rgba(212,160,84,0.50)" }}>
+          Synthetic data · No live systems connected · All actions are safe
+        </span>
+      </div>
+      <button
+        onClick={() => setDismissed(true)}
+        className="text-[9px] font-mono hover:opacity-80 transition-opacity shrink-0"
+        style={{ color: "rgba(212,160,84,0.4)" }}
+        aria-label="Dismiss demo banner"
+      >
+        dismiss
+      </button>
+    </div>
+  );
+}
+
 export function UnifiedLayout({ children, mode, onModeChange }: {
   children: ReactNode;
   mode: WorkspaceMode;
@@ -374,6 +408,8 @@ export function UnifiedLayout({ children, mode, onModeChange }: {
             <div className="w-6 h-6 rounded flex items-center justify-center text-[9px] font-bold" style={{ background: `${accent}12`, border: `1px solid ${accent}20`, color: accent }}>SL</div>
           </div>
         </header>
+
+        <DemoEnvironmentBanner environment={resolveEnvironment()} />
 
         <main className="flex-1 overflow-auto" style={{ background: "#080c14" }}>
           {children}

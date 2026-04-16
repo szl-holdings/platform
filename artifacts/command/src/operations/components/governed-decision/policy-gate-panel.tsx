@@ -194,6 +194,12 @@ export function PolicyGatePanel({ finalOutcome, evaluations, approvalChain, esca
                 <span className="text-[9px] shrink-0" style={{ color: "#d4a054" }}>{entry.actor}</span>
               </div>
             ))}
+            <div className="flex items-center gap-1.5 pt-2 mt-1" style={{ borderTop: `1px solid ${BORDER.subtle}` }}>
+              <span className="text-[7px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(212,160,84,0.05)", border: "1px solid rgba(212,160,84,0.12)", color: "rgba(212,160,84,0.45)" }}>
+                synthetic · demo scenario
+              </span>
+              <span className="text-[7px] font-mono" style={{ color: TEXT.muted }}>No live systems connected — audit log is illustrative</span>
+            </div>
           </div>
         )}
       </div>
