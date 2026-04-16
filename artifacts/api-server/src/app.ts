@@ -23,6 +23,7 @@ import { sessionRefreshPolicy } from "./middlewares/session-policy";
 import { apiVersionMiddleware } from "./middlewares/api-version";
 import { etagMiddleware } from "./middlewares/optimistic-concurrency";
 import { ENV_SPECS } from "./lib/startup-validation";
+import { resolveRuntimeMode } from "@szl-holdings/config";
 
 const app: Express = express();
 
@@ -227,8 +228,12 @@ app.get("/api/health", async (_req: Request, res: Response) => {
     { slug: "api-server", name: "API Server", type: "backend" },
   ];
 
-  const isDemoSeed = process.env.ENABLE_DEMO_SEED === "true";
-  const runtimeMode: string = isDemoSeed ? "demo" : (process.env.NODE_ENV || "development");
+  let runtimeMode: string;
+  try {
+    runtimeMode = resolveRuntimeMode();
+  } catch {
+    runtimeMode = process.env["NODE_ENV"] === "production" ? "production" : "local-dev";
+  }
 
   res.status(overallStatus === "healthy" ? 200 : 503).json({
     status: overallStatus,

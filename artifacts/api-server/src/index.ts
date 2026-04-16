@@ -22,6 +22,7 @@ import { seedPlatformData } from "./lib/seed-platform";
 import { initializeOpenTelemetry } from "@szl-holdings/observability";
 import { seedMspData } from "./lib/seed-msp";
 import { seedDreamscapeData } from "./lib/seed-dreamscape";
+import { isSeedDataAllowed, resolveRuntimeMode } from "@szl-holdings/config";
 import { buildGraphQLMiddleware } from "./graphql/index.js";
 import { registerGraphQLHandler } from "./app.js";
 import { prewarmIntelligenceCache, scheduleIntelligenceRefresh, scheduleIntelligenceCachePruning } from "./routes/intelligence/index.js";
@@ -202,11 +203,11 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     await startDurableScheduler();
 
     // Step 4: Demo seeds — isolated from production data paths.
-    // Only run when: NODE_ENV !== "production" OR ENABLE_DEMO_SEED=true is explicitly set.
-    // This prevents synthetic data from polluting production databases.
-    const isDemoSeedEnabled = process.env.NODE_ENV !== "production" || process.env.ENABLE_DEMO_SEED === "true";
-    if (isDemoSeedEnabled) {
-      logger.info("[seed] Demo seed enabled — running platform/MSP/Dreamscape seeds");
+    // Gate is now enforced by isSeedDataAllowed() from @szl-holdings/config (runtime mode model).
+    // Each seed function also guards itself independently for defense-in-depth.
+    const currentMode = resolveRuntimeMode();
+    if (isSeedDataAllowed()) {
+      logger.info({ mode: currentMode }, "[seed] Demo seed enabled — running platform/MSP/Dreamscape seeds");
       seedPlatformData().catch(err => {
         logger.warn({ err }, "[seed-platform] Seed failed (non-fatal)");
       });
@@ -217,7 +218,7 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
         logger.warn({ err }, "[seed-dreamscape] Creative Workflows seed failed (non-fatal)");
       });
     } else {
-      logger.info("[seed] Production environment — demo seeds suppressed (set ENABLE_DEMO_SEED=true to override)");
+      logger.info({ mode: currentMode }, "[seed] Demo seeds suppressed — runtime mode does not permit seed data. Set DEMO_MODE=true or ENABLE_DEMO_SEED=true to enable in non-production environments.");
     }
     initIngestionFramework().catch(err => {
       logger.warn({ err }, "[ingestion] Framework init failed (non-fatal)");

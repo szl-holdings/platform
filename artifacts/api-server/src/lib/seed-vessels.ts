@@ -1,3 +1,4 @@
+import { isSeedDataAllowed, getRuntimeMode } from "@szl-holdings/config";
 import {
   db,
   vesselsTable,
@@ -283,6 +284,13 @@ const EXCEPTION_STATUSES: Array<InsertFleetException["status"]> = [
 ];
 
 export async function seedVesselsData(): Promise<void> {
+  if (!isSeedDataAllowed()) {
+    const mode = getRuntimeMode();
+    throw new Error(
+      `[seed-vessels] Attempted to seed vessels demo data in ${mode} mode. ` +
+        `Seed data is only permitted in local-dev, internal-preview, and demo modes.`,
+    );
+  }
   console.log("[seed-vessels] Starting vessels comprehensive seed...");
 
   try {

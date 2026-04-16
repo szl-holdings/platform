@@ -25,6 +25,10 @@ attached_assets/
 backups/
 exports/
 
+# Root-level workspace export archives — non-runtime binaries (deleted, do not re-add)
+project-export.zip
+*.workspace-export.zip
+
 # Test output
 playwright-report/
 test-results/

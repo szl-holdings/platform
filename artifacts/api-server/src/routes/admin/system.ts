@@ -504,6 +504,16 @@ export function register(router: IRouter): void {
   router.get("/admin/environment/full", (_req, res) => {
     const { validateStartupConfig } = require("../../lib/startup-validation");
     const result = validateStartupConfig();
-    res.json({ timestamp: new Date().toISOString(), environment: process.env["NODE_ENV"] ?? "development", appEnv: process.env["APP_ENV"] ?? "development", demoMode: process.env["DEMO_MODE"] === "true", valid: result.valid, errors: result.errors, warnings: result.warnings, envSummary: result.envSummary });
+    res.json({
+      timestamp: new Date().toISOString(),
+      environment: process.env["NODE_ENV"] ?? "development",
+      appEnv: process.env["APP_ENV"] ?? "development",
+      runtimeMode: result.runtimeMode,
+      demoMode: result.runtimeMode === "demo",
+      valid: result.valid,
+      errors: result.errors,
+      warnings: result.warnings,
+      envSummary: result.envSummary,
+    });
   });
 }

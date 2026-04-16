@@ -1,3 +1,4 @@
+import { isSeedDataAllowed, getRuntimeMode } from "@szl-holdings/config";
 import { db } from "@szl-holdings/db";
 import {
   mspClientsTable,
@@ -10,6 +11,13 @@ import { sql } from "drizzle-orm";
 import { logger } from "./logger";
 
 export async function seedMspData(): Promise<void> {
+  if (!isSeedDataAllowed()) {
+    const mode = getRuntimeMode();
+    throw new Error(
+      `[seed-msp] Attempted to seed MSP demo data in ${mode} mode. ` +
+        `Seed data is only permitted in local-dev, internal-preview, and demo modes.`,
+    );
+  }
   const existing = await db.select({ c: sql<number>`count(*)::int` }).from(mspClientsTable);
   if (existing[0].c > 0) {
     logger.debug("[msp-seed] MSP data already seeded, skipping.");

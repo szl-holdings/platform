@@ -1,3 +1,4 @@
+import { isSeedDataAllowed, getRuntimeMode } from "@szl-holdings/config";
 import {
   db,
   organizationsTable,
@@ -29,6 +30,14 @@ async function tableHasData(table: any): Promise<boolean> {
 }
 
 export async function seedPlatformData(): Promise<void> {
+  if (!isSeedDataAllowed()) {
+    const mode = getRuntimeMode();
+    throw new Error(
+      `[seed-platform] Attempted to seed demo data in ${mode} mode. ` +
+        `Seed data is only permitted in local-dev, internal-preview, and demo modes. ` +
+        `Set DEMO_MODE=true or ENABLE_DEMO_SEED=true to enable seeding in non-production environments.`,
+    );
+  }
   console.log("[seed-platform] Starting platform seed data...");
 
   const orgsExist = await tableHasData(organizationsTable);

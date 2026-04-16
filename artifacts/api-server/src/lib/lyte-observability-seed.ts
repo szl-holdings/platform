@@ -1,3 +1,4 @@
+import { isSeedDataAllowed, getRuntimeMode } from "@szl-holdings/config";
 import {
   db,
   lytePrismScoresTable,
@@ -42,6 +43,13 @@ function generateMetricValue(m: typeof METRIC_TYPES[0], isAnomaly: boolean): num
 }
 
 export async function seedLyteObservability() {
+  if (!isSeedDataAllowed()) {
+    const mode = getRuntimeMode();
+    throw new Error(
+      `[lyte-observability-seed] Attempted to seed observability data in ${mode} mode. ` +
+        `Seed data is only permitted in local-dev, internal-preview, and demo modes.`,
+    );
+  }
   const results: Record<string, number> = {};
 
   // ── 1. PRISM Scores ───────────────────────────────────────────────────────

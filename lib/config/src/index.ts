@@ -1,3 +1,5 @@
+export * from "./runtime-mode.js";
+
 export const APP_NAME = "SZL Holdings Platform";
 export const APP_VERSION = "0.1.0";
 

@@ -1,3 +1,4 @@
+import { isSeedDataAllowed, getRuntimeMode } from "@szl-holdings/config";
 import { db } from "@szl-holdings/db";
 import {
   dreamscapeCampaignsTable,
@@ -10,6 +11,13 @@ import {
 import { sql } from "drizzle-orm";
 
 export async function seedDreamscapeData(): Promise<void> {
+  if (!isSeedDataAllowed()) {
+    const mode = getRuntimeMode();
+    throw new Error(
+      `[seed-dreamscape] Attempted to seed Creative Workflows data in ${mode} mode. ` +
+        `Seed data is only permitted in local-dev, internal-preview, and demo modes.`,
+    );
+  }
   console.log("[seed-dreamscape] Starting Creative Workflows seed data...");
 
   const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(dreamscapeCampaignsTable);

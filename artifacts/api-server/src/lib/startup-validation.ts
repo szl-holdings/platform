@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import { resolveRuntimeMode, isProductionMode, isDemoMode as resolveIsDemoMode } from "@szl-holdings/config";
 import { logger } from "./logger";
 
 interface EnvVarSpec {
@@ -14,6 +15,7 @@ export const ENV_SPECS: EnvVarSpec[] = [
   { key: "PORT", required: false, description: "Server listen port", defaultValue: "3000", group: "server" },
   { key: "NODE_ENV", required: false, description: "Runtime environment (development | production | test)", defaultValue: "development", group: "server" },
   { key: "APP_ENV", required: false, description: "Application environment label (staging | production | demo)", group: "server" },
+  { key: "RUNTIME_MODE", required: false, description: "Explicit runtime mode override: local-dev | internal-preview | demo | production (resolved from APP_ENV/NODE_ENV/DEMO_MODE if not set)", group: "server" },
   { key: "LOG_LEVEL", required: false, description: "Pino log level (trace | debug | info | warn | error | fatal)", defaultValue: "info", group: "server" },
   { key: "PUBLIC_APP_URL", required: false, description: "Public-facing application URL (used for OIDC redirects and email links)", group: "server" },
   { key: "CORS_ORIGINS", required: false, description: "Comma-separated list of allowed CORS origins", group: "server" },
@@ -63,6 +65,7 @@ export interface ValidationResult {
   errors: string[];
   warnings: string[];
   resolved: Record<string, string>;
+  runtimeMode: import("@szl-holdings/config").RuntimeMode;
   envSummary: {
     group: string;
     vars: { key: string; configured: boolean; required: boolean; description: string }[];
@@ -87,8 +90,27 @@ export function validateStartupConfig(): ValidationResult {
     }
   }
 
-  const isProduction = process.env.NODE_ENV === "production";
-  const isDemoMode = process.env.DEMO_MODE === "true";
+  const explicitMode = process.env["RUNTIME_MODE"];
+  if (explicitMode && !["local-dev", "internal-preview", "demo", "production"].includes(explicitMode)) {
+    errors.push(
+      `RUNTIME_MODE is set to an unrecognized value: "${explicitMode}". ` +
+        `Valid values: local-dev, internal-preview, demo, production. ` +
+        `Unset or correct RUNTIME_MODE before starting the server.`,
+    );
+  }
+
+  let isProduction = false;
+  let isDemoMode = false;
+  let runtimeMode: import("@szl-holdings/config").RuntimeMode = "local-dev";
+  try {
+    isProduction = isProductionMode();
+    isDemoMode = resolveIsDemoMode();
+    runtimeMode = resolveRuntimeMode();
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    errors.push(`Runtime mode resolution failed: ${msg}`);
+    isProduction = process.env["NODE_ENV"] === "production";
+  }
 
   if (isProduction && !process.env.DATABASE_URL) {
     warnings.push("DATABASE_URL not set in production — database features will be unavailable");
@@ -140,7 +162,9 @@ export function validateStartupConfig(): ValidationResult {
   }
 
   if (isDemoMode) {
-    logger.info("DEMO_MODE=true — external service calls will be mocked, destructive operations disabled");
+    logger.info({ runtimeMode }, "Runtime mode: demo — external service calls will be mocked, destructive operations disabled");
+  } else {
+    logger.info({ runtimeMode }, "Runtime mode resolved");
   }
 
   const groupMap = new Map<string, typeof ENV_SPECS>();
@@ -174,7 +198,7 @@ export function validateStartupConfig(): ValidationResult {
     logger.info({ resolved }, "Startup config validation passed");
   }
 
-  return { valid, errors, warnings, resolved, envSummary };
+  return { valid, errors, warnings, resolved, envSummary, runtimeMode };
 }
 
 export function failFastOnInvalidConfig(): void {

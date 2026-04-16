@@ -107,6 +107,16 @@ export class AIAdapter extends ServiceAdapter {
     options?: { model?: string; maxTokens?: number },
   ): Promise<ChatCompletionResult> {
     if (!this.isLive && provider !== "gemini" && provider !== "huggingface") {
+      const isProduction =
+        process.env["NODE_ENV"] === "production" ||
+        process.env["APP_ENV"] === "production" ||
+        process.env["RUNTIME_MODE"] === "production";
+      if (isProduction) {
+        throw new Error(
+          `[ai-adapter] Provider "${provider}" is not configured in production mode. ` +
+            `Mock responses are not permitted in production. Configure real AI provider credentials.`,
+        );
+      }
       return this.mockChatCompletion(messages);
     }
 
@@ -143,9 +153,19 @@ export class AIAdapter extends ServiceAdapter {
     options?: { model?: string; maxTokens?: number },
   ): Promise<ChatCompletionResult> {
     // Mock mode is opt-in only — set AI_MOCK_MODE=true to enable demo/test mode.
-    // In normal Replit deployments the Replit AI proxy keys are always present,
-    // so this guard ensures mock never silently activates in production.
+    // In production mode, AI_MOCK_MODE is disallowed: mock AI must never masquerade
+    // as real operational behavior in a live customer-facing environment.
     if (process.env["AI_MOCK_MODE"] === "true") {
+      const isProduction =
+        process.env["NODE_ENV"] === "production" ||
+        process.env["APP_ENV"] === "production" ||
+        process.env["RUNTIME_MODE"] === "production";
+      if (isProduction) {
+        throw new Error(
+          "[ai-adapter] AI_MOCK_MODE=true is not permitted in production mode. " +
+            "Remove AI_MOCK_MODE or set it to 'false'. Configure real AI provider credentials instead.",
+        );
+      }
       return this.mockChatCompletion(messages);
     }
 
@@ -164,19 +184,45 @@ export class AIAdapter extends ServiceAdapter {
     }
 
     if (providers.length === 0) {
-      // No real providers configured — fall back to mock to avoid hard crash.
+      // In production mode, missing AI credentials is a hard failure — never silently mock.
+      // In non-production modes, fall back to mock to keep demos and local dev functional.
+      if (process.env["NODE_ENV"] === "production" || process.env["APP_ENV"] === "production" || process.env["RUNTIME_MODE"] === "production") {
+        throw new Error(
+          "[ai-adapter] No AI providers configured in production mode. " +
+            "Set AI_INTEGRATIONS_OPENAI_API_KEY, OPENAI_API_KEY, or ANTHROPIC_API_KEY to enable AI features. " +
+            "Set AI_MOCK_MODE=true to explicitly opt in to demo/mock responses (not recommended in production).",
+        );
+      }
+      // Non-production: fall back to mock to avoid hard crash in dev/demo environments.
       // Set AI_INTEGRATIONS_OPENAI_API_KEY or OPENAI_API_KEY to enable live AI.
       return this.mockChatCompletion(messages);
     }
 
+    const errors: string[] = [];
     for (const tryProvider of providers) {
       try {
         return await tryProvider();
-      } catch {
+      } catch (err) {
+        errors.push(err instanceof Error ? err.message : String(err));
         continue;
       }
     }
 
+    // All configured providers failed.
+    const isProduction =
+      process.env["NODE_ENV"] === "production" ||
+      process.env["APP_ENV"] === "production" ||
+      process.env["RUNTIME_MODE"] === "production";
+
+    if (isProduction) {
+      throw new Error(
+        `[ai-adapter] All configured AI providers failed in production mode. ` +
+          `Provider errors: ${errors.join("; ")}. ` +
+          `Check provider credentials and network connectivity. Mock responses are not permitted in production.`,
+      );
+    }
+
+    // Non-production: fall back to mock after all providers fail, to keep demos and dev functional.
     return this.mockChatCompletion(messages);
   }
 
@@ -405,7 +451,18 @@ export class AIAdapter extends ServiceAdapter {
     messages: ChatMessage[],
     options?: { model?: string; maxTokens?: number },
   ): AsyncGenerator<string, void, unknown> {
+    const isProduction =
+      process.env["NODE_ENV"] === "production" ||
+      process.env["APP_ENV"] === "production" ||
+      process.env["RUNTIME_MODE"] === "production";
+
     if (!this.isLive) {
+      if (isProduction) {
+        throw new Error(
+          "[ai-adapter] No AI providers configured in production mode (streaming). " +
+            "Configure real AI provider credentials. Mock streaming is not permitted in production.",
+        );
+      }
       yield* this.mockStreamCompletion();
       return;
     }
@@ -422,15 +479,27 @@ export class AIAdapter extends ServiceAdapter {
       streamProviders.push(() => this.anthropicStream(messages, options));
     }
 
+    const streamErrors: string[] = [];
     for (const tryProvider of streamProviders) {
       try {
         yield* tryProvider();
         return;
-      } catch {
+      } catch (err) {
+        streamErrors.push(err instanceof Error ? err.message : String(err));
         continue;
       }
     }
 
+    // All stream providers failed.
+    if (isProduction) {
+      throw new Error(
+        `[ai-adapter] All configured AI streaming providers failed in production mode. ` +
+          `Provider errors: ${streamErrors.join("; ")}. ` +
+          `Check provider credentials and network connectivity. Mock streaming is not permitted in production.`,
+      );
+    }
+
+    // Non-production: fall back to mock stream to keep demos and dev functional.
     yield* this.mockStreamCompletion();
   }
 

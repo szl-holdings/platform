@@ -1,3 +1,4 @@
+import { isSeedDataAllowed, getRuntimeMode } from "@szl-holdings/config";
 import { db } from "@szl-holdings/db";
 import {
   terraBrokeragesTable,
@@ -11,6 +12,13 @@ import {
 import { sql, eq } from "drizzle-orm";
 
 export async function seedTerraDemo() {
+  if (!isSeedDataAllowed()) {
+    const mode = getRuntimeMode();
+    throw new Error(
+      `[terra-seed] Attempted to seed Terra demo data in ${mode} mode. ` +
+        `Seed data is only permitted in local-dev, internal-preview, and demo modes.`,
+    );
+  }
   console.log("[terra-seed] Starting Terra demo data seed...");
 
   await db.execute(sql`

@@ -126,12 +126,33 @@ See `NAVIGATION_STRATEGY.md`, `PRODUCT_SURFACE_MAP.md`, `ROUTE_INVENTORY.md` for
 -   `.github/workflows/deploy-production.yml` — Deploy to production on release publish
 -   `GITHUB_SETUP_CHECKLIST.md` — Manual GitHub UI settings for branch protection
 
+## Runtime Mode System
+
+The platform uses a formal four-mode runtime model. Mode is resolved from environment variables at startup with no silent fallback.
+
+| Mode | Purpose | Key ENV |
+|------|---------|---------|
+| `local-dev` | Engineer development (default) | (no vars needed) |
+| `internal-preview` | Internal demos, stakeholder previews | `APP_ENV=internal-preview` |
+| `demo` | External demos, investor walkthroughs | `DEMO_MODE=true` or `APP_ENV=demo` |
+| `production` | Live customer service | `NODE_ENV=production` or `APP_ENV=production` |
+
+**Implementation:** `lib/config/src/runtime-mode.ts` (exported from `@szl-holdings/config`)  
+**Documentation:** `docs/operations/runtime-modes.md`  
+**Surface area audit:** `docs/operations/surface-area-decisions.md`
+
+Key gate functions: `isProductionMode()`, `isDemoMode()`, `isSeedDataAllowed()`, `isConnectorFallbackAllowed()`, `isBillingActive()`, `areNotificationsActive()`, `resolveConnectorStatus()`
+
+In production mode: seed data paths throw, connector fallbacks are blocked, billing is live, all external notifications fire.
+
 ## Operational Docs
 -   `CONTRIBUTING.md` — Setup, branching, PR workflow, engineering standards
 -   `DEPLOYMENT-GUIDE.md` — Replit + Azure deployment procedures
 -   `OPERATIONS-RUNBOOK.md` — Environment, database, health checks, incident response
 -   `SECRETS_SETUP.md` — Mobile credential provisioning guide
 -   `RELEASE_CHECKLIST.md` — Pre-release checklist
+-   `docs/operations/runtime-modes.md` — Runtime mode model (authoritative)
+-   `docs/operations/surface-area-decisions.md` — Archive/quarantine/delete audit log
 
 ## Replay, Eval & Trust Infrastructure
 
