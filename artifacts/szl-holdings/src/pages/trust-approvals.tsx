@@ -56,8 +56,8 @@ const APPROVAL_TIERS = [
 const HITL_PRINCIPLES = [
   {
     icon: CheckSquare,
-    title: "Gate mechanism is non-bypassable",
-    body: "The human approval gate is built into the execution model at the infrastructure level, not as application logic. Bypassing the gate requires an explicit override record — there is no silent skip path.",
+    title: "Gate enforced at the execution layer",
+    body: "The human approval gate is implemented in the Alloy workflow execution layer, not deferred to per-app logic. Bypassing the gate requires an explicit, attributed override record written to the audit trail — there is no silent skip path.",
   },
   {
     icon: Users,
@@ -123,8 +123,9 @@ export default function TrustApprovalsPage() {
               </div>
               <p style={{ fontSize: "clamp(1rem,1.8vw,1.0625rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "52ch" }}>
                 Every consequential action in Lyte + Alloy passes through a tiered approval path.
-                The gate mechanism is non-bypassable by design. Approvers receive full context.
-                Every decision — including overrides — is permanently recorded.
+                The gate is enforced at the workflow execution layer — bypass requires an explicit,
+                logged override. Approvers receive full context. Every decision — including overrides
+                — is permanently recorded.
               </p>
             </m.div>
           </div>

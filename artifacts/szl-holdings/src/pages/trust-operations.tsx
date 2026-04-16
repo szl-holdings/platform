@@ -29,7 +29,7 @@ const CAPABILITIES = [
   {
     icon: Database,
     title: "Architectural tenant isolation",
-    body: "Every query, every export, and every AI inference is scoped to the requesting tenant at the database and middleware layer. Cross-tenant data access is architecturally impossible through the query layer.",
+    body: "Every query, every export, and every AI inference is scoped to the requesting tenant at the database and middleware layer. Cross-tenant data access is blocked at the query layer through enforced organization-id guards on every data path.",
   },
   {
     icon: ShieldCheck,

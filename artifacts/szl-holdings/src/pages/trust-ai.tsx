@@ -134,10 +134,13 @@ export default function TrustAIPage() {
             <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
               <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(258,55%,68%)", marginBottom: "1rem" }}>Hard boundaries</p>
               <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "0.875rem" }}>
-                Not configurable. Applied to every tenant, every pack, every environment.
+                Operating boundaries. Applied to every tenant, every pack, every environment.
               </h2>
-              <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "2.5rem" }}>
-                These boundaries are not application-level toggles. They are architectural constraints.
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "60ch", marginBottom: "2.5rem" }}>
+                These boundaries are policy commitments enforced through the Alloy execution layer
+                and Covenant Policy Engine — not user-facing toggles. Where a boundary is enforced
+                structurally (tenant scoping, source attribution) versus by approval-gated workflow
+                (external sends, financial writes), the difference is documented in the Architecture page.
               </p>
             </m.div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>

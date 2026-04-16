@@ -71,7 +71,7 @@ const PIPELINE_STAGES = [
 ];
 
 const TENANT_ARCH = [
-  { label: "Tenant namespace isolation", body: "Every tenant has an isolated signal and workflow namespace. Cross-tenant data access is not possible by architectural design." },
+  { label: "Tenant namespace isolation", body: "Every tenant has an isolated signal and workflow namespace. Cross-tenant data access is blocked at the query layer through organization-id guards enforced on every data path." },
   { label: "Role-scoped action model", body: "What a user can see, recommend, approve, and execute is determined by their role within their tenant. Roles are defined by the tenant admin, not the platform." },
   { label: "Domain pack layering", body: "Vertical domain packs (Aegis, Vessels, Terra) extend the core platform with domain-specific signal vocabulary and workflow logic — they do not bypass the core governance model." },
   { label: "Connector permissions", body: "Each external integration has scoped permissions. A connector to a task system cannot read financial records, and vice versa, unless explicitly configured and approved." },

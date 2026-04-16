@@ -14,7 +14,7 @@ const GOVERNANCE_PRINCIPLES = [
   {
     icon: CheckSquare,
     title: "Human-in-the-Loop Gates Are Configurable, Not Optional",
-    body: "HITL approval gates are built into the Alloy execution model at the action-type level. Which actions require approval, who can approve them, and what information they receive are all configurable — but the gate mechanism itself is non-bypassable without an explicit override record.",
+    body: "HITL approval gates are built into the Alloy execution model at the action-type level. Which actions require approval, who can approve them, and what information they receive are all configurable — but bypassing a gate requires an explicit, attributed override record. There is no silent skip path.",
   },
   {
     icon: FileText,
