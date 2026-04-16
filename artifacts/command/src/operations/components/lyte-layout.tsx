@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
 import { ReactNode, useState } from "react";
+import { ServiceStatusRail } from "./service-status-rail";
 import {
   Zap, Menu, X, ChevronDown, Bell, Settings, Users, Flag, FileText,
   Database, Play, Activity, CheckSquare, Shield, Network, Heart,
@@ -447,6 +448,7 @@ export function LyteLayout({ children }: { children: ReactNode }) {
             {children}
           </SectionErrorBoundary>
         </main>
+        <ServiceStatusRail />
       </div>
       <OnboardingWizard config={LYTE_ONBOARDING_CONFIG} />
     </div>

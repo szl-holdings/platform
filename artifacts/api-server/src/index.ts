@@ -201,16 +201,24 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     // Step 3c: Start the scheduler AFTER all handlers are registered
     await startDurableScheduler();
 
-    // Step 4: Seeds run after schema is 100% confirmed — fire concurrently, each non-fatal
-    seedPlatformData().catch(err => {
-      logger.warn({ err }, "[seed-platform] Seed failed (non-fatal)");
-    });
-    seedMspData().catch(err => {
-      logger.warn({ err }, "[msp-seed] MSP demo seed failed (non-fatal)");
-    });
-    seedDreamscapeData().catch(err => {
-      logger.warn({ err }, "[seed-dreamscape] Creative Workflows seed failed (non-fatal)");
-    });
+    // Step 4: Demo seeds — isolated from production data paths.
+    // Only run when: NODE_ENV !== "production" OR ENABLE_DEMO_SEED=true is explicitly set.
+    // This prevents synthetic data from polluting production databases.
+    const isDemoSeedEnabled = process.env.NODE_ENV !== "production" || process.env.ENABLE_DEMO_SEED === "true";
+    if (isDemoSeedEnabled) {
+      logger.info("[seed] Demo seed enabled — running platform/MSP/Dreamscape seeds");
+      seedPlatformData().catch(err => {
+        logger.warn({ err }, "[seed-platform] Seed failed (non-fatal)");
+      });
+      seedMspData().catch(err => {
+        logger.warn({ err }, "[msp-seed] MSP demo seed failed (non-fatal)");
+      });
+      seedDreamscapeData().catch(err => {
+        logger.warn({ err }, "[seed-dreamscape] Creative Workflows seed failed (non-fatal)");
+      });
+    } else {
+      logger.info("[seed] Production environment — demo seeds suppressed (set ENABLE_DEMO_SEED=true to override)");
+    }
     initIngestionFramework().catch(err => {
       logger.warn({ err }, "[ingestion] Framework init failed (non-fatal)");
     });

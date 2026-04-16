@@ -1,12 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui";
+import { OperationalEvidencePanel, OperationalAuditTimeline } from "@szl-holdings/shared-ui";
+import type { OperationalEvidenceItem as EvidenceItem, AuditHistoryEntry } from "@szl-holdings/shared-ui";
 import { Card, CardContent } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
 import {
   CheckSquare, User, AlertOctagon, TrendingDown, GitBranch, Clock, AlertTriangle,
-  ArrowRight, Filter, Zap, Users, BarChart3, Package
+  ArrowRight, Filter, Zap, Users, BarChart3, Package, Calendar, ChevronDown, ChevronRight, FileSearch
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
@@ -65,46 +67,166 @@ const ROLE_KPI_CONFIG: Record<Role, { kpis: string[]; defaultSort: string; label
   },
 };
 
-const DEMO_ACTIONS = [
+interface DemoAction {
+  id: number;
+  title: string;
+  description: string;
+  signalCategory: string;
+  state: ActionState;
+  priority: string;
+  owner: string;
+  assignedTo?: string;
+  valueAtRisk?: string;
+  createdAt: string;
+  dueDate: string;
+  workflowStage: string;
+  roleVisibility: Partial<Record<Role, boolean>>;
+  evidence: EvidenceItem[];
+  auditHistory: AuditHistoryEntry[];
+}
+
+const DEMO_ACTIONS: DemoAction[] = [
   {
     id: 1, title: "Northgate Contract — Legal Review Stalled", description: "Contract stuck in legal queue 48h past SLA. $840K ARR at risk.",
     signalCategory: "approval_latency", state: "new", priority: "urgent", owner: "Jordan Alvarez", valueAtRisk: "840000",
-    createdAt: new Date(Date.now() - 48 * 3600000).toISOString(), roleVisibility: { executive: true, operations: true },
+    createdAt: new Date(Date.now() - 48 * 3600000).toISOString(),
+    dueDate: new Date(Date.now() + 4 * 3600000).toISOString(),
+    workflowStage: "Legal Review",
+    roleVisibility: { executive: true, operations: true },
+    evidence: [
+      { id: "e1a", label: "Queue Dwell Time", value: "48h 12m", source: "workflow-engine / approval-svc", confidence: 0.98 },
+      { id: "e1b", label: "SLA Threshold", value: "24h", source: "ops-policy/contracts-v2", confidence: 1.0 },
+      { id: "e1c", label: "Last Reviewer Action", value: "Opened — 48h ago", source: "legal-portal audit log" },
+      { id: "e1d", label: "ARR at Risk", value: "$840,000", source: "crm/opportunity #NG-2241", confidence: 0.95 },
+    ],
+    auditHistory: [
+      { id: "ah1a", action: "Signal surfaced", actor: "alloy-signal-engine", actorType: "agent", timestamp: new Date(Date.now() - 48 * 3600000).toISOString() },
+      { id: "ah1b", action: "Routed to Jordan Alvarez", actor: "routing-policy/contracts", actorType: "agent", timestamp: new Date(Date.now() - 47 * 3600000).toISOString() },
+      { id: "ah1c", action: "Viewed", actor: "jordan.alvarez@szl.com", actorType: "user", timestamp: new Date(Date.now() - 46 * 3600000).toISOString() },
+    ],
   },
   {
     id: 2, title: "TechCorp Onboarding — No Owner Assigned", description: "Critical onboarding step has been unassigned for 6 days.",
     signalCategory: "ownership_gap", state: "acknowledged", priority: "high", owner: "Marcus Webb", valueAtRisk: "320000",
-    createdAt: new Date(Date.now() - 144 * 3600000).toISOString(), roleVisibility: { operations: true, delivery: true },
+    createdAt: new Date(Date.now() - 144 * 3600000).toISOString(),
+    dueDate: new Date(Date.now() - 2 * 24 * 3600000).toISOString(),
+    workflowStage: "Onboarding",
+    roleVisibility: { operations: true, delivery: true },
+    evidence: [
+      { id: "e2a", label: "Step Unassigned Since", value: "6d 2h", source: "onboarding-orchestrator", confidence: 1.0 },
+      { id: "e2b", label: "Milestone Blocked", value: "Integration Config", source: "project-tracker #TC-891" },
+      { id: "e2c", label: "Customer Health Risk", value: "High — NPS drop expected", source: "cs-health-model v3", confidence: 0.81 },
+    ],
+    auditHistory: [
+      { id: "ah2a", action: "Ownership gap detected", actor: "ownership-watcher", actorType: "agent", timestamp: new Date(Date.now() - 144 * 3600000).toISOString() },
+      { id: "ah2b", action: "Acknowledged", actor: "marcus.webb@szl.com", actorType: "user", timestamp: new Date(Date.now() - 96 * 3600000).toISOString(), notes: "Investigating re-assignment options" },
+    ],
   },
   {
     id: 3, title: "Q2 Revenue Forecast — 18% Drift Detected", description: "Forecast model shows significant deviation from plan.",
     signalCategory: "forecast_drift", state: "new", priority: "urgent", owner: "Sarah Kim", valueAtRisk: "2100000",
-    createdAt: new Date(Date.now() - 12 * 3600000).toISOString(), roleVisibility: { executive: true },
+    createdAt: new Date(Date.now() - 12 * 3600000).toISOString(),
+    dueDate: new Date(Date.now() + 12 * 3600000).toISOString(),
+    workflowStage: "Finance Review",
+    roleVisibility: { executive: true },
+    evidence: [
+      { id: "e3a", label: "Plan vs Forecast Delta", value: "-18.3%", source: "finance-model/q2-2026-v14", confidence: 0.91 },
+      { id: "e3b", label: "Primary Driver", value: "Northgate + 3 mid-market slips", source: "revenue-attribution-engine" },
+      { id: "e3c", label: "ARR Impact", value: "$2.1M", source: "crm-pipeline rollup", confidence: 0.87 },
+    ],
+    auditHistory: [
+      { id: "ah3a", action: "Drift threshold exceeded (>15%)", actor: "forecast-monitor", actorType: "agent", timestamp: new Date(Date.now() - 12 * 3600000).toISOString() },
+      { id: "ah3b", action: "Escalated to Sarah Kim", actor: "routing-policy/finance", actorType: "agent", timestamp: new Date(Date.now() - 11 * 3600000).toISOString() },
+    ],
   },
   {
     id: 4, title: "Vendor Onboarding Pipeline — 3 Stalled", description: "Three vendor workflows stuck at compliance check for 5+ days.",
     signalCategory: "stalled_workflow", state: "assigned", priority: "high", owner: "Riley Torres", assignedTo: "Compliance Team", valueAtRisk: "180000",
-    createdAt: new Date(Date.now() - 120 * 3600000).toISOString(), roleVisibility: { operations: true, delivery: true },
+    createdAt: new Date(Date.now() - 120 * 3600000).toISOString(),
+    dueDate: new Date(Date.now() + 24 * 3600000).toISOString(),
+    workflowStage: "Compliance Check",
+    roleVisibility: { operations: true, delivery: true },
+    evidence: [
+      { id: "e4a", label: "Stalled Vendors", value: "Nexus Corp, Dataplex, Orion Supply", source: "vendor-pipeline-tracker" },
+      { id: "e4b", label: "Average Stall Duration", value: "5.4 days", source: "workflow-analytics", confidence: 0.99 },
+      { id: "e4c", label: "Blocker", value: "Missing SOC 2 attestation", source: "compliance-gate-engine" },
+    ],
+    auditHistory: [
+      { id: "ah4a", action: "Stall detected (>4d threshold)", actor: "workflow-watchdog", actorType: "agent", timestamp: new Date(Date.now() - 120 * 3600000).toISOString() },
+      { id: "ah4b", action: "Assigned to Compliance Team", actor: "riley.torres@szl.com", actorType: "user", timestamp: new Date(Date.now() - 100 * 3600000).toISOString() },
+      { id: "ah4c", action: "Compliance review initiated", actor: "compliance@szl.com", actorType: "user", timestamp: new Date(Date.now() - 80 * 3600000).toISOString(), notes: "Requested docs from vendors" },
+    ],
   },
   {
     id: 5, title: "Apex Logistics — Handoff Failure at Delivery", description: "Customer success handoff failed; no confirmation from delivery lead.",
     signalCategory: "handoff_failure", state: "escalated", priority: "urgent", owner: "Alex Chen", valueAtRisk: "560000",
-    createdAt: new Date(Date.now() - 24 * 3600000).toISOString(), roleVisibility: { executive: true, operations: true, delivery: true },
+    createdAt: new Date(Date.now() - 24 * 3600000).toISOString(),
+    dueDate: new Date(Date.now() - 4 * 3600000).toISOString(),
+    workflowStage: "Customer Handoff",
+    roleVisibility: { executive: true, operations: true, delivery: true },
+    evidence: [
+      { id: "e5a", label: "Handoff Trigger", value: "Deal closed 2026-04-15", source: "crm/opportunity #APX-1104" },
+      { id: "e5b", label: "Confirmation Status", value: "No ACK from delivery lead", source: "handoff-orchestrator" },
+      { id: "e5c", label: "Customer Tenure", value: "Enterprise — 3 years", source: "account-db", confidence: 1.0 },
+    ],
+    auditHistory: [
+      { id: "ah5a", action: "Handoff initiated", actor: "crm-trigger/deal-closed", actorType: "agent", timestamp: new Date(Date.now() - 24 * 3600000).toISOString() },
+      { id: "ah5b", action: "ACK timeout (4h)", actor: "handoff-orchestrator", actorType: "agent", timestamp: new Date(Date.now() - 20 * 3600000).toISOString() },
+      { id: "ah5c", action: "Escalated", actor: "alex.chen@szl.com", actorType: "user", timestamp: new Date(Date.now() - 18 * 3600000).toISOString(), notes: "No response from delivery lead; escalating to VP" },
+    ],
   },
   {
     id: 6, title: "Enterprise Deal Status Conflict", description: "CRM shows 'Closed Won' but finance hasn't received PO. $1.2M at stake.",
     signalCategory: "status_conflict", state: "new", priority: "high", owner: "Morgan Lee", valueAtRisk: "1200000",
-    createdAt: new Date(Date.now() - 4 * 3600000).toISOString(), roleVisibility: { executive: true, operations: true },
+    createdAt: new Date(Date.now() - 4 * 3600000).toISOString(),
+    dueDate: new Date(Date.now() + 48 * 3600000).toISOString(),
+    workflowStage: "Finance Reconciliation",
+    roleVisibility: { executive: true, operations: true },
+    evidence: [
+      { id: "e6a", label: "CRM Status", value: "Closed Won (2026-04-16)", source: "salesforce/opp #ENT-7721" },
+      { id: "e6b", label: "Finance PO Status", value: "Not received", source: "finance-erp/payables" },
+      { id: "e6c", label: "Contract Value", value: "$1,200,000 ARR", source: "contracts-db #CTR-2241" },
+      { id: "e6d", label: "Conflict Duration", value: "4h 12m", source: "reconciliation-engine", confidence: 0.99 },
+    ],
+    auditHistory: [
+      { id: "ah6a", action: "Status discrepancy detected", actor: "reconciliation-cron", actorType: "agent", timestamp: new Date(Date.now() - 4 * 3600000).toISOString() },
+      { id: "ah6b", action: "Assigned to Morgan Lee", actor: "ops-routing", actorType: "agent", timestamp: new Date(Date.now() - 3.5 * 3600000).toISOString() },
+    ],
   },
   {
     id: 7, title: "Platform Launch — 3 Gates Not Cleared", description: "Missing security review, load test sign-off, and legal clearance.",
     signalCategory: "readiness_blocker", state: "assigned", priority: "high", owner: "Sam Park", assignedTo: "Launch Team", valueAtRisk: "450000",
-    createdAt: new Date(Date.now() - 36 * 3600000).toISOString(), roleVisibility: { operations: true, delivery: true },
+    createdAt: new Date(Date.now() - 36 * 3600000).toISOString(),
+    dueDate: new Date(Date.now() + 72 * 3600000).toISOString(),
+    workflowStage: "Launch Gate Review",
+    roleVisibility: { operations: true, delivery: true },
+    evidence: [
+      { id: "e7a", label: "Pending Gates", value: "Security Review, Load Test, Legal", source: "launch-gate-engine" },
+      { id: "e7b", label: "Launch Target", value: "2026-04-19", source: "project-tracker/launch-v3" },
+      { id: "e7c", label: "Impacted ARR", value: "$450K (first-month)", source: "finance-model", confidence: 0.82 },
+    ],
+    auditHistory: [
+      { id: "ah7a", action: "Gate blockers flagged", actor: "launch-readiness-engine", actorType: "agent", timestamp: new Date(Date.now() - 36 * 3600000).toISOString() },
+      { id: "ah7b", action: "Assigned to Launch Team", actor: "sam.park@szl.com", actorType: "user", timestamp: new Date(Date.now() - 30 * 3600000).toISOString() },
+      { id: "ah7c", action: "Security review scheduled", actor: "security@szl.com", actorType: "user", timestamp: new Date(Date.now() - 20 * 3600000).toISOString() },
+    ],
   },
   {
     id: 8, title: "Pipeline Hygiene — 47 Stale Opportunities", description: "Deals last touched >30 days consuming forecast capacity.",
     signalCategory: "pipeline_hygiene", state: "new", priority: "medium", owner: "Jordan Alvarez", valueAtRisk: "890000",
-    createdAt: new Date(Date.now() - 72 * 3600000).toISOString(), roleVisibility: { executive: true, operations: true },
+    createdAt: new Date(Date.now() - 72 * 3600000).toISOString(),
+    dueDate: new Date(Date.now() + 5 * 24 * 3600000).toISOString(),
+    workflowStage: "Sales Ops Review",
+    roleVisibility: { executive: true, operations: true },
+    evidence: [
+      { id: "e8a", label: "Stale Opportunity Count", value: "47", source: "crm-hygiene-scanner", confidence: 1.0 },
+      { id: "e8b", label: "Avg Days Since Touch", value: "38.4 days", source: "crm-analytics" },
+      { id: "e8c", label: "Forecast Distortion", value: "$890K inflated pipeline", source: "forecast-quality-engine", confidence: 0.88 },
+    ],
+    auditHistory: [
+      { id: "ah8a", action: "Hygiene scan completed", actor: "crm-hygiene-scanner", actorType: "agent", timestamp: new Date(Date.now() - 72 * 3600000).toISOString() },
+      { id: "ah8b", action: "Report generated and queued", actor: "ops-reporting", actorType: "agent", timestamp: new Date(Date.now() - 71 * 3600000).toISOString() },
+    ],
   },
 ];
 
@@ -125,6 +247,7 @@ export default function ActionQueuePage() {
   const [role, setRole] = useState<Role>("operations");
   const [stateFilter, setStateFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [expandedId, setExpandedId] = useState<number | null>(null);
 
   const { data: rawActions } = useQuery({
     queryKey: ["lyte-actions", role],
@@ -245,6 +368,9 @@ export default function ActionQueuePage() {
           const ageHours = getAgeHours(action.createdAt);
           const isOverdue = ageHours > 48 && !["resolved", "dismissed"].includes(action.state);
           const nextStates = STATE_TRANSITIONS[action.state as ActionState] || [];
+          const isExpanded = expandedId === action.id;
+          const evidence: EvidenceItem[] = action.evidence ?? [];
+          const auditHistory: AuditHistoryEntry[] = action.auditHistory ?? [];
 
           return (
             <Card key={action.id} className={cn(
@@ -272,14 +398,47 @@ export default function ActionQueuePage() {
                     </div>
                     <div className="text-sm font-semibold text-white mb-1">{action.title}</div>
                     <div className="text-xs text-zinc-400 mb-2">{action.description}</div>
-                    <div className="flex items-center gap-3 text-[10px] text-zinc-500">
+                    <div className="flex items-center flex-wrap gap-3 text-[10px] text-zinc-500">
                       <span className="flex items-center gap-1"><User className="w-3 h-3" />{action.owner}</span>
                       {action.assignedTo && <span className="flex items-center gap-1"><Users className="w-3 h-3" />→ {action.assignedTo}</span>}
                       {action.valueAtRisk && <span className="flex items-center gap-1 text-[#d4a054]"><BarChart3 className="w-3 h-3" />{formatCurrency(action.valueAtRisk)} VAR</span>}
-                      <span>{ageHours}h old</span>
+                      {action.workflowStage && (
+                        <span className="flex items-center gap-1 px-1.5 py-px rounded font-mono text-[9px]" style={{ color: "#8b7ac8", background: "rgba(139,122,200,0.08)", border: "1px solid rgba(139,122,200,0.18)" }}>
+                          {action.workflowStage}
+                        </span>
+                      )}
+                      {action.dueDate && (() => {
+                        const due = new Date(action.dueDate);
+                        const isPast = due < new Date();
+                        const hoursUntil = Math.round((due.getTime() - Date.now()) / 3600000);
+                        const label = isPast
+                          ? `Overdue ${Math.abs(hoursUntil)}h`
+                          : hoursUntil < 24
+                            ? `Due in ${hoursUntil}h`
+                            : `Due ${due.toLocaleDateString([], { month: "short", day: "numeric" })}`;
+                        return (
+                          <span className={`flex items-center gap-1 ${isPast ? "text-[#c45a4a]" : hoursUntil < 12 ? "text-[#c8953c]" : "text-zinc-500"}`}>
+                            <Calendar className="w-3 h-3" />
+                            {label}
+                          </span>
+                        );
+                      })()}
+                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{ageHours}h old</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
+                    {(evidence.length > 0 || auditHistory.length > 0) && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 px-2 text-[10px] text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800"
+                        onClick={() => setExpandedId(isExpanded ? null : action.id)}
+                        title={isExpanded ? "Hide evidence" : "Show evidence & audit trail"}
+                      >
+                        <FileSearch className="w-3 h-3 mr-1" />
+                        {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                      </Button>
+                    )}
                     {nextStates.map((nextState) => (
                       <Button
                         key={nextState}
@@ -300,6 +459,29 @@ export default function ActionQueuePage() {
                     ))}
                   </div>
                 </div>
+
+                {isExpanded && (
+                  <div
+                    className="mt-4 pt-4 grid gap-4"
+                    style={{
+                      borderTop: "1px solid rgba(255,255,255,0.06)",
+                      gridTemplateColumns: evidence.length > 0 && auditHistory.length > 0 ? "1fr 1fr" : "1fr",
+                    }}
+                  >
+                    {evidence.length > 0 && (
+                      <div>
+                        <p className="text-[9px] uppercase tracking-widest font-semibold mb-2" style={{ color: "rgba(255,255,255,0.25)" }}>Signal Provenance</p>
+                        <OperationalEvidencePanel items={evidence} compact />
+                      </div>
+                    )}
+                    {auditHistory.length > 0 && (
+                      <div>
+                        <p className="text-[9px] uppercase tracking-widest font-semibold mb-2" style={{ color: "rgba(255,255,255,0.25)" }}>Audit Trail</p>
+                        <OperationalAuditTimeline entries={auditHistory} compact maxEntries={5} />
+                      </div>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           );

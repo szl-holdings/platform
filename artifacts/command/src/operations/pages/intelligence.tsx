@@ -5,7 +5,8 @@ import { Brain, Activity, Globe, AlertTriangle, FileText, Radio, TrendingUp, Clo
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRealtimeChannel, AnimatedCounter} from "@szl-holdings/shared-ui";
 import { apiFetch } from "@szl-holdings/shared-ui";
-: { value: number }) {
+
+function LocalCounter({ value }: { value: number }) {
   const [display, setDisplay] = useState(0);
   useEffect(() => {
     let c = false;

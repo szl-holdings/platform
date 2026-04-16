@@ -228,6 +228,9 @@ app.get("/api/health", async (_req: Request, res: Response) => {
     { slug: "api-server", name: "API Server", type: "backend" },
   ];
 
+  const isDemoSeed = process.env.ENABLE_DEMO_SEED === "true";
+  const runtimeMode: string = isDemoSeed ? "demo" : (process.env.NODE_ENV || "development");
+
   res.status(overallStatus === "healthy" ? 200 : 503).json({
     status: overallStatus,
     timestamp: new Date().toISOString(),
@@ -235,6 +238,7 @@ app.get("/api/health", async (_req: Request, res: Response) => {
     uptime_human: `${Math.floor(uptimeSeconds / 3600)}h ${Math.floor((uptimeSeconds % 3600) / 60)}m ${uptimeSeconds % 60}s`,
     version: process.env.npm_package_version || "0.0.0",
     environment: process.env.NODE_ENV || "development",
+    mode: runtimeMode,
     node: process.version,
     memory: {
       heapUsedMb: Math.round(memUsage.heapUsed / 1024 / 1024),
