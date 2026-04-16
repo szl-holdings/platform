@@ -8,7 +8,7 @@ import {
   BellOff, Code, Target, Phone, Calendar, Layers, Map, Crown, ChevronRight,
   Menu, X, BarChart3, Clapperboard, Power, Bell, Lock, GitCommit, Sigma
 } from "lucide-react";
-import { MultiplayerSessionBanner, EcosystemNav } from "@szl-holdings/shared-ui";
+import { MultiplayerSessionBanner, EcosystemNav, EnvironmentLabel, useDemoMode, MODE_LABELS, MODE_COLORS, MODE_ICONS } from "@szl-holdings/shared-ui";
 
 export type WorkspaceMode = "strategy" | "operations" | "infrastructure";
 
@@ -181,6 +181,32 @@ function WorkspaceSwitcher({ mode, onModeChange }: { mode: WorkspaceMode; onMode
   );
 }
 
+function HeaderStatusPills() {
+  const { mode: persona } = useDemoMode();
+  const personaColors = MODE_COLORS[persona];
+  return (
+    <div className="hidden md:flex items-center gap-1.5">
+      <EnvironmentLabel environment="demo" />
+      <span
+        className="flex items-center gap-1 text-[8px] font-mono font-semibold tracking-wider px-2 py-0.5 rounded"
+        style={{ color: personaColors.text, background: personaColors.bg, border: `1px solid ${personaColors.border}` }}
+        title={`Persona view: ${MODE_LABELS[persona]}`}
+      >
+        <span style={{ fontSize: "10px" }}>{MODE_ICONS[persona]}</span>
+        {MODE_LABELS[persona].toUpperCase()}
+      </span>
+      <span
+        className="flex items-center gap-1 text-[8px] font-mono font-semibold tracking-wider px-2 py-0.5 rounded"
+        style={{ color: "#6b8f71", background: "rgba(107,143,113,0.08)", border: "1px solid rgba(107,143,113,0.2)" }}
+        title="All command-plane services healthy"
+      >
+        <span className="w-1 h-1 rounded-full" style={{ background: "#6b8f71" }} />
+        SVC OK
+      </span>
+    </div>
+  );
+}
+
 export function UnifiedLayout({ children, mode, onModeChange }: {
   children: ReactNode;
   mode: WorkspaceMode;
@@ -281,6 +307,8 @@ export function UnifiedLayout({ children, mode, onModeChange }: {
             <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>
               · {WORKSPACE_TABS.find((t) => t.mode === mode)?.sublabel}
             </span>
+            <div className="hidden md:block w-px h-3.5 mx-1" style={{ background: "rgba(255,255,255,0.06)" }} />
+            <HeaderStatusPills />
           </div>
           <div className="flex items-center gap-2">
             <button className="relative p-1 rounded hover:bg-white/5 transition-colors" style={{ color: "rgba(255,255,255,0.5)" }}>
