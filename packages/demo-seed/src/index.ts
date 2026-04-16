@@ -1,0 +1,63 @@
+/**
+ * @workspace/demo-seed
+ *
+ * Demo data seed runner for all four SZL Holdings demo narratives.
+ * Designed to be run against a local or staging database before demos.
+ *
+ * Usage:
+ *   pnpm --filter @workspace/demo-seed run seed:all
+ *   pnpm --filter @workspace/demo-seed run seed:business
+ *   pnpm --filter @workspace/demo-seed run seed:security
+ *   pnpm --filter @workspace/demo-seed run seed:maritime
+ *   pnpm --filter @workspace/demo-seed run seed:legal
+ *
+ * See scripts/demo-reset/ for full reset and restore procedures.
+ */
+
+export { DEMO_PERSONAS, getPersonaByRole, getPersonaById, getPersonasByNarrative } from "./personas";
+export type { DemoPersona, DemoPersonaRole } from "./personas";
+
+export { BUSINESS_REVOPS_NARRATIVE } from "./narrative-business-revops";
+export type { BusinessRevopsNarrative } from "./narrative-business-revops";
+
+export { SECURITY_SOC_NARRATIVE } from "./narrative-security-soc";
+export type { SecuritySocNarrative } from "./narrative-security-soc";
+
+export { MARITIME_NARRATIVE } from "./narrative-maritime";
+export type { MaritimeNarrative } from "./narrative-maritime";
+
+export { LEGAL_COMPLIANCE_NARRATIVE } from "./narrative-legal-compliance";
+export type { LegalComplianceNarrative } from "./narrative-legal-compliance";
+
+export const DEMO_NARRATIVES = [
+  { id: "business-revops", label: "Business Observability / RevOps / CFO", pack: "lyte", file: "./narrative-business-revops" },
+  { id: "security-soc", label: "Security / SOC / Risk", pack: "aegis", file: "./narrative-security-soc" },
+  { id: "maritime", label: "Maritime / Sanctions / Fleet Operations", pack: "vessels", file: "./narrative-maritime" },
+  { id: "legal-compliance", label: "Legal / Compliance / Matter Command", pack: "prism-counsel", file: "./narrative-legal-compliance" },
+] as const;
+
+export const DEMO_PERSONA_ROLES = ["executive", "operator", "analyst", "auditor"] as const;
+
+/**
+ * Summary of all demo entities for quick reference during presentations.
+ * Each narrative shows the signal-to-outcome chain.
+ */
+export const DEMO_SUMMARY = {
+  version: "1.0.0",
+  lastUpdated: "2026-04-16",
+  narratives: DEMO_NARRATIVES.length,
+  personas: 6,
+  roles: DEMO_PERSONA_ROLES.length,
+  flow: [
+    "Signal ingestion",
+    "Context assembly (Twin model)",
+    "AI recommendation generation",
+    "Human approval gate",
+    "Governed execution (Alloy)",
+    "Outcome capture",
+    "Executive summary",
+    "Proof chain / audit trail",
+  ],
+};
+
+export { seedAllNarratives, seedNarrative, clearDemoData } from "./seed-runner";

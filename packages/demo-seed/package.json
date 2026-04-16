@@ -1,0 +1,22 @@
+{
+  "name": "@workspace/demo-seed",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Demo data seed package for all four SZL Holdings demo narratives",
+  "main": "src/index.ts",
+  "scripts": {
+    "seed:all": "tsx src/seed-runner.ts",
+    "seed:business": "tsx src/seed-runner.ts business",
+    "seed:security": "tsx src/seed-runner.ts security",
+    "seed:maritime": "tsx src/seed-runner.ts maritime",
+    "seed:legal": "tsx src/seed-runner.ts legal"
+  },
+  "dependencies": {
+    "@szl-holdings/db": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  }
+}
