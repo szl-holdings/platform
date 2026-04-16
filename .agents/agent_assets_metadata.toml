@@ -120,6 +120,12 @@ uri = "file://.local/deliverables/medium-week-1/post-3-sunday/hero.png"
 type = "image"
 title = "generated_image"
 
+[[generated]]
+id = "J1hrP9QziqKAplL0uO4IG"
+uri = "file://attached_assets/generated_images/szl-cover-source.png"
+type = "image"
+title = "generated_image"
+
 [[outputs]]
 id = "I_ORUhKS2b7MEVDwDdGWJ"
 uri = "file://social-content/banners/linkedin-7-lenses-banner.png"
@@ -185,3 +191,9 @@ id = "SNb50eTVxxRY2PhmxZ0ZW"
 uri = "file://.local/deliverables/medium-week-1.zip"
 type = "unspecified"
 title = "SZL Holdings — Medium Week 1 Launch Pack"
+
+[[outputs]]
+id = "9EVq2wPr7lL0HtbXXEs6d"
+uri = "file://output/szl-substack-profile-kit.zip"
+type = "unspecified"
+title = "SZL Holdings — Substack Profile Kit"
