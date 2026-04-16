@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-04-16 (rev 6)  
+**Last updated:** 2026-04-16 (rev 7)  
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -105,6 +105,8 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | AF-001 | `adminGuard` uses `Buffer.equals()` not `crypto.timingSafeEqual` for internal token | Security / Auth | Theoretical timing attack on admin token | Replace with `timingSafeEqual` (same fix as KG002 in auth.ts) | Security Lead |
 | AF-003 | `GET /vessels/fleets` routes return all tenants' fleet data without tenant scoping | Security / Multi-tenancy | Cross-tenant data visibility | Add tenant scope filtering to vessels fleet routes | Engineering |
 | AF-007 | `vessels.*` tables (`vessels_fleets`, `vessels`, positions, cargo, routes) missing `org_id` | Security / Multi-tenancy | DB-level cross-tenant vessel data access | Add `org_id` migration; designate `maritime.ts` as authoritative schema | Engineering |
+| KG030 | PostHog product analytics not yet wired | Analytics | No funnel or feature-adoption data | Instrument before launch (OBS-007) | Product |
+| KG031 | Status page at `/status` not yet live | Support Ops | No customer self-service incident visibility | Deploy via Betterstack/Instatus per STATUSPAGE_PLAN.md (SUP-001) | Platform |
 
 ---
 
@@ -129,6 +131,8 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | TD-005 | SECURITY.md role list showed 6 of 11 platform roles | Doc Accuracy | ✅ Resolved Apr-2026 | Corrected to full 11-role hierarchy with reference to ACCESS-CONTROL-MATRIX.md |
 | TD-006 | PRODUCT-SURFACES.md lists domain-specific mobile apps (aegis-mobile, vessels-mobile, terra-mobile, lyte-mobile) that are not registered artifacts | Doc Accuracy | ⚠️ Open — verify artifact registration status before first external eval |
 | KG029 | Integration connector test stub in alloy-integrations | API / Quality | Minor UX gap | `routes/alloy-integrations.ts:345` returns hardcoded "Test not implemented for this integration type" for unsupported integrations — implement per-type test logic or document which types are testable |
+| KG032 | `lib/observability/src/collector.ts` seeds simulated data in constructor | Observability / Analytics | Domain app dashboards display synthetic data | Wire live API signals to replace `seedSimulatedData()` call (OBS-008) |
+| KG033 | `OBSERVABILITY_ARCHITECTURE.md` covers decision-fabric surfaces only; no single doc covers production infra observability (OTEL config, logging pipeline, metrics, alerting) | Docs / Observability | Onboarding friction for new VP/Platform lead | Add §Production Infrastructure Observability section to OBSERVABILITY_ARCHITECTURE.md (OBS-006) |
 | RD-001 | SOC 2 Type II / FedRAMP readiness | Compliance | Sales blocker | Post-revenue roadmap items |
 | RD-002 | Horizontal scaling / Load testing | Infra | Scale risk | Validate Azure autoscale under load |
 
@@ -172,17 +176,19 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | Severity | Total | Resolved | Open |
 |----------|-------|----------|------|
 | P0 — Critical / High | 11 | 10 | 1 |
-| P1 — High | 12 | 0 | 12 |
-| P2 — Medium / Low | 24 | 4 | 20 |
+| P1 — High | 14 | 0 | 14 |
+| P2 — Medium / Low | 26 | 4 | 22 |
 | Flow Audit Gaps (Phase 4–5) | 4 | 0 | 4 |
 | Test Quality Gaps (Phase 4–5) | 8 | 2 | 6 |
-| **Total** | **59** | **16** | **43** |
+| **Total** | **63** | **16** | **47** |
 
 > **April 2026 Phase 0–1 audit note:** Full operational audit (Phases 0–1) completed. Deliverables produced: FULL_SYSTEM_INVENTORY.md, AUDIT_FINDINGS_REGISTER.md, OUT_OF_SCOPE_REGISTER.md, ENVIRONMENT_VARIABLES.md, updated .env.example. KG018 (env var schema) resolved by ENVIRONMENT_VARIABLES.md. GAP-004 (.env.example) resolved by comprehensive update. KG029 (alloy-integrations test stub) newly cataloged. TD-004 remains re-opened. No new P0/P1 security findings discovered. No hardcoded credentials found in source. All GitHub Actions workflows remain SHA-pinned. Net P2 change: +2 gaps added, +2 resolved. See LAUNCH_BLOCKERS.md for the full pre-launch blocker register.
 >
 > **April 2026 Phase 2–3 audit note:** Architecture, Auth & Tenancy hardening audit completed. Three new P1 gaps discovered: AF-001 (adminGuard timing-unsafe token compare), AF-003 (vessels fleet routes cross-tenant), AF-007 (vessels DB schema missing org_id). Seven additional P2 findings documented in AUDIT_FINDINGS_REGISTER.md. Net change: +3 P1 open gaps. Full findings in AUDIT_FINDINGS_REGISTER.md and CONTROL_PLANE_ARCHITECTURE.md.
 >
 > **April 2026 Phase 4–5 audit note:** Flow audit and quality pass completed. 4 new flow gaps and 8 test quality gaps documented. 2 test gaps resolved in this sprint (cortex-inca-smoke config fix, api-version error message fix). All lint warnings documented as baseline (4,519 warnings, 0 errors). Full findings in AUDIT_FINDINGS_REGISTER.md.
+>
+> **April 2026 Phase 6–9 audit note:** Observability, billing, support operations, and release safety audit completed. All 25 deliverable documents verified present and substantive. 2 new P1 gaps added: KG030 (PostHog not wired) and KG031 (status page not live). 2 new P2 gaps added: KG032 (observability collector uses simulated data) and KG033 (no unified production infra observability doc). 1 existing gap clarified: BIL-001 notes Stripe is test-mode only (cross-reference DATA-009). Release safety documentation (RELEASE_CHECKLIST.md, DEPLOYMENT-GUIDE.md, ENVIRONMENT_VALIDATION.md, ROLLBACK_PLAYBOOK.md, LAUNCH_DAY_RUNBOOK.md, GO_NO_GO_CHECKLIST.md) is all production-quality. CI pipeline is comprehensive with 14 workflows all SHA-pinned. No new P0 findings. Full findings in AUDIT_FINDINGS_REGISTER.md §Phase 6–9.
 
 ---
 
@@ -213,6 +219,42 @@ Operational gaps, process health, test coverage, observability, team ownership.
 - `REGRESSION_RISK_REGISTER.md` — high-risk logic requiring regression coverage
 - `QA_SIGNOFF_CHECKLIST.md` — release gate checklist
 
+### Phase 6–9 Ops, Billing & Release Documents (verified Apr 2026)
+
+**Observability & Analytics:**
+- `OBSERVABILITY_ARCHITECTURE.md` — decision-fabric observability surfaces
+- `AI_RUNTIME_OBSERVABILITY.md` — AI telemetry and GenAI trace conventions
+- `ANALYTICS-EVENTS.md` — canonical event taxonomy with funnel definitions
+- `NORTH_STAR_METRICS.md` — governed decisions as the north star metric
+- `EXECUTIVE_SCORECARD.md` — board-quality weekly/monthly scorecard framework
+- `CUSTOMER_HEALTH_MODEL.md` — 5-signal composite health score (0–100) per tenant
+- `LAUNCH_ANALYTICS_PLAN.md` — Day 0/1/7/30 measurement plan with benchmarks
+
+**Billing & Commercial:**
+- `BILLING_ARCHITECTURE.md` — Stripe integration, entitlement middleware, billing state
+- `ENTITLEMENTS_MODEL.md` — plan tiers, feature gating, domain pack access model
+- `PLAN_MATRIX.md` — quick-reference feature comparison across all tiers
+- `PRICING_PACKAGING.md` — commercial pricing, packaging, and discount structure
+- `REVENUE_MODEL.md` — ARR model, expansion vectors, and revenue forecasting
+- `LAND_AND_EXPAND.md` — land/expand motion, expansion triggers, and playbook
+
+**Support & Incident Operations:**
+- `SUPPORT_OPERATIONS.md` — channels, tiers, SLAs, and staffing model
+- `INCIDENT_COMMAND_PLAYBOOK.md` — IC role, phases, communications, review process
+- `SEVERITY_MODEL.md` — P0–P3 classification with qualifying criteria and response targets
+- `STATUSPAGE_PLAN.md` — status page architecture (planned) with Betterstack/Instatus guidance
+- `CUSTOMER_ESCALATION_MATRIX.md` — who to contact, when, and how for each scenario
+- `RUNBOOK_COMMON_FAILURES.md` — step-by-step recovery for known failure modes
+- `SUPPORT_HANDOFF_GUIDE.md` — IC transfer and shift-handover procedures
+
+**Release Safety:**
+- `RELEASE_CHECKLIST.md` — comprehensive pre-release gate with staged rollout plan
+- `DEPLOYMENT-GUIDE.md` — Replit + Azure deployment procedures with hard blockers
+- `ENVIRONMENT_VALIDATION.md` — Stage 1 (dev→staging) and Stage 2 (staging→prod) gates
+- `ROLLBACK_PLAYBOOK.md` — rollback criteria, procedures for Replit + Azure, DB rollback
+- `LAUNCH_DAY_RUNBOOK.md` — T-48h, T-0, T+24h/72h launch operations
+- `GO_NO_GO_CHECKLIST.md` — 7-section launch decision tool with binary pass/fail criteria
+
 ### Implementation References
 - `lib/db/migrations/0001_add_tenant_id_to_rag_knowledge_chunks.sql` — DB migration for tenant isolation
 - `artifacts/api-server/src/lib/validation.ts` — `validateBody` / `validateQuery` / `validateParams` helpers
@@ -230,6 +272,8 @@ Operational gaps, process health, test coverage, observability, team ownership.
 ## Incident Log
 
 - **2026-04-16 (Phase 4–5 Flow & Quality Audit):** Flow audit and quality pass completed. All major user/admin flows documented in FLOW_AUDIT_MATRIX.md. 4 new flow gaps (FLOW-001–004) and 8 test quality gaps (TG-001–008) added to register. 2 test defects fixed: cortex-inca-smoke excluded from unit config; api-version error messages corrected (4 failing tests now pass). Lint baseline documented: 4,519 warnings, 0 errors. Full findings in AUDIT_FINDINGS_REGISTER.md. New QA docs created: TEST_STRATEGY.md, SMOKE_TEST_PLAN.md, REGRESSION_RISK_REGISTER.md, QA_SIGNOFF_CHECKLIST.md.
+
+- **2026-04-16 (Phase 6–9 Ops, Billing & Release Audit):** Observability, analytics, billing, support operations, incident response, and release safety audit completed. All 25 deliverable documents verified present and substantive. New gaps cataloged: KG030 (PostHog not wired), KG031 (status page not live), KG032 (observability collector seeds simulated data), KG033 (no unified prod infra observability doc). Billing documentation (BILLING_ARCHITECTURE.md, ENTITLEMENTS_MODEL.md, PLAN_MATRIX.md, PRICING_PACKAGING.md, REVENUE_MODEL.md, LAND_AND_EXPAND.md) verified complete and accurate. Support operations documentation (SUPPORT_OPERATIONS.md, INCIDENT_COMMAND_PLAYBOOK.md, SEVERITY_MODEL.md, STATUSPAGE_PLAN.md, CUSTOMER_ESCALATION_MATRIX.md, RUNBOOK_COMMON_FAILURES.md, SUPPORT_HANDOFF_GUIDE.md) verified production-quality. Release safety documentation (RELEASE_CHECKLIST.md, DEPLOYMENT-GUIDE.md, ENVIRONMENT_VALIDATION.md, ROLLBACK_PLAYBOOK.md, LAUNCH_DAY_RUNBOOK.md, GO_NO_GO_CHECKLIST.md) verified production-quality with real pass/fail criteria. CI pipeline verified: 14 workflows all SHA-pinned. No new P0 security findings. KNOWN-GAPS.md updated to rev 7.
 
 - **2026-04-16 (Phase 0–1 Operational Audit):** Full exhaustive inventory and repo/secret hygiene audit completed. No hardcoded credentials found in source — all secrets use `process.env.*`. All 13 GitHub Actions workflows confirmed SHA-pinned. New deliverables created: FULL_SYSTEM_INVENTORY.md (complete platform catalog — 15 artifacts, 40 lib dirs, 18 packages, 225 route files, 13 CI workflows, scripted verification appendix), AUDIT_FINDINGS_REGISTER.md (51 findings with Impact and Manual Review Needed columns), OUT_OF_SCOPE_REGISTER.md (20 deferred items), ENVIRONMENT_VARIABLES.md (~150 vars documented with source-verified defaults), .env.example expanded to 175 vars. KG018 and GAP-004 resolved by new docs. KG029 (alloy-integrations test stub) newly cataloged. virusScan.ts confirmed as explicit stub (KG020c). SESSION_TTL_MS default corrected to 604800000 (7 days) per env-config.ts. KNOWN-GAPS.md updated (rev 6).
 

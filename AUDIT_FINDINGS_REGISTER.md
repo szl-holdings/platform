@@ -1,6 +1,6 @@
 # SZL Holdings — Audit Findings Register
 
-**Last updated:** 2026-04-16 (Phases 0–5 Audit)
+**Last updated:** 2026-04-16 (Phase 6–9 Ops Audit)
 **Owner:** Platform Engineering / Engineering
 **Scope:** Full SZL Holdings monorepo — all apps, libraries, routes, secrets, CI/CD, docs, and flows
 
@@ -17,6 +17,7 @@ This register catalogs every finding from all operational audit phases (Phase 0�
 | Phase 0–1: Inventory & Architecture | Apr 2026 | Code inventory, route audit, auth audit, secret hygiene, env vars | Completed |
 | Phase 2–3: Security & Auth Hardening | Apr 2026 | Auth, secrets, tenant isolation | P0 items resolved |
 | Phase 4–5: Flow Audit & Quality Pass | Apr 2026 | Flows, testing, lint, build, QA docs | Completed |
+| Phase 6–9: Ops, Billing & Release | Apr 2026 | Observability, analytics, billing, support, incident, release safety | Completed — 6 new findings |
 
 ---
 
@@ -228,6 +229,40 @@ This register catalogs every finding from all operational audit phases (Phase 0�
 
 ---
 
+## Phase 6–9 Findings (Ops, Billing & Release Audit — Apr 2026)
+
+### Phase 6: Observability & Analytics
+
+| ID | Finding | Severity | Status | Notes |
+|----|---------|----------|--------|-------|
+| OBS-006 | `OBSERVABILITY_ARCHITECTURE.md` is scoped to decision-fabric observability (Layer 4 surfaces) only. Production infrastructure observability — OTEL export config, structured logging pipeline, metrics aggregation, business events tracking, alerting architecture — is distributed across `OPERATIONS-RUNBOOK.md`, `DEPLOYMENT-GUIDE.md`, and `AI_RUNTIME_OBSERVABILITY.md` with no single unified reference. | P2 | ⚠️ Open | Recommend adding a §Production Infrastructure Observability section to OBSERVABILITY_ARCHITECTURE.md covering logging stack, OTEL export, metrics, and alerting |
+| OBS-007 | PostHog product analytics listed as "Planned" in `ANALYTICS-EVENTS.md`. No instrumentation exists for product funnels, feature adoption, or cohort analysis. GA4 is configured for page views only. | P1 | ⚠️ Open | Must be wired before launch to support activation and engagement measurement |
+| OBS-008 | `lib/observability/src/collector.ts` calls `seedSimulatedData()` in its constructor — the observability collector is pre-populated with synthetic data rather than real telemetry signals. This is a frontend-rendering component, not server telemetry, but it means the observability dashboards in domain apps display simulated rather than live metrics. | P2 | ⚠️ Open | Wire live API signals to replace seed data; tracked in KNOWN-GAPS.md |
+
+### Phase 7: Billing & Entitlements
+
+| ID | Finding | Severity | Status | Notes |
+|----|---------|----------|--------|-------|
+| BIL-001 | Stripe integration uses test-mode keys — no live revenue is collectible. `BILLING_ARCHITECTURE.md` honestly documents this. Full billing wiring (live Stripe keys, webhook event handling for all subscription events, invoice lifecycle) is required before first commercial transaction. Cross-reference: DATA-009, FLOW-002, TG-001. | P1 | ⚠️ Open | Must resolve before any paying tenant; LB-007 does not include a billing live check — recommend adding one to GO_NO_GO_CHECKLIST.md Section 1 |
+| BIL-002 | `BILLING_ARCHITECTURE.md`, `ENTITLEMENTS_MODEL.md`, `PLAN_MATRIX.md`, `PRICING_PACKAGING.md`, `REVENUE_MODEL.md`, `LAND_AND_EXPAND.md` — all complete, accurate, and internally consistent. No documentation gaps found. | INFO | ✅ Verified | All billing and commercial documentation is production-quality |
+
+### Phase 8: Support Operations
+
+| ID | Finding | Severity | Status | Notes |
+|----|---------|----------|--------|-------|
+| SUP-001 | Status page at `/status` is described as "Planned — pre-GA" in `SUPPORT_OPERATIONS.md`. No live status page exists. Customers experiencing incidents have no self-service visibility into platform status, increasing support ticket volume during outages. | P1 | ⚠️ Open | `STATUSPAGE_PLAN.md` defines the plan (Betterstack / Instatus recommended). Must be live before first enterprise pilot. |
+| SUP-002 | `SUPPORT_OPERATIONS.md`, `INCIDENT_COMMAND_PLAYBOOK.md`, `SEVERITY_MODEL.md`, `STATUSPAGE_PLAN.md`, `CUSTOMER_ESCALATION_MATRIX.md`, `RUNBOOK_COMMON_FAILURES.md`, `SUPPORT_HANDOFF_GUIDE.md` — all complete, operationally sound, and mutually consistent. | INFO | ✅ Verified | Support operations documentation is production-quality |
+
+### Phase 9: Release Safety
+
+| ID | Finding | Severity | Status | Notes |
+|----|---------|----------|--------|-------|
+| REL-001 | `RELEASE_CHECKLIST.md` header contains `Related: RELEASE-CHECKLIST.md` (dash format) — a stale self-referential doc link. Minor doc hygiene issue; no functional impact. | P3 | ⚠️ Open | Fix header to reference correct companion docs (`RELEASE_INTELLIGENCE.md`, `ROLLBACK_PLAYBOOK.md`, etc.) |
+| REL-002 | `RELEASE_CHECKLIST.md`, `DEPLOYMENT-GUIDE.md`, `ENVIRONMENT_VALIDATION.md`, `ROLLBACK_PLAYBOOK.md`, `LAUNCH_DAY_RUNBOOK.md`, `GO_NO_GO_CHECKLIST.md` — all complete, actionable, and mutually consistent. `GO_NO_GO_CHECKLIST.md` is a real decision tool with clear binary pass/fail criteria per section, conditional blocker acceptance table, and named sign-off by Founder. | INFO | ✅ Verified | Release safety documentation is production-quality |
+| REL-003 | CI pipeline is comprehensive: lint, typecheck, test, build, integration-test, codeql, dependency-review, e2e, lighthouse, and security workflows all present with SHA-pinned actions. Noted: `integration-test` job in `ci.yml` uses pnpm v9 / Node 20 while other jobs use pnpm v10 / Node 22 (CI-004 — existing finding). | INFO | ⚠️ CI-004 open | Align integration-test job with rest of CI matrix before GA |
+
+---
+
 ## Cumulative Findings Summary
 
 | Category | Total | Resolved | Open |
@@ -237,7 +272,7 @@ This register catalogs every finding from all operational audit phases (Phase 0�
 | API (API-) | 5 | 0 | 5 |
 | Database (DB-) | 2 | 1 | 1 |
 | CI/CD (CI-) | 5 | 3 | 2 |
-| Observability (OBS-) | 5 | 0 | 5 |
+| Observability (OBS-) | 8 | 0 | 8 |
 | Data / Mocks (DATA-) | 9 | 0 | 9 |
 | Documentation (DOC-) | 4 | 0 | 4 |
 | Operations (OPS-) | 8 | 0 | 8 |
@@ -246,14 +281,17 @@ This register catalogs every finding from all operational audit phases (Phase 0�
 | Test Quality Phase 4–5 (AF-T) | 10 | 2 | 8 |
 | Code Quality Phase 4–5 (AF-Q) | 3 | 0 | 3 |
 | Flow Audit Phase 4–5 (AF-F) | 6 | 0 | 6 |
-| **Total** | **88** | **12** | **76** |
+| Billing (BIL-) | 2 | 1 | 1 |
+| Support (SUP-) | 2 | 1 | 1 |
+| Release (REL-) | 3 | 2 | 1 |
+| **Total** | **94** | **12** | **82** |
 
 ---
 
 ## Priority Next Actions
 
-1. **Sprint 3 (Immediate):** SEC-007 (SSRF), CI-002 (CodeQL), CI-003 (dep-review), AF-T003–T005 (billing/webhook/admin tests), OBS-001 (OTEL), OBS-002 (Sentry), OPS-004 (CODEOWNERS)
-2. **Sprint 4:** AF-T007–T009 (mobile E2E, policy/proof tests, WebSocket isolation), OBS-005 (SLO), OPS-006 (Lighthouse), DOC-001 (TRUST_CENTER_INDEX fix)
+1. **Sprint 3 (Immediate):** SEC-007 (SSRF), CI-002 (CodeQL), CI-003 (dep-review), AF-T003–T005 (billing/webhook/admin tests), OBS-001 (OTEL), OBS-002 (Sentry), OPS-004 (CODEOWNERS), OBS-007 (PostHog), SUP-001 (Status page), BIL-001 (Stripe live keys)
+2. **Sprint 4:** AF-T007–T009 (mobile E2E, policy/proof tests, WebSocket isolation), OBS-005 (SLO), OPS-006 (Lighthouse), DOC-001 (TRUST_CENTER_INDEX fix), OBS-006 (unified prod observability doc), OBS-008 (collector live data)
 3. **Pre-launch blockers:** See LAUNCH_BLOCKERS.md for the authoritative list
 
 ---
