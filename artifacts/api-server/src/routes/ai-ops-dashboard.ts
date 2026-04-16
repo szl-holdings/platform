@@ -486,12 +486,11 @@ router.post(
       let reviewQueued = false;
       if (sentiment === "down") {
         updateTraceStatus(traceId, "flagged");
-        const alreadyEnqueued = feedbackStore.some(
-          f => f.feedbackId !== entry.feedbackId
-            && f.traceId === traceId
-            && f.sentiment === "down",
+        const existingQueueItems = listReviewQueue({ orgId: trace.orgId ?? undefined });
+        const alreadyInQueue = existingQueueItems.some(
+          q => q.traceId === traceId && (q.status === "pending" || q.status === "in_review"),
         );
-        if (!alreadyEnqueued) {
+        if (!alreadyInQueue) {
           enqueueForReview({
             trace: { ...trace, requiresReview: true },
             overrideReason: correction
