@@ -44,6 +44,7 @@
     "react-i18next": "^17.0.2",
     "sonner": "^2.0.7",
     "@szl-holdings/prism-bus": "workspace:*",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@szl-holdings/ui-command": "workspace:*"
   }
 }

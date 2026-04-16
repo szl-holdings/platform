@@ -46,6 +46,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@tanstack/query-persist-client-core": "^5.99.0",
-    "@tanstack/query-sync-storage-persister": "^5.99.0"
+    "@tanstack/query-sync-storage-persister": "^5.99.0",
+    "@szl-holdings/ui-command": "workspace:*"
   }
 }

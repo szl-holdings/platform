@@ -49,6 +49,7 @@ const PilotAegisPage = lazy(() => import("@/pages/pilot-aegis"));
 const NexusCommandPage = lazy(() => import("@/pages/nexus-command"));
 const NexusExplorerPage = lazy(() => import("@/pages/nexus-explorer"));
 const ControlTowerPage = lazy(() => import("@/pages/control-tower"));
+const BusinessStatePage = lazy(() => import("@/pages/business-state"));
 const IntelligenceFabricPage = lazy(() => import("@/pages/intelligence-fabric"));
 const CortexIntelligenceHubPage = lazy(() => import("@/pages/cortex-intelligence-hub"));
 const AnalystWorkspacePage = lazy(() => import("@/pages/analyst-workspace"));
@@ -1104,6 +1105,9 @@ function App() {
             </Route>
             <Route path="/autopilot">
               <Suspense fallback={<PageLoader />}><AutopilotPage /></Suspense>
+            </Route>
+            <Route path="/business-state">
+              <Suspense fallback={<PageLoader />}><BusinessStatePage /></Suspense>
             </Route>
             <Route path="/founder-legacy">
               <Redirect to="/investors/founder" />
