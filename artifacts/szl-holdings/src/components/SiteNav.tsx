@@ -255,34 +255,36 @@ export function SiteNav() {
                               backdropFilter: "blur(20px)",
                             }}
                           >
-                            {item.children!.map((child) => (
-                              <Link
-                                key={child.href + child.label}
-                                href={child.href}
-                                onClick={() => { handleNavClick(child.label, child.href); setOpenDropdown(null); }}
-                                style={{
-                                  display: "block",
-                                  padding: "0.5rem 0.75rem",
-                                  borderRadius: "0.375rem",
-                                  textDecoration: "none",
-                                  transition: "background 0.15s ease",
-                                }}
-                                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.05)"; }}
-                                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
-                              >
-                                <span style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, color: "var(--color-szl-text-secondary)", transition: "color 0.15s ease" }}
-                                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
-                                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-                                >
-                                  {child.label}
-                                </span>
-                                {child.note && (
-                                  <span style={{ display: "block", fontSize: "0.6875rem", color: "var(--color-szl-text-faint)", marginTop: "1px", fontFamily: "var(--font-mono)" }}>
-                                    {child.note}
+                            {item.children!.map((child) => {
+                              const isChildExt = child.href.startsWith("http");
+                              const ddStyle = { display: "block", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", textDecoration: "none" as const, transition: "background 0.15s ease" };
+                              const ddEnter = (e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.05)"; };
+                              const ddLeave = (e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.background = "transparent"; };
+                              const childContent = (
+                                <>
+                                  <span style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, color: "var(--color-szl-text-secondary)", transition: "color 0.15s ease" }}
+                                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
+                                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+                                  >
+                                    {child.label}
                                   </span>
-                                )}
-                              </Link>
-                            ))}
+                                  {child.note && (
+                                    <span style={{ display: "block", fontSize: "0.6875rem", color: "var(--color-szl-text-faint)", marginTop: "1px", fontFamily: "var(--font-mono)" }}>
+                                      {child.note}
+                                    </span>
+                                  )}
+                                </>
+                              );
+                              return isChildExt ? (
+                                <a key={child.href + child.label} href={child.href} target="_blank" rel="noopener noreferrer" style={ddStyle} onMouseEnter={ddEnter} onMouseLeave={ddLeave}>
+                                  {childContent}
+                                </a>
+                              ) : (
+                                <Link key={child.href + child.label} href={child.href} onClick={() => { handleNavClick(child.label, child.href); setOpenDropdown(null); }} style={ddStyle} onMouseEnter={ddEnter} onMouseLeave={ddLeave}>
+                                  {childContent}
+                                </Link>
+                              );
+                            })}
                           </m.div>
                         )}
                       </AnimatePresence>
