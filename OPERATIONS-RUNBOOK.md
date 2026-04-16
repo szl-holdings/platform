@@ -62,7 +62,7 @@ Each artifact has a dedicated Replit workflow. Workflows are managed through the
 
 The `artifacts/api-server: api` workflow is registered but the API server runs as a subprocess of the Command Vite process. The standalone workflow will fail with port conflict — this is expected.
 
-**Archived artifacts** (firestorm, lyte-command-center, imperium, prism-counsel, stephen-site) have no running workflows. Their code has been removed; only marker files remain.
+**Archived artifacts** (firestorm, lyte-command-center, imperium, prism-counsel, stephen-site) have no running workflows. Their source code has been removed (0 ts/tsx files); DEPRECATED.md/ARCHIVED.md markers and stale dist/node_modules directories remain.
 
 ### When to Restart a Workflow
 - Code changes require a server restart

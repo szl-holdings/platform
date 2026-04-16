@@ -127,7 +127,7 @@ Requires login — operational surfaces:
 
 ## Archived Surfaces
 
-The following surfaces are archived (code removed, marker files remain):
+The following surfaces are archived (source code removed — 0 ts/tsx files; marker files and stale build artifacts remain):
 
 | Surface | Disposition | Content Moved To |
 |---------|-------------|-----------------|

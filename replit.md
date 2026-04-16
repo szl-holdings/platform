@@ -40,7 +40,7 @@ The platform is built as a pnpm monorepo using TypeScript 5.9, React 19, Vite, a
 | szl-holdings-mobile | Expo | 167 | CORTEX mobile command |
 
 ### Archived Artifacts (Code Removed)
-firestorm, lyte-command-center, imperium, prism-counsel, stephen-site — all have DEPRECATED.md or ARCHIVED.md markers only.
+firestorm, lyte-command-center, imperium, prism-counsel, stephen-site — source code removed (0 ts/tsx files); DEPRECATED.md/ARCHIVED.md markers plus stale dist/node_modules remain.
 
 ### Technology Stack
 -   **Frontend:** React 19, Vite, TanStack React Query, Wouter, Tailwind CSS v4, Framer Motion.
@@ -105,12 +105,10 @@ See `NAVIGATION_STRATEGY.md`, `PRODUCT_SURFACE_MAP.md`, `ROUTE_INVENTORY.md` for
 -   **Legal Data:** CourtListener REST API
 -   **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot
 
-## Demo Credentials
--   admin@szlholdings.com / DemoAdmin2026! (platform_owner role)
+## Important Operational Notes
+-   Demo credentials are stored in Replit Secrets — see SECRETS_SETUP.md
 -   Strategy dashboard: `use-ecosystem-data.ts` DEMO_SNAPSHOT fallback on 401/403 only
 -   SSE URL: root-relative `/api/command/snapshot/stream`
-
-## Important Operational Notes
 -   **Artifact limit:** 15 active — do NOT use createArtifact()
 -   **Auth model:** `req.user.roles` is array; CSRF `/api/analytics/event` exempt
 -   **`@lyte` alias:** maps to `src/operations` in vite.config.ts
