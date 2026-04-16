@@ -81,3 +81,32 @@ playwright-report/
 # Database dumps
 *.dump
 *.pgdump
+
+# ── Credential & secrets hardening ────────────────────────────────────────────
+# Firebase / Google mobile credentials — never commit real files
+google-services.json
+GoogleService-Info.plist
+# Google service-account keys
+service-account*.json
+google-play-service-account.json
+*-service-account.json
+*_service_account*.json
+# Android signing keystores
+*.keystore
+*.jks
+# iOS / macOS signing
+*.p12
+*.cer
+*.mobileprovision
+*.provisionprofile
+# EAS / Expo secrets
+eas-cli-local-build-plugin-*
+.eas/
+# Generic secret / credential patterns
+*secret*.json
+*credentials*.json
+*private_key*.json
+# Additional .env variants not already listed
+.env.*
+!.env.example
+!.env.*.example
