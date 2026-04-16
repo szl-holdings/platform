@@ -95,6 +95,7 @@ google-play-service-account.json
 *.keystore
 *.jks
 # iOS / macOS signing
+*.p8
 *.p12
 *.cer
 *.mobileprovision
