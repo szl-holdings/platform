@@ -18,16 +18,20 @@
 
 ## Demo URLs
 
+> **Route notation:** All paths below are relative to the Replit preview root. The Command app is mounted at `/command/`; its in-app routes use the `/operations/...` prefix (e.g., the flagship loop is `/command/operations/governed-decision-loop`).
+
 | Product | Demo URL | Auth Required |
 |---------|----------|---------------|
 | SZL Holdings (marketing) | `https://szlholdings.com` | No |
-| Lyte Command Center | `/lyte-command-center/?view=app` | Yes (demo org) |
+| Command (Unified Ops) | `/command/operations` | Yes (demo org) |
+| Command — Flagship Loop | `/command/operations/governed-decision-loop` | Yes (demo org) |
 | Alloy Fabric | `/alloy/` | Yes (demo org) |
-| Aegis Defense | `/firestorm/` | Yes (demo org) |
+| Aegis Defense | `/aegis/` | Yes (demo org) |
 | Vessels Maritime | `/vessels/` | Yes (demo org) |
 | Terra Real Estate | `/terra/` | Yes (demo org) |
-| PRISM Counsel | `/prism-counsel/` | Yes (demo org) |
 | Carlota Jo | `/carlota-jo/` | No (public) |
+
+> **Deprecated:** Lyte Command Center (`/lyte-command-center/`) is archived — use `/command/operations` instead. Firestorm (`/firestorm/`) is superseded by Aegis. PRISM Counsel (`/prism-counsel/`) is deprecated (task #579).
 
 ---
 
@@ -130,6 +134,77 @@ Key talking points:
 - "The Proof Chain makes every decision reconstructable — signal to outcome"
 - "Monte Carlo shows operators not just what to do, but what could happen if they do it"
 - "The same five primitives power every domain pack — shared governance, domain-specific intelligence"
+
+---
+
+## Flagship Loop — Step-by-Step Walkthrough
+
+The Governed Decision Loop (`/command/operations/governed-decision-loop`) is the canonical demo of the entire governed intelligence platform. It shows a real scenario — a fleet ETA compliance gap — traversing all nine steps of the decision loop powered by the five platform primitives.
+
+**Scenario:** Three vessels (M/V Meridian, M/V Catalyst, M/V Horizon) are outside SLA threshold. The system surfaces a $2.1M risk signal, generates a reroute recommendation, simulates outcomes, gates on policy, routes to human approval, executes, seals proof, and records the outcome.
+
+### Step 1 — Signal
+
+- **What to show:** Signal SIG-4821 ingested from Vessel Telemetry / AIS Feed
+- **Talking point:** "Every decision starts with a signal. This one came from live telemetry — three vessels are now at risk of missing SLA. The signal carries evidence and a risk estimate before a human ever sees it."
+- **Primitive:** None yet — this is raw ingest
+
+### Step 2 — Context
+
+- **What to show:** Cross-domain intelligence from Aegis (piracy risk), Terra (port congestion), and PRISM (SLA penalty clause); 14 historical pattern matches at 87% confidence
+- **Talking point:** "Lyte doesn't just surface the signal — it enriches it. Aegis knows there's a piracy advisory in the same waters. Terra knows Singapore port is congested. PRISM knows the contract has a penalty clause that triggers in 96 hours. No human had to connect those dots."
+- **Primitive:** Proof Chain (provenance of each enrichment source)
+
+### Step 3 — Recommendation
+
+- **What to show:** REC-0421 — reroute recommendation with 82% confidence, reasoning chain, and model attribution (szl-ops-advisor-v3)
+- **Talking point:** "The AI generates a specific recommendation with its reasoning fully exposed — not a black box. You can see every factor it weighed, what it deprioritized, and the alternative it considered. If an operator overrides it, that gets recorded too."
+- **Primitive:** Proof Chain (model ID, provider, confidence, prompt attribution)
+
+### Step 4 — Simulation
+
+- **What to show:** Monte Carlo — three scenarios (Reroute, Maintain Route, Negotiate SLA). Highlight the distribution chart and tornado sensitivity drivers.
+- **Talking point:** "Before asking anyone to approve anything, the system runs 10,000 simulations. It shows you not just the expected outcome — the median, the worst case, the best case — but which variables drive the most uncertainty. Weather delay matters most; fuel price matters less."
+- **Primitive:** Monte Carlo
+
+### Step 5 — Policy Gate
+
+- **What to show:** Four Covenant Policy evaluations all passing — high-severity approval gate, financial threshold check, compliance logging, cross-domain sign-off requirement
+- **Talking point:** "Covenant Policy runs automatically before any human sees an approval request. It checks whether the action is even legal to approve, who needs to sign off, and whether any compliance rules apply. Here, four policies ran in under 10ms and all passed."
+- **Primitive:** Covenant Policy
+
+### Step 6 — Approval
+
+- **What to show:** Three-step approval chain — Fleet Ops Lead, Finance Controller, CEO — all approved with timestamps and comments
+- **Talking point:** "This is the human-in-the-loop gate. The system knows who needs to approve based on the policy evaluation — it doesn't just email everyone. Each approver sees the recommendation, the simulation, and the proof chain before they sign."
+- **Primitive:** Covenant Policy (role-based routing), Workflow Engine (state machine)
+
+### Step 7 — Execution
+
+- **What to show:** Five execution steps — authorization verified, reroute order dispatched, fuel surcharge logged, client notified, audit trail sealed — all in 4.2 seconds
+- **Talking point:** "Once all approvals are in, the workflow engine executes the action. Each sub-step is instrumented — the vessel got the reroute order via VSAT, the finance system was updated, the client was notified, and the proof chain was sealed, all in 4.2 seconds."
+- **Primitive:** Workflow Engine, Proof Chain
+
+### Step 8 — Proof Chain
+
+- **What to show:** Two proof records — the recommendation (AI Generated, 82% confidence, approved by Marcus Chen) and the simulation result (System Computed, 84% confidence). Show input sources and lineage.
+- **Talking point:** "The Proof Chain is the immutable record. Every piece of AI content has a fingerprint — source class, model attribution, confidence score, who reviewed it, and what data it was derived from. If this decision is ever questioned — in an audit, in litigation, by a regulator — this is the record."
+- **Primitive:** Proof Chain
+
+### Step 9 — Outcome
+
+- **What to show:** Outcome OUT-2104 — Achieved — $2.1M protected, 97% prediction accuracy, operator feedback, downstream impact (contract renewal probability +17%)
+- **Talking point:** "Twenty-nine hours later, the outcome is recorded. The SLA was protected. The system's prediction was 97% accurate. The operator left feedback. And now this decision becomes a training signal — the next time a similar pattern appears, the system's confidence will be higher."
+- **Primitive:** Outcome Graph (decision memory, learning loop)
+
+---
+
+### Flagship Loop — Key Talking Points
+
+- "This is a single decision. Everything you just saw — signal to outcome — is the governed decision loop. Every decision on this platform runs through this loop."
+- "The five primitives are invisible to operators. They experience it as: a signal appears, a recommendation is there, it's already been vetted, I approve, it executes, I can see exactly what happened."
+- "This isn't a demo feature. The same Covenant Policy engine, the same Proof Chain, the same Monte Carlo engine powers Aegis, Vessels, and Terra. Domain-specific intelligence, shared governance."
+- "The loop closes. Outcomes feed back in. The system learns. After 50 similar decisions, the recommendation confidence for this pattern will be in the 90s."
 
 ---
 

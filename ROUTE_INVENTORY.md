@@ -216,6 +216,54 @@ Full application at `/carlota-jo/`. Flag: `PUBLIC` (live, client-facing). 70 ts/
 Full application at `/command/`. Flag: `DEMO`. 223 ts/tsx files.
 Unified ops command — absorbs former Lyte Command Center and IMPERIUM surfaces.
 
+> **Route notation:** The Command Wouter router uses `/command` as its base. In-app paths beginning with `/operations/` are the actual browser URL suffix (e.g., `/command/operations/governed-decision-loop`). The tables below list the in-app paths only; prepend `/command` to get the full URL. This is a curated list of key routes — the full route table is in `artifacts/command/src/App.tsx`.
+
+### Flagship Loop Routes
+
+| Route | Title | Flag | Primitive |
+|-------|-------|------|-----------|
+| `/operations/governed-decision-loop` | Governed Decision Loop | DEMO | All 5 |
+
+### Core Ops Routes (Lyte)
+
+| Route | Title | Flag | Notes |
+|-------|-------|------|-------|
+| `/operations` | Executive Command | DEMO | Primary ops dashboard |
+| `/operations/inbox` | Command Inbox | DEMO | Signal inbox |
+| `/operations/prism` | PRISM Dashboard | DEMO | 5-pillar intelligence view |
+| `/operations/prism/pulse` | Pulse | DEMO | System/business health |
+| `/operations/prism/risk` | Risk | DEMO | Exposure and vulnerability |
+| `/operations/prism/intelligence` | Intelligence | DEMO | Analysis and insights |
+| `/operations/prism/signals` | Signals Feed | DEMO | Real-time events |
+| `/operations/prism/motion` | Motion | DEMO | Workflow and action |
+| `/operations/approvals` | Approvals Center | DEMO | Human-in-the-loop gate |
+| `/operations/ownership` | Ownership Map | DEMO | Accountability graph |
+| `/operations/escalation` | Escalation Center | DEMO | Escalation management |
+| `/operations/trust-audit` | Trust & Audit | DEMO | Governance audit trail |
+| `/operations/action-queue` | Action Queue | DEMO | Pending decisions |
+| `/operations/blocker-board` | Blocker Board | DEMO | Critical blockers |
+| `/operations/digest` | Digest Center | DEMO | AI digest reports |
+| `/operations/queue` | Operational Queue | DEMO | Queued work items |
+
+### Alloy Fabric Routes (within Command)
+
+| Route | Title | Flag |
+|-------|-------|------|
+| `/operations/alloy/canvas` | Workflow Canvas | DEMO |
+| `/operations/alloy/actions` | Action Console | DEMO |
+| `/operations/alloy/templates` | Workflow Templates | DEMO |
+| `/operations/alloy/governance` | Governance Audit | DEMO |
+| `/operations/alloy/simulate` | Policy Simulation | DEMO |
+| `/operations/alloy/traces` | Execution Traces | DEMO |
+| `/operations/alloy/receipts` | Trust Receipts | DEMO |
+| `/operations/alloy/replay` | Replay Timeline | DEMO |
+| `/operations/alloy/agents` | Agent Monitor | DEMO |
+| `/operations/alloy/handoffs` | Agent Handoffs | DEMO |
+| `/operations/alloy/compiler` | Graph Compiler | DEMO |
+| `/operations/alloy/intelligence` | Intelligence Fabric | DEMO |
+| `/operations/alloy/integrations` | Integration Health | DEMO |
+| `/operations/alloy/gates` | Write-Back Gates | DEMO |
+
 ---
 
 ## API Server (`artifacts/api-server`)

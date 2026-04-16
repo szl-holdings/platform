@@ -48,6 +48,32 @@ Which primitives each product surface uses:
 
 ---
 
+## Flagship Decision Loop
+
+The Governed Decision Loop is the canonical end-to-end workflow that demonstrates the complete governed intelligence platform in a single, walkable sequence. It lives at `/command/operations/governed-decision-loop`.
+
+**Scenario domain:** Vessels (maritime fleet ETA compliance)
+**Entry point:** Executive Command home page → "Governed Decision Loop" card → "Full View"
+**Sidebar navigation:** Core → Decision Loop
+
+The loop traverses all nine steps and activates all five primitives in sequence:
+
+| Step | Label | Primitive(s) Activated |
+|------|-------|----------------------|
+| 1 | Signal | — (raw ingest) |
+| 2 | Context | Proof Chain (enrichment provenance) |
+| 3 | Recommendation | Proof Chain (model attribution, confidence) |
+| 4 | Simulation | Monte Carlo (10,000-iteration scenario analysis) |
+| 5 | Policy Gate | Covenant Policy (automated compliance evaluation) |
+| 6 | Approval | Covenant Policy + Workflow Engine (human-in-the-loop chain) |
+| 7 | Execution | Workflow Engine (governed action execution) |
+| 8 | Proof Chain | Proof Chain (immutable provenance record sealed) |
+| 9 | Outcome | Outcome Graph (result captured, learning loop closed) |
+
+See `DEMO_GUIDE.md` → "Flagship Loop — Step-by-Step Walkthrough" for the full demo script.
+
+---
+
 ## Surface Details
 
 ### Command — Unified Operations Surface
@@ -62,7 +88,9 @@ The primary interface for operators. Everything converges here. Absorbs the form
 | Approvals Center | Human-in-the-loop approval queue across all domains | Covenant Policy, Proof Chain |
 | Operations | AI-assisted operations management | Outcome Graph, Workflow Engine |
 | Infrastructure | Cloud sovereignty and platform infrastructure | Workflow Engine |
-| Governed Decision Loop | Full 9-step loop visualization | All 5 |
+| **Governed Decision Loop** | **Flagship end-to-end loop: Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome** | **All 5** |
+| Decision Receipts | Immutable record of past governed decisions | Proof Chain, Outcome Graph |
+| Outcome Loop | Aggregate outcome graph and learning loop view | Outcome Graph |
 
 ### Alloy — Execution Fabric
 
