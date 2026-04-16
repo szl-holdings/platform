@@ -39,6 +39,9 @@
     { "idx": 34, "version": "7", "when": 1775120000000, "tag": "0034_reports_pipeline", "breakpoints": true },
     { "idx": 35, "version": "7", "when": 1775125000000, "tag": "0035_stream_data_sources", "breakpoints": true },
     { "idx": 36, "version": "7", "when": 1775130000000, "tag": "0036_gdpr_contact_email_hash", "breakpoints": true },
-    { "idx": 37, "version": "7", "when": 1775135000000, "tag": "0037_multi_tenancy_partner_portal", "breakpoints": true }
+    { "idx": 37, "version": "7", "when": 1775135000000, "tag": "0037_multi_tenancy_partner_portal", "breakpoints": true },
+    { "idx": 38, "version": "7", "when": 1775140000000, "tag": "0038_cortex_action_drafts", "breakpoints": true },
+    { "idx": 39, "version": "7", "when": 1775145000000, "tag": "0039_changelog_entries", "breakpoints": true },
+    { "idx": 40, "version": "7", "when": 1745808000000, "tag": "0040_daily_briefings", "breakpoints": true }
   ]
 }

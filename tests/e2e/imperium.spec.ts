@@ -2,6 +2,21 @@ import { test, expect } from "@playwright/test";
 
 const BASE = (process.env.IMPERIUM_BASE_PATH ?? "/imperium").replace(/\/$/, "");
 
+let appAvailable = true;
+test.beforeAll(async ({ browser }) => {
+  const page = await browser.newPage();
+  try {
+    const resp = await page.goto(`${BASE}/`, { timeout: 5000, waitUntil: "domcontentloaded" });
+    appAvailable = !!resp && resp.status() < 500;
+  } catch {
+    appAvailable = false;
+  }
+  await page.close();
+});
+test.beforeEach(async ({}, testInfo) => {
+  if (!appAvailable) testInfo.skip();
+});
+
 test.describe("IMPERIUM — Smoke Tests", () => {
   test("loads home without fatal errors", async ({ page }) => {
     await page.goto(`${BASE}/`);

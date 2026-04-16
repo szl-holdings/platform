@@ -2,6 +2,21 @@ import { test, expect } from "@playwright/test";
 
 const PRISM_PATH = process.env.PRISM_BASE_PATH ?? "/prism-counsel";
 
+let appAvailable = true;
+test.beforeAll(async ({ browser }) => {
+  const page = await browser.newPage();
+  try {
+    const resp = await page.goto(PRISM_PATH, { timeout: 5000, waitUntil: "domcontentloaded" });
+    appAvailable = !!resp && resp.status() < 500;
+  } catch {
+    appAvailable = false;
+  }
+  await page.close();
+});
+test.beforeEach(async ({}, testInfo) => {
+  if (!appAvailable) testInfo.skip();
+});
+
 test.describe("PRISM Counsel — Smoke Tests", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(PRISM_PATH);

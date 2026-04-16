@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-const AEGIS_PATH = process.env.AEGIS_BASE_PATH ?? "/firestorm";
+const AEGIS_PATH = process.env.AEGIS_BASE_PATH ?? "/aegis";
 
 test.describe("Aegis — Smoke Tests", () => {
   test.beforeEach(async ({ page }) => {

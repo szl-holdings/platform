@@ -1,6 +1,20 @@
 import { defineConfig, devices } from "@playwright/test";
+import { execSync } from "child_process";
 
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:80";
+
+function resolveChromiumPath(): string | undefined {
+  if (process.env.PLAYWRIGHT_CHROMIUM_PATH) {
+    return process.env.PLAYWRIGHT_CHROMIUM_PATH;
+  }
+  try {
+    const p = execSync("which chromium 2>/dev/null", { encoding: "utf8" }).trim();
+    if (p) return p;
+  } catch {}
+  return undefined;
+}
+
+const chromiumPath = resolveChromiumPath();
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -24,7 +38,10 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        ...(chromiumPath ? { launchOptions: { executablePath: chromiumPath } } : {}),
+      },
     },
   ],
   timeout: 60000,
