@@ -41,14 +41,6 @@ VAPID_PUBLIC_KEY = "BIe1uJr8KS1Ilhz9KWTwRwfV_BC6C2FDdo6gbn-KDt1QS14KaOIMHuWVhzzJ
 VAPID_SUBJECT = "mailto:platform@szlholdings.com"
 
 [[ports]]
-localPort = 5000
-externalPort = 5000
-
-[[ports]]
-localPort = 5001
-externalPort = 3003
-
-[[ports]]
 localPort = 8080
 externalPort = 80
 
@@ -59,7 +51,3 @@ externalPort = 3000
 [[ports]]
 localPort = 21130
 externalPort = 3001
-
-[[ports]]
-localPort = 23933
-externalPort = 3002
