@@ -6,6 +6,8 @@ import { serverTelemetry } from "@szl-holdings/observability";
 import { JOB_TYPES } from "./job-queue";
 import { NAMED_JOB_TYPES } from "./scheduled-jobs";
 import { PLATFORM_JOB_TYPES } from "./platform-jobs";
+import { db, pool, dataRetentionPoliciesTable, dataRetentionAuditLogTable } from "@szl-holdings/db";
+import { eq, and } from "drizzle-orm";
 import { NYC_INGESTION_JOB_TYPE } from "./terra-nyc-ingestion";
 import { NYC_EXTENDED_INGESTION_JOB_TYPE } from "./terra-nyc-extended-ingestion";
 
@@ -178,6 +180,113 @@ durableJobQueue.register(JOB_TYPES.DAILY_COMMERCIAL_DATA_REFRESH, async (job) =>
   logger.info({ jobId: job.id, ...result }, "Daily commercial data refresh completed");
 });
 
+durableJobQueue.register(PLATFORM_JOB_TYPES.DATA_RETENTION_SWEEP, async (job) => {
+  logger.info({ jobId: job.id }, "Data retention sweep started");
+  const policies = await db
+    .select()
+    .from(dataRetentionPoliciesTable)
+    .where(eq(dataRetentionPoliciesTable.isActive, true));
+
+  let totalProcessed = 0;
+  let failed = 0;
+
+  for (const policy of policies) {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - policy.retentionDays);
+    let affectedRows = 0;
+    let status: "success" | "failure" = "success";
+    let errorMessage: string | null = null;
+
+    try {
+      const TABLE_CONFIG: Record<string, { hasTenantCol: boolean; piiColumns: Record<string, string> | null }> = {
+        audit_events: { hasTenantCol: true, piiColumns: null },
+        activity_log: { hasTenantCol: true, piiColumns: null },
+        usage_events: { hasTenantCol: true, piiColumns: null },
+        connector_logs: { hasTenantCol: false, piiColumns: null },
+        webhook_events: { hasTenantCol: true, piiColumns: null },
+        sessions: { hasTenantCol: false, piiColumns: null },
+        notifications: { hasTenantCol: false, piiColumns: null },
+        platform_contact_requests: { hasTenantCol: false, piiColumns: { email: "redacted@purged.invalid", name: "Purged User" } },
+        support_tickets: { hasTenantCol: true, piiColumns: { submitter_email: "redacted@purged.invalid", submitter_name: "Purged User" } },
+      };
+      if (!TABLE_CONFIG[policy.tableName]) {
+        logger.error({ tableName: policy.tableName, policyId: policy.id }, "Retention sweep: tableName not in allowlist — skipping");
+        failed++;
+        continue;
+      }
+      const tableConf = TABLE_CONFIG[policy.tableName]!;
+      const TABLES_WITH_ORG_ID = new Set(Object.entries(TABLE_CONFIG).filter(([, v]) => v.hasTenantCol).map(([k]) => k));
+      const hasTenantCol = TABLES_WITH_ORG_ID.has(policy.tableName) && policy.orgId != null;
+      const tenantFilter = hasTenantCol ? ` AND org_id = $2` : "";
+      const params: (string | number)[] = [cutoffDate.toISOString()];
+      if (hasTenantCol && policy.orgId != null) params.push(policy.orgId);
+
+      if (policy.purgeStrategy === "delete") {
+        const result = await pool.query(
+          `DELETE FROM "${policy.tableName}" WHERE created_at < $1${tenantFilter}`,
+          params
+        );
+        affectedRows = result.rowCount ?? 0;
+      } else if (policy.purgeStrategy === "anonymize") {
+        const piiColumns = tableConf.piiColumns;
+        if (!piiColumns || Object.keys(piiColumns).length === 0) {
+          const countResult = await pool.query(
+            `SELECT COUNT(*)::int AS cnt FROM "${policy.tableName}" WHERE created_at < $1${tenantFilter}`,
+            params
+          );
+          affectedRows = countResult.rows[0]?.cnt ?? 0;
+          logger.warn({ tableName: policy.tableName, policyId: policy.id }, "Anonymize: no PII columns defined — skipping data modification");
+        } else {
+          const setClauses = Object.entries(piiColumns).map(([col, val]) => `"${col}" = '${val}'`).join(", ");
+          const whereExtra = Object.keys(piiColumns).map((col) => `"${col}" IS NOT NULL`).join(" OR ");
+          const result = await pool.query(
+            `UPDATE "${policy.tableName}" SET ${setClauses} WHERE created_at < $1${tenantFilter} AND (${whereExtra})`,
+            params
+          );
+          affectedRows = result.rowCount ?? 0;
+        }
+      } else if (policy.purgeStrategy === "archive") {
+        const countResult = await pool.query(
+          `SELECT COUNT(*)::int AS cnt FROM "${policy.tableName}" WHERE created_at < $1${tenantFilter}`,
+          params
+        );
+        affectedRows = countResult.rows[0]?.cnt ?? 0;
+        logger.info({ tableName: policy.tableName, policyId: policy.id, affectedRows }, "Archive strategy: rows identified for archival. External archival pipeline required before deletion.");
+      }
+      totalProcessed += affectedRows;
+    } catch (err: unknown) {
+      errorMessage = err instanceof Error ? err.message : "Purge failed";
+      status = "failure";
+      failed++;
+      logger.error({ err, tableName: policy.tableName, policyId: policy.id }, "Retention sweep: table purge failed");
+    }
+
+    await db.insert(dataRetentionAuditLogTable).values({
+      policyId: policy.id,
+      orgId: policy.orgId ?? null,
+      tableName: policy.tableName,
+      action: status === "success" ? "purge_completed" : "purge_failed",
+      actorId: null,
+      actorName: "Scheduler",
+      affectedRows,
+      details: { retentionDays: policy.retentionDays, purgeStrategy: policy.purgeStrategy, orgId: policy.orgId, triggeredBy: "scheduler" },
+      status,
+      errorMessage,
+    }).catch((e) => logger.error({ err: e }, "Retention sweep: failed to write audit log"));
+
+    await db.update(dataRetentionPoliciesTable)
+      .set({ lastRunAt: new Date(), updatedAt: new Date() })
+      .where(eq(dataRetentionPoliciesTable.id, policy.id))
+      .catch(() => {});
+  }
+
+  logger.info({ jobId: job.id, policies: policies.length, totalProcessed, failed }, "Data retention sweep completed");
+  serverTelemetry.recordBusinessEvent({
+    type: "data_retention_sweep_completed",
+    metadata: { policies: policies.length, totalProcessed, failed },
+  });
+});
+
 const DEFAULT_SCHEDULES: ScheduleDefinition[] = [
   { name: "health_scan_5m", jobType: JOB_TYPES.HEALTH_SCAN, cronExpression: "*/5 * * * *", payload: { services: ["database", "job-queue", "api"] }, maxRetries: 1 },
   { name: "alert_check_15m", jobType: JOB_TYPES.ALERT_CHECK, cronExpression: "*/15 * * * *", payload: {}, maxRetries: 1 },
@@ -211,6 +320,7 @@ const DEFAULT_SCHEDULES: ScheduleDefinition[] = [
   { name: "platform_salesforce_opportunity_sync_hourly", jobType: PLATFORM_JOB_TYPES.SALESFORCE_OPPORTUNITY_SYNC, cronExpression: "0 * * * *", payload: {}, maxRetries: 2 },
   { name: "platform_jira_sprint_health_scan_hourly", jobType: PLATFORM_JOB_TYPES.JIRA_SPRINT_HEALTH_SCAN, cronExpression: "0 * * * *", payload: {}, maxRetries: 2 },
   { name: "notification_email_digest_daily", jobType: PLATFORM_JOB_TYPES.NOTIFICATION_DIGEST, cronExpression: "0 8 * * *", payload: { since: "24h" }, maxRetries: 2 },
+  { name: "data_retention_sweep_weekly", jobType: PLATFORM_JOB_TYPES.DATA_RETENTION_SWEEP, cronExpression: "0 2 * * 0", payload: {}, maxRetries: 1 },
 ] as const;
 
 export async function startDurableQueue(): Promise<void> {

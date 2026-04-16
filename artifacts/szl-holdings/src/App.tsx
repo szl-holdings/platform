@@ -81,6 +81,11 @@ const RoiCalculatorPage = lazy(() => import("@/pages/roi-calculator"));
 const ReliefMessagingPage = lazy(() => import("@/pages/relief-messaging"));
 
 const CrmIntelligencePage = lazy(() => import("@/pages/crm-intelligence"));
+const SupportPortalPage = lazy(() => import("@/pages/support-portal"));
+const SupportSubmitPage = lazy(() => import("@/pages/support-submit"));
+const SupportTicketsPage = lazy(() => import("@/pages/support-tickets"));
+const SupportTicketDetailPage = lazy(() => import("@/pages/support-ticket-detail"));
+const AdminDataRetentionPage = lazy(() => import("@/pages/admin-data-retention"));
 
 // New platform-repositioning pages
 const LytePage = lazy(() => import("@/pages/lyte-page"));
@@ -864,6 +869,9 @@ function App() {
             <Route path="/admin/platform-settings">
               <RequireAuth><Suspense fallback={<PageLoader />}><UnifiedSettingsPage /></Suspense></RequireAuth>
             </Route>
+            <Route path="/admin/data-retention">
+              <RequireAuth><Suspense fallback={<PageLoader />}><AdminDataRetentionPage /></Suspense></RequireAuth>
+            </Route>
             <Route path="/admin">
               <RequireAuth><Suspense fallback={<PageLoader />}><AdminPage /></Suspense></RequireAuth>
             </Route>
@@ -970,6 +978,20 @@ function App() {
             </Route>
             <Route path="/nuro-forge/self-healing">
               <Suspense fallback={<PageLoader />}><NuroForgeSelfHealing /></Suspense>
+            </Route>
+
+            {/* ── Support portal routes ── */}
+            <Route path="/support/tickets/:id">
+              <RequireAuth><Suspense fallback={<PageLoader />}><SupportTicketDetailPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/support/tickets">
+              <RequireAuth><Suspense fallback={<PageLoader />}><SupportTicketsPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/support/submit">
+              <RequireAuth><Suspense fallback={<PageLoader />}><SupportSubmitPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/support">
+              <RequireAuth><Suspense fallback={<PageLoader />}><SupportPortalPage /></Suspense></RequireAuth>
             </Route>
 
             {/* ── Legal / utility routes ── */}

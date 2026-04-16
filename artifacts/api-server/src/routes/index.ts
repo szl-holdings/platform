@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import supportRouter from "./support";
+import dataRetentionRouter from "./data-retention";
 import copilotRouter from "./copilot";
 import mcpRouter from "./mcp";
 import { SHORT_CACHE, MEDIUM_CACHE } from "../middlewares/rate-limiters";
@@ -708,5 +710,12 @@ router.use(tenantHealthRouter);
 router.use("/changelog", _readLimiter);
 router.use("/changelog", _writeLimiter);
 router.use(changelogRouter);
+
+router.use("/support", _readLimiter);
+router.use("/support", _writeLimiter);
+router.use(supportRouter);
+router.use("/data-retention", _readLimiter);
+router.use("/data-retention", _writeLimiter);
+router.use(dataRetentionRouter);
 
 export default router;

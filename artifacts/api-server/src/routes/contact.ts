@@ -1,5 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { db, pool } from "@szl-holdings/db";
+import { supportTicketsTable } from "@szl-holdings/db";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
 import { authMiddleware } from "../middlewares/auth";
@@ -75,6 +76,24 @@ router.post("/contact/submit", publicSubmitLimiter, validateBody(contactSubmitSc
       { id: row.id, type: sanitized.type, app: sanitized.app },
       "Contact request submitted",
     );
+
+    const ticketRef = `TKT-${Date.now().toString(36).toUpperCase()}`;
+    try {
+      await db.insert(supportTicketsTable).values({
+        ticketRef,
+        subject: `[Contact Form] ${type ?? "General"} enquiry from ${name}`,
+        description: message ?? `Contact form submission from ${name} (${email})`,
+        category: "other",
+        priority: "medium",
+        status: "open",
+        submitterName: name,
+        submitterEmail: email,
+        userId: null,
+        orgId: null,
+      });
+    } catch (fanoutErr) {
+      logger.warn({ err: fanoutErr, contactId: row.id }, "Failed to fan-out contact request to support ticket (non-fatal)");
+    }
 
     sendSuccess(res, {
       id: row.id,

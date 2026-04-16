@@ -24,6 +24,7 @@ export const PLATFORM_JOB_TYPES = {
   JIRA_SPRINT_HEALTH_SCAN: "hourly_jira_sprint_health_scan",
   NOTIFICATION_DISPATCH: "notification_dispatch",
   NOTIFICATION_DIGEST: "notification_email_digest",
+  DATA_RETENTION_SWEEP: "data_retention_sweep",
 } as const;
 
 export type PlatformJobType = typeof PLATFORM_JOB_TYPES[keyof typeof PLATFORM_JOB_TYPES];
