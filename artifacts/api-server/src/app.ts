@@ -230,9 +230,9 @@ app.get("/api/health", async (_req: Request, res: Response) => {
       server: { status: "ok" },
       database: { status: dbStatus, latencyMs: dbLatencyMs },
       job_queue: { status: queueStatus, depth: queueDepth },
-      storage: { status: process.env.OBJECT_STORAGE_BUCKET_ID ? "configured" : "demo" },
-      auth: { status: process.env.SESSION_SECRET ? "configured" : "missing_secret" },
-      ai: { status: (process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || process.env.OPENAI_API_KEY) ? "configured" : "not_configured" },
+      storage: { status: "ok", mode: process.env.OBJECT_STORAGE_BUCKET_ID ? "cloud" : "local" },
+      auth: { status: process.env.SESSION_SECRET ? "ok" : "degraded", mode: process.env.SESSION_SECRET ? "configured" : "missing_secret" },
+      ai: { status: "ok", mode: (process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || process.env.OPENAI_API_KEY) ? "live" : "mock" },
     },
   });
 });

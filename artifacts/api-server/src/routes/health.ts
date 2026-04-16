@@ -34,13 +34,12 @@ router.get("/healthz", async (_req, res) => {
   const backupHealth = getBackupHealthStatus();
   const dbHealth = await checkDatabase();
 
-  const storageStatus = process.env.OBJECT_STORAGE_BUCKET_ID ? "configured" : "demo";
-  const authStatus = process.env.SESSION_SECRET ? "configured" : "missing_secret";
-  const aiStatus = (process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || process.env.OPENAI_API_KEY)
-    ? "configured"
-    : "not_configured";
+  const hasSessionSecret = !!process.env.SESSION_SECRET;
+  const hasAiKey = !!(process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || process.env.OPENAI_API_KEY);
+  const hasCloudStorage = !!process.env.OBJECT_STORAGE_BUCKET_ID;
+  const authStatus = hasSessionSecret ? "ok" : "degraded";
 
-  const overallStatus = dbHealth.status === "ok" ? "ok" : "degraded";
+  const overallStatus = dbHealth.status === "ok" && authStatus === "ok" ? "ok" : "degraded";
 
   res.json({
     ...base,
@@ -51,9 +50,9 @@ router.get("/healthz", async (_req, res) => {
     services: {
       server: { status: "ok" },
       database: dbHealth,
-      storage: { status: storageStatus },
-      auth: { status: authStatus },
-      ai: { status: aiStatus },
+      storage: { status: "ok", mode: hasCloudStorage ? "cloud" : "local" },
+      auth: { status: authStatus, mode: hasSessionSecret ? "configured" : "missing_secret" },
+      ai: { status: "ok", mode: hasAiKey ? "live" : "mock" },
       backup: {
         status: backupHealth.status,
         lastBackupAt: backupHealth.lastBackupAt,

@@ -954,13 +954,24 @@ async function seed() {
   console.log("\n── Post-seed verification ──────────────────────────────────");
   const verificationErrors: string[] = [];
 
-  const userCount = await db.select({ count: sql<number>`count(*)::int` }).from(usersTable);
-  const actualUsers = userCount[0]?.count ?? 0;
-  if (actualUsers < 5) {
-    verificationErrors.push(`Expected ≥5 demo users, found ${actualUsers}`);
-  } else {
-    console.log(`  ✓ ${actualUsers} users in database`);
+  async function assertMinCount(table: any, tableName: string, min: number) {
+    const result = await db.select({ count: sql<number>`count(*)::int` }).from(table);
+    const actual = result[0]?.count ?? 0;
+    if (actual < min) {
+      verificationErrors.push(`${tableName}: expected ≥${min}, found ${actual}`);
+    } else {
+      console.log(`  ✓ ${actual} ${tableName}`);
+    }
   }
+
+  await assertMinCount(usersTable, "users", 5);
+  await assertMinCount(organizationsTable, "organizations", 1);
+  await assertMinCount(vesselsTable, "vessels", 4);
+  await assertMinCount(notificationsTable, "notifications", 1);
+  await assertMinCount(activityLogTable, "activity_log entries", 1);
+  await assertMinCount(appsRegistryTable, "registered apps", 1);
+  await assertMinCount(featureFlagsTable, "feature flags", 1);
+  await assertMinCount(billingPlansTable, "billing plans", 1);
 
   const adminCheck = await db.select().from(usersTable).where(eq(usersTable.email, "admin@szlholdings.com")).limit(1);
   if (adminCheck.length === 0 || !adminCheck[0].passwordHash) {
@@ -969,18 +980,15 @@ async function seed() {
     console.log("  ✓ admin@szlholdings.com has password hash");
   }
 
-  const orgCount = await db.select({ count: sql<number>`count(*)::int` }).from(organizationsTable);
-  if ((orgCount[0]?.count ?? 0) < 1) {
-    verificationErrors.push("No organizations found");
-  } else {
-    console.log(`  ✓ ${orgCount[0]?.count} organizations`);
+  const demoEmails = ["alex@szlholdings.com", "jordan@szlholdings.com", "morgan@szlholdings.com", "casey@szlholdings.com"];
+  for (const email of demoEmails) {
+    const check = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
+    if (check.length === 0 || !check[0].passwordHash) {
+      verificationErrors.push(`Demo user ${email} missing or has no password hash`);
+    }
   }
-
-  const vesselCheck = await db.select({ count: sql<number>`count(*)::int` }).from(vesselsTable);
-  if ((vesselCheck[0]?.count ?? 0) < 1) {
-    verificationErrors.push("No vessels found");
-  } else {
-    console.log(`  ✓ ${vesselCheck[0]?.count} vessels`);
+  if (verificationErrors.filter(e => e.includes("Demo user")).length === 0) {
+    console.log(`  ✓ all ${demoEmails.length} demo users have password hashes`);
   }
 
   if (verificationErrors.length > 0) {
@@ -992,7 +1000,8 @@ async function seed() {
   if (seedWarnings.length > 0) {
     console.log(`\n⚠ Seed completed with ${seedWarnings.length} non-critical warning(s):`);
     seedWarnings.forEach(w => console.warn(`  - ${w}`));
-    console.log("  These are due to schema drift in domain tables and do not affect demo functionality.\n");
+    console.log("  (Voyages/corridors tables have column-level schema drift from prior migrations.");
+    console.log("   Core demo flow does not depend on these tables.)\n");
   }
 
   console.log("\n✅ Seed complete — all critical assertions passed!");
