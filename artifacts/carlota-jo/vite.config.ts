@@ -58,7 +58,6 @@ function gatewayPlugin(): import("vite").Plugin {
     },
   };
 }
-
 export default defineConfig({
   base: basePath,
   plugins: [
