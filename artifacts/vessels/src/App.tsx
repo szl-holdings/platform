@@ -12,7 +12,7 @@ import {
   Ship, AlertTriangle, Activity, LayoutDashboard, WifiOff,
   BarChart3, ChevronDown, User, ChevronRight, DollarSign, Wrench,
   MapPin, Radio, List, Globe, Navigation, EyeOff, ShieldAlert, Shield, Anchor, Brain, Menu, FileText,
-  TrendingUp, Calculator, Zap, Cpu, Leaf, Waves, Fuel
+  TrendingUp, Calculator, Zap, Cpu, Leaf, Waves, Fuel, Layers, RotateCcw, GitBranch
 } from "lucide-react";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
@@ -190,6 +190,9 @@ const BunkerOptimizerPage = lazy(() => import("@/pages/bunker-optimizer"));
 const PscInspectorPage = lazy(() => import("@/pages/psc-inspector"));
 const InsurancePanelPage = lazy(() => import("@/pages/insurance-panel"));
 const VesselsSettingsPage = lazy(() => import("@/pages/settings"));
+const VesselsAtlasRuntimePage = lazy(() => import("@/pages/atlas-runtime"));
+const VesselsReplayPage = lazy(() => import("@/pages/replay"));
+const VesselsScenarioBranchesPage = lazy(() => import("@/pages/scenario-branches"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -343,6 +346,15 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
         href: path,
         icon: <Icon className="w-3.5 h-3.5" />,
       })),
+    },
+    {
+      id: "atlas-runtime",
+      label: "ATLAS Spatial Runtime",
+      items: [
+        { id: "atlas-runtime", label: "Route Memory Twin", href: "/atlas-runtime", icon: <Layers className="w-3.5 h-3.5" /> },
+        { id: "voyage-replay", label: "Voyage Replay", href: "/replay", icon: <RotateCcw className="w-3.5 h-3.5" /> },
+        { id: "scenario-branches", label: "Scenario Branches", href: "/scenario-branches", icon: <GitBranch className="w-3.5 h-3.5" /> },
+      ],
     },
     {
       id: "digital-twin-platform",
@@ -630,6 +642,9 @@ function DashboardRouter() {
         <Route path="/bunker-optimizer" component={BunkerOptimizerPage} />
         <Route path="/psc-inspector" component={PscInspectorPage} />
         <Route path="/insurance-panel" component={InsurancePanelPage} />
+        <Route path="/atlas-runtime" component={VesselsAtlasRuntimePage} />
+        <Route path="/replay" component={VesselsReplayPage} />
+        <Route path="/scenario-branches" component={VesselsScenarioBranchesPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-sky-400/40">Page not found</p>
@@ -766,7 +781,9 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     location.startsWith("/charter-party") || location.startsWith("/demurrage") ||
     location.startsWith("/freight-rates") || location.startsWith("/sts-detection") ||
     location.startsWith("/crew-tracker") || location.startsWith("/bunker-optimizer") ||
-    location.startsWith("/psc-inspector") || location.startsWith("/insurance-panel");
+    location.startsWith("/psc-inspector") || location.startsWith("/insurance-panel") ||
+    location.startsWith("/atlas-runtime") || location.startsWith("/replay") ||
+    location.startsWith("/scenario-branches");
 
   if (isDashboard) {
     return (

@@ -91,6 +91,9 @@ const TaxAppeal = lazy(() => import("@/pages/tax-appeal"));
 const WaterfallCalculator = lazy(() => import("@/pages/waterfall-calculator"));
 const ConstructionMonitor = lazy(() => import("@/pages/construction-monitor"));
 const TenantScreening = lazy(() => import("@/pages/tenant-screening"));
+const TerraAtlasRuntimePage = lazy(() => import("@/pages/atlas-runtime"));
+const TerraReplayPage = lazy(() => import("@/pages/replay"));
+const TerraScenarioBranchesPage = lazy(() => import("@/pages/scenario-branches"));
 
 function PageLoader() {
   return (
@@ -173,6 +176,9 @@ function PrivateRouter() {
         <Route path="/waterfall-calculator" component={WaterfallCalculator} />
         <Route path="/construction-monitor" component={ConstructionMonitor} />
         <Route path="/tenant-screening" component={TenantScreening} />
+        <Route path="/atlas-runtime" component={TerraAtlasRuntimePage} />
+        <Route path="/replay" component={TerraReplayPage} />
+        <Route path="/scenario-branches" component={TerraScenarioBranchesPage} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
