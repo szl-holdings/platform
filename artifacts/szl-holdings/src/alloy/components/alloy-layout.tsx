@@ -226,7 +226,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
   const { status: wsStatus } = useRealtimeChannel("workflow-runs");
   const [, navigate] = useLocation();
   const [workflowCmds, setWorkflowCmds] = useState<CommandItem[]>([]);
-  const { trackTourCompleted } = useOnboardingAnalytics({ platform: "szl", tourId: "szl-alloy" });
+  const { trackTourCompleted, trackTourSkipped } = useOnboardingAnalytics({ platform: "szl", tourId: "szl-alloy" });
 
   useEffect(() => {
     let cancelled = false;
@@ -478,7 +478,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
         </main>
       </div>
 
-      <OnboardingWizard config={SZL_ONBOARDING_CONFIG} onComplete={trackTourCompleted} />
+      <OnboardingWizard config={SZL_ONBOARDING_CONFIG} onComplete={trackTourCompleted} onSkip={trackTourSkipped} />
     </div>
   );
 }

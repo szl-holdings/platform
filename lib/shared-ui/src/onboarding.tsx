@@ -365,9 +365,10 @@ function StepCard({
 export interface OnboardingWizardProps {
   config: OnboardingConfig;
   onComplete?: () => void;
+  onSkip?: (atStep?: number) => void;
 }
 
-export function OnboardingWizard({ config, onComplete }: OnboardingWizardProps) {
+export function OnboardingWizard({ config, onComplete, onSkip }: OnboardingWizardProps) {
   const { appId, accentColor = "#8b5cf6", steps } = config;
   const { active, currentStep, markCompleted, dismiss, setStep } = useOnboardingState(appId);
 
@@ -386,8 +387,8 @@ export function OnboardingWizard({ config, onComplete }: OnboardingWizardProps) 
 
   const handleSkip = React.useCallback(() => {
     dismiss();
-    onComplete?.();
-  }, [dismiss, onComplete]);
+    onSkip?.(currentStep);
+  }, [dismiss, onSkip, currentStep]);
 
   if (!active || steps.length === 0) return null;
 
