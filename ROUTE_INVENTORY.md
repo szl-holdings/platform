@@ -242,7 +242,7 @@ Note: `cortex-mobile` is a bare scaffold (2 files) — not a functional app. The
 
 ## Archived Surfaces
 
-The following artifacts have been archived (source code removed — 0 ts/tsx files; DEPRECATED.md/ARCHIVED.md markers and stale dist/node_modules remain):
+The following artifacts have been archived (app source removed — no pages/components/routes; marker files, stale dist/node_modules, and residual config may remain):
 
 | Surface | Former Path | Disposition |
 |---------|-------------|-------------|

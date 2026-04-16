@@ -40,7 +40,7 @@ The platform is built as a pnpm monorepo using TypeScript 5.9, React 19, Vite, a
 | szl-holdings-mobile | Expo | 167 | CORTEX mobile command |
 
 ### Archived Artifacts (Code Removed)
-firestorm, lyte-command-center, imperium, prism-counsel, stephen-site — source code removed (0 ts/tsx files); DEPRECATED.md/ARCHIVED.md markers plus stale dist/node_modules remain.
+firestorm, lyte-command-center, imperium, prism-counsel, stephen-site — no app source (pages/components) remains; DEPRECATED.md/ARCHIVED.md markers, stale dist/node_modules, and residual config files may exist.
 
 ### Technology Stack
 -   **Frontend:** React 19, Vite, TanStack React Query, Wouter, Tailwind CSS v4, Framer Motion.
