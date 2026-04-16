@@ -237,11 +237,11 @@ Track each step as a named funnel in PostHog to measure step-to-step conversion.
 
 ---
 
-*See also: [EVENT_TAXONOMY.md](EVENT_TAXONOMY.md) · [ANALYTICS_PLAN.md](ANALYTICS_PLAN.md) · [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md)*
+*See also: [EVENT_TAXONOMY.md](EVENT_TAXONOMY.md) · [ANALYTICS_PLAN.md](ANALYTICS_PLAN.md) · [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) · [LAUNCH_ANALYTICS_PLAN.md](LAUNCH_ANALYTICS_PLAN.md) · [CUSTOMER_HEALTH_MODEL.md](CUSTOMER_HEALTH_MODEL.md)*
 
 ---
 
-*Last verified against source code: 2026-04-15. Re-verify against `artifacts/api-server/src/`, `lib/db/src/schema/`, and `lib/auth/src/` after significant code changes.*
+*Last verified against source code: 2026-04-16. Re-verify against `artifacts/api-server/src/`, `lib/db/src/schema/`, and `lib/auth/src/` after significant code changes.*
 
 ---
 
@@ -282,3 +282,180 @@ The Decision Fabric emits the following analytics events. All events carry
 These events are intended for the existing analytics pipeline; instrumentation
 ships as part of Phase 9 (UX Premiumization) and is captured here to lock
 the contract.
+
+---
+
+## Launch Event Taxonomy (April 2026)
+
+The following event categories are required for launch analytics coverage. These events feed [LAUNCH_ANALYTICS_PLAN.md](LAUNCH_ANALYTICS_PLAN.md) and [CUSTOMER_HEALTH_MODEL.md](CUSTOMER_HEALTH_MODEL.md).
+
+### Activation & Onboarding Events
+
+| Event | Trigger | Properties | Priority |
+|-------|---------|-----------|---------|
+| `user_signup_started` | User begins registration / org creation flow | `signup_method`, `referrer_source` | **Critical** |
+| `user_signup_completed` | Org and first user successfully created | `org_id` (hashed), `signup_method`, `plan_tier` | **Critical** |
+| `onboarding_step_completed` | User completes one of 4 onboarding wizard steps | `step_number` (1–4), `step_name`, `org_id` (hashed), `time_spent_sec` | **Critical** |
+| `onboarding_completed` | All 4 onboarding steps complete | `org_id` (hashed), `plan_tier`, `total_time_sec` | **Critical** |
+| `onboarding_abandoned` | User exits onboarding before completing | `last_step_completed`, `org_id` (hashed), `time_in_flow_sec` | High |
+| `first_governed_decision` | First AI-governed decision in new org | `org_id` (hashed), `domain`, `hours_since_signup` | **Critical** |
+| `sso_configured` | Enterprise SSO configured for org | `org_id` (hashed), `sso_provider`, `scim_enabled` | High |
+| `domain_pack_installed` | First AI domain pack configured | `org_id` (hashed), `domain_pack`, `pack_count` | High |
+| `tenant_activated` | Org reaches activation milestone (first governed decision ≤ 72h) | `org_id` (hashed), `activation_hours`, `plan_tier` | **Critical** |
+
+**Privacy rules:** `org_id` is always hashed before emission. No user PII included.
+
+---
+
+### Workflow Events
+
+| Event | Trigger | Properties | Priority |
+|-------|---------|-----------|---------|
+| `workflow_started` | User initiates a governed workflow | `workflow_type`, `domain`, `org_id` (hashed) | High |
+| `workflow_step_completed` | Individual step in workflow completed | `workflow_type`, `step_name`, `domain`, `time_spent_sec` | Medium |
+| `workflow_completed` | Workflow reaches terminal success state | `workflow_type`, `domain`, `total_duration_sec`, `org_id` (hashed) | **Critical** |
+| `workflow_abandoned` | Workflow exited before terminal state | `workflow_type`, `domain`, `last_step`, `org_id` (hashed) | High |
+| `workflow_ai_assist_used` | User invokes AI assistance within a workflow | `workflow_type`, `domain`, `assist_type` | Medium |
+
+---
+
+### Approval Cycle Events
+
+| Event | Trigger | Properties | Priority |
+|-------|---------|-----------|---------|
+| `approval_requested` | Approval workflow triggered | `approval_type`, `domain`, `org_id` (hashed), `requester_role` | High |
+| `approval_cycle_completed` | Approval decision recorded (approved or denied) | `approval_type`, `domain`, `verdict`, `cycle_time_sec`, `auto_approved` | **Critical** |
+| `approval_escalated` | Approval escalated beyond first approver | `approval_type`, `domain`, `org_id` (hashed), `escalation_reason` | High |
+| `approval_bottleneck_triggered` | Approval exceeds 24-hour threshold | `approval_type`, `domain`, `hours_pending` | High |
+| `approval_policy_denied` | Action blocked by policy check | `policy_name`, `domain`, `denied_action`, `org_id` (hashed) | High |
+
+---
+
+### Support & Feedback Events
+
+| Event | Trigger | Properties | Priority |
+|-------|---------|-----------|---------|
+| `support_ticket_created` | User opens a support request | `ticket_category`, `product_area`, `plan_tier` | High |
+| `support_ticket_resolved` | Support ticket closed | `ticket_category`, `resolution_time_sec`, `resolution_type` | High |
+| `help_docs_searched` | User searches in-product help | `query_length`, `results_count`, `page_context` | Medium |
+| `help_article_viewed` | User views a help/docs article | `article_id`, `article_section`, `page_context` | Medium |
+| `feedback_submitted` | User submits in-product feedback | `feedback_type`, `sentiment`, `product_area` | High |
+| `nps_response_recorded` | NPS survey response captured | `nps_score`, `plan_tier`, `org_tenure_days` | High |
+
+**Privacy rules:** No free-text feedback content is emitted to third-party analytics tools.
+
+---
+
+### Error & Incident Events
+
+These events are emitted server-side by the error tracking and monitoring layer.
+
+| Event | Trigger | Properties | Priority |
+|-------|---------|-----------|---------|
+| `api_error_occurred` | API returns 5xx response | `status_code`, `endpoint`, `domain`, `error_class` | **Critical** |
+| `auth_failure` | Authentication or session validation fails | `failure_reason`, `attempt_method` | High |
+| `db_query_slow` | Query exceeds `SLOW_QUERY_THRESHOLD_MS` | `query_fingerprint`, `duration_ms`, `table` | High |
+| `db_error` | Database query returns error | `error_class`, `query_fingerprint` | **Critical** |
+| `ai_provider_unhealthy` | AI provider health check fails | `provider`, `error_type`, `consecutive_failures` | **Critical** |
+| `rate_limit_hit` | Client hits API rate limit | `endpoint`, `plan_tier`, `org_id` (hashed) | Medium |
+| `incident_opened` | SEV incident formally opened | `severity`, `affected_surface`, `org_count_affected` | **Critical** |
+| `incident_resolved` | SEV incident closed | `severity`, `duration_sec`, `root_cause_category` | **Critical** |
+
+---
+
+### Recommendation & Simulation Events
+
+Extends and consolidates the AI evaluation events above with outcome tracking.
+
+| Event | Trigger | Properties | Priority |
+|-------|---------|-----------|---------|
+| `recommendation_generated` | AI recommendation produced for a user | `domain`, `recommendation_type`, `confidence`, `latency_ms`, `org_id` (hashed) | **Critical** |
+| `recommendation_accepted` | User explicitly accepts AI recommendation | `domain`, `recommendation_type`, `confidence`, `time_to_decision_sec` | **Critical** |
+| `recommendation_rejected` | User explicitly rejects AI recommendation | `domain`, `recommendation_type`, `rejection_reason_category` | High |
+| `recommendation_modified` | User modifies AI recommendation before accepting | `domain`, `modification_scope` | High |
+| `simulation_run` | Decision simulation executed | `domain`, `scenario_type`, `iterations`, `org_id` (hashed) | High |
+| `simulation_viewed` | User views simulation results | `domain`, `scenario_type`, `result_summary` | Medium |
+| `outcome_recorded` | Actual outcome recorded for a governed decision | `domain`, `decision_type`, `prediction_error`, `org_id` (hashed) | **Critical** |
+| `learning_cycle_triggered` | Outcome Graph calibration job initiated | `domain`, `sample_size`, `trigger_type` | Medium |
+
+---
+
+### Billing & Plan Events
+
+| Event | Trigger | Properties | Priority |
+|-------|---------|-----------|---------|
+| `plan_selected` | Org selects or changes plan during onboarding | `plan_tier`, `billing_period`, `org_id` (hashed) | **Critical** |
+| `plan_upgraded` | Org upgrades to higher tier | `from_tier`, `to_tier`, `trigger` | **Critical** |
+| `plan_downgraded` | Org downgrades to lower tier | `from_tier`, `to_tier`, `downgrade_reason_category` | High |
+| `trial_started` | Trial or pilot period begins | `plan_tier`, `trial_days`, `org_id` (hashed) | **Critical** |
+| `trial_converted` | Trial org converts to paid | `from_tier`, `to_tier`, `trial_duration_days` | **Critical** |
+| `trial_expired_unconverted` | Trial ends without conversion | `plan_tier`, `trial_duration_days`, `activation_achieved` | High |
+| `invoice_created` | Billing invoice generated | `plan_tier`, `amount_cents` (obfuscated to tier band), `billing_period` | High |
+| `payment_failed` | Payment attempt failed | `plan_tier`, `failure_reason_category` | **Critical** |
+
+---
+
+### Conversion Events
+
+| Event | Trigger | Properties | Priority |
+|-------|---------|-----------|---------|
+| `pilot_inquiry_accepted` | Design partner / pilot org provisioned | `org_id` (hashed), `plan_tier`, `source_channel` | **Critical** |
+| `pilot_converted_to_paid` | Pilot org signs paid contract | `org_id` (hashed), `conversion_trigger`, `pilot_duration_days` | **Critical** |
+| `pilot_lost` | Pilot org exits without converting | `exit_reason_category`, `pilot_duration_days`, `last_activated` | High |
+| `expansion_seat_added` | Additional users added to paid org | `org_id` (hashed), `seats_added`, `plan_tier` | **Critical** |
+| `expansion_pack_added` | Additional domain pack purchased | `org_id` (hashed), `pack_name`, `plan_tier` | **Critical** |
+| `expansion_module_added` | Additional product module purchased | `org_id` (hashed), `module_name`, `plan_tier` | **Critical** |
+| `churn_signal_detected` | Automated churn risk signal (score drops below 40) | `org_id` (hashed), `health_score`, `primary_signal` | **Critical** |
+| `churn_confirmed` | Org cancels or fails to renew | `org_id` (hashed), `churn_reason_category`, `tenure_days`, `plan_tier` | **Critical** |
+
+---
+
+### Tenant Health Events
+
+These events feed the [CUSTOMER_HEALTH_MODEL.md](CUSTOMER_HEALTH_MODEL.md) health score computation.
+
+| Event | Trigger | Properties | Priority |
+|-------|---------|-----------|---------|
+| `health_score_computed` | Weekly tenant health score computed | `org_id` (hashed), `health_score`, `tier`, `delta_from_last_week` | High |
+| `health_tier_changed` | Tenant moves between health tiers | `org_id` (hashed), `from_tier`, `to_tier`, `primary_signal` | **Critical** |
+| `tenant_stage_advanced` | Tenant advances lifecycle stage | `org_id` (hashed), `from_stage`, `to_stage` | **Critical** |
+| `retention_risk_flagged` | D7/D30 retention signal below threshold | `org_id` (hashed), `signal_type`, `current_value`, `threshold` | High |
+| `expansion_signal_detected` | Tenant shows expansion readiness signal | `org_id` (hashed), `signal_type`, `plan_tier` | High |
+| `qbr_scheduled` | Quarterly business review scheduled | `org_id` (hashed), `plan_tier` | Medium |
+
+---
+
+## Launch Event Instrumentation Priority
+
+Events required to be live before public launch:
+
+**Must fire on Day 0 (no exceptions):**
+- `user_signup_completed`
+- `onboarding_step_completed` (all 4 steps)
+- `onboarding_completed`
+- `first_governed_decision`
+- `tenant_activated`
+- `recommendation_generated`
+- `recommendation_accepted`
+- `recommendation_rejected`
+- `approval_cycle_completed`
+- `workflow_completed`
+- `api_error_occurred`
+- `demo_requested` (existing)
+- `cta_clicked` (existing)
+
+**Required within Week 1:**
+- `outcome_recorded`
+- `health_score_computed`
+- `health_tier_changed`
+- `tenant_stage_advanced`
+- `support_ticket_created`
+- `plan_selected`
+- `trial_started`
+
+**Required within Month 1:**
+- `simulation_run`
+- `learning_cycle_triggered`
+- `pilot_converted_to_paid`
+- `expansion_seat_added`
+- `churn_signal_detected`
