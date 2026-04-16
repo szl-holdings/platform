@@ -14,6 +14,11 @@ import {
   Database,
   Globe,
   Layers,
+  Users,
+  Code2,
+  TrendingUp,
+  Handshake,
+  BarChart3,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -64,34 +69,34 @@ const EXPANSION_LANES = [
   {
     slug: "PRISM Counsel",
     category: "Legal Observability",
-    desc: "Matter twins, deadline tracking, and governed demand workflows for litigation teams.",
+    desc: "Matter twins, deadline tracking, and governed demand workflows for litigation teams. Alloy backbone, legal domain layer.",
     color: "#8b7ac8",
     href: "/solutions/prism-counsel",
-    status: "Design partner stage",
+    status: "Domain pack",
   },
   {
     slug: "Vessels",
     category: "Maritime Intelligence",
-    desc: "Voyage and fleet twins with risk-ranked action surfaces for fleet operators.",
+    desc: "Voyage and fleet twins with risk-ranked action surfaces for fleet operators. Same proof chain, maritime layer.",
     color: "#4a90b8",
     href: "/solutions/vessels",
-    status: "Design partner stage",
+    status: "Domain pack",
   },
   {
     slug: "Aegis",
     category: "Security & Defense",
-    desc: "Threat twins and SOC command for environments where every decision has consequence.",
+    desc: "Threat twins and SOC command for environments where every decision has consequence. Policy-gated, fully audited.",
     color: "#c85a5a",
     href: "/solutions/aegis",
-    status: "Design partner stage",
+    status: "Domain pack",
   },
   {
     slug: "Terra",
     category: "Real Estate Intelligence",
-    desc: "Property twins with distress signals, deal tracking, and governed underwriting flows.",
+    desc: "Property twins with distress signals, deal tracking, and governed underwriting flows. Alloy backbone, RE domain layer.",
     color: "#5fa87a",
     href: "/solutions/terra",
-    status: "Design partner stage",
+    status: "Domain pack",
   },
   {
     slug: "Carlota Jo",
@@ -99,7 +104,7 @@ const EXPANSION_LANES = [
     desc: "Premium client advisory with discreet intake, managed service flows, and audit-grade delivery.",
     color: "#c8a05a",
     href: "/carlota-jo/",
-    status: "Active",
+    status: "Managed advisory",
   },
 ];
 
@@ -344,26 +349,118 @@ export default function HomePage() {
                   Explore the platform
                 </Link>
                 <Link
-                  href="/pulse"
+                  href="/design-partner"
                   style={{
                     display: "inline-flex", alignItems: "center", gap: "0.5rem",
                     padding: "0.75rem 1.5rem",
-                    background: "linear-gradient(135deg, rgba(212,160,84,0.15), rgba(212,160,84,0.05))",
-                    color: "#d4a054",
-                    border: "1px solid rgba(212,160,84,0.3)",
+                    background: "transparent",
+                    color: "var(--color-szl-text-secondary)",
+                    border: "1px solid var(--color-szl-border-hover)",
                     borderRadius: "0.375rem",
                     fontSize: "0.875rem", fontWeight: 500,
                     textDecoration: "none",
-                    transition: "border-color 0.2s ease, background 0.2s ease",
+                    transition: "border-color 0.2s ease, color 0.2s ease",
                   }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(212,160,84,0.6)"; (e.currentTarget as HTMLElement).style.background = "linear-gradient(135deg, rgba(212,160,84,0.25), rgba(212,160,84,0.1))"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(212,160,84,0.3)"; (e.currentTarget as HTMLElement).style.background = "linear-gradient(135deg, rgba(212,160,84,0.15), rgba(212,160,84,0.05))"; }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.25)"; (e.currentTarget as HTMLElement).style.color = "hsl(38,8%,90%)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--color-szl-border-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
                 >
-                  <Activity size={15} />
-                  Platform Pulse
+                  <Handshake size={15} />
+                  Become a design partner
                 </Link>
               </div>
             </m.div>
+          </div>
+        </section>
+
+        {/* ── 1b. Audience Paths ──────────────────────────────────────── */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.015)" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(2.5rem,4vw,3rem) var(--space-content-x)" }}>
+            <div style={{ marginBottom: "1.5rem" }}>
+              <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)" }}>
+                Where do you start?
+              </p>
+            </div>
+            <div style={{ display: "grid", gap: "0.75rem" }} className="sm:grid-cols-2 lg:grid-cols-5">
+              {[
+                {
+                  icon: TrendingUp,
+                  label: "Executive buyer",
+                  desc: "Value prop, ROI, and design-partner path.",
+                  href: "/platform",
+                  accent: "hsl(192,72%,48%)",
+                },
+                {
+                  icon: Code2,
+                  label: "Technical evaluator",
+                  desc: "Architecture, stack, and integration surface.",
+                  href: "/architecture",
+                  accent: "hsl(215,60%,60%)",
+                },
+                {
+                  icon: Shield,
+                  label: "Security reviewer",
+                  desc: "Controls, AI governance, and audit trail.",
+                  href: "/trust",
+                  accent: "hsl(340,60%,58%)",
+                },
+                {
+                  icon: Handshake,
+                  label: "Design partner",
+                  desc: "Work directly with the founding team.",
+                  href: "/design-partner",
+                  accent: "hsl(38,72%,58%)",
+                },
+                {
+                  icon: BarChart3,
+                  label: "Investor",
+                  desc: "Market thesis, moat, and data room.",
+                  href: "/investor",
+                  accent: "hsl(145,60%,50%)",
+                },
+              ].map((path, i) => {
+                const Icon = path.icon;
+                return (
+                  <m.div
+                    key={path.label}
+                    custom={i}
+                    variants={fadeUp}
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true }}
+                  >
+                    <Link
+                      href={path.href}
+                      style={{ display: "block", textDecoration: "none" }}
+                    >
+                      <div
+                        style={{
+                          padding: "1.125rem 1.25rem",
+                          borderRadius: "0.75rem",
+                          background: "hsla(0,0%,100%,0.025)",
+                          border: "1px solid hsla(0,0%,100%,0.07)",
+                          transition: "border-color 0.2s ease, background 0.2s ease",
+                          cursor: "pointer",
+                          height: "100%",
+                        }}
+                        onMouseEnter={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = `${path.accent}35`; el.style.background = `${path.accent}06`; }}
+                        onMouseLeave={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "hsla(0,0%,100%,0.07)"; el.style.background = "hsla(0,0%,100%,0.025)"; }}
+                      >
+                        <div style={{
+                          width: "30px", height: "30px", borderRadius: "0.4rem", marginBottom: "0.75rem",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          background: `${path.accent}12`,
+                          border: `1px solid ${path.accent}28`,
+                        }}>
+                          <Icon size={14} style={{ color: path.accent }} />
+                        </div>
+                        <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: "hsl(38,8%,90%)", marginBottom: "0.3rem" }}>{path.label}</p>
+                        <p style={{ fontSize: "0.75rem", lineHeight: 1.5, color: "var(--color-szl-text-faint)" }}>{path.desc}</p>
+                      </div>
+                    </Link>
+                  </m.div>
+                );
+              })}
+            </div>
           </div>
         </section>
 
@@ -766,16 +863,19 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 8. Expansion Lane Map ───────────────────────────────────── */}
+        {/* ── 8. Domain Packs ─────────────────────────────────────────── */}
         <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.01)" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
-            <div style={{ marginBottom: "3rem", maxWidth: "42rem" }}>
+            <div style={{ marginBottom: "3rem", maxWidth: "48rem" }}>
               <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
-                Expansion lanes
+                Domain packs — governed extensions
               </p>
-              <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)" }}>
-                The architecture generalizes. Lyte first. Then every domain where execution latency has a cost.
+              <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)", marginBottom: "1rem" }}>
+                One backbone. Every high-consequence domain.
               </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.7, color: "var(--color-szl-text-secondary)" }}>
+                Domain packs extend Alloy's intelligence and Lyte's observability layer into vertical environments. Each pack inherits the same proof chain, policy controls, and audit architecture — not a separate product, not a one-off integration.
+              </p>
             </div>
             <div style={{ display: "grid", gap: "1rem" }} className="sm:grid-cols-2 lg:grid-cols-3">
               {EXPANSION_LANES.map((lane, i) => (

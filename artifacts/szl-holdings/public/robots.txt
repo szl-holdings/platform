@@ -1,9 +1,37 @@
 User-agent: *
 Allow: /
 
+# Authenticated / internal tools — not for indexing
 Disallow: /app/
 Disallow: /admin
 Disallow: /kpis
+Disallow: /forge
+Disallow: /forge/
+Disallow: /nexus
+Allow: /alloy-fabric
+Disallow: /alloy
+Disallow: /alloy/
+Disallow: /ops/
+Disallow: /nuro-forge/
+Disallow: /distribution-os/
+Disallow: /azure-tenant/
+Disallow: /control-tower
+Disallow: /nexus-explorer
+Disallow: /analyst-workspace
+Disallow: /oracle-briefing
+Disallow: /report-builder
+Disallow: /kpi-dashboard
+Disallow: /ai-cost-analytics
+Disallow: /tenant-health-scorecards
+Disallow: /unified-settings
+Disallow: /scim-provisioning
+Disallow: /powerbi-config
+Disallow: /lp-sentiment-pulse
+Disallow: /revenue-fusion
+Disallow: /venture-intel/
+
+# Crawl delay recommendation for bots that respect it
+Crawl-delay: 10
 
 Sitemap: https://szlholdings.com/sitemap.xml
 Security: https://szlholdings.com/.well-known/security.txt

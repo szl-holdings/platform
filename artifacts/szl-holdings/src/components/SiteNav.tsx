@@ -9,65 +9,40 @@ import { useAuth } from "@szl-holdings/replit-auth-web";
 
 const NAV_ITEMS = [
   {
-    label: "Nexus",
-    href: "/nexus",
-    highlight: true,
-    children: null,
-  },
-  {
     label: "Platform",
     href: "/platform",
     highlight: false,
     children: [
-      { label: "Platform Overview", href: "/platform" },
-      { label: "CORTEX — Cross-Domain Fusion", href: "/intelligence/cortex" },
-      { label: "Lyte — Business Observability", href: "/lyte" },
-      { label: "Alloy — Execution Fabric", href: "/alloy-fabric" },
-      { label: "Architecture", href: "/architecture" },
-      { label: "HELM CONSOLE — Family Command", href: "/helm" },
+      { label: "Platform Overview", href: "/platform", note: "SZL Holdings stack" },
+      { label: "Alloy — Execution Fabric", href: "/alloy-fabric", note: "Intelligence backbone" },
+      { label: "Lyte — Business Observability", href: "/lyte", note: "Operator command layer" },
+      { label: "Architecture", href: "/architecture", note: "Eight-layer stack" },
+      { label: "How It Works", href: "/how-it-works", note: "Signal → action loop" },
     ],
   },
   {
-    label: "Lyte",
-    href: "/lyte",
+    label: "Domain Packs",
+    href: "/solutions",
     highlight: false,
-    children: null,
+    children: [
+      { label: "Domain Packs Overview", href: "/solutions", note: "Governed extensions" },
+      { label: "PRISM Counsel", href: "/solutions/prism-counsel", note: "Legal observability" },
+      { label: "Vessels", href: "/solutions/vessels", note: "Maritime intelligence" },
+      { label: "Aegis", href: "/solutions/aegis", note: "Security & defense" },
+      { label: "Terra", href: "/solutions/terra", note: "Real estate intelligence" },
+      { label: "Carlota Jo", href: "/carlota-jo/", note: "Private advisory" },
+    ],
   },
   {
     label: "Trust",
     href: "/trust",
     highlight: false,
     children: [
-      { label: "Trust Center", href: "/trust" },
-      { label: "Security", href: "/trust/security" },
-      { label: "Architecture", href: "/architecture" },
-      { label: "AI Governance", href: "/trust/ai" },
-      { label: "Governance", href: "/trust/governance" },
-    ],
-  },
-  {
-    label: "Docs",
-    href: "/docs",
-    highlight: false,
-    children: [
-      { label: "Documentation", href: "/docs" },
-      { label: "Architecture", href: "/docs/architecture" },
-      { label: "Control Plane", href: "/docs/control-plane" },
-      { label: "Proof Chain", href: "/docs/proof-chain" },
-    ],
-  },
-  {
-    label: "Resources",
-    href: "/insights",
-    highlight: false,
-    children: [
-      { label: "Insights & Articles", href: "/insights" },
-      { label: "Case Studies", href: "/case-studies" },
-      { label: "FAQ", href: "/faq" },
-      { label: "Public Roadmap", href: "/roadmap" },
-      { label: "What SZL Relieves", href: "/relief" },
-      { label: "ROI Calculator", href: "/roi" },
-      { label: "Platform Packages", href: "/packages" },
+      { label: "Trust Center", href: "/trust", note: "Full diligence index" },
+      { label: "Security", href: "/trust/security", note: "Controls & posture" },
+      { label: "AI Governance", href: "/trust/ai", note: "Model accountability" },
+      { label: "Compliance Architecture", href: "/trust/governance", note: "Policy & audit" },
+      { label: "Proof Chain", href: "/docs/proof-chain", note: "Audit trail design" },
     ],
   },
   {
@@ -75,57 +50,57 @@ const NAV_ITEMS = [
     href: "/company",
     highlight: false,
     children: [
-      { label: "About SZL Holdings", href: "/company" },
-      { label: "Operating Doctrine", href: "/operating-doctrine" },
-      { label: "Leadership", href: "/leadership" },
-      { label: "Founder", href: "/founder" },
-      { label: "Design Partners", href: "/design-partner" },
-      { label: "Contact", href: "/contact" },
+      { label: "About SZL Holdings", href: "/company", note: "Mission & thesis" },
+      { label: "Founder", href: "/founder", note: "Stephen Lutar" },
+      { label: "Operating Doctrine", href: "/operating-doctrine", note: "How we build" },
+      { label: "Design Partners", href: "/design-partner", note: "Work with us" },
+      { label: "Investor Relations", href: "/investor", note: "Series A path" },
+      { label: "Contact", href: "/contact", note: "" },
     ],
   },
   {
-    label: "Fund Intel",
-    href: "/fund",
+    label: "Resources",
+    href: "/insights",
     highlight: false,
     children: [
-      { label: "Fund Intelligence Hub", href: "/fund" },
-      { label: "AI Deal Scoring", href: "/fund/deal-scoring" },
-      { label: "LP Report Generation", href: "/fund/lp-reports" },
-      { label: "Portfolio Intelligence", href: "/fund/portfolio-intelligence" },
-      { label: "Cap Table & Waterfall", href: "/fund/cap-table" },
-      { label: "Exit Modeling", href: "/fund/exit-modeling" },
-      { label: "Treasury & Cash Mgmt", href: "/fund/treasury" },
-      { label: "SEC & Compliance", href: "/fund/compliance" },
-      { label: "LP Communication", href: "/fund/lp-crm" },
-      { label: "Fund Benchmarking", href: "/fund/benchmarking" },
-      { label: "Co-Investment & SPVs", href: "/fund/co-invest" },
+      { label: "Insights & Analysis", href: "/insights", note: "" },
+      { label: "Documentation", href: "/docs", note: "" },
+      { label: "FAQ", href: "/faq", note: "" },
+      { label: "ROI Calculator", href: "/roi", note: "" },
+      { label: "Public Roadmap", href: "/roadmap", note: "" },
+      { label: "Case Studies", href: "/case-studies", note: "" },
     ],
   },
   {
     label: "Demo",
     href: "/demo",
     children: null,
-    highlight: false,
+    highlight: true,
   },
 ];
 
 const NAV_LINKS_MOBILE = [
-  { label: "Nexus Command", href: "/nexus", primary: true },
-  { label: "Fund Intelligence", href: "/fund", primary: true },
-  { label: "Demo", href: "/demo", primary: true },
+  { label: "Request a Demo", href: "/demo", primary: true },
+  { label: "Design Partners", href: "/design-partner", primary: true },
+  { label: "Investor Relations", href: "/investor", primary: true },
   { label: "Platform Overview", href: "/platform", primary: false },
-  { label: "Lyte", href: "/lyte", primary: false },
-  { label: "Alloy", href: "/alloy-fabric", primary: false },
+  { label: "Lyte — Observability", href: "/lyte", primary: false },
+  { label: "Alloy — Execution Fabric", href: "/alloy-fabric", primary: false },
   { label: "Architecture", href: "/architecture", primary: false },
+  { label: "Domain Packs", href: "/solutions", primary: false },
+  { label: "PRISM Counsel", href: "/solutions/prism-counsel", primary: false },
+  { label: "Vessels", href: "/solutions/vessels", primary: false },
+  { label: "Aegis", href: "/solutions/aegis", primary: false },
+  { label: "Terra", href: "/solutions/terra", primary: false },
   { label: "Trust Center", href: "/trust", primary: false },
   { label: "Security", href: "/trust/security", primary: false },
-  { label: "Docs", href: "/docs", primary: false },
+  { label: "AI Governance", href: "/trust/ai", primary: false },
+  { label: "Documentation", href: "/docs", primary: false },
   { label: "Insights", href: "/insights", primary: false },
   { label: "Case Studies", href: "/case-studies", primary: false },
-  { label: "Company", href: "/company", primary: false },
+  { label: "About the Company", href: "/company", primary: false },
   { label: "Leadership", href: "/leadership", primary: false },
   { label: "Founder", href: "/founder", primary: false },
-  { label: "Design Partners", href: "/design-partner", primary: false },
   { label: "Contact", href: "/contact", primary: false },
 ];
 
@@ -254,7 +229,7 @@ export function SiteNav() {
                               top: "calc(100% + 4px)",
                               left: "50%",
                               transform: "translateX(-50%)",
-                              minWidth: "200px",
+                              minWidth: "220px",
                               background: "hsl(214,16%,6%)",
                               border: "1px solid var(--color-szl-border-hover)",
                               borderRadius: "0.625rem",
@@ -272,16 +247,23 @@ export function SiteNav() {
                                   display: "block",
                                   padding: "0.5rem 0.75rem",
                                   borderRadius: "0.375rem",
-                                  fontSize: "0.8125rem",
-                                  fontWeight: 500,
-                                  color: "var(--color-szl-text-secondary)",
                                   textDecoration: "none",
-                                  transition: "color 0.15s ease, background 0.15s ease",
+                                  transition: "background 0.15s ease",
                                 }}
-                                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.05)"; }}
-                                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.05)"; }}
+                                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
                               >
-                                {child.label}
+                                <span style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, color: "var(--color-szl-text-secondary)", transition: "color 0.15s ease" }}
+                                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
+                                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+                                >
+                                  {child.label}
+                                </span>
+                                {child.note && (
+                                  <span style={{ display: "block", fontSize: "0.6875rem", color: "var(--color-szl-text-faint)", marginTop: "1px", fontFamily: "var(--font-mono)" }}>
+                                    {child.note}
+                                  </span>
+                                )}
                               </Link>
                             ))}
                           </m.div>
