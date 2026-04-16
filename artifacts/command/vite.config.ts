@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 import { spawn, type ChildProcess } from "child_process";
+import http from "http";
 import net from "net";
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
@@ -48,7 +49,6 @@ function sharedProxyPlugin(): Plugin {
         next();
       });
 
-      const http = require("http");
       const proxyServer = http.createServer((req: any, res: any) => {
         const url = req.url || "/";
         if (url === "/" || url === "/health" || url === "/__health") {

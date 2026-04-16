@@ -1,0 +1,33 @@
+{
+  "name": "@workspace/cognitive-observability",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Cognitive Observability — telemetry, quality, cost, drift, and value metrics. OpenTelemetry-compatible exporter with the full SZL metric set for the SZL Agentic Cognitive Operating Intelligence Platform.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./metrics": {
+      "types": "./dist/metrics.d.ts",
+      "import": "./src/metrics.ts"
+    },
+    "./exporter": {
+      "types": "./dist/exporter.d.ts",
+      "import": "./src/exporter.ts"
+    },
+    "./collector": {
+      "types": "./dist/collector.d.ts",
+      "import": "./src/collector.ts"
+    }
+  },
+  "dependencies": {
+    "@szl-holdings/observability-core": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "vitest": "^4.1.2"
+  }
+}

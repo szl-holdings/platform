@@ -1,0 +1,48 @@
+{
+  "name": "@workspace/alloy",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Alloy OS — cognitive runtime and execution fabric. Run manager, checkpoint/replay hooks, model router interface, tool invocation through Tool Mesh, approval gate via Guardian, action ledger writer, for the SZL Agentic Cognitive Operating Intelligence Platform.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./src/types.ts"
+    },
+    "./run-manager": {
+      "types": "./dist/run-manager.d.ts",
+      "import": "./src/run-manager.ts"
+    },
+    "./checkpoint": {
+      "types": "./dist/checkpoint.d.ts",
+      "import": "./src/checkpoint.ts"
+    },
+    "./model-router": {
+      "types": "./dist/model-router.d.ts",
+      "import": "./src/model-router.ts"
+    },
+    "./ledger": {
+      "types": "./dist/ledger.d.ts",
+      "import": "./src/ledger.ts"
+    },
+    "./workflow": {
+      "types": "./dist/workflow.d.ts",
+      "import": "./src/workflow.ts"
+    }
+  },
+  "dependencies": {
+    "@szl-holdings/action-engine": "workspace:*",
+    "@workspace/guardian": "workspace:*",
+    "@workspace/tool-mesh": "workspace:*",
+    "@workspace/trace-graph": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "vitest": "^4.1.2"
+  }
+}

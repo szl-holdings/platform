@@ -1,0 +1,33 @@
+{
+  "name": "@workspace/guardian",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Guardian — unified policy engine and approval tiers. Eight policy tiers, deny-by-default decision engine, and rule schema for the SZL Agentic Cognitive Operating Intelligence Platform.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./tiers": {
+      "types": "./dist/tiers.d.ts",
+      "import": "./src/tiers.ts"
+    },
+    "./schema": {
+      "types": "./dist/schema.d.ts",
+      "import": "./src/schema.ts"
+    },
+    "./decision-engine": {
+      "types": "./dist/decision-engine.d.ts",
+      "import": "./src/decision-engine.ts"
+    }
+  },
+  "dependencies": {
+    "@szl-holdings/policy-engine": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "vitest": "^4.1.2"
+  }
+}

@@ -86,6 +86,30 @@
     },
     {
       "path": "./packages/action-engine"
+    },
+    {
+      "path": "./packages/constellation"
+    },
+    {
+      "path": "./packages/guardian"
+    },
+    {
+      "path": "./packages/trace-graph"
+    },
+    {
+      "path": "./packages/eval-os"
+    },
+    {
+      "path": "./packages/memory-fabric"
+    },
+    {
+      "path": "./packages/tool-mesh"
+    },
+    {
+      "path": "./packages/alloy"
+    },
+    {
+      "path": "./packages/cognitive-observability"
     }
   ]
 }

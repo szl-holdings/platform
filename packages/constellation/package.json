@@ -1,0 +1,37 @@
+{
+  "name": "@workspace/constellation",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Constellation — cross-domain ontology and operational graph. Canonical node/edge schemas, adapter interfaces, and in-memory reference store for the SZL Agentic Cognitive Operating Intelligence Platform.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./schema": {
+      "types": "./dist/schema.d.ts",
+      "import": "./src/schema.ts"
+    },
+    "./adapter": {
+      "types": "./dist/adapter.d.ts",
+      "import": "./src/adapter.ts"
+    },
+    "./store": {
+      "types": "./dist/store.d.ts",
+      "import": "./src/store.ts"
+    },
+    "./query": {
+      "types": "./dist/query.d.ts",
+      "import": "./src/query.ts"
+    }
+  },
+  "dependencies": {
+    "@szl-holdings/atlas-core": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "vitest": "^4.1.2"
+  }
+}
