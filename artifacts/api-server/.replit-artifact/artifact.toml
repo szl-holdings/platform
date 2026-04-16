@@ -11,7 +11,7 @@ paths = [ "/api/" ]
 localPort = 8080
 
 [services.development]
-run = "PORT=8080 node dist/index.mjs"
+run = "pnpm --filter @workspace/api-server run dev"
 
 [services.env]
 PORT = "8080"
