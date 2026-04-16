@@ -10,6 +10,7 @@ import {
 } from "@szl-holdings/db";
 import { eq, sql, desc, and, or, ilike } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
+import { logger } from "../lib/logger";
 import { authMiddleware } from "../middlewares/auth";
 import { ingestAegisIncident } from "@szl-holdings/ai-engine/domain-embedding-hooks";
 
@@ -211,7 +212,7 @@ router.post("/msp/tickets", auth, async (req, res) => {
       // Fail-closed: skip knowledge graph ingestion when no tenant context is available.
       // This route has optional auth; ingesting without a tenant would create globally visible artifacts.
       if (_tid) {
-        void ingestAegisIncident({ id: ticket.id, title: ticket.subject, incidentType: ticket.category ?? "General", severity: ticket.priority ?? "medium", description: ticket.description ?? undefined }, _tid).catch((e: unknown) => console.error("[msp] ingestAegisIncident failed:", e));
+        void ingestAegisIncident({ id: ticket.id, title: ticket.subject, incidentType: ticket.category ?? "General", severity: ticket.priority ?? "medium", description: ticket.description ?? undefined }, _tid).catch((e: unknown) => logger.error({ err: e }, "[msp] ingestAegisIncident failed"));
       }
     }
     sendCreated(res, { ticket });
@@ -242,7 +243,7 @@ router.patch("/msp/tickets/:id", auth, async (req, res) => {
     const _tid2 = req.user?.orgs[0]?.orgId != null ? String(req.user.orgs[0].orgId) : undefined;
     // Fail-closed: skip ingestion without tenant context.
     if (_tid2) {
-      void ingestAegisIncident({ id: ticket.id, title: ticket.subject, incidentType: ticket.category ?? "General", severity: ticket.priority ?? "medium", description: ticket.description ?? undefined }, _tid2).catch((e: unknown) => console.error("[msp] ingestAegisIncident update failed:", e));
+      void ingestAegisIncident({ id: ticket.id, title: ticket.subject, incidentType: ticket.category ?? "General", severity: ticket.priority ?? "medium", description: ticket.description ?? undefined }, _tid2).catch((e: unknown) => logger.error({ err: e }, "[msp] ingestAegisIncident update failed"));
     }
     sendSuccess(res, { ticket });
   } catch (err) {

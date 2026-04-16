@@ -1,4 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { z } from "zod";
 import {
   db,
   alloyWorkflowsTable,
@@ -31,6 +32,30 @@ import {
 } from "../lib/api-response";
 import { logger } from "../lib/logger";
 import { broadcastWs, pubsub, ALLOY_EVENTS } from "../lib/pubsub-bridge.js";
+import { validateBody } from "../lib/validation";
+
+const upsertFeatureFlagSchema = z.object({
+  key: z.string().min(1).max(100).regex(/^[a-z0-9_-]+$/i),
+  name: z.string().min(1).max(200).trim(),
+  description: z.string().max(1000).trim().optional(),
+  isEnabled: z.boolean().optional(),
+  rolloutPercentage: z.number().int().min(0).max(100).optional(),
+  conditions: z.record(z.unknown()).optional().nullable(),
+});
+
+const patchFeatureFlagSchema = z.object({
+  name: z.string().min(1).max(200).trim().optional(),
+  description: z.string().max(1000).trim().optional(),
+  isEnabled: z.boolean().optional(),
+  rolloutPercentage: z.number().int().min(0).max(100).optional(),
+  conditions: z.record(z.unknown()).optional().nullable(),
+}).refine(d => Object.keys(d).length > 0, { message: "At least one field is required" });
+
+const approvalDecisionSchema = z.object({
+  decision: z.enum(["approved", "rejected"]),
+  notes: z.string().max(5000).trim().optional(),
+});
+
 const router: IRouter = Router();
 
 function getUserOrgIds(user?: AuthenticatedUser): number[] {
@@ -558,10 +583,9 @@ router.get("/alloy/admin/flags", authMiddleware(), requireRole("super_admin", "o
   }
 });
 
-router.post("/alloy/admin/flags", authMiddleware(), requireRole("super_admin", "ops"), async (req, res) => {
+router.post("/alloy/admin/flags", authMiddleware(), requireRole("super_admin", "ops"), validateBody(upsertFeatureFlagSchema), async (req, res) => {
   try {
     const { key, name, description, isEnabled, rolloutPercentage, conditions } = req.body;
-    if (!key || !name) { sendBadRequest(res, "key and name are required"); return; }
     const [existing] = await db.select().from(featureFlagsTable).where(eq(featureFlagsTable.key, key));
     if (existing) {
       const [updated] = await db.update(featureFlagsTable).set({
@@ -584,7 +608,7 @@ router.post("/alloy/admin/flags", authMiddleware(), requireRole("super_admin", "
   }
 });
 
-router.patch("/alloy/admin/flags/:key", authMiddleware(), requireRole("super_admin", "ops"), async (req, res) => {
+router.patch("/alloy/admin/flags/:key", authMiddleware(), requireRole("super_admin", "ops"), validateBody(patchFeatureFlagSchema), async (req, res) => {
   try {
     const key = String(req.params.key);
     const [existing] = await db.select().from(featureFlagsTable).where(eq(featureFlagsTable.key, key));
@@ -849,14 +873,10 @@ router.get("/alloy/approvals", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/alloy/approvals/:id/decide", authMiddleware(), requireRole("super_admin", "admin", "ops", "compliance"), async (req, res) => {
+router.post("/alloy/approvals/:id/decide", authMiddleware(), requireRole("super_admin", "admin", "ops", "compliance"), validateBody(approvalDecisionSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const { decision, notes } = req.body;
-    if (!["approved", "rejected"].includes(decision)) {
-      sendBadRequest(res, "Decision must be 'approved' or 'rejected'");
-      return;
-    }
     const [approval] = await db.select().from(alloyApprovalsTable).where(eq(alloyApprovalsTable.id, id));
     if (!approval) { sendNotFound(res, "Approval"); return; }
     if (!isGlobalAdmin(req.user)) {

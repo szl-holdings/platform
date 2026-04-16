@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { logger } from "../lib/logger";
 import { db } from "@szl-holdings/db";
 import {
   agentUsageStats,
@@ -74,7 +75,7 @@ helmRouter.get("/helm/overview", async (_req: Request, res: Response) => {
       },
     });
   } catch (err) {
-    console.error("GET /helm/overview error:", err);
+    logger.error({ err }, "GET /helm/overview error:");
     return void res.status(500).json({ error: "Failed to fetch HELM overview" });
   }
 });
@@ -100,7 +101,7 @@ helmRouter.get("/helm/agent-runs", async (req: Request, res: Response) => {
 
     return void res.json({ success: true, data: rows });
   } catch (err) {
-    console.error("GET /helm/agent-runs error:", err);
+    logger.error({ err }, "GET /helm/agent-runs error:");
     return void res.status(500).json({ error: "Failed to fetch agent runs" });
   }
 });
@@ -137,7 +138,7 @@ helmRouter.get("/helm/outcome-graph", async (req: Request, res: Response) => {
 
     return void res.json({ success: true, data: { byDomain, topOverrideAgents: overrides } });
   } catch (err) {
-    console.error("GET /helm/outcome-graph error:", err);
+    logger.error({ err }, "GET /helm/outcome-graph error:");
     return void res.status(500).json({ error: "Failed to fetch outcome graph stats" });
   }
 });
@@ -175,7 +176,7 @@ helmRouter.get("/helm/atlas-artifacts", async (req: Request, res: Response) => {
 
     return void res.json({ success: true, data: { byTemplate, exportsByFormat, failedExports: recentJobs } });
   } catch (err) {
-    console.error("GET /helm/atlas-artifacts error:", err);
+    logger.error({ err }, "GET /helm/atlas-artifacts error:");
     return void res.status(500).json({ error: "Failed to fetch atlas artifact stats" });
   }
 });
@@ -208,7 +209,7 @@ helmRouter.get("/helm/worldline", async (_req: Request, res: Response) => {
       },
     });
   } catch (err) {
-    console.error("GET /helm/worldline error:", err);
+    logger.error({ err }, "GET /helm/worldline error:");
     return void res.status(500).json({ error: "Failed to fetch worldline health" });
   }
 });
@@ -239,7 +240,7 @@ helmRouter.get("/helm/proof-chain", async (req: Request, res: Response) => {
 
     return void res.json({ success: true, data: { anomalies, byState } });
   } catch (err) {
-    console.error("GET /helm/proof-chain error:", err);
+    logger.error({ err }, "GET /helm/proof-chain error:");
     return void res.status(500).json({ error: "Failed to fetch proof chain stats" });
   }
 });

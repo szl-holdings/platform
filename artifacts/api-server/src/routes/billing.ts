@@ -6,6 +6,47 @@ import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { services } from "@szl-holdings/services";
 import { logger } from "../lib/logger";
 import { isFlagEnabled } from "../lib/platform-flags";
+import { z } from "zod";
+import { validateBody } from "../lib/validation";
+
+const checkoutSchema = z.object({
+  priceId: z.string().min(1),
+  mode: z.enum(["subscription", "payment"]).optional(),
+  successUrl: z.string().url(),
+  cancelUrl: z.string().url(),
+  customerEmail: z.string().email().optional(),
+});
+
+const customerPortalSchema = z.object({
+  customerId: z.string().min(1),
+  returnUrl: z.string().url(),
+});
+
+const cancelSubscriptionSchema = z.object({
+  subscriptionId: z.string().min(1),
+  cancelImmediately: z.boolean().optional(),
+});
+
+const updateSubscriptionSchema = z.object({
+  subscriptionId: z.string().min(1),
+  newPriceId: z.string().min(1),
+});
+
+const stripeCheckoutSchema = z.object({
+  tierId: z.string().min(1),
+  tierName: z.string().optional(),
+  service: z.string().optional(),
+  email: z.string().email().optional(),
+  successUrl: z.string().url(),
+  cancelUrl: z.string().url(),
+});
+
+const planSubscribeSchema = z.object({
+  planId: z.string().min(1),
+  email: z.string().email().optional(),
+  successUrl: z.string().url(),
+  cancelUrl: z.string().url(),
+});
 
 const router: IRouter = Router();
 
@@ -59,20 +100,9 @@ router.get("/billing/products", async (_req, res) => {
   }
 });
 
-router.post("/billing/checkout", async (req: Request, res: Response) => {
+router.post("/billing/checkout", validateBody(checkoutSchema), async (req: Request, res: Response) => {
   try {
-    const { priceId, mode, successUrl, cancelUrl, customerEmail } = req.body as {
-      priceId: string;
-      mode?: "subscription" | "payment";
-      successUrl: string;
-      cancelUrl: string;
-      customerEmail?: string;
-    };
-
-    if (!priceId || !successUrl || !cancelUrl) {
-      sendBadRequest(res, "priceId, successUrl, and cancelUrl are required");
-      return;
-    }
+    const { priceId, mode, successUrl, cancelUrl, customerEmail } = req.body as z.infer<typeof checkoutSchema>;
 
     let customerId: string | undefined;
     if (customerEmail) {
@@ -132,22 +162,14 @@ router.get("/billing/subscription-status", async (req: Request, res: Response) =
   }
 });
 
-router.post("/billing/customer-portal", async (req: Request, res: Response) => {
+router.post("/billing/customer-portal", validateBody(customerPortalSchema), async (req: Request, res: Response) => {
   const portalEnabled = await isFlagEnabled("pilot_customer_portal_enabled");
   if (!portalEnabled) {
     res.status(403).json({ error: "Feature not available", feature: "pilot_customer_portal_enabled", fallback: { url: null } });
     return;
   }
   try {
-    const { customerId, returnUrl } = req.body as {
-      customerId: string;
-      returnUrl: string;
-    };
-
-    if (!customerId || !returnUrl) {
-      sendBadRequest(res, "customerId and returnUrl are required");
-      return;
-    }
+    const { customerId, returnUrl } = req.body as z.infer<typeof customerPortalSchema>;
 
     const session = await services.stripe.createCustomerPortalSession(customerId, returnUrl);
     sendSuccess(res, { url: session.url });
@@ -419,17 +441,9 @@ router.post("/billing/webhooks", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/stripe/checkout", async (req: Request, res: Response) => {
+router.post("/stripe/checkout", validateBody(stripeCheckoutSchema), async (req: Request, res: Response) => {
   try {
-    const { tierId, tierName, service, email, successUrl, cancelUrl } = req.body as {
-      tierId?: string; tierName?: string; service?: string;
-      email?: string; successUrl?: string; cancelUrl?: string;
-    };
-
-    if (!tierId || !successUrl || !cancelUrl) {
-      res.status(400).json({ error: "tierId, successUrl, and cancelUrl are required" });
-      return;
-    }
+    const { tierId, tierName, service, email, successUrl, cancelUrl } = req.body as z.infer<typeof stripeCheckoutSchema>;
 
     const tierPricing: Record<string, string> = {
       "strategy-session": process.env.STRIPE_PRICE_STRATEGY_SESSION || "",
@@ -479,16 +493,9 @@ router.get("/billing/command/plans", (_req, res) => {
   sendSuccess(res, plans);
 });
 
-router.post("/billing/command/subscribe", async (req: Request, res: Response) => {
+router.post("/billing/command/subscribe", validateBody(planSubscribeSchema), async (req: Request, res: Response) => {
   try {
-    const { planId, email, successUrl, cancelUrl } = req.body as {
-      planId?: string; email?: string; successUrl?: string; cancelUrl?: string;
-    };
-
-    if (!planId || !successUrl || !cancelUrl) {
-      sendBadRequest(res, "planId, successUrl, and cancelUrl are required");
-      return;
-    }
+    const { planId, email, successUrl, cancelUrl } = req.body as z.infer<typeof planSubscribeSchema>;
 
     const plan = COMMAND_PLANS[planId as keyof typeof COMMAND_PLANS];
     if (!plan) {
@@ -537,16 +544,9 @@ router.get("/billing/terra/plans", (_req, res) => {
   sendSuccess(res, plans);
 });
 
-router.post("/billing/terra/subscribe", authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.post("/billing/terra/subscribe", authMiddleware({ required: false }), validateBody(planSubscribeSchema), async (req: Request, res: Response) => {
   try {
-    const { planId, email, successUrl, cancelUrl } = req.body as {
-      planId?: string; email?: string; successUrl?: string; cancelUrl?: string;
-    };
-
-    if (!planId || !successUrl || !cancelUrl) {
-      sendBadRequest(res, "planId, successUrl, and cancelUrl are required");
-      return;
-    }
+    const { planId, email, successUrl, cancelUrl } = req.body as z.infer<typeof planSubscribeSchema>;
 
     const plan = TERRA_PLANS[planId as keyof typeof TERRA_PLANS];
     if (!plan) {
@@ -749,17 +749,9 @@ router.post("/billing/sync-plans", authMiddleware(), requireRole("admin", "super
   }
 });
 
-router.post("/billing/cancel-subscription", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/billing/cancel-subscription", authMiddleware(), validateBody(cancelSubscriptionSchema), async (req: Request, res: Response) => {
   try {
-    const { subscriptionId, cancelImmediately } = req.body as {
-      subscriptionId?: string;
-      cancelImmediately?: boolean;
-    };
-
-    if (!subscriptionId) {
-      sendBadRequest(res, "subscriptionId is required");
-      return;
-    }
+    const { subscriptionId, cancelImmediately } = req.body as z.infer<typeof cancelSubscriptionSchema>;
 
     if (!services.stripe.isLive) {
       sendSuccess(res, {
@@ -801,17 +793,9 @@ router.post("/billing/cancel-subscription", authMiddleware(), async (req: Reques
   }
 });
 
-router.post("/billing/update-subscription", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/billing/update-subscription", authMiddleware(), validateBody(updateSubscriptionSchema), async (req: Request, res: Response) => {
   try {
-    const { subscriptionId, newPriceId } = req.body as {
-      subscriptionId?: string;
-      newPriceId?: string;
-    };
-
-    if (!subscriptionId || !newPriceId) {
-      sendBadRequest(res, "subscriptionId and newPriceId are required");
-      return;
-    }
+    const { subscriptionId, newPriceId } = req.body as z.infer<typeof updateSubscriptionSchema>;
 
     if (!services.stripe.isLive) {
       sendSuccess(res, {

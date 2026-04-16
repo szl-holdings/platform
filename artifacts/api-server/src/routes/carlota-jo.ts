@@ -293,7 +293,7 @@ router.post("/booking/services", authMiddleware(), async (req, res) => {
     if (row) {
       const _r = row as Record<string, unknown>;
       const _tid = req.user?.orgs[0]?.orgId != null ? String(req.user.orgs[0].orgId) : undefined;
-      void ingestCarlotaService({ id: row.id, name: row.name, description: _r.description as string | undefined, tier: _r.tier as string | undefined, category: _r.category as string | undefined }, _tid).catch((e: unknown) => console.error("[carlota-jo] ingestCarlotaService failed:", e));
+      void ingestCarlotaService({ id: row.id, name: row.name, description: _r.description as string | undefined, tier: _r.tier as string | undefined, category: _r.category as string | undefined }, _tid).catch((e: unknown) => logger.error({ err: e }, "[carlota-jo] ingestCarlotaService failed"));
     }
     sendSuccess(res, row, 201);
   } catch (err) {
@@ -308,7 +308,7 @@ router.patch("/booking/services/:id", authMiddleware(), async (req, res) => {
     if (!row) { sendNotFound(res, "Service"); return; }
     const _r2 = row as Record<string, unknown>;
     const _tid2 = req.user?.orgs[0]?.orgId != null ? String(req.user.orgs[0].orgId) : undefined;
-    void ingestCarlotaService({ id: row.id, name: row.name, description: _r2.description as string | undefined, tier: _r2.tier as string | undefined, category: _r2.category as string | undefined }, _tid2).catch((e: unknown) => console.error("[carlota-jo] ingestCarlotaService failed:", e));
+    void ingestCarlotaService({ id: row.id, name: row.name, description: _r2.description as string | undefined, tier: _r2.tier as string | undefined, category: _r2.category as string | undefined }, _tid2).catch((e: unknown) => logger.error({ err: e }, "[carlota-jo] ingestCarlotaService failed"));
     sendSuccess(res, row);
   } catch (err) {
     handleRouteError(res, err, "Failed to update service");

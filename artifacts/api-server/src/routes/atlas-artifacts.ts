@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { logger } from "../lib/logger";
 import {
   db,
   atlasArtifactsTable,
@@ -83,7 +84,7 @@ atlasRouter.post("/atlas/artifacts", async (req: Request, res: Response) => {
 
     return void res.status(201).json({ success: true, data: artifact });
   } catch (err) {
-    console.error("POST /atlas/artifacts error:", err);
+    logger.error({ err }, "POST /atlas/artifacts error:");
     return void res.status(500).json({ error: "Failed to create artifact" });
   }
 });
@@ -117,7 +118,7 @@ atlasRouter.get("/atlas/artifacts", async (req: Request, res: Response) => {
     const rows = conditions.length > 0 ? await q.where(and(...conditions)) : await q;
     return void res.json({ success: true, data: rows, total: rows.length });
   } catch (err) {
-    console.error("GET /atlas/artifacts error:", err);
+    logger.error({ err }, "GET /atlas/artifacts error:");
     return void res.status(500).json({ error: "Failed to list artifacts" });
   }
 });
@@ -132,7 +133,7 @@ atlasRouter.get("/atlas/artifacts/:id", async (req: Request, res: Response) => {
 
     return void res.json({ success: true, data: artifact });
   } catch (err) {
-    console.error("GET /atlas/artifacts/:id error:", err);
+    logger.error({ err }, "GET /atlas/artifacts/:id error:");
     return void res.status(500).json({ error: "Failed to get artifact" });
   }
 });
@@ -161,7 +162,7 @@ atlasRouter.patch("/atlas/artifacts/:id", async (req: Request, res: Response) =>
 
     return void res.json({ success: true, data: updated });
   } catch (err) {
-    console.error("PATCH /atlas/artifacts/:id error:", err);
+    logger.error({ err }, "PATCH /atlas/artifacts/:id error:");
     return void res.status(500).json({ error: "Failed to update artifact" });
   }
 });
@@ -202,7 +203,7 @@ atlasRouter.post("/atlas/artifacts/:id/regenerate", async (req: Request, res: Re
 
     return void res.status(201).json({ success: true, data: newVersion });
   } catch (err) {
-    console.error("POST /atlas/artifacts/:id/regenerate error:", err);
+    logger.error({ err }, "POST /atlas/artifacts/:id/regenerate error:");
     return void res.status(500).json({ error: "Failed to regenerate artifact" });
   }
 });
@@ -227,7 +228,7 @@ atlasRouter.get("/atlas/artifacts/:slug/versions", async (req: Request, res: Res
 
     return void res.json({ success: true, data: rows });
   } catch (err) {
-    console.error("GET /atlas/artifacts/:slug/versions error:", err);
+    logger.error({ err }, "GET /atlas/artifacts/:slug/versions error:");
     return void res.status(500).json({ error: "Failed to get version history" });
   }
 });
@@ -247,7 +248,7 @@ atlasRouter.post("/atlas/artifacts/:id/share", async (req: Request, res: Respons
 
     return void res.json({ success: true, token, expiresAt });
   } catch (err) {
-    console.error("POST /atlas/artifacts/:id/share error:", err);
+    logger.error({ err }, "POST /atlas/artifacts/:id/share error:");
     return void res.status(500).json({ error: "Failed to create share link" });
   }
 });
@@ -267,7 +268,7 @@ atlasRouter.get("/atlas/shared/:token", async (req: Request, res: Response) => {
 
     return void res.json({ success: true, data: artifact });
   } catch (err) {
-    console.error("GET /atlas/shared/:token error:", err);
+    logger.error({ err }, "GET /atlas/shared/:token error:");
     return void res.status(500).json({ error: "Failed to get shared artifact" });
   }
 });
@@ -301,7 +302,7 @@ atlasRouter.post("/atlas/artifacts/:id/export", async (req: Request, res: Respon
 
     return void res.status(202).json({ success: true, data: job, message: "Export job queued" });
   } catch (err) {
-    console.error("POST /atlas/artifacts/:id/export error:", err);
+    logger.error({ err }, "POST /atlas/artifacts/:id/export error:");
     return void res.status(500).json({ error: "Failed to create export job" });
   }
 });
@@ -316,7 +317,7 @@ atlasRouter.get("/atlas/export-jobs/:id", async (req: Request, res: Response) =>
 
     return void res.json({ success: true, data: job });
   } catch (err) {
-    console.error("GET /atlas/export-jobs/:id error:", err);
+    logger.error({ err }, "GET /atlas/export-jobs/:id error:");
     return void res.status(500).json({ error: "Failed to get export job" });
   }
 });

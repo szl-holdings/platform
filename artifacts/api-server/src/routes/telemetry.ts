@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, dosAnalyticsEventsTable } from "@szl-holdings/db";
+import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
@@ -20,7 +21,7 @@ router.post("/telemetry/events", async (req, res) => {
     await db.insert(dosAnalyticsEventsTable).values(rows);
     res.json({ ok: true, count: rows.length });
   } catch (err) {
-    console.error("[telemetry] event ingest error:", err);
+    logger.error({ err }, "[telemetry] event ingest error");
     res.status(500).json({ error: "ingest failed" });
   }
 });

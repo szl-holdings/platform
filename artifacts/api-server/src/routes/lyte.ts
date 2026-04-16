@@ -39,7 +39,7 @@ router.post("/lyte/workspaces", authMiddleware(), denyIfReadOnly(), async (req, 
     if (row) {
       const r = row as Record<string, unknown>;
       const _tid = req.user?.orgs[0]?.orgId != null ? String(req.user.orgs[0].orgId) : undefined;
-      void ingestLyteSystem({ id: r.id as string | number, name: r.name as string, systemType: (r.type as string) ?? "workspace", description: r.description as string | undefined, health: r.status as string | undefined, orgId: r.orgId as number | undefined }, _tid).catch((e: unknown) => console.error("[lyte] ingestLyteSystem failed:", e));
+      void ingestLyteSystem({ id: r.id as string | number, name: r.name as string, systemType: (r.type as string) ?? "workspace", description: r.description as string | undefined, health: r.status as string | undefined, orgId: r.orgId as number | undefined }, _tid).catch((e: unknown) => logger.error({ err: e }, "[lyte] ingestLyteSystem failed"));
     }
     sendSuccess(res, row, 201);
   } catch (err) {

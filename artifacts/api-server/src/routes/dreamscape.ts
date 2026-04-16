@@ -13,6 +13,61 @@ import {
 import { eq, desc, sql } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
+import { z } from "zod";
+import { validateBody } from "../lib/validation";
+
+const createCampaignSchema = z.object({
+  name: z.string().min(1).max(200),
+  description: z.string().max(2000).optional(),
+  status: z.string().max(50).optional(),
+  clientId: z.number().int().positive().optional(),
+  budget: z.number().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+}).passthrough();
+
+const updateCampaignSchema = createCampaignSchema.partial();
+
+const createScriptSchema = z.object({
+  title: z.string().min(1).max(200),
+  campaignId: z.number().int().positive(),
+  content: z.string().max(100000).optional(),
+  status: z.string().max(50).optional(),
+}).passthrough();
+
+const updateScriptSchema = createScriptSchema.partial();
+
+const createStoryboardSchema = z.object({
+  title: z.string().min(1).max(200),
+  campaignId: z.number().int().positive(),
+  sceneNumber: z.number().int().min(1).optional(),
+  description: z.string().max(5000).optional(),
+}).passthrough();
+
+const updateStoryboardSchema = createStoryboardSchema.partial();
+
+const createVoiceAssetSchema = z.object({
+  name: z.string().min(1).max(200),
+  campaignId: z.number().int().positive(),
+  voiceType: z.string().max(100).optional(),
+  assetUrl: z.string().url().max(2000).optional(),
+}).passthrough();
+
+const createCampaignAssetSchema = z.object({
+  campaignId: z.number().int().positive(),
+  assetUrl: z.string().url().max(2000),
+  assetType: z.string().max(50).optional(),
+  label: z.string().max(200).optional(),
+}).passthrough();
+
+const createReviewSchema = z.object({
+  campaignId: z.number().int().positive(),
+  rating: z.number().int().min(1).max(5).optional(),
+  feedback: z.string().max(5000).optional(),
+  reviewerId: z.number().int().positive().optional(),
+}).passthrough();
+
+const updateReviewSchema = createReviewSchema.partial();
 
 const router: IRouter = Router();
 
@@ -27,7 +82,7 @@ router.get("/dreamscape/campaigns", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/dreamscape/campaigns", authMiddleware(), async (req, res) => {
+router.post("/dreamscape/campaigns", authMiddleware(), validateBody(createCampaignSchema), async (req, res) => {
   try {
     const [row] = await db.insert(dreamscapeCampaignsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -47,7 +102,7 @@ router.get("/dreamscape/campaigns/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/dreamscape/campaigns/:id", authMiddleware(), async (req, res) => {
+router.patch("/dreamscape/campaigns/:id", authMiddleware(), validateBody(updateCampaignSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(dreamscapeCampaignsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dreamscapeCampaignsTable.id, id)).returning();
@@ -79,7 +134,7 @@ router.get("/dreamscape/campaigns/:id/scripts", authMiddleware(), async (req, re
   }
 });
 
-router.post("/dreamscape/scripts", authMiddleware(), async (req, res) => {
+router.post("/dreamscape/scripts", authMiddleware(), validateBody(createScriptSchema), async (req, res) => {
   try {
     const [row] = await db.insert(dreamscapeScriptsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -99,7 +154,7 @@ router.get("/dreamscape/scripts/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/dreamscape/scripts/:id", authMiddleware(), async (req, res) => {
+router.patch("/dreamscape/scripts/:id", authMiddleware(), validateBody(updateScriptSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(dreamscapeScriptsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dreamscapeScriptsTable.id, id)).returning();
@@ -131,7 +186,7 @@ router.get("/dreamscape/campaigns/:id/storyboards", authMiddleware(), async (req
   }
 });
 
-router.post("/dreamscape/storyboards", authMiddleware(), async (req, res) => {
+router.post("/dreamscape/storyboards", authMiddleware(), validateBody(createStoryboardSchema), async (req, res) => {
   try {
     const [row] = await db.insert(dreamscapeStoryboardsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -140,7 +195,7 @@ router.post("/dreamscape/storyboards", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/dreamscape/storyboards/:id", authMiddleware(), async (req, res) => {
+router.patch("/dreamscape/storyboards/:id", authMiddleware(), validateBody(updateStoryboardSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(dreamscapeStoryboardsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dreamscapeStoryboardsTable.id, id)).returning();
@@ -172,7 +227,7 @@ router.get("/dreamscape/campaigns/:id/voice-assets", authMiddleware(), async (re
   }
 });
 
-router.post("/dreamscape/voice-assets", authMiddleware(), async (req, res) => {
+router.post("/dreamscape/voice-assets", authMiddleware(), validateBody(createVoiceAssetSchema), async (req, res) => {
   try {
     const [row] = await db.insert(dreamscapeVoiceAssetsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -213,7 +268,7 @@ router.get("/dreamscape/campaigns/:id/assets", authMiddleware(), async (req, res
   }
 });
 
-router.post("/dreamscape/campaign-assets", authMiddleware(), async (req, res) => {
+router.post("/dreamscape/campaign-assets", authMiddleware(), validateBody(createCampaignAssetSchema), async (req, res) => {
   try {
     const [row] = await db.insert(dreamscapeCampaignAssetsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -243,7 +298,7 @@ router.get("/dreamscape/campaigns/:id/reviews", authMiddleware(), async (req, re
   }
 });
 
-router.post("/dreamscape/reviews", authMiddleware(), async (req, res) => {
+router.post("/dreamscape/reviews", authMiddleware(), validateBody(createReviewSchema), async (req, res) => {
   try {
     const [row] = await db.insert(dreamscapeReviewsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -252,7 +307,7 @@ router.post("/dreamscape/reviews", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/dreamscape/reviews/:id", authMiddleware(), async (req, res) => {
+router.patch("/dreamscape/reviews/:id", authMiddleware(), validateBody(updateReviewSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(dreamscapeReviewsTable).set(req.body).where(eq(dreamscapeReviewsTable.id, id)).returning();

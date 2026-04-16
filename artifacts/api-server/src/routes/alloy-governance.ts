@@ -29,7 +29,16 @@ import {
   handleRouteError,
   parsePagination,
 } from "../lib/api-response";
+import { z } from "zod";
+import { validateBody } from "../lib/validation";
 import { logger } from "../lib/logger";
+
+const updatePolicySchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  description: z.string().max(2000).nullable().optional(),
+  status: z.enum(["draft", "active", "archived", "suspended"]).optional(),
+  rules: z.record(z.unknown()).optional(),
+});
 
 const router: IRouter = Router();
 
@@ -186,7 +195,7 @@ router.post("/alloy/policies", authMiddleware(), requireRole("admin"), async (re
   }
 });
 
-router.patch("/alloy/policies/:id", authMiddleware(), requireRole("admin"), async (req, res) => {
+router.patch("/alloy/policies/:id", authMiddleware(), requireRole("admin"), validateBody(updatePolicySchema), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id));
     if (isNaN(id)) return sendBadRequest(res, "Invalid policy ID");
@@ -206,11 +215,12 @@ router.patch("/alloy/policies/:id", authMiddleware(), requireRole("admin"), asyn
       return sendForbidden(res, "Cannot modify a policy belonging to another org");
     }
 
+    const body = req.body as z.infer<typeof updatePolicySchema>;
     const updates: Partial<typeof alloyPoliciesTable.$inferInsert> = {};
-    if (req.body.name !== undefined) updates.name = req.body.name;
-    if (req.body.description !== undefined) updates.description = req.body.description;
-    if (req.body.status !== undefined) updates.status = req.body.status;
-    if (req.body.rules !== undefined) updates.rules = req.body.rules;
+    if (body.name !== undefined) updates.name = body.name;
+    if (body.description !== undefined) updates.description = body.description;
+    if (body.status !== undefined) updates.status = body.status;
+    if (body.rules !== undefined) updates.rules = body.rules as Record<string, unknown>;
     updates.updatedAt = new Date();
 
     const [updated] = await db

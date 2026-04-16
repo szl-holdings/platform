@@ -22,6 +22,7 @@
 
 import { Router, type Request, type Response, type NextFunction } from "express";
 import crypto from "crypto";
+import { logger } from "../lib/logger";
 import { db } from "@szl-holdings/db";
 import {
   usersTable,
@@ -430,7 +431,7 @@ router.get("/scim/v2/Users", scimBearerAuth, async (req: Request, res: Response)
       Resources: page.map((u) => buildUserScimResource(u, provisionedMap.get(u.id) ?? null, baseUrl)),
     });
   } catch (err) {
-    console.error("SCIM GET /Users error:", err);
+    logger.error({ err }, "SCIM GET /Users error:");
     return scimError(res, 500, "internalError", "Internal server error");
   }
 });
@@ -458,7 +459,7 @@ router.get("/scim/v2/Users/:id", scimBearerAuth, async (req: Request, res: Respo
 
     return scimResponse(res, 200, buildUserScimResource(user, provisioned, getBaseUrl(req)));
   } catch (err) {
-    console.error("SCIM GET /Users/:id error:", err);
+    logger.error({ err }, "SCIM GET /Users/:id error:");
     return scimError(res, 500, "internalError", "Internal server error");
   }
 });
@@ -552,7 +553,7 @@ router.post("/scim/v2/Users", scimBearerAuth, async (req: Request, res: Response
 
     return scimResponse(res, 201, buildUserScimResource(user, provisionedRow ?? null, baseUrl));
   } catch (err) {
-    console.error("SCIM POST /Users error:", err);
+    logger.error({ err }, "SCIM POST /Users error:");
     await logScimOperation(req.scimContext?.tenantId ?? 0, "create_user", "User", "error", {
       errorMessage: String(err),
       requestBody: req.body,
@@ -616,7 +617,7 @@ router.put("/scim/v2/Users/:id", scimBearerAuth, async (req: Request, res: Respo
 
     return scimResponse(res, 200, buildUserScimResource(updatedUser, updatedProvisioned ?? null, baseUrl));
   } catch (err) {
-    console.error("SCIM PUT /Users/:id error:", err);
+    logger.error({ err }, "SCIM PUT /Users/:id error:");
     return scimError(res, 500, "internalError", "Internal server error");
   }
 });
@@ -705,7 +706,7 @@ router.patch("/scim/v2/Users/:id", scimBearerAuth, async (req: Request, res: Res
 
     return scimResponse(res, 200, buildUserScimResource(updatedUser, updatedProvisioned ?? null, baseUrl));
   } catch (err) {
-    console.error("SCIM PATCH /Users/:id error:", err);
+    logger.error({ err }, "SCIM PATCH /Users/:id error:");
     return scimError(res, 500, "internalError", "Internal server error");
   }
 });
@@ -742,7 +743,7 @@ router.delete("/scim/v2/Users/:id", scimBearerAuth, async (req: Request, res: Re
 
     return res.status(204).end();
   } catch (err) {
-    console.error("SCIM DELETE /Users/:id error:", err);
+    logger.error({ err }, "SCIM DELETE /Users/:id error:");
     return scimError(res, 500, "internalError", "Internal server error");
   }
 });
@@ -798,7 +799,7 @@ router.get("/scim/v2/Groups", scimBearerAuth, async (req: Request, res: Response
       )),
     });
   } catch (err) {
-    console.error("SCIM GET /Groups error:", err);
+    logger.error({ err }, "SCIM GET /Groups error:");
     return scimError(res, 500, "internalError", "Internal server error");
   }
 });
@@ -835,7 +836,7 @@ router.get("/scim/v2/Groups/:id", scimBearerAuth, async (req: Request, res: Resp
       getBaseUrl(req),
     ));
   } catch (err) {
-    console.error("SCIM GET /Groups/:id error:", err);
+    logger.error({ err }, "SCIM GET /Groups/:id error:");
     return scimError(res, 500, "internalError", "Internal server error");
   }
 });
@@ -886,7 +887,7 @@ router.post("/scim/v2/Groups", scimBearerAuth, async (req: Request, res: Respons
       baseUrl,
     ));
   } catch (err) {
-    console.error("SCIM POST /Groups error:", err);
+    logger.error({ err }, "SCIM POST /Groups error:");
     return scimError(res, 500, "internalError", "Internal server error");
   }
 });
@@ -952,7 +953,7 @@ router.put("/scim/v2/Groups/:id", scimBearerAuth, async (req: Request, res: Resp
       baseUrl,
     ));
   } catch (err) {
-    console.error("SCIM PUT /Groups/:id error:", err);
+    logger.error({ err }, "SCIM PUT /Groups/:id error:");
     return scimError(res, 500, "internalError", "Internal server error");
   }
 });
@@ -1039,7 +1040,7 @@ router.patch("/scim/v2/Groups/:id", scimBearerAuth, async (req: Request, res: Re
       baseUrl,
     ));
   } catch (err) {
-    console.error("SCIM PATCH /Groups/:id error:", err);
+    logger.error({ err }, "SCIM PATCH /Groups/:id error:");
     return scimError(res, 500, "internalError", "Internal server error");
   }
 });
@@ -1066,7 +1067,7 @@ router.delete("/scim/v2/Groups/:id", scimBearerAuth, async (req: Request, res: R
 
     return res.status(204).end();
   } catch (err) {
-    console.error("SCIM DELETE /Groups/:id error:", err);
+    logger.error({ err }, "SCIM DELETE /Groups/:id error:");
     return scimError(res, 500, "internalError", "Internal server error");
   }
 });

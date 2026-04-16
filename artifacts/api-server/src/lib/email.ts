@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { logger } from "./logger";
 
 interface EmailOptions {
   to: string;
@@ -126,7 +127,7 @@ export function hasEmailProviderConfigured(): boolean {
 export async function sendEmail(options: EmailOptions): Promise<SendResult> {
   if (!hasEmailProviderConfigured()) {
     if (!_emailProviderWarningLogged) {
-      console.warn("[email] No email provider configured (SENDGRID_API_KEY, RESEND_API_KEY, or SMTP credentials). Email delivery skipped.");
+      logger.warn("No email provider configured (SENDGRID_API_KEY, RESEND_API_KEY, or SMTP credentials). Email delivery skipped.");
       _emailProviderWarningLogged = true;
     }
     return { success: false, error: "No email provider configured" };

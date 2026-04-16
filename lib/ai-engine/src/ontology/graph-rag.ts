@@ -35,6 +35,7 @@ export interface GraphRAGQuery {
   minConfidence?: number;
   temporalDecayEnabled?: boolean;
   riskFilterEnabled?: boolean;
+  tenantId?: string;
 }
 
 export interface GraphRAGResult {
@@ -246,6 +247,7 @@ export class GraphRAGEngine {
       minConfidence = 0.2,
       temporalDecayEnabled = true,
       riskFilterEnabled = false,
+      tenantId,
     } = params;
 
     const reasoningPath: ReasoningStep[] = [];
@@ -353,7 +355,7 @@ export class GraphRAGEngine {
 
           try {
             const domainQuery = `${query} ${node.entity.name} ${node.entity.tags.join(" ")}`;
-            const retrieved = alloyRetrieval.retrieveHybrid(domainQuery, queryEmbedding, topKChunksPerEntity);
+            const retrieved = alloyRetrieval.retrieveHybrid(domainQuery, queryEmbedding, topKChunksPerEntity, tenantId ?? "");
 
             const rel = node.relationships[0];
             const significance = rel ? (
@@ -421,7 +423,7 @@ export class GraphRAGEngine {
 
     if (allChunks.length === 0) {
       try {
-        const fallback = alloyRetrieval.retrieveHybrid(query, queryEmbedding, 10);
+        const fallback = alloyRetrieval.retrieveHybrid(query, queryEmbedding, 10, tenantId ?? "");
         for (const chunk of fallback.chunks) {
           allChunks.push({
             ...chunk,

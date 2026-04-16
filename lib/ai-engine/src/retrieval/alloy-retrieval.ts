@@ -4,6 +4,7 @@ import type { EmbedOptions } from "../embedding/index.js";
 
 export interface RetrievalChunk {
   id: string;
+  tenantId: string;
   content: string;
   source: string;
   sourceType: EvidenceItem["sourceType"];
@@ -51,7 +52,23 @@ export class AlloyRetrievalEngine {
     return this.chunks.length;
   }
 
-  ingest(content: string, source: string, sourceType: RetrievalChunk["sourceType"], metadata?: Record<string, unknown>): RetrievalChunk[] {
+  tenantIndexedCount(tenantId: string): number {
+    if (!tenantId) return 0;
+    return this.chunks.filter(c => c.tenantId === tenantId).length;
+  }
+
+  /**
+   * Ingest content into the in-memory knowledge store.
+   * `tenantId` is REQUIRED. Calls without a valid tenant identifier are
+   * rejected (return empty array) to prevent globally-visible artifacts.
+   */
+  ingest(content: string, source: string, sourceType: RetrievalChunk["sourceType"], metadata?: Record<string, unknown>, tenantId: string = ""): RetrievalChunk[] {
+    const resolvedTenantId = tenantId || (metadata?.tenantId as string | undefined);
+    if (!resolvedTenantId) {
+      process.stderr.write("[alloy-retrieval] ingest() called without tenantId — rejecting to prevent cross-tenant artifact\n");
+      return [];
+    }
+
     const paragraphs = content.split(/\n{2,}/);
     const words = content.split(/\s+/);
     const chunkTexts: string[] = [];
@@ -74,6 +91,7 @@ export class AlloyRetrievalEngine {
 
     const newChunks: RetrievalChunk[] = chunkTexts.map((text, idx) => ({
       id: `chunk-${source}-${Date.now()}-${idx}`,
+      tenantId: resolvedTenantId,
       content: text,
       source,
       sourceType,
@@ -95,17 +113,28 @@ export class AlloyRetrievalEngine {
     if (chunk) chunk.embedding = embedding;
   }
 
-  retrieveSemantic(queryEmbedding: number[], topK: number = 12): ScoredChunk[] {
+  /**
+   * Semantic (vector) retrieval scoped to a specific tenant.
+   * Returns empty array when `tenantId` is absent (fail-closed).
+   */
+  retrieveSemantic(queryEmbedding: number[], topK: number = 12, tenantId: string): ScoredChunk[] {
+    if (!tenantId) return [];
     return this.chunks
-      .filter(c => c.embedding)
+      .filter(c => c.embedding && c.tenantId === tenantId)
       .map(c => ({ ...c, score: cosineSimilarity(queryEmbedding, c.embedding!), matchType: "semantic" as const }))
       .sort((a, b) => b.score - a.score)
       .slice(0, topK);
   }
 
-  retrieveKeyword(query: string, topK: number = 12): ScoredChunk[] {
+  /**
+   * Keyword retrieval scoped to a specific tenant.
+   * Returns empty array when `tenantId` is absent (fail-closed).
+   */
+  retrieveKeyword(query: string, topK: number = 12, tenantId: string): ScoredChunk[] {
+    if (!tenantId) return [];
     const terms = query.toLowerCase().split(/\s+/).filter(t => t.length > 2);
     return this.chunks
+      .filter(c => c.tenantId === tenantId)
       .map(c => {
         const lower = c.content.toLowerCase();
         const matched = terms.filter(t => lower.includes(t)).length;
@@ -116,10 +145,17 @@ export class AlloyRetrievalEngine {
       .slice(0, topK);
   }
 
-  retrieveHybrid(query: string, queryEmbedding: number[] | null, topK: number = 12): RetrievalResult {
+  /**
+   * Hybrid retrieval scoped to a specific tenant.
+   * Returns an empty result set when `tenantId` is absent (fail-closed).
+   */
+  retrieveHybrid(query: string, queryEmbedding: number[] | null, topK: number = 12, tenantId: string): RetrievalResult {
     const start = Date.now();
-    const semanticResults = queryEmbedding ? this.retrieveSemantic(queryEmbedding, topK * 2) : [];
-    const keywordResults = this.retrieveKeyword(query, topK * 2);
+    if (!tenantId) {
+      return { chunks: [], query, method: queryEmbedding ? "hybrid" : "keyword", totalIndexed: 0, latencyMs: Date.now() - start };
+    }
+    const semanticResults = queryEmbedding ? this.retrieveSemantic(queryEmbedding, topK * 2, tenantId) : [];
+    const keywordResults = this.retrieveKeyword(query, topK * 2, tenantId);
 
     const merged = new Map<string, ScoredChunk>();
     for (const chunk of semanticResults) {
@@ -140,13 +176,18 @@ export class AlloyRetrievalEngine {
       chunks: results,
       query,
       method: queryEmbedding ? "hybrid" : "keyword",
-      totalIndexed: this.chunks.length,
+      totalIndexed: this.chunks.filter(c => c.tenantId === tenantId).length,
       latencyMs: Date.now() - start,
     };
   }
 
-  async ingestAndEmbed(content: string, source: string, sourceType: RetrievalChunk["sourceType"], metadata?: Record<string, unknown>, embedOptions?: EmbedOptions): Promise<RetrievalChunk[]> {
-    const newChunks = this.ingest(content, source, sourceType, metadata);
+  /**
+   * Ingest content and immediately embed it.
+   * `tenantId` is REQUIRED — delegates to `ingest()` which is fail-closed.
+   */
+  async ingestAndEmbed(content: string, source: string, sourceType: RetrievalChunk["sourceType"], metadata?: Record<string, unknown>, embedOptions?: EmbedOptions, tenantId: string = ""): Promise<RetrievalChunk[]> {
+    const newChunks = this.ingest(content, source, sourceType, metadata, tenantId);
+    if (newChunks.length === 0) return [];
     const { embeddingPipeline } = await import("../embedding/index.js");
     const batchResult = await embeddingPipeline.embedBatch(
       newChunks.map(c => c.content),
@@ -161,26 +202,43 @@ export class AlloyRetrievalEngine {
     return newChunks;
   }
 
-  async embedAndRetrieveHybrid(query: string, topK: number = 12, embedOptions?: EmbedOptions): Promise<RetrievalResult> {
+  /**
+   * Embed query and retrieve hybrid results.
+   * `tenantId` is REQUIRED — delegates to `retrieveHybrid()` which is fail-closed.
+   */
+  async embedAndRetrieveHybrid(query: string, topK: number = 12, embedOptions?: EmbedOptions, tenantId: string = ""): Promise<RetrievalResult> {
     const { getEmbedding } = await import("../embedding/index.js");
     const queryEmbedding = await getEmbedding(query, embedOptions);
-    return this.retrieveHybrid(query, queryEmbedding, topK);
+    return this.retrieveHybrid(query, queryEmbedding, topK, tenantId);
   }
 
+  /**
+   * Retrieve from the persistent vector database.
+   * `tenantId` is REQUIRED — passed to the DB query for tenant scoping.
+   * The fallback path also enforces tenant scope; if no tenantId the
+   * fallback returns an empty result set (fail-closed).
+   */
   async retrieveFromDb(query: string, queryEmbedding: number[] | null, options: {
     topK?: number;
     maxSensitivityLevel?: SensitivityLevel;
     domains?: string[];
     sourceTypes?: RagSourceType[];
-  } = {}): Promise<RetrievalResult> {
+    tenantId: string;
+  }): Promise<RetrievalResult> {
     const start = Date.now();
-    const { topK = 10, maxSensitivityLevel = "restricted", domains, sourceTypes } = options;
+    const { topK = 10, maxSensitivityLevel = "restricted", domains, sourceTypes, tenantId } = options;
+
+    if (!tenantId) {
+      process.stderr.write("[alloy-retrieval] retrieveFromDb() called without tenantId — returning empty (fail-closed)\n");
+      return { chunks: [], query, method: queryEmbedding ? "hybrid" : "keyword", totalIndexed: 0, latencyMs: Date.now() - start };
+    }
 
     try {
       const { hybridSearch } = await import("../rag-vector-store.js");
       const { results, totalIndexed, latencyMs } = await hybridSearch({
         query,
         queryEmbedding,
+        tenantId,
         topK,
         maxSensitivityLevel,
         domains,
@@ -189,6 +247,7 @@ export class AlloyRetrievalEngine {
 
       const chunks: ScoredChunk[] = results.map(r => ({
         id: r.id,
+        tenantId: r.tenantId ?? tenantId,
         content: r.content,
         source: r.source,
         sourceType: r.sourceType as EvidenceItem["sourceType"],
@@ -208,8 +267,8 @@ export class AlloyRetrievalEngine {
         latencyMs,
       };
     } catch (err) {
-      console.warn("[alloy-retrieval] DB retrieval failed, falling back to in-memory:", err);
-      return this.retrieveHybrid(query, queryEmbedding, topK);
+      process.stderr.write(`[alloy-retrieval] DB retrieval failed, falling back to in-memory (tenant-scoped): ${String(err)}\n`);
+      return this.retrieveHybrid(query, queryEmbedding, topK, tenantId);
     }
   }
 

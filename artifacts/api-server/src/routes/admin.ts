@@ -13,7 +13,26 @@ import { authMiddleware, requireRole } from "../middlewares/auth";
 import { serverTelemetry } from "@szl-holdings/observability";
 import { durableJobQueue } from "@szl-holdings/forge-runtime";
 import { logActivity } from "../lib/activity-logger";
+import { logger } from "../lib/logger";
 import { isFlagEnabled } from "../lib/platform-flags";
+import { z } from "zod";
+import { validateBody } from "../lib/validation";
+
+const enabledSchema = z.object({ enabled: z.boolean() });
+const createUserSchema = z.object({
+  email: z.string().email(),
+  name: z.string().min(1).max(200),
+  role: z.string().min(1),
+});
+const reasonSchema = z.object({ reason: z.string().max(2000).optional() });
+const broadcastSchema = z.object({
+  title: z.string().min(1).max(300).optional(),
+  body: z.string().min(1).max(2000).optional(),
+  data: z.record(z.unknown()).optional(),
+  template: z.string().optional(),
+  vars: z.record(z.unknown()).optional(),
+});
+const impersonateEndSchema = z.object({ impersonationToken: z.string().min(1) });
 
 const adminRouter: IRouter = Router();
 
@@ -481,13 +500,13 @@ adminRouter.post("/admin/connectors/:name/test", async (req, res) => {
   res.json(result);
 });
 
-adminRouter.put("/admin/connectors/:name/enable", (req, res) => {
+adminRouter.put("/admin/connectors/:name/enable", validateBody(enabledSchema), (req, res) => {
   const adapter = services.getAdapter(req.params["name"]!);
   if (!adapter) {
     res.status(404).json({ error: "Connector not found" });
     return;
   }
-  const { enabled } = req.body as { enabled: boolean };
+  const { enabled } = req.body as z.infer<typeof enabledSchema>;
   adapter.setEnabled(enabled);
   integrationActivityLog.unshift({
     id: `act_${Date.now()}`,
@@ -605,8 +624,8 @@ adminRouter.get("/admin/users", async (_req, res) => {
   }
 });
 
-adminRouter.post("/admin/users", (req, res) => {
-  const { email, name, role } = req.body as { email: string; name: string; role: string };
+adminRouter.post("/admin/users", validateBody(createUserSchema), (req, res) => {
+  const { email, name, role } = req.body as z.infer<typeof createUserSchema>;
   const newUser = {
     id: `usr_${Date.now()}`,
     email,
@@ -756,10 +775,10 @@ adminRouter.get("/admin/feature-flags", async (_req, res) => {
   }
 });
 
-adminRouter.put("/admin/feature-flags/:key", async (req, res) => {
+adminRouter.put("/admin/feature-flags/:key", validateBody(enabledSchema), async (req, res) => {
   try {
     const key = req.params["key"]!;
-    const { enabled } = req.body as { enabled: boolean };
+    const { enabled } = req.body as z.infer<typeof enabledSchema>;
     const [updated] = await db
       .update(featureFlagsTable)
       .set({ isEnabled: enabled, updatedAt: new Date() })
@@ -894,7 +913,7 @@ adminRouter.post("/admin/seed", async (_req, res) => {
       tables: Object.entries(results).map(([name, rows]) => ({ name, rows })),
     });
   } catch (err: any) {
-    console.error("[admin/seed] Error:", err);
+    logger.error({ err }, "[admin/seed] Error");
     res.status(500).json({ success: false, error: err?.message ?? "Seed failed" });
   }
 });
@@ -909,7 +928,7 @@ adminRouter.post("/admin/seed/reset", async (_req, res) => {
       tables: Object.entries(results).map(([name, rows]) => ({ name, rows })),
     });
   } catch (err: any) {
-    console.error("[admin/seed/reset] Error:", err);
+    logger.error({ err }, "[admin/seed/reset] Error");
     res.status(500).json({ success: false, error: err?.message ?? "Reset failed" });
   }
 });
@@ -1228,14 +1247,14 @@ adminRouter.post("/admin/artifact-approvals/:id/approve", async (req, res) => {
   }
 });
 
-adminRouter.post("/admin/artifact-approvals/:id/reject", async (req, res) => {
+adminRouter.post("/admin/artifact-approvals/:id/reject", validateBody(reasonSchema), async (req, res) => {
   const approvalsEnabled = await isFlagEnabled("alloy_artifact_approvals_enabled");
   if (!approvalsEnabled) {
     res.status(403).json({ error: "Feature not available", feature: "alloy_artifact_approvals_enabled" });
     return;
   }
   const { id } = req.params;
-  const { reason } = req.body as { reason?: string };
+  const { reason } = req.body as z.infer<typeof reasonSchema>;
 
   try {
     const approval = await db
@@ -1378,9 +1397,9 @@ adminRouter.get("/admin/push-tokens/stats", async (_req, res) => {
   }
 });
 
-adminRouter.post("/admin/push-notifications/broadcast", async (req, res) => {
+adminRouter.post("/admin/push-notifications/broadcast", validateBody(broadcastSchema), async (req, res) => {
   try {
-    const { title, body, data, template, vars } = req.body;
+    const { title, body, data, template, vars } = req.body as z.infer<typeof broadcastSchema>;
     const { sendPushBroadcast } = await import("../lib/expo-push");
     const { buildPushMessage } = await import("../lib/push-templates");
 
@@ -1419,7 +1438,7 @@ adminRouter.get("/admin/environment/full", (_req, res) => {
 
 // ─── Admin Impersonation ────────────────────────────────────────────────────
 
-adminRouter.post("/admin/impersonate/:userId", requireRole("admin"), async (req, res) => {
+adminRouter.post("/admin/impersonate/:userId", requireRole("admin"), validateBody(reasonSchema), async (req, res) => {
   try {
     const { startImpersonation } = await import("../middlewares/session-policy");
     const targetUserId = parseInt(req.params["userId"] as string, 10);
@@ -1427,7 +1446,7 @@ adminRouter.post("/admin/impersonate/:userId", requireRole("admin"), async (req,
       res.status(400).json({ error: "Invalid user ID" });
       return;
     }
-    const { reason } = req.body as { reason?: string };
+    const { reason } = req.body as z.infer<typeof reasonSchema>;
     const result = await startImpersonation({
       impersonatorId: req.user!.id,
       targetUserId,
@@ -1446,14 +1465,10 @@ adminRouter.post("/admin/impersonate/:userId", requireRole("admin"), async (req,
   }
 });
 
-adminRouter.post("/admin/impersonate/end", requireRole("admin"), async (req, res) => {
+adminRouter.post("/admin/impersonate/end", requireRole("admin"), validateBody(impersonateEndSchema), async (req, res) => {
   try {
     const { endImpersonation } = await import("../middlewares/session-policy");
-    const { impersonationToken } = req.body as { impersonationToken?: string };
-    if (!impersonationToken) {
-      res.status(400).json({ error: "impersonationToken is required" });
-      return;
-    }
+    const { impersonationToken } = req.body as z.infer<typeof impersonateEndSchema>;
     await endImpersonation({
       impersonatorId: req.user!.id,
       impersonationToken,
@@ -1468,7 +1483,7 @@ adminRouter.post("/admin/impersonate/end", requireRole("admin"), async (req, res
   }
 });
 
-adminRouter.delete("/admin/sessions/:userId", requireRole("admin"), async (req, res) => {
+adminRouter.delete("/admin/sessions/:userId", requireRole("admin"), validateBody(reasonSchema), async (req, res) => {
   try {
     const { forceTerminateUserSessions } = await import("../middlewares/session-policy");
     const targetUserId = parseInt(req.params["userId"] as string, 10);
@@ -1476,7 +1491,7 @@ adminRouter.delete("/admin/sessions/:userId", requireRole("admin"), async (req, 
       res.status(400).json({ error: "Invalid user ID" });
       return;
     }
-    const { reason } = req.body as { reason?: string };
+    const { reason } = req.body as z.infer<typeof reasonSchema>;
     const result = await forceTerminateUserSessions({
       adminUserId: req.user!.id,
       targetUserId,

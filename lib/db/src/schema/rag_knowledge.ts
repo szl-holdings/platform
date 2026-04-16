@@ -10,6 +10,7 @@ export const ragKnowledgeChunks = pgTable(
   "rag_knowledge_chunks",
   {
     id: text("id").primaryKey(),
+    tenantId: text("tenant_id"),
     content: text("content").notNull(),
     source: text("source").notNull(),
     sourceType: text("source_type").notNull(),
@@ -26,6 +27,7 @@ export const ragKnowledgeChunks = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
+    index("rag_chunks_tenant_id_idx").on(t.tenantId),
     index("rag_chunks_source_type_idx").on(t.sourceType),
     index("rag_chunks_domain_idx").on(t.domain),
     index("rag_chunks_sensitivity_idx").on(t.sensitivityLevel),

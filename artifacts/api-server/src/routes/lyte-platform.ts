@@ -17,6 +17,7 @@ import {
 import { eq, and, desc, sql, or, gte, lte } from "drizzle-orm";
 import { z } from "zod";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
+import { logger } from "../lib/logger";
 import { authMiddleware, parseIdParam, canAccessOrgRecord } from "../middlewares/auth";
 import { isFlagEnabled } from "../lib/platform-flags";
 import { services } from "@szl-holdings/services";
@@ -126,7 +127,7 @@ async function lyteAuditLog(
     actorUserId,
     organizationId: organizationId ?? null,
   }).catch((err: unknown) => {
-    console.error("[lyteAuditLog] Failed to write audit log:", actionType, entityType, entityId, err);
+    logger.error({ err, actionType, entityType, entityId }, "[lyteAuditLog] Failed to write audit log");
   });
 }
 

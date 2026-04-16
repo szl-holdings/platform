@@ -1,5 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { randomUUID, createHash, createSign, createHmac } from "crypto";
+import { logger } from "../lib/logger";
 
 interface AuthUser { id: number; role: string; email?: string; displayName?: string }
 type ExtendedRequest = Request & { user?: AuthUser }
@@ -757,7 +758,7 @@ router.post("/documents/batch-pdf", authMiddleware(), async (req: Request, res: 
     ));
 
     processBatchAsync(batchId, jobs).catch(err => {
-      console.error(`[pdf-batch] Batch ${batchId} failed:`, err);
+      logger.error({ err, batchId }, "[pdf-batch] Batch processing failed");
     });
 
     sendCreated(res, { batchId, batch, jobs });
@@ -845,7 +846,7 @@ router.post("/documents/pdf-jobs/:jobId/retry", authMiddleware(), async (req, re
     await db.update(pdfJobsTable).set({ status: "pending", error: null, startedAt: null, completedAt: null }).where(eq(pdfJobsTable.id, jobId));
 
     processJobAsync(job).catch(err => {
-      console.error(`[pdf-batch] Job ${jobId} retry failed:`, err);
+      logger.error({ err, jobId }, "[pdf-batch] Job retry failed");
     });
     sendSuccess(res, { retried: true, jobId });
   } catch (err) {
@@ -993,10 +994,10 @@ async function processJobAsync(job: typeof pdfJobsTable.$inferSelect) {
           visibility: "private",
         });
       } catch (aclErr) {
-        console.warn("[pdf-batch] Failed to set ACL on PDF object:", aclErr instanceof Error ? aclErr.message : aclErr);
+        logger.warn({ err: aclErr }, "[pdf-batch] Failed to set ACL on PDF object");
       }
     } catch (storageErr) {
-      console.warn("[pdf-batch] Object storage upload failed, falling back to base64:", storageErr instanceof Error ? storageErr.message : storageErr);
+      logger.warn({ err: storageErr }, "[pdf-batch] Object storage upload failed, falling back to base64");
     }
 
     const updatedEntityData: Record<string, unknown> = {

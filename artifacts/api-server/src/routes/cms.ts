@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
+import { z } from "zod";
+import { validateBody } from "../lib/validation";
 import multer from "multer";
 import {
   db, sitesTable, pagesTable, sectionsTable, venturesTable, servicesTable,
@@ -22,6 +24,65 @@ const imageUpload = multer({
   },
 });
 
+
+const contactSubmissionSchema = z.object({
+  name: z.string().min(1).max(200).trim(),
+  email: z.string().email().max(320).trim().toLowerCase(),
+  company: z.string().max(200).trim().optional().nullable(),
+  phone: z.string().max(50).trim().optional().nullable(),
+  message: z.string().min(1).max(10000).trim(),
+  formKey: z.string().max(100).trim().optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const createPageSchema = z.object({
+  siteId: z.number().int().positive().optional().nullable(),
+  title: z.string().min(1).max(500).trim(),
+  slug: z.string().min(1).max(200).trim(),
+  status: z.enum(["draft", "published", "archived"]).optional(),
+  metaTitle: z.string().max(200).trim().optional().nullable(),
+  metaDescription: z.string().max(500).trim().optional().nullable(),
+  content: z.record(z.unknown()).optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const patchPageSchema = createPageSchema.partial().refine(
+  d => Object.keys(d).length > 0,
+  { message: "At least one field is required" }
+);
+
+const createArticleSchema = z.object({
+  siteId: z.number().int().positive().optional().nullable(),
+  title: z.string().min(1).max(500).trim(),
+  slug: z.string().min(1).max(200).trim(),
+  status: z.enum(["draft", "published", "archived"]).optional(),
+  excerpt: z.string().max(1000).trim().optional().nullable(),
+  content: z.string().max(100000).optional().nullable(),
+  coverImageUrl: z.string().url().max(2048).optional().nullable(),
+  tags: z.array(z.string()).optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const patchArticleSchema = createArticleSchema.partial().refine(
+  d => Object.keys(d).length > 0,
+  { message: "At least one field is required" }
+);
+
+const createCmsPostSchema = z.object({
+  title: z.string().min(1).max(500).trim(),
+  slug: z.string().min(1).max(200).trim().optional(),
+  status: z.enum(["draft", "published", "archived"]).optional(),
+  content: z.string().max(200000).optional().nullable(),
+  excerpt: z.string().max(2000).trim().optional().nullable(),
+  coverImageUrl: z.string().url().max(2048).optional().nullable(),
+  tags: z.array(z.string()).optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const patchCmsPostSchema = createCmsPostSchema.partial().refine(
+  d => Object.keys(d).length > 0,
+  { message: "At least one field is required" }
+);
 
 const router: IRouter = Router();
 
@@ -103,14 +164,14 @@ router.get("/cms/pages/:id", authMiddleware({ required: false }), async (req, re
   } catch (err) { handleRouteError(res, err, "Failed to get page"); }
 });
 
-router.post("/cms/pages", requireCmsWrite, async (req, res) => {
+router.post("/cms/pages", requireCmsWrite, validateBody(createPageSchema), async (req, res) => {
   try {
     const [row] = await db.insert(pagesTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create page"); }
 });
 
-router.patch("/cms/pages/:id", requireCmsWrite, async (req, res) => {
+router.patch("/cms/pages/:id", requireCmsWrite, validateBody(patchPageSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(pagesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(pagesTable.id, id)).returning();
@@ -240,14 +301,14 @@ router.get("/cms/articles/:slug", authMiddleware({ required: false }), async (re
   } catch (err) { handleRouteError(res, err, "Failed to get article"); }
 });
 
-router.post("/cms/articles", requireCmsWrite, async (req, res) => {
+router.post("/cms/articles", requireCmsWrite, validateBody(createArticleSchema), async (req, res) => {
   try {
     const [row] = await db.insert(articlesTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create article"); }
 });
 
-router.patch("/cms/articles/:id", requireCmsWrite, async (req, res) => {
+router.patch("/cms/articles/:id", requireCmsWrite, validateBody(patchArticleSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(articlesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(articlesTable.id, id)).returning();
@@ -613,7 +674,7 @@ router.patch("/cms/updates/:id", requireCmsWrite, async (req, res) => {
 
 // ─── Contact Submissions ──────────────────────────────────────────────────────
 
-router.post("/cms/contact-submissions", async (req, res) => {
+router.post("/cms/contact-submissions", validateBody(contactSubmissionSchema), async (req, res) => {
   try {
     const [row] = await db.insert(contactSubmissionsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -844,7 +905,7 @@ router.get("/cms/posts/:slug", authMiddleware({ required: false }), async (req, 
   } catch (err) { handleRouteError(res, err, "Failed to get CMS post"); }
 });
 
-router.post("/cms/posts", authMiddleware(), requireRole("admin", "editor"), async (req, res) => {
+router.post("/cms/posts", authMiddleware(), requireRole("admin", "editor"), validateBody(createCmsPostSchema), async (req, res) => {
   try {
     const [row] = await db.insert(cmsPostsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -864,7 +925,7 @@ router.put("/cms/posts/:id", authMiddleware(), requireRole("admin", "editor"), a
   } catch (err) { handleRouteError(res, err, "Failed to update CMS post"); }
 });
 
-router.patch("/cms/posts/:id", authMiddleware(), requireRole("admin", "editor"), async (req, res) => {
+router.patch("/cms/posts/:id", authMiddleware(), requireRole("admin", "editor"), validateBody(patchCmsPostSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const updateData = { ...req.body, updatedAt: new Date() };

@@ -1,4 +1,5 @@
 import { db } from "@szl-holdings/db";
+import { logger } from "./logger";
 import {
   pcMattersTable,
   pcMatterClocksTable,
@@ -509,7 +510,7 @@ export async function runAllForecasts(matterId: number, orgId: number, actorId?:
     throw new Error(`All 8 forecast computations failed: ${errors.join("; ")}`);
   }
   if (errors.length > 0) {
-    console.error(`[ny-forecast-engine] ${errors.length} forecast(s) failed:`, errors);
+    logger.warn({ errors }, `${errors.length} forecast(s) failed`);
   }
 
   for (const result of valid) {

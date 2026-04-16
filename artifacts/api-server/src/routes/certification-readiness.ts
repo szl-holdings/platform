@@ -18,6 +18,47 @@ import {
 import { eq, desc, sql, and, asc } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
+import { z } from "zod";
+import { validateBody } from "../lib/validation";
+
+const createProgramSchema = z.object({
+  name: z.string().min(1).max(200),
+  frameworkType: z.string().min(1).max(100),
+  description: z.string().max(2000).optional(),
+  targetDate: z.string().optional(),
+  leadOwnerId: z.number().int().positive().optional(),
+}).passthrough();
+
+const updateProgramSchema = createProgramSchema.partial();
+
+const createRequirementSchema = z.object({
+  programId: z.number().int().positive(),
+  title: z.string().min(1).max(300),
+  category: z.string().min(1).max(100),
+  description: z.string().max(5000).optional(),
+  priority: z.string().max(50).optional(),
+  sortOrder: z.number().int().min(0).optional(),
+}).passthrough();
+
+const updateRequirementSchema = createRequirementSchema.partial();
+
+const createCertStatusSchema = z.object({
+  programId: z.number().int().positive(),
+  overallStatus: z.string().max(50).optional(),
+  completionPct: z.number().min(0).max(100).optional(),
+  notes: z.string().max(5000).optional(),
+}).passthrough();
+
+const createCertTaskSchema = z.object({
+  programId: z.number().int().positive(),
+  title: z.string().min(1).max(300),
+  description: z.string().max(5000).optional(),
+  assigneeId: z.number().int().positive().optional(),
+  dueDate: z.string().optional(),
+  sortOrder: z.number().int().min(0).optional(),
+}).passthrough();
+
+const updateCertTaskSchema = createCertTaskSchema.partial();
 
 const router: IRouter = Router();
 const auth = [authMiddleware(), requireRole("exec", "admin")];
@@ -64,7 +105,7 @@ router.get("/certification/programs", ...auth, async (req, res) => {
   }
 });
 
-router.post("/certification/programs", ...auth, async (req, res) => {
+router.post("/certification/programs", ...auth, validateBody(createProgramSchema), async (req, res) => {
   try {
     const [row] = await db.insert(certificationProgramsTable).values(req.body).returning();
     await logCertAudit("create", "certification_program", row.id, req.body);
@@ -90,7 +131,7 @@ router.get("/certification/programs/:id", ...auth, async (req, res) => {
   }
 });
 
-router.patch("/certification/programs/:id", ...auth, async (req, res) => {
+router.patch("/certification/programs/:id", ...auth, validateBody(updateProgramSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(certificationProgramsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(certificationProgramsTable.id, id)).returning();
@@ -116,7 +157,7 @@ router.delete("/certification/programs/:id", ...auth, async (req, res) => {
 
 // ─── CERTIFICATION REQUIREMENTS ───────────────────────────────────────────────
 
-router.post("/certification/requirements", ...auth, async (req, res) => {
+router.post("/certification/requirements", ...auth, validateBody(createRequirementSchema), async (req, res) => {
   try {
     const [row] = await db.insert(certificationRequirementsTable).values(req.body).returning();
     await logCertAudit("create", "certification_requirement", row.id, req.body);
@@ -126,7 +167,7 @@ router.post("/certification/requirements", ...auth, async (req, res) => {
   }
 });
 
-router.patch("/certification/requirements/:id", ...auth, async (req, res) => {
+router.patch("/certification/requirements/:id", ...auth, validateBody(updateRequirementSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const { createdAt, ...body } = req.body;
@@ -162,7 +203,7 @@ router.get("/certification/status", ...auth, async (req, res) => {
   }
 });
 
-router.post("/certification/status", ...auth, async (req, res) => {
+router.post("/certification/status", ...auth, validateBody(createCertStatusSchema), async (req, res) => {
   try {
     const [row] = await db.insert(certificationStatusTable).values(req.body).returning();
     await logCertAudit("create", "certification_status", row.id, req.body);
@@ -207,7 +248,7 @@ router.get("/certification/tasks", ...auth, async (req, res) => {
   }
 });
 
-router.post("/certification/tasks", ...auth, async (req, res) => {
+router.post("/certification/tasks", ...auth, validateBody(createCertTaskSchema), async (req, res) => {
   try {
     const [row] = await db.insert(certificationTasksTable).values(req.body).returning();
     await logCertAudit("create", "certification_task", row.id, req.body);
@@ -217,7 +258,7 @@ router.post("/certification/tasks", ...auth, async (req, res) => {
   }
 });
 
-router.patch("/certification/tasks/:id", ...auth, async (req, res) => {
+router.patch("/certification/tasks/:id", ...auth, validateBody(updateCertTaskSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const update = { ...req.body, updatedAt: new Date() };

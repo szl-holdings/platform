@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import { timingSafeEqual } from "crypto";
 import { db, usersTable, sessionsTable, userRolesTable, rolesTable, orgMembersTable, organizationsTable } from "@szl-holdings/db";
 import { eq, and, gt } from "drizzle-orm";
 import type { RoleName } from "@szl-holdings/db";
@@ -42,7 +43,11 @@ function checkInternalToken(req: Request): boolean {
   const internalToken = process.env["ALLOY_INTERNAL_TOKEN"];
   if (!internalToken) return false;
   const header = req.headers["x-internal-token"] as string | undefined;
-  return header === internalToken;
+  if (!header) return false;
+  const a = Buffer.from(internalToken, "utf8");
+  const b = Buffer.from(header, "utf8");
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
 }
 
 async function resolveUserFromToken(token: string): Promise<AuthenticatedUser | null> {

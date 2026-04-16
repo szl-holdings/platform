@@ -1,3 +1,5 @@
+import { logger } from "./logger";
+
 export interface GeocodeResult {
   latitude: number;
   longitude: number;
@@ -152,7 +154,7 @@ export async function geocodeAddress(address: string): Promise<GeocodeResult> {
     try {
       return await geocodeViaMapbox(address);
     } catch (err) {
-      console.warn("[geocoding] Mapbox failed, trying Google Maps fallback:", (err as Error).message);
+      logger.warn({ err }, "Mapbox geocode failed, trying Google Maps fallback");
     }
   }
 
@@ -168,7 +170,7 @@ export async function reverseGeocode(lat: number, lng: number): Promise<ReverseG
     try {
       return await reverseGeocodeViaMapbox(lat, lng);
     } catch (err) {
-      console.warn("[geocoding] Mapbox reverse failed, trying Google Maps fallback:", (err as Error).message);
+      logger.warn({ err }, "Mapbox reverse geocode failed, trying Google Maps fallback");
     }
   }
 

@@ -1,5 +1,7 @@
 import { Router, type IRouter } from "express";
+import { z } from "zod";
 import { logger } from "../lib/logger";
+import { validateBody } from "../lib/validation";
 import {
   db,
   holdingsVenturesTable,
@@ -23,6 +25,54 @@ import { eq, desc, ilike, or, sql, count } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError, sendBadRequest, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { sendEmail, buildInquiryAckEmail, buildLeadNotificationEmail, INTERNAL_EMAIL } from "../lib/email";
+
+const createVentureSchema = z.object({
+  name: z.string().min(1).max(200).trim(),
+  slug: z.string().max(100).optional(),
+  description: z.string().max(5000).trim().optional(),
+  status: z.string().max(50).optional(),
+  sector: z.string().max(100).trim().optional(),
+  stage: z.string().max(100).trim().optional(),
+  foundedYear: z.number().int().min(1900).max(2100).optional().nullable(),
+  website: z.string().url().max(2048).optional().nullable(),
+  logoUrl: z.string().url().max(2048).optional().nullable(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const patchVentureSchema = createVentureSchema.partial().refine(
+  d => Object.keys(d).length > 0,
+  { message: "At least one field is required" }
+);
+
+const createMilestoneSchema = z.object({
+  ventureId: z.number().int().positive().optional().nullable(),
+  title: z.string().min(1).max(500).trim(),
+  description: z.string().max(5000).trim().optional(),
+  status: z.string().max(50).optional(),
+  dueDate: z.string().datetime({ offset: true }).optional().nullable(),
+  completedAt: z.string().datetime({ offset: true }).optional().nullable(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const createMetricSchema = z.object({
+  ventureId: z.number().int().positive().optional().nullable(),
+  name: z.string().min(1).max(200).trim(),
+  value: z.union([z.number(), z.string()]).optional(),
+  unit: z.string().max(100).trim().optional().nullable(),
+  period: z.string().max(50).trim().optional().nullable(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const createLeadershipSchema = z.object({
+  ventureId: z.number().int().positive().optional().nullable(),
+  name: z.string().min(1).max(200).trim(),
+  role: z.string().min(1).max(200).trim(),
+  bio: z.string().max(5000).trim().optional(),
+  avatarUrl: z.string().url().max(2048).optional().nullable(),
+  linkedinUrl: z.string().url().max(2048).optional().nullable(),
+  sortOrder: z.number().int().min(0).optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
 
 const router: IRouter = Router();
 
@@ -214,7 +264,7 @@ router.get("/holdings/ventures/:id", async (req, res) => {
   }
 });
 
-router.post("/holdings/ventures", authMiddleware(), async (req, res) => {
+router.post("/holdings/ventures", authMiddleware(), validateBody(createVentureSchema), async (req, res) => {
   try {
     const [row] = await db.insert(holdingsVenturesTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -223,7 +273,7 @@ router.post("/holdings/ventures", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/holdings/ventures/:id", authMiddleware(), async (req, res) => {
+router.patch("/holdings/ventures/:id", authMiddleware(), validateBody(patchVentureSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(holdingsVenturesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(holdingsVenturesTable.id, id)).returning();
@@ -256,7 +306,7 @@ router.get("/holdings/milestones", async (req, res) => {
   }
 });
 
-router.post("/holdings/milestones", authMiddleware(), async (req, res) => {
+router.post("/holdings/milestones", authMiddleware(), validateBody(createMilestoneSchema), async (req, res) => {
   try {
     const [row] = await db.insert(holdingsMilestonesTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -295,7 +345,7 @@ router.get("/holdings/metrics", async (req, res) => {
   }
 });
 
-router.post("/holdings/metrics", authMiddleware(), async (req, res) => {
+router.post("/holdings/metrics", authMiddleware(), validateBody(createMetricSchema), async (req, res) => {
   try {
     const [row] = await db.insert(holdingsMetricsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -326,7 +376,7 @@ router.get("/holdings/leadership", async (req, res) => {
   }
 });
 
-router.post("/holdings/leadership", authMiddleware(), async (req, res) => {
+router.post("/holdings/leadership", authMiddleware(), validateBody(createLeadershipSchema), async (req, res) => {
   try {
     const [row] = await db.insert(holdingsLeadershipTable).values(req.body).returning();
     sendSuccess(res, row, 201);

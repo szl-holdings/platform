@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
+import { logger } from "../lib/logger";
 import { authMiddleware } from "../middlewares/auth";
 import { broadcastWs, pubsub, TERRA_EVENTS } from "../lib/pubsub-bridge.js";
 import { db, pool } from "@szl-holdings/db";
@@ -460,7 +461,7 @@ router.post("/terra/pipeline/deals", authMiddleware({ required: true }), async (
 
     if (inserted[0] && body.address) {
       const _tid = req.user?.orgs[0]?.orgId != null ? String(req.user.orgs[0].orgId) : undefined;
-      void ingestTerraProperty({ id: inserted[0].id, address: body.address, city: (body as Record<string, unknown>).borough as string ?? (body as Record<string, unknown>).county as string ?? "", state: "NY", zipCode: (body as Record<string, unknown>).zipCode as string | undefined, propertyType: body.type, ownerName: body.ownerName ?? undefined, currentValue: body.price ? Number(body.price) : undefined }, _tid).catch((e: unknown) => console.error("[terra-crm] ingestTerraProperty failed:", e));
+      void ingestTerraProperty({ id: inserted[0].id, address: body.address, city: (body as Record<string, unknown>).borough as string ?? (body as Record<string, unknown>).county as string ?? "", state: "NY", zipCode: (body as Record<string, unknown>).zipCode as string | undefined, propertyType: body.type, ownerName: body.ownerName ?? undefined, currentValue: body.price ? Number(body.price) : undefined }, _tid).catch((e: unknown) => logger.error({ err: e }, "[terra-crm] ingestTerraProperty failed"));
     }
     sendSuccess(res, { id: externalId, deal: inserted[0] });
   } catch (err) { handleRouteError(res, err, "Failed to create deal"); }

@@ -291,12 +291,17 @@ router.post("/ai/retrieve", authMiddleware({ required: true }), async (req, res)
     const k = Math.min(topK || 12, 50);
     const isAdmin = req.user && isGlobalAdmin(req.user);
     const maxSensitivity = isAdmin ? "restricted" : "internal";
+    const callerTenantId = req.user?.orgs?.[0]?.orgId != null ? String(req.user.orgs[0].orgId) : "";
+    if (!callerTenantId) {
+      res.status(403).json({ error: "Tenant context required for AI retrieval" });
+      return;
+    }
     let result;
     if (method === "keyword") {
-      const chunks = alloyRetrieval.retrieveKeyword(query, k);
-      result = { chunks, query, method: "keyword" as const, totalIndexed: alloyRetrieval.indexedCount, latencyMs: 0 };
+      const chunks = alloyRetrieval.retrieveKeyword(query, k, callerTenantId);
+      result = { chunks, query, method: "keyword" as const, totalIndexed: alloyRetrieval.tenantIndexedCount(callerTenantId), latencyMs: 0 };
     } else {
-      result = await alloyRetrieval.retrieveFromDb(query, null, { topK: k, maxSensitivityLevel: maxSensitivity as any });
+      result = await alloyRetrieval.retrieveFromDb(query, null, { topK: k, maxSensitivityLevel: maxSensitivity as any, tenantId: callerTenantId });
     }
     const evidence = alloyRetrieval.toEvidenceItems(result.chunks);
 
@@ -457,7 +462,12 @@ router.post("/ai/retrieval/ingest", authMiddleware({ required: true }), async (r
     };
     if (!content || !source) { res.status(400).json({ error: "content and source required" }); return; }
 
-    const chunks = alloyRetrieval.ingest(content, source, (sourceType || "playbook") as any, metadata);
+    const ingestTenantId = req.user?.orgs?.[0]?.orgId != null ? String(req.user.orgs[0].orgId) : "";
+    if (!ingestTenantId) {
+      res.status(403).json({ error: "Tenant context required for AI ingestion" });
+      return;
+    }
+    const chunks = alloyRetrieval.ingest(content, source, (sourceType || "playbook") as any, metadata, ingestTenantId);
     res.json({ ingested: chunks.length, source, stats: alloyRetrieval.getStats() });
   } catch (err) {
     logger.error({ err }, "AI retrieval ingest error");
@@ -522,8 +532,9 @@ router.post("/ai/decision", authMiddleware({ required: true }), async (req, res)
 
     const isAdminUser = req.user && isGlobalAdmin(req.user);
     const decisionSensitivity = isAdminUser ? "restricted" : "internal";
-    const retrievalContext = rawInput
-      ? await alloyRetrieval.retrieveFromDb(rawInput as string, null, { topK: 5, maxSensitivityLevel: decisionSensitivity as any })
+    const decisionTenantId = req.user?.orgs?.[0]?.orgId != null ? String(req.user.orgs[0].orgId) : "";
+    const retrievalContext = rawInput && decisionTenantId
+      ? await alloyRetrieval.retrieveFromDb(rawInput as string, null, { topK: 5, maxSensitivityLevel: decisionSensitivity as any, tenantId: decisionTenantId })
       : null;
 
     const enrichedEvidence = [

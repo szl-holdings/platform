@@ -274,8 +274,16 @@ app.get("/api/health/ready", async (_req: Request, res: Response) => {
 app.get("/api/health/detailed", async (req: Request, res: Response) => {
   if (isProduction) {
     const internalToken = process.env.ALLOY_INTERNAL_TOKEN;
-    const providedToken = req.headers["x-internal-token"];
-    const hasInternalAccess = internalToken && providedToken === internalToken;
+    const providedToken = req.headers["x-internal-token"] as string | undefined;
+    let hasInternalAccess = false;
+    if (internalToken && providedToken) {
+      const a = Buffer.from(internalToken, "utf8");
+      const b = Buffer.from(providedToken, "utf8");
+      if (a.length === b.length) {
+        const { timingSafeEqual } = await import("crypto");
+        hasInternalAccess = timingSafeEqual(a, b);
+      }
+    }
     if (!hasInternalAccess && !req.isAuthenticated()) {
       res.status(401).json({ error: "Authentication required", message: "Detailed health information is restricted." });
       return;

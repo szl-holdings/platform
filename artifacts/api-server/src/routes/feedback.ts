@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { logger } from "../lib/logger";
 import { db, pool, feedbackTable, feedbackSurveyPrefsTable } from "@szl-holdings/db";
 import { desc, eq, sql, and, gte, lt } from "drizzle-orm";
 import { authMiddleware, requireRole } from "../middlewares/auth";
@@ -39,7 +40,7 @@ feedbackRouter.post("/feedback/nps", validateBody(feedbackNpsSchema), async (req
 
     res.status(201).json({ success: true, id: entry.id });
   } catch (err) {
-    console.error("POST /feedback/nps error:", err);
+    logger.error({ err }, "POST /feedback/nps error:");
     res.status(500).json({ error: "Failed to submit NPS feedback" });
   }
 });
@@ -64,7 +65,7 @@ feedbackRouter.post("/feedback/contextual", validateBody(feedbackContextualSchem
 
     res.status(201).json({ success: true, id: entry.id });
   } catch (err) {
-    console.error("POST /feedback/contextual error:", err);
+    logger.error({ err }, "POST /feedback/contextual error:");
     res.status(500).json({ error: "Failed to submit contextual feedback" });
   }
 });
@@ -89,7 +90,7 @@ feedbackRouter.post("/feedback/dismiss", validateBody(dismissSchema), async (req
 
     res.json({ success: true });
   } catch (err) {
-    console.error("POST /feedback/dismiss error:", err);
+    logger.error({ err }, "POST /feedback/dismiss error:");
     res.status(500).json({ error: "Failed to dismiss survey" });
   }
 });
@@ -134,7 +135,7 @@ feedbackRouter.get("/feedback/nps-eligibility", async (req: Request, res: Respon
 
     res.json({ eligible: true });
   } catch (err) {
-    console.error("GET /feedback/nps-eligibility error:", err);
+    logger.error({ err }, "GET /feedback/nps-eligibility error:");
     res.status(500).json({ error: "Failed to check NPS eligibility" });
   }
 });
@@ -248,7 +249,7 @@ feedbackRouter.get("/admin/feedback/analytics", async (_req: Request, res: Respo
       recentComments,
     });
   } catch (err) {
-    console.error("GET /admin/feedback/analytics error:", err);
+    logger.error({ err }, "GET /admin/feedback/analytics error:");
     res.status(500).json({ error: "Failed to load feedback analytics" });
   }
 });
@@ -291,7 +292,7 @@ feedbackRouter.get("/admin/feedback/list", async (req: Request, res: Response) =
       },
     });
   } catch (err) {
-    console.error("GET /admin/feedback/list error:", err);
+    logger.error({ err }, "GET /admin/feedback/list error:");
     res.status(500).json({ error: "Failed to list feedback" });
   }
 });

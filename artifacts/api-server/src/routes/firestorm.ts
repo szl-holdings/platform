@@ -38,6 +38,7 @@ import { REFERENCE_COMPLIANCE_CONTROLS } from "./readiness.js";
 import { eq, desc, sql, inArray, and } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendNoContent, handleRouteError } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
+import { logger } from "../lib/logger";
 import { validateIfMatch } from "../middlewares/optimistic-concurrency";
 import { queryEvidenceIndex, ingestDecisionToEvidenceIndex } from "../lib/tradecraft-evidence-store";
 import { validateAndBuildDecision, type DecisionObjectType } from "@szl-holdings/ai-engine";
@@ -1338,7 +1339,7 @@ router.post("/firestorm/push-token", authMiddleware({ required: true }), async (
       res.status(400).json({ error: "token is required" });
       return;
     }
-    console.info(`[Push] Registered push token for platform=${platform ?? "unknown"}: ${token.slice(0, 20)}...`);
+    logger.info({ platform: platform ?? "unknown" }, "[Push] Registered push token");
     sendSuccess(res, { registered: true, platform: platform ?? "unknown" });
   } catch (err) {
     handleRouteError(res, err, "Failed to register push token");
@@ -1959,7 +1960,7 @@ router.post("/firestorm/tradecraft/decisions", authMiddleware({ required: true }
         errorClass: "schema_validation",
         resolved: false,
       }).catch((auditErr) => {
-        console.warn("[tradecraft] Failed to persist validation audit record — non-fatal", { auditErr });
+        logger.warn({ auditErr }, "[tradecraft] Failed to persist validation audit record — non-fatal");
       });
       res.status(422).json({
         error: "Decision object failed structured validation. Payload does not satisfy the required schema for this decision type.",
@@ -2025,7 +2026,7 @@ router.post("/firestorm/tradecraft/decisions", authMiddleware({ required: true }
         humanReviewRequired: decision.humanReviewRequired,
         gapsAndUnknowns: Array.isArray(decision.gapsAndUnknowns) ? decision.gapsAndUnknowns : [],
       }).catch(err => {
-        console.warn("[tradecraft] Failed to upsert case memory from decision — non-fatal", { err, caseId: decision.caseId });
+        logger.warn({ err, caseId: decision.caseId }, "[tradecraft] Failed to upsert case memory from decision — non-fatal");
       });
     }
 
@@ -2233,7 +2234,7 @@ router.post("/firestorm/tradecraft/notebook", authMiddleware({ required: true })
             changeLog: [...currentChangeLog, changeEntry],
           })
           .where(sql`${firestormCaseMemoryTable.caseId} = ${note.caseId}`)
-          .catch((err: unknown) => { console.warn("[tradecraft] Failed to auto-update case memory with note — non-fatal", { err }); });
+          .catch((err: unknown) => { logger.warn({ err }, "[tradecraft] Failed to auto-update case memory with note — non-fatal"); });
       } else {
         await db.insert(firestormCaseMemoryTable).values({
           caseId: note.caseId,
@@ -2247,7 +2248,7 @@ router.post("/firestorm/tradecraft/notebook", authMiddleware({ required: true })
           summary: { totalDecisions: 0, lastDecisionAt: null, currentRiskLevel: "medium", pendingApprovals: 0, humanReviewRequired: false } as unknown as Record<string, unknown>,
           openedAt: nowNote,
           lastUpdatedAt: nowNote,
-        }).catch((err: unknown) => { console.warn("[tradecraft] Failed to create case memory for note — non-fatal", { err }); });
+        }).catch((err: unknown) => { logger.warn({ err }, "[tradecraft] Failed to create case memory for note — non-fatal"); });
       }
     }
 

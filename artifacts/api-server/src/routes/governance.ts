@@ -1,4 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { z } from "zod";
 import {
   db,
   alloyLegacyPoliciesTable,
@@ -18,6 +19,68 @@ import {
   handleRouteError,
   parsePagination,
 } from "../lib/api-response";
+import { validateBody } from "../lib/validation";
+
+const createPolicySchema = z.object({
+  name: z.string().min(1).max(200).trim(),
+  description: z.string().max(2000).trim().optional(),
+  policyType: z.string().min(1).max(100),
+  scope: z.string().max(100).optional(),
+  rules: z.array(z.unknown()).optional(),
+  priority: z.number().int().min(0).max(10000).optional(),
+  complianceFramework: z.string().max(200).trim().optional(),
+});
+
+const patchPolicySchema = z.object({
+  name: z.string().min(1).max(200).trim().optional(),
+  description: z.string().max(2000).trim().optional(),
+  rules: z.array(z.unknown()).optional(),
+  isActive: z.boolean().optional(),
+  priority: z.number().int().min(0).max(10000).optional(),
+  scope: z.string().max(100).optional(),
+}).refine(d => Object.keys(d).length > 0, { message: "At least one field is required" });
+
+const createModelRoutingSchema = z.object({
+  name: z.string().min(1).max(200).trim(),
+  modelProvider: z.string().min(1).max(100),
+  modelId: z.string().min(1).max(200),
+  taskCategories: z.array(z.string()).optional(),
+  maxCostPerCall: z.number().positive().optional(),
+  isAllowed: z.boolean().optional(),
+  isDefault: z.boolean().optional(),
+  priority: z.number().int().min(0).max(10000).optional(),
+  environment: z.string().max(50).optional(),
+});
+
+const patchModelRoutingSchema = z.object({
+  isAllowed: z.boolean().optional(),
+  isDefault: z.boolean().optional(),
+  maxCostPerCall: z.number().positive().optional(),
+  priority: z.number().int().min(0).max(10000).optional(),
+  taskCategories: z.array(z.string()).optional(),
+}).refine(d => Object.keys(d).length > 0, { message: "At least one field is required" });
+
+const createBudgetSchema = z.object({
+  name: z.string().min(1).max(200).trim(),
+  budgetType: z.string().max(50).optional(),
+  limitAmount: z.number().positive(),
+  warnThreshold: z.number().min(0).max(1).optional(),
+  hardStopThreshold: z.number().min(0).max(1).optional(),
+  periodEnd: z.string().datetime({ offset: true }).optional().nullable(),
+});
+
+const createCostEventSchema = z.object({
+  eventType: z.string().min(1).max(100),
+  resourceId: z.string().max(200).optional().nullable(),
+  resourceName: z.string().max(200).optional().nullable(),
+  modelProvider: z.string().max(100).optional().nullable(),
+  modelId: z.string().max(200).optional().nullable(),
+  tokensIn: z.number().int().min(0).optional(),
+  tokensOut: z.number().int().min(0).optional(),
+  costUsd: z.number().min(0).optional(),
+  budgetId: z.number().int().positive().optional().nullable(),
+  metadata: z.record(z.unknown()).optional(),
+});
 
 const router: IRouter = Router();
 
@@ -65,10 +128,9 @@ router.get("/policies/:id", authMiddleware(), async (req: Request, res: Response
   }
 });
 
-router.post("/policies", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.post("/policies", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(createPolicySchema), async (req: Request, res: Response) => {
   try {
     const { name, description, policyType, scope, rules, priority, complianceFramework } = req.body;
-    if (!name || !policyType) return sendBadRequest(res, "name and policyType are required");
     const orgId = req.user?.orgs?.[0]?.orgId ?? null;
     const [row] = await db.insert(alloyLegacyPoliciesTable).values({
       orgId,
@@ -87,7 +149,7 @@ router.post("/policies", authMiddleware(), requireRole("super_admin", "admin", "
   }
 });
 
-router.patch("/policies/:id", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.patch("/policies/:id", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(patchPolicySchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid policy ID");
@@ -138,10 +200,9 @@ router.get("/model-routing", authMiddleware(), async (req: Request, res: Respons
   }
 });
 
-router.post("/model-routing", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.post("/model-routing", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(createModelRoutingSchema), async (req: Request, res: Response) => {
   try {
     const { name, modelProvider, modelId, taskCategories, maxCostPerCall, isAllowed, isDefault, priority, environment } = req.body;
-    if (!name || !modelProvider || !modelId) return sendBadRequest(res, "name, modelProvider, modelId are required");
     const orgId = req.user?.orgs?.[0]?.orgId ?? null;
     const [row] = await db.insert(modelRoutingPoliciesTable).values({
       orgId,
@@ -158,7 +219,7 @@ router.post("/model-routing", authMiddleware(), requireRole("super_admin", "admi
   }
 });
 
-router.patch("/model-routing/:id", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.patch("/model-routing/:id", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(patchModelRoutingSchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");
@@ -193,10 +254,9 @@ router.get("/budgets", authMiddleware(), async (req: Request, res: Response) => 
   }
 });
 
-router.post("/budgets", authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
+router.post("/budgets", authMiddleware(), requireRole("super_admin", "admin"), validateBody(createBudgetSchema), async (req: Request, res: Response) => {
   try {
     const { name, budgetType, limitAmount, warnThreshold, hardStopThreshold, periodEnd } = req.body;
-    if (!name || !limitAmount) return sendBadRequest(res, "name and limitAmount are required");
     const orgId = req.user?.orgs?.[0]?.orgId ?? null;
     const [row] = await db.insert(costBudgetsTable).values({
       orgId,
@@ -232,10 +292,9 @@ router.get("/cost-events", authMiddleware(), async (req: Request, res: Response)
   }
 });
 
-router.post("/cost-events", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/cost-events", authMiddleware(), validateBody(createCostEventSchema), async (req: Request, res: Response) => {
   try {
     const { eventType, resourceId, resourceName, modelProvider, modelId, tokensIn, tokensOut, costUsd, budgetId, metadata } = req.body;
-    if (!eventType) return sendBadRequest(res, "eventType is required");
     const orgId = req.user?.orgs?.[0]?.orgId ?? null;
     const [row] = await db.insert(costEventsTable).values({
       orgId,

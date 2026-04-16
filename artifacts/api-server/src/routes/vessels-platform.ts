@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { logger } from "../lib/logger";
 import {
   db,
   maritimeVesselsTable,
@@ -164,7 +165,7 @@ async function vesselAuditLog(
     actorUserId,
     organizationId: organizationId ?? null,
   }).catch((err: unknown) => {
-    console.error("[vesselAuditLog] Failed to write audit log:", actionType, entityType, entityId, err);
+    logger.error({ err, actionType, entityType, entityId }, "[vesselAuditLog] Failed to write audit log");
   });
 }
 

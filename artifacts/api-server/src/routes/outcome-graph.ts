@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { logger } from "../lib/logger";
 import {
   db,
   outcomeGraphTable,
@@ -72,7 +73,7 @@ outcomeGraphRouter.post("/outcome-graph/recommendations", async (req: Request, r
 
     return res.status(201).json({ success: true, data: row });
   } catch (err) {
-    console.error("POST /outcome-graph/recommendations error:", err);
+    logger.error({ err }, "POST /outcome-graph/recommendations error:");
     return res.status(500).json({ error: "Failed to record recommendation" });
   }
 });
@@ -115,7 +116,7 @@ outcomeGraphRouter.post("/outcome-graph/recommendations/:id/decision", async (re
 
     return res.json({ success: true, data: updated });
   } catch (err) {
-    console.error("POST /outcome-graph/recommendations/:id/decision error:", err);
+    logger.error({ err }, "POST /outcome-graph/recommendations/:id/decision error:");
     return res.status(500).json({ error: "Failed to record decision" });
   }
 });
@@ -153,7 +154,7 @@ outcomeGraphRouter.post("/outcome-graph/recommendations/:id/outcome", async (req
 
     return res.json({ success: true, data: updated });
   } catch (err) {
-    console.error("POST /outcome-graph/recommendations/:id/outcome error:", err);
+    logger.error({ err }, "POST /outcome-graph/recommendations/:id/outcome error:");
     return res.status(500).json({ error: "Failed to record outcome" });
   }
 });
@@ -185,7 +186,7 @@ outcomeGraphRouter.get("/outcome-graph/recommendations", async (req: Request, re
     const rows = conditions.length > 0 ? await q.where(and(...conditions)) : await q;
     return res.json({ success: true, data: rows, total: rows.length });
   } catch (err) {
-    console.error("GET /outcome-graph/recommendations error:", err);
+    logger.error({ err }, "GET /outcome-graph/recommendations error:");
     return res.status(500).json({ error: "Failed to list outcomes" });
   }
 });
@@ -214,7 +215,7 @@ outcomeGraphRouter.get("/outcome-graph/stats", async (req: Request, res: Respons
 
     return res.json({ success: true, data: rows });
   } catch (err) {
-    console.error("GET /outcome-graph/stats error:", err);
+    logger.error({ err }, "GET /outcome-graph/stats error:");
     return res.status(500).json({ error: "Failed to get outcome stats" });
   }
 });
@@ -242,7 +243,7 @@ outcomeGraphRouter.post("/outcome-graph/learning-jobs", requireRole("admin", "su
 
     return res.status(201).json({ success: true, data: job });
   } catch (err) {
-    console.error("POST /outcome-graph/learning-jobs error:", err);
+    logger.error({ err }, "POST /outcome-graph/learning-jobs error:");
     return res.status(500).json({ error: "Failed to create learning job" });
   }
 });
@@ -262,7 +263,7 @@ outcomeGraphRouter.get("/outcome-graph/learning-jobs", requireRole("admin", "sup
     const rows = conditions.length > 0 ? await q.where(and(...conditions)) : await q;
     return res.json({ success: true, data: rows });
   } catch (err) {
-    console.error("GET /outcome-graph/learning-jobs error:", err);
+    logger.error({ err }, "GET /outcome-graph/learning-jobs error:");
     return res.status(500).json({ error: "Failed to list learning jobs" });
   }
 });

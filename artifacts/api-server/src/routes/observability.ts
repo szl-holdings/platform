@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import { services } from "@szl-holdings/services";
+import { logger } from "../lib/logger";
 import { MetricCollector, serverTelemetry, clientTelemetry } from "@szl-holdings/observability";
 import type { WebVitalsReport } from "@szl-holdings/observability";
 import { ALL_CONFIGS, getConfigBySlug } from "@szl-holdings/observability/configs";
@@ -202,7 +203,7 @@ router.post("/observability/client-errors", (req, res) => {
     },
   });
 
-  console.error(`[ClientError] ${body.app}: ${String(body.message || "").slice(0, 200)} (${body.errorId})`);
+  logger.error({ app: body.app, errorId: body.errorId, url: body.url }, `[ClientError] ${String(body.message || "").slice(0, 200)}`);
   res.status(204).end();
 });
 
@@ -224,7 +225,7 @@ router.post("/observability/error-feedback", (req, res) => {
     },
   });
 
-  console.info(`[ErrorFeedback] ${body.app}: ${String(body.description || "").slice(0, 200)} (${body.errorId})`);
+  logger.info({ app: body.app, errorId: body.errorId, url: body.url }, `[ErrorFeedback] ${String(body.description || "").slice(0, 200)}`);
   res.status(204).end();
 });
 

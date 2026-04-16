@@ -1,9 +1,13 @@
+import pino from "pino";
 import type { SensitivityLevel, RagSourceType } from "./types.js";
+
+const logger = pino({ name: "rag-vector-store", level: process.env.LOG_LEVEL ?? "info" });
 
 export type { SensitivityLevel, RagSourceType };
 
 export interface RagChunk {
   id: string;
+  tenantId?: string | null;
   content: string;
   source: string;
   sourceType: RagSourceType;
@@ -41,9 +45,10 @@ export async function upsertChunk(chunk: Omit<RagChunk, "createdAt" | "updatedAt
     const embeddingLiteral = chunk.embedding ? toVectorLiteral(chunk.embedding) : null;
     await pool.query(
       `INSERT INTO rag_knowledge_chunks
-        (id, content, source, source_type, domain, sensitivity_level, object_id, chunk_index, chunk_hash, metadata, embedding, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::vector, NOW(), NOW())
+        (id, tenant_id, content, source, source_type, domain, sensitivity_level, object_id, chunk_index, chunk_hash, metadata, embedding, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::vector, NOW(), NOW())
        ON CONFLICT (id) DO UPDATE SET
+         tenant_id = EXCLUDED.tenant_id,
          content = EXCLUDED.content,
          source = EXCLUDED.source,
          metadata = EXCLUDED.metadata,
@@ -51,6 +56,7 @@ export async function upsertChunk(chunk: Omit<RagChunk, "createdAt" | "updatedAt
          updated_at = NOW()`,
       [
         chunk.id,
+        chunk.tenantId ?? null,
         chunk.content,
         chunk.source,
         chunk.sourceType,
@@ -64,7 +70,7 @@ export async function upsertChunk(chunk: Omit<RagChunk, "createdAt" | "updatedAt
       ],
     );
   } catch (err) {
-    console.warn("[rag-vector-store] Failed to upsert chunk:", err);
+    logger.error({ err }, "Failed to upsert chunk");
   }
 }
 
@@ -76,6 +82,7 @@ export async function upsertChunksBatch(chunks: Array<Omit<RagChunk, "createdAt"
 
 export interface SemanticSearchOptions {
   queryEmbedding: number[];
+  tenantId?: string;
   topK?: number;
   domains?: string[];
   maxSensitivityLevel?: SensitivityLevel;
@@ -83,12 +90,18 @@ export interface SemanticSearchOptions {
 }
 
 export async function semanticSearch(opts: SemanticSearchOptions): Promise<RagSearchResult[]> {
-  const { queryEmbedding, topK = 12, domains, maxSensitivityLevel = "restricted", sourceTypes } = opts;
+  const { queryEmbedding, tenantId, topK = 12, domains, maxSensitivityLevel = "restricted", sourceTypes } = opts;
   const allowedLevels = SENSITIVITY_ORDER.slice(0, SENSITIVITY_ORDER.indexOf(maxSensitivityLevel) + 1);
   const conditions: string[] = [`sensitivity_level = ANY($2)`, `embedding IS NOT NULL`];
   const params: unknown[] = [toVectorLiteral(queryEmbedding), allowedLevels];
   let paramIdx = 3;
 
+  if (!tenantId) {
+    logger.warn("semanticSearch called without tenantId — returning empty (fail-closed)");
+    return [];
+  }
+  conditions.push(`tenant_id = $${paramIdx++}`);
+  params.push(tenantId);
   if (domains && domains.length > 0) {
     conditions.push(`domain = ANY($${paramIdx++})`);
     params.push(domains);
@@ -111,13 +124,14 @@ export async function semanticSearch(opts: SemanticSearchOptions): Promise<RagSe
     );
     return result.rows.map(r => rowToResult(r, "semantic"));
   } catch (err) {
-    console.warn("[rag-vector-store] Semantic search failed:", err);
+    logger.error({ err }, "Semantic search failed");
     return [];
   }
 }
 
 export interface KeywordSearchOptions {
   query: string;
+  tenantId?: string;
   topK?: number;
   domains?: string[];
   maxSensitivityLevel?: SensitivityLevel;
@@ -125,7 +139,7 @@ export interface KeywordSearchOptions {
 }
 
 export async function keywordSearch(opts: KeywordSearchOptions): Promise<RagSearchResult[]> {
-  const { query, topK = 12, domains, maxSensitivityLevel = "restricted", sourceTypes } = opts;
+  const { query, tenantId, topK = 12, domains, maxSensitivityLevel = "restricted", sourceTypes } = opts;
   const terms = query.toLowerCase().split(/\s+/).filter(t => t.length > 2);
   if (terms.length === 0) return [];
 
@@ -135,6 +149,12 @@ export async function keywordSearch(opts: KeywordSearchOptions): Promise<RagSear
   const params: unknown[] = [tsQuery, allowedLevels];
   let paramIdx = 3;
 
+  if (!tenantId) {
+    logger.warn("keywordSearch called without tenantId — returning empty (fail-closed)");
+    return [];
+  }
+  conditions.push(`tenant_id = $${paramIdx++}`);
+  params.push(tenantId);
   if (domains && domains.length > 0) {
     conditions.push(`domain = ANY($${paramIdx++})`);
     params.push(domains);
@@ -157,7 +177,7 @@ export async function keywordSearch(opts: KeywordSearchOptions): Promise<RagSear
     );
     return result.rows.map(r => rowToResult(r, "keyword"));
   } catch (err) {
-    console.warn("[rag-vector-store] Keyword search failed:", err);
+    logger.error({ err }, "Keyword search failed");
     return [];
   }
 }
@@ -165,6 +185,7 @@ export async function keywordSearch(opts: KeywordSearchOptions): Promise<RagSear
 export interface HybridSearchOptions {
   query: string;
   queryEmbedding: number[] | null;
+  tenantId?: string;
   topK?: number;
   domains?: string[];
   maxSensitivityLevel?: SensitivityLevel;
@@ -174,13 +195,13 @@ export interface HybridSearchOptions {
 
 export async function hybridSearch(opts: HybridSearchOptions): Promise<{ results: RagSearchResult[]; totalIndexed: number; latencyMs: number }> {
   const start = Date.now();
-  const { query, queryEmbedding, topK = 10, semanticWeight = 0.7 } = opts;
+  const { query, queryEmbedding, tenantId, topK = 10, semanticWeight = 0.7 } = opts;
 
   const [semanticResults, keywordResults] = await Promise.all([
     queryEmbedding
-      ? semanticSearch({ queryEmbedding, topK: topK * 2, domains: opts.domains, maxSensitivityLevel: opts.maxSensitivityLevel, sourceTypes: opts.sourceTypes })
+      ? semanticSearch({ queryEmbedding, tenantId, topK: topK * 2, domains: opts.domains, maxSensitivityLevel: opts.maxSensitivityLevel, sourceTypes: opts.sourceTypes })
       : Promise.resolve([]),
-    keywordSearch({ query, topK: topK * 2, domains: opts.domains, maxSensitivityLevel: opts.maxSensitivityLevel, sourceTypes: opts.sourceTypes }),
+    keywordSearch({ query, tenantId, topK: topK * 2, domains: opts.domains, maxSensitivityLevel: opts.maxSensitivityLevel, sourceTypes: opts.sourceTypes }),
   ]);
 
   const merged = new Map<string, RagSearchResult>();
@@ -198,19 +219,29 @@ export async function hybridSearch(opts: HybridSearchOptions): Promise<{ results
   }
 
   const results = [...merged.values()].sort((a, b) => b.score - a.score).slice(0, topK);
-  const totalIndexed = await getChunkCount();
+  const totalIndexed = await getChunkCount({ tenantId, sourceType: opts.sourceTypes?.[0] });
 
   return { results, totalIndexed, latencyMs: Date.now() - start };
 }
 
-export async function getChunkCount(sourceType?: RagSourceType): Promise<number> {
+export async function getChunkCount(opts?: { tenantId?: string; sourceType?: RagSourceType }): Promise<number> {
   try {
     const pool = await getPool();
+    const { tenantId, sourceType } = opts ?? {};
+    const conditions: string[] = [];
+    const params: unknown[] = [];
+    if (tenantId) {
+      params.push(tenantId);
+      conditions.push(`tenant_id = $${params.length}`);
+    }
+    if (sourceType) {
+      params.push(sourceType);
+      conditions.push(`source_type = $${params.length}`);
+    }
+    const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
     const result = await pool.query(
-      sourceType
-        ? `SELECT COUNT(*)::int AS total FROM rag_knowledge_chunks WHERE source_type = $1`
-        : `SELECT COUNT(*)::int AS total FROM rag_knowledge_chunks`,
-      sourceType ? [sourceType] : [],
+      `SELECT COUNT(*)::int AS total FROM rag_knowledge_chunks ${where}`,
+      params,
     );
     return (result.rows[0] as { total: number }).total;
   } catch {
@@ -268,6 +299,7 @@ export async function deleteChunksByObjectId(objectId: string, sourceType?: RagS
 function rowToResult(r: Record<string, unknown>, defaultMatchType: "semantic" | "keyword"): RagSearchResult {
   return {
     id: r.id as string,
+    tenantId: (r.tenant_id as string | null) ?? null,
     content: r.content as string,
     source: r.source as string,
     sourceType: r.source_type as RagSourceType,

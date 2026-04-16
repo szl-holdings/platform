@@ -1,7 +1,9 @@
 import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import crypto from "crypto";
+import { z } from "zod";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
+import { validateBody } from "../lib/validation";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { db } from "@szl-holdings/db";
 import {
@@ -46,6 +48,50 @@ function buildMultiTenantLoginUrl(azureTenantId: string, redirectUri: string): s
   const encodedRedirect = encodeURIComponent(redirectUri);
   return `https://login.microsoftonline.com/${azureTenantId}/oauth2/v2.0/authorize?client_id=${appClientId}&response_type=code&redirect_uri=${encodedRedirect}&scope=openid+email+profile+offline_access+User.Read`;
 }
+
+const createTenantSchema = z.object({
+  azureTenantId: z.string().min(1).max(100),
+  displayName: z.string().min(1).max(200),
+  domain: z.string().max(200).optional(),
+  organizationId: z.union([z.number().int().positive(), z.string().regex(/^\d+$/)]).optional(),
+  config: z.record(z.unknown()).optional(),
+});
+
+const updateTenantStatusSchema = z.object({
+  status: z.enum(["pending", "active", "suspended"]).optional(),
+  adminConsentGranted: z.enum(["pending", "granted", "revoked"]).optional(),
+}).refine(d => d.status !== undefined || d.adminConsentGranted !== undefined, {
+  message: "status or adminConsentGranted is required",
+});
+
+const updateProvisioningConfigSchema = z.object({
+  autoProvisionUsers: z.boolean().optional(),
+  defaultRole: z.string().max(50).optional(),
+  syncGroupsEnabled: z.boolean().optional(),
+  scimEnabled: z.boolean().optional(),
+  sessionTimeoutHours: z.number().int().positive().max(720).optional(),
+});
+
+const createDataverseConnectionSchema = z.object({
+  orgUrl: z.string().url().max(500),
+  orgName: z.string().max(200).optional(),
+  authMethod: z.enum(["client_credentials", "delegated"]).default("client_credentials"),
+  clientId: z.string().max(200).optional(),
+  clientSecret: z.string().max(500).optional(),
+  syncConfig: z.object({
+    entities: z.array(z.string()).optional(),
+    syncIntervalMinutes: z.number().int().positive().max(10080).optional(),
+  }).optional(),
+});
+
+const deprovisionUserSchema = z.object({
+  userId: z.union([z.number().int().positive(), z.string().regex(/^\d+$/)]),
+  reason: z.string().max(500).optional(),
+});
+
+const linkOrganizationSchema = z.object({
+  organizationId: z.union([z.number().int().positive(), z.string().regex(/^\d+$/)]),
+});
 
 router.get(
   "/admin/tenants",
@@ -97,6 +143,7 @@ router.post(
   tenantRateLimit,
   authMiddleware(),
   requireRole("admin"),
+  validateBody(createTenantSchema),
   async (req: Request, res: Response) => {
     try {
       const body = req.body ?? {};
@@ -220,6 +267,7 @@ router.patch(
   tenantRateLimit,
   authMiddleware(),
   requireRole("admin"),
+  validateBody(updateTenantStatusSchema),
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
@@ -277,6 +325,7 @@ router.patch(
   tenantRateLimit,
   authMiddleware(),
   requireRole("admin"),
+  validateBody(updateProvisioningConfigSchema),
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
@@ -388,6 +437,7 @@ router.post(
   tenantRateLimit,
   authMiddleware(),
   requireRole("admin"),
+  validateBody(createDataverseConnectionSchema),
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
@@ -777,6 +827,7 @@ router.post(
   tenantRateLimit,
   authMiddleware(),
   requireRole("admin"),
+  validateBody(deprovisionUserSchema),
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
@@ -925,6 +976,7 @@ router.patch(
   tenantRateLimit,
   authMiddleware(),
   requireRole("admin"),
+  validateBody(linkOrganizationSchema),
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
