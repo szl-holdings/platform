@@ -7,7 +7,7 @@ const FOOTER_COLS = [
       { label: "Platform Overview", href: "/platform" },
       { label: "Lyte — Command", href: "/lyte" },
       { label: "Alloy — Execution", href: "/alloy-fabric" },
-      { label: "CORTEX — Mobile", href: "/cortex" },
+      { label: "CORTEX — Mobile", href: "https://cortex.szlholdings.com" },
       { label: "Architecture", href: "/architecture" },
     ],
   },
@@ -179,18 +179,21 @@ export function SiteFooter() {
                 {col.heading}
               </h4>
               <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-                {col.links.map((link) => (
+                {col.links.map((link) => {
+                  const isExternal = link.href.startsWith("http");
+                  const linkStyle = { fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", transition: "color 0.18s ease", display: "block", textDecoration: "none" };
+                  const onEnter = (e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; };
+                  const onLeave = (e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; };
+                  return (
                   <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", transition: "color 0.18s ease", display: "block", textDecoration: "none" }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-                    >
-                      {link.label}
-                    </Link>
+                    {isExternal ? (
+                      <a href={link.href} target="_blank" rel="noopener noreferrer" style={linkStyle} onMouseEnter={onEnter} onMouseLeave={onLeave}>{link.label}</a>
+                    ) : (
+                      <Link href={link.href} style={linkStyle} onMouseEnter={onEnter} onMouseLeave={onLeave}>{link.label}</Link>
+                    )}
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             </div>
           ))}
