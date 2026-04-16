@@ -18,6 +18,7 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { WorkspaceTrigger } from "@/components/WorkspaceSwitcher";
+import { router } from "expo-router";
 import { apiFetch } from "@/lib/apiClient";
 
 const ACCENT = "#c9a84c";
@@ -482,6 +483,25 @@ export default function CortexIntelligenceScreen() {
             />
           }
         >
+          <TouchableOpacity
+            onPress={() => router.navigate("/(shell)/intelligence/pulse")}
+            activeOpacity={0.85}
+            style={[styles.pulseCard, { backgroundColor: "#0a0a0a", borderColor: "#c9a84c" }]}
+          >
+            <View style={styles.pulseCardInner}>
+              <View>
+                <Text style={styles.pulseCardLabel}>AI EXECUTIVE BRIEFING</Text>
+                <Text style={styles.pulseCardTitle}>Pulse Intelligence Brief</Text>
+                <Text style={[styles.pulseCardSub, { color: "#9ca3af" }]}>
+                  Today's strategic summary · Agent-attributed · Confidence-scored
+                </Text>
+              </View>
+              <View style={[styles.pulseCardBadge, { backgroundColor: "#c9a84c22", borderColor: "#c9a84c" }]}>
+                <Text style={[styles.pulseCardBadgeText, { color: "#c9a84c" }]}>OPEN →</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+
           {stats && (
             <View style={styles.statsRow}>
               {[
@@ -718,6 +738,45 @@ const styles = StyleSheet.create({
   tabBadgeText: { fontSize: 10, fontWeight: "700", color: "#000000" },
   scroll: { flex: 1 },
   scrollContent: { padding: 16, gap: 8 },
+  pulseCard: {
+    borderRadius: 10,
+    borderWidth: 1,
+    padding: 14,
+    marginBottom: 8,
+  },
+  pulseCardInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  pulseCardLabel: {
+    fontSize: 9,
+    fontWeight: "700",
+    color: "#c9a84c",
+    letterSpacing: 1.2,
+    marginBottom: 4,
+  },
+  pulseCardTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#ffffff",
+    marginBottom: 2,
+  },
+  pulseCardSub: {
+    fontSize: 11,
+    lineHeight: 15,
+  },
+  pulseCardBadge: {
+    borderRadius: 6,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  pulseCardBadgeText: {
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+  },
   statsRow: { flexDirection: "row", gap: 8, marginBottom: 8 },
   statCard: {
     flex: 1,

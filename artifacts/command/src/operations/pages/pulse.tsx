@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion as m } from "framer-motion";
 import { Activity, Zap, AlertTriangle, CheckCircle, Clock, BarChart3, Workflow, Bell, Cpu, Eye, Gauge, ArrowUpRight } from "lucide-react";
 import { ParticleField, PulseMetricCard, PulseThroughputChart, PulseHeader, PulseHealthGrid, PulseEventFeed, PulseFlowDiagram, PulseTechStack } from "@szl-holdings/shared-ui";
+import { PulseBriefingPanel } from "@szl-holdings/shared-ui/pulse-briefing-panel";
 
 const AGENTS = [
   { name: "Lyte Observer", domain: "signals" },
@@ -62,6 +63,9 @@ export default function LytePulse() {
       <ParticleField accentColor="#f59e0b" />
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <PulseHeader title="AIOps Pulse" subtitle={`Observability command — ${signalCount.toLocaleString()} signals processed · 6 ops agents`} accentColor="#f59e0b" />
+        <div style={{ marginBottom: 20 }}>
+          <PulseBriefingPanel domain="platform" />
+        </div>
         <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-lg overflow-hidden mb-5 p-3"
           style={{ background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.04)" }}>
           <div className="flex items-center justify-between mb-2">

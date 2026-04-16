@@ -38,6 +38,7 @@
     "./UserButton": "./src/UserButton.tsx",
     "./doctrine-layer-badge": "./src/doctrine-layer-badge.tsx",
     "./explainability-panel": "./src/explainability-panel.tsx",
+    "./pulse-briefing-panel": "./src/pulse-briefing-panel.tsx",
     "./utils": "./src/utils.ts",
     "./hooks/use-mobile": "./src/hooks/use-mobile.tsx",
     "./hooks/use-toast": "./src/hooks/use-toast.ts",

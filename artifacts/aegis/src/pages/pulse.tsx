@@ -8,6 +8,7 @@ import {
   ParticleField, PulseMetricCard, PulseThroughputChart, PulseHeader,
   PulseHealthGrid, PulseEventFeed, PulseFlowDiagram, PulseTechStack
 } from "@szl-holdings/shared-ui";
+import { PulseBriefingPanel } from "@szl-holdings/shared-ui/pulse-briefing-panel";
 
 const AGENTS = [
   { name: "Sentinel SOC", domain: "soc" },
@@ -107,6 +108,9 @@ export default function AegisPulse() {
       <ParticleField accentColor="#3b82f6" />
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <PulseHeader title="Aegis Threat Pulse" subtitle={`SOC operations — ${totalThreats.toLocaleString()} threats processed · 6 defense agents active`} accentColor="#3b82f6" />
+        <div style={{ marginBottom: 20 }}>
+          <PulseBriefingPanel domain="security" />
+        </div>
 
         <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}
           className="rounded-lg overflow-hidden mb-5 p-3"

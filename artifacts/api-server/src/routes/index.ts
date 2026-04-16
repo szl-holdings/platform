@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import pulseBriefingRouter from "./pulse";
+import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import * as core from "./groups/core";
 import * as vessels from "./groups/vessels";
 import * as security from "./groups/security";
@@ -16,6 +18,8 @@ import * as decisions from "./groups/decisions";
 import * as domainAtlas from "./groups/domain-atlas";
 
 const router: IRouter = Router();
+
+router.use("/pulse", perUserApiSlidingLimiter, pulseBriefingRouter);
 
 core.register(router);
 vessels.register(router);

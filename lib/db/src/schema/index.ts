@@ -38,6 +38,7 @@ export * from "./platform_events";
 export * from "./alloy";
 export * from "./terra";
 export * from "./szl_canonical";
+export * from "./pulse";
 export * from "./canonical";
 export * from "./maritime";
 export * from "./capital_readiness";

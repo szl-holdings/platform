@@ -12,6 +12,7 @@ import {
   AgentNeuralMesh, DomainHealthGrid, CrossDomainIntelFlow,
   AppDetailPanel, ThroughputChart,
 } from "./pulse-components";
+import { PulseBriefingPanel } from "@szl-holdings/shared-ui/pulse-briefing-panel";
 
 const MetricCard = memo(function MetricCard({ label, value, icon: Icon, color, trend, suffix, delay }: {
   label: string; value: number; icon: typeof Cpu; color: string; trend: string; suffix?: string; delay: number;
@@ -111,6 +112,10 @@ export default function PulsePage() {
           <MetricCard label="Active Agents" value={12} icon={Brain} color="#8b5cf6" trend="Neural mesh online" delay={240} />
           <MetricCard label="Signals / hr" value={totalEvents} icon={Signal} color="#f59e0b" trend="+23% throughput" delay={320} />
           <MetricCard label="Domains" value={9} icon={Eye} color="#10b981" trend="Full coverage" delay={400} />
+        </div>
+
+        <div style={{ marginBottom: 20 }}>
+          <PulseBriefingPanel domain="executive" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">

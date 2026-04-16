@@ -18,6 +18,7 @@ const PROXY_ROUTES = [
   { prefix: "/command/", port: 3102 },
   { prefix: "/terra/", port: 6099 },
   { prefix: "/vessels/", port: 6899 },
+  { prefix: "/pulse/", port: 5201 },
 ];
 
 function sharedProxyPlugin() {

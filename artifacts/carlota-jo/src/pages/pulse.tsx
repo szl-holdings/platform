@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion as m } from "framer-motion";
 import { Sparkles, Users, Calendar, TrendingUp, BarChart3, MessageSquare, Target, Heart, Star, Award, Activity, Briefcase } from "lucide-react";
 import { ParticleField, PulseMetricCard, PulseThroughputChart, PulseHeader, PulseHealthGrid, PulseEventFeed, PulseFlowDiagram, PulseTechStack } from "@szl-holdings/shared-ui";
+import { PulseBriefingPanel } from "@szl-holdings/shared-ui/pulse-briefing-panel";
 
 const AGENTS = [
   { name: "Compass CJ", domain: "strategy" },
@@ -54,6 +55,9 @@ export default function CarlotaJoPulse() {
       <ParticleField accentColor="#c4a265" />
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <PulseHeader title="Advisory Pulse" subtitle={`Client intelligence — ${engagements} active engagements · 5 advisory agents`} accentColor="#c4a265" />
+        <div style={{ marginBottom: 20 }}>
+          <PulseBriefingPanel domain="financial" />
+        </div>
         <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-lg overflow-hidden mb-5 p-3"
           style={{ background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.04)" }}>
           <div className="flex items-center justify-between mb-2">
