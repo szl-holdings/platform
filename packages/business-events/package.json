@@ -1,0 +1,23 @@
+{
+  "name": "@szl-holdings/business-events",
+  "version": "0.0.0",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szl-holdings/szl-holdings-platform.git",
+    "directory": "packages/business-events"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./emitter": "./src/emitter/index.ts",
+    "./adapters": "./src/adapters/index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  }
+}

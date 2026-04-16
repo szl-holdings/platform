@@ -1,0 +1,24 @@
+{
+  "name": "@szl-holdings/telemetry-standards",
+  "version": "0.0.0",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szl-holdings/szl-holdings-platform.git",
+    "directory": "packages/telemetry-standards"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./genai": "./src/genai/index.ts",
+    "./business": "./src/business/index.ts",
+    "./http": "./src/http/index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  }
+}

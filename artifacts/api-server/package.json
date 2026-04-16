@@ -33,6 +33,8 @@
     "@szl-holdings/intelligence-feeds": "workspace:*",
     "@szl-holdings/monte-carlo": "workspace:*",
     "@szl-holdings/observability": "workspace:*",
+    "@szl-holdings/business-events": "workspace:*",
+    "@szl-holdings/telemetry-standards": "workspace:*",
     "@szl-holdings/prism-bus": "workspace:*",
     "@szl-holdings/proof-chain": "workspace:*",
     "@szl-holdings/pulse-evals": "workspace:*",

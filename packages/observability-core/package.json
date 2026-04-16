@@ -1,0 +1,28 @@
+{
+  "name": "@szl-holdings/observability-core",
+  "version": "0.0.0",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szl-holdings/szl-holdings-platform.git",
+    "directory": "packages/observability-core"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./middleware": "./src/middleware/index.ts",
+    "./context": "./src/context/index.ts",
+    "./correlation": "./src/correlation/index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/express": "^5.0.0"
+  },
+  "dependencies": {
+    "@szl-holdings/observability": "workspace:*"
+  }
+}

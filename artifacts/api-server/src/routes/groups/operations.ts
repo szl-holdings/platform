@@ -6,6 +6,7 @@ import adminRouter from "../admin";
 import observabilityRouter from "../observability";
 import opsManagementRouter from "../ops-management";
 import commandRouter from "../command";
+import businessEventsRouter from "../business-events-ingestion";
 
 const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
@@ -22,4 +23,7 @@ export function register(router: IRouter): void {
   router.use("/command", _readLimiter);
   router.use("/command", _writeLimiter);
   router.use("/command", commandRouter);
+
+  router.use("/business-events", _writeLimiter);
+  router.use(businessEventsRouter);
 }

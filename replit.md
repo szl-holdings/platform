@@ -26,7 +26,29 @@ The platform is built as a pnpm monorepo using TypeScript 5.9, React 19, Vite, a
 ### Monorepo Structure
 -   **15 artifact dirs** in `artifacts/` — 7 canonical web, 1 canonical mobile, 1 internal, 5 archived, 1 shell
 -   **34 lib packages** in `lib/` — shared infrastructure and platform primitives
+-   **3 packages** in `packages/` — business observability fabric (observability-core, business-events, telemetry-standards)
 -   **569 DB tables**, 116 schema files in `lib/db/src/schema/`
+
+### Business Observability Fabric (packages/)
+
+Three new packages implement the ATLAS business telemetry layer:
+
+| Package | Path | Purpose |
+|---------|------|---------|
+| `@szl-holdings/observability-core` | `packages/observability-core` | OTEL setup, AsyncLocalStorage context, correlation ID propagation, Express middleware |
+| `@szl-holdings/business-events` | `packages/business-events` | Typed ATLAS event emitters (11 event classes), domain KPI adapters, event bus |
+| `@szl-holdings/telemetry-standards` | `packages/telemetry-standards` | GenAI semantic convention constants, business/HTTP attribute name contracts |
+
+**Architecture docs:**
+- `docs/observability/business-observability-spec.md` — ATLAS event contract, API endpoints, ingestion adapters
+- `docs/observability/genai-observability-spec.md` — GenAI span types, OTel semantic conventions, prompt trace contract
+
+**API server routes added:**
+- `POST /api/business-events/kpi` — ingest batch KPI records → ATLAS events
+- `POST /api/business-events/transactions` — ingest domain transactions → ATLAS events
+- `POST /api/business-events/emit` — emit typed ATLAS events directly
+- `GET /api/business-events/summary` — aggregated event counts by class/domain
+- `GET /api/business-events/events` — recent raw events (ops/admin)
 
 ### Canonical Artifacts (Active)
 | Artifact | Path | Files | Purpose |
