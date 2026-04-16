@@ -219,6 +219,92 @@ The two primitives form a trust sandwich:
 
 ---
 
+## User-Facing Trust UI
+
+The trust primitives are now surfaced in product UI across Aegis, Terra, and Vessels through reusable React components in `lib/shared-ui`:
+
+### ProofPanel Component
+
+Renders proof chain metadata inline in any AI output area:
+
+```tsx
+<ProofPanel
+  proof={{
+    sourceClass: "llm_generated",
+    confidenceScore: 0.87,
+    modelId: "gpt-4o",
+    reviewState: "approved",
+    exportSafetyState: "safe",
+    inputSources: [{ type: "threat_feed", id: "001", label: "CISA Advisory" }],
+    lineage: [{ label: "Raw logs ingested", sourceClass: "sensor_data" }],
+  }}
+  variant="inline"   // "inline" | "drawer" | "badge"
+  showActions        // enables Approve / Flag buttons for reviewers
+  onReview={(state) => reviewProof({ proofId, reviewState: state })}
+/>
+```
+
+**Variants:**
+- `"badge"` — compact inline chip with popover expansion (for AI output panels)
+- `"inline"` — full provenance card embedded in content
+- `"drawer"` — sidebar panel for detailed review
+
+### PolicyResult Component
+
+Shows policy evaluation outcomes with full context:
+
+```tsx
+<PolicyResult
+  decision={{
+    effect: "escalate",
+    reason: "Requires CISO approval for external notification",
+    escalationPath: ["SOC Lead", "Security Manager", "CISO"],
+    approvalHistory: [...],
+    whatNeedsToChange: ["CISO must approve", "Legal review required"],
+  }}
+  showDetails
+  onEscalate={() => triggerEscalation(requestId)}
+  onAppeal={(reason) => submitAppeal(requestId, reason)}
+/>
+```
+
+### AdminAuditTrail Component
+
+Full decision timeline with filtering, search, and immutable hash verification:
+
+```tsx
+<AdminAuditTrail
+  entries={auditEntries}
+  showFilters
+  domainLabel="Security Operations"
+/>
+```
+
+### SimulationCockpit Component
+
+Decision cockpit with scenario ranges, sensitivity analysis, cost-of-waiting, and predicted vs actual tracking:
+
+```tsx
+<SimulationCockpit
+  title="Incident Response Decision Cockpit"
+  scenarios={[worstCase, baseCase, bestCase]}
+  primaryMetricLabel="Time to Containment"
+  iterationsRun={10000}
+  confidenceLevel={0.95}
+  predictedVsActual={[...pastOutcomes]}
+/>
+```
+
+### Integration Points
+
+| App | Trust UI Location | URL |
+|-----|------------------|-----|
+| Aegis | Trust & Provenance Center | `/trust-provenance` |
+| Terra | Trust & Provenance Center | `/trust-provenance` |
+| Vessels | Trust & Provenance Center + Voyage Cockpit | `/trust-provenance` |
+
+---
+
 ## Related Documents
 
 | Document | Path |
@@ -227,4 +313,4 @@ The two primitives form a trust sandwich:
 | Decision simulation | [DECISION_SIMULATION.md](DECISION_SIMULATION.md) |
 | Access control matrix | [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) |
 | Security policy | [SECURITY.md](SECURITY.md) |
-| Trust center | [docs/trust/trust-center.md](docs/trust/trust-center.md) |
+| Trust center | [TRUST_CENTER_INDEX.md](TRUST_CENTER_INDEX.md) |

@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useStepUp } from "@/lib/use-step-up";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { ProofPanel, PolicyResultBanner } from "@szl-holdings/shared-ui";
 import {
   CheckCircle2, XCircle, Clock, AlertTriangle, FileText, Lock,
   ChevronDown, ChevronRight, Eye, Shield, UserCheck, Activity,
@@ -300,6 +301,44 @@ export default function DecisionConsole() {
               <div className="text-[10px] font-mono uppercase tracking-[0.15em] mb-3 text-white/40">Analytical Confidence</div>
               <ConfidenceBar value={selectedMock.confidence} />
             </div>
+          )}
+
+          {/* Proof Chain — provenance and review state for the selected decision */}
+          {!usingLive && (
+            <ProofPanel
+              proof={{
+                sourceClass: "human_authored",
+                confidenceScore: selectedMock.confidence / 100,
+                actorAttribution: selectedMock.analyst,
+                reviewState: selectedMock.approvalState === "approved" ? "approved"
+                  : selectedMock.approvalState === "rejected" ? "flagged" : "unreviewed",
+                exportSafetyState: selectedMock.sensitivityLabel === "RESTRICTED" ? "restricted" : "safe",
+                inputSources: selectedMock.evidence.map(ev => ({
+                  type: "evidence_file",
+                  id: ev.id,
+                  label: ev.name,
+                })),
+                lineage: selectedMock.auditChain.map(ac => ({
+                  label: `${ac.action} — ${ac.user} at ${ac.at}`,
+                  sourceClass: "human_authored" as const,
+                })),
+              }}
+              variant="inline"
+              showActions={selectedMock.approvalState === "pending"}
+            />
+          )}
+
+          {/* Policy Banner for pending approvals */}
+          {selectedMock.approvalState === "pending" && !usingLive && (
+            <PolicyResultBanner
+              decision={{
+                effect: "escalate",
+                allowed: false,
+                reason: `Confidence threshold at ${selectedMock.confidence}% meets escalation trigger. Requires ${selectedMock.approver} approval before actioning.`,
+                escalationPath: [selectedMock.approver],
+                whatNeedsToChange: [`${selectedMock.approver} must review and approve`, "Step-up verification required for approval"],
+              }}
+            />
           )}
 
           {/* Recommended Outcome / Description */}

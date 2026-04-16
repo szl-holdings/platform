@@ -71,6 +71,7 @@ const WhatChanged = lazy(() => import("@/pages/what-changed"));
 const DiligencePrep = lazy(() => import("@/pages/diligence-prep"));
 const ReadinessBoard = lazy(() => import("@/pages/readiness-board"));
 const ApprovalReview = lazy(() => import("@/pages/approval-review"));
+const TrustProvenancePage = lazy(() => import("@/pages/trust-provenance"));
 const DistressRadar = lazy(() => import("@/pages/distress-radar"));
 const NeighborhoodMomentum = lazy(() => import("@/pages/neighborhood-momentum"));
 const SellerMotivation = lazy(() => import("@/pages/seller-motivation"));
@@ -152,6 +153,7 @@ function PrivateRouter() {
         <Route path="/diligence-prep" component={DiligencePrep} />
         <Route path="/readiness-board" component={ReadinessBoard} />
         <Route path="/approval-review" component={ApprovalReview} />
+        <Route path="/trust-provenance" component={TrustProvenancePage} />
         <Route path="/distress-radar" component={DistressRadar} />
         <Route path="/neighborhood-momentum" component={NeighborhoodMomentum} />
         <Route path="/seller-motivation" component={SellerMotivation} />

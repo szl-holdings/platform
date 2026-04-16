@@ -164,6 +164,7 @@ const FleetWhatChangedPage = lazy(() => import("@/pages/fleet-what-changed"));
 const ExceptionQueuePage = lazy(() => import("@/pages/exception-queue"));
 const RouteRiskPage = lazy(() => import("@/pages/route-risk"));
 const VesselsApprovalReviewPage = lazy(() => import("@/pages/vessels-approval-review"));
+const TrustProvenancePage = lazy(() => import("@/pages/trust-provenance"));
 const DisruptionForecastPage = lazy(() => import("@/pages/disruption-forecast"));
 const DarkFleetEconomicsPage = lazy(() => import("@/pages/dark-fleet-economics"));
 const VoyagePnLPage = lazy(() => import("@/pages/voyage-pnl"));
@@ -404,6 +405,7 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
         { id: "exception-queue", label: "Exceptions", href: "/exception-queue", icon: <AlertTriangle className="w-3.5 h-3.5" /> },
         { id: "route-risk", label: "Route Risk", href: "/route-risk", icon: <Navigation className="w-3.5 h-3.5" /> },
         { id: "approval-review", label: "Review & Approval", href: "/approval-review", icon: <Shield className="w-3.5 h-3.5" /> },
+        { id: "trust-provenance", label: "Trust & Provenance", href: "/trust-provenance", icon: <Shield className="w-3.5 h-3.5" /> },
         ...legacyNavItems
           .filter(({ path }) => !["/intelligence", "/agent-insights"].includes(path))
           .map(({ path, label, icon: Icon }) => ({ id: path + "-leg", label, href: path, icon: <Icon className="w-3 h-3" /> })),
@@ -603,6 +605,7 @@ function DashboardRouter() {
         <Route path="/exception-queue" component={ExceptionQueuePage} />
         <Route path="/route-risk" component={RouteRiskPage} />
         <Route path="/approval-review" component={VesselsApprovalReviewPage} />
+        <Route path="/trust-provenance" component={TrustProvenancePage} />
         <Route path="/disruption-forecast" component={DisruptionForecastPage} />
         <Route path="/dark-fleet-economics" component={DarkFleetEconomicsPage} />
         <Route path="/voyage-pnl" component={VoyagePnLPage} />

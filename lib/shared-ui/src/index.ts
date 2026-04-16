@@ -346,3 +346,42 @@ export * from "./onboarding";
 export { LiveClock, type LiveClockProps } from "./live-clock";
 export { AnimatedCounter, type AnimatedCounterProps } from "./animated-counter";
 export { useInterval } from "./use-interval";
+
+export {
+  ProofPanel,
+  ProofPanelBadge,
+  ProofPanelRow,
+  type ProofPanelData,
+  type ProofPanelProps,
+  type ProvenanceSourceClass,
+  type ProofReviewState,
+  type ProofExportSafetyState,
+  type ProofInputSource,
+} from "./proof-panel";
+
+export {
+  PolicyResult,
+  PolicyResultBanner,
+  PolicyTimelineEntry,
+  type PolicyDecisionRecord,
+  type PolicyResultProps,
+  type PolicyEffect,
+} from "./policy-result";
+
+export {
+  SimulationCockpit,
+  SimulationCockpitCompact,
+  type SimulationCockpitProps,
+  type SimulationScenario,
+  type ScenarioRange,
+  type SensitivityDriver,
+  type PredictedVsActual,
+} from "./simulation-cockpit";
+
+export {
+  AdminAuditTrail,
+  type AdminAuditTrailProps,
+  type AuditTrailEntry,
+  type AuditActorType,
+  type AuditActionType,
+} from "./admin-audit-trail";

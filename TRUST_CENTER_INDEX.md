@@ -36,8 +36,34 @@ See the live Trust Center at `/trust-center` on the SZL Holdings platform.
 | Data Classification | [docs/DATA_CLASSIFICATION.md](docs/DATA_CLASSIFICATION.md) | Data sensitivity tiers |
 | Third-Party Register | [docs/THIRD_PARTY_REGISTER.md](docs/THIRD_PARTY_REGISTER.md) | All third-party services and data access |
 | Backup & Recovery | [BACKUP_AND_RECOVERY.md](BACKUP_AND_RECOVERY.md) | Backup strategy and RTO/RPO |
+| Data Retention | [DATA-RETENTION.md](DATA-RETENTION.md) | Retention periods, deletion procedures, legal holds |
 | Incident Severity Matrix | [INCIDENT_SEVERITY_MATRIX.md](INCIDENT_SEVERITY_MATRIX.md) | Incident classification and response |
 | Incident Response | [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) | Full incident handling procedures |
+
+---
+
+## Trust & Provenance UI
+
+Live trust surfaces available in each product application:
+
+| Product | Trust Center Page | URL | Key Features |
+|---------|------------------|-----|-------------|
+| Aegis | Trust & Provenance Center | `/aegis/trust-provenance` | Proof chains, policy governance, decision audit trail, incident simulation cockpit |
+| Terra | Trust & Provenance Center | `/terra/trust-provenance` | AI valuation provenance, deal policy governance, deal simulation cockpit |
+| Vessels | Trust & Provenance Center | `/vessels/trust-provenance` | Sanctions assessment proofs, voyage P&L simulation cockpit, compliance audit trail |
+
+### Shared UI Components
+
+All trust surfaces use reusable React components from `lib/shared-ui`:
+
+| Component | Purpose | Export |
+|-----------|---------|--------|
+| `ProofPanel` | Renders proof chain metadata, source lineage, confidence, review state | `"inline" \| "drawer" \| "badge"` |
+| `PolicyResult` | Shows policy evaluation results, escalation paths, approval history, remediation guidance | `"card" \| "inline" \| "banner"` |
+| `SimulationCockpit` | Decision cockpit with best/base/worst ranges, sensitivity analysis, cost-of-waiting | Full page or embedded |
+| `AdminAuditTrail` | Immutable decision timeline with filtering, search, and hash verification | Admin/operator views |
+
+See [PROOF_AND_POLICY_MODEL.md](PROOF_AND_POLICY_MODEL.md) for component usage and integration documentation.
 
 ---
 

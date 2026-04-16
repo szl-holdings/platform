@@ -161,11 +161,95 @@ This creates a flywheel: the more decisions the platform processes, the more acc
 
 ---
 
+## Simulation Cockpit UI
+
+The `SimulationCockpit` component in `lib/shared-ui` surfaces all simulation capabilities as an operator-facing decision cockpit. It is not a chart widget — it is a full decision interface.
+
+### What Operators See
+
+**Scenario Ranges tab:**
+- Best / base / worst outcomes on a visual range bar
+- Colour-coded: red (worst) → amber (base) → green (best)
+- Per-metric breakdown: net profit, duration, cost, probability
+- Confidence interval indicator
+- Cost-of-waiting analysis — "every day of delay costs $8,500"
+- Recommendation with strength indicator (strong / moderate / weak)
+
+**Sensitivity Drivers tab:**
+- Tornado chart showing which input variables have the highest impact
+- Direction indicator: positive (increases outcome) / negative (decreases outcome)
+- Ranked by absolute impact magnitude
+
+**Scenario Comparison tab:**
+- Side-by-side comparison of all scenarios
+- Delta vs baseline clearly marked
+- Single click to switch active scenario
+- Tag labels: Preferred · Low Risk · High Upside · Baseline
+
+**Predicted vs Actual tab:**
+- Tracks past simulation predictions against realized outcomes
+- Delta percentage shows model calibration accuracy
+- Builds operator confidence over time — "the model predicted $180K, we achieved $204K"
+
+### Usage
+
+```tsx
+import { SimulationCockpit } from "@szl-holdings/shared-ui";
+
+<SimulationCockpit
+  title="Voyage P&L Decision Cockpit"
+  description="MV Pacific Star — Rotterdam to Singapore"
+  scenarios={[
+    {
+      id: "direct-route",
+      label: "Direct Route",
+      tag: "preferred",
+      probability: 0.45,
+      primaryMetric: { best: 340000, base: 218000, worst: 82000, format: "currency", unit: "$" },
+      sensitivityDrivers: [
+        { id: "freight_rate", label: "Freight Rate (BDI)", impact: 0.55, direction: "positive" },
+        { id: "bunker_price", label: "Bunker Price", impact: -0.38, direction: "negative" },
+      ],
+      costOfWaiting: { perDay: 8500, description: "Daily demurrage + opportunity cost" },
+      recommendation: "Proceed if sanctions clearance confirmed within 48h.",
+      recommendationStrength: "strong",
+    },
+  ]}
+  primaryMetricLabel="Net Voyage Profit"
+  iterationsRun={10000}
+  confidenceLevel={0.90}
+  predictedVsActual={pastOutcomes}
+/>
+```
+
+### Integration Points
+
+| Domain | Page | Simulation Type |
+|--------|------|----------------|
+| Aegis | `/aegis/trust-provenance` (Decision Cockpit tab) | Incident response scenario analysis |
+| Terra | `/terra/trust-provenance` (Deal Simulation tab) | Deal ROI and IRR simulation |
+| Vessels | `/vessels/trust-provenance` (Voyage Cockpit tab) | Voyage P&L scenario analysis |
+
+### Compact Variant
+
+For embedding in dashboards and cards without full cockpit experience:
+
+```tsx
+<SimulationCockpitCompact
+  scenarios={scenarios}
+  primaryMetricLabel="Expected Value"
+  accentColor="#8b7ac8"
+/>
+```
+
+---
+
 ## Related Documents
 
 | Document | Path |
 |----------|------|
 | Platform primitives | [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) |
 | Proof and policy model | [PROOF_AND_POLICY_MODEL.md](PROOF_AND_POLICY_MODEL.md) |
+| Trust center index | [TRUST_CENTER_INDEX.md](TRUST_CENTER_INDEX.md) |
 | Category positioning | [CATEGORY_POSITIONING.md](CATEGORY_POSITIONING.md) |
 | System overview | [SYSTEM-OVERVIEW.md](SYSTEM-OVERVIEW.md) |

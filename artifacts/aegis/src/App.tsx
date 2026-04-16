@@ -21,7 +21,8 @@ import {
   Play, LayoutDashboard, Ticket, Monitor, DollarSign, Wrench, Server,
   FlaskConical, Cpu, Cpu as CpuIcon, Network, Radio, Plus, Sun, Eye,
   Database, Trophy, Boxes, GitBranch, Link2, Flame, Menu, X, ChevronDown,
-  Hexagon, Zap, Briefcase, Globe, Sparkles, Crosshair, Scale, Settings, Clock
+  Hexagon, Zap, Briefcase, Globe, Sparkles, Crosshair, Scale, Settings, Clock,
+  FileSearch
 } from "lucide-react";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { sentinelConfig } from "@szl-holdings/shared-ui/copilot-configs";
@@ -117,6 +118,7 @@ const SoarPlaybooks = lazy(() => import("@/pages/soar-playbooks"));
 const StixTaxii = lazy(() => import("@/pages/stix-taxii"));
 const TradecraftEnginePage = lazy(() => import("@/pages/tradecraft-engine"));
 const AuditChainPage = lazy(() => import("@/pages/audit-chain"));
+const TrustProvenancePage = lazy(() => import("@/pages/trust-provenance"));
 
 // ─── CITADEL Crisis Command ───────────────────────────────────────────────────
 const CitadelWarRoom = lazy(() => import("@/pages/citadel-war-room"));
@@ -269,6 +271,7 @@ const governanceNavItems = [
   { path: "/gov/integrations", label: "Integration Hub", icon: Globe },
   { path: "/gov/canonical-demo", label: "Canonical Demo", icon: Play },
   { path: "/gov/trust", label: "Trust & Security", icon: ShieldCheck },
+  { path: "/trust-provenance", label: "Trust & Provenance Center", icon: FileSearch },
 ];
 
 const securityNavPrimary = [
@@ -854,6 +857,7 @@ function AppRouter() {
         <Route path="/cr/milestones" component={MilestonesTrends} />
         <Route path="/cr/ai-insights" component={ReadinessAIInsights} />
         <Route path="/audit-chain" component={AuditChainPage} />
+        <Route path="/trust-provenance" component={TrustProvenancePage} />
         <Route path="/sacsayhuaman-shield" component={SacsayhuamanShield} />
         <Route path="/adversary-emulation" component={AdversaryEmulation} />
         <Route path="/agent-insights" component={AgentInsightsPage} />

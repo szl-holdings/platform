@@ -5,7 +5,7 @@ import {
   ArrowUpRight, Download
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { EmptyState } from "@szl-holdings/shared-ui";
+import { EmptyState, PolicyResultBanner } from "@szl-holdings/shared-ui";
 import { propertyTwins, type PropertyApproval } from "@/data/property-twin";
 
 const ACCENT = "#40856a";
@@ -106,32 +106,45 @@ function ApprovalCard({ approval, onAction }: { approval: FlatApproval; onAction
         )}
 
         {approval.status === "pending" && (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => onAction(approval.id, "approve")}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
-              style={{ background: ACCENT, color: "white" }}
-            >
-              <CheckCircle size={12} />
-              Approve
-            </button>
-            <button
-              onClick={() => onAction(approval.id, "reject")}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-colors hover:bg-white/5"
-              style={{ border: "1px solid #c04a2a40", color: "#c04a2a" }}
-            >
-              <X size={12} />
-              Reject
-            </button>
-            <button
-              onClick={() => onAction(approval.id, "escalate")}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-colors hover:bg-white/5"
-              style={{ border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}
-            >
-              <ArrowUpRight size={12} />
-              Escalate
-            </button>
-          </div>
+          <>
+            <div className="mb-3">
+              <PolicyResultBanner
+                decision={{
+                  effect: "escalate",
+                  allowed: false,
+                  reason: `${ACTION_LABELS[approval.actionClass] ?? approval.actionClass} policy requires human approval at ${approval.priority} priority before execution.`,
+                  escalationPath: ["Deal Manager", "Fund Controller"],
+                  whatNeedsToChange: ["Authorized reviewer must approve", "Review supporting documentation before deciding"],
+                }}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onAction(approval.id, "approve")}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
+                style={{ background: ACCENT, color: "white" }}
+              >
+                <CheckCircle size={12} />
+                Approve
+              </button>
+              <button
+                onClick={() => onAction(approval.id, "reject")}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-colors hover:bg-white/5"
+                style={{ border: "1px solid #c04a2a40", color: "#c04a2a" }}
+              >
+                <X size={12} />
+                Reject
+              </button>
+              <button
+                onClick={() => onAction(approval.id, "escalate")}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-colors hover:bg-white/5"
+                style={{ border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}
+              >
+                <ArrowUpRight size={12} />
+                Escalate
+              </button>
+            </div>
+          </>
         )}
       </div>
     </div>

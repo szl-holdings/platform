@@ -3,7 +3,7 @@ import {
   Shield, CheckCircle, X, AlertTriangle, MessageSquare,
   ChevronRight, ArrowUpRight, Download, Anchor
 } from "lucide-react";
-import { EmptyState } from "@szl-holdings/shared-ui";
+import { EmptyState, PolicyResultBanner } from "@szl-holdings/shared-ui";
 import { voyageTwins, type VoyageApproval } from "@/data/fleet-twin";
 
 const ACCENT = "hsl(205 70% 50%)";
@@ -94,20 +94,36 @@ function ApprovalCard({ approval, onAction }: { approval: FlatApproval; onAction
           </div>
         )}
         {approval.status === "pending" && (
-          <div className="flex gap-2">
-            <button onClick={() => onAction(approval.id, "approve")} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium"
-              style={{ background: ACCENT_DIM, color: "white" }}>
-              <CheckCircle size={12} />Approve
-            </button>
-            <button onClick={() => onAction(approval.id, "reject")} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg hover:bg-white/5"
-              style={{ border: "1px solid #c04a2a40", color: "#c04a2a" }}>
-              <X size={12} />Reject
-            </button>
-            <button onClick={() => onAction(approval.id, "escalate")} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg hover:bg-white/5"
-              style={{ border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}>
-              <ArrowUpRight size={12} />Escalate
-            </button>
-          </div>
+          <>
+            <div className="mb-3">
+              <PolicyResultBanner
+                decision={{
+                  effect: approval.priority === "critical" ? "deny" : "escalate",
+                  allowed: false,
+                  reason: `${ACTION_LABELS[approval.actionClass] ?? approval.actionClass} for ${approval.vesselName} requires human approval. Priority: ${approval.priority}.`,
+                  escalationPath: ["Fleet Operations Manager", "Compliance Officer"],
+                  whatNeedsToChange: [
+                    "Authorized fleet operator must review and approve",
+                    approval.priority === "critical" ? "Immediate action required — critical priority" : "Review voyage documentation before deciding",
+                  ],
+                }}
+              />
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => onAction(approval.id, "approve")} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium"
+                style={{ background: ACCENT_DIM, color: "white" }}>
+                <CheckCircle size={12} />Approve
+              </button>
+              <button onClick={() => onAction(approval.id, "reject")} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg hover:bg-white/5"
+                style={{ border: "1px solid #c04a2a40", color: "#c04a2a" }}>
+                <X size={12} />Reject
+              </button>
+              <button onClick={() => onAction(approval.id, "escalate")} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg hover:bg-white/5"
+                style={{ border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}>
+                <ArrowUpRight size={12} />Escalate
+              </button>
+            </div>
+          </>
         )}
       </div>
     </div>
