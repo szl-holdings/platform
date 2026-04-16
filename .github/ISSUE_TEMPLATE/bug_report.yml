@@ -9,23 +9,22 @@ body:
   - type: dropdown
     id: component
     attributes:
-      label: Affected Platform / Component
-      description: Which platform or component exhibits this behavior?
+      label: Affected Surface / Component
+      description: Which platform surface or component exhibits this behavior?
       multiple: true
       options:
-        - Lyte — Business Observability
+        - Lyte — Governed Command Surface
         - Aegis — Defense & Intelligence
         - Terra — Real Estate Intelligence
         - Vessels — Maritime Intelligence
         - PRISM Counsel — Legal Command
         - Carlota Jo — Advisory
-        - IMPERIUM — Cloud Sovereignty
         - Command Portal — Ecosystem Hub
         - SZL Holdings — Corporate
         - CORTEX — Mobile Command (Expo)
         - Stephen Lutar — Founder Site
         - API Server
-        - Shared Library / Infrastructure
+        - Shared Library / Platform Primitive
         - CI/CD & GitHub Actions
     validations:
       required: true

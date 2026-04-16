@@ -10,7 +10,7 @@
 # Default owner — all files not matched by a more specific rule
 *  @stephenlutar2-hash
 
-# ── Core shared libraries ──────────────────────────────────────────────────────
+# ── Platform primitives & shared libraries ─────────────────────────────────────
 /lib/  @stephenlutar2-hash
 /lib/db/  @stephenlutar2-hash
 /lib/auth/  @stephenlutar2-hash
@@ -18,38 +18,32 @@
 /lib/ai-engine/  @stephenlutar2-hash
 /lib/shared-ui/  @stephenlutar2-hash
 /lib/api-spec/  @stephenlutar2-hash
+/lib/outcome-graph/  @stephenlutar2-hash
+/lib/proof-chain/  @stephenlutar2-hash
+/lib/covenant-policy/  @stephenlutar2-hash
+/lib/monte-carlo/  @stephenlutar2-hash
+/lib/workflow-engine/  @stephenlutar2-hash
 
 # ── API Server ────────────────────────────────────────────────────────────────
 /artifacts/api-server/  @stephenlutar2-hash
 
-# ── Web Applications ──────────────────────────────────────────────────────────
+# ── Command surfaces ──────────────────────────────────────────────────────────
 /artifacts/szl-holdings/  @stephenlutar2-hash
-/artifacts/lyte-command-center/  @stephenlutar2-hash
-/artifacts/firestorm/  @stephenlutar2-hash
+/artifacts/command/  @stephenlutar2-hash
+
+# ── Domain packs ──────────────────────────────────────────────────────────────
 /artifacts/aegis/  @stephenlutar2-hash
 /artifacts/terra/  @stephenlutar2-hash
 /artifacts/vessels/  @stephenlutar2-hash
-/artifacts/carlota-jo/  @stephenlutar2-hash
 /artifacts/prism-counsel/  @stephenlutar2-hash
-/artifacts/imperium/  @stephenlutar2-hash
-/artifacts/command/  @stephenlutar2-hash
+/artifacts/carlota-jo/  @stephenlutar2-hash
+
+# ── Supporting surfaces ──────────────────────────────────────────────────────
 /artifacts/stephen-site/  @stephenlutar2-hash
-/artifacts/nexus/  @stephenlutar2-hash
-/artifacts/forge/  @stephenlutar2-hash
-/artifacts/partner-portal/  @stephenlutar2-hash
-/artifacts/inca-lab/  @stephenlutar2-hash
 /artifacts/mockup-sandbox/  @stephenlutar2-hash
 
-# ── Mobile Applications ───────────────────────────────────────────────────────
+# ── Mobile (CORTEX) ─────────────────────────────────────────────────────────
 /artifacts/szl-holdings-mobile/  @stephenlutar2-hash
-/artifacts/cortex-mobile/  @stephenlutar2-hash
-/artifacts/aegis-mobile/  @stephenlutar2-hash
-/artifacts/alloy-mobile/  @stephenlutar2-hash
-/artifacts/lyte-mobile/  @stephenlutar2-hash
-/artifacts/terra-mobile/  @stephenlutar2-hash
-/artifacts/vessels-mobile/  @stephenlutar2-hash
-/artifacts/carlota-jo-mobile/  @stephenlutar2-hash
-/artifacts/stephen-mobile/  @stephenlutar2-hash
 
 # ── Infrastructure & CI/CD ───────────────────────────────────────────────────
 /infra/  @stephenlutar2-hash

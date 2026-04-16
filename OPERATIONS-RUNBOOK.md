@@ -77,22 +77,20 @@ When something is broken and you don't know where to start, follow this sequence
 
 ### Available Workflows
 
-| Workflow | Service | Notes |
+| Workflow | Surface | Notes |
 |----------|---------|-------|
-| `artifacts/api-server: api` | API Server | All backends. Must be running first. |
-| `artifacts/szl-holdings: web` | SZL Holdings | |
-| `artifacts/lyte-command-center: web` | Lyte Command Center | |
-| `artifacts/firestorm: web` | Aegis/Firestorm | |
-| `artifacts/vessels: web` | Vessels | |
-| `artifacts/terra: web` | Terra | |
-| `artifacts/carlota-jo: web` | Carlota Jo | |
-| `artifacts/stephen-site: web` | Stephen Site | |
-| `artifacts/imperium: web` | IMPERIUM | |
-| `artifacts/command: web` | Command Portal | |
-| `artifacts/prism-counsel: web` | PRISM Counsel | |
+| `artifacts/szl-holdings: web` | SZL Holdings (Corporate) | Independent on port 21130, previewPath `/` |
+| `artifacts/aegis: web` | Aegis (Defense & Intelligence) | Shared gateway on port 9090, previewPath `/aegis/` |
+| `artifacts/terra: web` | Terra (Real Estate) | Shared gateway on port 9090, previewPath `/terra/` |
+| `artifacts/carlota-jo: web` | Carlota Jo (Advisory) | Shared gateway on port 9090, previewPath `/carlota-jo/` |
+| `artifacts/vessels: web` | Vessels (Maritime) | Shared gateway on port 9090, previewPath `/vessels/` |
+| `artifacts/command: web` | Command Portal | Shared gateway on port 9090, previewPath `/command/`. API server runs as subprocess. |
+| `artifacts/prism-counsel: web` | PRISM Counsel (Legal) | Shared gateway on port 9090 |
+| `artifacts/stephen-site: web` | Stephen Lutar (Founder) | Shared gateway on port 9090 |
 | `artifacts/szl-holdings-mobile: expo` | CORTEX Mobile | Expo tunnel |
-| `artifacts/cortex-mobile: expo` | Cortex Mobile (WIP) | Expo tunnel |
 | `artifacts/mockup-sandbox: Component Preview Server` | Design sandbox | Internal only |
+
+The `artifacts/api-server: api` workflow is registered but the API server runs as a subprocess of the Command Vite process. The standalone workflow will fail with port conflict — this is expected.
 
 ### When to Restart a Workflow
 

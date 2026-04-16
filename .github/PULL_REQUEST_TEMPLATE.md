@@ -27,23 +27,22 @@ _List the key changes made. Be specific._
 
 ---
 
-## Affected Artifacts
+## Affected Surfaces
 
 _Which applications or libraries are affected?_
 
 - [ ] `api-server`
-- [ ] `lyte-command-center`
-- [ ] `firestorm` / `aegis` (Aegis — Unified Defense & Intelligence)
-- [ ] `vessels`
-- [ ] `terra`
-- [ ] `carlota-jo`
-- [ ] `prism-counsel`
-- [ ] `imperium`
+- [ ] `szl-holdings` (Corporate / Marketing)
 - [ ] `command` (Command Portal)
-- [ ] `szl-holdings`
-- [ ] `szl-holdings-mobile` (CORTEX — Unified Mobile Command)
-- [ ] `stephen-site`
+- [ ] `aegis` (Aegis — Defense & Intelligence)
+- [ ] `vessels` (Vessels — Maritime Intelligence)
+- [ ] `terra` (Terra — Real Estate Intelligence)
+- [ ] `prism-counsel` (PRISM Counsel — Legal Command)
+- [ ] `carlota-jo` (Carlota Jo — Advisory)
+- [ ] `stephen-site` (Founder Site)
+- [ ] `szl-holdings-mobile` (CORTEX — Mobile Command)
 - [ ] Shared library (`lib/`)
+- [ ] Platform primitive (`lib/outcome-graph/`, `lib/proof-chain/`, `lib/covenant-policy/`, `lib/monte-carlo/`, `lib/workflow-engine/`)
 - [ ] Infrastructure (`infra/`)
 - [ ] Documentation (`docs/`)
 

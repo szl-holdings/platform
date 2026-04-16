@@ -81,23 +81,14 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    # Builds all web artifacts that have a compilable package.json build script.
-    # Explicitly excluded (no package.json / not standard Vite builds):
-    #   nexus, forge, partner-portal, inca-lab — scaffold stubs without build scripts
-    #   mockup-sandbox — design/component preview server, not a production build target
-    # Mobile artifacts (szl-holdings-mobile, cortex-mobile, aegis-mobile, alloy-mobile,
-    #   lyte-mobile, terra-mobile, vessels-mobile, carlota-jo-mobile, stephen-mobile)
-    #   are excluded from web CI; they are built via Expo CI tooling separately.
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: pnpm/action-setup@fe52bf0ad0164d2310b5e4d5d7bfec47b67e3f9d # v4.0.0
         with: { version: 9 }
-      - uses: actions/setup-node@v4 # pin to SHA when dependabot updates
+      - uses: actions/setup-node@v4
         with: { node-version: '20', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @workspace/szl-holdings run build
-      - run: pnpm --filter @workspace/lyte-command-center run build
-      - run: pnpm --filter @workspace/firestorm run build
       - run: pnpm --filter @workspace/aegis run build
       - run: pnpm --filter @workspace/terra run build
       - run: pnpm --filter @workspace/vessels run build
@@ -105,7 +96,6 @@ jobs:
       - run: pnpm --filter @workspace/stephen-site run build
       - run: pnpm --filter @workspace/command run build
       - run: pnpm --filter @workspace/prism-counsel run build
-      - run: pnpm --filter @workspace/imperium run build
 
   ci-gate:
     name: CI Gate

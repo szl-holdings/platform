@@ -340,13 +340,10 @@ See `infra/runbooks/RUNBOOK_ROLLBACK.md` for the full rollback playbook. Rollbac
 
 | Workflow | File | Trigger | Purpose |
 |----------|------|---------|---------|
-| CI | `ci.yml` | Push / PR | Lint, typecheck, build |
-| E2E Tests | `e2e.yml` | Push / PR | Playwright E2E tests |
-| Lighthouse CI | `lighthouse.yml` | Push / PR | Performance audits |
-| CodeQL | `codeql.yml` | Push / PR | Security analysis |
-| Security Audit | `security.yml` | Scheduled | Dependency audit |
-| Deploy Staging | `deploy-staging.yml` | Push to main | Staging deployment |
-| Deploy Production | `deploy-production.yml` | Release published | Production deployment |
+| CI | `ci.yml` | Push / PR | Lint, typecheck, build all packages |
+| Release | `release.yml` | Push to main / manual | Semantic versioning and GitHub Release |
+| Deploy Staging | `deploy-staging.yml` | Push to main | Staging deployment via Replit API |
+| Deploy Production | `deploy-production.yml` | Release published / manual | Production deployment via Replit API |
 
 ### Post-Merge Script
 

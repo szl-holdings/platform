@@ -74,7 +74,7 @@ The SZL Holdings platform uses **Role-Based Access Control (RBAC)** with **organ
 |-------------|---------------|-------------|-------|
 | `/` | PUBLIC | — | Landing page |
 | `/platform`, `/lyte`, `/alloy-fabric` | PUBLIC | — | Product pages |
-| `/solutions/*` | PUBLIC | — | Vertical solution pages |
+| `/solutions/*` | PUBLIC | — | Domain pack solution pages |
 | `/trust*` | PUBLIC | — | Trust Center |
 | `/docs/*` | PUBLIC | — | Documentation |
 | `/legal/*` | PUBLIC | — | Legal pages |
@@ -90,7 +90,7 @@ The SZL Holdings platform uses **Role-Based Access Control (RBAC)** with **organ
 
 ---
 
-### Lyte Command Center (`/lyte-command-center/`)
+### Lyte (via Command Portal `/command/`)
 
 | Route | Classification | Minimum Role |
 |-------|---------------|-------------|
@@ -103,7 +103,7 @@ The SZL Holdings platform uses **Role-Based Access Control (RBAC)** with **organ
 
 ---
 
-### Aegis — Unified Defense & Intelligence (`/firestorm/`)
+### Aegis — Unified Defense & Intelligence (`/aegis/`)
 
 | Route | Classification | Minimum Role |
 |-------|---------------|-------------|
@@ -177,24 +177,12 @@ The SZL Holdings platform uses **Role-Based Access Control (RBAC)** with **organ
 
 ---
 
-### IMPERIUM (`/imperium/`)
-
-| Route | Classification | Minimum Role |
-|-------|---------------|-------------|
-| All IMPERIUM routes | PRIVATE | `operator` |
-| Legatus Console | PRIVATE | `operator` |
-| Imperium Map | PRIVATE | `analyst` |
-| Senate Chamber (governance) | PRIVATE | `org_admin` |
-| Tenant provisioning | PRIVATE | `org_admin` |
-
----
-
 ### Command Portal (`/command/`)
 
 | Route | Classification | Minimum Role |
 |-------|---------------|-------------|
 | All Command routes | PRIVATE | `analyst` |
-| 8-domain dashboard | PRIVATE | `analyst` |
+| Cross-domain command surface | PRIVATE | `analyst` |
 | Executive briefing | PRIVATE | `analyst` |
 | Cross-domain orchestration | PRIVATE | `operator` |
 

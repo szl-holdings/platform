@@ -9,23 +9,23 @@ body:
   - type: dropdown
     id: component
     attributes:
-      label: Affected Platform / Component
-      description: Which platform or component would this feature affect?
+      label: Affected Surface / Component
+      description: Which platform surface or component would this feature affect?
       multiple: true
       options:
-        - Lyte — Business Observability
+        - Lyte — Governed Command Surface
         - Aegis — Defense & Intelligence
         - Terra — Real Estate Intelligence
         - Vessels — Maritime Intelligence
         - PRISM Counsel — Legal Command
         - Carlota Jo — Advisory
-        - IMPERIUM — Cloud Sovereignty
         - Command Portal — Ecosystem Hub
         - SZL Holdings — Corporate
         - CORTEX — Mobile Command
         - Stephen Lutar — Founder Site
         - API Server / Shared Infrastructure
-        - New platform / vertical
+        - Platform Primitive (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine)
+        - New domain pack
     validations:
       required: true
 
