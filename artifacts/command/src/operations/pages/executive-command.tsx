@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { cn } from "@lyte/lib/utils";
 import { useDemoMode } from "@lyte/lib/demo-mode";
+import { GovernedDecisionSummary } from "../components/governed-decision/decision-summary-card";
 
 const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e", panel: "#0e1219" };
 const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.06)", accent: "rgba(45,212,191,0.12)" };
@@ -553,6 +554,8 @@ export default function ExecutiveCommandPage() {
           })}
         </div>
       </div>
+
+      <GovernedDecisionSummary />
 
       {/* Quick links */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
