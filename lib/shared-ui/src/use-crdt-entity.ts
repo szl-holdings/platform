@@ -110,7 +110,7 @@ export function useCrdtEntity(
     ws.onmessage = (ev) => {
       if (!mountedRef.current) return;
       try {
-        const msg = JSON.parse(ev.data as string) as { type: string } & Partial<CrdtDeltaMsg>;
+        const msg = JSON.parse(ev.data as string) as { type: string; room?: string; delta?: Record<string, LwwField>; entityType?: string; entityId?: string; actorId?: string; ts?: number; clock?: Record<string, number> };
         if (msg.type === "ping") {
           ws.send(JSON.stringify({ type: "pong", timestamp: Date.now() }));
           return;

@@ -1,5 +1,6 @@
-const API_BASE = (import.meta as { env?: { BASE_URL?: string } }).env?.BASE_URL
-  ? `${(import.meta as { env: { BASE_URL: string } }).env.BASE_URL}api`
+const meta = import.meta as unknown as { env?: { BASE_URL?: string } };
+const API_BASE = meta.env?.BASE_URL
+  ? `${meta.env.BASE_URL}api`
   : "/api";
 
 export interface WebPushRegistrationOptions {
@@ -47,7 +48,7 @@ export async function registerWebPush(options: WebPushRegistrationOptions): Prom
 
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+      applicationServerKey: urlBase64ToUint8Array(vapidPublicKey) as unknown as BufferSource,
     });
 
     await sendSubscriptionToServer(subscription, options.appId);

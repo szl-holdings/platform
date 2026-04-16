@@ -13,7 +13,8 @@
   },
   "references": [
     { "path": "../../lib/replit-auth-web" },
-    { "path": "../../lib/api-client-react" }
+    { "path": "../../lib/api-client-react" },
+    { "path": "../../lib/prism-bus" }
   ],
   "include": ["src"]
 }

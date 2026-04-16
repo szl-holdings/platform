@@ -6,6 +6,7 @@
     "emitDeclarationOnly": true,
     "outDir": "dist",
     "rootDir": "src",
+    "jsx": "react-jsx",
     "types": ["node"]
   },
   "include": ["src"]

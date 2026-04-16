@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Bell, Check, CheckCheck, Filter, RefreshCw, Trash2, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PageDataSkeleton, EmptyState, ErrorState } from "@szl/shared-ui";
+import { PageDataSkeleton, EmptyState, ErrorState } from "@szl-holdings/shared-ui";
 
 interface Notification {
   id: number;

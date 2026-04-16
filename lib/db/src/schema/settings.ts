@@ -160,21 +160,21 @@ export const tenantHealthScorecardsTable = pgTable(
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const insertPlatformSettingSchema = createInsertSchema(platformSettingsTable).omit({ id: true, createdAt: true, updatedAt: true });
-export type InsertPlatformSetting = z.infer<typeof insertPlatformSettingSchema>;
+export type InsertPlatformSetting = typeof platformSettingsTable.$inferInsert;
 export type PlatformSetting = typeof platformSettingsTable.$inferSelect;
 
 export const insertTenantSettingSchema = createInsertSchema(tenantSettingsTable).omit({ id: true, createdAt: true, updatedAt: true });
-export type InsertTenantSetting = z.infer<typeof insertTenantSettingSchema>;
+export type InsertTenantSetting = typeof tenantSettingsTable.$inferInsert;
 export type TenantSetting = typeof tenantSettingsTable.$inferSelect;
 
 export const insertUserSettingSchema = createInsertSchema(userSettingsTable).omit({ id: true, createdAt: true, updatedAt: true });
-export type InsertUserSetting = z.infer<typeof insertUserSettingSchema>;
+export type InsertUserSetting = typeof userSettingsTable.$inferInsert;
 export type UserSetting = typeof userSettingsTable.$inferSelect;
 
 export const insertSettingsAuditLogSchema = createInsertSchema(settingsAuditLogTable).omit({ id: true, createdAt: true });
-export type InsertSettingsAuditLog = z.infer<typeof insertSettingsAuditLogSchema>;
+export type InsertSettingsAuditLog = typeof settingsAuditLogTable.$inferInsert;
 export type SettingsAuditLog = typeof settingsAuditLogTable.$inferSelect;
 
 export const insertTenantHealthScorecardSchema = createInsertSchema(tenantHealthScorecardsTable).omit({ id: true, createdAt: true });
-export type InsertTenantHealthScorecard = z.infer<typeof insertTenantHealthScorecardSchema>;
+export type InsertTenantHealthScorecard = typeof tenantHealthScorecardsTable.$inferInsert;
 export type TenantHealthScorecard = typeof tenantHealthScorecardsTable.$inferSelect;

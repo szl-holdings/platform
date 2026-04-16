@@ -10,6 +10,9 @@ function createMockRes(): Partial<Response> & { _headers: Record<string, string>
     _headers: {},
     _status: 200,
     _json: null,
+    getHeader(key: string) {
+      return res._headers[key];
+    },
     setHeader(key: string, value: string) {
       res._headers[key] = value;
       return res;
