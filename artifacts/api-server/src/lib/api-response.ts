@@ -81,7 +81,7 @@ export function sendConflict(res: Response, message = "Resource conflict") {
 }
 
 export function sendTooManyRequests(res: Response, message = "Rate limit exceeded", retryAfterSeconds?: number) {
-  if (retryAfterSeconds) res.setHeader("Retry-After", String(retryAfterSeconds));
+  if (retryAfterSeconds !== undefined) res.setHeader("Retry-After", String(retryAfterSeconds));
   sendError(res, message, 429, "RATE_LIMITED");
 }
 
