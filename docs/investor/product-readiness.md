@@ -21,7 +21,7 @@
 
 ## Product Readiness Matrix
 
-### Lyte — Business Observability
+### Lyte — Governed Command Surface
 
 | Dimension | Assessment |
 |-----------|-----------|

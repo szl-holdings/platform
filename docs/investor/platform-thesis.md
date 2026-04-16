@@ -89,7 +89,7 @@ As of Q2 2026, the SZL Holdings platform consists of command surfaces, an execut
 |---------|---------|--------|
 | **Lyte** | Operator command surface — PRISM framework, signal timeline, action queue, approval chains | Functional Alpha |
 | **CORTEX** | Unified mobile command — all domains in one iOS/Android app | Functional Alpha |
-| **Command Portal** | Ecosystem hub — cross-domain 8-domain dashboard | Functional Alpha |
+| **Command Portal** | Ecosystem hub — cross-domain command surface | Functional Alpha |
 
 **Execution fabric:**
 | Surface | Purpose | Status |
