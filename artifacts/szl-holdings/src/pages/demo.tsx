@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { DataStateBadge } from "@/components/DataStateBadge";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
+import { analytics } from "@/lib/analytics";
 
 interface WorkflowStep {
   label: string;
@@ -281,6 +282,7 @@ export default function DemoPage() {
     if (Object.keys(errs).length > 0) { setAccessErrors(errs); return; }
     setAccessErrors({});
     setAccessSubmitting(true);
+    analytics.ctaClick("request_access_submit", "demo", pack.id);
     try {
       const response = await fetch(`${API_BASE}/holdings/inquiries`, {
         method: "POST",
@@ -295,6 +297,8 @@ export default function DemoPage() {
       });
       if (response.status === 201 || response.ok) {
         setAccessSent(true);
+        analytics.demoRequest("demo-page");
+        analytics.formSubmit("demo_access_request", "demo");
         toast.success("Request received. We'll follow up within 24 hours.");
       } else {
         setAccessErrors({ general: "Submission failed. Please try again or email hello@szlholdings.com." });
@@ -392,7 +396,7 @@ export default function DemoPage() {
                 return (
                   <button
                     key={p.id}
-                    onClick={() => setSelectedPack(i)}
+                    onClick={() => { setSelectedPack(i); analytics.ctaClick(p.id, "demo", "pack_selector"); }}
                     style={{
                       display: "flex",
                       alignItems: "center",

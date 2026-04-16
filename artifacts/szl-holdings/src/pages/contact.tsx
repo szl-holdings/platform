@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { m } from "framer-motion";
 import { Link } from "wouter";
 import { ArrowRight, CheckCircle2, Shield } from "lucide-react";
@@ -6,6 +6,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
+import { analytics } from "@/lib/analytics";
 
 const API = "/api";
 
@@ -45,6 +46,14 @@ export default function ContactPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [honeypot, setHoneypot] = useState("");
+  const funnelStarted = useRef(false);
+
+  const trackFunnelStart = (inquiryType: string) => {
+    if (!funnelStarted.current) {
+      funnelStarted.current = true;
+      analytics.contactFunnelStart(inquiryType);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,6 +81,7 @@ export default function ContactPage() {
     }
 
     setSubmitting(true);
+    analytics.ctaClick("contact_form_submit", "contact", form.type);
     try {
       const res = await fetch(`${API}/contact/submit`, {
         method: "POST",
@@ -91,6 +101,8 @@ export default function ContactPage() {
         throw new Error((body as { error?: string }).error ?? "Submission failed");
       }
       setSubmitted(true);
+      analytics.contactFormSubmit(form.type);
+      if (form.type === "demo") analytics.demoRequest("contact-page");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Something went wrong.";
       toast.error(`${msg} Please try again or email hello@szlholdings.com directly.`);
@@ -193,7 +205,7 @@ export default function ContactPage() {
                           onChange={(e) => setForm({ ...form, name: e.target.value })}
                           style={inputStyle}
                           placeholder="Full name"
-                          onFocus={(e) => { (e.target as HTMLInputElement).style.borderColor = "var(--color-lyte)"; }}
+                          onFocus={(e) => { (e.target as HTMLInputElement).style.borderColor = "var(--color-lyte)"; trackFunnelStart(form.type); }}
                           onBlur={(e) => { (e.target as HTMLInputElement).style.borderColor = "var(--color-szl-border-hover)"; }}
                         />
                       </div>

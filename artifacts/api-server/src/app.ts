@@ -128,14 +128,15 @@ app.use(telemetryMiddleware);
 app.use(
   pinoHttp({
     logger,
-    genReqId: (req) => (req as Request).correlationId || req.id,
+    genReqId: (req) => (req as Request).requestId || (req as Request).correlationId || req.id,
     serializers: {
       req(req) {
         return {
           id: req.id,
           method: req.method,
           url: req.url?.split("?")[0],
-          correlationId: req.id,
+          requestId: req.id,
+          correlationId: (req.raw as Request).correlationId ?? req.id,
         };
       },
       res(res) {
