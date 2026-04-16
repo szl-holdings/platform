@@ -17,7 +17,7 @@ SZL Holdings has built a production-grade, enterprise-ready governed operational
 - **700+ database tables** in PostgreSQL 16 with org-scoped tenant isolation on every query
 - **11-role RBAC** with OIDC/PKCE authentication, SCIM 2.0, and Azure AD SSO
 - **Six governance primitives** (Proof Chain, Covenant Policy, Outcome Graph, Monte Carlo, Workflow Engine, Event Fabric) shared across all domain packs
-- **All P0 security gaps resolved** in the April 2026 hardening sprint; residual P1–P2 items tracked with remediation owners
+- **All P0 security gaps resolved** in the April 2026 hardening sprint; Phase 2–3 audit found 3 new P1 and 7 new P2 gaps, all tracked with Sprint 3 remediation owners
 - **Functional Alpha** across all platforms with seeded/demo data — not yet commercially deployed
 
 ---
@@ -423,19 +423,29 @@ No separate "agent identity" bypass exists — agents present a valid session to
 
 ## 9. Known Gaps and Remediation Status
 
-The following table summarizes all open gaps from the April 2026 security audit. Full detail in [KNOWN-GAPS.md](KNOWN-GAPS.md).
+The following table summarizes all open gaps from the April 2026 security and architecture audits. Full detail in [KNOWN-GAPS.md](KNOWN-GAPS.md) and [AUDIT_FINDINGS_REGISTER.md](AUDIT_FINDINGS_REGISTER.md).
 
 ### P0 — Critical (All Resolved)
 
 | ID | Gap | Status |
 |----|-----|--------|
 | KG001 | Cross-tenant vector/RAG retrieval isolation | ✅ Resolved Apr-2026 |
-| KG002 | Timing-unsafe internal token comparison | ✅ Resolved Apr-2026 |
+| KG002 | Timing-unsafe internal token comparison (auth.ts) | ✅ Resolved Apr-2026 |
 | KG014 | `graph-rag.ts` not propagating tenant ID | ✅ Resolved Apr-2026 |
 | KG015 | No `tenant_id` column in `rag_knowledge_chunks` | ✅ Resolved Apr-2026 |
 | KG003–KG008 | Unvalidated write routes / missing structured logging | ✅ Resolved Apr-2026 |
 
-### P1 — High (Open, Tracked)
+### P1 — High (Open, Tracked) — Phase 2–3 Audit Additions
+
+Three new P1 gaps were discovered in the Phase 2–3 architecture and tenancy hardening audit:
+
+| ID | Gap | Sprint Target |
+|----|-----|--------------|
+| AF-001 | `adminGuard` middleware uses non-timing-safe `Buffer.equals()` for internal token | Sprint 3 |
+| AF-003 | `GET /vessels/fleets` routes return all tenants' fleet data (missing tenant scope) | Sprint 3 |
+| AF-007 | `vessels.*` DB tables (`vessels_fleets`, `vessels`, positions) missing `org_id` column | Sprint 3 |
+
+### P1 — High (Open, Tracked) — Previously Identified
 
 | ID | Gap | Sprint Target |
 |----|-----|--------------|
@@ -444,11 +454,18 @@ The following table summarizes all open gaps from the April 2026 security audit.
 | KG011 | No CodeQL SAST in CI pipeline | Sprint 3 |
 | KG012 | No automated dependency vulnerability review in CI | Sprint 3 |
 | KG013 | No `CODEOWNERS` file | Sprint 3 |
+| KG026 | MFA not implemented for super_admin sessions | Enterprise tier |
 
 ### P2 — Medium (Open, Roadmapped)
 
 | ID | Gap | Sprint Target |
 |----|-----|--------------|
+| AF-004 | Backup export endpoint lacks orgId authority validation | Sprint 3 |
+| AF-008 | `conversations` table missing `org_id` (AI chat history not tenant-scoped) | Sprint 3 |
+| AF-010 | Sessions not invalidated on role change | Sprint 3 |
+| AF-012 | Sessions not invalidated on `SESSION_SECRET` rotation | Sprint 3 |
+| AF-013 | Internal token verification duplicated with divergent patterns | Sprint 3 |
+| AF-014 | No ORM-layer cross-tenant query guard | Sprint 4 |
 | KG018 | 80+ env vars with no formal schema documentation | Sprint 4 |
 | KG019 | No Lighthouse CI performance regression guard | Sprint 4 |
 | KG020b | Webhook delivery URL has no SSRF host validation | Sprint 3 |
@@ -458,7 +475,7 @@ The following table summarizes all open gaps from the April 2026 security audit.
 | KG024 | Large vendor bundle sizes (1–1.7 MB) | Sprint 4 |
 | KG025 | WCAG accessibility not systematically audited | Sprint 4 |
 
-**Diligence assessment:** All critical security gaps are resolved. Remaining open items are P1–P2, have remediation owners, and are scoped to Sprint 3–4 or post-launch roadmap. The three highest-priority items for pre-commercial deployment are KG009 (OTEL), KG011 (SAST), and KG010 (E2E testing).
+**Diligence assessment:** All original P0 security gaps are resolved. The Phase 2–3 audit added 3 new P1 gaps and 7 new P2 gaps — all tracked with remediation owners and Sprint 3 targets. The five highest-priority items for pre-commercial deployment are: KG009 (OTEL), AF-001 (adminGuard token), AF-003/AF-007 (vessels tenancy), KG011 (SAST), and KG026 (MFA for super_admin). Full findings in [AUDIT_FINDINGS_REGISTER.md](AUDIT_FINDINGS_REGISTER.md).
 
 ---
 
@@ -498,6 +515,10 @@ The following table summarizes all open gaps from the April 2026 security audit.
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Full architecture reference |
 | [SYSTEM-OVERVIEW.md](SYSTEM-OVERVIEW.md) | Platform overview for non-technical stakeholders |
 | [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) | Full role/route/permission mappings |
+| [TENANCY-MODEL.md](TENANCY-MODEL.md) | Multi-tenant isolation model and assumptions |
+| [CONTROL_PLANE_ARCHITECTURE.md](CONTROL_PLANE_ARCHITECTURE.md) | Admin tooling and privileged access paths |
+| [DEPENDENCY_MAP.md](DEPENDENCY_MAP.md) | Package dependency graph and ownership |
+| [AUDIT_FINDINGS_REGISTER.md](AUDIT_FINDINGS_REGISTER.md) | Phase 2–3 auth and tenancy audit findings |
 | [SECURITY-CHECKLIST.md](SECURITY-CHECKLIST.md) | Security controls mapped to implementation |
 | [KNOWN-GAPS.md](KNOWN-GAPS.md) | Full gap registry with remediation status |
 | [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) | Six governance primitives in detail |
@@ -509,4 +530,4 @@ The following table summarizes all open gaps from the April 2026 security audit.
 
 ---
 
-*Last verified against source code: 2026-04-16. Status of all P0 gaps confirmed against `lib/db/src/schema/`, `lib/auth/src/`, and `artifacts/api-server/src/`.*
+*Last verified against source code: 2026-04-16. Phase 2–3 architecture, auth, and tenancy audit complete. P0 gaps confirmed resolved. 3 new P1 gaps (AF-001, AF-003, AF-007) and 7 P2 gaps documented in AUDIT_FINDINGS_REGISTER.md.*

@@ -2,7 +2,7 @@
 
 **Version:** 3.0 | **Date:** April 2026 | **Audience:** Technical advisors, engineers, enterprise evaluators
 
-**Related:** [SYSTEM-OVERVIEW.md](SYSTEM-OVERVIEW.md) · [PRODUCT-SURFACES.md](PRODUCT-SURFACES.md) · [DATA-MODEL.md](DATA-MODEL.md) · [API-SPEC.md](API-SPEC.md) · [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md)
+**Related:** [SYSTEM-OVERVIEW.md](SYSTEM-OVERVIEW.md) · [PRODUCT-SURFACES.md](PRODUCT-SURFACES.md) · [DATA-MODEL.md](DATA-MODEL.md) · [API-SPEC.md](API-SPEC.md) · [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md) · [DEPENDENCY_MAP.md](DEPENDENCY_MAP.md) · [CONTROL_PLANE_ARCHITECTURE.md](CONTROL_PLANE_ARCHITECTURE.md) · [AUDIT_FINDINGS_REGISTER.md](AUDIT_FINDINGS_REGISTER.md)
 
 ---
 
@@ -261,4 +261,4 @@ Confirmed Action + Full Audit Trail
 
 ---
 
-*Last verified against source code: 2026-04-15. Re-verify against `artifacts/api-server/src/`, `lib/db/src/schema/`, and `lib/auth/src/` after significant code changes.*
+*Last verified against source code: 2026-04-16 (Phase 2–3 audit). Re-verify against `artifacts/api-server/src/`, `lib/db/src/schema/`, and `lib/auth/src/` after significant code changes. See [AUDIT_FINDINGS_REGISTER.md](AUDIT_FINDINGS_REGISTER.md) for open architectural findings.*

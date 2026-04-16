@@ -1,10 +1,12 @@
 # SZL Holdings — Audit Findings Register
 
-**Last updated:** 2026-04-16 (Phase 0–1 + Phase 4–5 Audit)
+**Last updated:** 2026-04-16 (Phases 0–5 Audit)
 **Owner:** Platform Engineering / Engineering
 **Scope:** Full SZL Holdings monorepo — all apps, libraries, routes, secrets, CI/CD, docs, and flows
 
-This register catalogs every finding from all operational audit phases. It is the canonical findings reference. For the gap register with full remediation tracking, see `KNOWN-GAPS.md`. For detailed series A findings, see `docs/audit/series-a-gap-register.md`.
+This register catalogs every finding from all operational audit phases (Phase 0–5). It is the canonical findings reference. For the gap register with full remediation tracking, see `KNOWN-GAPS.md`. For detailed series A findings, see `docs/audit/series-a-gap-register.md`.
+
+**Related:** [KNOWN-GAPS.md](KNOWN-GAPS.md) · [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) · [TENANCY-MODEL.md](TENANCY-MODEL.md) · [SECURITY-CHECKLIST.md](SECURITY-CHECKLIST.md) · [DEPENDENCY_MAP.md](DEPENDENCY_MAP.md) · [CONTROL_PLANE_ARCHITECTURE.md](CONTROL_PLANE_ARCHITECTURE.md)
 
 ---
 
@@ -34,6 +36,7 @@ This register catalogs every finding from all operational audit phases. It is th
 | `QUAL-` | Quality / testing |
 | `AF-T-` | Test quality (Phase 4–5) |
 | `AF-F-` | Flow audit (Phase 4–5) |
+| `AF-` | Phase 2–3 Architecture/Auth/Tenancy Finding |
 
 ---
 
@@ -41,10 +44,10 @@ This register catalogs every finding from all operational audit phases. It is th
 
 | Severity | Definition |
 |---|---|
-| **P0 — Critical** | Active security risk or data exposure — fix immediately |
-| **P1 — High** | Must resolve before first paying tenant or general launch |
-| **P2 — Medium** | Should resolve before broad go-to-market |
-| **P3 — Low** | Quality improvement; no blocking impact |
+| **P0 — Critical** | Active security risk or data exposure / auth bypass — fix immediately |
+| **P1 — High** | Significant exposure; must fix before first paying tenant or public launch |
+| **P2 — Medium** | Limited exposure; should resolve before broad go-to-market |
+| **P3 — Low** | Quality / informational / hardening; no blocking impact |
 | **INFO** | Tracked for awareness — no action urgency |
 
 ---
@@ -108,6 +111,15 @@ This register catalogs every finding from all operational audit phases. It is th
 | QUAL-001 | E2E test coverage sparse | P2 | `playwright.config.ts` | Write-path regressions may not be caught | ⚠️ Open — GAP-013 | No | No |
 | QUAL-002 | No Lighthouse performance CI | P2 | CI (duplicate of OPS-006) | Performance regressions uncaught on merge | ⚠️ Open — KG019 | No | No |
 | QUAL-003 | No accessibility audit | P2 | All web artifacts | WCAG compliance unknown — enterprise risk | ⚠️ Open — KG025 | No | No |
+| AF-001 | Auth | P1 | `middlewares/admin-guard.ts` | `adminGuard` non-timing-safe token comparison | ⚠️ Open | No | Conditional |
+| AF-003 | Tenancy | P1 | `routes/vessels.ts` | Vessels fleet routes return all tenants' data | ⚠️ Open | No | Conditional |
+| AF-007 | Tenancy / DB | P1 | `lib/db/src/schema/vessels.ts` | `vessels.*` tables missing `org_id` | ⚠️ Open | No | Conditional |
+| AF-004 | Admin / Privileged | P2 | `routes/backup.ts` | Backup export lacks orgId authority check | ⚠️ Open | No | No |
+| AF-008 | Tenancy / DB | P2 | `lib/db/src/schema/conversations.ts` | `conversations` table missing `org_id` | ⚠️ Open | No | No |
+| AF-010 | Auth / Session | P2 | `lib/auth/` | Sessions not invalidated on role change | ⚠️ Open | No | No |
+| AF-012 | Auth / Session | P2 | `lib/auth/` | Sessions not invalidated on `SESSION_SECRET` rotation | ⚠️ Open | No | No |
+| AF-013 | Architecture | P2 | `middlewares/` | Duplicate divergent internal token verification | ⚠️ Open | No | No |
+| AF-014 | Tenancy | P2 | ORM layer | No cross-tenant query guard at ORM layer | ⚠️ Open | No | No |
 
 ---
 
@@ -230,10 +242,11 @@ This register catalogs every finding from all operational audit phases. It is th
 | Documentation (DOC-) | 4 | 0 | 4 |
 | Operations (OPS-) | 8 | 0 | 8 |
 | Quality (QUAL-) | 3 | 0 | 3 |
+| Phase 2–3 Architecture/Auth/Tenancy (AF-) | 14 | 0 | 14 |
 | Test Quality Phase 4–5 (AF-T) | 10 | 2 | 8 |
 | Code Quality Phase 4–5 (AF-Q) | 3 | 0 | 3 |
 | Flow Audit Phase 4–5 (AF-F) | 6 | 0 | 6 |
-| **Total** | **74** | **12** | **62** |
+| **Total** | **88** | **12** | **76** |
 
 ---
 
@@ -247,4 +260,178 @@ This register catalogs every finding from all operational audit phases. It is th
 
 *Related: `KNOWN-GAPS.md` · `OUT_OF_SCOPE_REGISTER.md` · `docs/audit/series-a-gap-register.md` · `SECURITY-CHECKLIST.md` · `TEST_STRATEGY.md` · `FLOW_AUDIT_MATRIX.md`*
 
-*Last audited: 2026-04-16*
+## Phase 2–3 Audit Findings (AF-) — Detailed Notes
+
+### AF-001: `adminGuard` Uses Non-Timing-Safe Token Comparison
+
+| Field | Value |
+|-------|-------|
+| **ID** | AF-001 |
+| **Severity** | P1 — High |
+| **Area** | Auth / Internal Token Security |
+| **File** | `artifacts/api-server/src/middlewares/admin-guard.ts` |
+| **Lines** | ~25–29 |
+| **Status** | ⚠️ Open |
+
+**Finding:**
+The `adminGuard` middleware compares the `x-internal-token` header using `Buffer.equals()` rather than `crypto.timingSafeEqual`. This is inconsistent with the fix applied in `auth.ts` (SEC-004, resolved Apr-2026) and is theoretically vulnerable to timing attacks.
+
+```typescript
+// admin-guard.ts — current (NOT timing-safe)
+return header.length === internalSecret.length &&
+  Buffer.from(header).equals(Buffer.from(internalSecret));
+
+// auth.ts — correct pattern
+return timingSafeEqual(a, b);
+```
+
+**Recommendation:** Replace `Buffer.equals()` with `crypto.timingSafeEqual` in `adminGuard`, matching the pattern in `auth.ts`.
+
+---
+
+### AF-003: Vessels Fleet Routes Lack Tenant Scope Filtering
+
+| Field | Value |
+|-------|-------|
+| **ID** | AF-003 |
+| **Severity** | P1 — High |
+| **Area** | Tenancy / Multi-tenant Data Isolation |
+| **File** | `artifacts/api-server/src/routes/vessels.ts` |
+| **Status** | ⚠️ Open |
+
+**Finding:**
+`GET /vessels/fleets` and `GET /vessels/fleets/:id` use `authMiddleware()` for authentication but perform no tenant-scoped filtering. The query returns **all fleets** from the `vessels_fleets` table (compounded by AF-007: the table has no `org_id` column).
+
+**Impact:** Any authenticated user can view all fleets belonging to any tenant.
+
+**Recommendation:** Add `org_id` to `vessels_fleets` and add tenant-scoped filtering in route handlers, or designate these as platform-global reference data with explicit documentation.
+
+---
+
+### AF-007: `vessels.*` Tables Missing `org_id` Column
+
+| Field | Value |
+|-------|-------|
+| **ID** | AF-007 |
+| **Severity** | P1 — High |
+| **Area** | Tenancy / DB Schema |
+| **File** | `lib/db/src/schema/vessels.ts` |
+| **Status** | ⚠️ Open |
+
+**Finding:**
+The original vessels product schema defines `vessels_fleets`, `vessels`, `vessels_positions`, `vessels_cargo`, `vessels_routes`, `vessels_alert_rules`, `vessels_alerts`, and `vessels_simulations` without `org_id` columns. A newer, parallel schema (`maritime.ts`) exists with proper `org_id` scoping on all tables.
+
+**Recommendation:** Designate `maritime.ts` as the authoritative vessel schema. Add a migration to add `org_id` to the `vessels.*` tables. Deprecate the old schema.
+
+---
+
+### AF-004: Backup Export Lacks `orgId` Authority Validation
+
+| Field | Value |
+|-------|-------|
+| **ID** | AF-004 |
+| **Severity** | P2 — Medium |
+| **Area** | Admin / Privileged Data Access |
+| **File** | `artifacts/api-server/src/routes/backup.ts` |
+| **Status** | ⚠️ Open |
+
+**Finding:** `POST /admin/backup/export-tenant` accepts `orgId` in the request body without validating that the requesting admin has authority over that specific org. Any `admin`-role user could export data from any org by specifying an arbitrary `orgId`.
+
+**Recommendation:** Validate `orgId` authority, or restrict to `founder_admin` / `platform_admin` roles only.
+
+---
+
+### AF-008: `conversations` Table Missing `org_id`
+
+| Field | Value |
+|-------|-------|
+| **ID** | AF-008 |
+| **Severity** | P2 — Medium |
+| **Area** | Tenancy / DB Schema |
+| **File** | `lib/db/src/schema/conversations.ts` |
+| **Status** | ⚠️ Open |
+
+**Finding:** The AI chat history `conversations` table has no `org_id` column — conversations from different tenants share the same table without isolation.
+
+**Recommendation:** Add `org_id` and `user_id` foreign keys to `conversations`.
+
+---
+
+### AF-010: Sessions Not Revoked on Role Change
+
+| Field | Value |
+|-------|-------|
+| **ID** | AF-010 |
+| **Severity** | P2 — Medium |
+| **Area** | Auth / Session Lifecycle |
+| **Status** | ⚠️ Open |
+
+**Finding:** When a user's role is changed or revoked, active sessions remain valid for up to 30 days (credential login TTL).
+
+**Recommendation:** Invalidate all active sessions for a user when their role changes. Or re-validate roles from DB on each request instead of trusting session-cached roles.
+
+---
+
+### AF-012: No Session Invalidation on `SESSION_SECRET` Rotation
+
+| Field | Value |
+|-------|-------|
+| **ID** | AF-012 |
+| **Severity** | P2 — Medium |
+| **Area** | Auth / Session Security |
+| **Status** | ⚠️ Open |
+
+**Finding:** Rotating `SESSION_SECRET` does not invalidate existing sessions. Sessions signed with the old secret remain valid until they expire naturally.
+
+**Recommendation:** Implement a session version counter; increment on rotation to force re-authentication.
+
+---
+
+### AF-013: Divergent Internal Token Verification Patterns
+
+| Field | Value |
+|-------|-------|
+| **ID** | AF-013 |
+| **Severity** | P2 — Medium |
+| **Area** | Architecture / Code Consistency |
+| **Files** | `middlewares/admin-guard.ts` · `middlewares/auth.ts` |
+| **Status** | ⚠️ Open |
+
+**Finding:** `auth.ts` uses `crypto.timingSafeEqual`; `admin-guard.ts` uses `Buffer.equals()`. The same token is verified two different ways across two middlewares.
+
+**Recommendation:** Extract `checkInternalToken()` to a shared utility (`lib/internal-token.ts`) used by both middlewares.
+
+---
+
+### AF-014: No ORM-Layer Cross-Tenant Query Guard
+
+| Field | Value |
+|-------|-------|
+| **ID** | AF-014 |
+| **Severity** | P2 — Medium |
+| **Area** | Tenancy / Defense in Depth |
+| **Status** | ⚠️ Open |
+
+**Finding:** Tenant isolation relies entirely on route-handler-level enforcement. There is no ORM-level guard that catches a developer accidentally writing a cross-tenant query.
+
+**Recommendation:** Add a custom ESLint rule flagging Drizzle queries on org-scoped tables that lack a `WHERE org_id = ?` predicate, or create typesafe query builder wrappers that inject `org_id` automatically.
+
+---
+
+## Phase 2–3 Audit Action Items
+
+Priority order for remediation:
+
+1. **AF-001** — Fix `adminGuard` to use `timingSafeEqual` (30 min)
+2. **AF-003 + AF-007** — Vessel schema tenancy: designate authoritative schema, add `org_id` migration (estimated: 2–3 days)
+3. **AF-013** — Extract token verification to shared utility (1 hour)
+4. **AF-004** — Validate `orgId` authorization on backup export (1 hour)
+5. **AF-010 + AF-012** — Session invalidation hardening (1–2 days)
+6. **AF-008** — Add `org_id` to `conversations` (1 hour + migration)
+7. **AF-014** — ORM-layer cross-tenant query guard / ESLint rule (2–3 days)
+
+---
+
+*Related: `KNOWN-GAPS.md` · `OUT_OF_SCOPE_REGISTER.md` · `docs/audit/series-a-gap-register.md` · `SECURITY-CHECKLIST.md` · `CONTROL_PLANE_ARCHITECTURE.md`*
+
+*Last audited: 2026-04-16. Route files audited: representative sample across core, billing, admin, backup, vessels, and middleware layers. For complete route coverage, reference ROUTE_INVENTORY.md.*

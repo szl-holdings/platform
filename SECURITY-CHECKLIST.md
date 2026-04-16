@@ -168,11 +168,31 @@ Every commit and pull request runs:
 
 ---
 
+## Phase 2–3 Audit Findings (April 2026)
+
+The following gaps were identified in the Phase 2–3 Architecture, Auth & Tenancy audit. Full detail in [AUDIT_FINDINGS_REGISTER.md](AUDIT_FINDINGS_REGISTER.md).
+
+| Finding ID | Description | Severity | Status |
+|-----------|-------------|----------|--------|
+| AF-001 | `adminGuard` uses `Buffer.equals()` instead of `crypto.timingSafeEqual` for internal token | P1 | ⚠️ Open |
+| AF-003 | `GET /vessels/fleets` and fleet sub-routes return all tenants' fleet data | P1 | ⚠️ Open |
+| AF-007 | `vessels.*` DB tables (fleet, vessel, positions, cargo, routes) missing `org_id` column | P1 | ⚠️ Open |
+| AF-004 | Backup export endpoint accepts arbitrary `orgId` without verifying admin authority | P2 | ⚠️ Open |
+| AF-008 | `conversations` table missing `org_id` — AI chat history not tenant-scoped at DB level | P2 | ⚠️ Open |
+| AF-010 | Sessions not invalidated on role change (up to 30-day exposure window) | P2 | ⚠️ Open |
+| AF-012 | Sessions not invalidated on `SESSION_SECRET` rotation | P2 | ⚠️ Open |
+| AF-013 | Internal token verification duplicated with divergent patterns across middlewares | P2 | ⚠️ Open |
+| AF-014 | No ORM-layer cross-tenant query guard — developer can accidentally write cross-tenant query | P2 | ⚠️ Open |
+
+---
+
 ## Remaining Gaps (see KNOWN-GAPS.md for full detail)
 
 | Gap ID | Description | Severity | ETA | Launch Impact |
 |--------|-------------|----------|-----|---------------|
 | GAP-001 | Manual rotation of Firebase/Google keys needed | High | Immediate | 🔴 Hard blocker (LB-001) |
+| AF-001 | `adminGuard` non-timing-safe internal token comparison | P1 | Sprint 3 | 🟡 Conditional |
+| AF-003 / AF-007 | Vessels schema + routes lack tenant scoping | P1 | Sprint 3 | 🟡 Conditional |
 | KG009 | OTEL exporter not wired for production | P1 | Pre-deploy | 🔴 Hard blocker (LB-006) |
 | KG026 | MFA not implemented | P1 | Enterprise tier launch | 🟡 Conditional (LC-005) |
 | KG027 | External uptime monitoring absent | P1 | Pre-deploy | 🔴 Hard blocker (LB-002) |
@@ -183,7 +203,7 @@ Every commit and pull request runs:
 | KG020c | No virus scanning on uploaded files | P2 | Sprint 4 | 🟢 Not blocking |
 | GAP-002 | No CI/CD automated secret scanning | Med | Sprint 3 | 🟡 Conditional (LC-001) |
 
-> **All P0 items are resolved.** DB-level tenant isolation, timing-safe auth, Zod validation on all high-risk write routes, structured Pino logging in all production paths. Mobile secrets transition to template-based management is complete. See `KNOWN-GAPS.md` for full resolution log.
+> **All original P0 items are resolved.** DB-level tenant isolation, timing-safe auth (in auth.ts), Zod validation on all high-risk write routes, structured Pino logging in all production paths. Mobile secrets transition to template-based management is complete. The Phase 2–3 audit discovered 3 new P1 gaps (AF-001, AF-003, AF-007) — see AUDIT_FINDINGS_REGISTER.md. See `KNOWN-GAPS.md` for full resolution log.
 
 > **For launch decision:** See [LAUNCH_BLOCKERS.md](LAUNCH_BLOCKERS.md) for the definitive list of hard blockers and conditional items. See [GO_NO_GO_CHECKLIST.md](GO_NO_GO_CHECKLIST.md) for the final launch sign-off framework.
 
