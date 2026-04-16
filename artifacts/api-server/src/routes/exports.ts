@@ -6,8 +6,10 @@ import {
   vesselsFleetsTable, vesselsTable,
   terraDealsTable,
   mspTicketsTable,
+  meteringEventsTable,
+  invoicesTable,
 } from "@szl-holdings/db";
-import { desc, gte, lte, and, ilike, or, sql } from "drizzle-orm";
+import { desc, gte, lte, and, ilike, or, sql, eq } from "drizzle-orm";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { isFlagEnabled } from "../lib/platform-flags";
 import { runExport, getExportByToken, listExportHistory } from "../lib/export-service";
@@ -37,6 +39,13 @@ function getUserEmail(req: Request): string | null {
   return (req as ExtendedRequest).user?.email ?? null;
 }
 
+/** Filters the full column definition list to only those the user selected.
+ *  If no selection is provided (or the list is empty), all columns are included. */
+function filterColumns(allCols: ExportColumn[], selected?: string[]): ExportColumn[] {
+  if (!selected?.length) return allCols;
+  return allCols.filter(c => selected.includes(c.key));
+}
+
 async function checkExportEnabled(res: Response): Promise<boolean> {
   const enabled = await isFlagEnabled("advanced_export_enabled");
   if (!enabled) {
@@ -58,17 +67,19 @@ router.post("/exports/audit-log", authMiddleware(), requireRole("admin", "compli
       search,
       action,
       schedule = "once",
+      columns: selectedColumns,
     } = req.body as {
       format?: "csv" | "pdf";
       dateFrom?: string;
       dateTo?: string;
       search?: string;
       action?: string;
-      schedule?: "once" | "daily" | "weekly";
+      schedule?: "once" | "daily" | "weekly" | "monthly";
+      columns?: string[];
     };
 
     if (!["csv", "pdf"].includes(format)) return sendBadRequest(res, "Invalid format — must be csv or pdf");
-    if (!["once", "daily", "weekly"].includes(schedule)) return sendBadRequest(res, "Invalid schedule");
+    if (!["once", "daily", "weekly", "monthly"].includes(schedule)) return sendBadRequest(res, "Invalid schedule");
 
     const conditions = [];
     if (dateFrom) conditions.push(gte(auditEventsTable.createdAt, new Date(dateFrom)));
@@ -102,7 +113,7 @@ router.post("/exports/audit-log", authMiddleware(), requireRole("admin", "compli
       .orderBy(desc(auditEventsTable.createdAt))
       .limit(10_000);
 
-    const columns: ExportColumn[] = [
+    const allColumns: ExportColumn[] = [
       { key: "id", label: "ID" },
       { key: "createdAt", label: "Timestamp" },
       { key: "action", label: "Action" },
@@ -113,6 +124,7 @@ router.post("/exports/audit-log", authMiddleware(), requireRole("admin", "compli
       { key: "ipAddress", label: "IP Address" },
       { key: "userAgent", label: "User Agent" },
     ];
+    const columns = filterColumns(allColumns, selectedColumns);
 
     const filterParams = JSON.stringify({ dateFrom, dateTo, search, action });
     const name = `Audit Log Export — ${new Date().toISOString().slice(0, 10)}`;
@@ -146,11 +158,22 @@ router.post("/exports/audit-log", authMiddleware(), requireRole("admin", "compli
 router.post("/exports/aegis-incidents", authMiddleware(), requireRole("admin", "ops", "compliance"), async (req: Request, res: Response) => {
   if (!await checkExportEnabled(res)) return;
   try {
-    const { format = "csv", schedule = "once" } = req.body as { format?: "csv" | "pdf"; schedule?: "once" | "daily" | "weekly" };
+    const { format = "csv", schedule = "once", status, search, dateFrom, dateTo, columns: selectedColumns } = req.body as {
+      format?: "csv" | "pdf"; schedule?: "once" | "daily" | "weekly" | "monthly";
+      status?: string; search?: string; dateFrom?: string; dateTo?: string; columns?: string[];
+    };
     if (!["csv", "pdf"].includes(format)) return sendBadRequest(res, "Invalid format");
+    if (!["once", "daily", "weekly", "monthly"].includes(schedule)) return sendBadRequest(res, "Invalid schedule");
 
-    const rows = await db.select().from(firestormFindingsTable).orderBy(desc(firestormFindingsTable.createdAt)).limit(10_000);
-    const columns: ExportColumn[] = [
+    const conditions = [];
+    if (dateFrom) conditions.push(gte(firestormFindingsTable.createdAt, new Date(dateFrom)));
+    if (dateTo) conditions.push(lte(firestormFindingsTable.createdAt, new Date(dateTo)));
+    if (status && status !== "all") conditions.push(eq(firestormFindingsTable.status, status));
+    if (search) conditions.push(or(ilike(firestormFindingsTable.title, `%${search}%`), ilike(firestormFindingsTable.category, `%${search}%`))!);
+    const rows = await db.select().from(firestormFindingsTable)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(firestormFindingsTable.createdAt)).limit(10_000);
+    const allColumns: ExportColumn[] = [
       { key: "id", label: "ID" },
       { key: "createdAt", label: "Created At" },
       { key: "title", label: "Title" },
@@ -160,6 +183,7 @@ router.post("/exports/aegis-incidents", authMiddleware(), requireRole("admin", "
       { key: "description", label: "Description" },
       { key: "recommendation", label: "Recommendation" },
     ];
+    const columns = filterColumns(allColumns, selectedColumns);
 
     const result = await runExport({
       name: `Aegis Incidents Export — ${new Date().toISOString().slice(0, 10)}`,
@@ -189,11 +213,22 @@ router.post("/exports/aegis-incidents", authMiddleware(), requireRole("admin", "
 router.post("/exports/vessels", authMiddleware(), requireRole("admin", "ops", "compliance"), async (req: Request, res: Response) => {
   if (!await checkExportEnabled(res)) return;
   try {
-    const { format = "csv", schedule = "once" } = req.body as { format?: "csv" | "pdf"; schedule?: "once" | "daily" | "weekly" };
+    const { format = "csv", schedule = "once", status, search, dateFrom, dateTo, columns: selectedColumns } = req.body as {
+      format?: "csv" | "pdf"; schedule?: "once" | "daily" | "weekly" | "monthly";
+      status?: string; search?: string; dateFrom?: string; dateTo?: string; columns?: string[];
+    };
     if (!["csv", "pdf"].includes(format)) return sendBadRequest(res, "Invalid format");
+    if (!["once", "daily", "weekly", "monthly"].includes(schedule)) return sendBadRequest(res, "Invalid schedule");
 
-    const rows = await db.select().from(vesselsTable).orderBy(desc(vesselsTable.createdAt)).limit(10_000);
-    const columns: ExportColumn[] = [
+    const conditions = [];
+    if (dateFrom) conditions.push(gte(vesselsTable.createdAt, new Date(dateFrom)));
+    if (dateTo) conditions.push(lte(vesselsTable.createdAt, new Date(dateTo)));
+    if (status && status !== "all") conditions.push(eq(vesselsTable.status, status));
+    if (search) conditions.push(or(ilike(vesselsTable.name, `%${search}%`), ilike(vesselsTable.mmsi, `%${search}%`), ilike(vesselsTable.flag, `%${search}%`))!);
+    const rows = await db.select().from(vesselsTable)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(vesselsTable.createdAt)).limit(10_000);
+    const allColumns: ExportColumn[] = [
       { key: "id", label: "ID" },
       { key: "createdAt", label: "Created At" },
       { key: "name", label: "Vessel Name" },
@@ -206,6 +241,7 @@ router.post("/exports/vessels", authMiddleware(), requireRole("admin", "ops", "c
       { key: "nextPort", label: "Next Port" },
       { key: "grossTonnage", label: "Gross Tonnage" },
     ];
+    const columns = filterColumns(allColumns, selectedColumns);
 
     const result = await runExport({
       name: `Vessels Fleet Export — ${new Date().toISOString().slice(0, 10)}`,
@@ -235,11 +271,22 @@ router.post("/exports/vessels", authMiddleware(), requireRole("admin", "ops", "c
 router.post("/exports/terra-deals", authMiddleware(), requireRole("admin", "ops", "compliance"), async (req: Request, res: Response) => {
   if (!await checkExportEnabled(res)) return;
   try {
-    const { format = "csv", schedule = "once" } = req.body as { format?: "csv" | "pdf"; schedule?: "once" | "daily" | "weekly" };
+    const { format = "csv", schedule = "once", status, search, dateFrom, dateTo, columns: selectedColumns } = req.body as {
+      format?: "csv" | "pdf"; schedule?: "once" | "daily" | "weekly" | "monthly";
+      status?: string; search?: string; dateFrom?: string; dateTo?: string; columns?: string[];
+    };
     if (!["csv", "pdf"].includes(format)) return sendBadRequest(res, "Invalid format");
+    if (!["once", "daily", "weekly", "monthly"].includes(schedule)) return sendBadRequest(res, "Invalid schedule");
 
-    const rows = await db.select().from(terraDealsTable).orderBy(desc(terraDealsTable.createdAt)).limit(10_000);
-    const columns: ExportColumn[] = [
+    const conditions = [];
+    if (dateFrom) conditions.push(gte(terraDealsTable.createdAt, new Date(dateFrom)));
+    if (dateTo) conditions.push(lte(terraDealsTable.createdAt, new Date(dateTo)));
+    if (status && status !== "all") conditions.push(eq(terraDealsTable.stage, status));
+    if (search) conditions.push(or(ilike(terraDealsTable.address, `%${search}%`), ilike(terraDealsTable.ownerName, `%${search}%`))!);
+    const rows = await db.select().from(terraDealsTable)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(terraDealsTable.createdAt)).limit(10_000);
+    const allColumns: ExportColumn[] = [
       { key: "id", label: "ID" },
       { key: "createdAt", label: "Created At" },
       { key: "address", label: "Address" },
@@ -254,6 +301,7 @@ router.post("/exports/terra-deals", authMiddleware(), requireRole("admin", "ops"
       { key: "clientName", label: "Client" },
       { key: "estimatedCloseDate", label: "Est. Close Date" },
     ];
+    const columns = filterColumns(allColumns, selectedColumns);
 
     const result = await runExport({
       name: `Terra Deals Export — ${new Date().toISOString().slice(0, 10)}`,
@@ -283,11 +331,22 @@ router.post("/exports/terra-deals", authMiddleware(), requireRole("admin", "ops"
 router.post("/exports/lyte-signals", authMiddleware(), requireRole("admin", "ops", "compliance"), async (req: Request, res: Response) => {
   if (!await checkExportEnabled(res)) return;
   try {
-    const { format = "csv", schedule = "once" } = req.body as { format?: "csv" | "pdf"; schedule?: "once" | "daily" | "weekly" };
+    const { format = "csv", schedule = "once", status, search, dateFrom, dateTo, columns: selectedColumns } = req.body as {
+      format?: "csv" | "pdf"; schedule?: "once" | "daily" | "weekly" | "monthly";
+      status?: string; search?: string; dateFrom?: string; dateTo?: string; columns?: string[];
+    };
     if (!["csv", "pdf"].includes(format)) return sendBadRequest(res, "Invalid format");
+    if (!["once", "daily", "weekly", "monthly"].includes(schedule)) return sendBadRequest(res, "Invalid schedule");
 
-    const rows = await db.select().from(lyteSignalsTable).orderBy(desc(lyteSignalsTable.createdAt)).limit(10_000);
-    const columns: ExportColumn[] = [
+    const conditions = [];
+    if (dateFrom) conditions.push(gte(lyteSignalsTable.createdAt, new Date(dateFrom)));
+    if (dateTo) conditions.push(lte(lyteSignalsTable.createdAt, new Date(dateTo)));
+    if (status && status !== "all") conditions.push(eq(lyteSignalsTable.status, status));
+    if (search) conditions.push(or(ilike(lyteSignalsTable.title, `%${search}%`), ilike(lyteSignalsTable.source, `%${search}%`))!);
+    const rows = await db.select().from(lyteSignalsTable)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(lyteSignalsTable.createdAt)).limit(10_000);
+    const allColumns: ExportColumn[] = [
       { key: "id", label: "ID" },
       { key: "createdAt", label: "Created At" },
       { key: "title", label: "Signal Title" },
@@ -297,6 +356,7 @@ router.post("/exports/lyte-signals", authMiddleware(), requireRole("admin", "ops
       { key: "sourceType", label: "Source Type" },
       { key: "description", label: "Description" },
     ];
+    const columns = filterColumns(allColumns, selectedColumns);
 
     const result = await runExport({
       name: `Lyte Signals Export — ${new Date().toISOString().slice(0, 10)}`,
@@ -326,11 +386,22 @@ router.post("/exports/lyte-signals", authMiddleware(), requireRole("admin", "ops
 router.post("/exports/msp-tickets", authMiddleware(), requireRole("admin", "ops", "compliance"), async (req: Request, res: Response) => {
   if (!await checkExportEnabled(res)) return;
   try {
-    const { format = "csv", schedule = "once" } = req.body as { format?: "csv" | "pdf"; schedule?: "once" | "daily" | "weekly" };
+    const { format = "csv", schedule = "once", status, search, dateFrom, dateTo, columns: selectedColumns } = req.body as {
+      format?: "csv" | "pdf"; schedule?: "once" | "daily" | "weekly" | "monthly";
+      status?: string; search?: string; dateFrom?: string; dateTo?: string; columns?: string[];
+    };
     if (!["csv", "pdf"].includes(format)) return sendBadRequest(res, "Invalid format");
+    if (!["once", "daily", "weekly", "monthly"].includes(schedule)) return sendBadRequest(res, "Invalid schedule");
 
-    const rows = await db.select().from(mspTicketsTable).orderBy(desc(mspTicketsTable.createdAt)).limit(10_000);
-    const columns: ExportColumn[] = [
+    const conditions = [];
+    if (dateFrom) conditions.push(gte(mspTicketsTable.createdAt, new Date(dateFrom)));
+    if (dateTo) conditions.push(lte(mspTicketsTable.createdAt, new Date(dateTo)));
+    if (status && status !== "all") conditions.push(eq(mspTicketsTable.status, status));
+    if (search) conditions.push(or(ilike(mspTicketsTable.subject, `%${search}%`), ilike(mspTicketsTable.category, `%${search}%`))!);
+    const rows = await db.select().from(mspTicketsTable)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(mspTicketsTable.createdAt)).limit(10_000);
+    const allColumns: ExportColumn[] = [
       { key: "id", label: "ID" },
       { key: "createdAt", label: "Created At" },
       { key: "ticketNumber", label: "Ticket Number" },
@@ -343,6 +414,7 @@ router.post("/exports/msp-tickets", authMiddleware(), requireRole("admin", "ops"
       { key: "slaStatus", label: "SLA Status" },
       { key: "resolvedAt", label: "Resolved At" },
     ];
+    const columns = filterColumns(allColumns, selectedColumns);
 
     const result = await runExport({
       name: `MSP Tickets Export — ${new Date().toISOString().slice(0, 10)}`,
@@ -364,6 +436,289 @@ router.post("/exports/msp-tickets", authMiddleware(), requireRole("admin", "ops"
     res.send(result.buffer);
   } catch (err) {
     handleRouteError(res, err, "Failed to export MSP tickets");
+  }
+});
+
+// ─── Usage Metering Export ───────────────────────────────────────────────────
+
+router.post("/exports/usage-metering", authMiddleware(), requireRole("admin", "ops", "compliance"), async (req: Request, res: Response) => {
+  if (!await checkExportEnabled(res)) return;
+  try {
+    const { format = "csv", schedule = "once", dateFrom, dateTo, orgId, columns: selectedColumns } = req.body as {
+      format?: "csv" | "pdf";
+      schedule?: "once" | "daily" | "weekly" | "monthly";
+      dateFrom?: string;
+      dateTo?: string;
+      orgId?: number;
+      columns?: string[];
+    };
+
+    if (!["csv", "pdf"].includes(format)) return sendBadRequest(res, "Invalid format — must be csv or pdf");
+    if (!["once", "daily", "weekly", "monthly"].includes(schedule)) return sendBadRequest(res, "Invalid schedule");
+
+    const conditions = [];
+    if (dateFrom) conditions.push(gte(meteringEventsTable.occurredAt, new Date(dateFrom)));
+    if (dateTo) conditions.push(lte(meteringEventsTable.occurredAt, new Date(dateTo)));
+    if (orgId) conditions.push(eq(meteringEventsTable.orgId, orgId));
+
+    const rows = await db
+      .select({
+        id: meteringEventsTable.id,
+        orgId: meteringEventsTable.orgId,
+        featureKey: meteringEventsTable.featureKey,
+        product: meteringEventsTable.product,
+        quantity: meteringEventsTable.quantity,
+        unitLabel: meteringEventsTable.unitLabel,
+        occurredAt: meteringEventsTable.occurredAt,
+      })
+      .from(meteringEventsTable)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(meteringEventsTable.occurredAt))
+      .limit(10_000);
+
+    const allColumns: ExportColumn[] = [
+      { key: "id", label: "ID" },
+      { key: "orgId", label: "Org ID" },
+      { key: "featureKey", label: "Feature" },
+      { key: "product", label: "Product" },
+      { key: "quantity", label: "Quantity" },
+      { key: "unitLabel", label: "Unit" },
+      { key: "occurredAt", label: "Occurred At" },
+    ];
+    const columns = filterColumns(allColumns, selectedColumns);
+
+    const result = await runExport({
+      name: `Usage Metering Export — ${new Date().toISOString().slice(0, 10)}`,
+      dataSource: "metering_events",
+      format,
+      columns,
+      rows: rows as Record<string, unknown>[],
+      triggeredByUserId: getUserId(req),
+      triggeredByEmail: getUserEmail(req),
+      filterParams: JSON.stringify({ dateFrom, dateTo }),
+      scheduleFrequency: schedule,
+    });
+
+    res.setHeader("Content-Type", CONTENT_TYPES[format]);
+    res.setHeader("Content-Disposition", `attachment; filename="usage-metering-${result.exportId}.${FILE_EXTENSIONS[format]}"`);
+    res.setHeader("X-Export-Id", result.exportId);
+    res.setHeader("X-Download-Token", result.downloadToken);
+    res.setHeader("X-Export-Expires", result.expiresAt.toISOString());
+    res.setHeader("X-Row-Count", String(result.rowCount));
+    res.send(result.buffer);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to export usage metering");
+  }
+});
+
+// ─── Revenue Events (Invoices) Export ────────────────────────────────────────
+
+router.post("/exports/revenue-events", authMiddleware(), requireRole("admin", "ops", "compliance"), async (req: Request, res: Response) => {
+  if (!await checkExportEnabled(res)) return;
+  try {
+    const { format = "csv", schedule = "once", dateFrom, dateTo, status, orgId, columns: selectedColumns } = req.body as {
+      format?: "csv" | "pdf";
+      schedule?: "once" | "daily" | "weekly" | "monthly";
+      dateFrom?: string;
+      dateTo?: string;
+      status?: string;
+      orgId?: number;
+      columns?: string[];
+    };
+
+    if (!["csv", "pdf"].includes(format)) return sendBadRequest(res, "Invalid format — must be csv or pdf");
+    if (!["once", "daily", "weekly", "monthly"].includes(schedule)) return sendBadRequest(res, "Invalid schedule");
+
+    const conditions = [];
+    if (dateFrom) conditions.push(gte(invoicesTable.createdAt, new Date(dateFrom)));
+    if (dateTo) conditions.push(lte(invoicesTable.createdAt, new Date(dateTo)));
+    if (status && status !== "all") conditions.push(eq(invoicesTable.status, status as "draft" | "open" | "paid" | "void" | "uncollectible"));
+    if (orgId) conditions.push(eq(invoicesTable.orgId, orgId));
+
+    const rows = await db
+      .select({
+        id: invoicesTable.id,
+        orgId: invoicesTable.orgId,
+        stripeInvoiceId: invoicesTable.stripeInvoiceId,
+        amount: invoicesTable.amount,
+        currency: invoicesTable.currency,
+        status: invoicesTable.status,
+        paidAt: invoicesTable.paidAt,
+        createdAt: invoicesTable.createdAt,
+      })
+      .from(invoicesTable)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(invoicesTable.createdAt))
+      .limit(10_000);
+
+    const allColumns: ExportColumn[] = [
+      { key: "id", label: "ID" },
+      { key: "orgId", label: "Org ID" },
+      { key: "stripeInvoiceId", label: "Stripe Invoice" },
+      { key: "amount", label: "Amount" },
+      { key: "currency", label: "Currency" },
+      { key: "status", label: "Status" },
+      { key: "paidAt", label: "Paid At" },
+      { key: "createdAt", label: "Created At" },
+    ];
+    const columns = filterColumns(allColumns, selectedColumns);
+
+    const result = await runExport({
+      name: `Revenue Events Export — ${new Date().toISOString().slice(0, 10)}`,
+      dataSource: "invoices",
+      format,
+      columns,
+      rows: rows as Record<string, unknown>[],
+      triggeredByUserId: getUserId(req),
+      triggeredByEmail: getUserEmail(req),
+      filterParams: JSON.stringify({ dateFrom, dateTo, status }),
+      scheduleFrequency: schedule,
+    });
+
+    res.setHeader("Content-Type", CONTENT_TYPES[format]);
+    res.setHeader("Content-Disposition", `attachment; filename="revenue-events-${result.exportId}.${FILE_EXTENSIONS[format]}"`);
+    res.setHeader("X-Export-Id", result.exportId);
+    res.setHeader("X-Download-Token", result.downloadToken);
+    res.setHeader("X-Export-Expires", result.expiresAt.toISOString());
+    res.setHeader("X-Row-Count", String(result.rowCount));
+    res.send(result.buffer);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to export revenue events");
+  }
+});
+
+// ─── Generic Preview Endpoint ─────────────────────────────────────────────────
+// Returns first N rows for any supported export domain as JSON (no file generated)
+
+router.get("/exports/preview", authMiddleware(), requireRole("admin", "ops", "compliance"), async (req: Request, res: Response) => {
+  try {
+    const { domain, limit: limitStr = "20", dateFrom, dateTo, status, search, orgId } = req.query as Record<string, string>;
+    const limit = Math.min(parseInt(limitStr, 10) || 20, 100);
+    const from = dateFrom ? new Date(dateFrom) : undefined;
+    const to = dateTo ? new Date(dateTo) : undefined;
+
+    let rows: Record<string, unknown>[] = [];
+
+    switch (domain) {
+      case "audit_events": {
+        const w = and(
+          from ? gte(auditEventsTable.createdAt, from) : undefined,
+          to ? lte(auditEventsTable.createdAt, to) : undefined,
+          search ? or(ilike(auditEventsTable.action, `%${search}%`), ilike(auditEventsTable.entityType, `%${search}%`))! : undefined,
+        );
+        rows = (await db.select({
+          id: auditEventsTable.id, action: auditEventsTable.action,
+          entityType: auditEventsTable.entityType, entityId: auditEventsTable.entityId,
+          ipAddress: auditEventsTable.ipAddress, createdAt: auditEventsTable.createdAt,
+        }).from(auditEventsTable).where(w).orderBy(desc(auditEventsTable.createdAt)).limit(limit)) as Record<string, unknown>[];
+        break;
+      }
+      case "vessels": {
+        const w = and(
+          from ? gte(vesselsTable.createdAt, from) : undefined,
+          to ? lte(vesselsTable.createdAt, to) : undefined,
+          status ? eq(vesselsTable.status, status) : undefined,
+          search ? or(ilike(vesselsTable.name, `%${search}%`), ilike(vesselsTable.mmsi, `%${search}%`))! : undefined,
+        );
+        rows = (await db.select({
+          id: vesselsTable.id, name: vesselsTable.name, mmsi: vesselsTable.mmsi,
+          imo: vesselsTable.imo, type: vesselsTable.type, flag: vesselsTable.flag,
+          status: vesselsTable.status, createdAt: vesselsTable.createdAt,
+        }).from(vesselsTable).where(w).orderBy(desc(vesselsTable.createdAt)).limit(limit)) as Record<string, unknown>[];
+        break;
+      }
+      case "terra_deals": {
+        const w = and(
+          from ? gte(terraDealsTable.createdAt, from) : undefined,
+          to ? lte(terraDealsTable.createdAt, to) : undefined,
+          status ? eq(terraDealsTable.stage, status) : undefined,
+          search ? or(ilike(terraDealsTable.address, `%${search}%`), ilike(terraDealsTable.ownerName, `%${search}%`))! : undefined,
+        );
+        rows = (await db.select({
+          id: terraDealsTable.id, address: terraDealsTable.address,
+          stage: terraDealsTable.stage, type: terraDealsTable.type,
+          price: terraDealsTable.price, createdAt: terraDealsTable.createdAt,
+        }).from(terraDealsTable).where(w).orderBy(desc(terraDealsTable.createdAt)).limit(limit)) as Record<string, unknown>[];
+        break;
+      }
+      case "lyte_signals": {
+        const w = and(
+          from ? gte(lyteSignalsTable.createdAt, from) : undefined,
+          to ? lte(lyteSignalsTable.createdAt, to) : undefined,
+          status ? eq(lyteSignalsTable.status, status) : undefined,
+          search ? or(ilike(lyteSignalsTable.title, `%${search}%`), ilike(lyteSignalsTable.source, `%${search}%`))! : undefined,
+        );
+        rows = (await db.select({
+          id: lyteSignalsTable.id, title: lyteSignalsTable.title,
+          severity: lyteSignalsTable.severity, status: lyteSignalsTable.status,
+          source: lyteSignalsTable.source, createdAt: lyteSignalsTable.createdAt,
+        }).from(lyteSignalsTable).where(w).orderBy(desc(lyteSignalsTable.createdAt)).limit(limit)) as Record<string, unknown>[];
+        break;
+      }
+      case "aegis_incidents": {
+        const w = and(
+          from ? gte(firestormFindingsTable.createdAt, from) : undefined,
+          to ? lte(firestormFindingsTable.createdAt, to) : undefined,
+          status ? eq(firestormFindingsTable.status, status) : undefined,
+          search ? or(ilike(firestormFindingsTable.title, `%${search}%`), ilike(firestormFindingsTable.category, `%${search}%`))! : undefined,
+        );
+        rows = (await db.select({
+          id: firestormFindingsTable.id, title: firestormFindingsTable.title,
+          severity: firestormFindingsTable.severity, status: firestormFindingsTable.status,
+          category: firestormFindingsTable.category, createdAt: firestormFindingsTable.createdAt,
+        }).from(firestormFindingsTable).where(w).orderBy(desc(firestormFindingsTable.createdAt)).limit(limit)) as Record<string, unknown>[];
+        break;
+      }
+      case "msp_tickets": {
+        const w = and(
+          from ? gte(mspTicketsTable.createdAt, from) : undefined,
+          to ? lte(mspTicketsTable.createdAt, to) : undefined,
+          status ? eq(mspTicketsTable.status, status) : undefined,
+          search ? or(ilike(mspTicketsTable.subject, `%${search}%`), ilike(mspTicketsTable.category, `%${search}%`))! : undefined,
+        );
+        rows = (await db.select({
+          id: mspTicketsTable.id, subject: mspTicketsTable.subject,
+          status: mspTicketsTable.status, priority: mspTicketsTable.priority,
+          category: mspTicketsTable.category, createdAt: mspTicketsTable.createdAt,
+        }).from(mspTicketsTable).where(w).orderBy(desc(mspTicketsTable.createdAt)).limit(limit)) as Record<string, unknown>[];
+        break;
+      }
+      case "usage_metering": {
+        const numericOrgId = orgId && !isNaN(parseInt(orgId)) ? parseInt(orgId) : undefined;
+        const w = and(
+          from ? gte(meteringEventsTable.occurredAt, from) : undefined,
+          to ? lte(meteringEventsTable.occurredAt, to) : undefined,
+          numericOrgId ? eq(meteringEventsTable.orgId, String(numericOrgId)) : undefined,
+        );
+        rows = (await db.select({
+          id: meteringEventsTable.id, orgId: meteringEventsTable.orgId,
+          featureKey: meteringEventsTable.featureKey, product: meteringEventsTable.product,
+          quantity: meteringEventsTable.quantity, occurredAt: meteringEventsTable.occurredAt,
+        }).from(meteringEventsTable).where(w).orderBy(desc(meteringEventsTable.occurredAt)).limit(limit)) as Record<string, unknown>[];
+        break;
+      }
+      case "revenue_events": {
+        const numericOrgId = orgId && !isNaN(parseInt(orgId)) ? parseInt(orgId) : undefined;
+        const w = and(
+          from ? gte(invoicesTable.createdAt, from) : undefined,
+          to ? lte(invoicesTable.createdAt, to) : undefined,
+          status ? eq(invoicesTable.status, status as "draft" | "open" | "paid" | "void" | "uncollectible") : undefined,
+          numericOrgId ? eq(invoicesTable.orgId, numericOrgId) : undefined,
+        );
+        rows = (await db.select({
+          id: invoicesTable.id, orgId: invoicesTable.orgId, amount: invoicesTable.amount,
+          currency: invoicesTable.currency, status: invoicesTable.status,
+          createdAt: invoicesTable.createdAt,
+        }).from(invoicesTable).where(w).orderBy(desc(invoicesTable.createdAt)).limit(limit)) as Record<string, unknown>[];
+        break;
+      }
+      default:
+        return sendBadRequest(res, `Unknown domain: ${domain}. Supported: audit_events, aegis_incidents, vessels, terra_deals, lyte_signals, msp_tickets, usage_metering, revenue_events`);
+    }
+
+    sendSuccess(res, rows);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to load export preview");
   }
 });
 

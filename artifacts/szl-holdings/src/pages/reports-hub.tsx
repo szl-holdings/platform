@@ -453,16 +453,34 @@ export default function ReportsHub() {
             <h1 className="text-xl font-bold text-zinc-100">Reports Hub</h1>
             <p className="text-xs text-zinc-500 mt-0.5">Industrial report generation & document intelligence pipeline</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2 flex-wrap justify-end">
+            <a
+              href={`${BASE}/investor-analytics`}
+              className="px-3 py-1.5 text-xs border border-zinc-700 rounded-lg text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 transition-colors"
+            >
+              Investor Analytics
+            </a>
+            <a
+              href={`${BASE}/reports/export-builder`}
+              className="px-3 py-1.5 text-xs border border-zinc-700 rounded-lg text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 transition-colors"
+            >
+              Export Builder
+            </a>
+            <a
+              href={`${BASE}/reports/scheduled`}
+              className="px-3 py-1.5 text-xs border border-zinc-700 rounded-lg text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 transition-colors"
+            >
+              Scheduled Reports
+            </a>
             <button
               onClick={() => window.location.href = `${BASE}/reports/builder`}
-              className="px-4 py-2 text-sm border border-zinc-700 rounded-lg text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 transition-colors"
+              className="px-3 py-1.5 text-xs border border-zinc-700 rounded-lg text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 transition-colors"
             >
               Report Builder
             </button>
             <button
               onClick={() => setShowGenerate(true)}
-              className="px-4 py-2 text-sm font-medium text-zinc-900 bg-[#c2a55a] rounded-lg hover:bg-[#d4bc82] transition-colors"
+              className="px-4 py-1.5 text-xs font-medium text-zinc-900 bg-[#c2a55a] rounded-lg hover:bg-[#d4bc82] transition-colors"
             >
               Generate Report
             </button>

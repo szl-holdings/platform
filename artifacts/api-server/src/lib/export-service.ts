@@ -29,7 +29,7 @@ export interface ExportOptions {
   triggeredByUserId?: number | null;
   triggeredByEmail?: string | null;
   filterParams?: string;
-  scheduleFrequency?: "once" | "daily" | "weekly";
+  scheduleFrequency?: "once" | "daily" | "weekly" | "monthly";
 }
 
 export interface ExportResult {

@@ -18,7 +18,7 @@ export const exportJobsTable = pgTable("export_jobs", {
   downloadToken: text("download_token"),
   expiresAt: timestamp("expires_at"),
   errorMessage: text("error_message"),
-  scheduleFrequency: text("schedule_frequency", { enum: ["once", "daily", "weekly"] }).notNull().default("once"),
+  scheduleFrequency: text("schedule_frequency", { enum: ["once", "daily", "weekly", "monthly"] }).notNull().default("once"),
   nextRunAt: timestamp("next_run_at"),
   completedAt: timestamp("completed_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),

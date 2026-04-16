@@ -1,6 +1,5 @@
 import { Router, type Request, type Response } from "express";
-import { db } from "../lib/db";
-import { changelogEntriesTable } from "@szl-holdings/db";
+import { db, changelogEntriesTable } from "@szl-holdings/db";
 import { desc, eq } from "drizzle-orm";
 import { logger } from "../lib/logger";
 

@@ -4,7 +4,7 @@
  */
 import { Router, type IRouter, type Request, type Response } from "express";
 import { authMiddleware, requireRole } from "../middlewares/auth";
-import { handleRouteError, sendSuccess, sendError, sendBadRequest } from "../lib/api-response";
+import { handleRouteError, sendSuccess, sendError, sendBadRequest, sendNotFound } from "../lib/api-response";
 import { renderReportToPdf, DOMAIN_TEMPLATES, listAvailableTemplates, BRAND_THEMES } from "../lib/report-engine";
 import type { ReportTemplate, ReportBlock, BrandTheme } from "../lib/report-engine";
 import {
@@ -27,6 +27,8 @@ import {
   markReportDistributed,
   createReportSchedule,
   listReportSchedules,
+  updateReportSchedule,
+  getReportScheduleById,
   getSchedulesDue,
   markScheduleRun,
   getReportStats,
@@ -530,7 +532,11 @@ router.post("/reports/narrative", authMiddleware(), async (req: Request, res: Re
 router.get("/reports/schedules", authMiddleware(), async (req: Request, res: Response) => {
   try {
     const domain = req.query["domain"] as string | undefined;
-    const isActive = req.query["isActive"] !== undefined ? req.query["isActive"] !== "false" : true;
+    // "all" or omitted → no filter; "true"/"false" → filter by isActive flag
+    const isActiveParam = req.query["isActive"] as string | undefined;
+    const isActive = isActiveParam === undefined || isActiveParam === "all"
+      ? undefined
+      : isActiveParam !== "false";
     const schedules = await listReportSchedules({ domain, isActive });
     sendSuccess(res, schedules);
   } catch (err) {
@@ -604,7 +610,22 @@ router.post("/reports/schedules/run-due", authMiddleware(), requireRole("admin")
     for (const schedule of schedules) {
       try {
         const templateKey = schedule.templateId;
-        const template = DOMAIN_TEMPLATES[templateKey] || null;
+        // Try built-in domain template first; fall back to DB-saved template
+        let template: ReportTemplate | null = DOMAIN_TEMPLATES[templateKey] || null;
+        if (!template) {
+          const dbTemplate = await getReportTemplate(templateKey);
+          if (dbTemplate) {
+            template = {
+              id: dbTemplate.templateId,
+              name: dbTemplate.name,
+              domain: dbTemplate.domain,
+              reportType: dbTemplate.reportType,
+              brandTheme: (dbTemplate.brandTheme as import("../lib/report-engine").BrandTheme) || "szl",
+              blocks: (dbTemplate.blocks as import("../lib/report-engine").ReportBlock[]) || [],
+              dataRequirements: (dbTemplate.dataRequirements as string[]) || [],
+            };
+          }
+        }
         if (!template) {
           results.push({ scheduleId: schedule.scheduleId, status: "skipped", error: "Template not found" });
           continue;
@@ -644,6 +665,15 @@ router.post("/reports/schedules/run-due", authMiddleware(), requireRole("admin")
         }
 
         await markScheduleRun(schedule.scheduleId, "completed");
+
+        const runDueDataConfig = (schedule.dataConfig as Record<string, unknown> | null) ?? {};
+        const runDueDeliveryMethod = (runDueDataConfig["deliveryMethod"] as string | undefined) ?? "email";
+        const runDueEmails = (schedule.recipientEmails as string[] | null) ?? [];
+        for (const email of runDueEmails) {
+          const channel = runDueDeliveryMethod === "download" ? "download" : "email";
+          await createDistribution({ reportId, recipientEmail: email, channel: channel as "email" | "webhook" | "dashboard" | "download" });
+        }
+
         results.push({ scheduleId: schedule.scheduleId, status: "completed", reportId });
         logger.info({ scheduleId: schedule.scheduleId, reportId }, "Scheduled report generated");
       } catch (scheduleErr) {
@@ -656,6 +686,108 @@ router.post("/reports/schedules/run-due", authMiddleware(), requireRole("admin")
     sendSuccess(res, { processed: schedules.length, results });
   } catch (err) {
     handleRouteError(res, err, "Failed to run scheduled reports");
+  }
+});
+
+// ─── Per-Schedule: Toggle active state ───────────────────────────────────────
+
+router.patch("/reports/schedules/:scheduleId", authMiddleware(), requireRole("admin", "ops"), async (req: Request, res: Response) => {
+  try {
+    const scheduleId = req.params["scheduleId"] as string;
+    const { isActive } = req.body as { isActive?: boolean };
+
+    if (isActive === undefined || typeof isActive !== "boolean") {
+      return sendBadRequest(res, "isActive (boolean) is required");
+    }
+
+    const schedule = await getReportScheduleById(scheduleId);
+    if (!schedule) return sendNotFound(res, "Schedule");
+
+    await updateReportSchedule(scheduleId, { isActive });
+    sendSuccess(res, { scheduleId, isActive });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to update schedule");
+  }
+});
+
+// ─── Per-Schedule: Run immediately ───────────────────────────────────────────
+
+router.post("/reports/schedules/:scheduleId/run", authMiddleware(), requireRole("admin", "ops"), async (req: Request, res: Response) => {
+  try {
+    const scheduleId = req.params["scheduleId"] as string;
+    const schedule = await getReportScheduleById(scheduleId);
+    if (!schedule) return sendNotFound(res, "Schedule");
+
+    const templateKey = schedule.templateId;
+    // Try built-in domain template first; fall back to DB-saved template
+    let template: ReportTemplate | null = DOMAIN_TEMPLATES[templateKey] || null;
+    if (!template) {
+      const dbTemplate = await getReportTemplate(templateKey);
+      if (dbTemplate) {
+        template = {
+          id: dbTemplate.templateId,
+          name: dbTemplate.name,
+          domain: dbTemplate.domain,
+          reportType: dbTemplate.reportType,
+          brandTheme: (dbTemplate.brandTheme as import("../lib/report-engine").BrandTheme) || "szl",
+          blocks: (dbTemplate.blocks as import("../lib/report-engine").ReportBlock[]) || [],
+          dataRequirements: (dbTemplate.dataRequirements as string[]) || [],
+        };
+      }
+    }
+
+    if (!template) {
+      await markScheduleRun(scheduleId, "failed");
+      return sendBadRequest(res, `No template found for key: ${templateKey}`);
+    }
+
+    const dataConfig = (schedule.dataConfig as Record<string, unknown>) || {};
+
+    const narrative = await generateReportNarrative({
+      domain: schedule.domain as "szl_holdings" | "carlota_jo" | "aegis" | "terra" | "vessels" | "lyte" | "prism" | "general",
+      reportType: template.reportType,
+      data: dataConfig,
+      tone: "executive",
+      sections: ["executive_summary", "trend_analysis", "recommendations", "outlook"],
+    });
+
+    const pdfBuffer = await renderReportToPdf({
+      template,
+      data: dataConfig,
+      narrativeSections: narrative,
+      entityName: template.name,
+    });
+
+    const reportId = await createReportGeneration({
+      templateId: schedule.templateId,
+      title: `${template.name} — ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" })}`,
+      domain: schedule.domain,
+      reportType: template.reportType,
+      brandTheme: template.brandTheme,
+      dataSnapshot: dataConfig,
+      narrativeSections: narrative,
+      pdfBuffer,
+      scheduledRunId: schedule.scheduleId,
+      generatedByUserId: getUserId(req),
+    });
+
+    if (schedule.autoApprove) {
+      await updateReportStatus(reportId, "approved");
+    }
+    await markScheduleRun(scheduleId, "completed");
+
+    const perRunDataConfig = (schedule.dataConfig as Record<string, unknown> | null) ?? {};
+    const perRunDeliveryMethod = (perRunDataConfig["deliveryMethod"] as string | undefined) ?? "email";
+    const perRunEmails = (schedule.recipientEmails as string[] | null) ?? [];
+    for (const email of perRunEmails) {
+      const channel = perRunDeliveryMethod === "download" ? "download" : "email";
+      await createDistribution({ reportId, recipientEmail: email, channel: channel as "email" | "webhook" | "dashboard" | "download", distributedByUserId: getUserId(req) });
+    }
+
+    sendSuccess(res, { scheduleId, reportId, status: "completed", distributionCount: perRunEmails.length, deliveryMethod: perRunDeliveryMethod });
+    logger.info({ scheduleId, reportId }, "Per-schedule run completed");
+  } catch (err) {
+    handleRouteError(res, err, "Failed to run schedule");
   }
 });
 

@@ -56,6 +56,9 @@ const OracleBriefingPage = lazy(() => import("@/pages/oracle-briefing"));
 const KpiDashboardPage = lazy(() => import("@/pages/kpi-dashboard"));
 const ReportsHubPage = lazy(() => import("@/pages/reports-hub"));
 const ReportBuilderPage = lazy(() => import("@/pages/report-builder"));
+const InvestorAnalyticsPage = lazy(() => import("@/pages/investor-analytics"));
+const ExportBuilderPage = lazy(() => import("@/pages/export-builder"));
+const ScheduledReportsPage = lazy(() => import("@/pages/scheduled-reports"));
 const AICostAnalyticsPage = lazy(() => import("@/pages/ai-cost-analytics"));
 const AdminPage = lazy(() => import("@/pages/admin"));
 const TenantHealthScorecardsPage = lazy(() => import("@/pages/tenant-health-scorecards"));
@@ -829,8 +832,17 @@ function App() {
             <Route path="/reports/builder">
               <RequireAuth><Suspense fallback={<PageLoader />}><ReportBuilderPage /></Suspense></RequireAuth>
             </Route>
+            <Route path="/reports/export-builder">
+              <RequireAuth><Suspense fallback={<PageLoader />}><ExportBuilderPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/reports/scheduled">
+              <RequireAuth><Suspense fallback={<PageLoader />}><ScheduledReportsPage /></Suspense></RequireAuth>
+            </Route>
             <Route path="/reports">
               <RequireAuth><Suspense fallback={<PageLoader />}><ReportsHubPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/investor-analytics">
+              <RequireAuth><Suspense fallback={<PageLoader />}><InvestorAnalyticsPage /></Suspense></RequireAuth>
             </Route>
 
             {/* ── Intelligence Fabric ── */}

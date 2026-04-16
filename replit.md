@@ -63,6 +63,15 @@ The platform is built as a pnpm monorepo using Node.js 24 and TypeScript 5.9.
 - **Real-time:** WebSocket (HMAC-signed tickets), SSE, push notifications
 - **Bundling:** esbuild (CJS) and Vite
 
+### Reporting & Analytics Engine (Added April 2026)
+The platform now includes a full-stack analytics and reporting engine in the SZL Holdings dashboard:
+
+- **Investor Analytics Dashboard** (`/investor-analytics`) — Business metrics page with MRR/ARR trajectory, customer growth, churn rate, NRR, LTV/CAC ratio, MAU/WAU, funnel visualization (Visitor→Signup→Activation→Trial→Paid), cohort retention matrix, and average retention curve. Backed by real-time queries against billing, subscription, and user tables.
+- **Data Export Builder** (`/reports/export-builder`) — Self-service export tool with 8 data domains (audit events, Aegis incidents, Vessels fleet, Terra deals, Lyte signals, MSP tickets, usage metering, revenue events), filter panel (date range, status, search), column picker, live preview, and CSV/PDF generation.
+- **Scheduled Reports** (`/reports/scheduled`) — Schedule management UI supporting daily/weekly/monthly/quarterly delivery, email or download-link delivery methods, auto-approve mode, and delivery history linked to the Reports Hub.
+- **Reports Hub Navigation** — Enhanced with quick-links to all three new tools.
+- **API Route** (`/api/investor-analytics/*`) — Four endpoints: `/metrics`, `/funnel`, `/cohort`, `/audit-diffs`. Computes real-time investor-grade business metrics from subscriptions, invoices, revenue events, and users tables. Serves cohort retention analysis and before/after change-diff audit reporting.
+
 ### Platform Capabilities
 The platform comprises 15 active artifacts sharing governance infrastructure:
 - **Authentication & RBAC:** 11-role hierarchy with deny-by-default global auth enforcer

@@ -381,6 +381,22 @@ export async function createReportSchedule(params: {
   return scheduleId;
 }
 
+export async function updateReportSchedule(scheduleId: string, updates: { isActive?: boolean }) {
+  await db
+    .update(reportSchedulesTable)
+    .set({ ...updates, updatedAt: new Date() })
+    .where(eq(reportSchedulesTable.scheduleId, scheduleId));
+}
+
+export async function getReportScheduleById(scheduleId: string) {
+  const [schedule] = await db
+    .select()
+    .from(reportSchedulesTable)
+    .where(eq(reportSchedulesTable.scheduleId, scheduleId))
+    .limit(1);
+  return schedule ?? null;
+}
+
 export async function listReportSchedules(opts: { domain?: string; isActive?: boolean } = {}) {
   const conditions = [];
   if (opts.domain) conditions.push(eq(reportSchedulesTable.domain, opts.domain));

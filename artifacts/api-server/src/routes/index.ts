@@ -53,6 +53,7 @@ import terraDistressRouter from "./terra-distress";
 import terraBrokerRouter from "./terra-broker";
 import exportsRouter from "./exports";
 import reportsRouter from "./reports";
+import investorAnalyticsRouter from "./investor-analytics";
 import aegisOpsLiveRouter from "./msp-live";
 import aegisOpsRouter from "./msp";
 import terraLiveRouter from "./terra-live";
@@ -450,6 +451,9 @@ router.use(exportsRouter);
 
 router.use("/reports", _readLimiter);
 router.use(reportsRouter);
+
+router.use("/investor-analytics", _readLimiter);
+router.use(investorAnalyticsRouter);
 
 router.use("/public", publicStatusRouter);
 router.use("/admin/status", _writeLimiter);
