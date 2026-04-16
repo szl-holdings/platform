@@ -111,6 +111,9 @@ const NotFoundPage = lazy(() => import("@/pages/not-found"));
 const EcosystemPage = lazy(() => import("@/pages/ecosystem"));
 const AutopilotPage = lazy(() => import("@/pages/autopilot"));
 const CaseStudiesPage = lazy(() => import("@/pages/case-studies"));
+const OnboardingPage = lazy(() => import("@/pages/onboarding"));
+const OrgSettingsPage = lazy(() => import("@/pages/org-settings"));
+const UsageDashboardPage = lazy(() => import("@/pages/usage-dashboard"));
 const InsightsPage = lazy(() => import("@/pages/insights"));
 const InsightsArticlePage = lazy(() => import("@/pages/insights-article"));
 const CoreCommandPage = lazy(() => import("@/pages/core-command"));
@@ -1184,6 +1187,25 @@ function App() {
 
             <Route path="/crm-intelligence">
               <Suspense fallback={<PageLoader />}><CrmIntelligencePage /></Suspense>
+            </Route>
+
+            <Route path="/onboarding/:orgSlug">
+              {(params) => <Suspense fallback={<PageLoader />}><OnboardingPage orgSlug={params.orgSlug} /></Suspense>}
+            </Route>
+            <Route path="/onboarding">
+              <Suspense fallback={<PageLoader />}><OnboardingPage /></Suspense>
+            </Route>
+            <Route path="/settings/:orgSlug">
+              {(params) => <Suspense fallback={<PageLoader />}><OrgSettingsPage orgSlug={params.orgSlug} /></Suspense>}
+            </Route>
+            <Route path="/settings">
+              <Suspense fallback={<PageLoader />}><OrgSettingsPage /></Suspense>
+            </Route>
+            <Route path="/usage/:orgSlug">
+              {(params) => <Suspense fallback={<PageLoader />}><UsageDashboardPage orgSlug={params.orgSlug} /></Suspense>}
+            </Route>
+            <Route path="/usage">
+              <Suspense fallback={<PageLoader />}><UsageDashboardPage /></Suspense>
             </Route>
 
             {/* Catch-all → 404 */}

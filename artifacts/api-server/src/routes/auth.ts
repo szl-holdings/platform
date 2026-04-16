@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, usersTable, sessionsTable, rolesTable, userRolesTable, toCanonicalRole, type RoleName } from "@szl-holdings/db";
+import { db, usersTable, sessionsTable, rolesTable, userRolesTable, organizationsTable, orgMembersTable, toCanonicalRole, type RoleName } from "@szl-holdings/db";
 import { eq, desc, and } from "drizzle-orm";
 import { randomBytes, pbkdf2Sync, timingSafeEqual } from "crypto";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
@@ -88,12 +88,24 @@ router.get("/auth/me", authMiddleware(), async (req, res) => {
       sendNotFound(res, "User");
       return;
     }
+
+    const orgRows = await db
+      .select({
+        slug: organizationsTable.slug,
+        name: organizationsTable.name,
+        role: orgMembersTable.role,
+      })
+      .from(orgMembersTable)
+      .innerJoin(organizationsTable, eq(orgMembersTable.orgId, organizationsTable.id))
+      .where(eq(orgMembersTable.userId, req.user!.id));
+
     sendSuccess(res, {
       id: user.id,
       displayName: user.displayName,
       email: user.email,
       avatarUrl: user.avatarUrl,
       roles: req.user!.roles,
+      orgs: orgRows,
     });
   } catch (err) {
     req.log?.error({ err }, "Failed to get current user");

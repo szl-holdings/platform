@@ -26,6 +26,8 @@ export default function ShellLayout() {
         <Stack.Screen name="quick-actions" options={{ animation: "slide_from_bottom" }} />
         <Stack.Screen name="settings" options={{ animation: "slide_from_right" }} />
         <Stack.Screen name="intelligence" />
+        <Stack.Screen name="notifications" options={{ animation: "slide_from_right" }} />
+        <Stack.Screen name="usage" options={{ animation: "slide_from_right" }} />
       </Stack>
       <WorkspaceSwitcher />
       <ScreenshotPolicyEnforcer />

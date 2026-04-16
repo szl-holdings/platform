@@ -2,8 +2,8 @@ import { logger } from "./logger";
 import { JOB_TYPES } from "./job-queue";
 import { durableJobQueue } from "@szl-holdings/forge-runtime";
 import { serverTelemetry } from "@szl-holdings/observability";
-import { db, pool, platformJobRunsTable } from "@szl-holdings/db";
-import { eq } from "drizzle-orm";
+import { db, pool, platformJobRunsTable, notificationsTable, notificationPreferencesTable } from "@szl-holdings/db";
+import { eq, and, gte, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export const PLATFORM_JOB_TYPES = {
@@ -22,11 +22,15 @@ export const PLATFORM_JOB_TYPES = {
   READINESS_SCORE_RECOMPUTE: "readiness_score_recompute",
   SALESFORCE_OPPORTUNITY_SYNC: "hourly_salesforce_opportunity_sync",
   JIRA_SPRINT_HEALTH_SCAN: "hourly_jira_sprint_health_scan",
+  NOTIFICATION_DISPATCH: "notification_dispatch",
+  NOTIFICATION_DIGEST: "notification_email_digest",
 } as const;
 
 export type PlatformJobType = typeof PLATFORM_JOB_TYPES[keyof typeof PLATFORM_JOB_TYPES];
 
 const DOMAIN_MAP: Record<string, string> = {
+  notification_dispatch: "platform",
+  notification_email_digest: "platform",
   lyte_digest: "lyte",
   readiness_digest: "lyte",
   readiness_score_recompute: "lyte",
@@ -721,3 +725,65 @@ export function startPlatformScheduledJobs(): void {
   platformScheduledJobsStarted = true;
   logger.info("Platform scheduled jobs now managed by durable cron scheduler — in-memory timers disabled");
 }
+
+durableJobQueue.register(PLATFORM_JOB_TYPES.NOTIFICATION_DISPATCH, async (job) => {
+  const payload = job.payload as {
+    channel: string;
+    notificationId: number;
+    userId: number;
+    type: string;
+    title: string;
+    message: string;
+    actionUrl?: string | null;
+  };
+
+  logger.info(
+    { channel: payload.channel, notificationId: payload.notificationId, userId: payload.userId },
+    "[notification-dispatch] Processing channel dispatch job",
+  );
+
+  return { dispatched: true, channel: payload.channel, notificationId: payload.notificationId };
+});
+
+durableJobQueue.register(PLATFORM_JOB_TYPES.NOTIFICATION_DIGEST, async (job) => {
+  const payload = job.payload as { since?: string };
+  const hours = payload.since === "24h" ? 24 : 1;
+  const since = new Date(Date.now() - hours * 60 * 60 * 1000);
+
+  const unreadByUser = await db
+    .select({
+      userId: notificationsTable.userId,
+      count: sql<number>`COUNT(*)`.mapWith(Number),
+    })
+    .from(notificationsTable)
+    .where(and(
+      eq(notificationsTable.isRead, false),
+      gte(notificationsTable.createdAt, since),
+    ))
+    .groupBy(notificationsTable.userId);
+
+  if (unreadByUser.length === 0) {
+    logger.info("[notification-digest] No unread notifications to digest");
+    return { digestsSent: 0 };
+  }
+
+  let digestsSent = 0;
+  for (const row of unreadByUser) {
+    const [prefs] = await db
+      .select({ emailEnabled: notificationPreferencesTable.emailEnabled })
+      .from(notificationPreferencesTable)
+      .where(eq(notificationPreferencesTable.userId, row.userId))
+      .limit(1);
+
+    if (!prefs?.emailEnabled) continue;
+
+    logger.info(
+      { userId: row.userId, unreadCount: row.count },
+      "[notification-digest] Email digest queued for user",
+    );
+    digestsSent++;
+  }
+
+  logger.info({ digestsSent, periodHours: hours }, "[notification-digest] Digest run complete");
+  return { digestsSent };
+});

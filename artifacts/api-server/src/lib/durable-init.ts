@@ -210,6 +210,7 @@ const DEFAULT_SCHEDULES: ScheduleDefinition[] = [
   { name: "platform_route_pressure_scan_hourly", jobType: PLATFORM_JOB_TYPES.ROUTE_PRESSURE_SCAN, cronExpression: "0 * * * *", payload: {}, maxRetries: 1 },
   { name: "platform_salesforce_opportunity_sync_hourly", jobType: PLATFORM_JOB_TYPES.SALESFORCE_OPPORTUNITY_SYNC, cronExpression: "0 * * * *", payload: {}, maxRetries: 2 },
   { name: "platform_jira_sprint_health_scan_hourly", jobType: PLATFORM_JOB_TYPES.JIRA_SPRINT_HEALTH_SCAN, cronExpression: "0 * * * *", payload: {}, maxRetries: 2 },
+  { name: "notification_email_digest_daily", jobType: PLATFORM_JOB_TYPES.NOTIFICATION_DIGEST, cronExpression: "0 8 * * *", payload: { since: "24h" }, maxRetries: 2 },
 ] as const;
 
 export async function startDurableQueue(): Promise<void> {

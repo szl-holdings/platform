@@ -6,11 +6,56 @@ import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { publish, WS_CHANNELS } from "../lib/websocket";
 import { validateBody, createNotificationSchema } from "../lib/validation";
 import { z } from "zod";
+import { logger } from "../lib/logger";
+import { durableJobQueue } from "@szl-holdings/forge-runtime";
+import { PLATFORM_JOB_TYPES } from "../lib/platform-jobs";
 
 const router: IRouter = Router();
 
 const validTypes = ["info", "warning", "error", "success", "action_required"] as const;
 const validChannels = ["in_app", "email", "sms", "slack"] as const;
+
+async function dispatchToExternalChannels(params: {
+  notificationId: number;
+  userId: number;
+  type: string;
+  title: string;
+  message: string;
+  actionUrl?: string | null;
+}): Promise<void> {
+  const prefs = await db.select().from(notificationPreferencesTable)
+    .where(eq(notificationPreferencesTable.userId, params.userId))
+    .limit(1);
+
+  const p = prefs[0];
+  if (!p) return;
+
+  const channels: string[] = [];
+  if (p.emailEnabled) channels.push("email");
+  if (p.smsEnabled) channels.push("sms");
+  if (p.slackEnabled) channels.push("slack");
+
+  if (channels.length === 0) return;
+
+  logger.info(
+    { notificationId: params.notificationId, userId: params.userId, channels },
+    "[notifications] Enqueueing external channel dispatch jobs",
+  );
+
+  for (const channel of channels) {
+    void durableJobQueue.enqueue(PLATFORM_JOB_TYPES.NOTIFICATION_DISPATCH, {
+      channel,
+      notificationId: params.notificationId,
+      userId: params.userId,
+      type: params.type,
+      title: params.title,
+      message: params.message,
+      actionUrl: params.actionUrl,
+    }).catch((err: unknown) => {
+      logger.error({ err, channel, notificationId: params.notificationId }, "[notifications] Failed to enqueue dispatch job");
+    });
+  }
+}
 
 router.get("/notifications", authMiddleware({ required: false }), async (req, res) => {
   try {
@@ -46,6 +91,15 @@ router.post("/notifications", authMiddleware(), requireRole("ops"), validateBody
     }).returning();
 
     publish(WS_CHANNELS.NOTIFICATIONS, "new_notification", notification);
+
+    void dispatchToExternalChannels({
+      notificationId: notification.id,
+      userId: notification.userId,
+      type: notification.type,
+      title: notification.title,
+      message: notification.message,
+      actionUrl: notification.actionUrl,
+    });
 
     sendCreated(res, notification);
   } catch (err) {

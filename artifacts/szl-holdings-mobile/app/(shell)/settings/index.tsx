@@ -24,12 +24,27 @@ interface SettingItem {
 
 const SETTINGS: SettingItem[] = [
   {
+    title: "Notifications",
+    description: "Inbox, read history, and notification channel preferences",
+    route: "/(shell)/notifications",
+    icon: "bell",
+    accent: "#c9a84c",
+    tag: "NEW",
+  },
+  {
+    title: "Usage Dashboard",
+    description: "Active users, API calls, storage, and feature adoption",
+    route: "/(shell)/usage",
+    icon: "bar-chart-2",
+    accent: "#6366f1",
+    tag: "NEW",
+  },
+  {
     title: "Home Screen Widgets",
     description: "Configure KPI widgets for iOS & Android home screen",
     route: "/(shell)/settings/widgets",
     icon: "grid",
     accent: "#6366f1",
-    tag: "NEW",
   },
   {
     title: "Daily Executive Digest",
@@ -37,7 +52,6 @@ const SETTINGS: SettingItem[] = [
     route: "/(shell)/settings/digest",
     icon: "sun",
     accent: ACCENT,
-    tag: "NEW",
   },
   {
     title: "Security & Privacy",

@@ -43,6 +43,7 @@ export async function apiFetch<T>(
   if (!res.ok) {
     throw new Error(`API error ${res.status}: ${path}`);
   }
+  if (res.status === 204) return null as T;
   return res.json() as Promise<T>;
 }
 

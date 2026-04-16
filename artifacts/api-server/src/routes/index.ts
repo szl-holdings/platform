@@ -100,6 +100,9 @@ import analyticsRouter from "./analytics";
 import invitationsRouter from "./invitations";
 import { idempotencyMiddleware, optionalIdempotencyMiddleware } from "../middlewares/idempotency";
 import gdprRouter from "./gdpr";
+import onboardingRouter from "./onboarding";
+import orgSettingsRouter from "./org-settings";
+import usageRouter from "./usage";
 import privacyRouter from "./privacy";
 import lyteBillingRouter from "./lyte-billing";
 import { alloyResearchRouter } from "./alloy-research";
@@ -625,6 +628,17 @@ router.use(copilotRouter);
 router.use(gdprRouter);
 
 router.use(privacyRouter);
+
+router.use("/onboarding", _writeLimiter);
+router.use(onboardingRouter);
+
+router.use("/orgs", _readLimiter);
+router.use("/orgs", _writeLimiter);
+router.use("/user", _readLimiter);
+router.use("/user", _writeLimiter);
+router.use(orgSettingsRouter);
+
+router.use(usageRouter);
 
 router.use("/partner", _writeLimiter);
 router.use("/partner", _readLimiter);
