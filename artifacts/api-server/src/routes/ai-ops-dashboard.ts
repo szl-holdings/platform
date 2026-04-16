@@ -41,10 +41,12 @@ import {
   getReviewQueueStats,
   listEvaluatorHooks,
   aggregateHookStats,
+  enqueueForReview,
   type TraceDomain,
   type TraceStatus,
   type ReviewVerdict,
 } from "@szl-holdings/ai-engine";
+import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
@@ -481,11 +483,43 @@ router.post(
       feedbackStore.unshift(entry);
       if (feedbackStore.length > MAX_FEEDBACK) feedbackStore.length = MAX_FEEDBACK;
 
+      let reviewQueued = false;
       if (sentiment === "down") {
         updateTraceStatus(traceId, "flagged");
+        const alreadyEnqueued = feedbackStore.some(
+          f => f.feedbackId !== entry.feedbackId
+            && f.traceId === traceId
+            && f.sentiment === "down",
+        );
+        if (!alreadyEnqueued) {
+          enqueueForReview({
+            trace: { ...trace, requiresReview: true },
+            overrideReason: correction
+              ? `human_feedback_down: ${correction.slice(0, 200)}`
+              : "human_feedback_down",
+          });
+          reviewQueued = true;
+        }
       }
 
-      sendSuccess(res, { feedback: entry });
+      logger.info(
+        {
+          event: "ai_feedback_recorded",
+          feedbackId: entry.feedbackId,
+          traceId,
+          orgId: entry.orgId,
+          userId: entry.userId,
+          domain: trace.domain,
+          recommendationType: trace.recommendationType,
+          sentiment,
+          hasCorrection: Boolean(correction),
+          hasComment: Boolean(comment),
+          reviewQueued,
+        },
+        "AI trace feedback recorded",
+      );
+
+      sendSuccess(res, { feedback: entry, reviewQueued });
     } catch (err) {
       handleRouteError(res, err, "POST /ai/ops/traces/:id/feedback");
     }
