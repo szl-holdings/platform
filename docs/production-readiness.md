@@ -95,14 +95,16 @@ _Updated: April 3, 2026_
 
 ### External service dependencies (paid, third-party):
 
+> **Deployment clarification (updated April 16, 2026):** The platform is hosted on **Replit** (autoscale deployment), not Azure App Service or Azure infrastructure. Azure AD/Entra ID and Azure Power BI in the table below are **enterprise feature integrations** (SSO, embedded analytics) — not the deployment or hosting target. See `docs/architecture/canonical-deployment-model.md` for the authoritative deployment doctrine.
+
 | Service | Purpose | Tier | Notes |
 |---------|---------|------|-------|
 | Stripe | Payment processing | Paid | Requires live key for real charges |
 | Resend | Email delivery | Free tier available | 100 emails/day free |
 | Replit Object Storage | File/asset storage | Paid (Replit) | Object storage plan required |
 | OpenAI / Anthropic / Gemini | AI inference | Via Replit AI proxy | No extra key needed in dev |
-| Azure AD / Entra ID | SSO, SCIM | Enterprise Azure subscription | Required for corporate tenant onboarding |
-| Azure Power BI | Embedded analytics | Power BI Pro/Premium | Required for live Power BI embed |
+| Azure AD / Entra ID | Enterprise SSO, SCIM | Enterprise Azure subscription | Feature integration only — required for corporate tenant SSO |
+| Azure Power BI | Embedded analytics | Power BI Pro/Premium | Feature integration only — required for per-tenant Power BI embed |
 | SendGrid / Twilio | (Optional) SMS/push | Paid | Not currently wired |
 
 ---

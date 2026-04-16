@@ -185,8 +185,10 @@ See [RELEASE_PROCESS.md](RELEASE_PROCESS.md) and [RELEASE_CHECKLIST.md](RELEASE_
 Quick reference:
 1. `pnpm release:prep` — updates CHANGELOG and version
 2. Run [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) manually
-3. Deploy via Azure Bicep templates in `/infra/`
+3. Deploy via Replit: publish a GitHub Release, which triggers `deploy-production.yml`, or use the Replit UI Deploy button
 4. `pnpm release:notes` — generates release summary
+
+> **Note:** Replit is the canonical deployment target. References to Azure Bicep templates in earlier docs are superseded. See `docs/architecture/canonical-deployment-model.md`.
 
 ---
 

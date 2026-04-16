@@ -1,17 +1,19 @@
 # SZL Holdings — Deployment Model
 
-**Date:** April 16, 2026
-**Status:** Authoritative — supersedes `docs/trust/deployment-model.md` (which is retained for the trust center audience)
+**Date:** April 16, 2026  
+**Status:** ⚠️ PARTIALLY SUPERSEDED — See `docs/architecture/canonical-deployment-model.md` for the authoritative deployment doctrine. The Azure tier described in this document has been revised: Azure is used for enterprise feature integrations (SSO, Power BI) only, not as a production deployment host. Replit is the sole primary deployment target.  
 **Audience:** Engineering, DevOps, investors conducting technical due diligence
 
 ---
 
 ## Summary
 
-SZL Holdings operates a three-tier deployment model:
-1. **Replit** — primary live environment for development, demos, and investor evaluation
-2. **GitHub Actions** — CI validation on every PR/merge; staging trigger (inactive pending token configuration)
-3. **Azure** — enterprise production target; fully IaC-defined but not yet deployed (pending first commercial contract)
+SZL Holdings deployment model (updated April 16, 2026):
+1. **Replit** — primary live environment for development, demos, investor evaluation, **and production deployment** (autoscale)
+2. **GitHub Actions** — CI validation on every PR/merge; deploy workflows trigger Replit deployments
+3. **Azure** — ~~enterprise production target~~ enterprise feature integrations only (Azure AD SSO, SCIM, Power BI embed); not the deployment host
+
+> **Deployment doctrine decision (April 16, 2026):** Replit is the sole primary deployment target. Azure infrastructure (App Service, Bicep templates, Key Vault as secrets store) is not part of the production deployment. See `docs/architecture/canonical-deployment-model.md`.
 
 ---
 
