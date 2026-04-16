@@ -34,9 +34,9 @@ Every step is instrumented. Every decision is attributed. Every AI recommendatio
 ├─────────────────────────────────────────────────────────────────────┤
 │  DOMAIN PACKS                                                        │
 │                                                                      │
-│  Aegis         Vessels       Terra        PRISM Counsel  Carlota Jo │
-│  Security &    Maritime      Real Estate  Legal Matter   Premium    │
-│  Defense       Intelligence  Intelligence Command        Advisory   │
+│  Aegis         Vessels       Terra        Carlota Jo               │
+│  Security &    Maritime      Real Estate  Premium                  │
+│  Defense       Intelligence  Intelligence Advisory                 │
 ├─────────────────────────────────────────────────────────────────────┤
 │  GOVERNANCE INFRASTRUCTURE                                           │
 │                                                                      │
@@ -45,7 +45,7 @@ Every step is instrumented. Every decision is attributed. Every AI recommendatio
 ├─────────────────────────────────────────────────────────────────────┤
 │  DATA LAYER                                                          │
 │                                                                      │
-│  PostgreSQL 16 (Drizzle ORM)  ·  685 tables  ·  112 schema files   │
+│  PostgreSQL 16 (Drizzle ORM)  ·  561 tables  ·  112 schema files   │
 │  External feeds: AIS, STIX/TAXII, sanctions, court records          │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -54,7 +54,7 @@ Every step is instrumented. Every decision is attributed. Every AI recommendatio
 
 **Alloy** is the execution fabric — where workflows are orchestrated, approvals are enforced, and audit trails are generated.
 
-**Domain packs** extend the same governance infrastructure into domain-specific intelligence: security (Aegis), maritime (Vessels), real estate (Terra), legal (PRISM Counsel), and advisory (Carlota Jo).
+**Domain packs** extend the same governance infrastructure into domain-specific intelligence: security (Aegis), maritime (Vessels), real estate (Terra), and advisory (Carlota Jo).
 
 **CORTEX** provides unified mobile command across all domains in a single native app.
 
@@ -85,9 +85,8 @@ See [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) for the full specification 
 | **Aegis** | Security & defense | SOC command, MITRE ATT&CK, SOAR playbooks, threat intelligence | Functional alpha |
 | **Vessels** | Maritime intelligence | AIS fleet tracking, sanctions screening, voyage economics, dark vessel detection | Functional alpha |
 | **Terra** | Real estate intelligence | NYC distress pipeline, ownership graph, deal workflow, market signals | Functional alpha |
-| **PRISM Counsel** | Legal command | Matter management, court filings, AI-assisted review with proof chain | Functional alpha |
 | **Carlota Jo** | Premium advisory | UHNW advisory operations — client portal, service catalog, booking | Live |
-| **IMPERIUM** | Cloud sovereignty | Infrastructure control, tenant provisioning, cost governance | Functional alpha |
+| **IMPERIUM** | Cloud sovereignty | Infrastructure control and infrastructure mode — merged into Command Portal | Merged |
 | **CORTEX** | Unified mobile | All domain workspaces in one app — biometric auth, cross-domain signals | Functional alpha |
 | **Command Portal** | Ecosystem hub | Real-time 8-domain dashboard, executive briefing, global search | Functional alpha |
 
@@ -119,7 +118,7 @@ See [Trust Center](docs/trust/trust-center.md) · [Security](SECURITY.md) · [Pr
 | Frontend | React 19, Vite, Tailwind CSS v4, Framer Motion, Recharts |
 | Mobile | Expo / React Native, NativeWind |
 | Backend | Express 5, Node.js |
-| Database | PostgreSQL 16, Drizzle ORM (685 tables, 112 schema files) |
+| Database | PostgreSQL 16, Drizzle ORM (561 tables, 112 schema files) |
 | AI | OpenAI, Anthropic, Gemini — multi-provider with fallback. 9 schema-validated decision types |
 | Auth | OIDC/PKCE, 11-role RBAC, SCIM 2.0, Azure AD multi-tenant SSO |
 | Real-time | WebSocket (signed tickets), SSE, push notifications |

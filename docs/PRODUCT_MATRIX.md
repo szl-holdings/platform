@@ -84,19 +84,6 @@
 
 ---
 
-### Stephen Lutar — Founder Authority Site
-
-| Attribute | Detail |
-|-----------|--------|
-| **Audience** | Prospective partners, employers, clients, collaborators |
-| **Problem Solved** | Founder identity and professional narrative separate from the corporate brand |
-| **Category** | Founder Portfolio |
-| **Status** | Live |
-| **Core Differentiators** | Work showcase, technical frameworks, thesis writing, case studies, career command |
-| **Strategic Role** | Founder positioning and personal brand — independent from SZL Holdings corporate identity |
-
----
-
 ## Internal Systems (Platform Infrastructure)
 
 These systems power the SZL ecosystem but are not standalone products sold to customers.

@@ -49,9 +49,8 @@ The platform is not a dashboard. It is a **decision surface** with built-in acco
 | **Aegis** | Security & Defense | Functional alpha |
 | **Vessels** | Maritime Intelligence | Functional alpha |
 | **Terra** | Real Estate Intelligence | Functional alpha |
-| **PRISM Counsel** | Legal Matter Command | Functional alpha |
 | **Carlota Jo** | Premium Advisory | Live |
-| **IMPERIUM** | Cloud Sovereignty | Functional alpha |
+| **IMPERIUM** | Cloud Sovereignty | Merged into Command Portal |
 
 **Five platform primitives** (shared by all surfaces):
 - **Outcome Graph** — decision lifecycle tracking
@@ -64,9 +63,9 @@ The platform is not a dashboard. It is a **decision surface** with built-in acco
 
 ## Platform Scale
 
-- **15 active artifacts** (10 web, 2 mobile, 1 API, 1 design system, 1 dev sandbox)
-- **685 database tables** across 112 schema files (Drizzle ORM)
-- **51 shared packages** in pnpm monorepo
+- **10 canonical artifacts** (7 web domain apps, 1 API, 2 mobile) + 1 internal dev sandbox
+- **561 database tables** across 112 schema files (Drizzle ORM)
+- **48 shared packages** in pnpm monorepo
 - **11-role RBAC** with org-scoped tenant isolation
 - **9 schema-validated AI decision types**
 - **Immutable audit trail** across all products via Proof Chain
