@@ -24,6 +24,12 @@ Ask before making major changes.
 Do not make changes to the folder `Z`.
 Do not make changes to the file `Y`.
 
+## Demo Day
+See `DEMO.md` for the full demo runbook including credentials, walkthrough script, and troubleshooting.
+- **Seed command:** `pnpm seed` creates 5 demo users with PBKDF2-hashed passwords
+- **Health endpoint:** `GET /api/health` returns full service matrix (database, auth, AI, storage, uptime)
+- **Login:** `POST /api/auth/login-password` — admin@szlholdings.com / DemoAdmin2026!, or alex/jordan/morgan/casey@szlholdings.com / DemoUser2026!
+
 ## Demo Assets
 A full investor showcase package lives in `demo-assets/`:
 - `screenshots/` — 9 high-quality app screenshots (szl-holdings, carlota-jo, terra, vessels, lyte, prism-counsel, stephen-site, command, firestorm-placeholder)
