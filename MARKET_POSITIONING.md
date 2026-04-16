@@ -71,6 +71,8 @@ This is not a refinement of existing categories. It is a response to a structura
 
 ### 4. Business Observability & Operational Intelligence (Emerging Category)
 
+**Key platforms:** Monte Carlo (data observability), Chronosphere (cloud-native observability), Observe Inc (SaaS observability with business context)
+
 **What the category promises:**
 - Real-time visibility into business operations (not just infrastructure)
 - Cross-functional signal aggregation from business tools
@@ -78,11 +80,11 @@ This is not a refinement of existing categories. It is a response to a structura
 - "Business context" layer on top of infrastructure telemetry
 
 **What the category misses:**
-- **Visibility without accountability.** Business observability shows what is happening operationally. It does not create a decision surface for what should happen next.
-- **No governance primitives.** These platforms add business context to dashboards. They do not add approval gates, proof chains, or policy enforcement to operational decisions.
-- **No AI governance.** When AI recommendations are added, they are treated as dashboard widgets, not as governed advisory outputs with attribution and approval requirements.
+- **Visibility without accountability.** Monte Carlo detects data quality anomalies; Chronosphere tracks service health; Observe correlates business events. None create a decision surface for what should happen next.
+- **No governance primitives.** These platforms add business context to dashboards. They do not add policy gates, proof chains, or governance enforcement to operational decisions.
+- **No AI governance.** When AI recommendations are added, they are treated as dashboard widgets, not as governed advisory outputs with attribution and policy requirements.
 
-**SZL's structural advantage:** SZL is what business observability should have been — not just visibility into operations, but a governed decision surface that connects signal to action with accountability at every step.
+**SZL's structural advantage:** SZL is what business observability should have been — not just visibility into operations, but governed decision infrastructure that connects signal to action with accountability at every step. Monte Carlo tells you your data pipeline broke. SZL tells you what to do about it, simulates the risk, checks the policy, and records the outcome.
 
 ---
 

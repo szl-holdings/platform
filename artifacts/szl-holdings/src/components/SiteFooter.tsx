@@ -5,8 +5,9 @@ const FOOTER_COLS = [
     heading: "Platform",
     links: [
       { label: "Platform Overview", href: "/platform" },
-      { label: "Lyte", href: "/lyte" },
-      { label: "Alloy", href: "/alloy-fabric" },
+      { label: "Lyte — Command", href: "/lyte" },
+      { label: "Alloy — Execution", href: "/alloy-fabric" },
+      { label: "CORTEX — Mobile", href: "/cortex" },
       { label: "Architecture", href: "/architecture" },
     ],
   },
