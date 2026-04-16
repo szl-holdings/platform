@@ -27,9 +27,9 @@ Each role inherits all permissions of roles below it.
 ### Cookie Sessions (primary)
 
 - Cookie name: `sid`
-- Expiry: 24 hours with sliding refresh
+- Expiry: 7 days (OIDC flow) / 30 days (credential flow) with sliding refresh
 - Flags: `Secure`, `HttpOnly`, `SameSite=Lax`
-- Used by: Web apps (command, lyte, szl-holdings, etc.)
+- Used by: Web apps (command, szl-holdings, aegis, etc.)
 
 ### Bearer Tokens
 
@@ -45,14 +45,24 @@ Each role inherits all permissions of roles below it.
 
 ## Middleware Stack (Auth)
 
-Applied in order on every `/api/*` route:
+Applied in order on every request (see `artifacts/api-server/src/app.ts`):
 
 ```
-correlationMiddleware    → Assign X-Correlation-Id
-authMiddleware           → Parse session cookie / bearer token → set req.user
-globalAuthEnforcer       → Block public routes if not in allowlist
+correlationMiddleware    → Assign X-Correlation-Id + X-Request-Id
+apiVersionMiddleware     → Parse X-Api-Version header
+helmet                   → Security headers
+cors                     → Environment-aware CORS
+globalLimiter            → Rate limiting (health endpoints exempt)
+telemetryMiddleware      → Performance metrics
+pinoHttp                 → Structured request logging
+cookieParser             → Parse cookies
+express.json             → Parse request body
 csrfMiddleware           → Validate CSRF token for state-mutating requests
+authMiddleware           → Parse session cookie / bearer token → set req.user
 sessionRefreshPolicy     → Extend session expiry on activity
+etagMiddleware           → Optimistic concurrency (ETag)
+globalAuthEnforcer       → Deny-by-default for /api/* not on public allowlist
+router                   → Domain-specific route handlers
 ```
 
 ## Route Authorization
@@ -100,7 +110,7 @@ Routes exempt from `globalAuthEnforcer`:
 | `POST /api/admin/*` | `ops` |
 | `PUT /api/users/*` | `ops` |
 | `DELETE /api/*/:id` | `super_admin` |
-| `GET /api/health/detailed` | `super_admin` or internal token |
+| `GET /api/health/detailed` | Any authenticated session or internal token (production); unauthenticated (development) |
 | `POST /api/cortex/*` | `super_admin` |
 
 ## Multi-Tenant Isolation

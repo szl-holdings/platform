@@ -7,18 +7,17 @@ Status: Canonical — all error codes must be registered here
 
 ```json
 {
-  "error": "VALIDATION_ERROR",
-  "message": "Human-readable description",
-  "statusCode": 400,
-  "requestId": "correlation-id-here",
-  "details": {
-    "field": "email",
-    "issue": "Required"
-  }
+  "error": "Human-readable description",
+  "code": "BAD_REQUEST",
+  "requestId": "unique-request-uuid",
+  "correlationId": "trace-correlation-uuid",
+  "details": [
+    { "path": "email", "message": "Required" }
+  ]
 }
 ```
 
-All error responses set `X-Correlation-Id` and `X-Request-Id` headers.
+Every error response includes both `requestId` and `correlationId` fields in the JSON body, and sets `X-Correlation-Id` and `X-Request-Id` response headers. The `code` field is always present — defaults to `INTERNAL_ERROR` for 5xx and `CLIENT_ERROR` for 4xx when not explicitly set.
 
 ## HTTP Status Codes in Use
 
@@ -119,9 +118,13 @@ sendNotFound(res, "Resource name")
 sendBadRequest(res, "message", details?)
 sendUnauthorized(res, "message")
 sendForbidden(res, "message")
+sendConflict(res, "message")
+sendTooManyRequests(res, "message", retryAfterSeconds?)
+sendServiceUnavailable(res, "message")
 sendSuccess(res, data, 200, meta?)
 sendCreated(res, data)
 sendNoContent(res)
+handleRouteError(res, err, "fallback message")
 ```
 
 ## Client Error Handling (Frontend)

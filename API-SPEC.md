@@ -120,7 +120,9 @@ See `artifacts/api-server/src/middlewares/csrf.ts` `EXEMPT_PATHS` and `isExempt(
 
 ---
 
-### Aegis / Firestorm — Security (`/api/firestorm`)
+### Aegis — Security & Defense (`/api/firestorm`)
+
+Routes retain the `/api/firestorm` prefix for backward compatibility; the frontend artifact is `aegis` at `/aegis/`.
 
 | Endpoint Group | Auth | Description |
 |---------------|------|-------------|
@@ -163,7 +165,9 @@ See `artifacts/api-server/src/middlewares/csrf.ts` `EXEMPT_PATHS` and `isExempt(
 
 ---
 
-### PRISM Counsel — Legal (`/api/prism-counsel`)
+### PRISM Counsel — Legal (`/api/prism-counsel`) [DEPRECATED]
+
+PRISM Counsel frontend is deprecated (task #579). API routes remain for data access but are no longer actively developed.
 
 | Endpoint Group | Auth | Description |
 |---------------|------|-------------|
@@ -242,14 +246,14 @@ There is **no PIN gate** in `adminGuard`.
 
 ### Health (`/api/health`)
 
-Implemented in `artifacts/api-server/src/app.ts`. All four health endpoints are public-accessible.
+Implemented in `artifacts/api-server/src/app.ts`. Health endpoints are public except `/api/health/detailed`.
 
 | Endpoint | Auth | Description |
 |----------|------|-------------|
 | `/api/health` | Public | Checks DB connectivity and connection count. Returns `200 OK` if healthy, `503` if degraded. |
 | `/api/health/live` | Public | Always returns `200 OK` with `{status: "ok"}` — process liveness only, no DB check. |
 | `/api/health/ready` | Public | Checks DB connectivity. Returns `200` if DB reachable, `503` if not. |
-| `/api/health/detailed` | **Production only:** session auth or `x-internal-token` header. **Development:** no auth enforced. | Full system status: DB connectivity + pool stats, job queue depth (pending/running/failed), telemetry (P95 latency, error rate, active alerts). Returns `503` if any check is `degraded`. |
+| `/api/health/detailed` | **Production:** any authenticated session (`req.isAuthenticated()`) or `X-Internal-Token` header matching `ALLOY_INTERNAL_TOKEN`. **Development:** no auth enforced. | Full system status: DB connectivity + pool stats, job queue depth (pending/running/failed), telemetry (P95 latency, error rate, active alerts). Returns `503` if any check is `degraded`. |
 
 ---
 
@@ -293,16 +297,20 @@ Error responses from `sendError` (`artifacts/api-server/src/lib/api-response.ts`
 ```json
 {
   "error": "Descriptive error message",
-  "correlationId": "uuid-correlation-id",
-  "code": "ERROR_CODE",
-  "details": {}
+  "code": "BAD_REQUEST",
+  "requestId": "unique-request-uuid",
+  "correlationId": "trace-correlation-uuid",
+  "details": [
+    { "path": "email", "message": "Required" }
+  ]
 }
 ```
 
 - `error` — human-readable error string (always present)
-- `correlationId` — request correlation ID (always present, maps to structured logs)
-- `code` — machine-readable error code (optional, e.g. `NOT_FOUND`, `BAD_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`)
-- `details` — additional context (optional)
+- `code` — machine-readable error code (always present; defaults to `INTERNAL_ERROR` for 5xx, `CLIENT_ERROR` for 4xx)
+- `requestId` — unique request identifier (always present, maps to `X-Request-Id` response header)
+- `correlationId` — trace correlation ID (always present, maps to `X-Correlation-Id` response header)
+- `details` — additional context (optional; Zod validation errors produce field-level arrays automatically)
 
 HTTP status is set via the response status code, not a field in the body. Some route handlers return bespoke error shapes outside of `sendError`; the above applies to the majority of routes.
 
@@ -325,4 +333,4 @@ If `X-Api-Version` is not provided, the server defaults to the current version. 
 
 ---
 
-*Last verified against source code: 2026-04-15. Re-verify against `artifacts/api-server/src/`, `lib/db/src/schema/`, and `lib/auth/src/` after significant code changes.*
+*Last verified against source code: 2026-04-16. Re-verify against `artifacts/api-server/src/`, `lib/db/src/schema/`, and `lib/auth/src/` after significant code changes.*

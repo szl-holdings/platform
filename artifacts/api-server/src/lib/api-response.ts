@@ -6,16 +6,16 @@ export interface ApiError {
   error: string;
   code?: string;
   requestId?: string;
+  correlationId?: string;
   details?: unknown;
 }
 
-function getOrCreateRequestId(res: Response): string {
-  const existing = (res.getHeader("X-Request-ID") ?? res.getHeader("X-Correlation-ID")) as string | undefined;
-  if (existing) return existing;
-  const id = randomUUID();
-  res.setHeader("X-Request-ID", id);
-  res.setHeader("X-Correlation-ID", id);
-  return id;
+function getOrCreateRequestId(res: Response): { requestId: string; correlationId: string } {
+  const requestId = (res.getHeader("X-Request-ID") as string | undefined) ?? randomUUID();
+  const correlationId = (res.getHeader("X-Correlation-ID") as string | undefined) ?? requestId;
+  if (!res.getHeader("X-Request-ID")) res.setHeader("X-Request-ID", requestId);
+  if (!res.getHeader("X-Correlation-ID")) res.setHeader("X-Correlation-ID", correlationId);
+  return { requestId, correlationId };
 }
 
 export function sendSuccess<T>(res: Response, data: T, status = 200, meta?: Record<string, unknown>) {
@@ -35,9 +35,8 @@ export function sendNoContent(res: Response) {
 }
 
 export function sendError(res: Response, error: string, status = 500, code?: string, details?: unknown) {
-  const requestId = getOrCreateRequestId(res);
-  const body: ApiError = { error, requestId };
-  if (code) body.code = code;
+  const { requestId, correlationId } = getOrCreateRequestId(res);
+  const body: ApiError = { error, code: code ?? (status >= 500 ? "INTERNAL_ERROR" : "CLIENT_ERROR"), requestId, correlationId };
   if (details) body.details = details;
   res.status(status).json(body);
 }
@@ -77,13 +76,31 @@ export function parsePagination(query: Record<string, unknown>) {
   return { page, limit, offset };
 }
 
+export function sendConflict(res: Response, message = "Resource conflict") {
+  sendError(res, message, 409, "CONFLICT");
+}
+
+export function sendTooManyRequests(res: Response, message = "Rate limit exceeded", retryAfterSeconds?: number) {
+  if (retryAfterSeconds) res.setHeader("Retry-After", String(retryAfterSeconds));
+  sendError(res, message, 429, "RATE_LIMITED");
+}
+
+export function sendServiceUnavailable(res: Response, message = "Service temporarily unavailable") {
+  sendError(res, message, 503, "SERVICE_UNAVAILABLE");
+}
+
 export function handleRouteError(res: Response, err: unknown, fallbackMessage: string) {
   if (err instanceof InvalidIdError) {
     sendBadRequest(res, "Invalid ID parameter");
     return;
   }
   if (err && typeof err === "object" && "issues" in err) {
-    sendBadRequest(res, "Invalid request data");
+    const issues = (err as { issues: Array<{ path?: (string | number)[]; message?: string }> }).issues;
+    const details = issues?.map(i => ({
+      path: i.path?.join("."),
+      message: i.message,
+    }));
+    sendBadRequest(res, "Validation failed", details);
     return;
   }
   if (err != null && typeof err === "object" && "statusCode" in err) {
@@ -94,6 +111,10 @@ export function handleRouteError(res: Response, err: unknown, fallbackMessage: s
     }
     if (statusCode === 404) {
       sendNotFound(res);
+      return;
+    }
+    if (statusCode === 409) {
+      sendConflict(res, err instanceof Error ? err.message : "Resource conflict");
       return;
     }
   }

@@ -11,10 +11,7 @@ const PLATFORM_APPS = [
   { slug: "aegis", name: "Aegis — Defense & Intelligence", type: "domain_pack" },
   { slug: "terra", name: "Terra — Real Estate Intelligence", type: "domain_pack" },
   { slug: "vessels", name: "Vessels — Maritime Intelligence", type: "domain_pack" },
-  { slug: "prism-counsel", name: "PRISM Counsel — Legal Intelligence", type: "domain_pack" },
   { slug: "carlota-jo", name: "Carlota Jo Consulting", type: "domain_pack" },
-  { slug: "firestorm", name: "Aegis Firestorm — Cybersecurity", type: "domain_pack" },
-  { slug: "stephen-site", name: "Stephen Site — Portfolio", type: "supporting" },
   { slug: "szl-holdings-mobile", name: "CORTEX — Mobile Command", type: "mobile" },
   { slug: "api-server", name: "API Server", type: "backend" },
 ];

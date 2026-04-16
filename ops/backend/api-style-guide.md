@@ -73,18 +73,17 @@ POST   /api/<resource>/search      → Advanced search (analyst+)
 
 ```json
 {
-  "error": "VALIDATION_ERROR",
-  "message": "Human-readable description",
-  "statusCode": 400,
-  "requestId": "abc-123",
-  "details": {
-    "field": "email",
-    "issue": "Required"
-  }
+  "error": "Human-readable description",
+  "code": "BAD_REQUEST",
+  "requestId": "unique-request-uuid",
+  "correlationId": "trace-correlation-uuid",
+  "details": [
+    { "path": "email", "message": "Required" }
+  ]
 }
 ```
 
-The `requestId` is always the `X-Correlation-Id` from the request header (or an auto-generated UUID if absent).
+Both `requestId` and `correlationId` are always present. `code` defaults to `INTERNAL_ERROR` (5xx) or `CLIENT_ERROR` (4xx) when not explicitly provided. Zod validation errors produce field-level details arrays automatically.
 
 ## Pagination
 
