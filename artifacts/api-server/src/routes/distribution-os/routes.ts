@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import { randomBytes, createHash } from "crypto";
 import { z } from "zod";
-import { computeLeadScore } from "../lib/lead-scoring";
+import { computeLeadScore } from "../../lib/lead-scoring";
 import {
   db,
   dosArticlesTable, dosArticleVersionsTable, dosNewslettersTable,
@@ -16,7 +16,7 @@ import {
   dosContentLifecycleTable,
 } from "@szl-holdings/db";
 import { eq, desc, asc, and, gte, count, sql } from "drizzle-orm";
-import { authMiddleware } from "../middlewares/auth";
+import { authMiddleware } from "../../middlewares/auth";
 
 const router = Router();
 const requireAuth = authMiddleware({ required: true });

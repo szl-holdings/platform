@@ -9,6 +9,7 @@ import type { Request, RequestHandler } from "express";
 import { WebSocketServer } from "ws";
 import { typeDefs, resolvers } from "./schema.js";
 import { logger } from "../lib/logger.js";
+import { createDataLoaders, type AppDataLoaders } from "./dataloaders.js";
 
 const MAX_QUERY_DEPTH = 10;
 
@@ -20,6 +21,7 @@ export interface GraphQLContext {
     role?: string;
   };
   req?: Request;
+  loaders: AppDataLoaders;
 }
 
 export async function buildGraphQLMiddleware(httpServer: HttpServer): Promise<RequestHandler> {
@@ -34,7 +36,7 @@ export async function buildGraphQLMiddleware(httpServer: HttpServer): Promise<Re
     {
       schema,
       context: async () => {
-        return {};
+        return { loaders: createDataLoaders() };
       },
       onConnect: async () => {
         logger.debug("GraphQL subscription client connected");
@@ -75,6 +77,7 @@ export async function buildGraphQLMiddleware(httpServer: HttpServer): Promise<Re
       return {
         user: authReq.user,
         req,
+        loaders: createDataLoaders(),
       };
     },
   });

@@ -34,10 +34,10 @@ import {
 } from "drizzle-orm";
 import {
   sendSuccess, sendNotFound, sendError, sendBadRequest, handleRouteError,
-} from "../lib/api-response";
-import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
-import { tenantScope, assertTenantAccess } from "../middlewares/tenant-scope";
-import { logger } from "../lib/logger";
+} from "../../lib/api-response";
+import { authMiddleware, requireRole, parseIdParam } from "../../middlewares/auth";
+import { tenantScope, assertTenantAccess } from "../../middlewares/tenant-scope";
+import { logger } from "../../lib/logger";
 
 const router: IRouter = Router();
 

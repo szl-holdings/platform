@@ -8,6 +8,7 @@ import {
   getVessel,
   type VesselsStoragePort,
 } from "../../lib/domain-services/vessels/index.js";
+import type { GraphQLContext } from "../index.js";
 
 export const vesselsTypeDefs = `#graphql
   type Vessel {
@@ -113,8 +114,12 @@ export const vesselsResolvers = {
     vessels: async (_: unknown, args: { status?: string; limit?: number; offset?: number }) => {
       return listVessels(await buildVesselsStorage(), args);
     },
-    vessel: async (_: unknown, args: { id: string }) => {
-      return getVessel(await buildVesselsStorage(), parseInt(args.id, 10));
+    vessel: async (_: unknown, args: { id: string }, context: GraphQLContext) => {
+      const numId = parseInt(args.id, 10);
+      if (context?.loaders?.vesselById) {
+        return context.loaders.vesselById.load(numId);
+      }
+      return getVessel(await buildVesselsStorage(), numId);
     },
     vesselPositions: async (_: unknown, args: { vesselId?: string; limit?: number }) => {
       return listVesselPositions(await buildVesselsStorage(), {

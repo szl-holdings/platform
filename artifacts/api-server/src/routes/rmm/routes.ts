@@ -1,10 +1,10 @@
 import { Router, type IRouter } from "express";
 import { db, mspDevicesTable, mspClientsTable } from "@szl-holdings/db";
 import { eq, desc, sql, and } from "drizzle-orm";
-import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
-import { authMiddleware, requireRole } from "../middlewares/auth";
-import { logger } from "../lib/logger";
-import { createRmmProvider, setCachedProvider, getCachedProvider, clearProviderCache, type RmmProviderConfig } from "../services/rmm-provider";
+import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../../lib/api-response";
+import { authMiddleware, requireRole } from "../../middlewares/auth";
+import { logger } from "../../lib/logger";
+import { createRmmProvider, setCachedProvider, getCachedProvider, clearProviderCache, type RmmProviderConfig } from "../../services/rmm-provider";
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "crypto";
 
 const SUPPORTED_PROVIDERS = ["ninjaone", "connectwise_automate", "connectwise_manage", "halopsa", "datto_rmm", "autotask_psa"] as const;

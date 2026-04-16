@@ -1,17 +1,17 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { randomUUID, createHash, createSign, createHmac } from "crypto";
-import { logger } from "../lib/logger";
+import { logger } from "../../lib/logger";
 
 interface AuthUser { id: number; role: string; email?: string; displayName?: string }
 type ExtendedRequest = Request & { user?: AuthUser }
 import { db, documentsTable, documentVersionsTable, documentCommentsTable, documentTemplatesTable, contentLibraryBlocksTable, signaturesTable, pdfJobsTable, pdfBatchesTable } from "@szl-holdings/db";
 import { eq, desc, sql, and, or, ne } from "drizzle-orm";
-import { sendSuccess, sendCreated, sendNotFound, handleRouteError, sendBadRequest, parsePagination } from "../lib/api-response";
-import { authMiddleware, requireRole } from "../middlewares/auth";
-import { renderEntityDataToPdfBuffer, renderDocumentToPdfBuffer } from "../lib/pdf-renderer";
-import type { BlockNode } from "../lib/pdf-renderer-types";
-import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
-import { setObjectAclPolicy } from "../lib/objectAcl";
+import { sendSuccess, sendCreated, sendNotFound, handleRouteError, sendBadRequest, parsePagination } from "../../lib/api-response";
+import { authMiddleware, requireRole } from "../../middlewares/auth";
+import { renderEntityDataToPdfBuffer, renderDocumentToPdfBuffer } from "../../lib/pdf-renderer";
+import type { BlockNode } from "../../lib/pdf-renderer-types";
+import { ObjectStorageService, ObjectNotFoundError } from "../../lib/objectStorage";
+import { setObjectAclPolicy } from "../../lib/objectAcl";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();

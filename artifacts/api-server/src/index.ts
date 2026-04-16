@@ -24,7 +24,7 @@ import { seedMspData } from "./lib/seed-msp";
 import { seedDreamscapeData } from "./lib/seed-dreamscape";
 import { buildGraphQLMiddleware } from "./graphql/index.js";
 import { registerGraphQLHandler } from "./app.js";
-import { prewarmIntelligenceCache, scheduleIntelligenceRefresh, scheduleIntelligenceCachePruning } from "./routes/intelligence.js";
+import { prewarmIntelligenceCache, scheduleIntelligenceRefresh, scheduleIntelligenceCachePruning } from "./routes/intelligence/index.js";
 import { pingRedis } from "./lib/redis-client.js";
 import { registerAllPrismJobHandlers } from "./services/prism-job-handlers";
 import { startPrismJobPoller } from "./services/prism-queue";

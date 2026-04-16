@@ -49,6 +49,7 @@
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2",
+    "dataloader": "^2.2.3",
     "drizzle-orm": "catalog:",
     "expo-server-sdk": "^6.1.0",
     "express": "^5",

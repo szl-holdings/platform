@@ -3,22 +3,22 @@ import { readFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { load as yamlLoad } from "js-yaml";
-import { authMiddleware, requireRole } from "../middlewares/auth";
-import { sendSuccess, handleRouteError } from "../lib/api-response";
-import { agentEventBus } from "../lib/event-bus";
+import { authMiddleware, requireRole } from "../../middlewares/auth";
+import { sendSuccess, handleRouteError } from "../../lib/api-response";
+import { agentEventBus } from "../../lib/event-bus";
 import {
   getKernelAuditTrail,
   verifyAuditChainIntegrity,
   issueScopeCertificate,
   keywordSearch,
 } from "@szl-holdings/ai-engine";
-import { orchestrate, getOrchestratorCapabilities } from "../lib/multi-agent-orchestrator";
-import { listPipelines, executePipeline, getPipelineConfig, executeComposedPipeline } from "../lib/intelligence-pipelines";
+import { orchestrate, getOrchestratorCapabilities } from "../../lib/multi-agent-orchestrator";
+import { listPipelines, executePipeline, getPipelineConfig, executeComposedPipeline } from "../../lib/intelligence-pipelines";
 
-import { inferenceTelemetry } from "../lib/inference-telemetry";
-import { insertDecision, listDecisions, updateDecisionStatus, getDecision } from "../lib/alloy-decision-store";
+import { inferenceTelemetry } from "../../lib/inference-telemetry";
+import { insertDecision, listDecisions, updateDecisionStatus, getDecision } from "../../lib/alloy-decision-store";
 import type { AlloyDecisionEvidenceRef, RiskLevel } from "@szl-holdings/ai-engine";
-import { logger } from "../lib/logger";
+import { logger } from "../../lib/logger";
 import { randomUUID } from "crypto";
 
 const router: IRouter = Router();

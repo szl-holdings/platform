@@ -10,6 +10,7 @@ import {
   listFirestormAssets,
   type FirestormStoragePort,
 } from "../../lib/domain-services/firestorm/index.js";
+import type { GraphQLContext } from "../index.js";
 
 export const firestormTypeDefs = `#graphql
   type FirestormAssessment {
@@ -19,6 +20,7 @@ export const firestormTypeDefs = `#graphql
     status: String
     overallRiskScore: Float
     createdAt: String
+    findings: [FirestormFinding!]!
   }
 
   type FirestormFinding {
@@ -126,8 +128,12 @@ export const firestormResolvers = {
     firestormAssessments: async (_: unknown, args: { limit?: number; offset?: number }) => {
       return listFirestormAssessments(await buildFirestormStorage(), args);
     },
-    firestormAssessment: async (_: unknown, args: { id: string }) => {
-      return getFirestormAssessment(await buildFirestormStorage(), parseInt(args.id, 10));
+    firestormAssessment: async (_: unknown, args: { id: string }, context: GraphQLContext) => {
+      const numId = parseInt(args.id, 10);
+      if (context?.loaders?.firestormAssessmentById) {
+        return context.loaders.firestormAssessmentById.load(numId);
+      }
+      return getFirestormAssessment(await buildFirestormStorage(), numId);
     },
     firestormFindings: async (_: unknown, args: { assessmentId?: string; severity?: string; limit?: number; offset?: number }) => {
       return listFirestormFindings(await buildFirestormStorage(), {
@@ -140,11 +146,23 @@ export const firestormResolvers = {
     firestormIncidents: async (_: unknown, args: { status?: string; severity?: string; limit?: number; offset?: number }) => {
       return listFirestormIncidents(await buildFirestormStorage(), args);
     },
-    firestormIncident: async (_: unknown, args: { id: string }) => {
-      return getFirestormIncident(await buildFirestormStorage(), parseInt(args.id, 10));
+    firestormIncident: async (_: unknown, args: { id: string }, context: GraphQLContext) => {
+      const numId = parseInt(args.id, 10);
+      if (context?.loaders?.firestormIncidentById) {
+        return context.loaders.firestormIncidentById.load(numId);
+      }
+      return getFirestormIncident(await buildFirestormStorage(), numId);
     },
     firestormAssets: async (_: unknown, args: { limit?: number; offset?: number }) => {
       return listFirestormAssets(await buildFirestormStorage(), args);
+    },
+  },
+  FirestormAssessment: {
+    findings: async (assessment: { id: number }, _: unknown, context: GraphQLContext) => {
+      if (context?.loaders?.findingsByAssessmentId) {
+        return context.loaders.findingsByAssessmentId.load(assessment.id);
+      }
+      return listFirestormFindings(await buildFirestormStorage(), { assessmentId: assessment.id });
     },
   },
   Mutation: {

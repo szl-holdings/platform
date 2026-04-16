@@ -1,12 +1,11 @@
 import { z } from "zod";
 import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
-import { z } from "zod";
 import rateLimit from "express-rate-limit";
 import crypto from "crypto";
-import { sendSuccess, sendBadRequest, sendNotFound, sendForbidden, sendError, handleRouteError } from "../lib/api-response";
-import { authMiddleware, requireRole } from "../middlewares/auth";
-import { logActivity } from "../lib/activity-logger";
-import { validateBody, tenantCreateSchema, tenantStatusSchema } from "../lib/validation";
+import { sendSuccess, sendBadRequest, sendNotFound, sendForbidden, sendError, handleRouteError } from "../../lib/api-response";
+import { authMiddleware, requireRole } from "../../middlewares/auth";
+import { logActivity } from "../../lib/activity-logger";
+import { validateBody, tenantCreateSchema, tenantStatusSchema } from "../../lib/validation";
 import { db } from "@szl-holdings/db";
 import {
   azureTenantsTable,
@@ -24,7 +23,7 @@ import {
 } from "@szl-holdings/db";
 import { eq, desc, and, count, sql, inArray } from "drizzle-orm";
 import { services } from "@szl-holdings/services";
-import { encryptSecret, decryptSecret } from "../lib/crypto";
+import { encryptSecret, decryptSecret } from "../../lib/crypto";
 
 const router: IRouter = Router();
 
