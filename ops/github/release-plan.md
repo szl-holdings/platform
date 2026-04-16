@@ -1,5 +1,7 @@
 # Release Plan — GitHub Releases
 
+> **Superseded by [`ops/github/release-governance.md`](./release-governance.md)** — Canonical release governance reference including pre-release process, hotfix policy, deprecation standards, and release workflow details. This file is retained for historical reference only.
+
 Defines the strategy, tagging convention, and publishing workflow for GitHub Releases on `szl-holdings-platform`.
 
 ---

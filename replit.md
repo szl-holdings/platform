@@ -141,6 +141,49 @@ All 6 artifact.toml files use `localPort = 9090`. The Replit workflow health che
 
 **Limitation:** HMR (Hot Module Replacement) WebSocket connections fail because the shared HTTP proxy does not handle WebSocket upgrades. Developers must manually refresh the browser after code changes.
 
+## Operational Documentation
+
+All operational runbooks, matrices, and governance documents live in `/ops/`:
+
+- `/ops/replit/replit-runbook.md` — Developer first-day runbook, named workflow reference, port mapping, secret tiers
+- `/ops/replit/replit-deployment-matrix.md` — Per-workload deployment type decisions (Autoscale / Reserved VM / N/A), port mapping, deployment options
+- `/ops/replit/deployment-decision.md` — Legacy deployment decision doc (superseded by replit-deployment-matrix.md)
+- `/ops/github/github-operating-model.md` — Branch strategy, commit conventions, CI workflow map, review standards, merge rules
+- `/ops/github/rulesets-and-protections.md` — Required branch ruleset settings, required status checks, environment protection rules
+- `/ops/github/actions-secret-matrix.md` — Canonical GitHub Actions secrets inventory (repo-level, environment-level, rotation policy)
+- `/ops/github/release-governance.md` — Versioning strategy, release workflow, changelog discipline, hotfix process
+- `/ops/github/manual-click-paths.md` — Step-by-step GitHub UI instructions (branch rules, environments, secrets, Dependabot)
+
+**Named Replit workflows (all defined in `.replit`):**
+
+Dev server workflows (persistent, started by Run button via `Project`):
+
+| Workflow | Command | Port | Type |
+|---------|---------|------|------|
+| `Project` (runButton) | Runs ALL 13 named workflows in parallel (see warning below) | — | parent |
+| `dev:flagship` | `PORT=21130 pnpm --filter @workspace/szl-holdings run dev` | 21130 | webview |
+| `dev:api` | `PORT=8080 pnpm --filter @workspace/api-server run dev` | 8080 | console |
+| `dev:command` | `VITE_PORT=6001 pnpm --filter @workspace/command run dev` | 6001 | webview |
+
+> **Warning — Run button:** The Replit `configureWorkflow()` API automatically adds every registered workflow to the `Project` parallel launcher (this is a platform constraint; `.replit` cannot be edited directly). Clicking **Run** starts ALL 13 workflows simultaneously, including `db:migrate` and `seed:demo`. **For normal development, always start services individually from the Replit workflow panel** — not via the Run button.
+
+Utility workflows (defined in `.replit` as named workflows, run individually on demand):
+
+| Workflow | Command |
+|---------|---------|
+| `dev:web` | `PORT=9090 pnpm --filter @workspace/szl-holdings run dev` (secondary slot, externalPort 3000) |
+| `build:flagship` | `pnpm --filter @workspace/szl-holdings run build` |
+| `build:api` | `pnpm --filter @workspace/api-server run build` |
+| `lint` | `pnpm run lint` |
+| `typecheck` | `pnpm run typecheck` |
+| `test` | `pnpm run test` |
+| `test:e2e` | `pnpm run test:e2e` |
+| `qa` | `pnpm run qa:site` |
+| `db:migrate` | `pnpm run migrate` |
+| `seed:demo` | `pnpm run seed:demo` |
+
+> **Caution:** Run utility workflows individually from the Replit workflow panel — not via the Run button (Project), which starts all workflows in parallel including state-mutating ones like `db:migrate`.
+
 ## External Dependencies
 - **Database:** PostgreSQL 16
 - **Authentication:** Replit Auth (OIDC/PKCE)

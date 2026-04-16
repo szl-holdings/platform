@@ -38,6 +38,12 @@
 /artifacts/prism-counsel/  @stephenlutar2-hash
 /artifacts/carlota-jo/  @stephenlutar2-hash
 
+# ── Additional domain packs ──────────────────────────────────────────────────
+/artifacts/firestorm/  @stephenlutar2-hash
+/artifacts/lyte-command-center/  @stephenlutar2-hash
+/artifacts/imperium/  @stephenlutar2-hash
+/artifacts/cortex-mobile/  @stephenlutar2-hash
+
 # ── Supporting surfaces ──────────────────────────────────────────────────────
 /artifacts/stephen-site/  @stephenlutar2-hash
 /artifacts/mockup-sandbox/  @stephenlutar2-hash
@@ -49,6 +55,9 @@
 /infra/  @stephenlutar2-hash
 /.github/  @stephenlutar2-hash
 /.github/workflows/  @stephenlutar2-hash
+
+# ── Operational docs ─────────────────────────────────────────────────────────
+/ops/  @stephenlutar2-hash
 
 # ── Documentation ────────────────────────────────────────────────────────────
 /docs/  @stephenlutar2-hash

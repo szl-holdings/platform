@@ -1,5 +1,7 @@
 # GitHub Actions Secrets Matrix
 
+> **Superseded by [`ops/github/actions-secret-matrix.md`](./actions-secret-matrix.md)** — Canonical secrets reference including corrected environment vs repository secret scoping for deploy workflows. This file is retained for historical reference only.
+
 Generated: 2026-04-15
 
 ## Repository Secrets
