@@ -90,6 +90,10 @@ const NAV = [
   { href: "/alloy/analytics", label: "Automation Analytics", icon: BarChart2 },
 ];
 
+const ATLAS_NAV = [
+  { href: "/alloy/atlas-approvals", label: "ATLAS Approvals", icon: GitBranch, badge: "New" },
+];
+
 const COMMAND_NAV = [
   { href: "/alloy/decisions", label: "Decision Objects", icon: Brain, badge: "New" },
   { href: "/alloy/skills", label: "Skill Registry", icon: Layers, badge: "New" },
@@ -162,6 +166,7 @@ function NavItem({ href, label, icon: Icon, exact, badge, onClick }: {
 
 const ALL_NAV_SECTIONS = [
   { items: NAV, group: "Navigate" },
+  { items: ATLAS_NAV, group: "Navigate" },
   { items: COMMAND_NAV, group: "Navigate" },
   { items: CREATIVE_NAV, group: "Navigate" },
   { items: DOCS_NAV, group: "Navigate" },
@@ -337,6 +342,11 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
           <nav className="flex-1 min-h-0 px-2 py-3 flex flex-col gap-0.5 overflow-y-auto">
             <div className="text-[9px] uppercase tracking-widest px-3 mb-1 font-medium" style={{ color: "rgba(255,255,255,0.25)" }}>Automation</div>
             {NAV.map(item => (
+              <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
+            ))}
+
+            <div className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium" style={{ color: "rgba(139,122,200,0.7)" }}>ATLAS Spatial</div>
+            {ATLAS_NAV.map(item => (
               <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
             ))}
 

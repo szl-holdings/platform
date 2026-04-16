@@ -29,6 +29,12 @@ type NavGroup = { section: string; items: { href: string; label: string; icon: t
 
 const STRATEGY_NAV: NavGroup[] = [
   {
+    section: "ATLAS Spatial Runtime",
+    items: [
+      { href: "/strategy/atlas-runtime", label: "Cross-Domain Twin View", icon: Layers },
+    ],
+  },
+  {
     section: "Command",
     items: [
       { href: "/strategy", label: "Governed Decision Loop", icon: LayoutDashboard },
@@ -85,6 +91,7 @@ const OPERATIONS_NAV: NavGroup[] = [
   {
     section: "Operations",
     items: [
+      { href: "/operations/what-changed", label: "Twin State Changes", icon: Activity },
       { href: "/operations/digest", label: "Digest Center", icon: FileText },
       { href: "/operations/finops", label: "FinOps", icon: DollarSign },
       { href: "/operations/on-call", label: "On-Call", icon: Phone },

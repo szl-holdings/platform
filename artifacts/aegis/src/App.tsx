@@ -34,6 +34,7 @@ import { PackBanner } from "@szl-holdings/shared-ui";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
 import { StaleIndicator } from "@szl-holdings/shared-ui/stale-indicator";
+import { ExecutiveSafeModeContext } from "./lib/executive-safe-mode-context";
 
 const AEGIS_ACCENT = LANE_ACCENT_HEX.aegis.primary;
 
@@ -72,6 +73,9 @@ const LegalWorkspacePage = lazy(() => import("@/pages/legal-workspace"));
 
 // ─── Security Operations pages ───────────────────────────────────────────────
 const AegisAtlasArtifactsPage = lazy(() => import("@/pages/atlas-artifacts"));
+const AegisAtlasRuntime = lazy(() => import("@/pages/atlas-runtime"));
+const AegisReplay = lazy(() => import("@/pages/replay"));
+const AegisScenarioBranches = lazy(() => import("@/pages/scenario-branches"));
 const AegisMarketingHome = lazy(() => import("@/pages/aegis-home"));
 const AegisPricingPage = lazy(() => import("@/pages/aegis-pricing"));
 const EnterpriseDemo = lazy(() => import("@/pages/enterprise-demo"));
@@ -515,6 +519,15 @@ function AegisSidebarContent({ location, onNavigate, collapsed, onToggleCollapse
 
   const securitySections: SidebarNavSection[] = [
     {
+      id: "atlas-runtime",
+      label: "ATLAS Spatial Runtime",
+      items: [
+        { id: "/atlas-runtime", label: "Posture Twin Theater", href: "/atlas-runtime", icon: <Layers className="w-3.5 h-3.5" /> },
+        { id: "/replay", label: "Attack Path Replay", href: "/replay", icon: <Play className="w-3.5 h-3.5" /> },
+        { id: "/scenario-branches", label: "Blast Radius Simulation", href: "/scenario-branches", icon: <GitBranch className="w-3.5 h-3.5" /> },
+      ],
+    },
+    {
       id: "citadel",
       label: "CITADEL Crisis Command",
       items: citadelNav.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3.5 h-3.5" /> })),
@@ -775,12 +788,23 @@ function AegisSidebarContent({ location, onNavigate, collapsed, onToggleCollapse
   );
 }
 
-function SidebarContent({ onNavigate, onReplayTour, collapsed, onToggleCollapse }: { onNavigate: (path: string) => void; onReplayTour?: () => void; collapsed?: boolean; onToggleCollapse?: () => void }) {
+function SidebarContent({ onNavigate, onReplayTour, collapsed, onToggleCollapse, executiveSafeMode, onToggleSafeMode }: { onNavigate: (path: string) => void; onReplayTour?: () => void; collapsed?: boolean; onToggleCollapse?: () => void; executiveSafeMode?: boolean; onToggleSafeMode?: () => void }) {
   const [location] = useLocation();
   return (
     <>
       <AegisSidebarContent location={location} onNavigate={onNavigate} collapsed={collapsed} onToggleCollapse={onToggleCollapse} />
       <div className="shrink-0 px-4 py-3 space-y-2" style={{ borderTop: `1px solid ${toAlpha("#ffffff", 0.05)}`, background: toAlpha("#0A0D14", 0.98) }}>
+        {!collapsed && (
+          <button
+            onClick={onToggleSafeMode}
+            className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all"
+            style={executiveSafeMode ? { color: "#8b7ac8", background: "rgba(139,122,200,0.12)", border: "1px solid rgba(139,122,200,0.3)" } : { color: "rgba(255,255,255,0.25)", background: "transparent", border: "1px solid rgba(255,255,255,0.06)" }}
+          >
+            <Shield className="w-3 h-3 shrink-0" />
+            {executiveSafeMode ? "Safe Mode Active" : "Executive Safe Mode"}
+            <span className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: executiveSafeMode ? "#8b7ac8" : "rgba(255,255,255,0.15)" }} />
+          </button>
+        )}
         {AEGIS_ONBOARDING_CONFIG.checklist && (
           <div className="mb-1">
             <GettingStartedChecklist
@@ -870,6 +894,9 @@ function AppRouter() {
         <Route path="/document-engine" component={DocumentEngine} />
         <Route path="/document-engine/:sub" component={DocumentEngine} />
         <Route path="/atlas-artifacts" component={AegisAtlasArtifactsPage} />
+        <Route path="/atlas-runtime" component={AegisAtlasRuntime} />
+        <Route path="/replay" component={AegisReplay} />
+        <Route path="/scenario-branches" component={AegisScenarioBranches} />
         <Route path="/consciousness" component={ConsciousnessPage} />
 
         {/* Governance & Reporting (Phase 3) */}
@@ -1048,6 +1075,8 @@ const MARKETING_ROUTES = ["/", "/home", "/demo", "/pulse"];
 function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(readAegisCollapsed);
+  const [executiveSafeMode, setExecutiveSafeMode] = useState(() => { try { return localStorage.getItem("aegis-executive-safe-mode") === "1"; } catch { return false; } });
+  const toggleSafeMode = () => setExecutiveSafeMode(prev => { const next = !prev; try { localStorage.setItem("aegis-executive-safe-mode", next ? "1" : "0"); } catch {} return next; });
   const { status: wsStatus } = useRealtimeChannel("aegis-incidents");
   const { syncState: aegisSyncState, lastSyncedAt: aegisLastSynced, pendingCount: aegisPending, conflictCount: aegisConflicts } = useWebSyncStatus({
     domain: "aegis",
@@ -1123,8 +1152,15 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
         </a>
         <EcosystemNav currentAppId="aegis" currentAppName="Aegis — Unified Defense & Intelligence" accentColor={AEGIS_ACCENT} />
         <SandboxModeBanner />
+        <ExecutiveSafeModeContext.Provider value={executiveSafeMode}>
+        {executiveSafeMode && (
+          <div className="flex items-center justify-between gap-4 px-4 py-2 text-[10px] font-bold uppercase tracking-widest shrink-0" style={{ background: "rgba(139,122,200,0.12)", borderBottom: "1px solid rgba(139,122,200,0.25)", color: "#8b7ac8" }}>
+            <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" /> Executive Safe Mode — Only approved risk states shown. Degraded &amp; blocked outputs filtered until reviewed.</span>
+            <button onClick={toggleSafeMode} className="text-[9px] px-2 py-0.5 rounded border border-purple-500/30 hover:bg-purple-500/10 transition-colors">Exit Safe Mode</button>
+          </div>
+        )}
         <SharedDashboardShell
-          sidebar={<SidebarContent onNavigate={(path) => { navigate(path); setSidebarOpen(false); }} onReplayTour={replayOnboarding} collapsed={sidebarCollapsed} onToggleCollapse={toggleSidebarCollapse} />}
+          sidebar={<SidebarContent onNavigate={(path) => { navigate(path); setSidebarOpen(false); }} onReplayTour={replayOnboarding} collapsed={sidebarCollapsed} onToggleCollapse={toggleSidebarCollapse} executiveSafeMode={executiveSafeMode} onToggleSafeMode={toggleSafeMode} />}
           mobileOpen={sidebarOpen}
           onMobileClose={() => setSidebarOpen(false)}
           sidebarWidth={sidebarCollapsed ? "3.5rem" : "14rem"}
@@ -1147,6 +1183,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
             <AppRouter />
           </main>
         </SharedDashboardShell>
+        </ExecutiveSafeModeContext.Provider>
         <Toaster />
         <CommandPalette
           open={cmdOpen}

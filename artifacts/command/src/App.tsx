@@ -54,6 +54,8 @@ const MarketingOnboarding = lazy(() => import("./pages/marketing/onboarding").th
 const MarketingStatus = lazy(() => import("./pages/marketing/status").then((m) => ({ default: m.MarketingStatus })));
 const MarketingVerifyEmail = lazy(() => import("./pages/marketing/verify-email").then((m) => ({ default: m.MarketingVerifyEmail })));
 
+const AtlasRuntimePage = lazy(() => import("./pages/atlas-runtime").then(m => ({ default: m.AtlasRuntimePage })));
+const WhatChangedPage = lazy(() => import("./operations/pages/what-changed"));
 const ExecutiveCommand = lazy(() => import("@lyte/pages/executive-command"));
 const LytePulse = lazy(() => import("@lyte/pages/pulse"));
 const PrismDashboard = lazy(() => import("@lyte/pages/prism-dashboard"));
@@ -201,6 +203,8 @@ function AppShell() {
               <Route path="/strategy/correlation-map" component={() => <CorrelationMapPage />} />
               <Route path="/strategy/signal-chains" component={() => <SignalChainsPage />} />
               <Route path="/strategy/enterprise-state" component={() => <EnterpriseStatePage />} />
+              <Route path="/strategy/atlas-runtime" component={() => <AtlasRuntimePage />} />
+              <Route path="/command/atlas-runtime" component={() => <AtlasRuntimePage />} />
 
               <Route path="/operations" component={() => <ExecutiveCommand />} />
               <Route path="/operations/pulse" component={() => <LytePulse />} />
@@ -211,6 +215,8 @@ function AppShell() {
               <Route path="/operations/prism/signals" component={() => <DemoSignals />} />
               <Route path="/operations/prism/motion" component={() => <ActionQueue />} />
               <Route path="/operations/blocker-board" component={() => <BlockerBoard />} />
+              <Route path="/operations/what-changed" component={() => <WhatChangedPage />} />
+              <Route path="/lyte/what-changed" component={() => <WhatChangedPage />} />
               <Route path="/operations/digest" component={() => <DigestCenter />} />
               <Route path="/operations/trust-audit" component={() => <TrustAudit />} />
               <Route path="/operations/approvals" component={() => <ApprovalsCenter />} />

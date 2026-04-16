@@ -238,6 +238,7 @@ const AlloyWorkflowOrchestration = lazy(() => import("@/alloy/pages/workflow-orc
 const AlloyConnectorMesh = lazy(() => import("@/alloy/pages/connector-mesh"));
 const AlloyGovernanceAudit = lazy(() => import("@/alloy/pages/governance-audit"));
 const AlloyEnterpriseGovernance = lazy(() => import("@/alloy/pages/enterprise-governance"));
+const AlloyAtlasApprovals = lazy(() => import("@/alloy/pages/atlas-approvals"));
 const AlloyAutomationAnalytics = lazy(() => import("@/alloy/pages/automation-analytics"));
 const AlloyConsolePage = lazy(() => import("@/alloy/pages/ConsolePage"));
 const AlloyDagView = lazy(() => import("@/alloy/pages/dag-view"));
@@ -699,6 +700,9 @@ function App() {
             </Route>
             <Route path="/alloy/governance">
               <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyGovernanceAudit /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/atlas-approvals">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyAtlasApprovals /></AlloyAppPage></Suspense>
             </Route>
             <Route path="/alloy/enterprise-governance">
               <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyEnterpriseGovernance /></AlloyAppPage></Suspense>
