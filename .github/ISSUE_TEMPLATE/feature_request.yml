@@ -13,16 +13,13 @@ body:
       description: Which platform surface or component would this feature affect?
       multiple: true
       options:
-        - Lyte — Governed Command Surface
+        - Command — Unified Operations
         - Aegis — Defense & Intelligence
         - Terra — Real Estate Intelligence
         - Vessels — Maritime Intelligence
-        - PRISM Counsel — Legal Command
         - Carlota Jo — Advisory
-        - Command Portal — Ecosystem Hub
         - SZL Holdings — Corporate
         - CORTEX — Mobile Command
-        - Stephen Lutar — Founder Site
         - API Server / Shared Infrastructure
         - Platform Primitive (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine)
         - New domain pack

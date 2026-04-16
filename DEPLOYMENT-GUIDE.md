@@ -334,4 +334,4 @@ The `scripts/post-merge.sh` script runs automatically after task branch merges:
 
 *See also: [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md) · [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) · [docs/deployment.md](docs/deployment.md)*
 
-*Last verified against source code: 2026-04-15*
+*Last verified against source code: 2026-04-16*

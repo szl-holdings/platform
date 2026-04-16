@@ -2,7 +2,7 @@
 
 > Complete inventory of all routes across the SZL Holdings platform with public/private/internal classification.
 
-Last updated: 2026-04-03
+Last updated: 2026-04-16
 
 ---
 
@@ -89,41 +89,11 @@ Last updated: 2026-04-03
 | Route | Title | Flag | Notes |
 |-------|-------|------|-------|
 | `/demo` | Demo | DEMO | Demo request / live demo |
-| `/lyte/demo` | Lyte Demo | DEMO | Redirects to Lyte Command Center |
+| `/lyte/demo` | Lyte Demo | DEMO | Demo entry |
 | `/pilot/prism-counsel` | PRISM Counsel Pilot | DEMO | Pilot flow |
 | `/pilot/terra` | Terra Pilot | DEMO | Pilot flow |
 | `/pilot/vessels` | Vessels Pilot | DEMO | Pilot flow |
 | `/pilot/aegis` | Aegis Pilot | DEMO | Pilot flow |
-
-### Authenticated App Routes (PRISM Counsel)
-
-| Route | Title | Flag |
-|-------|-------|------|
-| `/prism-counsel` | Dashboard | PRIVATE |
-| `/prism-counsel/matters` | Matters List | PRIVATE |
-| `/prism-counsel/matters/:id` | Matter Detail | PRIVATE |
-| `/prism-counsel/forecast` | Forecast | PRIVATE |
-| `/prism-counsel/deadlines` | Deadlines | PRIVATE |
-| `/prism-counsel/discovery` | Discovery | PRIVATE |
-| `/prism-counsel/playbooks` | Playbooks | PRIVATE |
-| `/prism-counsel/approvals` | Approvals | PRIVATE |
-| `/prism-counsel/copilot` | Copilot | PRIVATE |
-| `/prism-counsel/parties` | Parties | PRIVATE |
-| `/prism-counsel/trust` | Trust | PRIVATE |
-| `/prism-counsel/admin` | Admin | PRIVATE |
-| `/prism-counsel/watchlist` | Watchlist | PRIVATE |
-| `/prism-counsel/insurer-intel` | Insurer Intel | PRIVATE |
-| `/prism-counsel/venue-intel` | Venue Intel | PRIVATE |
-| `/prism-counsel/no-fault` | No Fault | PRIVATE |
-| `/prism-counsel/connectors` | Connectors | PRIVATE |
-| `/prism-counsel/matter-twin` | Matter Twin | PRIVATE |
-| `/prism-counsel/pressure-graph` | Pressure Graph | PRIVATE |
-| `/prism-counsel/proof-chain` | Proof Chain | PRIVATE |
-| `/prism-counsel/worldline` | Worldline | PRIVATE |
-| `/prism-counsel/copilot-workbench` | Copilot Workbench | PRIVATE |
-| `/prism-counsel/admin-health` | Admin Health | PRIVATE |
-| `/prism-counsel/signal-forge` | Signal Forge | PRIVATE |
-| `/prism-counsel/forecast-diff` | Forecast Diff | PRIVATE |
 
 ### Authenticated App Routes (Alloy)
 
@@ -160,6 +130,12 @@ Last updated: 2026-04-03
 | `/alloy/creative/brand-voice` | PRIVATE |
 | `/alloy/creative/content-calendar` | PRIVATE |
 | `/alloy/creative/ai-studio` | PRIVATE |
+
+### Founder Routes
+
+| Route | Title | Flag |
+|-------|-------|------|
+| `/founder` | Stephen Lutar | PRIVATE |
 
 ### Internal / Admin Routes
 
@@ -210,45 +186,41 @@ Last updated: 2026-04-03
 
 ---
 
-## Lyte Command Center (`artifacts/lyte-command-center`)
+## Aegis (`artifacts/aegis`)
 
-Full application at `/lyte-command-center/`. Flag: `DEMO` (requires context for external viewing).
-
----
-
-## Aegis / Firestorm (`artifacts/firestorm`)
-
-Full application at `/firestorm/`. Flag: `DEMO`.
+Full application at `/aegis/`. Flag: `DEMO`. 166 ts/tsx files.
+Supersedes the archived firestorm artifact.
 
 ---
 
 ## Vessels (`artifacts/vessels`)
 
-Full application at `/vessels/`. Flag: `DEMO`.
+Full application at `/vessels/`. Flag: `DEMO`. 103 ts/tsx files.
 
 ---
 
 ## Terra (`artifacts/terra`)
 
-Full application at `/terra/`. Flag: `DEMO`.
+Full application at `/terra/`. Flag: `DEMO`. 92 ts/tsx files.
 
 ---
 
 ## Carlota Jo (`artifacts/carlota-jo`)
 
-Full application at `/carlota-jo/`. Flag: `PUBLIC` (live, client-facing).
+Full application at `/carlota-jo/`. Flag: `PUBLIC` (live, client-facing). 70 ts/tsx files.
 
 ---
 
-## Stephen Site (`artifacts/stephen-site`)
+## Command (`artifacts/command`)
 
-Personal site at `/stephen/`. Flag: `PUBLIC`.
+Full application at `/command/`. Flag: `DEMO`. 223 ts/tsx files.
+Unified ops command — absorbs former Lyte Command Center and IMPERIUM surfaces.
 
 ---
 
 ## API Server (`artifacts/api-server`)
 
-Backend API at `/api`. Flag: `INTERNAL`.
+Backend API at `/api`. Flag: `INTERNAL`. 395 ts/tsx files.
 
 Key endpoints:
 - `/api/health` — health check (PUBLIC)
@@ -258,16 +230,24 @@ Key endpoints:
 
 ---
 
-## Mobile Apps
+## Mobile App
 
-All mobile apps are Expo-based and accessed via Expo Dev Client tunnel, not the Replit proxy.
+| App | Artifact | Flag | Notes |
+|-----|----------|------|-------|
+| CORTEX (SZL Holdings Mobile) | `szl-holdings-mobile` | PRIVATE | Primary mobile app — 167 ts/tsx files |
 
-| App | Flag | Notes |
-|-----|------|-------|
-| `szl-holdings-mobile` | INTERNAL | Executive command mobile |
-| `aegis-mobile` | DEMO | SOC command mobile |
-| `vessels-mobile` | DEMO | Fleet command mobile |
-| `terra-mobile` | DEMO | Field intelligence mobile |
-| `lyte-mobile` | DEMO | AIOps command mobile |
-| `stephen-mobile` | INTERNAL | Personal command |
-| `carlota-jo-mobile` | PRIVATE | Client app (live) |
+Note: `cortex-mobile` is a bare scaffold (2 files) — not a functional app. The real mobile app is `szl-holdings-mobile`.
+
+---
+
+## Archived Surfaces
+
+The following artifacts have been archived (code removed, marker files remain):
+
+| Surface | Former Path | Disposition |
+|---------|-------------|-------------|
+| Lyte Command Center | `/lyte-command-center/` | Merged into Command (`/command/`) |
+| Firestorm | `/firestorm/` | Superseded by Aegis (`/aegis/`) |
+| IMPERIUM | `/imperium/` | Merged into Command (`/command/`) |
+| PRISM Counsel | `/prism-counsel/` | Deprecated (task #579) |
+| Stephen Site | `/stephen/` | Content moved to `/founder` in SZL Holdings |

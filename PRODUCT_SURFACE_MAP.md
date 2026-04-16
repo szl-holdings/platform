@@ -1,6 +1,6 @@
 # Product Surface Map — SZL Holdings
 
-**Version:** 1.0 · **Last updated:** April 2026
+**Version:** 2.0 · **Last updated:** April 2026
 
 ---
 
@@ -10,29 +10,23 @@
 SZL Holdings Platform
 │
 ├── PLATFORM LAYER (shared governance infrastructure)
-│   ├── Lyte ─────────── Command surface for operators
-│   ├── Alloy ────────── Execution fabric (workflows, approvals, audit)
-│   ├── CORTEX ───────── Unified mobile command (all domains)
-│   └── Command Portal ─ Ecosystem-wide 8-domain dashboard
+│   ├── Command ────────── Unified ops command (strategy, operations, infrastructure)
+│   ├── Alloy ────────────── Execution fabric (workflows, approvals, audit)
+│   ├── CORTEX ───────────── Unified mobile command (all domains)
+│   └── SZL Holdings ─────── Corporate, marketing, trust center, investor hub
 │
 ├── PRIMITIVES (invisible to users, visible in every interaction)
-│   ├── Outcome Graph ── Decision lifecycle tracking
-│   ├── Proof Chain ──── Immutable audit trail
-│   ├── Covenant Policy ─ Permission and approval gates
-│   ├── Monte Carlo ──── Probabilistic risk simulation
-│   └── Workflow Engine ─ Durable process orchestration
+│   ├── Outcome Graph ────── Decision lifecycle tracking
+│   ├── Proof Chain ──────── Immutable audit trail
+│   ├── Covenant Policy ──── Permission and approval gates
+│   ├── Monte Carlo ──────── Probabilistic risk simulation
+│   └── Workflow Engine ──── Durable process orchestration
 │
-├── DOMAIN PACKS (domain-specific intelligence modules)
-│   ├── Aegis ─────────── Security & defense intelligence
-│   ├── Vessels ──────── Maritime fleet command
-│   ├── Terra ─────────── Real estate intelligence
-│   ├── PRISM Counsel ── Legal matter command
-│   ├── Carlota Jo ───── Premium advisory
-│   └── IMPERIUM ──────── Cloud sovereignty
-│
-└── CORPORATE
-    ├── SZL Holdings ──── Marketing, trust center, investor hub
-    └── Stephen Lutar ── Founder portfolio
+└── DOMAIN PACKS (domain-specific intelligence modules)
+    ├── Aegis ────────────── Security & defense intelligence
+    ├── Vessels ──────────── Maritime fleet command
+    ├── Terra ────────────── Real estate intelligence
+    └── Carlota Jo ──────── Premium advisory
 ```
 
 ---
@@ -43,37 +37,36 @@ Which primitives each product surface uses:
 
 | Surface | Outcome Graph | Proof Chain | Covenant Policy | Monte Carlo | Workflow Engine |
 |---------|:---:|:---:|:---:|:---:|:---:|
-| **Lyte** | ● | ● | ● | ● | ● |
+| **Command** | ● | ● | ● | ● | ● |
 | **Alloy** | ● | ● | ● | | ● |
 | **CORTEX** | ● | ● | ● | ● | |
-| **Command Portal** | ● | | | | |
+| **SZL Holdings** | | | | | |
 | **Aegis** | ● | ● | ● | ● | ● |
 | **Vessels** | ● | ● | ● | ● | ● |
 | **Terra** | ● | | | ● | |
-| **PRISM Counsel** | ● | ● | ● | ● | ● |
 | **Carlota Jo** | | ● | ● | | |
-| **IMPERIUM** | | | ● | | |
 
 ---
 
 ## Surface Details
 
-### Lyte — Operator Command Surface
+### Command — Unified Operations Surface
 
-The primary interface for operators. Everything converges here.
+The primary interface for operators. Everything converges here. Absorbs the former Lyte Command Center and IMPERIUM surfaces.
 
 | Module | Purpose | Primitives Used |
 |--------|---------|----------------|
-| PRISM Dashboard | 5-pillar operational overview (People, Revenue, Infrastructure, Security, Market) | Outcome Graph |
+| Strategy Dashboard | 5-pillar operational overview (People, Revenue, Infrastructure, Security, Market) | Outcome Graph |
 | Signal Timeline | Chronological feed of correlated business signals | Proof Chain |
 | Action Queue | Pending decisions with simulation context and approval status | All 5 |
 | Approvals Center | Human-in-the-loop approval queue across all domains | Covenant Policy, Proof Chain |
-| AIOps | AI-assisted operations management | Outcome Graph, Workflow Engine |
-| MSP/RMM | Managed services tooling | Workflow Engine |
+| Operations | AI-assisted operations management | Outcome Graph, Workflow Engine |
+| Infrastructure | Cloud sovereignty and platform infrastructure | Workflow Engine |
+| Governed Decision Loop | Full 9-step loop visualization | All 5 |
 
 ### Alloy — Execution Fabric
 
-The governance layer. Users don't "use Alloy" directly — they use Lyte, and Alloy enforces the rules.
+The governance layer. Users don't "use Alloy" directly — they use Command, and Alloy enforces the rules.
 
 | Module | Purpose | Primitives Used |
 |--------|---------|----------------|
@@ -114,17 +107,6 @@ The governance layer. Users don't "use Alloy" directly — they use Lyte, and Al
 | Market Signals | Real-time market intelligence | Outcome Graph |
 | Lead Scoring | AI-assisted prospect ranking | Outcome Graph |
 
-### Domain Pack: PRISM Counsel
-
-| Module | Purpose | Primitives Used |
-|--------|---------|----------------|
-| Matter Management | Case lifecycle tracking | Workflow Engine |
-| Copilot Workbench | AI-assisted legal analysis | Outcome Graph, Proof Chain |
-| Proof Chain Viewer | Audit trail visualization | Proof Chain |
-| Court Integration | Filing and deadline management | Workflow Engine |
-| Settlement Forecast | Probabilistic outcome modeling | Monte Carlo |
-| NY No-Fault | Specialized litigation module | All 5 |
-
 ### Domain Pack: Carlota Jo
 
 | Module | Purpose | Primitives Used |
@@ -138,20 +120,32 @@ The governance layer. Users don't "use Alloy" directly — they use Lyte, and Al
 
 ## Mobile Surface: CORTEX
 
-CORTEX mirrors the platform hierarchy in a mobile-native form:
+CORTEX mirrors the platform hierarchy in a mobile-native form (implemented in `artifacts/szl-holdings-mobile`):
 
 | Workspace | Maps To | Key Interactions |
 |-----------|---------|-----------------|
-| Lyte | Lyte Command Center | Signal feed, action cards, approvals |
+| Command | Command unified ops | Signal feed, action cards, approvals |
 | Aegis | Aegis domain pack | Alert triage, incident response |
 | Vessels | Vessels domain pack | Fleet map, vessel alerts |
 | Terra | Terra domain pack | Property alerts, deal updates |
-| PRISM Counsel | PRISM Counsel pack | Matter updates, deadline alerts |
 | Carlota Jo | Carlota Jo pack | Client messages, booking updates |
-| Command | Command Portal | Cross-domain health overview |
 | SZL Holdings | SZL Holdings | Portfolio status, notifications |
 
 Cross-domain badge counts on the workspace switcher show active signals per domain.
+
+---
+
+## Archived Surfaces
+
+The following surfaces have been deprecated and their code removed. See `ops/frontier/disposition-matrix.md` for full details.
+
+| Surface | Disposition |
+|---------|-------------|
+| Lyte Command Center | Merged into Command |
+| Firestorm | Superseded by Aegis |
+| IMPERIUM | Merged into Command (infrastructure mode) |
+| PRISM Counsel | Deprecated (task #579) |
+| Stephen Site | Content moved to `/founder` route in SZL Holdings |
 
 ---
 
@@ -160,6 +154,5 @@ Cross-domain badge counts on the workspace switcher show active signals per doma
 | Document | Path |
 |----------|------|
 | Navigation strategy | [NAVIGATION_STRATEGY.md](NAVIGATION_STRATEGY.md) |
-| Product surfaces (detailed) | [PRODUCT-SURFACES.md](PRODUCT-SURFACES.md) |
 | Platform primitives | [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) |
 | Route inventory | [ROUTE_INVENTORY.md](ROUTE_INVENTORY.md) |

@@ -17,17 +17,21 @@
 /lib/audit/  @stephenlutar2-hash
 /lib/ai-engine/  @stephenlutar2-hash
 /lib/shared-ui/  @stephenlutar2-hash
-/lib/api-spec/  @stephenlutar2-hash
+/lib/api-zod/  @stephenlutar2-hash
+/lib/services/  @stephenlutar2-hash
 /lib/outcome-graph/  @stephenlutar2-hash
 /lib/proof-chain/  @stephenlutar2-hash
 /lib/covenant-policy/  @stephenlutar2-hash
 /lib/monte-carlo/  @stephenlutar2-hash
 /lib/workflow-engine/  @stephenlutar2-hash
+/lib/observability/  @stephenlutar2-hash
+/lib/forge-runtime/  @stephenlutar2-hash
+/lib/prism-bus/  @stephenlutar2-hash
 
 # ── API Server ────────────────────────────────────────────────────────────────
 /artifacts/api-server/  @stephenlutar2-hash
 
-# ── Command surfaces ──────────────────────────────────────────────────────────
+# ── Platform command surfaces ──────────────────────────────────────────────────
 /artifacts/szl-holdings/  @stephenlutar2-hash
 /artifacts/command/  @stephenlutar2-hash
 
@@ -35,21 +39,14 @@
 /artifacts/aegis/  @stephenlutar2-hash
 /artifacts/terra/  @stephenlutar2-hash
 /artifacts/vessels/  @stephenlutar2-hash
-/artifacts/prism-counsel/  @stephenlutar2-hash
 /artifacts/carlota-jo/  @stephenlutar2-hash
-
-# ── Additional domain packs ──────────────────────────────────────────────────
-/artifacts/firestorm/  @stephenlutar2-hash
-/artifacts/lyte-command-center/  @stephenlutar2-hash
-/artifacts/imperium/  @stephenlutar2-hash
-/artifacts/cortex-mobile/  @stephenlutar2-hash
-
-# ── Supporting surfaces ──────────────────────────────────────────────────────
-/artifacts/stephen-site/  @stephenlutar2-hash
-/artifacts/mockup-sandbox/  @stephenlutar2-hash
 
 # ── Mobile (CORTEX) ─────────────────────────────────────────────────────────
 /artifacts/szl-holdings-mobile/  @stephenlutar2-hash
+/artifacts/cortex-mobile/  @stephenlutar2-hash
+
+# ── Internal tooling ──────────────────────────────────────────────────────────
+/artifacts/mockup-sandbox/  @stephenlutar2-hash
 
 # ── Infrastructure & CI/CD ───────────────────────────────────────────────────
 /infra/  @stephenlutar2-hash

@@ -35,7 +35,7 @@ The SZL Holdings platform runs as a **pnpm monorepo** on Replit (development / s
 ```
 /
 ├── artifacts/          # Deployable apps — web + mobile
-├── lib/                # 37 shared TypeScript packages
+├── lib/                # 34 shared TypeScript packages
 ├── scripts/            # QA, seeding, backup, migration scripts
 ├── infra/              # Azure Bicep IaC templates
 ├── packages/           # Marketplace integrations
@@ -52,7 +52,7 @@ Each artifact has a dedicated Replit workflow. Workflows are managed through the
 |----------|---------|--------------|-------|
 | `artifacts/szl-holdings: web` | SZL Holdings corporate site | `/` | Independent on port 21130 |
 | `artifacts/api-server: api` | Centralized API server | `/api/` | Runs as subprocess of Command Vite process |
-| `artifacts/firestorm: web` | Aegis / Firestorm | `/firestorm/` | Shared gateway on port 9090 |
+| `artifacts/aegis: web` | Aegis Defense | `/aegis/` | Shared gateway on port 9090 |
 | `artifacts/vessels: web` | Vessels Maritime | `/vessels/` | Shared gateway on port 9090 |
 | `artifacts/terra: web` | Terra Real Estate | `/terra/` | Shared gateway on port 9090 |
 | `artifacts/carlota-jo: web` | Carlota Jo Advisory | `/carlota-jo/` | Shared gateway on port 9090 |
@@ -61,6 +61,8 @@ Each artifact has a dedicated Replit workflow. Workflows are managed through the
 | `artifacts/mockup-sandbox: Component Preview Server` | Design sandbox | `/__mockup` | Internal only |
 
 The `artifacts/api-server: api` workflow is registered but the API server runs as a subprocess of the Command Vite process. The standalone workflow will fail with port conflict — this is expected.
+
+**Archived artifacts** (firestorm, lyte-command-center, imperium, prism-counsel, stephen-site) have no running workflows. Their code has been removed; only marker files remain.
 
 ### When to Restart a Workflow
 - Code changes require a server restart
@@ -102,7 +104,7 @@ Secrets are managed via **Replit Secrets** (development) and **Azure Key Vault**
 |----------|-------------|
 | `ISSUER_URL` | OIDC issuer URL (default: `https://replit.com/oidc`) |
 | `REPL_ID` | Replit deployment ID — used as OIDC client ID. Provided automatically |
-| `OAUTH_STATE_SECRET` | Signs OAuth state parameters |
+| `OAUTH_STATE_SECRET` | Signs OAuth state parameters (in Replit Secrets, not .replit) |
 | `SERVICE_ROLE_KEY` | Internal machine-to-machine service key |
 | `ALLOY_INTERNAL_TOKEN` | Admin token for AlloyChat and `/api/health/detailed` access (must be 32+ chars) |
 | `CORS_ORIGINS` | Comma-separated allowed CORS origins. **Must be set in production** |
@@ -357,4 +359,4 @@ After every task branch merge, the post-merge script runs automatically:
 
 ---
 
-*Last verified against source code: 2026-04-15*
+*Last verified against source code: 2026-04-16*

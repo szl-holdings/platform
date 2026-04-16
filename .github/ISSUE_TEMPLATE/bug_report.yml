@@ -13,16 +13,13 @@ body:
       description: Which platform surface or component exhibits this behavior?
       multiple: true
       options:
-        - Lyte — Governed Command Surface
+        - Command — Unified Operations
         - Aegis — Defense & Intelligence
         - Terra — Real Estate Intelligence
         - Vessels — Maritime Intelligence
-        - PRISM Counsel — Legal Command
         - Carlota Jo — Advisory
-        - Command Portal — Ecosystem Hub
         - SZL Holdings — Corporate
         - CORTEX — Mobile Command (Expo)
-        - Stephen Lutar — Founder Site
         - API Server
         - Shared Library / Platform Primitive
         - CI/CD & GitHub Actions
