@@ -133,24 +133,34 @@ workspace UI or `lib/proof-chain` API.
 
 ---
 
-## 6. "API request returns 503"
+## 6. "API request returns 5xx or 429"
 
-**Confirm:** Hit `/api/health/detailed` with the internal token.
+**Confirm:** Capture the exact status code and route. Hit
+`/api/health/detailed` with the internal token.
 
-**Likely causes:**
+**Likely causes by status:**
 
-1. Database unreachable
-2. AI provider timeout cascading to a dependent route
-3. Rate limit exceeded (200/15m global, 10/15m on auth)
+1. **503** — Database unreachable, or an AI provider timeout cascading
+   to a dependent route
+2. **502 / 504** — Upstream gateway / timeout (Replit proxy or external
+   provider)
+3. **429** — Rate limit exceeded (default policy: 200/15m global,
+   10/15m on auth, per `express-rate-limit` middleware)
+4. **500** — Unhandled exception; check structured Pino logs with the
+   request ID
 
 **Fix path:**
 
-- For (1): check Replit-managed PostgreSQL status; escalate per
+- For 503 from DB: check Replit-managed PostgreSQL status; escalate per
   `incident-triage-model.md` "Replit infra" path
-- For (2): identify the AI route returning 503; if global, file with the
-  provider; if local, check the AI integrations skill proxy
-- For (3): the rate limit is intentional; the 503 is correct behavior;
-  educate the partner
+- For 503 from AI: identify the AI route; if the provider is globally
+  down, file with the provider; if local, check the AI integrations
+  skill proxy
+- For 429: the rate limit is intentional and the 429 response is the
+  correct behavior; raise the per-tenant limit if a customer's usage
+  pattern justifies it (do not raise the global limit)
+- For 500: pull the request ID from the response; grep Pino logs for
+  the full stack; file as P2 minimum
 
 ---
 
