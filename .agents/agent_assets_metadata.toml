@@ -119,3 +119,21 @@ id = "AiQzVw9q_1uNXvQUdIykF"
 uri = "file://.local/generated-docs/SZL-Holdings-Executive-Brief.pdf"
 type = "pdf"
 title = "SZL Holdings — Executive Platform Brief (April 2026)"
+
+[[outputs]]
+id = "eAp5Yj203_LeuFD7zUMaG"
+uri = "file://deliverables/SZL-Substack-Launch-Plan.pdf"
+type = "pdf"
+title = "SZL Substack Launch Plan (100 pages)"
+
+[[outputs]]
+id = "3XK6yyXQrjHs5G5GEJlHH"
+uri = "file://deliverables/SZL-Medium-Launch-Plan.pdf"
+type = "pdf"
+title = "SZL Medium Launch Plan (100 pages)"
+
+[[outputs]]
+id = "uoV-wgFnavinxmSKQI3iJ"
+uri = "file://deliverables/SZL-Newsletter-Screenshots.zip"
+type = "unspecified"
+title = "SZL Newsletter Screenshots — mockups + references"
