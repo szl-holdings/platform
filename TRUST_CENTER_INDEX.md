@@ -72,6 +72,7 @@
 | [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) | Six governance primitives — Proof Chain, Covenant Policy, Outcome Graph, Monte Carlo, Workflow Engine, Event Fabric |
 | [PROOF_AND_POLICY_MODEL.md](PROOF_AND_POLICY_MODEL.md) | How AI outputs are tagged, reviewed, and governed before export |
 | [AI_EVALUATION_STRATEGY.md](AI_EVALUATION_STRATEGY.md) | INCA evaluation framework — confidence calibration, output scoring, drift detection |
+| [AI_GOVERNANCE.md](AI_GOVERNANCE.md) | Buyer-facing AI governance posture — advisory-only model, human-in-the-loop enforcement, override attribution |
 
 ### AI Governance Properties
 
@@ -152,6 +153,7 @@ SCIM 2.0 is implemented for automated user lifecycle management:
 | [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) | Full incident handling procedures |
 | [INCIDENT_SEVERITY_MATRIX.md](INCIDENT_SEVERITY_MATRIX.md) | Incident classification: P0–P3 with response targets |
 | [BACKUP_AND_RECOVERY.md](BACKUP_AND_RECOVERY.md) | Backup strategy — RPO 1 hour, RTO 4 hours |
+| [BACKUP-RESTORE.md](BACKUP-RESTORE.md) | Buyer-facing backup & restore commitments — RPO/RTO targets, restore drill cadence, data residency |
 | [ops/infra/recovery-and-backup-model.md](ops/infra/recovery-and-backup-model.md) | Backup model detail |
 | [docs/trust/deployment-model.md](docs/trust/deployment-model.md) | Infrastructure and deployment approach |
 
