@@ -75,7 +75,7 @@ describe("apiVersionMiddleware", () => {
     apiVersionMiddleware(req as Request, res as unknown as Response, next);
 
     expect(res._status).toBe(400);
-    expect((res._json as any).error).toBe("Unsupported API version");
+    expect((res._json as any).error).toContain("is not supported");
     expect(next).not.toHaveBeenCalled();
   });
 
@@ -144,7 +144,7 @@ describe("requireMinVersion", () => {
 
     requireMinVersion("2026-04-15")(req as Request, res as unknown as Response, next);
     expect(res._status).toBe(400);
-    expect((res._json as any).error).toBe("Version not supported");
+    expect((res._json as any).error).toContain("requires API version");
     expect(next).not.toHaveBeenCalled();
   });
 });

@@ -15,12 +15,13 @@ Do not make changes to the file `Y`.
 ### Core Architecture
 The platform is built as a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.js. It features a micro-frontend architecture for web applications, utilizing a shared gateway proxy pattern on port 9090 for routing sub-path artifacts.
 
-**Five Platform Primitives:**
+**Six Platform Primitives:**
 -   **Outcome Graph:** Tracks the decision lifecycle from recommendation to outcome.
 -   **Proof Chain:** Provides an immutable audit trail with provenance.
 -   **Covenant Policy:** Manages permissions and human-in-the-loop approval gates.
 -   **Monte Carlo:** Offers probabilistic risk simulation before execution.
 -   **Workflow Engine:** Orchestrates durable processes.
+-   **Event Fabric (PRISM Bus):** Cross-domain event bus for signal routing.
 
 ### Monorepo Structure
 -   **15 artifact dirs** in `artifacts/` — 7 canonical web, 1 canonical mobile, 1 internal, 5 archived, 1 shell

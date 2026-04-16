@@ -221,6 +221,7 @@ describe("Auth Routes", () => {
 
       const mockUser = { id: 1, displayName: "Test User", email: "test@example.com", avatarUrl: null };
       sharedDbSelect.mockReturnValueOnce(makeSelectChain([mockUser]));
+      sharedDbSelect.mockReturnValueOnce(makeSelectChain([]));
 
       const res = await request(authenticatedApp).get("/auth/me");
       expect(res.status).toBe(200);
