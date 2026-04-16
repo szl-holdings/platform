@@ -1,0 +1,78 @@
+import { z } from "zod";
+
+export const PolicyScopeSchema = z.enum(["tenant", "domain", "action"]);
+export type PolicyScope = z.infer<typeof PolicyScopeSchema>;
+
+export const PolicyEffectSchema = z.enum(["allow", "require_approval", "escalate", "block", "audit_only"]);
+export type PolicyEffect = z.infer<typeof PolicyEffectSchema>;
+
+export const PolicyConditionSchema = z.object({
+  field: z.string(),
+  operator: z.enum(["eq", "neq", "gt", "gte", "lt", "lte", "in", "not_in", "contains", "matches"]),
+  value: z.unknown(),
+});
+export type PolicyCondition = z.infer<typeof PolicyConditionSchema>;
+
+export const PolicyRuleSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  conditions: z.array(PolicyConditionSchema).optional(),
+  effect: PolicyEffectSchema,
+  requiredApproverRole: z.string().optional(),
+  escalateTo: z.string().optional(),
+  reason: z.string().optional(),
+  priority: z.number().int().min(0).max(10000).default(100),
+});
+export type PolicyRule = z.infer<typeof PolicyRuleSchema>;
+
+export const PolicySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  scope: PolicyScopeSchema,
+  tenantId: z.string().optional(),
+  domain: z.string().optional(),
+  actionTypes: z.array(z.string()).optional(),
+  rules: z.array(PolicyRuleSchema),
+  isActive: z.boolean().default(true),
+  priority: z.number().int().min(0).max(10000).default(100),
+  complianceFramework: z.string().optional(),
+  createdAt: z.number(),
+  updatedAt: z.number(),
+});
+export type Policy = z.infer<typeof PolicySchema>;
+
+export const EvaluationRequestSchema = z.object({
+  action: z.string(),
+  domain: z.string().optional(),
+  tenantId: z.string().optional(),
+  actionClass: z.string().optional(),
+  subject: z.object({
+    id: z.string().optional(),
+    roles: z.array(z.string()),
+    tenantId: z.string().optional(),
+  }),
+  resource: z.object({
+    type: z.string(),
+    id: z.string().optional(),
+    domain: z.string().optional(),
+    attributes: z.record(z.unknown()).optional(),
+  }),
+  context: z.record(z.unknown()).optional(),
+  estimatedCostUsd: z.number().optional(),
+  confidence: z.number().min(0).max(1).optional(),
+  urgency: z.string().optional(),
+});
+export type EvaluationRequest = z.infer<typeof EvaluationRequestSchema>;
+
+export interface PolicyEvaluationResult {
+  effect: PolicyEffect;
+  allowed: boolean;
+  requiresApproval: boolean;
+  requiredApproverRole?: string;
+  escalationTarget?: string;
+  matchedPolicies: Array<{ policyId: string; ruleName: string; effect: PolicyEffect }>;
+  violations: Array<{ policyId: string; policyName: string; reason: string }>;
+  reasoning: string;
+  evaluatedAt: number;
+}

@@ -93,6 +93,7 @@ const SupportTicketDetailPage = lazy(() => import("@/pages/support-ticket-detail
 const AdminDataRetentionPage = lazy(() => import("@/pages/admin-data-retention"));
 
 // New platform-repositioning pages
+const DecisioningCommandPage = lazy(() => import("@/pages/decisioning-command"));
 const LytePage = lazy(() => import("@/pages/lyte-page"));
 const AlloyPublicPage = lazy(() => import("@/pages/alloy-page"));
 const SolutionsPage = lazy(() => import("@/pages/solutions"));
@@ -435,6 +436,9 @@ function App() {
             </Route>
             <Route path="/lyte/app">
               <ExternalRedirect to="/command/operations/" />
+            </Route>
+            <Route path="/decisioning">
+              <Suspense fallback={<PageLoader />}><DecisioningCommandPage /></Suspense>
             </Route>
             <Route path="/platform/alloy">
               <Suspense fallback={<PageLoader />}><AlloyPublicPage /></Suspense>

@@ -12,6 +12,7 @@ import * as operations from "./groups/operations";
 import * as dataServices from "./groups/data-services";
 import * as billing from "./groups/billing";
 import * as misc from "./groups/misc";
+import * as decisions from "./groups/decisions";
 
 const router: IRouter = Router();
 
@@ -28,5 +29,6 @@ operations.register(router);
 dataServices.register(router);
 billing.register(router);
 misc.register(router);
+decisions.register(router);
 
 export default router;
