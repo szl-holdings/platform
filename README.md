@@ -80,15 +80,16 @@ See [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) for the full specification 
 
 | Product | Domain | Purpose | Status |
 |---------|--------|---------|--------|
-| **Lyte** | Governed command | Command surface — PRISM framework, signal timeline, action queue, approval chains | Functional alpha |
-| **Alloy** | Execution fabric | Workflow orchestration, approval gates, immutable audit trail | Functional alpha |
-| **Aegis** | Security & defense | SOC command, MITRE ATT&CK, SOAR playbooks, threat intelligence | Functional alpha |
-| **Vessels** | Maritime intelligence | AIS fleet tracking, sanctions screening, voyage economics, dark vessel detection | Functional alpha |
-| **Terra** | Real estate intelligence | NYC distress pipeline, ownership graph, deal workflow, market signals | Functional alpha |
-| **Carlota Jo** | Premium advisory | UHNW advisory operations — client portal, service catalog, booking | Live |
-| **IMPERIUM** | Cloud sovereignty | Infrastructure control and infrastructure mode — merged into Command Portal | Merged |
-| **CORTEX** | Unified mobile | All domain workspaces in one app — biometric auth, cross-domain signals | Functional alpha |
-| **Command Portal** | Ecosystem hub | Real-time 8-domain dashboard, executive briefing, global search | Functional alpha |
+| **Aegis** | Security & defense | SOC command, 8 advanced security modules, SOAR playbooks, threat intelligence | Active — `/firestorm/` |
+| **Vessels** | Maritime intelligence | Fleet tracking, S&P, demurrage, freight, voyage P&L | Active — `/vessels/` |
+| **Terra** | Real estate intelligence | Distress pipeline, ownership graph, deal workflow, AI analysis | Active — `/terra/` |
+| **Carlota Jo** | Premium advisory | UHNW advisory operations — client portal, service catalog, booking | Active — `/carlota-jo/` |
+| **Command** | Unified ops | Operator command surface, AIOps, portfolio oversight (merged Lyte + IMPERIUM) | Active — `/command/` |
+| **SZL Holdings** | Portfolio command | Fund intelligence, Nexus, Forge, Distribution OS, CORTEX web | Active — `/` |
+| **CORTEX Mobile** | Unified mobile | All 8 domain workspaces, biometric auth, offline sync, voice commands | Alpha prep |
+| ~~Lyte~~ | ~~Governed command~~ | Merged into Command | Deprecated |
+| ~~PRISM Counsel~~ | ~~Legal command~~ | Deprecated — see `artifacts/prism-counsel/DEPRECATED.md` | Deprecated |
+| ~~IMPERIUM~~ | ~~Cloud sovereignty~~ | Merged into Command — see `artifacts/imperium/DEPRECATED.md` | Deprecated |
 
 ---
 
@@ -238,12 +239,13 @@ These top-level documents are the canonical reference for Series A diligence, en
 |------|----------|
 | Ops runbook (source) | [docs/ops-runbook.md](docs/ops-runbook.md) |
 | Replit operations | [REPLIT_OPERATIONS.md](REPLIT_OPERATIONS.md) |
-| Environment variable matrix | [ENV_MATRIX.md](ENV_MATRIX.md) |
-| Deployment readiness checklist | [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) |
+| Environment matrix (canonical) | [ops/infra/environment-matrix.md](ops/infra/environment-matrix.md) |
+| Production architecture | [ops/infra/target-production-architecture.md](ops/infra/target-production-architecture.md) |
+| Backup & recovery (canonical) | [ops/infra/recovery-and-backup-model.md](ops/infra/recovery-and-backup-model.md) |
+| Launch readiness scorecard | [ops/frontier/launch-readiness-scorecard.md](ops/frontier/launch-readiness-scorecard.md) |
+| Mobile release readiness | [ops/mobile/flagship-release-readiness.md](ops/mobile/flagship-release-readiness.md) |
 | Route inventory | [ROUTE_INVENTORY.md](ROUTE_INVENTORY.md) |
 | Analytics plan | [ANALYTICS_PLAN.md](ANALYTICS_PLAN.md) |
-| Disaster recovery | [docs/disaster-recovery.md](docs/disaster-recovery.md) |
-| Backup & recovery | [BACKUP_AND_RECOVERY.md](BACKUP_AND_RECOVERY.md) |
 
 ### Process & Governance
 | Area | Document |

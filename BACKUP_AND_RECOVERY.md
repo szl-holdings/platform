@@ -1,5 +1,8 @@
 # Backup and Recovery — SZL Holdings Platform
 
+> **DEPRECATED** — This document has been superseded by [`ops/infra/recovery-and-backup-model.md`](ops/infra/recovery-and-backup-model.md).
+> This file is retained for historical reference only. Do not update it.
+
 > Backup strategy, recovery procedures, and data retention policy for the SZL Holdings platform.
 
 ---

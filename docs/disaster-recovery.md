@@ -1,5 +1,8 @@
 # Disaster Recovery & Backup Strategy
 
+> **DEPRECATED** — This document has been superseded by [`ops/infra/recovery-and-backup-model.md`](../ops/infra/recovery-and-backup-model.md).
+> This file is retained for historical reference only. Do not update it.
+
 ## Overview
 
 This document describes the backup strategy, data retention policy, and disaster

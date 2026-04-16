@@ -1,5 +1,8 @@
 # Deployment Readiness Checklist
 
+> **DEPRECATED** — This document has been superseded by [`ops/frontier/launch-readiness-scorecard.md`](ops/frontier/launch-readiness-scorecard.md) and [`ops/infra/target-production-architecture.md`](ops/infra/target-production-architecture.md).
+> This file is retained for historical reference only. Do not update it.
+
 > Pre-deployment verification for the SZL Holdings platform. Complete all applicable sections before any production deployment.
 
 ---

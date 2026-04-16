@@ -1,5 +1,8 @@
 # EAS Secrets Matrix
 
+> **DEPRECATED** — This document has been superseded by [`ops/mobile/eas-and-store-secrets-matrix.md`](eas-and-store-secrets-matrix.md).
+> This file is retained for historical reference only. Do not update it.
+
 Generated: 2026-04-15
 
 ## EAS Build Secrets

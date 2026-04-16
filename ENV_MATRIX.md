@@ -1,5 +1,8 @@
 # Environment Variable Matrix
 
+> **DEPRECATED** — This document has been superseded by [`ops/infra/environment-matrix.md`](ops/infra/environment-matrix.md).
+> This file is retained for historical reference only. Do not update it.
+
 > Complete reference for all environment variables used across the SZL Holdings platform. Organized by service and environment.
 
 ---

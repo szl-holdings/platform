@@ -1,5 +1,8 @@
 # Store Assets Checklist
 
+> **DEPRECATED** — This document has been superseded by [`ops/mobile/store-asset-inventory.md`](store-asset-inventory.md).
+> This file is retained for historical reference only. Do not update it.
+
 Generated: 2026-04-15
 
 ## iOS (App Store Connect)

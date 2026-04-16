@@ -1,5 +1,8 @@
 # Flagship Mobile Release Plan — CORTEX
 
+> **DEPRECATED** — This document has been superseded by [`ops/mobile/flagship-release-readiness.md`](flagship-release-readiness.md).
+> This file is retained for historical reference only. Do not update it.
+
 Generated: 2026-04-15
 
 ## Overview
