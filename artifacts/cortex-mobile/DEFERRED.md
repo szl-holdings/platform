@@ -1,6 +1,6 @@
 # DEFERRED — `cortex-mobile`
 
-**Status:** Deferred scaffold. Not the canonical mobile app.
+**Status:** Deferred Expo Router scaffold. Not the canonical mobile app.
 **Updated:** 2026-04-16
 
 ## Canonical mobile app
@@ -13,14 +13,24 @@ for TestFlight, Play Internal, and App Store / Google Play release.
 - iOS bundle / Android package: `com.szlholdings.executive.mobile`
 - Full Expo configuration, EAS profiles, push notifications, biometric auth,
   offline sync, and `@szl-holdings/mobile-shared` consumption.
+- 167 source files across `src/`, with a complete app shell, eight domain
+  workspaces, secure storage, and shared mobile primitives.
 
-## What this directory is
+## What this directory actually contains
 
-`artifacts/cortex-mobile/` contains an empty Expo Router scaffold
-(`app/auth/` and `app/workspace/` route directories) with **no
-`package.json`, no `app.json`, and no implementation files**. It was an
-exploratory route layout that has been superseded by the full CORTEX
-implementation in `artifacts/szl-holdings-mobile`.
+`artifacts/cortex-mobile/` is an empty Expo Router scaffold. The current
+contents are limited to:
+
+- `app/auth/` — empty route directory (no screens implemented)
+- `app/workspace/` — empty route directory (no screens implemented)
+- `expo-env.d.ts` — auto-generated Expo type reference (one line; not
+  source code)
+- `.expo/` — local Expo CLI cache (gitignored in practice)
+- `node_modules/` — transient install artifacts (gitignored)
+
+There is **no `package.json`, no `app.json`, no `eas.json`, and no
+implemented screens, components, or business logic** in this directory.
+Nothing here builds, ships, or runs as an application.
 
 ## Disposition
 
