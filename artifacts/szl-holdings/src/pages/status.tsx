@@ -42,6 +42,8 @@ interface StatusData {
   incidents: Incident[];
 }
 
+type UptimeHistory = Record<string, Record<string, number>>;
+
 function statusColor(status: string): string {
   if (status === "operational") return "#10b981";
   if (status === "degraded") return "#f59e0b";
@@ -77,19 +79,27 @@ function UptimeBadge({ value, label }: { value: number; label: string }) {
   );
 }
 
-function UptimeBar({ service }: { service: ServiceStatus }) {
+function UptimeBar({ service, history }: { service: ServiceStatus; history: Record<string, number> }) {
   const bars = 90;
+  const days = Array.from({ length: bars }, (_, i) => {
+    const d = new Date();
+    d.setUTCDate(d.getUTCDate() - (bars - 1 - i));
+    return d.toISOString().slice(0, 10);
+  });
   return (
     <div style={{ display: "flex", gap: 2, alignItems: "flex-end", height: 24 }}>
-      {Array.from({ length: bars }).map((_, i) => {
+      {days.map((day, i) => {
         const isLast = i === bars - 1;
+        const fraction = history[day];
+        const hasData = fraction !== undefined;
         const color = isLast && service.status !== "operational"
           ? statusColor(service.status)
-          : "#10b981";
-        const opacity = isLast ? 1 : 0.25 + Math.random() * 0.5;
+          : hasData && fraction < 0.99 ? (fraction < 0.95 ? "#ef4444" : "#f59e0b") : "#10b981";
+        const opacity = isLast ? 1 : hasData ? 0.35 + fraction * 0.65 : 0.2;
+        const height = isLast ? 20 : hasData ? 10 + fraction * 10 : 10;
         return (
-          <div key={i} style={{
-            width: 3, height: isLast ? 20 : 12 + Math.random() * 8,
+          <div key={day} title={`${day}: ${hasData ? `${(fraction * 100).toFixed(1)}%` : "no data"}`} style={{
+            width: 3, height,
             background: color, borderRadius: 2, opacity,
             flexShrink: 0,
           }} />
@@ -223,6 +233,7 @@ function IncidentCard({ incident }: { incident: Incident }) {
 
 export default function StatusPage() {
   const [data, setData] = useState<StatusData | null>(null);
+  const [uptimeHistory, setUptimeHistory] = useState<UptimeHistory>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [email, setEmail] = useState("");
@@ -232,10 +243,17 @@ export default function StatusPage() {
   const fetchStatus = async (refresh = false) => {
     if (refresh) setRefreshing(true);
     try {
-      const res = await fetch("/api/public/status");
-      if (!res.ok) throw new Error("Failed to load");
-      const json = await res.json() as StatusData;
+      const [statusRes, historyRes] = await Promise.all([
+        fetch("/api/public/status"),
+        fetch("/api/public/uptime-history"),
+      ]);
+      if (!statusRes.ok) throw new Error("Failed to load");
+      const json = await statusRes.json() as StatusData;
       setData(json);
+      if (historyRes.ok) {
+        const histJson = await historyRes.json() as { history: UptimeHistory };
+        setUptimeHistory(histJson.history ?? {});
+      }
     } catch {
       // keep old data on error
     } finally {
@@ -428,7 +446,7 @@ export default function StatusPage() {
                       </div>
                     </div>
                     <div style={{ marginTop: "0.75rem", paddingLeft: "1.5rem" }}>
-                      <UptimeBar service={svc} />
+                      <UptimeBar service={svc} history={uptimeHistory[svc.id] ?? {}} />
                       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 3 }}>
                         <span style={{ fontSize: 10, color: "hsl(210,5%,34%)" }}>90 days ago</span>
                         <span style={{ fontSize: 10, color: "hsl(210,5%,34%)" }}>Today</span>

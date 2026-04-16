@@ -115,6 +115,10 @@ const CoreCommandPage = lazy(() => import("@/pages/core-command"));
 const MeridianPage = lazy(() => import("@/pages/meridian"));
 const ControlPlanePage = lazy(() => import("@/pages/control-plane"));
 const PortfolioOpsPage = lazy(() => import("@/pages/portfolio-ops"));
+const OpsIncidentsPage = lazy(() => import("@/pages/ops-incidents"));
+const OpsAlertsPage = lazy(() => import("@/pages/ops-alerts"));
+const OpsRunbooksPage = lazy(() => import("@/pages/ops-runbooks"));
+const OpsDependencyMapPage = lazy(() => import("@/pages/ops-dependency-map"));
 
 // Public infrastructure pages (trust center, legal baseline, API, investor, press, brand, faq, roadmap)
 const SecurityPage = lazy(() => import("@/pages/security"));
@@ -767,6 +771,18 @@ function App() {
             </Route>
 
             {/* ── Internal ops routes (INTERNAL — not publicly linked) ── */}
+            <Route path="/ops/incidents">
+              <RequireAuth><Suspense fallback={<PageLoader />}><OpsIncidentsPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/ops/alerts">
+              <RequireAuth><Suspense fallback={<PageLoader />}><OpsAlertsPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/ops/runbooks">
+              <RequireAuth><Suspense fallback={<PageLoader />}><OpsRunbooksPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/ops/dependency-map">
+              <RequireAuth><Suspense fallback={<PageLoader />}><OpsDependencyMapPage /></Suspense></RequireAuth>
+            </Route>
             <Route path="/ops">
               <RequireAuth><Suspense fallback={<PageLoader />}><OpsPage /></Suspense></RequireAuth>
             </Route>

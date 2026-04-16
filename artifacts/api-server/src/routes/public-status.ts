@@ -139,6 +139,30 @@ router.get("/status", async (_req, res) => {
   }
 });
 
+router.get("/uptime-history", async (_req, res) => {
+  try {
+    const result = await pool.query<{ service_id: string; day: string; uptime_fraction: string }>(
+      `SELECT
+         service_id,
+         DATE(checked_at AT TIME ZONE 'UTC') AS day,
+         COUNT(*) FILTER (WHERE status = 'operational')::float / NULLIF(COUNT(*), 0) AS uptime_fraction
+       FROM platform_status_checks
+       WHERE checked_at >= NOW() - INTERVAL '90 days'
+       GROUP BY service_id, day
+       ORDER BY service_id, day ASC`
+    );
+    const byService: Record<string, Record<string, number>> = {};
+    for (const row of result.rows) {
+      if (!byService[row.service_id]) byService[row.service_id] = {};
+      byService[row.service_id][row.day] = parseFloat(row.uptime_fraction);
+    }
+    res.json({ history: byService });
+  } catch (err) {
+    logger.error({ error: (err as Error).message }, "Failed to fetch uptime history");
+    res.status(500).json({ error: "Failed to fetch uptime history" });
+  }
+});
+
 router.post("/status/subscribe", async (req, res) => {
   const { email } = req.body as { email?: string };
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {

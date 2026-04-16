@@ -17,6 +17,9 @@ import {
   ExternalLink,
   RefreshCw,
   Circle,
+  Bell,
+  BookOpen,
+  GitMerge,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -90,6 +93,31 @@ const OPS_SECTIONS = [
     icon: AlertTriangle,
     path: "/ops/incidents",
     description: "Active and historical incidents",
+    external: true,
+  },
+  {
+    id: "alerts",
+    label: "Alert Rules",
+    icon: Bell,
+    path: "/ops/alerts",
+    description: "Threshold alerting rules and events",
+    external: true,
+  },
+  {
+    id: "runbooks",
+    label: "Runbooks",
+    icon: BookOpen,
+    path: "/ops/runbooks",
+    description: "Step-by-step remediation guides",
+    external: true,
+  },
+  {
+    id: "dependency-map",
+    label: "Dependency Map",
+    icon: GitMerge,
+    path: "/ops/dependency-map",
+    description: "Service dependency visualization",
+    external: true,
   },
   {
     id: "checklists",

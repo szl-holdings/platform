@@ -93,6 +93,7 @@ import aegisSocLiveRouter from "./firestorm-live";
 import commandRouter from "./command";
 import firestormCommandRouter from "./firestorm-command-surfaces";
 import publicStatusRouter from "./public-status";
+import opsManagementRouter from "./ops-management";
 import { feedbackRouter } from "./feedback";
 import aiEngineRouter from "./ai-engine";
 import analyticsRouter from "./analytics";
@@ -445,6 +446,8 @@ router.use(reportsRouter);
 router.use("/public", publicStatusRouter);
 router.use("/admin/status", _writeLimiter);
 router.use("/admin/status", publicStatusRouter);
+
+router.use(opsManagementRouter);
 
 router.use("/feedback", _writeLimiter);
 router.use(feedbackRouter);
