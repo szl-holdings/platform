@@ -99,6 +99,30 @@ This checklist is the final gate before any external user accesses the SZL Holdi
 
 ---
 
+## Section 6A — GTM, Docs & Sales Readiness (All Mandatory for Design-Partner Launch)
+
+| # | Item | Status | Notes |
+|---|------|--------|-------|
+| G1 | Public docs available: Getting Started, Admin Guide, End User Guide, Operator Guide, FAQ, Troubleshooting | ☑ | GETTING_STARTED.md, ADMIN_SETUP_GUIDE.md, END_USER_GUIDE.md, OPERATOR_GUIDE.md, FAQ.md, TROUBLESHOOTING_GUIDE.md — all complete Apr 2026 |
+| G2 | Product Overview and Feature Overview complete | ☑ | PRODUCT_OVERVIEW.md, FEATURE_OVERVIEW.md — complete Apr 2026 |
+| G3 | Launch messaging house defined | ☑ | LAUNCH_MESSAGE_HOUSE.md — complete Apr 2026 |
+| G4 | Website copy refresh aligned with launch messaging | ☑ | WEBSITE_COPY_REFRESH.md — complete Apr 2026 |
+| G5 | Demo strategy documented for all three audiences (exec, operator, technical) | ☑ | DEMO_STRATEGY.md, EXECUTIVE_DEMO.md, OPERATOR_DEMO.md, TECHNICAL_DEMO.md — complete |
+| G6 | Design partner program defined with terms and pricing | ☑ | DESIGN_PARTNER_PROGRAM.md — complete |
+| G7 | Go-to-market motion documented | ☑ | GO_TO_MARKET_MOTION.md — complete |
+| G8 | Sales handoff guide complete | ☑ | SALES_HANDOFF_GUIDE.md — complete Apr 2026 |
+| G9 | Customer success playbook complete | ☑ | CUSTOMER_SUCCESS_PLAYBOOK.md — complete Apr 2026 |
+| G10 | Proof-of-value and land-and-expand playbooks documented | ☑ | PROOF_OF_VALUE_PLAYBOOK.md, LAND_AND_EXPAND.md — complete |
+| G11 | ROI model documented | ☑ | ROI_MODEL.md — complete |
+| G12 | Enterprise deal design documented | ☑ | ENTERPRISE_DEAL_DESIGN.md — complete |
+| G13 | Investor narrative updated and complete | ☑ | INVESTOR_NARRATIVE.md — current Apr 2026 |
+| G14 | Green-light diligence review complete (6 perspectives) | ☑ | GREEN_LIGHT_REVIEW.md — complete Apr 2026 |
+| G15 | At least one design partner in active conversation | ☐ | NOT YET — first design partner signing is the next milestone |
+
+**Section verdict:** ⚠️ CONDITIONAL GO — all docs and strategy complete; no signed design partners yet
+
+---
+
 ## Section 6 — Support and Operations (All Mandatory)
 
 | # | Item | Status | Notes |

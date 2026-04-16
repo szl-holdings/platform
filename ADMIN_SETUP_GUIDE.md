@@ -256,9 +256,37 @@ Limit alerts are sent when usage reaches 80% and 95% of each limit.
 
 ---
 
-## Phase 6: Security and Compliance
+## Phase 6: Governance and Approval Chains
 
-### 6.1 Audit Trail
+### 6.1 Approval Chains
+
+The governed decision loop requires human approvers for consequential actions. Configure approval chains to define who approves what.
+
+1. Go to **Admin → Governance → Approval Chains**
+2. Create a chain for each action type (e.g., "Fleet Reroute", "Security Escalation")
+3. Define the approvers in order (e.g., Operator → Manager → CFO for high-value actions)
+4. Set thresholds that trigger multi-level approval (e.g., actions >$50K require finance sign-off)
+5. Configure notification settings for each approver role
+
+### 6.2 Covenant Policies
+
+Covenant Policies enforce organizational rules on AI-assisted actions.
+
+1. Go to **Admin → Governance → Covenant Policies**
+2. Review the default policy set
+3. Add organization-specific rules:
+   - Financial thresholds
+   - Regulatory compliance gates
+   - Cross-domain sign-off requirements
+   - Time-window restrictions
+4. Test policies against sample actions using the **Policy Simulator**
+5. Publish — policies are enforced immediately on all new workflows
+
+---
+
+## Phase 7: Security and Compliance
+
+### 7.1 Audit Trail
 
 **Location:** Audit → All Events
 
@@ -268,13 +296,13 @@ Filter by: user, action type, resource, date range.
 
 Export: CSV or JSON for compliance reporting.
 
-### 6.2 Session Management
+### 7.2 Session Management
 
 **Location:** Settings → Security → Sessions
 
 View all active sessions for your organization. Force-terminate suspicious sessions. Sessions are invalidated automatically on role change (next login).
 
-### 6.3 API Keys
+### 7.3 API Keys
 
 **Location:** Settings → Security → API Keys
 
@@ -286,7 +314,7 @@ For machine-to-machine integrations:
 
 Rotate keys regularly. Compromised keys can be revoked instantly.
 
-### 6.4 IP Allowlisting (Enterprise)
+### 7.4 IP Allowlisting (Enterprise)
 
 **Location:** Settings → Security → Network
 
@@ -294,7 +322,7 @@ Restrict platform access to approved IP ranges. Applies to all users in the orga
 
 ---
 
-## Phase 7: Admin Health Check
+## Phase 8: Admin Health Check
 
 Before declaring the tenant production-ready, verify:
 
@@ -308,6 +336,8 @@ Before declaring the tenant production-ready, verify:
 - [ ] API keys created for any machine-to-machine integrations
 - [ ] Audit trail reviewed for any provisioning errors
 - [ ] First workflow deployed and tested
+- [ ] Approval chains configured for key action types
+- [ ] Covenant Policies reviewed and customized
 
 This checklist maps directly to the `CUSTOMER_SETUP_CHECKLIST.md` — share that with design partners to track their own progress.
 
@@ -347,3 +377,5 @@ This checklist maps directly to the `CUSTOMER_SETUP_CHECKLIST.md` — share that
 | Tenancy model | `TENANCY-MODEL.md` |
 | Support model | `SUPPORT_MODEL.md` |
 | Plan matrix | `PLAN_MATRIX.md` |
+| Authentication & Roles | `content/docs/auth-and-roles.md` |
+| Trust Center | `TRUST_CENTER_INDEX.md` |
