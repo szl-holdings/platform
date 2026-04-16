@@ -34,8 +34,9 @@ changelogRouter.get("/changelog", async (_req: Request, res: Response) => {
 
 changelogRouter.post("/changelog", async (req: Request, res: Response) => {
   try {
-    const user = (req as Request & { user?: { role?: string } }).user;
-    if (!user || !["platform_owner", "super_admin"].includes(user.role ?? "")) {
+    const user = (req as Request & { user?: { roles?: string[] } }).user;
+    const userRoles = user?.roles ?? [];
+    if (!user || (!userRoles.includes("platform_owner") && !userRoles.includes("super_admin") && !userRoles.includes("admin"))) {
       res.status(403).json({ error: "Admin access required" });
       return;
     }
