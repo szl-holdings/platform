@@ -255,6 +255,8 @@ function WorkflowVisualizer({ pack }: { pack: Pack }) {
   );
 }
 
+const API_BASE = "/api";
+
 export default function DemoPage() {
   const [selectedPack, setSelectedPack] = useState(0);
   const [accessForm, setAccessForm] = useState({ name: "", email: "", company: "", pack: "" });

@@ -789,7 +789,7 @@ function buildDemoRecs(): Recommendation[] {
     reasoning: g.customReasoning!,
     domain: g.domain,
     confidence: g.confidence,
-    urgency: (i === 0 ? "urgent" : i === 1 ? "critical" : "moderate") as "urgent" | "critical" | "moderate",
+    urgency: (i === 0 ? "urgent" : i === 1 ? "critical" : "moderate") as "critical" | "moderate" | "urgent" | "routine",
     priority: i === 1 ? 89 : i === 0 ? 74 : 58,
     suggestedAction: g.suggestedAction,
     suggestedOwner: g.suggestedOwner,

@@ -277,7 +277,7 @@ export default function AdminDataRetentionPage() {
                               <input type="text" value={editingPolicy.description} onChange={(e) => setEditingPolicy((p) => p ? { ...p, description: e.target.value } : p)} style={inputStyle} maxLength={500} />
                             </div>
                             <div style={{ display: "flex", gap: "0.625rem" }}>
-                              <button onClick={() => savePolicyMutation.mutate(editingPolicy)} disabled={savePolicyMutation.isPending} style={{ padding: "0.5rem 1rem", borderRadius: "6px", fontSize: "12px", fontWeight: 600, background: "hsl(192,72%,48%)", color: "hsl(210,12%,5%)", border: "none", cursor: "pointer" }}>
+                              <button onClick={() => savePolicyMutation.mutate({ ...editingPolicy, purgeStrategy: editingPolicy.purgeStrategy as "delete" | "anonymize" | "archive" })} disabled={savePolicyMutation.isPending} style={{ padding: "0.5rem 1rem", borderRadius: "6px", fontSize: "12px", fontWeight: 600, background: "hsl(192,72%,48%)", color: "hsl(210,12%,5%)", border: "none", cursor: "pointer" }}>
                                 {savePolicyMutation.isPending ? "Saving…" : "Save policy"}
                               </button>
                               <button onClick={() => setEditingPolicy(null)} style={{ padding: "0.5rem 1rem", borderRadius: "6px", fontSize: "12px", background: "transparent", border: "1px solid hsla(0,0%,100%,0.09)", color: "hsl(210,5%,50%)", cursor: "pointer" }}>Cancel</button>

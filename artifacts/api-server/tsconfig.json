@@ -58,15 +58,6 @@
     },
     {
       "path": "../../lib/auth"
-    },
-    {
-      "path": "../../packages/decision-engine"
-    },
-    {
-      "path": "../../packages/policy-engine"
-    },
-    {
-      "path": "../../packages/action-engine"
     }
   ]
 }

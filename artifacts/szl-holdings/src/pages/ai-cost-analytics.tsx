@@ -72,6 +72,8 @@ function BudgetStatusBar({ workflowId, percentUsed, status, budgetUsd, usedUsd }
   );
 }
 
+const API_BASE = "/api";
+
 export default function AICostAnalyticsPage() {
   const { data: costData, isLoading, refetch } = useQuery<CostAnalytics>({
     queryKey: ["ai-cost-analytics"],

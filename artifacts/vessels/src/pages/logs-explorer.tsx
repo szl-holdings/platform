@@ -79,7 +79,7 @@ export default function LogsExplorerPage() {
         <CardContent className="p-0">
           <div className="divide-y divide-border">
             {logs.map(log => {
-              const config = severityConfig[log.severity as keyof typeof severityConfig];
+              const config = severityConfig[log.severity as keyof typeof severityConfig] ?? severityConfig.Debug;
               const SeverityIcon = config.icon;
               const isExpanded = expandedIds.has(log.id);
               return (

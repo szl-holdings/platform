@@ -50,7 +50,41 @@ function StatCard({ label, value, color, icon, sub, alert }: { label: string; va
   );
 }
 
-function AgentHealthRow({ agent, onRestart }: { agent: Record<string, any>; onRestart: (id: string) => void }) {
+interface AgentHealth {
+  id: string;
+  name: string;
+  status: string;
+  violations: number;
+  successRate: number;
+  avgLatencyMs: number;
+  queueDepth: number;
+  cost24h: number;
+  lastRunAt: string;
+}
+
+const DEMO_STATE = {
+  agentHealth: [
+    {
+      id: "stub-agent",
+      name: "Stub Agent",
+      status: "idle",
+      violations: 0,
+      successRate: 99.9,
+      avgLatencyMs: 95,
+      queueDepth: 0,
+      cost24h: 0.01,
+      lastRunAt: new Date().toISOString(),
+    },
+  ],
+  executionQueue: {
+    pending: 0,
+    running: 0,
+    completed: 0,
+    failed: 0,
+  },
+} as const;
+
+function AgentHealthRow({ agent, onRestart }: { agent: AgentHealth; onRestart: (id: string) => void }) {
   const cfg = STATUS_CONFIG[agent.status] ?? STATUS_CONFIG.idle;
   const hasAlert = agent.violations > 0 || agent.status === "failed";
 
@@ -118,33 +152,33 @@ export default function OperatorControlCenter() {
 
   const { data: violationsData } = useQuery({
     queryKey: ["alloyPolicyViolations"],
-    queryFn: async () => {
-      try { return await apiFetch<{ violations: unknown[] }>("/alloy/policy-violations"); } catch { return null; }
+    queryFn: async (): Promise<{ violations: any[] } | null> => {
+      try { return await apiFetch<{ violations: any[] }>("/alloy/policy-violations"); } catch { return null; }
     },
     refetchInterval: 15000,
   });
 
   const { data: bottlenecksData } = useQuery({
     queryKey: ["alloyApprovalBottlenecks"],
-    queryFn: async () => {
-      try { return await apiFetch<{ bottlenecks: unknown[] }>("/alloy/approval-bottlenecks"); } catch { return null; }
+    queryFn: async (): Promise<{ bottlenecks: any[] } | null> => {
+      try { return await apiFetch<{ bottlenecks: any[] }>("/alloy/approval-bottlenecks"); } catch { return null; }
     },
     refetchInterval: 15000,
   });
 
   const { data: providersData } = useQuery({
     queryKey: ["alloyProviderHealth"],
-    queryFn: async () => {
-      try { return await apiFetch<{ providers: unknown[] }>("/alloy/provider-health"); } catch { return null; }
+    queryFn: async (): Promise<{ providers: any[] } | null> => {
+      try { return await apiFetch<{ providers: any[] }>("/alloy/provider-health"); } catch { return null; }
     },
     refetchInterval: 30000,
   });
 
   const queueData = (factoryFloor as any)?.globalCounts ?? { running: 0, queued: 0, waitingApproval: 0, failed: 0, totalToday: 0 };
-  const agentHealth = ((agentStats as any)?.agents ?? []) as Record<string, any>[];
-  const violations = ((violationsData as any)?.violations ?? []) as Record<string, any>[];
-  const bottlenecks = ((bottlenecksData as any)?.bottlenecks ?? []) as Record<string, any>[];
-  const providers = ((providersData as any)?.providers ?? []) as Record<string, any>[];
+  const agentHealth: any[] = (agentStats as any)?.agents ?? [];
+  const violations: any[] = (violationsData as any)?.violations ?? [];
+  const bottlenecks: any[] = (bottlenecksData as any)?.bottlenecks ?? [];
+  const providers: any[] = (providersData as any)?.providers ?? [];
 
   const failedAgents = agentHealth.filter(a => a.status === "failed").length;
   const totalViolations = violations.length;

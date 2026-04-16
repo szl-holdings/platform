@@ -2,6 +2,7 @@ import { randomUUID } from "crypto";
 import type {
   WorkflowDefinition,
   WorkflowRun,
+  WorkflowStep,
   StepExecutionRecord,
   ActionEngineResult,
 } from "./types.js";
@@ -62,7 +63,7 @@ export async function executeWorkflow(params: {
 
   const runId = randomUUID();
   const needsApproval = definition.requiresExplicitApproval && !approvedBy && !isDryRun && !isSimulation;
-  const executionMode = definition.executionMode;
+  const executionMode = definition.executionMode ?? "manual";
 
   const initialStatus: WorkflowRun["status"] = needsApproval ? "pending_approval" : "running";
 
@@ -78,7 +79,7 @@ export async function executeWorkflow(params: {
     isSimulation,
     status: initialStatus,
     currentStepIndex: 0,
-    steps: definition.steps.map(s => ({
+    steps: definition.steps.map((s: WorkflowStep) => ({
       stepId: s.id,
       stepName: s.name,
       startedAt: 0,
@@ -98,7 +99,7 @@ export async function executeWorkflow(params: {
 
   if (needsApproval) {
     appendAudit(run, undefined, "workflow.awaiting_approval", "Execution paused pending human approval.");
-    const approvalStep = definition.steps.find(s => s.requiresApproval);
+    const approvalStep = definition.steps.find((s: WorkflowStep) => s.requiresApproval);
     return {
       run,
       requiresApproval: true,
@@ -206,7 +207,7 @@ async function performRollback(
     const outputs = completedOutputs.get(stepDef.id) ?? {};
     const rollbackHandler = registeredRollbackHandlers.get(stepDef.rollbackHandler);
 
-    const stepRecord = run.steps.find(s => s.stepId === stepDef.id);
+    const stepRecord = run.steps.find((s: StepExecutionRecord) => s.stepId === stepDef.id);
     if (stepRecord) {
       stepRecord.rollbackedAt = Date.now();
       stepRecord.status = "rolled_back";
@@ -247,7 +248,7 @@ async function performRollback(
 function buildDryRunSummary(def: WorkflowDefinition): string {
   const lines = [
     `Dry run for workflow '${def.name}' (${def.id}).`,
-    `Steps: ${def.steps.map(s => s.name).join(" → ")}`,
+    `Steps: ${def.steps.map((s: WorkflowStep) => s.name).join(" → ")}`,
     `Execution mode: ${def.executionMode}`,
   ];
   if (def.estimatedCostUsd !== undefined) {

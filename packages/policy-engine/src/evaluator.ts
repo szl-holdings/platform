@@ -29,7 +29,7 @@ function evaluateCondition(condition: PolicyCondition, context: Record<string, u
 
 function evaluateRule(rule: PolicyRule, context: Record<string, unknown>): boolean {
   if (!rule.conditions || rule.conditions.length === 0) return true;
-  return rule.conditions.every(c => evaluateCondition(c, context));
+  return rule.conditions.every((c: PolicyCondition) => evaluateCondition(c, context));
 }
 
 function buildEvaluationContext(request: EvaluationRequest): Record<string, unknown> {

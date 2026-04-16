@@ -16,7 +16,7 @@ export const WorkflowStepSchema = z.object({
   timeoutMs: z.number().int().positive().optional(),
   retryCount: z.number().int().min(0).max(5).default(0),
 });
-export type WorkflowStep = z.infer<typeof WorkflowStepSchema>;
+export type WorkflowStep = z.input<typeof WorkflowStepSchema>;
 
 export const WorkflowDefinitionSchema = z.object({
   id: z.string(),
@@ -32,7 +32,7 @@ export const WorkflowDefinitionSchema = z.object({
   rollbackPolicy: z.enum(["none", "step", "full"]).default("step"),
   metadata: z.record(z.unknown()).optional(),
 });
-export type WorkflowDefinition = z.infer<typeof WorkflowDefinitionSchema>;
+export type WorkflowDefinition = z.input<typeof WorkflowDefinitionSchema>;
 
 export const StepExecutionRecordSchema = z.object({
   stepId: z.string(),

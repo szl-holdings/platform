@@ -11,14 +11,12 @@ globalThis.require = createRequire(import.meta.url);
 const artifactDir = path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = path.resolve(artifactDir, "../..");
 
-async function buildWorkspacePackageMap() {
-  const libDir = path.join(workspaceRoot, "lib");
-  const packageMap = {};
+async function scanDirForPackages(scanDir, packageMap) {
   try {
-    const entries = await readdir(libDir, { withFileTypes: true });
+    const entries = await readdir(scanDir, { withFileTypes: true });
     await Promise.all(entries.map(async (entry) => {
       if (!entry.isDirectory()) return;
-      const packageDir = path.join(libDir, entry.name);
+      const packageDir = path.join(scanDir, entry.name);
       const pkgPath = path.join(packageDir, "package.json");
       try {
         const pkgContent = await readFile(pkgPath, "utf8");
@@ -30,8 +28,14 @@ async function buildWorkspacePackageMap() {
       }
     }));
   } catch {
-    // lib dir not found
+    // dir not found, skip
   }
+}
+
+async function buildWorkspacePackageMap() {
+  const packageMap = {};
+  await scanDirForPackages(path.join(workspaceRoot, "lib"), packageMap);
+  await scanDirForPackages(path.join(workspaceRoot, "packages"), packageMap);
   return packageMap;
 }
 

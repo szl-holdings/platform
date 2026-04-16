@@ -598,7 +598,7 @@ export default function TradingDeskPage() {
                       {fills.map(f => (
                         <tr key={f.id} className="text-[11px] hover:bg-white/[0.02]" style={{ borderTop: `1px solid ${BORDER.subtle}` }}>
                           <td className="py-2.5 pr-3 font-mono text-[10px]" style={{ color: TEXT.tertiary }}>{f.fillRef}</td>
-                          <td className="py-2.5 pr-3 font-bold" style={{ color: ACCENT }}>{f.instrument?.symbol ?? `#${f.instrumentId}`}</td>
+                          <td className="py-2.5 pr-3 font-bold" style={{ color: ACCENT }}>{f.instrument?.symbol ?? `#${f.instrument?.id ?? f.id}`}</td>
                           <td className="py-2.5 pr-3"><SideBadge side={f.side} /></td>
                           <td className="py-2.5 pr-3 font-mono" style={{ color: TEXT.primary }}>{f.quantity}</td>
                           <td className="py-2.5 pr-3 font-mono" style={{ color: TEXT.primary }}>{fmt(f.price, 0)}</td>
