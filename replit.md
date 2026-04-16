@@ -31,7 +31,7 @@ The platform is built as a pnpm monorepo using TypeScript 5.9, React 19, Vite, a
 ### Canonical Artifacts (Active)
 | Artifact | Path | Files | Purpose |
 |----------|------|-------|---------|
-| szl-holdings | `/` | 402 | Corporate, marketing, trust center, investor hub |
+| szl-holdings | `/` | 403 | Corporate, marketing, trust center, investor hub, Decision Theater |
 | api-server | `/api` | 395 | REST + GraphQL + WebSocket backend |
 | command | `/command/` | 223 | Unified ops command (absorbed Lyte + IMPERIUM) |
 | aegis | `/aegis/` | 166 | Defense & security intelligence |

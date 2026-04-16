@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { m } from "framer-motion";
 import {
@@ -8,6 +8,8 @@ import {
   ArrowUpRight, TrendingUp, Eye, BarChart3, DollarSign,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const DecisionTheater = lazy(() => import("@/components/DecisionTheater"));
 
 function useCountUp(target: number, duration = 1200, enabled = true) {
   const [value, setValue] = useState(0);
@@ -279,7 +281,7 @@ function InvestorKPISection({ metricsLoading, metrics }: { metricsLoading: boole
 }
 
 export default function CoreCommandCenter() {
-  const [tab, setTab] = useState<"overview" | "recommendations" | "audit" | "services">("overview");
+  const [tab, setTab] = useState<"overview" | "decision-theater" | "recommendations" | "audit" | "services">("overview");
 
   const { data: metrics, isLoading: metricsLoading, refetch } = useQuery<CoreMetrics>({
     queryKey: ["core-metrics"],
@@ -383,7 +385,7 @@ export default function CoreCommandCenter() {
         </div>
         <div className="border-t border-border/30">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 flex gap-0.5 overflow-x-auto">
-            {(["overview", "recommendations", "audit", "services"] as const).map((t) => (
+            {(["overview", "decision-theater", "recommendations", "audit", "services"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
@@ -394,7 +396,7 @@ export default function CoreCommandCenter() {
                     : "border-transparent text-muted-foreground hover:text-foreground",
                 )}
               >
-                {t}
+                {t === "decision-theater" ? "Decision Theater" : t}
               </button>
             ))}
           </div>
@@ -653,6 +655,12 @@ export default function CoreCommandCenter() {
               </div>
             </div>
           </m.div>
+        )}
+
+        {tab === "decision-theater" && (
+          <Suspense fallback={<div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" /></div>}>
+            <DecisionTheater />
+          </Suspense>
         )}
 
         {tab === "recommendations" && (

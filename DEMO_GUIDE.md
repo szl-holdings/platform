@@ -1,8 +1,8 @@
 # Demo Guide — SZL Holdings Platform
 
-> Instructions for running demos of the governed operational intelligence platform, what to show to which audiences, and how to manage demo state.
+> Instructions for running demos of the Governed Decision Infrastructure platform, what to show to which audiences, and how to manage demo state.
 >
-> The core demo narrative: every consequential decision follows the same governed loop — Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome. Domain packs add domain-specific intelligence; the governance is shared.
+> The core demo narrative: every consequential decision follows the same governed loop — Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning. Domain packs add domain-specific intelligence; the governance is shared.
 
 ---
 
@@ -23,6 +23,7 @@
 | Product | Demo URL | Auth Required |
 |---------|----------|---------------|
 | SZL Holdings (marketing) | `https://szlholdings.com` | No |
+| Core Command — Decision Theater | `/core` (click "Decision Theater" tab) | No |
 | Command (Unified Ops) | `/command/operations` | Yes (demo org) |
 | Command — Flagship Loop | `/command/operations/governed-decision-loop` | Yes (demo org) |
 | Alloy Fabric | `/alloy/` | Yes (demo org) |
@@ -66,13 +67,43 @@ Demo data is seeded via `pnpm seed:demo` and uses realistic but entirely synthet
 
 1. **Start:** `szlholdings.com` — company overview (1 min)
 2. **Platform thesis:** `/platform` or `/investors/overview` — governed decision loop, five primitives (3 min)
-3. **Lyte walkthrough:** Signal timeline → PRISM dashboard → Action queue → Approval gate (5 min)
+3. **Decision Theater:** `/core` → Decision Theater tab — walk through the 9-step loop using the cross-domain threat scenario (5 min)
 4. **Alloy governance:** Workflow engine → Covenant Policy in action → Proof Chain audit trail (3 min)
 5. **Trust:** `/trust-center` — security posture, AI governance model (2 min)
 6. **Domain packs:** Brief overview of Aegis/Vessels/Terra as domain extensions on shared infrastructure (3 min)
 7. **Close:** Roadmap, revenue model, design partner opportunity (3 min)
 
 **What NOT to show:** Internal admin routes, investor data room (unless invited), unfinished sprint routes.
+
+---
+
+### Decision Theater Walkthrough (~10 minutes)
+
+**Goal:** Walk any audience through the full 9-step governed decision loop using a compelling cross-domain scenario — no auth required.
+
+**URL:** `/core` → click **Decision Theater** tab
+
+**Scenario:** A coordinated cyber intrusion at a partner port facility (Aegis) combined with a suspicious AIS transponder outage on an approaching tanker (Vessels). The platform correlates both signals, generates a governed response, and tracks the outcome.
+
+**Steps:**
+
+1. **Signal** (1 min) — Show how two independent domain packs (Aegis + Vessels) fire signals within a 4-minute window. Point out severity levels and raw telemetry.
+2. **Context** (1 min) — Highlight the 87% cross-domain correlation confidence and the 4 evidence links connecting the SSH intrusion to the vessel anomaly.
+3. **Recommendation** (1 min) — Show the AI-generated advisory: lockdown + vessel diversion. Note the 82% confidence score, model attribution (szl-threat-correlation-v3), and source citation.
+4. **Simulation** (1.5 min) — Walk through the Monte Carlo scenario comparison (10,000 iterations). Highlight the cost-of-waiting metric ($127K/hour) and the sensitivity tornado chart.
+5. **Policy** (1 min) — Show all 4 Covenant Policy checks passing. Note the human approver, role-based authorization, and cost threshold governance.
+6. **Execution** (1 min) — Walk through the 4-step workflow with completion times. Highlight automated vs. human actions.
+7. **Proof** (1 min) — Show the immutable Proof Chain with source attribution, review state, and audit trail timestamps.
+8. **Outcome** (1 min) — Compare predicted vs. actual results. Highlight that actual cost was 15.6% under budget and resolution was 25% faster than predicted.
+9. **Learning** (1 min) — Show how the outcome feeds back into model calibration, pattern detection, and policy validation.
+
+**Guided Demo Mode:** Click the "Guided Demo" button to auto-advance through all 9 stages (6 seconds per stage). The stage will auto-progress and show a "Playing…" indicator. Click any stage in the progress bar to jump directly.
+
+**Key Talking Points:**
+- "Every domain runs the same governed loop — the primitives are shared infrastructure"
+- "Proof Chain means every AI recommendation is traceable to its sources"
+- "Covenant Policy enforces organizational rules before any action executes"
+- "The Learning step creates a calibration flywheel — the platform gets smarter with every decision"
 
 ---
 
