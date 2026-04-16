@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch, isAuthError, DataStateBadge, useRealtimeChannel } from "@szl-holdings/shared-ui";
+import { apiFetch, isAuthError, DataStateBadge, useRealtimeChannel, LiveClock} from "@szl-holdings/shared-ui";
 import { Activity, Clock, CheckCircle, XCircle, RotateCcw, RefreshCw, AlertTriangle, Zap, Terminal, ChevronRight, Play, Filter } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
@@ -105,19 +105,6 @@ const STATUS_STYLES: Record<string, { color: string; icon: React.ReactNode; labe
   queued: { color: "#f59e0b", icon: <Clock className="w-3.5 h-3.5" />, label: "Queued" },
   cancelled: { color: "#6b7280", icon: <XCircle className="w-3.5 h-3.5" />, label: "Cancelled" },
 };
-
-function LiveClock() {
-  const [time, setTime] = useState(new Date());
-  useEffect(() => {
-    const id = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(id);
-  }, []);
-  return (
-    <span className="font-mono text-[10px]" style={{ color: "rgba(75,139,219,0.5)" }}>
-      {time.toLocaleTimeString("en-US", { hour12: false })} UTC
-    </span>
-  );
-}
 
 function RunDurationBadge({ startedAt, completedAt, status }: { startedAt?: string | null; completedAt?: string | null; status: string }) {
   const [elapsed, setElapsed] = useState(0);
@@ -339,7 +326,7 @@ export default function ExecutionRuns() {
               {freshnessAge < 5 ? "● live" : `↻ ${freshnessAge}s ago`}
             </span>
           )}
-          <LiveClock />
+          <LiveClock className="font-mono text-[10px]" style={{ color: "rgba(75,139,219,0.5)" }} />
           <button onClick={() => refetch()} className="flex items-center gap-1.5 text-[11px] border px-3 py-1.5 rounded-lg transition-colors hover:bg-white/5" style={{ color: "rgba(255,255,255,0.4)", borderColor: "rgba(255,255,255,0.08)" }}>
             <RefreshCw className="w-3 h-3" /> Refresh
           </button>

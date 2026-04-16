@@ -3,9 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-u
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Ship, Anchor, Navigation, AlertTriangle, Cloud, ShieldAlert, Globe, Radio, Waves, Thermometer, Wind, Eye, MapPin, Languages, Loader2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { apiFetch } from "@szl-holdings/shared-ui";
-
-function AnimatedCounter({ value }: { value: number }) {
+import { apiFetch, AnimatedCounter} from "@szl-holdings/shared-ui";
+: { value: number }) {
   const [display, setDisplay] = useState(0);
   useEffect(() => {
     let cancelled = false;

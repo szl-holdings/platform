@@ -1,0 +1,381 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { m, AnimatePresence } from "framer-motion";
+import {
+  Plus, Edit3, Trash2, Save, Loader2, X, Mail, BarChart3, RefreshCw,
+  Globe, TrendingUp, Users, Activity, ChevronDown, ChevronUp,
+  Building2, FileText,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { apiFetch } from "./api";
+import type { Site, Venture, Article, ContactSubmission } from "./api";
+
+// ─── Status Badge ─────────────────────────────────────────────────────────────
+
+function StatusBadge({ status }: { status: string }) {
+  const s = status?.toLowerCase();
+  const cls = s === "published" || s === "active" || s === "completed"
+    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+    : s === "draft" || s === "in_progress"
+    ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
+    : "bg-muted text-muted-foreground border-border";
+  return <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-full border uppercase tracking-wider", cls)}>{status}</span>;
+}
+
+// ─── Admin Dashboard ──────────────────────────────────────────────────────────
+
+function DashboardPanel() {
+  const { data: sites } = useQuery({ queryKey: ["cms-sites"], queryFn: () => apiFetch<Site[]>("/cms/sites") });
+  const { data: venturesData } = useQuery({ queryKey: ["cms-ventures"], queryFn: () => apiFetch<Venture[]>("/cms/ventures") });
+  const { data: articlesData } = useQuery({ queryKey: ["cms-articles"], queryFn: () => apiFetch<{ data: Article[] }>("/cms/articles") });
+  const { data: submissionsData } = useQuery({ queryKey: ["cms-submissions"], queryFn: () => apiFetch<{ data: ContactSubmission[] }>("/cms/contact-submissions") });
+
+  const ventures = Array.isArray(venturesData) ? venturesData : [];
+  const articles = articlesData?.data ?? [];
+  const submissions = submissionsData?.data ?? [];
+
+  const stats = [
+    { label: "Sites", value: sites?.length ?? 0, icon: Globe, color: "text-blue-500" },
+    { label: "Ventures", value: ventures.length, icon: Building2, color: "text-violet-500" },
+    { label: "Articles", value: articles.length, icon: FileText, color: "text-emerald-500" },
+    { label: "Submissions", value: submissions.length, icon: Mail, color: "text-amber-500" },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-base font-semibold text-foreground">Content Overview</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">Manage all CMS content for the SZL ecosystem.</p>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {stats.map(s => {
+          const Icon = s.icon;
+          return (
+            <div key={s.label} className="bg-card border border-border rounded-xl p-4">
+              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center mb-3", s.color.replace("text-", "bg-") + "/10")}>
+                <Icon className={cn("w-4 h-4", s.color)} />
+              </div>
+              <div className="text-2xl font-bold text-foreground">{s.value}</div>
+              <div className="text-xs text-muted-foreground mt-0.5">{s.label}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="bg-card border border-border rounded-xl p-5">
+        <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+          <Globe className="w-4 h-4 text-primary" /> Active Sites
+        </h3>
+        <div className="space-y-2">
+          {(sites ?? []).map(site => (
+            <div key={site.id} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+              <div>
+                <div className="text-sm font-medium text-foreground">{site.name}</div>
+                <div className="text-xs text-muted-foreground">{site.slug}</div>
+              </div>
+              <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-full border", site.isActive ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-muted text-muted-foreground border-border")}>
+                {site.isActive ? "Active" : "Inactive"}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="bg-card border border-border rounded-xl p-5">
+        <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+          <Mail className="w-4 h-4 text-primary" /> Recent Submissions
+          {submissions.length > 0 && <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-full">{submissions.length}</span>}
+        </h3>
+        {submissions.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No submissions yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {submissions.slice(0, 5).map(s => (
+              <div key={s.id} className="flex items-start justify-between py-2 border-b border-border/50 last:border-0">
+                <div>
+                  <div className="text-sm font-medium text-foreground">{s.fullName}</div>
+                  <div className="text-xs text-muted-foreground">{s.email} · {s.formKey}</div>
+                </div>
+                <div className="text-[10px] text-muted-foreground">{new Date(s.createdAt).toLocaleDateString()}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Generic CMS Table Panel ──────────────────────────────────────────────────
+
+interface FieldDef { key: string; label: string; type?: "text" | "textarea" | "select" | "boolean"; options?: string[]; }
+
+function CmsTablePanel({
+  title, icon: Icon, queryKey, endpoint, fields, renderRow, emptyMessage,
+}: {
+  title: string;
+  icon: React.ElementType;
+  queryKey: string[];
+  endpoint: string;
+  fields: FieldDef[];
+  renderRow: (item: Record<string, string | number | boolean | null | undefined>) => React.ReactNode;
+  emptyMessage?: string;
+}) {
+  const qc = useQueryClient();
+  const [editing, setEditing] = useState<Record<string, unknown> | null>(null);
+  const [isNew, setIsNew] = useState(false);
+  const [form, setForm] = useState<Record<string, string | boolean>>({});
+
+  const { data, isLoading } = useQuery({
+    queryKey,
+    queryFn: () => apiFetch<unknown>(endpoint),
+  });
+
+  const rows: Record<string, unknown>[] = Array.isArray(data) ? (data as Record<string, unknown>[]) : ((data as { data?: Record<string, unknown>[] } | undefined)?.data ?? []);
+
+  const saveMutation = useMutation({
+    mutationFn: async (vals: Record<string, unknown>) => {
+      if (isNew) {
+        return apiFetch(endpoint, { method: "POST", body: JSON.stringify(vals) });
+      } else {
+        return apiFetch(`${endpoint}/${editing?.id}`, { method: "PATCH", body: JSON.stringify(vals) });
+      }
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey }); setEditing(null); setIsNew(false); },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => apiFetch(`${endpoint}/${id}`, { method: "DELETE" }),
+    onSuccess: () => qc.invalidateQueries({ queryKey }),
+  });
+
+  const openEdit = (item: Record<string, unknown>) => {
+    setIsNew(false);
+    setEditing(item);
+    const f: Record<string, string | boolean> = {};
+    fields.forEach(fd => { f[fd.key] = (item[fd.key] as string | boolean) ?? ""; });
+    setForm(f);
+  };
+
+  const openNew = () => {
+    setIsNew(true);
+    setEditing({});
+    const f: Record<string, string | boolean> = {};
+    fields.forEach(fd => { f[fd.key] = fd.type === "boolean" ? false : ""; });
+    setForm(f);
+  };
+
+  const handleSave = () => {
+    saveMutation.mutate(form as Record<string, unknown>);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+            <Icon className="w-4 h-4 text-primary" /> {title}
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">{rows.length} record{rows.length !== 1 ? "s" : ""}</p>
+        </div>
+        <button onClick={openNew} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-white hover:bg-primary/90 transition-colors">
+          <Plus className="w-3.5 h-3.5" /> New
+        </button>
+      </div>
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
+        </div>
+      ) : rows.length === 0 ? (
+        <div className="bg-card border border-border rounded-xl p-8 text-center">
+          <p className="text-sm text-muted-foreground">{emptyMessage ?? "No records yet."}</p>
+        </div>
+      ) : (
+        <div className="bg-card border border-border rounded-xl divide-y divide-border/50">
+          {rows.map(item => (
+            <div key={(item as any).id} className="flex items-center justify-between px-4 py-3 hover:bg-muted/20 transition-colors">
+              <div className="flex-1 min-w-0 pr-4">{renderRow(item as Record<string, string | number | boolean | null | undefined>)}</div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button onClick={() => openEdit(item)} className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+                  <Edit3 className="w-3.5 h-3.5" />
+                </button>
+                <button onClick={() => { if (confirm("Delete this record?")) deleteMutation.mutate((item as any).id); }} className="p-1.5 rounded-md text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors">
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      <AnimatePresence>
+        {editing !== null && (
+          <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <m.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-card border border-border rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+              <div className="flex items-center justify-between p-5 border-b border-border/50">
+                <h3 className="text-sm font-semibold text-foreground">{isNew ? `New ${title.replace(/s$/, "")}` : `Edit ${title.replace(/s$/, "")}`}</h3>
+                <button onClick={() => { setEditing(null); setIsNew(false); }} className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="p-5 space-y-4">
+                {fields.map(fd => (
+                  <div key={fd.key}>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1.5">{fd.label}</label>
+                    {fd.type === "textarea" ? (
+                      <textarea value={form[fd.key] as string ?? ""} onChange={e => setForm(p => ({ ...p, [fd.key]: e.target.value }))} rows={4} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 resize-none" />
+                    ) : fd.type === "select" ? (
+                      <select value={form[fd.key] as string ?? ""} onChange={e => setForm(p => ({ ...p, [fd.key]: e.target.value }))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50">
+                        {fd.options?.map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    ) : fd.type === "boolean" ? (
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked={!!form[fd.key]} onChange={e => setForm(p => ({ ...p, [fd.key]: e.target.checked }))} className="rounded border-border" />
+                        <span className="text-sm text-foreground">Enabled</span>
+                      </label>
+                    ) : (
+                      <input value={form[fd.key] as string ?? ""} onChange={e => setForm(p => ({ ...p, [fd.key]: e.target.value }))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center justify-end gap-2 p-5 border-t border-border/50">
+                <button onClick={() => { setEditing(null); setIsNew(false); }} className="px-4 py-2 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">Cancel</button>
+                <button onClick={handleSave} disabled={saveMutation.isPending} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-primary text-white hover:bg-primary/90 disabled:opacity-50 transition-colors">
+                  {saveMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                  Save
+                </button>
+              </div>
+            </m.div>
+          </m.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ─── Submissions Panel ────────────────────────────────────────────────────────
+
+function SubmissionsPanel() {
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["cms-submissions"],
+    queryFn: () => apiFetch<{ data: ContactSubmission[] }>("/cms/contact-submissions"),
+  });
+
+  const submissions = data?.data ?? [];
+  const [expanded, setExpanded] = useState<number | null>(null);
+
+  const formKeyColors: Record<string, string> = {
+    szl_contact: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+    vessels_demo: "bg-teal-500/10 text-teal-600 border-teal-500/20",
+    inca_access: "bg-violet-500/10 text-violet-600 border-violet-500/20",
+    carlota_private_inquiry: "bg-pink-500/10 text-pink-600 border-pink-500/20",
+    stephen_contact: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20",
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+            <Mail className="w-4 h-4 text-primary" /> Contact Submissions
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">{submissions.length} submission{submissions.length !== 1 ? "s" : ""}</p>
+        </div>
+        <button onClick={() => refetch()} className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+          <RefreshCw className="w-4 h-4" />
+        </button>
+      </div>
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12"><Loader2 className="w-5 h-5 text-muted-foreground animate-spin" /></div>
+      ) : submissions.length === 0 ? (
+        <div className="bg-card border border-border rounded-xl p-8 text-center">
+          <p className="text-sm text-muted-foreground">No submissions yet. Forms will appear here when completed.</p>
+        </div>
+      ) : (
+        <div className="bg-card border border-border rounded-xl divide-y divide-border/50">
+          {submissions.map(s => (
+            <div key={s.id}>
+              <button onClick={() => setExpanded(expanded === s.id ? null : s.id)} className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted/20 transition-colors text-left">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-full border shrink-0", formKeyColors[s.formKey] ?? "bg-muted text-muted-foreground border-border")}>
+                    {s.formKey}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium text-foreground truncate">{s.fullName}</div>
+                    <div className="text-xs text-muted-foreground">{s.email}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0 ml-4">
+                  <span className="text-[10px] text-muted-foreground">{new Date(s.createdAt).toLocaleDateString()}</span>
+                  {expanded === s.id ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+                </div>
+              </button>
+              <AnimatePresence>
+                {expanded === s.id && (
+                  <m.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                    <div className="px-4 pb-4 space-y-2 bg-muted/20">
+                      {s.company && <div className="text-xs"><span className="text-muted-foreground">Company: </span><span className="text-foreground">{s.company}</span></div>}
+                      {s.message && <div className="text-xs text-foreground bg-background border border-border rounded-lg p-3 leading-relaxed">{s.message}</div>}
+                    </div>
+                  </m.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Analytics Panel ──────────────────────────────────────────────────────────
+
+function AnalyticsPanel() {
+  const eventSummary = [
+    { event: "page_view", count: "Track on each route", description: "Every page navigation" },
+    { event: "cta_click", count: "CTA interactions", description: "Button and link clicks with label" },
+    { event: "form_submit", count: "Form completions", description: "All form submissions" },
+    { event: "demo_request", count: "Demo requests", description: "Vessels demo form" },
+    { event: "access_request", count: "Access requests", description: "AI research access form" },
+    { event: "private_inquiry_submit", count: "Private inquiries", description: "Carlota Jo inquiry form" },
+    { event: "article_view", count: "Article views", description: "Article detail page loads" },
+    { event: "case_study_view", count: "Case study views", description: "Case study page loads" },
+    { event: "download_asset", count: "Asset downloads", description: "File and PDF downloads" },
+    { event: "sign_in", count: "Sign in events", description: "Authentication completions" },
+    { event: "dashboard_view", count: "Dashboard loads", description: "Authenticated dashboard views" },
+    { event: "alert_view", count: "Alert views", description: "Alert detail views" },
+    { event: "report_view", count: "Report views", description: "Report page views" },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+          <BarChart3 className="w-4 h-4 text-primary" /> Analytics Event Taxonomy
+        </h2>
+        <p className="text-xs text-muted-foreground mt-0.5">All analytics events fire via window.gtag and the analytics utility.</p>
+      </div>
+      <div className="bg-card border border-border rounded-xl divide-y divide-border/50">
+        {eventSummary.map(e => (
+          <div key={e.event} className="px-4 py-3">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <code className="text-xs font-mono text-primary bg-primary/5 px-2 py-0.5 rounded">{e.event}</code>
+                <p className="text-xs text-muted-foreground mt-1">{e.description}</p>
+              </div>
+              <span className="text-[10px] text-muted-foreground shrink-0">{e.count}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4">
+        <p className="text-xs text-amber-600 font-medium">Event Properties</p>
+        <p className="text-xs text-muted-foreground mt-1">All events include: <code className="font-mono">site</code>, <code className="font-mono">page</code>, <code className="font-mono">section</code>, <code className="font-mono">cta_label</code>, <code className="font-mono">form_key</code>, <code className="font-mono">content_slug</code></p>
+      </div>
+    </div>
+  );
+}
+
+
+export { StatusBadge, DashboardPanel, CmsTablePanel, SubmissionsPanel, AnalyticsPanel };

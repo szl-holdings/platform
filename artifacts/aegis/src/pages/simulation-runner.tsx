@@ -13,7 +13,7 @@ import { useState, useEffect, useRef } from "react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { doctrineEventBus } from "@szl-holdings/observability";
 import { DoctrineLayerBadge } from "@szl-holdings/shared-ui/doctrine-layer-badge";
-import { useRole } from "@szl-holdings/shared-ui";
+import { useRole, AnimatedCounter} from "@szl-holdings/shared-ui";
 import { Lock } from "lucide-react";
 
 const statusColors: Record<string, string> = {
@@ -37,8 +37,7 @@ function getScoreBg(score: number) {
   if (score < 70) return "bg-orange-500/10";
   return "bg-red-500/10";
 }
-
-function AnimatedCounter({ value }: { value: number }) {
+: { value: number }) {
   const [display, setDisplay] = useState(0);
   const ref = useRef<number>(0);
   useEffect(() => {

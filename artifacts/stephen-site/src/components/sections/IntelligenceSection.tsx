@@ -2,9 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import { Activity, Cpu, Globe, MessageSquare, Send, Loader2, TrendingUp, Zap, Shield, Ship, Brain, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChatBubble } from "@szl-holdings/shared-ui/ai-components";
-import { apiFetch } from "@szl-holdings/shared-ui";
-
-function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: string }) {
+import { apiFetch, AnimatedCounter} from "@szl-holdings/shared-ui";
+: { value: number; suffix?: string }) {
   const [display, setDisplay] = useState(0);
   useEffect(() => {
     let c = false;

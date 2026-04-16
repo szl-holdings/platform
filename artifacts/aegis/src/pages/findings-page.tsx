@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { AnimatedCounter } from "@szl-holdings/shared-ui";
 import { api } from "@/lib/api";
 import { Card, CardContent } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
@@ -27,8 +28,7 @@ const statusColors: Record<string, string> = {
   accepted: "bg-blue-500/10 text-blue-400 border-blue-500/20",
   false_positive: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
 };
-
-function AnimatedCounter({ value }: { value: number }) {
+: { value: number }) {
   const [display, setDisplay] = useState(0);
   const ref = useRef<number>(0);
   useEffect(() => {

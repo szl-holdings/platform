@@ -2,11 +2,10 @@ import { Link } from "wouter";
 import { Ship, ChevronRight, Shield, BarChart3, AlertTriangle, Activity, Globe, Anchor, Navigation, DollarSign, ArrowRight, Eye, TrendingUp, Zap, Clock, Waves, MapPin, Lock } from "lucide-react";
 import { MarketingNav } from "@/components/MarketingNav";
 import { MarketingFooter } from "@/components/MarketingFooter";
-import { ContactModal } from "@szl-holdings/shared-ui";
+import { ContactModal, AnimatedCounter} from "@szl-holdings/shared-ui";
 import { motion as m, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-
-function AnimatedCounter({ value, suffix = "", prefix = "" }: { value: number; suffix?: string; prefix?: string }) {
+: { value: number; suffix?: string; prefix?: string }) {
   const [display, setDisplay] = useState(0);
   useEffect(() => {
     const ctrl = animate(0, value, {

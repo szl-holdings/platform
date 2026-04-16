@@ -12,7 +12,7 @@ import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import React, { useState, useEffect, useRef } from "react";
 import { ExportButton } from "@szl-holdings/shared-ui/data-export";
 import { ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
-import { DataProvenance, ActionLoop, RoleSelector } from "@szl-holdings/shared-ui";
+import { DataProvenance, ActionLoop, RoleSelector, AnimatedCounter} from "@szl-holdings/shared-ui";
 import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
 
 const statusColors: Record<string, string> = {
@@ -35,8 +35,7 @@ function getRiskBadge(score: number) {
   if (score >= 31) return { label: "Medium", color: "text-amber-400 bg-amber-400/10 border-amber-400/20" };
   return { label: "Low", color: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" };
 }
-
-function AnimatedCounter({ value, duration = 1200 }: { value: number; duration?: number }) {
+: { value: number; duration?: number }) {
   const [display, setDisplay] = useState(0);
   const ref = useRef<number>(0);
   useEffect(() => {

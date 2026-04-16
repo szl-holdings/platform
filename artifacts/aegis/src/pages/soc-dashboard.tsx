@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { DataProvenance, ActionLoop, RoleSelector } from "@szl-holdings/shared-ui";
+import { DataProvenance, ActionLoop, RoleSelector, AnimatedCounter, LiveClock} from "@szl-holdings/shared-ui";
 import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
 import { Link } from "wouter";
 import {
@@ -33,8 +33,7 @@ const WORKSPACES = [
 ];
 
 type Workspace = "command" | "defense" | "labs";
-
-function AnimatedCounter({ value, decimals = 0 }: { value: number; decimals?: number }) {
+: { value: number; decimals?: number }) {
   const [display, setDisplay] = useState(0);
   const ref = useRef(0);
   useEffect(() => {
@@ -56,19 +55,6 @@ function AnimatedCounter({ value, decimals = 0 }: { value: number; decimals?: nu
     return () => { cancelled = true; };
   }, [value]);
   return <>{decimals > 0 ? display.toFixed(decimals) : Math.round(display)}</>;
-}
-
-function LiveClock() {
-  const [time, setTime] = useState(new Date());
-  useEffect(() => {
-    const t = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(t);
-  }, []);
-  return (
-    <span className="text-[10px] font-mono tabular-nums" style={{ color: DS.text.muted }}>
-      UTC {time.toISOString().slice(11, 19)}
-    </span>
-  );
 }
 
 function _minsAgo(ms: number) {
@@ -439,7 +425,7 @@ export default function AegisUnifiedOverview() {
           <p className="text-[11px]" style={{ color: DS.text.tertiary }}>One platform · Three workspaces · Shared intelligence layer</p>
         </div>
         <div className="flex items-center gap-3">
-          <LiveClock />
+          <LiveClock className="text-[10px] font-mono tabular-nums" style={{ color: DS.text.muted }} />
         </div>
       </div>
 

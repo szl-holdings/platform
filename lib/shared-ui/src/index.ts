@@ -342,3 +342,6 @@ export {
 } from "./cortex-what-if";
 export * from "./settings-shell";
 export * from "./onboarding";
+export { LiveClock, type LiveClockProps } from "./live-clock";
+export { AnimatedCounter, type AnimatedCounterProps } from "./animated-counter";
+export { useInterval } from "./use-interval";

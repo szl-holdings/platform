@@ -6,7 +6,7 @@ import { Input } from "@szl-holdings/shared-ui/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
 import { Globe, Shield, AlertTriangle, Search, Radio, Brain, MapPin, Crosshair, Activity, FileText, Clock, TrendingUp, Zap } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch, AnimatedCounter} from "@szl-holdings/shared-ui";
 
 const severityColors: Record<string, string> = {
   critical: "bg-red-500/10 text-red-400 border-red-500/20",
@@ -92,8 +92,7 @@ function ThreatMapCanvas({ threats }: { threats: any[] }) {
 
   return <canvas ref={canvasRef} className="w-full h-full rounded-lg" style={{ minHeight: 300 }} />;
 }
-
-function AnimatedCounter({ value }: { value: number }) {
+: { value: number }) {
   const [display, setDisplay] = useState(0);
   useEffect(() => {
     let cancelled = false;

@@ -13,7 +13,7 @@ import { useState, useEffect, useRef } from "react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { doctrineEventBus } from "@szl-holdings/observability";
 import { DoctrineLayerBadge } from "@szl-holdings/shared-ui/doctrine-layer-badge";
-import { DataStateBadge } from "@szl-holdings/shared-ui";
+import { DataStateBadge, AnimatedCounter} from "@szl-holdings/shared-ui";
 
 interface FleetAlert {
   id: number;
@@ -60,8 +60,7 @@ const alertStatusLabels: Record<string, string> = {
   resolved: "Operational change",
   dismissed: "Route variance",
 };
-
-function AnimatedCounter({ value }: { value: number }) {
+: { value: number }) {
   const [display, setDisplay] = useState(0);
   const ref = useRef<number>(0);
   useEffect(() => {

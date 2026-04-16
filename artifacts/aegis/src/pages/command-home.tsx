@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { LiveClock } from "@szl-holdings/shared-ui";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { cn } from "@szl-holdings/shared-ui/utils";
@@ -58,12 +59,6 @@ interface LiveFinding {
   status: string;
   remediationOwner?: string | null;
   createdAt: string;
-}
-
-function LiveClock() {
-  const [time, setTime] = useState(new Date());
-  useEffect(() => { const t = setInterval(() => setTime(new Date()), 1000); return () => clearInterval(t); }, []);
-  return <span className="font-mono tabular-nums text-[10px]" style={{ color: DS.text.muted }}>UTC {time.toISOString().slice(11, 19)}</span>;
 }
 
 function PulsingDot({ color = "#ef4444" }: { color?: string }) {
@@ -264,7 +259,7 @@ export default function CommandHome() {
             <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-violet-500/30 text-violet-400/80 bg-violet-500/5"><Lock className="w-2.5 h-2.5 inline mr-0.5" />{sessionClass}</span>
             {usingLive && <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-blue-500/20 bg-blue-500/5 text-blue-400/70">LIVE</span>}
           </div>
-          <LiveClock />
+          <LiveClock className="font-mono tabular-nums text-[10px]" style={{ color: DS.text.muted }} />
         </div>
       </div>
 

@@ -4,15 +4,12 @@ import { ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 import { Link } from "wouter";
 import { projects, experiments, models, insights, getResearchHealthScore } from "@/data/seed-data";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { DataStateBadge } from "@szl-holdings/shared-ui";
+import { DataStateBadge, useInterval} from "@szl-holdings/shared-ui";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
 
 function LiveClock() {
   const [time, setTime] = useState(new Date());
-  useEffect(() => {
-    const interval = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(interval);
-  }, []);
+  useInterval(() => setTime(new Date()), 1000);
   return (
     <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
       <div className="flex items-center gap-1.5">

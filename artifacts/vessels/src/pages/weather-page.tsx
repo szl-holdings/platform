@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { AnimatedCounter } from "@szl-holdings/shared-ui";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
@@ -50,8 +51,7 @@ function WeatherAtmosphere({ risk }: { risk: string }) {
   );
   return null;
 }
-
-function AnimatedCounter({ value, duration = 1200 }: { value: number; duration?: number }) {
+: { value: number; duration?: number }) {
   const [display, setDisplay] = useState(0);
   const ref = useRef<number>(0);
   useEffect(() => {

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { LiveClock } from "@szl-holdings/shared-ui";
 import {
   Shield, AlertTriangle, Clock, Users, FileText, Radio, Zap,
   ChevronRight, CheckCircle, Circle, XCircle, Play, Pause,
@@ -136,12 +137,6 @@ const DECISION_COLORS: Record<string, string> = { enacted: "#22c55e", pending: "
 
 type WarRoomTab = "timeline" | "resources" | "decisions" | "comms";
 
-function LiveClock() {
-  const [time, setTime] = useState(new Date());
-  useEffect(() => { const t = setInterval(() => setTime(new Date()), 1000); return () => clearInterval(t); }, []);
-  return <span className="font-mono tabular-nums">{time.toISOString().slice(11, 19)} UTC</span>;
-}
-
 function ElapsedTimer({ startMin }: { startMin: number }) {
   const [elapsed, setElapsed] = useState(startMin);
   useEffect(() => { const t = setInterval(() => setElapsed(e => e + 1 / 60), 1000); return () => clearInterval(t); }, [startMin]);
@@ -200,7 +195,7 @@ export default function CitadelWarRoom() {
           </div>
           <div className="text-right">
             <div className="text-[9px] font-mono" style={{ color: DS.text.muted }}>WAR ROOM TIME</div>
-            <div className="text-[11px]" style={{ color: DS.text.secondary }}><LiveClock /></div>
+            <div className="text-[11px]" style={{ color: DS.text.secondary }}><LiveClock className="font-mono tabular-nums" /></div>
           </div>
           <div className="text-right">
             <div className="text-[9px] font-mono" style={{ color: DS.text.muted }}>COMMANDER</div>

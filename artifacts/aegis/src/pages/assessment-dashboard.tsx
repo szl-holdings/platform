@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { AnimatedCounter } from "@szl-holdings/shared-ui";
 import { api } from "@/lib/api";
 import { AegisGraphQLPanel } from "@/components/graphql-data-panel";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
@@ -20,8 +21,7 @@ const statusColors: Record<string, string> = {
   completed: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   archived: "bg-blue-500/10 text-blue-400 border-blue-500/20",
 };
-
-function AnimatedCounter({ value, duration = 1200 }: { value: number; duration?: number }) {
+: { value: number; duration?: number }) {
   const [display, setDisplay] = useState(0);
   const ref = useRef<number>(0);
   useEffect(() => {
