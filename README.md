@@ -45,7 +45,7 @@ Every step is instrumented. Every decision is attributed. Every AI recommendatio
 ├─────────────────────────────────────────────────────────────────────┤
 │  DATA LAYER                                                          │
 │                                                                      │
-│  PostgreSQL 16 (Drizzle ORM)  ·  561 tables  ·  112 schema files   │
+│  PostgreSQL 16 (Drizzle ORM)  ·  569 tables  ·  116 schema files   │
 │  External feeds: AIS, STIX/TAXII, sanctions, court records          │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -119,7 +119,7 @@ See [Trust Center](docs/trust/trust-center.md) · [Security](SECURITY.md) · [Pr
 | Frontend | React 19, Vite, Tailwind CSS v4, Framer Motion, Recharts |
 | Mobile | Expo / React Native, NativeWind |
 | Backend | Express 5, Node.js |
-| Database | PostgreSQL 16, Drizzle ORM (561 tables, 112 schema files) |
+| Database | PostgreSQL 16, Drizzle ORM (569 tables, 116 schema files) |
 | AI | OpenAI, Anthropic, Gemini — multi-provider with fallback. 9 schema-validated decision types |
 | Auth | OIDC/PKCE, 11-role RBAC, SCIM 2.0, Azure AD multi-tenant SSO |
 | Real-time | WebSocket (signed tickets), SSE, push notifications |

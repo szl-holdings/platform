@@ -1,6 +1,6 @@
 # Repository Topology Map
 
-Generated: 2026-04-15
+Generated: 2026-04-16 (updated)
 
 ---
 
@@ -8,24 +8,24 @@ Generated: 2026-04-15
 
 ```
 szl-holdings-platform/
-├── artifacts/                    # 15 deployable apps
-│   ├── api-server/               # CANONICAL — Express API (Node.js 24, 172 route files)
-│   ├── szl-holdings/             # CANONICAL — Flagship web (338 src files)
-│   ├── aegis/                    # CANONICAL — Aegis defense UI (164 src files)
-│   ├── firestorm/                # CANONICAL — Aegis alt entry (9 src files, same domain)
-│   ├── terra/                    # CANONICAL — Real estate (91 src files)
-│   ├── vessels/                  # CANONICAL — Maritime (101 src files)
-│   ├── carlota-jo/               # CANONICAL — Advisory (69 src files)
-│   ├── command/                  # CANONICAL — Unified ops (213 src files)
-│   ├── cortex-mobile/            # CANONICAL MOBILE — Primary Expo app
-│   ├── szl-holdings-mobile/      # SECONDARY MOBILE — Holdings companion
-│   ├── lyte-command-center/      # SECONDARY — Merged into command, still running
-│   ├── imperium/                 # SECONDARY — Merged into command
-│   ├── prism-counsel/            # ARCHIVE — DEPRECATED.md; task #579
-│   ├── stephen-site/             # ARCHIVE — DEPRECATED.md; task #579
-│   └── mockup-sandbox/           # INTERNAL — UI prototyping only
+├── artifacts/                    # 17 dirs (7 canonical web, 1 mobile, 1 internal, 5 archived, 1 shell)
+│   ├── api-server/               # CANONICAL — Express API (389 src files)
+│   ├── szl-holdings/             # CANONICAL — Flagship web (375 src files)
+│   ├── aegis/                    # CANONICAL — Defense & security UI (166 src files)
+│   ├── terra/                    # CANONICAL — Real estate intelligence (88 src files)
+│   ├── vessels/                  # CANONICAL — Maritime intelligence (103 src files)
+│   ├── carlota-jo/               # CANONICAL — Advisory consulting (70 src files)
+│   ├── command/                  # CANONICAL — Unified ops command (222 src files)
+│   ├── szl-holdings-mobile/      # CANONICAL MOBILE — Primary Expo app (167 src files)
+│   ├── cortex-mobile/            # SHELL — Expo scaffold only (2 src files)
+│   ├── firestorm/                # ARCHIVE — ARCHIVED.md; code removed; superseded by aegis
+│   ├── lyte-command-center/      # ARCHIVE — DEPRECATED.md; merged into command
+│   ├── imperium/                 # ARCHIVE — DEPRECATED.md; merged into command
+│   ├── prism-counsel/            # ARCHIVE — DEPRECATED.md; deprecated task #579
+│   ├── stephen-site/             # ARCHIVE — DEPRECATED.md; content moved to /founder
+│   └── mockup-sandbox/           # INTERNAL — UI prototyping only (5 src files)
 │
-├── lib/                          # 33 shared libraries
+├── lib/                          # 35 shared libraries (2 empty shells)
 │   ├── HIGH ACTIVITY (100+ files)
 │   │   ├── ai-engine/            # AI orchestration (129 ts)
 │   │   ├── api-zod/              # Zod validation (154 ts)

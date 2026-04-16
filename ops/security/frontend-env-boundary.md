@@ -1,6 +1,6 @@
 # Frontend Environment Variable Boundary
 
-Generated: 2026-04-15
+Generated: 2026-04-16 (updated)
 Purpose: Define and enforce the boundary between server-side secrets and client-safe environment variables.
 
 ---

@@ -1,6 +1,6 @@
 # Secret Inventory
 
-Generated: 2026-04-15
+Generated: 2026-04-16 (updated)
 Purpose: Full inventory of every credential-bearing variable, its current location, classification, and required action.
 
 ---
@@ -106,15 +106,15 @@ These values ARE in `.replit [userenv.shared]` and are safe to be there (public 
 
 ## Summary Dashboard
 
-| Category | Total | In Replit Secrets | In Source (Bad) | Unknown |
-|----------|-------|-------------------|-----------------|---------|
-| Core platform | 6 | 5 | 0 | 1 (OAUTH_STATE_SECRET — action needed) |
-| VAPID | 3 | 0 | 0 | 1 (VAPID_PRIVATE_KEY — action needed) |
-| AI services | 4 | 3 | 0 | 1 |
-| Auth (Clerk) | 3 | 3 | 0 | 0 |
-| External services | 7 | 0 | 0 | 7 |
-| CI/CD | 5 | 0 | 1 | 4 |
-| Mobile credentials | 4 | 0 | 0 (placeholders) | 2 |
-| **TOTAL** | **32** | **11** | **1** | **20** |
+| Category | Total | In Replit Secrets | In `.replit` shared (safe) | In Source (Bad) | Unknown |
+|----------|-------|-------------------|---------------------------|-----------------|---------|
+| Core platform | 6 | 6 | 0 | 0 | 0 |
+| VAPID | 3 | 1 (private key) | 2 (public key + subject) | 0 | 0 |
+| AI services | 4 | 3 | 0 | 0 | 1 |
+| Auth (Clerk) | 3 | 3 | 0 | 0 | 0 |
+| External services | 7 | 0 | 0 | 0 | 7 |
+| CI/CD | 5 | 0 | 0 | 0 | 5 |
+| Mobile credentials | 3 | 0 | 0 | 0 (placeholders in .example) | 0 |
+| **TOTAL** | **31** | **13** | **2** | **0** | **13** |
 
-**Immediate actions:** Set `OAUTH_STATE_SECRET` and `VAPID_PRIVATE_KEY` in Replit Secrets panel with new generated values. Move `INTEGRATION_TEST_TOKEN` to env var.
+**Status:** OAUTH_STATE_SECRET and VAPID_PRIVATE_KEY have been removed from `.replit` shared config. Mobile credential files converted to `.example` placeholders with real files blocked by `.gitignore`. No secrets found in source code. Unknown items are external service keys that may not yet be configured (Stripe, SendGrid, etc.) — not leaks.

@@ -1,6 +1,6 @@
 # Repo Truth Audit
 
-Generated: 2026-04-15
+Generated: 2026-04-16 (updated)
 Scope: Full codebase — artifacts, shared libraries, mobile, CI/CD, documentation
 
 ---
@@ -9,14 +9,15 @@ Scope: Full codebase — artifacts, shared libraries, mobile, CI/CD, documentati
 
 | Category | Claimed | Verified Actual | Verdict |
 |----------|---------|-----------------|---------|
-| Web Applications | 22 | 15 artifact dirs (8 canonical, 2 deprecated running, 3 deprecated, 2 mobile) | INFLATED |
-| Shared Libraries | 37 | 33 packages in `lib/` | CLOSE (README outdated) |
-| API Endpoints | 2,331 | 172 route files, ~1,800–2,000 endpoints estimated | ASPIRATIONAL |
-| Database Tables | 644 | 561 (per repo-inventory) | INFLATED |
-| Source Files | 1,620 TypeScript files | ~1,400+ verified | PLAUSIBLE |
-| Lines of Code | 450,000+ | ~450,000 (api-server alone is 82,610 lines) | PLAUSIBLE |
+| Web Applications | 22 | 17 artifact dirs (7 canonical web, 1 internal, 3 archived, 4 deprecated/shell, 2 mobile) | INFLATED |
+| Shared Libraries | 37 | 35 packages in `lib/` (2 are empty shells: api-spec, approvals) | CLOSE (README outdated) |
+| API Endpoints | 2,331 | 389 api-server src files, ~1,800–2,000 endpoints estimated | ASPIRATIONAL |
+| Database Tables | 644→561 | 569 (verified via `information_schema`) | README OUTDATED |
+| Schema Files | 112 | 116 (verified via `lib/db/src/schema/*.ts`) | CLOSE |
+| Source Files | 1,620 TypeScript files | ~1,588 verified (sum across artifacts + lib) | PLAUSIBLE |
+| Lines of Code | 450,000+ | ~450,000+ (lib alone is ~161k LOC; api-server + flagship add ~200k+) | PLAUSIBLE |
 | UI Components | 252 web + 116 mobile | Not independently counted; component counts per app below | UNVERIFIED |
-| Native Mobile Apps | 2 | 2 (cortex-mobile, szl-holdings-mobile) | ACCURATE |
+| Native Mobile Apps | 2 | 2 (cortex-mobile shell, szl-holdings-mobile full) | PARTIALLY ACCURATE |
 
 ---
 
@@ -26,26 +27,26 @@ Scope: Full codebase — artifacts, shared libraries, mobile, CI/CD, documentati
 
 | Artifact | Dir | Source Files | Status | Classification | Notes |
 |----------|-----|-------------|--------|----------------|-------|
-| szl-holdings | `artifacts/szl-holdings` | 338 ts/tsx | Running | CANONICAL | Flagship web app; 251 pages/routes |
-| api-server | `artifacts/api-server` | 351 ts/tsx | Running | CANONICAL | 172 route files, 82k+ LOC |
-| firestorm | `artifacts/firestorm` | 9 ts/tsx | Running | CANONICAL | Aegis/Defense UI; small but real |
-| aegis | `artifacts/aegis` | 164 ts/tsx | Running | DUPLICATE | Same domain as firestorm; separate artifact with full UI |
-| terra | `artifacts/terra` | 91 ts/tsx | Running | CANONICAL | Real estate intelligence; 73 pages |
-| vessels | `artifacts/vessels` | 101 ts/tsx | Running | CANONICAL | Maritime intelligence; 84 pages |
-| carlota-jo | `artifacts/carlota-jo` | 69 ts/tsx | Running | CANONICAL | Advisory consulting; 49 pages |
-| command | `artifacts/command` | 213 ts/tsx | Running | CANONICAL | Unified ops command; 172 pages |
-| lyte-command-center | `artifacts/lyte-command-center` | 155 ts/tsx | Running | SECONDARY | Merged into command; still running separately |
-| imperium | `artifacts/imperium` | 22 ts/tsx | Running | SECONDARY | Cloud infra; merged into command |
-| prism-counsel | `artifacts/prism-counsel` | 138 ts/tsx | Has DEPRECATED.md | ARCHIVE | Legal was deprecated task #579; has full code but DEPRECATED.md |
-| stephen-site | `artifacts/stephen-site` | 60 ts/tsx | Has DEPRECATED.md | ARCHIVE | Founder site deprecated task #579 |
-| mockup-sandbox | `artifacts/mockup-sandbox` | 3 ts/tsx | Internal | INTERNAL-DEMO | UI prototyping tool only |
+| szl-holdings | `artifacts/szl-holdings` | 375 ts/tsx | Running | CANONICAL | Flagship web app |
+| api-server | `artifacts/api-server` | 389 ts/tsx | Running | CANONICAL | Sole backend; route files, 82k+ LOC |
+| aegis | `artifacts/aegis` | 166 ts/tsx | Running | CANONICAL | Defense & security UI |
+| terra | `artifacts/terra` | 88 ts/tsx | Running | CANONICAL | Real estate intelligence |
+| vessels | `artifacts/vessels` | 103 ts/tsx | Running | CANONICAL | Maritime intelligence |
+| carlota-jo | `artifacts/carlota-jo` | 70 ts/tsx | Running | CANONICAL | Advisory consulting |
+| command | `artifacts/command` | 222 ts/tsx | Running | CANONICAL | Unified ops command (absorbed Lyte + IMPERIUM) |
+| firestorm | `artifacts/firestorm` | 0 ts/tsx | ARCHIVED | ARCHIVE | Has ARCHIVED.md; code removed; superseded by aegis |
+| lyte-command-center | `artifacts/lyte-command-center` | 1 ts/tsx | ARCHIVED | ARCHIVE | Has DEPRECATED.md; merged into command |
+| imperium | `artifacts/imperium` | 0 ts/tsx | ARCHIVED | ARCHIVE | Has DEPRECATED.md; merged into command |
+| prism-counsel | `artifacts/prism-counsel` | 0 ts/tsx | ARCHIVED | ARCHIVE | Has DEPRECATED.md; deprecated task #579; code removed |
+| stephen-site | `artifacts/stephen-site` | 0 ts/tsx | ARCHIVED | ARCHIVE | Has DEPRECATED.md; content moved to /founder |
+| mockup-sandbox | `artifacts/mockup-sandbox` | 5 ts/tsx | Internal | INTERNAL | Dev-only UI prototyping tool |
 
 ### Mobile Artifacts
 
 | Artifact | Dir | App Files | Status | Classification | Notes |
 |----------|-----|-----------|--------|----------------|-------|
-| cortex-mobile | `artifacts/cortex-mobile` | Full Expo app | Active | CANONICAL | Primary mobile flagship; 8 domain workspaces |
-| szl-holdings-mobile | `artifacts/szl-holdings-mobile` | Full Expo app | Secondary | SECONDARY | Production later per disposition matrix |
+| szl-holdings-mobile | `artifacts/szl-holdings-mobile` | 167 ts/tsx | Active | CANONICAL-MOBILE | Full Expo app; running workflow |
+| cortex-mobile | `artifacts/cortex-mobile` | 2 ts/tsx | Shell | SHELL | Expo scaffold with no app code; 8-domain concept not implemented |
 
 ---
 
@@ -88,7 +89,7 @@ Scope: Full codebase — artifacts, shared libraries, mobile, CI/CD, documentati
 | api-spec | 0 | None | SHELL | No src or index.ts — empty package |
 | approvals | 0 | None | SHELL | No src or index.ts — empty package |
 
-**Note:** README claims 37 shared libraries. Actual count is 33. Two packages (api-spec, approvals) appear to be shells with no source code.
+**Note:** README claims 37 shared libraries. Actual count is 35 packages under `lib/`. Two packages (api-spec, approvals) are empty shells with no source code. Total lib LOC: ~161,000 lines across 35 packages.
 
 ---
 
@@ -96,21 +97,21 @@ Scope: Full codebase — artifacts, shared libraries, mobile, CI/CD, documentati
 
 | Workflow File | Trigger | Status | Notes |
 |--------------|---------|--------|-------|
-| `ci.yml` | PR/push master | ACTIVE | Lint, typecheck, test — functional |
-| `e2e.yml` | PR/push master | STALE-PARTIAL | Tests szl-holdings, lyte-command-center, firestorm — lyte-command-center is deprecated |
+| `build.yml` | PR/push main | ACTIVE | Build check gate |
+| `ci.yml` | PR/push main | ACTIVE | Lint, typecheck, test, integration-test |
+| `e2e.yml` | PR/push main | STALE-PARTIAL | Still references lyte-command-center (deprecated) |
 | `codeql.yml` | PR/push + weekly | ACTIVE | JavaScript/TypeScript analysis |
-| `security.yml` | PR/push + weekly | ACTIVE | Dependency scan + SBOM |
+| `security.yml` | PR/push + weekly | ACTIVE | Dependency scan + SBOM + secret scan |
 | `dependency-review.yml` | PR | ACTIVE | Dependabot review gate |
 | `deploy-staging.yml` | push to main | ACTIVE | Staging deployment |
 | `deploy-production.yml` | release published | ACTIVE | Production deployment with confirm gate |
-| `deploy.yml` | Likely legacy | NEEDS REVIEW | Overlaps with deploy-staging/deploy-production |
 | `lighthouse.yml` | PR/push | ACTIVE | Performance CI |
-| `container-publish.yml` | release | ACTIVE | Docker image publishing |
+| `container-publish.yml` | release | ACTIVE | Docker image publishing (SHA-pinned actions) |
 | `npm-publish.yml` | release | POSSIBLY STALE | npm publish — pnpm workspace may not need this |
 | `release.yml` | manual | ACTIVE | Release creation workflow |
-| `prism-counsel-ci.yml` | PR/push | STALE | References deprecated prism-counsel app |
+| `prism-counsel-ci.yml` | PR/push | STALE | References deprecated prism-counsel app — DELETE |
 
-**Key finding:** `e2e.yml` still tests `lyte-command-center` which has been merged into `command`. `prism-counsel-ci.yml` targets a deprecated app.
+**Key findings:** `e2e.yml` still tests `lyte-command-center` which has been merged into `command`. `prism-counsel-ci.yml` targets a deprecated app. All third-party actions SHA-pinned (verified in Task #893).
 
 ---
 
@@ -118,48 +119,47 @@ Scope: Full codebase — artifacts, shared libraries, mobile, CI/CD, documentati
 
 | Claim | Source | Verified? | Finding |
 |-------|--------|-----------|---------|
-| "22 apps" badge | README | NO | 15 artifact dirs; 8 canonical web + 2 mobile + 5 deprecated/internal |
-| "2,331 API endpoints" | README | UNVERIFIED | 172 route files exist; endpoint count unconfirmed |
-| "644 DB tables" | README | NO | repo-inventory.md records 561 tables |
-| "37 shared libraries" | README | NO | 33 packages exist; 2 are empty shells |
-| "Carlota Jo: Live" | README Products table | PLAUSIBLE | Has full code + 49 pages; no runtime verification |
-| "Stephen Lutar site: Live" | README Products table | MISLEADING | Has DEPRECATED.md; content moved to /founder |
-| "PRISM Counsel: Functional alpha" | README Products table | MISLEADING | Has DEPRECATED.md; deprecated in task #579 |
-| "IMPERIUM: Functional alpha" | README Products table | MISLEADING | 22 files; merged into command app |
-| "Node 20.x" | README badge | OUTDATED | `modules = ["nodejs-24"]` in .replit |
-| "51 packages" | README stack section | INFLATED | 33 lib packages + 15 artifact packages = 48 total |
+| "561 tables" | README | CLOSE | 569 tables verified via `information_schema.tables` (README says 561) |
+| "112 schema files" | README | CLOSE | 116 schema files verified via `lib/db/src/schema/*.ts` |
+| "51 packages" | README Monorepo section | CLOSE | 35 lib + 17 artifacts + 1 packages = 53 total dirs; 2 lib shells have no code |
+| "CORTEX Mobile: Alpha prep" | README Products table | MISLEADING | cortex-mobile has only 2 ts files — essentially a shell, not alpha |
+| "PRISM Counsel: Deprecated" | README Products table | ACCURATE | Correctly marked as deprecated |
+| "IMPERIUM: Deprecated" | README Products table | ACCURATE | Correctly marked as deprecated (merged into Command) |
+| "Lyte: Deprecated" | README Products table | ACCURATE | Correctly marked as deprecated (merged into Command) |
+| Node version | .replit | ACCURATE | `modules = ["nodejs-24"]` matches current runtime |
 
 ---
 
 ## Credential & Secret Audit
 
-### Confirmed Hardcoded Secrets in .replit
+### .replit Shared Config — Status
 
-| Secret | Value Status | Risk | Action Required |
-|--------|-------------|------|-----------------|
-| `OAUTH_STATE_SECRET` | Real 64-char hex value | HIGH — rotatable secret in plaintext | Move to Replit Secret, remove from .replit |
-| `VAPID_PRIVATE_KEY` | Real VAPID private key | HIGH — rotatable private key in plaintext | Move to Replit Secret, remove from .replit |
-| `VAPID_PUBLIC_KEY` | VAPID public key | LOW — public by design | Can remain as env var |
-| `VAPID_SUBJECT` | Email address | LOW — public by design | Can remain as env var |
+| Secret | Status | Risk | Notes |
+|--------|--------|------|-------|
+| `OAUTH_STATE_SECRET` | ✅ REMOVED | — | No longer in .replit; set as Replit Secret |
+| `VAPID_PRIVATE_KEY` | ✅ REMOVED | — | No longer in .replit; set as Replit Secret |
+| `VAPID_PUBLIC_KEY` | In `.replit [userenv.shared]` | NONE — public by design | Safe to keep; clients need this value |
+| `VAPID_SUBJECT` | In `.replit [userenv.shared]` | NONE — mailto: address | Safe to keep |
 
-### Mobile Credential Files
+### Mobile Credential Files — Status
 
 | File | Status | Action |
 |------|--------|--------|
-| `artifacts/szl-holdings-mobile/google-services.json` | ALREADY PLACEHOLDER | Add to .gitignore to prevent real file commits |
-| `artifacts/szl-holdings-mobile/GoogleService-Info.plist` | ALREADY PLACEHOLDER | Add to .gitignore |
-| `artifacts/cortex-mobile/google-services.json` | Check needed | Add to .gitignore |
-| `artifacts/cortex-mobile/GoogleService-Info.plist` | Check needed | Add to .gitignore |
+| `google-services.json` | ✅ Only `.example` tracked; real file in `.gitignore` | DONE |
+| `GoogleService-Info.plist` | ✅ Only `.example` tracked; real file in `.gitignore` | DONE |
+| `google-play-service-account.json` | ✅ Only `.example` tracked; real file in `.gitignore` | DONE |
+| `cortex-mobile/google-services.json` | Not present (shell app) | No action needed |
+| `cortex-mobile/GoogleService-Info.plist` | Not present (shell app) | No action needed |
 
-### Other Secret Patterns Found
+### Source Code Secret Scan — Status
 
-| Finding | Location | Risk |
-|---------|----------|------|
-| `sk_live_` display string | lyte-command-center/demo-settings.tsx, command/demo-settings.tsx | UI mock text only — no actual key |
-| `szl-test-integration-live-2026` | tests/api/server-live.test.ts (per risks-and-gaps.md) | Test token in source — LOW but should move to env var |
-| Dev fallback key `rmm-dev-only-key` | artifacts/api-server/src/routes/rmm.ts (per risks-and-gaps.md) | Guarded by NODE_ENV — LOW |
+Full regex scan (sk_live, AKIA, ghp_, PRIVATE KEY patterns) found 4 matches — all false positives:
+- `scripts/public-mirror/validate-public-surface.ts` — regex pattern in scanner tool
+- `scripts/qa/scan-secrets.js` — regex pattern in scanner tool
+- `artifacts/command/src/operations/pages/demo-settings.tsx` — UI display text `sk_live_••••••••`
+- `artifacts/api-server/src/routes/billing.ts` — `.startsWith("sk_live_")` check
 
-No live API keys (Stripe, OpenAI, SendGrid, etc.) were found embedded in source code.
+**No live API keys, private keys, or credentials found in source code.**
 
 ---
 
@@ -167,8 +167,9 @@ No live API keys (Stripe, OpenAI, SendGrid, etc.) were found embedded in source 
 
 | Classification | Count | Items |
 |---------------|-------|-------|
-| CANONICAL (production now) | 8 | szl-holdings, api-server, firestorm, aegis, terra, vessels, carlota-jo, command |
-| CANONICAL MOBILE | 2 | cortex-mobile, szl-holdings-mobile |
-| SECONDARY (production later) | 2 | lyte-command-center, imperium |
-| INTERNAL-DEMO | 1 | mockup-sandbox |
-| ARCHIVE-DEPRECATE | 2 | prism-counsel, stephen-site |
+| CANONICAL (production now) | 7 | szl-holdings, api-server, aegis, terra, vessels, carlota-jo, command |
+| CANONICAL-MOBILE | 1 | szl-holdings-mobile |
+| INTERNAL | 1 | mockup-sandbox |
+| ARCHIVE (code removed, marker file remains) | 5 | firestorm, lyte-command-center, imperium, prism-counsel, stephen-site |
+| SHELL (scaffold only, no real code) | 1 | cortex-mobile |
+| EMPTY SHELL (lib) | 2 | lib/api-spec, lib/approvals |

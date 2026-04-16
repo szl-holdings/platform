@@ -1,6 +1,6 @@
 # Product Surface Census
 
-Generated: 2026-04-15
+Generated: 2026-04-16 (updated)
 Purpose: Complete inventory of all user-facing surfaces — real vs. aspirational, per product.
 
 ---
@@ -11,7 +11,7 @@ Purpose: Complete inventory of all user-facing surfaces — real vs. aspirationa
 
 | Metric | Value |
 |--------|-------|
-| Source files | 338 ts/tsx |
+| Source files | 375 ts/tsx |
 | Pages/routes | 251 |
 | Classification | CANONICAL |
 | Functionality | Marketing, trust center, docs, fund intelligence, founder profile, Nexus command, developer portal |
@@ -23,7 +23,7 @@ Purpose: Complete inventory of all user-facing surfaces — real vs. aspirationa
 
 | Metric | Value |
 |--------|-------|
-| Source files | 351 ts/tsx |
+| Source files | 389 ts/tsx |
 | Route files | 172 |
 | Lines of code | 82,610+ |
 | Classification | CANONICAL |
@@ -37,28 +37,18 @@ Purpose: Complete inventory of all user-facing surfaces — real vs. aspirationa
 
 | Metric | Value |
 |--------|-------|
-| Source files | 164 ts/tsx |
+| Source files | 166 ts/tsx |
 | Pages/routes | 158 |
 | Classification | CANONICAL |
 | Functionality | SOC command, MITRE ATT&CK mapping, SOAR playbooks, XDR console, Sentinel AI |
 | Backend-connected | Partially — threat intel feeds in demo/stub mode; core SOC UI real |
-| Notes | Full app at /aegis/; firestorm at /firestorm/ is thin (9 files) entry point |
-
-### 4. Firestorm (`artifacts/firestorm`)
-
-| Metric | Value |
-|--------|-------|
-| Source files | 9 ts/tsx |
-| Pages/routes | 7 |
-| Classification | CANONICAL (thin wrapper) |
-| Functionality | Defense intelligence entry point; routes into aegis domain |
-| Notes | Very thin; 9 files likely routes/wrappers only |
+| Notes | Full app at /aegis/; firestorm artifact archived (code removed, superseded by aegis) |
 
 ### 5. Terra — Real Estate Intelligence (`artifacts/terra`)
 
 | Metric | Value |
 |--------|-------|
-| Source files | 91 ts/tsx |
+| Source files | 88 ts/tsx |
 | Pages/routes | 73 |
 | Classification | CANONICAL |
 | Functionality | NYC distress pipeline, ownership entity graph, deal pipeline, MLS ingestion, broker workflow |
@@ -69,7 +59,7 @@ Purpose: Complete inventory of all user-facing surfaces — real vs. aspirationa
 
 | Metric | Value |
 |--------|-------|
-| Source files | 101 ts/tsx |
+| Source files | 103 ts/tsx |
 | Pages/routes | 84 |
 | Classification | CANONICAL |
 | Functionality | AIS fleet tracking, sanctions screening, voyage economics, dark vessel detection, commodity trading |
@@ -80,7 +70,7 @@ Purpose: Complete inventory of all user-facing surfaces — real vs. aspirationa
 
 | Metric | Value |
 |--------|-------|
-| Source files | 69 ts/tsx |
+| Source files | 70 ts/tsx |
 | Pages/routes | 49 |
 | Classification | CANONICAL |
 | Functionality | Client management, service catalog, booking, document delivery, messaging |
@@ -92,68 +82,50 @@ Purpose: Complete inventory of all user-facing surfaces — real vs. aspirationa
 
 | Metric | Value |
 |--------|-------|
-| Source files | 213 ts/tsx |
+| Source files | 222 ts/tsx |
 | Pages/routes | 172 |
 | Classification | CANONICAL |
 | Functionality | Strategy, operations, infrastructure command — absorbs Lyte + Imperium |
 | Backend-connected | Yes — SSE real-time, signal timeline, approval queues |
 
-### 9. CORTEX Mobile (`artifacts/cortex-mobile`)
+### 9. SZL Holdings Mobile (`artifacts/szl-holdings-mobile`)
 
 | Metric | Value |
 |--------|-------|
-| App screens | Full Expo app structure |
-| Classification | CANONICAL MOBILE |
-| Functionality | 8-domain workspace switcher, biometric auth, cross-domain signals, copilot |
-| Backend-connected | Via API server |
-| Release readiness | Not yet on TestFlight/Play Store |
-| Credential files | Need verification (szl-holdings-mobile has placeholders) |
+| Source files | 167 ts/tsx |
+| Classification | CANONICAL-MOBILE |
+| Functionality | Primary mobile app; full Expo app with live workflow |
+| Google credential | PLACEHOLDER (.example tracked; real file in .gitignore) |
+| iOS credential | PLACEHOLDER (.example tracked; real file in .gitignore) |
+| Release readiness | Alpha — not yet on TestFlight/Play Store |
 
-### 10. SZL Holdings Mobile (`artifacts/szl-holdings-mobile`)
+### 10. CORTEX Mobile (`artifacts/cortex-mobile`)
 
 | Metric | Value |
 |--------|-------|
-| App screens | Full Expo app |
-| Classification | SECONDARY MOBILE |
-| Functionality | Holdings companion app |
-| Google credential | PLACEHOLDER (confirmed placeholder in google-services.json) |
-| iOS credential | PLACEHOLDER (confirmed placeholder in GoogleService-Info.plist) |
-| Release readiness | Deferred — ship CORTEX first |
+| Source files | 2 ts/tsx (expo-env.d.ts + router types) |
+| Classification | SHELL |
+| Functionality | Expo scaffold only — no app screens, no navigation, no business logic |
+| Notes | 8-domain workspace concept exists only in docs, not in code |
 
 ---
 
-## Secondary / Deprecated Surfaces
+## Archived Surfaces
 
-### Lyte Command Center (`artifacts/lyte-command-center`)
-- 155 src files, 141 pages — substantial app
-- **Status:** Merged into `command` but still registered and running
-- **Surface exposure:** Active at /lyte-command-center/ path
-- **Recommendation:** Deregister artifact, redirect traffic to /command/
+All archived artifacts have 0 source files (code removed). Only marker files remain.
 
-### IMPERIUM (`artifacts/imperium`)
-- 22 src files, 15 pages — thin
-- **Status:** Merged into command (infrastructure mode)
-- **Surface exposure:** Active at /imperium/ path
-- **Recommendation:** Deregister artifact, redirect to /command/infrastructure
-
-### PRISM Counsel (`artifacts/prism-counsel`)
-- 138 src files, 128 pages — substantial code base
-- **Status:** Has DEPRECATED.md; deprecated in task #579
-- **Surface exposure:** Still registered, still running at /prism-counsel/
-- **README claims:** Listed as "127 components, Functional alpha" — MISLEADING (it's deprecated)
-- **Recommendation:** Remove from README products table; deregister and archive
-
-### Stephen Site (`artifacts/stephen-site`)
-- 60 src files, 37 pages
-- **Status:** Has DEPRECATED.md; content moved to /founder in szl-holdings
-- **README claims:** Listed as "58 components, Live" — MISLEADING (deprecated)
-- **Recommendation:** Remove from README products table; deregister and archive
+| Artifact | Status | Original Purpose | Disposition |
+|----------|--------|-----------------|-------------|
+| firestorm | ARCHIVED.md | Defense entry point | Superseded by aegis |
+| lyte-command-center | DEPRECATED.md | Governed command | Merged into command |
+| imperium | DEPRECATED.md | Cloud infrastructure | Merged into command |
+| prism-counsel | DEPRECATED.md | Legal command | Deprecated task #579 |
+| stephen-site | DEPRECATED.md | Founder portfolio | Content moved to /founder |
 
 ### Mockup Sandbox (`artifacts/mockup-sandbox`)
-- 3 src files — pure tooling
+- 5 src files — pure tooling
 - **Status:** Internal UI prototyping
-- **Surface exposure:** At /__mockup — internal only
-- **Recommendation:** Keep but never list in public-facing docs
+- **Surface exposure:** At /__mockup — internal only, dev-only
 
 ---
 
@@ -161,9 +133,9 @@ Purpose: Complete inventory of all user-facing surfaces — real vs. aspirationa
 
 | Status | Count | Artifacts |
 |--------|-------|-----------|
-| CANONICAL (web) | 8 | szl-holdings, api-server, aegis, firestorm, terra, vessels, carlota-jo, command |
-| CANONICAL (mobile) | 2 | cortex-mobile, szl-holdings-mobile |
-| SECONDARY (running, merge candidates) | 2 | lyte-command-center, imperium |
-| ARCHIVE-DEPRECATE | 2 | prism-counsel, stephen-site |
+| CANONICAL (web) | 7 | szl-holdings, api-server, aegis, terra, vessels, carlota-jo, command |
+| CANONICAL (mobile) | 1 | szl-holdings-mobile |
+| SHELL (scaffold only) | 1 | cortex-mobile |
+| ARCHIVE (code removed) | 5 | firestorm, lyte-command-center, imperium, prism-counsel, stephen-site |
 | INTERNAL | 1 | mockup-sandbox |
-| **TOTAL** | **15** | |
+| **TOTAL** | **15** (17 dirs total, some renamed/reclassified) |

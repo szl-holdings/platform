@@ -1,7 +1,7 @@
 # Disposition Matrix
 
-Generated: 2026-04-15
-Authority: Phase 0 Truth Audit
+Generated: 2026-04-16 (updated)
+Authority: Phase 0 Truth Audit — verified against live repo
 
 ---
 
@@ -10,10 +10,10 @@ Authority: Phase 0 Truth Audit
 | Class | Meaning |
 |-------|---------|
 | CANONICAL-NOW | Production now — canonical, investor-ready, actively maintained |
-| CANONICAL-MOBILE | Mobile flagship — primary or secondary |
-| SECONDARY | Real functionality, absorbed into canonical app; deregister artifact |
+| CANONICAL-MOBILE | Mobile flagship — primary |
 | INTERNAL | Dev tool, never customer-facing |
-| ARCHIVE-DEPRECATE | Has DEPRECATED.md, deprecated by prior task; deregister and stop running |
+| ARCHIVE | Has DEPRECATED.md or ARCHIVED.md; code removed; marker file remains |
+| SHELL | Scaffold exists but no real application code |
 
 ---
 
@@ -21,28 +21,28 @@ Authority: Phase 0 Truth Audit
 
 ### Web Artifacts
 
-| Artifact | Dir | Classification | Disposition | Owner Task |
-|----------|-----|----------------|-------------|------------|
-| szl-holdings | `artifacts/szl-holdings` | CANONICAL-NOW | Keep — primary public flagship | Ongoing |
-| api-server | `artifacts/api-server` | CANONICAL-NOW | Keep — sole backend | Ongoing |
-| aegis | `artifacts/aegis` | CANONICAL-NOW | Keep — full defense UI (164 src files) | Ongoing |
-| terra | `artifacts/terra` | CANONICAL-NOW | Keep — real estate intelligence | Live data wiring phase |
-| vessels | `artifacts/vessels` | CANONICAL-NOW | Keep — maritime intelligence | Live data wiring phase |
-| carlota-jo | `artifacts/carlota-jo` | CANONICAL-NOW | Keep — advisory; most production-ready | Ongoing |
-| command | `artifacts/command` | CANONICAL-NOW | Keep — unified ops command | Ongoing |
-| firestorm | `artifacts/firestorm` | SECONDARY | Deregister; add 301 → /aegis/; code in place | Phase 2 |
-| lyte-command-center | `artifacts/lyte-command-center` | SECONDARY | Deregister; add 301 → /command/; merged | Phase 2 |
-| imperium | `artifacts/imperium` | SECONDARY | Deregister; add 301 → /command/infrastructure | Phase 2 |
-| prism-counsel | `artifacts/prism-counsel` | ARCHIVE-DEPRECATE | Deregister; DEPRECATED.md; task #579 | Phase 2 |
-| stephen-site | `artifacts/stephen-site` | ARCHIVE-DEPRECATE | Deregister; DEPRECATED.md; content in /founder | Phase 2 |
-| mockup-sandbox | `artifacts/mockup-sandbox` | INTERNAL | Keep; never list in public docs | Ongoing |
+| Artifact | Dir | Src Files | Classification | Disposition |
+|----------|-----|-----------|----------------|-------------|
+| szl-holdings | `artifacts/szl-holdings` | 375 | CANONICAL-NOW | Keep — primary public flagship |
+| api-server | `artifacts/api-server` | 389 | CANONICAL-NOW | Keep — sole backend |
+| aegis | `artifacts/aegis` | 166 | CANONICAL-NOW | Keep — defense & security UI |
+| terra | `artifacts/terra` | 88 | CANONICAL-NOW | Keep — real estate intelligence |
+| vessels | `artifacts/vessels` | 103 | CANONICAL-NOW | Keep — maritime intelligence |
+| carlota-jo | `artifacts/carlota-jo` | 70 | CANONICAL-NOW | Keep — advisory consulting |
+| command | `artifacts/command` | 222 | CANONICAL-NOW | Keep — unified ops command (absorbed Lyte + IMPERIUM) |
+| firestorm | `artifacts/firestorm` | 0 | ARCHIVE | Code removed; ARCHIVED.md; superseded by aegis |
+| lyte-command-center | `artifacts/lyte-command-center` | 1 | ARCHIVE | Code removed; DEPRECATED.md; merged into command |
+| imperium | `artifacts/imperium` | 0 | ARCHIVE | Code removed; DEPRECATED.md; merged into command |
+| prism-counsel | `artifacts/prism-counsel` | 0 | ARCHIVE | Code removed; DEPRECATED.md; deprecated task #579 |
+| stephen-site | `artifacts/stephen-site` | 0 | ARCHIVE | Code removed; DEPRECATED.md; content moved to /founder |
+| mockup-sandbox | `artifacts/mockup-sandbox` | 5 | INTERNAL | Keep; dev-only prototyping tool |
 
 ### Mobile Artifacts
 
-| Artifact | Dir | Classification | Disposition | Owner Task |
-|----------|-----|----------------|-------------|------------|
-| cortex-mobile | `artifacts/cortex-mobile` | CANONICAL-MOBILE | Keep — primary mobile flagship | Mobile release phase |
-| szl-holdings-mobile | `artifacts/szl-holdings-mobile` | CANONICAL-MOBILE | Keep — secondary; ship after CORTEX | Mobile release phase |
+| Artifact | Dir | Src Files | Classification | Disposition |
+|----------|-----|-----------|----------------|-------------|
+| szl-holdings-mobile | `artifacts/szl-holdings-mobile` | 167 | CANONICAL-MOBILE | Keep — primary mobile app; full Expo app |
+| cortex-mobile | `artifacts/cortex-mobile` | 2 | SHELL | Scaffold only; 8-domain concept not yet implemented |
 
 ---
 
@@ -119,14 +119,15 @@ Authority: Phase 0 Truth Audit
 
 ---
 
-## README Accuracy Corrections Required
+## README Accuracy Status
 
-| Claim | Current | Correct | Priority |
-|-------|---------|---------|----------|
-| Apps badge | 22 | 8 canonical web + 2 mobile = 10 | P1 |
-| DB tables badge | 644 | 561 | P1 |
-| Shared libraries | 37 | 33 (2 empty shells) | P2 |
-| Node badge | 20.x | 24 | P2 |
-| Products table | Includes PRISM Counsel + Stephen Site as active | Both deprecated | P1 |
-| IMPERIUM listed as "Functional alpha" | 11 components | Merged into command | P2 |
-| "51 packages" in stack section | 51 | 48 (33 lib + 15 artifact) | P3 |
+README was updated as part of Task #893. Current accuracy:
+
+| Claim | Status | Notes |
+|-------|--------|-------|
+| DB tables: 561 | CLOSE | Actual: 569 (8 tables added since last count) |
+| Schema files: 112 | CLOSE | Actual: 116 |
+| Packages: 51 | CLOSE | Actual: 53 dirs (35 lib + 17 artifact + 1 packages) |
+| Products table | ACCURATE | Deprecated apps correctly marked |
+| Node 24 | ACCURATE | Matches .replit modules |
+| CORTEX Mobile: "Alpha prep" | MISLEADING | Only 2 src files — scaffold, not alpha |

@@ -1,6 +1,6 @@
 # Execution Sequence
 
-Generated: 2026-04-15
+Generated: 2026-04-16 (updated)
 Purpose: Recommended ordering for operationalization work after Phase 0–1 truth audit and security hygiene.
 
 ---
