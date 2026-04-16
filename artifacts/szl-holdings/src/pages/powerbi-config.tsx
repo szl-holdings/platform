@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { m } from "framer-motion";
-import { apiFetch } from "@szl-holdings/shared-ui";
 import {
   BarChart3, Settings, CheckCircle2, AlertCircle, ArrowLeft, ChevronRight,
   Info, ExternalLink, Save, Eye, EyeOff, Loader2, RefreshCw, Shield,

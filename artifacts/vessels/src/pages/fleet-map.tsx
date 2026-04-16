@@ -77,8 +77,8 @@ function VesselSidePanel({ vessel, onClose, exceptions }: { vessel: VesselProfil
 
         <div className="grid grid-cols-2 gap-2">
           {[
-            { label: "Latitude", value: `${vessel.lat.toFixed(4)}°` },
-            { label: "Longitude", value: `${vessel.lon.toFixed(4)}°` },
+            { label: "Latitude", value: `${(vessel.lat ?? 0).toFixed(4)}°` },
+            { label: "Longitude", value: `${(vessel.lon ?? 0).toFixed(4)}°` },
             { label: "Speed", value: `${vessel.currentSpeed} kn` },
             { label: "Heading", value: `${vessel.heading}°` },
           ].map(item => (
@@ -102,8 +102,8 @@ function VesselSidePanel({ vessel, onClose, exceptions }: { vessel: VesselProfil
           </div>
           <div className="flex items-center justify-between text-[10px]">
             <span className="text-sky-400/40">{vessel.routeProgress}% complete</span>
-            <span className={cn("font-mono", vessel.etaDelta < 0 ? "text-emerald-400" : vessel.etaDelta > 0 ? "text-orange-400" : "text-sky-400/50")}>
-              {vessel.etaDelta < 0 ? `${Math.abs(vessel.etaDelta)}h ahead` : vessel.etaDelta > 0 ? `${vessel.etaDelta}h delayed` : "On schedule"}
+            <span className={cn("font-mono", (vessel.etaDelta ?? 0) < 0 ? "text-emerald-400" : (vessel.etaDelta ?? 0) > 0 ? "text-orange-400" : "text-sky-400/50")}>
+              {(vessel.etaDelta ?? 0) < 0 ? `${Math.abs(vessel.etaDelta ?? 0)}h ahead` : (vessel.etaDelta ?? 0) > 0 ? `${vessel.etaDelta}h delayed` : "On schedule"}
             </span>
           </div>
         </div>
@@ -111,11 +111,11 @@ function VesselSidePanel({ vessel, onClose, exceptions }: { vessel: VesselProfil
         <div className="grid grid-cols-2 gap-2">
           <div className="bg-sky-500/5 rounded-lg p-2.5 border border-sky-500/10">
             <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">TCE</p>
-            <p className="text-xs font-mono text-sky-100 mt-0.5">{vessel.tce > 0 ? `$${vessel.tce.toLocaleString()}/d` : "—"}</p>
+            <p className="text-xs font-mono text-sky-100 mt-0.5">{(vessel.tce ?? 0) > 0 ? `$${(vessel.tce ?? 0).toLocaleString()}/d` : "—"}</p>
           </div>
           <div className="bg-sky-500/5 rounded-lg p-2.5 border border-sky-500/10">
             <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Utilization</p>
-            <p className="text-xs font-mono text-sky-100 mt-0.5">{vessel.utilization > 0 ? `${vessel.utilization}%` : "Unavailable"}</p>
+            <p className="text-xs font-mono text-sky-100 mt-0.5">{(vessel.utilization ?? 0) > 0 ? `${vessel.utilization}%` : "Unavailable"}</p>
           </div>
           <div className="bg-sky-500/5 rounded-lg p-2.5 border border-sky-500/10">
             <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">CII Rating</p>
@@ -123,7 +123,7 @@ function VesselSidePanel({ vessel, onClose, exceptions }: { vessel: VesselProfil
           </div>
           <div className="bg-sky-500/5 rounded-lg p-2.5 border border-sky-500/10">
             <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Readiness</p>
-            <p className={cn("text-xs font-mono font-bold mt-0.5", vessel.readinessScore >= 80 ? "text-emerald-400" : vessel.readinessScore >= 60 ? "text-amber-400" : "text-red-400")}>{vessel.readinessScore}/100</p>
+            <p className={cn("text-xs font-mono font-bold mt-0.5", (vessel.readinessScore ?? 0) >= 80 ? "text-emerald-400" : (vessel.readinessScore ?? 0) >= 60 ? "text-amber-400" : "text-red-400")}>{vessel.readinessScore}/100</p>
           </div>
         </div>
 
@@ -404,7 +404,7 @@ function MapboxFleetMap({
           position: relative;
         `;
 
-        if (vessel.alertCount > 0 && !isSelected) {
+        if ((vessel.alertCount ?? 0) > 0 && !isSelected) {
           const badge = document.createElement("div");
           badge.style.cssText = `
             position: absolute;
@@ -465,7 +465,7 @@ function MapboxFleetMap({
 
         el.addEventListener("mouseenter", () => {
           if (!isSelected) {
-            popup.setLngLat([vessel.lon, vessel.lat]).addTo(map);
+            popup.setLngLat([vessel.lon ?? 0, vessel.lat ?? 0]).addTo(map);
           }
         });
         el.addEventListener("mouseleave", () => {
@@ -477,7 +477,7 @@ function MapboxFleetMap({
         });
 
         const marker = new mbgl.Marker({ element: el })
-          .setLngLat([vessel.lon, vessel.lat])
+          .setLngLat([vessel.lon ?? 0, vessel.lat ?? 0])
           .addTo(map);
 
         markersRef.current.set(vessel.id, marker);
@@ -487,7 +487,7 @@ function MapboxFleetMap({
         const map2 = mapRef.current;
         if (map2) {
           map2.flyTo({
-            center: [selectedVessel.lon, selectedVessel.lat],
+            center: [selectedVessel.lon ?? 0, selectedVessel.lat ?? 0],
             zoom: Math.max(map2.getZoom(), 4),
             duration: 800,
             essential: true,
@@ -720,7 +720,7 @@ export default function FleetMapPage() {
   }, [filters, vessels]);
 
   const statuses = ["all", ...Array.from(new Set(vessels.map(v => v.status)))];
-  const types = ["all", ...Array.from(new Set(vessels.map(v => v.type)))];
+  const types: string[] = ["all", ...Array.from(new Set(vessels.map(v => v.type).filter((t): t is string => t != null)))];
 
   const handleVesselSelect = useCallback((v: VesselProfile | null) => {
     setSelectedVessel(v);

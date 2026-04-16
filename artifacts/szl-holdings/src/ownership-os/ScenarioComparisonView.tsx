@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Scale, Eye, EyeOff, CheckCircle2, AlertCircle, Star, Shield } from "lucide-react";
+import { Loader2, Scale, Eye, EyeOff, CheckCircle2, AlertCircle, Star, Shield, CheckSquare, Circle, Percent, Award, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { OwnershipScenario, ScenarioDetail } from "./types";
 import { apiFetch } from "./api";
-import { ScoreBar, StatusBadge, FitBadge } from "./components";
+import { ScoreBar, StatusBadge, FitBadge, DisclaimerBanner } from "./components";
 
 export function ScenarioComparisonView() {
   const { data: scenarios = [], isLoading } = useQuery<OwnershipScenario[]>({

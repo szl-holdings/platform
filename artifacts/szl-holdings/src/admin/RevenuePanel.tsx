@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   BarChart3, TrendingUp, DollarSign, Download, ChevronDown, ChevronRight,
   AlertCircle, Loader2, RefreshCw, Globe, Building2, Users,
-  LinkIcon, ExternalLink, CheckCircle2, Clock,
+  LinkIcon, ExternalLink, CheckCircle2, Clock, FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { apiFetchAdmin } from "./api";

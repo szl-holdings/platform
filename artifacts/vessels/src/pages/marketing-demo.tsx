@@ -3,6 +3,8 @@ import { ChevronRight, Ship, AlertCircle } from "lucide-react";
 import { MarketingNav } from "@/components/MarketingNav";
 import { MarketingFooter } from "@/components/MarketingFooter";
 
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+
 export default function MarketingDemoPage() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -14,7 +16,7 @@ export default function MarketingDemoPage() {
     setSubmitError(null);
     setSubmitting(true);
     try {
-      const res = await fetch(`${API_BASE}/demo-requests`, {
+      const res = await fetch(`${BASE}/demo-requests`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

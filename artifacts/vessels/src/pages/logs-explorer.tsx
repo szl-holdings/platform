@@ -79,7 +79,7 @@ export default function LogsExplorerPage() {
         <CardContent className="p-0">
           <div className="divide-y divide-border">
             {logs.map(log => {
-              const config = severityConfig[log.severity];
+              const config = severityConfig[log.severity as keyof typeof severityConfig];
               const SeverityIcon = config.icon;
               const isExpanded = expandedIds.has(log.id);
               return (
@@ -95,7 +95,7 @@ export default function LogsExplorerPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <Badge variant="outline" className={`text-[10px] ${config.color}`}>{log.severity}</Badge>
-                        <span className="text-xs text-muted-foreground font-mono">{new Date(log.timestamp).toLocaleString()}</span>
+                        <span className="text-xs text-muted-foreground font-mono">{new Date(log.timestamp ?? Date.now()).toLocaleString()}</span>
                         <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground">{log.category}</Badge>
                         <span className="text-xs text-muted-foreground">{log.vesselName}</span>
                       </div>

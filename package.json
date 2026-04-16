@@ -95,7 +95,7 @@
     "@types/nodemailer": "^7.0.11",
     "@udecode/plate-core": "^49.0.0",
     "archiver": "^7.0.1",
-    "nodemailer": "^8.0.4",
+    "nodemailer": "^8.0.5",
     "puppeteer-core": "^24.41.0",
     "react": "catalog:",
     "react-dom": "catalog:",
@@ -110,7 +110,13 @@
       "react": "$react",
       "react-dom": "$react-dom",
       "path-to-regexp": "8.4.2",
-      "brace-expansion": "2.1.0"
+      "brace-expansion": "2.1.0",
+      "vite": "7.3.2",
+      "lodash": "4.18.1",
+      "micromatch>picomatch": "2.3.2",
+      "tinyglobby>picomatch": "4.0.4",
+      "@tootallnate/once": "3.0.1",
+      "@esbuild-kit/core-utils>esbuild": "0.27.3"
     }
   }
 }

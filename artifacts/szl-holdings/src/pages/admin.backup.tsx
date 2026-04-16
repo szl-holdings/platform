@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { m, AnimatePresence } from "framer-motion";
-import { apiFetch } from "@szl-holdings/shared-ui";
 import {
   Settings, Edit3, Shield, CheckCircle2, AlertCircle, Loader2, Save, Plus, Trash2,
   ChevronRight, Eye, EyeOff, Building2, BarChart3, Mail, FileText, Globe, Layers,

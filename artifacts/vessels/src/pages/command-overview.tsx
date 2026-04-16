@@ -79,9 +79,9 @@ function ExecutiveView({ vessels, fleetExceptions, voyageEconomics }: ViewProps)
   const avgMarginPct = totalRevenue > 0 ? totalMargin / totalRevenue * 100 : 0;
   const criticalExc = fleetExceptions.filter(e => e.severity === "critical" && e.status === "active").length;
   const activeVessels = vessels.filter(v => v.status !== "maintenance");
-  const fleetUtil = activeVessels.length > 0 ? activeVessels.reduce((a, v) => a + v.utilization, 0) / activeVessels.length : 0;
-  const utilizingVessels = vessels.filter(v => v.utilization > 0);
-  const avgTCE = utilizingVessels.length > 0 ? utilizingVessels.reduce((a, v) => a + v.tce, 0) / utilizingVessels.length : 0;
+  const fleetUtil = activeVessels.length > 0 ? activeVessels.reduce((a, v) => a + (v.utilization ?? 0), 0) / activeVessels.length : 0;
+  const utilizingVessels = vessels.filter(v => (v.utilization ?? 0) > 0);
+  const avgTCE = utilizingVessels.length > 0 ? utilizingVessels.reduce((a, v) => a + (v.tce ?? 0), 0) / utilizingVessels.length : 0;
 
   return (
     <div className="space-y-6">
@@ -128,7 +128,7 @@ function ExecutiveView({ vessels, fleetExceptions, voyageEconomics }: ViewProps)
                   <span className="text-xs font-medium text-sky-100 flex-1">{v.name}</span>
                   <span className="text-[10px] text-sky-400/50 font-mono">{v.type}</span>
                   <Badge variant="outline" className={cn("text-[9px] shrink-0", sc.color)}>{sc.label}</Badge>
-                  <div className="text-[10px] text-sky-400/40 font-mono w-16 text-right">{v.utilization > 0 ? `${v.tce.toLocaleString()}/d` : "—"}</div>
+                  <div className="text-[10px] text-sky-400/40 font-mono w-16 text-right">{(v.utilization ?? 0) > 0 ? `${(v.tce ?? 0).toLocaleString()}/d` : "—"}</div>
                   <ChevronRight className="w-3 h-3 text-sky-400/30 shrink-0" />
                 </div>
               </Link>
@@ -295,13 +295,13 @@ export default function CommandOverviewPage() {
 
   const totalVessels = vessels.length;
   const atSea = vessels.filter(v => v.status === "at_sea").length;
-  const delayed = vessels.filter(v => ["delayed", "exception_active", "anchored"].includes(v.status) && v.etaDelta > 8).length;
+  const delayed = vessels.filter(v => ["delayed", "exception_active", "anchored"].includes(v.status) && (v.etaDelta ?? 0) > 8).length;
   const inPort = vessels.filter(v => v.status === "in_port" || v.status === "loading").length;
   const maintenanceCount = vessels.filter(v => v.status === "maintenance").length;
   const criticalExceptions = fleetExceptions.filter(e => e.severity === "critical" && e.status === "active").length;
-  const weatherAffected = vessels.filter(v => v.status === "exception_active" || (v.status === "delayed" && v.etaDelta > 12)).length;
+  const weatherAffected = vessels.filter(v => v.status === "exception_active" || (v.status === "delayed" && (v.etaDelta ?? 0) > 12)).length;
   const activeVessels = vessels.filter(v => v.status !== "maintenance");
-  const fleetUtil = activeVessels.length > 0 ? Math.round(activeVessels.reduce((a, v) => a + v.utilization, 0) / activeVessels.length) : 0;
+  const fleetUtil = activeVessels.length > 0 ? Math.round(activeVessels.reduce((a, v) => a + (v.utilization ?? 0), 0) / activeVessels.length) : 0;
 
   const tabs: { id: TabId; label: string }[] = [
     { id: "exec", label: "Executive" },

@@ -61,7 +61,7 @@ export default function AppliedIntelligencePage() {
                 <div>
                   <p className="text-xs font-semibold text-muted-foreground mb-1.5">Action Items</p>
                   <ul className="space-y-1">
-                    {(b.actionItems ?? []).map((item, i) => (
+                    {(b.actionItems ?? []).map((item: string, i: number) => (
                       <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
                         <CheckCircle className="w-3 h-3 mt-0.5 text-primary shrink-0" />
                         {item}
@@ -70,7 +70,7 @@ export default function AppliedIntelligencePage() {
                   </ul>
                 </div>
                 <div className="flex flex-wrap gap-1 pt-2 border-t border-border">
-                  {(b.affectedVessels ?? []).map(v => (
+                  {(b.affectedVessels ?? []).map((v: string) => (
                     <Badge key={v} variant="outline" className="text-[10px] bg-muted text-muted-foreground">{v}</Badge>
                   ))}
                 </div>
@@ -108,8 +108,8 @@ export default function AppliedIntelligencePage() {
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">{p.recommendedAction}</p>
                 <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                  <span>Predicted: {new Date(p.predictedFailureDate).toLocaleDateString()}</span>
-                  <span>Est. Cost: ${p.estimatedCost.toLocaleString()}</span>
+                  <span>Predicted: {p.predictedFailureDate ? new Date(p.predictedFailureDate).toLocaleDateString() : "—"}</span>
+                  <span>Est. Cost: ${(p.estimatedCost ?? 0).toLocaleString()}</span>
                   <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/20">
                     <Target className="w-3 h-3 mr-1" />{p.confidence}% confidence
                   </Badge>

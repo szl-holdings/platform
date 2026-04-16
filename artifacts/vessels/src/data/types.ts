@@ -23,4 +23,4 @@ export type {
   SanctionsRiskIndicator,
   ComplianceAlert,
   Fleet,
-} from "./types";
+} from "./vessel-types";

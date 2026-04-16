@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import { DistributionOsLayout } from "./admin-dashboard";
 
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+
 const API = import.meta.env.VITE_API_URL || "";
 
 function getCsrfToken(): string {
@@ -128,7 +130,7 @@ function EndpointRow({ endpoint, apiKey }: { endpoint: typeof API_ENDPOINTS[numb
   const [expanded, setExpanded] = useState(false);
   const methodColor: Record<string, string> = { GET: "#5a9c5a", POST: "#d4a054", PATCH: "#4a90b8", DELETE: "#c45a4a" };
   const exampleCurl = `curl -X ${endpoint.method} \\
-  "${API_BASE}${endpoint.path}${endpoint.params}" \\
+  "${BASE}${endpoint.path}${endpoint.params}" \\
   -H "Authorization: Bearer ${apiKey}" \\
   -H "Content-Type: application/json"`;
 

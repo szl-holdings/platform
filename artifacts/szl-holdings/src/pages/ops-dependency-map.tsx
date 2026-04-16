@@ -321,7 +321,7 @@ export default function OpsDependencyMapPage() {
                       <circle cx={14} cy={14} r={4} fill={sc} />
                       <text x={26} y={18} fontSize="11" fill={cc} fontWeight="600">{CATEGORY_ICONS[node.category] ?? "⚙"} {node.category}</text>
                       <text x={10} y={38} fontSize="12.5" fill="hsl(38,12%,90%)" fontWeight="600">{node.name.length > 18 ? node.name.slice(0, 17) + "…" : node.name}</text>
-                      <text x={10} y={52} fontSize="9" fill={sc} textTransform="capitalize">{node.status}</text>
+                      <text x={10} y={52} fontSize="9" fill={sc} style={{ textTransform: "capitalize" }}>{node.status}</text>
                     </g>
                   );
                 })}

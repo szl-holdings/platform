@@ -1,8 +1,13 @@
 import { useState } from "react";
+
 import { useQuery } from "@tanstack/react-query";
+
 import { Search } from "lucide-react";
+
 import { cn } from "@/lib/utils";
+
 import { API_BASE, DOMAIN_COLORS } from "./constants";
+
 import { TimeAgo } from "./components";
 
 export function SearchLayer() {

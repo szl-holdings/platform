@@ -1,8 +1,13 @@
 import { useState, useRef, useCallback } from "react";
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { Workflow, PlusCircle, Layers, Play, ChevronRight, Trash2, GripVertical } from "lucide-react";
+
 import { cn } from "@/lib/utils";
+
 import { API_BASE, DOMAIN_COLORS, STAGE_LIBRARY, STAGE_COLOR_MAP, ComposerStage } from "./constants";
+
 import { SectionCard } from "./components";
 
 export function ActLayer() {

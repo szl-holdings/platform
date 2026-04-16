@@ -80,6 +80,7 @@ const BUILT_IN_WORKFLOWS: WorkflowDefinition[] = [
         handler: "portfolio.assess-macro",
         executionMode: "semi_auto",
         requiresApproval: false,
+        retryCount: 0,
       },
       {
         id: "score-assets",
@@ -87,6 +88,7 @@ const BUILT_IN_WORKFLOWS: WorkflowDefinition[] = [
         handler: "portfolio.score-assets",
         executionMode: "semi_auto",
         requiresApproval: false,
+        retryCount: 0,
       },
       {
         id: "generate-proposal",
@@ -95,6 +97,7 @@ const BUILT_IN_WORKFLOWS: WorkflowDefinition[] = [
         executionMode: "semi_auto",
         requiresApproval: true,
         approverRole: "exec",
+        retryCount: 0,
       },
       {
         id: "execute-rebalance",
@@ -104,6 +107,7 @@ const BUILT_IN_WORKFLOWS: WorkflowDefinition[] = [
         requiresApproval: true,
         approverRole: "admin",
         rollbackHandler: "portfolio.rollback-rebalance",
+        retryCount: 0,
       },
     ],
     metadata: { domain: "szl-holdings", category: "portfolio-management" },
@@ -125,6 +129,7 @@ const BUILT_IN_WORKFLOWS: WorkflowDefinition[] = [
         handler: "aegis.classify-incident",
         executionMode: "manual",
         requiresApproval: false,
+        retryCount: 0,
       },
       {
         id: "legal-hold",
@@ -133,6 +138,7 @@ const BUILT_IN_WORKFLOWS: WorkflowDefinition[] = [
         executionMode: "manual",
         requiresApproval: true,
         approverRole: "compliance",
+        retryCount: 0,
       },
       {
         id: "update-risk-score",
@@ -140,6 +146,7 @@ const BUILT_IN_WORKFLOWS: WorkflowDefinition[] = [
         handler: "portfolio.update-risk-score",
         executionMode: "semi_auto",
         requiresApproval: false,
+        retryCount: 0,
       },
     ],
     metadata: { domain: "aegis", category: "incident-response" },
@@ -161,6 +168,7 @@ const BUILT_IN_WORKFLOWS: WorkflowDefinition[] = [
         handler: "vessels.identify-delay",
         executionMode: "autonomous",
         requiresApproval: false,
+        retryCount: 0,
       },
       {
         id: "flag-properties",
@@ -168,6 +176,7 @@ const BUILT_IN_WORKFLOWS: WorkflowDefinition[] = [
         handler: "terra.flag-properties",
         executionMode: "semi_auto",
         requiresApproval: false,
+        retryCount: 0,
       },
       {
         id: "review-contracts",
@@ -175,6 +184,7 @@ const BUILT_IN_WORKFLOWS: WorkflowDefinition[] = [
         handler: "prism.review-contracts",
         executionMode: "manual",
         requiresApproval: false,
+        retryCount: 0,
       },
     ],
     metadata: { domain: "vessels", category: "cross-domain-alert" },

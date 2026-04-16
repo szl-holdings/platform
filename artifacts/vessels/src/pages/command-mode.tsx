@@ -52,16 +52,16 @@ function VesselRail({ vessel, selected, onSelect }: { vessel: VesselProfile; sel
       <div className="flex items-center gap-2">
         <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
         <span className="text-[11px] font-medium text-sky-100 flex-1 truncate">{vessel.name}</span>
-        {vessel.alertCount > 0 && (
+        {(vessel.alertCount ?? 0) > 0 && (
           <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
         )}
       </div>
       <div className="flex items-center gap-2 mt-0.5 pl-3.5 text-[9px] text-sky-400/40">
         <span>{statusLabels[vessel.status]}</span>
-        {vessel.currentSpeed > 0 && <span>· {vessel.currentSpeed} kn</span>}
-        {vessel.etaDelta !== 0 && (
-          <span className={cn("ml-auto", vessel.etaDelta < 0 ? "text-emerald-400/60" : "text-orange-400/60")}>
-            {vessel.etaDelta > 0 ? `+${vessel.etaDelta}h` : `${vessel.etaDelta}h`}
+        {(vessel.currentSpeed ?? 0) > 0 && <span>· {vessel.currentSpeed} kn</span>}
+        {(vessel.etaDelta ?? 0) !== 0 && (
+          <span className={cn("ml-auto", (vessel.etaDelta ?? 0) < 0 ? "text-emerald-400/60" : "text-orange-400/60")}>
+            {(vessel.etaDelta ?? 0) > 0 ? `+${vessel.etaDelta}h` : `${vessel.etaDelta}h`}
           </span>
         )}
       </div>
@@ -141,7 +141,7 @@ function CommandMap({ selectedVessel, vessels }: { selectedVessel: VesselProfile
         </g>
 
         {vessels.map(v => {
-          const { x, y } = toMapCoords(v.lat, v.lon, W, H);
+          const { x, y } = toMapCoords(v.lat ?? 0, v.lon ?? 0, W, H);
           const color = statusColors[v.status] || "#666";
           const isSelected = selectedVessel?.id === v.id;
 
@@ -163,7 +163,7 @@ function CommandMap({ selectedVessel, vessels }: { selectedVessel: VesselProfile
                 </circle>
               )}
               <circle cx={x} cy={y} r={isSelected ? 5.5 : 3.5} fill={color} filter={isSelected ? "url(#cmd-glow)" : undefined} />
-              {v.alertCount > 0 && !isSelected && (
+              {(v.alertCount ?? 0) > 0 && !isSelected && (
                 <circle cx={x + 3} cy={y - 3} r={2.5} fill="#ef4444">
                   <animate attributeName="opacity" values="1;0.3;1" dur="1s" repeatCount="indefinite" />
                 </circle>
@@ -174,7 +174,7 @@ function CommandMap({ selectedVessel, vessels }: { selectedVessel: VesselProfile
       </svg>
 
       {selectedVessel && (() => {
-        const { x, y } = toMapCoords(selectedVessel.lat, selectedVessel.lon, W, H);
+        const { x, y } = toMapCoords(selectedVessel.lat ?? 0, selectedVessel.lon ?? 0, W, H);
         const pctX = (x / W) * 100;
         const pctY = (y / H) * 100;
         return (
@@ -298,8 +298,8 @@ export default function CommandModePage() {
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { label: "Status", value: statusLabels[activeVessel.status] ?? activeVessel.status },
-                    { label: "Speed", value: `${(activeVessel as Record<string, unknown>)["currentSpeed"] ?? "—"} kn` },
-                    { label: "Heading", value: `${(activeVessel as Record<string, unknown>)["heading"] ?? "—"}°` },
+                    { label: "Speed", value: `${activeVessel.currentSpeed ?? "—"} kn` },
+                    { label: "Heading", value: `${activeVessel.heading ?? "—"}°` },
                     { label: "ETA", value: "—" },
                   ].map(item => (
                     <div key={item.label} className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
@@ -315,7 +315,7 @@ export default function CommandModePage() {
                     <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Route</p>
                   </div>
                   <p className="text-[10px] text-sky-200">
-                    {(activeVessel as Record<string, unknown>)["lastPort"] as string ?? "—"} → {activeVessel.destination ?? "—"}
+                    {activeVessel.lastPort ?? "—"} → {activeVessel.destination ?? "—"}
                   </p>
                 </div>
 

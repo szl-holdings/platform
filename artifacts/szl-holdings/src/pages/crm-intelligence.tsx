@@ -280,8 +280,8 @@ export default function CrmIntelligencePage() {
                         </span>
                         <div className="text-right">
                           <div className="text-sm font-bold text-white">{formatCurrency(opp.value)}</div>
-                          {opp.probability != null && (
-                            <div className="text-xs text-slate-400">{opp.probability}% prob</div>
+                          {(opp as { probability?: number | null }).probability != null && (
+                            <div className="text-xs text-slate-400">{(opp as { probability?: number | null }).probability}% prob</div>
                           )}
                         </div>
                         <div className="text-xs text-slate-500 w-20 text-right">

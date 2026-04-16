@@ -74,6 +74,18 @@
     },
     {
       "path": "./lib/atlas-spatial-runtime"
+    },
+    {
+      "path": "./packages/atlas-core"
+    },
+    {
+      "path": "./packages/decision-engine"
+    },
+    {
+      "path": "./packages/policy-engine"
+    },
+    {
+      "path": "./packages/action-engine"
     }
   ]
 }

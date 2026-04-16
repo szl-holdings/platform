@@ -57,7 +57,7 @@ export default function AdminDataRetentionPage() {
 
   const queryClient = useQueryClient();
   const [expandedTable, setExpandedTable] = useState<string | null>(null);
-  const [editingPolicy, setEditingPolicy] = useState<{ tableName: string; retentionDays: number; purgeStrategy: string; isActive: boolean; description: string } | null>(null);
+  const [editingPolicy, setEditingPolicy] = useState<{ tableName: string; retentionDays: number; purgeStrategy: "archive" | "delete" | "anonymize"; isActive: boolean; description: string } | null>(null);
   const [runningTable, setRunningTable] = useState<string | null>(null);
   const [orgIdInput, setOrgIdInput] = useState<string>("");
   const selectedOrgId = orgIdInput.trim() !== "" ? Number(orgIdInput.trim()) || null : null;
@@ -258,7 +258,7 @@ export default function AdminDataRetentionPage() {
                               </div>
                               <div>
                                 <label style={labelStyle}>Purge strategy</label>
-                                <select value={editingPolicy.purgeStrategy} onChange={(e) => setEditingPolicy((p) => p ? { ...p, purgeStrategy: e.target.value } : p)} style={{ ...inputStyle, appearance: "none" }}>
+                                <select value={editingPolicy.purgeStrategy} onChange={(e) => setEditingPolicy((p) => p ? { ...p, purgeStrategy: e.target.value as "archive" | "delete" | "anonymize" } : p)} style={{ ...inputStyle, appearance: "none" }}>
                                   <option value="delete">Hard delete</option>
                                   <option value="anonymize">Anonymize PII</option>
                                   <option value="archive">Archive</option>

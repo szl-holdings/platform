@@ -44,7 +44,9 @@
     "react-i18next": "^17.0.2",
     "sonner": "^2.0.7",
     "@szl-holdings/prism-bus": "workspace:*",
-    "zod": "catalog:",
-    "@szl-holdings/ui-command": "workspace:*"
+    "@szl-holdings/covenant-policy": "workspace:*",
+    "@szl-holdings/monte-carlo": "workspace:*",
+    "@szl-holdings/ui-command": "workspace:*",
+    "zod": "catalog:"
   }
 }

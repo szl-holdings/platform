@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { apiFetch } from "@szl-holdings/shared-ui";
 import {
   Building2, CheckCircle2, ArrowRight, ArrowLeft, Shield,
   Key, Users, Settings, Copy, ExternalLink, AlertCircle,

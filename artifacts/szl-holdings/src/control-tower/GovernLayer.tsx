@@ -1,7 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
+
 import { Shield, CheckCircle2, XCircle, Circle, Lock, Unlock, Eye } from "lucide-react";
+
 import { cn } from "@/lib/utils";
+
 import { API_BASE, DOMAIN_COLORS } from "./constants";
+
 import { SectionCard, TimeAgo } from "./components";
 
 export function GovernLayer() {

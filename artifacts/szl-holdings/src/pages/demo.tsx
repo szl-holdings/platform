@@ -9,6 +9,8 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { analytics } from "@/lib/analytics";
 
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+
 interface WorkflowStep {
   label: string;
   detail: string;
@@ -284,7 +286,7 @@ export default function DemoPage() {
     setAccessSubmitting(true);
     analytics.ctaClick("request_access_submit", "demo", pack.id);
     try {
-      const response = await fetch(`${API_BASE}/holdings/inquiries`, {
+      const response = await fetch(`${BASE}/holdings/inquiries`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

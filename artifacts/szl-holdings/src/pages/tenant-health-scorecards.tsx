@@ -279,7 +279,7 @@ export default function TenantHealthScorecards() {
               filterTier === tier
                 ? tier === "all"
                   ? "bg-primary text-primary-foreground border-primary"
-                  : cn(TIER_CONFIG[tier === "all" ? "healthy" : tier]?.bg, TIER_CONFIG[tier === "all" ? "healthy" : tier]?.text, TIER_CONFIG[tier === "all" ? "healthy" : tier]?.border)
+                  : cn(TIER_CONFIG[tier]?.bg, TIER_CONFIG[tier]?.text, TIER_CONFIG[tier]?.border)
                 : "bg-muted border-border text-muted-foreground hover:text-foreground",
             )}
           >

@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { m, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Plus, RefreshCw, Shield, ChevronRight, Star, TrendingUp, Eye, EyeOff, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, Plus, RefreshCw, Shield, ChevronRight, Star, TrendingUp, Eye, EyeOff, CheckCircle2, AlertCircle, Check, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { OwnershipScenario } from "./types";
 import { apiFetch } from "./api";
-import { ScoreBar, StatusBadge } from "./components";
+import { ScoreBar, StatusBadge, DisclaimerBanner } from "./components";
 
 // ─── Scenario List ────────────────────────────────────────────────────────────
 

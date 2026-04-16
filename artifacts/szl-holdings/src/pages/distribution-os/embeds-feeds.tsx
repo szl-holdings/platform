@@ -7,6 +7,8 @@ import {
 } from "lucide-react";
 import { DistributionOsLayout } from "./admin-dashboard";
 
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+
 const BASE_URL = "https://szlholdings.com";
 const API_BASE = "https://szlholdings.com/api";
 
@@ -76,7 +78,7 @@ export default function EmbeedsFeedsPage() {
   const [widgetTheme, setWidgetTheme] = useState<"dark" | "light">("dark");
   const [articleSlug, setArticleSlug] = useState("enterprise-ai-adoption-2025");
 
-  const oembedUrl = `${API_BASE}/oembed?url=${encodeURIComponent(`${BASE_URL}/insights/${articleSlug}`)}&format=json`;
+  const oembedUrl = `${BASE}/oembed?url=${encodeURIComponent(`${BASE_URL}/insights/${articleSlug}`)}&format=json`;
   const widgetScript = `<!-- SZL Holdings Widget -->
 <script>
   (function(d, s, id) {
@@ -110,7 +112,7 @@ export default function EmbeedsFeedsPage() {
         "${BASE_URL}/newsletter/*",
         "${BASE_URL}/posts/*"
       ],
-      "url": "${API_BASE}/oembed",
+      "url": "${BASE}/oembed",
       "formats": ["json", "xml"],
       "discovery": true
     }
@@ -160,10 +162,10 @@ export default function EmbeedsFeedsPage() {
 
           <SectionCard icon={Rss} title="RSS & Atom Feeds" subtitle="Auto-generated feeds for every content type — syndicate anywhere" color="#d4a054">
             <div>
-              <FeedRow icon={Rss} label="All Articles (RSS)" url={`${API_BASE}/feeds/articles.rss`} color="#d4a054" desc="All published flagship essays and articles" />
-              <FeedRow icon={Rss} label="Newsletters (RSS)" url={`${API_BASE}/feeds/newsletters.rss`} color="#d4a054" desc="Every published newsletter issue" />
-              <FeedRow icon={BookOpen} label="X Posts (Atom)" url={`${API_BASE}/feeds/posts.atom`} color="#1a8cd8" desc="Published X posts and threads" />
-              <FeedRow icon={Rss} label="All Content (Combined)" url={`${API_BASE}/feeds/all.rss`} color="#5a9c5a" desc="Combined feed of all published content types" />
+              <FeedRow icon={Rss} label="All Articles (RSS)" url={`${BASE}/feeds/articles.rss`} color="#d4a054" desc="All published flagship essays and articles" />
+              <FeedRow icon={Rss} label="Newsletters (RSS)" url={`${BASE}/feeds/newsletters.rss`} color="#d4a054" desc="Every published newsletter issue" />
+              <FeedRow icon={BookOpen} label="X Posts (Atom)" url={`${BASE}/feeds/posts.atom`} color="#1a8cd8" desc="Published X posts and threads" />
+              <FeedRow icon={Rss} label="All Content (Combined)" url={`${BASE}/feeds/all.rss`} color="#5a9c5a" desc="Combined feed of all published content types" />
               <div style={{ paddingTop: "0.875rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 <Zap size={12} style={{ color: "#d4a054" }} />
                 <span style={{ fontSize: "0.75rem", color: "#6b6560" }}>Feeds auto-update within 2 minutes of publishing. Add to Feedly, Inoreader, or any RSS aggregator.</span>

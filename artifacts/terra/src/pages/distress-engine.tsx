@@ -11,11 +11,11 @@ import { cn } from "@szl-holdings/shared-ui/utils";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 function fetchJson(path: string) {
-  return fetch(`${API_BASE}${path}`).then(r => r.json()).then(d => d.data ?? d);
+  return fetch(`${BASE}${path}`).then(r => r.json()).then(d => d.data ?? d);
 }
 
 async function postJson(path: string, body: unknown) {
-  const r = await fetch(`${API_BASE}${path}`, {
+  const r = await fetch(`${BASE}${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -521,7 +521,7 @@ export default function DistressEnginePage() {
     if (boroughFilter !== "all") params.set("borough", boroughFilter);
     if (distressFilter !== "all") params.set("distressType", distressFilter);
     if (searchQuery) params.set("q", searchQuery);
-    window.open(`${API_BASE}/terra/distress/export/csv?${params}`, "_blank");
+    window.open(`${BASE}/terra/distress/export/csv?${params}`, "_blank");
   }
 
   return (

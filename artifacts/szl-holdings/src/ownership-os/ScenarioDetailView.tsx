@@ -3,13 +3,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { m } from "framer-motion";
 import {
   Shield, Users, FileText, CheckCircle2, AlertCircle, Loader2, Plus, Trash2,
-  Edit3, ChevronRight, ArrowLeft, RefreshCw, Briefcase,
-  BarChart3, ClipboardList, Flag, Award, Info, Percent,
+  Edit3, ChevronRight, ArrowLeft, RefreshCw, Briefcase, Star,
+  BarChart3, ClipboardList, Flag, Award, Info, Percent, Check, Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ScenarioDetail } from "./types";
 import { apiFetch } from "./api";
-import { StatusBadge, ScoreBar, BoolCheck } from "./components";
+import { StatusBadge, ScoreBar, BoolCheck, DisclaimerBanner, PriorityBadge } from "./components";
 import { EquityChart, ControlAuthorityMap, OfficerMatrix, CertFitComparison } from "./charts";
 import { NextActionsPanel } from "./NextActionsPanel";
 import { InlineForm, useEntityMutation } from "./InlineForm";

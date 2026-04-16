@@ -1,8 +1,13 @@
 import { useState } from "react";
+
 import { useQuery } from "@tanstack/react-query";
+
 import { Radio, Activity, RefreshCw, Hash } from "lucide-react";
+
 import { cn } from "@/lib/utils";
+
 import { API_BASE, SEVERITY_COLORS, DOMAIN_COLORS } from "./constants";
+
 import { SectionCard, TimeAgo } from "./components";
 
 export function SenseLayer() {
@@ -107,7 +112,7 @@ export function SenseLayer() {
                     >
                       <span className={cn("font-mono font-medium shrink-0", DOMAIN_COLORS[domain] ?? "text-muted-foreground")}>{domain}</span>
                       <span className="text-muted-foreground mx-0.5">›</span>
-                      <span className="font-medium flex-1 truncate">{s.title ?? type.replace(/_/g, " ")}</span>
+                      <span className="font-medium flex-1 truncate">{String(s.title ?? type.replace(/_/g, " "))}</span>
                       <span className={cn("shrink-0 px-1 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wide border", SEVERITY_COLORS[severity] ?? "")}>
                         {severity}
                       </span>

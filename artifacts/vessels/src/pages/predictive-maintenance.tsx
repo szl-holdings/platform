@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Wrench, Activity, AlertTriangle, CheckCircle2, Clock, TrendingUp, BarChart3, Cpu, Thermometer, Zap, Calendar } from "lucide-react";
+import { Wrench, Activity, AlertTriangle, CheckCircle2, Clock, TrendingUp, BarChart3, Cpu, Thermometer, Zap, Calendar, ChevronRight } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 

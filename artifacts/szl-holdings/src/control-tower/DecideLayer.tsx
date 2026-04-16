@@ -1,8 +1,13 @@
 import { useState } from "react";
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { Cpu, Brain, Play, GitBranch, ChevronDown } from "lucide-react";
+
 import { cn } from "@/lib/utils";
+
 import { API_BASE, DOMAIN_COLORS } from "./constants";
+
 import { SectionCard, StatusDot, ConfidenceBadge, TimeAgo } from "./components";
 
 export function DecideLayer() {

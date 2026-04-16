@@ -12,7 +12,7 @@ import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import React, { useState, useEffect, useRef } from "react";
 import { ExportButton } from "@szl-holdings/shared-ui/data-export";
 import { ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
-import { DataProvenance, ActionLoop, RoleSelector, AnimatedCounter} from "@szl-holdings/shared-ui";
+import { DataProvenance, ActionLoop, RoleSelector } from "@szl-holdings/shared-ui";
 import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
 
 const statusColors: Record<string, string> = {

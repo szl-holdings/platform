@@ -152,7 +152,7 @@ export default function ListingsPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch(`${API_BASE}/terra/mls/listings?limit=1`, { headers: { Accept: "application/json" }, signal: controller.signal })
+    fetch(`${BASE}/terra/mls/listings?limit=1`, { headers: { Accept: "application/json" }, signal: controller.signal })
       .then(r => r.json())
       .then(d => {
         if (d.count != null) setMlsCount(d.count);

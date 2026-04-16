@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import {
   ChevronDown, ExternalLink, FileCode,
+  Globe, Database, Webhook, Terminal,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";

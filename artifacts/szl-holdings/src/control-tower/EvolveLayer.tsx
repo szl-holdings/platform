@@ -1,8 +1,13 @@
 import { useState } from "react";
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { TrendingUp, Server, FlaskConical, Sparkles } from "lucide-react";
+
 import { cn } from "@/lib/utils";
+
 import { API_BASE, DOMAIN_COLORS } from "./constants";
+
 import { SectionCard, StatusDot, ConfidenceBadge } from "./components";
 
 export function EvolveLayer() {
@@ -42,7 +47,7 @@ export function EvolveLayer() {
           { label: "Total Inferences", value: String(systemMetrics?.totalInferences ?? 0), color: "text-fuchsia-400" },
           { label: "Avg Latency", value: `${Math.round(Number(systemMetrics?.avgLatencyMs ?? 0))}ms`, color: "text-sky-400" },
           { label: "Total Decisions", value: String(systemMetrics?.totalDecisions ?? 0), color: "text-violet-400" },
-          { label: "Pending Optimizations", value: String(agentMetrics.reduce((s, a) => s + ((a as Record<string, unknown>)?.optimizationProposals as unknown[] ?? []).filter((p: unknown) => (p as Record<string, unknown>).status === "pending").length, 0)), color: "text-amber-400" },
+          { label: "Pending Optimizations", value: String(agentMetrics.reduce((s: number, a) => s + ((a as Record<string, unknown>)?.optimizationProposals as unknown[] ?? []).filter((p: unknown) => (p as Record<string, unknown>).status === "pending").length, 0)), color: "text-amber-400" },
         ].map(({ label, value, color }) => (
           <div key={label} className="bg-card border border-border rounded-xl p-3 text-center">
             <p className={cn("text-lg font-bold font-mono", color)}>{metricsLoading ? "…" : value}</p>

@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { DollarSign, TrendingUp, Zap, Bot, AlertTriangle, CheckCircle, BarChart3, RefreshCw } from "lucide-react";
 
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+
 interface SpendRecord {
   workflowId: string;
   model: string;
@@ -74,7 +76,7 @@ export default function AICostAnalyticsPage() {
   const { data: costData, isLoading, refetch } = useQuery<CostAnalytics>({
     queryKey: ["ai-cost-analytics"],
     queryFn: async () => {
-      const r = await fetch(`${API_BASE}/nuro-mesh/cost/analytics`);
+      const r = await fetch(`${BASE}/nuro-mesh/cost/analytics`);
       return r.json();
     },
     refetchInterval: 30000,
@@ -83,7 +85,7 @@ export default function AICostAnalyticsPage() {
   const { data: flywheelStats } = useQuery<FlywheelStats>({
     queryKey: ["flywheel-stats"],
     queryFn: async () => {
-      const r = await fetch(`${API_BASE}/nuro-mesh/flywheel/stats`);
+      const r = await fetch(`${BASE}/nuro-mesh/flywheel/stats`);
       return r.json();
     },
     refetchInterval: 60000,

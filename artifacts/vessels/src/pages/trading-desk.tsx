@@ -58,6 +58,7 @@ interface Fill {
   id: number; orderId: number; fillRef: string; side: string;
   quantity: string; price: string; commission: string;
   executionVenue: string; filledAt: string; instrument?: Instrument;
+  instrumentId?: number;
 }
 
 interface PnlSummary {

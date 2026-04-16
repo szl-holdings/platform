@@ -141,9 +141,9 @@ export default function InfrastructurePage() {
           <div className="space-y-3">
             {maintenanceLogs.sort((a, b) => {
               const order: Record<string, number> = { Overdue: 0, "In Progress": 1, Scheduled: 2, Completed: 3 };
-              return (order[a.status] ?? 4) - (order[b.status] ?? 4);
+              return (order[a.status ?? ""] ?? 4) - (order[b.status ?? ""] ?? 4);
             }).map(log => {
-              const StatusIcon = statusIcons[log.status] || Clock;
+              const StatusIcon = statusIcons[log.status ?? ""] || Clock;
               return (
                 <div key={log.id} className={`p-4 rounded-lg border transition-all ${log.status === "Overdue" ? "border-red-500/20 bg-red-500/5" : log.status === "In Progress" ? "border-amber-500/20 bg-amber-500/5" : "border-border bg-background/50"}`}>
                   <div className="flex items-start justify-between">
@@ -161,7 +161,7 @@ export default function InfrastructurePage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground ml-7">
-                    <span>Scheduled: {new Date(log.date).toLocaleDateString()}</span>
+                    <span>Scheduled: {log.date ? new Date(log.date).toLocaleDateString() : "—"}</span>
                     <span>Est: {log.estimatedHours}h</span>
                     <span>Cost: ${(log.cost ?? 0).toLocaleString()}</span>
                   </div>

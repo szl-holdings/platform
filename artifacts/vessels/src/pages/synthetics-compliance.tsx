@@ -91,20 +91,20 @@ export default function SyntheticsCompliancePage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {certificates.sort((a, b) => a.daysUntilExpiry - b.daysUntilExpiry).map(cert => (
+              {certificates.sort((a, b) => (a.daysUntilExpiry ?? 0) - (b.daysUntilExpiry ?? 0)).map(cert => (
                 <div key={cert.id} className={`p-3 rounded-lg border transition-all ${cert.status === "Expired" ? "border-red-500/20 bg-red-500/5" : cert.status === "Expiring Soon" ? "border-amber-500/20 bg-amber-500/5" : "border-border bg-background/50"}`}>
                   <div className="flex items-center justify-between mb-1">
                     <p className="text-sm font-semibold">{cert.certificateType}</p>
-                    <Badge variant="outline" className={`text-xs ${certStatusColors[cert.status]}`}>
+                    <Badge variant="outline" className={`text-xs ${certStatusColors[cert.status ?? ""]}`}>
                       {cert.status === "Expired" && <AlertTriangle className="w-3 h-3 mr-1" />}
                       {cert.status}
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground">{cert.vesselName} · {cert.issuer}{cert.regulation ? ` · ${cert.regulation}` : ""}</p>
                   <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
-                    <span>Expires: {new Date(cert.expiryDate).toLocaleDateString()}</span>
-                    <span className={`font-semibold ${cert.daysUntilExpiry <= 0 ? "text-red-400" : cert.daysUntilExpiry <= 30 ? "text-amber-400" : "text-emerald-400"}`}>
-                      {cert.daysUntilExpiry <= 0 ? `${Math.abs(cert.daysUntilExpiry)}d overdue` : `${cert.daysUntilExpiry}d remaining`}
+                    <span>Expires: {cert.expiryDate ? new Date(cert.expiryDate).toLocaleDateString() : "—"}</span>
+                    <span className={`font-semibold ${(cert.daysUntilExpiry ?? 0) <= 0 ? "text-red-400" : (cert.daysUntilExpiry ?? 0) <= 30 ? "text-amber-400" : "text-emerald-400"}`}>
+                      {(cert.daysUntilExpiry ?? 0) <= 0 ? `${Math.abs(cert.daysUntilExpiry ?? 0)}d overdue` : `${cert.daysUntilExpiry ?? 0}d remaining`}
                     </span>
                   </div>
                 </div>
@@ -126,7 +126,7 @@ export default function SyntheticsCompliancePage() {
                   <div key={def.id} className={`p-3 rounded-lg border transition-all ${def.status === "Open" ? "border-red-500/20 bg-red-500/5" : "border-border bg-background/50"}`}>
                     <div className="flex items-center justify-between mb-1">
                       <p className="text-sm font-semibold">{def.description}</p>
-                      <Badge variant="outline" className={`text-xs ${defSeverityColors[def.severity]}`}>{def.severity}</Badge>
+                      <Badge variant="outline" className={`text-xs ${defSeverityColors[def.severity ?? ""]}`}>{def.severity}</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground">{def.vesselName} · {def.port} · Code: {def.deficiencyCode}{def.mouRegime ? ` · ${def.mouRegime}` : ""}</p>
                     <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">

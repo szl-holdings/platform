@@ -9,22 +9,22 @@ export default function FleetAPMPage() {
   const { data: vessels = [] } = useQuery({ queryKey: ["apm-vessels"], queryFn: () => dataProvider.getVessels() });
   const { data: kpis } = useQuery({ queryKey: ["fleet-kpis"], queryFn: () => dataProvider.getFleetKPIs() });
 
-  const activeVessels = vessels.filter(v => v.tce > 0);
-  const avgTCE = activeVessels.length > 0 ? Math.round(activeVessels.reduce((s, v) => s + v.tce, 0) / activeVessels.length) : 0;
-  const avgUtil = vessels.length > 0 ? Math.round(vessels.reduce((s, v) => s + v.utilization, 0) / vessels.length * 10) / 10 : 0;
-  const topPerformers = [...vessels].sort((a, b) => b.tce - a.tce).slice(0, 5);
-  const bottomPerformers = [...vessels].filter(v => v.tce > 0).sort((a, b) => a.tce - b.tce).slice(0, 5);
+  const activeVessels = vessels.filter(v => (v.tce ?? 0) > 0);
+  const avgTCE = activeVessels.length > 0 ? Math.round(activeVessels.reduce((s, v) => s + (v.tce ?? 0), 0) / activeVessels.length) : 0;
+  const avgUtil = vessels.length > 0 ? Math.round(vessels.reduce((s, v) => s + (v.utilization ?? 0), 0) / vessels.length * 10) / 10 : 0;
+  const topPerformers = [...vessels].sort((a, b) => (b.tce ?? 0) - (a.tce ?? 0)).slice(0, 5);
+  const bottomPerformers = [...vessels].filter(v => (v.tce ?? 0) > 0).sort((a, b) => (a.tce ?? 0) - (b.tce ?? 0)).slice(0, 5);
 
-  const utilizationData = vessels.filter(v => v.utilization > 0).map(v => ({
+  const utilizationData = vessels.filter(v => (v.utilization ?? 0) > 0).map(v => ({
     name: v.name,
-    utilization: v.utilization,
+    utilization: v.utilization ?? 0,
     target: 90,
   }));
 
   const tceByType: Record<string, { count: number; total: number }> = {};
   vessels.forEach(v => {
     if (!tceByType[(v.vesselType ?? 'unknown')]) tceByType[(v.vesselType ?? 'unknown')] = { count: 0, total: 0 };
-    if (v.tce > 0) { tceByType[(v.vesselType ?? 'unknown')].count++; tceByType[(v.vesselType ?? 'unknown')].total += v.tce; }
+    if ((v.tce ?? 0) > 0) { tceByType[(v.vesselType ?? 'unknown')].count++; tceByType[(v.vesselType ?? 'unknown')].total += (v.tce ?? 0); }
   });
   const marketTrendData = Object.entries(tceByType).filter(([, d]) => d.count > 0).map(([type, d]) => ({
     type: type.charAt(0).toUpperCase() + type.slice(1),
@@ -196,7 +196,7 @@ export default function FleetAPMPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold text-emerald-400">${v.tce.toLocaleString()}/day</p>
+                    <p className="text-sm font-bold text-emerald-400">${(v.tce ?? 0).toLocaleString()}/day</p>
                     <p className="text-xs text-muted-foreground">{v.utilization}% util</p>
                   </div>
                 </div>
@@ -223,8 +223,8 @@ export default function FleetAPMPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold text-amber-400">${v.tce.toLocaleString()}/day</p>
-                    <Badge variant="outline" className={`text-xs ${v.utilization < 85 ? "bg-red-500/10 text-red-400" : "bg-amber-500/10 text-amber-400"}`}>{v.utilization}%</Badge>
+                    <p className="text-sm font-bold text-amber-400">${(v.tce ?? 0).toLocaleString()}/day</p>
+                    <Badge variant="outline" className={`text-xs ${(v.utilization ?? 0) < 85 ? "bg-red-500/10 text-red-400" : "bg-amber-500/10 text-amber-400"}`}>{v.utilization}%</Badge>
                   </div>
                 </div>
               ))}

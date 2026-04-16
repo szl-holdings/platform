@@ -46,12 +46,12 @@ export default function CO2EmissionsPage() {
   const totalFuel = filteredEmissions.reduce((s, e) => s + (e.fuelConsumed ?? 0), 0);
 
   const ciiDistribution: Record<string, number> = {};
-  vessels.forEach(v => { ciiDistribution[v.ciiRating] = (ciiDistribution[v.ciiRating] || 0) + 1; });
+  vessels.forEach(v => { ciiDistribution[v.ciiRating ?? ""] = (ciiDistribution[v.ciiRating ?? ""] || 0) + 1; });
   const ciiPieData = Object.entries(ciiDistribution).map(([rating, count]) => ({ name: rating, value: count }));
 
   const vesselEmissions = vessels.map(v => ({
     name: v.name,
-    co2Daily: v.co2EmissionsDaily,
+    co2Daily: v.co2EmissionsDaily ?? 0,
     ciiRating: v.ciiRating,
     eexi: v.eexi,
   })).filter(v => v.co2Daily > 0).sort((a, b) => b.co2Daily - a.co2Daily);
@@ -120,7 +120,7 @@ export default function CO2EmissionsPage() {
                 <div className="flex items-center gap-2 mt-1">
                   <p className="text-2xl font-bold font-display">{vessels.length > 0 ? (() => {
                     const ciiMap: Record<string, number> = { A: 1, B: 2, C: 3, D: 4, E: 5 };
-                    const avg = vessels.reduce((s, v) => s + (ciiMap[v.ciiRating] || 3), 0) / vessels.length;
+                    const avg = vessels.reduce((s, v) => s + (ciiMap[v.ciiRating ?? ""] || 3), 0) / vessels.length;
                     return avg.toFixed(1);
                   })() : "—"}</p>
                   <Badge variant="outline" className={ciiBadgeColors[Object.entries(ciiDistribution).sort((a, b) => b[1] - a[1])[0]?.[0] || "B"]}>
@@ -236,7 +236,7 @@ export default function CO2EmissionsPage() {
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-sm font-mono">{v.co2Daily} MT/day</span>
-                  <Badge variant="outline" className={`text-xs ${ciiBadgeColors[v.ciiRating]}`}>CII {v.ciiRating}</Badge>
+                  <Badge variant="outline" className={`text-xs ${ciiBadgeColors[v.ciiRating ?? ""]}`}>CII {v.ciiRating}</Badge>
                   <span className="text-xs text-muted-foreground">EEXI: {v.eexi}</span>
                 </div>
               </div>

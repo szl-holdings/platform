@@ -72,7 +72,7 @@
     "jszip": "^3.10.1",
     "lru-cache": "^11.3.5",
     "multer": "^2.1.1",
-    "nodemailer": "^8.0.4",
+    "nodemailer": "^8.0.5",
     "openid-client": "^6.8.2",
     "pdfkit": "^0.18.0",
     "pino": "^9",

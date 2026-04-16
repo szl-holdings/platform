@@ -8,6 +8,7 @@ import {
   TrendingUp, Clock, ExternalLink, ChevronDown, ChevronUp,
   DollarSign, Cloud, Key, Database, HardDrive, Activity,
   SmilePlus, Eye, EyeOff, ClipboardList, Plus, X,
+  Building2, UserCheck,
 } from "lucide-react";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";

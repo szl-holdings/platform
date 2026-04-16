@@ -1267,13 +1267,13 @@ function App() {
               <Suspense fallback={<PageLoader />}><OnboardingPage /></Suspense>
             </Route>
             <Route path="/settings/:orgSlug">
-              {(params) => <Suspense fallback={<PageLoader />}><OrgSettingsPage orgSlug={params.orgSlug} /></Suspense>}
+              {() => <Suspense fallback={<PageLoader />}><OrgSettingsPage /></Suspense>}
             </Route>
             <Route path="/settings">
               <Suspense fallback={<PageLoader />}><OrgSettingsPage /></Suspense>
             </Route>
             <Route path="/usage/:orgSlug">
-              {(params) => <Suspense fallback={<PageLoader />}><UsageDashboardPage orgSlug={params.orgSlug} /></Suspense>}
+              {() => <Suspense fallback={<PageLoader />}><UsageDashboardPage /></Suspense>}
             </Route>
             <Route path="/usage">
               <Suspense fallback={<PageLoader />}><UsageDashboardPage /></Suspense>
