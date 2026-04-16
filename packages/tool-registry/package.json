@@ -1,0 +1,24 @@
+{
+  "name": "@szl-holdings/tool-registry",
+  "version": "0.0.0",
+  "private": false,
+  "description": "Unified tool registry with MCP bridging, schema validation, approval policy, and execution tracking",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szl-holdings/szl-holdings-platform.git",
+    "directory": "packages/tool-registry"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./registry": "./src/registry.ts",
+    "./mcp-bridge": "./src/mcp-bridge.ts",
+    "./executor": "./src/executor.ts"
+  },
+  "dependencies": {
+    "pino": "^9"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  }
+}

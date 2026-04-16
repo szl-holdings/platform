@@ -27,6 +27,7 @@ The platform is built as a pnpm monorepo using TypeScript 5.9, React 19, Vite, a
 -   **15 artifact dirs** in `artifacts/` — 7 canonical web, 1 canonical mobile, 1 internal, 5 archived, 1 shell
 -   **34 lib packages** in `lib/` — shared infrastructure and platform primitives
 -   **3 packages** in `packages/` — business observability fabric (observability-core, business-events, telemetry-standards)
+-   **5 new platform packages** in `packages/` — AI Control Plane and NVIDIA-Ready Modules (see below)
 -   **569 DB tables**, 116 schema files in `lib/db/src/schema/`
 
 ### Business Observability Fabric (packages/)
@@ -76,6 +77,20 @@ firestorm, lyte-command-center, imperium, prism-counsel, stephen-site — no app
 -   **AI Ops Dashboard:** REST endpoints at `/api/ai/ops/*` for cost, latency, confidence, review queue, and evaluator stats.
 -   **Real-time:** WebSocket (HMAC-signed tickets), Server-Sent Events (SSE), push notifications.
 -   **Bundling:** esbuild (CJS) and Vite.
+
+### AI Control Plane & NVIDIA-Ready Packages (`packages/`)
+
+Five new packages in `packages/` provide provider-agnostic AI infrastructure:
+
+| Package | Description |
+|---------|-------------|
+| `@szl-holdings/ai-control-plane` | Model routing, eval-aware selection, fallback engine, cost controls (budget policies + hard stops), PII redactor, prompt injection scanner, agent tier definitions (assistant/analyst/operator/autonomous), policy engine |
+| `@szl-holdings/prompt-registry` | Versioned prompt management with eval metadata, A/B comparison, and promotion lifecycle |
+| `@szl-holdings/tool-registry` | Tool management with approval classes, MCP bridging, dry-run execution, and audit trail |
+| `@szl-holdings/nvidia-adapters` | Optional NVIDIA NIM endpoint adapter, NeMo eval hooks + observability events, agent profiler with performance grades |
+| `@szl-holdings/openusd-export` | OpenUSD digital twin export for Vessels (route simulation), Terra (property scenarios), and Aegis (security scenario rehearsal) |
+
+**Architecture docs:** `docs/ai/ai-control-plane.md`, `docs/ai/nvidia-optional-runtime.md`, `docs/platform/digital-twin-and-simulation-strategy.md`
 
 ### UI/UX and Design System
 The platform utilizes a premium, SZL-branded, dark-first design system. Typography includes Space Grotesk, Inter, and JetBrains Mono. Domain packs maintain unique visual identities within the overarching brand.

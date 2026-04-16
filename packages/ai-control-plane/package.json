@@ -1,0 +1,28 @@
+{
+  "name": "@szl-holdings/ai-control-plane",
+  "version": "0.0.0",
+  "private": false,
+  "description": "Provider-agnostic AI control plane — model routing, eval-aware selection, cost controls, PII redaction, and agent tier policy enforcement",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szl-holdings/szl-holdings-platform.git",
+    "directory": "packages/ai-control-plane"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./router": "./src/router.ts",
+    "./eval-selector": "./src/eval-selector.ts",
+    "./fallback": "./src/fallback.ts",
+    "./cost-controller": "./src/cost-controller.ts",
+    "./pii-redactor": "./src/pii-redactor.ts",
+    "./agent-tiers": "./src/agent-tiers.ts",
+    "./policy-engine": "./src/policy-engine.ts"
+  },
+  "dependencies": {
+    "pino": "^9"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  }
+}
