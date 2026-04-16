@@ -567,6 +567,28 @@ export {
 } from "./digital-twins/twin-engine.js";
 
 export {
+  matterTwin,
+  portfolioTwin,
+  incidentTwin,
+  portTwin,
+  type ExtendedTwinType,
+  type MatterTwinState,
+  type PortfolioTwinState,
+  type IncidentTwinState,
+  type PortTwinState,
+  persistSnapshot,
+  getSnapshotHistory,
+  compareSnapshots,
+  branchScenario,
+  replayState,
+  detectDrift,
+  MatterTwin,
+  PortfolioTwin,
+  IncidentTwin,
+  PortTwin,
+} from "./digital-twins/twin-engine-spatial.js";
+
+export {
   FusionCortex,
   fusionCortex,
   type FusionAlert,

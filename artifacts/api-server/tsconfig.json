@@ -45,6 +45,9 @@
       "path": "../../lib/intelligence-feeds"
     },
     {
+      "path": "../../lib/atlas-spatial-runtime"
+    },
+    {
       "path": "../../lib/observability"
     },
     {

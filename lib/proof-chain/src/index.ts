@@ -212,3 +212,11 @@ export function summarizeProof(proof: ProofChain): ProofSummary {
     generatedAt: proof.generatedAt,
   };
 }
+
+export {
+  tagSpatialContent,
+  getProofBundle,
+  hashArtifactContent,
+} from "./spatial-lineage.js";
+
+export type { TagSpatialContentParams } from "./spatial-lineage.js";

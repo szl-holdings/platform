@@ -28,6 +28,7 @@ import streamingIngestionRouter from "../streaming-ingestion";
 import connectorHubRouter from "../connector-hub";
 import a2aRouter from "../a2a";
 import jobsRouter from "../jobs";
+import atlasSpatialRuntimeRouter from "../atlas-spatial-runtime";
 
 const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
@@ -115,4 +116,8 @@ export function register(router: IRouter): void {
   router.use("/jobs", _readLimiter);
   router.use("/jobs", tenantScope({ required: false }));
   router.use(jobsRouter);
+
+  router.use("/atlas/spatial", _readLimiter);
+  router.use("/atlas/spatial", _writeLimiter);
+  router.use(atlasSpatialRuntimeRouter);
 }

@@ -35,8 +35,9 @@ router.get("/digital-twins/entity/:entityId", authMiddleware(), async (req, res)
 });
 
 router.get("/digital-twins/type/:type", authMiddleware(), async (req, res) => {
-  const type = req.params.type as string as "vessel" | "property" | "posture";
-  if (!["vessel", "property", "posture"].includes(type)) return sendBadRequest(res, "Invalid twin type");
+  const type = req.params.type as string as import("@szl-holdings/ai-engine").TwinType;
+  const validTypes = ["vessel", "property", "posture", "matter", "portfolio", "incident", "port"];
+  if (!validTypes.includes(type)) return sendBadRequest(res, "Invalid twin type");
   const twins = twinRegistry.getByType(type);
   res.json({ success: true, twins });
 });

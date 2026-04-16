@@ -10,7 +10,7 @@
  * - PostureTwin: security posture score, attack surface map, breach simulation
  */
 
-export type TwinType = "vessel" | "property" | "posture";
+export type TwinType = "vessel" | "property" | "posture" | "matter" | "portfolio" | "incident" | "port";
 
 export type TwinStatus = "active" | "degraded" | "offline" | "simulating";
 

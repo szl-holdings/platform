@@ -44,6 +44,7 @@
     "@szl-holdings/receipt-graph": "workspace:*",
     "@szl-holdings/services": "workspace:*",
     "@szl-holdings/worldline": "workspace:*",
+    "@szl-holdings/atlas-spatial-runtime": "workspace:*",
     "@types/archiver": "^7.0.0",
     "@types/graphql-depth-limit": "^1.1.6",
     "@types/js-yaml": "^4.0.9",

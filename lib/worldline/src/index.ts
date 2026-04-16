@@ -254,3 +254,15 @@ export function scoreFreshness(
 ): number {
   return computeFreshnessScore(lastSuccessAt, cadence);
 }
+
+export {
+  createSignalOverlay,
+  querySignalOverlays,
+  getActiveOverlaysForEntity,
+  expireOverlay,
+  expireStaleOverlays,
+  getOverlayById,
+  scoreOverlayTrust,
+} from "./signal-overlays.js";
+
+export type { CreateOverlayParams, OverlayQueryOptions } from "./signal-overlays.js";
