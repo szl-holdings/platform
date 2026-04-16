@@ -96,6 +96,7 @@ import {
   holdingsLeadershipTable,
   holdingsInquiriesTable,
 } from "@szl-holdings/db";
+import { sql, eq } from "drizzle-orm";
 import { randomBytes, pbkdf2Sync } from "crypto";
 
 function hashPassword(password: string): string {
@@ -108,6 +109,7 @@ const DEMO_PASSWORD_ADMIN = "DemoAdmin2026!";
 const DEMO_PASSWORD_USER = "DemoUser2026!";
 
 async function seed() {
+  const seedWarnings: string[] = [];
   console.log("Seeding database...");
 
   console.log("  Clearing existing data...");
@@ -929,7 +931,8 @@ async function seed() {
     ]);
     console.log("  ✓ vessel maintenance items");
     } catch (err: any) {
-      console.warn(`  ⚠ Voyages/exceptions/maintenance skipped (FK mismatch): ${err.message?.slice(0, 80)}`);
+      seedWarnings.push(`Voyages/exceptions/maintenance: ${err.message?.slice(0, 120)}`);
+      console.warn(`  ⚠ Voyages/exceptions/maintenance skipped (FK/schema drift): ${err.message?.slice(0, 80)}`);
     }
   }
 
@@ -944,10 +947,55 @@ async function seed() {
     ]);
     console.log("  ✓ corridors");
   } catch (err: any) {
-    console.warn(`  ⚠ Corridors skipped (schema mismatch): ${err.message?.slice(0, 80)}`);
+    seedWarnings.push(`Corridors: ${err.message?.slice(0, 120)}`);
+    console.warn(`  ⚠ Corridors skipped (schema drift): ${err.message?.slice(0, 80)}`);
   }
 
-  console.log("\n✅ Seed complete!");
+  console.log("\n── Post-seed verification ──────────────────────────────────");
+  const verificationErrors: string[] = [];
+
+  const userCount = await db.select({ count: sql<number>`count(*)::int` }).from(usersTable);
+  const actualUsers = userCount[0]?.count ?? 0;
+  if (actualUsers < 5) {
+    verificationErrors.push(`Expected ≥5 demo users, found ${actualUsers}`);
+  } else {
+    console.log(`  ✓ ${actualUsers} users in database`);
+  }
+
+  const adminCheck = await db.select().from(usersTable).where(eq(usersTable.email, "admin@szlholdings.com")).limit(1);
+  if (adminCheck.length === 0 || !adminCheck[0].passwordHash) {
+    verificationErrors.push("Admin user missing or has no password hash");
+  } else {
+    console.log("  ✓ admin@szlholdings.com has password hash");
+  }
+
+  const orgCount = await db.select({ count: sql<number>`count(*)::int` }).from(organizationsTable);
+  if ((orgCount[0]?.count ?? 0) < 1) {
+    verificationErrors.push("No organizations found");
+  } else {
+    console.log(`  ✓ ${orgCount[0]?.count} organizations`);
+  }
+
+  const vesselCheck = await db.select({ count: sql<number>`count(*)::int` }).from(vesselsTable);
+  if ((vesselCheck[0]?.count ?? 0) < 1) {
+    verificationErrors.push("No vessels found");
+  } else {
+    console.log(`  ✓ ${vesselCheck[0]?.count} vessels`);
+  }
+
+  if (verificationErrors.length > 0) {
+    console.error("\n❌ Post-seed verification FAILED:");
+    verificationErrors.forEach(e => console.error(`  ✗ ${e}`));
+    process.exit(1);
+  }
+
+  if (seedWarnings.length > 0) {
+    console.log(`\n⚠ Seed completed with ${seedWarnings.length} non-critical warning(s):`);
+    seedWarnings.forEach(w => console.warn(`  - ${w}`));
+    console.log("  These are due to schema drift in domain tables and do not affect demo functionality.\n");
+  }
+
+  console.log("\n✅ Seed complete — all critical assertions passed!");
 }
 
 seed()

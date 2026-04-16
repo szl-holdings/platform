@@ -5,16 +5,6 @@ import { pool } from "@szl-holdings/db";
 
 const router: IRouter = Router();
 
-async function checkDatabase(): Promise<{ status: string; responseTimeMs: number; tables?: number }> {
-  const start = Date.now();
-  try {
-    const result = await pool.query("SELECT count(*)::int AS cnt FROM pg_tables WHERE schemaname = 'public'");
-    return { status: "healthy", responseTimeMs: Date.now() - start, tables: result.rows[0]?.cnt ?? 0 };
-  } catch {
-    return { status: "unhealthy", responseTimeMs: Date.now() - start };
-  }
-}
-
 const PLATFORM_APPS = [
   { slug: "szl-holdings", name: "SZL Holdings Dashboard", type: "command_surface" },
   { slug: "command", name: "Unified Command", type: "command_surface" },
@@ -26,14 +16,31 @@ const PLATFORM_APPS = [
   { slug: "firestorm", name: "Aegis Firestorm — Cybersecurity", type: "domain_pack" },
   { slug: "stephen-site", name: "Stephen Site — Portfolio", type: "supporting" },
   { slug: "szl-holdings-mobile", name: "CORTEX — Mobile Command", type: "mobile" },
+  { slug: "api-server", name: "API Server", type: "backend" },
 ];
+
+async function checkDatabase(): Promise<{ status: string; latencyMs: number; tables?: number }> {
+  const start = Date.now();
+  try {
+    const result = await pool.query("SELECT count(*)::int AS cnt FROM pg_tables WHERE schemaname = 'public'");
+    return { status: "ok", latencyMs: Date.now() - start, tables: result.rows[0]?.cnt ?? 0 };
+  } catch {
+    return { status: "degraded", latencyMs: Date.now() - start };
+  }
+}
 
 router.get("/healthz", async (_req, res) => {
   const base = HealthCheckResponse.parse({ status: "ok" });
   const backupHealth = getBackupHealthStatus();
   const dbHealth = await checkDatabase();
 
-  const overallStatus = dbHealth.status === "healthy" ? "ok" : "degraded";
+  const storageStatus = process.env.OBJECT_STORAGE_BUCKET_ID ? "configured" : "demo";
+  const authStatus = process.env.SESSION_SECRET ? "configured" : "missing_secret";
+  const aiStatus = (process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || process.env.OPENAI_API_KEY)
+    ? "configured"
+    : "not_configured";
+
+  const overallStatus = dbHealth.status === "ok" ? "ok" : "degraded";
 
   res.json({
     ...base,
@@ -42,8 +49,11 @@ router.get("/healthz", async (_req, res) => {
     version: process.env.npm_package_version ?? "0.0.0",
     uptime: Math.floor(process.uptime()),
     services: {
+      server: { status: "ok" },
       database: dbHealth,
-      api: { status: "healthy", responseTimeMs: 0 },
+      storage: { status: storageStatus },
+      auth: { status: authStatus },
+      ai: { status: aiStatus },
       backup: {
         status: backupHealth.status,
         lastBackupAt: backupHealth.lastBackupAt,
