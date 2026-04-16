@@ -391,7 +391,22 @@ export function LyteLayout({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-10 flex items-center justify-between px-3 md:px-4 shrink-0 z-10" role="banner" style={{ borderBottom: `1px solid ${BORDER.subtle}`, background: BG.header, backdropFilter: "blur(8px)" }}>
+        {isLiveDemoActive && (
+          <div
+            className="flex items-center justify-center gap-2.5 py-1 text-[9px] font-mono uppercase tracking-widest shrink-0"
+            style={{ background: "rgba(212,160,84,0.12)", borderBottom: "1px solid rgba(212,160,84,0.25)", color: "#d4a054" }}
+            role="status"
+            aria-live="polite"
+          >
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: "#d4a054" }} />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ background: "#d4a054" }} />
+            </span>
+            <span>Demo Mode — Synthetic data only · No live systems connected</span>
+            <span className="px-1.5 py-px rounded font-bold" style={{ background: "rgba(212,160,84,0.15)", border: "1px solid rgba(212,160,84,0.3)" }}>SEEDED</span>
+          </div>
+        )}
+        <header className="h-10 flex items-center justify-between px-3 md:px-4 shrink-0 z-10" role="banner" style={{ borderBottom: `1px solid ${isLiveDemoActive ? "rgba(212,160,84,0.15)" : BORDER.subtle}`, background: isLiveDemoActive ? "rgba(212,160,84,0.03)" : BG.header, backdropFilter: "blur(8px)" }}>
           <div className="flex items-center gap-2.5 text-[10px] font-mono">
             <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-1 rounded hover:bg-white/5 mr-1" style={{ color: TEXT.secondary }} aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"} aria-expanded={sidebarOpen}>
               {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -402,21 +417,11 @@ export function LyteLayout({ children }: { children: ReactNode }) {
             <span style={{ color: "#c8953c" }}>8 Gaps</span>
             <span className="hidden sm:block" style={{ color: TEXT.muted }}>·</span>
             <span className="hidden sm:block" style={{ color: "#d4a054" }}>$5.03M at risk</span>
-            {isDemoMode && (
+            {isDemoMode && !isLiveDemoActive && (
               <span className="hidden sm:flex items-center ml-1 gap-1">
                 <span style={{ color: TEXT.muted }}>·</span>
                 <EnvironmentLabel environment="demo" />
                 <EnvironmentLabel environment="seeded" />
-              </span>
-            )}
-            {isLiveDemoActive && (
-              <span className="hidden sm:flex items-center ml-1 gap-1.5">
-                <span style={{ color: TEXT.muted }}>·</span>
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: "#c45a4a" }} />
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ background: "#c45a4a" }} />
-                </span>
-                <span className="text-[9px] font-mono uppercase tracking-wider" style={{ color: "#c45a4a" }}>Live Demo Running</span>
               </span>
             )}
           </div>
