@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { OpsLayout } from "../components/ops-layout";
+import { ServiceStatusPanel } from "../components/service-status-panel";
 import { BarChart2, Shield, Activity, DollarSign, CheckCircle2, TrendingUp, TrendingDown, AlertTriangle, Info } from "lucide-react";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
 import { useEcosystemData } from "../hooks/use-ecosystem-data";
@@ -197,6 +198,9 @@ export default function HealthPage() {
             ))}
           </div>
         </div>
+
+        {/* Service Status */}
+        <ServiceStatusPanel />
 
         {/* Dimension Breakdown */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

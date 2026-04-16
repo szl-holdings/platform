@@ -38,7 +38,7 @@ v{MAJOR}.{MINOR}.{PATCH}
 
 Examples: `v0.1.0`, `v0.2.0`, `v1.0.0`
 
-Tag against the `master` branch. No branch-specific release tags.
+Tag against the `main` branch. No branch-specific release tags.
 
 ---
 
@@ -88,7 +88,7 @@ gh release create v0.2.0 \
 
 1. Go to: `https://github.com/stephenlutar2-hash/szl-holdings-platform/releases/new`
 2. Click **Choose a tag** → type `v0.2.0` → click **Create new tag: v0.2.0 on publish**
-3. Target: `master`
+3. Target: `main`
 4. Enter title and paste release notes from `docs/releases/v0.2.0.md`
 5. Check **Set as the latest release**
 6. Click **Publish release**
