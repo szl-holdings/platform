@@ -65,7 +65,7 @@ const expansionLanes = [
   },
   {
     icon: ShieldCheck,
-    name: "Aegis / Firestorm",
+    name: "Aegis",
     body: "A security and command environment for incident, threat, and managed operations workflows.",
   },
   {

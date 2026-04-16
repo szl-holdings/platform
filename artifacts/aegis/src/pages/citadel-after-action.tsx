@@ -45,7 +45,7 @@ const METRICS = [
 
 const TIMELINE_SUMMARY = [
   { time: "T+0m", event: "SIEM detection · APT29 lateral movement on DC-PROD-03", type: "detect" },
-  { time: "T+2m", event: "ICS Level 3 declared · CITADEL war room activated · PB-APT-001 initiated", type: "escalate" },
+  { time: "T+2m", event: "ICS Level 3 declared · Crisis response activated · PB-APT-001 initiated", type: "escalate" },
   { time: "T+4m", event: "Labs pre-detection confirmed (8m ahead of SIEM) · INC-2846 C2 beacon linked", type: "intel" },
   { time: "T+7m", event: "Northgate CISO notified · TKT-4827 placed on security hold", type: "notify" },
   { time: "T+9m", event: "Forensic evidence preservation initiated · Memory dump ordered", type: "action" },
@@ -70,7 +70,7 @@ const WHAT_WENT_WELL = [
   "S3 exfiltration pattern (ALT-5821) detected and blocked before data left the perimeter — preventing double-extortion leverage.",
   "Northgate CISO was notified proactively at T+7m, exceeding contractual notification SLA and preserving client trust.",
   "All 5 decisions were logged with explicit rationale, approver, and outcome — creating a clean audit trail for regulatory review.",
-  "Incident Commander declared crisis at T+2m, well within the 5-minute target threshold. War room coordination was efficient.",
+  "Incident Commander declared crisis at T+2m, well within the 5-minute target threshold. Crisis response coordination was efficient.",
   "Legal (PRISM) confirmed no regulatory breach notification required — regulatory risk was proactively assessed and closed within 48h.",
 ];
 

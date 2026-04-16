@@ -9,13 +9,13 @@ import { IMPERIUM_DATA, getThreatColor } from "@imp/lib/imperium-data";
 import { cn } from "@imp/lib/utils";
 
 const NAV_ITEMS = [
-  { path: "/", label: "LEGATUS", sublabel: "Executive Command", icon: Crown },
-  { path: "/imperium-map", label: "IMPERIUM MAP", sublabel: "Roman Hierarchy", icon: Map },
-  { path: "/praetorian", label: "PRAETORIAN", sublabel: "Security Perimeter", icon: Shield },
-  { path: "/senate", label: "SENATE", sublabel: "Governance Chamber", icon: BookOpen },
-  { path: "/supply-lines", label: "SUPPLY LINES", sublabel: "Network Topology", icon: Network },
-  { path: "/centurion", label: "CENTURION AI", sublabel: "Agent Profiles", icon: Cpu },
-  { path: "/intelligence", label: "INTELLIGENCE", sublabel: "SIGINT Briefing", icon: Radio },
+  { path: "/", label: "EXECUTIVE CONSOLE", sublabel: "Executive Overview", icon: Crown },
+  { path: "/imperium-map", label: "RESOURCE MAP", sublabel: "Resource Hierarchy", icon: Map },
+  { path: "/praetorian", label: "SECURITY PERIMETER", sublabel: "Security Controls", icon: Shield },
+  { path: "/senate", label: "GOVERNANCE BOARD", sublabel: "Change Management", icon: BookOpen },
+  { path: "/supply-lines", label: "NETWORK TOPOLOGY", sublabel: "Service Mesh Routes", icon: Network },
+  { path: "/centurion", label: "AI OPERATIONS", sublabel: "Agent Profiles", icon: Cpu },
+  { path: "/intelligence", label: "INTELLIGENCE", sublabel: "Signals Briefing", icon: Radio },
 ];
 
 function ThreatBadge({ level }: { level: string }) {
@@ -62,17 +62,17 @@ export function ImperiumLayout({ children }: { children: React.ReactNode }) {
             </div>
             <div>
               <h1 className="font-display text-sm tracking-[0.15em] font-bold gold-text leading-tight">
-                IMPERIUM
+                PLATFORM
               </h1>
               <p className="text-[10px] tracking-widest text-slate-500 uppercase leading-tight">
-                Cloud Sovereignty
+                Cloud Infrastructure
               </p>
             </div>
           </div>
           <div className="mt-3 px-2 py-2 rounded imperial-card flex items-center justify-between">
             <ThreatBadge level={imperium.threatLevel} />
             <span className="font-mono text-[10px] text-slate-500">
-              AQ {imperium.aquilaScore}
+              HS {imperium.aquilaScore}
             </span>
           </div>
         </div>
@@ -122,15 +122,15 @@ export function ImperiumLayout({ children }: { children: React.ReactNode }) {
           <div className="grid grid-cols-3 gap-1 text-center">
             <div>
               <div className="font-mono text-xs font-bold gold-text">{imperium.totalResources}</div>
-              <div className="text-[9px] tracking-wider text-slate-600 uppercase">Sentinels</div>
+              <div className="text-[9px] tracking-wider text-slate-600 uppercase">Resources</div>
             </div>
             <div>
               <div className="font-mono text-xs font-bold gold-text">{imperium.legions.length}</div>
-              <div className="text-[9px] tracking-wider text-slate-600 uppercase">Legions</div>
+              <div className="text-[9px] tracking-wider text-slate-600 uppercase">Regions</div>
             </div>
             <div>
               <div className="font-mono text-xs font-bold text-green-400">{imperium.aquilaScore}</div>
-              <div className="text-[9px] tracking-wider text-slate-600 uppercase">Aquila</div>
+              <div className="text-[9px] tracking-wider text-slate-600 uppercase">Health</div>
             </div>
           </div>
         </div>
@@ -163,10 +163,10 @@ export function ImperiumLayout({ children }: { children: React.ReactNode }) {
               )}
             </button>
             <div className="hidden sm:flex items-center gap-2 text-slate-500 text-xs font-mono">
-              <span className="tracking-widest">IMPERIUM SZLHOLDINGS</span>
+              <span className="tracking-widest">PLATFORM SZLHOLDINGS</span>
               <span>/</span>
               <span style={{ color: "#c9a227" }}>
-                {NAV_ITEMS.find((n) => location === n.path || (n.path !== "/" && location.startsWith(n.path)))?.label || "LEGATUS"}
+                {NAV_ITEMS.find((n) => location === n.path || (n.path !== "/" && location.startsWith(n.path)))?.label || "COMMAND"}
               </span>
             </div>
           </div>

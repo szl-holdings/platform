@@ -23,7 +23,7 @@ const workspaces = [
       "Threat hunting, forensics, identity threat detection",
       "Vulnerability management and hardening controls",
       "Compliance readiness across frameworks",
-      "Sacsayhuam\u00e1n Shield — adaptive perimeter defense",
+      "Adaptive Defense Shield — perimeter defense",
     ],
   },
   {
@@ -50,10 +50,10 @@ const workspaces = [
     icon: Brain,
     href: "/intel/dashboard",
     capabilities: [
-      "Quipu Command — agent orchestration",
+      "Agent Console — agent orchestration",
       "Neural explorer and model registry",
       "Experiment tracking and evaluation",
-      "Chasqui Relay — intelligence routing",
+      "Signal Router — intelligence routing",
       "Prediction models with confidence scoring",
       "Research-to-action pipeline",
     ],

@@ -46,7 +46,7 @@ export default function EnterpriseDemo() {
       const successUrl = window.location.origin + baseUrl + "/demo?quote=success";
       const cancelUrl = window.location.origin + baseUrl + "/demo?quote=cancel";
 
-      const res = await fetch("/api/billing/firestorm/enterprise-quote", {
+      const res = await fetch("/api/billing/aegis/enterprise-quote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

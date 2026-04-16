@@ -43,7 +43,7 @@ export default function AlertsManagement() {
         layer: "UNDERSTAND",
         severity: criticalCount > 0 ? "critical" : "warning",
         title: `${openCount} open AI system alert${openCount > 1 ? "s" : ""}`,
-        description: `INCA intelligence platform: ${openCount} open alert(s) including model drift, pipeline anomalies, and accuracy thresholds.`,
+        description: `AI intelligence platform: ${openCount} open alert(s) including model drift, pipeline anomalies, and accuracy thresholds.`,
         entitiesInvolved: alerts.filter(a => a.status === "open").slice(0, 3).map(a => a.source),
         context: {
           source: "alerts-management",

@@ -8,14 +8,14 @@ const entries = [
     version: "v3.8.0",
     date: "March 28, 2026",
     type: "minor",
-    highlight: "Firestorm XDR Console + Lyte Anomaly Detection launch",
+    highlight: "Aegis XDR Console + Lyte Anomaly Detection launch",
     changes: [
-      { type: "feature", text: "Firestorm: Unified XDR Console with cross-source alert correlation and entity risk scoring" },
-      { type: "feature", text: "Firestorm: Threat Hunting Workbench with KQL-style query builder and campaign management" },
+      { type: "feature", text: "Aegis: Unified XDR Console with cross-source alert correlation and entity risk scoring" },
+      { type: "feature", text: "Aegis: Threat Hunting Workbench with KQL-style query builder and campaign management" },
       { type: "feature", text: "Lyte: Watchdog AI Anomaly Detection with 98.2% noise reduction" },
       { type: "feature", text: "Lyte: SLO Tracking with burn rate alerts and error budget visualization" },
       { type: "improvement", text: "Admin Panel: Connector Health grid with latency heatmaps and failure analytics" },
-      { type: "fix", text: "INCA: GPU monitoring panel chart rendering on mobile viewports" },
+      { type: "fix", text: "SZL Cortex: GPU monitoring panel chart rendering on mobile viewports" },
     ],
   },
   {
@@ -36,10 +36,10 @@ const entries = [
     version: "v3.6.0",
     date: "February 24, 2026",
     type: "minor",
-    highlight: "INCA GPU Monitoring + LLM Evaluation launch",
+    highlight: "SZL Cortex GPU Monitoring + LLM Evaluation launch",
     changes: [
-      { type: "feature", text: "INCA: GPU Cluster Monitoring with thermal, utilization, and memory pressure tracking" },
-      { type: "feature", text: "INCA: LLM Evaluation Studio with automated regression testing and A/B model comparison" },
+      { type: "feature", text: "SZL Cortex: GPU Cluster Monitoring with thermal, utilization, and memory pressure tracking" },
+      { type: "feature", text: "SZL Cortex: LLM Evaluation Studio with automated regression testing and A/B model comparison" },
       { type: "feature", text: "Alloy: Prediction Studio with multi-channel scenario modeling" },
       { type: "feature", text: "Alloy: Confidence Scoring with probabilistic output and assumption tracking" },
       { type: "improvement", text: "Aegis: Risk Register redesign with dynamic filtering and bulk status updates" },
@@ -101,7 +101,7 @@ const versionBadge: Record<string, string> = {
 export default function Changelog() {
   usePageMeta({
     title: "Changelog | SZL Holdings – Platform Release Notes",
-    description: "Latest updates, features, and improvements across the SZL Holdings platform portfolio. Track product releases from Firestorm, Aegis Intelligence, Terra, Vessels, Lyte, Alloy, Aegis Operations, and Aegis.",
+    description: "Latest updates, features, and improvements across the SZL Holdings platform portfolio. Track product releases from Aegis, Aegis Intelligence, Terra, Vessels, Lyte, Alloy, Aegis Operations, and Aegis.",
     canonical: "https://szlholdings.com/changelog",
   });
   return (

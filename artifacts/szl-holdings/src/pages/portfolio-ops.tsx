@@ -60,7 +60,7 @@ const apps: AppReadiness[] = [
     features: { shipped: 16, planned: 3 }, deployment: { region: "US-East", lastRelease: "Mar 25" }, confidence: "High",
   },
   {
-    name: "INCA", slug: "inca", icon: Brain, accent: "hsl(250,58%,58%)",
+    name: "SZL Cortex", slug: "inca", icon: Brain, accent: "hsl(250,58%,58%)",
     stage: "Live", maturity: 78, readinessScore: 82, owner: "AI Research", team: "Research",
     blockers: [], risks: ["Model registry expansion in progress"],
     features: { shipped: 14, planned: 6 }, deployment: { region: "US-East", lastRelease: "Mar 24" }, confidence: "Medium",

@@ -22,7 +22,7 @@ const DS = {
 };
 
 const PROV: DataProvenanceInfo = {
-    source: "Distribution OS — Predictive Virality Engine",
+    source: "Distribution OS — Distribution Analytics Engine",
     lastUpdated: new Date().toISOString(),
     freshness: "minutes",
     confidence: "high",
@@ -120,7 +120,7 @@ export default function PredictiveViralityPage() {
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "1.25rem", flexWrap: "wrap", gap: "0.75rem" }}>
           <div>
             <h1 style={{ fontSize: "1.25rem", fontWeight: 700, color: DS.text.primary, letterSpacing: "-0.025em", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <Flame size={18} style={{ color: DS.accent }} /> Predictive Virality Engine
+              <Flame size={18} style={{ color: DS.accent }} /> Distribution Analytics Engine
             </h1>
             <p style={{ fontSize: "0.75rem", color: DS.text.tertiary, marginTop: "0.25rem" }}>AI-powered pre-publish scoring — know what will perform before you hit publish</p>
           </div>

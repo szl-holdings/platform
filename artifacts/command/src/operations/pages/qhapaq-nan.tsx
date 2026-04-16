@@ -4,7 +4,7 @@ import { cn } from "@szl-holdings/shared-ui/utils";
 
 const NODES = [
   { id: "aegis", name: "Aegis Command", role: "Defense & Intelligence", agent: "Sentinel Engine", color: "text-indigo-400", bg: "bg-indigo-400/10", border: "border-indigo-400/25", x: 50, y: 15, type: "cortex" },
-  { id: "lyte", name: "Lyte", role: "Spinal Cord", agent: "Qhapaq Ñan", color: "text-[#d4a054]", bg: "bg-[#d4a054]/10", border: "border-[#d4a054]/20", x: 50, y: 50, type: "hub" },
+  { id: "lyte", name: "Lyte", role: "Spinal Cord", agent: "Intelligence Hub", color: "text-[#d4a054]", bg: "bg-[#d4a054]/10", border: "border-[#d4a054]/20", x: 50, y: 50, type: "hub" },
   { id: "vessels", name: "Vessels", role: "Maritime Organ", agent: "Maritime Analyst", color: "text-cyan-400", bg: "bg-cyan-400/10", border: "border-cyan-400/20", x: 17, y: 30, type: "organ" },
   { id: "msp", name: "Aegis Operations", role: "Managed Services Command", agent: "IT Sentinel", color: "text-[#c45a4a]", bg: "bg-[#c45a4a]/10", border: "border-[#c45a4a]/20", x: 5, y: 55, type: "organ" },
   { id: "terra", name: "Terra", role: "Real Estate Intelligence Organ", agent: "Deal Scout", color: "text-[#6b8f71]", bg: "bg-green-400/10", border: "border-green-400/20", x: 17, y: 78, type: "organ" },
@@ -35,11 +35,11 @@ interface TrafficPacket {
 
 const AGENT_ACTIVITY: { time: string; app: string; agent: string; action: string; type: "signal" | "intelligence" | "policy" | "reflex" }[] = [
   { time: "now", app: "Vessels", agent: "Maritime Analyst", action: "Dark vessel alert: MV Poseidon off Strait of Malacca", type: "signal" },
-  { time: "12s", app: "INCA Cortex", agent: "Quipu Engine", action: "Spawning investigative sub-agent for maritime anomaly", type: "intelligence" },
-  { time: "28s", app: "Firestorm", agent: "Sacsayhuamán Shield", action: "Policy check passed for cross-domain data access", type: "policy" },
+  { time: "12s", app: "SZL Cortex", agent: "AI Engine", action: "Spawning investigative sub-agent for maritime anomaly", type: "intelligence" },
+  { time: "28s", app: "Command", agent: "Policy Guard", action: "Policy check passed for cross-domain data access", type: "policy" },
   { time: "45s", app: "Aegis Operations", agent: "IT Sentinel", action: "Auto-remediated memory leak — TKT-4821 closed", type: "reflex" },
   { time: "1m", app: "Terra", agent: "Deal Scout", action: "Off-market opportunity flagged: Brickell, Miami — $4.2M cap rate 7.1%", type: "signal" },
-  { time: "1m 20s", app: "INCA Cortex", agent: "Willaq Umu Oracle", action: "Q1 synthesis complete — 94% portfolio health, 3 risk vectors", type: "intelligence" },
+  { time: "1m 20s", app: "SZL Cortex", agent: "AI Analyst", action: "Q1 synthesis complete — 94% portfolio health, 3 risk vectors", type: "intelligence" },
   { time: "2m", app: "Alloy", agent: "Creative Director", action: "Campaign rebalance: +$12K to LinkedIn video segment", type: "reflex" },
   { time: "2m 30s", app: "Aegis SOC", agent: "Security Sentinel LLM", action: "Blocked external write — agent action escalated for review", type: "policy" },
   { time: "3m", app: "Carlota Jo", agent: "Advisory Agent", action: "Client briefing ready: Acme Portfolio Q1 2026", type: "intelligence" },
@@ -79,13 +79,13 @@ export default function QhapaqNan() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-3 mb-1">
-          <h2 className="text-2xl font-bold text-white">Qhapaq Ñan</h2>
+          <h2 className="text-2xl font-bold text-white">Intelligence Mesh</h2>
           <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#d4a054]/20 text-[#d4a054] border border-[#d4a054]/30">
             Intelligence Mesh
           </span>
         </div>
         <p className="text-sm text-slate-400">
-          The Royal Road Network — visualizing the intelligence mesh connecting all ecosystem apps. Each app is an organ, Lyte is the spinal cord, INCA is the brain.
+          The Intelligence Network — visualizing the signal mesh connecting all ecosystem apps. Each app is an organ, Lyte is the spinal cord, SZL Cortex is the brain.
         </p>
       </div>
 
@@ -192,7 +192,7 @@ export default function QhapaqNan() {
               </div>
             </div>
             <p className="text-xs text-slate-400">
-              Connected to {CONNECTIONS.filter(c => c.from === selectedNodeData.id || c.to === selectedNodeData.id).length} roads in the Qhapaq Ñan network.
+              Connected to {CONNECTIONS.filter(c => c.from === selectedNodeData.id || c.to === selectedNodeData.id).length} links in the intelligence network.
               Click another node to explore its connections.
             </p>
           </div>
@@ -215,7 +215,7 @@ export default function QhapaqNan() {
               Agent Activity Feed
               <span className="w-2 h-2 rounded-full bg-[#6b8f71] animate-pulse" />
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">Real-time stream of what INCA's agents are doing across all ecosystem apps</p>
+            <p className="text-xs text-slate-400 mt-0.5">Real-time stream of what the AI agents are doing across all ecosystem apps</p>
           </div>
         </div>
         <div className="divide-y divide-white/5">

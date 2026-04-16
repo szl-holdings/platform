@@ -62,12 +62,12 @@ const OPERATIONS_NAV = [
 ];
 
 const INFRASTRUCTURE_NAV = [
-  { href: "/infrastructure", label: "Legatus Console", icon: Crown },
-  { href: "/infrastructure/imperium-map", label: "Imperium Map", icon: Map },
-  { href: "/infrastructure/praetorian", label: "Praetorian Guard", icon: Shield },
-  { href: "/infrastructure/senate", label: "Senate Chamber", icon: BookOpen },
-  { href: "/infrastructure/supply-lines", label: "Supply Lines", icon: Network },
-  { href: "/infrastructure/centurion", label: "Centurion AI", icon: Cpu },
+  { href: "/infrastructure", label: "Executive Console", icon: Crown },
+  { href: "/infrastructure/imperium-map", label: "Resource Map", icon: Map },
+  { href: "/infrastructure/praetorian", label: "Security Perimeter", icon: Shield },
+  { href: "/infrastructure/senate", label: "Governance Board", icon: BookOpen },
+  { href: "/infrastructure/supply-lines", label: "Network Topology", icon: Network },
+  { href: "/infrastructure/centurion", label: "AI Operations", icon: Cpu },
   { href: "/infrastructure/intelligence", label: "Intelligence Briefing", icon: Radio },
 ];
 

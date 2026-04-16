@@ -58,8 +58,8 @@ const ENTERPRISE_NAV = [
 ];
 
 const NURO_FORGE_NAV = [
-  { href: "/nuro-forge", label: "Nuro Forge", icon: Cpu, badge: "New" },
-  { href: "/nuro-forge/arena", label: "Tournament Arena", icon: Zap },
+  { href: "/nuro-forge", label: "Model Lab", icon: Cpu, badge: "New" },
+  { href: "/nuro-forge/arena", label: "Model Benchmarks", icon: Zap },
   { href: "/nuro-forge/composition", label: "Model Composition", icon: GitBranch },
   { href: "/nuro-forge/governance", label: "Governance & Safety", icon: Shield },
   { href: "/nuro-forge/fine-tuning", label: "Fine-Tuning Engine", icon: Brain },
@@ -295,7 +295,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
               <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
             ))}
 
-            <div className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium" style={{ color: "rgba(212,160,84,0.6)" }}>Nuro Forge</div>
+            <div className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium" style={{ color: "rgba(212,160,84,0.6)" }}>Model Lab</div>
             {NURO_FORGE_NAV.map(item => (
               <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
             ))}

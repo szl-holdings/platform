@@ -85,7 +85,7 @@ export default function HuntAgents() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Search className="w-5 h-5 text-emerald-400" />
-            <h1 className="text-lg font-semibold text-white">Autonomous Threat Hunting Agents</h1>
+            <h1 className="text-lg font-semibold text-white">Threat Hunters</h1>
           </div>
           <p className="text-xs text-zinc-500">AI agents formulate hypotheses, query SIEM/EDR/network data, identify novel attack patterns, and generate hunt reports. Agents learn from previous investigations.</p>
         </div>

@@ -98,7 +98,7 @@ const PLAYBOOKS: Playbook[] = [
     active: true,
     steps: [
       { id: "S001", seq: 1, name: "Alert Validation & Triage", type: "assess", auto: true, sla: "5m", detail: "Validate SIEM alert. Cross-reference with threat intel feeds. Determine confidence score and affected assets. Open incident ticket.", status: "completed" },
-      { id: "S002", seq: 2, name: "Crisis Declaration", type: "escalate", auto: false, assignee: "SOC Lead", sla: "10m", detail: "If confidence ≥ 85% and production assets affected: declare CITADEL crisis. Set ICS level. Activate war room. Page incident commander.", status: "completed" },
+      { id: "S002", seq: 2, name: "Crisis Declaration", type: "escalate", auto: false, assignee: "SOC Lead", sla: "10m", detail: "If confidence ≥ 85% and production assets affected: declare a crisis. Set ICS level. Activate crisis response. Page incident commander.", status: "completed" },
       { id: "S003", seq: 3, name: "Evidence Preservation Window", type: "contain", auto: false, assignee: "Forensics Lead", sla: "15m", detail: "Order memory dump on affected hosts. Preserve logs on adjacent systems. Initiate chain of custody. Do NOT isolate yet.", status: "completed" },
       { id: "S004", seq: 4, name: "Threat Actor Attribution", type: "assess", auto: true, sla: "20m", detail: "Run TTP matching against MITRE ATT&CK. Cross-reference C2 infrastructure. Query threat intel for actor profile. Confidence scoring.", status: "completed" },
       { id: "S005", seq: 5, name: "Client Impact Assessment", type: "assess", auto: false, assignee: "MSP Lead", sla: "15m", detail: "Identify managed client assets in blast radius. Notify client CISOs. Assess SLA implications. Activate client communication protocol.", status: "completed" },

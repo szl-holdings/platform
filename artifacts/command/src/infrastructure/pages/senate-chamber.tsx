@@ -161,11 +161,11 @@ export default function SenateChamber() {
         <div className="flex items-center gap-3 mb-1">
           <BookOpen className="w-5 h-5" style={{ color: "#c9a227" }} />
           <h1 className="font-display text-lg tracking-[0.2em] gold-text gold-glow font-bold uppercase">
-            Senate Chamber
+            Governance Board
           </h1>
         </div>
         <p className="text-xs text-slate-500 ml-8">
-          Multi-party governance — critical changes require Senate vote · Tribune veto capability
+          Multi-party governance — critical changes require committee vote · Veto capability
         </p>
       </div>
 
@@ -188,20 +188,20 @@ export default function SenateChamber() {
       <div className="imperial-card rounded-lg p-4">
         <div className="flex items-center gap-2 mb-3">
           <Gavel className="w-4 h-4" style={{ color: "#c9a227" }} />
-          <span className="font-display text-xs tracking-[0.15em] gold-text uppercase">Lex Imperium — Governance Charter</span>
+          <span className="font-display text-xs tracking-[0.15em] gold-text uppercase">Governance Charter</span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-400">
           <div className="rounded p-3 bg-white/3 border border-white/5">
             <div className="font-display text-[10px] tracking-[0.12em] gold-text mb-1 uppercase">Scaling Changes</div>
-            Require 3 Senate votes. Impact analysis by Centurion AI required before proposal.
+            Require 3 committee votes. Impact analysis by AI Ops required before proposal.
           </div>
           <div className="rounded p-3 bg-white/3 border border-white/5">
             <div className="font-display text-[10px] tracking-[0.12em] gold-text mb-1 uppercase">Security Changes</div>
-            SOVEREIGN/CONFIDENTIAL resources require Senate vote + Praetorian review.
+            SOVEREIGN/CONFIDENTIAL resources require committee vote + Security Center review.
           </div>
           <div className="rounded p-3 bg-white/3 border border-white/5">
-            <div className="font-display text-[10px] tracking-[0.12em] gold-text mb-1 uppercase">Tribune Veto</div>
-            Any designated Tribune may veto pending proposals. Veto requires written justification logged immutably.
+            <div className="font-display text-[10px] tracking-[0.12em] gold-text mb-1 uppercase">Approver Veto</div>
+            Any designated Approver may veto pending proposals. Veto requires written justification logged immutably.
           </div>
         </div>
       </div>
@@ -211,7 +211,7 @@ export default function SenateChamber() {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Clock className="w-4 h-4 text-yellow-400" />
-            <span className="font-display text-xs tracking-[0.12em] text-yellow-400 uppercase">Awaiting Senate Vote ({pending.length})</span>
+            <span className="font-display text-xs tracking-[0.12em] text-yellow-400 uppercase">Awaiting Committee Vote ({pending.length})</span>
           </div>
           <div className="space-y-3">
             {pending.map((p) => <ProposalCard key={p.id} proposal={p} />)}

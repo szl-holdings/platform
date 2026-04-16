@@ -51,13 +51,13 @@ export default function TournamentArenaPage() {
               <Trophy className="w-4 h-4" style={{ color: "#f59e0b" }} />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.9)" }}>Tournament Arena</h1>
-              <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>{totalDuels.toLocaleString()} duels completed · {models.length} models competing</p>
+              <h1 className="text-xl font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.9)" }}>Model Benchmarks</h1>
+              <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>{totalDuels.toLocaleString()} tests completed · {models.length} models competing</p>
             </div>
           </div>
           <button onClick={executeDuel} className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-medium"
             style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.2)" }}>
-            <Swords className="w-3.5 h-3.5" /> Run Duel
+            <Swords className="w-3.5 h-3.5" /> Run Test
           </button>
         </m.div>
 
@@ -68,7 +68,7 @@ export default function TournamentArenaPage() {
               <div className="flex items-center justify-center gap-2 mb-4">
                 <Swords className="w-4 h-4" style={{ color: "#f59e0b" }} />
                 <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#f59e0b" }}>
-                  {activeDuel.phase === "running" ? "Duel in Progress" : "Duel Complete"} — {activeDuel.domain}
+                  {activeDuel.phase === "running" ? "Test in Progress" : "Test Complete"} — {activeDuel.domain}
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -76,7 +76,7 @@ export default function TournamentArenaPage() {
                   <div className="text-sm font-bold" style={{ color: activeDuel.phase === "done" && activeDuel.result?.winner === activeDuel.c.name ? "#10b981" : "rgba(255,255,255,0.7)" }}>
                     {activeDuel.c.name}
                   </div>
-                  <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>{activeDuel.c.provider} · Elo {activeDuel.c.elo}</div>
+                  <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>{activeDuel.c.provider} · Score {activeDuel.c.elo}</div>
                   {activeDuel.phase === "done" && activeDuel.result?.winner === activeDuel.c.name && (
                     <m.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full" style={{ background: "rgba(16,185,129,0.12)", color: "#10b981" }}>
                       <Crown className="w-3 h-3" /> <span className="text-[10px] font-bold">Winner</span>
@@ -96,7 +96,7 @@ export default function TournamentArenaPage() {
                   <div className="text-sm font-bold" style={{ color: activeDuel.phase === "done" && activeDuel.result?.winner === activeDuel.d.name ? "#10b981" : "rgba(255,255,255,0.7)" }}>
                     {activeDuel.d.name}
                   </div>
-                  <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>{activeDuel.d.provider} · Elo {activeDuel.d.elo}</div>
+                  <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>{activeDuel.d.provider} · Score {activeDuel.d.elo}</div>
                   {activeDuel.phase === "done" && activeDuel.result?.winner === activeDuel.d.name && (
                     <m.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full" style={{ background: "rgba(16,185,129,0.12)", color: "#10b981" }}>
                       <Crown className="w-3 h-3" /> <span className="text-[10px] font-bold">Winner</span>
@@ -126,7 +126,7 @@ export default function TournamentArenaPage() {
         {selectedView === "leaderboard" ? (
           <div className="rounded-lg overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.04)" }}>
             <div className="grid grid-cols-[40px_1fr_80px_70px_70px_70px_80px_80px] gap-2 px-4 py-2" style={{ background: "rgba(255,255,255,0.02)" }}>
-              {["#", "Model", "Elo", "W", "L", "D", "Latency", "$/1k"].map(h => (
+              {["#", "Model", "Score", "W", "L", "D", "Latency", "$/1k"].map(h => (
                 <span key={h} className="text-[9px] uppercase tracking-wider font-medium" style={{ color: "rgba(255,255,255,0.2)" }}>{h}</span>
               ))}
             </div>
@@ -157,7 +157,7 @@ export default function TournamentArenaPage() {
           <div className="space-y-2">
             {duels.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.3)" }}>No duels recorded yet. Click "Run Duel" to start.</p>
+                <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.3)" }}>No tests recorded yet. Click "Run Test" to start.</p>
               </div>
             ) : duels.map((d, i) => (
               <m.div key={d.id} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}

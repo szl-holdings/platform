@@ -9,8 +9,8 @@ const ECOSYSTEM_APPS = [
   { id: "terra", name: "Terra", role: "Business Telemetry Intel", agent: "Deal Scout", icon: TrendingUp, color: "text-emerald-400", bg: "bg-emerald-400/10", borderColor: "border-emerald-400/20" },
   { id: "dreamscape", name: "Alloy Predict", role: "Predictive Intelligence", agent: "Alloy Predictor", icon: Zap, color: "text-violet-400", bg: "bg-violet-400/10", borderColor: "border-violet-400/20" },
   { id: "carlota-jo", name: "Carlota Jo", role: "Advisory Intelligence", agent: "Advisory Agent", icon: Brain, color: "text-pink-400", bg: "bg-pink-400/10", borderColor: "border-pink-400/20" },
-  { id: "aegis", name: "Aegis", role: "Immune System", agent: "Sacsayhuamán Shield", icon: Shield, color: "text-orange-400", bg: "bg-orange-400/10", borderColor: "border-orange-400/20" },
-  { id: "lyte", name: "Lyte", role: "Nervous System", agent: "Qhapaq Ñan Router", icon: Activity, color: "text-amber-400", bg: "bg-amber-400/10", borderColor: "border-amber-400/20" },
+  { id: "aegis", name: "Aegis", role: "Security Operations", agent: "Adaptive Defense", icon: Shield, color: "text-orange-400", bg: "bg-orange-400/10", borderColor: "border-orange-400/20" },
+  { id: "lyte", name: "Lyte", role: "Observability Layer", agent: "Signal Router", icon: Activity, color: "text-amber-400", bg: "bg-amber-400/10", borderColor: "border-amber-400/20" },
   { id: "szl-holdings", name: "SZL Holdings", role: "Portfolio Intelligence", agent: "Portfolio Analyst", icon: TrendingUp, color: "text-indigo-400", bg: "bg-indigo-400/10", borderColor: "border-indigo-400/20" },
   { id: "stephen", name: "Stephen", role: "Brand Intelligence", agent: "Brand Monitor", icon: Radio, color: "text-rose-400", bg: "bg-rose-400/10", borderColor: "border-rose-400/20" },
 ];
@@ -61,8 +61,8 @@ const GLOBAL_STATS = [
   { label: "Active Agents", value: "9", sub: "across ecosystem", color: "text-emerald-400", bg: "bg-emerald-400/10" },
   { label: "Actions Today", value: "1,847", sub: "total executions", color: "text-amber-400", bg: "bg-amber-400/10" },
   { label: "Avg Confidence", value: "88%", sub: "decision quality", color: "text-cyan-400", bg: "bg-cyan-400/10" },
-  { label: "System 1 (Inti)", value: "6", sub: "reflexive agents", color: "text-yellow-400", bg: "bg-yellow-400/10" },
-  { label: "System 2 (Mama Q)", value: "3", sub: "deep reasoning", color: "text-indigo-400", bg: "bg-indigo-400/10" },
+  { label: "Fast Analysis (S1)", value: "6", sub: "reflexive agents", color: "text-yellow-400", bg: "bg-yellow-400/10" },
+  { label: "Deep Reasoning (S2)", value: "3", sub: "deliberate analysis", color: "text-indigo-400", bg: "bg-indigo-400/10" },
   { label: "Policy Checks", value: "0 blocked", sub: "all cleared today", color: "text-emerald-400", bg: "bg-emerald-400/10" },
 ];
 
@@ -219,7 +219,7 @@ function LiveClock() {
   return (
     <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
-      <span className="text-emerald-400 font-semibold text-[10px] uppercase tracking-wider">Quipu Engine Active</span>
+      <span className="text-emerald-400 font-semibold text-[10px] uppercase tracking-wider">Orchestration Engine Active</span>
       <span className="text-border">·</span>
       <span>{time.toLocaleTimeString("en-US", { hour12: false })}</span>
     </div>
@@ -236,14 +236,14 @@ export default function QuipuCommand() {
             <div className="w-8 h-8 rounded-lg bg-amber-400/15 flex items-center justify-center">
               <span className="text-amber-400 text-lg">𝕼</span>
             </div>
-            <h1 className="text-xl font-display font-bold text-foreground tracking-tight">Quipu Command</h1>
+            <h1 className="text-xl font-display font-bold text-foreground tracking-tight">Agent Orchestration</h1>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-amber-400/10 text-amber-400 border border-amber-400/20">
               9 agents active
             </span>
           </div>
           <p className="text-xs text-muted-foreground">
-            The agentic core — each knot is an agent with a domain mission, each thread connects to the apps they serve.
-            <span className="text-amber-400/60 ml-2 font-mono">Quipu Engine v2.1</span>
+            The agentic core — each node is an agent with a domain mission, connected to the apps they serve.
+            <span className="text-amber-400/60 ml-2 font-mono">Orchestration Engine v2.1</span>
           </p>
         </div>
         <LiveClock />
@@ -265,12 +265,12 @@ export default function QuipuCommand() {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
             <span className="text-amber-400">⌇</span>
-            Quipu String — Agent Network Topology
+            Agent Network Topology
           </h3>
           <div className="flex items-center gap-4 text-[10px] text-muted-foreground font-mono">
             <span className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" />
-              Active knot
+              Active node
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-slate-600 inline-block" />
@@ -345,9 +345,9 @@ export default function QuipuCommand() {
       <div className="flex flex-wrap gap-3">
         {[
           { href: "/agent-spawner", label: "Spawn New Agent" },
-          { href: "/chasqui-relay", label: "Chasqui Relay Console" },
-          { href: "/dual-mind", label: "Dual-Mind Monitor" },
-          { href: "/willaq-umu", label: "Willaq Umu Oracle" },
+          { href: "/chasqui-relay", label: "Signal Routing Console" },
+          { href: "/dual-mind", label: "Dual-Mode Monitor" },
+          { href: "/willaq-umu", label: "AI Advisor Console" },
         ].map(link => (
           <Link key={link.href} href={link.href}>
             <span className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-xs text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all cursor-pointer">

@@ -30,13 +30,57 @@ export default function CopilotScreen() {
 
   const welcomeMessage = WELCOME_MESSAGES[activeWorkspace] ?? "How can I help?";
 
+  const getResponse = (workspace: string, query: string): string => {
+    const q = query.toLowerCase();
+    const responses: Record<string, string[]> = {
+      defense: [
+        "Current threat posture: 2 active P1 incidents under containment. SOC team engaged on APT29 lateral movement — containment at 87%. SIEM showing 94% reduction in false positives post-tuning.",
+        "Compliance status: SOC 2 Type II audit in progress, 91% controls passed. 3 remediation items open with target closure by end of quarter.",
+        "No active critical incidents. Last 24h: 14 alerts triaged, 12 auto-resolved. Threat hunting queue: 3 campaigns active.",
+      ],
+      fleet: [
+        "Fleet status: 23 vessels active, 2 in port, 1 undergoing scheduled maintenance. AIS coverage nominal across all monitored routes.",
+        "Route optimization analysis complete. Current fuel efficiency is 4.2% above benchmark. No adverse weather in primary shipping lanes.",
+        "Dark fleet activity detected: 2 vessels showing AIS gap exceeding 8h in the Black Sea corridor. Behavioral analysis flagged for review.",
+      ],
+      properties: [
+        "Portfolio overview: 847 active listings, 12 pending closings this month. Miami Beach micro-market showing 8.3% YoY appreciation above model forecast.",
+        "Market signals: Cap rate compression continuing in Class A multifamily. 3 distress opportunities flagged in NYC portfolio scan.",
+        "Deal pipeline: 4 assets in due diligence, 2 LOIs outstanding. Projected Q2 deployment: $42M.",
+      ],
+      operations: [
+        "System health: 99.97% uptime across all services. API gateway latency at 48ms P99. No active incidents.",
+        "Cost anomaly detected: GPU cluster spend up 34% week-over-week. Usage spike traced to model evaluation jobs. Reviewing optimization options.",
+        "Deployment summary: 8 releases today, all green. Rollback rate: 0%. Next scheduled maintenance window: Sunday 02:00 UTC.",
+      ],
+      advisory: [
+        "Client overview: 18 active engagements. 3 deliverables due this week. Q2 pipeline: $2.8M in qualified opportunities.",
+        "Upcoming sessions: 4 client calls scheduled today. Preparation materials for Meridian Capital briefing are ready for review.",
+        "Engagement health: 2 accounts flagged for check-in — response time trending above SLA. Recommend outreach this week.",
+      ],
+      portfolio: [
+        "Portfolio performance: +22% YTD across all holdings. Top performer: Vessels Maritime (+34%). Aegis Security on track for Series B milestones.",
+        "Board prep: Next meeting in 11 days. Deck 80% complete. 3 action items from last session still open.",
+        "Fund activity: $3.2M deployed this quarter. 2 new term sheets under review. Liquidity position: strong.",
+      ],
+      founder: [
+        "Personal command overview: 3 priority articles in draft, 2 venture meetings this week, 4 investor updates due end of month.",
+        "Content performance: Last article reached 12,400 views. LinkedIn engagement up 18% this quarter.",
+        "Venture pipeline: 2 new deals in screening, 1 in final due diligence. Advisory board expansion discussion pending.",
+      ],
+    };
+    const pool = responses[workspace] ?? responses.portfolio;
+    const idx = Math.abs(q.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % pool.length;
+    return pool[idx];
+  };
+
   const handleSend = () => {
     if (!input.trim()) return;
     const userMsg: Message = { id: `u-${Date.now()}`, role: "user", content: input.trim(), timestamp: new Date() };
     const assistantMsg: Message = {
       id: `a-${Date.now()}`,
       role: "assistant",
-      content: `[${config.copilotName}] I'm processing your request about "${input.trim().slice(0, 50)}". In a full deployment, this would connect to the ${config.label} AI backend. For now, I can confirm the ${config.shortLabel} workspace is operational with all systems nominal.`,
+      content: getResponse(activeWorkspace, input.trim()),
       timestamp: new Date(),
     };
     setMessages(prev => [...prev, userMsg, assistantMsg]);

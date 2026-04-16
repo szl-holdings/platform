@@ -480,10 +480,10 @@ export default function PhantomWarRoom() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Crosshair className="w-3.5 h-3.5" style={{ color: PHANTOM_ACCENT }} />
-            <span className="text-[10px] font-bold uppercase tracking-widest font-mono" style={{ color: PHANTOM_ACCENT }}>PHANTOM · Adversary Simulation Engine</span>
-            <span className="px-1.5 py-0.5 rounded text-[8px] font-bold" style={{ background: "rgba(168,85,247,0.15)", color: PHANTOM_ACCENT }}>WAR ROOM</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest font-mono" style={{ color: PHANTOM_ACCENT }}>Adversary Simulation Engine</span>
+            <span className="px-1.5 py-0.5 rounded text-[8px] font-bold" style={{ background: "rgba(168,85,247,0.15)", color: PHANTOM_ACCENT }}>SIMULATION</span>
           </div>
-          <h1 className="text-xl font-bold text-white">PHANTOM War Room</h1>
+          <h1 className="text-xl font-bold text-white">Simulation Center</h1>
           <p className="text-[11px] mt-0.5" style={{ color: DS.text.muted }}>
             NSA-inspired adversary simulation — AI-generated attack campaigns mapped to MITRE ATT&CK with real-time kill chain visualization
           </p>

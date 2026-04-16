@@ -1,7 +1,7 @@
 export const DARK_FLEET_VESSELS = [
   {
     id: "DFE-001",
-    name: "GHOST MERIDIAN",
+    name: "PACIFIC MERIDIAN",
     imo: "9821045",
     flag: "Unknown",
     type: "VLCC",
@@ -36,7 +36,7 @@ export const DARK_FLEET_VESSELS = [
   },
   {
     id: "DFE-002",
-    name: "NORTHERN PHANTOM",
+    name: "URAL SEA QUEEN",
     imo: "9654321",
     flag: "Comoros",
     type: "Suezmax",
@@ -106,7 +106,7 @@ export const DARK_FLEET_VESSELS = [
   },
   {
     id: "DFE-004",
-    name: "DELTA SPECTRE",
+    name: "GUINEA MARINER",
     imo: "9445566",
     flag: "Cameroon",
     type: "Handysize Tanker",

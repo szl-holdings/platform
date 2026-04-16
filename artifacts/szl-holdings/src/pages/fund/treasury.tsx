@@ -25,7 +25,7 @@ const CAPITAL_CALLS = [
 ];
 
 const DISTRIBUTIONS = [
-  { id: "d2", date: "Feb 28, 2026", amount: "$3.8M", type: "Realized proceeds — INCA partial exit", status: "distributed" },
+  { id: "d2", date: "Feb 28, 2026", amount: "$3.8M", type: "Realized proceeds — SZL Cortex partial exit", status: "distributed" },
   { id: "d1", date: "Aug 30, 2025", amount: "$2.1M", type: "Income distribution — mgmt fee offsets", status: "distributed" },
 ];
 

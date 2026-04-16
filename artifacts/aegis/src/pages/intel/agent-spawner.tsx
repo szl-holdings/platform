@@ -48,7 +48,7 @@ const DOMAIN_TEMPLATES = [
   {
     id: "security-sentinel", name: "Security Sentinel", icon: Shield, color: "text-orange-400", bg: "bg-orange-400/10",
     description: "Enforces agent security policies, detects threats, and orchestrates immune response.",
-    defaultInstruction: "Monitor all agent actions for policy violations, detect anomalous AI behavior, enforce Sacsayhuamán Shield protocols.",
+    defaultInstruction: "Monitor all agent actions for policy violations, detect anomalous AI behavior, enforce Policy Shield protocols.",
     domain: "Aegis", systemType: "inti" as const,
     capabilities: ["Policy enforcement", "Anomaly detection", "Action auditing", "Threat response"],
   },
@@ -68,7 +68,7 @@ const LIVE_AGENTS = [
   { name: "Alloy Predictor", domain: "Alloy Predict", status: "active", uptime: "3d 18h", actions: 445, lastAction: "8m ago" },
   { name: "Advisory Agent", domain: "Carlota Jo", status: "monitoring", uptime: "10d 4h", actions: 312, lastAction: "1h ago" },
   { name: "Security Sentinel", domain: "Aegis", status: "active", uptime: "30d 0h", actions: 7234, lastAction: "1s ago" },
-  { name: "Qhapaq Ñan Router", domain: "Lyte", status: "active", uptime: "30d 0h", actions: 52843, lastAction: "1s ago" },
+  { name: "Intelligence Router", domain: "Lyte", status: "active", uptime: "30d 0h", actions: 52843, lastAction: "1s ago" },
   { name: "Portfolio Analyst", domain: "SZL Holdings", status: "monitoring", uptime: "14d 12h", actions: 2143, lastAction: "15m ago" },
   { name: "Brand Monitor", domain: "Stephen", status: "monitoring", uptime: "5d 8h", actions: 187, lastAction: "45m ago" },
 ];
@@ -184,7 +184,7 @@ export default function AgentSpawner() {
                     />
                     <p className="text-[10px] text-muted-foreground/50 mt-1 flex items-center gap-1">
                       <Sparkles className="w-3 h-3" />
-                      The Quipu Engine interprets this instruction and configures the agent's mission parameters.
+                      The AI Engine interprets this instruction and configures the agent's mission parameters.
                     </p>
                   </div>
 
@@ -212,7 +212,7 @@ export default function AgentSpawner() {
                     <div className="flex-1 p-3 rounded-lg bg-amber-400/5 border border-amber-400/15">
                       <p className="text-[10px] text-amber-400/80 font-mono flex items-center gap-1.5">
                         <Shield className="w-3 h-3" />
-                        All agent actions will pass through Sacsayhuamán Shield policy enforcement before execution.
+                        All agent actions will pass through Policy Shield enforcement before execution.
                       </p>
                     </div>
                   </div>
@@ -231,7 +231,7 @@ export default function AgentSpawner() {
                     {spawned ? (
                       <><CheckCircle2 className="w-4 h-4" /> Agent Spawned Successfully</>
                     ) : spawning ? (
-                      <><div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> Initializing Quipu Knot...</>
+                      <><div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> Initializing Agent Node...</>
                     ) : (
                       <><Plus className="w-4 h-4" /> Spawn Agent</>
                     )}
@@ -245,7 +245,7 @@ export default function AgentSpawner() {
                 <Brain className="w-6 h-6 text-muted-foreground" />
               </div>
               <p className="text-sm text-muted-foreground">Select a domain template to configure and deploy an agent</p>
-              <p className="text-xs text-muted-foreground/50 mt-1">Each agent becomes a knot on the Quipu string</p>
+              <p className="text-xs text-muted-foreground/50 mt-1">Each agent becomes a node in the network</p>
             </div>
           )}
         </div>

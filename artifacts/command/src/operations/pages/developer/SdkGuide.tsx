@@ -66,8 +66,8 @@ const threats = await client.security.getAegisThreats();
 // Aegis compliance
 const compliance = await client.security.getAegisCompliance();
 
-// Firestorm simulations
-const scenarios = await client.security.getFirestormScenarios();`,
+// Aegis simulations
+const scenarios = await client.security.getScenarios();`,
           },
           {
             name: "Analytics",
@@ -97,8 +97,8 @@ const alerts = await client.maritime.getAlerts();`,
             code: `// Alloy signal queue
 const signals = await client.alloy.getSignals();
 
-// INCA intelligence
-const campaigns = await client.ai.getIncaCampaigns();`,
+// AI intelligence
+const campaigns = await client.ai.getCampaigns();`,
           },
           {
             name: "Infrastructure",

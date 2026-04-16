@@ -3,8 +3,8 @@ import { Radio, Shield, Zap, Lock, Globe, Activity, ArrowRight, Clock, ChevronDo
 import { cn } from "@szl-holdings/shared-ui/utils";
 
 const MODELS = [
-  { id: "willaq-umu-70b", name: "Willaq Umu 70B", type: "General Oracle", latency: "420ms", cost: "$0.0018/req", requests: 4821, accuracy: 96.2, status: "optimal" },
-  { id: "inca-vision-7b", name: "INCA Vision 7B", type: "Visual Analysis", latency: "180ms", cost: "$0.0008/req", requests: 1243, accuracy: 91.4, status: "optimal" },
+  { id: "primary-intelligence-70b", name: "Primary Intelligence 70B", type: "General Reasoning", latency: "420ms", cost: "$0.0018/req", requests: 4821, accuracy: 96.2, status: "optimal" },
+  { id: "vision-analysis-7b", name: "Vision Analysis 7B", type: "Visual Analysis", latency: "180ms", cost: "$0.0008/req", requests: 1243, accuracy: 91.4, status: "optimal" },
   { id: "maritime-specialist", name: "Maritime Specialist", type: "Domain — Vessels", latency: "95ms", cost: "$0.0004/req", requests: 892, accuracy: 94.8, status: "optimal" },
   { id: "financial-oracle", name: "Financial Oracle", type: "Domain — Finance", latency: "210ms", cost: "$0.0012/req", requests: 2134, accuracy: 93.7, status: "optimal" },
   { id: "security-sentinel-llm", name: "Security Sentinel LLM", type: "Domain — Security", latency: "140ms", cost: "$0.0006/req", requests: 3847, accuracy: 97.1, status: "optimal" },
@@ -59,8 +59,8 @@ const ROUTING_RULES = [
   { condition: "Maritime domain signals", target: "Maritime Specialist", reason: "Domain expertise + lower latency", privacy: "internal" },
   { condition: "Financial analysis requests", target: "Financial Oracle", reason: "Specialized financial training", privacy: "confidential" },
   { condition: "Security policy evaluations", target: "Security Sentinel LLM", reason: "Security-hardened model + audit trail", privacy: "restricted" },
-  { condition: "General reasoning & synthesis", target: "Willaq Umu 70B", reason: "Highest capability for complex tasks", privacy: "internal" },
-  { condition: "Visual asset analysis", target: "INCA Vision 7B", reason: "Vision-optimized architecture", privacy: "public" },
+  { condition: "General reasoning & synthesis", target: "Primary Intelligence 70B", reason: "Highest capability for complex tasks", privacy: "internal" },
+  { condition: "Visual asset analysis", target: "Vision Analysis 7B", reason: "Vision-optimized architecture", privacy: "public" },
   { condition: "Code & technical questions", target: "Code Analyst 13B", reason: "Technical training corpus", privacy: "internal" },
 ];
 
@@ -89,14 +89,13 @@ export default function ChasquiRelay() {
           <div className="w-8 h-8 rounded-lg bg-cyan-400/15 flex items-center justify-center">
             <Radio className="w-4 h-4 text-cyan-400" />
           </div>
-          <h1 className="text-xl font-display font-bold text-foreground tracking-tight">Chasqui Relay Console</h1>
+          <h1 className="text-xl font-display font-bold text-foreground tracking-tight">Signal Routing Console</h1>
           <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-cyan-400/10 text-cyan-400 border border-cyan-400/20 animate-pulse">
             live
           </span>
         </div>
         <p className="text-xs text-muted-foreground">
           Real-time intelligence routing — which requests are flowing to which models, privacy boundaries enforced, and relay performance metrics.
-          Named after the <span className="text-cyan-400/70">Chasqui</span> — elite Inca messenger runners who relayed encoded information across the empire.
         </p>
       </div>
 
@@ -157,7 +156,7 @@ export default function ChasquiRelay() {
             <Lock className="w-3.5 h-3.5 text-amber-400" />
             Privacy-Aware Routing Rules
           </h3>
-          <p className="text-[10px] text-muted-foreground/70 mt-0.5">Chasqui routing logic — determining which oracle handles each request type with privacy boundaries enforced.</p>
+          <p className="text-[10px] text-muted-foreground/70 mt-0.5">Routing logic — determining which model handles each request type with privacy boundaries enforced.</p>
         </div>
         <div className="divide-y divide-border/40">
           {ROUTING_RULES.map((rule, i) => {

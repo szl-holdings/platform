@@ -27,7 +27,7 @@ const tiers = [
     notIncluded: [
       "Adversary emulation",
       "MSP command (client management)",
-      "Intelligence Engine (INCA Labs)",
+      "Intelligence Engine (AI Labs)",
       "Custom compliance frameworks",
     ],
   },
@@ -54,7 +54,7 @@ const tiers = [
       "API access",
     ],
     notIncluded: [
-      "INCA Intelligence Labs",
+      "AI Intelligence Labs",
       "Dedicated security engineer",
     ],
   },
@@ -68,7 +68,7 @@ const tiers = [
     highlight: false,
     features: [
       "Full Aegis platform — all workspaces",
-      "INCA Intelligence Labs access",
+      "AI Intelligence Labs access",
       "Custom AI security models",
       "Classified threat feed integration",
       "FedRAMP / CMMC / IL-4 support",

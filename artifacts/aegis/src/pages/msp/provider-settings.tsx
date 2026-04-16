@@ -33,7 +33,7 @@ const PROVIDER_OPTIONS = [
   { value: "halopsa", label: "HaloPSA", type: "psa", auth: "oauth2", supported: true },
   { value: "datto_rmm", label: "Datto RMM", type: "rmm", auth: "api_key", supported: true },
   { value: "autotask_psa", label: "Autotask PSA", type: "psa", auth: "basic", supported: true },
-  { value: "atera", label: "Atera (Coming Soon)", type: "both", auth: "api_key", supported: false },
+  { value: "atera", label: "Atera", type: "both", auth: "api_key", supported: false },
 ];
 
 const statusBadge: Record<string, { label: string; className: string; icon: React.ReactNode }> = {

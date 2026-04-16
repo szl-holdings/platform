@@ -31,10 +31,10 @@ export default function GettingStarted() {
         <h2 className="text-base font-display font-semibold mb-4">API Domains</h2>
         <div className="grid md:grid-cols-3 gap-3">
           {[
-            { icon: Shield, name: "Security", desc: "Firestorm — threat detection, compliance, red team simulations", color: "text-[#c45a4a] bg-[#c45a4a]/10" },
+            { icon: Shield, name: "Security", desc: "Aegis — threat detection, compliance, red team simulations", color: "text-[#c45a4a] bg-[#c45a4a]/10" },
             { icon: Globe, name: "Analytics", desc: "Lyte — decision analytics, metrics, observability", color: "text-[#4a90b8] bg-[#4a90b8]/10" },
             { icon: Globe, name: "Maritime", desc: "Vessels — fleet tracking, voyage management, maritime intelligence", color: "text-cyan-400 bg-cyan-500/10" },
-            { icon: Zap, name: "AI / ML", desc: "INCA, Alloy — agentic intelligence, workflow orchestration, signal analysis", color: "text-violet-400 bg-violet-500/10" },
+            { icon: Zap, name: "AI / ML", desc: "SZL Cortex, Alloy — agentic intelligence, workflow orchestration, signal analysis", color: "text-violet-400 bg-violet-500/10" },
             { icon: Globe, name: "Real Estate", desc: "Terra — portfolio intelligence, climate risk, property analytics", color: "text-[#6b8f71] bg-[#6b8f71]/10" },
             { icon: Globe, name: "Platform", desc: "Auth, CMS, ecosystem health, extensions", color: "text-[#d4a054] bg-[#d4a054]/10" },
           ].map((domain) => (
@@ -69,7 +69,7 @@ const client = new SZLClient({
 const health = await client.platform.health();
 
 // Get security threats
-const threats = await client.security.getFirestormThreats();
+const threats = await client.security.getThreats();
 
 // Access analytics
 const metrics = await client.analytics.getLyteMetrics();`}</code></pre>

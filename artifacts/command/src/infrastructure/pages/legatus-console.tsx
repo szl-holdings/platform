@@ -9,6 +9,8 @@ import { IMPERIUM_DATA, getAquilaColor, getAquilaLabel, getThreatColor, getClass
 import { ClassificationBadge } from "@imp/components/classification-badge";
 import { cn } from "@imp/lib/utils";
 
+const THREAT_DISPLAY: Record<string, string> = { PAX: "CLEAR", VIGILIA: "ELEVATED", BELLUM: "ACTIVE", FUROR: "CRITICAL" };
+
 function AquilaGauge({ score }: { score: number }) {
   const color = getAquilaColor(score);
   const label = getAquilaLabel(score);
@@ -56,16 +58,16 @@ function LegionCard({ legion }: { legion: Legion }) {
           <AquilaGauge score={legion.aquilaScore} />
           <div className="flex-1 pl-4 space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-500">Cohorts</span>
+              <span className="text-slate-500">Groups</span>
               <span className="font-mono text-slate-300">{legion.cohorts.length}</span>
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-500">Sentinels</span>
+              <span className="text-slate-500">Resources</span>
               <span className="font-mono text-slate-300">{totalSentinels}</span>
             </div>
             <div className="flex items-center justify-between text-xs">
               <span className="text-slate-500">Threat</span>
-              <span className="font-mono text-xs tracking-wider" style={{ color: threatColor }}>{legion.threatLevel}</span>
+              <span className="font-mono text-xs tracking-wider" style={{ color: threatColor }}>{THREAT_DISPLAY[legion.threatLevel] ?? legion.threatLevel}</span>
             </div>
             <div className="flex items-center justify-between text-xs">
               <span className="text-slate-500">Monthly</span>
@@ -120,11 +122,11 @@ export default function LegatusConsole() {
           <div className="flex items-center gap-3 mb-1">
             <Crown className="w-5 h-5" style={{ color: "#c9a227" }} />
             <h1 className="font-display text-lg tracking-[0.2em] gold-text gold-glow font-bold uppercase">
-              Legatus Console
+              Executive Console
             </h1>
           </div>
           <p className="text-xs text-slate-500 tracking-wide ml-8">
-            Empire at a glance — {imperium.name}
+            Platform at a glance — {imperium.name}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -148,33 +150,33 @@ export default function LegatusConsole() {
           />
           <div>
             <span className="font-display text-sm tracking-[0.2em] font-bold mr-2" style={{ color: getThreatColor(imperium.threatLevel) }}>
-              THREAT: {imperium.threatLevel}
+              THREAT: {THREAT_DISPLAY[imperium.threatLevel] ?? imperium.threatLevel}
             </span>
             <span className="text-xs text-slate-400">
-              {imperium.threatLevel === "PAX" && "All quiet on all fronts. No active threats."}
-              {imperium.threatLevel === "VIGILIA" && "Elevated reconnaissance. WAF engaged. Monitoring intensified."}
-              {imperium.threatLevel === "BELLUM" && "Active attack detected. Hardening protocols engaged."}
-              {imperium.threatLevel === "FUROR" && "Critical breach. Emergency protocols active. Command isolation required."}
+              {imperium.threatLevel === "PAX" && "All clear — no active threats. Standard monitoring in effect."}
+              {imperium.threatLevel === "VIGILIA" && "Elevated — enhanced monitoring active. WAF rules tightened."}
+              {imperium.threatLevel === "BELLUM" && "Active threat detected. Emergency hardening protocols engaged."}
+              {imperium.threatLevel === "FUROR" && "Critical breach. Emergency protocols active. Manual isolation required."}
             </span>
           </div>
         </div>
         <Link href="/infrastructure/praetorian">
           <a className="text-xs font-mono tracking-wider text-slate-400 hover:text-gold transition-colors flex items-center gap-1">
-            PRAETORIAN <ChevronRight className="w-3 h-3" />
+            SECURITY CENTER <ChevronRight className="w-3 h-3" />
           </a>
         </Link>
       </div>
 
       {/* Stat grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard icon={Globe2} label="Aquila Score" value={`${imperium.aquilaScore}/100`}
+        <StatCard icon={Globe2} label="Health Score" value={`${imperium.aquilaScore}/100`}
           sub={getAquilaLabel(imperium.aquilaScore)} color={getAquilaColor(imperium.aquilaScore)} />
-        <StatCard icon={Server} label="Total Sentinels" value={imperium.totalResources}
-          sub={`${imperium.legions.length} Legions active`} />
+        <StatCard icon={Server} label="Total Resources" value={imperium.totalResources}
+          sub={`${imperium.legions.length} Regions active`} />
         <StatCard icon={DollarSign} label="Monthly Cost" value={`$${imperium.totalCostPerMonth.toLocaleString()}`}
           sub="All regions combined" color="#4ade80" />
         <StatCard icon={Shield} label="Sovereign Resources" value={imperium.classificationSummary.SOVEREIGN}
-          sub="Praetorian-guarded" href="/infrastructure/praetorian" />
+          sub="Security-protected" href="/infrastructure/praetorian" />
       </div>
 
       {/* Classification breakdown */}
@@ -215,7 +217,7 @@ export default function LegatusConsole() {
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Activity className="w-4 h-4" style={{ color: "#c9a227" }} />
-          <span className="font-display text-xs tracking-[0.15em] gold-text uppercase">Active Legions</span>
+          <span className="font-display text-xs tracking-[0.15em] gold-text uppercase">Active Regions</span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {imperium.legions.map((legion) => (
@@ -227,10 +229,10 @@ export default function LegatusConsole() {
       {/* Quick Actions */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {[
-          { label: "IMPERIUM MAP", sub: "Full hierarchy view", href: "/imperium-map", icon: Globe2 },
-          { label: "SENATE", sub: "3 proposals pending", href: "/senate", icon: AlertTriangle },
-          { label: "SUPPLY LINES", sub: "Network topology", href: "/supply-lines", icon: Wifi },
-          { label: "INTELLIGENCE", sub: "SIGINT briefing", href: "/intelligence", icon: Database },
+          { label: "RESOURCE MAP", sub: "Full hierarchy view", href: "/imperium-map", icon: Globe2 },
+          { label: "GOVERNANCE BOARD", sub: "3 proposals pending", href: "/senate", icon: AlertTriangle },
+          { label: "NETWORK TOPOLOGY", sub: "Service mesh routes", href: "/supply-lines", icon: Wifi },
+          { label: "INTELLIGENCE", sub: "Signals briefing", href: "/intelligence", icon: Database },
         ].map((action) => {
           const Icon = action.icon;
           return (

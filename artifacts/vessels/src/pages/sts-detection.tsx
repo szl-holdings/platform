@@ -24,7 +24,7 @@ interface StsEvent {
 const STS_EVENTS: StsEvent[] = [
   {
     id: "STS-001",
-    vessels: ["GHOST MERIDIAN", "KAZAN SPIRIT"],
+    vessels: ["PACIFIC MERIDIAN", "KAZAN SPIRIT"],
     imos: ["9821045", "9654789"],
     flags: ["Unknown", "Russia"],
     location: "Persian Gulf — 26.1°N 55.8°E",

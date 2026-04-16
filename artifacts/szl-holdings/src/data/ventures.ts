@@ -231,7 +231,7 @@ export const ventures: Venture[] = [
   },
   {
     id: "firestorm",
-    name: "Firestorm",
+    name: "Aegis",
     tagline: "Continuous Adversarial Security Simulation",
     oneLiner: "Military-grade cyber range platform enabling continuous red team / blue team exercises at enterprise scale.",
     audience: "Enterprise CISOs, defense contractors, government agencies, and compliance-driven security teams.",
@@ -239,9 +239,9 @@ export const ventures: Venture[] = [
     status: "Live",
     accentColor: "#ef4444",
     description:
-      "Firestorm replaces point-in-time penetration testing with continuous adversarial simulation across the full MITRE ATT&CK framework. The platform runs automated campaigns, adapts attack paths based on defensive responses, and delivers real-time security posture scoring with compliance-grade audit trails.",
+      "Aegis replaces point-in-time penetration testing with continuous adversarial simulation across the full MITRE ATT&CK framework. The platform runs automated campaigns, adapts attack paths based on defensive responses, and delivers real-time security posture scoring with compliance-grade audit trails.",
     painSolved:
-      "The annual pen test is a snapshot of a system that no longer exists. Adversaries operate continuously; defenders should too. Firestorm makes continuous security validation economically viable by automating the full ATT&CK matrix coverage at machine speed.",
+      "The annual pen test is a snapshot of a system that no longer exists. Adversaries operate continuously; defenders should too. Aegis makes continuous security validation economically viable by automating the full ATT&CK matrix coverage at machine speed.",
     metrics: [
       { label: "Simulations Executed", value: "31,200+", trend: "up" },
       { label: "ATT&CK Techniques Covered", value: "200+", trend: "neutral" },
@@ -258,7 +258,7 @@ export const ventures: Venture[] = [
       {
         title: "Continuous vs. Annual: Security Posture Delta",
         problem: "A Fortune 500 CISO couldn't quantify their security posture improvement to the board.",
-        solution: "Firestorm implemented continuous simulation with quarterly board-ready posture reports.",
+        solution: "Aegis implemented continuous simulation with quarterly board-ready posture reports.",
         result: "Security posture score improved from 62 to 78 over 2 quarters. Board approved expanded security budget.",
       },
     ],
@@ -279,12 +279,12 @@ export const ventures: Venture[] = [
       "Compliance posture mapping and audit report generation",
     ],
     nextMilestone: "Federal sector certification and FedRAMP path (Q3 2026)",
-    path: "/ventures/firestorm",
-    externalPath: "/firestorm/",
+    path: "/ventures/aegis",
+    externalPath: "/aegis/",
   },
   {
     id: "inca",
-    name: "INCA",
+    name: "SZL Cortex",
     tagline: "AI Research Command Center",
     oneLiner: "Enterprise-grade LLM evaluation, model governance, and AI research management platform.",
     audience: "AI/ML teams, enterprise AI governance officers, and research organizations deploying models at scale.",
@@ -292,9 +292,9 @@ export const ventures: Venture[] = [
     status: "Live",
     accentColor: "#8b5cf6",
     description:
-      "INCA provides the evaluation and governance infrastructure that enterprise AI deployments need. It tests models against proprietary data distributions, detects behavioral drift, tracks experiments, and delivers the model registry and compliance trails that regulated industries require.",
+      "SZL Cortex provides the evaluation and governance infrastructure that enterprise AI deployments need. It tests models against proprietary data distributions, detects behavioral drift, tracks experiments, and delivers the model registry and compliance trails that regulated industries require.",
     painSolved:
-      "General benchmarks don't tell you how a model performs on your data, in your context, at your risk threshold. INCA closes the evaluation gap between public benchmarks and operational deployment — and maintains the governance layer that allows enterprises to deploy AI in regulated environments.",
+      "General benchmarks don't tell you how a model performs on your data, in your context, at your risk threshold. SZL Cortex closes the evaluation gap between public benchmarks and operational deployment — and maintains the governance layer that allows enterprises to deploy AI in regulated environments.",
     metrics: [
       { label: "Pilot Clients", value: "12", trend: "up" },
       { label: "Series A Raised", value: "$14M", trend: "neutral" },
@@ -311,7 +311,7 @@ export const ventures: Venture[] = [
       {
         title: "Domain-Specific Model Validation",
         problem: "An enterprise deploying LLMs for contract analysis found benchmark scores didn't correlate with accuracy on their document types.",
-        solution: "INCA built a custom evaluation suite against their proprietary document corpus and operational edge cases.",
+        solution: "SZL Cortex built a custom evaluation suite against their proprietary document corpus and operational edge cases.",
         result: "Model selection improved. Production failure rate dropped 67%.",
       },
     ],
@@ -333,7 +333,7 @@ export const ventures: Venture[] = [
     ],
     nextMilestone: "Three new evaluation workflow modules (Q2 2026)",
     path: "/ventures/inca",
-    externalPath: "/firestorm/intel/dashboard",
+    externalPath: "/aegis/intel/dashboard",
   },
   {
     id: "terra",
@@ -435,7 +435,7 @@ export const ventures: Venture[] = [
       "Multi-agent coordination and policy enforcement",
       "DAG execution engine with retry and escalation",
       "Performance attribution per model variant",
-      "Integration with INCA, Beacon, Aegis, Lyte, and Vessels",
+      "Integration with SZL Cortex, Beacon, Aegis, Lyte, and Vessels",
     ],
     nextMilestone: "Alloy Scenario Model Library public launch (Q2 2026)",
     path: "/ventures/alloy",
@@ -492,7 +492,7 @@ export const ventures: Venture[] = [
     ],
     nextMilestone: "Lyte integration for AIOps signal-to-ticket automation (Q3 2026)",
     path: "/ventures/msp",
-    externalPath: "/firestorm/ops/dashboard",
+    externalPath: "/aegis/ops/dashboard",
   },
 ];
 

@@ -111,7 +111,7 @@ function TopologyDiagram() {
     { id: "api", label: "Container App", sub: "API Server", x: 50, y: 35, color: "#60a5fa" },
     { id: "pg", label: "PostgreSQL", sub: "Private VNet", x: 20, y: 65, color: "#f87171" },
     { id: "redis", label: "Redis Cache", sub: "Private Endpoint", x: 45, y: 65, color: "#fb923c" },
-    { id: "kv", label: "Key Vault", sub: "Praetorian", x: 70, y: 65, color: "#c9a227" },
+    { id: "kv", label: "Key Vault", sub: "Security Perimeter", x: 70, y: 65, color: "#c9a227" },
     { id: "swa", label: "Static Web Apps", sub: "×18 apps", x: 82, y: 35, color: "#4ade80" },
     { id: "sb", label: "Service Bus", sub: "9 queues", x: 20, y: 35, color: "#a78bfa" },
   ];
@@ -172,11 +172,11 @@ export default function SupplyLines() {
         <div className="flex items-center gap-3 mb-1">
           <Network className="w-5 h-5" style={{ color: "#c9a227" }} />
           <h1 className="font-display text-lg tracking-[0.2em] gold-text gold-glow font-bold uppercase">
-            Supply Lines
+            Network Topology
           </h1>
         </div>
         <p className="text-xs text-slate-500 ml-8">
-          Network topology — data flows rendered as Roman supply routes with live latency/throughput
+          Network topology — data flows rendered as service mesh routes with live latency/throughput
         </p>
       </div>
 

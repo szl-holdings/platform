@@ -1,10 +1,10 @@
 import { Brain, Cpu, GitBranch, Layers, Zap, Activity, ArrowRight, Eye } from "lucide-react";
 
 const architectures = [
-  { name: "INCA-LLM-7B", type: "Transformer", params: "7.2B", layers: 32, heads: 32, dim: 4096, status: "production", accuracy: 94.2, latency: "45ms" },
-  { name: "INCA-Vision-3B", type: "Vision Transformer", params: "3.1B", layers: 24, heads: 16, dim: 2048, status: "production", accuracy: 91.8, latency: "32ms" },
-  { name: "INCA-Code-13B", type: "Transformer", params: "13.4B", layers: 40, heads: 40, dim: 5120, status: "staging", accuracy: 96.1, latency: "78ms" },
-  { name: "INCA-Multi-1B", type: "Multi-Modal", params: "1.2B", layers: 16, heads: 12, dim: 1024, status: "research", accuracy: 88.5, latency: "28ms" },
+  { name: "SZL-LLM-7B", type: "Transformer", params: "7.2B", layers: 32, heads: 32, dim: 4096, status: "production", accuracy: 94.2, latency: "45ms" },
+  { name: "SZL-Vision-3B", type: "Vision Transformer", params: "3.1B", layers: 24, heads: 16, dim: 2048, status: "production", accuracy: 91.8, latency: "32ms" },
+  { name: "SZL-Code-13B", type: "Transformer", params: "13.4B", layers: 40, heads: 40, dim: 5120, status: "staging", accuracy: 96.1, latency: "78ms" },
+  { name: "SZL-Multi-1B", type: "Multi-Modal", params: "1.2B", layers: 16, heads: 12, dim: 1024, status: "research", accuracy: 88.5, latency: "28ms" },
 ];
 
 const layerVisualization = [
@@ -52,7 +52,7 @@ export default function NeuralExplorer() {
 
       <div className="rounded-xl border border-border bg-card p-5">
         <h2 className="font-display font-semibold mb-4 flex items-center gap-2">
-          <Layers className="w-4 h-4 text-violet-400" /> Model Cortex Visualization — INCA-LLM-7B
+          <Layers className="w-4 h-4 text-violet-400" /> Model Cortex Visualization — SZL-LLM-7B
         </h2>
         <div className="flex items-center gap-2 overflow-x-auto pb-4">
           {layerVisualization.map((layer, i) => (

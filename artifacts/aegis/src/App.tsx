@@ -254,7 +254,7 @@ const commandSurfacesNav = [
 ];
 
 const citadelNav = [
-  { path: "/citadel", label: "CITADEL War Room", icon: Flame },
+  { path: "/citadel", label: "Incident Command", icon: Flame },
   { path: "/citadel/playbooks", label: "Crisis Playbooks", icon: Play },
   { path: "/citadel/after-action", label: "After-Action Report", icon: FileText },
 ];
@@ -272,7 +272,7 @@ const governanceNavItems = [
 
 const securityNavPrimary = [
   { path: "/soc", label: "SOC Overview", icon: Activity },
-  { path: "/sacsayhuaman-shield", label: "Sacsayhuamán Shield", icon: ShieldCheck },
+  { path: "/sacsayhuaman-shield", label: "Adaptive Defense", icon: ShieldCheck },
   { path: "/incidents", label: "Incidents", icon: Shield },
   { path: "/alerts", label: "Alerts", icon: Bell },
   { path: "/cases", label: "Case Management", icon: Briefcase },
@@ -287,19 +287,19 @@ const securityNavPrimary = [
 ];
 
 const phantomSentinelNav = [
-  { path: "/phantom/war-room", label: "PHANTOM War Room", icon: Crosshair },
-  { path: "/phantom/purple-exercise", label: "Purple Team Exercise", icon: Shield },
+  { path: "/phantom/war-room", label: "Simulation Center", icon: Crosshair },
+  { path: "/phantom/purple-exercise", label: "Security Exercise", icon: Shield },
   { path: "/phantom/tabletop", label: "Executive Tabletop", icon: FileText },
-  { path: "/sentinel/behavioral", label: "SENTINEL Behavioral", icon: Eye },
+  { path: "/sentinel/behavioral", label: "Behavioral Analytics", icon: Eye },
   { path: "/threat-sim-report", label: "Simulation Reports", icon: FileText },
 ];
 
 const agenticDefenseNav = [
   { path: "/agentic-soc", label: "Agentic SOC", icon: BrainIcon },
-  { path: "/deception-grid", label: "Deception Grid", icon: Eye },
+  { path: "/deception-grid", label: "Threat Decoys", icon: Eye },
   { path: "/mtd-engine", label: "Moving Target Defense", icon: Zap },
   { path: "/digital-twin", label: "Cyber Digital Twin", icon: Layers },
-  { path: "/hunt-agents", label: "Threat Hunt Agents", icon: Search },
+  { path: "/hunt-agents", label: "Threat Hunters", icon: Search },
   { path: "/compliance-evidence", label: "Compliance Evidence", icon: ClipboardCheck },
   { path: "/vuln-lifecycle", label: "Vuln Lifecycle", icon: Bug },
   { path: "/cyber-insurance-intel", label: "Cyber Insurance Intel", icon: DollarSign },
@@ -379,10 +379,10 @@ const intelNavPrimary = [
 ];
 
 const intelCortexNav = [
-  { path: "/intel/quipu-command", label: "Quipu Command", icon: Network },
-  { path: "/intel/chasqui-relay", label: "Chasqui Relay", icon: Radio },
-  { path: "/intel/dual-mind", label: "Dual-Mind Monitor", icon: Sun },
-  { path: "/intel/willaq-umu", label: "Willaq Umu Oracle", icon: Eye },
+  { path: "/intel/quipu-command", label: "Agent Orchestration", icon: Network },
+  { path: "/intel/chasqui-relay", label: "Signal Routing", icon: Radio },
+  { path: "/intel/dual-mind", label: "Reasoning Monitor", icon: Sun },
+  { path: "/intel/willaq-umu", label: "AI Advisor", icon: Eye },
   { path: "/intel/agent-autonomy", label: "Agent Autonomy", icon: BrainIcon },
   { path: "/intel/agent-autonomy/agents", label: "↳ Live Agents", icon: Users },
   { path: "/intel/agent-autonomy/a2a", label: "↳ A2A Graph", icon: Network },
@@ -550,7 +550,7 @@ function AegisSidebarContent({ location, onNavigate, collapsed, onToggleCollapse
     },
     {
       id: "phantom-sentinel",
-      label: "PHANTOM & SENTINEL",
+      label: "Simulation & Analytics",
       items: phantomSentinelNav.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3.5 h-3.5" /> })),
     },
     {
@@ -980,9 +980,9 @@ function nav(path: string) {
 }
 
 const aegisCommands: CommandItem[] = [
-  { id: "nav-citadel-war-room", label: "CITADEL War Room", icon: "🔥", group: "CITADEL Crisis Command", keywords: ["crisis", "war room", "incident command", "ics", "emergency"], action: nav("/citadel") },
-  { id: "nav-citadel-playbooks", label: "Crisis Playbooks", icon: "⚡", group: "CITADEL Crisis Command", keywords: ["playbook", "crisis", "response", "apt", "ransomware", "scenario"], action: nav("/citadel/playbooks") },
-  { id: "nav-citadel-aar", label: "After-Action Report", icon: "📋", group: "CITADEL Crisis Command", keywords: ["after action", "aar", "post incident", "report", "lessons learned"], action: nav("/citadel/after-action") },
+  { id: "nav-citadel-war-room", label: "CITADEL Crisis Center", icon: "🔥", group: "CITADEL Crisis Response", keywords: ["crisis", "crisis response", "incident command", "ics", "emergency"], action: nav("/citadel") },
+  { id: "nav-citadel-playbooks", label: "Crisis Playbooks", icon: "⚡", group: "CITADEL Crisis Response", keywords: ["playbook", "crisis", "response", "apt", "ransomware", "scenario"], action: nav("/citadel/playbooks") },
+  { id: "nav-citadel-aar", label: "After-Action Report", icon: "📋", group: "CITADEL Crisis Response", keywords: ["after action", "aar", "post incident", "report", "lessons learned"], action: nav("/citadel/after-action") },
   { id: "nav-command-home", label: "Command Home", icon: "🏠", group: "Command Surfaces", keywords: ["home", "dashboard", "command", "operator"], action: nav("/command-home") },
   { id: "nav-investigations", label: "Investigations Board", icon: "🔍", group: "Command Surfaces", keywords: ["investigation", "case", "timeline", "entities"], action: nav("/investigations") },
   { id: "nav-decision-console", label: "Decision Console", icon: "📋", group: "Command Surfaces", keywords: ["decision", "confidence", "evidence", "approve"], action: nav("/decision-console") },
@@ -1004,7 +1004,7 @@ const aegisCommands: CommandItem[] = [
   { id: "nav-devices", label: "Device Inventory", icon: "💻", group: "Managed Operations", action: nav("/ops/devices") },
   { id: "nav-dispatch", label: "Technician Dispatch", icon: "🔧", group: "Managed Operations", action: nav("/ops/dispatch") },
   { id: "nav-intel-dashboard", label: "Intelligence Dashboard", icon: "🧠", group: "Intelligence Engine", action: nav("/intel/dashboard") },
-  { id: "nav-quipu", label: "Quipu Command", icon: "🕸️", group: "Intelligence Engine", action: nav("/intel/quipu-command") },
+  { id: "nav-quipu", label: "Agent Console", icon: "🕸️", group: "Intelligence Engine", action: nav("/intel/quipu-command") },
   { id: "nav-models", label: "Models", icon: "⚙️", group: "Intelligence Engine", action: nav("/intel/models") },
   { id: "nav-predictions", label: "Predictions", icon: "📈", group: "Intelligence Engine", action: nav("/intel/predictions") },
   { id: "nav-intel-insights", label: "Intel Insights", icon: "💡", group: "Intelligence Engine", action: nav("/intel/insights") },

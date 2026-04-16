@@ -69,7 +69,7 @@ const DEMO_STEPS: DemoStep[] = [
     durationSec: 60,
     icon: Activity,
     output: "Analyst: J. Chen — triage confirmed — network isolation action → execution mode: approval_required → approval request APR-041 created",
-    technicalDetail: "PUT /api/firestorm/incidents/41 → workflow_action INSERT → broadcastWs(approval-queue) → pubsub.publish(APPROVAL_REQUESTED)",
+    technicalDetail: "PUT /api/aegis/incidents/41 → workflow_action INSERT → broadcastWs(approval-queue) → pubsub.publish(APPROVAL_REQUESTED)",
     highlight: "High-risk actions require explicit approval. The analyst cannot bypass the gate — only a designated approver can authorize.",
   },
   {
@@ -102,7 +102,7 @@ const DEMO_STEPS: DemoStep[] = [
     durationSec: 40,
     icon: Lock,
     output: "Audit chain: 14 events — detection 14:28 → triage 14:31 → approval request 14:31 → approval granted 14:32 → execution complete 14:33. MTTD: 3min. MTTA: 4min.",
-    technicalDetail: "GET /api/firestorm/incidents/41/audit → joins workflow_actions, approval_log, tool_execution_log → ordered by timestamp",
+    technicalDetail: "GET /api/aegis/incidents/41/audit → joins workflow_actions, approval_log, tool_execution_log → ordered by timestamp",
     highlight: "The audit chain is complete and cannot be modified post-write. Every action is traceable to a human actor or to the system agent.",
   },
   {

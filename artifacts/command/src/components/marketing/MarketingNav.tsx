@@ -23,7 +23,7 @@ export function MarketingNav() {
                 <Link href="/marketing/apps/carlota-jo" className="block p-2 hover:bg-white/5 rounded text-white transition-colors">Carlota Jo</Link>
                 <Link href="/marketing/apps/stephen" className="block p-2 hover:bg-white/5 rounded text-white transition-colors">Stephen</Link>
                 <Link href="/marketing/apps/command" className="block p-2 hover:bg-white/5 rounded text-white transition-colors">Command</Link>
-                <Link href="/marketing/apps/firestorm" className="block p-2 hover:bg-white/5 rounded text-white transition-colors">Firestorm</Link>
+                <Link href="/aegis/" className="block p-2 hover:bg-white/5 rounded text-white transition-colors">Aegis</Link>
               </div>
             </div>
           </div>

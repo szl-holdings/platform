@@ -186,28 +186,6 @@ const appData = {
     ],
     stats: [{ v: "E2E", l: "Encrypted by default" }, { v: "0", l: "Data shared with third parties" }, { v: "Zero-knowledge", l: "Architecture" }],
   },
-  firestorm: {
-    name: "Firestorm",
-    tagline: "Unified Defense & Intelligence Command",
-    color: "text-orange-400",
-    accentHex: "#f97316",
-    bgGradient: "from-orange-500/20",
-    icon: Flame,
-    description: "Full-spectrum defense intelligence, multi-domain situational awareness, and command-level decision support for critical national security operations.",
-    longDescription: "Firestorm is the apex tier of the SZL defense stack. Where Aegis handles SOC command, Firestorm unifies multi-domain intelligence across cyber, physical, maritime, and geopolitical threat surfaces into a single command interface used by senior defense and government operators.",
-    features: [
-      { title: "Multi-Domain Situational Awareness", desc: "Correlates cyber, maritime, geospatial, and HUMINT signals into a unified operational picture. Battlefield-grade visualization with sub-5-second refresh on all threat domains simultaneously." },
-      { title: "Decision Support Engine", desc: "AI-powered course-of-action generation presents ranked response options with risk assessment and second-order effect modeling for senior commanders, reducing decision cycle time by 70%." },
-      { title: "Coalition Intelligence Sharing", desc: "Federated intelligence mesh allows controlled, need-to-know information sharing with allied partners without exposing classified source data. Full PKI-enforced access controls." },
-    ],
-    integrations: ["MITRE ATT&CK", "DoD DCSA Feeds", "Palantir", "Esri ArcGIS", "Five Eyes Feeds", "NATO NCIA"],
-    useCases: [
-      { title: "Crisis Response Coordination", desc: "Orchestrate multi-agency response to complex, evolving crises with unified command channels and decision logging." },
-      { title: "Persistent Threat Monitoring", desc: "Track state-sponsored actor campaigns across cyber, maritime, and physical domains with automated escalation workflows." },
-      { title: "Strategic Intelligence Briefings", desc: "Generate daily intelligence assessments for senior leadership synthesized from classified and open-source feeds." },
-    ],
-    stats: [{ v: "5s", l: "Multi-domain refresh rate" }, { v: "70%", l: "Decision cycle reduction" }, { v: "TS/SCI", l: "Classification support" }],
-  },
   command: {
     name: "Command Portal",
     tagline: "Ecosystem Orchestration",

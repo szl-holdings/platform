@@ -94,9 +94,9 @@ const DEMO_CONFIGS: Record<DemoId, {
       },
       {
         id: 2, label: "Alloy Activates Research Agent", phase: "agent",
-        description: "INCA (research intelligence) dispatched. Queries: company financials, press coverage, product releases, patent filings, LinkedIn headcount changes, pricing data.",
+        description: "AI research agent dispatched. Queries: company financials, press coverage, product releases, patent filings, LinkedIn headcount changes, pricing data.",
         icon: <Zap className="w-3.5 h-3.5" />, durationMs: 2200,
-        evidence: "INCA confidence: 84% · Sources scanned: 14 · Synthesis: 3,200 words",
+        evidence: "AI confidence: 84% · Sources scanned: 14 · Synthesis: 3,200 words",
       },
       {
         id: 3, label: "Evidence Retrieved & Synthesized", phase: "decision",
@@ -130,13 +130,13 @@ const DEMO_CONFIGS: Record<DemoId, {
         id: 1, label: "Research Query", phase: "signal",
         description: "User asks: 'Summarize the market for B2B workflow automation in 2026. Include key vendors, funding trends, and customer pain points.'",
         icon: <Eye className="w-3.5 h-3.5" />, durationMs: 400,
-        evidence: "Query source: Alloy console · Agent routing: INCA (research) + Beacon (analytics)",
+        evidence: "Query source: Alloy console · Agent routing: AI research agent + Beacon (analytics)",
       },
       {
         id: 2, label: "Multi-Source Synthesis", phase: "agent",
-        description: "INCA queries Arxiv, HuggingFace, web sources, and internal knowledge. Beacon correlates with platform metrics. Responses synthesized by Alloy orchestrator.",
+        description: "AI research agent queries Arxiv, HuggingFace, web sources, and internal knowledge. Beacon correlates with platform metrics. Responses synthesized by Alloy orchestrator.",
         icon: <Zap className="w-3.5 h-3.5" />, durationMs: 2400,
-        evidence: "Agents: INCA + Beacon · Sources: 11 · Avg confidence: 82%",
+        evidence: "Agents: SZL Cortex + Beacon · Sources: 11 · Avg confidence: 82%",
       },
       {
         id: 3, label: "Artifact Generated", phase: "action",

@@ -1401,7 +1401,7 @@ export default function ControlTowerPage() {
               className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-border rounded-lg px-3 py-1.5 transition-colors"
             >
               <Globe className="w-3.5 h-3.5" />
-              Nuro Forge
+              Model Lab
             </Link>
           </div>
         </div>

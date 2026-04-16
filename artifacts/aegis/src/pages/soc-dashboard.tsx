@@ -134,7 +134,7 @@ const PRIORITY_WORK = {
   labs: [
     { id: "EXP-047", title: "Threat Cluster Correlation — Q1 APT", severity: "Active", score: 0, status: "Running", assignee: "Neural Explorer", technique: "" },
     { id: "MDL-v3.2", title: "Churn Prediction Model — Validation", severity: "Review", score: 0, status: "Awaiting Review", assignee: "Data Team", technique: "" },
-    { id: "AGT-012", title: "Agent Workflow — Compliance Scan", severity: "Active", score: 0, status: "Executing", assignee: "Quipu Agent", technique: "" },
+    { id: "AGT-012", title: "Agent Workflow — Compliance Scan", severity: "Active", score: 0, status: "Executing", assignee: "AI Agent", technique: "" },
   ],
 };
 

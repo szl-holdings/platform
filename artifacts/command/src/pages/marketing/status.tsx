@@ -35,7 +35,7 @@ const BASELINE_SERVICES: ServiceHealth[] = [
   { name: "Carlota Jo Consulting", status: "operational", uptime: "99.99%", responseTimeMs: 43 },
   { name: "Stephen — Personal Command", status: "operational", uptime: "99.99%", responseTimeMs: 40 },
   { name: "Command Portal", status: "operational", uptime: "100%", responseTimeMs: 35 },
-  { name: "Firestorm — Defense Fusion", status: "operational", uptime: "99.97%", responseTimeMs: 76 },
+  { name: "Aegis — Defense & Intelligence", status: "operational", uptime: "99.97%", responseTimeMs: 76 },
 ];
 
 const INCIDENTS = [

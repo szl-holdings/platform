@@ -24,7 +24,7 @@ const PLATFORM_NODES = [
   { id: "alloy-engine",     label: "Alloy Engine",     icon: Layers,   connects: ["signal-bus", "workflow-exec", "ml-inference"], platform: "Alloy" },
   { id: "terra-beacon",     label: "Terra Beacon",     icon: Globe,    connects: ["signal-bus", "geo-index", "crm-sync"], platform: "Terra" },
   { id: "vessels-intel",    label: "Vessels Intel",    icon: Activity, connects: ["signal-bus", "ais-stream", "port-api"], platform: "Vessels" },
-  { id: "firestorm-soc",    label: "Firestorm SOC",    icon: Shield,   connects: ["signal-bus", "threat-db", "vuln-scan"], platform: "Firestorm" },
+  { id: "firestorm-soc",    label: "Aegis SOC",    icon: Shield,   connects: ["signal-bus", "threat-db", "vuln-scan"], platform: "Aegis" },
   { id: "signal-bus",       label: "Signal Bus",       icon: Activity, connects: ["prism-engine", "alert-engine", "escalation-mgr"], platform: "Core" },
   { id: "prism-engine",     label: "PRISM Engine",     icon: Database, connects: ["metrics-store"], platform: "Lyte" },
   { id: "alert-engine",     label: "Alert Engine",     icon: AlertTriangle, connects: ["notification-svc"], platform: "Core" },
@@ -42,7 +42,7 @@ const PLATFORM_COLORS: Record<string, string> = {
   Alloy:     "#4B8BDB",
   Terra:     "#4a90b8",
   Vessels:   "#38bdf8",
-  Firestorm: "#c45a4a",
+  Aegis: "#c45a4a",
 };
 
 const HEALTH_STYLES = {

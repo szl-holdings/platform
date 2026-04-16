@@ -6,7 +6,7 @@ const updates = [
     date: "March 2026",
     tag: "Platform",
     headline: "Navigation & page architecture overhaul across all portfolio apps",
-    summary: "Completed a comprehensive restructuring of the site architecture across SZL Holdings, Vessels, INCA, Carlota Jo, and Stephen Site. Each app now has clean marketing navigation, proper route structures, and expanded page coverage matching the master payload spec.",
+    summary: "Completed a comprehensive restructuring of the site architecture across SZL Holdings, Vessels, SZL Cortex, Carlota Jo, and Stephen Site. Each app now has clean marketing navigation, proper route structures, and expanded page coverage matching the master payload spec.",
   },
   {
     date: "February 2026",
@@ -22,9 +22,9 @@ const updates = [
   },
   {
     date: "January 2026",
-    tag: "INCA",
+    tag: "SZL Cortex",
     headline: "GPU Monitoring and LLM Evaluation Studio shipped",
-    summary: "INCA's research infrastructure received two major additions: a GPU monitoring module for compute cost optimization and an LLM evaluation studio for benchmarking and comparing model performance across tasks.",
+    summary: "SZL Cortex's research infrastructure received two major additions: a GPU monitoring module for compute cost optimization and an LLM evaluation studio for benchmarking and comparing model performance across tasks.",
   },
   {
     date: "January 2026",
@@ -34,9 +34,9 @@ const updates = [
   },
   {
     date: "December 2025",
-    tag: "Firestorm",
+    tag: "Aegis",
     headline: "XDR Console and Threat Hunting Workbench launched",
-    summary: "Firestorm shipped the XDR (Extended Detection and Response) Console alongside the Threat Hunting Workbench — enabling security teams to correlate signals across endpoint, network, and cloud telemetry in a unified interface.",
+    summary: "Aegis shipped the XDR (Extended Detection and Response) Console alongside the Threat Hunting Workbench — enabling security teams to correlate signals across endpoint, network, and cloud telemetry in a unified interface.",
   },
 ];
 

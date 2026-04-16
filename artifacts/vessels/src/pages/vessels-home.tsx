@@ -523,7 +523,7 @@ export default function VesselsHome() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               { metric: "34 days", label: "Pre-designation lead time", detail: "AIS-dark vessel activity flagged before formal OFAC listing", accent: "#3b82f6" },
-              { metric: "94%", label: "Confidence score", detail: "INCA SENTINEL-GAT-v4 behavioral signature accuracy on pre-designation case", accent: "#0ea5e9" },
+              { metric: "94%", label: "Confidence score", detail: "Security AI v4 behavioral signature accuracy on pre-designation case", accent: "#0ea5e9" },
               { metric: "40K+", label: "Vessels monitored", detail: "Continuous autonomous intelligence across global maritime corridors", accent: "#38bdf8" },
               { metric: "0", label: "Compliance breaches", detail: "Fleet operators cleared exposure window before formal designation", accent: "#22d3ee" },
               { metric: "< 2h", label: "P&I notification time", detail: "From autonomous alert to insurer notification — same monitoring cycle", accent: "#67e8f9" },

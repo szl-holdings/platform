@@ -11,7 +11,7 @@ const workflows = [
 
 const changeLog = [
   { id: "CHG-041", type: "config", description: "Updated API rate limits for production", author: "System", timestamp: "14:23", status: "approved", impact: "low" },
-  { id: "CHG-040", type: "deploy", description: "Deployed v2.4.1 to Firestorm", author: "CI/CD", timestamp: "13:45", status: "completed", impact: "medium" },
+  { id: "CHG-040", type: "deploy", description: "Deployed v2.4.1 to Aegis", author: "CI/CD", timestamp: "13:45", status: "completed", impact: "medium" },
   { id: "CHG-039", type: "schema", description: "Database migration — added vessels metrics table", author: "System", timestamp: "12:30", status: "completed", impact: "high" },
   { id: "CHG-038", type: "config", description: "Feature flag 'dark-mode-v2' enabled", author: "Admin", timestamp: "11:15", status: "approved", impact: "low" },
   { id: "CHG-037", type: "security", description: "SSL certificate rotated for all services", author: "Automated", timestamp: "09:00", status: "completed", impact: "medium" },

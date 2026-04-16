@@ -78,8 +78,8 @@ const ACTIVE_CRISIS = {
 
 const TIMELINE_EVENTS: CrisisEvent[] = [
   { id: "E001", time: "14:22", elapsed: "T+0", title: "Initial Alert — SIEM Detection", detail: "APT29 TTP pattern matched on DC-PROD-03. Lateral movement via SMB. Confidence 96/100.", severity: "critical", source: "SIEM · Sentinel Watch", actor: "APT29", domain: "defense", confirmed: true },
-  { id: "E002", time: "14:24", elapsed: "T+2m", title: "Crisis Declared — ICS Level 3", detail: "J. Chen declared Citadel crisis ICS Level 3. War room activated. Playbook PB-APT-001 initiated.", severity: "critical", source: "Incident Command", confirmed: true },
-  { id: "E003", time: "14:26", elapsed: "T+4m", title: "Labs Pre-Detection Confirmed", detail: "Neural explorer had flagged pattern 8 minutes before SIEM alert. APT29 C2 beacon on INC-2846 linked.", severity: "high", source: "Aegis Labs · INCA", confirmed: true },
+  { id: "E002", time: "14:24", elapsed: "T+2m", title: "Crisis Declared — ICS Level 3", detail: "J. Chen declared Crisis ICS Level 3. Crisis response activated. Playbook PB-APT-001 initiated.", severity: "critical", source: "Incident Command", confirmed: true },
+  { id: "E003", time: "14:26", elapsed: "T+4m", title: "Labs Pre-Detection Confirmed", detail: "Neural explorer had flagged pattern 8 minutes before SIEM alert. APT29 C2 beacon on INC-2846 linked.", severity: "high", source: "Aegis Labs · AI", confirmed: true },
   { id: "E004", time: "14:29", elapsed: "T+7m", title: "Managed Client Impact Assessment", detail: "DC-PROD-03 is Northgate managed asset. SLA ticket #4827 potentially compromised. Client notified.", severity: "high", source: "MSP Command", actor: "Northgate", domain: "operations", confirmed: true },
   { id: "E005", time: "14:31", elapsed: "T+9m", title: "Evidence Preservation Initiated", detail: "Memory dump ordered on DC-PROD-03. Log preservation on 4 adjacent hosts. Chain of custody active.", severity: "medium", source: "Forensics · J. Park", confirmed: true },
   { id: "E006", time: "14:35", elapsed: "T+13m", title: "CVE-2024-3400 Correlation", detail: "Unpatched PA Firewall FW-EDGE-01 identified as likely initial access vector. CVE linked to this campaign.", severity: "critical", source: "Vulnerability Intel", confirmed: true },
@@ -91,7 +91,7 @@ const TIMELINE_EVENTS: CrisisEvent[] = [
 ];
 
 const DECISIONS: Decision[] = [
-  { id: "D001", time: "14:26", title: "Declare ICS Level 3 Crisis", rationale: "Confirmed APT29 lateral movement on production infrastructure with 3 managed clients at risk. Escalation threshold met.", decidedBy: "J. Chen (Incident Commander)", outcome: "Full war room activation. PB-APT-001 initiated. All hands on deck.", status: "enacted" },
+  { id: "D001", time: "14:26", title: "Declare ICS Level 3 Crisis", rationale: "Confirmed APT29 lateral movement on production infrastructure with 3 managed clients at risk. Escalation threshold met.", decidedBy: "J. Chen (Incident Commander)", outcome: "Full crisis response activation. PB-APT-001 initiated. All hands on deck.", status: "enacted" },
   { id: "D002", time: "14:38", title: "Defer Northgate Service Migration", rationale: "TKT-4827 (Northgate server migration) paused. DC-PROD-03 is the target host — migrating now would disrupt forensics and risk evidence contamination.", decidedBy: "R. Davis (MSP Lead)", outcome: "TKT-4827 moved to 'Hold — Security Event' status. Northgate CISO notified.", status: "enacted" },
   { id: "D003", time: "14:39", title: "Hold EDR Isolation — Preserve Evidence", rationale: "Isolation of DC-PROD-03 will sever the attacker's active session, but also destroy live forensic opportunity. Decision: monitor + collect before isolating.", decidedBy: "J. Chen (Incident Commander)", outcome: "15-minute evidence collection window. EDR isolation held pending memory dump completion.", status: "enacted" },
   { id: "D004", time: "14:52", title: "Execute EDR Isolation on DC-PROD-03", rationale: "Evidence collection complete. Memory dump captured. Live threat still active. Risk of further lateral movement exceeds forensic benefit of continued monitoring.", decidedBy: "J. Chen + S. Park (Approver)", outcome: "DC-PROD-03 isolated at 14:52. 3 adjacent hosts flagged for secondary sweep.", status: "enacted" },
@@ -103,7 +103,7 @@ const RESOURCES: ResourceAssignment[] = [
   { id: "R002", role: "Lead Threat Analyst", name: "S. Park", domain: "Defense", task: "APT29 TTP attribution, C2 mapping, kill chain analysis", status: "active" },
   { id: "R003", role: "Forensics Lead", name: "M. Rodriguez", domain: "Defense", task: "Memory dump analysis, DC-PROD-03 forensic imaging", status: "active" },
   { id: "R004", role: "MSP Client Lead", name: "R. Davis", domain: "Operations", task: "Northgate communication, SLA breach mitigation, client impact", status: "active" },
-  { id: "R005", role: "Intel Analyst", name: "INCA Neural System", domain: "Labs", task: "Real-time threat correlation, APT29 campaign pattern analysis", status: "active" },
+  { id: "R005", role: "Intel Analyst", name: "Neural Intelligence System", domain: "Labs", task: "Real-time threat correlation, APT29 campaign pattern analysis", status: "active" },
   { id: "R006", role: "Network Defense", name: "A. Thompson", domain: "Defense", task: "Firewall rule deployment, C2 path severing, perimeter hardening", status: "active" },
   { id: "R007", role: "Legal Counsel", name: "K. Wilson (PRISM)", domain: "Legal", task: "Evidence preservation requirements, breach notification obligations", status: "standby", eta: "30m" },
   { id: "R008", role: "Executive Liaison", name: "P. Santos", domain: "Executive", task: "CISO briefing, board notification draft, PR hold coordination", status: "standby" },
@@ -113,14 +113,14 @@ const RESOURCES: ResourceAssignment[] = [
 
 const COMMS: CommEntry[] = [
   { id: "C001", time: "14:22", from: "Sentinel SIEM", role: "Automated System", message: "ALERT P1: APT29 lateral movement detected on DC-PROD-03. MITRE T1021.002. Confidence 96. Incident INC-2847 opened. Assigning to J. Chen.", type: "intel", priority: "urgent" },
-  { id: "C002", time: "14:25", from: "J. Chen", role: "Incident Commander", message: "Confirming CITADEL activation. ICS Level 3. War room open. All leads report in. PB-APT-001 active. Northgate impact assessment needed immediately.", type: "action", priority: "urgent" },
-  { id: "C003", time: "14:27", from: "INCA Neural System", role: "AI Intel Agent", message: "Neural explorer analysis complete. APT29 C2 infrastructure overlaps with INC-2846. Pre-detection signal was 8 minutes ahead of SIEM. Attribution confidence: 94%. Recommending kill chain diagram.", type: "intel" },
+  { id: "C002", time: "14:25", from: "J. Chen", role: "Incident Commander", message: "Confirming ICS activation. Level 3. Crisis response open. All leads report in. PB-APT-001 active. Northgate impact assessment needed immediately.", type: "action", priority: "urgent" },
+  { id: "C003", time: "14:27", from: "Neural Intelligence System", role: "AI Intel Agent", message: "Neural explorer analysis complete. APT29 C2 infrastructure overlaps with INC-2846. Pre-detection signal was 8 minutes ahead of SIEM. Attribution confidence: 94%. Recommending kill chain diagram.", type: "intel" },
   { id: "C004", time: "14:29", from: "R. Davis", role: "MSP Client Lead", message: "Northgate CISO K. O'Brien contacted. Confirmed DC-PROD-03 is critical infrastructure for their migration. TKT-4827 placed on hold. They're requesting hourly updates.", type: "update" },
   { id: "C005", time: "14:33", from: "S. Park", role: "Lead Threat Analyst", message: "APT29 Kill chain mapped: Recon → FW exploit (CVE-2024-3400) → Initial access → Credential harvesting → Lateral move SMB → DC-PROD-03. Staging via S3. Classic FIN7-adjacent pattern.", type: "intel" },
   { id: "C006", time: "14:41", from: "J. Chen", role: "Incident Commander", message: "Decision logged: Holding EDR isolation for 15 min evidence window. M. Rodriguez — begin memory dump NOW. S. Park — continue live monitoring, document every lateral attempt. A. Thompson — block all SMB to DC-PROD-03 adjacent hosts.", type: "action", priority: "urgent" },
   { id: "C007", time: "14:52", from: "J. Chen", role: "Incident Commander", message: "EDR isolation approved and executed on DC-PROD-03 at 14:52. Memory dump complete. 3 adjacent hosts flagged. C2 beacon severed by A. Thompson 14:50. Moving to eradication phase prep.", type: "action" },
   { id: "C008", time: "15:02", from: "P. Santos", role: "Executive Liaison", message: "CISO brief delivered. Board notification draft ready — holding pending legal review. PR statement drafted. No external disclosure. Legal hold on all logs confirmed by K. Wilson.", type: "update" },
-  { id: "C009", time: "15:05", from: "CITADEL SYSTEM", role: "Automated Broadcast", message: "BROADCAST: Crisis status update distributed to all connected verticals. Vessels, Terra, PRISM, SZL Holdings — crisis banner active. Cross-domain impact assessment underway.", type: "broadcast" },
+  { id: "C009", time: "15:05", from: "INCIDENT SYSTEM", role: "Automated Broadcast", message: "BROADCAST: Crisis status update distributed to all connected verticals. Vessels, Terra, PRISM, SZL Holdings — crisis banner active. Cross-domain impact assessment underway.", type: "broadcast" },
 ];
 
 const COMM_COLORS: Record<string, string> = {
@@ -181,7 +181,7 @@ export default function CitadelWarRoom() {
       <div className="shrink-0 px-4 py-2.5 border-b flex items-center gap-3" style={{ borderColor: "rgba(239,68,68,0.2)", background: "rgba(239,68,68,0.04)" }}>
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-          <span className="text-sm font-bold tracking-tight text-red-400">CITADEL WAR ROOM</span>
+          <span className="text-sm font-bold tracking-tight text-red-400">CRISIS RESPONSE CENTER</span>
           <span className="text-[9px] px-2 py-0.5 rounded font-mono uppercase font-bold" style={{ background: "rgba(239,68,68,0.2)", color: "#fca5a5", border: "1px solid rgba(239,68,68,0.3)" }}>ICS L{ACTIVE_CRISIS.icsLevel} ACTIVE</span>
         </div>
         <div className="h-4 w-px" style={{ background: "rgba(255,255,255,0.08)" }} />
@@ -419,7 +419,7 @@ export default function CitadelWarRoom() {
                 value={newComm}
                 onChange={e => setNewComm(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && sendComm()}
-                placeholder="Enter war room communication..."
+                placeholder="Enter crisis response communication..."
                 className="flex-1 px-3 py-2 rounded-lg text-[11px] outline-none"
                 style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", color: DS.text.primary }}
               />

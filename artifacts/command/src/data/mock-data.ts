@@ -15,7 +15,7 @@ export const baseDomainData: DomainData[] = [
     ],
     alerts: { count: 7, severity: "critical" },
     sparkline: [58,61,63,60,58,62,65,63,61,64,62,60,61,63,60,58,61,63,65,62,60,61,62,61],
-    link: "/firestorm/",
+    link: "/aegis/",
   },
   {
     id: "vessels",

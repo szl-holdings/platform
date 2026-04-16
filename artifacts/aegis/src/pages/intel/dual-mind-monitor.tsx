@@ -36,7 +36,7 @@ const MAMA_QUILLA_TASKS: MamaQuillaTask[] = [
   { id: "mq2", agent: "Advisory Agent", task: "Competitive landscape analysis: SZL vs. emerging PE-tech firms in advisory automation", stage: "analyzing", progress: 45, startedAt: new Date(Date.now() - 1200000), estimatedComplete: "28 min", depth: "deep" },
   { id: "mq3", agent: "IT Sentinel", task: "Predictive model: infrastructure failure probability for next 7-day window based on 90-day patterns", stage: "gathering", progress: 22, startedAt: new Date(Date.now() - 300000), estimatedComplete: "1h 10m", depth: "medium" },
   { id: "mq4", agent: "Deal Scout", task: "Miami Beach micro-market scenario modeling: 3 economic conditions × 5 property types", stage: "analyzing", progress: 61, startedAt: new Date(Date.now() - 960000), estimatedComplete: "18 min", depth: "deep" },
-  { id: "mq5", agent: "Qhapaq Ñan Router", task: "Intelligence mesh optimization: re-routing analysis to reduce avg relay latency by 15%", stage: "delivering", progress: 94, startedAt: new Date(Date.now() - 2400000), estimatedComplete: "4 min", depth: "shallow" },
+  { id: "mq5", agent: "Intelligence Router", task: "Intelligence mesh optimization: re-routing analysis to reduce avg relay latency by 15%", stage: "delivering", progress: 94, startedAt: new Date(Date.now() - 2400000), estimatedComplete: "4 min", depth: "shallow" },
 ];
 
 function generateIntiAction(): IntiAction {

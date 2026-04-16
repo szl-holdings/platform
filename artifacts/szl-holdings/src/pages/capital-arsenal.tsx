@@ -199,7 +199,7 @@ function DocumentViewer({
 .meta{font-size:9pt;color:#666;margin-top:4pt;font-family:'Helvetica Neue',sans-serif;}
 .footer{border-top:1pt solid #ccc;padding-top:8pt;margin-top:30pt;font-size:8pt;color:#999;font-family:'Helvetica Neue',sans-serif;}
 </style></head><body>
-<div class="header"><div class="logo">SZL Holdings</div><div class="subtitle">Capital Arsenal — Confidential</div>
+<div class="header"><div class="logo">SZL Holdings</div><div class="subtitle">Capital Management — Confidential</div>
 <div class="doc-title">${doc.title}</div>
 <div class="meta">${doc.lane ? `${doc.lane} · ` : ""}${TYPE_LABELS[doc.type] ?? doc.type} · Status: ${doc.status} · ${dateStr}</div></div>
 ${sectionsHtml}
@@ -306,7 +306,7 @@ This document does not constitute an offer to sell securities or financial, lega
       >
         <div className="print-branded-header">
           <div className="print-logo-line">SZL Holdings</div>
-          <div className="print-subtitle">Capital Arsenal — Confidential</div>
+          <div className="print-subtitle">Capital Management — Confidential</div>
           <div className="print-doc-title">{doc.title}</div>
           <div className="print-doc-meta">
             {doc.lane ? `${doc.lane} · ` : ""}{TYPE_LABELS[doc.type] ?? doc.type} · Status: {doc.status} · Generated {new Date().toLocaleDateString()}
@@ -513,7 +513,7 @@ export default function CapitalArsenalPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   usePageMeta({
-    title: "Capital Arsenal — SZL Holdings",
+    title: "Capital Management — SZL Holdings",
     description: "Complete capital readiness document set: investor materials, bank/SBA package, angel package, NY state programs, and federal programs.",
     canonical: "https://szlholdings.com/admin/capital-arsenal",
   });
@@ -640,7 +640,7 @@ export default function CapitalArsenalPage() {
               Capital Readiness OS
             </p>
             <h1 style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)", fontWeight: 700, letterSpacing: "-0.025em", color: "hsl(38,12%,94%)", lineHeight: 1.1, marginBottom: "0.875rem" }}>
-              Capital Arsenal
+              Capital Management
             </h1>
             <p style={{ fontSize: "14px", lineHeight: 1.65, color: "hsl(210,5%,55%)", maxWidth: "36rem" }}>
               Professional, investor-grade documents for every capital channel — bank, angel, grants, and certifications. Internal use only.

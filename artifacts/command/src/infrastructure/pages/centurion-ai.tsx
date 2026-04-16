@@ -122,7 +122,7 @@ function CenturionCard({ profile }: { profile: typeof CENTURION_PROFILES[0] }) {
           <div className="rounded p-3 border" style={{ background: "rgba(201,162,39,0.04)", borderColor: "rgba(201,162,39,0.15)" }}>
             <div className="flex items-center gap-2 mb-2">
               <Zap className="w-3.5 h-3.5" style={{ color: "#c9a227" }} />
-              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Centurion Recommendation</span>
+              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">AI Recommendation</span>
             </div>
             <p className="text-xs leading-relaxed" style={{ color: "rgba(226,215,180,0.8)" }}>{profile.recommendation}</p>
           </div>
@@ -184,7 +184,7 @@ export default function CenturionAI() {
         <div className="flex items-center gap-3 mb-1">
           <Cpu className="w-5 h-5" style={{ color: "#c9a227" }} />
           <h1 className="font-display text-lg tracking-[0.2em] gold-text gold-glow font-bold uppercase">
-            Centurion AI
+            AI Operations
           </h1>
         </div>
         <p className="text-xs text-slate-500 ml-8">
@@ -195,8 +195,8 @@ export default function CenturionAI() {
       {/* Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: "Active Centurions", value: CENTURION_PROFILES.length, color: "#c9a227" },
-          { label: "Avg Aquila Score", value: avgAquila, color: getAquilaColor(avgAquila) },
+          { label: "Active Monitors", value: CENTURION_PROFILES.length, color: "#c9a227" },
+          { label: "Avg Health Score", value: avgAquila, color: getAquilaColor(avgAquila) },
           { label: "Recommendations", value: CENTURION_PROFILES.filter((p) => p.recommendation.length > 0).length, color: "#facc15" },
           { label: "Critical Alerts", value: CENTURION_PROFILES.filter((p) => p.failureProbability > 0.1).length, color: "#4ade80" },
         ].map(({ label, value, color }) => (

@@ -29,7 +29,7 @@ const SEED_DECISIONS: PolicyDecision[] = [
   { id: "pd3", timestamp: new Date(Date.now() - 35000), agent: "Portfolio Analyst", domain: "SZL Holdings", action: "Read cross-app financial metrics (all 12 apps)", actionType: "cross_domain", decision: "permitted", policyRule: "PORTFOLIO-CROSS-READ-001", riskScore: 28, details: "Portfolio analyst has cross-domain read access per enterprise policy." },
   { id: "pd4", timestamp: new Date(Date.now() - 52000), agent: "Deal Scout", domain: "Terra", action: "Initiate API call to CoStar property database", actionType: "external_api", decision: "permitted", policyRule: "EXT-API-COSTAR-APPROVED", riskScore: 22, details: "CoStar API is pre-approved for Terra domain agents." },
   { id: "pd5", timestamp: new Date(Date.now() - 78000), agent: "Advisory Agent", domain: "Carlota Jo", action: "Access client financial records for briefing prep", actionType: "data_access", decision: "blocked", policyRule: "CLIENT-DATA-ACCESS-RESTRICTED", riskScore: 89, details: "Client financial records require explicit client consent flag. Flag not set for this request." },
-  { id: "pd6", timestamp: new Date(Date.now() - 102000), agent: "Quipu Engine", domain: "INCA Cortex", action: "Spawn sub-agent with cross-domain write permissions", actionType: "agent_spawn", decision: "blocked", policyRule: "AGENT-SPAWN-WRITE-PROHIBITED", riskScore: 94, details: "Sub-agents cannot be spawned with elevated permissions without explicit authorization chain." },
+  { id: "pd6", timestamp: new Date(Date.now() - 102000), agent: "Orchestration Engine", domain: "Intelligence Platform", action: "Spawn sub-agent with cross-domain write permissions", actionType: "agent_spawn", decision: "blocked", policyRule: "AGENT-SPAWN-WRITE-PROHIBITED", riskScore: 94, details: "Sub-agents cannot be spawned with elevated permissions without explicit authorization chain." },
   { id: "pd7", timestamp: new Date(Date.now() - 130000), agent: "Alloy Predictor", domain: "Alloy Predict", action: "Access Terra signals for scenario model update", actionType: "data_access", decision: "permitted", policyRule: "CROSS-DOMAIN-READ-ALLOY-001", riskScore: 18, details: "Alloy Predictor has read access to Terra telemetry for model inputs." },
   { id: "pd8", timestamp: new Date(Date.now() - 185000), agent: "Brand Monitor", domain: "Stephen", action: "Read public sentiment API — Twitter/X firehose", actionType: "external_api", decision: "permitted", policyRule: "PUBLIC-DATA-READ-001", riskScore: 5, details: "Public data aggregation is unrestricted." },
   { id: "pd9", timestamp: new Date(Date.now() - 210000), agent: "Portfolio Analyst", domain: "SZL Holdings", action: "Initiate ACH transfer to portfolio company account", actionType: "financial_transaction", decision: "blocked", policyRule: "FINANCIAL-TRANSACTION-NO-AI-AUTONOMOUS", riskScore: 99, details: "Financial transactions are fully prohibited for autonomous AI agents. Requires dual human authorization." },
@@ -112,7 +112,7 @@ export default function SacsayhuamanShield() {
             <Shield className="w-5 h-5 text-orange-400" />
           </div>
           <div>
-            <h1 className="text-xl font-display font-bold text-orange-50 tracking-tight">Sacsayhuamán Shield</h1>
+            <h1 className="text-xl font-display font-bold text-orange-50 tracking-tight">Adaptive Defense</h1>
             <p className="text-xs text-orange-400/50 font-mono uppercase tracking-wider">Agent Security Guardrails</p>
           </div>
           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-orange-500/10 text-orange-400 border border-orange-500/20 animate-pulse">
@@ -120,8 +120,8 @@ export default function SacsayhuamanShield() {
           </span>
         </div>
         <p className="text-xs text-muted-foreground mt-2">
-          Named for <span className="text-orange-400/80">Sacsayhuamán</span> — the massive fortress protecting Cusco. Every agent action passes through this policy engine before execution.
-          Governs data access, external API calls, financial transactions, and agent spawning across the entire Quipu network.
+          Every agent action passes through this policy engine before execution.
+          Governs data access, external API calls, financial transactions, and agent spawning across the entire platform.
         </p>
       </div>
 

@@ -20,7 +20,7 @@ const DS = {
 };
 
 const PROV: DataProvenanceInfo = {
-    source: "Distribution OS — Audience Genome Intelligence",
+    source: "Distribution OS — Audience Insights Intelligence",
     lastUpdated: new Date().toISOString(),
     freshness: "minutes",
     confidence: "high",
@@ -73,7 +73,7 @@ export default function AudienceGenomePage() {
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "1.25rem", flexWrap: "wrap", gap: "0.75rem" }}>
           <div>
             <h1 style={{ fontSize: "1.25rem", fontWeight: 700, color: DS.text.primary, letterSpacing: "-0.025em", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <Dna size={18} style={{ color: DS.accent }} /> Audience Genome Intelligence
+              <Dna size={18} style={{ color: DS.accent }} /> Audience Insights Intelligence
             </h1>
             <p style={{ fontSize: "0.75rem", color: DS.text.tertiary, marginTop: "0.25rem" }}>Deep psychographic profiling, preference mapping, and audience migration tracking</p>
           </div>

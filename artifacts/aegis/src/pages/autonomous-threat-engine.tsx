@@ -210,10 +210,10 @@ export default function AutonomousThreatEngine() {
           <div className="flex items-center gap-2 mb-1">
             <Brain className="w-3.5 h-3.5" style={{ color: ACCENT }} />
             <span className="text-[10px] font-bold uppercase tracking-widest font-mono" style={{ color: ACCENT }}>Aegis · Autonomous Threat Engine</span>
-            <span className="px-1.5 py-0.5 rounded text-[8px] font-bold animate-pulse" style={{ background: "rgba(239,68,68,0.15)", color: ACCENT }}>SELF-DRIVING ACTIVE</span>
+            <span className="px-1.5 py-0.5 rounded text-[8px] font-bold animate-pulse" style={{ background: "rgba(239,68,68,0.15)", color: ACCENT }}>AUTONOMOUS ACTIVE</span>
           </div>
           <h1 className="text-xl font-bold text-white">Autonomous Threat Engine</h1>
-          <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>Continuously scans, classifies, and auto-remediates threats. Tesla-inspired self-driving security with MITRE ATT&CK mapping and configurable approval gates.</p>
+          <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>Continuously scans, classifies, and auto-remediates threats using MITRE ATT&CK mapping with configurable human-in-the-loop approval gates.</p>
         </div>
         <button
           onClick={() => setAutonomous(v => !v)}

@@ -610,7 +610,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
               {[
                 { name: "Terra", href: "/terra/" },
                 { name: "Vessels", href: "/vessels/" },
-                { name: "Aegis", href: "/firestorm/" },
+                { name: "Aegis", href: "/aegis/" },
                 { name: "Carlota Jo", href: "/carlota-jo/" },
                 { name: "SZL", href: "/szl-holdings/" },
               ].map(l => (

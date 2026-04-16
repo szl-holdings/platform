@@ -87,7 +87,7 @@ const PORTFOLIO_COLUMNS = [
     label: "Expansion Lanes",
     color: "#7ba3d4",
     items: [
-      { name: "Aegis / Firestorm", desc: "Security & incident command" },
+      { name: "Aegis", desc: "Security & incident command" },
       { name: "Vessels", desc: "Maritime intelligence platform" },
       { name: "Terra", desc: "Real estate intelligence platform" },
       { name: "PRISM Counsel", desc: "Legal observability (early stage)" },

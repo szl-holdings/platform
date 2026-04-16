@@ -160,17 +160,17 @@ function ModelCard({ model }: { model: ModelState }) {
 
 const MODELS_SEED = [
   { id: "alloy-gpt4", name: "Alloy GPT-4o", provider: "OpenAI / Azure", baseLatency: 850, baseDrift: 4 },
-  { id: "quipu-claude", name: "Quipu Claude-3.5", provider: "Anthropic", baseLatency: 650, baseDrift: 8 },
+  { id: "quipu-claude", name: "Claude-3.5 Sonnet", provider: "Anthropic", baseLatency: 650, baseDrift: 8 },
   { id: "rag-embed", name: "RAG Embedder ada-002", provider: "OpenAI", baseLatency: 90, baseDrift: 2 },
   { id: "drift-det", name: "Drift Detector v2", provider: "SZL Custom", baseLatency: 45, baseDrift: 18 },
-  { id: "quipu-classify", name: "Quipu Classifier", provider: "SZL Fine-tuned", baseLatency: 180, baseDrift: 12 },
+  { id: "quipu-classify", name: "SZL Classifier v2", provider: "SZL Fine-tuned", baseLatency: 180, baseDrift: 12 },
   { id: "alloy-embed", name: "Alloy Embedder v3", provider: "SZL Custom", baseLatency: 70, baseDrift: 5 },
 ];
 
 const GPU_SEED = [
   { id: "gpu-0", name: "GPU-0 · NVIDIA A100", workload: "Alloy GPT-4o Inference" },
   { id: "gpu-1", name: "GPU-1 · NVIDIA A100", workload: "RAG Pipeline + Embeddings" },
-  { id: "gpu-2", name: "GPU-2 · NVIDIA H100", workload: "Quipu Claude Proxy Cache" },
+  { id: "gpu-2", name: "GPU-2 · NVIDIA H100", workload: "Claude Proxy Cache" },
   { id: "gpu-3", name: "GPU-3 · NVIDIA H100", workload: "Drift Detection + Fine-tune" },
 ];
 
@@ -355,7 +355,7 @@ export default function GpuComputeObservatory() {
           <div className="grid grid-cols-3 gap-4">
             {[
               { label: "Optimization Opportunity", desc: "Alloy GPT-4o handles 40% of requests that could be routed to smaller models. Estimated savings: $120/day", color: "#6b8f71" },
-              { label: "Drift Alert Action", desc: "Quipu Classifier drift score 18.4 — re-evaluation recommended. Model performance degrading on financial domain queries.", color: "#d4a054" },
+              { label: "Drift Alert Action", desc: "SZL Classifier v2 drift score 18.4 — re-evaluation recommended. Model performance degrading on financial domain queries.", color: "#d4a054" },
               { label: "Capacity Forecast", desc: "GPU-0 projected to exceed 95% utilization in 3.2 hours at current inference rate. Recommend spinning up GPU-4.", color: "#c45a4a" },
             ].map(r => (
               <div key={r.label} className="rounded-xl border p-4" style={{ borderColor: `${r.color}20`, background: `${r.color}06` }}>

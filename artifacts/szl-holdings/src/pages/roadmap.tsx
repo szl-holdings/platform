@@ -11,7 +11,7 @@ const quarters = [
     items: [
       { app: "Aegis", icon: Shield, color: "#6366f1", title: "XDR Console + Threat Hunting Workbench", status: "done" },
       { app: "Lyte", icon: Zap, color: "#f59e0b", title: "PRISM Framework + Business Observability", status: "done" },
-      { app: "INCA", icon: Brain, color: "#8b5cf6", title: "GPU Monitoring + LLM Evaluation Studio", status: "done" },
+      { app: "SZL Cortex", icon: Brain, color: "#8b5cf6", title: "GPU Monitoring + LLM Evaluation Studio", status: "done" },
       { app: "Terra", icon: Building2, color: "#4d7c0f", title: "Distress Engine + Property Intelligence", status: "done" },
       { app: "Alloy", icon: Palette, color: "#6366f1", title: "Predictive Intelligence Engine + Confidence Scoring", status: "done" },
       { app: "Aegis", icon: FileText, color: "#10b981", title: "Vendor Risk Assessment + Risk Register", status: "done" },
@@ -26,7 +26,7 @@ const quarters = [
       { app: "Vessels", icon: Ship, color: "#3b82f6", title: "AI Route Optimization Engine", status: "in_progress" },
       { app: "Aegis", icon: Shield, color: "#6366f1", title: "Identity Threat Intelligence + Executive Risk Board", status: "in_progress" },
       { app: "Lyte", icon: Zap, color: "#f59e0b", title: "Cloud Cost Intelligence + On-Call Management", status: "in_progress" },
-      { app: "INCA", icon: Brain, color: "#8b5cf6", title: "Ensemble Pipeline Studio + Multi-Model Comparison", status: "planned" },
+      { app: "SZL Cortex", icon: Brain, color: "#8b5cf6", title: "Ensemble Pipeline Studio + Multi-Model Comparison", status: "planned" },
       { app: "Terra", icon: Building2, color: "#4d7c0f", title: "AI Lease Abstraction + Tenant Intelligence", status: "planned" },
       { app: "Admin", icon: Globe, color: "#a3a3a3", title: "Deployment Visualization + Git Integration", status: "planned" },
       { app: "SZL Holdings", icon: Globe, color: "#6c63ff", title: "Portfolio Intelligence Dashboard + IR Module", status: "in_progress" },
@@ -42,7 +42,7 @@ const quarters = [
       { app: "Vessels", icon: Ship, color: "#3b82f6", title: "Sanctions Compliance + AIS Integration", status: "planned" },
       { app: "Aegis", icon: FileText, color: "#10b981", title: "Multi-Framework Hub (SOC2+ISO+GDPR)", status: "planned" },
       { app: "Aegis", icon: Shield, color: "#6366f1", title: "Red Team Simulation Marketplace", status: "planned" },
-      { app: "INCA", icon: Brain, color: "#8b5cf6", title: "Model Governance + Audit Trail for Regulated AI", status: "planned" },
+      { app: "SZL Cortex", icon: Brain, color: "#8b5cf6", title: "Model Governance + Audit Trail for Regulated AI", status: "planned" },
     ],
   },
   {
@@ -74,7 +74,7 @@ const quarterBadge = {
 export default function Roadmap() {
   usePageMeta({
     title: "Roadmap | SZL Holdings – Platform Development Roadmap",
-    description: "The SZL Holdings platform roadmap: upcoming features, quarterly milestones, and product priorities across Alloy, Lyte, Vessels, Aegis, Terra, INCA, and Carlota Jo.",
+    description: "The SZL Holdings platform roadmap: upcoming features, quarterly milestones, and product priorities across Alloy, Lyte, Vessels, Aegis, Terra, SZL Cortex, and Carlota Jo.",
     canonical: "https://szlholdings.com/roadmap",
   });
   return (

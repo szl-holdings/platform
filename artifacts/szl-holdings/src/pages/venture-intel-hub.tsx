@@ -31,8 +31,8 @@ const MODULES = [
     icon: GitMerge,
     color: "#8b7ac8",
     rgb: "139,122,200",
-    label: "Synergy Map",
-    title: "Cross-Portfolio Synergy Map",
+    label: "Portfolio Connections",
+    title: "Cross-Portfolio Connections",
     description:
       "Automatically identifies and quantifies revenue synergies between portfolio companies — Aegis cyber for Vessels maritime clients, Terra property data for PRISM litigation, and more.",
   },

@@ -45,7 +45,7 @@ const PLATFORM_NODES = [
   { id: "api-gateway",      label: "API Gateway",      platform: "Core",      connects: ["lyte-core", "alloy-engine", "firestorm-soc", "terra-beacon"] },
   { id: "lyte-core",        label: "Lyte Core",        platform: "Lyte",      connects: ["signal-bus", "action-router", "prism-engine"] },
   { id: "alloy-engine",     label: "Alloy Engine",     platform: "Alloy",     connects: ["signal-bus", "workflow-exec", "ml-inference"] },
-  { id: "firestorm-soc",    label: "Firestorm SOC",    platform: "Firestorm", connects: ["signal-bus", "threat-db"] },
+  { id: "firestorm-soc",    label: "Aegis SOC",    platform: "Aegis", connects: ["signal-bus", "threat-db"] },
   { id: "terra-beacon",     label: "Terra Beacon",     platform: "Terra",     connects: ["signal-bus", "geo-index"] },
   { id: "signal-bus",       label: "Signal Bus",       platform: "Core",      connects: ["prism-engine", "alert-engine", "escalation-mgr"] },
   { id: "ml-inference",     label: "ML Inference",     platform: "Alloy",     connects: ["metrics-store"] },
@@ -56,13 +56,13 @@ const PLATFORM_NODES = [
   { id: "action-router",    label: "Action Router",    platform: "Lyte",      connects: [] },
   { id: "metrics-store",    label: "Metrics Store",    platform: "Core",      connects: [] },
   { id: "notification-svc", label: "Notification Svc", platform: "Core",      connects: [] },
-  { id: "threat-db",        label: "Threat DB",        platform: "Firestorm", connects: [] },
+  { id: "threat-db",        label: "Threat DB",        platform: "Aegis", connects: [] },
   { id: "geo-index",        label: "Geo Index",        platform: "Terra",     connects: [] },
 ];
 
 const PLATFORM_COLORS: Record<string, string> = {
   Core: "#d4a054", Lyte: "#d4a054", Alloy: "#4B8BDB",
-  Terra: "#4a90b8", Vessels: "#38bdf8", Firestorm: "#c45a4a",
+  Terra: "#4a90b8", Vessels: "#38bdf8", Aegis: "#c45a4a",
 };
 
 const HEALTH_COLORS = {
@@ -470,7 +470,7 @@ export default function LivingTopology() {
             <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm" style={{ background: "#d4a054" }} /> Core</div>
             <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm" style={{ background: "#4B8BDB" }} /> Alloy</div>
             <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm" style={{ background: "#4a90b8" }} /> Terra</div>
-            <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm" style={{ background: "#c45a4a" }} /> Firestorm</div>
+            <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm" style={{ background: "#c45a4a" }} /> Aegis</div>
           </div>
         </div>
       )}

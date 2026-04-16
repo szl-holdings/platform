@@ -89,7 +89,7 @@ function staticWebAppSentinel(app: string): Sentinel {
 
 export const IMPERIUM_DATA: Imperium = {
   id: "imperium-szlholdings",
-  name: "IMPERIUM SZLHOLDINGS",
+  name: "SZL HOLDINGS PLATFORM",
   totalResources: 58,
   aquilaScore: 91,
   threatLevel: "VIGILIA",
@@ -104,7 +104,7 @@ export const IMPERIUM_DATA: Imperium = {
   legions: [
     {
       id: "legion-eastus",
-      name: "LEGIO I PRIMARIS",
+      name: "REGION I — PRIMARY",
       label: "East US — Primary",
       region: "eastus",
       aquilaScore: 93,
@@ -113,7 +113,7 @@ export const IMPERIUM_DATA: Imperium = {
       cohorts: [
         {
           id: "cohort-compute",
-          name: "COHORS COMPUTATIO",
+          name: "GROUP — COMPUTE",
           label: "Compute & API",
           classification: "RESTRICTED",
           aquilaScore: 94,
@@ -121,7 +121,7 @@ export const IMPERIUM_DATA: Imperium = {
           centuries: [
             {
               id: "century-containerapp",
-              name: "CENTURIA API",
+              name: "CLUSTER — API",
               label: "Container App Environment",
               classification: "RESTRICTED",
               type: "container-app",
@@ -166,7 +166,7 @@ export const IMPERIUM_DATA: Imperium = {
         },
         {
           id: "cohort-frontend",
-          name: "COHORS FRONTALIS",
+          name: "GROUP — FRONTEND",
           label: "Frontend Static Web Apps",
           classification: "OPEN",
           aquilaScore: 91,
@@ -174,7 +174,7 @@ export const IMPERIUM_DATA: Imperium = {
           centuries: [
             {
               id: "century-swa-primary",
-              name: "CENTURIA WEBAPP PRIMA",
+              name: "CLUSTER — WEB APPS A",
               label: "Primary Web Apps (Group A)",
               classification: "OPEN",
               type: "static-web-app",
@@ -183,7 +183,7 @@ export const IMPERIUM_DATA: Imperium = {
             },
             {
               id: "century-swa-secondary",
-              name: "CENTURIA WEBAPP SECUNDA",
+              name: "CLUSTER — WEB APPS B",
               label: "Secondary Web Apps (Group B)",
               classification: "OPEN",
               type: "static-web-app",
@@ -194,7 +194,7 @@ export const IMPERIUM_DATA: Imperium = {
         },
         {
           id: "cohort-data",
-          name: "COHORS DATA",
+          name: "GROUP — DATA",
           label: "Data Services",
           classification: "CONFIDENTIAL",
           aquilaScore: 97,
@@ -202,7 +202,7 @@ export const IMPERIUM_DATA: Imperium = {
           centuries: [
             {
               id: "century-postgres",
-              name: "CENTURIA POSTGRES",
+              name: "CLUSTER — POSTGRES",
               label: "PostgreSQL Flexible Server",
               classification: "CONFIDENTIAL",
               type: "database",
@@ -245,7 +245,7 @@ export const IMPERIUM_DATA: Imperium = {
             },
             {
               id: "century-redis",
-              name: "CENTURIA REDIS",
+              name: "CLUSTER — REDIS",
               label: "Azure Cache for Redis",
               classification: "CONFIDENTIAL",
               type: "cache",
@@ -277,7 +277,7 @@ export const IMPERIUM_DATA: Imperium = {
             },
             {
               id: "century-storage",
-              name: "CENTURIA STORAGE",
+              name: "CLUSTER — BLOB STORAGE",
               label: "Storage Accounts",
               classification: "CONFIDENTIAL",
               type: "storage",
@@ -305,7 +305,7 @@ export const IMPERIUM_DATA: Imperium = {
             },
             {
               id: "century-messaging",
-              name: "CENTURIA MESSAGING",
+              name: "CLUSTER — SERVICE BUS",
               label: "Service Bus",
               classification: "RESTRICTED",
               type: "messaging",
@@ -335,15 +335,15 @@ export const IMPERIUM_DATA: Imperium = {
         },
         {
           id: "cohort-sovereign",
-          name: "COHORS PRAETORIA",
-          label: "Praetorian-Guarded Resources",
+          name: "GROUP — SECURITY",
+          label: "Security-Protected Resources",
           classification: "SOVEREIGN",
           aquilaScore: 99,
           costPerMonth: 320,
           centuries: [
             {
               id: "century-keyvault",
-              name: "CENTURIA CLAVES",
+              name: "CLUSTER — KEY VAULT",
               label: "Key Vault",
               classification: "SOVEREIGN",
               type: "keyvault",
@@ -363,7 +363,7 @@ export const IMPERIUM_DATA: Imperium = {
             },
             {
               id: "century-network",
-              name: "CENTURIA VIAE",
+              name: "CLUSTER — NETWORKING",
               label: "Network Infrastructure",
               classification: "SOVEREIGN",
               type: "network",
@@ -427,7 +427,7 @@ export const IMPERIUM_DATA: Imperium = {
             },
             {
               id: "century-frontdoor",
-              name: "CENTURIA PORTA",
+              name: "CLUSTER — GATEWAY",
               label: "Front Door & WAF",
               classification: "SOVEREIGN",
               type: "network",
@@ -466,7 +466,7 @@ export const IMPERIUM_DATA: Imperium = {
             },
             {
               id: "century-monitoring",
-              name: "CENTURIA VIGILIA",
+              name: "CLUSTER — MONITORING",
               label: "Monitoring & Observability",
               classification: "RESTRICTED",
               type: "monitoring",
@@ -507,7 +507,7 @@ export const IMPERIUM_DATA: Imperium = {
     },
     {
       id: "legion-dr",
-      name: "LEGIO II RESERVA",
+      name: "REGION II — STANDBY",
       label: "Geo-Redundant Backup Region",
       region: "westus2",
       aquilaScore: 88,
@@ -516,7 +516,7 @@ export const IMPERIUM_DATA: Imperium = {
       cohorts: [
         {
           id: "cohort-dr-data",
-          name: "COHORS RESERVA",
+          name: "GROUP — STANDBY",
           label: "Geo-Redundant Data",
           classification: "CONFIDENTIAL",
           aquilaScore: 97,
@@ -524,7 +524,7 @@ export const IMPERIUM_DATA: Imperium = {
           centuries: [
             {
               id: "century-pg-geo",
-              name: "CENTURIA POSTGRES GEO",
+              name: "CLUSTER — POSTGRES GEO",
               label: "PostgreSQL Geo-Redundant Backup",
               classification: "CONFIDENTIAL",
               type: "database",
@@ -544,7 +544,7 @@ export const IMPERIUM_DATA: Imperium = {
             },
             {
               id: "century-docintell",
-              name: "CENTURIA INTELLIGENTIA",
+              name: "CLUSTER — INTELLIGENCE",
               label: "Document Intelligence (AI)",
               classification: "RESTRICTED",
               type: "container-app",
@@ -734,7 +734,7 @@ export const SENATE_PROPOSALS = [
     type: "SCALING",
     classification: "RESTRICTED" as Classification,
     status: "PENDING_VOTE" as const,
-    proposedBy: "Centurion AI — COHORS COMPUTATIO",
+    proposedBy: "AI Ops — Compute Cluster",
     proposedAt: new Date(Date.now() - 3600000 * 2),
     votes: { aye: 2, nay: 0, veto: false, required: 3 },
     impact: "HIGH",
@@ -747,7 +747,7 @@ export const SENATE_PROPOSALS = [
     type: "SECURITY",
     classification: "SOVEREIGN" as Classification,
     status: "APPROVED" as const,
-    proposedBy: "Praetorian Guard — Auto-Hardening",
+    proposedBy: "Security Center — Auto-Hardening",
     proposedAt: new Date(Date.now() - 3600000 * 48),
     votes: { aye: 3, nay: 0, veto: false, required: 3 },
     impact: "MEDIUM",
@@ -756,11 +756,11 @@ export const SENATE_PROPOSALS = [
   {
     id: "senate-003",
     title: "Enable WAF Rate-Limit: 500 req/min",
-    description: "Reduce WAF rate limit threshold from 1000 to 500 req/min following reconnaissance patterns in Firestorm threat feed.",
+    description: "Reduce WAF rate limit threshold from 1000 to 500 req/min following reconnaissance patterns in Aegis threat feed.",
     type: "SECURITY",
     classification: "SOVEREIGN" as Classification,
     status: "PENDING_VOTE" as const,
-    proposedBy: "Praetorian Guard — BELLUM Protocol",
+    proposedBy: "Security Center — Threat Protocol",
     proposedAt: new Date(Date.now() - 3600000),
     votes: { aye: 1, nay: 1, veto: false, required: 3 },
     impact: "HIGH",
@@ -773,12 +773,12 @@ export const SENATE_PROPOSALS = [
     type: "SCALING",
     classification: "CONFIDENTIAL" as Classification,
     status: "VETOED" as const,
-    proposedBy: "Centurion AI — COHORS DATA",
+    proposedBy: "AI Ops — Data Cluster",
     proposedAt: new Date(Date.now() - 3600000 * 72),
     votes: { aye: 2, nay: 0, veto: true, required: 3 },
     impact: "HIGH",
     costDelta: "+$280/mo",
-    vetoBy: "Tribune Stephen L.",
+    vetoBy: "Approver: Stephen L.",
     vetoReason: "Defer until Q3 capacity review",
   },
   {
@@ -788,7 +788,7 @@ export const SENATE_PROPOSALS = [
     type: "NETWORK",
     classification: "SOVEREIGN" as Classification,
     status: "PENDING_VOTE" as const,
-    proposedBy: "Praetorian Guard — Network Hardening",
+    proposedBy: "Security Perimeter — Network Hardening",
     proposedAt: new Date(Date.now() - 3600000 * 6),
     votes: { aye: 0, nay: 0, veto: false, required: 3 },
     impact: "MEDIUM",
@@ -799,9 +799,9 @@ export const SENATE_PROPOSALS = [
 export const CENTURION_PROFILES = [
   {
     id: "centurion-compute",
-    name: "MARCUS COMPUTATIO",
-    century: "CENTURIA API",
-    cohort: "COHORS COMPUTATIO",
+    name: "API MONITOR",
+    century: "CLUSTER — API",
+    cohort: "GROUP — COMPUTE",
     aquilaScore: 94,
     status: "ACTIVE" as const,
     readinessReport: "Container App scaling at 41% CPU utilization. 2 active replicas. P95 latency 142ms — within SLA. HTTP scaling rule active at concurrentRequests=25. No anomalies detected.",
@@ -813,9 +813,9 @@ export const CENTURION_PROFILES = [
   },
   {
     id: "centurion-data",
-    name: "GAIUS DATARUM",
-    century: "CENTURIA POSTGRES",
-    cohort: "COHORS DATA",
+    name: "DB MONITOR",
+    century: "CLUSTER — POSTGRES",
+    cohort: "GROUP — DATA",
     aquilaScore: 98,
     status: "ACTIVE" as const,
     readinessReport: "PostgreSQL running at 22% CPU. HA Standby synchronized. Connection pool at 38% capacity. Backup status: geo-redundant backup current. Last successful backup: 6 hours ago.",
@@ -827,9 +827,9 @@ export const CENTURION_PROFILES = [
   },
   {
     id: "centurion-cache",
-    name: "JULIA CACHERINA",
-    century: "CENTURIA REDIS",
-    cohort: "COHORS DATA",
+    name: "CACHE MONITOR",
+    century: "CLUSTER — REDIS",
+    cohort: "GROUP — DATA",
     aquilaScore: 95,
     status: "ACTIVE" as const,
     readinessReport: "Redis C1 Standard at 62% memory utilization. Replica synchronized. Cache hit rate 94.2%. maxmemory-policy: allkeys-lru active. No eviction pressure.",
@@ -841,13 +841,13 @@ export const CENTURION_PROFILES = [
   },
   {
     id: "centurion-frontend",
-    name: "OCTAVIA WEBALIS",
-    century: "CENTURIA WEBAPP PRIMA",
-    cohort: "COHORS FRONTALIS",
+    name: "WEB MONITOR",
+    century: "CLUSTER — WEB APPS A",
+    cohort: "GROUP — FRONTEND",
     aquilaScore: 91,
     status: "ACTIVE" as const,
     readinessReport: "18 Static Web Apps active via Front Door CDN. Average latency 12ms globally. WAF blocking 847 requests/day. Cache hit rate 98.3% for hashed assets.",
-    recommendation: "Static asset caching excellent. Consider enabling preloading headers for critical JS bundles. Identify the 3 apps with Aquila scores below 88 for bundle optimization review.",
+    recommendation: "Static asset caching excellent. Consider enabling preloading headers for critical JS bundles. Identify the 3 apps with health scores below 88 for bundle optimization review.",
     scalingRecommendation: { currentMin: 18, currentMax: 18, recommendedMin: 18, recommendedMax: 18 },
     failureProbability: 0.005,
     failurePrediction: "No failure risk. CDN infrastructure managed by Azure Front Door.",
@@ -855,13 +855,13 @@ export const CENTURION_PROFILES = [
   },
   {
     id: "centurion-security",
-    name: "BRUTUS PRAETORIANUS",
-    century: "CENTURIA PORTA",
-    cohort: "COHORS PRAETORIA",
+    name: "SECURITY MONITOR",
+    century: "CLUSTER — GATEWAY",
+    cohort: "GROUP — SECURITY",
     aquilaScore: 97,
     status: "ACTIVE" as const,
     readinessReport: "Front Door Premium active. WAF in Prevention mode. DRS 2.1 + Bot Manager 1.1 active. Rate limit: 1000 req/min. 3 managed rule sets active. Custom domain SSL: valid.",
-    recommendation: "Reduce WAF rate limit to 500 req/min based on Firestorm threat feed reconnaissance patterns. Enable geo-filtering for high-risk regions.",
+    recommendation: "Reduce WAF rate limit to 500 req/min based on threat intelligence reconnaissance patterns. Enable geo-filtering for high-risk regions.",
     scalingRecommendation: { currentMin: 1, currentMax: 1, recommendedMin: 1, recommendedMax: 1 },
     failureProbability: 0.008,
     failurePrediction: "No failure risk. Certificate renewal managed automatically.",
@@ -913,7 +913,7 @@ export const INTELLIGENCE_BRIEFS = {
   operational: {
     title: "OPERATIONAL INTELLIGENCE",
     classification: "RESTRICTED" as Classification,
-    summary: "All 58 resources ACTIVE. Zero P1/P2 incidents in last 24 hours. API P95 latency at 142ms (SLA: 500ms). PostgreSQL HA active. 3 Senate proposals pending vote.",
+    summary: "All 58 resources ACTIVE. Zero P1/P2 incidents in last 24 hours. API P95 latency at 142ms (SLA: 500ms). PostgreSQL HA active. 3 change proposals pending review.",
     uptime: "99.98%",
     incidentsToday: 0,
     p95Latency: 142,

@@ -3,7 +3,7 @@ import { MarketingFooter } from "../../components/marketing/MarketingFooter";
 import { motion } from "framer-motion";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
 import { Link } from "wouter";
-import { Shield, Activity, Anchor, Building2, Gavel, Users, BrainCircuit, Command as CmdIcon, Briefcase, Flame } from "lucide-react";
+import { Shield, Activity, Anchor, Building2, Gavel, Users, BrainCircuit, Command as CmdIcon, Briefcase } from "lucide-react";
 
 export function MarketingHome() {
   const apps = [
@@ -16,7 +16,6 @@ export function MarketingHome() {
     { id: "stephen", name: "Stephen", icon: Users, desc: "Personal executive command", color: "text-white" },
     { id: "command", name: "Command", icon: CmdIcon, desc: "Ecosystem orchestration & pulse", color: "text-purple-500" },
     { id: "carlota-jo", name: "Carlota Jo", icon: BrainCircuit, desc: "Consulting & portfolio advisory", color: "text-pink-500" },
-    { id: "firestorm", name: "Firestorm", icon: Flame, desc: "Unified defense & intelligence fusion", color: "text-orange-500" },
   ];
 
   return (

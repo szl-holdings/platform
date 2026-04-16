@@ -79,7 +79,7 @@ export const ALLOY_WORKFLOWS: WorkflowDefinition[] = [
     outputs: ["Exception report", "Remediation plan", "Escalation record", "Action confirmation"],
     approvalPoints: 1,
     category: "Operations",
-    connectedProducts: ["Lyte", "Vessels", "Firestorm"],
+    connectedProducts: ["Lyte", "Vessels", "Aegis"],
     estimatedDuration: "1–5 minutes",
     icon: "⚠️",
   },

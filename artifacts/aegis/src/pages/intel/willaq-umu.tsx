@@ -4,12 +4,12 @@ import { cn } from "@szl-holdings/shared-ui/utils";
 
 const ORACLES = [
   {
-    id: "willaq-70b", name: "Willaq Umu 70B", subtitle: "High Oracle — The Supreme Interpreter",
-    description: "The most capable oracle in the Quipu Engine. Handles complex multi-domain reasoning, strategic synthesis, and long-context analysis.",
+    id: "willaq-70b", name: "Primary AI Model", subtitle: "General Reasoning — Cross-Domain Analysis",
+    description: "The most capable model in the platform. Handles complex multi-domain reasoning, strategic synthesis, and long-context analysis.",
     accuracy: 96.2, latency: "420ms", cost: "$0.0018/req", context: "128K tokens",
     domains: ["Strategy", "Research", "Synthesis", "Cross-domain"],
     specialty: "Deep reasoning, report generation, scenario modeling",
-    mystique: "Consulted for questions of empire-level significance",
+    mystique: "Highest-capability model for complex analytical tasks",
     color: "text-amber-400", bg: "bg-amber-400/10", border: "border-amber-400/20",
     confidence: 94, available: true,
   },
@@ -19,7 +19,7 @@ const ORACLES = [
     accuracy: 94.8, latency: "95ms", cost: "$0.0004/req", context: "32K tokens",
     domains: ["Maritime", "Logistics", "Trade routes", "Port operations"],
     specialty: "Fleet intelligence, disruption prediction, vessel anomaly detection",
-    mystique: "Interprets the signs of currents and winds",
+    mystique: "Domain specialist for maritime logistics and fleet operations",
     color: "text-cyan-400", bg: "bg-cyan-400/10", border: "border-cyan-400/20",
     confidence: 91, available: true,
   },
@@ -29,7 +29,7 @@ const ORACLES = [
     accuracy: 93.7, latency: "210ms", cost: "$0.0012/req", context: "64K tokens",
     domains: ["Finance", "Investment", "Risk", "Portfolio"],
     specialty: "DCF modeling, market sentiment, risk-adjusted returns",
-    mystique: "Reads the patterns of gold and silver flowing through the empire",
+    mystique: "Specialized for investment analysis and market regime detection",
     color: "text-yellow-400", bg: "bg-yellow-400/10", border: "border-yellow-400/20",
     confidence: 89, available: true,
   },
@@ -39,7 +39,7 @@ const ORACLES = [
     accuracy: 97.1, latency: "140ms", cost: "$0.0006/req", context: "32K tokens",
     domains: ["Security", "Compliance", "Threat intel", "Policy"],
     specialty: "Threat classification, IOC analysis, policy enforcement",
-    mystique: "Reads omens in network patterns and warns of hostile forces",
+    mystique: "Specialized for threat classification and compliance assessment",
     color: "text-orange-400", bg: "bg-orange-400/10", border: "border-orange-400/20",
     confidence: 96, available: true,
   },
@@ -49,7 +49,7 @@ const ORACLES = [
     accuracy: 88.4, latency: "320ms", cost: "$0.0014/req", context: "64K tokens",
     domains: ["Creative", "Marketing", "Brand", "Content"],
     specialty: "Content ideation, voice consistency, campaign optimization",
-    mystique: "Interprets the cultural signals and weaves compelling narratives",
+    mystique: "Specialized for content strategy and brand voice consistency",
     color: "text-violet-400", bg: "bg-violet-400/10", border: "border-violet-400/20",
     confidence: 84, available: true,
   },
@@ -59,7 +59,7 @@ const ORACLES = [
     accuracy: 95.9, latency: "380ms", cost: "$0.0015/req", context: "64K tokens",
     domains: ["Engineering", "Architecture", "Code review", "Systems"],
     specialty: "Code quality, architecture patterns, technical strategy",
-    mystique: "Reads the sacred logic encoded in software and infrastructure",
+    mystique: "Specialized for code analysis and architecture review",
     color: "text-emerald-400", bg: "bg-emerald-400/10", border: "border-emerald-400/20",
     confidence: 88, available: false,
   },
@@ -67,7 +67,7 @@ const ORACLES = [
 
 const EXAMPLE_CONSULTATIONS = [
   { question: "What maritime disruptions should we anticipate in the next 30 days based on current geopolitical signals?", oracle: "Maritime Oracle", confidence: 87, summary: "El Niño weather pattern will increase Suez Canal delays by 15–22%. Red Sea tensions remain elevated — recommend rerouting 3 key fleet segments via Cape of Good Hope. Panama Canal water levels critical through April." },
-  { question: "What is the SZL Holdings portfolio's greatest systemic risk in Q2 2026?", oracle: "Willaq Umu 70B", confidence: 91, summary: "Cross-portfolio talent concentration risk is highest — 4 of 9 apps rely on the same 3 engineers for critical path work. Secondary risk: MSP's customer concentration (top 3 clients = 62% of ARR). Recommend: talent redundancy planning and MSP diversification initiative." },
+  { question: "What is the SZL Holdings portfolio's greatest systemic risk in Q2 2026?", oracle: "Primary AI Model", confidence: 91, summary: "Cross-portfolio talent concentration risk is highest — 4 of 9 apps rely on the same 3 engineers for critical path work. Secondary risk: MSP's customer concentration (top 3 clients = 62% of ARR). Recommend: talent redundancy planning and MSP diversification initiative." },
   { question: "Which Dreamscape campaign targeting segments show highest predicted ROAS for Q2?", oracle: "Creative Oracle", confidence: 78, summary: "B2B SaaS decision-makers aged 35–44 in the US Southeast show 2.8x predicted ROAS based on Q1 engagement data. LinkedIn video format outperforms display by 3.1x for this cohort. Recommend shifting 40% of Q2 budget to this segment and format combination." },
 ];
 
@@ -79,11 +79,11 @@ interface ComparisonResult {
   caveats: string;
 }
 
-const COMPARISON_QUESTION = "What is the single highest-leverage action INCA could take in the next 90 days?";
+const COMPARISON_QUESTION = "What is the single highest-leverage action SZL Holdings could take in the next 90 days?";
 const COMPARISON_RESULTS: ComparisonResult[] = [
-  { oracle: "Willaq Umu 70B", answer: "Deploy automated cross-domain anomaly correlation — connecting Vessels, MSP, and Terra signals into a unified early warning system would reduce MTTD by an estimated 60%.", confidence: 91, reasoning: ["Each app currently operates in isolation", "Cross-domain signals show 3 unrealized correlations", "MSP ticket data predicts Terra market disruptions with 2-week lead time"], caveats: "Requires API bridge between Vessels and MSP data layers." },
-  { oracle: "Financial Oracle", answer: "Instrument the portfolio intelligence layer with real-time cash flow correlation across all portfolio companies — enabling proactive capital allocation 45-90 days ahead of need.", confidence: 84, reasoning: ["Portfolio companies share seasonal patterns", "Capital allocation timing gap costs ~$340K/yr in opportunity cost", "AI-driven allocation has 2.1x better outcomes in comparable portfolios"], caveats: "Financial data sensitivity requires Sacsayhuamán Shield escalation." },
-  { oracle: "Security Oracle", answer: "Implement continuous agent action auditing across all Quipu knots — current visibility gap means 23% of agent actions are unaudited, creating compliance and security exposure.", confidence: 96, reasoning: ["Compliance frameworks require full audit trails by Q3 2026", "3 incidents last quarter traced to unaudited agent actions", "Audit infrastructure reduces investigation time by 80%"], caveats: "Performance overhead estimated at 4–7ms per action." },
+  { oracle: "Primary AI Model", answer: "Deploy automated cross-domain anomaly correlation — connecting Vessels, MSP, and Terra signals into a unified early warning system would reduce MTTD by an estimated 60%.", confidence: 91, reasoning: ["Each app currently operates in isolation", "Cross-domain signals show 3 unrealized correlations", "MSP ticket data predicts Terra market disruptions with 2-week lead time"], caveats: "Requires API bridge between Vessels and MSP data layers." },
+  { oracle: "Financial Oracle", answer: "Instrument the portfolio intelligence layer with real-time cash flow correlation across all portfolio companies — enabling proactive capital allocation 45-90 days ahead of need.", confidence: 84, reasoning: ["Portfolio companies share seasonal patterns", "Capital allocation timing gap costs ~$340K/yr in opportunity cost", "AI-driven allocation has 2.1x better outcomes in comparable portfolios"], caveats: "Financial data sensitivity requires Adaptive Defense escalation review." },
+  { oracle: "Security Oracle", answer: "Implement continuous agent action auditing across all agent network nodes — current visibility gap means 23% of agent actions are unaudited, creating compliance and security exposure.", confidence: 96, reasoning: ["Compliance frameworks require full audit trails by Q3 2026", "3 incidents last quarter traced to unaudited agent actions", "Audit infrastructure reduces investigation time by 80%"], caveats: "Performance overhead estimated at 4–7ms per action." },
 ];
 
 export default function WillaqUmu() {
@@ -102,7 +102,7 @@ export default function WillaqUmu() {
         question,
         oracle: oracle?.name || "",
         confidence: oracle?.confidence || 80,
-        summary: "The Willaq Umu Oracle has processed your question against its domain knowledge and cross-referenced signals from across the SZL ecosystem. Based on current intelligence patterns, the recommendation carries high confidence. The Oracle advises prioritizing this action in the next 14-day operational cycle. Multiple supporting signals from the Qhapaq Ñan network corroborate this interpretation.",
+        summary: "The AI Advisor has processed your question against its domain knowledge and cross-referenced signals from across the SZL ecosystem. Based on current intelligence patterns, the recommendation carries high confidence. Prioritizing this action in the next 14-day operational cycle is advised. Multiple supporting signals from the intelligence network corroborate this interpretation.",
       });
       setConsulting(false);
     }, 2800);
@@ -116,17 +116,16 @@ export default function WillaqUmu() {
           <div className="w-8 h-8 rounded-lg bg-amber-400/15 flex items-center justify-center">
             <Eye className="w-4 h-4 text-amber-400" />
           </div>
-          <h1 className="text-xl font-display font-bold text-foreground tracking-tight">Willaq Umu — Oracle Hub</h1>
+          <h1 className="text-xl font-display font-bold text-foreground tracking-tight">AI Advisor</h1>
         </div>
         <p className="text-xs text-muted-foreground">
-          The <span className="text-amber-400/80">Willaq Umu</span> was the High Priest — the Oracle who interpreted signs and advised the Sapa Inca.
-          Consult multiple AI models, compare their reasoning, and receive confidence-scored interpretations.
+          Consult domain-specific AI models, compare their reasoning, and receive confidence-scored interpretations.
         </p>
       </div>
 
       {/* Oracle fleet */}
       <div>
-        <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-3">The Oracle Fleet</h3>
+        <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-3">AI Model Fleet</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {ORACLES.map(oracle => (
             <button key={oracle.id}

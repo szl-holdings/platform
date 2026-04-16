@@ -602,7 +602,7 @@ router.post("/billing/terra/metered-usage", authMiddleware(), async (req: Reques
   }
 });
 
-router.post("/billing/firestorm/enterprise-quote", authMiddleware({ required: false }), async (req: Request, res: Response) => {
+async function handleAegisEnterpriseQuote(req: Request, res: Response): Promise<void> {
   try {
     const { companyName, email, contactName, seats, addOns, notes, successUrl, cancelUrl } = req.body as {
       companyName?: string;
@@ -656,7 +656,7 @@ router.post("/billing/firestorm/enterprise-quote", authMiddleware({ required: fa
       const baseAmount = seats ? Math.max(seats, 10) * 990_00 : 990_00;
       const lineItems = [
         {
-          description: `Firestorm Enterprise — ${seats ?? 1} seat${(seats ?? 1) !== 1 ? "s" : ""}`,
+          description: `Aegis Enterprise — ${seats ?? 1} seat${(seats ?? 1) !== 1 ? "s" : ""}`,
           amount: baseAmount,
           currency: "usd",
         },
@@ -678,7 +678,7 @@ router.post("/billing/firestorm/enterprise-quote", authMiddleware({ required: fa
         invoiceId: invoice.id,
         invoiceStatus: invoice.status,
         hostedInvoiceUrl: invoice.hostedInvoiceUrl,
-        message: "Enterprise invoice sent to your email. A Firestorm specialist will follow up within 1 business day.",
+        message: "Enterprise invoice sent to your email. An Aegis specialist will follow up within 1 business day.",
       });
       return;
     }
@@ -691,7 +691,10 @@ router.post("/billing/firestorm/enterprise-quote", authMiddleware({ required: fa
   } catch (err) {
     handleRouteError(res, err, "Failed to create enterprise quote");
   }
-});
+}
+
+router.post("/billing/aegis/enterprise-quote", authMiddleware({ required: false }), handleAegisEnterpriseQuote);
+router.post("/billing/firestorm/enterprise-quote", authMiddleware({ required: false }), handleAegisEnterpriseQuote);
 
 router.post("/billing/sync-plans", authMiddleware(), requireRole("admin", "super_admin"), async (_req: Request, res: Response) => {
   try {

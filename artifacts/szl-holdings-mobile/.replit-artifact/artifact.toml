@@ -1,6 +1,6 @@
 kind = "mobile"
     previewPath = "/szl-holdings-mobile/"
-    title = "CORTEX — Unified Command"
+    title = "SZL Holdings — Mobile Command"
     version = "1.0.0"
     id = "artifacts/szl-holdings-mobile"
 
@@ -23,4 +23,3 @@ kind = "mobile"
     [services.env]
     EXPO_PORT = "8085"
     BASE_PATH = "/szl-holdings-mobile/"
-  

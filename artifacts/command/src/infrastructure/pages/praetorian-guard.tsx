@@ -6,10 +6,10 @@ import { cn } from "@imp/lib/utils";
 
 const THREAT_LEVELS: ThreatLevel[] = ["PAX", "VIGILIA", "BELLUM", "FUROR"];
 const THREAT_LABELS: Record<ThreatLevel, { latin: string; english: string; color: string; description: string }> = {
-  PAX: { latin: "PAX", english: "Peace", color: "#4ade80", description: "No active threats. All perimeters secure. Standard monitoring in effect." },
-  VIGILIA: { latin: "VIGILIA", english: "Watch", color: "#facc15", description: "Elevated activity. Enhanced monitoring active. WAF rules tightened." },
-  BELLUM: { latin: "BELLUM", english: "War", color: "#fb923c", description: "Active threat engagement. Emergency hardening protocols engaged. All gates on lockdown." },
-  FUROR: { latin: "FUROR", english: "Fury", color: "#ef4444", description: "Critical breach underway. Maximum isolation. Manual intervention required immediately." },
+  PAX: { latin: "CLEAR", english: "Clear", color: "#4ade80", description: "No active threats. All systems nominal. Standard monitoring in effect." },
+  VIGILIA: { latin: "ELEVATED", english: "Elevated", color: "#facc15", description: "Elevated activity detected. Enhanced monitoring active. WAF rules tightened." },
+  BELLUM: { latin: "ACTIVE", english: "Active Threat", color: "#fb923c", description: "Active threat engagement. Emergency hardening protocols engaged. All services restricted." },
+  FUROR: { latin: "CRITICAL", english: "Critical", color: "#ef4444", description: "Critical breach underway. Maximum isolation. Manual intervention required immediately." },
 };
 
 function ThreatGauge({ current }: { current: ThreatLevel }) {
@@ -151,10 +151,10 @@ export default function PraetorianGuard() {
         <div className="flex items-center gap-3 mb-1">
           <Shield className="w-5 h-5" style={{ color: "#c9a227" }} />
           <h1 className="font-display text-lg tracking-[0.2em] gold-text gold-glow font-bold uppercase">
-            Praetorian Guard
+            Security Perimeter
           </h1>
         </div>
-        <p className="text-xs text-slate-500 ml-8">Autonomous security perimeter — PAX → VIGILIA → BELLUM → FUROR</p>
+        <p className="text-xs text-slate-500 ml-8">Autonomous security perimeter — CLEAR → ELEVATED → ACTIVE → CRITICAL</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -211,7 +211,7 @@ export default function PraetorianGuard() {
           </div>
           <div className="flex items-center gap-2">
             <RefreshCw className="w-3 h-3 text-slate-600" />
-            <span className="text-[10px] font-mono text-slate-600">Aegis/Firestorm linked</span>
+            <span className="text-[10px] font-mono text-slate-600">Aegis linked</span>
           </div>
         </div>
         <div>

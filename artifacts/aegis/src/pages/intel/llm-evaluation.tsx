@@ -129,7 +129,7 @@ export default function LLMEvaluation() {
               value={testPrompt}
               onChange={e => setTestPrompt(e.target.value)}
               onKeyDown={e => e.key === "Enter" && !e.shiftKey && runLiveTest()}
-              placeholder="Enter a prompt to test against the INCA research agent (gpt-5.2)..."
+              placeholder="Enter a prompt to test against the AI research agent (gpt-5.2)..."
               disabled={liveTest?.loading}
               className="flex-1 px-3 py-2 text-xs bg-muted rounded-lg border border-border focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
             />
@@ -157,7 +157,7 @@ export default function LLMEvaluation() {
                 <span className="font-mono bg-muted px-1.5 py-0.5 rounded">{liveTest.model}</span>
                 {liveTest.loading && <span className="flex items-center gap-1 text-primary"><Loader2 className="w-3 h-3 animate-spin" /> streaming...</span>}
                 {liveTest.latencyMs && <span className="text-emerald-400">{(liveTest.latencyMs / 1000).toFixed(2)}s</span>}
-                <span className="ml-auto text-[9px]">via INCA research agent</span>
+                <span className="ml-auto text-[9px]">via AI research agent</span>
               </div>
               {liveTest.error && <p className="text-xs text-red-400">{liveTest.error}</p>}
               {liveTest.response && (

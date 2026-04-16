@@ -27,7 +27,7 @@ const DEMOS = [
     color: "hsl(0,72%,56%)",
     colorMuted: "hsla(0,72%,56%,0.08)",
     colorBorder: "hsla(0,72%,56%,0.22)",
-    href: "/firestorm/",
+    href: "/aegis/",
     cta: "Open Aegis",
   },
   {

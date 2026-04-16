@@ -61,7 +61,7 @@ function CenturyBlock({ century, depth }: { century: Century; depth: number }) {
         <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color }} />
         <div className="flex-1 min-w-0">
           <span className="font-display text-[10px] tracking-[0.1em] text-slate-300 font-semibold truncate block">{century.name}</span>
-          <span className="text-[9px] text-slate-600">{century.label} · {century.sentinels.length} sentinels</span>
+          <span className="text-[9px] text-slate-600">{century.label} · {century.sentinels.length} resources</span>
         </div>
         <AquilaPip score={century.aquilaScore} size="xs" />
         <ClassificationBadge classification={century.classification} size="xs" />
@@ -138,11 +138,11 @@ function LegionBlock({ legion }: { legion: Legion }) {
           <div className="grid grid-cols-3 gap-3 mb-3 px-2 py-2">
             <div className="text-center">
               <div className="font-mono text-lg font-bold" style={{ color }}>{legion.aquilaScore}</div>
-              <div className="text-[10px] text-slate-500">Aquila Score</div>
+              <div className="text-[10px] text-slate-500">Health Score</div>
             </div>
             <div className="text-center">
               <div className="font-mono text-lg font-bold text-slate-300">{legion.cohorts.length}</div>
-              <div className="text-[10px] text-slate-500">Cohorts</div>
+              <div className="text-[10px] text-slate-500">Groups</div>
             </div>
             <div className="text-center">
               <div className="font-mono text-lg font-bold text-green-400">${legion.costPerMonth.toLocaleString()}</div>
@@ -169,22 +169,22 @@ export default function ImperiumMap() {
         <div className="flex items-center gap-3 mb-1">
           <Globe2 className="w-5 h-5" style={{ color: "#c9a227" }} />
           <h1 className="font-display text-lg tracking-[0.2em] gold-text gold-glow font-bold uppercase">
-            Imperium Map
+            Resource Map
           </h1>
         </div>
         <p className="text-xs text-slate-500 ml-8">
-          Full Roman hierarchy — Legions → Cohorts → Centuries → Sentinels
+          Full platform hierarchy — Regions → Groups → Clusters → Resources
         </p>
       </div>
 
       {/* Hierarchy legend */}
       <div className="flex flex-wrap gap-4 text-[10px] text-slate-500 font-mono">
         {[
-          { label: "IMPERIUM", desc: "Entire cloud empire" },
-          { label: "LEGION", desc: "Azure region" },
-          { label: "COHORT", desc: "Resource group / service cluster" },
-          { label: "CENTURY", desc: "Service type group" },
-          { label: "SENTINEL", desc: "Individual resource instance" },
+          { label: "PLATFORM", desc: "Entire cloud estate" },
+          { label: "REGION", desc: "Azure region" },
+          { label: "GROUP", desc: "Resource group / service cluster" },
+          { label: "CLUSTER", desc: "Service type group" },
+          { label: "RESOURCE", desc: "Individual resource instance" },
         ].map((tier, i) => (
           <React.Fragment key={tier.label}>
             {i > 0 && <ChevronRight className="w-3 h-3 text-slate-700 self-center" />}

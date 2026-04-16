@@ -110,7 +110,7 @@ const REPORTS: Array<{
     id: "security_posture",
     name: "Security Posture Report",
     app: "Aegis",
-    appPath: "/firestorm/powerbi",
+    appPath: "/aegis/powerbi",
     description: "Real-time security posture metrics, incident trends, control effectiveness, and compliance scores.",
     color: "#3b82f6",
     icon: "🛡️",

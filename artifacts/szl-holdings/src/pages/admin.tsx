@@ -485,7 +485,7 @@ function AnalyticsPanel() {
     { event: "cta_click", count: "CTA interactions", description: "Button and link clicks with label" },
     { event: "form_submit", count: "Form completions", description: "All form submissions" },
     { event: "demo_request", count: "Demo requests", description: "Vessels demo form" },
-    { event: "access_request", count: "Access requests", description: "INCA access form" },
+    { event: "access_request", count: "Access requests", description: "AI research access form" },
     { event: "private_inquiry_submit", count: "Private inquiries", description: "Carlota Jo inquiry form" },
     { event: "article_view", count: "Article views", description: "Article detail page loads" },
     { event: "case_study_view", count: "Case study views", description: "Case study page loads" },
@@ -1085,7 +1085,7 @@ const ADMIN_SECTIONS = [
   { id: "dashboard", label: "Dashboard", icon: Gauge },
   { id: "revenue", label: "Revenue", icon: DollarSign },
   { id: "capital-readiness", label: "Capital Readiness", icon: DollarSign },
-  { id: "capital-arsenal", label: "Capital Arsenal", icon: BookOpen },
+  { id: "capital-arsenal", label: "Capital Management", icon: BookOpen },
   { id: "certification-readiness", label: "Cert Readiness", icon: Shield },
   { id: "azure-tenants", label: "Azure Tenants", icon: Cloud },
   { id: "scim-provisioning", label: "SCIM Provisioning", icon: Shield },
@@ -2855,7 +2855,7 @@ export default function AdminPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-                      <BookOpen className="w-4 h-4 text-primary" /> Capital Arsenal
+                      <BookOpen className="w-4 h-4 text-primary" /> Capital Management
                     </h2>
                     <p className="text-sm text-muted-foreground mt-0.5">Complete document library: investor materials, bank/SBA package, NY state programs, and federal programs.</p>
                   </div>
@@ -2906,7 +2906,7 @@ export default function AdminPage() {
                 <div className="text-center pt-2">
                   <Link href="/admin/capital-arsenal">
                     <a className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors">
-                      <BookOpen className="w-4 h-4" /> Open Full Capital Arsenal
+                      <BookOpen className="w-4 h-4" /> Open Capital Management
                     </a>
                   </Link>
                 </div>
@@ -2986,7 +2986,7 @@ export default function AdminPage() {
                 </div>
                 <div className="grid grid-cols-1 gap-4">
                   {[
-                    { icon: "🛡️", label: "Security Posture Report", app: "Aegis", path: "/firestorm/powerbi", color: "#3b82f6", desc: "Real-time security posture metrics, incident trends, and compliance scores." },
+                    { icon: "🛡️", label: "Security Posture Report", app: "Aegis", path: "/aegis/powerbi", color: "#3b82f6", desc: "Real-time security posture metrics, incident trends, and compliance scores." },
                     { icon: "🏢", label: "Portfolio Analytics Report", app: "Terra", path: "/terra/powerbi", color: "#10b981", desc: "Property-level analytics including NOI, occupancy, IRR, and distress signals." },
                     { icon: "⚡", label: "Operational KPIs Report", app: "Lyte", path: "/command/operations/powerbi", color: "#f59e0b", desc: "Business observability KPIs including SLA performance and PRISM health scores." },
                   ].map(r => (

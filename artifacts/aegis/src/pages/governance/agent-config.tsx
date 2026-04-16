@@ -43,9 +43,9 @@ const DEFAULT_AGENTS: AgentDef[] = [
     confidenceThreshold: 0.8, active: true,
   },
   {
-    id: "inca", name: "INCA", domain: "research",
+    id: "szl-cortex", name: "SZL Cortex", domain: "research",
     preferredModel: "gemini-3.1-pro-preview", preferredProvider: "gemini",
-    systemPrompt: "You are INCA, the AI research intelligence agent within the Nuro Mesh. You specialize in AI/ML research, model evaluation, academic literature analysis, and technology trend assessment.",
+    systemPrompt: "You are SZL Cortex, the AI research intelligence agent within the platform. You specialize in AI/ML research, model evaluation, academic literature analysis, and technology trend assessment.",
     tools: ["huggingface_search", "arxiv_search", "model_registry"], highStakesDomains: [],
     confidenceThreshold: 0.75, active: true,
   },

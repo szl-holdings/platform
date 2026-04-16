@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 
 const FORGE_SECTIONS = [
-  { id: "arena", label: "Tournament Arena", icon: Trophy, color: "#f59e0b", href: "/nuro-forge/arena", desc: "Head-to-head model benchmarking with Elo ranking", stat: "12 models", metric: "2,847 duels" },
+  { id: "arena", label: "Model Benchmarks", icon: Trophy, color: "#f59e0b", href: "/nuro-forge/arena", desc: "Head-to-head model benchmarking with performance ranking", stat: "12 models", metric: "2,847 tests" },
   { id: "composition", label: "Model Composition", icon: GitMerge, color: "#8b5cf6", href: "/nuro-forge/composition", desc: "Autonomous pipeline construction & self-optimization", stat: "8 pipelines", metric: "94.2% quality" },
   { id: "governance", label: "Governance & Safety", icon: Shield, color: "#3b82f6", href: "/nuro-forge/governance", desc: "Bias detection, hallucination scoring, audit trails", stat: "100% audited", metric: "0 violations" },
   { id: "fine-tuning", label: "Federated Fine-Tuning", icon: Brain, color: "#ec4899", href: "/nuro-forge/fine-tuning", desc: "Domain-isolated learning signals & model improvement", stat: "9 domains", metric: "+12.4% accuracy" },
@@ -23,7 +23,7 @@ const FORGE_SECTIONS = [
 
 const ModelActivityFeed = memo(function ModelActivityFeed() {
   const events = useMemo(() => [
-    { model: "Claude 4 Sonnet", action: "Won duel vs GPT-5.2", domain: "Legal", time: "2s ago", color: "#8b5cf6" },
+    { model: "Claude 4 Sonnet", action: "Outperformed GPT-5.2", domain: "Legal", time: "2s ago", color: "#8b5cf6" },
     { model: "Qwen3-8B", action: "Inference: 142ms", domain: "Maritime", time: "5s ago", color: "#06b6d4" },
     { model: "GPT-5.2", action: "Promoted to production", domain: "Financial", time: "12s ago", color: "#10b981" },
     { model: "Gemini 2.5 Pro", action: "Governance check passed", domain: "Advisory", time: "18s ago", color: "#3b82f6" },
@@ -53,7 +53,7 @@ const ModelActivityFeed = memo(function ModelActivityFeed() {
   );
 });
 
-function EloLeaderboard() {
+function PerformanceLeaderboard() {
   const models = [
     { name: "Claude 4 Sonnet", elo: 1847, provider: "Anthropic", trend: "+12", color: "#8b5cf6" },
     { name: "GPT-5.2", elo: 1823, provider: "OpenAI", trend: "+8", color: "#10b981" },
@@ -95,11 +95,11 @@ export default function NuroForgeDashboard() {
               <Cpu className="w-4 h-4" style={{ color: "#d4a054" }} />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.9)" }}>Nuro Forge</h1>
-              <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>Self-Evolving Model Arena & Intelligence Fabric</p>
+              <h1 className="text-xl font-bold tracking-tight" style={{ color: "rgba(255,255,255,0.9)" }}>Model Lab</h1>
+              <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>AI Model Intelligence Platform</p>
             </div>
             <span className="ml-2 px-2 py-0.5 rounded text-[9px] font-semibold tracking-wider"
-              style={{ background: "linear-gradient(135deg, rgba(212,160,84,0.2), rgba(212,160,84,0.08))", color: "#d4a054", border: "1px solid rgba(212,160,84,0.2)" }}>LIVE</span>
+              style={{ background: "linear-gradient(135deg, rgba(212,160,84,0.2), rgba(212,160,84,0.08))", color: "#d4a054", border: "1px solid rgba(212,160,84,0.2)" }}>ACTIVE</span>
           </div>
         </m.div>
 
@@ -126,9 +126,9 @@ export default function NuroForgeDashboard() {
             className="rounded-lg p-4" style={{ background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.04)" }}>
             <h2 className="text-[13px] font-semibold mb-3 flex items-center gap-2" style={{ color: "rgba(255,255,255,0.65)" }}>
               <Trophy className="w-4 h-4" style={{ color: "#f59e0b" }} />
-              Elo Leaderboard
+              Performance Rankings
             </h2>
-            <EloLeaderboard />
+            <PerformanceLeaderboard />
           </m.div>
 
           <m.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.15 }}
@@ -144,7 +144,7 @@ export default function NuroForgeDashboard() {
         <m.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <h2 className="text-[13px] font-semibold mb-4 flex items-center gap-2" style={{ color: "rgba(255,255,255,0.65)" }}>
             <Zap className="w-4 h-4" style={{ color: "#d4a054" }} />
-            Intelligence Fabric
+            Module Overview
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
             {FORGE_SECTIONS.map((section, i) => (
@@ -178,7 +178,7 @@ export default function NuroForgeDashboard() {
 
         <div className="text-center py-6 mt-4">
           <p className="text-[9px] uppercase tracking-[0.25em]" style={{ color: "rgba(255,255,255,0.08)" }}>
-            Nuro Forge — Self-Evolving AI Intelligence Fabric — SZL Holdings
+            Model Lab — AI Model Intelligence Platform — SZL Holdings
           </p>
         </div>
       </div>

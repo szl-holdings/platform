@@ -115,7 +115,7 @@ const TOTAL_OPPORTUNITY = SYNERGIES.reduce((acc, s) => acc + s.annualOpportunity
 
 export default function SynergyMapPage() {
   usePageMeta({
-    title: "Cross-Portfolio Synergy Map — SZL Holdings Venture Intelligence",
+    title: "Cross-Portfolio Connections — SZL Holdings Venture Intelligence",
     description: "Revenue synergies between SZL portfolio companies — quantified and actionable.",
     canonical: "https://szlholdings.com/venture-intelligence/synergy-map",
   });
@@ -134,10 +134,10 @@ export default function SynergyMapPage() {
             </Link>
             <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
               <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.6rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>
-                Synergy Map
+                Portfolio Connections
               </p>
               <h1 style={{ fontSize: "clamp(1.75rem,3.5vw,2.75rem)", fontWeight: 700, letterSpacing: "-0.026em", color: "hsl(38,12%,94%)", lineHeight: 1.1, marginBottom: "0.75rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>
-                Cross-Portfolio Synergy Map
+                Cross-Portfolio Connections
               </h1>
               <div style={{ display: "flex", alignItems: "center", gap: "2rem", flexWrap: "wrap" }}>
                 <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,52%)", lineHeight: 1.65, maxWidth: "36rem" }}>

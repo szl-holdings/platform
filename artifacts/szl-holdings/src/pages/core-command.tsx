@@ -91,7 +91,7 @@ const platformLinks = [
   { name: "Lyte", role: "INTERPRET", subtitle: "Business Observability", href: "/command/operations/", icon: Zap, color: "#f59e0b" },
   { name: "Alloy Creative", role: "CREATE", subtitle: "Creative Workflows", href: "/alloy/creative", icon: Brain, color: "#ec4899" },
   { name: "Alloy", role: "EXECUTE", subtitle: "Execution Fabric", href: "/alloy/", icon: Layers, color: "#6366f1" },
-  { name: "Aegis", role: "DEFEND", subtitle: "Defense & Intelligence", href: "/firestorm/", icon: Shield, color: "#6366f1" },
+  { name: "Aegis", role: "DEFEND", subtitle: "Defense & Intelligence", href: "/aegis/", icon: Shield, color: "#6366f1" },
   { name: "Vessels", role: "TRACK", subtitle: "Maritime Intelligence", href: "/vessels/", icon: Ship, color: "#3b82f6" },
   { name: "Carlota Jo", role: "CONSULT", subtitle: "Brand Strategy", href: "/carlota-jo/", icon: Globe, color: "#10b981" },
 ];
@@ -628,7 +628,7 @@ export default function CoreCommandCenter() {
                   <div className="space-y-1">
                     {[
                       { label: "Terra — Property Intelligence", href: "/terra/", color: "#4d7c0f", icon: Building },
-                      { label: "Aegis — Defense & Intelligence", href: "/firestorm/", color: "#6366f1", icon: Shield },
+                      { label: "Aegis — Defense & Intelligence", href: "/aegis/", color: "#6366f1", icon: Shield },
                       { label: "Carlota Jo — Consulting", href: "/carlota-jo/", color: "#10b981", icon: Globe },
                       { label: "Vessels — Maritime", href: "/vessels/", color: "#3b82f6", icon: Ship },
                       { label: "Alloy — Creative Workflows", href: "/alloy/creative", color: "#ec4899", icon: Eye },

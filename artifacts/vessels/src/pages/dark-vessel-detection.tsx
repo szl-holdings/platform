@@ -4,17 +4,17 @@ import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Eye, EyeOff, AlertTriangle, Shield, Radio, Ship, MapPin, Clock, Filter, Search, RefreshCw, Sparkles, Loader2 } from "lucide-react";
 
 const darkVessels = [
-  { id: "DV-001", name: "GHOST MERIDIAN", imo: "9821045", flag: "Unknown", lat: 25.4, lon: 56.2, lastAIS: "14h ago", gapDuration: "14h 22m", suspicionScore: 94, reason: "AIS disabled near Iran — sanctions zone transit", priorCalls: ["Bandar Abbas", "Jebel Ali"], ownerChain: "Obscured via 3 shell co.", status: "Critical" },
-  { id: "DV-002", name: "NORTHERN PHANTOM", imo: "9654321", flag: "Comoros", lat: 37.8, lon: 23.1, lastAIS: "9h ago", gapDuration: "9h 11m", suspicionScore: 81, reason: "Repeated AIS gaps in Black Sea during wartime period", priorCalls: ["Novorossiysk", "Batumi"], ownerChain: "Seagate Maritime Ltd.", status: "High" },
-  { id: "DV-003", name: "ORIENT MIRAGE", imo: "9112233", flag: "Palau", lat: 3.1, lon: 103.4, lastAIS: "6h ago", gapDuration: "6h 55m", suspicionScore: 73, reason: "AIS gap in South China Sea STS transfer zone", priorCalls: ["Zhoushan", "Busan"], ownerChain: "Pacific Ventures Pte.", status: "Medium" },
-  { id: "DV-004", name: "KAIROS SHADOW", imo: "9987654", flag: "Tanzania", lat: 12.7, lon: 44.9, lastAIS: "3h ago", gapDuration: "3h 40m", suspicionScore: 67, reason: "AIS off near Yemen conflict zone", priorCalls: ["Hudaydah", "Aden"], ownerChain: "Red Sea Maritime LLC", status: "Medium" },
-  { id: "DV-005", name: "DELTA SPECTRE", imo: "9445566", flag: "Cameroon", lat: -1.3, lon: 8.7, lastAIS: "21h ago", gapDuration: "21h 05m", suspicionScore: 88, reason: "Extended AIS blackout in Gulf of Guinea — piracy corridor", priorCalls: ["Lomé", "Abidjan"], ownerChain: "Atlantic Ridge Corp.", status: "High" },
+  { id: "DV-001", name: "PACIFIC MERIDIAN", imo: "9821045", flag: "Unknown", lat: 25.4, lon: 56.2, lastAIS: "14h ago", gapDuration: "14h 22m", suspicionScore: 94, reason: "AIS disabled near Iran — sanctions zone transit", priorCalls: ["Bandar Abbas", "Jebel Ali"], ownerChain: "Obscured via 3 shell co.", status: "Critical" },
+  { id: "DV-002", name: "CASPIAN PIONEER", imo: "9654321", flag: "Comoros", lat: 37.8, lon: 23.1, lastAIS: "9h ago", gapDuration: "9h 11m", suspicionScore: 81, reason: "Repeated AIS gaps in Black Sea during wartime period", priorCalls: ["Novorossiysk", "Batumi"], ownerChain: "Seagate Maritime Ltd.", status: "High" },
+  { id: "DV-003", name: "FAR EASTERN PROGRESS", imo: "9112233", flag: "Palau", lat: 3.1, lon: 103.4, lastAIS: "6h ago", gapDuration: "6h 55m", suspicionScore: 73, reason: "AIS gap in South China Sea STS transfer zone", priorCalls: ["Zhoushan", "Busan"], ownerChain: "Pacific Ventures Pte.", status: "Medium" },
+  { id: "DV-004", name: "GULF VOYAGER", imo: "9987654", flag: "Tanzania", lat: 12.7, lon: 44.9, lastAIS: "3h ago", gapDuration: "3h 40m", suspicionScore: 67, reason: "AIS off near Yemen conflict zone", priorCalls: ["Hudaydah", "Aden"], ownerChain: "Red Sea Maritime LLC", status: "Medium" },
+  { id: "DV-005", name: "ATLANTIC HARVESTER", imo: "9445566", flag: "Cameroon", lat: -1.3, lon: 8.7, lastAIS: "21h ago", gapDuration: "21h 05m", suspicionScore: 88, reason: "Extended AIS blackout in Gulf of Guinea — piracy corridor", priorCalls: ["Lomé", "Abidjan"], ownerChain: "Atlantic Ridge Corp.", status: "High" },
 ];
 
 const shipToShipAlerts = [
-  { id: "STS-001", vessels: ["GHOST MERIDIAN", "KAZAN SPIRIT"], location: "Persian Gulf — 26.1°N 55.8°E", timestamp: "2h ago", cargo: "Crude Oil (suspected)", confidence: 96, sanctionsLink: true },
-  { id: "STS-002", vessels: ["DELTA SPECTRE", "CALABAR EXPRESS"], location: "Gulf of Guinea — 1.2°N 8.4°E", timestamp: "6h ago", cargo: "Unknown", confidence: 82, sanctionsLink: false },
-  { id: "STS-003", vessels: ["ORIENT MIRAGE", "PACIFIC DAWN"], location: "Malacca Strait — 3.4°N 103.2°E", timestamp: "11h ago", cargo: "Petrochemicals (suspected)", confidence: 74, sanctionsLink: false },
+  { id: "STS-001", vessels: ["PACIFIC MERIDIAN", "KAZAN SPIRIT"], location: "Persian Gulf — 26.1°N 55.8°E", timestamp: "2h ago", cargo: "Crude Oil (suspected)", confidence: 96, sanctionsLink: true },
+  { id: "STS-002", vessels: ["ATLANTIC HARVESTER", "CALABAR EXPRESS"], location: "Gulf of Guinea — 1.2°N 8.4°E", timestamp: "6h ago", cargo: "Unknown", confidence: 82, sanctionsLink: false },
+  { id: "STS-003", vessels: ["FAR EASTERN PROGRESS", "PACIFIC DAWN"], location: "Malacca Strait — 3.4°N 103.2°E", timestamp: "11h ago", cargo: "Petrochemicals (suspected)", confidence: 74, sanctionsLink: false },
 ];
 
 const iuuAlerts = [
