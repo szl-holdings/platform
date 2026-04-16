@@ -343,3 +343,39 @@ All platforms are at **Functional Alpha** status — full feature sets with seed
 ---
 
 *Last verified against code on 2026-04-16*
+
+---
+
+## Decision Fabric (April 2026)
+
+The platform now includes a unifying **Decision Fabric** layer that sits
+above the canonical primitives (Outcome Graph, Proof Chain, Covenant Policy,
+Prism Bus, Forge / Workflow Engine, Monte Carlo Simulation, Approvals).
+
+### What it adds
+
+1. **One correlation index across every primitive.** Every step of the
+   canonical 9-step loop (Signal → Context → Recommendation → Simulation →
+   Policy → Execution → Proof → Outcome → Learning) writes a row keyed by
+   the same `correlationId`, so end-to-end timelines no longer require
+   bespoke joins.
+2. **Decision memory.** Every consequential decision is captured as an
+   immutable `decision_record` with backlinks to the outcome graph, proof
+   chain, frozen policy version, frozen simulation snapshot, approval, and
+   workflow run, plus `predictedOutcome`, `actualOutcome`, and
+   `predictionError`.
+3. **Eight observability surfaces.** Workflow 360, Entity Investigation,
+   Recommendation Trace, Approval Bottlenecks, Policy Failures, Prediction
+   Drift, Domain Cluster Stats, Learning Jobs — all served from
+   `/api/decision-fabric/*`.
+4. **A learning loop.** `POST /decision-fabric/learning/run` walks recent
+   decisions and emits a deterministic per-domain calibration report
+   (ranking-weight delta + confidence multiplier) that the Decision Engine
+   and Monte Carlo Simulation packages consume on their next cycle.
+5. **Playbook suggestions.** Pattern retrieval clusters successful
+   decisions and proposes `playbook_suggestions` that operators can promote
+   into workflows.
+
+See `DECISION_FABRIC.md` for architecture, `OBSERVABILITY_ARCHITECTURE.md`
+for the surface contracts, and `OUTCOME_GRAPH_MODEL.md` for the deepened
+data model.

@@ -327,3 +327,81 @@ The following directories exist under `artifacts/` but are not yet deployed arti
 ---
 
 *Last verified against code on 2026-04-16*
+
+---
+
+## Decision Fabric surfaces (April 2026)
+
+The Decision Fabric exposes a single, governed API namespace
+(`/api/decision-fabric/*`) for every cross-primitive view. Each surface
+lists the primary user, the question it answers, and the route that powers
+it.
+
+### Workflow 360
+- **User:** ops lead, auditor, support engineer.
+- **Question:** "What happened during this workflow run, end to end?"
+- **Route:** `GET /api/decision-fabric/workflows/:runId/360`
+- **Returns:** decision record + chronological primitive timeline.
+
+### Entity Investigation
+- **User:** analyst, account manager, auditor.
+- **Question:** "Show me everything that ever touched this entity."
+- **Route:** `GET /api/decision-fabric/entities/:type/:id/investigation`
+- **Returns:** decisions, primitive events, primitives touched, first /
+  last seen.
+
+### Recommendation Trace
+- **User:** product owner, ML observer.
+- **Question:** "What flowed downstream from this recommendation?"
+- **Route:** `GET /api/decision-fabric/recommendations/:id/trace`
+- **Returns:** decisions, events, predicted vs. actual outcome.
+
+### Approval Bottlenecks
+- **User:** ops lead.
+- **Question:** "Where is the approval queue stuck?"
+- **Route:** `GET /api/decision-fabric/approvals/bottlenecks`
+- **Returns:** pending counts + oldest / mean wait time per
+  `(actionClass, resourceType)`.
+
+### Policy Failures
+- **User:** policy owner, governance lead.
+- **Question:** "Which policies deny the most?"
+- **Route:** `GET /api/decision-fabric/policies/failures`
+- **Returns:** denials per policy + last denied timestamp.
+
+### Prediction Drift
+- **User:** model owner, ML observer.
+- **Question:** "Where are predictions diverging most from reality?"
+- **Route:** `GET /api/decision-fabric/predictions/drift`
+- **Returns:** top-N decisions by `abs(predictionError)`.
+
+### Decision Records
+- **User:** any role with read-access to the org.
+- **Question:** "Give me the durable record for this decision."
+- **Routes:** `POST /decisions`, `GET /decisions`, `GET /decisions/:id`,
+  `POST /decisions/:id/actual-outcome`.
+
+### Snapshots
+- **User:** governance / engineering.
+- **Routes:** `POST /policy-snapshots`, `POST /simulation-snapshots`.
+
+### Playbook Suggestions
+- **User:** ops lead, head of product.
+- **Question:** "What patterns are emerging that we should productize?"
+- **Routes:** `GET /playbooks`, `POST /playbooks/generate` (admin),
+  `POST /playbooks/:id/review` (admin).
+
+### Cluster Stats
+- **User:** product, ops.
+- **Question:** "Where is decision volume concentrated and how reliable is
+  it?"
+- **Route:** `GET /api/decision-fabric/clusters`.
+
+### Learning Cycle
+- **User:** platform admin.
+- **Question:** "Run a calibration cycle on the recent decision corpus."
+- **Route:** `POST /api/decision-fabric/learning/run` (admin) — persisted
+  as a row in `outcome_graph_learning_jobs`.
+
+All routes require an authenticated session. Org isolation is enforced from
+the user session at the route layer, not optional in the library.

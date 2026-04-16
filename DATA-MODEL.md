@@ -607,3 +607,66 @@ All domain entities reference `org_id` (integer FK) for tenant isolation. Signif
 ---
 
 *Last verified against source code: 2026-04-15. Re-verify against `artifacts/api-server/src/`, `lib/db/src/schema/`, and `lib/auth/src/` after significant code changes.*
+
+---
+
+## Decision Fabric (April 2026 — Phase 1–2)
+
+The Decision Fabric layer adds five tables that unify primitive events into
+end-to-end decision memory. See `DECISION_FABRIC.md` and
+`OUTCOME_GRAPH_MODEL.md` for the architecture and lifecycle.
+
+### `decision_fabric_correlation_links`
+
+Cross-primitive index. One row per primitive event participating in the
+canonical 9-step loop.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | serial pk | |
+| `org_id` | int → organizations | nullable for platform-scoped events |
+| `correlation_id` | text not null | shared across all rows for one decision flow |
+| `primitive` | enum | `prism_bus` · `proof_chain` · `outcome_graph` · `covenant_policy` · `workflow_engine` · `monte_carlo` · `approval` · `decision_record` |
+| `primitive_id` | text not null | source row id within that primitive |
+| `entity_type` / `entity_id` | text | subject of the event |
+| `workflow_run_id` | text | when the event happened inside a workflow |
+| `domain` | enum | fabric domain |
+| `occurred_at` | timestamp | |
+| `metadata` | jsonb | |
+
+Indexed on `correlation_id`, `workflow_run_id`, `(entity_type, entity_id)`,
+`primitive`, `org_id`.
+
+### `decision_fabric_records`
+
+One row per consequential decision. Carries forward and backward links to
+every supporting artifact plus predicted-vs-actual outcome.
+
+Notable columns: `domain`, `entity_type`, `entity_id`, `title`, `rationale`,
+`context`, `decided_by_user_id`, `decided_by_role`, `owner_user_id`,
+`outcome_graph_id`, `proof_chain_id`, `policy_version_id`,
+`simulation_snapshot_id`, `approval_id`, `workflow_run_id`,
+`recommendation_id`, `predicted_outcome`, `actual_outcome`,
+`prediction_error`, `status` (`draft` · `executed` · `rolled_back` ·
+`superseded`), `correlation_id`, `metadata`, `decided_at`.
+
+### `decision_fabric_policy_versions`
+
+Immutable policy bodies frozen at evaluation time so a decision can be
+replayed against the exact policy that ran. Columns: `policy_id`, `version`,
+`policy_name`, `effect`, `body` (jsonb), `authored_by_user_id`,
+`captured_at`.
+
+### `decision_fabric_simulation_snapshots`
+
+Frozen Monte Carlo (or other) simulation runs used as evidence. Columns:
+`domain`, `scenario_id`, `scenario_name`, `inputs`, `parameters`, `results`,
+`confidence_interval`, `iterations`, `seed`, `captured_at`.
+
+### `decision_fabric_playbook_suggestions`
+
+Auto-generated playbook proposals. Columns: `domain`, `title`, `description`,
+`trigger_signature`, `recommended_actions`, `supporting_decision_ids`,
+`sample_size`, `success_rate`, `confidence`, `status` (`proposed` ·
+`accepted` · `rejected` · `promoted_to_workflow`), `reviewed_by_user_id`,
+`reviewed_at`, `promoted_workflow_id`.

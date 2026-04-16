@@ -23,6 +23,7 @@
     "@szl-holdings/action-engine": "workspace:*",
     "@szl-holdings/ai-engine": "workspace:*",
     "@szl-holdings/decision-engine": "workspace:*",
+    "@szl-holdings/decision-fabric": "workspace:*",
     "@szl-holdings/api-zod": "workspace:*",
     "@szl-holdings/audit": "workspace:*",
     "@szl-holdings/auth": "workspace:*",

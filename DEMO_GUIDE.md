@@ -300,3 +300,64 @@ pnpm --filter scripts run seed:demo -- --product vessels
 2. Send follow-up within 24 hours
 3. Note any feedback or questions that came up
 4. If demo data needs cleanup, run `pnpm seed:demo` to reset
+
+---
+
+## Decision Fabric demo (April 2026)
+
+Use this script to demonstrate end-to-end traceability and decision memory.
+
+### Setup
+Run the demo seeder: `pnpm run seed:demo`. It now seeds a handful of
+correlated primitive events plus a couple of `decision_records` so the
+fabric surfaces have something to render.
+
+### Script
+
+1. **Open Workflow 360 for the most recent rebalance run.**
+   `GET /api/decision-fabric/workflows/<runId>/360` — show the timeline
+   weaving Prism Bus signals, Proof Chain reviews, Covenant Policy
+   evaluations, and the resulting Outcome Graph row.
+   *Talking point:* "Every primitive that touched this run is in one
+   timeline. There is no separate event log to reconcile."
+
+2. **Investigate the underlying entity.**
+   `GET /api/decision-fabric/entities/vessel/IMO-9876543/investigation` —
+   show every recommendation, decision, and outcome that ever involved this
+   vessel, with the primitives and domains tagged.
+   *Talking point:* "This is what 'know your asset' actually looks like."
+
+3. **Trace a recommendation to its outcome.**
+   `GET /api/decision-fabric/recommendations/<recId>/trace` — show the
+   decision record, the predicted outcome, the actual outcome, and the
+   prediction error.
+   *Talking point:* "We don't just recommend. We grade ourselves."
+
+4. **Inspect bottlenecks.**
+   `GET /api/decision-fabric/approvals/bottlenecks` and `/policies/failures`
+   side by side — show the queue depth and the policies denying most often.
+   *Talking point:* "When the queue jams, you can see exactly why and
+   where, in seconds."
+
+5. **Run a learning cycle live.**
+   `POST /api/decision-fabric/learning/run` (admin) — call the endpoint and
+   show the resulting calibration report and the new entry under
+   `GET /api/outcome-graph/learning-jobs`.
+   *Talking point:* "Every cycle, the system gets a little better — and we
+   record exactly how much, why, and with what evidence."
+
+6. **(Optional) Promote a playbook.**
+   `POST /api/decision-fabric/playbooks/generate` then
+   `POST /api/decision-fabric/playbooks/<id>/review` with
+   `status="promoted_to_workflow"` — show the generated suggestion getting
+   promoted into a Forge workflow.
+   *Talking point:* "Patterns that prove themselves become repeatable
+   workflows automatically."
+
+### Audience cuts
+
+- **Investors:** steps 1, 3, 5 — emphasize the moat (decision memory +
+  measurable learning).
+- **Enterprise buyers:** steps 1, 2, 4 — emphasize auditability and
+  operational visibility.
+- **Technical partners:** all six steps.

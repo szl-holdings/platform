@@ -304,3 +304,45 @@ A platform that compounds on five dimensions simultaneously across eight structu
 ---
 
 *Last verified against source code: 2026-04-16.*
+
+---
+
+## Moat extension — Decision Fabric (April 2026)
+
+The Decision Fabric makes three previously implicit moats explicit and
+measurable.
+
+### Moat: end-to-end traceability as a first-class API
+
+Competitors who ship governance modules typically expose audit logs. We
+expose **Workflow 360**, **Entity Investigation**, and **Recommendation
+Trace** as governed APIs that join across signal, recommendation, policy,
+simulation, execution, proof, and outcome under a single `correlationId`.
+
+Switching cost: any customer who builds a compliance workflow on these
+surfaces inherits five primitives' worth of data wiring. Replicating it
+requires rebuilding the correlation contract from scratch.
+
+### Moat: decision memory with replay
+
+`decision_records` carry frozen `policy_version` and `simulation_snapshot`
+links. Years after a decision is made, an auditor or operator can
+reconstruct the exact policy text and the exact simulation parameters that
+shaped it. No competitor we've seen freezes both at decision time.
+
+Defensibility: every decision recorded compounds the corpus. After ~10k
+decisions, the corpus itself becomes a sales asset ("here is what we have
+learned to predict, with calibrated confidence").
+
+### Moat: deterministic, replayable learning loop
+
+`runLearningCycle()` is a pure function of the `decision_records` corpus
+plus a window. Same inputs always produce the same calibration report.
+Customers can therefore audit the learning loop the same way they audit a
+policy. This is rare in ML-adjacent products, where learning is a black
+box; here it is a contract.
+
+### Moat reinforcement
+
+The fabric reinforces the existing covenant-policy and proof-chain moats by
+making them queryable in operator surfaces, not just in audit logs.

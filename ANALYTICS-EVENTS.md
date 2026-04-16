@@ -242,3 +242,43 @@ Track each step as a named funnel in PostHog to measure step-to-step conversion.
 ---
 
 *Last verified against source code: 2026-04-15. Re-verify against `artifacts/api-server/src/`, `lib/db/src/schema/`, and `lib/auth/src/` after significant code changes.*
+
+---
+
+## Decision Fabric Events (April 2026)
+
+The Decision Fabric emits the following analytics events. All events carry
+`orgId`, `correlationId`, and `domain` when known.
+
+### Substrate
+
+| Event | When | Properties |
+|-------|------|------------|
+| `fabric.correlation.linked` | `POST /decision-fabric/correlations/link` | `primitive`, `primitiveId`, `entityType`, `entityId`, `workflowRunId` |
+| `fabric.decision.recorded` | `POST /decision-fabric/decisions` | `decisionId`, `entityType`, `entityId`, `recommendationId`, `policyVersionId`, `simulationSnapshotId`, `status` |
+| `fabric.decision.actualRecorded` | `POST /decision-fabric/decisions/:id/actual-outcome` | `decisionId`, `predictionError`, `status` |
+| `fabric.policy.snapshot.captured` | `POST /decision-fabric/policy-snapshots` | `policyId`, `version`, `effect` |
+| `fabric.simulation.snapshot.captured` | `POST /decision-fabric/simulation-snapshots` | `scenarioId`, `iterations`, `seed` |
+
+### Surfaces
+
+| Event | When | Properties |
+|-------|------|------------|
+| `fabric.workflow360.viewed` | `GET /decision-fabric/workflows/:runId/360` | `workflowRunId`, `eventCount`, `primitivesTouched` |
+| `fabric.entity.investigated` | `GET /decision-fabric/entities/:type/:id/investigation` | `entityType`, `entityId`, `eventCount`, `decisionCount` |
+| `fabric.recommendation.traced` | `GET /decision-fabric/recommendations/:id/trace` | `recommendationId`, `decisionCount`, `eventCount` |
+| `fabric.bottlenecks.viewed` | `GET /decision-fabric/approvals/bottlenecks` | `groups`, `topActionClass` |
+| `fabric.policy.failures.viewed` | `GET /decision-fabric/policies/failures` | `topPolicyName`, `denialCount` |
+| `fabric.predictions.drift.viewed` | `GET /decision-fabric/predictions/drift` | `topRecommendationId`, `maxAbsError` |
+
+### Pattern engine & learning
+
+| Event | When | Properties |
+|-------|------|------------|
+| `fabric.playbook.generated` | `POST /decision-fabric/playbooks/generate` | `count`, `domain`, `windowDays` |
+| `fabric.playbook.reviewed` | `POST /decision-fabric/playbooks/:id/review` | `playbookId`, `status`, `promotedWorkflowId` |
+| `fabric.learning.cycleRun` | `POST /decision-fabric/learning/run` | `jobId`, `domainsScored`, `windowDays` |
+
+These events are intended for the existing analytics pipeline; instrumentation
+ships as part of Phase 9 (UX Premiumization) and is captured here to lock
+the contract.

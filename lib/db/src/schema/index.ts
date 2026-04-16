@@ -76,6 +76,7 @@ export * from "./prism_counsel_purview";
 export * from "./prism_counsel_recovery";
 export * from "./distribution-os";
 export * from "./outcome_graph";
+export * from "./decision_fabric";
 export * from "./atlas_artifacts";
 export * from "./fine_tuning";
 export * from "./a2a";
