@@ -30,8 +30,8 @@ export function MarketingFooter() {
           <ul className="space-y-3">
             <li><Link href="/marketing/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
             <li><Link href="/marketing/status" className="hover:text-white transition-colors">System Status</Link></li>
-            <li><Link href="#" className="hover:text-white transition-colors">Trust Center</Link></li>
-            <li><Link href="#" className="hover:text-white transition-colors">Contact Sales</Link></li>
+            <li><a href="/trust-center" className="hover:text-white transition-colors">Trust Center</a></li>
+            <li><a href="mailto:contact@szlholdings.com" className="hover:text-white transition-colors">Contact Sales</a></li>
           </ul>
         </div>
       </div>

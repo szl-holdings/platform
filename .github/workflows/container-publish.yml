@@ -38,11 +38,6 @@ jobs:
             dockerfile: artifacts/szl-holdings/Dockerfile
             image: ghcr.io/szl-holdings/szl-holdings-web
 
-          - service: lyte-command-center
-            context: .
-            dockerfile: artifacts/lyte-command-center/Dockerfile
-            image: ghcr.io/szl-holdings/lyte-command-center
-
           - service: vessels
             context: .
             dockerfile: artifacts/vessels/Dockerfile
@@ -121,7 +116,6 @@ jobs:
           echo "|---------|-------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| api-server | \`ghcr.io/szl-holdings/api-server\` | ${{ needs.build-and-push.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| szl-holdings | \`ghcr.io/szl-holdings/szl-holdings-web\` | ${{ needs.build-and-push.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| lyte-command-center | \`ghcr.io/szl-holdings/lyte-command-center\` | ${{ needs.build-and-push.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| vessels | \`ghcr.io/szl-holdings/vessels\` | ${{ needs.build-and-push.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| terra | \`ghcr.io/szl-holdings/terra\` | ${{ needs.build-and-push.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| aegis | \`ghcr.io/szl-holdings/aegis\` | ${{ needs.build-and-push.result }} |" >> $GITHUB_STEP_SUMMARY

@@ -132,8 +132,7 @@
 | **Finding** | `container-publish.yml` build matrix includes `lyte-command-center` as a service. This artifact is archived and no longer has a Dockerfile. The workflow would fail for this matrix entry if triggered. |
 | **Risk** | Container publish workflow fails on `lyte-command-center` entry. Affects CI signal quality. |
 | **Owner** | Platform Engineering |
-| **Target** | Wave 3–4 cleanup |
-| **Wave** | 3–4 |
+| **Status** | **CLOSED — April 16, 2026** — `lyte-command-center` entry removed from build matrix and summary in `container-publish.yml` |
 
 ---
 
@@ -249,6 +248,7 @@
 | GAP-C006 | Demo credentials embedded in `replit.md` | April 16, 2026 — No credential values present, only references to SECRETS_SETUP.md |
 | GAP-C007 | Real secrets in `.env.example` | April 16, 2026 — All values are safe placeholders |
 | GAP-C008 | Deployment doctrine ambiguity (Replit vs Azure) | April 16, 2026 — Resolved: Replit is primary. Documented in canonical-deployment-model.md. Direct fixes applied to: REPLIT_OPERATIONS.md (release section), docs/production-readiness.md (section 2 clarification), docs/DEPLOYMENT_MODEL.md (superseded notice). DEPLOYMENT_READINESS.md already deprecated. |
+| GAP-008 | `container-publish.yml` references archived `lyte-command-center` artifact | April 16, 2026 — `lyte-command-center` entry removed from build matrix and summary step |
 
 ---
 
