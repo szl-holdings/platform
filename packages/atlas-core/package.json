@@ -1,0 +1,31 @@
+{
+  "name": "@szl-holdings/atlas-core",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "ATLAS Enterprise State Model — canonical schema, primitives, and Zod validation for the SZL Holdings platform",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./primitives": {
+      "types": "./dist/primitives.d.ts",
+      "import": "./src/primitives.ts"
+    },
+    "./domain": {
+      "types": "./dist/domain.d.ts",
+      "import": "./src/domain.ts"
+    },
+    "./validation": {
+      "types": "./dist/validation.d.ts",
+      "import": "./src/validation.ts"
+    }
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  }
+}

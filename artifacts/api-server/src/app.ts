@@ -22,6 +22,7 @@ import { csrfMiddleware } from "./middlewares/csrf";
 import { sessionRefreshPolicy } from "./middlewares/session-policy";
 import { apiVersionMiddleware } from "./middlewares/api-version";
 import { etagMiddleware } from "./middlewares/optimistic-concurrency";
+import { ENV_SPECS } from "./lib/startup-validation";
 
 const app: Express = express();
 
@@ -424,6 +425,60 @@ app.get("/api/version", (_req: Request, res: Response) => {
     docs: "/api/docs",
     openapi: "/api/openapi",
     health: "/api/health",
+  });
+});
+
+app.get("/api/env-registry", async (req: Request, res: Response) => {
+  if (isProduction) {
+    const internalToken = process.env.ALLOY_INTERNAL_TOKEN;
+    const providedToken = req.headers["x-internal-token"] as string | undefined;
+    let hasInternalAccess = false;
+    if (internalToken && providedToken) {
+      const a = Buffer.from(internalToken, "utf8");
+      const b = Buffer.from(providedToken, "utf8");
+      if (a.length === b.length) {
+        const { timingSafeEqual } = await import("crypto");
+        hasInternalAccess = timingSafeEqual(a, b);
+      }
+    }
+    if (!hasInternalAccess && !req.isAuthenticated()) {
+      sendUnauthorized(res, "Environment registry is restricted to authenticated or internal users in production");
+      return;
+    }
+  }
+  const groups = ENV_SPECS.reduce<Record<string, Array<{
+    key: string;
+    required: boolean;
+    description: string;
+    configured: boolean;
+    hasDefault: boolean;
+    sensitive: boolean;
+  }>>>((acc, spec) => {
+    const group = spec.group ?? "other";
+    if (!acc[group]) acc[group] = [];
+    acc[group].push({
+      key: spec.key,
+      required: spec.required,
+      description: spec.description,
+      configured: !!process.env[spec.key],
+      hasDefault: !!spec.defaultValue,
+      sensitive: !!spec.sensitive,
+    });
+    return acc;
+  }, {});
+  const totalVars = ENV_SPECS.length;
+  const configuredVars = ENV_SPECS.filter(s => !!process.env[s.key]).length;
+  res.json({
+    registryVersion: "1.0",
+    atlasSchemaVersion: process.env.ATLAS_SCHEMA_VERSION ?? "1.0.0",
+    environment: process.env.NODE_ENV ?? "development",
+    summary: {
+      total: totalVars,
+      configured: configuredVars,
+      unconfigured: totalVars - configuredVars,
+      coveragePct: Math.round((configuredVars / totalVars) * 100),
+    },
+    groups,
   });
 });
 

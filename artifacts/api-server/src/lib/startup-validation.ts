@@ -10,7 +10,7 @@ interface EnvVarSpec {
   group?: string;
 }
 
-const ENV_SPECS: EnvVarSpec[] = [
+export const ENV_SPECS: EnvVarSpec[] = [
   { key: "PORT", required: false, description: "Server listen port", defaultValue: "3000", group: "server" },
   { key: "NODE_ENV", required: false, description: "Runtime environment (development | production | test)", defaultValue: "development", group: "server" },
   { key: "APP_ENV", required: false, description: "Application environment label (staging | production | demo)", group: "server" },
@@ -42,6 +42,20 @@ const ENV_SPECS: EnvVarSpec[] = [
   { key: "PUBLIC_OBJECT_SEARCH_PATHS", required: false, description: "Comma-separated GCS paths for public asset serving (set by App Storage provisioning)", group: "storage" },
   { key: "PRIVATE_OBJECT_DIR", required: false, description: "GCS path prefix for private object uploads (set by App Storage provisioning)", group: "storage" },
   { key: "REPLIT_DEV_DOMAIN", required: false, description: "Replit development domain for proxy-aware redirects", group: "runtime" },
+
+  { key: "ATLAS_SCHEMA_VERSION", required: false, description: "ATLAS enterprise state model schema version — used for compatibility checks across domain packs", defaultValue: "1.0.0", group: "atlas" },
+  { key: "ATLAS_DOMAIN_PACK_ENFORCE", required: false, description: "Set to 'true' to enforce strict ATLAS conformance validation on entity writes", defaultValue: "false", group: "atlas" },
+  { key: "ATLAS_EVENT_BUS_ENABLED", required: false, description: "Set to 'true' to enable cross-domain ATLAS event bus routing", defaultValue: "false", group: "atlas" },
+  { key: "ATLAS_CROSS_DOMAIN_TELEMETRY", required: false, description: "Set to 'true' to capture cross-domain entity relationship telemetry", defaultValue: "false", group: "atlas" },
+
+  { key: "ENABLE_DEMO_SEED", required: false, description: "Set to 'true' to enable demo data seeding on startup (sets runtime mode to 'demo')", defaultValue: "false", group: "platform" },
+  { key: "FEATURE_ALLOY_ORCHESTRATION", required: false, description: "Set to 'true' to enable the Alloy orchestration subsystem", defaultValue: "true", group: "features" },
+  { key: "FEATURE_ALLOY_GOVERNANCE", required: false, description: "Set to 'true' to enable the Alloy governance and approval subsystem", defaultValue: "true", group: "features" },
+  { key: "FEATURE_ALLOY_WEBHOOKS", required: false, description: "Set to 'true' to enable Alloy outbound webhook delivery", defaultValue: "true", group: "features" },
+  { key: "FEATURE_AUDIT_LOGGING", required: false, description: "Set to 'true' to enable platform-wide immutable audit logging", defaultValue: "true", group: "features" },
+  { key: "ALLOY_REQUIRE_APPROVAL_CRITICAL", required: false, description: "Set to 'true' to require human approval for critical operations (cannot be false in production)", defaultValue: "true", group: "alloy" },
+  { key: "ALLOY_WORKFLOW_AUTO_RUN", required: false, description: "Set to 'true' to auto-run scheduled workflows on server startup", defaultValue: "true", group: "alloy" },
+  { key: "ALLOY_MAX_BATCH_SIZE", required: false, description: "Maximum number of items processed in a single workflow batch", defaultValue: "100", group: "alloy" },
 ];
 
 export interface ValidationResult {
@@ -119,6 +133,10 @@ export function validateStartupConfig(): ValidationResult {
     const generated = randomBytes(32).toString("hex");
     process.env.OAUTH_STATE_SECRET = generated;
     warnings.push("OAUTH_STATE_SECRET not set — auto-generated a secure 64-char secret for this session");
+  }
+
+  if (isProduction && process.env.ALLOY_REQUIRE_APPROVAL_CRITICAL === "false") {
+    errors.push("ALLOY_REQUIRE_APPROVAL_CRITICAL cannot be set to 'false' in production — human approval is required for consequential actions. This is an architectural invariant.");
   }
 
   if (isDemoMode) {

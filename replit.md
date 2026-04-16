@@ -96,6 +96,24 @@ See `NAVIGATION_STRATEGY.md`, `PRODUCT_SURFACE_MAP.md`, `ROUTE_INVENTORY.md` for
 -   `SECRETS_SETUP.md` — Mobile credential provisioning guide
 -   `RELEASE_CHECKLIST.md` — Pre-release checklist
 
+## ATLAS Enterprise State Model
+
+Three canonical packages define the shared entity vocabulary across all domain packs:
+
+| Package | Name | Purpose |
+|---------|------|---------|
+| `packages/atlas-core` | `@szl-holdings/atlas-core` | Full ATLAS schema: 14 primitive types + 6 domain-specific types with Zod validation |
+| `packages/atlas-types` | `@szl-holdings/atlas-types` | Convenience re-exports of all ATLAS TypeScript types |
+| `packages/atlas-events` | `@szl-holdings/atlas-events` | Standardized event taxonomy (100+ named events) + envelope contract |
+
+Architecture doc: `docs/architecture/atlas-enterprise-state-model.md`  
+Env registry doc: `docs/architecture/env-registry.md`
+
+ATLAS primitives: `Signal`, `Event`, `Risk`, `Opportunity`, `Control`, `Workflow`, `Recommendation`, `Action`, `Approval`, `Evidence`, `Outcome`, `Policy`, `KPI`, `SLO`  
+ATLAS domain types: `Case`, `Matter`, `Mission`, `Deal`, `Voyage`, `Incident`
+
+Event naming convention: `domain.subject.verb` (e.g., `security.incident.created`, `business.risk.detected`)
+
 ## External Dependencies
 -   **Database:** PostgreSQL 16
 -   **Authentication:** Replit Auth (OIDC/PKCE)

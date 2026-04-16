@@ -1,0 +1,19 @@
+{
+  "name": "@szl-holdings/atlas-types",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "ATLAS canonical TypeScript type definitions — re-exports all types from atlas-core with convenience aliases",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@szl-holdings/atlas-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  }
+}
