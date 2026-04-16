@@ -154,6 +154,35 @@ Enterprise deployments on Azure support:
 
 ---
 
+## MCP Gateway Tenancy
+
+The MCP gateway enforces the same tenant isolation model as the REST API with additional guarantees specific to agent access patterns.
+
+### Tenant Context Injection
+
+MCP tool callers cannot supply `orgId` as a tool parameter. The gateway extracts `org_id` from the authenticated session and injects it into every database query. This eliminates a class of tenant hopping attacks that can occur when callers supply their own tenant context.
+
+**Exception:** Super-admin tools (e.g., `platform_get_tenant_state` with `orgId` override) are gated behind `adminGuard` middleware and require `super_admin` role. All such invocations are logged with elevated audit detail.
+
+### Agent Session Binding
+
+AI agents that access the platform through the MCP gateway must authenticate using a session token bound to a human user or a provisioned service account. The session carries an `org_id` that binds the agent to a single tenant for the duration of the session.
+
+Multi-tenant agent orchestration (a single agent serving multiple tenants) is not supported in the current model. Each tenant interaction requires a separate session scoped to that tenant's `org_id`.
+
+### Isolation at the Tool Layer
+
+Every MCP tool is implemented with the org-scope invariant:
+1. `getUserOrgIds(user)` extracts the caller's tenant(s)
+2. All DB queries include `WHERE org_id IN (?)` with the caller's org IDs
+3. Results are never filtered post-retrieval to avoid TOCTOU gaps — the DB query scope is authoritative
+
+### AI Trace Tenant Scoping
+
+AI evaluation traces (`lib/ai-engine/src/evals/trace-capture.ts`) are stored with `orgId` and only returned for the authenticated user's tenant. The AI Ops dashboard endpoints (`/api/ai/ops/*`) enforce tenant scope identically to other domain APIs.
+
+---
+
 ## Related Documents
 
 | Document | Path |
@@ -163,3 +192,5 @@ Enterprise deployments on Azure support:
 | Security checklist | `SECURITY-CHECKLIST.md` |
 | Deployment guide | `DEPLOYMENT-GUIDE.md` |
 | Secrets policy | `SECRETS_SETUP.md` |
+| MCP gateway strategy | `MCP_GATEWAY_STRATEGY.md` |
+| AI evaluation strategy | `AI_EVALUATION_STRATEGY.md` |

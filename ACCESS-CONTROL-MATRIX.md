@@ -252,12 +252,22 @@ Admin routes (`/admin`) are protected by `adminGuard` (`artifacts/api-server/src
 | `/api/vessels/*` | PRIVATE | `analyst` |
 | `/api/prism-counsel/*` | PRIVATE | `analyst` |
 | `/api/ai/*` | PRIVATE | `analyst` |
+| `/api/ai/ops/summary` (read) | PRIVATE | `analyst` |
+| `/api/ai/ops/traces` (read) | PRIVATE | `analyst` |
+| `/api/ai/ops/traces/:id/status` (write) | PRIVATE | `operator` |
+| `/api/ai/ops/review-queue` (read) | PRIVATE | `analyst` |
+| `/api/ai/ops/review-queue/:id/decision` (write) | PRIVATE | `operator` |
+| `/api/ai/ops/evaluators` (read) | PRIVATE | `admin` — platform-global data |
+| `/api/ai/ops/evaluators/stats` (read) | PRIVATE | `admin` — platform-global data |
 | `/api/intelligence/*` | PRIVATE | `analyst` |
 | `/api/storage/*` | PRIVATE | `analyst` |
 | `/api/billing/*` | PRIVATE | `org_owner` |
 | `/api/billing/webhook` | PUBLIC | Stripe signature |
 | `/api/admin/*` | INTERNAL | `super_admin` |
 | `/api/notifications/*` | PRIVATE | `operator` |
+| `/api/mcp` (public tools) | PUBLIC | — |
+| `/api/mcp` (tenant-scoped tools) | PRIVATE | `analyst` (read), `operator` (write/trigger) |
+| `/api/mcp` (admin tools) | INTERNAL | `admin` / `super_admin` |
 
 ---
 
@@ -308,6 +318,37 @@ Authorization maps **org membership role** (the primary enforced role in route h
 **Legend:** ✅ Full access · 👁 Read-only · — No access
 
 *Note: Fine-grained permission enforcement is implemented per route handler. This matrix represents the general authorization intent; consult individual route files in `artifacts/api-server/src/routes/` for exact checks.*
+
+---
+
+## MCP Gateway Access Control
+
+The MCP gateway (`/api/mcp`) enforces the same RBAC model as the REST API. Access is layered:
+
+| Layer | Enforcement |
+|-------|------------|
+| Authentication | Session cookie or Bearer token (same as REST API) |
+| Tenant scope | `org_id` injected from authenticated session — callers cannot supply their own `orgId` |
+| Tool role check | Each tool class has a minimum role requirement (see table below) |
+| High-risk guard | Covenant Policy Engine blocks high-risk actions for non-approver roles |
+| Audit logging | Every invocation recorded in immutable audit trail |
+
+### MCP Tool Role Requirements
+
+| Tool Class | Examples | Minimum Role | Notes |
+|------------|----------|-------------|-------|
+| Public read | `platform_schema_query` | None | No auth required |
+| Tenant read | `vessels_fleet_status`, `terra_property_search` | `analyst` | Auth + org scope required |
+| Analysis | `firestorm_triage_incident`, `lyte_run_analysis` | `analyst` | Queued for review if low-confidence |
+| Workflow trigger | `alloy_launch_workflow`, `alloy_skill_invoke` | `operator` | Returns `pending_approval` for review-class skills |
+| Approval action | `platform_request_approval` | `operator` | Triggers Alloy approval workflow |
+| Admin-only | `alloy_skill_invoke` (admin class) | `admin` / `super_admin` | Returns `PERMISSION_DENIED` otherwise |
+
+### Agent Identity
+
+When an AI agent (NuroMesh, Claude, GPT-4) accesses the MCP gateway, it must present a valid session token on behalf of a human user or a service account. There is no separate "agent identity" bypass — agents are subject to the same role enforcement as human users.
+
+Service accounts used by AI agents should be assigned the minimum necessary role (`analyst` for read-only agents, `operator` for workflow-triggering agents).
 
 ---
 

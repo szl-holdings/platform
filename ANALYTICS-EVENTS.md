@@ -147,6 +147,34 @@ The `trackEvent` wrapper handles: consent gate check, null-checking, dev-mode su
 
 ---
 
+### AI Evaluation & Operations Events
+
+These events are emitted server-side by the AI evaluation layer and MCP gateway. They are not browser analytics events — they feed the AI Ops dashboard and quality monitoring pipeline.
+
+| Event | Trigger | Properties | Priority |
+|-------|---------|-----------|---------|
+| `ai_trace_captured` | Every AI recommendation captured | `trace_id`, `domain`, `model`, `recommendation_type`, `confidence`, `latency_ms`, `cost_usd`, `risk_level`, `requires_review` | **Critical** |
+| `ai_trace_flagged` | Trace auto-escalated to review queue | `trace_id`, `domain`, `review_reason`, `priority`, `confidence`, `risk_level` | High |
+| `ai_eval_run` | Evaluator hook executed on a trace | `trace_id`, `hook_id`, `hook_name`, `domain`, `score`, `passed` | High |
+| `ai_eval_pass_rate_drop` | Domain eval pass rate drops below threshold | `domain`, `current_pass_rate`, `threshold`, `window_hours` | **Critical** |
+| `ai_review_claimed` | Reviewer claims a review queue item | `review_id`, `trace_id`, `domain`, `priority` | Medium |
+| `ai_review_decided` | Reviewer records a verdict | `review_id`, `trace_id`, `domain`, `verdict`, `reviewed_by_role` | High |
+| `ai_review_escalated` | Review item escalated to team | `review_id`, `trace_id`, `escalated_to`, `domain`, `risk_level` | High |
+| `ai_cost_spike` | Per-call cost exceeds alert threshold ($0.50) | `trace_id`, `domain`, `model`, `cost_usd`, `threshold_usd` | High |
+| `ai_latency_exceeded` | Recommendation latency exceeds 10s | `trace_id`, `domain`, `model`, `latency_ms`, `budget_ms` | Medium |
+| `mcp_tool_invoked` | MCP gateway tool called | `tool_name`, `domain`, `caller_role`, `org_id` (hashed), `latency_ms`, `result_status` | Medium |
+| `mcp_tool_denied` | Tool call denied by role/policy check | `tool_name`, `caller_role`, `deny_reason` | High |
+| `mcp_approval_queued` | Tool triggered approval workflow | `tool_name`, `workflow_run_id`, `domain`, `caller_role` | High |
+| `ai_learning_job_completed` | Outcome Graph calibration job finished | `domain`, `job_type`, `sample_size`, `acceptance_rate`, `calibration_suggestion` | Medium |
+
+**Privacy rules for AI evaluation events:**
+- `org_id` is hashed before emission to third-party analytics tools
+- No model prompt content is emitted
+- `reviewed_by_role` is the role string, not a user ID
+- `trace_id` is an opaque identifier — not linkable to user PII externally
+
+---
+
 ## Key Business Metrics
 
 | Metric | Definition | Reporting Frequency |

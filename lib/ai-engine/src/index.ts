@@ -159,6 +159,51 @@ export {
 
 export { GOLDEN_SET } from "./evals/golden-set.js";
 export { runEvals, type EvalResult, type EvalReport } from "./evals/run-evals.js";
+export {
+  captureTrace,
+  getTrace,
+  listTraces,
+  updateTraceStatus,
+  aggregateTraces,
+  registerTraceSink,
+  REVIEW_CONFIDENCE_THRESHOLD,
+  REVIEW_HIGH_RISK_LEVELS,
+  REVIEW_COST_THRESHOLD_USD,
+  type AITrace,
+  type TraceCaptureInput,
+  type TraceStatus,
+  type TraceDomain,
+  type RecommendationType,
+  type TraceAggregate,
+} from "./evals/trace-capture.js";
+export {
+  registerEvaluatorHook,
+  unregisterEvaluatorHook,
+  listEvaluatorHooks,
+  getEvaluatorHook,
+  runEvaluatorHooksForTrace,
+  getHookResults,
+  aggregateHookStats,
+  type RegisteredEvalHook,
+  type EvalHookResult,
+  type EvalHookFn,
+  type DomainEvalContext,
+  type EvalAssertion,
+} from "./evals/evaluator-hooks.js";
+export {
+  enqueueForReview,
+  autoEnqueueTrace,
+  getReviewItem,
+  listReviewQueue,
+  recordReviewDecision,
+  markInReview,
+  getReviewQueueStats,
+  type ReviewQueueItem,
+  type ReviewVerdict,
+  type ReviewPriority,
+  type ReviewDecisionInput,
+  type ReviewQueueStats,
+} from "./evals/review-queue.js";
 
 export {
   exportTrainingData,

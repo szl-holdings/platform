@@ -1,0 +1,420 @@
+/**
+ * AI Operations Dashboard
+ *
+ * Aggregated view of AI system health: cost, latency, quality metrics,
+ * feedback rates, review queue status, and evaluator hook pass rates.
+ *
+ * Routes:
+ *   GET  /ai/ops/summary         — Overall AI operations snapshot
+ *   GET  /ai/ops/traces          — Paginated trace list with filters
+ *   POST /ai/ops/traces/capture  — Manually capture a trace
+ *   GET  /ai/ops/traces/:id      — Single trace detail
+ *   PATCH /ai/ops/traces/:id/status — Update trace status
+ *   GET  /ai/ops/review-queue/stats — Review queue statistics
+ *   GET  /ai/ops/review-queue    — Review queue list with filters
+ *   PATCH /ai/ops/review-queue/:id/claim    — Claim item for review
+ *   PATCH /ai/ops/review-queue/:id/decision — Record review decision
+ *   GET  /ai/ops/evaluators/stats — Aggregated evaluator hook stats
+ *   GET  /ai/ops/evaluators      — Registered evaluator hooks
+ */
+
+import { Router, type IRouter } from "express";
+import {
+  sendSuccess,
+  sendBadRequest,
+  sendNotFound,
+  sendForbidden,
+  handleRouteError,
+} from "../lib/api-response";
+import { authMiddleware, requireRole } from "../middlewares/auth";
+import type { AuthenticatedUser } from "../middlewares/auth";
+import {
+  captureTrace,
+  getTrace,
+  listTraces,
+  updateTraceStatus,
+  aggregateTraces,
+  listReviewQueue,
+  getReviewItem,
+  recordReviewDecision,
+  markInReview,
+  getReviewQueueStats,
+  listEvaluatorHooks,
+  aggregateHookStats,
+  type TraceDomain,
+  type TraceStatus,
+  type ReviewVerdict,
+} from "@szl-holdings/ai-engine";
+
+const router: IRouter = Router();
+
+function getOrgId(user?: AuthenticatedUser): number | undefined {
+  return user?.orgs?.[0]?.orgId ?? undefined;
+}
+
+function isGlobalAdmin(user?: AuthenticatedUser): boolean {
+  if (!user) return false;
+  return user.roles.includes("super_admin") || user.roles.includes("admin");
+}
+
+function canAccessOrgResource(user: AuthenticatedUser | undefined, resourceOrgId: number | null | undefined): boolean {
+  if (isGlobalAdmin(user)) return true;
+  const userOrg = getOrgId(user);
+  if (resourceOrgId == null) return false;
+  return userOrg != null && userOrg === resourceOrgId;
+}
+
+function isMissingTenantScope(user: AuthenticatedUser | undefined): boolean {
+  if (isGlobalAdmin(user)) return false;
+  return getOrgId(user) == null;
+}
+
+router.get(
+  "/ai/ops/summary",
+  authMiddleware({ required: true }),
+  requireRole("analyst", "operator", "admin", "super_admin"),
+  (req, res) => {
+    try {
+      if (isMissingTenantScope(req.user)) {
+        sendForbidden(res, "No organization context — cannot scope AI ops data");
+        return;
+      }
+      const orgId = getOrgId(req.user);
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+      const traceAggregates = aggregateTraces({ orgId, since });
+      const reviewStats = getReviewQueueStats(orgId);
+      const hookStats = aggregateHookStats();
+
+      const totalTraces = traceAggregates.reduce((s: number, a: typeof traceAggregates[0]) => s + a.totalTraces, 0);
+      const totalCost = traceAggregates.reduce((s: number, a: typeof traceAggregates[0]) => s + a.totalCostUsd, 0);
+      const totalReviewRequired = traceAggregates.reduce((s: number, a: typeof traceAggregates[0]) => s + a.reviewRequired, 0);
+      const avgLatency = traceAggregates.length > 0
+        ? traceAggregates.reduce((s: number, a: typeof traceAggregates[0]) => s + a.avgLatencyMs, 0) / traceAggregates.length
+        : 0;
+      const avgConfidence = traceAggregates.length > 0
+        ? traceAggregates.reduce((s: number, a: typeof traceAggregates[0]) => s + a.avgConfidence, 0) / traceAggregates.length
+        : 0;
+
+      const evalPassRates = traceAggregates.filter((a: typeof traceAggregates[0]) => a.evalPassRate != null);
+      const overallEvalPassRate = evalPassRates.length > 0
+        ? evalPassRates.reduce((s: number, a: typeof traceAggregates[0]) => s + (a.evalPassRate ?? 0), 0) / evalPassRates.length
+        : null;
+
+      const adminView = isGlobalAdmin(req.user);
+      const evaluatorsSection = adminView ? {
+        registered: hookStats.length,
+        avgPassRate: hookStats.length > 0
+          ? Number((hookStats.reduce((s: number, h: typeof hookStats[0]) => s + h.passRate, 0) / hookStats.length).toFixed(3))
+          : null,
+      } : undefined;
+
+      sendSuccess(res, {
+        period: "last_24h",
+        traces: {
+          total: totalTraces,
+          reviewRequired: totalReviewRequired,
+          reviewRate: totalTraces > 0 ? totalReviewRequired / totalTraces : 0,
+          avgLatencyMs: Math.round(avgLatency),
+          avgConfidence: Number(avgConfidence.toFixed(3)),
+          totalCostUsd: Number(totalCost.toFixed(4)),
+          evalPassRate: overallEvalPassRate != null ? Number(overallEvalPassRate.toFixed(3)) : null,
+        },
+        byDomain: traceAggregates,
+        reviewQueue: {
+          total: reviewStats.total,
+          pending: reviewStats.pending,
+          inReview: reviewStats.inReview,
+          escalated: reviewStats.escalated,
+          criticalPending: reviewStats.byPriority.critical,
+          highPending: reviewStats.byPriority.high,
+        },
+        ...(evaluatorsSection !== undefined ? { evaluators: evaluatorsSection } : {}),
+        generatedAt: new Date().toISOString(),
+      });
+    } catch (err) {
+      handleRouteError(res, err, "GET /ai/ops/summary");
+    }
+  },
+);
+
+router.get(
+  "/ai/ops/traces",
+  authMiddleware({ required: true }),
+  requireRole("analyst", "operator", "admin", "super_admin"),
+  (req, res) => {
+    try {
+      if (isMissingTenantScope(req.user)) {
+        sendForbidden(res, "No organization context — cannot scope AI ops data");
+        return;
+      }
+      const orgId = getOrgId(req.user);
+      const domain = req.query["domain"] as string | undefined;
+      const requiresReviewQ = req.query["requiresReview"] as string | undefined;
+      const status = req.query["status"] as string | undefined;
+      const riskLevel = req.query["riskLevel"] as string | undefined;
+      const limitQ = req.query["limit"] as string | undefined;
+      const offsetQ = req.query["offset"] as string | undefined;
+
+      const traces = listTraces({
+        orgId,
+        domain: domain as TraceDomain | undefined,
+        requiresReview: requiresReviewQ === "true" ? true : requiresReviewQ === "false" ? false : undefined,
+        status: status as TraceStatus | undefined,
+        riskLevel: riskLevel || undefined,
+        limit: Math.min(Number(limitQ ?? "50"), 200),
+        offset: Number(offsetQ ?? "0"),
+      });
+
+      sendSuccess(res, { traces, count: traces.length });
+    } catch (err) {
+      handleRouteError(res, err, "GET /ai/ops/traces");
+    }
+  },
+);
+
+router.post(
+  "/ai/ops/traces/capture",
+  authMiddleware({ required: true }),
+  requireRole("operator", "admin", "super_admin"),
+  (req, res) => {
+    try {
+      const input = req.body as Record<string, unknown>;
+      if (!input?.model || !input?.modelProvider || !input?.domain || !input?.promptText) {
+        sendBadRequest(res, "model, modelProvider, domain, and promptText are required");
+        return;
+      }
+
+      const orgId = getOrgId(req.user);
+      const trace = captureTrace({
+        model: String(input.model),
+        modelProvider: String(input.modelProvider),
+        domain: input.domain as TraceDomain,
+        promptText: String(input.promptText),
+        orgId: orgId ?? null,
+        latencyMs: typeof input.latencyMs === "number" ? input.latencyMs : 0,
+        recommendationType: (input.recommendationType as import("@szl-holdings/ai-engine").RecommendationType) ?? "generic",
+      });
+      sendSuccess(res, trace, 201);
+    } catch (err) {
+      handleRouteError(res, err, "POST /ai/ops/traces/capture");
+    }
+  },
+);
+
+router.get(
+  "/ai/ops/traces/:traceId",
+  authMiddleware({ required: true }),
+  requireRole("analyst", "operator", "admin", "super_admin"),
+  (req, res) => {
+    try {
+      const trace = getTrace(String(req.params.traceId));
+      if (!trace) {
+        sendNotFound(res, "trace");
+        return;
+      }
+      if (!canAccessOrgResource(req.user, trace.orgId)) {
+        sendNotFound(res, "trace");
+        return;
+      }
+      sendSuccess(res, trace);
+    } catch (err) {
+      handleRouteError(res, err, "GET /ai/ops/traces/:traceId");
+    }
+  },
+);
+
+router.patch(
+  "/ai/ops/traces/:traceId/status",
+  authMiddleware({ required: true }),
+  requireRole("operator", "admin", "super_admin"),
+  (req, res) => {
+    try {
+      const body = req.body as { status?: TraceStatus; evalScore?: number; evalPassed?: boolean };
+      if (!body.status) {
+        sendBadRequest(res, "status is required");
+        return;
+      }
+
+      const traceId = String(req.params.traceId);
+      const existing = getTrace(traceId);
+      if (!existing || !canAccessOrgResource(req.user, existing.orgId)) {
+        sendNotFound(res, "trace");
+        return;
+      }
+      const updated = updateTraceStatus(traceId, body.status, body.evalScore, body.evalPassed);
+      if (!updated) {
+        sendNotFound(res, "trace");
+        return;
+      }
+
+      sendSuccess(res, { traceId, status: body.status });
+    } catch (err) {
+      handleRouteError(res, err, "PATCH /ai/ops/traces/:traceId/status");
+    }
+  },
+);
+
+router.get(
+  "/ai/ops/review-queue/stats",
+  authMiddleware({ required: true }),
+  requireRole("analyst", "operator", "admin", "super_admin"),
+  (req, res) => {
+    try {
+      if (isMissingTenantScope(req.user)) {
+        sendForbidden(res, "No organization context — cannot scope review queue data");
+        return;
+      }
+      const orgId = getOrgId(req.user);
+      const stats = getReviewQueueStats(orgId);
+      sendSuccess(res, stats);
+    } catch (err) {
+      handleRouteError(res, err, "GET /ai/ops/review-queue/stats");
+    }
+  },
+);
+
+router.get(
+  "/ai/ops/review-queue",
+  authMiddleware({ required: true }),
+  requireRole("analyst", "operator", "admin", "super_admin"),
+  (req, res) => {
+    try {
+      if (isMissingTenantScope(req.user)) {
+        sendForbidden(res, "No organization context — cannot scope review queue data");
+        return;
+      }
+      const orgId = getOrgId(req.user);
+      const domain = req.query["domain"] as string | undefined;
+      const status = req.query["status"] as ("pending" | "in_review" | "resolved" | "escalated") | undefined;
+      const priority = req.query["priority"] as ("low" | "medium" | "high" | "critical") | undefined;
+      const verdict = req.query["verdict"] as ReviewVerdict | undefined;
+      const limitQ = req.query["limit"] as string | undefined;
+      const offsetQ = req.query["offset"] as string | undefined;
+
+      const items = listReviewQueue({
+        orgId,
+        domain: domain || undefined,
+        status,
+        priority,
+        verdict,
+        limit: Math.min(Number(limitQ ?? "50"), 200),
+        offset: Number(offsetQ ?? "0"),
+      });
+
+      sendSuccess(res, { items, count: items.length });
+    } catch (err) {
+      handleRouteError(res, err, "GET /ai/ops/review-queue");
+    }
+  },
+);
+
+router.patch(
+  "/ai/ops/review-queue/:reviewId/claim",
+  authMiddleware({ required: true }),
+  requireRole("analyst", "operator", "admin", "super_admin"),
+  (req, res) => {
+    try {
+      const reviewId = String(req.params.reviewId);
+      const item = getReviewItem(reviewId);
+      if (!item || !canAccessOrgResource(req.user, item.orgId)) {
+        sendNotFound(res, "review item");
+        return;
+      }
+
+      const claimed = markInReview(reviewId);
+      if (!claimed) {
+        sendBadRequest(res, "Item cannot be claimed — it may already be in review or resolved");
+        return;
+      }
+      sendSuccess(res, { reviewId, status: "in_review" });
+    } catch (err) {
+      handleRouteError(res, err, "PATCH /ai/ops/review-queue/:reviewId/claim");
+    }
+  },
+);
+
+router.patch(
+  "/ai/ops/review-queue/:reviewId/decision",
+  authMiddleware({ required: true }),
+  requireRole("operator", "admin", "super_admin"),
+  (req, res) => {
+    try {
+      const user = req.user;
+      if (!user?.id) {
+        sendForbidden(res, "Authentication required");
+        return;
+      }
+
+      const body = req.body as { verdict?: ReviewVerdict; reviewNotes?: string; escalatedTo?: string };
+      const VALID_VERDICTS: ReviewVerdict[] = ["approved", "rejected", "flagged", "escalated", "deferred"];
+      if (!body.verdict || !VALID_VERDICTS.includes(body.verdict)) {
+        sendBadRequest(res, `verdict must be one of: ${VALID_VERDICTS.join(", ")}`);
+        return;
+      }
+
+      const reviewId = String(req.params.reviewId);
+      const existing = getReviewItem(reviewId);
+      if (!existing || !canAccessOrgResource(req.user, existing.orgId)) {
+        sendNotFound(res, "review item");
+        return;
+      }
+      const updated = recordReviewDecision({
+        reviewId,
+        verdict: body.verdict,
+        reviewedBy: user.id,
+        reviewNotes: body.reviewNotes,
+        escalatedTo: body.escalatedTo,
+      });
+
+      if (!updated) {
+        sendNotFound(res, "review item");
+        return;
+      }
+
+      sendSuccess(res, updated);
+    } catch (err) {
+      handleRouteError(res, err, "PATCH /ai/ops/review-queue/:reviewId/decision");
+    }
+  },
+);
+
+router.get(
+  "/ai/ops/evaluators/stats",
+  authMiddleware({ required: true }),
+  requireRole("admin", "super_admin"),
+  (_req, res) => {
+    try {
+      const stats = aggregateHookStats();
+      sendSuccess(res, { stats, count: stats.length });
+    } catch (err) {
+      handleRouteError(res, err, "GET /ai/ops/evaluators/stats");
+    }
+  },
+);
+
+router.get(
+  "/ai/ops/evaluators",
+  authMiddleware({ required: true }),
+  requireRole("admin", "super_admin"),
+  (_req, res) => {
+    try {
+      const hooks = listEvaluatorHooks();
+      sendSuccess(res, {
+        hooks: hooks.map(h => ({
+          id: h.id,
+          name: h.name,
+          domain: h.domain,
+          description: h.description,
+          version: h.version,
+          registeredAt: h.registeredAt,
+        })),
+        count: hooks.length,
+      });
+    } catch (err) {
+      handleRouteError(res, err, "GET /ai/ops/evaluators");
+    }
+  },
+);
+
+export default router;

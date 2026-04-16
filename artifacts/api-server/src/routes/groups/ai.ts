@@ -4,6 +4,7 @@ import { idempotencyMiddleware } from "../../middlewares/idempotency";
 import { tenantScope } from "../../middlewares/tenant-scope";
 
 import aiEngineRouter from "../ai-engine";
+import aiOpsDashboardRouter from "../ai-ops-dashboard";
 import copilotRouter from "../copilot";
 import mcpRouter from "../mcp";
 import nueroMeshRouter from "../nuro-mesh";
@@ -35,6 +36,9 @@ export function register(router: IRouter): void {
   router.use("/ai", _readLimiter);
   router.use("/ai/tools/execute", idempotencyMiddleware);
   router.use(aiEngineRouter);
+
+  router.use("/ai/ops", _readLimiter);
+  router.use(aiOpsDashboardRouter);
 
   router.use("/copilot", _writeLimiter);
   router.use(copilotRouter);

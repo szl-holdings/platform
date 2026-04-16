@@ -50,6 +50,8 @@ firestorm, lyte-command-center, imperium, prism-counsel, stephen-site — no app
 -   **Authentication:** OIDC/PKCE, session-based with cookie+Bearer token, 11-role RBAC.
 -   **Mobile:** Expo / React Native, NativeWind.
 -   **AI:** Multi-provider (OpenAI, Anthropic, Gemini) with fallback, supporting 9 schema-validated decision types.
+-   **AI Evaluation:** Trace capture (`lib/ai-engine/src/evals/trace-capture.ts`), evaluator hooks (`evaluator-hooks.ts`), and review queue (`review-queue.ts`) for every AI recommendation lifecycle.
+-   **AI Ops Dashboard:** REST endpoints at `/api/ai/ops/*` for cost, latency, confidence, review queue, and evaluator stats.
 -   **Real-time:** WebSocket (HMAC-signed tickets), Server-Sent Events (SSE), push notifications.
 -   **Bundling:** esbuild (CJS) and Vite.
 
@@ -59,7 +61,7 @@ The platform utilizes a premium, SZL-branded, dark-first design system. Typograp
 ### API Layers
 -   **REST API:** Modular Express routes using Zod and Drizzle.
 -   **GraphQL API:** Unified API at `/api/graphql` using Apollo Server v5 and `graphql-ws` for subscriptions.
--   **MCP Server:** Model Context Protocol server at `/api/mcp` for AI tool orchestration.
+-   **MCP Gateway:** Model Context Protocol server at `/api/mcp` (JSON-RPC 2.0 + SSE) with 26 tenant-scoped, role-enforced, approval-aware tools. See `MCP_GATEWAY_STRATEGY.md`.
 
 ### Key Features
 -   **Reporting & Analytics Engine:** Includes an Investor Analytics Dashboard, Data Export Builder, and Scheduled Reports.

@@ -31,6 +31,13 @@ import {
   createAlloyDecision,
   getApprovalPolicy,
   APPROVAL_MATRIX,
+  captureTrace,
+  autoEnqueueTrace,
+  enqueueForReview,
+  runEvaluatorHooksForTrace,
+  updateTraceStatus,
+  type DomainEvalContext,
+  type AITrace,
   type HFChatMessage,
   type RouteClass,
   type ActionDecision,
@@ -69,6 +76,24 @@ function writeAudit(entry: Record<string, unknown>): void {
     approverRoles: entry.approverRoles as string[] | undefined,
     metadata: entry,
   }).catch(() => {});
+}
+
+async function runAndPersistEval(trace: AITrace, ctx: DomainEvalContext): Promise<void> {
+  try {
+    const results = await runEvaluatorHooksForTrace(trace, ctx);
+    if (results.length === 0) return;
+    const avgScore = results.reduce((s, r) => s + r.score, 0) / results.length;
+    const allPassed = results.every(r => r.passed);
+    if (allPassed) {
+      updateTraceStatus(trace.traceId, "evaluated", avgScore, true);
+    } else {
+      updateTraceStatus(trace.traceId, "flagged", avgScore, false);
+      if (!trace.requiresReview) {
+        enqueueForReview({ trace, overrideReason: "eval_failed" });
+      }
+    }
+  } catch {
+  }
 }
 
 router.get("/ai/health", (_req, res) => {
@@ -137,6 +162,22 @@ router.post("/ai/respond", async (req, res) => {
       inputLength: messages.map(m => m.content).join("").length,
     });
 
+    const respondTrace = captureTrace({
+      domain: "alloy",
+      recommendationType: "generic",
+      model: completion.model,
+      modelProvider: completion.provider ?? "unknown",
+      orgId: getOrgId(req.user),
+      promptText: messages.map(m => m.content).join(" ").slice(0, 500),
+      latencyMs: completion.latencyMs,
+      promptTokens: completion.usage?.promptTokens,
+      completionTokens: completion.usage?.completionTokens,
+      outputSummary: `Chat response (${completion.finishReason ?? "stop"})`,
+    });
+    const respondCtx: DomainEvalContext = { domain: "alloy" };
+    autoEnqueueTrace(respondTrace);
+    runAndPersistEval(respondTrace, respondCtx);
+
     res.json({
       content: completion.content,
       model: completion.model,
@@ -188,6 +229,23 @@ router.post("/ai/triage", async (req, res) => {
       confidence: result.confidence,
       rawOutput: raw.slice(0, 1000),
     });
+
+    const trace = captureTrace({
+      domain: "alloy",
+      recommendationType: "threat_triage",
+      model: completion.model,
+      modelProvider: completion.provider ?? "unknown",
+      orgId: getOrgId(req.user),
+      promptText: (context ? `${context}\n${input}` : input).slice(0, 500),
+      latencyMs: completion.latencyMs,
+      promptTokens: completion.usage?.promptTokens,
+      completionTokens: completion.usage?.completionTokens,
+      confidence: result.confidence,
+      outputSummary: `Triage: ${result.priority} → ${result.routeTo}`,
+    });
+    const triageCtx: DomainEvalContext = { domain: "alloy" };
+    autoEnqueueTrace(trace);
+    runAndPersistEval(trace, triageCtx);
 
     res.json({ decision: result, model: completion.model, latencyMs: completion.latencyMs });
   } catch (err) {
@@ -275,6 +333,24 @@ Consider constraints: ${constraints?.join("; ") || "none specified"}`,
       confidence: result.confidence,
       rawOutput: raw.slice(0, 1000),
     });
+
+    const planTrace = captureTrace({
+      domain: "alloy",
+      recommendationType: "escalation_proposal",
+      model: completion.model,
+      modelProvider: "unknown",
+      orgId: getOrgId(req.user),
+      promptText: (context ? `${context}\n${objective}` : objective).slice(0, 500),
+      latencyMs: completion.latencyMs,
+      promptTokens: completion.usage?.promptTokens,
+      completionTokens: completion.usage?.completionTokens,
+      confidence: result.confidence,
+      riskLevel: result.approvalRequired ? "high" : "low",
+      outputSummary: `Plan: ${result.action} (${result.actionType})`,
+    });
+    const planCtx: DomainEvalContext = { domain: "alloy" };
+    autoEnqueueTrace(planTrace);
+    runAndPersistEval(planTrace, planCtx);
 
     res.json({ plan: result, model: completion.model, latencyMs: completion.latencyMs });
   } catch (err) {

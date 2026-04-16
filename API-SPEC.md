@@ -193,6 +193,30 @@ AI endpoints return recommendations with model version logged to the audit trail
 
 ---
 
+### AI Operations Dashboard (`/api/ai/ops`)
+
+Provides visibility into AI system cost, latency, quality, and human review operations. Access requires `analyst` minimum role.
+
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/ai/ops/summary` | GET | Required (`analyst+`) | 24-hour rolling snapshot: cost, latency, confidence, review queue, eval pass rates, per-domain aggregates |
+| `/api/ai/ops/traces` | GET | Required (`analyst+`) | Paginated trace list; filter by `domain`, `requiresReview`, `status`, `riskLevel` |
+| `/api/ai/ops/traces/:traceId` | GET | Required (`analyst+`) | Single trace detail |
+| `/api/ai/ops/traces/:traceId/status` | PATCH | Required (`operator+`) | Update trace status (`pending` / `evaluated` / `reviewed` / `flagged` / `archived`) |
+| `/api/ai/ops/traces/capture` | POST | Required (`operator+`) | Manually capture a trace (testing / data import) |
+| `/api/ai/ops/review-queue` | GET | Required (`analyst+`) | Review queue items; filter by `domain`, `status`, `priority`, `verdict` |
+| `/api/ai/ops/review-queue/stats` | GET | Required (`analyst+`) | Review queue statistics and priority breakdown |
+| `/api/ai/ops/review-queue/:reviewId/decision` | PATCH | Required (`operator+`) | Record review verdict: `approved`, `rejected`, `flagged`, `escalated`, `deferred` |
+| `/api/ai/ops/review-queue/:reviewId/claim` | PATCH | Required (`analyst+`) | Claim a review item for in-progress review |
+| `/api/ai/ops/evaluators` | GET | Required (`admin+`) | Registered evaluator hooks inventory (platform-global; admin only) |
+| `/api/ai/ops/evaluators/stats` | GET | Required (`admin+`) | Aggregated evaluator hook pass rates and run counts (platform-global; admin only) |
+
+**Trace schema fields:** `traceId`, `model`, `modelProvider`, `domain`, `recommendationType`, `promptHash`, `promptTokens`, `completionTokens`, `latencyMs`, `costEstimateUsd`, `confidence`, `riskLevel`, `requiresReview`, `reviewReason`, `evalScore`, `evalPassed`, `status`, `capturedAt`.
+
+See [AI_EVALUATION_STRATEGY.md](AI_EVALUATION_STRATEGY.md) for full trace capture and evaluation documentation.
+
+---
+
 ### Intelligence Feeds (`/api/intelligence`)
 
 | Endpoint Group | Auth | Description |
@@ -241,6 +265,47 @@ There is **no PIN gate** in `adminGuard`.
 | `/api/admin/tenants` | adminGuard | Tenant provisioning |
 | `/api/admin/backup` | adminGuard | Database backup operations |
 | `/api/admin/users` | adminGuard | Platform-level user management |
+
+---
+
+### MCP Gateway (`/api/mcp`)
+
+The Model Context Protocol gateway exposes platform capabilities as structured, scoped, auditable tools for AI agents and operator assistants.
+
+**Protocol:** JSON-RPC 2.0 (MCP 2024-11-05)
+**Authentication:** Optional — public tool subset available without auth; tenant-scoped tools require session cookie or Bearer token.
+**CSRF:** Exempt (auth via session/token; request integrity enforced at middleware level).
+
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `POST /api/mcp` | POST | Optional | JSON-RPC 2.0 message endpoint (single or batch requests) |
+| `GET /api/mcp/sse` | GET | Optional | Server-Sent Events stream for persistent MCP client sessions |
+| `GET /api/mcp/health` | GET | Public | Gateway health, server info, tool/resource/prompt counts |
+| `GET /api/mcp/tools` | GET | Optional | Tool inventory with JSON schema for each tool |
+| `GET /api/mcp/resources` | GET | Optional | Resource inventory |
+| `GET /api/mcp/prompts` | GET | Optional | Prompt template inventory |
+
+**MCP Methods:**
+
+| Method | Description |
+|--------|-------------|
+| `initialize` | Handshake — returns server info and capabilities |
+| `tools/list` | List all available tools with input schemas |
+| `tools/call` | Invoke a specific tool by name |
+| `resources/list` | List platform data resources |
+| `resources/read` | Read a named resource by URI |
+| `prompts/list` | List available prompt templates |
+| `prompts/get` | Get a prompt template with rendered messages |
+| `ping` | Liveness check |
+
+**Tool categories:**
+- **Domain tools** (~13): `firestorm_*`, `vessels_*`, `terra_*`, `lyte_*`, `inca_*` — domain intelligence and operations
+- **Platform tools** (~6): `alloy_*` — workflow engine, decision records, skills, approvals
+- **Data tools** (~7): `platform_*` — proof chain, outcome graph, policy simulation, tenant state
+
+**Security:** Every tool invocation is org-scoped (tenant context injected from session, not from caller parameters), role-checked, and audit-logged. High-risk workflow actions require approval before execution and return `status: "pending_approval"`.
+
+See [MCP_GATEWAY_STRATEGY.md](MCP_GATEWAY_STRATEGY.md) for full gateway design, tool inventory, and security model.
 
 ---
 
