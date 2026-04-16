@@ -6,17 +6,17 @@
 
 ## Portfolio Overview
 
-SZL Holdings operates a unified ecosystem of five domain platforms sharing one intelligence backbone, one execution fabric, one design system, and one data layer. This is not a portfolio of unrelated products — it is a compounding system where each platform strengthens the architectural investment shared by all.
+SZL Holdings operates a governed operational intelligence platform with six domain packs sharing one governance infrastructure, one execution fabric, one design system, and one data layer. This is not a portfolio of unrelated products — it is a compounding system where each domain pack strengthens the architectural investment shared by all. Five platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine) run across every surface.
 
 ---
 
-## Lyte — Business Observability
+## Lyte — Governed Command Surface
 
-**Category:** Business Observability  
+**Category:** Governed Operational Intelligence  
 **Layer:** Observe / Decide / Act  
 **Readiness:** Functional Alpha  
 
-The flagship platform and operating wedge. Lyte makes every operational surface visible, contextual, and actionable through the PRISM framework.
+The flagship command surface and commercial operating wedge. Lyte makes every operational surface visible, contextual, and actionable through the PRISM framework and the governed decision loop.
 
 **PRISM Dimensions:**
 - **Pulse** — Business health, operating heartbeat, trend status
@@ -35,7 +35,7 @@ The flagship platform and operating wedge. Lyte makes every operational surface 
 - Role-aware dashboards (exec, ops, compliance, maintenance)
 - Alloy integration: every Lyte signal can become an Alloy workflow
 
-**Strategic position:** Operating wedge. The primary commercial entry point. Establishes the Business Observability category.
+**Strategic position:** Operating wedge. The primary commercial entry point. Establishes the Governed Operational Intelligence category.
 
 ---
 
@@ -152,7 +152,7 @@ The compounding value of this portfolio:
 
 | Investment | Benefits | Platforms |
 |-----------|----------|----------|
-| `@workspace/shared-ui` | One component library, consistent premium aesthetic | All 7 web, all 7 mobile |
+| `@workspace/shared-ui` | One component library, consistent premium aesthetic | All web and mobile surfaces |
 | `@workspace/db` + Drizzle | One schema, one migration system, one query layer | All platforms |
 | `@workspace/auth` | OIDC PKCE + RBAC built once | All platforms |
 | `@workspace/workflow-engine` | Alloy execution fabric built once | All platforms |

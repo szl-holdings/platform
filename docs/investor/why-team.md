@@ -21,11 +21,11 @@ This is not a team of specialists operating in silos. It is a single founder wit
 
 **Why this matters:**
 
-**Architectural coherence.** The SZL platform has a unity of purpose that multi-person teams often lack. Every product reflects the same architectural thesis, the same design principles, and the same conviction about what Business Observability requires. This is not a portfolio of features assembled by committee.
+**Architectural coherence.** The SZL platform has a unity of purpose that multi-person teams often lack. Every product surface reflects the same architectural thesis, the same design principles, and the same conviction about what governed operational intelligence requires. This is not a portfolio of features assembled by committee.
 
 **Speed without debt.** The codebase reflects deliberate architectural investment — shared libraries, typed APIs, monorepo discipline — rather than the accumulation of shortcuts taken under deadline pressure. This is a speed advantage that compounds.
 
-**Domain conviction.** The platforms were built from real understanding of the operational problems they solve — maritime risk, security operations, real estate distress intelligence, business observability — not from market research documents. The product reflects what operators actually need, not what feature prioritization frameworks suggest.
+**Domain conviction.** The domain packs were built from real understanding of the operational problems they solve — maritime risk, security operations, real estate distress intelligence, governed decision-making — not from market research documents. The product reflects what operators actually need, not what feature prioritization frameworks suggest.
 
 ---
 
@@ -33,11 +33,11 @@ This is not a team of specialists operating in silos. It is a single founder wit
 
 The codebase is the most credible proof of the team's capability. As of Q1 2026:
 
-- **16 deployable artifacts** — implemented, documented, and buildable
-- **Full-stack implementation** — React, TypeScript, Express, PostgreSQL, Drizzle ORM, WebSocket, Expo/React Native, Azure Bicep
-- **Production-grade shared infrastructure** — auth, audit trail, real-time, AI engine, workflow engine, design system
-- **5 domain platforms** — each with real feature depth (not marketing mockups)
-- **Enterprise integrations** — Stripe, OpenAI/Anthropic/Gemini, Mapbox, Salesforce AppExchange, Jira Marketplace
+- **15 active artifacts** — implemented, documented, and buildable
+- **Full-stack implementation** — React, TypeScript, Express, PostgreSQL, Drizzle ORM, WebSocket, Expo/React Native
+- **Production-grade shared infrastructure** — five platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine) plus auth, AI engine, design system
+- **6 domain packs** — each with real feature depth (not marketing mockups)
+- **Enterprise integrations** — Stripe, OpenAI/Anthropic/Gemini, Mapbox, and more
 - **Architecture documentation** — written before implementation, not reconstructed after
 
 The engineering equivalent of this output for a conventional team would represent 18–24 months of work from a 3–4 person engineering team. The leverage is AI-assisted development applied with architectural discipline.

@@ -9,7 +9,7 @@
 
 The enterprises that will win the next decade are not the ones with the most data. They are the ones that can reason across their data, connect operational signal to strategic decision, and act with confidence — faster than their competitors, and with more accountability than their regulators require.
 
-SZL Holdings is building the platform that makes that possible. We are doing it in verticals where the stakes are high enough that the platform's value is undeniable, and with architecture that is explicit enough that it compounds as we scale.
+SZL Holdings is building the platform that makes that possible. We are doing it in operational domains where the stakes are high enough that the platform's value is undeniable, and with architecture that is explicit enough that it compounds as we scale.
 
 ---
 
@@ -27,9 +27,9 @@ It is distinct from:
 
 **ERP / Workflow Platforms:** These execute processes. Governed Operational Intelligence surfaces the signals that should inform whether and how those processes run, adds simulation (Monte Carlo) before action, and records the full decision chain.
 
-The market does not yet have a dominant platform in this category. The tools that come closest — Datadog (infrastructure observability), Splunk (security intelligence), Palantir (government analytics) — serve specific verticals without the cross-domain governance architecture that this category requires.
+The market does not yet have a dominant platform in this category. The tools that come closest — Datadog (infrastructure observability), Splunk (security intelligence), Palantir (government analytics) — serve specific domains without the cross-domain governance architecture that this category requires.
 
-SZL Holdings is building this architecture from the ground up, in verticals where the cost of ungoverned decisions is quantifiably high.
+SZL Holdings is building this architecture from the ground up, in operational domains where the cost of ungoverned decisions is quantifiably high.
 
 ---
 
