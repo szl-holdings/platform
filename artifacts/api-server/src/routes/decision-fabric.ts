@@ -20,11 +20,18 @@
  *   POST  /playbooks/:id/review
  *   GET   /clusters
  *   POST  /learning/run
+ *
+ * Tenant isolation:
+ *   Org id is read from the canonical session shape (`req.user.orgs[0].orgId`).
+ *   Non-admin callers without an org membership receive 403; admins/super-admins
+ *   may operate without an org id (platform-scoped). All library functions also
+ *   filter by org id when one is provided, so cross-tenant reads/updates by
+ *   numeric record id are not possible for non-admin callers.
  */
 
 import { Router, type IRouter, type Request, type Response } from "express";
 import { z } from "zod";
-import { authMiddleware, requireRole } from "../middlewares/auth";
+import { authMiddleware, requireRole, type AuthenticatedUser } from "../middlewares/auth";
 import { logger } from "../lib/logger";
 import {
   linkEvent,
@@ -64,6 +71,61 @@ const FABRIC_DOMAIN = z.enum([
   "general",
   "global",
 ]);
+type FabricDomain = z.infer<typeof FABRIC_DOMAIN>;
+
+const PLAYBOOK_STATUS = z.enum(["proposed", "accepted", "rejected", "promoted_to_workflow"]);
+type PlaybookStatus = z.infer<typeof PLAYBOOK_STATUS>;
+
+/**
+ * Resolve the calling org. Returns:
+ *   { orgId: number }  — normal tenant member
+ *   { orgId: null   }  — admin/super_admin operating cross-tenant
+ *   null               — caller has no org membership and is not admin
+ *                        (route should respond 403)
+ *
+ * Reads from the canonical `req.user.orgs[]` shape declared in
+ * `middlewares/auth.ts`; the auth middleware guarantees `req.user` is set on
+ * any route past `authMiddleware({ required: true })`.
+ */
+function resolveCallerOrg(user: AuthenticatedUser | undefined): { orgId: number | null } | null {
+  if (!user) return null;
+  const isAdmin = user.roles.includes("admin") || user.roles.includes("super_admin");
+  const orgId = user.orgs[0]?.orgId;
+  if (orgId != null) return { orgId };
+  if (isAdmin) return { orgId: null };
+  return null;
+}
+
+/** Coerce a single path/query param to a trimmed string, rejecting arrays. */
+function singleParam(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const t = raw.trim();
+  return t.length > 0 ? t : null;
+}
+
+function singleQuery(raw: unknown): string | undefined {
+  return typeof raw === "string" && raw.length > 0 ? raw : undefined;
+}
+
+function intQuery(raw: unknown): number | undefined {
+  if (typeof raw !== "string" || raw.length === 0) return undefined;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+function domainQuery(raw: unknown): FabricDomain | undefined {
+  const s = singleQuery(raw);
+  if (!s) return undefined;
+  const parsed = FABRIC_DOMAIN.safeParse(s);
+  return parsed.success ? parsed.data : undefined;
+}
+
+function playbookStatusQuery(raw: unknown): PlaybookStatus | undefined {
+  const s = singleQuery(raw);
+  if (!s) return undefined;
+  const parsed = PLAYBOOK_STATUS.safeParse(s);
+  return parsed.success ? parsed.data : undefined;
+}
 
 // ─── Correlation ────────────────────────────────────────────────────────────
 
@@ -89,10 +151,11 @@ const linkSchema = z.object({
 
 decisionFabricRouter.post("/decision-fabric/correlations/link", async (req: Request, res: Response) => {
   try {
+    const ctx = resolveCallerOrg(req.user);
+    if (!ctx) return res.status(403).json({ error: "Org membership required" });
     const parsed = linkSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: "Invalid body", details: parsed.error.flatten() });
-    const user = (req as any).user;
-    const row = await linkEvent({ ...parsed.data, orgId: user?.orgId ?? null });
+    const row = await linkEvent({ ...parsed.data, orgId: ctx.orgId });
     return res.status(201).json({ success: true, data: row });
   } catch (err) {
     logger.error({ err }, "POST /decision-fabric/correlations/link error");
@@ -104,8 +167,11 @@ decisionFabricRouter.post("/decision-fabric/correlations/link", async (req: Requ
 
 decisionFabricRouter.get("/decision-fabric/workflows/:runId/360", async (req: Request, res: Response) => {
   try {
-    const user = (req as any).user;
-    const view = await getWorkflow360(req.params.runId, { orgId: user?.orgId ?? null });
+    const ctx = resolveCallerOrg(req.user);
+    if (!ctx) return res.status(403).json({ error: "Org membership required" });
+    const runId = singleParam(req.params.runId);
+    if (!runId) return res.status(400).json({ error: "Invalid runId" });
+    const view = await getWorkflow360(runId, { orgId: ctx.orgId });
     return res.json({ success: true, data: view });
   } catch (err) {
     logger.error({ err }, "GET /decision-fabric/workflows/:runId/360 error");
@@ -117,10 +183,12 @@ decisionFabricRouter.get("/decision-fabric/workflows/:runId/360", async (req: Re
 
 decisionFabricRouter.get("/decision-fabric/entities/:entityType/:entityId/investigation", async (req: Request, res: Response) => {
   try {
-    const user = (req as any).user;
-    const result = await investigateEntity(req.params.entityType, req.params.entityId, {
-      orgId: user?.orgId ?? null,
-    });
+    const ctx = resolveCallerOrg(req.user);
+    if (!ctx) return res.status(403).json({ error: "Org membership required" });
+    const entityType = singleParam(req.params.entityType);
+    const entityId = singleParam(req.params.entityId);
+    if (!entityType || !entityId) return res.status(400).json({ error: "Invalid entityType/entityId" });
+    const result = await investigateEntity(entityType, entityId, { orgId: ctx.orgId });
     return res.json({ success: true, data: result });
   } catch (err) {
     logger.error({ err }, "GET /decision-fabric/entities/.../investigation error");
@@ -132,8 +200,11 @@ decisionFabricRouter.get("/decision-fabric/entities/:entityType/:entityId/invest
 
 decisionFabricRouter.get("/decision-fabric/recommendations/:recommendationId/trace", async (req: Request, res: Response) => {
   try {
-    const user = (req as any).user;
-    const trace = await traceRecommendation(req.params.recommendationId, { orgId: user?.orgId ?? null });
+    const ctx = resolveCallerOrg(req.user);
+    if (!ctx) return res.status(403).json({ error: "Org membership required" });
+    const recommendationId = singleParam(req.params.recommendationId);
+    if (!recommendationId) return res.status(400).json({ error: "Invalid recommendationId" });
+    const trace = await traceRecommendation(recommendationId, { orgId: ctx.orgId });
     return res.json({ success: true, data: trace });
   } catch (err) {
     logger.error({ err }, "GET /decision-fabric/recommendations/:id/trace error");
@@ -145,9 +216,9 @@ decisionFabricRouter.get("/decision-fabric/recommendations/:recommendationId/tra
 
 decisionFabricRouter.get("/decision-fabric/approvals/bottlenecks", async (req: Request, res: Response) => {
   try {
-    const user = (req as any).user;
-    const limit = req.query.limit ? Number(req.query.limit) : undefined;
-    const data = await getApprovalBottlenecks({ orgId: user?.orgId ?? null, limit });
+    const ctx = resolveCallerOrg(req.user);
+    if (!ctx) return res.status(403).json({ error: "Org membership required" });
+    const data = await getApprovalBottlenecks({ orgId: ctx.orgId, limit: intQuery(req.query.limit) });
     return res.json({ success: true, data });
   } catch (err) {
     logger.error({ err }, "GET /decision-fabric/approvals/bottlenecks error");
@@ -157,9 +228,9 @@ decisionFabricRouter.get("/decision-fabric/approvals/bottlenecks", async (req: R
 
 decisionFabricRouter.get("/decision-fabric/policies/failures", async (req: Request, res: Response) => {
   try {
-    const user = (req as any).user;
-    const limit = req.query.limit ? Number(req.query.limit) : undefined;
-    const data = await getPolicyFailures({ orgId: user?.orgId ?? null, limit });
+    const ctx = resolveCallerOrg(req.user);
+    if (!ctx) return res.status(403).json({ error: "Org membership required" });
+    const data = await getPolicyFailures({ orgId: ctx.orgId, limit: intQuery(req.query.limit) });
     return res.json({ success: true, data });
   } catch (err) {
     logger.error({ err }, "GET /decision-fabric/policies/failures error");
@@ -169,9 +240,9 @@ decisionFabricRouter.get("/decision-fabric/policies/failures", async (req: Reque
 
 decisionFabricRouter.get("/decision-fabric/predictions/drift", async (req: Request, res: Response) => {
   try {
-    const user = (req as any).user;
-    const limit = req.query.limit ? Number(req.query.limit) : undefined;
-    const data = await getPredictionDrift({ orgId: user?.orgId ?? null, limit });
+    const ctx = resolveCallerOrg(req.user);
+    if (!ctx) return res.status(403).json({ error: "Org membership required" });
+    const data = await getPredictionDrift({ orgId: ctx.orgId, limit: intQuery(req.query.limit) });
     return res.json({ success: true, data });
   } catch (err) {
     logger.error({ err }, "GET /decision-fabric/predictions/drift error");
@@ -205,14 +276,15 @@ const recordDecisionSchema = z.object({
 
 decisionFabricRouter.post("/decision-fabric/decisions", async (req: Request, res: Response) => {
   try {
+    const ctx = resolveCallerOrg(req.user);
+    if (!ctx) return res.status(403).json({ error: "Org membership required" });
     const parsed = recordDecisionSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: "Invalid body", details: parsed.error.flatten() });
-    const user = (req as any).user;
     const row = await recordDecision({
       ...parsed.data,
-      orgId: user?.orgId ?? null,
-      decidedByUserId: user?.id ?? null,
-    } as any);
+      orgId: ctx.orgId,
+      decidedByUserId: req.user?.id ?? null,
+    });
     return res.status(201).json({ success: true, data: row });
   } catch (err) {
     logger.error({ err }, "POST /decision-fabric/decisions error");
@@ -222,17 +294,17 @@ decisionFabricRouter.post("/decision-fabric/decisions", async (req: Request, res
 
 decisionFabricRouter.get("/decision-fabric/decisions", async (req: Request, res: Response) => {
   try {
-    const user = (req as any).user;
-    const limit = req.query.limit ? Number(req.query.limit) : undefined;
+    const ctx = resolveCallerOrg(req.user);
+    if (!ctx) return res.status(403).json({ error: "Org membership required" });
     const data = await listDecisions({
-      orgId: user?.orgId ?? null,
-      domain: req.query.domain as any,
-      entityType: req.query.entityType as string | undefined,
-      entityId: req.query.entityId as string | undefined,
-      workflowRunId: req.query.workflowRunId as string | undefined,
-      recommendationId: req.query.recommendationId as string | undefined,
-      correlationId: req.query.correlationId as string | undefined,
-      limit,
+      orgId: ctx.orgId,
+      domain: domainQuery(req.query.domain),
+      entityType: singleQuery(req.query.entityType),
+      entityId: singleQuery(req.query.entityId),
+      workflowRunId: singleQuery(req.query.workflowRunId),
+      recommendationId: singleQuery(req.query.recommendationId),
+      correlationId: singleQuery(req.query.correlationId),
+      limit: intQuery(req.query.limit),
     });
     return res.json({ success: true, data });
   } catch (err) {
@@ -243,10 +315,11 @@ decisionFabricRouter.get("/decision-fabric/decisions", async (req: Request, res:
 
 decisionFabricRouter.get("/decision-fabric/decisions/:id", async (req: Request, res: Response) => {
   try {
-    const id = Number(req.params.id);
+    const ctx = resolveCallerOrg(req.user);
+    if (!ctx) return res.status(403).json({ error: "Org membership required" });
+    const id = Number(singleParam(req.params.id));
     if (!Number.isFinite(id)) return res.status(400).json({ error: "Invalid id" });
-    const user = (req as any).user;
-    const row = await getDecision(id, user?.orgId ?? null);
+    const row = await getDecision(id, ctx.orgId);
     if (!row) return res.status(404).json({ error: "Not found" });
     return res.json({ success: true, data: row });
   } catch (err) {
@@ -263,12 +336,13 @@ const actualOutcomeSchema = z.object({
 
 decisionFabricRouter.post("/decision-fabric/decisions/:id/actual-outcome", async (req: Request, res: Response) => {
   try {
-    const id = Number(req.params.id);
+    const ctx = resolveCallerOrg(req.user);
+    if (!ctx) return res.status(403).json({ error: "Org membership required" });
+    const id = Number(singleParam(req.params.id));
     if (!Number.isFinite(id)) return res.status(400).json({ error: "Invalid id" });
     const parsed = actualOutcomeSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: "Invalid body", details: parsed.error.flatten() });
-    const user = (req as any).user;
-    const row = await recordActualOutcome({ decisionId: id, orgId: user?.orgId ?? null, ...parsed.data });
+    const row = await recordActualOutcome({ decisionId: id, orgId: ctx.orgId, ...parsed.data });
     if (!row) return res.status(404).json({ error: "Not found" });
     return res.json({ success: true, data: row });
   } catch (err) {
@@ -289,13 +363,14 @@ const policySnapshotSchema = z.object({
 
 decisionFabricRouter.post("/decision-fabric/policy-snapshots", async (req: Request, res: Response) => {
   try {
+    const ctx = resolveCallerOrg(req.user);
+    if (!ctx) return res.status(403).json({ error: "Org membership required" });
     const parsed = policySnapshotSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: "Invalid body", details: parsed.error.flatten() });
-    const user = (req as any).user;
     const row = await snapshotPolicy({
       ...parsed.data,
-      orgId: user?.orgId ?? null,
-      authoredByUserId: user?.id ?? null,
+      orgId: ctx.orgId,
+      authoredByUserId: req.user?.id ?? null,
     });
     return res.status(201).json({ success: true, data: row });
   } catch (err) {
@@ -318,10 +393,11 @@ const simulationSnapshotSchema = z.object({
 
 decisionFabricRouter.post("/decision-fabric/simulation-snapshots", async (req: Request, res: Response) => {
   try {
+    const ctx = resolveCallerOrg(req.user);
+    if (!ctx) return res.status(403).json({ error: "Org membership required" });
     const parsed = simulationSnapshotSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: "Invalid body", details: parsed.error.flatten() });
-    const user = (req as any).user;
-    const row = await snapshotSimulation({ ...parsed.data, orgId: user?.orgId ?? null });
+    const row = await snapshotSimulation({ ...parsed.data, orgId: ctx.orgId });
     return res.status(201).json({ success: true, data: row });
   } catch (err) {
     logger.error({ err }, "POST /decision-fabric/simulation-snapshots error");
@@ -333,11 +409,12 @@ decisionFabricRouter.post("/decision-fabric/simulation-snapshots", async (req: R
 
 decisionFabricRouter.get("/decision-fabric/playbooks", async (req: Request, res: Response) => {
   try {
-    const user = (req as any).user;
+    const ctx = resolveCallerOrg(req.user);
+    if (!ctx) return res.status(403).json({ error: "Org membership required" });
     const data = await listPlaybookSuggestions({
-      orgId: user?.orgId ?? null,
-      status: req.query.status as any,
-      limit: req.query.limit ? Number(req.query.limit) : undefined,
+      orgId: ctx.orgId,
+      status: playbookStatusQuery(req.query.status),
+      limit: intQuery(req.query.limit),
     });
     return res.json({ success: true, data });
   } catch (err) {
@@ -346,16 +423,20 @@ decisionFabricRouter.get("/decision-fabric/playbooks", async (req: Request, res:
   }
 });
 
+const generatePlaybookSchema = z.object({
+  domain: FABRIC_DOMAIN.optional(),
+  windowDays: z.number().int().positive().optional(),
+  minSampleSize: z.number().int().positive().optional(),
+  minSuccessRate: z.number().min(0).max(1).optional(),
+});
+
 decisionFabricRouter.post("/decision-fabric/playbooks/generate", requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
   try {
-    const user = (req as any).user;
-    const data = await generatePlaybookSuggestions({
-      orgId: user?.orgId ?? null,
-      domain: req.body?.domain,
-      windowDays: req.body?.windowDays,
-      minSampleSize: req.body?.minSampleSize,
-      minSuccessRate: req.body?.minSuccessRate,
-    });
+    const ctx = resolveCallerOrg(req.user);
+    if (!ctx) return res.status(403).json({ error: "Org membership required" });
+    const parsed = generatePlaybookSchema.safeParse(req.body ?? {});
+    if (!parsed.success) return res.status(400).json({ error: "Invalid body", details: parsed.error.flatten() });
+    const data = await generatePlaybookSuggestions({ orgId: ctx.orgId, ...parsed.data });
     return res.status(201).json({ success: true, data });
   } catch (err) {
     logger.error({ err }, "POST /decision-fabric/playbooks/generate error");
@@ -364,19 +445,20 @@ decisionFabricRouter.post("/decision-fabric/playbooks/generate", requireRole("ad
 });
 
 const reviewPlaybookSchema = z.object({
-  status: z.enum(["proposed", "accepted", "rejected", "promoted_to_workflow"]),
+  status: PLAYBOOK_STATUS,
   promotedWorkflowId: z.string().optional(),
 });
 
 decisionFabricRouter.post("/decision-fabric/playbooks/:id/review", requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
   try {
-    const id = Number(req.params.id);
+    const ctx = resolveCallerOrg(req.user);
+    if (!ctx) return res.status(403).json({ error: "Org membership required" });
+    const id = Number(singleParam(req.params.id));
     if (!Number.isFinite(id)) return res.status(400).json({ error: "Invalid id" });
     const parsed = reviewPlaybookSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: "Invalid body", details: parsed.error.flatten() });
-    const user = (req as any).user;
-    if (!user?.id) return res.status(401).json({ error: "User required" });
-    const row = await reviewPlaybookSuggestion(id, parsed.data.status, user.id, user?.orgId ?? null, parsed.data.promotedWorkflowId);
+    if (!req.user?.id) return res.status(401).json({ error: "User required" });
+    const row = await reviewPlaybookSuggestion(id, parsed.data.status, req.user.id, ctx.orgId, parsed.data.promotedWorkflowId);
     if (!row) return res.status(404).json({ error: "Not found" });
     return res.json({ success: true, data: row });
   } catch (err) {
@@ -387,12 +469,13 @@ decisionFabricRouter.post("/decision-fabric/playbooks/:id/review", requireRole("
 
 decisionFabricRouter.get("/decision-fabric/clusters", async (req: Request, res: Response) => {
   try {
-    const user = (req as any).user;
+    const ctx = resolveCallerOrg(req.user);
+    if (!ctx) return res.status(403).json({ error: "Org membership required" });
     const data = await getDomainClusterStats({
-      orgId: user?.orgId ?? null,
-      domain: req.query.domain as any,
-      windowDays: req.query.windowDays ? Number(req.query.windowDays) : undefined,
-      limit: req.query.limit ? Number(req.query.limit) : undefined,
+      orgId: ctx.orgId,
+      domain: domainQuery(req.query.domain),
+      windowDays: intQuery(req.query.windowDays),
+      limit: intQuery(req.query.limit),
     });
     return res.json({ success: true, data });
   } catch (err) {
@@ -403,13 +486,20 @@ decisionFabricRouter.get("/decision-fabric/clusters", async (req: Request, res: 
 
 // ─── Learning Loop ───────────────────────────────────────────────────────────
 
+const learningRunSchema = z.object({
+  windowDays: z.number().int().positive().optional(),
+});
+
 decisionFabricRouter.post("/decision-fabric/learning/run", requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
   try {
-    const user = (req as any).user;
+    const ctx = resolveCallerOrg(req.user);
+    if (!ctx) return res.status(403).json({ error: "Org membership required" });
+    const parsed = learningRunSchema.safeParse(req.body ?? {});
+    if (!parsed.success) return res.status(400).json({ error: "Invalid body", details: parsed.error.flatten() });
     const result = await runLearningCycle({
-      orgId: user?.orgId ?? null,
-      windowDays: req.body?.windowDays,
-      triggeredBy: user?.email ?? "decision-fabric-api",
+      orgId: ctx.orgId,
+      windowDays: parsed.data.windowDays,
+      triggeredBy: req.user?.email ?? "decision-fabric-api",
     });
     return res.status(201).json({ success: true, data: result });
   } catch (err) {
