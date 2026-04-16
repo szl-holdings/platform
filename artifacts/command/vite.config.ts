@@ -35,9 +35,20 @@ function sharedProxyPlugin(): Plugin {
   return {
     name: "shared-proxy",
     apply: "serve",
-    async configureServer() {
-      const http = await import("http");
-      const proxyServer = http.createServer((req, res) => {
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = req.url ?? "/";
+        if (url === "/" || url === "/__health" || url === "/health" ||
+            url === basePath || url === basePath.replace(/\/$/, "")) {
+          res.writeHead(200, { "Content-Type": "text/plain" });
+          res.end("OK");
+          return;
+        }
+        next();
+      });
+
+      const http = require("http");
+      const proxyServer = http.createServer((req: any, res: any) => {
         const url = req.url || "/";
         if (url === "/" || url === "/health" || url === "/__health") {
           res.writeHead(200, { "Content-Type": "text/plain" });
@@ -45,12 +56,12 @@ function sharedProxyPlugin(): Plugin {
           return;
         }
         const normalizedUrl = url.endsWith("/") ? url : url + "/";
-        const route = PROXY_ROUTES.find((r) => normalizedUrl.startsWith(r.prefix));
+        const route = PROXY_ROUTES.find((r: any) => normalizedUrl.startsWith(r.prefix));
         const targetPort = route ? route.port : vitePort;
         const upstream = http.request(
           { hostname: "127.0.0.1", port: targetPort, path: url, method: req.method,
             headers: { ...req.headers, host: "localhost:" + targetPort } },
-          (upRes) => { res.writeHead(upRes.statusCode || 200, upRes.headers); upRes.pipe(res, { end: true }); }
+          (upRes: any) => { res.writeHead(upRes.statusCode || 200, upRes.headers); upRes.pipe(res, { end: true }); }
         );
         upstream.on("error", () => {
           if (!res.headersSent) { res.writeHead(503, { "Content-Type": "text/plain" }); res.end("Upstream not ready on port " + targetPort); }
@@ -131,11 +142,11 @@ function apiServerPlugin(): Plugin {
 export default defineConfig({
   base: basePath,
   plugins: [
+    sharedProxyPlugin(),
+    apiServerPlugin(),
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
-    sharedProxyPlugin(),
-    apiServerPlugin(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [
@@ -182,9 +193,6 @@ export default defineConfig({
       },
     },
   },
-  optimizeDeps: {
-    holdUntilCrawlEnd: true,
-  },
   server: {
     port: vitePort,
     strictPort: true,
@@ -194,13 +202,6 @@ export default defineConfig({
     fs: {
       strict: true,
       deny: ["**/.*"],
-    },
-    proxy: {
-      "/api": {
-        target: `http://localhost:${API_SERVER_PORT}`,
-        changeOrigin: true,
-        secure: false,
-      },
     },
   },
   preview: {

@@ -477,7 +477,6 @@ async function seedCanonical() {
   console.log("\nSZL canonical seed complete.");
 }
 
-seedCanonical().catch((err) => {
-  console.error("Seed failed:", err);
-  process.exit(1);
-});
+seedCanonical()
+  .then(() => { console.log("[runner] seed-canonical complete"); process.exit(0); })
+  .catch((err) => { console.error("Seed failed:", err); process.exit(1); });

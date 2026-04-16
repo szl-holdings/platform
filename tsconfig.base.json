@@ -19,7 +19,6 @@
     "useUnknownInCatchVariables": true,
     "alwaysStrict": true,
     "skipLibCheck": true,
-    "jsx": "react-jsx",
     "target": "es2022",
     "types": [],
     "customConditions": ["workspace"]

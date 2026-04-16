@@ -1,17 +1,14 @@
 #!/usr/bin/env node
 /**
  * Route Smoke Tests — SZL Holdings Ecosystem
- * Dynamically discovers API route prefixes from routes/index.ts and merges them
- * with the known web-app route table. API discovery treats 401/403/405 as
- * "acceptable" (auth-gated or method-gated) — only 5xx and connection failures
- * are flagged as regressions.
+ * Each app runs on its own port; routes are tested against the correct server.
+ * API routes are tested directly against the api-server.
  *
  * Usage:
- *   BASE_URL=https://szlholdings.com node scripts/qa/smoke-routes.js
- *   node scripts/qa/smoke-routes.js            (defaults to http://localhost:3000)
- *   node scripts/qa/smoke-routes.js --api-only  (API routes only)
- *   node scripts/qa/smoke-routes.js --web-only  (web frontend routes only)
- *   node scripts/qa/smoke-routes.js --json      (emit JSON output)
+ *   node scripts/qa/smoke-routes.js
+ *   node scripts/qa/smoke-routes.js --api-only
+ *   node scripts/qa/smoke-routes.js --web-only
+ *   node scripts/qa/smoke-routes.js --json
  */
 
 import { readFileSync, existsSync } from "fs";
@@ -19,7 +16,6 @@ import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 const TIMEOUT_MS = parseInt(process.env.SMOKE_TIMEOUT ?? "10000", 10);
 const CONCURRENCY = parseInt(process.env.SMOKE_CONCURRENCY ?? "5", 10);
 const API_ONLY = process.argv.includes("--api-only");
@@ -28,6 +24,18 @@ const JSON_OUTPUT = process.argv.includes("--json");
 
 const ROOT = join(__dirname, "../..");
 const ROUTES_INDEX = join(ROOT, "artifacts/api-server/src/routes/index.ts");
+
+// Per-app base URLs — read from env or use defaults matching artifact.toml localPort values
+const SZL_URL    = process.env.SZL_URL    || "http://localhost:21130";
+const AEGIS_URL  = process.env.AEGIS_URL  || "http://localhost:3000";
+const TERRA_URL  = process.env.TERRA_URL  || "http://localhost:6800";
+const VESSELS_URL= process.env.VESSELS_URL|| "http://localhost:8000";
+const CJ_URL     = process.env.CJ_URL     || "http://localhost:5000";
+const CMD_URL    = process.env.CMD_URL    || "http://localhost:8099";
+const API_URL    = process.env.API_URL    || "http://localhost:8080";
+
+// Legacy single-base-url override (used by external callers)
+const BASE_URL = process.env.BASE_URL || null;
 
 const PARAM_PATTERN = /:[a-zA-Z_]+/;
 const SKIP_PATTERNS = ["/auth", "/billing/checkout", "/billing/cancel", "/billing/update", "/scim"];
@@ -54,118 +62,125 @@ function discoverApiPrefixes(filePath) {
   return Array.from(paths).sort();
 }
 
-const WEB_DOMAIN_ROUTES = {
-  "SZL Holdings (root)": [
-    "/",
-    "/about",
-    "/ecosystem",
-    "/platform",
-    "/lyte",
-    "/alloy-fabric",
-    "/solutions",
-    "/solutions/aegis",
-    "/solutions/vessels",
-    "/solutions/terra",
-    "/design-partners",
-    "/contact",
-    "/pricing",
-    "/status",
-    "/how-it-works",
-    "/trust-center",
-    "/trust",
-    "/trust/security",
-    "/trust/governance",
-    "/trust/architecture",
-    "/trust/ai",
-    "/trust/approvals",
-    "/trust/operations",
-    "/legal/privacy",
-    "/legal/terms",
-    "/accessibility",
-    "/nuro-forge",
-    "/nuro-forge/arena",
-    "/nuro-forge/governance",
-    "/nuro-forge/composition",
-    "/nuro-forge/fine-tuning",
-    "/nuro-forge/multimodal",
-  ],
-
-  "Ecosystem Command Portal": [
-    "/command",
-  ],
-
-  "Lyte Command Center": [
-    "/lyte-command-center",
-    "/lyte-command-center/dashboard",
-    "/lyte-command-center/ai-ops",
-    "/lyte-command-center/alerts",
-    "/lyte-command-center/action-center",
-    "/lyte-command-center/executive-command",
-    "/lyte-command-center/alloy-workflow-canvas",
-    "/lyte-command-center/autonomous-noc",
-    "/lyte-command-center/intervention-workspace",
-    "/lyte-command-center/living-topology",
-  ],
-
-  "Aegis / Firestorm": [
-    "/firestorm",
-    "/firestorm/incidents",
-    "/firestorm/alerts",
-    "/firestorm/cases",
-    "/firestorm/findings",
-    "/firestorm/executive-risk",
-    "/firestorm/asset-inventory",
-    "/firestorm/command-home",
-    "/firestorm/simulation-runner",
-    "/firestorm/scenario-library",
-    "/firestorm/agentic-soc",
-    "/firestorm/adversary-engine",
-    "/firestorm/deception-grid",
-    "/firestorm/nexus/analyst-workspace",
-  ],
-
-  "Terra": [
-    "/terra",
-    "/terra/dashboard",
-    "/terra/deals",
-    "/terra/documents",
-    "/terra/analytics",
-    "/terra/executive-overview",
-    "/terra/climate-risk",
-    "/terra/agents-command",
-    "/terra/unified-command",
-    "/terra/portfolio-scenario",
-    "/terra/distress-engine",
-    "/terra/avm-engine",
-  ],
-
-  "Vessels": [
-    "/vessels",
-    "/vessels/fleet-dashboard",
-    "/vessels/fleet-map",
-    "/vessels/exceptions-center",
-    "/vessels/alert-center",
-    "/vessels/command-overview",
-    "/vessels/document-engine",
-    "/vessels/simulations-page",
-    "/vessels/disruption-forecast",
-    "/vessels/command-mode",
-    "/vessels/voyage-desk",
-    "/vessels/dark-vessel-detection",
-  ],
-
-  "Carlota Jo": [
-    "/carlota-jo",
-    "/carlota-jo/about",
-    "/carlota-jo/approach",
-    "/carlota-jo/booking",
-    "/carlota-jo/contact",
-    "/carlota-jo/founder",
-    "/carlota-jo/consulting-os",
-    "/carlota-jo/revenue-intelligence",
-  ],
-
-};
+// Domain config: each entry has a name, baseUrl, and route paths
+// Routes are relative paths appended to baseUrl
+const WEB_DOMAIN_CONFIGS = [
+  {
+    name: "SZL Holdings (root)",
+    baseUrl: BASE_URL || SZL_URL,
+    routes: [
+      "/",
+      "/about",
+      "/ecosystem",
+      "/platform",
+      "/lyte",
+      "/alloy-fabric",
+      "/solutions",
+      "/solutions/aegis",
+      "/solutions/vessels",
+      "/solutions/terra",
+      "/design-partners",
+      "/contact",
+      "/pricing",
+      "/status",
+      "/how-it-works",
+      "/trust-center",
+      "/trust",
+      "/trust/security",
+      "/trust/governance",
+      "/trust/architecture",
+      "/trust/ai",
+      "/trust/approvals",
+      "/trust/operations",
+      "/legal/privacy",
+      "/legal/terms",
+      "/accessibility",
+      "/nuro-forge",
+      "/nuro-forge/arena",
+      "/nuro-forge/governance",
+      "/nuro-forge/composition",
+      "/nuro-forge/fine-tuning",
+      "/nuro-forge/multimodal",
+    ],
+  },
+  {
+    name: "Aegis / Firestorm",
+    baseUrl: BASE_URL ? `${BASE_URL}` : AEGIS_URL,
+    // Routes use the /aegis/ base path
+    routes: [
+      "/aegis/",
+      "/aegis/incidents",
+      "/aegis/alerts",
+      "/aegis/cases",
+      "/aegis/findings",
+      "/aegis/executive-risk",
+      "/aegis/asset-inventory",
+      "/aegis/command-home",
+      "/aegis/simulation-panel",
+      "/aegis/soc",
+      "/aegis/threat-intel",
+      "/aegis/compliance",
+      "/aegis/adversary-emulation",
+    ],
+  },
+  {
+    name: "Terra",
+    baseUrl: BASE_URL ? `${BASE_URL}` : TERRA_URL,
+    routes: [
+      "/terra/",
+      "/terra/dashboard",
+      "/terra/deals",
+      "/terra/documents",
+      "/terra/analytics",
+      "/terra/executive-overview",
+      "/terra/climate-risk",
+      "/terra/agents-command",
+      "/terra/unified-command",
+      "/terra/portfolio-scenario",
+      "/terra/distress-engine",
+      "/terra/avm-engine",
+    ],
+  },
+  {
+    name: "Vessels",
+    baseUrl: BASE_URL ? `${BASE_URL}` : VESSELS_URL,
+    routes: [
+      "/vessels/",
+      "/vessels/fleet-dashboard",
+      "/vessels/fleet-map",
+      "/vessels/exceptions-center",
+      "/vessels/alert-center",
+      "/vessels/command-overview",
+      "/vessels/document-engine",
+      "/vessels/simulations-page",
+      "/vessels/disruption-forecast",
+      "/vessels/command-mode",
+      "/vessels/voyage-desk",
+      "/vessels/dark-vessel-detection",
+    ],
+  },
+  {
+    name: "Carlota Jo",
+    baseUrl: BASE_URL ? `${BASE_URL}` : CJ_URL,
+    routes: [
+      "/carlota-jo/",
+      "/carlota-jo/about",
+      "/carlota-jo/approach",
+      "/carlota-jo/booking",
+      "/carlota-jo/contact",
+      "/carlota-jo/founder",
+      "/carlota-jo/consulting-os",
+      "/carlota-jo/revenue-intelligence",
+    ],
+  },
+  {
+    name: "Command Portal",
+    baseUrl: BASE_URL ? `${BASE_URL}` : CMD_URL,
+    routes: [
+      "/command/",
+    ],
+  },
+];
 
 const KNOWN_READ_API_ROUTES = [
   "/api/health",
@@ -175,15 +190,6 @@ const KNOWN_READ_API_ROUTES = [
   "/api/docs",
 ];
 
-/**
- * Three-tier route checking:
- *
- * "web"      — React SPA routes: must return < 400 (HTML page load).
- * "api"      — Known concrete API endpoints (health, docs): must return 2xx.
- * "discover" — Dynamically discovered router.use() prefix mounts: must return < 500.
- *              A 404 here is expected — many middleware prefix mounts have no root
- *              GET handler. Only a 5xx indicates an Express crash regression.
- */
 async function checkRouteUrl(url, timeout, tier) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
@@ -211,12 +217,12 @@ async function checkRouteUrl(url, timeout, tier) {
   }
 }
 
-async function runDomainBatch(paths, tier, concurrency, timeout) {
+async function runDomainBatch(baseUrl, paths, tier, concurrency, timeout) {
   const results = [];
   for (let i = 0; i < paths.length; i += concurrency) {
     const batch = paths.slice(i, i + concurrency);
     const batchResults = await Promise.all(
-      batch.map((path) => checkRouteUrl(BASE_URL + path, timeout, tier))
+      batch.map((path) => checkRouteUrl(baseUrl + path, timeout, tier))
     );
     results.push(...batchResults);
   }
@@ -225,7 +231,6 @@ async function runDomainBatch(paths, tier, concurrency, timeout) {
 
 async function main() {
   const discoveredPrefixes = discoverApiPrefixes(ROUTES_INDEX);
-
   const knownApiSet = new Set(KNOWN_READ_API_ROUTES);
   const newlyDiscovered = discoveredPrefixes
     .map((p) => `/api${p}`)
@@ -233,11 +238,10 @@ async function main() {
 
   if (!JSON_OUTPUT) {
     console.log(`\nSZL Holdings Ecosystem — Route Smoke Tests`);
-    console.log(`Base URL:     ${BASE_URL}`);
-    console.log(`Timeout:      ${TIMEOUT_MS}ms | Concurrency: ${CONCURRENCY}`);
+    console.log(`Timeout: ${TIMEOUT_MS}ms | Concurrency: ${CONCURRENCY}`);
     console.log(`API Discovery: ${discoveredPrefixes.length} prefixes from routes/index.ts`);
-    console.log(`  Tiers: web=<400 | api(known)=2xx | discover(prefix)=<500 (404 ok, no root GET)`);
-    console.log(`  Web routes require < 400 (full page load)\n`);
+    console.log(`  Per-app URLs: SZL=${SZL_URL} AEGIS=${AEGIS_URL} TERRA=${TERRA_URL} VESSELS=${VESSELS_URL}`);
+    console.log(`  CJ=${CJ_URL} CMD=${CMD_URL} API=${API_URL}\n`);
   }
 
   const domainSummary = [];
@@ -246,10 +250,10 @@ async function main() {
   let totalFailed = 0;
 
   if (!API_ONLY) {
-    for (const [domain, routes] of Object.entries(WEB_DOMAIN_ROUTES)) {
-      if (!JSON_OUTPUT) console.log(`  ── ${domain} (${routes.length} routes)`);
+    for (const { name, baseUrl, routes } of WEB_DOMAIN_CONFIGS) {
+      if (!JSON_OUTPUT) console.log(`  ── ${name} (${routes.length} routes) @ ${baseUrl}`);
 
-      const results = await runDomainBatch(routes, "web", CONCURRENCY, TIMEOUT_MS);
+      const results = await runDomainBatch(baseUrl, routes, "web", CONCURRENCY, TIMEOUT_MS);
       let dp = 0, df = 0;
 
       for (const result of results) {
@@ -262,13 +266,14 @@ async function main() {
         }
       }
 
-      allResults[domain] = results.map((r) => ({ path: r.url.replace(BASE_URL, ""), ok: r.ok, status: r.status, duration: r.duration, error: r.error ?? null }));
-      domainSummary.push({ domain, passed: dp, failed: df, total: routes.length });
+      allResults[name] = results.map((r) => ({ path: r.url.replace(baseUrl, ""), ok: r.ok, status: r.status, duration: r.duration, error: r.error ?? null }));
+      domainSummary.push({ domain: name, passed: dp, failed: df, total: routes.length });
       if (!JSON_OUTPUT) console.log();
     }
   }
 
   if (!WEB_ONLY) {
+    const apiBaseUrl = BASE_URL || API_URL;
     const apiSections = [
       { label: "API Health & Core (2xx required)", paths: KNOWN_READ_API_ROUTES, tier: "api" },
       { label: "API Prefixes (discovered router.use mounts, <500 required)", paths: newlyDiscovered, tier: "discover" },
@@ -276,9 +281,9 @@ async function main() {
 
     for (const { label, paths, tier } of apiSections) {
       if (paths.length === 0) continue;
-      if (!JSON_OUTPUT) console.log(`  ── ${label} (${paths.length} routes)`);
+      if (!JSON_OUTPUT) console.log(`  ── ${label} (${paths.length} routes) @ ${apiBaseUrl}`);
 
-      const results = await runDomainBatch(paths, tier, CONCURRENCY, TIMEOUT_MS);
+      const results = await runDomainBatch(apiBaseUrl, paths, tier, CONCURRENCY, TIMEOUT_MS);
       let dp = 0, df = 0;
 
       for (const result of results) {
@@ -291,7 +296,7 @@ async function main() {
         }
       }
 
-      allResults[label] = results.map((r) => ({ path: r.url.replace(BASE_URL, ""), ok: r.ok, status: r.status, duration: r.duration, error: r.error ?? null }));
+      allResults[label] = results.map((r) => ({ path: r.url.replace(apiBaseUrl, ""), ok: r.ok, status: r.status, duration: r.duration, error: r.error ?? null }));
       domainSummary.push({ domain: label, passed: dp, failed: df, total: paths.length });
       if (!JSON_OUTPUT) console.log();
     }
@@ -299,7 +304,6 @@ async function main() {
 
   if (JSON_OUTPUT) {
     console.log(JSON.stringify({
-      baseUrl: BASE_URL,
       timestamp: new Date().toISOString(),
       discoveredApiPrefixes: discoveredPrefixes.length,
       domains: allResults,

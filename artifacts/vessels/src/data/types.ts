@@ -136,6 +136,7 @@ export interface MaintenanceItem {
 }
 
 export interface PerformanceMetric {
+  id?: number;
   vesselId: number;
   vesselName: string;
   utilization: number;
@@ -209,16 +210,19 @@ export interface PortStateDeficiency {
 
 export interface ShipmentRecord {
   id: number;
-  vesselId: number;
-  bl: string;
+  vesselId: number | null;
+  vesselName?: string;
+  shipmentId?: string;
+  bl?: string;
   cargoType: string;
-  cargoTonnes: number;
-  shipper: string;
-  consignee: string;
+  cargoTonnes?: number;
+  weight?: number | null;
+  shipper?: string;
+  consignee?: string;
   origin: string;
   destination: string;
-  loadedAt: string;
-  deliveredAt: string | null;
+  loadedAt?: string;
+  deliveredAt?: string | null;
   status: string;
   onTimeScore: number | null;
   customerSatisfaction: number | null;
@@ -233,28 +237,30 @@ export interface EventLog {
   vesselId: number | null;
   vesselName: string | null;
   severity: "Critical" | "Warning" | "Info" | "Debug";
-  category: string;
-  title: string;
+  category?: string;
+  title?: string;
   message: string;
-  details: string | null;
-  occurredAt: string;
+  details?: string | null;
+  occurredAt?: string;
   timestamp: string;
+  type?: string;
   [key: string]: any;
 }
 
 export interface EmissionRecord {
   id: number;
   vesselId: number;
-  reportingPeriod: string;
-  co2Tonnes: number;
-  so2Tonnes: number;
-  noxTonnes: number;
-  cii: string;
-  ciiScore: number;
+  reportingPeriod?: string;
+  co2Tonnes?: number;
+  so2Tonnes?: number;
+  noxTonnes?: number;
+  cii?: string;
+  ciiScore?: number;
   month: string | null;
   co2Emissions: number | null;
   fuelConsumed: number | null;
   distanceTraveled: number | null;
+  ciiRating?: string | null;
   [key: string]: any;
 }
 
@@ -288,6 +294,12 @@ export interface PredictiveMaintenance {
   [key: string]: any;
 }
 
+export interface ForecastDataPoint {
+  date: string;
+  value?: number;
+  forecast?: number;
+}
+
 export interface ForecastModule {
   id: number;
   title: string;
@@ -297,7 +309,7 @@ export interface ForecastModule {
   forecastDate: string;
   trend: "up" | "down";
   confidence: number;
-  dataPoints: Array<{ date: string; value: number; forecast?: boolean }>;
+  dataPoints: ForecastDataPoint[];
   [key: string]: any;
 }
 

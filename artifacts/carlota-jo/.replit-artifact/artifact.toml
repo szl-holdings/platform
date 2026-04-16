@@ -29,4 +29,3 @@ kind = "web"
   [services.env]
   VITE_PORT = "3101"
   BASE_PATH = "/carlota-jo/"
-  

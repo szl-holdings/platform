@@ -6,7 +6,7 @@ import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
-const vitePort = Number(process.env.VITE_PORT) || 23933;
+const vitePort = Number(process.env.PORT) || 3000;
 const basePath = process.env.BASE_PATH || "/aegis/";
 
 const PROXY_ROUTES = [
@@ -22,46 +22,14 @@ function sharedProxyPlugin(): Plugin {
   return {
     name: "shared-proxy",
     apply: "serve",
-    async configureServer() {
-      const http = await import("http");
-      const proxyServer = http.createServer((req, res) => {
-        const url = req.url || "/";
-        if (url === "/" || url === "/health" || url === "/__health") {
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url === "/" || req.url === "/__health" || req.url === "/health") {
           res.writeHead(200, { "Content-Type": "text/plain" });
           res.end("OK");
           return;
         }
-
-        const normalizedUrl = url.endsWith("/") ? url : url + "/";
-        const route = PROXY_ROUTES.find((r) => normalizedUrl.startsWith(r.prefix));
-        const targetPort = route ? route.port : vitePort;
-
-        const upstream = http.request(
-          {
-            hostname: "127.0.0.1",
-            port: targetPort,
-            path: url,
-            method: req.method,
-            headers: { ...req.headers, host: "localhost:" + targetPort },
-          },
-          (upRes) => {
-            res.writeHead(upRes.statusCode || 200, upRes.headers);
-            upRes.pipe(res, { end: true });
-          }
-        );
-        upstream.on("error", () => {
-          if (!res.headersSent) {
-            res.writeHead(503, { "Content-Type": "text/plain" });
-            res.end("Upstream not ready on port " + targetPort);
-          }
-        });
-        req.pipe(upstream, { end: true });
-      });
-      proxyServer.listen({ port: 9090, host: "0.0.0.0", reusePort: true }, () => {
-        console.log("[shared-proxy] Listening on port 9090 (reusePort)");
-      });
-      proxyServer.on("error", (err: NodeJS.ErrnoException) => {
-        console.warn("[shared-proxy] Port 9090 bind error:", err.code);
+        next();
       });
     },
   };
@@ -70,10 +38,10 @@ function sharedProxyPlugin(): Plugin {
 export default defineConfig({
   base: basePath,
   plugins: [
+    sharedProxyPlugin(),
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
-    sharedProxyPlugin(),
 
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined

@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
@@ -59,10 +59,10 @@ function sharedProxyPlugin() {
 export default defineConfig({
   base: basePath,
   plugins: [
+    sharedProxyPlugin(),
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
-    sharedProxyPlugin(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [

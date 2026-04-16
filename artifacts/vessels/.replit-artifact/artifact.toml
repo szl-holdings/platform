@@ -29,4 +29,3 @@ kind = "web"
   [services.env]
   VITE_PORT = "6899"
   BASE_PATH = "/vessels/"
-  
