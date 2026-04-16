@@ -795,7 +795,7 @@ export default function HomePage() {
                 );
               })}
             </div>
-            <div style={{ marginTop: "1.5rem" }}>
+            <div style={{ marginTop: "2rem", display: "flex", flexDirection: "column", gap: "0.875rem" }}>
               <Link
                 href="/trust"
                 style={{
@@ -810,6 +810,43 @@ export default function HomePage() {
               >
                 View the Trust Center <ChevronRight size={14} />
               </Link>
+              <div style={{
+                display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center",
+                padding: "0.875rem 1.125rem",
+                borderRadius: "0.625rem",
+                background: "hsla(0,0%,100%,0.025)",
+                border: "1px solid hsla(0,0%,100%,0.07)",
+              }}>
+                <span style={{ fontSize: "0.75rem", fontWeight: 500, color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", whiteSpace: "nowrap", marginRight: "0.25rem" }}>
+                  Evaluating SZL?
+                </span>
+                {[
+                  { label: "Executive brief", href: "/trust#evaluators", color: "hsl(192,72%,48%)" },
+                  { label: "Technical review", href: "/trust#evaluators", color: "hsl(258,55%,68%)" },
+                  { label: "Security posture", href: "/trust/security", color: "hsl(145,62%,46%)" },
+                  { label: "Investor materials", href: "/trust#evaluators", color: "hsl(40,90%,54%)" },
+                ].map((item) => (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: "0.25rem",
+                      fontSize: "0.75rem", fontWeight: 600,
+                      color: item.color, textDecoration: "none",
+                      padding: "0.25rem 0.625rem",
+                      borderRadius: "0.25rem",
+                      background: `${item.color}12`,
+                      border: `1px solid ${item.color}28`,
+                      transition: "background 0.15s ease",
+                      whiteSpace: "nowrap",
+                    }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = `${item.color}22`; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = `${item.color}12`; }}
+                  >
+                    {item.label} <ArrowRight size={10} />
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
         </section>

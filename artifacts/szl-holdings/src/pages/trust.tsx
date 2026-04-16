@@ -1,9 +1,76 @@
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { ShieldCheck, Lock, Brain, Download, Settings, CheckSquare, ArrowRight, Layers, Database, Eye } from "lucide-react";
+import { ShieldCheck, Lock, Brain, Download, Settings, CheckSquare, ArrowRight, Layers, Database, Eye, Briefcase, Code2, UserCheck, BarChart2 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+
+const DILIGENCE_PATHS = [
+  {
+    id: "executive",
+    icon: Briefcase,
+    color: "hsl(192,72%,48%)",
+    colorMuted: "hsla(192,72%,48%,0.07)",
+    colorBorder: "hsla(192,72%,48%,0.20)",
+    audience: "Executive Buyer",
+    question: "Is this safe to operate at scale?",
+    summary: "Governance model, risk surface, audit readiness, and operational accountability.",
+    links: [
+      { label: "AI Governance model", href: "/trust/governance" },
+      { label: "Approval & HITL gates", href: "/trust/approvals" },
+      { label: "System architecture", href: "/architecture" },
+      { label: "Operating doctrine", href: "/operating-doctrine" },
+    ],
+  },
+  {
+    id: "technical",
+    icon: Code2,
+    color: "hsl(258,55%,68%)",
+    colorMuted: "hsla(258,55%,68%,0.07)",
+    colorBorder: "hsla(258,55%,68%,0.20)",
+    audience: "Technical Evaluator",
+    question: "How is this actually built?",
+    summary: "Architecture layers, integration surface, control plane, proof chain, and data handling.",
+    links: [
+      { label: "Platform architecture", href: "/architecture" },
+      { label: "Security controls", href: "/trust/security" },
+      { label: "Control plane docs", href: "/docs/control-plane" },
+      { label: "Proof chain docs", href: "/docs/proof-chain" },
+    ],
+  },
+  {
+    id: "security",
+    icon: UserCheck,
+    color: "hsl(145,62%,46%)",
+    colorMuted: "hsla(145,62%,40%,0.07)",
+    colorBorder: "hsla(145,62%,40%,0.20)",
+    audience: "Security Reviewer",
+    question: "What controls are actually in place today?",
+    summary: "RBAC, data isolation, credential management, disclosure policy, and threat posture — current state, not roadmap.",
+    links: [
+      { label: "Security posture", href: "/trust/security" },
+      { label: "AI governance", href: "/trust/governance" },
+      { label: "Responsible disclosure", href: "/legal/security-disclosure" },
+      { label: "Architecture trust layer", href: "/trust/architecture" },
+    ],
+  },
+  {
+    id: "investor",
+    icon: BarChart2,
+    color: "hsl(40,90%,54%)",
+    colorMuted: "hsla(40,90%,54%,0.07)",
+    colorBorder: "hsla(40,90%,54%,0.22)",
+    audience: "Investor",
+    question: "What makes this defensible?",
+    summary: "Architecture moat, operating doctrine, audit-grade governance, and the thesis behind the platform.",
+    links: [
+      { label: "Architecture defensibility", href: "/architecture" },
+      { label: "Operating doctrine", href: "/operating-doctrine" },
+      { label: "Investor relations", href: "/investor-relations" },
+      { label: "Governance audit trail", href: "/trust/governance" },
+    ],
+  },
+];
 
 const TRUST_PAGES = [
   {
@@ -144,6 +211,70 @@ export default function TrustPage() {
                       <Icon size={14} color="hsl(145,62%,46%)" />
                     </div>
                     <p style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "hsl(214,7%,58%)", marginTop: "2px" }}>{s.text}</p>
+                  </m.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* Audience diligence paths */}
+        <section id="evaluators" style={{ padding: "var(--space-section-md) 0", borderBottom: "1px solid var(--color-szl-border)" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>Self-serve diligence paths</p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "32ch", marginBottom: "0.75rem" }}>
+                Start where you are.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "3rem" }}>
+                Each path below takes you directly to the materials most relevant to your role — no hunting, no gating.
+              </p>
+            </m.div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1rem" }}>
+              {DILIGENCE_PATHS.map((path, i) => {
+                const Icon = path.icon;
+                return (
+                  <m.div
+                    key={path.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.38, delay: i * 0.07 }}
+                    style={{
+                      borderRadius: "0.875rem",
+                      padding: "1.5rem",
+                      background: path.colorMuted,
+                      border: `1px solid ${path.colorBorder}`,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "1rem",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                      <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", background: path.colorMuted, border: `1px solid ${path.colorBorder}`, borderRadius: "0.375rem", flexShrink: 0 }}>
+                        <Icon size={15} color={path.color} />
+                      </div>
+                      <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: path.color }}>{path.audience}</span>
+                    </div>
+                    <div>
+                      <p style={{ fontSize: "0.9375rem", fontWeight: 600, color: "hsl(38,8%,88%)", marginBottom: "0.375rem", lineHeight: 1.35 }}>{path.question}</p>
+                      <p style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "hsl(214,7%,54%)" }}>{path.summary}</p>
+                    </div>
+                    <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                      {path.links.map((link) => (
+                        <li key={link.href}>
+                          <Link
+                            href={link.href}
+                            style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", fontSize: "0.8125rem", fontWeight: 500, color: path.color, textDecoration: "none", opacity: 0.9, transition: "opacity 0.15s ease" }}
+                            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+                            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.9"; }}
+                          >
+                            <ArrowRight size={11} />
+                            {link.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
                   </m.div>
                 );
               })}

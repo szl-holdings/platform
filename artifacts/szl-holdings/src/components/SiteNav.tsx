@@ -39,6 +39,7 @@ const NAV_ITEMS = [
     highlight: false,
     children: [
       { label: "Trust Center", href: "/trust", note: "Full diligence index" },
+      { label: "Diligence Paths →", href: "/trust#evaluators", note: "Find your path" },
       { label: "Security", href: "/trust/security", note: "Controls & posture" },
       { label: "AI Governance", href: "/trust/ai", note: "Model accountability" },
       { label: "Compliance Architecture", href: "/trust/governance", note: "Policy & audit" },
