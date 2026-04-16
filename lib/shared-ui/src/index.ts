@@ -341,3 +341,4 @@ export {
   type WhatIfCascade,
 } from "./cortex-what-if";
 export * from "./settings-shell";
+export * from "./onboarding";

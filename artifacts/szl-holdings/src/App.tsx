@@ -249,6 +249,7 @@ const AlloyMcpToolCreator = lazy(() => import("@/alloy/pages/mcp-tool-creator"))
 const AcademyPage = lazy(() => import("@/pages/academy"));
 const HelpPage = lazy(() => import("@/pages/help"));
 const DemosPage = lazy(() => import("@/pages/demos"));
+const ChangelogPage = lazy(() => import("@/pages/changelog"));
 const LPSentimentPulse = lazy(() => import("@/pages/lp-sentiment-pulse"));
 
 const queryClient = new QueryClient({
@@ -518,6 +519,9 @@ function App() {
             </Route>
             <Route path="/demos">
               <Suspense fallback={<PageLoader />}><DemosPage /></Suspense>
+            </Route>
+            <Route path="/changelog">
+              <Suspense fallback={<PageLoader />}><ChangelogPage /></Suspense>
             </Route>
             <Route path="/lp-sentiment-pulse">
               <Suspense fallback={<PageLoader />}><LPSentimentPulse /></Suspense>

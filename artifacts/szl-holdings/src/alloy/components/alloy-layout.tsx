@@ -3,8 +3,72 @@ import { cn } from "@szl-holdings/shared-ui/utils";
 import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
 import { ReactNode, useState, useEffect } from "react";
 import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard, ArrowLeft, FileText, Brain, Layers, Home, BookOpen, Globe, Lock, Play, Star, DollarSign, Store, Code2, Cpu, Scale, HeartPulse, BarChart3, Image, Package } from "lucide-react";
-import { useRealtimeChannel, RealtimeStatusIndicator } from "@szl-holdings/shared-ui";
+import { useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui";
+import { useOnboardingAnalytics } from "@szl-holdings/shared-ui/onboarding";
 import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, useRegisterCommands, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
+
+const ALLOY_ACCENT = "#4B8BDB";
+
+const SZL_ONBOARDING_CONFIG: OnboardingConfig = {
+  appId: "szl-alloy",
+  appName: "Alloy",
+  accentColor: ALLOY_ACCENT,
+  steps: [
+    {
+      id: "welcome",
+      title: "Welcome to Alloy",
+      description: "Alloy is the execution fabric of SZL Holdings — automate workflows, orchestrate connectors, and govern every decision with full auditability.",
+      placement: "center",
+      icon: Zap,
+    },
+    {
+      id: "factory-floor",
+      title: "Factory Floor",
+      description: "Monitor all active automation runs in real time. See execution status, throughput metrics, and drill into any workflow for full trace visibility.",
+      targetSelector: "a[href='/alloy']",
+      placement: "right",
+      icon: LayoutDashboard,
+    },
+    {
+      id: "signals",
+      title: "Signal Feed",
+      description: "Every external event enters here — webhooks, API triggers, scheduled crons. Signals are routed through the governed decision loop before execution.",
+      targetSelector: "a[href='/alloy/signals']",
+      placement: "right",
+      icon: Radio,
+    },
+    {
+      id: "connectors",
+      title: "Connector Mesh",
+      description: "Manage integrations with 60+ platforms. Each connector is health-monitored and governed by the same policy layer as your workflows.",
+      targetSelector: "a[href='/alloy/connectors']",
+      placement: "right",
+      icon: Network,
+    },
+    {
+      id: "governance",
+      title: "Governance & Audit",
+      description: "Every action leaves a proof chain. Review approval workflows, audit trails, and compliance attestations across all automation runs.",
+      targetSelector: "a[href='/alloy/governance']",
+      placement: "right",
+      icon: Shield,
+    },
+    {
+      id: "ecosystem",
+      title: "Cross-Domain Navigation",
+      description: "Switch between domain packs (Terra, Vessels, Aegis) using the ecosystem links at the bottom of the sidebar — all sharing the same data layer.",
+      placement: "center",
+      icon: Globe,
+    },
+  ],
+  checklist: [
+    { id: "explore-factory", label: "Explore the Factory Floor", description: "View active automation runs and throughput" },
+    { id: "review-connectors", label: "Review Connector Mesh", description: "Check integration health and available connectors" },
+    { id: "browse-signals", label: "Browse Signal Feed", description: "See how external events trigger workflows" },
+    { id: "check-governance", label: "Check Governance & Audit", description: "Review the proof chain and approval logs" },
+    { id: "visit-domain", label: "Visit a Domain Pack", description: "Navigate to Terra, Vessels, or Aegis" },
+  ],
+};
 
 const COMMAND_LOOP = [
   { phase: "DETECT", color: "#0ea5e9", active: false },
@@ -162,6 +226,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
   const { status: wsStatus } = useRealtimeChannel("workflow-runs");
   const [, navigate] = useLocation();
   const [workflowCmds, setWorkflowCmds] = useState<CommandItem[]>([]);
+  const { trackTourCompleted, trackTourSkipped, trackChecklistViewed } = useOnboardingAnalytics({ platform: "szl", tourId: "szl-alloy" });
 
   useEffect(() => {
     let cancelled = false;
@@ -311,6 +376,18 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             ))}
           </nav>
 
+          <div className="px-2 mb-2">
+            <GettingStartedChecklist
+              appId="szl-alloy"
+              appName="Alloy"
+              items={SZL_ONBOARDING_CONFIG.checklist ?? []}
+              accentColor={ALLOY_ACCENT}
+              onReplayTour={() => {
+                try { localStorage.setItem("szl_onboarding_szl-alloy", JSON.stringify({ completed: false })); window.location.reload(); } catch {}
+              }}
+            />
+          </div>
+
           <div className="mt-auto shrink-0 px-3 py-3 mx-2 mb-2 rounded-lg" style={{ background: "rgba(75,139,219,0.04)", border: "1px solid rgba(75,139,219,0.08)" }}>
             <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: "rgba(75,139,219,0.4)" }}>Runtime Health</div>
             <div className="space-y-1.5">
@@ -400,6 +477,8 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
           </SectionErrorBoundary>
         </main>
       </div>
+
+      <OnboardingWizard config={SZL_ONBOARDING_CONFIG} onComplete={trackTourCompleted} />
     </div>
   );
 }

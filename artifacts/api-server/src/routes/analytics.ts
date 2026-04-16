@@ -17,6 +17,9 @@ const ALLOWED_EVENTS = new Set([
   "trial_started", "trial_converted",
   "contact_form_submitted", "demo_requested", "demo_scheduled", "demo_completed",
   "ai_inference_called", "ai_recommendation_shown", "ai_recommendation_acted_on", "ai_provider_failure",
+  "tour_started", "tour_completed", "tour_skipped", "tour_step_viewed",
+  "checklist_item_completed", "checklist_dismissed", "checklist_viewed",
+  "help_tip_opened", "changelog_viewed",
 ]);
 
 const ALLOWED_PLATFORMS = new Set(["lyte", "aegis", "terra", "vessels", "carlota_jo", "admin", "api", "szl"]);

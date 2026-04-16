@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch, DataStateBadge, isAuthError, DataProvenance, ActionLoop, RoleSelector } from "@szl-holdings/shared-ui";
+import { apiFetch, DataStateBadge, isAuthError, DataProvenance, ActionLoop, RoleSelector, EmptyState } from "@szl-holdings/shared-ui";
 import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
 import { Activity, CheckCircle, XCircle, Clock, AlertTriangle, ChevronRight, Zap, TrendingUp, Timer } from "lucide-react";
 import { useState } from "react";
@@ -407,9 +407,13 @@ export default function FactoryFloor() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-12 text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>
-            No workflows match this filter.
-          </div>
+          <EmptyState
+            icon={Activity}
+            headline="No workflows match this filter"
+            description="Try adjusting your filter criteria, or check back later as new automation runs are ingested."
+            accentColor="#4B8BDB"
+            compact
+          />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filtered.map(stat => (

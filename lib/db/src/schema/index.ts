@@ -108,3 +108,4 @@ export * from "./daily_briefings";
 export * from "./cortex_action_drafts";
 export * from "./multiplayer_sessions";
 export * from "./settings";
+export * from "./changelog";

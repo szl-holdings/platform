@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { GitBranch, Sparkles, Bug, Zap, Shield, RefreshCw } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 const entries = [
   {
@@ -104,6 +106,18 @@ export default function Changelog() {
     description: "Latest updates, features, and improvements across the SZL Holdings platform portfolio. Track product releases from Aegis, Aegis Intelligence, Terra, Vessels, Lyte, Alloy, Aegis Operations, and Aegis.",
     canonical: "https://szlholdings.com/changelog",
   });
+
+  const [apiEntries, setApiEntries] = useState<Array<{
+    id: number; version: string; title: string; date: string;
+    category: string; body: string; tags?: string[];
+  }>>([]);
+
+  useEffect(() => {
+    apiFetch("/changelog")
+      .then((data: any) => setApiEntries(data.entries ?? []))
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-3xl mx-auto px-6 py-10 space-y-8">
@@ -114,6 +128,39 @@ export default function Changelog() {
           </h1>
           <p className="text-sm text-muted-foreground mt-1">Release history and feature updates across the SZL platform ecosystem.</p>
         </div>
+
+        {apiEntries.length > 0 && (
+          <div className="space-y-4 mb-8">
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Latest Updates</h2>
+            {apiEntries.map(ae => {
+              const catCfg = typeConfig[ae.category as keyof typeof typeConfig] ?? typeConfig.feature;
+              const CatIcon = catCfg.icon;
+              return (
+                <Card key={ae.id} className="border-border">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Badge variant="outline" className="text-[11px] font-mono font-bold text-primary bg-primary/10 border-primary/20">{ae.version}</Badge>
+                      <span className="text-xs text-muted-foreground">{new Date(ae.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                      <div className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium ${catCfg.color}`}>
+                        <CatIcon className="w-2.5 h-2.5" />
+                        {catCfg.label}
+                      </div>
+                    </div>
+                    <p className="text-sm font-semibold text-foreground mb-1">{ae.title}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line">{ae.body}</p>
+                    {ae.tags && ae.tags.length > 0 && (
+                      <div className="flex gap-1.5 mt-2 flex-wrap">
+                        {ae.tags.map(tag => (
+                          <span key={tag} className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-muted text-muted-foreground">{tag}</span>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
 
         <div className="space-y-8">
           {entries.map(entry => (

@@ -80,6 +80,9 @@ The platform comprises 15 active artifacts sharing governance infrastructure:
 - **GraphQL API:** Unified API at `/api/graphql` using Apollo Server v5 and `graphql-ws` for subscriptions across 9 domain modules
 - **MCP Server:** Model Context Protocol server at `/api/mcp` for AI tool orchestration, exposing 23 tools, 4 resources, and 5 prompt templates via HTTP+SSE
 
+### Onboarding System
+Product onboarding components in `lib/shared-ui/src/onboarding/`: `ProductTour`, `OnboardingChecklist`, `HelpTip`, `ChangelogPage`, `useOnboardingAnalytics`. Legacy `OnboardingWizard` + `GettingStartedChecklist` in `lib/shared-ui/src/onboarding.tsx` — used by Aegis, Vessels, Terra, and SZL Holdings Alloy. Changelog page at `/changelog` with DB-backed entries (`changelog_entries` table) + static fallbacks. Analytics events: `tour_started`, `tour_completed`, `tour_skipped`, `tour_step_viewed`, `checklist_item_completed`, `checklist_dismissed`, `checklist_viewed`, `help_tip_opened`, `changelog_viewed`.
+
 ### Design System
 Premium, SZL-branded dark-first design system (except Carlota Jo luxury light-mode). Typography: Space Grotesk, Inter, JetBrains Mono. Domain packs maintain unique visual identities within the overarching brand hierarchy.
 

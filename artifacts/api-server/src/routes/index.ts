@@ -177,6 +177,7 @@ import crossDomainQueryRouter from "./cross-domain-query";
 import correlationMapRouter from "./correlation-map";
 import unifiedSettingsRouter from "./unified-settings";
 import tenantHealthRouter from "./tenant-health";
+import changelogRouter from "./changelog";
 
 const router: IRouter = Router();
 
@@ -689,5 +690,8 @@ router.use(unifiedSettingsRouter);
 router.use("/tenant-health", _readLimiter);
 router.use("/tenant-health", _writeLimiter);
 router.use(tenantHealthRouter);
+
+router.use("/changelog", _readLimiter);
+router.use(changelogRouter);
 
 export default router;

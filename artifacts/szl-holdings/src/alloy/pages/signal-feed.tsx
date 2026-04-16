@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch, DataStateBadge, isAuthError } from "@szl-holdings/shared-ui";
+import { apiFetch, DataStateBadge, isAuthError, EmptyState } from "@szl-holdings/shared-ui";
 import { Radio, AlertTriangle, Info, ChevronRight, Filter, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -303,9 +303,13 @@ export default function SignalFeed() {
               <div key={i} className="h-14 rounded-lg border border-white/5 animate-pulse" style={{ background: "rgba(12,18,30,0.6)" }} />
             ))
           ) : signals.length === 0 ? (
-            <div className="text-center py-12 text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>
-              No signals match this filter.
-            </div>
+            <EmptyState
+              icon={Radio}
+              headline="No signals match this filter"
+              description="Adjust your source or severity filters. Signals are ingested in real time from webhooks, APIs, and scheduled crons."
+              accentColor="#4B8BDB"
+              compact
+            />
           ) : (
             signals.map(s => <SignalRow key={s.id} signal={s} />)
           )}

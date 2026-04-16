@@ -114,7 +114,13 @@
     "./ambient-intelligence": "./src/ambient-intelligence.tsx",
     "./energy-heartbeat": "./src/energy-heartbeat.tsx",
     "./cross-domain-correlation": "./src/cross-domain-correlation.tsx",
-    "./settings-shell": "./src/settings-shell.tsx"
+    "./settings-shell": "./src/settings-shell.tsx",
+    "./onboarding": "./src/onboarding/index.ts",
+    "./onboarding/product-tour": "./src/onboarding/product-tour.tsx",
+    "./onboarding/use-product-tour": "./src/onboarding/use-product-tour.ts",
+    "./onboarding/onboarding-checklist": "./src/onboarding/onboarding-checklist.tsx",
+    "./onboarding/help-tip": "./src/onboarding/help-tip.tsx",
+    "./onboarding/changelog-page": "./src/onboarding/changelog-page.tsx"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.4",

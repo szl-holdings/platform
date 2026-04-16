@@ -6,7 +6,7 @@ import {
   ChevronDown, ChevronRight, Eye, CheckCheck, X as XIcon, ToggleRight, FileText, Users, Flag,
 } from "lucide-react";
 import { cn } from "../lib/utils";
-import { isAuthError } from "@szl-holdings/shared-ui";
+import { isAuthError, EmptyState } from "@szl-holdings/shared-ui";
 
 function noRetryOn401(failureCount: number, error: unknown): boolean {
   if (isAuthError(error)) return false;
@@ -392,7 +392,13 @@ function ConsoleInner() {
             workflows.map(wf => <WorkflowCard key={wf.id} workflow={wf} />)
           )}
           {!wfLoading && workflows.length === 0 && (
-            <div className="py-12 text-center text-white/30 text-sm">No workflows found.</div>
+            <EmptyState
+              icon={Zap}
+              headline="No workflows found"
+              description="Workflows will appear here once configured. Create your first automation to get started."
+              accentColor="#4B8BDB"
+              compact
+            />
           )}
         </div>
       )}
@@ -405,7 +411,13 @@ function ConsoleInner() {
             signals.map(sig => <SignalRow key={sig.id} signal={sig} />)
           )}
           {!sigLoading && signals.length === 0 && (
-            <div className="py-12 text-center text-white/30 text-sm">No signals ingested yet.</div>
+            <EmptyState
+              icon={Zap}
+              headline="No signals ingested yet"
+              description="Signals are captured from webhooks, API triggers, and scheduled events. Configure a connector to start ingesting."
+              accentColor="#4B8BDB"
+              compact
+            />
           )}
         </div>
       )}
