@@ -1,0 +1,31 @@
+kind = "video"
+previewPath = "/szl-demo-video/"
+title = "SZL Holdings — Governed Autonomy Demo"
+version = "1.0.0"
+id = "artifacts/szl-demo-video"
+router = "path"
+
+[[integratedSkills]]
+name = "video-js"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/szl-demo-video/" ]
+localPort = 8765
+
+[services.development]
+run = "bash -c 'cd /home/runner/workspace/artifacts/szl-demo-video && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/szl-demo-video", "run", "build" ]
+publicDir = "artifacts/szl-demo-video/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "8765"
+BASE_PATH = "/szl-demo-video/"

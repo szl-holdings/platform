@@ -275,3 +275,9 @@ id = "8CTa9InM8JY_rD4G-KBV1"
 uri = "file://LINKEDIN-LAUNCH/images/01-cover.jpg"
 type = "image"
 title = "Cover — Governed Decision Operating System"
+
+[[outputs]]
+id = "k6xy6Woyt-gGFnCMmpikP"
+uri = "file://deliverables/linkedin-4-17.zip"
+type = "unspecified"
+title = "linkedin 4/17 — SZL Holdings demo video"
