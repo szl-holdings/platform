@@ -238,13 +238,13 @@ title = "Launch Bundle — Ecosystem Cycle 2026.04 (zip)"
 id = "YrYkn9JzDwMCO40yd_lAV"
 uri = "file://LINKEDIN-LAUNCH.zip"
 type = "unspecified"
-title = "LINKEDIN-LAUNCH.zip — 17 slides + 52s video + post copy"
+title = "SZL Holdings — LinkedIn Launch Bundle (v4 · Vercel-tier)"
 
 [[outputs]]
 id = "x_hVSsyNANZQ_EUsWD2Me"
 uri = "file://LINKEDIN-LAUNCH/video/szl-holdings-launch-demo.mp4"
 type = "video"
-title = "Launch demo video — 52s, 17 surfaces"
+title = "Launch video (52s)"
 
 [[outputs]]
 id = "dyCSqiDqDu8RppRwjlE6M"
@@ -269,3 +269,9 @@ id = "F8_hWwQ5FUmKs3W62B0HV"
 uri = "file://LINKEDIN-LAUNCH/01-LINKEDIN-POST.md"
 type = "text"
 title = "01-LINKEDIN-POST.md — full post copy (carousel + video)"
+
+[[outputs]]
+id = "8CTa9InM8JY_rD4G-KBV1"
+uri = "file://LINKEDIN-LAUNCH/images/01-cover.jpg"
+type = "image"
+title = "Cover — Governed Decision Operating System"
