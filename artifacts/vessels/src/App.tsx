@@ -12,7 +12,8 @@ import {
   Ship, AlertTriangle, Activity, LayoutDashboard, WifiOff,
   BarChart3, ChevronDown, User, ChevronRight, DollarSign, Wrench,
   MapPin, Radio, List, Globe, Navigation, EyeOff, ShieldAlert, Shield, Anchor, Brain, Menu, FileText,
-  TrendingUp, Calculator, Zap, Cpu, Leaf, Waves, Fuel, Layers, RotateCcw, GitBranch
+  TrendingUp, Calculator, Zap, Cpu, Leaf, Waves, Fuel, Layers, RotateCcw, GitBranch,
+  Network, Users, Link2
 } from "lucide-react";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
@@ -194,6 +195,11 @@ const VesselsSettingsPage = lazy(() => import("@/pages/settings"));
 const VesselsAtlasRuntimePage = lazy(() => import("@/pages/atlas-runtime"));
 const VesselsReplayPage = lazy(() => import("@/pages/replay"));
 const VesselsScenarioBranchesPage = lazy(() => import("@/pages/scenario-branches"));
+const OwnerCargoGraphPage = lazy(() => import("@/pages/owner-cargo-graph"));
+const RouteAnomalyEnginePage = lazy(() => import("@/pages/route-anomaly-engine"));
+const SanctionsChainExplorerPage = lazy(() => import("@/pages/sanctions-chain-explorer"));
+const CounterpartyRiskMapPage = lazy(() => import("@/pages/counterparty-risk-map"));
+const VoyageTwinPage = lazy(() => import("@/pages/voyage-twin"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -338,6 +344,11 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
         { id: "voyage-replay", label: "Voyage Replay", href: "/replay", icon: <RotateCcw className="w-3.5 h-3.5" /> },
         { id: "scenario-branches", label: "Scenario Branches", href: "/scenario-branches", icon: <GitBranch className="w-3.5 h-3.5" /> },
         { id: "constellation", label: "Constellation", href: "/constellation", icon: <Layers className="w-3.5 h-3.5" /> },
+        { id: "owner-cargo-graph", label: "Owner–Port–Cargo Graph", href: "/owner-cargo-graph", icon: <Network className="w-3.5 h-3.5" /> },
+        { id: "route-anomaly-engine", label: "Route Anomaly Engine", href: "/route-anomaly-engine", icon: <Navigation className="w-3.5 h-3.5" /> },
+        { id: "sanctions-chain-explorer", label: "Sanctions Chain Explorer", href: "/sanctions-chain-explorer", icon: <Link2 className="w-3.5 h-3.5" /> },
+        { id: "counterparty-risk-map", label: "Counterparty Risk Map", href: "/counterparty-risk-map", icon: <Users className="w-3.5 h-3.5" /> },
+        { id: "voyage-twin", label: "Voyage Twin", href: "/voyage-twin", icon: <Cpu className="w-3.5 h-3.5" /> },
       ],
     },
     {
@@ -624,6 +635,11 @@ function DashboardRouter() {
         <Route path="/atlas-runtime" component={VesselsAtlasRuntimePage} />
         <Route path="/replay" component={VesselsReplayPage} />
         <Route path="/scenario-branches" component={VesselsScenarioBranchesPage} />
+        <Route path="/owner-cargo-graph" component={OwnerCargoGraphPage} />
+        <Route path="/route-anomaly-engine" component={RouteAnomalyEnginePage} />
+        <Route path="/sanctions-chain-explorer" component={SanctionsChainExplorerPage} />
+        <Route path="/counterparty-risk-map" component={CounterpartyRiskMapPage} />
+        <Route path="/voyage-twin" component={VoyageTwinPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-sky-400/40">Page not found</p>

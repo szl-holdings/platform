@@ -29,6 +29,7 @@
  */
 
 import type { Request, Response, NextFunction } from "express";
+import { timingSafeEqual } from "crypto";
 import { serverTelemetry } from "@szl-holdings/observability";
 import { sendUnauthorized } from "../lib/api-response";
 
@@ -66,6 +67,17 @@ const PUBLIC_PREFIXES = [
   "/api/docs/",
 ];
 
+function isValidInternalToken(req: Request): boolean {
+  const secret = process.env["ALLOY_INTERNAL_TOKEN"];
+  if (!secret) return false;
+  const header = req.headers["x-internal-token"];
+  if (typeof header !== "string") return false;
+  const a = Buffer.from(secret, "utf8");
+  const b = Buffer.from(header, "utf8");
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
+}
+
 export function globalAuthEnforcer(
   req: Request,
   res: Response,
@@ -77,6 +89,11 @@ export function globalAuthEnforcer(
   }
 
   if (req.user || req.oidcUser) {
+    next();
+    return;
+  }
+
+  if (isValidInternalToken(req)) {
     next();
     return;
   }
