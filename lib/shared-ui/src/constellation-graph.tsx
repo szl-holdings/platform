@@ -860,7 +860,7 @@ export function ConstellationGraph({
   }, [traceOriginId, traceDistances, nodes, edges, hostDomain, traceDepth, traceTruncated]);
 
   const exportTrace = useCallback(
-    (format: "json" | "csv") => {
+    async (format: "json" | "csv") => {
       const bundle = buildTraceBundle();
       if (!bundle) return;
       const slug = (bundle.origin.name ?? bundle.origin.id ?? "trace")
@@ -881,6 +881,31 @@ export function ConstellationGraph({
         // Defer revoke so the browser has time to start the download
         setTimeout(() => URL.revokeObjectURL(url), 1000);
       };
+
+      // Prefer the server-side export so the file carries richer evidence
+      // (per-node provenance + last-update timestamps + linked event ids,
+      // per-edge source attribution + cst_edge_evidence rows). Fall back to
+      // the client-built bundle if the server route is missing or errors.
+      const originId = bundle.origin.id;
+      if (originId) {
+        try {
+          const params = new URLSearchParams();
+          params.set("format", format);
+          params.set("depth", String(Math.max(1, Math.min(4, bundle.depth || 2))));
+          const res = await fetch(
+            `/api/graph/entities/${encodeURIComponent(originId)}/subgraph/export?${params.toString()}`,
+            { credentials: "include" },
+          );
+          if (res.ok) {
+            const blob = await res.blob();
+            downloadBlob(blob, `trace-${slug}-${ts}.${format}`);
+            return;
+          }
+        } catch {
+          // fall through to client-side export
+        }
+      }
+
       if (format === "json") {
         const blob = new Blob([JSON.stringify(bundle, null, 2)], {
           type: "application/json",

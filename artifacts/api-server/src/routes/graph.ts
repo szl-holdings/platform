@@ -11,7 +11,7 @@ import {
   CstSearchParamsSchema,
 } from "@szl-holdings/constellation";
 import type { CstNode } from "@szl-holdings/constellation";
-import { db, cstNodes, cstEdges } from "@szl-holdings/db";
+import { db, cstNodes, cstEdges, cstEdgeEvidence } from "@szl-holdings/db";
 import { eq, or, inArray } from "drizzle-orm";
 
 const router: IRouter = Router();
@@ -326,6 +326,378 @@ router.get("/graph/entities/:id/subgraph", async (req: Request, res: Response) =
     });
   } catch (err) {
     return handleRouteError(res, err, "GET /graph/entities/:id/subgraph");
+  }
+});
+
+/**
+ * GET /graph/entities/:id/subgraph/export?format=json|csv&depth=N
+ *
+ * Same BFS subgraph as /subgraph, but enriched with provenance evidence so the
+ * file is useful for investigators sharing it with counterparties:
+ *   - per-node: source system (id/type/label), last update timestamp, and
+ *     linked event ids (actions, executions, documents, risks)
+ *   - per-edge: source attribution + every cst_edge_evidence row referencing
+ *     the edge (evidence type, source, recorded by/at, payload)
+ *
+ * Streams JSON or CSV (with NODES / EDGES / EVIDENCE sections) and sets a
+ * Content-Disposition header so browsers save it as `trace-{origin}-{ts}.{ext}`.
+ *
+ * Query params:
+ *   format       "json" (default) or "csv"
+ *   depth        BFS depth (default 2, range 1–4)
+ *   maxNodes     soft cap on total nodes (default 75, max 300)
+ *   perHopLimit  max edges examined per node per hop (default 25, max 100)
+ */
+router.get("/graph/entities/:id/subgraph/export", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const format = String(req.query.format ?? "json").toLowerCase();
+    if (format !== "json" && format !== "csv") {
+      return sendBadRequest(res, "format must be 'json' or 'csv'");
+    }
+    const depth = parseInt((req.query.depth as string) ?? "2", 10);
+    if (isNaN(depth) || depth < 1 || depth > 4) {
+      return sendBadRequest(res, "depth must be 1–4");
+    }
+    const maxNodes = parseInt((req.query.maxNodes as string) ?? "75", 10);
+    if (isNaN(maxNodes) || maxNodes < 2 || maxNodes > 300) {
+      return sendBadRequest(res, "maxNodes must be 2–300");
+    }
+    const perHopLimit = parseInt((req.query.perHopLimit as string) ?? "25", 10);
+    if (isNaN(perHopLimit) || perHopLimit < 1 || perHopLimit > 100) {
+      return sendBadRequest(res, "perHopLimit must be 1–100");
+    }
+
+    const origin = await getNodeById(id);
+    if (!origin) {
+      return res.status(404).json({ error: "Entity not found", id });
+    }
+
+    // BFS — same shape as /subgraph above. Kept inline (rather than extracted)
+    // so the export endpoint stays independently auditable.
+    const distances = new Map<string, number>();
+    distances.set(id, 0);
+    const collectedEdges = new Map<string, typeof cstEdges.$inferSelect>();
+    let frontier: string[] = [id];
+    let truncated = false;
+
+    for (let hop = 1; hop <= depth; hop++) {
+      if (frontier.length === 0) break;
+      const edgeRows = await db
+        .select()
+        .from(cstEdges)
+        .where(or(inArray(cstEdges.fromNodeId, frontier), inArray(cstEdges.toNodeId, frontier)))
+        .limit(perHopLimit * frontier.length);
+      const nextFrontier = new Set<string>();
+      for (const e of edgeRows) {
+        collectedEdges.set(e.id, e);
+        const endpoints = [e.fromNodeId, e.toNodeId].filter(
+          (nid): nid is string => !!nid,
+        );
+        for (const nid of endpoints) {
+          if (distances.has(nid)) continue;
+          if (distances.size >= maxNodes) {
+            truncated = true;
+            continue;
+          }
+          distances.set(nid, hop);
+          nextFrontier.add(nid);
+        }
+      }
+      if (edgeRows.length >= perHopLimit * frontier.length) {
+        truncated = true;
+      }
+      frontier = Array.from(nextFrontier);
+    }
+
+    const allNodeIds = Array.from(distances.keys());
+    const nodeRows = await db.select().from(cstNodes).where(inArray(cstNodes.id, allNodeIds));
+    const includedNodeIds = new Set(allNodeIds);
+    const filteredEdges: Array<typeof cstEdges.$inferSelect> = [];
+    for (const e of collectedEdges.values()) {
+      if (
+        e.fromNodeId &&
+        e.toNodeId &&
+        includedNodeIds.has(e.fromNodeId) &&
+        includedNodeIds.has(e.toNodeId)
+      ) {
+        filteredEdges.push(e);
+      } else {
+        truncated = true;
+      }
+    }
+
+    // Pull evidence rows for every retained edge in a single query so we can
+    // attach them to the export without N+1 round trips.
+    const evidenceRows = filteredEdges.length > 0
+      ? await db
+          .select()
+          .from(cstEdgeEvidence)
+          .where(inArray(cstEdgeEvidence.edgeId, filteredEdges.map((e) => e.id)))
+      : [];
+    const evidenceByEdge = new Map<string, Array<typeof cstEdgeEvidence.$inferSelect>>();
+    for (const ev of evidenceRows) {
+      const list = evidenceByEdge.get(ev.edgeId) ?? [];
+      list.push(ev);
+      evidenceByEdge.set(ev.edgeId, list);
+    }
+
+    const generatedAt = new Date().toISOString();
+    const slug = (origin.name || origin.id || "trace")
+      .toString()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 48) || "trace";
+    const tsForFile = generatedAt.replace(/[:.]/g, "-");
+    const filename = `trace-${slug}-${tsForFile}.${format}`;
+
+    // Per-node enrichment: keep everything /subgraph already returns and add
+    // provenance fields, last-update timestamp, and the union of linked event
+    // ids the platform tracks against an entity.
+    const enrichedNodes = nodeRows.map((n) => {
+      const linkedEventIds = [
+        ...((n.relatedActionIds as string[] | null) ?? []),
+        ...((n.relatedExecutionIds as string[] | null) ?? []),
+        ...((n.relatedDocumentIds as string[] | null) ?? []),
+        ...((n.relatedRiskIds as string[] | null) ?? []),
+      ];
+      return {
+        id: n.id,
+        canonicalId: n.canonicalId,
+        domain: n.domain,
+        entityType: n.entityType,
+        name: n.name,
+        description: n.description,
+        labels: n.labels,
+        confidence: n.confidence,
+        sensitivityTier: n.sensitivityTier,
+        isActive: n.isActive,
+        freshness: n.freshness,
+        extensions: n.extensions,
+        createdAt: n.createdAt,
+        updatedAt: n.updatedAt,
+        distance: distances.get(n.id) ?? null,
+        provenance: {
+          sourceId: n.provenanceSourceId,
+          sourceType: n.provenanceSourceType,
+          sourceLabel: n.provenanceSourceLabel,
+          lastUpdatedAt: n.updatedAt,
+        },
+        linkedEvents: {
+          actionIds: (n.relatedActionIds as string[] | null) ?? [],
+          executionIds: (n.relatedExecutionIds as string[] | null) ?? [],
+          documentIds: (n.relatedDocumentIds as string[] | null) ?? [],
+          riskIds: (n.relatedRiskIds as string[] | null) ?? [],
+          all: linkedEventIds,
+        },
+      };
+    });
+
+    const enrichedEdges = filteredEdges.map((e) => ({
+      id: e.id,
+      fromNodeId: e.fromNodeId,
+      toNodeId: e.toNodeId,
+      relationshipType: e.relationshipType,
+      confidence: e.confidence,
+      active: e.active,
+      createdAt: e.createdAt,
+      updatedAt: e.updatedAt,
+      source: {
+        sourceId: e.sourceId,
+        sourceType: e.sourceType,
+        sourceLabel: e.sourceLabel,
+      },
+      evidence: (evidenceByEdge.get(e.id) ?? []).map((ev) => ({
+        id: ev.id,
+        evidenceType: ev.evidenceType,
+        sourceId: ev.sourceId,
+        sourceLabel: ev.sourceLabel,
+        confidence: ev.confidence,
+        recordedBy: ev.recordedBy,
+        recordedAt: ev.recordedAt,
+        payload: ev.payload,
+      })),
+    }));
+
+    const payload = {
+      generatedAt,
+      origin: {
+        id: origin.id,
+        canonicalId: origin.canonicalId,
+        domain: origin.domain,
+        entityType: origin.entityType,
+        name: origin.name,
+      },
+      depth,
+      truncated,
+      distances: Object.fromEntries(distances),
+      nodes: enrichedNodes,
+      edges: enrichedEdges,
+      stats: {
+        nodeCount: enrichedNodes.length,
+        edgeCount: enrichedEdges.length,
+        evidenceCount: evidenceRows.length,
+        maxDistance: Math.max(0, ...distances.values()),
+      },
+    };
+
+    if (format === "json") {
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+      return res.status(200).send(JSON.stringify(payload, null, 2));
+    }
+
+    // CSV: header block + NODES / EDGES / EVIDENCE sections so an analyst can
+    // open the file in a spreadsheet and still see provenance side-by-side.
+    const csvEscape = (v: unknown): string => {
+      if (v === null || v === undefined) return "";
+      const s = Array.isArray(v)
+        ? v.join("|")
+        : typeof v === "object"
+          ? JSON.stringify(v)
+          : String(v);
+      if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+      return s;
+    };
+    const lines: string[] = [];
+    lines.push(`# Constellation trace export`);
+    lines.push(`# generated_at,${csvEscape(payload.generatedAt)}`);
+    lines.push(`# origin_id,${csvEscape(payload.origin.id)}`);
+    lines.push(`# origin_name,${csvEscape(payload.origin.name)}`);
+    lines.push(`# origin_domain,${csvEscape(payload.origin.domain)}`);
+    lines.push(`# depth,${payload.depth}`);
+    lines.push(`# truncated,${payload.truncated}`);
+    lines.push(`# node_count,${payload.stats.nodeCount}`);
+    lines.push(`# edge_count,${payload.stats.edgeCount}`);
+    lines.push(`# evidence_count,${payload.stats.evidenceCount}`);
+    lines.push("");
+    lines.push("# NODES");
+    lines.push(
+      [
+        "id",
+        "canonical_id",
+        "entity_type",
+        "name",
+        "domain",
+        "hop_distance",
+        "confidence",
+        "sensitivity_tier",
+        "is_active",
+        "freshness",
+        "labels",
+        "description",
+        "provenance_source_id",
+        "provenance_source_type",
+        "provenance_source_label",
+        "last_updated_at",
+        "linked_event_ids",
+      ].join(","),
+    );
+    for (const n of enrichedNodes) {
+      lines.push(
+        [
+          n.id,
+          n.canonicalId,
+          n.entityType,
+          n.name,
+          n.domain,
+          n.distance,
+          n.confidence,
+          n.sensitivityTier,
+          n.isActive,
+          n.freshness,
+          n.labels,
+          n.description,
+          n.provenance.sourceId,
+          n.provenance.sourceType,
+          n.provenance.sourceLabel,
+          n.provenance.lastUpdatedAt,
+          n.linkedEvents.all,
+        ]
+          .map(csvEscape)
+          .join(","),
+      );
+    }
+    lines.push("");
+    lines.push("# EDGES");
+    lines.push(
+      [
+        "id",
+        "from_node_id",
+        "to_node_id",
+        "relationship_type",
+        "confidence",
+        "active",
+        "created_at",
+        "updated_at",
+        "source_id",
+        "source_type",
+        "source_label",
+        "evidence_count",
+      ].join(","),
+    );
+    for (const e of enrichedEdges) {
+      lines.push(
+        [
+          e.id,
+          e.fromNodeId,
+          e.toNodeId,
+          e.relationshipType,
+          e.confidence,
+          e.active,
+          e.createdAt,
+          e.updatedAt,
+          e.source.sourceId,
+          e.source.sourceType,
+          e.source.sourceLabel,
+          e.evidence.length,
+        ]
+          .map(csvEscape)
+          .join(","),
+      );
+    }
+    lines.push("");
+    lines.push("# EVIDENCE");
+    lines.push(
+      [
+        "edge_id",
+        "evidence_id",
+        "evidence_type",
+        "source_id",
+        "source_label",
+        "confidence",
+        "recorded_by",
+        "recorded_at",
+        "payload",
+      ].join(","),
+    );
+    for (const e of enrichedEdges) {
+      for (const ev of e.evidence) {
+        lines.push(
+          [
+            e.id,
+            ev.id,
+            ev.evidenceType,
+            ev.sourceId,
+            ev.sourceLabel,
+            ev.confidence,
+            ev.recordedBy,
+            ev.recordedAt,
+            ev.payload,
+          ]
+            .map(csvEscape)
+            .join(","),
+        );
+      }
+    }
+
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    return res.status(200).send(lines.join("\n"));
+  } catch (err) {
+    return handleRouteError(res, err, "GET /graph/entities/:id/subgraph/export");
   }
 });
 
