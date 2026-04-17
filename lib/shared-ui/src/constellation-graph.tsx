@@ -84,6 +84,15 @@ const DOMAIN_COLORS: Record<string, string> = {
   platform: "#94a3b8",
 };
 
+/** Hop-distance ring colors used during a multi-hop trace. Index = hops from origin. */
+const DISTANCE_COLORS: string[] = [
+  "#ffffff", // 0 — origin
+  "#22d3ee", // 1 hop
+  "#a855f7", // 2 hops
+  "#f59e0b", // 3 hops
+  "#ef4444", // 4+ hops
+];
+
 const TYPE_GLYPH: Record<string, string> = {
   person: "◉",
   organization: "⬡",
@@ -344,6 +353,14 @@ export function ConstellationGraph({
   const [expanding, setExpanding] = useState<string | null>(null);
   const [expandError, setExpandError] = useState<string | null>(null);
 
+  // Multi-hop trace state. `traceOriginId` anchors the distance scale visible
+  // on the canvas; `traceDistances` maps node id -> shortest hop count from
+  // that origin. `traceDepth` is the user's chosen radius for the next trace.
+  const [traceDepth, setTraceDepth] = useState(2);
+  const [traceOriginId, setTraceOriginId] = useState<string | null>(null);
+  const [traceDistances, setTraceDistances] = useState<Record<string, number>>({});
+  const [traceTruncated, setTraceTruncated] = useState(false);
+
   // Reset operator expansions whenever the host graph changes (new domain or
   // refreshed payload) so fragments from a previous view never leak into the
   // next one.
@@ -355,6 +372,9 @@ export function ConstellationGraph({
     setExpanding(null);
     setExpandError(null);
     setSelected(null);
+    setTraceOriginId(null);
+    setTraceDistances({});
+    setTraceTruncated(false);
   }, [graphKey]);
 
   // Compute the cutoff time for the freshness window filter
@@ -514,6 +534,67 @@ export function ConstellationGraph({
         alphaRef.current = 1;
       } catch (err) {
         setExpandError((err as Error)?.message ?? "Failed to expand neighbors");
+      } finally {
+        setExpanding((cur) => (cur === node.id ? null : cur));
+      }
+    },
+    [expanding],
+  );
+
+  const tracePath = useCallback(
+    async (node: ConstellationGraphNode, depth: number) => {
+      if (!node?.id || expanding === node.id) return;
+      setExpanding(node.id);
+      setExpandError(null);
+      try {
+        const res = await apiFetch<
+          | {
+              data?: {
+                origin: ConstellationGraphNode;
+                depth: number;
+                truncated: boolean;
+                distances: Record<string, number>;
+                nodes: (ConstellationGraphNode & { distance?: number | null })[];
+                edges: ConstellationGraphEdge[];
+              };
+            }
+          | {
+              origin: ConstellationGraphNode;
+              depth: number;
+              truncated: boolean;
+              distances: Record<string, number>;
+              nodes: (ConstellationGraphNode & { distance?: number | null })[];
+              edges: ConstellationGraphEdge[];
+            }
+        >(
+          `/graph/entities/${encodeURIComponent(node.id)}/subgraph?depth=${depth}&maxNodes=75`,
+        );
+        const payload =
+          (res as { data?: { origin: ConstellationGraphNode; depth: number; truncated: boolean; distances: Record<string, number>; nodes: ConstellationGraphNode[]; edges: ConstellationGraphEdge[] } }).data ??
+          (res as { origin: ConstellationGraphNode; depth: number; truncated: boolean; distances: Record<string, number>; nodes: ConstellationGraphNode[]; edges: ConstellationGraphEdge[] });
+        if (!payload?.origin) throw new Error("Empty response");
+        setExpandedNodes((prev) => {
+          const next = { ...prev };
+          for (const n of payload.nodes ?? []) next[n.id] = n;
+          return next;
+        });
+        setExpandedEdges((prev) => {
+          const next = { ...prev };
+          for (const e of payload.edges ?? []) next[e.id] = e;
+          return next;
+        });
+        setExpandedIds((prev) => {
+          const next = new Set(prev);
+          for (const n of payload.nodes ?? []) next.add(n.id);
+          return next;
+        });
+        setTraceOriginId(payload.origin.id);
+        setTraceDistances(payload.distances ?? {});
+        setTraceTruncated(!!payload.truncated);
+        setSelected((prev) => (prev?.id === payload.origin.id ? payload.origin : prev));
+        alphaRef.current = 1;
+      } catch (err) {
+        setExpandError((err as Error)?.message ?? "Failed to trace path");
       } finally {
         setExpanding((cur) => (cur === node.id ? null : cur));
       }
@@ -920,6 +1001,19 @@ export function ConstellationGraph({
                       strokeWidth={1.5}
                     />
                   )}
+                  {/* Distance ring: when a multi-hop trace is active, draw a
+                      thin halo around each node colored by hop count so the
+                      operator can see how far each entity sits from the
+                      trace origin at a glance. */}
+                  {traceOriginId && traceDistances[n.id] !== undefined && (
+                    <circle
+                      r={r + 3}
+                      fill="none"
+                      stroke={DISTANCE_COLORS[Math.min(traceDistances[n.id], DISTANCE_COLORS.length - 1)]}
+                      strokeWidth={n.id === traceOriginId ? 2.5 : 1.5}
+                      strokeOpacity={0.85}
+                    />
+                  )}
                   <circle
                     r={r}
                     fill={isExternal ? "#1e293b" : color}
@@ -928,6 +1022,19 @@ export function ConstellationGraph({
                     strokeWidth={isExternal ? 1.5 : 0}
                     strokeDasharray={isExternal ? "3 2" : undefined}
                   />
+                  {traceOriginId && traceDistances[n.id] !== undefined && n.id !== traceOriginId && (
+                    <text
+                      x={r + 4}
+                      y={-r}
+                      textAnchor="start"
+                      fill={DISTANCE_COLORS[Math.min(traceDistances[n.id], DISTANCE_COLORS.length - 1)]}
+                      fontSize={9}
+                      fontWeight={700}
+                      style={{ pointerEvents: "none" }}
+                    >
+                      {traceDistances[n.id]}h
+                    </text>
+                  )}
                   <text
                     textAnchor="middle"
                     dominantBaseline="central"
@@ -982,6 +1089,27 @@ export function ConstellationGraph({
             </svg>
             <span style={{ fontSize: 10, color: "#cbd5e1" }}>Cross-domain</span>
           </div>
+          {traceOriginId && (
+            <>
+              <div style={{ height: 1, background: "rgba(255,255,255,0.08)", margin: "3px 0" }} />
+              <div style={{ fontSize: 9, color: "#94a3b8", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                Hops from origin
+              </div>
+              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                {DISTANCE_COLORS.slice(0, 5).map((c, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 3 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: "50%", border: `1.5px solid ${c}` }} />
+                    <span style={{ fontSize: 9, color: "#cbd5e1" }}>{i === 4 ? "4+" : i}</span>
+                  </div>
+                ))}
+              </div>
+              {traceTruncated && (
+                <div style={{ fontSize: 9, color: "#fbbf24" }} data-testid="constellation-trace-truncated">
+                  Result truncated by node/edge cap
+                </div>
+              )}
+            </>
+          )}
         </div>
 
         {/* Stats */}
@@ -1065,6 +1193,49 @@ export function ConstellationGraph({
                   conf {Math.round((selected.confidence ?? 0) * 100)}%
                 </span>
               )}
+              <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <label style={{ fontSize: 10, color: "#94a3b8" }} htmlFor="constellation-trace-depth">
+                  hops
+                </label>
+                <select
+                  id="constellation-trace-depth"
+                  value={traceDepth}
+                  onChange={(e) => setTraceDepth(Number(e.target.value))}
+                  style={{
+                    fontSize: 11,
+                    padding: "3px 6px",
+                    borderRadius: 4,
+                    border: `1px solid ${accentColor}40`,
+                    background: "rgba(10,15,28,0.7)",
+                    color: "#e8edf8",
+                  }}
+                  data-testid="constellation-trace-depth"
+                >
+                  <option value={1}>1</option>
+                  <option value={2}>2</option>
+                  <option value={3}>3</option>
+                  <option value={4}>4</option>
+                </select>
+                <button
+                  onClick={() => tracePath(selected, traceDepth)}
+                  disabled={expanding === selected.id}
+                  style={{
+                    fontSize: 11,
+                    padding: "5px 10px",
+                    borderRadius: 4,
+                    border: `1px solid ${accentColor}60`,
+                    background: expanding === selected.id ? "rgba(255,255,255,0.04)" : `${accentColor}28`,
+                    color: expanding === selected.id ? "#64748b" : accentColor,
+                    cursor: expanding === selected.id ? "default" : "pointer",
+                    fontWeight: 600,
+                    letterSpacing: "0.04em",
+                  }}
+                  data-testid="constellation-trace-path"
+                  title={`Walk up to ${traceDepth} hops out from this node`}
+                >
+                  {expanding === selected.id ? "Tracing…" : `↳ Trace ${traceDepth} hops`}
+                </button>
+              </div>
               <button
                 onClick={() => expandNeighbors(selected)}
                 disabled={expanding === selected.id}
