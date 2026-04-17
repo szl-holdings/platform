@@ -10,6 +10,7 @@ process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 const vitePort = Number(process.env.VITE_PORT) || 3101;
 const basePath = process.env.BASE_PATH || "/carlota-jo/";
 
+// Shared proxy port — hardcoded; do not use a PROXY_PORT env var to override this.
 const SHARED_PROXY_PORT = 9090;
 
 function sharedProxyPlugin() {

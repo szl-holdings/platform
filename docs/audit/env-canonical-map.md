@@ -72,9 +72,10 @@
 | `PUBLIC_APP_URL` | Required | Ops | Set in `.replit` `[userenv.production]` as `https://szlholdings.replit.app` | Used for link generation, OAuth redirects |
 | `BASE_URL` | Optional | Ops | Not set; derived from `PUBLIC_APP_URL` at runtime | Canonical root URL for internal link generation |
 | `SZL_API_BASE` | Optional | Ops | Not set; defaults to relative URL in dev | Base URL for API calls from frontend artifacts |
-| `PROXY_PORT` | Optional | Dev | Not set | Internal proxy port override; rarely needed |
 | `VITE_APP_URL` | Optional | Dev | Not set; dev uses auto-detected base URL | Frontend base URL override |
 | `VITE_PORT` | Dev-only | Dev | Not set | Vite dev server port override |
+
+> **Shared proxy port:** All frontend artifacts bind a shared HTTP proxy on port **9090** via `SHARED_PROXY_PORT = 9090` hardcoded in each `vite.config.ts`. This is a compile-time constant, not an environment variable. `PROXY_PORT` was a previous env-based override for this value and has been removed.
 
 ---
 

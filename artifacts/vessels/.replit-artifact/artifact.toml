@@ -27,5 +27,6 @@ kind = "web"
   to = "/index.html"
 
   [services.env]
+  # Shared proxy port (9090) is hardcoded in vite.config.ts; PROXY_PORT env var is not used.
   VITE_PORT = "6899"
   BASE_PATH = "/vessels/"

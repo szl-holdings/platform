@@ -11,6 +11,7 @@ process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 const port = Number(process.env.VITE_PORT) || 5201;
 const basePath = process.env.BASE_PATH || "/pulse/";
 
+// Shared proxy port — hardcoded; do not use a PROXY_PORT env var to override this.
 const SHARED_PROXY_PORT = 9090;
 
 function sharedProxyPlugin() {
