@@ -64,6 +64,20 @@ export const publicSubmitLimiter = rateLimit({
   handler: makeRateLimitHandler("Too many submissions from this IP. Please try again in an hour."),
 }) as unknown as RequestHandler;
 
+// Looser bucket for public file-upload endpoints. A single deal submission
+// can attach up to 10 files and a founder may iterate (replace, retry, add)
+// before they actually submit, so the 5/hour publicSubmitLimiter would lock
+// them out. This limiter targets ~6 full submissions per hour worth of
+// uploads and is paired with the strict publicSubmitLimiter on the final
+// submit endpoint, which still gates how many deals can be created.
+export const publicUploadLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: isProduction ? 60 : 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: makeRateLimitHandler("Too many file uploads from this IP. Please try again in an hour."),
+}) as unknown as RequestHandler;
+
 export const gdprLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: isProduction ? 3 : 30,

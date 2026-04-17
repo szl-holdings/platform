@@ -1,3 +1,11 @@
+export type DealAttachmentRef = {
+  kind: "deck" | "data-room";
+  name: string;
+  size: number;
+  contentType: string;
+  downloadUrl: string;
+};
+
 export type SubmittedDeal = {
   id: string;
   company: string;
@@ -13,9 +21,23 @@ export type SubmittedDeal = {
   summary: string;
   risks: string[];
   strengths: string[];
+  deckUrl?: string | null;
+  attachments?: DealAttachmentRef[];
   date: string;
   source: "inbound";
 };
+
+export type AttachmentUpload = {
+  kind: "deck" | "data-room";
+  name: string;
+  size: number;
+  contentType: string;
+  objectPath: string;
+};
+
+const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
+const SUBMIT_ENDPOINT = `${API_BASE}/api/public/fund-inbound-deals`;
+const LIST_ENDPOINT = `${API_BASE}/api/fund-inbound-deals`;
 
 export type SubmitDealPayload = {
   company: string;
@@ -38,11 +60,34 @@ export type SubmitDealPayload = {
   status: SubmittedDeal["status"];
   strengths: string[];
   risks: string[];
+  attachments?: AttachmentUpload[];
 };
 
-const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
-const SUBMIT_ENDPOINT = `${API_BASE}/api/public/fund-inbound-deals`;
-const LIST_ENDPOINT = `${API_BASE}/api/fund-inbound-deals`;
+export async function uploadAttachment(file: File, kind: "deck" | "data-room"): Promise<AttachmentUpload> {
+  // Server-mediated upload: the API enforces the 25MB ceiling and MIME
+  // allowlist before writing anything to object storage.
+  const form = new FormData();
+  form.append("file", file);
+  form.append("kind", kind);
+  const res = await fetch(`${API_BASE}/api/public/fund-inbound-deals/upload`, {
+    method: "POST",
+    headers: { "x-requested-with": "XMLHttpRequest" },
+    body: form,
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => res.statusText);
+    throw new Error(`Upload failed (${res.status}): ${text}`);
+  }
+  const json = await res.json() as { data?: { objectPath: string; name: string; size: number; contentType: string } } | { objectPath: string; name: string; size: number; contentType: string };
+  const data = "data" in json && json.data ? json.data : (json as { objectPath: string; name: string; size: number; contentType: string });
+  return {
+    kind,
+    name: data.name,
+    size: data.size,
+    contentType: data.contentType,
+    objectPath: data.objectPath,
+  };
+}
 
 let cache: SubmittedDeal[] = [];
 const listeners = new Set<() => void>();
@@ -61,9 +106,22 @@ export async function loadSubmittedDeals(): Promise<SubmittedDeal[]> {
       return cache;
     }
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json = await res.json() as { data?: SubmittedDeal[] } | SubmittedDeal[];
+    type RawAttachment = { kind: "deck" | "data-room"; name: string; size: number; contentType: string; downloadPath?: string; downloadUrl?: string };
+    type RawDeal = Omit<SubmittedDeal, "attachments"> & { attachments?: RawAttachment[] };
+    const json = await res.json() as { data?: RawDeal[] } | RawDeal[];
     const list = Array.isArray(json) ? json : (json.data ?? []);
-    cache = list;
+    // Prepend the API base to attachment download paths so analyst links work
+    // even when the frontend and API are served from different origins.
+    cache = list.map(d => ({
+      ...d,
+      attachments: (d.attachments ?? []).map(a => ({
+        kind: a.kind,
+        name: a.name,
+        size: a.size,
+        contentType: a.contentType,
+        downloadUrl: a.downloadPath ? `${API_BASE}${a.downloadPath}` : (a.downloadUrl ?? ""),
+      })),
+    })) as SubmittedDeal[];
     listeners.forEach(fn => fn());
     return cache;
   } catch {

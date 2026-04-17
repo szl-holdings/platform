@@ -53,6 +53,7 @@ const EXEMPT_PATHS = new Set([
   "/api/telemetry/events",
   "/api/analytics/event",
   "/api/public/fund-inbound-deals",
+  "/api/public/fund-inbound-deals/upload",
 ]);
 
 const GRAPHQL_PATHS = ["/api/graphql", "/graphql"];

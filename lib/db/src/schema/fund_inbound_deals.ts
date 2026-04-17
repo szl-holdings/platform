@@ -2,6 +2,14 @@ import { pgTable, text, serial, timestamp, integer, jsonb, index } from "drizzle
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
+export type DealAttachment = {
+  kind: "deck" | "data-room";
+  name: string;
+  size: number;
+  contentType: string;
+  objectPath: string;
+};
+
 export const fundInboundDealsTable = pgTable("fund_inbound_deals", {
   id: serial("id").primaryKey(),
   pipelineId: text("pipeline_id").notNull().unique(),
@@ -30,6 +38,7 @@ export const fundInboundDealsTable = pgTable("fund_inbound_deals", {
   status: text("status", { enum: ["screening", "active", "passed", "invested"] }).notNull().default("screening"),
   strengths: jsonb("strengths").$type<string[]>().notNull().default([]),
   risks: jsonb("risks").$type<string[]>().notNull().default([]),
+  attachments: jsonb("attachments").$type<DealAttachment[]>().notNull().default([]),
   source: text("source").notNull().default("inbound"),
   submittedAt: timestamp("submitted_at").notNull().defaultNow(),
 }, (t) => [

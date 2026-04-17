@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { getSubmittedDeals, loadSubmittedDeals, subscribeSubmittedDeals, type SubmittedDeal } from "@/lib/dealSubmissions";
+import { getSubmittedDeals, loadSubmittedDeals, subscribeSubmittedDeals, type SubmittedDeal, type DealAttachmentRef } from "@/lib/dealSubmissions";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import {
   Brain, ArrowLeft, Star,
   ChevronRight, Upload, AlertCircle, CheckCircle2,
-  Zap, FileText, Target,
+  Zap, FileText, Target, Paperclip, Download, ExternalLink,
 } from "lucide-react";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { SiteNav } from "@/components/SiteNav";
@@ -27,7 +27,15 @@ type Deal = {
   risks: string[];
   strengths: string[];
   date: string;
+  deckUrl?: string | null;
+  attachments?: DealAttachmentRef[];
 };
+
+function formatBytes(n: number): string {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 const DEALS: Deal[] = [
   {
@@ -141,6 +149,8 @@ function toDeal(s: SubmittedDeal): Deal {
     risks: s.risks.length ? s.risks : ["Awaiting analyst review"],
     strengths: s.strengths.length ? s.strengths : ["Inbound submission via founder portal"],
     date: s.date,
+    deckUrl: s.deckUrl,
+    attachments: s.attachments,
   };
 }
 
@@ -283,6 +293,52 @@ export default function DealScoringPage() {
                     <ScoreGauge score={deal.scores.financials} label="Financials" />
                   </div>
                 </div>
+
+                {(deal.attachments && deal.attachments.length > 0) || deal.deckUrl ? (
+                  <div className="rounded-xl border border-white/[0.08] bg-black/20 p-4 mb-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Paperclip className="h-3.5 w-3.5 text-[#d4a054]" />
+                      <span className="text-xs font-semibold text-white">Founder Materials</span>
+                      <span className="text-[10px] text-white/35">
+                        {(deal.attachments?.length ?? 0)} file{(deal.attachments?.length ?? 0) === 1 ? "" : "s"}
+                        {deal.deckUrl ? " · 1 link" : ""}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {deal.deckUrl ? (
+                        <a
+                          href={deal.deckUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-between rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-[11px] text-white/80 hover:bg-white/[0.05]"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <ExternalLink className="h-3 w-3 text-[#4a90b8] flex-shrink-0" />
+                            <span className="truncate">Founder-supplied deck link</span>
+                          </div>
+                        </a>
+                      ) : null}
+                      {(deal.attachments ?? []).map((a, i) => (
+                        <a
+                          key={`${a.downloadUrl}-${i}`}
+                          href={a.downloadUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-between rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-[11px] text-white/80 hover:bg-white/[0.05]"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <FileText className={`h-3 w-3 flex-shrink-0 ${a.kind === "deck" ? "text-[#d4a054]" : "text-[#4a90b8]"}`} />
+                            <span className="truncate">{a.name}</span>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span className="text-[10px] text-white/35">{formatBytes(a.size)}</span>
+                            <Download className="h-3 w-3 text-white/40" />
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="rounded-xl border border-[#6aaa72]/20 bg-[#6aaa72]/[0.04] p-4">

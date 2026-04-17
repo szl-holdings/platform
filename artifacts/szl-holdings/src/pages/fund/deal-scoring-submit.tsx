@@ -1,15 +1,38 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { m } from "framer-motion";
 import { Link } from "wouter";
 import {
   ArrowLeft, ChevronRight, Upload, Send, Brain, CheckCircle2,
   AlertCircle, Building2, User, Target, Sparkles, TrendingUp,
-  GraduationCap, Briefcase, Award, FileText,
+  GraduationCap, Briefcase, Award, FileText, Loader2, X,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { submitDeal } from "@/lib/dealSubmissions";
+import { submitDeal, uploadAttachment, type AttachmentUpload } from "@/lib/dealSubmissions";
+
+const ACCEPTED_TYPES = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "text/plain",
+  "text/csv",
+  "application/zip",
+  "application/x-zip-compressed",
+];
+const ACCEPT_ATTR = ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip";
+const MAX_FILE_BYTES = 25 * 1024 * 1024;
+const MAX_ATTACHMENTS = 10;
+
+function formatBytes(n: number): string {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 type SubmissionForm = {
   company: string;
@@ -142,6 +165,75 @@ export default function DealScoringSubmitPage() {
   const [pipelineId, setPipelineId] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string>("");
+  const [deck, setDeck] = useState<AttachmentUpload | null>(null);
+  const [dataRoom, setDataRoom] = useState<AttachmentUpload[]>([]);
+  const [uploadingDeck, setUploadingDeck] = useState(false);
+  const [uploadingDataRoom, setUploadingDataRoom] = useState(false);
+  const [uploadError, setUploadError] = useState<string>("");
+  const deckInputRef = useRef<HTMLInputElement | null>(null);
+  const dataRoomInputRef = useRef<HTMLInputElement | null>(null);
+
+  async function handleDeckPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploadError("");
+    if (!ACCEPTED_TYPES.includes(file.type)) {
+      setUploadError(`"${file.name}" is not an accepted file type.`);
+      return;
+    }
+    if (file.size > MAX_FILE_BYTES) {
+      setUploadError(`"${file.name}" exceeds the 25 MB per-file limit.`);
+      return;
+    }
+    setUploadingDeck(true);
+    try {
+      const uploaded = await uploadAttachment(file, "deck");
+      setDeck(uploaded);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Deck upload failed.");
+    } finally {
+      setUploadingDeck(false);
+    }
+  }
+
+  async function handleDataRoomPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    if (!files.length) return;
+    setUploadError("");
+    const remaining = MAX_ATTACHMENTS - dataRoom.length - (deck ? 1 : 0);
+    if (remaining <= 0) {
+      setUploadError(`You can attach at most ${MAX_ATTACHMENTS} files in total.`);
+      return;
+    }
+    const accepted: File[] = [];
+    for (const f of files.slice(0, remaining)) {
+      if (!ACCEPTED_TYPES.includes(f.type)) {
+        setUploadError(`"${f.name}" is not an accepted file type.`);
+        continue;
+      }
+      if (f.size > MAX_FILE_BYTES) {
+        setUploadError(`"${f.name}" exceeds the 25 MB per-file limit.`);
+        continue;
+      }
+      accepted.push(f);
+    }
+    if (!accepted.length) return;
+    setUploadingDataRoom(true);
+    try {
+      const results: AttachmentUpload[] = [];
+      for (const f of accepted) {
+        const u = await uploadAttachment(f, "data-room");
+        results.push(u);
+      }
+      setDataRoom(prev => [...prev, ...results]);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "One or more files failed to upload.");
+    } finally {
+      setUploadingDataRoom(false);
+    }
+  }
 
   const triage = useMemo(() => scoreTriage(form), [form]);
   const founder = useMemo(() => scoreFounder(form), [form]);
@@ -183,6 +275,10 @@ export default function DealScoringSubmitPage() {
         founderPriorExits: form.founderPriorExits || undefined,
         summary: form.summary,
         deckUrl: form.deckUrl || undefined,
+        attachments: [
+          ...(deck ? [deck] : []),
+          ...dataRoom,
+        ],
         convictionScore: compositeScore,
         scores: {
           team: teamScore,
@@ -233,7 +329,14 @@ export default function DealScoringSubmitPage() {
           </div>
 
           {submitted ? (
-            <SuccessPanel form={form} composite={compositeScore} recommendation={recommendation} pipelineId={pipelineId} onReset={() => { setForm(EMPTY); setSubmitted(false); setPipelineId(""); setSubmitError(""); }} />
+            <SuccessPanel
+              form={form}
+              composite={compositeScore}
+              recommendation={recommendation}
+              pipelineId={pipelineId}
+              attachmentCount={(deck ? 1 : 0) + dataRoom.length}
+              onReset={() => { setForm(EMPTY); setSubmitted(false); setPipelineId(""); setSubmitError(""); setDeck(null); setDataRoom([]); setUploadError(""); }}
+            />
           ) : (
             <div className="grid grid-cols-12 gap-5 mt-8">
               <form onSubmit={handleSubmit} className="col-span-7 space-y-5">
@@ -274,22 +377,105 @@ export default function DealScoringSubmitPage() {
                     placeholder="What you build, who you sell to, what's working, why now. Aim for 2–4 sentences."
                     multiline
                   />
-                  <Field label="Deck URL" value={form.deckUrl} onChange={v => update("deckUrl", v)} placeholder="https://docsend.com/..." />
+                  <Field label="Deck URL (optional, e.g. DocSend)" value={form.deckUrl} onChange={v => update("deckUrl", v)} placeholder="https://docsend.com/..." />
+
+                  <input
+                    ref={deckInputRef}
+                    type="file"
+                    accept={ACCEPT_ATTR}
+                    className="hidden"
+                    onChange={handleDeckPick}
+                  />
+                  <input
+                    ref={dataRoomInputRef}
+                    type="file"
+                    accept={ACCEPT_ATTR}
+                    multiple
+                    className="hidden"
+                    onChange={handleDataRoomPick}
+                  />
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-xl border border-dashed border-white/[0.12] bg-black/20 p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] uppercase tracking-[0.1em] text-white/40">Pitch deck (PDF)</span>
+                        <button
+                          type="button"
+                          onClick={() => deckInputRef.current?.click()}
+                          disabled={uploadingDeck}
+                          className="flex items-center gap-1.5 rounded-lg border border-white/[0.1] bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold text-white/70 hover:bg-white/[0.08] disabled:opacity-50"
+                        >
+                          {uploadingDeck ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+                          {deck ? "Replace" : "Upload"}
+                        </button>
+                      </div>
+                      {deck ? (
+                        <div className="flex items-center justify-between rounded-lg bg-black/30 px-2.5 py-1.5">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <FileText className="h-3 w-3 text-[#d4a054] flex-shrink-0" />
+                            <span className="truncate text-[11px] text-white/80">{deck.name}</span>
+                            <span className="text-[10px] text-white/35 flex-shrink-0">{formatBytes(deck.size)}</span>
+                          </div>
+                          <button type="button" onClick={() => setDeck(null)} className="text-white/40 hover:text-[#c45a4a]">
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <p className="text-[10px] text-white/35">PDF, PPT, or Keynote export. 25 MB max.</p>
+                      )}
+                    </div>
+
+                    <div className="rounded-xl border border-dashed border-white/[0.12] bg-black/20 p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] uppercase tracking-[0.1em] text-white/40">Data room files</span>
+                        <button
+                          type="button"
+                          onClick={() => dataRoomInputRef.current?.click()}
+                          disabled={uploadingDataRoom || dataRoom.length + (deck ? 1 : 0) >= MAX_ATTACHMENTS}
+                          className="flex items-center gap-1.5 rounded-lg border border-white/[0.1] bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold text-white/70 hover:bg-white/[0.08] disabled:opacity-50"
+                        >
+                          {uploadingDataRoom ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+                          Add files
+                        </button>
+                      </div>
+                      {dataRoom.length === 0 ? (
+                        <p className="text-[10px] text-white/35">Financials, cap table, customer references. 25 MB / file.</p>
+                      ) : (
+                        <div className="space-y-1">
+                          {dataRoom.map((f, i) => (
+                            <div key={`${f.objectPath}-${i}`} className="flex items-center justify-between rounded-lg bg-black/30 px-2.5 py-1.5">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <FileText className="h-3 w-3 text-[#4a90b8] flex-shrink-0" />
+                                <span className="truncate text-[11px] text-white/80">{f.name}</span>
+                                <span className="text-[10px] text-white/35 flex-shrink-0">{formatBytes(f.size)}</span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setDataRoom(prev => prev.filter((_, idx) => idx !== i))}
+                                className="text-white/40 hover:text-[#c45a4a]"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {uploadError ? (
+                    <div className="rounded-xl border border-[#c45a4a]/30 bg-[#c45a4a]/[0.08] px-3 py-1.5 text-[11px] text-[#c45a4a]">
+                      {uploadError}
+                    </div>
+                  ) : null}
                 </Section>
 
                 <div className="flex items-center gap-3">
                   <button
                     type="submit"
-                    disabled={!canSubmit || submitting}
+                    disabled={!canSubmit || submitting || uploadingDeck || uploadingDataRoom}
                     className="flex items-center gap-2 rounded-xl bg-[#d4a054] px-5 py-2.5 text-xs font-semibold text-black hover:bg-[#d4a054]/90 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     <Send className="h-3.5 w-3.5" /> {submitting ? "Submitting…" : "Submit to SZL Pipeline"}
-                  </button>
-                  <button
-                    type="button"
-                    className="flex items-center gap-2 rounded-xl border border-white/[0.08] px-4 py-2.5 text-xs font-semibold text-white/60 hover:bg-white/[0.04]"
-                  >
-                    <Upload className="h-3.5 w-3.5" /> Attach Data Room
                   </button>
                   <span className="text-[10px] text-white/35">All submissions trigger autonomous triage within 60 seconds.</span>
                 </div>
@@ -449,7 +635,7 @@ function ComparablesPanel({ sector, comps }: { sector: string; comps: typeof DEF
   );
 }
 
-function SuccessPanel({ form, composite, recommendation, pipelineId, onReset }: { form: SubmissionForm; composite: number; recommendation: { label: string; color: string }; pipelineId: string; onReset: () => void }) {
+function SuccessPanel({ form, composite, recommendation, pipelineId, attachmentCount, onReset }: { form: SubmissionForm; composite: number; recommendation: { label: string; color: string }; pipelineId: string; attachmentCount: number; onReset: () => void }) {
   return (
     <m.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mt-8 rounded-2xl border border-[#6aaa72]/25 bg-[#6aaa72]/[0.05] p-8">
       <div className="flex items-center gap-3 mb-4">
@@ -459,6 +645,9 @@ function SuccessPanel({ form, composite, recommendation, pipelineId, onReset }: 
         <div>
           <h2 className="text-lg font-semibold text-white">Submission received — {form.company}</h2>
           <p className="text-xs text-white/50">A confirmation has been sent to {form.founderEmail}. Your deal is now in the pipeline.</p>
+          {attachmentCount > 0 ? (
+            <p className="mt-1 text-[11px] text-white/40">{attachmentCount} file{attachmentCount === 1 ? "" : "s"} attached and stored securely for analyst review.</p>
+          ) : null}
         </div>
       </div>
 
