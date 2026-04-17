@@ -80,7 +80,7 @@ export default function TeamPage() {
 
   const filtered = MEMBERS.filter((m) => {
     const s = search.toLowerCase();
-    if (s && !m.name.toLowerCase().includes(s) && !m.email.toLowerCase().includes(s)) return false;
+    if (s && !(m.name ?? "").toLowerCase().includes(s) && !(m.email ?? "").toLowerCase().includes(s)) return false;
     if (teamFilter !== "all" && m.team !== teamFilter) return false;
     return true;
   });

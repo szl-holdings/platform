@@ -1170,7 +1170,7 @@ router.get("/team", requireAnyAuth(), requireRole("super_admin", "admin", "ops",
       const lastSeenIso = u.lastLoginAt ? new Date(u.lastLoginAt).toISOString() : null;
       return {
         id: `u${u.id}`,
-        name: u.displayName,
+        name: u.displayName ?? u.email ?? "Unknown User",
         email: u.email ?? "",
         role: (u.platformRole ?? "operator").replace(/_/g, " "),
         team: u.team ?? "Unassigned",
