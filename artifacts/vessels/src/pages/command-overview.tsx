@@ -5,7 +5,8 @@ import { useAuth } from "@/contexts/auth-context";
 import {
   Ship, AlertTriangle, Clock, Wrench, TrendingUp, TrendingDown,
   ChevronRight, Activity, DollarSign, Fuel, CloudLightning, BarChart3,
-  CheckCircle2, XCircle, Minus, RefreshCw, EyeOff, ShieldAlert, Navigation
+  CheckCircle2, XCircle, Minus, RefreshCw, EyeOff, ShieldAlert, Navigation,
+  FileSignature, Users, Shield, Anchor
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { CommandModeSurface, type CommandModeSignal, useRealtimeChannel } from "@szl-holdings/shared-ui";
@@ -405,6 +406,8 @@ export default function CommandOverviewPage() {
       {activeTab === "ops" && <OperationsView {...viewProps} />}
       {activeTab === "commercial" && <CommercialView {...viewProps} />}
 
+      <CommercialAndCompliancePanels />
+
       <div className="mt-6">
         <CommandModeSurface
           title="Command Mode — Fleet Signals"
@@ -421,6 +424,127 @@ export default function CommandOverviewPage() {
           description="Vessels runs on the Lyte + Alloy core — AIS processing, anomaly detection, sanctions screening, and route exception modeling all powered by the same intelligence fabric."
           accentColor="#0ea5e9"
         />
+      </div>
+    </div>
+  );
+}
+
+function CommercialAndCompliancePanels() {
+  const commercial = [
+    {
+      label: "Open Charter Negotiations",
+      value: 1,
+      sub: "draft + negotiated fixtures",
+      href: "/charter-party",
+      icon: FileSignature,
+      tone: "text-sky-300",
+      ring: "border-sky-500/15",
+    },
+    {
+      label: "Demurrage Accruing",
+      value: "$38.8K",
+      sub: "across 2 ongoing/disputed cases",
+      href: "/demurrage",
+      icon: Clock,
+      tone: "text-amber-300",
+      ring: "border-amber-500/20",
+    },
+    {
+      label: "Fleet P&I Exposure",
+      value: "$900K",
+      sub: "2 open H&M / P&I claims",
+      href: "/insurance-panel",
+      icon: ShieldAlert,
+      tone: "text-orange-300",
+      ring: "border-orange-500/20",
+    },
+  ];
+
+  const compliance = [
+    {
+      label: "Expired STCW Certs",
+      value: 2,
+      sub: "Master + Chief Engineer",
+      href: "/crew-tracker",
+      icon: Users,
+      tone: "text-red-300",
+      ring: "border-red-500/20",
+    },
+    {
+      label: "Rotations Due Soon",
+      value: 1,
+      sub: "urgent — Chief Engineer",
+      href: "/crew-tracker",
+      icon: Anchor,
+      tone: "text-amber-300",
+      ring: "border-amber-500/20",
+    },
+    {
+      label: "High-Risk PSC Vessels",
+      value: 2,
+      sub: "detentions or ≥5 deficiencies (90d)",
+      href: "/psc-inspector",
+      icon: Shield,
+      tone: "text-orange-300",
+      ring: "border-orange-500/20",
+    },
+  ];
+
+  const Card = ({ item }: { item: typeof commercial[number] }) => {
+    const Icon = item.icon;
+    return (
+      <Link href={item.href}>
+        <div
+          className={cn(
+            "group rounded-xl px-4 py-3 flex items-center gap-3 cursor-pointer transition-all border",
+            item.ring,
+          )}
+          style={{ background: "rgba(10,22,40,0.65)" }}
+        >
+          <div
+            className="shrink-0 flex items-center justify-center"
+            style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(56,189,248,0.08)", border: "1px solid rgba(56,189,248,0.15)" }}
+          >
+            <Icon className="w-3.5 h-3.5 text-sky-300/80" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className={cn("text-lg font-bold font-display leading-none", item.tone)}>{item.value}</p>
+            <p className="text-[10px] text-sky-400/60 uppercase tracking-wider mt-1">{item.label}</p>
+            <p className="text-[10px] text-sky-400/40 mt-0.5 truncate">{item.sub}</p>
+          </div>
+          <ChevronRight className="w-3.5 h-3.5 text-sky-400/30 group-hover:text-sky-300 shrink-0 transition-colors" />
+        </div>
+      </Link>
+    );
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-6">
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider">Commercial Risk</h3>
+          <Link href="/charter-party">
+            <button className="text-[10px] text-sky-400/50 hover:text-sky-300 flex items-center gap-1 transition-colors">
+              Charter Desk <ChevronRight className="w-3 h-3" />
+            </button>
+          </Link>
+        </div>
+        <div className="space-y-2">
+          {commercial.map((c) => <Card key={c.label} item={c} />)}
+        </div>
+      </div>
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider">Crew &amp; Compliance</h3>
+          <Link href="/psc-inspector">
+            <button className="text-[10px] text-sky-400/50 hover:text-sky-300 flex items-center gap-1 transition-colors">
+              PSC Inspector <ChevronRight className="w-3 h-3" />
+            </button>
+          </Link>
+        </div>
+        <div className="space-y-2">
+          {compliance.map((c) => <Card key={c.label} item={c} />)}
+        </div>
       </div>
     </div>
   );
