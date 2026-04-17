@@ -1,6 +1,6 @@
 import type { IRouter } from "express";
 import { db } from "@szl-holdings/db";
-import { contactSubmissionsTable, leadStatusTable } from "@szl-holdings/db";
+import { contactSubmissionsTable, leadStatusTable, supportKnowledgeArticlesTable } from "@szl-holdings/db";
 import { eq, desc, sql } from "drizzle-orm";
 import { z } from "zod";
 import { validateBody } from "../../lib/validation.js";
@@ -16,6 +16,18 @@ const updateStatusSchema = z.object({
   notes: z.string().max(5000).optional(),
   notify: z.boolean().optional(),
 });
+
+const kbArticleSchema = z.object({
+  slug: z.string().min(1).max(200).regex(/^[a-z0-9-]+$/, "Slug must be lowercase alphanumeric with hyphens"),
+  title: z.string().min(1).max(300),
+  category: z.string().min(1).max(100),
+  summary: z.string().min(1).max(1000),
+  body: z.string().min(1).max(50000),
+  tags: z.array(z.string().max(50)).max(20).default([]),
+  isPublished: z.boolean().default(true),
+});
+
+const kbArticleUpdateSchema = kbArticleSchema.partial();
 
 const replySchema = z.object({
   subject: z.string().min(1).max(300),
@@ -289,6 +301,95 @@ export function register(router: IRouter): void {
     } catch (err) {
       logger.error({ err }, "[admin/support-queue] POST reply failed");
       sendError(res, "Failed to send reply", 500, "INTERNAL_ERROR");
+    }
+  });
+
+  router.get("/admin/kb-articles", async (_req, res) => {
+    try {
+      const articles = await db
+        .select()
+        .from(supportKnowledgeArticlesTable)
+        .orderBy(desc(supportKnowledgeArticlesTable.updatedAt));
+      const [{ total }] = await db
+        .select({ total: sql<number>`count(*)::int` })
+        .from(supportKnowledgeArticlesTable);
+      res.json({ articles, total });
+    } catch (err) {
+      logger.error({ err }, "[admin/kb-articles] GET failed");
+      sendError(res, "Failed to fetch KB articles", 500, "INTERNAL_ERROR");
+    }
+  });
+
+  router.post("/admin/kb-articles", validateBody(kbArticleSchema), async (req, res) => {
+    try {
+      const data = req.body as z.infer<typeof kbArticleSchema>;
+      const [article] = await db
+        .insert(supportKnowledgeArticlesTable)
+        .values(data)
+        .returning();
+      logger.info({ slug: article.slug }, "[admin/kb-articles] Article created");
+      res.status(201).json({ article });
+    } catch (err: unknown) {
+      const pgError = err as { code?: string };
+      if (pgError?.code === "23505") {
+        sendBadRequest(res, "An article with that slug already exists");
+        return;
+      }
+      logger.error({ err }, "[admin/kb-articles] POST failed");
+      sendError(res, "Failed to create KB article", 500, "INTERNAL_ERROR");
+    }
+  });
+
+  router.patch("/admin/kb-articles/:id", validateBody(kbArticleUpdateSchema), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) { sendBadRequest(res, "Invalid article ID"); return; }
+
+      const data = req.body as z.infer<typeof kbArticleUpdateSchema>;
+      if (Object.keys(data).length === 0) {
+        sendBadRequest(res, "No fields to update");
+        return;
+      }
+
+      const [article] = await db
+        .update(supportKnowledgeArticlesTable)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(supportKnowledgeArticlesTable.id, id))
+        .returning();
+
+      if (!article) { sendNotFound(res, "KB article"); return; }
+
+      logger.info({ id, slug: article.slug }, "[admin/kb-articles] Article updated");
+      res.json({ article });
+    } catch (err: unknown) {
+      const pgError = err as { code?: string };
+      if (pgError?.code === "23505") {
+        sendBadRequest(res, "An article with that slug already exists");
+        return;
+      }
+      logger.error({ err }, "[admin/kb-articles] PATCH failed");
+      sendError(res, "Failed to update KB article", 500, "INTERNAL_ERROR");
+    }
+  });
+
+  router.delete("/admin/kb-articles/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) { sendBadRequest(res, "Invalid article ID"); return; }
+
+      const [article] = await db
+        .update(supportKnowledgeArticlesTable)
+        .set({ isPublished: false, updatedAt: new Date() })
+        .where(eq(supportKnowledgeArticlesTable.id, id))
+        .returning();
+
+      if (!article) { sendNotFound(res, "KB article"); return; }
+
+      logger.info({ id, slug: article.slug }, "[admin/kb-articles] Article archived");
+      res.json({ success: true, article });
+    } catch (err) {
+      logger.error({ err }, "[admin/kb-articles] DELETE failed");
+      sendError(res, "Failed to archive KB article", 500, "INTERNAL_ERROR");
     }
   });
 }

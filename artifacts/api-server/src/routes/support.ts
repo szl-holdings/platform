@@ -1,10 +1,10 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { db } from "@szl-holdings/db";
-import { supportTicketsTable, supportTicketCommentsTable } from "@szl-holdings/db";
+import { supportTicketsTable, supportTicketCommentsTable, supportKnowledgeArticlesTable } from "@szl-holdings/db";
 import { authMiddleware, requireRole, type AuthenticatedUser } from "../middlewares/auth";
 import { validateBody } from "../lib/validation";
 import { z } from "zod";
-import { eq, desc, and, inArray, isNull, or } from "drizzle-orm";
+import { eq, desc, and, inArray, isNull, or, ilike, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
 import { randomBytes } from "crypto";
 import {
@@ -57,91 +57,67 @@ const updateStatusSchema = z.object({
   assignedToName: z.string().max(200).optional(),
 });
 
-const KB_ARTICLES = [
-  {
-    id: 1,
-    slug: "getting-started-lyte",
-    title: "Getting started with Lyte",
-    category: "Getting Started",
-    summary: "Learn how to connect your first data source and surface operational signals in Lyte.",
-    body: "Lyte connects to your existing approval queues, task systems, and workflow tools. This guide walks through your first integration and signal configuration.",
-    tags: ["lyte", "onboarding", "integrations"],
-    viewCount: 142,
-  },
-  {
-    id: 2,
-    slug: "alloy-audit-trail",
-    title: "Understanding the Alloy Proof Chain",
-    category: "Governance",
-    summary: "Every action in Alloy generates an immutable audit record. Learn how to view and export your proof chain.",
-    body: "The Alloy Proof Chain records every action, approval, and inference with complete lineage. This article explains the data model, retention policy, and export options.",
-    tags: ["alloy", "audit", "compliance"],
-    viewCount: 98,
-  },
-  {
-    id: 3,
-    slug: "sso-setup",
-    title: "Setting up SSO with Azure AD",
-    category: "Authentication",
-    summary: "Configure single sign-on using Azure Active Directory or any OIDC-compatible identity provider.",
-    body: "SZL Holdings supports OpenID Connect (OIDC) with PKCE. This guide covers Azure AD configuration, SCIM provisioning setup, and role mapping.",
-    tags: ["sso", "azure", "oidc", "security"],
-    viewCount: 217,
-  },
-  {
-    id: 4,
-    slug: "billing-plans",
-    title: "Understanding billing and plan limits",
-    category: "Billing",
-    summary: "Learn about plan tiers, seat limits, usage metering, and how to upgrade your subscription.",
-    body: "Billing is metered per seat and per feature entitlement. This article explains how usage is calculated, how to view your current period, and how to upgrade.",
-    tags: ["billing", "plans", "seats"],
-    viewCount: 76,
-  },
-  {
-    id: 5,
-    slug: "data-export",
-    title: "Exporting your data (GDPR / portability)",
-    category: "Data & Privacy",
-    summary: "Request a full export of your organization's data or submit a GDPR erasure request.",
-    body: "Under GDPR and CCPA, you have the right to access, export, and delete your data. This article explains how to initiate an export or erasure request through the platform.",
-    tags: ["gdpr", "ccpa", "data", "privacy", "export"],
-    viewCount: 63,
-  },
-  {
-    id: 6,
-    slug: "webhook-setup",
-    title: "Configuring outbound webhooks",
-    category: "Integrations",
-    summary: "Send real-time events to your systems using the SZL Holdings webhook system.",
-    body: "Webhooks let you receive real-time notifications when key events occur in your workspace. This guide covers endpoint registration, signature verification, and retry behavior.",
-    tags: ["webhooks", "integrations", "events"],
-    viewCount: 54,
-  },
-];
+router.get("/support/knowledge", async (req: Request, res: Response) => {
+  try {
+    const { q, category } = req.query as { q?: string; category?: string };
 
-router.get("/support/knowledge", (req: Request, res: Response) => {
-  const { q, category } = req.query as { q?: string; category?: string };
-  let articles = [...KB_ARTICLES];
-  if (q) {
-    const query = q.toLowerCase();
-    articles = articles.filter(
-      (a) => a.title.toLowerCase().includes(query) || a.summary.toLowerCase().includes(query) || a.tags.some((t) => t.includes(query))
-    );
+    const filters: ReturnType<typeof eq>[] = [eq(supportKnowledgeArticlesTable.isPublished, true)];
+
+    if (category) {
+      filters.push(ilike(supportKnowledgeArticlesTable.category, category));
+    }
+
+    let articles = await db
+      .select()
+      .from(supportKnowledgeArticlesTable)
+      .where(and(...filters))
+      .orderBy(desc(supportKnowledgeArticlesTable.viewCount));
+
+    if (q) {
+      const query = q.toLowerCase();
+      articles = articles.filter(
+        (a) =>
+          a.title.toLowerCase().includes(query) ||
+          a.summary.toLowerCase().includes(query) ||
+          a.tags.some((t) => t.toLowerCase().includes(query))
+      );
+    }
+
+    res.json({ articles });
+  } catch (err) {
+    logger.error({ err }, "Failed to fetch KB articles");
+    res.status(500).json({ error: "Failed to fetch knowledge base articles" });
   }
-  if (category) {
-    articles = articles.filter((a) => a.category.toLowerCase() === category.toLowerCase());
-  }
-  res.json({ articles });
 });
 
-router.get("/support/knowledge/:slug", (req: Request, res: Response) => {
-  const article = KB_ARTICLES.find((a) => a.slug === req.params["slug"]);
-  if (!article) {
-    res.status(404).json({ error: "Article not found" });
-    return;
+router.get("/support/knowledge/:slug", async (req: Request, res: Response) => {
+  try {
+    const [article] = await db
+      .select()
+      .from(supportKnowledgeArticlesTable)
+      .where(
+        and(
+          eq(supportKnowledgeArticlesTable.slug, req.params["slug"] as string),
+          eq(supportKnowledgeArticlesTable.isPublished, true)
+        )
+      )
+      .limit(1);
+
+    if (!article) {
+      res.status(404).json({ error: "Article not found" });
+      return;
+    }
+
+    await db
+      .update(supportKnowledgeArticlesTable)
+      .set({ viewCount: sql`${supportKnowledgeArticlesTable.viewCount} + 1` })
+      .where(eq(supportKnowledgeArticlesTable.id, article.id));
+
+    res.json({ article: { ...article, viewCount: article.viewCount + 1 } });
+  } catch (err) {
+    logger.error({ err }, "Failed to fetch KB article");
+    res.status(500).json({ error: "Failed to fetch article" });
   }
-  res.json({ article });
 });
 
 router.post("/support/tickets", authMiddleware(), validateBody(submitTicketSchema), async (req: Request, res: Response) => {
