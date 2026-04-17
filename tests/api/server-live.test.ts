@@ -29,6 +29,7 @@ import express, {
   type Request,
   type Response,
 } from "express";
+import cookieParser from "cookie-parser";
 
 // ── Internal token for ALLOY_INTERNAL_TOKEN auth path ────────────────────────
 const LIVE_TOKEN = "szl-test-integration-live-2026";
@@ -162,6 +163,7 @@ async function buildLiveApp(routes: express.Router[]): Promise<Express> {
 
   app.use(express.json({ limit: "1mb" }));
   app.use(express.urlencoded({ extended: true, limit: "1mb" }));
+  app.use(cookieParser());
 
   // Real global rate limiter (in-memory, no Redis dependency)
   app.use(globalLimiter);
@@ -291,6 +293,104 @@ describe("Live Server — REST endpoints through real CSRF + rate-limiting + aut
       .send({ name: "Should Be Blocked" });
     expect(res.status).toBe(403);
     expect(res.body).toHaveProperty("error");
+  });
+});
+
+// ── Domain: REST — Successful POST mutations via CSRF cookie+header round-trip ─
+
+/**
+ * Acquires a CSRF token from a GET response Set-Cookie header.
+ * The real csrfMiddleware issues a csrf_token cookie on every GET that
+ * doesn't already have one.  We extract that token and replay it as both
+ * the cookie value and the X-CSRF-Token header on the subsequent POST,
+ * exactly as a real browser client would.
+ */
+function extractCsrfToken(setCookieHeader: string[] | string | undefined): string | undefined {
+  const cookies = Array.isArray(setCookieHeader) ? setCookieHeader : setCookieHeader ? [setCookieHeader] : [];
+  const match = cookies.find((c) => c.startsWith("csrf_token="));
+  return match?.split(";")[0].split("=")[1];
+}
+
+describe("Live Server — Successful POST mutations via CSRF cookie+header round-trip", () => {
+  it("POST /api/vessels/fleets creates a fleet after acquiring CSRF token from GET", async () => {
+    const router = (await import("../../artifacts/api-server/src/routes/vessels")).default;
+    const app = await buildLiveApp([router]);
+
+    // Step 1: GET to trigger the real csrfMiddleware to issue a csrf_token cookie
+    const getRes = await request(app)
+      .get("/api/vessels/fleets")
+      .set("x-internal-token", LIVE_TOKEN);
+    expect(getRes.status).toBe(200);
+
+    // Step 2: Extract the CSRF token from Set-Cookie
+    const csrfToken = extractCsrfToken(getRes.headers["set-cookie"] as string[] | undefined);
+    expect(csrfToken).toBeDefined();
+
+    // Step 3: POST with the cookie AND matching X-CSRF-Token header — real middleware should pass
+    const postRes = await request(app)
+      .post("/api/vessels/fleets")
+      .set("x-internal-token", LIVE_TOKEN)
+      .set("Cookie", `csrf_token=${csrfToken}`)
+      .set("x-csrf-token", csrfToken!)
+      .set("Content-Type", "application/json")
+      .send({ name: "Integration Test Fleet" });
+    expect(postRes.status).toBe(201);
+    expect(postRes.body).toHaveProperty("id");
+    expect(postRes.body.name).toBe("Integration Test Fleet");
+  });
+
+  it("POST /api/lyte/workspaces creates a workspace after acquiring CSRF token from GET", async () => {
+    const router = (await import("../../artifacts/api-server/src/routes/lyte")).default;
+    const app = await buildLiveApp([router]);
+
+    // Step 1: GET to obtain csrf_token cookie
+    const getRes = await request(app)
+      .get("/api/lyte/workspaces")
+      .set("x-internal-token", LIVE_TOKEN);
+    expect(getRes.status).toBe(200);
+
+    // Step 2: Extract CSRF token
+    const csrfToken = extractCsrfToken(getRes.headers["set-cookie"] as string[] | undefined);
+    expect(csrfToken).toBeDefined();
+
+    // Step 3: POST with cookie + matching header
+    const postRes = await request(app)
+      .post("/api/lyte/workspaces")
+      .set("x-internal-token", LIVE_TOKEN)
+      .set("Cookie", `csrf_token=${csrfToken}`)
+      .set("x-csrf-token", csrfToken!)
+      .set("Content-Type", "application/json")
+      .send({ name: "Integration Test Workspace" });
+    expect(postRes.status).toBe(201);
+    expect(postRes.body).toHaveProperty("id");
+    expect(postRes.body.name).toBe("Integration Test Workspace");
+  });
+
+  it("POST /api/firestorm/scenarios creates a scenario after acquiring CSRF token from GET", async () => {
+    const router = (await import("../../artifacts/api-server/src/routes/firestorm")).default;
+    const app = await buildLiveApp([router]);
+
+    // Step 1: GET to obtain csrf_token cookie
+    const getRes = await request(app)
+      .get("/api/firestorm/scenarios")
+      .set("x-internal-token", LIVE_TOKEN);
+    expect(getRes.status).toBe(200);
+
+    // Step 2: Extract CSRF token
+    const csrfToken = extractCsrfToken(getRes.headers["set-cookie"] as string[] | undefined);
+    expect(csrfToken).toBeDefined();
+
+    // Step 3: POST with cookie + matching header
+    const postRes = await request(app)
+      .post("/api/firestorm/scenarios")
+      .set("x-internal-token", LIVE_TOKEN)
+      .set("Cookie", `csrf_token=${csrfToken}`)
+      .set("x-csrf-token", csrfToken!)
+      .set("Content-Type", "application/json")
+      .send({ name: "Integration Test Scenario", category: "network" });
+    expect(postRes.status).toBe(201);
+    expect(postRes.body).toHaveProperty("id");
+    expect(postRes.body.name).toBe("Integration Test Scenario");
   });
 });
 
