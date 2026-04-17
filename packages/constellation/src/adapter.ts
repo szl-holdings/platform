@@ -1,4 +1,5 @@
 import type { ConstellationNode, ConstellationEdge } from "./schema.js";
+import type { CstDomain, CstNodeTypeRegistration, CreateCstNode, CstNode } from "./types.ts";
 
 export interface DomainAdapter<TSource = unknown> {
   readonly domain: string;
@@ -42,4 +43,11 @@ export function projectDomain<T>(
   const nodes = sources.map((s) => adapter.projectNode(s));
   const edges = sources.flatMap((s) => adapter.projectEdges?.(s, nodes) ?? []);
   return { nodes, edges };
+}
+
+export interface ConstellationAdapter {
+  readonly domain: CstDomain;
+  readonly nodeTypes: CstNodeTypeRegistration[];
+  upsertEntity(input: CreateCstNode): Promise<CstNode>;
+  lookupByAlias(aliasType: string, aliasValue: string): Promise<CstNode | null>;
 }

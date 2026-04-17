@@ -19,6 +19,7 @@ import { scheduleNycIngestionJob } from "./lib/terra-nyc-ingestion";
 import "./lib/terra-nyc-extended-ingestion";
 import { scheduleNycExtendedIngestionJob } from "./lib/terra-nyc-extended-ingestion";
 import { seedPlatformData } from "./lib/seed-platform";
+import { seedConstellationData } from "./lib/seed-constellation";
 import { initializeOpenTelemetry } from "@szl-holdings/observability";
 import { seedMspData } from "./lib/seed-msp";
 import { seedDreamscapeData } from "./lib/seed-dreamscape";
@@ -216,6 +217,9 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
       });
       seedDreamscapeData().catch(err => {
         logger.warn({ err }, "[seed-dreamscape] Creative Workflows seed failed (non-fatal)");
+      });
+      seedConstellationData().catch(err => {
+        logger.warn({ err }, "[seed-constellation] Constellation graph seed failed (non-fatal)");
       });
     } else {
       logger.info({ mode: currentMode }, "[seed] Demo seeds suppressed — runtime mode does not permit seed data. Set DEMO_MODE=true or ENABLE_DEMO_SEED=true to enable in non-production environments.");
