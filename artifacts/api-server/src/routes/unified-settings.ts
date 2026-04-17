@@ -17,9 +17,9 @@
  */
 
 import { Router, type IRouter, type Request, type Response } from "express";
-import { db, platformSettingsTable, tenantSettingsTable, userSettingsTable, settingsAuditLogTable } from "@szl-holdings/db";
+import { db, platformSettingsTable, tenantSettingsTable, userSettingsTable, settingsAuditLogTable, usersTable } from "@szl-holdings/db";
 import { hashIp } from "@szl-holdings/audit";
-import { eq, and, desc, asc } from "drizzle-orm";
+import { eq, and, desc, asc, like, gte, lte } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNoContent, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { assertTenantAccess } from "../middlewares/tenant-scope";
@@ -540,22 +540,97 @@ router.delete(
 router.get(
   "/settings/audit",
   authMiddleware(),
-  requireRole(...ADMIN_ROLES),
   async (req: Request, res: Response) => {
     try {
+      const user = req.user!;
+      const isAdmin = user.roles.includes("super_admin") || user.roles.includes("admin");
+
       const tier = req.query.tier as string | undefined;
-      const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : undefined;
       const namespace = req.query.namespace as string | undefined;
       const limit = Math.min(parseInt(String(req.query.limit ?? "100"), 10), 500);
+      const after = req.query.after ? new Date(req.query.after as string) : undefined;
+      // Make `before` inclusive of the full selected day (23:59:59.999 UTC)
+      let before: Date | undefined;
+      if (req.query.before) {
+        before = new Date(req.query.before as string);
+        if (!isNaN(before.getTime())) {
+          before.setUTCHours(23, 59, 59, 999);
+        }
+      }
+
+      // Admins: optional orgId filter; non-admins: must resolve to a valid org
+      let orgId: number | undefined;
+      if (req.query.orgId) {
+        const requested = parseInt(req.query.orgId as string, 10);
+        if (isNaN(requested)) {
+          sendBadRequest(res, "Invalid orgId");
+          return;
+        }
+        if (!isAdmin && !assertTenantAccess(req, res, requested)) return;
+        orgId = requested;
+      } else if (!isAdmin) {
+        const primaryOrgId = user.orgs[0]?.orgId;
+        if (!primaryOrgId) {
+          // Non-admin with no org: return empty rather than all-tenant data
+          sendSuccess(res, []);
+          return;
+        }
+        orgId = primaryOrgId;
+      }
+
+      // Final safety guard: non-admins must always have an orgId at this point
+      if (!isAdmin && !orgId) {
+        sendSuccess(res, []);
+        return;
+      }
 
       const conditions = [];
       if (tier && ["platform", "tenant", "user"].includes(tier)) {
         conditions.push(eq(settingsAuditLogTable.tier, tier as "platform" | "tenant" | "user"));
       }
-      if (orgId) conditions.push(eq(settingsAuditLogTable.orgId, orgId));
-      if (namespace) conditions.push(eq(settingsAuditLogTable.namespace, namespace));
+      // Org scoping
+      if (!isAdmin) {
+        // Non-admins are restricted to their own org AND only their own authored changes
+        conditions.push(eq(settingsAuditLogTable.orgId, orgId!));
+        conditions.push(eq(settingsAuditLogTable.actorId, user.id));
+      } else if (orgId) {
+        conditions.push(eq(settingsAuditLogTable.orgId, orgId));
+      }
+      // Namespace prefix match (e.g. "aegis" matches "aegis.notifications")
+      if (namespace) {
+        conditions.push(like(settingsAuditLogTable.namespace, `${namespace}%`));
+      }
+      if (after && !isNaN(after.getTime())) {
+        conditions.push(gte(settingsAuditLogTable.createdAt, after));
+      }
+      if (before && !isNaN(before.getTime())) {
+        conditions.push(lte(settingsAuditLogTable.createdAt, before));
+      }
 
-      const rows = await db.select().from(settingsAuditLogTable)
+      // Admins get full fields including actorEmail and ipAddress.
+      // Non-admins only see their own entries and never receive sensitive fields.
+      const rows = await db
+        .select({
+          id: settingsAuditLogTable.id,
+          tier: settingsAuditLogTable.tier,
+          settingId: settingsAuditLogTable.settingId,
+          namespace: settingsAuditLogTable.namespace,
+          key: settingsAuditLogTable.key,
+          orgId: settingsAuditLogTable.orgId,
+          userId: settingsAuditLogTable.userId,
+          actorId: settingsAuditLogTable.actorId,
+          action: settingsAuditLogTable.action,
+          oldValue: settingsAuditLogTable.oldValue,
+          newValue: settingsAuditLogTable.newValue,
+          // ipAddress only returned to admins
+          ...(isAdmin ? { ipAddress: settingsAuditLogTable.ipAddress } : {}),
+          createdAt: settingsAuditLogTable.createdAt,
+          actorName: usersTable.displayName,
+          // actorEmail only returned to admins
+          ...(isAdmin ? { actorEmail: usersTable.email } : {}),
+        })
+        .from(settingsAuditLogTable)
+        .leftJoin(usersTable, eq(settingsAuditLogTable.actorId, usersTable.id))
         .where(conditions.length > 0 ? and(...conditions) : undefined)
         .orderBy(desc(settingsAuditLogTable.createdAt))
         .limit(limit);

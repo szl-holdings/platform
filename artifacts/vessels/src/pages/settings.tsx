@@ -10,7 +10,7 @@ import {
 } from "@szl-holdings/shared-ui/settings-shell";
 import {
   Loader2, Bell, BellOff, Users, Shield, Key,
-  Activity, Lock, CreditCard, FileText,
+  Activity, Lock, CreditCard, FileText, Filter, ChevronRight,
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
@@ -394,42 +394,146 @@ function BillingPanel() {
   );
 }
 
+interface AuditEntry {
+  id: number;
+  tier: string;
+  namespace: string;
+  key: string;
+  action: "create" | "update" | "delete";
+  oldValue: unknown;
+  newValue: unknown;
+  actorId: number | null;
+  actorName: string | null;
+  actorEmail: string | null;
+  createdAt: string;
+}
+
 function AuditPanel() {
+  const [nsFilter, setNsFilter] = useState("");
+  const [afterDate, setAfterDate] = useState("");
+  const [beforeDate, setBeforeDate] = useState("");
+  const [applied, setApplied] = useState({ ns: "", after: "", before: "" });
+
+  const params = new URLSearchParams({ namespace: applied.ns || "vessels", limit: "100" });
+  if (applied.after) params.set("after", applied.after);
+  if (applied.before) params.set("before", applied.before);
+
   const { data, isLoading } = useQuery({
-    queryKey: ["vessels-settings-audit"],
-    queryFn: () => apiFetch<unknown[]>("/settings/audit?namespace=vessels&limit=50"),
+    queryKey: ["vessels-settings-audit", applied],
+    queryFn: () => apiFetch<AuditEntry[]>(`/settings/audit?${params.toString()}`),
     staleTime: 30_000,
   });
 
-  const entries = (data ?? []) as Array<{
-    id: number; tier: string; namespace: string; key: string;
-    action: string; oldValue: unknown; newValue: unknown; createdAt: string;
-  }>;
+  const entries = data ?? [];
+
+  const applyFilters = () => setApplied({ ns: nsFilter, after: afterDate, before: beforeDate });
+  const clearFilters = () => {
+    setNsFilter(""); setAfterDate(""); setBeforeDate("");
+    setApplied({ ns: "", after: "", before: "" });
+  };
 
   return (
-    <SettingsSectionPanel title="Settings Audit" description="Record of all settings changes in Vessels">
+    <SettingsSectionPanel title="Settings Change History" description="Audit trail of settings changes in Vessels">
+      <p className="mb-4 text-xs text-sky-400/40">
+        Org admins and platform admins see the full team history. Other members see only their own changes.
+      </p>
+      <div className="mb-4 p-3 rounded-lg border border-sky-500/10 bg-sky-500/5 flex flex-wrap items-end gap-3">
+        <div className="flex flex-col gap-1 min-w-[160px]">
+          <label className="text-[10px] text-sky-400/60 font-medium uppercase tracking-wide">Namespace prefix</label>
+          <input
+            type="text"
+            value={nsFilter}
+            onChange={e => setNsFilter(e.target.value)}
+            placeholder="e.g. vessels.notifications"
+            className="h-7 px-2 text-xs rounded border border-sky-500/20 bg-[#040c1a] text-sky-100 placeholder:text-sky-400/30 focus:outline-none focus:ring-1 focus:ring-sky-500/40"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-[10px] text-sky-400/60 font-medium uppercase tracking-wide">From</label>
+          <input
+            type="date"
+            value={afterDate}
+            onChange={e => setAfterDate(e.target.value)}
+            className="h-7 px-2 text-xs rounded border border-sky-500/20 bg-[#040c1a] text-sky-100 focus:outline-none focus:ring-1 focus:ring-sky-500/40"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-[10px] text-sky-400/60 font-medium uppercase tracking-wide">To</label>
+          <input
+            type="date"
+            value={beforeDate}
+            onChange={e => setBeforeDate(e.target.value)}
+            className="h-7 px-2 text-xs rounded border border-sky-500/20 bg-[#040c1a] text-sky-100 focus:outline-none focus:ring-1 focus:ring-sky-500/40"
+          />
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={applyFilters}
+            className="flex items-center gap-1.5 h-7 px-3 text-xs font-medium rounded bg-sky-500/10 border border-sky-500/20 text-sky-400 hover:bg-sky-500/20 transition-colors"
+          >
+            <Filter className="w-3 h-3" /> Apply
+          </button>
+          <button
+            onClick={clearFilters}
+            className="h-7 px-3 text-xs text-sky-400/50 hover:text-sky-300 border border-sky-500/10 rounded transition-colors"
+          >
+            Clear
+          </button>
+        </div>
+      </div>
+
       {isLoading ? (
-        <div className="space-y-2">{[0, 1, 2].map(i => <div key={i} className="h-10 bg-muted animate-pulse rounded" />)}</div>
+        <div className="space-y-2">{[0, 1, 2].map(i => <div key={i} className="h-14 bg-sky-500/5 animate-pulse rounded" />)}</div>
       ) : entries.length === 0 ? (
-        <div className="py-8 text-center">
-          <FileText className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">No settings changes logged yet</p>
+        <div className="py-10 text-center">
+          <FileText className="w-6 h-6 text-sky-400/30 mx-auto mb-2" />
+          <p className="text-sm text-sky-400/50">No settings changes found</p>
+          <p className="text-xs text-sky-400/30 mt-1">Changes will appear here when settings are modified</p>
         </div>
       ) : (
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           {entries.map(e => (
-            <div key={e.id} className="flex items-start gap-3 py-2 px-3 rounded-lg hover:bg-muted/30 transition-colors text-xs">
-              <span className="font-mono text-muted-foreground shrink-0">{e.namespace}.{e.key}</span>
-              <span className={cn(
-                "font-semibold uppercase text-[10px]",
-                e.action === "create" ? "text-emerald-400" : e.action === "update" ? "text-sky-400" : "text-red-400"
-              )}>
-                {e.action}
-              </span>
-              {e.newValue != null && <span className="font-mono text-foreground">→ {JSON.stringify(e.newValue)}</span>}
-              <span className="ml-auto text-muted-foreground shrink-0 text-[10px]">
-                {new Date(e.createdAt).toLocaleString()}
-              </span>
+            <div key={e.id} className="rounded-lg border border-sky-500/10 bg-sky-500/5 hover:bg-sky-500/10 transition-colors px-3 py-2.5">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={cn(
+                  "text-[10px] font-bold uppercase px-1.5 py-0.5 rounded",
+                  e.action === "create" ? "bg-emerald-500/10 text-emerald-400" :
+                  e.action === "update" ? "bg-sky-500/10 text-sky-400" :
+                  "bg-red-500/10 text-red-400"
+                )}>
+                  {e.action}
+                </span>
+                <span className="font-mono text-xs text-sky-100">{e.namespace}<span className="text-sky-400/40">.</span>{e.key}</span>
+                <span className="ml-auto text-[10px] text-sky-400/50 shrink-0">{new Date(e.createdAt).toLocaleString()}</span>
+              </div>
+              <div className="mt-1.5 flex items-center gap-2 flex-wrap text-xs">
+                {e.actorName ? (
+                  <span className="text-sky-400/60">
+                    by <span className="text-sky-200 font-medium">{e.actorName}</span>
+                    {e.actorEmail && <span className="text-sky-400/40"> ({e.actorEmail})</span>}
+                  </span>
+                ) : e.actorId ? (
+                  <span className="text-sky-400/50">by user #{e.actorId}</span>
+                ) : (
+                  <span className="text-sky-400/30 italic">system</span>
+                )}
+                {(e.oldValue != null || e.newValue != null) && (
+                  <span className="flex items-center gap-1 font-mono text-[10px]">
+                    {e.oldValue != null && (
+                      <span className="px-1.5 py-0.5 rounded bg-red-500/5 border border-red-500/20 text-red-400/70 line-through">
+                        {JSON.stringify(e.oldValue)}
+                      </span>
+                    )}
+                    {e.oldValue != null && e.newValue != null && <ChevronRight className="w-3 h-3 text-sky-400/30 shrink-0" />}
+                    {e.newValue != null && (
+                      <span className="px-1.5 py-0.5 rounded bg-emerald-500/5 border border-emerald-500/20 text-emerald-400/70">
+                        {JSON.stringify(e.newValue)}
+                      </span>
+                    )}
+                  </span>
+                )}
+                <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-sky-500/5 border border-sky-500/10 text-sky-400/50 capitalize">{e.tier}</span>
+              </div>
             </div>
           ))}
         </div>
