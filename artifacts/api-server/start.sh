@@ -2,6 +2,29 @@
 set -e
 cd /home/runner/workspace/artifacts/api-server
 
+# --- API server build ---------------------------------------------------------
+# This script is the authoritative standalone entry point for the API server.
+# It runs as its own workflow (artifacts/api-server: api) independently of any
+# other app. Rebuild the server bundle whenever source files are newer than the
+# built output so that a simple workflow restart picks up code changes.
+DIST="./dist/index.mjs"
+NEEDS_BUILD=0
+if [ ! -f "$DIST" ]; then
+  NEEDS_BUILD=1
+elif [ -n "$(find ./src -name '*.ts' -newer "$DIST" -print -quit 2>/dev/null)" ]; then
+  NEEDS_BUILD=1
+elif [ package.json -nt "$DIST" ] || [ build.mjs -nt "$DIST" ]; then
+  NEEDS_BUILD=1
+fi
+if [ "$NEEDS_BUILD" = "1" ]; then
+  echo "[api-server start.sh] Building API server..."
+  node ./build.mjs
+  echo "[api-server start.sh] Build complete."
+else
+  echo "[api-server start.sh] Build is up to date; skipping rebuild."
+fi
+# -----------------------------------------------------------------------------
+
 # --- NEXUS frontend rebuild ---------------------------------------------------
 # The NEXUS UI (artifacts/mockup-sandbox) is served as a static build by this
 # API server (see app.ts -> nexusDist). Rebuild the Vite bundle automatically
@@ -30,5 +53,4 @@ else
 fi
 # -----------------------------------------------------------------------------
 
-test -f ./dist/index.mjs || node ./build.mjs
 exec node --max-old-space-size=1536 --expose-gc --optimize-for-size --enable-source-maps ./dist/index.mjs

@@ -3,7 +3,6 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
-import { spawn, type ChildProcess } from "child_process";
 import http from "http";
 import net from "net";
 
@@ -13,7 +12,6 @@ const vitePort = Number(process.env.VITE_PORT) || 3102;
 const basePath = process.env.BASE_PATH || "/command/";
 
 const SHARED_PROXY_PORT = 9090;
-const API_SERVER_PORT = 8080;
 
 const PROXY_ROUTES = [
   { prefix: "/aegis/", port: 3000 },
@@ -24,14 +22,6 @@ const PROXY_ROUTES = [
   { prefix: "/vessels/", port: 6899 },
   { prefix: "/pulse/", port: 5201 },
 ];
-
-const apiServerDist = path.resolve(
-  import.meta.dirname,
-  "..",
-  "api-server",
-  "dist",
-  "index.mjs"
-);
 
 function sharedProxyPlugin(): Plugin {
   return {
@@ -95,72 +85,10 @@ function sharedProxyPlugin(): Plugin {
   };
 }
 
-function isPortInUse(p: number): Promise<boolean> {
-  return new Promise((resolve) => {
-    const srv = net.createServer();
-    srv.once("error", () => resolve(true));
-    srv.once("listening", () => {
-      srv.close();
-      resolve(false);
-    });
-    srv.listen(p, "0.0.0.0");
-  });
-}
-
-function apiServerPlugin(): Plugin {
-  let child: ChildProcess | null = null;
-
-  return {
-    name: "api-server-dev",
-    apply: "serve",
-    async configureServer(server) {
-      if (child) return;
-
-      if (process.env.EMBED_API_SERVER === "false") {
-        console.log("[api-server-dev] Embedding disabled via EMBED_API_SERVER=false");
-        return;
-      }
-
-      const alreadyRunning = await isPortInUse(API_SERVER_PORT);
-      if (alreadyRunning) {
-        console.log(
-          `[api-server-dev] Port ${API_SERVER_PORT} already in use — skipping embedded api-server`
-        );
-        return;
-      }
-
-      child = spawn("node", ["--max-old-space-size=512", apiServerDist], {
-        env: { ...process.env, PORT: String(API_SERVER_PORT) },
-        stdio: "inherit",
-        detached: false,
-      });
-
-      child.on("error", (err) => {
-        console.error("[api-server-dev] Failed to start api-server:", err.message);
-      });
-
-      child.on("exit", (code) => {
-        if (code !== null && code !== 0) {
-          console.warn(`[api-server-dev] api-server exited with code ${code}`);
-        }
-        child = null;
-      });
-
-      server.httpServer?.once("close", () => {
-        if (child) {
-          child.kill("SIGTERM");
-          child = null;
-        }
-      });
-    },
-  };
-}
-
 export default defineConfig({
   base: basePath,
   plugins: [
     sharedProxyPlugin(),
-    apiServerPlugin(),
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
