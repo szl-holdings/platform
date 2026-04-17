@@ -87,6 +87,7 @@ interface SupportTicket {
   id: number; formKey: string; fullName: string; email: string;
   company?: string; message?: string; createdAt: string;
   status?: string; notes?: string; ownerUserId?: number | null; leadStatusId?: number | null;
+  submissionStatus?: "open" | "resolved"; resolvedAt?: string | null;
 }
 interface OverviewData {
   counts: { users: number; activeUsers: number; apps: number; connectors: number; liveConnectors: number };
@@ -878,17 +879,23 @@ const statusConfig: Record<TicketStatus, { label: string; variant: BadgeVariant 
   lost: { label: "Lost", variant: "red" },
 };
 
+interface ReplyModal { ticketId: number; email: string; name: string; subject: string; body: string; }
+
 function SupportPanel() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [showResolved, setShowResolved] = useState(false);
   const [expanded, setExpanded] = useState<number | null>(null);
   const [assignInputs, setAssignInputs] = useState<Record<number, string>>({});
   const [noteInputs, setNoteInputs] = useState<Record<number, string>>({});
+  const [replyModal, setReplyModal] = useState<ReplyModal | null>(null);
+  const [replySending, setReplySending] = useState(false);
+  const [replyResult, setReplyResult] = useState<{ success: boolean; message: string } | null>(null);
 
-  const { data, isLoading, refetch } = useQuery<{ tickets: SupportTicket[]; total: number }>({
-    queryKey: ["admin-support"],
-    queryFn: () => adminFetch("/admin/support-queue"),
+  const { data, isLoading, refetch } = useQuery<{ tickets: SupportTicket[]; total: number; openTotal: number }>({
+    queryKey: ["admin-support", showResolved],
+    queryFn: () => adminFetch(`/admin/support-queue${showResolved ? "?includeResolved=true" : ""}`),
     refetchInterval: 60000,
   });
 
@@ -915,6 +922,40 @@ function SupportPanel() {
       setNoteInputs(p => { const next = { ...p }; delete next[id]; return next; });
     },
   });
+
+  const resolveMutation = useMutation({
+    mutationFn: ({ id }: { id: number }) =>
+      adminFetch(`/admin/support-queue/${id}/resolve`, { method: "POST" }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-support"] }),
+  });
+
+  const reopenMutation = useMutation({
+    mutationFn: ({ id }: { id: number }) =>
+      adminFetch(`/admin/support-queue/${id}/reopen`, { method: "POST" }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-support"] }),
+  });
+
+  const handleSendReply = async () => {
+    if (!replyModal) return;
+    setReplySending(true);
+    setReplyResult(null);
+    try {
+      const result = await adminFetch<{ success: boolean; sent: boolean; error?: string }>(
+        `/admin/support-queue/${replyModal.ticketId}/reply`,
+        { method: "POST", body: JSON.stringify({ subject: replyModal.subject, body: replyModal.body }) }
+      );
+      if (result.sent) {
+        setReplyResult({ success: true, message: "Reply sent successfully." });
+        setTimeout(() => { setReplyModal(null); setReplyResult(null); }, 1500);
+      } else {
+        setReplyResult({ success: false, message: result.error ?? "Email delivery unavailable — no provider configured." });
+      }
+    } catch {
+      setReplyResult({ success: false, message: "Failed to send reply. Please try again." });
+    } finally {
+      setReplySending(false);
+    }
+  };
 
   const tickets = (data?.tickets ?? []).filter((t) => {
     const s = t.status ?? "new";
@@ -946,10 +987,68 @@ function SupportPanel() {
 
   return (
     <div className="space-y-5">
-      <SectionHeader title="Support Queue" subtitle={`${data?.total ?? 0} contact submissions`} onRefresh={() => refetch()} loading={isLoading} />
+      {replyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => { if (!replySending) { setReplyModal(null); setReplyResult(null); } }}>
+          <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+              <div>
+                <p className="text-sm font-semibold text-foreground">Reply to {replyModal.name}</p>
+                <p className="text-xs text-muted-foreground">{replyModal.email}</p>
+              </div>
+              <button onClick={() => { setReplyModal(null); setReplyResult(null); }} disabled={replySending} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="px-5 py-4 space-y-3">
+              <div>
+                <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Subject</label>
+                <input
+                  type="text"
+                  value={replyModal.subject}
+                  onChange={(e) => setReplyModal(m => m ? { ...m, subject: e.target.value } : m)}
+                  className="mt-1 w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40"
+                  disabled={replySending}
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Message</label>
+                <textarea
+                  rows={7}
+                  value={replyModal.body}
+                  onChange={(e) => setReplyModal(m => m ? { ...m, body: e.target.value } : m)}
+                  placeholder="Write your reply…"
+                  className="mt-1 w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40 resize-none"
+                  disabled={replySending}
+                />
+              </div>
+              {replyResult && (
+                <div className={cn("text-xs px-3 py-2 rounded-lg", replyResult.success ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20" : "bg-red-500/10 text-red-500 border border-red-500/20")}>
+                  {replyResult.message}
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end gap-2 px-5 pb-4">
+              <button onClick={() => { setReplyModal(null); setReplyResult(null); }} disabled={replySending} className="px-4 py-2 rounded-lg text-xs font-medium border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-40">
+                Cancel
+              </button>
+              <button onClick={handleSendReply} disabled={replySending || !replyModal.subject.trim() || !replyModal.body.trim()} className="px-4 py-2 rounded-lg text-xs font-semibold bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-40 flex items-center gap-1.5">
+                {replySending ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Sending…</> : <><Mail className="w-3.5 h-3.5" /> Send Reply</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <SectionHeader title="Support Queue" subtitle={showResolved ? `${data?.total ?? 0} total submissions` : `${data?.openTotal ?? 0} open · ${data?.total ?? 0} total`} onRefresh={() => refetch()} loading={isLoading} />
 
       <div className="flex gap-2">
         <div className="flex-1"><SearchInput value={search} onChange={setSearch} placeholder="Search by name, email, or form..." /></div>
+        <button
+          onClick={() => setShowResolved(v => !v)}
+          className={cn("flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-colors", showResolved ? "border-emerald-500/40 text-emerald-600 bg-emerald-500/10" : "border-border text-muted-foreground hover:text-foreground hover:bg-muted")}
+        >
+          <CheckCircle2 className="w-3.5 h-3.5" /> {showResolved ? "Hiding resolved" : "Show resolved"}
+        </button>
         <button onClick={exportCsv} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
           <Download className="w-3.5 h-3.5" /> Export
         </button>
@@ -989,6 +1088,7 @@ function SupportPanel() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
+                    {t.submissionStatus === "resolved" && <Badge label="Resolved" variant="green" />}
                     <Badge label={sc.label} variant={sc.variant} />
                     <Badge label={fk.label} variant={fk.variant} />
                     <span className="text-[10px] text-muted-foreground">{new Date(t.createdAt).toLocaleDateString()}</span>
@@ -1010,7 +1110,34 @@ function SupportPanel() {
                             <p className="text-xs text-foreground">{t.notes}</p>
                           </div>
                         )}
-                        <p className="text-[10px] text-muted-foreground/60">Submitted {new Date(t.createdAt).toLocaleString()}</p>
+                        <p className="text-[10px] text-muted-foreground/60">Submitted {new Date(t.createdAt).toLocaleString()}{t.resolvedAt ? ` · Resolved ${new Date(t.resolvedAt).toLocaleString()}` : ""}</p>
+
+                        <div className="flex items-center gap-2 flex-wrap pt-1" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            onClick={() => setReplyModal({ ticketId: t.id, email: t.email, name: t.fullName, subject: `Re: Your inquiry`, body: "" })}
+                            className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-md font-semibold border border-primary/30 text-primary hover:bg-primary/10 transition-colors"
+                          >
+                            <Mail className="w-3 h-3" /> Reply
+                          </button>
+                          {t.submissionStatus === "resolved" ? (
+                            <button
+                              onClick={() => reopenMutation.mutate({ id: t.id })}
+                              disabled={reopenMutation.isPending}
+                              className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-md font-semibold border border-amber-500/30 text-amber-600 hover:bg-amber-500/10 transition-colors disabled:opacity-40"
+                            >
+                              <Circle className="w-3 h-3" /> {reopenMutation.isPending ? "Reopening…" : "Reopen"}
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => resolveMutation.mutate({ id: t.id })}
+                              disabled={resolveMutation.isPending}
+                              className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-md font-semibold border border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10 transition-colors disabled:opacity-40"
+                            >
+                              <CheckCircle2 className="w-3 h-3" /> {resolveMutation.isPending ? "Resolving…" : "Resolve"}
+                            </button>
+                          )}
+                        </div>
+
                         <div className="flex items-center gap-1.5 flex-wrap pt-1">
                           <span className="text-[10px] text-muted-foreground font-medium mr-1">Update status:</span>
                           {TICKET_STATUSES.filter(s => s !== currentStatus).map((s) => (

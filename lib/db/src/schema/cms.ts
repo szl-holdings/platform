@@ -277,6 +277,8 @@ export const contactSubmissionsTable = pgTable("contact_submissions", {
   message: text("message"),
   preferredTimeline: text("preferred_timeline"),
   metadataJson: jsonb("metadata_json"),
+  status: text("status", { enum: ["open", "resolved"] }).notNull().default("open"),
+  resolvedAt: timestamp("resolved_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
