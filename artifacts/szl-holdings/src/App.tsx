@@ -217,6 +217,7 @@ const VenturePortfolioPage = lazy(() => import("@/pages/venture-portfolio"));
 
 const FundIntelHubPage = lazy(() => import("@/pages/fund/index"));
 const FundDealScoringPage = lazy(() => import("@/pages/fund/deal-scoring"));
+const FundDealScoringSubmitPage = lazy(() => import("@/pages/fund/deal-scoring-submit"));
 const FundLpReportsPage = lazy(() => import("@/pages/fund/lp-reports"));
 const FundPortfolioIntelPage = lazy(() => import("@/pages/fund/portfolio-intelligence"));
 const FundCapTablePage = lazy(() => import("@/pages/fund/cap-table"));
@@ -984,6 +985,9 @@ function App() {
             </Route>
             <Route path="/fund/deal-scoring">
               <RequireAuth><Suspense fallback={<PageLoader />}><FundDealScoringPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/fund/deal-scoring/submit">
+              <Suspense fallback={<PageLoader />}><FundDealScoringSubmitPage /></Suspense>
             </Route>
             <Route path="/fund/lp-reports">
               <RequireAuth><Suspense fallback={<PageLoader />}><FundLpReportsPage /></Suspense></RequireAuth>

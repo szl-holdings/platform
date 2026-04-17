@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { getSubmittedDeals, subscribeSubmittedDeals, type SubmittedDeal } from "@/lib/dealSubmissions";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import {
@@ -124,13 +125,37 @@ function DealCard({ deal, selected, onClick }: { deal: Deal; selected: boolean; 
   );
 }
 
+function toDeal(s: SubmittedDeal): Deal {
+  return {
+    id: s.id,
+    company: s.company,
+    sector: s.sector,
+    stage: s.stage,
+    askSize: s.askSize,
+    valuation: s.valuation,
+    convictionScore: s.convictionScore,
+    scores: s.scores,
+    status: s.status,
+    founder: s.founder,
+    summary: s.summary,
+    risks: s.risks.length ? s.risks : ["Awaiting analyst review"],
+    strengths: s.strengths.length ? s.strengths : ["Inbound submission via founder portal"],
+    date: s.date,
+  };
+}
+
 export default function DealScoringPage() {
   usePageMeta({ title: "AI Deal Scoring — SZL Fund Intelligence", description: "Autonomous deal screening and conviction scoring engine." });
-  const [selectedId, setSelectedId] = useState<string>("d1");
   const [filter, setFilter] = useState<string>("all");
+  const [submissions, setSubmissions] = useState<SubmittedDeal[]>(() => getSubmittedDeals());
 
-  const deal = DEALS.find(d => d.id === selectedId) ?? DEALS[0];
-  const filtered = filter === "all" ? DEALS : DEALS.filter(d => d.status === filter);
+  useEffect(() => subscribeSubmittedDeals(() => setSubmissions(getSubmittedDeals())), []);
+
+  const allDeals = useMemo<Deal[]>(() => [...submissions.map(toDeal), ...DEALS], [submissions]);
+  const [selectedId, setSelectedId] = useState<string>(allDeals[0]?.id ?? "d1");
+
+  const deal = allDeals.find(d => d.id === selectedId) ?? allDeals[0];
+  const filtered = filter === "all" ? allDeals : allDeals.filter(d => d.status === filter);
   const radarData = [
     { subject: "Team", score: deal.scores.team },
     { subject: "Market", score: deal.scores.market },
@@ -162,12 +187,21 @@ export default function DealScoringPage() {
           </div>
 
           <div className="grid grid-cols-4 gap-3 mt-6 mb-8">
-            {[
-              { label: "Deals Scored", value: "47", icon: FileText, color: "#d4a054" },
-              { label: "Active Pipeline", value: "12", icon: Target, color: "#4a90b8" },
-              { label: "Avg Conviction", value: "73.2", icon: Star, color: "#6aaa72" },
-              { label: "Invested", value: "3", icon: CheckCircle2, color: "#8b7ac8" },
-            ].map(m => (
+            {(() => {
+              const baseScored = 47;
+              const baseActive = 12;
+              const baseInvested = 3;
+              const totalScored = baseScored + allDeals.length - DEALS.length;
+              const activeCount = baseActive + allDeals.filter(d => d.status === "active").length - DEALS.filter(d => d.status === "active").length;
+              const avg = allDeals.length ? (allDeals.reduce((s, d) => s + d.convictionScore, 0) / allDeals.length).toFixed(1) : "0.0";
+              const investedCount = baseInvested + allDeals.filter(d => d.status === "invested").length - DEALS.filter(d => d.status === "invested").length;
+              return [
+                { label: "Deals Scored", value: String(totalScored), icon: FileText, color: "#d4a054" },
+                { label: "Active Pipeline", value: String(activeCount), icon: Target, color: "#4a90b8" },
+                { label: "Avg Conviction", value: avg, icon: Star, color: "#6aaa72" },
+                { label: "Invested", value: String(investedCount), icon: CheckCircle2, color: "#8b7ac8" },
+              ];
+            })().map(m => (
               <div key={m.label} className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <m.icon className="h-4 w-4" style={{ color: m.color }} />
@@ -185,9 +219,11 @@ export default function DealScoringPage() {
                 {f}
               </button>
             ))}
-            <button className="ml-auto flex items-center gap-1.5 rounded-full border border-white/[0.08] px-3 py-1 text-[10px] text-white/40 hover:text-white/70">
-              <Upload className="h-3 w-3" /> Score New Deal
-            </button>
+            <Link href="/fund/deal-scoring/submit">
+              <button className="ml-auto flex items-center gap-1.5 rounded-full border border-[#d4a054]/30 bg-[#d4a054]/10 px-3 py-1 text-[10px] font-semibold text-[#d4a054] hover:bg-[#d4a054]/20">
+                <Upload className="h-3 w-3" /> Inbound Submission Portal
+              </button>
+            </Link>
           </div>
 
           <div className="grid grid-cols-12 gap-5">
