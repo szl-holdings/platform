@@ -390,6 +390,34 @@ describe("Integration — /domains/:domain/graph", () => {
     expect(res.body.nodes.length).toBeLessThanOrEqual(5);
   });
 
+  it("GET /domains/terra/graph paginates: page1 + page2 cover unique nodes and stats.nodeCount stays the total", async () => {
+    // Pulls two consecutive pages of 1 node each and asserts:
+    //  1. The two pages don't return the same node id (offset advanced)
+    //  2. stats.nodeCount is the *total* (count(*)), unaffected by limit/offset
+    //     so the client can compute "loaded vs. total" from it.
+    const page1 = await request(app)
+      .get("/domains/terra/graph")
+      .query({ limit: 1, offset: 0 });
+    expect(page1.status).toBe(200);
+    if (page1.body.stats.nodeCount < 2) {
+      // Not enough data to exercise pagination on this fixture — skip the
+      // overlap assertions but still check the total-count contract.
+      expect(page1.body.nodes.length).toBeLessThanOrEqual(1);
+      return;
+    }
+    const page2 = await request(app)
+      .get("/domains/terra/graph")
+      .query({ limit: 1, offset: 1 });
+    expect(page2.status).toBe(200);
+    expect(page1.body.nodes.length).toBe(1);
+    expect(page2.body.nodes.length).toBe(1);
+    expect(page1.body.nodes[0].id).not.toBe(page2.body.nodes[0].id);
+    // Both pages must report the same total nodeCount — it's a count(*) over
+    // the filtered nodes, not a count of what's returned.
+    expect(page1.body.stats.nodeCount).toBe(page2.body.stats.nodeCount);
+    expect(page1.body.stats.nodeCount).toBeGreaterThanOrEqual(2);
+  });
+
   it("GET /domains/terra/graph rejects out-of-range limit with 400", async () => {
     const tooBig = await request(app).get("/domains/terra/graph").query({ limit: 9999 });
     expect(tooBig.status).toBe(400);

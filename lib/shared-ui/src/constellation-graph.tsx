@@ -275,7 +275,10 @@ export function ConstellationGraph({
   showControls = true,
 }: ConstellationGraphProps) {
   const [fetched, setFetched] = useState<ConstellationGraphResponse | null>(null);
+  const [extraPages, setExtraPages] = useState<ConstellationGraphResponse[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showCross, setShowCross] = useState(true);
   const [selected, setSelected] = useState<ConstellationGraphNode | null>(null);
@@ -286,6 +289,7 @@ export function ConstellationGraph({
   const [sinceWindow, setSinceWindow] = useState<"24h" | "7d" | "30d" | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [seenTypes, setSeenTypes] = useState<string[]>([]);
+  const [pageSize, setPageSize] = useState(120);
   const containerRef = useRef<HTMLDivElement>(null);
   const simRef = useRef<SimNode[]>([]);
   const alphaRef = useRef(1);
@@ -311,9 +315,11 @@ export function ConstellationGraph({
     let cancelled = false;
     setLoading(true);
     setError(null);
+    setLoadMoreError(null);
     const params = new URLSearchParams();
     params.set("includeCross", String(showCross));
-    params.set("limit", "120");
+    params.set("limit", String(pageSize));
+    params.set("offset", "0");
     if (entityTypeFilter) params.set("entityType", entityTypeFilter);
     // Only constrain when "Active only" is on. When off the user wants to see
     // all statuses, so we omit the param (server returns inactive-only when
@@ -326,6 +332,9 @@ export function ConstellationGraph({
         // sendSuccess wraps payloads in { data, ... } — handle either shape
         const payload = (res as { data?: ConstellationGraphResponse }).data ?? (res as ConstellationGraphResponse);
         setFetched(payload);
+        // Reset any accumulated additional pages whenever a new first page
+        // arrives — filter/page-size changes start the pagination over.
+        setExtraPages([]);
       })
       .catch((err) => {
         if (cancelled) return;
@@ -337,10 +346,111 @@ export function ConstellationGraph({
     return () => {
       cancelled = true;
     };
-  }, [domain, data, showCross, entityTypeFilter, activeOnly, reload.current]);
+  }, [domain, data, showCross, entityTypeFilter, activeOnly, pageSize, reload.current]);
 
-  const graph = data ?? fetched;
+  // Merge the first-page payload with any additional pages loaded via the
+  // "Load more" control so the canvas keeps growing as the operator pages
+  // through large domains. Stats from the first page reflect the *total* node
+  // count (server runs count(*) ignoring limit/offset), so we keep them.
+  const graph = useMemo<ConstellationGraphResponse | null>(() => {
+    if (data) return data;
+    if (!fetched) return null;
+    if (extraPages.length === 0) return fetched;
+    const nodeMap = new Map<string, ConstellationGraphNode>();
+    for (const n of fetched.nodes) nodeMap.set(n.id, n);
+    const edgeMap = new Map<string, ConstellationGraphEdge>();
+    for (const e of fetched.edges) edgeMap.set(e.id, e);
+    for (const page of extraPages) {
+      for (const n of page.nodes) nodeMap.set(n.id, n);
+      for (const e of page.edges) edgeMap.set(e.id, e);
+    }
+    // Recompute cross/internal edge counts from the deduped merged edge set so
+    // edges that show up in multiple pages (because the API returns edges
+    // touching that page's nodeIds) aren't double-counted. An edge is internal
+    // when both endpoints belong to the host domain's loaded node set.
+    const mergedEdges = Array.from(edgeMap.values());
+    const hostInternalIds = new Set<string>();
+    for (const n of nodeMap.values()) {
+      // Nodes returned by /domains/:domain/graph have no `domain` field set
+      // (the server omits it because it's implied), so missing domain ===
+      // host-domain. Cross-domain neighbors loaded via expand always carry an
+      // explicit non-host domain.
+      if (!n.domain || n.domain === fetched.domain) hostInternalIds.add(n.id);
+    }
+    let crossDomainEdgeCount = 0;
+    let internalEdgeCount = 0;
+    for (const e of mergedEdges) {
+      const fromInternal = hostInternalIds.has(e.fromNodeId);
+      const toInternal = hostInternalIds.has(e.toNodeId);
+      if (fromInternal && toInternal) internalEdgeCount += 1;
+      else crossDomainEdgeCount += 1;
+    }
+    return {
+      ...fetched,
+      nodes: Array.from(nodeMap.values()),
+      edges: mergedEdges,
+      stats: {
+        // First page returns the true total node count via count(*) — keep it.
+        nodeCount: fetched.stats.nodeCount,
+        edgeCount: mergedEdges.length,
+        crossDomainEdgeCount,
+        internalEdgeCount,
+      },
+    };
+  }, [data, fetched, extraPages]);
   const hostDomain = graph?.domain ?? domain ?? "platform";
+
+  // Number of nodes the operator has actually loaded onto the canvas (sum of
+  // unique nodes from the first page + every "Load more" page that succeeded).
+  const loadedNodeCount = useMemo(() => {
+    if (data) return data.nodes.length;
+    if (!fetched) return 0;
+    if (extraPages.length === 0) return fetched.nodes.length;
+    const seen = new Set<string>();
+    for (const n of fetched.nodes) seen.add(n.id);
+    for (const page of extraPages) for (const n of page.nodes) seen.add(n.id);
+    return seen.size;
+  }, [data, fetched, extraPages]);
+
+  const totalNodeCount = graph?.stats.nodeCount ?? 0;
+  const hasMore = !data && fetched !== null && loadedNodeCount < totalNodeCount;
+
+  const loadMore = useCallback(() => {
+    if (!domain || data || !fetched || loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    setLoadMoreError(null);
+    const params = new URLSearchParams();
+    params.set("includeCross", String(showCross));
+    params.set("limit", String(pageSize));
+    params.set("offset", String(loadedNodeCount));
+    if (entityTypeFilter) params.set("entityType", entityTypeFilter);
+    if (activeOnly) params.set("isActive", "true");
+    const url = `/domains/${encodeURIComponent(domain)}/graph?${params.toString()}`;
+    apiFetch<{ data?: ConstellationGraphResponse } | ConstellationGraphResponse>(url)
+      .then((res) => {
+        const payload = (res as { data?: ConstellationGraphResponse }).data ?? (res as ConstellationGraphResponse);
+        setExtraPages((prev) => [...prev, payload]);
+        // Re-energize the simulation so freshly-loaded nodes ease into place
+        alphaRef.current = 1;
+      })
+      .catch((err) => {
+        setLoadMoreError((err as Error)?.message ?? "Failed to load more entities");
+      })
+      .finally(() => {
+        setLoadingMore(false);
+      });
+  }, [
+    domain,
+    data,
+    fetched,
+    loadingMore,
+    hasMore,
+    showCross,
+    pageSize,
+    loadedNodeCount,
+    entityTypeFilter,
+    activeOnly,
+  ]);
 
   // Cache of enriched cross-domain entities (id -> full node), filled lazily
   const [externalCache, setExternalCache] = useState<Record<string, ConstellationGraphNode>>({});
@@ -829,6 +939,37 @@ export function ConstellationGraph({
                 testId={`constellation-since-chip-${w}`}
               />
             ))}
+            <span
+              style={{
+                fontSize: 10,
+                color: "#64748b",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                marginLeft: 8,
+              }}
+            >
+              Per page
+            </span>
+            <select
+              value={pageSize}
+              onChange={(e) => setPageSize(parseInt(e.target.value, 10))}
+              data-testid="constellation-page-size"
+              style={{
+                fontSize: 11,
+                padding: "4px 8px",
+                borderRadius: 4,
+                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(0,0,0,0.25)",
+                color: "#e8edf8",
+                outline: "none",
+              }}
+            >
+              {[60, 120, 240, 500].map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
             <div style={{ flex: 1 }} />
             <input
               type="search"
@@ -1126,7 +1267,11 @@ export function ConstellationGraph({
               gap: 12,
             }}
           >
-            <span>{stats.nodeCount} nodes</span>
+            <span data-testid="constellation-stats-nodes">
+              {data
+                ? `${stats.nodeCount} nodes`
+                : `${loadedNodeCount} / ${stats.nodeCount} nodes`}
+            </span>
             <span>·</span>
             <span>{stats.internalEdgeCount} internal</span>
             <span>·</span>
@@ -1134,6 +1279,61 @@ export function ConstellationGraph({
           </div>
         )}
       </div>
+
+      {/* Load more / pagination footer */}
+      {showControls && !data && fetched && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+            marginTop: 8,
+            padding: "6px 10px",
+            borderRadius: 6,
+            background: "rgba(255,255,255,0.02)",
+            border: "1px solid rgba(255,255,255,0.05)",
+            fontSize: 11,
+            color: "#94a3b8",
+          }}
+          data-testid="constellation-pagination"
+        >
+          <span data-testid="constellation-pagination-status">
+            Loaded {loadedNodeCount} of {totalNodeCount} entities
+            {totalNodeCount > 0
+              ? ` (${Math.round((loadedNodeCount / totalNodeCount) * 100)}%)`
+              : ""}
+          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {loadMoreError && (
+              <span style={{ color: "#ef4444", fontSize: 10 }}>{loadMoreError}</span>
+            )}
+            <button
+              onClick={loadMore}
+              disabled={!hasMore || loadingMore}
+              data-testid="constellation-load-more"
+              style={{
+                fontSize: 11,
+                padding: "5px 12px",
+                borderRadius: 4,
+                border: `1px solid ${hasMore ? `${accentColor}60` : "rgba(255,255,255,0.1)"}`,
+                background: hasMore && !loadingMore ? `${accentColor}18` : "rgba(255,255,255,0.03)",
+                color: hasMore && !loadingMore ? accentColor : "#64748b",
+                cursor: hasMore && !loadingMore ? "pointer" : "default",
+                fontWeight: 600,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+              }}
+            >
+              {loadingMore
+                ? "Loading…"
+                : hasMore
+                ? `Load ${Math.min(pageSize, totalNodeCount - loadedNodeCount)} more`
+                : "All loaded"}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Details panel */}
       {selected && (
