@@ -508,6 +508,12 @@ app.use("/api", etagMiddleware);
 app.use(globalAuthEnforcer);
 app.use("/api", router);
 
+const nexusDist = join(__dirname, "../../mockup-sandbox/dist/public");
+app.use("/nexus", express.static(nexusDist, { index: false }));
+app.use("/nexus", (_req: Request, res: Response) => {
+  res.sendFile(join(nexusDist, "index.html"));
+});
+
 let _graphqlHandler: ((req: Request, res: Response, next: import("express").NextFunction) => void) | null = null;
 
 export function registerGraphQLHandler(

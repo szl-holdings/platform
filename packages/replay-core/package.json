@@ -1,5 +1,5 @@
 {
-  "name": "@szl-holdings/replay-core",
+  "name": "@workspace/replay-core",
   "version": "0.0.0",
   "private": false,
   "type": "module",

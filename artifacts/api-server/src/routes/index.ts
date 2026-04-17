@@ -30,6 +30,7 @@ import * as alloyRuntime from "./groups/alloy-runtime-group";
 import * as selfModel from "./groups/self-model";
 import * as verifier from "./groups/verifier";
 import * as skillLibrary from "./groups/skill-library";
+import nexusRouter from "./nexus";
 
 const router: IRouter = Router();
 
@@ -61,6 +62,8 @@ alloyRuntime.register(router);
 selfModel.register(router);
 verifier.register(router);
 skillLibrary.register(router);
+
+router.use("/nexus", nexusRouter);
 
 router.use(tracesRouter);
 router.use(reflectionsRouter);

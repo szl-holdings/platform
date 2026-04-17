@@ -1,17 +1,17 @@
 kind = "design"
-previewPath = "/__mockup"
-title = "Component Preview Server"
+previewPath = "/nexus/"
+title = "NEXUS — Unified Agentic AI Layer"
 version = "1.0.0"
 id = "XegfDyZt7HqfW2Bb8Ghoy"
 
 [[services]]
 localPort = 8008
-name = "Component Preview Server"
-paths = ["/__mockup"]
+name = "web"
+paths = ["/nexus/"]
 
 [services.env]
 PORT = "8008"
-BASE_PATH = "/__mockup"
+BASE_PATH = "/nexus/"
 
 [services.development]
-run = "pnpm --filter @workspace/mockup-sandbox run dev"
+run = "bash /home/runner/workspace/artifacts/mockup-sandbox/start.sh"

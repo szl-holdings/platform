@@ -664,7 +664,7 @@ export const cogActionsTable = pgTable(
 /**
  * rollback_events — immutable record of every rollback. Append-only.
  */
-export const rollbackEventsTable = pgTable(
+export const cognitiveRollbackEventsTable = pgTable(
   "rollback_events",
   {
     id: uuid("id").defaultRandom().primaryKey(),
@@ -729,5 +729,5 @@ export type PolicyRow = typeof policiesTable.$inferSelect;
 export type PolicyInsert = typeof policiesTable.$inferInsert;
 export type CogActionRow = typeof cogActionsTable.$inferSelect;
 export type CogActionInsert = typeof cogActionsTable.$inferInsert;
-export type RollbackEventRow = typeof rollbackEventsTable.$inferSelect;
-export type RollbackEventInsert = typeof rollbackEventsTable.$inferInsert;
+export type RollbackEventRow = typeof cognitiveRollbackEventsTable.$inferSelect;
+export type RollbackEventInsert = typeof cognitiveRollbackEventsTable.$inferInsert;

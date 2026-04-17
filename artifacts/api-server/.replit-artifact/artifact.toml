@@ -7,7 +7,7 @@ router = "path"
 
 [[services]]
 name = "api"
-paths = [ "/api/" ]
+paths = [ "/api/", "/nexus/" ]
 localPort = 8080
 
 [services.development]

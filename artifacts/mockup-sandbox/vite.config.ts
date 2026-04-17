@@ -1,35 +1,17 @@
-import { defineConfig, type Plugin } from "vite";
+import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
-import { mockupPreviewPlugin } from "./mockupPreviewPlugin";
+
+process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
 const port = Number(process.env.PORT) || 8008;
-const basePath = process.env.BASE_PATH || "/mockup-sandbox/";
-
-function healthCheckMiddlewarePlugin(): Plugin {
-  return {
-    name: "health-check-middleware",
-    apply: "serve",
-    configureServer(server) {
-      server.middlewares.use((req, res, next) => {
-        if (req.url === "/" || req.url === "/__health" || req.url === "/health") {
-          res.writeHead(200, { "Content-Type": "text/plain" });
-          res.end("OK");
-          return;
-        }
-        next();
-      });
-    },
-  };
-}
+const basePath = process.env.BASE_PATH || "/nexus/";
 
 export default defineConfig({
   base: basePath,
   plugins: [
-    healthCheckMiddlewarePlugin(),
-    mockupPreviewPlugin(),
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
@@ -58,28 +40,37 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id): string | undefined {
-          if (id.includes('node_modules')) {
-            if (id.includes('recharts') || id.includes('d3-')) return 'vendor-charts';
-            if (id.includes('framer-motion')) return 'vendor-motion';
-            if (id.includes('@radix-ui')) return 'vendor-radix';
-            if (id.includes('@tanstack')) return 'vendor-tanstack';
-            if (id.includes('lucide-react')) return 'vendor-icons';
-            if (id.includes('react-dom')) return 'vendor-react';
-            if (id.includes('react/')) return 'vendor-react';
+          if (id.includes("node_modules")) {
+            if (id.includes("recharts") || id.includes("d3-")) return "vendor-charts";
+            if (id.includes("framer-motion")) return "vendor-motion";
+            if (id.includes("@radix-ui")) return "vendor-radix";
+            if (id.includes("lucide-react")) return "vendor-icons";
+            if (id.includes("react-dom")) return "vendor-react";
+            if (id.includes("react/")) return "vendor-react";
           }
           return undefined;
         },
       },
     },
   },
+  optimizeDeps: {
+    holdUntilCrawlEnd: true,
+  },
   server: {
     port,
-    strictPort: true,
-    host: "0.0.0.0",
+    host: "::",
     allowedHosts: true,
+    hmr: { clientPort: 443 },
     fs: {
-      strict: true,
+      strict: false,
       deny: ["**/.*"],
+    },
+    proxy: {
+      "/api": {
+        target: "http://localhost:8080",
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
   preview: {

@@ -68,3 +68,19 @@ The platform is a pnpm monorepo utilizing TypeScript 5.9, React 19, Vite, and No
 -   **Government Data:** CISA KEV, NVD CVE, MITRE ATT&CK, Census/BLS, FEMA NRI, NYC Open Data, SEC EDGAR
 -   **Legal Data:** CourtListener REST API
 -   **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot
+
+## NEXUS — Unified Agentic AI Layer
+
+NEXUS is the unified agentic AI orchestration layer for the SZL portfolio, accessible at `/nexus/`. It is served as a static build from the API server (port 8080) and its backend routes live at `/api/nexus/*`.
+
+**Four Pillars:**
+1. **Parallel Research Swarm** — Gatherer/Peer-Reviewer/Drafter/Verifier agents with SSE streaming at `/api/nexus/research`
+2. **Persistent Memory + Skills Library** — Cross-session memory fabric with 12 seeded skills, ingest from 20+ public repos at `/api/nexus/memory`, `/api/nexus/skills`
+3. **Universal Protocol Bridge** — MCP/A2A/ACP/ANP routing with 12 registered tools at `/api/nexus/bridge`
+4. **Cross-App Orchestrator** — Routes tasks across all 10 SZL artifacts at `/api/nexus/orchestrate`
+
+**Frontend:** `artifacts/mockup-sandbox/` — 8 pages (Home, Research, Memory, Skills, PatternAtlas, Bridge, Orchestrator, Ingest). Built to `dist/public/`, served statically by the API server.
+
+**Backend:** `artifacts/api-server/src/routes/nexus.ts` — all NEXUS API endpoints registered at `/api/nexus/*` via `nexusRouter`.
+
+**Serving:** Static NEXUS dist is served by Express in `app.ts` via `express.static` at `/nexus/` with SPA fallback. The `kind=design` mockup-sandbox workflow has port detection incompatibility on this platform — the static build approach bypasses this entirely.
