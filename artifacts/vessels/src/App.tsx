@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from "react";
-import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
+import { Switch, Route, Router as WouterRouter, Link, Redirect, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { persistQueryClient } from "@tanstack/query-persist-client-core";
@@ -224,24 +224,6 @@ const adminNavItems = [
   { path: "/dashboard/audit-log", label: "Audit Log", icon: Activity },
 ];
 
-const legacyNavItems = [
-  { path: "/fleet", label: "Fleet Map", icon: Globe },
-  { path: "/exceptions", label: "Exceptions", icon: AlertTriangle },
-  { path: "/economics", label: "Voyage Economics", icon: DollarSign },
-  { path: "/port-congestion", label: "Port Congestion", icon: Anchor },
-  { path: "/cargo-tracking", label: "Cargo Tracking", icon: Ship },
-  { path: "/ais-live", label: "AIS Live Tracking", icon: Activity },
-  { path: "/commodity-flow", label: "Commodity Flow", icon: BarChart3 },
-  { path: "/maintenance", label: "Maintenance", icon: Wrench },
-  { path: "/command", label: "Command Mode", icon: Activity },
-  { path: "/analytics", label: "Analytics", icon: BarChart3 },
-  { path: "/intelligence", label: "Maritime Intel", icon: Globe },
-  { path: "/corridors", label: "Corridors", icon: Navigation },
-  { path: "/agent-insights", label: "Agent Insights", icon: Brain },
-  { path: "/command-workflows", label: "Command Workflows", icon: ShieldAlert },
-  { path: "/document-engine", label: "Document Engine", icon: FileText },
-];
-
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-full min-h-[200px]">
@@ -404,9 +386,6 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
         { id: "trade-flow-heatmap", label: "Trade Flow Heatmap", href: "/trade-flow-heatmap", icon: <BarChart3 className="w-3.5 h-3.5" /> },
         { id: "intelligence-briefs", label: "Intelligence Briefs", href: "/intelligence-briefs", icon: <Zap className="w-3.5 h-3.5" /> },
         { id: "trading-desk", label: "Trading Desk", href: "/trading-desk", icon: <TrendingUp className="w-3.5 h-3.5" /> },
-        { id: "commodity-flow", label: "Commodity Flow", href: "/commodity-flow", icon: <BarChart3 className="w-3.5 h-3.5" /> },
-        { id: "intelligence", label: "Maritime Intel", href: "/intelligence", icon: <Globe className="w-3.5 h-3.5" /> },
-        { id: "agent-insights", label: "Agent Insights", href: "/agent-insights", icon: <Brain className="w-3.5 h-3.5" /> },
       ],
     },
     {
@@ -419,15 +398,6 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
         { id: "route-risk", label: "Route Risk", href: "/route-risk", icon: <Navigation className="w-3.5 h-3.5" /> },
         { id: "approval-review", label: "Review & Approval", href: "/approval-review", icon: <Shield className="w-3.5 h-3.5" /> },
         { id: "trust-provenance", label: "Trust & Provenance", href: "/trust-provenance", icon: <Shield className="w-3.5 h-3.5" /> },
-        { id: "fleet-map", label: "Fleet Map", href: "/fleet", icon: <Globe className="w-3.5 h-3.5" /> },
-        { id: "exceptions-legacy", label: "Exception Center", href: "/exceptions", icon: <AlertTriangle className="w-3.5 h-3.5" /> },
-        { id: "voyage-economics", label: "Voyage Economics", href: "/economics", icon: <DollarSign className="w-3.5 h-3.5" /> },
-        { id: "port-congestion", label: "Port Congestion", href: "/port-congestion", icon: <Anchor className="w-3.5 h-3.5" /> },
-        { id: "cargo-tracking", label: "Cargo Tracking", href: "/cargo-tracking", icon: <Ship className="w-3.5 h-3.5" /> },
-        { id: "ais-live", label: "AIS Live", href: "/ais-live", icon: <Activity className="w-3.5 h-3.5" /> },
-        { id: "maintenance", label: "Maintenance", href: "/maintenance", icon: <Wrench className="w-3.5 h-3.5" /> },
-        { id: "command-workflows", label: "Command Workflows", href: "/command-workflows", icon: <ShieldAlert className="w-3.5 h-3.5" /> },
-        { id: "document-engine", label: "Document Engine", href: "/document-engine", icon: <FileText className="w-3.5 h-3.5" /> },
       ],
     },
     {
@@ -588,20 +558,21 @@ function DashboardRouter() {
             </div>
           </div>
         </Route>
-        {/* Legacy routes preserved */}
-        <Route path="/fleet" component={FleetMapPage} />
+        {/* Legacy route redirects — kept for backward compatibility, redirect to /dashboard/* equivalents */}
+        <Route path="/fleet"><Redirect to="/dashboard/fleet" /></Route>
+        <Route path="/vessels-list"><Redirect to="/dashboard/vessels" /></Route>
+        <Route path="/corridors"><Redirect to="/dashboard/routes" /></Route>
+        <Route path="/routes"><Redirect to="/dashboard/routes" /></Route>
+        <Route path="/alerts"><Redirect to="/dashboard/alerts" /></Route>
+        <Route path="/analytics"><Redirect to="/dashboard/reports" /></Route>
+        {/* Legacy routes preserved (no clean /dashboard/* equivalent) */}
         <Route path="/vessel/:id" component={VesselDetailEnhancedPage} />
         <Route path="/vessels/:id" component={VesselDetailEnhancedPage} />
-        <Route path="/vessels-list" component={VesselsListPage} />
-        <Route path="/corridors" component={CorridorRoutesPage} />
         <Route path="/exceptions" component={ExceptionsCenterPage} />
         <Route path="/economics" component={VoyageEconomicsPage} />
         <Route path="/maintenance" component={MaintenanceReadinessPage} />
         <Route path="/command" component={CommandModePage} />
-        <Route path="/analytics" component={PerformanceAnalyticsPage} />
         <Route path="/intelligence" component={MaritimeIntelligence} />
-        <Route path="/routes" component={CorridorRoutesPage} />
-        <Route path="/alerts" component={AlertCenterPage} />
         <Route path="/weather" component={WeatherPage} />
         <Route path="/port-analytics" component={PortAnalyticsPage} />
         <Route path="/co2-emissions" component={CO2EmissionsPage} />

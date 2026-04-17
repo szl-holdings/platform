@@ -251,7 +251,7 @@ Full application at `/vessels/`. Flag: `DEMO`. 103 ts/tsx files.
 | `/trust-provenance` | Trust & Provenance | DEMO | Governance |
 | `/settings` | Settings | PRIVATE | Admin |
 
-**Note:** Vessels has a dual-nav pattern — `primaryNavItems` (new `/dashboard/*`) and `legacyNavItems` (older flat routes). Both are active. Target state: consolidate to `/dashboard/*`.
+**Note:** Vessels nav has been consolidated to `/dashboard/*` as the single primary hierarchy. Legacy flat routes (`/fleet`, `/vessels-list`, `/corridors`, `/routes`, `/alerts`, `/analytics`) now redirect to their `/dashboard/*` equivalents. Other legacy routes (`/exceptions`, `/economics`, `/maintenance`, `/command`, `/intelligence`, etc.) remain registered for backward compatibility but are no longer surfaced in the sidebar.
 
 ---
 
