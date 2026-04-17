@@ -1,14 +1,12 @@
 import { MarketingNav } from "../../../components/marketing/MarketingNav";
-  import { MarketingFooter } from "../../../components/marketing/MarketingFooter";
-  import { motion } from "framer-motion";
-  import { Button } from "@szl-holdings/shared-ui/ui/button";
-  import { Link, useParams } from "wouter";
-  import { CheckCircle2, ArrowRight } from "lucide-react";
-  import { OPS_FEATURES, OPS_FEATURE_LIST } from "./data";
-  export type { OpsFeature } from "./data";
-  export { OPS_FEATURES, OPS_FEATURE_LIST };
+import { MarketingFooter } from "../../../components/marketing/MarketingFooter";
+import { motion } from "framer-motion";
+import { Button } from "@szl-holdings/shared-ui/ui/button";
+import { Link, useParams } from "wouter";
+import { CheckCircle2, ArrowRight } from "lucide-react";
+import { OPS_FEATURES } from "./data";
 
-  export function MarketingOpsFeaturePage() {
+export function MarketingOpsFeaturePage() {
   const { slug } = useParams<{ slug: string }>();
   const feature = slug ? OPS_FEATURES[slug] : undefined;
 
