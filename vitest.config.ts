@@ -87,6 +87,7 @@ export default defineConfig({
       { find: "@szl-holdings/atlas-core", replacement: resolve(__dirname, "packages/atlas-core/src/index.ts") },
       { find: "@szl-holdings/policy-engine", replacement: resolve(__dirname, "packages/policy-engine/src/index.ts") },
       { find: "@szl-holdings/replay-core", replacement: resolve(__dirname, "packages/replay-core/src/index.ts") },
+      { find: "@workspace/replay-core", replacement: resolve(__dirname, "packages/replay-core/src/index.ts") },
       { find: "@szl-holdings/evals-core", replacement: resolve(__dirname, "packages/evals-core/src/index.ts") },
       { find: "@szl-holdings/tool-registry", replacement: resolve(__dirname, "packages/tool-registry/src/index.ts") },
       { find: "@szl-holdings/action-engine", replacement: resolve(__dirname, "packages/action-engine/src/index.ts") },
@@ -110,6 +111,7 @@ export default defineConfig({
       "packages/alloy/src/**/*.test.ts",
       "packages/cognitive-observability/src/**/*.test.ts",
       "packages/reflection-engine/src/**/*.test.ts",
+      "packages/replay-core/src/**/*.test.ts",
     ],
     exclude: [
       "tests/e2e/**",

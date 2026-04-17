@@ -21,6 +21,74 @@ describe("TraceRecordSchema", () => {
     expect(trace.retries).toBe(0);
     expect(trace.toolCalls).toEqual([]);
   });
+
+  it("captures all spec fields — run_id, objective, self-model, world-model ref, plan graph", () => {
+    const now = new Date().toISOString();
+    const trace = TraceRecordSchema.parse({
+      traceId: "t-full",
+      runId: "run-001",
+      startedAt: now,
+      objective: "Analyze vessel voyage P&L",
+      selfModelSnapshot: { role: "analyst", capabilities: ["finance", "logistics"] },
+      worldModelSnapshotRef: "world-snapshot-v42",
+      planGraph: {
+        nodes: [
+          { nodeId: "n1", label: "Fetch voyage data", nodeType: "tool", status: "completed", dependsOn: [], metadata: {} },
+          { nodeId: "n2", label: "Run P&L model", nodeType: "model", status: "completed", dependsOn: ["n1"], metadata: {} },
+        ],
+        edges: [{ from: "n1", to: "n2" }],
+        version: "1.0",
+        createdAt: now,
+      },
+      modelsUsed: ["gpt-4o", "o1-mini"],
+      promptVersions: ["v1.2.0", "v1.3.1"],
+      verifierDecisions: [
+        { verifierId: "v1", step: "output-check", outcome: "pass", score: 0.95, reason: "Meets criteria", timestamp: now },
+      ],
+      reflections: [
+        { reflectionId: "r1", trigger: "low-confidence", content: "Retry with more context", actionTaken: "added-context", timestamp: now },
+      ],
+      rollbackPoints: [
+        { rollbackId: "rb1", spanId: "s1", label: "Before model call", createdAt: now },
+      ],
+      output: { summary: "Voyage profitable", marginPct: 12.4 },
+      operatorComments: [
+        { commentId: "c1", operatorId: "ops-001", content: "Looks good", createdAt: now, tags: ["reviewed"] },
+      ],
+    });
+
+    expect(trace.runId).toBe("run-001");
+    expect(trace.objective).toBe("Analyze vessel voyage P&L");
+    expect(trace.selfModelSnapshot).toEqual({ role: "analyst", capabilities: ["finance", "logistics"] });
+    expect(trace.worldModelSnapshotRef).toBe("world-snapshot-v42");
+    expect(trace.planGraph?.nodes).toHaveLength(2);
+    expect(trace.planGraph?.edges).toHaveLength(1);
+    expect(trace.modelsUsed).toEqual(["gpt-4o", "o1-mini"]);
+    expect(trace.promptVersions).toEqual(["v1.2.0", "v1.3.1"]);
+    expect(trace.verifierDecisions).toHaveLength(1);
+    expect(trace.reflections).toHaveLength(1);
+    expect(trace.rollbackPoints).toHaveLength(1);
+    expect(trace.output).toEqual({ summary: "Voyage profitable", marginPct: 12.4 });
+    expect(trace.operatorComments).toHaveLength(1);
+  });
+
+  it("captures grade on a trace", () => {
+    const now = new Date().toISOString();
+    const trace = TraceRecordSchema.parse({
+      traceId: "t-graded",
+      startedAt: now,
+      grade: {
+        gradeId: "g1",
+        gradedBy: "supervisor",
+        score: 0.87,
+        rubric: { accuracy: 0.9, efficiency: 0.8 },
+        notes: "Good but slightly slow",
+        gradedAt: now,
+      },
+    });
+    expect(trace.grade?.score).toBe(0.87);
+    expect(trace.grade?.rubric["accuracy"]).toBe(0.9);
+  });
 });
 
 describe("InMemoryTraceStore", () => {
@@ -40,7 +108,7 @@ describe("InMemoryTraceStore", () => {
   });
 });
 
-describe("TraceWriter", () => {
+describe("TraceWriter — extended fields", () => {
   let store: InMemoryTraceStore;
   let writer: TraceWriter;
 
@@ -53,6 +121,19 @@ describe("TraceWriter", () => {
     const trace = writer.startTrace({ traceId: "t-001", model: "gpt-4o" });
     expect(trace.status).toBe("running");
     expect(trace.model).toBe("gpt-4o");
+    expect(trace.runId).toBe("t-001");
+  });
+
+  it("starts trace with objective and self-model snapshot", () => {
+    const trace = writer.startTrace({
+      traceId: "t-obj",
+      objective: "Find best vessel route",
+      selfModelSnapshot: { role: "logistics-agent" },
+      worldModelSnapshotRef: "snapshot-v7",
+    });
+    expect(trace.objective).toBe("Find best vessel route");
+    expect(trace.selfModelSnapshot).toEqual({ role: "logistics-agent" });
+    expect(trace.worldModelSnapshotRef).toBe("snapshot-v7");
   });
 
   it("appends tool calls and retrieves them", () => {
@@ -67,6 +148,94 @@ describe("TraceWriter", () => {
     const trace = store.get("t-001")!;
     expect(trace.toolCalls).toHaveLength(1);
     expect(trace.toolCalls[0]?.toolName).toBe("graph-query");
+  });
+
+  it("appends verifier decisions", () => {
+    writer.startTrace({ traceId: "t-001" });
+    writer.appendVerifierDecision("t-001", {
+      verifierId: "v-check",
+      step: "output-validation",
+      outcome: "pass",
+      score: 0.92,
+      reason: "All constraints satisfied",
+      timestamp: new Date().toISOString(),
+    });
+    const trace = store.get("t-001")!;
+    expect(trace.verifierDecisions).toHaveLength(1);
+    expect(trace.verifierDecisions[0]?.outcome).toBe("pass");
+  });
+
+  it("appends reflections", () => {
+    writer.startTrace({ traceId: "t-001" });
+    writer.appendReflection("t-001", {
+      reflectionId: "r-1",
+      trigger: "error-rate-spike",
+      content: "Retry with fallback model",
+      actionTaken: "model-switch",
+      timestamp: new Date().toISOString(),
+    });
+    const trace = store.get("t-001")!;
+    expect(trace.reflections).toHaveLength(1);
+    expect(trace.reflections[0]?.trigger).toBe("error-rate-spike");
+  });
+
+  it("adds rollback points", () => {
+    writer.startTrace({ traceId: "t-001" });
+    writer.addRollbackPoint("t-001", {
+      rollbackId: "rb-1",
+      spanId: "s-pre-call",
+      label: "Before LLM call",
+      createdAt: new Date().toISOString(),
+    });
+    const trace = store.get("t-001")!;
+    expect(trace.rollbackPoints).toHaveLength(1);
+    expect(trace.rollbackPoints[0]?.label).toBe("Before LLM call");
+  });
+
+  it("sets plan graph", () => {
+    writer.startTrace({ traceId: "t-001" });
+    writer.setPlanGraph("t-001", {
+      nodes: [{ nodeId: "n1", label: "Step 1", nodeType: "task", status: "pending", dependsOn: [], metadata: {} }],
+      edges: [],
+      version: "1.0",
+    });
+    const trace = store.get("t-001")!;
+    expect(trace.planGraph?.nodes).toHaveLength(1);
+  });
+
+  it("sets output", () => {
+    writer.startTrace({ traceId: "t-001" });
+    writer.setOutput("t-001", { result: "done", confidence: 0.95 });
+    const trace = store.get("t-001")!;
+    expect(trace.output).toEqual({ result: "done", confidence: 0.95 });
+  });
+
+  it("adds operator comments with persist", () => {
+    writer.startTrace({ traceId: "t-001" });
+    const comment = writer.addOperatorComment("t-001", "ops-99", "Looks correct", {
+      spanId: "s-1",
+      tags: ["verified"],
+    });
+    expect(comment.commentId).toBeDefined();
+    const trace = store.get("t-001")!;
+    expect(trace.operatorComments).toHaveLength(1);
+    expect(trace.operatorComments[0]?.operatorId).toBe("ops-99");
+    expect(trace.operatorComments[0]?.tags).toContain("verified");
+  });
+
+  it("grades a run and persists the grade", () => {
+    writer.startTrace({ traceId: "t-001" });
+    writer.completeTrace("t-001", { status: "completed" });
+    const grade = writer.gradeRun("t-001", {
+      gradedBy: "evaluator",
+      score: 0.78,
+      rubric: { relevance: 0.8, accuracy: 0.75 },
+      notes: "Minor hallucination in step 3",
+    });
+    expect(grade.gradeId).toBeDefined();
+    expect(grade.score).toBe(0.78);
+    const trace = store.get("t-001")!;
+    expect(trace.grade?.score).toBe(0.78);
   });
 
   it("completes a trace and sets completedAt", () => {
@@ -86,12 +255,16 @@ describe("TraceWriter", () => {
   });
 });
 
-describe("TraceReplayer", () => {
-  it("replays a trace deterministically via visitor", () => {
+describe("TraceReplayer — deterministic replay", () => {
+  it("replays a trace deterministically via visitor including verifiers and reflections", () => {
     const store = makeStore();
     const writer = new TraceWriter(store);
-    writer.startTrace({ traceId: "t-001" });
+    const now = new Date().toISOString();
+    writer.startTrace({ traceId: "t-001", objective: "Test objective" });
     writer.appendToolCall("t-001", { toolId: "t1", toolName: "search", success: true, retries: 0, approvalRequired: false });
+    writer.appendVerifierDecision("t-001", { verifierId: "v1", step: "check", outcome: "pass", timestamp: now });
+    writer.appendReflection("t-001", { reflectionId: "r1", trigger: "low-confidence", content: "retry", timestamp: now });
+    writer.addRollbackPoint("t-001", { rollbackId: "rb1", createdAt: now });
     writer.completeTrace("t-001");
 
     const replayer = new TraceReplayer(store);
@@ -99,10 +272,13 @@ describe("TraceReplayer", () => {
     replayer.replayTrace("t-001", {
       onTraceStart: (t) => visited.push(`start:${t.traceId}`),
       onToolCall: (c) => visited.push(`tool:${c.toolName}`),
+      onVerifierDecision: (v) => visited.push(`verifier:${v.verifierId}`),
+      onReflection: (r) => visited.push(`reflection:${r.reflectionId}`),
+      onRollbackPoint: (rp) => visited.push(`rollback:${rp.rollbackId}`),
       onTraceEnd: (t) => visited.push(`end:${t.traceId}`),
     });
 
-    expect(visited).toEqual(["start:t-001", "tool:search", "end:t-001"]);
+    expect(visited).toEqual(["start:t-001", "tool:search", "verifier:v1", "reflection:r1", "rollback:rb1", "end:t-001"]);
   });
 
   it("getTraceTree returns spans as a tree", () => {
@@ -132,6 +308,162 @@ describe("TraceReplayer", () => {
     const diff = replayer.compareTraces("t-a", "t-b");
     expect(diff.latencyDeltaMs).toBe(50);
     expect(diff.tokenDelta).toBe(100);
+  });
+});
+
+describe("TraceDiff — extended comparisons", () => {
+  it("detects model changes between runs", () => {
+    const store = makeStore();
+    const writer = new TraceWriter(store);
+    writer.startTrace({ traceId: "base", model: "gpt-4o", modelsUsed: ["gpt-4o"] });
+    writer.completeTrace("base", { latencyMs: 200 });
+    writer.startTrace({ traceId: "candidate", model: "o1-mini", modelsUsed: ["o1-mini", "gpt-4o"] });
+    writer.completeTrace("candidate", { latencyMs: 180 });
+
+    const replayer = new TraceReplayer(store);
+    const diff = replayer.compareTraces("base", "candidate");
+    expect(diff.modelChanged).toBe(true);
+    expect(diff.modelsAdded).toContain("o1-mini");
+  });
+
+  it("detects prompt version changes", () => {
+    const store = makeStore();
+    const writer = new TraceWriter(store);
+    writer.startTrace({ traceId: "base", promptVersions: ["v1.0"] });
+    writer.completeTrace("base");
+    writer.startTrace({ traceId: "candidate", promptVersions: ["v2.0"] });
+    writer.completeTrace("candidate");
+
+    const replayer = new TraceReplayer(store);
+    const diff = replayer.compareTraces("base", "candidate");
+    expect(diff.promptVersionsChanged).toBe(true);
+    expect(diff.promptVersionsA).toEqual(["v1.0"]);
+    expect(diff.promptVersionsB).toEqual(["v2.0"]);
+  });
+
+  it("detects tool additions and removals", () => {
+    const store = makeStore();
+    const writer = new TraceWriter(store);
+    writer.startTrace({ traceId: "base" });
+    writer.appendToolCall("base", { toolId: "t1", toolName: "search", success: true, retries: 0, approvalRequired: false });
+    writer.completeTrace("base");
+    writer.startTrace({ traceId: "candidate" });
+    writer.appendToolCall("candidate", { toolId: "t2", toolName: "embed", success: true, retries: 0, approvalRequired: false });
+    writer.completeTrace("candidate");
+
+    const replayer = new TraceReplayer(store);
+    const diff = replayer.compareTraces("base", "candidate");
+    expect(diff.toolsAdded).toContain("embed");
+    expect(diff.toolsRemoved).toContain("search");
+  });
+
+  it("detects output change", () => {
+    const store = makeStore();
+    const writer = new TraceWriter(store);
+    writer.startTrace({ traceId: "base" });
+    writer.setOutput("base", { answer: "A" });
+    writer.completeTrace("base");
+    writer.startTrace({ traceId: "candidate" });
+    writer.setOutput("candidate", { answer: "B" });
+    writer.completeTrace("candidate");
+
+    const replayer = new TraceReplayer(store);
+    const diff = replayer.compareTraces("base", "candidate");
+    expect(diff.outputChanged).toBe(true);
+  });
+
+  it("detects verifier pass rate delta", () => {
+    const store = makeStore();
+    const writer = new TraceWriter(store);
+    const now = new Date().toISOString();
+    writer.startTrace({ traceId: "base" });
+    writer.appendVerifierDecision("base", { verifierId: "v1", step: "s", outcome: "pass", timestamp: now });
+    writer.appendVerifierDecision("base", { verifierId: "v2", step: "s", outcome: "pass", timestamp: now });
+    writer.completeTrace("base");
+
+    writer.startTrace({ traceId: "candidate" });
+    writer.appendVerifierDecision("candidate", { verifierId: "v1", step: "s", outcome: "pass", timestamp: now });
+    writer.appendVerifierDecision("candidate", { verifierId: "v2", step: "s", outcome: "fail", timestamp: now });
+    writer.completeTrace("candidate");
+
+    const replayer = new TraceReplayer(store);
+    const diff = replayer.compareTraces("base", "candidate");
+    expect(diff.verifierPassRateDelta).toBeCloseTo(-0.5);
+  });
+
+  it("detects grade score delta", () => {
+    const store = makeStore();
+    const writer = new TraceWriter(store);
+    writer.startTrace({ traceId: "base" });
+    writer.completeTrace("base");
+    writer.gradeRun("base", { gradedBy: "eval", score: 0.9, rubric: {} });
+
+    writer.startTrace({ traceId: "candidate" });
+    writer.completeTrace("candidate");
+    writer.gradeRun("candidate", { gradedBy: "eval", score: 0.7, rubric: {} });
+
+    const replayer = new TraceReplayer(store);
+    const diff = replayer.compareTraces("base", "candidate");
+    expect(diff.gradeScoreDelta).toBeCloseTo(-0.2);
+  });
+});
+
+describe("Regression detection", () => {
+  it("detectRegressions flags candidates that exceed thresholds", () => {
+    const store = makeStore();
+    const writer = new TraceWriter(store);
+
+    writer.startTrace({ traceId: "baseline" });
+    writer.completeTrace("baseline", { latencyMs: 100, costUsd: 0.005, status: "completed" });
+
+    writer.startTrace({ traceId: "slow-run" });
+    writer.completeTrace("slow-run", { latencyMs: 800, costUsd: 0.005, status: "completed" });
+
+    writer.startTrace({ traceId: "ok-run" });
+    writer.completeTrace("ok-run", { latencyMs: 150, costUsd: 0.005, status: "completed" });
+
+    const replayer = new TraceReplayer(store);
+    const regressions = replayer.detectRegressions("baseline", ["slow-run", "ok-run"], {
+      latencyRegressionMs: 500,
+      costRegressionUsd: 0.05,
+    });
+
+    expect(regressions).toHaveLength(1);
+    expect(regressions[0]?.candidateTraceId).toBe("slow-run");
+    expect(regressions[0]?.diff.regressionDetected).toBe(true);
+    expect(regressions[0]?.diff.regressionReasons[0]).toMatch(/Latency increased/);
+  });
+
+  it("detectRegressions returns empty when no regressions", () => {
+    const store = makeStore();
+    const writer = new TraceWriter(store);
+    writer.startTrace({ traceId: "baseline" });
+    writer.completeTrace("baseline", { latencyMs: 100, status: "completed" });
+    writer.startTrace({ traceId: "candidate" });
+    writer.completeTrace("candidate", { latencyMs: 105, status: "completed" });
+
+    const replayer = new TraceReplayer(store);
+    const regressions = replayer.detectRegressions("baseline", ["candidate"], {
+      latencyRegressionMs: 500,
+    });
+    expect(regressions).toHaveLength(0);
+  });
+
+  it("detectRegressions flags grade score drop", () => {
+    const store = makeStore();
+    const writer = new TraceWriter(store);
+    writer.startTrace({ traceId: "baseline" });
+    writer.completeTrace("baseline");
+    writer.gradeRun("baseline", { gradedBy: "eval", score: 0.95, rubric: {} });
+
+    writer.startTrace({ traceId: "candidate" });
+    writer.completeTrace("candidate");
+    writer.gradeRun("candidate", { gradedBy: "eval", score: 0.70, rubric: {} });
+
+    const replayer = new TraceReplayer(store);
+    const regressions = replayer.detectRegressions("baseline", ["candidate"], { gradeScoreDrop: 0.1 });
+    expect(regressions).toHaveLength(1);
+    expect(regressions[0]?.diff.regressionReasons[0]).toMatch(/Grade score dropped/);
   });
 });
 
@@ -345,7 +677,7 @@ describe("TraceSdk", () => {
   });
 });
 
-describe("Replay diff", () => {
+describe("Replay diff — existing tests", () => {
   it("compareTraces surfaces tool call, latency, token, and cost diffs", () => {
     const store = makeStore();
     const writer = new TraceWriter(store);
