@@ -727,10 +727,26 @@ describe("Integration — /domains/:domain/graph (multi-domain seeded fixture)",
     expect(res.body.stats.internalEdgeCount).toBe(0);
   });
 
-  it("terra graph without isActive filter includes BOTH active and inactive terra nodes", async () => {
+  it("terra graph defaults to active-only (matches isActive=true)", async () => {
     const res = await request(app)
       .get("/domains/terra/graph")
       .query({ entityType: FIXTURE_ENTITY_TYPE });
+    expect(res.status).toBe(200);
+    expect(res.body.domain).toBe("terra");
+
+    // Default behavior should match isActive=true: only the 3 active terra nodes
+    const returnedIds = (res.body.nodes as Array<{ id: string }>).map((n) => n.id).sort();
+    expect(returnedIds).toEqual([...seeded.terra].sort());
+    expect(res.body.stats.nodeCount).toBe(3);
+    expect(res.body.stats.edgeCount).toBe(9);
+    expect(res.body.stats.crossDomainEdgeCount).toBe(6);
+    expect(res.body.stats.internalEdgeCount).toBe(3);
+  });
+
+  it("terra graph with isActive=all opts out of the filter and includes BOTH active and inactive terra nodes", async () => {
+    const res = await request(app)
+      .get("/domains/terra/graph")
+      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: "all" });
     expect(res.status).toBe(200);
     expect(res.body.domain).toBe("terra");
 

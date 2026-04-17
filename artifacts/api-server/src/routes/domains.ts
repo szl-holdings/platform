@@ -15,7 +15,9 @@
  *
  * Query params:
  *   entityType   filter by entity type
- *   isActive     filter active-only (default: true)
+ *   isActive     filter active-only (default: true). Pass `isActive=false`
+ *                to fetch ONLY inactive nodes, or `isActive=all` to disable
+ *                the filter and return both active and inactive nodes.
  *   limit        max nodes (default: 100, max: 500)
  *   offset       pagination offset (default: 0)
  *   includeCross include cross-domain edges (default: true)
@@ -204,7 +206,8 @@ function domainHandler(domain: string) {
         return sendBadRequest(res, "offset must be >= 0");
       }
       const includeCross = req.query.includeCross !== "false";
-      const isActive = req.query.isActive !== undefined ? req.query.isActive !== "false" : undefined;
+      const isActiveRaw = req.query.isActive as string | undefined;
+      const isActive = isActiveRaw === "all" ? undefined : isActiveRaw !== "false";
       const activeEdgesOnly = req.query.activeEdgesOnly === "true";
 
       const graph = await buildDomainGraph(domain, {
