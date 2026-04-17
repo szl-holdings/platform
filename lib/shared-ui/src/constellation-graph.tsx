@@ -471,6 +471,7 @@ export function ConstellationGraph({
   // Remember the node that failed so the Retry button can re-issue the same
   // request even if the operator briefly clicks elsewhere in the panel.
   const expandErrorNodeRef = useRef<ConstellationGraphNode | null>(null);
+  const [expandLimit, setExpandLimit] = useState<25 | 50 | 100 | 200>(25);
 
   // Multi-hop trace state. `traceOriginId` anchors the distance scale visible
   // on the canvas; `traceDistances` maps node id -> shortest hop count from
@@ -627,7 +628,7 @@ export function ConstellationGraph({
         const res = await apiFetch<
           | { data?: { node: ConstellationGraphNode; neighbors: ConstellationGraphNode[]; edges: ConstellationGraphEdge[] } }
           | { node: ConstellationGraphNode; neighbors: ConstellationGraphNode[]; edges: ConstellationGraphEdge[] }
-        >(`/graph/entities/${encodeURIComponent(node.id)}/neighbors?limit=25`);
+        >(`/graph/entities/${encodeURIComponent(node.id)}/neighbors?limit=${expandLimit}`);
         const payload =
           (res as { data?: { node: ConstellationGraphNode; neighbors: ConstellationGraphNode[]; edges: ConstellationGraphEdge[] } }).data ??
           (res as { node: ConstellationGraphNode; neighbors: ConstellationGraphNode[]; edges: ConstellationGraphEdge[] });
@@ -659,7 +660,7 @@ export function ConstellationGraph({
         setExpanding((cur) => (cur === node.id ? null : cur));
       }
     },
-    [expanding],
+    [expanding, expandLimit],
   );
 
   const tracePath = useCallback(
@@ -1475,29 +1476,55 @@ export function ConstellationGraph({
                   {expanding === selected.id ? "Tracing…" : `↳ Trace ${traceDepth} hops`}
                 </button>
               </div>
-              <button
-                onClick={() => expandNeighbors(selected)}
-                disabled={expanding === selected.id}
-                style={{
-                  fontSize: 11,
-                  padding: "5px 10px",
-                  borderRadius: 4,
-                  border: `1px solid ${accentColor}60`,
-                  background: expanding === selected.id ? "rgba(255,255,255,0.04)" : `${accentColor}18`,
-                  color: expanding === selected.id ? "#64748b" : accentColor,
-                  cursor: expanding === selected.id ? "default" : "pointer",
-                  fontWeight: 600,
-                  letterSpacing: "0.04em",
-                }}
-                data-testid="constellation-expand-neighbors"
-                title="Fetch this node's 1-hop neighbors across all domains"
-              >
-                {expanding === selected.id
-                  ? "Expanding…"
-                  : expandedIds.has(selected.id)
-                  ? "Re-expand neighbors ↻"
-                  : "+ Expand neighbors"}
-              </button>
+              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                <button
+                  onClick={() => expandNeighbors(selected)}
+                  disabled={expanding === selected.id}
+                  style={{
+                    fontSize: 11,
+                    padding: "5px 10px",
+                    borderRadius: 4,
+                    border: `1px solid ${accentColor}60`,
+                    background: expanding === selected.id ? "rgba(255,255,255,0.04)" : `${accentColor}18`,
+                    color: expanding === selected.id ? "#64748b" : accentColor,
+                    cursor: expanding === selected.id ? "default" : "pointer",
+                    fontWeight: 600,
+                    letterSpacing: "0.04em",
+                  }}
+                  data-testid="constellation-expand-neighbors"
+                  title={`Fetch this node's 1-hop neighbors across all domains (up to ${expandLimit})`}
+                >
+                  {expanding === selected.id
+                    ? "Expanding…"
+                    : expandedIds.has(selected.id)
+                    ? `Re-expand neighbors ↻`
+                    : `+ Expand neighbors`}
+                </button>
+                <select
+                  value={expandLimit}
+                  onChange={(e) => setExpandLimit(Number(e.target.value) as 25 | 50 | 100 | 200)}
+                  disabled={expanding === selected.id}
+                  aria-label="Maximum neighbors to load per expansion"
+                  title="Maximum neighbors to load per expansion"
+                  data-testid="constellation-expand-limit"
+                  style={{
+                    fontSize: 11,
+                    padding: "5px 6px",
+                    borderRadius: 4,
+                    border: `1px solid ${accentColor}40`,
+                    background: "rgba(15,23,42,0.8)",
+                    color: "#cbd5e1",
+                    cursor: expanding === selected.id ? "default" : "pointer",
+                    fontWeight: 600,
+                    letterSpacing: "0.04em",
+                  }}
+                >
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                  <option value={200}>200</option>
+                </select>
+              </div>
               <button
                 onClick={() => navigateToOwner(selected)}
                 disabled={!selected.domain}
