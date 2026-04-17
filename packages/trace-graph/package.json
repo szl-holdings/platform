@@ -24,6 +24,18 @@
     "./replay": {
       "types": "./dist/replay.d.ts",
       "import": "./src/replay.ts"
+    },
+    "./queue": {
+      "types": "./dist/queue.d.ts",
+      "import": "./src/queue.ts"
+    },
+    "./query": {
+      "types": "./dist/query.d.ts",
+      "import": "./src/query.ts"
+    },
+    "./sdk": {
+      "types": "./dist/sdk.d.ts",
+      "import": "./src/sdk.ts"
     }
   },
   "dependencies": {

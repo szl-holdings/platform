@@ -18,6 +18,7 @@ import * as decisions from "./groups/decisions";
 import * as domainAtlas from "./groups/domain-atlas";
 import * as graph from "./groups/graph";
 import * as guardian from "./groups/guardian";
+import tracesRouter from "./traces";
 
 const router: IRouter = Router();
 
@@ -40,5 +41,7 @@ decisions.register(router);
 domainAtlas.register(router);
 graph.register(router);
 guardian.register(router);
+
+router.use(tracesRouter);
 
 export default router;

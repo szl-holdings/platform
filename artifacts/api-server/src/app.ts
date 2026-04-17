@@ -16,6 +16,7 @@ import { sendError, sendNotFound, sendUnauthorized } from "./lib/api-response";
 import { correlationMiddleware } from "./middlewares/correlation";
 import { globalLimiter } from "./middlewares/rate-limiters";
 import { telemetryMiddleware } from "./middlewares/telemetry";
+import { traceEmitMiddleware } from "./middlewares/trace-emit";
 import { authMiddleware } from "./middlewares/authMiddleware";
 import { globalAuthEnforcer } from "./middlewares/global-auth-enforcer";
 import { csrfMiddleware } from "./middlewares/csrf";
@@ -126,6 +127,7 @@ app.use(compression({
 app.use(globalLimiter);
 
 app.use(telemetryMiddleware);
+app.use(traceEmitMiddleware);
 
 app.use(
   pinoHttp({

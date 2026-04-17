@@ -20,6 +20,7 @@
     "@graphql-tools/schema": "^10.0.31",
     "@react-pdf/renderer": "^4.3.2",
     "@swc/helpers": "^0.5.20",
+    "@workspace/trace-graph": "workspace:*",
     "@szl-holdings/action-engine": "workspace:*",
     "@szl-holdings/ai-engine": "workspace:*",
     "@szl-holdings/decision-engine": "workspace:*",

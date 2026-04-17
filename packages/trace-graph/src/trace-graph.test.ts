@@ -3,6 +3,9 @@ import { TraceRecordSchema } from "./schema.js";
 import { InMemoryTraceStore } from "./store.js";
 import { TraceWriter } from "./writer.js";
 import { TraceReplayer } from "./replay.js";
+import { WriteQueue, QueuedTraceStore } from "./queue.js";
+import { TraceQueryEngine } from "./query.js";
+import { TraceSdk } from "./sdk.js";
 
 function makeStore() {
   return new InMemoryTraceStore();
@@ -129,5 +132,254 @@ describe("TraceReplayer", () => {
     const diff = replayer.compareTraces("t-a", "t-b");
     expect(diff.latencyDeltaMs).toBe(50);
     expect(diff.tokenDelta).toBe(100);
+  });
+});
+
+describe("WriteQueue", () => {
+  it("enqueues writes and flushes to inner store", async () => {
+    const inner = makeStore();
+    const queue = new WriteQueue(inner, { flushIntervalMs: 10000 });
+    const trace = TraceRecordSchema.parse({ traceId: "q-001", startedAt: new Date().toISOString() });
+    inner.save(trace);
+    queue.enqueue({ type: "save", trace });
+    expect(queue.pendingCount).toBe(1);
+    await queue.flush();
+    expect(queue.pendingCount).toBe(0);
+  });
+
+  it("QueuedTraceStore saves immediately to inner and provides read access", () => {
+    const inner = makeStore();
+    const qStore = new QueuedTraceStore(inner, { flushIntervalMs: 10000 });
+    const trace = TraceRecordSchema.parse({ traceId: "qs-001", startedAt: new Date().toISOString() });
+    qStore.save(trace);
+    expect(qStore.get("qs-001")).toBeDefined();
+    expect(inner.get("qs-001")).toBeDefined();
+    qStore.queue.stop();
+  });
+
+  it("QueuedTraceStore count reflects inner store", () => {
+    const inner = makeStore();
+    const qStore = new QueuedTraceStore(inner, { flushIntervalMs: 10000 });
+    const t1 = TraceRecordSchema.parse({ traceId: "qs-a", startedAt: new Date().toISOString() });
+    const t2 = TraceRecordSchema.parse({ traceId: "qs-b", startedAt: new Date().toISOString() });
+    qStore.save(t1);
+    qStore.save(t2);
+    expect(qStore.count()).toBe(2);
+    qStore.queue.stop();
+  });
+});
+
+describe("TraceQueryEngine", () => {
+  let store: InMemoryTraceStore;
+  let writer: TraceWriter;
+  let engine: TraceQueryEngine;
+
+  beforeEach(() => {
+    store = makeStore();
+    writer = new TraceWriter(store);
+    engine = new TraceQueryEngine(store);
+  });
+
+  it("queries all traces with no filter", () => {
+    writer.startTrace({ traceId: "q-1" });
+    writer.startTrace({ traceId: "q-2" });
+    const result = engine.query();
+    expect(result.traces).toHaveLength(2);
+    expect(result.total).toBe(2);
+  });
+
+  it("filters by agentId", () => {
+    writer.startTrace({ traceId: "q-1", agentId: "agent-alpha" });
+    writer.startTrace({ traceId: "q-2", agentId: "agent-beta" });
+    const result = engine.query({ agentId: "agent-alpha" });
+    expect(result.traces).toHaveLength(1);
+    expect(result.traces[0]?.traceId).toBe("q-1");
+  });
+
+  it("filters by status (running vs completed)", () => {
+    writer.startTrace({ traceId: "q-run" });
+    writer.startTrace({ traceId: "q-done" });
+    writer.completeTrace("q-done", { status: "completed" });
+    const running = engine.query({ status: "running" });
+    expect(running.traces.some(t => t.traceId === "q-run")).toBe(true);
+    expect(running.traces.every(t => t.status === "running")).toBe(true);
+  });
+
+  it("filters traces with errors via hasErrors flag", () => {
+    writer.startTrace({ traceId: "q-err" });
+    writer.recordError("q-err", "FAIL", "something failed");
+    writer.startTrace({ traceId: "q-ok" });
+    const errResult = engine.query({ hasErrors: true });
+    expect(errResult.traces.every(t => t.errors.length > 0)).toBe(true);
+    const okResult = engine.query({ hasErrors: false });
+    expect(okResult.traces.every(t => t.errors.length === 0)).toBe(true);
+  });
+
+  it("paginates results via limit and offset", () => {
+    for (let i = 0; i < 5; i++) writer.startTrace({ traceId: `page-${i}` });
+    const page1 = engine.query({ limit: 2, offset: 0 });
+    const page2 = engine.query({ limit: 2, offset: 2 });
+    expect(page1.traces).toHaveLength(2);
+    expect(page2.traces).toHaveLength(2);
+    expect(page1.total).toBe(5);
+    expect(page1.traces[0]?.traceId).not.toBe(page2.traces[0]?.traceId);
+  });
+
+  it("getById retrieves the correct trace", () => {
+    writer.startTrace({ traceId: "find-me", agentId: "agent-x" });
+    const found = engine.getById("find-me");
+    expect(found?.agentId).toBe("agent-x");
+  });
+});
+
+describe("Entity linkage", () => {
+  it("links entities to traces bidirectionally", () => {
+    const store = makeStore();
+    const writer = new TraceWriter(store);
+    const engine = new TraceQueryEngine(store);
+
+    writer.startTrace({ traceId: "t-linked" });
+    engine.linkEntityToTrace("t-linked", "entity-001");
+    engine.linkEntityToTrace("t-linked", "entity-002");
+
+    const entities = engine.getEntitiesForTrace("t-linked");
+    expect(entities).toContain("entity-001");
+    expect(entities).toContain("entity-002");
+
+    const traces = engine.getTracesForEntity("entity-001");
+    expect(traces).toContain("t-linked");
+  });
+
+  it("filters traces by entityId in query", () => {
+    const store = makeStore();
+    const writer = new TraceWriter(store);
+    const engine = new TraceQueryEngine(store);
+
+    writer.startTrace({ traceId: "t-a" });
+    writer.startTrace({ traceId: "t-b" });
+    engine.linkEntityToTrace("t-a", "ent-x");
+
+    const result = engine.query({ entityId: "ent-x" });
+    expect(result.traces).toHaveLength(1);
+    expect(result.traces[0]?.traceId).toBe("t-a");
+  });
+
+  it("returns empty for entity with no traces", () => {
+    const engine = new TraceQueryEngine(makeStore());
+    expect(engine.getTracesForEntity("ghost-entity")).toEqual([]);
+    expect(engine.getEntitiesForTrace("ghost-trace")).toEqual([]);
+  });
+});
+
+describe("TraceSdk", () => {
+  it("startSession creates a running trace", () => {
+    const store = makeStore();
+    const sdk = new TraceSdk(new TraceWriter(store), new TraceQueryEngine(store));
+    const session = sdk.startSession({ agentId: "agent-sdk" });
+    expect(store.get(session.traceId)?.status).toBe("running");
+  });
+
+  it("startSpan and endSpan append a completed span", () => {
+    const store = makeStore();
+    const sdk = new TraceSdk(new TraceWriter(store), new TraceQueryEngine(store));
+    const session = sdk.startSession({});
+    const spanId = session.startSpan({ name: "test-span" });
+    session.endSpan(spanId, { status: "ok" });
+    session.complete();
+    const trace = store.get(session.traceId)!;
+    expect(trace.spans).toHaveLength(1);
+    expect(trace.spans[0]?.name).toBe("test-span");
+    expect(trace.spans[0]?.status).toBe("ok");
+  });
+
+  it("complete sets trace to completed with latency", () => {
+    const store = makeStore();
+    const sdk = new TraceSdk(new TraceWriter(store), new TraceQueryEngine(store));
+    const session = sdk.startSession({});
+    const result = session.complete({ latencyMs: 42 });
+    expect(result.status).toBe("completed");
+    expect(result.latencyMs).toBe(42);
+  });
+
+  it("fail records error and sets status to failed", () => {
+    const store = makeStore();
+    const sdk = new TraceSdk(new TraceWriter(store), new TraceQueryEngine(store));
+    const session = sdk.startSession({});
+    const result = session.fail("ERR_CODE", "oops");
+    expect(result.status).toBe("failed");
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]?.code).toBe("ERR_CODE");
+  });
+
+  it("wrapToolCall records success on resolved call", async () => {
+    const store = makeStore();
+    const sdk = new TraceSdk(new TraceWriter(store), new TraceQueryEngine(store));
+    const session = sdk.startSession({});
+    const wrapped = sdk.wrapToolCall(session, "t1", "adder", async (a: number, b: number) => a + b);
+    const res = await wrapped(3, 4);
+    expect(res).toBe(7);
+    session.complete();
+    const trace = store.get(session.traceId)!;
+    expect(trace.toolCalls.some(tc => tc.toolName === "adder" && tc.success)).toBe(true);
+  });
+
+  it("wrapToolCall records failure on rejected call", async () => {
+    const store = makeStore();
+    const sdk = new TraceSdk(new TraceWriter(store), new TraceQueryEngine(store));
+    const session = sdk.startSession({});
+    const wrapped = sdk.wrapToolCall(session, "t-fail", "breaker", async () => { throw new Error("boom"); });
+    await expect(wrapped()).rejects.toThrow("boom");
+    session.complete();
+    const trace = store.get(session.traceId)!;
+    expect(trace.toolCalls.some(tc => tc.toolName === "breaker" && !tc.success)).toBe(true);
+  });
+
+  it("linkEntity associates entity with trace in query engine", () => {
+    const store = makeStore();
+    const engine = new TraceQueryEngine(store);
+    const sdk = new TraceSdk(new TraceWriter(store), engine);
+    const session = sdk.startSession({});
+    session.linkEntity("entity-999");
+    session.complete();
+    expect(engine.getEntitiesForTrace(session.traceId)).toContain("entity-999");
+  });
+});
+
+describe("Replay diff", () => {
+  it("compareTraces surfaces tool call, latency, token, and cost diffs", () => {
+    const store = makeStore();
+    const writer = new TraceWriter(store);
+
+    writer.startTrace({ traceId: "base" });
+    writer.appendToolCall("base", { toolId: "t1", toolName: "search", success: true, retries: 0, approvalRequired: false });
+    writer.completeTrace("base", { latencyMs: 200, costUsd: 0.01, totalTokens: 400 });
+
+    writer.startTrace({ traceId: "replay" });
+    writer.appendToolCall("replay", { toolId: "t1", toolName: "search", success: true, retries: 0, approvalRequired: false });
+    writer.appendToolCall("replay", { toolId: "t2", toolName: "embed", success: true, retries: 0, approvalRequired: false });
+    writer.completeTrace("replay", { latencyMs: 320, costUsd: 0.018, totalTokens: 600 });
+
+    const replayer = new TraceReplayer(store);
+    const diff = replayer.compareTraces("base", "replay");
+
+    expect(diff.latencyDeltaMs).toBeCloseTo(120);
+    expect(diff.tokenDelta).toBe(200);
+    expect(diff.toolCallCountDelta).toBe(1);
+    expect(diff.statusA).toBe("completed");
+    expect(diff.statusB).toBe("completed");
+  });
+
+  it("compareTraces detects error count change", () => {
+    const store = makeStore();
+    const writer = new TraceWriter(store);
+    writer.startTrace({ traceId: "clean" });
+    writer.completeTrace("clean");
+    writer.startTrace({ traceId: "dirty" });
+    writer.recordError("dirty", "ERR", "oops");
+    writer.completeTrace("dirty", { status: "failed" });
+
+    const replayer = new TraceReplayer(store);
+    const diff = replayer.compareTraces("clean", "dirty");
+    expect(diff.errorCountDelta).toBe(1);
   });
 });

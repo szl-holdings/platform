@@ -193,6 +193,37 @@ Seeded scenarios: `aegis-soc-threat-triage-v1` (3 snapshots, ground truth), `ves
 
 Framework docs: `docs/ai/agent-evaluation-framework.md`
 
+## SZL Foundation — Trace Graph
+
+**Foundation 03** delivers the canonical trace layer that links every agent run, model call, tool invocation, retrieval, memory op, and workflow step into a queryable graph.
+
+### @workspace/trace-graph (`packages/trace-graph/`)
+
+| Module | Purpose |
+|--------|---------|
+| `schema.ts` | Zod types for TraceRecord, TraceSpan, ToolCallRecord, RetrievalRecord, MemoryIORecord, CitationRecord, GuardrailResult |
+| `store.ts` | InMemoryTraceStore (implements TraceStore interface) |
+| `writer.ts` | TraceWriter — startTrace, appendToolCall/Retrieval/MemoryIO/Span/Citation, completeTrace, recordError |
+| `replay.ts` | TraceReplayer — visitor-based replay, tree construction, compareTraces diff |
+| `queue.ts` | WriteQueue + QueuedTraceStore — non-blocking write-behind ingestion queue |
+| `query.ts` | TraceQueryEngine — filter by agent/workflow/entity/session/status/errors/time, pagination, entity linkage |
+| `sdk.ts` | TraceSdk + TraceSession — span lifecycle, wrapToolCall/wrapModelCall decorators, linkEntity |
+
+### DB Schema (`lib/db/src/schema/trace_graph.ts`)
+Four Drizzle tables: `traces`, `trace_spans`, `trace_events`, `trace_entity_links`
+- Full field coverage: requestId, agentId, workflowId, userId, operatorId, domain, model, promptVersion, latency/tokens/cost, retries, rollback, replay markers, businessImpact
+- `trace_entity_links` FK to `entities.id` (constellation linkage)
+- Migration: `lib/db/drizzle/0044_trace_graph.sql`
+
+### API Routes (`artifacts/api-server/src/routes/traces.ts`)
+- `GET /api/traces` — query with all filter params + pagination
+- `GET /api/traces/:id` — single trace + linked entity IDs
+- `POST /api/traces/:id/replay` — replay visitor traversal with step log and diff summary
+- `POST /api/traces/:id/link-entity` — link a constellation entity to a trace
+
+### Middleware (`artifacts/api-server/src/middlewares/trace-emit.ts`)
+Auto-emits a request-level trace on every non-health/apm request. Non-blocking (write-behind). Wired after telemetryMiddleware in `app.ts`.
+
 ## ATLAS Enterprise State Model
 
 Three canonical packages define the shared entity vocabulary across all domain packs:
