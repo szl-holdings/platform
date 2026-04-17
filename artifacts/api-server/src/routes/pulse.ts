@@ -1,9 +1,25 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
 import PDFDocument from "pdfkit";
-import { desc, eq } from "drizzle-orm";
-import { db, pulseDissentsTable, pulseCustomBriefsTable, pulseBriefingsTable } from "@szl-holdings/db";
+import { and, desc, eq, gte, inArray, sql } from "drizzle-orm";
+import {
+  db,
+  pulseDissentsTable,
+  pulseCustomBriefsTable,
+  pulseBriefingsTable,
+  firestormFindingsTable,
+  firestormAlertsTable,
+  firestormIncidentsTable,
+  maritimeExceptionsTable,
+  fleetExceptionsTable,
+  complianceCalendarTable,
+  complianceSupervisionQueueTable,
+  holdingsMetricsTable,
+} from "@szl-holdings/db";
 import { authMiddleware, requireRole } from "../middlewares/auth";
+import { gatewayInfer } from "../lib/ai-gateway";
+import { logger } from "../lib/logger";
+import { services } from "@szl-holdings/services";
 
 const router = Router();
 router.use(authMiddleware({ required: true }));
@@ -515,10 +531,318 @@ async function getBriefingById(id: string): Promise<Briefing | null> {
   return rows[0] ? rowToBriefing(rows[0]) : null;
 }
 
+interface SignalContext {
+  date: string;
+  threats: {
+    openFindings: number;
+    criticalFindings: Array<{ title: string; severity: string; affectedAsset: string | null }>;
+    activeAlerts: Array<{ title: string; severity: string; source: string }>;
+    activeIncidents: Array<{ title: string; severity: string; status: string }>;
+  };
+  maritime: {
+    openExceptions: number;
+    criticalExceptions: Array<{ title: string; severity: string; type: string; valueAtRiskUsd: string | null }>;
+    fleetExceptions: Array<{ title: string; severity: string; status: string }>;
+  };
+  compliance: {
+    upcomingDeadlines: Array<{ title: string; type: string; dueDate: string; severity: string }>;
+    supervisionQueue: number;
+  };
+  portfolio: {
+    recentMetrics: Array<{ name: string; value: string; change: string | null; category: string | null }>;
+  };
+}
+
+async function gatherSignals(): Promise<SignalContext> {
+  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const today = new Date();
+
+  const safe = async <T>(p: Promise<T>, fallback: T): Promise<T> => {
+    try { return await p; } catch (err) { logger.warn({ err: err instanceof Error ? err.message : String(err) }, "[pulse] signal fetch failed"); return fallback; }
+  };
+
+  const [
+    findingsCount,
+    criticalFindings,
+    alerts,
+    incidents,
+    maritimeExc,
+    maritimeCritical,
+    fleetExc,
+    complianceCal,
+    supervisionCount,
+    metrics,
+  ] = await Promise.all([
+    safe(db.select({ c: sql<number>`count(*)::int` }).from(firestormFindingsTable).where(eq(firestormFindingsTable.status, "open")), [{ c: 0 }]),
+    safe(db.select().from(firestormFindingsTable).where(eq(firestormFindingsTable.severity, "critical")).orderBy(desc(firestormFindingsTable.createdAt)).limit(5), []),
+    safe(db.select().from(firestormAlertsTable).where(gte(firestormAlertsTable.createdAt, since)).orderBy(desc(firestormAlertsTable.createdAt)).limit(8), []),
+    safe(db.select().from(firestormIncidentsTable).where(gte(firestormIncidentsTable.detectedAt, since)).orderBy(desc(firestormIncidentsTable.detectedAt)).limit(5), []),
+    safe(db.select({ c: sql<number>`count(*)::int` }).from(maritimeExceptionsTable).where(eq(maritimeExceptionsTable.status, "new")), [{ c: 0 }]),
+    safe(db.select().from(maritimeExceptionsTable).where(and(gte(maritimeExceptionsTable.detectedAt, since), inArray(maritimeExceptionsTable.severity, ["critical", "high"]))).orderBy(desc(maritimeExceptionsTable.detectedAt)).limit(5), []),
+    safe(db.select().from(fleetExceptionsTable).orderBy(desc(fleetExceptionsTable.createdAt)).limit(5), []),
+    safe(db.select().from(complianceCalendarTable).where(gte(complianceCalendarTable.dueAt, today)).orderBy(complianceCalendarTable.dueAt).limit(8), []),
+    safe(db.select({ c: sql<number>`count(*)::int` }).from(complianceSupervisionQueueTable), [{ c: 0 }]),
+    safe(db.select().from(holdingsMetricsTable).orderBy(desc(holdingsMetricsTable.createdAt)).limit(8), []),
+  ]);
+
+  return {
+    date: today.toISOString().slice(0, 10),
+    threats: {
+      openFindings: findingsCount[0]?.c ?? 0,
+      criticalFindings: criticalFindings.map((f) => ({
+        title: f.title,
+        severity: f.severity,
+        affectedAsset: f.affectedAsset ?? null,
+      })),
+      activeAlerts: alerts.map((a) => ({ title: a.title, severity: a.severity, source: a.source })),
+      activeIncidents: incidents.map((i) => ({ title: i.title, severity: i.severity, status: i.status })),
+    },
+    maritime: {
+      openExceptions: maritimeExc[0]?.c ?? 0,
+      criticalExceptions: maritimeCritical.map((m) => ({
+        title: m.title,
+        severity: m.severity,
+        type: m.exceptionType,
+        valueAtRiskUsd: m.valueAtRiskUsd,
+      })),
+      fleetExceptions: fleetExc.map((f) => ({
+        title: (f as { exceptionType?: string; title?: string }).title ?? (f as { exceptionType?: string }).exceptionType ?? "Fleet exception",
+        severity: (f as { severity?: string }).severity ?? "medium",
+        status: (f as { status?: string }).status ?? "open",
+      })),
+    },
+    compliance: {
+      upcomingDeadlines: complianceCal.map((c) => ({
+        title: (c as { title?: string; eventTitle?: string }).title ?? (c as { eventTitle?: string }).eventTitle ?? "Compliance event",
+        type: (c as { eventType?: string; type?: string }).eventType ?? (c as { type?: string }).type ?? "deadline",
+        dueDate: c.dueAt ? new Date(c.dueAt).toISOString().slice(0, 10) : "",
+        severity: (c as { severity?: string; priority?: string }).severity ?? (c as { priority?: string }).priority ?? "medium",
+      })),
+      supervisionQueue: supervisionCount[0]?.c ?? 0,
+    },
+    portfolio: {
+      recentMetrics: metrics.map((m) => ({
+        name: m.label,
+        value: String(m.value ?? ""),
+        change: m.change ?? null,
+        category: m.category ?? null,
+      })),
+    },
+  };
+}
+
+const SECTION_BLUEPRINT: Array<{ id: string; title: string; agentId: string; domain: DomainKey }> = [
+  { id: "exec-summary", title: "Executive Summary", agentId: "alloy", domain: "executive" },
+  { id: "maritime", title: "Maritime Outlook", agentId: "helmsman", domain: "maritime" },
+  { id: "security", title: "Threat Landscape", agentId: "sentinel", domain: "security" },
+  { id: "real_estate", title: "Real Estate Pulse", agentId: "terra", domain: "real_estate" },
+  { id: "legal", title: "Legal Pipeline", agentId: "lexis", domain: "legal" },
+  { id: "financial", title: "Portfolio Movements", agentId: "atlas", domain: "financial" },
+  { id: "platform", title: "Platform Health", agentId: "beacon", domain: "platform" },
+];
+
+interface AIBriefingPayload {
+  headline: string;
+  leadSentence: string;
+  overallRisk: RiskLevel;
+  overallConfidence: number;
+  sections: Array<{
+    id: string;
+    keyJudgment: string;
+    narrative: string[];
+    confidence: number;
+    riskLevel: RiskLevel;
+    keyFindings: Array<{ finding: string; severity: RiskLevel }>;
+    assumptions: string[];
+    gaps: string[];
+  }>;
+  recommendedActions: Array<{
+    action: string;
+    priority: "P0" | "P1" | "P2" | "P3";
+    owner: string;
+    rationale: string;
+    dueBy: string;
+  }>;
+}
+
+function clampRisk(s: unknown): RiskLevel {
+  const v = String(s ?? "").toUpperCase();
+  if (v === "CRITICAL" || v === "HIGH" || v === "MEDIUM" || v === "LOW") return v;
+  return "MEDIUM";
+}
+
+function confidenceLabel(c: number): ConfidenceLevel {
+  if (c >= 0.8) return "HIGH";
+  if (c >= 0.65) return "MODERATE";
+  if (c >= 0.5) return "LOW";
+  return "INSUFFICIENT";
+}
+
+function extractJson(text: string): unknown {
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const candidate = fenced ? fenced[1]! : text;
+  const start = candidate.indexOf("{");
+  const end = candidate.lastIndexOf("}");
+  if (start === -1 || end === -1) throw new Error("No JSON object found in model output");
+  return JSON.parse(candidate.slice(start, end + 1));
+}
+
+async function generateAIBriefing(date: string): Promise<Briefing> {
+  const signals = await gatherSignals();
+  const now = new Date();
+  const briefId = `brief-${date}-${now.getTime()}`;
+
+  const sectionSpec = SECTION_BLUEPRINT.map((s) => `- id: "${s.id}", title: "${s.title}", agent: ${s.agentId}, domain: ${s.domain}`).join("\n");
+
+  const systemPrompt = [
+    "You are the SZL Holdings Pulse executive briefing engine.",
+    "You synthesize a daily, decision-grade intelligence brief for C-suite executives.",
+    "Tone: precise, calibrated, intelligence-community style. Use confidence levels and explicitly disclose gaps and assumptions.",
+    "OUTPUT: a single JSON object only — no prose, no markdown, no code fences.",
+  ].join(" ");
+
+  const userPrompt = [
+    `Today's date: ${date}.`,
+    "Generate today's morning Pulse briefing as a JSON object with this exact shape:",
+    `{
+  "headline": string (one sentence, the dominant judgment of the day),
+  "leadSentence": string (one paragraph, sets context across domains),
+  "overallRisk": "CRITICAL"|"HIGH"|"MEDIUM"|"LOW",
+  "overallConfidence": number 0.0-1.0,
+  "sections": [
+    { "id": one of the section ids below,
+      "keyJudgment": string,
+      "narrative": string[] (2-4 paragraphs),
+      "confidence": number 0.0-1.0,
+      "riskLevel": "CRITICAL"|"HIGH"|"MEDIUM"|"LOW",
+      "keyFindings": [{"finding": string, "severity": "CRITICAL"|"HIGH"|"MEDIUM"|"LOW"}],
+      "assumptions": string[],
+      "gaps": string[]
+    }
+  ],
+  "recommendedActions": [
+    {"action": string, "priority": "P0"|"P1"|"P2"|"P3", "owner": string, "rationale": string, "dueBy": string}
+  ]
+}`,
+    "Sections to include (use these ids exactly, in this order):",
+    sectionSpec,
+    "Ground every section in the live signals below. Cite specific titles or counts where relevant. If a domain has no signals, say so explicitly in 'gaps' and lower confidence accordingly.",
+    "",
+    "LIVE SIGNALS (JSON):",
+    JSON.stringify(signals, null, 2),
+  ].join("\n");
+
+  const response = await gatewayInfer({
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
+    ],
+    agentId: "pulse-briefing",
+    domain: "executive",
+    strategy: "fastest",
+    maxTokens: 4000,
+    timeoutMs: 90_000,
+  });
+
+  const parsed = extractJson(response.content) as AIBriefingPayload;
+
+  const sections: BriefingSection[] = SECTION_BLUEPRINT.map((blueprint) => {
+    const aiSection = parsed.sections?.find((s) => s.id === blueprint.id);
+    const conf = Number(aiSection?.confidence ?? 0.7);
+    const risk = clampRisk(aiSection?.riskLevel);
+    return {
+      id: blueprint.id,
+      title: blueprint.title,
+      agentId: blueprint.agentId,
+      confidence: Number(Math.max(0.4, Math.min(0.99, conf)).toFixed(2)),
+      confidenceLabel: confidenceLabel(conf),
+      riskLevel: risk,
+      keyJudgment: String(aiSection?.keyJudgment ?? "No judgment generated for this domain."),
+      narrative: Array.isArray(aiSection?.narrative) ? aiSection!.narrative.map(String) : [],
+      keyFindings: Array.isArray(aiSection?.keyFindings)
+        ? aiSection!.keyFindings.map((f) => ({ finding: String(f.finding ?? ""), severity: clampRisk(f.severity) }))
+        : [],
+      assumptions: Array.isArray(aiSection?.assumptions) ? aiSection!.assumptions.map(String) : [],
+      gaps: Array.isArray(aiSection?.gaps) ? aiSection!.gaps.map(String) : [],
+      lastUpdated: now.toISOString(),
+    };
+  });
+
+  const overallConfidence = Number(
+    Math.max(0.4, Math.min(0.99, Number(parsed.overallConfidence ?? sections.reduce((a, s) => a + s.confidence, 0) / sections.length))).toFixed(2),
+  );
+
+  const briefing: Briefing = {
+    id: briefId,
+    date,
+    edition: `Morning Edition · ${now.toUTCString()}`,
+    classification: "SZL-EXEC-RESTRICTED",
+    status: "published",
+    overallRisk: clampRisk(parsed.overallRisk),
+    overallConfidence,
+    headline: String(parsed.headline ?? "Pulse briefing generated"),
+    leadSentence: String(parsed.leadSentence ?? ""),
+    domains: SECTION_BLUEPRINT.map((s) => s.domain),
+    sections,
+    recommendedActions: Array.isArray(parsed.recommendedActions)
+      ? parsed.recommendedActions.slice(0, 8).map((a) => ({
+          action: String(a.action ?? ""),
+          priority: (["P0", "P1", "P2", "P3"].includes(String(a.priority)) ? a.priority : "P2") as "P0" | "P1" | "P2" | "P3",
+          owner: String(a.owner ?? "Executive"),
+          rationale: String(a.rationale ?? ""),
+          dueBy: String(a.dueBy ?? "Within 24 hours"),
+        }))
+      : [],
+    generatedAt: now.toISOString(),
+  };
+
+  await insertBriefing(briefing);
+  logger.info({ briefId, provider: response.provider, model: response.model, latencyMs: response.routing.totalLatencyMs }, "[pulse] AI briefing generated");
+  return briefing;
+}
+
+async function getBriefingForDate(date: string): Promise<Briefing | null> {
+  const rows = await db
+    .select()
+    .from(pulseBriefingsTable)
+    .where(eq(pulseBriefingsTable.date, date))
+    .orderBy(desc(pulseBriefingsTable.generatedAt))
+    .limit(1);
+  return rows[0] ? rowToBriefing(rows[0]) : null;
+}
+
+let dailyGenerationLock: Promise<Briefing> | null = null;
+async function ensureTodaysBriefing(): Promise<Briefing | null> {
+  const today = new Date().toISOString().slice(0, 10);
+  const existing = await getBriefingForDate(today);
+  if (existing) return existing;
+
+  if (!services.ai.isLive) {
+    logger.warn("[pulse] no AI provider configured — returning latest existing briefing");
+    return getLatestBriefing();
+  }
+
+  if (dailyGenerationLock) return dailyGenerationLock;
+  dailyGenerationLock = (async () => {
+    try {
+      return await generateAIBriefing(today);
+    } finally {
+      dailyGenerationLock = null;
+    }
+  })();
+
+  try {
+    return await dailyGenerationLock;
+  } catch (err) {
+    logger.error({ err: err instanceof Error ? err.message : String(err) }, "[pulse] AI briefing generation failed; falling back to latest");
+    return getLatestBriefing();
+  }
+}
+
 router.get("/today", async (_req: Request, res: Response): Promise<void> => {
-  const latest = await getLatestBriefing();
-  if (!latest) { res.json({ success: true, briefing: null }); return; }
-  res.json({ success: true, briefing: withAgentNames(latest) });
+  const brief = await ensureTodaysBriefing();
+  if (!brief) { res.json({ success: true, briefing: null }); return; }
+  res.json({ success: true, briefing: withAgentNames(brief) });
 });
 
 router.get("/briefings", async (req: Request, res: Response): Promise<void> => {
@@ -595,9 +919,27 @@ router.get("/domain-panel/:domain", async (req: Request, res: Response): Promise
 });
 
 router.post("/briefings/generate", async (_req: Request, res: Response): Promise<void> => {
-  const prior = (await getLatestBriefing()) ?? DEMO_BRIEFINGS[0] ?? null;
   const now = new Date();
   const dateStr = now.toISOString().slice(0, 10);
+
+  if (services.ai.isLive) {
+    try {
+      const aiBrief = await generateAIBriefing(dateStr);
+      res.json({
+        success: true,
+        message: "Briefing generated by AI agent collective.",
+        jobId: `job-${now.getTime()}`,
+        briefingId: aiBrief.id,
+        briefing: withAgentNames(aiBrief),
+        estimatedCompletionAt: now.toISOString(),
+      });
+      return;
+    } catch (err) {
+      logger.error({ err: err instanceof Error ? err.message : String(err) }, "[pulse] on-demand AI generation failed; falling back to synthesis");
+    }
+  }
+
+  const prior = (await getLatestBriefing()) ?? DEMO_BRIEFINGS[0] ?? null;
   const newId = `brief-${dateStr}-${now.getTime()}`;
 
   const hashStr = (s: string): number => {
