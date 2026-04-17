@@ -20,8 +20,8 @@
 
 import { Router, type IRouter, type Request, type Response } from "express";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
-import { requireAnyAuth } from "../middlewares/auth";
-import { db, intelligenceCacheTable, pcMattersTable, pcDeadlinesTable, fundNavRecordsTable, fundPortfolioFinancialsTable, usersTable, guardianPoliciesTable, guardianActionsTable, maritimeVesselsTable } from "@szl-holdings/db";
+import { requireAnyAuth, requireRole } from "../middlewares/auth";
+import { db, intelligenceCacheTable, pcMattersTable, pcDeadlinesTable, fundNavRecordsTable, fundPortfolioFinancialsTable, usersTable, guardianPoliciesTable, guardianActionsTable, maritimeVesselsTable, lyteMetricsTable, lyteAlertsTable, lyteAlertEventsTable, usageEventsTable, approvalRequestsTable, approvalAuditTrailTable, healthChecksTable } from "@szl-holdings/db";
 import { eq, desc, count, sql, and, gte, lte } from "drizzle-orm";
 import { logger } from "../lib/logger";
 import os from "os";
@@ -654,7 +654,7 @@ const DOMAIN_COLOR: Record<string, string> = {
  * Builds an alert inbox from real signals: OTX threats (Aegis), GDELT geopolitical
  * (Terra), upcoming PRISM legal deadlines, and Lyte runtime telemetry.
  */
-router.get("/alerts", async (_req: Request, res: Response) => {
+router.get("/alerts", requireAnyAuth(), async (_req: Request, res: Response) => {
   try {
     const alerts: Array<{
       id: string; domain: string; domainColor: string; priority: "critical" | "high" | "medium" | "low";
@@ -793,56 +793,94 @@ router.get("/alerts", async (_req: Request, res: Response) => {
  * domain-level cost analytics. Cost figures are computed from actual request
  * counts × per-call rate cards (no random data).
  */
-router.get("/costs", async (_req: Request, res: Response) => {
+router.get("/costs", requireAnyAuth(), async (_req: Request, res: Response) => {
   try {
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
-    // Guardian actions logged this month — used as a proxy for AI/inference cost
-    let actionsMtd = 0;
+    // Per-feature unit cost rate card (USD per metered unit). Stable, source-attributed.
+    const RATE_CARD: Record<string, { unitCost: number; domain: string }> = {
+      "aegis.threat_lookup": { unitCost: 0.012, domain: "aegis" },
+      "aegis.alert_processed": { unitCost: 0.008, domain: "aegis" },
+      "vessels.ais_poll": { unitCost: 0.0008, domain: "vessels" },
+      "vessels.tracking_request": { unitCost: 0.004, domain: "vessels" },
+      "terra.market_query": { unitCost: 0.006, domain: "terra" },
+      "terra.geopolitical_event": { unitCost: 0.003, domain: "terra" },
+      "lyte.metric_ingest": { unitCost: 0.0002, domain: "lyte" },
+      "lyte.alert_eval": { unitCost: 0.001, domain: "lyte" },
+      "prism.matter_lookup": { unitCost: 0.05, domain: "prism" },
+      "prism.deadline_check": { unitCost: 0.002, domain: "prism" },
+      "szl.dashboard_view": { unitCost: 0.0005, domain: "szl" },
+      "carlota.session": { unitCost: 0.0015, domain: "carlota" },
+    };
+    const DOMAIN_BUDGETS: Record<string, number> = {
+      aegis: 28000, vessels: 35000, terra: 18000, lyte: 22000,
+      prism: 12000, szl: 8000, carlota: 5000,
+    };
+    const DOMAIN_NAMES: Record<string, string> = {
+      aegis: "Aegis", vessels: "Vessels", terra: "Terra", lyte: "Lyte",
+      prism: "PRISM", szl: "SZL Holdings", carlota: "Carlota Jo",
+    };
+    const DOMAIN_HEX: Record<string, string> = {
+      aegis: DOMAIN_COLOR.Aegis, vessels: DOMAIN_COLOR.Vessels, terra: DOMAIN_COLOR.Terra,
+      lyte: DOMAIN_COLOR.Lyte, prism: DOMAIN_COLOR.PRISM, szl: DOMAIN_COLOR.SZL,
+      carlota: DOMAIN_COLOR["Carlota Jo"],
+    };
+
+    // Real billing actuals: aggregate usage_events by feature_key for current and previous month.
+    let mtdEvents: Array<{ featureKey: string; total: number }> = [];
+    let prevEvents: Array<{ featureKey: string; total: number }> = [];
     try {
-      const [row] = await db.select({ c: count() }).from(guardianActionsTable)
-        .where(gte(guardianActionsTable.createdAt, monthStart));
-      actionsMtd = Number(row?.c ?? 0);
+      mtdEvents = await db
+        .select({ featureKey: usageEventsTable.featureKey, total: sql<number>`COALESCE(SUM(${usageEventsTable.quantity}), 0)::int` })
+        .from(usageEventsTable)
+        .where(gte(usageEventsTable.recordedAt, monthStart))
+        .groupBy(usageEventsTable.featureKey);
+      prevEvents = await db
+        .select({ featureKey: usageEventsTable.featureKey, total: sql<number>`COALESCE(SUM(${usageEventsTable.quantity}), 0)::int` })
+        .from(usageEventsTable)
+        .where(and(gte(usageEventsTable.recordedAt, prevMonthStart), lte(usageEventsTable.recordedAt, monthStart)))
+        .groupBy(usageEventsTable.featureKey);
     } catch { /* non-fatal */ }
 
-    // PRISM matters (legal database calls proxy)
-    let mattersTotal = 0;
-    try {
-      const [row] = await db.select({ c: count() }).from(pcMattersTable);
-      mattersTotal = Number(row?.c ?? 0);
-    } catch { /* non-fatal */ }
+    const domainAgg = new Map<string, { spent: number; calls: number }>();
+    const domainPrev = new Map<string, number>();
+    Object.keys(DOMAIN_BUDGETS).forEach((d) => { domainAgg.set(d, { spent: 0, calls: 0 }); domainPrev.set(d, 0); });
+    for (const e of mtdEvents) {
+      const r = RATE_CARD[e.featureKey];
+      if (!r) continue;
+      const agg = domainAgg.get(r.domain);
+      if (agg) {
+        agg.spent += Number(e.total) * r.unitCost;
+        agg.calls += Number(e.total);
+      }
+    }
+    for (const e of prevEvents) {
+      const r = RATE_CARD[e.featureKey];
+      if (!r) continue;
+      domainPrev.set(r.domain, (domainPrev.get(r.domain) ?? 0) + Number(e.total) * r.unitCost);
+    }
 
-    // Vessels tracked (AIS feed cost driver)
-    let vesselsTracked = 0;
-    try {
-      const [row] = await db.select({ c: count() }).from(maritimeVesselsTable);
-      vesselsTracked = Number(row?.c ?? 0);
-    } catch { /* non-fatal */ }
+    const totalCalls = Array.from(domainAgg.values()).reduce((s, a) => s + a.calls, 0);
+    const hasRealUsage = totalCalls > 0;
 
-    // Per-domain budget × computed spend
-    const PER_INFERENCE_USD = 0.012;
-    const PER_AIS_POLL_USD = 0.0008;
-    const PER_LEGAL_LOOKUP_USD = 0.05;
-
-    const aegisSpent = Math.round(actionsMtd * 0.4 * PER_INFERENCE_USD * 100) / 100 + 1800; // base infra + variable
-    const vesselsSpent = Math.round(vesselsTracked * PER_AIS_POLL_USD * 24 * now.getDate() * 100) / 100 + 2200;
-    const prismSpent = Math.round(mattersTotal * PER_LEGAL_LOOKUP_USD * 30 * 100) / 100 + 1100;
-    const lyte = await getLyteData();
-    const lyteSpent = 1900 + Math.round(lyte.uptimeSecs / 86400 * 80 * 100) / 100;
-    const terraSpent = 1500;
-    const szlSpent = 680;
-    const carlotaSpent = 410;
-
-    const domains = [
-      { id: "aegis", name: "Aegis", color: DOMAIN_COLOR.Aegis, budget: 28000, spent: Math.round(aegisSpent), apiCalls: Math.round(actionsMtd * 0.4) || 1200, storage: 4.2, compute: 18, trend: 12 },
-      { id: "vessels", name: "Vessels", color: DOMAIN_COLOR.Vessels, budget: 35000, spent: Math.round(vesselsSpent), apiCalls: vesselsTracked * 24 * now.getDate() || 1200, storage: 11.8, compute: 31, trend: vesselsSpent > 35000 ? 24 : 6 },
-      { id: "terra", name: "Terra", color: DOMAIN_COLOR.Terra, budget: 18000, spent: Math.round(terraSpent), apiCalls: 8400, storage: 6.1, compute: 14, trend: -8 },
-      { id: "lyte", name: "Lyte", color: DOMAIN_COLOR.Lyte, budget: 22000, spent: Math.round(lyteSpent), apiCalls: Math.round(lyte.uptimeSecs * 5) || 12000, storage: 2.4, compute: 22, trend: 6 },
-      { id: "prism", name: "PRISM", color: DOMAIN_COLOR.PRISM, budget: 12000, spent: Math.round(prismSpent), apiCalls: mattersTotal * 30 || 4200, storage: 8.9, compute: 9, trend: 3 },
-      { id: "szl", name: "SZL Holdings", color: DOMAIN_COLOR.SZL, budget: 8000, spent: Math.round(szlSpent), apiCalls: 1800, storage: 1.2, compute: 6, trend: -2 },
-      { id: "carlota", name: "Carlota Jo", color: DOMAIN_COLOR["Carlota Jo"], budget: 5000, spent: Math.round(carlotaSpent), apiCalls: 950, storage: 0.8, compute: 4, trend: 1 },
-    ];
+    const domains = Object.keys(DOMAIN_BUDGETS).map((id) => {
+      const agg = domainAgg.get(id) ?? { spent: 0, calls: 0 };
+      const prev = domainPrev.get(id) ?? 0;
+      const trend = prev > 0 ? Math.round(((agg.spent - prev) / prev) * 100) : 0;
+      return {
+        id,
+        name: DOMAIN_NAMES[id],
+        color: DOMAIN_HEX[id],
+        budget: DOMAIN_BUDGETS[id],
+        spent: Math.round(agg.spent * 100) / 100,
+        apiCalls: agg.calls,
+        storage: 0,
+        compute: 0,
+        trend,
+      };
+    });
 
     const totalSpent = domains.reduce((s, d) => s + d.spent, 0);
     const totalBudget = domains.reduce((s, d) => s + d.budget, 0);
@@ -851,14 +889,14 @@ router.get("/costs", async (_req: Request, res: Response) => {
     sendSuccess(res, {
       domains,
       summary: {
-        totalSpent,
+        totalSpent: Math.round(totalSpent * 100) / 100,
         totalBudget,
         overBudget,
-        totalApiCalls: domains.reduce((s, d) => s + d.apiCalls, 0),
-        totalStorageTb: +domains.reduce((s, d) => s + d.storage, 0).toFixed(1),
+        totalApiCalls: totalCalls,
+        totalStorageTb: 0,
       },
       generatedAt: new Date().toISOString(),
-      dataSource: "computed",
+      dataSource: hasRealUsage ? "usage_events" : "empty",
     });
   } catch (err) {
     logger.error({ err }, "command costs error");
@@ -872,52 +910,114 @@ router.get("/costs", async (_req: Request, res: Response) => {
  * Builds SLA dashboard from live runtime signals (Lyte CPU/heap/uptime) and
  * domain heuristics derived from real DB activity.
  */
-router.get("/sla", async (_req: Request, res: Response) => {
+router.get("/sla", requireAnyAuth(), async (_req: Request, res: Response) => {
   try {
-    const lyte = await getLyteData();
-    const aegis = await getAegisData();
-    const vessels = await getVesselsData();
-    const prism = await getPrismData();
+    const since30d = new Date(Date.now() - 30 * 86400000);
+    const since24h = new Date(Date.now() - 86400000);
 
-    const slas = [
-      {
+    // Real telemetry: aggregate Lyte metrics by service/metric_type for the last 24h.
+    let metrics: Array<{ service: string; metricType: string; avg: number; p95: number; samples: number }> = [];
+    try {
+      metrics = await db
+        .select({
+          service: lyteMetricsTable.service,
+          metricType: lyteMetricsTable.metricType,
+          avg: sql<number>`COALESCE(AVG(${lyteMetricsTable.value}), 0)::float`,
+          p95: sql<number>`COALESCE(PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY ${lyteMetricsTable.value}), 0)::float`,
+          samples: sql<number>`COUNT(*)::int`,
+        })
+        .from(lyteMetricsTable)
+        .where(gte(lyteMetricsTable.recordedAt, since24h))
+        .groupBy(lyteMetricsTable.service, lyteMetricsTable.metricType);
+    } catch { /* non-fatal */ }
+
+    // Health-check pass rate per service (rolling 30d) — domain health endpoints.
+    let health: Array<{ service: string; pass: number; total: number }> = [];
+    try {
+      health = await db
+        .select({
+          service: healthChecksTable.service,
+          pass: sql<number>`SUM(CASE WHEN ${healthChecksTable.status} = 'healthy' THEN 1 ELSE 0 END)::int`,
+          total: sql<number>`COUNT(*)::int`,
+        })
+        .from(healthChecksTable)
+        .where(gte(healthChecksTable.checkedAt, since30d))
+        .groupBy(healthChecksTable.service);
+    } catch { /* non-fatal */ }
+
+    const metricFor = (service: string, metricType: string) =>
+      metrics.find((m) => m.service === service && m.metricType === metricType);
+    const uptimeFor = (service: string) => {
+      const h = health.find((x) => x.service === service);
+      if (!h || h.total === 0) return null;
+      return +(((h.pass / h.total) * 100).toFixed(2));
+    };
+
+    const slas: Array<{
+      id: string; domain: string; domainColor: string; name: string; metric: string;
+      target: number; unit: string; current: number; compliance30d: number; breach: boolean;
+      window: string; owner: string; samples: number; source: string; lastBreach?: string;
+    }> = [];
+
+    const lyteLatency = metricFor("api-server", "latency");
+    if (lyteLatency) {
+      const breach = lyteLatency.p95 > 2000;
+      slas.push({
         id: "lyte-latency", domain: "Lyte", domainColor: DOMAIN_COLOR.Lyte,
         name: "API Response Time P95", metric: "95th percentile latency",
-        target: 2000, unit: "ms", current: lyte.cpuLoad > 80 ? 2400 : lyte.cpuLoad > 50 ? 1800 : 1100,
-        compliance30d: lyte.cpuLoad > 80 ? 81.5 : 96.2, breach: lyte.cpuLoad > 80,
+        target: 2000, unit: "ms", current: Math.round(lyteLatency.p95),
+        compliance30d: uptimeFor("api-server") ?? 0, breach,
         window: "Rolling 24h", owner: "Lyte Eng Team",
-        ...(lyte.cpuLoad > 80 ? { lastBreach: "1h ago" } : {}),
-      },
-      {
+        samples: lyteLatency.samples, source: "lyte_metrics",
+        ...(breach ? { lastBreach: "within 24h" } : {}),
+      });
+    }
+    const lyteAvail = uptimeFor("api-server");
+    if (lyteAvail !== null) {
+      slas.push({
         id: "lyte-uptime", domain: "Lyte", domainColor: DOMAIN_COLOR.Lyte,
-        name: "Service Uptime", metric: "Process uptime continuity",
-        target: 99.9, unit: "%", current: lyte.recentRestart ? 99.4 : 99.97,
-        compliance30d: lyte.recentRestart ? 99.4 : 99.95, breach: lyte.recentRestart,
-        window: "Monthly", owner: "Eng Team",
-        ...(lyte.recentRestart ? { lastBreach: "just now" } : {}),
-      },
-      {
-        id: "aegis-mttr", domain: "Aegis", domainColor: DOMAIN_COLOR.Aegis,
-        name: "Security Incident MTTR", metric: "Mean Time to Respond",
-        target: 15, unit: "min", current: aegis.alertCount > 3 ? 18 : 11,
-        compliance30d: aegis.alertCount > 3 ? 88.4 : 94.2, breach: aegis.alertCount > 3,
-        window: "Rolling 30d", owner: "Aegis SOC",
-      },
-      {
+        name: "Service Uptime", metric: "Health-check pass rate",
+        target: 99.9, unit: "%", current: lyteAvail,
+        compliance30d: lyteAvail, breach: lyteAvail < 99.9,
+        window: "Rolling 30d", owner: "Eng Team",
+        samples: health.find((h) => h.service === "api-server")?.total ?? 0,
+        source: "health_checks",
+      });
+    }
+    const aegisErr = metricFor("aegis", "error_rate");
+    if (aegisErr) {
+      slas.push({
+        id: "aegis-errors", domain: "Aegis", domainColor: DOMAIN_COLOR.Aegis,
+        name: "Aegis Error Rate", metric: "Errors per request",
+        target: 1, unit: "%", current: +aegisErr.avg.toFixed(2),
+        compliance30d: uptimeFor("aegis") ?? 0, breach: aegisErr.avg > 1,
+        window: "Rolling 24h", owner: "Aegis SOC",
+        samples: aegisErr.samples, source: "lyte_metrics",
+      });
+    }
+    const vesselsAvail = uptimeFor("vessels");
+    if (vesselsAvail !== null) {
+      slas.push({
         id: "vessels-uptime", domain: "Vessels", domainColor: DOMAIN_COLOR.Vessels,
-        name: "Fleet Tracking Uptime", metric: "AIS feed availability",
-        target: 99.5, unit: "%", current: vessels.lastUpdated ? 99.8 : 95.0,
-        compliance30d: vessels.lastUpdated ? 99.1 : 92.0, breach: !vessels.lastUpdated,
-        window: "Monthly", owner: "Maritime Ops",
-      },
-      {
-        id: "prism-turnaround", domain: "PRISM", domainColor: DOMAIN_COLOR.PRISM,
-        name: "Contract Review Turnaround", metric: "Legal review completion",
-        target: 72, unit: "hrs", current: prism.deadlines7d > 5 ? 84 : 68,
-        compliance30d: prism.deadlines7d > 5 ? 79.0 : 89.3, breach: prism.deadlines7d > 5,
-        window: "Per matter", owner: "Priya Nair",
-      },
-    ];
+        name: "Fleet Tracking Uptime", metric: "Vessels service health",
+        target: 99.5, unit: "%", current: vesselsAvail,
+        compliance30d: vesselsAvail, breach: vesselsAvail < 99.5,
+        window: "Rolling 30d", owner: "Maritime Ops",
+        samples: health.find((h) => h.service === "vessels")?.total ?? 0,
+        source: "health_checks",
+      });
+    }
+    const prismThr = metricFor("prism", "throughput");
+    if (prismThr) {
+      slas.push({
+        id: "prism-throughput", domain: "PRISM", domainColor: DOMAIN_COLOR.PRISM,
+        name: "Legal Review Throughput", metric: "Matters processed/hr",
+        target: 5, unit: "/hr", current: +prismThr.avg.toFixed(1),
+        compliance30d: uptimeFor("prism") ?? 0, breach: prismThr.avg < 5,
+        window: "Rolling 24h", owner: "Priya Nair",
+        samples: prismThr.samples, source: "lyte_metrics",
+      });
+    }
 
     sendSuccess(res, {
       slas,
@@ -925,10 +1025,10 @@ router.get("/sla", async (_req: Request, res: Response) => {
         total: slas.length,
         breaching: slas.filter((s) => s.breach).length,
         nominal: slas.filter((s) => !s.breach).length,
-        avgCompliance: +(slas.reduce((s, x) => s + x.compliance30d, 0) / slas.length).toFixed(1),
+        avgCompliance: slas.length > 0 ? +(slas.reduce((s, x) => s + x.compliance30d, 0) / slas.length).toFixed(1) : 0,
       },
       generatedAt: new Date().toISOString(),
-      dataSource: "live",
+      dataSource: slas.length > 0 ? "telemetry" : "empty",
     });
   } catch (err) {
     logger.error({ err }, "command sla error");
@@ -941,30 +1041,89 @@ router.get("/sla", async (_req: Request, res: Response) => {
  *
  * Returns governance policies from the guardian_policies table.
  */
-router.get("/governance", async (_req: Request, res: Response) => {
+router.get("/governance", requireAnyAuth(), async (_req: Request, res: Response) => {
   try {
     const rows = await db.select().from(guardianPoliciesTable)
       .orderBy(desc(guardianPoliciesTable.updatedAt))
       .limit(50);
 
-    const policies = rows.map((p) => ({
-      id: `p${p.id}`,
-      title: p.name,
-      category: (p.tags && Array.isArray(p.tags) && p.tags[0]) ? String(p.tags[0]) : "operational",
-      status: p.enabled ? "active" : "draft",
-      domains: ["All Domains"],
-      version: `v${p.priority ?? 1}`,
-      owner: p.owner ?? "Platform Admin",
-      lastUpdated: new Date(p.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-      effectiveDate: new Date(p.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }),
-      description: p.description ?? `Tier ${p.tier} policy. Action: ${p.action}.`,
-      enforcement: p.action === "block" ? "auto" : p.action === "approve" ? "manual" : "advisory",
-      approvalChain: [],
-      auditLog: [
-        { date: new Date(p.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }), action: "Policy reviewed", actor: p.owner ?? "System" },
-        { date: new Date(p.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }), action: "Policy created", actor: p.owner ?? "System" },
-      ],
-    }));
+    // Pull recent approval requests scoped per policy via resourceType="policy".
+    const approvals = await db.select({
+      id: approvalRequestsTable.id,
+      resourceId: approvalRequestsTable.resourceId,
+      status: approvalRequestsTable.status,
+      requiredApproverRole: approvalRequestsTable.requiredApproverRole,
+      requestedByRole: approvalRequestsTable.requestedByRole,
+      createdAt: approvalRequestsTable.createdAt,
+      approvedAt: approvalRequestsTable.approvedAt,
+      rejectedAt: approvalRequestsTable.rejectedAt,
+    }).from(approvalRequestsTable)
+      .where(eq(approvalRequestsTable.resourceType, "policy"))
+      .orderBy(desc(approvalRequestsTable.createdAt))
+      .limit(200);
+
+    // Pull audit-trail entries for those approvals.
+    const auditByApproval = new Map<number, Array<{ action: string; createdAt: Date | string; actorRole: string | null; note: string | null }>>();
+    if (approvals.length > 0) {
+      const approvalIds = approvals.map((a) => a.id);
+      const audit = await db.select({
+        approvalId: approvalAuditTrailTable.approvalId,
+        action: approvalAuditTrailTable.action,
+        createdAt: approvalAuditTrailTable.createdAt,
+        actorRole: approvalAuditTrailTable.actorRole,
+        note: approvalAuditTrailTable.note,
+      }).from(approvalAuditTrailTable)
+        .where(sql`${approvalAuditTrailTable.approvalId} IN (${sql.join(approvalIds.map((id) => sql`${id}`), sql`, `)})`)
+        .orderBy(desc(approvalAuditTrailTable.createdAt));
+      for (const a of audit) {
+        if (a.approvalId == null) continue;
+        const arr = auditByApproval.get(a.approvalId) ?? [];
+        arr.push({ action: a.action, createdAt: a.createdAt, actorRole: a.actorRole, note: a.note });
+        auditByApproval.set(a.approvalId, arr);
+      }
+    }
+
+    const approvalsByPolicy = new Map<string, typeof approvals>();
+    for (const a of approvals) {
+      const arr = approvalsByPolicy.get(a.resourceId) ?? [];
+      arr.push(a);
+      approvalsByPolicy.set(a.resourceId, arr);
+    }
+
+    const policies = rows.map((p) => {
+      const policyApprovals = approvalsByPolicy.get(String(p.id)) ?? [];
+      const approvalChain = policyApprovals.slice(0, 5).map((a) => ({
+        approvalId: a.id,
+        status: a.status,
+        requiredRole: a.requiredApproverRole,
+        requestedByRole: a.requestedByRole,
+        requestedAt: new Date(a.createdAt).toISOString(),
+        decidedAt: a.approvedAt ?? a.rejectedAt ?? null,
+      }));
+      const auditLog = policyApprovals.flatMap((a) => auditByApproval.get(a.id) ?? [])
+        .slice(0, 10)
+        .map((e) => ({
+          date: new Date(e.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+          action: e.action,
+          actor: e.actorRole ?? "system",
+          note: e.note,
+        }));
+      return {
+        id: `p${p.id}`,
+        title: p.name,
+        category: (p.tags && Array.isArray(p.tags) && p.tags[0]) ? String(p.tags[0]) : "operational",
+        status: p.enabled ? "active" : "draft",
+        domains: ["All Domains"],
+        version: `v${p.priority ?? 1}`,
+        owner: p.owner ?? "Platform Admin",
+        lastUpdated: new Date(p.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        effectiveDate: new Date(p.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }),
+        description: p.description ?? `Tier ${p.tier} policy. Action: ${p.action}.`,
+        enforcement: p.action === "block" ? "auto" : p.action === "approve" ? "manual" : "advisory",
+        approvalChain,
+        auditLog,
+      };
+    });
 
     sendSuccess(res, {
       policies,
@@ -972,9 +1131,10 @@ router.get("/governance", async (_req: Request, res: Response) => {
         total: policies.length,
         active: policies.filter((p) => p.status === "active").length,
         draft: policies.filter((p) => p.status === "draft").length,
+        pendingApprovals: approvals.filter((a) => a.status === "pending").length,
       },
       generatedAt: new Date().toISOString(),
-      dataSource: policies.length > 0 ? "live" : "empty",
+      dataSource: policies.length > 0 ? "guardian_policies+approvals" : "empty",
     });
   } catch (err) {
     logger.error({ err }, "command governance error");
@@ -987,7 +1147,7 @@ router.get("/governance", async (_req: Request, res: Response) => {
  *
  * Returns active platform users from the auth users table.
  */
-router.get("/team", async (_req: Request, res: Response) => {
+router.get("/team", requireAnyAuth(), requireRole("super_admin", "admin", "ops", "compliance"), async (_req: Request, res: Response) => {
   try {
     const rows = await db.select({
       id: usersTable.id,
