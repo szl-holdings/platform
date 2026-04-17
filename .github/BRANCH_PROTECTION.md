@@ -109,7 +109,21 @@ For the complete setup walkthrough, see [`docs/github/environment-protection-set
 
 ---
 
-## 5. Dependabot
+## 5. GitHub Repository Secret Scanning
+
+Navigate to **Settings → Code security and analysis** and enable:
+
+| Setting | Value |
+|---|---|
+| Secret scanning | Enabled |
+| Push protection | Enabled — blocks pushes containing known secret patterns before they land |
+| Secret scanning alerts | Notify security contact (configure under Settings → Security → Notifications) |
+
+> **Why:** GitHub's native secret scanning runs continuously on the full commit history and detects secrets from 200+ service providers. Combined with the gitleaks CI gate (`.github/workflows/ci.yml` `secret-scan` job and `.gitleaks.toml`), this provides defence in depth: gitleaks catches leaks before merge; GitHub catches anything that slips through on `main`. Push protection additionally blocks secrets at the point of `git push`.
+
+---
+
+## 6. Dependabot
 
 Dependabot is configured in `.github/dependabot.yml` to:
 
@@ -126,7 +140,7 @@ To enable **Dependabot auto-merge** for patch-level updates (optional):
 
 ---
 
-## 6. Release Workflow
+## 7. Release Workflow
 
 Releases are created automatically on every push to `main`:
 

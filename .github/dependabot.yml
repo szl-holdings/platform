@@ -77,3 +77,4 @@ updates:
           - "treosh/*"
           - "softprops/*"
           - "pnpm/*"
+          - "gitleaks/*"

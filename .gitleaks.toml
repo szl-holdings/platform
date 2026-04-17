@@ -1,0 +1,135 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# SZL Holdings — Gitleaks Configuration
+#
+# Gitleaks scans every commit in a pull request for high-confidence credential
+# patterns and blocks the merge if any are found.
+#
+# This file extends the built-in gitleaks default rule set (which covers 150+
+# provider-specific patterns) and layers on project-specific allowlists to
+# suppress well-understood false positives.
+#
+# Docs: https://github.com/gitleaks/gitleaks
+# ─────────────────────────────────────────────────────────────────────────────
+
+title = "SZL Holdings — Secret Scanning Policy"
+
+# ── Extend the upstream default rule set ─────────────────────────────────────
+# The default set is maintained by the gitleaks team and covers OpenAI, AWS,
+# GitHub, GCP, Stripe, Twilio, Resend, and 140+ other providers.
+[extend]
+useDefault = true
+
+# ── Global allowlist ──────────────────────────────────────────────────────────
+# Entries here suppress matches across ALL rules.
+[allowlist]
+  description = "Global false-positive suppressions for SZL Holdings"
+
+  # ── Entire files that are safe to skip ──────────────────────────────────────
+  paths = [
+    # Lock files contain hashes, not secrets
+    "pnpm-lock.yaml",
+    "package-lock.json",
+    "yarn.lock",
+
+    # The scanner itself contains regex patterns for secret detection;
+    # those patterns are not credentials.
+    "scripts/qa/scan-secrets.js",
+
+    # gitleaks config — contains allowlist regex fragments
+    ".gitleaks.toml",
+
+    # Playwright and test reports are generated output, not source
+    "playwright-report",
+    "test-results",
+    "coverage",
+  ]
+
+  # ── Regex patterns that are always safe ─────────────────────────────────────
+  # These patterns match documentation examples, placeholder values, and CI
+  # fixture strings that look like real credentials but are not.
+  regexes = [
+    # Generic placeholder strings used in .env.example and docs
+    "your[-_]?(?:api[-_]?)?(?:key|secret|token|password|credential)(?:[-_]?here)?",
+    "placeholder",
+    "changeme",
+    "replace[-_]?me",
+    "example[-_]?only",
+
+    # Stripe test-mode keys (not live)
+    "sk_test_[a-zA-Z0-9]+",
+    "pk_test_[a-zA-Z0-9]+",
+    "rk_test_[a-zA-Z0-9]+",
+    "whsec_test_[a-zA-Z0-9]+",
+
+    # AWS example / documentation account IDs used in ARN examples
+    "AKIAIOSFODNN7EXAMPLE",
+    "AKIA0000000000EXAMPLE",
+
+    # GitHub token examples from documentation (26 hex chars after prefix — not
+    # a real 36-char personal token)
+    "ghp_[a-f0-9]{26}",
+
+    # OpenAI placeholder keys that appear in docs / templates
+    "sk-proj-[A-Za-z0-9_-]{20}XXXXXXXXXX",
+    "sk-[Xx]{20,}",
+
+    # Resend placeholder keys used in .env.example
+    "re_[Xx]{24,}",
+    "re_0000[a-zA-Z0-9]{20}",
+
+    # JWT example from README / docs — recognisable by all-zero payload
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\\.eyJzdWIiOiIxMjM0NTY3ODkwIn0\\.",
+
+    # Postgres DSN used in integration tests (local CI service; not production)
+    "postgresql://postgres:postgres@localhost",
+
+    # Replit deployment URLs — not secrets
+    "REPLIT_DEV_DOMAIN",
+    "replit\\.app",
+    "replit\\.dev",
+  ]
+
+  # ── Commit-level stop-list ────────────────────────────────────────────────
+  # These commit SHAs are known historical commits that pre-date this policy.
+  # Any new leaked secrets must be rotated AND the commit re-evaluated.
+  commits = []
+
+# ── Custom rule: detect high-entropy base64 private keys ─────────────────────
+# The default gitleaks set already covers PEM blocks; this is an additional
+# defence for unusual wrapping formats.
+[[rules]]
+  id          = "private-key-bare"
+  description = "Bare high-entropy private key block (non-standard wrapping)"
+  regex       = '''(?i)-----BEGIN[ A-Z]*PRIVATE KEY[ A-Z]*-----'''
+  tags        = ["key", "credential"]
+
+  [rules.allowlist]
+    paths = [
+      # .env.example deliberately contains a commented-out example block
+      "\\.env\\.example",
+      # documentation may quote key format without real key content
+      "SECRETS_SETUP\\.md",
+    ]
+
+# ── Custom rule: Expo / EAS token ────────────────────────────────────────────
+[[rules]]
+  id          = "expo-eas-token"
+  description = "Expo EAS / Expo account token"
+  regex       = '''eas_[a-zA-Z0-9_-]{40,}'''
+  tags        = ["expo", "credential"]
+
+# ── Custom rule: Resend production key ───────────────────────────────────────
+# The built-in Resend rule can fire on test keys; this scoped rule targets only
+# production-style keys (mixed case, min 28 chars, not matching the allowlist
+# placeholder pattern above).
+[[rules]]
+  id          = "resend-production-key"
+  description = "Resend production API key"
+  regex       = '''re_[a-zA-Z0-9]{28,}'''
+  tags        = ["resend", "credential"]
+
+  [rules.allowlist]
+    regexes = [
+      "re_[Xx]{24,}",
+      "re_0000[a-zA-Z0-9]{20}",
+    ]

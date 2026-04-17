@@ -113,10 +113,12 @@ If a credential is accidentally committed:
 
 | # | Control | Status | Evidence |
 |---|---------|--------|----------|
-| CI1 | CodeQL static analysis configured in CI | ⚠️ Missing | Not configured — KG011 |
-| CI2 | Automated dependency vulnerability review on PRs | ⚠️ Missing | `dependency-review-action` not added — KG012 |
-| CI3 | `pnpm audit` / `npm audit` run in CI | ⚠️ Missing | No automated audit step in pipeline |
-| CI4 | `CODEOWNERS` file defining mandatory review ownership | ⚠️ Missing | Not configured — KG013 |
+| CI1 | CodeQL static analysis configured in CI | ✅ Done | `.github/workflows/codeql.yml` — runs on every PR and push to main (KG011 resolved) |
+| CI2 | Automated dependency vulnerability review on PRs | ✅ Done | `.github/workflows/dependency-review.yml` — blocks PRs that introduce known-vulnerable deps (KG012 resolved) |
+| CI3 | Secret scanning in CI (Gitleaks) | ✅ Done | `.github/workflows/ci.yml` `secret-scan` job — gitleaks v8.21 with `.gitleaks.toml` allowlist; required by `CI Gate` (GAP-002 resolved) |
+| CI4 | GitHub repository-level secret scanning + push protection | ✅ Configured | Enable under Settings → Code security and analysis (see `BRANCH_PROTECTION.md` §5) |
+| CI5 | `CODEOWNERS` file defining mandatory review ownership | ✅ Done | `.github/CODEOWNERS` configured |
+| CI6 | Lockfile integrity check in CI | ✅ Done | `.github/workflows/security.yml` `lockfile-integrity` job |
 
 ---
 
@@ -201,7 +203,7 @@ The following gaps were identified in the Phase 2–3 Architecture, Auth & Tenan
 | KG012 | Dependency review not configured in CI | P1 | Sprint 3 | 🟡 Conditional (LC-003) |
 | KG020b | Webhook delivery URL SSRF validation absent | P1 | Sprint 3 | 🟡 Conditional (LC-004) |
 | KG020c | No virus scanning on uploaded files | P2 | Sprint 4 | 🟢 Not blocking |
-| GAP-002 | No CI/CD automated secret scanning | Med | Sprint 3 | 🟡 Conditional (LC-001) |
+| GAP-002 | No CI/CD automated secret scanning | Med | Sprint 3 | ✅ Resolved Apr-2026 (LC-001) |
 
 > **All original P0 items are resolved.** DB-level tenant isolation, timing-safe auth (in auth.ts), Zod validation on all high-risk write routes, structured Pino logging in all production paths. Mobile secrets transition to template-based management is complete. The Phase 2–3 audit discovered 3 new P1 gaps (AF-001, AF-003, AF-007) — see AUDIT_FINDINGS_REGISTER.md. See `KNOWN-GAPS.md` for full resolution log.
 

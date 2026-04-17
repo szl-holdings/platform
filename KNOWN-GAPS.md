@@ -40,12 +40,12 @@ Risk exposure, compliance posture, diligence readiness.
 | KG011 | No CodeQL SAST in CI pipeline | P1 | ✅ Resolved Apr-2026 |
 | KG012 | No automated dependency vulnerability review in CI | P1 | ✅ Resolved Apr-2026 |
 | KG010 | No automated E2E / integration test suite | P1 | ⚠️ Open — Sprint 3–4 |
-| GAP-002 | No CI/CD automated secret scanning | Med | ⚠️ Open |
+| GAP-002 | No CI/CD automated secret scanning | Med | ✅ Resolved Apr-2026 |
 | GAP-003 | Android keystore not managed by EAS | Med | ✅ Resolved Apr-2026 |
 | VD1 | No responsible disclosure policy / `security.txt` | P2 | ⚠️ Open — Sprint 4 |
 | KG025 | WCAG accessibility not systematically audited | P2 | ⚠️ Open — Sprint 4 |
 
-**Diligence verdict:** All P0 security gaps identified in the pre-sprint audit are resolved. KG011 (CodeQL SAST) and KG012 (dependency review) are now resolved — CI security gates are live. Remaining open items (P1–P2, High/Med) are scoped, have remediation owners, and do not represent critical blockers for Series A close. The highest remaining enterprise risk is the absence of an automated E2E regression suite (KG010).
+**Diligence verdict:** All P0 security gaps identified in the pre-sprint audit are resolved. KG011 (CodeQL SAST), KG012 (dependency review), and GAP-002 (secret scanning) are now resolved — CI security gates are live. Remaining open items (P1–P2, High) are scoped, have remediation owners, and do not represent critical blockers for Series A close. The highest remaining enterprise risk is the absence of an automated E2E regression suite (KG010).
 
 ---
 
@@ -114,7 +114,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 
 | ID | Gap | Area | Impact | Notes |
 |----|-----|------|--------|-------|
-| GAP-002 | No CI/CD automated secret scanning | Security | Leaked keys risk | Add `gitleaks` to CI |
+| GAP-002 | No CI/CD automated secret scanning | Security | Leaked keys risk | ✅ Resolved Apr-2026 — `gitleaks` v8.21 added as required CI gate; `.gitleaks.toml` config with allowlists; dual scan (gitleaks + custom pattern matcher) on every PR |
 | GAP-003 | Android keystore not in EAS | Mobile Ops | SPOF risk | ✅ Resolved Apr-2026. `eas.json` sets `credentialsSource: "remote"` for production Android/iOS. Firebase credentials uploaded as EAS file secrets (`GOOGLE_SERVICES_JSON`, `GOOGLE_SERVICE_INFO_PLIST`) and read dynamically by `app.config.js`. Google Play service account key stored as EAS string secret (`GOOGLE_SERVICE_ACCOUNT_KEY_JSON`) — EAS Submit reads it automatically, no `serviceAccountKeyPath` in `eas.json`. `SECRETS_SETUP.md` rewritten to EAS-first workflow. No local credential files required for any build. |
 | KG018 | 80+ env vars — no formal schema | Ops | Onboarding friction | ✅ Resolved Apr-2026 — ENVIRONMENT_VARIABLES.md created with full schema |
 | KG020c | No virus scanning on uploads | Security | Malware risk | `lib/virusScan.ts` is an explicit stub — integrate ClamAV or cloud AV |
