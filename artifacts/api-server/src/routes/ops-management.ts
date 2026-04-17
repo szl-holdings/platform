@@ -4,6 +4,7 @@ import { logger } from "../lib/logger";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { z } from "zod";
 import { validateBody } from "../lib/validation";
+import { sendEmail, buildAlertFiredEmail, hasEmailProviderConfigured } from "../lib/email";
 // Valid incident status transitions (state machine)
 const INCIDENT_TRANSITIONS: Record<string, string[]> = {
   open: ["investigating"],
@@ -670,48 +671,30 @@ router.post("/ops/alert-rules/evaluate", async (_req, res) => {
 
         // Dispatch email notifications if configured for this rule
         if (rule.notify_email && rule.email_recipients.length > 0) {
-          const sgKey = process.env["SENDGRID_API_KEY"];
-          const resendKey = process.env["RESEND_API_KEY"];
-          if (sgKey || resendKey) {
-            const severityUpper = rule.severity.toUpperCase();
-            const subject = `[${severityUpper}] Alert fired: ${rule.name}`;
-            const html = `<h2 style="color:#dc2626;">&#9888; Alert Fired: ${rule.name}</h2>
-<table style="border-collapse:collapse;font-family:monospace;font-size:14px;">
-<tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Severity</td><td><strong>${rule.severity}</strong></td></tr>
-<tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Metric</td><td>${rule.metric_name}</td></tr>
-<tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Current value</td><td>${metricVal}</td></tr>
-<tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Threshold</td><td>${rule.condition} ${rule.threshold}</td></tr>
-</table>
-<p style="margin-top:16px;font-size:13px;color:#6b7280;">View alerts in your SZL Holdings ops dashboard.<br>This is an automated alert.</p>`;
+          if (!hasEmailProviderConfigured()) {
+            logger.warn({ rule: rule.name }, "[ops] Alert has notify_email=true but no email provider is configured (set SENDGRID_API_KEY, RESEND_API_KEY, or SMTP credentials)");
+          } else {
+            const alertsUrl = process.env["ALERTS_PAGE_URL"] ?? `${process.env["APP_BASE_URL"] ?? "https://szlholdings.com"}/command/ops/alerts`;
+            const { subject, html, text } = buildAlertFiredEmail({
+              ruleName: rule.name,
+              severity: rule.severity,
+              metricName: rule.metric_name,
+              metricValue: metricVal,
+              condition: rule.condition,
+              threshold: rule.threshold,
+              alertsUrl,
+            });
             for (const recipient of rule.email_recipients) {
-              const dispatchFn = async () => {
-                if (sgKey) {
-                  const r = await fetch("https://api.sendgrid.com/v3/mail/send", {
-                    method: "POST",
-                    headers: { Authorization: `Bearer ${sgKey}`, "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      personalizations: [{ to: [{ email: recipient }] }],
-                      from: { email: "inquiries@szlholdings.com", name: "SZL Holdings Ops" },
-                      subject,
-                      content: [{ type: "text/html", value: html }],
-                    }),
-                  });
-                  if (!r.ok) throw new Error(`SendGrid ${r.status}`);
-                } else if (resendKey) {
-                  const r = await fetch("https://api.resend.com/emails", {
-                    method: "POST",
-                    headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
-                    body: JSON.stringify({ from: "ops@szlholdings.com", to: [recipient], subject, html }),
-                  });
-                  if (!r.ok) throw new Error(`Resend ${r.status}`);
+              sendEmail({ to: recipient, subject, html, text }).then(result => {
+                if (result.success) {
+                  logger.info({ rule: rule.name, recipient, provider: result.provider }, "[ops] Alert email dispatched");
+                } else {
+                  logger.warn({ rule: rule.name, recipient, error: result.error }, "[ops] Alert email dispatch failed (non-fatal)");
                 }
-              };
-              dispatchFn().catch(emailErr => {
-                logger.warn({ emailErr, recipient, rule: rule.name }, "[ops] Alert email dispatch failed (non-fatal)");
+              }).catch(emailErr => {
+                logger.warn({ emailErr, recipient, rule: rule.name }, "[ops] Alert email dispatch threw (non-fatal)");
               });
             }
-          } else {
-            logger.warn({ rule: rule.name }, "[ops] Alert has notify_email=true but no email provider is configured (set SENDGRID_API_KEY or RESEND_API_KEY)");
           }
         }
       }

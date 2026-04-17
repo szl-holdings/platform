@@ -211,6 +211,71 @@ function szlBrand(content: string): string {
 </html>`;
 }
 
+export interface AlertFiredEmailOptions {
+  ruleName: string;
+  severity: string;
+  metricName: string;
+  metricValue: number;
+  condition: string;
+  threshold: number;
+  alertsUrl?: string;
+}
+
+const SEVERITY_COLORS: Record<string, string> = {
+  critical: "#dc2626",
+  high:     "#ea580c",
+  warning:  "#d97706",
+  info:     "#2563eb",
+};
+
+export function buildAlertFiredEmail(opts: AlertFiredEmailOptions): { subject: string; html: string; text: string } {
+  const severityColor = SEVERITY_COLORS[opts.severity.toLowerCase()] ?? "#6b7280";
+  const severityLabel = opts.severity.toUpperCase();
+  const alertsUrl = opts.alertsUrl ?? "https://szlholdings.com/command/ops/alerts";
+
+  const subject = `[${severityLabel}] Alert fired: ${opts.ruleName}`;
+
+  const html = szlBrand(`
+    <h2 style="color:${severityColor};">&#9888; Alert Fired: ${opts.ruleName}</h2>
+    <p style="margin-bottom:20px;">An alert rule has triggered on your SZL Holdings platform. Review the details below and take action if needed.</p>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:20px;">
+      <tr>
+        <td style="padding:8px 0;color:#6b7280;font-weight:500;width:40%;">Severity</td>
+        <td style="padding:8px 0;"><strong style="color:${severityColor};">${severityLabel}</strong></td>
+      </tr>
+      <tr style="border-top:1px solid #f3f4f6;">
+        <td style="padding:8px 0;color:#6b7280;font-weight:500;">Metric</td>
+        <td style="padding:8px 0;font-family:monospace;">${opts.metricName}</td>
+      </tr>
+      <tr style="border-top:1px solid #f3f4f6;">
+        <td style="padding:8px 0;color:#6b7280;font-weight:500;">Current value</td>
+        <td style="padding:8px 0;font-family:monospace;font-weight:700;">${opts.metricValue}</td>
+      </tr>
+      <tr style="border-top:1px solid #f3f4f6;">
+        <td style="padding:8px 0;color:#6b7280;font-weight:500;">Threshold</td>
+        <td style="padding:8px 0;font-family:monospace;">${opts.condition} ${opts.threshold}</td>
+      </tr>
+    </table>
+    <a href="${alertsUrl}" class="cta">View Alerts Dashboard</a>
+    <p style="margin-top:20px;font-size:12px;color:#9ca3af;">This is an automated alert from the SZL Holdings Ops Center. No reply is needed.</p>
+  `);
+
+  const text = [
+    `[${severityLabel}] Alert Fired: ${opts.ruleName}`,
+    ``,
+    `Severity:      ${severityLabel}`,
+    `Metric:        ${opts.metricName}`,
+    `Current value: ${opts.metricValue}`,
+    `Threshold:     ${opts.condition} ${opts.threshold}`,
+    ``,
+    `View alerts: ${alertsUrl}`,
+    ``,
+    `This is an automated alert from the SZL Holdings Ops Center.`,
+  ].join("\n");
+
+  return { subject, html, text };
+}
+
 export function buildInquiryAckEmail(name: string, subject: string): string {
   return szlBrand(`
     <h2>We received your inquiry</h2>
