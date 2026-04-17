@@ -20,6 +20,7 @@ import "./lib/terra-nyc-extended-ingestion";
 import { scheduleNycExtendedIngestionJob } from "./lib/terra-nyc-extended-ingestion";
 import { seedPlatformData } from "./lib/seed-platform";
 import { seedConstellationData } from "./lib/seed-constellation";
+import { seedGuardianDefaults } from "./lib/seed-guardian";
 import { initializeOpenTelemetry } from "@szl-holdings/observability";
 import { seedMspData } from "./lib/seed-msp";
 import { seedDreamscapeData } from "./lib/seed-dreamscape";
@@ -224,6 +225,10 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     } else {
       logger.info({ mode: currentMode }, "[seed] Demo seeds suppressed — runtime mode does not permit seed data. Set DEMO_MODE=true or ENABLE_DEMO_SEED=true to enable in non-production environments.");
     }
+    // Guardian default tier policies are operational data (not demo data) — always seed.
+    seedGuardianDefaults().catch(err => {
+      logger.warn({ err }, "[seed-guardian] Guardian defaults seed failed (non-fatal)");
+    });
     initIngestionFramework().catch(err => {
       logger.warn({ err }, "[ingestion] Framework init failed (non-fatal)");
     });

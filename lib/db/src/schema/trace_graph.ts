@@ -10,7 +10,7 @@ import {
   index,
   pgEnum,
 } from "drizzle-orm/pg-core";
-import { entitiesTable } from "./entities.ts";
+import { entitiesTable } from "./entities";
 
 export const traceStatusEnum = pgEnum("trace_status", [
   "running",
