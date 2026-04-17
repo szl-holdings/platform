@@ -9,7 +9,7 @@ import {
   ArrowRight, AlertTriangle, Eye, Globe, Map, Shield, BarChart3,
   ChevronRight, Layers, FileText, CheckCircle, ArrowUpRight, Circle,
 } from "lucide-react";
-import { brokerageSummary, brokerageDeals, riskSignals, agents } from "@/data/brokerage";
+import { agents } from "@/data/brokerage";
 import { RiskBadge, StageBadge, formatCurrency, AgentAvatar } from "@/components/brokerage-ui";
 import { properties } from "@/data/portfolio";
 import { useMapboxToken } from "@/hooks/use-mapbox-token";
@@ -34,14 +34,6 @@ const DOCTRINE_MODULES = [
   { id: "action", label: "Action", icon: ArrowRight, color: DS.text.tertiary, desc: "Execute", href: "/deals" },
 ];
 
-const MARKET_SIGNALS = [
-  { time: "5m ago", text: "New pre-foreclosure filing — 847 Park Ave, Queens (Est. $2.1M)", severity: "high" as const },
-  { time: "12m ago", text: "Price reduction: 1240 Broadway commercial listing dropped 8% ($4.2M → $3.9M)", severity: "medium" as const },
-  { time: "28m ago", text: "Ownership transfer detected — LLC → individual on 3 Tribeca parcels", severity: "high" as const },
-  { time: "45m ago", text: "New listing match: 2BR Chelsea, $890K — matches 3 active buyer profiles", severity: "medium" as const },
-  { time: "1h ago", text: "Distress cluster: 4 new filings in East Harlem zip 10029", severity: "critical" as const },
-  { time: "2h ago", text: "Broker SLA warning — 2 inquiries aging past 4h target", severity: "high" as const },
-];
 
 const SEVERITY_COLORS: Record<string, string> = {
   critical: DS.accent.red,
@@ -50,13 +42,6 @@ const SEVERITY_COLORS: Record<string, string> = {
   low: DS.text.muted,
 };
 
-const OPPORTUNITY_QUEUE = [
-  { address: "847 Park Ave, Queens", type: "Pre-Foreclosure", owner: "Estate of R. Martinez", stage: "Distress", confidence: 87, evidence: "14yr hold · Q2 2026 debt maturity · filing confirmed", nextAction: "Initiate outreach", value: "$2.1M", flag: "urgent" as const },
-  { address: "1240 Broadway, Manhattan", type: "Commercial", owner: "Midtown RE LLC (unmask: Cerberus Capital)", stage: "Watch", confidence: 74, evidence: "Listing price down 8% · 47 DOM · LLC transfer pending", nextAction: "Comp analysis", value: "$3.9M", flag: "active" as const },
-  { address: "45 Warren St, Tribeca", type: "Multi-Family", owner: "W.Capital Partners LLC", stage: "Investigate", confidence: 61, evidence: "LLC transfer detected · 11yr hold · no active filings", nextAction: "Ownership verify", value: "$4.8M", flag: "watch" as const },
-  { address: "1890 Adam C Powell Blvd, Harlem", type: "Mixed-Use", owner: "R&B Holding Corp", stage: "Distress", confidence: 82, evidence: "Cluster alert: 4 filings, zip 10029 · tax lien delinquent", nextAction: "File review", value: "$1.6M", flag: "urgent" as const },
-  { address: "312 W 23rd St, Chelsea", type: "Residential", owner: "J. Park (individual)", stage: "Qualified", confidence: 55, evidence: "3 active buyer matches · motivated seller indicated", nextAction: "Schedule showing", value: "$890K", flag: "active" as const },
-];
 
 const FLAG_STYLES: Record<string, { color: string; label: string }> = {
   urgent: { color: DS.accent.red, label: "Urgent" },
@@ -64,14 +49,51 @@ const FLAG_STYLES: Record<string, { color: string; label: string }> = {
   watch: { color: DS.text.tertiary, label: "Watch" },
 };
 
-const PIPELINE_STAGES = [
-  { stage: "Distress", color: DS.accent.red, deals: OPPORTUNITY_QUEUE.filter(o => o.stage === "Distress").length },
-  { stage: "Watch", color: DS.accent.gold, deals: OPPORTUNITY_QUEUE.filter(o => o.stage === "Watch").length },
-  { stage: "Investigate", color: DS.accent.blue, deals: OPPORTUNITY_QUEUE.filter(o => o.stage === "Investigate").length },
-  { stage: "Qualified", color: DS.accent.green, deals: OPPORTUNITY_QUEUE.filter(o => o.stage === "Qualified").length },
-  { stage: "Closed", color: DS.text.secondary, deals: 2 },
-];
-const stageTotalDeals = PIPELINE_STAGES.reduce((s, p) => s + p.deals, 0);
+function relativeTime(iso: string | null | undefined): string {
+  if (!iso) return "recently";
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
+function mapDealToQueueItem(deal: Record<string, unknown>) {
+  const price = typeof deal.price === "number" ? deal.price : (typeof deal.price === "string" ? parseFloat(deal.price) : 0);
+  const stage = typeof deal.stage === "string" ? deal.stage : "lead";
+  const capStage = stage.charAt(0).toUpperCase() + stage.slice(1);
+  const riskLevel = typeof deal.riskLevel === "string" ? deal.riskLevel : "medium";
+  const flag = riskLevel === "high" ? "urgent" : riskLevel === "medium" ? "active" : "watch";
+  const prob = typeof deal.probability === "number" ? deal.probability : 50;
+  const days = typeof deal.daysInStage === "number" ? deal.daysInStage : 0;
+  return {
+    address: String(deal.address ?? "—"),
+    type: String(deal.type ?? "Property"),
+    owner: String(deal.ownerName ?? "—"),
+    stage: capStage,
+    confidence: prob,
+    evidence: `${days}d in stage · ${riskLevel} risk`,
+    nextAction: String(deal.nextAction ?? "Review"),
+    value: price > 0 ? `$${(price / 1e6).toFixed(1)}M` : "—",
+    flag: flag as "urgent" | "active" | "watch",
+  };
+}
+
+function mapAlertToSignal(alert: Record<string, unknown>) {
+  const sev = String(alert.severity ?? "medium");
+  const alertType = String(alert.alertType ?? "signal");
+  const borough = String(alert.borough ?? "NYC");
+  const address = alert.address ? String(alert.address) : null;
+  const title = alert.title ? String(alert.title) : null;
+  const text = title ?? (address ? `${address} — ${alertType} (${borough})` : `${alertType} detected in ${borough}`);
+  return {
+    time: relativeTime(alert.triggeredAt as string ?? null),
+    text,
+    severity: (["critical", "high", "medium", "low"].includes(sev) ? sev : "medium") as "critical" | "high" | "medium" | "low",
+  };
+}
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API = "/api";
@@ -80,28 +102,61 @@ export default function TerraIntelligence() {
   const qc = useQueryClient();
   const { lastMessage: wsSignal } = useRealtimeChannel("terra-signals");
 
-  const { data: healthData, isError: apiDown } = useQuery({
-    queryKey: ["terra-dashboard-health"],
-    queryFn: () => fetch(`${API}/terra/pipeline/deals?limit=1`).then(r => r.json()).then(d => d.data ?? d),
+  const { data: dealsData, isError: dealsError } = useQuery({
+    queryKey: ["terra-dashboard-deals"],
+    queryFn: () => fetch(`${API}/terra/pipeline/deals?limit=20`).then(r => { if (!r.ok) throw new Error(`API error ${r.status}`); return r.json(); }).then(d => d.data ?? d),
     staleTime: 60000,
     retry: 1,
+    refetchInterval: 120_000,
   });
-  const dataMode: "live" | "demo" = (!apiDown && healthData?.dataMode === "live") ? "live" : "demo";
+
+  const { data: alertsData } = useQuery({
+    queryKey: ["terra-dashboard-alerts"],
+    queryFn: () => fetch(`${API}/terra/distress/alerts?limit=10`).then(r => { if (!r.ok) throw new Error(`API error ${r.status}`); return r.json(); }).then(d => d.data ?? d),
+    staleTime: 60000,
+    retry: 1,
+    refetchInterval: 120_000,
+  });
+
+  const dataMode: "live" | "demo" = (!dealsError && dealsData?.dataMode === "live") ? "live" : "demo";
+
+  const liveDeals: Record<string, unknown>[] = Array.isArray(dealsData?.deals) && dealsData.deals.length > 0 ? dealsData.deals : [];
+  const liveAlerts: Record<string, unknown>[] = Array.isArray(alertsData?.alerts) && alertsData.alerts.length > 0 ? alertsData.alerts : [];
+
+  const OPPORTUNITY_QUEUE = liveDeals.slice(0, 8).map(mapDealToQueueItem);
+
+  const MARKET_SIGNALS = liveAlerts.slice(0, 8).map(mapAlertToSignal);
+
+  const liveDealCount = dealsData?.count ?? liveDeals.length;
+  const liveListingCount = liveDeals.length;
+
+  const stageLC = (s: string) => s.toLowerCase();
+  const PIPELINE_STAGES = [
+    { stage: "Distress", color: DS.accent.red, deals: OPPORTUNITY_QUEUE.filter(o => ["distress", "lead"].includes(stageLC(o.stage))).length },
+    { stage: "Watch", color: DS.accent.gold, deals: OPPORTUNITY_QUEUE.filter(o => ["watch", "showing"].includes(stageLC(o.stage))).length },
+    { stage: "Negotiate", color: DS.accent.blue, deals: OPPORTUNITY_QUEUE.filter(o => ["investigate", "offer", "negotiation", "negotiate"].includes(stageLC(o.stage))).length },
+    { stage: "Qualified", color: DS.accent.green, deals: OPPORTUNITY_QUEUE.filter(o => ["qualified", "accepted", "under-contract"].includes(stageLC(o.stage))).length },
+    { stage: "Closed", color: DS.text.secondary, deals: OPPORTUNITY_QUEUE.filter(o => stageLC(o.stage) === "closed").length },
+  ];
+  const stageTotalDeals = PIPELINE_STAGES.reduce((s, p) => s + p.deals, 0);
 
   useEffect(() => {
     if (!wsSignal) return;
+    qc.invalidateQueries({ queryKey: ["terra-dashboard-deals"] });
+    qc.invalidateQueries({ queryKey: ["terra-dashboard-alerts"] });
     qc.invalidateQueries({ queryKey: ["terra-deals"] });
     qc.invalidateQueries({ queryKey: ["terra-signals"] });
     qc.invalidateQueries({ queryKey: ["terra-leads"] });
   }, [wsSignal, qc]);
 
   const [activeRole, setActiveRole] = useState("operator");
-  const activeSignals = riskSignals.filter(s => !s.acknowledged);
-  const criticalSignals = activeSignals.filter(s => s.severity === "critical");
-  const topDeals = [...brokerageDeals].sort((a, b) => b.price - a.price).slice(0, 5);
+  const criticalSignals = liveAlerts.filter(a => a.severity === "critical");
+  const topDeals = liveDeals.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0)).slice(0, 5);
   const topAgents = [...agents].sort((a, b) => b.commissionMTD - a.commissionMTD).slice(0, 4);
   const { token: mapToken } = useMapboxToken();
   const [showMap, setShowMap] = useState(false);
+  const portfolioValue = properties.reduce((s, p) => s + (p.value ?? 0), 0);
+  const portfolioLabel = portfolioValue >= 1e9 ? `$${(portfolioValue / 1e9).toFixed(1)}B` : portfolioValue >= 1e6 ? `$${(portfolioValue / 1e6).toFixed(0)}M` : "—";
 
   return (
     <div className="space-y-4 max-w-[1400px]">
@@ -164,9 +219,9 @@ export default function TerraIntelligence() {
             {activeRole === "buyer" && "Demo View"}
           </div>
           <div className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>
-            {activeRole === "executive" && `${brokerageSummary.activeListings} active listings · ${OPPORTUNITY_QUEUE.length} live acquisition targets · ${OPPORTUNITY_QUEUE.filter(o => o.flag === "urgent").length} urgent. Distress cluster activity in East Harlem and Queens. Total portfolio tracked: $2.4B.`}
-            {activeRole === "operator" && `${criticalSignals.length} critical market signals active. ${OPPORTUNITY_QUEUE.filter(o => o.stage === "Distress").length} distress opportunities require outreach. Confidence-weighted queue ready for review.`}
-            {activeRole === "analyst" && `${topDeals.length} deals in pipeline. ${topAgents.length} active brokers. ${OPPORTUNITY_QUEUE.filter(o => o.flag === "urgent").length} inquiries require same-day response. Broker SLA warning on 2 aging inquiries.`}
+            {activeRole === "executive" && `${liveListingCount} active listings · ${OPPORTUNITY_QUEUE.length} live acquisition targets · ${OPPORTUNITY_QUEUE.filter(o => o.flag === "urgent").length} urgent. Distress cluster activity detected. Total portfolio tracked: ${portfolioLabel}.`}
+            {activeRole === "operator" && `${criticalSignals.length} critical market signals active. ${OPPORTUNITY_QUEUE.filter(o => o.stage === "Distress" || o.stage === "distress" || o.stage === "lead").length} distress opportunities require outreach. Confidence-weighted queue ready for review.`}
+            {activeRole === "analyst" && `${topDeals.length} deals in pipeline. ${topAgents.length} active brokers. ${OPPORTUNITY_QUEUE.filter(o => o.flag === "urgent").length} inquiries require same-day response. Broker SLA warning on aging inquiries.`}
             {activeRole === "admin" && `Data mode: ${dataMode}. All Terra intelligence sources connected. Property map token: ${mapToken ? "Active" : "Inactive"}.`}
             {activeRole === "buyer" && "You're viewing Terra — SZL's property intelligence platform. Distress detection, ownership stack analysis, and broker orchestration all demonstrated with sample market data."}
           </div>
@@ -176,14 +231,12 @@ export default function TerraIntelligence() {
       {/* KPI Strip */}
       <div className="rounded-xl border overflow-hidden" style={{ borderColor: DS.border, background: DS.surface }}>
         <div style={{ height: 2, background: `linear-gradient(90deg, ${DS.accent.gold}, ${DS.accent.blue}40, transparent)` }} />
-        <div className="grid grid-cols-3 md:grid-cols-6">
+        <div className="grid grid-cols-2 md:grid-cols-4">
           {[
-            { label: "Active Listings", value: brokerageSummary.activeListings.toString(), color: DS.accent.gold },
-            { label: "Distress Signals", value: "3", color: DS.accent.red, pulse: true },
-            { label: "Deals in Motion", value: brokerageSummary.activeDeals.toString(), color: DS.accent.blue },
-            { label: "Broker Response", value: "2.4h", color: DS.accent.green, sub: "avg" },
-            { label: "Market Movement", value: "+2.1%", color: DS.accent.green, sub: "30d" },
-            { label: "Portfolio Tracked", value: "$2.4B", color: DS.accent.gold },
+            { label: "Active Listings", value: liveListingCount.toString(), color: DS.accent.gold },
+            { label: "Distress Signals", value: (liveAlerts.length || alertsData?.count || 0).toString(), color: DS.accent.red, pulse: true },
+            { label: "Deals in Motion", value: liveDealCount.toString(), color: DS.accent.blue },
+            { label: "Portfolio Assets", value: properties.length.toString(), color: DS.accent.gold },
           ].map((c, i) => (
             <div key={c.label} className="px-3 py-3 text-center" style={{ borderLeft: i > 0 ? `1px solid ${DS.borderMuted}` : "none" }}>
               <div className="flex items-center justify-center gap-1.5 mb-0.5">
@@ -266,6 +319,11 @@ export default function TerraIntelligence() {
             </div>
 
             <div className="divide-y" style={{ borderColor: DS.borderMuted }}>
+              {OPPORTUNITY_QUEUE.length === 0 && (
+                <div className="px-4 py-8 text-center">
+                  <p className="text-[11px]" style={{ color: DS.text.muted }}>No acquisition targets detected yet — distress engine is scanning.</p>
+                </div>
+              )}
               {OPPORTUNITY_QUEUE.map((item, i) => {
                 const flag = FLAG_STYLES[item.flag];
                 const confColor = item.confidence >= 80 ? DS.accent.green : item.confidence >= 65 ? DS.accent.gold : DS.text.tertiary;
@@ -330,15 +388,20 @@ export default function TerraIntelligence() {
               </Link>
             </div>
             <div className="space-y-0">
+              {topDeals.length === 0 && (
+                <div className="py-6 text-center">
+                  <p className="text-[11px]" style={{ color: DS.text.muted }}>Pipeline loading…</p>
+                </div>
+              )}
               {topDeals.map((deal, i) => (
-                <div key={deal.id} className="flex items-center gap-3 py-2 hover:bg-white/[0.015] transition-colors" style={{ borderTop: i > 0 ? `1px solid ${DS.borderMuted}` : "none" }}>
+                <div key={deal.id ?? i} className="flex items-center gap-3 py-2 hover:bg-white/[0.015] transition-colors" style={{ borderTop: i > 0 ? `1px solid ${DS.borderMuted}` : "none" }}>
                   <div className="flex-1 min-w-0">
                     <p className="text-[11px] font-medium truncate" style={{ color: "rgba(255,255,255,0.8)" }}>{deal.address}</p>
-                    {deal.buyerName && <span className="text-[9px]" style={{ color: DS.text.muted }}>{deal.buyerName}</span>}
+                    {(deal.buyerName || deal.clientName || deal.ownerName) && <span className="text-[9px]" style={{ color: DS.text.muted }}>{deal.buyerName ?? deal.clientName ?? deal.ownerName}</span>}
                   </div>
                   <StageBadge stage={deal.stage} />
                   <RiskBadge level={deal.riskLevel} />
-                  <span className="text-[11px] font-mono font-bold" style={{ color: DS.accent.gold }}>{formatCurrency(deal.price)}</span>
+                  <span className="text-[11px] font-mono font-bold" style={{ color: DS.accent.gold }}>{deal.price ? formatCurrency(Number(deal.price)) : "—"}</span>
                 </div>
               ))}
             </div>
@@ -357,6 +420,11 @@ export default function TerraIntelligence() {
               <span className="text-[9px] font-mono ml-auto" style={{ color: DS.text.muted }}>{MARKET_SIGNALS.length} active</span>
             </div>
             <div className="space-y-0">
+              {MARKET_SIGNALS.length === 0 && (
+                <div className="py-6 text-center">
+                  <p className="text-[11px]" style={{ color: DS.text.muted }}>No signals yet — monitoring active.</p>
+                </div>
+              )}
               {MARKET_SIGNALS.map((sig, i) => (
                 <div key={i} className="flex gap-2.5 py-2" style={{ borderTop: i > 0 ? `1px solid ${DS.borderMuted}` : "none" }}>
                   <div className="flex flex-col items-center shrink-0 pt-0.5">
@@ -415,10 +483,10 @@ export default function TerraIntelligence() {
             </div>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { label: "Occupancy", value: "81%", color: DS.accent.gold },
-                { label: "Pipeline", value: formatCurrency(brokerageSummary.pipelineValue), color: DS.accent.blue },
-                { label: "Freshness", value: "2m ago", color: DS.text.tertiary },
-                { label: "Confidence", value: "High", color: DS.accent.green },
+                { label: "Pipeline", value: `${liveDealCount} deals`, color: DS.accent.blue },
+                { label: "Alerts", value: (liveAlerts.length || 0).toString(), color: liveAlerts.length > 0 ? DS.accent.red : DS.text.tertiary },
+                { label: "Data Mode", value: dataMode === "live" ? "Live" : "Offline", color: dataMode === "live" ? DS.accent.green : DS.text.muted },
+                { label: "Assets", value: properties.length.toString(), color: DS.accent.gold },
               ].map(s => (
                 <div key={s.label}>
                   <div className="text-[8px]" style={{ color: DS.text.muted }}>{s.label}</div>
@@ -486,10 +554,10 @@ export default function TerraIntelligence() {
         title="Priority Field Actions"
         actions={[
           { id: "1", label: `Initiate outreach — ${OPPORTUNITY_QUEUE[0]?.address ?? "high-priority target"}`, type: "investigate", severity: "critical" },
-          { id: "2", label: `Verify ownership — ${OPPORTUNITY_QUEUE[2]?.address ?? "LLC entity"}`, type: "assign", severity: "high" },
-          { id: "3", label: "Review broker SLA breaches — 2 inquiries aging past 4h target", type: "approve", severity: "high" },
-          { id: "4", label: "Comp analysis on 1240 Broadway listing price drop", type: "investigate", severity: "medium" },
-          { id: "5", label: "File review — distress cluster Harlem zip 10029", type: "escalate", severity: "critical" },
+          { id: "2", label: `Verify ownership — ${OPPORTUNITY_QUEUE[1]?.address ?? "LLC entity"}`, type: "assign", severity: "high" },
+          { id: "3", label: `Review broker SLA breaches — ${OPPORTUNITY_QUEUE.filter(o => o.flag === "urgent").length} urgent items`, type: "approve", severity: "high" },
+          { id: "4", label: OPPORTUNITY_QUEUE[2] ? `Comp analysis on ${OPPORTUNITY_QUEUE[2].address}` : "Comp analysis — price drop detected", type: "investigate", severity: "medium" },
+          { id: "5", label: MARKET_SIGNALS[0] ? `Signal: ${MARKET_SIGNALS[0].text.slice(0, 60)}` : "Review distress cluster signals", type: "escalate", severity: "critical" },
         ]}
       />
 

@@ -9,6 +9,14 @@ import {
   FORWARD_CAPACITY,
   type TeamMember,
 } from "@/data/operationalData";
+import { useCarlotaApiData } from "@/hooks/useCarlotaApiData";
+
+interface KpiItem {
+  label: string;
+  value: string;
+  sub: string;
+  live?: boolean;
+}
 
 const GOLD = "var(--color-gold)";
 
@@ -27,6 +35,7 @@ export default function CapacityPlanner() {
   });
 
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const apiData = useCarlotaApiData();
 
   const avgUtilisation = Math.round(TEAM.reduce((s, m) => s + m.utilisation, 0) / TEAM.length);
   const benchCount = TEAM.filter(m => m.status === "bench" || m.status === "under").length;
@@ -48,15 +57,21 @@ export default function CapacityPlanner() {
             <p style={{ fontSize: 15, color: "#4A7A63", maxWidth: 520, lineHeight: 1.7, marginBottom: 32 }}>
               Real-time team allocation, bench analysis, skill-gap detection, and forward capacity planning — so you never over-commit or leave capability idle.
             </p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 16, maxWidth: 700 }}>
-              {[
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 16, maxWidth: 900 }}>
+              {([
                 { label: "Team Utilisation", value: `${avgUtilisation}%`, sub: "Current average" },
                 { label: "Capacity Available", value: `${benchCount} members`, sub: "Partially or fully available" },
-                { label: "Active Engagements", value: "5", sub: "Across 5 clients" },
+                { label: "Active Engagements", value: apiData.isLive ? apiData.reservationsTotal.toString() : "—", sub: apiData.isLive ? "Active reservations" : "Awaiting data", live: apiData.isLive },
                 { label: "Skill Gaps Identified", value: SKILL_GAPS.length.toString(), sub: "Require action" },
-              ].map(kpi => (
-                <div key={kpi.label} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "14px 16px" }}>
-                  <div style={{ fontSize: 22, fontWeight: 600, color: "#F5F0E8", fontFamily: "'Cormorant Garamond', serif" }}>{kpi.value}</div>
+                ...(apiData.isLive ? [
+                  { label: "Client Inquiries", value: apiData.inquiriesTotal.toString(), sub: "from live CRM", live: true },
+                ] : []),
+              ] as KpiItem[]).map(kpi => (
+                <div key={kpi.label} style={{ background: kpi.live ? "rgba(5,150,105,0.08)" : "rgba(255,255,255,0.04)", border: `1px solid ${kpi.live ? "rgba(5,150,105,0.25)" : "rgba(255,255,255,0.08)"}`, borderRadius: 12, padding: "14px 16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <div style={{ fontSize: 22, fontWeight: 600, color: "#F5F0E8", fontFamily: "'Cormorant Garamond', serif" }}>{kpi.value}</div>
+                    {kpi.live && <span style={{ fontSize: 8, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#34D399", background: "rgba(52,211,153,0.12)", padding: "2px 5px", borderRadius: 4 }}>Live</span>}
+                  </div>
                   <div style={{ fontSize: 11, color: "#4A7A63", marginTop: 2 }}>{kpi.label}</div>
                   <div style={{ fontSize: 10, color: "#2A5040", marginTop: 2 }}>{kpi.sub}</div>
                 </div>

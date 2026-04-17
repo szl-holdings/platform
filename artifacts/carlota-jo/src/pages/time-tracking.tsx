@@ -428,8 +428,6 @@ export default function TimeTracking() {
       setToast("Failed to update invoice.");
     }
   };
-    }
-  };
 
   const exportInvoicePdf = (inv: Invoice) => {
     const items = inv.entryIds && inv.entryIds.length > 0

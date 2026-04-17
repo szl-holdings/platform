@@ -15,6 +15,7 @@
     "@replit/vite-plugin-runtime-error-modal": "catalog:",
     "@szl-holdings/mcp-client": "workspace:*",
     "@tailwindcss/vite": "catalog:",
+    "@tanstack/react-query": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",

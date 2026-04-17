@@ -264,6 +264,8 @@ export default function KpiDashboardPage() {
   useEffect(() => {
     document.title = "KPI Dashboard — SZL Holdings";
     fetchData();
+    const interval = setInterval(() => fetchData(true), 60_000);
+    return () => clearInterval(interval);
   }, []);
 
   const agg = data?.aggregate;
@@ -286,7 +288,7 @@ export default function KpiDashboardPage() {
                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                 style={{ marginBottom: "2.5rem" }}
               >
-                <DataStateBadge state="DEMO DATA" position="top-left" style={{ position: "relative", top: "auto", left: "auto", right: "auto", bottom: "auto", display: "inline-flex", marginBottom: "0.75rem" }} />
+                <DataStateBadge state={data ? "LIVE" : "DEMO DATA"} position="top-left" style={{ position: "relative", top: "auto", left: "auto", right: "auto", bottom: "auto", display: "inline-flex", marginBottom: "0.75rem" }} />
                 <div style={{ display: "flex", alignItems: "flex-end", gap: "0.75rem", marginBottom: "0.5rem" }}>
                   <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "linear-gradient(135deg, hsla(214,80%,55%,0.2), hsla(232,68%,50%,0.12))", border: "1px solid hsla(214,80%,55%,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <Zap size={15} style={{ color: "hsl(214,80%,65%)" }} />

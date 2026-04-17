@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { useConsultingMetrics } from "@/hooks/useConsultingMetrics";
+import { useCarlotaApiData } from "@/hooks/useCarlotaApiData";
 import {
   Sparkles, FileText, Network, Radar, Activity, Heart,
   TrendingUp, GraduationCap, Lightbulb, Users, FolderOpen,
@@ -250,7 +251,26 @@ export default function ConsultingOS() {
 
   const [hoveredModule, setHoveredModule] = useState<string | null>(null);
   const metrics = useConsultingMetrics();
-  const PLATFORM_METRICS = metrics.platform;
+  const apiData = useCarlotaApiData();
+  const PLATFORM_METRICS = [
+    ...metrics.platform,
+    ...(apiData.isLive ? [
+      {
+        label: "Client Inquiries",
+        value: apiData.inquiriesTotal.toString(),
+        change: "from CRM",
+        up: true,
+        source: "live" as const,
+      },
+      ...(apiData.servicesCount > 0 ? [{
+        label: "Services Offered",
+        value: apiData.servicesCount.toString(),
+        change: "live catalogue",
+        up: true,
+        source: "live" as const,
+      }] : []),
+    ] : []),
+  ];
   const liveModuleMetrics: Record<string, string> = {
     "time-tracking": metrics.modules.timeTracking,
     "capacity-planner": metrics.modules.capacityPlanner,
