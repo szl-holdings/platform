@@ -204,6 +204,27 @@ export function useDriftSummary() {
   });
 }
 
+export interface DriftHistorySnapshot {
+  measuredAt: string;
+  overallDriftScore: number;
+  status: "healthy" | "degraded" | "critical";
+  domains: DomainDrift[];
+  topAlerts: Array<{ domain: string; reason: string; severity: "warning" | "critical" }>;
+}
+
+export interface DriftHistoryResponse {
+  snapshots: DriftHistorySnapshot[];
+  count: number;
+}
+
+export function useDriftHistory() {
+  return useQuery({
+    queryKey: ["pulse", "drift-history"],
+    queryFn: () => rawFetch<DriftHistoryResponse>("/api/drift/history"),
+    refetchInterval: 60_000,
+  });
+}
+
 export function useDeployments(environment: "production" | "staging" | "development" = "production") {
   return useQuery({
     queryKey: ["pulse", "deployments", environment],

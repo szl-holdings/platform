@@ -1,5 +1,9 @@
-import { Activity, AlertTriangle, CheckCircle, GitCommit, Layers, RefreshCw, Server, TrendingDown } from "lucide-react";
-import { useDeployments, useDriftSummary, useExecutiveBrief } from "../lib/api";
+import { useState } from "react";
+import { Activity, AlertTriangle, CheckCircle, ChevronDown, ChevronRight, GitCommit, Layers, LineChart as LineChartIcon, RefreshCw, Server, TrendingDown } from "lucide-react";
+import {
+  Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
+} from "recharts";
+import { useDeployments, useDriftHistory, useDriftSummary, useExecutiveBrief } from "../lib/api";
 
 function StatusDot({ status }: { status: "healthy" | "degraded" | "critical" }) {
   const color = status === "healthy" ? "#4eca8b" : status === "degraded" ? "#c8a84b" : "#e05050";
@@ -39,20 +43,57 @@ function SectionHeader({ icon, title, subtitle, right }: { icon: React.ReactNode
   );
 }
 
+const DOMAIN_COLORS: Record<string, string> = {
+  terra: "#4eca8b",
+  prism: "#c8a84b",
+  vessels: "#5090e8",
+  aegis: "#e05050",
+  lyte: "#a070e0",
+  imperium: "#e08c40",
+  "carlota-jo": "#40c0c0",
+  platform: "#7a8295",
+};
+
+function formatTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+}
+
 export default function SystemHealth() {
   const briefQ = useExecutiveBrief();
   const driftQ = useDriftSummary();
+  const historyQ = useDriftHistory();
   const deployQ = useDeployments("production");
 
   const brief = briefQ.data;
   const drift = driftQ.data;
+  const history = historyQ.data;
   const deploys = deployQ.data;
 
-  const refreshAll = () => {
+  const [showPerDomain, setShowPerDomain] = useState(false);
+
+  const refreshAll = async () => {
     briefQ.refetch();
-    driftQ.refetch();
     deployQ.refetch();
+    // Sequence drift -> history so the new snapshot appears in the trend immediately.
+    await driftQ.refetch();
+    historyQ.refetch();
   };
+
+  const overallChartData = (history?.snapshots ?? []).map((s) => ({
+    t: formatTime(s.measuredAt),
+    score: s.overallDriftScore,
+    status: s.status,
+  }));
+
+  const domainKeys = Array.from(
+    new Set((history?.snapshots ?? []).flatMap((s) => s.domains.map((d) => d.domain))),
+  );
+
+  const perDomainChartData = (history?.snapshots ?? []).map((s) => {
+    const row: Record<string, number | string> = { t: formatTime(s.measuredAt) };
+    for (const d of s.domains) row[d.domain] = d.driftScore;
+    return row;
+  });
 
   return (
     <div style={{ padding: "28px 28px 40px" }}>
@@ -159,6 +200,116 @@ export default function SystemHealth() {
         />
         {driftQ.isLoading && <div style={{ color: "var(--pulse-text-muted)", fontSize: "0.85rem" }}>Loading drift report…</div>}
         {driftQ.error && <div style={{ color: "#e05050", fontSize: "0.85rem" }}>Failed to load drift report.</div>}
+
+        {/* Drift trend chart */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <LineChartIcon size={12} color="var(--pulse-text-muted)" />
+              <span style={{ fontSize: "0.68rem", color: "var(--pulse-text-muted)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                Drift Trend
+              </span>
+              {history && (
+                <span style={{ fontSize: "0.68rem", color: "var(--pulse-text-dim)" }}>
+                  · last {history.snapshots.length} of {history.count} snapshots
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => setShowPerDomain((v) => !v)}
+              disabled={!history || history.snapshots.length === 0}
+              style={{
+                display: "flex", alignItems: "center", gap: 4,
+                padding: "4px 8px", borderRadius: 4,
+                background: "transparent", border: "1px solid var(--pulse-border)",
+                color: "var(--pulse-text-muted)", fontSize: "0.7rem", cursor: history && history.snapshots.length > 0 ? "pointer" : "not-allowed",
+                opacity: history && history.snapshots.length > 0 ? 1 : 0.5,
+              }}
+            >
+              {showPerDomain ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+              {showPerDomain ? "Hide per-domain" : "Inspect per-domain"}
+            </button>
+          </div>
+
+          {historyQ.isLoading && (
+            <div style={{ color: "var(--pulse-text-muted)", fontSize: "0.8rem", padding: "12px 0" }}>Loading drift history…</div>
+          )}
+          {historyQ.error && (
+            <div style={{ color: "#e05050", fontSize: "0.8rem", padding: "12px 0" }}>Failed to load drift history.</div>
+          )}
+          {history && history.snapshots.length === 0 && !historyQ.isLoading && (
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8,
+              padding: "16px 12px", borderRadius: 6,
+              background: "rgba(0,0,0,0.2)", border: "1px dashed var(--pulse-border)",
+              color: "var(--pulse-text-muted)", fontSize: "0.8rem",
+            }}>
+              <Activity size={13} />
+              No drift snapshots yet. History begins after the next drift measurement (refresh or wait for the next polling cycle).
+            </div>
+          )}
+          {history && history.snapshots.length > 0 && !showPerDomain && (
+            <div style={{ width: "100%", height: 160 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={overallChartData} margin={{ top: 4, right: 8, left: -12, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="driftGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#c8a84b" stopOpacity={0.45} />
+                      <stop offset="100%" stopColor="#c8a84b" stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                  <XAxis dataKey="t" stroke="var(--pulse-text-dim)" tick={{ fontSize: 10 }} />
+                  <YAxis stroke="var(--pulse-text-dim)" tick={{ fontSize: 10 }} domain={[0, (max: number) => Math.max(0.5, Math.ceil(max * 10) / 10)]} />
+                  <Tooltip
+                    contentStyle={{ background: "rgba(15,18,28,0.95)", border: "1px solid var(--pulse-border)", borderRadius: 6, fontSize: "0.75rem" }}
+                    labelStyle={{ color: "var(--pulse-text-muted)" }}
+                    formatter={(v: number) => [v.toFixed(3), "Drift"]}
+                  />
+                  <Area type="monotone" dataKey="score" stroke="#c8a84b" strokeWidth={2} fill="url(#driftGrad)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+          {history && history.snapshots.length > 0 && showPerDomain && (
+            <>
+              <div style={{ width: "100%", height: 200 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={perDomainChartData} margin={{ top: 4, right: 8, left: -12, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                    <XAxis dataKey="t" stroke="var(--pulse-text-dim)" tick={{ fontSize: 10 }} />
+                    <YAxis stroke="var(--pulse-text-dim)" tick={{ fontSize: 10 }} domain={[0, (max: number) => Math.max(0.5, Math.ceil(max * 10) / 10)]} />
+                    <Tooltip
+                      contentStyle={{ background: "rgba(15,18,28,0.95)", border: "1px solid var(--pulse-border)", borderRadius: 6, fontSize: "0.75rem" }}
+                      labelStyle={{ color: "var(--pulse-text-muted)" }}
+                      formatter={(v: number) => v.toFixed(3)}
+                    />
+                    {domainKeys.map((dk) => (
+                      <Line
+                        key={dk}
+                        type="monotone"
+                        dataKey={dk}
+                        stroke={DOMAIN_COLORS[dk] ?? "#7a8295"}
+                        strokeWidth={1.5}
+                        dot={false}
+                        isAnimationActive={false}
+                      />
+                    ))}
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 8 }}>
+                {domainKeys.map((dk) => (
+                  <div key={dk} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: "0.7rem", color: "var(--pulse-text-dim)" }}>
+                    <span style={{ width: 10, height: 2, background: DOMAIN_COLORS[dk] ?? "#7a8295" }} />
+                    <span style={{ textTransform: "capitalize" }}>{dk}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
         {drift && (
           <>
             <div style={{ overflowX: "auto" }}>
