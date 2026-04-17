@@ -21,7 +21,7 @@ This is not a team of specialists operating in silos. It is a single founder wit
 
 **Why this matters:**
 
-**Architectural coherence.** The SZL platform has a unity of purpose that multi-person teams often lack. Every product surface reflects the same architectural thesis, the same design principles, and the same conviction about what governed operational intelligence requires. This is not a portfolio of features assembled by committee.
+**Architectural coherence.** The SZL platform has a unity of purpose that multi-person teams often lack. Every product surface reflects the same architectural thesis, the same design principles, and the same conviction about what a governed decision operating system requires. This is not a portfolio of features assembled by committee.
 
 **Speed without debt.** The codebase reflects deliberate architectural investment — shared libraries, typed APIs, monorepo discipline — rather than the accumulation of shortcuts taken under deadline pressure. This is a speed advantage that compounds.
 
@@ -35,7 +35,7 @@ The codebase is the most credible proof of the team's capability. As of Q1 2026:
 
 - **15 active artifacts** — implemented, documented, and buildable
 - **Full-stack implementation** — React, TypeScript, Express, PostgreSQL, Drizzle ORM, WebSocket, Expo/React Native
-- **Production-grade shared infrastructure** — five platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine) plus auth, AI engine, design system
+- **Production-grade shared infrastructure** — six platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, Event Fabric) plus auth, AI engine, design system
 - **6 domain packs** — each with real feature depth (not marketing mockups)
 - **Enterprise integrations** — Stripe, OpenAI/Anthropic/Gemini, Mapbox, and more
 - **Architecture documentation** — written before implementation, not reconstructed after

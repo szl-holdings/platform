@@ -6,7 +6,7 @@
 
 ## The Convergence
 
-Three independent forces have converged to make Governed Operational Intelligence the right category to build in 2024–2026:
+Three independent forces have converged to make the Governed Decision Operating System the right category to build in 2024–2026:
 
 ---
 
@@ -18,7 +18,7 @@ In 2023–2024, LLM quality crossed a threshold where the systems can do somethi
 
 This is not about chat interfaces or copilots. It is about the ability to maintain a coherent analytical model across an organization's full operational surface and surface recommendations that an operator can act on with confidence — under governance, with full attribution.
 
-The SZL architecture is designed specifically for this capability: five platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine) that ensure every AI recommendation is attributed, every consequential action is governed, and every decision is tracked from signal to outcome.
+The SZL architecture is designed specifically for this capability: six platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, Event Fabric) that ensure every AI recommendation is attributed, every consequential action is governed, and every decision is tracked from signal to outcome.
 
 Three years ago, building this was aspirational. Today, it is engineering.
 
@@ -43,7 +43,7 @@ This is not a compliance feature — it is a set of platform primitives. It is a
 
 Enterprise BI adoption has plateaued. Every significant organization has a Tableau or Power BI deployment. They have the data. They have the dashboards.
 
-What they don't have is operational clarity — the ability to understand not just what the data says historically, but what is happening now, why it matters, what action to take, and whether that action is safe to execute under governance. This is the gap that Governed Operational Intelligence fills, and it is a gap that BI tools are structurally unable to close because their architecture is built for retrospective analysis, not governed decision execution.
+What they don't have is operational clarity — the ability to understand not just what the data says historically, but what is happening now, why it matters, what action to take, and whether that action is safe to execute under governance. This is the gap that the Governed Decision Operating System fills, and it is a gap that BI tools are structurally unable to close because their architecture is built for retrospective analysis, not governed decision execution.
 
 The timing is right because:
 1. Organizations have already invested in the underlying data infrastructure
@@ -56,7 +56,7 @@ The timing is right because:
 
 Category-defining platforms are typically built in narrow windows — when the enabling technology has arrived but the category has not yet been captured.
 
-The enabling technology for Governed Operational Intelligence (capable LLMs, mature observability tooling, enterprise appetite for AI governance) has arrived in 2023–2024.
+The enabling technology for the Governed Decision Operating System (capable LLMs, mature observability tooling, enterprise appetite for AI governance) has arrived in 2023–2024.
 
 The category has not yet been captured. Datadog does infrastructure observability. Splunk does security intelligence. Palantir does government analytics. Nobody owns the governed decision layer — the platform that connects signal detection to action execution with structural governance, full attribution, and closed-loop learning.
 

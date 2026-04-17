@@ -1,13 +1,15 @@
 # Market Positioning — SZL Holdings
 
-**Version:** 1.0 · **Last updated:** April 2026
+**Version:** 2.0 · **Last updated:** April 2026
 **Audience:** Investors, design partners, strategic conversations
 
 ---
 
-## Category: Governed Decision Infrastructure
+## Category: Governed Decision Operating System
 
-SZL Holdings creates a new category: **governed decision infrastructure** — the structural layer between signal detection and action execution that enforces governance, attribution, and outcome tracking on every consequential decision.
+SZL Holdings creates a new category: **governed decision operating system** — the platform layer between signal detection and action execution that enforces governance, attribution, and outcome tracking on every consequential decision.
+
+The term *operating system* is precise: the platform provides shared governance primitives (Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, Event Fabric), a cross-domain event kernel, and policy enforcement infrastructure. Domain packs are applications that run on this OS. The governance is the kernel — not a feature, not a layer bolted on after the fact.
 
 This is not a refinement of existing categories. It is a response to a structural gap: enterprise operations today have signal tools, recommendation tools, and execution tools, but no governed connection between them. The result is an accountability gap that grows with every AI tool added.
 
@@ -84,7 +86,7 @@ This is not a refinement of existing categories. It is a response to a structura
 - **No governance primitives.** These platforms add business context to dashboards. They do not add policy gates, proof chains, or governance enforcement to operational decisions.
 - **No AI governance.** When AI recommendations are added, they are treated as dashboard widgets, not as governed advisory outputs with attribution and policy requirements.
 
-**SZL's structural advantage:** SZL is what business observability should have been — not just visibility into operations, but governed decision infrastructure that connects signal to action with accountability at every step. Monte Carlo tells you your data pipeline broke. SZL tells you what to do about it, simulates the risk, checks the policy, and records the outcome.
+**SZL's structural advantage:** SZL is what business observability should have been — not just visibility into operations, but governed decision operating system that connects signal to action with accountability at every step. Monte Carlo tells you your data pipeline broke. SZL tells you what to do about it, simulates the risk, checks the policy, and records the outcome.
 
 ---
 
@@ -122,7 +124,7 @@ This is not a refinement of existing categories. It is a response to a structura
 
 ## Why This Category Exists Now
 
-Three converging pressures create the market for governed decision infrastructure:
+Three converging pressures create the market for the governed decision operating system:
 
 ### 1. AI recommendation volume exceeds governance capacity
 Enterprise teams now receive more AI-generated recommendations than they can review, approve, or track. Without governance infrastructure, recommendations execute informally or not at all. The gap between "AI suggested" and "human decided" widens.
@@ -150,7 +152,7 @@ This context compounds over time and is specific to each organization. It cannot
 
 ## One-Sentence Positioning
 
-> SZL Holdings builds governed decision infrastructure — the structural layer between signal detection and action execution that enforces governance, attribution, and outcome tracking on every consequential decision.
+> SZL Holdings builds the governed decision operating system — the platform layer between signal detection and action execution that enforces governance, attribution, and outcome tracking on every consequential decision.
 
 ---
 

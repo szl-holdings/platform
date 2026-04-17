@@ -1,6 +1,6 @@
 # Investor Narrative — SZL Holdings
 
-**Version:** 2.0 · **Date:** April 2026  
+**Version:** 3.0 · **Date:** April 2026  
 **Audience:** Series A investors, strategic investors, board candidates  
 **Classification:** Confidential — NDA required
 
@@ -8,7 +8,9 @@
 
 ## The Thesis, One Sentence
 
-SZL Holdings builds **governed decision infrastructure** — the structural layer between signal detection and action execution that enforces governance, attribution, and outcome tracking on every consequential enterprise decision.
+SZL Holdings builds the **governed decision operating system** — the platform layer between signal detection and action execution that enforces governance, attribution, and outcome tracking on every consequential enterprise decision.
+
+The term *operating system* is deliberate: SZL provides shared governance primitives, a cross-domain event kernel, and policy enforcement infrastructure on which domain-specific intelligence runs. Domain packs are applications. The governance is the OS.
 
 ---
 
@@ -34,9 +36,9 @@ The success of Datadog, New Relic, and Grafana in DevOps observability demonstra
 
 ---
 
-## The Category: Governed Decision Infrastructure
+## The Category: Governed Decision Operating System
 
-Governed decision infrastructure is the emerging category at the intersection of:
+The governed decision operating system is the emerging category at the intersection of:
 - **Operational signal detection** — what is happening across the organization
 - **AI-assisted reasoning** — what to do about it
 - **Structured action execution** — doing it under governance, with attribution
@@ -50,6 +52,7 @@ It is distinct from every existing category:
 | **Workflow Tools** | Automates sequences | No simulation, no policy enforcement, no AI governance |
 | **AIOps / MLOps** | Optimizes specific systems | Domain-specific, no cross-domain governance |
 | **SIEM / SOC Platforms** | Security event management | One domain, no shared governance infrastructure |
+| **Observability Platforms** | Alerts on operational state | No decision surface, no accountability, no outcome tracking |
 
 The market does not yet have a dominant platform in this category. The tools that come closest — Palantir (government), Datadog (infrastructure), ServiceNow (workflows) — address adjacent problems without the cross-domain, governed decision architecture that this category requires.
 
@@ -86,7 +89,7 @@ See [MOAT_MAP.md](MOAT_MAP.md) for the complete moat analysis with codebase evid
 The platform hierarchy:
 
 ```
-SZL Holdings (governed decision infrastructure)
+SZL Holdings (governed decision operating system)
     │
     ├── Lyte — Flagship command surface (PRISM framework)
     │   Five-pillar intelligence: Pulse · Risk · Intelligence · Signals · Motion
@@ -118,6 +121,18 @@ Every surface shares six governance primitives:
 | **Event Fabric** | Cross-domain signal backbone |
 
 These are not features — they are the structural abstractions that make the platform fundamentally different from dashboards, copilots, and workflow tools. Domain packs add domain intelligence. The primitives provide the governance.
+
+### Forge — Governed Agent Lifecycle
+
+The Forge subsystem adds a seventh structural layer: governed lifecycle management for every AI agent in the platform. Every agent is versioned, has model/prompt/policy bindings, runs through a drift evaluator, and must clear 8 promotion blocker codes before advancing to production. Agent telemetry is captured at every run. Rollback is deterministic.
+
+The result: operators can audit every AI agent the same way they audit a workflow — version history, promotion rationale, drift events, and rollback record, all in one governance surface. This is the governed agent gateway described in the moat map.
+
+### Decision Fabric — Cross-Primitive Query Layer
+
+The Decision Fabric exposes every governance primitive as a unified, queryable API. Workflow 360 joins signal, recommendation, policy, simulation, execution, proof, and outcome under a single correlation ID. Entity Investigation shows everything that ever touched an entity across all primitives and domains. Recommendation Trace follows an AI output from generation to outcome, including prediction error.
+
+For auditors and compliance reviewers, this turns five years of decisions into a structured, queryable record — not a collection of log files.
 
 ---
 
@@ -205,7 +220,7 @@ See [TECHNICAL_DILIGENCE_PACKET.md](TECHNICAL_DILIGENCE_PACKET.md) for the full 
 
 **4. The technical foundation is production-grade.** 450,000+ lines of TypeScript, 2,331 endpoints, 700+ database tables, 37 shared packages, multi-tenant isolation, OIDC auth, SCIM 2.0, Azure Bicep IaC. This is not a prototype — it is an enterprise platform at Functional Alpha.
 
-**5. The timing is right.** AI capability has crossed the inference threshold. Regulatory pressure is forcing governance. The observability category has proven enterprise willingness to pay for operational clarity. The category of governed decision infrastructure is being created now.
+**5. The timing is right.** AI capability has crossed the inference threshold. Regulatory pressure is forcing governance. The observability category has proven enterprise willingness to pay for operational clarity. The category of governed decision operating system is being created now.
 
 ---
 
@@ -226,4 +241,4 @@ See [TECHNICAL_DILIGENCE_PACKET.md](TECHNICAL_DILIGENCE_PACKET.md) for the full 
 ---
 
 *Stephen Lutar — Founder & CEO, SZL Holdings*  
-*Last updated: April 2026*
+*Last updated: April 2026. Version 3.0 — Phase 10–11 elevation complete. Category renamed to Governed Decision Operating System. Forge and Decision Fabric sections added. All investor doc primitive counts corrected to six.*

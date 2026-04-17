@@ -6,13 +6,13 @@
 
 ## Portfolio Overview
 
-SZL Holdings operates a governed operational intelligence platform with six domain packs sharing one governance infrastructure, one execution fabric, one design system, and one data layer. This is not a portfolio of unrelated products — it is a compounding system where each domain pack strengthens the architectural investment shared by all. Five platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine) run across every surface.
+SZL Holdings operates a governed decision operating system with six domain packs sharing one governance infrastructure, one execution fabric, one design system, and one data layer. This is not a portfolio of unrelated products — it is a compounding system where each domain pack strengthens the architectural investment shared by all. Six platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, Event Fabric) run across every surface.
 
 ---
 
 ## Lyte — Governed Command Surface
 
-**Category:** Governed Operational Intelligence  
+**Category:** Governed Decision Operating System  
 **Layer:** Observe / Decide / Act  
 **Readiness:** Functional Alpha  
 
@@ -35,7 +35,7 @@ The flagship command surface and commercial operating wedge. Lyte makes every op
 - Role-aware dashboards (exec, ops, compliance, maintenance)
 - Alloy integration: every Lyte signal can become an Alloy workflow
 
-**Strategic position:** Operating wedge. The primary commercial entry point. Establishes the Governed Operational Intelligence category.
+**Strategic position:** Operating wedge. The primary commercial entry point. Establishes the Governed Decision Operating System category.
 
 ---
 

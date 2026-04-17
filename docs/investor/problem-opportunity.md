@@ -51,13 +51,13 @@ This is not a data problem. Organizations have more data than they can use. It i
 
 ## The Opportunity
 
-The Governed Operational Intelligence market is an emerging category without a dominant player. Point solutions are abundant. Platform solutions that provide the full governed decision loop — Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome — do not exist.
+The Governed Decision Operating System market is an emerging category without a dominant player. Point solutions are abundant. Platform solutions that provide the full governed decision loop — Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome — do not exist.
 
 **Market size estimates (indicative):**
 
 | Segment | SAM (Indicative) | Key Players (Point Solutions) |
 |---------|-----------------|-------------------------------|
-| Governed Operational Intelligence | $8–12B growing to $30B+ by 2030 | PagerDuty, Datadog (infra), Splunk (security) |
+| Governed Decision Operating System | $8–12B growing to $30B+ by 2030 | PagerDuty, Datadog (infra), Splunk (security) |
 | Maritime Intelligence | $2–4B | Veson, AMOS, specialized data providers |
 | Real Estate Intelligence | $3–5B (NYC alone is $500M+ TAM) | CoStar, Crexi, scattered data providers |
 | Security Operations (SOC tooling) | $15–20B | IBM QRadar, Palo Alto XSOAR, Splunk SIEM |
@@ -74,6 +74,6 @@ The Governed Operational Intelligence market is an emerging category without a d
 
 **AI timing.** The enabling technology for this category (capable LLMs with traceable reasoning) only became reliable enough for enterprise use in 2023–2024. The companies that built before this threshold built with inferior AI engines. The companies entering now have the right enabling technology available.
 
-**Governance demand.** Enterprise tolerance for AI black boxes is declining. Regulatory pressure (EU AI Act, SEC AI disclosure, NIST AI RMF) is pushing demand toward AI systems with structural governance — explainability, audit trails, human-in-the-loop enforcement. The five platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine) address this demand architecturally, not cosmetically.
+**Governance demand.** Enterprise tolerance for AI black boxes is declining. Regulatory pressure (EU AI Act, SEC AI disclosure, NIST AI RMF) is pushing demand toward AI systems with structural governance — explainability, audit trails, human-in-the-loop enforcement. The six platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, Event Fabric) address this demand architecturally, not cosmetically.
 
 SZL Holdings is entering at the right architectural moment with the right governance design.

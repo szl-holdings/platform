@@ -13,19 +13,19 @@ SZL Holdings is building the platform that makes that possible. We are doing it 
 
 ---
 
-## The Category: Governed Operational Intelligence
+## The Category: Governed Decision Operating System
 
-Governed Operational Intelligence is the emerging category at the intersection of operational signal detection, AI-assisted reasoning, and structured action execution — under governance, with full attribution.
+Governed Decision Operating System is the emerging category at the intersection of operational signal detection, AI-assisted reasoning, and structured action execution — under governance, with full attribution. The term *operating system* is precise: the platform provides shared governance primitives, a cross-domain event kernel (Event Fabric), and policy enforcement infrastructure on which domain-specific intelligence runs.
 
 It is distinct from:
 
-**Business Intelligence (BI):** BI answers "what happened?" Governed Operational Intelligence answers "what is happening, what should we do, and can we prove the decision chain?"
+**Business Intelligence (BI):** BI answers "what happened?" The Governed Decision Operating System answers "what is happening, what should we do, and can we prove the decision chain?"
 
 **AI Copilots:** Copilots add recommendation volume without governance. This platform enforces human approval gates (Covenant Policy), tracks decision outcomes (Outcome Graph), and records immutable audit trails (Proof Chain).
 
-**AIOps / MLOps:** These optimize specific technical systems. Governed Operational Intelligence spans the full operational layer — commercial, logistics, security, people, and financial systems — with structural governance.
+**AIOps / MLOps:** These optimize specific technical systems. The Governed Decision Operating System spans the full operational layer — commercial, logistics, security, people, and financial systems — with structural governance.
 
-**ERP / Workflow Platforms:** These execute processes. Governed Operational Intelligence surfaces the signals that should inform whether and how those processes run, adds simulation (Monte Carlo) before action, and records the full decision chain.
+**ERP / Workflow Platforms:** These execute processes. The Governed Decision Operating System surfaces the signals that should inform whether and how those processes run, adds simulation (Monte Carlo) before action, and records the full decision chain.
 
 The market does not yet have a dominant platform in this category. The tools that come closest — Datadog (infrastructure observability), Splunk (security intelligence), Palantir (government analytics) — serve specific domains without the cross-domain governance architecture that this category requires.
 
@@ -53,7 +53,7 @@ Every consequential decision in the platform follows the same loop:
 Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome
 ```
 
-This loop is powered by five **platform primitives** — architectural abstractions shared by every product surface:
+This loop is powered by six **platform primitives** — architectural abstractions shared by every product surface:
 
 | Primitive | What It Does |
 |-----------|-------------|
@@ -62,6 +62,7 @@ This loop is powered by five **platform primitives** — architectural abstracti
 | **Covenant Policy** | Permission and approval gates. Human-in-the-loop is enforced at the policy layer — AI cannot bypass it. |
 | **Monte Carlo** | Probabilistic simulation before action — confidence intervals, sensitivity analysis, scenario comparison. |
 | **Workflow Engine** | Durable multi-step process orchestration with agent coordination and checkpoint recovery. |
+| **Event Fabric** | Cross-domain signal backbone — normalizes, routes, and correlates events across all domain packs. Enables cross-domain intelligence. |
 
 These are not features. They are the structural abstractions that make the platform fundamentally different from dashboards, copilots, and workflow tools.
 
@@ -82,7 +83,7 @@ The primary commercial entry point is **Lyte + Alloy** — the command surface a
 
 ## Current Platform
 
-As of Q2 2026, the SZL Holdings platform consists of command surfaces, an execution fabric, and six domain packs — all sharing the same five platform primitives:
+As of Q2 2026, the SZL Holdings platform consists of command surfaces, an execution fabric, and six domain packs — all sharing the same six platform primitives:
 
 **Command surfaces:**
 | Surface | Purpose | Status |
@@ -113,7 +114,7 @@ As of Q2 2026, the SZL Holdings platform consists of command surfaces, an execut
 | Active artifacts | 15 |
 | Database tables | 685 across 112 schema files (per-domain namespaced, all org-scoped) |
 | Shared TypeScript packages | 51 in pnpm monorepo |
-| Platform primitives | 5 (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine) |
+| Platform primitives | 6 (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, Event Fabric) |
 | AI decision types (schema-validated) | 9 |
 | RBAC roles | 11 |
 | Supported notification channels | 4 (Slack, Teams, email, WebSocket push) |
@@ -139,7 +140,7 @@ The SZL platform was not designed as a collection of independent products. It wa
 
 SZL Holdings is building governance infrastructure. The defensibility comes from six structural advantages:
 
-1. **Five platform primitives** — Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, and Workflow Engine are not features that can be added to a competitor's product. They are architectural abstractions that shape the entire data model and execution layer. Replicating them requires rebuilding from the foundation.
+1. **Six platform primitives** — Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, and Event Fabric are not features that can be added to a competitor's product. They are architectural abstractions that shape the entire data model and execution layer. Replicating them requires rebuilding from the foundation.
 
 2. **Shared event model (PRISM Bus)** — Signals across the ecosystem conform to a common schema with cross-domain correlation. This is the prerequisite for multi-domain intelligence. It took investment to build; it cannot be replicated quickly.
 

@@ -1,6 +1,6 @@
 # Moat Map — SZL Holdings Platform
 
-**Version:** 1.0 · **Date:** April 2026  
+**Version:** 2.0 · **Date:** April 2026  
 **Audience:** Series A investors, strategic advisors, enterprise evaluators  
 **Classification:** Confidential — NDA required
 
@@ -303,7 +303,7 @@ A platform that compounds on five dimensions simultaneously across eight structu
 
 ---
 
-*Last verified against source code: 2026-04-16.*
+*Last verified against source code: 2026-04-17. Version 2.0 — updated to reflect Forge governed agent lifecycle (Moat 6 extension), Decision Fabric cross-primitive query surfaces, and Phase 10–11 diligence audit findings.*
 
 ---
 

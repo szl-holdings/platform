@@ -89,7 +89,7 @@ Each domain pack opens a distinct sales motion. Vessels opens maritime trade sho
 
 ### Lyte vs. BI Tools (Tableau, Power BI, Looker)
 
-BI tools answer "what happened." Lyte answers "what is happening, what should we do, and can we prove the decision chain?" The five platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine) create structural accountability that BI tools do not attempt.
+BI tools answer "what happened." Lyte answers "what is happening, what should we do, and can we prove the decision chain?" The six platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, Event Fabric) create structural accountability that BI tools do not attempt.
 
 ### Lyte vs. AI Copilots (ChatGPT, Copilot, Glean)
 
