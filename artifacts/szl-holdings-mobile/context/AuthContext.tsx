@@ -91,6 +91,7 @@ async function secureDelToken(): Promise<void> {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const discovery = AuthSession.useAutoDiscovery(ISSUER_URL);
@@ -110,6 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const token = await secureGetToken();
       if (!token) {
+        setAccessToken(null);
         setUser(null);
         setIsLoading(false);
         return;
@@ -122,10 +124,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!res.ok) {
         await secureDelToken();
+        setAccessToken(null);
         setUser(null);
         setIsLoading(false);
         return;
       }
+
+      setAccessToken(token);
 
       const json = await res.json();
       const data = json.data ?? json;
@@ -139,9 +144,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
       } else {
         await secureDelToken();
+        setAccessToken(null);
         setUser(null);
       }
     } catch {
+      setAccessToken(null);
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -179,6 +186,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
         await secureSetToken(accessToken);
+        setAccessToken(accessToken);
         await fetchUser();
       } catch (err) {
         console.error("[Auth] Token exchange error:", err);
@@ -208,6 +216,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
     } finally {
       await secureDelToken();
+      setAccessToken(null);
       setUser(null);
     }
   }, []);
@@ -223,14 +232,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         signOut: logout,
         buildHeaders: (extra?: Record<string, string>) => {
-          const token = user ? (user as { token?: string }).token : null;
           const headers: Record<string, string> = { "Content-Type": "application/json", ...extra };
-          if (token) headers["Authorization"] = `Bearer ${token}`;
+          if (accessToken) headers["Authorization"] = `Bearer ${accessToken}`;
           return headers;
         },
         buildWsAuthMessage: () => {
-          const token = user ? (user as { token?: string }).token ?? "" : "";
-          return { type: "auth", token };
+          return { type: "auth", token: accessToken ?? "" };
         },
         signals: [],
       }}
