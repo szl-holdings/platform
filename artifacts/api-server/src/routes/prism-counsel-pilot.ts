@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { z } from "zod";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { tenantScope } from "../middlewares/tenant-scope";
+import { validateBody } from "../lib/validation";
 import { pilotIngestion } from "../services/prism-pilot-ingestion";
 import { pilotChangeTracker } from "../services/prism-pilot-change-tracker";
 import { pilotReview, pilotSignoff } from "../services/prism-pilot-review";
@@ -312,11 +313,9 @@ router.get("/what-changed", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/what-changed/mark-read", async (req: Request, res: Response) => {
+router.post("/what-changed/mark-read", validateBody(MarkReadSchema), async (req: Request, res: Response) => {
   try {
-    const parsed = MarkReadSchema.safeParse(req.body);
-    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
-    const { ids } = parsed.data;
+    const { ids } = req.body as z.infer<typeof MarkReadSchema>;
     await pilotChangeTracker.markRead(getOrgId(req), ids);
     res.json({ marked: ids.length });
   } catch (err: any) {
@@ -345,22 +344,18 @@ router.get("/reviews/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/reviews", async (req: Request, res: Response) => {
+router.post("/reviews", validateBody(ReviewCreateSchema), async (req: Request, res: Response) => {
   try {
-    const parsed = ReviewCreateSchema.safeParse(req.body);
-    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
-    const review = await pilotReview.createReview(getOrgId(req), parsed.data);
+    const review = await pilotReview.createReview(getOrgId(req), req.body as z.infer<typeof ReviewCreateSchema>);
     res.json({ review });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to create review" });
   }
 });
 
-router.patch("/reviews/:id/state", async (req: Request, res: Response) => {
+router.patch("/reviews/:id/state", validateBody(ReviewStateSchema), async (req: Request, res: Response) => {
   try {
-    const parsed = ReviewStateSchema.safeParse(req.body);
-    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
-    const { state } = parsed.data;
+    const { state } = req.body as z.infer<typeof ReviewStateSchema>;
     const review = await pilotReview.updateReviewState(getOrgId(req), parseInt(req.params.id as string), state, req.user!.id);
     res.json({ review });
   } catch (err: any) {
@@ -396,11 +391,9 @@ router.get("/signoffs/pending", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/signoffs/:id/resolve", async (req: Request, res: Response) => {
+router.post("/signoffs/:id/resolve", validateBody(SignoffResolveSchema), async (req: Request, res: Response) => {
   try {
-    const parsed = SignoffResolveSchema.safeParse(req.body);
-    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
-    const { decision } = parsed.data;
+    const { decision } = req.body as z.infer<typeof SignoffResolveSchema>;
     const result = await pilotSignoff.resolve(getOrgId(req), parseInt(req.params.id as string), decision, req.user!.id);
     res.json({ signoff: result });
   } catch (err: any) {
@@ -418,11 +411,9 @@ router.get("/exports", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/exports", async (req: Request, res: Response) => {
+router.post("/exports", validateBody(ExportCreateSchema), async (req: Request, res: Response) => {
   try {
-    const parsed = ExportCreateSchema.safeParse(req.body);
-    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
-    const exp = await pilotExport.generateExport(getOrgId(req), { ...parsed.data, generatedBy: req.user!.id });
+    const exp = await pilotExport.generateExport(getOrgId(req), { ...(req.body as z.infer<typeof ExportCreateSchema>), generatedBy: req.user!.id });
     res.json({ export: exp });
   } catch (err: any) {
     res.status(500).json({ error: err.message || "Failed to generate export" });
@@ -449,22 +440,18 @@ router.get("/exports/:id/content", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/ingest/email", async (req: Request, res: Response) => {
+router.post("/ingest/email", validateBody(IngestEmailSchema), async (req: Request, res: Response) => {
   try {
-    const parsed = IngestEmailSchema.safeParse(req.body);
-    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
-    const job = await pilotIngestion.ingestEmail(getOrgId(req), parsed.data);
+    const job = await pilotIngestion.ingestEmail(getOrgId(req), req.body as z.infer<typeof IngestEmailSchema>);
     res.json({ job });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to ingest email" });
   }
 });
 
-router.post("/ingest/file", async (req: Request, res: Response) => {
+router.post("/ingest/file", validateBody(IngestFileSchema), async (req: Request, res: Response) => {
   try {
-    const parsed = IngestFileSchema.safeParse(req.body);
-    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
-    const job = await pilotIngestion.ingestFile(getOrgId(req), parsed.data);
+    const job = await pilotIngestion.ingestFile(getOrgId(req), req.body as z.infer<typeof IngestFileSchema>);
     res.json({ job });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to ingest file" });

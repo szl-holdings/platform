@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { z } from "zod";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { tenantScope } from "../middlewares/tenant-scope";
+import { validateBody } from "../lib/validation";
 import { insurerPressureEngine } from "../services/prism-insurer-pressure";
 import { settlementFrictionEngine } from "../services/prism-settlement-friction";
 import { portfolioLearning } from "../services/prism-portfolio-learning";
@@ -97,12 +98,10 @@ router.get("/pressure/silence-windows", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/pressure/:matterId/events", async (req: Request, res: Response) => {
+router.post("/pressure/:matterId/events", validateBody(CarrierEventSchema), async (req: Request, res: Response) => {
   try {
-    const parsed = CarrierEventSchema.safeParse(req.body);
-    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
     const matterId = parseInt(req.params.matterId as string);
-    await insurerPressureEngine.recordCarrierEvent(getOrgId(req), matterId, parsed.data);
+    await insurerPressureEngine.recordCarrierEvent(getOrgId(req), matterId, req.body as z.infer<typeof CarrierEventSchema>);
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to record carrier event" });
@@ -266,11 +265,9 @@ router.get("/copilot/pilot-one/cards", (_req: Request, res: Response) => {
   }
 });
 
-router.post("/copilot/pilot-one/execute", async (req: Request, res: Response): Promise<void> => {
+router.post("/copilot/pilot-one/execute", validateBody(PilotOneExecuteSchema), async (req: Request, res: Response): Promise<void> => {
   try {
-    const parsed = PilotOneExecuteSchema.safeParse(req.body);
-    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
-    const { matterId, cardId } = parsed.data;
+    const { matterId, cardId } = req.body as z.infer<typeof PilotOneExecuteSchema>;
     const result = await copilotPilotOne.executeActionCard(getOrgId(req), matterId, cardId);
     res.json(result);
   } catch (err: any) {

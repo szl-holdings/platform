@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { z } from "zod";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { tenantScope } from "../middlewares/tenant-scope";
+import { validateBody } from "../lib/validation";
 import { db } from "@szl-holdings/db";
 import { eq, and, desc, or, sql, isNull, not, gte } from "drizzle-orm";
 import {
@@ -403,10 +404,8 @@ router.get("/review-desk/items/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/review-desk/items", async (req: Request, res: Response) => {
+router.post("/review-desk/items", validateBody(ReviewItemCreateSchema), async (req: Request, res: Response) => {
   try {
-    const bodyParsed = ReviewItemCreateSchema.safeParse(req.body);
-    if (!bodyParsed.success) { res.status(400).json({ error: "Invalid request body", issues: bodyParsed.error.issues }); return; }
     const {
       matterId, reviewWorkType, title, description,
       sourceEntityType, sourceEntityId, sourceLineage, isGenerated,
@@ -417,7 +416,7 @@ router.post("/review-desk/items", async (req: Request, res: Response) => {
       contradictionSeverityScore, lowConfidenceScore, exportSendDependencyScore,
       workUnblockedScore, partnerUrgencyScore, clientFacingImpactScore,
       recoveryLienDependencyScore, slaHours, dueBy,
-    } = bodyParsed.data;
+    } = req.body as z.infer<typeof ReviewItemCreateSchema>;
 
     const scores = {
       deadlineRiskScore: deadlineRiskScore ?? 0,
@@ -476,12 +475,10 @@ router.post("/review-desk/items", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/review-desk/items/:id/transition", async (req: Request, res: Response) => {
+router.post("/review-desk/items/:id/transition", validateBody(TransitionSchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const parsed = TransitionSchema.safeParse(req.body);
-    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
-    const { toState, reason } = parsed.data;
+    const { toState, reason } = req.body as z.infer<typeof TransitionSchema>;
     const actorId = req.user!.id;
     const validTransitions = buildValidTransitions();
 
@@ -541,17 +538,10 @@ router.post("/review-desk/items/:id/transition", async (req: Request, res: Respo
   }
 });
 
-router.post("/review-desk/items/:id/approve", async (req: Request, res: Response) => {
-  req.body.toState = "approved";
-  return void ((router as any).handle?.(req, res, () => {}) ?? res.status(500).json({ error: "Route error" }));
-});
-
-router.post("/review-desk/items/:id/actions/approve", async (req: Request, res: Response) => {
+router.post("/review-desk/items/:id/actions/approve", validateBody(ApproveActionSchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const parsed = ApproveActionSchema.safeParse(req.body);
-    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
-    const { notes } = parsed.data;
+    const { notes } = req.body as z.infer<typeof ApproveActionSchema>;
     const actorId = req.user!.id;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -583,12 +573,10 @@ router.post("/review-desk/items/:id/actions/approve", async (req: Request, res: 
   }
 });
 
-router.post("/review-desk/items/:id/actions/reject", async (req: Request, res: Response) => {
+router.post("/review-desk/items/:id/actions/reject", validateBody(RejectActionSchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const parsed = RejectActionSchema.safeParse(req.body);
-    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
-    const { reason } = parsed.data;
+    const { reason } = req.body as z.infer<typeof RejectActionSchema>;
     const actorId = req.user!.id;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -615,12 +603,10 @@ router.post("/review-desk/items/:id/actions/reject", async (req: Request, res: R
   }
 });
 
-router.post("/review-desk/items/:id/actions/revise", async (req: Request, res: Response) => {
+router.post("/review-desk/items/:id/actions/revise", validateBody(ReviseActionSchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const parsed = ReviseActionSchema.safeParse(req.body);
-    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
-    const { notes } = parsed.data;
+    const { notes } = req.body as z.infer<typeof ReviseActionSchema>;
     const actorId = req.user!.id;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -647,12 +633,10 @@ router.post("/review-desk/items/:id/actions/revise", async (req: Request, res: R
   }
 });
 
-router.post("/review-desk/items/:id/actions/escalate", async (req: Request, res: Response) => {
+router.post("/review-desk/items/:id/actions/escalate", validateBody(EscalateActionSchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const parsed = EscalateActionSchema.safeParse(req.body);
-    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
-    const { escalateTo, reason } = parsed.data;
+    const { escalateTo, reason } = req.body as z.infer<typeof EscalateActionSchema>;
     const actorId = req.user!.id;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -681,12 +665,10 @@ router.post("/review-desk/items/:id/actions/escalate", async (req: Request, res:
   }
 });
 
-router.post("/review-desk/items/:id/actions/assign", async (req: Request, res: Response) => {
+router.post("/review-desk/items/:id/actions/assign", validateBody(AssignActionSchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const parsed = AssignActionSchema.safeParse(req.body);
-    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
-    const { assignTo, role } = parsed.data;
+    const { assignTo, role } = req.body as z.infer<typeof AssignActionSchema>;
     const actorId = req.user!.id;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -718,12 +700,10 @@ router.post("/review-desk/items/:id/actions/assign", async (req: Request, res: R
   }
 });
 
-router.post("/review-desk/items/:id/actions/block", async (req: Request, res: Response) => {
+router.post("/review-desk/items/:id/actions/block", validateBody(BlockActionSchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const parsed = BlockActionSchema.safeParse(req.body);
-    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
-    const { reason } = parsed.data;
+    const { reason } = req.body as z.infer<typeof BlockActionSchema>;
     const actorId = req.user!.id;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -743,12 +723,10 @@ router.post("/review-desk/items/:id/actions/block", async (req: Request, res: Re
   }
 });
 
-router.post("/review-desk/items/:id/actions/request-support", async (req: Request, res: Response) => {
+router.post("/review-desk/items/:id/actions/request-support", validateBody(SupportRequestSchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const parsed = SupportRequestSchema.safeParse(req.body);
-    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
-    const { request } = parsed.data;
+    const { request } = req.body as z.infer<typeof SupportRequestSchema>;
     const actorId = req.user!.id;
 
     const [item] = await db.select().from(pcManagedReviewItemsTable)
@@ -825,12 +803,10 @@ router.post("/review-desk/items/:id/actions/export-packet", async (req: Request,
   }
 });
 
-router.post("/review-desk/items/:id/notes", async (req: Request, res: Response) => {
+router.post("/review-desk/items/:id/notes", validateBody(AddNoteSchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
-    const parsed = AddNoteSchema.safeParse(req.body);
-    if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
-    const { noteType, content, isPrivileged } = parsed.data;
+    const { noteType, content, isPrivileged } = req.body as z.infer<typeof AddNoteSchema>;
     const authorId = req.user!.id;
 
     const [note] = await db.insert(pcManagedReviewNotesTable).values({
