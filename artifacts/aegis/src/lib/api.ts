@@ -189,6 +189,30 @@ export const api = {
     evidenceQuery: (data: { query: string; caseId?: string; incidentId?: string; sourceTypes?: string[]; maxResults?: number; minRelevance?: number }) =>
       apiFetch<any>("/aegis/tradecraft/evidence-index/query", { method: "POST", body: JSON.stringify(data) }),
   },
+  otIcs: {
+    assets: () => apiFetch<any[]>("/aegis/ot-ics/assets"),
+    frames: (params?: { protocol?: string; assetId?: string; severity?: string; limit?: number }) => {
+      const q = new URLSearchParams();
+      if (params?.protocol) q.set("protocol", params.protocol);
+      if (params?.assetId) q.set("assetId", params.assetId);
+      if (params?.severity) q.set("severity", params.severity);
+      if (params?.limit) q.set("limit", String(params.limit));
+      return apiFetch<any[]>(`/aegis/ot-ics/frames${q.toString() ? `?${q}` : ""}`);
+    },
+    conversations: (sessionId?: string) =>
+      apiFetch<any[]>(`/aegis/ot-ics/conversations${sessionId ? `?sessionId=${encodeURIComponent(sessionId)}` : ""}`),
+    anomalyScores: (params?: { assetId?: string; hours?: number }) => {
+      const q = new URLSearchParams();
+      if (params?.assetId) q.set("assetId", params.assetId);
+      if (params?.hours) q.set("hours", String(params.hours));
+      return apiFetch<any[]>(`/aegis/ot-ics/anomaly-scores${q.toString() ? `?${q}` : ""}`);
+    },
+    recomputeBaselines: () =>
+      apiFetch<{ updatedAssets: number; baselines: Array<{ assetId: string; baseline: number; sampleCount: number }> }>(
+        "/aegis/ot-ics/baseline/recompute",
+        { method: "POST" },
+      ),
+  },
   command: {
     posture: () => apiFetch<any>("/aegis/command/posture"),
     investigations: () => apiFetch<any>("/aegis/command/investigations"),

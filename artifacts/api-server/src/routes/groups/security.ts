@@ -12,6 +12,7 @@ import readinessRouter from "../readiness";
 import aegisOpsLiveRouter from "../msp-live";
 import aegisOpsRouter from "../msp";
 import rmmRouter from "../rmm";
+import otIcsRouter from "../ot-ics";
 
 const _readLimiter = perUserApiSlidingLimiter;
 
@@ -62,4 +63,6 @@ export function register(router: IRouter): void {
 
   router.use("/msp", _readLimiter);
   router.use("/msp", rmmRouter);
+
+  router.use(otIcsRouter);
 }
