@@ -3,7 +3,8 @@ import { MarketingFooter } from "../../components/marketing/MarketingFooter";
 import { motion } from "framer-motion";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
 import { Link } from "wouter";
-import { Shield, Activity, Anchor, Building2, Gavel, Users, BrainCircuit, Command as CmdIcon, Briefcase } from "lucide-react";
+import { Shield, Activity, Anchor, Building2, Gavel, Users, BrainCircuit, Command as CmdIcon, Briefcase, ArrowRight } from "lucide-react";
+import { OPS_FEATURE_LIST } from "./ops/data";
 
 export function MarketingHome() {
   const apps = [
@@ -97,6 +98,68 @@ export function MarketingHome() {
                 </Link>
               </motion.div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Ops Center */}
+      <section className="py-32 bg-zinc-950 border-t border-white/5">
+        <div className="max-w-7xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-20"
+          >
+            <div className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium bg-white/5 border border-white/10 mb-6 backdrop-blur-sm text-white/70">
+              <span className="flex h-2 w-2 rounded-full bg-emerald-400 mr-2 animate-pulse" />
+              Command Ops Center
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">One Pane for the Whole Operation.</h2>
+            <p className="text-xl text-white/50 max-w-3xl mx-auto font-light">
+              Replace PagerDuty, Backstage, Nobl9, and your spreadsheet of approvals. Eight ops surfaces, all reading from the same source-of-record tables that power the platform.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {OPS_FEATURE_LIST.map((feature, i) => {
+              const Icon = feature.icon;
+              return (
+                <motion.div
+                  key={feature.slug}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05 }}
+                >
+                  <Link
+                    href={`/marketing/ops/${feature.slug}`}
+                    className="group block p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05] hover:border-white/[0.12] transition-all duration-300 h-full"
+                    data-testid={`link-ops-${feature.slug}`}
+                  >
+                    <Icon
+                      className="w-7 h-7 mb-4 opacity-80 group-hover:opacity-100 transition-opacity"
+                      style={{ color: feature.accent }}
+                    />
+                    <h3 className="text-lg font-semibold mb-2 tracking-tight">{feature.name}</h3>
+                    <p className="text-white/50 text-sm leading-relaxed mb-3 group-hover:text-white/70 transition-colors">
+                      {feature.description}
+                    </p>
+                    <div className="flex items-center text-xs text-white/40 group-hover:text-white/70 transition-colors">
+                      Learn more <ArrowRight className="w-3 h-3 ml-1" />
+                    </div>
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          <div className="text-center mt-12">
+            <Link href="/marketing/pricing">
+              <Button variant="outline" className="border-white/20 text-white hover:bg-white/5">
+                See Ops Center Pricing
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

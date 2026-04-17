@@ -48,6 +48,7 @@ const ExecutiveBriefingPage = lazy(() => import("./pages/executive-briefing").th
 
 const MarketingHome = lazy(() => import("./pages/marketing").then((m) => ({ default: m.MarketingHome })));
 const MarketingAppPage = lazy(() => import("./pages/marketing/apps/[id]").then((m) => ({ default: m.MarketingAppPage })));
+const MarketingOpsFeaturePage = lazy(() => import("./pages/marketing/ops/[slug]").then((m) => ({ default: m.MarketingOpsFeaturePage })));
 const MarketingPricing = lazy(() => import("./pages/marketing/pricing").then((m) => ({ default: m.MarketingPricing })));
 const MarketingSignup = lazy(() => import("./pages/marketing/signup").then((m) => ({ default: m.MarketingSignup })));
 const MarketingOnboarding = lazy(() => import("./pages/marketing/onboarding").then((m) => ({ default: m.MarketingOnboarding })));
@@ -171,6 +172,7 @@ function AppShell() {
         <Switch>
           <Route path="/marketing" component={() => <MarketingHome />} />
           <Route path="/marketing/apps/:id" component={() => <MarketingAppPage />} />
+          <Route path="/marketing/ops/:slug" component={() => <MarketingOpsFeaturePage />} />
           <Route path="/marketing/pricing" component={() => <MarketingPricing />} />
           <Route path="/marketing/signup" component={() => <MarketingSignup />} />
           <Route path="/marketing/onboarding" component={() => <MarketingOnboarding />} />

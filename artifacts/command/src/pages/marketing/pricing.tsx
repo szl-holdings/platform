@@ -5,23 +5,46 @@ import { Button } from "@szl-holdings/shared-ui/ui/button";
 import { Input } from "@szl-holdings/shared-ui/ui/input";
 import { Label } from "@szl-holdings/shared-ui/ui/label";
 import { CheckCircle2, X, ChevronDown, Shield, Lock, Server, Zap } from "lucide-react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { toast } from "sonner";
 
-const FEATURES = [
-  { label: "Users", free: "1", pro: "Up to 10", enterprise: "Unlimited" },
-  { label: "Connected Platforms", free: "1", pro: "All 9", enterprise: "All 9 + custom" },
-  { label: "API Access", free: false, pro: true, enterprise: true },
-  { label: "Data Exports", free: false, pro: "CSV, JSON", enterprise: "CSV, JSON, SFTP, custom" },
-  { label: "Real-time WebSocket Feeds", free: false, pro: true, enterprise: true },
-  { label: "Advanced AI Agents", free: false, pro: "5 agents", enterprise: "Unlimited" },
-  { label: "Audit Log Retention", free: "7 days", pro: "90 days", enterprise: "Unlimited" },
-  { label: "Custom Integrations", free: false, pro: false, enterprise: true },
-  { label: "SSO / SAML", free: false, pro: false, enterprise: true },
-  { label: "On-Premise Deployment", free: false, pro: false, enterprise: true },
-  { label: "Dedicated Success Manager", free: false, pro: false, enterprise: true },
-  { label: "SLA Guarantee", free: false, pro: "99.9%", enterprise: "99.99%" },
-  { label: "Support Channel", free: "Community", pro: "Priority Email", enterprise: "24/7 Dedicated" },
+const FEATURE_GROUPS: { group: string; rows: { label: string; free: string | boolean; pro: string | boolean; enterprise: string | boolean }[] }[] = [
+  {
+    group: "Platform",
+    rows: [
+      { label: "Users", free: "1", pro: "Up to 10", enterprise: "Unlimited" },
+      { label: "Connected Platforms", free: "1", pro: "All 9", enterprise: "All 9 + custom" },
+      { label: "API Access", free: false, pro: true, enterprise: true },
+      { label: "Data Exports", free: false, pro: "CSV, JSON", enterprise: "CSV, JSON, SFTP, custom" },
+      { label: "Real-time WebSocket Feeds", free: false, pro: true, enterprise: true },
+      { label: "Advanced AI Agents", free: false, pro: "5 agents", enterprise: "Unlimited" },
+    ],
+  },
+  {
+    group: "Ops Center",
+    rows: [
+      { label: "Alert Inbox (cross-domain triage)", free: false, pro: true, enterprise: true },
+      { label: "SLA Dashboard (real telemetry SLOs)", free: false, pro: true, enterprise: true },
+      { label: "Health Score (composite ecosystem health)", free: false, pro: true, enterprise: true },
+      { label: "Cost Analytics (usage × rate card)", free: false, pro: true, enterprise: true },
+      { label: "Release Feed (cross-app deployments)", free: false, pro: true, enterprise: true },
+      { label: "Daily Digest (role-aware briefing)", free: false, pro: true, enterprise: true },
+      { label: "Governance & Approvals audit trail", free: false, pro: false, enterprise: true },
+      { label: "Team & Access roster (RBAC)", free: false, pro: false, enterprise: true },
+    ],
+  },
+  {
+    group: "Compliance & Support",
+    rows: [
+      { label: "Audit Log Retention", free: "7 days", pro: "90 days", enterprise: "Unlimited" },
+      { label: "Custom Integrations", free: false, pro: false, enterprise: true },
+      { label: "SSO / SAML", free: false, pro: false, enterprise: true },
+      { label: "On-Premise Deployment", free: false, pro: false, enterprise: true },
+      { label: "Dedicated Success Manager", free: false, pro: false, enterprise: true },
+      { label: "SLA Guarantee", free: false, pro: "99.9%", enterprise: "99.99%" },
+      { label: "Support Channel", free: "Community", pro: "Priority Email", enterprise: "24/7 Dedicated" },
+    ],
+  },
 ];
 
 const FAQS = [
@@ -336,6 +359,7 @@ export function MarketingPricing() {
               <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" /> All 9 Platforms</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" /> API Access + Webhooks</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" /> 5 AI Agents</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" /> Ops Center: alerts, SLA, health, costs, releases, digest</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" /> 90-day audit log</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" /> 99.9% SLA</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" /> Priority email support</li>
@@ -369,6 +393,7 @@ export function MarketingPricing() {
             <ul className="space-y-3 mb-8 flex-1 text-sm text-white/70">
               <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-white/30 shrink-0" /> Unlimited Users</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-white/30 shrink-0" /> Unlimited AI Agents</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-white/30 shrink-0" /> Full Ops Center + Governance & Team admin</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-white/30 shrink-0" /> Custom Integrations</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-white/30 shrink-0" /> SSO / SAML</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-white/30 shrink-0" /> On-Premise Deployment</li>
@@ -408,16 +433,26 @@ export function MarketingPricing() {
               </tr>
             </thead>
             <tbody>
-              {FEATURES.map((f, i) => (
-                <tr
-                  key={i}
-                  className={`border-b border-white/5 transition-colors hover:bg-white/[0.02] ${i % 2 === 0 ? "" : "bg-white/[0.01]"}`}
-                >
-                  <td className="p-4 pl-6 text-white/80">{f.label}</td>
-                  <td className="p-4 text-center"><FeatureCell value={f.free} /></td>
-                  <td className="p-4 text-center"><FeatureCell value={f.pro} /></td>
-                  <td className="p-4 text-center"><FeatureCell value={f.enterprise} /></td>
-                </tr>
+              {FEATURE_GROUPS.map((group) => (
+                <Fragment key={group.group}>
+                  <tr className="bg-white/[0.03]">
+                    <td colSpan={4} className="p-3 pl-6 text-xs uppercase tracking-wider text-white/50 font-semibold">
+                      {group.group}
+                    </td>
+                  </tr>
+                  {group.rows.map((f, i) => (
+                    <tr
+                      key={`${group.group}-${i}`}
+                      className={`border-b border-white/5 transition-colors hover:bg-white/[0.02] ${i % 2 === 0 ? "" : "bg-white/[0.01]"}`}
+                      data-testid={`row-feature-${f.label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`}
+                    >
+                      <td className="p-4 pl-6 text-white/80">{f.label}</td>
+                      <td className="p-4 text-center"><FeatureCell value={f.free} /></td>
+                      <td className="p-4 text-center"><FeatureCell value={f.pro} /></td>
+                      <td className="p-4 text-center"><FeatureCell value={f.enterprise} /></td>
+                    </tr>
+                  ))}
+                </Fragment>
               ))}
             </tbody>
           </table>
