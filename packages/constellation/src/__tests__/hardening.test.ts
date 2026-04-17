@@ -25,8 +25,8 @@ import { InMemoryTraceStore, TraceQueryEngine } from "@workspace/trace-graph";
 import type { TraceRecord } from "@workspace/trace-graph";
 import { runEvalSuite } from "@szl-holdings/evals-core";
 import type { EvalCase } from "@szl-holdings/evals-core";
-import { mcpBridge } from "@szl-holdings/tool-registry";
-import { ToolRegistry } from "@szl-holdings/tool-registry";
+import { InMemoryToolRegistry, ToolManifestSchema } from "@workspace/tool-mesh";
+import { ToolMeshMcpBridge, defaultMcpBridge } from "@workspace/tool-mesh/mcp-bridge";
 
 const NOW = new Date().toISOString();
 const STALE_TS = new Date(Date.now() - 25 * 3600 * 1000).toISOString();
@@ -479,28 +479,27 @@ describe("Eval Regression", () => {
 // MCP Tool Schema
 // ─────────────────────────────────────────────────────────────────────────────
 describe("MCP Tool Schema", () => {
-  it("ToolRegistry getMcpSchema exposes MCP-flagged tools", () => {
-    const localRegistry = new ToolRegistry();
-    localRegistry.register({
-      id: "mcp-hardening-tool",
+  it("InMemoryToolRegistry lists MCP-enabled tools via bridge", () => {
+    const localRegistry = new InMemoryToolRegistry();
+    localRegistry.register(ToolManifestSchema.parse({
+      id: "mcp_hardening_tool",
       name: "mcp_hardening_tool",
       description: "A test tool for MCP schema validation",
-      version: "1.0.0",
-      category: "test",
-      parameters: [
-        { name: "query", type: "string", description: "Search query", required: true },
-        { name: "limit", type: "number", description: "Max results", required: false, defaultValue: 10 },
-      ],
-      approvalClass: "auto",
-      allowedTiers: ["standard"],
-      sideEffects: false,
-      idempotent: true,
-      tags: ["test"],
+      policyTier: "internal-workflow",
+      domainTags: ["custom"],
+      inputSchema: {
+        type: "object",
+        properties: {
+          query: { type: "string", description: "Search query" },
+          limit: { type: "number", description: "Max results" },
+        },
+        required: ["query"],
+      },
       enabled: true,
-      mcpExposed: true,
-    });
+    }));
 
-    const schema = localRegistry.getMcpSchema();
+    const bridge = new ToolMeshMcpBridge(localRegistry);
+    const schema = bridge.listTools();
     expect(schema).toBeInstanceOf(Array);
 
     const tool = schema.find((t) => t.name === "mcp_hardening_tool");
@@ -510,65 +509,59 @@ describe("MCP Tool Schema", () => {
     expect((tool!.inputSchema.required as string[])).not.toContain("limit");
   });
 
-  it("getMcpSchema excludes non-MCP tools", () => {
-    const localRegistry = new ToolRegistry();
-    localRegistry.register({
-      id: "internal-hardening-tool",
+  it("disabled tools are excluded from MCP schema", () => {
+    const localRegistry = new InMemoryToolRegistry();
+    localRegistry.register(ToolManifestSchema.parse({
+      id: "internal_hardening_tool",
       name: "internal_hardening_tool",
-      description: "Internal only",
-      version: "1.0.0",
-      category: "internal",
-      parameters: [],
-      approvalClass: "admin_only",
-      allowedTiers: ["enterprise"],
-      sideEffects: true,
-      idempotent: false,
-      tags: [],
-      enabled: true,
-      mcpExposed: false,
-    });
+      description: "Internal only — disabled",
+      policyTier: "operator-assisted",
+      domainTags: ["custom"],
+      inputSchema: { type: "object", properties: {} },
+      enabled: false,
+    }));
 
-    const schema = localRegistry.getMcpSchema();
+    const bridge = new ToolMeshMcpBridge(localRegistry);
+    const schema = bridge.listTools();
     expect(schema.find((t) => t.name === "internal_hardening_tool")).toBeUndefined();
   });
 
   it("tool schema marks required vs optional parameters correctly", () => {
-    const localRegistry = new ToolRegistry();
-    localRegistry.register({
-      id: "schema-req-test-tool",
+    const localRegistry = new InMemoryToolRegistry();
+    localRegistry.register(ToolManifestSchema.parse({
+      id: "schema_req_test_tool",
       name: "schema_req_test_tool",
-      description: "Schema test",
-      version: "1.0.0",
-      category: "test",
-      parameters: [
-        { name: "required_field", type: "string", description: "Required", required: true },
-        { name: "optional_field", type: "string", description: "Optional", required: false },
-      ],
-      approvalClass: "auto",
-      allowedTiers: ["standard"],
-      sideEffects: false,
-      idempotent: true,
-      tags: [],
+      description: "Schema required/optional test",
+      policyTier: "internal-workflow",
+      domainTags: ["custom"],
+      inputSchema: {
+        type: "object",
+        properties: {
+          required_field: { type: "string", description: "Required" },
+          optional_field: { type: "string", description: "Optional" },
+        },
+        required: ["required_field"],
+      },
       enabled: true,
-      mcpExposed: true,
-    });
+    }));
 
-    const schema = localRegistry.getMcpSchema();
+    const bridge = new ToolMeshMcpBridge(localRegistry);
+    const schema = bridge.listTools();
     const tool = schema.find((t) => t.name === "schema_req_test_tool");
     expect(tool!.inputSchema.required).toContain("required_field");
     expect((tool!.inputSchema.required as string[])).not.toContain("optional_field");
   });
 
-  it("global mcpBridge server info has correct protocol version", () => {
-    const info = mcpBridge.getServerInfo();
+  it("defaultMcpBridge server info has correct protocol version", () => {
+    const info = defaultMcpBridge.getServerInfo();
     expect(info.name).toBeTruthy();
     expect(info.protocolVersion).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(info.tools).toBeInstanceOf(Array);
   });
 
-  it("mcpBridge external tool registration appears in server info", () => {
+  it("defaultMcpBridge external tool registration appears in server info", () => {
     const uniqueName = `test_external_mcp_${Date.now()}`;
-    mcpBridge.registerExternalTool({
+    defaultMcpBridge.registerExternalTool({
       name: uniqueName,
       description: "Hardening external tool",
       inputSchema: { entityId: { type: "string", description: "Entity ID" } },
@@ -576,12 +569,12 @@ describe("MCP Tool Schema", () => {
       handler: async () => ({ ok: true }),
     });
 
-    const info = mcpBridge.getServerInfo();
+    const info = defaultMcpBridge.getServerInfo();
     const found = info.tools.find((t) => t.name === uniqueName);
     expect(found).toBeDefined();
     expect(found!.description).toBe("Hardening external tool");
 
-    mcpBridge.unregisterExternalTool(uniqueName);
+    defaultMcpBridge.unregisterExternalTool(uniqueName);
   });
 });
 

@@ -18,6 +18,15 @@ export const GRAPH_QUERY_TOOL_MANIFEST: ToolManifest = {
   domainTags: ["graph"],
   policyTier: "internal-workflow",
   allowedEnvironments: ["development", "staging", "production"],
+  inputSchema: {
+    type: "object",
+    properties: {
+      query: { type: "string", description: "Search query string" },
+      domain: { type: "string", description: "Optional domain filter" },
+      maxResults: { type: "integer", minimum: 1, description: "Maximum number of results to return" },
+    },
+    required: ["query"],
+  },
   rateLimits: { requestsPerMinute: 60 },
   timeoutMs: 5000,
   failureModes: [{ type: "timeout", retryable: true, maxRetries: 2 }],

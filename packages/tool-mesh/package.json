@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "MCP Tool Mesh — first-class tool registry and gateway. Tool manifest schema, registry, Gateway that consults Guardian before invocation and emits Trace Graph spans, for the SZL Agentic Cognitive Operating Intelligence Platform.",
+  "description": "MCP Tool Mesh — canonical schema-bound tool registry and gateway. Consolidates tool-registry, gateway, rate limiting, timeouts, fallback chains, guardian approval, observability hooks, MCP bridging, and execution tracking.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -20,6 +20,18 @@
     "./gateway": {
       "types": "./dist/gateway.d.ts",
       "import": "./src/gateway.ts"
+    },
+    "./rate-limiter": {
+      "types": "./dist/rate-limiter.d.ts",
+      "import": "./src/rate-limiter.ts"
+    },
+    "./executor": {
+      "types": "./dist/executor.d.ts",
+      "import": "./src/executor.ts"
+    },
+    "./mcp-bridge": {
+      "types": "./dist/mcp-bridge.d.ts",
+      "import": "./src/mcp-bridge.ts"
     },
     "./tools/graph-query": {
       "types": "./dist/tools/graph-query.d.ts",
@@ -43,7 +55,7 @@
     }
   },
   "dependencies": {
-    "@szl-holdings/tool-registry": "workspace:*",
+    "@workspace/cognitive-observability": "workspace:*",
     "@workspace/guardian": "workspace:*",
     "@workspace/trace-graph": "workspace:*",
     "zod": "catalog:"

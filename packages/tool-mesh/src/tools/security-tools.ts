@@ -17,6 +17,15 @@ export const THREAT_SCAN_TOOL_MANIFEST: ToolManifest = {
   domainTags: ["security"],
   policyTier: "regulated-workflow",
   allowedEnvironments: ["staging", "production"],
+  inputSchema: {
+    type: "object",
+    properties: {
+      targetId: { type: "string", description: "ID of the target host, network, or workload" },
+      targetType: { type: "string", enum: ["host", "network", "workload", "endpoint"], description: "Type of scan target" },
+      depth: { type: "string", enum: ["surface", "deep", "full"], description: "Scan depth level" },
+    },
+    required: ["targetId", "targetType"],
+  },
   rateLimits: { requestsPerMinute: 10, concurrency: 3 },
   timeoutMs: 60000,
   failureModes: [
@@ -58,6 +67,16 @@ export const ALERT_ESCALATION_TOOL_MANIFEST: ToolManifest = {
   domainTags: ["security"],
   policyTier: "executive-facing",
   allowedEnvironments: ["staging", "production"],
+  inputSchema: {
+    type: "object",
+    properties: {
+      alertId: { type: "string", description: "Unique identifier of the alert to escalate" },
+      severity: { type: "string", enum: ["low", "medium", "high", "critical"], description: "Alert severity level" },
+      reason: { type: "string", description: "Justification for escalation" },
+      escalateTo: { type: "string", description: "Optional target team or person for escalation" },
+    },
+    required: ["alertId", "severity", "reason"],
+  },
   rateLimits: { requestsPerMinute: 30 },
   timeoutMs: 10000,
   failureModes: [{ type: "error", retryable: true, maxRetries: 2 }],
@@ -92,6 +111,15 @@ export const COMPLIANCE_CHECK_TOOL_MANIFEST: ToolManifest = {
   domainTags: ["security"],
   policyTier: "regulated-workflow",
   allowedEnvironments: ["development", "staging", "production"],
+  inputSchema: {
+    type: "object",
+    properties: {
+      framework: { type: "string", enum: ["SOC2", "ISO27001", "NIST", "HIPAA", "GDPR", "PCI-DSS"], description: "Compliance framework to evaluate" },
+      scope: { type: "string", description: "Scope of the compliance check (e.g., service name or data classification)" },
+      includeRemediation: { type: "boolean", description: "Whether to include remediation recommendations" },
+    },
+    required: ["framework", "scope"],
+  },
   rateLimits: { requestsPerMinute: 20 },
   timeoutMs: 30000,
   failureModes: [{ type: "timeout", retryable: true, maxRetries: 2 }],
@@ -126,6 +154,15 @@ export const INCIDENT_CONTAINMENT_TOOL_MANIFEST: ToolManifest = {
   domainTags: ["security"],
   policyTier: "human-approval-mandatory",
   allowedEnvironments: ["production"],
+  inputSchema: {
+    type: "object",
+    properties: {
+      incidentId: { type: "string", description: "Unique identifier of the active security incident" },
+      containmentAction: { type: "string", enum: ["isolate-host", "block-ip", "revoke-credentials", "disable-account"], description: "The containment action to apply" },
+      justification: { type: "string", description: "Documented justification for the containment action" },
+    },
+    required: ["incidentId", "containmentAction", "justification"],
+  },
   rateLimits: { requestsPerMinute: 5, concurrency: 1 },
   timeoutMs: 30000,
   failureModes: [{ type: "error", retryable: false, maxRetries: 0 }],
@@ -159,6 +196,14 @@ export const VULNERABILITY_REPORT_TOOL_MANIFEST: ToolManifest = {
   domainTags: ["security"],
   policyTier: "internal-workflow",
   allowedEnvironments: ["development", "staging", "production"],
+  inputSchema: {
+    type: "object",
+    properties: {
+      cveId: { type: "string", description: "CVE identifier to filter by (e.g. CVE-2024-1234)" },
+      assetId: { type: "string", description: "Asset identifier to scope results" },
+      severity: { type: "string", enum: ["critical", "high", "medium", "low"], description: "Minimum severity filter" },
+    },
+  },
   rateLimits: { requestsPerMinute: 60 },
   timeoutMs: 15000,
   failureModes: [{ type: "timeout", retryable: true, maxRetries: 2 }],

@@ -22,8 +22,8 @@ function makeGateway(registry: InMemoryToolRegistry) {
   const guardian = new GuardianDecisionEngine();
   guardian.addRule({
     id: "allow-internal",
-    name: "Allow internal-workflow",
-    tier: "internal-workflow",
+    name: "Allow supervised tier",
+    tier: "supervised",
     conditions: [],
     action: "allow",
     priority: 10,
@@ -126,7 +126,7 @@ describe("ToolMeshGateway", () => {
   it("records trace on tool invocation", async () => {
     const store = new InMemoryTraceStore();
     const guardian = new GuardianDecisionEngine();
-    guardian.addRule({ id: "allow", name: "Allow all", tier: "internal-workflow", conditions: [], action: "allow", priority: 1, enabled: true, tags: [] });
+    guardian.addRule({ id: "allow", name: "Allow all", tier: "supervised", conditions: [], action: "allow", priority: 1, enabled: true, tags: [] });
     const writer = new TraceWriter(store);
     const tracingGateway = new ToolMeshGateway(registry, guardian, writer);
     tracingGateway.registerHandler("graph-query", graphQueryHandler);
@@ -297,7 +297,7 @@ describe("Gateway approval-required flow", () => {
     guardian.addRule({
       id: "allow-internal",
       name: "Allow internal-workflow tools",
-      tier: "internal-workflow",
+      tier: "supervised",
       conditions: [],
       action: "allow",
       priority: 10,
@@ -324,7 +324,7 @@ describe("Gateway approval-required flow", () => {
     registry.register(disabledManifest);
 
     const guardian = new GuardianDecisionEngine();
-    guardian.addRule({ id: "allow", name: "Allow all", tier: "internal-workflow", conditions: [], action: "allow", priority: 1, enabled: true, tags: [] });
+    guardian.addRule({ id: "allow", name: "Allow all", tier: "supervised", conditions: [], action: "allow", priority: 1, enabled: true, tags: [] });
     const store = new InMemoryTraceStore();
     const writer = new TraceWriter(store);
     const gateway = new ToolMeshGateway(registry, guardian, writer);

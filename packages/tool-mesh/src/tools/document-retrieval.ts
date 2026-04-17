@@ -20,6 +20,17 @@ export const DOCUMENT_RETRIEVAL_TOOL_MANIFEST: ToolManifest = {
   domainTags: ["documents"],
   policyTier: "internal-workflow",
   allowedEnvironments: ["development", "staging", "production"],
+  inputSchema: {
+    type: "object",
+    properties: {
+      query: { type: "string", description: "Semantic search query" },
+      domain: { type: "string", description: "Optional domain scope filter" },
+      topK: { type: "integer", minimum: 1, description: "Maximum number of documents to return" },
+      minScore: { type: "number", minimum: 0, maximum: 1, description: "Minimum similarity score threshold" },
+      filters: { type: "object", description: "Optional key-value metadata filters" },
+    },
+    required: ["query"],
+  },
   rateLimits: { requestsPerMinute: 120 },
   timeoutMs: 10000,
   failureModes: [{ type: "timeout", retryable: true, maxRetries: 3 }, { type: "unavailable", retryable: false, maxRetries: 0 }],
