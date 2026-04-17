@@ -41,12 +41,14 @@ export async function seedPlatformData(): Promise<void> {
   console.log("[seed-platform] Starting platform seed data...");
 
   const orgsExist = await tableHasData(organizationsTable);
-  if (orgsExist) {
-    const [{ count: signalCount }] = await db.select({ count: sql<number>`count(*)::int` }).from(platformSignalsTable);
-    if (signalCount > 0) {
-      console.log("[seed-platform] Platform data already seeded, skipping...");
-      return;
-    }
+  const signalsExist = await tableHasData(platformSignalsTable);
+  const vesselsExist = await tableHasData(maritimeVesselsTable);
+  const voyagesExist = await tableHasData(voyagesTable);
+  const exceptionsExist = await tableHasData(maritimeExceptionsTable);
+
+  if (orgsExist && signalsExist && vesselsExist && voyagesExist && exceptionsExist) {
+    console.log("[seed-platform] Platform data already seeded, skipping...");
+    return;
   }
 
   const [alloyOrg] = await db.insert(organizationsTable).values({
@@ -73,25 +75,29 @@ export async function seedPlatformData(): Promise<void> {
     plan: "enterprise",
   }).onConflictDoNothing().returning();
 
-  const alloyOrgId = alloyOrg?.id;
-  const lyteOrgId = lyteOrg?.id;
-  const vesselsOrgId = vesselsOrg?.id;
-
-  if (!alloyOrgId || !lyteOrgId || !vesselsOrgId) {
-    console.log("[seed-platform] Orgs already exist or failed to create, checking by slug...");
+  async function resolveOrgId(returned: { id: number } | undefined, slug: string): Promise<number> {
+    if (returned?.id) return returned.id;
+    const [existing] = await db
+      .select({ id: organizationsTable.id })
+      .from(organizationsTable)
+      .where(eq(organizationsTable.slug, slug));
+    if (!existing?.id) {
+      throw new Error(`[seed-platform] Could not resolve org id for slug "${slug}"`);
+    }
+    return existing.id;
   }
 
-  const seedOrgId = alloyOrgId ?? 1;
-  const seedLyteOrgId = lyteOrgId ?? 2;
-  const seedVesselsOrgId = vesselsOrgId ?? 3;
+  const seedOrgId = await resolveOrgId(alloyOrg, "alloy-demo");
+  const seedLyteOrgId = await resolveOrgId(lyteOrg, "lyte-demo");
+  const seedVesselsOrgId = await resolveOrgId(vesselsOrg, "vessels-demo");
 
   await db.insert(productsTable).values([
-    { slug: "alloy", name: "Alloy", description: "Execution Fabric — signal ingest, workflow orchestration, artifact management", productType: "platform" as const, isActive: true },
-    { slug: "lyte", name: "Lyte Command Center", description: "Business telemetry and ops signal management for MSPs", productType: "module" as const, isActive: true },
-    { slug: "vessels", name: "Vessels Maritime Intelligence", description: "Maritime fleet monitoring, voyage management, and exception handling", productType: "vertical" as const, isActive: true },
-    { slug: "terra", name: "Terra", description: "Predictive intelligence and business analytics", productType: "module" as const, isActive: true },
-    { slug: "inca", name: "INCA AI Research Command", description: "AI research orchestration and knowledge management", productType: "service" as const, isActive: true },
-  ] as any).onConflictDoNothing(); // productsTable used here
+    { key: "alloy", name: "Alloy", description: "Execution Fabric — signal ingest, workflow orchestration, artifact management", category: "platform" as const, isActive: true },
+    { key: "lyte", name: "Lyte Command Center", description: "Business telemetry and ops signal management for MSPs", category: "ops" as const, isActive: true },
+    { key: "vessels", name: "Vessels Maritime Intelligence", description: "Maritime fleet monitoring, voyage management, and exception handling", category: "maritime" as const, isActive: true },
+    { key: "terra", name: "Terra", description: "Predictive intelligence and business analytics", category: "intelligence" as const, isActive: true },
+    { key: "inca", name: "INCA AI Research Command", description: "AI research orchestration and knowledge management", category: "intelligence" as const, isActive: true },
+  ]).onConflictDoNothing(); // productsTable used here
 
   await db.insert(featureFlagsTable).values([
     { key: "alloy.signal_ingest", name: "Alloy Signal Ingest", description: "Enable signal ingest API for Alloy", isEnabled: true, scope: "product", product: "alloy", rolloutPercentage: 100 },
@@ -109,6 +115,7 @@ export async function seedPlatformData(): Promise<void> {
   const dayAgo = new Date(now.getTime() - 86400000);
   const weekAgo = new Date(now.getTime() - 7 * 86400000);
 
+  if (!signalsExist) {
   await db.insert(platformSignalsTable).values([
     {
       orgId: seedOrgId,
@@ -348,7 +355,10 @@ export async function seedPlatformData(): Promise<void> {
       },
     ]).onConflictDoNothing(); // productsTable used here
   }
+  } // end if (!signalsExist)
 
+  const seedMaritime = !vesselsExist || !voyagesExist || !exceptionsExist;
+  if (seedMaritime) {
   const portValues = [
     { name: "Port of Shanghai", locode: "CNSHA", country: "China", region: "Asia Pacific", latitude: "31.2304", longitude: "121.4737", portType: "container" as const, status: "congested" as const, avgCongestionDays: "3.2", weeklyCapacityTeu: 142000 },
     { name: "Port of Singapore", locode: "SGSIN", country: "Singapore", region: "Southeast Asia", latitude: "1.2655", longitude: "103.8196", portType: "container" as const, status: "open" as const, avgCongestionDays: "1.8", weeklyCapacityTeu: 89000 },
@@ -460,9 +470,15 @@ export async function seedPlatformData(): Promise<void> {
     },
   ];
 
-  const insertedVessels = await db.insert(maritimeVesselsTable).values(vesselValues).onConflictDoNothing().returning();
+  let insertedVessels = await db.insert(maritimeVesselsTable).values(vesselValues).onConflictDoNothing().returning();
+  if (insertedVessels.length === 0) {
+    insertedVessels = await db
+      .select()
+      .from(maritimeVesselsTable)
+      .where(eq(maritimeVesselsTable.orgId, seedVesselsOrgId)) as typeof insertedVessels;
+  }
 
-  if (insertedVessels.length > 0) {
+  if (insertedVessels.length >= 3) {
     const vessel1 = insertedVessels[0];
     const vessel2 = insertedVessels[1];
     const vessel3 = insertedVessels[2];
@@ -609,6 +625,7 @@ export async function seedPlatformData(): Promise<void> {
       },
     ]).onConflictDoNothing(); // productsTable used here
   }
+  } // end if (seedMaritime)
 
   await db.insert(readinessItemsTable).values([
     {
