@@ -10,7 +10,8 @@ import {
   Bell, Menu, X, Briefcase, Map, Globe, TrendingUp, BookOpen,
   Shield, Layers, Radio, Search, PieChart, PanelLeftClose, PanelLeftOpen,
   Camera, Hammer, Box, DollarSign, Scale, Ruler, FileSearch,
-  ClipboardList, TrendingDown, RefreshCw, Calculator, Percent, UserCheck, HardHat, GitBranch, Network
+  ClipboardList, TrendingDown, RefreshCw, Calculator, Percent, UserCheck, HardHat, GitBranch, Network,
+  Brain, GitMerge, AlertTriangle, Landmark, MapPin
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui";
 import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
@@ -107,6 +108,18 @@ const NAV_SECTIONS: SidebarNavSection[] = [
       { id: "diligence-prep", href: "/diligence-prep", label: "Diligence Prep", icon: <Search className="w-full h-full" /> },
       { id: "readiness-board", href: "/readiness-board", label: "Readiness Board", icon: <BarChart3 className="w-full h-full" /> },
       { id: "approval-review", href: "/approval-review", label: "Review & Approval", icon: <Shield className="w-full h-full" /> },
+    ],
+  },
+  {
+    id: "cognitive-runtime",
+    label: "Cognitive Runtime",
+    items: [
+      { id: "ownership-graph", href: "/ownership-graph", label: "Ownership Graph", icon: <GitBranch className="w-full h-full" /> },
+      { id: "lender-exposure-map", href: "/lender-exposure-map", label: "Lender Exposure Map", icon: <Landmark className="w-full h-full" /> },
+      { id: "covenant-monitoring", href: "/covenant-monitoring", label: "Covenant Monitor", icon: <Shield className="w-full h-full" /> },
+      { id: "distress-forecast", href: "/distress-forecast", label: "Distress Forecast", icon: <AlertTriangle className="w-full h-full" /> },
+      { id: "underwriting-copilot", href: "/underwriting-copilot", label: "Underwriting Copilot", icon: <Brain className="w-full h-full" /> },
+      { id: "diligence-room", href: "/diligence-room", label: "Diligence Room", icon: <Layers className="w-full h-full" /> },
     ],
   },
   {

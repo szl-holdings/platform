@@ -25,8 +25,10 @@ import { authMiddleware } from "../middlewares/auth";
 import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
 
 const router: IRouter = Router();
-router.use(authMiddleware({ required: true }));
-router.use(perUserApiSlidingLimiter);
+// Scope auth to /constellation paths only — this router is mounted without a path prefix
+// so a bare router.use(auth) would block all requests passing through, not just ours.
+router.use("/constellation", authMiddleware({ required: true }));
+router.use("/constellation", perUserApiSlidingLimiter);
 
 const filtersSchema = z
   .object({

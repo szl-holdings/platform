@@ -28,8 +28,8 @@
  *  - Per-service health probes (e.g. /api/prism-counsel/health)
  */
 
-import type { Request, Response, NextFunction } from "express";
 import { timingSafeEqual } from "crypto";
+import type { Request, Response, NextFunction } from "express";
 import { serverTelemetry } from "@szl-holdings/observability";
 import { sendUnauthorized } from "../lib/api-response";
 
@@ -65,6 +65,10 @@ const PUBLIC_PREFIXES = [
   "/api/federation/agents/",
   "/api/v1/",
   "/api/docs/",
+  // Terra Cognitive runtime — read-only GET routes use authMiddleware({ required: false })
+  // and are intentionally accessible without a session (richer context shown when authed).
+  // The POST mutation /submit-review is NOT included here; it enforces its own auth.
+  "/api/terra/cognitive/",
 ];
 
 function isValidInternalToken(req: Request): boolean {

@@ -95,6 +95,12 @@ const TerraAtlasRuntimePage = lazy(() => import("@/pages/atlas-runtime"));
 const TerraReplayPage = lazy(() => import("@/pages/replay"));
 const TerraScenarioBranchesPage = lazy(() => import("@/pages/scenario-branches"));
 const TerraConstellationPage = lazy(() => import("@/pages/constellation"));
+const OwnershipGraphPage = lazy(() => import("@/pages/ownership-graph"));
+const LenderExposureMapPage = lazy(() => import("@/pages/lender-exposure-map"));
+const CovenantMonitoringPage = lazy(() => import("@/pages/covenant-monitoring"));
+const DistressForecastPage = lazy(() => import("@/pages/distress-forecast"));
+const UnderwritingCopilotPage = lazy(() => import("@/pages/underwriting-copilot"));
+const DiligenceRoomPage = lazy(() => import("@/pages/diligence-room"));
 
 function PageLoader() {
   return (
@@ -181,6 +187,12 @@ function PrivateRouter() {
         <Route path="/replay" component={TerraReplayPage} />
         <Route path="/scenario-branches" component={TerraScenarioBranchesPage} />
         <Route path="/constellation" component={TerraConstellationPage} />
+        <Route path="/ownership-graph" component={OwnershipGraphPage} />
+        <Route path="/lender-exposure-map" component={LenderExposureMapPage} />
+        <Route path="/covenant-monitoring" component={CovenantMonitoringPage} />
+        <Route path="/distress-forecast" component={DistressForecastPage} />
+        <Route path="/underwriting-copilot" component={UnderwritingCopilotPage} />
+        <Route path="/diligence-room" component={DiligenceRoomPage} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

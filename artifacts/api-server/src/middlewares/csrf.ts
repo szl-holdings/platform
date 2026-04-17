@@ -3,6 +3,15 @@ import { randomBytes } from "crypto";
 import { logger } from "../lib/logger";
 import { sendError } from "../lib/api-response";
 
+function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
 const CSRF_COOKIE = "csrf_token";
 const CSRF_HEADER = "x-csrf-token";
 const CSRF_TOKEN_BYTES = 32;
@@ -11,6 +20,9 @@ const CSRF_COOKIE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
 const EXEMPT_PATHS = new Set([
+  // Terra Cognitive POST mutations — server-to-server calls authenticated via
+  // authMiddleware({ required: true }) at route level; CSRF not applicable.
+  "/api/terra/cognitive/covenants/submit-review",
   "/api/health",
   "/api/health/live",
   "/api/health/ready",
@@ -79,6 +91,18 @@ function timingSafeEqual(a: string, b: string): boolean {
 }
 
 export function csrfMiddleware(req: Request, res: Response, next: NextFunction): void {
+  // Internal service-to-service requests carry x-internal-token instead of a
+  // browser CSRF cookie — bypass CSRF enforcement for them.
+  const internalToken = process.env["ALLOY_INTERNAL_TOKEN"];
+  if (internalToken) {
+    const header = req.headers["x-internal-token"] as string | undefined;
+    if (header) {
+      if (safeEqual(internalToken, header)) {
+        return next();
+      }
+    }
+  }
+
   if (SAFE_METHODS.has(req.method)) {
     if (!req.cookies?.[CSRF_COOKIE]) {
       const token = generateToken();

@@ -6,6 +6,10 @@ export {
 } from "@szl-holdings/forge-runtime";
 
 import { agentScheduler, agentExecutionRuntime, durableScheduler, seedDefaultSchedules } from "@szl-holdings/forge-runtime";
+import { createHash } from "crypto";
+import { db, guardianActionsTable, guardianApprovalRequestsTable } from "@szl-holdings/db";
+import { eq } from "drizzle-orm";
+import { searchDistressedProperties } from "./terra-distress-service";
 import { logger } from "./logger";
 
 const BASE_URL = `http://localhost:${process.env["PORT"] || 3000}`;
@@ -38,6 +42,89 @@ async function fetchData(path: string): Promise<unknown> {
 }
 
 export { fetchData, getInternalHeaders, BASE_URL };
+
+function covenantBreachRequestId(propertyId: string, breachType: string): string {
+  return createHash("sha256")
+    .update(`terra-covenant-breach:${propertyId}:${breachType}`)
+    .digest("hex")
+    .slice(0, 36);
+}
+
+/**
+ * Scan distress properties and dispatch guardian approval requests for any
+ * covenant breaches detected.  Safe to re-run: onConflictDoNothing prevents
+ * duplicates via the deterministic requestId.
+ */
+async function dispatchCovenantBreaches(): Promise<void> {
+  try {
+    const properties = await searchDistressedProperties({ limit: 50 });
+    const critical = properties.filter(p => (p.opportunityScore ?? 0) >= 70);
+
+    for (const prop of critical) {
+      const debt = prop.debtAmount ?? 0;
+      const value = prop.estimatedValue ?? 1;
+      const impliedLtv = value > 0 ? Math.min(1.0, debt / value) : 0;
+      const impliedDscr = Math.max(0.6, 1.8 - ((prop.opportunityScore ?? 70) / 100) * 1.4);
+
+      const covenantType = prop.distressType === "tax_lien" ? "ltv"
+        : impliedDscr < 1.2 ? "dscr"
+        : "occupancy";
+
+      const requestId = covenantBreachRequestId(prop.id, covenantType);
+      const env = process.env["NODE_ENV"] === "production" ? "production" : "development";
+
+      const existing = await db
+        .select({ id: guardianActionsTable.id })
+        .from(guardianActionsTable)
+        .where(eq(guardianActionsTable.requestId, requestId))
+        .limit(1);
+
+      if (existing.length > 0) continue;
+
+      const [inserted] = await db.insert(guardianActionsTable).values({
+        requestId,
+        agentId: "terra-covenant-monitor",
+        sessionId: `sched-${Date.now()}`,
+        orgId: null,
+        tier: "t1",
+        action: "covenant_breach_review",
+        toolId: "covenant-monitor",
+        model: "terra-cognitive-v1",
+        environment: env,
+        outcome: "require-approval",
+        matchedRuleId: "terra-covenant-t1",
+        reason: `Daily covenant scan: ${covenantType} breach on ${prop.address ?? prop.id} (score ${prop.opportunityScore ?? 70}/100, LTV ${(impliedLtv * 100).toFixed(1)}%, DSCR ${impliedDscr.toFixed(2)})`,
+        rollbackRequired: false,
+        redactApplied: false,
+        controlViolations: [],
+        payload: { propertyId: prop.id, address: prop.address, distressType: prop.distressType, covenantType, score: prop.opportunityScore, debtAmount: debt, estimatedValue: value },
+        decidedAt: new Date(),
+      }).onConflictDoNothing().returning();
+
+      if (inserted) {
+        await db.insert(guardianApprovalRequestsTable).values({
+          requestId,
+          agentId: "terra-covenant-monitor",
+          sessionId: `sched-${Date.now()}`,
+          orgId: null,
+          tier: "t1",
+          action: "covenant_breach_review",
+          toolId: "covenant-monitor",
+          approvalType: "single",
+          status: "pending",
+          requiredApprovers: ["terra-risk-officer"],
+          approvals: [],
+          payload: { propertyId: prop.id, address: prop.address, distressType: prop.distressType, covenantType, score: prop.opportunityScore },
+        }).onConflictDoNothing();
+        logger.info({ requestId, propertyId: prop.id, covenantType }, "[terra-covenant-monitor] Guardian approval request dispatched");
+      }
+    }
+
+    logger.info({ breachCount: critical.length }, "[terra-covenant-monitor] Covenant breach scan complete");
+  } catch (err) {
+    logger.warn({ err }, "[terra-covenant-monitor] Guardian dispatch failed (non-fatal)");
+  }
+}
 
 function safeSerialize(data: unknown, maxLen: number): string {
   if (data == null) return "null";
@@ -146,6 +233,22 @@ export async function registerDefaultSchedules(): Promise<void> {
       },
     },
     {
+      agentId: "terra-covenant-monitor",
+      name: "Terra Covenant Monitor",
+      domain: "terra" as const,
+      intervalMs: 24 * 60 * 60 * 1000,
+      enabled: true,
+      taskDescription: "Scan active distress properties for covenant metric deviations (DSCR, LTV, occupancy), dispatch guardian approval requests for breaches, and produce a daily covenant status digest.",
+      systemPrompt: `You are an autonomous real estate covenant compliance agent. Analyze distress property data to identify covenant breaches and near-term risks. Focus on: DSCR deterioration, LTV threshold crossings, occupancy covenant failures, and auction proximity. Dispatch guardian approval requests for critical breaches.`,
+      analysisPrompt: async () => {
+        const [covenants, forecast] = await Promise.all([
+          fetchData("/api/terra/cognitive/covenants"),
+          fetchData("/api/terra/cognitive/distress-forecast?limit=10"),
+        ]);
+        return `Analyze this covenant and distress forecast data for the real estate portfolio and identify the top 1-2 most significant covenant compliance findings:\n\nCovenant Status: ${safeSerialize(covenants, 2000)}\nDistress Forecast: ${safeSerialize(forecast, 1000)}\n\nRespond with findings in this format:\nFINDING: [title]\nSEVERITY: [low|medium|high|critical]\nSUMMARY: [2-3 sentence summary]\nTAGS: [comma-separated tags]`;
+      },
+    },
+    {
       agentId: "nexus-autonomous",
       name: "Nexus Cross-Domain Fusion Monitor",
       domain: "global" as const,
@@ -198,6 +301,12 @@ export async function registerDefaultSchedules(): Promise<void> {
         maxRetries: 0,
       },
       async (_job, ctx) => {
+        // For the covenant monitor: dispatch guardian actions for critical
+        // breaches BEFORE running the LLM narrative so the agent finding
+        // can reference the already-created approval requests.
+        if (capturedAgentId === "terra-covenant-monitor") {
+          await dispatchCovenantBreaches();
+        }
         await agentScheduler.runAgent(capturedAgentId);
         await ctx.saveState({
           lastRunAt: new Date().toISOString(),

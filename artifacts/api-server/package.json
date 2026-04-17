@@ -17,6 +17,7 @@
     "smoke:cognitive-runtime": "tsx src/scripts/smoke-cognitive-runtime.ts",
     "test:cognitive-contracts": "tsx src/scripts/smoke-cognitive-contracts.ts",
     "smoke:vessels-cognitive": "tsx src/scripts/smoke-vessels-cognitive.ts",
+    "test:terra-cognitive": "tsx src/scripts/smoke-terra-cognitive-api.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },

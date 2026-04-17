@@ -145,9 +145,7 @@ export function validateStartupConfig(): ValidationResult {
     if (isProduction) {
       errors.push(`ALLOY_INTERNAL_TOKEN is too short (${alloyToken.length} chars, minimum 32) — replace with a secure 32+ character secret.`);
     } else {
-      const generated = randomBytes(48).toString("hex");
-      process.env.ALLOY_INTERNAL_TOKEN = generated;
-      warnings.push("ALLOY_INTERNAL_TOKEN was too short (< 32 characters) — auto-generated a secure 96-char token for this session (set a permanent secret for production)");
+      warnings.push(`ALLOY_INTERNAL_TOKEN is short (${alloyToken.length} chars) — use a 32+ character secret in production`);
     }
   }
 
