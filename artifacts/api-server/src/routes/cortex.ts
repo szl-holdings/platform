@@ -684,10 +684,15 @@ router.get(
       const domainFilter = req.query.domain ? String(req.query.domain) : undefined;
       const orgIds = callerOrgIds(req as unknown as Record<string, unknown>);
 
-      const whereClauses = [];
-      if (orgIds.length > 0) {
-        whereClauses.push(inArray(cortexActionDraftsTable.orgId, orgIds));
+      // Deny-by-default: a user with no org memberships has no scope and cannot
+      // see any drafts. Return an empty result rather than falling back to an
+      // unscoped query that would expose all tenants' data.
+      if (orgIds.length === 0) {
+        sendSuccess(res, { drafts: [], total: 0, pendingCount: 0 });
+        return;
       }
+
+      const whereClauses = [inArray(cortexActionDraftsTable.orgId, orgIds)];
       if (statusFilter && ["pending", "approved", "dismissed"].includes(statusFilter)) {
         whereClauses.push(eq(cortexActionDraftsTable.status, statusFilter as "pending" | "approved" | "dismissed"));
       }
@@ -698,21 +703,17 @@ router.get(
       const drafts = await db
         .select()
         .from(cortexActionDraftsTable)
-        .where(whereClauses.length > 0 ? and(...whereClauses) : undefined)
+        .where(and(...whereClauses))
         .orderBy(
           sql`CASE priority WHEN 'urgent' THEN 0 WHEN 'high' THEN 1 ELSE 2 END`,
           desc(cortexActionDraftsTable.generatedAt)
         )
         .limit(50);
 
-      const pendingWhere = orgIds.length > 0
-        ? and(eq(cortexActionDraftsTable.status, "pending"), inArray(cortexActionDraftsTable.orgId, orgIds))
-        : eq(cortexActionDraftsTable.status, "pending");
-
       const [{ count: pendingCount }] = await db
         .select({ count: sql<number>`count(*)::int` })
         .from(cortexActionDraftsTable)
-        .where(pendingWhere);
+        .where(and(eq(cortexActionDraftsTable.status, "pending"), inArray(cortexActionDraftsTable.orgId, orgIds)));
 
       const formatted = drafts.map((d) => ({
         id: d.draftUuid,
@@ -821,9 +822,16 @@ router.post(
       const orgIds = callerOrgIds(req as unknown as Record<string, unknown>);
       const now = new Date();
 
-      const approveWhere = orgIds.length > 0
-        ? and(eq(cortexActionDraftsTable.draftUuid, req.params.i as string), inArray(cortexActionDraftsTable.orgId, orgIds))
-        : eq(cortexActionDraftsTable.draftUuid, req.params.i as string);
+      // Deny-by-default: no org membership → no scope → 404 (no existence leak).
+      if (orgIds.length === 0) {
+        sendNotFound(res, "Action draft");
+        return;
+      }
+
+      const approveWhere = and(
+        eq(cortexActionDraftsTable.draftUuid, req.params.id as string),
+        inArray(cortexActionDraftsTable.orgId, orgIds)
+      );
 
       const [updated] = await db
         .update(cortexActionDraftsTable)
@@ -876,9 +884,16 @@ router.post(
       const caller = callerEmail(req as unknown as Record<string, unknown>);
       const orgIds = callerOrgIds(req as unknown as Record<string, unknown>);
 
-      const dismissWhere = orgIds.length > 0
-        ? and(eq(cortexActionDraftsTable.draftUuid, req.params.i as string), inArray(cortexActionDraftsTable.orgId, orgIds))
-        : eq(cortexActionDraftsTable.draftUuid, req.params.i as string);
+      // Deny-by-default: no org membership → no scope → 404 (no existence leak).
+      if (orgIds.length === 0) {
+        sendNotFound(res, "Action draft");
+        return;
+      }
+
+      const dismissWhere = and(
+        eq(cortexActionDraftsTable.draftUuid, req.params.id as string),
+        inArray(cortexActionDraftsTable.orgId, orgIds)
+      );
 
       const [updated] = await db
         .update(cortexActionDraftsTable)
