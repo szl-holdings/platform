@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import pulseBriefingRouter from "./pulse";
+import evalsRouter from "./evals";
 import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import * as core from "./groups/core";
 import * as vessels from "./groups/vessels";
@@ -24,6 +25,7 @@ import * as alloyRuntime from "./groups/alloy-runtime-group";
 const router: IRouter = Router();
 
 router.use("/pulse", perUserApiSlidingLimiter, pulseBriefingRouter);
+router.use(evalsRouter);
 
 core.register(router);
 vessels.register(router);

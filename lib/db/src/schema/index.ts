@@ -120,3 +120,4 @@ export * from "./forge";
 export * from "./constellation";
 export * from "./guardian_tools";
 export * from "./trace_graph";
+export * from "./eval_os";

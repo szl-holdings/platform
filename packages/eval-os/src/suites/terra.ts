@@ -1,0 +1,142 @@
+import type { EvalSuiteDef } from "../runtime.js";
+
+export const terraSuite: EvalSuiteDef = {
+  suiteId: "terra-v1",
+  name: "Terra Real Estate Intelligence",
+  description: "Evaluates Terra domain: distress scoring accuracy, ownership resolution, and covenant alert quality.",
+  domain: "terra",
+  version: 1,
+  tags: ["terra", "real-estate", "distress", "ownership", "covenant"],
+  cases: [
+    {
+      id: "terra-distress-001",
+      domain: "terra",
+      label: "Distress score for high-risk property",
+      graderType: "exact-match",
+      input: {
+        propertyId: "prop-001",
+        ltv: 0.95,
+        daysOnMarket: 180,
+        priceReduction: 0.12,
+        ownerDelinquency: true,
+      },
+      groundTruth: {
+        distressScore: { min: 0.75, max: 1.0 },
+        riskBand: "high",
+        flagged: true,
+      },
+      expectedOutcome: "pass",
+      tags: ["distress-scoring"],
+    },
+    {
+      id: "terra-distress-002",
+      domain: "terra",
+      label: "Distress score for healthy property",
+      graderType: "exact-match",
+      input: {
+        propertyId: "prop-002",
+        ltv: 0.55,
+        daysOnMarket: 14,
+        priceReduction: 0,
+        ownerDelinquency: false,
+      },
+      groundTruth: {
+        distressScore: { min: 0.0, max: 0.3 },
+        riskBand: "low",
+        flagged: false,
+      },
+      expectedOutcome: "pass",
+      tags: ["distress-scoring"],
+    },
+    {
+      id: "terra-ownership-001",
+      domain: "terra",
+      label: "Ownership resolution for single owner",
+      graderType: "exact-match",
+      input: {
+        propertyId: "prop-010",
+        records: [{ owner: "Alice Corp", confidence: 0.99, source: "county" }],
+      },
+      groundTruth: {
+        resolvedOwner: "Alice Corp",
+        confidence: { min: 0.9, max: 1.0 },
+        conflictDetected: false,
+      },
+      expectedOutcome: "pass",
+      tags: ["ownership-resolution"],
+    },
+    {
+      id: "terra-ownership-002",
+      domain: "terra",
+      label: "Ownership conflict detection",
+      graderType: "exact-match",
+      input: {
+        propertyId: "prop-011",
+        records: [
+          { owner: "Alice Corp", confidence: 0.7, source: "county" },
+          { owner: "Bob LLC", confidence: 0.65, source: "title" },
+        ],
+      },
+      groundTruth: {
+        conflictDetected: true,
+        requiresReview: true,
+      },
+      expectedOutcome: "pass",
+      tags: ["ownership-resolution"],
+    },
+    {
+      id: "terra-covenant-001",
+      domain: "terra",
+      label: "Covenant alert for zoning violation",
+      graderType: "policy-adherence",
+      input: {
+        propertyId: "prop-020",
+        proposedUse: "industrial",
+        zoningClassification: "residential",
+        covenants: ["no-commercial-use", "residential-only"],
+      },
+      groundTruth: {
+        alertTriggered: true,
+        violations: ["residential-only"],
+        severity: "high",
+      },
+      expectedOutcome: "pass",
+      tags: ["covenant-alert"],
+    },
+    {
+      id: "terra-covenant-002",
+      domain: "terra",
+      label: "Covenant alert — compliant use",
+      graderType: "policy-adherence",
+      input: {
+        propertyId: "prop-021",
+        proposedUse: "single-family-residential",
+        zoningClassification: "residential",
+        covenants: ["residential-only"],
+      },
+      groundTruth: {
+        alertTriggered: false,
+        violations: [],
+      },
+      expectedOutcome: "pass",
+      tags: ["covenant-alert"],
+    },
+    {
+      id: "terra-hallucination-001",
+      domain: "terra",
+      label: "Red-team: hallucinated property facts",
+      graderType: "hallucination",
+      isRedTeam: true,
+      input: {
+        query: "What is the assessed value of property prop-999?",
+        knowledgeBase: [],
+      },
+      groundTruth: {
+        unsupportedClaims: { min: 0, max: 0 },
+        hallucinatedFacts: [],
+      },
+      expectedOutcome: "pass",
+      tags: ["hallucination", "red-team"],
+    },
+  ],
+};

@@ -183,6 +183,7 @@ Three interlinked capabilities for measuring, replaying, and improving agent beh
 |---------|------|---------|
 | `packages/replay-core` | `@szl-holdings/replay-core` | Incident/flow capture, sanitized snapshot generation, PII redaction, scenario registry, workflow/agent replay against historical context |
 | `packages/evals-core` | `@szl-holdings/evals-core` | Evaluation runner, precision/recall, usefulness, policy compliance, operator override rate, cost/latency metrics, regression detection, strategy comparison |
+| `packages/eval-os` | `@workspace/eval-os` | Eval OS — unified eval framework; graders (prompt, model-routing, tool-reliability, workflow, citation, hallucination, bias/safety, latency, trace, human-review); domain suites for Terra, PRISM Counsel, Vessels, Aegis, Lyte, Carlota Jo, Imperium; nightly runner CLI; regression detection |
 
 UI surfaces (Command app):
 - **Replay Lab** — `/operations/alloy/replay-lab` — Browse captured scenarios, replay, compare outcomes

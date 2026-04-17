@@ -48,6 +48,7 @@
     "@szl-holdings/prism-bus": "workspace:*",
     "@szl-holdings/proof-chain": "workspace:*",
     "@szl-holdings/pulse-evals": "workspace:*",
+    "@workspace/eval-os": "workspace:*",
     "@szl-holdings/receipt-graph": "workspace:*",
     "@szl-holdings/constellation": "workspace:*",
     "@szl-holdings/services": "workspace:*",

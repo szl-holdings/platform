@@ -28,10 +28,34 @@
     "./cli": {
       "types": "./dist/cli.d.ts",
       "import": "./src/cli.ts"
+    },
+    "./graders": {
+      "types": "./dist/graders.d.ts",
+      "import": "./src/graders.ts"
+    },
+    "./runtime": {
+      "types": "./dist/runtime.d.ts",
+      "import": "./src/runtime.ts"
+    },
+    "./trace-grader": {
+      "types": "./dist/trace-grader.d.ts",
+      "import": "./src/trace-grader.ts"
+    },
+    "./nightly-runner": {
+      "types": "./dist/nightly-runner.d.ts",
+      "import": "./src/nightly-runner.ts"
+    },
+    "./suites": {
+      "types": "./dist/suites/index.d.ts",
+      "import": "./src/suites/index.ts"
     }
   },
   "bin": {
-    "eval-os": "./src/cli.ts"
+    "eval-os": "./src/nightly-runner.ts"
+  },
+  "scripts": {
+    "run-suite": "tsx src/nightly-runner.ts",
+    "test": "vitest run"
   },
   "dependencies": {
     "@szl-holdings/evals-core": "workspace:*",
@@ -39,6 +63,7 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "tsx": "catalog:",
     "vitest": "^4.1.2"
   }
 }
