@@ -26,6 +26,7 @@
     "seed:atlas:terra": "pnpm --filter @workspace/scripts run seed:atlas:terra",
     "seed:atlas:counsel": "pnpm --filter @workspace/scripts run seed:atlas:counsel",
     "migrate": "pnpm --filter @szl-holdings/db run push-force",
+    "db:migrate": "pnpm --filter @szl-holdings/db run migrate",
     "start": "pnpm -r --if-present run dev",
     "capture:screens": "bash scripts/media/capture-screenshots.sh",
     "qa:routes": "node scripts/qa/smoke-routes.js",
