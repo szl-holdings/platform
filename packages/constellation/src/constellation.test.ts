@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { ConstellationNodeSchema, ConstellationEdgeSchema } from "./schema.js";
 import { InMemoryGraphStore } from "./store.js";
-import { findNeighbors, findPath, subgraph, searchNodes } from "./query.js";
+import { findNeighbors, findPath, subgraph, searchGraphNodes } from "./query.js";
 import { projectDomain, adapterRegistry } from "./adapter.js";
 import type { ConstellationNode } from "./schema.js";
 
@@ -120,7 +120,7 @@ describe("Query helpers", () => {
   });
 
   it("searchNodes finds by label", () => {
-    const results = searchNodes("beta", { store });
+    const results = searchGraphNodes("beta", { store });
     expect(results).toHaveLength(1);
     expect(results[0]?.id).toBe("b");
   });

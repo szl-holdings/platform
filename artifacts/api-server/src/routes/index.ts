@@ -1,6 +1,10 @@
 import { Router, type IRouter } from "express";
 import pulseBriefingRouter from "./pulse";
 import evalsRouter from "./evals";
+import briefingsRouter from "./briefings";
+import driftRouter from "./drift";
+import deploymentsRouter from "./deployments";
+import domainsRouter from "./domains";
 import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import * as core from "./groups/core";
 import * as vessels from "./groups/vessels";
@@ -26,6 +30,10 @@ const router: IRouter = Router();
 
 router.use("/pulse", perUserApiSlidingLimiter, pulseBriefingRouter);
 router.use(evalsRouter);
+router.use(briefingsRouter);
+router.use(driftRouter);
+router.use(deploymentsRouter);
+router.use(domainsRouter);
 
 core.register(router);
 vessels.register(router);

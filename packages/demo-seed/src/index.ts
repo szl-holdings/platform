@@ -61,3 +61,5 @@ export const DEMO_SUMMARY = {
 };
 
 export { seedAllNarratives, seedNarrative, clearDemoData } from "./seed-runner";
+
+export { seedConstellation, CONSTELLATION_NODES, CONSTELLATION_EDGES } from "./seed-constellation";

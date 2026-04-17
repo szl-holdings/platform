@@ -19,6 +19,8 @@ import type {
   CstEdgeEvidence,
   CstNodeTypeRegistration,
 } from "./types.ts";
+import type { GraphStore } from "./store.js";
+import type { ConstellationNode, ConstellationEdge } from "./schema.js";
 
 function mapDbNodeToSchema(row: typeof cstNodes.$inferSelect): CstNode {
   return {
@@ -344,3 +346,118 @@ export {
   upsertNode as createNode,
   upsertEdge as createEdge,
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// In-memory graph traversal helpers (operate on GraphStore, not Postgres)
+// ─────────────────────────────────────────────────────────────────────────────
+
+type StoreCtx = { store: GraphStore };
+
+/**
+ * Returns nodes directly connected to `nodeId` via edges.
+ *
+ * direction:
+ *   "outgoing" — edges where fromNodeId === nodeId
+ *   "incoming" — edges where toNodeId   === nodeId
+ *   "both"     — either direction (default)
+ */
+export function findNeighbors(
+  nodeId: string,
+  direction: "outgoing" | "incoming" | "both" = "both",
+  ctx: StoreCtx,
+): { nodes: ConstellationNode[] } {
+  const edges = ctx.store.listEdges();
+  const neighborIds = new Set<string>();
+  for (const e of edges) {
+    if ((direction === "outgoing" || direction === "both") && e.fromNodeId === nodeId) {
+      neighborIds.add(e.toNodeId);
+    }
+    if ((direction === "incoming" || direction === "both") && e.toNodeId === nodeId) {
+      neighborIds.add(e.fromNodeId);
+    }
+  }
+  const nodes = ctx.store.listNodes().filter((n) => neighborIds.has(n.id));
+  return { nodes };
+}
+
+/**
+ * Returns the shortest directed path from `fromId` to `toId` (BFS), or null
+ * if no path exists within `maxDepth` hops.
+ */
+export function findPath(
+  fromId: string,
+  toId: string,
+  maxDepth: number,
+  ctx: StoreCtx,
+): ConstellationNode[] | null {
+  if (fromId === toId) {
+    const node = ctx.store.getNode(fromId);
+    return node ? [node] : null;
+  }
+
+  const queue: string[][] = [[fromId]];
+  const visited = new Set<string>([fromId]);
+
+  while (queue.length > 0) {
+    const path = queue.shift()!;
+    if (path.length > maxDepth) break;
+    const current = path[path.length - 1]!;
+    const edges = ctx.store.listEdges({ fromNodeId: current });
+
+    for (const e of edges) {
+      const next = e.toNodeId;
+      if (!visited.has(next)) {
+        const newPath = [...path, next];
+        if (next === toId) {
+          return newPath.map((id) => ctx.store.getNode(id)!).filter(Boolean);
+        }
+        visited.add(next);
+        queue.push(newPath);
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Returns all nodes reachable from `nodeId` within `depth` directed hops,
+ * plus all edges between those nodes.
+ */
+export function subgraph(
+  nodeId: string,
+  depth: number,
+  ctx: StoreCtx,
+): { nodes: ConstellationNode[]; edges: ConstellationEdge[] } {
+  const reachable = new Set<string>([nodeId]);
+  let frontier = new Set<string>([nodeId]);
+
+  for (let d = 0; d < depth; d++) {
+    const nextFrontier = new Set<string>();
+    for (const id of frontier) {
+      for (const e of ctx.store.listEdges({ fromNodeId: id })) {
+        if (!reachable.has(e.toNodeId)) {
+          reachable.add(e.toNodeId);
+          nextFrontier.add(e.toNodeId);
+        }
+      }
+    }
+    frontier = nextFrontier;
+    if (frontier.size === 0) break;
+  }
+
+  const nodes = ctx.store.listNodes().filter((n) => reachable.has(n.id));
+  const edges = ctx.store.listEdges().filter(
+    (e) => reachable.has(e.fromNodeId) && reachable.has(e.toNodeId),
+  );
+  return { nodes, edges };
+}
+
+/**
+ * Synchronous label-text search across an in-memory GraphStore.
+ * Use `searchNodes` (async) for full-text DB search.
+ */
+export function searchGraphNodes(query: string, ctx: StoreCtx): ConstellationNode[] {
+  const lq = query.toLowerCase();
+  return ctx.store.listNodes().filter((n) => n.label.toLowerCase().includes(lq));
+}
