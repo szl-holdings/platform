@@ -6,6 +6,8 @@ import { validateBody } from "../lib/validation";
 import { z } from "zod";
 import { eq, desc, and, inArray, isNull } from "drizzle-orm";
 import { logger } from "../lib/logger";
+import { durableJobQueue, durableScheduler } from "../lib/durable-init";
+import { PLATFORM_JOB_TYPES } from "../lib/platform-jobs";
 
 const router: IRouter = Router();
 
@@ -331,6 +333,83 @@ router.get("/data-retention/audit-log", async (req: Request, res: Response) => {
   } catch (err) {
     logger.error({ err }, "Failed to fetch retention audit log");
     res.status(500).json({ error: "Failed to fetch audit log" });
+  }
+});
+
+router.get("/data-retention/sweep-status", async (req: Request, res: Response) => {
+  try {
+    const user = req.user as AuthenticatedUser;
+    const superAdmin = isSuperAdmin(user);
+
+    let scheduleInfo: { name: string; cronExpression: string; enabled: boolean; lastRunAt: string | null; nextRunAt: string | null } | null = null;
+    try {
+      const schedules = await durableScheduler.getSchedules();
+      const sweepSchedule = schedules.find((s: { name: string }) => s.name === "data_retention_sweep_weekly");
+      if (sweepSchedule) {
+        scheduleInfo = {
+          name: sweepSchedule.name,
+          cronExpression: sweepSchedule.cronExpression ?? "0 2 * * 0",
+          enabled: sweepSchedule.enabled ?? true,
+          lastRunAt: sweepSchedule.lastRunAt ?? null,
+          nextRunAt: sweepSchedule.nextRunAt ?? null,
+        };
+      }
+    } catch (schedErr) {
+      logger.warn({ schedErr }, "data-retention: failed to fetch schedule info (non-fatal)");
+    }
+
+    const lastSweepEntry = await db
+      .select()
+      .from(dataRetentionAuditLogTable)
+      .where(eq(dataRetentionAuditLogTable.actorName, "Scheduler"))
+      .orderBy(desc(dataRetentionAuditLogTable.executedAt))
+      .limit(1);
+
+    const policyFilter = superAdmin
+      ? eq(dataRetentionPoliciesTable.isActive, true)
+      : (() => {
+          const orgIds = callerOrgIds(user);
+          return orgIds.length > 0
+            ? and(eq(dataRetentionPoliciesTable.isActive, true), inArray(dataRetentionPoliciesTable.orgId, orgIds))
+            : eq(dataRetentionPoliciesTable.isActive, false);
+        })();
+
+    const activePolicies = await db
+      .select()
+      .from(dataRetentionPoliciesTable)
+      .where(policyFilter);
+
+    res.json({
+      schedule: scheduleInfo,
+      lastSweepAt: lastSweepEntry[0]?.executedAt ?? null,
+      activePolicies: activePolicies.length,
+      canTriggerSweep: superAdmin,
+    });
+  } catch (err) {
+    logger.error({ err }, "Failed to fetch retention sweep status");
+    res.status(500).json({ error: "Failed to fetch sweep status" });
+  }
+});
+
+router.post("/data-retention/sweep", async (req: Request, res: Response) => {
+  try {
+    const user = req.user as AuthenticatedUser;
+    if (!user.roles.includes("super_admin")) {
+      res.status(403).json({ error: "Only super admins can trigger the global data retention sweep" });
+      return;
+    }
+
+    const job = await durableJobQueue.enqueue(PLATFORM_JOB_TYPES.DATA_RETENTION_SWEEP, {
+      triggeredBy: "manual",
+      triggeredByUserId: user.id,
+    });
+
+    logger.info({ jobId: job.id, actorId: user.id, actorName: user.displayName ?? user.email }, "Manual data retention sweep triggered");
+
+    res.json({ success: true, jobId: job.id, message: "Retention sweep enqueued — all active policies will be processed." });
+  } catch (err) {
+    logger.error({ err }, "Failed to trigger retention sweep");
+    res.status(500).json({ error: "Failed to trigger sweep" });
   }
 });
 

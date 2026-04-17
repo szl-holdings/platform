@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { m } from "framer-motion";
-import { Shield, Clock, Trash2, RefreshCw, ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, Database } from "lucide-react";
+import { Shield, Clock, Trash2, RefreshCw, ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, Database, Play } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
@@ -38,6 +38,19 @@ interface AuditLogEntry {
   status: string;
   errorMessage: string | null;
   executedAt: string;
+}
+
+interface SweepStatus {
+  schedule: {
+    name: string;
+    cronExpression: string;
+    enabled: boolean;
+    lastRunAt: string | null;
+    nextRunAt: string | null;
+  } | null;
+  lastSweepAt: string | null;
+  activePolicies: number;
+  canTriggerSweep: boolean;
 }
 
 const PURGE_STRATEGY_LABELS: Record<string, string> = {
@@ -89,6 +102,40 @@ export default function AdminDataRetentionPage() {
       if (!res.ok) throw new Error("Failed to load audit log");
       return res.json() as Promise<{ entries: AuditLogEntry[] }>;
     },
+  });
+
+  const { data: sweepStatusData, refetch: refetchSweepStatus } = useQuery({
+    queryKey: ["retention-sweep-status"],
+    queryFn: async () => {
+      const res = await fetch(`${API}/data-retention/sweep-status`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to load sweep status");
+      return res.json() as Promise<SweepStatus>;
+    },
+    refetchInterval: 30_000,
+  });
+
+  const runSweepMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`${API}/data-retention/sweep`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({})) as { error?: string };
+        throw new Error(body.error ?? "Failed to trigger sweep");
+      }
+      return res.json() as Promise<{ success: boolean; jobId: string; message: string }>;
+    },
+    onSuccess: (data) => {
+      toast.success(data.message ?? "Retention sweep enqueued.");
+      queryClient.invalidateQueries({ queryKey: ["retention-audit-log"] });
+      queryClient.invalidateQueries({ queryKey: ["retention-sweep-status"] });
+      setTimeout(() => {
+        void refetchSweepStatus();
+        void refetchAudit();
+      }, 3000);
+    },
+    onError: (err: Error) => toast.error(err.message ?? "Failed to trigger sweep."),
   });
 
   type PolicyInput = Pick<RetentionPolicy, "tableName" | "retentionDays" | "purgeStrategy" | "isActive" | "description">;
@@ -208,6 +255,59 @@ export default function AdminDataRetentionPage() {
                 <span style={{ fontSize: "1.5rem", fontWeight: 700, color: "hsl(38,12%,88%)" }}>{stat.value}</span>
               </div>
             ))}
+          </div>
+
+          <div style={{ ...cardStyle, marginBottom: "2rem" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                <Clock size={14} style={{ color: "hsl(192,72%,48%)" }} />
+                <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(38,12%,82%)" }}>Automated Sweep Schedule</span>
+                <span style={{ fontSize: "11px", padding: "0.15rem 0.5rem", borderRadius: "20px", background: "hsla(142,60%,50%,0.1)", color: "hsl(142,60%,52%)", border: "1px solid hsla(142,60%,50%,0.2)" }}>
+                  {sweepStatusData?.schedule?.enabled !== false ? "Active · weekly" : "Disabled"}
+                </span>
+              </div>
+              {sweepStatusData?.canTriggerSweep && (
+                <button
+                  onClick={() => {
+                    if (confirm("Run the full data retention sweep now? All active policies will be processed immediately.")) {
+                      runSweepMutation.mutate();
+                    }
+                  }}
+                  disabled={runSweepMutation.isPending}
+                  style={{ padding: "0.4rem 0.875rem", borderRadius: "6px", fontSize: "12px", fontWeight: 600, background: "hsla(192,72%,48%,0.1)", border: "1px solid hsla(192,72%,48%,0.25)", color: "hsl(192,72%,52%)", cursor: "pointer", display: "flex", alignItems: "center", gap: "5px" }}
+                >
+                  {runSweepMutation.isPending ? <RefreshCw size={11} style={{ animation: "spin 1s linear infinite" }} /> : <Play size={11} />}
+                  {runSweepMutation.isPending ? "Enqueueing…" : "Run sweep now"}
+                </button>
+              )}
+            </div>
+            <div style={{ display: "flex", gap: "2.5rem", marginTop: "1rem", flexWrap: "wrap" }}>
+              {[
+                {
+                  label: "Cron schedule",
+                  value: sweepStatusData?.schedule?.cronExpression ?? "0 2 * * 0",
+                  hint: "Every Sunday at 02:00 UTC",
+                },
+                {
+                  label: "Last automated sweep",
+                  value: sweepStatusData?.lastSweepAt
+                    ? new Date(sweepStatusData.lastSweepAt).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
+                    : sweepStatusData !== undefined ? "Never run" : "Loading…",
+                  hint: null,
+                },
+                {
+                  label: "Active policies",
+                  value: sweepStatusData?.activePolicies !== undefined ? String(sweepStatusData.activePolicies) : "—",
+                  hint: "policies that will run on next sweep",
+                },
+              ].map((item) => (
+                <div key={item.label}>
+                  <span style={{ fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "hsl(210,5%,40%)", display: "block", marginBottom: "0.25rem" }}>{item.label}</span>
+                  <span style={{ fontSize: "13px", color: "hsl(38,12%,78%)", fontFamily: item.label === "Cron schedule" ? "var(--font-mono)" : "inherit" }}>{item.value}</span>
+                  {item.hint && <span style={{ display: "block", fontSize: "11px", color: "hsl(210,5%,38%)", marginTop: "0.125rem" }}>{item.hint}</span>}
+                </div>
+              ))}
+            </div>
           </div>
 
           <div style={sectionStyle}>
