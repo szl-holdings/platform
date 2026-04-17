@@ -1,7 +1,8 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useState } from "react";
+import { useLocalSearchParams } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Modal,
@@ -102,6 +103,7 @@ function LeadCard({ lead, onEdit }: { lead: Lead; onEdit: (lead: Lead) => void }
 export default function PipelineTab() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams<{ prefillAddress?: string }>();
   const [selectedStage, setSelectedStage] = useState("All");
   const [refreshing, setRefreshing] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -109,10 +111,26 @@ export default function PipelineTab() {
   const [editNote, setEditNote] = useState("");
   const [showEditModal, setShowEditModal] = useState(false);
 
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newAddress, setNewAddress] = useState("");
+  const [newStage, setNewStage] = useState("new");
+  const [newValue, setNewValue] = useState("");
+
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
 
   const qc = useQueryClient();
+
+  useEffect(() => {
+    if (params.prefillAddress) {
+      setNewAddress(params.prefillAddress);
+      setNewName("");
+      setNewStage("new");
+      setNewValue("");
+      setShowAddModal(true);
+    }
+  }, [params.prefillAddress]);
 
   const { data, isError: leadsError, refetch } = useQuery({
     queryKey: ["terra-pipeline"],
@@ -145,6 +163,53 @@ export default function PipelineTab() {
   const displayLeads = allLeads.filter(l => selectedStage === "All" || l.stage === selectedStage);
 
   const totalValue = allLeads.reduce((acc, l) => acc + l.value, 0);
+
+  const createLead = useMutation({
+    mutationFn: async (payload: { name: string; address: string; stage: string; value: number }) => {
+      const res = await fetch(API_BASE + "/terra/crm/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ownerName: payload.name,
+          propertyAddress: payload.address,
+          stage: payload.stage,
+          estimatedValue: payload.value,
+          score: 50,
+          priority: "medium",
+          source: "ar-scanner",
+          nextAction: "Review property details",
+          lastContact: new Date().toISOString().split("T")[0],
+        }),
+      });
+      if (!res.ok) throw new Error("Create failed: " + res.status);
+      return res.json();
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["terra-pipeline"] });
+      setShowAddModal(false);
+      setNewName("");
+      setNewAddress("");
+      setNewStage("new");
+      setNewValue("");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    },
+    onError: () => {
+      Alert.alert("Error", "Could not add lead. Please try again.");
+    },
+  });
+
+  const handleAddLead = () => {
+    if (!newAddress.trim()) {
+      Alert.alert("Missing info", "Please enter a property address.");
+      return;
+    }
+    createLead.mutate({
+      name: newName.trim() || "Unknown Owner",
+      address: newAddress.trim(),
+      stage: newStage,
+      value: parseFloat(newValue.replace(/[^0-9.]/g, "")) || 0,
+    });
+  };
 
   const updateLead = useMutation({
     mutationFn: async ({ id, stage, note }: { id: string; stage: string; note: string }) => {
@@ -202,7 +267,14 @@ export default function PipelineTab() {
           <Text style={[styles.title, { color: colors.cream }]}>Deals & Leads</Text>
         </View>
         <Pressable
-          onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setNewName("");
+            setNewAddress("");
+            setNewStage("new");
+            setNewValue("");
+            setShowAddModal(true);
+          }}
           style={[styles.addBtn, { backgroundColor: colors.goldDim, borderColor: colors.goldBorder }]}
         >
           <Feather name="plus" size={16} color={colors.gold} />
@@ -267,6 +339,76 @@ export default function PipelineTab() {
           </View>
         )}
       </ScrollView>
+
+      <Modal
+        visible={showAddModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowAddModal(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setShowAddModal(false)}>
+          <Pressable style={[styles.modalSheet, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]} onPress={() => {}}>
+            <View style={styles.modalHandle} />
+            <Text style={[styles.modalTitle, { color: colors.cream }]}>Add to Pipeline</Text>
+            <Text style={[styles.modalAddress, { color: colors.mutedForeground }]}>
+              {newAddress ? `Scanned: ${newAddress}` : "New lead from AR scanner"}
+            </Text>
+
+            <Text style={[styles.modalLabel, { color: colors.goldSubtle }]}>OWNER / CONTACT NAME</Text>
+            <TextInput
+              value={newName}
+              onChangeText={setNewName}
+              placeholder="Owner or contact name"
+              placeholderTextColor={colors.mutedForeground}
+              style={[styles.noteInput, { color: colors.cream, borderColor: colors.border, backgroundColor: colors.surface, minHeight: 44 }]}
+            />
+
+            <Text style={[styles.modalLabel, { color: colors.goldSubtle }]}>PROPERTY ADDRESS</Text>
+            <TextInput
+              value={newAddress}
+              onChangeText={setNewAddress}
+              placeholder="Property address"
+              placeholderTextColor={colors.mutedForeground}
+              style={[styles.noteInput, { color: colors.cream, borderColor: colors.border, backgroundColor: colors.surface, minHeight: 44 }]}
+            />
+
+            <Text style={[styles.modalLabel, { color: colors.goldSubtle }]}>ESTIMATED VALUE</Text>
+            <TextInput
+              value={newValue}
+              onChangeText={setNewValue}
+              placeholder="e.g. 4500000"
+              placeholderTextColor={colors.mutedForeground}
+              keyboardType="numeric"
+              style={[styles.noteInput, { color: colors.cream, borderColor: colors.border, backgroundColor: colors.surface, minHeight: 44 }]}
+            />
+
+            <Text style={[styles.modalLabel, { color: colors.goldSubtle }]}>INITIAL STAGE</Text>
+            <View style={styles.stageOptions}>
+              {["new", "contacted", "analyzing", "negotiating"].map(s => {
+                const sColor = STAGE_COLORS[s] ?? colors.gold;
+                const isActive = newStage === s;
+                return (
+                  <Pressable
+                    key={s}
+                    onPress={() => { Haptics.selectionAsync(); setNewStage(s); }}
+                    style={[styles.stageOption, { borderColor: isActive ? sColor : colors.border, backgroundColor: isActive ? sColor + "15" : "transparent" }]}
+                  >
+                    <Text style={[styles.stageOptionText, { color: isActive ? sColor : colors.mutedForeground }]}>{STAGE_LABELS[s] ?? s}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            <Pressable
+              onPress={handleAddLead}
+              disabled={createLead.isPending}
+              style={[styles.saveLeadBtn, { backgroundColor: colors.goldDim, borderColor: colors.goldBorder, opacity: createLead.isPending ? 0.6 : 1 }]}
+            >
+              <Text style={[styles.saveLeadText, { color: colors.gold }]}>{createLead.isPending ? "Adding..." : "Add to Pipeline"}</Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       <Modal
         visible={showEditModal}

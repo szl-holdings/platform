@@ -5,13 +5,16 @@ import {
   StyleSheet,
   TouchableOpacity,
   Animated,
+  Alert,
   Platform,
   Easing,
+  Linking,
 } from "react-native";
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { CameraView, useCameraPermissions } from "expo-camera";
 
 const ACCENT = "#c9a84c";
 
@@ -160,9 +163,85 @@ function ARDataCard({ property, visible }: { property: ARProperty; visible: bool
   );
 }
 
+function CameraBackground({ scanning }: { scanning: boolean }) {
+  if (Platform.OS === "web") {
+    return (
+      <View style={styles.cameraPlaceholder}>
+        <View style={styles.cameraGrid}>
+          {Array.from({ length: 20 }).map((_, i) => (
+            <View key={i} style={styles.gridCell} />
+          ))}
+        </View>
+        {scanning && <ScanLine />}
+      </View>
+    );
+  }
+
+  return (
+    <CameraView style={StyleSheet.absoluteFill} facing="back">
+      {scanning && <ScanLine />}
+    </CameraView>
+  );
+}
+
+function PermissionScreen({
+  onRequest,
+  canAskAgain,
+  insets,
+}: {
+  onRequest: () => void;
+  canAskAgain: boolean;
+  insets: { top: number; bottom: number };
+}) {
+  const handleOpenSettings = async () => {
+    if (Platform.OS !== "web") {
+      try {
+        await Linking.openSettings();
+      } catch (_) {
+        Alert.alert("Cannot open Settings", "Please open your device Settings and grant Camera access to CORTEX manually.");
+      }
+    }
+  };
+
+  return (
+    <View style={[styles.permissionContainer, { paddingTop: insets.top, paddingBottom: insets.bottom + 32 }]}>
+      <TouchableOpacity style={styles.backBtnAbsolute} onPress={() => router.back()}>
+        <Feather name="chevron-left" size={20} color="#fff" />
+      </TouchableOpacity>
+
+      <View style={styles.permissionIconWrap}>
+        <Feather name="camera" size={40} color={ACCENT} />
+      </View>
+
+      <Text style={styles.permissionTitle}>Camera Access Required</Text>
+      <Text style={styles.permissionBody}>
+        The AR Property Viewer needs camera access to overlay Terra intelligence on buildings around you.
+      </Text>
+
+      {canAskAgain ? (
+        <TouchableOpacity style={styles.permissionBtn} onPress={onRequest}>
+          <Text style={styles.permissionBtnText}>Enable Camera</Text>
+        </TouchableOpacity>
+      ) : (
+        <>
+          <Text style={styles.permissionDeniedNote}>
+            Camera permission was denied. Open Settings to grant access.
+          </Text>
+          {Platform.OS !== "web" && (
+            <TouchableOpacity style={styles.permissionBtn} onPress={handleOpenSettings}>
+              <Text style={styles.permissionBtnText}>Open Settings</Text>
+            </TouchableOpacity>
+          )}
+        </>
+      )}
+    </View>
+  );
+}
+
 export default function ARPropertyViewerScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const [permission, requestPermission] = useCameraPermissions();
   const [scanning, setScanning] = useState(true);
   const [propertyIndex, setPropertyIndex] = useState(0);
   const [dataVisible, setDataVisible] = useState(false);
@@ -191,16 +270,33 @@ export default function ARPropertyViewerScreen() {
 
   const property = MOCK_PROPERTIES[propertyIndex];
 
+  useEffect(() => {
+    if (Platform.OS !== "web" && permission && !permission.granted && permission.canAskAgain) {
+      requestPermission();
+    }
+  }, [permission]);
+
+  if (Platform.OS !== "web") {
+    if (!permission) {
+      return <View style={styles.root} />;
+    }
+
+    if (!permission.granted) {
+      return (
+        <View style={[styles.root, { backgroundColor: "#090810" }]}>
+          <PermissionScreen
+            onRequest={requestPermission}
+            canAskAgain={permission.canAskAgain}
+            insets={insets}
+          />
+        </View>
+      );
+    }
+  }
+
   return (
     <View style={[styles.root, { backgroundColor: "#000" }]}>
-      <View style={styles.cameraPlaceholder}>
-        <View style={styles.cameraGrid}>
-          {Array.from({ length: 20 }).map((_, i) => (
-            <View key={i} style={styles.gridCell} />
-          ))}
-        </View>
-        {scanning && <ScanLine />}
-      </View>
+      <CameraBackground scanning={scanning} />
 
       <View style={[styles.overlay, StyleSheet.absoluteFill]}>
         <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
@@ -251,7 +347,15 @@ export default function ARPropertyViewerScreen() {
                 <Feather name="external-link" size={14} color={ACCENT} />
                 <Text style={styles.arActionBtnText}>Open in Terra</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.arActionBtn, { borderColor: "rgba(34,197,94,0.3)" }]}>
+              <TouchableOpacity
+                style={[styles.arActionBtn, { borderColor: "rgba(34,197,94,0.3)" }]}
+                onPress={() =>
+                  router.push({
+                    pathname: "/(shell)/properties/(tabs)/pipeline" as never,
+                    params: { prefillAddress: property.address },
+                  } as never)
+                }
+              >
                 <Feather name="plus" size={14} color="#22c55e" />
                 <Text style={[styles.arActionBtnText, { color: "#22c55e" }]}>Add to Pipeline</Text>
               </TouchableOpacity>
@@ -259,14 +363,6 @@ export default function ARPropertyViewerScreen() {
           )}
         </View>
       </View>
-
-      {Platform.OS !== "web" && (
-        <View style={styles.cameraNoteContainer}>
-          <Text style={styles.cameraNoteText}>
-            Point camera at building to overlay property intelligence
-          </Text>
-        </View>
-      )}
     </View>
   );
 }
@@ -440,17 +536,66 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_500Medium",
     color: ACCENT,
   },
-  cameraNoteContainer: {
+  permissionContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 32,
+    gap: 16,
+  },
+  backBtnAbsolute: {
     position: "absolute",
-    top: "45%",
-    left: 0,
-    right: 0,
+    top: 60,
+    left: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  permissionIconWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: `${ACCENT}15`,
+    borderWidth: 1,
+    borderColor: `${ACCENT}30`,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  permissionTitle: {
+    fontSize: 20,
+    fontFamily: "Inter_600SemiBold",
+    color: "#f0eeff",
+    textAlign: "center",
+  },
+  permissionBody: {
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+    color: "rgba(240,238,255,0.6)",
+    textAlign: "center",
+    lineHeight: 22,
+  },
+  permissionDeniedNote: {
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    color: "rgba(240,238,255,0.4)",
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  permissionBtn: {
+    marginTop: 8,
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: ACCENT,
     alignItems: "center",
   },
-  cameraNoteText: {
-    fontSize: 11,
-    fontFamily: "Inter_400Regular",
-    color: "rgba(255,255,255,0.3)",
-    textAlign: "center",
+  permissionBtnText: {
+    fontSize: 14,
+    fontFamily: "Inter_600SemiBold",
+    color: "#090810",
   },
 });

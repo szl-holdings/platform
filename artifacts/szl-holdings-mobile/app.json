@@ -55,6 +55,7 @@
       },
       "permissions": [
         "android.permission.INTERNET",
+        "android.permission.CAMERA",
         "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.VIBRATE",
         "android.permission.USE_BIOMETRIC",
@@ -73,6 +74,7 @@
           "origin": "https://replit.com/"
         }
       ],
+      "expo-camera",
       "expo-font",
       "expo-secure-store",
       [
