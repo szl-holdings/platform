@@ -142,6 +142,14 @@ const INFRASTRUCTURE_NAV: NavGroup[] = [
     ],
   },
   {
+    section: "Command & Control",
+    items: [
+      { href: "/infrastructure/directives", label: "Directive Cascade", icon: Zap },
+      { href: "/infrastructure/coalition", label: "Coalition Manager", icon: Users },
+      { href: "/infrastructure/reserves", label: "Strategic Reserves", icon: Database },
+    ],
+  },
+  {
     section: "Network",
     items: [
       { href: "/infrastructure/supply-lines", label: "Network Topology", icon: Network },

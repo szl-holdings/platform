@@ -1114,6 +1114,286 @@ export const GEO_PINS: GeoPin[] = [
   },
 ];
 
+export type DirectiveStatus = "ACTIVE" | "CASCADING" | "SUSPENDED" | "ARCHIVED";
+export type DirectivePriority = "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
+
+export interface Directive {
+  id: string;
+  title: string;
+  body: string;
+  priority: DirectivePriority;
+  status: DirectiveStatus;
+  classification: Classification;
+  issuedBy: string;
+  issuedAt: Date;
+  cascadedTo: string[];
+  tags: string[];
+  cascadeCount: number;
+}
+
+export const INITIAL_DIRECTIVES: Directive[] = [
+  {
+    id: "dir-001",
+    title: "VIGILIA PROTOCOL — Elevated WAF Posture",
+    body: "All API endpoints must operate under heightened WAF scrutiny. Rate limits reduced to 500 req/min. Security perimeter Centurions report anomalies immediately.",
+    priority: "CRITICAL",
+    status: "ACTIVE",
+    classification: "SOVEREIGN",
+    issuedBy: "Praetorianus — Security Center",
+    issuedAt: new Date(Date.now() - 3600000 * 4),
+    cascadedTo: ["GROUP — SECURITY", "GROUP — COMPUTE", "GROUP — DATA"],
+    tags: ["WAF", "SECURITY", "PROTOCOL"],
+    cascadeCount: 3,
+  },
+  {
+    id: "dir-002",
+    title: "REDIS WATCH — Memory Threshold Alert at 70%",
+    body: "Cache tier must page Centurion AI when Redis memory utilization exceeds 70%. Prepare Premium P1 upgrade request for senate review if threshold is breached.",
+    priority: "HIGH",
+    status: "ACTIVE",
+    classification: "CONFIDENTIAL",
+    issuedBy: "Centurion AI — Cache Monitor",
+    issuedAt: new Date(Date.now() - 3600000 * 12),
+    cascadedTo: ["GROUP — DATA"],
+    tags: ["REDIS", "CAPACITY", "ALERT"],
+    cascadeCount: 1,
+  },
+  {
+    id: "dir-003",
+    title: "COST CONTAINMENT — Q2 Spend Cap",
+    body: "Monthly cloud spend must not exceed $4,500 without senate approval. All scaling proposals require cost-impact analysis. AI Ops recommendations must include projected cost delta.",
+    priority: "MEDIUM",
+    status: "CASCADING",
+    classification: "RESTRICTED",
+    issuedBy: "Executive Console — CFO Directive",
+    issuedAt: new Date(Date.now() - 3600000 * 72),
+    cascadedTo: ["GROUP — COMPUTE", "GROUP — FRONTEND"],
+    tags: ["COST", "Q2", "GOVERNANCE"],
+    cascadeCount: 2,
+  },
+  {
+    id: "dir-004",
+    title: "DR READINESS — Failover Drill Scheduled",
+    body: "Standby region (West US 2) must be warm-tested within 7 days. RTO target < 15 minutes. All Centurion agents must confirm readiness status.",
+    priority: "MEDIUM",
+    status: "SUSPENDED",
+    classification: "RESTRICTED",
+    issuedBy: "Legatus Console — CTO Office",
+    issuedAt: new Date(Date.now() - 3600000 * 96),
+    cascadedTo: [],
+    tags: ["DR", "FAILOVER", "READINESS"],
+    cascadeCount: 0,
+  },
+];
+
+export type CoalitionStatus = "ACTIVE" | "OBSERVING" | "SUSPENDED" | "TERMINATED";
+
+export interface CoalitionPartner {
+  id: string;
+  name: string;
+  role: string;
+  domain: string;
+  trustScore: number;
+  status: CoalitionStatus;
+  classification: Classification;
+  lastContact: Date;
+  notes: string;
+  alerts: number;
+}
+
+export const INITIAL_COALITION: CoalitionPartner[] = [
+  {
+    id: "cp-001",
+    name: "Azure Security Center",
+    role: "Threat Intelligence Feed",
+    domain: "Security",
+    trustScore: 98,
+    status: "ACTIVE",
+    classification: "SOVEREIGN",
+    lastContact: new Date(Date.now() - 60000 * 5),
+    notes: "Primary threat feed. Feeds WAF and Praetorian. SLA: 99.99%.",
+    alerts: 2,
+  },
+  {
+    id: "cp-002",
+    name: "Aegis SIEM",
+    role: "Security Information & Event Management",
+    domain: "Security",
+    trustScore: 95,
+    status: "ACTIVE",
+    classification: "CONFIDENTIAL",
+    lastContact: new Date(Date.now() - 60000 * 2),
+    notes: "SIEM ingesting WAF logs, App Insights, and PostgreSQL audit stream.",
+    alerts: 0,
+  },
+  {
+    id: "cp-003",
+    name: "Firestorm — Risk Engine",
+    role: "Real-Time Risk Scoring",
+    domain: "Finance",
+    trustScore: 87,
+    status: "ACTIVE",
+    classification: "CONFIDENTIAL",
+    lastContact: new Date(Date.now() - 60000 * 30),
+    notes: "Cross-domain risk signals from Firestorm integrated via Service Bus.",
+    alerts: 1,
+  },
+  {
+    id: "cp-004",
+    name: "Vessels — Maritime Intelligence",
+    role: "Operational Domain Signal",
+    domain: "Operations",
+    trustScore: 82,
+    status: "OBSERVING",
+    classification: "RESTRICTED",
+    lastContact: new Date(Date.now() - 3600000 * 2),
+    notes: "Fleet telemetry aggregated. Observing mode pending API upgrade.",
+    alerts: 0,
+  },
+  {
+    id: "cp-005",
+    name: "PRISM Counsel",
+    role: "Legal & Compliance Advisory",
+    domain: "Legal",
+    trustScore: 91,
+    status: "ACTIVE",
+    classification: "CONFIDENTIAL",
+    lastContact: new Date(Date.now() - 3600000 * 1),
+    notes: "SOC-2 compliance reports and GDPR advisory integrated.",
+    alerts: 0,
+  },
+  {
+    id: "cp-006",
+    name: "Entra ID — Identity Provider",
+    role: "Zero Trust Identity Fabric",
+    domain: "Security",
+    trustScore: 99,
+    status: "ACTIVE",
+    classification: "SOVEREIGN",
+    lastContact: new Date(Date.now() - 60000 * 1),
+    notes: "Conditional Access + MFA enforcement for all admin sessions.",
+    alerts: 0,
+  },
+];
+
+export type ReserveStatus = "NOMINAL" | "REDUCED" | "CRITICAL" | "DEPLETED";
+
+export interface ReservePool {
+  id: string;
+  name: string;
+  category: string;
+  totalCapacity: number;
+  currentLevel: number;
+  unit: string;
+  status: ReserveStatus;
+  classification: Classification;
+  lastDrawdown?: Date;
+  notes: string;
+}
+
+export interface DrawdownRequest {
+  id: string;
+  poolId: string;
+  amount: number;
+  justification: string;
+  requestedBy: string;
+  requestedAt: Date;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+}
+
+export const INITIAL_RESERVES: ReservePool[] = [
+  {
+    id: "res-compute",
+    name: "COMPUTE RESERVE",
+    category: "Infrastructure",
+    totalCapacity: 20,
+    currentLevel: 10,
+    unit: "replicas",
+    status: "NOMINAL",
+    classification: "RESTRICTED",
+    lastDrawdown: new Date(Date.now() - 3600000 * 48),
+    notes: "Container App max-replica headroom. Current burst capacity available.",
+  },
+  {
+    id: "res-budget",
+    name: "CONTINGENCY BUDGET",
+    category: "Finance",
+    totalCapacity: 10000,
+    currentLevel: 7400,
+    unit: "USD/mo",
+    status: "NOMINAL",
+    classification: "CONFIDENTIAL",
+    notes: "Monthly cloud spend contingency above baseline $4,280 cap.",
+  },
+  {
+    id: "res-storage",
+    name: "STORAGE HEADROOM",
+    category: "Infrastructure",
+    totalCapacity: 128,
+    currentLevel: 83,
+    unit: "GB",
+    status: "NOMINAL",
+    classification: "CONFIDENTIAL",
+    lastDrawdown: new Date(Date.now() - 3600000 * 24),
+    notes: "PostgreSQL storage pool. Auto-grow enabled.",
+  },
+  {
+    id: "res-redis",
+    name: "CACHE CAPACITY",
+    category: "Infrastructure",
+    totalCapacity: 6,
+    currentLevel: 2.28,
+    unit: "GB",
+    status: "REDUCED",
+    classification: "CONFIDENTIAL",
+    notes: "Redis C1 Standard headroom. 62% consumed. Upgrade to P1 queued.",
+  },
+  {
+    id: "res-waf",
+    name: "WAF RATE HEADROOM",
+    category: "Security",
+    totalCapacity: 1000,
+    currentLevel: 153,
+    unit: "req/min blocked",
+    status: "NOMINAL",
+    classification: "SOVEREIGN",
+    lastDrawdown: new Date(Date.now() - 3600000 * 1),
+    notes: "WAF rate-limit buffer. Current blocks well within tolerance.",
+  },
+  {
+    id: "res-oncall",
+    name: "ON-CALL CAPACITY",
+    category: "Personnel",
+    totalCapacity: 4,
+    currentLevel: 3,
+    unit: "engineers",
+    status: "NOMINAL",
+    classification: "RESTRICTED",
+    notes: "On-call roster headroom. One engineer on approved leave.",
+  },
+];
+
+export const INITIAL_DRAWDOWNS: DrawdownRequest[] = [
+  {
+    id: "dd-001",
+    poolId: "res-compute",
+    amount: 4,
+    justification: "Q2 load test required additional burst replicas for 48h window.",
+    requestedBy: "Centurion AI — Compute Monitor",
+    requestedAt: new Date(Date.now() - 3600000 * 48),
+    status: "APPROVED",
+  },
+  {
+    id: "dd-002",
+    poolId: "res-budget",
+    amount: 600,
+    justification: "Senate proposal: VNet-inject Service Bus (Premium SKU) pending approval.",
+    requestedBy: "Security Perimeter — Network Hardening",
+    requestedAt: new Date(Date.now() - 3600000 * 6),
+    status: "PENDING",
+  },
+];
+
 export const INTELLIGENCE_BRIEFS = {
   cost: {
     title: "COST INTELLIGENCE",

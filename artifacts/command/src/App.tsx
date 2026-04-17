@@ -138,6 +138,9 @@ const SupplyLines = lazy(() => import("@imp/pages/supply-lines"));
 const CenturionAI = lazy(() => import("@imp/pages/centurion-ai"));
 const IntelligenceBriefing = lazy(() => import("@imp/pages/intelligence-briefing"));
 const GeospatialIntelligence = lazy(() => import("@imp/pages/geospatial"));
+const DirectiveCascade = lazy(() => import("@imp/pages/directive-cascade"));
+const Coalition = lazy(() => import("@imp/pages/coalition"));
+const StrategicReserves = lazy(() => import("@imp/pages/strategic-reserves"));
 
 function getMode(location: string): WorkspaceMode {
   if (location.startsWith("/operations") || location.startsWith("/cognitive")) return "operations";
@@ -312,6 +315,9 @@ function AppShell() {
               <Route path="/infrastructure/centurion" component={() => <CenturionAI />} />
               <Route path="/infrastructure/intelligence" component={() => <IntelligenceBriefing />} />
               <Route path="/infrastructure/geospatial" component={() => <GeospatialIntelligence />} />
+              <Route path="/infrastructure/directives" component={() => <DirectiveCascade />} />
+              <Route path="/infrastructure/coalition" component={() => <Coalition />} />
+              <Route path="/infrastructure/reserves" component={() => <StrategicReserves />} />
 
               <Route>
                 <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
