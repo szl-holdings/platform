@@ -38,6 +38,23 @@ import {
 
 const router: IRouter = Router();
 
+/**
+ * Forge governance is operator-scoped (single platform tenant). Write
+ * operations on the registry, promotions, rollbacks, executions and
+ * approvals must come from a privileged operator role. Read endpoints
+ * remain authenticated-only since the registry is non-confidential
+ * platform metadata.
+ */
+const FORGE_OPERATOR_ROLES = new Set(["super_admin", "admin", "platform_operator"]);
+function requireForgeOperator(req: Request, res: Response): boolean {
+  const roles = req.user?.roles ?? [];
+  if (!roles.some(r => FORGE_OPERATOR_ROLES.has(r))) {
+    sendBadRequest(res, "Forge write operations require platform operator role");
+    return false;
+  }
+  return true;
+}
+
 function validateBody<T extends z.ZodTypeAny>(schema: T) {
   return (req: Request, res: Response, next: (err?: unknown) => void) => {
     const result = schema.safeParse(req.body);
@@ -128,6 +145,7 @@ router.get("/forge/agents", async (req: Request, res: Response) => {
 });
 
 router.post("/forge/agents", validateBody(createAgentSchema), async (req: Request, res: Response) => {
+    if (!requireForgeOperator(req, res)) return;
   try {
     const data = req.body as z.infer<typeof createAgentSchema>;
     const [agent] = await db.insert(forgeAgentsTable).values({
@@ -163,6 +181,7 @@ router.get("/forge/agents/:id/versions", async (req, res) => {
 
 router.post("/forge/agents/:id/versions", validateBody(createVersionSchema), async (req, res) => {
   try {
+    if (!requireForgeOperator(req, res)) return;
     const agentId = req.params.id!;
     const [last] = await db.select({ v: sql<number>`coalesce(max(${forgeAgentVersionsTable.version}), 0)` })
       .from(forgeAgentVersionsTable).where(eq(forgeAgentVersionsTable.agentId, agentId));
@@ -182,6 +201,7 @@ router.post("/forge/agents/:id/versions", validateBody(createVersionSchema), asy
 
 router.post("/forge/agents/:id/promote", validateBody(promoteSchema), async (req, res) => {
   try {
+    if (!requireForgeOperator(req, res)) return;
     const agentId = req.params.id!;
     const [agent] = await db.select().from(forgeAgentsTable).where(eq(forgeAgentsTable.id, agentId)).limit(1);
     if (!agent) return sendNotFound(res, "Agent not found");
@@ -226,6 +246,7 @@ router.post("/forge/agents/:id/promote", validateBody(promoteSchema), async (req
 
 router.post("/forge/agents/:id/rollback", validateBody(rollbackSchema), async (req, res) => {
   try {
+    if (!requireForgeOperator(req, res)) return;
     const data = req.body as z.infer<typeof rollbackSchema>;
     const agentId = req.params.id!;
     // Integrity: target version must belong to this agent
@@ -249,6 +270,7 @@ router.post("/forge/agents/:id/rollback", validateBody(rollbackSchema), async (r
 
 router.post("/forge/agents/:id/execute", validateBody(executeSchema), async (req, res) => {
   try {
+    if (!requireForgeOperator(req, res)) return;
     const agentId = req.params.id!;
     const [agent] = await db.select().from(forgeAgentsTable).where(eq(forgeAgentsTable.id, agentId)).limit(1);
     if (!agent || !agent.activeVersionId) return sendBadRequest(res, "Agent has no active version");
@@ -291,6 +313,7 @@ router.get("/forge/promotions", async (req, res) => {
 
 router.post("/forge/promotions/:id/approve", validateBody(approveSchema), async (req, res) => {
   try {
+    if (!requireForgeOperator(req, res)) return;
     const data = req.body as z.infer<typeof approveSchema>;
     const result = await recordPromotionApproval({
       promotionId: req.params.id!, approverUserId: req.user?.id,
@@ -333,6 +356,7 @@ router.get("/forge/drift/summary", async (_req, res) => {
 
 router.post("/forge/drift/evaluate", async (req, res) => {
   try {
+    if (!requireForgeOperator(req, res)) return;
     const { agentId, envId } = req.body as { agentId?: string; envId?: string };
     if (!agentId || !envId) return sendBadRequest(res, "agentId and envId required");
     const report = await evaluateDrift(agentId, envId);
@@ -398,6 +422,10 @@ router.get("/forge/targets", async (_req, res) => {
 router.get("/forge/models", async (_req, res) => {
   try { sendSuccess(res, await db.select().from(forgeModelsTable).orderBy(forgeModelsTable.name)); }
   catch (err) { handleRouteError(res, err, "Failed to list models"); }
+});
+router.get("/forge/tools", async (_req, res) => {
+  try { sendSuccess(res, await db.select().from(forgeToolsTable).orderBy(forgeToolsTable.name)); }
+  catch (err) { handleRouteError(res, err, "Failed to list tools"); }
 });
 router.get("/forge/prompts", async (_req, res) => {
   try {
