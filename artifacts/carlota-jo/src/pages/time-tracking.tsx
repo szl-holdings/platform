@@ -7,33 +7,16 @@ import {
   AlertCircle, Download, Filter, BarChart3, CreditCard
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  TIME_ENTRIES,
+  INVOICES,
+  BILLING_DATA,
+  RATE_CARDS,
+  type TimeEntry,
+  type Invoice,
+} from "@/data/operationalData";
 
 const GOLD = "var(--color-gold)";
-
-type TimeEntry = {
-  id: string;
-  date: string;
-  engagement: string;
-  phase: string;
-  deliverable: string;
-  hours: number;
-  rateType: "standard" | "premium" | "fixed" | "non-billable";
-  rate: number;
-  description: string;
-  billable: boolean;
-  approved: boolean;
-};
-
-type Invoice = {
-  id: string;
-  client: string;
-  engagement: string;
-  amount: number;
-  status: "draft" | "sent" | "paid" | "overdue";
-  dueDate: string;
-  issuedDate: string;
-  items: number;
-};
 
 const RATE_META: Record<TimeEntry["rateType"], { label: string; color: string }> = {
   standard:      { label: "Standard", color: "#0284C7" },
@@ -48,37 +31,6 @@ const INVOICE_STATUS: Record<Invoice["status"], { label: string; color: string }
   paid:    { label: "Paid", color: "#059669" },
   overdue: { label: "Overdue", color: "#DC2626" },
 };
-
-const TIME_ENTRIES: TimeEntry[] = [
-  { id: "t1", date: "Apr 15, 2026", engagement: "Luminary Brands", phase: "Strategy Development", deliverable: "Competitive positioning report", hours: 3.5, rateType: "premium", rate: 350, description: "Deep competitor analysis across 8 market players", billable: true, approved: true },
-  { id: "t2", date: "Apr 15, 2026", engagement: "Vertex Capital", phase: "Discovery", deliverable: "Stakeholder interviews", hours: 2.0, rateType: "standard", rate: 275, description: "CTO and CFO interview sessions", billable: true, approved: true },
-  { id: "t3", date: "Apr 14, 2026", engagement: "Luminary Brands", phase: "Strategy Development", deliverable: "Executive presentation", hours: 4.0, rateType: "premium", rate: 350, description: "Deck build for board-level strategy review", billable: true, approved: false },
-  { id: "t4", date: "Apr 14, 2026", engagement: "Internal", phase: "Business Development", deliverable: "Proposal — Solaris Health", hours: 2.5, rateType: "non-billable", rate: 0, description: "Proposal development and pricing review", billable: false, approved: true },
-  { id: "t5", date: "Apr 13, 2026", engagement: "Aurelius PE", phase: "Masterclass Series", deliverable: "Session 4 facilitation", hours: 6.0, rateType: "fixed", rate: 4200, description: "Full-day portfolio value creation masterclass", billable: true, approved: true },
-  { id: "t6", date: "Apr 12, 2026", engagement: "Vertex Capital", phase: "Discovery", deliverable: "Data room review", hours: 3.0, rateType: "standard", rate: 275, description: "Financial and operational data analysis", billable: true, approved: true },
-  { id: "t7", date: "Apr 11, 2026", engagement: "Luminary Brands", phase: "Roadmap", deliverable: "90-day action plan", hours: 2.5, rateType: "premium", rate: 350, description: "KPI framework and implementation timeline", billable: true, approved: true },
-];
-
-const INVOICES: Invoice[] = [
-  { id: "INV-2026-009", client: "Aurelius Private Equity", engagement: "Portfolio Strategy Masterclass", amount: 16800, status: "paid", dueDate: "Apr 7, 2026", issuedDate: "Mar 24, 2026", items: 4 },
-  { id: "INV-2026-010", client: "Luminary Brands", engagement: "Growth Strategy Phase 2", amount: 14875, status: "sent", dueDate: "Apr 22, 2026", issuedDate: "Apr 8, 2026", items: 12 },
-  { id: "INV-2026-011", client: "Vertex Capital Partners", engagement: "M&A Advisory Discovery", amount: 8250, status: "draft", dueDate: "Apr 30, 2026", issuedDate: "Apr 15, 2026", items: 6 },
-  { id: "INV-2026-008", client: "Oasis Wellness", engagement: "Digital Strategy Q1", amount: 6200, status: "overdue", dueDate: "Mar 31, 2026", issuedDate: "Mar 15, 2026", items: 8 },
-];
-
-const BILLING_DATA = [
-  { week: "W10", billable: 32, nonBillable: 8 },
-  { week: "W11", billable: 38, nonBillable: 6 },
-  { week: "W12", billable: 29, nonBillable: 11 },
-  { week: "W13", billable: 41, nonBillable: 5 },
-  { week: "W14", billable: 35, nonBillable: 7 },
-];
-
-const RATE_CARDS = [
-  { engagement: "Luminary Brands", standard: "£275/hr", premium: "£350/hr", fixed: "Milestone-based", blendedTarget: "£310/hr" },
-  { engagement: "Vertex Capital Partners", standard: "£275/hr", premium: "£350/hr", fixed: "—", blendedTarget: "£290/hr" },
-  { engagement: "Aurelius Private Equity", standard: "—", premium: "—", fixed: "£4,200/session", blendedTarget: "£525/hr equiv." },
-];
 
 const totalBillable = TIME_ENTRIES.filter(e => e.billable).reduce((s, e) => s + e.hours, 0);
 const totalRevenue = TIME_ENTRIES.filter(e => e.billable).reduce((s, e) => s + e.hours * (e.rateType === "fixed" ? e.rate / e.hours : e.rate), 0);

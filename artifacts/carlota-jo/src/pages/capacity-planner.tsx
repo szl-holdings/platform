@@ -2,95 +2,15 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { Users, TrendingUp, AlertCircle, CheckCircle, Calendar, BarChart3, Zap, Clock } from "lucide-react";
+import {
+  TEAM,
+  CAPACITY_ALERTS as ALERTS,
+  SKILL_GAPS,
+  FORWARD_CAPACITY,
+  type TeamMember,
+} from "@/data/operationalData";
 
 const GOLD = "var(--color-gold)";
-
-type TeamMember = {
-  id: string;
-  name: string;
-  title: string;
-  skills: string[];
-  allocations: { engagement: string; client: string; pct: number; weeks: string; color: string }[];
-  utilisation: number;
-  capacity: number;
-  status: "optimal" | "over" | "under" | "bench";
-  dayRate: number;
-};
-
-type CapacityAlert = {
-  type: "warning" | "critical" | "info";
-  message: string;
-  member?: string;
-};
-
-const TEAM: TeamMember[] = [
-  {
-    id: "m1", name: "Carlota Jo", title: "Lead Advisor", dayRate: 2200,
-    skills: ["Strategy", "Brand", "M&A", "Exec Advisory", "Healthcare"],
-    allocations: [
-      { engagement: "Growth Strategy", client: "Luminary Brands", pct: 30, weeks: "Apr–Jun", color: "#B8960C" },
-      { engagement: "M&A Advisory", client: "Vertex Capital", pct: 40, weeks: "Apr–May", color: "#7C3AED" },
-      { engagement: "Business Development", client: "Internal", pct: 20, weeks: "Ongoing", color: "#94A3B8" },
-    ],
-    utilisation: 90, capacity: 100, status: "optimal",
-  },
-  {
-    id: "m2", name: "Dr. Priya Rajan", title: "Healthcare Transformation", dayRate: 1800,
-    skills: ["Digital Transformation", "EHR", "Clinical Ops", "Change Mgmt"],
-    allocations: [
-      { engagement: "Digital Health Strategy", client: "Solaris Health", pct: 60, weeks: "Jun–Aug", color: "#059669" },
-      { engagement: "Proposal Support", client: "Internal", pct: 10, weeks: "Apr", color: "#94A3B8" },
-    ],
-    utilisation: 70, capacity: 100, status: "under",
-  },
-  {
-    id: "m3", name: "James Whitmore", title: "Brand & Marketing", dayRate: 1400,
-    skills: ["Brand Strategy", "DTC", "Positioning", "Consumer Insights"],
-    allocations: [
-      { engagement: "Brand Repositioning", client: "Kestrel Brands", pct: 50, weeks: "May–Jun", color: "#DC2626" },
-      { engagement: "Brand Positioning Sprint", client: "Kestrel Brands", pct: 20, weeks: "May", color: "#F87171" },
-    ],
-    utilisation: 70, capacity: 100, status: "under",
-  },
-  {
-    id: "m4", name: "Sofia Andersson", title: "Financial Services & M&A", dayRate: 2200,
-    skills: ["M&A Advisory", "Financial Modelling", "Market Entry", "PE"],
-    allocations: [
-      { engagement: "M&A Advisory", client: "Vertex Capital", pct: 80, weeks: "Apr–May", color: "#7C3AED" },
-      { engagement: "Portfolio Strategy", client: "Aurelius PE", pct: 20, weeks: "Apr", color: "#0284C7" },
-    ],
-    utilisation: 100, capacity: 100, status: "over",
-  },
-  {
-    id: "m5", name: "Kai Okonkwo", title: "Organisational Design", dayRate: 1600,
-    skills: ["Org Design", "Culture", "Leadership Dev", "HRBP"],
-    allocations: [
-      { engagement: "Org Design Phase 2", client: "Clearfield Manufacturing", pct: 50, weeks: "Apr–May", color: "#D97706" },
-    ],
-    utilisation: 50, capacity: 100, status: "bench",
-  },
-];
-
-const ALERTS: CapacityAlert[] = [
-  { type: "critical", message: "Sofia Andersson is at 100% capacity through May — no buffer for Solaris Health scope should it advance.", member: "Sofia Andersson" },
-  { type: "warning", message: "Dr. Priya Rajan has 30% bench capacity in April. Consider assigning to Solaris Health pre-engagement work.", member: "Priya Rajan" },
-  { type: "warning", message: "Kai Okonkwo available for Solaris Health or Nimbus Logistics from mid-May onward. Strong fit for org design scope.", member: "Kai Okonkwo" },
-  { type: "info", message: "Team capacity increases by ~40% in Q3 as Vertex and Aurelius engagements close. Begin pipeline development now." },
-];
-
-const SKILL_GAPS = [
-  { skill: "Data Analytics / AI Implementation", demand: "High", gap: "Critical", suggestion: "Source specialist from external network — target: Nimbus Logistics and Solaris Health" },
-  { skill: "Regulatory Strategy (FCA)", demand: "Medium", gap: "Moderate", suggestion: "Sofia partially covers. Consider dedicated specialist for Financial Services pipeline growth" },
-  { skill: "Supply Chain Optimisation", demand: "Medium", gap: "High", suggestion: "No current capacity. Required for Nimbus Logistics scope. Source now." },
-];
-
-const FORWARD_CAPACITY = [
-  { month: "Apr", available: 52, committed: 148, total: 200 },
-  { month: "May", available: 80, committed: 120, total: 200 },
-  { month: "Jun", available: 110, committed: 90, total: 200 },
-  { month: "Jul", available: 160, committed: 40, total: 200 },
-  { month: "Aug", available: 140, committed: 60, total: 200 },
-];
 
 const STATUS_META: Record<TeamMember["status"], { label: string; color: string; bg: string }> = {
   optimal: { label: "Optimal", color: "#059669", bg: "#ECFDF5" },

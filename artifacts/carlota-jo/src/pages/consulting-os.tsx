@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { useConsultingMetrics } from "@/hooks/useConsultingMetrics";
 import {
   Sparkles, FileText, Network, Radar, Activity, Heart,
   TrendingUp, GraduationCap, Lightbulb, Users, FolderOpen,
@@ -206,14 +207,6 @@ const OS_MODULES = [
   },
 ];
 
-const PLATFORM_METRICS = [
-  { label: "Active Engagements", value: "3", change: "+1 this month", up: true },
-  { label: "Pipeline Value", value: "£2.4M", change: "+18% QoQ", up: true },
-  { label: "Avg Proposal Win Rate", value: "94%", change: "+6% vs last year", up: true },
-  { label: "Client Health Avg", value: "84/100", change: "Excellent", up: true },
-  { label: "Knowledge Nodes", value: "1,247", change: "+142 this week", up: true },
-  { label: "Team Utilisation", value: "87%", change: "Optimal range", up: true },
-];
 
 const RECENT_ACTIVITY = [
   { type: "proposal", icon: FileText, text: "Proposal generated for Luminary Brands expansion — 47 pages", time: "2 hours ago", color: "#B8960C" },
@@ -256,6 +249,15 @@ export default function ConsultingOS() {
   });
 
   const [hoveredModule, setHoveredModule] = useState<string | null>(null);
+  const metrics = useConsultingMetrics();
+  const PLATFORM_METRICS = metrics.platform;
+  const liveModuleMetrics: Record<string, string> = {
+    "time-tracking": metrics.modules.timeTracking,
+    "capacity-planner": metrics.modules.capacityPlanner,
+    "profitability-analytics": metrics.modules.profitability,
+    engagement: metrics.modules.engagementDelivery,
+    revenue: metrics.modules.revenue,
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: "#FAFAF8", paddingTop: 64 }}>
@@ -389,7 +391,7 @@ export default function ConsultingOS() {
                         </div>
 
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 12, borderTop: "1px solid #F0EBE0" }}>
-                          <span style={{ fontSize: 12, color: "#A89878" }}>{mod.metric}</span>
+                          <span style={{ fontSize: 12, color: "#A89878" }}>{liveModuleMetrics[mod.id] ?? mod.metric}</span>
                           <ArrowUpRight size={14} color={mod.color} style={{ opacity: isHovered ? 1 : 0.4, transition: "opacity 0.2s" }} />
                         </div>
                       </div>

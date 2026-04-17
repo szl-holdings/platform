@@ -6,68 +6,9 @@ import {
   ChevronDown, ChevronUp, Target, Clock, ArrowUp, ArrowDown, Zap
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, ReferenceLine } from "recharts";
+import { ENGAGEMENTS, MARGIN_HISTORY } from "@/data/operationalData";
 
 const GOLD = "var(--color-gold)";
-
-type EngagementPnL = {
-  id: string;
-  client: string;
-  engagement: string;
-  status: "active" | "complete" | "at-risk";
-  feeType: "fixed" | "time-and-materials" | "retainer";
-  contractedValue: number;
-  invoiced: number;
-  collected: number;
-  costToDate: number;
-  forecastedCost: number;
-  marginTarget: number;
-  phase: string;
-  rateRealisationPct: number;
-  writeOffs: number;
-  scopeCreepHours: number;
-  startDate: string;
-  endDate: string;
-  alerts: string[];
-};
-
-const ENGAGEMENTS: EngagementPnL[] = [
-  {
-    id: "e1", client: "Luminary Brands", engagement: "Growth Strategy Phase 2",
-    status: "active", feeType: "fixed", contractedValue: 84000, invoiced: 42000,
-    collected: 42000, costToDate: 28400, forecastedCost: 58000, marginTarget: 38,
-    phase: "Strategy Development", rateRealisationPct: 96, writeOffs: 1200,
-    scopeCreepHours: 8, startDate: "Jan 2026", endDate: "Jun 2026",
-    alerts: ["Scope creep detected: 8 uncompensated hours in brand workshop session"],
-  },
-  {
-    id: "e2", client: "Vertex Capital Partners", engagement: "M&A Advisory",
-    status: "active", feeType: "time-and-materials", contractedValue: 120000, invoiced: 28000,
-    collected: 28000, costToDate: 19800, forecastedCost: 92000, marginTarget: 42,
-    phase: "Discovery & Due Diligence", rateRealisationPct: 100, writeOffs: 0,
-    scopeCreepHours: 0, startDate: "Apr 2026", endDate: "Aug 2026",
-    alerts: [],
-  },
-  {
-    id: "e3", client: "Aurelius Private Equity", engagement: "Portfolio Strategy Masterclass",
-    status: "complete", feeType: "fixed", contractedValue: 16800, invoiced: 16800,
-    collected: 16800, costToDate: 8200, forecastedCost: 8200, marginTarget: 45,
-    phase: "Completed", rateRealisationPct: 100, writeOffs: 0,
-    scopeCreepHours: 0, startDate: "Mar 2026", endDate: "Mar 2026",
-    alerts: [],
-  },
-  {
-    id: "e4", client: "Oasis Wellness", engagement: "Digital Strategy & DTC Build",
-    status: "at-risk", feeType: "fixed", contractedValue: 62000, invoiced: 46500,
-    collected: 40300, costToDate: 44200, forecastedCost: 68000, marginTarget: 35,
-    phase: "Phase 3 — Implementation", rateRealisationPct: 81, writeOffs: 4800,
-    scopeCreepHours: 22, startDate: "Oct 2025", endDate: "Apr 2026",
-    alerts: [
-      "Budget overrun: forecasted cost £6,000 above contracted value",
-      "Rate realisation at 81% — £4,800 written off year-to-date",
-      "22 uncompensated hours from scope changes — consider amendment",
-    ],
-  },
-];
 
 const STATUS_META = {
   active:   { label: "Active", color: "#0284C7", bg: "#EFF6FF" },
@@ -77,16 +18,6 @@ const STATUS_META = {
 
 const fmtGBP = (v: number) => v >= 1000 ? `£${(v / 1000).toFixed(0)}K` : `£${v}`;
 const calcMargin = (rev: number, cost: number) => rev > 0 ? Math.round(((rev - cost) / rev) * 100) : 0;
-
-const MARGIN_HISTORY = [
-  { month: "Oct", margin: 44 },
-  { month: "Nov", margin: 41 },
-  { month: "Dec", margin: 38 },
-  { month: "Jan", margin: 46 },
-  { month: "Feb", margin: 42 },
-  { month: "Mar", margin: 51 },
-  { month: "Apr", margin: 48 },
-];
 
 const WRITE_OFF_DATA = ENGAGEMENTS.map(e => ({ name: e.client.split(" ")[0], writeOffs: e.writeOffs, scopeCreep: e.scopeCreepHours * 300 }));
 
