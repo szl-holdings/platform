@@ -316,6 +316,43 @@ describe("Integration — /deployments", () => {
     expect(res.status).toBe(400);
     expect(res.body).toHaveProperty("error");
   });
+
+  it("persists registry across a simulated API server restart", async () => {
+    // Simulate a process restart by reloading the route module and rebuilding
+    // the Express app. Drizzle's pg pool is module-scoped and would be
+    // re-instantiated; the database row store must outlive that restart.
+    vi.resetModules();
+    const freshApp = buildApp();
+    const freshRouter = (
+      await import("../../artifacts/api-server/src/routes/deployments")
+    ).default;
+    freshApp.use(freshRouter);
+
+    const active = await request(freshApp)
+      .get(`/deployments/${APP_ID}`)
+      .query({ environment: ENV });
+    expect(active.status).toBe(200);
+    expect(active.body.appId).toBe(APP_ID);
+    // After the rollback step, the active version is 1.0.0.
+    expect(active.body.version).toBe("1.0.0");
+    expect(active.body.status).toBe("active");
+
+    const history = await request(freshApp)
+      .get(`/deployments/${APP_ID}/history`)
+      .query({ environment: ENV });
+    expect(history.status).toBe(200);
+    // Original 1.0.0, then 1.1.0 (now rolled-back), then the rollback
+    // re-activation of 1.0.0 — all three rows must have survived the restart.
+    expect(history.body.count).toBeGreaterThanOrEqual(3);
+    const versions = history.body.history.map((r: { version: string }) => r.version);
+    expect(versions).toContain("1.0.0");
+    expect(versions).toContain("1.1.0");
+    const rolledBack = history.body.history.find(
+      (r: { version: string; status: string }) =>
+        r.version === "1.1.0" && r.status === "rolled-back",
+    );
+    expect(rolledBack).toBeTruthy();
+  });
 });
 
 // ── /domains/:domain/graph ────────────────────────────────────────────────────

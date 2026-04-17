@@ -121,3 +121,4 @@ export * from "./constellation";
 export * from "./guardian_tools";
 export * from "./trace_graph";
 export * from "./eval_os";
+export * from "./deployments";
