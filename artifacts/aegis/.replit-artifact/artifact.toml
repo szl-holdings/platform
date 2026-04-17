@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/aegis/"
+title = "Aegis"
+version = "1.0.0"
+id = "artifacts/aegis"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/aegis/" ]
+localPort = 3000
+
+[services.development]
+run = "bash -c 'cd /home/runner/workspace/artifacts/aegis && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/aegis", "run", "build" ]
+publicDir = "artifacts/aegis/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+VITE_PORT = "3000"
+BASE_PATH = "/aegis/"
