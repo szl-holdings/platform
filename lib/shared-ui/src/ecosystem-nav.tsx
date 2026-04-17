@@ -70,9 +70,10 @@ const ENV_CHIP_STYLE: Record<DeploymentEnvironment, { dot: string; label: string
 
 function detectEnvironment(): DeploymentEnvironment {
   if (typeof window === "undefined") return "sandbox";
-  const host = window.location.hostname;
-  if (host === "szlholdings.com" || host.endsWith(".szlholdings.com")) return "production";
-  if (host.includes("pilot")) return "pilot";
+  const host = window.location.hostname.toLowerCase();
+  if (host.includes("pilot") || host.includes("staging")) return "pilot";
+  if (host === "szlholdings.com" || host === "www.szlholdings.com") return "production";
+  if (host.endsWith(".szlholdings.com")) return "production";
   return "sandbox";
 }
 
