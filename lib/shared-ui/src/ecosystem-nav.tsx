@@ -47,6 +47,8 @@ export interface RecentItem {
   timestamp: number;
 }
 
+export type DeploymentEnvironment = "production" | "pilot" | "sandbox";
+
 export interface EcosystemNavProps {
   currentAppId: string;
   currentAppName: string;
@@ -57,6 +59,53 @@ export interface EcosystemNavProps {
   userName?: string;
   userRole?: string;
   breadcrumbs?: BreadcrumbItem[];
+  environment?: DeploymentEnvironment;
+}
+
+const ENV_CHIP_STYLE: Record<DeploymentEnvironment, { dot: string; label: string; color: string; border: string; bg: string }> = {
+  production: { dot: "hsl(152 55% 50%)", label: "Production", color: "hsl(152 35% 78%)", border: "hsla(152 55% 50% / 0.30)", bg: "hsla(152 55% 30% / 0.10)" },
+  pilot:      { dot: "hsl(42 80% 55%)",  label: "Pilot",      color: "hsl(42 50% 80%)",  border: "hsla(42 80% 50% / 0.30)",  bg: "hsla(42 80% 30% / 0.10)" },
+  sandbox:    { dot: "hsl(210 40% 60%)", label: "Sandbox",    color: "hsl(210 25% 78%)", border: "hsla(210 40% 50% / 0.28)", bg: "hsla(210 40% 30% / 0.10)" },
+};
+
+function detectEnvironment(): DeploymentEnvironment {
+  if (typeof window === "undefined") return "sandbox";
+  const host = window.location.hostname;
+  if (host === "szlholdings.com" || host.endsWith(".szlholdings.com")) return "production";
+  if (host.includes("pilot")) return "pilot";
+  return "sandbox";
+}
+
+function EnvironmentChip({ environment }: { environment: DeploymentEnvironment }) {
+  const s = ENV_CHIP_STYLE[environment];
+  return (
+    <div
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "6px",
+        padding: "3px 8px",
+        borderRadius: "3px",
+        background: s.bg,
+        border: `1px solid ${s.border}`,
+      }}
+      title={`Environment: ${s.label}`}
+    >
+      <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: s.dot, boxShadow: `0 0 6px ${s.dot}` }} />
+      <span
+        style={{
+          fontSize: "9px",
+          fontWeight: 700,
+          letterSpacing: "0.10em",
+          color: s.color,
+          fontFamily: "'Geist Mono', ui-monospace, monospace",
+          textTransform: "uppercase",
+        }}
+      >
+        {s.label}
+      </span>
+    </div>
+  );
 }
 
 const RECENT_ITEMS_KEY = "szl-ecosystem-recent-items";
@@ -566,7 +615,7 @@ function AppSwitcherPanel({
           All Projects
         </a>
         <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.25)", fontFamily: "'Geist Mono', monospace", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-          SZL Holdings · Governed Decision Infrastructure
+          {ECOSYSTEM_APPS.length} apps
         </span>
       </div>
     </div>
@@ -1178,7 +1227,9 @@ export function EcosystemNav({
   userName: userNameProp,
   userRole: userRoleProp,
   breadcrumbs,
+  environment,
 }: EcosystemNavProps) {
+  const envValue: DeploymentEnvironment = environment ?? detectEnvironment();
   const { user, isAuthenticated, login, logout } = useAuth();
   const appData = ECOSYSTEM_APPS.find((a) => a.id === currentAppId);
   const notificationCenter = useNotificationCenter(appData?.name ?? currentAppName);
@@ -1330,6 +1381,7 @@ export function EcosystemNav({
             {currentAppName}
           </span>
           <DoctrineNavBadge appId={currentAppId} />
+          <EnvironmentChip environment={envValue} />
         </div>
 
         {breadcrumbs && breadcrumbs.length > 0 && (
@@ -1481,7 +1533,10 @@ export function EcosystemNav({
                   (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
               }}
             >
-              🔔
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true" style={{ color: "rgba(255,255,255,0.7)" }}>
+                <path d="M8 1.5a4 4 0 0 0-4 4v2.382a1 1 0 0 1-.106.447l-1.106 2.213A.5.5 0 0 0 3.236 11h9.528a.5.5 0 0 0 .448-.724l-1.106-2.213a1 1 0 0 1-.106-.447V5.5a4 4 0 0 0-4-4Z" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round" />
+                <path d="M6.5 13a1.5 1.5 0 0 0 3 0" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+              </svg>
               {unreadCount > 0 && (
                 <span
                   style={{
@@ -1650,10 +1705,28 @@ export function EcosystemNav({
                       {user.roles && user.roles.length > 0 ? user.roles[0] : userRoleProp || "Member"}
                     </div>
                   </div>
-                  {[
-                    { label: "Account Settings", icon: "⚙", href: "/admin/platform-settings" },
-                    { label: "Notifications", icon: "🔔", href: "/notifications" },
-                  ].map((item) => (
+                  {([
+                    {
+                      label: "Account Settings",
+                      href: "/admin/platform-settings",
+                      icon: (
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                          <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.3" />
+                          <path d="M8 1.5v1.8M8 12.7v1.8M14.5 8h-1.8M3.3 8H1.5M12.6 3.4l-1.27 1.27M4.67 11.33L3.4 12.6M12.6 12.6l-1.27-1.27M4.67 4.67L3.4 3.4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                        </svg>
+                      ),
+                    },
+                    {
+                      label: "Notifications",
+                      href: "/notifications",
+                      icon: (
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                          <path d="M8 1.5a4 4 0 0 0-4 4v2.382a1 1 0 0 1-.106.447l-1.106 2.213A.5.5 0 0 0 3.236 11h9.528a.5.5 0 0 0 .448-.724l-1.106-2.213a1 1 0 0 1-.106-.447V5.5a4 4 0 0 0-4-4Z" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round" />
+                          <path d="M6.5 13a1.5 1.5 0 0 0 3 0" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+                        </svg>
+                      ),
+                    },
+                  ] as const).map((item) => (
                     <a
                       key={item.href}
                       href={item.href}
@@ -1673,7 +1746,7 @@ export function EcosystemNav({
                       onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.07)"; }}
                       onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
                     >
-                      <span style={{ fontSize: "14px", width: "18px", textAlign: "center" }}>{item.icon}</span>
+                      <span style={{ width: "18px", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.55)" }}>{item.icon}</span>
                       {item.label}
                     </a>
                   ))}
