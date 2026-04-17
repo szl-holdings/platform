@@ -1,5 +1,7 @@
 # X Thread — SZL Holdings Portfolio Launch
 
+> Canonical: https://szlholdings.substack.com/p/the-operator-issue-01-why-im-building
+
 **Author:** Stephen Lutar — Founder & CEO, SZL Holdings
 **Handle:** @szlholdings · **Site:** szlholdings.com
 
