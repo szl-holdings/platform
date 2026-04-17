@@ -48,12 +48,30 @@ function safeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 
+const INTERNAL_TOKEN_ALLOWED_PREFIXES = ["/api/internal/", "/api/alloy/agent/"];
+
 function checkInternalToken(req: Request): boolean {
   const internalToken = process.env["ALLOY_INTERNAL_TOKEN"];
   if (!internalToken) return false;
   const header = req.headers["x-internal-token"] as string | undefined;
   if (!header) return false;
-  return safeEqual(internalToken, header);
+  const matched = safeEqual(internalToken, header);
+  if (matched) {
+    const path = req.path;
+    const allowedByScope = INTERNAL_TOKEN_ALLOWED_PREFIXES.some((prefix) => path.startsWith(prefix));
+    if (!allowedByScope) {
+      logger.warn(
+        { method: req.method, path, ip: req.ip },
+        "[auth] Internal token rejected: route is outside allowed internal-token scope"
+      );
+      return false;
+    }
+    logger.info(
+      { method: req.method, path, ip: req.ip },
+      "[auth] Internal agent token accepted"
+    );
+  }
+  return matched;
 }
 
 async function resolveUserFromToken(token: string): Promise<AuthenticatedUser | null> {

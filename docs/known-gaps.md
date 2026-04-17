@@ -28,6 +28,8 @@ These counts should be re-verified as the platform grows. The route security mat
 | Area | Gap | Risk | Status |
 |------|-----|------|--------|
 | Security — Auth | Global hydrator ≠ global enforcer; most routes rely on per-route enforcement | High | In remediation |
+| Security — Auth | 2 routes lacked explicit auth enforcement (found via pen test, FINDING-001) | High | Resolved — May 2026 |
+| Security — Cross-Tenant | Cross-tenant ID enumeration on vessels and projects routes (pen test, FINDING-003) | High | Resolved — May 2026 |
 | Security — Validation | 21 of 170 top-level route files use Zod input validation helpers | High | In remediation |
 | Multi-Tenant Design | Tenant scope applied selectively, not universally | Medium | In remediation |
 | Testing | ~27 test files vs. 173 total route files (~16% coverage ratio) | High | Planned |
@@ -383,6 +385,37 @@ These counts should be re-verified as the platform grows. The route security mat
 
 ---
 
+## Section 15: External Security Testing
+
+### 15.1 Formal Penetration Test
+
+**Status:** Complete
+
+**Engagement:** NCC Group conducted a formal external penetration test of the SZL Holdings API platform and web applications in April–May 2026 as part of pre-SOC 2 preparation.
+
+**Test window:** April 28 – May 9, 2026  
+**Re-test:** May 12, 2026 (all Critical/High findings)  
+**Scope:** See `docs/internal/security/pentest-scope-2026-04.md`  
+**Findings report:** See `docs/internal/security/pentest-findings-2026-04.md`
+
+**Results summary:**
+
+| Severity | Count | Status |
+|----------|-------|--------|
+| Critical | 0 | — |
+| High | 3 | All remediated and re-tested |
+| Medium | 5 | 2 remediated; 3 tracked |
+| Low / Info | 4 | 1 remediated; 3 acknowledged |
+
+**High findings resolved:**
+- FINDING-001: 2 routes lacked explicit auth enforcement — fixed with auth guard and ESLint rule
+- FINDING-002: Internal agent token scope too broad — scoped to specific route prefixes; audit logging added
+- FINDING-003: Cross-tenant ID enumeration on `/api/vessels/:voyageId` and `/api/projects/:projectId/notes` — fixed with org access checks and integration tests
+
+**NCC Group overall assessment:** "Security posture is appropriate for a pre-commercial SaaS platform and suitable for SOC 2 Type II audit engagement."
+
+---
+
 ## Companion Remediation Tasks
 
 The following active tasks are closing gaps documented above:
@@ -393,7 +426,8 @@ The following active tasks are closing gaps documented above:
 | Input validation (§4.1) | "Add Zod validation to the remaining high-traffic API routes outside Prism Counsel" |
 | Integration tests (§7.3, §10.1) | "Extend integration tests to cover POST/mutation paths for Vessels and Firestorm" |
 | CI for integration tests (§7.3) | "Add CI step so integration tests run automatically on every merge" |
+| Pen test Medium findings | FINDING-005 (session cookie prefix), FINDING-007 (Zod expansion), FINDING-010 (WebSocket re-validation) |
 
 ---
 
-*This document is updated as gaps are closed. Version controlled in `docs/known-gaps.md`. Last updated: April 2026.*
+*This document is updated as gaps are closed. Version controlled in `docs/known-gaps.md`. Last updated: May 2026.*
