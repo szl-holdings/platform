@@ -94,6 +94,7 @@ const TenantScreening = lazy(() => import("@/pages/tenant-screening"));
 const TerraAtlasRuntimePage = lazy(() => import("@/pages/atlas-runtime"));
 const TerraReplayPage = lazy(() => import("@/pages/replay"));
 const TerraScenarioBranchesPage = lazy(() => import("@/pages/scenario-branches"));
+const TerraConstellationPage = lazy(() => import("@/pages/constellation"));
 
 function PageLoader() {
   return (
@@ -179,6 +180,7 @@ function PrivateRouter() {
         <Route path="/atlas-runtime" component={TerraAtlasRuntimePage} />
         <Route path="/replay" component={TerraReplayPage} />
         <Route path="/scenario-branches" component={TerraScenarioBranchesPage} />
+        <Route path="/constellation" component={TerraConstellationPage} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

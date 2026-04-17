@@ -10,7 +10,7 @@ import {
   Bell, Menu, X, Briefcase, Map, Globe, TrendingUp, BookOpen,
   Shield, Layers, Radio, Search, PieChart, PanelLeftClose, PanelLeftOpen,
   Camera, Hammer, Box, DollarSign, Scale, Ruler, FileSearch,
-  ClipboardList, TrendingDown, RefreshCw, Calculator, Percent, UserCheck, HardHat, GitBranch
+  ClipboardList, TrendingDown, RefreshCw, Calculator, Percent, UserCheck, HardHat, GitBranch, Network
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui";
 import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
@@ -66,6 +66,7 @@ const NAV_SECTIONS: SidebarNavSection[] = [
       { id: "atlas-runtime", href: "/atlas-runtime", label: "Property Twin", icon: <Layers className="w-full h-full" /> },
       { id: "property-replay", href: "/replay", label: "Property Replay", icon: <RefreshCw className="w-full h-full" /> },
       { id: "scenario-branches", href: "/scenario-branches", label: "Scenario Branches", icon: <GitBranch className="w-full h-full" /> },
+      { id: "constellation", href: "/constellation", label: "Constellation", icon: <Network className="w-full h-full" /> },
     ],
   },
   {

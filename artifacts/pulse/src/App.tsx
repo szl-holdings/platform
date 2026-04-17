@@ -1,4 +1,5 @@
 import { Switch, Route, useLocation } from "wouter";
+import Constellation from "@/pages/Constellation";
 import Shell from "./components/Shell";
 import TodaysBrief from "./pages/TodaysBrief";
 import Library from "./pages/Library";
@@ -24,6 +25,7 @@ export default function App() {
         <Route path={`${BASE}/dissent`} component={DissentChannel} />
         <Route path={`${BASE}/system`} component={SystemHealth} />
         <Route path={`${BASE}/settings`} component={Settings} />
+        <Route path={`${BASE}/constellation`} component={Constellation} />
         <Route component={TodaysBrief} />
       </Switch>
     </Shell>

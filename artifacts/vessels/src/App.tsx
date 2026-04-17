@@ -163,6 +163,7 @@ const VoyageDeskPage = lazy(() => import("@/pages/voyage-desk"));
 const FleetWhatChangedPage = lazy(() => import("@/pages/fleet-what-changed"));
 const ExceptionQueuePage = lazy(() => import("@/pages/exception-queue"));
 const RouteRiskPage = lazy(() => import("@/pages/route-risk"));
+const ConstellationPage = lazy(() => import("@/pages/constellation"));
 const VesselsApprovalReviewPage = lazy(() => import("@/pages/vessels-approval-review"));
 const TrustProvenancePage = lazy(() => import("@/pages/trust-provenance"));
 const DisruptionForecastPage = lazy(() => import("@/pages/disruption-forecast"));
@@ -354,6 +355,7 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
         { id: "atlas-runtime", label: "Route Memory Twin", href: "/atlas-runtime", icon: <Layers className="w-3.5 h-3.5" /> },
         { id: "voyage-replay", label: "Voyage Replay", href: "/replay", icon: <RotateCcw className="w-3.5 h-3.5" /> },
         { id: "scenario-branches", label: "Scenario Branches", href: "/scenario-branches", icon: <GitBranch className="w-3.5 h-3.5" /> },
+        { id: "constellation", label: "Constellation", href: "/constellation", icon: <Layers className="w-3.5 h-3.5" /> },
       ],
     },
     {
@@ -621,6 +623,7 @@ function DashboardRouter() {
         <Route path="/what-changed" component={FleetWhatChangedPage} />
         <Route path="/exception-queue" component={ExceptionQueuePage} />
         <Route path="/route-risk" component={RouteRiskPage} />
+        <Route path="/constellation" component={ConstellationPage} />
         <Route path="/approval-review" component={VesselsApprovalReviewPage} />
         <Route path="/trust-provenance" component={TrustProvenancePage} />
         <Route path="/disruption-forecast" component={DisruptionForecastPage} />
