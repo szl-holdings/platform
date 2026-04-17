@@ -189,7 +189,7 @@ router.get("/billing/stripe-config", async (_req, res) => {
       { key: "STRIPE_PRICE_TERRA_PRO_ANNUAL",        label: "Terra — Pro (Annual)" },
       { key: "STRIPE_PRICE_TERRA_ENTERPRISE_MONTHLY",label: "Terra — Enterprise (Monthly)" },
       { key: "STRIPE_PRICE_TERRA_ENTERPRISE_ANNUAL", label: "Terra — Enterprise (Annual)" },
-      { key: "STRIPE_PRICE_FIRESTORM_ENTERPRISE",    label: "Aegis/Firestorm — Enterprise" },
+      { key: "STRIPE_PRICE_AEGIS_ENTERPRISE",    label: "Aegis — Enterprise" },
     ];
 
     const prices = priceVars.map(({ key, label }) => ({
@@ -587,7 +587,7 @@ async function handleAegisEnterpriseQuote(req: Request, res: Response): Promise<
       contactName ?? companyName,
       {
         company: companyName,
-        product: "firestorm",
+        product: "aegis",
         requestType: "enterprise-quote",
         seats: String(seats ?? 0),
         addOns: (addOns ?? []).join(", "),
@@ -595,7 +595,7 @@ async function handleAegisEnterpriseQuote(req: Request, res: Response): Promise<
     );
 
     if (services.stripe.isLive) {
-      const enterprisePriceId = process.env.STRIPE_PRICE_FIRESTORM_ENTERPRISE;
+      const enterprisePriceId = process.env.STRIPE_PRICE_AEGIS_ENTERPRISE;
 
       if (enterprisePriceId && successUrl && cancelUrl) {
         const session = await services.stripe.createCheckoutSession({
@@ -604,7 +604,7 @@ async function handleAegisEnterpriseQuote(req: Request, res: Response): Promise<
           customerId: customer.id,
           successUrl,
           cancelUrl,
-          metadata: { product: "firestorm", companyName, notes: notes ?? "" },
+          metadata: { product: "aegis", companyName, notes: notes ?? "" },
         });
         sendSuccess(res, {
           status: "checkout",
@@ -631,7 +631,7 @@ async function handleAegisEnterpriseQuote(req: Request, res: Response): Promise<
 
       const invoice = await services.stripe.createInvoice(customer.id, lineItems, {
         notes: notes ?? `Enterprise inquiry from ${companyName}. Add-ons requested: ${(addOns ?? []).join(", ") || "none"}.`,
-        metadata: { product: "firestorm", companyName, requestType: "enterprise-quote" },
+        metadata: { product: "aegis", companyName, requestType: "enterprise-quote" },
       });
 
       sendSuccess(res, {
@@ -656,7 +656,6 @@ async function handleAegisEnterpriseQuote(req: Request, res: Response): Promise<
 }
 
 router.post("/billing/aegis/enterprise-quote", authMiddleware({ required: false }), handleAegisEnterpriseQuote);
-router.post("/billing/firestorm/enterprise-quote", authMiddleware({ required: false }), handleAegisEnterpriseQuote);
 
 router.post("/billing/sync-plans", authMiddleware(), requireRole("admin", "super_admin"), async (_req: Request, res: Response) => {
   try {
@@ -876,7 +875,7 @@ router.post("/billing/firestorm/invoice", authMiddleware(), requireRole("admin",
     const invoice = await services.stripe.createInvoice(customerId, lineItems, {
       dueDate,
       notes,
-      metadata: { product: "firestorm" },
+      metadata: { product: "aegis" },
     });
 
     sendSuccess(res, {
