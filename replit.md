@@ -25,12 +25,10 @@ The platform is a pnpm monorepo utilizing TypeScript 5.9, React 19, Vite, and No
 
 **Business Observability Fabric (ATLAS):** Implemented via three packages (`@szl-holdings/observability-core`, `@szl-holdings/business-events`, `@szl-holdings/telemetry-standards`) for OpenTelemetry setup, event emission, and semantic conventions.
 
-**Canonical Artifacts (Active Applications):** Key applications include `szl-holdings` (corporate), `api-server` (backend), `command` (unified operations), `aegis` (defense intelligence), `vessels` (maritime command), `terra` (real estate intelligence), `carlota-jo` (advisory), `pulse` (AI executive briefing), and `szl-holdings-mobile` (mobile command).
-
-**Known ID alias — Aegis:** The `artifacts/aegis/.replit-artifact/artifact.toml` carries `id = "artifacts/firestorm"` (a legacy name from when the app was called Firestorm). The platform API does not support changing artifact IDs in place, so the alias persists until a full re-registration is performed (see follow-up task #1300). The stale `/artifacts/firestorm` directory (which held only build output, no source) has been deleted. The workflow is correctly named `artifacts/aegis: web`.
+**Canonical Artifacts (Active Applications — 10 total):** `szl-holdings` (corporate dashboard, root), `api-server` (backend), `command` (unified operations), `vessels` (maritime intelligence), `terra` (real estate intelligence), `carlota-jo` (advisory), `pulse` (AI executive briefing), `szl-holdings-mobile` (mobile command), `szl-demo-video` (demo video), and `mockup-sandbox`/NEXUS (agentic AI layer). Five archived artifact directories are retained in the repo but not registered: `aegis` (superseded), `imperium` (merged into command), `lyte-command-center` (merged into command), `prism-counsel` (deprecated), `stephen-site` (deprecated).
 
 **Vite Sub-Path App Config Notes:**
-- All sub-path apps (aegis, terra, vessels, carlota-jo, command, pulse) share `PORT=9090` via `reusePort: true` shared proxy
+- All sub-path apps (terra, vessels, carlota-jo, command, pulse) share `PORT=9090` via `reusePort: true` shared proxy
 - Each app has its own Vite dev server on a dedicated `VITE_PORT` (3000, 5201, 6099, etc.)
 - All sub-path vite configs MUST use `fs.strict: false` to allow Vite to serve workspace library files from `lib/`
 - SZL Holdings (root app) uses `PORT` directly; sub-apps use the shared proxy architecture
