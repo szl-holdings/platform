@@ -246,6 +246,104 @@ describe("ConstellationGraph — Expand neighbors action", () => {
     });
   });
 
+  it("shows a retry banner when expansion fails, then recovers on retry", async () => {
+    // First neighbors call fails (500), second succeeds.
+    let hubNeighborCalls = 0;
+    fetchSpy.mockImplementation(async (input: RequestInfo | URL): Promise<Response> => {
+      const url = typeof input === "string" ? input : input.toString();
+      calls.push({ url });
+
+      if (url.includes(`/graph/entities/${PLACEHOLDER_ID}`) && !url.includes("/neighbors")) {
+        return jsonResponse({
+          data: {
+            node: {
+              id: PLACEHOLDER_ID,
+              entityType: "vessel",
+              name: "Enriched Vessel",
+              domain: "vessels",
+            },
+          },
+        });
+      }
+
+      if (url.includes(`/graph/entities/${HUB_ID}/neighbors`)) {
+        hubNeighborCalls += 1;
+        if (hubNeighborCalls === 1) {
+          return new Response(
+            JSON.stringify({ error: "upstream timeout" }),
+            { status: 500, headers: { "Content-Type": "application/json" } },
+          );
+        }
+        return jsonResponse({
+          data: {
+            node: baseData.nodes[0],
+            neighbors: [
+              {
+                id: NEW_NEIGHBOR_ID,
+                entityType: "organization",
+                name: "Discovered Org",
+                domain: "aegis",
+              },
+            ],
+            edges: [
+              {
+                id: "edge-hub-to-new",
+                fromNodeId: HUB_ID,
+                toNodeId: NEW_NEIGHBOR_ID,
+                relationshipType: "monitored_by",
+                active: true,
+              },
+            ],
+          },
+        });
+      }
+
+      return new Response("not-mocked", { status: 500 });
+    });
+
+    render(<ConstellationGraph data={baseData} height={300} />);
+
+    const hub = await waitFor(() => {
+      const el = document.querySelector(`[data-testid="constellation-node-${HUB_ID}"]`);
+      expect(el).toBeTruthy();
+      return el as Element;
+    });
+    await act(async () => { fireEvent.click(hub); });
+
+    const expandBtn = await waitFor(() => screen.getByTestId("constellation-expand-neighbors"));
+    await act(async () => { fireEvent.click(expandBtn); });
+
+    // The error banner appears with a retry button
+    const banner = await waitFor(() => {
+      const el = screen.getByTestId("constellation-expand-error");
+      expect(el).toBeTruthy();
+      return el;
+    });
+    expect(banner.getAttribute("role")).toBe("alert");
+    expect(banner.textContent).toMatch(/Couldn’t expand neighbors|Couldn't expand neighbors/);
+
+    const retryBtn = screen.getByTestId("constellation-expand-retry");
+    expect(retryBtn.textContent).toMatch(/Retry expansion/i);
+
+    // Click retry — second call succeeds
+    await act(async () => { fireEvent.click(retryBtn); });
+
+    // Banner disappears once retry succeeds
+    await waitFor(() => {
+      expect(screen.queryByTestId("constellation-expand-error")).toBeNull();
+    });
+
+    // The new neighbor must now be in the SVG
+    await waitFor(() => {
+      expect(
+        document.querySelector(`[data-testid="constellation-node-${NEW_NEIGHBOR_ID}"]`),
+      ).toBeTruthy();
+    });
+
+    // Confirm we issued exactly two neighbor requests (initial + retry)
+    expect(hubNeighborCalls).toBe(2);
+  });
+
   it("hub neighbors call is sent with limit=25 by default", async () => {
     render(<ConstellationGraph data={baseData} height={300} />);
 

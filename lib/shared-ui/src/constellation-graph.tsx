@@ -462,6 +462,9 @@ export function ConstellationGraph({
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
   const [expanding, setExpanding] = useState<string | null>(null);
   const [expandError, setExpandError] = useState<string | null>(null);
+  // Remember the node that failed so the Retry button can re-issue the same
+  // request even if the operator briefly clicks elsewhere in the panel.
+  const expandErrorNodeRef = useRef<ConstellationGraphNode | null>(null);
 
   // Multi-hop trace state. `traceOriginId` anchors the distance scale visible
   // on the canvas; `traceDistances` maps node id -> shortest hop count from
@@ -613,6 +616,7 @@ export function ConstellationGraph({
       if (!node?.id || expanding === node.id) return;
       setExpanding(node.id);
       setExpandError(null);
+      expandErrorNodeRef.current = null;
       try {
         const res = await apiFetch<
           | { data?: { node: ConstellationGraphNode; neighbors: ConstellationGraphNode[]; edges: ConstellationGraphEdge[] } }
@@ -643,6 +647,7 @@ export function ConstellationGraph({
         // Re-energize the simulation so new nodes ease into place
         alphaRef.current = 1;
       } catch (err) {
+        expandErrorNodeRef.current = node;
         setExpandError((err as Error)?.message ?? "Failed to expand neighbors");
       } finally {
         setExpanding((cur) => (cur === node.id ? null : cur));
@@ -1479,11 +1484,6 @@ export function ConstellationGraph({
                   ? `Open in ${DOMAIN_LABEL[selected.domain] ?? selected.domain} →`
                   : "Resolving owner…"}
               </button>
-              {expandError && (
-                <span style={{ fontSize: 10, color: "#ef4444", maxWidth: 180, textAlign: "right" }}>
-                  {expandError}
-                </span>
-              )}
               <button
                 onClick={() => setSelected(null)}
                 style={{
@@ -1500,6 +1500,60 @@ export function ConstellationGraph({
               </button>
             </div>
           </div>
+          {expandError && (
+            <div
+              role="alert"
+              data-testid="constellation-expand-error"
+              style={{
+                marginTop: 12,
+                padding: "10px 12px",
+                borderRadius: 6,
+                background: "rgba(239,68,68,0.1)",
+                border: "1px solid rgba(239,68,68,0.45)",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 10,
+                flexWrap: "wrap",
+              }}
+            >
+              <div style={{ fontSize: 14, lineHeight: 1, color: "#ef4444" }}>⚠</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "#fecaca" }}>
+                  Couldn’t expand neighbors
+                </div>
+                <div style={{ fontSize: 11, color: "#fca5a5", marginTop: 3, wordBreak: "break-word" }}>
+                  {expandError}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const target = expandErrorNodeRef.current ?? selected;
+                  if (target) void expandNeighbors(target);
+                }}
+                disabled={expanding === (expandErrorNodeRef.current?.id ?? selected?.id)}
+                data-testid="constellation-expand-retry"
+                style={{
+                  fontSize: 11,
+                  padding: "5px 10px",
+                  borderRadius: 4,
+                  border: "1px solid rgba(239,68,68,0.6)",
+                  background: "rgba(239,68,68,0.18)",
+                  color: "#fecaca",
+                  cursor:
+                    expanding === (expandErrorNodeRef.current?.id ?? selected?.id)
+                      ? "default"
+                      : "pointer",
+                  fontWeight: 600,
+                  letterSpacing: "0.04em",
+                }}
+              >
+                {expanding === (expandErrorNodeRef.current?.id ?? selected?.id)
+                  ? "Retrying…"
+                  : "Retry expansion"}
+              </button>
+            </div>
+          )}
         </div>
       )}
 
