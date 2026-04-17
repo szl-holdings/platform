@@ -13,6 +13,7 @@ import {
   PlanCycleError,
   PlanNotFoundError,
   type PlanGraph,
+  type PlanStep,
 } from "../index.js";
 
 const ctx = (overrides: Record<string, unknown> = {}) =>
@@ -92,8 +93,29 @@ describe("topoSort", () => {
   });
 
   it("throws PlanCycleError on cycles", () => {
-    const a = { stepId: "a", index: 0, title: "a", description: "", dependsOn: ["b"], status: "pending", route: { routeClass: "generation", selectedBy: "priority", estimatedCostUsd: 0, fallbackChain: [] }, estimatedValue: 0.5, estimatedRisk: 0.1, riskLevel: "low", requiredEvidence: [], requiredApproval: false, rollbackPoints: [], inputs: {}, metadata: {} } as any;
-    const b = { ...a, stepId: "b", title: "b", index: 1, dependsOn: ["a"] };
+    const a: PlanStep = {
+      stepId: "a",
+      index: 0,
+      title: "a",
+      description: "",
+      dependsOn: ["b"],
+      status: "pending",
+      route: {
+        routeClass: "generation",
+        selectedBy: "priority",
+        estimatedCostUsd: 0,
+        fallbackChain: [],
+      },
+      estimatedValue: 0.5,
+      estimatedRisk: 0.1,
+      riskLevel: "low",
+      requiredEvidence: [],
+      requiredApproval: false,
+      rollbackPoints: [],
+      inputs: {},
+      metadata: {},
+    };
+    const b: PlanStep = { ...a, stepId: "b", title: "b", index: 1, dependsOn: ["a"] };
     expect(() => topoSort([a, b])).toThrow(PlanCycleError);
   });
 });
