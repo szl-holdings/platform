@@ -12,7 +12,7 @@ kind = "web"
   [[services]]
   name = "web"
   paths = [ "/command/" ]
-  localPort = 9090
+  localPort = 3102
 
   [services.development]
   run = "bash -c 'cd /home/runner/workspace/artifacts/command && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
