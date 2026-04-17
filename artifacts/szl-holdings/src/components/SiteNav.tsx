@@ -88,7 +88,7 @@ const NAV_ITEMS = [
     ],
   },
   {
-    label: "Demo",
+    label: "Request Demo",
     href: "/demo",
     children: null,
     highlight: true,
@@ -179,10 +179,11 @@ export function SiteNav() {
                   width: "30px", height: "30px",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   borderRadius: "0.3125rem",
-                  background: "linear-gradient(135deg, var(--color-szl-accent) 0%, hsl(38,45%,42%) 100%)",
+                  background: "hsla(0,0%,100%,0.04)",
+                  border: "1px solid hsla(0,0%,100%,0.14)",
                 }}
               >
-                <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "0.625rem", color: "hsl(214,18%,3%)", letterSpacing: "-0.02em" }}>
+                <span style={{ fontFamily: "var(--font-mono, 'Geist Mono', ui-monospace, monospace)", fontWeight: 700, fontSize: "0.6875rem", color: "var(--color-szl-text)", letterSpacing: "0.04em" }}>
                   SZL
                 </span>
               </div>

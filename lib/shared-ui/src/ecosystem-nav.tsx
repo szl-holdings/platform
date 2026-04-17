@@ -113,7 +113,7 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     subtitle: "Command Surface · Business Observability",
     path: "/command/operations/",
     accent: "#22d3ee",
-    icon: "⚡",
+    icon: "◆",
     description: "Flagship Command Surface — Business Observability",
   },
   {
@@ -454,17 +454,22 @@ function AppSwitcherPanel({
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <div
             style={{
-              width: "20px",
-              height: "20px",
-              background: "linear-gradient(135deg, #8b7ac8, #4a90b8)",
-              borderRadius: "5px",
+              width: "22px",
+              height: "22px",
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.14)",
+              borderRadius: "4px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: "11px",
+              fontFamily: "'Geist Mono', ui-monospace, monospace",
+              fontSize: "9px",
+              fontWeight: 700,
+              letterSpacing: "0.05em",
+              color: "rgba(255,255,255,0.85)",
             }}
           >
-            🏛️
+            SZL
           </div>
           <span
             style={{
@@ -558,10 +563,10 @@ function AppSwitcherPanel({
           onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.7)")}
           onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.4)")}
         >
-          📋 All Projects
+          All Projects
         </a>
-        <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.2)", fontFamily: "'Geist Mono', monospace", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-          OBSERVE · UNDERSTAND · DECIDE · EXECUTE
+        <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.25)", fontFamily: "'Geist Mono', monospace", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+          SZL Holdings · Governed Decision Infrastructure
         </span>
       </div>
     </div>
@@ -862,7 +867,10 @@ function GlobalSearchPanel({
             borderBottom: "1px solid rgba(255,255,255,0.07)",
           }}
         >
-          <span style={{ fontSize: "18px", opacity: 0.5 }}>🔍</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style={{ opacity: 0.45, flexShrink: 0 }}>
+            <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M10.5 10.5L13.5 13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
           <input
             ref={inputRef}
             value={query}
@@ -1126,34 +1134,36 @@ function DoctrineNavBadge({ appId }: { appId: string }) {
   return (
     <div
       style={{
-        display: "flex",
+        display: "inline-flex",
         alignItems: "center",
-        gap: "2px",
-        padding: "2px 6px",
-        borderRadius: "4px",
-        background: "hsla(0 0% 100% / 0.04)",
-        border: "1px solid hsla(0 0% 100% / 0.08)",
+        gap: "6px",
+        padding: "2px 7px",
+        borderRadius: "3px",
+        background: "hsla(0 0% 100% / 0.03)",
+        border: "1px solid hsla(0 0% 100% / 0.09)",
       }}
+      title={`${config.primaryRole} · ${config.layers.join(" · ")}`}
     >
-      {config.layers.map((layer, i) => (
-        <React.Fragment key={layer}>
-          {i > 0 && (
-            <span style={{ fontSize: "7px", color: "rgba(255,255,255,0.2)", margin: "0 1px" }}>+</span>
-          )}
-          <span
-            style={{
-              fontSize: "8px",
-              fontWeight: 700,
-              letterSpacing: "0.06em",
-              color: DOCTRINE_LAYER_COLORS[layer].color,
-              fontFamily: "'Geist Mono', monospace",
-              textTransform: "uppercase",
-            }}
-          >
-            {layer}
-          </span>
-        </React.Fragment>
-      ))}
+      <span
+        style={{
+          width: "5px",
+          height: "5px",
+          borderRadius: "50%",
+          background: "hsla(0 0% 100% / 0.45)",
+        }}
+      />
+      <span
+        style={{
+          fontSize: "9px",
+          fontWeight: 600,
+          letterSpacing: "0.08em",
+          color: "rgba(255,255,255,0.55)",
+          fontFamily: "'Geist Mono', ui-monospace, monospace",
+          textTransform: "uppercase",
+        }}
+      >
+        {config.primaryRole}
+      </span>
     </div>
   );
 }
@@ -1250,18 +1260,22 @@ export function EcosystemNav({
         >
           <div
             style={{
-              width: "26px",
-              height: "26px",
-              background: "linear-gradient(135deg, #8b7ac8, #4a90b8)",
-              borderRadius: "7px",
+              width: "28px",
+              height: "28px",
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.14)",
+              borderRadius: "6px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: "13px",
-              boxShadow: "0 0 12px rgba(168,85,247,0.4)",
+              fontFamily: "'Geist Mono', ui-monospace, monospace",
+              fontSize: "10px",
+              fontWeight: 700,
+              letterSpacing: "0.05em",
+              color: "rgba(255,255,255,0.92)",
             }}
           >
-            🏛️
+            SZL
           </div>
           <span
             style={{
@@ -1413,7 +1427,10 @@ export function EcosystemNav({
               (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.45)";
             }}
           >
-            <span style={{ fontSize: "13px" }}>🔍</span>
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M10.5 10.5L13.5 13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
             <span style={{ display: "none" }} className="eco-nav-search-label">
               Search...
             </span>
@@ -1727,8 +1744,6 @@ export function EcosystemNav({
           .eco-nav-brand-label { display: inline !important; }
           .eco-nav-search-label { display: inline !important; }
           .eco-nav-user-info { display: block !important; }
-          .eco-nav-demomode { display: flex !important; }
-          .eco-nav-persona { display: flex !important; }
         }
       `}</style>
     </>

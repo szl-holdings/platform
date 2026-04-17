@@ -62,7 +62,7 @@ const SZL_ONBOARDING_CONFIG: OnboardingConfig = {
     },
   ],
   checklist: [
-    { id: "explore-factory", label: "Explore the Factory Floor", description: "View active automation runs and throughput" },
+    { id: "explore-factory", label: "Open the Automation Console", description: "View active automation runs and throughput" },
     { id: "review-connectors", label: "Review Connector Mesh", description: "Check integration health and available connectors" },
     { id: "browse-signals", label: "Browse Signal Feed", description: "See how external events trigger workflows" },
     { id: "check-governance", label: "Check Governance & Audit", description: "Review the proof chain and approval logs" },
@@ -80,7 +80,7 @@ const COMMAND_LOOP = [
 
 const NAV = [
   { href: "/alloy/home", label: "Workspace Home", icon: Home, badge: "New" },
-  { href: "/alloy", label: "Factory Floor", icon: LayoutDashboard, exact: true },
+  { href: "/alloy", label: "Automation Console", icon: LayoutDashboard, exact: true },
   { href: "/alloy/runs", label: "Execution History", icon: Activity },
   { href: "/alloy/signals", label: "Signal Feed", icon: Radio },
   { href: "/alloy/workflows", label: "Workflow Orchestration", icon: GitBranch },
@@ -96,8 +96,8 @@ const ATLAS_NAV = [
 
 const COMMAND_NAV = [
   { href: "/alloy/decisions", label: "Decision Objects", icon: Brain, badge: "New" },
-  { href: "/alloy/skills", label: "Skill Registry", icon: Layers, badge: "New" },
-  { href: "/alloy/operator", label: "Operator Control", icon: Shield, badge: "New" },
+  { href: "/alloy/skills", label: "Capability Library", icon: Layers, badge: "New" },
+  { href: "/alloy/operator", label: "Agent Control", icon: Shield, badge: "New" },
 ];
 
 const CREATIVE_NAV = [
@@ -114,14 +114,14 @@ const DOCS_NAV = [
 const INTELLIGENCE_NAV = [
   { href: "/alloy/research", label: "Research Mode", icon: BookOpen },
   { href: "/alloy/artifacts", label: "Artifact Studio", icon: Layers },
-  { href: "/alloy/browser", label: "Browser Operator", icon: Globe },
+  { href: "/alloy/browser", label: "Web Automation", icon: Globe },
 ];
 
 const ENTERPRISE_NAV = [
   { href: "/alloy/policies", label: "Policy Manager", icon: Lock, badge: "New" },
   { href: "/alloy/admin-analytics", label: "Admin Analytics", icon: BarChart2, badge: "New" },
   { href: "/alloy/usage", label: "Usage Metering", icon: DollarSign, badge: "New" },
-  { href: "/alloy/demos", label: "Canonical Demos", icon: Play, badge: "New" },
+  { href: "/alloy/demos", label: "Reference Demos", icon: Play, badge: "New" },
   { href: "/alloy/pilot", label: "Pilot Onboarding", icon: Star, badge: "New" },
 ];
 
@@ -179,15 +179,15 @@ const ALL_NAV_SECTIONS = [
 const ALLOY_SLASH_COMMANDS: CommandItem[] = [
   { id: "slash-workflow", label: "/workflow", description: "Open Workflow Orchestration", icon: "⬡", group: "Slash Commands", isSlashCommand: true, keywords: ["workflow", "orchestration"], action: () => {} },
   { id: "slash-approve", label: "/approve", description: "Open Approvals Queue", icon: "✓", group: "Slash Commands", isSlashCommand: true, keywords: ["approve", "governance", "review"], action: () => {} },
-  { id: "slash-signals", label: "/signals", description: "Open Signal Feed", icon: "📡", group: "Slash Commands", isSlashCommand: true, keywords: ["signals", "feed", "events"], action: () => {} },
+  { id: "slash-signals", label: "/signals", description: "Open Signal Feed", icon: "◇", group: "Slash Commands", isSlashCommand: true, keywords: ["signals", "feed", "events"], action: () => {} },
   { id: "slash-runs", label: "/runs", description: "Open Execution History", icon: "▶", group: "Slash Commands", isSlashCommand: true, keywords: ["runs", "history", "execution"], action: () => {} },
-  { id: "slash-analytics", label: "/analytics", description: "Open Automation Analytics", icon: "📊", group: "Slash Commands", isSlashCommand: true, keywords: ["analytics", "metrics", "data"], action: () => {} },
-  { id: "slash-decisions", label: "/decisions", description: "Open Decision Objects", icon: "🧠", group: "Slash Commands", isSlashCommand: true, keywords: ["decisions", "ai", "intelligence"], action: () => {} },
-  { id: "slash-skills", label: "/skills", description: "Open Skill Registry", icon: "◈", group: "Slash Commands", isSlashCommand: true, keywords: ["skills", "registry", "capabilities"], action: () => {} },
-  { id: "slash-operators", label: "/operators", description: "Open Operator Control Center", icon: "🛡", group: "Slash Commands", isSlashCommand: true, keywords: ["operator", "agents", "control"], action: () => {} },
-  { id: "slash-connectors", label: "/connectors", description: "Open Connector Mesh", icon: "🔗", group: "Slash Commands", isSlashCommand: true, keywords: ["connectors", "integrations", "mesh"], action: () => {} },
-  { id: "slash-docs", label: "/docs", description: "Open Document Engine", icon: "📄", group: "Slash Commands", isSlashCommand: true, keywords: ["docs", "documents", "files"], action: () => {} },
-  { id: "slash-home", label: "/home", description: "Workspace Home & Priority Dashboard", icon: "⚡", group: "Slash Commands", isSlashCommand: true, keywords: ["home", "workspace", "priority"], action: () => {} },
+  { id: "slash-analytics", label: "/analytics", description: "Open Automation Analytics", icon: "▤", group: "Slash Commands", isSlashCommand: true, keywords: ["analytics", "metrics", "data"], action: () => {} },
+  { id: "slash-decisions", label: "/decisions", description: "Open Decision Objects", icon: "◎", group: "Slash Commands", isSlashCommand: true, keywords: ["decisions", "ai", "intelligence"], action: () => {} },
+  { id: "slash-skills", label: "/skills", description: "Open Capability Library", icon: "◈", group: "Slash Commands", isSlashCommand: true, keywords: ["skills", "registry", "capabilities"], action: () => {} },
+  { id: "slash-operators", label: "/operators", description: "Open Agent Control Center", icon: "□", group: "Slash Commands", isSlashCommand: true, keywords: ["operator", "agents", "control"], action: () => {} },
+  { id: "slash-connectors", label: "/connectors", description: "Open Connector Mesh", icon: "⊕", group: "Slash Commands", isSlashCommand: true, keywords: ["connectors", "integrations", "mesh"], action: () => {} },
+  { id: "slash-docs", label: "/docs", description: "Open Document Engine", icon: "▭", group: "Slash Commands", isSlashCommand: true, keywords: ["docs", "documents", "files"], action: () => {} },
+  { id: "slash-home", label: "/home", description: "Workspace Home & Priority Dashboard", icon: "◉", group: "Slash Commands", isSlashCommand: true, keywords: ["home", "workspace", "priority"], action: () => {} },
 ];
 
 const SLASH_TO_NAV: Record<string, string> = {
