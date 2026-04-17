@@ -27,6 +27,17 @@ const TEST_USER = {
 // Header used by tests to opt-in to "no credentials presented" so we can
 // exercise the 401 path even though the middleware itself is mocked.
 const NO_AUTH_HEADER = "x-test-no-auth";
+// Header used by tests to override the principal's canonical role so we can
+// exercise role-based authorization (denyIfReadOnly + requireRole) paths.
+const TEST_ROLE_HEADER = "x-test-role";
+
+const READ_ONLY_ROLES = new Set(["executive_viewer", "anonymous_visitor"]);
+
+function rolesFromReq(req: Request): string[] {
+  const header = req.headers[TEST_ROLE_HEADER];
+  const role = Array.isArray(header) ? header[0] : header;
+  return [role && role.length > 0 ? role : "ops"];
+}
 
 const mockAuthMiddleware = (options: { required?: boolean } = {}) =>
   (req: Request, res: Response, next: NextFunction) => {
@@ -43,9 +54,13 @@ const mockAuthMiddleware = (options: { required?: boolean } = {}) =>
       next();
       return;
     }
+    const roles = rolesFromReq(req);
     res.locals.userId = TEST_USER.id;
-    res.locals.role = "ops";
-    (req as Request & { user?: typeof TEST_USER }).user = TEST_USER;
+    res.locals.role = roles[0];
+    (req as Request & { user?: typeof TEST_USER & { roles: string[] } }).user = {
+      ...TEST_USER,
+      roles,
+    };
     next();
   };
 
@@ -53,10 +68,37 @@ vi.mock(
   "../../artifacts/api-server/src/middlewares/auth",
   () => ({
     authMiddleware: mockAuthMiddleware,
-    requireRole: (..._roles: string[]) =>
-      (_req: Request, _res: Response, next: NextFunction) => next(),
+    requireRole: (...allowed: string[]) =>
+      (req: Request, res: Response, next: NextFunction) => {
+        const user = (req as Request & { user?: { roles?: string[] } }).user;
+        if (!user) {
+          res.status(401).json({ error: "Authentication required", code: "UNAUTHORIZED" });
+          return;
+        }
+        const roles = user.roles ?? [];
+        if (roles.includes("super_admin") || roles.includes("admin")) {
+          next();
+          return;
+        }
+        if (allowed.some((r) => roles.includes(r))) {
+          next();
+          return;
+        }
+        res.status(403).json({ error: "Insufficient permissions", code: "FORBIDDEN" });
+      },
     denyIfReadOnly: () =>
-      (_req: Request, _res: Response, next: NextFunction) => next(),
+      (req: Request, res: Response, next: NextFunction) => {
+        const user = (req as Request & { user?: { roles?: string[] } }).user;
+        if (!user) {
+          res.status(401).json({ error: "Authentication required", code: "UNAUTHORIZED" });
+          return;
+        }
+        if ((user.roles ?? []).some((r) => READ_ONLY_ROLES.has(r))) {
+          res.status(403).json({ error: "Read-only access — write operations are not permitted", code: "FORBIDDEN" });
+          return;
+        }
+        next();
+      },
     parseIdParam: (id: string) => {
       const n = parseInt(id, 10);
       if (isNaN(n)) throw Object.assign(new Error("Invalid ID"), { status: 400 });
@@ -361,6 +403,104 @@ describe("Integration — /deployments", () => {
       .send({ environment: ENV });
     expect(res.status).toBe(401);
     expect(res.body).toHaveProperty("error");
+  });
+
+  it("POST /deployments returns 403 when called by a read-only role (executive_viewer)", async () => {
+    const res = await request(app)
+      .post("/deployments")
+      .set(TEST_ROLE_HEADER, "executive_viewer")
+      .send({
+        appId: `${APP_ID}-readonly`,
+        appName: "Read-Only Attempt",
+        version: "9.9.9",
+        environment: ENV,
+      });
+    expect(res.status).toBe(403);
+    expect(res.body).toHaveProperty("error");
+  });
+
+  it("POST /deployments returns 403 when called by an analyst (not in allowed roles)", async () => {
+    const res = await request(app)
+      .post("/deployments")
+      .set(TEST_ROLE_HEADER, "analyst")
+      .send({
+        appId: `${APP_ID}-analyst`,
+        appName: "Analyst Attempt",
+        version: "9.9.9",
+        environment: ENV,
+      });
+    expect(res.status).toBe(403);
+    expect(res.body).toHaveProperty("error");
+  });
+
+  it("POST /deployments/:appId/rollback returns 403 when called by a read-only role", async () => {
+    const res = await request(app)
+      .post(`/deployments/${APP_ID}/rollback`)
+      .set(TEST_ROLE_HEADER, "executive_viewer")
+      .send({ environment: ENV });
+    expect(res.status).toBe(403);
+    expect(res.body).toHaveProperty("error");
+  });
+
+  it("POST /deployments/:appId/rollback returns 403 when called by analyst", async () => {
+    const res = await request(app)
+      .post(`/deployments/${APP_ID}/rollback`)
+      .set(TEST_ROLE_HEADER, "analyst")
+      .send({ environment: ENV });
+    expect(res.status).toBe(403);
+    expect(res.body).toHaveProperty("error");
+  });
+
+  it("POST /deployments succeeds (201) for the exec role", async () => {
+    const execAppId = `${APP_ID}-exec`;
+    const res = await request(app)
+      .post("/deployments")
+      .set(TEST_ROLE_HEADER, "exec")
+      .send({
+        appId: execAppId,
+        appName: "Exec Allowed App",
+        version: "1.0.0",
+        environment: ENV,
+      });
+    expect(res.status).toBe(201);
+    expect(res.body).toMatchObject({ appId: execAppId, status: "active" });
+  });
+
+  it("POST /deployments succeeds (201) for the admin role", async () => {
+    const adminAppId = `${APP_ID}-admin`;
+    const res = await request(app)
+      .post("/deployments")
+      .set(TEST_ROLE_HEADER, "admin")
+      .send({
+        appId: adminAppId,
+        appName: "Admin Allowed App",
+        version: "1.0.0",
+        environment: ENV,
+      });
+    expect(res.status).toBe(201);
+    expect(res.body).toMatchObject({ appId: adminAppId, status: "active" });
+  });
+
+  it("POST /deployments/:appId/rollback succeeds (200) for an allowed role (admin)", async () => {
+    const rbAppId = `${APP_ID}-admin-rb`;
+    const v1 = await request(app)
+      .post("/deployments")
+      .set(TEST_ROLE_HEADER, "admin")
+      .send({ appId: rbAppId, appName: "RB App", version: "1.0.0", environment: ENV });
+    expect(v1.status).toBe(201);
+    const v2 = await request(app)
+      .post("/deployments")
+      .set(TEST_ROLE_HEADER, "admin")
+      .send({ appId: rbAppId, appName: "RB App", version: "1.1.0", environment: ENV });
+    expect(v2.status).toBe(201);
+
+    const rb = await request(app)
+      .post(`/deployments/${rbAppId}/rollback`)
+      .set(TEST_ROLE_HEADER, "admin")
+      .send({ environment: ENV });
+    expect(rb.status).toBe(200);
+    expect(rb.body).toMatchObject({ rolledBack: true });
+    expect(rb.body.current.version).toBe("1.0.0");
   });
 
   it("POST /deployments records the authenticated principal as deployedBy and ignores client-supplied value", async () => {

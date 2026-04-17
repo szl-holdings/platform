@@ -27,7 +27,7 @@ import {
   sendBadRequest,
   handleRouteError,
 } from "../lib/api-response";
-import { authMiddleware } from "../middlewares/auth";
+import { authMiddleware, denyIfReadOnly, requireRole } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { logger } from "../lib/logger";
 
@@ -222,7 +222,7 @@ router.get("/deployments/:appId/history", authMiddleware({ required: false }), p
   }
 });
 
-router.post("/deployments", authMiddleware({ required: true }), perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+router.post("/deployments", authMiddleware({ required: true }), denyIfReadOnly(), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
   try {
     const { appId, appName, version, environment, commitSha, notes, metadata } =
       req.body as Partial<DeploymentRecord>;
@@ -270,7 +270,7 @@ router.post("/deployments", authMiddleware({ required: true }), perUserWriteSlid
   }
 });
 
-router.post("/deployments/:appId/rollback", authMiddleware({ required: true }), perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+router.post("/deployments/:appId/rollback", authMiddleware({ required: true }), denyIfReadOnly(), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
   try {
     const { appId } = req.params;
     const env = (req.body.environment as string) ?? "production";
