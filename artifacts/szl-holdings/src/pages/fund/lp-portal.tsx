@@ -1,10 +1,10 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import {
   ArrowLeft, ChevronRight, User, TrendingUp, Download,
   FileText, FolderOpen, Eye, Clock, Activity, Send, Lock, Shield,
-  CheckCircle2, MessageSquare, Filter, BarChart3, ImageIcon,
+  CheckCircle2, MessageSquare, Filter, BarChart3, ImageIcon, Loader2,
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -12,134 +12,95 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { apiRequest } from "@/lib/api";
 
 type Permission = "gp_only" | "qualified_lp" | "all_lp" | "co_investor" | "public";
 type LpTier = "all_lp" | "qualified_lp";
 
-type Lp = {
-  id: string;
+type LpRow = {
+  id: number;
   name: string;
-  contact: string;
+  contact: string | null;
   tier: LpTier;
-  commitment: number;
-  called: number;
-  distributions: number;
-  navShare: number;
-  unitsHeld: number;
-  joinDate: string;
+  joinDate: string | null;
+  isDemo: boolean;
 };
 
-const LPS: Lp[] = [
-  {
-    id: "lp1", name: "Meridian Capital", contact: "j.harrow@meridiancap.com",
-    tier: "qualified_lp", commitment: 12_000_000, called: 7_440_000,
-    distributions: 1_128_000, navShare: 10_104_000, unitsHeld: 7_205,
-    joinDate: "Jan 2024",
-  },
-  {
-    id: "lp2", name: "Astor Family Office", contact: "office@astorfamily.com",
-    tier: "all_lp", commitment: 5_000_000, called: 3_100_000,
-    distributions: 470_000, navShare: 4_210_000, unitsHeld: 3_002,
-    joinDate: "Mar 2024",
-  },
-  {
-    id: "lp3", name: "Blackrock Endowment", contact: "endowment@brk.org",
-    tier: "qualified_lp", commitment: 25_000_000, called: 15_500_000,
-    distributions: 2_350_000, navShare: 21_050_000, unitsHeld: 15_010,
-    joinDate: "Jan 2024",
-  },
-];
+type CapitalAccount = {
+  lpId: number;
+  lpName: string;
+  tier: LpTier;
+  contact: string | null;
+  joinDate: string | null;
+  commitmentCents: number;
+  calledCents: number;
+  uncalledCents: number;
+  distributionsCents: number;
+  currentNavCents: number;
+  ownershipPct: number | null;
+  unitsHeld: number | null;
+  vintage: string | null;
+};
 
-const NAV_HISTORY = [
-  { period: "Q1 '25", navPerUnit: 1.040, distributions: 0.00 },
-  { period: "Q2 '25", navPerUnit: 1.148, distributions: 0.04 },
-  { period: "Q3 '25", navPerUnit: 1.239, distributions: 0.06 },
-  { period: "Q4 '25", navPerUnit: 1.319, distributions: 0.07 },
-  { period: "Q1 '26", navPerUnit: 1.402, distributions: 0.09 },
-];
+type NavPoint = {
+  id: number;
+  navDate: string;
+  period: string;
+  navPerUnit: number | null;
+  totalNavCents: number;
+  distributedCents: number;
+};
 
 type DocItem = {
-  id: string;
+  id: number;
   name: string;
   folder: string;
-  type: "pdf" | "xlsx" | "pptx";
+  type: "pdf" | "xlsx" | "pptx" | "docx" | "csv" | "other";
   size: string;
   uploaded: string;
   permission: Permission;
   watermarked: boolean;
 };
 
-const ALL_DOCS: DocItem[] = [
-  { id: "d1", name: "SZL Fund II — Investment Memorandum.pdf", folder: "Fund Overview", type: "pdf", size: "4.2 MB", uploaded: "Apr 12, 2026", permission: "all_lp", watermarked: true },
-  { id: "d2", name: "Fund II Pitch Deck — LP Edition.pptx", folder: "Fund Overview", type: "pptx", size: "12.8 MB", uploaded: "Apr 10, 2026", permission: "all_lp", watermarked: true },
-  { id: "d3", name: "Team Biographies & Track Record.pdf", folder: "Fund Overview", type: "pdf", size: "2.1 MB", uploaded: "Mar 28, 2026", permission: "all_lp", watermarked: false },
-  { id: "d4", name: "Investment Committee Charter.pdf", folder: "Fund Overview", type: "pdf", size: "0.8 MB", uploaded: "Mar 1, 2026", permission: "qualified_lp", watermarked: false },
-  { id: "d5", name: "Fund II — Q1 2026 Financial Statements.pdf", folder: "Financial Statements", type: "pdf", size: "3.6 MB", uploaded: "Apr 14, 2026", permission: "qualified_lp", watermarked: true },
-  { id: "d6", name: "2025 Audited Financial Statements.pdf", folder: "Financial Statements", type: "pdf", size: "5.1 MB", uploaded: "Mar 15, 2026", permission: "qualified_lp", watermarked: true },
-  { id: "d7", name: "NAV Methodology & Valuation Policy.pdf", folder: "Financial Statements", type: "pdf", size: "1.2 MB", uploaded: "Jan 10, 2026", permission: "qualified_lp", watermarked: false },
-  { id: "d8", name: "Vessels — Q1 2026 Board Update.pdf", folder: "Portfolio Updates", type: "pdf", size: "2.8 MB", uploaded: "Apr 13, 2026", permission: "all_lp", watermarked: true },
-  { id: "d9", name: "Aegis — Q1 2026 Operational Report.pdf", folder: "Portfolio Updates", type: "pdf", size: "3.2 MB", uploaded: "Apr 11, 2026", permission: "all_lp", watermarked: true },
-  { id: "d10", name: "Terra — Q1 2026 KPI Dashboard.xlsx", folder: "Portfolio Updates", type: "xlsx", size: "1.4 MB", uploaded: "Apr 10, 2026", permission: "all_lp", watermarked: true },
-  { id: "d11", name: "Lyte — Q1 2026 Product Roadmap Update.pptx", folder: "Portfolio Updates", type: "pptx", size: "6.4 MB", uploaded: "Apr 9, 2026", permission: "all_lp", watermarked: false },
-  { id: "d12", name: "SZL Fund II — 2025 ESG Annual Report.pdf", folder: "ESG & Impact", type: "pdf", size: "4.1 MB", uploaded: "Apr 1, 2026", permission: "all_lp", watermarked: false },
-  { id: "d13", name: "Portfolio DEI Metrics — 2025.xlsx", folder: "ESG & Impact", type: "xlsx", size: "1.6 MB", uploaded: "Mar 28, 2026", permission: "all_lp", watermarked: false },
-  { id: "d14", name: "Limited Partnership Agreement — Fund II.pdf", folder: "Legal & Compliance", type: "pdf", size: "8.2 MB", uploaded: "Jan 15, 2026", permission: "gp_only", watermarked: false },
-];
+type DocsResponse = { data: DocItem[]; meta?: { totalAvailable?: number; visibleTiers?: string[]; accessTier?: LpTier } };
+type LpsResponse = { data: LpRow[]; meta?: unknown };
 
 type ReportItem = {
-  id: string;
+  id: number;
   period: string;
   generated: string;
-  navPerUnit: number;
-  irr: number;
-  tvpi: number;
-  dpi: number;
+  navPerUnit: number | null;
+  irr: number | null;
+  tvpi: number | null;
+  dpi: number | null;
   size: string;
 };
 
-const REPORTS: ReportItem[] = [
-  { id: "r1", period: "Q1 2026", generated: "Apr 14, 2026", navPerUnit: 1.402, irr: 28.4, tvpi: 2.10, dpi: 0.62, size: "3.6 MB" },
-  { id: "r2", period: "Q4 2025", generated: "Jan 15, 2026", navPerUnit: 1.319, irr: 26.8, tvpi: 1.98, dpi: 0.52, size: "3.4 MB" },
-  { id: "r3", period: "Q3 2025", generated: "Oct 12, 2025", navPerUnit: 1.239, irr: 24.1, tvpi: 1.82, dpi: 0.41, size: "3.2 MB" },
-  { id: "r4", period: "Q2 2025", generated: "Jul 14, 2025", navPerUnit: 1.148, irr: 21.3, tvpi: 1.66, dpi: 0.30, size: "3.0 MB" },
-  { id: "r5", period: "Q1 2025", generated: "Apr 14, 2025", navPerUnit: 1.040, irr: 18.4, tvpi: 1.48, dpi: 0.18, size: "2.9 MB" },
-];
-
 type ActivityEntry = {
-  id: string;
+  id: number | string;
   action: "Viewed" | "Downloaded" | "Messaged GP";
   target: string;
   time: string;
 };
 
-const SEED_ACTIVITY: ActivityEntry[] = [
-  { id: "e1", action: "Downloaded", target: "Fund II — Q1 2026 Financial Statements.pdf", time: "2 hours ago" },
-  { id: "e2", action: "Viewed", target: "SZL Fund II — Investment Memorandum.pdf", time: "Yesterday 4:18 PM" },
-  { id: "e3", action: "Downloaded", target: "Q1 2026 LP Report.pdf", time: "Apr 14, 10:02 AM" },
-  { id: "e4", action: "Viewed", target: "Vessels — Q1 2026 Board Update.pdf", time: "Apr 13, 9:41 AM" },
-  { id: "e5", action: "Messaged GP", target: "Question on Aegis cyber bundle traction", time: "Apr 11, 2:33 PM" },
-];
-
-const FILE_ICONS: Record<string, React.ElementType> = {
-  pdf: FileText,
-  xlsx: BarChart3,
-  pptx: ImageIcon,
+type MessageRow = {
+  id: number;
+  from: "lp" | "gp";
+  author: string;
+  body: string;
+  time: string;
+  sentAt: string;
 };
 
-const FILE_COLORS: Record<string, string> = {
-  pdf: "#c45a4a", xlsx: "#6aaa72", pptx: "#d4a054",
-};
+const FILE_ICONS: Record<string, React.ElementType> = { pdf: FileText, xlsx: BarChart3, pptx: ImageIcon };
+const FILE_COLORS: Record<string, string> = { pdf: "#c45a4a", xlsx: "#6aaa72", pptx: "#d4a054" };
 
-function fmtMoney(n: number): string {
+function fmtMoneyCents(cents: number | null | undefined): string {
+  if (cents == null) return "—";
+  const n = cents / 100;
   if (Math.abs(n) >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
   if (Math.abs(n) >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
   return `$${n.toFixed(0)}`;
-}
-
-function canSee(lp: Lp, permission: Permission): boolean {
-  if (permission === "all_lp" || permission === "public") return true;
-  if (permission === "qualified_lp") return lp.tier === "qualified_lp";
-  return false;
 }
 
 function KpiTile({ label, value, sub, color }: { label: string; value: string; sub?: string; color: string }) {
@@ -157,6 +118,13 @@ function KpiTile({ label, value, sub, color }: { label: string; value: string; s
 
 type Tab = "overview" | "documents" | "reports" | "activity" | "messages";
 
+function unwrap<T>(payload: T | { data: T }): T {
+  if (payload && typeof payload === "object" && "data" in (payload as Record<string, unknown>)) {
+    return (payload as { data: T }).data;
+  }
+  return payload as T;
+}
+
 export default function FundLpPortalPage() {
   usePageMeta({
     title: "LP Portal — SZL Holdings Fund",
@@ -164,55 +132,176 @@ export default function FundLpPortalPage() {
     canonical: "https://szlholdings.com/fund/lp-portal",
   });
 
-  const [lpId, setLpId] = useState<string>(LPS[0].id);
+  const [lps, setLps] = useState<LpRow[]>([]);
+  const [lpId, setLpId] = useState<number | null>(null);
   const [tab, setTab] = useState<Tab>("overview");
   const [folderFilter, setFolderFilter] = useState<string>("All");
-  const [activity, setActivity] = useState<ActivityEntry[]>(SEED_ACTIVITY);
+
+  const [account, setAccount] = useState<CapitalAccount | null>(null);
+  const [navHistory, setNavHistory] = useState<NavPoint[]>([]);
+  const [docs, setDocs] = useState<DocItem[]>([]);
+  const [docsMeta, setDocsMeta] = useState<DocsResponse["meta"] | undefined>(undefined);
+  const [reports, setReports] = useState<ReportItem[]>([]);
+  const [activity, setActivity] = useState<ActivityEntry[]>([]);
+  const [messages, setMessages] = useState<MessageRow[]>([]);
   const [messageDraft, setMessageDraft] = useState<string>("");
-  const [messages, setMessages] = useState<Array<{ id: string; from: "lp" | "gp"; body: string; time: string }>>([
-    { id: "m1", from: "lp", body: "Could you share more color on the Aegis-Vessels maritime cyber bundle pipeline for Q2?", time: "Apr 11, 2:33 PM" },
-    { id: "m2", from: "gp", body: "Absolutely — pipeline currently sits at $15.6M with 4 enterprise opportunities in late-stage diligence. We'll include a deep-dive in the Q1 letter shipping next week.", time: "Apr 11, 5:08 PM" },
-  ]);
 
-  const lp = LPS.find(l => l.id === lpId)!;
-  const visibleDocs = useMemo(() => ALL_DOCS.filter(d => canSee(lp, d.permission)), [lp]);
+  const [loading, setLoading] = useState(true);
+  const [lpLoading, setLpLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Initial: load LP roster + NAV history (NAV is fund-wide).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const [lpsResp, navResp] = await Promise.all([
+          apiRequest<LpsResponse>("GET", "/api/lp-portal/lps"),
+          apiRequest<NavPoint[] | { data: NavPoint[] }>("GET", "/api/lp-portal/nav-history"),
+        ]);
+        if (cancelled) return;
+        const roster = lpsResp.data ?? [];
+        setLps(roster);
+        setNavHistory(unwrap(navResp));
+        if (roster.length > 0) setLpId(roster[0].id);
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e.message : "Failed to load LP portal");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Per-LP loads.
+  useEffect(() => {
+    if (lpId == null) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        setLpLoading(true);
+        const [acctResp, docsResp, reportsResp, actResp, msgResp] = await Promise.all([
+          apiRequest<CapitalAccount | { data: CapitalAccount }>("GET", `/api/lp-portal/lps/${lpId}/capital-account`),
+          apiRequest<DocsResponse>("GET", `/api/lp-portal/lps/${lpId}/documents`),
+          apiRequest<ReportItem[] | { data: ReportItem[] }>("GET", `/api/lp-portal/lps/${lpId}/reports`),
+          apiRequest<ActivityEntry[] | { data: ActivityEntry[] }>("GET", `/api/lp-portal/lps/${lpId}/activity`),
+          apiRequest<MessageRow[] | { data: MessageRow[] }>("GET", `/api/lp-portal/lps/${lpId}/messages`),
+        ]);
+        if (cancelled) return;
+        setAccount(unwrap(acctResp));
+        setDocs(docsResp.data ?? []);
+        setDocsMeta(docsResp.meta);
+        setReports(unwrap(reportsResp));
+        setActivity(unwrap(actResp));
+        setMessages(unwrap(msgResp));
+        setFolderFilter("All");
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e.message : "Failed to load LP data");
+      } finally {
+        if (!cancelled) setLpLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [lpId]);
+
   const folders = useMemo(() => {
-    const set = new Set(visibleDocs.map(d => d.folder));
+    const set = new Set(docs.map(d => d.folder));
     return ["All", ...Array.from(set)];
-  }, [visibleDocs]);
-  const filteredDocs = folderFilter === "All" ? visibleDocs : visibleDocs.filter(d => d.folder === folderFilter);
+  }, [docs]);
+  const filteredDocs = folderFilter === "All" ? docs : docs.filter(d => d.folder === folderFilter);
 
-  const calledPct = (lp.called / lp.commitment) * 100;
-  const moic = lp.called > 0 ? (lp.navShare + lp.distributions) / lp.called : 0;
-  const dpi = lp.called > 0 ? lp.distributions / lp.called : 0;
-  const tvpi = lp.called > 0 ? (lp.navShare + lp.distributions) / lp.called : 0;
-  const totalValue = lp.navShare + lp.distributions;
+  const lpName = account?.lpName ?? lps.find(l => l.id === lpId)?.name ?? "LP";
+  const tier: LpTier = account?.tier ?? lps.find(l => l.id === lpId)?.tier ?? "all_lp";
+  const contact = account?.contact ?? lps.find(l => l.id === lpId)?.contact ?? "";
+  const joinDate = account?.joinDate ?? lps.find(l => l.id === lpId)?.joinDate ?? "—";
 
-  const navChartData = NAV_HISTORY.map(n => ({
-    period: n.period,
-    "Position Value": Math.round(lp.unitsHeld * n.navPerUnit),
-    "Cumulative Distributions": Math.round(lp.unitsHeld * (NAV_HISTORY
-      .slice(0, NAV_HISTORY.findIndex(x => x.period === n.period) + 1)
-      .reduce((s, x) => s + x.distributions, 0))),
-  }));
+  const commitment = account?.commitmentCents ?? 0;
+  const called = account?.calledCents ?? 0;
+  const distributions = account?.distributionsCents ?? 0;
+  const navShare = account?.currentNavCents ?? 0;
+  const unitsHeld = account?.unitsHeld ?? 0;
+  const calledPct = commitment > 0 ? (called / commitment) * 100 : 0;
+  const moic = called > 0 ? (navShare + distributions) / called : 0;
+  const dpi = called > 0 ? distributions / called : 0;
+  const tvpi = moic;
+  const totalValue = navShare + distributions;
+  const latestNavPerUnit = navHistory.length > 0 ? (navHistory[navHistory.length - 1].navPerUnit ?? 0) : 0;
 
-  const trackEvent = (action: ActivityEntry["action"], target: string) => {
-    setActivity(prev => [{
-      id: `live-${Date.now()}`, action, target, time: "Just now",
-    }, ...prev]);
-  };
+  const navChartData = navHistory.map((n, i) => {
+    const cumDist = navHistory.slice(0, i + 1).reduce((s, x) => s + (x.distributedCents / 100), 0);
+    // Distributions are fund-wide; scale by ownershipPct for an LP-level view.
+    const pct = (account?.ownershipPct ?? 0) / 100;
+    return {
+      period: n.period,
+      "Position Value": Math.round(unitsHeld * (n.navPerUnit ?? 0)),
+      "Cumulative Distributions": Math.round(pct * cumDist),
+    };
+  });
 
-  const handleDownloadDoc = (doc: DocItem) => trackEvent("Downloaded", doc.name);
-  const handleViewDoc = (doc: DocItem) => trackEvent("Viewed", doc.name);
-  const handleDownloadReport = (r: ReportItem) => trackEvent("Downloaded", `${r.period} LP Report.pdf`);
+  async function logActivity(action: "viewed" | "downloaded" | "messaged_gp", target: string, extra?: { documentId?: number; reportId?: number }) {
+    if (lpId == null) return;
+    try {
+      const resp = await apiRequest<{ data: ActivityEntry } | ActivityEntry>("POST", `/api/lp-portal/lps/${lpId}/activity`, { action, target, ...extra });
+      const entry = unwrap(resp);
+      setActivity(prev => [entry, ...prev]);
+    } catch {
+      // non-fatal — UI continues
+    }
+  }
 
-  const handleSendMessage = () => {
+  const handleDownloadDoc = (doc: DocItem) => logActivity("downloaded", doc.name, { documentId: doc.id });
+  const handleViewDoc = (doc: DocItem) => logActivity("viewed", doc.name, { documentId: doc.id });
+  const handleDownloadReport = (r: ReportItem) => logActivity("downloaded", `${r.period} LP Report.pdf`, { reportId: r.id });
+
+  async function handleSendMessage() {
     const body = messageDraft.trim();
-    if (!body) return;
-    setMessages(prev => [...prev, { id: `m-${Date.now()}`, from: "lp", body, time: "Just now" }]);
-    trackEvent("Messaged GP", body.length > 60 ? body.slice(0, 57) + "..." : body);
-    setMessageDraft("");
-  };
+    if (!body || lpId == null) return;
+    try {
+      const resp = await apiRequest<{ data: MessageRow } | MessageRow>("POST", `/api/lp-portal/lps/${lpId}/messages`, { body });
+      const msg = unwrap(resp);
+      setMessages(prev => [...prev, msg]);
+      setActivity(prev => [{
+        id: `live-${Date.now()}`,
+        action: "Messaged GP",
+        target: body.length > 60 ? body.slice(0, 57) + "..." : body,
+        time: "Just now",
+      }, ...prev]);
+      setMessageDraft("");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to send message");
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#080b10] text-white">
+        <SiteNav />
+        <main className="mx-auto max-w-7xl px-6 pt-28 pb-24 flex items-center justify-center">
+          <div className="flex items-center gap-3 text-white/50 text-sm">
+            <Loader2 className="h-4 w-4 animate-spin" /> Loading LP portal…
+          </div>
+        </main>
+        <SiteFooter />
+      </div>
+    );
+  }
+
+  if (error && lps.length === 0) {
+    return (
+      <div className="min-h-screen bg-[#080b10] text-white">
+        <SiteNav />
+        <main className="mx-auto max-w-7xl px-6 pt-28 pb-24">
+          <div className="rounded-2xl border border-[#c45a4a]/30 bg-[#c45a4a]/[0.06] p-6 text-sm text-white/80">
+            <div className="font-semibold text-white mb-1">Couldn't load LP portal</div>
+            <div className="text-white/60">{error}</div>
+          </div>
+        </main>
+        <SiteFooter />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#080b10] text-white">
@@ -238,7 +327,7 @@ export default function FundLpPortalPage() {
                 </div>
                 <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#4a90b8]">Limited Partner Portal</span>
               </div>
-              <h1 className="text-3xl font-semibold tracking-tight text-white mb-2">Welcome back, {lp.name}</h1>
+              <h1 className="text-3xl font-semibold tracking-tight text-white mb-2">Welcome back, {lpName}</h1>
               <p className="text-white/50 text-sm max-w-2xl">
                 Self-service access to your capital account, permissioned data room documents, quarterly reports, activity history, and direct messaging with the GP team.
               </p>
@@ -247,33 +336,39 @@ export default function FundLpPortalPage() {
             <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-3 min-w-[260px]">
               <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/40 mb-1.5">Signed in as</div>
               <select
-                value={lpId}
-                onChange={e => { setLpId(e.target.value); setFolderFilter("All"); }}
+                value={lpId ?? ""}
+                onChange={e => { setLpId(Number(e.target.value)); setFolderFilter("All"); }}
                 className="w-full rounded-lg border border-white/[0.08] bg-black/30 px-3 py-2 text-sm text-white focus:outline-none focus:border-[#4a90b8]/50"
                 data-testid="select-lp"
               >
-                {LPS.map(l => (
+                {lps.map(l => (
                   <option key={l.id} value={l.id} style={{ background: "#0d1117" }}>
                     {l.name} — {l.tier === "qualified_lp" ? "Qualified LP" : "All-LP tier"}
                   </option>
                 ))}
               </select>
-              <div className="text-[10px] text-white/35 mt-1.5">{lp.contact} · LP since {lp.joinDate}</div>
+              <div className="text-[10px] text-white/35 mt-1.5">{contact} · LP since {joinDate ?? "—"}</div>
             </div>
           </div>
 
+          {lpLoading && (
+            <div className="flex items-center gap-2 text-[10px] text-white/40 mb-4">
+              <Loader2 className="h-3 w-3 animate-spin" /> Loading capital account…
+            </div>
+          )}
+
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-            <KpiTile label="Commitment" value={fmtMoney(lp.commitment)} sub={`${calledPct.toFixed(0)}% called`} color="#4a90b8" />
-            <KpiTile label="Called Capital" value={fmtMoney(lp.called)} sub={`${fmtMoney(lp.commitment - lp.called)} uncalled`} color="#d4a054" />
-            <KpiTile label="Current NAV" value={fmtMoney(lp.navShare)} sub={`${lp.unitsHeld.toLocaleString()} units · NAV/unit $${NAV_HISTORY[NAV_HISTORY.length - 1].navPerUnit.toFixed(3)}`} color="#6aaa72" />
-            <KpiTile label="Distributions" value={fmtMoney(lp.distributions)} sub={`DPI ${dpi.toFixed(2)}×`} color="#8b7ac8" />
+            <KpiTile label="Commitment" value={fmtMoneyCents(commitment)} sub={`${calledPct.toFixed(0)}% called`} color="#4a90b8" />
+            <KpiTile label="Called Capital" value={fmtMoneyCents(called)} sub={`${fmtMoneyCents(commitment - called)} uncalled`} color="#d4a054" />
+            <KpiTile label="Current NAV" value={fmtMoneyCents(navShare)} sub={`${unitsHeld.toLocaleString()} units · NAV/unit $${latestNavPerUnit.toFixed(3)}`} color="#6aaa72" />
+            <KpiTile label="Distributions" value={fmtMoneyCents(distributions)} sub={`DPI ${dpi.toFixed(2)}×`} color="#8b7ac8" />
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-            <KpiTile label="Total Value" value={fmtMoney(totalValue)} sub="NAV + cumulative distributions" color="#6aaa72" />
+            <KpiTile label="Total Value" value={fmtMoneyCents(totalValue)} sub="NAV + cumulative distributions" color="#6aaa72" />
             <KpiTile label="MOIC" value={`${moic.toFixed(2)}×`} sub="Multiple on invested capital" color="#d4a054" />
             <KpiTile label="TVPI" value={`${tvpi.toFixed(2)}×`} sub="Total value to paid-in" color="#4a90b8" />
-            <KpiTile label="Documents Available" value={String(visibleDocs.length)} sub={`${REPORTS.length} quarterly reports`} color="#8b7ac8" />
+            <KpiTile label="Documents Available" value={String(docs.length)} sub={`${reports.length} quarterly reports`} color="#8b7ac8" />
           </div>
 
           <div className="flex flex-wrap gap-1 mb-6 border-b border-white/[0.06]">
@@ -322,7 +417,7 @@ export default function FundLpPortalPage() {
                         <YAxis tickFormatter={v => `$${(v / 1000).toFixed(0)}K`} tick={{ fontSize: 9, fill: "hsl(210,5%,38%)" }} axisLine={false} tickLine={false} />
                         <Tooltip
                           contentStyle={{ background: "#0d1117", border: "1px solid hsla(0,0%,100%,0.08)", borderRadius: 6, fontSize: 11 }}
-                          formatter={(v: number) => fmtMoney(v)}
+                          formatter={(v: number) => `$${v.toLocaleString()}`}
                         />
                         <Area type="monotone" dataKey="Position Value" stroke="#4a90b8" strokeWidth={2} fill="url(#lpNavGrad)" />
                         <Area type="monotone" dataKey="Cumulative Distributions" stroke="#6aaa72" strokeWidth={2} fill="url(#lpDistGrad)" />
@@ -338,7 +433,7 @@ export default function FundLpPortalPage() {
                       <span className="text-sm font-semibold text-white">Latest Documents</span>
                     </div>
                     <div className="space-y-2">
-                      {visibleDocs.slice(0, 4).map(d => {
+                      {docs.slice(0, 4).map(d => {
                         const Icon = FILE_ICONS[d.type] ?? FileText;
                         return (
                           <button
@@ -354,6 +449,9 @@ export default function FundLpPortalPage() {
                           </button>
                         );
                       })}
+                      {docs.length === 0 && (
+                        <div className="text-[11px] text-white/35">No documents available.</div>
+                      )}
                     </div>
                   </div>
 
@@ -362,24 +460,30 @@ export default function FundLpPortalPage() {
                       <FileText className="h-4 w-4 text-[#4a90b8]" />
                       <span className="text-sm font-semibold text-white">Most Recent Report</span>
                     </div>
-                    <div className="text-xs text-white/40 mb-1">{REPORTS[0].period} · Generated {REPORTS[0].generated}</div>
-                    <div className="grid grid-cols-2 gap-2 mt-3 mb-4">
-                      <div className="rounded-lg bg-white/[0.03] p-2">
-                        <div className="text-[10px] uppercase tracking-wider text-white/40">Net IRR</div>
-                        <div className="text-base font-semibold text-white">{REPORTS[0].irr}%</div>
-                      </div>
-                      <div className="rounded-lg bg-white/[0.03] p-2">
-                        <div className="text-[10px] uppercase tracking-wider text-white/40">TVPI</div>
-                        <div className="text-base font-semibold text-white">{REPORTS[0].tvpi}×</div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleDownloadReport(REPORTS[0])}
-                      className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#4a90b8] px-3 py-2 text-xs font-semibold text-black hover:bg-[#4a90b8]/90 transition-colors"
-                      data-testid="button-download-latest-report"
-                    >
-                      <Download className="h-3.5 w-3.5" /> Download {REPORTS[0].period} Report
-                    </button>
+                    {reports.length > 0 ? (
+                      <>
+                        <div className="text-xs text-white/40 mb-1">{reports[0].period} · Generated {reports[0].generated}</div>
+                        <div className="grid grid-cols-2 gap-2 mt-3 mb-4">
+                          <div className="rounded-lg bg-white/[0.03] p-2">
+                            <div className="text-[10px] uppercase tracking-wider text-white/40">Net IRR</div>
+                            <div className="text-base font-semibold text-white">{reports[0].irr ?? "—"}%</div>
+                          </div>
+                          <div className="rounded-lg bg-white/[0.03] p-2">
+                            <div className="text-[10px] uppercase tracking-wider text-white/40">TVPI</div>
+                            <div className="text-base font-semibold text-white">{reports[0].tvpi ?? "—"}×</div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleDownloadReport(reports[0])}
+                          className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#4a90b8] px-3 py-2 text-xs font-semibold text-black hover:bg-[#4a90b8]/90 transition-colors"
+                          data-testid="button-download-latest-report"
+                        >
+                          <Download className="h-3.5 w-3.5" /> Download {reports[0].period} Report
+                        </button>
+                      </>
+                    ) : (
+                      <div className="text-[11px] text-white/35">No quarterly reports yet.</div>
+                    )}
                   </div>
 
                   <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5">
@@ -397,6 +501,9 @@ export default function FundLpPortalPage() {
                           </div>
                         </div>
                       ))}
+                      {activity.length === 0 && (
+                        <div className="text-[11px] text-white/35">No activity yet.</div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -418,14 +525,15 @@ export default function FundLpPortalPage() {
                     </button>
                   ))}
                   <span className="ml-auto text-[10px] text-white/35">
-                    Showing {filteredDocs.length} of {visibleDocs.length} permissioned · {ALL_DOCS.length - visibleDocs.length} restricted
+                    Showing {filteredDocs.length} of {docs.length} permissioned
+                    {docsMeta?.totalAvailable != null ? ` · ${Math.max(0, docsMeta.totalAvailable - docs.length)} restricted` : ""}
                   </span>
                 </div>
 
                 <div className="rounded-2xl border border-[#4a90b8]/20 bg-[#4a90b8]/[0.04] p-4 mb-5 flex items-start gap-3">
                   <Shield className="h-4 w-4 text-[#4a90b8] flex-shrink-0 mt-0.5" />
                   <div className="text-xs text-white/65">
-                    Your access tier is <strong className="text-white">{lp.tier === "qualified_lp" ? "Qualified LP" : "All-LP"}</strong>. You can see all documents tagged <em>All LPs</em>{lp.tier === "qualified_lp" ? " and Qualified LP" : ""}. GP-only and co-investor materials are filtered out.
+                    Your access tier is <strong className="text-white">{tier === "qualified_lp" ? "Qualified LP" : "All-LP"}</strong>. You can see all documents tagged <em>All LPs</em>{tier === "qualified_lp" ? " and Qualified LP" : ""}. GP-only and co-investor materials are filtered out by the server.
                   </div>
                 </div>
 
@@ -497,7 +605,7 @@ export default function FundLpPortalPage() {
                     <div>NAV / Unit</div>
                     <div className="text-right">Action</div>
                   </div>
-                  {REPORTS.map((r, i) => (
+                  {reports.map((r, i) => (
                     <m.div
                       key={r.id}
                       initial={{ opacity: 0, x: -8 }}
@@ -515,10 +623,10 @@ export default function FundLpPortalPage() {
                         </div>
                       </div>
                       <div className="text-xs text-white/55">{r.generated}</div>
-                      <div className="text-sm text-white font-semibold">{r.irr}%</div>
-                      <div className="text-sm text-white font-semibold">{r.tvpi}×</div>
-                      <div className="text-sm text-white font-semibold">{r.dpi}×</div>
-                      <div className="text-sm text-white">${r.navPerUnit.toFixed(3)}</div>
+                      <div className="text-sm text-white font-semibold">{r.irr ?? "—"}%</div>
+                      <div className="text-sm text-white font-semibold">{r.tvpi ?? "—"}×</div>
+                      <div className="text-sm text-white font-semibold">{r.dpi ?? "—"}×</div>
+                      <div className="text-sm text-white">${(r.navPerUnit ?? 0).toFixed(3)}</div>
                       <div className="text-right">
                         <button
                           onClick={() => handleDownloadReport(r)}
@@ -530,6 +638,9 @@ export default function FundLpPortalPage() {
                       </div>
                     </m.div>
                   ))}
+                  {reports.length === 0 && (
+                    <div className="px-5 py-8 text-center text-sm text-white/40">No quarterly reports available yet.</div>
+                  )}
                 </div>
               </m.div>
             )}
@@ -569,12 +680,15 @@ export default function FundLpPortalPage() {
                         </div>
                       </div>
                     ))}
+                    {activity.length === 0 && (
+                      <div className="px-5 py-8 text-center text-sm text-white/40">No activity recorded yet.</div>
+                    )}
                   </div>
                 </div>
                 <div className="mt-4 rounded-2xl border border-[#6aaa72]/20 bg-[#6aaa72]/[0.04] p-4 flex items-start gap-3">
                   <CheckCircle2 className="h-4 w-4 text-[#6aaa72] flex-shrink-0 mt-0.5" />
                   <div className="text-xs text-white/65">
-                    Your activity log is private to you and the GP team. Events are immutably recorded for 7 years to satisfy ILPA reporting and audit requirements.
+                    Your activity log is private to you and the GP team. Events are immutably recorded server-side for 7 years to satisfy ILPA reporting and audit requirements.
                   </div>
                 </div>
               </m.div>
@@ -589,24 +703,27 @@ export default function FundLpPortalPage() {
                     <span className="ml-auto text-[10px] text-white/35">Typical reply within 1 business day</span>
                   </div>
                   <div className="px-5 py-5 space-y-3 max-h-[420px] overflow-y-auto">
-                    {messages.map(m => (
-                      <div key={m.id} className={`flex ${m.from === "lp" ? "justify-end" : "justify-start"}`}>
+                    {messages.map(msg => (
+                      <div key={msg.id} className={`flex ${msg.from === "lp" ? "justify-end" : "justify-start"}`}>
                         <div
                           className="max-w-[75%] rounded-2xl px-4 py-2.5"
                           style={{
-                            background: m.from === "lp" ? "#4a90b8" : "rgba(255,255,255,0.04)",
-                            color: m.from === "lp" ? "#000" : "rgba(255,255,255,0.85)",
-                            border: m.from === "lp" ? "none" : "1px solid rgba(255,255,255,0.06)",
+                            background: msg.from === "lp" ? "#4a90b8" : "rgba(255,255,255,0.04)",
+                            color: msg.from === "lp" ? "#000" : "rgba(255,255,255,0.85)",
+                            border: msg.from === "lp" ? "none" : "1px solid rgba(255,255,255,0.06)",
                           }}
                         >
                           <div className="text-[10px] font-semibold uppercase tracking-wider mb-1 opacity-70">
-                            {m.from === "lp" ? lp.name : "SZL GP Team"}
+                            {msg.author}
                           </div>
-                          <div className="text-sm leading-relaxed">{m.body}</div>
-                          <div className="text-[10px] mt-1.5 opacity-60">{m.time}</div>
+                          <div className="text-sm leading-relaxed">{msg.body}</div>
+                          <div className="text-[10px] mt-1.5 opacity-60">{msg.time}</div>
                         </div>
                       </div>
                     ))}
+                    {messages.length === 0 && (
+                      <div className="text-center text-sm text-white/40 py-6">No messages yet. Start the conversation below.</div>
+                    )}
                   </div>
                   <div className="border-t border-white/[0.06] p-4 flex gap-2">
                     <input

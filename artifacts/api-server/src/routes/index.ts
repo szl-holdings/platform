@@ -39,6 +39,7 @@ import execBriefingsRouter from "./executive-briefings";
 import fundInboundDealsRouter from "./fund-inbound-deals";
 import aegisPcapRouter from "./aegis-pcap";
 import carlotaTimeTrackingRouter from "./carlota-time-tracking";
+import lpPortalRouter from "./lp-portal";
 
 const router: IRouter = Router();
 
@@ -71,6 +72,7 @@ router.use(domainsRouter);
 router.use(constellationViewsRouter);
 router.use(fundInboundDealsRouter);
 router.use(aegisPcapRouter);
+router.use(lpPortalRouter);
 
 core.register(router);
 vessels.register(router);

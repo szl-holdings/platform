@@ -409,6 +409,60 @@ export const fundCapTableAuditLogTable = pgTable("fund_cap_table_audit_log", {
   index("fund_audit_occurred_idx").on(t.occurredAt),
 ]);
 
+// ─── LP PORTAL: DATA ROOM, MESSAGES, ACTIVITY ─────────────────────────────────
+
+export const fundLpDataRoomDocsTable = pgTable("fund_lp_data_room_docs", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  folder: text("folder").notNull(),
+  fileType: text("file_type", { enum: ["pdf", "xlsx", "pptx", "docx", "csv", "other"] }).notNull().default("pdf"),
+  sizeLabel: text("size_label").notNull().default("0 MB"),
+  uploadedAt: text("uploaded_at").notNull(),
+  permissionTier: text("permission_tier", { enum: ["public", "all_lp", "qualified_lp", "co_investor", "gp_only"] }).notNull().default("all_lp"),
+  watermarked: boolean("watermarked").notNull().default(false),
+  sourceUri: text("source_uri"),
+  uploadedBy: text("uploaded_by"),
+  isDemo: boolean("is_demo").notNull().default(false),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("fund_lp_docs_folder_idx").on(t.folder),
+  index("fund_lp_docs_perm_idx").on(t.permissionTier),
+  index("fund_lp_docs_demo_idx").on(t.isDemo),
+]);
+
+export const fundLpMessagesTable = pgTable("fund_lp_messages", {
+  id: serial("id").primaryKey(),
+  lpId: integer("lp_id").notNull().references(() => fundAccreditedInvestorsTable.id, { onDelete: "cascade" }),
+  fromRole: text("from_role", { enum: ["lp", "gp"] }).notNull(),
+  authorName: text("author_name").notNull(),
+  body: text("body").notNull(),
+  isDemo: boolean("is_demo").notNull().default(false),
+  metadata: jsonb("metadata"),
+  sentAt: timestamp("sent_at").notNull().defaultNow(),
+}, (t) => [
+  index("fund_lp_messages_lp_idx").on(t.lpId),
+  index("fund_lp_messages_sent_idx").on(t.sentAt),
+]);
+
+export const fundLpActivityEventsTable = pgTable("fund_lp_activity_events", {
+  id: serial("id").primaryKey(),
+  lpId: integer("lp_id").notNull().references(() => fundAccreditedInvestorsTable.id, { onDelete: "cascade" }),
+  action: text("action", { enum: ["viewed", "downloaded", "messaged_gp", "logged_in"] }).notNull(),
+  target: text("target").notNull(),
+  documentId: integer("document_id").references(() => fundLpDataRoomDocsTable.id, { onDelete: "set null" }),
+  reportId: integer("report_id").references(() => fundLpReportsTable.id, { onDelete: "set null" }),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  isDemo: boolean("is_demo").notNull().default(false),
+  metadata: jsonb("metadata"),
+  occurredAt: timestamp("occurred_at").notNull().defaultNow(),
+}, (t) => [
+  index("fund_lp_activity_lp_idx").on(t.lpId),
+  index("fund_lp_activity_occurred_idx").on(t.occurredAt),
+]);
+
 // ─── INSERT SCHEMAS & TYPES ───────────────────────────────────────────────────
 
 export const insertFundPortfolioFinancialSchema = createInsertSchema(fundPortfolioFinancialsTable).omit({ id: true, createdAt: true, updatedAt: true });
@@ -470,3 +524,15 @@ export type FundDistributionLine = typeof fundDistributionLinesTable.$inferSelec
 export const insertFundNavRecordSchema = createInsertSchema(fundNavRecordsTable).omit({ id: true, createdAt: true });
 export type InsertFundNavRecord = z.infer<typeof insertFundNavRecordSchema>;
 export type FundNavRecord = typeof fundNavRecordsTable.$inferSelect;
+
+export const insertFundLpDataRoomDocSchema = createInsertSchema(fundLpDataRoomDocsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertFundLpDataRoomDoc = z.infer<typeof insertFundLpDataRoomDocSchema>;
+export type FundLpDataRoomDoc = typeof fundLpDataRoomDocsTable.$inferSelect;
+
+export const insertFundLpMessageSchema = createInsertSchema(fundLpMessagesTable).omit({ id: true, sentAt: true });
+export type InsertFundLpMessage = z.infer<typeof insertFundLpMessageSchema>;
+export type FundLpMessage = typeof fundLpMessagesTable.$inferSelect;
+
+export const insertFundLpActivityEventSchema = createInsertSchema(fundLpActivityEventsTable).omit({ id: true, occurredAt: true });
+export type InsertFundLpActivityEvent = z.infer<typeof insertFundLpActivityEventSchema>;
+export type FundLpActivityEvent = typeof fundLpActivityEventsTable.$inferSelect;

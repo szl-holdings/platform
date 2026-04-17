@@ -77,6 +77,10 @@ const PUBLIC_PREFIXES = [
   "/api/booking/services",
   // Debug: add console.log to confirm matching
   "/api/booking/health",
+  // LP portal — read-only GET routes use authMiddleware({ required: false }) so the
+  // marketing demo at /fund/lp-portal can showcase seeded data, while authenticated
+  // LPs see only their own real records (matched by contact email).
+  "/api/lp-portal/",
 ];
 
 function isValidInternalToken(req: Request): boolean {
