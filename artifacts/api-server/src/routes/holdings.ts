@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import rateLimit from "express-rate-limit";
 import { z } from "zod";
 import { logger } from "../lib/logger";
 import { validateBody } from "../lib/validation";
@@ -417,7 +418,15 @@ router.get("/holdings/inquiries", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/holdings/inquiries", validateBody(createInquirySchema), (req, res) => {
+const inquiryRateLimit = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: "Too many inquiry submissions. Please try again later." },
+});
+
+router.post("/holdings/inquiries", inquiryRateLimit, validateBody(createInquirySchema), (req, res) => {
   const { name, email, subject, message, company, intent, source } = req.body as z.infer<typeof createInquirySchema>;
 
   const metadata: Record<string, string> = {};
