@@ -47,6 +47,24 @@ This is not a data problem. Organizations have more data than they can use. It i
 - By the time they identify an opportunity, three other brokers have already called
 - Ownership structures are deliberately obfuscated through LLCs — tracing beneficial ownership is a research project, not a workflow
 
+### Legal Operations (PRISM Counsel)
+
+- General counsel teams triage inbound matters in shared inboxes, with conflict checks, privilege scoping, and recovery analytics living in separate spreadsheets
+- AI-assisted legal tools surface citations without a verifiable provenance chain — privilege risk is real, and outputs cannot be defended at audit
+- Matter accountability and proof of decision are critical, but no platform connects matter signal → governed approval → outcome with an immutable audit trail
+
+### Cloud Sovereignty (IMPERIUM)
+
+- Regulated and sovereignty-bound enterprises run multi-cloud (Azure / AWS / GCP) without a single governance plane for data residency, jurisdiction tagging, or change-approval enforcement
+- Compliance posture is reconstructed for each audit instead of continuously attested
+- Infrastructure changes happen without a Covenant Policy gate — and certainly without a Proof Chain attribution back to who approved them and why
+
+### The Mobile and Executive-Visibility Gap (CORTEX, Command Portal)
+
+- Domain leaders sit on five to seven separate dashboards on a laptop, and have no equivalent surface on mobile — every domain previously demanded its own native app
+- Boards and CEOs have no single web view that aggregates security, fleet, real-estate, legal, and operations signals at one altitude — they receive separate decks from each function on a separate cadence
+- The result is a structural blind spot at exactly the executive layer that is supposed to govern all of it
+
 ---
 
 ## The Opportunity

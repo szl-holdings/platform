@@ -20,6 +20,7 @@
 | **Founder** | Stephen Lutar |
 | **Model** | Governed decision operating system — six primitives shared across domain packs |
 | **Primary Surface** | Lyte command surface + Alloy execution fabric (governed decision operating system) |
+| **Command Surfaces** | Lyte (web), CORTEX (unified iOS/Android mobile across all domains), Command Portal (cross-domain ecosystem hub) |
 | **Domain Packs** | Security (Aegis), Maritime (Vessels), Real Estate (Terra), Legal (PRISM Counsel), Advisory (Carlota Jo), Cloud (IMPERIUM) |
 | **Revenue Model** | SaaS subscriptions, usage-based billing, enterprise contracts |
 | **Primary Markets** | Enterprise and mid-market operations, security, maritime, real estate |
@@ -48,9 +49,10 @@ The architecture is unique: six platform primitives (Outcome Graph, Proof Chain,
 
 As of Q1 2026, SZL Holdings has:
 
-- **15 active artifacts** — 10 web apps, 2 mobile apps (Expo/React Native), 1 API server, 1 design system, 1 dev sandbox
+- **15 active artifacts** — 10 web surfaces (Lyte, Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM, Pulse, Command Portal, SZL Holdings corporate), 1 unified mobile command (CORTEX, Expo/React Native), 1 advisory mobile client, 1 API server, 1 design system, 1 dev sandbox
+- **Three command surfaces** — Lyte (web operator command), CORTEX (unified mobile command consolidating every domain in a single iOS/Android app), Command Portal (cross-domain ecosystem hub)
 - **Six platform primitives** — Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, Event Fabric — shared by all surfaces
-- **6 domain packs** fully implemented with seeded/demo data and role-aware dashboards
+- **6 domain packs** fully implemented with seeded/demo data and role-aware dashboards (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM)
 - **685 database tables** across 112 schema files, 51 shared packages
 - **Azure Bicep IaC** — enterprise deployment architecture ready
 - **Stripe billing infrastructure** — built and pending activation

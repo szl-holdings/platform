@@ -8,6 +8,8 @@
 
 The go-to-market strategy is deliberate and sequential. We are not attempting to sell six domain packs simultaneously. The commercial wedge is **Lyte** — the governed command surface for operations-led organizations — with Alloy as the embedded execution fabric that enforces the governed decision loop. Domain packs (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM) expand the platform into domain-specific intelligence on the same governance infrastructure.
 
+The product surface a buyer evaluates today is materially larger than the original Lyte web wedge. **CORTEX** ships a single iOS/Android app that consolidates every domain pack (Lyte, Aegis, Vessels, Terra, Carlota Jo) behind one OIDC sign-in, deep linking, and unified push notifications — eliminating the prior plan to ship a separate mobile app per domain. **Command Portal** adds a cross-domain ecosystem hub for executives who need a single web pane covering all domain pack signals in one place. **IMPERIUM** adds the Cloud Sovereignty domain pack (infrastructure governance and compliance) to the sellable surface. These three products are critical to enterprise pursuits: a CISO or COO evaluating Lyte will, in the same procurement cycle, ask "do you have mobile?" and "can my exec team see all of this without leaving one screen?" — the answer is now yes without any custom work.
+
 ### Why Lyte First
 
 1. **Universal problem** — Every organization with more than 50 people has the accountability gap that Lyte solves. Decisions running without attribution, AI recommendations without governance, signals without routes to action.

@@ -6,7 +6,7 @@
 
 ## Portfolio Overview
 
-SZL Holdings operates a governed decision operating system with six domain packs sharing one governance infrastructure, one execution fabric, one design system, and one data layer. This is not a portfolio of unrelated products — it is a compounding system where each domain pack strengthens the architectural investment shared by all. Six platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, Event Fabric) run across every surface.
+SZL Holdings operates a governed decision operating system with **three command surfaces** (Lyte, CORTEX, Command Portal), one execution fabric (Alloy), and **six domain packs** (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM) — all sharing one governance infrastructure, one design system, and one data layer. This is not a portfolio of unrelated products — it is a compounding system where each domain pack strengthens the architectural investment shared by all. Six platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, Event Fabric) run across every surface.
 
 ![SZL Holdings ecosystem map — how command surfaces, execution fabric, domain packs, and external signal sources interconnect](../../assets/readme/architecture/ecosystem-map.svg)
 
@@ -138,6 +138,44 @@ Fleet command for maritime operators.
 
 ---
 
+## PRISM Counsel — Legal Matter Command
+
+**Category:** Legal Operations & Matter Intelligence  
+**Layer:** Observe / Advise / Resolve  
+**Readiness:** Functional Alpha  
+
+Matter management and legal intelligence for in-house counsel and litigation teams operating under the same governed decision loop as every other domain pack.
+
+**Capability highlights:**
+- Matter lifecycle (intake, triage, conflict checks, resolution) with Covenant Policy approval gates
+- AI triage of inbound matters with Proof Chain provenance on every recommendation
+- Recovery tables and litigation analytics
+- Document intelligence with citation-backed reasoning
+- Immutable audit trail across the entire matter lifecycle (Proof Chain)
+
+**Strategic position:** Legal domain pack. Buyer is GC / Head of Litigation / Head of Compliance. Trust requirements (privilege, audit) make Covenant Policy + Proof Chain a structural fit, not a feature.
+
+---
+
+## IMPERIUM — Cloud Sovereignty
+
+**Category:** Infrastructure Governance & Cloud Compliance  
+**Layer:** Govern / Enforce  
+**Readiness:** Functional Alpha  
+
+Cloud sovereignty and infrastructure governance for regulated and sovereignty-sensitive enterprises.
+
+**Capability highlights:**
+- Cloud posture and compliance scoring across Azure / AWS / GCP
+- Sovereignty controls (data residency, jurisdiction tagging, transfer audit)
+- Covenant Policy enforcement on infrastructure change requests
+- Proof Chain attribution for every infrastructure decision
+- Integrates with Aegis CSPM and the Command Portal CISO surface
+
+**Strategic position:** Cloud domain pack. Sells into the same CISO / VP Infrastructure buyer that buys Aegis, but addresses infrastructure governance rather than threat operations. Together with Aegis, completes the security + infrastructure governance pairing required for FedRAMP and sovereignty-bound enterprises.
+
+---
+
 ## Carlota Jo — Private Advisory
 
 ![Carlota Jo Consulting — luxury advisory web platform](../../assets/readme/products/carlota-jo.jpg)
@@ -155,6 +193,44 @@ Principal-led advisory on brand strategy, operations, and executive engagement.
 - Demonstrates the advisory model that every domain pack can eventually support
 
 **Strategic position:** Demonstrates the Advise layer of the ecosystem. Revenue model is advisory retainer — different from the SaaS platforms, but validates the full stack.
+
+---
+
+## CORTEX — Unified Mobile Command
+
+**Category:** Mobile Command Surface  
+**Layer:** Observe / Decide / Act (mobile)  
+**Readiness:** Functional Alpha  
+
+A single iOS/Android app that consolidates every domain pack — Lyte, Aegis, Vessels, Terra, Carlota Jo — under one OIDC sign-in. Replaces what would otherwise have been a separate mobile app per domain (the prior "7 mobile apps" model) with one branded mobile command surface.
+
+**Capability highlights:**
+- One unified login covering every domain workspace the user has access to (RBAC enforced)
+- Cross-domain workspace switcher (drop into Aegis incidents, then Vessels fleet, then Lyte approvals — same session)
+- Unified push notifications with `appId: "cortex"` plus deep-linking back to the exact domain route (e.g., a Vessels vessel page or an Aegis incident detail)
+- Branded launch experience (CORTEX hexagon icon, branded splash) and Expo OTA-update ready
+- Designed to ship as the single mobile binary across the entire ecosystem
+
+**Strategic position:** Mobile is now a single product, not six. Eliminates per-domain mobile development cost, reduces app-store surface to one submission, and meaningfully shortens the answer to the universal enterprise question "do you have mobile?" in every Lyte / Aegis / Vessels procurement.
+
+---
+
+## Command Portal — Cross-Domain Ecosystem Hub
+
+**Category:** Executive Command Surface  
+**Layer:** Observe (cross-domain)  
+**Readiness:** Functional Alpha  
+
+The web ecosystem hub for executives who need a single pane covering every domain pack signal at once — without bouncing between Lyte, Aegis, Vessels, Terra, PRISM Counsel, and IMPERIUM.
+
+**Capability highlights:**
+- Cross-domain signal aggregation and portfolio health monitoring
+- Ecosystem status view: which domain packs are live, which are degraded
+- Unified KPI surface for executives (CISO dashboard aggregating Aegis modules, ops view aggregating Lyte signals, fleet view aggregating Vessels)
+- Direct navigation into the responsible domain pack workspace
+- Cognitive Console (Trace Replay, Eval Lab, Policy) for governance review of the AI/agent layer that runs underneath every domain pack
+
+**Strategic position:** The exec-level surface that turns "six platforms" into "one ecosystem" for the buying conversation. Critical for board-level reporting, executive briefing rituals, and sales conversations with multi-domain enterprises.
 
 ---
 
