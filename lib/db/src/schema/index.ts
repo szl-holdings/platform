@@ -118,6 +118,7 @@ export * from "./data_retention";
 export * from "./atlas_spatial_runtime";
 export * from "./forge";
 export * from "./constellation";
+export * from "./constellation_views";
 export * from "./guardian_tools";
 export * from "./trace_graph";
 export * from "./eval_os";

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { apiFetch } from "./api-fetch";
+import { apiFetch, ApiError } from "./api-fetch";
 import { cn } from "./utils";
 
 /**
@@ -131,6 +131,39 @@ const DEFAULT_FILTERS: PersistedFilters = {
   sinceWindow: "all",
   searchQuery: "",
 };
+
+export interface SavedConstellationView {
+  id: number;
+  domain: string;
+  name: string;
+  filters: PersistedFilters;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+function filtersEqual(a: PersistedFilters, b: PersistedFilters): boolean {
+  return (
+    a.entityTypeFilter === b.entityTypeFilter &&
+    a.activeOnly === b.activeOnly &&
+    a.sinceWindow === b.sinceWindow &&
+    a.searchQuery.trim() === b.searchQuery.trim()
+  );
+}
+
+function normalizeViewFilters(raw: unknown): PersistedFilters {
+  const v = (raw ?? {}) as Partial<PersistedFilters>;
+  return {
+    entityTypeFilter:
+      typeof v.entityTypeFilter === "string" && v.entityTypeFilter.length > 0
+        ? v.entityTypeFilter
+        : null,
+    activeOnly: typeof v.activeOnly === "boolean" ? v.activeOnly : true,
+    sinceWindow: SINCE_VALUES.includes(v.sinceWindow as SinceWindow)
+      ? (v.sinceWindow as SinceWindow)
+      : "all",
+    searchQuery: typeof v.searchQuery === "string" ? v.searchQuery : "",
+  };
+}
 
 function readFiltersFromUrl(): PersistedFilters {
   if (typeof window === "undefined") return DEFAULT_FILTERS;
@@ -343,6 +376,13 @@ export function ConstellationGraph({
   const [searchQuery, setSearchQuery] = useState(initialFilters.searchQuery);
   const [seenTypes, setSeenTypes] = useState<string[]>([]);
   const [pageSize, setPageSize] = useState(120);
+  // Saved views (per-user, per-domain). Server-backed; falls back gracefully
+  // when the operator is signed out (the API returns 401 and we hide the UI).
+  const [savedViews, setSavedViews] = useState<SavedConstellationView[] | null>(null);
+  const [savedViewsAvailable, setSavedViewsAvailable] = useState(true);
+  const [savedViewsBusy, setSavedViewsBusy] = useState(false);
+  const [savedViewsError, setSavedViewsError] = useState<string | null>(null);
+  const [activeSavedViewId, setActiveSavedViewId] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const simRef = useRef<SimNode[]>([]);
   const alphaRef = useRef(1);
@@ -353,6 +393,188 @@ export function ConstellationGraph({
     reload.current += 1;
     force((x) => x + 1);
   }, []);
+
+  // --- Saved views ----------------------------------------------------------
+  // Loaded once per (host) domain. Hidden when the API responds 401/403, which
+  // happens for unauthenticated viewers; we keep the rest of the UI working.
+  useEffect(() => {
+    if (!domain) return;
+    let cancelled = false;
+    setSavedViewsError(null);
+    apiFetch<{ data?: SavedConstellationView[] } | SavedConstellationView[]>(
+      `/constellation/views?domain=${encodeURIComponent(domain)}`,
+    )
+      .then((res) => {
+        if (cancelled) return;
+        const rows = (res as { data?: SavedConstellationView[] }).data ?? (res as SavedConstellationView[]);
+        const normalized = (rows ?? []).map((r) => ({
+          ...r,
+          filters: normalizeViewFilters(r.filters as unknown),
+        }));
+        setSavedViews(normalized);
+        setSavedViewsAvailable(true);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
+          setSavedViewsAvailable(false);
+          setSavedViews([]);
+          return;
+        }
+        setSavedViewsError((err as Error)?.message ?? "Failed to load saved views");
+        setSavedViews([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [domain, data]);
+
+  // Whenever filters change, clear the active saved-view marker if they no
+  // longer match. This keeps the dropdown honest — selecting a view then
+  // tweaking a filter shows "(unsaved changes)" in the picker.
+  useEffect(() => {
+    if (activeSavedViewId === null || !savedViews) return;
+    const v = savedViews.find((sv) => sv.id === activeSavedViewId);
+    if (!v) {
+      setActiveSavedViewId(null);
+      return;
+    }
+    const current: PersistedFilters = {
+      entityTypeFilter,
+      activeOnly,
+      sinceWindow,
+      searchQuery,
+    };
+    if (!filtersEqual(current, v.filters)) {
+      setActiveSavedViewId(null);
+    }
+  }, [entityTypeFilter, activeOnly, sinceWindow, searchQuery, savedViews, activeSavedViewId]);
+
+  const applySavedView = useCallback((view: SavedConstellationView) => {
+    const f = normalizeViewFilters(view.filters as unknown);
+    setEntityTypeFilter(f.entityTypeFilter);
+    setActiveOnly(f.activeOnly);
+    setSinceWindow(f.sinceWindow);
+    setSearchQuery(f.searchQuery);
+    setActiveSavedViewId(view.id);
+  }, []);
+
+  const saveCurrentView = useCallback(async () => {
+    if (!domain) return;
+    if (typeof window === "undefined") return;
+    const defaultName = activeSavedViewId
+      ? savedViews?.find((v) => v.id === activeSavedViewId)?.name ?? ""
+      : "";
+    const raw = window.prompt("Name this Constellation view", defaultName);
+    if (raw === null) return;
+    const name = raw.trim();
+    if (!name) return;
+    const filters: PersistedFilters = {
+      entityTypeFilter,
+      activeOnly,
+      sinceWindow,
+      searchQuery,
+    };
+    setSavedViewsBusy(true);
+    setSavedViewsError(null);
+    try {
+      const res = await apiFetch<{ data?: SavedConstellationView } | SavedConstellationView>(
+        `/constellation/views`,
+        {
+          method: "POST",
+          body: JSON.stringify({ domain, name, filters }),
+          retries: 0,
+        },
+      );
+      const row = (res as { data?: SavedConstellationView }).data ?? (res as SavedConstellationView);
+      const normalized: SavedConstellationView = {
+        ...row,
+        filters: normalizeViewFilters(row.filters as unknown),
+      };
+      setSavedViews((prev) => {
+        const next = (prev ?? []).filter((v) => v.id !== normalized.id);
+        next.push(normalized);
+        next.sort((a, b) => a.name.localeCompare(b.name));
+        return next;
+      });
+      setActiveSavedViewId(normalized.id);
+    } catch (err) {
+      const msg =
+        err instanceof ApiError && err.status === 409
+          ? "A saved view with that name already exists. Pick another."
+          : (err as Error)?.message ?? "Failed to save view";
+      setSavedViewsError(msg);
+    } finally {
+      setSavedViewsBusy(false);
+    }
+  }, [
+    domain,
+    entityTypeFilter,
+    activeOnly,
+    sinceWindow,
+    searchQuery,
+    savedViews,
+    activeSavedViewId,
+  ]);
+
+  const renameSavedView = useCallback(
+    async (view: SavedConstellationView) => {
+      if (typeof window === "undefined") return;
+      const raw = window.prompt(`Rename "${view.name}" to:`, view.name);
+      if (raw === null) return;
+      const name = raw.trim();
+      if (!name || name === view.name) return;
+      setSavedViewsBusy(true);
+      setSavedViewsError(null);
+      try {
+        const res = await apiFetch<{ data?: SavedConstellationView } | SavedConstellationView>(
+          `/constellation/views/${view.id}`,
+          { method: "PATCH", body: JSON.stringify({ name }), retries: 0 },
+        );
+        const row = (res as { data?: SavedConstellationView }).data ?? (res as SavedConstellationView);
+        const normalized: SavedConstellationView = {
+          ...row,
+          filters: normalizeViewFilters(row.filters as unknown),
+        };
+        setSavedViews((prev) =>
+          (prev ?? [])
+            .map((v) => (v.id === normalized.id ? normalized : v))
+            .sort((a, b) => a.name.localeCompare(b.name)),
+        );
+      } catch (err) {
+        const msg =
+          err instanceof ApiError && err.status === 409
+            ? "A saved view with that name already exists. Pick another."
+            : (err as Error)?.message ?? "Failed to rename view";
+        setSavedViewsError(msg);
+      } finally {
+        setSavedViewsBusy(false);
+      }
+    },
+    [],
+  );
+
+  const deleteSavedView = useCallback(
+    async (view: SavedConstellationView) => {
+      if (typeof window === "undefined") return;
+      if (!window.confirm(`Delete saved view "${view.name}"?`)) return;
+      setSavedViewsBusy(true);
+      setSavedViewsError(null);
+      try {
+        await apiFetch<void>(`/constellation/views/${view.id}`, {
+          method: "DELETE",
+          retries: 0,
+        });
+        setSavedViews((prev) => (prev ?? []).filter((v) => v.id !== view.id));
+        setActiveSavedViewId((curr) => (curr === view.id ? null : curr));
+      } catch (err) {
+        setSavedViewsError((err as Error)?.message ?? "Failed to delete view");
+      } finally {
+        setSavedViewsBusy(false);
+      }
+    },
+    [],
+  );
 
   // --- URL state persistence -------------------------------------------------
   // Filters are mirrored to the URL query string so views survive reloads and
@@ -1463,6 +1685,131 @@ export function ConstellationGraph({
             border: "1px solid rgba(255,255,255,0.06)",
           }}
         >
+          {savedViewsAvailable && (
+            <div
+              data-testid="constellation-saved-views"
+              style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}
+            >
+              <span style={{ fontSize: 10, color: "#64748b", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                Saved views
+              </span>
+              <select
+                value={activeSavedViewId === null ? "" : String(activeSavedViewId)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (!v) {
+                    setActiveSavedViewId(null);
+                    return;
+                  }
+                  const id = parseInt(v, 10);
+                  const view = (savedViews ?? []).find((sv) => sv.id === id);
+                  if (view) applySavedView(view);
+                }}
+                disabled={savedViewsBusy}
+                data-testid="constellation-saved-views-picker"
+                style={{
+                  fontSize: 11,
+                  padding: "4px 8px",
+                  borderRadius: 4,
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  background: "rgba(0,0,0,0.25)",
+                  color: "#e8edf8",
+                  outline: "none",
+                  minWidth: 200,
+                }}
+              >
+                <option value="">
+                  {savedViews === null
+                    ? "Loading…"
+                    : savedViews.length === 0
+                      ? "— No saved views —"
+                      : "— Select a view —"}
+                </option>
+                {(savedViews ?? []).map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {v.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={saveCurrentView}
+                disabled={savedViewsBusy || !domain}
+                data-testid="constellation-save-view"
+                style={{
+                  fontSize: 10,
+                  padding: "4px 10px",
+                  borderRadius: 4,
+                  border: `1px solid ${accentColor}55`,
+                  background: `${accentColor}18`,
+                  color: accentColor,
+                  cursor: savedViewsBusy ? "wait" : "pointer",
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  fontWeight: 600,
+                }}
+              >
+                Save view
+              </button>
+              {activeSavedViewId !== null && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const v = (savedViews ?? []).find((sv) => sv.id === activeSavedViewId);
+                      if (v) renameSavedView(v);
+                    }}
+                    disabled={savedViewsBusy}
+                    data-testid="constellation-rename-view"
+                    style={{
+                      fontSize: 10,
+                      padding: "4px 8px",
+                      borderRadius: 4,
+                      border: "1px solid rgba(255,255,255,0.15)",
+                      background: "transparent",
+                      color: "#cbd5e1",
+                      cursor: savedViewsBusy ? "wait" : "pointer",
+                      letterSpacing: "0.06em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Rename
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const v = (savedViews ?? []).find((sv) => sv.id === activeSavedViewId);
+                      if (v) deleteSavedView(v);
+                    }}
+                    disabled={savedViewsBusy}
+                    data-testid="constellation-delete-view"
+                    style={{
+                      fontSize: 10,
+                      padding: "4px 8px",
+                      borderRadius: 4,
+                      border: "1px solid rgba(239,68,68,0.4)",
+                      background: "transparent",
+                      color: "#fca5a5",
+                      cursor: savedViewsBusy ? "wait" : "pointer",
+                      letterSpacing: "0.06em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Delete
+                  </button>
+                </>
+              )}
+              {savedViewsError && (
+                <span
+                  role="alert"
+                  data-testid="constellation-saved-views-error"
+                  style={{ fontSize: 10, color: "#fca5a5" }}
+                >
+                  {savedViewsError}
+                </span>
+              )}
+            </div>
+          )}
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <span style={{ fontSize: 10, color: "#64748b", letterSpacing: "0.08em", textTransform: "uppercase" }}>
               Type

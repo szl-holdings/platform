@@ -5,6 +5,7 @@ import briefingsRouter from "./briefings";
 import driftRouter from "./drift";
 import deploymentsRouter from "./deployments";
 import domainsRouter from "./domains";
+import constellationViewsRouter from "./constellation-views";
 import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { guardianPolicyCheck } from "../middlewares/guardian-policy";
 import * as core from "./groups/core";
@@ -46,6 +47,7 @@ router.use(briefingsRouter);
 router.use(driftRouter);
 router.use(deploymentsRouter);
 router.use(domainsRouter);
+router.use(constellationViewsRouter);
 
 core.register(router);
 vessels.register(router);
