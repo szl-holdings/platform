@@ -1,7 +1,8 @@
 import { lazy, Suspense, type ReactNode } from "react";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { carlotaJoConfig } from "@szl-holdings/shared-ui/copilot-configs";
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
+import PlatformSidebar, { isPlatformRoute, PLATFORM_SIDEBAR_WIDTH } from "@/components/PlatformSidebar";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
@@ -210,6 +211,34 @@ const carlotaShortcuts: KeyboardShortcut[] = [
   { key: "S", description: "Go to Services", category: "Navigation" },
 ];
 
+function AppShell() {
+  const [location] = useLocation();
+  const showSidebar = isPlatformRoute(location);
+  return (
+    <div style={{ minHeight: "100vh" }}>
+      <EcosystemNav currentAppId="carlota-jo" currentAppName="Carlota Jo" accentColor={CARLOTA_ACCENT} />
+      {showSidebar && (
+        <div className="hidden lg:block">
+          <PlatformSidebar />
+        </div>
+      )}
+      <div
+        style={{
+          marginLeft: showSidebar ? PLATFORM_SIDEBAR_WIDTH : 0,
+        }}
+        className={showSidebar ? "platform-shell-content" : undefined}
+      >
+        <Router />
+      </div>
+      <style>{`
+        @media (max-width: 1023px) {
+          .platform-shell-content { margin-left: 0 !important; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(carlotaCommands);
 
@@ -219,10 +248,8 @@ function App() {
     <SandboxModeProvider>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <PowerUserProvider shortcuts={carlotaShortcuts} appName="Carlota Jo" accentColor={CARLOTA_ACCENT}>
-          <div style={{ minHeight: "100vh" }}>
-            <EcosystemNav currentAppId="carlota-jo" currentAppName="Carlota Jo" accentColor={CARLOTA_ACCENT} />
-            <Router />
-          </div>
+          <AppShell />
+
           <CommandPalette
             open={cmdOpen}
             onClose={() => setCmdOpen(false)}
