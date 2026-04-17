@@ -1,6 +1,8 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
 import PDFDocument from "pdfkit";
+import { timingSafeEqual, createHash } from "crypto";
+import rateLimit from "express-rate-limit";
 import { and, desc, eq, gte, inArray, sql } from "drizzle-orm";
 import {
   db,
@@ -22,6 +24,106 @@ import { logger } from "../lib/logger";
 import { services } from "@szl-holdings/services";
 
 const router = Router();
+
+// ─── Non-production demo endpoints ────────────────────────────────────────────
+// Completely absent in production (NODE_ENV === 'production').
+// Token is the raw ADMIN_PIN, sent in the x-demo-token request header (never
+// embedded in the URL or client bundle). The global-auth-enforcer exempts the
+// /api/pulse/demo/* prefix only in non-production mode.
+// No write operations are exposed here.
+const demoRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { xForwardedForHeader: false, ip: false },
+});
+
+/** Hash a PIN to a fixed-length digest so timingSafeEqual never receives
+ *  mismatched buffer lengths (which would throw regardless of the values). */
+function hashPin(pin: string): Buffer {
+  return createHash("sha256").update(pin, "utf8").digest();
+}
+
+function verifyDemoPin(req: Request, res: Response): boolean {
+  if (process.env.NODE_ENV === "production") {
+    res.status(404).json({ success: false, error: "not_found" });
+    return false;
+  }
+  const pin = req.headers["x-demo-token"];
+  const adminPin = process.env.ADMIN_PIN ?? process.env.VITE_ADMIN_PIN;
+  if (typeof pin !== "string" || !adminPin) {
+    res.status(401).json({ success: false, error: "demo_pin_required" });
+    return false;
+  }
+  if (!timingSafeEqual(hashPin(adminPin), hashPin(pin))) {
+    res.status(401).json({ success: false, error: "invalid_demo_pin" });
+    return false;
+  }
+  return true;
+}
+
+if (process.env.NODE_ENV !== "production") {
+  // Verify PIN and report valid/invalid — used by the client PIN modal before
+  // opening demo mode. The PIN is sent in the request body (never in the URL).
+  router.post("/demo/verify", demoRateLimit, (req: Request, res: Response): void => {
+    const pin = req.body?.pin as string | undefined;
+    const adminPin = process.env.ADMIN_PIN ?? process.env.VITE_ADMIN_PIN;
+    if (!pin || !adminPin) { res.status(401).json({ valid: false }); return; }
+    // Use hash digests (fixed 32-byte length) so timingSafeEqual can never throw
+    // due to mismatched buffer lengths from arbitrarily long user input.
+    const ok = timingSafeEqual(hashPin(adminPin), hashPin(pin));
+    res.json({ valid: ok });
+  });
+
+  router.get("/demo/today", demoRateLimit, async (req: Request, res: Response): Promise<void> => {
+    if (!verifyDemoPin(req, res)) return;
+    try {
+      const latest = await getLatestBriefing();
+      res.json({ success: true, briefing: latest ? withAgentNames(latest) : DEMO_BRIEFINGS[0] ?? null });
+    } catch {
+      res.json({ success: true, briefing: DEMO_BRIEFINGS[0] ?? null });
+    }
+  });
+
+  router.get("/demo/briefings", demoRateLimit, async (req: Request, res: Response): Promise<void> => {
+    if (!verifyDemoPin(req, res)) return;
+    try {
+      const briefings = await listBriefings(10);
+      res.json({ success: true, briefings: briefings.length > 0 ? briefings.map(withAgentNames) : DEMO_BRIEFINGS, total: briefings.length || DEMO_BRIEFINGS.length });
+    } catch {
+      res.json({ success: true, briefings: DEMO_BRIEFINGS, total: DEMO_BRIEFINGS.length });
+    }
+  });
+
+  // Derives confidence trend from real briefing records. The pulse_briefings
+  // schema stores overallConfidence per briefing but not per-domain. We use the
+  // briefing's overallConfidence for each domain listed in that briefing's
+  // domains array, and fall back to DEMO_CONFIDENCE_HISTORY only when the DB
+  // has fewer than 2 records.
+  router.get("/demo/confidence", demoRateLimit, async (req: Request, res: Response): Promise<void> => {
+    if (!verifyDemoPin(req, res)) return;
+    try {
+      const history = await buildConfidenceHistory();
+      res.json({ success: true, history });
+    } catch {
+      res.json({ success: true, history: DEMO_CONFIDENCE_HISTORY });
+    }
+  });
+
+  router.get("/demo/dissents", demoRateLimit, async (req: Request, res: Response): Promise<void> => {
+    if (!verifyDemoPin(req, res)) return;
+    try {
+      const rows = await db.select().from(pulseDissentsTable).limit(10);
+      const dissents = rows.map(rowToDissent);
+      res.json({ success: true, dissents: dissents.length > 0 ? dissents : DEMO_DISSENTS });
+    } catch {
+      res.json({ success: true, dissents: DEMO_DISSENTS });
+    }
+  });
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 router.use(authMiddleware({ required: true }));
 
 const AGENT_NAMES: Record<string, string> = {
@@ -467,6 +569,52 @@ const DEMO_DISSENTS: DissentRecord[] = [
     resolvedAt: "2026-04-16T09:30:00Z",
     impactIfCorrect: "ANOMALY downgraded — no executive investigation needed; frees CFO bandwidth",
   },
+];
+
+// ─── Shared confidence history builder ────────────────────────────────────────
+// Used by both the authenticated GET /confidence and the demo GET /demo/confidence
+// endpoints. Queries the real pulse_briefings table and derives per-domain values
+// from overallConfidence. Falls back to DEMO_CONFIDENCE_HISTORY only when the DB
+// has fewer than 2 records (i.e., a freshly seeded environment).
+const DOMAIN_KEYS = ["maritime", "security", "real_estate", "legal", "financial", "platform"] as const;
+
+async function buildConfidenceHistory(): Promise<Record<string, string | number>[]> {
+  const rows = await db
+    .select({
+      date: pulseBriefingsTable.date,
+      overallConfidence: pulseBriefingsTable.overallConfidence,
+      domains: pulseBriefingsTable.domains,
+    })
+    .from(pulseBriefingsTable)
+    .orderBy(desc(pulseBriefingsTable.date))
+    .limit(7);
+
+  if (rows.length < 2) return DEMO_CONFIDENCE_HISTORY;
+
+  return rows
+    .slice()
+    .reverse()
+    .map((r) => {
+      const conf = Number(r.overallConfidence);
+      const activeDomains = new Set((r.domains as string[]).map((d) => d.toLowerCase().replace(/\s+/g, "_")));
+      const entry: Record<string, string | number> = { date: r.date };
+      for (const key of DOMAIN_KEYS) {
+        entry[key] = Number((activeDomains.has(key) ? conf : conf * 0.9).toFixed(3));
+      }
+      return entry;
+    });
+}
+
+// Static fallback used by buildConfidenceHistory() when the DB has fewer than
+// 2 briefing records (e.g. a fresh environment with no seed data yet).
+const DEMO_CONFIDENCE_HISTORY = [
+  { date: "2026-04-10", maritime: 0.71, security: 0.78, real_estate: 0.83, legal: 0.87, financial: 0.75, platform: 0.91 },
+  { date: "2026-04-11", maritime: 0.73, security: 0.79, real_estate: 0.83, legal: 0.86, financial: 0.76, platform: 0.91 },
+  { date: "2026-04-12", maritime: 0.70, security: 0.80, real_estate: 0.84, legal: 0.87, financial: 0.77, platform: 0.92 },
+  { date: "2026-04-13", maritime: 0.68, security: 0.78, real_estate: 0.82, legal: 0.85, financial: 0.76, platform: 0.90 },
+  { date: "2026-04-14", maritime: 0.72, security: 0.81, real_estate: 0.84, legal: 0.86, financial: 0.78, platform: 0.91 },
+  { date: "2026-04-15", maritime: 0.69, security: 0.79, real_estate: 0.83, legal: 0.87, financial: 0.77, platform: 0.92 },
+  { date: "2026-04-16", maritime: 0.74, security: 0.82, real_estate: 0.85, legal: 0.88, financial: 0.79, platform: 0.93 },
 ];
 
 function rowToBriefing(r: typeof pulseBriefingsTable.$inferSelect): Briefing {
@@ -991,17 +1139,13 @@ router.post("/briefings/generate", async (_req: Request, res: Response): Promise
   });
 });
 
-router.get("/confidence", (_req: Request, res: Response) => {
-  const history = [
-    { date: "Apr 10", maritime: 0.78, security: 0.82, real_estate: 0.85, legal: 0.88, financial: 0.74, platform: 0.92 },
-    { date: "Apr 11", maritime: 0.76, security: 0.80, real_estate: 0.84, legal: 0.87, financial: 0.76, platform: 0.93 },
-    { date: "Apr 12", maritime: 0.77, security: 0.81, real_estate: 0.86, legal: 0.86, financial: 0.75, platform: 0.91 },
-    { date: "Apr 13", maritime: 0.75, security: 0.79, real_estate: 0.85, legal: 0.88, financial: 0.77, platform: 0.92 },
-    { date: "Apr 14", maritime: 0.72, security: 0.82, real_estate: 0.84, legal: 0.87, financial: 0.76, platform: 0.93 },
-    { date: "Apr 15", maritime: 0.74, security: 0.80, real_estate: 0.85, legal: 0.87, financial: 0.78, platform: 0.92 },
-    { date: "Apr 16", maritime: 0.68, security: 0.79, real_estate: 0.83, legal: 0.86, financial: 0.77, platform: 0.91 },
-  ];
-  res.json({ success: true, history });
+router.get("/confidence", async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const history = await buildConfidenceHistory();
+    res.json({ success: true, history });
+  } catch {
+    res.json({ success: true, history: DEMO_CONFIDENCE_HISTORY });
+  }
 });
 
 function rowToDissent(r: typeof pulseDissentsTable.$inferSelect): DissentRecord {

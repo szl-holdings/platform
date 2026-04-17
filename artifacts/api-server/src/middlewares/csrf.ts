@@ -55,6 +55,9 @@ function isExempt(path: string): boolean {
   if (path.startsWith("/api/alloy/integrations/webhooks/receive/")) return true;
   if (path === "/api/mcp" || path.startsWith("/api/mcp/")) return true;
   if (path.match(/^\/api\/distribution-os\/linktree\/\d+\/click$/)) return true;
+  // Non-production demo PIN verification — stateless read-only PIN check;
+  // no session or user state is modified on the server side.
+  if (process.env.NODE_ENV !== "production" && path === "/api/pulse/demo/verify") return true;
   return false;
 }
 

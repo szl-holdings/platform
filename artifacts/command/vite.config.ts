@@ -40,8 +40,7 @@ function sharedProxyPlugin(): Plugin {
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const url = req.url ?? "/";
-        if (url === "/" || url === "/__health" || url === "/health" ||
-            url === basePath || url === basePath.replace(/\/$/, "")) {
+        if (url === "/" || url === "/__health" || url === "/health") {
           res.writeHead(200, { "Content-Type": "text/plain" });
           res.end("OK");
           return;

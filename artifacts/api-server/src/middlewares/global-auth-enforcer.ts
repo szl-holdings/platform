@@ -95,6 +95,15 @@ export function globalAuthEnforcer(
     }
   }
 
+  // Non-production demo access routes: PIN-validated but session-free.
+  // Completely disabled in production; route handlers apply timing-safe PIN check.
+  // /api/pulse/demo/verify accepts PIN in POST body (never in URL).
+  if (process.env.NODE_ENV !== "production" &&
+    (path.startsWith("/api/pulse/demo/") || path === "/api/pulse/demo/verify")) {
+    next();
+    return;
+  }
+
   serverTelemetry.recordAuthFailure();
   sendUnauthorized(res, "This endpoint requires a valid session. Please log in.");
 }

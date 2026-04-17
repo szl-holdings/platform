@@ -1,6 +1,31 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Briefing, DissentRecord, CustomBriefRequest, DomainKey, RiskLevel } from "./data";
 
+// The demo token is the PIN entered via the PIN modal in App.tsx.
+// It is stored in sessionStorage by verifyAndStoreDemoPin() after the server
+// validates it. The PIN is never placed in the client bundle or the URL.
+const DEMO_TOKEN_KEY = "pulse-demo-token";
+const DEMO_ALLOWED = import.meta.env.DEV || import.meta.env.VITE_DEMO_ALLOWED === "true";
+
+function isDemoMode(): boolean {
+  if (!DEMO_ALLOWED) return false;
+  return !!sessionStorage.getItem(DEMO_TOKEN_KEY);
+}
+
+async function demoApiFetch<T>(path: string): Promise<T> {
+  const token = sessionStorage.getItem(DEMO_TOKEN_KEY);
+  if (!token) throw new Error("demo_session_expired");
+  const res = await fetch(path, {
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      "x-demo-token": token,
+    },
+  });
+  if (!res.ok) throw new Error(`Demo API ${res.status}`);
+  return res.json() as Promise<T>;
+}
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
     credentials: "include",
@@ -33,7 +58,12 @@ export interface ConfidenceHistoryEntry {
 export function useTodaysBrief() {
   return useQuery({
     queryKey: ["pulse", "today"],
-    queryFn: () => apiFetch<{ success: true; briefing: Briefing }>("/api/pulse/today"),
+    queryFn: async () => {
+      if (isDemoMode()) {
+        return demoApiFetch<{ success: true; briefing: Briefing }>("/api/pulse/demo/today");
+      }
+      return apiFetch<{ success: true; briefing: Briefing }>("/api/pulse/today");
+    },
     select: (d) => d.briefing,
   });
 }
@@ -47,7 +77,19 @@ export function useBriefings(filters?: { domain?: DomainKey | "all"; risk?: Risk
 
   return useQuery({
     queryKey: ["pulse", "briefings", filters?.domain ?? "all", filters?.risk ?? "all"],
-    queryFn: () => apiFetch<{ success: true; briefings: Briefing[]; total: number }>(path),
+    queryFn: async () => {
+      if (isDemoMode()) {
+        const data = await demoApiFetch<{ success: true; briefings: Briefing[]; total: number }>("/api/pulse/demo/briefings");
+        if (filters?.domain && filters.domain !== "all") {
+          data.briefings = data.briefings.filter(b => b.domains.includes(filters.domain as DomainKey));
+        }
+        if (filters?.risk && filters.risk !== "all") {
+          data.briefings = data.briefings.filter(b => b.overallRisk === filters.risk);
+        }
+        return data;
+      }
+      return apiFetch<{ success: true; briefings: Briefing[]; total: number }>(path);
+    },
     select: (d) => d.briefings,
   });
 }
@@ -55,7 +97,18 @@ export function useBriefings(filters?: { domain?: DomainKey | "all"; risk?: Risk
 export function useBriefing(id: string | undefined) {
   return useQuery({
     queryKey: ["pulse", "briefing", id],
-    queryFn: () => apiFetch<{ success: true; briefing: Briefing }>(`/api/pulse/briefings/${id}`),
+    queryFn: async () => {
+      if (isDemoMode()) {
+        // In demo mode, fetch the full briefings list and find by ID.
+        // Falls back to today's briefing if the specific ID isn't in the demo set.
+        const all = await demoApiFetch<{ success: true; briefings: Briefing[]; total: number }>("/api/pulse/demo/briefings");
+        const match = all.briefings.find((b) => b.id === id);
+        if (match) return { success: true as const, briefing: match };
+        // ID not in demo set — return today's as the closest proxy
+        return demoApiFetch<{ success: true; briefing: Briefing }>("/api/pulse/demo/today");
+      }
+      return apiFetch<{ success: true; briefing: Briefing }>(`/api/pulse/briefings/${id}`);
+    },
     select: (d) => d.briefing,
     enabled: !!id,
   });
@@ -64,7 +117,12 @@ export function useBriefing(id: string | undefined) {
 export function useConfidenceHistory() {
   return useQuery({
     queryKey: ["pulse", "confidence"],
-    queryFn: () => apiFetch<{ success: true; history: ConfidenceHistoryEntry[] }>("/api/pulse/confidence"),
+    queryFn: async () => {
+      if (isDemoMode()) {
+        return demoApiFetch<{ success: true; history: ConfidenceHistoryEntry[] }>("/api/pulse/demo/confidence");
+      }
+      return apiFetch<{ success: true; history: ConfidenceHistoryEntry[] }>("/api/pulse/confidence");
+    },
     select: (d) => d.history,
   });
 }
@@ -72,7 +130,12 @@ export function useConfidenceHistory() {
 export function useDissents() {
   return useQuery({
     queryKey: ["pulse", "dissents"],
-    queryFn: () => apiFetch<{ success: true; dissents: DissentRecord[] }>("/api/pulse/dissents"),
+    queryFn: async () => {
+      if (isDemoMode()) {
+        return demoApiFetch<{ success: true; dissents: DissentRecord[] }>("/api/pulse/demo/dissents");
+      }
+      return apiFetch<{ success: true; dissents: DissentRecord[] }>("/api/pulse/dissents");
+    },
     select: (d) => d.dissents,
   });
 }
@@ -89,11 +152,15 @@ export interface FileDissentInput {
 export function useFileDissent() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: FileDissentInput) =>
-      apiFetch<{ success: true; dissent: DissentRecord }>("/api/pulse/dissents", {
+    mutationFn: (input: FileDissentInput) => {
+      if (isDemoMode()) {
+        return Promise.reject(new Error("Write operations are not available in demo mode. Sign in to file a dissent."));
+      }
+      return apiFetch<{ success: true; dissent: DissentRecord }>("/api/pulse/dissents", {
         method: "POST",
         body: JSON.stringify(input),
-      }),
+      });
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["pulse", "dissents"] });
     },
@@ -103,7 +170,13 @@ export function useFileDissent() {
 export function useCustomBriefs() {
   return useQuery({
     queryKey: ["pulse", "custom"],
-    queryFn: () => apiFetch<{ success: true; requests: CustomBriefRequest[] }>("/api/pulse/custom"),
+    queryFn: () => {
+      if (isDemoMode()) {
+        // Custom briefs are not available in demo mode; return an empty list
+        return Promise.resolve({ success: true as const, requests: [] as CustomBriefRequest[] });
+      }
+      return apiFetch<{ success: true; requests: CustomBriefRequest[] }>("/api/pulse/custom");
+    },
     select: (d) => d.requests,
   });
 }
@@ -335,11 +408,15 @@ export function useArchiveBriefing() {
 export function useRequestCustomBrief() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: RequestCustomBriefInput) =>
-      apiFetch<{ success: true; request: CustomBriefRequest }>("/api/pulse/custom", {
+    mutationFn: (input: RequestCustomBriefInput) => {
+      if (isDemoMode()) {
+        return Promise.reject(new Error("Custom brief requests are not available in demo mode. Sign in to request a brief."));
+      }
+      return apiFetch<{ success: true; request: CustomBriefRequest }>("/api/pulse/custom", {
         method: "POST",
         body: JSON.stringify(input),
-      }),
+      });
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["pulse", "custom"] });
     },
