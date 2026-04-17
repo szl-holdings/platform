@@ -1,5 +1,7 @@
 # Prism Counsel — Executive Overview
 
+> **DEPRECATED:** PRISM Counsel has been retired. Legal capabilities are now available in the **Aegis legal workspace** (`/aegis/`). This document is preserved for historical reference only.
+
 **Audience:** Managing Partners, COOs, Legal Technology Decision-Makers  
 **Date:** April 2026
 

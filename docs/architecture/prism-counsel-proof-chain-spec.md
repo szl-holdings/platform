@@ -1,5 +1,7 @@
 # Prism Counsel — Proof Chain Specification
 
+> **DEPRECATED:** PRISM Counsel has been retired and consolidated into the Aegis legal workspace. Proof chain capabilities are now part of Aegis. This document is preserved for historical reference only.
+
 **Version:** 1.0  
 **Date:** April 2026  
 **Scope:** Engineering + legal product reference

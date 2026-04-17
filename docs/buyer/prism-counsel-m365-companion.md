@@ -1,5 +1,7 @@
 # Prism Counsel — Microsoft 365 Companion Overview
 
+> **DEPRECATED:** PRISM Counsel has been retired. Legal capabilities are now available in the **Aegis legal workspace** (`/aegis/`). This document is preserved for historical reference only.
+
 **Audience:** M365 Administrators, Legal IT Teams, Decision Makers  
 **Date:** April 2026
 

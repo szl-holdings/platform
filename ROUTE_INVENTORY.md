@@ -32,7 +32,7 @@ Last updated: 2026-04-16
 | `/solutions/aegis` | Aegis — Security & Defense | PUBLIC | Vertical page |
 | `/solutions/vessels` | Vessels — Maritime Intelligence | PUBLIC | Vertical page |
 | `/solutions/terra` | Terra — Real Estate Intelligence | PUBLIC | Vertical page |
-| `/solutions/prism-counsel` | PRISM Counsel | PUBLIC | Vertical page |
+| `/solutions/prism-counsel` | PRISM Counsel | PUBLIC | Vertical page — **DEPRECATED** (consolidated into Aegis legal workspace) |
 | `/design-partners` | Design Partners | PUBLIC | Partner program |
 | `/contact` | Contact | PUBLIC | Contact form |
 | `/pricing` | Pricing | PUBLIC | Pricing page |
@@ -66,23 +66,23 @@ Last updated: 2026-04-16
 
 ### Solution Trust Routes
 
-| Route | Flag |
-|-------|------|
-| `/solutions/prism-counsel/trust` | PUBLIC |
-| `/solutions/terra/trust` | PUBLIC |
-| `/solutions/vessels/trust` | PUBLIC |
-| `/solutions/aegis/trust` | PUBLIC |
-| `/solutions/lyte/trust` | PUBLIC |
+| Route | Flag | Notes |
+|-------|------|-------|
+| `/solutions/prism-counsel/trust` | PUBLIC | **DEPRECATED** — see `/solutions/aegis/trust` |
+| `/solutions/terra/trust` | PUBLIC | |
+| `/solutions/vessels/trust` | PUBLIC | |
+| `/solutions/aegis/trust` | PUBLIC | |
+| `/solutions/lyte/trust` | PUBLIC | |
 
 ### Standalone Public Product Pages
 
-| Route | Title | Flag |
-|-------|-------|------|
-| `/prism-counsel-public` | PRISM Counsel | PUBLIC |
-| `/terra-public` | Terra | PUBLIC |
-| `/vessels-public` | Vessels | PUBLIC |
-| `/aegis-public` | Aegis | PUBLIC |
-| `/carlota-jo-public` | Carlota Jo | PUBLIC |
+| Route | Title | Flag | Notes |
+|-------|-------|------|-------|
+| `/prism-counsel-public` | PRISM Counsel | PUBLIC | **DEPRECATED** — use `/solutions/aegis` |
+| `/terra-public` | Terra | PUBLIC | |
+| `/vessels-public` | Vessels | PUBLIC | |
+| `/aegis-public` | Aegis | PUBLIC | |
+| `/carlota-jo-public` | Carlota Jo | PUBLIC | |
 
 ### Demo Routes (Require Context)
 
@@ -90,7 +90,7 @@ Last updated: 2026-04-16
 |-------|-------|------|-------|
 | `/demo` | Demo | DEMO | Demo request / live demo |
 | `/lyte/demo` | Lyte Demo | DEMO | Demo entry |
-| `/pilot/prism-counsel` | PRISM Counsel Pilot | DEMO | Pilot flow |
+| `/pilot/prism-counsel` | PRISM Counsel Pilot | DEMO | **DEPRECATED** — use `/pilot/aegis` |
 | `/pilot/terra` | Terra Pilot | DEMO | Pilot flow |
 | `/pilot/vessels` | Vessels Pilot | DEMO | Pilot flow |
 | `/pilot/aegis` | Aegis Pilot | DEMO | Pilot flow |

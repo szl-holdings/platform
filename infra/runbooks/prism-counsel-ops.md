@@ -1,5 +1,7 @@
 # PRISM Counsel — Operations Runbook
 
+> **DEPRECATED:** PRISM Counsel (`artifacts/prism-counsel`) has been retired. Legal capabilities are now consolidated into the **Aegis legal workspace** (`/aegis/`). This runbook is preserved for historical reference only. No active service exists.
+
 ## Service Overview
 
 PRISM Counsel is a legal matter observability and governed execution platform for plaintiff-side NY insurance litigation teams.

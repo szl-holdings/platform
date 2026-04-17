@@ -82,11 +82,10 @@ SZL Holdings is a pnpm monorepo containing a unified ecosystem of command-grade 
 - **Users:** Fleet executives, maritime operations teams, commercial directors, insurers.
 - **Key dependencies:** `@szl-holdings/db`, `@szl-holdings/intelligence-feeds`, `@szl-holdings/worldline`, `@szl-holdings/shared-ui`.
 
-#### `artifacts/prism-counsel` — PRISM Counsel — Legal Matter Command
-- **Preview path:** `/prism-counsel/`
-- **Purpose:** Agentic legal operating system for high-stakes litigation and recovery operations. Provides Matter Twin case management, AI-assisted document review, pressure/friction boards, NY-specific practice modules (No-Fault), and recovery ops (liens, settlements).
-- **Users:** Legal partners, case managers, discovery analysts, recovery specialists.
-- **Key dependencies:** `@szl-holdings/ai-engine`, `@szl-holdings/proof-chain`, `@szl-holdings/receipt-graph`, `@szl-holdings/covenant-policy`, `@szl-holdings/shared-ui`.
+#### ~~`artifacts/prism-counsel`~~ — PRISM Counsel — **DEPRECATED**
+- **Status:** Archived — app source removed. No active workflow.
+- **Successor:** Legal capabilities consolidated into the **Aegis legal workspace** (`/aegis/`).
+- **Notes:** Matter Twin, document review, proof chain, and NY-specific practice modules are now part of Aegis. See `docs/architecture/prism-counsel-*.md` for historical architecture references (marked deprecated).
 
 #### `artifacts/carlota-jo` — Carlota Jo Consulting
 - **Preview path:** `/carlota-jo/`
@@ -106,11 +105,10 @@ SZL Holdings is a pnpm monorepo containing a unified ecosystem of command-grade 
 - **Users:** Internal administrators, ecosystem operators, prospective clients.
 - **Key dependencies:** `@szl-holdings/shared-ui`, `@szl-holdings/prism-bus`.
 
-#### `artifacts/stephen-site` — Stephen Lutar
-- **Preview path:** `/stephen/`
-- **Purpose:** Personal brand and creator economy platform for Stephen Lutar. Tracks research impact, manages media relations, and provides audience intelligence and digital product storefront.
-- **Users:** Content creators, media partners, followers.
-- **Key dependencies:** `@szl-holdings/shared-ui`.
+#### ~~`artifacts/stephen-site`~~ — Stephen Lutar Site — **DEPRECATED**
+- **Status:** Archived — app source removed. No active workflow.
+- **Successor:** Founder content consolidated into the **`/founder` page** in `artifacts/szl-holdings` (SZL Holdings web app).
+- **Notes:** All personal brand, media, and creator economy content is now served from the founder page within the main SZL Holdings site.
 
 #### `artifacts/api-server` — API Server
 - **Preview path:** `/api/`
@@ -167,9 +165,9 @@ All mobile apps depend on `@szl-holdings/mobile-shared` (verified across lyte-mo
 │  Web (Vite + React)          Mobile (Expo + React Native)       │
 │  szl-holdings  lyte          lyte-mobile  aegis-mobile          │
 │  firestorm     terra         terra-mobile vessels-mobile        │
-│  vessels       prism-counsel carlota-jo-mobile szl-mobile       │
+│  vessels       carlota-jo-mobile szl-mobile                     │
 │  carlota-jo    command       stephen-mobile                     │
-│  imperium      stephen-site                                     │
+│  imperium      [prism-counsel/stephen-site — ARCHIVED]          │
 └──────────────────┬──────────────────────┬───────────────────────┘
                    │  REST/JSON           │  REST/JSON
                    │  GraphQL             │  (EXPO_PUBLIC_API_URL)

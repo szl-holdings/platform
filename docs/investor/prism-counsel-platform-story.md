@@ -1,5 +1,7 @@
 # Prism Counsel — Platform Story
 
+> **DEPRECATED:** PRISM Counsel has been retired and its capabilities consolidated into the Aegis legal workspace. This document is preserved for historical reference only.
+
 **Audience:** Investors, Strategic Partners  
 **Date:** April 2026
 

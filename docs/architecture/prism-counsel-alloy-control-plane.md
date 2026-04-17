@@ -1,5 +1,7 @@
 # Prism Counsel — Alloy Control Plane Architecture
 
+> **DEPRECATED:** PRISM Counsel has been retired and consolidated into the Aegis legal workspace. This document is preserved for historical reference only.
+
 **Version:** 1.0  
 **Date:** April 2026  
 **Scope:** Internal engineering reference

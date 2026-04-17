@@ -50,7 +50,7 @@
 - Fleet positions and vessel data in Vessels
 - Real estate deals and distress signals in Terra
 - SOAR playbook executions in Aegis
-- Law firm matters and forecasts in PRISM Counsel
+- Law firm matters and forecasts in Aegis legal workspace (formerly PRISM Counsel)
 - Workflow execution history in Alloy
 
 Demo data is seeded via `pnpm seed:demo` and uses realistic but entirely synthetic data.
@@ -112,12 +112,12 @@ Demo data is seeded via `pnpm seed:demo` and uses realistic but entirely synthet
 
 **Goal:** Demonstrate operational fit for their domain, show trust and compliance posture.
 
-**For legal/professional services buyers (PRISM Counsel):**
-1. Landing `/solutions/prism-counsel` (2 min)
-2. PRISM Counsel dashboard — matter list, deadlines, forecast (5 min)
+**For legal/professional services buyers (Aegis legal workspace — formerly PRISM Counsel):**
+1. Landing `/solutions/aegis` (2 min)
+2. Aegis legal workspace — matter list, deadlines, forecast (5 min)
 3. Copilot workbench — AI with approval gate (5 min)
 4. Proof chain — immutable audit trail (3 min)
-5. Trust: `/solutions/prism-counsel/trust` (3 min)
+5. Trust: `/solutions/aegis/trust` (3 min)
 6. Discussion and Q&A (12 min)
 
 **For maritime operators (Vessels):**
