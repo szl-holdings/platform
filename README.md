@@ -1,153 +1,164 @@
 # SZL Holdings
 
-> The governed operational intelligence layer — connecting what is observable to what is executable, under governance, with full attribution.
+[![CI](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml) [![CodeQL](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml) [![Security](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml) [![License](https://img.shields.io/badge/license-UNLICENSED-lightgrey)](./LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/) [![pnpm](https://img.shields.io/badge/pnpm-monorepo-orange)](https://pnpm.io/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)](https://www.postgresql.org/)
 
-[Architecture](./SYSTEM-OVERVIEW.md) · [Platform Primitives](./PLATFORM_PRIMITIVES.md) · [Trust Center](./docs/trust/trust-center.md) · [Security](./SECURITY.md) · [Category Positioning](./CATEGORY_POSITIONING.md) · [Investor Docs](./docs/investor/platform-thesis.md)
+**Governed operational intelligence — connecting what is observable to what is executable, with full attribution.**
+
+[Architecture](./ARCHITECTURE.md) · [Platform Primitives](./PLATFORM_PRIMITIVES.md) · [Trust Center](./docs/trust/trust-center.md) · [Security](./SECURITY.md) · [Investor Docs](./docs/investor/platform-thesis.md)
 
 ---
 
-## What This Is
+## Trust
 
-Enterprise operations have an accountability gap. Dashboards show what happened. Alerts show what's wrong. Neither tells operators *what to do next*, *who is responsible*, or *whether the recommended action is safe to execute*.
+An AI-assisted operations platform carries a distinct trust burden. The platform addresses it structurally, not through policy documents alone.
 
-AI tools compound the problem. They add recommendation volume without governance. Operators end up with more data, more noise, and more untracked decisions running in parallel.
+| Concern | Structural Response |
+|---------|---------------------|
+| AI without oversight | Covenant Policy enforces approval gates — AI cannot execute consequential actions without human confirmation |
+| Opaque AI outputs | All recommendations include source citations, confidence scores, and retrieval provenance |
+| Audit accountability | Every action generates an immutable audit event with actor attribution via Proof Chain |
+| Access control | 11-role RBAC with org-scoped tenant isolation. Deny-by-default global auth enforcer |
+| Multi-tenancy | All queries scoped by org identifier. Cross-org access returns 404 to prevent information leakage |
+| Decision traceability | Outcome Graph tracks the full chain: signal to recommendation to decision to outcome |
+
+[Trust Center](docs/trust/trust-center.md) · [Security Policy](SECURITY.md) · [Proof and Policy Model](PROOF_AND_POLICY_MODEL.md)
+
+---
+
+## What We Build
+
+Enterprise operations have an accountability gap. Dashboards show what happened. Alerts surface what is wrong. Neither tells operators what to do next, who is responsible, or whether a recommended action is safe to execute.
+
+AI tools compound the problem: they add recommendation volume without governance. Operators accumulate more data, more noise, and more untracked decisions.
 
 SZL Holdings builds the governed decision layer that sits between signal detection and action execution:
 
 ```
-Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome
+Signal -> Context -> Recommendation -> Simulation -> Policy -> Approval -> Execution -> Proof -> Outcome
 ```
 
 Every step is instrumented. Every decision is attributed. Every AI recommendation carries source citations and confidence scores. Every consequential action requires human confirmation.
 
 ---
 
-## Platform Hierarchy
+## Product Portfolio
+
+### Platform Core
+
+**Lyte** is the flagship command surface where operators observe signals, review AI recommendations, run simulations, and make governed decisions. It runs the PRISM framework (People, Revenue, Infrastructure, Security, Market) across all connected domains.
+
+**Alloy** is the execution fabric: signal normalization, workflow orchestration, approval controls, human-in-the-loop gates, and immutable audit trail. It is the shared infrastructure layer that makes AI-assisted operations durable and accountable.
+
+**CORTEX** is the unified mobile command app (iOS and Android) that surfaces all domain workspaces with biometric authentication and offline-capable sync.
+
+### Domain Packs
+
+Domain packs extend the same governance infrastructure into domain-specific intelligence. Each pack is a structured application built on Lyte, Alloy, and the six platform primitives.
+
+| Product | Domain | Status |
+|---------|--------|--------|
+| **Aegis** | Security and defense intelligence — SOC command, advanced security modules, SOAR playbooks, threat intelligence | Active |
+| **Vessels** | Maritime fleet intelligence — AIS tracking, S&P workflow, demurrage, freight, voyage P&L | Active |
+| **Terra** | Real estate intelligence — distress pipeline, ownership graph, deal workflow, AI analysis | Active |
+| **PRISM Counsel** | Legal matter command — agentic matter management, court filings, recovery operations | Active |
+| **Carlota Jo** | Premium advisory operations — UHNW client portal, service catalog, engagement management | Active |
+| **IMPERIUM** | Cloud sovereignty — multi-cloud governance, policy enforcement, cloud estate visibility | Active |
+
+### Command Portal
+
+The Command Portal is the cross-domain real-time dashboard aggregating signals from all domain packs into a unified executive view with eight-domain SSE feeds and executive briefing.
+
+### Screens
+
+![SZL Holdings Dashboard](assets/readme/products/szl-holdings-dashboard.jpg)
+
+![Aegis Command](assets/readme/products/aegis-command.jpg)
+
+![Vessels Maritime Intelligence](assets/readme/products/vessels-maritime.jpg)
+
+![Terra Real Estate Intelligence](assets/readme/products/terra-real-estate.jpg)
+
+![Command Portal](assets/readme/products/command-portal.jpg)
+
+![Carlota Jo Advisory](assets/readme/products/carlota-jo.jpg)
+
+---
+
+## Architecture
+
+The six platform primitives define what is structurally different from dashboards, copilots, and workflow tools:
+
+| Primitive | Function |
+|-----------|----------|
+| **Outcome Graph** | Tracks the full lifecycle: recommendation to decision to outcome. Closed-loop learning — the platform knows which recommendations led to which results. |
+| **Proof Chain** | Immutable, verifiable audit trail for every significant action. Compliance teams can reconstruct any decision chain. AI outputs carry provenance. |
+| **Covenant Policy** | Defines what agents and users can do, with what approval requirements. Human-in-the-loop is enforced at the policy layer — AI cannot bypass it. |
+| **Decision Simulation** | Probabilistic simulation before action — confidence intervals and sensitivity analysis. Operators see not just what should be done but what could happen. |
+| **Workflow Engine** | Durable multi-step process orchestration with agent coordination. Complex decisions are tracked, governed, and recoverable. |
+| **Event Fabric** | Cross-domain signal backbone — normalizes, routes, and correlates events. A sanctions hit in Vessels can surface a legal risk flag in PRISM Counsel automatically. |
+
+**Platform hierarchy:**
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│  SZL HOLDINGS                                                        │
-│  The governed operational intelligence layer                         │
-├─────────────────────────────────────────────────────────────────────┤
-│  Lyte                 — Flagship command surface (PRISM framework)   │
-│  Alloy                — Execution fabric (workflows, approvals, audit)│
-│  CORTEX               — Unified mobile command (iOS + Android)       │
-├─────────────────────────────────────────────────────────────────────┤
-│  DOMAIN PACKS                                                        │
-│                                                                      │
-│  Aegis     Vessels     Terra     PRISM Counsel  Carlota Jo  IMPERIUM │
-│  Security  Maritime   Real Est  Legal Matter   Premium     Cloud    │
-│  & Defense Intelligence Intel  Command        Advisory    Sov.     │
-├─────────────────────────────────────────────────────────────────────┤
-│  GOVERNANCE INFRASTRUCTURE                                           │
-│                                                                      │
-│  Outcome Graph  ·  Proof Chain  ·  Covenant Policy                  │
-│  Decision Simulation  ·  Workflow Engine  ·  Event Fabric           │
-├─────────────────────────────────────────────────────────────────────┤
-│  DATA LAYER                                                          │
-│                                                                      │
-│  PostgreSQL 16 (Drizzle ORM)  ·  700+ tables  ·  116 schema files  │
-│  External feeds: AIS, STIX/TAXII, sanctions, court records          │
-└─────────────────────────────────────────────────────────────────────┘
++-----------------------------------------------------------------------+
+|  SZL HOLDINGS                                                         |
+|  Governed operational intelligence layer                              |
++-----------------------------------------------------------------------+
+|  Lyte                  — Flagship command surface (PRISM framework)   |
+|  Alloy                 — Execution fabric (workflows, approvals, audit)|
+|  CORTEX                — Unified mobile command (iOS + Android)       |
++-----------------------------------------------------------------------+
+|  DOMAIN PACKS                                                         |
+|                                                                       |
+|  Aegis    Vessels    Terra    PRISM Counsel    Carlota Jo    IMPERIUM  |
++-----------------------------------------------------------------------+
+|  GOVERNANCE INFRASTRUCTURE                                            |
+|                                                                       |
+|  Outcome Graph  .  Proof Chain  .  Covenant Policy                   |
+|  Decision Simulation  .  Workflow Engine  .  Event Fabric            |
++-----------------------------------------------------------------------+
+|  DATA LAYER                                                           |
+|                                                                       |
+|  PostgreSQL 16 (Drizzle ORM)  .  External feeds: AIS, STIX/TAXII    |
++-----------------------------------------------------------------------+
 ```
 
-**Lyte** is the flagship command surface — where operators observe signals, review AI recommendations, run simulations, and make governed decisions.
-
-**Alloy** is the execution fabric — where workflows are orchestrated, approvals are enforced, and audit trails are generated.
-
-**CORTEX** provides unified mobile command across all domains in a single native app.
-
-**Domain packs** extend the same governance infrastructure into domain-specific intelligence: security (Aegis), maritime (Vessels), real estate (Terra), legal (PRISM Counsel), advisory (Carlota Jo), and cloud sovereignty (IMPERIUM).
+See [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) for the full specification of each primitive and [ARCHITECTURE.md](ARCHITECTURE.md) for the service topology.
 
 ---
 
-## Six Platform Primitives
+## Repository Map
 
-What makes this structurally different from dashboards, copilots, and workflow tools:
+This is a pnpm monorepo. Key locations:
 
-| Primitive | What It Does | Why It Matters |
-|-----------|-------------|----------------|
-| **Outcome Graph** | Tracks the full lifecycle: recommendation → decision → outcome | Closed-loop learning — the platform knows which recommendations led to which results |
-| **Proof Chain** | Immutable, verifiable audit trail for every significant action | Compliance teams can reconstruct any decision chain. AI outputs carry provenance. |
-| **Covenant Policy** | Defines what agents and users can do, with what approval requirements | Human-in-the-loop is enforced at the policy layer — AI cannot bypass it |
-| **Decision Simulation** | Probabilistic simulation before action — confidence intervals and sensitivity analysis | Operators see not just "what should we do" but "what could happen if we do it" |
-| **Workflow Engine** | Durable multi-step process orchestration with agent coordination | Complex decisions are tracked, governed, and recoverable — not opaque one-shots |
-| **Event Fabric** | Cross-domain signal backbone — normalizes, routes, and correlates events | A sanctions hit in Vessels can surface a legal risk flag in PRISM Counsel automatically |
+| Path | Contents |
+|------|----------|
+| `artifacts/` | All deployable web and mobile applications |
+| `lib/` | Shared libraries: database client, auth, AI, event bus, UI components |
+| `scripts/` | Seed scripts, QA scripts, deployment utilities |
+| `docs/` | Architecture, trust, investor, and operational documentation |
+| `ops/` | Infrastructure configuration, environment matrix, runbooks |
+| `.github/workflows/` | CI, CodeQL, security, deploy, and README QA pipelines |
+| `assets/readme/` | All README-facing visual assets (products, architecture, brand) |
 
-See [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) for the full specification of each primitive.
+Artifact inventory:
 
----
-
-## Flagship Workflow: Lyte Signal-to-Action
-
-The core loop that runs in every domain, visible in Lyte:
-
-1. **Signal arrives** — a risk indicator, anomaly, or threshold breach is detected and normalized by the Event Fabric
-2. **Context is added** — an AI agent analyzes the signal, attaches source citations, confidence score, and proof chain entry
-3. **Simulation runs** — the Decision Simulation engine models possible outcomes before the recommendation surfaces
-4. **Recommendation appears** — Lyte's action queue surfaces the recommendation with evidence, confidence band, and simulation results
-5. **Policy is checked** — Covenant Policy determines whether human approval is required and from whom
-6. **Operator reviews and decides** — in Lyte (web) or CORTEX (mobile), the operator approves, rejects, or overrides
-7. **Action executes** — the Workflow Engine runs the action as a governed, durable process
-8. **Proof is recorded** — the Proof Chain captures the full trail: signal → recommendation → approval → execution → outcome
-9. **Outcome is tracked** — the Outcome Graph records the result and feeds it back into agent calibration
+| Artifact | Path | Preview |
+|----------|------|---------|
+| SZL Holdings (corporate) | `artifacts/szl-holdings/` | `/` |
+| Command Portal | `artifacts/command/` | `/command/` |
+| Aegis | `artifacts/aegis/` | `/aegis/` |
+| Vessels | `artifacts/vessels/` | `/vessels/` |
+| Terra | `artifacts/terra/` | `/terra/` |
+| Carlota Jo | `artifacts/carlota-jo/` | `/carlota-jo/` |
+| CORTEX (mobile) | `artifacts/szl-holdings-mobile/` | `/szl-holdings-mobile/` |
+| API Server | `artifacts/api-server/` | `/api/` |
 
 ---
 
-## Products
+## Build, Run, and Contribute
 
-| Product | Domain | Purpose | Status |
-|---------|--------|---------|--------|
-| **Lyte** | Flagship command | Governed command surface — PRISM framework, signal-to-action, approvals | Active — integrated into Command (`/command/`) |
-| **Alloy** | Execution fabric | Workflow orchestration, approval gates, immutable audit trail | Active — shared infrastructure |
-| **CORTEX** | Mobile command | All domain workspaces, biometric auth, offline sync | Alpha — `/szl-holdings-mobile/` |
-| **Aegis** | Security & defense | SOC command, 8 advanced security modules, SOAR playbooks, threat intelligence | Active — `/aegis/` |
-| **Vessels** | Maritime intelligence | Fleet tracking, S&P, demurrage, freight, voyage P&L | Active — `/vessels/` |
-| **Terra** | Real estate intelligence | Distress pipeline, ownership graph, deal workflow, AI analysis | Active — `/terra/` |
-| **PRISM Counsel** | Legal matter command | Agentic matter management, court filings, recovery operations | Governed extension — legal module |
-| **Carlota Jo** | Premium advisory | UHNW advisory operations — client portal, service catalog, booking | Live — `/carlota-jo/` |
-| **IMPERIUM** | Cloud sovereignty | Multi-cloud governance, policy enforcement, cloud estate visibility | Governed extension — integrated into Command |
-| **Command Portal** | Ecosystem hub | Cross-domain real-time dashboard, 8-domain SSE, executive briefing | Active — `/command/` |
-| **SZL Holdings** | Corporate platform | Investor portal, trust center, ecosystem overview | Active — `/` |
-
----
-
-## Trust
-
-An AI-assisted operations platform carries a distinct trust burden. SZL Holdings addresses it structurally:
-
-| Concern | How It Is Addressed |
-|---------|---------------------|
-| AI without oversight | Covenant Policy enforces approval gates — AI cannot execute consequential actions without human confirmation |
-| Opaque AI outputs | All recommendations include source citations, confidence scores, and retrieval provenance via Proof Chain |
-| Audit accountability | Every action generates an immutable audit event with actor attribution via Proof Chain |
-| Access control | 11-role RBAC with org-scoped tenant isolation. Deny-by-default global auth enforcer |
-| Multi-tenancy | All queries scoped by `org_id`. Cross-org access returns 404 to prevent information leakage |
-| AI governance | Advisory agents only — governance enforced at the Alloy layer, not the UI layer |
-| Decision traceability | Outcome Graph tracks the full chain: signal → recommendation → decision → outcome |
-
-See [Trust Center](docs/trust/trust-center.md) · [Security](SECURITY.md) · [Proof and Policy Model](PROOF_AND_POLICY_MODEL.md)
-
----
-
-## Technology
-
-| Layer | Stack |
-|-------|-------|
-| Language | TypeScript (full stack) |
-| Frontend | React 19, Vite, Tailwind CSS v4, Framer Motion, Recharts |
-| Mobile | Expo / React Native, NativeWind |
-| Backend | Express 5, Node.js |
-| Database | PostgreSQL 16, Drizzle ORM (700+ tables, 116 schema files) |
-| AI | OpenAI, Anthropic, Gemini — multi-provider with fallback. 9 schema-validated decision types |
-| Auth | OIDC/PKCE, 11-role RBAC, SCIM 2.0, Azure AD multi-tenant SSO |
-| Real-time | WebSocket (signed tickets), SSE, push notifications |
-| Event system | Event Fabric / Prism Bus (cross-domain), Forge Runtime (agent execution) |
-| Monorepo | pnpm workspaces — 40+ packages |
-
----
-
-## Local Development
+**Requirements:** Node.js 22+, pnpm 10+
 
 ```bash
 git clone https://github.com/szl-holdings/szl-holdings-platform.git
@@ -156,116 +167,66 @@ pnpm install
 pnpm dev
 ```
 
+**Common tasks:**
+
+```bash
+pnpm typecheck          # TypeScript type checking across all packages
+pnpm test               # Unit and component tests
+pnpm test:integration   # Integration tests
+pnpm readme:check       # Validate README images and badge workflows
+pnpm qa:routes          # Smoke-test all routes
+pnpm audit:all          # Run full audit suite (mocks, routes, deps, copy, design)
+pnpm seed               # Seed the local database with demo data
+```
+
 See [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) for staging and production deployment.
 
----
+**Contributing:** See [CONTRIBUTING.md](CONTRIBUTING.md) for the branch workflow, code style, commit format, and PR process. All contributions require a passing CI run and a passing `pnpm readme:check` before merge.
 
-## Deployment
+**Environments:**
 
 | Environment | Purpose | Trigger |
 |-------------|---------|---------|
-| **Replit Workspace** | Active development, internal preview | Always on |
-| **Staging** | Integration validation before production | Auto on push to `main` via `deploy-staging.yml` |
-| **Production** | Customer-facing deployment | On published release via `deploy-production.yml` |
-
-See [Deployment Model](docs/trust/deployment-model.md) · [Branch Protection & CI/CD Settings](.github/BRANCH_PROTECTION.md)
+| Development | Active development and internal preview | Always on (Replit workspace) |
+| Staging | Integration validation before production | Push to `main` via `deploy-staging.yml` |
+| Production | Customer-facing deployment | Published release via `deploy-production.yml` |
 
 ---
 
-## Documentation
+## Governance, Security, and Contact
 
-### Canonical Diligence Documents
+**Access control:** 11-role RBAC with deny-by-default enforcement. All routes require authentication. All queries are org-scoped.
 
-These top-level documents are the canonical reference for Series A diligence, enterprise evaluation, and technical review.
+**AI governance:** Advisory agents only. Covenant Policy enforces approval gates at the workflow layer. AI cannot bypass human confirmation requirements.
+
+**Audit trail:** Every consequential action writes an immutable Proof Chain event with actor attribution, timestamp, source, and decision context.
+
+**Vulnerability disclosure:** See [SECURITY.md](SECURITY.md). Responsible disclosure only.
+
+**Known gaps and tech debt:** Documented honestly in [KNOWN-GAPS.md](KNOWN-GAPS.md).
+
+### Documentation Index
 
 | Document | Purpose |
 |----------|---------|
-| [SYSTEM-OVERVIEW.md](SYSTEM-OVERVIEW.md) | High-level platform overview for non-technical stakeholders |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture: topology, stack, monorepo structure, design principles |
-| [PRODUCT-SURFACES.md](PRODUCT-SURFACES.md) | All product surfaces with status, audience, tech stack |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture: topology, stack, design principles |
+| [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) | The six core abstractions |
 | [DATA-MODEL.md](DATA-MODEL.md) | Entity-relationship overview of the core database schema |
 | [API-SPEC.md](API-SPEC.md) | API surface: route inventory, auth model, rate limiting |
 | [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) | Role-permission matrix mapped to implementation |
-| [SECURITY-CHECKLIST.md](SECURITY-CHECKLIST.md) | Security controls checklist mapped to actual implementation |
-| [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) | Deployment procedures for Replit and Azure |
-| [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md) | Operational procedures, failure modes, incident response |
-| [KNOWN-GAPS.md](KNOWN-GAPS.md) | Honest assessment of tech debt, gaps, and planned improvements |
-
-### Platform Narrative
-| Document | Purpose |
-|----------|---------|
-| [CATEGORY_POSITIONING.md](CATEGORY_POSITIONING.md) | What "governed operational intelligence" means, why it matters, and the domain-pack extensibility model |
-| [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) | The six core abstractions that define the platform |
-| [PROOF_AND_POLICY_MODEL.md](PROOF_AND_POLICY_MODEL.md) | How trust is recorded and enforced |
-| [DECISION_SIMULATION.md](DECISION_SIMULATION.md) | Monte Carlo simulation across domains |
-
-### Technical Reference
-| Document | Purpose |
-|----------|---------|
-| [SYSTEM-OVERVIEW.md](SYSTEM-OVERVIEW.md) | Architecture organized around the governed decision loop |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Service topology, shared libraries, data flow |
-| [API-SPEC.md](API-SPEC.md) | Full REST/GraphQL/MCP API catalogue |
-| [DATA-MODEL.md](DATA-MODEL.md) | Database schema overview |
-| [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) | Role/route/permission mappings |
-
-### Product
-| Document | Purpose |
-|----------|---------|
-| [PRODUCT-SURFACES.md](PRODUCT-SURFACES.md) | Every user-facing artifact with purpose, taxonomy, and audience |
-| [PRODUCT_SURFACE_MAP.md](PRODUCT_SURFACE_MAP.md) | Which primitives power which surfaces |
-| [NAVIGATION_STRATEGY.md](NAVIGATION_STRATEGY.md) | Information architecture and navigation model |
-| [DEMO_GUIDE.md](DEMO_GUIDE.md) | How to run demos for different audiences |
-| [ROUTE_INVENTORY.md](ROUTE_INVENTORY.md) | Complete route inventory with classification |
-
-### Brand & Company
-| Document | Purpose |
-|----------|---------|
-| [BRAND_GUIDELINES.md](BRAND_GUIDELINES.md) | Visual identity, voice, and terminology standards |
-| [COMPANY_FACT_SHEET.md](COMPANY_FACT_SHEET.md) | One-page company summary |
-| [PRESS_KIT.md](PRESS_KIT.md) | Media-ready overview and boilerplate |
-| [TRUST_CENTER_INDEX.md](TRUST_CENTER_INDEX.md) | Index for all trust documentation |
-
-### Investor
-| Document | Purpose |
-|----------|---------|
-| [INVESTOR_NARRATIVE.md](INVESTOR_NARRATIVE.md) | Governed decision infrastructure thesis — why now, why this architecture compounds |
-| [MOAT_MAP.md](MOAT_MAP.md) | Eight structural moats with codebase evidence |
-| [PRODUCT_ROADMAP.md](PRODUCT_ROADMAP.md) | 30-day and 90-day priorities |
-| [TECHNICAL_DILIGENCE_PACKET.md](TECHNICAL_DILIGENCE_PACKET.md) | Single-document technical diligence reference for Series A review |
-| [docs/investor/platform-thesis.md](docs/investor/platform-thesis.md) | Category thesis and investment case |
-| [docs/investor/investor-overview.md](docs/investor/investor-overview.md) | Company overview for investors |
-| [docs/investor/product-readiness.md](docs/investor/product-readiness.md) | Honest product status assessment |
-| [docs/investor/go-to-market.md](docs/investor/go-to-market.md) | GTM strategy and sequencing |
-
-### Trust & Security
-| Area | Document |
-|------|----------|
-| Trust center | [docs/trust/trust-center.md](docs/trust/trust-center.md) |
-| Security posture | [docs/trust/security-posture.md](docs/trust/security-posture.md) |
-| Access control policy | [docs/ACCESS_CONTROL.md](docs/ACCESS_CONTROL.md) |
-| Secrets policy | [docs/SECRETS_POLICY.md](docs/SECRETS_POLICY.md) |
-| Deployment model | [docs/trust/deployment-model.md](docs/trust/deployment-model.md) |
-
-### Operations & Development
-| Area | Document |
-|------|----------|
-| Ops runbook (source) | [docs/ops-runbook.md](docs/ops-runbook.md) |
-| Replit operations | [REPLIT_OPERATIONS.md](REPLIT_OPERATIONS.md) |
-| Environment matrix (canonical) | [ops/infra/environment-matrix.md](ops/infra/environment-matrix.md) |
-| Production architecture | [ops/infra/target-production-architecture.md](ops/infra/target-production-architecture.md) |
-| Backup & recovery (canonical) | [ops/infra/recovery-and-backup-model.md](ops/infra/recovery-and-backup-model.md) |
-| Launch readiness scorecard | [ops/frontier/launch-readiness-scorecard.md](ops/frontier/launch-readiness-scorecard.md) |
-| Mobile release readiness | [ops/mobile/flagship-release-readiness.md](ops/mobile/flagship-release-readiness.md) |
-
-### Process & Governance
-| Area | Document |
-|------|----------|
-| Release process | [RELEASE_PROCESS.md](RELEASE_PROCESS.md) |
-| Release checklist | [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) |
-| Changelog | [CHANGELOG.md](CHANGELOG.md) |
-| Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
-| Security disclosure | [SECURITY.md](SECURITY.md) |
+| [SECURITY-CHECKLIST.md](SECURITY-CHECKLIST.md) | Security controls checklist |
+| [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) | Deployment procedures |
+| [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md) | Operational procedures and incident response |
+| [KNOWN-GAPS.md](KNOWN-GAPS.md) | Honest assessment of tech debt and planned improvements |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guidelines |
+| [docs/readme-standards.md](docs/readme-standards.md) | README asset and badge standards |
 
 ---
 
-**Stephen Lutar** — Founder & CEO, SZL Holdings
+**Stephen Lutar** — Founder and CEO, SZL Holdings
+
+**Email:** inquiries@szlholdings.com
+**Website:** [szlholdings.com](https://szlholdings.com)
+**LinkedIn:** [linkedin.com/in/stephen-l-279315240](https://linkedin.com/in/stephen-l-279315240)
+
+Open to design partner conversations, enterprise evaluation, and investment introductions.
