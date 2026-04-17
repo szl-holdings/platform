@@ -8,14 +8,14 @@ import {
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import {
-  TIME_ENTRIES,
-  INVOICES,
   BILLING_DATA,
   RATE_CARDS,
   type TimeEntry as BaseTimeEntry,
   type Invoice as BaseInvoice,
 } from "@/data/operationalData";
 import { jsPDF } from "jspdf";
+
+const API_BASE = "/api";
 
 const GOLD = "var(--color-gold)";
 const GOLD_HEX: [number, number, number] = [201, 169, 97];
@@ -56,7 +56,6 @@ const ENGAGEMENT_TO_CLIENT: Record<string, string> = {
   "Internal": "Internal",
 };
 
-const STORAGE_KEY = "carlota-jo:time-tracking:v1";
 const CLIENT_EMAIL_KEY = "carlota-jo:client-emails:v1";
 
 const DEFAULT_CLIENT_EMAILS: Record<string, string> = {
@@ -83,28 +82,36 @@ function saveClientEmails(map: Record<string, string>) {
   try { window.localStorage.setItem(CLIENT_EMAIL_KEY, JSON.stringify(map)); } catch { /* ignore */ }
 }
 
-type PersistedState = { entries: TimeEntry[]; invoices: Invoice[]; nextInvoiceSeq: number };
-
-function defaultState(): PersistedState {
-  return { entries: TIME_ENTRIES as TimeEntry[], invoices: INVOICES as Invoice[], nextInvoiceSeq: 12 };
+let csrfTokenCache: string | null = null;
+async function getCsrfToken(): Promise<string> {
+  if (csrfTokenCache) return csrfTokenCache;
+  const res = await fetch(`${API_BASE}/csrf-token`, { credentials: "include" });
+  const body = await res.json();
+  csrfTokenCache = String(body.csrfToken ?? "");
+  return csrfTokenCache;
 }
 
-function loadState(): PersistedState {
-  if (typeof window === "undefined") return defaultState();
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultState();
-    const parsed = JSON.parse(raw) as PersistedState;
-    if (!parsed.entries || !parsed.invoices) throw new Error("invalid");
-    return parsed;
-  } catch {
-    return defaultState();
+async function apiJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const method = (init?.method ?? "GET").toUpperCase();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...((init?.headers as Record<string, string>) ?? {}),
+  };
+  if (method !== "GET" && method !== "HEAD") {
+    headers["X-CSRF-Token"] = await getCsrfToken();
   }
-}
-
-function saveState(state: PersistedState) {
-  if (typeof window === "undefined") return;
-  try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch { /* ignore quota */ }
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...init,
+    headers,
+    credentials: "include",
+  });
+  if (!res.ok) {
+    // If CSRF expired, invalidate cache so next write refetches.
+    if (res.status === 403) csrfTokenCache = null;
+    throw new Error(`HTTP ${res.status}`);
+  }
+  const body = await res.json();
+  return (body?.data ?? body) as T;
 }
 
 function formatToday(): string {
@@ -138,9 +145,8 @@ export default function TimeTracking() {
   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
-  const [entries, setEntries] = useState<TimeEntry[]>(() => loadState().entries);
-  const [invoices, setInvoices] = useState<Invoice[]>(() => loadState().invoices);
-  const [nextInvoiceSeq, setNextInvoiceSeq] = useState<number>(() => loadState().nextInvoiceSeq);
+  const [entries, setEntries] = useState<TimeEntry[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [clientEmails, setClientEmails] = useState<Record<string, string>>(() => loadClientEmails());
   const [emailModal, setEmailModal] = useState<{ invoiceId: string; mode: "send" | "resend" } | null>(null);
   const [emailRecipient, setEmailRecipient] = useState("");
@@ -153,8 +159,22 @@ export default function TimeTracking() {
   }, [clientEmails]);
 
   useEffect(() => {
-    saveState({ entries, invoices, nextInvoiceSeq });
-  }, [entries, invoices, nextInvoiceSeq]);
+    let cancelled = false;
+    (async () => {
+      try {
+        const [es, is] = await Promise.all([
+          apiJson<TimeEntry[]>("/booking/time-entries"),
+          apiJson<Invoice[]>("/booking/time-invoices"),
+        ]);
+        if (cancelled) return;
+        setEntries(es);
+        setInvoices(is);
+      } catch {
+        if (!cancelled) setToast("Could not load time tracking data.");
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     if (!toast) return;
@@ -211,14 +231,14 @@ export default function TimeTracking() {
     }
   };
 
-  const saveNewEntry = () => {
+  const saveNewEntry = async () => {
     const hours = parseFloat(newEntry.hours);
     if (!newEntry.phase.trim() || !newEntry.deliverable.trim() || !Number.isFinite(hours) || hours <= 0) {
       setToast("Please complete phase, deliverable, and hours.");
       return;
     }
     const rateMap: Record<TimeEntry["rateType"], number> = { standard: 275, premium: 350, fixed: 4200, "non-billable": 0 };
-    const entry: TimeEntry = {
+    const payload = {
       id: "t-" + Date.now().toString(36),
       date: formatToday(),
       engagement: newEntry.engagement,
@@ -231,54 +251,56 @@ export default function TimeTracking() {
       billable: newEntry.rateType !== "non-billable",
       approved: false,
     };
-    setEntries(prev => [entry, ...prev]);
-    setShowNewEntry(false);
-    setNewEntry({ engagement: "Luminary Brands", phase: "", deliverable: "", hours: "", rateType: "standard", description: "" });
-    setToast("Time entry logged.");
+    try {
+      const saved = await apiJson<TimeEntry>("/booking/time-entries", { method: "POST", body: JSON.stringify(payload) });
+      setEntries(prev => [saved, ...prev]);
+      setShowNewEntry(false);
+      setNewEntry({ engagement: "Luminary Brands", phase: "", deliverable: "", hours: "", rateType: "standard", description: "" });
+      setToast("Time entry logged.");
+    } catch {
+      setToast("Failed to save time entry.");
+    }
   };
 
-  const generateInvoices = () => {
-    const eligible = entries.filter(e => e.billable && e.approved && !e.invoiceId && e.engagement !== "Internal");
-    if (eligible.length === 0) {
+  const approveEntry = async (id: string) => {
+    try {
+      const updated = await apiJson<TimeEntry>(`/booking/time-entries/${encodeURIComponent(id)}`, {
+        method: "PATCH", body: JSON.stringify({ approved: true }),
+      });
+      setEntries(prev => prev.map(x => x.id === id ? updated : x));
+      setToast("Entry approved.");
+    } catch {
+      setToast("Failed to approve entry.");
+    }
+  };
+
+  const generateInvoices = async () => {
+    const readyCount = entries.filter(e => e.billable && e.approved && !e.invoiceId && e.engagement !== "Internal").length;
+    if (readyCount === 0) {
       setToast("No approved billable entries ready to invoice.");
       return;
     }
-    const groups = new Map<string, TimeEntry[]>();
-    for (const e of eligible) {
-      const arr = groups.get(e.engagement) ?? [];
-      arr.push(e);
-      groups.set(e.engagement, arr);
+    try {
+      const result = await apiJson<{ invoices: Invoice[]; updatedEntries: TimeEntry[] }>(
+        "/booking/time-invoices/generate",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            engagementToClient: ENGAGEMENT_TO_CLIENT,
+            issuedDate: formatToday(),
+            dueDate: addDays(15),
+          }),
+        },
+      );
+      const updatedMap = new Map(result.updatedEntries.map(e => [e.id, e]));
+      setEntries(prev => prev.map(e => updatedMap.get(e.id) ?? e));
+      setInvoices(prev => [...result.invoices, ...prev]);
+      setActiveTab("invoices");
+      const total = result.invoices.reduce((s, i) => s + i.amount, 0);
+      setToast(`${result.invoices.length} draft invoice${result.invoices.length > 1 ? "s" : ""} generated · £${total.toLocaleString()}`);
+    } catch {
+      setToast("Failed to generate invoices.");
     }
-    const newInvoices: Invoice[] = [];
-    let seq = nextInvoiceSeq;
-    const updatedEntries = [...entries];
-    for (const [engagement, items] of groups) {
-      const id = `INV-2026-${String(seq).padStart(3, "0")}`;
-      seq += 1;
-      const amount = items.reduce((s, e) => s + entryValue(e), 0);
-      const inv: Invoice = {
-        id,
-        client: ENGAGEMENT_TO_CLIENT[engagement] ?? engagement,
-        engagement,
-        amount,
-        status: "draft",
-        dueDate: addDays(15),
-        issuedDate: formatToday(),
-        items: items.length,
-        entryIds: items.map(e => e.id),
-      };
-      newInvoices.push(inv);
-      for (const e of items) {
-        const idx = updatedEntries.findIndex(x => x.id === e.id);
-        if (idx !== -1) updatedEntries[idx] = { ...updatedEntries[idx], invoiceId: id };
-      }
-    }
-    setEntries(updatedEntries);
-    setInvoices(prev => [...newInvoices, ...prev]);
-    setNextInvoiceSeq(seq);
-    setActiveTab("invoices");
-    const total = newInvoices.reduce((s, i) => s + i.amount, 0);
-    setToast(`${newInvoices.length} draft invoice${newInvoices.length > 1 ? "s" : ""} generated · £${total.toLocaleString()}`);
   };
 
   const openSendInvoice = (id: string, mode: "send" | "resend" = "send") => {
@@ -368,6 +390,16 @@ export default function TimeTracking() {
       }
 
       const sentAtIso = (data.sentAt as string) || new Date().toISOString();
+      
+      // PERSIST TO POSTGRES
+      try {
+        await apiJson(`/booking/time-invoices/${encodeURIComponent(inv.id)}`, {
+          method: "PATCH", body: JSON.stringify({ status: "sent", sentAt: sentAtIso, sentTo: recipient }),
+        });
+      } catch (patchErr) {
+        console.error("Failed to persist invoice sent status to Postgres", patchErr);
+      }
+
       setInvoices(prev => prev.map(x => x.id === inv.id
         ? { ...x, status: x.status === "draft" ? "sent" : x.status, sentAt: sentAtIso, sentTo: recipient, lastSendError: undefined }
         : x));
@@ -382,6 +414,20 @@ export default function TimeTracking() {
       setEmailError(errorMsg);
       setInvoices(prev => prev.map(x => x.id === inv.id ? { ...x, lastSendError: errorMsg } : x));
       setEmailSending(false);
+    }
+  };
+
+  const sendInvoice = async (id: string) => {
+    try {
+      const updated = await apiJson<Invoice>(`/booking/time-invoices/${encodeURIComponent(id)}`, {
+        method: "PATCH", body: JSON.stringify({ status: "sent", sentAt: new Date().toISOString() }),
+      });
+      setInvoices(prev => prev.map(inv => inv.id === id ? updated : inv));
+      setToast(`${id} marked as sent.`);
+    } catch {
+      setToast("Failed to update invoice.");
+    }
+  };
     }
   };
 
@@ -860,8 +906,7 @@ export default function TimeTracking() {
                                 <span>·</span>
                                 <button onClick={(ev) => {
                                   ev.stopPropagation();
-                                  setEntries(prev => prev.map(x => x.id === entry.id ? { ...x, approved: true } : x));
-                                  setToast("Entry approved.");
+                                  void approveEntry(entry.id);
                                 }} style={{ background: "none", border: "none", padding: 0, color: GOLD, fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
                                   Approve
                                 </button>

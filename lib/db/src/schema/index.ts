@@ -20,6 +20,7 @@ export * from "./dreamscape";
 export * from "./readiness";
 export * from "./inca";
 export * from "./carlota_jo";
+export * from "./carlota_time_billing";
 export * from "./holdings";
 export * from "./conversations";
 export * from "./messages";

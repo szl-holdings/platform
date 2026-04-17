@@ -69,6 +69,14 @@ const PUBLIC_PREFIXES = [
   // and are intentionally accessible without a session (richer context shown when authed).
   // The POST mutation /submit-review is NOT included here; it enforces its own auth.
   "/api/terra/cognitive/",
+  // Carlota Jo time tracking & invoice persistence — publicly accessible from the
+  // time-tracking page (which is unauthenticated like the rest of the marketing
+  // demo). Backed by Postgres so the data syncs across devices.
+  "/api/booking/time-entries",
+  "/api/booking/time-invoices",
+  "/api/booking/services",
+  // Debug: add console.log to confirm matching
+  "/api/booking/health",
 ];
 
 function isValidInternalToken(req: Request): boolean {

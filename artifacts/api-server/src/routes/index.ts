@@ -38,8 +38,17 @@ import cognitiveRuntimeRouter from "./cognitive-runtime";
 import execBriefingsRouter from "./executive-briefings";
 import fundInboundDealsRouter from "./fund-inbound-deals";
 import aegisPcapRouter from "./aegis-pcap";
+import carlotaTimeTrackingRouter from "./carlota-time-tracking";
 
 const router: IRouter = Router();
+
+// Carlota Jo time-tracking & invoice routes (public, unauthenticated).
+// Mounted at the TOP of the /api router, BEFORE any route group that applies
+// blanket auth/tenant-scope middleware to an unprefixed sub-router — otherwise
+// those guards would intercept /booking/time-entries and /booking/time-invoices
+// and return 401 before the handlers run. See carlota-time-tracking.ts for the
+// matching PUBLIC_PREFIXES allowlist in global-auth-enforcer.ts.
+router.use(carlotaTimeTrackingRouter);
 
 // Global Guardian policy check — derives category from request path and
 // applies to every agent-facing route family. Read-only methods skip
