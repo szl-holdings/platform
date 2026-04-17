@@ -107,6 +107,12 @@ export default defineConfig({
       { find: "@workspace/self-model/store", replacement: resolve(__dirname, "packages/self-model/src/store.ts") },
       { find: "@workspace/self-model/update", replacement: resolve(__dirname, "packages/self-model/src/update.ts") },
       { find: "@workspace/self-model", replacement: resolve(__dirname, "packages/self-model/src/index.ts") },
+      { find: "@workspace/verifier/types", replacement: resolve(__dirname, "packages/verifier/src/types.ts") },
+      { find: "@workspace/verifier/checks", replacement: resolve(__dirname, "packages/verifier/src/checks.ts") },
+      { find: "@workspace/verifier/aggregator", replacement: resolve(__dirname, "packages/verifier/src/aggregator.ts") },
+      { find: "@workspace/verifier/engine", replacement: resolve(__dirname, "packages/verifier/src/engine.ts") },
+      { find: "@workspace/verifier/store", replacement: resolve(__dirname, "packages/verifier/src/store.ts") },
+      { find: "@workspace/verifier", replacement: resolve(__dirname, "packages/verifier/src/index.ts") },
     ],
   },
   test: {
@@ -128,6 +134,7 @@ export default defineConfig({
       "packages/replay-core/src/**/*.test.ts",
       "packages/planner/src/**/*.test.ts",
       "packages/self-model/src/**/*.test.ts",
+      "packages/verifier/src/**/*.test.ts",
     ],
     exclude: [
       "tests/e2e/**",

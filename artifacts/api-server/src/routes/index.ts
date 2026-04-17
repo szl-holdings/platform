@@ -28,6 +28,7 @@ import reflectionsRouter from "./reflections";
 import plansRouter from "./plans";
 import * as alloyRuntime from "./groups/alloy-runtime-group";
 import * as selfModel from "./groups/self-model";
+import * as verifier from "./groups/verifier";
 
 const router: IRouter = Router();
 
@@ -57,6 +58,7 @@ graph.register(router);
 guardian.register(router);
 alloyRuntime.register(router);
 selfModel.register(router);
+verifier.register(router);
 
 router.use(tracesRouter);
 router.use(reflectionsRouter);

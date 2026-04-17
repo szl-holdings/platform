@@ -113,6 +113,9 @@
     },
     {
       "path": "./packages/self-model"
+    },
+    {
+      "path": "./packages/verifier"
     }
   ]
 }

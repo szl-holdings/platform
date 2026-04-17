@@ -444,6 +444,9 @@ importers:
       '@workspace/trace-graph':
         specifier: workspace:*
         version: link:../../packages/trace-graph
+      '@workspace/verifier':
+        specifier: workspace:*
+        version: link:../../packages/verifier
       archiver:
         specifier: ^7.0.1
         version: 7.0.1
@@ -2631,6 +2634,25 @@ importers:
       typescript:
         specifier: ~5.9.2
         version: 5.9.3
+
+  packages/verifier:
+    dependencies:
+      '@szl-holdings/policy-engine':
+        specifier: workspace:*
+        version: link:../policy-engine
+      drizzle-orm:
+        specifier: 'catalog:'
+        version: 0.45.2(@types/pg@8.18.0)(pg@8.20.0)
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   scripts:
     dependencies:

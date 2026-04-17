@@ -1,0 +1,42 @@
+{
+  "name": "@workspace/verifier",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Verifier — strict pre-commit checks (evidence, citation, contradiction, policy, domain, action safety, completeness, calibration) gating every cognitive output.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./src/types.ts"
+    },
+    "./engine": {
+      "types": "./dist/engine.d.ts",
+      "import": "./src/engine.ts"
+    },
+    "./checks": {
+      "types": "./dist/checks.d.ts",
+      "import": "./src/checks.ts"
+    },
+    "./aggregator": {
+      "types": "./dist/aggregator.d.ts",
+      "import": "./src/aggregator.ts"
+    },
+    "./store": {
+      "types": "./dist/store.d.ts",
+      "import": "./src/store.ts"
+    }
+  },
+  "dependencies": {
+    "@szl-holdings/policy-engine": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "vitest": "^4.1.2"
+  }
+}
