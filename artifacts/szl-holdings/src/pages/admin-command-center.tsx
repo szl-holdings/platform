@@ -973,17 +973,32 @@ function SupportPanel() {
     stephen_contact: { label: "Stephen", variant: "neutral" },
   };
 
-  const exportCsv = () => {
-    const rows = [["ID", "Name", "Email", "Form", "Company", "Status", "Message", "Date"]];
-    (data?.tickets ?? []).forEach((t) => {
-      rows.push([String(t.id), t.fullName, t.email, t.formKey, t.company ?? "", t.status ?? "new", (t.message ?? "").replace(/\n/g, " "), new Date(t.createdAt).toLocaleDateString()]);
-    });
-    const csv = rows.map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = "support-queue.csv"; a.click();
-    URL.revokeObjectURL(url);
+  const exportCsv = async () => {
+    const csvParams = new URLSearchParams();
+    if (showResolved) csvParams.set("includeResolved", "true");
+    if (search) csvParams.set("search", search);
+    if (statusFilter && statusFilter !== "all") csvParams.set("status", statusFilter);
+    csvParams.set("format", "csv");
+    try {
+      const res = await fetch(`${API}/admin/support-queue?${csvParams}`, { credentials: "include" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "support-queue.csv"; a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      const rows = [["ID", "Name", "Email", "Form", "Company", "Status", "Message", "Date"]];
+      tickets.forEach((t) => {
+        rows.push([String(t.id), t.fullName, t.email, t.formKey, t.company ?? "", t.status ?? "new", (t.message ?? "").replace(/\n/g, " "), new Date(t.createdAt).toLocaleDateString()]);
+      });
+      const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "support-queue.csv"; a.click();
+      URL.revokeObjectURL(url);
+    }
   };
 
   return (
@@ -1051,7 +1066,7 @@ function SupportPanel() {
           <CheckCircle2 className="w-3.5 h-3.5" /> {showResolved ? "Hiding resolved" : "Show resolved"}
         </button>
         <button onClick={exportCsv} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-          <Download className="w-3.5 h-3.5" /> Export
+          <Download className="w-3.5 h-3.5" /> Export CSV
         </button>
       </div>
 
@@ -1253,17 +1268,30 @@ function AuditPanel() {
     queryFn: () => adminFetch("/admin/orgs"),
   });
 
-  const exportCsv = () => {
-    const rows = [["ID", "Action", "Actor", "Target", "Result", "IP", "Timestamp", "Details"]];
-    (data?.logs ?? []).forEach((l) => {
-      rows.push([l.id, l.action, l.actor, l.target, l.result, l.ipAddress ?? "", l.timestamp, l.details ?? ""]);
-    });
-    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = "audit-log.csv"; a.click();
-    URL.revokeObjectURL(url);
+  const exportCsv = async () => {
+    const csvParams = new URLSearchParams(params);
+    csvParams.delete("limit");
+    csvParams.set("format", "csv");
+    try {
+      const res = await fetch(`${API}/admin/audit-log?${csvParams}`, { credentials: "include" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "audit-log.csv"; a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      const rows = [["ID", "Action", "Actor", "Target", "Result", "IP", "Timestamp", "Details"]];
+      (data?.logs ?? []).forEach((l) => {
+        rows.push([l.id, l.action, l.actor, l.target, l.result, l.ipAddress ?? "", l.timestamp, l.details ?? ""]);
+      });
+      const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "audit-log.csv"; a.click();
+      URL.revokeObjectURL(url);
+    }
   };
 
   const actionColors: Record<string, string> = {

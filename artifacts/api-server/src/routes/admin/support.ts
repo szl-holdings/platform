@@ -1,7 +1,7 @@
 import type { IRouter } from "express";
 import { db } from "@szl-holdings/db";
 import { contactSubmissionsTable, leadStatusTable, supportKnowledgeArticlesTable } from "@szl-holdings/db";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, ilike, or, and } from "drizzle-orm";
 import { z } from "zod";
 import { validateBody } from "../../lib/validation.js";
 import { sendError, sendNotFound, sendBadRequest } from "../../lib/api-response.js";
@@ -80,12 +80,35 @@ function buildSupportReplyEmail(
 </html>`;
 }
 
+function buildCsvRow(cells: string[]): string {
+  return cells.map((c) => `"${String(c ?? "").replace(/"/g, '""')}"`).join(",");
+}
+
 export function register(router: IRouter): void {
   router.get("/admin/support-queue", async (req, res) => {
     try {
       const includeResolved = req.query.includeResolved === "true";
+      const format = req.query.format as string | undefined;
+      const search = req.query.search as string | undefined;
+      const statusFilter = req.query.status as string | undefined;
       const limitParam = parseInt(req.query.limit as string ?? "100", 10);
-      const limit = Math.min(isNaN(limitParam) ? 100 : limitParam, 500);
+      const limit = format === "csv" ? 5000 : Math.min(isNaN(limitParam) ? 100 : limitParam, 500);
+
+      const conditions = [];
+      if (!includeResolved) conditions.push(eq(contactSubmissionsTable.status, "open"));
+      if (search) {
+        conditions.push(
+          or(
+            ilike(contactSubmissionsTable.fullName, `%${search}%`),
+            ilike(contactSubmissionsTable.email, `%${search}%`),
+            ilike(contactSubmissionsTable.formKey, `%${search}%`),
+          )!
+        );
+      }
+      if (statusFilter && statusFilter !== "all") {
+        conditions.push(eq(leadStatusTable.status, statusFilter as "new" | "contacted" | "qualified" | "closed" | "lost"));
+      }
+      const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
       const rows = await db
         .select({
@@ -106,18 +129,9 @@ export function register(router: IRouter): void {
         })
         .from(contactSubmissionsTable)
         .leftJoin(leadStatusTable, eq(leadStatusTable.contactSubmissionId, contactSubmissionsTable.id))
-        .where(
-          includeResolved
-            ? undefined
-            : eq(contactSubmissionsTable.status, "open")
-        )
+        .where(whereClause)
         .orderBy(desc(contactSubmissionsTable.createdAt))
         .limit(limit);
-
-      const [{ total }, [{ openTotal }]] = await Promise.all([
-        db.select({ total: sql<number>`count(*)::int` }).from(contactSubmissionsTable).then(r => r[0]),
-        db.select({ openTotal: sql<number>`count(*)::int` }).from(contactSubmissionsTable).where(eq(contactSubmissionsTable.status, "open")),
-      ]);
 
       const tickets = rows.map((r) => ({
         id: r.id,
@@ -135,6 +149,35 @@ export function register(router: IRouter): void {
         notes: r.notes,
         ownerUserId: r.ownerUserId,
       }));
+
+      if (format === "csv") {
+        const header = buildCsvRow(["ID", "Name", "Email", "Form", "Company", "Status", "Submission Status", "Message", "Notes", "Owner User ID", "Submitted At", "Resolved At"]);
+        const body = tickets.map((t) =>
+          buildCsvRow([
+            String(t.id),
+            t.fullName,
+            t.email,
+            t.formKey,
+            t.company ?? "",
+            t.status,
+            t.submissionStatus ?? "",
+            (t.message ?? "").replace(/\r?\n/g, " "),
+            (t.notes ?? "").replace(/\r?\n/g, " "),
+            t.ownerUserId != null ? String(t.ownerUserId) : "",
+            t.createdAt instanceof Date ? t.createdAt.toISOString() : String(t.createdAt),
+            t.resolvedAt instanceof Date ? t.resolvedAt.toISOString() : (t.resolvedAt ?? ""),
+          ])
+        );
+        res.setHeader("Content-Type", "text/csv; charset=utf-8");
+        res.setHeader("Content-Disposition", 'attachment; filename="support-queue.csv"');
+        res.send([header, ...body].join("\r\n"));
+        return;
+      }
+
+      const [{ total }, [{ openTotal }]] = await Promise.all([
+        db.select({ total: sql<number>`count(*)::int` }).from(contactSubmissionsTable).then(r => r[0]),
+        db.select({ openTotal: sql<number>`count(*)::int` }).from(contactSubmissionsTable).where(eq(contactSubmissionsTable.status, "open")),
+      ]);
 
       res.json({ tickets, total, openTotal });
     } catch (err) {

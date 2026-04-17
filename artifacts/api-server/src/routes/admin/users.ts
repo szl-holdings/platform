@@ -123,8 +123,9 @@ export function register(router: IRouter): void {
       const dateTo = req.query["dateTo"] as string | undefined;
       const userFilter = req.query["user"] as string | undefined;
       const orgIdParam = req.query["orgId"] as string | undefined;
+      const format = req.query["format"] as string | undefined;
       const limitParam = parseInt(req.query["limit"] as string ?? "50", 10);
-      const limit = Math.min(isNaN(limitParam) ? 50 : limitParam, 200);
+      const limit = format === "csv" ? 10000 : Math.min(isNaN(limitParam) ? 50 : limitParam, 200);
 
       // If filtering by tenant/org, resolve the set of member user IDs first
       let orgMemberUserIds: number[] | null = null;
@@ -154,6 +155,13 @@ export function register(router: IRouter): void {
       if (orgMemberUserIds !== null) {
         if (orgMemberUserIds.length === 0) {
           // Org exists but has no members — return empty result
+          if (format === "csv") {
+            const toCsvCell = (v: string) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+            res.setHeader("Content-Type", "text/csv; charset=utf-8");
+            res.setHeader("Content-Disposition", 'attachment; filename="audit-log.csv"');
+            res.send(["ID", "Action", "Actor", "Target", "Result", "IP Address", "Timestamp", "Details"].map(toCsvCell).join(","));
+            return;
+          }
           res.json({ logs: [], total: 0 });
           return;
         }
@@ -162,7 +170,16 @@ export function register(router: IRouter): void {
 
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
       const rows = await db.select({ id: auditEventsTable.id, action: auditEventsTable.action, entityType: auditEventsTable.entityType, entityId: auditEventsTable.entityId, userId: auditEventsTable.userId, userName: usersTable.displayName, userEmail: usersTable.email, oldValues: auditEventsTable.oldValues, newValues: auditEventsTable.newValues, ipAddress: auditEventsTable.ipAddress, createdAt: auditEventsTable.createdAt }).from(auditEventsTable).leftJoin(usersTable, eq(auditEventsTable.userId, usersTable.id)).where(whereClause).orderBy(desc(auditEventsTable.createdAt)).limit(limit);
-      const logs = rows.map((r) => ({ id: `log_${r.id}`, action: r.action, actor: r.userEmail ?? r.userName ?? `user_${r.userId}`, target: r.entityType + (r.entityId ? `/${r.entityId}` : ""), result: "success", timestamp: r.createdAt.toISOString(), details: r.newValues ? JSON.stringify(r.newValues).slice(0, 120) : null, ipAddress: r.ipAddress }));
+      const logs = rows.map((r) => ({ id: `log_${r.id}`, action: r.action, actor: r.userEmail ?? r.userName ?? `user_${r.userId}`, target: r.entityType + (r.entityId ? `/${r.entityId}` : ""), result: "success", timestamp: r.createdAt.toISOString(), details: r.newValues ? JSON.stringify(r.newValues).slice(0, 500) : null, ipAddress: r.ipAddress }));
+      if (format === "csv") {
+        const toCsvCell = (v: string) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+        const header = ["ID", "Action", "Actor", "Target", "Result", "IP Address", "Timestamp", "Details"].map(toCsvCell).join(",");
+        const body = logs.map((l) => [l.id, l.action, l.actor, l.target, l.result, l.ipAddress ?? "", l.timestamp, l.details ?? ""].map(toCsvCell).join(","));
+        res.setHeader("Content-Type", "text/csv; charset=utf-8");
+        res.setHeader("Content-Disposition", 'attachment; filename="audit-log.csv"');
+        res.send([header, ...body].join("\r\n"));
+        return;
+      }
       res.json({ logs, total: logs.length });
     } catch {
       sendError(res, "Failed to fetch audit log", 500, "INTERNAL_ERROR");
