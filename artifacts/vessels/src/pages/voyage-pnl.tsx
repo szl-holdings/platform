@@ -6,9 +6,22 @@ import { cn } from "@szl-holdings/shared-ui/utils";
 import {
   DollarSign, TrendingUp, TrendingDown, Ship, Fuel, Clock, Anchor,
   Wind, Navigation, AlertTriangle, BarChart3, ChevronDown, ChevronRight,
-  Calculator, Sliders, Zap
+  Calculator, Sliders, Zap, Activity
 } from "lucide-react";
 import { BarChart, Bar, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, LineChart, Line, Cell } from "recharts";
+
+// Baltic Exchange-style TCE benchmarks per vessel class (USD/day)
+// Mirrors the data on the Freight Rate Benchmarking page (freight-rates.tsx)
+const CLASS_BENCHMARKS: Record<string, { tce: number; changePct: number; fleetAvg: number; topQuartile: number; bottomQuartile: number }> = {
+  VLCC:         { tce: 58200, changePct: +3.21, fleetAvg: 55400, topQuartile: 64800, bottomQuartile: 49100 },
+  Suezmax:      { tce: 41600, changePct: +1.48, fleetAvg: 39800, topQuartile: 46200, bottomQuartile: 35100 },
+  Aframax:      { tce: 32400, changePct: -0.92, fleetAvg: 31200, topQuartile: 36800, bottomQuartile: 27600 },
+  Capesize:     { tce: 28450, changePct: +6.84, fleetAvg: 27100, topQuartile: 32500, bottomQuartile: 23400 },
+  Panamax:      { tce: 16280, changePct: -2.05, fleetAvg: 16100, topQuartile: 18900, bottomQuartile: 14200 },
+  Supramax:     { tce: 13840, changePct: +1.61, fleetAvg: 13500, topQuartile: 15800, bottomQuartile: 11600 },
+  Handysize:    { tce: 12150, changePct: +4.11, fleetAvg: 11900, topQuartile: 13700, bottomQuartile: 10400 },
+  "LNG Carrier":{ tce: 78500, changePct: +5.42, fleetAvg: 74200, topQuartile: 86400, bottomQuartile: 64800 },
+};
 
 const VOYAGES = [
   {
@@ -235,6 +248,23 @@ function VoyagePnLCard({ voyage }: { voyage: typeof VOYAGES[0] }) {
     { name: "Delay", value: Math.round(s.delayCost / 1000) },
   ].filter(d => d.value > 0);
 
+  // Freight benchmarking — compare voyage TCE against Baltic Exchange class benchmark
+  const benchmark = CLASS_BENCHMARKS[voyage.type];
+  const totalDays = voyage.baseDaysAtSea + (s.weatherDelay || 0);
+  const voyageTCE = totalDays > 0 ? s.netRevenue / totalDays : 0;
+  const tceDelta = benchmark ? voyageTCE - benchmark.tce : 0;
+  const tceDeltaPct = benchmark && benchmark.tce !== 0 ? (tceDelta / benchmark.tce) * 100 : 0;
+  const aboveMarket = tceDelta >= 0;
+  const benchmarkChartData = benchmark
+    ? [
+        { name: "Bottom Q", value: Math.round(benchmark.bottomQuartile / 1000) },
+        { name: "Fleet Avg", value: Math.round(benchmark.fleetAvg / 1000) },
+        { name: "Baltic", value: Math.round(benchmark.tce / 1000) },
+        { name: "Top Q", value: Math.round(benchmark.topQuartile / 1000) },
+        { name: "This Voyage", value: Math.round(voyageTCE / 1000) },
+      ]
+    : [];
+
   return (
     <div
       className={cn(
@@ -264,6 +294,20 @@ function VoyagePnLCard({ voyage }: { voyage: typeof VOYAGES[0] }) {
                 <span className={cn("font-mono text-[10px]", isPositive ? "text-emerald-400/70" : "text-red-400/70")}>
                   Margin: {s.margin.toFixed(1)}%
                 </span>
+                {benchmark && (
+                  <span
+                    className={cn(
+                      "flex items-center gap-1 font-mono text-[10px] px-1.5 py-0.5 rounded border",
+                      aboveMarket
+                        ? "text-emerald-300 border-emerald-500/20 bg-emerald-500/5"
+                        : "text-red-300 border-red-500/20 bg-red-500/5"
+                    )}
+                    title={`Voyage TCE ${fmtMoney(voyageTCE)}/day vs Baltic ${fmtMoney(benchmark.tce)}/day`}
+                  >
+                    <Activity className="w-3 h-3" />
+                    vs Market: {aboveMarket ? "+" : ""}{tceDeltaPct.toFixed(1)}%
+                  </span>
+                )}
               </div>
             </div>
             <ChevronRight className={cn("w-4 h-4 text-sky-400/30 shrink-0 mt-1 transition-transform", expanded && "rotate-90")} />
@@ -358,6 +402,83 @@ function VoyagePnLCard({ voyage }: { voyage: typeof VOYAGES[0] }) {
               </ResponsiveContainer>
             </div>
           </div>
+
+          {benchmark && (
+            <div className="bg-[#0a1628]/60 border border-sky-500/10 rounded-lg p-3 space-y-3">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <Activity className="w-3.5 h-3.5 text-sky-400" />
+                  <p className="text-[10px] uppercase tracking-widest text-sky-400/60">Freight Rate Benchmark — {voyage.type}</p>
+                  <Badge variant="outline" className="text-[9px] text-sky-400/60 border-sky-500/15">Baltic Exchange</Badge>
+                </div>
+                <button
+                  onClick={(e) => { e.stopPropagation(); navigate("/freight-rates"); }}
+                  className="text-[10px] text-sky-400/60 hover:text-sky-300 underline-offset-2 hover:underline"
+                >
+                  View full benchmark →
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div>
+                  <p className="text-[9px] uppercase tracking-wider text-sky-400/40">Voyage TCE</p>
+                  <p className={cn("text-sm font-bold font-mono", aboveMarket ? "text-emerald-400" : "text-red-400")}>
+                    {fmtMoney(voyageTCE)}<span className="text-[9px] text-sky-400/40 font-normal">/day</span>
+                  </p>
+                  <p className="text-[9px] text-sky-400/40 mt-0.5">over {totalDays.toFixed(1)} days</p>
+                </div>
+                <div>
+                  <p className="text-[9px] uppercase tracking-wider text-sky-400/40">Baltic Benchmark</p>
+                  <p className="text-sm font-bold font-mono text-sky-200">
+                    {fmtMoney(benchmark.tce)}<span className="text-[9px] text-sky-400/40 font-normal">/day</span>
+                  </p>
+                  <p className={cn("text-[9px] mt-0.5 font-mono", benchmark.changePct >= 0 ? "text-emerald-400/70" : "text-red-400/70")}>
+                    Spot {benchmark.changePct >= 0 ? "+" : ""}{benchmark.changePct.toFixed(2)}% wk
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[9px] uppercase tracking-wider text-sky-400/40">vs Market</p>
+                  <p className={cn("text-sm font-bold font-mono flex items-center gap-1", aboveMarket ? "text-emerald-400" : "text-red-400")}>
+                    {aboveMarket ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                    {aboveMarket ? "+" : ""}{tceDeltaPct.toFixed(1)}%
+                  </p>
+                  <p className="text-[9px] text-sky-400/40 mt-0.5">{aboveMarket ? "+" : ""}{fmtMoney(tceDelta)}/day</p>
+                </div>
+                <div>
+                  <p className="text-[9px] uppercase tracking-wider text-sky-400/40">Fleet-Class Avg</p>
+                  <p className="text-sm font-bold font-mono text-sky-300">
+                    {fmtMoney(benchmark.fleetAvg)}<span className="text-[9px] text-sky-400/40 font-normal">/day</span>
+                  </p>
+                  <p className="text-[9px] text-sky-400/40 mt-0.5">Q1: {fmtMoney(benchmark.bottomQuartile)} · Q3: {fmtMoney(benchmark.topQuartile)}</p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-sky-400/40 mb-2">TCE vs Fleet-Class Distribution (USD 000s/day)</p>
+                <ResponsiveContainer width="100%" height={140}>
+                  <BarChart data={benchmarkChartData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1e3a5f" />
+                    <XAxis dataKey="name" tick={{ fontSize: 9, fill: "#4a7fa5" }} />
+                    <YAxis tick={{ fontSize: 9, fill: "#4a7fa5" }} />
+                    <Tooltip
+                      contentStyle={{ background: "#0a1628", border: "1px solid #1e3a5f", borderRadius: 8, fontSize: 11 }}
+                      formatter={(v: number) => [`$${v}K/day`, "TCE"]}
+                    />
+                    <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                      {benchmarkChartData.map((d, i) => {
+                        const isVoyage = d.name === "This Voyage";
+                        const isBaltic = d.name === "Baltic";
+                        const fill = isVoyage
+                          ? (aboveMarket ? "#22c55e" : "#ef4444")
+                          : isBaltic ? "#38bdf8" : "#1e3a5f";
+                        return <Cell key={i} fill={fill} fillOpacity={isVoyage || isBaltic ? 0.9 : 0.6} />;
+                      })}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
 
           {!isPositive && scenario !== "base" && (
             <div className="bg-red-500/5 border border-red-500/10 rounded-lg p-3 space-y-2">
