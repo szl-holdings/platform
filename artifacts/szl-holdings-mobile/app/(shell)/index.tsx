@@ -18,6 +18,7 @@ import { useWorkspace, WORKSPACES, type WorkspaceDomain } from "@/context/Worksp
 import { WorkspaceTrigger } from "@/components/WorkspaceSwitcher";
 import { useApiStatus } from "@szl-holdings/mobile-shared";
 import { VoiceCommandModal } from "@/components/VoiceCommandModal";
+import { FusionBar } from "@/components/FusionBar";
 
 const ACCENT = "#c9a84c";
 
@@ -323,6 +324,9 @@ export default function CommandFeedScreen() {
             </Text>
           </View>
         )}
+
+        <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>FUSION QUERY</Text>
+        <FusionBar />
 
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>MORNING BRIEF</Text>
         <View style={[styles.briefCard, { backgroundColor: colors.card, borderColor: healthColor + "40" }]}>
