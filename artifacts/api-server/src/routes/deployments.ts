@@ -18,8 +18,8 @@
  */
 
 import { Router, type IRouter, type Request, type Response } from "express";
-import { db, deploymentsTable, type Deployment } from "@szl-holdings/db";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { db, deploymentsTable, usersTable, type Deployment } from "@szl-holdings/db";
+import { and, asc, desc, eq, inArray, or } from "drizzle-orm";
 import {
   sendSuccess,
   sendCreated,
@@ -51,6 +51,13 @@ function principalFor(req: Request): string {
 export type DeploymentStatus = "active" | "deploying" | "rolled-back" | "failed" | "inactive";
 export type DeploymentEnvironment = "development" | "staging" | "production";
 
+export interface DeploymentUserSummary {
+  id: number;
+  displayName: string;
+  email: string | null;
+  avatarUrl: string | null;
+}
+
 export interface DeploymentRecord {
   appId: string;
   appName: string;
@@ -59,12 +66,13 @@ export interface DeploymentRecord {
   status: DeploymentStatus;
   deployedAt: string;
   deployedBy: string;
+  deployedByUser?: DeploymentUserSummary;
   commitSha?: string;
   notes?: string;
   metadata?: Record<string, unknown>;
 }
 
-function toRecord(row: Deployment): DeploymentRecord {
+function toRecord(row: Deployment, user?: DeploymentUserSummary): DeploymentRecord {
   return {
     appId: row.appId,
     appName: row.appName,
@@ -73,10 +81,70 @@ function toRecord(row: Deployment): DeploymentRecord {
     status: row.status,
     deployedAt: row.deployedAt.toISOString(),
     deployedBy: row.deployedBy,
+    deployedByUser: user,
     commitSha: row.commitSha ?? undefined,
     notes: row.notes ?? undefined,
     metadata: row.metadata ?? undefined,
   };
+}
+
+/**
+ * Resolve `deployedBy` strings to user profiles for UI rendering. The column
+ * stores whatever `principalFor` produced — email, displayName, or numeric id
+ * (see POST handlers below) — so we look users up by all three in one query
+ * each and build a lookup keyed by the original `deployedBy` value.
+ */
+async function lookupDeployers(
+  deployedByValues: string[],
+): Promise<Map<string, DeploymentUserSummary>> {
+  const map = new Map<string, DeploymentUserSummary>();
+  const unique = Array.from(new Set(deployedByValues.filter((v) => v && v !== "system")));
+  if (unique.length === 0) return map;
+
+  const emails = unique.filter((v) => v.includes("@"));
+  const numericIds = unique
+    .filter((v) => /^\d+$/.test(v))
+    .map((v) => Number.parseInt(v, 10))
+    .filter((n) => Number.isFinite(n));
+  const otherNames = unique.filter((v) => !v.includes("@") && !/^\d+$/.test(v));
+
+  const filters = [];
+  if (emails.length > 0) filters.push(inArray(usersTable.email, emails));
+  if (numericIds.length > 0) filters.push(inArray(usersTable.id, numericIds));
+  if (otherNames.length > 0) filters.push(inArray(usersTable.displayName, otherNames));
+  if (filters.length === 0) return map;
+
+  const rows = await db
+    .select({
+      id: usersTable.id,
+      email: usersTable.email,
+      displayName: usersTable.displayName,
+      avatarUrl: usersTable.avatarUrl,
+    })
+    .from(usersTable)
+    .where(filters.length === 1 ? filters[0] : or(...filters));
+
+  for (const r of rows) {
+    const summary: DeploymentUserSummary = {
+      id: r.id,
+      displayName: r.displayName,
+      email: r.email,
+      avatarUrl: r.avatarUrl,
+    };
+    if (r.email && unique.includes(r.email)) map.set(r.email, summary);
+    if (unique.includes(r.displayName)) {
+      // Don't clobber a stronger email-based match
+      if (!map.has(r.displayName)) map.set(r.displayName, summary);
+    }
+    const idStr = String(r.id);
+    if (unique.includes(idStr) && !map.has(idStr)) map.set(idStr, summary);
+  }
+  return map;
+}
+
+async function recordsWithUsers(rows: Deployment[]): Promise<DeploymentRecord[]> {
+  const users = await lookupDeployers(rows.map((r) => r.deployedBy));
+  return rows.map((r) => toRecord(r, users.get(r.deployedBy)));
 }
 
 async function getHistory(appId: string, env: string): Promise<Deployment[]> {
@@ -120,7 +188,7 @@ router.get("/deployments", authMiddleware({ required: false }), perUserApiSlidin
           eq(deploymentsTable.status, "active"),
         ),
       );
-    const deployments = rows.map(toRecord);
+    const deployments = await recordsWithUsers(rows);
     return sendSuccess(res, { deployments, environment: env, count: deployments.length });
   } catch (err) {
     return handleRouteError(res, err, "GET /deployments");
@@ -135,7 +203,8 @@ router.get("/deployments/:appId", authMiddleware({ required: false }), perUserAp
     if (!active) {
       return sendNotFound(res, `No active deployment for app '${appId}' in '${env}'`);
     }
-    return sendSuccess(res, toRecord(active));
+    const [enriched] = await recordsWithUsers([active]);
+    return sendSuccess(res, enriched);
   } catch (err) {
     return handleRouteError(res, err, `GET /deployments/${req.params.appId}`);
   }
@@ -146,7 +215,7 @@ router.get("/deployments/:appId/history", authMiddleware({ required: false }), p
     const { appId } = req.params;
     const env = (req.query.environment as string) ?? "production";
     const rows = await getHistory(appId, env);
-    const history = rows.map(toRecord);
+    const history = await recordsWithUsers(rows);
     return sendSuccess(res, { appId, environment: env, history, count: history.length });
   } catch (err) {
     return handleRouteError(res, err, `GET /deployments/${req.params.appId}/history`);
@@ -194,7 +263,8 @@ router.post("/deployments", authMiddleware({ required: true }), perUserWriteSlid
     });
 
     logger.info({ appId, version, environment }, "Deployment registered");
-    return sendCreated(res, toRecord(inserted));
+    const [enriched] = await recordsWithUsers([inserted]);
+    return sendCreated(res, enriched);
   } catch (err) {
     return handleRouteError(res, err, "POST /deployments");
   }
@@ -278,10 +348,11 @@ router.post("/deployments/:appId/rollback", authMiddleware({ required: true }), 
       { appId, from: result.previous.version, to: result.rolled.version },
       "Rollback executed",
     );
+    const enriched = await recordsWithUsers([result.previous, result.rolled]);
     return sendSuccess(res, {
       rolledBack: true,
-      previous: toRecord(result.previous),
-      current: toRecord(result.rolled),
+      previous: enriched[0]!,
+      current: enriched[1]!,
     });
   } catch (err) {
     return handleRouteError(res, err, `POST /deployments/${req.params.appId}/rollback`);

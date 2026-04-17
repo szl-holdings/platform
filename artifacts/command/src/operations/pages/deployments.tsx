@@ -19,6 +19,13 @@ import {
 type DeploymentStatus = "active" | "deploying" | "rolled-back" | "failed" | "inactive";
 type DeploymentEnvironment = "development" | "staging" | "production";
 
+interface DeploymentUserSummary {
+  id: number;
+  displayName: string;
+  email: string | null;
+  avatarUrl: string | null;
+}
+
 interface DeploymentRecord {
   appId: string;
   appName: string;
@@ -27,9 +34,90 @@ interface DeploymentRecord {
   status: DeploymentStatus;
   deployedAt: string;
   deployedBy: string;
+  deployedByUser?: DeploymentUserSummary;
   commitSha?: string;
   notes?: string;
   metadata?: Record<string, unknown>;
+}
+
+function initialsFor(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
+  return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase();
+}
+
+function DeployerBadge({
+  record,
+  size = "sm",
+  prefix,
+}: {
+  record: DeploymentRecord;
+  size?: "sm" | "md";
+  prefix?: string;
+}) {
+  const user = record.deployedByUser;
+  const name = user?.displayName ?? record.deployedBy;
+  const dim = size === "md" ? 20 : 16;
+  const fontSize = size === "md" ? 9 : 8;
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 text-[11px] font-mono"
+      style={{ color: "var(--color-fg-muted)" }}
+      title={user?.email ?? record.deployedBy}
+    >
+      {prefix && <span className="opacity-70">{prefix}</span>}
+      {user?.avatarUrl ? (
+        <img
+          src={user.avatarUrl}
+          alt=""
+          width={dim}
+          height={dim}
+          className="rounded-full object-cover shrink-0"
+          style={{ border: "1px solid var(--color-surface-border)" }}
+        />
+      ) : (
+        <span
+          className="inline-flex items-center justify-center rounded-full font-bold shrink-0"
+          style={{
+            width: dim,
+            height: dim,
+            fontSize,
+            backgroundColor: "color-mix(in srgb, #8b7ac8 18%, transparent)",
+            color: "#cdb8f0",
+            border: "1px solid color-mix(in srgb, #8b7ac8 30%, transparent)",
+          }}
+        >
+          {initialsFor(name)}
+        </span>
+      )}
+      <span className="truncate" style={{ color: "var(--color-fg-secondary, var(--color-fg-primary))" }}>
+        {name}
+      </span>
+    </span>
+  );
+}
+
+/**
+ * For a rollback row, find the latest non-rollback deployment of the same
+ * version that preceded it — that's the person who originally shipped that
+ * version. Shows "Rolled back by X · originally shipped by Y".
+ */
+function findOriginalDeployerFor(
+  entry: DeploymentRecord,
+  history: DeploymentRecord[],
+): DeploymentRecord | undefined {
+  if (!entry.notes?.startsWith("Rolled back from")) return undefined;
+  const entryTime = new Date(entry.deployedAt).getTime();
+  const candidates = history
+    .filter(
+      (h) =>
+        h.version === entry.version &&
+        new Date(h.deployedAt).getTime() < entryTime &&
+        !h.notes?.startsWith("Rolled back from"),
+    )
+    .sort((a, b) => new Date(b.deployedAt).getTime() - new Date(a.deployedAt).getTime());
+  return candidates[0];
 }
 
 interface ListResponse {
@@ -277,8 +365,9 @@ export default function DeploymentsPage() {
                               <span className="text-[11px] font-mono" style={{ color: "#cdb8f0" }}>{d.version}</span>
                               <StatusBadge status={d.status} />
                               <span className="text-[10px] font-mono" style={{ color: "var(--color-fg-muted)" }}>
-                                {formatTime(d.deployedAt)} · {d.deployedBy}
+                                {formatTime(d.deployedAt)}
                               </span>
+                              <DeployerBadge record={d} />
                             </div>
                           </div>
                           <ChevronRight
@@ -391,8 +480,28 @@ export default function DeploymentsPage() {
                             )}
                           </div>
                           <div className="text-[11px] font-mono mb-1" style={{ color: "var(--color-fg-muted)" }}>
-                            {formatTime(entry.deployedAt)} · {entry.deployedBy}
+                            {formatTime(entry.deployedAt)}
                           </div>
+                          {(() => {
+                            const isRollback = entry.notes?.startsWith("Rolled back from") ?? false;
+                            const original = isRollback
+                              ? findOriginalDeployerFor(entry, sortedHistory)
+                              : undefined;
+                            return (
+                              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-1">
+                                <DeployerBadge
+                                  record={entry}
+                                  prefix={isRollback ? "Rolled back by" : "Shipped by"}
+                                />
+                                {original && original.deployedBy !== entry.deployedBy && (
+                                  <DeployerBadge
+                                    record={original}
+                                    prefix="originally shipped by"
+                                  />
+                                )}
+                              </div>
+                            );
+                          })()}
                           {entry.notes && (
                             <div className="text-xs leading-relaxed" style={{ color: "var(--color-fg-secondary, var(--color-fg-muted))" }}>
                               {entry.notes}

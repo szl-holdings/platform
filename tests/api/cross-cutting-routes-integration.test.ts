@@ -380,6 +380,90 @@ describe("Integration — /deployments", () => {
     expect(res.body.deployedBy).toBe(TEST_USER.email);
   });
 
+  it("enriches deployments with the deployer's user profile (name + avatar) when a matching user exists", async () => {
+    const { db, usersTable } = await import("@szl-holdings/db");
+    const { eq } = await import("drizzle-orm");
+
+    // Seed a user that matches the test principal's email so the enrichment
+    // join in /deployments can resolve a profile.
+    const email = TEST_USER.email;
+    const displayName = "Enriched Test User";
+    const avatarUrl = "https://example.invalid/avatar.png";
+
+    await db.delete(usersTable).where(eq(usersTable.email, email));
+    const [seeded] = await db
+      .insert(usersTable)
+      .values({ email, displayName, avatarUrl })
+      .returning();
+    expect(seeded).toBeTruthy();
+
+    try {
+      const enrichedAppId = `${APP_ID}-enriched`;
+      const created = await request(app)
+        .post("/deployments")
+        .send({
+          appId: enrichedAppId,
+          appName: "Enriched App",
+          version: "1.0.0",
+          environment: ENV,
+        });
+      expect(created.status).toBe(201);
+      expect(created.body.deployedByUser).toMatchObject({
+        id: seeded!.id,
+        displayName,
+        email,
+        avatarUrl,
+      });
+
+      const list = await request(app).get("/deployments").query({ environment: ENV });
+      expect(list.status).toBe(200);
+      const found = list.body.deployments.find(
+        (d: { appId: string }) => d.appId === enrichedAppId,
+      );
+      expect(found).toBeTruthy();
+      expect(found.deployedByUser?.displayName).toBe(displayName);
+      expect(found.deployedByUser?.avatarUrl).toBe(avatarUrl);
+
+      const history = await request(app)
+        .get(`/deployments/${enrichedAppId}/history`)
+        .query({ environment: ENV });
+      expect(history.status).toBe(200);
+      expect(history.body.history[0].deployedByUser?.email).toBe(email);
+
+      // Rollback response must also carry enriched user info on both
+      // previous and current rows so the UI can label "Rolled back by X /
+      // originally shipped by Y" without a second fetch.
+      const second = await request(app)
+        .post("/deployments")
+        .send({
+          appId: enrichedAppId,
+          appName: "Enriched App",
+          version: "2.0.0",
+          environment: ENV,
+        });
+      expect(second.status).toBe(201);
+
+      const rolled = await request(app)
+        .post(`/deployments/${enrichedAppId}/rollback`)
+        .send({ environment: ENV });
+      expect(rolled.status).toBe(200);
+      expect(rolled.body.previous.deployedByUser).toMatchObject({
+        id: seeded!.id,
+        displayName,
+        email,
+        avatarUrl,
+      });
+      expect(rolled.body.current.deployedByUser).toMatchObject({
+        id: seeded!.id,
+        displayName,
+        email,
+        avatarUrl,
+      });
+    } finally {
+      await db.delete(usersTable).where(eq(usersTable.id, seeded!.id));
+    }
+  });
+
   it("persists registry across a simulated API server restart", async () => {
     // Simulate a process restart by reloading the route module and rebuilding
     // the Express app. Drizzle's pg pool is module-scoped and would be
