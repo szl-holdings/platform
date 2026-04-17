@@ -38,6 +38,12 @@ export interface ReviewApprovalParams {
   note?: string;
   correlationId?: string;
   serviceAttribution?: string;
+  /**
+   * Defense-in-depth tenant guard. When provided, the operation will throw
+   * `ApprovalAccessDeniedError` if the loaded approval's orgId does not match.
+   * Routes/services should pass the caller's orgId for non-admin actors.
+   */
+  expectedOrgId?: number | null;
 }
 
 export interface EscalateApprovalParams {
@@ -48,6 +54,16 @@ export interface EscalateApprovalParams {
   reason: string;
   correlationId?: string;
   serviceAttribution?: string;
+  /** See {@link ReviewApprovalParams.expectedOrgId}. */
+  expectedOrgId?: number | null;
+}
+
+export class ApprovalAccessDeniedError extends Error {
+  readonly code = "APPROVAL_ACCESS_DENIED";
+  constructor(approvalId: number) {
+    super(`Cross-tenant access denied for approval ${approvalId}`);
+    this.name = "ApprovalAccessDeniedError";
+  }
 }
 
 export interface AddApprovalCommentParams {
@@ -142,6 +158,10 @@ export async function reviewApproval(
     throw Object.assign(new Error(`Approval ${params.approvalId} not found`), { code: "NOT_FOUND" });
   }
 
+  if (params.expectedOrgId != null && existing.orgId != null && existing.orgId !== params.expectedOrgId) {
+    throw new ApprovalAccessDeniedError(params.approvalId);
+  }
+
   if (existing.status !== "pending" && existing.status !== "escalated") {
     throw Object.assign(
       new Error(`Cannot review approval in status: ${existing.status}`),
@@ -195,6 +215,10 @@ export async function escalateApproval(
 
   if (!existing) {
     throw Object.assign(new Error(`Approval ${params.approvalId} not found`), { code: "NOT_FOUND" });
+  }
+
+  if (params.expectedOrgId != null && existing.orgId != null && existing.orgId !== params.expectedOrgId) {
+    throw new ApprovalAccessDeniedError(params.approvalId);
   }
 
   if (existing.status !== "pending") {
@@ -295,6 +319,29 @@ export async function listPendingApprovals(options: {
     .where(and(...conditions))
     .orderBy(desc(approvalRequestsTable.createdAt))
     .limit(options.limit ?? 100);
+}
+
+export async function listApprovals(options: {
+  orgId?: number;
+  statuses?: Array<"pending" | "approved" | "rejected" | "revised" | "escalated" | "expired" | "withdrawn">;
+  limit?: number;
+} = {}): Promise<ApprovalRequest[]> {
+  const conditions = [] as Array<ReturnType<typeof eq>>;
+  if (options.statuses && options.statuses.length > 0) {
+    conditions.push(inArray(approvalRequestsTable.status, options.statuses) as ReturnType<typeof eq>);
+  }
+  if (options.orgId != null) {
+    conditions.push(eq(approvalRequestsTable.orgId, options.orgId));
+  }
+
+  const query = db
+    .select()
+    .from(approvalRequestsTable)
+    .orderBy(desc(approvalRequestsTable.createdAt))
+    .limit(options.limit ?? 200);
+
+  if (conditions.length === 0) return query;
+  return query.where(and(...conditions));
 }
 
 export async function getApprovalAuditTrail(approvalId: number) {

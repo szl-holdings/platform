@@ -5,12 +5,50 @@ import {
   sendCreated,
   sendNotFound,
   sendBadRequest,
+  sendForbidden,
   handleRouteError,
   parsePagination,
 } from "../lib/api-response";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
+
+const ADMIN_ROLES = new Set(["super_admin", "admin"]);
+
+/**
+ * Tenant access guard for /approvals/:id/* routes. Returns the loaded approval
+ * if the actor may access it, or sends the appropriate error response and
+ * returns null. Admins bypass org scoping.
+ */
+async function loadAccessibleApproval(
+  req: Request,
+  res: Response,
+  approvalId: number,
+): Promise<{ orgId: number | null; status: string } | null> {
+  const { getApprovalById } = await import("@szl-holdings/covenant-policy");
+  const approval = await getApprovalById(approvalId);
+  if (!approval) {
+    sendNotFound(res, "Approval");
+    return null;
+  }
+  const user = req.user;
+  const isAdmin = user?.roles?.some((r) => ADMIN_ROLES.has(r)) ?? false;
+  if (!isAdmin) {
+    const userOrgId = user?.orgs?.[0]?.orgId ?? null;
+    if (approval.orgId != null && approval.orgId !== userOrgId) {
+      sendForbidden(res, "Approval is outside your organization");
+      return null;
+    }
+  }
+  return { orgId: approval.orgId, status: approval.status };
+}
+
+function callerOrgIdForGuard(req: Request): number | null {
+  const user = req.user;
+  const isAdmin = user?.roles?.some((r) => ADMIN_ROLES.has(r)) ?? false;
+  if (isAdmin) return null;
+  return user?.orgs?.[0]?.orgId ?? null;
+}
 
 router.post("/approvals", authMiddleware(), async (req: Request, res: Response) => {
   try {
@@ -78,11 +116,17 @@ router.get("/approvals", authMiddleware(), requireRole("super_admin", "admin", "
     const isAdmin = user?.roles?.some(r => ["super_admin", "admin"].includes(r)) ?? false;
     const orgId = isAdmin ? undefined : (user?.orgs?.[0]?.orgId ?? undefined);
 
-    const { listPendingApprovals } = await import("@szl-holdings/covenant-policy");
-    const results = await listPendingApprovals({
-      orgId,
-      limit,
-    });
+    const { listPendingApprovals, listApprovals } = await import("@szl-holdings/covenant-policy");
+    const results =
+      status === "all"
+        ? await listApprovals({ orgId, limit })
+        : status && status !== "pending" && status !== "escalated"
+          ? await listApprovals({
+              orgId,
+              limit,
+              statuses: [status as "approved" | "rejected" | "revised" | "expired" | "withdrawn"],
+            })
+          : await listPendingApprovals({ orgId, limit });
 
     sendSuccess(res, results, 200, { page, limit, total: results.length });
   } catch (err) {
@@ -95,9 +139,11 @@ router.get("/approvals/:id", authMiddleware(), async (req: Request, res: Respons
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid approval ID"); return; }
 
+    const guard = await loadAccessibleApproval(req, res, id);
+    if (!guard) return;
+
     const { getApprovalById } = await import("@szl-holdings/covenant-policy");
     const approval = await getApprovalById(id);
-
     if (!approval) { sendNotFound(res, "Approval"); return; }
 
     sendSuccess(res, approval);
@@ -117,16 +163,49 @@ router.post("/approvals/:id/review", authMiddleware(), requireRole("super_admin"
       return;
     }
 
-    const { reviewApproval } = await import("@szl-holdings/covenant-policy");
-    const updated = await reviewApproval({
-      approvalId: id,
-      actorId: req.user?.id ?? null,
-      actorRole: req.user?.roles?.[0],
-      decision: decision as "approved" | "rejected" | "revised",
-      note,
-      correlationId: (req as unknown as { correlationId?: string }).correlationId,
-      serviceAttribution: "api-server",
-    });
+    const guard = await loadAccessibleApproval(req, res, id);
+    if (!guard) return;
+
+    const { reviewApproval, getApprovalById, ApprovalAccessDeniedError } = await import("@szl-holdings/covenant-policy");
+    let updated;
+    try {
+      updated = await reviewApproval({
+        approvalId: id,
+        actorId: req.user?.id ?? null,
+        actorRole: req.user?.roles?.[0],
+        decision: decision as "approved" | "rejected" | "revised",
+        note,
+        correlationId: (req as unknown as { correlationId?: string }).correlationId,
+        serviceAttribution: "api-server",
+        expectedOrgId: callerOrgIdForGuard(req),
+      });
+    } catch (err) {
+      if (err instanceof ApprovalAccessDeniedError) {
+        sendForbidden(res, err.message);
+        return;
+      }
+      throw err;
+    }
+
+    try {
+      const full = await getApprovalById(id);
+      const payload = (full?.payload ?? {}) as { runId?: string; stepId?: string };
+      const runId = payload.runId ?? full?.correlationId ?? undefined;
+      if (runId) {
+        const { getAlloyRunManager } = await import("../lib/alloy-run-manager-singleton");
+        await getAlloyRunManager().recordApprovalDecision({
+          runId,
+          approvalId: id,
+          decision: decision as "approved" | "rejected" | "revised",
+          actorId: req.user?.id ?? null,
+          actorRole: req.user?.roles?.[0],
+          note,
+          stepId: payload.stepId,
+        });
+      }
+    } catch (err) {
+      logger.warn({ err, approvalId: id }, "approvals.ledger-writeback-failed");
+    }
 
     sendSuccess(res, updated);
   } catch (err) {
@@ -145,16 +224,29 @@ router.post("/approvals/:id/escalate", authMiddleware(), requireRole("super_admi
       return;
     }
 
-    const { escalateApproval } = await import("@szl-holdings/covenant-policy");
-    const updated = await escalateApproval({
-      approvalId: id,
-      actorId: req.user?.id ?? null,
-      actorRole: req.user?.roles?.[0],
-      escalatedToId,
-      reason,
-      correlationId: (req as unknown as { correlationId?: string }).correlationId,
-      serviceAttribution: "api-server",
-    });
+    const guard = await loadAccessibleApproval(req, res, id);
+    if (!guard) return;
+
+    const { escalateApproval, ApprovalAccessDeniedError } = await import("@szl-holdings/covenant-policy");
+    let updated;
+    try {
+      updated = await escalateApproval({
+        approvalId: id,
+        actorId: req.user?.id ?? null,
+        actorRole: req.user?.roles?.[0],
+        escalatedToId,
+        reason,
+        correlationId: (req as unknown as { correlationId?: string }).correlationId,
+        serviceAttribution: "api-server",
+        expectedOrgId: callerOrgIdForGuard(req),
+      });
+    } catch (err) {
+      if (err instanceof ApprovalAccessDeniedError) {
+        sendForbidden(res, err.message);
+        return;
+      }
+      throw err;
+    }
 
     sendSuccess(res, updated);
   } catch (err) {
@@ -170,13 +262,13 @@ router.post("/approvals/:id/comment", authMiddleware(), async (req: Request, res
     const { body, isInternal } = req.body as { body?: string; isInternal?: boolean };
     if (!body) { sendBadRequest(res, "body is required"); return; }
 
-    const { addApprovalComment, getApprovalById } = await import("@szl-holdings/covenant-policy");
-    const approval = await getApprovalById(id);
-    if (!approval) { sendNotFound(res, "Approval"); return; }
+    const guard = await loadAccessibleApproval(req, res, id);
+    if (!guard) return;
 
+    const { addApprovalComment } = await import("@szl-holdings/covenant-policy");
     await addApprovalComment({
       approvalId: id,
-      orgId: approval.orgId,
+      orgId: guard.orgId,
       authorId: req.user?.id ?? null,
       authorRole: req.user?.roles?.[0],
       body,
@@ -194,10 +286,10 @@ router.get("/approvals/:id/audit-trail", authMiddleware(), requireRole("super_ad
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid approval ID"); return; }
 
-    const { getApprovalAuditTrail, getApprovalById } = await import("@szl-holdings/covenant-policy");
-    const approval = await getApprovalById(id);
-    if (!approval) { sendNotFound(res, "Approval"); return; }
+    const guard = await loadAccessibleApproval(req, res, id);
+    if (!guard) return;
 
+    const { getApprovalAuditTrail } = await import("@szl-holdings/covenant-policy");
     const trail = await getApprovalAuditTrail(id);
     sendSuccess(res, trail);
   } catch (err) {
@@ -211,7 +303,15 @@ router.get("/approvals/by-resource/:resourceType/:resourceId", authMiddleware(),
 
     const { listApprovalsByResource } = await import("@szl-holdings/covenant-policy");
     const results = await listApprovalsByResource(resourceType, resourceId);
-    sendSuccess(res, results);
+
+    const user = req.user;
+    const isAdmin = user?.roles?.some((r) => ADMIN_ROLES.has(r)) ?? false;
+    const userOrgId = user?.orgs?.[0]?.orgId ?? null;
+    const filtered = isAdmin
+      ? results
+      : results.filter((r) => r.orgId == null || r.orgId === userOrgId);
+
+    sendSuccess(res, filtered);
   } catch (err) {
     handleRouteError(res, err, "Failed to list approvals for resource");
   }

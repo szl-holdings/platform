@@ -168,6 +168,86 @@ describe("Approval gating", () => {
     expect(state.status).toBe("completed");
   });
 
+  it("approved decision resumes parked run from the gated step", async () => {
+    const ledger = new InMemoryActionLedger();
+    const calls: string[] = [];
+    const captured: { approvalId?: number | string } = {};
+    const approvalGate = {
+      async requestApproval(p: { stepId: string }) {
+        captured.approvalId = `appr-${p.stepId}`;
+        return { approvalId: captured.approvalId, status: "pending" as const };
+      },
+    };
+    const manager = new RunManager({ ledger, approvalGate });
+
+    const stepA: WorkflowStep = {
+      id: "alpha",
+      name: "Alpha",
+      async execute() {
+        calls.push("alpha");
+        return { stepId: "alpha", success: true, output: "a" };
+      },
+    };
+    const stepB: WorkflowStep = {
+      id: "beta",
+      name: "Beta",
+      async execute() {
+        calls.push("beta");
+        return { stepId: "beta", success: true, output: "b" };
+      },
+    };
+
+    const config = makeConfig({ policyTier: "human-approval-mandatory" });
+    manager.createRun(config);
+    const parked = await manager.executeSteps(config.runId, [stepA, stepB], config);
+
+    expect(parked.status).toBe("awaiting-approval");
+    expect(calls).toEqual([]);
+    expect(captured.approvalId).toBeDefined();
+
+    const result = await manager.recordApprovalDecision({
+      approvalId: captured.approvalId!,
+      decision: "approved",
+      actorRole: "ops",
+    });
+
+    expect(result?.resumed).toBe(true);
+    expect(result?.finalState?.status).toBe("awaiting-approval");
+    expect(calls).toEqual(["alpha"]);
+
+    const approval2 = `appr-beta`;
+    expect(captured.approvalId).toBe(approval2);
+    const result2 = await manager.recordApprovalDecision({
+      approvalId: approval2,
+      decision: "approved",
+      actorRole: "ops",
+    });
+    expect(result2?.finalState?.status).toBe("completed");
+    expect(calls).toEqual(["alpha", "beta"]);
+  });
+
+  it("rejected decision finalizes parked run as failed", async () => {
+    const captured: { approvalId?: number | string } = {};
+    const approvalGate = {
+      async requestApproval(p: { stepId: string }) {
+        captured.approvalId = `r-${p.stepId}`;
+        return { approvalId: captured.approvalId, status: "pending" as const };
+      },
+    };
+    const manager = new RunManager({ approvalGate });
+    const config = makeConfig({ policyTier: "human-approval-mandatory" });
+    manager.createRun(config);
+    await manager.executeSteps(config.runId, [ECHO_STEP], config);
+
+    const result = await manager.recordApprovalDecision({
+      approvalId: captured.approvalId!,
+      decision: "rejected",
+      note: "policy violation",
+    });
+    expect(result?.finalState?.status).toBe("failed");
+    expect(result?.finalState?.error).toMatch(/rejected/i);
+  });
+
   it("approval state is tracked via ledger", async () => {
     const ledger = new InMemoryActionLedger();
     const manager = new RunManager({ ledger });

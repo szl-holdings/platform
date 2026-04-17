@@ -91,6 +91,7 @@ const NAV = [
 ];
 
 const ATLAS_NAV = [
+  { href: "/alloy/operator-approvals", label: "Operator Approvals", icon: Shield, badge: "Live" },
   { href: "/alloy/atlas-approvals", label: "ATLAS Approvals", icon: GitBranch, badge: "New" },
 ];
 

@@ -12,9 +12,9 @@ import {
   parsePagination,
 } from "../lib/api-response";
 import { logger } from "../lib/logger";
-import { RunManager } from "@workspace/alloy/run-manager";
 import { RunConfigSchema } from "@workspace/alloy/types";
 import { defaultLedger, makeLedgerEntry } from "@workspace/alloy/ledger";
+import { getAlloyRunManager } from "../lib/alloy-run-manager-singleton";
 import { InMemoryCheckpointStore } from "@workspace/alloy/checkpoint";
 import { DefaultModelRouter } from "@workspace/alloy/model-router";
 import { ECHO_STEP } from "@workspace/alloy/workflow";
@@ -22,7 +22,7 @@ import type { WorkflowStep, StepContext, StepResult, LedgerEntry, RunConfig } fr
 
 const router: IRouter = Router();
 
-const runManager = new RunManager({ ledger: defaultLedger });
+const runManager = getAlloyRunManager();
 const modelRouter = new DefaultModelRouter();
 const checkpointStore = new InMemoryCheckpointStore();
 
@@ -201,6 +201,14 @@ router.post("/workflow-runs", authMiddleware(), async (req: Request, res: Respon
       return;
     }
 
+    const user = (req as Request & { user?: { id?: number; roles?: string[]; orgs?: Array<{ orgId?: number }> } }).user;
+    const serverMetadata: Record<string, unknown> = {
+      ...(body.metadata ?? {}),
+      orgId: user?.orgs?.[0]?.orgId ?? null,
+      requestedById: user?.id ?? null,
+      requestedByRole: user?.roles?.[0] ?? null,
+    };
+
     const config = RunConfigSchema.parse({
       runId: randomUUID(),
       workflowId: body.workflowId,
@@ -209,7 +217,7 @@ router.post("/workflow-runs", authMiddleware(), async (req: Request, res: Respon
       model: body.model,
       policyTier: body.policyTier,
       checkpointEnabled: true,
-      metadata: body.metadata ?? {},
+      metadata: serverMetadata,
     });
 
     const state = runManager.createRun(config);

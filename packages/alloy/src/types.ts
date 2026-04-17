@@ -68,10 +68,19 @@ export interface StepResult {
 export interface ApprovalGate {
   requestApproval(params: {
     runId: string;
+    workflowId: string;
+    agentId?: string;
+    stepId: string;
+    stepIndex: number;
     reason: string;
     requiredApprovers: string[];
+    matchedRuleId?: string;
+    tier?: string;
+    orgId?: number | string | null;
+    requestedById?: number | string | null;
+    requestedByRole?: string;
     context: Record<string, unknown>;
-  }): Promise<{ approved: boolean; approver?: string; timestamp: string }>;
+  }): Promise<{ approvalId?: number | string; status: "pending" | "approved" | "rejected" } | undefined>;
 }
 
 export interface ModelRouterOptions {

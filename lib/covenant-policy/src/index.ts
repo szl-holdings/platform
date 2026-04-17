@@ -36,9 +36,11 @@ export {
   getApprovalById,
   listApprovalsByResource,
   listPendingApprovals,
+  listApprovals,
   getApprovalAuditTrail,
   getApprovalComments,
   expireStaleApprovals,
+  ApprovalAccessDeniedError,
 } from "./approvals.js";
 
 export type {
