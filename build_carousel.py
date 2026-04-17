@@ -233,14 +233,238 @@ def slide_cta(n, total):
     d.text((40, 1138), "→  szlholdings.com", font=F_H2, fill=GOLD)
     img.save(f"{OUT}/{n:02d}-cta.jpg", quality=92)
 
+# =====================================================================
+#  FOUNDATION 07 SLIDES  —  the new substrate that just merged
+# =====================================================================
+import math
+
+def slide_foundation_stack(n, total):
+    img, d = base_canvas()
+    chrome(d, n, total, "10  ·  THE FOUNDATION  (07)")
+    d.text((40, 160), "Six primitives.", font=F_HERO, fill=INK)
+    d.text((40, 240), "One governed substrate.", font=F_HERO, fill=GOLD)
+    d.text((40, 340), "Every domain pack composes the same six layers — so a maritime",
+           font=F_BODY, fill=DIM)
+    d.text((40, 372), "trace and a real-estate trace look identical to the audit log.",
+           font=F_BODY, fill=DIM)
+
+    layers = [
+        ("CONSTELLATION", "Cross-domain entity graph. Property ↔ vessel ↔ matter ↔ incident ↔ signal."),
+        ("TRACE GRAPH",   "Every signal → recommendation → action edge persisted as a queryable DAG."),
+        ("GUARDIAN",      "8-tier policy engine on every model call. Block / warn / escalate / log."),
+        ("EVAL OS",       "Continuous gates promote prompts and tools. No silent regressions."),
+        ("MEMORY FABRIC", "Retrieval that knows what it's allowed to remember. PII-aware. Tenant-aware."),
+        ("TOOL MESH",     "Every external action is approved, signed, audited, replayable."),
+    ]
+    ly = 460; rh = 100; gap = 12
+    for i,(name, desc) in enumerate(layers):
+        y = ly + i*(rh+gap)
+        d.rounded_rectangle([40, y, W-40, y+rh], radius=10, fill=PANEL, outline=LINE, width=1)
+        d.rectangle([40, y, 46, y+rh], fill=ACCENT)
+        d.text((70, y+18), f"{i+1:02d}  ·  {name}", font=F_LBL, fill=ACCENT)
+        d.text((70, y+50), desc, font=F_BODY, fill=INK)
+    img.save(f"{OUT}/{n:02d}-foundation-stack.jpg", quality=92)
+
+def slide_constellation_graph(n, total):
+    img, d = base_canvas()
+    chrome(d, n, total, "11  ·  CONSTELLATION  ·  CROSS-DOMAIN GRAPH")
+    d.text((40, 160), "One incident.", font=F_H1, fill=INK)
+    d.text((40, 222), "Five domains.", font=F_H1, fill=INK)
+    d.text((40, 304), "One audit trail.", font=F_H1, fill=GOLD)
+    d.text((40, 384), "Live demo seed: \"Harbor View Tower\" — a real-estate property whose",
+           font=F_BODY, fill=DIM)
+    d.text((40, 416), "title dispute, vessel charter, security incident, and revenue drift",
+           font=F_BODY, fill=DIM)
+    d.text((40, 448), "are all linked in Constellation from day one.", font=F_BODY, fill=DIM)
+
+    # Force-positioned 5-node graph
+    cx, cy, r = W//2, 920, 280
+    nodes = [
+        ("TERRA",   "Harbor View Tower",    "property",         (cx,           cy - r)),
+        ("VESSELS", "Charter MS-447",       "shipment",         (cx + int(r*0.95), cy - int(r*0.31))),
+        ("LYTE",    "Revenue drift -18%",   "financial signal", (cx + int(r*0.59), cy + int(r*0.81))),
+        ("AEGIS",   "Site incident #2207",  "security event",   (cx - int(r*0.59), cy + int(r*0.81))),
+        ("PRISM",   "Title dispute M-019",  "legal matter",     (cx - int(r*0.95), cy - int(r*0.31))),
+    ]
+    edges = [(0,1,"supplies"),(0,2,"revenue"),(0,3,"site of"),(0,4,"matter of"),
+             (3,4,"affects"),(2,4,"triggered by")]
+
+    # edges first
+    for a,b,lbl in edges:
+        x1,y1 = nodes[a][3]; x2,y2 = nodes[b][3]
+        d.line([(x1,y1),(x2,y2)], fill=(60,72,90), width=2)
+        mx,my = (x1+x2)//2,(y1+y2)//2
+        # tiny edge label chip
+        tw = int(d.textlength(lbl, font=F_NUM)) + 16
+        d.rounded_rectangle([mx-tw//2, my-13, mx+tw//2, my+13], radius=6, fill=BG, outline=(60,72,90), width=1)
+        d.text((mx-tw//2+8, my-9), lbl, font=F_NUM, fill=DIM)
+
+    # nodes on top
+    for tag, name, kind, (x,y) in nodes:
+        d.ellipse([x-78, y-78, x+78, y+78], fill=PANEL, outline=ACCENT, width=2)
+        d.text((x - int(d.textlength(tag,  font=F_LBL))//2, y-30), tag,  font=F_LBL,  fill=ACCENT)
+        d.text((x - int(d.textlength(name, font=F_NUM))//2, y-2),  name, font=F_NUM,  fill=INK)
+        d.text((x - int(d.textlength(kind, font=F_NUM))//2, y+20), kind, font=F_NUM,  fill=DIM)
+
+    d.text((40, 1230), "5 nodes  ·  6 cross-domain edges  ·  every edge carries provenance, confidence, and a source trace",
+           font=F_NUM, fill=DIM)
+    img.save(f"{OUT}/{n:02d}-constellation-graph.jpg", quality=92)
+
+def slide_smoke_pipeline(n, total):
+    img, d = base_canvas()
+    chrome(d, n, total, "12  ·  THE 12-STEP SMOKE  ·  SIGNAL → EXEC BRIEF")
+    d.text((40, 160), "End-to-end, in 12 verifiable steps.", font=F_H2, fill=INK)
+    d.text((40, 210), "Every release runs this. Every step is a passing test.", font=F_BODY, fill=DIM)
+
+    steps = [
+        ("01","Create entity",          "Constellation node with provenance"),
+        ("02","Cross-domain edges",     "Link to other domain entities"),
+        ("03","Agent run",              "Tool registered, handler invoked"),
+        ("04","Trace capture",          "Run persisted to trace store"),
+        ("05","Eval grade",             "Output scored by evals-core"),
+        ("06","Policy: allow",          "Low-risk recommendation routes"),
+        ("07","Policy: block",          "High-value action escalates"),
+        ("08","Approved execution",     "Signed handler runs"),
+        ("09","Audit entry",            "Verifiable, append-only"),
+        ("10","Replay snapshot",        "Re-run against historical state"),
+        ("11","Rollback deploy",        "Revert to previous stable version"),
+        ("12","Executive brief",        "Auto-generated from live Constellation"),
+    ]
+    sx, sy = 40, 290
+    cw = (W-80-12)//2; rh = 78; gap = 10
+    for i,(num,title,sub) in enumerate(steps):
+        col = i%2; row = i//2
+        x = sx + col*(cw+12); y = sy + row*(rh+gap)
+        d.rounded_rectangle([x, y, x+cw, y+rh], radius=8, fill=PANEL, outline=LINE, width=1)
+        d.rectangle([x, y, x+44, y+rh], fill=(20,28,40))
+        d.text((x+10, y+24), num, font=F_LBL, fill=ACCENT)
+        d.text((x+58, y+10), title, font=F_LBL, fill=INK)
+        d.text((x+58, y+40), sub,   font=F_NUM, fill=DIM)
+    d.text((40, 1240), "405 tests passing  ·  24 test files  ·  green CI on every PR", font=F_NUM, fill=GOLD)
+    img.save(f"{OUT}/{n:02d}-smoke-pipeline.jpg", quality=92)
+
+def slide_api_surface(n, total):
+    img, d = base_canvas()
+    chrome(d, n, total, "13  ·  CROSS-CUTTING API SURFACE")
+    d.text((40, 160), "The substrate is HTTP-addressable.", font=F_H2, fill=INK)
+    d.text((40, 210), "Every domain pack speaks the same four endpoints — RBAC-gated, audited, versioned.",
+           font=F_BODY, fill=DIM)
+
+    rows = [
+        ("GET",  "/briefings",                  "Pulse executive briefings — list, approve, archive"),
+        ("POST", "/briefings",                  "Generate from live Constellation state"),
+        ("GET",  "/drift",                      "Drift reports across agents and prompts"),
+        ("POST", "/drift/:id/acknowledge",      "Operator ack — closes the loop, logs to audit"),
+        ("GET",  "/deployments",                "Deployment registry per artifact"),
+        ("POST", "/deployments/:id/rollback",   "One-call rollback to the previous stable"),
+        ("GET",  "/domains/:domain/graph",      "Constellation projection for any domain"),
+        ("GET",  "/evals",                      "Eval gate results — promotions, regressions, blocks"),
+    ]
+    ry = 290; rh = 80
+    method_w = 90
+    for i,(m, path, desc) in enumerate(rows):
+        y = ry + i*(rh+8)
+        d.rounded_rectangle([40, y, W-40, y+rh], radius=8, fill=PANEL, outline=LINE, width=1)
+        col = ACCENT if m=="GET" else GOLD
+        d.rounded_rectangle([56, y+22, 56+method_w, y+22+36], radius=6, fill=col)
+        d.text((56 + (method_w - int(d.textlength(m, font=F_LBL)))//2, y+28), m, font=F_LBL, fill=BG)
+        d.text((170, y+18), path, font=F_MONO, fill=INK)
+        d.text((170, y+48), desc, font=F_NUM, fill=DIM)
+    d.text((40, 1240), "OpenAPI-described  ·  typed clients generated end-to-end  ·  401 by default", font=F_NUM, fill=DIM)
+    img.save(f"{OUT}/{n:02d}-api-surface.jpg", quality=92)
+
+def slide_numbers(n, total):
+    img, d = base_canvas()
+    chrome(d, n, total, "14  ·  ONE MONTH IN")
+    d.text((40, 160), "30 days.", font=F_HERO, fill=INK)
+    d.text((40, 240), "One operator.", font=F_HERO, fill=INK)
+    d.text((40, 320), "This is what shipped.", font=F_HERO, fill=GOLD)
+
+    metrics = [
+        ("9",     "production surfaces",   "web + mobile, all live"),
+        ("17",    "deployable artifacts",  "monorepo, pnpm workspaces"),
+        ("120+",  "database tables",       "drizzle-typed, migration-safe"),
+        ("405",   "passing tests",         "24 files, green CI"),
+        ("12",    "smoke steps",           "signal → executive brief"),
+        ("8",     "Guardian tiers",        "policy on every model call"),
+        ("6",     "domain packs",          "Lyte, Vessels, Terra, PRISM, Aegis, Imperium"),
+        ("100%",  "TypeScript",            "no JS, no Python in core"),
+        ("0",     "AI hallucinations",     "every claim has a trace ID"),
+    ]
+    sx, sy = 40, 480
+    cw = (W-80-20)//3; rh = 220
+    for i,(big, lbl, sub) in enumerate(metrics):
+        col = i%3; row = i//3
+        x = sx + col*(cw+10); y = sy + row*(rh+10)
+        d.rounded_rectangle([x, y, x+cw, y+rh], radius=10, fill=PANEL, outline=LINE, width=1)
+        d.rectangle([x, y, x+cw, y+4], fill=ACCENT if i%2==0 else GOLD)
+        d.text((x+18, y+22), big, font=F_HERO, fill=INK)
+        d.text((x+18, y+130), lbl, font=F_LBL, fill=ACCENT)
+        d.text((x+18, y+158), sub, font=F_NUM, fill=DIM)
+    img.save(f"{OUT}/{n:02d}-numbers.jpg", quality=92)
+
+def slide_gates(n, total):
+    img, d = base_canvas()
+    chrome(d, n, total, "15  ·  GUARDIAN  ·  EVERY MODEL CALL, GATED")
+    d.text((40, 160), "Every model call passes through 8 tiers.", font=F_H2, fill=INK)
+    d.text((40, 210), "Anything sensitive can be blocked, escalated, or logged — by policy, not by prompt.",
+           font=F_BODY, fill=DIM)
+
+    tiers = [
+        ("T1","Schema",      "input/output shape valid"),
+        ("T2","Identity",    "tenant + actor verified"),
+        ("T3","Budget",      "cost cap enforced"),
+        ("T4","PII",         "redactor strips sensitive data"),
+        ("T5","Injection",   "prompt-injection scan"),
+        ("T6","Tool ACL",    "approval class checked"),
+        ("T7","Eval gate",   "min score required to ship"),
+        ("T8","Audit",       "signed entry written"),
+    ]
+    sx, sy = 40, 320; cw = (W-80-20)//4; rh = 220
+    for i,(tag, name, desc) in enumerate(tiers):
+        col = i%4; row = i//4
+        x = sx + col*(cw+6); y = sy + row*(rh+10)
+        d.rounded_rectangle([x, y, x+cw, y+rh], radius=10, fill=PANEL, outline=LINE, width=1)
+        d.rectangle([x, y, x+cw, y+6], fill=ACCENT)
+        d.text((x+16, y+24), tag,  font=F_H2,  fill=ACCENT)
+        d.text((x+16, y+90), name, font=F_LBL, fill=INK)
+        # wrap desc
+        words = desc.split(); line=""; ly = y+128
+        for w in words:
+            t = (line+" "+w).strip()
+            if d.textlength(t, font=F_NUM) > cw-32:
+                d.text((x+16, ly), line, font=F_NUM, fill=DIM); ly+=24; line=w
+            else: line=t
+        if line: d.text((x+16, ly), line, font=F_NUM, fill=DIM)
+
+    # bottom: continuous gates
+    d.rounded_rectangle([40, 800, W-40, 1240], radius=10, fill=PANEL, outline=LINE, width=1)
+    d.rectangle([40, 800, W-40, 806], fill=GOLD)
+    d.text((60, 824), "EVAL OS  ·  CONTINUOUS GATES", font=F_LBL, fill=GOLD)
+    d.text((60, 870), "Prompts and tools don't ship on vibes.", font=F_H2, fill=INK)
+    d.text((60, 928), "Every change runs an eval suite. Score below baseline →  release blocked.", font=F_BODY, fill=DIM)
+    d.text((60, 968), "Score above baseline →  promotion candidate. Operator approves with one click.", font=F_BODY, fill=DIM)
+    d.text((60, 1024), "→  no silent regressions", font=F_BODY, fill=ACCENT)
+    d.text((60, 1062), "→  no untracked prompt drift", font=F_BODY, fill=ACCENT)
+    d.text((60, 1100), "→  no \"it worked yesterday\"", font=F_BODY, fill=ACCENT)
+    d.text((60, 1180), "Receipts on every claim. That's the whole product.", font=F_LBL, fill=GOLD)
+    img.save(f"{OUT}/{n:02d}-gates.jpg", quality=92)
+
+
 # build
 slide_cover()
 slide_thesis()
-total = 2 + len(PRODUCT_SLIDES) + 1
+total = 2 + len(PRODUCT_SLIDES) + 6 + 1   # cover + thesis + product + foundation07(6) + cta
 n = 3
 for src, kicker, headline, caption, label in PRODUCT_SLIDES:
     slide_product(n, n, total, src, kicker, headline, caption, label)
     n += 1
+slide_foundation_stack(n, total);  n += 1
+slide_constellation_graph(n, total); n += 1
+slide_smoke_pipeline(n, total);    n += 1
+slide_api_surface(n, total);       n += 1
+slide_numbers(n, total);           n += 1
+slide_gates(n, total);             n += 1
 slide_cta(n, total)
-print(f"Built {n} slides → {OUT}")
+print(f"Built {n} slides (total expected {total}) → {OUT}")
 for f in sorted(os.listdir(OUT)): print(" ", f)

@@ -238,4 +238,34 @@ title = "Launch Bundle — Ecosystem Cycle 2026.04 (zip)"
 id = "YrYkn9JzDwMCO40yd_lAV"
 uri = "file://LINKEDIN-LAUNCH.zip"
 type = "unspecified"
-title = "LinkedIn Launch Bundle v2 — 11 branded carousel slides + 30s demo video + post copy + posting playbook"
+title = "LINKEDIN-LAUNCH.zip — 17 slides + 52s video + post copy"
+
+[[outputs]]
+id = "x_hVSsyNANZQ_EUsWD2Me"
+uri = "file://LINKEDIN-LAUNCH/video/szl-holdings-launch-demo.mp4"
+type = "video"
+title = "Launch demo video — 52s, 17 surfaces"
+
+[[outputs]]
+id = "dyCSqiDqDu8RppRwjlE6M"
+uri = "file://LINKEDIN-LAUNCH/images/12-constellation-graph.jpg"
+type = "image"
+title = "Slide 12 — Constellation cross-domain graph"
+
+[[outputs]]
+id = "dA15eLcnXaOVpEdOa8c5F"
+uri = "file://LINKEDIN-LAUNCH/images/13-smoke-pipeline.jpg"
+type = "image"
+title = "Slide 13 — 12-step smoke pipeline"
+
+[[outputs]]
+id = "-es_fNtYDiK33UINB4vzh"
+uri = "file://LINKEDIN-LAUNCH/images/16-gates.jpg"
+type = "image"
+title = "Slide 16 — Guardian + Eval OS gates"
+
+[[outputs]]
+id = "F8_hWwQ5FUmKs3W62B0HV"
+uri = "file://LINKEDIN-LAUNCH/01-LINKEDIN-POST.md"
+type = "text"
+title = "01-LINKEDIN-POST.md — full post copy (carousel + video)"

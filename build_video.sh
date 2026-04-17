@@ -8,8 +8,8 @@ OUT="LINKEDIN-LAUNCH/video/szl-holdings-launch-demo.mp4"
 mkdir -p LINKEDIN-LAUNCH/video
 rm -f "$OUT"
 
-DUR=3.2
-XFADE=0.5
+DUR=3.6
+XFADE=0.55
 W=1080
 H=1350
 FPS=24
