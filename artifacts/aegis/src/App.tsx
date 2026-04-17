@@ -643,9 +643,9 @@ function AegisSidebarContent({ location, onNavigate, collapsed, onToggleCollapse
       label: "Legal Command",
       items: [
         { id: "/legal", label: "Matter Overview", href: "/legal", icon: <Scale className="w-3.5 h-3.5" /> },
-        { id: "/legal/matters", label: "Active Matters", href: "/legal", icon: <Scale className="w-3.5 h-3.5" /> },
-        { id: "/legal/deadlines", label: "Deadline Risk Queue", href: "/legal", icon: <Clock className="w-3.5 h-3.5" /> },
-        { id: "/legal/ai", label: "AI Recommendations", href: "/legal", icon: <BrainIcon className="w-3.5 h-3.5" /> },
+        { id: "/legal/matters", label: "Active Matters", href: "/legal/matters", icon: <Scale className="w-3.5 h-3.5" /> },
+        { id: "/legal/deadlines", label: "Deadline Risk Queue", href: "/legal/deadlines", icon: <Clock className="w-3.5 h-3.5" /> },
+        { id: "/legal/ai", label: "AI Recommendations", href: "/legal/ai", icon: <BrainIcon className="w-3.5 h-3.5" /> },
       ],
     },
   ];
@@ -853,6 +853,9 @@ function AppRouter() {
     <Suspense fallback={<PageLoader />}>
       <Switch>
         {/* Legal Workspace (PRISM Counsel) */}
+        <Route path="/legal/matters" component={LegalWorkspacePage} />
+        <Route path="/legal/deadlines" component={LegalWorkspacePage} />
+        <Route path="/legal/ai" component={LegalWorkspacePage} />
         <Route path="/legal" component={LegalWorkspacePage} />
 
         {/* Aegis Home & Enterprise */}
@@ -1077,9 +1080,9 @@ const aegisCommands: CommandItem[] = [
   { id: "nav-predictions", label: "Predictions", icon: "📈", group: "Intelligence Engine", action: nav("/intel/predictions") },
   { id: "nav-intel-insights", label: "Intel Insights", icon: "💡", group: "Intelligence Engine", action: nav("/intel/insights") },
   { id: "nav-legal", label: "Matter Overview", icon: "⚖️", group: "Legal Command", keywords: ["legal", "matter", "overview", "prism"], action: nav("/legal") },
-  { id: "nav-legal-matters", label: "Active Matters", icon: "📂", group: "Legal Command", keywords: ["legal", "matters", "cases", "active", "litigation"], action: nav("/legal") },
-  { id: "nav-legal-deadlines", label: "Deadline Risk Queue", icon: "⏰", group: "Legal Command", keywords: ["legal", "deadline", "risk", "queue", "calendar"], action: nav("/legal") },
-  { id: "nav-legal-ai", label: "AI Recommendations", icon: "🤖", group: "Legal Command", keywords: ["legal", "ai", "recommendations", "settlement", "prediction"], action: nav("/legal") },
+  { id: "nav-legal-matters", label: "Active Matters", icon: "📂", group: "Legal Command", keywords: ["legal", "matters", "cases", "active", "litigation"], action: nav("/legal/matters") },
+  { id: "nav-legal-deadlines", label: "Deadline Risk Queue", icon: "⏰", group: "Legal Command", keywords: ["legal", "deadline", "risk", "queue", "calendar"], action: nav("/legal/deadlines") },
+  { id: "nav-legal-ai", label: "AI Recommendations", icon: "🤖", group: "Legal Command", keywords: ["legal", "ai", "recommendations", "settlement", "prediction"], action: nav("/legal/ai") },
   ...createBaselineWebActions(
     (path) => { window.location.href = BASE + path.replace(/^\//, ""); },
     {
