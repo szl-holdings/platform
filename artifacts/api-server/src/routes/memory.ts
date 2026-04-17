@@ -10,7 +10,7 @@ import {
   parsePagination,
 } from "../lib/api-response";
 import { logger } from "../lib/logger";
-import { InMemoryStore } from "@workspace/memory-fabric/store";
+import { defaultMemoryStore } from "@workspace/memory-fabric/store";
 import {
   applyRetentionDefaults,
   redactEntry,
@@ -25,7 +25,7 @@ import type { MemoryEntry, MemoryType, SensitivityLevel } from "@workspace/memor
 
 const router: IRouter = Router();
 
-const memoryStore = new InMemoryStore();
+const memoryStore = defaultMemoryStore;
 
 const ALL_MEMORY_TYPES: MemoryType[] = [
   "working", "session", "episodic", "semantic", "workflow",

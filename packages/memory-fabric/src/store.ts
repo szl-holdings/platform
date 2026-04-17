@@ -143,4 +143,36 @@ export class InMemoryStore implements MemoryStore {
   }
 }
 
-export const defaultMemoryStore = new InMemoryStore();
+/**
+ * A MemoryStore wrapper that delegates to a swappable backend. Used as the
+ * process-wide `defaultMemoryStore` so the API server can register a durable
+ * Postgres-backed implementation at boot time.
+ */
+export class MutableMemoryStore implements MemoryStore {
+  private backend: MemoryStore;
+
+  constructor(initial: MemoryStore = new InMemoryStore()) {
+    this.backend = initial;
+  }
+
+  setBackend(store: MemoryStore): void {
+    this.backend = store;
+  }
+
+  getBackend(): MemoryStore {
+    return this.backend;
+  }
+
+  put(entry: MemoryEntry): void { this.backend.put(entry); }
+  get(id: string): MemoryEntry | undefined { return this.backend.get(id); }
+  getByKey(tier: MemoryTier, key: string, scopeId?: string): MemoryEntry | undefined {
+    return this.backend.getByKey(tier, key, scopeId);
+  }
+  list(query?: MemoryStoreQuery): MemoryEntry[] { return this.backend.list(query); }
+  delete(id: string): boolean { return this.backend.delete(id); }
+  evictExpired(): number { return this.backend.evictExpired(); }
+  count(tier?: MemoryTier): number { return this.backend.count(tier); }
+  clear(tier?: MemoryTier): void { this.backend.clear(tier); }
+}
+
+export const defaultMemoryStore: MutableMemoryStore = new MutableMemoryStore();

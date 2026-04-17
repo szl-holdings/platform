@@ -36,7 +36,6 @@
     "@workspace/guardian": "workspace:*",
     "@workspace/memory-fabric": "workspace:*",
     "@workspace/tool-mesh": "workspace:*",
-    "@workspace/trace-graph": "workspace:*",
     "@szl-holdings/crdt-sync": "workspace:*",
     "@szl-holdings/data-connectors": "workspace:*",
     "@szl-holdings/db": "workspace:*",

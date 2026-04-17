@@ -40,6 +40,7 @@ import { registerAnalyticsJobHandlers } from "./lib/analytics-jobs";
 import { initializeAlloyDomainEventSubscriptions } from "./lib/domain-events/alloy-wiring.js";
 import { startIntelligenceFeeds, stopIntelligenceFeeds } from "./lib/intelligence-feeds-init";
 import { startMeshPublisher } from "./lib/control-tower-mesh-publisher";
+import { initDurablePersistence, stopDurablePersistence } from "./lib/persistence-init";
 
 failFastOnInvalidConfig();
 
@@ -153,6 +154,10 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     await ensurePlatformFlags();
     await knowledgeStore.loadFromDb();
     logger.info("[bootstrap] Platform flags and knowledge store loaded");
+
+    // Step 2b: Wire Trace Graph and Memory Fabric to Postgres so traces,
+    // approvals, audit trails, and agent memory survive restarts.
+    await initDurablePersistence();
 
     // Step 3: Start durable (PostgreSQL-backed) job queue
     await startDurableQueue();
@@ -345,6 +350,12 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
       logger.info("Durable job queue flushed");
     } catch (err) {
       logger.warn({ err }, "Error flushing durable job queue");
+    }
+
+    try {
+      await stopDurablePersistence();
+    } catch (err) {
+      logger.warn({ err }, "Error flushing trace/memory persistence");
     }
 
     try {

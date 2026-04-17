@@ -17,6 +17,10 @@
       "types": "./dist/store.d.ts",
       "import": "./src/store.ts"
     },
+    "./postgres-store": {
+      "types": "./dist/postgres-store.d.ts",
+      "import": "./src/postgres-store.ts"
+    },
     "./retention": {
       "types": "./dist/retention.d.ts",
       "import": "./src/retention.ts"
@@ -27,6 +31,7 @@
     }
   },
   "dependencies": {
+    "drizzle-orm": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

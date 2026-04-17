@@ -21,6 +21,10 @@
       "types": "./dist/store.d.ts",
       "import": "./src/store.ts"
     },
+    "./postgres-store": {
+      "types": "./dist/postgres-store.d.ts",
+      "import": "./src/postgres-store.ts"
+    },
     "./replay": {
       "types": "./dist/replay.d.ts",
       "import": "./src/replay.ts"
@@ -40,6 +44,7 @@
   },
   "dependencies": {
     "@szl-holdings/replay-core": "workspace:*",
+    "drizzle-orm": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

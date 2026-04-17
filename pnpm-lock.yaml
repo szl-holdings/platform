@@ -2407,6 +2407,9 @@ importers:
 
   packages/memory-fabric:
     dependencies:
+      drizzle-orm:
+        specifier: 'catalog:'
+        version: 0.45.2(@types/pg@8.18.0)(pg@8.20.0)
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -2546,6 +2549,9 @@ importers:
       '@szl-holdings/replay-core':
         specifier: workspace:*
         version: link:../replay-core
+      drizzle-orm:
+        specifier: 'catalog:'
+        version: 0.45.2(@types/pg@8.18.0)(pg@8.20.0)
       zod:
         specifier: 'catalog:'
         version: 3.25.76

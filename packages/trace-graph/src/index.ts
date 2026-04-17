@@ -1,5 +1,6 @@
 export * from "./schema.js";
 export * from "./store.js";
+export * from "./postgres-store.js";
 export * from "./writer.js";
 export * from "./replay.js";
 export * from "./queue.js";

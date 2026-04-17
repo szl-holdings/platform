@@ -37,4 +37,46 @@ export class InMemoryTraceStore implements TraceStore {
   }
 }
 
-export const defaultTraceStore = new InMemoryTraceStore();
+/**
+ * A TraceStore wrapper that delegates to a swappable backend. Used as the
+ * process-wide `defaultTraceStore` so the API server can register a durable
+ * Postgres-backed implementation at boot time without breaking existing
+ * imports that hold a reference to `defaultTraceStore`.
+ */
+export class MutableTraceStore implements TraceStore {
+  private backend: TraceStore;
+
+  constructor(initial: TraceStore = new InMemoryTraceStore()) {
+    this.backend = initial;
+  }
+
+  setBackend(store: TraceStore): void {
+    this.backend = store;
+  }
+
+  getBackend(): TraceStore {
+    return this.backend;
+  }
+
+  save(trace: TraceRecord): void {
+    this.backend.save(trace);
+  }
+
+  get(traceId: string): TraceRecord | undefined {
+    return this.backend.get(traceId);
+  }
+
+  list(filter?: { sessionId?: string; workflowId?: string; agentId?: string; status?: TraceRecord["status"] }): TraceRecord[] {
+    return this.backend.list(filter);
+  }
+
+  delete(traceId: string): boolean {
+    return this.backend.delete(traceId);
+  }
+
+  count(): number {
+    return this.backend.count();
+  }
+}
+
+export const defaultTraceStore: MutableTraceStore = new MutableTraceStore();
