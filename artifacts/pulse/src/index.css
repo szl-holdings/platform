@@ -164,3 +164,9 @@ html, body, #root {
 .live-indicator {
   animation: pulse-glow 2s ease-in-out infinite;
 }
+
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

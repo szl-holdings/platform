@@ -34,6 +34,7 @@ import * as verifier from "./groups/verifier";
 import * as skillLibrary from "./groups/skill-library";
 import nexusRouter from "./nexus";
 import cognitiveRuntimeRouter from "./cognitive-runtime";
+import execBriefingsRouter from "./executive-briefings";
 
 const router: IRouter = Router();
 
@@ -43,6 +44,7 @@ const router: IRouter = Router();
 router.use(guardianPolicyCheck());
 
 router.use("/pulse", perUserApiSlidingLimiter, pulseBriefingRouter);
+router.use("/pulse", perUserApiSlidingLimiter, execBriefingsRouter);
 router.use(evalsRouter);
 router.use(briefingsRouter);
 router.use(driftRouter);

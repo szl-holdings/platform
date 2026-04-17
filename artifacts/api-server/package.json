@@ -64,6 +64,7 @@
     "@workspace/cognitive-runtime": "workspace:*",
     "@workspace/eval-forge": "workspace:*",
     "@workspace/eval-os": "workspace:*",
+    "@workspace/executive-briefing": "workspace:*",
     "@workspace/guardian": "workspace:*",
     "@workspace/memory-fabric": "workspace:*",
     "@workspace/planner": "workspace:*",

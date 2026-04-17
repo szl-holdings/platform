@@ -429,6 +429,9 @@ importers:
       '@workspace/eval-os':
         specifier: workspace:*
         version: link:../../packages/eval-os
+      '@workspace/executive-briefing':
+        specifier: workspace:*
+        version: link:../../packages/executive-briefing
       '@workspace/guardian':
         specifier: workspace:*
         version: link:../../packages/guardian
@@ -2552,6 +2555,22 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
+
+  packages/executive-briefing:
+    dependencies:
+      '@workspace/verifier':
+        specifier: workspace:*
+        version: link:../verifier
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/guardian:
     dependencies:

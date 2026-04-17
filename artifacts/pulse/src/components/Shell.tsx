@@ -2,7 +2,7 @@ import { ReactNode, ComponentType } from "react";
 import { Link, useLocation } from "wouter";
 import {
   BookOpen, BarChart2, FileText, MessageSquare,
-  Settings, Radio, ChevronRight, Zap, Shield, Activity, Network,
+  Settings, Radio, ChevronRight, Zap, Shield, Activity, Network, Cpu,
   type LucideProps
 } from "lucide-react";
 
@@ -13,6 +13,7 @@ const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "/pulse";
 const NAV_ITEMS = [
   { href: `${BASE}/`, label: "Today's Brief", icon: Radio },
   { href: `${BASE}/library`, label: "Briefing Library", icon: BookOpen },
+  { href: `${BASE}/engine`, label: "Brief Engine", icon: Cpu },
   { href: `${BASE}/confidence`, label: "Confidence", icon: BarChart2 },
   { href: `${BASE}/custom`, label: "Custom Brief", icon: FileText },
   { href: `${BASE}/dissent`, label: "Dissent Channel", icon: MessageSquare },
@@ -81,11 +82,11 @@ export default function Shell({ children }: { children: ReactNode }) {
         <nav style={{ padding: "12px 10px", flex: 1, overflowY: "auto" }}>
           <div style={{ marginBottom: 6 }}>
             <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--pulse-text-muted)", padding: "4px 12px 8px", }}>Intelligence</div>
-            {NAV_ITEMS.slice(0, 4).map(item => <NavItem key={item.href} {...item} />)}
+            {NAV_ITEMS.slice(0, 5).map(item => <NavItem key={item.href} {...item} />)}
           </div>
           <div>
             <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--pulse-text-muted)", padding: "12px 12px 8px" }}>System</div>
-            {NAV_ITEMS.slice(4).map(item => <NavItem key={item.href} {...item} />)}
+            {NAV_ITEMS.slice(5).map(item => <NavItem key={item.href} {...item} />)}
           </div>
         </nav>
 

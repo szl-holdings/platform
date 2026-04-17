@@ -10,6 +10,7 @@ import DissentChannel from "./pages/DissentChannel";
 import Settings from "./pages/Settings";
 import BriefingDetail from "./pages/BriefingDetail";
 import SystemHealth from "./pages/SystemHealth";
+import BriefingEngine from "./pages/BriefingEngine";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "/pulse";
 
@@ -259,6 +260,7 @@ export default function App() {
           <Route path={`${BASE}/system`} component={SystemHealth} />
           <Route path={`${BASE}/settings`} component={Settings} />
           <Route path={`${BASE}/constellation`} component={Constellation} />
+          <Route path={`${BASE}/engine`} component={BriefingEngine} />
           <Route component={TodaysBrief} />
         </Switch>
       </Shell>

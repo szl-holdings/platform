@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, jsonb, numeric } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, jsonb, numeric, boolean } from "drizzle-orm/pg-core";
 
 export const pulseBriefingsTable = pgTable("pulse_briefings", {
   id: text("id").primaryKey(),
@@ -45,4 +45,27 @@ export const pulseCustomBriefsTable = pgTable("pulse_custom_briefs", {
   requestedAt: timestamp("requested_at").notNull().defaultNow(),
   status: text("status", { enum: ["pending", "generating", "complete", "failed"] }).notNull().default("pending"),
   briefingId: text("briefing_id"),
+});
+
+export const pulseExecBriefsTable = pgTable("pulse_exec_briefs", {
+  id: text("id").primaryKey(),
+  briefingId: text("briefing_id"),
+  domain: text("domain").notNull(),
+  status: text("status", { enum: ["published", "draft", "revision_required"] }).notNull().default("draft"),
+  headline: text("headline").notNull(),
+  situation: text("situation").notNull(),
+  autonomyTier: text("autonomy_tier").notNull(),
+  confidence: numeric("confidence").notNull(),
+  overallRisk: text("overall_risk").notNull(),
+  verifierStatus: text("verifier_status", { enum: ["passed", "revision_required", "pending"] }).notNull().default("pending"),
+  verifierFeedback: text("verifier_feedback"),
+  whatWeBelieve: jsonb("what_we_believe").notNull().$type<unknown[]>(),
+  whyCitations: jsonb("why_citations").notNull().$type<unknown[]>(),
+  whatWeRecommend: jsonb("what_we_recommend").notNull().$type<unknown[]>(),
+  sourceTraceIds: jsonb("source_trace_ids").notNull().$type<string[]>().default([]),
+  entityProvenance: jsonb("entity_provenance").notNull().$type<unknown[]>().default([]),
+  sections: jsonb("sections").notNull().$type<unknown[]>().default([]),
+  scheduled: boolean("scheduled").notNull().default(false),
+  generatedAt: timestamp("generated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
