@@ -96,16 +96,16 @@ The `deploy-production.yml` workflow deploys to this environment on published re
 
 ## 4. Secrets
 
-Navigate to **Settings → Secrets and variables → Actions** and set the following repository-level secrets:
+> **Recommended:** Set these secrets as **environment-scoped** secrets under **Settings → Environments → [environment name] → Environment secrets**. Environment secrets are only exposed to workflows running in that specific environment and cannot leak across deployment targets. Setting them at the repository level (Settings → Secrets and variables → Actions) also works but provides weaker access control.
 
-| Secret | Used By | Description |
+| Secret | Environment | Description |
 |---|---|---|
-| `REPLIT_DEPLOY_TOKEN` | `deploy-production.yml` | Replit personal access or deploy token for production |
-| `REPLIT_APP_ID` | `deploy-production.yml` | Replit app/repl ID for production |
-| `REPLIT_STAGING_DEPLOY_TOKEN` | `deploy-staging.yml` | Replit personal access or deploy token for staging |
-| `REPLIT_STAGING_APP_ID` | `deploy-staging.yml` | Replit app/repl ID for staging |
+| `REPLIT_STAGING_DEPLOY_TOKEN` | `staging` | Replit personal access or deploy token for the staging Repl |
+| `REPLIT_STAGING_APP_ID` | `staging` | Replit app/repl ID for the staging environment |
+| `REPLIT_DEPLOY_TOKEN` | `production` | Replit personal access or deploy token for the production Repl |
+| `REPLIT_APP_ID` | `production` | Replit app/repl ID for the production environment |
 
-> Secrets scoped to an environment (staging / production) should be set under **Settings → Environments → [environment name] → Environment secrets** rather than at the repository level, for tighter access control.
+For the complete setup walkthrough, see [`docs/github/environment-protection-setup.md`](../docs/github/environment-protection-setup.md).
 
 ---
 
