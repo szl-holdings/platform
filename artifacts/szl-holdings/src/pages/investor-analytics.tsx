@@ -22,17 +22,36 @@ const VIOLET = "#8b5cf6";
 const AMBER = "#f59e0b";
 const MUTED = "#52525b";
 
-function fmt(n: number, prefix = "", suffix = "") {
+function fmt(n: number | null | undefined, prefix = "", suffix = "") {
+  if (n == null || !isFinite(n)) return "No data yet";
   if (n >= 1_000_000) return `${prefix}${(n / 1_000_000).toFixed(1)}M${suffix}`;
   if (n >= 1_000) return `${prefix}${(n / 1_000).toFixed(1)}K${suffix}`;
   return `${prefix}${n.toFixed(0)}${suffix}`;
 }
 
-function fmtCurrency(n: number) {
+function fmtCurrency(n: number | null | undefined) {
+  if (n == null || !isFinite(n)) return "No data yet";
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
   if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
   return `$${n.toFixed(2)}`;
 }
+
+function fmtPct(n: number | null | undefined, decimals = 1) {
+  if (n == null || !isFinite(n)) return "No data yet";
+  return `${n.toFixed(decimals)}%`;
+}
+
+function fmtRatio(n: number | null | undefined, suffix = "x", decimals = 2) {
+  if (n == null || !isFinite(n)) return "No data yet";
+  return `${n.toFixed(decimals)}${suffix}`;
+}
+
+function fmtMonths(n: number | null | undefined) {
+  if (n == null || !isFinite(n)) return "No data yet";
+  return `${n.toFixed(1)} mo`;
+}
+
+const NO_DATA = "No data yet";
 
 function MetricCard({
   label, value, sub, trend, trendUp, color = GOLD,
@@ -44,16 +63,22 @@ function MetricCard({
   trendUp?: boolean;
   color?: string;
 }) {
+  const isNoData = value === NO_DATA;
   return (
     <div className="bg-[#111318] border border-[#1e2230] rounded-xl p-5">
       <p className="text-xs text-[#7a8099] uppercase tracking-widest mb-2">{label}</p>
-      <p className="text-2xl font-bold mb-1" style={{ color }}>{value}</p>
-      {trend && (
+      <p className="text-2xl font-bold mb-1" style={{ color: isNoData ? "#52525b" : color }}>
+        {value}
+      </p>
+      {!isNoData && trend && (
         <p className={`text-xs font-medium ${trendUp ? "text-emerald-400" : "text-rose-400"}`}>
           {trendUp ? "▲" : "▼"} {trend}
         </p>
       )}
-      {sub && !trend && <p className="text-xs text-[#7a8099]">{sub}</p>}
+      {isNoData && (
+        <p className="text-xs text-[#3a3d4a]">Insufficient data to compute</p>
+      )}
+      {!isNoData && sub && !trend && <p className="text-xs text-[#7a8099]">{sub}</p>}
     </div>
   );
 }
@@ -341,50 +366,50 @@ export default function InvestorAnalytics() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                   <MetricCard
                     label="MRR"
-                    value={fmtCurrency(summary.mrr ?? 0)}
-                    trend={summary.mrrGrowth !== undefined ? `${Math.abs(summary.mrrGrowth)}% vs last month` : undefined}
+                    value={fmtCurrency(summary.mrr)}
+                    trend={summary.mrrGrowth != null ? `${Math.abs(summary.mrrGrowth)}% vs last month` : undefined}
                     trendUp={(summary.mrrGrowth ?? 0) >= 0}
                     color={GOLD}
                   />
                   <MetricCard
                     label="ARR"
-                    value={fmtCurrency(summary.arr ?? 0)}
+                    value={fmtCurrency(summary.arr)}
                     sub="Annualized run rate"
                     color={GOLD}
                   />
                   <MetricCard
                     label="Total Customers"
-                    value={fmt(summary.totalCustomers ?? 0)}
-                    trend={summary.customerGrowth !== undefined ? `${Math.abs(summary.customerGrowth)}% vs last month` : undefined}
+                    value={fmt(summary.totalCustomers)}
+                    trend={summary.customerGrowth != null ? `${Math.abs(summary.customerGrowth)}% vs last month` : undefined}
                     trendUp={(summary.customerGrowth ?? 0) >= 0}
                     color={BLUE}
                   />
                   <MetricCard
                     label="Churn Rate"
-                    value={`${summary.churnRate ?? 0}%`}
+                    value={fmtPct(summary.churnRate, 2)}
                     sub="Monthly customer churn"
                     color={(summary.churnRate ?? 0) < 5 ? EMERALD : ROSE}
                   />
                   <MetricCard
                     label="NRR"
-                    value={`${summary.nrr ?? 100}%`}
-                    sub="Net revenue retention"
-                    color={(summary.nrr ?? 100) >= 100 ? EMERALD : AMBER}
+                    value={fmtPct(summary.nrr)}
+                    sub={summary.nrr != null ? "Net revenue retention" : undefined}
+                    color={summary.nrr != null ? (summary.nrr >= 100 ? EMERALD : AMBER) : MUTED}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <MetricCard
                     label="CAC Payback"
-                    value={`${summary.cacPayback ?? 0} mo`}
-                    sub="Months to recoup acquisition cost"
+                    value={fmtMonths(summary.cacPayback)}
+                    sub={summary.cacPayback != null ? "Months to recoup acquisition cost" : undefined}
                     color={AMBER}
                   />
                   <MetricCard
                     label="LTV/CAC Ratio"
-                    value={`${summary.ltvCacRatio ?? 0}x`}
-                    sub="Customer lifetime value vs CAC"
-                    color={(summary.ltvCacRatio ?? 0) >= 3 ? EMERALD : AMBER}
+                    value={fmtRatio(summary.ltvCacRatio)}
+                    sub={summary.ltvCacRatio != null ? "Customer lifetime value vs CAC" : undefined}
+                    color={summary.ltvCacRatio != null ? ((summary.ltvCacRatio >= 3 ? EMERALD : AMBER)) : MUTED}
                   />
                   <MetricCard
                     label="MAU"

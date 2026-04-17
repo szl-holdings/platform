@@ -2,6 +2,45 @@
  * Investor Analytics — Business Metrics Engine
  * Computes MRR/ARR trajectory, customer metrics, churn, NRR, LTV/CAC,
  * funnel conversion, and cohort retention from billing + usage data.
+ *
+ * Metric definitions:
+ *
+ * MRR  — Sum of priceMonthly for all subscriptions that were active
+ *         (status=active or trialing, or were not yet canceled) in a given month,
+ *         derived from createdAt and canceledAt on the subscriptions table.
+ *
+ * ARR  — MRR × 12.
+ *
+ * MRR Growth — ((currentMRR - prevMonthMRR) / prevMonthMRR) × 100.
+ *              Returns null when prevMonthMRR = 0 (no baseline to compare).
+ *
+ * Total Customers — Count of organizations with status = 'active'.
+ *
+ * Customer Growth — ((currentCount - prevMonthCount) / prevMonthCount) × 100.
+ *                   Returns null when prevMonthCount = 0.
+ *
+ * Churn Rate — (subscriptions canceled in month / cumulative active customers
+ *               at start of month) × 100.  Returns 0 when no customers exist.
+ *
+ * NRR (Net Revenue Retention) — (currentMRR / prevMonthMRR) × 100.
+ *   This is a simplified single-period NRR proxy using plan revenue,
+ *   not a full expansion/contraction/churn decomposition.
+ *   Returns null when prevMonthMRR = 0 (no billing baseline).
+ *
+ * LTV — (avgMRR per customer) / avgMonthlyChurnRate.
+ *   avgMonthlyChurnRate = (totalCanceledSubs / totalSubs) / 12.
+ *   Returns null when either input is zero or no customers exist.
+ *
+ * CAC Proxy — Average priceMonthly of subscriptions created in the last 12 months.
+ *   This is a billing-data proxy for acquisition cost, not a true marketing-spend CAC.
+ *   Returns null when no recent subscriptions exist.
+ *
+ * LTV/CAC — LTV / CACProxy.  Returns null when either is null/zero.
+ *
+ * CAC Payback — CACProxy / avgMRRPerCustomer (months to recoup).
+ *               Returns null when either is null/zero.
+ *
+ * Churned subscription — any subscription row where canceledAt IS NOT NULL.
  */
 import { Router, type IRouter, type Request, type Response } from "express";
 import {
@@ -213,19 +252,28 @@ router.get(
       // Previous month MRR for growth
       const prevMonth = monthKey(addMonths(now, -1));
       const prevMrr = mrrByMonth[prevMonth] || 0;
-      const mrrGrowth = prevMrr > 0 ? parseFloat(((currentMrr - prevMrr) / prevMrr * 100).toFixed(1)) : 0;
+      // null = no prior billing baseline (not the same as 0% growth)
+      const mrrGrowth: number | null = prevMrr > 0
+        ? parseFloat(((currentMrr - prevMrr) / prevMrr * 100).toFixed(1))
+        : null;
 
       // Total customers (active orgs)
       const totalCustomers = orgs.filter(o => o.status === "active").length;
       const prevMonthCustomers = customersByMonth[prevMonth] || 0;
-      const customerGrowth = prevMonthCustomers > 0 ? parseFloat(((totalCustomers - prevMonthCustomers) / prevMonthCustomers * 100).toFixed(1)) : 0;
+      // null = no prior customer baseline
+      const customerGrowth: number | null = prevMonthCustomers > 0
+        ? parseFloat(((totalCustomers - prevMonthCustomers) / prevMonthCustomers * 100).toFixed(1))
+        : null;
 
       // Churn rate (current month)
       const currentChurn = churnByMonth[monthKey(now)] || 0;
 
-      // NRR (Net Revenue Retention): simplified — expansion/contraction/churn
-      // = (starting MRR + expansion - contraction - churn MRR) / starting MRR
-      const nrr = prevMrr > 0 ? parseFloat(((currentMrr / prevMrr) * 100).toFixed(1)) : 100;
+      // NRR (Net Revenue Retention): simplified single-period proxy.
+      // = (currentMRR / prevMonthMRR) × 100.
+      // null = no prior billing baseline (avoids a misleading "100%" when no data exists)
+      const nrr: number | null = prevMrr > 0
+        ? parseFloat(((currentMrr / prevMrr) * 100).toFixed(1))
+        : null;
 
       // LTV: avgMrrPerCustomer / monthlyChurnRate (standard SaaS formula using real billing data)
       const avgMrrPerCustomer = totalCustomers > 0 ? currentMrr / totalCustomers : 0;
