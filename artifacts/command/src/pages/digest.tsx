@@ -1,7 +1,32 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { OpsLayout } from "../components/ops-layout";
 import { Zap, Shield, Activity, DollarSign, CheckCircle2, Clock, AlertTriangle, ChevronRight, Settings, RefreshCw, User } from "lucide-react";
 import { useEcosystemData } from "../hooks/use-ecosystem-data";
+
+interface ApiDigestSection {
+  id: string;
+  priority: number;
+  label: string;
+  color: string;
+  headline: string;
+  detail: string;
+  actions: { label: string; href: string }[];
+  relevantFor: string[];
+}
+
+interface ApiDigestResponse {
+  role: string;
+  sections: ApiDigestSection[];
+  stats: { firing: number; critical: number; pending: number; p95: number };
+  generatedAt: string;
+  dataSource: string;
+}
+
+const SECTION_ICONS: Record<string, React.ElementType> = {
+  health: Activity, alerts: AlertTriangle, security: Shield, sla: CheckCircle2,
+  costs: DollarSign, compliance: CheckCircle2, "ops-win": Zap, activity: Clock,
+};
 
 type Role = "executive" | "security" | "operations" | "finance" | "legal";
 
@@ -123,7 +148,32 @@ export default function DigestPage() {
   });
 
   const compositeScore = data?.compositeScore ?? 78;
-  const sections = buildDigest(role, compositeScore);
+
+  const { data: apiData } = useQuery<ApiDigestResponse>({
+    queryKey: ["command-digest", role],
+    queryFn: async () => {
+      const res = await fetch(`/api/command/digest?role=${role}`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to load digest");
+      const json = await res.json();
+      return (json?.data ?? json) as ApiDigestResponse;
+    },
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+  });
+
+  const sections: DigestSection[] = apiData?.sections
+    ? apiData.sections.map((s) => ({
+        id: s.id,
+        priority: s.priority,
+        icon: SECTION_ICONS[s.id] ?? Activity,
+        label: s.label,
+        color: s.color,
+        headline: s.headline,
+        detail: s.detail,
+        actions: s.actions,
+        relevantFor: (s.relevantFor as Role[]),
+      }))
+    : buildDigest(role, compositeScore);
 
   const handleRegenerate = () => {
     setGenerating(true);

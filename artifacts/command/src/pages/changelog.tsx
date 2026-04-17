@@ -1,9 +1,17 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { OpsLayout } from "../components/ops-layout";
 import { GitCommit, Tag, Rocket, AlertTriangle, CheckCircle2, Clock, Search } from "lucide-react";
 
 type ChangeType = "deploy" | "feature" | "fix" | "security" | "config" | "breaking";
 type ChangeSeverity = "major" | "minor" | "patch";
+
+interface ApiReleasesResponse {
+  releases: ChangeEntry[];
+  summary: { total: number; deploysToday: number; rolledBack: number };
+  generatedAt: string;
+  dataSource: string;
+}
 
 interface ChangeEntry {
   id: string;
@@ -21,7 +29,7 @@ interface ChangeEntry {
   status: "live" | "rolling" | "rolled-back";
 }
 
-const CHANGES: ChangeEntry[] = [
+const FALLBACK_CHANGES: ChangeEntry[] = [
   { id: "c1", domain: "Vessels", domainColor: "#0ea5e9", type: "security", severity: "major", title: "Emergency patch: AIS transponder authentication bypass", description: "Critical vulnerability in transponder authentication. All vessel OT systems updated. No data compromise detected. CVE-2026-0441.", version: "v4.2.1", author: "Aegis SOC", timestamp: "14:23", date: "Apr 15", tags: ["security", "critical", "patch"], status: "live" },
   { id: "c2", domain: "Lyte", domainColor: "#f97316", type: "feature", severity: "minor", title: "Route optimization v2 — ML-powered scheduling", description: "New ML model for predictive driver-route matching. Expected 18% improvement in on-time deliveries. Rolled out to 30% of traffic.", version: "v3.8.0", author: "Lyte Eng Team", timestamp: "09:41", date: "Apr 15", tags: ["ml", "optimization", "feature"], status: "rolling" },
   { id: "c3", domain: "Terra", domainColor: "#22c55e", type: "deploy", severity: "patch", title: "Valuation model update — Q2 2026 comparable data", description: "Refreshed comparable transaction database with 1,240 new Q1 2026 transactions. Affects all portfolio valuations.", version: "v2.11.4", author: "Terra Data Team", timestamp: "08:00", date: "Apr 15", tags: ["data", "valuation"], status: "live" },
@@ -66,6 +74,19 @@ export default function ChangelogPage() {
   const [typeFilter, setTypeFilter] = useState<ChangeType | "all">("all");
   const [severityFilter, setSeverityFilter] = useState<ChangeSeverity | "all">("all");
 
+  const { data: apiData } = useQuery<ApiReleasesResponse>({
+    queryKey: ["command-releases"],
+    queryFn: async () => {
+      const res = await fetch("/api/command/releases", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to load releases");
+      const json = await res.json();
+      return (json?.data ?? json) as ApiReleasesResponse;
+    },
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+  });
+
+  const CHANGES: ChangeEntry[] = apiData?.releases ?? FALLBACK_CHANGES;
   const domains = Array.from(new Set(CHANGES.map((c) => c.domain)));
 
   const filtered = CHANGES.filter((c) => {
@@ -89,10 +110,10 @@ export default function ChangelogPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Deploys Today", value: CHANGES.filter(c => c.date === "Apr 15").length, color: "#8b7ac8" },
-            { label: "This Week", value: CHANGES.length, color: "var(--color-low)" },
+            { label: "Deploys Today", value: apiData?.summary.deploysToday ?? CHANGES.filter(c => c.date === new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" })).length, color: "#8b7ac8" },
+            { label: "Total Releases", value: apiData?.summary.total ?? CHANGES.length, color: "var(--color-low)" },
             { label: "Security Updates", value: CHANGES.filter(c => c.type === "security").length, color: "var(--color-critical)" },
-            { label: "Breaking Changes", value: CHANGES.filter(c => c.type === "breaking").length, color: "var(--color-high)" },
+            { label: "Rolled Back", value: apiData?.summary.rolledBack ?? CHANGES.filter(c => c.status === "rolled-back").length, color: "var(--color-high)" },
           ].map(({ label, value, color }) => (
             <div key={label} className="p-4 rounded-xl" style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)" }}>
               <div className="text-2xl font-bold font-mono" style={{ color }}>{value}</div>

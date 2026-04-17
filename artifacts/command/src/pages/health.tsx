@@ -1,9 +1,20 @@
 import { useState } from "react";
 import { OpsLayout } from "../components/ops-layout";
 import { ServiceStatusPanel } from "../components/service-status-panel";
-import { BarChart2, Shield, Activity, DollarSign, CheckCircle2, TrendingUp, TrendingDown, AlertTriangle, Info } from "lucide-react";
-import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
+import { BarChart2, Shield, Activity, DollarSign, CheckCircle2, AlertTriangle, Info } from "lucide-react";
+import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer } from "recharts";
 import { useEcosystemData } from "../hooks/use-ecosystem-data";
+import { useQuery } from "@tanstack/react-query";
+
+interface ApiHealthResponse {
+  compositeScore: number;
+  dimensions: Array<{
+    key: string; label: string; color: string; weight: number; score: number;
+    signals: Array<{ label: string; value: string; status: "good" | "warn" | "bad" }>;
+  }>;
+  generatedAt: string;
+  dataSource: string;
+}
 
 interface DimensionScore {
   key: string;
@@ -16,7 +27,11 @@ interface DimensionScore {
   trend: number[];
 }
 
-const DIMENSIONS: DimensionScore[] = [
+const DIMENSION_ICONS: Record<string, React.ElementType> = {
+  security: Shield, operational: Activity, financial: DollarSign, compliance: CheckCircle2,
+};
+
+const FALLBACK_DIMENSIONS: DimensionScore[] = [
   {
     key: "security", label: "Security", icon: Shield, color: "#ef4444", score: 82, weight: 0.30,
     signals: [
@@ -59,11 +74,6 @@ const DIMENSIONS: DimensionScore[] = [
   },
 ];
 
-const HISTORY = Array.from({ length: 30 }, (_, i) => {
-  const base = 76;
-  const noise = Math.sin(i * 0.4) * 4 + Math.random() * 3;
-  return { day: `Apr ${i + 1}`, score: Math.round(Math.max(60, Math.min(95, base + noise))) };
-}).slice(0, 15);
 
 function scoreColor(score: number) {
   if (score >= 85) return "var(--color-low)";
@@ -81,7 +91,37 @@ function scoreLabel(score: number) {
 
 export default function HealthPage() {
   const { data } = useEcosystemData();
-  const compositeScore = data?.compositeScore ?? Math.round(DIMENSIONS.reduce((s, d) => s + d.score * d.weight, 0));
+  const { data: apiData } = useQuery<ApiHealthResponse>({
+    queryKey: ["command-health"],
+    queryFn: async () => {
+      const res = await fetch("/api/command/health", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to load health");
+      const json = await res.json();
+      return (json?.data ?? json) as ApiHealthResponse;
+    },
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+  });
+
+  const DIMENSIONS: DimensionScore[] = apiData?.dimensions
+    ? apiData.dimensions.map((d) => {
+        const fb = FALLBACK_DIMENSIONS.find((f) => f.key === d.key);
+        return {
+          key: d.key,
+          label: d.label,
+          icon: DIMENSION_ICONS[d.key] ?? Activity,
+          color: d.color,
+          score: d.score,
+          weight: d.weight,
+          signals: d.signals,
+          trend: fb?.trend ?? [d.score, d.score, d.score, d.score, d.score, d.score, d.score],
+        };
+      })
+    : FALLBACK_DIMENSIONS;
+
+  const compositeScore = apiData?.compositeScore
+    ?? data?.compositeScore
+    ?? Math.round(DIMENSIONS.reduce((s, d) => s + d.score * d.weight, 0));
   const [selected, setSelected] = useState<string | null>(null);
 
   const selectedDimension = DIMENSIONS.find((d) => d.key === selected);
@@ -156,31 +196,28 @@ export default function HealthPage() {
           </div>
         </div>
 
-        {/* Trend + Domain Grid */}
+        {/* Current Snapshot + Domain Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Trend Chart */}
+          {/* Live Composite Snapshot */}
           <div className="lg:col-span-2 rounded-xl p-5" style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)" }}>
             <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-fg-muted)" }}>Health Score Trend (15 days)</span>
-              <div className="flex items-center gap-2">
-                {compositeScore > HISTORY[HISTORY.length - 2]?.score ? (
-                  <TrendingUp className="w-3.5 h-3.5" style={{ color: "var(--color-low)" }} />
-                ) : (
-                  <TrendingDown className="w-3.5 h-3.5" style={{ color: "var(--color-high)" }} />
-                )}
-                <span className="text-xs font-mono" style={{ color: compositeScore > 75 ? "var(--color-low)" : "var(--color-high)" }}>
-                  {compositeScore > 75 ? "+" : ""}{compositeScore - (HISTORY[0]?.score ?? compositeScore)} pts vs 15d ago
-                </span>
-              </div>
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-fg-muted)" }}>Composite Health — Live</span>
+              <span className="text-[10px] font-mono uppercase" style={{ color: "var(--color-fg-muted)" }}>
+                Source: {apiData?.dataSource ?? "fallback"}
+              </span>
             </div>
-            <ResponsiveContainer width="100%" height={180}>
-              <LineChart data={HISTORY}>
-                <XAxis dataKey="day" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 9 }} axisLine={false} tickLine={false} interval={2} />
-                <YAxis domain={[60, 95]} tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 9 }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ backgroundColor: "#1a1d2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", fontSize: "10px" }} formatter={(v: number) => [v, "Health Score"]} />
-                <Line type="monotone" dataKey="score" stroke="#8b7ac8" strokeWidth={2} dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {DIMENSIONS.map((d) => (
+                <div key={d.key} className="rounded-lg p-3" style={{ backgroundColor: "var(--color-bg-elevated)", border: `1px solid ${d.color}30` }}>
+                  <div className="text-[10px] font-mono uppercase tracking-wider mb-1" style={{ color: "var(--color-fg-muted)" }}>{d.label}</div>
+                  <div className="text-2xl font-bold font-mono" style={{ color: d.color }}>{d.score}</div>
+                  <div className="text-[10px] font-mono mt-1" style={{ color: "var(--color-fg-muted)" }}>weight {Math.round(d.weight * 100)}%</div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 text-[11px]" style={{ color: "var(--color-fg-muted)" }}>
+              Updated {apiData?.generatedAt ? new Date(apiData.generatedAt).toLocaleTimeString() : "—"} · Trend history not yet recorded.
+            </div>
           </div>
 
           {/* Domain Scores */}

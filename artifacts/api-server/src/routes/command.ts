@@ -21,7 +21,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { requireAnyAuth, requireRole } from "../middlewares/auth";
-import { db, intelligenceCacheTable, pcMattersTable, pcDeadlinesTable, fundNavRecordsTable, fundPortfolioFinancialsTable, usersTable, guardianPoliciesTable, guardianActionsTable, maritimeVesselsTable, lyteMetricsTable, lyteAlertsTable, lyteAlertEventsTable, usageEventsTable, approvalRequestsTable, approvalAuditTrailTable, healthChecksTable } from "@szl-holdings/db";
+import { db, intelligenceCacheTable, pcMattersTable, pcDeadlinesTable, fundNavRecordsTable, fundPortfolioFinancialsTable, usersTable, guardianPoliciesTable, guardianActionsTable, maritimeVesselsTable, lyteMetricsTable, lyteAlertsTable, lyteAlertEventsTable, usageEventsTable, approvalRequestsTable, approvalAuditTrailTable, healthChecksTable, deploymentsTable, activityLogTable } from "@szl-holdings/db";
 import { eq, desc, count, sql, and, gte, lte } from "drizzle-orm";
 import { logger } from "../lib/logger";
 import os from "os";
@@ -1201,6 +1201,282 @@ router.get("/team", requireAnyAuth(), requireRole("super_admin", "admin", "ops",
   } catch (err) {
     logger.error({ err }, "command team error");
     handleRouteError(res, err, "Failed to load team");
+  }
+});
+
+/**
+ * GET /api/command/releases
+ *
+ * Returns the unified release feed: deployments table joined with changelog
+ * entries (recent first). Used by the Release Feed ops page.
+ */
+router.get("/releases", requireAnyAuth(), async (_req: Request, res: Response) => {
+  try {
+    const DOMAIN_BY_APP: Record<string, { domain: string; color: string }> = {
+      "api-server": { domain: "Lyte", color: DOMAIN_COLOR.Lyte },
+      "vessels": { domain: "Vessels", color: DOMAIN_COLOR.Vessels },
+      "aegis": { domain: "Aegis", color: DOMAIN_COLOR.Aegis },
+      "terra": { domain: "Terra", color: DOMAIN_COLOR.Terra },
+      "prism": { domain: "PRISM", color: DOMAIN_COLOR.PRISM },
+      "command": { domain: "Command", color: "#8b7ac8" },
+      "szl-holdings": { domain: "SZL Holdings", color: DOMAIN_COLOR.SZL },
+      "carlota-jo": { domain: "Carlota Jo", color: DOMAIN_COLOR["Carlota Jo"] },
+    };
+    const STATUS_MAP: Record<string, "live" | "rolling" | "rolled-back"> = {
+      active: "live", deploying: "rolling", "rolled-back": "rolled-back",
+      failed: "rolled-back", inactive: "rolled-back",
+    };
+
+    const deployRows = await db.select().from(deploymentsTable)
+      .orderBy(desc(deploymentsTable.deployedAt))
+      .limit(50);
+
+    const ALLOWED_TYPES = new Set(["deploy", "feature", "fix", "security", "config", "breaking"]);
+    const ALLOWED_SEVERITY = new Set(["major", "minor", "patch"]);
+    const releases = deployRows.map((d) => {
+      const dm = DOMAIN_BY_APP[d.appId] ?? { domain: d.appName ?? d.appId, color: "#8b7ac8" };
+      const meta = (d.metadata ?? {}) as Record<string, unknown>;
+      const rawType = typeof meta.type === "string" ? meta.type : "";
+      const type = ALLOWED_TYPES.has(rawType) ? rawType : "deploy";
+      const rawSeverity = typeof meta.severity === "string" ? meta.severity : "";
+      const severity = ALLOWED_SEVERITY.has(rawSeverity)
+        ? rawSeverity
+        : (d.status === "failed" || d.status === "rolled-back" ? "major" : "minor");
+      const dt = new Date(d.deployedAt);
+      return {
+        id: `d${d.id}`,
+        domain: dm.domain,
+        domainColor: dm.color,
+        type,
+        severity,
+        title: `${d.appName} ${d.version}`,
+        description: d.notes ?? `Deployed to ${d.environment}${d.commitSha ? ` (${d.commitSha.slice(0, 8)})` : ""}.`,
+        version: d.version,
+        author: d.deployedBy,
+        timestamp: dt.toISOString().slice(11, 16),
+        date: dt.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        tags: Array.isArray(meta.tags) ? meta.tags as string[] : [d.environment],
+        status: STATUS_MAP[d.status] ?? "live",
+      };
+    });
+
+    sendSuccess(res, {
+      releases,
+      summary: {
+        total: releases.length,
+        deploysToday: releases.filter((r) => r.date === new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" })).length,
+        rolledBack: releases.filter((r) => r.status === "rolled-back").length,
+      },
+      generatedAt: new Date().toISOString(),
+      dataSource: releases.length > 0 ? "deployments" : "empty",
+    });
+  } catch (err) {
+    logger.error({ err }, "command releases error");
+    handleRouteError(res, err, "Failed to load release feed");
+  }
+});
+
+/**
+ * GET /api/command/health
+ *
+ * Composite ecosystem health score derived from real telemetry across four
+ * dimensions: security (Aegis alerts + threats), operational (Lyte SLA
+ * breaches + service health), financial (budget burn vs trend), compliance
+ * (active policies + pending approvals).
+ */
+router.get("/health", requireAnyAuth(), async (_req: Request, res: Response) => {
+  try {
+    const since30d = new Date(Date.now() - 30 * 86400000);
+    const since24h = new Date(Date.now() - 86400000);
+
+    // Security signals
+    const [aegisAlerts] = await db.select({ c: count() }).from(lyteAlertsTable)
+      .where(and(eq(lyteAlertsTable.service, "aegis"), eq(lyteAlertsTable.status, "firing")));
+    const [aegisHealth] = await db.select({
+      pass: sql<number>`SUM(CASE WHEN ${healthChecksTable.status} = 'healthy' THEN 1 ELSE 0 END)::int`,
+      total: sql<number>`COUNT(*)::int`,
+    }).from(healthChecksTable)
+      .where(and(eq(healthChecksTable.service, "aegis"), gte(healthChecksTable.checkedAt, since30d)));
+    const securityScore = Math.max(40, Math.min(100,
+      90 - Number(aegisAlerts?.c ?? 0) * 5 + (aegisHealth?.total ? Math.round((Number(aegisHealth.pass) / Number(aegisHealth.total)) * 10) : 0)
+    ));
+
+    // Operational signals
+    const [latency] = await db.select({
+      p95: sql<number>`COALESCE(PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY ${lyteMetricsTable.value}), 0)::float`,
+    }).from(lyteMetricsTable)
+      .where(and(eq(lyteMetricsTable.service, "api-server"), eq(lyteMetricsTable.metricType, "latency"), gte(lyteMetricsTable.recordedAt, since24h)));
+    const [apiHealth] = await db.select({
+      pass: sql<number>`SUM(CASE WHEN ${healthChecksTable.status} = 'healthy' THEN 1 ELSE 0 END)::int`,
+      total: sql<number>`COUNT(*)::int`,
+    }).from(healthChecksTable)
+      .where(and(eq(healthChecksTable.service, "api-server"), gte(healthChecksTable.checkedAt, since30d)));
+    const latencyP95 = Number(latency?.p95 ?? 0);
+    const uptime = apiHealth?.total ? Number(apiHealth.pass) / Number(apiHealth.total) : 1;
+    const operationalScore = Math.max(40, Math.min(100,
+      Math.round(60 + uptime * 30 - Math.max(0, (latencyP95 - 1500) / 100))
+    ));
+
+    // Financial signals (usage-events MTD vs prev month)
+    const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const prevMonthStart = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1);
+    const [mtd] = await db.select({ c: sql<number>`COALESCE(SUM(${usageEventsTable.quantity}), 0)::int` })
+      .from(usageEventsTable).where(gte(usageEventsTable.recordedAt, monthStart));
+    const [prev] = await db.select({ c: sql<number>`COALESCE(SUM(${usageEventsTable.quantity}), 0)::int` })
+      .from(usageEventsTable).where(and(gte(usageEventsTable.recordedAt, prevMonthStart), lte(usageEventsTable.recordedAt, monthStart)));
+    const burn = Number(prev?.c ?? 0) > 0 ? Number(mtd?.c ?? 0) / Number(prev?.c ?? 0) : 1;
+    const financialScore = Math.max(40, Math.min(100, Math.round(85 - Math.max(0, (burn - 1) * 50))));
+
+    // Compliance signals
+    const [activePolicies] = await db.select({ c: count() }).from(guardianPoliciesTable).where(eq(guardianPoliciesTable.enabled, true));
+    const [totalPolicies] = await db.select({ c: count() }).from(guardianPoliciesTable);
+    const [pendingApprovals] = await db.select({ c: count() }).from(approvalRequestsTable).where(eq(approvalRequestsTable.status, "pending"));
+    const policyRatio = Number(totalPolicies?.c ?? 0) > 0 ? Number(activePolicies?.c ?? 0) / Number(totalPolicies?.c ?? 1) : 1;
+    const complianceScore = Math.max(40, Math.min(100,
+      Math.round(70 + policyRatio * 25 - Math.min(15, Number(pendingApprovals?.c ?? 0) * 2))
+    ));
+
+    const dimensions = [
+      {
+        key: "security", label: "Security", color: "#ef4444", weight: 0.30, score: securityScore,
+        signals: [
+          { label: "Active firing alerts (Aegis)", value: String(Number(aegisAlerts?.c ?? 0)), status: Number(aegisAlerts?.c ?? 0) > 0 ? "warn" : "good" },
+          { label: "Aegis health pass-rate", value: aegisHealth?.total ? `${((Number(aegisHealth.pass) / Number(aegisHealth.total)) * 100).toFixed(1)}%` : "n/a", status: "good" },
+        ],
+      },
+      {
+        key: "operational", label: "Operational", color: "#0ea5e9", weight: 0.30, score: operationalScore,
+        signals: [
+          { label: "API latency P95 (24h)", value: latencyP95 > 0 ? `${Math.round(latencyP95)}ms` : "n/a", status: latencyP95 > 2000 ? "bad" : "good" },
+          { label: "API uptime (30d)", value: `${(uptime * 100).toFixed(2)}%`, status: uptime < 0.999 ? "warn" : "good" },
+        ],
+      },
+      {
+        key: "financial", label: "Financial", color: "#22c55e", weight: 0.25, score: financialScore,
+        signals: [
+          { label: "Usage MTD vs prev month", value: `${(burn * 100 - 100).toFixed(1)}%`, status: burn > 1.1 ? "warn" : "good" },
+        ],
+      },
+      {
+        key: "compliance", label: "Compliance", color: "#a855f7", weight: 0.15, score: complianceScore,
+        signals: [
+          { label: "Active policies", value: `${Number(activePolicies?.c ?? 0)} of ${Number(totalPolicies?.c ?? 0)}`, status: "good" },
+          { label: "Pending approvals", value: String(Number(pendingApprovals?.c ?? 0)), status: Number(pendingApprovals?.c ?? 0) > 0 ? "warn" : "good" },
+        ],
+      },
+    ];
+
+    const compositeScore = Math.round(dimensions.reduce((s, d) => s + d.score * d.weight, 0));
+
+    sendSuccess(res, {
+      compositeScore,
+      dimensions,
+      generatedAt: new Date().toISOString(),
+      dataSource: "telemetry",
+    });
+  } catch (err) {
+    logger.error({ err }, "command health error");
+    handleRouteError(res, err, "Failed to load health score");
+  }
+});
+
+/**
+ * GET /api/command/digest
+ *
+ * Returns a personalized daily digest derived from real signals: composite
+ * health score, firing alerts, breached SLAs, budget burn, pending approvals,
+ * and recent activity-log entries.
+ */
+router.get("/digest", requireAnyAuth(), async (req: Request, res: Response) => {
+  try {
+    const role = (typeof req.query.role === "string" ? req.query.role : "executive") as
+      "executive" | "security" | "operations" | "finance" | "legal";
+    const since24h = new Date(Date.now() - 86400000);
+
+    const [firingAlerts] = await db.select({ c: count() }).from(lyteAlertsTable).where(eq(lyteAlertsTable.status, "firing"));
+    const [criticalAlerts] = await db.select({ c: count() }).from(lyteAlertsTable)
+      .where(and(eq(lyteAlertsTable.status, "firing"), eq(lyteAlertsTable.severity, "critical")));
+    const [pendingApprovals] = await db.select({ c: count() }).from(approvalRequestsTable).where(eq(approvalRequestsTable.status, "pending"));
+    const [latency] = await db.select({
+      p95: sql<number>`COALESCE(PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY ${lyteMetricsTable.value}), 0)::float`,
+    }).from(lyteMetricsTable)
+      .where(and(eq(lyteMetricsTable.metricType, "latency"), gte(lyteMetricsTable.recordedAt, since24h)));
+
+    // Recent activity
+    const recent = await db.select({
+      action: activityLogTable.action,
+      resource: activityLogTable.resource,
+      description: activityLogTable.description,
+      createdAt: activityLogTable.createdAt,
+    }).from(activityLogTable)
+      .orderBy(desc(activityLogTable.createdAt))
+      .limit(8);
+
+    // Computed dimensions
+    const firing = Number(firingAlerts?.c ?? 0);
+    const critical = Number(criticalAlerts?.c ?? 0);
+    const pending = Number(pendingApprovals?.c ?? 0);
+    const p95 = Math.round(Number(latency?.p95 ?? 0));
+
+    const sections: Array<{
+      id: string; priority: number; label: string; color: string;
+      headline: string; detail: string; relevantFor: string[];
+      actions: Array<{ label: string; href: string }>;
+    }> = [
+      {
+        id: "alerts", priority: role === "security" ? 1 : 2, label: "Active Alerts", color: "var(--color-critical)",
+        headline: critical > 0
+          ? `${critical} critical, ${firing - critical} additional alerts firing right now`
+          : firing > 0 ? `${firing} alerts firing — no critical, monitor for escalation` : "No firing alerts — environment nominal",
+        detail: critical > 0
+          ? "Critical alerts require immediate triage in the Alert Inbox. Aegis SOC and on-call ops should coordinate."
+          : "Run a Lyte saved view if anomalies appear; otherwise no action required.",
+        actions: [{ label: "Alert Inbox", href: "/alerts" }],
+        relevantFor: ["executive", "security", "operations"],
+      },
+      {
+        id: "sla", priority: role === "operations" ? 1 : 3, label: "SLA Performance", color: "var(--color-high)",
+        headline: p95 > 0
+          ? `API P95 latency at ${p95}ms ${p95 > 2000 ? "(breaching 2s target)" : "(within target)"}`
+          : "No latency telemetry in last 24h",
+        detail: p95 > 2000
+          ? "Investigate downstream dependencies and recent deploys. Consider scaling api-server."
+          : "All measured services are within their SLOs.",
+        actions: [{ label: "SLA Dashboard", href: "/sla" }],
+        relevantFor: ["executive", "operations"],
+      },
+      {
+        id: "compliance", priority: role === "legal" ? 1 : 4, label: "Governance & Compliance", color: "#a855f7",
+        headline: pending > 0 ? `${pending} approval${pending === 1 ? "" : "s"} pending` : "No pending governance approvals",
+        detail: pending > 0
+          ? "Review the queue in Governance to keep policy decisions moving."
+          : "Approval queue is clear; audit trail is current.",
+        actions: [{ label: "Review Approvals", href: "/governance" }],
+        relevantFor: ["executive", "security", "legal"],
+      },
+      {
+        id: "activity", priority: role === "executive" ? 3 : 5, label: "Recent Activity", color: "#8b7ac8",
+        headline: recent.length > 0
+          ? `${recent.length} platform events in the last 24h`
+          : "No recent platform activity recorded",
+        detail: recent.slice(0, 3).map((r) => `${r.action} ${r.resource}`).join(" · ") || "Nothing to report.",
+        actions: [{ label: "Audit Log", href: "/governance" }],
+        relevantFor: ["executive", "operations", "security", "finance", "legal"],
+      },
+    ];
+
+    const filtered = sections.filter((s) => s.relevantFor.includes(role)).sort((a, b) => a.priority - b.priority);
+
+    sendSuccess(res, {
+      role,
+      sections: filtered,
+      stats: { firing, critical, pending, p95 },
+      generatedAt: new Date().toISOString(),
+      dataSource: "telemetry+activity",
+    });
+  } catch (err) {
+    logger.error({ err }, "command digest error");
+    handleRouteError(res, err, "Failed to load digest");
   }
 });
 
