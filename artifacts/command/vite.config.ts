@@ -74,6 +74,23 @@ function sharedProxyPlugin(): Plugin {
       proxyServer.on("error", (err: NodeJS.ErrnoException) => {
         console.warn("[shared-proxy] Bind error:", err.code);
       });
+      proxyServer.on("upgrade", (req, socket, head) => {
+        const url = req.url || "/";
+        const normalizedUrl = url.endsWith("/") ? url : url + "/";
+        const route = PROXY_ROUTES.find((r) => normalizedUrl.startsWith(r.prefix));
+        const targetPort = route ? route.port : vitePort;
+        const conn = net.connect(targetPort, "127.0.0.1", () => {
+          const rawHeaders = Object.entries(req.headers)
+            .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`)
+            .join("\r\n");
+          conn.write(`${req.method} ${url} HTTP/1.1\r\n${rawHeaders}\r\n\r\n`);
+          if (head && head.length) conn.write(head);
+          socket.pipe(conn);
+          conn.pipe(socket);
+        });
+        conn.on("error", () => socket.destroy());
+        socket.on("error", () => conn.destroy());
+      });
     },
   };
 }
