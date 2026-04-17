@@ -90,3 +90,13 @@ NEXUS is the unified agentic AI orchestration layer for the SZL portfolio, acces
 **Backend:** `artifacts/api-server/src/routes/nexus.ts` — all NEXUS API endpoints registered at `/api/nexus/*` via `nexusRouter`.
 
 **Serving:** Static NEXUS dist is served by Express in `app.ts` via `express.static` at `/nexus/` with SPA fallback. The `kind=design` mockup-sandbox workflow has port detection incompatibility on this platform — the static build approach bypasses this entirely.
+
+**Rebuild pipeline (NEXUS UI changes):** The api-server `start.sh` automatically rebuilds the NEXUS Vite bundle whenever any file under `artifacts/mockup-sandbox/src/`, `index.html`, `vite.config.ts`, or `package.json` is newer than the built `dist/public/index.html`. So the standard workflow for shipping NEXUS UI changes is simply:
+
+1. Edit files in `artifacts/mockup-sandbox/src/`.
+2. Restart the `artifacts/api-server: api` workflow.
+
+The startup script will detect the stale build, run `vite build` for the mockup-sandbox, then start the API server — no manual build step required. Helper scripts:
+- `pnpm --filter @workspace/api-server build:nexus` — build the NEXUS bundle only.
+- `pnpm --filter @workspace/api-server rebuild:nexus` — force a NEXUS rebuild and start the API server (sets `FORCE_NEXUS_BUILD=1`).
+- Set `SKIP_NEXUS_BUILD=1` to bypass the auto-rebuild check (useful for hot iterating on backend-only changes).
