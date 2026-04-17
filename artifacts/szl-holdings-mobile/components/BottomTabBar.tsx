@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useWorkspace, type WorkspaceDomain } from "@/context/WorkspaceContext";
 import { useColors } from "@/hooks/useColors";
 import { apiFetch } from "@/lib/apiClient";
+import { useNotificationCountContext } from "@/context/NotificationCountContext";
 
 interface TabItem {
   id: WorkspaceDomain;
@@ -56,7 +57,6 @@ const TABS: TabItem[] = [
 
 const HIDDEN_ROUTES = [
   "/(shell)/quick-actions",
-  "/(shell)/settings",
   "/(shell)/notifications",
   "/(shell)/usage",
 ];
@@ -96,6 +96,7 @@ export function BottomTabBar() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const pathname = usePathname();
+  const { unreadCount } = useNotificationCountContext();
 
   useCortexBadge();
 
@@ -107,6 +108,9 @@ export function BottomTabBar() {
     setActiveWorkspace(tab.id);
     router.navigate(tab.route as never);
   };
+
+  const isSettingsActive =
+    pathname === "/(shell)/settings" || pathname.startsWith("/(shell)/settings/");
 
   return (
     <View
@@ -120,7 +124,7 @@ export function BottomTabBar() {
       ]}
     >
       {TABS.map((tab) => {
-        const isActive = activeWorkspace === tab.id;
+        const isActive = !isSettingsActive && activeWorkspace === tab.id;
         const badge = badges[tab.id] ?? 0;
         const color = isActive ? tab.accent : colors.mutedForeground;
 
@@ -169,6 +173,43 @@ export function BottomTabBar() {
           </TouchableOpacity>
         );
       })}
+
+      <TouchableOpacity
+        onPress={() => router.navigate("/(shell)/settings" as never)}
+        style={styles.tab}
+        activeOpacity={0.7}
+      >
+        <View style={styles.tabInner}>
+          {isSettingsActive && (
+            <View style={[styles.activeIndicator, { backgroundColor: colors.mutedForeground }]} />
+          )}
+          <View style={styles.iconWrap}>
+            <Feather
+              name="settings"
+              size={20}
+              color={isSettingsActive ? colors.foreground : colors.mutedForeground}
+            />
+            {unreadCount > 0 && (
+              <View style={[styles.badge, { backgroundColor: "#ef4444" }]}>
+                <Text style={styles.badgeText}>
+                  {unreadCount > 99 ? "99+" : String(unreadCount)}
+                </Text>
+              </View>
+            )}
+          </View>
+          <Text
+            style={[
+              styles.label,
+              {
+                color: isSettingsActive ? colors.foreground : colors.mutedForeground,
+                fontFamily: isSettingsActive ? "Inter_600SemiBold" : "Inter_400Regular",
+              },
+            ]}
+          >
+            Settings
+          </Text>
+        </View>
+      </TouchableOpacity>
     </View>
   );
 }

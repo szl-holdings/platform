@@ -19,6 +19,7 @@ import { WorkspaceTrigger } from "@/components/WorkspaceSwitcher";
 import { useApiStatus } from "@szl-holdings/mobile-shared";
 import { VoiceCommandModal } from "@/components/VoiceCommandModal";
 import { FusionBar } from "@/components/FusionBar";
+import { useNotificationCountContext } from "@/context/NotificationCountContext";
 
 const ACCENT = "#c9a84c";
 
@@ -175,6 +176,7 @@ export default function CommandFeedScreen() {
   const { setActiveWorkspace, setBadge } = useWorkspace();
   const apiStatus = useApiStatus();
   const [voiceVisible, setVoiceVisible] = useState(false);
+  const { unreadCount: notifUnreadCount } = useNotificationCountContext();
 
   useEffect(() => {
     setActiveWorkspace("command");
@@ -299,6 +301,33 @@ export default function CommandFeedScreen() {
             style={[styles.headerIconBtn, { borderColor: colors.border }]}
           >
             <Feather name="settings" size={16} color={colors.mutedForeground} />
+            {notifUnreadCount > 0 && (
+              <View
+                style={{
+                  position: "absolute",
+                  top: -4,
+                  right: -4,
+                  minWidth: 15,
+                  height: 15,
+                  borderRadius: 8,
+                  backgroundColor: "#ef4444",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingHorizontal: 3,
+                }}
+              >
+                <Text
+                  style={{
+                    color: "#fff",
+                    fontSize: 9,
+                    fontFamily: "Inter_600SemiBold",
+                    lineHeight: 13,
+                  }}
+                >
+                  {notifUnreadCount > 99 ? "99+" : String(notifUnreadCount)}
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
       </View>

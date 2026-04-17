@@ -3,6 +3,7 @@ import { m, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { UserButton } from "@szl-holdings/shared-ui/UserButton";
+import { NotificationBell } from "./NotificationBell";
 
 const navLinks = [
   { label: "Ecosystem", href: "/ecosystem" },
@@ -163,6 +164,7 @@ export function Navbar() {
               </Link>
             );
           })}
+          <NotificationBell />
           <UserButton />
         </div>
 
