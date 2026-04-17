@@ -11,7 +11,6 @@ Do not make changes to the folder `Z`.
 Do not make changes to the file `Y`.
 
 ## System Architecture
-
 The platform is a pnpm monorepo utilizing TypeScript 5.9, React 19, Vite, and Node.js. It employs a micro-frontend architecture for web applications, routed via a shared gateway proxy on port 9090.
 
 **Core Platform Primitives:**
@@ -27,7 +26,6 @@ The platform is a pnpm monorepo utilizing TypeScript 5.9, React 19, Vite, and No
 **Business Observability Fabric (ATLAS):** Implemented via three packages (`@szl-holdings/observability-core`, `@szl-holdings/business-events`, `@szl-holdings/telemetry-standards`) for OpenTelemetry setup, event emission, and semantic conventions.
 
 **Canonical Artifacts (Active Applications):** Key applications include `szl-holdings` (corporate), `api-server` (backend), `command` (unified operations), `aegis` (defense intelligence), `vessels` (maritime command), `terra` (real estate intelligence), `carlota-jo` (advisory), and `szl-holdings-mobile` (mobile command).
-
 **Technology Stack:**
 -   **Frontend:** React 19, Vite, TanStack React Query, Wouter, Tailwind CSS v4, Framer Motion.
 -   **Backend:** Express 5, Drizzle ORM, Zod, pino.
@@ -61,7 +59,7 @@ The platform is a pnpm monorepo utilizing TypeScript 5.9, React 19, Vite, and No
 
 ## External Dependencies
 -   **Database:** PostgreSQL 16
--   **Authentication:** Replit Auth (OIDC/PKCE)
+-   **Authentication:** Replit Auth
 -   **Payment Processing:** Stripe
 -   **AI Providers:** OpenAI, Anthropic, Gemini, HuggingFace Inference API, Elevenlabs
 -   **Communication:** Slack, Twilio, Resend, SendGrid

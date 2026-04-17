@@ -1,9 +1,17 @@
 import { useState } from "react";
-import { Activity, AlertTriangle, CheckCircle, ChevronDown, ChevronRight, GitCommit, Layers, LineChart as LineChartIcon, RefreshCw, Server, TrendingDown } from "lucide-react";
+import { Activity, AlertTriangle, CheckCircle, ChevronDown, ChevronRight, GitCommit, History, Layers, LineChart as LineChartIcon, RefreshCw, RotateCcw, Server, TrendingDown, X } from "lucide-react";
 import {
   Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
-import { useDeployments, useDriftHistory, useDriftSummary, useExecutiveBrief } from "../lib/api";
+import {
+  useDeployments,
+  useDeploymentHistory,
+  useDriftHistory,
+  useDriftSummary,
+  useExecutiveBrief,
+  useRollbackDeployment,
+  type DeploymentRecord,
+} from "../lib/api";
 
 function StatusDot({ status }: { status: "healthy" | "degraded" | "critical" }) {
   const color = status === "healthy" ? "#4eca8b" : status === "degraded" ? "#c8a84b" : "#e05050";
@@ -58,11 +66,196 @@ function formatTime(iso: string): string {
   return new Date(iso).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
 }
 
+interface Toast {
+  id: number;
+  kind: "success" | "error";
+  message: string;
+}
+
+function ToastStack({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id: number) => void }) {
+  return (
+    <div style={{ position: "fixed", top: 20, right: 20, zIndex: 1000, display: "flex", flexDirection: "column", gap: 8 }}>
+      {toasts.map((t) => {
+        const color = t.kind === "success" ? "#4eca8b" : "#e05050";
+        return (
+          <div key={t.id} style={{
+            display: "flex", alignItems: "center", gap: 10,
+            background: "rgba(15,18,28,0.95)", border: `1px solid ${color}66`,
+            borderLeft: `3px solid ${color}`, color: "var(--pulse-text)",
+            padding: "10px 14px", borderRadius: 6, fontSize: "0.82rem",
+            minWidth: 280, maxWidth: 420, boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+          }}>
+            {t.kind === "success" ? <CheckCircle size={14} color={color} /> : <AlertTriangle size={14} color={color} />}
+            <span style={{ flex: 1 }}>{t.message}</span>
+            <button
+              onClick={() => onDismiss(t.id)}
+              style={{ background: "transparent", border: "none", color: "var(--pulse-text-muted)", cursor: "pointer", display: "flex" }}
+              aria-label="Dismiss"
+            >
+              <X size={13} />
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function ConfirmModal({
+  deployment,
+  onCancel,
+  onConfirm,
+  pending,
+  errorMessage,
+}: {
+  deployment: DeploymentRecord;
+  onCancel: () => void;
+  onConfirm: () => void;
+  pending: boolean;
+  errorMessage?: string;
+}) {
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="rollback-modal-title"
+      style={{
+        position: "fixed", inset: 0, zIndex: 900,
+        background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center",
+        padding: 20,
+      }}
+      onClick={(e) => { if (e.target === e.currentTarget && !pending) onCancel(); }}
+    >
+      <div style={{
+        background: "var(--pulse-bg, #11141d)", border: "1px solid var(--pulse-border)",
+        borderRadius: 8, padding: 22, maxWidth: 460, width: "100%",
+        boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+          <RotateCcw size={16} color="#c8a84b" />
+          <h3 id="rollback-modal-title" style={{ fontSize: "0.95rem", fontWeight: 600, color: "var(--pulse-text)" }}>
+            Roll back deployment?
+          </h3>
+        </div>
+        <p style={{ fontSize: "0.82rem", color: "var(--pulse-text-muted)", lineHeight: 1.5, marginBottom: 14 }}>
+          This will mark the active deployment as rolled-back and promote the previous version of{" "}
+          <strong style={{ color: "var(--pulse-text)" }}>{deployment.appName}</strong> in{" "}
+          <strong style={{ color: "var(--pulse-text)" }}>{deployment.environment}</strong>.
+        </p>
+        <div style={{
+          background: "rgba(0,0,0,0.25)", border: "1px solid var(--pulse-border)",
+          borderRadius: 4, padding: 10, marginBottom: 14, fontSize: "0.78rem", color: "var(--pulse-text-dim)",
+        }}>
+          <div>App: <span style={{ color: "var(--pulse-text)" }}>{deployment.appName}</span></div>
+          <div>Current version: <span style={{ fontFamily: "JetBrains Mono, monospace", color: "var(--pulse-gold)" }}>v{deployment.version}</span></div>
+          <div>Deployed by: <span style={{ color: "var(--pulse-text)" }}>{deployment.deployedBy}</span></div>
+        </div>
+        {errorMessage && (
+          <div style={{
+            background: "rgba(224,80,80,0.1)", borderLeft: "2px solid #e05050",
+            padding: "8px 10px", marginBottom: 12, fontSize: "0.78rem", color: "#e05050", borderRadius: 4,
+          }}>
+            {errorMessage}
+          </div>
+        )}
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+          <button
+            onClick={onCancel}
+            disabled={pending}
+            style={{
+              padding: "8px 14px", borderRadius: 5,
+              background: "transparent", border: "1px solid var(--pulse-border)",
+              color: "var(--pulse-text)", fontSize: "0.78rem", fontWeight: 600,
+              cursor: pending ? "not-allowed" : "pointer", opacity: pending ? 0.5 : 1,
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={pending}
+            style={{
+              padding: "8px 14px", borderRadius: 5,
+              background: "rgba(224,80,80,0.18)", border: "1px solid rgba(224,80,80,0.5)",
+              color: "#ffb3b3", fontSize: "0.78rem", fontWeight: 600,
+              cursor: pending ? "not-allowed" : "pointer", opacity: pending ? 0.7 : 1,
+              display: "inline-flex", alignItems: "center", gap: 6,
+            }}
+          >
+            <RotateCcw size={12} />
+            {pending ? "Rolling back…" : "Confirm rollback"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HistoryDrawer({ appId, environment }: { appId: string; environment: "production" | "staging" | "development" }) {
+  const histQ = useDeploymentHistory(appId, environment);
+  const items = histQ.data?.history ?? [];
+  return (
+    <div style={{
+      marginTop: 8, marginLeft: 14, padding: "10px 12px",
+      background: "rgba(0,0,0,0.25)", border: "1px solid var(--pulse-border)",
+      borderRadius: 5,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+        <History size={11} color="var(--pulse-text-muted)" />
+        <span style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--pulse-text-muted)" }}>
+          Version History
+        </span>
+        {histQ.data && (
+          <span style={{ fontSize: "0.68rem", color: "var(--pulse-text-dim)" }}>· {histQ.data.count} entries</span>
+        )}
+      </div>
+      {histQ.isLoading && <div style={{ fontSize: "0.78rem", color: "var(--pulse-text-muted)" }}>Loading history…</div>}
+      {histQ.error && <div style={{ fontSize: "0.78rem", color: "#e05050" }}>Failed to load history.</div>}
+      {histQ.data && items.length === 0 && (
+        <div style={{ fontSize: "0.78rem", color: "var(--pulse-text-muted)" }}>No history available.</div>
+      )}
+      {items.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          {[...items].reverse().map((h, i) => (
+            <div key={`${h.deployedAt}-${i}`} style={{
+              display: "flex", alignItems: "center", gap: 10,
+              padding: "6px 8px", borderRadius: 4,
+              background: h.status === "active" ? "rgba(78,202,139,0.06)" : "transparent",
+              borderLeft: `2px solid ${deploymentColor(h.status)}`,
+            }}>
+              <span style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.72rem", color: "var(--pulse-gold-dim)", minWidth: 60 }}>
+                v{h.version}
+              </span>
+              <span style={{ fontSize: "0.66rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: deploymentColor(h.status), minWidth: 80 }}>
+                {h.status}
+              </span>
+              <span style={{ fontSize: "0.72rem", color: "var(--pulse-text-dim)", flex: 1 }}>
+                {new Date(h.deployedAt).toLocaleString("en-US", { dateStyle: "short", timeStyle: "short" })} · by {h.deployedBy}
+              </span>
+              {h.commitSha && (
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 3, fontFamily: "JetBrains Mono, monospace", fontSize: "0.68rem", color: "var(--pulse-text-muted)" }}>
+                  <GitCommit size={9} />{h.commitSha.slice(0, 7)}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function SystemHealth() {
   const briefQ = useExecutiveBrief();
   const driftQ = useDriftSummary();
   const historyQ = useDriftHistory();
   const deployQ = useDeployments("production");
+  const rollback = useRollbackDeployment("production");
+
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [confirmTarget, setConfirmTarget] = useState<DeploymentRecord | null>(null);
+  const [confirmError, setConfirmError] = useState<string | undefined>(undefined);
+  const [toasts, setToasts] = useState<Toast[]>([]);
 
   const brief = briefQ.data;
   const drift = driftQ.data;
@@ -95,8 +288,46 @@ export default function SystemHealth() {
     return row;
   });
 
+  const pushToast = (kind: "success" | "error", message: string) => {
+    const id = Date.now() + Math.random();
+    setToasts((prev) => [...prev, { id, kind, message }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 5000);
+  };
+
+  const dismissToast = (id: number) => setToasts((prev) => prev.filter((t) => t.id !== id));
+
+  const handleConfirmRollback = async () => {
+    if (!confirmTarget) return;
+    setConfirmError(undefined);
+    try {
+      const result = await rollback.mutateAsync({ appId: confirmTarget.appId });
+      setConfirmTarget(null);
+      pushToast(
+        "success",
+        `Rolled back ${result.previous.appName} from v${result.previous.version} to v${result.current.version}.`,
+      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Rollback failed";
+      setConfirmError(message);
+      pushToast("error", `Rollback failed: ${message}`);
+    }
+  };
+
   return (
     <div style={{ padding: "28px 28px 40px" }}>
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
+      {confirmTarget && (
+        <ConfirmModal
+          deployment={confirmTarget}
+          onCancel={() => { if (!rollback.isPending) { setConfirmTarget(null); setConfirmError(undefined); } }}
+          onConfirm={handleConfirmRollback}
+          pending={rollback.isPending}
+          errorMessage={confirmError}
+        />
+      )}
+
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 22 }}>
         <div>
           <h1 style={{ fontSize: "1.4rem", fontWeight: 600, color: "var(--pulse-text)", marginBottom: 6 }}>System Health</h1>
@@ -388,32 +619,68 @@ export default function SystemHealth() {
         )}
         {deploys && deploys.deployments.length > 0 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {deploys.deployments.map((d) => (
-              <div key={`${d.appId}-${d.deployedAt}`} style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
-                padding: "12px 14px", borderRadius: 6,
-                background: "rgba(0,0,0,0.2)", border: "1px solid var(--pulse-border)",
-                borderLeft: `3px solid ${deploymentColor(d.status)}`,
-              }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                    <CheckCircle size={12} color={deploymentColor(d.status)} />
-                    <span style={{ fontSize: "0.86rem", fontWeight: 600, color: "var(--pulse-text)" }}>{d.appName}</span>
-                    <span style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.7rem", color: "var(--pulse-gold-dim)", padding: "1px 6px", borderRadius: 3, background: "rgba(200,168,75,0.08)" }}>v{d.version}</span>
-                    <span style={{ fontSize: "0.68rem", color: deploymentColor(d.status), textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>{d.status}</span>
+            {deploys.deployments.map((d) => {
+              const isOpen = !!expanded[d.appId];
+              return (
+                <div key={`${d.appId}-${d.deployedAt}`}>
+                  <div style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+                    padding: "12px 14px", borderRadius: 6,
+                    background: "rgba(0,0,0,0.2)", border: "1px solid var(--pulse-border)",
+                    borderLeft: `3px solid ${deploymentColor(d.status)}`,
+                  }}>
+                    <button
+                      onClick={() => setExpanded((prev) => ({ ...prev, [d.appId]: !prev[d.appId] }))}
+                      aria-expanded={isOpen}
+                      aria-label={isOpen ? `Collapse history for ${d.appName}` : `Expand history for ${d.appName}`}
+                      style={{
+                        flex: 1, textAlign: "left", background: "transparent", border: "none",
+                        color: "inherit", cursor: "pointer", padding: 0, display: "flex", alignItems: "flex-start", gap: 8,
+                      }}
+                    >
+                      <span style={{ marginTop: 2, color: "var(--pulse-text-muted)", display: "flex" }}>
+                        {isOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                      </span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                          <CheckCircle size={12} color={deploymentColor(d.status)} />
+                          <span style={{ fontSize: "0.86rem", fontWeight: 600, color: "var(--pulse-text)" }}>{d.appName}</span>
+                          <span style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.7rem", color: "var(--pulse-gold-dim)", padding: "1px 6px", borderRadius: 3, background: "rgba(200,168,75,0.08)" }}>v{d.version}</span>
+                          <span style={{ fontSize: "0.68rem", color: deploymentColor(d.status), textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>{d.status}</span>
+                        </div>
+                        <div style={{ display: "flex", gap: 12, fontSize: "0.7rem", color: "var(--pulse-text-muted)" }}>
+                          <span>{d.environment}</span>
+                          <span>·</span>
+                          <span>by {d.deployedBy}</span>
+                          <span>·</span>
+                          <span>{new Date(d.deployedAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}</span>
+                          {d.commitSha && <><span>·</span><span style={{ display: "inline-flex", alignItems: "center", gap: 3, fontFamily: "JetBrains Mono, monospace" }}><GitCommit size={10} />{d.commitSha.slice(0, 7)}</span></>}
+                        </div>
+                        {d.notes && <div style={{ fontSize: "0.7rem", color: "var(--pulse-text-dim)", marginTop: 4 }}>{d.notes}</div>}
+                      </div>
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setConfirmError(undefined); setConfirmTarget(d); }}
+                      disabled={d.status !== "active"}
+                      title={d.status !== "active" ? "Only active deployments can be rolled back" : "Roll back to previous version"}
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: 6,
+                        padding: "6px 12px", borderRadius: 5,
+                        background: "rgba(224,80,80,0.12)", border: "1px solid rgba(224,80,80,0.35)",
+                        color: "#ffb3b3", fontSize: "0.74rem", fontWeight: 600,
+                        cursor: d.status !== "active" ? "not-allowed" : "pointer",
+                        opacity: d.status !== "active" ? 0.4 : 1,
+                        flexShrink: 0,
+                      }}
+                    >
+                      <RotateCcw size={11} />
+                      Rollback
+                    </button>
                   </div>
-                  <div style={{ display: "flex", gap: 12, fontSize: "0.7rem", color: "var(--pulse-text-muted)" }}>
-                    <span>{d.environment}</span>
-                    <span>·</span>
-                    <span>by {d.deployedBy}</span>
-                    <span>·</span>
-                    <span>{new Date(d.deployedAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}</span>
-                    {d.commitSha && <><span>·</span><span style={{ display: "inline-flex", alignItems: "center", gap: 3, fontFamily: "JetBrains Mono, monospace" }}><GitCommit size={10} />{d.commitSha.slice(0, 7)}</span></>}
-                  </div>
-                  {d.notes && <div style={{ fontSize: "0.7rem", color: "var(--pulse-text-dim)", marginTop: 4 }}>{d.notes}</div>}
+                  {isOpen && <HistoryDrawer appId={d.appId} environment="production" />}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </Card>

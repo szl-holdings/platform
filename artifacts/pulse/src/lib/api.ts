@@ -169,10 +169,36 @@ export interface DeploymentRecord {
   notes?: string;
 }
 
+function getCsrfToken(): string | undefined {
+  if (typeof document === "undefined") return undefined;
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+  return match ? decodeURIComponent(match[1]!) : undefined;
+}
+
+const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+
+async function ensureCsrfToken(): Promise<string | undefined> {
+  let token = getCsrfToken();
+  if (token) return token;
+  try {
+    await fetch("/api/csrf-token", { credentials: "include" });
+  } catch {
+    // ignore — CSRF is best-effort; the request will fail loud if needed
+  }
+  token = getCsrfToken();
+  return token;
+}
+
 async function rawFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const method = (init?.method ?? "GET").toUpperCase();
+  const csrfHeaders: Record<string, string> = {};
+  if (!SAFE_METHODS.has(method)) {
+    const token = await ensureCsrfToken();
+    if (token) csrfHeaders["x-csrf-token"] = token;
+  }
   const res = await fetch(path, {
     credentials: "include",
-    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+    headers: { "Content-Type": "application/json", ...csrfHeaders, ...(init?.headers ?? {}) },
     ...init,
   });
   if (!res.ok) {
@@ -233,6 +259,44 @@ export function useDeployments(environment: "production" | "staging" | "developm
         `/api/deployments?environment=${environment}`,
       ),
     refetchInterval: 60_000,
+  });
+}
+
+export function useDeploymentHistory(
+  appId: string | undefined,
+  environment: "production" | "staging" | "development" = "production",
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: ["pulse", "deployments", "history", environment, appId],
+    queryFn: () =>
+      rawFetch<{ appId: string; environment: string; history: DeploymentRecord[]; count: number }>(
+        `/api/deployments/${encodeURIComponent(appId!)}/history?environment=${environment}`,
+      ),
+    enabled: !!appId && enabled,
+  });
+}
+
+export interface RollbackResponse {
+  rolledBack: true;
+  previous: DeploymentRecord;
+  current: DeploymentRecord;
+}
+
+export function useRollbackDeployment(
+  environment: "production" | "staging" | "development" = "production",
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ appId, version }: { appId: string; version?: string }) =>
+      rawFetch<RollbackResponse>(`/api/deployments/${encodeURIComponent(appId)}/rollback`, {
+        method: "POST",
+        body: JSON.stringify({ environment, ...(version ? { version } : {}) }),
+      }),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ["pulse", "deployments", environment] });
+      qc.invalidateQueries({ queryKey: ["pulse", "deployments", "history", environment, vars.appId] });
+    },
   });
 }
 
