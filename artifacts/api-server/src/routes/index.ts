@@ -17,6 +17,7 @@ import * as misc from "./groups/misc";
 import * as decisions from "./groups/decisions";
 import * as domainAtlas from "./groups/domain-atlas";
 import * as graph from "./groups/graph";
+import * as guardian from "./groups/guardian";
 
 const router: IRouter = Router();
 
@@ -38,5 +39,6 @@ misc.register(router);
 decisions.register(router);
 domainAtlas.register(router);
 graph.register(router);
+guardian.register(router);
 
 export default router;

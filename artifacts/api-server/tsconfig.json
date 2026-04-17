@@ -58,6 +58,12 @@
     },
     {
       "path": "../../lib/auth"
+    },
+    {
+      "path": "../../packages/guardian"
+    },
+    {
+      "path": "../../packages/tool-mesh"
     }
   ]
 }

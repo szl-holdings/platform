@@ -28,6 +28,18 @@
     "./tools/document-retrieval": {
       "types": "./dist/tools/document-retrieval.d.ts",
       "import": "./src/tools/document-retrieval.ts"
+    },
+    "./tools/security-tools": {
+      "types": "./dist/tools/security-tools.d.ts",
+      "import": "./src/tools/security-tools.ts"
+    },
+    "./tools/finance-tools": {
+      "types": "./dist/tools/finance-tools.d.ts",
+      "import": "./src/tools/finance-tools.ts"
+    },
+    "./tools/operations-tools": {
+      "types": "./dist/tools/operations-tools.d.ts",
+      "import": "./src/tools/operations-tools.ts"
     }
   },
   "dependencies": {

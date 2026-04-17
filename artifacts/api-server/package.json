@@ -30,6 +30,8 @@
     "@szl-holdings/config": "workspace:*",
     "@szl-holdings/covenant-policy": "workspace:*",
     "@szl-holdings/policy-engine": "workspace:*",
+    "@workspace/guardian": "workspace:*",
+    "@workspace/tool-mesh": "workspace:*",
     "@szl-holdings/crdt-sync": "workspace:*",
     "@szl-holdings/data-connectors": "workspace:*",
     "@szl-holdings/db": "workspace:*",
