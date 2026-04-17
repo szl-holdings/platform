@@ -663,6 +663,170 @@ export function ConstellationGraph({
     [expanding, expandLimit],
   );
 
+  // Build a portable bundle of the currently-traced subgraph: every node that
+  // has a hop distance from the trace origin, every edge whose endpoints are
+  // both in that set, plus origin metadata so the file is self-describing.
+  const buildTraceBundle = useCallback(() => {
+    if (!traceOriginId) return null;
+    const traceNodeIds = new Set(Object.keys(traceDistances));
+    if (!traceNodeIds.has(traceOriginId)) traceNodeIds.add(traceOriginId);
+    const nodeById = new Map(nodes.map((n) => [n.id, n] as const));
+    const origin = nodeById.get(traceOriginId) ?? null;
+    const traceNodes = Array.from(traceNodeIds)
+      .map((id) => {
+        const node = nodeById.get(id);
+        if (!node) return null;
+        return {
+          id: node.id,
+          canonicalId: node.canonicalId ?? null,
+          entityType: node.entityType,
+          name: node.name,
+          domain: node.domain ?? hostDomain,
+          hopDistance: traceDistances[id] ?? (id === traceOriginId ? 0 : null),
+          confidence: node.confidence ?? null,
+          sensitivityTier: node.sensitivityTier ?? null,
+          isActive: node.isActive ?? null,
+          freshness: node.freshness ?? null,
+          description: node.description ?? null,
+          labels: node.labels ?? [],
+        };
+      })
+      .filter((n): n is NonNullable<typeof n> => n !== null)
+      .sort((a, b) => (a.hopDistance ?? 99) - (b.hopDistance ?? 99));
+    const traceEdges = edges
+      .filter((e) => traceNodeIds.has(e.fromNodeId) && traceNodeIds.has(e.toNodeId))
+      .map((e) => ({
+        id: e.id,
+        fromNodeId: e.fromNodeId,
+        toNodeId: e.toNodeId,
+        relationshipType: e.relationshipType,
+        confidence: e.confidence ?? null,
+        active: e.active ?? null,
+      }));
+    return {
+      generatedAt: new Date().toISOString(),
+      hostDomain,
+      origin: origin
+        ? {
+            id: origin.id,
+            canonicalId: origin.canonicalId ?? null,
+            entityType: origin.entityType,
+            name: origin.name,
+            domain: origin.domain ?? hostDomain,
+          }
+        : { id: traceOriginId },
+      depth: traceDepth,
+      truncated: traceTruncated,
+      nodeCount: traceNodes.length,
+      edgeCount: traceEdges.length,
+      nodes: traceNodes,
+      edges: traceEdges,
+    };
+  }, [traceOriginId, traceDistances, nodes, edges, hostDomain, traceDepth, traceTruncated]);
+
+  const exportTrace = useCallback(
+    (format: "json" | "csv") => {
+      const bundle = buildTraceBundle();
+      if (!bundle) return;
+      const slug = (bundle.origin.name ?? bundle.origin.id ?? "trace")
+        .toString()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 48) || "trace";
+      const ts = bundle.generatedAt.replace(/[:.]/g, "-");
+      const downloadBlob = (blob: Blob, filename: string) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        // Defer revoke so the browser has time to start the download
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      };
+      if (format === "json") {
+        const blob = new Blob([JSON.stringify(bundle, null, 2)], {
+          type: "application/json",
+        });
+        downloadBlob(blob, `trace-${slug}-${ts}.json`);
+        return;
+      }
+      // CSV: single file containing a header block, then a NODES section and
+      // an EDGES section so a reviewer can open it directly in a spreadsheet.
+      const csvEscape = (v: unknown): string => {
+        if (v === null || v === undefined) return "";
+        const s = Array.isArray(v) ? v.join("|") : String(v);
+        if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+        return s;
+      };
+      const lines: string[] = [];
+      lines.push(`# Constellation trace export`);
+      lines.push(`# generated_at,${csvEscape(bundle.generatedAt)}`);
+      lines.push(`# host_domain,${csvEscape(bundle.hostDomain)}`);
+      lines.push(`# origin_id,${csvEscape(bundle.origin.id)}`);
+      lines.push(`# origin_name,${csvEscape(bundle.origin.name ?? "")}`);
+      lines.push(`# depth,${bundle.depth}`);
+      lines.push(`# truncated,${bundle.truncated}`);
+      lines.push(`# node_count,${bundle.nodeCount}`);
+      lines.push(`# edge_count,${bundle.edgeCount}`);
+      lines.push("");
+      lines.push("# NODES");
+      lines.push(
+        [
+          "id",
+          "canonical_id",
+          "entity_type",
+          "name",
+          "domain",
+          "hop_distance",
+          "confidence",
+          "sensitivity_tier",
+          "is_active",
+          "freshness",
+          "labels",
+          "description",
+        ].join(","),
+      );
+      for (const n of bundle.nodes) {
+        lines.push(
+          [
+            n.id,
+            n.canonicalId,
+            n.entityType,
+            n.name,
+            n.domain,
+            n.hopDistance,
+            n.confidence,
+            n.sensitivityTier,
+            n.isActive,
+            n.freshness,
+            n.labels,
+            n.description,
+          ]
+            .map(csvEscape)
+            .join(","),
+        );
+      }
+      lines.push("");
+      lines.push("# EDGES");
+      lines.push(
+        ["id", "from_node_id", "to_node_id", "relationship_type", "confidence", "active"].join(","),
+      );
+      for (const e of bundle.edges) {
+        lines.push(
+          [e.id, e.fromNodeId, e.toNodeId, e.relationshipType, e.confidence, e.active]
+            .map(csvEscape)
+            .join(","),
+        );
+      }
+      const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+      downloadBlob(blob, `trace-${slug}-${ts}.csv`);
+    },
+    [buildTraceBundle],
+  );
+
   const tracePath = useCallback(
     async (node: ConstellationGraphNode, depth: number) => {
       if (!node?.id || expanding === node.id) return;
@@ -1474,6 +1638,57 @@ export function ConstellationGraph({
                   title={`Walk up to ${traceDepth} hops out from this node`}
                 >
                   {expanding === selected.id ? "Tracing…" : `↳ Trace ${traceDepth} hops`}
+                </button>
+              </div>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: 4 }}
+                data-testid="constellation-export-controls"
+              >
+                <button
+                  onClick={() => exportTrace("json")}
+                  disabled={!traceOriginId}
+                  style={{
+                    fontSize: 11,
+                    padding: "5px 10px",
+                    borderRadius: 4,
+                    border: `1px solid ${traceOriginId ? `${accentColor}60` : "rgba(255,255,255,0.15)"}`,
+                    background: traceOriginId ? `${accentColor}18` : "rgba(255,255,255,0.04)",
+                    color: traceOriginId ? accentColor : "#64748b",
+                    cursor: traceOriginId ? "pointer" : "not-allowed",
+                    fontWeight: 600,
+                    letterSpacing: "0.04em",
+                  }}
+                  data-testid="constellation-export-trace-json"
+                  title={
+                    traceOriginId
+                      ? "Download the traced subgraph as JSON"
+                      : "Run a trace first to enable export"
+                  }
+                >
+                  ⬇ Export trace · JSON
+                </button>
+                <button
+                  onClick={() => exportTrace("csv")}
+                  disabled={!traceOriginId}
+                  style={{
+                    fontSize: 11,
+                    padding: "5px 8px",
+                    borderRadius: 4,
+                    border: `1px solid ${traceOriginId ? `${accentColor}60` : "rgba(255,255,255,0.15)"}`,
+                    background: traceOriginId ? `${accentColor}10` : "rgba(255,255,255,0.04)",
+                    color: traceOriginId ? accentColor : "#64748b",
+                    cursor: traceOriginId ? "pointer" : "not-allowed",
+                    fontWeight: 600,
+                    letterSpacing: "0.04em",
+                  }}
+                  data-testid="constellation-export-trace-csv"
+                  title={
+                    traceOriginId
+                      ? "Download the traced subgraph as CSV"
+                      : "Run a trace first to enable export"
+                  }
+                >
+                  CSV
                 </button>
               </div>
               <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
