@@ -37,6 +37,7 @@ import nexusRouter from "./nexus";
 import cognitiveRuntimeRouter from "./cognitive-runtime";
 import execBriefingsRouter from "./executive-briefings";
 import fundInboundDealsRouter from "./fund-inbound-deals";
+import aegisPcapRouter from "./aegis-pcap";
 
 const router: IRouter = Router();
 
@@ -60,6 +61,7 @@ router.use(deploymentsRouter);
 router.use(domainsRouter);
 router.use(constellationViewsRouter);
 router.use(fundInboundDealsRouter);
+router.use(aegisPcapRouter);
 
 core.register(router);
 vessels.register(router);

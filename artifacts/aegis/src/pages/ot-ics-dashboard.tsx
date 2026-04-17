@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Cpu,
+  Download,
   Factory,
   Flame,
   Gauge,
@@ -54,6 +55,25 @@ interface ConversationFrame {
   summary: string;
   bytes: number;
   anomalous: boolean;
+}
+
+const HOST_IP: Record<string, string> = {
+  "ENG-WS-3": "10.4.12.65",
+  "S7-CPU-413": "10.4.12.50",
+  "HMI-A": "10.4.12.18",
+  "PLC-Boiler-2": "10.4.12.41",
+  "PLC-Reactor-1": "10.4.12.42",
+  "RTU-Substation-7": "10.4.12.71",
+};
+
+const SESSION_DATE = "2026-04-17";
+
+function tsToEpochMs(ts: string): number {
+  // ts format "HH:MM:SS.mmm"
+  const [hms, ms = "0"] = ts.split(".");
+  const [hh, mm, ss] = hms.split(":").map((n) => Number.parseInt(n, 10));
+  const millis = Number.parseInt(ms.padEnd(3, "0").slice(0, 3), 10);
+  return Date.parse(`${SESSION_DATE}T${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}.${String(millis).padStart(3, "0")}Z`);
 }
 
 interface OtAsset {
@@ -205,17 +225,113 @@ export default function OtIcsDashboard() {
   const [replayIndex, setReplayIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<string | null>("PLC-Boiler-2");
+  const [replayProtocolFilter, setReplayProtocolFilter] = useState<ProtocolName | "all">("all");
+  const [rangeStartIdx, setRangeStartIdx] = useState(0);
+  const [rangeEndIdx, setRangeEndIdx] = useState(conversation.length - 1);
+  const [pcapDownloading, setPcapDownloading] = useState(false);
+  const [pcapError, setPcapError] = useState<string | null>(null);
+
+  const filteredConversation = useMemo(() => {
+    const start = Math.min(rangeStartIdx, rangeEndIdx);
+    const end = Math.max(rangeStartIdx, rangeEndIdx);
+    return conversation
+      .slice(start, end + 1)
+      .filter((f) => replayProtocolFilter === "all" || f.protocol === replayProtocolFilter);
+  }, [replayProtocolFilter, rangeStartIdx, rangeEndIdx]);
+
+  const safeReplayIndex = Math.max(0, Math.min(replayIndex, filteredConversation.length - 1));
+  const activeReplayFrame = filteredConversation[safeReplayIndex] ?? conversation[0];
+
+  // Reset playback when filters narrow the active set out of bounds.
+  useEffect(() => {
+    if (replayIndex >= filteredConversation.length) {
+      setReplayIndex(Math.max(filteredConversation.length - 1, 0));
+    }
+  }, [filteredConversation.length, replayIndex]);
+
+  const handleDownloadPcap = async () => {
+    setPcapDownloading(true);
+    setPcapError(null);
+    try {
+      const rawHexByTs = new Map(decodedFrames.map((d) => [d.ts, d.rawHex]));
+      const framesPayload = filteredConversation.map((f) => {
+        const srcHost = f.src;
+        const dstHost = f.dst;
+        return {
+          ts: tsToEpochMs(f.ts),
+          srcIp: HOST_IP[srcHost] ?? "10.4.99.1",
+          dstIp: HOST_IP[dstHost] ?? "10.4.99.2",
+          protocol: f.protocol.toLowerCase() as "modbus" | "dnp3" | "s7",
+          payloadHex: rawHexByTs.get(f.ts),
+          bytes: f.bytes,
+        };
+      });
+      const sessionId = `INC-2024-0329-${replayProtocolFilter}-${rangeStartIdx}-${rangeEndIdx}`;
+      const startTs = framesPayload.length > 0 ? Math.min(...framesPayload.map((f) => f.ts)) : undefined;
+      const endTs = framesPayload.length > 0 ? Math.max(...framesPayload.map((f) => f.ts)) : undefined;
+
+      // CSRF: read csrf_token cookie (auto-set on first GET) or fetch one.
+      const readCookie = (name: string): string | null => {
+        const match = document.cookie.split("; ").find((c) => c.startsWith(`${name}=`));
+        return match ? decodeURIComponent(match.slice(name.length + 1)) : null;
+      };
+      let csrfToken = readCookie("csrf_token");
+      if (!csrfToken) {
+        const tokenRes = await fetch("/api/csrf-token", { credentials: "include" });
+        if (tokenRes.ok) {
+          const data = (await tokenRes.json()) as { csrfToken?: string };
+          csrfToken = data.csrfToken ?? readCookie("csrf_token");
+        }
+      }
+
+      const res = await fetch("/api/aegis/replay/pcap", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        body: JSON.stringify({
+          sessionId,
+          frames: framesPayload,
+          filter: {
+            protocol: replayProtocolFilter === "all" ? "all" : (replayProtocolFilter.toLowerCase() as "modbus" | "dnp3" | "s7"),
+            startTs,
+            endTs,
+          },
+        }),
+      });
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+        throw new Error((errBody as { error?: string }).error ?? `HTTP ${res.status}`);
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${sessionId}.pcap`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setPcapError(err instanceof Error ? err.message : "Failed to export PCAP");
+    } finally {
+      setPcapDownloading(false);
+    }
+  };
 
   const visibleFrames = useMemo(
     () => (protocolFilter === "all" ? decodedFrames : decodedFrames.filter((f) => f.protocol === protocolFilter)),
     [protocolFilter],
   );
   const selectedFrame = decodedFrames.find((f) => f.id === selectedFrameId) ?? decodedFrames[0];
-  const replayFrame = conversation[replayIndex];
+  const replayFrame = activeReplayFrame;
   const selectedAssetData = otAssets.find((a) => a.id === selectedAsset) ?? null;
 
   const tickPlayback = () => {
-    setReplayIndex((i) => Math.min(conversation.length - 1, i + 1));
+    setReplayIndex((i) => Math.min(filteredConversation.length - 1, i + 1));
   };
 
   // Simple play loop: advance every 1.2s while playing
@@ -223,7 +339,7 @@ export default function OtIcsDashboard() {
     if (!playing) return;
     const id = setInterval(() => {
       setReplayIndex((i) => {
-        if (i >= conversation.length - 1) {
+        if (i >= filteredConversation.length - 1) {
           setPlaying(false);
           return i;
         }
@@ -231,7 +347,7 @@ export default function OtIcsDashboard() {
       });
     }, 1200);
     return () => clearInterval(id);
-  }, [playing]);
+  }, [playing, filteredConversation.length]);
 
   return (
     <div className="p-6 space-y-6">
@@ -381,10 +497,10 @@ export default function OtIcsDashboard() {
               <div>
                 <p className="text-xs uppercase tracking-wider text-muted-foreground">Session Replay — INC-2024-0329</p>
                 <p className="text-sm font-medium">
-                  Frame {replayFrame.seq} of {conversation.length} · {replayFrame.ts}
+                  Frame {filteredConversation.length === 0 ? 0 : safeReplayIndex + 1} of {filteredConversation.length} · {replayFrame.ts}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <ReplayBtn onClick={() => setReplayIndex(0)} icon={<SkipBack className="w-3.5 h-3.5" />} label="Restart" />
                 <ReplayBtn
                   onClick={() => setReplayIndex((i) => Math.max(0, i - 1))}
@@ -400,18 +516,96 @@ export default function OtIcsDashboard() {
                 </button>
                 <ReplayBtn onClick={tickPlayback} icon={<ChevronRight className="w-3.5 h-3.5" />} label="Next" />
                 <ReplayBtn
-                  onClick={() => setReplayIndex(conversation.length - 1)}
+                  onClick={() => setReplayIndex(Math.max(0, filteredConversation.length - 1))}
                   icon={<SkipForward className="w-3.5 h-3.5" />}
                   label="End"
                 />
+                <button
+                  onClick={handleDownloadPcap}
+                  disabled={pcapDownloading || filteredConversation.length === 0}
+                  data-testid="button-download-pcap"
+                  title="Export the current session frames as a .pcap file for Wireshark, Zeek, or other forensics tools"
+                  className="px-3 py-1.5 rounded-lg border border-emerald-500/50 bg-emerald-500/10 text-emerald-300 text-xs font-medium flex items-center gap-1.5 hover:bg-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  {pcapDownloading ? "Exporting…" : "Download PCAP"}
+                </button>
               </div>
             </div>
+
+            {/* Filter / range controls */}
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 text-[11px]">
+              <div>
+                <p className="uppercase tracking-wider text-muted-foreground mb-1.5">Protocol Filter</p>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {(["all", "Modbus", "DNP3", "S7"] as const).map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => {
+                        setReplayProtocolFilter(p as ProtocolName | "all");
+                        setReplayIndex(0);
+                      }}
+                      data-testid={`button-replay-filter-${p}`}
+                      className={`px-2 py-1 rounded border transition ${
+                        replayProtocolFilter === p
+                          ? "border-primary/60 bg-primary/15 text-primary"
+                          : "border-white/10 bg-white/5 text-muted-foreground hover:bg-white/10"
+                      }`}
+                    >
+                      {p === "all" ? "All" : p}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="uppercase tracking-wider text-muted-foreground mb-1.5">Range Start</p>
+                <select
+                  value={rangeStartIdx}
+                  onChange={(e) => {
+                    const v = Number.parseInt(e.target.value, 10);
+                    setRangeStartIdx(v);
+                    if (v > rangeEndIdx) setRangeEndIdx(v);
+                    setReplayIndex(0);
+                  }}
+                  data-testid="select-range-start"
+                  className="w-full px-2 py-1.5 rounded border border-white/10 bg-black/40 font-mono text-[11px]"
+                >
+                  {conversation.map((f, i) => (
+                    <option key={f.seq} value={i}>{f.ts} · #{f.seq} {f.protocol}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <p className="uppercase tracking-wider text-muted-foreground mb-1.5">Range End</p>
+                <select
+                  value={rangeEndIdx}
+                  onChange={(e) => {
+                    const v = Number.parseInt(e.target.value, 10);
+                    setRangeEndIdx(v);
+                    if (v < rangeStartIdx) setRangeStartIdx(v);
+                    setReplayIndex(0);
+                  }}
+                  data-testid="select-range-end"
+                  className="w-full px-2 py-1.5 rounded border border-white/10 bg-black/40 font-mono text-[11px]"
+                >
+                  {conversation.map((f, i) => (
+                    <option key={f.seq} value={i}>{f.ts} · #{f.seq} {f.protocol}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {pcapError && (
+              <div className="mt-3 px-3 py-2 rounded border border-red-500/40 bg-red-500/10 text-[11px] text-red-300" role="alert">
+                PCAP export failed: {pcapError}
+              </div>
+            )}
 
             {/* Progress bar */}
             <div className="mt-4 h-1.5 rounded-full bg-white/5 overflow-hidden">
               <div
                 className="h-full bg-primary transition-all"
-                style={{ width: `${((replayIndex + 1) / conversation.length) * 100}%` }}
+                style={{ width: `${filteredConversation.length === 0 ? 0 : ((safeReplayIndex + 1) / filteredConversation.length) * 100}%` }}
               />
             </div>
 
@@ -446,8 +640,15 @@ export default function OtIcsDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {conversation.map((f, idx) => {
-                  const active = idx === replayIndex;
+                {filteredConversation.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">
+                      No frames match the selected protocol filter and time range.
+                    </td>
+                  </tr>
+                )}
+                {filteredConversation.map((f, idx) => {
+                  const active = idx === safeReplayIndex;
                   return (
                     <tr
                       key={f.seq}
