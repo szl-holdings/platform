@@ -17,10 +17,10 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Apps-22_Production-00C853?style=flat-square" alt="22 Apps" />
-  <img src="https://img.shields.io/badge/API_Endpoints-2,331-FF6F00?style=flat-square" alt="2,331 Endpoints" />
-  <img src="https://img.shields.io/badge/Database-644_Tables-4169E1?style=flat-square" alt="644 Tables" />
-  <img src="https://img.shields.io/badge/Industries-8_Verticals-9C27B0?style=flat-square" alt="8 Verticals" />
+  <img src="https://img.shields.io/badge/Artifacts-11_Registered-00C853?style=flat-square" alt="11 Artifacts" />
+  <img src="https://img.shields.io/badge/API_Endpoints-2,816-FF6F00?style=flat-square" alt="2,816 Endpoints" />
+  <img src="https://img.shields.io/badge/Database-798_Tables-4169E1?style=flat-square" alt="798 Tables" />
+  <img src="https://img.shields.io/badge/Domain_Packs-6_Verticals-9C27B0?style=flat-square" alt="6 Domain Packs" />
 </p>
 
 <p align="center">
@@ -40,9 +40,9 @@ SZL Holdings builds the **governed operational intelligence layer** — the plat
 **Lyte** is the command surface. **Alloy** is the execution fabric. **CORTEX** is the unified mobile command center. Domain intelligence packs extend the same system into cybersecurity, maritime, real estate, legal, and private advisory.
 
 ```
-22 Production Applications     644 Database Tables     2,331 API Endpoints
-10 Web Platforms               37  Shared Libraries     450,000+ Lines of Code
- 1 Mobile Command Center        8  Industry Verticals   1 Founder
+11 Registered Artifacts    798 Database Tables     2,816 API Endpoints
+ 8 Web Applications         40  Shared Libraries     450,000+ Lines of Code
+ 1 Mobile Command Center     6  Domain Packs         1 Founder
 ```
 
 ---
@@ -193,10 +193,10 @@ All 8 domain workspaces in a single Expo/React Native app. Biometric auth, cross
 | **Frontend** | React 19, Vite 7, Tailwind CSS 4, Framer Motion, Recharts |
 | **Mobile** | Expo SDK 53 / React Native, NativeWind |
 | **Backend** | Express 5, Node.js 20 |
-| **Database** | PostgreSQL 16, Drizzle ORM, 644 tables |
+| **Database** | PostgreSQL 16, Drizzle ORM, 798 tables |
 | **AI** | Multi-provider (Anthropic, OpenAI, Gemini, Groq), evidence-backed retrieval |
 | **Auth** | OIDC/PKCE, 11-role RBAC, SCIM 2.0, Azure AD multi-tenant SSO |
-| **Infra** | pnpm monorepo, 37 packages, Azure (App Service, PostgreSQL Flexible, Key Vault) |
+| **Infra** | pnpm monorepo, 40 packages, Azure (App Service, PostgreSQL Flexible, Key Vault) |
 | **CI/CD** | GitHub Actions — lint, typecheck, test, build, CodeQL, dependency review, Lighthouse |
 
 ---
@@ -218,7 +218,7 @@ All 8 domain workspaces in a single Expo/React Native app. Biometric auth, cross
 
 → **[szl-holdings/szl-holdings-platform](https://github.com/szl-holdings/szl-holdings-platform)**
 
-The canonical platform monorepo. 10 production web apps, 2 mobile command centers, 37 shared libraries, 644 database tables, 2,331 API endpoints. TypeScript throughout.
+The canonical platform monorepo. 11 registered artifacts (8 web, 1 mobile, 1 video, 1 design), 40 shared libraries, 798 database tables, 2,816 API endpoints. TypeScript throughout.
 
 ---
 

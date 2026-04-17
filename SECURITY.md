@@ -60,7 +60,7 @@ The SZL Holdings platform is currently in active pre-commercial development. Sec
 - AI agent execution boundaries and human-in-the-loop enforcement
 - Data access control (11-role RBAC implementation)
 - Multi-tenant isolation (org_id scoping)
-- Exposed API endpoints (2,331 routes)
+- Exposed API endpoints (2,816 routes)
 
 ### Out of Scope
 
