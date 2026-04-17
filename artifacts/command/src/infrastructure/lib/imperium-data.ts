@@ -1,5 +1,5 @@
 export type Classification = "OPEN" | "RESTRICTED" | "CONFIDENTIAL" | "SOVEREIGN";
-export type ThreatLevel = "PAX" | "VIGILIA" | "BELLUM" | "FUROR";
+export type ThreatLevel = "CLEAR" | "ELEVATED" | "ACTIVE" | "CRITICAL";
 export type AquilaScore = number;
 
 export interface Sentinel {
@@ -92,7 +92,7 @@ export const IMPERIUM_DATA: Imperium = {
   name: "SZL HOLDINGS PLATFORM",
   totalResources: 58,
   aquilaScore: 91,
-  threatLevel: "VIGILIA",
+  threatLevel: "ELEVATED",
   totalCostPerMonth: 4280,
   lastUpdated: new Date(),
   classificationSummary: {
@@ -108,7 +108,7 @@ export const IMPERIUM_DATA: Imperium = {
       label: "East US — Primary",
       region: "eastus",
       aquilaScore: 93,
-      threatLevel: "VIGILIA",
+      threatLevel: "ELEVATED",
       costPerMonth: 3100,
       cohorts: [
         {
@@ -511,7 +511,7 @@ export const IMPERIUM_DATA: Imperium = {
       label: "Geo-Redundant Backup Region",
       region: "westus2",
       aquilaScore: 88,
-      threatLevel: "PAX",
+      threatLevel: "CLEAR",
       costPerMonth: 1180,
       cohorts: [
         {
@@ -581,10 +581,10 @@ export function getClassificationColor(classification: Classification): string {
 
 export function getThreatColor(threat: ThreatLevel): string {
   const map: Record<ThreatLevel, string> = {
-    PAX: "#4ade80",
-    VIGILIA: "#facc15",
-    BELLUM: "#fb923c",
-    FUROR: "#ef4444",
+    CLEAR: "#4ade80",
+    ELEVATED: "#facc15",
+    ACTIVE: "#fb923c",
+    CRITICAL: "#ef4444",
   };
   return map[threat];
 }
@@ -1134,7 +1134,7 @@ export interface Directive {
 export const INITIAL_DIRECTIVES: Directive[] = [
   {
     id: "dir-001",
-    title: "VIGILIA PROTOCOL — Elevated WAF Posture",
+    title: "ELEVATED PROTOCOL — Elevated WAF Posture",
     body: "All API endpoints must operate under heightened WAF scrutiny. Rate limits reduced to 500 req/min. Security perimeter Centurions report anomalies immediately.",
     priority: "CRITICAL",
     status: "ACTIVE",
@@ -1424,7 +1424,7 @@ export const INTELLIGENCE_BRIEFS = {
   threat: {
     title: "THREAT INTELLIGENCE",
     classification: "CONFIDENTIAL" as Classification,
-    currentLevel: "VIGILIA" as ThreatLevel,
+    currentLevel: "ELEVATED" as ThreatLevel,
     summary: "Elevated reconnaissance activity detected against /api/auth endpoints. WAF successfully blocked 847 malicious requests in last 24h. Bot Manager flagging 3.2% of traffic as automated.",
     indicators: [
       { type: "Reconnaissance", severity: "MEDIUM", description: "SQL injection probes against /api/graphql (blocked by WAF DRS 2.1)", count: 234 },

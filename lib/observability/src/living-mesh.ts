@@ -299,7 +299,7 @@ export function seedLivingMeshData(): void {
   ];
   const models = [
     { id: "alloy-gpt4", name: "Alloy GPT-4o", provider: "openai" },
-    { id: "quipu-claude", name: "Quipu Claude-3.5", provider: "anthropic" },
+    { id: "orchestration-claude", name: "Orchestration Claude-3.5", provider: "anthropic" },
     { id: "rag-embed", name: "RAG Embedder ada-002", provider: "openai" },
     { id: "drift-detector", name: "Drift Detector v2", provider: "custom" },
   ];

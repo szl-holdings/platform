@@ -29,8 +29,8 @@ const AGENT_TASKS = [
   "Tracking 28 brand mentions, flagging 1 reputation risk",
 ];
 
-const SYSTEM_STATES: ("inti" | "mama-quilla")[] = [
-  "inti", "mama-quilla", "inti", "inti", "mama-quilla", "inti", "mama-quilla", "mama-quilla", "inti",
+const SYSTEM_STATES: ("fast" | "deep")[] = [
+  "fast", "deep", "fast", "fast", "deep", "fast", "deep", "deep", "fast",
 ];
 
 interface AgentNode {
@@ -44,7 +44,7 @@ interface AgentNode {
   borderColor: string;
   status: typeof AGENT_STATUSES[number];
   task: string;
-  systemState: "inti" | "mama-quilla";
+  systemState: "fast" | "deep";
   confidence: number;
   actionsToday: number;
 }
@@ -67,7 +67,7 @@ const GLOBAL_STATS = [
   { label: "Policy Checks", value: "0 blocked", sub: "all cleared today", color: "text-emerald-400", bg: "bg-emerald-400/10" },
 ];
 
-function KnotString({ agents }: { agents: AgentNode[] }) {
+function AgentNetworkDiagram({ agents }: { agents: AgentNode[] }) {
   const width = 900;
   const height = 200;
   const centerY = height / 2;
@@ -88,7 +88,7 @@ function KnotString({ agents }: { agents: AgentNode[] }) {
           </filter>
         </defs>
 
-        {/* Main quipu string */}
+        {/* Main connection thread */}
         <path
           d={`M 0 ${centerY} Q ${width / 4} ${centerY - 20} ${width / 2} ${centerY} Q ${width * 3 / 4} ${centerY + 20} ${width} ${centerY}`}
           fill="none"
@@ -133,7 +133,7 @@ function KnotString({ agents }: { agents: AgentNode[] }) {
               {/* System state indicator */}
               <text x={x} y={knotY + 3} textAnchor="middle" fontSize="6"
                 fill="white" fontFamily="monospace">
-                {agent.systemState === "inti" ? "☀" : "◑"}
+                {agent.systemState === "fast" ? "☀" : "◑"}
               </text>
             </g>
           );
@@ -185,11 +185,11 @@ function AgentCard({ agent }: { agent: AgentNode }) {
           </div>
           <span className={cn(
             "text-[9px] px-1.5 py-0.5 rounded-full font-mono",
-            agent.systemState === "inti"
+            agent.systemState === "fast"
               ? "bg-yellow-400/10 text-yellow-400"
               : "bg-indigo-400/10 text-indigo-400"
           )}>
-            {agent.systemState === "inti" ? "☀ Inti" : "◑ Mama Q"}
+            {agent.systemState === "fast" ? "☀ Fast" : "◑ Deep"}
           </span>
         </div>
       </div>
@@ -258,7 +258,7 @@ export default function AiCommandCenter() {
         ))}
       </div>
 
-      {/* Quipu String Visualization */}
+      {/* Agent Network Topology */}
       <div className="bg-card/60 backdrop-blur-sm border border-amber-400/15 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
@@ -276,15 +276,15 @@ export default function AiCommandCenter() {
             </span>
             <span className="flex items-center gap-1.5">
               <span className="text-yellow-400">☀</span>
-              Inti (System 1)
+              Fast (System 1)
             </span>
             <span className="flex items-center gap-1.5">
               <span className="text-indigo-400">◑</span>
-              Mama Q (System 2)
+              Deep (System 2)
             </span>
           </div>
         </div>
-        <KnotString agents={agents} />
+        <AgentNetworkDiagram agents={agents} />
         <p className="text-[10px] text-muted-foreground/50 font-mono mt-2 text-center">
           Each knot represents an active domain agent. Threads connect agents to their serving apps. Gold = active, grey = standby.
         </p>
@@ -308,11 +308,11 @@ export default function AiCommandCenter() {
         <div className="bg-gradient-to-br from-yellow-500/5 to-orange-500/5 border border-yellow-400/20 rounded-xl p-5">
           <h4 className="text-sm font-display font-semibold text-yellow-400 flex items-center gap-2 mb-3">
             <span className="text-xl">☀</span>
-            Inti — System 1 (Reflexive)
+            Fast Analysis — System 1 (Reflexive)
           </h4>
           <p className="text-xs text-muted-foreground mb-3">Fast, instinctive actions triggered in real-time. No deep reasoning required.</p>
           <div className="space-y-2">
-            {agents.filter(a => a.systemState === "inti").map(a => (
+            {agents.filter(a => a.systemState === "fast").map(a => (
               <div key={a.id} className="flex items-center gap-2 text-[11px]">
                 <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", a.status === "active" ? "bg-emerald-400 animate-pulse" : "bg-slate-500")} />
                 <span className="text-foreground font-medium">{a.agent}</span>
@@ -324,11 +324,11 @@ export default function AiCommandCenter() {
         <div className="bg-gradient-to-br from-indigo-500/5 to-violet-500/5 border border-indigo-400/20 rounded-xl p-5">
           <h4 className="text-sm font-display font-semibold text-indigo-400 flex items-center gap-2 mb-3">
             <span className="text-xl">◑</span>
-            Mama Quilla — System 2 (Deep Reasoning)
+            Deep Reasoning — System 2 (Deliberate)
           </h4>
           <p className="text-xs text-muted-foreground mb-3">Deliberate, analytical reasoning for trend analysis, strategy, and scenario modeling.</p>
           <div className="space-y-2">
-            {agents.filter(a => a.systemState === "mama-quilla").map(a => (
+            {agents.filter(a => a.systemState === "deep").map(a => (
               <div key={a.id} className="flex items-center gap-2 text-[11px]">
                 <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", a.status === "active" ? "bg-indigo-400 animate-pulse" : "bg-slate-500")} />
                 <span className="text-foreground font-medium">{a.agent}</span>
@@ -343,7 +343,7 @@ export default function AiCommandCenter() {
       <div className="flex flex-wrap gap-3">
         {[
           { href: "/agent-spawner", label: "Spawn New Agent" },
-          { href: "/chasqui-relay", label: "Signal Routing Console" },
+          { href: "/intel/signal-relay", label: "Signal Routing Console" },
           { href: "/dual-mind", label: "Dual-Mode Monitor" },
           { href: "/intel/ai-advisor", label: "AI Advisor Console" },
         ].map(link => (

@@ -4,7 +4,7 @@ import { cn } from "@szl-holdings/shared-ui/utils";
 
 const ORACLES = [
   {
-    id: "willaq-70b", name: "Primary AI Model", subtitle: "General Reasoning — Cross-Domain Analysis",
+    id: "primary-70b", name: "Primary AI Model", subtitle: "General Reasoning — Cross-Domain Analysis",
     description: "The most capable model in the platform. Handles complex multi-domain reasoning, strategic synthesis, and long-context analysis.",
     accuracy: 96.2, latency: "420ms", cost: "$0.0018/req", context: "128K tokens",
     domains: ["Strategy", "Research", "Synthesis", "Cross-domain"],

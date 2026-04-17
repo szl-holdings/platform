@@ -64,7 +64,7 @@ const ROUTING_RULES = [
   { condition: "Code & technical questions", target: "Code Analyst 13B", reason: "Technical training corpus", privacy: "internal" },
 ];
 
-export default function ChasquiRelay() {
+export default function SignalRelay() {
   const [events, setEvents] = useState<RelayEvent[]>(() => Array.from({ length: 12 }, generateEvent));
   const [paused, setPaused] = useState(false);
 

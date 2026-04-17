@@ -2,16 +2,16 @@ import { useState } from "react";
 import { Brain, ChevronUp, ChevronDown, X } from "lucide-react";
 import { cn } from "./utils";
 
-export interface IncaAgentConfig {
+export interface AgentModeConfig {
   agentName: string;
-  systemType: "inti" | "mama-quilla";
+  systemType: "fast" | "deep";
   status?: "active" | "monitoring" | "standby" | "processing";
   currentTask?: string;
   confidence?: number;
   actionsToday?: number;
 }
 
-interface IncaAgentIndicatorProps extends IncaAgentConfig {
+interface AgentModeIndicatorProps extends AgentModeConfig {
   className?: string;
 }
 
@@ -22,7 +22,7 @@ const STATUS_CONFIG = {
   processing: { label: "Processing", dotClass: "bg-blue-400 animate-pulse", textClass: "text-[#4a90b8]" },
 };
 
-export function IncaAgentIndicator({
+export function AgentModeIndicator({
   agentName,
   systemType,
   status = "active",
@@ -30,14 +30,14 @@ export function IncaAgentIndicator({
   confidence,
   actionsToday,
   className,
-}: IncaAgentIndicatorProps) {
+}: AgentModeIndicatorProps) {
   const [expanded, setExpanded] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
   if (dismissed) return null;
 
   const statusCfg = STATUS_CONFIG[status];
-  const isInti = systemType === "inti";
+  const isFast = systemType === "fast";
 
   return (
     <div className={cn("fixed bottom-4 right-4 z-50 select-none", className)}>
@@ -56,15 +56,15 @@ export function IncaAgentIndicator({
           </div>
           <div className="flex-1 min-w-0 text-left">
             <p className="text-[11px] font-bold text-[#d4a054] truncate leading-none mb-0.5">
-              INCA · {agentName}
+              {agentName}
             </p>
             <p className="text-[9px] text-muted-foreground/60 font-mono truncate">{statusCfg.label}</p>
           </div>
           <span className={cn(
             "text-[9px] px-1.5 py-0.5 rounded-full font-mono shrink-0",
-            isInti ? "bg-yellow-400/10 text-yellow-400" : "bg-indigo-400/10 text-indigo-400"
+            isFast ? "bg-yellow-400/10 text-yellow-400" : "bg-indigo-400/10 text-indigo-400"
           )}>
-            {isInti ? "☀ Inti" : "◑ Mama Q"}
+            {isFast ? "☀ Fast" : "◑ Deep"}
           </span>
           {expanded
             ? <ChevronDown className="w-3 h-3 text-muted-foreground" />
@@ -114,7 +114,7 @@ export function IncaAgentIndicator({
 
             <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground/40 font-mono">
               <span className="w-1 h-1 rounded-full bg-[#d4a054]/40 inline-block" />
-              Quipu Engine · SZL Holdings · INCA Cortex
+              Orchestration Engine · SZL Holdings
             </div>
           </div>
         )}

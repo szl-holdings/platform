@@ -9,7 +9,7 @@ import { IMPERIUM_DATA, getAquilaColor, getAquilaLabel, getThreatColor, getClass
 import { ClassificationBadge } from "@imp/components/classification-badge";
 import { cn } from "@imp/lib/utils";
 
-const THREAT_DISPLAY: Record<string, string> = { PAX: "CLEAR", VIGILIA: "ELEVATED", BELLUM: "ACTIVE", FUROR: "CRITICAL" };
+const THREAT_DISPLAY: Record<string, string> = { CLEAR: "CLEAR", ELEVATED: "ELEVATED", ACTIVE: "ACTIVE", CRITICAL: "CRITICAL" };
 
 function AquilaGauge({ score }: { score: number }) {
   const color = getAquilaColor(score);
@@ -139,8 +139,8 @@ export default function LegatusConsole() {
       <div
         className="rounded-lg p-3 flex items-center justify-between border"
         style={{
-          background: `rgba(${imperium.threatLevel === "PAX" ? "74,222,128" : imperium.threatLevel === "VIGILIA" ? "250,204,21" : imperium.threatLevel === "BELLUM" ? "251,146,60" : "239,68,68"},0.06)`,
-          borderColor: `rgba(${imperium.threatLevel === "PAX" ? "74,222,128" : imperium.threatLevel === "VIGILIA" ? "250,204,21" : imperium.threatLevel === "BELLUM" ? "251,146,60" : "239,68,68"},0.3)`,
+          background: `rgba(${imperium.threatLevel === "CLEAR" ? "74,222,128" : imperium.threatLevel === "ELEVATED" ? "250,204,21" : imperium.threatLevel === "ACTIVE" ? "251,146,60" : "239,68,68"},0.06)`,
+          borderColor: `rgba(${imperium.threatLevel === "CLEAR" ? "74,222,128" : imperium.threatLevel === "ELEVATED" ? "250,204,21" : imperium.threatLevel === "ACTIVE" ? "251,146,60" : "239,68,68"},0.3)`,
         }}
       >
         <div className="flex items-center gap-3">
@@ -153,10 +153,10 @@ export default function LegatusConsole() {
               THREAT: {THREAT_DISPLAY[imperium.threatLevel] ?? imperium.threatLevel}
             </span>
             <span className="text-xs text-slate-400">
-              {imperium.threatLevel === "PAX" && "All clear — no active threats. Standard monitoring in effect."}
-              {imperium.threatLevel === "VIGILIA" && "Elevated — enhanced monitoring active. WAF rules tightened."}
-              {imperium.threatLevel === "BELLUM" && "Active threat detected. Emergency hardening protocols engaged."}
-              {imperium.threatLevel === "FUROR" && "Critical breach. Emergency protocols active. Manual isolation required."}
+              {imperium.threatLevel === "CLEAR" && "All clear — no active threats. Standard monitoring in effect."}
+              {imperium.threatLevel === "ELEVATED" && "Elevated — enhanced monitoring active. WAF rules tightened."}
+              {imperium.threatLevel === "ACTIVE" && "Active threat detected. Emergency hardening protocols engaged."}
+              {imperium.threatLevel === "CRITICAL" && "Critical breach. Emergency protocols active. Manual isolation required."}
             </span>
           </div>
         </div>

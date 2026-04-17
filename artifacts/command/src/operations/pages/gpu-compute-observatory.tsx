@@ -160,10 +160,10 @@ function ModelCard({ model }: { model: ModelState }) {
 
 const MODELS_SEED = [
   { id: "alloy-gpt4", name: "Alloy GPT-4o", provider: "OpenAI / Azure", baseLatency: 850, baseDrift: 4 },
-  { id: "quipu-claude", name: "Claude-3.5 Sonnet", provider: "Anthropic", baseLatency: 650, baseDrift: 8 },
+  { id: "orchestration-claude", name: "Claude-3.5 Sonnet", provider: "Anthropic", baseLatency: 650, baseDrift: 8 },
   { id: "rag-embed", name: "RAG Embedder ada-002", provider: "OpenAI", baseLatency: 90, baseDrift: 2 },
   { id: "drift-det", name: "Drift Detector v2", provider: "SZL Custom", baseLatency: 45, baseDrift: 18 },
-  { id: "quipu-classify", name: "SZL Classifier v2", provider: "SZL Fine-tuned", baseLatency: 180, baseDrift: 12 },
+  { id: "szl-classify", name: "SZL Classifier v2", provider: "SZL Fine-tuned", baseLatency: 180, baseDrift: 12 },
   { id: "alloy-embed", name: "Alloy Embedder v3", provider: "SZL Custom", baseLatency: 70, baseDrift: 5 },
 ];
 

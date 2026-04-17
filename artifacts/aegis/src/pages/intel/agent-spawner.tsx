@@ -7,56 +7,56 @@ const DOMAIN_TEMPLATES = [
     id: "maritime", name: "Maritime Analyst", icon: Globe, color: "text-cyan-400", bg: "bg-cyan-400/10",
     description: "Tracks fleet anomalies, vessel behavior patterns, and predicts maritime disruptions.",
     defaultInstruction: "Monitor vessel AIS data for anomalous behavior, predict port congestion, and surface dark vessel activity in monitored regions.",
-    domain: "Vessels", systemType: "inti" as const,
+    domain: "Vessels", systemType: "fast" as const,
     capabilities: ["AIS signal analysis", "Port congestion prediction", "Dark vessel detection", "Weather correlation"],
   },
   {
     id: "it-ops", name: "IT Sentinel", icon: Cpu, color: "text-blue-400", bg: "bg-blue-400/10",
     description: "Auto-triages IT tickets, predicts outages, and orchestrates remediation playbooks.",
     defaultInstruction: "Monitor ticket queue for patterns, predict infrastructure failures 4 hours ahead, auto-triage P1 incidents.",
-    domain: "Aegis Operations", systemType: "mama-quilla" as const,
+    domain: "Aegis Operations", systemType: "deep" as const,
     capabilities: ["Ticket auto-triage", "Outage prediction", "Playbook orchestration", "SLA tracking"],
   },
   {
     id: "deal-scout", name: "Deal Scout", icon: TrendingUp, color: "text-emerald-400", bg: "bg-emerald-400/10",
     description: "Surfaces investment opportunities, predicts market shifts, and scores properties.",
     defaultInstruction: "Scan MLS, off-market signals, and economic indicators to surface high-yield opportunities in target markets.",
-    domain: "Terra", systemType: "mama-quilla" as const,
+    domain: "Terra", systemType: "deep" as const,
     capabilities: ["Off-market opportunity detection", "Market shift prediction", "Yield scoring", "Comparable analysis"],
   },
   {
     id: "creative-dir", name: "Alloy Predictor", icon: Zap, color: "text-violet-400", bg: "bg-violet-400/10",
     description: "Surfaces prediction scenarios, models confidence distributions, and generates forecast briefs via Alloy's predictive intelligence engine.",
     defaultInstruction: "Analyze signal data, model forward-looking scenarios, and generate confidence-weighted recommendations based on Alloy's predictive models.",
-    domain: "Alloy Predict", systemType: "inti" as const,
+    domain: "Alloy Predict", systemType: "fast" as const,
     capabilities: ["Scenario modeling", "Confidence scoring", "Risk analysis", "Opportunity surfacing"],
   },
   {
     id: "advisory", name: "Advisory Intelligence", icon: Brain, color: "text-pink-400", bg: "bg-pink-400/10",
     description: "Prepares client briefings, monitors competitive landscape, and surfaces advisory insights.",
     defaultInstruction: "Monitor client portfolio performance, prepare pre-meeting intelligence briefings, and track competitive movements.",
-    domain: "Carlota Jo", systemType: "mama-quilla" as const,
+    domain: "Carlota Jo", systemType: "deep" as const,
     capabilities: ["Client briefing prep", "Competitive monitoring", "Portfolio tracking", "Meeting intelligence"],
   },
   {
     id: "brand-monitor", name: "Brand Monitor", icon: Radio, color: "text-rose-400", bg: "bg-rose-400/10",
     description: "Tracks brand reputation, surfaces PR opportunities, and monitors thought leadership impact.",
     defaultInstruction: "Monitor social, news, and industry forums for brand mentions, reputation risks, and speaking opportunities.",
-    domain: "Stephen", systemType: "inti" as const,
+    domain: "Stephen", systemType: "fast" as const,
     capabilities: ["Reputation monitoring", "Opportunity surfacing", "Sentiment tracking", "Coverage alerts"],
   },
   {
     id: "security-sentinel", name: "Security Sentinel", icon: Shield, color: "text-orange-400", bg: "bg-orange-400/10",
     description: "Enforces agent security policies, detects threats, and orchestrates immune response.",
     defaultInstruction: "Monitor all agent actions for policy violations, detect anomalous AI behavior, enforce Policy Shield protocols.",
-    domain: "Aegis", systemType: "inti" as const,
+    domain: "Aegis", systemType: "fast" as const,
     capabilities: ["Policy enforcement", "Anomaly detection", "Action auditing", "Threat response"],
   },
   {
     id: "portfolio", name: "Portfolio Analyst", icon: Activity, color: "text-indigo-400", bg: "bg-indigo-400/10",
     description: "Monitors ecosystem health across all 12 apps, surfaces investor insights, and tracks portfolio KPIs.",
     defaultInstruction: "Aggregate 6 Lenses scores across portfolio, detect cross-app anomalies, and generate investor-ready health summaries.",
-    domain: "SZL Holdings", systemType: "mama-quilla" as const,
+    domain: "SZL Holdings", systemType: "deep" as const,
     capabilities: ["Cross-app aggregation", "6 Lenses scoring", "Investor reporting", "Health monitoring"],
   },
 ];
@@ -154,11 +154,11 @@ export default function AgentSpawner() {
                   </div>
                   <span className={cn(
                     "px-2 py-0.5 rounded-full text-[10px] font-mono",
-                    selectedTemplate.systemType === "inti"
+                    selectedTemplate.systemType === "fast"
                       ? "bg-yellow-400/10 text-yellow-400"
                       : "bg-indigo-400/10 text-indigo-400"
                   )}>
-                    {selectedTemplate.systemType === "inti" ? "☀ System 1 (Inti)" : "◑ System 2 (Mama Q)"}
+                    {selectedTemplate.systemType === "fast" ? "☀ System 1 (Fast)" : "◑ System 2 (Deep)"}
                   </span>
                 </div>
 
@@ -199,11 +199,11 @@ export default function AgentSpawner() {
                       <label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground block mb-1.5">System Mode</label>
                       <div className={cn(
                         "border rounded-lg px-3 py-2 text-xs font-mono",
-                        selectedTemplate.systemType === "inti"
+                        selectedTemplate.systemType === "fast"
                           ? "bg-yellow-400/10 border-yellow-400/20 text-yellow-400"
                           : "bg-indigo-400/10 border-indigo-400/20 text-indigo-400"
                       )}>
-                        {selectedTemplate.systemType === "inti" ? "☀ Inti — Reflexive" : "◑ Mama Q — Deep Reasoning"}
+                        {selectedTemplate.systemType === "fast" ? "☀ Fast — Reflexive" : "◑ Deep — Reasoning"}
                       </div>
                     </div>
                   </div>

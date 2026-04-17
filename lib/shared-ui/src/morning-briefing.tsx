@@ -79,7 +79,7 @@ function generateDemoBriefing(date: Date): DailyBriefing {
       {
         domain: "aegis",
         title: "47 Active Alerts — 3 Critical",
-        summary: "MITRE T1190 pattern detected on perimeter. 2 identity anomalies in SOC queue. Sacsayhuaman Shield holding.",
+        summary: "MITRE T1190 pattern detected on perimeter. 2 identity anomalies in SOC queue. Security perimeter holding.",
         metric: "3 critical",
         trend: "flat",
         severity: "high",

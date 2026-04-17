@@ -166,10 +166,10 @@ const MspServiceDesk = lazy(() => import("@/pages/msp/service-desk"));
 const MspProviderSettings = lazy(() => import("@/pages/msp/provider-settings"));
 const AegisUnifiedSettings = lazy(() => import("@/pages/settings/unified-settings"));
 
-// ─── Intelligence Engine pages (from INCA) ────────────────────────────────────
+// ─── Intelligence Engine pages ────────────────────────────────────────────────
 const IntelDashboard = lazy(() => import("@/pages/intel/dashboard"));
 const AiCommandCenter = lazy(() => import("@/pages/intel/ai-command-center"));
-const ChasquiRelay = lazy(() => import("@/pages/intel/chasqui-relay"));
+const SignalRelay = lazy(() => import("@/pages/intel/signal-relay"));
 const DualMindMonitor = lazy(() => import("@/pages/intel/dual-mind-monitor"));
 const AiAdvisor = lazy(() => import("@/pages/intel/ai-advisor"));
 const AgentAutonomyDashboard = lazy(() => import("@/pages/intel/agent-autonomy"));
@@ -401,7 +401,7 @@ const intelNavPrimary = [
 
 const intelCortexNav = [
   { path: "/intel/ai-command-center", label: "Agent Orchestration", icon: Network },
-  { path: "/intel/chasqui-relay", label: "Signal Routing", icon: Radio },
+  { path: "/intel/signal-relay", label: "Signal Routing", icon: Radio },
   { path: "/intel/dual-mind", label: "Reasoning Monitor", icon: Sun },
   { path: "/intel/ai-advisor", label: "AI Advisor", icon: Eye },
   { path: "/intel/agent-autonomy", label: "Agent Autonomy", icon: BrainIcon },
@@ -959,7 +959,8 @@ function AppRouter() {
         {/* Intelligence Engine — requires security or admin role */}
         <Route path="/intel/dashboard">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><IntelDashboard /></RoleGate>}</Route>
         <Route path="/intel/ai-command-center">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><AiCommandCenter /></RoleGate>}</Route>
-        <Route path="/intel/chasqui-relay">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><ChasquiRelay /></RoleGate>}</Route>
+        <Route path="/intel/signal-relay">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><SignalRelay /></RoleGate>}</Route>
+        <Route path="/intel/chasqui-relay">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><SignalRelay /></RoleGate>}</Route>
         <Route path="/intel/dual-mind">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><DualMindMonitor /></RoleGate>}</Route>
         <Route path="/intel/ai-advisor">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><AiAdvisor /></RoleGate>}</Route>
         <Route path="/intel/agent-autonomy">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><AgentAutonomyDashboard /></RoleGate>}</Route>
@@ -1075,7 +1076,7 @@ const aegisCommands: CommandItem[] = [
   { id: "nav-devices", label: "Device Inventory", icon: "💻", group: "Managed Operations", action: nav("/ops/devices") },
   { id: "nav-dispatch", label: "Technician Dispatch", icon: "🔧", group: "Managed Operations", action: nav("/ops/dispatch") },
   { id: "nav-intel-dashboard", label: "Intelligence Dashboard", icon: "🧠", group: "Intelligence Engine", action: nav("/intel/dashboard") },
-  { id: "nav-quipu", label: "Agent Console", icon: "🕸️", group: "Intelligence Engine", action: nav("/intel/ai-command-center") },
+  { id: "nav-agent-console", label: "Agent Console", icon: "🕸️", group: "Intelligence Engine", action: nav("/intel/ai-command-center") },
   { id: "nav-models", label: "Models", icon: "⚙️", group: "Intelligence Engine", action: nav("/intel/models") },
   { id: "nav-predictions", label: "Predictions", icon: "📈", group: "Intelligence Engine", action: nav("/intel/predictions") },
   { id: "nav-intel-insights", label: "Intel Insights", icon: "💡", group: "Intelligence Engine", action: nav("/intel/insights") },

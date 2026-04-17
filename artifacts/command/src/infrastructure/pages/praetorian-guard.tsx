@@ -4,12 +4,12 @@ import { IMPERIUM_DATA, INTELLIGENCE_BRIEFS, getThreatColor, type ThreatLevel } 
 import { ClassificationBadge } from "@imp/components/classification-badge";
 import { cn } from "@imp/lib/utils";
 
-const THREAT_LEVELS: ThreatLevel[] = ["PAX", "VIGILIA", "BELLUM", "FUROR"];
-const THREAT_LABELS: Record<ThreatLevel, { latin: string; english: string; color: string; description: string }> = {
-  PAX: { latin: "CLEAR", english: "Clear", color: "#4ade80", description: "No active threats. All systems nominal. Standard monitoring in effect." },
-  VIGILIA: { latin: "ELEVATED", english: "Elevated", color: "#facc15", description: "Elevated activity detected. Enhanced monitoring active. WAF rules tightened." },
-  BELLUM: { latin: "ACTIVE", english: "Active Threat", color: "#fb923c", description: "Active threat engagement. Emergency hardening protocols engaged. All services restricted." },
-  FUROR: { latin: "CRITICAL", english: "Critical", color: "#ef4444", description: "Critical breach underway. Maximum isolation. Manual intervention required immediately." },
+const THREAT_LEVELS: ThreatLevel[] = ["CLEAR", "ELEVATED", "ACTIVE", "CRITICAL"];
+const THREAT_LABELS: Record<ThreatLevel, { label: string; color: string; description: string }> = {
+  CLEAR: { label: "Clear", color: "#4ade80", description: "No active threats. All systems nominal. Standard monitoring in effect." },
+  ELEVATED: { label: "Elevated", color: "#facc15", description: "Elevated activity detected. Enhanced monitoring active. WAF rules tightened." },
+  ACTIVE: { label: "Active Threat", color: "#fb923c", description: "Active threat engagement. Emergency hardening protocols engaged. All services restricted." },
+  CRITICAL: { label: "Critical", color: "#ef4444", description: "Critical breach underway. Maximum isolation. Manual intervention required immediately." },
 };
 
 function ThreatGauge({ current }: { current: ThreatLevel }) {
@@ -39,7 +39,7 @@ function ThreatGauge({ current }: { current: ThreatLevel }) {
                 />
                 <div className="text-[9px] font-mono text-center mt-1.5 tracking-widest"
                   style={{ color: isActive ? cfg.color : "rgba(148,163,184,0.4)" }}>
-                  {level}
+                  {cfg.label.toUpperCase()}
                 </div>
               </div>
             );
@@ -55,7 +55,7 @@ function ThreatGauge({ current }: { current: ThreatLevel }) {
           <div className="flex items-center gap-2 mb-2">
             <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ backgroundColor: getThreatColor(current) }} />
             <span className="font-display text-base tracking-[0.2em] font-bold" style={{ color: getThreatColor(current) }}>
-              {current} — {THREAT_LABELS[current].english}
+              {current} — {THREAT_LABELS[current].label}
             </span>
           </div>
           <p className="text-xs text-slate-400 leading-relaxed">{THREAT_LABELS[current].description}</p>
@@ -102,13 +102,13 @@ function ThreatFeedEntry({ indicator }: { indicator: typeof INTELLIGENCE_BRIEFS.
 
 function AutoHardeningCard({ threat }: { threat: ThreatLevel }) {
   const recommendations = {
-    PAX: ["All hardening measures nominal", "Next secret rotation: 23 days", "WAF rate limit: 1000 req/min — OK"],
-    VIGILIA: ["RECOMMEND: Reduce WAF rate limit to 500 req/min", "RECOMMEND: Enable enhanced auth logging", "RECOMMEND: Geo-filter high-risk regions"],
-    BELLUM: ["URGENT: Activate geo-blocking immediately", "URGENT: Rotate all Key Vault secrets", "URGENT: Enable Container App IP restrictions"],
-    FUROR: ["CRITICAL: Isolate all private endpoints", "CRITICAL: Disable public Container App ingress", "CRITICAL: Engage incident response team"],
+    CLEAR: ["All hardening measures nominal", "Next secret rotation: 23 days", "WAF rate limit: 1000 req/min — OK"],
+    ELEVATED: ["RECOMMEND: Reduce WAF rate limit to 500 req/min", "RECOMMEND: Enable enhanced auth logging", "RECOMMEND: Geo-filter high-risk regions"],
+    ACTIVE: ["URGENT: Activate geo-blocking immediately", "URGENT: Rotate all Key Vault secrets", "URGENT: Enable Container App IP restrictions"],
+    CRITICAL: ["CRITICAL: Isolate all private endpoints", "CRITICAL: Disable public Container App ingress", "CRITICAL: Engage incident response team"],
   };
   const recs = recommendations[threat];
-  const colors: Record<ThreatLevel, string> = { PAX: "#4ade80", VIGILIA: "#facc15", BELLUM: "#fb923c", FUROR: "#ef4444" };
+  const colors: Record<ThreatLevel, string> = { CLEAR: "#4ade80", ELEVATED: "#facc15", ACTIVE: "#fb923c", CRITICAL: "#ef4444" };
   const color = colors[threat];
 
   return (
@@ -121,11 +121,11 @@ function AutoHardeningCard({ threat }: { threat: ThreatLevel }) {
         {recs.map((rec, i) => (
           <div key={i} className="flex items-start gap-2 text-xs">
             <ChevronRight className="w-3 h-3 flex-shrink-0 mt-0.5" style={{ color }} />
-            <span style={{ color: threat === "PAX" ? "rgba(148,163,184,0.7)" : "rgba(226,215,180,0.85)" }}>{rec}</span>
+            <span style={{ color: threat === "CLEAR" ? "rgba(148,163,184,0.7)" : "rgba(226,215,180,0.85)" }}>{rec}</span>
           </div>
         ))}
       </div>
-      {threat !== "PAX" && (
+      {threat !== "CLEAR" && (
         <button className="mt-3 w-full py-2 rounded font-mono text-[10px] tracking-widest font-bold border transition-all hover:bg-current/10"
           style={{ borderColor: color, color }}>
           INITIATE HARDENING PROTOCOL

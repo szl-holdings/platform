@@ -72,7 +72,7 @@ test.describe("IMPERIUM — Per-Route Content Validation", () => {
     await page.goto(`${BASE}/praetorian`);
     await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
     const html = await page.content();
-    expect(html).toMatch(/Threat Condition|PRAETORIAN|PAX|VIGILIA|BELLUM/i);
+    expect(html).toMatch(/Threat Condition|PRAETORIAN|CLEAR|ELEVATED|ACTIVE/i);
   });
 
   test("senate shows senate content", async ({ page }) => {
