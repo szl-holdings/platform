@@ -158,7 +158,7 @@ function AppShell() {
           body: JSON.stringify({
             token,
             platform: Platform.OS,
-            appId: "cortex-mobile",
+            appId: "cortex",
           }),
         });
       } catch (err) {

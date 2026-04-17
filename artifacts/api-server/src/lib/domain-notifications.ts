@@ -11,6 +11,13 @@ export interface DomainNotif {
   message: string;
   severity: NotifSeverity;
   actionUrl?: string;
+  // Optional CORTEX mobile deep-link (overrides the workspace-root default).
+  // Should be an Expo Router path like "/(shell)/defense/incident/INC-1234".
+  mobileRoute?: string;
+  // Optional CORTEX mobile workspace domain override (defaults to the value
+  // derived from `appId`). Useful when one server appId can target multiple
+  // workspaces depending on the notification (e.g. lyte vs prism).
+  mobileDomain?: string;
 }
 
 // Maps the legacy per-app `appId` used here to the unified CORTEX mobile
@@ -47,8 +54,8 @@ const DOMAIN_TO_CORTEX_ROUTE: Record<string, string> = {
 };
 
 export function broadcastNotification(notif: DomainNotif): void {
-  const cortexDomain = APP_ID_TO_CORTEX_DOMAIN[notif.appId] ?? "command";
-  const cortexRoute = DOMAIN_TO_CORTEX_ROUTE[cortexDomain] ?? "/(shell)/";
+  const cortexDomain = notif.mobileDomain ?? APP_ID_TO_CORTEX_DOMAIN[notif.appId] ?? "command";
+  const cortexRoute = notif.mobileRoute ?? DOMAIN_TO_CORTEX_ROUTE[cortexDomain] ?? "/(shell)/";
 
   const payload = {
     id: `${notif.appId}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -102,14 +109,18 @@ const domainConfigs: DomainNotifConfig[] = [
         severity: "critical" as NotifSeverity,
         actionUrl: "/firestorm/soc",
       }),
-      () => ({
-        appId: "aegis",
-        appName: "Aegis",
-        title: "SLA Breach Warning",
-        message: `P1 incident #INC-${1000 + Math.floor(Math.random() * 900)} approaching 4h SLA threshold`,
-        severity: "warning" as NotifSeverity,
-        actionUrl: "/firestorm/soc",
-      }),
+      () => {
+        const incidentId = `INC-${1000 + Math.floor(Math.random() * 900)}`;
+        return {
+          appId: "aegis",
+          appName: "Aegis",
+          title: "SLA Breach Warning",
+          message: `P1 incident #${incidentId} approaching 4h SLA threshold`,
+          severity: "warning" as NotifSeverity,
+          actionUrl: "/firestorm/soc",
+          mobileRoute: `/(shell)/defense/incident/${incidentId}`,
+        };
+      },
       () => ({
         appId: "aegis",
         appName: "Aegis",
@@ -132,14 +143,20 @@ const domainConfigs: DomainNotifConfig[] = [
     appId: "vessels",
     appName: "Vessels",
     generators: [
-      () => ({
-        appId: "vessels",
-        appName: "Vessels",
-        title: "Dark Vessel Alert",
-        message: `Vessel ${["MV Prometheus", "MSC Aurora", "Pacific Star", "Nordic Eagle"][Math.floor(Math.random() * 4)]} AIS signal lost — possible dark vessel activity`,
-        severity: "critical" as NotifSeverity,
-        actionUrl: "/vessels/dark-vessel-detection",
-      }),
+      () => {
+        const vessels = ["MV Prometheus", "MSC Aurora", "Pacific Star", "Nordic Eagle"];
+        const vesselSlugs = ["mv-prometheus", "msc-aurora", "pacific-star", "nordic-eagle"];
+        const idx = Math.floor(Math.random() * vessels.length);
+        return {
+          appId: "vessels",
+          appName: "Vessels",
+          title: "Dark Vessel Alert",
+          message: `Vessel ${vessels[idx]} AIS signal lost — possible dark vessel activity`,
+          severity: "critical" as NotifSeverity,
+          actionUrl: "/vessels/dark-vessel-detection",
+          mobileRoute: `/(shell)/fleet/vessel/${vesselSlugs[idx]}`,
+        };
+      },
       () => ({
         appId: "vessels",
         appName: "Vessels",
