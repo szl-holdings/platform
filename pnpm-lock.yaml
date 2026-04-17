@@ -417,9 +417,15 @@ importers:
       '@types/pdfkit':
         specifier: ^0.17.5
         version: 0.17.5
+      '@workspace/alloy':
+        specifier: workspace:*
+        version: link:../../packages/alloy
       '@workspace/guardian':
         specifier: workspace:*
         version: link:../../packages/guardian
+      '@workspace/memory-fabric':
+        specifier: workspace:*
+        version: link:../../packages/memory-fabric
       '@workspace/tool-mesh':
         specifier: workspace:*
         version: link:../../packages/tool-mesh

@@ -19,6 +19,7 @@ import * as domainAtlas from "./groups/domain-atlas";
 import * as graph from "./groups/graph";
 import * as guardian from "./groups/guardian";
 import tracesRouter from "./traces";
+import * as alloyRuntime from "./groups/alloy-runtime-group";
 
 const router: IRouter = Router();
 
@@ -41,6 +42,7 @@ decisions.register(router);
 domainAtlas.register(router);
 graph.register(router);
 guardian.register(router);
+alloyRuntime.register(router);
 
 router.use(tracesRouter);
 

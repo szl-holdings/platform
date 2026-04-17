@@ -262,3 +262,34 @@ Event naming convention: `domain.subject.verb` (e.g., `security.incident.created
 -   **Auth model:** `req.user.roles` is array; CSRF `/api/analytics/event` exempt
 -   **`@lyte` alias:** maps to `src/operations` in vite.config.ts
 -   **db:migrate:** Stuck on interactive drizzle-kit prompt for `firestorm_tool_audit_log` — use `--force` flag
+
+## Memory Fabric & Alloy Runtime (Foundation 06)
+
+### @workspace/memory-fabric (packages/memory-fabric)
+Tiered memory layer with 8 scopes and full provenance/freshness/retention/sensitivity tracking:
+- **Tiers:** session (1d), workflow (7d), entity (90d), artifact (365d), executive (180d), domain (∞), operator-feedback (730d), long-term (∞)
+- **Each record carries:** provenance (source, sourceId, author, method), freshness (lastAccessedAt, lastUpdatedAt, isStale), confidence (0-1), sensitivity tier (public/internal/confidential/restricted), retention policy, linkedEntities, linkedTraces, linkedActions
+- **Key exports:** MemoryEntry, MemoryEntrySchema, InMemoryStore, applyRetentionDefaults, isExpired, checkSensitivity
+
+### @workspace/alloy (packages/alloy)
+Cognitive runtime and execution control plane. Absorbs ai-control-plane, decision-engine, action-engine concepts:
+- **RunManager:** orchestrates workflow steps, emits trace spans via TraceWriter, calls Guardian for policy decisions, saves checkpoints, writes ledger entries
+- **GuardianDecisionEngine integration:** deny → failed, require-approval → awaiting-approval
+- **InMemoryActionLedger:** immutable ledger (copies stored and returned to prevent external mutation)
+- **CheckpointStore, DefaultModelRouter, workflow primitives (ECHO_STEP, VALIDATE_STEP)**
+
+### DB Schema additions (lib/db/src/schema)
+- `memory_fabric.ts` → `memory_records`, `memory_links` tables
+- `alloy_runtime.ts` → 12 tables: `alloy_runtime_workflows`, `alloy_runtime_workflow_steps`, `alloy_runtime_workflow_runs`, `alloy_runtime_agents`, `alloy_runtime_agent_versions`, `alloy_runtime_prompts`, `alloy_runtime_prompt_versions`, `alloy_runtime_models`, `alloy_runtime_model_versions`, `alloy_runtime_model_routes`, `alloy_runtime_signals`, `alloy_runtime_signal_sources`, `alloy_runtime_signal_scores`, `alloy_runtime_actions`
+
+### API routes (api-server)
+New endpoints registered under `routes/groups/alloy-runtime-group.ts`:
+- `/memory` — GET/POST/PUT/DELETE memory records, stats, eviction
+- `/workflows` — CRUD workflow definitions
+- `/workflow-runs` — execute runs, replay, get run state
+- `/agents` + `/agents/:id/versions` — agent CRUD + versioning
+- `/models` + `/models/route` — model registry + model routing
+- `/prompts` + `/prompts/:id/versions` — prompt management
+- `/signals` — ingest and manage runtime signals
+- `/actions` — action ledger reads and writes
+- `/recommendations` — stub backed by DB recommendations table

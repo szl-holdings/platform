@@ -98,6 +98,8 @@ export * from "./knowledge_graph";
 export * from "./stream_sources";
 export * from "./ml_pipeline";
 export * from "./analytics";
+export * from "./memory_fabric";
+export * from "./alloy_runtime";
 export * from "./push_infra";
 export * from "./job_queue";
 export * from "./metering";

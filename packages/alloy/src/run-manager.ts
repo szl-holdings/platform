@@ -91,6 +91,14 @@ export class RunManager {
           this.traceWriter.completeTrace(traceId, { status: "failed" });
           return state;
         }
+
+        if (decision.outcome === "require-approval") {
+          state = { ...state, status: "awaiting-approval", error: `Guardian requires approval for step ${step.id}: ${decision.reason}`, updatedAt: new Date().toISOString() };
+          this.runs.set(runId, state);
+          this.traceWriter.completeTrace(traceId, { status: "failed" });
+          this.ledger.record(makeLedgerEntry(runId, "approval", `Approval required for step ${step.id}: ${decision.reason}`));
+          return state;
+        }
       }
 
       const ctx: StepContext = {

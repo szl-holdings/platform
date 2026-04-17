@@ -36,12 +36,14 @@ export class InMemoryStore implements MemoryStore {
   get(id: string): MemoryEntry | undefined {
     const entry = this.entries.get(id);
     if (entry) {
-      this.entries.set(id, {
+      const updated = {
         ...entry,
         freshness: { ...entry.freshness, lastAccessedAt: new Date().toISOString() },
-      });
+      };
+      this.entries.set(id, updated);
+      return updated;
     }
-    return entry;
+    return undefined;
   }
 
   getByKey(tier: MemoryTier, key: string, scopeId?: string): MemoryEntry | undefined {
