@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { TrendingUp, TrendingDown, MapPin, DollarSign, Clock, BarChart3, RefreshCw, AlertCircle, Map } from "lucide-react";
 import { marketData, properties } from "@/data/portfolio";
 import { cn } from "@/lib/utils";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from "recharts";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -334,7 +335,12 @@ export default function MarketPage() {
             </tbody>
           </table>
           {!isLoading && displayMarketData.length === 0 && (
-            <div className="text-center py-12 text-terra-text-muted text-sm">No market data available</div>
+            <EmptyState
+              icon={BarChart3}
+              headline="No market data available"
+              description="Market inventory and pricing data will appear here once connected to live data feeds."
+              compact
+            />
           )}
         </div>
       </motion.div>

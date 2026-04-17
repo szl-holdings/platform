@@ -403,9 +403,8 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
         { id: "intelligence-briefs", label: "Intelligence Briefs", href: "/intelligence-briefs", icon: <Zap className="w-3.5 h-3.5" /> },
         { id: "trading-desk", label: "Trading Desk", href: "/trading-desk", icon: <TrendingUp className="w-3.5 h-3.5" /> },
         { id: "commodity-flow", label: "Commodity Flow", href: "/commodity-flow", icon: <BarChart3 className="w-3.5 h-3.5" /> },
-        ...legacyNavItems
-          .filter(({ path }) => ["/intelligence", "/agent-insights"].includes(path))
-          .map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3 h-3" /> })),
+        { id: "intelligence", label: "Maritime Intel", href: "/intelligence", icon: <Globe className="w-3.5 h-3.5" /> },
+        { id: "agent-insights", label: "Agent Insights", href: "/agent-insights", icon: <Brain className="w-3.5 h-3.5" /> },
       ],
     },
     {
@@ -418,9 +417,15 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
         { id: "route-risk", label: "Route Risk", href: "/route-risk", icon: <Navigation className="w-3.5 h-3.5" /> },
         { id: "approval-review", label: "Review & Approval", href: "/approval-review", icon: <Shield className="w-3.5 h-3.5" /> },
         { id: "trust-provenance", label: "Trust & Provenance", href: "/trust-provenance", icon: <Shield className="w-3.5 h-3.5" /> },
-        ...legacyNavItems
-          .filter(({ path }) => !["/intelligence", "/agent-insights"].includes(path))
-          .map(({ path, label, icon: Icon }) => ({ id: path + "-leg", label, href: path, icon: <Icon className="w-3 h-3" /> })),
+        { id: "fleet-map", label: "Fleet Map", href: "/fleet", icon: <Globe className="w-3.5 h-3.5" /> },
+        { id: "exceptions-legacy", label: "Exception Center", href: "/exceptions", icon: <AlertTriangle className="w-3.5 h-3.5" /> },
+        { id: "voyage-economics", label: "Voyage Economics", href: "/economics", icon: <DollarSign className="w-3.5 h-3.5" /> },
+        { id: "port-congestion", label: "Port Congestion", href: "/port-congestion", icon: <Anchor className="w-3.5 h-3.5" /> },
+        { id: "cargo-tracking", label: "Cargo Tracking", href: "/cargo-tracking", icon: <Ship className="w-3.5 h-3.5" /> },
+        { id: "ais-live", label: "AIS Live", href: "/ais-live", icon: <Activity className="w-3.5 h-3.5" /> },
+        { id: "maintenance", label: "Maintenance", href: "/maintenance", icon: <Wrench className="w-3.5 h-3.5" /> },
+        { id: "command-workflows", label: "Command Workflows", href: "/command-workflows", icon: <ShieldAlert className="w-3.5 h-3.5" /> },
+        { id: "document-engine", label: "Document Engine", href: "/document-engine", icon: <FileText className="w-3.5 h-3.5" /> },
       ],
     },
     {

@@ -191,11 +191,67 @@ Last updated: 2026-04-16
 Full application at `/aegis/`. Flag: `DEMO`. 166 ts/tsx files.
 Supersedes the archived firestorm artifact.
 
+### Key Aegis Routes
+
+| Route | Title | Flag | Section |
+|-------|-------|------|---------|
+| `/` | Aegis Home (marketing) | PUBLIC | Marketing |
+| `/soc` | SOC Overview | DEMO | Security Operations |
+| `/incidents` | Incidents | DEMO | Security Operations |
+| `/alerts` | Alerts | DEMO | Security Operations |
+| `/cases` | Case Management | DEMO | Security Operations |
+| `/mitre-attack` | MITRE ATT&CK | DEMO | Security Operations |
+| `/threat-intel` | Threat Intelligence | DEMO | Security Operations |
+| `/findings` | Findings | DEMO | Security Operations |
+| `/vulnerabilities` | Vulnerabilities | DEMO | Security Operations |
+| `/asset-inventory` | Asset Inventory | DEMO | Security Operations |
+| `/citadel` | Citadel Crisis Command | DEMO | Crisis Response |
+| `/citadel/playbooks` | Crisis Playbooks | DEMO | Crisis Response |
+| `/citadel/after-action` | After-Action Report | DEMO | Crisis Response |
+| `/command-home` | Command Home | DEMO | Command Surface |
+| `/investigations` | Investigations Board | DEMO | Command Surface |
+| `/decision-console` | Decision Console | DEMO | Command Surface |
+| `/response-orchestration` | Response Orchestration | DEMO | Command Surface |
+| `/msp/dashboard` | MSP Dashboard | DEMO | Managed Operations |
+| `/msp/clients` | MSP Clients | DEMO | Managed Operations |
+| `/msp/tickets` | MSP Tickets | DEMO | Managed Operations |
+| `/intel/dashboard` | Intelligence Dashboard | DEMO | Intelligence Engine |
+| `/gov/operator-analytics` | Operator Analytics | DEMO | Governance |
+| `/gov/governance` | Enterprise Governance | DEMO | Governance |
+| `/trust-provenance` | Trust & Provenance Center | DEMO | Governance |
+| `/settings` | Settings | PRIVATE | Admin |
+
 ---
 
 ## Vessels (`artifacts/vessels`)
 
 Full application at `/vessels/`. Flag: `DEMO`. 103 ts/tsx files.
+
+### Key Vessels Routes
+
+| Route | Title | Flag | Section |
+|-------|-------|------|---------|
+| `/` | Vessels Home (marketing) | PUBLIC | Marketing |
+| `/dashboard` | Command Overview | DEMO | Primary (new) |
+| `/dashboard/fleet` | Fleet Map | DEMO | Primary (new) |
+| `/dashboard/vessels` | Vessels List | DEMO | Primary (new) |
+| `/dashboard/routes` | Routes | DEMO | Primary (new) |
+| `/dashboard/alerts` | Alert Center | DEMO | Primary (new) |
+| `/dashboard/reports` | Reports | DEMO | Primary (new) |
+| `/fleet` | Fleet Map (legacy) | DEMO | Legacy |
+| `/exceptions` | Exceptions (legacy) | DEMO | Legacy |
+| `/economics` | Voyage Economics (legacy) | DEMO | Legacy |
+| `/vessel/:id` | Vessel Detail | DEMO | Detail |
+| `/dark-vessel` | Dark Vessel Detection | DEMO | Intelligence |
+| `/sanctions` | Sanctions Screening | DEMO | Intelligence |
+| `/risk-scoring` | Risk Scoring | DEMO | Intelligence |
+| `/voyage-pnl` | Voyage P&L | DEMO | Commercial |
+| `/freight-rates` | Freight Rates | DEMO | Commercial |
+| `/voyage-desk` | Voyage Desk | DEMO | Commercial |
+| `/trust-provenance` | Trust & Provenance | DEMO | Governance |
+| `/settings` | Settings | PRIVATE | Admin |
+
+**Note:** Vessels has a dual-nav pattern — `primaryNavItems` (new `/dashboard/*`) and `legacyNavItems` (older flat routes). Both are active. Target state: consolidate to `/dashboard/*`.
 
 ---
 
@@ -203,11 +259,50 @@ Full application at `/vessels/`. Flag: `DEMO`. 103 ts/tsx files.
 
 Full application at `/terra/`. Flag: `DEMO`. 92 ts/tsx files.
 
+### Key Terra Routes
+
+| Route | Title | Flag | Section |
+|-------|-------|------|---------|
+| `/home` | Terra Home (marketing) | PUBLIC | Marketing |
+| `/dashboard` | Broker Dashboard | DEMO | Primary |
+| `/distress-engine` | Distress Engine | DEMO | Intelligence |
+| `/distress-pipeline` | Distress Pipeline | DEMO | Intelligence |
+| `/property-map` | Property Map | DEMO | Intelligence |
+| `/property/:id` | Property Detail | DEMO | Detail |
+| `/deals` | Deal Pipeline | DEMO | Operations |
+| `/pipeline` | Pipeline | DEMO | Operations |
+| `/listings` | Listings | DEMO | Operations |
+| `/leads` | Leads | DEMO | Operations |
+| `/market` | Market Signals | DEMO | Intelligence |
+| `/market-intelligence` | Market Intelligence | DEMO | Intelligence |
+| `/portfolio-dashboard` | Portfolio Dashboard | DEMO | Analysis |
+| `/trust-provenance` | Trust & Provenance | DEMO | Governance |
+
 ---
 
 ## Carlota Jo (`artifacts/carlota-jo`)
 
 Full application at `/carlota-jo/`. Flag: `PUBLIC` (live, client-facing). 70 ts/tsx files.
+
+### Key Carlota Jo Routes
+
+| Route | Title | Flag | Section |
+|-------|-------|------|---------|
+| `/` | Home | PUBLIC | Marketing |
+| `/services` | Services | PUBLIC | Marketing |
+| `/approach` | Approach | PUBLIC | Marketing |
+| `/about` | About | PUBLIC | Marketing |
+| `/who-we-serve` | Who We Serve | PUBLIC | Marketing |
+| `/contact` | Contact | PUBLIC | Marketing |
+| `/portal` | Client Portal Overview | PRIVATE | Portal |
+| `/portal/documents` | Client Documents | PRIVATE | Portal |
+| `/portal/messages` | Client Messages | PRIVATE | Portal |
+| `/portal/updates` | Client Updates | PRIVATE | Portal |
+| `/portal/settings` | Portal Settings | PRIVATE | Portal |
+| `/booking` | Booking | PUBLIC | Conversion |
+| `/booking/success` | Booking Success | PUBLIC | Conversion |
+| `/legal/privacy` | Privacy Policy | PUBLIC | Legal |
+| `/legal/terms` | Terms of Service | PUBLIC | Legal |
 
 ---
 

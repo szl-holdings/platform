@@ -101,25 +101,25 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
   {
     id: "alloy",
     name: "Alloy",
-    subtitle: "Engine · SZL Holdings Module",
+    subtitle: "Execution Fabric · Governed Orchestration",
     path: "/alloy",
     accent: "#60a5fa",
     icon: "⬡",
-    description: "Execution Fabric & Orchestration Engine",
+    description: "Execution Fabric & Governed Orchestration Engine",
   },
   {
     id: "lyte",
     name: "Lyte",
-    subtitle: "Platform · Business Observability",
+    subtitle: "Command Surface · Business Observability",
     path: "/command/operations/",
     accent: "#22d3ee",
     icon: "⚡",
-    description: "Business Observability Command Platform",
+    description: "Flagship Command Surface — Business Observability",
   },
   {
     id: "aegis",
     name: "Aegis",
-    subtitle: "Security · Defense & Intelligence Command",
+    subtitle: "Domain Pack · Unified Defense & Intelligence",
     path: "/aegis/",
     accent: "#8b7ac8",
     icon: "⬡",
@@ -128,7 +128,7 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
   {
     id: "vessels",
     name: "Vessels",
-    subtitle: "Platform · Maritime Command",
+    subtitle: "Domain Pack · Maritime Intelligence",
     path: "/vessels/",
     accent: "#38bdf8",
     icon: "⚓",
@@ -137,7 +137,7 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
   {
     id: "terra",
     name: "Terra",
-    subtitle: "Flagship · Broker Command",
+    subtitle: "Domain Pack · Real Estate Intelligence",
     path: "/terra/",
     accent: "#c87941",
     icon: "⬢",
@@ -146,11 +146,11 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
   {
     id: "carlota-jo",
     name: "Carlota Jo",
-    subtitle: "Service · High-Trust Operations",
+    subtitle: "Domain Pack · Premium Advisory",
     path: "/carlota-jo/",
     accent: "#d4b896",
     icon: "◈",
-    description: "Discreet Operational & Residence Support",
+    description: "Premium Advisory — High-Trust Client Operations",
   },
   {
     id: "szl-leadership",
@@ -475,7 +475,7 @@ function AppSwitcherPanel({
               textTransform: "uppercase",
             }}
           >
-            SZL Intelligence Architecture
+            SZL Holdings Platform
           </span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>

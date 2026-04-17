@@ -182,5 +182,7 @@ The following surfaces have been deprecated and their code removed. See `ops/fro
 | Document | Path |
 |----------|------|
 | Navigation strategy | [NAVIGATION_STRATEGY.md](NAVIGATION_STRATEGY.md) |
-| Platform primitives | [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) |
 | Route inventory | [ROUTE_INVENTORY.md](ROUTE_INVENTORY.md) |
+| Design system notes | [DESIGN_SYSTEM_NOTES.md](DESIGN_SYSTEM_NOTES.md) |
+| Platform primitives | [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) |
+| Brand guidelines | [BRAND_GUIDELINES.md](BRAND_GUIDELINES.md) |

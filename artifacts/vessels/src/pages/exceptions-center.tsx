@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import {
   AlertTriangle, Clock, User, ChevronDown, ChevronRight,
@@ -413,10 +414,12 @@ export default function ExceptionsCenterPage() {
       {!isLoading && !isError && (
         <div className="space-y-3">
           {filtered.length === 0 ? (
-            <div className="py-16 text-center">
-              <CheckCircle2 className="w-10 h-10 text-emerald-400/20 mx-auto mb-3" />
-              <p className="text-sm text-sky-400/40">No exceptions match current filters</p>
-            </div>
+            <EmptyState
+              icon={CheckCircle2}
+              headline="No exceptions"
+              description="No fleet exceptions match the current filter. The fleet is operating within defined parameters."
+              accentColor="#38bdf8"
+            />
           ) : (
             filtered.map(exc => (
               <ExceptionCard

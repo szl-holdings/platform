@@ -139,6 +139,63 @@ The following surfaces are archived (app source removed — no pages/components/
 
 ---
 
+## Terminology Consistency Rules
+
+All app subtitles in the EcosystemNav app switcher must follow the canonical pattern:
+`[Category] · [Canonical Name]`
+
+| App | Correct Subtitle | Wrong (do not use) |
+|-----|-----------------|-------------------|
+| SZL Holdings | `Ecosystem · Parent Company` | "Corporate Platform", "Hub" |
+| Alloy | `Execution Fabric · Governed Orchestration` | "Engine · SZL Holdings Module" |
+| Lyte | `Command Surface · Business Observability` | "Platform · Business Observability" |
+| Aegis | `Domain Pack · Unified Defense & Intelligence` | "Security · Defense & Intelligence Command" |
+| Vessels | `Domain Pack · Maritime Intelligence` | "Platform · Maritime Command" |
+| Terra | `Domain Pack · Real Estate Intelligence` | "Flagship · Broker Command" |
+| Carlota Jo | `Domain Pack · Premium Advisory` | "Service · High-Trust Operations" |
+
+**Critical rule:** Domain Packs (Aegis, Vessels, Terra, Carlota Jo) must never use "Platform" or "Flagship" in their subtitle. Only Lyte is the Flagship Command Surface. Only SZL Holdings is the Platform.
+
+---
+
+## UX Audit Findings (April 2026)
+
+### Terminology Issues Fixed
+
+- **Vessels subtitle** was "Platform · Maritime Command" — corrected to "Domain Pack · Maritime Intelligence"
+- **Terra subtitle** was "Flagship · Broker Command" — corrected to "Domain Pack · Real Estate Intelligence"
+- **Alloy subtitle** was "Engine · SZL Holdings Module" — corrected to "Execution Fabric · Governed Orchestration"
+- **Carlota Jo subtitle** was "Service · High-Trust Operations" — corrected to "Domain Pack · Premium Advisory"
+- **Aegis subtitle** was "Security · Defense & Intelligence Command" — corrected to "Domain Pack · Unified Defense & Intelligence"
+- **Lyte subtitle** was "Platform · Business Observability" — corrected to "Command Surface · Business Observability"
+
+### Navigation Patterns Observed
+
+**Consistent across all apps:**
+- All web surfaces render EcosystemNav as the global top bar
+- All domain packs use SidebarNav with grouped sections
+- Cmd+K CommandPalette available in all apps
+- Realtime status, notification center, and user button present everywhere
+
+**Legacy nav items in Vessels:**
+- Vessels has both `primaryNavItems` (new dashboard routes at `/dashboard/*`) and `legacyNavItems` (older routes at `/fleet`, `/exceptions`, etc.)
+- The legacy items remain in the sidebar to avoid breaking operator workflows
+- Target state: migrate operators to `/dashboard/*` routes, then remove legacy items
+
+### Empty State Coverage
+
+All apps have `PageLoader` fallback components during Suspense. Specific empty states vary by page — the most critical patterns (alert centers, exception queues, fleet maps) should display domain-specific guidance, not generic "No data found" messages.
+
+### Loading State Pattern
+
+All apps use a thin circular spinner (`border-2 rounded-full animate-spin`) as the page-level `PageLoader`. This is consistent and appropriate. Skeleton loaders are used on some data tables; the target is to standardize skeleton use for list and table views.
+
+### Error State Pattern
+
+React error boundaries are implemented at the app level. Page-level error states show a simple "Page not found" fallback. Operator-facing errors should provide actionable next steps (retry, contact support link, navigate to parent section).
+
+---
+
 ## Target State Changes
 
 The current navigation works. The following improvements would strengthen the governed decision narrative:
@@ -147,6 +204,7 @@ The current navigation works. The following improvements would strengthen the go
 2. **Add primitive indicators** to recommendation cards — show which primitives were involved (e.g., "Simulated with Monte Carlo · Policy checked · Proof recorded")
 3. **Unify the approval experience** — approvals from all domain packs surface in a single Command approvals center and CORTEX approval feed
 4. **Cross-domain breadcrumbs** — when navigating from a Command signal to a domain pack detail, maintain the trail back to Command
+5. **Consolidate Vessels legacy nav** — migrate operators from legacy `/fleet`, `/exceptions` routes to the unified `/dashboard/*` hierarchy, then deprecate the legacy sidebar section
 
 ---
 

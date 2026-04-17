@@ -6,6 +6,7 @@ import {
   Activity, Crosshair, Target, CheckCircle, WifiOff, Wifi, BarChart3,
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { LiveDataBadge } from "@/lib/live-badge";
 import { api } from "@/lib/api";
 import { ThreatFeedSimulator } from "@szl-holdings/observability";
@@ -544,7 +545,7 @@ export default function ThreatIntelFeed() {
               <Radio className="w-4 h-4 animate-pulse mr-2" /> Loading NVD data...
             </div>
           ) : cves.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground text-sm">No CVE data available</div>
+            <EmptyState icon={Database} headline="No CVE data available" description="CVE data from the NVD feed will appear here. Check your feed connection or try refreshing." accentColor="#6366f1" />
           ) : cves.map((cve: any) => (
             <div key={cve.id} className="bg-card border border-border rounded-xl p-4 hover:border-primary/20 transition-all">
               <div className="flex items-start justify-between gap-4">
@@ -597,7 +598,7 @@ export default function ThreatIntelFeed() {
               <Radio className="w-4 h-4 animate-pulse mr-2" /> Loading CISA KEV data...
             </div>
           ) : kevVulns.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground text-sm">No KEV data available</div>
+            <EmptyState icon={Shield} headline="No KEV entries available" description="CISA Known Exploited Vulnerabilities will appear here. Check your feed connection or try refreshing." accentColor="#6366f1" />
           ) : kevVulns.map((v: any) => (
             <div key={v.cveID} className="bg-card border border-border rounded-xl p-4 hover:border-orange-500/20 transition-all">
               <div className="flex items-start justify-between gap-4">
@@ -640,7 +641,7 @@ export default function ThreatIntelFeed() {
               <Radio className="w-4 h-4 animate-pulse mr-2" /> Loading threat news...
             </div>
           ) : newsItems.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground text-sm">No news available</div>
+            <EmptyState icon={Rss} headline="No threat news available" description="Curated threat intelligence news will appear here when the news feed is connected." accentColor="#6366f1" />
           ) : newsItems.map((item: any) => (
             <div key={item.id} className="bg-card border border-border rounded-xl p-4 hover:border-primary/20 transition-all">
               <div className="flex items-start justify-between gap-4">
@@ -685,7 +686,7 @@ export default function ThreatIntelFeed() {
               <Radio className="w-4 h-4 animate-pulse mr-2" /> Loading CERT advisories...
             </div>
           ) : allCertAdvisories.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground text-sm">No CERT advisory data available</div>
+            <EmptyState icon={Globe} headline="No CERT advisories available" description="Government CERT advisories from CISA, NCSC, BSI, and ACSC will appear here when feeds are connected." accentColor="#6366f1" />
           ) : certFeeds.filter((f: any) => f.advisories?.length > 0).map((feed: any) => (
             <div key={feed.feedId}>
               <div className="flex items-center gap-2 mb-2">

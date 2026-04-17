@@ -14,6 +14,7 @@ import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { doctrineEventBus } from "@szl-holdings/observability";
 import { DoctrineLayerBadge } from "@szl-holdings/shared-ui/doctrine-layer-badge";
 import { DataStateBadge, AnimatedCounter} from "@szl-holdings/shared-ui";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 
 interface FleetAlert {
   id: number;
@@ -198,15 +199,12 @@ export default function AlertCenterPage() {
               {[...Array(3)].map((_, i) => <AlertSkeleton key={i} />)}
             </>
           ) : alerts.length === 0 ? (
-            <Card className="bg-card border-border border-dashed">
-              <CardContent className="p-16 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center mx-auto mb-4">
-                  <BellOff className="w-8 h-8 text-muted-foreground/30" />
-                </div>
-                <p className="text-muted-foreground font-medium">No active vessels in this view.</p>
-                <p className="text-xs text-muted-foreground/60 mt-1">Nothing to display yet.</p>
-              </CardContent>
-            </Card>
+            <EmptyState
+              icon={BellOff}
+              headline="No fleet alerts"
+              description="The fleet is operating within normal parameters. Active alerts will appear here when triggered by vessels or alert rules."
+              accentColor="#38bdf8"
+            />
           ) : (
             alerts.map((alert, i: number) => {
               const vessel = vessels.find((v) => v.id === alert.vesselId);
@@ -291,15 +289,12 @@ export default function AlertCenterPage() {
             </Dialog>
           </div>
           {alertRules.length === 0 ? (
-            <Card className="bg-card border-border border-dashed">
-              <CardContent className="p-16 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center mx-auto mb-4">
-                  <Shield className="w-8 h-8 text-muted-foreground/30" />
-                </div>
-                <p className="text-muted-foreground font-medium">No alert rules configured</p>
-                <p className="text-xs text-muted-foreground/60 mt-1">Create rules to automatically trigger alerts</p>
-              </CardContent>
-            </Card>
+            <EmptyState
+              icon={Shield}
+              headline="No alert rules configured"
+              description="Create rules to automatically trigger alerts when vessel behavior falls outside acceptable parameters."
+              accentColor="#38bdf8"
+            />
           ) : alertRules.map((rule, i: number) => (
             <Card key={rule.id} className={`bg-card border-border hover:border-primary/20 transition-all duration-300 animate-fade-in-up stagger-${Math.min(i + 1, 8)}`}>
               <CardContent className="p-4">

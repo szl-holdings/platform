@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { OpsLayout } from "../components/ops-layout";
 import { Bell, BellOff, ArrowUpRight, Clock, CheckCircle2, AlarmClock, ChevronDown, Filter, Settings, XCircle } from "lucide-react";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 
 type AlertStatus = "active" | "acknowledged" | "snoozed" | "resolved";
 type AlertPriority = "critical" | "high" | "medium" | "low";
@@ -196,12 +197,12 @@ export default function AlertsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4" style={{ minHeight: "500px" }}>
           <div className="lg:col-span-2 flex flex-col gap-2">
             {filtered.length === 0 && (
-              <div
-                className="flex-1 flex items-center justify-center p-12 rounded-xl text-sm"
-                style={{ backgroundColor: "var(--color-surface-base)", border: "1px dashed var(--color-surface-border)", color: "var(--color-fg-muted)" }}
-              >
-                No alerts match the current filters
-              </div>
+              <EmptyState
+                icon={BellOff}
+                headline="No alerts match the current filters"
+                description="Try adjusting the severity or status filter to see more results."
+                compact
+              />
             )}
             {filtered.map((alert) => {
               const StatusIcon = STATUS_ICONS[alert.status];

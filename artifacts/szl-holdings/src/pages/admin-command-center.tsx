@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRole } from "@szl-holdings/shared-ui";
+import { EmptyState as SharedEmptyState } from "@szl-holdings/shared-ui/EmptyState";
 
 const API = "/api";
 
@@ -174,14 +175,7 @@ function SearchInput({ value, onChange, placeholder }: { value: string; onChange
 }
 
 function EmptyState({ message }: { message: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center mb-3">
-        <Circle className="w-5 h-5 text-muted-foreground" />
-      </div>
-      <p className="text-sm text-muted-foreground">{message}</p>
-    </div>
-  );
+  return <SharedEmptyState headline={message} compact />;
 }
 
 function SectionHeader({ title, subtitle, onRefresh, loading }: {

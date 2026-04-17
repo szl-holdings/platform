@@ -1,6 +1,16 @@
 import * as React from "react";
 import { cn } from "../utils";
 
+function WarningIcon({ size = 28 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ color: "rgba(239,68,68,0.7)" }}>
+      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+      <path d="M12 9v4" />
+      <path d="M12 17h.01" />
+    </svg>
+  );
+}
+
 export interface ErrorStateProps {
   title?: string;
   description?: string;
@@ -57,7 +67,7 @@ export function ErrorState({
         }}
       >
         {icon ?? (
-          <span className={compact ? "text-xl" : "text-3xl"}>⚡</span>
+          <WarningIcon size={compact ? 20 : 28} />
         )}
       </div>
 
